@@ -127,7 +127,7 @@ A list of Unix shell style patterns. Biome handles only the files and folders th
 ```
 
 :::caution
-When both `include` and `exclude` are specified, the field `exclude` takes **precedence** over `include`
+When both `include` and `ignore` are specified, `ignore` takes **precedence** over `include`
 :::
 
 Given the following example:
@@ -138,7 +138,7 @@ Given the following example:
 {
   "files": {
     "include": ["scripts/**/*.js", "src/**/*.js"],
-    "exclude": ["scripts/**/*.js"]
+    "ignore": ["scripts/**/*.js"]
   }
 }
 ```
@@ -232,7 +232,7 @@ match these patterns.
 ```
 
 :::caution
-When both `include` and `exclude` are specified, the field `exclude` takes **precedence** over `include`
+When both `include` and `ignore` are specified, `ignore` takes **precedence** over `include`
 :::
 
 Given the following example:
@@ -243,7 +243,7 @@ Given the following example:
 {
   "linter": {
     "include": ["scripts/**/*.js", "src/**/*.js"],
-    "exclude": ["scripts/**/*.js"]
+    "ignore": ["scripts/**/*.js"]
   }
 }
 ```
@@ -390,7 +390,7 @@ match these patterns.
 ```
 
 :::caution
-When both `include` and `exclude` are specified, the field `exclude` takes **precedence** over `include`
+When both `include` and `ignore` are specified, `ignore` takes **precedence** over `include`
 :::
 
 Given the following example:
@@ -401,7 +401,7 @@ Given the following example:
 {
   "formatter": {
     "include": ["scripts/**/*.js", "src/**/*.js"],
-    "exclude": ["scripts/**/*.js"]
+    "ignore": ["scripts/**/*.js"]
   }
 }
 ```
@@ -489,7 +489,7 @@ match these patterns.
 ```
 
 :::caution
-When both `include` and `exclude` are specified, the field `exclude` takes **precedence** over `include`
+When both `include` and `ignore` are specified, `ignore` takes **precedence** over `include`
 :::
 
 Given the following example:
@@ -500,7 +500,7 @@ Given the following example:
 {
   "organizeImports": {
     "include": ["scripts/**/*.js", "src/**/*.js"],
-    "exclude": ["scripts/**/*.js"]
+    "ignore": ["scripts/**/*.js"]
   }
 }
 ```

@@ -1,6 +1,6 @@
-# Overall Metrics
+## Overall Metrics
 
-**Average compatibility**: 95.94
+**Average compatibility**: 95.89
 
 <details>
     <summary>Definition</summary>
@@ -8,7 +8,7 @@
     $$average = \frac\{\sum_{file}^\{files}compatibility_\{file}}\{files}$$
 </details>
 
-**Compatible lines**: 95.98
+**Compatible lines**: 96.51
 
 <details>
     <summary>Definition</summary>
@@ -18,8 +18,9 @@
 
 [Metric definition discussion](https://github.com/rome/tools/issues/2555#issuecomment-1124787893)
 
+## Test cases
 
-# js/arrays/issue-10159.js
+### js/arrays/issue-10159.js
 ```diff
  {
    for (const srcPath of [src, `${src}.js`, `${src}/index`, `${src}/index.js`]) {
@@ -48,7 +49,7 @@
 **Prettier Similarity**: 85.00%
 
 
-# js/arrays/numbers-negative.js
+### js/arrays/numbers-negative.js
 ```diff
  const numbers1 = [
    -2017, -506252, -744011292, -7224, -70.4, -83353.6, -708.4, -174023963.52,
@@ -80,21 +81,19 @@
 **Prettier Similarity**: 76.19%
 
 
-# js/arrays/numbers-with-holes.js
+### js/arrays/numbers-with-holes.js
 ```diff
  const numberWithHoles1 = [
    7234932941,
    7234932722,
    7234932312,
-+  // comment before a hole 1
    ,
--  // comment before a hole 1
+   // comment before a hole 1
    7234932841,
    ,
    7234932843,
--  ,
+   ,
    // comment after a hole 1
-+  ,
    7234932436,
  ];
  
@@ -103,25 +102,23 @@
    0x234932722,
    0x234932312,
 -
-+  // comment before a hole 2
    ,
--  // comment before a hole 2
+   // comment before a hole 2
    0x234932841,
    ,
    0x234932843,
--  ,
-   // comment after a hole 2
-+  ,
+   ,
 +
+   // comment after a hole 2
    0x234932436,
  ];
 
 ```
 
-**Prettier Similarity**: 82.14%
+**Prettier Similarity**: 96.43%
 
 
-# js/arrays/numbers-with-tricky-comments.js
+### js/arrays/numbers-with-tricky-comments.js
 ```diff
  const lazyCatererNumbers = [
    1, 2, 4, 7, 11, 16, 22, 29, 37, 46, 56, 67, 79, 92, 106, 121, 137, 154, 172,
@@ -143,7 +140,7 @@
 **Prettier Similarity**: 54.55%
 
 
-# js/arrows/curried.js
+### js/arrows/curried.js
 ```diff
  const fn1 = (a) => 3;
  const fn2 = (a) => (b) => 3;
@@ -433,7 +430,7 @@
 **Prettier Similarity**: 68.78%
 
 
-# js/arrows/currying-2.js
+### js/arrows/currying-2.js
 ```diff
  const a = (x) => (y) => (z) =>
    x / 0.123456789 + (y * calculateSomething(z)) / Math.PI;
@@ -472,7 +469,7 @@
 **Prettier Similarity**: 40.91%
 
 
-# js/arrows/currying-4.js
+### js/arrows/currying-4.js
 ```diff
  Y(() => (a ? b : c));
  
@@ -625,7 +622,7 @@
 **Prettier Similarity**: 67.57%
 
 
-# js/arrows/issue-1389-curry.js
+### js/arrows/issue-1389-curry.js
 ```diff
  const foobar =
    (argumentOne, argumentTwo, argumentThree) =>
@@ -659,7 +656,7 @@
 **Prettier Similarity**: 83.33%
 
 
-# js/arrows/newline-before-arrow/newline-before-arrow.js
+### js/arrows/newline-before-arrow/newline-before-arrow.js
 ```diff
 -async (x) => x;
 +async;
@@ -671,7 +668,7 @@
 **Prettier Similarity**: 0.00%
 
 
-# js/assignment/issue-15534.js
+### js/assignment/issue-15534.js
 ```diff
 -params["redirectTo"] =
 -  `${window.location.pathname}${window.location.search}${window.location.hash}`;
@@ -696,7 +693,7 @@
 **Prettier Similarity**: 18.18%
 
 
-# js/chain-expression/test.js
+### js/chain-expression/test.js
 ```diff
 -(a?.b).c;
 -(a?.()).b;
@@ -716,7 +713,7 @@
 **Prettier Similarity**: 50.00%
 
 
-# js/comments-closure-typecast/satisfies.js
+### js/comments-closure-typecast/satisfies.js
 ```diff
 -module.exports = /** @satisfies {Record<string, string>} */ ({
 +module.exports = /** @satisfies {Record<string, string>} */ {
@@ -729,7 +726,31 @@
 **Prettier Similarity**: 33.33%
 
 
-# js/comments/empty-statements.js
+### js/comments-closure-typecast/styled-components.js
+```diff
+ const OverlapWrapper =
+   /** @type {import('styled-components').ThemedStyledFunction<'div',null,{overlap: boolean}>} */
+   (styled.div)`
+-    position: relative;
++position:relative;
+     > {
+-      position: absolute;
+-      bottom: ${(p) => p.overlap === "previous" && 0};
+-      top: ${(p) => p.overlap === "next" && 0};
+-    }
+-  `;
++  position: absolute;
++  bottom: ${(p) => p.overlap === "previous" && 0};
++top: ${(p) => p.overlap === "next" && 0};
++}
++`;
+
+```
+
+**Prettier Similarity**: 40.00%
+
+
+### js/comments/empty-statements.js
 ```diff
 -a; /* a */ // b
 -/* c */
@@ -761,7 +782,7 @@
 **Prettier Similarity**: 13.33%
 
 
-# js/comments/export.js
+### js/comments/export.js
 ```diff
  export //comment
 - {};
@@ -808,7 +829,7 @@
 **Prettier Similarity**: 97.37%
 
 
-# js/comments/function/between-parentheses-and-function-body.js
+### js/comments/function/between-parentheses-and-function-body.js
 ```diff
  function function_declaration() {
    // this is a function
@@ -865,7 +886,19 @@
 **Prettier Similarity**: 50.00%
 
 
-# js/comments/jsdoc-nestled-dangling.js
+### js/comments/html-like/comment.js
+```diff
+ <!--
+-alert(1); 
++alert(1)
+ -->
+
+```
+
+**Prettier Similarity**: 66.67%
+
+
+### js/comments/jsdoc-nestled-dangling.js
 ```diff
  {
    {
@@ -896,7 +929,7 @@
 **Prettier Similarity**: 90.91%
 
 
-# js/comments/jsdoc-nestled.js
+### js/comments/jsdoc-nestled.js
 ```diff
  const issues = {
    see: "#7724 and #12653",
@@ -939,7 +972,7 @@
 **Prettier Similarity**: 77.42%
 
 
-# js/comments/multi-comments-on-same-line.js
+### js/comments/multi-comments-on-same-line.js
 ```diff
  /*========= All on same line =========*/
  a;
@@ -1040,7 +1073,7 @@
 **Prettier Similarity**: 96.67%
 
 
-# js/comments/return-statement.js
+### js/comments/return-statement.js
 ```diff
  function jsx() {
    return (
@@ -1227,7 +1260,7 @@
 **Prettier Similarity**: 91.67%
 
 
-# js/comments/tagged-template-literal.js
+### js/comments/tagged-template-literal.js
 ```diff
  foo``; // comment
  
@@ -1251,7 +1284,7 @@
 **Prettier Similarity**: 85.71%
 
 
-# js/comments/trailing-jsdocs.js
+### js/comments/trailing-jsdocs.js
 ```diff
  const CONNECTION_STATUS = (exports.CONNECTION_STATUS = {
    CLOSED: Object.freeze({ kind: "CLOSED" }),
@@ -1290,7 +1323,7 @@
 **Prettier Similarity**: 70.37%
 
 
-# js/conditional/comments.js
+### js/conditional/comments.js
 ```diff
  var inspect =
    4 === util.inspect.length
@@ -1357,14 +1390,11 @@
      */
      foo
    : test
--    ? /* comment
-+  ? /* comment
+     ? /* comment
    comment
      comment */
--      foo
--    : bar;
-+    foo
-+  : bar;
+       foo
+     : bar;
  
  test ? /* comment */ foo : bar;
  
@@ -1385,17 +1415,13 @@
             comment
        A newline will be added after this comment, unfortunately – but it can be removed manually, see next statement.
      */
--    test
--    ? foo
--    : /* comment
-+  test
-+  ? foo
-+  : /* comment
+     test
+     ? foo
+     : /* comment
    comment
      comment
     */
--      bar;
-+    bar;
+       bar;
  
  // It is at least possible to delete the extra newline that was
  // unfortunately added before the second condition above:
@@ -1408,16 +1434,13 @@
             comment
      */
 -  : test
--    ? foo
--    : /* comment
-+  test
-+  ? foo
-+  : /* comment
++    test
+     ? foo
+     : /* comment
    comment
      comment
     */
--      bar;
-+    bar;
+       bar;
  
  test ? foo : /* comment */ bar;
  
@@ -1430,437 +1453,10 @@
 
 ```
 
-**Prettier Similarity**: 89.43%
+**Prettier Similarity**: 97.56%
 
 
-# js/conditional/new-ternary-examples.js
-```diff
- // from https://gist.github.com/rattrayalex/dacbf5838571a47f22d0ae1f8b960268
- // Input and output should match (for 2-space indent formatting).
- // TypeScript is here: prettier/tests/format/typescript/conditional-types/new-ternary-spec.ts
- // EXAMPLES
- //  mostly taken from https://github.com/prettier/prettier/issues/9561
- 
- const message =
-   i % 3 === 0 && i % 5 === 0
-     ? "fizzbuzz"
-     : i % 3 === 0
--      ? "fizz"
--      : i % 5 === 0
--        ? "buzz"
--        : String(i);
-+    ? "fizz"
-+    : i % 5 === 0
-+    ? "buzz"
-+    : String(i);
- 
- const paymentMessageShort =
-   state == "success"
-     ? "Payment completed successfully"
-     : state == "processing"
--      ? "Payment processing"
--      : state == "invalid_cvc"
--        ? "There was an issue with your CVC number"
--        : state == "invalid_expiry"
--          ? "Expiry must be sometime in the past."
--          : "There was an issue with the payment.  Please contact support.";
-+    ? "Payment processing"
-+    : state == "invalid_cvc"
-+    ? "There was an issue with your CVC number"
-+    : state == "invalid_expiry"
-+    ? "Expiry must be sometime in the past."
-+    : "There was an issue with the payment.  Please contact support.";
- 
- const paymentMessageWithABreak =
-   state == "success"
-     ? "Payment completed successfully"
-     : state == "processing"
--      ? "Payment processing"
--      : state == "invalid_cvc"
--        ? "There was an issue with your CVC number, and you need to take a prompt action on it."
--        : state == "invalid_expiry"
--          ? "Expiry must be sometime in the past."
--          : "There was an issue with the payment.  Please contact support.";
-+    ? "Payment processing"
-+    : state == "invalid_cvc"
-+    ? "There was an issue with your CVC number, and you need to take a prompt action on it."
-+    : state == "invalid_expiry"
-+    ? "Expiry must be sometime in the past."
-+    : "There was an issue with the payment.  Please contact support.";
- 
- const typeofExample = definition.encode
-   ? definition.encode(
-       typeof row[field] !== "undefined"
-         ? row[field]
-         : typeof definition.default !== "undefined"
--          ? definition.default
--          : null,
-+        ? definition.default
-+        : null,
-     )
-   : typeof row[field] !== "undefined"
--    ? row[field]
--    : typeof definition.default !== "undefined"
--      ? definition.default
--      : null;
-+  ? row[field]
-+  : typeof definition.default !== "undefined"
-+  ? definition.default
-+  : null;
- 
- // (the following is semantically equivalent to the above, but written in a more-confusing style – it'd be hard to grok no matter the formatting)
- const typeofExampleFlipped = definition.encode
-   ? definition.encode(
-       typeof row[field] === "undefined"
-         ? typeof definition.default === "undefined"
-           ? null
-           : definition.default
-         : row[field],
-     )
-   : typeof row[field] === "undefined"
--    ? typeof definition.default === "undefined"
--      ? null
--      : definition.default
--    : row[field];
-+  ? typeof definition.default === "undefined"
-+    ? null
-+    : definition.default
-+  : row[field];
- 
- // JSX Examples:
- 
- const typicalLongConsequentWithNullAlternate = (
-   <div>
-     {children && !isEmptyChildren(children) ? (
-       <FooComponent
-         className="a bunch of css classes might go here, wow so many"
-         foo={foo}
-         bar={includeBar ? bar : null}
-       />
-     ) : null}
-   </div>
- );
- 
- const reactRouterExampleJSX = (
-   <div>
-     {children && !isEmptyChildren(children)
-       ? children
-       : props.match
--        ? component
--          ? React.createElement(component, props)
--          : render
--            ? render(props)
--            : null
--        : null}
-+      ? component
-+        ? React.createElement(component, props)
-+        : render
-+        ? render(props)
-+        : null
-+      : null}
-   </div>
- );
- 
- const reactRouterExampleNonJSX =
-   children && !isEmptyChildren(children)
-     ? children
-     : props.match
--      ? component
--        ? React.createElement(component, props)
--        : render
--          ? render(props)
--          : null
--      : null;
-+    ? component
-+      ? React.createElement(component, props)
-+      : render
-+      ? render(props)
-+      : null
-+    : null;
- 
- inJSXExpressionContainer.withLongConditionals.example = (
-   <div>
-     {isACat() && (someReallyLongCondition || moreInThisLongCondition)
-       ? someReallyLargeExpression.toMakeMeowNoise().willCauseParens()
-       : someReallyLongCondition || moreInThisLongCondition
--        ? bark()
--        : someReallyLargeExpression.toMakeMeowNoise().willCauseParens()}
-+      ? bark()
-+      : someReallyLargeExpression.toMakeMeowNoise().willCauseParens()}
-   </div>
- );
- 
- inJSXExpressionContainer.withLoops.orBooleans.example = (
-   <div>
-     {items
-       ? items.map((item) =>
-           item.display ? (
-             <Item item={item} attr="breaks ternary but not consequent" />
-           ) : (
-             <Blank />
-           ),
-         )
-       : null}
- 
-     {showTheStuff &&
-       (foo ? (
-         <Thing thing={foooooooooooooooooooooooooo} bar="bazzzzzz" />
-       ) : (
-         <OtherThing />
-       ))}
-   </div>
- );
- 
- inJSXExpressionContainer.withNullConditional = (
-   <div>
-     {isACat() ? null : <Foo />}
-     {isACat() && (someReallyLongCondition || moreInThisLongCondition) ? null : (
-       <Foo />
-     )}
-     {isACat() &&
-     (someReallyLongCondition ||
-       moreInThisLongCondition ||
-       evenMoreInThisExtraLongConditional) ? null : (
-       <Foo />
-     )}
-   </div>
- );
-
-```
-
-**Prettier Similarity**: 73.33%
-
-
-# js/conditional/new-ternary-spec.js
-```diff
- // from https://gist.github.com/rattrayalex/dacbf5838571a47f22d0ae1f8b960268
- // Input and output should match (for 2-space indent formatting).
- // TypeScript is here: prettier/tests/format/typescript/conditional-types/new-ternary-spec.ts
- 
- // remain on one line if possible:
- const short = isLoud() ? makeNoise() : silent();
- 
- // next, put everything after the =
- const lessShort = isLoudReallyLoud()
-   ? makeNoiseReallyLoudly.omgSoLoud()
-   : silent();
- 
- // next, indent the consequent:
- const andIndented = isLoudReallyReallyReallyReallyLoud()
-   ? makeNoiseReallyReallyReallyReallyReallyLoudly.omgSoLoud()
-   : silent();
- 
- // unless the consequent is short (less than ten characters long):
- const shortSoCase = isLoudReallyReallyReallyReallyLoud()
-   ? silent()
-   : makeNoiseReallyReallyReallyReallyReallyLoudly.omgSoLoud();
- 
- // if chained, always break and put after the =
- const chainedShort = isCat() ? meow() : isDog() ? bark() : silent();
- 
- // when a consequent breaks in a chain:
- const chainedWithLongConsequent = isCat()
-   ? someReallyLargeExpression
-       .thatWouldCauseALineBreak()
-       .willCauseAnIndentButNotParens()
-   : isDog()
--    ? bark()
--    : silent();
-+  ? bark()
-+  : silent();
- 
- // nested ternary in consequent always breaks:
- const chainedWithTernaryConsequent = isCat()
-   ? aNestedCondition
-     ? theResult()
-     : theAlternate()
-   : isDog()
--    ? bark()
--    : silent();
-+  ? bark()
-+  : silent();
- 
- // consequent and terminal alternate break:
- const consequentAndTerminalAlternateBreak = isCat()
-   ? someReallyLargeExpression
-       .thatWouldCauseALineBreak()
-       .willCauseAnIndentButNotParens()
-   : isDog()
--    ? bark()
--    : someReallyLargeExpression
--        .thatWouldCauseALineBreak()
--        .willCauseAnIndentButNotParens();
-+  ? bark()
-+  : someReallyLargeExpression
-+      .thatWouldCauseALineBreak()
-+      .willCauseAnIndentButNotParens();
- 
- // multiline conditions and consequents/alternates:
- const multilineConditionsConsequentsAndAlternates =
-   isAnAdorableKittyCat() && (someReallyLongCondition || moreInThisLongCondition)
-     ? someReallyLargeExpression
-         .thatWouldCauseALineBreak()
-         .willCauseAnIndentButNotParens()
-     : isNotAnAdorableKittyCat() &&
--        (someReallyLongCondition || moreInThisLongCondition)
--      ? bark()
--      : shortCondition()
--        ? shortConsequent()
--        : someReallyLargeExpression
--            .thatWouldCauseALineBreak()
--            .willCauseAnIndentButNotParens();
-+      (someReallyLongCondition || moreInThisLongCondition)
-+    ? bark()
-+    : shortCondition()
-+    ? shortConsequent()
-+    : someReallyLargeExpression
-+        .thatWouldCauseALineBreak()
-+        .willCauseAnIndentButNotParens();
- 
- // illustrating case of mostly short conditionals
- const mostlyShort =
-   x === 1
-     ? "one"
-     : x === 2
--      ? "two"
--      : x === 3
--        ? "three"
--        : x === 5 &&
--            y === 7 &&
--            someOtherThing.thatIsSoLong.thatItBreaksTheTestCondition()
--          ? "four"
--          : x === 6
--            ? "six"
--            : "idk";
-+    ? "two"
-+    : x === 3
-+    ? "three"
-+    : x === 5 &&
-+      y === 7 &&
-+      someOtherThing.thatIsSoLong.thatItBreaksTheTestCondition()
-+    ? "four"
-+    : x === 6
-+    ? "six"
-+    : "idk";
- 
- // long conditional, short consequent/alternate, not chained - do indent after ?
- const longConditional =
-   bifornCringerMoshedPerplexSawder === 2 / askTrovenaBeenaDependsRowans &&
-   glimseGlyphsHazardNoopsTieTie >=
-     averredBathersBoxroomBuggyNurl().anodyneCondosMalateOverateRetinol()
-     ? "foo"
-     : "bar";
- 
- // long conditional, short consequent/alternate, chained
- // (break on short consequents iff in chained ternary and its conditional broke)
- const longConditionalChained =
-   bifornCringerMoshedPerplexSawder === 2 / askTrovenaBeenaDependsRowans &&
-   glimseGlyphsHazardNoopsTieTie >=
-     averredBathersBoxroomBuggyNurl().anodyneCondosMalateOverateRetinol()
-     ? "foo"
-     : anotherCondition
--      ? "bar"
--      : "baz";
-+    ? "bar"
-+    : "baz";
- 
- // As a function parameter, don't add an extra indent:
- definition.encode(
-   typeof row[field] !== "undefined"
-     ? row[field]
-     : typeof definition.default !== "undefined"
--      ? definition.default
--      : null,
-+    ? definition.default
-+    : null,
-   typeof row[field] === "undefined"
-     ? typeof definition.default === "undefined"
-       ? null
-       : definition.default
-     : row[field],
- );
- 
- // In a return, break and over-indent:
- const inReturn = () => {
-   if (short) {
-     return foo ? 1 : 2;
-   }
-   return typeof row[aVeryLongFieldName] !== "undefined"
-     ? row[aVeryLongFieldName]
-     : null;
- };
- 
- // Remove current JSX Mode, and replace it with this algorithm:
- // When a ternary's parent is a JSXExpressionContainer which is not in a JSXAttribute,
- // force the consequent to break,
- // and if the alternate breaks,
- // add a newline before the closing curly brace.
- // Special case when the consequent is `null`:
- // do not add a line before or after it,
- // and wrap the alternate in parens.
- 
- const someJSX = (
-   <div>
-     Typical jsx case:
-     {showFoo ? <Foo attribute="such and such stuff here" /> : <Bar short />}
-     Nested, and with a non-jsx consequent is the same:
-     {component ? (
-       React.createElement(component, props)
-     ) : render ? (
-       <div>{render(props)}</div>
-     ) : (
-       <div>Nothing is here</div>
-     )}
-     As is a non-jsx consequent:
-     {showTheJSXElement ? <div>the stuff</div> : renderOtherStuff()}
-     But if the alternate breaks, add a newline before the closing curly brace:
-     {showTheThing || pleaseShowTheThing ? (
-       <Foo attribute="such and such stuff here" />
-     ) : (
-       <Bar
-         attribute="such and such stuff here"
-         another="more stuff here"
-         third="and even more, hooray!"
-       />
-     )}
-     When the consequent is `null` and the alternate breaks, hug it with parens
-     to match boolean behavior:
-     {!thing ? null : (
-       <TheThing
-         thing={thing}
-         someVeryLongPropertyThatBreaksTheAlternate="hello"
-       />
-     )}
-   </div>
- );
- 
- ternaryWithJSXElements.hasNoSpecialCasing = component ? (
-   <div>{React.createElement(component, props)}</div>
- ) : render ? (
-   <div>{render(props)}</div>
- ) : (
-   <div>Nothing is here</div>
- );
- 
- jsxExpressionContainer.inJSXAttribute.hasNoSpecialCasing = (
-   <Foo
-     withJSX={isRed ? <RedColorThing /> : <GreenColorThing />}
-     withJSXBroken={
-       isRed || isSomeOtherLongCondition.thatBreaksTheLine() ? (
-         <RedColorThing />
-       ) : (
-         <GreenColorThing />
-       )
-     }
-   />
- );
-
-```
-
-**Prettier Similarity**: 84.90%
-
-
-# js/conditional/postfix-ternary-regressions.js
+### js/conditional/postfix-ternary-regressions.js
 ```diff
  // concatened string in consequent should be visually distinguishable from alternate
  // … or maybe this is okay, because the colon is enough?
@@ -1901,19 +1497,15 @@
    return !linkTo
      ? false
      : typeof linkTo === "function"
--      ? linkTo(record, reference)
--      : linkToRecord(rootPath, sourceId, linkTo_as_string);
-+    ? linkTo(record, reference)
-+    : linkToRecord(rootPath, sourceId, linkTo_as_string);
+       ? linkTo(record, reference)
+       : linkToRecord(rootPath, sourceId, linkTo_as_string);
  }
  function foo2() {
    return React.isValidElement(emptyText)
      ? React.cloneElement(emptyText)
      : emptyText === ""
--      ? " " // em space, forces the display of an empty line of normal height
--      : translate(emptyText, { _: emptyText });
-+    ? " " // em space, forces the display of an empty line of normal height
-+    : translate(emptyText, { _: emptyText });
+       ? " " // em space, forces the display of an empty line of normal height
+       : translate(emptyText, { _: emptyText });
  }
  
  // Function call ideally wouldnt break break
@@ -1960,17 +1552,13 @@
    payload
      ? payload.id || (payload.data ? payload.data.id : null)
      : requestPayload
--      ? requestPayload.id
--      : null,
-+    ? requestPayload.id
-+    : null,
+       ? requestPayload.id
+       : null,
    payload && payload.data
      ? payload.data
      : requestPayload && requestPayload.data
--      ? requestPayload.data
--      : null,
-+    ? requestPayload.data
-+    : null,
+       ? requestPayload.data
+       : null,
  );
  
  const delayedDataProvider = new Proxy(restProvider, {
@@ -2016,12 +1604,9 @@
  const badComments = schema.model
    ? schema
    : // If model is an array where the items schema is a referred model then we need to use that
--    schema.type === "array"
--    ? schema.items
--    : schema;
-+  schema.type === "array"
-+  ? schema.items
-+  : schema;
+     schema.type === "array"
+     ? schema.items
+     : schema;
  
  const anotherBadComment = refModel
    ? // If we're in a shared params file then reference the model name directly
@@ -2034,10 +1619,10 @@
 
 ```
 
-**Prettier Similarity**: 91.03%
+**Prettier Similarity**: 98.08%
 
 
-# js/destructuring/destructuring.js
+### js/destructuring/destructuring.js
 ```diff
  const [one, two = null, three = null] = arr;
  a = ([s = 1]) => 1;
@@ -2106,7 +1691,59 @@
 **Prettier Similarity**: 91.67%
 
 
-# js/export/blank-line-between-specifiers.js
+### js/explicit-resource-management/valid-await-using-binding-escaped.js
+```diff
+ async function f() {
+-  await using ab = c;
++  await using \u0061b = c;
+ }
+
+```
+
+**Prettier Similarity**: 66.67%
+
+
+### js/explicit-resource-management/valid-await-using-comments.js
+```diff
+ async function f() {
+   {
+-    /*0*/ await using /*1*/ /*2*/ b /*3*/ = /*4*/ f(); /*5*/
++    /*0*/ await using /*1*/ /*2*/ b /*3*/ = /*4*/ f() /*5*/;
+   }
+   {
+     /*0*/ for (
+       /*1*/ /*2*/ await using /*3*/ /*4*/ b /*5*/ =
+           /*6*/ x /*7*/ /*8*/ /*9*/ /*10*/;
+       ;
+-
+     );
+   }
+   {
+     /*0*/ for (/*1*/ /*2*/ await using /*3*/ /*4*/ b /*5*/ of /*6*/ x /*7*/ /*8*/);
+   }
+   {
+     /*0*/ for await (/*1*/ /*2*/ /*3*/ await using /*4*/ /*5*/ b /*6*/ of /*7*/ x /*8*/ /*9*/);
+   }
+ }
+
+```
+
+**Prettier Similarity**: 89.47%
+
+
+### js/explicit-resource-management/valid-using-binding-escaped.js
+```diff
+ {
+-  using ab = c;
++  using \u0061b = c;
+ }
+
+```
+
+**Prettier Similarity**: 66.67%
+
+
+### js/export/blank-line-between-specifiers.js
 ```diff
  export {
    // a
@@ -2135,7 +1772,7 @@
 **Prettier Similarity**: 90.48%
 
 
-# js/for/continue-and-break-comment-without-blocks.js
+### js/for/continue-and-break-comment-without-blocks.js
 ```diff
  for (;;) continue;
  // comment
@@ -2221,7 +1858,7 @@
 **Prettier Similarity**: 87.67%
 
 
-# js/if/expr_and_same_line_comments.js
+### js/if/expr_and_same_line_comments.js
 ```diff
  if (a === 0) doSomething(); // comment A1
  else if (a === 1) doSomethingElse(); // comment B1
@@ -2271,7 +1908,7 @@
 **Prettier Similarity**: 97.56%
 
 
-# js/ignore/class-expression-decorator.js
+### js/ignore/class-expression-decorator.js
 ```diff
 -// prettier-ignore
  (
@@ -2285,7 +1922,7 @@
 **Prettier Similarity**: 80.00%
 
 
-# js/ignore/issue-11077.js
+### js/ignore/issue-11077.js
 ```diff
  function HelloWorld(x) {
 -  // prettier-ignore
@@ -2315,7 +1952,7 @@
 **Prettier Similarity**: 61.11%
 
 
-# js/ignore/issue-13737.js
+### js/ignore/issue-13737.js
 ```diff
  oneArgument(
    // prettier-ignore
@@ -2335,7 +1972,7 @@
 **Prettier Similarity**: 60.00%
 
 
-# js/ignore/issue-14404.js
+### js/ignore/issue-14404.js
 ```diff
  async function foo() {
 -  // prettier-ignore
@@ -2353,7 +1990,7 @@
 **Prettier Similarity**: 28.57%
 
 
-# js/ignore/issue-9877.js
+### js/ignore/issue-9877.js
 ```diff
  export default function test() {
    return {
@@ -2373,7 +2010,7 @@
 **Prettier Similarity**: 45.45%
 
 
-# js/last-argument-expansion/dangling-comment-in-arrow-function.js
+### js/last-argument-expansion/dangling-comment-in-arrow-function.js
 ```diff
 -foo(() =>
 -  // foo
@@ -2389,7 +2026,7 @@
 **Prettier Similarity**: 20.00%
 
 
-# js/last-argument-expansion/function-body-in-mode-break.js
+### js/last-argument-expansion/function-body-in-mode-break.js
 ```diff
  fs.readdirSync(suiteLoc).forEach(function (testName) {
 -  (skip ? it.skip : it)(
@@ -2415,7 +2052,7 @@
 **Prettier Similarity**: 66.67%
 
 
-# js/objects/assignment-expression/object-property.js
+### js/objects/assignment-expression/object-property.js
 ```diff
  a = {
 -  [(this.resource = resource)]: 1,
@@ -2427,7 +2064,7 @@
 **Prettier Similarity**: 66.67%
 
 
-# js/optional-chaining-assignment/valid-parenthesized.js
+### js/optional-chaining-assignment/valid-parenthesized.js
 ```diff
 -a?.b = c;
 +(a?.b) = c;
@@ -2437,7 +2074,7 @@
 **Prettier Similarity**: 0.00%
 
 
-# js/optional-chaining/chaining.js
+### js/optional-chaining/chaining.js
 ```diff
  var street = user.address?.street;
  var fooValue = myForm.querySelector("input[name=foo]")?.value;
@@ -2542,7 +2179,7 @@
 **Prettier Similarity**: 88.51%
 
 
-# js/quotes/objects.js
+### js/quotes/objects.js
 ```diff
  const obj = {
    a: true,
@@ -2556,7 +2193,7 @@
 **Prettier Similarity**: 80.00%
 
 
-# js/range/boundary-2.js
+### js/range/boundary-2.js
 ```diff
  function a(
  ){
@@ -2577,7 +2214,7 @@
 **Prettier Similarity**: 33.33%
 
 
-# js/range/boundary-3.js
+### js/range/boundary-3.js
 ```diff
  a (
  );
@@ -2593,7 +2230,7 @@
 **Prettier Similarity**: 50.00%
 
 
-# js/range/boundary.js
+### js/range/boundary.js
 ```diff
 -foo = 1.0000;bar = 1.0;
 -baz = 1.0;
@@ -2607,7 +2244,7 @@
 **Prettier Similarity**: 60.00%
 
 
-# js/range/class-declaration.js
+### js/range/class-declaration.js
 ```diff
  
  
@@ -2623,7 +2260,7 @@
 **Prettier Similarity**: 85.71%
 
 
-# js/range/multiple-statements2.js
+### js/range/multiple-statements2.js
 ```diff
  call(
    1, 2,3
@@ -2643,7 +2280,7 @@
 **Prettier Similarity**: 72.73%
 
 
-# js/range/nested3.js
+### js/range/nested3.js
 ```diff
  try {
 -  1;
@@ -2662,7 +2299,7 @@
 **Prettier Similarity**: 42.86%
 
 
-# js/range/whitespace.js
+### js/range/whitespace.js
 ```diff
 - 
 
@@ -2671,7 +2308,7 @@
 **Prettier Similarity**: 0.00%
 
 
-# js/return-outside-function/return-outside-function.js
+### js/return-outside-function/return-outside-function.js
 ```diff
 -return (
 -  someVeryLongStringA &&
@@ -2686,7 +2323,7 @@
 **Prettier Similarity**: 0.00%
 
 
-# js/sequence-expression/ignore.js
+### js/sequence-expression/ignore.js
 ```diff
 -+(
 -  // prettier-ignore
@@ -2709,7 +2346,7 @@
 **Prettier Similarity**: 50.00%
 
 
-# js/sequence-expression/parenthesized.js
+### js/sequence-expression/parenthesized.js
 ```diff
 -console.log(
 -  /* 1 */
@@ -2754,7 +2391,7 @@
 **Prettier Similarity**: 0.00%
 
 
-# js/sloppy-mode/function-declaration-in-while.js
+### js/sloppy-mode/function-declaration-in-while.js
 ```diff
 -while (false) function foo() {}
 +while (false) function foo(){}
@@ -2764,7 +2401,7 @@
 **Prettier Similarity**: 0.00%
 
 
-# js/strings/escaped.js
+### js/strings/escaped.js
 ```diff
 +// FIXME
 +// TODO: reformat issue
@@ -2783,7 +2420,7 @@
 **Prettier Similarity**: 33.33%
 
 
-# js/switch/comments2.js
+### js/switch/comments2.js
 ```diff
  switch (1) {
    default: // comment1
@@ -2825,7 +2462,7 @@
 **Prettier Similarity**: 74.07%
 
 
-# js/ternaries/func-call.js
+### js/ternaries/func-call.js
 ```diff
  fn(
    bifornCringerMoshedPerplexSawder,
@@ -2843,408 +2480,7 @@
 **Prettier Similarity**: 88.89%
 
 
-# js/ternaries/indent.js
-```diff
- aaaaaaaaaaaaaaa
-   ? bbbbbbbbbbbbbbbbbb
-   : ccccccccccccccc
--    ? ddddddddddddddd
--    : eeeeeeeeeeeeeee
--      ? fffffffffffffff
--      : gggggggggggggggg;
-+  ? ddddddddddddddd
-+  : eeeeeeeeeeeeeee
-+  ? fffffffffffffff
-+  : gggggggggggggggg;
- 
- aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-   ? aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-     ? aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-       ? aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-       : aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-     : aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-   : aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa;
- 
- a
-   ? {
-       a: 0,
-     }
-   : {
-       a: {
-         a: 0,
-       }
-         ? {
-             a: 0,
-           }
-         : {
-             y: {
-               a: 0,
-             }
-               ? {
-                   a: 0,
-                 }
-               : {
-                   a: 0,
-                 },
-           },
-     };
- 
- a
-   ? {
-       a: function () {
-         return a
-           ? {
-               a: [
-                 a
-                   ? {
-                       a: 0,
-                       b: [a ? [0, 1] : []],
-                     }
-                   : [
-                       [
-                         0,
-                         {
-                           a: 0,
-                         },
-                         a ? 0 : 1,
-                       ],
-                       function () {
-                         return a
-                           ? {
-                               a: 0,
-                             }
-                           : [
-                               {
-                                 a: 0,
-                               },
-                               {},
-                             ];
-                       },
-                     ],
-               ],
-             }
-           : [
-               a
-                 ? function () {
-                     a
-                       ? a(
-                           a
-                             ? {
-                                 a: a({
-                                   a: 0,
-                                 }),
-                               }
-                             : [
-                                 0,
-                                 a(),
-                                 a(
-                                   a(),
-                                   {
-                                     a: 0,
-                                   },
-                                   a
-                                     ? a()
-                                     : a({
-                                         a: 0,
-                                       }),
-                                 ),
-                                 a()
-                                   ? {
-                                       a: a(),
-                                       b: [],
-                                     }
-                                   : {},
-                               ],
-                         )
-                       : a(
-                           a()
-                             ? {
-                                 a: 0,
-                               }
-                             : (function (a) {
-                                 return a()
-                                   ? [
-                                       {
-                                         a: 0,
-                                         b: a(),
-                                       },
-                                     ]
-                                   : a([
-                                       a
-                                         ? {
-                                             a: 0,
-                                           }
-                                         : {},
-                                       {
-                                         a: 0,
-                                       },
-                                     ]);
-                               })(
-                                 a
-                                   ? function (a) {
-                                       return function () {
-                                         return 0;
-                                       };
-                                     }
-                                   : function (a) {
-                                       return function () {
-                                         return 1;
-                                       };
-                                     },
-                               ),
-                         );
-                   }
-                 : function () {},
-             ];
-       },
-     }
-   : a;
-
-```
-
-**Prettier Similarity**: 97.33%
-
-
-# js/ternaries/nested-in-condition.js
-```diff
- $var = (
-   $number % 10 >= 2 && ($number % 100 < 10 || $number % 100 >= 20)
-     ? kochabCooieGameOnOboleUnweave
-     : annularCooeedSplicesWalksWayWay
- )
-   ? anodyneCondosMalateOverateRetinol
-   : averredBathersBoxroomBuggyNurl;
- 
- const value = (
-   bifornCringerMoshedPerplexSawder
-     ? askTrovenaBeenaDependsRowans
-     : glimseGlyphsHazardNoopsTieTie
- )
-   ? true
-     ? true
-     : false
-   : true
--    ? true
--    : false;
-+  ? true
-+  : false;
- 
- (
-   bifornCringerMoshedPerplexSawder
-     ? askTrovenaBeenaDependsRowans
-     : glimseGlyphsHazardNoopsTieTie
- ) ? (
-   <Element>
-     <Sub />
-     <Sub />
-     <Sub />
-     <Sub />
-     <Sub />
-     <Sub />
-   </Element>
- ) : (
-   <Element2>
-     <Sub />
-     <Sub />
-     <Sub />
-   </Element2>
- );
-
-```
-
-**Prettier Similarity**: 95.00%
-
-
-# js/ternaries/nested.js
-```diff
- let icecream =
-   what == "cone"
-     ? (p) => (!!p ? `here's your ${p} cone` : `just the empty cone for you`)
-     : (p) => `here's your ${p} ${what}`;
- 
- const value = condition1
-   ? value1
-   : condition2
--    ? value2
--    : condition3
--      ? value3
--      : value4;
-+  ? value2
-+  : condition3
-+  ? value3
-+  : value4;
- 
- const StorybookLoader = ({ match }) =>
-   match.params.storyId === "button" ? (
-     <ButtonStorybook />
-   ) : match.params.storyId === "color" ? (
-     <ColorBook />
-   ) : match.params.storyId === "typography" ? (
-     <TypographyBook />
-   ) : match.params.storyId === "loading" ? (
-     <LoaderStorybook />
-   ) : match.params.storyId === "deal-list" ? (
-     <DealListStory />
-   ) : (
-     <Message>
-       <Title>{"Missing story book"}</Title>
-       <Content>
-         <BackButton />
-       </Content>
-     </Message>
-   );
- 
- const message =
-   i % 3 === 0 && i % 5 === 0
-     ? "fizzbuzz"
-     : i % 3 === 0
--      ? "fizz"
--      : i % 5 === 0
--        ? "buzz"
--        : String(i);
-+    ? "fizz"
-+    : i % 5 === 0
-+    ? "buzz"
-+    : String(i);
- 
- const paymentMessage =
-   state == "success"
-     ? "Payment completed successfully"
-     : state == "processing"
--      ? "Payment processing"
--      : state == "invalid_cvc"
--        ? "There was an issue with your CVC number"
--        : state == "invalid_expiry"
--          ? "Expiry must be sometime in the past."
--          : "There was an issue with the payment.  Please contact support.";
-+    ? "Payment processing"
-+    : state == "invalid_cvc"
-+    ? "There was an issue with your CVC number"
-+    : state == "invalid_expiry"
-+    ? "Expiry must be sometime in the past."
-+    : "There was an issue with the payment.  Please contact support.";
- 
- const paymentMessage2 =
-   state == "success"
-     ? 1 //'Payment completed successfully'
-     : state == "processing"
--      ? 2 //'Payment processing'
--      : state == "invalid_cvc"
--        ? 3 //'There was an issue with your CVC number'
--        : true //state == 'invalid_expiry'
--          ? 4 //'Expiry must be sometime in the past.'
--          : 5; // 'There was an issue with the payment.  Please contact support.'
-+    ? 2 //'Payment processing'
-+    : state == "invalid_cvc"
-+    ? 3 //'There was an issue with your CVC number'
-+    : true //state == 'invalid_expiry'
-+    ? 4 //'Expiry must be sometime in the past.'
-+    : 5; // 'There was an issue with the payment.  Please contact support.'
- 
- const foo = (
-   <div
-     className={
-       "match-achievement-medal-type type" +
-       (medals[0].record
-         ? "-record"
-         : medals[0].unique
--          ? "-unique"
--          : medals[0].type)
-+        ? "-unique"
-+        : medals[0].type)
-     }
-   >
-     {medals[0].record
-       ? i18n("Record")
-       : medals[0].unique
--        ? i18n("Unique")
--        : medals[0].type === 0
--          ? i18n("Silver")
--          : medals[0].type === 1
--            ? i18n("Gold")
--            : medals[0].type === 2
--              ? i18n("Platinum")
--              : i18n("Theme")}
-+      ? i18n("Unique")
-+      : medals[0].type === 0
-+      ? i18n("Silver")
-+      : medals[0].type === 1
-+      ? i18n("Gold")
-+      : medals[0].type === 2
-+      ? i18n("Platinum")
-+      : i18n("Theme")}
-   </div>
- );
- 
- a
-   ? literalline
-   : {
--        123: 12,
--      }
--    ? line
--    : softline;
-+      123: 12,
-+    }
-+  ? line
-+  : softline;
- 
- const config = {
-   onFailure:
-     onFailure !== undefined
-       ? onFailure
-       : (error) => {
-           notify(
-             typeof error === "string"
-               ? error
-               : error.message || "ra.notification.http_error",
-             "warning",
-             {
-               _:
-                 typeof error === "string"
-                   ? error
-                   : error && error.message
--                    ? error.message
--                    : undefined,
-+                  ? error.message
-+                  : undefined,
-             },
-           );
-           refresh();
-         },
- };
- 
- showNotification(
-   typeof error === "string" ? error : error.message || body,
-   level || "warning",
-   {
-     messageArgs,
-     undoable: false,
-   },
- );
- 
- const result =
-   children && !isEmptyChildren(children)
-     ? children
-     : props.match
--      ? component
--        ? React.createElement(component, props)
--        : render
--          ? render(props)
--          : null
--      : null;
-+    ? component
-+      ? React.createElement(component, props)
-+      : render
-+      ? render(props)
-+      : null
-+    : null;
-
-```
-
-**Prettier Similarity**: 69.78%
-
-
-# js/test-declarations/angularjs_inject.js
+### js/test-declarations/angularjs_inject.js
 ```diff
  beforeEach(inject(($fooService, $barService) => {
    // code
@@ -3284,7 +2520,52 @@
 **Prettier Similarity**: 87.10%
 
 
-# jsx/comments/in-attributes.js
+### js/throw_expressions/throw_expression.js
+```diff
+-function save(filename = throw new TypeError("Argument required")) {}
++function save(filename = throw new TypeError("Argument required")
++)
++{
++}
+ 
+ lint(ast, {
+-  with: () => throw new Error("avoid using 'with' statements."),
++  with: () => throw new Error("avoid using 'with' statements.")
+ });
+ 
+ function getEncoder(encoding) {
+-  const encoder =
+-    encoding === "utf8"
+-      ? new UTF8Encoder()
+-      : encoding === "utf16le"
+-        ? new UTF16Encoder(false)
+-        : encoding === "utf16be"
+-          ? new UTF16Encoder(true)
+-          : throw new Error("Unsupported encoding");
++  const encoder = encoding === "utf8" ? new UTF8Encoder()
++                : encoding === "utf16le" ? new UTF16Encoder(false)
++                : encoding === "utf16be" ? new UTF16Encoder(true)
++                :
++  throw new Error("Unsupported encoding");
+ }
+ 
+ class Product {
+   get id() {
+     return this._id;
+   }
+   set id(value) {
+-    this._id = value || throw new Error("Invalid value");
++    this._id = value ||
++    throw new Error("Invalid value");
+   }
+ }
+
+```
+
+**Prettier Similarity**: 53.85%
+
+
+### jsx/comments/in-attributes.js
 ```diff
  <div attr=/* comment */ "foo"></div>;
  
@@ -3309,7 +2590,7 @@
 **Prettier Similarity**: 73.33%
 
 
-# jsx/comments/in-end-tag.js
+### jsx/comments/in-end-tag.js
 ```diff
  /* =========== before slash =========== */
  <a></
@@ -3376,7 +2657,7 @@
 **Prettier Similarity**: 96.55%
 
 
-# jsx/cursor/in-jsx-text.js
+### jsx/cursor/in-jsx-text.js
 ```diff
  <>
 -  a<div>hi</div>
@@ -3389,7 +2670,22 @@
 **Prettier Similarity**: 50.00%
 
 
-# jsx/fbt/test.js
+### jsx/do/do.js
+```diff
+ <div>
+   {do {
+-    1;
++	  1
+   }}
+-</div>;
++</div>
+
+```
+
+**Prettier Similarity**: 60.00%
+
+
+### jsx/fbt/test.js
 ```diff
  x = (
    <fbt>
@@ -3517,7 +2813,7 @@
 **Prettier Similarity**: 83.65%
 
 
-# jsx/jsx/arrow.js
+### jsx/jsx/arrow.js
 ```diff
  () => (
    <Component>
@@ -3610,7 +2906,7 @@
 **Prettier Similarity**: 54.10%
 
 
-# jsx/jsx/await.js
+### jsx/jsx/await.js
 ```diff
  async function testFunction() {
    const short = (
@@ -3679,178 +2975,7 @@
 **Prettier Similarity**: 77.36%
 
 
-# jsx/jsx/conditional-expression.js
-```diff
- // There are two ways to print ConditionalExpressions: "normal mode" and
- // "JSX mode". This is normal mode (when breaking):
- //
- //   test
- //     ? consequent
- //     : alternate;
- //
- // And this is JSX mode (when breaking):
- //
- //   test ? (
- //     consequent
- //   ) : (
- //     alternate
- //   );
- //
- // When non-breaking, they look the same:
- //
- //  test ? consequent : alternate;
- //
- // We only print a conditional expression in JSX mode if its test,
- // consequent, or alternate are JSXElements.
- // Otherwise, we print in normal mode.
- 
- // This ConditionalExpression has no JSXElements so it prints in normal mode.
- // The line does not break.
- normalModeNonBreaking ? "a" : "b";
- 
- // This ConditionalExpression has no JSXElements so it prints in normal mode.
- // Its consequent is very long, so it breaks out to multiple lines.
- normalModeBreaking
-   ? johnJacobJingleHeimerSchmidtHisNameIsMyNameTooWheneverWeGoOutThePeopleAlwaysShoutThereGoesJohnJacobJingleHeimerSchmidtYaDaDaDaDaDaDa
-   : "c";
- 
- // This ConditionalExpression prints in JSX mode because its test is a
- // JSXElement. It is non-breaking.
- // Note: I have never, ever seen someone use a JSXElement as the test in a
- // ConditionalExpression. But this test is included for completeness.
- <div /> ? jsxModeFromElementNonBreaking : "a";
- 
- // This ConditionalExpression prints in JSX mode because its consequent is a
- // JSXElement. It is non-breaking.
- jsxModeFromElementNonBreaking ? <div /> : "a";
- 
- // This ConditionalExpression prints in JSX mode because its alternate is a
- // JSXElement. It is non-breaking.
- jsxModeFromElementNonBreaking ? "a" : <div />;
- 
- // This ConditionalExpression prints in JSX mode because its test is a
- // JSXElement. It is breaking.
- // Note: I have never, ever seen someone use a JSXElement as the test in a
- // ConditionalExpression. But this test is included for completeness.
- <div>
-   <span>
-     thisIsASongAboutYourPoorSickPenguinHeHasAFeverAndHisToesAreBlueButIfISingToYourPoorSickPenguinHeWillFeelBetterInADayOrTwo
-   </span>
- </div> ? (
-   "jsx mode from element breaking"
- ) : (
-   "a"
- );
- 
- // This ConditionalExpression prints in JSX mode because its consequent is a
- // JSXElement. It is breaking.
- jsxModeFromElementBreaking ? (
-   <div>
-     <span>
-       thisIsASongAboutYourPoorSickPenguinHeHasAFeverAndHisToesAreBlueButIfISingToYourPoorSickPenguinHeWillFeelBetterInADayOrTwo
-     </span>
-   </div>
- ) : (
-   "a"
- );
- 
- // This ConditionalExpression prints in JSX mode because its alternate is a
- // JSXElement. It is breaking.
- jsxModeFromElementBreaking ? (
-   "a"
- ) : (
-   <div>
-     <span>
-       thisIsASongAboutYourPoorSickPenguinHeHasAFeverAndHisToesAreBlueButIfISingToYourPoorSickPenguinHeWillFeelBetterInADayOrTwo
-     </span>
-   </div>
- );
- 
- // This chain of ConditionalExpressions prints in JSX mode because the parent of
- // the outermost ConditionalExpression is a JSXExpressionContainer. It is
- // non-breaking.
- <div>{a ? "a" : b ? "b" : "c"}</div>;
- 
- // This chain of ConditionalExpressions prints in JSX mode because the parent of
- // the outermost ConditionalExpression is a JSXExpressionContainer. It is
- // breaking.
- <div>
-   {thisIsASongAboutYourPoorSickPenguinHeHasAFeverAndHisToesAreBlueButIfISingToYourPoorSickPenguinHeWillFeelBetterInADayOrTwo
-     ? "a"
-     : b
--      ? "b"
--      : "c"}
-+    ? "b"
-+    : "c"}
- </div>;
- 
- // This chain of ConditionalExpressions prints in JSX mode because there is a
- // JSX element somewhere in the chain. It is non-breaking.
- cable ? "satellite" : isPublic ? "affairs" : network ? <span id="c" /> : "dun";
- 
- // This chain of ConditionalExpressions prints in JSX mode because there is a
- // JSX element somewhere in the chain (in this case, at the end). It is
- // breaking; notice the consequents and alternates in the entire chain get
- // wrapped in parens.
- cable ? (
-   "satellite"
- ) : isPublic ? (
-   "affairs"
- ) : network ? (
-   <div>
-     <span>
-       thisIsASongAboutYourPoorSickPenguinHeHasAFeverAndHisToesAreBlueButIfISingToYourPoorSickPenguinHeWillFeelBetterInADayOrTwo
-     </span>
-   </div>
- ) : (
-   "dunno"
- );
- 
- // This chain of ConditionalExpressions prints in JSX mode because there is a
- // JSX element somewhere in the chain (in this case, at the beginning). It is
- // breaking; notice the consequents and alternates in the entire chain get
- // wrapped in parens.
- cable ? (
-   <div>
-     <span>
-       thisIsASongAboutYourPoorSickPenguinHeHasAFeverAndHisToesAreBlueButIfISingToYourPoorSickPenguinHeWillFeelBetterInADayOrTwo
-     </span>
-   </div>
- ) : sateline ? (
-   "public"
- ) : affairs ? (
-   "network"
- ) : (
-   "dunno"
- );
- 
- // This chain of ConditionalExpressions prints in JSX mode because there is a
- // JSX element somewhere in the chain. It is breaking; notice the consequents
- // and alternates in the entire chain get wrapped in parens.
- <div>
-   {properties.length > 1 ||
-   (properties.length === 1 && properties[0].apps.size > 1) ? (
-     draggingApp == null || newPropertyName == null ? (
-       <MigrationPropertyListItem />
-     ) : (
-       <MigrationPropertyListItem apps={Immutable.List()} />
-     )
-   ) : null}
- </div>;
- 
- // #3552
- foo ? (
-   <span>
-     loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong jsx
-   </span>
- ) : undefined;
-
-```
-
-**Prettier Similarity**: 98.76%
-
-
-# jsx/jsx/quotes.js
+### jsx/jsx/quotes.js
 ```diff
  <div id="&quot;'<>&amp;quot;" />;
  <div id='"&#39;<>&amp;quot;' />;
@@ -3899,7 +3024,7 @@
 **Prettier Similarity**: 79.41%
 
 
-# jsx/newlines/test.js
+### jsx/newlines/test.js
 ```diff
  keep = (
    <p>
@@ -3966,7 +3091,7 @@
 **Prettier Similarity**: 96.61%
 
 
-# jsx/spread/attribute.js
+### jsx/spread/attribute.js
 ```diff
  <div {...a} />;
  
@@ -4015,7 +3140,7 @@
 **Prettier Similarity**: 86.11%
 
 
-# jsx/spread/child.js
+### jsx/spread/child.js
 ```diff
  <div>{...a}</div>;
  
@@ -4060,7 +3185,37 @@
 **Prettier Similarity**: 84.38%
 
 
-# jsx/text-wrap/test.js
+### jsx/template/styled-components.js
+```diff
+ <style jsx>{`
+   p {
+     color: red;
+   }
+ `}</style>;
+ 
+ <style jsx>{tpl`
+   p {
+     color: red;
+   }
+ `}</style>;
+ 
+ <style jsx>
+-  {`
+-    p {
+-      color: red;
+-    }
++  {`p {
++     color: red;
++     }
+   `}
+ </style>;
+
+```
+
+**Prettier Similarity**: 78.95%
+
+
+### jsx/text-wrap/test.js
 ```diff
  // Wrapping text
  x = (
@@ -4644,7 +3799,7 @@
 **Prettier Similarity**: 98.96%
 
 
-# jsx/tuple/tuple.js
+### jsx/tuple/tuple.js
 ```diff
  a = [<div />, <div />];
  
@@ -4657,7 +3812,7 @@
 **Prettier Similarity**: 50.00%
 
 
-# typescript/arrow/comments.ts
+### typescript/arrow/comments.ts
 ```diff
  const fn1 = () => {
    return;
@@ -4675,7 +3830,7 @@
 **Prettier Similarity**: 88.89%
 
 
-# typescript/arrows/type_params.ts
+### typescript/arrows/type_params.ts
 ```diff
 -<T,>(a) => {};
 +<T>(a) => {};
@@ -4685,7 +3840,7 @@
 **Prettier Similarity**: 0.00%
 
 
-# typescript/assignment/issue-5370.ts
+### typescript/assignment/issue-5370.ts
 ```diff
 -const durabilityMetricsSelectable: Immutable.OrderedSet<SomeReportingMetric> =
 -  myExperienceSelectable.concat(otherDurabilityMetricsSelectable);
@@ -4698,7 +3853,30 @@
 **Prettier Similarity**: 0.00%
 
 
-# typescript/chain-expression/test.ts
+### typescript/cast/tuple-and-record.ts
+```diff
+ breakAfterCast = <PermissionsChecker<any> | undefined>(
+   (<any>permissions)[receiverType]
+ );
+-breakAfterCast = <PermissionsChecker<any> | undefined>(
+-  (<any>permissions)(#[receiverType])
+-);
++breakAfterCast = <PermissionsChecker<any> | undefined>(<any>permissions)(#[receiverType]);
+ 
+ testObjLiteral = <PermissionsChecker<any> | undefined>{ prop1: "myPropVal" };
+-testObjLiteral = <PermissionsChecker<any> | undefined>#{ prop1: "myPropVal" };
++testObjLiteral =  <PermissionsChecker<any> | undefined>
++#
++{
++  prop1: "myPropVal";
++}
+
+```
+
+**Prettier Similarity**: 45.45%
+
+
+### typescript/chain-expression/test.ts
 ```diff
 -(a?.b)!.c;
 -(a?.())!.b;
@@ -4714,7 +3892,7 @@
 **Prettier Similarity**: 0.00%
 
 
-# typescript/class/constructor.ts
+### typescript/class/constructor.ts
 ```diff
  class C {
    constructor(override a: number) {}
@@ -4749,7 +3927,7 @@
 **Prettier Similarity**: 96.15%
 
 
-# typescript/class/duplicates-access-modifier.ts
+### typescript/class/duplicates-access-modifier.ts
 ```diff
  class Foo {
 -  public a;
@@ -4769,7 +3947,7 @@
 **Prettier Similarity**: 28.57%
 
 
-# typescript/class/empty-method-body.ts
+### typescript/class/empty-method-body.ts
 ```diff
  // #9324
  
@@ -4789,7 +3967,7 @@
 **Prettier Similarity**: 80.00%
 
 
-# typescript/class/parameter-properties.ts
+### typescript/class/parameter-properties.ts
 ```diff
  class MyClass {
 -  constructor(
@@ -4826,7 +4004,7 @@
 **Prettier Similarity**: 53.85%
 
 
-# typescript/class/quoted-property.ts
+### typescript/class/quoted-property.ts
 ```diff
  class User {
 -  "username": string;
@@ -4838,7 +4016,7 @@
 **Prettier Similarity**: 66.67%
 
 
-# typescript/comments/declare_function.ts
+### typescript/comments/declare_function.ts
 ```diff
  declare function fn(
    currentRequest: { a: number },
@@ -4853,7 +4031,7 @@
 **Prettier Similarity**: 83.33%
 
 
-# typescript/comments/mapped_types.ts
+### typescript/comments/mapped_types.ts
 ```diff
  type A = {
    // commentA
@@ -4903,7 +4081,7 @@
 **Prettier Similarity**: 95.00%
 
 
-# typescript/comments/method_types.ts
+### typescript/comments/method_types.ts
 ```diff
  interface foo1 {
    bar3 /* foo */(/* baz */); // bat
@@ -4956,7 +4134,7 @@
 **Prettier Similarity**: 84.62%
 
 
-# typescript/comments/type-parameters.ts
+### typescript/comments/type-parameters.ts
 ```diff
  functionName<A /* A comment */>();
  const a: T</* comment */> = 1;
@@ -4997,7 +4175,7 @@
 **Prettier Similarity**: 87.10%
 
 
-# typescript/compiler/contextualSignatureInstantiation2.ts
+### typescript/compiler/contextualSignatureInstantiation2.ts
 ```diff
  // dot f g x = f(g(x))
  var dot: <T, S>(f: (_: T) => S) => <U>(g: (_: U) => T) => (_: U) => S;
@@ -5015,7 +4193,7 @@
 **Prettier Similarity**: 88.89%
 
 
-# typescript/compiler/decrementAndIncrementOperators.ts
+### typescript/compiler/decrementAndIncrementOperators.ts
 ```diff
  var x = 0;
  
@@ -5064,237 +4242,7 @@
 **Prettier Similarity**: 89.19%
 
 
-# typescript/conditional-types/comments.ts
-```diff
- type A = B extends T
-   ? // comment
-     foo
-   : bar;
- 
- type A = B extends test /* comment
-   comment
-       comment
- */
-   ? foo
-   : bar;
- 
- type T = test extends B
-   ? /* comment
-           comment
-     comment
-           comment
-   */
-     foo
-   : bar;
- 
- type T = test extends B
-   ? /* comment
-        comment
-        comment
-        comment
-     */
-     foo
-   : test extends B
--    ? /* comment
-+  ? /* comment
-   comment
-     comment */
--      foo
--    : bar;
-+    foo
-+  : bar;
- 
- type T = test extends B ? /* comment */ foo : bar;
- 
- type T = test extends B
-   ? foo
-   : /* comment
-          comment
-      comment
-            comment
-     */
-     bar;
- 
- type T = test extends B
-   ? foo
-   : /* comment
-          comment
-      comment
-            comment
-     */
--    test extends B
--    ? foo
--    : /* comment
-+  test extends B
-+  ? foo
-+  : /* comment
-   comment
-     comment
-    */
--      bar;
-+    bar;
- 
- type T = test extends B ? foo : /* comment */ bar;
- 
- type T = test extends B
-   ? test extends B /* c
- c */
-     ? foo
-     : bar
-   : bar;
-
-```
-
-**Prettier Similarity**: 89.86%
-
-
-# typescript/conditional-types/conditonal-types.ts
-```diff
- export type DeepReadonly<T> = T extends any[]
-   ? DeepReadonlyArray<T[number]>
-   : T extends object
--    ? DeepReadonlyObject<T>
--    : T;
-+  ? DeepReadonlyObject<T>
-+  : T;
- 
- type NonFunctionPropertyNames<T> = {
-   [K in keyof T]: T[K] extends Function ? never : K;
- }[keyof T];
- 
- interface DeepReadonlyArray<T> extends ReadonlyArray<DeepReadonly<T>> {}
- 
- type DeepReadonlyObject<T> = {
-   readonly [P in NonFunctionPropertyNames<T>]: DeepReadonly<T[P]>;
- };
- 
- type TypeName<T> = T extends string
-   ? "string"
-   : T extends number
--    ? "number"
--    : T extends boolean
--      ? "boolean"
--      : T extends undefined
--        ? "undefined"
--        : T extends Function
--          ? "function"
--          : "object";
-+  ? "number"
-+  : T extends boolean
-+  ? "boolean"
-+  : T extends undefined
-+  ? "undefined"
-+  : T extends Function
-+  ? "function"
-+  : "object";
- 
- type Type01 = 0 extends (1 extends 2 ? 3 : 4) ? 5 : 6;
- type Type02 = 0 extends (1 extends 2 ? 3 : 4) ? 5 : 6;
- type Type03 = 0 extends (1 extends 2 ? 3 : 4) ? 5 : 6;
- type Type04 = 0 extends (1 extends 2 ? 3 : 4) ? 5 : 6;
- type Type05 = (0 extends 1 ? 2 : 3) extends 4 ? 5 : 6;
- type Type06 = (0 extends 1 ? 2 : 3) extends 4 ? 5 : 6;
- type Type07 = (0 extends 1 ? 2 : 3) extends 4 ? 5 : 6;
- type Type08 = (0 extends 1 ? 2 : 3) extends 4 ? 5 : 6;
- 
- type T1 = () => void extends T ? U : V;
- type T1a = () => void extends T ? U : V;
- type T1b = () => void extends T ? U : V;
- type T2 = (() => void) extends T ? U : V;
- 
- type U1 = new () => X extends T ? U : V;
- type U1a = new () => X extends T ? U : V;
- type U1b = new () => X extends T ? U : V;
- type U2 = (new () => X) extends T ? U : V;
-
-```
-
-**Prettier Similarity**: 78.26%
-
-
-# typescript/conditional-types/infer-type.ts
-```diff
- type TestReturnType<T extends (...args: any[]) => any> = T extends (
-   ...args: any[]
- ) => infer R
-   ? R
-   : any;
- 
- type Unpacked<T> = T extends (infer U)[]
-   ? U
-   : T extends (...args: any[]) => infer U
--    ? U
--    : T extends Promise<infer U>
--      ? U
--      : T;
-+  ? U
-+  : T extends Promise<infer U>
-+  ? U
-+  : T;
-
-```
-
-**Prettier Similarity**: 69.23%
-
-
-# typescript/conditional-types/new-ternary-spec.ts
-```diff
- // TypeScript has the same behavior, including a line break after =, but no parens around "conditional":
- type KnownKeys<T> = {
-   [K in keyof T]: string extends K ? never : number extends K ? never : K;
- } extends { [_ in keyof T]: infer U }
-   ? {} extends U
-     ? never
-     : U
-   : never;
- 
- type KnownKeysWithLongExtends<T> = {
-   [K in keyof T]: string extends K ? never : number extends K ? never : K;
- } extends {
-   [_ in keyof T]: SomeReallyLongThingThatBreaksTheLine<infer U>;
- }
-   ? U
-   : never;
- 
- // TypeScript examples:
- type TypeName<T> = T extends string
-   ? "string"
-   : T extends number
--    ? "number"
--    : T extends boolean
--      ? "boolean"
--      : T extends undefined
--        ? "undefined"
--        : T extends Function
--          ? "function"
--          : "object";
-+  ? "number"
-+  : T extends boolean
-+  ? "boolean"
-+  : T extends undefined
-+  ? "undefined"
-+  : T extends Function
-+  ? "function"
-+  : "object";
- 
- type Unpacked<T> = T extends (infer U)[]
-   ? U
-   : T extends (...args: any[]) => infer U
--    ? SomeReallyLongThingThatBreaksTheLine<U>
--    : T extends Promise<infer U>
--      ? U
--      : T;
-+  ? SomeReallyLongThingThatBreaksTheLine<U>
-+  : T extends Promise<infer U>
-+  ? U
-+  : T;
-
-```
-
-**Prettier Similarity**: 67.57%
-
-
-# typescript/conditional-types/parentheses.ts
+### typescript/conditional-types/parentheses.ts
 ```diff
  // #13275
  type Foo<T> = T extends ((...a: any[]) => infer R extends string) ? R : never;
@@ -5335,7 +4283,7 @@
 **Prettier Similarity**: 56.00%
 
 
-# typescript/conformance/classes/classDeclarations/classAbstractKeyword/classAbstractInstantiations2.ts
+### typescript/conformance/classes/classDeclarations/classAbstractKeyword/classAbstractInstantiations2.ts
 ```diff
  class A {}
  
@@ -5399,7 +4347,7 @@
 **Prettier Similarity**: 98.18%
 
 
-# typescript/conformance/classes/classDeclarations/classAbstractKeyword/classAbstractMixedWithModifiers.ts
+### typescript/conformance/classes/classDeclarations/classAbstractKeyword/classAbstractMixedWithModifiers.ts
 ```diff
  abstract class A {
    abstract foo_a();
@@ -5426,7 +4374,7 @@
 **Prettier Similarity**: 73.33%
 
 
-# typescript/conformance/classes/classDeclarations/classAbstractKeyword/classAbstractProperties.ts
+### typescript/conformance/classes/classDeclarations/classAbstractKeyword/classAbstractProperties.ts
 ```diff
  abstract class A {
    abstract x: number;
@@ -5449,7 +4397,7 @@
 **Prettier Similarity**: 84.62%
 
 
-# typescript/conformance/classes/constructorDeclarations/constructorParameters/constructorImplementationWithDefaultValues2.ts
+### typescript/conformance/classes/constructorDeclarations/constructorParameters/constructorImplementationWithDefaultValues2.ts
 ```diff
  class C {
    constructor(x);
@@ -5481,7 +4429,7 @@
 **Prettier Similarity**: 82.61%
 
 
-# typescript/conformance/classes/constructorDeclarations/constructorParameters/constructorParameterProperties.ts
+### typescript/conformance/classes/constructorDeclarations/constructorParameters/constructorParameterProperties.ts
 ```diff
  class C {
    y: string;
@@ -5518,7 +4466,7 @@
 **Prettier Similarity**: 66.67%
 
 
-# typescript/conformance/classes/constructorDeclarations/constructorParameters/readonlyInConstructorParameters.ts
+### typescript/conformance/classes/constructorDeclarations/constructorParameters/readonlyInConstructorParameters.ts
 ```diff
  class C {
    constructor(readonly x: number) {}
@@ -5540,7 +4488,7 @@
 **Prettier Similarity**: 92.31%
 
 
-# typescript/conformance/classes/constructorDeclarations/constructorParameters/readonlyReadonly.ts
+### typescript/conformance/classes/constructorDeclarations/constructorParameters/readonlyReadonly.ts
 ```diff
  class C {
 -  readonly x: number;
@@ -5554,7 +4502,7 @@
 **Prettier Similarity**: 50.00%
 
 
-# typescript/conformance/classes/mixinClassesAnnotated.ts
+### typescript/conformance/classes/mixinClassesAnnotated.ts
 ```diff
  // @declaration: true
  
@@ -5634,7 +4582,7 @@
 **Prettier Similarity**: 87.14%
 
 
-# typescript/conformance/classes/mixinClassesAnonymous.ts
+### typescript/conformance/classes/mixinClassesAnonymous.ts
 ```diff
  type Constructor<T> = new (...args: any[]) => T;
  
@@ -5716,7 +4664,7 @@
 **Prettier Similarity**: 87.50%
 
 
-# typescript/conformance/internalModules/importDeclarations/exportImportAlias.ts
+### typescript/conformance/internalModules/importDeclarations/exportImportAlias.ts
 ```diff
  // expect no errors here
  
@@ -5798,7 +4746,7 @@
 **Prettier Similarity**: 88.89%
 
 
-# typescript/conformance/internalModules/importDeclarations/importAliasIdentifiers.ts
+### typescript/conformance/internalModules/importDeclarations/importAliasIdentifiers.ts
 ```diff
  module moduleA {
    export class Point {
@@ -5857,7 +4805,7 @@
 **Prettier Similarity**: 92.00%
 
 
-# typescript/conformance/parser/ecmascript5/Statements/parserES5ForOfStatement21.ts
+### typescript/conformance/parser/ecmascript5/Statements/parserES5ForOfStatement21.ts
 ```diff
  //@target: ES5
 -for (var of of) {
@@ -5869,7 +4817,7 @@
 **Prettier Similarity**: 33.33%
 
 
-# typescript/custom/abstract/abstractProperties.ts
+### typescript/custom/abstract/abstractProperties.ts
 ```diff
  abstract class Foo {
 -  private abstract a: 1;
@@ -5889,7 +4837,7 @@
 **Prettier Similarity**: 50.00%
 
 
-# typescript/declare/declare_function_with_body.ts
+### typescript/declare/declare_function_with_body.ts
 ```diff
  // Invalid, but recoverable
 -declare function foo() {};
@@ -5904,7 +4852,7 @@
 **Prettier Similarity**: 60.00%
 
 
-# typescript/declare/object-type-in-declare-function.ts
+### typescript/declare/object-type-in-declare-function.ts
 ```diff
 -declare function foo(this: {
 -  a: boolean;
@@ -5934,7 +4882,7 @@
 **Prettier Similarity**: 73.68%
 
 
-# typescript/declare/trailing-comma/function-rest-trailing-comma.ts
+### typescript/declare/trailing-comma/function-rest-trailing-comma.ts
 ```diff
 -declare function foo(...args: any[]);
 -declare function foo(
@@ -5948,7 +4896,7 @@
 **Prettier Similarity**: 0.00%
 
 
-# typescript/decorators-ts/angular.ts
+### typescript/decorators-ts/angular.ts
 ```diff
  @Component({
    selector: "toh-hero-button",
@@ -5965,7 +4913,7 @@
 **Prettier Similarity**: 87.50%
 
 
-# typescript/decorators-ts/typeorm.ts
+### typescript/decorators-ts/typeorm.ts
 ```diff
  @Entity()
  export class Board {
@@ -5997,7 +4945,7 @@
 **Prettier Similarity**: 82.61%
 
 
-# typescript/decorators/decorators-comments.ts
+### typescript/decorators/decorators-comments.ts
 ```diff
  class Foo1 {
    @foo
@@ -6048,7 +4996,7 @@
 **Prettier Similarity**: 77.14%
 
 
-# typescript/definite/without-annotation.ts
+### typescript/definite/without-annotation.ts
 ```diff
  class Foo {
 -  a!;
@@ -6077,7 +5025,7 @@
 **Prettier Similarity**: 25.00%
 
 
-# typescript/error-recovery/generic.ts
+### typescript/error-recovery/generic.ts
 ```diff
  f1<>();
  
@@ -6107,7 +5055,7 @@
 **Prettier Similarity**: 84.21%
 
 
-# typescript/error-recovery/index-signature.ts
+### typescript/error-recovery/index-signature.ts
 ```diff
  type A = { [key: string] };
  
@@ -6156,7 +5104,7 @@
 **Prettier Similarity**: 48.39%
 
 
-# typescript/error-recovery/jsdoc_only_types.ts
+### typescript/error-recovery/jsdoc_only_types.ts
 ```diff
 -let a: *;
 +let a:
@@ -6186,7 +5134,7 @@
 **Prettier Similarity**: 6.67%
 
 
-# typescript/function-type/consistent.ts
+### typescript/function-type/consistent.ts
 ```diff
  // TSFunctionType
  type A = (
@@ -6225,7 +5173,7 @@
 **Prettier Similarity**: 68.00%
 
 
-# typescript/generic/ungrouped-parameters.ts
+### typescript/generic/ungrouped-parameters.ts
 ```diff
 -function filterTooltipWithFoo<F extends Field>(
 -  oldEncoding: Encoding<F>,
@@ -6249,7 +5197,7 @@
 **Prettier Similarity**: 80.00%
 
 
-# typescript/import-export/type-modifier.ts
+### typescript/import-export/type-modifier.ts
 ```diff
  export type { SomeThing };
  export type { A as B };
@@ -6273,7 +5221,7 @@
 **Prettier Similarity**: 93.33%
 
 
-# typescript/interface2/break/break.ts
+### typescript/interface2/break/break.ts
 ```diff
 -export interface Environment1
 -  extends GenericEnvironment<SomeType, AnotherType, YetAnotherType> {
@@ -6390,7 +5338,7 @@
 **Prettier Similarity**: 93.33%
 
 
-# typescript/intersection/consistent-with-flow/intersection-parens.ts
+### typescript/intersection/consistent-with-flow/intersection-parens.ts
 ```diff
  type A = (number | string) & boolean;
  type B = (number | string) & boolean;
@@ -6454,26 +5402,7 @@
 **Prettier Similarity**: 69.77%
 
 
-# typescript/keyword-types/conditional-types.ts
-```diff
- export type UnwrappedResultRow<T> = {
-   [P in keyof T]: T[P] extends Req<infer a>
-     ? a
-     : T[P] extends Opt<infer b>
--      ? b
--      : // TEST
--        never;
-+    ? b
-+    : // TEST
-+      never;
- };
-
-```
-
-**Prettier Similarity**: 62.50%
-
-
-# typescript/last-argument-expansion/decorated-function.tsx
+### typescript/last-argument-expansion/decorated-function.tsx
 ```diff
 -const Counter = decorator("my-counter")((props: {
 -  initialCount?: number;
@@ -6581,7 +5510,7 @@
 **Prettier Similarity**: 27.87%
 
 
-# typescript/last-argument-expansion/forward-ref.tsx
+### typescript/last-argument-expansion/forward-ref.tsx
 ```diff
 -export const Link = forwardRef<HTMLAnchorElement, LinkProps>(
 -  function Link(props, ref) {
@@ -6628,7 +5557,7 @@
 **Prettier Similarity**: 58.62%
 
 
-# typescript/mapped-type/break-mode/break-mode.ts
+### typescript/mapped-type/break-mode/break-mode.ts
 ```diff
  type A1 = { readonly [A in B]: T };
 -type A2 = {
@@ -6654,7 +5583,7 @@
 **Prettier Similarity**: 46.15%
 
 
-# typescript/mapped-type/issue-11098.ts
+### typescript/mapped-type/issue-11098.ts
 ```diff
  type Type = {
    // comment
@@ -6716,7 +5645,7 @@
 **Prettier Similarity**: 92.00%
 
 
-# typescript/multiparser-css/issue-6259.ts
+### typescript/multiparser-css/issue-6259.ts
 ```diff
  const yesFrame = (
    ...args: Interpolation<ThemedStyledProps<{}, Theme>>[]
@@ -6734,7 +5663,7 @@
 **Prettier Similarity**: 57.14%
 
 
-# typescript/non-null/optional-chain.ts
+### typescript/non-null/optional-chain.ts
 ```diff
  a?.b!.c;
  a?.b!.c.d;
@@ -6765,7 +5694,7 @@
 **Prettier Similarity**: 72.22%
 
 
-# typescript/prettier-ignore/issue-14238.ts
+### typescript/prettier-ignore/issue-14238.ts
 ```diff
 -export const foo = // prettier-ignore
 -  (bar as Baz).qux;
@@ -6780,7 +5709,7 @@
 **Prettier Similarity**: 0.00%
 
 
-# typescript/prettier-ignore/mapped-types.ts
+### typescript/prettier-ignore/mapped-types.ts
 ```diff
  type a = {
      // prettier-ignore
@@ -6866,7 +5795,7 @@
 **Prettier Similarity**: 65.67%
 
 
-# typescript/prettier-ignore/prettier-ignore-nested-unions.ts
+### typescript/prettier-ignore/prettier-ignore-nested-unions.ts
 ```diff
  export type a =
    // foo
@@ -6907,7 +5836,7 @@
 **Prettier Similarity**: 62.96%
 
 
-# typescript/prettier-ignore/prettier-ignore-parenthesized-type.ts
+### typescript/prettier-ignore/prettier-ignore-parenthesized-type.ts
 ```diff
  type Foo =
    // prettier-ignore
@@ -6921,7 +5850,7 @@
 **Prettier Similarity**: 40.00%
 
 
-# typescript/satisfies-operators/comments-unstable.ts
+### typescript/satisfies-operators/comments-unstable.ts
 ```diff
  const t1 = {
    prop1: 1,
@@ -6937,7 +5866,7 @@
 **Prettier Similarity**: 57.14%
 
 
-# typescript/test-declarations/test_declarations.ts
+### typescript/test-declarations/test_declarations.ts
 ```diff
 -test("does something really long and complicated so I have to write a very long name for the test", <T>(done) => {
 +test("does something really long and complicated so I have to write a very long name for the test", <
@@ -6951,7 +5880,7 @@
 **Prettier Similarity**: 40.00%
 
 
-# typescript/trailing-comma/trailing.ts
+### typescript/trailing-comma/trailing.ts
 ```diff
  export class BaseSingleLevelProfileTargeting<
    T extends ValidSingleLevelProfileNode,
@@ -6975,7 +5904,7 @@
 **Prettier Similarity**: 93.33%
 
 
-# typescript/trailing-comma/type-parameters-vs-arguments.ts
+### typescript/trailing-comma/type-parameters-vs-arguments.ts
 ```diff
  class FooClass<A, B, C> {
    a: A;
@@ -6998,7 +5927,7 @@
 **Prettier Similarity**: 63.64%
 
 
-# typescript/type-arguments-bit-shift-left-like/1.ts
+### typescript/type-arguments-bit-shift-left-like/1.ts
 ```diff
 -f << (<T>x);
 +f << <T>x;
@@ -7008,7 +5937,7 @@
 **Prettier Similarity**: 0.00%
 
 
-# typescript/typeparams/const.ts
+### typescript/typeparams/const.ts
 ```diff
  function a<const T>() {}
  function b<const T extends U>() {}
@@ -7050,7 +5979,7 @@
 **Prettier Similarity**: 93.75%
 
 
-# typescript/typeparams/empty-parameters-with-arrow-function/issue-13817.ts
+### typescript/typeparams/empty-parameters-with-arrow-function/issue-13817.ts
 ```diff
 -const xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx: xxxxxxxxxxxxxxxxxxxxxx<> = (
 -  arg,
@@ -7073,7 +6002,7 @@
 **Prettier Similarity**: 50.00%
 
 
-# typescript/typeparams/line-breaking-after-extends-2.ts
+### typescript/typeparams/line-breaking-after-extends-2.ts
 ```diff
  a = {
    parseFunctionBodyAndFinish<
@@ -7115,7 +6044,7 @@
 **Prettier Similarity**: 96.97%
 
 
-# typescript/typeparams/line-breaking-after-extends.ts
+### typescript/typeparams/line-breaking-after-extends.ts
 ```diff
  export type OuterType1<
 -  LongerLongerLongerLongerInnerType extends
@@ -7146,7 +6075,7 @@
 **Prettier Similarity**: 70.00%
 
 
-# typescript/typeparams/print-width-120/issue-7542.tsx
+### typescript/typeparams/print-width-120/issue-7542.tsx
 ```diff
  export const Foo = forwardRef(
    (props: FooProps, ref: Ref<HTMLElement>): JSX.Element => {
@@ -7182,7 +6111,7 @@
 **Prettier Similarity**: 80.00%
 
 
-# typescript/union/comments.ts
+### typescript/union/comments.ts
 ```diff
  type Foo = (
    | "thing1" // Comment1
@@ -7204,7 +6133,7 @@
 **Prettier Similarity**: 60.00%
 
 
-# typescript/union/consistent-with-flow/prettier-ignore.ts
+### typescript/union/consistent-with-flow/prettier-ignore.ts
 ```diff
  export type a =
    // foo
@@ -7240,7 +6169,7 @@
 **Prettier Similarity**: 88.00%
 
 
-# typescript/union/consistent-with-flow/single-type.ts
+### typescript/union/consistent-with-flow/single-type.ts
 ```diff
  type A1 =
    | A
@@ -7300,7 +6229,7 @@
 **Prettier Similarity**: 76.60%
 
 
-# typescript/union/single-type/single-type.ts
+### typescript/union/single-type/single-type.ts
 ```diff
 -type A1 /* 2 */ = /* 1 */ /* 3 */ /* 4 */ {
 -  key: string;
@@ -7316,7 +6245,7 @@
 **Prettier Similarity**: 0.00%
 
 
-# typescript/union/union-parens.ts
+### typescript/union/union-parens.ts
 ```diff
  export type A =
    | aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa

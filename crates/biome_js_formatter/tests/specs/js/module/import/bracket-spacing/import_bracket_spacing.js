@@ -21,4 +21,10 @@ import "very_long_import_very_long_import_very" assert {
     "type": /****/ "json"
         }
 
+
+// Single named alias import
+import {foo as bar   } from "foo";
+// Multiple named imports
+import {   foo as baz,   aaa} from "foo";
+
 import(aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, {assert: {type:'json'}})

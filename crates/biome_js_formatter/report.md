@@ -1,6 +1,6 @@
-# Overall Metrics
+## Overall Metrics
 
-**Average compatibility**: 95.94
+**Average compatibility**: 95.89
 
 <details>
     <summary>Definition</summary>
@@ -8,7 +8,7 @@
     $$average = \frac\{\sum_{file}^\{files}compatibility_\{file}}\{files}$$
 </details>
 
-**Compatible lines**: 95.98
+**Compatible lines**: 96.51
 
 <details>
     <summary>Definition</summary>
@@ -18,23 +18,24 @@
 
 [Metric definition discussion](https://github.com/rome/tools/issues/2555#issuecomment-1124787893)
 
+## Test cases
 
-# js/array-spread/multiple.js
-
-**Prettier Similarity**: 100.00%
-
-
-# js/arrays/empty.js
+### js/array-spread/multiple.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/arrays/holes-in-args.js
+### js/arrays/empty.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/arrays/issue-10159.js
+### js/arrays/holes-in-args.js
+
+**Prettier Similarity**: 100.00%
+
+
+### js/arrays/issue-10159.js
 ```diff
  {
    for (const srcPath of [src, `${src}.js`, `${src}/index`, `${src}/index.js`]) {
@@ -63,32 +64,32 @@
 **Prettier Similarity**: 85.00%
 
 
-# js/arrays/last.js
+### js/arrays/last.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/arrays/nested.js
+### js/arrays/nested.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/arrays/numbers-in-args.js
+### js/arrays/numbers-in-args.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/arrays/numbers-in-assignment.js
+### js/arrays/numbers-in-assignment.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/arrays/numbers-negative-comment-after-minus.js
+### js/arrays/numbers-negative-comment-after-minus.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/arrays/numbers-negative.js
+### js/arrays/numbers-negative.js
 ```diff
  const numbers1 = [
    -2017, -506252, -744011292, -7224, -70.4, -83353.6, -708.4, -174023963.52,
@@ -120,26 +121,24 @@
 **Prettier Similarity**: 76.19%
 
 
-# js/arrays/numbers-trailing-comma.js
+### js/arrays/numbers-trailing-comma.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/arrays/numbers-with-holes.js
+### js/arrays/numbers-with-holes.js
 ```diff
  const numberWithHoles1 = [
    7234932941,
    7234932722,
    7234932312,
-+  // comment before a hole 1
    ,
--  // comment before a hole 1
+   // comment before a hole 1
    7234932841,
    ,
    7234932843,
--  ,
+   ,
    // comment after a hole 1
-+  ,
    7234932436,
  ];
  
@@ -148,30 +147,28 @@
    0x234932722,
    0x234932312,
 -
-+  // comment before a hole 2
    ,
--  // comment before a hole 2
+   // comment before a hole 2
    0x234932841,
    ,
    0x234932843,
--  ,
-   // comment after a hole 2
-+  ,
+   ,
 +
+   // comment after a hole 2
    0x234932436,
  ];
 
 ```
 
-**Prettier Similarity**: 82.14%
+**Prettier Similarity**: 96.43%
 
 
-# js/arrays/numbers-with-trailing-comments.js
+### js/arrays/numbers-with-trailing-comments.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/arrays/numbers-with-tricky-comments.js
+### js/arrays/numbers-with-tricky-comments.js
 ```diff
  const lazyCatererNumbers = [
    1, 2, 4, 7, 11, 16, 22, 29, 37, 46, 56, 67, 79, 92, 106, 121, 137, 154, 172,
@@ -193,77 +190,77 @@
 **Prettier Similarity**: 54.55%
 
 
-# js/arrays/numbers1.js
+### js/arrays/numbers1.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/arrays/numbers2.js
+### js/arrays/numbers2.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/arrays/numbers3.js
+### js/arrays/numbers3.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/arrays/preserve_empty_lines.js
+### js/arrays/preserve_empty_lines.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/arrow-call/arrow_call.js
+### js/arrow-call/arrow_call.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/arrow-call/class-property.js
+### js/arrow-call/class-property.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/arrows/arrow-chain-with-trailing-comments.js
+### js/arrows/arrow-chain-with-trailing-comments.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/arrows/arrow_function_expression.js
+### js/arrows/arrow_function_expression.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/arrows/assignment-chain-with-arrow-chain.js
+### js/arrows/assignment-chain-with-arrow-chain.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/arrows/block_like.js
+### js/arrows/block_like.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/arrows/call.js
+### js/arrows/call.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/arrows/chain-as-arg.js
+### js/arrows/chain-as-arg.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/arrows/chain-in-logical-expression.js
+### js/arrows/chain-in-logical-expression.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/arrows/comment.js
+### js/arrows/comment.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/arrows/curried.js
+### js/arrows/curried.js
 ```diff
  const fn1 = (a) => 3;
  const fn2 = (a) => (b) => 3;
@@ -553,7 +550,7 @@
 **Prettier Similarity**: 68.78%
 
 
-# js/arrows/currying-2.js
+### js/arrows/currying-2.js
 ```diff
  const a = (x) => (y) => (z) =>
    x / 0.123456789 + (y * calculateSomething(z)) / Math.PI;
@@ -592,12 +589,12 @@
 **Prettier Similarity**: 40.91%
 
 
-# js/arrows/currying-3.js
+### js/arrows/currying-3.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/arrows/currying-4.js
+### js/arrows/currying-4.js
 ```diff
  Y(() => (a ? b : c));
  
@@ -750,12 +747,12 @@
 **Prettier Similarity**: 67.57%
 
 
-# js/arrows/currying.js
+### js/arrows/currying.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/arrows/issue-1389-curry.js
+### js/arrows/issue-1389-curry.js
 ```diff
  const foobar =
    (argumentOne, argumentTwo, argumentThree) =>
@@ -789,22 +786,22 @@
 **Prettier Similarity**: 83.33%
 
 
-# js/arrows/issue-4166-curry.js
+### js/arrows/issue-4166-curry.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/arrows/long-call-no-args.js
+### js/arrows/long-call-no-args.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/arrows/long-contents.js
+### js/arrows/long-contents.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/arrows/newline-before-arrow/newline-before-arrow.js
+### js/arrows/newline-before-arrow/newline-before-arrow.js
 ```diff
 -async (x) => x;
 +async;
@@ -816,102 +813,102 @@
 **Prettier Similarity**: 0.00%
 
 
-# js/arrows/parens.js
+### js/arrows/parens.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/arrows/semi/semi.js
+### js/arrows/semi/semi.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/assignment-comments/call.js
+### js/assignment-comments/call.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/assignment-comments/call2.js
+### js/assignment-comments/call2.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/assignment-comments/function.js
+### js/assignment-comments/function.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/assignment-comments/identifier.js
+### js/assignment-comments/identifier.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/assignment-comments/number.js
+### js/assignment-comments/number.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/assignment-comments/string.js
+### js/assignment-comments/string.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/assignment-expression/assignment_expression.js
+### js/assignment-expression/assignment_expression.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/assignment/binaryish.js
+### js/assignment/binaryish.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/assignment/call-with-template.js
+### js/assignment/call-with-template.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/assignment/chain-two-segments.js
+### js/assignment/chain-two-segments.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/assignment/chain.js
+### js/assignment/chain.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/assignment/destructuring-array.js
+### js/assignment/destructuring-array.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/assignment/destructuring-heuristic.js
+### js/assignment/destructuring-heuristic.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/assignment/destructuring.js
+### js/assignment/destructuring.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/assignment/discussion-15196.js
+### js/assignment/discussion-15196.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/assignment/issue-10218.js
+### js/assignment/issue-10218.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/assignment/issue-1419.js
+### js/assignment/issue-1419.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/assignment/issue-15534.js
+### js/assignment/issue-15534.js
 ```diff
 -params["redirectTo"] =
 -  `${window.location.pathname}${window.location.search}${window.location.hash}`;
@@ -936,452 +933,312 @@
 **Prettier Similarity**: 18.18%
 
 
-# js/assignment/issue-1966.js
+### js/assignment/issue-1966.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/assignment/issue-2184.js
+### js/assignment/issue-2184.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/assignment/issue-2482-1.js
+### js/assignment/issue-2482-1.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/assignment/issue-2482-2.js
+### js/assignment/issue-2482-2.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/assignment/issue-2540.js
+### js/assignment/issue-2540.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/assignment/issue-3819.js
+### js/assignment/issue-3819.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/assignment/issue-4094.js
+### js/assignment/issue-4094.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/assignment/issue-5610.js
+### js/assignment/issue-5610.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/assignment/issue-6922.js
+### js/assignment/issue-6922.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/assignment/issue-7091.js
+### js/assignment/issue-7091.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/assignment/issue-7572.js
+### js/assignment/issue-7572.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/assignment/issue-7961.js
+### js/assignment/issue-7961.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/assignment/issue-8218.js
+### js/assignment/issue-8218.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/assignment/lone-arg.js
+### js/assignment/lone-arg.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/assignment/sequence.js
+### js/assignment/sequence.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/assignment/unary.js
+### js/assignment/unary.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/async/async-iteration.js
+### js/async/async-iteration.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/async/async-shorthand-method.js
+### js/async/async-shorthand-method.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/async/await-parse.js
+### js/async/await-parse.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/async/conditional-expression.js
+### js/async/conditional-expression.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/async/exponentiation.js
+### js/async/exponentiation.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/async/inline-await.js
+### js/async/inline-await.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/async/nested.js
+### js/async/nested.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/async/nested2.js
+### js/async/nested2.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/async/parens.js
+### js/async/parens.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/async/simple-nested-await.js
+### js/async/simple-nested-await.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/babel-plugins/async-generators.js
+### js/big-int/literal.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/babel-plugins/bigint.js
+### js/binary-expressions/arrow.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/babel-plugins/class-properties.js
+### js/binary-expressions/bitwise-flags.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/babel-plugins/class-static-block.js
+### js/binary-expressions/call.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/babel-plugins/decorator-auto-accessors.js
+### js/binary-expressions/comment.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/babel-plugins/decorators.js
+### js/binary-expressions/equality.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/babel-plugins/destructuring-private.js
+### js/binary-expressions/exp.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/babel-plugins/dynamic-import.js
+### js/binary-expressions/if.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/babel-plugins/export-namespace-from.js
+### js/binary-expressions/in_instanceof.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/babel-plugins/function-sent.js
+### js/binary-expressions/inline-jsx.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/babel-plugins/import-assertions-dynamic.js
+### js/binary-expressions/inline-object-array.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/babel-plugins/import-assertions-static.js
+### js/binary-expressions/jsx_parent.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/babel-plugins/import-attributes-dynamic.js
+### js/binary-expressions/like-regexp.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/babel-plugins/import-attributes-static.js
+### js/binary-expressions/math.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/babel-plugins/import-meta.js
+### js/binary-expressions/return.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/babel-plugins/jsx.js
+### js/binary-expressions/short-right.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/babel-plugins/logical-assignment-operators.js
+### js/binary-expressions/test.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/babel-plugins/module-string-names.js
+### js/binary-expressions/unary.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/babel-plugins/nullish-coalescing-operator.js
+### js/binary_math/parens.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/babel-plugins/numeric-separator.js
+### js/bracket-spacing/array.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/babel-plugins/object-rest-spread.js
+### js/bracket-spacing/object.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/babel-plugins/optional-catch-binding.js
+### js/break-calls/break.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/babel-plugins/optional-chaining-assignment.js
+### js/break-calls/parent.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/babel-plugins/optional-chaining.js
+### js/break-calls/react.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/babel-plugins/private-fields-in-in.js
+### js/break-calls/reduce.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/babel-plugins/private-methods.js
+### js/call/first-argument-expansion/expression-2nd-arg.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/babel-plugins/regex-v-flag.js
+### js/call/first-argument-expansion/issue-12892.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/babel-plugins/regexp-modifiers.js
+### js/call/first-argument-expansion/issue-13237.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/big-int/literal.js
+### js/call/first-argument-expansion/issue-14454.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/binary-expressions/arrow.js
+### js/call/first-argument-expansion/issue-2456.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/binary-expressions/bitwise-flags.js
+### js/call/first-argument-expansion/issue-4401.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/binary-expressions/call.js
+### js/call/first-argument-expansion/issue-5172.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/binary-expressions/comment.js
+### js/call/first-argument-expansion/jsx.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/binary-expressions/equality.js
+### js/call/first-argument-expansion/test.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/binary-expressions/exp.js
+### js/call/no-argument/special-cases.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/binary-expressions/if.js
-
-**Prettier Similarity**: 100.00%
-
-
-# js/binary-expressions/in_instanceof.js
-
-**Prettier Similarity**: 100.00%
-
-
-# js/binary-expressions/inline-jsx.js
-
-**Prettier Similarity**: 100.00%
-
-
-# js/binary-expressions/inline-object-array.js
-
-**Prettier Similarity**: 100.00%
-
-
-# js/binary-expressions/jsx_parent.js
-
-**Prettier Similarity**: 100.00%
-
-
-# js/binary-expressions/like-regexp.js
-
-**Prettier Similarity**: 100.00%
-
-
-# js/binary-expressions/math.js
-
-**Prettier Similarity**: 100.00%
-
-
-# js/binary-expressions/return.js
-
-**Prettier Similarity**: 100.00%
-
-
-# js/binary-expressions/short-right.js
-
-**Prettier Similarity**: 100.00%
-
-
-# js/binary-expressions/test.js
-
-**Prettier Similarity**: 100.00%
-
-
-# js/binary-expressions/unary.js
-
-**Prettier Similarity**: 100.00%
-
-
-# js/binary_math/parens.js
-
-**Prettier Similarity**: 100.00%
-
-
-# js/bracket-spacing/array.js
-
-**Prettier Similarity**: 100.00%
-
-
-# js/bracket-spacing/object.js
-
-**Prettier Similarity**: 100.00%
-
-
-# js/break-calls/break.js
-
-**Prettier Similarity**: 100.00%
-
-
-# js/break-calls/parent.js
-
-**Prettier Similarity**: 100.00%
-
-
-# js/break-calls/react.js
-
-**Prettier Similarity**: 100.00%
-
-
-# js/break-calls/reduce.js
-
-**Prettier Similarity**: 100.00%
-
-
-# js/call/first-argument-expansion/expression-2nd-arg.js
-
-**Prettier Similarity**: 100.00%
-
-
-# js/call/first-argument-expansion/issue-12892.js
-
-**Prettier Similarity**: 100.00%
-
-
-# js/call/first-argument-expansion/issue-13237.js
-
-**Prettier Similarity**: 100.00%
-
-
-# js/call/first-argument-expansion/issue-14454.js
-
-**Prettier Similarity**: 100.00%
-
-
-# js/call/first-argument-expansion/issue-2456.js
-
-**Prettier Similarity**: 100.00%
-
-
-# js/call/first-argument-expansion/issue-4401.js
-
-**Prettier Similarity**: 100.00%
-
-
-# js/call/first-argument-expansion/issue-5172.js
-
-**Prettier Similarity**: 100.00%
-
-
-# js/call/first-argument-expansion/jsx.js
-
-**Prettier Similarity**: 100.00%
-
-
-# js/call/first-argument-expansion/test.js
-
-**Prettier Similarity**: 100.00%
-
-
-# js/call/no-argument/special-cases.js
-
-**Prettier Similarity**: 100.00%
-
-
-# js/chain-expression/test.js
+### js/chain-expression/test.js
 ```diff
 -(a?.b).c;
 -(a?.()).b;
@@ -1401,242 +1258,242 @@
 **Prettier Similarity**: 50.00%
 
 
-# js/class-comment/class-property.js
+### js/class-comment/class-property.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/class-comment/misc.js
+### js/class-comment/misc.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/class-comment/superclass.js
+### js/class-comment/superclass.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/class-extends/complex.js
+### js/class-extends/complex.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/class-extends/extends.js
+### js/class-extends/extends.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/class-static-block/class-static-block.js
+### js/class-static-block/class-static-block.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/class-static-block/with-line-breaks.js
+### js/class-static-block/with-line-breaks.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/classes-private-fields/optional-chaining.js
+### js/classes-private-fields/optional-chaining.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/classes-private-fields/private_fields.js
+### js/classes-private-fields/private_fields.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/classes-private-fields/with_comments.js
+### js/classes-private-fields/with_comments.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/classes/asi.js
+### js/classes/asi.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/classes/assignment.js
+### js/classes/assignment.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/classes/binary.js
+### js/classes/binary.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/classes/call.js
+### js/classes/call.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/classes/class-fields-features.js
+### js/classes/class-fields-features.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/classes/empty.js
+### js/classes/empty.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/classes/keyword-property/async.js
+### js/classes/keyword-property/async.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/classes/keyword-property/computed.js
+### js/classes/keyword-property/computed.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/classes/keyword-property/get.js
+### js/classes/keyword-property/get.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/classes/keyword-property/private.js
+### js/classes/keyword-property/private.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/classes/keyword-property/set.js
+### js/classes/keyword-property/set.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/classes/keyword-property/static-async.js
+### js/classes/keyword-property/static-async.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/classes/keyword-property/static-get.js
+### js/classes/keyword-property/static-get.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/classes/keyword-property/static-set.js
+### js/classes/keyword-property/static-set.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/classes/keyword-property/static-static.js
+### js/classes/keyword-property/static-static.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/classes/keyword-property/static.js
+### js/classes/keyword-property/static.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/classes/member.js
+### js/classes/member.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/classes/method.js
+### js/classes/method.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/classes/new.js
+### js/classes/new.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/classes/property.js
+### js/classes/property.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/classes/super.js
+### js/classes/super.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/classes/ternary.js
+### js/classes/ternary.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/classes/top-level-super/example.js
+### js/classes/top-level-super/example.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/comments-closure-typecast/binary-expr.js
+### js/comments-closure-typecast/binary-expr.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/comments-closure-typecast/closure-compiler-type-cast.js
+### js/comments-closure-typecast/closure-compiler-type-cast.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/comments-closure-typecast/comment-in-the-middle.js
+### js/comments-closure-typecast/comment-in-the-middle.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/comments-closure-typecast/comment-placement.js
+### js/comments-closure-typecast/comment-placement.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/comments-closure-typecast/extra-spaces-and-asterisks.js
+### js/comments-closure-typecast/extra-spaces-and-asterisks.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/comments-closure-typecast/iife-issue-5850-isolated.js
+### js/comments-closure-typecast/iife-issue-5850-isolated.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/comments-closure-typecast/iife.js
+### js/comments-closure-typecast/iife.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/comments-closure-typecast/issue-4124.js
+### js/comments-closure-typecast/issue-4124.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/comments-closure-typecast/issue-8045.js
+### js/comments-closure-typecast/issue-8045.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/comments-closure-typecast/issue-9358.js
+### js/comments-closure-typecast/issue-9358.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/comments-closure-typecast/member.js
+### js/comments-closure-typecast/member.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/comments-closure-typecast/nested.js
+### js/comments-closure-typecast/nested.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/comments-closure-typecast/non-casts.js
+### js/comments-closure-typecast/non-casts.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/comments-closure-typecast/object-with-comment.js
+### js/comments-closure-typecast/object-with-comment.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/comments-closure-typecast/satisfies.js
+### js/comments-closure-typecast/satisfies.js
 ```diff
 -module.exports = /** @satisfies {Record<string, string>} */ ({
 +module.exports = /** @satisfies {Record<string, string>} */ {
@@ -1649,97 +1506,121 @@
 **Prettier Similarity**: 33.33%
 
 
-# js/comments-closure-typecast/superclass.js
+### js/comments-closure-typecast/styled-components.js
+```diff
+ const OverlapWrapper =
+   /** @type {import('styled-components').ThemedStyledFunction<'div',null,{overlap: boolean}>} */
+   (styled.div)`
+-    position: relative;
++position:relative;
+     > {
+-      position: absolute;
+-      bottom: ${(p) => p.overlap === "previous" && 0};
+-      top: ${(p) => p.overlap === "next" && 0};
+-    }
+-  `;
++  position: absolute;
++  bottom: ${(p) => p.overlap === "previous" && 0};
++top: ${(p) => p.overlap === "next" && 0};
++}
++`;
+
+```
+
+**Prettier Similarity**: 40.00%
+
+
+### js/comments-closure-typecast/superclass.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/comments-closure-typecast/ways-to-specify-type.js
+### js/comments-closure-typecast/ways-to-specify-type.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/comments/arrow.js
+### js/comments/arrow.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/comments/assignment-pattern.js
+### js/comments/assignment-pattern.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/comments/before-comma.js
+### js/comments/before-comma.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/comments/binary-expressions-block-comments.js
+### js/comments/binary-expressions-block-comments.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/comments/binary-expressions-parens.js
+### js/comments/binary-expressions-parens.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/comments/binary-expressions-single-comments.js
+### js/comments/binary-expressions-single-comments.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/comments/binary-expressions.js
+### js/comments/binary-expressions.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/comments/blank.js
+### js/comments/blank.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/comments/break-continue-statements.js
+### js/comments/break-continue-statements.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/comments/call_comment.js
+### js/comments/call_comment.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/comments/class.js
+### js/comments/class.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/comments/dangling.js
+### js/comments/dangling.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/comments/dangling_array.js
+### js/comments/dangling_array.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/comments/dangling_for.js
+### js/comments/dangling_for.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/comments/dynamic_imports.js
+### js/comments/dynamic_imports.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/comments/emoji.js
+### js/comments/emoji.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/comments/empty-statements.js
+### js/comments/empty-statements.js
 ```diff
 -a; /* a */ // b
 -/* c */
@@ -1771,12 +1652,12 @@
 **Prettier Similarity**: 13.33%
 
 
-# js/comments/export-and-import.js
+### js/comments/export-and-import.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/comments/export.js
+### js/comments/export.js
 ```diff
  export //comment
 - {};
@@ -1823,22 +1704,22 @@
 **Prettier Similarity**: 97.37%
 
 
-# js/comments/first-line.js
+### js/comments/first-line.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/comments/flow-types/inline.js
+### js/comments/flow-types/inline.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/comments/function-declaration.js
+### js/comments/function-declaration.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/comments/function/between-parentheses-and-function-body.js
+### js/comments/function/between-parentheses-and-function-body.js
 ```diff
  function function_declaration() {
    // this is a function
@@ -1895,22 +1776,34 @@
 **Prettier Similarity**: 50.00%
 
 
-# js/comments/if.js
+### js/comments/html-like/comment.js
+```diff
+ <!--
+-alert(1); 
++alert(1)
+ -->
+
+```
+
+**Prettier Similarity**: 66.67%
+
+
+### js/comments/if.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/comments/issue-3532.js
+### js/comments/issue-3532.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/comments/issues.js
+### js/comments/issues.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/comments/jsdoc-nestled-dangling.js
+### js/comments/jsdoc-nestled-dangling.js
 ```diff
  {
    {
@@ -1941,7 +1834,7 @@
 **Prettier Similarity**: 90.91%
 
 
-# js/comments/jsdoc-nestled.js
+### js/comments/jsdoc-nestled.js
 ```diff
  const issues = {
    see: "#7724 and #12653",
@@ -1984,32 +1877,32 @@
 **Prettier Similarity**: 77.42%
 
 
-# js/comments/jsdoc.js
+### js/comments/jsdoc.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/comments/jsx.js
+### js/comments/jsx.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/comments/last-arg.js
+### js/comments/last-arg.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/comments/multi-comments-2.js
+### js/comments/multi-comments-2.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/comments/multi-comments-on-same-line-2.js
+### js/comments/multi-comments-on-same-line-2.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/comments/multi-comments-on-same-line.js
+### js/comments/multi-comments-on-same-line.js
 ```diff
  /*========= All on same line =========*/
  a;
@@ -2110,17 +2003,17 @@
 **Prettier Similarity**: 96.67%
 
 
-# js/comments/multi-comments.js
+### js/comments/multi-comments.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/comments/preserve-new-line-last.js
+### js/comments/preserve-new-line-last.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/comments/return-statement.js
+### js/comments/return-statement.js
 ```diff
  function jsx() {
    return (
@@ -2307,17 +2200,17 @@
 **Prettier Similarity**: 91.67%
 
 
-# js/comments/single-star-jsdoc.js
+### js/comments/single-star-jsdoc.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/comments/switch.js
+### js/comments/switch.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/comments/tagged-template-literal.js
+### js/comments/tagged-template-literal.js
 ```diff
  foo``; // comment
  
@@ -2341,12 +2234,12 @@
 **Prettier Similarity**: 85.71%
 
 
-# js/comments/template-literal.js
+### js/comments/template-literal.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/comments/trailing-jsdocs.js
+### js/comments/trailing-jsdocs.js
 ```diff
  const CONNECTION_STATUS = (exports.CONNECTION_STATUS = {
    CLOSED: Object.freeze({ kind: "CLOSED" }),
@@ -2385,32 +2278,32 @@
 **Prettier Similarity**: 70.37%
 
 
-# js/comments/trailing_space.js
+### js/comments/trailing_space.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/comments/try.js
+### js/comments/try.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/comments/variable_declarator.js
+### js/comments/variable_declarator.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/comments/while.js
+### js/comments/while.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/computed-props/classes.js
+### js/computed-props/classes.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/conditional/comments.js
+### js/conditional/comments.js
 ```diff
  var inspect =
    4 === util.inspect.length
@@ -2477,14 +2370,11 @@
      */
      foo
    : test
--    ? /* comment
-+  ? /* comment
+     ? /* comment
    comment
      comment */
--      foo
--    : bar;
-+    foo
-+  : bar;
+       foo
+     : bar;
  
  test ? /* comment */ foo : bar;
  
@@ -2505,17 +2395,13 @@
             comment
        A newline will be added after this comment, unfortunately – but it can be removed manually, see next statement.
      */
--    test
--    ? foo
--    : /* comment
-+  test
-+  ? foo
-+  : /* comment
+     test
+     ? foo
+     : /* comment
    comment
      comment
     */
--      bar;
-+    bar;
+       bar;
  
  // It is at least possible to delete the extra newline that was
  // unfortunately added before the second condition above:
@@ -2528,16 +2414,13 @@
             comment
      */
 -  : test
--    ? foo
--    : /* comment
-+  test
-+  ? foo
-+  : /* comment
++    test
+     ? foo
+     : /* comment
    comment
      comment
     */
--      bar;
-+    bar;
+       bar;
  
  test ? foo : /* comment */ bar;
  
@@ -2550,447 +2433,30 @@
 
 ```
 
-**Prettier Similarity**: 89.43%
+**Prettier Similarity**: 97.56%
 
 
-# js/conditional/new-expression.js
-
-**Prettier Similarity**: 100.00%
-
-
-# js/conditional/new-ternary-examples.js
-```diff
- // from https://gist.github.com/rattrayalex/dacbf5838571a47f22d0ae1f8b960268
- // Input and output should match (for 2-space indent formatting).
- // TypeScript is here: prettier/tests/format/typescript/conditional-types/new-ternary-spec.ts
- // EXAMPLES
- //  mostly taken from https://github.com/prettier/prettier/issues/9561
- 
- const message =
-   i % 3 === 0 && i % 5 === 0
-     ? "fizzbuzz"
-     : i % 3 === 0
--      ? "fizz"
--      : i % 5 === 0
--        ? "buzz"
--        : String(i);
-+    ? "fizz"
-+    : i % 5 === 0
-+    ? "buzz"
-+    : String(i);
- 
- const paymentMessageShort =
-   state == "success"
-     ? "Payment completed successfully"
-     : state == "processing"
--      ? "Payment processing"
--      : state == "invalid_cvc"
--        ? "There was an issue with your CVC number"
--        : state == "invalid_expiry"
--          ? "Expiry must be sometime in the past."
--          : "There was an issue with the payment.  Please contact support.";
-+    ? "Payment processing"
-+    : state == "invalid_cvc"
-+    ? "There was an issue with your CVC number"
-+    : state == "invalid_expiry"
-+    ? "Expiry must be sometime in the past."
-+    : "There was an issue with the payment.  Please contact support.";
- 
- const paymentMessageWithABreak =
-   state == "success"
-     ? "Payment completed successfully"
-     : state == "processing"
--      ? "Payment processing"
--      : state == "invalid_cvc"
--        ? "There was an issue with your CVC number, and you need to take a prompt action on it."
--        : state == "invalid_expiry"
--          ? "Expiry must be sometime in the past."
--          : "There was an issue with the payment.  Please contact support.";
-+    ? "Payment processing"
-+    : state == "invalid_cvc"
-+    ? "There was an issue with your CVC number, and you need to take a prompt action on it."
-+    : state == "invalid_expiry"
-+    ? "Expiry must be sometime in the past."
-+    : "There was an issue with the payment.  Please contact support.";
- 
- const typeofExample = definition.encode
-   ? definition.encode(
-       typeof row[field] !== "undefined"
-         ? row[field]
-         : typeof definition.default !== "undefined"
--          ? definition.default
--          : null,
-+        ? definition.default
-+        : null,
-     )
-   : typeof row[field] !== "undefined"
--    ? row[field]
--    : typeof definition.default !== "undefined"
--      ? definition.default
--      : null;
-+  ? row[field]
-+  : typeof definition.default !== "undefined"
-+  ? definition.default
-+  : null;
- 
- // (the following is semantically equivalent to the above, but written in a more-confusing style – it'd be hard to grok no matter the formatting)
- const typeofExampleFlipped = definition.encode
-   ? definition.encode(
-       typeof row[field] === "undefined"
-         ? typeof definition.default === "undefined"
-           ? null
-           : definition.default
-         : row[field],
-     )
-   : typeof row[field] === "undefined"
--    ? typeof definition.default === "undefined"
--      ? null
--      : definition.default
--    : row[field];
-+  ? typeof definition.default === "undefined"
-+    ? null
-+    : definition.default
-+  : row[field];
- 
- // JSX Examples:
- 
- const typicalLongConsequentWithNullAlternate = (
-   <div>
-     {children && !isEmptyChildren(children) ? (
-       <FooComponent
-         className="a bunch of css classes might go here, wow so many"
-         foo={foo}
-         bar={includeBar ? bar : null}
-       />
-     ) : null}
-   </div>
- );
- 
- const reactRouterExampleJSX = (
-   <div>
-     {children && !isEmptyChildren(children)
-       ? children
-       : props.match
--        ? component
--          ? React.createElement(component, props)
--          : render
--            ? render(props)
--            : null
--        : null}
-+      ? component
-+        ? React.createElement(component, props)
-+        : render
-+        ? render(props)
-+        : null
-+      : null}
-   </div>
- );
- 
- const reactRouterExampleNonJSX =
-   children && !isEmptyChildren(children)
-     ? children
-     : props.match
--      ? component
--        ? React.createElement(component, props)
--        : render
--          ? render(props)
--          : null
--      : null;
-+    ? component
-+      ? React.createElement(component, props)
-+      : render
-+      ? render(props)
-+      : null
-+    : null;
- 
- inJSXExpressionContainer.withLongConditionals.example = (
-   <div>
-     {isACat() && (someReallyLongCondition || moreInThisLongCondition)
-       ? someReallyLargeExpression.toMakeMeowNoise().willCauseParens()
-       : someReallyLongCondition || moreInThisLongCondition
--        ? bark()
--        : someReallyLargeExpression.toMakeMeowNoise().willCauseParens()}
-+      ? bark()
-+      : someReallyLargeExpression.toMakeMeowNoise().willCauseParens()}
-   </div>
- );
- 
- inJSXExpressionContainer.withLoops.orBooleans.example = (
-   <div>
-     {items
-       ? items.map((item) =>
-           item.display ? (
-             <Item item={item} attr="breaks ternary but not consequent" />
-           ) : (
-             <Blank />
-           ),
-         )
-       : null}
- 
-     {showTheStuff &&
-       (foo ? (
-         <Thing thing={foooooooooooooooooooooooooo} bar="bazzzzzz" />
-       ) : (
-         <OtherThing />
-       ))}
-   </div>
- );
- 
- inJSXExpressionContainer.withNullConditional = (
-   <div>
-     {isACat() ? null : <Foo />}
-     {isACat() && (someReallyLongCondition || moreInThisLongCondition) ? null : (
-       <Foo />
-     )}
-     {isACat() &&
-     (someReallyLongCondition ||
-       moreInThisLongCondition ||
-       evenMoreInThisExtraLongConditional) ? null : (
-       <Foo />
-     )}
-   </div>
- );
-
-```
-
-**Prettier Similarity**: 73.33%
-
-
-# js/conditional/new-ternary-spec.js
-```diff
- // from https://gist.github.com/rattrayalex/dacbf5838571a47f22d0ae1f8b960268
- // Input and output should match (for 2-space indent formatting).
- // TypeScript is here: prettier/tests/format/typescript/conditional-types/new-ternary-spec.ts
- 
- // remain on one line if possible:
- const short = isLoud() ? makeNoise() : silent();
- 
- // next, put everything after the =
- const lessShort = isLoudReallyLoud()
-   ? makeNoiseReallyLoudly.omgSoLoud()
-   : silent();
- 
- // next, indent the consequent:
- const andIndented = isLoudReallyReallyReallyReallyLoud()
-   ? makeNoiseReallyReallyReallyReallyReallyLoudly.omgSoLoud()
-   : silent();
- 
- // unless the consequent is short (less than ten characters long):
- const shortSoCase = isLoudReallyReallyReallyReallyLoud()
-   ? silent()
-   : makeNoiseReallyReallyReallyReallyReallyLoudly.omgSoLoud();
- 
- // if chained, always break and put after the =
- const chainedShort = isCat() ? meow() : isDog() ? bark() : silent();
- 
- // when a consequent breaks in a chain:
- const chainedWithLongConsequent = isCat()
-   ? someReallyLargeExpression
-       .thatWouldCauseALineBreak()
-       .willCauseAnIndentButNotParens()
-   : isDog()
--    ? bark()
--    : silent();
-+  ? bark()
-+  : silent();
- 
- // nested ternary in consequent always breaks:
- const chainedWithTernaryConsequent = isCat()
-   ? aNestedCondition
-     ? theResult()
-     : theAlternate()
-   : isDog()
--    ? bark()
--    : silent();
-+  ? bark()
-+  : silent();
- 
- // consequent and terminal alternate break:
- const consequentAndTerminalAlternateBreak = isCat()
-   ? someReallyLargeExpression
-       .thatWouldCauseALineBreak()
-       .willCauseAnIndentButNotParens()
-   : isDog()
--    ? bark()
--    : someReallyLargeExpression
--        .thatWouldCauseALineBreak()
--        .willCauseAnIndentButNotParens();
-+  ? bark()
-+  : someReallyLargeExpression
-+      .thatWouldCauseALineBreak()
-+      .willCauseAnIndentButNotParens();
- 
- // multiline conditions and consequents/alternates:
- const multilineConditionsConsequentsAndAlternates =
-   isAnAdorableKittyCat() && (someReallyLongCondition || moreInThisLongCondition)
-     ? someReallyLargeExpression
-         .thatWouldCauseALineBreak()
-         .willCauseAnIndentButNotParens()
-     : isNotAnAdorableKittyCat() &&
--        (someReallyLongCondition || moreInThisLongCondition)
--      ? bark()
--      : shortCondition()
--        ? shortConsequent()
--        : someReallyLargeExpression
--            .thatWouldCauseALineBreak()
--            .willCauseAnIndentButNotParens();
-+      (someReallyLongCondition || moreInThisLongCondition)
-+    ? bark()
-+    : shortCondition()
-+    ? shortConsequent()
-+    : someReallyLargeExpression
-+        .thatWouldCauseALineBreak()
-+        .willCauseAnIndentButNotParens();
- 
- // illustrating case of mostly short conditionals
- const mostlyShort =
-   x === 1
-     ? "one"
-     : x === 2
--      ? "two"
--      : x === 3
--        ? "three"
--        : x === 5 &&
--            y === 7 &&
--            someOtherThing.thatIsSoLong.thatItBreaksTheTestCondition()
--          ? "four"
--          : x === 6
--            ? "six"
--            : "idk";
-+    ? "two"
-+    : x === 3
-+    ? "three"
-+    : x === 5 &&
-+      y === 7 &&
-+      someOtherThing.thatIsSoLong.thatItBreaksTheTestCondition()
-+    ? "four"
-+    : x === 6
-+    ? "six"
-+    : "idk";
- 
- // long conditional, short consequent/alternate, not chained - do indent after ?
- const longConditional =
-   bifornCringerMoshedPerplexSawder === 2 / askTrovenaBeenaDependsRowans &&
-   glimseGlyphsHazardNoopsTieTie >=
-     averredBathersBoxroomBuggyNurl().anodyneCondosMalateOverateRetinol()
-     ? "foo"
-     : "bar";
- 
- // long conditional, short consequent/alternate, chained
- // (break on short consequents iff in chained ternary and its conditional broke)
- const longConditionalChained =
-   bifornCringerMoshedPerplexSawder === 2 / askTrovenaBeenaDependsRowans &&
-   glimseGlyphsHazardNoopsTieTie >=
-     averredBathersBoxroomBuggyNurl().anodyneCondosMalateOverateRetinol()
-     ? "foo"
-     : anotherCondition
--      ? "bar"
--      : "baz";
-+    ? "bar"
-+    : "baz";
- 
- // As a function parameter, don't add an extra indent:
- definition.encode(
-   typeof row[field] !== "undefined"
-     ? row[field]
-     : typeof definition.default !== "undefined"
--      ? definition.default
--      : null,
-+    ? definition.default
-+    : null,
-   typeof row[field] === "undefined"
-     ? typeof definition.default === "undefined"
-       ? null
-       : definition.default
-     : row[field],
- );
- 
- // In a return, break and over-indent:
- const inReturn = () => {
-   if (short) {
-     return foo ? 1 : 2;
-   }
-   return typeof row[aVeryLongFieldName] !== "undefined"
-     ? row[aVeryLongFieldName]
-     : null;
- };
- 
- // Remove current JSX Mode, and replace it with this algorithm:
- // When a ternary's parent is a JSXExpressionContainer which is not in a JSXAttribute,
- // force the consequent to break,
- // and if the alternate breaks,
- // add a newline before the closing curly brace.
- // Special case when the consequent is `null`:
- // do not add a line before or after it,
- // and wrap the alternate in parens.
- 
- const someJSX = (
-   <div>
-     Typical jsx case:
-     {showFoo ? <Foo attribute="such and such stuff here" /> : <Bar short />}
-     Nested, and with a non-jsx consequent is the same:
-     {component ? (
-       React.createElement(component, props)
-     ) : render ? (
-       <div>{render(props)}</div>
-     ) : (
-       <div>Nothing is here</div>
-     )}
-     As is a non-jsx consequent:
-     {showTheJSXElement ? <div>the stuff</div> : renderOtherStuff()}
-     But if the alternate breaks, add a newline before the closing curly brace:
-     {showTheThing || pleaseShowTheThing ? (
-       <Foo attribute="such and such stuff here" />
-     ) : (
-       <Bar
-         attribute="such and such stuff here"
-         another="more stuff here"
-         third="and even more, hooray!"
-       />
-     )}
-     When the consequent is `null` and the alternate breaks, hug it with parens
-     to match boolean behavior:
-     {!thing ? null : (
-       <TheThing
-         thing={thing}
-         someVeryLongPropertyThatBreaksTheAlternate="hello"
-       />
-     )}
-   </div>
- );
- 
- ternaryWithJSXElements.hasNoSpecialCasing = component ? (
-   <div>{React.createElement(component, props)}</div>
- ) : render ? (
-   <div>{render(props)}</div>
- ) : (
-   <div>Nothing is here</div>
- );
- 
- jsxExpressionContainer.inJSXAttribute.hasNoSpecialCasing = (
-   <Foo
-     withJSX={isRed ? <RedColorThing /> : <GreenColorThing />}
-     withJSXBroken={
-       isRed || isSomeOtherLongCondition.thatBreaksTheLine() ? (
-         <RedColorThing />
-       ) : (
-         <GreenColorThing />
-       )
-     }
-   />
- );
-
-```
-
-**Prettier Similarity**: 84.90%
-
-
-# js/conditional/no-confusing-arrow.js
+### js/conditional/new-expression.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/conditional/postfix-ternary-regressions.js
+### js/conditional/new-ternary-examples.js
+
+**Prettier Similarity**: 100.00%
+
+
+### js/conditional/new-ternary-spec.js
+
+**Prettier Similarity**: 100.00%
+
+
+### js/conditional/no-confusing-arrow.js
+
+**Prettier Similarity**: 100.00%
+
+
+### js/conditional/postfix-ternary-regressions.js
 ```diff
  // concatened string in consequent should be visually distinguishable from alternate
  // … or maybe this is okay, because the colon is enough?
@@ -3031,19 +2497,15 @@
    return !linkTo
      ? false
      : typeof linkTo === "function"
--      ? linkTo(record, reference)
--      : linkToRecord(rootPath, sourceId, linkTo_as_string);
-+    ? linkTo(record, reference)
-+    : linkToRecord(rootPath, sourceId, linkTo_as_string);
+       ? linkTo(record, reference)
+       : linkToRecord(rootPath, sourceId, linkTo_as_string);
  }
  function foo2() {
    return React.isValidElement(emptyText)
      ? React.cloneElement(emptyText)
      : emptyText === ""
--      ? " " // em space, forces the display of an empty line of normal height
--      : translate(emptyText, { _: emptyText });
-+    ? " " // em space, forces the display of an empty line of normal height
-+    : translate(emptyText, { _: emptyText });
+       ? " " // em space, forces the display of an empty line of normal height
+       : translate(emptyText, { _: emptyText });
  }
  
  // Function call ideally wouldnt break break
@@ -3090,17 +2552,13 @@
    payload
      ? payload.id || (payload.data ? payload.data.id : null)
      : requestPayload
--      ? requestPayload.id
--      : null,
-+    ? requestPayload.id
-+    : null,
+       ? requestPayload.id
+       : null,
    payload && payload.data
      ? payload.data
      : requestPayload && requestPayload.data
--      ? requestPayload.data
--      : null,
-+    ? requestPayload.data
-+    : null,
+       ? requestPayload.data
+       : null,
  );
  
  const delayedDataProvider = new Proxy(restProvider, {
@@ -3146,12 +2604,9 @@
  const badComments = schema.model
    ? schema
    : // If model is an array where the items schema is a referred model then we need to use that
--    schema.type === "array"
--    ? schema.items
--    : schema;
-+  schema.type === "array"
-+  ? schema.items
-+  : schema;
+     schema.type === "array"
+     ? schema.items
+     : schema;
  
  const anotherBadComment = refModel
    ? // If we're in a shared params file then reference the model name directly
@@ -3164,290 +2619,290 @@
 
 ```
 
-**Prettier Similarity**: 91.03%
+**Prettier Similarity**: 98.08%
 
 
-# js/cursor/comments-1.js
-
-**Prettier Similarity**: 100.00%
-
-
-# js/cursor/comments-2.js
+### js/cursor/comments-1.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/cursor/comments-3.js
+### js/cursor/comments-2.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/cursor/comments-4.js
+### js/cursor/comments-3.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/cursor/cursor-0.js
+### js/cursor/comments-4.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/cursor/cursor-1.js
+### js/cursor/cursor-0.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/cursor/cursor-10.js
+### js/cursor/cursor-1.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/cursor/cursor-2.js
+### js/cursor/cursor-10.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/cursor/cursor-3.js
+### js/cursor/cursor-2.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/cursor/cursor-4.js
+### js/cursor/cursor-3.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/cursor/cursor-5.js
+### js/cursor/cursor-4.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/cursor/cursor-6.js
+### js/cursor/cursor-5.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/cursor/cursor-7.js
+### js/cursor/cursor-6.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/cursor/cursor-8.js
+### js/cursor/cursor-7.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/cursor/cursor-9.js
+### js/cursor/cursor-8.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/cursor/cursor-emoji.js
+### js/cursor/cursor-9.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/cursor/file-start-with-comment-1.js
+### js/cursor/cursor-emoji.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/cursor/file-start-with-comment-2.js
+### js/cursor/file-start-with-comment-1.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/cursor/file-start-with-comment-3.js
+### js/cursor/file-start-with-comment-2.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/cursor/range-0.js
+### js/cursor/file-start-with-comment-3.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/cursor/range-1.js
+### js/cursor/range-0.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/cursor/range-2.js
+### js/cursor/range-1.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/cursor/range-3.js
+### js/cursor/range-2.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/cursor/range-4.js
+### js/cursor/range-3.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/cursor/range-5.js
+### js/cursor/range-4.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/cursor/range-6.js
+### js/cursor/range-5.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/cursor/range-7.js
+### js/cursor/range-6.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/cursor/range-8.js
+### js/cursor/range-7.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/decorator-auto-accessors/basic.js
+### js/cursor/range-8.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/decorator-auto-accessors/comments.js
+### js/decorator-auto-accessors/basic.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/decorator-auto-accessors/computed.js
+### js/decorator-auto-accessors/comments.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/decorator-auto-accessors/not-accessor-method.js
+### js/decorator-auto-accessors/computed.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/decorator-auto-accessors/not-accessor-property.js
+### js/decorator-auto-accessors/not-accessor-method.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/decorator-auto-accessors/private.js
+### js/decorator-auto-accessors/not-accessor-property.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/decorator-auto-accessors/static-computed.js
+### js/decorator-auto-accessors/private.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/decorator-auto-accessors/static-private.js
+### js/decorator-auto-accessors/static-computed.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/decorator-auto-accessors/static.js
+### js/decorator-auto-accessors/static-private.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/decorator-auto-accessors/with-semicolon-1.js
+### js/decorator-auto-accessors/static.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/decorator-auto-accessors/with-semicolon-2.js
+### js/decorator-auto-accessors/with-semicolon-1.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/decorators-export/after_export.js
+### js/decorator-auto-accessors/with-semicolon-2.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/decorators-export/before_export.js
+### js/decorators-export/after_export.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/decorators/class-expression/arguments.js
+### js/decorators-export/before_export.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/decorators/class-expression/class-expression.js
+### js/decorators/class-expression/arguments.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/decorators/class-expression/member-expression.js
+### js/decorators/class-expression/class-expression.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/decorators/class-expression/super-class.js
+### js/decorators/class-expression/member-expression.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/decorators/classes.js
+### js/decorators/class-expression/super-class.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/decorators/comments.js
+### js/decorators/classes.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/decorators/member-expression.js
+### js/decorators/comments.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/decorators/methods.js
+### js/decorators/member-expression.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/decorators/mixed.js
+### js/decorators/methods.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/decorators/mobx.js
+### js/decorators/mixed.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/decorators/multiline.js
+### js/decorators/mobx.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/decorators/multiple.js
+### js/decorators/multiline.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/decorators/parens.js
+### js/decorators/multiple.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/decorators/redux.js
+### js/decorators/parens.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/destructuring-ignore/ignore.js
+### js/decorators/redux.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/destructuring/destructuring.js
+### js/destructuring-ignore/ignore.js
+
+**Prettier Similarity**: 100.00%
+
+
+### js/destructuring/destructuring.js
 ```diff
  const [one, two = null, three = null] = arr;
  a = ([s = 1]) => 1;
@@ -3516,202 +2971,379 @@
 **Prettier Similarity**: 91.67%
 
 
-# js/destructuring/issue-5988.js
+### js/destructuring/issue-5988.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/directives/escaped.js
+### js/directives/escaped.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/directives/issue-7346.js
+### js/directives/issue-7346.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/directives/last-line-0.js
+### js/directives/last-line-0.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/directives/last-line-1.js
+### js/directives/last-line-1.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/directives/last-line-2.js
+### js/directives/last-line-2.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/directives/newline.js
+### js/directives/newline.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/directives/no-newline.js
+### js/directives/no-newline.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/directives/test.js
+### js/directives/test.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/dynamic-import/assertions.js
+### js/dynamic-import/assertions.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/dynamic-import/test.js
+### js/dynamic-import/test.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/empty-paren-comment/class-property.js
+### js/empty-paren-comment/class-property.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/empty-paren-comment/class.js
+### js/empty-paren-comment/class.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/empty-paren-comment/empty_paren_comment.js
+### js/empty-paren-comment/empty_paren_comment.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/empty-statement/body.js
+### js/empty-statement/body.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/empty-statement/no-newline.js
+### js/empty-statement/no-newline.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/end-of-line/example.js
+### js/end-of-line/example.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/es6modules/export_default_arrow_expression.js
+### js/es6modules/export_default_arrow_expression.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/es6modules/export_default_call_expression.js
+### js/es6modules/export_default_call_expression.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/es6modules/export_default_class_declaration.js
+### js/es6modules/export_default_class_declaration.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/es6modules/export_default_class_expression.js
+### js/es6modules/export_default_class_expression.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/es6modules/export_default_function_declaration.js
+### js/es6modules/export_default_function_declaration.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/es6modules/export_default_function_declaration_async.js
+### js/es6modules/export_default_function_declaration_async.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/es6modules/export_default_function_declaration_named.js
+### js/es6modules/export_default_function_declaration_named.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/es6modules/export_default_function_expression.js
+### js/es6modules/export_default_function_expression.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/es6modules/export_default_function_expression_named.js
+### js/es6modules/export_default_function_expression_named.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/es6modules/export_default_new_expression.js
+### js/es6modules/export_default_new_expression.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/export-default/binary_and_template.js
+### js/explicit-resource-management/for-await-using-of-comments.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/export-default/body.js
+### js/explicit-resource-management/invalid-duplicate-using-bindings.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/export-default/class_instance.js
+### js/explicit-resource-management/invalid-script-top-level-using-binding.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/export-default/function_in_template.js
+### js/explicit-resource-management/using-declarations.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/export-default/function_tostring.js
+### js/explicit-resource-management/valid-await-expr-using-in.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/export-default/iife.js
+### js/explicit-resource-management/valid-await-expr-using-instanceof.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/export-star/export-star-as-default.js
+### js/explicit-resource-management/valid-await-expr-using.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/export-star/export-star-as-reserved-word.js
+### js/explicit-resource-management/valid-await-using-asi-assignment.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/export-star/export-star-as-string.js
+### js/explicit-resource-management/valid-await-using-binding-basic.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/export-star/export-star-as-string2.js
+### js/explicit-resource-management/valid-await-using-binding-escaped.js
+```diff
+ async function f() {
+-  await using ab = c;
++  await using \u0061b = c;
+ }
+
+```
+
+**Prettier Similarity**: 66.67%
+
+
+### js/explicit-resource-management/valid-await-using-binding-non-bmp.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/export-star/export-star-as.js
+### js/explicit-resource-management/valid-await-using-binding-using.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/export-star/export-star.js
+### js/explicit-resource-management/valid-await-using-comments.js
+```diff
+ async function f() {
+   {
+-    /*0*/ await using /*1*/ /*2*/ b /*3*/ = /*4*/ f(); /*5*/
++    /*0*/ await using /*1*/ /*2*/ b /*3*/ = /*4*/ f() /*5*/;
+   }
+   {
+     /*0*/ for (
+       /*1*/ /*2*/ await using /*3*/ /*4*/ b /*5*/ =
+           /*6*/ x /*7*/ /*8*/ /*9*/ /*10*/;
+       ;
+-
+     );
+   }
+   {
+     /*0*/ for (/*1*/ /*2*/ await using /*3*/ /*4*/ b /*5*/ of /*6*/ x /*7*/ /*8*/);
+   }
+   {
+     /*0*/ for await (/*1*/ /*2*/ /*3*/ await using /*4*/ /*5*/ b /*6*/ of /*7*/ x /*8*/ /*9*/);
+   }
+ }
+
+```
+
+**Prettier Similarity**: 89.47%
+
+
+### js/explicit-resource-management/valid-for-await-using-binding-escaped-of-of.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/export/blank-line-between-specifiers.js
+### js/explicit-resource-management/valid-for-using-binding-escaped-of-of.js
+
+**Prettier Similarity**: 100.00%
+
+
+### js/explicit-resource-management/valid-for-using-binding-of-of.js
+
+**Prettier Similarity**: 100.00%
+
+
+### js/explicit-resource-management/valid-for-using-declaration.js
+
+**Prettier Similarity**: 100.00%
+
+
+### js/explicit-resource-management/valid-using-as-identifier-computed-member.js
+
+**Prettier Similarity**: 100.00%
+
+
+### js/explicit-resource-management/valid-using-as-identifier-expression-statement.js
+
+**Prettier Similarity**: 100.00%
+
+
+### js/explicit-resource-management/valid-using-as-identifier-for-await-of.js
+
+**Prettier Similarity**: 100.00%
+
+
+### js/explicit-resource-management/valid-using-as-identifier-for-in.js
+
+**Prettier Similarity**: 100.00%
+
+
+### js/explicit-resource-management/valid-using-as-identifier-for-init.js
+
+**Prettier Similarity**: 100.00%
+
+
+### js/explicit-resource-management/valid-using-as-identifier-for-of.js
+
+**Prettier Similarity**: 100.00%
+
+
+### js/explicit-resource-management/valid-using-as-identifier-in.js
+
+**Prettier Similarity**: 100.00%
+
+
+### js/explicit-resource-management/valid-using-binding-basic.js
+
+**Prettier Similarity**: 100.00%
+
+
+### js/explicit-resource-management/valid-using-binding-escaped.js
+```diff
+ {
+-  using ab = c;
++  using \u0061b = c;
+ }
+
+```
+
+**Prettier Similarity**: 66.67%
+
+
+### js/explicit-resource-management/valid-using-binding-non-bmp.js
+
+**Prettier Similarity**: 100.00%
+
+
+### js/explicit-resource-management/valid-using-binding-using.js
+
+**Prettier Similarity**: 100.00%
+
+
+### js/export-default/binary_and_template.js
+
+**Prettier Similarity**: 100.00%
+
+
+### js/export-default/body.js
+
+**Prettier Similarity**: 100.00%
+
+
+### js/export-default/class_instance.js
+
+**Prettier Similarity**: 100.00%
+
+
+### js/export-default/function_in_template.js
+
+**Prettier Similarity**: 100.00%
+
+
+### js/export-default/function_tostring.js
+
+**Prettier Similarity**: 100.00%
+
+
+### js/export-default/iife.js
+
+**Prettier Similarity**: 100.00%
+
+
+### js/export-star/export-star-as-default.js
+
+**Prettier Similarity**: 100.00%
+
+
+### js/export-star/export-star-as-reserved-word.js
+
+**Prettier Similarity**: 100.00%
+
+
+### js/export-star/export-star-as-string.js
+
+**Prettier Similarity**: 100.00%
+
+
+### js/export-star/export-star-as-string2.js
+
+**Prettier Similarity**: 100.00%
+
+
+### js/export-star/export-star-as.js
+
+**Prettier Similarity**: 100.00%
+
+
+### js/export-star/export-star.js
+
+**Prettier Similarity**: 100.00%
+
+
+### js/export/blank-line-between-specifiers.js
 ```diff
  export {
    // a
@@ -3740,67 +3372,67 @@
 **Prettier Similarity**: 90.48%
 
 
-# js/export/bracket.js
+### js/export/bracket.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/export/empty.js
+### js/export/empty.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/export/same-local-and-exported.js
+### js/export/same-local-and-exported.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/export/test.js
+### js/export/test.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/export/undefined.js
+### js/export/undefined.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/expression_statement/no_regression.js
+### js/expression_statement/no_regression.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/expression_statement/use_strict.js
+### js/expression_statement/use_strict.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/for-await/for-await.js
+### js/for-await/for-await.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/for-of/async-identifier.js
+### js/for-of/async-identifier.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/for/comment.js
+### js/for/comment.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/for/continue-and-break-comment-1.js
+### js/for/continue-and-break-comment-1.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/for/continue-and-break-comment-2.js
+### js/for/continue-and-break-comment-2.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/for/continue-and-break-comment-without-blocks.js
+### js/for/continue-and-break-comment-without-blocks.js
 ```diff
  for (;;) continue;
  // comment
@@ -3886,162 +3518,162 @@
 **Prettier Similarity**: 87.67%
 
 
-# js/for/for.js
+### js/for/for.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/for/in.js
+### js/for/in.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/for/var.js
+### js/for/var.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/function-comments/params-trail-comments.js
+### js/function-comments/params-trail-comments.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/function-first-param/function_expression.js
+### js/function-first-param/function_expression.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/function-single-destructuring/array.js
+### js/function-single-destructuring/array.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/function-single-destructuring/object.js
+### js/function-single-destructuring/object.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/function/function_expression.js
+### js/function/function_expression.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/function/issue-10277.js
+### js/function/issue-10277.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/functional-composition/functional_compose.js
+### js/functional-composition/functional_compose.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/functional-composition/gobject_connect.js
+### js/functional-composition/gobject_connect.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/functional-composition/lodash_flow.js
+### js/functional-composition/lodash_flow.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/functional-composition/lodash_flow_right.js
+### js/functional-composition/lodash_flow_right.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/functional-composition/mongo_connect.js
+### js/functional-composition/mongo_connect.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/functional-composition/pipe-function-calls-with-comments.js
+### js/functional-composition/pipe-function-calls-with-comments.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/functional-composition/pipe-function-calls.js
+### js/functional-composition/pipe-function-calls.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/functional-composition/ramda_compose.js
+### js/functional-composition/ramda_compose.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/functional-composition/ramda_pipe.js
+### js/functional-composition/ramda_pipe.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/functional-composition/redux_compose.js
+### js/functional-composition/redux_compose.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/functional-composition/redux_connect.js
+### js/functional-composition/redux_connect.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/functional-composition/reselect_createselector.js
+### js/functional-composition/reselect_createselector.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/functional-composition/rxjs_pipe.js
+### js/functional-composition/rxjs_pipe.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/generator/anonymous.js
+### js/generator/anonymous.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/generator/async.js
+### js/generator/async.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/generator/function-name-starts-with-get.js
+### js/generator/function-name-starts-with-get.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/identifier/for-of/await.js
+### js/identifier/for-of/await.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/identifier/for-of/let.js
+### js/identifier/for-of/let.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/identifier/parentheses/const.js
+### js/identifier/parentheses/const.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/identifier/parentheses/let.js
+### js/identifier/parentheses/let.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/if/comment_before_else.js
+### js/if/comment_before_else.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/if/else.js
+### js/if/else.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/if/expr_and_same_line_comments.js
+### js/if/expr_and_same_line_comments.js
 ```diff
  if (a === 0) doSomething(); // comment A1
  else if (a === 1) doSomethingElse(); // comment B1
@@ -4091,17 +3723,17 @@
 **Prettier Similarity**: 97.56%
 
 
-# js/if/if_comments.js
+### js/if/if_comments.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/if/trailing_comment.js
+### js/if/trailing_comment.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/ignore/class-expression-decorator.js
+### js/ignore/class-expression-decorator.js
 ```diff
 -// prettier-ignore
  (
@@ -4115,27 +3747,27 @@
 **Prettier Similarity**: 80.00%
 
 
-# js/ignore/decorator.js
+### js/ignore/decorator.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/ignore/ignore-2.js
+### js/ignore/ignore-2.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/ignore/ignore.js
+### js/ignore/ignore.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/ignore/issue-10661.js
+### js/ignore/issue-10661.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/ignore/issue-11077.js
+### js/ignore/issue-11077.js
 ```diff
  function HelloWorld(x) {
 -  // prettier-ignore
@@ -4165,7 +3797,7 @@
 **Prettier Similarity**: 61.11%
 
 
-# js/ignore/issue-13737.js
+### js/ignore/issue-13737.js
 ```diff
  oneArgument(
    // prettier-ignore
@@ -4185,7 +3817,7 @@
 **Prettier Similarity**: 60.00%
 
 
-# js/ignore/issue-14404.js
+### js/ignore/issue-14404.js
 ```diff
  async function foo() {
 -  // prettier-ignore
@@ -4203,12 +3835,12 @@
 **Prettier Similarity**: 28.57%
 
 
-# js/ignore/issue-9335.js
+### js/ignore/issue-9335.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/ignore/issue-9877.js
+### js/ignore/issue-9877.js
 ```diff
  export default function test() {
    return {
@@ -4228,217 +3860,217 @@
 **Prettier Similarity**: 45.45%
 
 
-# js/ignore/semi/asi.js
+### js/ignore/semi/asi.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/ignore/semi/directive.js
+### js/ignore/semi/directive.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/import-assertions/bracket-spacing/dynamic-import.js
+### js/import-assertions/bracket-spacing/dynamic-import.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/import-assertions/bracket-spacing/empty.js
+### js/import-assertions/bracket-spacing/empty.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/import-assertions/bracket-spacing/re-export.js
+### js/import-assertions/bracket-spacing/re-export.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/import-assertions/bracket-spacing/static-import.js
+### js/import-assertions/bracket-spacing/static-import.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/import-assertions/dynamic-import.js
+### js/import-assertions/dynamic-import.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/import-assertions/empty.js
+### js/import-assertions/empty.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/import-assertions/multi-types.js
+### js/import-assertions/multi-types.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/import-assertions/non-type.js
+### js/import-assertions/non-type.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/import-assertions/not-import-assertions.js
+### js/import-assertions/not-import-assertions.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/import-assertions/re-export.js
+### js/import-assertions/re-export.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/import-assertions/static-import.js
+### js/import-assertions/static-import.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/import-assertions/without-from.js
+### js/import-assertions/without-from.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/import-attributes/bracket-spacing/dynamic-import.js
+### js/import-attributes/bracket-spacing/dynamic-import.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/import-attributes/bracket-spacing/empty.js
+### js/import-attributes/bracket-spacing/empty.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/import-attributes/bracket-spacing/re-export.js
+### js/import-attributes/bracket-spacing/re-export.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/import-attributes/bracket-spacing/static-import.js
+### js/import-attributes/bracket-spacing/static-import.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/import-attributes/dynamic-import.js
+### js/import-attributes/dynamic-import.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/import-attributes/empty.js
+### js/import-attributes/empty.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/import-attributes/multi-types.js
+### js/import-attributes/multi-types.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/import-attributes/non-type.js
+### js/import-attributes/non-type.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/import-attributes/re-export.js
+### js/import-attributes/re-export.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/import-attributes/static-import.js
+### js/import-attributes/static-import.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/import-attributes/without-from.js
+### js/import-attributes/without-from.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/import-meta/import_meta.js
+### js/import-meta/import_meta.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/import/brackets.js
+### js/import/brackets.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/import/comments.js
+### js/import/comments.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/import/empty-import.js
+### js/import/empty-import.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/import/inline.js
+### js/import/inline.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/import/long-line.js
+### js/import/long-line.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/import/multiple_standalones.js
+### js/import/multiple_standalones.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/import/same-local-and-imported.js
+### js/import/same-local-and-imported.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/in/arrow-function-invalid.js
+### js/in/arrow-function-invalid.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/in/arrow-function.js
+### js/in/arrow-function.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/invalid-code/duplicate_bindings.js
+### js/invalid-code/duplicate_bindings.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/label/block-statement-and-regexp.js
+### js/label/block-statement-and-regexp.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/label/comment.js
+### js/label/comment.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/label/empty_label.js
+### js/label/empty_label.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/last-argument-expansion/arrow.js
+### js/last-argument-expansion/arrow.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/last-argument-expansion/assignment-pattern.js
+### js/last-argument-expansion/assignment-pattern.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/last-argument-expansion/break-parent.js
+### js/last-argument-expansion/break-parent.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/last-argument-expansion/dangling-comment-in-arrow-function.js
+### js/last-argument-expansion/dangling-comment-in-arrow-function.js
 ```diff
 -foo(() =>
 -  // foo
@@ -4454,22 +4086,22 @@
 **Prettier Similarity**: 20.00%
 
 
-# js/last-argument-expansion/edge_case.js
+### js/last-argument-expansion/edge_case.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/last-argument-expansion/empty-lines.js
+### js/last-argument-expansion/empty-lines.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/last-argument-expansion/empty-object.js
+### js/last-argument-expansion/empty-object.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/last-argument-expansion/function-body-in-mode-break.js
+### js/last-argument-expansion/function-body-in-mode-break.js
 ```diff
  fs.readdirSync(suiteLoc).forEach(function (testName) {
 -  (skip ? it.skip : it)(
@@ -4495,387 +4127,387 @@
 **Prettier Similarity**: 66.67%
 
 
-# js/last-argument-expansion/function-expression-issue-2239.js
+### js/last-argument-expansion/function-expression-issue-2239.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/last-argument-expansion/function-expression.js
+### js/last-argument-expansion/function-expression.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/last-argument-expansion/issue-10708.js
+### js/last-argument-expansion/issue-10708.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/last-argument-expansion/issue-7518.js
+### js/last-argument-expansion/issue-7518.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/last-argument-expansion/jsx.js
+### js/last-argument-expansion/jsx.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/last-argument-expansion/number-only-array.js
+### js/last-argument-expansion/number-only-array.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/last-argument-expansion/object.js
+### js/last-argument-expansion/object.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/last-argument-expansion/overflow.js
+### js/last-argument-expansion/overflow.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/line-suffix-boundary/boundary.js
+### js/line-suffix-boundary/boundary.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/line/windows.js
+### js/line/windows.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/literal-numeric-separator/test.js
+### js/literal-numeric-separator/test.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/literal/number.js
+### js/literal/number.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/logical-assignment/logical-assignment.js
+### js/logical-assignment/logical-assignment.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/logical_expressions/issue-7024.js
+### js/logical_expressions/issue-7024.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/logical_expressions/logical_expression_operators.js
+### js/logical_expressions/logical_expression_operators.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/member/conditional.js
+### js/member/conditional.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/member/expand.js
+### js/member/expand.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/member/logical.js
+### js/member/logical.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/method-chain/13018.js
+### js/method-chain/13018.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/method-chain/bracket_0-1.js
+### js/method-chain/bracket_0-1.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/method-chain/bracket_0.js
+### js/method-chain/bracket_0.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/method-chain/break-last-call.js
+### js/method-chain/break-last-call.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/method-chain/break-last-member.js
+### js/method-chain/break-last-member.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/method-chain/break-multiple.js
+### js/method-chain/break-multiple.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/method-chain/comment.js
+### js/method-chain/comment.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/method-chain/complex-args.js
+### js/method-chain/complex-args.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/method-chain/computed-merge.js
+### js/method-chain/computed-merge.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/method-chain/computed.js
+### js/method-chain/computed.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/method-chain/conditional.js
+### js/method-chain/conditional.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/method-chain/cypress.js
+### js/method-chain/cypress.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/method-chain/d3.js
+### js/method-chain/d3.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/method-chain/first_long.js
+### js/method-chain/first_long.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/method-chain/fluent-configuration.js
+### js/method-chain/fluent-configuration.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/method-chain/inline_merge.js
+### js/method-chain/inline_merge.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/method-chain/issue-11298.js
+### js/method-chain/issue-11298.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/method-chain/issue-3594.js
+### js/method-chain/issue-3594.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/method-chain/issue-3621.js
+### js/method-chain/issue-3621.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/method-chain/issue-4125.js
+### js/method-chain/issue-4125.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/method-chain/logical.js
+### js/method-chain/logical.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/method-chain/multiple-members.js
+### js/method-chain/multiple-members.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/method-chain/object-literal.js
+### js/method-chain/object-literal.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/method-chain/pr-7889.js
+### js/method-chain/pr-7889.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/method-chain/print-width-120/constructor.js
+### js/method-chain/print-width-120/constructor.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/method-chain/print-width-120/issue-7884.js
+### js/method-chain/print-width-120/issue-7884.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/method-chain/short-names.js
+### js/method-chain/short-names.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/method-chain/simple-args.js
+### js/method-chain/simple-args.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/method-chain/square_0.js
+### js/method-chain/square_0.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/method-chain/test.js
+### js/method-chain/test.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/method-chain/this.js
+### js/method-chain/this.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/module-string-names/module-string-names-export.js
+### js/module-string-names/module-string-names-export.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/module-string-names/module-string-names-import.js
+### js/module-string-names/module-string-names-import.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/new-expression/call.js
+### js/new-expression/call.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/new-expression/new_expression.js
+### js/new-expression/new_expression.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/new-expression/with-member-expression.js
+### js/new-expression/with-member-expression.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/new-target/outside-functions.js
+### js/new-target/outside-functions.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/new-target/range.js
+### js/new-target/range.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/newline/backslash_2028.js
+### js/newline/backslash_2028.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/newline/backslash_2029.js
+### js/newline/backslash_2029.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/no-semi/class.js
+### js/no-semi/class.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/no-semi/comments.js
+### js/no-semi/comments.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/no-semi/issue2006.js
+### js/no-semi/issue2006.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/no-semi/no-semi.js
+### js/no-semi/no-semi.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/no-semi/private-field.js
+### js/no-semi/private-field.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/non-strict/argument-name-clash.js
+### js/non-strict/argument-name-clash.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/non-strict/keywords.js
+### js/non-strict/keywords.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/non-strict/octal-number.js
+### js/non-strict/octal-number.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/nullish-coalescing/nullish_coalesing_operator.js
+### js/nullish-coalescing/nullish_coalesing_operator.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/numeric-separators/number.js
+### js/numeric-separators/number.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/object-colon-bug/bug.js
+### js/object-colon-bug/bug.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/object-prop-break-in/comment.js
+### js/object-prop-break-in/comment.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/object-prop-break-in/long-value.js
+### js/object-prop-break-in/long-value.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/object-prop-break-in/short-keys.js
+### js/object-prop-break-in/short-keys.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/object-prop-break-in/test.js
+### js/object-prop-break-in/test.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/object-property-comment/after-key.js
+### js/object-property-comment/after-key.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/object-property-ignore/ignore.js
+### js/object-property-ignore/ignore.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/object-property-ignore/issue-5678.js
+### js/object-property-ignore/issue-5678.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/objects/assignment-expression/object-property.js
+### js/objects/assignment-expression/object-property.js
 ```diff
  a = {
 -  [(this.resource = resource)]: 1,
@@ -4887,67 +4519,67 @@
 **Prettier Similarity**: 66.67%
 
 
-# js/objects/assignment-expression/object-value.js
+### js/objects/assignment-expression/object-value.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/objects/bigint-key.js
+### js/objects/bigint-key.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/objects/escape-sequence-key.js
+### js/objects/escape-sequence-key.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/objects/expand.js
+### js/objects/expand.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/objects/getter-setter.js
+### js/objects/getter-setter.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/objects/method.js
+### js/objects/method.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/objects/range.js
+### js/objects/range.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/objects/right-break.js
+### js/objects/right-break.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/optional-catch-binding/optional_catch_binding.js
+### js/optional-catch-binding/optional_catch_binding.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/optional-chaining-assignment/valid-complex-case.js
+### js/optional-chaining-assignment/valid-complex-case.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/optional-chaining-assignment/valid-lhs-eq.js
+### js/optional-chaining-assignment/valid-lhs-eq.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/optional-chaining-assignment/valid-lhs-plus-eq.js
+### js/optional-chaining-assignment/valid-lhs-plus-eq.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/optional-chaining-assignment/valid-parenthesized.js
+### js/optional-chaining-assignment/valid-parenthesized.js
 ```diff
 -a?.b = c;
 +(a?.b) = c;
@@ -4957,7 +4589,7 @@
 **Prettier Similarity**: 0.00%
 
 
-# js/optional-chaining/chaining.js
+### js/optional-chaining/chaining.js
 ```diff
  var street = user.address?.street;
  var fooValue = myForm.querySelector("input[name=foo]")?.value;
@@ -5062,82 +4694,82 @@
 **Prettier Similarity**: 88.51%
 
 
-# js/optional-chaining/comments.js
+### js/optional-chaining/comments.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/optional-chaining/eval.js
+### js/optional-chaining/eval.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/performance/nested-real.js
+### js/performance/nested-real.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/performance/nested.js
+### js/performance/nested.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/preserve-line/argument-list.js
+### js/preserve-line/argument-list.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/preserve-line/comments.js
+### js/preserve-line/comments.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/preserve-line/member-chain.js
+### js/preserve-line/member-chain.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/preserve-line/parameter-list.js
+### js/preserve-line/parameter-list.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/private-in/private-in.js
+### js/private-in/private-in.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/quote-props/classes.js
+### js/quote-props/classes.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/quote-props/numeric-separator.js
+### js/quote-props/numeric-separator.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/quote-props/objects.js
+### js/quote-props/objects.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/quote-props/with_member_expressions.js
+### js/quote-props/with_member_expressions.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/quote-props/with_numbers.js
+### js/quote-props/with_numbers.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/quotes/functions.js
+### js/quotes/functions.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/quotes/objects.js
+### js/quotes/objects.js
 ```diff
  const obj = {
    a: true,
@@ -5151,17 +4783,17 @@
 **Prettier Similarity**: 80.00%
 
 
-# js/quotes/strings.js
+### js/quotes/strings.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/range/array.js
+### js/range/array.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/range/boundary-2.js
+### js/range/boundary-2.js
 ```diff
  function a(
  ){
@@ -5182,7 +4814,7 @@
 **Prettier Similarity**: 33.33%
 
 
-# js/range/boundary-3.js
+### js/range/boundary-3.js
 ```diff
  a (
  );
@@ -5198,7 +4830,7 @@
 **Prettier Similarity**: 50.00%
 
 
-# js/range/boundary.js
+### js/range/boundary.js
 ```diff
 -foo = 1.0000;bar = 1.0;
 -baz = 1.0;
@@ -5212,7 +4844,7 @@
 **Prettier Similarity**: 60.00%
 
 
-# js/range/class-declaration.js
+### js/range/class-declaration.js
 ```diff
  
  
@@ -5228,92 +4860,92 @@
 **Prettier Similarity**: 85.71%
 
 
-# js/range/different-levels.js
+### js/range/different-levels.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/range/directive.js
+### js/range/directive.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/range/function-body.js
+### js/range/function-body.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/range/function-declaration.js
+### js/range/function-declaration.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/range/ignore-indentation.js
+### js/range/ignore-indentation.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/range/issue-3789-1.js
+### js/range/issue-3789-1.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/range/issue-3789-2.js
+### js/range/issue-3789-2.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/range/issue-4206-1.js
+### js/range/issue-4206-1.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/range/issue-4206-2.js
+### js/range/issue-4206-2.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/range/issue-4206-3.js
+### js/range/issue-4206-3.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/range/issue-4206-4.js
+### js/range/issue-4206-4.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/range/large-dict.js
+### js/range/large-dict.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/range/module-export1.js
+### js/range/module-export1.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/range/module-export2.js
+### js/range/module-export2.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/range/module-export3.js
+### js/range/module-export3.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/range/module-import.js
+### js/range/module-import.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/range/multiple-statements.js
+### js/range/multiple-statements.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/range/multiple-statements2.js
+### js/range/multiple-statements2.js
 ```diff
  call(
    1, 2,3
@@ -5333,22 +4965,22 @@
 **Prettier Similarity**: 72.73%
 
 
-# js/range/nested-print-width.js
+### js/range/nested-print-width.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/range/nested.js
+### js/range/nested.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/range/nested2.js
+### js/range/nested2.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/range/nested3.js
+### js/range/nested3.js
 ```diff
  try {
 -  1;
@@ -5367,42 +4999,42 @@
 **Prettier Similarity**: 42.86%
 
 
-# js/range/object-expression.js
+### js/range/object-expression.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/range/object-expression2.js
+### js/range/object-expression2.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/range/range-end.js
+### js/range/range-end.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/range/range-start.js
+### js/range/range-start.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/range/range.js
+### js/range/range.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/range/start-equals-end.js
+### js/range/start-equals-end.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/range/try-catch.js
+### js/range/try-catch.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/range/whitespace.js
+### js/range/whitespace.js
 ```diff
 - 
 
@@ -5411,62 +5043,62 @@
 **Prettier Similarity**: 0.00%
 
 
-# js/regex/d-flag.js
+### js/regex/d-flag.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/regex/multiple-flags.js
+### js/regex/multiple-flags.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/regex/regexp-modifiers.js
+### js/regex/regexp-modifiers.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/regex/test.js
+### js/regex/test.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/regex/v-flag.js
+### js/regex/v-flag.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/require-amd/named-amd-module.js
+### js/require-amd/named-amd-module.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/require-amd/non-amd-define.js
+### js/require-amd/non-amd-define.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/require-amd/require.js
+### js/require-amd/require.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/require/require.js
+### js/require/require.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/reserved-word/interfaces.js
+### js/reserved-word/interfaces.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/rest/trailing-commas.js
+### js/rest/trailing-commas.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/return-outside-function/return-outside-function.js
+### js/return-outside-function/return-outside-function.js
 ```diff
 -return (
 -  someVeryLongStringA &&
@@ -5481,27 +5113,27 @@
 **Prettier Similarity**: 0.00%
 
 
-# js/return/binaryish.js
+### js/return/binaryish.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/return/comment.js
+### js/return/comment.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/sequence-break/break.js
+### js/sequence-break/break.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/sequence-expression/export-default.js
+### js/sequence-expression/export-default.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/sequence-expression/ignore.js
+### js/sequence-expression/ignore.js
 ```diff
 -+(
 -  // prettier-ignore
@@ -5524,7 +5156,7 @@
 **Prettier Similarity**: 50.00%
 
 
-# js/sequence-expression/parenthesized.js
+### js/sequence-expression/parenthesized.js
 ```diff
 -console.log(
 -  /* 1 */
@@ -5569,37 +5201,37 @@
 **Prettier Similarity**: 0.00%
 
 
-# js/shebang/shebang-newline.js
+### js/shebang/shebang-newline.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/shebang/shebang.js
+### js/shebang/shebang.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/sloppy-mode/delete-variable.js
+### js/sloppy-mode/delete-variable.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/sloppy-mode/eval-arguments-binding.js
+### js/sloppy-mode/eval-arguments-binding.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/sloppy-mode/eval-arguments.js
+### js/sloppy-mode/eval-arguments.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/sloppy-mode/function-declaration-in-if.js
+### js/sloppy-mode/function-declaration-in-if.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/sloppy-mode/function-declaration-in-while.js
+### js/sloppy-mode/function-declaration-in-while.js
 ```diff
 -while (false) function foo() {}
 +while (false) function foo(){}
@@ -5609,17 +5241,17 @@
 **Prettier Similarity**: 0.00%
 
 
-# js/sloppy-mode/labeled-function-declaration.js
+### js/sloppy-mode/labeled-function-declaration.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/spread/spread.js
+### js/spread/spread.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/strings/escaped.js
+### js/strings/escaped.js
 ```diff
 +// FIXME
 +// TODO: reformat issue
@@ -5638,32 +5270,32 @@
 **Prettier Similarity**: 33.33%
 
 
-# js/strings/multiline-literal.js
+### js/strings/multiline-literal.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/strings/non-octal-eight-and-nine.js
+### js/strings/non-octal-eight-and-nine.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/strings/strings.js
+### js/strings/strings.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/strings/template-literals.js
+### js/strings/template-literals.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/switch/comments.js
+### js/switch/comments.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/switch/comments2.js
+### js/switch/comments2.js
 ```diff
  switch (1) {
    default: // comment1
@@ -5705,117 +5337,117 @@
 **Prettier Similarity**: 74.07%
 
 
-# js/switch/empty_lines.js
+### js/switch/empty_lines.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/switch/empty_statement.js
+### js/switch/empty_statement.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/switch/empty_switch.js
+### js/switch/empty_switch.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/switch/switch.js
+### js/switch/switch.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/tab-width/class.js
+### js/tab-width/class.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/tab-width/nested-functions.spec.js
+### js/tab-width/nested-functions.spec.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/template-align/indent.js
+### js/template-align/indent.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/template-literals/binary-exporessions.js
+### js/template-literals/binary-exporessions.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/template-literals/conditional-expressions.js
+### js/template-literals/conditional-expressions.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/template-literals/expressions.js
+### js/template-literals/expressions.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/template-literals/indention.js
+### js/template-literals/indention.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/template-literals/logical-expressions.js
+### js/template-literals/logical-expressions.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/template-literals/sequence-expressions.js
+### js/template-literals/sequence-expressions.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/template/arrow.js
+### js/template/arrow.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/template/call.js
+### js/template/call.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/template/comment.js
+### js/template/comment.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/template/faulty-locations.js
+### js/template/faulty-locations.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/template/graphql.js
+### js/template/graphql.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/template/indent.js
+### js/template/indent.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/template/inline.js
+### js/template/inline.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/template/parenthesis.js
+### js/template/parenthesis.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/ternaries/binary.js
+### js/ternaries/binary.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/ternaries/func-call.js
+### js/ternaries/func-call.js
 ```diff
  fn(
    bifornCringerMoshedPerplexSawder,
@@ -5833,438 +5465,52 @@
 **Prettier Similarity**: 88.89%
 
 
-# js/ternaries/indent-after-paren.js
+### js/ternaries/indent-after-paren.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/ternaries/indent.js
-```diff
- aaaaaaaaaaaaaaa
-   ? bbbbbbbbbbbbbbbbbb
-   : ccccccccccccccc
--    ? ddddddddddddddd
--    : eeeeeeeeeeeeeee
--      ? fffffffffffffff
--      : gggggggggggggggg;
-+  ? ddddddddddddddd
-+  : eeeeeeeeeeeeeee
-+  ? fffffffffffffff
-+  : gggggggggggggggg;
- 
- aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-   ? aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-     ? aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-       ? aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-       : aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-     : aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-   : aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa;
- 
- a
-   ? {
-       a: 0,
-     }
-   : {
-       a: {
-         a: 0,
-       }
-         ? {
-             a: 0,
-           }
-         : {
-             y: {
-               a: 0,
-             }
-               ? {
-                   a: 0,
-                 }
-               : {
-                   a: 0,
-                 },
-           },
-     };
- 
- a
-   ? {
-       a: function () {
-         return a
-           ? {
-               a: [
-                 a
-                   ? {
-                       a: 0,
-                       b: [a ? [0, 1] : []],
-                     }
-                   : [
-                       [
-                         0,
-                         {
-                           a: 0,
-                         },
-                         a ? 0 : 1,
-                       ],
-                       function () {
-                         return a
-                           ? {
-                               a: 0,
-                             }
-                           : [
-                               {
-                                 a: 0,
-                               },
-                               {},
-                             ];
-                       },
-                     ],
-               ],
-             }
-           : [
-               a
-                 ? function () {
-                     a
-                       ? a(
-                           a
-                             ? {
-                                 a: a({
-                                   a: 0,
-                                 }),
-                               }
-                             : [
-                                 0,
-                                 a(),
-                                 a(
-                                   a(),
-                                   {
-                                     a: 0,
-                                   },
-                                   a
-                                     ? a()
-                                     : a({
-                                         a: 0,
-                                       }),
-                                 ),
-                                 a()
-                                   ? {
-                                       a: a(),
-                                       b: [],
-                                     }
-                                   : {},
-                               ],
-                         )
-                       : a(
-                           a()
-                             ? {
-                                 a: 0,
-                               }
-                             : (function (a) {
-                                 return a()
-                                   ? [
-                                       {
-                                         a: 0,
-                                         b: a(),
-                                       },
-                                     ]
-                                   : a([
-                                       a
-                                         ? {
-                                             a: 0,
-                                           }
-                                         : {},
-                                       {
-                                         a: 0,
-                                       },
-                                     ]);
-                               })(
-                                 a
-                                   ? function (a) {
-                                       return function () {
-                                         return 0;
-                                       };
-                                     }
-                                   : function (a) {
-                                       return function () {
-                                         return 1;
-                                       };
-                                     },
-                               ),
-                         );
-                   }
-                 : function () {},
-             ];
-       },
-     }
-   : a;
-
-```
-
-**Prettier Similarity**: 97.33%
-
-
-# js/ternaries/nested-in-condition.js
-```diff
- $var = (
-   $number % 10 >= 2 && ($number % 100 < 10 || $number % 100 >= 20)
-     ? kochabCooieGameOnOboleUnweave
-     : annularCooeedSplicesWalksWayWay
- )
-   ? anodyneCondosMalateOverateRetinol
-   : averredBathersBoxroomBuggyNurl;
- 
- const value = (
-   bifornCringerMoshedPerplexSawder
-     ? askTrovenaBeenaDependsRowans
-     : glimseGlyphsHazardNoopsTieTie
- )
-   ? true
-     ? true
-     : false
-   : true
--    ? true
--    : false;
-+  ? true
-+  : false;
- 
- (
-   bifornCringerMoshedPerplexSawder
-     ? askTrovenaBeenaDependsRowans
-     : glimseGlyphsHazardNoopsTieTie
- ) ? (
-   <Element>
-     <Sub />
-     <Sub />
-     <Sub />
-     <Sub />
-     <Sub />
-     <Sub />
-   </Element>
- ) : (
-   <Element2>
-     <Sub />
-     <Sub />
-     <Sub />
-   </Element2>
- );
-
-```
-
-**Prettier Similarity**: 95.00%
-
-
-# js/ternaries/nested.js
-```diff
- let icecream =
-   what == "cone"
-     ? (p) => (!!p ? `here's your ${p} cone` : `just the empty cone for you`)
-     : (p) => `here's your ${p} ${what}`;
- 
- const value = condition1
-   ? value1
-   : condition2
--    ? value2
--    : condition3
--      ? value3
--      : value4;
-+  ? value2
-+  : condition3
-+  ? value3
-+  : value4;
- 
- const StorybookLoader = ({ match }) =>
-   match.params.storyId === "button" ? (
-     <ButtonStorybook />
-   ) : match.params.storyId === "color" ? (
-     <ColorBook />
-   ) : match.params.storyId === "typography" ? (
-     <TypographyBook />
-   ) : match.params.storyId === "loading" ? (
-     <LoaderStorybook />
-   ) : match.params.storyId === "deal-list" ? (
-     <DealListStory />
-   ) : (
-     <Message>
-       <Title>{"Missing story book"}</Title>
-       <Content>
-         <BackButton />
-       </Content>
-     </Message>
-   );
- 
- const message =
-   i % 3 === 0 && i % 5 === 0
-     ? "fizzbuzz"
-     : i % 3 === 0
--      ? "fizz"
--      : i % 5 === 0
--        ? "buzz"
--        : String(i);
-+    ? "fizz"
-+    : i % 5 === 0
-+    ? "buzz"
-+    : String(i);
- 
- const paymentMessage =
-   state == "success"
-     ? "Payment completed successfully"
-     : state == "processing"
--      ? "Payment processing"
--      : state == "invalid_cvc"
--        ? "There was an issue with your CVC number"
--        : state == "invalid_expiry"
--          ? "Expiry must be sometime in the past."
--          : "There was an issue with the payment.  Please contact support.";
-+    ? "Payment processing"
-+    : state == "invalid_cvc"
-+    ? "There was an issue with your CVC number"
-+    : state == "invalid_expiry"
-+    ? "Expiry must be sometime in the past."
-+    : "There was an issue with the payment.  Please contact support.";
- 
- const paymentMessage2 =
-   state == "success"
-     ? 1 //'Payment completed successfully'
-     : state == "processing"
--      ? 2 //'Payment processing'
--      : state == "invalid_cvc"
--        ? 3 //'There was an issue with your CVC number'
--        : true //state == 'invalid_expiry'
--          ? 4 //'Expiry must be sometime in the past.'
--          : 5; // 'There was an issue with the payment.  Please contact support.'
-+    ? 2 //'Payment processing'
-+    : state == "invalid_cvc"
-+    ? 3 //'There was an issue with your CVC number'
-+    : true //state == 'invalid_expiry'
-+    ? 4 //'Expiry must be sometime in the past.'
-+    : 5; // 'There was an issue with the payment.  Please contact support.'
- 
- const foo = (
-   <div
-     className={
-       "match-achievement-medal-type type" +
-       (medals[0].record
-         ? "-record"
-         : medals[0].unique
--          ? "-unique"
--          : medals[0].type)
-+        ? "-unique"
-+        : medals[0].type)
-     }
-   >
-     {medals[0].record
-       ? i18n("Record")
-       : medals[0].unique
--        ? i18n("Unique")
--        : medals[0].type === 0
--          ? i18n("Silver")
--          : medals[0].type === 1
--            ? i18n("Gold")
--            : medals[0].type === 2
--              ? i18n("Platinum")
--              : i18n("Theme")}
-+      ? i18n("Unique")
-+      : medals[0].type === 0
-+      ? i18n("Silver")
-+      : medals[0].type === 1
-+      ? i18n("Gold")
-+      : medals[0].type === 2
-+      ? i18n("Platinum")
-+      : i18n("Theme")}
-   </div>
- );
- 
- a
-   ? literalline
-   : {
--        123: 12,
--      }
--    ? line
--    : softline;
-+      123: 12,
-+    }
-+  ? line
-+  : softline;
- 
- const config = {
-   onFailure:
-     onFailure !== undefined
-       ? onFailure
-       : (error) => {
-           notify(
-             typeof error === "string"
-               ? error
-               : error.message || "ra.notification.http_error",
-             "warning",
-             {
-               _:
-                 typeof error === "string"
-                   ? error
-                   : error && error.message
--                    ? error.message
--                    : undefined,
-+                  ? error.message
-+                  : undefined,
-             },
-           );
-           refresh();
-         },
- };
- 
- showNotification(
-   typeof error === "string" ? error : error.message || body,
-   level || "warning",
-   {
-     messageArgs,
-     undoable: false,
-   },
- );
- 
- const result =
-   children && !isEmptyChildren(children)
-     ? children
-     : props.match
--      ? component
--        ? React.createElement(component, props)
--        : render
--          ? render(props)
--          : null
--      : null;
-+    ? component
-+      ? React.createElement(component, props)
-+      : render
-+      ? render(props)
-+      : null
-+    : null;
-
-```
-
-**Prettier Similarity**: 69.78%
-
-
-# js/ternaries/parenthesis.js
+### js/ternaries/indent.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/ternaries/test.js
+### js/ternaries/nested-in-condition.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/test-declarations/angular_async.js
+### js/ternaries/nested.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/test-declarations/angular_fakeAsync.js
+### js/ternaries/parenthesis.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/test-declarations/angular_waitForAsync.js
+### js/ternaries/test.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/test-declarations/angularjs_inject.js
+### js/test-declarations/angular_async.js
+
+**Prettier Similarity**: 100.00%
+
+
+### js/test-declarations/angular_fakeAsync.js
+
+**Prettier Similarity**: 100.00%
+
+
+### js/test-declarations/angular_waitForAsync.js
+
+**Prettier Similarity**: 100.00%
+
+
+### js/test-declarations/angularjs_inject.js
 ```diff
  beforeEach(inject(($fooService, $barService) => {
    // code
@@ -6304,187 +5550,232 @@
 **Prettier Similarity**: 87.10%
 
 
-# js/test-declarations/jest-each-template-string.js
+### js/test-declarations/jest-each-template-string.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/test-declarations/jest-each.js
+### js/test-declarations/jest-each.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/test-declarations/test_declarations.js
+### js/test-declarations/test_declarations.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/throw_statement/binaryish.js
+### js/throw_expressions/throw_expression.js
+```diff
+-function save(filename = throw new TypeError("Argument required")) {}
++function save(filename = throw new TypeError("Argument required")
++)
++{
++}
+ 
+ lint(ast, {
+-  with: () => throw new Error("avoid using 'with' statements."),
++  with: () => throw new Error("avoid using 'with' statements.")
+ });
+ 
+ function getEncoder(encoding) {
+-  const encoder =
+-    encoding === "utf8"
+-      ? new UTF8Encoder()
+-      : encoding === "utf16le"
+-        ? new UTF16Encoder(false)
+-        : encoding === "utf16be"
+-          ? new UTF16Encoder(true)
+-          : throw new Error("Unsupported encoding");
++  const encoder = encoding === "utf8" ? new UTF8Encoder()
++                : encoding === "utf16le" ? new UTF16Encoder(false)
++                : encoding === "utf16be" ? new UTF16Encoder(true)
++                :
++  throw new Error("Unsupported encoding");
+ }
+ 
+ class Product {
+   get id() {
+     return this._id;
+   }
+   set id(value) {
+-    this._id = value || throw new Error("Invalid value");
++    this._id = value ||
++    throw new Error("Invalid value");
+   }
+ }
+
+```
+
+**Prettier Similarity**: 53.85%
+
+
+### js/throw_statement/binaryish.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/throw_statement/comment.js
+### js/throw_statement/comment.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/throw_statement/jsx.js
+### js/throw_statement/jsx.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/top-level-await/example.js
+### js/top-level-await/example.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/top-level-await/in-expression.js
+### js/top-level-await/in-expression.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/trailing-comma/dynamic-import.js
+### js/trailing-comma/dynamic-import.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/trailing-comma/es5.js
+### js/trailing-comma/es5.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/trailing-comma/function-calls.js
+### js/trailing-comma/function-calls.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/trailing-comma/jsx.js
+### js/trailing-comma/jsx.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/trailing-comma/object.js
+### js/trailing-comma/object.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/trailing-comma/trailing_whitespace.js
+### js/trailing-comma/trailing_whitespace.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/try/catch.js
+### js/try/catch.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/try/empty.js
+### js/try/empty.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/try/try.js
+### js/try/try.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/unary-expression/comments.js
+### js/unary-expression/comments.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/unary-expression/urnary_expression.js
+### js/unary-expression/urnary_expression.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/unary/object.js
+### js/unary/object.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/unary/series.js
+### js/unary/series.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/unicode/combining-characters.js
+### js/unicode/combining-characters.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/unicode/keys.js
+### js/unicode/keys.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/unicode/nbsp-jsx.js
+### js/unicode/nbsp-jsx.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/update-expression/update_expression.js
+### js/update-expression/update_expression.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/variable_declarator/multiple.js
+### js/variable_declarator/multiple.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/variable_declarator/string.js
+### js/variable_declarator/string.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/while/indent.js
+### js/while/indent.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/with/indent.js
+### js/with/indent.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/yield/arrow.js
+### js/yield/arrow.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/yield/conditional.js
+### js/yield/conditional.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/yield/jsx-without-parenthesis.js
+### js/yield/jsx-without-parenthesis.js
 
 **Prettier Similarity**: 100.00%
 
 
-# js/yield/jsx.js
+### js/yield/jsx.js
 
 **Prettier Similarity**: 100.00%
 
 
-# jsx/attr-element/attr-element.js
+### jsx/attr-element/attr-element.js
 
 **Prettier Similarity**: 100.00%
 
 
-# jsx/binary-expressions/relational-operators.js
+### jsx/binary-expressions/relational-operators.js
 
 **Prettier Similarity**: 100.00%
 
 
-# jsx/comments/eslint-disable.js
+### jsx/comments/eslint-disable.js
 
 **Prettier Similarity**: 100.00%
 
 
-# jsx/comments/in-attributes.js
+### jsx/comments/in-attributes.js
 ```diff
  <div attr=/* comment */ "foo"></div>;
  
@@ -6509,7 +5800,7 @@
 **Prettier Similarity**: 73.33%
 
 
-# jsx/comments/in-end-tag.js
+### jsx/comments/in-end-tag.js
 ```diff
  /* =========== before slash =========== */
  <a></
@@ -6576,22 +5867,22 @@
 **Prettier Similarity**: 96.55%
 
 
-# jsx/comments/in-tags.js
+### jsx/comments/in-tags.js
 
 **Prettier Similarity**: 100.00%
 
 
-# jsx/comments/jsx-tag-comment-after-prop.js
+### jsx/comments/jsx-tag-comment-after-prop.js
 
 **Prettier Similarity**: 100.00%
 
 
-# jsx/comments/like-a-comment-in-jsx-text.js
+### jsx/comments/like-a-comment-in-jsx-text.js
 
 **Prettier Similarity**: 100.00%
 
 
-# jsx/cursor/in-jsx-text.js
+### jsx/cursor/in-jsx-text.js
 ```diff
  <>
 -  a<div>hi</div>
@@ -6604,22 +5895,37 @@
 **Prettier Similarity**: 50.00%
 
 
-# jsx/deprecated-jsx-bracket-same-line-option/jsx.js
+### jsx/deprecated-jsx-bracket-same-line-option/jsx.js
 
 **Prettier Similarity**: 100.00%
 
 
-# jsx/escape/escape.js
+### jsx/do/do.js
+```diff
+ <div>
+   {do {
+-    1;
++	  1
+   }}
+-</div>;
++</div>
+
+```
+
+**Prettier Similarity**: 60.00%
+
+
+### jsx/escape/escape.js
 
 **Prettier Similarity**: 100.00%
 
 
-# jsx/escape/nbsp.js
+### jsx/escape/nbsp.js
 
 **Prettier Similarity**: 100.00%
 
 
-# jsx/fbt/test.js
+### jsx/fbt/test.js
 ```diff
  x = (
    <fbt>
@@ -6747,22 +6053,22 @@
 **Prettier Similarity**: 83.65%
 
 
-# jsx/fragment/fragment.js
+### jsx/fragment/fragment.js
 
 **Prettier Similarity**: 100.00%
 
 
-# jsx/ignore/jsx_ignore.js
+### jsx/ignore/jsx_ignore.js
 
 **Prettier Similarity**: 100.00%
 
 
-# jsx/jsx/array-iter.js
+### jsx/jsx/array-iter.js
 
 **Prettier Similarity**: 100.00%
 
 
-# jsx/jsx/arrow.js
+### jsx/jsx/arrow.js
 ```diff
  () => (
    <Component>
@@ -6855,12 +6161,12 @@
 **Prettier Similarity**: 54.10%
 
 
-# jsx/jsx/attr-comments.js
+### jsx/jsx/attr-comments.js
 
 **Prettier Similarity**: 100.00%
 
 
-# jsx/jsx/await.js
+### jsx/jsx/await.js
 ```diff
  async function testFunction() {
    const short = (
@@ -6929,218 +6235,52 @@
 **Prettier Similarity**: 77.36%
 
 
-# jsx/jsx/conditional-expression.js
-```diff
- // There are two ways to print ConditionalExpressions: "normal mode" and
- // "JSX mode". This is normal mode (when breaking):
- //
- //   test
- //     ? consequent
- //     : alternate;
- //
- // And this is JSX mode (when breaking):
- //
- //   test ? (
- //     consequent
- //   ) : (
- //     alternate
- //   );
- //
- // When non-breaking, they look the same:
- //
- //  test ? consequent : alternate;
- //
- // We only print a conditional expression in JSX mode if its test,
- // consequent, or alternate are JSXElements.
- // Otherwise, we print in normal mode.
- 
- // This ConditionalExpression has no JSXElements so it prints in normal mode.
- // The line does not break.
- normalModeNonBreaking ? "a" : "b";
- 
- // This ConditionalExpression has no JSXElements so it prints in normal mode.
- // Its consequent is very long, so it breaks out to multiple lines.
- normalModeBreaking
-   ? johnJacobJingleHeimerSchmidtHisNameIsMyNameTooWheneverWeGoOutThePeopleAlwaysShoutThereGoesJohnJacobJingleHeimerSchmidtYaDaDaDaDaDaDa
-   : "c";
- 
- // This ConditionalExpression prints in JSX mode because its test is a
- // JSXElement. It is non-breaking.
- // Note: I have never, ever seen someone use a JSXElement as the test in a
- // ConditionalExpression. But this test is included for completeness.
- <div /> ? jsxModeFromElementNonBreaking : "a";
- 
- // This ConditionalExpression prints in JSX mode because its consequent is a
- // JSXElement. It is non-breaking.
- jsxModeFromElementNonBreaking ? <div /> : "a";
- 
- // This ConditionalExpression prints in JSX mode because its alternate is a
- // JSXElement. It is non-breaking.
- jsxModeFromElementNonBreaking ? "a" : <div />;
- 
- // This ConditionalExpression prints in JSX mode because its test is a
- // JSXElement. It is breaking.
- // Note: I have never, ever seen someone use a JSXElement as the test in a
- // ConditionalExpression. But this test is included for completeness.
- <div>
-   <span>
-     thisIsASongAboutYourPoorSickPenguinHeHasAFeverAndHisToesAreBlueButIfISingToYourPoorSickPenguinHeWillFeelBetterInADayOrTwo
-   </span>
- </div> ? (
-   "jsx mode from element breaking"
- ) : (
-   "a"
- );
- 
- // This ConditionalExpression prints in JSX mode because its consequent is a
- // JSXElement. It is breaking.
- jsxModeFromElementBreaking ? (
-   <div>
-     <span>
-       thisIsASongAboutYourPoorSickPenguinHeHasAFeverAndHisToesAreBlueButIfISingToYourPoorSickPenguinHeWillFeelBetterInADayOrTwo
-     </span>
-   </div>
- ) : (
-   "a"
- );
- 
- // This ConditionalExpression prints in JSX mode because its alternate is a
- // JSXElement. It is breaking.
- jsxModeFromElementBreaking ? (
-   "a"
- ) : (
-   <div>
-     <span>
-       thisIsASongAboutYourPoorSickPenguinHeHasAFeverAndHisToesAreBlueButIfISingToYourPoorSickPenguinHeWillFeelBetterInADayOrTwo
-     </span>
-   </div>
- );
- 
- // This chain of ConditionalExpressions prints in JSX mode because the parent of
- // the outermost ConditionalExpression is a JSXExpressionContainer. It is
- // non-breaking.
- <div>{a ? "a" : b ? "b" : "c"}</div>;
- 
- // This chain of ConditionalExpressions prints in JSX mode because the parent of
- // the outermost ConditionalExpression is a JSXExpressionContainer. It is
- // breaking.
- <div>
-   {thisIsASongAboutYourPoorSickPenguinHeHasAFeverAndHisToesAreBlueButIfISingToYourPoorSickPenguinHeWillFeelBetterInADayOrTwo
-     ? "a"
-     : b
--      ? "b"
--      : "c"}
-+    ? "b"
-+    : "c"}
- </div>;
- 
- // This chain of ConditionalExpressions prints in JSX mode because there is a
- // JSX element somewhere in the chain. It is non-breaking.
- cable ? "satellite" : isPublic ? "affairs" : network ? <span id="c" /> : "dun";
- 
- // This chain of ConditionalExpressions prints in JSX mode because there is a
- // JSX element somewhere in the chain (in this case, at the end). It is
- // breaking; notice the consequents and alternates in the entire chain get
- // wrapped in parens.
- cable ? (
-   "satellite"
- ) : isPublic ? (
-   "affairs"
- ) : network ? (
-   <div>
-     <span>
-       thisIsASongAboutYourPoorSickPenguinHeHasAFeverAndHisToesAreBlueButIfISingToYourPoorSickPenguinHeWillFeelBetterInADayOrTwo
-     </span>
-   </div>
- ) : (
-   "dunno"
- );
- 
- // This chain of ConditionalExpressions prints in JSX mode because there is a
- // JSX element somewhere in the chain (in this case, at the beginning). It is
- // breaking; notice the consequents and alternates in the entire chain get
- // wrapped in parens.
- cable ? (
-   <div>
-     <span>
-       thisIsASongAboutYourPoorSickPenguinHeHasAFeverAndHisToesAreBlueButIfISingToYourPoorSickPenguinHeWillFeelBetterInADayOrTwo
-     </span>
-   </div>
- ) : sateline ? (
-   "public"
- ) : affairs ? (
-   "network"
- ) : (
-   "dunno"
- );
- 
- // This chain of ConditionalExpressions prints in JSX mode because there is a
- // JSX element somewhere in the chain. It is breaking; notice the consequents
- // and alternates in the entire chain get wrapped in parens.
- <div>
-   {properties.length > 1 ||
-   (properties.length === 1 && properties[0].apps.size > 1) ? (
-     draggingApp == null || newPropertyName == null ? (
-       <MigrationPropertyListItem />
-     ) : (
-       <MigrationPropertyListItem apps={Immutable.List()} />
-     )
-   ) : null}
- </div>;
- 
- // #3552
- foo ? (
-   <span>
-     loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong jsx
-   </span>
- ) : undefined;
-
-```
-
-**Prettier Similarity**: 98.76%
-
-
-# jsx/jsx/expression.js
+### jsx/jsx/conditional-expression.js
 
 **Prettier Similarity**: 100.00%
 
 
-# jsx/jsx/flow_fix_me.js
+### jsx/jsx/expression.js
 
 **Prettier Similarity**: 100.00%
 
 
-# jsx/jsx/html_escape.js
+### jsx/jsx/flow_fix_me.js
 
 **Prettier Similarity**: 100.00%
 
 
-# jsx/jsx/hug.js
+### jsx/jsx/html_escape.js
 
 **Prettier Similarity**: 100.00%
 
 
-# jsx/jsx/logical-expression.js
+### jsx/jsx/hug.js
 
 **Prettier Similarity**: 100.00%
 
 
-# jsx/jsx/object-property.js
+### jsx/jsx/logical-expression.js
 
 **Prettier Similarity**: 100.00%
 
 
-# jsx/jsx/open-break.js
+### jsx/jsx/object-property.js
 
 **Prettier Similarity**: 100.00%
 
 
-# jsx/jsx/parens.js
+### jsx/jsx/open-break.js
 
 **Prettier Similarity**: 100.00%
 
 
-# jsx/jsx/quotes.js
+### jsx/jsx/parens.js
+
+**Prettier Similarity**: 100.00%
+
+
+### jsx/jsx/quotes.js
 ```diff
  <div id="&quot;'<>&amp;quot;" />;
  <div id='"&#39;<>&amp;quot;' />;
@@ -7189,57 +6329,57 @@
 **Prettier Similarity**: 79.41%
 
 
-# jsx/jsx/regex.js
+### jsx/jsx/regex.js
 
 **Prettier Similarity**: 100.00%
 
 
-# jsx/jsx/return-statement.js
+### jsx/jsx/return-statement.js
 
 **Prettier Similarity**: 100.00%
 
 
-# jsx/jsx/self-closing.js
+### jsx/jsx/self-closing.js
 
 **Prettier Similarity**: 100.00%
 
 
-# jsx/jsx/spacing.js
+### jsx/jsx/spacing.js
 
 **Prettier Similarity**: 100.00%
 
 
-# jsx/jsx/template-literal-in-attr.js
+### jsx/jsx/template-literal-in-attr.js
 
 **Prettier Similarity**: 100.00%
 
 
-# jsx/jsx/ternary.js
+### jsx/jsx/ternary.js
 
 **Prettier Similarity**: 100.00%
 
 
-# jsx/last-line/last_line.js
+### jsx/last-line/last_line.js
 
 **Prettier Similarity**: 100.00%
 
 
-# jsx/last-line/single_prop_multiline_string.js
+### jsx/last-line/single_prop_multiline_string.js
 
 **Prettier Similarity**: 100.00%
 
 
-# jsx/multiline-assign/test.js
+### jsx/multiline-assign/test.js
 
 **Prettier Similarity**: 100.00%
 
 
-# jsx/namespace/jsx_namespaced_name.js
+### jsx/namespace/jsx_namespaced_name.js
 
 **Prettier Similarity**: 100.00%
 
 
-# jsx/newlines/test.js
+### jsx/newlines/test.js
 ```diff
  keep = (
    <p>
@@ -7306,37 +6446,37 @@
 **Prettier Similarity**: 96.61%
 
 
-# jsx/newlines/windows.js
+### jsx/newlines/windows.js
 
 **Prettier Similarity**: 100.00%
 
 
-# jsx/optional-chaining/optional-chaining.jsx
+### jsx/optional-chaining/optional-chaining.jsx
 
 **Prettier Similarity**: 100.00%
 
 
-# jsx/significant-space/comments.js
+### jsx/significant-space/comments.js
 
 **Prettier Similarity**: 100.00%
 
 
-# jsx/significant-space/test.js
+### jsx/significant-space/test.js
 
 **Prettier Similarity**: 100.00%
 
 
-# jsx/single-attribute-per-line/single-attribute-per-line.js
+### jsx/single-attribute-per-line/single-attribute-per-line.js
 
 **Prettier Similarity**: 100.00%
 
 
-# jsx/split-attrs/test.js
+### jsx/split-attrs/test.js
 
 **Prettier Similarity**: 100.00%
 
 
-# jsx/spread/attribute.js
+### jsx/spread/attribute.js
 ```diff
  <div {...a} />;
  
@@ -7385,7 +6525,7 @@
 **Prettier Similarity**: 86.11%
 
 
-# jsx/spread/child.js
+### jsx/spread/child.js
 ```diff
  <div>{...a}</div>;
  
@@ -7430,12 +6570,42 @@
 **Prettier Similarity**: 84.38%
 
 
-# jsx/stateless-arrow-fn/test.js
+### jsx/stateless-arrow-fn/test.js
 
 **Prettier Similarity**: 100.00%
 
 
-# jsx/text-wrap/test.js
+### jsx/template/styled-components.js
+```diff
+ <style jsx>{`
+   p {
+     color: red;
+   }
+ `}</style>;
+ 
+ <style jsx>{tpl`
+   p {
+     color: red;
+   }
+ `}</style>;
+ 
+ <style jsx>
+-  {`
+-    p {
+-      color: red;
+-    }
++  {`p {
++     color: red;
++     }
+   `}
+ </style>;
+
+```
+
+**Prettier Similarity**: 78.95%
+
+
+### jsx/text-wrap/test.js
 ```diff
  // Wrapping text
  x = (
@@ -8019,7 +7189,7 @@
 **Prettier Similarity**: 98.96%
 
 
-# jsx/tuple/tuple.js
+### jsx/tuple/tuple.js
 ```diff
  a = [<div />, <div />];
  
@@ -8032,57 +7202,57 @@
 **Prettier Similarity**: 50.00%
 
 
-# typescript/abstract-class/export-default.ts
+### typescript/abstract-class/export-default.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/abstract-construct-types/abstract-construct-types.ts
+### typescript/abstract-construct-types/abstract-construct-types.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/abstract-property/semicolon.ts
+### typescript/abstract-property/semicolon.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/ambient/ambient.ts
+### typescript/ambient/ambient.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/angular-component-examples/test.component.ts
+### typescript/angular-component-examples/test.component.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/argument-expansion/argument_expansion.ts
+### typescript/argument-expansion/argument_expansion.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/argument-expansion/arrow-with-return-type.ts
+### typescript/argument-expansion/arrow-with-return-type.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/array/comment.ts
+### typescript/array/comment.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/array/key.ts
+### typescript/array/key.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/arrow/arrow_regression.ts
+### typescript/arrow/arrow_regression.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/arrow/comments.ts
+### typescript/arrow/comments.ts
 ```diff
  const fn1 = () => {
    return;
@@ -8100,22 +7270,22 @@
 **Prettier Similarity**: 88.89%
 
 
-# typescript/arrow/issue-6107-curry.ts
+### typescript/arrow/issue-6107-curry.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/arrows/arrow_function_expression.ts
+### typescript/arrows/arrow_function_expression.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/arrows/short_body.ts
+### typescript/arrows/short_body.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/arrows/type_params.ts
+### typescript/arrows/type_params.ts
 ```diff
 -<T,>(a) => {};
 +<T>(a) => {};
@@ -8125,107 +7295,107 @@
 **Prettier Similarity**: 0.00%
 
 
-# typescript/as/array-pattern.ts
+### typescript/as/array-pattern.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/as/as.ts
+### typescript/as/as.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/as/assignment.ts
+### typescript/as/assignment.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/as/assignment2.ts
+### typescript/as/assignment2.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/as/export_default_as.ts
+### typescript/as/export_default_as.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/as/expression-statement.ts
+### typescript/as/expression-statement.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/as/long-identifiers.ts
+### typescript/as/long-identifiers.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/as/nested-await-and-as.ts
+### typescript/as/nested-await-and-as.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/as/return.ts
+### typescript/as/return.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/as/ternary.ts
+### typescript/as/ternary.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/assert/comment.ts
+### typescript/assert/comment.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/assert/index.ts
+### typescript/assert/index.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/assignment/issue-10846.ts
+### typescript/assignment/issue-10846.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/assignment/issue-10848.tsx
+### typescript/assignment/issue-10848.tsx
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/assignment/issue-10850.ts
+### typescript/assignment/issue-10850.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/assignment/issue-12413.ts
+### typescript/assignment/issue-12413.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/assignment/issue-2322.ts
+### typescript/assignment/issue-2322.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/assignment/issue-2482.ts
+### typescript/assignment/issue-2482.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/assignment/issue-2485.ts
+### typescript/assignment/issue-2485.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/assignment/issue-3122.ts
+### typescript/assignment/issue-3122.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/assignment/issue-5370.ts
+### typescript/assignment/issue-5370.ts
 ```diff
 -const durabilityMetricsSelectable: Immutable.OrderedSet<SomeReportingMetric> =
 -  myExperienceSelectable.concat(otherDurabilityMetricsSelectable);
@@ -8238,77 +7408,100 @@
 **Prettier Similarity**: 0.00%
 
 
-# typescript/assignment/issue-6783.ts
+### typescript/assignment/issue-6783.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/assignment/issue-8619.ts
+### typescript/assignment/issue-8619.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/assignment/issue-9172.ts
+### typescript/assignment/issue-9172.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/assignment/lone-arg.ts
+### typescript/assignment/lone-arg.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/assignment/parenthesized.ts
+### typescript/assignment/parenthesized.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/bigint/bigint.ts
+### typescript/bigint/bigint.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/break-calls/type_args.ts
+### typescript/break-calls/type_args.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/call-signature/call-signature.ts
+### typescript/call-signature/call-signature.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/cast/as-const.ts
+### typescript/cast/as-const.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/cast/assert-and-assign.ts
+### typescript/cast/assert-and-assign.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/cast/generic-cast.ts
+### typescript/cast/generic-cast.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/cast/hug-args.ts
+### typescript/cast/hug-args.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/cast/parenthesis.ts
+### typescript/cast/parenthesis.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/catch-clause/type-annotation.ts
+### typescript/cast/tuple-and-record.ts
+```diff
+ breakAfterCast = <PermissionsChecker<any> | undefined>(
+   (<any>permissions)[receiverType]
+ );
+-breakAfterCast = <PermissionsChecker<any> | undefined>(
+-  (<any>permissions)(#[receiverType])
+-);
++breakAfterCast = <PermissionsChecker<any> | undefined>(<any>permissions)(#[receiverType]);
+ 
+ testObjLiteral = <PermissionsChecker<any> | undefined>{ prop1: "myPropVal" };
+-testObjLiteral = <PermissionsChecker<any> | undefined>#{ prop1: "myPropVal" };
++testObjLiteral =  <PermissionsChecker<any> | undefined>
++#
++{
++  prop1: "myPropVal";
++}
+
+```
+
+**Prettier Similarity**: 45.45%
+
+
+### typescript/catch-clause/type-annotation.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/chain-expression/test.ts
+### typescript/chain-expression/test.ts
 ```diff
 -(a?.b)!.c;
 -(a?.())!.b;
@@ -8324,32 +7517,32 @@
 **Prettier Similarity**: 0.00%
 
 
-# typescript/class-comment/class-implements.ts
+### typescript/class-comment/class-implements.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/class-comment/declare.ts
+### typescript/class-comment/declare.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/class-comment/generic.ts
+### typescript/class-comment/generic.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/class-comment/misc.ts
+### typescript/class-comment/misc.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/class/abstract-method.ts
+### typescript/class/abstract-method.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/class/constructor.ts
+### typescript/class/constructor.ts
 ```diff
  class C {
    constructor(override a: number) {}
@@ -8384,22 +7577,22 @@
 **Prettier Similarity**: 96.15%
 
 
-# typescript/class/declare-readonly-field-initializer-w-annotation.ts
+### typescript/class/declare-readonly-field-initializer-w-annotation.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/class/declare-readonly-field-initializer.ts
+### typescript/class/declare-readonly-field-initializer.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/class/dunder.ts
+### typescript/class/dunder.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/class/duplicates-access-modifier.ts
+### typescript/class/duplicates-access-modifier.ts
 ```diff
  class Foo {
 -  public a;
@@ -8419,7 +7612,7 @@
 **Prettier Similarity**: 28.57%
 
 
-# typescript/class/empty-method-body.ts
+### typescript/class/empty-method-body.ts
 ```diff
  // #9324
  
@@ -8439,27 +7632,27 @@
 **Prettier Similarity**: 80.00%
 
 
-# typescript/class/extends_implements.ts
+### typescript/class/extends_implements.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/class/generics.ts
+### typescript/class/generics.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/class/methods.ts
+### typescript/class/methods.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/class/optional.ts
+### typescript/class/optional.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/class/parameter-properties.ts
+### typescript/class/parameter-properties.ts
 ```diff
  class MyClass {
 -  constructor(
@@ -8496,7 +7689,7 @@
 **Prettier Similarity**: 53.85%
 
 
-# typescript/class/quoted-property.ts
+### typescript/class/quoted-property.ts
 ```diff
  class User {
 -  "username": string;
@@ -8508,52 +7701,52 @@
 **Prettier Similarity**: 66.67%
 
 
-# typescript/class/standard_private_fields.ts
+### typescript/class/standard_private_fields.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/classes/break-heritage.ts
+### typescript/classes/break-heritage.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/classes/break.ts
+### typescript/classes/break.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/comments-2/dangling.ts
+### typescript/comments-2/dangling.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/comments-2/issues.ts
+### typescript/comments-2/issues.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/comments-2/last-arg.ts
+### typescript/comments-2/last-arg.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/comments/abstract_class.ts
+### typescript/comments/abstract_class.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/comments/abstract_methods.ts
+### typescript/comments/abstract_methods.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/comments/after_jsx_generic.tsx
+### typescript/comments/after_jsx_generic.tsx
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/comments/declare_function.ts
+### typescript/comments/declare_function.ts
 ```diff
  declare function fn(
    currentRequest: { a: number },
@@ -8568,27 +7761,27 @@
 **Prettier Similarity**: 83.33%
 
 
-# typescript/comments/interface.ts
+### typescript/comments/interface.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/comments/issues.ts
+### typescript/comments/issues.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/comments/jsx.tsx
+### typescript/comments/jsx.tsx
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/comments/location.ts
+### typescript/comments/location.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/comments/mapped_types.ts
+### typescript/comments/mapped_types.ts
 ```diff
  type A = {
    // commentA
@@ -8638,7 +7831,7 @@
 **Prettier Similarity**: 95.00%
 
 
-# typescript/comments/method_types.ts
+### typescript/comments/method_types.ts
 ```diff
  interface foo1 {
    bar3 /* foo */(/* baz */); // bat
@@ -8691,17 +7884,17 @@
 **Prettier Similarity**: 84.62%
 
 
-# typescript/comments/methods.ts
+### typescript/comments/methods.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/comments/ts-parameter-proerty.ts
+### typescript/comments/ts-parameter-proerty.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/comments/type-parameters.ts
+### typescript/comments/type-parameters.ts
 ```diff
  functionName<A /* A comment */>();
  const a: T</* comment */> = 1;
@@ -8742,62 +7935,62 @@
 **Prettier Similarity**: 87.10%
 
 
-# typescript/comments/type_literals.ts
+### typescript/comments/type_literals.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/comments/types.ts
+### typescript/comments/types.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/comments/union.ts
+### typescript/comments/union.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/compiler/ClassDeclaration22.ts
+### typescript/compiler/ClassDeclaration22.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/compiler/anyIsAssignableToObject.ts
+### typescript/compiler/anyIsAssignableToObject.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/compiler/castOfAwait.ts
+### typescript/compiler/castOfAwait.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/compiler/castParentheses.ts
+### typescript/compiler/castParentheses.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/compiler/castTest.ts
+### typescript/compiler/castTest.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/compiler/checkInfiniteExpansionTermination.ts
+### typescript/compiler/checkInfiniteExpansionTermination.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/compiler/commentInNamespaceDeclarationWithIdentifierPathName.ts
+### typescript/compiler/commentInNamespaceDeclarationWithIdentifierPathName.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/compiler/commentsInterface.ts
+### typescript/compiler/commentsInterface.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/compiler/contextualSignatureInstantiation2.ts
+### typescript/compiler/contextualSignatureInstantiation2.ts
 ```diff
  // dot f g x = f(g(x))
  var dot: <T, S>(f: (_: T) => S) => <U>(g: (_: U) => T) => (_: U) => S;
@@ -8815,12 +8008,12 @@
 **Prettier Similarity**: 88.89%
 
 
-# typescript/compiler/declareDottedModuleName.ts
+### typescript/compiler/declareDottedModuleName.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/compiler/decrementAndIncrementOperators.ts
+### typescript/compiler/decrementAndIncrementOperators.ts
 ```diff
  var x = 0;
  
@@ -8869,277 +8062,67 @@
 **Prettier Similarity**: 89.19%
 
 
-# typescript/compiler/es5ExportDefaultClassDeclaration4.ts
+### typescript/compiler/es5ExportDefaultClassDeclaration4.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/compiler/functionOverloadsOnGenericArity1.ts
+### typescript/compiler/functionOverloadsOnGenericArity1.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/compiler/globalIsContextualKeyword.ts
+### typescript/compiler/globalIsContextualKeyword.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/compiler/indexSignatureWithInitializer.ts
+### typescript/compiler/indexSignatureWithInitializer.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/compiler/mappedTypeWithCombinedTypeMappers.ts
+### typescript/compiler/mappedTypeWithCombinedTypeMappers.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/compiler/modifiersOnInterfaceIndexSignature1.ts
+### typescript/compiler/modifiersOnInterfaceIndexSignature1.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/compiler/privacyGloImport.ts
+### typescript/compiler/privacyGloImport.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conditional-types/comments.ts
-```diff
- type A = B extends T
-   ? // comment
-     foo
-   : bar;
- 
- type A = B extends test /* comment
-   comment
-       comment
- */
-   ? foo
-   : bar;
- 
- type T = test extends B
-   ? /* comment
-           comment
-     comment
-           comment
-   */
-     foo
-   : bar;
- 
- type T = test extends B
-   ? /* comment
-        comment
-        comment
-        comment
-     */
-     foo
-   : test extends B
--    ? /* comment
-+  ? /* comment
-   comment
-     comment */
--      foo
--    : bar;
-+    foo
-+  : bar;
- 
- type T = test extends B ? /* comment */ foo : bar;
- 
- type T = test extends B
-   ? foo
-   : /* comment
-          comment
-      comment
-            comment
-     */
-     bar;
- 
- type T = test extends B
-   ? foo
-   : /* comment
-          comment
-      comment
-            comment
-     */
--    test extends B
--    ? foo
--    : /* comment
-+  test extends B
-+  ? foo
-+  : /* comment
-   comment
-     comment
-    */
--      bar;
-+    bar;
- 
- type T = test extends B ? foo : /* comment */ bar;
- 
- type T = test extends B
-   ? test extends B /* c
- c */
-     ? foo
-     : bar
-   : bar;
-
-```
-
-**Prettier Similarity**: 89.86%
-
-
-# typescript/conditional-types/conditonal-types.ts
-```diff
- export type DeepReadonly<T> = T extends any[]
-   ? DeepReadonlyArray<T[number]>
-   : T extends object
--    ? DeepReadonlyObject<T>
--    : T;
-+  ? DeepReadonlyObject<T>
-+  : T;
- 
- type NonFunctionPropertyNames<T> = {
-   [K in keyof T]: T[K] extends Function ? never : K;
- }[keyof T];
- 
- interface DeepReadonlyArray<T> extends ReadonlyArray<DeepReadonly<T>> {}
- 
- type DeepReadonlyObject<T> = {
-   readonly [P in NonFunctionPropertyNames<T>]: DeepReadonly<T[P]>;
- };
- 
- type TypeName<T> = T extends string
-   ? "string"
-   : T extends number
--    ? "number"
--    : T extends boolean
--      ? "boolean"
--      : T extends undefined
--        ? "undefined"
--        : T extends Function
--          ? "function"
--          : "object";
-+  ? "number"
-+  : T extends boolean
-+  ? "boolean"
-+  : T extends undefined
-+  ? "undefined"
-+  : T extends Function
-+  ? "function"
-+  : "object";
- 
- type Type01 = 0 extends (1 extends 2 ? 3 : 4) ? 5 : 6;
- type Type02 = 0 extends (1 extends 2 ? 3 : 4) ? 5 : 6;
- type Type03 = 0 extends (1 extends 2 ? 3 : 4) ? 5 : 6;
- type Type04 = 0 extends (1 extends 2 ? 3 : 4) ? 5 : 6;
- type Type05 = (0 extends 1 ? 2 : 3) extends 4 ? 5 : 6;
- type Type06 = (0 extends 1 ? 2 : 3) extends 4 ? 5 : 6;
- type Type07 = (0 extends 1 ? 2 : 3) extends 4 ? 5 : 6;
- type Type08 = (0 extends 1 ? 2 : 3) extends 4 ? 5 : 6;
- 
- type T1 = () => void extends T ? U : V;
- type T1a = () => void extends T ? U : V;
- type T1b = () => void extends T ? U : V;
- type T2 = (() => void) extends T ? U : V;
- 
- type U1 = new () => X extends T ? U : V;
- type U1a = new () => X extends T ? U : V;
- type U1b = new () => X extends T ? U : V;
- type U2 = (new () => X) extends T ? U : V;
-
-```
-
-**Prettier Similarity**: 78.26%
-
-
-# typescript/conditional-types/infer-type.ts
-```diff
- type TestReturnType<T extends (...args: any[]) => any> = T extends (
-   ...args: any[]
- ) => infer R
-   ? R
-   : any;
- 
- type Unpacked<T> = T extends (infer U)[]
-   ? U
-   : T extends (...args: any[]) => infer U
--    ? U
--    : T extends Promise<infer U>
--      ? U
--      : T;
-+  ? U
-+  : T extends Promise<infer U>
-+  ? U
-+  : T;
-
-```
-
-**Prettier Similarity**: 69.23%
-
-
-# typescript/conditional-types/nested-in-condition.ts
+### typescript/conditional-types/comments.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conditional-types/new-ternary-spec.ts
-```diff
- // TypeScript has the same behavior, including a line break after =, but no parens around "conditional":
- type KnownKeys<T> = {
-   [K in keyof T]: string extends K ? never : number extends K ? never : K;
- } extends { [_ in keyof T]: infer U }
-   ? {} extends U
-     ? never
-     : U
-   : never;
- 
- type KnownKeysWithLongExtends<T> = {
-   [K in keyof T]: string extends K ? never : number extends K ? never : K;
- } extends {
-   [_ in keyof T]: SomeReallyLongThingThatBreaksTheLine<infer U>;
- }
-   ? U
-   : never;
- 
- // TypeScript examples:
- type TypeName<T> = T extends string
-   ? "string"
-   : T extends number
--    ? "number"
--    : T extends boolean
--      ? "boolean"
--      : T extends undefined
--        ? "undefined"
--        : T extends Function
--          ? "function"
--          : "object";
-+  ? "number"
-+  : T extends boolean
-+  ? "boolean"
-+  : T extends undefined
-+  ? "undefined"
-+  : T extends Function
-+  ? "function"
-+  : "object";
- 
- type Unpacked<T> = T extends (infer U)[]
-   ? U
-   : T extends (...args: any[]) => infer U
--    ? SomeReallyLongThingThatBreaksTheLine<U>
--    : T extends Promise<infer U>
--      ? U
--      : T;
-+  ? SomeReallyLongThingThatBreaksTheLine<U>
-+  : T extends Promise<infer U>
-+  ? U
-+  : T;
+### typescript/conditional-types/conditonal-types.ts
 
-```
-
-**Prettier Similarity**: 67.57%
+**Prettier Similarity**: 100.00%
 
 
-# typescript/conditional-types/parentheses.ts
+### typescript/conditional-types/infer-type.ts
+
+**Prettier Similarity**: 100.00%
+
+
+### typescript/conditional-types/nested-in-condition.ts
+
+**Prettier Similarity**: 100.00%
+
+
+### typescript/conditional-types/new-ternary-spec.ts
+
+**Prettier Similarity**: 100.00%
+
+
+### typescript/conditional-types/parentheses.ts
 ```diff
  // #13275
  type Foo<T> = T extends ((...a: any[]) => infer R extends string) ? R : never;
@@ -9180,82 +8163,82 @@
 **Prettier Similarity**: 56.00%
 
 
-# typescript/conformance/ambient/ambientDeclarations.ts
+### typescript/conformance/ambient/ambientDeclarations.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/classes/abstract.ts
+### typescript/conformance/classes/abstract.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/classes/classDeclarations/classAbstractKeyword/classAbstractAccessor.ts
+### typescript/conformance/classes/classDeclarations/classAbstractKeyword/classAbstractAccessor.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/classes/classDeclarations/classAbstractKeyword/classAbstractAsIdentifier.ts
+### typescript/conformance/classes/classDeclarations/classAbstractKeyword/classAbstractAsIdentifier.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/classes/classDeclarations/classAbstractKeyword/classAbstractAssignabilityConstructorFunction.ts
+### typescript/conformance/classes/classDeclarations/classAbstractKeyword/classAbstractAssignabilityConstructorFunction.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/classes/classDeclarations/classAbstractKeyword/classAbstractClinterfaceAssignability.ts
+### typescript/conformance/classes/classDeclarations/classAbstractKeyword/classAbstractClinterfaceAssignability.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/classes/classDeclarations/classAbstractKeyword/classAbstractConstructorAssignability.ts
+### typescript/conformance/classes/classDeclarations/classAbstractKeyword/classAbstractConstructorAssignability.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/classes/classDeclarations/classAbstractKeyword/classAbstractCrashedOnce.ts
+### typescript/conformance/classes/classDeclarations/classAbstractKeyword/classAbstractCrashedOnce.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/classes/classDeclarations/classAbstractKeyword/classAbstractExtends.ts
+### typescript/conformance/classes/classDeclarations/classAbstractKeyword/classAbstractExtends.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/classes/classDeclarations/classAbstractKeyword/classAbstractFactoryFunction.ts
+### typescript/conformance/classes/classDeclarations/classAbstractKeyword/classAbstractFactoryFunction.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/classes/classDeclarations/classAbstractKeyword/classAbstractGeneric.ts
+### typescript/conformance/classes/classDeclarations/classAbstractKeyword/classAbstractGeneric.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/classes/classDeclarations/classAbstractKeyword/classAbstractImportInstantiation.ts
+### typescript/conformance/classes/classDeclarations/classAbstractKeyword/classAbstractImportInstantiation.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/classes/classDeclarations/classAbstractKeyword/classAbstractInAModule.ts
+### typescript/conformance/classes/classDeclarations/classAbstractKeyword/classAbstractInAModule.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/classes/classDeclarations/classAbstractKeyword/classAbstractInheritance.ts
+### typescript/conformance/classes/classDeclarations/classAbstractKeyword/classAbstractInheritance.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/classes/classDeclarations/classAbstractKeyword/classAbstractInstantiations1.ts
+### typescript/conformance/classes/classDeclarations/classAbstractKeyword/classAbstractInstantiations1.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/classes/classDeclarations/classAbstractKeyword/classAbstractInstantiations2.ts
+### typescript/conformance/classes/classDeclarations/classAbstractKeyword/classAbstractInstantiations2.ts
 ```diff
  class A {}
  
@@ -9319,12 +8302,12 @@
 **Prettier Similarity**: 98.18%
 
 
-# typescript/conformance/classes/classDeclarations/classAbstractKeyword/classAbstractMethodInNonAbstractClass.ts
+### typescript/conformance/classes/classDeclarations/classAbstractKeyword/classAbstractMethodInNonAbstractClass.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/classes/classDeclarations/classAbstractKeyword/classAbstractMixedWithModifiers.ts
+### typescript/conformance/classes/classDeclarations/classAbstractKeyword/classAbstractMixedWithModifiers.ts
 ```diff
  abstract class A {
    abstract foo_a();
@@ -9351,17 +8334,17 @@
 **Prettier Similarity**: 73.33%
 
 
-# typescript/conformance/classes/classDeclarations/classAbstractKeyword/classAbstractOverloads.ts
+### typescript/conformance/classes/classDeclarations/classAbstractKeyword/classAbstractOverloads.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/classes/classDeclarations/classAbstractKeyword/classAbstractOverrideWithAbstract.ts
+### typescript/conformance/classes/classDeclarations/classAbstractKeyword/classAbstractOverrideWithAbstract.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/classes/classDeclarations/classAbstractKeyword/classAbstractProperties.ts
+### typescript/conformance/classes/classDeclarations/classAbstractKeyword/classAbstractProperties.ts
 ```diff
  abstract class A {
    abstract x: number;
@@ -9384,72 +8367,72 @@
 **Prettier Similarity**: 84.62%
 
 
-# typescript/conformance/classes/classDeclarations/classAbstractKeyword/classAbstractSingleLineDecl.ts
+### typescript/conformance/classes/classDeclarations/classAbstractKeyword/classAbstractSingleLineDecl.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/classes/classDeclarations/classAbstractKeyword/classAbstractSuperCalls.ts
+### typescript/conformance/classes/classDeclarations/classAbstractKeyword/classAbstractSuperCalls.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/classes/classDeclarations/classAbstractKeyword/classAbstractUsingAbstractMethod1.ts
+### typescript/conformance/classes/classDeclarations/classAbstractKeyword/classAbstractUsingAbstractMethod1.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/classes/classDeclarations/classAbstractKeyword/classAbstractUsingAbstractMethods2.ts
+### typescript/conformance/classes/classDeclarations/classAbstractKeyword/classAbstractUsingAbstractMethods2.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/classes/classDeclarations/classAbstractKeyword/classAbstractWithInterface.ts
+### typescript/conformance/classes/classDeclarations/classAbstractKeyword/classAbstractWithInterface.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/classes/classDeclarations/classHeritageSpecification/classAppearsToHaveMembersOfObject.ts
+### typescript/conformance/classes/classDeclarations/classHeritageSpecification/classAppearsToHaveMembersOfObject.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/classes/classDeclarations/classHeritageSpecification/classExtendingClass.ts
+### typescript/conformance/classes/classDeclarations/classHeritageSpecification/classExtendingClass.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/classes/classDeclarations/classHeritageSpecification/classExtendsItselfIndirectly.ts
+### typescript/conformance/classes/classDeclarations/classHeritageSpecification/classExtendsItselfIndirectly.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/classes/classDeclarations/classHeritageSpecification/classIsSubtypeOfBaseType.ts
+### typescript/conformance/classes/classDeclarations/classHeritageSpecification/classIsSubtypeOfBaseType.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/classes/classDeclarations/classInsideBlock.ts
+### typescript/conformance/classes/classDeclarations/classInsideBlock.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/classes/classExpression.ts
+### typescript/conformance/classes/classExpression.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/classes/constructorDeclarations/constructorParameters/constructorDefaultValuesReferencingThis.ts
+### typescript/conformance/classes/constructorDeclarations/constructorParameters/constructorDefaultValuesReferencingThis.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/classes/constructorDeclarations/constructorParameters/constructorImplementationWithDefaultValues.ts
+### typescript/conformance/classes/constructorDeclarations/constructorParameters/constructorImplementationWithDefaultValues.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/classes/constructorDeclarations/constructorParameters/constructorImplementationWithDefaultValues2.ts
+### typescript/conformance/classes/constructorDeclarations/constructorParameters/constructorImplementationWithDefaultValues2.ts
 ```diff
  class C {
    constructor(x);
@@ -9481,17 +8464,17 @@
 **Prettier Similarity**: 82.61%
 
 
-# typescript/conformance/classes/constructorDeclarations/constructorParameters/constructorOverloadsWithDefaultValues.ts
+### typescript/conformance/classes/constructorDeclarations/constructorParameters/constructorOverloadsWithDefaultValues.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/classes/constructorDeclarations/constructorParameters/constructorOverloadsWithOptionalParameters.ts
+### typescript/conformance/classes/constructorDeclarations/constructorParameters/constructorOverloadsWithOptionalParameters.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/classes/constructorDeclarations/constructorParameters/constructorParameterProperties.ts
+### typescript/conformance/classes/constructorDeclarations/constructorParameters/constructorParameterProperties.ts
 ```diff
  class C {
    y: string;
@@ -9528,22 +8511,22 @@
 **Prettier Similarity**: 66.67%
 
 
-# typescript/conformance/classes/constructorDeclarations/constructorParameters/constructorParameterProperties2.ts
+### typescript/conformance/classes/constructorDeclarations/constructorParameters/constructorParameterProperties2.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/classes/constructorDeclarations/constructorParameters/declarationEmitReadonly.ts
+### typescript/conformance/classes/constructorDeclarations/constructorParameters/declarationEmitReadonly.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/classes/constructorDeclarations/constructorParameters/readonlyConstructorAssignment.ts
+### typescript/conformance/classes/constructorDeclarations/constructorParameters/readonlyConstructorAssignment.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/classes/constructorDeclarations/constructorParameters/readonlyInConstructorParameters.ts
+### typescript/conformance/classes/constructorDeclarations/constructorParameters/readonlyInConstructorParameters.ts
 ```diff
  class C {
    constructor(readonly x: number) {}
@@ -9565,7 +8548,7 @@
 **Prettier Similarity**: 92.31%
 
 
-# typescript/conformance/classes/constructorDeclarations/constructorParameters/readonlyReadonly.ts
+### typescript/conformance/classes/constructorDeclarations/constructorParameters/readonlyReadonly.ts
 ```diff
  class C {
 -  readonly x: number;
@@ -9579,12 +8562,12 @@
 **Prettier Similarity**: 50.00%
 
 
-# typescript/conformance/classes/mixinAccessModifiers.ts
+### typescript/conformance/classes/mixinAccessModifiers.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/classes/mixinClassesAnnotated.ts
+### typescript/conformance/classes/mixinClassesAnnotated.ts
 ```diff
  // @declaration: true
  
@@ -9664,7 +8647,7 @@
 **Prettier Similarity**: 87.14%
 
 
-# typescript/conformance/classes/mixinClassesAnonymous.ts
+### typescript/conformance/classes/mixinClassesAnonymous.ts
 ```diff
  type Constructor<T> = new (...args: any[]) => T;
  
@@ -9746,57 +8729,57 @@
 **Prettier Similarity**: 87.50%
 
 
-# typescript/conformance/classes/mixinClassesMembers.ts
+### typescript/conformance/classes/mixinClassesMembers.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/classes/nestedClassDeclaration.ts
+### typescript/conformance/classes/nestedClassDeclaration.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/comments/comments.ts
+### typescript/conformance/comments/comments.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/declarationEmit/typePredicates/declarationEmitThisPredicatesWithPrivateName01.ts
+### typescript/conformance/declarationEmit/typePredicates/declarationEmitThisPredicatesWithPrivateName01.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/es6/Symbols/symbolProperty15.ts
+### typescript/conformance/es6/Symbols/symbolProperty15.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/es6/templates/templateStringWithEmbeddedTypeAssertionOnAdditionES6.ts
+### typescript/conformance/es6/templates/templateStringWithEmbeddedTypeAssertionOnAdditionES6.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/expressions/asOperator/asOperatorContextualType.ts
+### typescript/conformance/expressions/asOperator/asOperatorContextualType.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/expressions/functionCalls/callWithSpreadES6.ts
+### typescript/conformance/expressions/functionCalls/callWithSpreadES6.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/interfaces/interfaceDeclarations/interfaceWithMultipleBaseTypes2.ts
+### typescript/conformance/interfaces/interfaceDeclarations/interfaceWithMultipleBaseTypes2.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/internalModules/importDeclarations/circularImportAlias.ts
+### typescript/conformance/internalModules/importDeclarations/circularImportAlias.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/internalModules/importDeclarations/exportImportAlias.ts
+### typescript/conformance/internalModules/importDeclarations/exportImportAlias.ts
 ```diff
  // expect no errors here
  
@@ -9878,12 +8861,12 @@
 **Prettier Similarity**: 88.89%
 
 
-# typescript/conformance/internalModules/importDeclarations/exportInterface.ts
+### typescript/conformance/internalModules/importDeclarations/exportInterface.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/internalModules/importDeclarations/importAliasIdentifiers.ts
+### typescript/conformance/internalModules/importDeclarations/importAliasIdentifiers.ts
 ```diff
  module moduleA {
    export class Point {
@@ -9942,22 +8925,22 @@
 **Prettier Similarity**: 92.00%
 
 
-# typescript/conformance/internalModules/importDeclarations/invalidImportAliasIdentifiers.ts
+### typescript/conformance/internalModules/importDeclarations/invalidImportAliasIdentifiers.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/internalModules/importDeclarations/shadowedInternalModule.ts
+### typescript/conformance/internalModules/importDeclarations/shadowedInternalModule.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/parser/ecmascript5/Statements/parserES5ForOfStatement2.ts
+### typescript/conformance/parser/ecmascript5/Statements/parserES5ForOfStatement2.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/parser/ecmascript5/Statements/parserES5ForOfStatement21.ts
+### typescript/conformance/parser/ecmascript5/Statements/parserES5ForOfStatement21.ts
 ```diff
  //@target: ES5
 -for (var of of) {
@@ -9969,397 +8952,397 @@
 **Prettier Similarity**: 33.33%
 
 
-# typescript/conformance/parser/ecmascript5/Statements/parserForInStatement2.ts
+### typescript/conformance/parser/ecmascript5/Statements/parserForInStatement2.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/types/ambient/ambientDeclarations.ts
+### typescript/conformance/types/ambient/ambientDeclarations.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/types/any/anyAsConstructor.ts
+### typescript/conformance/types/any/anyAsConstructor.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/types/any/anyAsFunctionCall.ts
+### typescript/conformance/types/any/anyAsFunctionCall.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/types/any/anyAsGenericFunctionCall.ts
+### typescript/conformance/types/any/anyAsGenericFunctionCall.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/types/any/anyPropertyAccess.ts
+### typescript/conformance/types/any/anyPropertyAccess.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/types/constKeyword/constKeyword.ts
+### typescript/conformance/types/constKeyword/constKeyword.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/types/constructorType/cunstructorType.ts
+### typescript/conformance/types/constructorType/cunstructorType.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/types/enumDeclaration/enumDeclaration.ts
+### typescript/conformance/types/enumDeclaration/enumDeclaration.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/types/firstTypeNode/firstTypeNode.ts
+### typescript/conformance/types/firstTypeNode/firstTypeNode.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/types/functions/TSFunctionTypeNoUnnecessaryParentheses.ts
+### typescript/conformance/types/functions/TSFunctionTypeNoUnnecessaryParentheses.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/types/functions/functionImplementationErrors.ts
+### typescript/conformance/types/functions/functionImplementationErrors.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/types/functions/functionImplementations.ts
+### typescript/conformance/types/functions/functionImplementations.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/types/functions/functionOverloadCompatibilityWithVoid01.ts
+### typescript/conformance/types/functions/functionOverloadCompatibilityWithVoid01.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/types/functions/functionOverloadCompatibilityWithVoid02.ts
+### typescript/conformance/types/functions/functionOverloadCompatibilityWithVoid02.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/types/functions/functionOverloadCompatibilityWithVoid03.ts
+### typescript/conformance/types/functions/functionOverloadCompatibilityWithVoid03.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/types/functions/functionOverloadErrorsSyntax.ts
+### typescript/conformance/types/functions/functionOverloadErrorsSyntax.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/types/functions/functionTypeTypeParameters.ts
+### typescript/conformance/types/functions/functionTypeTypeParameters.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/types/functions/parameterInitializersForwardReferencing.ts
+### typescript/conformance/types/functions/parameterInitializersForwardReferencing.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/types/importEqualsDeclaration/importEqualsDeclaration.ts
+### typescript/conformance/types/importEqualsDeclaration/importEqualsDeclaration.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/types/indexedAccesType/indexedAccesType.ts
+### typescript/conformance/types/indexedAccesType/indexedAccesType.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/types/interfaceDeclaration/interfaceDeclaration.ts
+### typescript/conformance/types/interfaceDeclaration/interfaceDeclaration.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/types/intersectionType/intersectionType.ts
+### typescript/conformance/types/intersectionType/intersectionType.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/types/lastTypeNode/lastTypeNode.ts
+### typescript/conformance/types/lastTypeNode/lastTypeNode.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/types/mappedType/mappedType.ts
+### typescript/conformance/types/mappedType/mappedType.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/types/methodSignature/methodSignature.ts
+### typescript/conformance/types/methodSignature/methodSignature.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/types/moduleDeclaration/kind-detection.ts
+### typescript/conformance/types/moduleDeclaration/kind-detection.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/types/moduleDeclaration/moduleDeclaration.ts
+### typescript/conformance/types/moduleDeclaration/moduleDeclaration.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/types/namespaceExportDeclaration/exportAsNamespace.d.ts
+### typescript/conformance/types/namespaceExportDeclaration/exportAsNamespace.d.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/types/never/never.ts
+### typescript/conformance/types/never/never.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/types/nonNullExpression/nonNullExpression.ts
+### typescript/conformance/types/nonNullExpression/nonNullExpression.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/types/parameterProperty/parameterProperty.ts
+### typescript/conformance/types/parameterProperty/parameterProperty.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/types/symbol/symbol.ts
+### typescript/conformance/types/symbol/symbol.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/types/thisType/thisType.ts
+### typescript/conformance/types/thisType/thisType.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/types/tuple/contextualTypeWithTuple.ts
+### typescript/conformance/types/tuple/contextualTypeWithTuple.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/types/tuple/emptyTuples/emptyTuplesTypeAssertion02.ts
+### typescript/conformance/types/tuple/emptyTuples/emptyTuplesTypeAssertion02.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/types/tuple/indexerWithTuple.ts
+### typescript/conformance/types/tuple/indexerWithTuple.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/types/tuple/tupleElementTypes1.ts
+### typescript/conformance/types/tuple/tupleElementTypes1.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/types/tuple/tupleElementTypes2.ts
+### typescript/conformance/types/tuple/tupleElementTypes2.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/types/tuple/tupleElementTypes3.ts
+### typescript/conformance/types/tuple/tupleElementTypes3.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/types/tuple/tupleElementTypes4.ts
+### typescript/conformance/types/tuple/tupleElementTypes4.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/types/tuple/typeInferenceWithTupleType.ts
+### typescript/conformance/types/tuple/typeInferenceWithTupleType.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/types/tuple/wideningTuples1.ts
+### typescript/conformance/types/tuple/wideningTuples1.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/types/tuple/wideningTuples2.ts
+### typescript/conformance/types/tuple/wideningTuples2.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/types/tuple/wideningTuples3.ts
+### typescript/conformance/types/tuple/wideningTuples3.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/types/tuple/wideningTuples4.ts
+### typescript/conformance/types/tuple/wideningTuples4.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/types/tuple/wideningTuples5.ts
+### typescript/conformance/types/tuple/wideningTuples5.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/types/tuple/wideningTuples6.ts
+### typescript/conformance/types/tuple/wideningTuples6.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/types/tuple/wideningTuples7.ts
+### typescript/conformance/types/tuple/wideningTuples7.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/types/typeOperator/typeOperator.ts
+### typescript/conformance/types/typeOperator/typeOperator.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/types/typeParameter/typeParameter.ts
+### typescript/conformance/types/typeParameter/typeParameter.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/types/typeParameters/typeParameterLists/innerTypeParameterShadowingOuterOne.ts
+### typescript/conformance/types/typeParameters/typeParameterLists/innerTypeParameterShadowingOuterOne.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/types/typeParameters/typeParameterLists/innerTypeParameterShadowingOuterOne2.ts
+### typescript/conformance/types/typeParameters/typeParameterLists/innerTypeParameterShadowingOuterOne2.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/types/typeParameters/typeParameterLists/staticMembersUsingClassTypeParameter.ts
+### typescript/conformance/types/typeParameters/typeParameterLists/staticMembersUsingClassTypeParameter.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/types/typeParameters/typeParameterLists/typeParametersAvailableInNestedScope2.ts
+### typescript/conformance/types/typeParameters/typeParameterLists/typeParametersAvailableInNestedScope2.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/types/typeReference/typeReference.ts
+### typescript/conformance/types/typeReference/typeReference.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/types/undefined/undefined.ts
+### typescript/conformance/types/undefined/undefined.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/types/union/unionTypeCallSignatures.ts
+### typescript/conformance/types/union/unionTypeCallSignatures.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/types/union/unionTypeCallSignatures3.ts
+### typescript/conformance/types/union/unionTypeCallSignatures3.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/types/union/unionTypeCallSignatures4.ts
+### typescript/conformance/types/union/unionTypeCallSignatures4.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/types/union/unionTypeConstructSignatures.ts
+### typescript/conformance/types/union/unionTypeConstructSignatures.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/types/union/unionTypeEquivalence.ts
+### typescript/conformance/types/union/unionTypeEquivalence.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/types/union/unionTypeFromArrayLiteral.ts
+### typescript/conformance/types/union/unionTypeFromArrayLiteral.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/types/union/unionTypeIndexSignature.ts
+### typescript/conformance/types/union/unionTypeIndexSignature.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/types/union/unionTypePropertyAccessibility.ts
+### typescript/conformance/types/union/unionTypePropertyAccessibility.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/conformance/types/variableDeclarator/variableDeclarator.ts
+### typescript/conformance/types/variableDeclarator/variableDeclarator.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/const/initializer-ambient-context.ts
+### typescript/const/initializer-ambient-context.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/cursor/array-pattern.ts
+### typescript/cursor/array-pattern.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/cursor/arrow-function-type.ts
+### typescript/cursor/arrow-function-type.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/cursor/class-property.ts
+### typescript/cursor/class-property.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/cursor/function-return-type.ts
+### typescript/cursor/function-return-type.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/cursor/identifier-1.ts
+### typescript/cursor/identifier-1.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/cursor/identifier-2.ts
+### typescript/cursor/identifier-2.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/cursor/identifier-3.ts
+### typescript/cursor/identifier-3.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/cursor/method-signature.ts
+### typescript/cursor/method-signature.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/cursor/property-signature.ts
+### typescript/cursor/property-signature.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/cursor/rest.ts
+### typescript/cursor/rest.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/custom/abstract/abstractNewlineHandling.ts
+### typescript/custom/abstract/abstractNewlineHandling.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/custom/abstract/abstractProperties.ts
+### typescript/custom/abstract/abstractProperties.ts
 ```diff
  abstract class Foo {
 -  private abstract a: 1;
@@ -10379,112 +9362,112 @@
 **Prettier Similarity**: 50.00%
 
 
-# typescript/custom/call/callSignature.ts
+### typescript/custom/call/callSignature.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/custom/computedProperties/string.ts
+### typescript/custom/computedProperties/string.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/custom/computedProperties/symbol.ts
+### typescript/custom/computedProperties/symbol.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/custom/declare/declareModifier.d.ts
+### typescript/custom/declare/declareModifier.d.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/custom/modifiers/minustoken.ts
+### typescript/custom/modifiers/minustoken.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/custom/modifiers/question.ts
+### typescript/custom/modifiers/question.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/custom/modifiers/readonly.ts
+### typescript/custom/modifiers/readonly.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/custom/module/global.ts
+### typescript/custom/module/global.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/custom/module/moduleNamespace.ts
+### typescript/custom/module/moduleNamespace.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/custom/module/nestedNamespace.ts
+### typescript/custom/module/nestedNamespace.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/custom/new/newKeyword.ts
+### typescript/custom/new/newKeyword.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/custom/stability/moduleBlock.ts
+### typescript/custom/stability/moduleBlock.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/custom/typeParameters/callAndConstructSignatureLong.ts
+### typescript/custom/typeParameters/callAndConstructSignatureLong.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/custom/typeParameters/functionTypeLong.ts
+### typescript/custom/typeParameters/functionTypeLong.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/custom/typeParameters/interfaceParamsLong.ts
+### typescript/custom/typeParameters/interfaceParamsLong.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/custom/typeParameters/typeParametersLong.ts
+### typescript/custom/typeParameters/typeParametersLong.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/custom/typeParameters/variables.ts
+### typescript/custom/typeParameters/variables.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/declare/declare-get-set-field.ts
+### typescript/declare/declare-get-set-field.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/declare/declare_class_fields.ts
+### typescript/declare/declare_class_fields.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/declare/declare_enum.ts
+### typescript/declare/declare_enum.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/declare/declare_function.ts
+### typescript/declare/declare_function.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/declare/declare_function_with_body.ts
+### typescript/declare/declare_function_with_body.ts
 ```diff
  // Invalid, but recoverable
 -declare function foo() {};
@@ -10499,27 +9482,27 @@
 **Prettier Similarity**: 60.00%
 
 
-# typescript/declare/declare_interface.ts
+### typescript/declare/declare_interface.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/declare/declare_module.ts
+### typescript/declare/declare_module.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/declare/declare_namespace.ts
+### typescript/declare/declare_namespace.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/declare/declare_var.ts
+### typescript/declare/declare_var.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/declare/object-type-in-declare-function.ts
+### typescript/declare/object-type-in-declare-function.ts
 ```diff
 -declare function foo(this: {
 -  a: boolean;
@@ -10549,7 +9532,7 @@
 **Prettier Similarity**: 73.68%
 
 
-# typescript/declare/trailing-comma/function-rest-trailing-comma.ts
+### typescript/declare/trailing-comma/function-rest-trailing-comma.ts
 ```diff
 -declare function foo(...args: any[]);
 -declare function foo(
@@ -10563,27 +9546,27 @@
 **Prettier Similarity**: 0.00%
 
 
-# typescript/decorator-auto-accessors/decorator-auto-accessors-new-line.ts
+### typescript/decorator-auto-accessors/decorator-auto-accessors-new-line.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/decorator-auto-accessors/decorator-auto-accessors-type-annotations.ts
+### typescript/decorator-auto-accessors/decorator-auto-accessors-type-annotations.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/decorator-auto-accessors/no-semi/decorator-auto-accessor-like-property-name.ts
+### typescript/decorator-auto-accessors/no-semi/decorator-auto-accessor-like-property-name.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/decorators-ts/accessor-decorator.ts
+### typescript/decorators-ts/accessor-decorator.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/decorators-ts/angular.ts
+### typescript/decorators-ts/angular.ts
 ```diff
  @Component({
    selector: "toh-hero-button",
@@ -10600,37 +9583,37 @@
 **Prettier Similarity**: 87.50%
 
 
-# typescript/decorators-ts/class-decorator.ts
+### typescript/decorators-ts/class-decorator.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/decorators-ts/method-decorator.ts
+### typescript/decorators-ts/method-decorator.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/decorators-ts/mobx.ts
+### typescript/decorators-ts/mobx.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/decorators-ts/multiple.ts
+### typescript/decorators-ts/multiple.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/decorators-ts/parameter-decorator.ts
+### typescript/decorators-ts/parameter-decorator.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/decorators-ts/property-decorator.ts
+### typescript/decorators-ts/property-decorator.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/decorators-ts/typeorm.ts
+### typescript/decorators-ts/typeorm.ts
 ```diff
  @Entity()
  export class Board {
@@ -10662,27 +9645,27 @@
 **Prettier Similarity**: 82.61%
 
 
-# typescript/decorators/accessor.ts
+### typescript/decorators/accessor.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/decorators/argument-list-preserve-line.ts
+### typescript/decorators/argument-list-preserve-line.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/decorators/comments.ts
+### typescript/decorators/comments.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/decorators/decorator-type-assertion.ts
+### typescript/decorators/decorator-type-assertion.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/decorators/decorators-comments.ts
+### typescript/decorators/decorators-comments.ts
 ```diff
  class Foo1 {
    @foo
@@ -10733,37 +9716,37 @@
 **Prettier Similarity**: 77.14%
 
 
-# typescript/decorators/decorators.ts
+### typescript/decorators/decorators.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/decorators/inline-decorators.ts
+### typescript/decorators/inline-decorators.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/decorators/legacy.ts
+### typescript/decorators/legacy.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/decorators/mobx.ts
+### typescript/decorators/mobx.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/definite/asi.ts
+### typescript/definite/asi.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/definite/definite.ts
+### typescript/definite/definite.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/definite/without-annotation.ts
+### typescript/definite/without-annotation.ts
 ```diff
  class Foo {
 -  a!;
@@ -10792,32 +9775,32 @@
 **Prettier Similarity**: 25.00%
 
 
-# typescript/destructuring/destructuring.ts
+### typescript/destructuring/destructuring.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/end-of-line/multiline.ts
+### typescript/end-of-line/multiline.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/enum/computed-members.ts
+### typescript/enum/computed-members.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/enum/enum.ts
+### typescript/enum/enum.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/enum/multiline.ts
+### typescript/enum/multiline.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/error-recovery/generic.ts
+### typescript/error-recovery/generic.ts
 ```diff
  f1<>();
  
@@ -10847,7 +9830,7 @@
 **Prettier Similarity**: 84.21%
 
 
-# typescript/error-recovery/index-signature.ts
+### typescript/error-recovery/index-signature.ts
 ```diff
  type A = { [key: string] };
  
@@ -10896,7 +9879,7 @@
 **Prettier Similarity**: 48.39%
 
 
-# typescript/error-recovery/jsdoc_only_types.ts
+### typescript/error-recovery/jsdoc_only_types.ts
 ```diff
 -let a: *;
 +let a:
@@ -10926,42 +9909,52 @@
 **Prettier Similarity**: 6.67%
 
 
-# typescript/export-default/function_as.ts
+### typescript/explicit-resource-management/await-using-with-type-declaration.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/export/comment.ts
+### typescript/explicit-resource-management/using-with-type-declaration.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/export/default.ts
+### typescript/export-default/function_as.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/export/export-as-ns.ts
+### typescript/export/comment.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/export/export-class.ts
+### typescript/export/default.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/export/export-type-star-from.ts
+### typescript/export/export-as-ns.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/export/export.ts
+### typescript/export/export-class.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/function-type/consistent.ts
+### typescript/export/export-type-star-from.ts
+
+**Prettier Similarity**: 100.00%
+
+
+### typescript/export/export.ts
+
+**Prettier Similarity**: 100.00%
+
+
+### typescript/function-type/consistent.ts
 ```diff
  // TSFunctionType
  type A = (
@@ -11000,47 +9993,47 @@
 **Prettier Similarity**: 68.00%
 
 
-# typescript/function-type/single-parameter.ts
+### typescript/function-type/single-parameter.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/function-type/type-annotation.ts
+### typescript/function-type/type-annotation.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/function/single_expand.ts
+### typescript/function/single_expand.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/functional-composition/pipe-function-calls-with-comments.ts
+### typescript/functional-composition/pipe-function-calls-with-comments.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/functional-composition/pipe-function-calls.ts
+### typescript/functional-composition/pipe-function-calls.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/generic/arrow-return-type.ts
+### typescript/generic/arrow-return-type.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/generic/issue-6899.ts
+### typescript/generic/issue-6899.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/generic/object-method.ts
+### typescript/generic/object-method.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/generic/ungrouped-parameters.ts
+### typescript/generic/ungrouped-parameters.ts
 ```diff
 -function filterTooltipWithFoo<F extends Field>(
 -  oldEncoding: Encoding<F>,
@@ -11064,7 +10057,7 @@
 **Prettier Similarity**: 80.00%
 
 
-# typescript/import-export/type-modifier.ts
+### typescript/import-export/type-modifier.ts
 ```diff
  export type { SomeThing };
  export type { A as B };
@@ -11088,112 +10081,112 @@
 **Prettier Similarity**: 93.33%
 
 
-# typescript/import-require/import_require.ts
+### typescript/import-require/import_require.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/import-require/type-imports.ts
+### typescript/import-require/type-imports.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/import-type/import-type.ts
+### typescript/import-type/import-type.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/index-signature/index-signature.ts
+### typescript/index-signature/index-signature.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/index-signature/static.ts
+### typescript/index-signature/static.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/infer-extends/basic.ts
+### typescript/infer-extends/basic.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/instantiation-expression/basic.ts
+### typescript/instantiation-expression/basic.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/instantiation-expression/binary-expr.ts
+### typescript/instantiation-expression/binary-expr.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/instantiation-expression/inferface-asi.ts
+### typescript/instantiation-expression/inferface-asi.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/instantiation-expression/logical-expr.ts
+### typescript/instantiation-expression/logical-expr.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/instantiation-expression/new.ts
+### typescript/instantiation-expression/new.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/instantiation-expression/property-access.ts
+### typescript/instantiation-expression/property-access.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/instantiation-expression/typeof.ts
+### typescript/instantiation-expression/typeof.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/interface/comments-generic.ts
+### typescript/interface/comments-generic.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/interface/comments.ts
+### typescript/interface/comments.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/interface/generic.ts
+### typescript/interface/generic.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/interface/ignore.ts
+### typescript/interface/ignore.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/interface/long-extends.ts
+### typescript/interface/long-extends.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/interface/long-type-parameters/long-type-parameters.ts
+### typescript/interface/long-type-parameters/long-type-parameters.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/interface/pattern-parameters.ts
+### typescript/interface/pattern-parameters.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/interface/separator.ts
+### typescript/interface/separator.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/interface2/break/break.ts
+### typescript/interface2/break/break.ts
 ```diff
 -export interface Environment1
 -  extends GenericEnvironment<SomeType, AnotherType, YetAnotherType> {
@@ -11310,27 +10303,27 @@
 **Prettier Similarity**: 93.33%
 
 
-# typescript/interface2/comments-declare.ts
+### typescript/interface2/comments-declare.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/interface2/comments.ts
+### typescript/interface2/comments.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/interface2/module.ts
+### typescript/interface2/module.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/intersection/consistent-with-flow/comment.ts
+### typescript/intersection/consistent-with-flow/comment.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/intersection/consistent-with-flow/intersection-parens.ts
+### typescript/intersection/consistent-with-flow/intersection-parens.ts
 ```diff
  type A = (number | string) & boolean;
  type B = (number | string) & boolean;
@@ -11394,71 +10387,57 @@
 **Prettier Similarity**: 69.77%
 
 
-# typescript/intersection/type-arguments.ts
+### typescript/intersection/type-arguments.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/intrinsic/intrinsic.ts
+### typescript/intrinsic/intrinsic.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/key-remapping-in-mapped-types/key-remapping.ts
+### typescript/key-remapping-in-mapped-types/key-remapping.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/keyof/keyof.ts
+### typescript/keyof/keyof.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/keyword-types/conditional-types.ts
-```diff
- export type UnwrappedResultRow<T> = {
-   [P in keyof T]: T[P] extends Req<infer a>
-     ? a
-     : T[P] extends Opt<infer b>
--      ? b
--      : // TEST
--        never;
-+    ? b
-+    : // TEST
-+      never;
- };
-
-```
-
-**Prettier Similarity**: 62.50%
-
-
-# typescript/keyword-types/keyword-types-with-parens-comments.ts
+### typescript/keyword-types/conditional-types.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/keywords/keywords-2.ts
+### typescript/keyword-types/keyword-types-with-parens-comments.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/keywords/keywords.ts
+### typescript/keywords/keywords-2.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/keywords/module.ts
+### typescript/keywords/keywords.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/last-argument-expansion/break.ts
+### typescript/keywords/module.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/last-argument-expansion/decorated-function.tsx
+### typescript/last-argument-expansion/break.ts
+
+**Prettier Similarity**: 100.00%
+
+
+### typescript/last-argument-expansion/decorated-function.tsx
 ```diff
 -const Counter = decorator("my-counter")((props: {
 -  initialCount?: number;
@@ -11566,12 +10545,12 @@
 **Prettier Similarity**: 27.87%
 
 
-# typescript/last-argument-expansion/edge_case.ts
+### typescript/last-argument-expansion/edge_case.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/last-argument-expansion/forward-ref.tsx
+### typescript/last-argument-expansion/forward-ref.tsx
 ```diff
 -export const Link = forwardRef<HTMLAnchorElement, LinkProps>(
 -  function Link(props, ref) {
@@ -11618,12 +10597,12 @@
 **Prettier Similarity**: 58.62%
 
 
-# typescript/literal/multiline.ts
+### typescript/literal/multiline.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/mapped-type/break-mode/break-mode.ts
+### typescript/mapped-type/break-mode/break-mode.ts
 ```diff
  type A1 = { readonly [A in B]: T };
 -type A2 = {
@@ -11649,12 +10628,12 @@
 **Prettier Similarity**: 46.15%
 
 
-# typescript/mapped-type/intersection.ts
+### typescript/mapped-type/intersection.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/mapped-type/issue-11098.ts
+### typescript/mapped-type/issue-11098.ts
 ```diff
  type Type = {
    // comment
@@ -11716,72 +10695,72 @@
 **Prettier Similarity**: 92.00%
 
 
-# typescript/mapped-type/mapped-type.ts
+### typescript/mapped-type/mapped-type.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/method-chain/comment.ts
+### typescript/method-chain/comment.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/method/issue-10352-consistency.ts
+### typescript/method/issue-10352-consistency.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/method/method-signature-with-wrapped-return-type.ts
+### typescript/method/method-signature-with-wrapped-return-type.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/method/method-signature.ts
+### typescript/method/method-signature.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/method/semi.ts
+### typescript/method/semi.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/method/type_literal_optional_method.ts
+### typescript/method/type_literal_optional_method.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/module/empty.ts
+### typescript/module/empty.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/module/global.ts
+### typescript/module/global.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/module/keyword.ts
+### typescript/module/keyword.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/module/module_nested.ts
+### typescript/module/module_nested.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/module/namespace_function.ts
+### typescript/module/namespace_function.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/module/namespace_nested.ts
+### typescript/module/namespace_nested.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/multiparser-css/issue-6259.ts
+### typescript/multiparser-css/issue-6259.ts
 ```diff
  const yesFrame = (
    ...args: Interpolation<ThemedStyledProps<{}, Theme>>[]
@@ -11799,42 +10778,42 @@
 **Prettier Similarity**: 57.14%
 
 
-# typescript/namespace/invalid-await.ts
+### typescript/namespace/invalid-await.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/never/type-argument.src.ts
+### typescript/never/type-argument.src.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/new/new-signature.ts
+### typescript/new/new-signature.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/no-semi/no-semi.ts
+### typescript/no-semi/no-semi.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/no-semi/non-null.ts
+### typescript/no-semi/non-null.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/non-null/braces.ts
+### typescript/non-null/braces.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/non-null/member-chain.ts
+### typescript/non-null/member-chain.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/non-null/optional-chain.ts
+### typescript/non-null/optional-chain.ts
 ```diff
  a?.b!.c;
  a?.b!.c.d;
@@ -11865,72 +10844,72 @@
 **Prettier Similarity**: 72.22%
 
 
-# typescript/non-null/parens.ts
+### typescript/non-null/parens.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/nosemi/index-signature.ts
+### typescript/nosemi/index-signature.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/nosemi/interface.ts
+### typescript/nosemi/interface.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/nosemi/type.ts
+### typescript/nosemi/type.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/optional-call/type-parameters.ts
+### typescript/optional-call/type-parameters.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/optional-method/optional-method.ts
+### typescript/optional-method/optional-method.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/optional-type/complex.ts
+### typescript/optional-type/complex.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/optional-type/simple.ts
+### typescript/optional-type/simple.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/optional-variance/basic.ts
+### typescript/optional-variance/basic.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/optional-variance/with-jsx.tsx
+### typescript/optional-variance/with-jsx.tsx
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/override-modifiers/override-modifier.ts
+### typescript/override-modifiers/override-modifier.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/override-modifiers/parameter-property.ts
+### typescript/override-modifiers/parameter-property.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/predicate-types/predicate-types.ts
+### typescript/predicate-types/predicate-types.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/prettier-ignore/issue-14238.ts
+### typescript/prettier-ignore/issue-14238.ts
 ```diff
 -export const foo = // prettier-ignore
 -  (bar as Baz).qux;
@@ -11945,7 +10924,7 @@
 **Prettier Similarity**: 0.00%
 
 
-# typescript/prettier-ignore/mapped-types.ts
+### typescript/prettier-ignore/mapped-types.ts
 ```diff
  type a = {
      // prettier-ignore
@@ -12031,7 +11010,7 @@
 **Prettier Similarity**: 65.67%
 
 
-# typescript/prettier-ignore/prettier-ignore-nested-unions.ts
+### typescript/prettier-ignore/prettier-ignore-nested-unions.ts
 ```diff
  export type a =
    // foo
@@ -12072,7 +11051,7 @@
 **Prettier Similarity**: 62.96%
 
 
-# typescript/prettier-ignore/prettier-ignore-parenthesized-type.ts
+### typescript/prettier-ignore/prettier-ignore-parenthesized-type.ts
 ```diff
  type Foo =
    // prettier-ignore
@@ -12086,77 +11065,77 @@
 **Prettier Similarity**: 40.00%
 
 
-# typescript/private-fields-in-in/basic.ts
+### typescript/private-fields-in-in/basic.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/quote-props/types.ts
+### typescript/quote-props/types.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/range/export-assignment.ts
+### typescript/range/export-assignment.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/range/issue-4926.ts
+### typescript/range/issue-4926.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/range/issue-7148.ts
+### typescript/range/issue-7148.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/readonly/array.ts
+### typescript/readonly/array.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/readonly/readonly.ts
+### typescript/readonly/readonly.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/rest-type/complex.ts
+### typescript/rest-type/complex.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/rest-type/infer-type.ts
+### typescript/rest-type/infer-type.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/rest-type/simple.ts
+### typescript/rest-type/simple.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/rest/rest.ts
+### typescript/rest/rest.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/satisfies-operators/argument-expansion.ts
+### typescript/satisfies-operators/argument-expansion.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/satisfies-operators/assignment.ts
+### typescript/satisfies-operators/assignment.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/satisfies-operators/basic.ts
+### typescript/satisfies-operators/basic.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/satisfies-operators/comments-unstable.ts
+### typescript/satisfies-operators/comments-unstable.ts
 ```diff
  const t1 = {
    prop1: 1,
@@ -12172,112 +11151,112 @@
 **Prettier Similarity**: 57.14%
 
 
-# typescript/satisfies-operators/comments.ts
+### typescript/satisfies-operators/comments.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/satisfies-operators/export-default-as.ts
+### typescript/satisfies-operators/export-default-as.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/satisfies-operators/expression-statement.ts
+### typescript/satisfies-operators/expression-statement.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/satisfies-operators/gt-lt.ts
+### typescript/satisfies-operators/gt-lt.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/satisfies-operators/hug-args.ts
+### typescript/satisfies-operators/hug-args.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/satisfies-operators/lhs.ts
+### typescript/satisfies-operators/lhs.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/satisfies-operators/nested-await-and-satisfies.ts
+### typescript/satisfies-operators/nested-await-and-satisfies.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/satisfies-operators/non-null.ts
+### typescript/satisfies-operators/non-null.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/satisfies-operators/satisfies.ts
+### typescript/satisfies-operators/satisfies.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/satisfies-operators/template-literal.ts
+### typescript/satisfies-operators/template-literal.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/satisfies-operators/ternary.ts
+### typescript/satisfies-operators/ternary.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/satisfies-operators/types-comments.ts
+### typescript/satisfies-operators/types-comments.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/semi/no-semi.ts
+### typescript/semi/no-semi.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/static-blocks/multiple.ts
+### typescript/static-blocks/multiple.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/static-blocks/nested.ts
+### typescript/static-blocks/nested.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/static-blocks/static-blocks.ts
+### typescript/static-blocks/static-blocks.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/symbol/symbol.ts
+### typescript/symbol/symbol.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/template-literal-types/template-literal-types.ts
+### typescript/template-literal-types/template-literal-types.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/template-literals/as-expression.ts
+### typescript/template-literals/as-expression.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/template-literals/expressions.ts
+### typescript/template-literals/expressions.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/ternaries/indent.ts
+### typescript/ternaries/indent.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/test-declarations/test_declarations.ts
+### typescript/test-declarations/test_declarations.ts
 ```diff
 -test("does something really long and complicated so I have to write a very long name for the test", <T>(done) => {
 +test("does something really long and complicated so I have to write a very long name for the test", <
@@ -12291,12 +11270,12 @@
 **Prettier Similarity**: 40.00%
 
 
-# typescript/trailing-comma/arrow-functions.tsx
+### typescript/trailing-comma/arrow-functions.tsx
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/trailing-comma/trailing.ts
+### typescript/trailing-comma/trailing.ts
 ```diff
  export class BaseSingleLevelProfileTargeting<
    T extends ValidSingleLevelProfileNode,
@@ -12320,12 +11299,12 @@
 **Prettier Similarity**: 93.33%
 
 
-# typescript/trailing-comma/type-arguments.ts
+### typescript/trailing-comma/type-arguments.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/trailing-comma/type-parameters-vs-arguments.ts
+### typescript/trailing-comma/type-parameters-vs-arguments.ts
 ```diff
  class FooClass<A, B, C> {
    a: A;
@@ -12348,97 +11327,97 @@
 **Prettier Similarity**: 63.64%
 
 
-# typescript/tsx/generic-component.tsx
+### typescript/tsx/generic-component.tsx
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/tsx/keyword.tsx
+### typescript/tsx/keyword.tsx
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/tsx/member-expression.tsx
+### typescript/tsx/member-expression.tsx
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/tsx/not-react.ts
+### typescript/tsx/not-react.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/tsx/react.tsx
+### typescript/tsx/react.tsx
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/tsx/this.tsx
+### typescript/tsx/this.tsx
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/tsx/type-parameters.tsx
+### typescript/tsx/type-parameters.tsx
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/tsx/url.tsx
+### typescript/tsx/url.tsx
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/tuple/dangling-comments.ts
+### typescript/tuple/dangling-comments.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/tuple/trailing-comma-for-empty-tuples.ts
+### typescript/tuple/trailing-comma-for-empty-tuples.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/tuple/trailing-comma-trailing-rest.ts
+### typescript/tuple/trailing-comma-trailing-rest.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/tuple/trailing-comma.ts
+### typescript/tuple/trailing-comma.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/tuple/tuple-labeled.ts
+### typescript/tuple/tuple-labeled.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/tuple/tuple-rest-not-last.ts
+### typescript/tuple/tuple-rest-not-last.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/tuple/tuple.ts
+### typescript/tuple/tuple.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/type-alias/issue-100857.ts
+### typescript/type-alias/issue-100857.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/type-alias/issue-9874.ts
+### typescript/type-alias/issue-9874.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/type-alias/pattern-parameter.ts
+### typescript/type-alias/pattern-parameter.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/type-arguments-bit-shift-left-like/1.ts
+### typescript/type-arguments-bit-shift-left-like/1.ts
 ```diff
 -f << (<T>x);
 +f << <T>x;
@@ -12448,77 +11427,77 @@
 **Prettier Similarity**: 0.00%
 
 
-# typescript/type-arguments-bit-shift-left-like/2.ts
+### typescript/type-arguments-bit-shift-left-like/2.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/type-arguments-bit-shift-left-like/4.ts
+### typescript/type-arguments-bit-shift-left-like/4.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/type-arguments-bit-shift-left-like/6.ts
+### typescript/type-arguments-bit-shift-left-like/6.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/type-member-get-set/type-member-get-set.ts
+### typescript/type-member-get-set/type-member-get-set.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/type-only-module-specifiers/basic.ts
+### typescript/type-only-module-specifiers/basic.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/typeof-this/decorators.ts
+### typescript/typeof-this/decorators.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/typeof-this/typeof-this.ts
+### typescript/typeof-this/typeof-this.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/typeof/typeof.ts
+### typescript/typeof/typeof.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/typeparams/class-method.ts
+### typescript/typeparams/class-method.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/typeparams/consistent/flow-only.ts
+### typescript/typeparams/consistent/flow-only.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/typeparams/consistent/issue-9501.ts
+### typescript/typeparams/consistent/issue-9501.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/typeparams/consistent/simple-types.ts
+### typescript/typeparams/consistent/simple-types.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/typeparams/consistent/template-literal-types.ts
+### typescript/typeparams/consistent/template-literal-types.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/typeparams/consistent/typescript-only.ts
+### typescript/typeparams/consistent/typescript-only.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/typeparams/const.ts
+### typescript/typeparams/const.ts
 ```diff
  function a<const T>() {}
  function b<const T extends U>() {}
@@ -12560,7 +11539,7 @@
 **Prettier Similarity**: 93.75%
 
 
-# typescript/typeparams/empty-parameters-with-arrow-function/issue-13817.ts
+### typescript/typeparams/empty-parameters-with-arrow-function/issue-13817.ts
 ```diff
 -const xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx: xxxxxxxxxxxxxxxxxxxxxx<> = (
 -  arg,
@@ -12583,7 +11562,7 @@
 **Prettier Similarity**: 50.00%
 
 
-# typescript/typeparams/line-breaking-after-extends-2.ts
+### typescript/typeparams/line-breaking-after-extends-2.ts
 ```diff
  a = {
    parseFunctionBodyAndFinish<
@@ -12625,7 +11604,7 @@
 **Prettier Similarity**: 96.97%
 
 
-# typescript/typeparams/line-breaking-after-extends.ts
+### typescript/typeparams/line-breaking-after-extends.ts
 ```diff
  export type OuterType1<
 -  LongerLongerLongerLongerInnerType extends
@@ -12656,12 +11635,12 @@
 **Prettier Similarity**: 70.00%
 
 
-# typescript/typeparams/long-function-arg.ts
+### typescript/typeparams/long-function-arg.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/typeparams/print-width-120/issue-7542.tsx
+### typescript/typeparams/print-width-120/issue-7542.tsx
 ```diff
  export const Foo = forwardRef(
    (props: FooProps, ref: Ref<HTMLElement>): JSX.Element => {
@@ -12697,17 +11676,17 @@
 **Prettier Similarity**: 80.00%
 
 
-# typescript/typeparams/tagged-template-expression.ts
+### typescript/typeparams/tagged-template-expression.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/typeparams/trailing-comma/type-paramters.ts
+### typescript/typeparams/trailing-comma/type-paramters.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/union/comments.ts
+### typescript/union/comments.ts
 ```diff
  type Foo = (
    | "thing1" // Comment1
@@ -12729,17 +11708,17 @@
 **Prettier Similarity**: 60.00%
 
 
-# typescript/union/consistent-with-flow/comment.ts
+### typescript/union/consistent-with-flow/comment.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/union/consistent-with-flow/comments.ts
+### typescript/union/consistent-with-flow/comments.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/union/consistent-with-flow/prettier-ignore.ts
+### typescript/union/consistent-with-flow/prettier-ignore.ts
 ```diff
  export type a =
    // foo
@@ -12775,7 +11754,7 @@
 **Prettier Similarity**: 88.00%
 
 
-# typescript/union/consistent-with-flow/single-type.ts
+### typescript/union/consistent-with-flow/single-type.ts
 ```diff
  type A1 =
    | A
@@ -12835,17 +11814,17 @@
 **Prettier Similarity**: 76.60%
 
 
-# typescript/union/consistent-with-flow/within-tuple.ts
+### typescript/union/consistent-with-flow/within-tuple.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/union/inlining.ts
+### typescript/union/inlining.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/union/single-type/single-type.ts
+### typescript/union/single-type/single-type.ts
 ```diff
 -type A1 /* 2 */ = /* 1 */ /* 3 */ /* 4 */ {
 -  key: string;
@@ -12861,7 +11840,7 @@
 **Prettier Similarity**: 0.00%
 
 
-# typescript/union/union-parens.ts
+### typescript/union/union-parens.ts
 ```diff
  export type A =
    | aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
@@ -12985,22 +11964,22 @@
 **Prettier Similarity**: 92.59%
 
 
-# typescript/union/with-type-params.ts
+### typescript/union/with-type-params.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/unique-symbol/unique-symbol.ts
+### typescript/unique-symbol/unique-symbol.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/unknown/unknown.ts
+### typescript/unknown/unknown.ts
 
 **Prettier Similarity**: 100.00%
 
 
-# typescript/webhost/webtsc.ts
+### typescript/webhost/webtsc.ts
 
 **Prettier Similarity**: 100.00%
 
