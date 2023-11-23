@@ -1,6 +1,6 @@
 use std::io;
 
-use biome_console::{fmt, MarkupBuf, markup};
+use biome_console::{fmt, markup, MarkupBuf};
 
 use crate::display::frame::SourceFile;
 use crate::{diagnostic::internal::AsDiagnostic, Diagnostic, Resource, Severity};
