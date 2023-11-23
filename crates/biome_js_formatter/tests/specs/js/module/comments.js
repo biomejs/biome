@@ -76,3 +76,11 @@ statement /* comment */;
 "test" /*trailing*/ ;
 
 /* EOF comment */
+
+function foo() {
+    if (bar) {
+        foo
+    }
+    // empty statement leading comments
+    ;
+}
