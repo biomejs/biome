@@ -309,12 +309,16 @@ impl<'token> LiteralStringNormaliser<'token> {
 
     fn normalize_string(&self, string_information: &StringInformation) -> Cow<'token, str> {
         let raw_content = self.raw_content();
+        let is_escape_preserved = matches!(self.token.token.kind(), JSX_STRING_LITERAL);
 
         if matches!(self.token.parent_kind, StringLiteralParentKind::Directive) {
             return Cow::Borrowed(raw_content);
         }
-
-        normalize_string(raw_content, string_information.preferred_quote.into())
+        normalize_string(
+            raw_content,
+            string_information.preferred_quote.into(),
+            is_escape_preserved,
+        )
     }
 
     fn raw_content(&self) -> &'token str {
