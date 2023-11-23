@@ -1077,6 +1077,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noAriaHiddenOnFocusable": {
+					"description": "Enforce that aria-hidden=\"true\" is not set on focusable elements.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noDefaultExport": {
 					"description": "Disallow default exports.",
 					"anyOf": [
