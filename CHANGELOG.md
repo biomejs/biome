@@ -63,6 +63,10 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ### Parser
 
+#### Bug fixes
+
+- Fix [#846](https://github.com/biomejs/biome/issues/846) that erroneously parsed `<const T,>() => {}` as a JSX tag instead of an arrow function when both TypeScript and JSX are enabled.
+
 ### VSCode
 
 ## 1.3.3 (2023-10-31)
