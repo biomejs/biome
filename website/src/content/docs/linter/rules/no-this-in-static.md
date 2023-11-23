@@ -1,11 +1,11 @@
 ---
-title: noThisInStatic (since vnext)
+title: noThisInStatic (since v1.3.1)
 ---
 
-**Diagnostic Category: `lint/nursery/noThisInStatic`**
+**Diagnostic Category: `lint/complexity/noThisInStatic`**
 
-:::caution
-This rule is part of the [nursery](/linter/rules/#nursery) group.
+:::note
+This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
 Disallow `this` and `super` in `static` contexts.
@@ -37,9 +37,9 @@ Source: https://github.com/mysticatea/eslint-plugin/blob/master/docs/rules/no-th
  }
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noThisInStatic.js:5:9 <a href="https://biomejs.dev/linter/rules/no-this-in-static">lint/nursery/noThisInStatic</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noThisInStatic.js:5:9 <a href="https://biomejs.dev/linter/rules/no-this-in-static">lint/complexity/noThisInStatic</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Using </span><span style="color: Orange;"><strong>this</strong></span><span style="color: Orange;"> in a </span><span style="color: Orange;"><strong>static</strong></span><span style="color: Orange;"> context can be confusing.</span>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Using </span><span style="color: Tomato;"><strong>this</strong></span><span style="color: Tomato;"> in a </span><span style="color: Tomato;"><strong>static</strong></span><span style="color: Tomato;"> context can be confusing.</span>
   
     <strong>4 │ </strong>    static foo() {
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>5 │ </strong>        this.CONSTANT;
@@ -68,9 +68,9 @@ Source: https://github.com/mysticatea/eslint-plugin/blob/master/docs/rules/no-th
  }
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noThisInStatic.js:3:9 <a href="https://biomejs.dev/linter/rules/no-this-in-static">lint/nursery/noThisInStatic</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noThisInStatic.js:3:9 <a href="https://biomejs.dev/linter/rules/no-this-in-static">lint/complexity/noThisInStatic</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Using </span><span style="color: Orange;"><strong>super</strong></span><span style="color: Orange;"> in a </span><span style="color: Orange;"><strong>static</strong></span><span style="color: Orange;"> context can be confusing.</span>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Using </span><span style="color: Tomato;"><strong>super</strong></span><span style="color: Tomato;"> in a </span><span style="color: Tomato;"><strong>static</strong></span><span style="color: Tomato;"> context can be confusing.</span>
   
     <strong>1 │ </strong> class B extends A {
     <strong>2 │ </strong>    static bar() {

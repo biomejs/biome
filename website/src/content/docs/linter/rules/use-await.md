@@ -1,5 +1,5 @@
 ---
-title: useAwait (since v1.3.0)
+title: useAwait (since v1.4.0)
 ---
 
 **Diagnostic Category: `lint/nursery/useAwait`**

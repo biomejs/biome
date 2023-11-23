@@ -1,5 +1,5 @@
 ---
-title: noImplicitAnyLet (since vnext)
+title: noImplicitAnyLet (since v1.4.0)
 ---
 
 **Diagnostic Category: `lint/nursery/noImplicitAnyLet`**

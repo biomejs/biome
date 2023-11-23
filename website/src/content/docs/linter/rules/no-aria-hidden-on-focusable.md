@@ -1,5 +1,5 @@
 ---
-title: noAriaHiddenOnFocusable (since v1.3.0)
+title: noAriaHiddenOnFocusable (since v1.4.0)
 ---
 
 **Diagnostic Category: `lint/nursery/noAriaHiddenOnFocusable`**

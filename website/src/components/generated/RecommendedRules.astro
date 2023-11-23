@@ -5,6 +5,7 @@
 	<li><a href='/linter/rules/no-blank-target'>noBlankTarget</a></li>
 	<li><a href='/linter/rules/no-distracting-elements'>noDistractingElements</a></li>
 	<li><a href='/linter/rules/no-header-scope'>noHeaderScope</a></li>
+	<li><a href='/linter/rules/no-interactive-element-to-noninteractive-role'>noInteractiveElementToNoninteractiveRole</a></li>
 	<li><a href='/linter/rules/no-noninteractive-element-to-interactive-role'>noNoninteractiveElementToInteractiveRole</a></li>
 	<li><a href='/linter/rules/no-noninteractive-tabindex'>noNoninteractiveTabindex</a></li>
 	<li><a href='/linter/rules/no-positive-tabindex'>noPositiveTabindex</a></li>
@@ -13,8 +14,10 @@
 	<li><a href='/linter/rules/no-svg-without-title'>noSvgWithoutTitle</a></li>
 	<li><a href='/linter/rules/use-alt-text'>useAltText</a></li>
 	<li><a href='/linter/rules/use-anchor-content'>useAnchorContent</a></li>
+	<li><a href='/linter/rules/use-aria-activedescendant-with-tabindex'>useAriaActivedescendantWithTabindex</a></li>
 	<li><a href='/linter/rules/use-aria-props-for-role'>useAriaPropsForRole</a></li>
 	<li><a href='/linter/rules/use-button-type'>useButtonType</a></li>
+	<li><a href='/linter/rules/use-heading-content'>useHeadingContent</a></li>
 	<li><a href='/linter/rules/use-html-lang'>useHtmlLang</a></li>
 	<li><a href='/linter/rules/use-iframe-title'>useIframeTitle</a></li>
 	<li><a href='/linter/rules/use-key-with-click-events'>useKeyWithClickEvents</a></li>
@@ -29,6 +32,7 @@
 	<li><a href='/linter/rules/no-for-each'>noForEach</a></li>
 	<li><a href='/linter/rules/no-multiple-spaces-in-regular-expression-literals'>noMultipleSpacesInRegularExpressionLiterals</a></li>
 	<li><a href='/linter/rules/no-static-only-class'>noStaticOnlyClass</a></li>
+	<li><a href='/linter/rules/no-this-in-static'>noThisInStatic</a></li>
 	<li><a href='/linter/rules/no-useless-catch'>noUselessCatch</a></li>
 	<li><a href='/linter/rules/no-useless-constructor'>noUselessConstructor</a></li>
 	<li><a href='/linter/rules/no-useless-empty-export'>noUselessEmptyExport</a></li>
@@ -39,18 +43,21 @@
 	<li><a href='/linter/rules/no-useless-this-alias'>noUselessThisAlias</a></li>
 	<li><a href='/linter/rules/no-useless-type-constraint'>noUselessTypeConstraint</a></li>
 	<li><a href='/linter/rules/no-with'>noWith</a></li>
+	<li><a href='/linter/rules/use-arrow-function'>useArrowFunction</a></li>
 	<li><a href='/linter/rules/use-flat-map'>useFlatMap</a></li>
 	<li><a href='/linter/rules/use-literal-keys'>useLiteralKeys</a></li>
 	<li><a href='/linter/rules/use-optional-chain'>useOptionalChain</a></li>
+	<li><a href='/linter/rules/use-simple-number-keys'>useSimpleNumberKeys</a></li>
 	<li><a href='/linter/rules/no-children-prop'>noChildrenProp</a></li>
 	<li><a href='/linter/rules/no-const-assign'>noConstAssign</a></li>
 	<li><a href='/linter/rules/no-constant-condition'>noConstantCondition</a></li>
 	<li><a href='/linter/rules/no-constructor-return'>noConstructorReturn</a></li>
+	<li><a href='/linter/rules/no-empty-character-class-in-regex'>noEmptyCharacterClassInRegex</a></li>
 	<li><a href='/linter/rules/no-empty-pattern'>noEmptyPattern</a></li>
 	<li><a href='/linter/rules/no-global-object-calls'>noGlobalObjectCalls</a></li>
 	<li><a href='/linter/rules/no-inner-declarations'>noInnerDeclarations</a></li>
 	<li><a href='/linter/rules/no-invalid-constructor-super'>noInvalidConstructorSuper</a></li>
-	<li><a href='/linter/rules/no-new-symbol'>noNewSymbol</a></li>
+	<li><a href='/linter/rules/no-invalid-new-builtin'>noInvalidNewBuiltin</a></li>
 	<li><a href='/linter/rules/no-nonoctal-decimal-escape'>noNonoctalDecimalEscape</a></li>
 	<li><a href='/linter/rules/no-precision-loss'>noPrecisionLoss</a></li>
 	<li><a href='/linter/rules/no-render-return-value'>noRenderReturnValue</a></li>
@@ -80,7 +87,9 @@
 	<li><a href='/linter/rules/no-non-null-assertion'>noNonNullAssertion</a></li>
 	<li><a href='/linter/rules/no-parameter-assign'>noParameterAssign</a></li>
 	<li><a href='/linter/rules/no-unused-template-literal'>noUnusedTemplateLiteral</a></li>
+	<li><a href='/linter/rules/no-useless-else'>noUselessElse</a></li>
 	<li><a href='/linter/rules/no-var'>noVar</a></li>
+	<li><a href='/linter/rules/use-as-const-assertion'>useAsConstAssertion</a></li>
 	<li><a href='/linter/rules/use-const'>useConst</a></li>
 	<li><a href='/linter/rules/use-default-parameter-last'>useDefaultParameterLast</a></li>
 	<li><a href='/linter/rules/use-enum-initializers'>useEnumInitializers</a></li>
@@ -118,6 +127,7 @@
 	<li><a href='/linter/rules/no-global-is-nan'>noGlobalIsNan</a></li>
 	<li><a href='/linter/rules/no-import-assign'>noImportAssign</a></li>
 	<li><a href='/linter/rules/no-label-var'>noLabelVar</a></li>
+	<li><a href='/linter/rules/no-misleading-instantiator'>noMisleadingInstantiator</a></li>
 	<li><a href='/linter/rules/no-prototype-builtins'>noPrototypeBuiltins</a></li>
 	<li><a href='/linter/rules/no-redeclare'>noRedeclare</a></li>
 	<li><a href='/linter/rules/no-redundant-use-strict'>noRedundantUseStrict</a></li>

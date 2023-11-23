@@ -35,7 +35,8 @@ declare_rule! {
     pub(crate) NoNewSymbol {
         version: "1.0.0",
         name: "noNewSymbol",
-        recommended: true,
+        recommended: false,
+        deprecated: "Use `noInvalidNewBuiltin` instead.",
         fix_kind: FixKind::Unsafe,
     }
 }
