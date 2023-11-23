@@ -78,13 +78,13 @@ Bracket same line: false
 type A = [
 	adsadasdasdasdasdasdasdasdasdasdas,
 	dsadsadasdasdasdasdasdasdasd,
-	dsadsadasdasdasdasdasdasdasd
+	dsadsadasdasdasdasdasdasdasd,
 ];
 
 interface C<
 	adsadasdasdasdasdasdasdasdasdasdas,
 	dsadsadasdasdasdasdasdasdasd,
-	dsadsadasdasdasdasdasdasdasd
+	dsadsadasdasdasdasdasdasdasd,
 > {}
 ```
 

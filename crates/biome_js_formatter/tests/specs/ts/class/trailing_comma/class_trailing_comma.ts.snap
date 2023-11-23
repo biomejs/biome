@@ -92,12 +92,12 @@ Bracket same line: false
 class C<
 	longlonglonglonglonglonglongT1,
 	longlonglonglonglonglonglongT2,
-	longlonglonglonglonglonglongT3
+	longlonglonglonglonglonglongT3,
 > {
 	one<
 		longlonglonglonglonglonglongT1,
 		longlonglonglonglonglonglongT2,
-		longlonglonglonglonglonglongT3
+		longlonglonglonglonglonglongT3,
 	>(
 		adsadasdasdasdasdasdasdasdasdasdas1,
 		dsadsadasdasdasdasdasdasdasd2,
@@ -106,7 +106,7 @@ class C<
 	two<
 		longlonglonglonglonglonglongT1,
 		longlonglonglonglonglonglongT2,
-		longlonglonglonglonglonglongT3
+		longlonglonglonglonglonglongT3,
 	>(
 		adsadasdasdasdasdasdasdasdasdasdas1,
 		dsadsadasdasdasdasdasdasdasd2,
