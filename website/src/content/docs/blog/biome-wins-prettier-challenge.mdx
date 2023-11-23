@@ -11,9 +11,9 @@ coauthorName: Biome Core Team, Biome Maintainers
 coauthorAvatar: /img/circle-indent-logo.svg
 pubDate: 2023-11-27
 layout: ../../../layouts/Blog.astro
-coverImage: ../../src/assets/prettier-challenge.png
+coverImage: blog/prettier-challenge.png
 coverImageAltText: The Prettier challenge banner, with the Biome logo over it
-socialImage: ../../src/assets/prettier-challenge.png
+socialImage: blog/prettier-challenge.png
 ---
 
 With the release of Biome **`v1.4.0`**, we claim the bounty of the [Prettier challenge](https://console.algora.io/challenges/prettier)!
@@ -30,7 +30,7 @@ yarn upgrade --exact @biomejs/biome@1.4.0
 
 ##  Better formatter
 
-Biome formatter has now **over 95% in terms of compatibility** against [Prettier](https://prettier.io/)!
+Biome formatter has now **over 96% in terms of compatibility** against [Prettier](https://prettier.io/)!
 
 Merit of challenge that was launched by [Christopher Chedeau](https://twitter.com/Vjeux/status/1722733472522142022), one of the Prettier's creators.
 
@@ -44,7 +44,7 @@ I believe the main factors that made this possible are three:
 Before the challenge, Biome had roughly a compatibility rate of 85%, based on our internal metrics (JavaScript, TypeScript and JSX, on options parity). Even though 85% might seem high,
 the impact of a low number such as 15% on big code bases is huge, and people might feel intimidated by so many changes, causing early adopters to receive frictions when bring Biome to their team. A member of our community shared some insights:
 
-> As a great example of how much even just that last 5% has improved things for large codebases (and specifically with `bracketSpacing` and now `bracketSameLine` implemented) i ran it one project in our monorepo (it's a debug build on a busy machine, that's why it took 13 seconds).
+> As a great example of how much even just that last 5% has improved things for large codebases (and specifically with `bracketSpacing` and now `bracketSameLine` implemented) i ran it one project in our monorepo [...].
 >
 > Just last week, this number `[diagnostics]` was more than 6,000. Even with the bracket options ignored, it was still more than 1000, and now there are only 200 left!
 
