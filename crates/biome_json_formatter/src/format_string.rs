@@ -16,7 +16,7 @@ impl Format<JsonFormatContext> for CleanedStringLiteralText<'_> {
         let content = self.token.text_trimmed();
         let raw_content = &content[1..content.len() - 1];
 
-        let text = match normalize_string(raw_content, Quote::Double) {
+        let text = match normalize_string(raw_content, Quote::Double, false) {
             Cow::Borrowed(_) => Cow::Borrowed(content),
             Cow::Owned(raw_content) => Cow::Owned(std::format!(
                 "{}{}{}",
