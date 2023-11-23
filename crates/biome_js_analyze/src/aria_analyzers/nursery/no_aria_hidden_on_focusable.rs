@@ -10,6 +10,10 @@ use biome_rowan::{AstNode, BatchMutationExt};
 declare_rule! {
     /// Enforce that aria-hidden="true" is not set on focusable elements.
     ///
+    /// `aria-hidden="true"` can be used to hide purely decorative content from screen reader users.
+    /// A focusable element with `aria-hidden="true"` can be reached by keyboard.
+    /// This can lead to confusion or unexpected behavior for screen reader users.
+    ///
     /// Source: https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/no-aria-hidden-on-focusable.md
     ///
     /// ## Example
@@ -35,6 +39,7 @@ declare_rule! {
     /// ```
     ///
     /// ## Resources
+    ///
     /// - [aria-hidden elements do not contain focusable elements](https://dequeuniversity.com/rules/axe/html/4.4/aria-hidden-focus)
     /// - [Element with aria-hidden has no content in sequential focus navigation](https://www.w3.org/WAI/standards-guidelines/act/rules/6cfa84/proposed/)
     /// - [MDN aria-hidden](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden)
@@ -75,11 +80,7 @@ impl Rule for NoAriaHiddenOnFocusable {
                     let tabindex_val = tabindex_text.trim().parse::<i32>();
 
                     if let Ok(num) = tabindex_val {
-                        if num >= 0 {
-                            return Some(());
-                        } else {
-                            return None;
-                        }
+                        return (num >= 0).then_some(());
                     }
                 }
             }
@@ -99,11 +100,11 @@ impl Rule for NoAriaHiddenOnFocusable {
                 rule_category!(),
                 node.range(),
                 markup! {
-                    "Disallow `aria-hidden='true'` from being set on focusable elements."
+                    "Disallow "<Emphasis>"aria-hidden=\"true\""</Emphasis>" from being set on focusable elements."
                 },
             )
             .note(markup! {
-                "`aria-hidden` must not be set to `true` on focusable elements."
+                ""<Emphasis>"aria-hidden"</Emphasis>" should not be set to "<Emphasis>"true"</Emphasis>" on focusable elements because this can lead to confusing behavior for screen reader users."
             }),
         )
     }

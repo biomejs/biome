@@ -18,7 +18,7 @@ expression: invalid.jsx
 ```
 invalid.jsx:2:3 lint/nursery/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Disallow `aria-hidden='true'` from being set on focusable elements.
+  ! Disallow aria-hidden="true" from being set on focusable elements.
   
     1 │ <>
   > 2 │   <div aria-hidden="true" tabIndex="0" />
@@ -26,7 +26,7 @@ invalid.jsx:2:3 lint/nursery/noAriaHiddenOnFocusable  FIXABLE  ━━━━━�
     3 │   <input aria-hidden="true" />
     4 │   <a href="/" aria-hidden="true" />
   
-  i `aria-hidden` must not be set to `true` on focusable elements.
+  i aria-hidden should not be set to true on focusable elements because this can lead to confusing behavior for screen reader users.
   
   i Unsafe fix: Remove the aria-hidden attribute from the element.
   
@@ -38,7 +38,7 @@ invalid.jsx:2:3 lint/nursery/noAriaHiddenOnFocusable  FIXABLE  ━━━━━�
 ```
 invalid.jsx:3:3 lint/nursery/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Disallow `aria-hidden='true'` from being set on focusable elements.
+  ! Disallow aria-hidden="true" from being set on focusable elements.
   
     1 │ <>
     2 │   <div aria-hidden="true" tabIndex="0" />
@@ -47,7 +47,7 @@ invalid.jsx:3:3 lint/nursery/noAriaHiddenOnFocusable  FIXABLE  ━━━━━�
     4 │   <a href="/" aria-hidden="true" />
     5 │   <button aria-hidden="true" />
   
-  i `aria-hidden` must not be set to `true` on focusable elements.
+  i aria-hidden should not be set to true on focusable elements because this can lead to confusing behavior for screen reader users.
   
   i Unsafe fix: Remove the aria-hidden attribute from the element.
   
@@ -59,7 +59,7 @@ invalid.jsx:3:3 lint/nursery/noAriaHiddenOnFocusable  FIXABLE  ━━━━━�
 ```
 invalid.jsx:4:3 lint/nursery/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Disallow `aria-hidden='true'` from being set on focusable elements.
+  ! Disallow aria-hidden="true" from being set on focusable elements.
   
     2 │   <div aria-hidden="true" tabIndex="0" />
     3 │   <input aria-hidden="true" />
@@ -68,7 +68,7 @@ invalid.jsx:4:3 lint/nursery/noAriaHiddenOnFocusable  FIXABLE  ━━━━━�
     5 │   <button aria-hidden="true" />
     6 │   <textarea aria-hidden="true" />
   
-  i `aria-hidden` must not be set to `true` on focusable elements.
+  i aria-hidden should not be set to true on focusable elements because this can lead to confusing behavior for screen reader users.
   
   i Unsafe fix: Remove the aria-hidden attribute from the element.
   
@@ -80,7 +80,7 @@ invalid.jsx:4:3 lint/nursery/noAriaHiddenOnFocusable  FIXABLE  ━━━━━�
 ```
 invalid.jsx:5:3 lint/nursery/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Disallow `aria-hidden='true'` from being set on focusable elements.
+  ! Disallow aria-hidden="true" from being set on focusable elements.
   
     3 │   <input aria-hidden="true" />
     4 │   <a href="/" aria-hidden="true" />
@@ -89,7 +89,7 @@ invalid.jsx:5:3 lint/nursery/noAriaHiddenOnFocusable  FIXABLE  ━━━━━�
     6 │   <textarea aria-hidden="true" />
     7 │   <p tabIndex="0" aria-hidden="true">text</p>
   
-  i `aria-hidden` must not be set to `true` on focusable elements.
+  i aria-hidden should not be set to true on focusable elements because this can lead to confusing behavior for screen reader users.
   
   i Unsafe fix: Remove the aria-hidden attribute from the element.
   
@@ -101,7 +101,7 @@ invalid.jsx:5:3 lint/nursery/noAriaHiddenOnFocusable  FIXABLE  ━━━━━�
 ```
 invalid.jsx:6:3 lint/nursery/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Disallow `aria-hidden='true'` from being set on focusable elements.
+  ! Disallow aria-hidden="true" from being set on focusable elements.
   
     4 │   <a href="/" aria-hidden="true" />
     5 │   <button aria-hidden="true" />
@@ -110,7 +110,7 @@ invalid.jsx:6:3 lint/nursery/noAriaHiddenOnFocusable  FIXABLE  ━━━━━�
     7 │   <p tabIndex="0" aria-hidden="true">text</p>
     8 │ </>
   
-  i `aria-hidden` must not be set to `true` on focusable elements.
+  i aria-hidden should not be set to true on focusable elements because this can lead to confusing behavior for screen reader users.
   
   i Unsafe fix: Remove the aria-hidden attribute from the element.
   
@@ -122,7 +122,7 @@ invalid.jsx:6:3 lint/nursery/noAriaHiddenOnFocusable  FIXABLE  ━━━━━�
 ```
 invalid.jsx:7:3 lint/nursery/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Disallow `aria-hidden='true'` from being set on focusable elements.
+  ! Disallow aria-hidden="true" from being set on focusable elements.
   
     5 │   <button aria-hidden="true" />
     6 │   <textarea aria-hidden="true" />
@@ -130,7 +130,7 @@ invalid.jsx:7:3 lint/nursery/noAriaHiddenOnFocusable  FIXABLE  ━━━━━�
       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     8 │ </>
   
-  i `aria-hidden` must not be set to `true` on focusable elements.
+  i aria-hidden should not be set to true on focusable elements because this can lead to confusing behavior for screen reader users.
   
   i Unsafe fix: Remove the aria-hidden attribute from the element.
   
