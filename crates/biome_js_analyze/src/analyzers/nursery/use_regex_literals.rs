@@ -198,6 +198,7 @@ fn parse_node(node: &JsNewOrCallExpression) -> Option<(AnyJsExpression, JsCallAr
 fn create_flags(flags: Result<AnyJsCallArgument, SyntaxError>) -> Option<String> {
     let flags = flags.ok()?;
     let flags = extract_literal_string(flags)?;
+    // u flag (Unicode mode) and v flag (unicodeSets mode) cannot be combined.
     if flags == "uv" || flags == "vu" {
         return None;
     }
