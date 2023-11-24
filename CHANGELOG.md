@@ -8,9 +8,7 @@ Read our [guidelines to categorize a change](https://biomejs.dev/internals/versi
 New entries must be placed in a section entitled `Unreleased`.
 Read our [guidelines for writing a good changelog entry](https://github.com/biomejs/biome/blob/main/CONTRIBUTING.md#changelog).
 
-## Unreleased
-
-### Analyzer
+## 1.4.0 (2023-11-27)
 
 ### CLI
 
@@ -19,6 +17,9 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 - Add option `--config-path` to `lsp-proxy` and `start` commands. It's now possible to tell the Daemon server to load `biome.json` from a custom path. Contributed by @ematipico
 
 - Add new `--diagnostic-level` option to let users control the level of diagnostics printed by the CLI. Possible values are: `"info"`, `"warn"`, `"hint"`. Contributed by @simonxabris
+- Add option `--line-feed` to the `format` command. Contributed by @SuperchupuDev
+- Add option `--bracket-same-line` to the `format` command. Contributed by @faultyserve
+- Add option `--bracket-spacing` to the `format` command. Contributed by @faultyserve
 
 #### Bug fixes
 
@@ -26,21 +27,21 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ### Configuration
 
-### Editors
+- Add option `formatter.lineFeed`. Contributed by @SuperchupuDev
+- Add option `javascript.formatter.bracketSameLine`. Contributed by @faultyserve
+- Add option `javascript.formatter.bracketSpacing`. Contributed by @faultyserve
 
 ### Formatter
 
 #### New features
 
 - Add a new option [`--line-ending`](https://biomejs.dev/reference/configuration/#formatterlineending). This option allows changing the type of line endings. Contributed by @SuperchupuDev
-
 - Added a new option called `--bracket-spacing` to the formatter. This option allows you to control whether spaces are inserted around the brackets of object literals. [#627](https://github.com/biomejs/biome/issues/627). Contributed by @faultyserver
+- Added a new option called `--bracket-same-line` to the formatter. This option allows you to control whether spaces are inserted around the brackets of object literals. [#627](https://github.com/biomejs/biome/issues/627). Contributed by @faultyserver
 
 #### Bug fixes
 
 - Fix [#301](https://github.com/biomejs/biome/issues/301), the formatter should not break before the `in` keyword. Contributed by @ematipico
-
-### JavaScript APIs
 
 ### Linter
 
