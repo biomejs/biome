@@ -131,7 +131,7 @@ Bracket same line: false
 function test<
 	longlonglonglonglonglonglongT1,
 	longlonglonglonglonglonglongT2,
-	longlonglonglonglonglonglongT3
+	longlonglonglonglonglonglongT3,
 >(
 	longlonglonglonglonglonglongItem1,
 	longlonglonglonglonglonglongItem2,
@@ -140,7 +140,7 @@ function test<
 const test1 = <
 	longlonglonglonglonglonglongT1,
 	longlonglonglonglonglonglongT2,
-	longlonglonglonglonglonglongT3
+	longlonglonglonglonglonglongT3,
 >(
 	longlonglonglonglonglonglongItem1,
 	longlonglonglonglonglonglongItem2,

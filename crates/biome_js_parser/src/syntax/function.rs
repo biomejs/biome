@@ -754,34 +754,37 @@ fn is_parenthesized_arrow_function_expression_impl(
         }
         // potential start of type parameters
         T![<] => {
-            if is_nth_at_type_parameter_modifier(p, n + 1) && !JsSyntaxFeature::Jsx.is_supported(p)
-            {
-                // <const T>...
-                IsParenthesizedArrowFunctionExpression::True
-            } else if !is_nth_at_identifier(p, n + 1) {
-                // <5...
-                IsParenthesizedArrowFunctionExpression::False
-            }
             // test jsx jsx_type_arguments
             // // These may look like a valid arrows but are JSX
             // <A extends>() =</A>;
             // <A extends="B">() =</A>;
             // <A extends ok>() =</A>;
+            // <const A>() =</const>;
+            // <const A extends/>;
+            // <A extends/>;
 
             // test tsx tsx_type_arguments
             // // These are valid type arguments
+            // <A,>() => {};
+            // <const A,>() => {};
             // <A extends B>() => {};
             // <A=string>() => {};
             // <A, B>() => {};
-            // <A extends B<C>>() => {}
+            // <A extends B<C>>() => {};
 
-            // <a... JSX override
-            else if JsSyntaxFeature::Jsx.is_supported(p) {
+            if JsSyntaxFeature::Jsx.is_supported(p) {
+                // Disambiguate between JSX and type parameters
+                // Type parameters of arrow functions accept only the `const` modifier.
+                let n = if p.nth_at(n + 1, T![const]) { n + 1 } else { n };
+                if !is_nth_at_identifier(p, n + 1) {
+                    // <5...
+                    return IsParenthesizedArrowFunctionExpression::False;
+                };
                 match p.nth(n + 2) {
                     T![extends] => {
-                        // `<a extends=` OR `<a extends>` is a JSX start element
+                        // `<a extends=` OR `<a extends/>` OR `<a extends>` is a JSX element
                         // and a `extends` type refinement: `<A extends string>`
-                        if matches!(p.nth(n + 3), T![=] | T![>]) {
+                        if matches!(p.nth(n + 3), T![=] | T![/] | T![>]) {
                             IsParenthesizedArrowFunctionExpression::False
                         }
                         // `<A extends B>` Could be either
@@ -796,6 +799,12 @@ fn is_parenthesized_arrow_function_expression_impl(
                     T![=] | T![,] => IsParenthesizedArrowFunctionExpression::True,
                     _ => IsParenthesizedArrowFunctionExpression::False,
                 }
+            } else if is_nth_at_type_parameter_modifier(p, n + 1) {
+                // <const T>...
+                IsParenthesizedArrowFunctionExpression::True
+            } else if !is_nth_at_identifier(p, n + 1) {
+                // <5...
+                IsParenthesizedArrowFunctionExpression::False
             } else {
                 // <a...
                 IsParenthesizedArrowFunctionExpression::Unknown

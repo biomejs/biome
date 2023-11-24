@@ -7,8 +7,8 @@ use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_syntax::{
-    AnyJsStatement, JsBlockStatement, JsFileSource, JsLabeledStatement, JsStatementList,
-    JsSyntaxKind, JsVariableStatement,
+    AnyJsStatement, AnyJsSwitchClause, JsBlockStatement, JsFileSource, JsLabeledStatement,
+    JsStatementList, JsSyntaxKind, JsVariableStatement,
 };
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
 
@@ -64,6 +64,10 @@ impl Rule for NoUselessLoneBlockStatements {
         let is_module = ctx.source_type::<JsFileSource>().is_module();
 
         if JsLabeledStatement::can_cast(block.syntax().parent()?.kind()) {
+            return None;
+        }
+
+        if AnyJsSwitchClause::can_cast(block.syntax().grand_parent()?.kind()) {
             return None;
         }
 

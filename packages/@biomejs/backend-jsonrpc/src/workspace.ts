@@ -758,6 +758,10 @@ export interface Nursery {
 	 */
 	noApproximativeNumericConstant?: RuleConfiguration;
 	/**
+	 * Enforce that aria-hidden="true" is not set on focusable elements.
+	 */
+	noAriaHiddenOnFocusable?: RuleConfiguration;
+	/**
 	 * Disallow default exports.
 	 */
 	noDefaultExport?: RuleConfiguration;
@@ -1487,6 +1491,7 @@ export type Category =
 	| "lint/correctness/useValidForDirection"
 	| "lint/correctness/useYield"
 	| "lint/nursery/noApproximativeNumericConstant"
+	| "lint/nursery/noAriaHiddenOnFocusable"
 	| "lint/nursery/noDefaultExport"
 	| "lint/nursery/noDuplicateJsonKeys"
 	| "lint/nursery/noEmptyBlockStatements"

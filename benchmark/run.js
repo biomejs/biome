@@ -116,7 +116,7 @@ function benchmarkFormatter(rome) {
 }
 
 function resolvePrettier() {
-	return path.resolve("node_modules/prettier/bin-prettier.js");
+	return path.resolve("node_modules/prettier/standalone.js");
 }
 
 function resolveParallelPrettier() {
