@@ -162,7 +162,7 @@ fn create_pattern(
             }
         };
     };
-    let pattern = extract_literal_string(&pattern)?;
+    let pattern = extract_literal_string(pattern)?;
     let pattern = pattern.replace("\\\\", "\\");
     if pattern.is_empty() || pattern == "*" || pattern == "+" || pattern == "?" {
         return None;
@@ -197,16 +197,18 @@ fn parse_node(node: &JsNewOrCallExpression) -> Option<(AnyJsExpression, JsCallAr
 
 fn create_flags(flags: Result<AnyJsCallArgument, SyntaxError>) -> Option<String> {
     let flags = flags.ok()?;
-    let flags = extract_literal_string(&flags)?;
+    let flags = extract_literal_string(flags)?;
     if flags == "uv" || flags == "vu" {
         return None;
     }
     Some(flags)
 }
 
-fn extract_literal_string(from: &AnyJsCallArgument) -> Option<String> {
-    let expr = from.as_any_js_expression()?;
-    match expr.clone().omit_parentheses() {
+fn extract_literal_string(from: AnyJsCallArgument) -> Option<String> {
+    let AnyJsCallArgument::AnyJsExpression(expr) = from else {
+        return None;
+    };
+    match expr.omit_parentheses() {
         AnyJsExpression::AnyJsLiteralExpression(expr) => {
             let expr = expr.as_js_string_literal_expression()?;
             let text = expr.inner_string_text().ok()?;
