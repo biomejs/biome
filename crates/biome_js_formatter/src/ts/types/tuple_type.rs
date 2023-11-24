@@ -20,7 +20,7 @@ impl FormatNodeRule<TsTupleType> for FormatTsTupleType {
         if elements.is_empty() {
             write!(
                 f,
-                [format_dangling_comments(node.syntax()).with_soft_block_indent()]
+                [format_dangling_comments(node.syntax()).with_block_indent()]
             )?;
         } else {
             write!(f, [group(&soft_block_indent(&elements.format())),])?;

@@ -1,5 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 212
 info: js/range/class-declaration.js
 ---
 
@@ -21,14 +22,12 @@ let    x
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,5 +1,7 @@
-+
-+
- class a {
+@@ -4,4 +4,4 @@
    b() {}
  }
  
 -let x;
+\ No newline at end of file
 +let    x
 \ No newline at end of file
 ```

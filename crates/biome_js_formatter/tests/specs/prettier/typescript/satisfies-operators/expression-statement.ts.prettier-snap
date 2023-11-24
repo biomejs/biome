@@ -9,18 +9,18 @@ const _ = () => {
       return 2;
     default:
       // exhaustiveness check idiom
-      type satisfies never;
+      (type) satisfies never;
       throw new Error("unreachable");
   }
 };
 
 function needParens() {
-  let satisfies unknown;
-  interface satisfies unknown;
-  module satisfies unknown;
-  using satisfies unknown;
-  yield satisfies unknown;
-  await satisfies unknown;
+  (let) satisfies unknown;
+  (interface) satisfies unknown;
+  (module) satisfies unknown;
+  (using) satisfies unknown;
+  (yield) satisfies unknown;
+  (await) satisfies unknown;
 }
 
 function noNeedParens() {
@@ -33,5 +33,5 @@ function noNeedParens() {
 
 function satisfiesChain() {
   satisfies satisfies satisfies satisfies satisfies;
-  type satisfies never satisfies unknown;
+  (type) satisfies never satisfies unknown;
 }

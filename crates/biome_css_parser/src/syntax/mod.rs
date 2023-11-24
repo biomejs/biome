@@ -77,11 +77,20 @@ pub(crate) fn parse_rule_block(p: &mut CssParser) -> ParsedSyntax {
 }
 
 #[inline]
-pub(super) fn parse_regular_identifier(p: &mut CssParser) -> ParsedSyntax {
+pub(crate) fn is_at_identifier(p: &mut CssParser) -> bool {
+    is_nth_at_identifier(p, 0)
+}
+
+#[inline]
+pub(crate) fn is_nth_at_identifier(p: &mut CssParser, n: usize) -> bool {
+    p.nth_at(n, T![ident]) || p.nth(n).is_contextual_keyword()
+}
+#[inline]
+pub(crate) fn parse_regular_identifier(p: &mut CssParser) -> ParsedSyntax {
     parse_identifier(p, CssLexContext::Regular)
 }
 #[inline]
-pub(super) fn parse_identifier(p: &mut CssParser, context: CssLexContext) -> ParsedSyntax {
+pub(crate) fn parse_identifier(p: &mut CssParser, context: CssLexContext) -> ParsedSyntax {
     if !is_at_identifier(p) {
         return Absent;
     }
@@ -92,14 +101,22 @@ pub(super) fn parse_identifier(p: &mut CssParser, context: CssLexContext) -> Par
 
     Present(identifier)
 }
-#[inline]
-pub(crate) fn is_at_identifier(p: &mut CssParser) -> bool {
-    is_nth_at_identifier(p, 0)
-}
 
 #[inline]
-pub(crate) fn is_nth_at_identifier(p: &mut CssParser, n: usize) -> bool {
-    p.nth_at(n, T![ident]) || p.nth(n).is_contextual_keyword()
+pub(crate) fn parse_regular_number(p: &mut CssParser) -> ParsedSyntax {
+    parse_number(p, CssLexContext::Regular)
+}
+#[inline]
+pub(crate) fn parse_number(p: &mut CssParser, context: CssLexContext) -> ParsedSyntax {
+    if !p.at(CSS_NUMBER_LITERAL) {
+        return Absent;
+    }
+
+    let m = p.start();
+
+    p.bump_with_context(CSS_NUMBER_LITERAL, context);
+
+    Present(m.complete(p, CSS_NUMBER))
 }
 
 #[inline]

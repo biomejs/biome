@@ -132,6 +132,7 @@ impl DeserializationVisitor for JsonFormatterVisitor {
             "indentStyle",
             "indentSize",
             "indentWidth",
+            "lineEnding",
             "lineWidth",
         ];
         let mut result = Self::Output::default();
@@ -158,6 +159,10 @@ impl DeserializationVisitor for JsonFormatterVisitor {
                 }
                 "indentWidth" => {
                     result.indent_width =
+                        Deserializable::deserialize(&value, &key_text, diagnostics);
+                }
+                "lineEnding" => {
+                    result.line_ending =
                         Deserializable::deserialize(&value, &key_text, diagnostics);
                 }
                 "lineWidth" => {

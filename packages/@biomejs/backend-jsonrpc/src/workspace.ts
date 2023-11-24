@@ -116,6 +116,10 @@ export interface FormatterConfiguration {
 	 */
 	indentWidth?: number;
 	/**
+	 * The type of line ending.
+	 */
+	lineEnding?: LineEnding;
+	/**
 	 * What's the max width of a line. Defaults to 80.
 	 */
 	lineWidth?: LineWidth;
@@ -210,6 +214,7 @@ If Biome can't find the configuration, it will attempt to use the current workin
 	useIgnoreFile?: boolean;
 }
 export type PlainIndentStyle = "tab" | "space";
+export type LineEnding = "lf" | "crlf" | "cr";
 /**
 	* Validated value for the `line_width` formatter options
 
@@ -224,6 +229,14 @@ export interface JavascriptFormatter {
 	 * Whether to add non-necessary parentheses to arrow functions. Defaults to "always".
 	 */
 	arrowParentheses?: ArrowParentheses;
+	/**
+	 * Whether to hug the closing bracket of multiline HTML/JSX tags to the end of the last line, rather than being alone on the following line. Defaults to false.
+	 */
+	bracketSameLine?: boolean;
+	/**
+	 * Whether to insert spaces around brackets in object literals. Defaults to true.
+	 */
+	bracketSpacing?: boolean;
 	/**
 	 * Control the formatter for JavaScript (and its super languages) files.
 	 */
@@ -245,7 +258,11 @@ export interface JavascriptFormatter {
 	 */
 	jsxQuoteStyle?: QuoteStyle;
 	/**
-	 * What's the max width of a line, applied to JavaScript (and its super languages) files. Defaults to 80.
+	 * The type of line ending applied to JavaScript (and its super languages) files.
+	 */
+	lineEnding?: LineEnding;
+	/**
+	 * What's the max width of a line applied to JavaScript (and its super languages) files. Defaults to 80.
 	 */
 	lineWidth?: LineWidth;
 	/**
@@ -295,7 +312,11 @@ export interface JsonFormatter {
 	 */
 	indentWidth?: number;
 	/**
-	 * What's the max width of a line, applied to JSON (and its super languages) files. Defaults to 80.
+	 * The type of line ending applied to JSON (and its super languages) files.
+	 */
+	lineEnding?: LineEnding;
+	/**
+	 * What's the max width of a line applied to JSON (and its super languages) files. Defaults to 80.
 	 */
 	lineWidth?: LineWidth;
 }
@@ -736,6 +757,10 @@ export interface Nursery {
 	 * Usually, the definition in the standard library is more precise than what people come up with or the used constant exceeds the maximum precision of the number type.
 	 */
 	noApproximativeNumericConstant?: RuleConfiguration;
+	/**
+	 * Enforce that aria-hidden="true" is not set on focusable elements.
+	 */
+	noAriaHiddenOnFocusable?: RuleConfiguration;
 	/**
 	 * Disallow default exports.
 	 */
@@ -1196,6 +1221,10 @@ export interface OverrideFormatterConfiguration {
 	 */
 	indentWidth?: number;
 	/**
+	 * The type of line ending.
+	 */
+	lineEnding?: LineEnding;
+	/**
 	 * What's the max width of a line. Defaults to 80.
 	 */
 	lineWidth?: LineWidth;
@@ -1458,6 +1487,7 @@ export type Category =
 	| "lint/correctness/useValidForDirection"
 	| "lint/correctness/useYield"
 	| "lint/nursery/noApproximativeNumericConstant"
+	| "lint/nursery/noAriaHiddenOnFocusable"
 	| "lint/nursery/noDefaultExport"
 	| "lint/nursery/noDuplicateJsonKeys"
 	| "lint/nursery/noEmptyBlockStatements"
@@ -1569,6 +1599,7 @@ export type Category =
 	| "internalError/panic"
 	| "parse"
 	| "parse/noSuperWithoutExtends"
+	| "parse/noInitializerWithDefinite"
 	| "parse/noDuplicatePrivateClassMembers"
 	| "lint"
 	| "lint/a11y"

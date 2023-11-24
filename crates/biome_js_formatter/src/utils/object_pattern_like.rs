@@ -161,12 +161,14 @@ impl JsObjectPatternLike {
 
 impl Format<JsFormatContext> for JsObjectPatternLike {
     fn fmt(&self, f: &mut Formatter<JsFormatContext>) -> FormatResult<()> {
+        let should_insert_space_around_brackets = f.options().bracket_spacing().value();
         let format_properties = format_with(|f| {
             write!(
                 f,
-                [soft_space_or_block_indent(&format_with(
-                    |f| self.write_properties(f)
-                ))]
+                [soft_block_indent_with_maybe_space(
+                    &format_with(|f| self.write_properties(f)),
+                    should_insert_space_around_brackets
+                )]
             )
         });
 

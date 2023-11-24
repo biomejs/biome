@@ -11,10 +11,14 @@ JsModule {
             },
             r_paren_token: R_PAREN@8..10 ")" [] [Whitespace(" ")],
             consequent: JsLabeledStatement {
-                label_token: IDENT@10..16 "label1" [] [],
+                label: JsLabel {
+                    value_token: IDENT@10..16 "label1" [] [],
+                },
                 colon_token: COLON@16..18 ":" [] [Whitespace(" ")],
                 body: JsLabeledStatement {
-                    label_token: IDENT@18..24 "label2" [] [],
+                    label: JsLabel {
+                        value_token: IDENT@18..24 "label2" [] [],
+                    },
                     colon_token: COLON@24..26 ":" [] [Whitespace(" ")],
                     body: JsBogusStatement {
                         items: [
@@ -55,10 +59,12 @@ JsModule {
         0: TRUE_KW@4..8 "true" [] []
       3: R_PAREN@8..10 ")" [] [Whitespace(" ")]
       4: JS_LABELED_STATEMENT@10..41
-        0: IDENT@10..16 "label1" [] []
+        0: JS_LABEL@10..16
+          0: IDENT@10..16 "label1" [] []
         1: COLON@16..18 ":" [] [Whitespace(" ")]
         2: JS_LABELED_STATEMENT@18..41
-          0: IDENT@18..24 "label2" [] []
+          0: JS_LABEL@18..24
+            0: IDENT@18..24 "label2" [] []
           1: COLON@24..26 ":" [] [Whitespace(" ")]
           2: JS_BOGUS_STATEMENT@26..41
             0: FUNCTION_KW@26..35 "function" [] [Whitespace(" ")]

@@ -865,6 +865,13 @@ impl Deserializable for Nursery {
                                 diagnostics,
                             );
                         }
+                        "noAriaHiddenOnFocusable" => {
+                            result.no_aria_hidden_on_focusable = Deserializable::deserialize(
+                                &value,
+                                "noAriaHiddenOnFocusable",
+                                diagnostics,
+                            );
+                        }
                         "noDefaultExport" => {
                             result.no_default_export =
                                 Deserializable::deserialize(&value, "noDefaultExport", diagnostics);
@@ -1014,6 +1021,7 @@ impl Deserializable for Nursery {
                                     "recommended",
                                     "all",
                                     "noApproximativeNumericConstant",
+                                    "noAriaHiddenOnFocusable",
                                     "noDefaultExport",
                                     "noDuplicateJsonKeys",
                                     "noEmptyBlockStatements",

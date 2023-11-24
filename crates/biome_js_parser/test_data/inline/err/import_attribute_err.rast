@@ -86,7 +86,9 @@ JsModule {
             l_curly_token: L_CURLY@96..98 "{" [] [Whitespace(" ")],
             statements: JsStatementList [
                 JsLabeledStatement {
-                    label_token: IDENT@98..102 "type" [] [],
+                    label: JsLabel {
+                        value_token: IDENT@98..102 "type" [] [],
+                    },
                     colon_token: COLON@102..104 ":" [] [Whitespace(" ")],
                     body: JsExpressionStatement {
                         expression: JsStringLiteralExpression {
@@ -305,7 +307,8 @@ JsModule {
       0: L_CURLY@96..98 "{" [] [Whitespace(" ")]
       1: JS_STATEMENT_LIST@98..111
         0: JS_LABELED_STATEMENT@98..111
-          0: IDENT@98..102 "type" [] []
+          0: JS_LABEL@98..102
+            0: IDENT@98..102 "type" [] []
           1: COLON@102..104 ":" [] [Whitespace(" ")]
           2: JS_EXPRESSION_STATEMENT@104..111
             0: JS_STRING_LITERAL_EXPRESSION@104..111

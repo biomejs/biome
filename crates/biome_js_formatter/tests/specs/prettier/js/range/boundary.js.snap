@@ -1,5 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 212
 info: js/range/boundary.js
 ---
 
@@ -19,9 +20,8 @@ foo = 1.0000;bar = 1.0000;baz=1.0000;
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,6 +1,4 @@
--foo = 1.0;
--bar = 1.0;
+@@ -1,5 +1,4 @@
+-foo = 1.0000;bar = 1.0;
 -baz = 1.0;
 +foo = 1.0000;bar = 1.0;baz=1.0000;
  // The range will be 13~26

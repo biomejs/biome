@@ -99,6 +99,7 @@ aReallyLongLine012345678901234567890123456789012345678901234567890123456789 *
 -----
 Indent style: Tab
 Indent width: 2
+Line ending: LF
 Line width: 80
 Quote style: Double Quotes
 JSX quote style: Double Quotes
@@ -106,6 +107,8 @@ Quote properties: As needed
 Trailing comma: All
 Semicolons: Always
 Arrow parentheses: Always
+Bracket spacing: true
+Bracket same line: false
 -----
 
 ```js
@@ -207,6 +210,7 @@ aReallyLongLine012345678901234567890123456789012345678901234567890123456789 *
 -----
 Indent style: Tab
 Indent width: 2
+Line ending: LF
 Line width: 80
 Quote style: Double Quotes
 JSX quote style: Double Quotes
@@ -214,6 +218,8 @@ Quote properties: As needed
 Trailing comma: All
 Semicolons: As needed
 Arrow parentheses: Always
+Bracket spacing: true
+Bracket same line: false
 -----
 
 ```js

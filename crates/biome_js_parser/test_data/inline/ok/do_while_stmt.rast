@@ -63,7 +63,7 @@ JsModule {
                 statements: JsStatementList [
                     JsBreakStatement {
                         break_token: BREAK_KW@64..69 "break" [] [],
-                        label_token: missing (optional),
+                        label: missing (optional),
                         semicolon_token: SEMICOLON@69..71 ";" [] [Whitespace(" ")],
                     },
                 ],

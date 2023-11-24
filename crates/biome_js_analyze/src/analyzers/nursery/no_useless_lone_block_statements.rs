@@ -7,8 +7,8 @@ use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_syntax::{
-    AnyJsStatement, JsBlockStatement, JsElseClause, JsFileSource, JsLabeledStatement,
-    JsStatementList, JsVariableStatement,
+    AnyJsStatement, AnyJsSwitchClause, JsBlockStatement, JsFileSource, JsLabeledStatement,
+    JsStatementList, JsSyntaxKind, JsVariableStatement,
 };
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
 
@@ -64,6 +64,10 @@ impl Rule for NoUselessLoneBlockStatements {
         let is_module = ctx.source_type::<JsFileSource>().is_module();
 
         if JsLabeledStatement::can_cast(block.syntax().parent()?.kind()) {
+            return None;
+        }
+
+        if AnyJsSwitchClause::can_cast(block.syntax().grand_parent()?.kind()) {
             return None;
         }
 
@@ -147,10 +151,15 @@ fn statement_has_block_level_declaration(statement: &AnyJsStatement, is_module: 
 fn in_control_structure(block: &JsBlockStatement) -> bool {
     if let Some(node) = block.syntax().parent() {
         let syntax_kind = node.kind();
-        if JsElseClause::can_cast(syntax_kind) {
+
+        if let JsSyntaxKind::JS_ELSE_CLAUSE
+        | JsSyntaxKind::JS_CATCH_CLAUSE
+        | JsSyntaxKind::JS_FINALLY_CLAUSE = syntax_kind
+        {
             return true;
         }
     }
+
     matches!(
         block.parent(),
         Some(
@@ -163,6 +172,7 @@ fn in_control_structure(block: &JsBlockStatement) -> bool {
                 | AnyJsStatement::JsWithStatement(_)
                 | AnyJsStatement::JsSwitchStatement(_)
                 | AnyJsStatement::JsTryStatement(_)
+                | AnyJsStatement::JsTryFinallyStatement(_)
         )
     )
 }

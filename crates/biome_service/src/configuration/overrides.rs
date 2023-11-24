@@ -10,7 +10,7 @@ use crate::settings::{
 };
 use crate::{MergeWith, Rules, WorkspaceError};
 use biome_deserialize::StringSet;
-use biome_formatter::{IndentStyle, LineWidth};
+use biome_formatter::{IndentStyle, LineEnding, LineWidth};
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
@@ -215,6 +215,11 @@ pub struct OverrideFormatterConfiguration {
     #[bpaf(long("indent-width"), argument("NUMBER"), optional)]
     pub indent_width: Option<u8>,
 
+    /// The type of line ending.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[bpaf(long("line-ending"), argument("lf|crlf|cr"), optional)]
+    pub line_ending: Option<LineEnding>,
+
     /// What's the max width of a line. Defaults to 80.
     #[serde(
         deserialize_with = "deserialize_line_width",
@@ -379,6 +384,7 @@ impl TryFrom<OverrideFormatterConfiguration> for OverrideFormatSettings {
             enabled: conf.enabled,
             indent_style: Some(indent_style),
             indent_width: Some(indent_width),
+            line_ending: conf.line_ending,
             line_width: conf.line_width,
             format_with_errors: conf.format_with_errors.unwrap_or_default(),
         })

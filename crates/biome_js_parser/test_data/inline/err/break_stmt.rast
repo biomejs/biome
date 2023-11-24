@@ -44,7 +44,9 @@ JsModule {
                     JsBogusStatement {
                         items: [
                             BREAK_KW@40..49 "break" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
-                            IDENT@49..52 "foo" [] [],
+                            JsLabel {
+                                value_token: IDENT@49..52 "foo" [] [],
+                            },
                             SEMICOLON@52..53 ";" [] [],
                         ],
                     },
@@ -92,7 +94,8 @@ JsModule {
         1: JS_STATEMENT_LIST@40..53
           0: JS_BOGUS_STATEMENT@40..53
             0: BREAK_KW@40..49 "break" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
-            1: IDENT@49..52 "foo" [] []
+            1: JS_LABEL@49..52
+              0: IDENT@49..52 "foo" [] []
             2: SEMICOLON@52..53 ";" [] []
         2: R_CURLY@53..55 "}" [Newline("\n")] []
   4: EOF@55..56 "" [Newline("\n")] []

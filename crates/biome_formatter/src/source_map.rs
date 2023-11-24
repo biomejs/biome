@@ -34,7 +34,7 @@ use std::iter::FusedIterator;
 ///
 /// Only having the deleted ranges to resolve the original text of a node isn't sufficient.
 /// Resolving the original text of a node is needed when formatting a node as verbatim, either because
-/// formatting the node failed because of a syntax error, or formatting is suppressed with a `rome-ignore format:` comment.
+/// formatting the node failed because of a syntax error, or formatting is suppressed with a `biome-ignore format:` comment.
 ///
 /// ```text
 /// // Source           // Transformed
@@ -458,7 +458,7 @@ impl TransformSourceMapBuilder {
     /// Adds a mapping to widen a nodes trimmed range.
     ///
     /// The formatter uses the trimmed range when formatting a node in verbatim either because the node
-    /// failed to format because of a syntax error or because it's formatting is suppressed with a `rome-ignore format:` comment.
+    /// failed to format because of a syntax error or because it's formatting is suppressed with a `biome-ignore format:` comment.
     ///
     /// This method adds a mapping to widen a nodes trimmed range to enclose another range instead. This is
     /// e.g. useful when removing parentheses around expressions where `(/* comment */ a /* comment */)` because
