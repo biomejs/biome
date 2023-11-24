@@ -229,7 +229,7 @@ fn extract_literal_string(from: AnyJsCallArgument) -> Option<String> {
         .as_static_value()
         .and_then(|value| match value {
             StaticValue::String(_) => Some(value.text().to_string().replace('\n', "\\n")),
-            StaticValue::EmptyString(_) => Some("".to_string()),
+            StaticValue::EmptyString(_) => Some(String::new()),
             _ => None,
         })
 }
