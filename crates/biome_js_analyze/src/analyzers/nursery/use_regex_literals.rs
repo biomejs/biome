@@ -174,11 +174,12 @@ fn create_pattern(
     let pattern = extract_literal_string(pattern)?;
     let pattern = pattern.replace("\\\\", "\\");
 
-    // if pattern is empty, (?:) is used instead.
+    // If pattern is empty, (?:) is used instead.
     if pattern.is_empty() {
         return Some("(?:)".to_string());
     }
 
+    // A repetition without quantifiers is invalid.
     if pattern == "*" || pattern == "+" || pattern == "?" {
         return None;
     }
