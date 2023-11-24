@@ -98,7 +98,9 @@ impl Rule for UseRegexLiterals {
             markup! {
                 "Use a regular expression literal instead of the "<Emphasis>"RegExp"</Emphasis>" constructor."
             },
-        ))
+        ).note(markup! {
+            "Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically."
+        }))
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {

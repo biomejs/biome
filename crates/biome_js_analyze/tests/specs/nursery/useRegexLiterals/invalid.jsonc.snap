@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 83
 expression: invalid.jsonc
 ---
 # Input
@@ -16,6 +15,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   
   > 1 │ new RegExp('abc');
       │ ^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -39,6 +40,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   > 1 │ new RegExp((('abc')), ('g'));
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
   - new·RegExp((('abc')),·('g'));
@@ -60,6 +63,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   
   > 1 │ RegExp('abc');
       │ ^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -83,6 +88,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   > 1 │ new RegExp('abc', 'g');
       │ ^^^^^^^^^^^^^^^^^^^^^^
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
   - new·RegExp('abc',·'g');
@@ -104,6 +111,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   
   > 1 │ RegExp('abc', 'g');
       │ ^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -127,6 +136,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   > 1 │ new RegExp(`abc`);
       │ ^^^^^^^^^^^^^^^^^
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
   - new·RegExp(`abc`);
@@ -148,6 +159,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   
   > 1 │ RegExp(`abc`);
       │ ^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -171,6 +184,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   > 1 │ new RegExp(`abc`, `g`);
       │ ^^^^^^^^^^^^^^^^^^^^^^
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
   - new·RegExp(`abc`,·`g`);
@@ -193,6 +208,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   > 1 │ RegExp(`abc`, `g`);
       │ ^^^^^^^^^^^^^^^^^^
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
   - RegExp(`abc`,·`g`);
@@ -214,6 +231,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   
   > 1 │ new RegExp(String.raw`abc`);
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -239,6 +258,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
   > 2 │ abc`);
       │ ^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -266,6 +287,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   > 2 │ abc`);
       │ ^^^^^
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
     1   │ - new·RegExp(String.raw`→ abc
@@ -289,6 +312,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   > 1 │ RegExp(String.raw`abc`);
       │ ^^^^^^^^^^^^^^^^^^^^^^^
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
   - RegExp(String.raw`abc`);
@@ -310,6 +335,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   
   > 1 │ new RegExp(String.raw`abc`, String.raw`g`);
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -333,6 +360,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   > 1 │ RegExp(String.raw`abc`, String.raw`g`);
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
   - RegExp(String.raw`abc`,·String.raw`g`);
@@ -354,6 +383,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   
   > 1 │ new RegExp(String['raw']`a`);
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -377,6 +408,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   > 1 │ new RegExp('a', `g`);
       │ ^^^^^^^^^^^^^^^^^^^^
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
   - new·RegExp('a',·`g`);
@@ -398,6 +431,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   
   > 1 │ RegExp(`a`, 'g');
       │ ^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -421,6 +456,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   > 1 │ RegExp(String.raw`a`, 'g');
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
   - RegExp(String.raw`a`,·'g');
@@ -442,6 +479,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   
   > 1 │ new RegExp(String.raw`\d`, `g`);
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -465,6 +504,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   > 1 │ new RegExp(String.raw`\\d`, `g`);
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
   - new·RegExp(String.raw`\\d`,·`g`);
@@ -486,6 +527,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   
   > 1 │ new RegExp(String['raw']`\\d`, `g`);
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -509,6 +552,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   > 1 │ new RegExp(String["raw"]`\\d`, `g`);
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
   - new·RegExp(String["raw"]`\\d`,·`g`);
@@ -530,6 +575,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   
   > 1 │ RegExp('a', String.raw`g`);
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -553,6 +600,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   > 1 │ new globalThis.RegExp('a');
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
   - new·globalThis.RegExp('a');
@@ -574,6 +623,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   
   > 1 │ globalThis.RegExp('a');
       │ ^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -597,6 +648,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   > 1 │ (globalThis).RegExp('a');
       │ ^^^^^^^^^^^^^^^^^^^^^^^^
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
   - (globalThis).RegExp('a');
@@ -618,6 +671,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   
   > 1 │ new RegExp((String?.raw)`a`);
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -641,6 +696,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   > 1 │ RegExp('abc', 'u');
       │ ^^^^^^^^^^^^^^^^^^
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
   - RegExp('abc',·'u');
@@ -662,6 +719,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   
   > 1 │ new RegExp('abc', 'd');
       │ ^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -685,6 +744,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   > 1 │ RegExp('abc', 'd');
       │ ^^^^^^^^^^^^^^^^^^
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
   - RegExp('abc',·'d');
@@ -706,6 +767,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   
   > 1 │ RegExp('\\\\', '');
       │ ^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -729,6 +792,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   > 1 │ RegExp('\n', '');
       │ ^^^^^^^^^^^^^^^^
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
   - RegExp('\n',·'');
@@ -750,6 +815,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   
   > 1 │ RegExp('\n\n', '');
       │ ^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -773,6 +840,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   > 1 │ RegExp('\t', '');
       │ ^^^^^^^^^^^^^^^^
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
   - RegExp('\t',·'');
@@ -794,6 +863,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   
   > 1 │ RegExp('\t\t', '');
       │ ^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -817,6 +888,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   > 1 │ RegExp('\r\n', '');
       │ ^^^^^^^^^^^^^^^^^^
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
   - RegExp('\r\n',·'');
@@ -838,6 +911,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   
   > 1 │ RegExp('\u1234', 'g')
       │ ^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -861,6 +936,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   > 1 │ RegExp('\u{1234}', 'g')
       │ ^^^^^^^^^^^^^^^^^^^^^^^
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
   - RegExp('\u{1234}',·'g')
@@ -882,6 +959,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   
   > 1 │ RegExp('\u{11111}', 'g')
       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -905,6 +984,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   > 1 │ RegExp('\v', '');
       │ ^^^^^^^^^^^^^^^^
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
   - RegExp('\v',·'');
@@ -926,6 +1007,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   
   > 1 │ RegExp('\v\v', '');
       │ ^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -949,6 +1032,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   > 1 │ RegExp('\f', '');
       │ ^^^^^^^^^^^^^^^^
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
   - RegExp('\f',·'');
@@ -970,6 +1055,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   
   > 1 │ RegExp('\f\f', '');
       │ ^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -993,6 +1080,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   > 1 │ RegExp('\\b', '');
       │ ^^^^^^^^^^^^^^^^^
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
   - RegExp('\\b',·'');
@@ -1014,6 +1103,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   
   > 1 │ RegExp('\\b\\b', '');
       │ ^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -1037,6 +1128,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   > 1 │ new RegExp('\\B\\b', '');
       │ ^^^^^^^^^^^^^^^^^^^^^^^^
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
   - new·RegExp('\\B\\b',·'');
@@ -1058,6 +1151,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   
   > 1 │ RegExp('\\w', '');
       │ ^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -1081,6 +1176,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   > 1 │ new globalThis.RegExp('\\W', '');
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
   - new·globalThis.RegExp('\\W',·'');
@@ -1102,6 +1199,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   
   > 1 │ RegExp('\\s', '');
       │ ^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -1125,6 +1224,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   > 1 │ new RegExp('\\S', '')
       │ ^^^^^^^^^^^^^^^^^^^^^
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
   - new·RegExp('\\S',·'')
@@ -1146,6 +1247,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   
   > 1 │ globalThis.RegExp('\\d', '');
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -1169,6 +1272,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   > 1 │ globalThis.RegExp('\\D', '')
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
   - globalThis.RegExp('\\D',·'')
@@ -1190,6 +1295,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   
   > 1 │ globalThis.RegExp('\\\\\\D', '')
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -1213,6 +1320,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   > 1 │ new RegExp('\\D\\D', '')
       │ ^^^^^^^^^^^^^^^^^^^^^^^^
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
   - new·RegExp('\\D\\D',·'')
@@ -1234,6 +1343,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   
   > 1 │ new globalThis.RegExp('\\0\\0', '');
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -1257,6 +1368,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   > 1 │ new RegExp('\\0\\0', '');
       │ ^^^^^^^^^^^^^^^^^^^^^^^^
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
   - new·RegExp('\\0\\0',·'');
@@ -1278,6 +1391,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   
   > 1 │ new RegExp('\0\0', 'g');
       │ ^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -1301,6 +1416,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   > 1 │ RegExp('\\0\\0\\0', '')
       │ ^^^^^^^^^^^^^^^^^^^^^^^
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
   - RegExp('\\0\\0\\0',·'')
@@ -1322,6 +1439,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   
   > 1 │ RegExp('\\78\\126\\5934', '')
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -1345,6 +1464,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   > 1 │ new window['RegExp']('\\x56\\x78\\x45', '');
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
   - new·window['RegExp']('\\x56\\x78\\x45',·'');
@@ -1366,6 +1487,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   
   > 1 │ new (window['RegExp'])('\\x56\\x78\\x45', '');
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -1389,6 +1512,8 @@ invalid.jsonc:1:6 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   > 1 │ a in(RegExp('abc'))
       │      ^^^^^^^^^^^^^
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
   - a·in(RegExp('abc'))
@@ -1411,6 +1536,8 @@ invalid.jsonc:1:6 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   > 1 │ func(new RegExp(String.raw`\w{1, 2`, 'u'),new RegExp(String.raw`\w{1, 2`, 'u'))
       │      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
   - func(new·RegExp(String.raw`\w{1,·2`,·'u'),new·RegExp(String.raw`\w{1,·2`,·'u'))
@@ -1426,6 +1553,8 @@ invalid.jsonc:1:43 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
   
   > 1 │ func(new RegExp(String.raw`\w{1, 2`, 'u'),new RegExp(String.raw`\w{1, 2`, 'u'))
       │                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -1451,6 +1580,8 @@ invalid.jsonc:2:13 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
   > 2 │             RegExp("foo").test(x) ? bar() : baz()
       │             ^^^^^^^^^^^^^
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
     1 1 │   x = y;
@@ -1474,6 +1605,8 @@ invalid.jsonc:1:8 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   > 1 │ typeof RegExp("foo")
       │        ^^^^^^^^^^^^^
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
   - typeof·RegExp("foo")
@@ -1496,6 +1629,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   > 1 │ RegExp("foo") instanceof RegExp(String.raw`blahblah`, 'g') ? typeof new RegExp('(\\p{Emoji_Presentation})\\1', `ug`) : false
       │ ^^^^^^^^^^^^^
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
   - RegExp("foo")·instanceof·RegExp(String.raw`blahblah`,·'g')·?·typeof·new·RegExp('(\\p{Emoji_Presentation})\\1',·`ug`)·:·false
@@ -1512,6 +1647,8 @@ invalid.jsonc:1:26 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
   > 1 │ RegExp("foo") instanceof RegExp(String.raw`blahblah`, 'g') ? typeof new RegExp('(\\p{Emoji_Presentation})\\1', `ug`) : false
       │                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
   - RegExp("foo")·instanceof·RegExp(String.raw`blahblah`,·'g')·?·typeof·new·RegExp('(\\p{Emoji_Presentation})\\1',·`ug`)·:·false
@@ -1527,6 +1664,8 @@ invalid.jsonc:1:69 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
   
   > 1 │ RegExp("foo") instanceof RegExp(String.raw`blahblah`, 'g') ? typeof new RegExp('(\\p{Emoji_Presentation})\\1', `ug`) : false
       │                                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -1549,6 +1688,8 @@ invalid.jsonc:1:5 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   
   > 1 │ [   new RegExp(`someregular`)]
       │     ^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -1577,6 +1718,8 @@ invalid.jsonc:1:32 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
     2 │             if (typeof totallyValidatesEmails === 'object') {
     3 │                 runSomethingThatExists(Regexp('stuff'))
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
     1   │ - const·totallyValidatesEmails·=·new·RegExp("\\S+@(\\S+\\.)+\\S+")
@@ -1601,6 +1744,8 @@ invalid.jsonc:1:2 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   > 1 │ !new RegExp('^Hey, ', 'u') && new RegExp('jk$') && ~new RegExp('^Sup, ') || new RegExp('hi') + new RegExp('person') === -new RegExp('hi again') ? 5 * new RegExp('abc') : 'notregbutstring'
       │  ^^^^^^^^^^^^^^^^^^^^^^^^^
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
   - !new·RegExp('^Hey,·',·'u')·&&·new·RegExp('jk$')·&&·~new·RegExp('^Sup,·')·||·new·RegExp('hi')·+·new·RegExp('person')·===·-new·RegExp('hi·again')·?·5·*·new·RegExp('abc')·:·'notregbutstring'
@@ -1616,6 +1761,8 @@ invalid.jsonc:1:31 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
   
   > 1 │ !new RegExp('^Hey, ', 'u') && new RegExp('jk$') && ~new RegExp('^Sup, ') || new RegExp('hi') + new RegExp('person') === -new RegExp('hi again') ? 5 * new RegExp('abc') : 'notregbutstring'
       │                               ^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -1633,6 +1780,8 @@ invalid.jsonc:1:53 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
   > 1 │ !new RegExp('^Hey, ', 'u') && new RegExp('jk$') && ~new RegExp('^Sup, ') || new RegExp('hi') + new RegExp('person') === -new RegExp('hi again') ? 5 * new RegExp('abc') : 'notregbutstring'
       │                                                     ^^^^^^^^^^^^^^^^^^^^
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
   - !new·RegExp('^Hey,·',·'u')·&&·new·RegExp('jk$')·&&·~new·RegExp('^Sup,·')·||·new·RegExp('hi')·+·new·RegExp('person')·===·-new·RegExp('hi·again')·?·5·*·new·RegExp('abc')·:·'notregbutstring'
@@ -1648,6 +1797,8 @@ invalid.jsonc:1:77 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
   
   > 1 │ !new RegExp('^Hey, ', 'u') && new RegExp('jk$') && ~new RegExp('^Sup, ') || new RegExp('hi') + new RegExp('person') === -new RegExp('hi again') ? 5 * new RegExp('abc') : 'notregbutstring'
       │                                                                             ^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -1665,6 +1816,8 @@ invalid.jsonc:1:96 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
   > 1 │ !new RegExp('^Hey, ', 'u') && new RegExp('jk$') && ~new RegExp('^Sup, ') || new RegExp('hi') + new RegExp('person') === -new RegExp('hi again') ? 5 * new RegExp('abc') : 'notregbutstring'
       │                                                                                                ^^^^^^^^^^^^^^^^^^^^
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
   - !new·RegExp('^Hey,·',·'u')·&&·new·RegExp('jk$')·&&·~new·RegExp('^Sup,·')·||·new·RegExp('hi')·+·new·RegExp('person')·===·-new·RegExp('hi·again')·?·5·*·new·RegExp('abc')·:·'notregbutstring'
@@ -1681,6 +1834,8 @@ invalid.jsonc:1:122 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━�
   > 1 │ !new RegExp('^Hey, ', 'u') && new RegExp('jk$') && ~new RegExp('^Sup, ') || new RegExp('hi') + new RegExp('person') === -new RegExp('hi again') ? 5 * new RegExp('abc') : 'notregbutstring'
       │                                                                                                                          ^^^^^^^^^^^^^^^^^^^^^^
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
   - !new·RegExp('^Hey,·',·'u')·&&·new·RegExp('jk$')·&&·~new·RegExp('^Sup,·')·||·new·RegExp('hi')·+·new·RegExp('person')·===·-new·RegExp('hi·again')·?·5·*·new·RegExp('abc')·:·'notregbutstring'
@@ -1696,6 +1851,8 @@ invalid.jsonc:1:151 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━�
   
   > 1 │ !new RegExp('^Hey, ', 'u') && new RegExp('jk$') && ~new RegExp('^Sup, ') || new RegExp('hi') + new RegExp('person') === -new RegExp('hi again') ? 5 * new RegExp('abc') : 'notregbutstring'
       │                                                                                                                                                       ^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -1721,6 +1878,8 @@ invalid.jsonc:2:13 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
   > 2 │             RegExp("foo")
       │             ^^^^^^^^^^^^^
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
     1 1 │   #!/usr/bin/sh
@@ -1744,6 +1903,8 @@ invalid.jsonc:1:28 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
   > 1 │ async function abc(){await new RegExp("foo")}
       │                            ^^^^^^^^^^^^^^^^^
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
   - async·function·abc(){await·new·RegExp("foo")}
@@ -1765,6 +1926,8 @@ invalid.jsonc:1:23 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
   
   > 1 │ function* abc(){yield new RegExp("foo")}
       │                       ^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -1788,6 +1951,8 @@ invalid.jsonc:1:24 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
   > 1 │ function* abc(){yield* new RegExp("foo")}
       │                        ^^^^^^^^^^^^^^^^^
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
   - function*·abc(){yield*·new·RegExp("foo")}
@@ -1809,6 +1974,8 @@ invalid.jsonc:1:18 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
   
   > 1 │ console.log({ ...new RegExp('a') })
       │                  ^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -1832,6 +1999,8 @@ invalid.jsonc:1:8 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   > 1 │ delete RegExp('a');
       │        ^^^^^^^^^^^
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
   - delete·RegExp('a');
@@ -1853,6 +2022,8 @@ invalid.jsonc:1:6 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   
   > 1 │ void RegExp('a');
       │      ^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -1876,6 +2047,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   > 1 │ new RegExp("\\S+@(\\S+\\.)+\\S+")**RegExp('a')
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
   - new·RegExp("\\S+@(\\S+\\.)+\\S+")**RegExp('a')
@@ -1891,6 +2064,8 @@ invalid.jsonc:1:36 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
   
   > 1 │ new RegExp("\\S+@(\\S+\\.)+\\S+")**RegExp('a')
       │                                    ^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -1914,6 +2089,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   > 1 │ new RegExp("\\S+@(\\S+\\.)+\\S+")%RegExp('a')
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
   - new·RegExp("\\S+@(\\S+\\.)+\\S+")%RegExp('a')
@@ -1929,6 +2106,8 @@ invalid.jsonc:1:35 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
   
   > 1 │ new RegExp("\\S+@(\\S+\\.)+\\S+")%RegExp('a')
       │                                   ^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -1951,6 +2130,8 @@ invalid.jsonc:1:6 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   
   > 1 │ a in RegExp('abc')
       │      ^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -1976,6 +2157,8 @@ invalid.jsonc:2:22 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
   > 2 │             /abc/ == new RegExp('cba');
       │                      ^^^^^^^^^^^^^^^^^
     3 │             
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -2004,6 +2187,8 @@ invalid.jsonc:2:23 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
       │                       ^^^^^^^^^^^^^^^^^
     3 │             
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
     1 1 │   
@@ -2030,6 +2215,8 @@ invalid.jsonc:2:22 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
   > 2 │             /abc/ != new RegExp('cba');
       │                      ^^^^^^^^^^^^^^^^^
     3 │             
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -2058,6 +2245,8 @@ invalid.jsonc:2:23 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
       │                       ^^^^^^^^^^^^^^^^^
     3 │             
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
     1 1 │   
@@ -2084,6 +2273,8 @@ invalid.jsonc:2:21 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
   > 2 │             /abc/ > new RegExp('cba');
       │                     ^^^^^^^^^^^^^^^^^
     3 │             
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -2112,6 +2303,8 @@ invalid.jsonc:2:21 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
       │                     ^^^^^^^^^^^^^^^^^
     3 │             
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
     1 1 │   
@@ -2138,6 +2331,8 @@ invalid.jsonc:2:22 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
   > 2 │             /abc/ >= new RegExp('cba');
       │                      ^^^^^^^^^^^^^^^^^
     3 │             
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -2166,6 +2361,8 @@ invalid.jsonc:2:22 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
       │                      ^^^^^^^^^^^^^^^^^
     3 │             
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
     1 1 │   
@@ -2192,6 +2389,8 @@ invalid.jsonc:2:22 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
   > 2 │             /abc/ << new RegExp('cba');
       │                      ^^^^^^^^^^^^^^^^^
     3 │             
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -2220,6 +2419,8 @@ invalid.jsonc:2:22 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
       │                      ^^^^^^^^^^^^^^^^^
     3 │             
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
     1 1 │   
@@ -2246,6 +2447,8 @@ invalid.jsonc:2:23 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
   > 2 │             /abc/ >>> new RegExp('cba');
       │                       ^^^^^^^^^^^^^^^^^
     3 │             
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -2274,6 +2477,8 @@ invalid.jsonc:2:21 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
       │                     ^^^^^^^^^^^^^^^^^
     3 │             
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
     1 1 │   
@@ -2300,6 +2505,8 @@ invalid.jsonc:2:21 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
   > 2 │             /abc/ & new RegExp('cba');
       │                     ^^^^^^^^^^^^^^^^^
     3 │             
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -2328,6 +2535,8 @@ invalid.jsonc:2:21 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
       │                     ^^^^^^^^^^^^^^^^^
     3 │             
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
     1 1 │   
@@ -2354,6 +2563,8 @@ invalid.jsonc:2:21 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
   > 2 │             null ?? new RegExp('blah')
       │                     ^^^^^^^^^^^^^^^^^^
     3 │             
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -2382,6 +2593,8 @@ invalid.jsonc:2:20 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
       │                    ^^^^^^^^^^^^^^^^^^
     3 │             
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
     1 1 │   
@@ -2408,6 +2621,8 @@ invalid.jsonc:2:29 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
   > 2 │             console.log({a: new RegExp('sup')})
       │                             ^^^^^^^^^^^^^^^^^
     3 │             
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -2436,6 +2651,8 @@ invalid.jsonc:2:32 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
       │                                ^^^^^^^^^^^^^^^^^
     3 │             
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
     1 1 │   
@@ -2462,6 +2679,8 @@ invalid.jsonc:2:29 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
   > 2 │             function abc() {new RegExp('sup')}
       │                             ^^^^^^^^^^^^^^^^^
     3 │             
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -2490,6 +2709,8 @@ invalid.jsonc:2:36 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
       │                                    ^^^^^^^^^^^^^^^^^
     3 │             
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
     1 1 │   
@@ -2516,6 +2737,8 @@ invalid.jsonc:2:21 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
   > 2 │             abc <<= new RegExp('cba');
       │                     ^^^^^^^^^^^^^^^^^
     3 │             
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -2544,6 +2767,8 @@ invalid.jsonc:2:21 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
       │                     ^^^^^^^^^^^^^^^^^
     3 │             
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
     1 1 │   
@@ -2570,6 +2795,8 @@ invalid.jsonc:2:22 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
   > 2 │             abc >>>= new RegExp('cba');
       │                      ^^^^^^^^^^^^^^^^^
     3 │             
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -2598,6 +2825,8 @@ invalid.jsonc:2:20 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
       │                    ^^^^^^^^^^^^^^^^^
     3 │             
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
     1 1 │   
@@ -2624,6 +2853,8 @@ invalid.jsonc:2:20 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
   > 2 │             abc &= new RegExp('cba');
       │                    ^^^^^^^^^^^^^^^^^
     3 │             
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -2652,6 +2883,8 @@ invalid.jsonc:2:20 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
       │                    ^^^^^^^^^^^^^^^^^
     3 │             
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
     1 1 │   
@@ -2678,6 +2911,8 @@ invalid.jsonc:2:21 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
   > 2 │             abc ??= new RegExp('cba');
       │                     ^^^^^^^^^^^^^^^^^
     3 │             
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -2706,6 +2941,8 @@ invalid.jsonc:2:21 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
       │                     ^^^^^^^^^^^^^^^^^
     3 │             
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
     1 1 │   
@@ -2732,6 +2969,8 @@ invalid.jsonc:2:21 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
   > 2 │             abc ||= new RegExp('cba');
       │                     ^^^^^^^^^^^^^^^^^
     3 │             
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -2760,6 +2999,8 @@ invalid.jsonc:2:21 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
       │                     ^^^^^^^^^^^^^^^^^^
     3 │             
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
     1 1 │   
@@ -2786,6 +3027,8 @@ invalid.jsonc:2:20 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
   > 2 │             abc /= new RegExp('blah')
       │                    ^^^^^^^^^^^^^^^^^^
     3 │             
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -2814,6 +3057,8 @@ invalid.jsonc:2:20 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
       │                    ^^^^^^^^^^^^^^^^^^
     3 │             
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
     1 1 │   
@@ -2840,6 +3085,8 @@ invalid.jsonc:2:20 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
   > 2 │             abc -= new RegExp('blah')
       │                    ^^^^^^^^^^^^^^^^^^
     3 │             
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -2868,6 +3115,8 @@ invalid.jsonc:2:20 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
       │                    ^^^^^^^^^^^^^^^^^^
     3 │             
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
     1 1 │   
@@ -2895,6 +3144,8 @@ invalid.jsonc:2:19 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
       │                   ^^^^^^^^^^^^^^^^^^
     3 │             
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
     1 1 │   
@@ -2919,6 +3170,8 @@ invalid.jsonc:1:3 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   > 1 │ a/RegExp("foo")in b
       │   ^^^^^^^^^^^^^
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
   - a/RegExp("foo")in·b
@@ -2940,6 +3193,8 @@ invalid.jsonc:1:3 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   
   > 1 │ a/RegExp("foo")instanceof b
       │   ^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -2964,6 +3219,8 @@ invalid.jsonc:1:4 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   > 1 │ do RegExp("foo")
       │    ^^^^^^^^^^^^^
     2 │ while (true);
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -2990,6 +3247,8 @@ invalid.jsonc:2:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   > 2 │ new RegExp('search')}
       │ ^^^^^^^^^^^^^^^^^^^^
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
     1 1 │   for(let i;i<5;i++) { break
@@ -3014,6 +3273,8 @@ invalid.jsonc:2:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
     1 │ for(let i;i<5;i++) { continue
   > 2 │ new RegExp('search')}
       │ ^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -3050,6 +3311,8 @@ invalid.jsonc:5:22 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
     6 │                     console.log('matches a regexp\' toString value')
     7 │                     break;
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
     3 3 │                   case "possibility":
@@ -3076,6 +3339,8 @@ invalid.jsonc:1:7 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   > 1 │ throw new RegExp('abcdefg') // fail with a regular expression
       │       ^^^^^^^^^^^^^^^^^^^^^
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
   - throw·new·RegExp('abcdefg')·//·fail·with·a·regular·expression
@@ -3097,6 +3362,8 @@ invalid.jsonc:1:15 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
   
   > 1 │ for (value of new RegExp('something being searched')) { console.log(value) }
       │               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -3120,6 +3387,8 @@ invalid.jsonc:1:39 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
   > 1 │ (async function(){for await (value of new RegExp('something being searched')) { console.log(value) }})()
       │                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
   - (async·function(){for·await·(value·of·new·RegExp('something·being·searched'))·{·console.log(value)·}})()
@@ -3142,6 +3411,8 @@ invalid.jsonc:1:15 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
   > 1 │ for (value in new RegExp('something being searched')) { console.log(value) }
       │               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
   - for·(value·in·new·RegExp('something·being·searched'))·{·console.log(value)·}
@@ -3163,6 +3434,8 @@ invalid.jsonc:1:31 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
   
   > 1 │ if (condition1 && condition2) new RegExp('avalue').test(str);
       │                               ^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -3188,6 +3461,8 @@ invalid.jsonc:2:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   > 2 │ new RegExp('myReg')
       │ ^^^^^^^^^^^^^^^^^^^
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
     1 1 │   debugger
@@ -3211,6 +3486,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   > 1 │ RegExp("\\\n")
       │ ^^^^^^^^^^^^^^
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
   - RegExp("\\\n")
@@ -3232,6 +3509,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   
   > 1 │ RegExp("\\\t")
       │ ^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -3255,6 +3534,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   > 1 │ RegExp("\\\f")
       │ ^^^^^^^^^^^^^^
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
   - RegExp("\\\f")
@@ -3276,6 +3557,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   
   > 1 │ RegExp("\\\v")
       │ ^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -3299,6 +3582,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   > 1 │ RegExp("\\\r")
       │ ^^^^^^^^^^^^^^
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
   - RegExp("\\\r")
@@ -3320,6 +3605,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   
   > 1 │ new RegExp("	")
       │ ^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -3343,6 +3630,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   > 1 │ new RegExp("/")
       │ ^^^^^^^^^^^^^^^
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
   - new·RegExp("/")
@@ -3364,6 +3653,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   
   > 1 │ new RegExp("\.")
       │ ^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -3387,6 +3678,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   > 1 │ new RegExp("\\.")
       │ ^^^^^^^^^^^^^^^^^
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
   - new·RegExp("\\.")
@@ -3408,6 +3701,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   
   > 1 │ new RegExp("\\\n\\\n")
       │ ^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -3431,6 +3726,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   > 1 │ new RegExp("\\\n\\\f\\\n")
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
   - new·RegExp("\\\n\\\f\\\n")
@@ -3452,6 +3749,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   
   > 1 │ new RegExp("\u000A\u000A");
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
@@ -3475,6 +3774,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   > 1 │ new RegExp('mysafereg' /* comment explaining its safety */)
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
   - new·RegExp('mysafereg'·/*·comment·explaining·its·safety·*/)
@@ -3497,6 +3798,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   > 1 │ new RegExp('[[A--B]]', 'v')
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
   - new·RegExp('[[A--B]]',·'v')
@@ -3519,6 +3822,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   > 1 │ new RegExp('[[A--B]]', 'v')
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
   i Safe fix: Use a literal notation instead.
   
   - new·RegExp('[[A--B]]',·'v')
@@ -3540,6 +3845,8 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
   
   > 1 │ new RegExp('[[A&&&]]', 'v')
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
   
   i Safe fix: Use a literal notation instead.
   
