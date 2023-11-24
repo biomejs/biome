@@ -171,39 +171,11 @@ fn create_pattern(
 }
 
 fn is_regexp_object(expr: AnyJsExpression, model: &SemanticModel) -> bool {
-    let name = (|| match expr.omit_parentheses() {
-        AnyJsExpression::JsIdentifierExpression(expr) => {
-            let ident = expr.name().ok()?;
-            if model.binding(&ident).is_some() {
-                return None;
-            };
-            Some(ident.name().ok()?.to_string())
-        }
-        AnyJsExpression::JsStaticMemberExpression(expr) => {
-            if !is_global_object(expr.object().ok()?) {
-                return None;
-            }
-            Some(expr.member().ok()?.text())
-        }
-        AnyJsExpression::JsComputedMemberExpression(expr) => {
-            if !is_global_object(expr.object().ok()?) {
-                return None;
-            }
-            Some(extract_inner_text(&expr)?)
-        }
-        _ => None,
-    })();
-
-    if let Some(name) = name {
-        name == "RegExp"
-    } else {
-        false
-    }
-}
-
-fn is_global_object(expr: AnyJsExpression) -> bool {
-    match expr.omit_parentheses().as_js_reference_identifier() {
-        Some(ident) => ident.is_global_this() || ident.has_name("window"),
+    match global_identifier(&expr.omit_parentheses()) {
+        Some((reference, name)) => match model.binding(&reference) {
+            Some(_) if !reference.is_global_this() && !reference.has_name("window") => false,
+            _ => name.text() == "RegExp",
+        },
         None => false,
     }
 }
