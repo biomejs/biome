@@ -6,13 +6,11 @@ use biome_diagnostics::Applicability;
 use biome_js_factory::make::js_regex_literal_expression;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    global_identifier, AnyJsCallArgument, AnyJsExpression, AnyJsLiteralExpression,
-    AnyJsTemplateElement, JsCallArguments, JsCallExpression, JsComputedMemberExpression,
+    global_identifier, static_value::StaticValue, AnyJsCallArgument, AnyJsExpression,
+    AnyJsLiteralExpression, JsCallArguments, JsCallExpression, JsComputedMemberExpression,
     JsNewExpression, JsSyntaxKind, JsSyntaxToken,
 };
-use biome_rowan::{
-    declare_node_union, AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, SyntaxError,
-};
+use biome_rowan::{declare_node_union, AstNode, AstSeparatedList, BatchMutationExt, SyntaxError};
 
 use crate::{semantic_services::Semantic, JsRuleAction};
 
@@ -209,36 +207,13 @@ fn extract_literal_string(from: AnyJsCallArgument) -> Option<String> {
     let AnyJsCallArgument::AnyJsExpression(expr) = from else {
         return None;
     };
-    match expr.omit_parentheses() {
-        AnyJsExpression::AnyJsLiteralExpression(expr) => {
-            let expr = expr.as_js_string_literal_expression()?;
-            let text = expr.inner_string_text().ok()?;
-            Some(text.to_string())
-        }
-        AnyJsExpression::JsTemplateExpression(expr) => {
-            let elements = expr.elements();
-            if !elements
-                .iter()
-                .all(|elem| matches!(elem, AnyJsTemplateElement::JsTemplateChunkElement(_)))
-            {
-                return None;
-            }
-
-            let text = elements
-                .iter()
-                .filter_map(|elem| {
-                    elem.as_js_template_chunk_element()
-                        .unwrap()
-                        .template_chunk_token()
-                        .ok()
-                })
-                .map(|elem| elem.text().replace('\n', "\\n"))
-                .collect::<String>();
-
-            Some(text)
-        }
-        _ => None,
-    }
+    expr.omit_parentheses()
+        .as_static_value()
+        .and_then(|value| match value {
+            StaticValue::String(_) => Some(value),
+            _ => None,
+        })
+        .map(|value| value.text().to_string().replace('\n', "\\n"))
 }
 
 fn extract_inner_text(expr: &JsComputedMemberExpression) -> Option<String> {
