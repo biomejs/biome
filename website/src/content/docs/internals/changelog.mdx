@@ -115,6 +115,8 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 - Fix [#576](https://github.com/biomejs/biome/issues/576) by removing some erroneous logic in [noSelfAssign](https://biomejs.dev/linter/rules/no-self-assign/). Contributed by @ematipico
 
+- Fix [#861](https://github.com/biomejs/biome/issues/861) that made [noUnusedVariables](https://biomejs.dev/linter/rules/no-unused-variables) always reports the parameter of an non-parenthesize arrow function as unused.
+
 - Fix [#595](https://github.com/biomejs/biome/issues/595) by updating unsafe-apply logic to avoid unexpected errors in [noUselessFragments](https://biomejs.dev/linter/rules/no-useless-fragments/). Contributed by @nissy-dev
 
 - Fix [#591](https://github.com/biomejs/biome/issues/591) which made [noRedeclare](https://biomejs.dev/linter/rules/no-redeclare) report type parameters with identical names but in different method signatures. Contributed by @Conaclos
