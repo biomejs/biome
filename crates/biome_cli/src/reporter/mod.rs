@@ -1,11 +1,9 @@
 use crate::cli_options::CliOptions;
-use crate::execute::{Execution, ReportMode, TraversalMode};
+use crate::execute::{Execution, TraversalMode};
 use crate::CliDiagnostic;
 use biome_console::{markup, Console, ConsoleExt, Markup};
 use biome_diagnostics::{Error, PrintDiagnostic, Severity};
 use std::time::Duration;
-use tracing::error;
-use tracing::log::Log;
 
 /// Information computed from a diff result
 #[derive(Debug)]
@@ -18,22 +16,10 @@ pub struct ReportDiff {
     pub after: String,
 }
 
-#[derive(Debug)]
-pub enum ReportKind {
-    Diagnostic(Error),
-    Diff(ReportDiff),
-}
-
-pub trait Reporter: Send + Sync // where
-//     W: ReportWriter,
-{
-    // fn report_message(&mut self, message: impl Display);
-
+pub trait Reporter: Send + Sync {
     fn report_not_printed_diagnostics(&mut self, number: u64);
     fn report_skipped_fixes(&mut self, number: u32);
     fn report_diagnostic(&mut self, diagnostic: Error);
-
-    fn report_diff(&mut self, path: String, report: ReportDiff);
 
     fn finish(self, execution: Execution) -> Dumper;
 }
@@ -47,18 +33,14 @@ pub trait ReportWriter {
 }
 
 pub struct ConsoleReporter {
-    pub(crate) mode: ReportMode,
     pub(crate) diagnostics: Vec<Error>,
-    pub(crate) verbose: bool,
     pub(crate) not_reported: u64,
     pub(crate) skipped_fixes: u32,
 }
 
 impl ConsoleReporter {
-    pub fn new(verbose: bool, mode: ReportMode) -> Self {
+    pub fn new() -> Self {
         Self {
-            mode,
-            verbose,
             diagnostics: Vec::default(),
             not_reported: 0,
             skipped_fixes: 0,
@@ -76,6 +58,8 @@ pub struct Dumper {
     pub duration: Duration,
     pub not_printed_diagnostics: u64,
     pub skipped_suggested_fixes: u32,
+    pub diagnostic_level: Severity,
+    pub verbose: bool,
 }
 
 impl Dumper {
@@ -95,6 +79,8 @@ impl Dumper {
             duration: Duration::default(),
             not_printed_diagnostics,
             skipped_suggested_fixes,
+            diagnostic_level: Severity::Information,
+            verbose: false,
         }
     }
 
@@ -115,8 +101,17 @@ impl Dumper {
         self.warnings = warnings;
         self
     }
+    pub fn with_diagnostic_level(mut self, diagnostic_level: Severity) -> Self {
+        self.diagnostic_level = diagnostic_level;
+        self
+    }
     pub fn with_errors(mut self, errors: usize) -> Self {
         self.errors = errors;
+        self
+    }
+
+    pub fn with_verbose(mut self, verbose: bool) -> Self {
+        self.verbose = verbose;
         self
     }
 
@@ -126,10 +121,11 @@ impl Dumper {
         console: &mut dyn Console,
     ) -> Result<(), CliDiagnostic> {
         for diagnostic in &self.diagnostics {
-            console.error(markup! {
-                // TODO: verbosity
-                {if true { PrintDiagnostic::verbose(diagnostic) } else { PrintDiagnostic::simple(diagnostic) }}
-            });
+            if diagnostic.severity() >= self.diagnostic_level {
+                console.error(markup! {
+                    {if self.verbose { PrintDiagnostic::verbose(diagnostic) } else { PrintDiagnostic::simple(diagnostic) }}
+                });
+            }
         }
 
         if self.execution.is_check() && self.skipped_suggested_fixes > 0 {
@@ -234,10 +230,6 @@ impl Reporter for ConsoleReporter {
 
     fn report_diagnostic(&mut self, diagnostic: Error) {
         self.diagnostics.push(diagnostic)
-    }
-
-    fn report_diff(&mut self, path: String, report: ReportDiff) {
-        todo!()
     }
 
     fn finish(self, execution: Execution) -> Dumper {

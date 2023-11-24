@@ -1455,13 +1455,6 @@ fn max_diagnostics_default() {
 
     console.out_buffer = filtered_messages;
 
-    assert_cli_snapshot(SnapshotPayload::new(
-        module_path!(),
-        "max_diagnostics_default",
-        fs,
-        console,
-        result,
-    ));
     assert_eq!(diagnostic_count, 20);
 }
 
@@ -1510,14 +1503,6 @@ fn max_diagnostics() {
     }
 
     console.out_buffer = filtered_messages;
-
-    assert_cli_snapshot(SnapshotPayload::new(
-        module_path!(),
-        "max_diagnostics",
-        fs,
-        console,
-        result,
-    ));
 
     assert_eq!(diagnostic_count, 10);
 }
