@@ -12,6 +12,7 @@ pub(crate) mod no_parameter_properties;
 pub(crate) mod no_unused_template_literal;
 pub(crate) mod use_block_statements;
 pub(crate) mod use_collapsed_else_if;
+pub(crate) mod use_consistent_array_type;
 pub(crate) mod use_default_parameter_last;
 pub(crate) mod use_enum_initializers;
 pub(crate) mod use_exponentiation_operator;
@@ -38,13 +39,13 @@ declare_group! {
             self :: no_unused_template_literal :: NoUnusedTemplateLiteral ,
             self :: use_block_statements :: UseBlockStatements ,
             self :: use_collapsed_else_if :: UseCollapsedElseIf ,
+            self :: use_consistent_array_type :: UseConsistentArrayType ,
             self :: use_default_parameter_last :: UseDefaultParameterLast ,
             self :: use_enum_initializers :: UseEnumInitializers ,
             self :: use_exponentiation_operator :: UseExponentiationOperator ,
             self :: use_literal_enum_members :: UseLiteralEnumMembers ,
             self :: use_numeric_literals :: UseNumericLiterals ,
             self :: use_self_closing_elements :: UseSelfClosingElements ,
-            self :: use_shorthand_array_type :: UseShorthandArrayType ,
             self :: use_single_case_statement :: UseSingleCaseStatement ,
             self :: use_single_var_declarator :: UseSingleVarDeclarator ,
             self :: use_template :: UseTemplate ,
