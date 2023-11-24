@@ -724,7 +724,8 @@ impl A11y {
         "useValidAriaValues",
         "useValidLang",
     ];
-    const RECOMMENDED_RULES: [&'static str; 27] = [
+    const RECOMMENDED_RULES: [&'static str; 28] = [
+        "noAccessKey",
         "noAriaUnsupportedElements",
         "noAutofocus",
         "noBlankTarget",
@@ -753,7 +754,8 @@ impl A11y {
         "useValidAriaValues",
         "useValidLang",
     ];
-    const RECOMMENDED_RULES_AS_FILTERS: [RuleFilter<'static>; 27] = [
+    const RECOMMENDED_RULES_AS_FILTERS: [RuleFilter<'static>; 28] = [
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]),
@@ -1121,7 +1123,7 @@ impl A11y {
     pub(crate) fn is_recommended_rule(rule_name: &str) -> bool {
         Self::RECOMMENDED_RULES.contains(&rule_name)
     }
-    pub(crate) fn recommended_rules_as_filters() -> [RuleFilter<'static>; 27] {
+    pub(crate) fn recommended_rules_as_filters() -> [RuleFilter<'static>; 28] {
         Self::RECOMMENDED_RULES_AS_FILTERS
     }
     pub(crate) fn all_rules_as_filters() -> [RuleFilter<'static>; 28] {

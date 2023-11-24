@@ -60,6 +60,7 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 The following rules are now recommended:
 
+- [a11y/noAccessKey](https://biomejs.dev/linter/rules/no-access-key)
 - [a11y/useHeadingContent](https://biomejs.dev/linter/rules/use-heading-content)
 - [complexity/useSimpleNumberKeys](https://biomejs.dev/linter/use-simple-number-keys)
 
