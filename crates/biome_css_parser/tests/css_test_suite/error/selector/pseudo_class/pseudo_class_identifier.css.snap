@@ -1,0 +1,331 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+: {}
+: .class{}
+.class: {}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selector_token: missing (optional),
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssPseudoClassSelector {
+                            colon_token: COLON@0..2 ":" [] [Whitespace(" ")],
+                            class: missing (required),
+                        },
+                    ],
+                },
+            ],
+            block: CssBlock {
+                l_curly_token: L_CURLY@2..3 "{" [] [],
+                declaration_list: CssDeclarationList [],
+                r_curly_token: R_CURLY@3..4 "}" [] [],
+            },
+        },
+        CssRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selector_token: missing (optional),
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssPseudoClassSelector {
+                            colon_token: COLON@4..7 ":" [Newline("\n")] [Whitespace(" ")],
+                            class: missing (required),
+                        },
+                        CssClassSelector {
+                            dot_token: DOT@7..8 "." [] [],
+                            name: CssIdentifier {
+                                value_token: IDENT@8..13 "class" [] [],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssBlock {
+                l_curly_token: L_CURLY@13..14 "{" [] [],
+                declaration_list: CssDeclarationList [],
+                r_curly_token: R_CURLY@14..15 "}" [] [],
+            },
+        },
+        CssRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selector_token: missing (optional),
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@15..17 "." [Newline("\n")] [],
+                            name: CssIdentifier {
+                                value_token: IDENT@17..22 "class" [] [],
+                            },
+                        },
+                        CssPseudoClassSelector {
+                            colon_token: COLON@22..24 ":" [] [Whitespace(" ")],
+                            class: missing (required),
+                        },
+                    ],
+                },
+            ],
+            block: CssBlock {
+                l_curly_token: L_CURLY@24..25 "{" [] [],
+                declaration_list: CssDeclarationList [],
+                r_curly_token: R_CURLY@25..26 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@26..27 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..27
+  0: (empty)
+  1: CSS_RULE_LIST@0..26
+    0: CSS_RULE@0..4
+      0: CSS_SELECTOR_LIST@0..2
+        0: CSS_COMPOUND_SELECTOR@0..2
+          0: (empty)
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@0..2
+            0: CSS_PSEUDO_CLASS_SELECTOR@0..2
+              0: COLON@0..2 ":" [] [Whitespace(" ")]
+              1: (empty)
+      1: CSS_BLOCK@2..4
+        0: L_CURLY@2..3 "{" [] []
+        1: CSS_DECLARATION_LIST@3..3
+        2: R_CURLY@3..4 "}" [] []
+    1: CSS_RULE@4..15
+      0: CSS_SELECTOR_LIST@4..13
+        0: CSS_COMPOUND_SELECTOR@4..13
+          0: (empty)
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@4..13
+            0: CSS_PSEUDO_CLASS_SELECTOR@4..7
+              0: COLON@4..7 ":" [Newline("\n")] [Whitespace(" ")]
+              1: (empty)
+            1: CSS_CLASS_SELECTOR@7..13
+              0: DOT@7..8 "." [] []
+              1: CSS_IDENTIFIER@8..13
+                0: IDENT@8..13 "class" [] []
+      1: CSS_BLOCK@13..15
+        0: L_CURLY@13..14 "{" [] []
+        1: CSS_DECLARATION_LIST@14..14
+        2: R_CURLY@14..15 "}" [] []
+    2: CSS_RULE@15..26
+      0: CSS_SELECTOR_LIST@15..24
+        0: CSS_COMPOUND_SELECTOR@15..24
+          0: (empty)
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@15..24
+            0: CSS_CLASS_SELECTOR@15..22
+              0: DOT@15..17 "." [Newline("\n")] []
+              1: CSS_IDENTIFIER@17..22
+                0: IDENT@17..22 "class" [] []
+            1: CSS_PSEUDO_CLASS_SELECTOR@22..24
+              0: COLON@22..24 ":" [] [Whitespace(" ")]
+              1: (empty)
+      1: CSS_BLOCK@24..26
+        0: L_CURLY@24..25 "{" [] []
+        1: CSS_DECLARATION_LIST@25..25
+        2: R_CURLY@25..26 "}" [] []
+  2: EOF@26..27 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+pseudo_class_identifier.css:1:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+  > 1 │ : {}
+      │   ^
+    2 │ : .class{}
+    3 │ .class: {}
+  
+  i Expected one of:
+  
+  - hover
+  - focus
+  - active
+  - first-child
+  - last-child
+  - nth-child
+  - nth-last-child
+  - first-of-type
+  - last-of-type
+  - nth-of-type
+  - nth-last-of-type
+  - only-child
+  - only-of-type
+  - checked
+  - disabled
+  - enabled
+  - required
+  - optional
+  - valid
+  - invalid
+  - in-range
+  - out-of-range
+  - read-only
+  - read-write
+  - placeholder-shown
+  - default
+  - checked
+  - indeterminate
+  - blank
+  - empty
+  - root
+  - target
+  - lang
+  - not
+  - is
+  - where
+  - fullscreen
+  - link
+  - visited
+  - any-link
+  - local-link
+  - scope
+  - current
+  - past
+  - future
+  
+pseudo_class_identifier.css:2:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    1 │ : {}
+  > 2 │ : .class{}
+      │   ^
+    3 │ .class: {}
+    4 │ 
+  
+  i Expected one of:
+  
+  - hover
+  - focus
+  - active
+  - first-child
+  - last-child
+  - nth-child
+  - nth-last-child
+  - first-of-type
+  - last-of-type
+  - nth-of-type
+  - nth-last-of-type
+  - only-child
+  - only-of-type
+  - checked
+  - disabled
+  - enabled
+  - required
+  - optional
+  - valid
+  - invalid
+  - in-range
+  - out-of-range
+  - read-only
+  - read-write
+  - placeholder-shown
+  - default
+  - checked
+  - indeterminate
+  - blank
+  - empty
+  - root
+  - target
+  - lang
+  - not
+  - is
+  - where
+  - fullscreen
+  - link
+  - visited
+  - any-link
+  - local-link
+  - scope
+  - current
+  - past
+  - future
+  
+pseudo_class_identifier.css:3:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    1 │ : {}
+    2 │ : .class{}
+  > 3 │ .class: {}
+      │         ^
+    4 │ 
+  
+  i Expected one of:
+  
+  - hover
+  - focus
+  - active
+  - first-child
+  - last-child
+  - nth-child
+  - nth-last-child
+  - first-of-type
+  - last-of-type
+  - nth-of-type
+  - nth-last-of-type
+  - only-child
+  - only-of-type
+  - checked
+  - disabled
+  - enabled
+  - required
+  - optional
+  - valid
+  - invalid
+  - in-range
+  - out-of-range
+  - read-only
+  - read-write
+  - placeholder-shown
+  - default
+  - checked
+  - indeterminate
+  - blank
+  - empty
+  - root
+  - target
+  - lang
+  - not
+  - is
+  - where
+  - fullscreen
+  - link
+  - visited
+  - any-link
+  - local-link
+  - scope
+  - current
+  - past
+  - future
+  
+```
+
+

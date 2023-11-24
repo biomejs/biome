@@ -39,6 +39,7 @@ SyntaxElement = SyntaxElement
 CssBogus = SyntaxElement*
 CssBogusSelector = SyntaxElement*
 CssBogusSubSelector = SyntaxElement*
+CssBogusPseudoClass = SyntaxElement*
 CssBogusBody =  SyntaxElement*
 CssBogusRule =  SyntaxElement*
 
@@ -161,6 +162,7 @@ AnyCssPseudoClass =
 	| CssPseudoClassFunctionRelativeSelectorList
 	| CssPseudoClassFunctionValueList
 	| CssPseudoClassFunctionNth
+	| CssBogusPseudoClass
 
 CssPseudoClassIdentifier =
 	name: CssIdentifier
