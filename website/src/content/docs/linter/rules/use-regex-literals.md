@@ -10,8 +10,16 @@ This rule is part of the [nursery](/linter/rules/#nursery) group.
 
 Enforce the use of the regular expression literals instead of the RegExp constructor if possible.
 
-It is considered a best practice to avoid the string literal notation on top of the regular expression notation,
-and use regular expression literals instead of the constructor function.
+There are two ways to create a regular expression:
+
+- Regular expression literals, e.g., `/abc/u`.
+- The RegExp constructor function, e.g., `new RegExp("abc", "u")` .
+
+The constructor function is particularly useful when you want to dynamically generate the pattern,
+because it takes string arguments.
+
+Using regular expression literals avoids some escaping required in a string literal,
+and are easier to analyze statically.
 
 Source: https://eslint.org/docs/latest/rules/prefer-regex-literals/
 
@@ -30,6 +38,8 @@ new RegExp("abc", "u");
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>new RegExp(&quot;abc&quot;, &quot;u&quot;);
    <strong>   │ </strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
     <strong>2 │ </strong>
+  
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.</span>
   
 <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Safe fix</span><span style="color: lightgreen;">: </span><span style="color: lightgreen;">Use a </span><span style="color: lightgreen;"><strong>literal notation</strong></span><span style="color: lightgreen;"> instead.</span>
   

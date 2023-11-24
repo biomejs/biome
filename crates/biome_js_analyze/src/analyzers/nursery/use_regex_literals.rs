@@ -19,8 +19,15 @@ use crate::{semantic_services::Semantic, JsRuleAction};
 declare_rule! {
     /// Enforce the use of the regular expression literals instead of the RegExp constructor if possible.
     ///
-    /// It is considered a best practice to avoid the string literal notation on top of the regular expression notation,
-    /// and use regular expression literals instead of the constructor function.
+    /// There are two ways to create a regular expression:
+    /// - Regular expression literals, e.g., `/abc/u`.
+    /// - The RegExp constructor function, e.g., `new RegExp("abc", "u")` .
+    ///
+    /// The constructor function is particularly useful when you want to dynamically generate the pattern,
+    /// because it takes string arguments.
+    ///
+    /// Using regular expression literals avoids some escaping required in a string literal,
+    /// and are easier to analyze statically.
     ///
     /// Source: https://eslint.org/docs/latest/rules/prefer-regex-literals/
     ///
