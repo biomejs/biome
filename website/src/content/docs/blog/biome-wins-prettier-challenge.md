@@ -130,8 +130,127 @@ biome check --diagnostic-level=error ./src
 
 ## New lint rules, and promoted rule
 
+### New rules
 
-#### Promoted rules
+- [noDefaultExport](https://biomejs.dev/linter/rules/no-default-export)
+  ```jsx
+  export default function f() {};
+  ```
+
+  <pre class="language-text"><code class="language-text">nursery/noDefaultExport.js:1:8 <a href="https://biomejs.dev/lint/rules/no-default-export">lint/nursery/noDefaultExport</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Avoid </span><span style="color: Orange;"><strong>default</strong></span><span style="color: Orange;"> exports.</span>
+
+  <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>export default function f() {};
+     <strong>   │ </strong>       <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
+      <strong>2 │ </strong>
+
+  <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Default exports cannot be easily discovered inside an editor and don't encourage the use of consistent names through a code base.</span>
+
+  <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Use a named export instead.</span>
+
+  </code></pre>
+
+- [noAriaHiddenOnFocusable](https://biomejs.dev/linter/rules/no-aria-hidden-on-focusable)
+
+  ```jsx
+  <div aria-hidden="true" tabIndex="0" />
+  ```
+
+  <pre class="language-text"><code class="language-text">nursery/noAriaHiddenOnFocusable.js:1:1 <a href="https://biomejs.dev/linter/rules/no-aria-hidden-on-focusable">lint/nursery/noAriaHiddenOnFocusable</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━
+
+  <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Disallow </span><span style="color: Tomato;"><strong>aria-hidden=&quot;true&quot;</strong></span><span style="color: Tomato;"> from being set on focusable elements.</span>
+
+  <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>&lt;div aria-hidden=&quot;true&quot; tabIndex=&quot;0&quot; /&gt;
+     <strong>   │ </strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
+      <strong>2 │ </strong>
+
+  <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;"><strong>aria-hidden</strong></span><span style="color: lightgreen;"> should not be set to </span><span style="color: lightgreen;"><strong>true</strong></span><span style="color: lightgreen;"> on focusable elements because this can lead to confusing behavior for screen reader users.</span>
+
+  <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Unsafe fix</span><span style="color: lightgreen;">: </span><span style="color: lightgreen;">Remove the aria-hidden attribute from the element.</span>
+
+  <strong>  </strong><strong>  1 │ </strong>&lt;div<span style="opacity: 0.8;">·</span><span style="color: Tomato;">a</span><span style="color: Tomato;">r</span><span style="color: Tomato;">i</span><span style="color: Tomato;">a</span><span style="color: Tomato;">-</span><span style="color: Tomato;">h</span><span style="color: Tomato;">i</span><span style="color: Tomato;">d</span><span style="color: Tomato;">d</span><span style="color: Tomato;">e</span><span style="color: Tomato;">n</span><span style="color: Tomato;">=</span><span style="color: Tomato;">&quot;</span><span style="color: Tomato;">t</span><span style="color: Tomato;">r</span><span style="color: Tomato;">u</span><span style="color: Tomato;">e</span><span style="color: Tomato;">&quot;</span><span style="opacity: 0.8;"><span style="color: Tomato;">·</span></span>tabIndex=&quot;0&quot;<span style="opacity: 0.8;">·</span>/&gt;
+  <strong>  </strong><strong>    │ </strong>     <span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span>
+  </code></pre>
+
+- [noImplicitAnyLet](https://biomejs.dev/linter/rules/no-implicit-any-let)
+
+  ```ts
+  var a;
+  a = 2;
+  ```
+
+  <pre class="language-text"><code class="language-text">nursery/noImplicitAnyLet.js:1:5 <a href="https://biomejs.dev/lint/rules/no-implicit-any-let">lint/nursery/noImplicitAnyLet</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This variable has implicitly the </span><span style="color: Tomato;"><strong>any</strong></span><span style="color: Tomato;"> type.</span>
+
+  <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>var a;
+     <strong>   │ </strong>    <strong><span style="color: Tomato;">^</span></strong>
+      <strong>2 │ </strong>a = 2;
+      <strong>3 │ </strong>
+
+  <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Variable declarations without type annotation and initialization have implicitly the </span><span style="color: lightgreen;"><strong>any</strong></span><span style="color: lightgreen;"> type. Declare type or initialize the variable with some value.</span>
+
+  </code></pre>
+
+- [useAwait](https://biomejs.dev/linter/rules/use-await)
+
+  ```jsx
+  async function fetchData() {
+  // Missing `await` for the promise returned by `fetch`
+    return fetch('/data');
+  }
+  ```
+
+  <pre class="language-text"><code class="language-text">nursery/useAwait.js:1:1 <a href="https://biomejs.dev/linter/rules/use-await">lint/nursery/useAwait</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This </span><span style="color: Tomato;"><strong>async</strong></span><span style="color: Tomato;"> function lacks an </span><span style="color: Tomato;"><strong>await</strong></span><span style="color: Tomato;"> expression.</span>
+
+  <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>async function fetchData() {
+     <strong>   │ </strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
+  <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>2 │ </strong>// Missing `await` for the promise returned by `fetch`
+  <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>3 │ </strong>  return fetch('/data');
+  <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>4 │ </strong>}
+     <strong>   │ </strong><strong><span style="color: Tomato;">^</span></strong>
+      <strong>5 │ </strong>
+
+  <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Remove this </span><span style="color: lightgreen;"><strong>async</strong></span><span style="color: lightgreen;"> modifier, or add an </span><span style="color: lightgreen;"><strong>await</strong></span><span style="color: lightgreen;"> expression in the function.</span>
+
+  <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>async function fetchData() {
+     <strong>   │ </strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
+  <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>2 │ </strong>// Missing `await` for the promise returned by `fetch`
+  <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>3 │ </strong>  return fetch('/data');
+  <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>4 │ </strong>}
+     <strong>   │ </strong><strong><span style="color: Tomato;">^</span></strong>
+      <strong>5 │ </strong>
+
+  <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;"><strong>Async</strong></span><span style="color: lightgreen;"> functions without </span><span style="color: lightgreen;"><strong>await</strong></span><span style="color: lightgreen;"> expressions may not need to be declared </span><span style="color: lightgreen;"><strong>async</strong></span><span style="color: lightgreen;">.</span>
+
+  </code></pre>
+- [useValidAriaRole](https://biomejs.dev/linter/rules/use-valid-aria-role)
+
+  ```jsx
+  <div role="datepicker"></div>
+  ```
+
+  <pre class="language-text"><code class="language-text">nursery/useValidAriaRole.js:1:1 <a href="https://biomejs.dev/lint/rules/use-valid-aria-role">lint/nursery/useValidAriaRole</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Enforce that elements with ARIA roles must use a valid, non-abstract ARIA role.</span>
+
+  <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>&lt;div role=&quot;datepicker&quot;&gt;&lt;/div&gt;
+     <strong>   │ </strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
+      <strong>2 │ </strong>
+
+  <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Check </span><span style="color: lightgreen;"><a href="https://www.w3.org/TR/wai-aria/#namefromauthor">WAI-ARIA</a></span><span style="color: lightgreen;"> for valid roles or provide options accordingly.</span>
+
+  <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Unsafe fix</span><span style="color: lightgreen;">: </span><span style="color: lightgreen;">Remove the invalid </span><span style="color: lightgreen;"><strong>role</strong></span><span style="color: lightgreen;"> attribute.
+  </span><span style="color: lightgreen;">  </span><span style="color: lightgreen;">  </span><span style="color: lightgreen;"> Check the list of all </span><span style="color: lightgreen;"><a href="https://www.w3.org/TR/wai-aria/#role_definitions">valid</a></span><span style="color: lightgreen;"> role attributes.</span>
+
+  <strong>  </strong><strong>  1 │ </strong>&lt;div<span style="opacity: 0.8;">·</span><span style="color: Tomato;">r</span><span style="color: Tomato;">o</span><span style="color: Tomato;">l</span><span style="color: Tomato;">e</span><span style="color: Tomato;">=</span><span style="color: Tomato;">&quot;</span><span style="color: Tomato;">d</span><span style="color: Tomato;">a</span><span style="color: Tomato;">t</span><span style="color: Tomato;">e</span><span style="color: Tomato;">p</span><span style="color: Tomato;">i</span><span style="color: Tomato;">c</span><span style="color: Tomato;">k</span><span style="color: Tomato;">e</span><span style="color: Tomato;">r</span><span style="color: Tomato;">&quot;</span>&gt;&lt;/div&gt;
+  <strong>  </strong><strong>    │ </strong>     <span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span>
+  </code></pre>
+
+### Promoted rules
 
 - [a11y/noInteractiveElementToNoninteractiveRole](https://biomejs.dev/linter/rules/no-interactive-element-to-noninteractive-role)
 - [complexity/noThisInStatic](https://biomejs.dev/linter/rules/no-this-in-static)
@@ -145,7 +264,7 @@ biome check --diagnostic-level=error ./src
 - [suspicious/noMisleadingInstantiator](https://biomejs.dev/linter/rules/no-misleading-instantiator)
 - [suspicious/noMisrefactoredShorthandAssign](https://biomejs.dev/linter/rules/no-misrefactored-shorthand-assign)
 
-The following rules are now recommended:
+### Recommended rules
 
 - [a11y/noAccessKey](https://biomejs.dev/linter/rules/no-access-key)
 
@@ -210,10 +329,9 @@ The following rules are now recommended:
   </code></pre>
 
 
-The following rules are now deprecated:
+### Deprecated rules
 
 - [correctness/noNewSymbol](https://biomejs.dev/linter/rules/no-new-symbol)
-
 
 The rule is replaced by [correctness/noInvalidNewBuiltin](https://biomejs.dev/linter/rules/no-invalid-new-builtin)
 
@@ -232,10 +350,10 @@ And a big welcome to our new joined maintainer:
 
 ## New sponsors
 
-Last but not least, we are proud to announce that we have two new sponsors"
+Last but not least, we are proud to announce that we have two new sponsors:
 
 - Gold: Shiguredō (https://shiguredo.jp/)
 - Bronze: KANAME (https://www.kanamekey.com/)
 
-If you want to economically contribute to the project, you can do so from the [GitHub Sponsorship page](https://github.com/sponsors/biomejs/) or the [Open Collective page](https://opencollective.com/biome).
+If you want to economically contribute to the project and help it to ship more features, you can do so from the [GitHub Sponsorship page](https://github.com/sponsors/biomejs/) or the [Open Collective page](https://opencollective.com/biome).
 
