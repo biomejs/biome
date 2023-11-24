@@ -250,20 +250,6 @@ biome check --diagnostic-level=error ./src
   <strong>  </strong><strong>    │ </strong>     <span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span>
   </code></pre>
 
-### Promoted rules
-
-- [a11y/noInteractiveElementToNoninteractiveRole](https://biomejs.dev/linter/rules/no-interactive-element-to-noninteractive-role)
-- [complexity/noThisInStatic](https://biomejs.dev/linter/rules/no-this-in-static)
-- [complexity/useArrowFunction](https://biomejs.dev/linter/rules/use-arrow-function)
-- [correctness/noEmptyCharacterClassInRegex](https://biomejs.dev/linter/rules/no-empty-character-class-in-regex)
-- [correctness/noInvalidNewBuiltin](https://biomejs.dev/linter/rules/no-invalid-new-builtin)
-- [style/noUselessElse](https://biomejs.dev/linter/rules/no-useless-else)
-- [style/useAsConstAssertion](https://biomejs.dev/linter/rules/use-as-const-assertion)
-- [style/useShorthandAssign](https://biomejs.dev/linter/rules/use-shorthand-assign)
-- [suspicious/noApproximativeNumericConstant](https://biomejs.dev/linter/rules/no-approximative-numeric-constant)
-- [suspicious/noMisleadingInstantiator](https://biomejs.dev/linter/rules/no-misleading-instantiator)
-- [suspicious/noMisrefactoredShorthandAssign](https://biomejs.dev/linter/rules/no-misrefactored-shorthand-assign)
-
 ### Recommended rules
 
 - [a11y/noAccessKey](https://biomejs.dev/linter/rules/no-access-key)
@@ -328,6 +314,20 @@ biome check --diagnostic-level=error ./src
 
   </code></pre>
 
+
+### Promoted rules
+
+- [a11y/noInteractiveElementToNoninteractiveRole](https://biomejs.dev/linter/rules/no-interactive-element-to-noninteractive-role)
+- [complexity/noThisInStatic](https://biomejs.dev/linter/rules/no-this-in-static)
+- [complexity/useArrowFunction](https://biomejs.dev/linter/rules/use-arrow-function)
+- [correctness/noEmptyCharacterClassInRegex](https://biomejs.dev/linter/rules/no-empty-character-class-in-regex)
+- [correctness/noInvalidNewBuiltin](https://biomejs.dev/linter/rules/no-invalid-new-builtin)
+- [style/noUselessElse](https://biomejs.dev/linter/rules/no-useless-else)
+- [style/useAsConstAssertion](https://biomejs.dev/linter/rules/use-as-const-assertion)
+- [style/useShorthandAssign](https://biomejs.dev/linter/rules/use-shorthand-assign)
+- [suspicious/noApproximativeNumericConstant](https://biomejs.dev/linter/rules/no-approximative-numeric-constant)
+- [suspicious/noMisleadingInstantiator](https://biomejs.dev/linter/rules/no-misleading-instantiator)
+- [suspicious/noMisrefactoredShorthandAssign](https://biomejs.dev/linter/rules/no-misrefactored-shorthand-assign)
 
 ### Deprecated rules
 
