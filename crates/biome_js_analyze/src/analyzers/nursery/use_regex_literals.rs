@@ -173,7 +173,13 @@ fn create_pattern(
     };
     let pattern = extract_literal_string(pattern)?;
     let pattern = pattern.replace("\\\\", "\\");
-    if pattern.is_empty() || pattern == "*" || pattern == "+" || pattern == "?" {
+
+    // if pattern is empty, (?:) is used instead.
+    if pattern.is_empty() {
+        return Some("(?:)".to_string());
+    }
+
+    if pattern == "*" || pattern == "+" || pattern == "?" {
         return None;
     }
     Some(pattern)
@@ -221,10 +227,10 @@ fn extract_literal_string(from: AnyJsCallArgument) -> Option<String> {
     expr.omit_parentheses()
         .as_static_value()
         .and_then(|value| match value {
-            StaticValue::String(_) => Some(value),
+            StaticValue::String(_) => Some(value.text().to_string().replace('\n', "\\n")),
+            StaticValue::EmptyString(_) => Some("".to_string()),
             _ => None,
         })
-        .map(|value| value.text().to_string().replace('\n', "\\n"))
 }
 
 fn extract_inner_text(expr: &JsComputedMemberExpression) -> Option<TokenText> {

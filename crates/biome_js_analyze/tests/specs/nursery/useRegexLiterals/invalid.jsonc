@@ -1,4 +1,7 @@
 [
+	"new RegExp('');",
+	"RegExp('', '');",
+	"new RegExp(String.raw``);",
 	"new RegExp('abc');",
 	"new RegExp((('abc')), ('g'));",
 	"RegExp('abc');",

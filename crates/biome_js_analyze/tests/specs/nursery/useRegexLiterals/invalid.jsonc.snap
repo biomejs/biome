@@ -4,6 +4,78 @@ expression: invalid.jsonc
 ---
 # Input
 ```js
+new RegExp('');
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ new RegExp('');
+      │ ^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - new·RegExp('');
+  + /(?:)/;
+  
+
+```
+
+# Input
+```js
+RegExp('', '');
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ RegExp('', '');
+      │ ^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - RegExp('',·'');
+  + /(?:)/;
+  
+
+```
+
+# Input
+```js
+new RegExp(String.raw``);
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a regular expression literal instead of the RegExp constructor.
+  
+  > 1 │ new RegExp(String.raw``);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.
+  
+  i Safe fix: Use a literal notation instead.
+  
+  - new·RegExp(String.raw``);
+  + /(?:)/;
+  
+
+```
+
+# Input
+```js
 new RegExp('abc');
 ```
 
