@@ -10,7 +10,9 @@ use biome_js_syntax::{
     AnyJsLiteralExpression, JsCallArguments, JsCallExpression, JsComputedMemberExpression,
     JsNewExpression, JsSyntaxKind, JsSyntaxToken,
 };
-use biome_rowan::{declare_node_union, AstNode, AstSeparatedList, BatchMutationExt, SyntaxError};
+use biome_rowan::{
+    declare_node_union, AstNode, AstSeparatedList, BatchMutationExt, SyntaxError, TokenText,
+};
 
 use crate::{semantic_services::Semantic, JsRuleAction};
 
@@ -145,7 +147,7 @@ fn create_pattern(
                 AnyJsExpression::JsStaticMemberExpression(expr) => {
                     let object = expr.object().ok()?;
                     let member = expr.member().ok()?;
-                    (object, member.text())
+                    (object, member.value_token().ok()?.token_text_trimmed())
                 }
                 AnyJsExpression::JsComputedMemberExpression(expr) => {
                     let object = expr.object().ok()?;
@@ -216,14 +218,11 @@ fn extract_literal_string(from: AnyJsCallArgument) -> Option<String> {
         .map(|value| value.text().to_string().replace('\n', "\\n"))
 }
 
-fn extract_inner_text(expr: &JsComputedMemberExpression) -> Option<String> {
-    let text = expr
-        .member()
+fn extract_inner_text(expr: &JsComputedMemberExpression) -> Option<TokenText> {
+    expr.member()
         .ok()?
         .as_any_js_literal_expression()?
         .as_js_string_literal_expression()?
         .inner_string_text()
-        .ok()?
-        .to_string();
-    Some(text)
+        .ok()
 }
