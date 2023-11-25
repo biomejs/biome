@@ -458,6 +458,7 @@ impl Format<JsFormatContext> for ArrowChain {
             AnyJsFunctionBody::JsFunctionBody(_)
                 | AnyJsFunctionBody::AnyJsExpression(
                     AnyJsExpression::JsObjectExpression(_)
+                        | AnyJsExpression::JsArrayExpression(_)
                         | AnyJsExpression::JsSequenceExpression(_)
                 )
         );
