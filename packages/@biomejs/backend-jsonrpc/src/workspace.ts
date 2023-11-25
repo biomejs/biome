@@ -758,6 +758,10 @@ export interface Nursery {
 	 */
 	noApproximativeNumericConstant?: RuleConfiguration;
 	/**
+	 * Enforce that aria-hidden="true" is not set on focusable elements.
+	 */
+	noAriaHiddenOnFocusable?: RuleConfiguration;
+	/**
 	 * Disallow default exports.
 	 */
 	noDefaultExport?: RuleConfiguration;
@@ -841,6 +845,10 @@ export interface Nursery {
 	 * Disallows package private imports.
 	 */
 	useImportRestrictions?: RuleConfiguration;
+	/**
+	 * Enforce the use of the regular expression literals instead of the RegExp constructor if possible.
+	 */
+	useRegexLiterals?: RuleConfiguration;
 	/**
 	 * Require assignment operator shorthand where possible.
 	 */
@@ -1483,6 +1491,7 @@ export type Category =
 	| "lint/correctness/useValidForDirection"
 	| "lint/correctness/useYield"
 	| "lint/nursery/noApproximativeNumericConstant"
+	| "lint/nursery/noAriaHiddenOnFocusable"
 	| "lint/nursery/noDefaultExport"
 	| "lint/nursery/noDuplicateJsonKeys"
 	| "lint/nursery/noEmptyBlockStatements"
@@ -1504,6 +1513,7 @@ export type Category =
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useGroupedTypeImport"
 	| "lint/nursery/useImportRestrictions"
+	| "lint/nursery/useRegexLiterals"
 	| "lint/nursery/useShorthandAssign"
 	| "lint/nursery/useValidAriaRole"
 	| "lint/performance/noAccumulatingSpread"

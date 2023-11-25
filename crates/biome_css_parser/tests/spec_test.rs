@@ -134,8 +134,7 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 #[test]
 pub fn quick_test() {
     let code = r#"
-:nth-child(+2n- 1) {}
-
+    :dir(ltr .class) {}
     "#;
     let root = parse_css(
         code,

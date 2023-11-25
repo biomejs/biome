@@ -1,0 +1,61 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: tsx/type_param.tsx
+---
+
+# Input
+
+```tsx
+// Arrow functions
+<T,>() => {};
+<const T,>() => {};
+<T extends U,>() => {};
+<const T extends U,>() => {};
+<T, U,>() => {};
+<const T, const U,>() => {};
+
+// Classes
+class A<T> {};
+class B<T,> {};
+class C<T,D,> {};
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing comma: All
+Semicolons: Always
+Arrow parentheses: Always
+Bracket spacing: true
+Bracket same line: false
+-----
+
+```tsx
+// Arrow functions
+<T,>() => {};
+<const T,>() => {};
+<T extends U>() => {};
+<const T extends U>() => {};
+<T, U>() => {};
+<const T, const U>() => {};
+
+// Classes
+class A<T> {}
+class B<T> {}
+class C<T, D> {}
+```
+
+

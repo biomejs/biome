@@ -762,6 +762,8 @@ impl<'src> CssLexer<'src> {
             b"nth-last-of-type" => NTHLASTOFTYPE_KW,
             b"nth-col" => NTHCOL_KW,
             b"nth-last-col" => NTHLASTCOL_KW,
+            b"ltr" => LTR_KW,
+            b"rtl" => RTL_KW,
             _ => IDENT,
         }
     }
