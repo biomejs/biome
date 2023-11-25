@@ -244,9 +244,21 @@ fn handle_dir_entry<'scope>(
             Some(
                 "package.json"
                     | "package-lock.json"
+                    | "package-lock.yaml"
+                    | ".npmrc"
+                    | "npm-shrinkwrap.json"
+                    | "yarn.lock"
+                    | "pnpm-lock.yaml"
+                    | "pnpm-workspace.yaml"
+                    | "composer.json"
+                    | "composer.lock"
                     | "typescript.json"
                     | "tsconfig.json"
                     | "jsconfig.json"
+                    | "bun.lockb"
+                    | "bunfig.toml"
+                    | "deno.json"
+                    | "deno.jsonc"
             )
         ) {
             return;
