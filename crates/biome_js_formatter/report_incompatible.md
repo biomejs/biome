@@ -1,6 +1,6 @@
 ## Overall Metrics
 
-**Average compatibility**: 95.89
+**Average compatibility**: 96.01
 
 <details>
     <summary>Definition</summary>
@@ -8,7 +8,7 @@
     $$average = \frac\{\sum_{file}^\{files}compatibility_\{file}}\{files}$$
 </details>
 
-**Compatible lines**: 96.51
+**Compatible lines**: 96.54
 
 <details>
     <summary>Definition</summary>
@@ -3830,16 +3830,6 @@
 **Prettier Similarity**: 88.89%
 
 
-### typescript/arrows/type_params.ts
-```diff
--<T,>(a) => {};
-+<T>(a) => {};
-
-```
-
-**Prettier Similarity**: 0.00%
-
-
 ### typescript/assignment/issue-5370.ts
 ```diff
 -const durabilityMetricsSelectable: Immutable.OrderedSet<SomeReportingMetric> =
@@ -4173,24 +4163,6 @@
 ```
 
 **Prettier Similarity**: 87.10%
-
-
-### typescript/compiler/contextualSignatureInstantiation2.ts
-```diff
- // dot f g x = f(g(x))
- var dot: <T, S>(f: (_: T) => S) => <U>(g: (_: U) => T) => (_: U) => S;
- dot =
-   <T, S>(f: (_: T) => S) =>
--  <U,>(g: (_: U) => T): ((r: U) => S) =>
-+  <U>(g: (_: U) => T): ((r: U) => S) =>
-   (x) =>
-     f(g(x));
- var id: <T>(x: T) => T;
- var r23 = dot(id)(id);
-
-```
-
-**Prettier Similarity**: 88.89%
 
 
 ### typescript/compiler/decrementAndIncrementOperators.ts
@@ -5943,8 +5915,7 @@
  function b<const T extends U>() {}
  function c<T, const U>() {}
  declare function d<const T>();
--<const T,>() => {};
-+<const T>() => {};
+ <const T,>() => {};
  <const T extends U>() => {};
  (function <const T>() {});
  (function <const T extends U>() {});
@@ -5976,7 +5947,7 @@
 
 ```
 
-**Prettier Similarity**: 93.75%
+**Prettier Similarity**: 96.88%
 
 
 ### typescript/typeparams/empty-parameters-with-arrow-function/issue-13817.ts
@@ -6042,37 +6013,6 @@
 ```
 
 **Prettier Similarity**: 96.97%
-
-
-### typescript/typeparams/line-breaking-after-extends.ts
-```diff
- export type OuterType1<
--  LongerLongerLongerLongerInnerType extends
--    LongerLongerLongerLongerOtherType<OneMoreType>,
-+  LongerLongerLongerLongerInnerType extends LongerLongerLongerLongerOtherType<OneMoreType>,
- > = { a: 1 };
- 
- export type OuterType2<
--  LongerLongerLongerLongerInnerType extends
--    LongerLongerLongerLongerLongerLongerLongerLongerOtherType,
-+  LongerLongerLongerLongerInnerType extends LongerLongerLongerLongerLongerLongerLongerLongerOtherType,
- > = { a: 1 };
- 
- export type OuterType3<
--  LongerLongerLongerLongerInnerType extends
--    LongerLongerLongerLongerLongerLo.ngerLongerLongerOtherType,
-+  LongerLongerLongerLongerInnerType extends LongerLongerLongerLongerLongerLo.ngerLongerLongerOtherType,
- > = { a: 1 };
- 
- export type OuterType4<
-   LongerLongerLongerLongerInnerType extends
-     | LongerLongerLongerLongerLongerLo
-     | ngerLongerLongerOtherType,
- > = { a: 1 };
-
-```
-
-**Prettier Similarity**: 70.00%
 
 
 ### typescript/typeparams/print-width-120/issue-7542.tsx
