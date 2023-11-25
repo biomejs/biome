@@ -449,10 +449,35 @@ impl Format<JsFormatContext> for ArrowChain {
 
         let is_assignment_rhs = self.options.assignment_layout.is_some();
 
+        // If this chain is the callee in a parent call expression, then we
+        // want it to break onto a new line to clearly show that the arrow
+        // chain is distinct and the _result_ is what's being called.
+        // Example:
+        //      (() => () => a)()
+        // becomes
+        //      (
+        //        () => () =>
+        //        a
+        //      )();
         let is_callee = head_parent
             .as_ref()
             .map_or(false, |parent| is_callee(head.syntax(), parent));
 
+        // With arrays, objects, sequence expressions, and block funciton bodies,
+        // the opening brace gives a convenient boundary to insert a line break,
+        // allowing that token to live immediately after the last arrow token
+        // and save a line from being printed with just the punctuation.
+        //
+        // (foo) => (bar) => [a, b]
+        //
+        // (foo) => (bar) => [
+        //   a,
+        //   b
+        // ]
+        //
+        // If the body is _not_ one of those kinds, then we'll want to insert a
+        // soft line break before the body so that it prints on a separate line
+        // in its entirety.
         let body_on_separate_line = !matches!(
             tail_body,
             AnyJsFunctionBody::JsFunctionBody(_)
@@ -463,7 +488,10 @@ impl Format<JsFormatContext> for ArrowChain {
                 )
         );
 
-        let break_before_chain = (is_callee && body_on_separate_line)
+        // If the arrow chain will break onto multiple lines, either because
+        // it's a callee or because the body is printed on its own line, then
+        // the signatures should be expanded first.
+        let break_signatures = (is_callee && body_on_separate_line)
             || matches!(
                 self.options.assignment_layout,
                 Some(AssignmentLikeLayout::ChainTailArrowFunction)
@@ -603,7 +631,7 @@ impl Format<JsFormatContext> for ArrowChain {
                 [
                     group(&indent(&format_arrow_signatures))
                         .with_group_id(Some(group_id))
-                        .should_expand(break_before_chain),
+                        .should_expand(break_signatures),
                     space(),
                     tail.fat_arrow_token().format(),
                     indent_if_group_breaks(&format_tail_body, group_id),
