@@ -265,11 +265,8 @@ interface L<in const T> {}
 
 #### Reason
 
-As mentioned in a [previous divergence](https://github.com/biomejs/biome/issues/739#issuecomment-1815374273), Prettier's Babel-based parsing for JS/TS is very loose and allows multiple errors to be ignored. Biome's parser intentionally has stricter rules than Prettier and correctly asserts that the `const` modifier is not allowed for type parameters of interfaces.
+As mentioned in a previous divergence, Prettier's Babel-based parsing for JS/TS is very loose and allows multiple errors to be ignored. Biome's parser intentionally has stricter rules than Prettier and correctly asserts that the `const` modifier is not allowed for type parameters of interfaces.
 
 In Prettier, this error isn't considered a parse error, and the AST is still built "correctly" with the appropriate nodes. When formatting, Prettier then just treats these nodes as normal and formats them accordingly.
 
 In Biome, the parsing errors result in a Bogus node, which may contain any number of valid nodes, invalid nodes, and/or raw tokens. When formatting, Biome treats bogus nodes as effectively plain text, printing them out verbatim into the resulting code without any formatting, since attempting to format could be incorrect and cause semantic changes.
-
-We could adopt the same strategy that discussed in a [previous comment](https://github.com/biomejs/biome/issues/739#issuecomment-1815374273) to fix the divergence.
-
