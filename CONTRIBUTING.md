@@ -390,3 +390,4 @@ Members are listed in alphabetical order. Members are free to use the full name,
 - [Victor Teles @victor-teles](https://github.com/victor-teles)
 - [Madeline Gurriarán @SuperchupuDev](https://github.com/SuperchupuDev)
 - [Takayuki Maeda @TaKO8Ki](https://github.com/TaKO8Ki)
+- [Jon Egeland @faultyserver](https://github.com/faultyserver)
