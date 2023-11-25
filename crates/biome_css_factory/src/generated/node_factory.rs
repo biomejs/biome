@@ -1189,6 +1189,16 @@ where
         slots,
     ))
 }
+pub fn css_bogus_pseudo_element<I>(slots: I) -> CssBogusPseudoElement
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssBogusPseudoElement::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_BOGUS_PSEUDO_ELEMENT,
+        slots,
+    ))
+}
 pub fn css_bogus_rule<I>(slots: I) -> CssBogusRule
 where
     I: IntoIterator<Item = Option<SyntaxElement>>,

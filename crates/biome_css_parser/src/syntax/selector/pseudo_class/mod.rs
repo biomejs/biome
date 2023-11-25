@@ -32,7 +32,7 @@ use self::function_value_list::{
 use self::identifier::parse_pseudo_class_identifier;
 use crate::parser::CssParser;
 use crate::syntax::is_at_identifier;
-use crate::syntax::parse_error::expect_any_pseudo_class;
+use crate::syntax::parse_error::expected_any_pseudo_class;
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::T;
 use biome_parser::prelude::ParsedSyntax;
@@ -51,9 +51,13 @@ pub(crate) fn parse_pseudo_class_selector(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
 
     p.bump(T![:]);
-    parse_pseudo_class(p).or_add_diagnostic(p, expect_any_pseudo_class);
 
-    Present(m.complete(p, CSS_PSEUDO_CLASS_SELECTOR))
+    let kind = match parse_pseudo_class(p).or_add_diagnostic(p, expected_any_pseudo_class) {
+        Some(_) => CSS_PSEUDO_CLASS_SELECTOR,
+        None => CSS_BOGUS_SUB_SELECTOR,
+    };
+
+    Present(m.complete(p, kind))
 }
 
 #[inline]

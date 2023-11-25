@@ -11,6 +11,7 @@ expression: snapshot
 :dir(rtl) {}
 :dir(   rtl   ) {}
 :dir(   RTL   ) {}
+:dir(ltr) .div {}
 
 ```
 
@@ -161,17 +162,60 @@ CssRoot {
                 r_curly_token: R_CURLY@81..82 "}" [] [],
             },
         },
+        CssRule {
+            prelude: CssSelectorList [
+                CssComplexSelector {
+                    left: CssCompoundSelector {
+                        nesting_selector_token: missing (optional),
+                        simple_selector: missing (optional),
+                        sub_selectors: CssSubSelectorList [
+                            CssPseudoClassSelector {
+                                colon_token: COLON@82..84 ":" [Newline("\n")] [],
+                                class: CssPseudoClassFunctionIdentifier {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@84..87 "dir" [] [],
+                                    },
+                                    l_paren_token: L_PAREN@87..88 "(" [] [],
+                                    ident: CssIdentifier {
+                                        value_token: IDENT@88..91 "ltr" [] [],
+                                    },
+                                    r_paren_token: R_PAREN@91..92 ")" [] [],
+                                },
+                            },
+                        ],
+                    },
+                    combinator: CSS_SPACE_LITERAL@92..93 " " [] [],
+                    right: CssCompoundSelector {
+                        nesting_selector_token: missing (optional),
+                        simple_selector: missing (optional),
+                        sub_selectors: CssSubSelectorList [
+                            CssClassSelector {
+                                dot_token: DOT@93..94 "." [] [],
+                                name: CssIdentifier {
+                                    value_token: IDENT@94..98 "div" [] [Whitespace(" ")],
+                                },
+                            },
+                        ],
+                    },
+                },
+            ],
+            block: CssBlock {
+                l_curly_token: L_CURLY@98..99 "{" [] [],
+                declaration_list: CssDeclarationList [],
+                r_curly_token: R_CURLY@99..100 "}" [] [],
+            },
+        },
     ],
-    eof_token: EOF@82..83 "" [Newline("\n")] [],
+    eof_token: EOF@100..101 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..83
+0: CSS_ROOT@0..101
   0: (empty)
-  1: CSS_RULE_LIST@0..82
+  1: CSS_RULE_LIST@0..100
     0: CSS_RULE@0..12
       0: CSS_SELECTOR_LIST@0..10
         0: CSS_COMPOUND_SELECTOR@0..10
@@ -267,7 +311,36 @@ CssRoot {
         0: L_CURLY@80..81 "{" [] []
         1: CSS_DECLARATION_LIST@81..81
         2: R_CURLY@81..82 "}" [] []
-  2: EOF@82..83 "" [Newline("\n")] []
+    5: CSS_RULE@82..100
+      0: CSS_SELECTOR_LIST@82..98
+        0: CSS_COMPLEX_SELECTOR@82..98
+          0: CSS_COMPOUND_SELECTOR@82..92
+            0: (empty)
+            1: (empty)
+            2: CSS_SUB_SELECTOR_LIST@82..92
+              0: CSS_PSEUDO_CLASS_SELECTOR@82..92
+                0: COLON@82..84 ":" [Newline("\n")] []
+                1: CSS_PSEUDO_CLASS_FUNCTION_IDENTIFIER@84..92
+                  0: CSS_IDENTIFIER@84..87
+                    0: IDENT@84..87 "dir" [] []
+                  1: L_PAREN@87..88 "(" [] []
+                  2: CSS_IDENTIFIER@88..91
+                    0: IDENT@88..91 "ltr" [] []
+                  3: R_PAREN@91..92 ")" [] []
+          1: CSS_SPACE_LITERAL@92..93 " " [] []
+          2: CSS_COMPOUND_SELECTOR@93..98
+            0: (empty)
+            1: (empty)
+            2: CSS_SUB_SELECTOR_LIST@93..98
+              0: CSS_CLASS_SELECTOR@93..98
+                0: DOT@93..94 "." [] []
+                1: CSS_IDENTIFIER@94..98
+                  0: IDENT@94..98 "div" [] [Whitespace(" ")]
+      1: CSS_BLOCK@98..100
+        0: L_CURLY@98..99 "{" [] []
+        1: CSS_DECLARATION_LIST@99..99
+        2: R_CURLY@99..100 "}" [] []
+  2: EOF@100..101 "" [Newline("\n")] []
 
 ```
 

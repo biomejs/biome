@@ -13,6 +13,7 @@ html:lang(de) {}
 html:lang(de, fr) {}
 :lang(fr-be) > q {}
 :lang(de) > q {}
+:lang(fr-be) .class {}
 
 ```
 
@@ -273,17 +274,62 @@ CssRoot {
                 r_curly_token: R_CURLY@130..131 "}" [] [],
             },
         },
+        CssRule {
+            prelude: CssSelectorList [
+                CssComplexSelector {
+                    left: CssCompoundSelector {
+                        nesting_selector_token: missing (optional),
+                        simple_selector: missing (optional),
+                        sub_selectors: CssSubSelectorList [
+                            CssPseudoClassSelector {
+                                colon_token: COLON@131..133 ":" [Newline("\n")] [],
+                                class: CssPseudoClassFunctionValueList {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@133..137 "lang" [] [],
+                                    },
+                                    l_paren_token: L_PAREN@137..138 "(" [] [],
+                                    value_list: CssPseudoValueList [
+                                        CssIdentifier {
+                                            value_token: IDENT@138..143 "fr-be" [] [],
+                                        },
+                                    ],
+                                    r_paren_token: R_PAREN@143..144 ")" [] [],
+                                },
+                            },
+                        ],
+                    },
+                    combinator: CSS_SPACE_LITERAL@144..145 " " [] [],
+                    right: CssCompoundSelector {
+                        nesting_selector_token: missing (optional),
+                        simple_selector: missing (optional),
+                        sub_selectors: CssSubSelectorList [
+                            CssClassSelector {
+                                dot_token: DOT@145..146 "." [] [],
+                                name: CssIdentifier {
+                                    value_token: IDENT@146..152 "class" [] [Whitespace(" ")],
+                                },
+                            },
+                        ],
+                    },
+                },
+            ],
+            block: CssBlock {
+                l_curly_token: L_CURLY@152..153 "{" [] [],
+                declaration_list: CssDeclarationList [],
+                r_curly_token: R_CURLY@153..154 "}" [] [],
+            },
+        },
     ],
-    eof_token: EOF@131..132 "" [Newline("\n")] [],
+    eof_token: EOF@154..155 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..132
+0: CSS_ROOT@0..155
   0: (empty)
-  1: CSS_RULE_LIST@0..131
+  1: CSS_RULE_LIST@0..154
     0: CSS_RULE@0..17
       0: CSS_SELECTOR_LIST@0..15
         0: CSS_COMPOUND_SELECTOR@0..15
@@ -449,7 +495,37 @@ CssRoot {
         0: L_CURLY@129..130 "{" [] []
         1: CSS_DECLARATION_LIST@130..130
         2: R_CURLY@130..131 "}" [] []
-  2: EOF@131..132 "" [Newline("\n")] []
+    7: CSS_RULE@131..154
+      0: CSS_SELECTOR_LIST@131..152
+        0: CSS_COMPLEX_SELECTOR@131..152
+          0: CSS_COMPOUND_SELECTOR@131..144
+            0: (empty)
+            1: (empty)
+            2: CSS_SUB_SELECTOR_LIST@131..144
+              0: CSS_PSEUDO_CLASS_SELECTOR@131..144
+                0: COLON@131..133 ":" [Newline("\n")] []
+                1: CSS_PSEUDO_CLASS_FUNCTION_VALUE_LIST@133..144
+                  0: CSS_IDENTIFIER@133..137
+                    0: IDENT@133..137 "lang" [] []
+                  1: L_PAREN@137..138 "(" [] []
+                  2: CSS_PSEUDO_VALUE_LIST@138..143
+                    0: CSS_IDENTIFIER@138..143
+                      0: IDENT@138..143 "fr-be" [] []
+                  3: R_PAREN@143..144 ")" [] []
+          1: CSS_SPACE_LITERAL@144..145 " " [] []
+          2: CSS_COMPOUND_SELECTOR@145..152
+            0: (empty)
+            1: (empty)
+            2: CSS_SUB_SELECTOR_LIST@145..152
+              0: CSS_CLASS_SELECTOR@145..152
+                0: DOT@145..146 "." [] []
+                1: CSS_IDENTIFIER@146..152
+                  0: IDENT@146..152 "class" [] [Whitespace(" ")]
+      1: CSS_BLOCK@152..154
+        0: L_CURLY@152..153 "{" [] []
+        1: CSS_DECLARATION_LIST@153..153
+        2: R_CURLY@153..154 "}" [] []
+  2: EOF@154..155 "" [Newline("\n")] []
 
 ```
 

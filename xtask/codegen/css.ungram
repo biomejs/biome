@@ -40,6 +40,7 @@ CssBogus = SyntaxElement*
 CssBogusSelector = SyntaxElement*
 CssBogusSubSelector = SyntaxElement*
 CssBogusPseudoClass = SyntaxElement*
+CssBogusPseudoElement = SyntaxElement*
 CssBogusBody =  SyntaxElement*
 CssBogusRule =  SyntaxElement*
 
@@ -339,6 +340,7 @@ AnyCssPseudoElement =
 	CssPseudoElementIdentifier
 	| CssPseudoElementFunctionSelector
   | CssPseudoElementFunctionIdentifier
+  | CssBogusPseudoElement
 
 // a::after {}
 //    ^^^^^

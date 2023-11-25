@@ -23,6 +23,7 @@ expression: snapshot
 :-webkit-any(:link:focus),
 #container-div :-webkit-any(:link, :hover),
 h1:-webkit-any(.h1class, #bar) {}
+:-moz-any(textarea) .div {}
 
 ```
 
@@ -874,17 +875,68 @@ CssRoot {
                 r_curly_token: R_CURLY@524..525 "}" [] [],
             },
         },
+        CssRule {
+            prelude: CssSelectorList [
+                CssComplexSelector {
+                    left: CssCompoundSelector {
+                        nesting_selector_token: missing (optional),
+                        simple_selector: missing (optional),
+                        sub_selectors: CssSubSelectorList [
+                            CssPseudoClassSelector {
+                                colon_token: COLON@525..527 ":" [Newline("\n")] [],
+                                class: CssPseudoClassFunctionCompoundSelectorList {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@527..535 "-moz-any" [] [],
+                                    },
+                                    l_paren_token: L_PAREN@535..536 "(" [] [],
+                                    compound_selector_list: CssCompoundSelectorList [
+                                        CssCompoundSelector {
+                                            nesting_selector_token: missing (optional),
+                                            simple_selector: CssTypeSelector {
+                                                ident: CssIdentifier {
+                                                    value_token: IDENT@536..544 "textarea" [] [],
+                                                },
+                                            },
+                                            sub_selectors: CssSubSelectorList [],
+                                        },
+                                    ],
+                                    r_paren_token: R_PAREN@544..545 ")" [] [],
+                                },
+                            },
+                        ],
+                    },
+                    combinator: CSS_SPACE_LITERAL@545..546 " " [] [],
+                    right: CssCompoundSelector {
+                        nesting_selector_token: missing (optional),
+                        simple_selector: missing (optional),
+                        sub_selectors: CssSubSelectorList [
+                            CssClassSelector {
+                                dot_token: DOT@546..547 "." [] [],
+                                name: CssIdentifier {
+                                    value_token: IDENT@547..551 "div" [] [Whitespace(" ")],
+                                },
+                            },
+                        ],
+                    },
+                },
+            ],
+            block: CssBlock {
+                l_curly_token: L_CURLY@551..552 "{" [] [],
+                declaration_list: CssDeclarationList [],
+                r_curly_token: R_CURLY@552..553 "}" [] [],
+            },
+        },
     ],
-    eof_token: EOF@525..526 "" [Newline("\n")] [],
+    eof_token: EOF@553..554 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..526
+0: CSS_ROOT@0..554
   0: (empty)
-  1: CSS_RULE_LIST@0..525
+  1: CSS_RULE_LIST@0..553
     0: CSS_RULE@0..25
       0: CSS_SELECTOR_LIST@0..23
         0: CSS_COMPOUND_SELECTOR@0..23
@@ -1449,7 +1501,41 @@ CssRoot {
         0: L_CURLY@523..524 "{" [] []
         1: CSS_DECLARATION_LIST@524..524
         2: R_CURLY@524..525 "}" [] []
-  2: EOF@525..526 "" [Newline("\n")] []
+    10: CSS_RULE@525..553
+      0: CSS_SELECTOR_LIST@525..551
+        0: CSS_COMPLEX_SELECTOR@525..551
+          0: CSS_COMPOUND_SELECTOR@525..545
+            0: (empty)
+            1: (empty)
+            2: CSS_SUB_SELECTOR_LIST@525..545
+              0: CSS_PSEUDO_CLASS_SELECTOR@525..545
+                0: COLON@525..527 ":" [Newline("\n")] []
+                1: CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR_LIST@527..545
+                  0: CSS_IDENTIFIER@527..535
+                    0: IDENT@527..535 "-moz-any" [] []
+                  1: L_PAREN@535..536 "(" [] []
+                  2: CSS_COMPOUND_SELECTOR_LIST@536..544
+                    0: CSS_COMPOUND_SELECTOR@536..544
+                      0: (empty)
+                      1: CSS_TYPE_SELECTOR@536..544
+                        0: CSS_IDENTIFIER@536..544
+                          0: IDENT@536..544 "textarea" [] []
+                      2: CSS_SUB_SELECTOR_LIST@544..544
+                  3: R_PAREN@544..545 ")" [] []
+          1: CSS_SPACE_LITERAL@545..546 " " [] []
+          2: CSS_COMPOUND_SELECTOR@546..551
+            0: (empty)
+            1: (empty)
+            2: CSS_SUB_SELECTOR_LIST@546..551
+              0: CSS_CLASS_SELECTOR@546..551
+                0: DOT@546..547 "." [] []
+                1: CSS_IDENTIFIER@547..551
+                  0: IDENT@547..551 "div" [] [Whitespace(" ")]
+      1: CSS_BLOCK@551..553
+        0: L_CURLY@551..552 "{" [] []
+        1: CSS_DECLARATION_LIST@552..552
+        2: R_CURLY@552..553 "}" [] []
+  2: EOF@553..554 "" [Newline("\n")] []
 
 ```
 

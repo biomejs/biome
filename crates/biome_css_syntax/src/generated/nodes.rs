@@ -2960,11 +2960,18 @@ impl AnyCssPseudoClassNthSelector {
 #[derive(Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum AnyCssPseudoElement {
+    CssBogusPseudoElement(CssBogusPseudoElement),
     CssPseudoElementFunctionIdentifier(CssPseudoElementFunctionIdentifier),
     CssPseudoElementFunctionSelector(CssPseudoElementFunctionSelector),
     CssPseudoElementIdentifier(CssPseudoElementIdentifier),
 }
 impl AnyCssPseudoElement {
+    pub fn as_css_bogus_pseudo_element(&self) -> Option<&CssBogusPseudoElement> {
+        match &self {
+            AnyCssPseudoElement::CssBogusPseudoElement(item) => Some(item),
+            _ => None,
+        }
+    }
     pub fn as_css_pseudo_element_function_identifier(
         &self,
     ) -> Option<&CssPseudoElementFunctionIdentifier> {
@@ -6526,6 +6533,11 @@ impl From<AnyCssPseudoClassNthSelector> for SyntaxElement {
         node.into()
     }
 }
+impl From<CssBogusPseudoElement> for AnyCssPseudoElement {
+    fn from(node: CssBogusPseudoElement) -> AnyCssPseudoElement {
+        AnyCssPseudoElement::CssBogusPseudoElement(node)
+    }
+}
 impl From<CssPseudoElementFunctionIdentifier> for AnyCssPseudoElement {
     fn from(node: CssPseudoElementFunctionIdentifier) -> AnyCssPseudoElement {
         AnyCssPseudoElement::CssPseudoElementFunctionIdentifier(node)
@@ -6543,19 +6555,24 @@ impl From<CssPseudoElementIdentifier> for AnyCssPseudoElement {
 }
 impl AstNode for AnyCssPseudoElement {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = CssPseudoElementFunctionIdentifier::KIND_SET
+    const KIND_SET: SyntaxKindSet<Language> = CssBogusPseudoElement::KIND_SET
+        .union(CssPseudoElementFunctionIdentifier::KIND_SET)
         .union(CssPseudoElementFunctionSelector::KIND_SET)
         .union(CssPseudoElementIdentifier::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            CSS_PSEUDO_ELEMENT_FUNCTION_IDENTIFIER
+            CSS_BOGUS_PSEUDO_ELEMENT
+                | CSS_PSEUDO_ELEMENT_FUNCTION_IDENTIFIER
                 | CSS_PSEUDO_ELEMENT_FUNCTION_SELECTOR
                 | CSS_PSEUDO_ELEMENT_IDENTIFIER
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
+            CSS_BOGUS_PSEUDO_ELEMENT => {
+                AnyCssPseudoElement::CssBogusPseudoElement(CssBogusPseudoElement { syntax })
+            }
             CSS_PSEUDO_ELEMENT_FUNCTION_IDENTIFIER => {
                 AnyCssPseudoElement::CssPseudoElementFunctionIdentifier(
                     CssPseudoElementFunctionIdentifier { syntax },
@@ -6577,6 +6594,7 @@ impl AstNode for AnyCssPseudoElement {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
+            AnyCssPseudoElement::CssBogusPseudoElement(it) => &it.syntax,
             AnyCssPseudoElement::CssPseudoElementFunctionIdentifier(it) => &it.syntax,
             AnyCssPseudoElement::CssPseudoElementFunctionSelector(it) => &it.syntax,
             AnyCssPseudoElement::CssPseudoElementIdentifier(it) => &it.syntax,
@@ -6584,6 +6602,7 @@ impl AstNode for AnyCssPseudoElement {
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
+            AnyCssPseudoElement::CssBogusPseudoElement(it) => it.syntax,
             AnyCssPseudoElement::CssPseudoElementFunctionIdentifier(it) => it.syntax,
             AnyCssPseudoElement::CssPseudoElementFunctionSelector(it) => it.syntax,
             AnyCssPseudoElement::CssPseudoElementIdentifier(it) => it.syntax,
@@ -6593,6 +6612,7 @@ impl AstNode for AnyCssPseudoElement {
 impl std::fmt::Debug for AnyCssPseudoElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            AnyCssPseudoElement::CssBogusPseudoElement(it) => std::fmt::Debug::fmt(it, f),
             AnyCssPseudoElement::CssPseudoElementFunctionIdentifier(it) => {
                 std::fmt::Debug::fmt(it, f)
             }
@@ -6606,6 +6626,7 @@ impl std::fmt::Debug for AnyCssPseudoElement {
 impl From<AnyCssPseudoElement> for SyntaxNode {
     fn from(n: AnyCssPseudoElement) -> SyntaxNode {
         match n {
+            AnyCssPseudoElement::CssBogusPseudoElement(it) => it.into(),
             AnyCssPseudoElement::CssPseudoElementFunctionIdentifier(it) => it.into(),
             AnyCssPseudoElement::CssPseudoElementFunctionSelector(it) => it.into(),
             AnyCssPseudoElement::CssPseudoElementIdentifier(it) => it.into(),
@@ -7747,6 +7768,63 @@ impl From<CssBogusPseudoClass> for SyntaxNode {
 }
 impl From<CssBogusPseudoClass> for SyntaxElement {
     fn from(n: CssBogusPseudoClass) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssBogusPseudoElement {
+    syntax: SyntaxNode,
+}
+impl CssBogusPseudoElement {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn items(&self) -> SyntaxElementChildren {
+        support::elements(&self.syntax)
+    }
+}
+impl AstNode for CssBogusPseudoElement {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_BOGUS_PSEUDO_ELEMENT as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_BOGUS_PSEUDO_ELEMENT
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssBogusPseudoElement {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssBogusPseudoElement")
+            .field("items", &DebugSyntaxElementChildren(self.items()))
+            .finish()
+    }
+}
+impl From<CssBogusPseudoElement> for SyntaxNode {
+    fn from(n: CssBogusPseudoElement) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssBogusPseudoElement> for SyntaxElement {
+    fn from(n: CssBogusPseudoElement) -> SyntaxElement {
         n.syntax.into()
     }
 }

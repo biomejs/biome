@@ -1,6 +1,6 @@
 use crate::parser::CssParser;
 use crate::syntax::parse_error::{
-    expect_any_attribute_matcher_name, expect_any_attribute_modifier, expected_identifier,
+    expected_any_attribute_matcher_name, expected_any_attribute_modifier, expected_identifier,
 };
 use crate::syntax::selector::selector_lex_context;
 use crate::syntax::{is_at_identifier, parse_css_string, parse_regular_identifier};
@@ -57,14 +57,14 @@ fn parse_attribute_matcher(p: &mut CssParser) -> ParsedSyntax {
 
     // bump attribute matcher type
     p.bump_any();
-    parse_attribute_matcher_value(p).or_add_diagnostic(p, expect_any_attribute_matcher_name);
+    parse_attribute_matcher_value(p).or_add_diagnostic(p, expected_any_attribute_matcher_name);
 
     let modifier = p.cur();
     if modifier.is_attribute_modifier_keyword() {
         p.bump(modifier);
     } else if modifier != T![']'] {
         // if we have an invalid modifier, we should add a diagnostic and bump it
-        let diagnostic = expect_any_attribute_modifier(p, p.cur_range());
+        let diagnostic = expected_any_attribute_modifier(p, p.cur_range());
         p.error(diagnostic);
         p.bump_any();
     }

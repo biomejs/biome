@@ -31,7 +31,7 @@ a:not(:not(:hover)) {}
 section:not(:not(h1, h2, h3, h4, h5, h6)) {}
 section:not(:not(h1, h2, h3, h4, h5, h6)) {}
 ul li:not(:first-of-type) {}
-
+:not(p) .div {}
 
 ```
 
@@ -1350,17 +1350,68 @@ CssRoot {
                 r_curly_token: R_CURLY@571..572 "}" [] [],
             },
         },
+        CssRule {
+            prelude: CssSelectorList [
+                CssComplexSelector {
+                    left: CssCompoundSelector {
+                        nesting_selector_token: missing (optional),
+                        simple_selector: missing (optional),
+                        sub_selectors: CssSubSelectorList [
+                            CssPseudoClassSelector {
+                                colon_token: COLON@572..574 ":" [Newline("\n")] [],
+                                class: CssPseudoClassFunctionSelectorList {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@574..577 "not" [] [],
+                                    },
+                                    l_paren_token: L_PAREN@577..578 "(" [] [],
+                                    selector_list: CssSelectorList [
+                                        CssCompoundSelector {
+                                            nesting_selector_token: missing (optional),
+                                            simple_selector: CssTypeSelector {
+                                                ident: CssIdentifier {
+                                                    value_token: IDENT@578..579 "p" [] [],
+                                                },
+                                            },
+                                            sub_selectors: CssSubSelectorList [],
+                                        },
+                                    ],
+                                    r_paren_token: R_PAREN@579..580 ")" [] [],
+                                },
+                            },
+                        ],
+                    },
+                    combinator: CSS_SPACE_LITERAL@580..581 " " [] [],
+                    right: CssCompoundSelector {
+                        nesting_selector_token: missing (optional),
+                        simple_selector: missing (optional),
+                        sub_selectors: CssSubSelectorList [
+                            CssClassSelector {
+                                dot_token: DOT@581..582 "." [] [],
+                                name: CssIdentifier {
+                                    value_token: IDENT@582..586 "div" [] [Whitespace(" ")],
+                                },
+                            },
+                        ],
+                    },
+                },
+            ],
+            block: CssBlock {
+                l_curly_token: L_CURLY@586..587 "{" [] [],
+                declaration_list: CssDeclarationList [],
+                r_curly_token: R_CURLY@587..588 "}" [] [],
+            },
+        },
     ],
-    eof_token: EOF@572..574 "" [Newline("\n"), Newline("\n")] [],
+    eof_token: EOF@588..589 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..574
+0: CSS_ROOT@0..589
   0: (empty)
-  1: CSS_RULE_LIST@0..572
+  1: CSS_RULE_LIST@0..588
     0: CSS_RULE@0..10
       0: CSS_SELECTOR_LIST@0..8
         0: CSS_COMPOUND_SELECTOR@0..8
@@ -2226,7 +2277,41 @@ CssRoot {
         0: L_CURLY@570..571 "{" [] []
         1: CSS_DECLARATION_LIST@571..571
         2: R_CURLY@571..572 "}" [] []
-  2: EOF@572..574 "" [Newline("\n"), Newline("\n")] []
+    23: CSS_RULE@572..588
+      0: CSS_SELECTOR_LIST@572..586
+        0: CSS_COMPLEX_SELECTOR@572..586
+          0: CSS_COMPOUND_SELECTOR@572..580
+            0: (empty)
+            1: (empty)
+            2: CSS_SUB_SELECTOR_LIST@572..580
+              0: CSS_PSEUDO_CLASS_SELECTOR@572..580
+                0: COLON@572..574 ":" [Newline("\n")] []
+                1: CSS_PSEUDO_CLASS_FUNCTION_SELECTOR_LIST@574..580
+                  0: CSS_IDENTIFIER@574..577
+                    0: IDENT@574..577 "not" [] []
+                  1: L_PAREN@577..578 "(" [] []
+                  2: CSS_SELECTOR_LIST@578..579
+                    0: CSS_COMPOUND_SELECTOR@578..579
+                      0: (empty)
+                      1: CSS_TYPE_SELECTOR@578..579
+                        0: CSS_IDENTIFIER@578..579
+                          0: IDENT@578..579 "p" [] []
+                      2: CSS_SUB_SELECTOR_LIST@579..579
+                  3: R_PAREN@579..580 ")" [] []
+          1: CSS_SPACE_LITERAL@580..581 " " [] []
+          2: CSS_COMPOUND_SELECTOR@581..586
+            0: (empty)
+            1: (empty)
+            2: CSS_SUB_SELECTOR_LIST@581..586
+              0: CSS_CLASS_SELECTOR@581..586
+                0: DOT@581..582 "." [] []
+                1: CSS_IDENTIFIER@582..586
+                  0: IDENT@582..586 "div" [] [Whitespace(" ")]
+      1: CSS_BLOCK@586..588
+        0: L_CURLY@586..587 "{" [] []
+        1: CSS_DECLARATION_LIST@587..587
+        2: R_CURLY@587..588 "}" [] []
+  2: EOF@588..589 "" [Newline("\n")] []
 
 ```
 

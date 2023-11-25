@@ -16,6 +16,7 @@ section:not(:has(h1, h2, h3, h4, h5, h6)) {}
 section:has(:not(h1, h2, h3, h4, h5, h6)) {}
 div:has(p) {}
 .header-group:has(h2):has(.subtitle) h2 {}
+a:has(> img) .div {}
 
 ```
 
@@ -661,17 +662,75 @@ CssRoot {
                 r_curly_token: R_CURLY@281..282 "}" [] [],
             },
         },
+        CssRule {
+            prelude: CssSelectorList [
+                CssComplexSelector {
+                    left: CssCompoundSelector {
+                        nesting_selector_token: missing (optional),
+                        simple_selector: CssTypeSelector {
+                            ident: CssIdentifier {
+                                value_token: IDENT@282..284 "a" [Newline("\n")] [],
+                            },
+                        },
+                        sub_selectors: CssSubSelectorList [
+                            CssPseudoClassSelector {
+                                colon_token: COLON@284..285 ":" [] [],
+                                class: CssPseudoClassFunctionRelativeSelectorList {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@285..288 "has" [] [],
+                                    },
+                                    l_paren_token: L_PAREN@288..289 "(" [] [],
+                                    relative_selector_list: CssRelativeSelectorList [
+                                        CssRelativeSelector {
+                                            combinator: R_ANGLE@289..291 ">" [] [Whitespace(" ")],
+                                            selector: CssCompoundSelector {
+                                                nesting_selector_token: missing (optional),
+                                                simple_selector: CssTypeSelector {
+                                                    ident: CssIdentifier {
+                                                        value_token: IDENT@291..294 "img" [] [],
+                                                    },
+                                                },
+                                                sub_selectors: CssSubSelectorList [],
+                                            },
+                                        },
+                                    ],
+                                    r_paren_token: R_PAREN@294..295 ")" [] [],
+                                },
+                            },
+                        ],
+                    },
+                    combinator: CSS_SPACE_LITERAL@295..296 " " [] [],
+                    right: CssCompoundSelector {
+                        nesting_selector_token: missing (optional),
+                        simple_selector: missing (optional),
+                        sub_selectors: CssSubSelectorList [
+                            CssClassSelector {
+                                dot_token: DOT@296..297 "." [] [],
+                                name: CssIdentifier {
+                                    value_token: IDENT@297..301 "div" [] [Whitespace(" ")],
+                                },
+                            },
+                        ],
+                    },
+                },
+            ],
+            block: CssBlock {
+                l_curly_token: L_CURLY@301..302 "{" [] [],
+                declaration_list: CssDeclarationList [],
+                r_curly_token: R_CURLY@302..303 "}" [] [],
+            },
+        },
     ],
-    eof_token: EOF@282..283 "" [Newline("\n")] [],
+    eof_token: EOF@303..304 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..283
+0: CSS_ROOT@0..304
   0: (empty)
-  1: CSS_RULE_LIST@0..282
+  1: CSS_RULE_LIST@0..303
     0: CSS_RULE@0..15
       0: CSS_SELECTOR_LIST@0..13
         0: CSS_COMPOUND_SELECTOR@0..13
@@ -1093,7 +1152,45 @@ CssRoot {
         0: L_CURLY@280..281 "{" [] []
         1: CSS_DECLARATION_LIST@281..281
         2: R_CURLY@281..282 "}" [] []
-  2: EOF@282..283 "" [Newline("\n")] []
+    10: CSS_RULE@282..303
+      0: CSS_SELECTOR_LIST@282..301
+        0: CSS_COMPLEX_SELECTOR@282..301
+          0: CSS_COMPOUND_SELECTOR@282..295
+            0: (empty)
+            1: CSS_TYPE_SELECTOR@282..284
+              0: CSS_IDENTIFIER@282..284
+                0: IDENT@282..284 "a" [Newline("\n")] []
+            2: CSS_SUB_SELECTOR_LIST@284..295
+              0: CSS_PSEUDO_CLASS_SELECTOR@284..295
+                0: COLON@284..285 ":" [] []
+                1: CSS_PSEUDO_CLASS_FUNCTION_RELATIVE_SELECTOR_LIST@285..295
+                  0: CSS_IDENTIFIER@285..288
+                    0: IDENT@285..288 "has" [] []
+                  1: L_PAREN@288..289 "(" [] []
+                  2: CSS_RELATIVE_SELECTOR_LIST@289..294
+                    0: CSS_RELATIVE_SELECTOR@289..294
+                      0: R_ANGLE@289..291 ">" [] [Whitespace(" ")]
+                      1: CSS_COMPOUND_SELECTOR@291..294
+                        0: (empty)
+                        1: CSS_TYPE_SELECTOR@291..294
+                          0: CSS_IDENTIFIER@291..294
+                            0: IDENT@291..294 "img" [] []
+                        2: CSS_SUB_SELECTOR_LIST@294..294
+                  3: R_PAREN@294..295 ")" [] []
+          1: CSS_SPACE_LITERAL@295..296 " " [] []
+          2: CSS_COMPOUND_SELECTOR@296..301
+            0: (empty)
+            1: (empty)
+            2: CSS_SUB_SELECTOR_LIST@296..301
+              0: CSS_CLASS_SELECTOR@296..301
+                0: DOT@296..297 "." [] []
+                1: CSS_IDENTIFIER@297..301
+                  0: IDENT@297..301 "div" [] [Whitespace(" ")]
+      1: CSS_BLOCK@301..303
+        0: L_CURLY@301..302 "{" [] []
+        1: CSS_DECLARATION_LIST@302..302
+        2: R_CURLY@302..303 "}" [] []
+  2: EOF@303..304 "" [Newline("\n")] []
 
 ```
 

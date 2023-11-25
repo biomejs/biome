@@ -17,6 +17,7 @@ impl SyntaxFactory for CssSyntaxFactory {
             CSS_BOGUS
             | CSS_BOGUS_BODY
             | CSS_BOGUS_PSEUDO_CLASS
+            | CSS_BOGUS_PSEUDO_ELEMENT
             | CSS_BOGUS_RULE
             | CSS_BOGUS_SELECTOR
             | CSS_BOGUS_SUB_SELECTOR => RawSyntaxNode::new(kind, children.into_iter().map(Some)),

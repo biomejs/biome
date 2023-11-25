@@ -8,6 +8,7 @@ expression: snapshot
 ```css
 :host-context(h1) {}
 :host-context(   h1   ) {}
+:host-context(h1) .div {}
 
 ```
 
@@ -26,7 +27,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoClassSelector {
                             colon_token: COLON@0..1 ":" [] [],
-                            class: CssPseudoClassFunctionCompoundSelector {
+                            class: CssPseudoClassFunctionSelector {
                                 name: CssIdentifier {
                                     value_token: IDENT@1..13 "host-context" [] [],
                                 },
@@ -60,7 +61,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoClassSelector {
                             colon_token: COLON@20..22 ":" [Newline("\n")] [],
-                            class: CssPseudoClassFunctionCompoundSelector {
+                            class: CssPseudoClassFunctionSelector {
                                 name: CssIdentifier {
                                     value_token: IDENT@22..34 "host-context" [] [],
                                 },
@@ -86,17 +87,66 @@ CssRoot {
                 r_curly_token: R_CURLY@46..47 "}" [] [],
             },
         },
+        CssRule {
+            prelude: CssSelectorList [
+                CssComplexSelector {
+                    left: CssCompoundSelector {
+                        nesting_selector_token: missing (optional),
+                        simple_selector: missing (optional),
+                        sub_selectors: CssSubSelectorList [
+                            CssPseudoClassSelector {
+                                colon_token: COLON@47..49 ":" [Newline("\n")] [],
+                                class: CssPseudoClassFunctionSelector {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@49..61 "host-context" [] [],
+                                    },
+                                    l_paren_token: L_PAREN@61..62 "(" [] [],
+                                    selector: CssCompoundSelector {
+                                        nesting_selector_token: missing (optional),
+                                        simple_selector: CssTypeSelector {
+                                            ident: CssIdentifier {
+                                                value_token: IDENT@62..64 "h1" [] [],
+                                            },
+                                        },
+                                        sub_selectors: CssSubSelectorList [],
+                                    },
+                                    r_paren_token: R_PAREN@64..65 ")" [] [],
+                                },
+                            },
+                        ],
+                    },
+                    combinator: CSS_SPACE_LITERAL@65..66 " " [] [],
+                    right: CssCompoundSelector {
+                        nesting_selector_token: missing (optional),
+                        simple_selector: missing (optional),
+                        sub_selectors: CssSubSelectorList [
+                            CssClassSelector {
+                                dot_token: DOT@66..67 "." [] [],
+                                name: CssIdentifier {
+                                    value_token: IDENT@67..71 "div" [] [Whitespace(" ")],
+                                },
+                            },
+                        ],
+                    },
+                },
+            ],
+            block: CssBlock {
+                l_curly_token: L_CURLY@71..72 "{" [] [],
+                declaration_list: CssDeclarationList [],
+                r_curly_token: R_CURLY@72..73 "}" [] [],
+            },
+        },
     ],
-    eof_token: EOF@47..48 "" [Newline("\n")] [],
+    eof_token: EOF@73..74 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..48
+0: CSS_ROOT@0..74
   0: (empty)
-  1: CSS_RULE_LIST@0..47
+  1: CSS_RULE_LIST@0..73
     0: CSS_RULE@0..20
       0: CSS_SELECTOR_LIST@0..18
         0: CSS_COMPOUND_SELECTOR@0..18
@@ -105,7 +155,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@0..18
             0: CSS_PSEUDO_CLASS_SELECTOR@0..18
               0: COLON@0..1 ":" [] []
-              1: CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR@1..18
+              1: CSS_PSEUDO_CLASS_FUNCTION_SELECTOR@1..18
                 0: CSS_IDENTIFIER@1..13
                   0: IDENT@1..13 "host-context" [] []
                 1: L_PAREN@13..14 "(" [] []
@@ -128,7 +178,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@20..45
             0: CSS_PSEUDO_CLASS_SELECTOR@20..45
               0: COLON@20..22 ":" [Newline("\n")] []
-              1: CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR@22..45
+              1: CSS_PSEUDO_CLASS_FUNCTION_SELECTOR@22..45
                 0: CSS_IDENTIFIER@22..34
                   0: IDENT@22..34 "host-context" [] []
                 1: L_PAREN@34..38 "(" [] [Whitespace("   ")]
@@ -143,7 +193,40 @@ CssRoot {
         0: L_CURLY@45..46 "{" [] []
         1: CSS_DECLARATION_LIST@46..46
         2: R_CURLY@46..47 "}" [] []
-  2: EOF@47..48 "" [Newline("\n")] []
+    2: CSS_RULE@47..73
+      0: CSS_SELECTOR_LIST@47..71
+        0: CSS_COMPLEX_SELECTOR@47..71
+          0: CSS_COMPOUND_SELECTOR@47..65
+            0: (empty)
+            1: (empty)
+            2: CSS_SUB_SELECTOR_LIST@47..65
+              0: CSS_PSEUDO_CLASS_SELECTOR@47..65
+                0: COLON@47..49 ":" [Newline("\n")] []
+                1: CSS_PSEUDO_CLASS_FUNCTION_SELECTOR@49..65
+                  0: CSS_IDENTIFIER@49..61
+                    0: IDENT@49..61 "host-context" [] []
+                  1: L_PAREN@61..62 "(" [] []
+                  2: CSS_COMPOUND_SELECTOR@62..64
+                    0: (empty)
+                    1: CSS_TYPE_SELECTOR@62..64
+                      0: CSS_IDENTIFIER@62..64
+                        0: IDENT@62..64 "h1" [] []
+                    2: CSS_SUB_SELECTOR_LIST@64..64
+                  3: R_PAREN@64..65 ")" [] []
+          1: CSS_SPACE_LITERAL@65..66 " " [] []
+          2: CSS_COMPOUND_SELECTOR@66..71
+            0: (empty)
+            1: (empty)
+            2: CSS_SUB_SELECTOR_LIST@66..71
+              0: CSS_CLASS_SELECTOR@66..71
+                0: DOT@66..67 "." [] []
+                1: CSS_IDENTIFIER@67..71
+                  0: IDENT@67..71 "div" [] [Whitespace(" ")]
+      1: CSS_BLOCK@71..73
+        0: L_CURLY@71..72 "{" [] []
+        1: CSS_DECLARATION_LIST@72..72
+        2: R_CURLY@72..73 "}" [] []
+  2: EOF@73..74 "" [Newline("\n")] []
 
 ```
 

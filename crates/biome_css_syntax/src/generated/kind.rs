@@ -326,6 +326,7 @@ pub enum CssSyntaxKind {
     CSS_BOGUS_SELECTOR,
     CSS_BOGUS_SUB_SELECTOR,
     CSS_BOGUS_PSEUDO_CLASS,
+    CSS_BOGUS_PSEUDO_ELEMENT,
     #[doc(hidden)]
     __LAST,
 }

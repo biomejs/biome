@@ -1,9 +1,10 @@
 use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
-use crate::syntax::parse_error::{
-    expect_any_selector, expected_identifier, expected_number, expected_pseudo_class_nth,
+use crate::syntax::parse_error::{expected_any_pseudo_class_nth, expected_number};
+use crate::syntax::selector::{
+    eat_or_recover_selector_function_close_token, recover_selector_function_parameter,
+    CssSelectorList,
 };
-use crate::syntax::selector::{parse_selector_function_close_token, CssSelectorList};
 use crate::syntax::{parse_number, parse_regular_identifier, parse_regular_number};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::CssSyntaxKind::{
@@ -39,13 +40,30 @@ pub(crate) fn parse_pseudo_class_function_nth(p: &mut CssParser) -> ParsedSyntax
 
     let m = p.start();
 
-    parse_regular_identifier(p).or_add_diagnostic(p, expected_identifier);
-
+    // we don't need to check if the value is valid, because we already did that
+    parse_regular_identifier(p).ok();
     p.bump_with_context(T!['('], CssLexContext::PseudoNthSelector);
-    parse_pseudo_class_nth_selector(p).or_add_diagnostic(p, expect_any_selector);
-    parse_selector_function_close_token(p);
 
-    Present(m.complete(p, CSS_PSEUDO_CLASS_FUNCTION_NTH))
+    let kind = if is_at_pseudo_class_nth_selector(p) {
+        // SAFETY: we know that the next token is a nth parameter
+        let selector = parse_pseudo_class_nth_selector(p).unwrap();
+
+        if eat_or_recover_selector_function_close_token(
+            p,
+            selector,
+            expected_any_pseudo_class_nth,
+        ) {
+            CSS_PSEUDO_CLASS_FUNCTION_NTH
+        } else {
+            CSS_BOGUS_PSEUDO_CLASS
+        }
+    } else {
+        recover_selector_function_parameter(p, expected_any_pseudo_class_nth);
+        p.expect(T![')']);
+        CSS_BOGUS_PSEUDO_CLASS
+    };
+
+    Present(m.complete(p, kind))
 }
 
 const PSEUDO_CLASS_FUNCTION_NTH_CLASS_IDENTIFIER_SET: TokenSet<CssSyntaxKind> =
@@ -71,7 +89,7 @@ fn parse_pseudo_class_nth_selector(p: &mut CssParser) -> ParsedSyntax {
 
     let m = p.start();
 
-    parse_pseudo_class_nth(p).or_add_diagnostic(p, expected_pseudo_class_nth);
+    parse_pseudo_class_nth(p).ok();
     parse_pseudo_class_of_nth_selector(p).ok();
 
     Present(m.complete(p, CSS_PSEUDO_CLASS_NTH_SELECTOR))
