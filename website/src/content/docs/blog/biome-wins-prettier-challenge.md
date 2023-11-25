@@ -130,6 +130,8 @@ biome check --diagnostic-level=error ./src
 
 ## New lint rules, and promoted rule
 
+Biome is a linter too, and it features more than [150 rules](https://biomejs.dev/linter/rules/)! In this release, some rules are promoted and new ones are available.
+
 ### New rules
 
 - [noDefaultExport](https://biomejs.dev/linter/rules/no-default-export)
