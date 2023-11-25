@@ -9,6 +9,9 @@ const rootManifest = JSON.parse(
 	fs.readFileSync(MANIFEST_PATH).toString("utf-8"),
 );
 
+let [major, minor, patch] = rootManifest["version"].split('.').map(num => parseInt(num));
+// increment patch version
+patch += 1;
 let version = rootManifest["version"];
 
 if (
