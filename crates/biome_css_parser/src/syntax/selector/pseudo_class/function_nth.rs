@@ -48,11 +48,8 @@ pub(crate) fn parse_pseudo_class_function_nth(p: &mut CssParser) -> ParsedSyntax
         // SAFETY: we know that the next token is a nth parameter
         let selector = parse_pseudo_class_nth_selector(p).unwrap();
 
-        if eat_or_recover_selector_function_close_token(
-            p,
-            selector,
-            expected_any_pseudo_class_nth,
-        ) {
+        if eat_or_recover_selector_function_close_token(p, selector, expected_any_pseudo_class_nth)
+        {
             CSS_PSEUDO_CLASS_FUNCTION_NTH
         } else {
             CSS_BOGUS_PSEUDO_CLASS
