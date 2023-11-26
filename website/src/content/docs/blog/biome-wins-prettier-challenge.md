@@ -113,6 +113,14 @@ With this challenge, we added new options to the formatter:
 
 ## VSCode extension goodies
 
+The VSCode has been moved to a [new repository](https://github.com/biomejs/biome-vscode).
+
+We removed the bundled binary from the extension, and you'll be able to download the version that you want. Here's a small video of how it works:
+
+<video width="1200" height="800" controls>
+  <source src="https://github.com/biomejs/biome-vscode/assets/649677/c7c1bf81-10a5-4cd6-bbdf-019d983a2d6a" type="video/mp4">
+</video>
+
 ## Some CLI goodies
 
 People that rely on Biome LSP will be pleased that they can now pass a custom configuration to the command `lsp-proxy`, using the option `--config-path`. The same option is accepted by the command `start`:
@@ -261,19 +269,19 @@ new RegExp("abc", "u");
 <pre class="language-text"><code class="language-text">nursery/useRegexLiterals.js:1:1 <a href="https://biomejs.dev/linter/rules/use-regex-literals">lint/nursery/useRegexLiterals</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Use a regular expression literal instead of the </span><span style="color: Orange;"><strong>RegExp</strong></span><span style="color: Orange;"> constructor.</span>
-  
+
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>new RegExp(&quot;abc&quot;, &quot;u&quot;);
    <strong>   │ </strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
     <strong>2 │ </strong>
-  
+
 <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Regular expression literals avoid some escaping required in a string literal, and are easier to analyze statically.</span>
-  
+
 <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Safe fix</span><span style="color: lightgreen;">: </span><span style="color: lightgreen;">Use a </span><span style="color: lightgreen;"><strong>literal notation</strong></span><span style="color: lightgreen;"> instead.</span>
-  
+
     <strong>1</strong>  <strong> │ </strong><span style="color: Tomato;">-</span> <span style="color: Tomato;"><strong>n</strong></span><span style="color: Tomato;"><strong>e</strong></span><span style="color: Tomato;"><strong>w</strong></span><span style="color: Tomato;"><span style="opacity: 0.8;"><strong>·</strong></span></span><span style="color: Tomato;"><strong>R</strong></span><span style="color: Tomato;"><strong>e</strong></span><span style="color: Tomato;"><strong>g</strong></span><span style="color: Tomato;"><strong>E</strong></span><span style="color: Tomato;"><strong>x</strong></span><span style="color: Tomato;"><strong>p</strong></span><span style="color: Tomato;"><strong>(</strong></span><span style="color: Tomato;"><strong>&quot;</strong></span><span style="color: Tomato;">a</span><span style="color: Tomato;">b</span><span style="color: Tomato;">c</span><span style="color: Tomato;"><strong>&quot;</strong></span><span style="color: Tomato;"><strong>,</strong></span><span style="color: Tomato;"><span style="opacity: 0.8;"><strong>·</strong></span></span><span style="color: Tomato;"><strong>&quot;</strong></span><span style="color: Tomato;">u</span><span style="color: Tomato;"><strong>&quot;</strong></span><span style="color: Tomato;"><strong>)</strong></span><span style="color: Tomato;">;</span>
       <strong>1</strong><strong> │ </strong><span style="color: MediumSeaGreen;">+</span> <span style="color: MediumSeaGreen;"><strong>/</strong></span><span style="color: MediumSeaGreen;">a</span><span style="color: MediumSeaGreen;">b</span><span style="color: MediumSeaGreen;">c</span><span style="color: MediumSeaGreen;"><strong>/</strong></span><span style="color: MediumSeaGreen;">u</span><span style="color: MediumSeaGreen;">;</span>
-    <strong>2</strong> <strong>2</strong><strong> │ </strong>  
-  
+    <strong>2</strong> <strong>2</strong><strong> │ </strong>
+
 </code></pre>
 
 ### Recommended rules
