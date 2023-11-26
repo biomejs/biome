@@ -85,7 +85,7 @@
 //! 4. Use the [playground](https://biomejs.dev/playground/) to inspect the code that you want to format.
 //! It helps you to understand which nodes need to be implemented/modified
 //! in order to implement formatting. Alternatively, you can locally run the playground by following
-//! the [playground instructions](https://github.com/biomejs/biome/blob/main/website/playground/README.md).
+//! the [playground instructions](https://github.com/biomejs/biome/blob/main/website/README.md).
 //! 5. Use the `quick_test.rs` file in `tests/` directory.
 //! function to test you snippet straight from your IDE, without running the whole test suite. The test
 //! is ignored on purpose, so you won't need to worry about the CI breaking.
