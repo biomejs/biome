@@ -286,6 +286,15 @@ fn format_signature(
     })
 }
 
+/// Returns a `true` result if the arrow function contains any elements which
+/// should force the chain to break onto multiple lines. This includes any kind
+/// of return type annotation if the function also takes parameters (e.g.,
+/// `(a, b): bool => ...`), or any kind of rest/object/array binding parameter
+/// (e.g., `({a, b: foo}) => ...`).
+///
+/// The complexity of these expressions limits their legibility when printed
+/// inline, so they force the chain to break to preserve clarity. Any other
+/// cases are considered simple enough to print in a single line.
 fn should_break_chain(arrow: &JsArrowFunctionExpression) -> SyntaxResult<bool> {
     if arrow.type_parameters().is_some() {
         return Ok(true);
@@ -438,16 +447,14 @@ impl Format<JsFormatContext> for ArrowChain {
         } = self;
 
         let head_parent = head.syntax().parent();
+        let tail_body = tail.body()?;
+        let is_assignment_rhs = self.options.assignment_layout.is_some();
         let ancestor_call_expr_or_logical_expr = head.syntax().ancestors().any(|ancestor| {
             matches!(
                 ancestor.kind(),
                 JsSyntaxKind::JS_CALL_EXPRESSION | JsSyntaxKind::JS_LOGICAL_EXPRESSION
             )
         });
-
-        let tail_body = tail.body()?;
-
-        let is_assignment_rhs = self.options.assignment_layout.is_some();
 
         // If this chain is the callee in a parent call expression, then we
         // want it to break onto a new line to clearly show that the arrow
@@ -457,13 +464,13 @@ impl Format<JsFormatContext> for ArrowChain {
         // becomes
         //      (
         //        () => () =>
-        //        a
+        //          a
         //      )();
         let is_callee = head_parent
             .as_ref()
             .map_or(false, |parent| is_callee(head.syntax(), parent));
 
-        // With arrays, objects, sequence expressions, and block funciton bodies,
+        // With arrays, objects, sequence expressions, and block function bodies,
         // the opening brace gives a convenient boundary to insert a line break,
         // allowing that token to live immediately after the last arrow token
         // and save a line from being printed with just the punctuation.
@@ -739,7 +746,7 @@ fn template_literal_contains_new_line(template: &JsTemplateExpression) -> bool {
 ///
 ///
 /// # Examples
-//
+///
 /// ```javascript
 /// "test" + `
 ///   some content
