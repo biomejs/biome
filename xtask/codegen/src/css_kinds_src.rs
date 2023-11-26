@@ -281,6 +281,9 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_PARAMETER_LIST",
         "CSS_DECLARATION_IMPORTANT",
         // Selectors nodes
+        "CSS_NAMESPACE",
+        "CSS_NAMED_NAMESPACE_PREFIX",
+        "CSS_UNIVERSAL_NAMESPACE_PREFIX",
         "CSS_ANY_SELECTOR_LIST",
         "CSS_COMPLEX_SELECTOR",
         "CSS_COMPOUND_SELECTOR",
@@ -316,6 +319,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_PSEUDO_CLASS_OF_NTH_SELECTOR",
         "CSS_ATTRIBUTE_SELECTOR",
         "CSS_ATTRIBUTE",
+        "CSS_ATTRIBUTE_NAME",
         "CSS_ATTRIBUTE_MATCHER",
         "CSS_ATTRIBUTE_MATCHER_VALUE",
         // Bogs nodes

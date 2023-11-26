@@ -89,6 +89,7 @@ CssRoot {
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
                     simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
                         ident: CssIdentifier {
                             value_token: IDENT@36..41 "html" [Newline("\n")] [],
                         },
@@ -123,6 +124,7 @@ CssRoot {
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
                     simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
                         ident: CssIdentifier {
                             value_token: IDENT@56..61 "html" [Newline("\n")] [],
                         },
@@ -157,6 +159,7 @@ CssRoot {
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
                     simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
                         ident: CssIdentifier {
                             value_token: IDENT@73..78 "html" [Newline("\n")] [],
                         },
@@ -218,6 +221,7 @@ CssRoot {
                     right: CssCompoundSelector {
                         nesting_selector_token: missing (optional),
                         simple_selector: CssTypeSelector {
+                            namespace: missing (optional),
                             ident: CssIdentifier {
                                 value_token: IDENT@110..112 "q" [] [Whitespace(" ")],
                             },
@@ -260,6 +264,7 @@ CssRoot {
                     right: CssCompoundSelector {
                         nesting_selector_token: missing (optional),
                         simple_selector: CssTypeSelector {
+                            namespace: missing (optional),
                             ident: CssIdentifier {
                                 value_token: IDENT@127..129 "q" [] [Whitespace(" ")],
                             },
@@ -375,7 +380,8 @@ CssRoot {
         0: CSS_COMPOUND_SELECTOR@36..54
           0: (empty)
           1: CSS_TYPE_SELECTOR@36..41
-            0: CSS_IDENTIFIER@36..41
+            0: (empty)
+            1: CSS_IDENTIFIER@36..41
               0: IDENT@36..41 "html" [Newline("\n")] []
           2: CSS_SUB_SELECTOR_LIST@41..54
             0: CSS_PSEUDO_CLASS_SELECTOR@41..54
@@ -397,7 +403,8 @@ CssRoot {
         0: CSS_COMPOUND_SELECTOR@56..71
           0: (empty)
           1: CSS_TYPE_SELECTOR@56..61
-            0: CSS_IDENTIFIER@56..61
+            0: (empty)
+            1: CSS_IDENTIFIER@56..61
               0: IDENT@56..61 "html" [Newline("\n")] []
           2: CSS_SUB_SELECTOR_LIST@61..71
             0: CSS_PSEUDO_CLASS_SELECTOR@61..71
@@ -419,7 +426,8 @@ CssRoot {
         0: CSS_COMPOUND_SELECTOR@73..92
           0: (empty)
           1: CSS_TYPE_SELECTOR@73..78
-            0: CSS_IDENTIFIER@73..78
+            0: (empty)
+            1: CSS_IDENTIFIER@73..78
               0: IDENT@73..78 "html" [Newline("\n")] []
           2: CSS_SUB_SELECTOR_LIST@78..92
             0: CSS_PSEUDO_CLASS_SELECTOR@78..92
@@ -460,7 +468,8 @@ CssRoot {
           2: CSS_COMPOUND_SELECTOR@110..112
             0: (empty)
             1: CSS_TYPE_SELECTOR@110..112
-              0: CSS_IDENTIFIER@110..112
+              0: (empty)
+              1: CSS_IDENTIFIER@110..112
                 0: IDENT@110..112 "q" [] [Whitespace(" ")]
             2: CSS_SUB_SELECTOR_LIST@112..112
       1: CSS_BLOCK@112..114
@@ -488,7 +497,8 @@ CssRoot {
           2: CSS_COMPOUND_SELECTOR@127..129
             0: (empty)
             1: CSS_TYPE_SELECTOR@127..129
-              0: CSS_IDENTIFIER@127..129
+              0: (empty)
+              1: CSS_IDENTIFIER@127..129
                 0: IDENT@127..129 "q" [] [Whitespace(" ")]
             2: CSS_SUB_SELECTOR_LIST@129..129
       1: CSS_BLOCK@129..131

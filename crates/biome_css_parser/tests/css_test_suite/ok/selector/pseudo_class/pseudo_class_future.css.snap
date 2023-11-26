@@ -35,6 +35,7 @@ CssRoot {
                                     CssCompoundSelector {
                                         nesting_selector_token: missing (optional),
                                         simple_selector: CssTypeSelector {
+                                            namespace: missing (optional),
                                             ident: CssIdentifier {
                                                 value_token: IDENT@8..9 "p" [] [],
                                             },
@@ -45,6 +46,7 @@ CssRoot {
                                     CssCompoundSelector {
                                         nesting_selector_token: missing (optional),
                                         simple_selector: CssTypeSelector {
+                                            namespace: missing (optional),
                                             ident: CssIdentifier {
                                                 value_token: IDENT@11..13 "li" [] [],
                                             },
@@ -55,6 +57,7 @@ CssRoot {
                                     CssCompoundSelector {
                                         nesting_selector_token: missing (optional),
                                         simple_selector: CssTypeSelector {
+                                            namespace: missing (optional),
                                             ident: CssIdentifier {
                                                 value_token: IDENT@15..17 "dt" [] [],
                                             },
@@ -65,6 +68,7 @@ CssRoot {
                                     CssCompoundSelector {
                                         nesting_selector_token: missing (optional),
                                         simple_selector: CssTypeSelector {
+                                            namespace: missing (optional),
                                             ident: CssIdentifier {
                                                 value_token: IDENT@19..21 "dd" [] [],
                                             },
@@ -102,6 +106,7 @@ CssRoot {
                                         CssCompoundSelector {
                                             nesting_selector_token: missing (optional),
                                             simple_selector: CssTypeSelector {
+                                                namespace: missing (optional),
                                                 ident: CssIdentifier {
                                                     value_token: IDENT@34..35 "p" [] [],
                                                 },
@@ -112,6 +117,7 @@ CssRoot {
                                         CssCompoundSelector {
                                             nesting_selector_token: missing (optional),
                                             simple_selector: CssTypeSelector {
+                                                namespace: missing (optional),
                                                 ident: CssIdentifier {
                                                     value_token: IDENT@37..39 "li" [] [],
                                                 },
@@ -122,6 +128,7 @@ CssRoot {
                                         CssCompoundSelector {
                                             nesting_selector_token: missing (optional),
                                             simple_selector: CssTypeSelector {
+                                                namespace: missing (optional),
                                                 ident: CssIdentifier {
                                                     value_token: IDENT@41..43 "dt" [] [],
                                                 },
@@ -132,6 +139,7 @@ CssRoot {
                                         CssCompoundSelector {
                                             nesting_selector_token: missing (optional),
                                             simple_selector: CssTypeSelector {
+                                                namespace: missing (optional),
                                                 ident: CssIdentifier {
                                                     value_token: IDENT@45..47 "dd" [] [],
                                                 },
@@ -192,28 +200,32 @@ CssRoot {
                   0: CSS_COMPOUND_SELECTOR@8..9
                     0: (empty)
                     1: CSS_TYPE_SELECTOR@8..9
-                      0: CSS_IDENTIFIER@8..9
+                      0: (empty)
+                      1: CSS_IDENTIFIER@8..9
                         0: IDENT@8..9 "p" [] []
                     2: CSS_SUB_SELECTOR_LIST@9..9
                   1: COMMA@9..11 "," [] [Whitespace(" ")]
                   2: CSS_COMPOUND_SELECTOR@11..13
                     0: (empty)
                     1: CSS_TYPE_SELECTOR@11..13
-                      0: CSS_IDENTIFIER@11..13
+                      0: (empty)
+                      1: CSS_IDENTIFIER@11..13
                         0: IDENT@11..13 "li" [] []
                     2: CSS_SUB_SELECTOR_LIST@13..13
                   3: COMMA@13..15 "," [] [Whitespace(" ")]
                   4: CSS_COMPOUND_SELECTOR@15..17
                     0: (empty)
                     1: CSS_TYPE_SELECTOR@15..17
-                      0: CSS_IDENTIFIER@15..17
+                      0: (empty)
+                      1: CSS_IDENTIFIER@15..17
                         0: IDENT@15..17 "dt" [] []
                     2: CSS_SUB_SELECTOR_LIST@17..17
                   5: COMMA@17..19 "," [] [Whitespace(" ")]
                   6: CSS_COMPOUND_SELECTOR@19..21
                     0: (empty)
                     1: CSS_TYPE_SELECTOR@19..21
-                      0: CSS_IDENTIFIER@19..21
+                      0: (empty)
+                      1: CSS_IDENTIFIER@19..21
                         0: IDENT@19..21 "dd" [] []
                     2: CSS_SUB_SELECTOR_LIST@21..21
                 3: R_PAREN@21..23 ")" [] [Whitespace(" ")]
@@ -238,28 +250,32 @@ CssRoot {
                     0: CSS_COMPOUND_SELECTOR@34..35
                       0: (empty)
                       1: CSS_TYPE_SELECTOR@34..35
-                        0: CSS_IDENTIFIER@34..35
+                        0: (empty)
+                        1: CSS_IDENTIFIER@34..35
                           0: IDENT@34..35 "p" [] []
                       2: CSS_SUB_SELECTOR_LIST@35..35
                     1: COMMA@35..37 "," [] [Whitespace(" ")]
                     2: CSS_COMPOUND_SELECTOR@37..39
                       0: (empty)
                       1: CSS_TYPE_SELECTOR@37..39
-                        0: CSS_IDENTIFIER@37..39
+                        0: (empty)
+                        1: CSS_IDENTIFIER@37..39
                           0: IDENT@37..39 "li" [] []
                       2: CSS_SUB_SELECTOR_LIST@39..39
                     3: COMMA@39..41 "," [] [Whitespace(" ")]
                     4: CSS_COMPOUND_SELECTOR@41..43
                       0: (empty)
                       1: CSS_TYPE_SELECTOR@41..43
-                        0: CSS_IDENTIFIER@41..43
+                        0: (empty)
+                        1: CSS_IDENTIFIER@41..43
                           0: IDENT@41..43 "dt" [] []
                       2: CSS_SUB_SELECTOR_LIST@43..43
                     5: COMMA@43..45 "," [] [Whitespace(" ")]
                     6: CSS_COMPOUND_SELECTOR@45..47
                       0: (empty)
                       1: CSS_TYPE_SELECTOR@45..47
-                        0: CSS_IDENTIFIER@45..47
+                        0: (empty)
+                        1: CSS_IDENTIFIER@45..47
                           0: IDENT@45..47 "dd" [] []
                       2: CSS_SUB_SELECTOR_LIST@47..47
                   3: R_PAREN@47..48 ")" [] []

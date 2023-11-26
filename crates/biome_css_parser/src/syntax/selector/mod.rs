@@ -10,7 +10,9 @@ use crate::syntax::parse_error::{
 use crate::syntax::selector::attribute::parse_attribute_selector;
 use crate::syntax::selector::pseudo_class::parse_pseudo_class_selector;
 use crate::syntax::selector::pseudo_element::parse_pseudo_element_selector;
-use crate::syntax::{is_at_identifier, parse_identifier, RULE_RECOVERY_SET};
+use crate::syntax::{
+    is_at_identifier, parse_identifier, parse_regular_identifier, RULE_RECOVERY_SET,
+};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, TextRange, T};
 use biome_parser::diagnostic::ToDiagnostic;
@@ -139,6 +141,10 @@ fn parse_complex_selector(p: &mut CssParser, mut left: CompletedMarker) -> Parse
 }
 
 #[inline]
+fn is_at_compound_selector(p: &mut CssParser) -> bool {
+    p.at(T![&]) || is_at_simple_selector(p) || p.at_ts(CssSubSelectorList::START_SET)
+}
+#[inline]
 fn parse_compound_selector(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_compound_selector(p) {
         return Absent;
@@ -154,8 +160,8 @@ fn parse_compound_selector(p: &mut CssParser) -> ParsedSyntax {
 }
 
 #[inline]
-fn is_at_compound_selector(p: &mut CssParser) -> bool {
-    p.at(T![&]) || is_at_simple_selector(p) || p.at_ts(CssSubSelectorList::START_SET)
+fn is_at_simple_selector(p: &mut CssParser) -> bool {
+    is_at_namespace(p) || p.at(T![*]) || is_at_identifier(p)
 }
 
 #[inline]
@@ -164,16 +170,57 @@ fn parse_simple_selector(p: &mut CssParser) -> ParsedSyntax {
         return Absent;
     }
 
-    match p.cur() {
-        T![*] => parse_universal_selector(p),
-        _ if is_at_identifier(p) => parse_type_selector(p),
-        _ => Absent,
+    let namespace = parse_namespace(p);
+
+    if p.at(T![*]) {
+        parse_universal_selector(p, namespace)
+    } else {
+        parse_type_selector(p, namespace)
     }
 }
 
 #[inline]
-fn is_at_simple_selector(p: &mut CssParser) -> bool {
+fn is_at_namespace(p: &mut CssParser) -> bool {
+    p.at(T![|]) || is_at_namespace_prefix(p) && p.nth_at(1, T![|])
+}
+
+#[inline]
+fn parse_namespace(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_namespace(p) {
+        return Absent;
+    }
+
+    let m = p.start();
+
+    // we don't need diagnostic here, because prefix is optional
+    parse_namespace_prefix(p).ok();
+    p.bump(T![|]);
+
+    Present(m.complete(p, CSS_NAMESPACE))
+}
+
+#[inline]
+fn is_at_namespace_prefix(p: &mut CssParser) -> bool {
     p.at(T![*]) || is_at_identifier(p)
+}
+
+#[inline]
+fn parse_namespace_prefix(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_namespace_prefix(p) {
+        return Absent;
+    }
+
+    let m = p.start();
+
+    let kind = if p.eat(T![*]) {
+        CSS_UNIVERSAL_NAMESPACE_PREFIX
+    } else {
+        // we don't need to check if the identifier is valid, because we already did that
+        parse_regular_identifier(p).ok();
+        CSS_NAMED_NAMESPACE_PREFIX
+    };
+
+    Present(m.complete(p, kind))
 }
 
 struct CssSubSelectorList;
@@ -244,12 +291,12 @@ pub(crate) fn parse_id_selector(p: &mut CssParser) -> ParsedSyntax {
 }
 
 #[inline]
-pub(crate) fn parse_universal_selector(p: &mut CssParser) -> ParsedSyntax {
+pub(crate) fn parse_universal_selector(p: &mut CssParser, namespace: ParsedSyntax) -> ParsedSyntax {
     if !p.at(T![*]) {
         return Absent;
     }
 
-    let m = p.start();
+    let m = namespace.precede(p);
 
     let context = selector_lex_context(p);
     p.eat_with_context(T![*], context);
@@ -258,13 +305,15 @@ pub(crate) fn parse_universal_selector(p: &mut CssParser) -> ParsedSyntax {
 }
 
 #[inline]
-fn parse_type_selector(p: &mut CssParser) -> ParsedSyntax {
+fn parse_type_selector(p: &mut CssParser, namespace: ParsedSyntax) -> ParsedSyntax {
     if !is_at_identifier(p) {
         return Absent;
     }
 
-    let m = p.start();
+    let m = namespace.precede(p);
+
     parse_selector_identifier(p).or_add_diagnostic(p, expected_identifier);
+
     Present(m.complete(p, CSS_TYPE_SELECTOR))
 }
 

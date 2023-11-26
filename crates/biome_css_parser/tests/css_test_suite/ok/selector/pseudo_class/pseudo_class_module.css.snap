@@ -49,6 +49,7 @@ CssRoot {
                                     right: CssCompoundSelector {
                                         nesting_selector_token: missing (optional),
                                         simple_selector: CssTypeSelector {
+                                            namespace: missing (optional),
                                             ident: CssIdentifier {
                                                 value_token: IDENT@15..18 "div" [] [],
                                             },
@@ -99,6 +100,7 @@ CssRoot {
                                         right: CssCompoundSelector {
                                             nesting_selector_token: missing (optional),
                                             simple_selector: CssTypeSelector {
+                                                namespace: missing (optional),
                                                 ident: CssIdentifier {
                                                     value_token: IDENT@37..41 "div" [] [Whitespace(" ")],
                                                 },
@@ -163,6 +165,7 @@ CssRoot {
                                         right: CssCompoundSelector {
                                             nesting_selector_token: missing (optional),
                                             simple_selector: CssTypeSelector {
+                                                namespace: missing (optional),
                                                 ident: CssIdentifier {
                                                     value_token: IDENT@66..69 "div" [] [],
                                                 },
@@ -232,7 +235,8 @@ CssRoot {
                   2: CSS_COMPOUND_SELECTOR@15..18
                     0: (empty)
                     1: CSS_TYPE_SELECTOR@15..18
-                      0: CSS_IDENTIFIER@15..18
+                      0: (empty)
+                      1: CSS_IDENTIFIER@15..18
                         0: IDENT@15..18 "div" [] []
                     2: CSS_SUB_SELECTOR_LIST@18..18
                 3: R_PAREN@18..20 ")" [] [Whitespace(" ")]
@@ -266,7 +270,8 @@ CssRoot {
                     2: CSS_COMPOUND_SELECTOR@37..41
                       0: (empty)
                       1: CSS_TYPE_SELECTOR@37..41
-                        0: CSS_IDENTIFIER@37..41
+                        0: (empty)
+                        1: CSS_IDENTIFIER@37..41
                           0: IDENT@37..41 "div" [] [Whitespace(" ")]
                       2: CSS_SUB_SELECTOR_LIST@41..41
                   1: PLUS@41..43 "+" [] [Whitespace(" ")]
@@ -309,7 +314,8 @@ CssRoot {
                     2: CSS_COMPOUND_SELECTOR@66..69
                       0: (empty)
                       1: CSS_TYPE_SELECTOR@66..69
-                        0: CSS_IDENTIFIER@66..69
+                        0: (empty)
+                        1: CSS_IDENTIFIER@66..69
                           0: IDENT@66..69 "div" [] []
                       2: CSS_SUB_SELECTOR_LIST@69..69
                   3: R_PAREN@69..70 ")" [] []
