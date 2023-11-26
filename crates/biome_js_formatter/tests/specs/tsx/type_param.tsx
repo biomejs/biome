@@ -3,6 +3,8 @@
 <const T,>() => {};
 <T extends U,>() => {};
 <const T extends U,>() => {};
+<T = T,>() => {};
+<const T = T,>() => {};
 <T, U,>() => {};
 <const T, const U,>() => {};
 
