@@ -3696,6 +3696,17 @@ pub struct Style {
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_shorthand_array_type: Option<RuleConfiguration>,
+
+    #[doc = "When expressing array types, this rule promotes the usage of T[] shorthand instead of Array<T>."]
+    #[bpaf(
+        long("use-consistent-array-type"),
+        argument("on|off|warn"),
+        optional,
+        hide
+    )]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_consistent_array_type: Option<RuleConfiguration>,
+
     #[doc = "Enforces switch clauses have a single statement, emits a quick fix wrapping the statements in a block."]
     #[bpaf(
         long("use-single-case-statement"),

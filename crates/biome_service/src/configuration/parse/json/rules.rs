@@ -1399,6 +1399,13 @@ impl Deserializable for Style {
                                 diagnostics,
                             );
                         }
+                        "useConsistentArrayType" => {
+                            result.use_consistent_array_type = Deserializable::deserialize(
+                                &value,
+                                "useConsistentArrayType",
+                                diagnostics,
+                            )
+                        }
                         "useSingleCaseStatement" => {
                             result.use_single_case_statement = Deserializable::deserialize(
                                 &value,
@@ -1443,6 +1450,7 @@ impl Deserializable for Style {
                                     "noVar",
                                     "useBlockStatements",
                                     "useCollapsedElseIf",
+                                    "useConsistentArrayType",
                                     "useConst",
                                     "useDefaultParameterLast",
                                     "useEnumInitializers",
