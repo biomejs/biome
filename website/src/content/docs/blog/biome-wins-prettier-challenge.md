@@ -372,6 +372,7 @@ Thank you to:
 - [Victor Teles @victor-teles](https://github.com/victor-teles)
 
 And a big welcome to our new joined maintainer:
+- [Jon Egeland @faultyserver](https://github.com/faultyserver)
 - [Takayuki Maeda @TaKO8Ki](https://github.com/TaKO8Ki)
 
 ## New sponsors
