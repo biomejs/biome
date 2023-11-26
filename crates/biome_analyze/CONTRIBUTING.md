@@ -121,7 +121,7 @@ Let's say we want to create a new rule called `myRuleName`, which uses the seman
    }
    ```
 
-   While implementing the diagnostic, please keep [Biome's technical principals](https://biomejs.dev/#technical) in mind.
+   While implementing the diagnostic, please keep [Biome's technical principals](https://biomejs.dev/internals/philosophy/#technical) in mind.
    This function is called for every signal emitted by the `run` function, and it may return
    zero or one diagnostic.
 
