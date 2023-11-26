@@ -2,11 +2,10 @@ use super::tag::Tag;
 use crate::format_element::tag::DedentMode;
 use crate::prelude::tag::GroupMode;
 use crate::prelude::*;
-use crate::printer::LineEnding;
 use crate::{format, write};
 use crate::{
     BufferExtensions, Format, FormatContext, FormatElement, FormatOptions, FormatResult, Formatter,
-    IndentStyle, IndentWidth, LineWidth, PrinterOptions, TransformSourceMap,
+    IndentStyle, IndentWidth, LineEnding, LineWidth, PrinterOptions, TransformSourceMap,
 };
 use biome_rowan::TextSize;
 use rustc_hash::FxHashMap;
@@ -163,11 +162,15 @@ impl FormatOptions for IrFormatOptions {
         LineWidth::default()
     }
 
+    fn line_ending(&self) -> LineEnding {
+        LineEnding::Lf
+    }
+
     fn as_print_options(&self) -> PrinterOptions {
         PrinterOptions {
             indent_width: self.indent_width(),
             print_width: self.line_width().into(),
-            line_ending: LineEnding::LineFeed,
+            line_ending: LineEnding::Lf,
             indent_style: IndentStyle::Space,
         }
     }

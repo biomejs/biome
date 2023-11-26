@@ -5,7 +5,6 @@ use crate::utils::member_chain::is_member_call_chain;
 use crate::utils::object::write_member_name;
 use crate::utils::AnyJsBinaryLikeExpression;
 use biome_formatter::{format_args, write, CstFormatContext, FormatOptions, VecBuffer};
-use biome_js_syntax::AnyJsLiteralExpression;
 use biome_js_syntax::{
     AnyJsAssignmentPattern, AnyJsBindingPattern, AnyJsCallArgument, AnyJsClassMemberName,
     AnyJsExpression, AnyJsFunctionBody, AnyJsObjectAssignmentPatternMember,
@@ -17,6 +16,7 @@ use biome_js_syntax::{
     TsInitializedPropertySignatureClassMemberFields, TsPropertySignatureClassMember,
     TsPropertySignatureClassMemberFields, TsTypeAliasDeclaration, TsTypeArguments,
 };
+use biome_js_syntax::{AnyJsLiteralExpression, JsUnaryExpression};
 use biome_rowan::{declare_node_union, AstNode, SyntaxNodeOptionExt, SyntaxResult};
 use std::iter;
 
@@ -949,7 +949,21 @@ pub(crate) fn should_break_after_operator(
                 AnyJsExpression::JsYieldExpression(expression) => {
                     expression.argument().and_then(|arg| arg.expression().ok())
                 }
-                AnyJsExpression::JsUnaryExpression(expression) => expression.argument().ok(),
+                AnyJsExpression::JsUnaryExpression(expression) => {
+                    if let Some(argument) = get_last_non_unary_argument(expression) {
+                        match argument {
+                            AnyJsExpression::JsAwaitExpression(expression) => {
+                                expression.argument().ok()
+                            }
+                            AnyJsExpression::JsYieldExpression(expression) => {
+                                expression.argument().and_then(|arg| arg.expression().ok())
+                            }
+                            _ => Some(argument),
+                        }
+                    } else {
+                        None
+                    }
+                }
                 _ => None,
             };
 
@@ -963,6 +977,21 @@ pub(crate) fn should_break_after_operator(
     };
 
     Ok(result)
+}
+
+/// Iterate over unary expression arguments to get last non-unary
+/// Example: void !!(await test()) -> returns await as last argument
+fn get_last_non_unary_argument(unary_expression: &JsUnaryExpression) -> Option<AnyJsExpression> {
+    let mut argument = unary_expression.argument().ok()?;
+
+    while let AnyJsExpression::JsUnaryExpression(ref unary) = argument {
+        argument = match unary.argument() {
+            Ok(arg) => arg,
+            _ => break,
+        };
+    }
+
+    Some(argument)
 }
 
 impl Format<JsFormatContext> for AnyJsAssignmentLike {
@@ -1013,7 +1042,7 @@ impl Format<JsFormatContext> for AnyJsAssignmentLike {
                         write![
                             f,
                             [
-                                group(&indent(&soft_line_break_or_space()),)
+                                group(&indent(&soft_line_break_or_space()))
                                     .with_group_id(Some(group_id)),
                                 line_suffix_boundary(),
                                 indent_if_group_breaks(&right, group_id)
@@ -1021,13 +1050,7 @@ impl Format<JsFormatContext> for AnyJsAssignmentLike {
                         ]
                     }
                     AssignmentLikeLayout::BreakAfterOperator => {
-                        write![
-                            f,
-                            [group(&indent(&format_args![
-                                soft_line_break_or_space(),
-                                right,
-                            ]))]
-                        ]
+                        write![f, [group(&soft_line_indent_or_space(&right))]]
                     }
                     AssignmentLikeLayout::NeverBreakAfterOperator => {
                         write![f, [space(), right]]

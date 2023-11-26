@@ -34,7 +34,7 @@ pub enum ModuleKind {
     /// An ECMAScript [Script](https://tc39.es/ecma262/multipage/ecmascript-language-scripts-and-modules.html#sec-scripts)
     Script,
 
-    /// AN ECMAScript [Module](https://tc39.es/ecma262/multipage/ecmascript-language-scripts-and-modules.html#sec-modules)
+    /// An ECMAScript [Module](https://tc39.es/ecma262/multipage/ecmascript-language-scripts-and-modules.html#sec-modules)
     #[default]
     Module,
 }
@@ -54,6 +54,9 @@ pub enum LanguageVariant {
     #[default]
     Standard,
 
+    /// Standard JavaScript or TypeScript syntax with some restrictions for future-proof compatibility with JSX
+    StandardRestricted,
+
     /// Allows JSX syntax inside a JavaScript or TypeScript file
     Jsx,
 }
@@ -61,6 +64,9 @@ pub enum LanguageVariant {
 impl LanguageVariant {
     pub const fn is_standard(&self) -> bool {
         matches!(self, LanguageVariant::Standard)
+    }
+    pub const fn is_standard_restricted(&self) -> bool {
+        matches!(self, LanguageVariant::StandardRestricted)
     }
     pub const fn is_jsx(&self) -> bool {
         matches!(self, LanguageVariant::Jsx)
@@ -129,6 +135,11 @@ impl JsFileSource {
             },
             ..Self::default()
         }
+    }
+
+    /// language: TS, variant: StandardRestricted, module_kind: Module, version: Latest
+    pub fn ts_restricted() -> JsFileSource {
+        Self::ts().with_variant(LanguageVariant::StandardRestricted)
     }
 
     /// language: TS, variant: JSX, module_kind: Module, version: Latest
@@ -238,7 +249,8 @@ fn compute_source_type_from_path_or_extension(
         match extension {
             "cjs" => JsFileSource::js_module().with_module_kind(ModuleKind::Script),
             "js" | "mjs" | "jsx" => JsFileSource::jsx(),
-            "ts" | "mts" | "cts" => JsFileSource::ts(),
+            "ts" => JsFileSource::ts(),
+            "mts" | "cts" => JsFileSource::ts_restricted(),
             "tsx" => JsFileSource::tsx(),
             _ => {
                 return Err(FileSourceError::UnknownExtension(

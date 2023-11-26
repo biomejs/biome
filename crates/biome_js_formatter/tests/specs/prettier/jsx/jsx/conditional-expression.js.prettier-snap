@@ -95,8 +95,8 @@ jsxModeFromElementBreaking ? (
   {thisIsASongAboutYourPoorSickPenguinHeHasAFeverAndHisToesAreBlueButIfISingToYourPoorSickPenguinHeWillFeelBetterInADayOrTwo
     ? "a"
     : b
-    ? "b"
-    : "c"}
+      ? "b"
+      : "c"}
 </div>;
 
 // This chain of ConditionalExpressions prints in JSX mode because there is a

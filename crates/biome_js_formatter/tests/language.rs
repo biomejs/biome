@@ -1,8 +1,11 @@
-use biome_formatter::{FormatContext, FormatResult, Formatted, IndentStyle, LineWidth, Printed};
+use biome_formatter::{
+    FormatContext, FormatResult, Formatted, IndentStyle, LineEnding, LineWidth, Printed,
+};
 use biome_formatter_test::TestFormatLanguage;
 use biome_js_formatter::context::trailing_comma::TrailingComma;
 use biome_js_formatter::context::{
-    ArrowParentheses, JsFormatContext, JsFormatOptions, QuoteProperties, QuoteStyle, Semicolons,
+    ArrowParentheses, BracketSameLine, BracketSpacing, JsFormatContext, JsFormatOptions,
+    QuoteProperties, QuoteStyle, Semicolons,
 };
 use biome_js_formatter::{format_node, format_range, JsFormatLanguage};
 use biome_js_parser::{parse, JsParserOptions};
@@ -87,6 +90,29 @@ impl From<JsSerializableIndentStyle> for IndentStyle {
         match test {
             JsSerializableIndentStyle::Tab => IndentStyle::Tab,
             JsSerializableIndentStyle::Space => IndentStyle::Space,
+        }
+    }
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Copy, Deserialize, Serialize, Default)]
+pub enum JsSerializableLineEnding {
+    ///  Line Feed only (\n), common on Linux and macOS as well as inside git repos
+    #[default]
+    Lf,
+
+    /// Carriage Return + Line Feed characters (\r\n), common on Windows
+    Crlf,
+
+    /// Carriage Return character only (\r), used very rarely
+    Cr,
+}
+
+impl From<JsSerializableLineEnding> for LineEnding {
+    fn from(test: JsSerializableLineEnding) -> Self {
+        match test {
+            JsSerializableLineEnding::Lf => LineEnding::Lf,
+            JsSerializableLineEnding::Crlf => LineEnding::Crlf,
+            JsSerializableLineEnding::Cr => LineEnding::Cr,
         }
     }
 }
@@ -176,6 +202,9 @@ pub struct JsSerializableFormatOptions {
     /// The indent width.
     pub indent_width: Option<u8>,
 
+    /// The type of line ending.
+    pub line_ending: Option<JsSerializableLineEnding>,
+
     /// What's the max width of a line. Defaults to 80.
     pub line_width: Option<u16>,
 
@@ -196,6 +225,12 @@ pub struct JsSerializableFormatOptions {
 
     /// Whether to add non-necessary parentheses to arrow functions. Defaults to "always".
     pub arrow_parentheses: Option<JsSerializableArrowParentheses>,
+
+    /// Whether to insert spaces around brackets in object literals. Defaults to true.
+    pub bracket_spacing: Option<bool>,
+
+    /// Whether to hug the closing bracket of multiline HTML/JSX tags to the end of the last line, rather than being alone on the following line. Defaults to false.
+    pub bracket_same_line: Option<bool>,
 }
 
 impl JsSerializableFormatOptions {
@@ -207,6 +242,7 @@ impl JsSerializableFormatOptions {
                     .map(|value| value.into())
                     .unwrap_or_default(),
             )
+            .with_line_ending(self.line_ending.unwrap_or_default().into())
             .with_line_width(
                 self.line_width
                     .and_then(|width| LineWidth::try_from(width).ok())
@@ -235,6 +271,14 @@ impl JsSerializableFormatOptions {
             .with_arrow_parentheses(
                 self.arrow_parentheses
                     .map_or_else(|| ArrowParentheses::Always, |value| value.into()),
+            )
+            .with_bracket_spacing(
+                self.bracket_spacing
+                    .map_or_else(BracketSpacing::default, |value| value.into()),
+            )
+            .with_bracket_same_line(
+                self.bracket_same_line
+                    .map_or_else(BracketSameLine::default, |value| value.into()),
             )
     }
 }

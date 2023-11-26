@@ -1260,6 +1260,47 @@ pub struct CssKeyframesSelectorFields {
     pub css_percentage: SyntaxResult<CssPercentage>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssNthOffset {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssNthOffset {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssNthOffsetFields {
+        CssNthOffsetFields {
+            sign: self.sign(),
+            value: self.value(),
+        }
+    }
+    pub fn sign(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn value(&self) -> SyntaxResult<CssNumber> {
+        support::required_node(&self.syntax, 1usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssNthOffset {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssNthOffsetFields {
+    pub sign: SyntaxResult<SyntaxToken>,
+    pub value: SyntaxResult<CssNumber>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssNumber {
     pub(crate) syntax: SyntaxNode,
 }
@@ -1526,6 +1567,57 @@ pub struct CssPseudoClassFunctionIdentifierFields {
     pub r_paren_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssPseudoClassFunctionNth {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssPseudoClassFunctionNth {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssPseudoClassFunctionNthFields {
+        CssPseudoClassFunctionNthFields {
+            name: self.name(),
+            l_paren_token: self.l_paren_token(),
+            selector: self.selector(),
+            r_paren_token: self.r_paren_token(),
+        }
+    }
+    pub fn name(&self) -> SyntaxResult<CssIdentifier> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn selector(&self) -> SyntaxResult<AnyCssPseudoClassNthSelector> {
+        support::required_node(&self.syntax, 2usize)
+    }
+    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 3usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssPseudoClassFunctionNth {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssPseudoClassFunctionNthFields {
+    pub name: SyntaxResult<CssIdentifier>,
+    pub l_paren_token: SyntaxResult<SyntaxToken>,
+    pub selector: SyntaxResult<AnyCssPseudoClassNthSelector>,
+    pub r_paren_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssPseudoClassFunctionRelativeSelectorList {
     pub(crate) syntax: SyntaxNode,
 }
@@ -1762,6 +1854,216 @@ impl Serialize for CssPseudoClassIdentifier {
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct CssPseudoClassIdentifierFields {
     pub name: SyntaxResult<CssIdentifier>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssPseudoClassNth {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssPseudoClassNth {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssPseudoClassNthFields {
+        CssPseudoClassNthFields {
+            sign: self.sign(),
+            value: self.value(),
+            symbol_token: self.symbol_token(),
+            offset: self.offset(),
+        }
+    }
+    pub fn sign(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 0usize)
+    }
+    pub fn value(&self) -> Option<CssNumber> {
+        support::node(&self.syntax, 1usize)
+    }
+    pub fn symbol_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+    pub fn offset(&self) -> Option<CssNthOffset> {
+        support::node(&self.syntax, 3usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssPseudoClassNth {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssPseudoClassNthFields {
+    pub sign: Option<SyntaxToken>,
+    pub value: Option<CssNumber>,
+    pub symbol_token: SyntaxResult<SyntaxToken>,
+    pub offset: Option<CssNthOffset>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssPseudoClassNthIdentifier {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssPseudoClassNthIdentifier {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssPseudoClassNthIdentifierFields {
+        CssPseudoClassNthIdentifierFields {
+            value: self.value(),
+        }
+    }
+    pub fn value(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssPseudoClassNthIdentifier {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssPseudoClassNthIdentifierFields {
+    pub value: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssPseudoClassNthNumber {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssPseudoClassNthNumber {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssPseudoClassNthNumberFields {
+        CssPseudoClassNthNumberFields {
+            sign: self.sign(),
+            value: self.value(),
+        }
+    }
+    pub fn sign(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 0usize)
+    }
+    pub fn value(&self) -> SyntaxResult<CssNumber> {
+        support::required_node(&self.syntax, 1usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssPseudoClassNthNumber {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssPseudoClassNthNumberFields {
+    pub sign: Option<SyntaxToken>,
+    pub value: SyntaxResult<CssNumber>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssPseudoClassNthSelector {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssPseudoClassNthSelector {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssPseudoClassNthSelectorFields {
+        CssPseudoClassNthSelectorFields {
+            nth: self.nth(),
+            of_selector: self.of_selector(),
+        }
+    }
+    pub fn nth(&self) -> SyntaxResult<AnyCssPseudoClassNth> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn of_selector(&self) -> Option<CssPseudoClassOfNthSelector> {
+        support::node(&self.syntax, 1usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssPseudoClassNthSelector {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssPseudoClassNthSelectorFields {
+    pub nth: SyntaxResult<AnyCssPseudoClassNth>,
+    pub of_selector: Option<CssPseudoClassOfNthSelector>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssPseudoClassOfNthSelector {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssPseudoClassOfNthSelector {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssPseudoClassOfNthSelectorFields {
+        CssPseudoClassOfNthSelectorFields {
+            of_token: self.of_token(),
+            selector_list: self.selector_list(),
+        }
+    }
+    pub fn of_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn selector_list(&self) -> CssSelectorList {
+        support::list(&self.syntax, 1usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssPseudoClassOfNthSelector {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssPseudoClassOfNthSelectorFields {
+    pub of_token: SyntaxResult<SyntaxToken>,
+    pub selector_list: CssSelectorList,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssPseudoClassSelector {
@@ -2523,9 +2825,11 @@ impl AnyCssCompoundSelector {
 #[derive(Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum AnyCssPseudoClass {
+    CssBogusPseudoClass(CssBogusPseudoClass),
     CssPseudoClassFunctionCompoundSelector(CssPseudoClassFunctionCompoundSelector),
     CssPseudoClassFunctionCompoundSelectorList(CssPseudoClassFunctionCompoundSelectorList),
     CssPseudoClassFunctionIdentifier(CssPseudoClassFunctionIdentifier),
+    CssPseudoClassFunctionNth(CssPseudoClassFunctionNth),
     CssPseudoClassFunctionRelativeSelectorList(CssPseudoClassFunctionRelativeSelectorList),
     CssPseudoClassFunctionSelector(CssPseudoClassFunctionSelector),
     CssPseudoClassFunctionSelectorList(CssPseudoClassFunctionSelectorList),
@@ -2533,6 +2837,12 @@ pub enum AnyCssPseudoClass {
     CssPseudoClassIdentifier(CssPseudoClassIdentifier),
 }
 impl AnyCssPseudoClass {
+    pub fn as_css_bogus_pseudo_class(&self) -> Option<&CssBogusPseudoClass> {
+        match &self {
+            AnyCssPseudoClass::CssBogusPseudoClass(item) => Some(item),
+            _ => None,
+        }
+    }
     pub fn as_css_pseudo_class_function_compound_selector(
         &self,
     ) -> Option<&CssPseudoClassFunctionCompoundSelector> {
@@ -2554,6 +2864,12 @@ impl AnyCssPseudoClass {
     ) -> Option<&CssPseudoClassFunctionIdentifier> {
         match &self {
             AnyCssPseudoClass::CssPseudoClassFunctionIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_pseudo_class_function_nth(&self) -> Option<&CssPseudoClassFunctionNth> {
+        match &self {
+            AnyCssPseudoClass::CssPseudoClassFunctionNth(item) => Some(item),
             _ => None,
         }
     }
@@ -2590,6 +2906,53 @@ impl AnyCssPseudoClass {
     pub fn as_css_pseudo_class_identifier(&self) -> Option<&CssPseudoClassIdentifier> {
         match &self {
             AnyCssPseudoClass::CssPseudoClassIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub enum AnyCssPseudoClassNth {
+    CssPseudoClassNth(CssPseudoClassNth),
+    CssPseudoClassNthIdentifier(CssPseudoClassNthIdentifier),
+    CssPseudoClassNthNumber(CssPseudoClassNthNumber),
+}
+impl AnyCssPseudoClassNth {
+    pub fn as_css_pseudo_class_nth(&self) -> Option<&CssPseudoClassNth> {
+        match &self {
+            AnyCssPseudoClassNth::CssPseudoClassNth(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_pseudo_class_nth_identifier(&self) -> Option<&CssPseudoClassNthIdentifier> {
+        match &self {
+            AnyCssPseudoClassNth::CssPseudoClassNthIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_pseudo_class_nth_number(&self) -> Option<&CssPseudoClassNthNumber> {
+        match &self {
+            AnyCssPseudoClassNth::CssPseudoClassNthNumber(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub enum AnyCssPseudoClassNthSelector {
+    CssBogusSelector(CssBogusSelector),
+    CssPseudoClassNthSelector(CssPseudoClassNthSelector),
+}
+impl AnyCssPseudoClassNthSelector {
+    pub fn as_css_bogus_selector(&self) -> Option<&CssBogusSelector> {
+        match &self {
+            AnyCssPseudoClassNthSelector::CssBogusSelector(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_pseudo_class_nth_selector(&self) -> Option<&CssPseudoClassNthSelector> {
+        match &self {
+            AnyCssPseudoClassNthSelector::CssPseudoClassNthSelector(item) => Some(item),
             _ => None,
         }
     }
@@ -4036,6 +4399,45 @@ impl From<CssKeyframesSelector> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for CssNthOffset {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_NTH_OFFSET as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_NTH_OFFSET
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssNthOffset {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssNthOffset")
+            .field("sign", &support::DebugSyntaxResult(self.sign()))
+            .field("value", &support::DebugSyntaxResult(self.value()))
+            .finish()
+    }
+}
+impl From<CssNthOffset> for SyntaxNode {
+    fn from(n: CssNthOffset) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssNthOffset> for SyntaxElement {
+    fn from(n: CssNthOffset) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
 impl AstNode for CssNumber {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -4303,6 +4705,53 @@ impl From<CssPseudoClassFunctionIdentifier> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for CssPseudoClassFunctionNth {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_PSEUDO_CLASS_FUNCTION_NTH as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_PSEUDO_CLASS_FUNCTION_NTH
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssPseudoClassFunctionNth {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssPseudoClassFunctionNth")
+            .field("name", &support::DebugSyntaxResult(self.name()))
+            .field(
+                "l_paren_token",
+                &support::DebugSyntaxResult(self.l_paren_token()),
+            )
+            .field("selector", &support::DebugSyntaxResult(self.selector()))
+            .field(
+                "r_paren_token",
+                &support::DebugSyntaxResult(self.r_paren_token()),
+            )
+            .finish()
+    }
+}
+impl From<CssPseudoClassFunctionNth> for SyntaxNode {
+    fn from(n: CssPseudoClassFunctionNth) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssPseudoClassFunctionNth> for SyntaxElement {
+    fn from(n: CssPseudoClassFunctionNth) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
 impl AstNode for CssPseudoClassFunctionRelativeSelectorList {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = SyntaxKindSet::from_raw(RawSyntaxKind(
@@ -4528,6 +4977,208 @@ impl From<CssPseudoClassIdentifier> for SyntaxNode {
 }
 impl From<CssPseudoClassIdentifier> for SyntaxElement {
     fn from(n: CssPseudoClassIdentifier) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssPseudoClassNth {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_PSEUDO_CLASS_NTH as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_PSEUDO_CLASS_NTH
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssPseudoClassNth {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssPseudoClassNth")
+            .field("sign", &support::DebugOptionalElement(self.sign()))
+            .field("value", &support::DebugOptionalElement(self.value()))
+            .field(
+                "symbol_token",
+                &support::DebugSyntaxResult(self.symbol_token()),
+            )
+            .field("offset", &support::DebugOptionalElement(self.offset()))
+            .finish()
+    }
+}
+impl From<CssPseudoClassNth> for SyntaxNode {
+    fn from(n: CssPseudoClassNth) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssPseudoClassNth> for SyntaxElement {
+    fn from(n: CssPseudoClassNth) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssPseudoClassNthIdentifier {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_PSEUDO_CLASS_NTH_IDENTIFIER as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_PSEUDO_CLASS_NTH_IDENTIFIER
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssPseudoClassNthIdentifier {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssPseudoClassNthIdentifier")
+            .field("value", &support::DebugSyntaxResult(self.value()))
+            .finish()
+    }
+}
+impl From<CssPseudoClassNthIdentifier> for SyntaxNode {
+    fn from(n: CssPseudoClassNthIdentifier) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssPseudoClassNthIdentifier> for SyntaxElement {
+    fn from(n: CssPseudoClassNthIdentifier) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssPseudoClassNthNumber {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_PSEUDO_CLASS_NTH_NUMBER as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_PSEUDO_CLASS_NTH_NUMBER
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssPseudoClassNthNumber {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssPseudoClassNthNumber")
+            .field("sign", &support::DebugOptionalElement(self.sign()))
+            .field("value", &support::DebugSyntaxResult(self.value()))
+            .finish()
+    }
+}
+impl From<CssPseudoClassNthNumber> for SyntaxNode {
+    fn from(n: CssPseudoClassNthNumber) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssPseudoClassNthNumber> for SyntaxElement {
+    fn from(n: CssPseudoClassNthNumber) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssPseudoClassNthSelector {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_PSEUDO_CLASS_NTH_SELECTOR as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_PSEUDO_CLASS_NTH_SELECTOR
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssPseudoClassNthSelector {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssPseudoClassNthSelector")
+            .field("nth", &support::DebugSyntaxResult(self.nth()))
+            .field(
+                "of_selector",
+                &support::DebugOptionalElement(self.of_selector()),
+            )
+            .finish()
+    }
+}
+impl From<CssPseudoClassNthSelector> for SyntaxNode {
+    fn from(n: CssPseudoClassNthSelector) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssPseudoClassNthSelector> for SyntaxElement {
+    fn from(n: CssPseudoClassNthSelector) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssPseudoClassOfNthSelector {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_PSEUDO_CLASS_OF_NTH_SELECTOR as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_PSEUDO_CLASS_OF_NTH_SELECTOR
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssPseudoClassOfNthSelector {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssPseudoClassOfNthSelector")
+            .field("of_token", &support::DebugSyntaxResult(self.of_token()))
+            .field("selector_list", &self.selector_list())
+            .finish()
+    }
+}
+impl From<CssPseudoClassOfNthSelector> for SyntaxNode {
+    fn from(n: CssPseudoClassOfNthSelector) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssPseudoClassOfNthSelector> for SyntaxElement {
+    fn from(n: CssPseudoClassOfNthSelector) -> SyntaxElement {
         n.syntax.into()
     }
 }
@@ -5523,6 +6174,11 @@ impl From<AnyCssCompoundSelector> for SyntaxElement {
         node.into()
     }
 }
+impl From<CssBogusPseudoClass> for AnyCssPseudoClass {
+    fn from(node: CssBogusPseudoClass) -> AnyCssPseudoClass {
+        AnyCssPseudoClass::CssBogusPseudoClass(node)
+    }
+}
 impl From<CssPseudoClassFunctionCompoundSelector> for AnyCssPseudoClass {
     fn from(node: CssPseudoClassFunctionCompoundSelector) -> AnyCssPseudoClass {
         AnyCssPseudoClass::CssPseudoClassFunctionCompoundSelector(node)
@@ -5536,6 +6192,11 @@ impl From<CssPseudoClassFunctionCompoundSelectorList> for AnyCssPseudoClass {
 impl From<CssPseudoClassFunctionIdentifier> for AnyCssPseudoClass {
     fn from(node: CssPseudoClassFunctionIdentifier) -> AnyCssPseudoClass {
         AnyCssPseudoClass::CssPseudoClassFunctionIdentifier(node)
+    }
+}
+impl From<CssPseudoClassFunctionNth> for AnyCssPseudoClass {
+    fn from(node: CssPseudoClassFunctionNth) -> AnyCssPseudoClass {
+        AnyCssPseudoClass::CssPseudoClassFunctionNth(node)
     }
 }
 impl From<CssPseudoClassFunctionRelativeSelectorList> for AnyCssPseudoClass {
@@ -5565,9 +6226,11 @@ impl From<CssPseudoClassIdentifier> for AnyCssPseudoClass {
 }
 impl AstNode for AnyCssPseudoClass {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = CssPseudoClassFunctionCompoundSelector::KIND_SET
+    const KIND_SET: SyntaxKindSet<Language> = CssBogusPseudoClass::KIND_SET
+        .union(CssPseudoClassFunctionCompoundSelector::KIND_SET)
         .union(CssPseudoClassFunctionCompoundSelectorList::KIND_SET)
         .union(CssPseudoClassFunctionIdentifier::KIND_SET)
+        .union(CssPseudoClassFunctionNth::KIND_SET)
         .union(CssPseudoClassFunctionRelativeSelectorList::KIND_SET)
         .union(CssPseudoClassFunctionSelector::KIND_SET)
         .union(CssPseudoClassFunctionSelectorList::KIND_SET)
@@ -5576,9 +6239,11 @@ impl AstNode for AnyCssPseudoClass {
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR
+            CSS_BOGUS_PSEUDO_CLASS
+                | CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR
                 | CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR_LIST
                 | CSS_PSEUDO_CLASS_FUNCTION_IDENTIFIER
+                | CSS_PSEUDO_CLASS_FUNCTION_NTH
                 | CSS_PSEUDO_CLASS_FUNCTION_RELATIVE_SELECTOR_LIST
                 | CSS_PSEUDO_CLASS_FUNCTION_SELECTOR
                 | CSS_PSEUDO_CLASS_FUNCTION_SELECTOR_LIST
@@ -5588,6 +6253,9 @@ impl AstNode for AnyCssPseudoClass {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
+            CSS_BOGUS_PSEUDO_CLASS => {
+                AnyCssPseudoClass::CssBogusPseudoClass(CssBogusPseudoClass { syntax })
+            }
             CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR => {
                 AnyCssPseudoClass::CssPseudoClassFunctionCompoundSelector(
                     CssPseudoClassFunctionCompoundSelector { syntax },
@@ -5602,6 +6270,9 @@ impl AstNode for AnyCssPseudoClass {
                 AnyCssPseudoClass::CssPseudoClassFunctionIdentifier(
                     CssPseudoClassFunctionIdentifier { syntax },
                 )
+            }
+            CSS_PSEUDO_CLASS_FUNCTION_NTH => {
+                AnyCssPseudoClass::CssPseudoClassFunctionNth(CssPseudoClassFunctionNth { syntax })
             }
             CSS_PSEUDO_CLASS_FUNCTION_RELATIVE_SELECTOR_LIST => {
                 AnyCssPseudoClass::CssPseudoClassFunctionRelativeSelectorList(
@@ -5632,9 +6303,11 @@ impl AstNode for AnyCssPseudoClass {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
+            AnyCssPseudoClass::CssBogusPseudoClass(it) => &it.syntax,
             AnyCssPseudoClass::CssPseudoClassFunctionCompoundSelector(it) => &it.syntax,
             AnyCssPseudoClass::CssPseudoClassFunctionCompoundSelectorList(it) => &it.syntax,
             AnyCssPseudoClass::CssPseudoClassFunctionIdentifier(it) => &it.syntax,
+            AnyCssPseudoClass::CssPseudoClassFunctionNth(it) => &it.syntax,
             AnyCssPseudoClass::CssPseudoClassFunctionRelativeSelectorList(it) => &it.syntax,
             AnyCssPseudoClass::CssPseudoClassFunctionSelector(it) => &it.syntax,
             AnyCssPseudoClass::CssPseudoClassFunctionSelectorList(it) => &it.syntax,
@@ -5644,9 +6317,11 @@ impl AstNode for AnyCssPseudoClass {
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
+            AnyCssPseudoClass::CssBogusPseudoClass(it) => it.syntax,
             AnyCssPseudoClass::CssPseudoClassFunctionCompoundSelector(it) => it.syntax,
             AnyCssPseudoClass::CssPseudoClassFunctionCompoundSelectorList(it) => it.syntax,
             AnyCssPseudoClass::CssPseudoClassFunctionIdentifier(it) => it.syntax,
+            AnyCssPseudoClass::CssPseudoClassFunctionNth(it) => it.syntax,
             AnyCssPseudoClass::CssPseudoClassFunctionRelativeSelectorList(it) => it.syntax,
             AnyCssPseudoClass::CssPseudoClassFunctionSelector(it) => it.syntax,
             AnyCssPseudoClass::CssPseudoClassFunctionSelectorList(it) => it.syntax,
@@ -5658,6 +6333,7 @@ impl AstNode for AnyCssPseudoClass {
 impl std::fmt::Debug for AnyCssPseudoClass {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            AnyCssPseudoClass::CssBogusPseudoClass(it) => std::fmt::Debug::fmt(it, f),
             AnyCssPseudoClass::CssPseudoClassFunctionCompoundSelector(it) => {
                 std::fmt::Debug::fmt(it, f)
             }
@@ -5665,6 +6341,7 @@ impl std::fmt::Debug for AnyCssPseudoClass {
                 std::fmt::Debug::fmt(it, f)
             }
             AnyCssPseudoClass::CssPseudoClassFunctionIdentifier(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssPseudoClass::CssPseudoClassFunctionNth(it) => std::fmt::Debug::fmt(it, f),
             AnyCssPseudoClass::CssPseudoClassFunctionRelativeSelectorList(it) => {
                 std::fmt::Debug::fmt(it, f)
             }
@@ -5680,9 +6357,11 @@ impl std::fmt::Debug for AnyCssPseudoClass {
 impl From<AnyCssPseudoClass> for SyntaxNode {
     fn from(n: AnyCssPseudoClass) -> SyntaxNode {
         match n {
+            AnyCssPseudoClass::CssBogusPseudoClass(it) => it.into(),
             AnyCssPseudoClass::CssPseudoClassFunctionCompoundSelector(it) => it.into(),
             AnyCssPseudoClass::CssPseudoClassFunctionCompoundSelectorList(it) => it.into(),
             AnyCssPseudoClass::CssPseudoClassFunctionIdentifier(it) => it.into(),
+            AnyCssPseudoClass::CssPseudoClassFunctionNth(it) => it.into(),
             AnyCssPseudoClass::CssPseudoClassFunctionRelativeSelectorList(it) => it.into(),
             AnyCssPseudoClass::CssPseudoClassFunctionSelector(it) => it.into(),
             AnyCssPseudoClass::CssPseudoClassFunctionSelectorList(it) => it.into(),
@@ -5693,6 +6372,156 @@ impl From<AnyCssPseudoClass> for SyntaxNode {
 }
 impl From<AnyCssPseudoClass> for SyntaxElement {
     fn from(n: AnyCssPseudoClass) -> SyntaxElement {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<CssPseudoClassNth> for AnyCssPseudoClassNth {
+    fn from(node: CssPseudoClassNth) -> AnyCssPseudoClassNth {
+        AnyCssPseudoClassNth::CssPseudoClassNth(node)
+    }
+}
+impl From<CssPseudoClassNthIdentifier> for AnyCssPseudoClassNth {
+    fn from(node: CssPseudoClassNthIdentifier) -> AnyCssPseudoClassNth {
+        AnyCssPseudoClassNth::CssPseudoClassNthIdentifier(node)
+    }
+}
+impl From<CssPseudoClassNthNumber> for AnyCssPseudoClassNth {
+    fn from(node: CssPseudoClassNthNumber) -> AnyCssPseudoClassNth {
+        AnyCssPseudoClassNth::CssPseudoClassNthNumber(node)
+    }
+}
+impl AstNode for AnyCssPseudoClassNth {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = CssPseudoClassNth::KIND_SET
+        .union(CssPseudoClassNthIdentifier::KIND_SET)
+        .union(CssPseudoClassNthNumber::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(
+            kind,
+            CSS_PSEUDO_CLASS_NTH | CSS_PSEUDO_CLASS_NTH_IDENTIFIER | CSS_PSEUDO_CLASS_NTH_NUMBER
+        )
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_PSEUDO_CLASS_NTH => {
+                AnyCssPseudoClassNth::CssPseudoClassNth(CssPseudoClassNth { syntax })
+            }
+            CSS_PSEUDO_CLASS_NTH_IDENTIFIER => {
+                AnyCssPseudoClassNth::CssPseudoClassNthIdentifier(CssPseudoClassNthIdentifier {
+                    syntax,
+                })
+            }
+            CSS_PSEUDO_CLASS_NTH_NUMBER => {
+                AnyCssPseudoClassNth::CssPseudoClassNthNumber(CssPseudoClassNthNumber { syntax })
+            }
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            AnyCssPseudoClassNth::CssPseudoClassNth(it) => &it.syntax,
+            AnyCssPseudoClassNth::CssPseudoClassNthIdentifier(it) => &it.syntax,
+            AnyCssPseudoClassNth::CssPseudoClassNthNumber(it) => &it.syntax,
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            AnyCssPseudoClassNth::CssPseudoClassNth(it) => it.syntax,
+            AnyCssPseudoClassNth::CssPseudoClassNthIdentifier(it) => it.syntax,
+            AnyCssPseudoClassNth::CssPseudoClassNthNumber(it) => it.syntax,
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssPseudoClassNth {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            AnyCssPseudoClassNth::CssPseudoClassNth(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssPseudoClassNth::CssPseudoClassNthIdentifier(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssPseudoClassNth::CssPseudoClassNthNumber(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssPseudoClassNth> for SyntaxNode {
+    fn from(n: AnyCssPseudoClassNth) -> SyntaxNode {
+        match n {
+            AnyCssPseudoClassNth::CssPseudoClassNth(it) => it.into(),
+            AnyCssPseudoClassNth::CssPseudoClassNthIdentifier(it) => it.into(),
+            AnyCssPseudoClassNth::CssPseudoClassNthNumber(it) => it.into(),
+        }
+    }
+}
+impl From<AnyCssPseudoClassNth> for SyntaxElement {
+    fn from(n: AnyCssPseudoClassNth) -> SyntaxElement {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<CssBogusSelector> for AnyCssPseudoClassNthSelector {
+    fn from(node: CssBogusSelector) -> AnyCssPseudoClassNthSelector {
+        AnyCssPseudoClassNthSelector::CssBogusSelector(node)
+    }
+}
+impl From<CssPseudoClassNthSelector> for AnyCssPseudoClassNthSelector {
+    fn from(node: CssPseudoClassNthSelector) -> AnyCssPseudoClassNthSelector {
+        AnyCssPseudoClassNthSelector::CssPseudoClassNthSelector(node)
+    }
+}
+impl AstNode for AnyCssPseudoClassNthSelector {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        CssBogusSelector::KIND_SET.union(CssPseudoClassNthSelector::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, CSS_BOGUS_SELECTOR | CSS_PSEUDO_CLASS_NTH_SELECTOR)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_BOGUS_SELECTOR => {
+                AnyCssPseudoClassNthSelector::CssBogusSelector(CssBogusSelector { syntax })
+            }
+            CSS_PSEUDO_CLASS_NTH_SELECTOR => {
+                AnyCssPseudoClassNthSelector::CssPseudoClassNthSelector(CssPseudoClassNthSelector {
+                    syntax,
+                })
+            }
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            AnyCssPseudoClassNthSelector::CssBogusSelector(it) => &it.syntax,
+            AnyCssPseudoClassNthSelector::CssPseudoClassNthSelector(it) => &it.syntax,
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            AnyCssPseudoClassNthSelector::CssBogusSelector(it) => it.syntax,
+            AnyCssPseudoClassNthSelector::CssPseudoClassNthSelector(it) => it.syntax,
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssPseudoClassNthSelector {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            AnyCssPseudoClassNthSelector::CssBogusSelector(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssPseudoClassNthSelector::CssPseudoClassNthSelector(it) => {
+                std::fmt::Debug::fmt(it, f)
+            }
+        }
+    }
+}
+impl From<AnyCssPseudoClassNthSelector> for SyntaxNode {
+    fn from(n: AnyCssPseudoClassNthSelector) -> SyntaxNode {
+        match n {
+            AnyCssPseudoClassNthSelector::CssBogusSelector(it) => it.into(),
+            AnyCssPseudoClassNthSelector::CssPseudoClassNthSelector(it) => it.into(),
+        }
+    }
+}
+impl From<AnyCssPseudoClassNthSelector> for SyntaxElement {
+    fn from(n: AnyCssPseudoClassNthSelector) -> SyntaxElement {
         let node: SyntaxNode = n.into();
         node.into()
     }
@@ -6400,6 +7229,16 @@ impl std::fmt::Display for AnyCssPseudoClass {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for AnyCssPseudoClassNth {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyCssPseudoClassNthSelector {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AnyCssPseudoElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -6575,6 +7414,11 @@ impl std::fmt::Display for CssKeyframesSelector {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for CssNthOffset {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for CssNumber {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -6605,6 +7449,11 @@ impl std::fmt::Display for CssPseudoClassFunctionIdentifier {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for CssPseudoClassFunctionNth {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for CssPseudoClassFunctionRelativeSelectorList {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -6626,6 +7475,31 @@ impl std::fmt::Display for CssPseudoClassFunctionValueList {
     }
 }
 impl std::fmt::Display for CssPseudoClassIdentifier {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssPseudoClassNth {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssPseudoClassNthIdentifier {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssPseudoClassNthNumber {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssPseudoClassNthSelector {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssPseudoClassOfNthSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -6816,6 +7690,63 @@ impl From<CssBogusBody> for SyntaxNode {
 }
 impl From<CssBogusBody> for SyntaxElement {
     fn from(n: CssBogusBody) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssBogusPseudoClass {
+    syntax: SyntaxNode,
+}
+impl CssBogusPseudoClass {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn items(&self) -> SyntaxElementChildren {
+        support::elements(&self.syntax)
+    }
+}
+impl AstNode for CssBogusPseudoClass {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_BOGUS_PSEUDO_CLASS as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_BOGUS_PSEUDO_CLASS
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssBogusPseudoClass {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssBogusPseudoClass")
+            .field("items", &DebugSyntaxElementChildren(self.items()))
+            .finish()
+    }
+}
+impl From<CssBogusPseudoClass> for SyntaxNode {
+    fn from(n: CssBogusPseudoClass) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssBogusPseudoClass> for SyntaxElement {
+    fn from(n: CssBogusPseudoClass) -> SyntaxElement {
         n.syntax.into()
     }
 }

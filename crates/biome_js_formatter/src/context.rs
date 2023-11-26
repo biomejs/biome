@@ -5,7 +5,7 @@ use biome_formatter::printer::PrinterOptions;
 use biome_formatter::token::string::Quote;
 use biome_formatter::{
     CstFormatContext, FormatContext, FormatElement, FormatOptions, IndentStyle, IndentWidth,
-    LineWidth, TransformSourceMap,
+    LineEnding, LineWidth, TransformSourceMap,
 };
 use biome_js_syntax::{AnyJsFunctionBody, JsFileSource, JsLanguage};
 use std::fmt;
@@ -138,6 +138,9 @@ pub struct JsFormatOptions {
     /// The indent width.
     indent_width: IndentWidth,
 
+    /// The type of line ending.
+    line_ending: LineEnding,
+
     /// What's the max width of a line. Defaults to 80.
     line_width: LineWidth,
 
@@ -159,6 +162,12 @@ pub struct JsFormatOptions {
     /// Whether to add non-necessary parentheses to arrow functions. Defaults to "always".
     arrow_parentheses: ArrowParentheses,
 
+    /// Whether to insert spaces around brackets in object literals. Defaults to true.
+    bracket_spacing: BracketSpacing,
+
+    /// Whether to hug the closing bracket of multiline HTML/JSX tags to the end of the last line, rather than being alone on the following line. Defaults to false.
+    bracket_same_line: BracketSameLine,
+
     /// Information related to the current file
     source_type: JsFileSource,
 }
@@ -169,6 +178,7 @@ impl JsFormatOptions {
             source_type,
             indent_style: IndentStyle::default(),
             indent_width: IndentWidth::default(),
+            line_ending: LineEnding::default(),
             line_width: LineWidth::default(),
             quote_style: QuoteStyle::default(),
             jsx_quote_style: QuoteStyle::default(),
@@ -176,11 +186,23 @@ impl JsFormatOptions {
             trailing_comma: TrailingComma::default(),
             semicolons: Semicolons::default(),
             arrow_parentheses: ArrowParentheses::default(),
+            bracket_spacing: BracketSpacing::default(),
+            bracket_same_line: BracketSameLine::default(),
         }
     }
 
     pub fn with_arrow_parentheses(mut self, arrow_parentheses: ArrowParentheses) -> Self {
         self.arrow_parentheses = arrow_parentheses;
+        self
+    }
+
+    pub fn with_bracket_spacing(mut self, bracket_spacing: BracketSpacing) -> Self {
+        self.bracket_spacing = bracket_spacing;
+        self
+    }
+
+    pub fn with_bracket_same_line(mut self, bracket_same_line: BracketSameLine) -> Self {
+        self.bracket_same_line = bracket_same_line;
         self
     }
 
@@ -191,6 +213,11 @@ impl JsFormatOptions {
 
     pub fn with_indent_width(mut self, indent_width: IndentWidth) -> Self {
         self.indent_width = indent_width;
+        self
+    }
+
+    pub fn with_line_ending(mut self, line_ending: LineEnding) -> Self {
+        self.line_ending = line_ending;
         self
     }
 
@@ -228,12 +255,24 @@ impl JsFormatOptions {
         self.arrow_parentheses = arrow_parentheses;
     }
 
+    pub fn set_bracket_spacing(&mut self, bracket_spacing: BracketSpacing) {
+        self.bracket_spacing = bracket_spacing;
+    }
+
+    pub fn set_bracket_same_line(&mut self, bracket_same_line: BracketSameLine) {
+        self.bracket_same_line = bracket_same_line;
+    }
+
     pub fn set_indent_style(&mut self, indent_style: IndentStyle) {
         self.indent_style = indent_style;
     }
 
     pub fn set_indent_width(&mut self, indent_width: IndentWidth) {
         self.indent_width = indent_width;
+    }
+
+    pub fn set_line_ending(&mut self, line_ending: LineEnding) {
+        self.line_ending = line_ending;
     }
 
     pub fn set_line_width(&mut self, line_width: LineWidth) {
@@ -262,6 +301,14 @@ impl JsFormatOptions {
 
     pub fn arrow_parentheses(&self) -> ArrowParentheses {
         self.arrow_parentheses
+    }
+
+    pub fn bracket_spacing(&self) -> BracketSpacing {
+        self.bracket_spacing
+    }
+
+    pub fn bracket_same_line(&self) -> BracketSameLine {
+        self.bracket_same_line
     }
 
     pub fn quote_style(&self) -> QuoteStyle {
@@ -306,6 +353,10 @@ impl FormatOptions for JsFormatOptions {
         self.line_width
     }
 
+    fn line_ending(&self) -> LineEnding {
+        self.line_ending
+    }
+
     fn as_print_options(&self) -> PrinterOptions {
         PrinterOptions::from(self)
     }
@@ -315,13 +366,16 @@ impl fmt::Display for JsFormatOptions {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         writeln!(f, "Indent style: {}", self.indent_style)?;
         writeln!(f, "Indent width: {}", self.indent_width.value())?;
+        writeln!(f, "Line ending: {}", self.line_ending)?;
         writeln!(f, "Line width: {}", self.line_width.get())?;
         writeln!(f, "Quote style: {}", self.quote_style)?;
         writeln!(f, "JSX quote style: {}", self.jsx_quote_style)?;
         writeln!(f, "Quote properties: {}", self.quote_properties)?;
         writeln!(f, "Trailing comma: {}", self.trailing_comma)?;
         writeln!(f, "Semicolons: {}", self.semicolons)?;
-        writeln!(f, "Arrow parentheses: {}", self.arrow_parentheses)
+        writeln!(f, "Arrow parentheses: {}", self.arrow_parentheses)?;
+        writeln!(f, "Bracket spacing: {}", self.bracket_spacing.value())?;
+        writeln!(f, "Bracket same line: {}", self.bracket_same_line.value())
     }
 }
 
@@ -619,5 +673,53 @@ impl Deserializable for ArrowParentheses {
                 None
             }
         }
+    }
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Copy, Hash)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
+    serde(rename_all = "camelCase")
+)]
+pub struct BracketSpacing(bool);
+
+impl BracketSpacing {
+    /// Return the boolean value for this [BracketSpacing]
+    pub fn value(&self) -> bool {
+        self.0
+    }
+}
+
+impl Default for BracketSpacing {
+    fn default() -> Self {
+        Self(true)
+    }
+}
+
+impl From<bool> for BracketSpacing {
+    fn from(value: bool) -> Self {
+        Self(value)
+    }
+}
+
+#[derive(Debug, Default, Eq, PartialEq, Clone, Copy, Hash)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
+    serde(rename_all = "camelCase")
+)]
+pub struct BracketSameLine(bool);
+
+impl BracketSameLine {
+    /// Return the boolean value for this [BracketSameLine]
+    pub fn value(&self) -> bool {
+        self.0
+    }
+}
+
+impl From<bool> for BracketSameLine {
+    fn from(value: bool) -> Self {
+        Self(value)
     }
 }

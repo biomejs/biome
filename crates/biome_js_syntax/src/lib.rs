@@ -4,6 +4,7 @@
 
 #[macro_use]
 mod generated;
+pub mod assign_ext;
 pub mod binding_ext;
 pub mod declaration_ext;
 pub mod directive_ext;

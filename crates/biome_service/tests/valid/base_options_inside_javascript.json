@@ -8,6 +8,7 @@
 			"enabled": true,
 			"indentStyle": "space",
 			"indentSize": 2,
+			"lineEnding": "lf",
 			"lineWidth": 200
 		}
 	}

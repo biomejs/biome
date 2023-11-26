@@ -15,15 +15,13 @@ interface RelayProps {
   | void, // articles type may be void
 }
 
-// FIXME
-// TODO: reformat issue
-// type FooBar = null // null
-// | { /** x **/
-//   y: number;
-//   z: string;
-// } // this documents the first option
-//   | void // this documents the second option
-//   ;
+type FooBar = null // null
+| { /** x **/
+  y: number;
+  z: string;
+} // this documents the first option
+  | void // this documents the second option
+  ;
 
 type FooBarWithoutComment = null
   | {

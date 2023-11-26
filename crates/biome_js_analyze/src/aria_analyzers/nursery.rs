@@ -2,6 +2,7 @@
 
 use biome_analyze::declare_group;
 
+pub(crate) mod no_aria_hidden_on_focusable;
 pub(crate) mod no_interactive_element_to_noninteractive_role;
 pub(crate) mod no_static_element_interactions;
 pub(crate) mod use_aria_activedescendant_with_tabindex;
@@ -11,6 +12,7 @@ declare_group! {
     pub (crate) Nursery {
         name : "nursery" ,
         rules : [
+            self :: no_aria_hidden_on_focusable :: NoAriaHiddenOnFocusable ,
             self :: no_interactive_element_to_noninteractive_role :: NoInteractiveElementToNoninteractiveRole ,
             self :: no_static_element_interactions :: NoStaticElementInteractions ,
             self :: use_aria_activedescendant_with_tabindex :: UseAriaActivedescendantWithTabindex ,

@@ -45,6 +45,8 @@ export default function SettingsTab({
 			trailingComma,
 			semicolons,
 			arrowParentheses,
+			bracketSpacing,
+			bracketSameLine,
 			lintRules,
 			enabledLinting,
 			importSortingEnabled,
@@ -88,6 +90,14 @@ export default function SettingsTab({
 	const setArrowParentheses = createPlaygroundSettingsSetter(
 		setPlaygroundState,
 		"arrowParentheses",
+	);
+	const setBracketSpacing = createPlaygroundSettingsSetter(
+		setPlaygroundState,
+		"bracketSpacing",
+	);
+	const setBracketSameLine = createPlaygroundSettingsSetter(
+		setPlaygroundState,
+		"bracketSameLine",
 	);
 	const setLintRules = createPlaygroundSettingsSetter(
 		setPlaygroundState,
@@ -252,6 +262,10 @@ export default function SettingsTab({
 				setSemicolons={setSemicolons}
 				arrowParentheses={arrowParentheses}
 				setArrowParentheses={setArrowParentheses}
+				bracketSpacing={bracketSpacing}
+				setBracketSpacing={setBracketSpacing}
+				bracketSameLine={bracketSameLine}
+				setBracketSameLine={setBracketSameLine}
 			/>
 			<LinterSettings
 				lintRules={lintRules}
@@ -581,6 +595,10 @@ function FormatterSettings({
 	setSemicolons,
 	arrowParentheses,
 	setArrowParentheses,
+	bracketSpacing,
+	setBracketSpacing,
+	bracketSameLine,
+	setBracketSameLine,
 }: {
 	lineWidth: number;
 	setLineWidth: (value: number) => void;
@@ -600,6 +618,10 @@ function FormatterSettings({
 	setSemicolons: (value: Semicolons) => void;
 	arrowParentheses: ArrowParentheses;
 	setArrowParentheses: (value: ArrowParentheses) => void;
+	bracketSpacing: boolean;
+	setBracketSpacing: (value: boolean) => void;
+	bracketSameLine: boolean;
+	setBracketSameLine: (value: boolean) => void;
 }) {
 	return (
 		<>
@@ -716,6 +738,26 @@ function FormatterSettings({
 						<option value={ArrowParentheses.Always}>Always</option>
 						<option value={ArrowParentheses.AsNeeded}>As needed</option>
 					</select>
+				</div>
+				<div className="field-row">
+					<label htmlFor="bracketSpacing">Bracket Spacing</label>
+					<input
+						id="bracketSpacing"
+						name="bracketSpacing"
+						type="checkbox"
+						checked={bracketSpacing}
+						onChange={(e) => setBracketSpacing(e.target.checked)}
+					/>
+				</div>
+				<div className="field-row">
+					<label htmlFor="bracketSameLine">Bracket Same Line</label>
+					<input
+						id="bracketSameLine"
+						name="bracketSameLine"
+						type="checkbox"
+						checked={bracketSameLine}
+						onChange={(e) => setBracketSameLine(e.target.checked)}
+					/>
 				</div>
 			</section>
 		</>

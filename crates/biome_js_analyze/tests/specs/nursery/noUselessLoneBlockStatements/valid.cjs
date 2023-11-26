@@ -46,3 +46,40 @@ function g() {
  for(i = 0; f(i); i++) {}
  return i;
 }
+
+function JsTryStatement() {
+    try {
+     foo();
+    } catch (error) {
+     bar();
+    } finally {
+     baz();
+    }
+   }
+   
+
+function JsTryFinallyStatement() {
+ try {
+  foo();
+ } catch (error) {
+  bar();
+ } finally {
+  baz();
+ }
+}
+
+switch (1) {
+  default: {
+    console.info("1");
+    console.info("2");
+    break;
+  }
+}
+
+switch (foo) {
+  case true: {
+    console.info("1");
+    console.info("2");
+    break;
+  }
+}

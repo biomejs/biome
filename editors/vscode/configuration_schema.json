@@ -1188,6 +1188,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useRegexLiterals": {
+					"description": "Enforce the use of the regular expression literals instead of the RegExp constructor if possible.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useShorthandAssign": {
 					"description": "Require assignment operator shorthand where possible.",
 					"anyOf": [

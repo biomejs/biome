@@ -6,7 +6,7 @@ use crate::{
 use biome_analyze::{AnalyzerRules, RuleFilter};
 use biome_deserialize::StringSet;
 use biome_diagnostics::Category;
-use biome_formatter::{IndentStyle, IndentWidth, LineWidth};
+use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth};
 use biome_fs::RomePath;
 use biome_js_analyze::metadata;
 use biome_js_formatter::context::JsFormatOptions;
@@ -146,6 +146,7 @@ pub struct FormatSettings {
     pub format_with_errors: bool,
     pub indent_style: Option<IndentStyle>,
     pub indent_width: Option<IndentWidth>,
+    pub line_ending: Option<LineEnding>,
     pub line_width: Option<LineWidth>,
     /// List of ignore paths/files
     pub ignored_files: Option<Matcher>,
@@ -160,6 +161,7 @@ impl Default for FormatSettings {
             format_with_errors: false,
             indent_style: Some(IndentStyle::default()),
             indent_width: Some(IndentWidth::default()),
+            line_ending: Some(LineEnding::default()),
             line_width: Some(LineWidth::default()),
             ignored_files: None,
             included_files: None,
@@ -177,6 +179,7 @@ pub struct OverrideFormatSettings {
     pub format_with_errors: bool,
     pub indent_style: Option<IndentStyle>,
     pub indent_width: Option<IndentWidth>,
+    pub line_ending: Option<LineEnding>,
     pub line_width: Option<LineWidth>,
 }
 
@@ -265,6 +268,9 @@ impl From<JavascriptConfiguration> for LanguageSettings<JsLanguage> {
             language_setting.formatter.trailing_comma = formatter.trailing_comma;
             language_setting.formatter.semicolons = formatter.semicolons;
             language_setting.formatter.arrow_parentheses = formatter.arrow_parentheses;
+            language_setting.formatter.bracket_spacing = formatter.bracket_spacing.map(Into::into);
+            language_setting.formatter.bracket_same_line =
+                formatter.bracket_same_line.map(Into::into);
             language_setting.formatter.enabled = formatter.enabled;
             language_setting.formatter.line_width = formatter.line_width;
             language_setting.formatter.indent_width = formatter
@@ -510,6 +516,12 @@ impl OverrideSettings {
                 }
                 if let Some(arrow_parentheses) = js_formatter.arrow_parentheses {
                     options.set_arrow_parentheses(arrow_parentheses);
+                }
+                if let Some(bracket_spacing) = js_formatter.bracket_spacing {
+                    options.set_bracket_spacing(bracket_spacing);
+                }
+                if let Some(bracket_same_line) = js_formatter.bracket_same_line {
+                    options.set_bracket_same_line(bracket_same_line);
                 }
             }
 

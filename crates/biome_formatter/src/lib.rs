@@ -52,7 +52,7 @@ use crate::printed_tokens::PrintedTokens;
 use crate::printer::{Printer, PrinterOptions};
 pub use arguments::{Argument, Arguments};
 use biome_deserialize::{
-    Deserializable, DeserializableValue, DeserializationDiagnostic, TextNumber,
+    Deserializable, DeserializableValue, DeserializationDiagnostic, Text, TextNumber,
 };
 pub use buffer::{
     Buffer, BufferExtensions, BufferSnapshot, Inspect, PreambleBuffer, RemoveSoftLinesBuffer,
@@ -121,6 +121,96 @@ impl std::fmt::Display for IndentStyle {
         match self {
             IndentStyle::Tab => std::write!(f, "Tab"),
             IndentStyle::Space => std::write!(f, "Space"),
+        }
+    }
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Copy, Hash)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
+    serde(rename_all = "camelCase")
+)]
+#[derive(Default)]
+pub enum LineEnding {
+    ///  Line Feed only (\n), common on Linux and macOS as well as inside git repos
+    #[default]
+    Lf,
+
+    /// Carriage Return + Line Feed characters (\r\n), common on Windows
+    Crlf,
+
+    /// Carriage Return character only (\r), used very rarely
+    Cr,
+}
+
+impl LineEnding {
+    #[inline]
+    pub const fn as_str(&self) -> &'static str {
+        match self {
+            LineEnding::Lf => "\n",
+            LineEnding::Crlf => "\r\n",
+            LineEnding::Cr => "\r",
+        }
+    }
+
+    /// Returns `true` if this is a [LineEnding::Lf].
+    pub const fn is_line_feed(&self) -> bool {
+        matches!(self, LineEnding::Lf)
+    }
+
+    /// Returns `true` if this is a [LineEnding::Crlf].
+    pub const fn is_carriage_return_line_feed(&self) -> bool {
+        matches!(self, LineEnding::Crlf)
+    }
+
+    /// Returns `true` if this is a [LineEnding::Cr].
+    pub const fn is_carriage_return(&self) -> bool {
+        matches!(self, LineEnding::Cr)
+    }
+}
+
+impl FromStr for LineEnding {
+    type Err = &'static str;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "lf" => Ok(Self::Lf),
+            "crlf" => Ok(Self::Crlf),
+            "cr" => Ok(Self::Cr),
+            // TODO: replace this error with a diagnostic
+            _ => Err("Value not supported for LineEnding"),
+        }
+    }
+}
+
+impl std::fmt::Display for LineEnding {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            LineEnding::Lf => std::write!(f, "LF"),
+            LineEnding::Crlf => std::write!(f, "CRLF"),
+            LineEnding::Cr => std::write!(f, "CR"),
+        }
+    }
+}
+
+impl Deserializable for LineEnding {
+    fn deserialize(
+        value: &impl DeserializableValue,
+        name: &str,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> Option<Self> {
+        let value_text = Text::deserialize(value, name, diagnostics)?;
+        if let Ok(value) = value_text.parse::<Self>() {
+            Some(value)
+        } else {
+            const ALLOWED_VARIANTS: &[&str] = &["lf", "crlf", "cr"];
+            diagnostics.push(DeserializationDiagnostic::new_unknown_value(
+                &value_text,
+                value.range(),
+                ALLOWED_VARIANTS,
+            ));
+            None
         }
     }
 }
@@ -292,6 +382,9 @@ pub trait FormatOptions {
     /// What's the max width of a line. Defaults to 80.
     fn line_width(&self) -> LineWidth;
 
+    /// The type of line ending.
+    fn line_ending(&self) -> LineEnding;
+
     /// Derives the print options from the these format options
     fn as_print_options(&self) -> PrinterOptions;
 }
@@ -339,6 +432,7 @@ pub struct SimpleFormatOptions {
     pub indent_style: IndentStyle,
     pub indent_width: IndentWidth,
     pub line_width: LineWidth,
+    pub line_ending: LineEnding,
 }
 
 impl FormatOptions for SimpleFormatOptions {
@@ -354,11 +448,16 @@ impl FormatOptions for SimpleFormatOptions {
         self.line_width
     }
 
+    fn line_ending(&self) -> LineEnding {
+        self.line_ending
+    }
+
     fn as_print_options(&self) -> PrinterOptions {
         PrinterOptions::default()
             .with_indent_style(self.indent_style)
             .with_indent_width(self.indent_width)
             .with_print_width(self.line_width.into())
+            .with_line_ending(self.line_ending)
     }
 }
 
