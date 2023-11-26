@@ -1,0 +1,45 @@
+---
+title: Biome
+template: splash
+description: ウェブプロジェクトのための唯一無二のツールチェーン
+hero:
+    title: ウェブプロジェクトのための唯一無二のツールチェーン
+    tagline: フォーマット、リントなど、一瞬で完了します
+    image:
+        alt: Biome, ウェブツールチェイン
+        file: ../../../assets/biome-logo-slogan.svg
+    actions:
+    - text: はじめる
+      link: /guides/getting-started/
+      icon: right-arrow
+      variant: primary
+    - text: GitHub
+      link: https://github.com/biomejs/biome
+      icon: external
+      variant: secondary
+---
+
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+
+<CardGrid stagger>
+    <Card title="速い" icon="rocket">
+        Rustで構築され、rust-analyzerにインスパイアされた革新的なアーキテクチャを採用
+    </Card>
+    <Card title="シンプル" icon="pencil">
+        設定なしで始められます。必要に応じて豊富なオプションが利用可能です。
+    </Card>
+    <Card title="スケーラブル" icon="random">
+        あらゆる規模のコードベースに対応するよう設計されているので、ツールではなく製品の成長に集中できます。
+    </Card>
+    <Card title="最適化済み" icon="setting">
+        With tight internal integration we are able to reuse previous work and any improvement to one tool improves them all.
+    </Card>
+    <Card title="豊富な情報量" icon="information">
+        曖昧なエラーメッセージを極力避けるので、問題がある場合その位置を明示し、解決のためのステップを提供します。
+    </Card>
+    <Card title="すぐに使える" icon="add-document">
+        使用しているすべての言語機能に対するすぐれたサポートをします。特にTypeScriptおよびJSXへのサポートを第一にしています。"
+    </Card>
+</CardGrid>
