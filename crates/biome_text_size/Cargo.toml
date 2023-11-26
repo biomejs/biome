@@ -8,7 +8,7 @@ keywords.workspace   = true
 license.workspace    = true
 name                 = "biome_text_size"
 repository.workspace = true
-version              = "0.3.0"
+version              = "0.3.1"
 
 [dependencies]
 schemars = { workspace = true, optional = true }
