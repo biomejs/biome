@@ -846,6 +846,10 @@ export interface Nursery {
 	 */
 	useImportRestrictions?: RuleConfiguration;
 	/**
+	 * Enforce the use of the regular expression literals instead of the RegExp constructor if possible.
+	 */
+	useRegexLiterals?: RuleConfiguration;
+	/**
 	 * Require assignment operator shorthand where possible.
 	 */
 	useShorthandAssign?: RuleConfiguration;
@@ -1509,6 +1513,7 @@ export type Category =
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useGroupedTypeImport"
 	| "lint/nursery/useImportRestrictions"
+	| "lint/nursery/useRegexLiterals"
 	| "lint/nursery/useShorthandAssign"
 	| "lint/nursery/useValidAriaRole"
 	| "lint/performance/noAccumulatingSpread"

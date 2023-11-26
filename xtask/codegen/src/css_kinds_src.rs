@@ -218,6 +218,8 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "nthlastoftype",
         "nthcol",
         "nthlastcol",
+        "ltr",
+        "rtl",
         "n",
         "even",
         "odd",
@@ -322,5 +324,6 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_BOGUS_RULE",
         "CSS_BOGUS_SELECTOR",
         "CSS_BOGUS_SUB_SELECTOR",
+        "CSS_BOGUS_PSEUDO_CLASS",
     ],
 };

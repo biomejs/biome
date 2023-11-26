@@ -3,20 +3,42 @@
 We can use help in a bunch of areas and any help is greatly appreciated!
 
 # Table of Contents
-- [Asking Questions, Making Proposals](#asking-questions-making-proposals)
-- [Reporting Bugs](#reporting-bugs)
-- [Getting Started](#getting-started)
-- [Install the Required Tools](#install-the-required-tools)
-- [Crates Development](#crates-development)
-- [VS Code Extension Development](#vs-code-extension-development)
-- [IntelliJ Extension Development](#intellij-plugin-development)
-- [Node.js Development](#nodejs-development)
-- [Website Development](#website-development)
-- [Commit Messages](#commit-messages)
-- [Creating Pull Requests](#creating-pull-requests)
-- [Releasing](#releasing)
-- [Resources](#resources)
-- [Current Members](#current-members)
+- [🚀 Contributing](#-contributing)
+- [Table of Contents](#table-of-contents)
+  - [Asking questions, making proposals](#asking-questions-making-proposals)
+  - [Reporting bugs](#reporting-bugs)
+  - [Getting Started](#getting-started)
+  - [Install the required tools](#install-the-required-tools)
+  - [Crates development](#crates-development)
+    - [Analyzers and lint rules](#analyzers-and-lint-rules)
+    - [Parser](#parser)
+    - [Formatter](#formatter)
+    - [Testing](#testing)
+    - [Checks](#checks)
+      - [Generated files](#generated-files)
+        - [`cargo codegen grammar`](#cargo-codegen-grammar)
+        - [`cargo codegen test`](#cargo-codegen-test)
+        - [`cargo codegen analyzer`](#cargo-codegen-analyzer)
+    - [crate dependencies](#crate-dependencies)
+  - [Intellij plugin development](#intellij-plugin-development)
+    - [Running the plugin on IDEA](#running-the-plugin-on-idea)
+    - [Build the plugin](#build-the-plugin)
+    - [UI Testing intellij plugin](#ui-testing-intellij-plugin)
+  - [Node.js development](#nodejs-development)
+  - [Website development](#website-development)
+  - [Commit messages](#commit-messages)
+  - [Creating pull requests](#creating-pull-requests)
+    - [Changelog](#changelog)
+      - [Writing a changelog line](#writing-a-changelog-line)
+    - [Documentation](#documentation)
+    - [Magic comments](#magic-comments)
+    - [Versioning](#versioning)
+  - [Releasing](#releasing)
+  - [Resources](#resources)
+  - [Current Members](#current-members)
+    - [Lead team](#lead-team)
+    - [Core Contributors team](#core-contributors-team)
+    - [Maintainers team](#maintainers-team)
 
 ## Asking questions, making proposals
 
@@ -353,7 +375,7 @@ When releasing a new version of a Biome, follow these steps:
 
 1. [ ] Update `version` in [Biome's `package.json`](./packages/@biomejs/biome/package.json) if applicable.
 
-2. [ ] Update `version` in each published crates if applicable. (`Cargo.toml` and `crates/**/Cargo.toml`)
+2. [ ] **Update to the same `version` in all crates** if you publish crates. (`Cargo.toml` and `crates/**/Cargo.toml`)
 
 3. [ ] Linter rules have a `version` metadata directly defined in their implementation.
    This field is set to `next` for newly created rules.
@@ -390,3 +412,4 @@ Members are listed in alphabetical order. Members are free to use the full name,
 - [Victor Teles @victor-teles](https://github.com/victor-teles)
 - [Madeline Gurriarán @SuperchupuDev](https://github.com/SuperchupuDev)
 - [Takayuki Maeda @TaKO8Ki](https://github.com/TaKO8Ki)
+- [Jon Egeland @faultyserver](https://github.com/faultyserver)

@@ -244,9 +244,15 @@ fn handle_dir_entry<'scope>(
             Some(
                 "package.json"
                     | "package-lock.json"
+                    | "npm-shrinkwrap.json"
+                    | "yarn.lock"
+                    | "composer.json"
+                    | "composer.lock"
                     | "typescript.json"
                     | "tsconfig.json"
                     | "jsconfig.json"
+                    | "deno.json"
+                    | "deno.jsonc"
             )
         ) {
             return;
