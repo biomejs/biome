@@ -1,6 +1,6 @@
 ## Overall Metrics
 
-**Average compatibility**: 96.06
+**Average compatibility**: 96.10
 
 <details>
     <summary>Definition</summary>
@@ -8,7 +8,7 @@
     $$average = \frac\{\sum_{file}^\{files}compatibility_\{file}}\{files}$$
 </details>
 
-**Compatible lines**: 96.60
+**Compatible lines**: 96.62
 
 <details>
     <summary>Definition</summary>
@@ -704,30 +704,6 @@
 ```
 
 **Prettier Similarity**: 33.33%
-
-
-### js/comments-closure-typecast/styled-components.js
-```diff
- const OverlapWrapper =
-   /** @type {import('styled-components').ThemedStyledFunction<'div',null,{overlap: boolean}>} */
-   (styled.div)`
--    position: relative;
-+position:relative;
-     > {
--      position: absolute;
--      bottom: ${(p) => p.overlap === "previous" && 0};
--      top: ${(p) => p.overlap === "next" && 0};
--    }
--  `;
-+  position: absolute;
-+  bottom: ${(p) => p.overlap === "previous" && 0};
-+top: ${(p) => p.overlap === "next" && 0};
-+}
-+`;
-
-```
-
-**Prettier Similarity**: 40.00%
 
 
 ### js/comments/empty-statements.js
