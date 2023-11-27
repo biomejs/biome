@@ -90,7 +90,7 @@ import { functionThatUsesFlatMap } from "./utils.js";
 
 これを回避するためにはインポートの"グループ"を作成します。**改行**を追加することでグループに区切ることができます。
 
-これによりBiomeはソートをグループに属するインポートステートメントに制限します。
+これによりBiomeは、ソートの対象をグループに属するimport文のみに制限します。
 
 ```js
 // group 1, only these two files will be sorted
