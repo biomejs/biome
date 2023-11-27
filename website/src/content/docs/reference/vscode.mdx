@@ -33,7 +33,7 @@ You can also enable Biome for specific languages only:
 - [Open the `settings.json`](https://code.visualstudio.com/docs/getstarted/settings#_settingsjson): open the _Command Palette_(<kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd title="Shift">⇧</kbd>+<kbd>P</kbd>) and select _Preferences: Open User Settings (JSON)_
 - And set the `editor.defaultFormatter` to `biomejs.biome` for the desired language
 
-```json
+```json title="biome.json"
 {
 	"editor.defaultFormatter": "<other formatter>",
 	"[javascript]": {
@@ -73,7 +73,7 @@ Biome respects VS Code's _Format on Save_ setting. To enable format on save, ope
 Biome respects VS Code's _Code Actions On Save_ setting. To enable fix on save, add
 
 
-```json
+```json title="biome.json"
 {
   "editor.codeActionsOnSave": {
     "quickfix.biome": true
@@ -89,7 +89,7 @@ The Biome VS Code extension supports imports sorting through the "Organize Impor
 
 You can add the following to your editor configuration if you want the action to run automatically on save instead of calling it manually:
 
-```json
+```json title="biome.json"
 {
 	"editor.codeActionsOnSave":{
 		"source.organizeImports.biome": true

@@ -40,11 +40,8 @@ pub(crate) fn generate_files() -> Result<()> {
     .unwrap();
 
     let configuration = format!(
-        r#"import CodeBlockHeader from "@src/components/CodeBlockHeader.astro";
-
-<CodeBlockHeader filename="biome.json" />
-
-```json
+        r#"
+```json title="biome.json"
 {}
 ```
 "#,

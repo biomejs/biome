@@ -47,7 +47,7 @@ declare_rule! {
     pub(crate) UseSimpleNumberKeys {
         version: "1.0.0",
         name: "useSimpleNumberKeys",
-        recommended: false,
+        recommended: true,
         fix_kind: FixKind::Safe,
     }
 }

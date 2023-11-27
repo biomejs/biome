@@ -53,7 +53,6 @@ declare_rule! {
     /// function fn(param: Array<Array<unknown>>): Array<unknown> {}
     /// ```
     ///
-    /// ```
     pub(crate) NoExplicitAny {
         version: "1.0.0",
         name: "noExplicitAny",

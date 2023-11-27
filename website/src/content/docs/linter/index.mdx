@@ -100,7 +100,7 @@ The diagnostics emitted by these rules are displayed with the warning severity i
 
 To enable rules, you need to change their diagnostic severity based on your needs:
 
-```json
+```json title="biome.json"
 {
   "linter": {
     "enabled": true,
@@ -119,7 +119,7 @@ To enable rules, you need to change their diagnostic severity based on your need
 
 Just add `"off"` as value inside its configuration. For example:
 
-```json
+```json title="biome.json"
 {
   "linter": {
     "enabled": true,
@@ -140,7 +140,7 @@ Just add `"off"` as value inside its configuration. For example:
 Most of Biome's rules will emit an **error**, but you are free to change their severity.
 Just add `"warn"` as value of the rule. Example:
 
-```json
+```json title="biome.json"
 {
   "linter": {
     "enabled": true,
@@ -160,7 +160,7 @@ This is useful in cases there's being a refactor going on and there's need to ma
 A few rules have options.
 When they do _accept_ some, you can pass them by shaping the value of the rule differently.
 
-```json
+```json title="biome.json"
 {
   "linter": {
     "enabled": true,
