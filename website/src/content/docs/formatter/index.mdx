@@ -270,3 +270,25 @@ As mentioned in a previous divergence, Prettier's Babel-based parsing for JS/TS 
 In Prettier, this error isn't considered a parse error, and the AST is still built "correctly" with the appropriate nodes. When formatting, Prettier then just treats these nodes as normal and formats them accordingly.
 
 In Biome, the parsing errors result in a Bogus node, which may contain any number of valid nodes, invalid nodes, and/or raw tokens. When formatting, Biome treats bogus nodes as effectively plain text, printing them out verbatim into the resulting code without any formatting, since attempting to format could be incorrect and cause semantic changes.
+
+
+### Prettier adds a trailing comma to type parameters of arrow functions even when it is not required.
+
+Input
+
+```tsx
+<T = unknown>() => {};
+```
+
+Diff
+
+```diff
+- <T = unknown,>() => {};
++ <T = unknown>() => {};
+```
+
+## Reason
+
+In some specific cases, a type parameter list of an arrow function requires a trailing comma to distinguish it from a JSX element.
+When a default type is provided, this trailing comma is not required.
+Here, we diverge from Prettier, because we think it better respects the original intent of Prettier, which was to add a trailing comma only when required.
