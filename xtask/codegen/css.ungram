@@ -64,6 +64,10 @@ CssRule =
 	block: CssBlock
 
 
+/////////////
+/// SELECTORS
+/////////////
+
 // .header, .app {}
 // ^^^^^^^^^^^^^
 CssSelectorList = (AnyCssSelector (',' AnyCssSelector)*)
@@ -88,12 +92,12 @@ CssComplexSelector =
 // ^^^^^^^
 CssCompoundSelector =
 	nesting_selector: '&'?
-	simple_selector: AnySimpleSelector?
+	simple_selector: AnyCssSimpleSelector?
 	sub_selectors: CssSubSelectorList
 
 CssSubSelectorList = AnyCssSubSelector*
 
-AnySimpleSelector =
+AnyCssSimpleSelector =
 	CssUniversalSelector
 	| CssTypeSelector
 
@@ -105,10 +109,39 @@ AnyCssSubSelector =
 	| CssPseudoElementSelector
 	| CssBogusSubSelector
 
-/////////////
-/// SELECTORS
-/////////////
+// * {}
+// ^
+// *|* {}
+// ^^^
+//  |* {}
+//  ^^
+CssUniversalSelector =
+	namespace: CssNamespace?
+	'*'
 
+// foo|h1 {}
+// ^^^^^^
+// |h1 {}
+// ^^^
+// div {}
+// ^^^
+CssTypeSelector =
+	namespace: CssNamespace?
+	ident: CssIdentifier
+
+CssNamespace =
+	prefix: AnyCssNamespacePrefix?
+	'|'
+
+AnyCssNamespacePrefix =
+	CssNamedNamespacePrefix
+	| CssUniversalNamespacePrefix
+
+CssNamedNamespacePrefix =
+	name: CssIdentifier
+
+CssUniversalNamespacePrefix =
+	'*'
 
 // #app {}
 // ^^^^
@@ -122,18 +155,17 @@ CssClassSelector =
 	'.'
 	name: CssIdentifier
 
-// * {}
-// ^
-CssUniversalSelector =
-	'*'
-
 // [title = "title" i] {}
 // ^^^^^^^^^^^^^^^^^^^
 CssAttributeSelector =
 	'['
-	name: CssIdentifier
+	name: CssAttributeName
 	matcher: CssAttributeMatcher?
 	']'
+
+CssAttributeName =
+	namespace: CssNamespace?
+	name: CssIdentifier
 
 // [title = "title" i] {}
 //        ^^^^^^^^^^^
@@ -321,10 +353,6 @@ CssNthOffset =
 CssPseudoClassOfNthSelector =
 	'of'
 	selector_list: CssSelectorList
-
-// div {}
-// ^^^
-CssTypeSelector = ident: CssIdentifier
 
 // a::after {}
 //  ^^^^^^^^

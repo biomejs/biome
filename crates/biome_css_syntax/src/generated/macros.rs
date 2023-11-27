@@ -77,6 +77,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssAttributeMatcherValue::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_ATTRIBUTE_NAME => {
+                    let $pattern = unsafe { $crate::CssAttributeName::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_ATTRIBUTE_SELECTOR => {
                     let $pattern = unsafe { $crate::CssAttributeSelector::new_unchecked(node) };
                     $body
@@ -127,6 +131,14 @@ macro_rules! map_syntax_node {
                 }
                 $crate::CssSyntaxKind::CSS_KEYFRAMES_SELECTOR => {
                     let $pattern = unsafe { $crate::CssKeyframesSelector::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_NAMED_NAMESPACE_PREFIX => {
+                    let $pattern = unsafe { $crate::CssNamedNamespacePrefix::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_NAMESPACE => {
+                    let $pattern = unsafe { $crate::CssNamespace::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_NTH_OFFSET => {
@@ -264,6 +276,11 @@ macro_rules! map_syntax_node {
                 }
                 $crate::CssSyntaxKind::CSS_TYPE_SELECTOR => {
                     let $pattern = unsafe { $crate::CssTypeSelector::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_UNIVERSAL_NAMESPACE_PREFIX => {
+                    let $pattern =
+                        unsafe { $crate::CssUniversalNamespacePrefix::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_UNIVERSAL_SELECTOR => {

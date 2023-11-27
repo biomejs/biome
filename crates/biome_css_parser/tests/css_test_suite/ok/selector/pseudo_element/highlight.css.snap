@@ -55,6 +55,7 @@ CssRoot {
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
                     simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
                         ident: CssIdentifier {
                             value_token: IDENT@23..28 "div" [Newline("\n"), Newline("\n")] [],
                         },
@@ -85,6 +86,7 @@ CssRoot {
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
                     simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
                         ident: CssIdentifier {
                             value_token: IDENT@48..53 "div" [Newline("\n"), Newline("\n")] [],
                         },
@@ -144,7 +146,8 @@ CssRoot {
         0: CSS_COMPOUND_SELECTOR@23..45
           0: (empty)
           1: CSS_TYPE_SELECTOR@23..28
-            0: CSS_IDENTIFIER@23..28
+            0: (empty)
+            1: CSS_IDENTIFIER@23..28
               0: IDENT@23..28 "div" [Newline("\n"), Newline("\n")] []
           2: CSS_SUB_SELECTOR_LIST@28..45
             0: CSS_PSEUDO_ELEMENT_SELECTOR@28..45
@@ -164,7 +167,8 @@ CssRoot {
         0: CSS_COMPOUND_SELECTOR@48..70
           0: (empty)
           1: CSS_TYPE_SELECTOR@48..53
-            0: CSS_IDENTIFIER@48..53
+            0: (empty)
+            1: CSS_IDENTIFIER@48..53
               0: IDENT@48..53 "div" [Newline("\n"), Newline("\n")] []
           2: CSS_SUB_SELECTOR_LIST@53..70
             0: CSS_PSEUDO_ELEMENT_SELECTOR@53..70

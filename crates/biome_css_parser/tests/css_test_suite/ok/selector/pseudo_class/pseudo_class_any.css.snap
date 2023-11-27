@@ -51,6 +51,7 @@ CssRoot {
                                     CssCompoundSelector {
                                         nesting_selector_token: missing (optional),
                                         simple_selector: CssTypeSelector {
+                                            namespace: missing (optional),
                                             ident: CssIdentifier {
                                                 value_token: IDENT@13..21 "textarea" [] [],
                                             },
@@ -87,6 +88,7 @@ CssRoot {
                                     CssCompoundSelector {
                                         nesting_selector_token: missing (optional),
                                         simple_selector: CssTypeSelector {
+                                            namespace: missing (optional),
                                             ident: CssIdentifier {
                                                 value_token: IDENT@36..44 "textarea" [] [],
                                             },
@@ -124,6 +126,7 @@ CssRoot {
                                         CssCompoundSelector {
                                             nesting_selector_token: missing (optional),
                                             simple_selector: CssTypeSelector {
+                                                namespace: missing (optional),
                                                 ident: CssIdentifier {
                                                     value_token: IDENT@62..68 "header" [] [],
                                                 },
@@ -134,6 +137,7 @@ CssRoot {
                                         CssCompoundSelector {
                                             nesting_selector_token: missing (optional),
                                             simple_selector: CssTypeSelector {
+                                                namespace: missing (optional),
                                                 ident: CssIdentifier {
                                                     value_token: IDENT@70..74 "main" [] [],
                                                 },
@@ -144,6 +148,7 @@ CssRoot {
                                         CssCompoundSelector {
                                             nesting_selector_token: missing (optional),
                                             simple_selector: CssTypeSelector {
+                                                namespace: missing (optional),
                                                 ident: CssIdentifier {
                                                     value_token: IDENT@76..82 "footer" [] [],
                                                 },
@@ -160,6 +165,7 @@ CssRoot {
                     right: CssCompoundSelector {
                         nesting_selector_token: missing (optional),
                         simple_selector: CssTypeSelector {
+                            namespace: missing (optional),
                             ident: CssIdentifier {
                                 value_token: IDENT@84..85 "p" [] [],
                             },
@@ -201,6 +207,7 @@ CssRoot {
                                         CssCompoundSelector {
                                             nesting_selector_token: missing (optional),
                                             simple_selector: CssTypeSelector {
+                                                namespace: missing (optional),
                                                 ident: CssIdentifier {
                                                     value_token: IDENT@105..111 "header" [] [],
                                                 },
@@ -211,6 +218,7 @@ CssRoot {
                                         CssCompoundSelector {
                                             nesting_selector_token: missing (optional),
                                             simple_selector: CssTypeSelector {
+                                                namespace: missing (optional),
                                                 ident: CssIdentifier {
                                                     value_token: IDENT@113..117 "main" [] [],
                                                 },
@@ -221,6 +229,7 @@ CssRoot {
                                         CssCompoundSelector {
                                             nesting_selector_token: missing (optional),
                                             simple_selector: CssTypeSelector {
+                                                namespace: missing (optional),
                                                 ident: CssIdentifier {
                                                     value_token: IDENT@119..125 "footer" [] [],
                                                 },
@@ -237,6 +246,7 @@ CssRoot {
                     right: CssCompoundSelector {
                         nesting_selector_token: missing (optional),
                         simple_selector: CssTypeSelector {
+                            namespace: missing (optional),
                             ident: CssIdentifier {
                                 value_token: IDENT@127..128 "p" [] [],
                             },
@@ -286,8 +296,11 @@ CssRoot {
                                             },
                                             CssAttributeSelector {
                                                 l_brack_token: L_BRACK@157..158 "[" [] [],
-                                                name: CssIdentifier {
-                                                    value_token: IDENT@158..162 "test" [] [],
+                                                name: CssAttributeName {
+                                                    namespace: missing (optional),
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@158..162 "test" [] [],
+                                                    },
                                                 },
                                                 matcher: missing (optional),
                                                 r_brack_token: R_BRACK@162..163 "]" [] [],
@@ -333,8 +346,11 @@ CssRoot {
                                             },
                                             CssAttributeSelector {
                                                 l_brack_token: L_BRACK@184..185 "[" [] [],
-                                                name: CssIdentifier {
-                                                    value_token: IDENT@185..189 "test" [] [],
+                                                name: CssAttributeName {
+                                                    namespace: missing (optional),
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@185..189 "test" [] [],
+                                                    },
                                                 },
                                                 matcher: missing (optional),
                                                 r_brack_token: R_BRACK@189..190 "]" [] [],
@@ -380,8 +396,11 @@ CssRoot {
                                             },
                                             CssAttributeSelector {
                                                 l_brack_token: L_BRACK@214..215 "[" [] [],
-                                                name: CssIdentifier {
-                                                    value_token: IDENT@215..219 "test" [] [],
+                                                name: CssAttributeName {
+                                                    namespace: missing (optional),
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@215..219 "test" [] [],
+                                                    },
                                                 },
                                                 matcher: missing (optional),
                                                 r_brack_token: R_BRACK@219..220 "]" [] [],
@@ -440,8 +459,11 @@ CssRoot {
                                             },
                                             CssAttributeSelector {
                                                 l_brack_token: L_BRACK@249..250 "[" [] [],
-                                                name: CssIdentifier {
-                                                    value_token: IDENT@250..254 "test" [] [],
+                                                name: CssAttributeName {
+                                                    namespace: missing (optional),
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@250..254 "test" [] [],
+                                                    },
                                                 },
                                                 matcher: missing (optional),
                                                 r_brack_token: R_BRACK@254..255 "]" [] [],
@@ -491,6 +513,7 @@ CssRoot {
                                     CssCompoundSelector {
                                         nesting_selector_token: missing (optional),
                                         simple_selector: CssTypeSelector {
+                                            namespace: missing (optional),
                                             ident: CssIdentifier {
                                                 value_token: IDENT@281..283 "h1" [] [],
                                             },
@@ -532,6 +555,7 @@ CssRoot {
                                     CssCompoundSelector {
                                         nesting_selector_token: missing (optional),
                                         simple_selector: CssTypeSelector {
+                                            namespace: missing (optional),
                                             ident: CssIdentifier {
                                                 value_token: IDENT@307..309 "b" [] [Whitespace(" ")],
                                             },
@@ -604,6 +628,7 @@ CssRoot {
                                     CssCompoundSelector {
                                         nesting_selector_token: missing (optional),
                                         simple_selector: CssTypeSelector {
+                                            namespace: missing (optional),
                                             ident: CssIdentifier {
                                                 value_token: IDENT@351..352 "i" [] [],
                                             },
@@ -614,6 +639,7 @@ CssRoot {
                                     CssCompoundSelector {
                                         nesting_selector_token: missing (optional),
                                         simple_selector: CssTypeSelector {
+                                            namespace: missing (optional),
                                             ident: CssIdentifier {
                                                 value_token: IDENT@353..354 "p" [] [],
                                             },
@@ -639,6 +665,7 @@ CssRoot {
                                     CssCompoundSelector {
                                         nesting_selector_token: missing (optional),
                                         simple_selector: CssTypeSelector {
+                                            namespace: missing (optional),
                                             ident: CssIdentifier {
                                                 value_token: IDENT@361..365 "span" [] [],
                                             },
@@ -824,6 +851,7 @@ CssRoot {
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
                     simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
                         ident: CssIdentifier {
                             value_token: IDENT@491..494 "h1" [Newline("\n")] [],
                         },
@@ -893,6 +921,7 @@ CssRoot {
                                         CssCompoundSelector {
                                             nesting_selector_token: missing (optional),
                                             simple_selector: CssTypeSelector {
+                                                namespace: missing (optional),
                                                 ident: CssIdentifier {
                                                     value_token: IDENT@536..544 "textarea" [] [],
                                                 },
@@ -953,7 +982,8 @@ CssRoot {
                   0: CSS_COMPOUND_SELECTOR@13..21
                     0: (empty)
                     1: CSS_TYPE_SELECTOR@13..21
-                      0: CSS_IDENTIFIER@13..21
+                      0: (empty)
+                      1: CSS_IDENTIFIER@13..21
                         0: IDENT@13..21 "textarea" [] []
                     2: CSS_SUB_SELECTOR_LIST@21..21
                 3: R_PAREN@21..23 ")" [] [Whitespace(" ")]
@@ -977,7 +1007,8 @@ CssRoot {
                   0: CSS_COMPOUND_SELECTOR@36..44
                     0: (empty)
                     1: CSS_TYPE_SELECTOR@36..44
-                      0: CSS_IDENTIFIER@36..44
+                      0: (empty)
+                      1: CSS_IDENTIFIER@36..44
                         0: IDENT@36..44 "textarea" [] []
                     2: CSS_SUB_SELECTOR_LIST@44..44
                 3: R_PAREN@44..46 ")" [] [Whitespace(" ")]
@@ -1002,21 +1033,24 @@ CssRoot {
                     0: CSS_COMPOUND_SELECTOR@62..68
                       0: (empty)
                       1: CSS_TYPE_SELECTOR@62..68
-                        0: CSS_IDENTIFIER@62..68
+                        0: (empty)
+                        1: CSS_IDENTIFIER@62..68
                           0: IDENT@62..68 "header" [] []
                       2: CSS_SUB_SELECTOR_LIST@68..68
                     1: COMMA@68..70 "," [] [Whitespace(" ")]
                     2: CSS_COMPOUND_SELECTOR@70..74
                       0: (empty)
                       1: CSS_TYPE_SELECTOR@70..74
-                        0: CSS_IDENTIFIER@70..74
+                        0: (empty)
+                        1: CSS_IDENTIFIER@70..74
                           0: IDENT@70..74 "main" [] []
                       2: CSS_SUB_SELECTOR_LIST@74..74
                     3: COMMA@74..76 "," [] [Whitespace(" ")]
                     4: CSS_COMPOUND_SELECTOR@76..82
                       0: (empty)
                       1: CSS_TYPE_SELECTOR@76..82
-                        0: CSS_IDENTIFIER@76..82
+                        0: (empty)
+                        1: CSS_IDENTIFIER@76..82
                           0: IDENT@76..82 "footer" [] []
                       2: CSS_SUB_SELECTOR_LIST@82..82
                   3: R_PAREN@82..83 ")" [] []
@@ -1024,7 +1058,8 @@ CssRoot {
           2: CSS_COMPOUND_SELECTOR@84..92
             0: (empty)
             1: CSS_TYPE_SELECTOR@84..85
-              0: CSS_IDENTIFIER@84..85
+              0: (empty)
+              1: CSS_IDENTIFIER@84..85
                 0: IDENT@84..85 "p" [] []
             2: CSS_SUB_SELECTOR_LIST@85..92
               0: CSS_PSEUDO_CLASS_SELECTOR@85..92
@@ -1053,21 +1088,24 @@ CssRoot {
                     0: CSS_COMPOUND_SELECTOR@105..111
                       0: (empty)
                       1: CSS_TYPE_SELECTOR@105..111
-                        0: CSS_IDENTIFIER@105..111
+                        0: (empty)
+                        1: CSS_IDENTIFIER@105..111
                           0: IDENT@105..111 "header" [] []
                       2: CSS_SUB_SELECTOR_LIST@111..111
                     1: COMMA@111..113 "," [] [Whitespace(" ")]
                     2: CSS_COMPOUND_SELECTOR@113..117
                       0: (empty)
                       1: CSS_TYPE_SELECTOR@113..117
-                        0: CSS_IDENTIFIER@113..117
+                        0: (empty)
+                        1: CSS_IDENTIFIER@113..117
                           0: IDENT@113..117 "main" [] []
                       2: CSS_SUB_SELECTOR_LIST@117..117
                     3: COMMA@117..119 "," [] [Whitespace(" ")]
                     4: CSS_COMPOUND_SELECTOR@119..125
                       0: (empty)
                       1: CSS_TYPE_SELECTOR@119..125
-                        0: CSS_IDENTIFIER@119..125
+                        0: (empty)
+                        1: CSS_IDENTIFIER@119..125
                           0: IDENT@119..125 "footer" [] []
                       2: CSS_SUB_SELECTOR_LIST@125..125
                   3: R_PAREN@125..126 ")" [] []
@@ -1075,7 +1113,8 @@ CssRoot {
           2: CSS_COMPOUND_SELECTOR@127..135
             0: (empty)
             1: CSS_TYPE_SELECTOR@127..128
-              0: CSS_IDENTIFIER@127..128
+              0: (empty)
+              1: CSS_IDENTIFIER@127..128
                 0: IDENT@127..128 "p" [] []
             2: CSS_SUB_SELECTOR_LIST@128..135
               0: CSS_PSEUDO_CLASS_SELECTOR@128..135
@@ -1110,8 +1149,10 @@ CssRoot {
                           0: IDENT@152..157 "class" [] []
                       1: CSS_ATTRIBUTE_SELECTOR@157..163
                         0: L_BRACK@157..158 "[" [] []
-                        1: CSS_IDENTIFIER@158..162
-                          0: IDENT@158..162 "test" [] []
+                        1: CSS_ATTRIBUTE_NAME@158..162
+                          0: (empty)
+                          1: CSS_IDENTIFIER@158..162
+                            0: IDENT@158..162 "test" [] []
                         2: (empty)
                         3: R_BRACK@162..163 "]" [] []
                 3: R_PAREN@163..165 ")" [] [Whitespace(" ")]
@@ -1142,8 +1183,10 @@ CssRoot {
                           0: IDENT@179..184 "class" [] []
                       1: CSS_ATTRIBUTE_SELECTOR@184..190
                         0: L_BRACK@184..185 "[" [] []
-                        1: CSS_IDENTIFIER@185..189
-                          0: IDENT@185..189 "test" [] []
+                        1: CSS_ATTRIBUTE_NAME@185..189
+                          0: (empty)
+                          1: CSS_IDENTIFIER@185..189
+                            0: IDENT@185..189 "test" [] []
                         2: (empty)
                         3: R_BRACK@189..190 "]" [] []
                 3: R_PAREN@190..192 ")" [] [Whitespace(" ")]
@@ -1174,8 +1217,10 @@ CssRoot {
                           0: IDENT@209..214 "class" [] []
                       1: CSS_ATTRIBUTE_SELECTOR@214..220
                         0: L_BRACK@214..215 "[" [] []
-                        1: CSS_IDENTIFIER@215..219
-                          0: IDENT@215..219 "test" [] []
+                        1: CSS_ATTRIBUTE_NAME@215..219
+                          0: (empty)
+                          1: CSS_IDENTIFIER@215..219
+                            0: IDENT@215..219 "test" [] []
                         2: (empty)
                         3: R_BRACK@219..220 "]" [] []
                   1: COMMA@220..222 "," [] [Whitespace(" ")]
@@ -1215,8 +1260,10 @@ CssRoot {
                           0: IDENT@244..249 "class" [] []
                       1: CSS_ATTRIBUTE_SELECTOR@249..255
                         0: L_BRACK@249..250 "[" [] []
-                        1: CSS_IDENTIFIER@250..254
-                          0: IDENT@250..254 "test" [] []
+                        1: CSS_ATTRIBUTE_NAME@250..254
+                          0: (empty)
+                          1: CSS_IDENTIFIER@250..254
+                            0: IDENT@250..254 "test" [] []
                         2: (empty)
                         3: R_BRACK@254..255 "]" [] []
                   1: COMMA@255..257 "," [] [Whitespace(" ")]
@@ -1249,7 +1296,8 @@ CssRoot {
                   0: CSS_COMPOUND_SELECTOR@281..283
                     0: (empty)
                     1: CSS_TYPE_SELECTOR@281..283
-                      0: CSS_IDENTIFIER@281..283
+                      0: (empty)
+                      1: CSS_IDENTIFIER@281..283
                         0: IDENT@281..283 "h1" [] []
                     2: CSS_SUB_SELECTOR_LIST@283..283
                 3: R_PAREN@283..284 ")" [] []
@@ -1277,7 +1325,8 @@ CssRoot {
                   2: CSS_COMPOUND_SELECTOR@307..309
                     0: (empty)
                     1: CSS_TYPE_SELECTOR@307..309
-                      0: CSS_IDENTIFIER@307..309
+                      0: (empty)
+                      1: CSS_IDENTIFIER@307..309
                         0: IDENT@307..309 "b" [] [Whitespace(" ")]
                     2: CSS_SUB_SELECTOR_LIST@309..309
                 3: R_PAREN@309..310 ")" [] []
@@ -1326,14 +1375,16 @@ CssRoot {
                   0: CSS_COMPOUND_SELECTOR@351..352
                     0: (empty)
                     1: CSS_TYPE_SELECTOR@351..352
-                      0: CSS_IDENTIFIER@351..352
+                      0: (empty)
+                      1: CSS_IDENTIFIER@351..352
                         0: IDENT@351..352 "i" [] []
                     2: CSS_SUB_SELECTOR_LIST@352..352
                   1: COMMA@352..353 "," [] []
                   2: CSS_COMPOUND_SELECTOR@353..354
                     0: (empty)
                     1: CSS_TYPE_SELECTOR@353..354
-                      0: CSS_IDENTIFIER@353..354
+                      0: (empty)
+                      1: CSS_IDENTIFIER@353..354
                         0: IDENT@353..354 "p" [] []
                     2: CSS_SUB_SELECTOR_LIST@354..354
                   3: COMMA@354..355 "," [] []
@@ -1350,7 +1401,8 @@ CssRoot {
                   6: CSS_COMPOUND_SELECTOR@361..371
                     0: (empty)
                     1: CSS_TYPE_SELECTOR@361..365
-                      0: CSS_IDENTIFIER@361..365
+                      0: (empty)
+                      1: CSS_IDENTIFIER@361..365
                         0: IDENT@361..365 "span" [] []
                     2: CSS_SUB_SELECTOR_LIST@365..371
                       0: CSS_PSEUDO_CLASS_SELECTOR@365..371
@@ -1469,7 +1521,8 @@ CssRoot {
         6: CSS_COMPOUND_SELECTOR@491..523
           0: (empty)
           1: CSS_TYPE_SELECTOR@491..494
-            0: CSS_IDENTIFIER@491..494
+            0: (empty)
+            1: CSS_IDENTIFIER@491..494
               0: IDENT@491..494 "h1" [Newline("\n")] []
           2: CSS_SUB_SELECTOR_LIST@494..523
             0: CSS_PSEUDO_CLASS_SELECTOR@494..523
@@ -1518,7 +1571,8 @@ CssRoot {
                     0: CSS_COMPOUND_SELECTOR@536..544
                       0: (empty)
                       1: CSS_TYPE_SELECTOR@536..544
-                        0: CSS_IDENTIFIER@536..544
+                        0: (empty)
+                        1: CSS_IDENTIFIER@536..544
                           0: IDENT@536..544 "textarea" [] []
                       2: CSS_SUB_SELECTOR_LIST@544..544
                   3: R_PAREN@544..545 ")" [] []

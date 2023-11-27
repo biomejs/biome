@@ -87,6 +87,7 @@ CssRoot {
                                     CssCompoundSelector {
                                         nesting_selector_token: missing (optional),
                                         simple_selector: CssTypeSelector {
+                                            namespace: missing (optional),
                                             ident: CssIdentifier {
                                                 value_token: IDENT@27..31 "div" [] [Whitespace(" ")],
                                             },
@@ -226,7 +227,8 @@ CssRoot {
                 2: CSS_COMPOUND_SELECTOR@27..31
                   0: (empty)
                   1: CSS_TYPE_SELECTOR@27..31
-                    0: CSS_IDENTIFIER@27..31
+                    0: (empty)
+                    1: CSS_IDENTIFIER@27..31
                       0: IDENT@27..31 "div" [] [Whitespace(" ")]
                   2: CSS_SUB_SELECTOR_LIST@31..31
       1: CSS_BLOCK@31..33
