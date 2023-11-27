@@ -38,7 +38,10 @@ impl<'a> FormatJsAnyParameterList<'a> {
 impl Format<JsFormatContext> for FormatJsAnyParameterList<'_> {
     fn fmt(&self, f: &mut Formatter<JsFormatContext>) -> FormatResult<()> {
         match self.layout {
-            None | Some(ParameterLayout::Default | ParameterLayout::NoParameters) => {
+            None
+            | Some(
+                ParameterLayout::Default | ParameterLayout::Compact | ParameterLayout::NoParameters,
+            ) => {
                 // The trailing separator is disallowed if the last element in the list is a rest parameter
                 let has_trailing_rest = match self.list.last() {
                     Some(elem) => matches!(
@@ -51,38 +54,23 @@ impl Format<JsFormatContext> for FormatJsAnyParameterList<'_> {
                     None => false,
                 };
 
-                let trailing_separator = if has_trailing_rest {
+                let is_compact = matches!(self.layout, Some(ParameterLayout::Compact));
+
+                let trailing_separator = if is_compact || has_trailing_rest {
                     TrailingSeparator::Disallowed
                 } else {
                     FormatTrailingComma::All.trailing_separator(f.options())
                 };
 
-                let mut join = f.join_nodes_with_soft_line();
-
-                match self.list {
-                    AnyJsParameterList::JsParameterList(list) => {
-                        let entries = list
-                            .format_separated(",")
-                            .with_trailing_separator(trailing_separator)
-                            .zip(list.iter());
-
-                        for (format_entry, node) in entries {
-                            join.entry(node?.syntax(), &format_entry);
-                        }
-                    }
-                    AnyJsParameterList::JsConstructorParameterList(list) => {
-                        let entries = list
-                            .format_separated(",")
-                            .with_trailing_separator(trailing_separator)
-                            .zip(list.iter());
-
-                        for (format_entry, node) in entries {
-                            join.entry(node?.syntax(), &format_entry);
-                        }
-                    }
+                if is_compact {
+                    let mut joiner = f.join_nodes_with_space();
+                    join_parameter_list(&mut joiner, &self.list, trailing_separator)?;
+                    joiner.finish()
+                } else {
+                    let mut joiner = f.join_nodes_with_soft_line();
+                    join_parameter_list(&mut joiner, &self.list, trailing_separator)?;
+                    joiner.finish()
                 }
-
-                join.finish()
             }
             Some(ParameterLayout::Hug) => {
                 let mut join = f.join_with(space());
@@ -102,4 +90,38 @@ impl Format<JsFormatContext> for FormatJsAnyParameterList<'_> {
             }
         }
     }
+}
+
+fn join_parameter_list<S>(
+    joiner: &mut JoinNodesBuilder<'_, '_, S, JsFormatContext>,
+    list: &AnyJsParameterList,
+    trailing_separator: TrailingSeparator,
+) -> FormatResult<()>
+where
+    S: Format<JsFormatContext>,
+{
+    match list {
+        AnyJsParameterList::JsParameterList(list) => {
+            let entries = list
+                .format_separated(",")
+                .with_trailing_separator(trailing_separator)
+                .zip(list.iter());
+
+            for (format_entry, node) in entries {
+                joiner.entry(node?.syntax(), &format_entry);
+            }
+        }
+        AnyJsParameterList::JsConstructorParameterList(list) => {
+            let entries = list
+                .format_separated(",")
+                .with_trailing_separator(trailing_separator)
+                .zip(list.iter());
+
+            for (format_entry, node) in entries {
+                joiner.entry(node?.syntax(), &format_entry);
+            }
+        }
+    }
+
+    Ok(())
 }

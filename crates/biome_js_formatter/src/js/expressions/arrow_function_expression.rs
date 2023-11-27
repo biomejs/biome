@@ -1,3 +1,4 @@
+use crate::js::bindings::parameters::FormatJsParametersOptions;
 use crate::prelude::*;
 use biome_formatter::{
     format_args, write, CstFormatContext, FormatRuleWithOptions, RemoveSoftLinesBuffer,
@@ -64,7 +65,12 @@ impl FormatNodeRule<JsArrowFunctionExpression> for FormatJsArrowFunctionExpressi
                     write!(
                         f,
                         [
-                            format_signature(&arrow, self.options.call_arg_layout.is_some(), false),
+                            format_signature(
+                                &arrow,
+                                self.options.call_arg_layout.is_some(),
+                                false,
+                                true
+                            ),
                             space(),
                             arrow.fat_arrow_token().format()
                         ]
@@ -206,6 +212,7 @@ fn format_signature(
     arrow: &JsArrowFunctionExpression,
     is_first_or_last_call_argument: bool,
     ancestor_call_expr_or_logical_expr: bool,
+    is_first_in_chain: bool,
 ) -> impl Format<JsFormatContext> + '_ {
     format_with(move |f| {
         if let Some(async_token) = arrow.async_token() {
@@ -242,10 +249,15 @@ fn format_signature(
                     }
                 }
                 AnyJsArrowFunctionParameters::JsParameters(params) => {
-                    if ancestor_call_expr_or_logical_expr {
-                        write!(f, [dedent(&params.format())])?;
+                    let formatted_params =
+                        params.format().with_options(FormatJsParametersOptions {
+                            prevent_soft_line_breaks: is_first_or_last_call_argument,
+                        });
+
+                    if ancestor_call_expr_or_logical_expr && !is_first_or_last_call_argument {
+                        write!(f, [group(&dedent(&formatted_params))])?;
                     } else {
-                        write!(f, [params.format()])?;
+                        write!(f, [formatted_params])?;
                     }
                 }
             };
@@ -260,6 +272,7 @@ fn format_signature(
             write!(
                 recording,
                 [group(&format_args![
+                    (!is_first_in_chain).then_some(space()),
                     group(&format_parameters),
                     group(&arrow.return_type_annotation().format())
                 ])]
@@ -272,6 +285,7 @@ fn format_signature(
             write!(
                 f,
                 [group(&format_args![
+                    (!is_first_in_chain).then_some(soft_line_break_or_space()),
                     format_parameters,
                     arrow.return_type_annotation().format()
                 ])]
@@ -510,6 +524,7 @@ impl Format<JsFormatContext> for ArrowChain {
             }
 
             let join_signatures = format_with(|f| {
+                let mut is_first_in_chain = true;
                 for arrow in self.arrows() {
                     write!(
                         f,
@@ -518,22 +533,18 @@ impl Format<JsFormatContext> for ArrowChain {
                             format_signature(
                                 arrow,
                                 self.options.call_arg_layout.is_some(),
-                                ancestor_call_expr_or_logical_expr
+                                ancestor_call_expr_or_logical_expr,
+                                is_first_in_chain,
                             )
                         ]
                     )?;
 
+                    is_first_in_chain = false;
+
                     // The arrow of the tail is formatted outside of the group to ensure it never
                     // breaks from the body
                     if arrow != tail {
-                        write!(
-                            f,
-                            [
-                                space(),
-                                arrow.fat_arrow_token().format(),
-                                soft_line_break_or_space()
-                            ]
-                        )?;
+                        write!(f, [space(), arrow.fat_arrow_token().format()])?;
                     }
                 }
 
