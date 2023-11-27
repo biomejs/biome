@@ -8,9 +8,8 @@ use crate::{
     JsComputedMemberAssignment, JsComputedMemberExpression, JsLiteralMemberName,
     JsLogicalExpression, JsNewExpression, JsNumberLiteralExpression, JsObjectExpression,
     JsPostUpdateExpression, JsReferenceIdentifier, JsRegexLiteralExpression,
-    JsStaticMemberExpression, JsStringLiteralExpression, JsSyntaxKind, JsSyntaxToken,
-    JsTemplateChunkElement, JsTemplateExpression, JsUnaryExpression, OperatorPrecedence,
-    TsStringLiteralType, T,
+    JsStaticMemberExpression, JsStringLiteralExpression, JsSyntaxToken, JsTemplateChunkElement,
+    JsTemplateExpression, JsUnaryExpression, OperatorPrecedence, TsStringLiteralType, T,
 };
 use crate::{JsPreUpdateExpression, JsSyntaxKind::*};
 use biome_rowan::{
@@ -862,8 +861,7 @@ impl JsStaticMemberExpression {
     /// a?.[b][c][d].e -> false
     /// ```
     pub fn is_optional(&self) -> bool {
-        self.operator_token()
-            .map_or(false, |token| token.kind() == JsSyntaxKind::QUESTIONDOT)
+        self.operator_token().map(|token| token.kind()) == Ok(T![?.])
     }
 
     /// Returns true if this member has an optional token or any member expression on the left side.
@@ -874,7 +872,7 @@ impl JsStaticMemberExpression {
     /// a?.[b][c][d].e -> true
     /// ```
     pub fn is_optional_chain(&self) -> bool {
-        is_optional_chain(self.clone().into())
+        AnyJsOptionalChainExpression::from(self.clone()).is_optional_chain()
     }
 }
 
@@ -898,7 +896,7 @@ impl JsComputedMemberExpression {
     /// a?.b.c.d[e] -> true
     /// ```
     pub fn is_optional_chain(&self) -> bool {
-        is_optional_chain(self.clone().into())
+        AnyJsOptionalChainExpression::from(self.clone()).is_optional_chain()
     }
 }
 
@@ -1005,6 +1003,83 @@ impl AnyJsMemberExpression {
             }
         };
         Some(value)
+    }
+}
+
+declare_node_union! {
+    pub AnyJsOptionalChainExpression = JsStaticMemberExpression | JsComputedMemberExpression | JsCallExpression
+}
+
+impl AnyJsOptionalChainExpression {
+    pub fn object(&self) -> SyntaxResult<AnyJsExpression> {
+        match self {
+            Self::JsStaticMemberExpression(expr) => expr.object(),
+            Self::JsComputedMemberExpression(expr) => expr.object(),
+            Self::JsCallExpression(expr) => expr.callee(),
+        }
+    }
+
+    pub fn optional_chain_token(&self) -> Option<JsSyntaxToken> {
+        match self {
+            Self::JsStaticMemberExpression(expr) => {
+                expr.operator_token().ok().filter(|x| x.kind() == T![?.])
+            }
+            Self::JsComputedMemberExpression(expr) => expr.optional_chain_token(),
+            Self::JsCallExpression(expr) => expr.optional_chain_token(),
+        }
+    }
+
+    /// Returns `true` if this expression has an optional chain token.
+    pub fn is_optional(&self) -> bool {
+        self.optional_chain_token().is_some()
+    }
+
+    /// Returns `true` if this expression is a chain of at least one expression with an optional chain token.
+    ///
+    /// ```
+    /// use biome_js_syntax::{AnyJsExpression, AnyJsLiteralExpression, AnyJsOptionalChainExpression, T};
+    /// use biome_js_factory::make;
+    ///
+    /// let a_id = make::js_identifier_expression(make::js_reference_identifier(make::ident("a")));
+    /// let b_name = make::js_name(make::ident("b"));
+    /// let c_name = make::js_name(make::ident("c"));
+    /// let d_name = make::js_name(make::ident("c"));
+    ///
+    /// // a.b?.c.d
+    /// let ab = make::js_static_member_expression(a_id.into(), make::token(T![.]), b_name.into());
+    /// let abc = make::js_static_member_expression(ab.clone().into(), make::token(T![?.]), c_name.into());
+    /// let abcd = make::js_static_member_expression(abc.into(), make::token(T![.]), d_name.into());
+    /// let abcd: AnyJsOptionalChainExpression = abcd.into();
+    /// assert!(abcd.is_optional_chain());
+    /// assert!(!ab.is_optional_chain());
+    /// ```
+    pub fn is_optional_chain(&self) -> bool {
+        if self.optional_chain_token().is_some() {
+            return true;
+        }
+        let mut current_expression = self.object();
+        while let Some(member_expr) = current_expression
+            .ok()
+            .and_then(|expr| Self::cast(expr.into_syntax()))
+        {
+            if member_expr.optional_chain_token().is_some() {
+                return true;
+            }
+            current_expression = member_expr.object();
+        }
+        false
+    }
+}
+
+impl From<AnyJsOptionalChainExpression> for AnyJsExpression {
+    fn from(node: AnyJsOptionalChainExpression) -> AnyJsExpression {
+        match node {
+            AnyJsOptionalChainExpression::JsStaticMemberExpression(expression) => expression.into(),
+            AnyJsOptionalChainExpression::JsComputedMemberExpression(expression) => {
+                expression.into()
+            }
+            AnyJsOptionalChainExpression::JsCallExpression(expression) => expression.into(),
+        }
     }
 }
 
@@ -1190,7 +1265,7 @@ impl JsCallExpression {
     /// a?.b.c.d() -> true
     /// ```
     pub fn is_optional_chain(&self) -> bool {
-        is_optional_chain(self.clone().into())
+        AnyJsOptionalChainExpression::from(self.clone()).is_optional_chain()
     }
 
     /// Get [AnyJsCallArgument] by it index inside the [JsCallExpression] argument list.
@@ -1247,42 +1322,6 @@ impl JsNewExpression {
                 .map_or(false, |it| it.has_name(name))
         })
     }
-}
-
-fn is_optional_chain(start: AnyJsExpression) -> bool {
-    let mut current = Some(start);
-
-    while let Some(node) = current {
-        current = match node {
-            AnyJsExpression::JsParenthesizedExpression(parenthesized) => {
-                parenthesized.expression().ok()
-            }
-
-            AnyJsExpression::JsCallExpression(call) => {
-                if call.is_optional() {
-                    return true;
-                }
-                call.callee().ok()
-            }
-
-            AnyJsExpression::JsStaticMemberExpression(member) => {
-                if member.is_optional() {
-                    return true;
-                }
-                member.object().ok()
-            }
-
-            AnyJsExpression::JsComputedMemberExpression(member) => {
-                if member.is_optional() {
-                    return true;
-                }
-                member.object().ok()
-            }
-            _ => return false,
-        }
-    }
-
-    false
 }
 
 impl TsStringLiteralType {
