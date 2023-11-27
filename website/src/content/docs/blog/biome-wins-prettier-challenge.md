@@ -121,7 +121,7 @@ We removed the bundled binary from the extension, and you'll be able to download
   <source src="https://github.com/biomejs/biome-vscode/assets/649677/c7c1bf81-10a5-4cd6-bbdf-019d983a2d6a" type="video/mp4">
 </video>
 
-From today, you will release a **nightly** version of the extension. This is a version meant for early adopters and to test things before they are officially released.
+From today, we release a [**nightly**](https://marketplace.visualstudio.com/items?itemName=biomejs.biome-nightly) version of the extension. This is a version meant for early adopters and to test things before they are officially released.
 
 ## Some CLI goodies
 
