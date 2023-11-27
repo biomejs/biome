@@ -121,6 +121,8 @@ We removed the bundled binary from the extension, and you'll be able to download
   <source src="https://github.com/biomejs/biome-vscode/assets/649677/c7c1bf81-10a5-4cd6-bbdf-019d983a2d6a" type="video/mp4">
 </video>
 
+From today, you will release a **nightly** version of the extension. This is a version meant for early adopters and to test things before they are officially released.
+
 ## Some CLI goodies
 
 People that rely on Biome LSP will be pleased that they can now pass a custom configuration to the command `lsp-proxy`, using the option `--config-path`. The same option is accepted by the command `start`:
