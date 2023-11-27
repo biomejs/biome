@@ -52,7 +52,7 @@ impl FormatNodeRule<JsFormalParameter> for FormatJsFormalParameter {
         if is_hug_parameter && decorators.is_empty() {
             write![f, [decorators.format(), content]]?;
         } else if decorators.is_empty() {
-            write![f, [decorators.format(), content]]?;
+            write![f, [decorators.format(), group(&content)]]?;
         } else {
             write![f, [group(&decorators.format()), group(&content)]]?;
         }

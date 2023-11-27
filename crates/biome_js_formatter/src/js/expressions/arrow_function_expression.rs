@@ -61,7 +61,7 @@ impl FormatNodeRule<JsArrowFunctionExpression> for FormatJsArrowFunctionExpressi
 
                 let body = arrow.body()?;
 
-                let format_signature = format_with(|f| {
+                let formatted_signature = format_with(|f| {
                     write!(
                         f,
                         [
@@ -114,7 +114,7 @@ impl FormatNodeRule<JsArrowFunctionExpression> for FormatJsArrowFunctionExpressi
                             return write!(
                                 f,
                                 [group(&format_args![
-                                    format_signature,
+                                    formatted_signature,
                                     group(&format_args![indent(&format_args![
                                         hard_line_break(),
                                         text("("),
@@ -127,7 +127,7 @@ impl FormatNodeRule<JsArrowFunctionExpression> for FormatJsArrowFunctionExpressi
                         return write!(
                             f,
                             [group(&format_args![
-                                format_signature,
+                                formatted_signature,
                                 group(&format_args![
                                     space(),
                                     text("("),
@@ -141,7 +141,7 @@ impl FormatNodeRule<JsArrowFunctionExpression> for FormatJsArrowFunctionExpressi
                 };
 
                 if body_has_soft_line_break {
-                    write![f, [format_signature, space(), format_body]]
+                    write![f, [formatted_signature, space(), format_body]]
                 } else {
                     let should_add_parens = should_add_parens(&body);
 
@@ -158,7 +158,7 @@ impl FormatNodeRule<JsArrowFunctionExpression> for FormatJsArrowFunctionExpressi
                     write!(
                         f,
                         [
-                            format_signature,
+                            formatted_signature,
                             group(&format_args![
                                 soft_line_indent_or_space(&format_with(|f| {
                                     if should_add_parens {
@@ -215,11 +215,16 @@ fn format_signature(
     is_first_in_chain: bool,
 ) -> impl Format<JsFormatContext> + '_ {
     format_with(move |f| {
-        if let Some(async_token) = arrow.async_token() {
-            write!(f, [async_token.format(), space()])?;
-        }
+        let formatted_async_token = format_with(|f: &mut JsFormatter| {
+            if let Some(async_token) = arrow.async_token() {
+                write!(f, [async_token.format(), space()])?;
+                Ok(())
+            } else {
+                Ok(())
+            }
+        });
 
-        let format_parameters = format_with(|f: &mut JsFormatter| {
+        let formatted_parameters = format_with(|f: &mut JsFormatter| {
             write!(f, [arrow.type_parameters().format()])?;
 
             match arrow.parameters()? {
@@ -273,7 +278,8 @@ fn format_signature(
                 recording,
                 [group(&format_args![
                     (!is_first_in_chain).then_some(space()),
-                    group(&format_parameters),
+                    formatted_async_token,
+                    group(&formatted_parameters),
                     group(&arrow.return_type_annotation().format())
                 ])]
             )?;
@@ -284,11 +290,18 @@ fn format_signature(
         } else {
             write!(
                 f,
-                [group(&format_args![
+                [
+                    // This soft break is placed outside of the group to ensure
+                    // that the parameter group only tries to write on a single
+                    // line and can't break pre-emptively without also causing
+                    // the parent (i.e., this ArrowChain) to break first.
                     (!is_first_in_chain).then_some(soft_line_break_or_space()),
-                    format_parameters,
-                    arrow.return_type_annotation().format()
-                ])]
+                    group(&format_args![
+                        formatted_async_token,
+                        formatted_parameters,
+                        arrow.return_type_annotation().format()
+                    ])
+                ]
             )?;
         }
 

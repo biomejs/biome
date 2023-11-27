@@ -1,4 +1,5 @@
 use biome_formatter::IndentStyle;
+use biome_formatter_test::check_reformat::CheckReformat;
 use biome_js_formatter::context::{ArrowParentheses, JsFormatOptions, QuoteStyle, Semicolons};
 use biome_js_formatter::format_node;
 use biome_js_parser::{parse, JsParserOptions};
@@ -13,11 +14,9 @@ mod language {
 // use this test check if your snippet prints as you wish, without using a snapshot
 fn quick_test() {
     let src = r#"
-a(
-    (long1ArgumentNamfffe1AndEvongferSothat,ff) => (
-      long3ArgumentName3ItafsafBreaks22  
-    ) => [a],
-  );
+    request.get('https://preview-9992--prettier.netlify.app', head => body => {
+        console.log(head, body);
+      });
     "#;
     let syntax = JsFileSource::tsx();
     let tree = parse(
@@ -31,22 +30,19 @@ a(
         .with_quote_style(QuoteStyle::Double)
         .with_jsx_quote_style(QuoteStyle::Single)
         .with_arrow_parentheses(ArrowParentheses::Always);
+
     let doc = format_node(options.clone(), &tree.syntax()).unwrap();
-
     let result = doc.print().unwrap();
+    let source_type = JsFileSource::js_module();
 
-    println!("{}", doc.into_document());
     eprintln!("{}", result.as_code());
-    // I don't know why semicolons are added there, but it's not related to my code changes so ¯\_(ツ)_/¯
-    assert_eq!(
+
+    CheckReformat::new(
+        &tree.syntax(),
         result.as_code(),
-        r#"const fooo: SomeThingWithLongMappedType<{
-  [P in
-    | AAAAAAAAAAAAAAAAA
-    | BBBBBBBBBBBB
-    | CCCCCCCCCCCCCCCCCCCCC
-    | DDDDDDDDDDDDDDDDDDDDDDDDDDDDD]: number;
-}> = {};
-"#
-    );
+        "testing",
+        &language::JsTestFormatLanguage::new(source_type),
+        options,
+    )
+    .check_reformat();
 }

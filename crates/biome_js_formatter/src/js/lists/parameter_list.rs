@@ -42,7 +42,7 @@ impl Format<JsFormatContext> for FormatJsAnyParameterList<'_> {
             | Some(
                 ParameterLayout::Default | ParameterLayout::Compact | ParameterLayout::NoParameters,
             ) => {
-                // The trailing separator is disallowed if the last element in the list is a rest parameter
+                let is_compact = matches!(self.layout, Some(ParameterLayout::Compact));
                 let has_trailing_rest = match self.list.last() {
                     Some(elem) => matches!(
                         elem?,
@@ -54,8 +54,13 @@ impl Format<JsFormatContext> for FormatJsAnyParameterList<'_> {
                     None => false,
                 };
 
-                let is_compact = matches!(self.layout, Some(ParameterLayout::Compact));
-
+                // If the list is being printed compactly, then the closing
+                // bracket _must_ appear immediately next to the last element,
+                // so a trailing separator would appear incorrect.
+                //
+                // If it's a rest parameter, the assumption is no more
+                // parameters could be added afterward, so no separator is
+                // added there either.
                 let trailing_separator = if is_compact || has_trailing_rest {
                     TrailingSeparator::Disallowed
                 } else {
