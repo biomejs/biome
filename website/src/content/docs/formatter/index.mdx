@@ -276,15 +276,15 @@ In Biome, the parsing errors result in a Bogus node, which may contain any numbe
 
 Input
 
-```tsx
+```tsx title="example.tsx"
 <T = unknown>() => {};
 ```
 
 Diff
 
-```diff
-- <T = unknown,>() => {};
-+ <T = unknown>() => {};
+```tsx title="example.tsx" del={1} ins={2}
+<T = unknown,>() => {};
+<T = unknown>() => {};
 ```
 
 #### Reason
