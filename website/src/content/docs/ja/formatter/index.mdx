@@ -1,0 +1,91 @@
+---
+title: Formatter
+description: Biome formatterの使い方
+---
+
+import PackageManagerBiomeCommand from "@src/components/PackageManagerBiomeCommand.astro";
+
+Biomeはスタイル関する論争に終止符を打つことを目的とした、絶対的なフォーマッターです。
+[Prettierと近い哲学](https://prettier.io/docs/en/option-philosophy.html)を持ち、
+スタイルに関する論争がBiomeのオプションに関する論争に発展するのを避けるために、いくつかのオプションだけをサポートしています。
+チーム内での[パーキンソンの凡俗法則](https://ja.wikipedia.org/wiki/パーキンソンの凡俗法則)のような議論を防ぐために、
+[新しいオプションを追加する衝動を意図的に抑え](https://github.com/prettier/prettier/issues/40)、
+本当に重要なことに集中できるようにしています。
+
+## オプション
+
+Biomeがサポートする、言語に依存しないオプションは以下の通りです。
+
+- インデントスタイル (デフォルト: `tab`): インデントにはスペースまたはタブを使用します
+- タブ幅 (デフォルト: `2`): インデントレベルごとのスペースの数です。
+- 行幅 (デフォルト: `80`): Biomeがコードを折り返す列幅です。
+
+特定の言語に対する他のフォーマットオプションも利用可能です。詳しくは[設定オプション](/reference/configuration)をご覧ください。
+
+## CLI
+
+デフォルトではフォーマッターはコードを**チェック**し、フォーマットに変更がある場合に診断情報を生成します。
+
+<PackageManagerBiomeCommand command="format ./src" />
+
+新しいフォーマットを**適用**する場合は、`--write`オプションを使用してください。
+
+<PackageManagerBiomeCommand command="format --write ./src" />
+
+利用可能なオプションを知りたい場合は、`--help`フラグを使用してください。
+
+<PackageManagerBiomeCommand command="format --help" />
+
+または、[CLIのリファレンス](/reference/cli#biomeformat)を確認してください。
+
+## 設定
+
+`biome.json`を使用して[Biomeを設定](/reference/configuration/#formatter)することができます。以下はデフォルトの設定です。
+
+```json
+{
+  "formatter": {
+    "enabled": true,
+    "formatWithErrors": false,
+    "indentStyle": "tab",
+    "indentWidth": 2,
+    "lineWidth": 80,
+    "ignore": []
+  }
+}
+```
+
+## コードを無視するには
+
+フォーマットされたコードが理想的でない場合があります。
+
+そのような場合はフォーマット抑制コメントが使用できます。
+
+```js
+// biome-ignore format: <説明文>
+```
+
+Example:
+
+```js
+const expr =
+  // biome-ignore format: この配列はフォーマットさせない。
+  [
+    (2 * n) / (r - l),
+    0,
+    (r + l) / (r - l),
+    0,
+    0,
+    (2 * n) / (t - b),
+    (t + b) / (t - b),
+    0,
+    0,
+    0,
+    -(f + n) / (f - n),
+    -(2 * f * n) / (f - n),
+    0,
+    0,
+    -1,
+    0,
+  ];
+```
