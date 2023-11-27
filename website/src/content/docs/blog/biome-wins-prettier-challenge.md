@@ -394,3 +394,12 @@ Last but not least, we are proud to announce that we have two new sponsors:
 
 If you want to economically contribute to the project and help it to ship more features, you can do so from the [GitHub Sponsorship page](https://github.com/sponsors/biomejs/) or the [Open Collective page](https://opencollective.com/biome).
 
+## What's next
+
+The project is thriving, with more people curious about the project and contributors that want to be involved.
+
+In the next months we will focus on:
+
+- Publishing a Roadmap. **Keep an eye on it**, it will involve a lot of **interesting** work.
+- Rebranding the website with a new logo.
+- Translate the website in Japanese.
