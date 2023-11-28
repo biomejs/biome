@@ -10,7 +10,7 @@ use biome_js_syntax::{
     AnyJsFormalParameter, AnyJsParameter, AnyTsType, JsArrowFunctionExpression,
     JsConstructorParameters, JsParameters, JsSyntaxNode, JsSyntaxToken,
 };
-use biome_rowan::{AstNode, SyntaxResult};
+use biome_rowan::{declare_node_union, AstNode, SyntaxResult};
 
 #[derive(Debug, Copy, Clone, Default)]
 pub(crate) struct FormatJsParameters {
@@ -50,9 +50,8 @@ impl FormatNodeRule<JsParameters> for FormatJsParameters {
     }
 }
 
-pub(crate) enum AnyJsParameters {
-    JsParameters(JsParameters),
-    JsConstructorParameters(JsConstructorParameters),
+declare_node_union! {
+    pub(crate) AnyJsParameters = JsParameters | JsConstructorParameters
 }
 
 pub(crate) struct FormatAnyJsParameters {
@@ -101,7 +100,7 @@ impl Format<JsFormatContext> for FormatAnyJsParameters {
                     f,
                     [
                         l_paren_token.format(),
-                        format_dangling_comments(self.inner_syntax()).with_soft_block_indent(),
+                        format_dangling_comments(self.parameters_syntax()).with_soft_block_indent(),
                         r_paren_token.format()
                     ]
                 )
@@ -228,7 +227,7 @@ impl FormatAnyJsParameters {
         }
     }
 
-    fn inner_syntax(&self) -> &JsSyntaxNode {
+    fn parameters_syntax(&self) -> &JsSyntaxNode {
         match &self.parameters {
             AnyJsParameters::JsParameters(parameters) => parameters.syntax(),
             AnyJsParameters::JsConstructorParameters(parameters) => parameters.syntax(),
