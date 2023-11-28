@@ -310,7 +310,7 @@ fn get_incrementable_like(node: AnyJsExpression) -> Option<AnyIncrementableLike>
 }
 
 impl AnyIncrementableLike {
-    ///Check whether expression is increment by one, like:
+    ///Check whether the current expression is increment by one, like:
     ///
     /// JsPostUpdateExpression: i++
     /// JsPreUpdateExpression: ++i
