@@ -116,6 +116,14 @@ export function GET() {
 							{ type: "null" },
 						],
 					},
+					noInteractiveElementToNoninteractiveRole: {
+						description:
+							"Enforce that non-interactive ARIA roles are not assigned to interactive HTML elements.",
+						anyOf: [
+							{ $ref: "#/definitions/RuleConfiguration" },
+							{ type: "null" },
+						],
+					},
 					noNoninteractiveElementToInteractiveRole: {
 						description:
 							"Enforce that interactive ARIA roles are not assigned to non-interactive HTML elements.",
@@ -179,6 +187,14 @@ export function GET() {
 					useAnchorContent: {
 						description:
 							"Enforce that anchors have content and that the content is accessible to screen readers.",
+						anyOf: [
+							{ $ref: "#/definitions/RuleConfiguration" },
+							{ type: "null" },
+						],
+					},
+					useAriaActivedescendantWithTabindex: {
+						description:
+							"Enforce that tabIndex is assigned to non-interactive HTML elements with aria-activedescendant.",
 						anyOf: [
 							{ $ref: "#/definitions/RuleConfiguration" },
 							{ type: "null" },
@@ -335,6 +351,13 @@ export function GET() {
 							{ type: "null" },
 						],
 					},
+					noThisInStatic: {
+						description: "Disallow this and super in static contexts.",
+						anyOf: [
+							{ $ref: "#/definitions/RuleConfiguration" },
+							{ type: "null" },
+						],
+					},
 					noUselessCatch: {
 						description: "Disallow unnecessary catch clauses.",
 						anyOf: [
@@ -418,6 +441,13 @@ export function GET() {
 					recommended: {
 						description: "It enables the recommended rules for this group",
 						type: ["boolean", "null"],
+					},
+					useArrowFunction: {
+						description: "Use arrow functions over function expressions.",
+						anyOf: [
+							{ $ref: "#/definitions/RuleConfiguration" },
+							{ type: "null" },
+						],
 					},
 					useFlatMap: {
 						description:
@@ -512,6 +542,14 @@ export function GET() {
 							{ type: "null" },
 						],
 					},
+					noEmptyCharacterClassInRegex: {
+						description:
+							"Disallow empty character classes in regular expression literals.",
+						anyOf: [
+							{ $ref: "#/definitions/RuleConfiguration" },
+							{ type: "null" },
+						],
+					},
 					noEmptyPattern: {
 						description: "Disallows empty destructuring patterns.",
 						anyOf: [
@@ -538,6 +576,14 @@ export function GET() {
 					noInvalidConstructorSuper: {
 						description:
 							"Prevents the incorrect use of super() inside classes. It also checks whether a call super() is missing from classes that extends other constructors.",
+						anyOf: [
+							{ $ref: "#/definitions/RuleConfiguration" },
+							{ type: "null" },
+						],
+					},
+					noInvalidNewBuiltin: {
+						description:
+							"Disallow new operators with global non-constructor functions.",
 						anyOf: [
 							{ $ref: "#/definitions/RuleConfiguration" },
 							{ type: "null" },
@@ -1151,9 +1197,9 @@ export function GET() {
 						description: "It enables ALL rules for this group.",
 						type: ["boolean", "null"],
 					},
-					noApproximativeNumericConstant: {
+					noAriaHiddenOnFocusable: {
 						description:
-							"Usually, the definition in the standard library is more precise than what people come up with or the used constant exceeds the maximum precision of the number type.",
+							'Enforce that aria-hidden="true" is not set on focusable elements.',
 						anyOf: [
 							{ $ref: "#/definitions/RuleConfiguration" },
 							{ type: "null" },
@@ -1181,55 +1227,9 @@ export function GET() {
 							{ type: "null" },
 						],
 					},
-					noEmptyCharacterClassInRegex: {
-						description:
-							"Disallow empty character classes in regular expression literals.",
-						anyOf: [
-							{ $ref: "#/definitions/RuleConfiguration" },
-							{ type: "null" },
-						],
-					},
 					noImplicitAnyLet: {
 						description:
 							"Disallow use of implicit any type on variable declarations.",
-						anyOf: [
-							{ $ref: "#/definitions/RuleConfiguration" },
-							{ type: "null" },
-						],
-					},
-					noInteractiveElementToNoninteractiveRole: {
-						description:
-							"Enforce that non-interactive ARIA roles are not assigned to interactive HTML elements.",
-						anyOf: [
-							{ $ref: "#/definitions/RuleConfiguration" },
-							{ type: "null" },
-						],
-					},
-					noInvalidNewBuiltin: {
-						description:
-							"Disallow new operators with global non-constructor functions.",
-						anyOf: [
-							{ $ref: "#/definitions/RuleConfiguration" },
-							{ type: "null" },
-						],
-					},
-					noMisleadingInstantiator: {
-						description: "Enforce proper usage of new and constructor.",
-						anyOf: [
-							{ $ref: "#/definitions/RuleConfiguration" },
-							{ type: "null" },
-						],
-					},
-					noMisrefactoredShorthandAssign: {
-						description:
-							"Disallow shorthand assign when variable appears on both sides.",
-						anyOf: [
-							{ $ref: "#/definitions/RuleConfiguration" },
-							{ type: "null" },
-						],
-					},
-					noThisInStatic: {
-						description: "Disallow this and super in static contexts.",
 						anyOf: [
 							{ $ref: "#/definitions/RuleConfiguration" },
 							{ type: "null" },
@@ -1249,13 +1249,6 @@ export function GET() {
 							{ type: "null" },
 						],
 					},
-					noUselessElse: {
-						description: "Disallow else block when the if block breaks early.",
-						anyOf: [
-							{ $ref: "#/definitions/RuleConfiguration" },
-							{ type: "null" },
-						],
-					},
 					noUselessLoneBlockStatements: {
 						description: "Disallow unnecessary nested block statements.",
 						anyOf: [
@@ -1266,29 +1259,6 @@ export function GET() {
 					recommended: {
 						description: "It enables the recommended rules for this group",
 						type: ["boolean", "null"],
-					},
-					useAriaActivedescendantWithTabindex: {
-						description:
-							"Enforce that tabIndex is assigned to non-interactive HTML elements with aria-activedescendant.",
-						anyOf: [
-							{ $ref: "#/definitions/RuleConfiguration" },
-							{ type: "null" },
-						],
-					},
-					useArrowFunction: {
-						description: "Use arrow functions over function expressions.",
-						anyOf: [
-							{ $ref: "#/definitions/RuleConfiguration" },
-							{ type: "null" },
-						],
-					},
-					useAsConstAssertion: {
-						description:
-							"Enforce the use of as const over literal type and type annotation.",
-						anyOf: [
-							{ $ref: "#/definitions/RuleConfiguration" },
-							{ type: "null" },
-						],
 					},
 					useAwait: {
 						description: "Ensure async functions utilize await.",
@@ -1312,9 +1282,9 @@ export function GET() {
 							{ type: "null" },
 						],
 					},
-					useShorthandAssign: {
+					useRegexLiterals: {
 						description:
-							"Require assignment operator shorthand where possible.",
+							"Enforce the use of the regular expression literals instead of the RegExp constructor if possible.",
 						anyOf: [
 							{ $ref: "#/definitions/RuleConfiguration" },
 							{ type: "null" },
@@ -1747,6 +1717,13 @@ export function GET() {
 							{ type: "null" },
 						],
 					},
+					noUselessElse: {
+						description: "Disallow else block when the if block breaks early.",
+						anyOf: [
+							{ $ref: "#/definitions/RuleConfiguration" },
+							{ type: "null" },
+						],
+					},
 					noVar: {
 						description: "Disallow the use of var",
 						anyOf: [
@@ -1757,6 +1734,14 @@ export function GET() {
 					recommended: {
 						description: "It enables the recommended rules for this group",
 						type: ["boolean", "null"],
+					},
+					useAsConstAssertion: {
+						description:
+							"Enforce the use of as const over literal type and type annotation.",
+						anyOf: [
+							{ $ref: "#/definitions/RuleConfiguration" },
+							{ type: "null" },
+						],
 					},
 					useBlockStatements: {
 						description: "Requires following curly brace conventions.",
@@ -1852,6 +1837,14 @@ export function GET() {
 							{ type: "null" },
 						],
 					},
+					useShorthandAssign: {
+						description:
+							"Require assignment operator shorthand where possible.",
+						anyOf: [
+							{ $ref: "#/definitions/RuleConfiguration" },
+							{ type: "null" },
+						],
+					},
 					useSingleCaseStatement: {
 						description:
 							"Enforces switch clauses have a single statement, emits a quick fix wrapping the statements in a block.",
@@ -1892,6 +1885,14 @@ export function GET() {
 					all: {
 						description: "It enables ALL rules for this group.",
 						type: ["boolean", "null"],
+					},
+					noApproximativeNumericConstant: {
+						description:
+							"Usually, the definition in the standard library is more precise than what people come up with or the used constant exceeds the maximum precision of the number type.",
+						anyOf: [
+							{ $ref: "#/definitions/RuleConfiguration" },
+							{ type: "null" },
+						],
 					},
 					noArrayIndexKey: {
 						description: "Discourage the usage of Array index in keys.",
@@ -2090,6 +2091,21 @@ export function GET() {
 					},
 					noLabelVar: {
 						description: "Disallow labels that share a name with a variable",
+						anyOf: [
+							{ $ref: "#/definitions/RuleConfiguration" },
+							{ type: "null" },
+						],
+					},
+					noMisleadingInstantiator: {
+						description: "Enforce proper usage of new and constructor.",
+						anyOf: [
+							{ $ref: "#/definitions/RuleConfiguration" },
+							{ type: "null" },
+						],
+					},
+					noMisrefactoredShorthandAssign: {
+						description:
+							"Disallow shorthand assign when variable appears on both sides.",
 						anyOf: [
 							{ $ref: "#/definitions/RuleConfiguration" },
 							{ type: "null" },
