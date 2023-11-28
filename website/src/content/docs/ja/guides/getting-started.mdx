@@ -5,7 +5,6 @@ description: Biomeと共に新しいプロジェクトを立ち上げる方法�
 
 import PackageManagerBiomeCommand from "@src/components/PackageManagerBiomeCommand.astro";
 import PackageManagerCommand from "@src/components/PackageManagerCommand.astro";
-import CodeBlockHeader from "@src/components/CodeBlockHeader.astro";
 
 ## 動作環境
 
@@ -41,11 +40,9 @@ Biomeをインストールする際には、バージョン範囲演算子を使
 
 `init` コマンドを実行すると、そのディレクトリに `biome.json` ファイルが新規作成されます。
 
-<CodeBlockHeader filename="biome.json" />
-
-```json
+```json title="biome.json"
 {
-  "$schema": "https://biomejs.dev/schemas/1.2.2/schema.json",
+  "$schema": "https://biomejs.dev/schemas/1.4.0/schema.json",
   "organizeImports": {
     "enabled": false
   },
