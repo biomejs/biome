@@ -542,7 +542,14 @@ impl Format<JsFormatContext> for ArrowChain {
             let join_signatures = format_with(|f: &mut JsFormatter| {
                 let mut is_first_in_chain = true;
                 for arrow in self.arrows() {
-                    if f.context().comments().has_leading_comments(arrow.syntax()) {
+                    // The first comment in the chain gets formatted by the
+                    // parent (the FormatJsArrowFunctionExpression), but the
+                    // rest of the arrows in the chain need to format their
+                    // comments manually, since they won't have their own
+                    // Format node to handle it.
+                    if !is_first_in_chain
+                        && f.context().comments().has_leading_comments(arrow.syntax())
+                    {
                         // A grouped layout implies that the arrow chain is trying to be rendered
                         // in a condensend, single-line format (at least the signatures, not
                         // necessarily the body). In that case, we _need_ to prevent the leading
@@ -550,18 +557,12 @@ impl Format<JsFormatContext> for ArrowChain {
                         // then we want to _force_ the line break so that the leading comments
                         // don't inadvertently end up on the previous line after the fat arrow.
                         if is_grouped_call_arg_layout {
-                            write!(
-                                f,
-                                [
-                                    maybe_space(!is_first_in_chain),
-                                    format_leading_comments(arrow.syntax())
-                                ]
-                            )?;
+                            write!(f, [space(), format_leading_comments(arrow.syntax())])?;
                         } else {
                             write!(
                                 f,
                                 [
-                                    (!is_first_in_chain).then_some(soft_line_break_or_space()),
+                                    soft_line_break_or_space(),
                                     format_leading_comments(arrow.syntax())
                                 ]
                             )?;
