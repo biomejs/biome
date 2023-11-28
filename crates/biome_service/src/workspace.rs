@@ -62,8 +62,10 @@ use biome_fs::RomePath;
 use biome_js_syntax::{TextRange, TextSize};
 use biome_text_edit::TextEdit;
 use std::collections::HashMap;
+use std::ffi::OsStr;
 use std::path::Path;
 use std::{borrow::Cow, panic::RefUnwindSafe, sync::Arc};
+use tracing::debug;
 
 pub use self::client::{TransportRequest, WorkspaceClient, WorkspaceTransport};
 pub use crate::file_handlers::Language;
@@ -92,6 +94,29 @@ pub struct FileFeaturesResult {
 }
 
 impl FileFeaturesResult {
+    /// Files that should not be processed no matter the cases
+    pub(crate) const FILES_TO_NOT_PROCESS: &'static [&'static str; 11] = &[
+        "package.json",
+        "package-lock.json",
+        "npm-shrinkwrap.json",
+        "yarn.lock",
+        "composer.json",
+        "composer.lock",
+        "typescript.json",
+        "tsconfig.json",
+        "jsconfig.json",
+        "deno.json",
+        "deno.jsonc",
+    ];
+
+    /// Checks whether this file can be processed
+    fn can_process(&self, path: &Path) -> bool {
+        path.file_name()
+            .and_then(OsStr::to_str)
+            .map(|file_name| !FileFeaturesResult::FILES_TO_NOT_PROCESS.contains(&file_name))
+            .unwrap_or_default()
+    }
+
     /// By default, all features are not supported by a file.
     const WORKSPACE_FEATURES: [(FeatureName, SupportKind); 3] = [
         (FeatureName::Lint, SupportKind::FileNotSupported),
@@ -128,41 +153,50 @@ impl FileFeaturesResult {
         language: &Language,
         path: &Path,
     ) -> Self {
-        let formatter_disabled =
-            if let Some(disabled) = settings.override_settings.formatter_disabled(path) {
-                disabled
-            } else if language.is_javascript_like() {
-                !settings.formatter().enabled || settings.javascript_formatter_disabled()
-            } else if language.is_json_like() {
-                !settings.formatter().enabled || settings.json_formatter_disabled()
-            } else {
-                !settings.formatter().enabled
-            };
-        if formatter_disabled {
-            self.features_supported
-                .insert(FeatureName::Format, SupportKind::FeatureNotEnabled);
-        }
-        // linter
-        if let Some(disabled) = settings.override_settings.linter_disabled(path) {
-            if disabled {
+        if self.can_process(path) {
+            let formatter_disabled =
+                if let Some(disabled) = settings.override_settings.formatter_disabled(path) {
+                    disabled
+                } else if language.is_javascript_like() {
+                    !settings.formatter().enabled || settings.javascript_formatter_disabled()
+                } else if language.is_json_like() {
+                    !settings.formatter().enabled || settings.json_formatter_disabled()
+                } else {
+                    !settings.formatter().enabled
+                };
+            if formatter_disabled {
+                self.features_supported
+                    .insert(FeatureName::Format, SupportKind::FeatureNotEnabled);
+            }
+            // linter
+            if let Some(disabled) = settings.override_settings.linter_disabled(path) {
+                if disabled {
+                    self.features_supported
+                        .insert(FeatureName::Lint, SupportKind::FeatureNotEnabled);
+                }
+            } else if !settings.linter().enabled {
                 self.features_supported
                     .insert(FeatureName::Lint, SupportKind::FeatureNotEnabled);
             }
-        } else if !settings.linter().enabled {
-            self.features_supported
-                .insert(FeatureName::Lint, SupportKind::FeatureNotEnabled);
-        }
 
-        // organize imports
-        if let Some(disabled) = settings.override_settings.organize_imports_disabled(path) {
-            if disabled {
+            // organize imports
+            if let Some(disabled) = settings.override_settings.organize_imports_disabled(path) {
+                if disabled {
+                    self.features_supported
+                        .insert(FeatureName::OrganizeImports, SupportKind::FeatureNotEnabled);
+                }
+            } else if !settings.organize_imports().enabled {
                 self.features_supported
                     .insert(FeatureName::OrganizeImports, SupportKind::FeatureNotEnabled);
             }
-        } else if !settings.organize_imports().enabled {
-            self.features_supported
-                .insert(FeatureName::OrganizeImports, SupportKind::FeatureNotEnabled);
+        } else {
+            self.features_supported = HashMap::from(FileFeaturesResult::WORKSPACE_FEATURES);
         }
+
+        debug!(
+            "The file has the following feature sets: \n{:?}",
+            &self.features_supported
+        );
 
         self
     }
