@@ -1,0 +1,774 @@
+---
+title: CLI コマンド
+emoji: ⌨️
+category: reference
+description: Biome CLIで使用可能なコマンドと引数
+---
+
+# コマンド一覧
+
+  * [`biome`↴](#biome)
+  * [`biome version`↴](#biome-version)
+  * [`biome rage`↴](#biome-rage)
+  * [`biome start`↴](#biome-start)
+  * [`biome stop`↴](#biome-stop)
+  * [`biome check`↴](#biome-check)
+  * [`biome lint`↴](#biome-lint)
+  * [`biome format`↴](#biome-format)
+  * [`biome ci`↴](#biome-ci)
+  * [`biome init`↴](#biome-init)
+  * [`biome lsp-proxy`↴](#biome-lsp-proxy)
+  * [`biome migrate`↴](#biome-migrate)
+
+## biome
+
+
+Biome公式CLI。プロジェクトのヘルスチェックや、単一のファイルのチェックに使います。
+
+**使用例**: **`biome`** _`command ...`_
+
+**使用可能なオプション:**
+- **`-h`**, **`--help`** &mdash;
+  ヘルプ情報を表示します。
+- **`-V`**, **`--version`** &mdash;
+  バージョン情報を表示します。
+
+
+
+**使用可能なコマンド:**
+- **`version`** &mdash;
+  Biomeのバージョン情報を表示し終了します。
+- **`rage`** &mdash;
+  デバッグ情報を表示します。
+- **`start`** &mdash;
+  Biomeデーモンサーバープロセスを開始します。
+- **`stop`** &mdash;
+  Biomeデーモンサーバープロセスを停止します。
+- **`check`** &mdash;
+  指定されたファイルに対してフォーマッタ、リンター、インポートの整理を実行します。
+- **`lint`** &mdash;
+  ファイルセットに対してさまざまなチェックを実行します。
+- **`format`** &mdash;
+  ファイルセットに対してフォーマッタを実行します。
+- **`ci`** &mdash;
+  CI環境で使用するコマンド。指定されたファイルに対してフォーマッタ、リンター、インポートの整理を実行します。
+- **`init`** &mdash;
+  新しいbiomeプロジェクトとして、デフォルトの設定ファイルを作成します。
+- **`lsp-proxy`** &mdash;
+  stdin/stdout経由で言語サーバープロトコルのサーバーとして機能します。
+- **`migrate`** &mdash;
+  構成ファイルの更新を行います。特に、破壊的な変更がある場合に使用します。
+
+
+## biome version
+
+Biomeのバージョン情報を表示して終了します。
+
+**使用方法**: **`biome`** **`version`**
+
+**使用可能なグローバルオプション**
+- **`--colors`**=_`<off|force>`_ &mdash;
+  マークアップの書式設定モードを設定します："off"はすべてをプレーンテキストとして表示し、"force"はコンソール出力が互換性がないと判断された場合でもANSIを使用してマークアップの書式を強制します。
+- **`--use-server`** &mdash;
+  実行中のBiomeデーモンサーバーに接続します。
+- **`--verbose`** &mdash;
+  診断に関する詳細な情報を表示します。
+- **`--config-path`**=_`PATH`_ &mdash;
+  設定ファイル`biome.json`のパスを指定します。
+- **`--max-diagnostics`**=_`NUMBER`_ &mdash;
+  表示される診断の数を制限します。
+
+  [デフォルト: 20]
+- **`--skip-errors`** &mdash;
+  構文エラーを含むファイルをスキップし、エラー診断を表示しません。
+- **`--no-errors-on-unmatched`** &mdash;
+  コマンドの実行中に、指定されたファイルが存在しない場合に発生するエラー診断を表示しません。
+- **`--error-on-warnings`** &mdash;
+  警告を出す診断がある場合、エラーを表示し処理を中断します。
+- **`--log-level`**=_`<none|debug|info|warn|error>`_ &mdash;
+  表示するログのレベルを指定します。debug、info、warn、errorの順に、詳細な情報を表示します。
+
+  `none`を指定すると、ログを表示しません。
+
+  [デフォルト: none]
+- **`--log-kind`**=_`<pretty|compact|json>`_ &mdash;
+ログの表示スタイルを指定します。
+
+  [デフォルト: pretty]
+- **`--diagnostic-level`**=_`<info|warn|error>`_ &mdash;
+表示する診断のレベルを指定します。info、warn、errorの順に、詳細な情報を表示します。例えば、`--diagnostic-level=error`を渡すと、エラーのみを含む診断のみが表示されます。
+
+  [デフォルト: info]
+
+
+
+**使用可能なオプション:**
+- **`-h`**, **`--help`** &mdash;
+  ヘルプ情報を表示します。
+
+
+## biome rage
+
+デバッグ情報を表示します。
+
+**使用例**: **`biome`** **`rage`** \[**`--daemon-logs`**\]
+
+**使用可能なグローバルオプション**
+- **`--colors`**=_`<off|force>`_ &mdash;
+  マークプのフォーマットモードを設定します。"off"はすべてのテキストをプレーンテキストとして表示し、"force"はコンソール出力が互換性がないと判断された場合でもANSIを使用してマークアップを強制的にフォーマットします。
+- **`--use-server`** &mdash;
+  実行中のBiomeデーモンサーバーに接続します。
+- **`--verbose`** &mdash;
+  診断に関する詳細な情報を表示します。
+- **`--config-path`**=_`PATH`_ &mdash;
+  設定ファイル`biome.json`のパスを指定します。
+- **`--max-diagnostics`**=_`NUMBER`_ &mdash;
+  表示される診断の数を制限します。
+
+  [デフォルト: 20]
+- **`--skip-errors`** &mdash;
+  構文エラーを含むファイルをスキップし、エラー診断を表示しません。
+- **`--no-errors-on-unmatched`** &mdash;
+  コマンドの実行中に、指定されたファイルが存在しない場合に発生するエラー診断を表示しません。
+- **`--error-on-warnings`** &mdash;
+  警告を出す診断がある場合、エラーを表示し処理を中断します。
+- **`--log-level`**=_`<none|debug|info|warn|error>`_ &mdash;
+  表示するログのレベルを指定します。debug、info、warn、errorの順に、詳細な情報を表示します。
+
+  `none`を指定すると、ログを表示しません。
+
+  [デフォルト: none]
+- **`--log-kind`**=_`<pretty|compact|json>`_ &mdash;
+ログの表示スタイルを指定します。
+
+  [デフォルト: pretty]
+- **`--diagnostic-level`**=_`<info|warn|error>`_ &mdash;
+表示する診断のレベルを指定します。info、warn、errorの順に、詳細な情報を表示します。例えば、`--diagnostic-level=error`を渡すと、エラーのみを含む診断のみが表示されます。
+
+  [デフォルト: info]
+
+
+
+**使用可能なオプション:**
+- **`--daemon-logs`** &mdash;
+  Biomeデーモンサーバーのログを表示します。
+- **`-h`**, **`--help`** &mdash;
+  ヘルプ情報を表示します。
+
+
+
+## biome start
+
+Biomeデーモンサーバープロセスを開始します。
+
+**使用例**: **`biome`** **`start`** \[**`--config-path`**=_`PATH`_\]
+
+**使用可能なオプション:**
+- **`--config-path`**=_`PATH`_ &mdash;
+  設定ファイル`biome.json`のパスを指定します。
+
+  環境変数 **`BIOME_CONFIG_PATH`** を使用。
+- **`-h`**, **`--help`** &mdash;
+  ヘルプ情報を表示します。
+
+
+## biome stop
+
+Biomeデーモンサーバープロセスを停止します。
+
+**使用例**: **`biome`** **`stop`**
+
+**使用可能なオプション:**
+- **`-h`**, **`--help`** &mdash;
+  ヘルプ情報を表示します。
+
+
+## biome check
+
+フォーマッタ、リンター、インポートの整理をリクエストされたファイルに実行します。
+
+**使用例**: **`biome`** **`check`** \[**`--apply`**\] \[**`--apply-unsafe`**\] \[_`PATH`_\]...
+
+**`biome.json`ファイル内に含まれる設定**
+- **`--vcs-client-kind`**=_`<git>`_ &mdash;
+  VCSクライアントの種類を指定します。
+- **`--vcs-enabled`**=_`<true|false>`_ &mdash;
+  BiomeがVCSクライアントを統合して利用するかどうかを設定します。
+- **`--vcs-use-ignore-file`**=_`<true|false>`_ &mdash;
+  BiomeがVCSのignoreファイルを使用するかどうかを設定します。`true` の場合、Biomeはignoreファイルで指定されたファイルを無視します。
+- **`--vcs-root`**=_`PATH`_ &mdash;
+  BiomeがチェックするVCSファイルのルートディレクトリを指定します。デフォルトでは、`biome.json`が見つかったディレクトリを使用します。
+
+  Biomeが設定を見つけられない場合、現在の作業ディレクトリを使用しようとします。現在の作業ディレクトリが見つからない場合、BiomeはVCS統合を使用せず、ログが表示されます。
+- **`--files-max-size`**=_`NUMBER`_ &mdash;
+  ソースコードファイルのバイト単位での最大許容サイズを指定します。この制限を超えるファイルは、パフォーマンス上の理由で無視されます。デフォルトは1MiBです。
+- **`--files-ignore-unknown`**=_`<true|false>`_ &mdash;
+  Biomeが解析不能なファイルを処理する際に診断ログを出すかどうかを指定します。
+- **`--indent-style`**=_`<tab|space>`_ &mdash;
+  インデントスタイル。
+- **`--indent-size`**=_`NUMBER`_ &mdash;
+  インデントサイズ。デフォルトは2です。（非推奨のプロパティです。`indent-width`を使用してください。）
+- **`--indent-width`**=_`NUMBER`_ &mdash;
+  インデントサイズ。デフォルトは2です。
+- **`--line-ending`**=_`<lf|crlf|cr>`_ &mdash;
+  改行のタイプを指定します。
+- **`--line-width`**=_`NUMBER`_ &mdash;
+  行の最大幅を指定します。デフォルトは80です。
+- **`--quote-style`**=_`<double|single>`_ &mdash;
+  JavaScriptコードで使用される引用符のタイプを指定します。デフォルトは"double"です。
+- **`--jsx-quote-style`**=_`<double|single>`_ &mdash;
+  JSXで使用される引用符のタイプを指定します。デフォルトは"double"です。
+- **`--quote-properties`**=_`<preserve|as-needed>`_ &mdash;
+  オブジェクト内のプロパティが引用されるタイミングを指定します。デフォルトは"as-needed"です。
+- **`--trailing-comma`**=_`<all|es5|none>`_ &mdash;
+  末尾にカンマを出力するかどうか指定します。デフォルトは"all"です。
+- **`--semicolons`**=_`<always|as-needed>`_ &mdash;
+  セミコロンを常に出力するか、ASIのために必要な場合のみ出力するか指定します。
+- **`--arrow-parentheses`**=_`<always|as-needed>`_ &mdash;
+  必要のない括弧をアロー関数に追加するかどうか指定します。デフォルトは"always"です。
+- **`--bracket-spacing`**=_`<true|false>`_ &mdash;
+  オブジェクトリテラルの括弧の周りにスペースを挿入するかどうか指定します。デフォルトは"true"です。
+- **`--bracket-same-line`**=_`<true|false>`_ &mdash;
+  複数行のHTML/JSXタグの閉じ括弧を、最後の行の終わりに寄せるか、独立した次の行にするか指定します。デフォルトは"false"です。
+- **`--javascript-formatter-enabled`**=_`<true|false>`_ &mdash;
+  JavaScript（または、その拡張言語）ファイルのフォーマッタを制御します。
+- **`--javascript-formatter-indent-style`**=_`<tab|space>`_ &mdash;
+  JavaScript（または、その拡張言語）ファイルに適用されるインデントスタイル。
+- **`--javascript-formatter-indent-size`**=_`NUMBER`_ &mdash;
+  JavaScript（または、その拡張言語）ファイルに適用されるインデントサイズ。デフォルトは2です。
+- **`--javascript-formatter-indent-width`**=_`NUMBER`_ &mdash;
+  JavaScript（または、その拡張言語）ファイルに適用されるインデントサイズ。デフォルトは2です。
+- **`--javascript-formatter-line-ending`**=_`<lf|crlf|cr>`_ &mdash;
+  JavaScript（または、その拡張言語）ファイルに適用される改行のタイプを指定します。
+- **`--javascript-formatter-line-width`**=_`NUMBER`_ &mdash;
+  JavaScript（または、その拡張言語）ファイルに適用される行の最大幅を指定します。デフォルトは80です。
+- **`--json-formatter-enabled`**=_`<true|false>`_ &mdash;
+  JSON（または、その拡張言語）ファイルのフォーマッタを制御します。
+- **`--json-formatter-indent-style`**=_`<tab|space>`_ &mdash;
+  JSON（または、その拡張言語）ファイルに適用されるインデントスタイル。
+- **`--json-formatter-indent-width`**=_`NUMBER`_ &mdash;
+  JSON（または、その拡張言語）ファイルに適用されるインデントサイズ。デフォルトは2です。
+- **`--json-formatter-indent-size`**=_`NUMBER`_ &mdash;
+  JSON（または、その拡張言語）ファイルに適用されるインデントサイズ。デフォルトは2です。
+- **`--json-formatter-line-ending`**=_`<lf|crlf|cr>`_ &mdash;
+  JSON（または、その拡張言語）ファイルに適用される改行のタイプを指定します。
+- **`--json-formatter-line-width`**=_`NUMBER`_ &mdash;
+  JSON（または、その拡張言語）ファイルに適用される行の最大幅を指定します。デフォルトは80です。
+
+
+
+**使用可能なグローバルオプション**
+- **`--colors`**=_`<off|force>`_ &mdash;
+  マークアップのフォーマットモードを設定します。"off"はすべてのテキストをプレーンテキストとして印刷し、"force"はコンソール出力が非互換であると判断されてもANSIを使用してマークアップのフォーマットを強制します。
+- **`--use-server`** &mdash;
+  実行中のBiomeデーモンサーバーに接続します。
+- **`--verbose`** &mdash;
+  診断に関する詳細な情報を表示します。
+- **`--config-path`**=_`PATH`_ &mdash;
+  設定ファイル`biome.json`のパスを指定します。
+- **`--max-diagnostics`**=_`NUMBER`_ &mdash;
+  表示される診断の数を制限します。
+
+  [デフォルト: 20]
+- **`--skip-errors`** &mdash;
+  構文エラーを含むファイルをスキップし、エラー診断を表示しません。
+- **`--no-errors-on-unmatched`** &mdash;
+  コマンドの実行中に、指定されたファイルが存在しない場合に発生するエラー診断を表示しません。
+- **`--error-on-warnings`** &mdash;
+  警告を出す診断がある場合、エラーを表示し処理を中断します。
+- **`--log-level`**=_`<none|debug|info|warn|error>`_ &mdash;
+  表示するログのレベルを指定します。debug、info、warn、errorの順に、詳細な情報を表示します。
+
+  `none`を指定すると、ログを表示しません。
+
+  [デフォルト: none]
+- **`--log-kind`**=_`<pretty|compact|json>`_ &mdash;
+ログの表示スタイルを指定します。
+
+  [デフォルト: pretty]
+- **`--diagnostic-level`**=_`<info|warn|error>`_ &mdash;
+表示する診断のレベルを指定します。info、warn、errorの順に、詳細な情報を表示します。例えば、`--diagnostic-level=error`を渡すと、エラーのみを含む診断のみが表示されます。
+
+  [デフォルト: info]
+
+
+
+**使用できる位置指定項目:**
+- _`PATH`_ &mdash;
+  単一ファイル、単一パス、またはパスのリスト
+
+
+
+**使用できるオプション:**
+- **`--apply`** &mdash;
+  安全な修正に対して、フォーマットを適用します。
+- **`--apply-unsafe`** &mdash;
+  安全な修正および安全でない修正に対して、フォーマット、インポートの整理を適用します。
+- **`--formatter-enabled`**=_`<true|false>`_ &mdash;
+  フォーマッタチェックを有効または無効にすることができます。
+- **`--linter-enabled`**=_`<true|false>`_ &mdash;
+  リンターチェックを有効または無効にすることができます。
+- **`--organize-imports-enabled`**=_`<true|false>`_ &mdash;
+  インポートの整理を有効または無効にすることができます。
+- **`--stdin-file-path`**=_`PATH`_ &mdash;
+  `stdin`からパイプされたコードをフォーマットし、`stdout`へ出力したい場合にこのオプションを使用します。
+
+  ファイルがディスク上に存在する必要はありません。重要なのはファイルの拡張子です。拡張子に基づいて、Biomeはコードをチェックすることができます。
+
+  例: `echo 'let a;' | biome check --stdin-file-path=file.js`
+- **`-h`**, **`--help`** &mdash;
+  ヘルプ情報を印刷します。
+
+
+## biome lint
+
+さまざまなファイルに対してチェックを実行します。
+
+**使用例**: **`biome`** **`lint`** \[**`--apply`**\] \[**`--apply-unsafe`**\] \[_`PATH`_\]...
+
+**VCSソフトウェアとBiomeを統合するためのプロパティのセット**
+- **`--vcs-client-kind`**=_`<git>`_ &mdash;
+  VCSクライアントの種類を指定します。
+- **`--vcs-enabled`**=_`<true|false>`_ &mdash;
+  BiomeがVCSクライアントを統合して利用するかどうかを設定します。
+- **`--vcs-use-ignore-file`**=_`<true|false>`_ &mdash;
+  BiomeがVCSのignoreファイルを使用するかどうかを設定します。`true` の場合、Biomeはignoreファイルで指定されたファイルを無視します。
+- **`--vcs-root`**=_`PATH`_ &mdash;
+  BiomeがチェックするVCSファイルのルートディレクトリを指定します。デフォルトでは、`biome.json`が見つかったディレクトリを使用します。
+
+  Biomeが設定を見つけられない場合、現在の作業ディレクトリを使用しようとします。現在の作業ディレクトリが見つからない場合、BiomeはVCS統合を使用せず、ログが表示されます。
+
+**ファイルシステムの設定**
+- **`--files-max-size`**=_`NUMBER`_ &mdash;
+  ソースコードファイルのバイト単位での最大許容サイズを指定します。この制限を超えるファイルは、パフォーマンス上の理由で無視されます。デフォルトは1MiBです。
+- **`--files-ignore-unknown`**=_`<true|false>`_ &mdash;
+  Biomeが解析不能なファイルを処理する際に診断ログを出すかどうかを指定します。
+
+
+
+**使用可能なグローバルオプション**
+- **`--colors`**=_`<off|force>`_ &mdash;
+  マークアップのフォーマットモードを設定します。"off"はすべてのテキストをプレーンテキストとして印刷し、"force"はコンソール出力が非互換であると判断されてもANSIを使用してマークアップのフォーマットを強制します。
+- **`--use-server`** &mdash;
+  実行中のBiomeデーモンサーバーに接続します。
+- **`--verbose`** &mdash;
+  診断に関する詳細な情報を表示します。
+- **`--config-path`**=_`PATH`_ &mdash;
+  設定ファイル`biome.json`のパスを指定します。
+- **`--max-diagnostics`**=_`NUMBER`_ &mdash;
+  表示される診断の数を制限します。
+
+  [デフォルト: 20]
+- **`--skip-errors`** &mdash;
+  構文エラーを含むファイルをスキップし、エラー診断を表示しません。
+- **`--no-errors-on-unmatched`** &mdash;
+  コマンドの実行中に、指定されたファイルが存在しない場合に発生するエラー診断を表示しません。
+- **`--error-on-warnings`** &mdash;
+  警告を出す診断がある場合、エラーを表示し処理を中断します。
+- **`--log-level`**=_`<none|debug|info|warn|error>`_ &mdash;
+  表示するログのレベルを指定します。debug、info、warn、errorの順に、詳細な情報を表示します。
+
+  `none`を指定すると、ログを表示しません。
+
+  [デフォルト: none]
+- **`--log-kind`**=_`<pretty|compact|json>`_ &mdash;
+ログの表示スタイルを指定します。
+
+  [デフォルト: pretty]
+- **`--diagnostic-level`**=_`<info|warn|error>`_ &mdash;
+表示する診断のレベルを指定します。info、warn、errorの順に、詳細な情報を表示します。例えば、`--diagnostic-level=error`を渡すと、エラーのみを含む診断のみが表示されます。
+
+  [デフォルト: info]
+
+
+
+**使用可能な位置パラメータ:**
+- _`PATH`_ &mdash;
+  単一のファイル、単一のパス、またはパスのリスト
+
+
+
+**使用可能なオプション:**
+- **`--apply`** &mdash;
+  安全な修正に対して、フォーマットを適用します。
+- **`--apply-unsafe`** &mdash;
+  安全な修正および安全でない修正に対して、フォーマット、インポートの整理を適用します。
+- **`    --stdin-file-path`**=_`PATH`_ &mdash;
+  `stdin`からパイプされたコードをフォーマットし、`stdout`へ出力したい場合にこのオプションを使用します。
+
+  ファイルがディスク上に存在する必要はありません。重要なのはファイルの拡張子です。拡張子に基づいて、Biomeはコードをチェックする方法を知っています。
+
+  例: `echo 'let a;' | biome lint --stdin-file-path=file.js`
+- **`-h`**, **`--help`** &mdash;
+  ヘルプ情報を印刷します。
+
+
+
+## biome format
+
+一連のファイルにフォーマッタを実行します。
+
+**使用例**: **`biome`** **`format`** \[**`--write`**\] \[_`PATH`_\]...
+
+**すべてのファイルに適用される一般的なオプション**
+- **`--indent-style`**=_`<tab|space>`_ &mdash;
+  インデントスタイル。
+- **`--indent-size`**=_`NUMBER`_ &mdash;
+  インデントサイズ。デフォルトは2です。（非推奨のプロパティです。`indent-width`を使用してください。）
+- **`--indent-width`**=_`NUMBER`_ &mdash;
+  インデントサイズ。デフォルトは2です。
+- **`--line-ending`**=_`<lf|crlf|cr>`_ &mdash;
+  改行のタイプを指定します。
+- **`--line-width`**=_`NUMBER`_ &mdash;
+  行の最大幅を指定します。デフォルトは80です。
+
+
+
+**JavaScriptファイルに特有のフォーマットオプション**
+- **`--quote-style`**=_`<double|single>`_ &mdash;
+  JavaScriptコードで使用される引用符のタイプを指定します。デフォルトは"double"です。
+- **`--jsx-quote-style`**=_`<double|single>`_ &mdash;
+  JSXで使用される引用符のタイプを指定します。デフォルトは"double"です。
+- **`--quote-properties`**=_`<preserve|as-needed>`_ &mdash;
+  オブジェクト内のプロパティが引用されるタイミングを指定します。デフォルトは"as-needed"です。
+- **`--trailing-comma`**=_`<all|es5|none>`_ &mdash;
+  末尾にカンマを出力するかどうか指定します。デフォルトは"all"です。
+- **`--semicolons`**=_`<always|as-needed>`_ &mdash;
+  セミコロンを常に出力するか、ASIのために必要な場合のみ出力するか指定します。
+- **`--arrow-parentheses`**=_`<always|as-needed>`_ &mdash;
+  必要のない括弧をアロー関数に追加するかどうか指定します。デフォルトは"always"です。
+- **`--bracket-spacing`**=_`<true|false>`_ &mdash;
+  オブジェクトリテラルの括弧の周りにスペースを挿入するかどうか指定します。デフォルトは"true"です。
+- **`--bracket-same-line`**=_`<true|false>`_ &mdash;
+  複数行のHTML/JSXタグの閉じ括弧を、最後の行の終わりに寄せるか、独立した次の行にするか指定します。デフォルトは"false"です。
+- **`--javascript-formatter-enabled`**=_`<true|false>`_ &mdash;
+  JavaScript（または、その拡張言語）ファイルのフォーマッタを制御します。
+- **`--javascript-formatter-indent-style`**=_`<tab|space>`_ &mdash;
+  JavaScript（または、その拡張言語）ファイルに適用されるインデントスタイル。
+- **`--javascript-formatter-indent-size`**=_`NUMBER`_ &mdash;
+  JavaScript（または、その拡張言語）ファイルに適用されるインデントサイズ。デフォルトは2です。
+- **`--javascript-formatter-indent-width`**=_`NUMBER`_ &mdash;
+  JavaScript（または、その拡張言語）ファイルに適用されるインデントサイズ。デフォルトは2です。
+- **`--javascript-formatter-line-ending`**=_`<lf|crlf|cr>`_ &mdash;
+  JavaScript（または、その拡張言語）ファイルに適用される行の終了のタイプを指定します。
+- **`--javascript-formatter-line-width`**=_`NUMBER`_ &mdash;
+  JavaScript（または、その拡張言語）ファイルに適用される行の最大幅を指定します。デフォルトは80です。
+
+
+
+
+**BiomeをVCSソフトウェアと統合するためのプロパティのセット。**
+- **`--vcs-client-kind`**=_`<git>`_ &mdash;
+  VCSクライアントの種類を指定します。
+- **`--vcs-enabled`**=_`<true|false>`_ &mdash;
+  BiomeがVCSクライアントを統合して利用するかどうかを設定します。
+- **`--vcs-use-ignore-file`**=_`<true|false>`_ &mdash;
+  BiomeがVCSのignoreファイルを使用するかどうかを設定します。`true` の場合、Biomeはignoreファイルで指定されたファイルを無視します。
+- **`--vcs-root`**=_`PATH`_ &mdash;
+  BiomeがチェックするVCSファイルのルートディレクトリを指定します。デフォルトでは、`biome.json`が見つかったディレクトリを使用します。
+
+  Biomeが設定を見つけられない場合、現在の作業ディレクトリを使用しようとします。現在の作業ディレクトリが見つからない場合、BiomeはVCS統合を使用せず、ログが表示されます。
+
+
+
+**ファイルシステムの設定**
+- **`--files-max-size`**=_`NUMBER`_ &mdash;
+  ソースコードファイルのバイト単位での最大許容サイズを指定します。この制限を超えるファイルは、パフォーマンス上の理由で無視されます。デフォルトは1MiBです。
+- **`--files-ignore-unknown`**=_`<true|false>`_ &mdash;
+  Biomeが解析不能なファイルを処理する際に診断ログを出すかどうかを指定します。
+
+
+
+**使用可能なグローバルオプション**
+- **`--colors`**=_`<off|force>`_ &mdash;
+  マークアップの書式設定モードを設定します。"off"はすべてをプレーンテキストとして表示し、"force"はコンソール出力が互換性がないと判断された場合でもANSIを使用してマークアップの書式を強制します。
+
+- **`--use-server`** &mdash;
+  実行中のBiomeデーモンサーバーに接続します。
+
+- **`--verbose`** &mdash;
+  診断に関する詳細な情報を表示します。
+
+- **`--config-path`**=_`PATH`_ &mdash;
+  設定ファイル`biome.json`のパスを指定します。
+
+- **`--max-diagnostics`**=_`NUMBER`_ &mdash;
+  表示される診断の数を制限します。
+
+  [デフォルト: 20]
+
+- **`--skip-errors`** &mdash;
+  構文エラーを含むファイルをスキップし、エラー診断を表示しません。
+
+- **`--no-errors-on-unmatched`** &mdash;
+  コマンドの実行中に、指定されたファイルが存在しない場合に発生するエラー診断を表示しません。
+
+- **`--error-on-warnings`** &mdash;
+  警告を出す診断がある場合、エラーを表示し処理を中断します。
+
+- **`--log-level`**=_`<none|debug|info|warn|error>`_ &mdash;
+  表示するログのレベルを指定します。debug、info、warn、errorの順に、詳細な情報を表示します。
+
+  `none`を指定すると、ログを表示しません。
+
+  [デフォルト: none]
+
+- **`--log-kind`**=_`<pretty|compact|json>`_ &mdash;
+ログの表示スタイルを指定します。
+
+  [デフォルト: pretty]
+
+- **`--diagnostic-level`**=_`<info|warn|error>`_ &mdash;
+表示する診断のレベルを指定します。info、warn、errorの順に、詳細な情報を表示します。例えば、`--diagnostic-level=error`を渡すと、エラーのみを含む診断のみが表示されます。
+
+  [デフォルト: info]
+
+**使用可能な位置引数:**
+- _`PATH`_ &mdash;
+  単一のファイル、単一のパス、またはパスのリスト。
+
+**使用可能なオプション:**
+- **`--json-formatter-enabled`**=_`<true|false>`_ &mdash;
+  JSON（または、その拡張言語）ファイルのフォーマッターとして使用するかどうか。
+
+- **`--json-formatter-indent-style`**=_`<tab|space>`_ &mdash;
+  JSON（または、その拡張言語）ファイルに適用されるインデントスタイル。
+
+- **`--json-formatter-indent-width`**=_`NUMBER`_ &mdash;
+  JSON（または、その拡張言語）ファイルに適用されるインデントサイズ。デフォルトは2です。
+
+- **`--json-formatter-line-ending`**=_`<lf|crlf|cr>`_ &mdash;
+  JSON（または、その拡張言語）ファイルに適用される行末のタイプを指定します。
+
+- **`--json-formatter-line-width`**=_`NUMBER`_ &mdash;
+  JSON（または、その拡張言語）ファイルに適用される行の最大幅を指定します。デフォルトは80です。
+
+- **`--stdin-file-path`**=_`PATH`_ &mdash;
+  `stdin`からパイプされたコードをフォーマットし、`stdout`へ出力したい場合にこのオプションを使用します。
+
+  ファイルがディスク上に存在する必要はありません。重要なのはファイルの拡張子です。拡張子に基づいて、Biomeはコードをチェックすることができます。
+
+  例: `echo 'let a;' | biome check --stdin-file-path=file.js`
+
+- **`--write`** &mdash;
+  フォーマットされたファイルをファイルシステムに書き込みます。
+
+- **`-h`**, **`--help`** &mdash;
+  ヘルプ情報を表示します。
+
+
+
+## biome ci
+
+CI環境で使用するコマンド。フォーマッター、リンター、および要求されたファイルへのインポート整理を実行します。
+
+ファイルは変更されません。このコマンドは読み取り専用の操作です。
+
+**使用例**: **`biome`** **`ci`** \[**`--formatter-enabled`**=_`<true|false>`_\] \[**`--linter-enabled`**=_`<true|false>`_\] \[**`--organize-imports-enabled`**=_`<true|false>`_\] \[_`PATH`_\]...
+
+**使用可能な`biome.json`ファイルに含まれる設定**
+- **`--vcs-client-kind`**=_`<git>`_ &mdash;
+  VCSクライアントの種類を指定します。
+- **`--vcs-enabled`**=_`<true|false>`_ &mdash;
+  BiomeがVCSクライアントを統合して利用するかどうかを設定します。
+- **`--vcs-use-ignore-file`**=_`<true|false>`_ &mdash;
+  BiomeがVCSのignoreファイルを使用するかどうかを設定します。`true` の場合、Biomeはignoreファイルで指定されたファイルを無視します。
+- **`--vcs-root`**=_`PATH`_ &mdash;
+  BiomeがチェックするVCSファイルのルートディレクトリを指定します。デフォルトでは、`biome.json`が見つかったディレクトリを使用します。
+
+  Biomeが設定を見つけられない場合、現在の作業ディレクトリを使用しようとします。現在の作業ディレクトリが見つからない場合、BiomeはVCS統合を使用せず、ログが表示されます。
+- **`--files-max-size`**=_`NUMBER`_ &mdash;
+  ソースコードファイルのバイト単位での最大許容サイズを指定します。この制限を超えるファイルは、パフォーマンス上の理由で無視されます。デフォルトは1MiBです。
+- **`--files-ignore-unknown`**=_`<true|false>`_ &mdash;
+  Biomeが解析不能なファイルを処理する際に診断ログを出すかどうかを指定します。
+- **`--indent-style`**=_`<tab|space>`_ &mdash;
+  インデントスタイル。
+- **`--indent-size`**=_`NUMBER`_ &mdash;
+  インデントサイズ。デフォルトは2です。（非推奨のプロパティです。`indent-width`を使用してください。）
+- **`--indent-width`**=_`NUMBER`_ &mdash;
+  インデントサイズ。デフォルトは2です。
+- **`--line-ending`**=_`<lf|crlf|cr>`_ &mdash;
+  改行のタイプを指定します。
+- **`--line-width`**=_`NUMBER`_ &mdash;
+  行の最大幅を指定します。デフォルトは80です。
+- **`--quote-style`**=_`<double|single>`_ &mdash;
+  JavaScriptコードで使用される引用符のタイプを指定します。デフォルトは"double"です。
+- **`--jsx-quote-style`**=_`<double|single>`_ &mdash;
+  JSXで使用される引用符のタイプを指定します。デフォルトは"double"です。
+- **`--quote-properties`**=_`<preserve|as-needed>`_ &mdash;
+  オブジェクト内のプロパティが引用されるタイミングを指定します。デフォルトは"as-needed"です。
+- **`--trailing-comma`**=_`<all|es5|none>`_ &mdash;
+  末尾にカンマを出力するかどうか指定します。デフォルトは"all"です。
+- **`--semicolons`**=_`<always|as-needed>`_ &mdash;
+  セミコロンを常に出力するか、ASIのために必要な場合のみ出力するか指定します。
+- **`--arrow-parentheses`**=_`<always|as-needed>`_ &mdash;
+  必要のない括弧をアロー関数に追加するかどうか指定します。デフォルトは"always"です。
+- **`--bracket-spacing`**=_`<true|false>`_ &mdash;
+  オブジェクトリテラルの括弧の周りにスペースを挿入するかどうか指定します。デフォルトは"true"です。
+- **`--bracket-same-line`**=_`<true|false>`_ &mdash;
+  複数行のHTML/JSXタグの閉じ括弧を、最後の行の終わりに寄せるか、独立した次の行にするか指定します。デフォルトは"false"です。
+- **`--javascript-formatter-enabled`**=_`<true|false>`_ &mdash;
+  JavaScript（または、その拡張言語）ファイルのフォーマッタを制御します。
+- **`--javascript-formatter-indent-style`**=_`<tab|space>`_ &mdash;
+  JavaScript（または、その拡張言語）ファイルに適用されるインデントスタイル。
+- **`--javascript-formatter-indent-size`**=_`NUMBER`_ &mdash;
+  JavaScript（または、その拡張言語）ファイルに適用されるインデントサイズ。デフォルトは2です。
+- **`--javascript-formatter-indent-width`**=_`NUMBER`_ &mdash;
+  JavaScript（または、その拡張言語）ファイルに適用されるインデントサイズ。デフォルトは2です。
+- **`--javascript-formatter-line-ending`**=_`<lf|crlf|cr>`_ &mdash;
+  JavaScript（または、その拡張言語）ファイルに適用される行末のタイプを指定します。
+- **`--javascript-formatter-line-width`**=_`NUMBER`_ &mdash;
+  JavaScript（または、その拡張言語）ファイルに適用される行の最大幅を指定します。デフォルトは80です。
+- **`--json-formatter-enabled`**=_`<true|false>`_ &mdash;
+  JSON（または、その拡張言語）ファイルのフォーマッターとして使用するかどうか。
+- **`--json-formatter-indent-style`**=_`<tab|space>`_ &mdash;
+  JSON（または、その拡張言語）ファイルに適用されるインデントスタイル。
+- **`--json-formatter-indent-width`**=_`NUMBER`_ &mdash;
+  JSON（または、その拡張言語）ファイルに適用されるインデントサイズ。デフォルトは2です。
+- **`--json-formatter-indent-size`**=_`NUMBER`_ &mdash;
+  JSON（または、その拡張言語）ファイルに適用されるインデントサイズ。デフォルトは2です。
+- **`--json-formatter-line-ending`**=_`<lf|crlf|cr>`_ &mdash;
+  JSON（または、その拡張言語）ファイルに適用される行末のタイプを指定します。
+- **`--json-formatter-line-width`**=_`NUMBER`_ &mdash;
+  JSON（または、その拡張言語）ファイルに適用される行の最大幅を指定します。デフォルトは80です。
+
+**使用可能なグローバルオプション**
+- **`--colors`**=_`<off|force>`_ &mdash;
+  マークアップの書式設定モードを設定します："off"はすべてをプレーンテキストとして表示し、"force"はコンソール出力が互換性がないと判断された場合でもANSIを使用してマークアップの書式を強制します。
+- **`--use-server`** &mdash;
+  実行中のBiomeデーモンサーバーに接続します。
+- **`--verbose`** &mdash;
+  診断に関する詳細な情報を表示します。
+- **`--config-path`**=_`PATH`_ &mdash;
+  設定ファイル`biome.json`のパスを指定します。
+- **`--max-diagnostics`**=_`NUMBER`_ &mdash;
+  表示される診断の数を制限します。
+
+  [デフォルト: 20]
+- **`--skip-errors`** &mdash;
+  構文エラーを含むファイルをスキップし、エラー診断を表示しません。
+- **`--no-errors-on-unmatched`** &mdash;
+  コマンドの実行中に、指定されたファイルが存在しない場合に発生するエラー診断を表示しません。
+- **`--error-on-warnings`** &mdash;
+  警告を出す診断がある場合、エラーを表示し処理を中断します。
+- **`--log-level`**=_`<none|debug|info|warn|error>`_ &mdash;
+  表示するログのレベルを指定します。debug、info、warn、errorの順に、詳細な情報を表示します。
+
+  `none`を指定すると、ログを表示しません。
+
+  [デフォルト: none]
+- **`--log-kind`**=_`<pretty|compact|json>`_ &mdash;
+ログの表示スタイルを指定します。
+
+  [デフォルト: pretty]
+- **`--diagnostic-level`**=_`<info|warn|error>`_ &mdash;
+表示する診断のレベルを指定します。info、warn、errorの順に、詳細な情報を表示します。例えば、`--diagnostic-level=error`を渡すと、エラーのみを含む診断のみが表示されます。
+
+  [デフォルト: info]
+
+**使用可能な位置引数:**
+- _`PATH`_ &mdash;
+  単一のファイル、単一のパス、またはパスのリスト。
+
+**使用可能なオプション:**
+- **`--formatter-enabled`**=_`<true|false>`_ &mdash;
+  フォーマッタチェックを有効または無効にすることができます。
+- **`--linter-enabled`**=_`<true|false>`_ &mdash;
+  リンターチェックを有効または無効にすることができます。
+- **`--organize-imports-enabled`**=_`<true|false>`_ &mdash;
+  インポートの整理を有効または無効にすることができます。
+- **`-h`**, **`--help`** &mdash;
+  ヘルプ情報を表示します。
+
+
+
+## biome init
+
+新しいbiomeプロジェクトとして、デフォルトの設定ファイルを作成します。
+
+**使用例**: **`biome`** **`init`**
+
+**使用可能なオプション:**
+- **`-h`**, **`--help`** &mdash;
+  ヘルプ情報を表示します。
+
+
+
+## biome lsp-proxy
+
+stdin/stdout経由で言語サーバープロトコルのサーバーとして機能します。
+
+**使用例**: **`biome`** **`lsp-proxy`** \[**`--config-path`**=_`PATH`_\]
+
+**使用可能なオプション:**
+- **`--config-path`**=_`PATH`_ &mdash;
+  設定ファイル`biome.json`のパスを指定します。
+
+  環境変数 **`BIOME_CONFIG_PATH`** を使用。
+- **`-h`**, **`--help`** &mdash;
+  ヘルプ情報を表示します。
+
+
+
+## biome migrate
+
+構成ファイルの更新を行います。特に、破壊的な変更がある場合に使用します。
+
+**使用例**: **`biome`** **`migrate`** \[**`--write`**\]
+
+**使用可能なグローバルオプション**
+- **`--colors`**=_`<off|force>`_ &mdash;
+  マークアップの書式設定モードを設定します："off"はすべてをプレーンテキストとして表示し、"force"はコンソール出力が互換性がないと判断された場合でもANSIを使用してマークアップの書式を強制します。
+- **`--use-server`** &mdash;
+  実行中のBiomeデーモンサーバーに接続します。
+- **`--verbose`** &mdash;
+  診断に関する詳細な情報を表示します。
+- **`--config-path`**=_`PATH`_ &mdash;
+  設定ファイル`biome.json`のパスを指定します。
+- **`--max-diagnostics`**=_`NUMBER`_ &mdash;
+  表示される診断の数を制限します。
+
+  [デフォルト: 20]
+- **`--skip-errors`** &mdash;
+  構文エラーを含むファイルをスキップし、エラー診断を表示しません。
+- **`--no-errors-on-unmatched`** &mdash;
+  コマンドの実行中に、指定されたファイルが存在しない場合に発生するエラー診断を表示しません。
+- **`--error-on-warnings`** &mdash;
+  警告を出す診断がある場合、エラーを表示し処理を中断します。
+- **`--log-level`**=_`<none|debug|info|warn|error>`_ &mdash;
+  表示するログのレベルを指定します。debug、info、warn、errorの順に、詳細な情報を表示します。
+
+  `none`を指定すると、ログを表示しません。
+
+  [デフォルト: none]
+- **`--log-kind`**=_`<pretty|compact|json>`_ &mdash;
+ログの表示スタイルを指定します。
+
+  [デフォルト: pretty]
+- **`--diagnostic-level`**=_`<info|warn|error>`_ &mdash;
+表示する診断のレベルを指定します。info、warn、errorの順に、詳細な情報を表示します。例えば、`--diagnostic-level=error`を渡すと、エラーのみを含む診断のみが表示されます。
+
+  [デフォルト: info]
+
+**使用可能なオプション:**
+- **`--write`** &mdash;
+  新しい設定ファイルをディスクに書き込みます。
+- **`-h`**, **`--help`** &mdash;
+  ヘルプ情報を表示します。
+
+## 環境変数
+
+### `BIOME_BINARY`
+
+使用する Biome バイナリを上書きします。これにより、例えばシステム全体の Biome バイナリを使用することができます。
+
+この変数を定義しない場合、Biome は自動的にプラットフォーム用の正しいバイナリを検出します。
+
+```sh
+# Nixから使用する例; バイナリのパスは "${pkgs.biome}/bin/biome" です
+BIOME_BINARY=/nix/store/68fyfw1hidsqkal1839whi3nzgvqv4pa-biome-1.0.0/bin/biome npx @biomejs/biome format .
+```
+
+## その他特徴
+
+- シンボリックリンクに遭遇した場合、CLIはそれらを3階層まで展開します。それ以上の階層ではエラー診断が行われます。
