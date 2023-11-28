@@ -72,7 +72,7 @@ declare_rule! {
     /// - [MDN: Using ARIA: Roles, states, and properties](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/ARIA_Techniques)
     ///
     pub(crate) UseValidAriaRole {
-        version: "next",
+        version: "1.4.0",
         name: "useValidAriaRole",
         recommended: true,
         fix_kind: FixKind::Unsafe,

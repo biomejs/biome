@@ -162,6 +162,12 @@ impl<'a> Printer<'a> {
                         _ => {
                             self.state.measured_group_fits = true;
 
+                            if let Some(id) = group.id() {
+                                self.state
+                                    .group_modes
+                                    .insert_print_mode(id, PrintMode::Flat);
+                            }
+
                             // Measure to see if the group fits up on a single line. If that's the case,
                             // print the group in "flat" mode, otherwise continue in expanded mode
                             stack.push(TagKind::Group, args.with_print_mode(PrintMode::Flat));

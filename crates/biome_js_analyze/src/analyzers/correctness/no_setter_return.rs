@@ -64,8 +64,6 @@ declare_rule! {
     ///   }
     /// }
     /// ```
-    ///
-    /// ```
     pub(crate) NoSetterReturn {
         version: "1.0.0",
         name: "noSetterReturn",

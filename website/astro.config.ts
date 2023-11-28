@@ -112,6 +112,17 @@ export default defineConfig({
 		react(),
 		starlight({
 			title: "",
+			defaultLocale: "root",
+			locales: {
+				root: {
+					label: "English",
+					lang: "en",
+				},
+				ja: {
+					label: "日本語",
+					lang: "ja",
+				},
+			},
 			sidebar: [
 				{ label: "Home", link: "/" },
 				{ label: "Blog", link: "/blog" },
@@ -134,18 +145,10 @@ export default defineConfig({
 						{
 							label: "How Biome works",
 							link: "/guides/how-biome-works",
-							badge: {
-								text: "New",
-								variant: "note",
-							},
 						},
 						{
 							label: "Integrate Biome in your editor",
 							link: "/guides/integrate-in-editor",
-							badge: {
-								text: "New",
-								variant: "note",
-							},
 						},
 					],
 				},

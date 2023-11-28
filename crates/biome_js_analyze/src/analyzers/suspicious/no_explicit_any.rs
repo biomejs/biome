@@ -1,7 +1,7 @@
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
-use biome_js_syntax::TsAnyType;
+use biome_js_syntax::{TsAnyType, TsTypeConstraintClause};
 use biome_rowan::AstNode;
 
 declare_rule! {
@@ -12,6 +12,9 @@ declare_rule! {
     ///
     /// TypeScript's `--noImplicitAny` compiler option prevents an implied `any`,
     /// but doesn't prevent `any` from being explicitly used the way this rule does.
+    ///
+    /// Sometimes you can use the type `unknown` instead of the type `any`.
+    /// It also accepts any value, however it requires to check that a property exists before calling it.
     ///
     /// Source: https://typescript-eslint.io/rules/no-explicit-any
     ///
@@ -41,7 +44,7 @@ declare_rule! {
     /// ```
     ///
     /// ```ts
-    /// class SomeClass {
+    /// class SomeClass<T extends any> {
     ///   message: Array<Array<unknown>>;
     /// }
     /// ```
@@ -50,7 +53,6 @@ declare_rule! {
     /// function fn(param: Array<Array<unknown>>): Array<unknown> {}
     /// ```
     ///
-    /// ```
     pub(crate) NoExplicitAny {
         version: "1.0.0",
         name: "noExplicitAny",
@@ -64,8 +66,15 @@ impl Rule for NoExplicitAny {
     type Signals = Option<Self::State>;
     type Options = ();
 
-    fn run(_: &RuleContext<Self>) -> Self::Signals {
-        Some(())
+    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        let node = ctx.query();
+        if TsTypeConstraintClause::can_cast(node.syntax().parent()?.kind()) {
+            // Ignore `<T extends any>`.
+            // This use is inoffensive and already triggers the rule `noUselessTypeConstraint`.
+            None
+        } else {
+            Some(())
+        }
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {

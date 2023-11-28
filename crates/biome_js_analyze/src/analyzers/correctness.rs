@@ -3,6 +3,7 @@
 use biome_analyze::declare_group;
 
 pub(crate) mod no_constructor_return;
+pub(crate) mod no_empty_character_class_in_regex;
 pub(crate) mod no_empty_pattern;
 pub(crate) mod no_inner_declarations;
 pub(crate) mod no_invalid_constructor_super;
@@ -27,6 +28,7 @@ declare_group! {
         name : "correctness" ,
         rules : [
             self :: no_constructor_return :: NoConstructorReturn ,
+            self :: no_empty_character_class_in_regex :: NoEmptyCharacterClassInRegex ,
             self :: no_empty_pattern :: NoEmptyPattern ,
             self :: no_inner_declarations :: NoInnerDeclarations ,
             self :: no_invalid_constructor_super :: NoInvalidConstructorSuper ,

@@ -1,5 +1,5 @@
 ---
-title: noDefaultExport (since vnext)
+title: noDefaultExport (since v1.4.0)
 ---
 
 **Diagnostic Category: `lint/nursery/noDefaultExport`**

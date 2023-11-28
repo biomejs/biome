@@ -74,7 +74,7 @@ impl PrintedTokens {
             }
         }
 
-        for offset in offsets {
+        if let Some(offset) = offsets.into_iter().next() {
             panic!("tracked offset {offset:?} doesn't match any token of {root:#?}. Have you passed a token from another tree?");
         }
     }

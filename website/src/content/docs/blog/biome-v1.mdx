@@ -37,7 +37,7 @@ Biome now supports two new, long-awaited options:
 
 You can use this option via CLI or via `biome.json` file:
 
-```json
+```json title="biome.json"
 {
   "javascript": {
    "formatter": {
@@ -65,7 +65,7 @@ const Header = () => {
 
 You can decide not to print parenthesis in arrow functions. You can customize the option via CLI or via `biome.json`:
 
-```json
+```json title="biome.json"
 {
   "javascript": {
    "formatter": {
@@ -112,7 +112,7 @@ With `--files-ignore-unknown` option, the CLI won't emit diagnostics and will co
 
 You can define this behaviour in the `biome.json` too:
 
-```json
+```json title="biome.json"
 {
   "files": {
    "ignoreUnknown": true
@@ -132,7 +132,7 @@ In Biome, you can change the configuration of rules and allow them to emit diagn
 
 Here's an example, let's change the diagnostic level of a rule via `biome.json`:
 
-```json
+```json title="biome.json"
 {
   "linter": {
    "recommended": true,
@@ -171,7 +171,7 @@ Biome can now format and lint `.jsonc` files.
 
 Biome can parse comments inside JSON files. You can opt-in to this feature via the configuration file:
 
-```json
+```json title="biome.json"
 {
   "json": {
    "parser": {
@@ -192,7 +192,7 @@ format your `tsconfig.json` file with comments without emitting errors!
 
 You can now break down your configuration file into different files and join them using the new `extends` property.
 
-```json
+```json title="biome.json"
 {
   "extends": ["./formatter.json", "./linter.json"]
 }
@@ -301,7 +301,7 @@ class Controller {
 
 Some users were dissatisfied because they couldn't use Biome inside their Angular/NestJS project. Now you can do it via configuration:
 
-```json
+```json title="biome.json"
 {
   "javascript": {
    "parser": {
@@ -336,7 +336,7 @@ Big thank you to the following contributors:
 [//]: # ()
 [//]: # (        Biome will enable all rules, even the ones that belong to `nursery` group:)
 
-[//]: # (        ```json)
+[//]: # (        ```json title="biome.json")
 
 [//]: # (        {)
 
@@ -367,7 +367,7 @@ Big thank you to the following contributors:
 [//]: # ()
 [//]: # (        Biome will disable **all** rules and enable only the rules that belong to `correctness` group:)
 
-[//]: # (        ```json)
+[//]: # (        ```json title="biome.json")
 
 [//]: # (        {)
 

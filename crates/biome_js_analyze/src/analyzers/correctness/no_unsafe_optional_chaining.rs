@@ -1,11 +1,11 @@
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_js_syntax::{
-    AnyJsAssignmentPattern, AnyJsBindingPattern, AnyJsExpression, JsAssignmentExpression,
-    JsAssignmentWithDefault, JsAwaitExpression, JsCallExpression, JsComputedMemberExpression,
-    JsConditionalExpression, JsExtendsClause, JsForOfStatement, JsInExpression,
-    JsInitializerClause, JsInstanceofExpression, JsLogicalExpression, JsLogicalOperator,
-    JsNewExpression, JsObjectAssignmentPatternProperty, JsObjectMemberList,
+    AnyJsAssignmentPattern, AnyJsBindingPattern, AnyJsOptionalChainExpression,
+    JsAssignmentExpression, JsAssignmentWithDefault, JsAwaitExpression, JsCallExpression,
+    JsComputedMemberExpression, JsConditionalExpression, JsExtendsClause, JsForOfStatement,
+    JsInExpression, JsInitializerClause, JsInstanceofExpression, JsLogicalExpression,
+    JsLogicalOperator, JsNewExpression, JsObjectAssignmentPatternProperty, JsObjectMemberList,
     JsParenthesizedExpression, JsSequenceExpression, JsSpread, JsStaticMemberExpression,
     JsTemplateExpression, JsVariableDeclarator, JsWithStatement,
 };
@@ -69,19 +69,19 @@ declare_rule! {
 }
 
 impl Rule for NoUnsafeOptionalChaining {
-    type Query = Ast<QueryNode>;
+    type Query = Ast<AnyJsOptionalChainExpression>;
     type State = TextRange;
     type Signals = Option<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let query_node = ctx.query();
+        let node = ctx.query();
 
         // need to check only optional chain nodes
-        if !query_node.is_optional() {
+        if !node.is_optional() {
             return None;
         }
-        let mut node: RuleNode = RuleNode::cast_ref(query_node.syntax())?;
+        let mut node: RuleNode = RuleNode::cast_ref(node.syntax())?;
         let mut parent = node.parent::<RuleNode>();
         // parentheses limit the scope of short-circuiting in chains
         // (a?.b).c // here we have an error
@@ -288,12 +288,11 @@ impl Rule for NoUnsafeOptionalChaining {
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, range: &Self::State) -> Option<RuleDiagnostic> {
-        let query_node = ctx.query();
-
+        let node = ctx.query();
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                query_node.range(),
+                node.optional_chain_token()?.text_trimmed_range(),
                 markup! {
                     "Unsafe usage of optional chaining."
                 },
@@ -303,54 +302,6 @@ impl Rule for NoUnsafeOptionalChaining {
                 "If it short-circuits with 'undefined' the evaluation will throw TypeError here:",
             ),
         )
-    }
-}
-
-declare_node_union! {
-    pub(crate) QueryNode = JsCallExpression | JsStaticMemberExpression | JsComputedMemberExpression
-}
-
-impl QueryNode {
-    pub fn is_optional(&self) -> bool {
-        match self {
-            QueryNode::JsCallExpression(expression) => expression.is_optional(),
-            QueryNode::JsStaticMemberExpression(expression) => expression.is_optional(),
-            QueryNode::JsComputedMemberExpression(expression) => expression.is_optional(),
-        }
-    }
-
-    pub fn range(&self) -> Option<TextRange> {
-        let token = match self {
-            QueryNode::JsCallExpression(expression) => expression.optional_chain_token(),
-            QueryNode::JsStaticMemberExpression(expression) => expression.operator_token().ok(),
-            QueryNode::JsComputedMemberExpression(expression) => expression.optional_chain_token(),
-        };
-
-        Some(token?.text_trimmed_range())
-    }
-}
-
-impl From<QueryNode> for AnyJsExpression {
-    fn from(node: QueryNode) -> AnyJsExpression {
-        match node {
-            QueryNode::JsCallExpression(expression) => expression.into(),
-            QueryNode::JsStaticMemberExpression(expression) => expression.into(),
-            QueryNode::JsComputedMemberExpression(expression) => expression.into(),
-        }
-    }
-}
-
-impl From<QueryNode> for RuleNode {
-    fn from(node: QueryNode) -> RuleNode {
-        match node {
-            QueryNode::JsCallExpression(expression) => RuleNode::JsCallExpression(expression),
-            QueryNode::JsStaticMemberExpression(expression) => {
-                RuleNode::JsStaticMemberExpression(expression)
-            }
-            QueryNode::JsComputedMemberExpression(expression) => {
-                RuleNode::JsComputedMemberExpression(expression)
-            }
-        }
     }
 }
 
@@ -376,4 +327,20 @@ declare_node_union! {
     | JsInExpression
     | JsInstanceofExpression
     | JsAssignmentWithDefault
+}
+
+impl From<AnyJsOptionalChainExpression> for RuleNode {
+    fn from(node: AnyJsOptionalChainExpression) -> RuleNode {
+        match node {
+            AnyJsOptionalChainExpression::JsCallExpression(expression) => {
+                RuleNode::JsCallExpression(expression)
+            }
+            AnyJsOptionalChainExpression::JsStaticMemberExpression(expression) => {
+                RuleNode::JsStaticMemberExpression(expression)
+            }
+            AnyJsOptionalChainExpression::JsComputedMemberExpression(expression) => {
+                RuleNode::JsComputedMemberExpression(expression)
+            }
+        }
+    }
 }

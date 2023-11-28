@@ -89,7 +89,6 @@ declare_rule! {
     /// let tuple: [boolean, string] = [false, "foo"];
     /// ```
     ///
-    /// ```
     pub(crate) NoBannedTypes {
         version: "1.0.0",
         name: "noBannedTypes",

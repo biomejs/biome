@@ -1,6 +1,6 @@
 ## Overall Metrics
 
-**Average compatibility**: 95.89
+**Average compatibility**: 96.10
 
 <details>
     <summary>Definition</summary>
@@ -8,7 +8,7 @@
     $$average = \frac\{\sum_{file}^\{files}compatibility_\{file}}\{files}$$
 </details>
 
-**Compatible lines**: 96.51
+**Compatible lines**: 96.62
 
 <details>
     <summary>Definition</summary>
@@ -1239,23 +1239,8 @@
 
 
 ### js/chain-expression/test.js
-```diff
--(a?.b).c;
--(a?.()).b;
-+a?.b.c;
-+a?.().b;
- 
--(a?.b)();
--(a?.())();
-+a?.b();
-+a?.()();
- 
- new (a?.b)();
- new (a?.())();
 
-```
-
-**Prettier Similarity**: 50.00%
+**Prettier Similarity**: 100.00%
 
 
 ### js/class-comment/class-property.js
@@ -1504,30 +1489,6 @@
 ```
 
 **Prettier Similarity**: 33.33%
-
-
-### js/comments-closure-typecast/styled-components.js
-```diff
- const OverlapWrapper =
-   /** @type {import('styled-components').ThemedStyledFunction<'div',null,{overlap: boolean}>} */
-   (styled.div)`
--    position: relative;
-+position:relative;
-     > {
--      position: absolute;
--      bottom: ${(p) => p.overlap === "previous" && 0};
--      top: ${(p) => p.overlap === "next" && 0};
--    }
--  `;
-+  position: absolute;
-+  bottom: ${(p) => p.overlap === "previous" && 0};
-+top: ${(p) => p.overlap === "next" && 0};
-+}
-+`;
-
-```
-
-**Prettier Similarity**: 40.00%
 
 
 ### js/comments-closure-typecast/superclass.js
@@ -4590,108 +4551,8 @@
 
 
 ### js/optional-chaining/chaining.js
-```diff
- var street = user.address?.street;
- var fooValue = myForm.querySelector("input[name=foo]")?.value;
- 
- obj?.prop;
- obj?.[expr];
- func?.(...args);
- 
- a?.();
- a?.[++x];
- a?.b.c(++x).d;
- a?.b[3].c?.(x).d;
- a?.b.c;
--(a?.b).c;
-+a?.b.c;
- a?.b?.c;
- delete a?.b;
- 
- a?.b[3].c?.(x).d.e?.f[3].g?.(y).h;
- 
--(a?.b).c();
--(a?.b[c]).c();
-+a?.b.c();
-+a?.b[c].c();
- 
- a?.b?.c.d?.e;
- (a ? b : c)?.d;
- 
- (list || list2)?.length;
- (list || list2)?.[list || list2];
- 
- async function HelloWorld() {
-   var x = (await foo.bar.blah)?.hi;
-   a?.[await b];
-   (await x)?.();
- }
- 
- a[b?.c].d();
- a?.[b?.c].d();
- a[b?.c]?.d();
- a?.[b?.c]?.d();
- 
- one?.fn();
--(one?.two).fn();
--(one?.two)();
--(one?.two())();
-+one?.two.fn();
-+one?.two();
-+one?.two()();
- one.two?.fn();
--(one.two?.three).fn();
-+one.two?.three.fn();
- one.two?.three?.fn();
- 
- one?.();
--(one?.())();
-+one?.()();
- one?.()?.();
- 
--(one?.()).two;
-+one?.().two;
- 
- a?.[b ? c : d];
- 
- (-1)?.toFixed();
- (void fn)?.();
- (a && b)?.();
- (a ? b : c)?.();
- (function () {})?.();
- (() => f)?.();
- (() => f)?.x;
--(a?.(x)).x;
-+a?.(x).x;
- (
-   aaaaaaaaaaaaaaaaaaaaaaaa &&
-   aaaaaaaaaaaaaaaaaaaaaaaa &&
-   aaaaaaaaaaaaaaaaaaaaaaaa
- )?.();
- 
- let f = () => ({})?.();
- let g = () => ({})?.b;
- a = () => ({})?.() && a;
- a = () => ({})?.()() && a;
- a = () => ({})?.().b && a;
- a = () => ({})?.b && a;
- a = () => ({})?.b() && a;
- (a) => ({})?.()?.b && 0;
- (a) => ({})?.b?.b && 0;
- (x) => ({})?.()();
- (x) => ({})?.().b;
- (x) => ({})?.b();
- (x) => ({})?.b.b;
- ({})?.a().b();
- ({ a: 1 })?.entries();
- 
- new (foo?.bar)();
- new (foo?.bar())();
- new (foo?.())();
 
-```
-
-**Prettier Similarity**: 88.51%
+**Prettier Similarity**: 100.00%
 
 
 ### js/optional-chaining/comments.js
@@ -7286,13 +7147,8 @@
 
 
 ### typescript/arrows/type_params.ts
-```diff
--<T,>(a) => {};
-+<T>(a) => {};
 
-```
-
-**Prettier Similarity**: 0.00%
+**Prettier Similarity**: 100.00%
 
 
 ### typescript/as/array-pattern.ts
@@ -7991,21 +7847,8 @@
 
 
 ### typescript/compiler/contextualSignatureInstantiation2.ts
-```diff
- // dot f g x = f(g(x))
- var dot: <T, S>(f: (_: T) => S) => <U>(g: (_: U) => T) => (_: U) => S;
- dot =
-   <T, S>(f: (_: T) => S) =>
--  <U,>(g: (_: U) => T): ((r: U) => S) =>
-+  <U>(g: (_: U) => T): ((r: U) => S) =>
-   (x) =>
-     f(g(x));
- var id: <T>(x: T) => T;
- var r23 = dot(id)(id);
 
-```
-
-**Prettier Similarity**: 88.89%
+**Prettier Similarity**: 100.00%
 
 
 ### typescript/compiler/declareDottedModuleName.ts
@@ -11503,8 +11346,7 @@
  function b<const T extends U>() {}
  function c<T, const U>() {}
  declare function d<const T>();
--<const T,>() => {};
-+<const T>() => {};
+ <const T,>() => {};
  <const T extends U>() => {};
  (function <const T>() {});
  (function <const T extends U>() {});
@@ -11536,7 +11378,7 @@
 
 ```
 
-**Prettier Similarity**: 93.75%
+**Prettier Similarity**: 96.88%
 
 
 ### typescript/typeparams/empty-parameters-with-arrow-function/issue-13817.ts
@@ -11605,34 +11447,8 @@
 
 
 ### typescript/typeparams/line-breaking-after-extends.ts
-```diff
- export type OuterType1<
--  LongerLongerLongerLongerInnerType extends
--    LongerLongerLongerLongerOtherType<OneMoreType>,
-+  LongerLongerLongerLongerInnerType extends LongerLongerLongerLongerOtherType<OneMoreType>,
- > = { a: 1 };
- 
- export type OuterType2<
--  LongerLongerLongerLongerInnerType extends
--    LongerLongerLongerLongerLongerLongerLongerLongerOtherType,
-+  LongerLongerLongerLongerInnerType extends LongerLongerLongerLongerLongerLongerLongerLongerOtherType,
- > = { a: 1 };
- 
- export type OuterType3<
--  LongerLongerLongerLongerInnerType extends
--    LongerLongerLongerLongerLongerLo.ngerLongerLongerOtherType,
-+  LongerLongerLongerLongerInnerType extends LongerLongerLongerLongerLongerLo.ngerLongerLongerOtherType,
- > = { a: 1 };
- 
- export type OuterType4<
-   LongerLongerLongerLongerInnerType extends
-     | LongerLongerLongerLongerLongerLo
-     | ngerLongerLongerOtherType,
- > = { a: 1 };
 
-```
-
-**Prettier Similarity**: 70.00%
+**Prettier Similarity**: 100.00%
 
 
 ### typescript/typeparams/long-function-arg.ts

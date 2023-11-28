@@ -38,7 +38,7 @@ declare_rule! {
     /// ```
     ///
     pub(crate) NoImplicitAnyLet {
-        version: "next",
+        version: "1.4.0",
         name: "noImplicitAnyLet",
         recommended: true,
     }
