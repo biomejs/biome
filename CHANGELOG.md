@@ -8,6 +8,46 @@ Read our [guidelines to categorize a change](https://biomejs.dev/internals/versi
 New entries must be placed in a section entitled `Unreleased`.
 Read our [guidelines for writing a good changelog entry](https://github.com/biomejs/biome/blob/main/CONTRIBUTING.md#changelog).
 
+## Unreleased
+
+### Analyzer
+
+### CLI
+
+### Configuration
+
+### Editors
+
+### Formatter
+
+### JavaScript APIs
+
+### Linter
+
+#### New features
+
+#### Enhancement
+
+- Implements [#924](https://github.com/biomejs/biome/issues/924) and [#920](https://github.com/biomejs/biome/issues/920). [noUselessElse](https://biomejs.dev/linter/rules/no-useless-else) now ignores `else` clauses that follow at least one `if` statement that doesn't break early. Contributed by @Conaclos
+
+  For example, the following code is no longer reported by the rule:
+
+  ```js
+  function f(x) {
+      if (x < 0) {
+        // this `if` doesn't break early.
+      } else if (x > 0) {
+          return x;
+      } else {
+          // This `else` block was previously reported as useless.
+      }
+  }
+  ```
+
+#### Bug fixes
+
+### Parser
+
 ## 1.4.0 (2023-11-27)
 
 ### CLI

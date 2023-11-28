@@ -199,7 +199,7 @@ mod test {
                 );
             }
             JsSyntaxKind::JS_REFERENCE_IDENTIFIER => {
-                // Do nothings.
+                // Do nothing.
             }
             x => {
                 panic!("This node cannot be exported! {:?}", x);
