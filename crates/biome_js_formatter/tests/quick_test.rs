@@ -14,13 +14,30 @@ mod language {
 // use this test check if your snippet prints as you wish, without using a snapshot
 fn quick_test() {
     let src = r#"
-type a= {
-    [
-      A in
-      // prettier-ignore
-      B
-    ]: C  |  D
-  }
+    /**
+ * Curried function that ends with a BEM CSS Selector
+ *
+ * @param {String} block - the BEM Block you'd like to select.
+ * @returns {Function}
+ */
+export const bem =
+	(block) =>
+	/**
+	 * @param {String} [element] - the BEM Element within that block; if undefined, selects the block itself.
+	 * @returns {Function}
+	 */
+	(element) =>
+	/**
+	 * @param {?String} [modifier] - the BEM Modifier for the Block or Element; if undefined, selects the Block or Element unmodified.
+	 * @returns {String}
+	 */
+	(modifier) =>
+		[
+			".",
+			css(block),
+			element ? `__${css(element)}` : "",
+			modifier ? `--${css(modifier)}` : "",
+		].join("");
     "#;
     let syntax = JsFileSource::tsx();
     let tree = parse(
@@ -33,29 +50,21 @@ type a= {
         .with_semicolons(Semicolons::Always)
         .with_quote_style(QuoteStyle::Double)
         .with_jsx_quote_style(QuoteStyle::Single)
-        .with_arrow_parentheses(ArrowParentheses::AsNeeded);
-    let result = format_node(options.clone(), &tree.syntax())
-        .unwrap()
-        .print()
-        .unwrap();
+        .with_arrow_parentheses(ArrowParentheses::Always);
 
-    let root = &tree.syntax();
-    let language = language::JsTestFormatLanguage::new(JsFileSource::tsx());
-    let check_reformat =
-        CheckReformat::new(root, result.as_code(), "quick_test", &language, options);
-    check_reformat.check_reformat();
+    let doc = format_node(options.clone(), &tree.syntax()).unwrap();
+    let result = doc.print().unwrap();
+    let source_type = JsFileSource::js_module();
 
+    println!("{}", doc.into_document());
     eprintln!("{}", result.as_code());
-    // I don't know why semicolons are added there, but it's not related to my code changes so ¯\_(ツ)_/¯
-    assert_eq!(
+
+    CheckReformat::new(
+        &tree.syntax(),
         result.as_code(),
-        r#"const fooo: SomeThingWithLongMappedType<{
-  [P in
-    | AAAAAAAAAAAAAAAAA
-    | BBBBBBBBBBBB
-    | CCCCCCCCCCCCCCCCCCCCC
-    | DDDDDDDDDDDDDDDDDDDDDDDDDDDDD]: number;
-}> = {};
-"#
-    );
+        "testing",
+        &language::JsTestFormatLanguage::new(source_type),
+        options,
+    )
+    .check_reformat();
 }
