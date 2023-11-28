@@ -1,7 +1,7 @@
 use crate::parser::CssParser;
 use crate::syntax::parse_error::expected_identifier;
 use crate::syntax::selector::eat_or_recover_selector_function_close_token;
-use crate::syntax::{is_at_identifier, parse_css_string, parse_regular_identifier};
+use crate::syntax::{is_at_identifier, parse_regular_identifier, parse_string};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::ParseSeparatedList;
@@ -89,7 +89,7 @@ fn parse_pseudo_value(p: &mut CssParser) -> ParsedSyntax {
     }
 
     if p.at(CSS_STRING_LITERAL) {
-        parse_css_string(p)
+        parse_string(p)
     } else {
         parse_regular_identifier(p)
     }

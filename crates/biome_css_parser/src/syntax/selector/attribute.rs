@@ -3,7 +3,7 @@ use crate::syntax::parse_error::{
     expected_any_attribute_matcher_name, expected_any_attribute_modifier, expected_identifier,
 };
 use crate::syntax::selector::{is_at_namespace, parse_namespace, selector_lex_context};
-use crate::syntax::{is_at_identifier, parse_css_string, parse_regular_identifier};
+use crate::syntax::{is_at_identifier, parse_regular_identifier, parse_string};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::diagnostic::expected_token;
@@ -103,7 +103,7 @@ fn parse_attribute_matcher_value(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
 
     if p.at(CSS_STRING_LITERAL) {
-        parse_css_string(p).ok();
+        parse_string(p).ok();
     } else {
         parse_regular_identifier(p).ok();
     }

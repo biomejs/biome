@@ -20,6 +20,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssAnyFunction::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_AT_CHARSET_RULE => {
+                    let $pattern = unsafe { $crate::CssAtCharsetRule::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_AT_KEYFRAMES => {
                     let $pattern = unsafe { $crate::CssAtKeyframes::new_unchecked(node) };
                     $body
@@ -297,6 +301,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::CssSyntaxKind::CSS_BOGUS => {
                     let $pattern = unsafe { $crate::CssBogus::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_BOGUS_AT_RULE => {
+                    let $pattern = unsafe { $crate::CssBogusAtRule::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_BOGUS_BODY => {

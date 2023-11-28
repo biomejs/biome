@@ -13,6 +13,22 @@ pub fn css_any_function(css_simple_function: CssSimpleFunction) -> CssAnyFunctio
         [Some(SyntaxElement::Node(css_simple_function.into_syntax()))],
     ))
 }
+pub fn css_at_charset_rule(
+    at_token: SyntaxToken,
+    charset_token: SyntaxToken,
+    encoding: CssString,
+    semicolon_token: SyntaxToken,
+) -> CssAtCharsetRule {
+    CssAtCharsetRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_AT_CHARSET_RULE,
+        [
+            Some(SyntaxElement::Token(at_token)),
+            Some(SyntaxElement::Token(charset_token)),
+            Some(SyntaxElement::Node(encoding.into_syntax())),
+            Some(SyntaxElement::Token(semicolon_token)),
+        ],
+    ))
+}
 pub fn css_at_keyframes(
     at_token: SyntaxToken,
     keyframes_token: SyntaxToken,
@@ -1272,6 +1288,16 @@ where
     I::IntoIter: ExactSizeIterator,
 {
     CssBogus::unwrap_cast(SyntaxNode::new_detached(CssSyntaxKind::CSS_BOGUS, slots))
+}
+pub fn css_bogus_at_rule<I>(slots: I) -> CssBogusAtRule
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssBogusAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_BOGUS_AT_RULE,
+        slots,
+    ))
 }
 pub fn css_bogus_body<I>(slots: I) -> CssBogusBody
 where

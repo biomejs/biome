@@ -72,6 +72,7 @@ impl biome_rowan::SyntaxKind for CssSyntaxKind {
                 | CSS_BOGUS_BODY
                 | CSS_BOGUS_PSEUDO_CLASS
                 | CSS_BOGUS_PSEUDO_ELEMENT
+                | CSS_BOGUS_AT_RULE
         )
     }
 
@@ -82,6 +83,7 @@ impl biome_rowan::SyntaxKind for CssSyntaxKind {
             kind if AnyCssRule::can_cast(*kind) => CSS_BOGUS_RULE,
             kind if AnyCssPseudoClass::can_cast(*kind) => CSS_BOGUS_PSEUDO_CLASS,
             kind if AnyCssPseudoElement::can_cast(*kind) => CSS_BOGUS_PSEUDO_ELEMENT,
+            kind if AnyCssAtRule::can_cast(*kind) => CSS_BOGUS_AT_RULE,
 
             _ => CSS_BOGUS,
         }

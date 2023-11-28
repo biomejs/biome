@@ -338,7 +338,10 @@ where
     if p.eat_with_context(T![')'], context) {
         true
     } else {
-        if let Ok(m) = ParseRecovery::new(CSS_BOGUS, SELECTOR_FUNCTION_RECOVERY_SET).recover(p) {
+        if let Ok(m) = ParseRecovery::new(CSS_BOGUS, SELECTOR_FUNCTION_RECOVERY_SET)
+            .enable_recovery_on_line_break()
+            .recover(p)
+        {
             let diagnostic = error_builder(
                 p,
                 TextRange::new(parameter.range(p).start(), m.range(p).end()),
@@ -362,6 +365,7 @@ where
     let start = p.cur_range().start();
 
     let range = ParseRecovery::new(CSS_BOGUS, SELECTOR_FUNCTION_RECOVERY_SET)
+        .enable_recovery_on_line_break()
         .recover(p)
         .map(|m| m.range(p))
         .unwrap_or_else(|_| p.cur_range());

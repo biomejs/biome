@@ -41,6 +41,7 @@ CssBogusSelector = SyntaxElement*
 CssBogusSubSelector = SyntaxElement*
 CssBogusPseudoClass = SyntaxElement*
 CssBogusPseudoElement = SyntaxElement*
+CssBogusAtRule = SyntaxElement*
 CssBogusBody =  SyntaxElement*
 CssBogusRule =  SyntaxElement*
 
@@ -417,8 +418,15 @@ CssDeclarationImportant =
 ////////////
 AnyCssAtRule =
 	CssAtKeyframes
+	| CssAtCharsetRule
 	| CssAtMedia
+	| CssBogusAtRule
 
+CssAtCharsetRule =
+	'@'
+	'charset'
+	encoding: CssString
+	';'
 
 // @keyframes "something" { from {} to {} }
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

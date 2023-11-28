@@ -218,6 +218,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "nthlastoftype",
         "nthcol",
         "nthlastcol",
+        "charset",
         "ltr",
         "rtl",
         "n",
@@ -322,6 +323,8 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_ATTRIBUTE_NAME",
         "CSS_ATTRIBUTE_MATCHER",
         "CSS_ATTRIBUTE_MATCHER_VALUE",
+        // At rule nodes
+        "CSS_AT_CHARSET_RULE",
         // Bogs nodes
         "CSS_BOGUS",
         "CSS_BOGUS_BODY",
@@ -330,5 +333,6 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_BOGUS_SUB_SELECTOR",
         "CSS_BOGUS_PSEUDO_CLASS",
         "CSS_BOGUS_PSEUDO_ELEMENT",
+        "CSS_BOGUS_AT_RULE",
     ],
 };

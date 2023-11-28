@@ -483,6 +483,7 @@ impl<'src> CssLexer<'src> {
             CRT => self.consume_ctr(),
             COL => self.consume_col(),
             AT_ => self.consume_byte(T![@]),
+            SEM => self.consume_byte(T![;]),
             HAS => self.consume_byte(T![#]),
             PNO => self.consume_byte(T!['(']),
             PNC => self.consume_byte(T![')']),
@@ -764,6 +765,7 @@ impl<'src> CssLexer<'src> {
             b"nth-last-col" => NTHLASTCOL_KW,
             b"ltr" => LTR_KW,
             b"rtl" => RTL_KW,
+            b"charset" => CHARSET_KW,
             _ => IDENT,
         }
     }

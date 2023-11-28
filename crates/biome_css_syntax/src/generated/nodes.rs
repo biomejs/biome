@@ -56,6 +56,57 @@ pub struct CssAnyFunctionFields {
     pub css_simple_function: SyntaxResult<CssSimpleFunction>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssAtCharsetRule {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssAtCharsetRule {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssAtCharsetRuleFields {
+        CssAtCharsetRuleFields {
+            at_token: self.at_token(),
+            charset_token: self.charset_token(),
+            encoding: self.encoding(),
+            semicolon_token: self.semicolon_token(),
+        }
+    }
+    pub fn at_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn charset_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn encoding(&self) -> SyntaxResult<CssString> {
+        support::required_node(&self.syntax, 2usize)
+    }
+    pub fn semicolon_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 3usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssAtCharsetRule {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssAtCharsetRuleFields {
+    pub at_token: SyntaxResult<SyntaxToken>,
+    pub charset_token: SyntaxResult<SyntaxToken>,
+    pub encoding: SyntaxResult<CssString>,
+    pub semicolon_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssAtKeyframes {
     pub(crate) syntax: SyntaxNode,
 }
@@ -2927,10 +2978,18 @@ impl AnyCssAtMediaQueryType {
 #[derive(Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum AnyCssAtRule {
+    CssAtCharsetRule(CssAtCharsetRule),
     CssAtKeyframes(CssAtKeyframes),
     CssAtMedia(CssAtMedia),
+    CssBogusAtRule(CssBogusAtRule),
 }
 impl AnyCssAtRule {
+    pub fn as_css_at_charset_rule(&self) -> Option<&CssAtCharsetRule> {
+        match &self {
+            AnyCssAtRule::CssAtCharsetRule(item) => Some(item),
+            _ => None,
+        }
+    }
     pub fn as_css_at_keyframes(&self) -> Option<&CssAtKeyframes> {
         match &self {
             AnyCssAtRule::CssAtKeyframes(item) => Some(item),
@@ -2940,6 +2999,12 @@ impl AnyCssAtRule {
     pub fn as_css_at_media(&self) -> Option<&CssAtMedia> {
         match &self {
             AnyCssAtRule::CssAtMedia(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_bogus_at_rule(&self) -> Option<&CssBogusAtRule> {
+        match &self {
+            AnyCssAtRule::CssBogusAtRule(item) => Some(item),
             _ => None,
         }
     }
@@ -3432,6 +3497,53 @@ impl From<CssAnyFunction> for SyntaxNode {
 }
 impl From<CssAnyFunction> for SyntaxElement {
     fn from(n: CssAnyFunction) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssAtCharsetRule {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_AT_CHARSET_RULE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_AT_CHARSET_RULE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssAtCharsetRule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssAtCharsetRule")
+            .field("at_token", &support::DebugSyntaxResult(self.at_token()))
+            .field(
+                "charset_token",
+                &support::DebugSyntaxResult(self.charset_token()),
+            )
+            .field("encoding", &support::DebugSyntaxResult(self.encoding()))
+            .field(
+                "semicolon_token",
+                &support::DebugSyntaxResult(self.semicolon_token()),
+            )
+            .finish()
+    }
+}
+impl From<CssAtCharsetRule> for SyntaxNode {
+    fn from(n: CssAtCharsetRule) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssAtCharsetRule> for SyntaxElement {
+    fn from(n: CssAtCharsetRule) -> SyntaxElement {
         n.syntax.into()
     }
 }
@@ -6349,6 +6461,11 @@ impl From<AnyCssAtMediaQueryType> for SyntaxElement {
         node.into()
     }
 }
+impl From<CssAtCharsetRule> for AnyCssAtRule {
+    fn from(node: CssAtCharsetRule) -> AnyCssAtRule {
+        AnyCssAtRule::CssAtCharsetRule(node)
+    }
+}
 impl From<CssAtKeyframes> for AnyCssAtRule {
     fn from(node: CssAtKeyframes) -> AnyCssAtRule {
         AnyCssAtRule::CssAtKeyframes(node)
@@ -6359,46 +6476,67 @@ impl From<CssAtMedia> for AnyCssAtRule {
         AnyCssAtRule::CssAtMedia(node)
     }
 }
+impl From<CssBogusAtRule> for AnyCssAtRule {
+    fn from(node: CssBogusAtRule) -> AnyCssAtRule {
+        AnyCssAtRule::CssBogusAtRule(node)
+    }
+}
 impl AstNode for AnyCssAtRule {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = CssAtKeyframes::KIND_SET.union(CssAtMedia::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> = CssAtCharsetRule::KIND_SET
+        .union(CssAtKeyframes::KIND_SET)
+        .union(CssAtMedia::KIND_SET)
+        .union(CssBogusAtRule::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, CSS_AT_KEYFRAMES | CSS_AT_MEDIA)
+        matches!(
+            kind,
+            CSS_AT_CHARSET_RULE | CSS_AT_KEYFRAMES | CSS_AT_MEDIA | CSS_BOGUS_AT_RULE
+        )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
+            CSS_AT_CHARSET_RULE => AnyCssAtRule::CssAtCharsetRule(CssAtCharsetRule { syntax }),
             CSS_AT_KEYFRAMES => AnyCssAtRule::CssAtKeyframes(CssAtKeyframes { syntax }),
             CSS_AT_MEDIA => AnyCssAtRule::CssAtMedia(CssAtMedia { syntax }),
+            CSS_BOGUS_AT_RULE => AnyCssAtRule::CssBogusAtRule(CssBogusAtRule { syntax }),
             _ => return None,
         };
         Some(res)
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
+            AnyCssAtRule::CssAtCharsetRule(it) => &it.syntax,
             AnyCssAtRule::CssAtKeyframes(it) => &it.syntax,
             AnyCssAtRule::CssAtMedia(it) => &it.syntax,
+            AnyCssAtRule::CssBogusAtRule(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
+            AnyCssAtRule::CssAtCharsetRule(it) => it.syntax,
             AnyCssAtRule::CssAtKeyframes(it) => it.syntax,
             AnyCssAtRule::CssAtMedia(it) => it.syntax,
+            AnyCssAtRule::CssBogusAtRule(it) => it.syntax,
         }
     }
 }
 impl std::fmt::Debug for AnyCssAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            AnyCssAtRule::CssAtCharsetRule(it) => std::fmt::Debug::fmt(it, f),
             AnyCssAtRule::CssAtKeyframes(it) => std::fmt::Debug::fmt(it, f),
             AnyCssAtRule::CssAtMedia(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssAtRule::CssBogusAtRule(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyCssAtRule> for SyntaxNode {
     fn from(n: AnyCssAtRule) -> SyntaxNode {
         match n {
+            AnyCssAtRule::CssAtCharsetRule(it) => it.into(),
             AnyCssAtRule::CssAtKeyframes(it) => it.into(),
             AnyCssAtRule::CssAtMedia(it) => it.into(),
+            AnyCssAtRule::CssBogusAtRule(it) => it.into(),
         }
     }
 }
@@ -7729,6 +7867,11 @@ impl std::fmt::Display for CssAnyFunction {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for CssAtCharsetRule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for CssAtKeyframes {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -8098,6 +8241,63 @@ impl From<CssBogus> for SyntaxNode {
 }
 impl From<CssBogus> for SyntaxElement {
     fn from(n: CssBogus) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssBogusAtRule {
+    syntax: SyntaxNode,
+}
+impl CssBogusAtRule {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn items(&self) -> SyntaxElementChildren {
+        support::elements(&self.syntax)
+    }
+}
+impl AstNode for CssBogusAtRule {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_BOGUS_AT_RULE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_BOGUS_AT_RULE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssBogusAtRule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssBogusAtRule")
+            .field("items", &DebugSyntaxElementChildren(self.items()))
+            .finish()
+    }
+}
+impl From<CssBogusAtRule> for SyntaxNode {
+    fn from(n: CssBogusAtRule) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssBogusAtRule> for SyntaxElement {
+    fn from(n: CssBogusAtRule) -> SyntaxElement {
         n.syntax.into()
     }
 }
