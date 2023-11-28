@@ -69,11 +69,11 @@ impl Format<JsFormatContext> for FormatJsAnyParameterList<'_> {
 
                 if is_compact {
                     let mut joiner = f.join_nodes_with_space();
-                    join_parameter_list(&mut joiner, &self.list, trailing_separator)?;
+                    join_parameter_list(&mut joiner, self.list, trailing_separator)?;
                     joiner.finish()
                 } else {
                     let mut joiner = f.join_nodes_with_soft_line();
-                    join_parameter_list(&mut joiner, &self.list, trailing_separator)?;
+                    join_parameter_list(&mut joiner, self.list, trailing_separator)?;
                     joiner.finish()
                 }
             }

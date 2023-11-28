@@ -101,7 +101,7 @@ impl Format<JsFormatContext> for FormatAnyJsParameters {
                     f,
                     [
                         l_paren_token.format(),
-                        format_dangling_comments(&self.inner_syntax()).with_soft_block_indent(),
+                        format_dangling_comments(self.inner_syntax()).with_soft_block_indent(),
                         r_paren_token.format()
                     ]
                 )
