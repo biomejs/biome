@@ -26,6 +26,7 @@ CssRoot {
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
                     simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
                         ident: CssIdentifier {
                             value_token: IDENT@0..3 "div" [] [],
                         },
@@ -69,6 +70,7 @@ CssRoot {
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
                     simple_selector: CssUniversalSelector {
+                        namespace: missing (optional),
                         star_token: STAR@26..28 "*" [Newline("\n")] [],
                     },
                     sub_selectors: CssSubSelectorList [
@@ -149,6 +151,7 @@ CssRoot {
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
                     simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
                         ident: CssIdentifier {
                             value_token: IDENT@77..82 "div" [Newline("\n"), Newline("\n")] [],
                         },
@@ -184,6 +187,7 @@ CssRoot {
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
                     simple_selector: CssUniversalSelector {
+                        namespace: missing (optional),
                         star_token: STAR@104..105 "*" [] [],
                     },
                     sub_selectors: CssSubSelectorList [
@@ -267,7 +271,8 @@ CssRoot {
         0: CSS_COMPOUND_SELECTOR@0..24
           0: (empty)
           1: CSS_TYPE_SELECTOR@0..3
-            0: CSS_IDENTIFIER@0..3
+            0: (empty)
+            1: CSS_IDENTIFIER@0..3
               0: IDENT@0..3 "div" [] []
           2: CSS_SUB_SELECTOR_LIST@3..24
             0: CSS_CLASS_SELECTOR@3..9
@@ -295,7 +300,8 @@ CssRoot {
         0: CSS_COMPOUND_SELECTOR@26..50
           0: (empty)
           1: CSS_UNIVERSAL_SELECTOR@26..28
-            0: STAR@26..28 "*" [Newline("\n")] []
+            0: (empty)
+            1: STAR@26..28 "*" [Newline("\n")] []
           2: CSS_SUB_SELECTOR_LIST@28..50
             0: CSS_CLASS_SELECTOR@28..34
               0: DOT@28..29 "." [] []
@@ -348,7 +354,8 @@ CssRoot {
         0: CSS_COMPOUND_SELECTOR@77..102
           0: (empty)
           1: CSS_TYPE_SELECTOR@77..82
-            0: CSS_IDENTIFIER@77..82
+            0: (empty)
+            1: CSS_IDENTIFIER@77..82
               0: IDENT@77..82 "div" [Newline("\n"), Newline("\n")] []
           2: CSS_SUB_SELECTOR_LIST@82..102
             0: CSS_CLASS_SELECTOR@82..88
@@ -371,7 +378,8 @@ CssRoot {
         2: CSS_COMPOUND_SELECTOR@104..126
           0: (empty)
           1: CSS_UNIVERSAL_SELECTOR@104..105
-            0: STAR@104..105 "*" [] []
+            0: (empty)
+            1: STAR@104..105 "*" [] []
           2: CSS_SUB_SELECTOR_LIST@105..126
             0: CSS_CLASS_SELECTOR@105..111
               0: DOT@105..106 "." [] []

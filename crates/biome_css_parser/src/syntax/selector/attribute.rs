@@ -1,8 +1,8 @@
 use crate::parser::CssParser;
 use crate::syntax::parse_error::{
-    expect_any_attribute_matcher_name, expect_any_attribute_modifier, expected_identifier,
+    expected_any_attribute_matcher_name, expected_any_attribute_modifier, expected_identifier,
 };
-use crate::syntax::selector::selector_lex_context;
+use crate::syntax::selector::{is_at_namespace, parse_namespace, selector_lex_context};
 use crate::syntax::{is_at_identifier, parse_css_string, parse_regular_identifier};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
@@ -21,7 +21,8 @@ pub(crate) fn parse_attribute_selector(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
 
     p.bump(T!['[']);
-    parse_regular_identifier(p).or_add_diagnostic(p, expected_identifier);
+    // we have diagnostic inside `parse_attribute_name` method
+    parse_attribute_name(p).ok();
 
     // `parse_attribute_matcher` method is invoked with `ok()`,
     // which turns an `Err` into an `Ok` variant, because attribute matcher in a CSS attribute selector
@@ -38,6 +39,23 @@ pub(crate) fn parse_attribute_selector(p: &mut CssParser) -> ParsedSyntax {
     }
 
     Present(m.complete(p, CSS_ATTRIBUTE_SELECTOR))
+}
+
+fn is_at_attribute_name(p: &mut CssParser) -> bool {
+    is_at_identifier(p) || is_at_namespace(p)
+}
+
+#[inline]
+pub(crate) fn parse_attribute_name(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_attribute_name(p) {
+        return Absent;
+    }
+
+    let m = p.start();
+    // we don't need diagnostic here, because namespace is optional
+    parse_namespace(p).ok();
+    parse_regular_identifier(p).or_add_diagnostic(p, expected_identifier);
+    Present(m.complete(p, CSS_ATTRIBUTE_NAME))
 }
 
 const ATTRIBUTE_MATCHER_SET: TokenSet<CssSyntaxKind> =
@@ -57,14 +75,14 @@ fn parse_attribute_matcher(p: &mut CssParser) -> ParsedSyntax {
 
     // bump attribute matcher type
     p.bump_any();
-    parse_attribute_matcher_value(p).or_add_diagnostic(p, expect_any_attribute_matcher_name);
+    parse_attribute_matcher_value(p).or_add_diagnostic(p, expected_any_attribute_matcher_name);
 
     let modifier = p.cur();
     if modifier.is_attribute_modifier_keyword() {
         p.bump(modifier);
     } else if modifier != T![']'] {
         // if we have an invalid modifier, we should add a diagnostic and bump it
-        let diagnostic = expect_any_attribute_modifier(p, p.cur_range());
+        let diagnostic = expected_any_attribute_modifier(p, p.cur_range());
         p.error(diagnostic);
         p.bump_any();
     }

@@ -1,3 +1,5 @@
-::cue(div + div {}
-::cue( {}
-::cue(
+::cure( {}
+::cure() {}
+::cure(.div, .class) {}
+::cure(.div, .class {}
+::cure(.div .class {}

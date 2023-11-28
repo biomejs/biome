@@ -3,7 +3,7 @@ mod selector;
 
 use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
-use crate::syntax::parse_error::expect_block;
+use crate::syntax::parse_error::expected_block;
 use crate::syntax::selector::CssSelectorList;
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
@@ -52,7 +52,7 @@ pub(crate) fn parse_rule(p: &mut CssParser) -> CompletedMarker {
         .or_recover(
             p,
             &ParseRecovery::new(CSS_BOGUS_BODY, BODY_RECOVERY_SET),
-            expect_block,
+            expected_block,
         )
         .is_err()
     {

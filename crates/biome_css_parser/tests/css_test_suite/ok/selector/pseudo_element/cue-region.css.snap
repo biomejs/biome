@@ -24,6 +24,7 @@ CssRoot {
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
                     simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
                         ident: CssIdentifier {
                             value_token: IDENT@0..5 "video" [] [],
                         },
@@ -51,6 +52,7 @@ CssRoot {
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
                     simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
                         ident: CssIdentifier {
                             value_token: IDENT@20..26 "video" [Newline("\n")] [],
                         },
@@ -92,6 +94,7 @@ CssRoot {
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
                     simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
                         ident: CssIdentifier {
                             value_token: IDENT@50..56 "video" [Newline("\n")] [],
                         },
@@ -144,7 +147,8 @@ CssRoot {
         0: CSS_COMPOUND_SELECTOR@0..18
           0: (empty)
           1: CSS_TYPE_SELECTOR@0..5
-            0: CSS_IDENTIFIER@0..5
+            0: (empty)
+            1: CSS_IDENTIFIER@0..5
               0: IDENT@0..5 "video" [] []
           2: CSS_SUB_SELECTOR_LIST@5..18
             0: CSS_PSEUDO_ELEMENT_SELECTOR@5..18
@@ -161,7 +165,8 @@ CssRoot {
         0: CSS_COMPOUND_SELECTOR@20..48
           0: (empty)
           1: CSS_TYPE_SELECTOR@20..26
-            0: CSS_IDENTIFIER@20..26
+            0: (empty)
+            1: CSS_IDENTIFIER@20..26
               0: IDENT@20..26 "video" [Newline("\n")] []
           2: CSS_SUB_SELECTOR_LIST@26..48
             0: CSS_PSEUDO_ELEMENT_SELECTOR@26..48
@@ -188,7 +193,8 @@ CssRoot {
         0: CSS_COMPOUND_SELECTOR@50..84
           0: (empty)
           1: CSS_TYPE_SELECTOR@50..56
-            0: CSS_IDENTIFIER@50..56
+            0: (empty)
+            1: CSS_IDENTIFIER@50..56
               0: IDENT@50..56 "video" [Newline("\n")] []
           2: CSS_SUB_SELECTOR_LIST@56..84
             0: CSS_PSEUDO_ELEMENT_SELECTOR@56..84
