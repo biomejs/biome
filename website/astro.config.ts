@@ -111,7 +111,7 @@ export default defineConfig({
 	integrations: [
 		react(),
 		starlight({
-			title: "",
+			title: "Biome",
 			defaultLocale: "root",
 			locales: {
 				root: {
@@ -197,6 +197,7 @@ export default defineConfig({
 			logo: {
 				light: "./src/assets/svg/biome-logo.svg",
 				dark: "./src/assets/svg/biome-logo.svg",
+				replacesTitle: true,
 			},
 			favicon: "/img/favicon.svg",
 			head: [
