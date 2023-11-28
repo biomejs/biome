@@ -681,3 +681,57 @@ impl Rule for ExampleRule {
     }
 }
 ```
+
+### Semantic Model
+
+The semantic model provides information about the references of a binding (variable) within a program, indicating if it is written (e.g., `const a = 4`), read (e.g., `const b = a`, where `a` is read), or exported.
+
+
+#### Using the Semantic<> in rule
+
+We've a `for` loop and we need to identify the `i` variable usage:
+
+```js
+for (let i = 0; i < array.length; i++) {
+  array[i] = i
+}
+```
+
+To get started we need to create a new rule using the semantic type `type Query = Semantic<JsForStatement>;`
+With that we can now use the `ctx.model()` to get information about bindings present in the for loop.
+
+```rust,ignore
+impl Rule for ForLoopCountReferences {
+    type Query = Semantic<JsForStatement>;
+    type State = ();
+    type Signals = Option<Self::State>;
+    type Options = ();
+
+    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        let node = ctx.query();
+
+        // The model holds all informations about the semantic, like scopes and declarations
+        let model = ctx.model();
+
+        // Here we are extracting the `let i = 0;` declaration in for loop
+        let initializer = node.initializer()?;
+        let declarators = initializer.as_js_variable_declaration()?.declarators();
+        let initializer = declarators.first()?.ok()?;
+        let initializer_id = initializer.id().ok()?;
+
+        // Now we have the binding of this declaration
+        let binding = initializer_id
+            .as_any_js_binding()?
+            .as_js_identifier_binding()?;
+
+        // How many times this variable appers in the code
+        let count = binding.all_references(model).count();
+
+        // Get all read references
+        let readonly_references = binding.all_reads(model);
+
+        // Get all write references
+        let write_references = binding.all_writes(model);
+    }
+}
+```

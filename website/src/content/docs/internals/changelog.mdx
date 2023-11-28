@@ -233,6 +233,12 @@ The following rules are now deprecated:
 - Fix [#609](https://github.com/biomejs/biome/issues/609) `useExhaustiveDependencies`, by removing `useContext`, `useId` and `useSyncExternalStore` from the known hooks. Contributed by @msdlisper
 - Fix `useExhaustiveDependencies`, by removing `useContext`, `useId` and `useSyncExternalStore` from the known hooks. Contributed by @msdlisper
 
+#### New features
+
+- Add [useForOf](https://biomejs.dev/linter/rules/use-for-of) rule.
+  The rule recommends a for-of loop when the loop index is only used to read from an array that is being iterated.
+  Contributed by @victor-teles
+
 ### Parser
 
 #### Enhancements
