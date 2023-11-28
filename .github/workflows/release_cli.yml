@@ -246,8 +246,12 @@ jobs:
     continue-on-error: true
     steps:
       - name: Bump Homebrew formula
-        uses: dawidd6/action-homebrew-bump-formula@v3
-        with:
-          org: biomejs
-          token: ${{ secrets.HOMEBREW_BUMP_PR_TOKEN }}
-          formula: biome
+        run: >
+          brew bump-formula-pr 
+            --no-audit 
+            --no-browse 
+            --version "${{ needs.build.outputs.version }}" 
+            --fork-org ${{ github.repository_owner }}  
+            biome
+        env:
+          HOMEBREW_GITHUB_API_TOKEN: ${{ secrets.HOMEBREW_BUMP_PR_TOKEN }}
