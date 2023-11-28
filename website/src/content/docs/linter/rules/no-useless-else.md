@@ -2,10 +2,10 @@
 title: noUselessElse (since v1.3.0)
 ---
 
-**Diagnostic Category: `lint/nursery/noUselessElse`**
+**Diagnostic Category: `lint/style/noUselessElse`**
 
-:::caution
-This rule is part of the [nursery](/linter/rules/#nursery) group.
+:::note
+This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
 Disallow `else` block when the `if` block breaks early.
@@ -28,7 +28,7 @@ while (x > 0) {
 }
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noUselessElse.js:4:7 <a href="https://biomejs.dev/linter/rules/no-useless-else">lint/nursery/noUselessElse</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/noUselessElse.js:4:7 <a href="https://biomejs.dev/linter/rules/no-useless-else">lint/style/noUselessElse</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This </span><span style="color: Tomato;"><strong>else</strong></span><span style="color: Tomato;"> clause can be omitted.</span>
   
@@ -78,7 +78,7 @@ function f() {
 }
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noUselessElse.js:4:7 <a href="https://biomejs.dev/linter/rules/no-useless-else">lint/nursery/noUselessElse</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/noUselessElse.js:4:7 <a href="https://biomejs.dev/linter/rules/no-useless-else">lint/style/noUselessElse</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This </span><span style="color: Tomato;"><strong>else</strong></span><span style="color: Tomato;"> clause can be omitted.</span>
   
@@ -128,7 +128,7 @@ function f() {
 }
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noUselessElse.js:4:7 <a href="https://biomejs.dev/linter/rules/no-useless-else">lint/nursery/noUselessElse</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/noUselessElse.js:4:7 <a href="https://biomejs.dev/linter/rules/no-useless-else">lint/style/noUselessElse</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This </span><span style="color: Tomato;"><strong>else</strong></span><span style="color: Tomato;"> clause can be omitted.</span>
   

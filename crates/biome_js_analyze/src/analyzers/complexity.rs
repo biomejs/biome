@@ -16,6 +16,7 @@ pub(crate) mod no_useless_switch_case;
 pub(crate) mod no_useless_type_constraint;
 pub(crate) mod no_void;
 pub(crate) mod no_with;
+pub(crate) mod use_arrow_function;
 pub(crate) mod use_flat_map;
 pub(crate) mod use_literal_keys;
 pub(crate) mod use_optional_chain;
@@ -40,6 +41,7 @@ declare_group! {
             self :: no_useless_type_constraint :: NoUselessTypeConstraint ,
             self :: no_void :: NoVoid ,
             self :: no_with :: NoWith ,
+            self :: use_arrow_function :: UseArrowFunction ,
             self :: use_flat_map :: UseFlatMap ,
             self :: use_literal_keys :: UseLiteralKeys ,
             self :: use_optional_chain :: UseOptionalChain ,

@@ -98,6 +98,10 @@ Shows the Biome version information and quit
   How the log should look like.
    
   [default: pretty]
+- **`    --diagnostic-level`**=_`<info|warn|error>`_ &mdash; 
+  The level of diagnostics to show. In order, from the lowest to the most important: info, warn, error. Passing `--diagnostic-level=error` will cause Biome to print only diagnostics that contain only errors.
+   
+  [default: info]
 
 
 
@@ -141,6 +145,10 @@ Prints information for debugging
   How the log should look like.
    
   [default: pretty]
+- **`    --diagnostic-level`**=_`<info|warn|error>`_ &mdash; 
+  The level of diagnostics to show. In order, from the lowest to the most important: info, warn, error. Passing `--diagnostic-level=error` will cause Biome to print only diagnostics that contain only errors.
+   
+  [default: info]
 
 
 
@@ -155,9 +163,13 @@ Prints information for debugging
 
 Start the Biome daemon server process
 
-**Usage**: **`biome`** **`start`** 
+**Usage**: **`biome`** **`start`** \[**`--config-path`**=_`PATH`_\]
 
 **Available options:**
+- **`    --config-path`**=_`PATH`_ &mdash; 
+  Allows to set a custom path when discovering the configuration file `biome.json`
+   
+  Uses environment variable **`BIOME_CONFIG_PATH`**
 - **`-h`**, **`--help`** &mdash; 
   Prints help information
 
@@ -200,6 +212,8 @@ Runs formatter, linter and import sorting to the requested files.
   The size of the indentation, 2 by default (deprecated, use `indent-width`)
 - **`    --indent-width`**=_`NUMBER`_ &mdash; 
   The size of the indentation, 2 by default
+- **`    --line-ending`**=_`<lf|crlf|cr>`_ &mdash; 
+  The type of line ending.
 - **`    --line-width`**=_`NUMBER`_ &mdash; 
   What's the max width of a line. Defaults to 80.
 - **`    --quote-style`**=_`<double|single>`_ &mdash; 
@@ -214,6 +228,10 @@ Runs formatter, linter and import sorting to the requested files.
   Whether the formatter prints semicolons for all statements or only in for statements where it is necessary because of ASI.
 - **`    --arrow-parentheses`**=_`<always|as-needed>`_ &mdash; 
   Whether to add non-necessary parentheses to arrow functions. Defaults to "always".
+- **`    --bracket-spacing`**=_`<true|false>`_ &mdash; 
+  Whether to insert spaces around brackets in object literals. Defaults to true.
+- **`    --bracket-same-line`**=_`<true|false>`_ &mdash; 
+  Whether to hug the closing bracket of multiline HTML/JSX tags to the end of the last line, rather than being alone on the following line. Defaults to false.
 - **`    --javascript-formatter-enabled`**=_`<true|false>`_ &mdash; 
   Control the formatter for JavaScript (and its super languages) files.
 - **`    --javascript-formatter-indent-style`**=_`<tab|space>`_ &mdash; 
@@ -222,8 +240,10 @@ Runs formatter, linter and import sorting to the requested files.
   The size of the indentation applied to JavaScript (and its super languages) files. Default to 2.
 - **`    --javascript-formatter-indent-width`**=_`NUMBER`_ &mdash; 
   The size of the indentation applied to JavaScript (and its super languages) files. Default to 2.
+- **`    --javascript-formatter-line-ending`**=_`<lf|crlf|cr>`_ &mdash; 
+  The type of line ending applied to JavaScript (and its super languages) files.
 - **`    --javascript-formatter-line-width`**=_`NUMBER`_ &mdash; 
-  What's the max width of a line, applied to JavaScript (and its super languages) files. Defaults to 80.
+  What's the max width of a line applied to JavaScript (and its super languages) files. Defaults to 80.
 - **`    --json-formatter-enabled`**=_`<true|false>`_ &mdash; 
   Control the formatter for JSON (and its super languages) files.
 - **`    --json-formatter-indent-style`**=_`<tab|space>`_ &mdash; 
@@ -232,8 +252,10 @@ Runs formatter, linter and import sorting to the requested files.
   The size of the indentation applied to JSON (and its super languages) files. Default to 2.
 - **`    --json-formatter-indent-size`**=_`NUMBER`_ &mdash; 
   The size of the indentation applied to JSON (and its super languages) files. Default to 2.
+- **`    --json-formatter-line-ending`**=_`<lf|crlf|cr>`_ &mdash; 
+  The type of line ending applied to JSON (and its super languages) files.
 - **`    --json-formatter-line-width`**=_`NUMBER`_ &mdash; 
-  What's the max width of a line, applied to JSON (and its super languages) files. Defaults to 80.
+  What's the max width of a line applied to JSON (and its super languages) files. Defaults to 80.
 
 
 
@@ -266,6 +288,10 @@ Runs formatter, linter and import sorting to the requested files.
   How the log should look like.
    
   [default: pretty]
+- **`    --diagnostic-level`**=_`<info|warn|error>`_ &mdash; 
+  The level of diagnostics to show. In order, from the lowest to the most important: info, warn, error. Passing `--diagnostic-level=error` will cause Biome to print only diagnostics that contain only errors.
+   
+  [default: info]
 
 
 
@@ -353,6 +379,10 @@ Run various checks on a set of files.
   How the log should look like.
    
   [default: pretty]
+- **`    --diagnostic-level`**=_`<info|warn|error>`_ &mdash; 
+  The level of diagnostics to show. In order, from the lowest to the most important: info, warn, error. Passing `--diagnostic-level=error` will cause Biome to print only diagnostics that contain only errors.
+   
+  [default: info]
 
 
 
@@ -390,6 +420,8 @@ Run the formatter on a set of files.
   The size of the indentation, 2 by default (deprecated, use `indent-width`)
 - **`    --indent-width`**=_`NUMBER`_ &mdash; 
   The size of the indentation, 2 by default
+- **`    --line-ending`**=_`<lf|crlf|cr>`_ &mdash; 
+  The type of line ending.
 - **`    --line-width`**=_`NUMBER`_ &mdash; 
   What's the max width of a line. Defaults to 80.
 
@@ -408,6 +440,10 @@ Run the formatter on a set of files.
   Whether the formatter prints semicolons for all statements or only in for statements where it is necessary because of ASI.
 - **`    --arrow-parentheses`**=_`<always|as-needed>`_ &mdash; 
   Whether to add non-necessary parentheses to arrow functions. Defaults to "always".
+- **`    --bracket-spacing`**=_`<true|false>`_ &mdash; 
+  Whether to insert spaces around brackets in object literals. Defaults to true.
+- **`    --bracket-same-line`**=_`<true|false>`_ &mdash; 
+  Whether to hug the closing bracket of multiline HTML/JSX tags to the end of the last line, rather than being alone on the following line. Defaults to false.
 - **`    --javascript-formatter-enabled`**=_`<true|false>`_ &mdash; 
   Control the formatter for JavaScript (and its super languages) files.
 - **`    --javascript-formatter-indent-style`**=_`<tab|space>`_ &mdash; 
@@ -416,8 +452,10 @@ Run the formatter on a set of files.
   The size of the indentation applied to JavaScript (and its super languages) files. Default to 2.
 - **`    --javascript-formatter-indent-width`**=_`NUMBER`_ &mdash; 
   The size of the indentation applied to JavaScript (and its super languages) files. Default to 2.
+- **`    --javascript-formatter-line-ending`**=_`<lf|crlf|cr>`_ &mdash; 
+  The type of line ending applied to JavaScript (and its super languages) files.
 - **`    --javascript-formatter-line-width`**=_`NUMBER`_ &mdash; 
-  What's the max width of a line, applied to JavaScript (and its super languages) files. Defaults to 80.
+  What's the max width of a line applied to JavaScript (and its super languages) files. Defaults to 80.
 
 
 
@@ -472,6 +510,10 @@ Run the formatter on a set of files.
   How the log should look like.
    
   [default: pretty]
+- **`    --diagnostic-level`**=_`<info|warn|error>`_ &mdash; 
+  The level of diagnostics to show. In order, from the lowest to the most important: info, warn, error. Passing `--diagnostic-level=error` will cause Biome to print only diagnostics that contain only errors.
+   
+  [default: info]
 
 
 
@@ -490,8 +532,10 @@ Run the formatter on a set of files.
   The size of the indentation applied to JSON (and its super languages) files. Default to 2.
 - **`    --json-formatter-indent-size`**=_`NUMBER`_ &mdash; 
   The size of the indentation applied to JSON (and its super languages) files. Default to 2.
+- **`    --json-formatter-line-ending`**=_`<lf|crlf|cr>`_ &mdash; 
+  The type of line ending applied to JSON (and its super languages) files.
 - **`    --json-formatter-line-width`**=_`NUMBER`_ &mdash; 
-  What's the max width of a line, applied to JSON (and its super languages) files. Defaults to 80.
+  What's the max width of a line applied to JSON (and its super languages) files. Defaults to 80.
 - **`    --stdin-file-path`**=_`PATH`_ &mdash; 
   Use this option when you want to format code piped from `stdin`, and print the output to `stdout`.
 
@@ -533,6 +577,8 @@ Files won't be modified, the command is a read-only operation.
   The size of the indentation, 2 by default (deprecated, use `indent-width`)
 - **`    --indent-width`**=_`NUMBER`_ &mdash; 
   The size of the indentation, 2 by default
+- **`    --line-ending`**=_`<lf|crlf|cr>`_ &mdash; 
+  The type of line ending.
 - **`    --line-width`**=_`NUMBER`_ &mdash; 
   What's the max width of a line. Defaults to 80.
 - **`    --quote-style`**=_`<double|single>`_ &mdash; 
@@ -547,6 +593,10 @@ Files won't be modified, the command is a read-only operation.
   Whether the formatter prints semicolons for all statements or only in for statements where it is necessary because of ASI.
 - **`    --arrow-parentheses`**=_`<always|as-needed>`_ &mdash; 
   Whether to add non-necessary parentheses to arrow functions. Defaults to "always".
+- **`    --bracket-spacing`**=_`<true|false>`_ &mdash; 
+  Whether to insert spaces around brackets in object literals. Defaults to true.
+- **`    --bracket-same-line`**=_`<true|false>`_ &mdash; 
+  Whether to hug the closing bracket of multiline HTML/JSX tags to the end of the last line, rather than being alone on the following line. Defaults to false.
 - **`    --javascript-formatter-enabled`**=_`<true|false>`_ &mdash; 
   Control the formatter for JavaScript (and its super languages) files.
 - **`    --javascript-formatter-indent-style`**=_`<tab|space>`_ &mdash; 
@@ -555,8 +605,10 @@ Files won't be modified, the command is a read-only operation.
   The size of the indentation applied to JavaScript (and its super languages) files. Default to 2.
 - **`    --javascript-formatter-indent-width`**=_`NUMBER`_ &mdash; 
   The size of the indentation applied to JavaScript (and its super languages) files. Default to 2.
+- **`    --javascript-formatter-line-ending`**=_`<lf|crlf|cr>`_ &mdash; 
+  The type of line ending applied to JavaScript (and its super languages) files.
 - **`    --javascript-formatter-line-width`**=_`NUMBER`_ &mdash; 
-  What's the max width of a line, applied to JavaScript (and its super languages) files. Defaults to 80.
+  What's the max width of a line applied to JavaScript (and its super languages) files. Defaults to 80.
 - **`    --json-formatter-enabled`**=_`<true|false>`_ &mdash; 
   Control the formatter for JSON (and its super languages) files.
 - **`    --json-formatter-indent-style`**=_`<tab|space>`_ &mdash; 
@@ -565,8 +617,10 @@ Files won't be modified, the command is a read-only operation.
   The size of the indentation applied to JSON (and its super languages) files. Default to 2.
 - **`    --json-formatter-indent-size`**=_`NUMBER`_ &mdash; 
   The size of the indentation applied to JSON (and its super languages) files. Default to 2.
+- **`    --json-formatter-line-ending`**=_`<lf|crlf|cr>`_ &mdash; 
+  The type of line ending applied to JSON (and its super languages) files.
 - **`    --json-formatter-line-width`**=_`NUMBER`_ &mdash; 
-  What's the max width of a line, applied to JSON (and its super languages) files. Defaults to 80.
+  What's the max width of a line applied to JSON (and its super languages) files. Defaults to 80.
 
 
 
@@ -599,6 +653,10 @@ Files won't be modified, the command is a read-only operation.
   How the log should look like.
    
   [default: pretty]
+- **`    --diagnostic-level`**=_`<info|warn|error>`_ &mdash; 
+  The level of diagnostics to show. In order, from the lowest to the most important: info, warn, error. Passing `--diagnostic-level=error` will cause Biome to print only diagnostics that contain only errors.
+   
+  [default: info]
 
 
 
@@ -634,41 +692,13 @@ Bootstraps a new biome project. Creates a configuration file with some defaults.
 
 Acts as a server for the Language Server Protocol over stdin/stdout
 
-**Usage**: **`biome`** **`lsp-proxy`** 
-
-**Global options applied to all commands**
-- **`    --colors`**=_`<off|force>`_ &mdash; 
-  Set the formatting mode for markup: "off" prints everything as plain text, "force" forces the formatting of markup using ANSI even if the console output is determined to be incompatible
-- **`    --use-server`** &mdash; 
-  Connect to a running instance of the Biome daemon server.
-- **`    --verbose`** &mdash; 
-  Print additional verbose advices on diagnostics
-- **`    --config-path`**=_`PATH`_ &mdash; 
-  Set the filesystem path to the directory of the biome.json configuration file
-- **`    --max-diagnostics`**=_`NUMBER`_ &mdash; 
-  Cap the amount of diagnostics displayed.
-   
-  [default: 20]
-- **`    --skip-errors`** &mdash; 
-  Skip over files containing syntax errors instead of emitting an error diagnostic.
-- **`    --no-errors-on-unmatched`** &mdash; 
-  Silence errors that would be emitted in case no files were processed during the execution of the command.
-- **`    --error-on-warnings`** &mdash; 
-  Tell Biome to exit with an error code if some diagnostics emit warnings.
-- **`    --log-level`**=_`<none|debug|info|warn|error>`_ &mdash; 
-  The level of logging. In order, from the most verbose to the least verbose: debug, info, warn, error.
-
-  The value `none` won't show any logging.
-   
-  [default: none]
-- **`    --log-kind`**=_`<pretty|compact|json>`_ &mdash; 
-  How the log should look like.
-   
-  [default: pretty]
-
-
+**Usage**: **`biome`** **`lsp-proxy`** \[**`--config-path`**=_`PATH`_\]
 
 **Available options:**
+- **`    --config-path`**=_`PATH`_ &mdash; 
+  Allows to set a custom path when discovering the configuration file `biome.json`
+   
+  Uses environment variable **`BIOME_CONFIG_PATH`**
 - **`-h`**, **`--help`** &mdash; 
   Prints help information
 
@@ -708,6 +738,10 @@ It updates the configuration when there are breaking changes
   How the log should look like.
    
   [default: pretty]
+- **`    --diagnostic-level`**=_`<info|warn|error>`_ &mdash; 
+  The level of diagnostics to show. In order, from the lowest to the most important: info, warn, error. Passing `--diagnostic-level=error` will cause Biome to print only diagnostics that contain only errors.
+   
+  [default: info]
 
 
 

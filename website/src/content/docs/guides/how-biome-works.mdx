@@ -3,7 +3,6 @@ title: How Biome works
 description: Learn how to set up a new project with Biome.
 ---
 import DefaultConfiguration from "@src/components/generated/DefaultConfiguration.mdx";
-import CodeBlockHeader from "@src/components/CodeBlockHeader.astro";
 
 
 ## Configuration
@@ -16,9 +15,7 @@ directory is usually the directory containing your project's `package.json`.
 
 This configuration file enables the formatter and sets the preferred indent style and width. The linter is disabled:
 
-<CodeBlockHeader filename="biome.json" />
-
-```json
+```json title="biome.json"
 {
   "formatter": {
     "enabled": true,

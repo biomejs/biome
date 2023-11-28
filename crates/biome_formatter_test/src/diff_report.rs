@@ -148,6 +148,7 @@ impl DiffReport {
             // Experimental syntax: `import module`
             "js/import-reflection/",
             // Embedded languages in template literals
+            "js/comments-closure-typecast/styled-components.js",
             "js/multiparser-comments/",
             "js/multiparser-css/",
             "js/multiparser-graphql/",
@@ -245,7 +246,6 @@ impl DiffReport {
             "js/binary-expressions/inline-jsx.js",
             "js/binary-expressions/jsx_parent.js",
             "js/call/first-argument-expansion/jsx.js",
-            "js/comments-closure-typecast/styled-components.js",
             "js/comments/html-like/",
             "js/comments/jsx.js",
             "js/comments/return-statement.js",

@@ -99,6 +99,15 @@ impl Rule for NoSvgWithoutTitle {
             return None;
         }
 
+        if let Some(aria_hidden_attr) = node.find_attribute_by_name("aria-hidden") {
+            if let Some(attr_static_val) = aria_hidden_attr.as_static_value() {
+                let attr_text = attr_static_val.text();
+                if attr_text == "true" {
+                    return None;
+                }
+            }
+        }
+
         // Checks if a `svg` element has a valid `title` element is in a childlist
         let jsx_element = node.parent::<JsxElement>()?;
         if let AnyJsxElement::JsxOpeningElement(_) = node {

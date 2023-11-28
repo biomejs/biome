@@ -175,10 +175,6 @@ a.tag {
 		@include mobile-only {
 			border-radius: 0;
 		}
-
-		@media only screen and (min-width: 840px) {
-			height: 400px;
-		}
 	}
 
 	figcaption {

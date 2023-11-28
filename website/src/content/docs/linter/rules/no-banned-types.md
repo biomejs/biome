@@ -152,9 +152,6 @@ let foo: string = "bar";
 let tuple: [boolean, string] = [false, "foo"];
 ```
 
-```
-```
-
 ## Related links
 
 - [Disable a rule](/linter/#disable-a-lint-rule)
