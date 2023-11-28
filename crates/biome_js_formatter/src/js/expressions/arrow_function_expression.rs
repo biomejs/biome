@@ -229,7 +229,8 @@ fn format_signature(
 
             match arrow.parameters()? {
                 AnyJsArrowFunctionParameters::AnyJsBinding(binding) => {
-                    let should_hug = is_test_call_argument(arrow.syntax())?;
+                    let should_hug =
+                        is_test_call_argument(arrow.syntax())? || is_first_or_last_call_argument;
 
                     let parentheses_not_needed = can_avoid_parentheses(arrow, f);
 
@@ -277,7 +278,7 @@ fn format_signature(
             write!(
                 recording,
                 [group(&format_args![
-                    (!is_first_in_chain).then_some(space()),
+                    maybe_space(!is_first_in_chain),
                     formatted_async_token,
                     group(&formatted_parameters),
                     group(&arrow.return_type_annotation().format())
@@ -536,20 +537,45 @@ impl Format<JsFormatContext> for ArrowChain {
                 write!(f, [soft_line_break()])?;
             }
 
-            let join_signatures = format_with(|f| {
+            let is_grouped_call_arg_layout = self.options.call_arg_layout.is_some();
+
+            let join_signatures = format_with(|f: &mut JsFormatter| {
                 let mut is_first_in_chain = true;
                 for arrow in self.arrows() {
+                    if f.context().comments().has_leading_comments(arrow.syntax()) {
+                        // A grouped layout implies that the arrow chain is trying to be rendered
+                        // in a condensend, single-line format (at least the signatures, not
+                        // necessarily the body). In that case, we _need_ to prevent the leading
+                        // comments from inserting line breaks. But if it's _not_ a grouped layout,
+                        // then we want to _force_ the line break so that the leading comments
+                        // don't inadvertently end up on the previous line after the fat arrow.
+                        if is_grouped_call_arg_layout {
+                            write!(
+                                f,
+                                [
+                                    maybe_space(!is_first_in_chain),
+                                    format_leading_comments(arrow.syntax())
+                                ]
+                            )?;
+                        } else {
+                            write!(
+                                f,
+                                [
+                                    (!is_first_in_chain).then_some(soft_line_break_or_space()),
+                                    format_leading_comments(arrow.syntax())
+                                ]
+                            )?;
+                        }
+                    }
+
                     write!(
                         f,
-                        [
-                            format_leading_comments(arrow.syntax()),
-                            format_signature(
-                                arrow,
-                                self.options.call_arg_layout.is_some(),
-                                ancestor_call_expr_or_logical_expr,
-                                is_first_in_chain,
-                            )
-                        ]
+                        [format_signature(
+                            arrow,
+                            is_grouped_call_arg_layout,
+                            ancestor_call_expr_or_logical_expr,
+                            is_first_in_chain,
+                        )]
                     )?;
 
                     is_first_in_chain = false;
