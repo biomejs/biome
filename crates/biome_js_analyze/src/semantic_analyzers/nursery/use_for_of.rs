@@ -12,7 +12,7 @@ use biome_rowan::{declare_node_union, AstNode, AstSeparatedList};
 use crate::{semantic_services::Semantic, utils::is_node_equal};
 
 declare_rule! {
-    /// This rule recommends a for-of loop when the loop index is only used to read from an array that is being iterated.
+    /// This rule recommends a `for-of` loop when in a `for` loop, the index used to extract an item from the iterated array.
     ///
     ///
     /// Source: https://typescript-eslint.io/rules/prefer-for-of/
@@ -48,7 +48,7 @@ declare_rule! {
     /// ```
     ///
     pub(crate) UseForOf {
-        version: "1.4.0",
+        version: "next",
         name: "useForOf",
         recommended: false,
     }
@@ -155,13 +155,14 @@ fn get_initializer_references(
         .collect()
 }
 
-/// Ensure the `for` declaration is correctly initialized
+/// Validates a for loop variable declarations.
 ///
-/// ## Valid example
-/// for (let i = 0; i < array.length; i++)
+/// The initializer must be declared with 0 and can't have multiple initializers.
 ///
-/// ## Invalid examples
-/// for (let i = 0, x = 1; i < array.length; i++)
+/// # Returns
+///
+/// - `Some(true)` if the initializer is valid.
+/// - `None` if the initializer is invalid (multiple initializers or not initialized with 0).
 ///
 fn is_initializer_valid(initializer: &AnyJsForInitializer) -> Option<bool> {
     let initializer_declarations = initializer.as_js_variable_declaration()?.declarators();
@@ -174,13 +175,15 @@ fn is_initializer_valid(initializer: &AnyJsForInitializer) -> Option<bool> {
     Some(true)
 }
 
-/// Ensure the `for` test is correctly initialized
+/// Validates a for loop test expression.
 ///
-/// ## Valid example
-/// for (let i = 0; i < array.length; i++)
+/// The test expression must be declared using less than length of array (eg: i < array.length)
+/// and reference to same variable declared in for initializer
 ///
-/// ## Invalid examples
-/// for (let i = 0; NOTI < array.length; i++)
+/// # Returns
+///
+/// - `Some(true)` if the test expression is valid.
+/// - `None` if the test expression is invalid (not using less than length or not the same variable name as the initializer).
 ///
 fn is_test_valid(
     initializer_binding: &JsIdentifierBinding,
@@ -208,21 +211,20 @@ fn is_test_valid(
     Some(true)
 }
 
-/// Ensure the `for` update is correctly initialized
+/// Validates a for loop update/final expression.
 ///
-/// ## Valid example
-/// for (let i = 0; i < array.length; i++)
+/// The update/final must increment the variable by 1 and reference to same variable declared in for initializer
 ///
-/// ## Invalid examples
-/// for (let i = 0; i < array.length; i--)
+/// # Returns
 ///
-/// for (let i = 0; i < array.length; NOTI++)
+/// - `Some(true)` if the  update/final expression is valid.
+/// - `None` if the  update/final expression is invalid (not a increment or not the same variable name as the initializer).
 ///
 fn is_update_valid(
     initializer_binding: &JsIdentifierBinding,
     update: AnyJsExpression,
 ) -> Option<bool> {
-    let incrementable_like = get_incrementable_like(update)?;
+    let incrementable_like = AnyIncrementableLike::try_from(update).ok()?;
 
     if initializer_binding.name_token().ok()?.text_trimmed()
         != incrementable_like.get_name_token()?.text_trimmed()
@@ -294,18 +296,22 @@ fn is_zero_initialized(variable_declarator: &JsVariableDeclarator) -> Option<boo
     Some(value == "0")
 }
 
-fn get_incrementable_like(node: AnyJsExpression) -> Option<AnyIncrementableLike> {
-    match node {
-        AnyJsExpression::JsAssignmentExpression(expression) => {
-            Some(AnyIncrementableLike::JsAssignmentExpression(expression))
+impl TryFrom<AnyJsExpression> for AnyIncrementableLike {
+    type Error = ();
+
+    fn try_from(value: AnyJsExpression) -> Result<Self, Self::Error> {
+        match value {
+            AnyJsExpression::JsAssignmentExpression(expression) => {
+                Ok(AnyIncrementableLike::JsAssignmentExpression(expression))
+            }
+            AnyJsExpression::JsPostUpdateExpression(expression) => {
+                Ok(AnyIncrementableLike::JsPostUpdateExpression(expression))
+            }
+            AnyJsExpression::JsPreUpdateExpression(expression) => {
+                Ok(AnyIncrementableLike::JsPreUpdateExpression(expression))
+            }
+            _ => Err(()),
         }
-        AnyJsExpression::JsPostUpdateExpression(expression) => {
-            Some(AnyIncrementableLike::JsPostUpdateExpression(expression))
-        }
-        AnyJsExpression::JsPreUpdateExpression(expression) => {
-            Some(AnyIncrementableLike::JsPreUpdateExpression(expression))
-        }
-        _ => None,
     }
 }
 

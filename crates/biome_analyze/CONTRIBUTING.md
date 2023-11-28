@@ -687,7 +687,7 @@ impl Rule for ExampleRule {
 The semantic model provides information about the references of a binding (variable) within a program, indicating if it is written (e.g., `const a = 4`), read (e.g., `const b = a`, where `a` is read), or exported.
 
 
-#### Using the Semantic<> in rule
+#### How to use the query `Semantic<>` in a lint rule
 
 We've a `for` loop and we need to identify the `i` variable usage:
 
@@ -698,7 +698,7 @@ for (let i = 0; i < array.length; i++) {
 ```
 
 To get started we need to create a new rule using the semantic type `type Query = Semantic<JsForStatement>;`
-With that we can now use the `ctx.model()` to get information about bindings present in the for loop.
+We can now use the `ctx.model()` to get information about bindings in the for loop.
 
 ```rust,ignore
 impl Rule for ForLoopCountReferences {
