@@ -1,11 +1,29 @@
 .sponsors {
 	display: flex;
 	flex-wrap: wrap;
-	.sponsors-row {
+	justify-content: space-between;
+
+	.sponsors-gold {
 		flex-grow: 1;
 		width: 33%;
 		img {
-			height: 120px;
+				height: 120px;
+		}
+	}
+
+	.sponsors-silver {
+		flex-grow: 1;
+		width: 33%;
+		img {
+				height: 100px;
+		}
+	}
+
+	.sponsors-bronze {
+		flex-grow: 1;
+		width: 33%;
+		img {
+				height: 80px;
 		}
 	}
 }
