@@ -33,7 +33,7 @@ pub(crate) fn parse_pseudo_class_function_compound_selector(p: &mut CssParser) -
         Present(selector) => {
             if eat_or_recover_selector_function_close_token(p, selector, expected_compound_selector)
             {
-                CSS_PSEUDO_CLASS_FUNCTION_SELECTOR
+                CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR
             } else {
                 CSS_BOGUS_PSEUDO_CLASS
             }
