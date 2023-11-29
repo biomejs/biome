@@ -1,9 +1,11 @@
 use crate::aria_services::Aria;
+use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, Rule, RuleDiagnostic};
+use biome_analyze::{declare_rule, ActionCategory, Rule, RuleDiagnostic, FixKind};
 use biome_console::markup;
+use biome_diagnostics::Applicability;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
-use biome_rowan::{AstNode, TextRange};
+use biome_rowan::{AstNode, BatchMutationExt, TextRange};
 
 declare_rule! {
     /// Enforce that interactive ARIA roles are not assigned to non-interactive HTML elements.
@@ -47,6 +49,7 @@ declare_rule! {
         version: "1.0.0",
         name: "noNoninteractiveElementToInteractiveRole",
         recommended: true,
+        fix_kind: FixKind::Unsafe,
     }
 }
 
@@ -102,5 +105,19 @@ impl Rule for NoNoninteractiveElementToInteractiveRole {
                 "Replace "<Emphasis>{{&state.element_name}}</Emphasis>" with a div or a span."
             }
         ))
+    }
+
+    fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<JsRuleAction> {
+        let node = ctx.query();
+        let role_attribute = node.find_attribute_by_name("role")?;
+
+        let mut mutation = ctx.root().begin();
+        mutation.remove_node(role_attribute);
+        Some(JsRuleAction {
+            category: ActionCategory::QuickFix,
+            applicability: Applicability::MaybeIncorrect,
+            message: markup! { "Remove the "<Emphasis>"role"</Emphasis>" attribute." }.to_owned(),
+            mutation,
+        })
     }
 }
