@@ -1,5 +1,5 @@
 {
-	"rewrites": [
-		{ "source": "/(?<lang>[^/]*)/(.*)", "destination": "/$lang/404/" }
+	"routes": [
+		{ "src": "/(?<lang>[^/]*)/(.*)", "dest": "/$lang/404/", "status": 404 }
 	]
 }
