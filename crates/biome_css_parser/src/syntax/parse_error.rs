@@ -11,6 +11,10 @@ pub(crate) fn expected_number(p: &CssParser, range: TextRange) -> ParseDiagnosti
     expected_node("number", range, p)
 }
 
+pub(crate) fn expected_string(p: &CssParser, range: TextRange) -> ParseDiagnostic {
+    expected_node("string", range, p)
+}
+
 pub(crate) fn expected_any_pseudo_class_nth(p: &CssParser, range: TextRange) -> ParseDiagnostic {
     expected_any(&["even", "odd", "n", "<An+B>", "number"], range, p)
 }
@@ -124,6 +128,33 @@ pub(crate) fn expected_any_pseudo_class(p: &CssParser, range: TextRange) -> Pars
             "current",
             "past",
             "future",
+        ],
+        range,
+    )
+    .into_diagnostic(p)
+}
+
+pub(crate) fn expected_any_at_rule(p: &CssParser, range: TextRange) -> ParseDiagnostic {
+    expect_one_of(
+        &[
+            "charset",
+            "color-profile",
+            "container",
+            "counter-style",
+            "document",
+            "font-face",
+            "font-feature-values",
+            "font-palette-values",
+            "import",
+            "keyframes",
+            "layer",
+            "media",
+            "namespace",
+            "page",
+            "property",
+            "supports",
+            "viewport",
+            "scope",
         ],
         range,
     )

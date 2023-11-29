@@ -1,8 +1,10 @@
+mod at_rule;
 mod parse_error;
 mod selector;
 
 use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
+use crate::syntax::at_rule::{at_at_rule, parse_at_rule};
 use crate::syntax::parse_error::expected_block;
 use crate::syntax::selector::CssSelectorList;
 use biome_css_syntax::CssSyntaxKind::*;
@@ -36,7 +38,11 @@ pub(crate) fn parse_rule_list(p: &mut CssParser) {
     while !p.at(EOF) {
         progress.assert_progressing(p);
 
-        parse_rule(p);
+        if at_at_rule(p) {
+            parse_at_rule(p).ok();
+        } else {
+            parse_rule(p);
+        }
     }
 
     rules.complete(p, CSS_RULE_LIST);
@@ -120,7 +126,7 @@ pub(crate) fn parse_number(p: &mut CssParser, context: CssLexContext) -> ParsedS
 }
 
 #[inline]
-pub(crate) fn parse_css_string(p: &mut CssParser) -> ParsedSyntax {
+pub(crate) fn parse_string(p: &mut CssParser) -> ParsedSyntax {
     if !p.at(CSS_STRING_LITERAL) {
         return Absent;
     }
