@@ -1163,7 +1163,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element {
-                    if CssIdentifier::can_cast(element.kind()) {
+                    if matches!(element.kind(), T![host] | T![host_context]) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -1203,7 +1203,10 @@ impl SyntaxFactory for CssSyntaxFactory {
                 let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element {
-                    if CssIdentifier::can_cast(element.kind()) {
+                    if matches!(
+                        element.kind(),
+                        T![_moz_any] | T![_webkit_any] | T![past] | T![current] | T![future]
+                    ) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -1243,7 +1246,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element {
-                    if CssIdentifier::can_cast(element.kind()) {
+                    if element.kind() == T![dir] {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -1283,7 +1286,15 @@ impl SyntaxFactory for CssSyntaxFactory {
                 let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element {
-                    if CssIdentifier::can_cast(element.kind()) {
+                    if matches!(
+                        element.kind(),
+                        T![nth_child]
+                            | T![nth_last_child]
+                            | T![nth_of_type]
+                            | T![nth_last_of_type]
+                            | T![nth_col]
+                            | T![nth_last_col]
+                    ) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -1323,7 +1334,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element {
-                    if CssIdentifier::can_cast(element.kind()) {
+                    if element.kind() == T![has] {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -1363,7 +1374,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element {
-                    if CssIdentifier::can_cast(element.kind()) {
+                    if matches!(element.kind(), T![global] | T![local]) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -1403,7 +1414,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element {
-                    if CssIdentifier::can_cast(element.kind()) {
+                    if matches!(element.kind(), T![matches] | T![not] | T![is] | T![where]) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -1443,7 +1454,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element {
-                    if CssIdentifier::can_cast(element.kind()) {
+                    if element.kind() == T![lang] {
                         slots.mark_present();
                         current_element = elements.next();
                     }

@@ -1674,8 +1674,8 @@ impl CssPseudoClassFunctionCompoundSelector {
             r_paren_token: self.r_paren_token(),
         }
     }
-    pub fn name(&self) -> SyntaxResult<CssIdentifier> {
-        support::required_node(&self.syntax, 0usize)
+    pub fn name(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
     }
     pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 1usize)
@@ -1698,7 +1698,7 @@ impl Serialize for CssPseudoClassFunctionCompoundSelector {
 }
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct CssPseudoClassFunctionCompoundSelectorFields {
-    pub name: SyntaxResult<CssIdentifier>,
+    pub name: SyntaxResult<SyntaxToken>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub selector: SyntaxResult<AnyCssCompoundSelector>,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
@@ -1725,8 +1725,8 @@ impl CssPseudoClassFunctionCompoundSelectorList {
             r_paren_token: self.r_paren_token(),
         }
     }
-    pub fn name(&self) -> SyntaxResult<CssIdentifier> {
-        support::required_node(&self.syntax, 0usize)
+    pub fn name(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
     }
     pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 1usize)
@@ -1749,7 +1749,7 @@ impl Serialize for CssPseudoClassFunctionCompoundSelectorList {
 }
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct CssPseudoClassFunctionCompoundSelectorListFields {
-    pub name: SyntaxResult<CssIdentifier>,
+    pub name: SyntaxResult<SyntaxToken>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub compound_selector_list: CssCompoundSelectorList,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
@@ -1770,14 +1770,14 @@ impl CssPseudoClassFunctionIdentifier {
     }
     pub fn as_fields(&self) -> CssPseudoClassFunctionIdentifierFields {
         CssPseudoClassFunctionIdentifierFields {
-            name: self.name(),
+            name_token: self.name_token(),
             l_paren_token: self.l_paren_token(),
             ident: self.ident(),
             r_paren_token: self.r_paren_token(),
         }
     }
-    pub fn name(&self) -> SyntaxResult<CssIdentifier> {
-        support::required_node(&self.syntax, 0usize)
+    pub fn name_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
     }
     pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 1usize)
@@ -1800,7 +1800,7 @@ impl Serialize for CssPseudoClassFunctionIdentifier {
 }
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct CssPseudoClassFunctionIdentifierFields {
-    pub name: SyntaxResult<CssIdentifier>,
+    pub name_token: SyntaxResult<SyntaxToken>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub ident: SyntaxResult<CssIdentifier>,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
@@ -1827,8 +1827,8 @@ impl CssPseudoClassFunctionNth {
             r_paren_token: self.r_paren_token(),
         }
     }
-    pub fn name(&self) -> SyntaxResult<CssIdentifier> {
-        support::required_node(&self.syntax, 0usize)
+    pub fn name(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
     }
     pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 1usize)
@@ -1851,7 +1851,7 @@ impl Serialize for CssPseudoClassFunctionNth {
 }
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct CssPseudoClassFunctionNthFields {
-    pub name: SyntaxResult<CssIdentifier>,
+    pub name: SyntaxResult<SyntaxToken>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub selector: SyntaxResult<AnyCssPseudoClassNthSelector>,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
@@ -1872,14 +1872,14 @@ impl CssPseudoClassFunctionRelativeSelectorList {
     }
     pub fn as_fields(&self) -> CssPseudoClassFunctionRelativeSelectorListFields {
         CssPseudoClassFunctionRelativeSelectorListFields {
-            name: self.name(),
+            name_token: self.name_token(),
             l_paren_token: self.l_paren_token(),
             relative_selector_list: self.relative_selector_list(),
             r_paren_token: self.r_paren_token(),
         }
     }
-    pub fn name(&self) -> SyntaxResult<CssIdentifier> {
-        support::required_node(&self.syntax, 0usize)
+    pub fn name_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
     }
     pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 1usize)
@@ -1902,7 +1902,7 @@ impl Serialize for CssPseudoClassFunctionRelativeSelectorList {
 }
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct CssPseudoClassFunctionRelativeSelectorListFields {
-    pub name: SyntaxResult<CssIdentifier>,
+    pub name_token: SyntaxResult<SyntaxToken>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub relative_selector_list: CssRelativeSelectorList,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
@@ -1929,8 +1929,8 @@ impl CssPseudoClassFunctionSelector {
             r_paren_token: self.r_paren_token(),
         }
     }
-    pub fn name(&self) -> SyntaxResult<CssIdentifier> {
-        support::required_node(&self.syntax, 0usize)
+    pub fn name(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
     }
     pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 1usize)
@@ -1953,7 +1953,7 @@ impl Serialize for CssPseudoClassFunctionSelector {
 }
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct CssPseudoClassFunctionSelectorFields {
-    pub name: SyntaxResult<CssIdentifier>,
+    pub name: SyntaxResult<SyntaxToken>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub selector: SyntaxResult<AnyCssSelector>,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
@@ -1980,8 +1980,8 @@ impl CssPseudoClassFunctionSelectorList {
             r_paren_token: self.r_paren_token(),
         }
     }
-    pub fn name(&self) -> SyntaxResult<CssIdentifier> {
-        support::required_node(&self.syntax, 0usize)
+    pub fn name(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
     }
     pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 1usize)
@@ -2004,7 +2004,7 @@ impl Serialize for CssPseudoClassFunctionSelectorList {
 }
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct CssPseudoClassFunctionSelectorListFields {
-    pub name: SyntaxResult<CssIdentifier>,
+    pub name: SyntaxResult<SyntaxToken>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub selector_list: CssSelectorList,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
@@ -2025,14 +2025,14 @@ impl CssPseudoClassFunctionValueList {
     }
     pub fn as_fields(&self) -> CssPseudoClassFunctionValueListFields {
         CssPseudoClassFunctionValueListFields {
-            name: self.name(),
+            name_token: self.name_token(),
             l_paren_token: self.l_paren_token(),
             value_list: self.value_list(),
             r_paren_token: self.r_paren_token(),
         }
     }
-    pub fn name(&self) -> SyntaxResult<CssIdentifier> {
-        support::required_node(&self.syntax, 0usize)
+    pub fn name_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
     }
     pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 1usize)
@@ -2055,7 +2055,7 @@ impl Serialize for CssPseudoClassFunctionValueList {
 }
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct CssPseudoClassFunctionValueListFields {
-    pub name: SyntaxResult<CssIdentifier>,
+    pub name_token: SyntaxResult<SyntaxToken>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub value_list: CssPseudoValueList,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
@@ -5263,7 +5263,7 @@ impl AstNode for CssPseudoClassFunctionIdentifier {
 impl std::fmt::Debug for CssPseudoClassFunctionIdentifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("CssPseudoClassFunctionIdentifier")
-            .field("name", &support::DebugSyntaxResult(self.name()))
+            .field("name_token", &support::DebugSyntaxResult(self.name_token()))
             .field(
                 "l_paren_token",
                 &support::DebugSyntaxResult(self.l_paren_token()),
@@ -5358,7 +5358,7 @@ impl AstNode for CssPseudoClassFunctionRelativeSelectorList {
 impl std::fmt::Debug for CssPseudoClassFunctionRelativeSelectorList {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("CssPseudoClassFunctionRelativeSelectorList")
-            .field("name", &support::DebugSyntaxResult(self.name()))
+            .field("name_token", &support::DebugSyntaxResult(self.name_token()))
             .field(
                 "l_paren_token",
                 &support::DebugSyntaxResult(self.l_paren_token()),
@@ -5500,7 +5500,7 @@ impl AstNode for CssPseudoClassFunctionValueList {
 impl std::fmt::Debug for CssPseudoClassFunctionValueList {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("CssPseudoClassFunctionValueList")
-            .field("name", &support::DebugSyntaxResult(self.name()))
+            .field("name_token", &support::DebugSyntaxResult(self.name_token()))
             .field(
                 "l_paren_token",
                 &support::DebugSyntaxResult(self.l_paren_token()),
