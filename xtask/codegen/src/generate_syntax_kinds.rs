@@ -34,7 +34,7 @@ pub fn generate_syntax_kinds(grammar: KindsSrc, language_kind: LanguageKind) -> 
     let all_keywords_values = &grammar
         .keywords
         .iter()
-        .map(|kw| kw.replace("-", "_"))
+        .map(|kw| kw.replace('-', "_"))
         .collect::<Vec<_>>();
     let full_keywords = all_keywords_values
         .iter()

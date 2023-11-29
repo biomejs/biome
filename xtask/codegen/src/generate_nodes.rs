@@ -878,7 +878,7 @@ pub(crate) fn token_kind_to_code(
     } else if kind_source.keywords.contains(&name) {
         // we need to replace "-" with "_" for the keywords
         // e.g. we have `color-profile` in css but it's an invalid ident in rust code
-        let token: proc_macro2::TokenStream = name.replace("-", "_").parse().unwrap();
+        let token: proc_macro2::TokenStream = name.replace('-', "_").parse().unwrap();
         quote! { T![#token] }
     } else {
         // $ is valid syntax in rust and it's part of macros,
