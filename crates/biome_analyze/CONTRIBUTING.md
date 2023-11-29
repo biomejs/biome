@@ -689,7 +689,7 @@ The semantic model provides information about the references of a binding (varia
 
 #### How to use the query `Semantic<>` in a lint rule
 
-We've a `for` loop and we need to identify the `i` variable usage:
+We have a for loop that creates an index i, and we need to identify where this index is used inside the body of the loop
 
 ```js
 for (let i = 0; i < array.length; i++) {

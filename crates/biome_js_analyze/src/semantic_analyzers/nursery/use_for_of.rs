@@ -1,11 +1,12 @@
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
-use biome_js_semantic::ReferencesExtensions;
+use biome_js_semantic::{ReferencesExtensions, SemanticModel};
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsForInitializer, JsAssignmentExpression, JsAssignmentOperator,
-    JsBinaryExpression, JsBinaryOperator, JsForStatement, JsIdentifierBinding,
-    JsIdentifierExpression, JsPostUpdateExpression, JsPostUpdateOperator, JsPreUpdateExpression,
-    JsPreUpdateOperator, JsSyntaxKind, JsSyntaxToken, JsUnaryOperator, JsVariableDeclarator,
+    AnyJsExpression, AnyJsForInitializer, AnyJsStatement, JsAssignmentExpression,
+    JsAssignmentOperator, JsBinaryExpression, JsBinaryOperator, JsForStatement,
+    JsIdentifierBinding, JsIdentifierExpression, JsPostUpdateExpression, JsPostUpdateOperator,
+    JsPreUpdateExpression, JsPreUpdateOperator, JsSyntaxKind, JsSyntaxToken, JsUnaryOperator,
+    JsVariableDeclarator,
 };
 use biome_rowan::{declare_node_union, AstNode, AstSeparatedList, TextRange};
 
@@ -89,10 +90,8 @@ impl Rule for UseForOf {
 
         let body = node.body().ok()?;
         let body_range = match body {
-            biome_js_syntax::AnyJsStatement::JsBlockStatement(block) => Some(block.range()),
-            biome_js_syntax::AnyJsStatement::JsExpressionStatement(statement) => {
-                Some(statement.range())
-            }
+            AnyJsStatement::JsBlockStatement(block) => Some(block.range()),
+            AnyJsStatement::JsExpressionStatement(statement) => Some(statement.range()),
             _ => None,
         }?;
 
@@ -138,8 +137,8 @@ impl Rule for UseForOf {
 /// - `Vec<AnyBindingExpression>`
 ///
 fn list_initializer_references(
-    model: &biome_js_semantic::SemanticModel,
-    binding: &biome_js_syntax::JsIdentifierBinding,
+    model: &SemanticModel,
+    binding: &JsIdentifierBinding,
     body_range: &TextRange,
 ) -> Vec<AnyBindingExpression> {
     binding
