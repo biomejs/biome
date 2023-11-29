@@ -1,4 +1,7 @@
-use crate::js::bindings::parameters::{should_hug_function_parameters, FormatAnyJsParameters};
+use crate::js::bindings::parameters::{
+    should_hug_function_parameters, AnyJsParameters, FormatAnyJsParameters,
+    FormatJsParametersOptions,
+};
 use crate::prelude::*;
 use crate::JsFormatContext;
 use biome_formatter::formatter::Formatter;
@@ -7,7 +10,7 @@ use biome_formatter::{Format, FormatResult};
 use biome_js_syntax::{
     AnyJsAssignmentPattern, AnyJsBindingPattern, AnyJsFormalParameter,
     AnyJsObjectAssignmentPatternMember, AnyJsObjectBindingPatternMember, JsObjectAssignmentPattern,
-    JsObjectBindingPattern, JsSyntaxKind, JsSyntaxToken,
+    JsObjectBindingPattern, JsParameters, JsSyntaxKind, JsSyntaxToken,
 };
 use biome_rowan::{declare_node_union, AstNode, SyntaxNodeOptionExt, SyntaxResult};
 
@@ -129,9 +132,16 @@ impl JsObjectPatternLike {
             JsObjectPatternLike::JsObjectBindingPattern(binding) => binding
                 .parent::<AnyJsFormalParameter>()
                 .and_then(|parameter| parameter.syntax().grand_parent())
-                .and_then(FormatAnyJsParameters::cast)
+                .and_then(JsParameters::cast)
                 .map_or(false, |parameters| {
-                    should_hug_function_parameters(&parameters, comments).unwrap_or(false)
+                    should_hug_function_parameters(
+                        &FormatAnyJsParameters::new(
+                            AnyJsParameters::JsParameters(parameters),
+                            FormatJsParametersOptions::default(),
+                        ),
+                        comments,
+                    )
+                    .unwrap_or(false)
                 }),
         }
     }

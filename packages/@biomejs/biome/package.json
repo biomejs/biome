@@ -21,7 +21,8 @@
         "configuration_schema.json",
         "README.md",
         "LICENSE-APACHE",
-        "LICENSE-MIT"
+        "LICENSE-MIT",
+        "ROME-LICENSE-MIT"
     ],
     "keywords": [
         "JavaScript",

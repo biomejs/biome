@@ -1,3 +1,4 @@
+use crate::js::bindings::parameters::FormatJsParametersOptions;
 use crate::prelude::*;
 use biome_formatter::{
     format_args, write, CstFormatContext, FormatRuleWithOptions, RemoveSoftLinesBuffer,
@@ -60,11 +61,16 @@ impl FormatNodeRule<JsArrowFunctionExpression> for FormatJsArrowFunctionExpressi
 
                 let body = arrow.body()?;
 
-                let format_signature = format_with(|f| {
+                let formatted_signature = format_with(|f| {
                     write!(
                         f,
                         [
-                            format_signature(&arrow, self.options.call_arg_layout.is_some(), false),
+                            format_signature(
+                                &arrow,
+                                self.options.call_arg_layout.is_some(),
+                                false,
+                                true
+                            ),
                             space(),
                             arrow.fat_arrow_token().format()
                         ]
@@ -108,7 +114,7 @@ impl FormatNodeRule<JsArrowFunctionExpression> for FormatJsArrowFunctionExpressi
                             return write!(
                                 f,
                                 [group(&format_args![
-                                    format_signature,
+                                    formatted_signature,
                                     group(&format_args![indent(&format_args![
                                         hard_line_break(),
                                         text("("),
@@ -121,7 +127,7 @@ impl FormatNodeRule<JsArrowFunctionExpression> for FormatJsArrowFunctionExpressi
                         return write!(
                             f,
                             [group(&format_args![
-                                format_signature,
+                                formatted_signature,
                                 group(&format_args![
                                     space(),
                                     text("("),
@@ -135,7 +141,7 @@ impl FormatNodeRule<JsArrowFunctionExpression> for FormatJsArrowFunctionExpressi
                 };
 
                 if body_has_soft_line_break {
-                    write![f, [format_signature, space(), format_body]]
+                    write![f, [formatted_signature, space(), format_body]]
                 } else {
                     let should_add_parens = should_add_parens(&body);
 
@@ -152,7 +158,7 @@ impl FormatNodeRule<JsArrowFunctionExpression> for FormatJsArrowFunctionExpressi
                     write!(
                         f,
                         [
-                            format_signature,
+                            formatted_signature,
                             group(&format_args![
                                 soft_line_indent_or_space(&format_with(|f| {
                                     if should_add_parens {
@@ -206,18 +212,25 @@ fn format_signature(
     arrow: &JsArrowFunctionExpression,
     is_first_or_last_call_argument: bool,
     ancestor_call_expr_or_logical_expr: bool,
+    is_first_in_chain: bool,
 ) -> impl Format<JsFormatContext> + '_ {
     format_with(move |f| {
-        if let Some(async_token) = arrow.async_token() {
-            write!(f, [async_token.format(), space()])?;
-        }
+        let formatted_async_token = format_with(|f: &mut JsFormatter| {
+            if let Some(async_token) = arrow.async_token() {
+                write!(f, [async_token.format(), space()])?;
+                Ok(())
+            } else {
+                Ok(())
+            }
+        });
 
-        let format_parameters = format_with(|f: &mut JsFormatter| {
+        let formatted_parameters = format_with(|f: &mut JsFormatter| {
             write!(f, [arrow.type_parameters().format()])?;
 
             match arrow.parameters()? {
                 AnyJsArrowFunctionParameters::AnyJsBinding(binding) => {
-                    let should_hug = is_test_call_argument(arrow.syntax())?;
+                    let should_hug =
+                        is_test_call_argument(arrow.syntax())? || is_first_or_last_call_argument;
 
                     let parentheses_not_needed = can_avoid_parentheses(arrow, f);
 
@@ -242,10 +255,15 @@ fn format_signature(
                     }
                 }
                 AnyJsArrowFunctionParameters::JsParameters(params) => {
-                    if ancestor_call_expr_or_logical_expr {
-                        write!(f, [dedent(&params.format())])?;
+                    let formatted_params =
+                        params.format().with_options(FormatJsParametersOptions {
+                            prevent_soft_line_breaks: is_first_or_last_call_argument,
+                        });
+
+                    if ancestor_call_expr_or_logical_expr && !is_first_or_last_call_argument {
+                        write!(f, [group(&dedent(&formatted_params))])?;
                     } else {
-                        write!(f, [params.format()])?;
+                        write!(f, [formatted_params])?;
                     }
                 }
             };
@@ -260,7 +278,9 @@ fn format_signature(
             write!(
                 recording,
                 [group(&format_args![
-                    group(&format_parameters),
+                    maybe_space(!is_first_in_chain),
+                    formatted_async_token,
+                    group(&formatted_parameters),
                     group(&arrow.return_type_annotation().format())
                 ])]
             )?;
@@ -271,10 +291,18 @@ fn format_signature(
         } else {
             write!(
                 f,
-                [group(&format_args![
-                    format_parameters,
-                    arrow.return_type_annotation().format()
-                ])]
+                [
+                    // This soft break is placed outside of the group to ensure
+                    // that the parameter group only tries to write on a single
+                    // line and can't break pre-emptively without also causing
+                    // the parent (i.e., this ArrowChain) to break first.
+                    (!is_first_in_chain).then_some(soft_line_break_or_space()),
+                    group(&format_args![
+                        formatted_async_token,
+                        formatted_parameters,
+                        arrow.return_type_annotation().format()
+                    ])
+                ]
             )?;
         }
 
@@ -509,31 +537,54 @@ impl Format<JsFormatContext> for ArrowChain {
                 write!(f, [soft_line_break()])?;
             }
 
-            let join_signatures = format_with(|f| {
+            let is_grouped_call_arg_layout = self.options.call_arg_layout.is_some();
+
+            let join_signatures = format_with(|f: &mut JsFormatter| {
+                let mut is_first_in_chain = true;
                 for arrow in self.arrows() {
+                    // The first comment in the chain gets formatted by the
+                    // parent (the FormatJsArrowFunctionExpression), but the
+                    // rest of the arrows in the chain need to format their
+                    // comments manually, since they won't have their own
+                    // Format node to handle it.
+                    if !is_first_in_chain
+                        && f.context().comments().has_leading_comments(arrow.syntax())
+                    {
+                        // A grouped layout implies that the arrow chain is trying to be rendered
+                        // in a condensend, single-line format (at least the signatures, not
+                        // necessarily the body). In that case, we _need_ to prevent the leading
+                        // comments from inserting line breaks. But if it's _not_ a grouped layout,
+                        // then we want to _force_ the line break so that the leading comments
+                        // don't inadvertently end up on the previous line after the fat arrow.
+                        if is_grouped_call_arg_layout {
+                            write!(f, [space(), format_leading_comments(arrow.syntax())])?;
+                        } else {
+                            write!(
+                                f,
+                                [
+                                    soft_line_break_or_space(),
+                                    format_leading_comments(arrow.syntax())
+                                ]
+                            )?;
+                        }
+                    }
+
                     write!(
                         f,
-                        [
-                            format_leading_comments(arrow.syntax()),
-                            format_signature(
-                                arrow,
-                                self.options.call_arg_layout.is_some(),
-                                ancestor_call_expr_or_logical_expr
-                            )
-                        ]
+                        [format_signature(
+                            arrow,
+                            is_grouped_call_arg_layout,
+                            ancestor_call_expr_or_logical_expr,
+                            is_first_in_chain,
+                        )]
                     )?;
+
+                    is_first_in_chain = false;
 
                     // The arrow of the tail is formatted outside of the group to ensure it never
                     // breaks from the body
                     if arrow != tail {
-                        write!(
-                            f,
-                            [
-                                space(),
-                                arrow.fat_arrow_token().format(),
-                                soft_line_break_or_space()
-                            ]
-                        )?;
+                        write!(f, [space(), arrow.fat_arrow_token().format()])?;
                     }
                 }
 
