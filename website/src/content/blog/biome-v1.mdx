@@ -1,16 +1,11 @@
 ---
 title: Biome v1
-url: /blog/biome-v1
-template: splash
 description: New formatter options, CLI improvements, JSONC support and more.
 summary: New formatter options, CLI improvements, JSONC support and more.
-authorName: Emanuele Stoppa
-authorAvatar: https://avatars.githubusercontent.com/u/602478?v=4
-authorUrl: https://twitter.com/ematipico
-coauthorName: Biome Core Team
-coauthorAvatar: /img/circle-indent-logo.svg
+authors:
+  - ema
+  - core
 pubDate: 2023-08-29
-layout: ../../../layouts/Blog.astro
 socialImage: social-logo.png
 ---
 
@@ -29,9 +24,9 @@ Or install the [VS Code extension](https://marketplace.visualstudio.com/items?it
 ## New formatter options
 
 Biome now supports two new, long-awaited options:
+
 - support for formatting the preferred quote kind in JSX;
 - support for formatting parenthesis in arrow functions only when they are needed;
-
 
 ### JSX quotes style
 
@@ -40,9 +35,9 @@ You can use this option via CLI or via `biome.json` file:
 ```json title="biome.json"
 {
   "javascript": {
-   "formatter": {
-    "jsxQuoteStyle": "single"
-   }
+    "formatter": {
+      "jsxQuoteStyle": "single"
+    }
   }
 }
 ```
@@ -57,8 +52,8 @@ And Biome will apply single quotes when defining attributes in JSX code:
 import Item from "./item.jsx";
 
 const Header = () => {
-    return <Item title='Docs' />;
-}
+  return <Item title="Docs" />;
+};
 ```
 
 ### Arrow function parenthesis
@@ -68,9 +63,9 @@ You can decide not to print parenthesis in arrow functions. You can customize th
 ```json title="biome.json"
 {
   "javascript": {
-   "formatter": {
-    "arrowParentheses": "asNeeded"
-   }
+    "formatter": {
+      "arrowParentheses": "asNeeded"
+    }
   }
 }
 ```
@@ -83,9 +78,9 @@ And Biome will print parenthesis only for those arrow functions that require the
 
 ```jsx
 // no need for parentheses
-const filter = term => {};
+const filter = (term) => {};
 // needs parentheses
-const filterBy = (term, fn) => {}
+const filterBy = (term, fn) => {};
 ```
 
 ## CLI improvements
@@ -95,8 +90,8 @@ The CLI was heavily reworked to guarantee consistent behaviour when handling fil
 Among those changes, there are some **breaking changes** in its behaviour.
 
 - The CLI exits with an error code if the configuration file contains errors; while Biome can parse the configuration successfully - even with errors - this was a hazard for our users.
-A typo in the configuration file would have resulted in Biome applying its defaults, and executing Biome with a different behaviour compared to the one set by the user.
-- The command `biome check` will now emit error diagnostics for *code not formatted* and exits with an error code. This behaviour aligns with the semantics meant for this command.
+  A typo in the configuration file would have resulted in Biome applying its defaults, and executing Biome with a different behaviour compared to the one set by the user.
+- The command `biome check` will now emit error diagnostics for _code not formatted_ and exits with an error code. This behaviour aligns with the semantics meant for this command.
 
 ### New `biome lint` command
 
@@ -115,7 +110,7 @@ You can define this behaviour in the `biome.json` too:
 ```json title="biome.json"
 {
   "files": {
-   "ignoreUnknown": true
+    "ignoreUnknown": true
   }
 }
 ```
@@ -135,12 +130,12 @@ Here's an example, let's change the diagnostic level of a rule via `biome.json`:
 ```json title="biome.json"
 {
   "linter": {
-   "recommended": true,
-   "rules": {
-    "a11y": {
-     "useAltText": "warn"
+    "recommended": true,
+    "rules": {
+      "a11y": {
+        "useAltText": "warn"
+      }
     }
-   }
   }
 }
 ```
@@ -149,8 +144,8 @@ Here's a sample code that will trigger the rule:
 
 ```jsx
 const Image = () => {
-    return <img src="https://example.com/image.png"  />
-}
+  return <img src="https://example.com/image.png" />;
+};
 ```
 
 And now, run the CLI using the new option:
@@ -174,9 +169,9 @@ Biome can parse comments inside JSON files. You can opt-in to this feature via t
 ```json title="biome.json"
 {
   "json": {
-   "parser": {
-    "allowComments": true
-   }
+    "parser": {
+      "allowComments": true
+    }
   }
 }
 ```
@@ -211,35 +206,35 @@ We **deleted** two rules:
 
 - [`noDuplicateJsonKeys`](/linter/rules/no-duplicate-json-keys/)
 
-	This rule disallows duplicate keys in a JSON object.
+  This rule disallows duplicate keys in a JSON object.
 
 - [`noExcessiveComplexity`](/linter/rules/no-excessive-complexity/)
 
-	This rule computes a complexity score and reports code with a score above a configurable threshold.
+  This rule computes a complexity score and reports code with a score above a configurable threshold.
 
 - [`noFallthroughSwitchClause`](/linter/rules/no-fallthrough-switch-clause/)
 
-	This rule disallows `switch` cases that fall through to the next `case`.
+  This rule disallows `switch` cases that fall through to the next `case`.
 
 - [`noGlobalIsFinite`](/linter/rules/no-global-is-finite/)
 
-	This rule recommends using `Number.isFinite` instead of the global and unsafe `isFinite` that attempts a type of coercion.
+  This rule recommends using `Number.isFinite` instead of the global and unsafe `isFinite` that attempts a type of coercion.
 
 - [`noGlobalIsNan`](/linter/rules/no-global-is-nan/)
 
-	This rule recommends using `Number.isNaN` instead of the global and unsafe `isNaN` that attempts a type of coercion.
+  This rule recommends using `Number.isNaN` instead of the global and unsafe `isNaN` that attempts a type of coercion.
 
 - [`noNonoctalDecimalEscape`](/linter/rules/no-nonoctal-decimal-escape/)
 
-	This rule disallows `\8` and `\9` escape sequences in string literals.
+  This rule disallows `\8` and `\9` escape sequences in string literals.
 
 - [`noUnsafeDeclarationMerging`](/linter/rules/no-unsafe-declaration-merging/)
 
-	This rule disallows declaration merging between an interface and a class.
+  This rule disallows declaration merging between an interface and a class.
 
 - [`noUselessEmptyExport`](/linter/rules/no-useless-empty-export/)
 
-	This rule disallows useless `export {}`.
+  This rule disallows useless `export {}`.
 
 - [noUselessThisAlias](/linter/rules/no-useless-this-alias/)
 
@@ -247,12 +242,12 @@ We **deleted** two rules:
 
 - [`noVoid`](/linter/rules/no-void/)
 
-	This rule disallows the use of `void`.
+  This rule disallows the use of `void`.
 
 - [`useArrowFunction`](/linter/rules/use-arrow-function/)
 
-	This rule proposes turning function expressions into arrow functions.
-	Function expressions that use `this` are ignored.
+  This rule proposes turning function expressions into arrow functions.
+  Function expressions that use `this` are ignored.
 
 - [`useGetterReturn`](/linter/rules/use-getter-return/)
 
@@ -260,15 +255,15 @@ We **deleted** two rules:
 
 - [`useImportRestrictions`](/linter/rules/use-import-restrictions/)
 
-	Enables restrictions on how local imports should be imported.
+  Enables restrictions on how local imports should be imported.
 
 - [`useIsArray`](/linter/rules/use-is-array/)
 
-	This rule proposes using `Array.isArray()` instead of `instanceof Array`.
+  This rule proposes using `Array.isArray()` instead of `instanceof Array`.
 
 - [`useNamingConvention`](/linter/rules/use-naming-convention/)
 
-	The rule enforces wide-spread naming conventions of Javascript and TypeScript across a codebase.
+  The rule enforces wide-spread naming conventions of Javascript and TypeScript across a codebase.
 
 #### Promoted rules
 
@@ -304,9 +299,9 @@ Some users were dissatisfied because they couldn't use Biome inside their Angula
 ```json title="biome.json"
 {
   "javascript": {
-   "parser": {
-    "unsafeParameterDecoratorsEnabled": true
-   }
+    "parser": {
+      "unsafeParameterDecoratorsEnabled": true
+    }
   }
 }
 ```
@@ -324,77 +319,45 @@ Big thank you to the following contributors:
 - [ddanielsantos](https://github.com/ddanielsantos), for their first contribution to the project;
 - [nikeee](https://github.com/nikeee), for their first contribution to the project;
 
-[//]: # (KEEP IT, NEEDED FOR THE FUTURE)
-[//]: # ()
-[//]: # ()
-[//]: # (<div class="card">)
-
-[//]: # (    <div class="column">)
-
-[//]: # (        <h4>Enable all rules</h4>)
-
-[//]: # ()
-[//]: # (        Biome will enable all rules, even the ones that belong to `nursery` group:)
-
-[//]: # (        ```json title="biome.json")
-
-[//]: # (        {)
-
-[//]: # (            "linter": {)
-
-[//]: # (            "enabled": true,)
-
-[//]: # (            "rule": {)
-
-[//]: # (            "all": true)
-
-[//]: # (        })
-
-[//]: # (        })
-
-[//]: # (        })
-
-[//]: # (        ```)
-
-[//]: # ()
-[//]: # (    </div>)
-
-[//]: # ()
-[//]: # (    <div class="column">)
-
-[//]: # (        <h4>Only some rules</h4>)
-
-[//]: # ()
-[//]: # (        Biome will disable **all** rules and enable only the rules that belong to `correctness` group:)
-
-[//]: # (        ```json title="biome.json")
-
-[//]: # (        {)
-
-[//]: # (            "linter": {)
-
-[//]: # (            "enabled": true,)
-
-[//]: # (            "rule": {)
-
-[//]: # (            "all": false,)
-
-[//]: # (            "correctness": {)
-
-[//]: # (            "all": true)
-
-[//]: # (        })
-
-[//]: # (        })
-
-[//]: # (        })
-
-[//]: # (        })
-
-[//]: # (        ```)
-
-[//]: # ()
-[//]: # (    </div>)
-
-[//]: # ()
-[//]: # (</div>)
+[//]: # "KEEP IT, NEEDED FOR THE FUTURE"
+[//]: #
+[//]: #
+[//]: # '<div class="card">'
+[//]: # '    <div class="column">'
+[//]: # "        <h4>Enable all rules</h4>"
+[//]: #
+[//]: # "        Biome will enable all rules, even the ones that belong to `nursery` group:"
+[//]: # '        ```json title="biome.json"'
+[//]: # "        {"
+[//]: # '            "linter": {'
+[//]: # '            "enabled": true,'
+[//]: # '            "rule": {'
+[//]: # '            "all": true'
+[//]: # "        }"
+[//]: # "        }"
+[//]: # "        }"
+[//]: # "        ```"
+[//]: #
+[//]: # "    </div>"
+[//]: #
+[//]: # '    <div class="column">'
+[//]: # "        <h4>Only some rules</h4>"
+[//]: #
+[//]: # "        Biome will disable **all** rules and enable only the rules that belong to `correctness` group:"
+[//]: # '        ```json title="biome.json"'
+[//]: # "        {"
+[//]: # '            "linter": {'
+[//]: # '            "enabled": true,'
+[//]: # '            "rule": {'
+[//]: # '            "all": false,'
+[//]: # '            "correctness": {'
+[//]: # '            "all": true'
+[//]: # "        }"
+[//]: # "        }"
+[//]: # "        }"
+[//]: # "        }"
+[//]: # "        ```"
+[//]: #
+[//]: # "    </div>"
+[//]: #
+[//]: # "</div>"

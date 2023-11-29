@@ -1,18 +1,14 @@
 ---
 title: Announcing Biome
-template: splash
-url: /blog/annoucing-biome
 description: Biome continues Rome's legacy; in this blog post, we explain why the fork, with some context and history.
 summary: Biome continues Rome's legacy; in this blog post, we explain why the fork, with some context and history.
-authorName: Emanuele Stoppa
-authorAvatar: https://avatars.githubusercontent.com/u/602478?v=4
-authorUrl: https://twitter.com/ematipico
-coauthorName: Biome Core Team
-coauthorAvatar: /img/circle-indent-logo.svg
+authors:
+  - ema
+  - core
 pubDate: 2023-08-29
-layout: ../../../layouts/Blog.astro
-coverImage: blog/announcing-biome/biome-logo-slogan.png
-coverImageAltText: The name of the project - "Biome", with the slogan underneath that says "Toolchain of the web"
+coverImage:
+  src: blog/announcing-biome/biome-logo-slogan.png
+  alt: The name of the project - "Biome", with the slogan underneath that says "Toolchain of the web"
 socialImage: blog/announcing-biome/biome-logo-slogan.png
 ---
 
@@ -23,11 +19,11 @@ Biome is the **official** fork of Rome and it will continue to be Rome's legacy.
 Biome is **led and maintained** by the same people that maintained Rome so far.
 
 **Follow us**:
+
 - [Github organization](https://github.com/biomejs)
 - [Official repository](https://github.com/biomejs/biome)
 - [Official discord server](https://discord.gg/BypW39g6Yc)
 - [Official twitter account](https://twitter.com/biomejs)
-
 
 ## Background
 
@@ -64,13 +60,18 @@ A few new [OSS contributors](#the-core-team) joined the cause and helped in cont
 
 In June, I [gave a talk](https://portal.gitnation.org/contents/rome-a-modern-toolchain) about Rome at JsNation 2023.
 
-<img src="/img/blog/announcing-biome/JsNation_2023.jpg" width="100%" alt="Emanuele Stoppa on the stage of JsNation" />
+<img
+  src="/img/blog/announcing-biome/JsNation_2023.jpg"
+  width="100%"
+  alt="Emanuele Stoppa on the stage of JsNation"
+/>
 
 So, the project is still alive, but maintaining it has become challenging:
+
 - I don't have admin rights on Discord, so I can't delegate moderation rights to other people;
 - I don't have access to the hosting platform of the website;
 - I don't have access to any registry (npm, VSCode, etc.);
-- the project is still under the MIT license of  Rome Tools Inc., which makes attributions and contributions seem foggy from a legal point of view (where's the company? I don't know).
+- the project is still under the MIT license of Rome Tools Inc., which makes attributions and contributions seem foggy from a legal point of view (where's the company? I don't know).
 
 Many attempts to reach out to the current owner were all void. There was only one thing I could do. **[We could do](#the-core-team).**
 
@@ -79,6 +80,7 @@ Many attempts to reach out to the current owner were all void. There was only on
 We created Biome. After weeks of discussions among the members of the core team and conversations with some friends, we thought that a clean slate was the best course of action.
 
 We pondered the idea of keeping the "rome" name in the new fork, but that was proven difficult:
+
 - Sebastian has registered tons of stuff with the "rome" name (GitHub organizations, website domains, open collectives, npm organizations). Finding the right combination wasn't easy;
 - without the proper rights in the Discord server, we couldn't delegate the moderation rights. Discord is a very important asset for community building;
 - keeping the name would have caused some attribution to Rome Tools Inc., making things still foggy when it comes to the legal aspects of the source code;
@@ -89,8 +91,11 @@ Given all these difficulties, the core team settled for a new project.
 
 ### "New is always better."
 
-<div style={{"minWidth": "200px"}}>
-  <img src="https://media.giphy.com/media/7EamSGumESd0Y/giphy.gif" width="100%" />
+<div style={{ minWidth: "200px" }}>
+  <img
+    src="https://media.giphy.com/media/7EamSGumESd0Y/giphy.gif"
+    width="100%"
+  />
 </div>
 
 Biome will embrace the same [philosophy](https://biomejs.dev/internals/philosophy) of the old Rome and the same mission. Although, the roadmap will likely change, and the core team could decide to focus on making the current features more stable instead of releasing new ones.
@@ -99,13 +104,14 @@ Still, the primary mission is alive, and Biome wants to be a 360° toolchain; we
 
 ### Why Biome
 
-The team wanted to create a second "Rome", a second version of it. So we fused the words "Bis" and "Rome". **Biome"".
+The team wanted to create a second "Rome", a second version of it. So we fused the words "Bis" and "Rome". \*\*Biome"".
 
 ## I still use the `rome` package. What should I do?
 
 The `rome` package **_won't be maintained anymore_** by the core team, so you won't get any more releases.
 
 1. You should use the `@biomejs/biome` package. Note that Biome also comes with a lot of new features and fixes. We've just prepared a [blog post](/blog/biome-v1) for that.
+
    ```diff
    {
    -  "rome": "12.1.3"
@@ -114,41 +120,41 @@ The `rome` package **_won't be maintained anymore_** by the core team, so you wo
    ```
 
 2. And change the CLI name in your scripts:
-    ```diff
+   ```diff
    {
-      "scripts": {
+     "scripts": {
    -    "format": "rome format --write ./src",
    +    "format": "biome format --write ./src"
-      }
+     }
    }
-    ```
+   ```
 3. In your `rome.json` file, update the URL of the `$schema` field:
 
-    ```diff
-    {
-    -  "$schema": "https://docs.rome.tools/schemas/12.1.3/schema.json",
-    +  "$schema": "https://biomejs.dev/schemas/1.0.0/schema.json"
-    }
-    ```
+   ```diff
+   {
+   -  "$schema": "https://docs.rome.tools/schemas/12.1.3/schema.json",
+   +  "$schema": "https://biomejs.dev/schemas/1.0.0/schema.json"
+   }
+   ```
 
 4. Then install the new official [VSCode](https://marketplace.visualstudio.com/items?itemName=biomejs.biome) or [open VSX](https://open-vsx.org/extension/biomejs/biome) extension. That's an important step if you use these extensions.
 
 5. After the installation of the extension, open the `settings.json`. If you have some Rome related settings there, you'll have to update them:
 
-    ```diff
-    {
-      "[javascript]": {
-    -		"editor.defaultFormatter": "rome.rome"
-    +		"editor.defaultFormatter": "biomejs.biome"
-      },
-      "editor.codeActionsOnSave": {
-    -    "quickfix.rome": true,
-    -    "source.organizeImports.rome": true
-    +    "quickfix.biome": true,
-    +    "source.organizeImports.biome": true
-      }
-    }
-    ```
+   ```diff
+   {
+     "[javascript]": {
+   -		"editor.defaultFormatter": "rome.rome"
+   +		"editor.defaultFormatter": "biomejs.biome"
+     },
+     "editor.codeActionsOnSave": {
+   -    "quickfix.rome": true,
+   -    "source.organizeImports.rome": true
+   +    "quickfix.biome": true,
+   +    "source.organizeImports.biome": true
+     }
+   }
+   ```
 
 Biome **still accepts the `rome.json` file** as a configuration, so you don't need to do anything yet. Biome also takes `biome.json` as a configuration file.
 
