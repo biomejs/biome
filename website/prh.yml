@@ -1,0 +1,5 @@
+# prh version
+version: 1
+rules:
+  - expected: lint
+    patterns: リント
