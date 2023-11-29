@@ -30,7 +30,9 @@ impl Deserializable for Rules {
                 let mut recommended_is_set = false;
                 let mut result = Self::Output::default();
                 for (key, value) in members.flatten() {
-                    let Some (key_text) = Text :: deserialize (& key , "" , diagnostics) else { continue ; } ;
+                    let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
+                        continue;
+                    };
                     match key_text.text() {
                         "recommended" => {
                             recommended_is_set = true;
@@ -128,7 +130,9 @@ impl Deserializable for A11y {
                 let mut recommended_is_set = false;
                 let mut result = Self::Output::default();
                 for (key, value) in members.flatten() {
-                    let Some (key_text) = Text :: deserialize (& key , "" , diagnostics) else { continue ; } ;
+                    let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
+                        continue;
+                    };
                     match key_text.text() {
                         "recommended" => {
                             recommended_is_set = true;
@@ -377,7 +381,9 @@ impl Deserializable for Complexity {
                 let mut recommended_is_set = false;
                 let mut result = Self::Output::default();
                 for (key, value) in members.flatten() {
-                    let Some (key_text) = Text :: deserialize (& key , "" , diagnostics) else { continue ; } ;
+                    let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
+                        continue;
+                    };
                     match key_text.text() {
                         "recommended" => {
                             recommended_is_set = true;
@@ -598,7 +604,9 @@ impl Deserializable for Correctness {
                 let mut recommended_is_set = false;
                 let mut result = Self::Output::default();
                 for (key, value) in members.flatten() {
-                    let Some (key_text) = Text :: deserialize (& key , "" , diagnostics) else { continue ; } ;
+                    let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
+                        continue;
+                    };
                     match key_text.text() {
                         "recommended" => {
                             recommended_is_set = true;
@@ -884,7 +892,9 @@ impl Deserializable for Nursery {
                 let mut recommended_is_set = false;
                 let mut result = Self::Output::default();
                 for (key, value) in members.flatten() {
-                    let Some (key_text) = Text :: deserialize (& key , "" , diagnostics) else { continue ; } ;
+                    let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
+                        continue;
+                    };
                     match key_text.text() {
                         "recommended" => {
                             recommended_is_set = true;
@@ -1037,7 +1047,9 @@ impl Deserializable for Performance {
                 let mut recommended_is_set = false;
                 let mut result = Self::Output::default();
                 for (key, value) in members.flatten() {
-                    let Some (key_text) = Text :: deserialize (& key , "" , diagnostics) else { continue ; } ;
+                    let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
+                        continue;
+                    };
                     match key_text.text() {
                         "recommended" => {
                             recommended_is_set = true;
@@ -1103,7 +1115,9 @@ impl Deserializable for Security {
                 let mut recommended_is_set = false;
                 let mut result = Self::Output::default();
                 for (key, value) in members.flatten() {
-                    let Some (key_text) = Text :: deserialize (& key , "" , diagnostics) else { continue ; } ;
+                    let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
+                        continue;
+                    };
                     match key_text.text() {
                         "recommended" => {
                             recommended_is_set = true;
@@ -1178,7 +1192,9 @@ impl Deserializable for Style {
                 let mut recommended_is_set = false;
                 let mut result = Self::Output::default();
                 for (key, value) in members.flatten() {
-                    let Some (key_text) = Text :: deserialize (& key , "" , diagnostics) else { continue ; } ;
+                    let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
+                        continue;
+                    };
                     match key_text.text() {
                         "recommended" => {
                             recommended_is_set = true;
@@ -1465,7 +1481,9 @@ impl Deserializable for Suspicious {
                 let mut recommended_is_set = false;
                 let mut result = Self::Output::default();
                 for (key, value) in members.flatten() {
-                    let Some (key_text) = Text :: deserialize (& key , "" , diagnostics) else { continue ; } ;
+                    let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
+                        continue;
+                    };
                     match key_text.text() {
                         "recommended" => {
                             recommended_is_set = true;
