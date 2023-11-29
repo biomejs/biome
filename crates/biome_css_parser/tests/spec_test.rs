@@ -134,7 +134,7 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 #[test]
 pub fn quick_test() {
     let code = r#"
-    @charset dsadsa;
+    @color-profile DEVICE-CMYK
 
     "#;
     let root = parse_css(

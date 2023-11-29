@@ -158,6 +158,20 @@ pub fn css_class_selector(dot_token: SyntaxToken, name: CssIdentifier) -> CssCla
         ],
     ))
 }
+pub fn css_color_profile_at_rule(
+    color_profile_token: SyntaxToken,
+    name: CssIdentifier,
+    block: CssBlock,
+) -> CssColorProfileAtRule {
+    CssColorProfileAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_COLOR_PROFILE_AT_RULE,
+        [
+            Some(SyntaxElement::Token(color_profile_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Node(block.into_syntax())),
+        ],
+    ))
+}
 pub fn css_complex_selector(
     left: AnyCssSelector,
     combinator_token: SyntaxToken,

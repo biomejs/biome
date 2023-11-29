@@ -423,14 +423,26 @@ CssAtRule =
 
 AnyCssAtRule =
 	CssCharsetAtRule
+	| CssColorProfileAtRule
 	| CssKeyframesAtRule
 	| CssMediaAtRule
 	| CssBogusAtRule
 
+// @charset "UTF-8";
+// ^^^^^^^^^^^^^^^^^
 CssCharsetAtRule =
 	'charset'
 	encoding: CssString
 	';'
+
+// @color-profile --fogra39 {}
+// ^^^^^^^^^^^^^^^^^^^^^^^^
+// @color-profile device-cmyk {}
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssColorProfileAtRule =
+	'color-profile'
+	name: CssIdentifier
+	block: CssBlock
 
 // @keyframes "something" { from {} to {} }
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

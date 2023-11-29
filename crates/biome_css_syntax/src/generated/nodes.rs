@@ -402,6 +402,52 @@ pub struct CssClassSelectorFields {
     pub name: SyntaxResult<CssIdentifier>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssColorProfileAtRule {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssColorProfileAtRule {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssColorProfileAtRuleFields {
+        CssColorProfileAtRuleFields {
+            color_profile_token: self.color_profile_token(),
+            name: self.name(),
+            block: self.block(),
+        }
+    }
+    pub fn color_profile_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn name(&self) -> SyntaxResult<CssIdentifier> {
+        support::required_node(&self.syntax, 1usize)
+    }
+    pub fn block(&self) -> SyntaxResult<CssBlock> {
+        support::required_node(&self.syntax, 2usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssColorProfileAtRule {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssColorProfileAtRuleFields {
+    pub color_profile_token: SyntaxResult<SyntaxToken>,
+    pub name: SyntaxResult<CssIdentifier>,
+    pub block: SyntaxResult<CssBlock>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssComplexSelector {
     pub(crate) syntax: SyntaxNode,
 }
@@ -2952,6 +2998,7 @@ pub struct CssVarFunctionValueFields {
 pub enum AnyCssAtRule {
     CssBogusAtRule(CssBogusAtRule),
     CssCharsetAtRule(CssCharsetAtRule),
+    CssColorProfileAtRule(CssColorProfileAtRule),
     CssKeyframesAtRule(CssKeyframesAtRule),
     CssMediaAtRule(CssMediaAtRule),
 }
@@ -2965,6 +3012,12 @@ impl AnyCssAtRule {
     pub fn as_css_charset_at_rule(&self) -> Option<&CssCharsetAtRule> {
         match &self {
             AnyCssAtRule::CssCharsetAtRule(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_color_profile_at_rule(&self) -> Option<&CssColorProfileAtRule> {
+        match &self {
+            AnyCssAtRule::CssColorProfileAtRule(item) => Some(item),
             _ => None,
         }
     }
@@ -3860,6 +3913,49 @@ impl From<CssClassSelector> for SyntaxNode {
 }
 impl From<CssClassSelector> for SyntaxElement {
     fn from(n: CssClassSelector) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssColorProfileAtRule {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_COLOR_PROFILE_AT_RULE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_COLOR_PROFILE_AT_RULE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssColorProfileAtRule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssColorProfileAtRule")
+            .field(
+                "color_profile_token",
+                &support::DebugSyntaxResult(self.color_profile_token()),
+            )
+            .field("name", &support::DebugSyntaxResult(self.name()))
+            .field("block", &support::DebugSyntaxResult(self.block()))
+            .finish()
+    }
+}
+impl From<CssColorProfileAtRule> for SyntaxNode {
+    fn from(n: CssColorProfileAtRule) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssColorProfileAtRule> for SyntaxElement {
+    fn from(n: CssColorProfileAtRule) -> SyntaxElement {
         n.syntax.into()
     }
 }
@@ -6359,6 +6455,11 @@ impl From<CssCharsetAtRule> for AnyCssAtRule {
         AnyCssAtRule::CssCharsetAtRule(node)
     }
 }
+impl From<CssColorProfileAtRule> for AnyCssAtRule {
+    fn from(node: CssColorProfileAtRule) -> AnyCssAtRule {
+        AnyCssAtRule::CssColorProfileAtRule(node)
+    }
+}
 impl From<CssKeyframesAtRule> for AnyCssAtRule {
     fn from(node: CssKeyframesAtRule) -> AnyCssAtRule {
         AnyCssAtRule::CssKeyframesAtRule(node)
@@ -6373,18 +6474,26 @@ impl AstNode for AnyCssAtRule {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = CssBogusAtRule::KIND_SET
         .union(CssCharsetAtRule::KIND_SET)
+        .union(CssColorProfileAtRule::KIND_SET)
         .union(CssKeyframesAtRule::KIND_SET)
         .union(CssMediaAtRule::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            CSS_BOGUS_AT_RULE | CSS_CHARSET_AT_RULE | CSS_KEYFRAMES_AT_RULE | CSS_MEDIA_AT_RULE
+            CSS_BOGUS_AT_RULE
+                | CSS_CHARSET_AT_RULE
+                | CSS_COLOR_PROFILE_AT_RULE
+                | CSS_KEYFRAMES_AT_RULE
+                | CSS_MEDIA_AT_RULE
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             CSS_BOGUS_AT_RULE => AnyCssAtRule::CssBogusAtRule(CssBogusAtRule { syntax }),
             CSS_CHARSET_AT_RULE => AnyCssAtRule::CssCharsetAtRule(CssCharsetAtRule { syntax }),
+            CSS_COLOR_PROFILE_AT_RULE => {
+                AnyCssAtRule::CssColorProfileAtRule(CssColorProfileAtRule { syntax })
+            }
             CSS_KEYFRAMES_AT_RULE => {
                 AnyCssAtRule::CssKeyframesAtRule(CssKeyframesAtRule { syntax })
             }
@@ -6397,6 +6506,7 @@ impl AstNode for AnyCssAtRule {
         match self {
             AnyCssAtRule::CssBogusAtRule(it) => &it.syntax,
             AnyCssAtRule::CssCharsetAtRule(it) => &it.syntax,
+            AnyCssAtRule::CssColorProfileAtRule(it) => &it.syntax,
             AnyCssAtRule::CssKeyframesAtRule(it) => &it.syntax,
             AnyCssAtRule::CssMediaAtRule(it) => &it.syntax,
         }
@@ -6405,6 +6515,7 @@ impl AstNode for AnyCssAtRule {
         match self {
             AnyCssAtRule::CssBogusAtRule(it) => it.syntax,
             AnyCssAtRule::CssCharsetAtRule(it) => it.syntax,
+            AnyCssAtRule::CssColorProfileAtRule(it) => it.syntax,
             AnyCssAtRule::CssKeyframesAtRule(it) => it.syntax,
             AnyCssAtRule::CssMediaAtRule(it) => it.syntax,
         }
@@ -6415,6 +6526,7 @@ impl std::fmt::Debug for AnyCssAtRule {
         match self {
             AnyCssAtRule::CssBogusAtRule(it) => std::fmt::Debug::fmt(it, f),
             AnyCssAtRule::CssCharsetAtRule(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssAtRule::CssColorProfileAtRule(it) => std::fmt::Debug::fmt(it, f),
             AnyCssAtRule::CssKeyframesAtRule(it) => std::fmt::Debug::fmt(it, f),
             AnyCssAtRule::CssMediaAtRule(it) => std::fmt::Debug::fmt(it, f),
         }
@@ -6425,6 +6537,7 @@ impl From<AnyCssAtRule> for SyntaxNode {
         match n {
             AnyCssAtRule::CssBogusAtRule(it) => it.into(),
             AnyCssAtRule::CssCharsetAtRule(it) => it.into(),
+            AnyCssAtRule::CssColorProfileAtRule(it) => it.into(),
             AnyCssAtRule::CssKeyframesAtRule(it) => it.into(),
             AnyCssAtRule::CssMediaAtRule(it) => it.into(),
         }
@@ -7964,6 +8077,11 @@ impl std::fmt::Display for CssCharsetAtRule {
     }
 }
 impl std::fmt::Display for CssClassSelector {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssColorProfileAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

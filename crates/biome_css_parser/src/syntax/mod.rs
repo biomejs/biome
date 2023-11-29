@@ -10,7 +10,7 @@ use crate::syntax::selector::CssSelectorList;
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::ParseSeparatedList;
-use biome_parser::parse_recovery::ParseRecovery;
+use biome_parser::parse_recovery::{ParseRecovery, RecoveryResult};
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::{token_set, CompletedMarker, Parser, ParserProgress, TokenSet};
@@ -54,18 +54,22 @@ pub(crate) fn parse_rule(p: &mut CssParser) -> CompletedMarker {
 
     CssSelectorList::default().parse_list(p);
 
-    if parse_rule_block(p)
-        .or_recover(
-            p,
-            &ParseRecovery::new(CSS_BOGUS_BODY, BODY_RECOVERY_SET),
-            expected_block,
-        )
-        .is_err()
-    {
-        return m.complete(p, CSS_BOGUS_RULE);
-    }
+    let kind = if parse_or_recover_rule_block(p).is_ok() {
+        CSS_RULE
+    } else {
+        CSS_BOGUS_RULE
+    };
 
-    m.complete(p, CSS_RULE)
+    m.complete(p, kind)
+}
+
+#[inline]
+pub(crate) fn parse_or_recover_rule_block(p: &mut CssParser) -> RecoveryResult {
+    parse_rule_block(p).or_recover(
+        p,
+        &ParseRecovery::new(CSS_BOGUS_BODY, BODY_RECOVERY_SET).enable_recovery_on_line_break(),
+        expected_block,
+    )
 }
 
 #[inline]

@@ -766,6 +766,7 @@ impl<'src> CssLexer<'src> {
             b"ltr" => LTR_KW,
             b"rtl" => RTL_KW,
             b"charset" => CHARSET_KW,
+            b"color-profile" => COLOR_PROFILE_KW,
             _ => IDENT,
         }
     }

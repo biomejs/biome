@@ -10,13 +10,13 @@ use biome_parser::prelude::*;
 use biome_rowan::SyntaxKind;
 
 #[inline]
-pub(crate) fn is_at_charset_rule(p: &mut CssParser) -> bool {
+pub(crate) fn is_at_charset_at_rule(p: &mut CssParser) -> bool {
     p.at(T![charset])
 }
 
 #[inline]
-pub(crate) fn parse_at_charset_rule(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_charset_rule(p) {
+pub(crate) fn parse_charset_at_rule(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_charset_at_rule(p) {
         return Absent;
     }
 

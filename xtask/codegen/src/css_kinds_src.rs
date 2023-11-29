@@ -219,6 +219,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "nthcol",
         "nthlastcol",
         "charset",
+        "color-profile",
         "ltr",
         "rtl",
         "n",
@@ -313,6 +314,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         // At rule nodes
         "CSS_AT_RULE",
         "CSS_CHARSET_AT_RULE",
+        "CSS_COLOR_PROFILE_AT_RULE",
         "CSS_KEYFRAMES_AT_RULE",
         "CSS_KEYFRAMES_BODY",
         "CSS_MEDIA_AT_RULE",
