@@ -1,0 +1,9 @@
+:has( {}
+:has() {}
+:has(^invalid) {}
+:has(^invalid {}
+:has(^invalid .class) {}
+:has(.div .class,^invalid) {}
+:has(.div .class {}
+:has(.div {}
+:has(.div

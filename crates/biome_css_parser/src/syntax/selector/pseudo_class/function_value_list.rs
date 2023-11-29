@@ -1,11 +1,11 @@
 use crate::parser::CssParser;
 use crate::syntax::parse_error::expected_identifier;
-use crate::syntax::selector::parse_selector_function_close_token;
+use crate::syntax::selector::eat_or_recover_selector_function_close_token;
 use crate::syntax::{is_at_identifier, parse_css_string, parse_regular_identifier};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::ParseSeparatedList;
-use biome_parser::parse_recovery::{ParseRecovery, RecoveryResult};
+use biome_parser::parse_recovery::{RecoveryError, RecoveryResult};
 use biome_parser::parsed_syntax::ParsedSyntax;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
 use biome_parser::{token_set, Parser, TokenSet};
@@ -25,19 +25,30 @@ pub(crate) fn parse_pseudo_class_function_value_list(p: &mut CssParser) -> Parse
 
     let m = p.start();
 
-    parse_regular_identifier(p).or_add_diagnostic(p, expected_identifier);
+    // we don't need to check if the identifier is valid, because we already did that
+    parse_regular_identifier(p).ok();
     p.bump(T!['(']);
-    CssPseudoValueList.parse_list(p);
-    parse_selector_function_close_token(p);
 
-    Present(m.complete(p, CSS_PSEUDO_CLASS_FUNCTION_VALUE_LIST))
+    let list = CssPseudoValueList.parse_list(p);
+    let list_range = list.range(p);
+
+    if list_range.is_empty() {
+        let diagnostic = expected_identifier(p, list_range);
+        p.error(diagnostic);
+    }
+
+    let kind = if eat_or_recover_selector_function_close_token(p, list, expected_identifier)
+        && !list_range.is_empty()
+    {
+        CSS_PSEUDO_CLASS_FUNCTION_VALUE_LIST
+    } else {
+        CSS_BOGUS_PSEUDO_CLASS
+    };
+
+    Present(m.complete(p, kind))
 }
 
 struct CssPseudoValueList;
-
-impl CssPseudoValueList {
-    const RECOVERY_SET: TokenSet<CssSyntaxKind> = token_set![T!['{'], T![')']];
-}
 
 impl ParseSeparatedList for CssPseudoValueList {
     type Kind = CssSyntaxKind;
@@ -54,11 +65,11 @@ impl ParseSeparatedList for CssPseudoValueList {
     }
 
     fn recover(&mut self, p: &mut CssParser, parsed_element: ParsedSyntax) -> RecoveryResult {
-        parsed_element.or_recover(
-            p,
-            &ParseRecovery::new(CSS_BOGUS, Self::RECOVERY_SET),
-            expected_identifier,
-        )
+        match parsed_element.or_add_diagnostic(p, expected_identifier) {
+            Some(m) => Ok(m),
+            // we don't need to recover here, because we have a better diagnostic message in a close token
+            None => Err(RecoveryError::RecoveryDisabled),
+        }
     }
 
     fn separating_element_kind(&mut self) -> CssSyntaxKind {

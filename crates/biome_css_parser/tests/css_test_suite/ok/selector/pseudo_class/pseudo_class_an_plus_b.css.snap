@@ -113,6 +113,7 @@ p:nth-child(-3){}
 :nth-child(2n+1 of li, .test) {}
 :nth-child(-n+3 of li.important) {}
 tr:nth-child(even of :not([hidden])) {}
+:nth-child(2n+1) .class {}
 
 ```
 
@@ -3310,6 +3311,7 @@ CssRoot {
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
                     simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
                         ident: CssIdentifier {
                             value_token: IDENT@1806..1810 "p" [Newline("\n"), Newline("\n"), Newline("\n")] [],
                         },
@@ -3348,6 +3350,7 @@ CssRoot {
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
                     simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
                         ident: CssIdentifier {
                             value_token: IDENT@1825..1827 "p" [Newline("\n")] [],
                         },
@@ -3386,6 +3389,7 @@ CssRoot {
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
                     simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
                         ident: CssIdentifier {
                             value_token: IDENT@1843..1845 "p" [Newline("\n")] [],
                         },
@@ -3424,6 +3428,7 @@ CssRoot {
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
                     simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
                         ident: CssIdentifier {
                             value_token: IDENT@1861..1863 "p" [Newline("\n")] [],
                         },
@@ -3462,6 +3467,7 @@ CssRoot {
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
                     simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
                         ident: CssIdentifier {
                             value_token: IDENT@1878..1880 "p" [Newline("\n")] [],
                         },
@@ -3500,6 +3506,7 @@ CssRoot {
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
                     simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
                         ident: CssIdentifier {
                             value_token: IDENT@1896..1898 "p" [Newline("\n")] [],
                         },
@@ -3538,6 +3545,7 @@ CssRoot {
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
                     simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
                         ident: CssIdentifier {
                             value_token: IDENT@1914..1916 "p" [Newline("\n")] [],
                         },
@@ -3576,6 +3584,7 @@ CssRoot {
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
                     simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
                         ident: CssIdentifier {
                             value_token: IDENT@1931..1933 "p" [Newline("\n")] [],
                         },
@@ -3614,6 +3623,7 @@ CssRoot {
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
                     simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
                         ident: CssIdentifier {
                             value_token: IDENT@1949..1951 "p" [Newline("\n")] [],
                         },
@@ -3680,6 +3690,7 @@ CssRoot {
                                             CssCompoundSelector {
                                                 nesting_selector_token: missing (optional),
                                                 simple_selector: CssTypeSelector {
+                                                    namespace: missing (optional),
                                                     ident: CssIdentifier {
                                                         value_token: IDENT@1988..1990 "li" [] [],
                                                     },
@@ -3734,6 +3745,7 @@ CssRoot {
                                             CssCompoundSelector {
                                                 nesting_selector_token: missing (optional),
                                                 simple_selector: CssTypeSelector {
+                                                    namespace: missing (optional),
                                                     ident: CssIdentifier {
                                                         value_token: IDENT@2017..2022 "li" [] [Whitespace("   ")],
                                                     },
@@ -3788,6 +3800,7 @@ CssRoot {
                                             CssCompoundSelector {
                                                 nesting_selector_token: missing (optional),
                                                 simple_selector: CssTypeSelector {
+                                                    namespace: missing (optional),
                                                     ident: CssIdentifier {
                                                         value_token: IDENT@2046..2048 "li" [] [],
                                                     },
@@ -3855,6 +3868,7 @@ CssRoot {
                                             CssCompoundSelector {
                                                 nesting_selector_token: missing (optional),
                                                 simple_selector: CssTypeSelector {
+                                                    namespace: missing (optional),
                                                     ident: CssIdentifier {
                                                         value_token: IDENT@2078..2080 "li" [] [],
                                                     },
@@ -3920,6 +3934,7 @@ CssRoot {
                                             CssCompoundSelector {
                                                 nesting_selector_token: missing (optional),
                                                 simple_selector: CssTypeSelector {
+                                                    namespace: missing (optional),
                                                     ident: CssIdentifier {
                                                         value_token: IDENT@2111..2113 "li" [] [],
                                                     },
@@ -3953,6 +3968,7 @@ CssRoot {
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
                     simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
                         ident: CssIdentifier {
                             value_token: IDENT@2127..2130 "tr" [Newline("\n")] [],
                         },
@@ -3990,8 +4006,11 @@ CssRoot {
                                                                     sub_selectors: CssSubSelectorList [
                                                                         CssAttributeSelector {
                                                                             l_brack_token: L_BRACK@2154..2155 "[" [] [],
-                                                                            name: CssIdentifier {
-                                                                                value_token: IDENT@2155..2161 "hidden" [] [],
+                                                                            name: CssAttributeName {
+                                                                                namespace: missing (optional),
+                                                                                name: CssIdentifier {
+                                                                                    value_token: IDENT@2155..2161 "hidden" [] [],
+                                                                                },
                                                                             },
                                                                             matcher: missing (optional),
                                                                             r_brack_token: R_BRACK@2161..2162 "]" [] [],
@@ -4019,17 +4038,73 @@ CssRoot {
                 r_curly_token: R_CURLY@2166..2167 "}" [] [],
             },
         },
+        CssRule {
+            prelude: CssSelectorList [
+                CssComplexSelector {
+                    left: CssCompoundSelector {
+                        nesting_selector_token: missing (optional),
+                        simple_selector: missing (optional),
+                        sub_selectors: CssSubSelectorList [
+                            CssPseudoClassSelector {
+                                colon_token: COLON@2167..2169 ":" [Newline("\n")] [],
+                                class: CssPseudoClassFunctionNth {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@2169..2178 "nth-child" [] [],
+                                    },
+                                    l_paren_token: L_PAREN@2178..2179 "(" [] [],
+                                    selector: CssPseudoClassNthSelector {
+                                        nth: CssPseudoClassNth {
+                                            sign: missing (optional),
+                                            value: CssNumber {
+                                                value_token: CSS_NUMBER_LITERAL@2179..2180 "2" [] [],
+                                            },
+                                            symbol_token: N_KW@2180..2181 "n" [] [],
+                                            offset: CssNthOffset {
+                                                sign: PLUS@2181..2182 "+" [] [],
+                                                value: CssNumber {
+                                                    value_token: CSS_NUMBER_LITERAL@2182..2183 "1" [] [],
+                                                },
+                                            },
+                                        },
+                                        of_selector: missing (optional),
+                                    },
+                                    r_paren_token: R_PAREN@2183..2184 ")" [] [],
+                                },
+                            },
+                        ],
+                    },
+                    combinator: CSS_SPACE_LITERAL@2184..2185 " " [] [],
+                    right: CssCompoundSelector {
+                        nesting_selector_token: missing (optional),
+                        simple_selector: missing (optional),
+                        sub_selectors: CssSubSelectorList [
+                            CssClassSelector {
+                                dot_token: DOT@2185..2186 "." [] [],
+                                name: CssIdentifier {
+                                    value_token: IDENT@2186..2192 "class" [] [Whitespace(" ")],
+                                },
+                            },
+                        ],
+                    },
+                },
+            ],
+            block: CssBlock {
+                l_curly_token: L_CURLY@2192..2193 "{" [] [],
+                declaration_list: CssDeclarationList [],
+                r_curly_token: R_CURLY@2193..2194 "}" [] [],
+            },
+        },
     ],
-    eof_token: EOF@2167..2168 "" [Newline("\n")] [],
+    eof_token: EOF@2194..2195 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..2168
+0: CSS_ROOT@0..2195
   0: (empty)
-  1: CSS_RULE_LIST@0..2167
+  1: CSS_RULE_LIST@0..2194
     0: CSS_RULE@0..19
       0: CSS_SELECTOR_LIST@0..17
         0: CSS_COMPOUND_SELECTOR@0..17
@@ -6222,7 +6297,8 @@ CssRoot {
         0: CSS_COMPOUND_SELECTOR@1806..1823
           0: (empty)
           1: CSS_TYPE_SELECTOR@1806..1810
-            0: CSS_IDENTIFIER@1806..1810
+            0: (empty)
+            1: CSS_IDENTIFIER@1806..1810
               0: IDENT@1806..1810 "p" [Newline("\n"), Newline("\n"), Newline("\n")] []
           2: CSS_SUB_SELECTOR_LIST@1810..1823
             0: CSS_PSEUDO_CLASS_SELECTOR@1810..1823
@@ -6247,7 +6323,8 @@ CssRoot {
         0: CSS_COMPOUND_SELECTOR@1825..1841
           0: (empty)
           1: CSS_TYPE_SELECTOR@1825..1827
-            0: CSS_IDENTIFIER@1825..1827
+            0: (empty)
+            1: CSS_IDENTIFIER@1825..1827
               0: IDENT@1825..1827 "p" [Newline("\n")] []
           2: CSS_SUB_SELECTOR_LIST@1827..1841
             0: CSS_PSEUDO_CLASS_SELECTOR@1827..1841
@@ -6272,7 +6349,8 @@ CssRoot {
         0: CSS_COMPOUND_SELECTOR@1843..1859
           0: (empty)
           1: CSS_TYPE_SELECTOR@1843..1845
-            0: CSS_IDENTIFIER@1843..1845
+            0: (empty)
+            1: CSS_IDENTIFIER@1843..1845
               0: IDENT@1843..1845 "p" [Newline("\n")] []
           2: CSS_SUB_SELECTOR_LIST@1845..1859
             0: CSS_PSEUDO_CLASS_SELECTOR@1845..1859
@@ -6297,7 +6375,8 @@ CssRoot {
         0: CSS_COMPOUND_SELECTOR@1861..1876
           0: (empty)
           1: CSS_TYPE_SELECTOR@1861..1863
-            0: CSS_IDENTIFIER@1861..1863
+            0: (empty)
+            1: CSS_IDENTIFIER@1861..1863
               0: IDENT@1861..1863 "p" [Newline("\n")] []
           2: CSS_SUB_SELECTOR_LIST@1863..1876
             0: CSS_PSEUDO_CLASS_SELECTOR@1863..1876
@@ -6322,7 +6401,8 @@ CssRoot {
         0: CSS_COMPOUND_SELECTOR@1878..1894
           0: (empty)
           1: CSS_TYPE_SELECTOR@1878..1880
-            0: CSS_IDENTIFIER@1878..1880
+            0: (empty)
+            1: CSS_IDENTIFIER@1878..1880
               0: IDENT@1878..1880 "p" [Newline("\n")] []
           2: CSS_SUB_SELECTOR_LIST@1880..1894
             0: CSS_PSEUDO_CLASS_SELECTOR@1880..1894
@@ -6347,7 +6427,8 @@ CssRoot {
         0: CSS_COMPOUND_SELECTOR@1896..1912
           0: (empty)
           1: CSS_TYPE_SELECTOR@1896..1898
-            0: CSS_IDENTIFIER@1896..1898
+            0: (empty)
+            1: CSS_IDENTIFIER@1896..1898
               0: IDENT@1896..1898 "p" [Newline("\n")] []
           2: CSS_SUB_SELECTOR_LIST@1898..1912
             0: CSS_PSEUDO_CLASS_SELECTOR@1898..1912
@@ -6372,7 +6453,8 @@ CssRoot {
         0: CSS_COMPOUND_SELECTOR@1914..1929
           0: (empty)
           1: CSS_TYPE_SELECTOR@1914..1916
-            0: CSS_IDENTIFIER@1914..1916
+            0: (empty)
+            1: CSS_IDENTIFIER@1914..1916
               0: IDENT@1914..1916 "p" [Newline("\n")] []
           2: CSS_SUB_SELECTOR_LIST@1916..1929
             0: CSS_PSEUDO_CLASS_SELECTOR@1916..1929
@@ -6397,7 +6479,8 @@ CssRoot {
         0: CSS_COMPOUND_SELECTOR@1931..1947
           0: (empty)
           1: CSS_TYPE_SELECTOR@1931..1933
-            0: CSS_IDENTIFIER@1931..1933
+            0: (empty)
+            1: CSS_IDENTIFIER@1931..1933
               0: IDENT@1931..1933 "p" [Newline("\n")] []
           2: CSS_SUB_SELECTOR_LIST@1933..1947
             0: CSS_PSEUDO_CLASS_SELECTOR@1933..1947
@@ -6422,7 +6505,8 @@ CssRoot {
         0: CSS_COMPOUND_SELECTOR@1949..1965
           0: (empty)
           1: CSS_TYPE_SELECTOR@1949..1951
-            0: CSS_IDENTIFIER@1949..1951
+            0: (empty)
+            1: CSS_IDENTIFIER@1949..1951
               0: IDENT@1949..1951 "p" [Newline("\n")] []
           2: CSS_SUB_SELECTOR_LIST@1951..1965
             0: CSS_PSEUDO_CLASS_SELECTOR@1951..1965
@@ -6470,7 +6554,8 @@ CssRoot {
                       0: CSS_COMPOUND_SELECTOR@1988..1990
                         0: (empty)
                         1: CSS_TYPE_SELECTOR@1988..1990
-                          0: CSS_IDENTIFIER@1988..1990
+                          0: (empty)
+                          1: CSS_IDENTIFIER@1988..1990
                             0: IDENT@1988..1990 "li" [] []
                         2: CSS_SUB_SELECTOR_LIST@1990..1990
                 3: R_PAREN@1990..1992 ")" [] [Whitespace(" ")]
@@ -6506,7 +6591,8 @@ CssRoot {
                       0: CSS_COMPOUND_SELECTOR@2017..2022
                         0: (empty)
                         1: CSS_TYPE_SELECTOR@2017..2022
-                          0: CSS_IDENTIFIER@2017..2022
+                          0: (empty)
+                          1: CSS_IDENTIFIER@2017..2022
                             0: IDENT@2017..2022 "li" [] [Whitespace("   ")]
                         2: CSS_SUB_SELECTOR_LIST@2022..2022
                 3: R_PAREN@2022..2024 ")" [] [Whitespace(" ")]
@@ -6542,7 +6628,8 @@ CssRoot {
                       0: CSS_COMPOUND_SELECTOR@2046..2048
                         0: (empty)
                         1: CSS_TYPE_SELECTOR@2046..2048
-                          0: CSS_IDENTIFIER@2046..2048
+                          0: (empty)
+                          1: CSS_IDENTIFIER@2046..2048
                             0: IDENT@2046..2048 "li" [] []
                         2: CSS_SUB_SELECTOR_LIST@2048..2048
                       1: COMMA@2048..2049 "," [] []
@@ -6587,7 +6674,8 @@ CssRoot {
                       0: CSS_COMPOUND_SELECTOR@2078..2080
                         0: (empty)
                         1: CSS_TYPE_SELECTOR@2078..2080
-                          0: CSS_IDENTIFIER@2078..2080
+                          0: (empty)
+                          1: CSS_IDENTIFIER@2078..2080
                             0: IDENT@2078..2080 "li" [] []
                         2: CSS_SUB_SELECTOR_LIST@2080..2080
                       1: COMMA@2080..2082 "," [] [Whitespace(" ")]
@@ -6631,7 +6719,8 @@ CssRoot {
                       0: CSS_COMPOUND_SELECTOR@2111..2123
                         0: (empty)
                         1: CSS_TYPE_SELECTOR@2111..2113
-                          0: CSS_IDENTIFIER@2111..2113
+                          0: (empty)
+                          1: CSS_IDENTIFIER@2111..2113
                             0: IDENT@2111..2113 "li" [] []
                         2: CSS_SUB_SELECTOR_LIST@2113..2123
                           0: CSS_CLASS_SELECTOR@2113..2123
@@ -6648,7 +6737,8 @@ CssRoot {
         0: CSS_COMPOUND_SELECTOR@2127..2165
           0: (empty)
           1: CSS_TYPE_SELECTOR@2127..2130
-            0: CSS_IDENTIFIER@2127..2130
+            0: (empty)
+            1: CSS_IDENTIFIER@2127..2130
               0: IDENT@2127..2130 "tr" [Newline("\n")] []
           2: CSS_SUB_SELECTOR_LIST@2130..2165
             0: CSS_PSEUDO_CLASS_SELECTOR@2130..2165
@@ -6680,8 +6770,10 @@ CssRoot {
                                   2: CSS_SUB_SELECTOR_LIST@2154..2162
                                     0: CSS_ATTRIBUTE_SELECTOR@2154..2162
                                       0: L_BRACK@2154..2155 "[" [] []
-                                      1: CSS_IDENTIFIER@2155..2161
-                                        0: IDENT@2155..2161 "hidden" [] []
+                                      1: CSS_ATTRIBUTE_NAME@2155..2161
+                                        0: (empty)
+                                        1: CSS_IDENTIFIER@2155..2161
+                                          0: IDENT@2155..2161 "hidden" [] []
                                       2: (empty)
                                       3: R_BRACK@2161..2162 "]" [] []
                               3: R_PAREN@2162..2163 ")" [] []
@@ -6690,7 +6782,45 @@ CssRoot {
         0: L_CURLY@2165..2166 "{" [] []
         1: CSS_DECLARATION_LIST@2166..2166
         2: R_CURLY@2166..2167 "}" [] []
-  2: EOF@2167..2168 "" [Newline("\n")] []
+    98: CSS_RULE@2167..2194
+      0: CSS_SELECTOR_LIST@2167..2192
+        0: CSS_COMPLEX_SELECTOR@2167..2192
+          0: CSS_COMPOUND_SELECTOR@2167..2184
+            0: (empty)
+            1: (empty)
+            2: CSS_SUB_SELECTOR_LIST@2167..2184
+              0: CSS_PSEUDO_CLASS_SELECTOR@2167..2184
+                0: COLON@2167..2169 ":" [Newline("\n")] []
+                1: CSS_PSEUDO_CLASS_FUNCTION_NTH@2169..2184
+                  0: CSS_IDENTIFIER@2169..2178
+                    0: IDENT@2169..2178 "nth-child" [] []
+                  1: L_PAREN@2178..2179 "(" [] []
+                  2: CSS_PSEUDO_CLASS_NTH_SELECTOR@2179..2183
+                    0: CSS_PSEUDO_CLASS_NTH@2179..2183
+                      0: (empty)
+                      1: CSS_NUMBER@2179..2180
+                        0: CSS_NUMBER_LITERAL@2179..2180 "2" [] []
+                      2: N_KW@2180..2181 "n" [] []
+                      3: CSS_NTH_OFFSET@2181..2183
+                        0: PLUS@2181..2182 "+" [] []
+                        1: CSS_NUMBER@2182..2183
+                          0: CSS_NUMBER_LITERAL@2182..2183 "1" [] []
+                    1: (empty)
+                  3: R_PAREN@2183..2184 ")" [] []
+          1: CSS_SPACE_LITERAL@2184..2185 " " [] []
+          2: CSS_COMPOUND_SELECTOR@2185..2192
+            0: (empty)
+            1: (empty)
+            2: CSS_SUB_SELECTOR_LIST@2185..2192
+              0: CSS_CLASS_SELECTOR@2185..2192
+                0: DOT@2185..2186 "." [] []
+                1: CSS_IDENTIFIER@2186..2192
+                  0: IDENT@2186..2192 "class" [] [Whitespace(" ")]
+      1: CSS_BLOCK@2192..2194
+        0: L_CURLY@2192..2193 "{" [] []
+        1: CSS_DECLARATION_LIST@2193..2193
+        2: R_CURLY@2193..2194 "}" [] []
+  2: EOF@2194..2195 "" [Newline("\n")] []
 
 ```
 

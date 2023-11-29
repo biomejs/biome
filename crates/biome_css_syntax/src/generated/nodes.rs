@@ -682,6 +682,47 @@ pub struct CssAttributeMatcherValueFields {
     pub name: SyntaxResult<AnyCssAttributeMatcherValue>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssAttributeName {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssAttributeName {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssAttributeNameFields {
+        CssAttributeNameFields {
+            namespace: self.namespace(),
+            name: self.name(),
+        }
+    }
+    pub fn namespace(&self) -> Option<CssNamespace> {
+        support::node(&self.syntax, 0usize)
+    }
+    pub fn name(&self) -> SyntaxResult<CssIdentifier> {
+        support::required_node(&self.syntax, 1usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssAttributeName {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssAttributeNameFields {
+    pub namespace: Option<CssNamespace>,
+    pub name: SyntaxResult<CssIdentifier>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssAttributeSelector {
     pub(crate) syntax: SyntaxNode,
 }
@@ -706,7 +747,7 @@ impl CssAttributeSelector {
     pub fn l_brack_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn name(&self) -> SyntaxResult<CssIdentifier> {
+    pub fn name(&self) -> SyntaxResult<CssAttributeName> {
         support::required_node(&self.syntax, 1usize)
     }
     pub fn matcher(&self) -> Option<CssAttributeMatcher> {
@@ -728,7 +769,7 @@ impl Serialize for CssAttributeSelector {
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct CssAttributeSelectorFields {
     pub l_brack_token: SyntaxResult<SyntaxToken>,
-    pub name: SyntaxResult<CssIdentifier>,
+    pub name: SyntaxResult<CssAttributeName>,
     pub matcher: Option<CssAttributeMatcher>,
     pub r_brack_token: SyntaxResult<SyntaxToken>,
 }
@@ -889,7 +930,7 @@ impl CssCompoundSelector {
     pub fn nesting_selector_token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, 0usize)
     }
-    pub fn simple_selector(&self) -> Option<AnySimpleSelector> {
+    pub fn simple_selector(&self) -> Option<AnyCssSimpleSelector> {
         support::node(&self.syntax, 1usize)
     }
     pub fn sub_selectors(&self) -> CssSubSelectorList {
@@ -908,7 +949,7 @@ impl Serialize for CssCompoundSelector {
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct CssCompoundSelectorFields {
     pub nesting_selector_token: Option<SyntaxToken>,
-    pub simple_selector: Option<AnySimpleSelector>,
+    pub simple_selector: Option<AnyCssSimpleSelector>,
     pub sub_selectors: CssSubSelectorList,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -1258,6 +1299,81 @@ pub struct CssKeyframesSelectorFields {
     pub from_token: SyntaxResult<SyntaxToken>,
     pub to_token: SyntaxResult<SyntaxToken>,
     pub css_percentage: SyntaxResult<CssPercentage>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssNamedNamespacePrefix {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssNamedNamespacePrefix {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssNamedNamespacePrefixFields {
+        CssNamedNamespacePrefixFields { name: self.name() }
+    }
+    pub fn name(&self) -> SyntaxResult<CssIdentifier> {
+        support::required_node(&self.syntax, 0usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssNamedNamespacePrefix {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssNamedNamespacePrefixFields {
+    pub name: SyntaxResult<CssIdentifier>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssNamespace {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssNamespace {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssNamespaceFields {
+        CssNamespaceFields {
+            prefix: self.prefix(),
+            bitwise_or_token: self.bitwise_or_token(),
+        }
+    }
+    pub fn prefix(&self) -> Option<AnyCssNamespacePrefix> {
+        support::node(&self.syntax, 0usize)
+    }
+    pub fn bitwise_or_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssNamespace {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssNamespaceFields {
+    pub prefix: Option<AnyCssNamespacePrefix>,
+    pub bitwise_or_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssNthOffset {
@@ -2555,11 +2671,15 @@ impl CssTypeSelector {
     }
     pub fn as_fields(&self) -> CssTypeSelectorFields {
         CssTypeSelectorFields {
+            namespace: self.namespace(),
             ident: self.ident(),
         }
     }
+    pub fn namespace(&self) -> Option<CssNamespace> {
+        support::node(&self.syntax, 0usize)
+    }
     pub fn ident(&self) -> SyntaxResult<CssIdentifier> {
-        support::required_node(&self.syntax, 0usize)
+        support::required_node(&self.syntax, 1usize)
     }
 }
 #[cfg(feature = "serde")]
@@ -2573,7 +2693,44 @@ impl Serialize for CssTypeSelector {
 }
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct CssTypeSelectorFields {
+    pub namespace: Option<CssNamespace>,
     pub ident: SyntaxResult<CssIdentifier>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssUniversalNamespacePrefix {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssUniversalNamespacePrefix {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssUniversalNamespacePrefixFields {
+        CssUniversalNamespacePrefixFields {
+            star_token: self.star_token(),
+        }
+    }
+    pub fn star_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssUniversalNamespacePrefix {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssUniversalNamespacePrefixFields {
+    pub star_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssUniversalSelector {
@@ -2591,11 +2748,15 @@ impl CssUniversalSelector {
     }
     pub fn as_fields(&self) -> CssUniversalSelectorFields {
         CssUniversalSelectorFields {
+            namespace: self.namespace(),
             star_token: self.star_token(),
         }
     }
+    pub fn namespace(&self) -> Option<CssNamespace> {
+        support::node(&self.syntax, 0usize)
+    }
     pub fn star_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
+        support::required_token(&self.syntax, 1usize)
     }
 }
 #[cfg(feature = "serde")]
@@ -2609,6 +2770,7 @@ impl Serialize for CssUniversalSelector {
 }
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct CssUniversalSelectorFields {
+    pub namespace: Option<CssNamespace>,
     pub star_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -2824,6 +2986,26 @@ impl AnyCssCompoundSelector {
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
+pub enum AnyCssNamespacePrefix {
+    CssNamedNamespacePrefix(CssNamedNamespacePrefix),
+    CssUniversalNamespacePrefix(CssUniversalNamespacePrefix),
+}
+impl AnyCssNamespacePrefix {
+    pub fn as_css_named_namespace_prefix(&self) -> Option<&CssNamedNamespacePrefix> {
+        match &self {
+            AnyCssNamespacePrefix::CssNamedNamespacePrefix(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_universal_namespace_prefix(&self) -> Option<&CssUniversalNamespacePrefix> {
+        match &self {
+            AnyCssNamespacePrefix::CssUniversalNamespacePrefix(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum AnyCssPseudoClass {
     CssBogusPseudoClass(CssBogusPseudoClass),
     CssPseudoClassFunctionCompoundSelector(CssPseudoClassFunctionCompoundSelector),
@@ -2960,11 +3142,18 @@ impl AnyCssPseudoClassNthSelector {
 #[derive(Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum AnyCssPseudoElement {
+    CssBogusPseudoElement(CssBogusPseudoElement),
     CssPseudoElementFunctionIdentifier(CssPseudoElementFunctionIdentifier),
     CssPseudoElementFunctionSelector(CssPseudoElementFunctionSelector),
     CssPseudoElementIdentifier(CssPseudoElementIdentifier),
 }
 impl AnyCssPseudoElement {
+    pub fn as_css_bogus_pseudo_element(&self) -> Option<&CssBogusPseudoElement> {
+        match &self {
+            AnyCssPseudoElement::CssBogusPseudoElement(item) => Some(item),
+            _ => None,
+        }
+    }
     pub fn as_css_pseudo_element_function_identifier(
         &self,
     ) -> Option<&CssPseudoElementFunctionIdentifier> {
@@ -3084,6 +3273,26 @@ impl AnyCssSelector {
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
+pub enum AnyCssSimpleSelector {
+    CssTypeSelector(CssTypeSelector),
+    CssUniversalSelector(CssUniversalSelector),
+}
+impl AnyCssSimpleSelector {
+    pub fn as_css_type_selector(&self) -> Option<&CssTypeSelector> {
+        match &self {
+            AnyCssSimpleSelector::CssTypeSelector(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_universal_selector(&self) -> Option<&CssUniversalSelector> {
+        match &self {
+            AnyCssSimpleSelector::CssUniversalSelector(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum AnyCssSubSelector {
     CssAttributeSelector(CssAttributeSelector),
     CssBogusSubSelector(CssBogusSubSelector),
@@ -3181,26 +3390,6 @@ impl AnyCssValue {
     pub fn as_css_string(&self) -> Option<&CssString> {
         match &self {
             AnyCssValue::CssString(item) => Some(item),
-            _ => None,
-        }
-    }
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
-pub enum AnySimpleSelector {
-    CssTypeSelector(CssTypeSelector),
-    CssUniversalSelector(CssUniversalSelector),
-}
-impl AnySimpleSelector {
-    pub fn as_css_type_selector(&self) -> Option<&CssTypeSelector> {
-        match &self {
-            AnySimpleSelector::CssTypeSelector(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_css_universal_selector(&self) -> Option<&CssUniversalSelector> {
-        match &self {
-            AnySimpleSelector::CssUniversalSelector(item) => Some(item),
             _ => None,
         }
     }
@@ -3838,6 +4027,48 @@ impl From<CssAttributeMatcherValue> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for CssAttributeName {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_ATTRIBUTE_NAME as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_ATTRIBUTE_NAME
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssAttributeName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssAttributeName")
+            .field(
+                "namespace",
+                &support::DebugOptionalElement(self.namespace()),
+            )
+            .field("name", &support::DebugSyntaxResult(self.name()))
+            .finish()
+    }
+}
+impl From<CssAttributeName> for SyntaxNode {
+    fn from(n: CssAttributeName) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssAttributeName> for SyntaxElement {
+    fn from(n: CssAttributeName) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
 impl AstNode for CssAttributeSelector {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -4396,6 +4627,86 @@ impl From<CssKeyframesSelector> for SyntaxNode {
 }
 impl From<CssKeyframesSelector> for SyntaxElement {
     fn from(n: CssKeyframesSelector) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssNamedNamespacePrefix {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_NAMED_NAMESPACE_PREFIX as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_NAMED_NAMESPACE_PREFIX
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssNamedNamespacePrefix {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssNamedNamespacePrefix")
+            .field("name", &support::DebugSyntaxResult(self.name()))
+            .finish()
+    }
+}
+impl From<CssNamedNamespacePrefix> for SyntaxNode {
+    fn from(n: CssNamedNamespacePrefix) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssNamedNamespacePrefix> for SyntaxElement {
+    fn from(n: CssNamedNamespacePrefix) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssNamespace {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_NAMESPACE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_NAMESPACE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssNamespace {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssNamespace")
+            .field("prefix", &support::DebugOptionalElement(self.prefix()))
+            .field(
+                "bitwise_or_token",
+                &support::DebugSyntaxResult(self.bitwise_or_token()),
+            )
+            .finish()
+    }
+}
+impl From<CssNamespace> for SyntaxNode {
+    fn from(n: CssNamespace) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssNamespace> for SyntaxElement {
+    fn from(n: CssNamespace) -> SyntaxElement {
         n.syntax.into()
     }
 }
@@ -5676,6 +5987,10 @@ impl AstNode for CssTypeSelector {
 impl std::fmt::Debug for CssTypeSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("CssTypeSelector")
+            .field(
+                "namespace",
+                &support::DebugOptionalElement(self.namespace()),
+            )
             .field("ident", &support::DebugSyntaxResult(self.ident()))
             .finish()
     }
@@ -5687,6 +6002,44 @@ impl From<CssTypeSelector> for SyntaxNode {
 }
 impl From<CssTypeSelector> for SyntaxElement {
     fn from(n: CssTypeSelector) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssUniversalNamespacePrefix {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_UNIVERSAL_NAMESPACE_PREFIX as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_UNIVERSAL_NAMESPACE_PREFIX
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssUniversalNamespacePrefix {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssUniversalNamespacePrefix")
+            .field("star_token", &support::DebugSyntaxResult(self.star_token()))
+            .finish()
+    }
+}
+impl From<CssUniversalNamespacePrefix> for SyntaxNode {
+    fn from(n: CssUniversalNamespacePrefix) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssUniversalNamespacePrefix> for SyntaxElement {
+    fn from(n: CssUniversalNamespacePrefix) -> SyntaxElement {
         n.syntax.into()
     }
 }
@@ -5714,6 +6067,10 @@ impl AstNode for CssUniversalSelector {
 impl std::fmt::Debug for CssUniversalSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("CssUniversalSelector")
+            .field(
+                "namespace",
+                &support::DebugOptionalElement(self.namespace()),
+            )
             .field("star_token", &support::DebugSyntaxResult(self.star_token()))
             .finish()
     }
@@ -6174,6 +6531,75 @@ impl From<AnyCssCompoundSelector> for SyntaxElement {
         node.into()
     }
 }
+impl From<CssNamedNamespacePrefix> for AnyCssNamespacePrefix {
+    fn from(node: CssNamedNamespacePrefix) -> AnyCssNamespacePrefix {
+        AnyCssNamespacePrefix::CssNamedNamespacePrefix(node)
+    }
+}
+impl From<CssUniversalNamespacePrefix> for AnyCssNamespacePrefix {
+    fn from(node: CssUniversalNamespacePrefix) -> AnyCssNamespacePrefix {
+        AnyCssNamespacePrefix::CssUniversalNamespacePrefix(node)
+    }
+}
+impl AstNode for AnyCssNamespacePrefix {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        CssNamedNamespacePrefix::KIND_SET.union(CssUniversalNamespacePrefix::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(
+            kind,
+            CSS_NAMED_NAMESPACE_PREFIX | CSS_UNIVERSAL_NAMESPACE_PREFIX
+        )
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_NAMED_NAMESPACE_PREFIX => {
+                AnyCssNamespacePrefix::CssNamedNamespacePrefix(CssNamedNamespacePrefix { syntax })
+            }
+            CSS_UNIVERSAL_NAMESPACE_PREFIX => {
+                AnyCssNamespacePrefix::CssUniversalNamespacePrefix(CssUniversalNamespacePrefix {
+                    syntax,
+                })
+            }
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            AnyCssNamespacePrefix::CssNamedNamespacePrefix(it) => &it.syntax,
+            AnyCssNamespacePrefix::CssUniversalNamespacePrefix(it) => &it.syntax,
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            AnyCssNamespacePrefix::CssNamedNamespacePrefix(it) => it.syntax,
+            AnyCssNamespacePrefix::CssUniversalNamespacePrefix(it) => it.syntax,
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssNamespacePrefix {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            AnyCssNamespacePrefix::CssNamedNamespacePrefix(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssNamespacePrefix::CssUniversalNamespacePrefix(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssNamespacePrefix> for SyntaxNode {
+    fn from(n: AnyCssNamespacePrefix) -> SyntaxNode {
+        match n {
+            AnyCssNamespacePrefix::CssNamedNamespacePrefix(it) => it.into(),
+            AnyCssNamespacePrefix::CssUniversalNamespacePrefix(it) => it.into(),
+        }
+    }
+}
+impl From<AnyCssNamespacePrefix> for SyntaxElement {
+    fn from(n: AnyCssNamespacePrefix) -> SyntaxElement {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<CssBogusPseudoClass> for AnyCssPseudoClass {
     fn from(node: CssBogusPseudoClass) -> AnyCssPseudoClass {
         AnyCssPseudoClass::CssBogusPseudoClass(node)
@@ -6526,6 +6952,11 @@ impl From<AnyCssPseudoClassNthSelector> for SyntaxElement {
         node.into()
     }
 }
+impl From<CssBogusPseudoElement> for AnyCssPseudoElement {
+    fn from(node: CssBogusPseudoElement) -> AnyCssPseudoElement {
+        AnyCssPseudoElement::CssBogusPseudoElement(node)
+    }
+}
 impl From<CssPseudoElementFunctionIdentifier> for AnyCssPseudoElement {
     fn from(node: CssPseudoElementFunctionIdentifier) -> AnyCssPseudoElement {
         AnyCssPseudoElement::CssPseudoElementFunctionIdentifier(node)
@@ -6543,19 +6974,24 @@ impl From<CssPseudoElementIdentifier> for AnyCssPseudoElement {
 }
 impl AstNode for AnyCssPseudoElement {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = CssPseudoElementFunctionIdentifier::KIND_SET
+    const KIND_SET: SyntaxKindSet<Language> = CssBogusPseudoElement::KIND_SET
+        .union(CssPseudoElementFunctionIdentifier::KIND_SET)
         .union(CssPseudoElementFunctionSelector::KIND_SET)
         .union(CssPseudoElementIdentifier::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            CSS_PSEUDO_ELEMENT_FUNCTION_IDENTIFIER
+            CSS_BOGUS_PSEUDO_ELEMENT
+                | CSS_PSEUDO_ELEMENT_FUNCTION_IDENTIFIER
                 | CSS_PSEUDO_ELEMENT_FUNCTION_SELECTOR
                 | CSS_PSEUDO_ELEMENT_IDENTIFIER
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
+            CSS_BOGUS_PSEUDO_ELEMENT => {
+                AnyCssPseudoElement::CssBogusPseudoElement(CssBogusPseudoElement { syntax })
+            }
             CSS_PSEUDO_ELEMENT_FUNCTION_IDENTIFIER => {
                 AnyCssPseudoElement::CssPseudoElementFunctionIdentifier(
                     CssPseudoElementFunctionIdentifier { syntax },
@@ -6577,6 +7013,7 @@ impl AstNode for AnyCssPseudoElement {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
+            AnyCssPseudoElement::CssBogusPseudoElement(it) => &it.syntax,
             AnyCssPseudoElement::CssPseudoElementFunctionIdentifier(it) => &it.syntax,
             AnyCssPseudoElement::CssPseudoElementFunctionSelector(it) => &it.syntax,
             AnyCssPseudoElement::CssPseudoElementIdentifier(it) => &it.syntax,
@@ -6584,6 +7021,7 @@ impl AstNode for AnyCssPseudoElement {
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
+            AnyCssPseudoElement::CssBogusPseudoElement(it) => it.syntax,
             AnyCssPseudoElement::CssPseudoElementFunctionIdentifier(it) => it.syntax,
             AnyCssPseudoElement::CssPseudoElementFunctionSelector(it) => it.syntax,
             AnyCssPseudoElement::CssPseudoElementIdentifier(it) => it.syntax,
@@ -6593,6 +7031,7 @@ impl AstNode for AnyCssPseudoElement {
 impl std::fmt::Debug for AnyCssPseudoElement {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            AnyCssPseudoElement::CssBogusPseudoElement(it) => std::fmt::Debug::fmt(it, f),
             AnyCssPseudoElement::CssPseudoElementFunctionIdentifier(it) => {
                 std::fmt::Debug::fmt(it, f)
             }
@@ -6606,6 +7045,7 @@ impl std::fmt::Debug for AnyCssPseudoElement {
 impl From<AnyCssPseudoElement> for SyntaxNode {
     fn from(n: AnyCssPseudoElement) -> SyntaxNode {
         match n {
+            AnyCssPseudoElement::CssBogusPseudoElement(it) => it.into(),
             AnyCssPseudoElement::CssPseudoElementFunctionIdentifier(it) => it.into(),
             AnyCssPseudoElement::CssPseudoElementFunctionSelector(it) => it.into(),
             AnyCssPseudoElement::CssPseudoElementIdentifier(it) => it.into(),
@@ -6893,6 +7333,68 @@ impl From<AnyCssSelector> for SyntaxElement {
         node.into()
     }
 }
+impl From<CssTypeSelector> for AnyCssSimpleSelector {
+    fn from(node: CssTypeSelector) -> AnyCssSimpleSelector {
+        AnyCssSimpleSelector::CssTypeSelector(node)
+    }
+}
+impl From<CssUniversalSelector> for AnyCssSimpleSelector {
+    fn from(node: CssUniversalSelector) -> AnyCssSimpleSelector {
+        AnyCssSimpleSelector::CssUniversalSelector(node)
+    }
+}
+impl AstNode for AnyCssSimpleSelector {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        CssTypeSelector::KIND_SET.union(CssUniversalSelector::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, CSS_TYPE_SELECTOR | CSS_UNIVERSAL_SELECTOR)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_TYPE_SELECTOR => AnyCssSimpleSelector::CssTypeSelector(CssTypeSelector { syntax }),
+            CSS_UNIVERSAL_SELECTOR => {
+                AnyCssSimpleSelector::CssUniversalSelector(CssUniversalSelector { syntax })
+            }
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            AnyCssSimpleSelector::CssTypeSelector(it) => &it.syntax,
+            AnyCssSimpleSelector::CssUniversalSelector(it) => &it.syntax,
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            AnyCssSimpleSelector::CssTypeSelector(it) => it.syntax,
+            AnyCssSimpleSelector::CssUniversalSelector(it) => it.syntax,
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssSimpleSelector {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            AnyCssSimpleSelector::CssTypeSelector(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssSimpleSelector::CssUniversalSelector(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssSimpleSelector> for SyntaxNode {
+    fn from(n: AnyCssSimpleSelector) -> SyntaxNode {
+        match n {
+            AnyCssSimpleSelector::CssTypeSelector(it) => it.into(),
+            AnyCssSimpleSelector::CssUniversalSelector(it) => it.into(),
+        }
+    }
+}
+impl From<AnyCssSimpleSelector> for SyntaxElement {
+    fn from(n: AnyCssSimpleSelector) -> SyntaxElement {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<CssAttributeSelector> for AnyCssSubSelector {
     fn from(node: CssAttributeSelector) -> AnyCssSubSelector {
         AnyCssSubSelector::CssAttributeSelector(node)
@@ -7137,68 +7639,6 @@ impl From<AnyCssValue> for SyntaxElement {
         node.into()
     }
 }
-impl From<CssTypeSelector> for AnySimpleSelector {
-    fn from(node: CssTypeSelector) -> AnySimpleSelector {
-        AnySimpleSelector::CssTypeSelector(node)
-    }
-}
-impl From<CssUniversalSelector> for AnySimpleSelector {
-    fn from(node: CssUniversalSelector) -> AnySimpleSelector {
-        AnySimpleSelector::CssUniversalSelector(node)
-    }
-}
-impl AstNode for AnySimpleSelector {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        CssTypeSelector::KIND_SET.union(CssUniversalSelector::KIND_SET);
-    fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, CSS_TYPE_SELECTOR | CSS_UNIVERSAL_SELECTOR)
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        let res = match syntax.kind() {
-            CSS_TYPE_SELECTOR => AnySimpleSelector::CssTypeSelector(CssTypeSelector { syntax }),
-            CSS_UNIVERSAL_SELECTOR => {
-                AnySimpleSelector::CssUniversalSelector(CssUniversalSelector { syntax })
-            }
-            _ => return None,
-        };
-        Some(res)
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        match self {
-            AnySimpleSelector::CssTypeSelector(it) => &it.syntax,
-            AnySimpleSelector::CssUniversalSelector(it) => &it.syntax,
-        }
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        match self {
-            AnySimpleSelector::CssTypeSelector(it) => it.syntax,
-            AnySimpleSelector::CssUniversalSelector(it) => it.syntax,
-        }
-    }
-}
-impl std::fmt::Debug for AnySimpleSelector {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            AnySimpleSelector::CssTypeSelector(it) => std::fmt::Debug::fmt(it, f),
-            AnySimpleSelector::CssUniversalSelector(it) => std::fmt::Debug::fmt(it, f),
-        }
-    }
-}
-impl From<AnySimpleSelector> for SyntaxNode {
-    fn from(n: AnySimpleSelector) -> SyntaxNode {
-        match n {
-            AnySimpleSelector::CssTypeSelector(it) => it.into(),
-            AnySimpleSelector::CssUniversalSelector(it) => it.into(),
-        }
-    }
-}
-impl From<AnySimpleSelector> for SyntaxElement {
-    fn from(n: AnySimpleSelector) -> SyntaxElement {
-        let node: SyntaxNode = n.into();
-        node.into()
-    }
-}
 impl std::fmt::Display for AnyCssAtMediaQueryFeatureType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -7220,6 +7660,11 @@ impl std::fmt::Display for AnyCssAttributeMatcherValue {
     }
 }
 impl std::fmt::Display for AnyCssCompoundSelector {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyCssNamespacePrefix {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -7264,17 +7709,17 @@ impl std::fmt::Display for AnyCssSelector {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for AnyCssSimpleSelector {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AnyCssSubSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
 impl std::fmt::Display for AnyCssValue {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
-impl std::fmt::Display for AnySimpleSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -7349,6 +7794,11 @@ impl std::fmt::Display for CssAttributeMatcherValue {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for CssAttributeName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for CssAttributeSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -7410,6 +7860,16 @@ impl std::fmt::Display for CssKeyframesBlock {
     }
 }
 impl std::fmt::Display for CssKeyframesSelector {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssNamedNamespacePrefix {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssNamespace {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -7560,6 +8020,11 @@ impl std::fmt::Display for CssString {
     }
 }
 impl std::fmt::Display for CssTypeSelector {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssUniversalNamespacePrefix {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -7747,6 +8212,63 @@ impl From<CssBogusPseudoClass> for SyntaxNode {
 }
 impl From<CssBogusPseudoClass> for SyntaxElement {
     fn from(n: CssBogusPseudoClass) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssBogusPseudoElement {
+    syntax: SyntaxNode,
+}
+impl CssBogusPseudoElement {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn items(&self) -> SyntaxElementChildren {
+        support::elements(&self.syntax)
+    }
+}
+impl AstNode for CssBogusPseudoElement {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_BOGUS_PSEUDO_ELEMENT as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_BOGUS_PSEUDO_ELEMENT
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssBogusPseudoElement {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssBogusPseudoElement")
+            .field("items", &DebugSyntaxElementChildren(self.items()))
+            .finish()
+    }
+}
+impl From<CssBogusPseudoElement> for SyntaxNode {
+    fn from(n: CssBogusPseudoElement) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssBogusPseudoElement> for SyntaxElement {
+    fn from(n: CssBogusPseudoElement) -> SyntaxElement {
         n.syntax.into()
     }
 }

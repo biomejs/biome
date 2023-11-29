@@ -261,9 +261,35 @@ pub fn css_attribute_matcher_value(name: AnyCssAttributeMatcherValue) -> CssAttr
         [Some(SyntaxElement::Node(name.into_syntax()))],
     ))
 }
+pub fn css_attribute_name(name: CssIdentifier) -> CssAttributeNameBuilder {
+    CssAttributeNameBuilder {
+        name,
+        namespace: None,
+    }
+}
+pub struct CssAttributeNameBuilder {
+    name: CssIdentifier,
+    namespace: Option<CssNamespace>,
+}
+impl CssAttributeNameBuilder {
+    pub fn with_namespace(mut self, namespace: CssNamespace) -> Self {
+        self.namespace = Some(namespace);
+        self
+    }
+    pub fn build(self) -> CssAttributeName {
+        CssAttributeName::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::CSS_ATTRIBUTE_NAME,
+            [
+                self.namespace
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Node(self.name.into_syntax())),
+            ],
+        ))
+    }
+}
 pub fn css_attribute_selector(
     l_brack_token: SyntaxToken,
-    name: CssIdentifier,
+    name: CssAttributeName,
     r_brack_token: SyntaxToken,
 ) -> CssAttributeSelectorBuilder {
     CssAttributeSelectorBuilder {
@@ -275,7 +301,7 @@ pub fn css_attribute_selector(
 }
 pub struct CssAttributeSelectorBuilder {
     l_brack_token: SyntaxToken,
-    name: CssIdentifier,
+    name: CssAttributeName,
     r_brack_token: SyntaxToken,
     matcher: Option<CssAttributeMatcher>,
 }
@@ -344,14 +370,14 @@ pub fn css_compound_selector(sub_selectors: CssSubSelectorList) -> CssCompoundSe
 pub struct CssCompoundSelectorBuilder {
     sub_selectors: CssSubSelectorList,
     nesting_selector_token: Option<SyntaxToken>,
-    simple_selector: Option<AnySimpleSelector>,
+    simple_selector: Option<AnyCssSimpleSelector>,
 }
 impl CssCompoundSelectorBuilder {
     pub fn with_nesting_selector_token(mut self, nesting_selector_token: SyntaxToken) -> Self {
         self.nesting_selector_token = Some(nesting_selector_token);
         self
     }
-    pub fn with_simple_selector(mut self, simple_selector: AnySimpleSelector) -> Self {
+    pub fn with_simple_selector(mut self, simple_selector: AnyCssSimpleSelector) -> Self {
         self.simple_selector = Some(simple_selector);
         self
     }
@@ -479,6 +505,38 @@ pub fn css_keyframes_selector(
             Some(SyntaxElement::Node(css_percentage.into_syntax())),
         ],
     ))
+}
+pub fn css_named_namespace_prefix(name: CssIdentifier) -> CssNamedNamespacePrefix {
+    CssNamedNamespacePrefix::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_NAMED_NAMESPACE_PREFIX,
+        [Some(SyntaxElement::Node(name.into_syntax()))],
+    ))
+}
+pub fn css_namespace(bitwise_or_token: SyntaxToken) -> CssNamespaceBuilder {
+    CssNamespaceBuilder {
+        bitwise_or_token,
+        prefix: None,
+    }
+}
+pub struct CssNamespaceBuilder {
+    bitwise_or_token: SyntaxToken,
+    prefix: Option<AnyCssNamespacePrefix>,
+}
+impl CssNamespaceBuilder {
+    pub fn with_prefix(mut self, prefix: AnyCssNamespacePrefix) -> Self {
+        self.prefix = Some(prefix);
+        self
+    }
+    pub fn build(self) -> CssNamespace {
+        CssNamespace::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::CSS_NAMESPACE,
+            [
+                self.prefix
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Token(self.bitwise_or_token)),
+            ],
+        ))
+    }
 }
 pub fn css_nth_offset(sign_token: SyntaxToken, value: CssNumber) -> CssNthOffset {
     CssNthOffset::unwrap_cast(SyntaxNode::new_detached(
@@ -912,17 +970,63 @@ pub fn css_string(value_token: SyntaxToken) -> CssString {
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
-pub fn css_type_selector(ident: CssIdentifier) -> CssTypeSelector {
-    CssTypeSelector::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_TYPE_SELECTOR,
-        [Some(SyntaxElement::Node(ident.into_syntax()))],
-    ))
+pub fn css_type_selector(ident: CssIdentifier) -> CssTypeSelectorBuilder {
+    CssTypeSelectorBuilder {
+        ident,
+        namespace: None,
+    }
 }
-pub fn css_universal_selector(star_token: SyntaxToken) -> CssUniversalSelector {
-    CssUniversalSelector::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_UNIVERSAL_SELECTOR,
+pub struct CssTypeSelectorBuilder {
+    ident: CssIdentifier,
+    namespace: Option<CssNamespace>,
+}
+impl CssTypeSelectorBuilder {
+    pub fn with_namespace(mut self, namespace: CssNamespace) -> Self {
+        self.namespace = Some(namespace);
+        self
+    }
+    pub fn build(self) -> CssTypeSelector {
+        CssTypeSelector::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::CSS_TYPE_SELECTOR,
+            [
+                self.namespace
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Node(self.ident.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn css_universal_namespace_prefix(star_token: SyntaxToken) -> CssUniversalNamespacePrefix {
+    CssUniversalNamespacePrefix::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_UNIVERSAL_NAMESPACE_PREFIX,
         [Some(SyntaxElement::Token(star_token))],
     ))
+}
+pub fn css_universal_selector(star_token: SyntaxToken) -> CssUniversalSelectorBuilder {
+    CssUniversalSelectorBuilder {
+        star_token,
+        namespace: None,
+    }
+}
+pub struct CssUniversalSelectorBuilder {
+    star_token: SyntaxToken,
+    namespace: Option<CssNamespace>,
+}
+impl CssUniversalSelectorBuilder {
+    pub fn with_namespace(mut self, namespace: CssNamespace) -> Self {
+        self.namespace = Some(namespace);
+        self
+    }
+    pub fn build(self) -> CssUniversalSelector {
+        CssUniversalSelector::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::CSS_UNIVERSAL_SELECTOR,
+            [
+                self.namespace
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Token(self.star_token)),
+            ],
+        ))
+    }
 }
 pub fn css_var_function(
     var_token: SyntaxToken,
@@ -1186,6 +1290,16 @@ where
 {
     CssBogusPseudoClass::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_BOGUS_PSEUDO_CLASS,
+        slots,
+    ))
+}
+pub fn css_bogus_pseudo_element<I>(slots: I) -> CssBogusPseudoElement
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssBogusPseudoElement::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_BOGUS_PSEUDO_ELEMENT,
         slots,
     ))
 }
