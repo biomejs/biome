@@ -50,6 +50,8 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 - Fix [#918](https://github.com/biomejs/biome/issues/918), [useSimpleNumberKeys](https://biomejs.dev/linter/rules/use-simple-number-keys) no longer repports false positive on comments. Contributed by @kalleep
 
+- Fix [#953](https://github.com/biomejs/biome/issues/953), [noRedeclare](https://biomejs.dev/linter/rules/no-redeclare) no longer reports type parameters with the same name in different mapped types as redeclarations. Contributed by @Conaclos
+
 ### Parser
 
 ## 1.4.0 (2023-11-27)
