@@ -1,0 +1,5 @@
+{
+	"rewrites": [
+		{ "source": "/(?<lang>[^/]*)/(.*)", "destination": "/$lang/404/" }
+	]
+}
