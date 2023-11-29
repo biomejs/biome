@@ -1,3 +1,9 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
 var r = /[👍]/u;
 var r = /[\\uD83D\\uDC4D]/u;
 var r = /[\\u{1F44D}]/u;
@@ -9,4 +15,8 @@ var r = /[👶]/u;
 var r = /🇯🇵/;
 var r = /[JP]/;
 var r = /👨‍👩‍👦/;
+
+
+```
+
 

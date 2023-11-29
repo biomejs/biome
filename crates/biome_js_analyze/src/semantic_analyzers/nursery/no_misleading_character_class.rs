@@ -76,7 +76,6 @@ impl Message {
 pub struct RuleState {
     range: TextRange,
     message: Message,
-    node: AnyRegexExpression,
 }
 
 impl Rule for NoMisleadingCharacterClass {
@@ -90,106 +89,74 @@ impl Rule for NoMisleadingCharacterClass {
 
         match regex {
             AnyRegexExpression::JsRegexLiteralExpression(expr) => {
-                let range = expr.syntax().text_range();
-
                 let Ok((pattern, flags)) = expr.decompose() else {
                     return None;
                 };
-
-                let has_v_flag = flags.text().contains('v');
-
-                if has_v_flag {
-                    return None;
-                }
-
-                let l = replace_escaped_unicode(pattern.text());
-
+                let regex_literal = v(pattern.text());
                 let has_u_flag = flags.text().contains('u');
+                let mut is_in_character_class = false;
+                let mut escape_next = false;
+                let mut char_iter = regex_literal.chars().peekable();
 
-                if !has_u_flag && has_surrogate_pair(&l) {
-                    return Some(RuleState {
-                        range,
+                for (i, ch) in char_iter.enumerate() {
+                    if escape_next {
+                        escape_next = false;
+                        continue;
+                    }
 
-                        message: Message::SurrogatePairWithoutUFlag,
+                    match ch {
+                        '\\' => escape_next = true,
+                        '[' => is_in_character_class = true,
+                        ']' => is_in_character_class = false,
+                        _ if is_in_character_class && i < regex_literal.len() => {
+                            if !has_u_flag && has_surrogate_pair(&regex_literal[i..]) {
+                                return Some(RuleState {
+                                    range: expr.syntax().text_range(),
+                                    message: Message::SurrogatePairWithoutUFlag,
+                                });
+                            }
+                            if has_combining_class_or_vs16(&regex_literal[i..]) {
+                                return Some(RuleState {
+                                    range: expr.syntax().text_range(),
+                                    message: Message::CombiningClassOrVs16,
+                                });
+                            }
 
-                        node: expr.clone().into(),
-                    });
+                            if has_regional_indicator_symbol(&regex_literal[i..]) {
+                                return Some(RuleState {
+                                    range: expr.syntax().text_range(),
+                                    message: Message::RegionalIndicatorSymbol,
+                                });
+                            }
+
+                            if has_emoji_modifier(&regex_literal[i..]) {
+                                return Some(RuleState {
+                                    range: expr.syntax().text_range(),
+                                    message: Message::EmojiModifier,
+                                });
+                            }
+
+                            if zwj(&regex_literal[i..]) {
+                                return Some(RuleState {
+                                    range: expr.syntax().text_range(),
+                                    message: Message::JoinedCharSequence,
+                                });
+                            }
+                        }
+                        _ => {}
+                    }
                 }
-
-                if has_combining_class_or_vs16(&l) {
-                    return Some(RuleState {
-                        range,
-
-                        message: Message::CombiningClassOrVs16,
-
-                        node: expr.clone().into(),
-                    });
-                }
-
-                if has_regional_indicator_symbol(&l) {
-                    return Some(RuleState {
-                        range,
-
-                        message: Message::RegionalIndicatorSymbol,
-
-                        node: expr.clone().into(),
-                    });
-                }
-
-                if has_emoji_modifier(&l) {
-                    return Some(RuleState {
-                        range,
-
-                        message: Message::EmojiModifier,
-
-                        node: expr.clone().into(),
-                    });
-                }
-
-                if zwj(&l) {
-                    return Some(RuleState {
-                        range,
-
-                        message: Message::JoinedCharSequence,
-
-                        node: expr.clone().into(),
-                    });
-                }
+                return None;
             }
 
             AnyRegexExpression::JsNewExpression(x) => {
-                // let regex = x.expression().ok()?.as_js_regex_literal_expression()?;
-
-                // Self::check_regex(ctx, regex).map(|state| RuleState {
-
-                // range: state.range,
-
-                // message: state.message,
-
-                // node: AnyRegexExpression::JsNewExpression(x.clone()),
-
-                // })
-
                 todo!();
             }
 
             AnyRegexExpression::JsCallExpression(x) => {
-                // let regex = x.expression().ok()?.as_js_regex_literal_expression()?;
-
-                // Self::check_regex(ctx, regex).map(|state| RuleState {
-
-                // range: state.range,
-
-                // message: state.message,
-
-                // node: AnyRegexExpression::JsCallExpression(x.clone()),
-
-                // })
-
                 todo!();
             }
         }
-
         None
     }
 
@@ -202,33 +169,32 @@ impl Rule for NoMisleadingCharacterClass {
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
-        match &state.node {
+        let node = ctx.query();
+        match node {
             AnyRegexExpression::JsRegexLiteralExpression(expr) => {
-                let mut mutation = ctx.root().begin();
+                if matches!(state.message, Message::SurrogatePairWithoutUFlag) {
+                    let prev_token = expr.value_token().ok()?;
+                    let text = prev_token.text();
+                    let next_token = JsSyntaxToken::new_detached(
+                        JsSyntaxKind::JS_REGEX_LITERAL,
+                        &format!("{}u", text),
+                        [],
+                        [],
+                    );
 
-                let prev_token = expr.value_token().ok()?;
+                    let mut mutation = ctx.root().begin();
+                    mutation.replace_token(prev_token, next_token);
 
-                let text = prev_token.text();
-
-                let next_token = JsSyntaxToken::new_detached(
-                    JsSyntaxKind::JS_REGEX_LITERAL,
-                    &format!("{}u", text),
-                    [],
-                    [],
-                );
-
-                mutation.replace_token(prev_token, next_token);
-
-                Some(JsRuleAction {
-                    category: ActionCategory::QuickFix,
-
-                    applicability: Applicability::MaybeIncorrect,
-
-                    message: markup! { "Add unicode "<Emphasis>"u"</Emphasis>" flag to regex" }
-                        .to_owned(),
-
-                    mutation,
-                })
+                    Some(JsRuleAction {
+                        category: ActionCategory::QuickFix,
+                        applicability: Applicability::MaybeIncorrect,
+                        message: markup! { "Add unicode "<Emphasis>"u"</Emphasis>" flag to regex" }
+                            .to_owned(),
+                        mutation,
+                    })
+                } else {
+                    None
+                }
             }
 
             AnyRegexExpression::JsNewExpression(_) => todo!(),
@@ -237,50 +203,6 @@ impl Rule for NoMisleadingCharacterClass {
 
             _ => None,
         }
-
-        // if matches!(state.message, Message::SurrogatePairWithoutUFlag) {
-
-        // let n = ctx.query();
-
-        // let mut mutation = ctx.root().begin();
-
-        // let prev_token = n.value_token().ok()?;
-
-        // let text = n.text();
-
-        // let next_token = JsSyntaxToken::new_detached(
-
-        // JsSyntaxKind::JS_REGEX_LITERAL,
-
-        // &format!("{}u", text),
-
-        // [],
-
-        // [],
-
-        // );
-
-        // mutation.replace_token(prev_token, next_token);
-
-        // Some(JsRuleAction {
-
-        // category: ActionCategory::QuickFix,
-
-        // applicability: Applicability::MaybeIncorrect,
-
-        // message: markup! { "Add unicode "<Emphasis>"u"</Emphasis>" flag to regex" }
-
-        // .to_owned(),
-
-        // mutation,
-
-        // })
-
-        // } else {
-
-        // None
-
-        // }
     }
 }
 
@@ -351,14 +273,77 @@ fn has_surrogate_pair(s: &str) -> bool {
     s.chars().any(|c| c as u32 > 0xFFFF)
 }
 
-fn replace_escaped_unicode(input: &str) -> String {
-    let re = Regex::new(r"\\u\{([0-9a-fA-F]+)\}").unwrap();
+fn replace_surrogate_pairs(input: &str) -> String {
+    let re = Regex::new(r"\\u([Dd][89ABab][0-9a-fA-F]{2})\\u([Dd][Cc][0-9a-fA-F]{2})").unwrap();
 
     re.replace_all(input, |caps: &regex::Captures| {
-        u32::from_str_radix(&caps[1], 16)
-            .ok()
-            .and_then(char::from_u32)
-            .map_or_else(String::new, |c| c.to_string())
+        let high = u32::from_str_radix(&caps[1], 16).unwrap();
+        let low = u32::from_str_radix(&caps[2], 16).unwrap();
+
+        let codepoint = ((high - 0xD800) << 10) + (low - 0xDC00) + 0x10000;
+
+        char::from_u32(codepoint).map_or_else(String::new, |c| c.to_string())
     })
     .into_owned()
+}
+
+fn v(input: &str) -> String {
+    let mut result = String::new();
+    let mut chars_iter = input.chars().peekable();
+
+    while let Some(ch) = chars_iter.next() {
+        if ch == '\\' && chars_iter.peek() == Some(&'u') {
+            // '\' の後に 'u' が来る場合、Unicodeエスケープとして処理
+            chars_iter.next(); // 'u' を消費
+
+            if chars_iter.peek() == Some(&'{') {
+                // '{' で始まる場合、コードポイントが {} 内にある
+                chars_iter.next(); // '{' を消費
+                let mut codepoint_str = String::new();
+                while let Some(&next_char) = chars_iter.peek() {
+                    if next_char == '}' {
+                        chars_iter.next(); // '}' を消費
+                        break;
+                    } else {
+                        codepoint_str.push(next_char);
+                        chars_iter.next();
+                    }
+                }
+                if let Ok(codepoint) = u32::from_str_radix(&codepoint_str, 16) {
+                    if let Some(character) = char::from_u32(codepoint) {
+                        result.push(character);
+                    }
+                }
+            } else {
+                // 通常のサロゲートペア
+                let mut high_surrogate_str = String::new();
+                for _ in 0..4 {
+                    if let Some(next_char) = chars_iter.next() {
+                        high_surrogate_str.push(next_char);
+                    }
+                }
+                if chars_iter.next() == Some('\\') && chars_iter.next() == Some('u') {
+                    let mut low_surrogate_str = String::new();
+                    for _ in 0..4 {
+                        if let Some(next_char) = chars_iter.next() {
+                            low_surrogate_str.push(next_char);
+                        }
+                    }
+                    let high_surrogate = u32::from_str_radix(&high_surrogate_str, 16).unwrap();
+                    let low_surrogate = u32::from_str_radix(&low_surrogate_str, 16).unwrap();
+                    let codepoint =
+                        ((high_surrogate - 0xD800) << 10) + (low_surrogate - 0xDC00) + 0x10000;
+
+                    if let Some(character) = char::from_u32(codepoint) {
+                        result.push(character);
+                    }
+                }
+            }
+        } else {
+            // Unicodeエスケープでない場合、そのまま追加
+            result.push(ch);
+        }
+    }
+
+    result
 }
