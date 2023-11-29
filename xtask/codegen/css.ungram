@@ -238,7 +238,7 @@ CssPseudoClassFunctionCompoundSelectorList =
 CssCompoundSelectorList = (AnyCssCompoundSelector (',' AnyCssCompoundSelector)*)
 
 // :host(span:focus) {}
-//  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+//  ^^^^^^^^^^^^^^^^
 CssPseudoClassFunctionCompoundSelector =
  	name: ('host' | 'host-context')
 	'('
@@ -339,7 +339,7 @@ CssPseudoClassNthIdentifier =
 //            ^^^^^
 CssPseudoClassNth =
 	sign: ('+' | '-')?
-  value: CssNumber?
+	value: CssNumber?
 	symbol: 'n'
 	offset: CssNthOffset?
 
@@ -368,8 +368,8 @@ CssPseudoElementSelector =
 AnyCssPseudoElement =
 	CssPseudoElementIdentifier
 	| CssPseudoElementFunctionSelector
-  | CssPseudoElementFunctionIdentifier
-  | CssBogusPseudoElement
+	| CssPseudoElementFunctionIdentifier
+	| CssBogusPseudoElement
 
 // a::after {}
 //    ^^^^^
@@ -424,6 +424,7 @@ CssAtRule =
 AnyCssAtRule =
 	CssCharsetAtRule
 	| CssColorProfileAtRule
+	| CssCounterStyleAtRule
 	| CssKeyframesAtRule
 	| CssMediaAtRule
 	| CssBogusAtRule
@@ -441,6 +442,11 @@ CssCharsetAtRule =
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 CssColorProfileAtRule =
 	'color-profile'
+	name: CssIdentifier
+	block: CssBlock
+
+CssCounterStyleAtRule =
+	'counter-style'
 	name: CssIdentifier
 	block: CssBlock
 
