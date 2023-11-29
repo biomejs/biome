@@ -11,7 +11,7 @@ use biome_rowan::SyntaxKind;
 
 #[inline]
 pub(crate) fn is_at_charset_rule(p: &mut CssParser) -> bool {
-    p.at(T![@]) && p.nth_at(1, T![charset])
+    p.at(T![charset])
 }
 
 #[inline]
@@ -22,7 +22,6 @@ pub(crate) fn parse_at_charset_rule(p: &mut CssParser) -> ParsedSyntax {
 
     let m = p.start();
 
-    p.bump(T![@]);
     p.bump(T![charset]);
 
     let kind = match parse_string(p).or_recover(
@@ -32,7 +31,7 @@ pub(crate) fn parse_at_charset_rule(p: &mut CssParser) -> ParsedSyntax {
     ) {
         Ok(encoding) if !encoding.kind(p).is_bogus() => {
             if eat_or_recover_close_token(p, encoding) {
-                CSS_AT_CHARSET_RULE
+                CSS_CHARSET_AT_RULE
             } else {
                 CSS_BOGUS_AT_RULE
             }

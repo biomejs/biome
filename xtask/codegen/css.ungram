@@ -54,7 +54,7 @@ CssRuleList = AnyCssRule*
 
 AnyCssRule =
 	CssRule
-	| AnyCssAtRule
+	| CssAtRule
 	| CssBogusRule
 
 
@@ -416,33 +416,36 @@ CssDeclarationImportant =
 /////////////
 // AT RULES
 ////////////
+
+CssAtRule =
+	'@'
+	rule: AnyCssAtRule
+
 AnyCssAtRule =
-	CssAtKeyframes
-	| CssAtCharsetRule
-	| CssAtMedia
+	CssCharsetAtRule
+	| CssKeyframesAtRule
+	| CssMediaAtRule
 	| CssBogusAtRule
 
-CssAtCharsetRule =
-	'@'
+CssCharsetAtRule =
 	'charset'
 	encoding: CssString
 	';'
 
 // @keyframes "something" { from {} to {} }
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-CssAtKeyframes =
-	'@'
+CssKeyframesAtRule =
 	'keyframes'
 	name: CssIdentifier | CssString
-	body: CssAtKeyframesBody
+	body: CssKeyframesBody
 
 
-CssAtKeyframesBody =
+CssKeyframesBody =
 	'{'
-	items: CssAtKeyframesItemList
+	items: CssKeyframesItemList
 	'}'
 
-CssAtKeyframesItemList = CssKeyframesBlock*
+CssKeyframesItemList = CssKeyframesBlock*
 
 // @keyframes "something" { 30%, 60% {} }
 //                          ^^^^^^^^^^^
@@ -458,83 +461,82 @@ CssKeyframesSelector = 'from' | 'to' | CssPercentage
 
 
 // @media screen, all, print {}
-CssAtMedia =
-	'@'
+CssMediaAtRule =
 	'media'
-	query_list: CssAtMediaQueryList
+	query_list: CssMediaQueryList
 	'{'
 	body: AnyCssRule
 	'}'
 
 
 // NB: a query list can't start with `and` condition
-CssAtMediaQueryList = (CssAtMediaQuery (',' CssAtMediaQuery)*)
+CssMediaQueryList = (CssMediaQuery (',' CssMediaQuery)*)
 
 // @media or screen and print {}
 // 		  ^^^^^^^^^^^^^^^^^^^^
-CssAtMediaQuery =
+CssMediaQuery =
 	condition: 'not' | 'or' | 'only'?
-	type: AnyCssAtMediaQueryType
-	consequent: CssAtMediaQueryConsequent?
+	type: AnyCssMediaQueryType
+	consequent: CssMediaQueryConsequent?
 
 
 // @media not screen and print {}
 // 		  ^^^^^^^^^
-CssAtMediaQueryConsequent =
+CssMediaQueryConsequent =
 	'and'
 	condition: 'not'?
-	type: AnyCssAtMediaQueryType
+	type: AnyCssMediaQueryType
 
 
-AnyCssAtMediaQueryType =
+AnyCssMediaQueryType =
 	CssIdentifier
-	| CssAtMediaQueryFeature
+	| CssMediaQueryFeature
 
 // @media (width: 800px) {}
 // 				^^^^^^^^^^^^^^
 // @media (width) {}
 // 				^^^^^^^
-CssAtMediaQueryFeature =
+CssMediaQueryFeature =
 	'('
-	feature: AnyCssAtMediaQueryFeatureType
+	feature: AnyCssMediaQueryFeatureType
 	')'
 
-AnyCssAtMediaQueryFeatureType =
-	CssAtMediaQueryFeaturePlain
-	| CssAtMediaQueryFeatureBoolean
-	| CssAtMediaQueryFeatureCompare
-	| CssAtMediaQueryFeatureRange
+AnyCssMediaQueryFeatureType =
+	CssMediaQueryFeaturePlain
+	| CssMediaQueryFeatureBoolean
+	| CssMediaQueryFeatureCompare
+	| CssMediaQueryFeatureRange
 
 
 // @media (width: 800px) {}
 // 				^^^^^^^^^^^^^^
-CssAtMediaQueryFeaturePlain =
+CssMediaQueryFeaturePlain =
 	name: CssIdentifier
 	':'
 	value: AnyCssValue
 
 // @media (width) {}
 // 				^^^^^^^
-CssAtMediaQueryFeatureBoolean = CssIdentifier
+CssMediaQueryFeatureBoolean = CssIdentifier
 
 
 // @media (height > 600px) {}
 // 				^^^^^^^^^^^^^^^
-CssAtMediaQueryFeatureCompare =
+CssMediaQueryFeatureCompare =
 	name: CssIdentifier
-	range: CssAtMediaQueryRange
+	range: CssMediaQueryRange
 	value: AnyCssValue
 
 // @media (400px <= width <= 700px) {}
 // 				^^^^^^^^^^^^^^^^^^^^^^^^
-CssAtMediaQueryFeatureRange =
+CssMediaQueryFeatureRange =
 	first_value: AnyCssValue
-	first_range: CssAtMediaQueryRange
+	first_range: CssMediaQueryRange
 	name: CssIdentifier
 	second_value: AnyCssValue
-	second_range: CssAtMediaQueryRange
+	second_range: CssMediaQueryRange
 
-CssAtMediaQueryRange = '>' | '<' | '>=' | '<='
+CssMediaQueryRange = '>' | '<' | '>=' | '<='
 
 
 ///////////////

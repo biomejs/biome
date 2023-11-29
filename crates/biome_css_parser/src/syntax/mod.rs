@@ -5,7 +5,7 @@ mod selector;
 use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use crate::syntax::at_rule::{at_at_rule, parse_at_rule};
-use crate::syntax::parse_error::{expected_any_at_rule, expected_block};
+use crate::syntax::parse_error::expected_block;
 use crate::syntax::selector::CssSelectorList;
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
@@ -39,7 +39,7 @@ pub(crate) fn parse_rule_list(p: &mut CssParser) {
         progress.assert_progressing(p);
 
         if at_at_rule(p) {
-            parse_at_rule(p).or_add_diagnostic(p, expected_any_at_rule);
+            parse_at_rule(p).ok();
         } else {
             parse_rule(p);
         }
