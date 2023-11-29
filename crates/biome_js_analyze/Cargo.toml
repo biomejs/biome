@@ -27,6 +27,7 @@ biome_rowan            = { workspace = true }
 bpaf.workspace         = true
 lazy_static            = { workspace = true }
 natord                 = "1.0.9"
+regex                  = "1.5.5"
 roaring                = "0.10.1"
 rustc-hash             = { workspace = true }
 schemars               = { workspace = true, optional = true }

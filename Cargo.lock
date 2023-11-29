@@ -401,6 +401,7 @@ dependencies = [
  "insta",
  "lazy_static",
  "natord",
+ "regex",
  "roaring",
  "rustc-hash",
  "schemars",
