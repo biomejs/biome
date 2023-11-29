@@ -8,13 +8,7 @@ Read our [guidelines to categorize a change](https://biomejs.dev/internals/versi
 New entries must be placed in a section entitled `Unreleased`.
 Read our [guidelines for writing a good changelog entry](https://github.com/biomejs/biome/blob/main/CONTRIBUTING.md#changelog).
 
-## Unreleased
-
-### Analyzer
-
-### CLI
-
-### Configuration
+## 1.4.1 (2023-29-11)
 
 ### Editors
 
