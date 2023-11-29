@@ -16,6 +16,14 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ### Formatter
 
+#### Bug fixes
+
+- Fix some accidental line breaks when printing array expressions within arrow functions and other long lines [#917](https://github.com/biomejs/biome/pull/917). Contributed by @faultyserver
+
+- Match Prettier's breaking strategy for `ArrowChain` layouts [#934](https://github.com/biomejs/biome/pull/934). Contributed by @faultyserver
+
+- Fix double-printing of leading comments in arrow chain expressions [#951](https://github.com/biomejs/biome/pull/951). Contributed by @faultyserver
+
 ### JavaScript APIs
 
 ### Linter
