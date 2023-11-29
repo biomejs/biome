@@ -19,12 +19,12 @@ const posts = (await getCollection("blog")).sort(
     posts.map(async (post) => (
       <article>
         <h2>
-          <a href={`blog/${post.slug}`}>{post.data.title}</a>
+          <a href={`/blog/${post.slug}`}>{post.data.title}</a>
         </h2>
         <BlogPostInfo post={post.data} />
         <Fragment set:html={post.data.summary} />
         <p>
-          <a href={`blog/${post.slug}`}>Read more</a>
+          <a href={`/blog/${post.slug}`}>Read more</a>
         </p>
       </article>
     ))
