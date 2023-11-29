@@ -24,9 +24,11 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 - Fix double-printing of leading comments in arrow chain expressions [#951](https://github.com/biomejs/biome/pull/951). Contributed by @faultyserver
 
-### JavaScript APIs
-
 ### Linter
+
+#### Bug fixes
+
+- Fix [#910](https://github.com/biomejs/biome/issues/910), where the rule `noSvgWithoutTitle` should skip elements that have `aria-hidden` attributes.
 
 #### New features
 
