@@ -1180,7 +1180,7 @@
 					]
 				},
 				"useForOf": {
-					"description": "This rule recommends a for-of loop when the loop index is only used to read from an array that is being iterated.",
+					"description": "This rule recommends a for-of loop when in a for loop, the index used to extract an item from the iterated array.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

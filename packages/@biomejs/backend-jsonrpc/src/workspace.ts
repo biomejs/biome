@@ -818,7 +818,7 @@ export interface Nursery {
 	 */
 	useAwait?: RuleConfiguration;
 	/**
-	 * This rule recommends a for-of loop when the loop index is only used to read from an array that is being iterated.
+	 * This rule recommends a for-of loop when in a for loop, the index used to extract an item from the iterated array.
 	 */
 	useForOf?: RuleConfiguration;
 	/**

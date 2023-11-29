@@ -4,10 +4,10 @@ use biome_js_semantic::ReferencesExtensions;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsForInitializer, JsAssignmentExpression, JsAssignmentOperator,
     JsBinaryExpression, JsBinaryOperator, JsForStatement, JsIdentifierBinding,
-    JsPostUpdateExpression, JsPostUpdateOperator, JsPreUpdateExpression, JsPreUpdateOperator,
-    JsSyntaxKind, JsSyntaxToken, JsUnaryOperator, JsVariableDeclarator,
+    JsIdentifierExpression, JsPostUpdateExpression, JsPostUpdateOperator, JsPreUpdateExpression,
+    JsPreUpdateOperator, JsSyntaxKind, JsSyntaxToken, JsUnaryOperator, JsVariableDeclarator,
 };
-use biome_rowan::{declare_node_union, AstNode, AstSeparatedList};
+use biome_rowan::{declare_node_union, AstNode, AstSeparatedList, TextRange};
 
 use crate::{semantic_services::Semantic, utils::is_node_equal};
 
@@ -41,12 +41,6 @@ declare_rule! {
     ///  }
     /// ```
     ///
-    /// ```js
-    /// for (let i = 1; i < array.length; i++) {
-    ///    console.log(i, array[i]);
-    ///  }
-    /// ```
-    ///
     pub(crate) UseForOf {
         version: "next",
         name: "useForOf",
@@ -56,6 +50,10 @@ declare_rule! {
 
 declare_node_union! {
     pub(crate) AnyIncrementableLike = JsPostUpdateExpression | JsPreUpdateExpression | JsAssignmentExpression
+}
+
+declare_node_union! {
+    pub(crate) AnyBindingExpression = JsPostUpdateExpression | JsPreUpdateExpression | JsIdentifierExpression
 }
 
 impl Rule for UseForOf {
@@ -69,7 +67,7 @@ impl Rule for UseForOf {
         let model = ctx.model();
         let initializer = node.initializer()?;
 
-        if !is_initializer_valid(&initializer)? {
+        if !is_for_initializer_valid(&initializer)? {
             return None;
         }
 
@@ -81,17 +79,24 @@ impl Rule for UseForOf {
             .as_any_js_binding()?
             .as_js_identifier_binding()?;
 
-        if !is_test_valid(binding, &test)? {
+        if !is_for_test_valid(binding, &test)? {
             return None;
         }
 
-        if !is_update_valid(binding, node.update()?)? {
+        if !is_for_update_valid(binding, node.update()?)? {
             return None;
         }
 
         let body = node.body().ok()?;
-        let block = body.as_js_block_statement();
-        let references = get_initializer_references(block, binding, model);
+        let body_range = match body {
+            biome_js_syntax::AnyJsStatement::JsBlockStatement(block) => Some(block.range()),
+            biome_js_syntax::AnyJsStatement::JsExpressionStatement(statement) => {
+                Some(statement.range())
+            }
+            _ => None,
+        }?;
+
+        let references = list_initializer_references(model, binding, &body_range);
         let array_right = test.as_js_binary_expression()?.right().ok()?;
         let array_used_in_for = array_right
             .as_js_static_member_expression()?
@@ -101,8 +106,7 @@ impl Rule for UseForOf {
         let index_only_used_with_array = |reference| {
             let array_in_use = reference_being_used_by_array(reference, &array_used_in_for)
                 .is_some_and(|array_in_use| array_in_use);
-            let is_delete =
-                is_delete(reference, &array_used_in_for).is_some_and(|is_assignee| is_assignee);
+            let is_delete = is_delete(reference).is_some_and(|is_delete| is_delete);
 
             array_in_use && !is_delete
         };
@@ -125,46 +129,43 @@ impl Rule for UseForOf {
     }
 }
 
-/// Get initializer references taking scope to account (excluding initials `for` loop references)
-fn get_initializer_references(
-    block: Option<&biome_js_syntax::JsBlockStatement>,
-    binding: &biome_js_syntax::JsIdentifierBinding,
+/// List all references used by for loop
+///
+/// If the for loop has a `block` this functions only returns references relative to this block
+///
+/// # Returns
+///
+/// - `Vec<AnyBindingExpression>`
+///
+fn list_initializer_references(
     model: &biome_js_semantic::SemanticModel,
-) -> Vec<AnyJsExpression> {
-    let skip_references = {
-        if block.is_none() {
-            2
-        } else {
-            0
-        }
-    };
-
+    binding: &biome_js_syntax::JsIdentifierBinding,
+    body_range: &TextRange,
+) -> Vec<AnyBindingExpression> {
     binding
         .all_references(model)
-        .skip(skip_references)
         .filter_map(|reference| {
-            if let Some(block) = block {
-                // If block is preset, we need to consider only references in this scope
-                if block.range().start() != reference.scope().range().start() {
-                    return None;
-                }
+            // We only want references within this block / for body
+            if reference.range().start() < body_range.start() {
+                return None;
             }
 
-            AnyJsExpression::cast(reference.syntax().parent()?)
+            AnyBindingExpression::try_from(AnyJsExpression::cast(reference.syntax().parent()?)?)
+                .ok()
         })
         .collect()
 }
 
-/// Validates a for loop variable declarations.
+/// Validates `for's` variable declarations.
 ///
-/// The initializer must be declared with 0 and can't have multiple initializers.
+/// The initializer must be declared with 0 and can't have multiple declarations.
 ///
 /// # Returns
 ///
 /// - `Some(true)` if the initializer is valid.
-/// - `None` if the initializer is invalid (multiple initializers or not initialized with 0).
+/// - `None` if the initializer is invalid (multiple declarations or not initialized with 0).
 ///
-fn is_initializer_valid(initializer: &AnyJsForInitializer) -> Option<bool> {
+fn is_for_initializer_valid(initializer: &AnyJsForInitializer) -> Option<bool> {
     let initializer_declarations = initializer.as_js_variable_declaration()?.declarators();
     let initializer = initializer_declarations.first()?.ok()?;
 
@@ -175,7 +176,7 @@ fn is_initializer_valid(initializer: &AnyJsForInitializer) -> Option<bool> {
     Some(true)
 }
 
-/// Validates a for loop test expression.
+/// Validates `for's` test expression.
 ///
 /// The test expression must be declared using less than length of array (eg: i < array.length)
 /// and reference to same variable declared in for initializer
@@ -185,7 +186,7 @@ fn is_initializer_valid(initializer: &AnyJsForInitializer) -> Option<bool> {
 /// - `Some(true)` if the test expression is valid.
 /// - `None` if the test expression is invalid (not using less than length or not the same variable name as the initializer).
 ///
-fn is_test_valid(
+fn is_for_test_valid(
     initializer_binding: &JsIdentifierBinding,
     test: &AnyJsExpression,
 ) -> Option<bool> {
@@ -211,7 +212,7 @@ fn is_test_valid(
     Some(true)
 }
 
-/// Validates a for loop update/final expression.
+/// Validates `for's` loop update/final expression.
 ///
 /// The update/final must increment the variable by 1 and reference to same variable declared in for initializer
 ///
@@ -220,7 +221,7 @@ fn is_test_valid(
 /// - `Some(true)` if the  update/final expression is valid.
 /// - `None` if the  update/final expression is invalid (not a increment or not the same variable name as the initializer).
 ///
-fn is_update_valid(
+fn is_for_update_valid(
     initializer_binding: &JsIdentifierBinding,
     update: AnyJsExpression,
 ) -> Option<bool> {
@@ -240,10 +241,10 @@ fn is_update_valid(
 }
 
 fn reference_being_used_by_array(
-    expression: &AnyJsExpression,
+    reference: &AnyBindingExpression,
     array_used_in_for: &AnyJsExpression,
 ) -> Option<bool> {
-    match expression.parent::<AnyJsExpression>()? {
+    match reference.parent::<AnyJsExpression>()? {
         AnyJsExpression::JsComputedMemberExpression(computed_member) => Some(is_node_equal(
             computed_member.object().ok()?.syntax(),
             array_used_in_for.syntax(),
@@ -252,19 +253,22 @@ fn reference_being_used_by_array(
     }
 }
 
-fn is_delete(expression: &AnyJsExpression, array_used_in_for: &AnyJsExpression) -> Option<bool> {
-    let parent = expression.parent::<AnyJsExpression>()?;
+/// Check whether array with index access is part of a delete operator (e.g: delete array[i])
+///
+/// # Returns
+///
+/// - `Some(true)` if reference's grandparent is a unary expression with operator DELETE.
+/// - `Some(false)` if the grandparent is not a unary expression or unary operator is not a Delete.
+///
+fn is_delete(reference: &AnyBindingExpression) -> Option<bool> {
+    let grand_parent = reference.syntax().grand_parent()?;
+    let js_expression = AnyJsExpression::cast(grand_parent)?;
 
-    match parent.parent::<AnyJsExpression>()? {
-        AnyJsExpression::JsUnaryExpression(unary_expression) => {
-            let is_delete = matches!(unary_expression.operator().ok()?, JsUnaryOperator::Delete);
-            let argument = unary_expression.argument().ok()?;
-            let argument = argument.as_js_computed_member_expression()?;
-            let same_reference =
-                is_node_equal(argument.object().ok()?.syntax(), array_used_in_for.syntax());
-
-            Some(is_delete && same_reference)
-        }
+    match js_expression {
+        AnyJsExpression::JsUnaryExpression(unary_expression) => Some(matches!(
+            unary_expression.operator().ok()?,
+            JsUnaryOperator::Delete
+        )),
         _ => Some(false),
     }
 }
@@ -294,25 +298,6 @@ fn is_zero_initialized(variable_declarator: &JsVariableDeclarator) -> Option<boo
     let value = value.text_trimmed();
 
     Some(value == "0")
-}
-
-impl TryFrom<AnyJsExpression> for AnyIncrementableLike {
-    type Error = ();
-
-    fn try_from(value: AnyJsExpression) -> Result<Self, Self::Error> {
-        match value {
-            AnyJsExpression::JsAssignmentExpression(expression) => {
-                Ok(AnyIncrementableLike::JsAssignmentExpression(expression))
-            }
-            AnyJsExpression::JsPostUpdateExpression(expression) => {
-                Ok(AnyIncrementableLike::JsPostUpdateExpression(expression))
-            }
-            AnyJsExpression::JsPreUpdateExpression(expression) => {
-                Ok(AnyIncrementableLike::JsPreUpdateExpression(expression))
-            }
-            _ => Err(()),
-        }
-    }
 }
 
 impl AnyIncrementableLike {
@@ -385,6 +370,44 @@ impl AnyIncrementableLike {
                 .as_js_identifier_assignment()?
                 .name_token()
                 .ok(),
+        }
+    }
+}
+
+impl TryFrom<AnyJsExpression> for AnyIncrementableLike {
+    type Error = ();
+
+    fn try_from(value: AnyJsExpression) -> Result<Self, Self::Error> {
+        match value {
+            AnyJsExpression::JsAssignmentExpression(expression) => {
+                Ok(AnyIncrementableLike::JsAssignmentExpression(expression))
+            }
+            AnyJsExpression::JsPostUpdateExpression(expression) => {
+                Ok(AnyIncrementableLike::JsPostUpdateExpression(expression))
+            }
+            AnyJsExpression::JsPreUpdateExpression(expression) => {
+                Ok(AnyIncrementableLike::JsPreUpdateExpression(expression))
+            }
+            _ => Err(()),
+        }
+    }
+}
+
+impl TryFrom<AnyJsExpression> for AnyBindingExpression {
+    type Error = ();
+
+    fn try_from(value: AnyJsExpression) -> Result<Self, Self::Error> {
+        match value {
+            AnyJsExpression::JsPostUpdateExpression(expression) => {
+                Ok(AnyBindingExpression::JsPostUpdateExpression(expression))
+            }
+            AnyJsExpression::JsIdentifierExpression(expression) => {
+                Ok(AnyBindingExpression::JsIdentifierExpression(expression))
+            }
+            AnyJsExpression::JsPreUpdateExpression(expression) => {
+                Ok(AnyBindingExpression::JsPreUpdateExpression(expression))
+            }
+            _ => Err(()),
         }
     }
 }

@@ -2812,7 +2812,7 @@ pub struct Nursery {
     #[bpaf(long("use-await"), argument("on|off|warn"), optional, hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_await: Option<RuleConfiguration>,
-    #[doc = "This rule recommends a for-of loop when the loop index is only used to read from an array that is being iterated."]
+    #[doc = "This rule recommends a for-of loop when in a for loop, the index used to extract an item from the iterated array."]
     #[bpaf(long("use-for-of"), argument("on|off|warn"), optional, hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_for_of: Option<RuleConfiguration>,

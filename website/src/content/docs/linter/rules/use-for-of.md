@@ -1,5 +1,5 @@
 ---
-title: useForOf (since v1.4.0)
+title: useForOf (since vnext)
 ---
 
 **Diagnostic Category: `lint/nursery/useForOf`**
@@ -8,7 +8,7 @@ title: useForOf (since v1.4.0)
 This rule is part of the [nursery](/linter/rules/#nursery) group.
 :::
 
-This rule recommends a for-of loop when the loop index is only used to read from an array that is being iterated.
+This rule recommends a `for-of` loop when in a `for` loop, the index used to extract an item from the iterated array.
 
 Source: https://typescript-eslint.io/rules/prefer-for-of/
 
@@ -45,12 +45,6 @@ for (let i = 0; i < array.length; i++) {
 
 ```jsx
 for (let i = 0, j = 0; i < array.length; i++) {
-   console.log(i, array[i]);
- }
-```
-
-```jsx
-for (let i = 1; i < array.length; i++) {
    console.log(i, array[i]);
  }
 ```
