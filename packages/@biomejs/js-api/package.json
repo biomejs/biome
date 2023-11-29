@@ -23,6 +23,7 @@
     "README.md",
 		"LICENSE-APACHE",
 		"LICENSE-MIT",
+    "ROME-LICENSE-MIT",
     "dist/"
   ],
   "main": "./dist/index.js",

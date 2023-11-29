@@ -75,3 +75,13 @@ function f (x) {
         return x;
     }
 }
+
+function f (x) {
+    if (x) {
+        // do nothing
+    } else if (x) {
+        return true;
+    } else {
+        // do nothing
+    }
+}

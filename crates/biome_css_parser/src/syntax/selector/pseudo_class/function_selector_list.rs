@@ -1,7 +1,7 @@
 use crate::parser::CssParser;
-use crate::syntax::parse_error::expected_identifier;
+use crate::syntax::parse_error::expected_selector;
 use crate::syntax::parse_regular_identifier;
-use crate::syntax::selector::{parse_selector_function_close_token, CssSelectorList};
+use crate::syntax::selector::{eat_or_recover_selector_function_close_token, CssSelectorList};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::ParseSeparatedList;
@@ -25,12 +25,29 @@ pub(crate) fn parse_pseudo_class_function_selector_list(p: &mut CssParser) -> Pa
 
     let m = p.start();
 
-    parse_regular_identifier(p).or_add_diagnostic(p, expected_identifier);
+    // we don't need to check if the identifier is valid, because we already did that
+    parse_regular_identifier(p).ok();
     p.bump(T!['(']);
-    CssSelectorList::default()
-        .with_end_kind(T![')'])
-        .parse_list(p);
-    parse_selector_function_close_token(p);
 
-    Present(m.complete(p, CSS_PSEUDO_CLASS_FUNCTION_SELECTOR_LIST))
+    let list = CssSelectorList::default()
+        .with_end_kind(T![')'])
+        // we don't need to recover here, because we have a better diagnostic message in a close token
+        .disable_recovery()
+        .parse_list(p);
+    let list_range = list.range(p);
+
+    if list_range.is_empty() && p.at(T![')']) {
+        let diagnostic = expected_selector(p, list_range);
+        p.error(diagnostic);
+    }
+
+    let kind = if eat_or_recover_selector_function_close_token(p, list, expected_selector)
+        && !list_range.is_empty()
+    {
+        CSS_PSEUDO_CLASS_FUNCTION_SELECTOR_LIST
+    } else {
+        CSS_BOGUS_PSEUDO_CLASS
+    };
+
+    Present(m.complete(p, kind))
 }

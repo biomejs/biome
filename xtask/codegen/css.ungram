@@ -40,6 +40,8 @@ CssBogus = SyntaxElement*
 CssBogusSelector = SyntaxElement*
 CssBogusSubSelector = SyntaxElement*
 CssBogusPseudoClass = SyntaxElement*
+CssBogusPseudoElement = SyntaxElement*
+CssBogusAtRule = SyntaxElement*
 CssBogusBody =  SyntaxElement*
 CssBogusRule =  SyntaxElement*
 
@@ -52,7 +54,7 @@ CssRuleList = AnyCssRule*
 
 AnyCssRule =
 	CssRule
-	| AnyCssAtRule
+	| CssAtRule
 	| CssBogusRule
 
 
@@ -62,6 +64,10 @@ CssRule =
 	prelude: CssSelectorList
 	block: CssBlock
 
+
+/////////////
+/// SELECTORS
+/////////////
 
 // .header, .app {}
 // ^^^^^^^^^^^^^
@@ -87,12 +93,12 @@ CssComplexSelector =
 // ^^^^^^^
 CssCompoundSelector =
 	nesting_selector: '&'?
-	simple_selector: AnySimpleSelector?
+	simple_selector: AnyCssSimpleSelector?
 	sub_selectors: CssSubSelectorList
 
 CssSubSelectorList = AnyCssSubSelector*
 
-AnySimpleSelector =
+AnyCssSimpleSelector =
 	CssUniversalSelector
 	| CssTypeSelector
 
@@ -104,10 +110,39 @@ AnyCssSubSelector =
 	| CssPseudoElementSelector
 	| CssBogusSubSelector
 
-/////////////
-/// SELECTORS
-/////////////
+// * {}
+// ^
+// *|* {}
+// ^^^
+//  |* {}
+//  ^^
+CssUniversalSelector =
+	namespace: CssNamespace?
+	'*'
 
+// foo|h1 {}
+// ^^^^^^
+// |h1 {}
+// ^^^
+// div {}
+// ^^^
+CssTypeSelector =
+	namespace: CssNamespace?
+	ident: CssIdentifier
+
+CssNamespace =
+	prefix: AnyCssNamespacePrefix?
+	'|'
+
+AnyCssNamespacePrefix =
+	CssNamedNamespacePrefix
+	| CssUniversalNamespacePrefix
+
+CssNamedNamespacePrefix =
+	name: CssIdentifier
+
+CssUniversalNamespacePrefix =
+	'*'
 
 // #app {}
 // ^^^^
@@ -121,18 +156,17 @@ CssClassSelector =
 	'.'
 	name: CssIdentifier
 
-// * {}
-// ^
-CssUniversalSelector =
-	'*'
-
 // [title = "title" i] {}
 // ^^^^^^^^^^^^^^^^^^^
 CssAttributeSelector =
 	'['
-	name: CssIdentifier
+	name: CssAttributeName
 	matcher: CssAttributeMatcher?
 	']'
+
+CssAttributeName =
+	namespace: CssNamespace?
+	name: CssIdentifier
 
 // [title = "title" i] {}
 //        ^^^^^^^^^^^
@@ -321,10 +355,6 @@ CssPseudoClassOfNthSelector =
 	'of'
 	selector_list: CssSelectorList
 
-// div {}
-// ^^^
-CssTypeSelector = ident: CssIdentifier
-
 // a::after {}
 //  ^^^^^^^^
 // video::cue(b) {}
@@ -339,6 +369,7 @@ AnyCssPseudoElement =
 	CssPseudoElementIdentifier
 	| CssPseudoElementFunctionSelector
   | CssPseudoElementFunctionIdentifier
+  | CssBogusPseudoElement
 
 // a::after {}
 //    ^^^^^
@@ -385,26 +416,36 @@ CssDeclarationImportant =
 /////////////
 // AT RULES
 ////////////
-AnyCssAtRule =
-	CssAtKeyframes
-	| CssAtMedia
 
+CssAtRule =
+	'@'
+	rule: AnyCssAtRule
+
+AnyCssAtRule =
+	CssCharsetAtRule
+	| CssKeyframesAtRule
+	| CssMediaAtRule
+	| CssBogusAtRule
+
+CssCharsetAtRule =
+	'charset'
+	encoding: CssString
+	';'
 
 // @keyframes "something" { from {} to {} }
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-CssAtKeyframes =
-	'@'
+CssKeyframesAtRule =
 	'keyframes'
 	name: CssIdentifier | CssString
-	body: CssAtKeyframesBody
+	body: CssKeyframesBody
 
 
-CssAtKeyframesBody =
+CssKeyframesBody =
 	'{'
-	items: CssAtKeyframesItemList
+	items: CssKeyframesItemList
 	'}'
 
-CssAtKeyframesItemList = CssKeyframesBlock*
+CssKeyframesItemList = CssKeyframesBlock*
 
 // @keyframes "something" { 30%, 60% {} }
 //                          ^^^^^^^^^^^
@@ -420,83 +461,82 @@ CssKeyframesSelector = 'from' | 'to' | CssPercentage
 
 
 // @media screen, all, print {}
-CssAtMedia =
-	'@'
+CssMediaAtRule =
 	'media'
-	query_list: CssAtMediaQueryList
+	query_list: CssMediaQueryList
 	'{'
 	body: AnyCssRule
 	'}'
 
 
 // NB: a query list can't start with `and` condition
-CssAtMediaQueryList = (CssAtMediaQuery (',' CssAtMediaQuery)*)
+CssMediaQueryList = (CssMediaQuery (',' CssMediaQuery)*)
 
 // @media or screen and print {}
 // 		  ^^^^^^^^^^^^^^^^^^^^
-CssAtMediaQuery =
+CssMediaQuery =
 	condition: 'not' | 'or' | 'only'?
-	type: AnyCssAtMediaQueryType
-	consequent: CssAtMediaQueryConsequent?
+	type: AnyCssMediaQueryType
+	consequent: CssMediaQueryConsequent?
 
 
 // @media not screen and print {}
 // 		  ^^^^^^^^^
-CssAtMediaQueryConsequent =
+CssMediaQueryConsequent =
 	'and'
 	condition: 'not'?
-	type: AnyCssAtMediaQueryType
+	type: AnyCssMediaQueryType
 
 
-AnyCssAtMediaQueryType =
+AnyCssMediaQueryType =
 	CssIdentifier
-	| CssAtMediaQueryFeature
+	| CssMediaQueryFeature
 
 // @media (width: 800px) {}
 // 				^^^^^^^^^^^^^^
 // @media (width) {}
 // 				^^^^^^^
-CssAtMediaQueryFeature =
+CssMediaQueryFeature =
 	'('
-	feature: AnyCssAtMediaQueryFeatureType
+	feature: AnyCssMediaQueryFeatureType
 	')'
 
-AnyCssAtMediaQueryFeatureType =
-	CssAtMediaQueryFeaturePlain
-	| CssAtMediaQueryFeatureBoolean
-	| CssAtMediaQueryFeatureCompare
-	| CssAtMediaQueryFeatureRange
+AnyCssMediaQueryFeatureType =
+	CssMediaQueryFeaturePlain
+	| CssMediaQueryFeatureBoolean
+	| CssMediaQueryFeatureCompare
+	| CssMediaQueryFeatureRange
 
 
 // @media (width: 800px) {}
 // 				^^^^^^^^^^^^^^
-CssAtMediaQueryFeaturePlain =
+CssMediaQueryFeaturePlain =
 	name: CssIdentifier
 	':'
 	value: AnyCssValue
 
 // @media (width) {}
 // 				^^^^^^^
-CssAtMediaQueryFeatureBoolean = CssIdentifier
+CssMediaQueryFeatureBoolean = CssIdentifier
 
 
 // @media (height > 600px) {}
 // 				^^^^^^^^^^^^^^^
-CssAtMediaQueryFeatureCompare =
+CssMediaQueryFeatureCompare =
 	name: CssIdentifier
-	range: CssAtMediaQueryRange
+	range: CssMediaQueryRange
 	value: AnyCssValue
 
 // @media (400px <= width <= 700px) {}
 // 				^^^^^^^^^^^^^^^^^^^^^^^^
-CssAtMediaQueryFeatureRange =
+CssMediaQueryFeatureRange =
 	first_value: AnyCssValue
-	first_range: CssAtMediaQueryRange
+	first_range: CssMediaQueryRange
 	name: CssIdentifier
 	second_value: AnyCssValue
-	second_range: CssAtMediaQueryRange
+	second_range: CssMediaQueryRange
 
-CssAtMediaQueryRange = '>' | '<' | '>=' | '<='
+CssMediaQueryRange = '>' | '<' | '>=' | '<='
 
 
 ///////////////

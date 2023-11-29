@@ -1,11 +1,13 @@
+use std::borrow::Cow;
+
 use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make;
-use biome_js_syntax::{AnyJsStatement, JsElseClause, JsIfStatement, JsStatementList};
-use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
+use biome_js_syntax::{AnyJsStatement, JsIfStatement, JsStatementList, JsSyntaxKind};
+use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, SyntaxNodeOptionExt};
 
 use crate::JsRuleAction;
 
@@ -15,6 +17,13 @@ declare_rule! {
     /// If an `if` block breaks early using a breaking statement (`return`, `break`, `continue`, or `throw`),
     /// then the `else` block becomes useless.
     /// Its contents can be placed outside of the block.
+    ///
+    /// If an `if` block breaks early using a breaking statement (`return`, `break`, `continue`, or `throw`),
+    /// then the `else` block becomes unnecessary.
+    /// This is because the content of the `else` block will never be executed in conjunction with the `if` block,
+    /// as the breaking statement ensures the control flow exits the `if` block immediately.
+    /// Therefore, the `else` block is redundant, and its content can be placed outside of the block,
+    /// reducing the indentation level by one.
     ///
     /// ## Examples
     ///
@@ -31,7 +40,7 @@ declare_rule! {
     /// ```
     ///
     /// ```js,expect_diagnostic
-    /// function f() {
+    /// function f(x) {
     ///     if (x < 0) {
     ///         return 0;
     ///     } else {
@@ -41,7 +50,7 @@ declare_rule! {
     /// ```
     ///
     /// ```js,expect_diagnostic
-    /// function f() {
+    /// function f(x) {
     ///     if (x < 0) {
     ///         throw new RangeError();
     ///     } else {
@@ -53,11 +62,23 @@ declare_rule! {
     /// ## Valid
     ///
     /// ```js
-    /// function f() {
+    /// function f(x) {
     ///     if (x < 0) {
     ///         return 0;
     ///     }
     ///     return x;
+    /// }
+    /// ```
+    ///
+    /// ```js
+    /// function f(x) {
+    ///     if (x < 0) {
+    ///         console.info("negative number");
+    ///     } else if (x > 0) {
+    ///         return x;
+    ///     } else {
+    ///         console.info("number 0");
+    ///     }
     /// }
     /// ```
     pub(crate) NoUselessElse {
@@ -69,70 +90,43 @@ declare_rule! {
 }
 
 impl Rule for NoUselessElse {
-    type Query = Ast<JsElseClause>;
-    type State = ();
-    type Signals = Option<Self::State>;
+    type Query = Ast<JsIfStatement>;
+    type State = JsIfStatement;
+    type Signals = Vec<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let else_clause = ctx.query();
-        let if_stmt = else_clause.parent::<JsIfStatement>()?;
-        let mut stmt_stack = vec![(if_stmt.consequent().ok()?, ScopeMetadata::default())];
-        while let Some((stmt, metadata)) = stmt_stack.pop() {
-            match stmt {
-                AnyJsStatement::JsBlockStatement(block_stmt) => {
-                    let Some(last) = block_stmt.statements().iter().last() else {
-                        // empty statement block
-                        return None;
-                    };
-                    stmt_stack.push((last, metadata));
-                }
-                AnyJsStatement::JsBreakStatement(_) => {
-                    if metadata.is_breakable {
-                        // We are inside a breakable structure (switch statement)
-                        // that we saw in a previous iteration.
-                        return None;
-                    }
-                }
-                AnyJsStatement::JsContinueStatement(_)
-                | AnyJsStatement::JsReturnStatement(_)
-                | AnyJsStatement::JsThrowStatement(_) => {}
-                AnyJsStatement::JsIfStatement(if_stmt) => {
-                    let Some(else_clause) = if_stmt.else_clause() else {
-                        // No else clause
-                        return None;
-                    };
-                    stmt_stack.push((if_stmt.consequent().ok()?, metadata));
-                    stmt_stack.push((else_clause.alternate().ok()?, metadata));
-                }
-                AnyJsStatement::JsSwitchStatement(switch_stmt) => {
-                    // To simplify, We do not take fallthoughs into account.
-                    // Thus, this can miss some useless else.
-                    let cases = switch_stmt.cases();
-                    let Some(last_case) = cases.last() else {
-                        // Empty switch
-                        return None;
-                    };
-                    if last_case.consequent().is_empty() {
-                        return None;
-                    }
-                    for switch_clause in cases.iter() {
-                        if let Some(last) = switch_clause.consequent().last() {
-                            stmt_stack.push((last, ScopeMetadata { is_breakable: true }));
-                        }
-                    }
-                }
-                _ => {
-                    // labeled statements, loops, try-catch, with statement, and others
-                    return None;
-                }
-            }
+        let mut result = vec![];
+        let if_stmt = ctx.query();
+        // Check an `if` statement only once.
+        if if_stmt.syntax().parent().kind() == Some(JsSyntaxKind::JS_ELSE_CLAUSE) {
+            return result;
         }
-        Some(())
+        let mut if_stmt = Cow::Borrowed(if_stmt);
+        while let (Ok(if_consequent), Some(else_clause)) =
+            (if_stmt.consequent(), if_stmt.else_clause())
+        {
+            // if the `if` statement doesn't break early, stop there
+            if breaks_early(if_consequent).is_none() {
+                break;
+            }
+            // Otherwise, report the `else` clause as useless
+            result.push(if_stmt.into_owned());
+            // And check the following `if` statement (if any)
+            let Some(stmt) = else_clause
+                .alternate()
+                .ok()
+                .and_then(|alternate| JsIfStatement::cast(alternate.into_syntax()))
+            else {
+                break;
+            };
+            if_stmt = Cow::Owned(stmt);
+        }
+        result
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
-        let else_clause = ctx.query();
+    fn diagnostic(_ctx: &RuleContext<Self>, if_stmt: &Self::State) -> Option<RuleDiagnostic> {
+        let else_clause = if_stmt.else_clause()?;
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
@@ -142,7 +136,7 @@ impl Rule for NoUselessElse {
                 },
             )
             .detail(
-                else_clause.syntax().parent()?.text_trimmed_range(),
+                if_stmt.range(),
                 markup! {
                     "This "<Emphasis>"if"</Emphasis>" statement uses an early breaking statement."
                 },
@@ -150,15 +144,14 @@ impl Rule for NoUselessElse {
         )
     }
 
-    fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
-        let else_clause = ctx.query();
-        let if_stmt = else_clause.parent::<JsIfStatement>()?;
+    fn action(ctx: &RuleContext<Self>, if_stmt: &Self::State) -> Option<JsRuleAction> {
+        let else_clause = if_stmt.else_clause()?;
         if let Some(stmts_list) = if_stmt.parent::<JsStatementList>() {
             let else_alternative = else_clause.alternate().ok()?;
             let if_pos = stmts_list
                 .iter()
                 .position(|x| x.syntax() == if_stmt.syntax())?;
-            let new_if_stmt = AnyJsStatement::from(if_stmt.with_else_clause(None))
+            let new_if_stmt = AnyJsStatement::from(if_stmt.clone().with_else_clause(None))
                 .with_trailing_trivia_pieces([])?;
             let prev_stmts = stmts_list.iter().take(if_pos).chain([new_if_stmt]);
             let next_stmts = stmts_list.iter().skip(if_pos + 1);
@@ -193,4 +186,59 @@ impl Rule for NoUselessElse {
 struct ScopeMetadata {
     // We are inside a breakable structure
     is_breakable: bool,
+}
+
+fn breaks_early(statement: AnyJsStatement) -> Option<()> {
+    let mut stmt_stack = vec![(statement, ScopeMetadata::default())];
+    while let Some((stmt, metadata)) = stmt_stack.pop() {
+        match stmt {
+            AnyJsStatement::JsBlockStatement(block_stmt) => {
+                let Some(last) = block_stmt.statements().iter().last() else {
+                    // empty statement block
+                    return None;
+                };
+                stmt_stack.push((last, metadata));
+            }
+            AnyJsStatement::JsBreakStatement(_) => {
+                if metadata.is_breakable {
+                    // We are inside a breakable structure (switch statement)
+                    // that we saw in a previous iteration.
+                    return None;
+                }
+            }
+            AnyJsStatement::JsContinueStatement(_)
+            | AnyJsStatement::JsReturnStatement(_)
+            | AnyJsStatement::JsThrowStatement(_) => {}
+            AnyJsStatement::JsIfStatement(if_stmt) => {
+                let Some(else_clause) = if_stmt.else_clause() else {
+                    // No else clause
+                    return None;
+                };
+                stmt_stack.push((if_stmt.consequent().ok()?, metadata));
+                stmt_stack.push((else_clause.alternate().ok()?, metadata));
+            }
+            AnyJsStatement::JsSwitchStatement(switch_stmt) => {
+                // To simplify, We do not take fallthoughs into account.
+                // Thus, this can miss some useless else.
+                let cases = switch_stmt.cases();
+                let Some(last_case) = cases.last() else {
+                    // Empty switch
+                    return None;
+                };
+                if last_case.consequent().is_empty() {
+                    return None;
+                }
+                for switch_clause in cases.iter() {
+                    if let Some(last) = switch_clause.consequent().last() {
+                        stmt_stack.push((last, ScopeMetadata { is_breakable: true }));
+                    }
+                }
+            }
+            _ => {
+                // labeled statements, loops, try-catch, with statement, and others
+                return None;
+            }
+        }
+    }
+    Some(())
 }

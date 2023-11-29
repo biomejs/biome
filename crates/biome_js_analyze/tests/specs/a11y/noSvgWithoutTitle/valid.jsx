@@ -37,4 +37,12 @@
 		<title>implicit role</title>
 		<span>Pass</span>
 	</svg>
+
+	<svg aria-hidden="true">
+        <defs>
+          <pattern>
+            <path d="M.5 200V.5H200" fill="none" />
+          </pattern>
+        </defs>
+    </svg>
 </>;

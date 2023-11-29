@@ -508,9 +508,14 @@ fn write_grouped_arguments(
         buffer.into_vec().into_boxed_slice()
     };
 
-    if grouped_breaks {
+    // If the grouped content breaks, then we can skip the most_flat variant,
+    // since we already know that it won't be fitting on a single line.
+    let variants = if grouped_breaks {
         write!(f, [expand_parent()])?;
-    }
+        vec![middle_variant, most_expanded.into_boxed_slice()]
+    } else {
+        vec![most_flat, middle_variant, most_expanded.into_boxed_slice()]
+    };
 
     // SAFETY: Safe because variants is guaranteed to contain exactly 3 entries:
     // * most flat
@@ -519,11 +524,7 @@ fn write_grouped_arguments(
     // ... and best fitting only requires the most flat/and expanded.
     unsafe {
         f.write_element(FormatElement::BestFitting(
-            format_element::BestFittingElement::from_vec_unchecked(vec![
-                most_flat,
-                middle_variant,
-                most_expanded.into_boxed_slice(),
-            ]),
+            format_element::BestFittingElement::from_vec_unchecked(variants),
         ))
     }
 }
