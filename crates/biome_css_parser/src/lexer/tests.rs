@@ -381,3 +381,12 @@ fn block_comment() {
         COMMENT:4
     }
 }
+
+
+#[test]
+fn bang() {
+    assert_lex! {
+        "!",
+        BANG:1
+    }
+}

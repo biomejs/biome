@@ -140,6 +140,8 @@ a {
     background: 123.456 ;
     background: "str" ;
     background: ddff ;
+    background: a !important;
+    background: a ! important;
 }
 
     "#;

@@ -4,10 +4,9 @@ mod selector;
 
 use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
-use crate::syntax;
 use crate::syntax::at_rule::{at_at_rule, parse_at_rule};
+use crate::syntax::parse_error::expected_block;
 use crate::syntax::parse_error::expected_identifier;
-use crate::syntax::parse_error::{expect_any_value, expected_block};
 use crate::syntax::selector::CssSelectorList;
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
@@ -15,7 +14,7 @@ use biome_parser::parse_lists::ParseSeparatedList;
 use biome_parser::parse_recovery::ParseRecovery;
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
-use biome_parser::{token_set, CompletedMarker, Marker, Parser, ParserProgress, TokenSet};
+use biome_parser::{token_set, CompletedMarker, Parser, ParserProgress, TokenSet};
 
 const RULE_RECOVERY_SET: TokenSet<CssSyntaxKind> =
     token_set![T![#], T![.], T![*], T![ident], T![:], T![::], T!['{']];
@@ -116,10 +115,17 @@ pub(crate) fn parse_declaration_item(p: &mut CssParser) {
     p.expect(T![:]);
     loop {
         let any_css_value = parse_any_css_value(p);
-
         if any_css_value.is_absent() {
             break;
         }
+    }
+    parse_declaration_important(p);
+}
+
+#[inline]
+pub(crate) fn parse_declaration_important(p: &mut CssParser) {
+    if p.eat(T![!]) {
+        p.expect(T![important]);
     }
 }
 
@@ -145,15 +151,13 @@ pub(crate) fn parse_any_css_value(p: &mut CssParser) -> ParsedSyntax {
     // 	| CssAnyFunction
     // 	| CssCustomProperty
 
-    return Absent;
+    Absent
 }
 
 pub(crate) fn parse_css_number_or_dimension(p: &mut CssParser) -> ParsedSyntax {
     if parse_css_number(p).is_present() && p.at(T![ident]) {
         let m = p.start();
-        dbg!(p.cur_text());
         parse_regular_identifier(p).or_add_diagnostic(p, expected_identifier);
-        dbg!(p.cur_text());
         return Present(m.complete(p, CSS_DIMENSION));
     }
     Absent
