@@ -10,15 +10,27 @@ var r = /[👍]\\a/;
 var r = /(?<=[👍])/;
 var r = /[Á]/;
 var r = /[Á]/u;
+var r = /[\u0041\u0301]/;
+var r = /[\u0041\u0301]/u;
+var r = /[\u{41}\u{301}]/u;
 var r = /[❇️]/;
 var r = /[❇️]/u;
+var r = /[\u2747\uFE0F]/;
+var r = /[\u2747\uFE0F]/u;
+var r = /[\u{2747}\u{FE0F}]/u;
 var r = /[👶🏻]/;
 var r = /[👶🏻]/u;
+var r = /[\uD83D\uDC76\uD83C\uDFFB]/u;
+var r = /[\u{1F476}\u{1F3FB}]/u;
 var r = /[🇯🇵]/;
 var r = /[🇯🇵]/i;
 var r = /[🇯🇵]/u;
+var r = /[\uD83C\uDDEF\uD83C\uDDF5]/u;
+var r = /[\u{1F1EF}\u{1F1F5}]/u;
 var r = /[👨‍👩‍👦]/;
 var r = /[👨‍👩‍👦]/u;
+var r = /[\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC66]/u
+var r = /[\u{1F468}\u{200D}\u{1F469}\u{200D}\u{1F466}]/u
 ```
 
 # Diagnostics
@@ -105,7 +117,7 @@ invalid.js:5:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━�
   > 5 │ var r = /[A�]/;
       │         ^^^^^
     6 │ var r = /[A�]/u;
-    7 │ var r = /[❇�]/;
+    7 │ var r = /[\u0041\u0301]/;
   
 
 ```
@@ -119,8 +131,8 @@ invalid.js:6:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━�
     5 │ var r = /[A�]/;
   > 6 │ var r = /[A�]/u;
       │         ^^^^^^
-    7 │ var r = /[❇�]/;
-    8 │ var r = /[❇�]/u;
+    7 │ var r = /[\u0041\u0301]/;
+    8 │ var r = /[\u0041\u0301]/u;
   
 
 ```
@@ -132,10 +144,10 @@ invalid.js:7:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━�
   
     5 │ var r = /[A�]/;
     6 │ var r = /[A�]/u;
-  > 7 │ var r = /[❇�]/;
-      │         ^^^^^
-    8 │ var r = /[❇�]/u;
-    9 │ var r = /[👶🏻]/;
+  > 7 │ var r = /[\u0041\u0301]/;
+      │         ^^^^^^^^^^^^^^^^
+    8 │ var r = /[\u0041\u0301]/u;
+    9 │ var r = /[\u{41}\u{301}]/u;
   
 
 ```
@@ -146,88 +158,71 @@ invalid.js:8:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━�
   ! Unexpected combined character in character class.
   
      6 │ var r = /[A�]/u;
-     7 │ var r = /[❇�]/;
-   > 8 │ var r = /[❇�]/u;
-       │         ^^^^^^
-     9 │ var r = /[👶🏻]/;
-    10 │ var r = /[👶🏻]/u;
+     7 │ var r = /[\u0041\u0301]/;
+   > 8 │ var r = /[\u0041\u0301]/u;
+       │         ^^^^^^^^^^^^^^^^^
+     9 │ var r = /[\u{41}\u{301}]/u;
+    10 │ var r = /[❇�]/;
   
 
 ```
 
 ```
-invalid.js:9:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:9:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected surrogate pair in character class. Use 'u' flag.
+  ! Unexpected combined character in character class.
   
-     7 │ var r = /[❇�]/;
-     8 │ var r = /[❇�]/u;
-   > 9 │ var r = /[👶🏻]/;
-       │         ^^^^^^^^
-    10 │ var r = /[👶🏻]/u;
-    11 │ var r = /[🇯🇵]/;
+     7 │ var r = /[\u0041\u0301]/;
+     8 │ var r = /[\u0041\u0301]/u;
+   > 9 │ var r = /[\u{41}\u{301}]/u;
+       │         ^^^^^^^^^^^^^^^^^^
+    10 │ var r = /[❇�]/;
+    11 │ var r = /[❇�]/u;
   
-  i Unsafe fix: Add unicode u flag to regex
-  
-    9 │ var·r·=·/[👶🏻]/u;
-      │                 + 
 
 ```
 
 ```
 invalid.js:10:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected modified Emoji in character class. 
+  ! Unexpected combined character in character class.
   
-     8 │ var r = /[❇�]/u;
-     9 │ var r = /[👶🏻]/;
-  > 10 │ var r = /[👶🏻]/u;
-       │         ^^^^^^^^^
-    11 │ var r = /[🇯🇵]/;
-    12 │ var r = /[🇯🇵]/i;
+     8 │ var r = /[\u0041\u0301]/u;
+     9 │ var r = /[\u{41}\u{301}]/u;
+  > 10 │ var r = /[❇�]/;
+       │         ^^^^^
+    11 │ var r = /[❇�]/u;
+    12 │ var r = /[\u2747\uFE0F]/;
   
 
 ```
 
 ```
-invalid.js:11:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:11:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected surrogate pair in character class. Use 'u' flag.
+  ! Unexpected combined character in character class.
   
-     9 │ var r = /[👶🏻]/;
-    10 │ var r = /[👶🏻]/u;
-  > 11 │ var r = /[🇯🇵]/;
+     9 │ var r = /[\u{41}\u{301}]/u;
+    10 │ var r = /[❇�]/;
+  > 11 │ var r = /[❇�]/u;
        │         ^^^^^^
-    12 │ var r = /[🇯🇵]/i;
-    13 │ var r = /[🇯🇵]/u;
+    12 │ var r = /[\u2747\uFE0F]/;
+    13 │ var r = /[\u2747\uFE0F]/u;
   
-  i Unsafe fix: Add unicode u flag to regex
-  
-    11 │ var·r·=·/[🇯🇵]/u;
-       │               + 
 
 ```
 
 ```
-invalid.js:12:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:12:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected surrogate pair in character class. Use 'u' flag.
+  ! Unexpected combined character in character class.
   
-    10 │ var r = /[👶🏻]/u;
-    11 │ var r = /[🇯🇵]/;
-  > 12 │ var r = /[🇯🇵]/i;
-       │         ^^^^^^^
-    13 │ var r = /[🇯🇵]/u;
-    14 │ var r = /[👨�👩�👦]/;
-  
-  i Unsafe fix: Add unicode u flag to regex
-  
-    10 10 │   var r = /[👶🏻]/u;
-    11 11 │   var r = /[🇯🇵]/;
-    12    │ - var·r·=·/[🇯🇵]/i;
-       12 │ + var·r·=·/[🇯🇵]/iu;
-    13 13 │   var r = /[🇯🇵]/u;
-    14 14 │   var r = /[👨�👩�👦]/;
+    10 │ var r = /[❇�]/;
+    11 │ var r = /[❇�]/u;
+  > 12 │ var r = /[\u2747\uFE0F]/;
+       │         ^^^^^^^^^^^^^^^^
+    13 │ var r = /[\u2747\uFE0F]/u;
+    14 │ var r = /[\u{2747}\u{FE0F}]/u;
   
 
 ```
@@ -235,45 +230,242 @@ invalid.js:12:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━�
 ```
 invalid.js:13:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Regional indicator symbol characters should not be used in character class.
+  ! Unexpected combined character in character class.
   
-    11 │ var r = /[🇯🇵]/;
-    12 │ var r = /[🇯🇵]/i;
-  > 13 │ var r = /[🇯🇵]/u;
-       │         ^^^^^^^
-    14 │ var r = /[👨�👩�👦]/;
-    15 │ var r = /[👨�👩�👦]/u;
+    11 │ var r = /[❇�]/u;
+    12 │ var r = /[\u2747\uFE0F]/;
+  > 13 │ var r = /[\u2747\uFE0F]/u;
+       │         ^^^^^^^^^^^^^^^^^
+    14 │ var r = /[\u{2747}\u{FE0F}]/u;
+    15 │ var r = /[👶🏻]/;
   
 
 ```
 
 ```
-invalid.js:14:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:14:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected combined character in character class.
+  
+    12 │ var r = /[\u2747\uFE0F]/;
+    13 │ var r = /[\u2747\uFE0F]/u;
+  > 14 │ var r = /[\u{2747}\u{FE0F}]/u;
+       │         ^^^^^^^^^^^^^^^^^^^^^
+    15 │ var r = /[👶🏻]/;
+    16 │ var r = /[👶🏻]/u;
+  
+
+```
+
+```
+invalid.js:15:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected surrogate pair in character class. Use 'u' flag.
   
-    12 │ var r = /[🇯🇵]/i;
-    13 │ var r = /[🇯🇵]/u;
-  > 14 │ var r = /[👨�👩�👦]/;
-       │         ^^^^^^^^^^
-    15 │ var r = /[👨�👩�👦]/u;
+    13 │ var r = /[\u2747\uFE0F]/u;
+    14 │ var r = /[\u{2747}\u{FE0F}]/u;
+  > 15 │ var r = /[👶🏻]/;
+       │         ^^^^^^^^
+    16 │ var r = /[👶🏻]/u;
+    17 │ var r = /[\uD83D\uDC76\uD83C\uDFFB]/u;
   
   i Unsafe fix: Add unicode u flag to regex
   
-    14 │ var·r·=·/[👨�👩�👦]/u;
+    15 │ var·r·=·/[👶🏻]/u;
+       │                 + 
+
+```
+
+```
+invalid.js:16:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected modified Emoji in character class. 
+  
+    14 │ var r = /[\u{2747}\u{FE0F}]/u;
+    15 │ var r = /[👶🏻]/;
+  > 16 │ var r = /[👶🏻]/u;
+       │         ^^^^^^^^^
+    17 │ var r = /[\uD83D\uDC76\uD83C\uDFFB]/u;
+    18 │ var r = /[\u{1F476}\u{1F3FB}]/u;
+  
+
+```
+
+```
+invalid.js:17:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected modified Emoji in character class. 
+  
+    15 │ var r = /[👶🏻]/;
+    16 │ var r = /[👶🏻]/u;
+  > 17 │ var r = /[\uD83D\uDC76\uD83C\uDFFB]/u;
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │ var r = /[\u{1F476}\u{1F3FB}]/u;
+    19 │ var r = /[🇯🇵]/;
+  
+
+```
+
+```
+invalid.js:18:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected modified Emoji in character class. 
+  
+    16 │ var r = /[👶🏻]/u;
+    17 │ var r = /[\uD83D\uDC76\uD83C\uDFFB]/u;
+  > 18 │ var r = /[\u{1F476}\u{1F3FB}]/u;
+       │         ^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ var r = /[🇯🇵]/;
+    20 │ var r = /[🇯🇵]/i;
+  
+
+```
+
+```
+invalid.js:19:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected surrogate pair in character class. Use 'u' flag.
+  
+    17 │ var r = /[\uD83D\uDC76\uD83C\uDFFB]/u;
+    18 │ var r = /[\u{1F476}\u{1F3FB}]/u;
+  > 19 │ var r = /[🇯🇵]/;
+       │         ^^^^^^
+    20 │ var r = /[🇯🇵]/i;
+    21 │ var r = /[🇯🇵]/u;
+  
+  i Unsafe fix: Add unicode u flag to regex
+  
+    19 │ var·r·=·/[🇯🇵]/u;
+       │               + 
+
+```
+
+```
+invalid.js:20:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected surrogate pair in character class. Use 'u' flag.
+  
+    18 │ var r = /[\u{1F476}\u{1F3FB}]/u;
+    19 │ var r = /[🇯🇵]/;
+  > 20 │ var r = /[🇯🇵]/i;
+       │         ^^^^^^^
+    21 │ var r = /[🇯🇵]/u;
+    22 │ var r = /[\uD83C\uDDEF\uD83C\uDDF5]/u;
+  
+  i Unsafe fix: Add unicode u flag to regex
+  
+    18 18 │   var r = /[\u{1F476}\u{1F3FB}]/u;
+    19 19 │   var r = /[🇯🇵]/;
+    20    │ - var·r·=·/[🇯🇵]/i;
+       20 │ + var·r·=·/[🇯🇵]/iu;
+    21 21 │   var r = /[🇯🇵]/u;
+    22 22 │   var r = /[\uD83C\uDDEF\uD83C\uDDF5]/u;
+  
+
+```
+
+```
+invalid.js:21:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Regional indicator symbol characters should not be used in character class.
+  
+    19 │ var r = /[🇯🇵]/;
+    20 │ var r = /[🇯🇵]/i;
+  > 21 │ var r = /[🇯🇵]/u;
+       │         ^^^^^^^
+    22 │ var r = /[\uD83C\uDDEF\uD83C\uDDF5]/u;
+    23 │ var r = /[\u{1F1EF}\u{1F1F5}]/u;
+  
+
+```
+
+```
+invalid.js:22:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Regional indicator symbol characters should not be used in character class.
+  
+    20 │ var r = /[🇯🇵]/i;
+    21 │ var r = /[🇯🇵]/u;
+  > 22 │ var r = /[\uD83C\uDDEF\uD83C\uDDF5]/u;
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    23 │ var r = /[\u{1F1EF}\u{1F1F5}]/u;
+    24 │ var r = /[👨�👩�👦]/;
+  
+
+```
+
+```
+invalid.js:23:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Regional indicator symbol characters should not be used in character class.
+  
+    21 │ var r = /[🇯🇵]/u;
+    22 │ var r = /[\uD83C\uDDEF\uD83C\uDDF5]/u;
+  > 23 │ var r = /[\u{1F1EF}\u{1F1F5}]/u;
+       │         ^^^^^^^^^^^^^^^^^^^^^^^
+    24 │ var r = /[👨�👩�👦]/;
+    25 │ var r = /[👨�👩�👦]/u;
+  
+
+```
+
+```
+invalid.js:24:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected surrogate pair in character class. Use 'u' flag.
+  
+    22 │ var r = /[\uD83C\uDDEF\uD83C\uDDF5]/u;
+    23 │ var r = /[\u{1F1EF}\u{1F1F5}]/u;
+  > 24 │ var r = /[👨�👩�👦]/;
+       │         ^^^^^^^^^^
+    25 │ var r = /[👨�👩�👦]/u;
+    26 │ var r = /[\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC66]/u
+  
+  i Unsafe fix: Add unicode u flag to regex
+  
+    24 │ var·r·=·/[👨�👩�👦]/u;
        │                   + 
 
 ```
 
 ```
-invalid.js:15:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:25:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected joined character sequence in character class.
   
-    13 │ var r = /[🇯🇵]/u;
-    14 │ var r = /[👨�👩�👦]/;
-  > 15 │ var r = /[👨�👩�👦]/u;
+    23 │ var r = /[\u{1F1EF}\u{1F1F5}]/u;
+    24 │ var r = /[👨�👩�👦]/;
+  > 25 │ var r = /[👨�👩�👦]/u;
        │         ^^^^^^^^^^^
+    26 │ var r = /[\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC66]/u
+    27 │ var r = /[\u{1F468}\u{200D}\u{1F469}\u{200D}\u{1F466}]/u
+  
+
+```
+
+```
+invalid.js:26:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected joined character sequence in character class.
+  
+    24 │ var r = /[👨�👩�👦]/;
+    25 │ var r = /[👨�👩�👦]/u;
+  > 26 │ var r = /[\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC66]/u
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    27 │ var r = /[\u{1F468}\u{200D}\u{1F469}\u{200D}\u{1F466}]/u
+  
+
+```
+
+```
+invalid.js:27:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected joined character sequence in character class.
+  
+    25 │ var r = /[👨�👩�👦]/u;
+    26 │ var r = /[\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC66]/u
+  > 27 │ var r = /[\u{1F468}\u{200D}\u{1F469}\u{200D}\u{1F466}]/u
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
 
 ```

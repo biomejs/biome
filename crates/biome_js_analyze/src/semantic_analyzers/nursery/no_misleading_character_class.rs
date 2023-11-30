@@ -6,7 +6,6 @@ use biome_js_syntax::{
     JsCallExpression, JsNewExpression, JsRegexLiteralExpression, JsSyntaxKind, JsSyntaxToken,
 };
 use biome_rowan::{declare_node_union, AstNode, BatchMutationExt, TextRange};
-use regex::Regex;
 declare_rule! {
     /// Disallow characters which are made with multiple code points in character class syntax
     ///
@@ -92,18 +91,16 @@ impl Rule for NoMisleadingCharacterClass {
                 let Ok((pattern, flags)) = expr.decompose() else {
                     return None;
                 };
-                let regex_literal = v(pattern.text());
+                let regex_literal = replace_escaped_unicode(pattern.text());
                 let has_u_flag = flags.text().contains('u');
                 let mut is_in_character_class = false;
                 let mut escape_next = false;
-                let mut char_iter = regex_literal.chars().peekable();
-
+                let char_iter = regex_literal.chars().peekable();
                 for (i, ch) in char_iter.enumerate() {
                     if escape_next {
                         escape_next = false;
                         continue;
                     }
-
                     match ch {
                         '\\' => escape_next = true,
                         '[' => is_in_character_class = true,
@@ -115,6 +112,7 @@ impl Rule for NoMisleadingCharacterClass {
                                     message: Message::SurrogatePairWithoutUFlag,
                                 });
                             }
+
                             if has_combining_class_or_vs16(&regex_literal[i..]) {
                                 return Some(RuleState {
                                     range: expr.syntax().text_range(),
@@ -273,77 +271,154 @@ fn has_surrogate_pair(s: &str) -> bool {
     s.chars().any(|c| c as u32 > 0xFFFF)
 }
 
-fn replace_surrogate_pairs(input: &str) -> String {
-    let re = Regex::new(r"\\u([Dd][89ABab][0-9a-fA-F]{2})\\u([Dd][Cc][0-9a-fA-F]{2})").unwrap();
-
-    re.replace_all(input, |caps: &regex::Captures| {
-        let high = u32::from_str_radix(&caps[1], 16).unwrap();
-        let low = u32::from_str_radix(&caps[2], 16).unwrap();
-
-        let codepoint = ((high - 0xD800) << 10) + (low - 0xDC00) + 0x10000;
-
-        char::from_u32(codepoint).map_or_else(String::new, |c| c.to_string())
-    })
-    .into_owned()
+fn is_unicode_char(ch: char) -> bool {
+    ch.is_ascii_digit() || ('a'..='f').contains(&ch) || ('A'..='F').contains(&ch)
 }
 
-fn v(input: &str) -> String {
+/// Convert unicode escape sequence string to unicode character
+/// - unicode escape sequences: \u{XXXX}
+/// - unicode escape sequences without parenthesis: \uXXXX
+/// - surrogate pair: \uXXXX\uXXXX
+/// If the unicode escape sequence is not valid, it will be treated as a simple string.
+///
+/// ```example
+/// \uD83D\uDC4D -> 👍
+/// \u0041\u0301 -> Á
+/// \uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC66 -> 👨‍👩‍👦
+/// \u{1F468}\u{200D}\u{1F469}\u{200D}\u{1F466} -> 👨‍👩‍👦
+/// \u899\uD83D\uDC4D -> \u899👍
+/// ````
+fn replace_escaped_unicode(input: &str) -> String {
     let mut result = String::new();
     let mut chars_iter = input.chars().peekable();
 
     while let Some(ch) = chars_iter.next() {
-        if ch == '\\' && chars_iter.peek() == Some(&'u') {
-            // '\' の後に 'u' が来る場合、Unicodeエスケープとして処理
-            chars_iter.next(); // 'u' を消費
-
-            if chars_iter.peek() == Some(&'{') {
-                // '{' で始まる場合、コードポイントが {} 内にある
-                chars_iter.next(); // '{' を消費
-                let mut codepoint_str = String::new();
-                while let Some(&next_char) = chars_iter.peek() {
-                    if next_char == '}' {
-                        chars_iter.next(); // '}' を消費
-                        break;
-                    } else {
-                        codepoint_str.push(next_char);
-                        chars_iter.next();
-                    }
-                }
-                if let Ok(codepoint) = u32::from_str_radix(&codepoint_str, 16) {
-                    if let Some(character) = char::from_u32(codepoint) {
-                        result.push(character);
-                    }
-                }
-            } else {
-                // 通常のサロゲートペア
-                let mut high_surrogate_str = String::new();
-                for _ in 0..4 {
-                    if let Some(next_char) = chars_iter.next() {
-                        high_surrogate_str.push(next_char);
-                    }
-                }
-                if chars_iter.next() == Some('\\') && chars_iter.next() == Some('u') {
-                    let mut low_surrogate_str = String::new();
-                    for _ in 0..4 {
-                        if let Some(next_char) = chars_iter.next() {
-                            low_surrogate_str.push(next_char);
-                        }
-                    }
-                    let high_surrogate = u32::from_str_radix(&high_surrogate_str, 16).unwrap();
-                    let low_surrogate = u32::from_str_radix(&low_surrogate_str, 16).unwrap();
-                    let codepoint =
-                        ((high_surrogate - 0xD800) << 10) + (low_surrogate - 0xDC00) + 0x10000;
-
-                    if let Some(character) = char::from_u32(codepoint) {
-                        result.push(character);
-                    }
-                }
+        if ch == '\\' {
+            match handle_escape_sequence(&mut chars_iter) {
+                Some(unicode_char) => result.push_str(&unicode_char),
+                None => result.push(ch),
             }
         } else {
-            // Unicodeエスケープでない場合、そのまま追加
             result.push(ch);
         }
     }
-
     result
+}
+
+fn handle_escape_sequence(chars_iter: &mut std::iter::Peekable<std::str::Chars>) -> Option<String> {
+    if chars_iter.peek() != Some(&'u') {
+        return None;
+    }
+    chars_iter.next();
+
+    if chars_iter.peek() == Some(&'{') {
+        handle_braced_escape_sequence(chars_iter)
+    } else {
+        handle_simple_or_surrogate_escape_sequence(chars_iter)
+    }
+}
+
+fn handle_braced_escape_sequence(
+    chars_iter: &mut std::iter::Peekable<std::str::Chars>,
+) -> Option<String> {
+    chars_iter.next();
+    let mut codepoint_str = String::new();
+    while let Some(&next_char) = chars_iter.peek() {
+        if next_char == '}' {
+            chars_iter.next();
+            break;
+        } else {
+            codepoint_str.push(next_char);
+            chars_iter.next();
+        }
+    }
+    u32::from_str_radix(&codepoint_str, 16)
+        .ok()
+        .and_then(char::from_u32)
+        .map(|c| c.to_string())
+}
+
+fn handle_simple_or_surrogate_escape_sequence(
+    chars_iter: &mut std::iter::Peekable<std::str::Chars>,
+) -> Option<String> {
+    let mut invalid_pair = String::new();
+    let mut high_surrogate_str = String::new();
+
+    for _ in 0..4 {
+        if let Some(next_char) = chars_iter.peek() {
+            if !is_unicode_char(*next_char) {
+                // Return as simple string. This is not unicode
+                return Some(format!("\\u{}", high_surrogate_str));
+            }
+            high_surrogate_str.push(*next_char);
+            chars_iter.next();
+        } else {
+            // Return as simple string. This is not unicode
+            return Some(format!("\\u{}", high_surrogate_str));
+        }
+    }
+
+    if let Ok(high_surrogate) = u32::from_str_radix(&high_surrogate_str, 16) {
+        // check if it is in the high surrogate range(0xD800-0xDBFF) in UTF-16.
+        if (0xD800..=0xDBFF).contains(&high_surrogate) {
+            // Handle surrogate pair
+            if chars_iter.next() == Some('\\') && chars_iter.next() == Some('u') {
+                let mut low_surrogate_str = String::new();
+                for _ in 0..4 {
+                    if let Some(next_char) = chars_iter.peek() {
+                        if !is_unicode_char(*next_char) {
+                            // high_surrogate is the correct codepoint but treating low_surrogate_str a string because it is not a valid unicode codepoint
+                            invalid_pair.push_str(&format!("{high_surrogate}"));
+                            invalid_pair.push_str(&low_surrogate_str);
+                            return Some(invalid_pair);
+                        }
+                        low_surrogate_str.push(*next_char);
+                        chars_iter.next();
+                    }
+                }
+                if let Ok(low_surrogate) = u32::from_str_radix(&low_surrogate_str, 16) {
+                    // check if it is in the low surrogate range(0xDC00-0xDFFF) in UTF-16.
+                    if (0xDC00..=0xDFFF).contains(&low_surrogate) {
+                        // calculate the codepoint from the surrogate pair
+                        let codepoint =
+                            ((high_surrogate - 0xD800) << 10) + (low_surrogate - 0xDC00) + 0x10000;
+                        return char::from_u32(codepoint).map(|c| c.to_string());
+                    };
+                } else {
+                    // high_surrogate is the correct codepoint but treating low_surrogate_str a string because it is not a valid unicode codepoint
+                    invalid_pair.push_str(&format!("{}", high_surrogate));
+                    invalid_pair.push_str(&format!("\\u{}", low_surrogate_str));
+                }
+            }
+        } else {
+            // Handle standard escape sequence
+            return char::from_u32(high_surrogate).map(|c| c.to_string());
+        }
+    } else {
+        invalid_pair.push_str(&format!("\\u{}", high_surrogate_str));
+    }
+    // return as simple string, not unicode
+    Some(invalid_pair)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn test_replace_escaped_unicode() {
+        assert_eq!(replace_escaped_unicode(r#"/[\uD83D\uDC4D]/"#), "/[👍]/");
+        assert_eq!(replace_escaped_unicode(r#"/[\u0041\u0301]/"#), "/[Á]/");
+        assert_eq!(
+            replace_escaped_unicode("/[\u{1F468}\u{200D}\u{1F469}\u{200D}\u{1F466}]/u"),
+            "/[👨‍👩‍👦]/u"
+        );
+        assert_eq!(
+            replace_escaped_unicode(r#"/[\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC66]/u"#),
+            "/[👨‍👩‍👦]/u"
+        );
+        assert_eq!(
+            replace_escaped_unicode(r#"/[\u899\uD83D\uDC4D]/"#),
+            r#"/[\u899👍]/"#
+        );
+    }
 }
