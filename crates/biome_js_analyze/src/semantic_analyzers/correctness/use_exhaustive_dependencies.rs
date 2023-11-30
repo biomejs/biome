@@ -56,7 +56,7 @@ declare_rule! {
     ///     let a = 1;
     ///     useEffect(() => {
     ///         console.log(a);
-    ///     });
+    ///     }, []);
     /// }
     /// ```
     ///
@@ -90,7 +90,7 @@ declare_rule! {
     ///     const b = a + 1;
     ///     useEffect(() => {
     ///         console.log(b);
-    ///     });
+    ///     }, []);
     /// }
     /// ```
     ///
@@ -520,6 +520,11 @@ impl Rule for UseExhaustiveDependencies {
             let Some(component_function) = function_of_hook_call(call) else {
                 return vec![];
             };
+
+            if result.dependencies_node.is_none() {
+                return vec![];
+            }
+
             let component_function_range = component_function.text_range();
 
             let captures: Vec<_> = result
