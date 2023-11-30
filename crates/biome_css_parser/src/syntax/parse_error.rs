@@ -44,6 +44,18 @@ pub(crate) fn expected_any_sub_selector(p: &CssParser, range: TextRange) -> Pars
         p,
     )
 }
+pub(crate) fn expect_any_value(p: &CssParser, range: TextRange) -> ParseDiagnostic {
+    expected_any(
+        &[
+            "identifier",
+            "string",
+            "number",
+            "dimension",
+        ],
+        range,
+        p,
+    )
+}
 
 pub(crate) fn expected_any_attribute_matcher_name(
     p: &CssParser,
