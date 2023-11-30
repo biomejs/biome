@@ -10,7 +10,7 @@ use biome_parser::parsed_syntax::ParsedSyntax;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
 use biome_parser::{token_set, Parser, TokenSet};
 
-const PSEUDO_CLASS_FUNCTION_VALUE_LIST_SET: TokenSet<CssSyntaxKind> = token_set![LANG_KW];
+const PSEUDO_CLASS_FUNCTION_VALUE_LIST_SET: TokenSet<CssSyntaxKind> = token_set![T![lang]];
 
 #[inline]
 pub(crate) fn is_at_pseudo_class_function_value_list(p: &mut CssParser) -> bool {
@@ -25,8 +25,7 @@ pub(crate) fn parse_pseudo_class_function_value_list(p: &mut CssParser) -> Parse
 
     let m = p.start();
 
-    // we don't need to check if the identifier is valid, because we already did that
-    parse_regular_identifier(p).ok();
+    p.bump_ts(PSEUDO_CLASS_FUNCTION_VALUE_LIST_SET);
     p.bump(T!['(']);
 
     let list = CssPseudoValueList.parse_list(p);

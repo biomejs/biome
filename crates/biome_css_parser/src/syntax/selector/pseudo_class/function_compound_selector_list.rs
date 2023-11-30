@@ -1,6 +1,5 @@
 use crate::parser::CssParser;
 use crate::syntax::parse_error::expected_compound_selector;
-use crate::syntax::parse_regular_identifier;
 use crate::syntax::selector::{
     eat_or_recover_selector_function_close_token, parse_compound_selector,
 };
@@ -15,8 +14,13 @@ use biome_parser::parsed_syntax::ParsedSyntax;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
 use biome_parser::{token_set, Parser, TokenSet};
 
-const PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR_LIST_SET: TokenSet<CssSyntaxKind> =
-    token_set![MOZANY_KW, WEBKITANY_KW, PAST_KW, CURRENT_KW, FUTURE_KW];
+const PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR_LIST_SET: TokenSet<CssSyntaxKind> = token_set![
+    T![_moz_any],
+    T![_webkit_any],
+    T![past],
+    T![current],
+    T![future]
+];
 
 #[inline]
 pub(crate) fn is_at_pseudo_class_function_compound_selector_list(p: &mut CssParser) -> bool {
@@ -33,8 +37,7 @@ pub(crate) fn parse_pseudo_class_function_compound_selector_list(
 
     let m = p.start();
 
-    // we don't need to check if the identifier is valid, because we already did that
-    parse_regular_identifier(p).ok();
+    p.bump_ts(PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR_LIST_SET);
     p.bump(T!['(']);
 
     let list = CssCompoundSelectorList.parse_list(p);

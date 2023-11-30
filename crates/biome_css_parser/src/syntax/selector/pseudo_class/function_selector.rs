@@ -1,6 +1,5 @@
 use crate::parser::CssParser;
 use crate::syntax::parse_error::expected_selector;
-use crate::syntax::parse_regular_identifier;
 use crate::syntax::selector::{
     eat_or_recover_selector_function_close_token, parse_selector,
     recover_selector_function_parameter,
@@ -12,7 +11,8 @@ use biome_parser::parsed_syntax::ParsedSyntax;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
 use biome_parser::{token_set, Parser, TokenSet};
 
-const PSEUDO_CLASS_FUNCTION_SELECTOR_SET: TokenSet<CssSyntaxKind> = token_set![GLOBAL_KW, LOCAL_KW];
+const PSEUDO_CLASS_FUNCTION_SELECTOR_SET: TokenSet<CssSyntaxKind> =
+    token_set![T![global], T![local]];
 
 #[inline]
 pub(crate) fn is_at_pseudo_class_function_selector(p: &mut CssParser) -> bool {
@@ -27,8 +27,7 @@ pub(crate) fn parse_pseudo_class_function_selector(p: &mut CssParser) -> ParsedS
 
     let m = p.start();
 
-    // we don't need to check if the identifier is valid, because we already did that
-    parse_regular_identifier(p).ok();
+    p.bump_ts(PSEUDO_CLASS_FUNCTION_SELECTOR_SET);
     p.bump(T!['(']);
 
     let kind = match parse_selector(p) {

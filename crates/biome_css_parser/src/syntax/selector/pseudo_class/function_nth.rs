@@ -5,7 +5,7 @@ use crate::syntax::selector::{
     eat_or_recover_selector_function_close_token, recover_selector_function_parameter,
     CssSelectorList,
 };
-use crate::syntax::{parse_number, parse_regular_identifier, parse_regular_number};
+use crate::syntax::{parse_number, parse_regular_number};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::CssSyntaxKind::{
     CSS_NTH_OFFSET, CSS_PSEUDO_CLASS_FUNCTION_NTH, CSS_PSEUDO_CLASS_NTH,
@@ -19,12 +19,12 @@ use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
 use biome_parser::{token_set, Parser, TokenSet};
 
 const PSEUDO_CLASS_FUNCTION_NTH_SET: TokenSet<CssSyntaxKind> = token_set![
-    NTHCHILD_KW,
-    NTHLASTCHILD_KW,
-    NTHOFTYPE_KW,
-    NTHLASTOFTYPE_KW,
-    NTHCOL_KW,
-    NTHLASTCOL_KW
+    T![nth_child],
+    T![nth_last_child],
+    T![nth_of_type],
+    T![nth_last_of_type],
+    T![nth_col],
+    T![nth_last_col],
 ];
 
 #[inline]
@@ -40,8 +40,7 @@ pub(crate) fn parse_pseudo_class_function_nth(p: &mut CssParser) -> ParsedSyntax
 
     let m = p.start();
 
-    // we don't need to check if the value is valid, because we already did that
-    parse_regular_identifier(p).ok();
+    p.bump_ts(PSEUDO_CLASS_FUNCTION_NTH_SET);
     p.bump_with_context(T!['('], CssLexContext::PseudoNthSelector);
 
     let kind = if is_at_pseudo_class_nth_selector(p) {
