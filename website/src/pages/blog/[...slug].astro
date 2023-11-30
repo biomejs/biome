@@ -24,7 +24,7 @@ const post = entry.data;
 const processedImage = await getImage({ src: post.socialImage });
 const socialImageUrl = new URL(
   processedImage.src,
-  Astro.site ?? "http://localhost:4321/"
+  `${Astro.url.origin}/`
 ).toString();
 
 const head = [
