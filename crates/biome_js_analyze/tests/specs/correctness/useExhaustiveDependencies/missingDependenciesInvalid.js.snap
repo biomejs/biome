@@ -154,6 +154,8 @@ missingDependenciesInvalid.js:7:5 lint/correctness/useExhaustiveDependencies ━
      9 │     }, []);
     10 │ }
   
+  i Either include it or remove the dependency array
+  
 
 ```
 
@@ -177,6 +179,8 @@ missingDependenciesInvalid.js:7:5 lint/correctness/useExhaustiveDependencies ━
        │                      ^
      9 │     }, []);
     10 │ }
+  
+  i Either include it or remove the dependency array
   
 
 ```
@@ -202,6 +206,8 @@ missingDependenciesInvalid.js:21:3 lint/correctness/useExhaustiveDependencies �
     31 │ 
     32 │       console.log(isPending);
   
+  i Either include it or remove the dependency array
+  
 
 ```
 
@@ -225,6 +231,8 @@ missingDependenciesInvalid.js:21:3 lint/correctness/useExhaustiveDependencies �
        │                   ^^^^^^^^^^^^^^^^
     29 │       console.log(memoizedValue);
     30 │       console.log(deferredValue);
+  
+  i Either include it or remove the dependency array
   
 
 ```
@@ -250,6 +258,8 @@ missingDependenciesInvalid.js:21:3 lint/correctness/useExhaustiveDependencies �
     26 │       dispatch(1);
     27 │ 
   
+  i Either include it or remove the dependency array
+  
 
 ```
 
@@ -273,6 +283,8 @@ missingDependenciesInvalid.js:21:3 lint/correctness/useExhaustiveDependencies �
        │                   ^^^^
     23 │       setName(1);
     24 │ 
+  
+  i Either include it or remove the dependency array
   
 
 ```
@@ -298,6 +310,8 @@ missingDependenciesInvalid.js:21:3 lint/correctness/useExhaustiveDependencies �
     33 │       startTransition();
     34 │   }, []);
   
+  i Either include it or remove the dependency array
+  
 
 ```
 
@@ -320,6 +334,8 @@ missingDependenciesInvalid.js:21:3 lint/correctness/useExhaustiveDependencies �
        │                   ^^^^^^^^^^^^^
     30 │       console.log(deferredValue);
     31 │ 
+  
+  i Either include it or remove the dependency array
   
 
 ```
@@ -345,6 +361,8 @@ missingDependenciesInvalid.js:41:3 lint/correctness/useExhaustiveDependencies �
     42 │   useCallback(() => console.log(a), []);
     43 │   useMemo(() => console.log(a), []);
   
+  i Either include it or remove the dependency array
+  
 
 ```
 
@@ -368,6 +386,8 @@ missingDependenciesInvalid.js:42:3 lint/correctness/useExhaustiveDependencies �
        │                                 ^
     43 │   useMemo(() => console.log(a), []);
     44 │   useImperativeHandle(ref, () => console.log(a), []);
+  
+  i Either include it or remove the dependency array
   
 
 ```
@@ -393,6 +413,8 @@ missingDependenciesInvalid.js:43:3 lint/correctness/useExhaustiveDependencies �
     44 │   useImperativeHandle(ref, () => console.log(a), []);
     45 │   useLayoutEffect(() => console.log(a), []);
   
+  i Either include it or remove the dependency array
+  
 
 ```
 
@@ -416,6 +438,8 @@ missingDependenciesInvalid.js:44:3 lint/correctness/useExhaustiveDependencies �
        │                                              ^
     45 │   useLayoutEffect(() => console.log(a), []);
     46 │   useInsertionEffect(() => console.log(a), []);
+  
+  i Either include it or remove the dependency array
   
 
 ```
@@ -441,6 +465,8 @@ missingDependenciesInvalid.js:45:3 lint/correctness/useExhaustiveDependencies �
     46 │   useInsertionEffect(() => console.log(a), []);
     47 │ }
   
+  i Either include it or remove the dependency array
+  
 
 ```
 
@@ -465,6 +491,8 @@ missingDependenciesInvalid.js:46:3 lint/correctness/useExhaustiveDependencies �
     47 │ }
     48 │ 
   
+  i Either include it or remove the dependency array
+  
 
 ```
 
@@ -488,6 +516,8 @@ missingDependenciesInvalid.js:53:3 lint/correctness/useExhaustiveDependencies �
        │                                ^
     55 │   }, []);
     56 │ }
+  
+  i Either include it or remove the dependency array
   
 
 ```
@@ -522,6 +552,8 @@ missingDependenciesInvalid.js:62:3 lint/correctness/useExhaustiveDependencies �
     65 │   }, []);
     66 │ }
   
+  i Either include them or remove the dependency array
+  
 
 ```
 
@@ -546,6 +578,8 @@ missingDependenciesInvalid.js:72:3 lint/correctness/useExhaustiveDependencies �
     74 │   }, []);
     75 │ }
   
+  i Either include it or remove the dependency array
+  
 
 ```
 
@@ -569,6 +603,8 @@ missingDependenciesInvalid.js:78:3 lint/correctness/useExhaustiveDependencies �
     80 │   }, []);
     81 │ });
   
+  i Either include it or remove the dependency array
+  
 
 ```
 
@@ -591,6 +627,8 @@ missingDependenciesInvalid.js:84:3 lint/correctness/useExhaustiveDependencies �
        │                   ^
     86 │   }, []);
     87 │ });
+  
+  i Either include it or remove the dependency array
   
 
 ```
@@ -616,6 +654,8 @@ missingDependenciesInvalid.js:92:3 lint/correctness/useExhaustiveDependencies �
     94 │   }, []);
     95 │ }
   
+  i Either include it or remove the dependency array
+  
 
 ```
 
@@ -639,6 +679,8 @@ missingDependenciesInvalid.js:99:3 lint/correctness/useExhaustiveDependencies �
         │                   ^
     101 │   }, []);
     102 │ }
+  
+  i Either include it or remove the dependency array
   
 
 ```
@@ -664,6 +706,8 @@ missingDependenciesInvalid.js:107:3 lint/correctness/useExhaustiveDependencies �
     109 │   }, []);
     110 │ }
   
+  i Either include it or remove the dependency array
+  
 
 ```
 
@@ -688,6 +732,8 @@ missingDependenciesInvalid.js:114:3 lint/correctness/useExhaustiveDependencies �
     116 │   }, []);
     117 │ }
   
+  i Either include it or remove the dependency array
+  
 
 ```
 
@@ -711,6 +757,8 @@ missingDependenciesInvalid.js:122:9 lint/correctness/useExhaustiveDependencies �
         │                   ^
     124 │   }, []);
     125 │ }
+  
+  i Either include it or remove the dependency array
   
 
 ```

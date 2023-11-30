@@ -45,6 +45,8 @@ customHook.js:5:5 lint/correctness/useExhaustiveDependencies ━━━━━━�
     7 │     }, []);
     8 │ 
   
+  i Either include it or remove the dependency array
+  
 
 ```
 
@@ -67,6 +69,8 @@ customHook.js:9:5 lint/correctness/useExhaustiveDependencies ━━━━━━�
        │                     ^
     11 │     }, []);
     12 │ 
+  
+  i Either include it or remove the dependency array
   
 
 ```

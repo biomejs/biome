@@ -385,7 +385,7 @@ impl ReactExtensiveDependenciesOptions {
 /// Flags the possible fixes that were found
 pub enum Fix {
     /// When a dependency needs to be added.
-    AddDependency(TextRange, Vec<TextRange>),
+    AddDependency(TextRange, Vec<TextRange>, usize),
     /// When a dependency needs to be removed.
     RemoveDependency(TextRange, Vec<TextRange>),
     /// When a dependency is more deep than the capture
@@ -565,6 +565,7 @@ impl Rule for UseExhaustiveDependencies {
                     )
                 })
                 .collect();
+            let deps_len = deps.len();
 
             let mut add_deps: BTreeMap<String, Vec<TextRange>> = BTreeMap::new();
             let mut remove_deps: Vec<TextRange> = vec![];
@@ -654,7 +655,11 @@ impl Rule for UseExhaustiveDependencies {
 
             // Generate signals
             for (_, captures) in add_deps {
-                signals.push(Fix::AddDependency(result.function_name_range, captures));
+                signals.push(Fix::AddDependency(
+                    result.function_name_range,
+                    captures,
+                    deps_len,
+                ));
             }
 
             if !remove_deps.is_empty() {
@@ -670,7 +675,7 @@ impl Rule for UseExhaustiveDependencies {
 
     fn diagnostic(_: &RuleContext<Self>, dep: &Self::State) -> Option<RuleDiagnostic> {
         match dep {
-            Fix::AddDependency(use_effect_range, captures) => {
+            Fix::AddDependency(use_effect_range, captures, deps_len) => {
                 let mut diag = RuleDiagnostic::new(
                     rule_category!(),
                     use_effect_range,
@@ -684,6 +689,14 @@ impl Rule for UseExhaustiveDependencies {
                         range,
                         "This dependency is not specified in the hook dependency list.",
                     );
+                }
+
+                if *deps_len == 0 {
+                    diag = if captures.len() == 1 {
+                        diag.note("Either include it or remove the dependency array")
+                    } else {
+                        diag.note("Either include them or remove the dependency array")
+                    }
                 }
 
                 Some(diag)

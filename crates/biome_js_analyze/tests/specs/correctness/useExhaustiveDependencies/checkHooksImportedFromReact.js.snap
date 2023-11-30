@@ -49,6 +49,8 @@ checkHooksImportedFromReact.js:3:9 lint/correctness/useExhaustiveDependencies �
     5 │   }, []);
     6 │ 
   
+  i Either include it or remove the dependency array
+  
 
 ```
 
