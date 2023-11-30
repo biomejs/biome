@@ -47,3 +47,6 @@ schema = ["schemars", "biome_text_edit/schemars", "biome_diagnostics_categories/
 [dev-dependencies]
 serde_json = { workspace = true }
 trybuild   = "1.0.80"
+
+[lints]
+workspace = true

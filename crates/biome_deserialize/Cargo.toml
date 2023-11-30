@@ -27,3 +27,6 @@ tracing           = { workspace = true }
 
 [features]
 schema = ["schemars", "schemars/indexmap"]
+
+[lints]
+workspace = true

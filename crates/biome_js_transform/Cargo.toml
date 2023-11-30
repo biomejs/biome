@@ -29,3 +29,6 @@ biome_js_parser    = { path = "../biome_js_parser" }
 biome_test_utils   = { path = "../biome_test_utils" }
 insta              = { workspace = true }
 tests_macros       = { path = "../tests_macros" }
+
+[lints]
+workspace = true

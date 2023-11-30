@@ -34,3 +34,6 @@ tests_macros         = { path = "../tests_macros" }
 # cargo-workspaces metadata
 [package.metadata.workspaces]
 independent = true
+
+[lints]
+workspace = true
