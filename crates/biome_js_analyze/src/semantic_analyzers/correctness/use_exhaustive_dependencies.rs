@@ -56,7 +56,7 @@ declare_rule! {
     ///     let a = 1;
     ///     useEffect(() => {
     ///         console.log(a);
-    ///     });
+    ///     }, []);
     /// }
     /// ```
     ///
@@ -90,7 +90,7 @@ declare_rule! {
     ///     const b = a + 1;
     ///     useEffect(() => {
     ///         console.log(b);
-    ///     });
+    ///     }, []);
     /// }
     /// ```
     ///
@@ -385,9 +385,16 @@ impl ReactExtensiveDependenciesOptions {
 /// Flags the possible fixes that were found
 pub enum Fix {
     /// When a dependency needs to be added.
-    AddDependency(TextRange, Vec<TextRange>),
+    AddDependency {
+        function_name_range: TextRange,
+        captures: Vec<TextRange>,
+        dependencies_len: usize,
+    },
     /// When a dependency needs to be removed.
-    RemoveDependency(TextRange, Vec<TextRange>),
+    RemoveDependency {
+        function_name_range: TextRange,
+        dependencies: Vec<TextRange>,
+    },
     /// When a dependency is more deep than the capture
     DependencyTooDeep {
         function_name_range: TextRange,
@@ -520,6 +527,11 @@ impl Rule for UseExhaustiveDependencies {
             let Some(component_function) = function_of_hook_call(call) else {
                 return vec![];
             };
+
+            if result.dependencies_node.is_none() {
+                return vec![];
+            }
+
             let component_function_range = component_function.text_range();
 
             let captures: Vec<_> = result
@@ -560,6 +572,7 @@ impl Rule for UseExhaustiveDependencies {
                     )
                 })
                 .collect();
+            let dependencies_len = deps.len();
 
             let mut add_deps: BTreeMap<String, Vec<TextRange>> = BTreeMap::new();
             let mut remove_deps: Vec<TextRange> = vec![];
@@ -649,14 +662,18 @@ impl Rule for UseExhaustiveDependencies {
 
             // Generate signals
             for (_, captures) in add_deps {
-                signals.push(Fix::AddDependency(result.function_name_range, captures));
+                signals.push(Fix::AddDependency {
+                    function_name_range: result.function_name_range,
+                    captures,
+                    dependencies_len,
+                });
             }
 
             if !remove_deps.is_empty() {
-                signals.push(Fix::RemoveDependency(
-                    result.function_name_range,
-                    remove_deps,
-                ));
+                signals.push(Fix::RemoveDependency {
+                    function_name_range: result.function_name_range,
+                    dependencies: remove_deps,
+                });
             }
         }
 
@@ -665,34 +682,49 @@ impl Rule for UseExhaustiveDependencies {
 
     fn diagnostic(_: &RuleContext<Self>, dep: &Self::State) -> Option<RuleDiagnostic> {
         match dep {
-            Fix::AddDependency(use_effect_range, captures) => {
+            Fix::AddDependency {
+                function_name_range,
+                captures,
+                dependencies_len,
+            } => {
                 let mut diag = RuleDiagnostic::new(
                     rule_category!(),
-                    use_effect_range,
+                    function_name_range,
                     markup! {
                         "This hook does not specify all of its dependencies."
                     },
                 );
 
-                for range in captures.iter() {
+                for range in captures {
                     diag = diag.detail(
                         range,
                         "This dependency is not specified in the hook dependency list.",
                     );
                 }
 
+                if *dependencies_len == 0 {
+                    diag = if captures.len() == 1 {
+                        diag.note("Either include it or remove the dependency array")
+                    } else {
+                        diag.note("Either include them or remove the dependency array")
+                    }
+                }
+
                 Some(diag)
             }
-            Fix::RemoveDependency(use_effect_range, ranges) => {
+            Fix::RemoveDependency {
+                function_name_range,
+                dependencies,
+            } => {
                 let mut diag = RuleDiagnostic::new(
                     rule_category!(),
-                    use_effect_range,
+                    function_name_range,
                     markup! {
                         "This hook specifies more dependencies than necessary."
                     },
                 );
 
-                for range in ranges.iter() {
+                for range in dependencies {
                     diag = diag.detail(range, "This dependency can be removed from the list.");
                 }
 
