@@ -1,0 +1,206 @@
+Hero
+
+---
+import { Card, CardGrid } from "@astrojs/starlight/components";
+import ProgressBar from '../../playground/components/Progress.tsx';
+import Contributors from "@src/components/Contributors.astro";
+import Inputf from '../../components/formatter/inputf.md'
+import Outputf from '../../components/formatter/outputf.md'
+import Input from '../../components/linter/input.md'
+import Output from '../../components/linter/output.md'
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import js from '../../assets/svg-new/js.svg'
+import json from '../../assets/svg-new/json.svg'
+import ts from '../../assets/svg-new/ts.svg'
+import css from '../../assets/svg-new/css.svg'
+
+---
+
+<html>
+  <body>
+    <!-- <div>
+      <div>One toolchain for your web project</div>
+      <div>Format, lint, and more in a fraction of a second.</div>
+      <button>Get Started</button>
+      <button>View on Github</button>
+
+      <div class="slogan-svg">
+        <img
+          src="../../assets/png/slogan-dark-transparent-x1.png"
+          alt="slogan-svg"
+        />
+      </div>
+    </div> -->
+
+    <div class="lang-sup">
+        <div class="svg-cont"><img src={js.src} width={js.width} height={js.height} alt="js-svg" /><span>JavaScript</span></div>
+        <div class="svg-cont"><img src={ts.src} width={ts.width} height={ts.height} alt="ts-svg" /><span>TypeScript</span></div>
+        <div class="svg-cont"><img src={json.src} width={json.width} height={json.height} alt="json-svg" /><span>Json</span></div>
+        <div class="svg-cont"><img src={css.src} width={css.width} height={css.height} alt="css-svg" /><span>Css</span></div>
+    </div>
+
+    <!-- <div class="install">
+      <input
+        class="inp-copy"
+        value="npm install --save-dev @biomejs/biome"
+        disabled
+      />
+      <svg
+        class="copy-svg"
+        width="14"
+        height="18"
+        viewBox="0 0 14 18"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        ><path
+          d="M4.49984 3.16667H2.83317C2.39114 3.16667 1.96722 3.34226 1.65466 3.65482C1.3421 3.96738 1.1665 4.39131 1.1665 4.83333V14.8333C1.1665 15.2754 1.3421 15.6993 1.65466 16.0118C1.96722 16.3244 2.39114 16.5 2.83317 16.5H11.1665C11.6085 16.5 12.0325 16.3244 12.345 16.0118C12.6576 15.6993 12.8332 15.2754 12.8332 14.8333V4.83333C12.8332 4.39131 12.6576 3.96738 12.345 3.65482C12.0325 3.34226 11.6085 3.16667 11.1665 3.16667H9.49984M4.49984 3.16667C4.49984 3.60869 4.67543 4.03262 4.98799 4.34518C5.30055 4.65774 5.72448 4.83333 6.1665 4.83333H7.83317C8.2752 4.83333 8.69912 4.65774 9.01168 4.34518C9.32424 4.03262 9.49984 3.60869 9.49984 3.16667M4.49984 3.16667C4.49984 2.72464 4.67543 2.30072 4.98799 1.98816C5.30055 1.67559 5.72448 1.5 6.1665 1.5H7.83317C8.2752 1.5 8.69912 1.67559 9.01168 1.98816C9.32424 2.30072 9.49984 2.72464 9.49984 3.16667"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"></path></svg
+      >
+    </div> -->
+
+    <div class="hero-code">
+    <Tabs>
+      <TabItem label="formatter">
+        <div class="linter formatter">
+            <Inputf />
+            <Outputf />
+            <div class="bench">
+              <div>
+                <ProgressBar client:visible duration={5} label="Biome" />
+                <ProgressBar client:visible duration={10} label="Dprint" />
+                <ProgressBar client:visible duration={20} label="Prettier" />
+              </div>
+            </div>
+        </div>
+      </TabItem>
+      <TabItem label="linter">
+        <div class="linter formatter">
+            <Input />
+            <Output />
+            <div class="bench">
+              <div>
+                <ProgressBar client:visible duration={5} label="Biome" />
+                <ProgressBar client:visible duration={20} label="Eslint" />
+              </div>
+            </div>
+        </div>
+      </TabItem>
+    </Tabs>
+  </div>
+
+    <div class="perf">Performance</div>
+    <Tabs>
+        <TabItem label="Linter">
+                <div class="bars">
+                <ProgressBar client:visible duration={5} label="Biome" />
+                <ProgressBar client:visible duration={20} label="Eslint" />
+            </div>
+            </TabItem>
+            <TabItem label="Formatter"> 
+                <div class="bars">
+                <ProgressBar client:visible duration={5} label="Biome" />
+                <ProgressBar client:visible duration={10} label="Dprint" />
+                <ProgressBar client:visible duration={20} label="Prettier" />
+            </div>
+            </TabItem>
+          </Tabs>
+
+    <CardGrid class="card-grid">
+      <Card class="card" title="Fast" icon="rocket">
+        Built with Rust and an innovative architecture inspired by
+        rust-analyzer.
+      </Card>
+      <Card class="card" title="Simple" icon="pencil">
+        Zero configuration needed to get started. Extensive options available
+        for when you need them.
+      </Card>
+      <Card class="card" title="Scalable" icon="random">
+        Designed to handle codebases of any size. Focus on growing product
+        instead of your tools.
+      </Card>
+      <Card class="card" title="Optimized" icon="setting">
+        With tight internal integration we are able to reuse previous work and
+        any improvement to one tool improves them all.
+      </Card>
+      <Card class="card" title="Actionable & Informative" icon="information">
+        Avoid obscure error messages, when we tell you something is wrong, we
+        tell you exactly where the problem is and how to fix it.
+      </Card>
+      <Card class="card" title="Batteries Included" icon="add-document">
+        Out of the box support for all the language features you use today.
+        First class support for TypeScript and JSX.
+      </Card>
+    </CardGrid>
+
+    <Contributors />
+
+    
+
+    
+        
+       
+
+    <script>
+    //   import "./scripts/hover.ts";
+    //   import "./scripts/contributors.ts"
+
+    </script>
+
+    <style>
+        .lang-sup {
+            margin-top: 50px;
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+        .lang-sup>img {
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+        .svg-cont {
+            display: flex;
+            margin: 0 !important;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+        }
+        .perf {
+            font-size: 50px;
+            text-align: center;
+            margin-top: 150px !important;
+            margin-bottom: 50px;
+        }
+        .card-grid {
+            margin-top: 150px !important;
+        }
+        .bars {
+            display: flex;
+            align-items: center;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 100px;
+        }
+        .linter {
+            margin-top: 150px !important;
+            display: grid;
+            grid-template-columns: repeat(3, 375px);
+            /* justify-content: space-evenly; */
+            margin: 0;
+        }
+        .bench {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          margin-top: 0 !important;
+          background: black !important;
+          border-top-right-radius: 40px;
+          border-bottom-right-radius: 40px;
+        }
+    </style>
+
+  </body>
+</html>

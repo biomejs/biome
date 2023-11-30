@@ -1,0 +1,41 @@
+.prog-cont {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    gap: 0;
+}
+
+.label {
+    margin-top: 20px;
+    width: 50px;
+    margin-left: 10px;
+    font-size: 18px;
+}
+
+.progress-bar-container {
+    margin-left: 10px;
+    margin-right: 10px;
+    display: flex;
+    width: 350px;
+    height: 30px;
+    /* padding: 4px;
+    border: 2px solid #5f6c7b; */
+    background: #25272f;
+    /* border-radius: 5px; */
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .bar {
+    height: 100%;
+    /* border-radius: 5px; */
+    transition: width 0.1s ease-in;
+    background-color: #60a5fa;
+  }
+
+  .time {
+    position: absolute;
+    right: 2%;
+    top: 10%;
+  }
+  
