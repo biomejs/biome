@@ -1,6 +1,5 @@
 use crate::parser::CssParser;
-use crate::syntax::parse_error::{expected_identifier, expected_relative_selector};
-use crate::syntax::parse_regular_identifier;
+use crate::syntax::parse_error::expected_relative_selector;
 use crate::syntax::selector::{
     eat_or_recover_selector_function_close_token, is_at_compound_selector, parse_selector,
 };
@@ -17,7 +16,7 @@ use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
 use biome_parser::{token_set, Parser, TokenSet};
 
 const PSEUDO_CLASS_FUNCTION_RELATIVE_SELECTOR_LIST_SET: TokenSet<CssSyntaxKind> =
-    token_set![HAS_KW];
+    token_set![T![has]];
 
 #[inline]
 pub(crate) fn is_at_pseudo_class_function_relative_selector_list(p: &mut CssParser) -> bool {
@@ -34,7 +33,7 @@ pub(crate) fn parse_pseudo_class_function_relative_selector_list(
 
     let m = p.start();
 
-    parse_regular_identifier(p).or_add_diagnostic(p, expected_identifier);
+    p.bump_ts(PSEUDO_CLASS_FUNCTION_RELATIVE_SELECTOR_LIST_SET);
     p.bump(T!['(']);
 
     let list = CssRelativeSelectorList.parse_list(p);

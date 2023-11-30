@@ -27,9 +27,7 @@ CssRoot {
                         CssPseudoClassSelector {
                             colon_token: COLON@0..1 ":" [] [],
                             class: CssPseudoClassFunctionCompoundSelectorList {
-                                name: CssIdentifier {
-                                    value_token: IDENT@1..8 "current" [] [],
-                                },
+                                name: CURRENT_KW@1..8 "current" [] [],
                                 l_paren_token: L_PAREN@8..9 "(" [] [],
                                 compound_selector_list: CssCompoundSelectorList [
                                     CssCompoundSelector {
@@ -98,9 +96,7 @@ CssRoot {
                             CssPseudoClassSelector {
                                 colon_token: COLON@26..28 ":" [Newline("\n")] [],
                                 class: CssPseudoClassFunctionCompoundSelectorList {
-                                    name: CssIdentifier {
-                                        value_token: IDENT@28..35 "current" [] [],
-                                    },
+                                    name: CURRENT_KW@28..35 "current" [] [],
                                     l_paren_token: L_PAREN@35..36 "(" [] [],
                                     compound_selector_list: CssCompoundSelectorList [
                                         CssCompoundSelector {
@@ -193,8 +189,7 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@0..24
               0: COLON@0..1 ":" [] []
               1: CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR_LIST@1..24
-                0: CSS_IDENTIFIER@1..8
-                  0: IDENT@1..8 "current" [] []
+                0: CURRENT_KW@1..8 "current" [] []
                 1: L_PAREN@8..9 "(" [] []
                 2: CSS_COMPOUND_SELECTOR_LIST@9..22
                   0: CSS_COMPOUND_SELECTOR@9..10
@@ -243,8 +238,7 @@ CssRoot {
               0: CSS_PSEUDO_CLASS_SELECTOR@26..50
                 0: COLON@26..28 ":" [Newline("\n")] []
                 1: CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR_LIST@28..50
-                  0: CSS_IDENTIFIER@28..35
-                    0: IDENT@28..35 "current" [] []
+                  0: CURRENT_KW@28..35 "current" [] []
                   1: L_PAREN@35..36 "(" [] []
                   2: CSS_COMPOUND_SELECTOR_LIST@36..49
                     0: CSS_COMPOUND_SELECTOR@36..37

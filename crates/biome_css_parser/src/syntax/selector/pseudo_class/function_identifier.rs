@@ -11,7 +11,7 @@ use biome_parser::parsed_syntax::ParsedSyntax;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
 use biome_parser::{token_set, Parser, TokenSet};
 
-const PSEUDO_CLASS_FUNCTION_IDENTIFIER_SET: TokenSet<CssSyntaxKind> = token_set![DIR_KW];
+const PSEUDO_CLASS_FUNCTION_IDENTIFIER_SET: TokenSet<CssSyntaxKind> = token_set![T![dir]];
 #[inline]
 pub(crate) fn is_at_pseudo_class_function_identifier(p: &mut CssParser) -> bool {
     p.at_ts(PSEUDO_CLASS_FUNCTION_IDENTIFIER_SET) && p.nth_at(1, T!['('])
@@ -25,8 +25,7 @@ pub(crate) fn parse_pseudo_class_function_identifier(p: &mut CssParser) -> Parse
 
     let m = p.start();
 
-    // we don't need to check if the identifier is valid, because we already did that
-    parse_regular_identifier(p).ok();
+    p.bump_ts(PSEUDO_CLASS_FUNCTION_IDENTIFIER_SET);
     p.bump(T!['(']);
 
     let kind = if is_at_dir_parameter_identifier(p) {
@@ -51,7 +50,7 @@ pub(crate) fn parse_pseudo_class_function_identifier(p: &mut CssParser) -> Parse
     Present(m.complete(p, kind))
 }
 
-const DIR_PARAMETER_IDENTIFIER_SET: TokenSet<CssSyntaxKind> = token_set![LTR_KW, RTL_KW];
+const DIR_PARAMETER_IDENTIFIER_SET: TokenSet<CssSyntaxKind> = token_set![T![ltr], T![rtl]];
 #[inline]
 fn is_at_dir_parameter_identifier(p: &mut CssParser) -> bool {
     p.at_ts(DIR_PARAMETER_IDENTIFIER_SET)

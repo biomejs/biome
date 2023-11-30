@@ -204,7 +204,7 @@ CssPseudoClassIdentifier =
 // :first-of-type {}
 //  ^^^^^^^^^^^^^
 CssPseudoClassFunctionIdentifier =
- 	name: CssIdentifier
+ 	name: 'dir'
 	'('
 	ident: CssIdentifier
 	')'
@@ -212,7 +212,7 @@ CssPseudoClassFunctionIdentifier =
 // :global(.class div) {}
 //  ^^^^^^^^^^^^^^^^^^
 CssPseudoClassFunctionSelector =
- 	name: CssIdentifier
+ 	name: ('global' | 'local')
 	'('
 	selector: AnyCssSelector
 	')'
@@ -220,7 +220,7 @@ CssPseudoClassFunctionSelector =
 // :not(div + #id:hover) {}
 //  ^^^^^^^^^^^^^^^^^^^^
 CssPseudoClassFunctionSelectorList =
- 	name: CssIdentifier
+ 	name: ('matches' | 'not' | 'is' | 'where')
 	'('
 	selector_list: CssSelectorList
 	')'
@@ -228,7 +228,7 @@ CssPseudoClassFunctionSelectorList =
 // :-webkit-any(i,p,:link,span:focus) {}
 //  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 CssPseudoClassFunctionCompoundSelectorList =
- 	name: CssIdentifier
+ 	name: ('-moz-any' | '-webkit-any' | 'past' | 'current' | 'future')
 	'('
 	compound_selector_list: CssCompoundSelectorList
 	')'
@@ -238,9 +238,9 @@ CssPseudoClassFunctionCompoundSelectorList =
 CssCompoundSelectorList = (AnyCssCompoundSelector (',' AnyCssCompoundSelector)*)
 
 // :host(span:focus) {}
-//  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+//  ^^^^^^^^^^^^^^^^
 CssPseudoClassFunctionCompoundSelector =
- 	name: CssIdentifier
+ 	name: ('host' | 'host-context')
 	'('
 	selector: AnyCssCompoundSelector
 	')'
@@ -252,7 +252,7 @@ AnyCssCompoundSelector =
 // :has(> img, +dt) {}
 // ^^^^^^^^^^^^^^^^
 CssPseudoClassFunctionRelativeSelectorList =
- 	name: CssIdentifier
+ 	name: 'has'
 	'('
 	relative_selector_list: CssRelativeSelectorList
 	')'
@@ -274,7 +274,7 @@ CssRelativeSelector =
 // :lang(de, fr) {}
 // ^^^^^^^^^^^^^
 CssPseudoClassFunctionValueList =
- 	name: CssIdentifier
+ 	name: 'lang'
 	'('
 	value_list: CssPseudoValueList
 	')'
@@ -292,7 +292,7 @@ AnyCssPseudoValue =
 // :nth-child(2n+1 of li, .test) {}
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 CssPseudoClassFunctionNth =
-	name: CssIdentifier
+	name: ('nth-child' | 'nth-last-child' | 'nth-of-type' | 'nth-last-of-type' | 'nth-col' | 'nth-last-col')
 	'('
 	selector: AnyCssPseudoClassNthSelector
 	')'
@@ -339,7 +339,7 @@ CssPseudoClassNthIdentifier =
 //            ^^^^^
 CssPseudoClassNth =
 	sign: ('+' | '-')?
-  value: CssNumber?
+	value: CssNumber?
 	symbol: 'n'
 	offset: CssNthOffset?
 
@@ -368,8 +368,8 @@ CssPseudoElementSelector =
 AnyCssPseudoElement =
 	CssPseudoElementIdentifier
 	| CssPseudoElementFunctionSelector
-  | CssPseudoElementFunctionIdentifier
-  | CssBogusPseudoElement
+	| CssPseudoElementFunctionIdentifier
+	| CssBogusPseudoElement
 
 // a::after {}
 //    ^^^^^
@@ -423,14 +423,32 @@ CssAtRule =
 
 AnyCssAtRule =
 	CssCharsetAtRule
+	| CssColorProfileAtRule
+	| CssCounterStyleAtRule
 	| CssKeyframesAtRule
 	| CssMediaAtRule
 	| CssBogusAtRule
 
+// @charset "UTF-8";
+// ^^^^^^^^^^^^^^^^^
 CssCharsetAtRule =
 	'charset'
 	encoding: CssString
 	';'
+
+// @color-profile --fogra39 {}
+// ^^^^^^^^^^^^^^^^^^^^^^^^
+// @color-profile device-cmyk {}
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssColorProfileAtRule =
+	'color-profile'
+	name: CssIdentifier
+	block: CssBlock
+
+CssCounterStyleAtRule =
+	'counter-style'
+	name: CssIdentifier
+	block: CssBlock
 
 // @keyframes "something" { from {} to {} }
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
