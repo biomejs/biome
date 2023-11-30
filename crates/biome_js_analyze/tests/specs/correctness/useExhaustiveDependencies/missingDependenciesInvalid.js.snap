@@ -12,7 +12,7 @@ function MyComponent1() {
     const b = a + 1;
     useEffect(() => {
       console.log(a, b);
-    });
+    }, []);
 }
 
 // interaction with other react hooks
@@ -44,12 +44,12 @@ function MyComponent2() {
 
 function MyComponent3() {
   let a = 1;
-  useEffect(() => console.log(a));
-  useCallback(() => console.log(a));
-  useMemo(() => console.log(a));
-  useImperativeHandle(ref, () => console.log(a));
-  useLayoutEffect(() => console.log(a));
-  useInsertionEffect(() => console.log(a));
+  useEffect(() => console.log(a), []);
+  useCallback(() => console.log(a), []);
+  useMemo(() => console.log(a), []);
+  useImperativeHandle(ref, () => console.log(a), []);
+  useLayoutEffect(() => console.log(a), []);
+  useInsertionEffect(() => console.log(a), []);
 }
 
 // inner closures
@@ -77,19 +77,19 @@ function MyComponent6() {
   let someObj = getObj();
   useEffect(() => {
       console.log(someObj.name)
-  });
+  }, []);
 }
 
 const MyComponent7 = React.memo(function ({ a }) {
   useEffect(() => {
       console.log(a);
-  });
+  }, []);
 });
 
 const MyComponent8 = React.memo(({ a }) => {
   useEffect(() => {
       console.log(a);
-  });
+  }, []);
 });
 
 // exported functions
@@ -97,14 +97,14 @@ export function MyComponent9() {
   let a = 1;
   useEffect(() => {
       console.log(a);
-  });
+  }, []);
 }
 
 export default function MyComponent10() {
   let a = 1;
   useEffect(() => {
       console.log(a);
-  });
+  }, []);
 }
 
 // named function
@@ -112,14 +112,14 @@ function MyComponent11() {
   let a = 1;
   useEffect(function inner() {
       console.log(a);
-  });
+  }, []);
 }
 
 function MyComponent12() {
   let a = 1;
   useEffect(async function inner() {
       console.log(a);
-  });
+  }, []);
 }
 
 // React.useXXX case
@@ -127,7 +127,7 @@ function MyComponent13() {
   let a = 1;
   React.useEffect(() => {
       console.log(a);
-  });
+  }, []);
 }
 
 ```
@@ -143,7 +143,7 @@ missingDependenciesInvalid.js:7:5 lint/correctness/useExhaustiveDependencies ━
   > 7 │     useEffect(() => {
       │     ^^^^^^^^^
     8 │       console.log(a, b);
-    9 │     });
+    9 │     }, []);
   
   i This dependency is not specified in the hook dependency list.
   
@@ -151,7 +151,7 @@ missingDependenciesInvalid.js:7:5 lint/correctness/useExhaustiveDependencies ━
      7 │     useEffect(() => {
    > 8 │       console.log(a, b);
        │                   ^
-     9 │     });
+     9 │     }, []);
     10 │ }
   
 
@@ -167,7 +167,7 @@ missingDependenciesInvalid.js:7:5 lint/correctness/useExhaustiveDependencies ━
   > 7 │     useEffect(() => {
       │     ^^^^^^^^^
     8 │       console.log(a, b);
-    9 │     });
+    9 │     }, []);
   
   i This dependency is not specified in the hook dependency list.
   
@@ -175,7 +175,7 @@ missingDependenciesInvalid.js:7:5 lint/correctness/useExhaustiveDependencies ━
      7 │     useEffect(() => {
    > 8 │       console.log(a, b);
        │                      ^
-     9 │     });
+     9 │     }, []);
     10 │ }
   
 
@@ -331,19 +331,19 @@ missingDependenciesInvalid.js:41:3 lint/correctness/useExhaustiveDependencies �
   
     39 │ function MyComponent3() {
     40 │   let a = 1;
-  > 41 │   useEffect(() => console.log(a));
+  > 41 │   useEffect(() => console.log(a), []);
        │   ^^^^^^^^^
-    42 │   useCallback(() => console.log(a));
-    43 │   useMemo(() => console.log(a));
+    42 │   useCallback(() => console.log(a), []);
+    43 │   useMemo(() => console.log(a), []);
   
   i This dependency is not specified in the hook dependency list.
   
     39 │ function MyComponent3() {
     40 │   let a = 1;
-  > 41 │   useEffect(() => console.log(a));
+  > 41 │   useEffect(() => console.log(a), []);
        │                               ^
-    42 │   useCallback(() => console.log(a));
-    43 │   useMemo(() => console.log(a));
+    42 │   useCallback(() => console.log(a), []);
+    43 │   useMemo(() => console.log(a), []);
   
 
 ```
@@ -354,20 +354,20 @@ missingDependenciesInvalid.js:42:3 lint/correctness/useExhaustiveDependencies �
   ! This hook does not specify all of its dependencies.
   
     40 │   let a = 1;
-    41 │   useEffect(() => console.log(a));
-  > 42 │   useCallback(() => console.log(a));
+    41 │   useEffect(() => console.log(a), []);
+  > 42 │   useCallback(() => console.log(a), []);
        │   ^^^^^^^^^^^
-    43 │   useMemo(() => console.log(a));
-    44 │   useImperativeHandle(ref, () => console.log(a));
+    43 │   useMemo(() => console.log(a), []);
+    44 │   useImperativeHandle(ref, () => console.log(a), []);
   
   i This dependency is not specified in the hook dependency list.
   
     40 │   let a = 1;
-    41 │   useEffect(() => console.log(a));
-  > 42 │   useCallback(() => console.log(a));
+    41 │   useEffect(() => console.log(a), []);
+  > 42 │   useCallback(() => console.log(a), []);
        │                                 ^
-    43 │   useMemo(() => console.log(a));
-    44 │   useImperativeHandle(ref, () => console.log(a));
+    43 │   useMemo(() => console.log(a), []);
+    44 │   useImperativeHandle(ref, () => console.log(a), []);
   
 
 ```
@@ -377,21 +377,21 @@ missingDependenciesInvalid.js:43:3 lint/correctness/useExhaustiveDependencies �
 
   ! This hook does not specify all of its dependencies.
   
-    41 │   useEffect(() => console.log(a));
-    42 │   useCallback(() => console.log(a));
-  > 43 │   useMemo(() => console.log(a));
+    41 │   useEffect(() => console.log(a), []);
+    42 │   useCallback(() => console.log(a), []);
+  > 43 │   useMemo(() => console.log(a), []);
        │   ^^^^^^^
-    44 │   useImperativeHandle(ref, () => console.log(a));
-    45 │   useLayoutEffect(() => console.log(a));
+    44 │   useImperativeHandle(ref, () => console.log(a), []);
+    45 │   useLayoutEffect(() => console.log(a), []);
   
   i This dependency is not specified in the hook dependency list.
   
-    41 │   useEffect(() => console.log(a));
-    42 │   useCallback(() => console.log(a));
-  > 43 │   useMemo(() => console.log(a));
+    41 │   useEffect(() => console.log(a), []);
+    42 │   useCallback(() => console.log(a), []);
+  > 43 │   useMemo(() => console.log(a), []);
        │                             ^
-    44 │   useImperativeHandle(ref, () => console.log(a));
-    45 │   useLayoutEffect(() => console.log(a));
+    44 │   useImperativeHandle(ref, () => console.log(a), []);
+    45 │   useLayoutEffect(() => console.log(a), []);
   
 
 ```
@@ -401,21 +401,21 @@ missingDependenciesInvalid.js:44:3 lint/correctness/useExhaustiveDependencies �
 
   ! This hook does not specify all of its dependencies.
   
-    42 │   useCallback(() => console.log(a));
-    43 │   useMemo(() => console.log(a));
-  > 44 │   useImperativeHandle(ref, () => console.log(a));
+    42 │   useCallback(() => console.log(a), []);
+    43 │   useMemo(() => console.log(a), []);
+  > 44 │   useImperativeHandle(ref, () => console.log(a), []);
        │   ^^^^^^^^^^^^^^^^^^^
-    45 │   useLayoutEffect(() => console.log(a));
-    46 │   useInsertionEffect(() => console.log(a));
+    45 │   useLayoutEffect(() => console.log(a), []);
+    46 │   useInsertionEffect(() => console.log(a), []);
   
   i This dependency is not specified in the hook dependency list.
   
-    42 │   useCallback(() => console.log(a));
-    43 │   useMemo(() => console.log(a));
-  > 44 │   useImperativeHandle(ref, () => console.log(a));
+    42 │   useCallback(() => console.log(a), []);
+    43 │   useMemo(() => console.log(a), []);
+  > 44 │   useImperativeHandle(ref, () => console.log(a), []);
        │                                              ^
-    45 │   useLayoutEffect(() => console.log(a));
-    46 │   useInsertionEffect(() => console.log(a));
+    45 │   useLayoutEffect(() => console.log(a), []);
+    46 │   useInsertionEffect(() => console.log(a), []);
   
 
 ```
@@ -425,20 +425,20 @@ missingDependenciesInvalid.js:45:3 lint/correctness/useExhaustiveDependencies �
 
   ! This hook does not specify all of its dependencies.
   
-    43 │   useMemo(() => console.log(a));
-    44 │   useImperativeHandle(ref, () => console.log(a));
-  > 45 │   useLayoutEffect(() => console.log(a));
+    43 │   useMemo(() => console.log(a), []);
+    44 │   useImperativeHandle(ref, () => console.log(a), []);
+  > 45 │   useLayoutEffect(() => console.log(a), []);
        │   ^^^^^^^^^^^^^^^
-    46 │   useInsertionEffect(() => console.log(a));
+    46 │   useInsertionEffect(() => console.log(a), []);
     47 │ }
   
   i This dependency is not specified in the hook dependency list.
   
-    43 │   useMemo(() => console.log(a));
-    44 │   useImperativeHandle(ref, () => console.log(a));
-  > 45 │   useLayoutEffect(() => console.log(a));
+    43 │   useMemo(() => console.log(a), []);
+    44 │   useImperativeHandle(ref, () => console.log(a), []);
+  > 45 │   useLayoutEffect(() => console.log(a), []);
        │                                     ^
-    46 │   useInsertionEffect(() => console.log(a));
+    46 │   useInsertionEffect(() => console.log(a), []);
     47 │ }
   
 
@@ -449,18 +449,18 @@ missingDependenciesInvalid.js:46:3 lint/correctness/useExhaustiveDependencies �
 
   ! This hook does not specify all of its dependencies.
   
-    44 │   useImperativeHandle(ref, () => console.log(a));
-    45 │   useLayoutEffect(() => console.log(a));
-  > 46 │   useInsertionEffect(() => console.log(a));
+    44 │   useImperativeHandle(ref, () => console.log(a), []);
+    45 │   useLayoutEffect(() => console.log(a), []);
+  > 46 │   useInsertionEffect(() => console.log(a), []);
        │   ^^^^^^^^^^^^^^^^^^
     47 │ }
     48 │ 
   
   i This dependency is not specified in the hook dependency list.
   
-    44 │   useImperativeHandle(ref, () => console.log(a));
-    45 │   useLayoutEffect(() => console.log(a));
-  > 46 │   useInsertionEffect(() => console.log(a));
+    44 │   useImperativeHandle(ref, () => console.log(a), []);
+    45 │   useLayoutEffect(() => console.log(a), []);
+  > 46 │   useInsertionEffect(() => console.log(a), []);
        │                                        ^
     47 │ }
     48 │ 
@@ -535,7 +535,7 @@ missingDependenciesInvalid.js:72:3 lint/correctness/useExhaustiveDependencies �
   > 72 │   useEffect(() => {
        │   ^^^^^^^^^
     73 │       console.log(someObj.name)
-    74 │   });
+    74 │   }, []);
   
   i This dependency is not specified in the hook dependency list.
   
@@ -543,7 +543,7 @@ missingDependenciesInvalid.js:72:3 lint/correctness/useExhaustiveDependencies �
     72 │   useEffect(() => {
   > 73 │       console.log(someObj.name)
        │                   ^^^^^^^^^^^^
-    74 │   });
+    74 │   }, []);
     75 │ }
   
 
@@ -558,7 +558,7 @@ missingDependenciesInvalid.js:78:3 lint/correctness/useExhaustiveDependencies �
   > 78 │   useEffect(() => {
        │   ^^^^^^^^^
     79 │       console.log(a);
-    80 │   });
+    80 │   }, []);
   
   i This dependency is not specified in the hook dependency list.
   
@@ -566,7 +566,7 @@ missingDependenciesInvalid.js:78:3 lint/correctness/useExhaustiveDependencies �
     78 │   useEffect(() => {
   > 79 │       console.log(a);
        │                   ^
-    80 │   });
+    80 │   }, []);
     81 │ });
   
 
@@ -581,7 +581,7 @@ missingDependenciesInvalid.js:84:3 lint/correctness/useExhaustiveDependencies �
   > 84 │   useEffect(() => {
        │   ^^^^^^^^^
     85 │       console.log(a);
-    86 │   });
+    86 │   }, []);
   
   i This dependency is not specified in the hook dependency list.
   
@@ -589,7 +589,7 @@ missingDependenciesInvalid.js:84:3 lint/correctness/useExhaustiveDependencies �
     84 │   useEffect(() => {
   > 85 │       console.log(a);
        │                   ^
-    86 │   });
+    86 │   }, []);
     87 │ });
   
 
@@ -605,7 +605,7 @@ missingDependenciesInvalid.js:92:3 lint/correctness/useExhaustiveDependencies �
   > 92 │   useEffect(() => {
        │   ^^^^^^^^^
     93 │       console.log(a);
-    94 │   });
+    94 │   }, []);
   
   i This dependency is not specified in the hook dependency list.
   
@@ -613,7 +613,7 @@ missingDependenciesInvalid.js:92:3 lint/correctness/useExhaustiveDependencies �
     92 │   useEffect(() => {
   > 93 │       console.log(a);
        │                   ^
-    94 │   });
+    94 │   }, []);
     95 │ }
   
 
@@ -629,7 +629,7 @@ missingDependenciesInvalid.js:99:3 lint/correctness/useExhaustiveDependencies �
    > 99 │   useEffect(() => {
         │   ^^^^^^^^^
     100 │       console.log(a);
-    101 │   });
+    101 │   }, []);
   
   i This dependency is not specified in the hook dependency list.
   
@@ -637,7 +637,7 @@ missingDependenciesInvalid.js:99:3 lint/correctness/useExhaustiveDependencies �
      99 │   useEffect(() => {
   > 100 │       console.log(a);
         │                   ^
-    101 │   });
+    101 │   }, []);
     102 │ }
   
 
@@ -653,7 +653,7 @@ missingDependenciesInvalid.js:107:3 lint/correctness/useExhaustiveDependencies �
   > 107 │   useEffect(function inner() {
         │   ^^^^^^^^^
     108 │       console.log(a);
-    109 │   });
+    109 │   }, []);
   
   i This dependency is not specified in the hook dependency list.
   
@@ -661,7 +661,7 @@ missingDependenciesInvalid.js:107:3 lint/correctness/useExhaustiveDependencies �
     107 │   useEffect(function inner() {
   > 108 │       console.log(a);
         │                   ^
-    109 │   });
+    109 │   }, []);
     110 │ }
   
 
@@ -677,7 +677,7 @@ missingDependenciesInvalid.js:114:3 lint/correctness/useExhaustiveDependencies �
   > 114 │   useEffect(async function inner() {
         │   ^^^^^^^^^
     115 │       console.log(a);
-    116 │   });
+    116 │   }, []);
   
   i This dependency is not specified in the hook dependency list.
   
@@ -685,7 +685,7 @@ missingDependenciesInvalid.js:114:3 lint/correctness/useExhaustiveDependencies �
     114 │   useEffect(async function inner() {
   > 115 │       console.log(a);
         │                   ^
-    116 │   });
+    116 │   }, []);
     117 │ }
   
 
@@ -701,7 +701,7 @@ missingDependenciesInvalid.js:122:9 lint/correctness/useExhaustiveDependencies �
   > 122 │   React.useEffect(() => {
         │         ^^^^^^^^^
     123 │       console.log(a);
-    124 │   });
+    124 │   }, []);
   
   i This dependency is not specified in the hook dependency list.
   
@@ -709,7 +709,7 @@ missingDependenciesInvalid.js:122:9 lint/correctness/useExhaustiveDependencies �
     122 │   React.useEffect(() => {
   > 123 │       console.log(a);
         │                   ^
-    124 │   });
+    124 │   }, []);
     125 │ }
   
 

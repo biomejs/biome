@@ -10,9 +10,14 @@ function MyComponent() {
     let a = 1;
     useEffect(() => {
         console.log(a);
-    });
+    }, []);
+
     useMyEffect(() => {
         console.log(a);
+    }, []);
+
+    useMyEffect(() => {
+       console.log(a);
     });
 }
 
@@ -29,7 +34,7 @@ customHook.js:5:5 lint/correctness/useExhaustiveDependencies ━━━━━━�
   > 5 │     useEffect(() => {
       │     ^^^^^^^^^
     6 │         console.log(a);
-    7 │     });
+    7 │     }, []);
   
   i This dependency is not specified in the hook dependency list.
   
@@ -37,32 +42,31 @@ customHook.js:5:5 lint/correctness/useExhaustiveDependencies ━━━━━━�
     5 │     useEffect(() => {
   > 6 │         console.log(a);
       │                     ^
-    7 │     });
-    8 │     useMyEffect(() => {
+    7 │     }, []);
+    8 │ 
   
 
 ```
 
 ```
-customHook.js:8:5 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+customHook.js:9:5 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This hook does not specify all of its dependencies.
   
-     6 │         console.log(a);
-     7 │     });
-   > 8 │     useMyEffect(() => {
+     7 │     }, []);
+     8 │ 
+   > 9 │     useMyEffect(() => {
        │     ^^^^^^^^^^^
-     9 │         console.log(a);
-    10 │     });
+    10 │         console.log(a);
+    11 │     }, []);
   
   i This dependency is not specified in the hook dependency list.
   
-     7 │     });
-     8 │     useMyEffect(() => {
-   > 9 │         console.log(a);
+     9 │     useMyEffect(() => {
+  > 10 │         console.log(a);
        │                     ^
-    10 │     });
-    11 │ }
+    11 │     }, []);
+    12 │ 
   
 
 ```

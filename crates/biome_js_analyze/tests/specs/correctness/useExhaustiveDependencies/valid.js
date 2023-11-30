@@ -7,7 +7,7 @@ import doSomething from 'a';
 // No captures
 function MyComponent1() {
     useEffect(() => {
-    });
+    }, []);
 }
 
 // All needed captures in the dependency list
@@ -114,20 +114,20 @@ const outside = f();
 function MyComponent9() {
     useEffect(() => {
       console.log(outside);
-    });
+    }, []);
 }
 
 // Memoized Components
 const MyComponent10 = React.memo(function () {
     useEffect(() => {
         console.log(outside);
-    });
+    }, []);
 });
 
 const MyComponent11 = React.memo(() => {
     useEffect(() => {
         console.log(outside);
-    });
+    }, []);
 });
 
 // exported functions
@@ -184,4 +184,13 @@ function MyComponent18() {
   return useMemo(() => {
     return obj?.a === 1 && obj.b === 2;
   }, [obj?.a, obj?.b]);
+}
+
+// Captures without dependency array
+// https://github.com/biomejs/biome/issues/608
+function MyComponent19() {
+    let a = 1;
+    useEffect(() => {
+        console.log(a);
+    });
 }
