@@ -28,7 +28,7 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 #### Bug fixes
 
-- Fix [#910](https://github.com/biomejs/biome/issues/910), where the rule `noSvgWithoutTitle` should skip elements that have `aria-hidden` attributes.
+- Fix [#910](https://github.com/biomejs/biome/issues/910), where the rule `noSvgWithoutTitle` should skip elements that have `aria-hidden` attributes. Contributed by @vasucp1207
 
 #### New features
 
