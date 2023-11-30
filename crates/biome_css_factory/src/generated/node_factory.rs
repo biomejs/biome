@@ -220,6 +220,20 @@ impl CssCompoundSelectorBuilder {
         ))
     }
 }
+pub fn css_counter_style_at_rule(
+    counter_style_token: SyntaxToken,
+    name: CssIdentifier,
+    block: CssBlock,
+) -> CssCounterStyleAtRule {
+    CssCounterStyleAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_COUNTER_STYLE_AT_RULE,
+        [
+            Some(SyntaxElement::Token(counter_style_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Node(block.into_syntax())),
+        ],
+    ))
+}
 pub fn css_custom_property(value_token: SyntaxToken) -> CssCustomProperty {
     CssCustomProperty::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_CUSTOM_PROPERTY,

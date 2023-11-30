@@ -1,0 +1,243 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@counter-style  {  }
+@counter-style 6788 {  }
+@counter-style 'string' {  }
+@counter-style ident
+@counter-style ident
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssBogusAtRule {
+                items: [
+                    COUNTER_STYLE_KW@1..16 "counter-style" [] [Whitespace("  ")],
+                    CssBlock {
+                        l_curly_token: L_CURLY@16..19 "{" [] [Whitespace("  ")],
+                        declaration_list: CssDeclarationList [],
+                        r_curly_token: R_CURLY@19..20 "}" [] [],
+                    },
+                ],
+            },
+        },
+        CssAtRule {
+            at_token: AT@20..22 "@" [Newline("\n")] [],
+            rule: CssBogusAtRule {
+                items: [
+                    COUNTER_STYLE_KW@22..36 "counter-style" [] [Whitespace(" ")],
+                    CssBogus {
+                        items: [
+                            CSS_NUMBER_LITERAL@36..41 "6788" [] [Whitespace(" ")],
+                        ],
+                    },
+                    CssBlock {
+                        l_curly_token: L_CURLY@41..44 "{" [] [Whitespace("  ")],
+                        declaration_list: CssDeclarationList [],
+                        r_curly_token: R_CURLY@44..45 "}" [] [],
+                    },
+                ],
+            },
+        },
+        CssAtRule {
+            at_token: AT@45..47 "@" [Newline("\n")] [],
+            rule: CssBogusAtRule {
+                items: [
+                    COUNTER_STYLE_KW@47..61 "counter-style" [] [Whitespace(" ")],
+                    CssBogus {
+                        items: [
+                            CSS_STRING_LITERAL@61..70 "'string'" [] [Whitespace(" ")],
+                        ],
+                    },
+                    CssBlock {
+                        l_curly_token: L_CURLY@70..73 "{" [] [Whitespace("  ")],
+                        declaration_list: CssDeclarationList [],
+                        r_curly_token: R_CURLY@73..74 "}" [] [],
+                    },
+                ],
+            },
+        },
+        CssAtRule {
+            at_token: AT@74..76 "@" [Newline("\n")] [],
+            rule: CssBogusAtRule {
+                items: [
+                    COUNTER_STYLE_KW@76..90 "counter-style" [] [Whitespace(" ")],
+                    CssIdentifier {
+                        value_token: IDENT@90..95 "ident" [] [],
+                    },
+                ],
+            },
+        },
+        CssAtRule {
+            at_token: AT@95..97 "@" [Newline("\n")] [],
+            rule: CssBogusAtRule {
+                items: [
+                    COUNTER_STYLE_KW@97..111 "counter-style" [] [Whitespace(" ")],
+                    CssIdentifier {
+                        value_token: IDENT@111..116 "ident" [] [],
+                    },
+                ],
+            },
+        },
+    ],
+    eof_token: EOF@116..117 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..117
+  0: (empty)
+  1: CSS_RULE_LIST@0..116
+    0: CSS_AT_RULE@0..20
+      0: AT@0..1 "@" [] []
+      1: CSS_BOGUS_AT_RULE@1..20
+        0: COUNTER_STYLE_KW@1..16 "counter-style" [] [Whitespace("  ")]
+        1: CSS_BLOCK@16..20
+          0: L_CURLY@16..19 "{" [] [Whitespace("  ")]
+          1: CSS_DECLARATION_LIST@19..19
+          2: R_CURLY@19..20 "}" [] []
+    1: CSS_AT_RULE@20..45
+      0: AT@20..22 "@" [Newline("\n")] []
+      1: CSS_BOGUS_AT_RULE@22..45
+        0: COUNTER_STYLE_KW@22..36 "counter-style" [] [Whitespace(" ")]
+        1: CSS_BOGUS@36..41
+          0: CSS_NUMBER_LITERAL@36..41 "6788" [] [Whitespace(" ")]
+        2: CSS_BLOCK@41..45
+          0: L_CURLY@41..44 "{" [] [Whitespace("  ")]
+          1: CSS_DECLARATION_LIST@44..44
+          2: R_CURLY@44..45 "}" [] []
+    2: CSS_AT_RULE@45..74
+      0: AT@45..47 "@" [Newline("\n")] []
+      1: CSS_BOGUS_AT_RULE@47..74
+        0: COUNTER_STYLE_KW@47..61 "counter-style" [] [Whitespace(" ")]
+        1: CSS_BOGUS@61..70
+          0: CSS_STRING_LITERAL@61..70 "'string'" [] [Whitespace(" ")]
+        2: CSS_BLOCK@70..74
+          0: L_CURLY@70..73 "{" [] [Whitespace("  ")]
+          1: CSS_DECLARATION_LIST@73..73
+          2: R_CURLY@73..74 "}" [] []
+    3: CSS_AT_RULE@74..95
+      0: AT@74..76 "@" [Newline("\n")] []
+      1: CSS_BOGUS_AT_RULE@76..95
+        0: COUNTER_STYLE_KW@76..90 "counter-style" [] [Whitespace(" ")]
+        1: CSS_IDENTIFIER@90..95
+          0: IDENT@90..95 "ident" [] []
+    4: CSS_AT_RULE@95..116
+      0: AT@95..97 "@" [Newline("\n")] []
+      1: CSS_BOGUS_AT_RULE@97..116
+        0: COUNTER_STYLE_KW@97..111 "counter-style" [] [Whitespace(" ")]
+        1: CSS_IDENTIFIER@111..116
+          0: IDENT@111..116 "ident" [] []
+  2: EOF@116..117 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+at_rule_counter_style_error.css:1:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found '{'.
+  
+  > 1 │ @counter-style  {  }
+      │                 ^
+    2 │ @counter-style 6788 {  }
+    3 │ @counter-style 'string' {  }
+  
+  i Expected an identifier here.
+  
+  > 1 │ @counter-style  {  }
+      │                 ^
+    2 │ @counter-style 6788 {  }
+    3 │ @counter-style 'string' {  }
+  
+at_rule_counter_style_error.css:2:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found '6788'.
+  
+    1 │ @counter-style  {  }
+  > 2 │ @counter-style 6788 {  }
+      │                ^^^^
+    3 │ @counter-style 'string' {  }
+    4 │ @counter-style ident
+  
+  i Expected an identifier here.
+  
+    1 │ @counter-style  {  }
+  > 2 │ @counter-style 6788 {  }
+      │                ^^^^
+    3 │ @counter-style 'string' {  }
+    4 │ @counter-style ident
+  
+at_rule_counter_style_error.css:3:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found ''string''.
+  
+    1 │ @counter-style  {  }
+    2 │ @counter-style 6788 {  }
+  > 3 │ @counter-style 'string' {  }
+      │                ^^^^^^^^
+    4 │ @counter-style ident
+    5 │ @counter-style ident
+  
+  i Expected an identifier here.
+  
+    1 │ @counter-style  {  }
+    2 │ @counter-style 6788 {  }
+  > 3 │ @counter-style 'string' {  }
+      │                ^^^^^^^^
+    4 │ @counter-style ident
+    5 │ @counter-style ident
+  
+at_rule_counter_style_error.css:5:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a body but instead found '@'.
+  
+    3 │ @counter-style 'string' {  }
+    4 │ @counter-style ident
+  > 5 │ @counter-style ident
+      │ ^
+    6 │ 
+  
+  i Expected a body here.
+  
+    3 │ @counter-style 'string' {  }
+    4 │ @counter-style ident
+  > 5 │ @counter-style ident
+      │ ^
+    6 │ 
+  
+at_rule_counter_style_error.css:6:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a body but instead found the end of the file.
+  
+    4 │ @counter-style ident
+    5 │ @counter-style ident
+  > 6 │ 
+      │ 
+  
+  i Expected a body here.
+  
+    4 │ @counter-style ident
+    5 │ @counter-style ident
+  > 6 │ 
+      │ 
+  
+```
+
+

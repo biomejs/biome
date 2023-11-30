@@ -540,6 +540,52 @@ pub struct CssCompoundSelectorFields {
     pub sub_selectors: CssSubSelectorList,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssCounterStyleAtRule {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssCounterStyleAtRule {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssCounterStyleAtRuleFields {
+        CssCounterStyleAtRuleFields {
+            counter_style_token: self.counter_style_token(),
+            name: self.name(),
+            block: self.block(),
+        }
+    }
+    pub fn counter_style_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn name(&self) -> SyntaxResult<CssIdentifier> {
+        support::required_node(&self.syntax, 1usize)
+    }
+    pub fn block(&self) -> SyntaxResult<CssBlock> {
+        support::required_node(&self.syntax, 2usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssCounterStyleAtRule {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssCounterStyleAtRuleFields {
+    pub counter_style_token: SyntaxResult<SyntaxToken>,
+    pub name: SyntaxResult<CssIdentifier>,
+    pub block: SyntaxResult<CssBlock>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssCustomProperty {
     pub(crate) syntax: SyntaxNode,
 }
@@ -2999,6 +3045,7 @@ pub enum AnyCssAtRule {
     CssBogusAtRule(CssBogusAtRule),
     CssCharsetAtRule(CssCharsetAtRule),
     CssColorProfileAtRule(CssColorProfileAtRule),
+    CssCounterStyleAtRule(CssCounterStyleAtRule),
     CssKeyframesAtRule(CssKeyframesAtRule),
     CssMediaAtRule(CssMediaAtRule),
 }
@@ -3018,6 +3065,12 @@ impl AnyCssAtRule {
     pub fn as_css_color_profile_at_rule(&self) -> Option<&CssColorProfileAtRule> {
         match &self {
             AnyCssAtRule::CssColorProfileAtRule(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_counter_style_at_rule(&self) -> Option<&CssCounterStyleAtRule> {
+        match &self {
+            AnyCssAtRule::CssCounterStyleAtRule(item) => Some(item),
             _ => None,
         }
     }
@@ -4042,6 +4095,49 @@ impl From<CssCompoundSelector> for SyntaxNode {
 }
 impl From<CssCompoundSelector> for SyntaxElement {
     fn from(n: CssCompoundSelector) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssCounterStyleAtRule {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_COUNTER_STYLE_AT_RULE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_COUNTER_STYLE_AT_RULE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssCounterStyleAtRule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssCounterStyleAtRule")
+            .field(
+                "counter_style_token",
+                &support::DebugSyntaxResult(self.counter_style_token()),
+            )
+            .field("name", &support::DebugSyntaxResult(self.name()))
+            .field("block", &support::DebugSyntaxResult(self.block()))
+            .finish()
+    }
+}
+impl From<CssCounterStyleAtRule> for SyntaxNode {
+    fn from(n: CssCounterStyleAtRule) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssCounterStyleAtRule> for SyntaxElement {
+    fn from(n: CssCounterStyleAtRule) -> SyntaxElement {
         n.syntax.into()
     }
 }
@@ -6460,6 +6556,11 @@ impl From<CssColorProfileAtRule> for AnyCssAtRule {
         AnyCssAtRule::CssColorProfileAtRule(node)
     }
 }
+impl From<CssCounterStyleAtRule> for AnyCssAtRule {
+    fn from(node: CssCounterStyleAtRule) -> AnyCssAtRule {
+        AnyCssAtRule::CssCounterStyleAtRule(node)
+    }
+}
 impl From<CssKeyframesAtRule> for AnyCssAtRule {
     fn from(node: CssKeyframesAtRule) -> AnyCssAtRule {
         AnyCssAtRule::CssKeyframesAtRule(node)
@@ -6475,6 +6576,7 @@ impl AstNode for AnyCssAtRule {
     const KIND_SET: SyntaxKindSet<Language> = CssBogusAtRule::KIND_SET
         .union(CssCharsetAtRule::KIND_SET)
         .union(CssColorProfileAtRule::KIND_SET)
+        .union(CssCounterStyleAtRule::KIND_SET)
         .union(CssKeyframesAtRule::KIND_SET)
         .union(CssMediaAtRule::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
@@ -6483,6 +6585,7 @@ impl AstNode for AnyCssAtRule {
             CSS_BOGUS_AT_RULE
                 | CSS_CHARSET_AT_RULE
                 | CSS_COLOR_PROFILE_AT_RULE
+                | CSS_COUNTER_STYLE_AT_RULE
                 | CSS_KEYFRAMES_AT_RULE
                 | CSS_MEDIA_AT_RULE
         )
@@ -6493,6 +6596,9 @@ impl AstNode for AnyCssAtRule {
             CSS_CHARSET_AT_RULE => AnyCssAtRule::CssCharsetAtRule(CssCharsetAtRule { syntax }),
             CSS_COLOR_PROFILE_AT_RULE => {
                 AnyCssAtRule::CssColorProfileAtRule(CssColorProfileAtRule { syntax })
+            }
+            CSS_COUNTER_STYLE_AT_RULE => {
+                AnyCssAtRule::CssCounterStyleAtRule(CssCounterStyleAtRule { syntax })
             }
             CSS_KEYFRAMES_AT_RULE => {
                 AnyCssAtRule::CssKeyframesAtRule(CssKeyframesAtRule { syntax })
@@ -6507,6 +6613,7 @@ impl AstNode for AnyCssAtRule {
             AnyCssAtRule::CssBogusAtRule(it) => &it.syntax,
             AnyCssAtRule::CssCharsetAtRule(it) => &it.syntax,
             AnyCssAtRule::CssColorProfileAtRule(it) => &it.syntax,
+            AnyCssAtRule::CssCounterStyleAtRule(it) => &it.syntax,
             AnyCssAtRule::CssKeyframesAtRule(it) => &it.syntax,
             AnyCssAtRule::CssMediaAtRule(it) => &it.syntax,
         }
@@ -6516,6 +6623,7 @@ impl AstNode for AnyCssAtRule {
             AnyCssAtRule::CssBogusAtRule(it) => it.syntax,
             AnyCssAtRule::CssCharsetAtRule(it) => it.syntax,
             AnyCssAtRule::CssColorProfileAtRule(it) => it.syntax,
+            AnyCssAtRule::CssCounterStyleAtRule(it) => it.syntax,
             AnyCssAtRule::CssKeyframesAtRule(it) => it.syntax,
             AnyCssAtRule::CssMediaAtRule(it) => it.syntax,
         }
@@ -6527,6 +6635,7 @@ impl std::fmt::Debug for AnyCssAtRule {
             AnyCssAtRule::CssBogusAtRule(it) => std::fmt::Debug::fmt(it, f),
             AnyCssAtRule::CssCharsetAtRule(it) => std::fmt::Debug::fmt(it, f),
             AnyCssAtRule::CssColorProfileAtRule(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssAtRule::CssCounterStyleAtRule(it) => std::fmt::Debug::fmt(it, f),
             AnyCssAtRule::CssKeyframesAtRule(it) => std::fmt::Debug::fmt(it, f),
             AnyCssAtRule::CssMediaAtRule(it) => std::fmt::Debug::fmt(it, f),
         }
@@ -6538,6 +6647,7 @@ impl From<AnyCssAtRule> for SyntaxNode {
             AnyCssAtRule::CssBogusAtRule(it) => it.into(),
             AnyCssAtRule::CssCharsetAtRule(it) => it.into(),
             AnyCssAtRule::CssColorProfileAtRule(it) => it.into(),
+            AnyCssAtRule::CssCounterStyleAtRule(it) => it.into(),
             AnyCssAtRule::CssKeyframesAtRule(it) => it.into(),
             AnyCssAtRule::CssMediaAtRule(it) => it.into(),
         }
@@ -8092,6 +8202,11 @@ impl std::fmt::Display for CssComplexSelector {
     }
 }
 impl std::fmt::Display for CssCompoundSelector {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssCounterStyleAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
