@@ -5,11 +5,17 @@ import Page from "@astrojs/starlight/components/Page.astro";
 
 export interface Props {
   title: string;
+  description: string;
   slug: string;
+  head?: Array<{
+    tag: string;
+    attrs?: Record<string, string | boolean | undefined>;
+    content?: string;
+  }>;
   editUrl?: string;
 }
 
-function getPageProps(title: string, slug: string, editUrl?: string) {
+function getPageProps({ title, description, slug, head = [], editUrl }: Props) {
   const entryMeta = { dir: "ltr", lang: "en", locale: undefined } as LocaleData;
 
   return {
@@ -22,9 +28,11 @@ function getPageProps(title: string, slug: string, editUrl?: string) {
             tag: "title",
             content: `${title} | Biome`,
           },
+          ...head,
         ],
         pagefind: false,
         title,
+        description,
         template: "splash",
       },
       slug,
@@ -48,9 +56,7 @@ function getPageProps(title: string, slug: string, editUrl?: string) {
   };
 }
 
-const { title, slug, editUrl } = Astro.props;
-
-const pageProps = getPageProps(title, slug, editUrl);
+const pageProps = getPageProps(Astro.props);
 ---
 
 <Page {...pageProps}>
