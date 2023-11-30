@@ -2,6 +2,7 @@
 import { getCollection, type CollectionEntry } from "astro:content";
 import BlogLayout from "@src/layouts/Blog.astro";
 import StarlightSplashLayout from "@src/layouts/StarlightSplashLayout.astro";
+import { getImage } from "astro:assets";
 
 export async function getStaticPaths() {
   const blogEntries = await getCollection("blog");
@@ -19,11 +20,36 @@ const { entry } = Astro.props;
 const { Content } = await entry.render();
 
 const post = entry.data;
+
+const processedImage = await getImage({ src: post.socialImage });
+const socialImageUrl = new URL(
+  processedImage.src,
+  Astro.site ?? "http://localhost:4321/"
+).toString();
+
+const head = [
+  {
+    tag: "meta",
+    attrs: {
+      property: "og:image",
+      content: socialImageUrl,
+    },
+  },
+  {
+    tag: "meta",
+    attrs: {
+      property: "twitter:image",
+      content: socialImageUrl,
+    },
+  },
+];
 ---
 
 <StarlightSplashLayout
   title={post.title}
+  description={post.description}
   slug={entry.slug}
+  head={head}
   editUrl={`https://github.com/biomejs/biome/edit/main/website/src/content/blog/${entry.id}`}
 >
   <BlogLayout post={post}>
