@@ -176,14 +176,12 @@ pub(crate) fn parse_any_css_value(p: &mut CssParser) -> ParsedSyntax {
         return css_number;
     }
 
-  
-
     Absent
 }
 
 // is_css_custom_property
 // TODO: why identifier start with '--'
-// FIX: fix lexer 
+// FIX: fix lexer
 #[inline]
 pub(crate) fn is_at_css_custom_property(p: &mut CssParser) -> bool {
     p.at(T![-]) && p.nth_at(1, T![-])
