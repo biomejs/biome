@@ -54,7 +54,7 @@ pub enum BiomeCommand {
     /// Runs formatter, linter and import sorting to the requested files.
     #[bpaf(command)]
     Check {
-        /// Apply safe fixes, formatting
+        /// Apply safe fixes, formatting and import sorting
         #[bpaf(long("apply"), switch)]
         apply: bool,
         /// Apply safe fixes and unsafe fixes, formatting and import sorting
@@ -97,7 +97,7 @@ pub enum BiomeCommand {
     /// Run various checks on a set of files.
     #[bpaf(command)]
     Lint {
-        /// Apply safe fixes, formatting
+        /// Apply safe fixes, formatting and import sorting
         #[bpaf(long("apply"), switch)]
         apply: bool,
         /// Apply safe fixes and unsafe fixes, formatting and import sorting
