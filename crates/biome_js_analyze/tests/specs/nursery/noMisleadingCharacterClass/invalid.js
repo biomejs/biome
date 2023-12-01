@@ -57,3 +57,7 @@ var r = new RegExp("[👨‍👩‍👦]", "");
 var r = new RegExp("[👨‍👩‍👦]", "u");
 var r = new RegExp("[\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC66]", "u");
 var r = new RegExp("[\u{1F468}\u{200D}\u{1F469}\u{200D}\u{1F466}]", "u");
+var r = new globalThis.RegExp("[❇️]", "");
+var r = new globalThis.RegExp("[👶🏻]", "u");
+var r = new globalThis.RegExp("[🇯🇵]", "");
+var r = new globalThis.RegExp("[\u{1F468}\u{200D}\u{1F469}\u{200D}\u{1F466}]", "u");

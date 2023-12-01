@@ -103,11 +103,25 @@ impl Rule for NoMisleadingCharacterClass {
             }
 
             AnyRegexExpression::JsNewExpression(expr) => {
-                let callee = match expr.callee().ok()? {
-                    AnyJsExpression::JsIdentifierExpression(callee) => callee,
-                    _ => return None,
+                let is_reg_exp = match expr.callee().ok()? {
+                    AnyJsExpression::JsIdentifierExpression(callee) => {
+                        callee.name().ok()?.has_name("RegExp")
+                    }
+                    AnyJsExpression::JsStaticMemberExpression(callee) => {
+                        let is_global_this = match callee.object().ok()? {
+                            AnyJsExpression::JsIdentifierExpression(e) => {
+                                e.name().ok()?.has_name("globalThis")
+                            }
+                            _ => false,
+                        };
+
+                        is_global_this
+                            && callee.member().ok()?.value_token().ok()?.text() == "RegExp"
+                    }
+                    _ => false,
                 };
-                if callee.name().ok()?.has_name("RegExp") {
+
+                if is_reg_exp {
                     let mut args = expr.arguments()?.args().iter();
                     let raw_regex_pattern = args
                         .next()
