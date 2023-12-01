@@ -1,4 +1,4 @@
 [build]
 base = "website/"
 publish = "dist/"
-command = "cargo install wasm-pack && pnpm build:wasm && pnpm install && pnpm build:js"
+command = "pnpm i -g wasm-pack && pnpm build:wasm && pnpm install && pnpm build:js"
