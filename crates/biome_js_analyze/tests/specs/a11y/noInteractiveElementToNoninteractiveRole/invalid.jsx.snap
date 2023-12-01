@@ -75,7 +75,7 @@ expression: invalid.jsx
 
 # Diagnostics
 ```
-invalid.jsx:2:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:2:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Interactive elements should not be assigned non-interactive roles.
   
@@ -89,11 +89,15 @@ invalid.jsx:2:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━�
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    2 │ <a·href="http://x.y.z"·role="img"·/>;
+      │                        -----------   
 
 ```
 
 ```
-invalid.jsx:3:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:3:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Interactive elements should not be assigned non-interactive roles.
   
@@ -108,11 +112,15 @@ invalid.jsx:3:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━�
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    3 │ <a·href="http://x.y.z"·tabIndex="0"·role="img"·/>;
+      │                                     -----------   
 
 ```
 
 ```
-invalid.jsx:5:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:5:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Interactive elements should not be assigned non-interactive roles.
   
@@ -127,11 +135,15 @@ invalid.jsx:5:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━�
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    5 │ <input·role="img"·/>;
+      │        -----------   
 
 ```
 
 ```
-invalid.jsx:6:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:6:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Interactive elements should not be assigned non-interactive roles.
   
@@ -146,11 +158,15 @@ invalid.jsx:6:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━�
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    6 │ <input·type="img"·role="img"·/>;
+      │                   -----------   
 
 ```
 
 ```
-invalid.jsx:7:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:7:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Interactive elements should not be assigned non-interactive roles.
   
@@ -165,11 +181,15 @@ invalid.jsx:7:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━�
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    7 │ <input·type="checkbox"·role="img"·/>;
+      │                        -----------   
 
 ```
 
 ```
-invalid.jsx:8:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:8:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Interactive elements should not be assigned non-interactive roles.
   
@@ -184,11 +204,15 @@ invalid.jsx:8:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━�
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    8 │ <input·type="color"·role="img"·/>;
+      │                     -----------   
 
 ```
 
 ```
-invalid.jsx:9:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:9:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Interactive elements should not be assigned non-interactive roles.
   
@@ -203,11 +227,15 @@ invalid.jsx:9:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━�
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    9 │ <input·type="date"·role="img"·/>;
+      │                    -----------   
 
 ```
 
 ```
-invalid.jsx:10:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:10:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   ! Interactive elements should not be assigned non-interactive roles.
   
@@ -222,11 +250,15 @@ invalid.jsx:10:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    10 │ <input·type="datetime"·role="img"·/>;
+       │                        -----------   
 
 ```
 
 ```
-invalid.jsx:11:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:11:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   ! Interactive elements should not be assigned non-interactive roles.
   
@@ -241,11 +273,15 @@ invalid.jsx:11:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    11 │ <input·type="datetime-local"·role="img"·/>;
+       │                              -----------   
 
 ```
 
 ```
-invalid.jsx:12:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:12:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   ! Interactive elements should not be assigned non-interactive roles.
   
@@ -260,11 +296,15 @@ invalid.jsx:12:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    12 │ <input·type="email"·role="img"·/>;
+       │                     -----------   
 
 ```
 
 ```
-invalid.jsx:13:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:13:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   ! Interactive elements should not be assigned non-interactive roles.
   
@@ -279,11 +319,15 @@ invalid.jsx:13:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    13 │ <input·type="file"·role="img"·/>;
+       │                    -----------   
 
 ```
 
 ```
-invalid.jsx:14:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:14:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   ! Interactive elements should not be assigned non-interactive roles.
   
@@ -298,11 +342,15 @@ invalid.jsx:14:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    14 │ <input·type="image"·role="img"·/>;
+       │                     -----------   
 
 ```
 
 ```
-invalid.jsx:15:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:15:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   ! Interactive elements should not be assigned non-interactive roles.
   
@@ -317,11 +365,15 @@ invalid.jsx:15:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    15 │ <input·type="month"·role="img"·/>;
+       │                     -----------   
 
 ```
 
 ```
-invalid.jsx:16:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:16:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   ! Interactive elements should not be assigned non-interactive roles.
   
@@ -336,11 +388,15 @@ invalid.jsx:16:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    16 │ <input·type="number"·role="img"·/>;
+       │                      -----------   
 
 ```
 
 ```
-invalid.jsx:17:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:17:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   ! Interactive elements should not be assigned non-interactive roles.
   
@@ -355,11 +411,15 @@ invalid.jsx:17:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    17 │ <input·type="password"·role="img"·/>;
+       │                        -----------   
 
 ```
 
 ```
-invalid.jsx:18:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:18:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   ! Interactive elements should not be assigned non-interactive roles.
   
@@ -374,11 +434,15 @@ invalid.jsx:18:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    18 │ <input·type="radio"·role="img"·/>;
+       │                     -----------   
 
 ```
 
 ```
-invalid.jsx:19:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:19:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   ! Interactive elements should not be assigned non-interactive roles.
   
@@ -393,11 +457,15 @@ invalid.jsx:19:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    19 │ <input·type="range"·role="img"·/>;
+       │                     -----------   
 
 ```
 
 ```
-invalid.jsx:20:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:20:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   ! Interactive elements should not be assigned non-interactive roles.
   
@@ -412,11 +480,15 @@ invalid.jsx:20:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    20 │ <input·type="reset"·role="img"·/>;
+       │                     -----------   
 
 ```
 
 ```
-invalid.jsx:21:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:21:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   ! Interactive elements should not be assigned non-interactive roles.
   
@@ -431,11 +503,15 @@ invalid.jsx:21:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    21 │ <input·type="search"·role="img"·/>;
+       │                      -----------   
 
 ```
 
 ```
-invalid.jsx:22:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:22:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   ! Interactive elements should not be assigned non-interactive roles.
   
@@ -450,11 +526,15 @@ invalid.jsx:22:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    22 │ <input·type="submit"·role="img"·/>;
+       │                      -----------   
 
 ```
 
 ```
-invalid.jsx:23:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:23:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   ! Interactive elements should not be assigned non-interactive roles.
   
@@ -469,11 +549,15 @@ invalid.jsx:23:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    23 │ <input·type="tel"·role="img"·/>;
+       │                   -----------   
 
 ```
 
 ```
-invalid.jsx:24:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:24:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   ! Interactive elements should not be assigned non-interactive roles.
   
@@ -488,11 +572,15 @@ invalid.jsx:24:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    24 │ <input·type="text"·role="img"·/>;
+       │                    -----------   
 
 ```
 
 ```
-invalid.jsx:25:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:25:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   ! Interactive elements should not be assigned non-interactive roles.
   
@@ -507,11 +595,15 @@ invalid.jsx:25:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    25 │ <input·type="time"·role="img"·/>;
+       │                    -----------   
 
 ```
 
 ```
-invalid.jsx:26:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:26:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   ! Interactive elements should not be assigned non-interactive roles.
   
@@ -526,11 +618,15 @@ invalid.jsx:26:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    26 │ <input·type="url"·role="img"·/>;
+       │                   -----------   
 
 ```
 
 ```
-invalid.jsx:27:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:27:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   ! Interactive elements should not be assigned non-interactive roles.
   
@@ -545,11 +641,15 @@ invalid.jsx:27:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    27 │ <input·type="week"·role="img"·/>;
+       │                    -----------   
 
 ```
 
 ```
-invalid.jsx:29:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:29:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   ! Interactive elements should not be assigned non-interactive roles.
   
@@ -564,11 +664,15 @@ invalid.jsx:29:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    29 │ <menuitem·role="img"·/>;
+       │           -----------   
 
 ```
 
 ```
-invalid.jsx:30:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:30:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   ! Interactive elements should not be assigned non-interactive roles.
   
@@ -583,11 +687,15 @@ invalid.jsx:30:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    30 │ <option·className="foo"·role="img"·/>;
+       │                         -----------   
 
 ```
 
 ```
-invalid.jsx:31:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:31:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   ! Interactive elements should not be assigned non-interactive roles.
   
@@ -602,11 +710,15 @@ invalid.jsx:31:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    31 │ <select·className="foo"·role="img"·/>;
+       │                         -----------   
 
 ```
 
 ```
-invalid.jsx:32:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:32:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   ! Interactive elements should not be assigned non-interactive roles.
   
@@ -621,11 +733,15 @@ invalid.jsx:32:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    32 │ <textarea·className="foo"·role="img"·/>;
+       │                           -----------   
 
 ```
 
 ```
-invalid.jsx:33:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:33:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   ! Interactive elements should not be assigned non-interactive roles.
   
@@ -640,11 +756,15 @@ invalid.jsx:33:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    33 │ <tr·role="img"·/>;
+       │     -----------   
 
 ```
 
 ```
-invalid.jsx:35:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:35:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   ! Interactive elements should not be assigned non-interactive roles.
   
@@ -659,11 +779,15 @@ invalid.jsx:35:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    35 │ <a·href="http://x.y.z"·role="listitem"·/>;
+       │                        ----------------   
 
 ```
 
 ```
-invalid.jsx:36:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:36:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   ! Interactive elements should not be assigned non-interactive roles.
   
@@ -678,11 +802,15 @@ invalid.jsx:36:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    36 │ <a·href="http://x.y.z"·tabIndex="0"·role="listitem"·/>;
+       │                                     ----------------   
 
 ```
 
 ```
-invalid.jsx:38:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:38:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   ! Interactive elements should not be assigned non-interactive roles.
   
@@ -697,11 +825,15 @@ invalid.jsx:38:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    38 │ <input·role="listitem"·/>;
+       │        ----------------   
 
 ```
 
 ```
-invalid.jsx:39:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:39:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   ! Interactive elements should not be assigned non-interactive roles.
   
@@ -716,11 +848,15 @@ invalid.jsx:39:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    39 │ <input·type="listitem"·role="listitem"·/>;
+       │                        ----------------   
 
 ```
 
 ```
-invalid.jsx:40:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:40:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   ! Interactive elements should not be assigned non-interactive roles.
   
@@ -735,11 +871,15 @@ invalid.jsx:40:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    40 │ <input·type="checkbox"·role="listitem"·/>;
+       │                        ----------------   
 
 ```
 
 ```
-invalid.jsx:41:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:41:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   ! Interactive elements should not be assigned non-interactive roles.
   
@@ -754,11 +894,15 @@ invalid.jsx:41:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    41 │ <input·type="color"·role="listitem"·/>;
+       │                     ----------------   
 
 ```
 
 ```
-invalid.jsx:42:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:42:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   ! Interactive elements should not be assigned non-interactive roles.
   
@@ -773,11 +917,15 @@ invalid.jsx:42:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    42 │ <input·type="date"·role="listitem"·/>;
+       │                    ----------------   
 
 ```
 
 ```
-invalid.jsx:43:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:43:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   ! Interactive elements should not be assigned non-interactive roles.
   
@@ -792,11 +940,15 @@ invalid.jsx:43:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    43 │ <input·type="datetime"·role="listitem"·/>;
+       │                        ----------------   
 
 ```
 
 ```
-invalid.jsx:44:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:44:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   ! Interactive elements should not be assigned non-interactive roles.
   
@@ -811,11 +963,15 @@ invalid.jsx:44:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    44 │ <input·type="datetime-local"·role="listitem"·/>;
+       │                              ----------------   
 
 ```
 
 ```
-invalid.jsx:45:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:45:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   ! Interactive elements should not be assigned non-interactive roles.
   
@@ -830,11 +986,15 @@ invalid.jsx:45:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    45 │ <input·type="email"·role="listitem"·/>;
+       │                     ----------------   
 
 ```
 
 ```
-invalid.jsx:46:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:46:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   ! Interactive elements should not be assigned non-interactive roles.
   
@@ -849,11 +1009,15 @@ invalid.jsx:46:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    46 │ <input·type="file"·role="listitem"·/>;
+       │                    ----------------   
 
 ```
 
 ```
-invalid.jsx:47:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:47:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   ! Interactive elements should not be assigned non-interactive roles.
   
@@ -868,11 +1032,15 @@ invalid.jsx:47:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    47 │ <input·type="image"·role="listitem"·/>;
+       │                     ----------------   
 
 ```
 
 ```
-invalid.jsx:48:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:48:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   ! Interactive elements should not be assigned non-interactive roles.
   
@@ -887,11 +1055,15 @@ invalid.jsx:48:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    48 │ <input·type="month"·role="listitem"·/>;
+       │                     ----------------   
 
 ```
 
 ```
-invalid.jsx:49:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:49:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   ! Interactive elements should not be assigned non-interactive roles.
   
@@ -906,11 +1078,15 @@ invalid.jsx:49:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    49 │ <input·type="number"·role="listitem"·/>;
+       │                      ----------------   
 
 ```
 
 ```
-invalid.jsx:50:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:50:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   ! Interactive elements should not be assigned non-interactive roles.
   
@@ -925,11 +1101,15 @@ invalid.jsx:50:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    50 │ <input·type="password"·role="listitem"·/>;
+       │                        ----------------   
 
 ```
 
 ```
-invalid.jsx:51:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:51:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   ! Interactive elements should not be assigned non-interactive roles.
   
@@ -944,11 +1124,15 @@ invalid.jsx:51:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    51 │ <input·type="radio"·role="listitem"·/>;
+       │                     ----------------   
 
 ```
 
 ```
-invalid.jsx:52:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:52:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   ! Interactive elements should not be assigned non-interactive roles.
   
@@ -963,11 +1147,15 @@ invalid.jsx:52:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    52 │ <input·type="range"·role="listitem"·/>;
+       │                     ----------------   
 
 ```
 
 ```
-invalid.jsx:53:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:53:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   ! Interactive elements should not be assigned non-interactive roles.
   
@@ -982,11 +1170,15 @@ invalid.jsx:53:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    53 │ <input·type="reset"·role="listitem"·/>;
+       │                     ----------------   
 
 ```
 
 ```
-invalid.jsx:54:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:54:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   ! Interactive elements should not be assigned non-interactive roles.
   
@@ -1001,11 +1193,15 @@ invalid.jsx:54:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    54 │ <input·type="search"·role="listitem"·/>;
+       │                      ----------------   
 
 ```
 
 ```
-invalid.jsx:55:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:55:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   ! Interactive elements should not be assigned non-interactive roles.
   
@@ -1020,11 +1216,15 @@ invalid.jsx:55:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    55 │ <input·type="submit"·role="listitem"·/>;
+       │                      ----------------   
 
 ```
 
 ```
-invalid.jsx:56:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:56:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   ! Interactive elements should not be assigned non-interactive roles.
   
@@ -1039,11 +1239,15 @@ invalid.jsx:56:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    56 │ <input·type="tel"·role="listitem"·/>;
+       │                   ----------------   
 
 ```
 
 ```
-invalid.jsx:57:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:57:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   ! Interactive elements should not be assigned non-interactive roles.
   
@@ -1058,11 +1262,15 @@ invalid.jsx:57:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    57 │ <input·type="text"·role="listitem"·/>;
+       │                    ----------------   
 
 ```
 
 ```
-invalid.jsx:58:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:58:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   ! Interactive elements should not be assigned non-interactive roles.
   
@@ -1077,11 +1285,15 @@ invalid.jsx:58:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    58 │ <input·type="time"·role="listitem"·/>;
+       │                    ----------------   
 
 ```
 
 ```
-invalid.jsx:59:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:59:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   ! Interactive elements should not be assigned non-interactive roles.
   
@@ -1096,11 +1308,15 @@ invalid.jsx:59:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    59 │ <input·type="url"·role="listitem"·/>;
+       │                   ----------------   
 
 ```
 
 ```
-invalid.jsx:60:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:60:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   ! Interactive elements should not be assigned non-interactive roles.
   
@@ -1115,11 +1331,15 @@ invalid.jsx:60:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    60 │ <input·type="week"·role="listitem"·/>;
+       │                    ----------------   
 
 ```
 
 ```
-invalid.jsx:62:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:62:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   ! Interactive elements should not be assigned non-interactive roles.
   
@@ -1134,11 +1354,15 @@ invalid.jsx:62:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    62 │ <menuitem·role="listitem"·/>;
+       │           ----------------   
 
 ```
 
 ```
-invalid.jsx:63:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:63:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   ! Interactive elements should not be assigned non-interactive roles.
   
@@ -1153,11 +1377,15 @@ invalid.jsx:63:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    63 │ <option·className="foo"·role="listitem"·/>;
+       │                         ----------------   
 
 ```
 
 ```
-invalid.jsx:64:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:64:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   ! Interactive elements should not be assigned non-interactive roles.
   
@@ -1172,11 +1400,15 @@ invalid.jsx:64:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    64 │ <select·className="foo"·role="listitem"·/>;
+       │                         ----------------   
 
 ```
 
 ```
-invalid.jsx:65:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:65:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   ! Interactive elements should not be assigned non-interactive roles.
   
@@ -1191,11 +1423,15 @@ invalid.jsx:65:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    65 │ <textarea·className="foo"·role="listitem"·/>;
+       │                           ----------------   
 
 ```
 
 ```
-invalid.jsx:66:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:66:1 lint/a11y/noInteractiveElementToNoninteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   ! Interactive elements should not be assigned non-interactive roles.
   
@@ -1209,6 +1445,10 @@ invalid.jsx:66:1 lint/a11y/noInteractiveElementToNoninteractiveRole ━━━━
   
   i Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    66 │ <tr·role="listitem"·/>;
+       │     ----------------   
 
 ```
 
