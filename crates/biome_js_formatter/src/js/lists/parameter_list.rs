@@ -68,9 +68,12 @@ impl Format<JsFormatContext> for FormatJsAnyParameterList<'_> {
                 };
 
                 let has_modifiers = self.list.iter().any(|node| {
-                    matches!(node, Ok(AnyParameter::AnyJsConstructorParameter(
-                        AnyJsConstructorParameter::TsPropertyParameter(parameter),
-                    )) if !parameter.modifiers().is_empty())
+                    matches!(
+                        node,
+                        Ok(AnyParameter::AnyJsConstructorParameter(
+                            AnyJsConstructorParameter::TsPropertyParameter(_),
+                        ))
+                    )
                 });
 
                 if is_compact {
