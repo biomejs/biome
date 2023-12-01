@@ -26,3 +26,6 @@ trybuild = "1.0"
 
 [features]
 serde_markup = ["serde", "schemars"]
+
+[lints]
+workspace = true

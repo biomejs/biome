@@ -15,3 +15,6 @@ version              = "0.3.1"
 biome_console     = { workspace = true }
 biome_diagnostics = { workspace = true }
 biome_rowan       = { workspace = true }
+
+[lints]
+workspace = true

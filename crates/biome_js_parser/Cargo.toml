@@ -44,3 +44,6 @@ tests    = []
 # cargo-workspaces metadata
 [package.metadata.workspaces]
 independent = true
+
+[lints]
+workspace = true
