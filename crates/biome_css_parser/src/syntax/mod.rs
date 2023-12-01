@@ -131,6 +131,10 @@ pub(crate) fn parse_declaration_important(p: &mut CssParser) {
 
 #[inline]
 pub(crate) fn parse_any_css_value(p: &mut CssParser) -> ParsedSyntax {
+    let css_any_function = parse_css_any_function(p);
+    if css_any_function.is_present() {
+        return css_any_function;
+    }
     let identifier = parse_regular_identifier(p);
     if identifier.is_present() {
         return identifier;
@@ -140,25 +144,90 @@ pub(crate) fn parse_any_css_value(p: &mut CssParser) -> ParsedSyntax {
         return css_string;
     }
     // Before css number
-    // eat `1px` or `1.0rem`` or  number
-    let css_dimension = parse_css_number_or_dimension(p);
+    // eat dimension  or number or  ratio
+    let css_dimension = parse_css_dimension(p);
     if css_dimension.is_present() {
         return css_dimension;
     }
 
-    // TDOO:
-    // 	| CssRatio
-    // 	| CssAnyFunction
-    // 	| CssCustomProperty
+    let css_ratio = parse_css_ratio(p);
+    if css_ratio.is_present() {
+        return css_ratio;
+    }
+    let css_number = parse_css_number(p);
+    if css_number.is_present() {
+        return css_number;
+    }
+
+    let css_custom_property = parse_css_custom_property(p);
+    if css_custom_property.is_present() {
+        return css_custom_property;
+    }
 
     Absent
 }
 
-pub(crate) fn parse_css_number_or_dimension(p: &mut CssParser) -> ParsedSyntax {
-    if parse_css_number(p).is_present() && p.at(T![ident]) {
+#[inline]
+pub(crate) fn parse_css_custom_property(p: &mut CssParser) -> ParsedSyntax {
+    if p.at(T![-]) && p.nth_at(1, T![-]) {
         let m = p.start();
+        p.eat(T![-]);
+        p.eat(T![-]);
         parse_regular_identifier(p).or_add_diagnostic(p, expected_identifier);
+        return Present(m.complete(p, CSS_CUSTOM_PROPERTY));
+    }
+    Absent
+}
+
+#[inline]
+pub(crate) fn parse_css_any_function(p: &mut CssParser) -> ParsedSyntax {
+    if p.at(T![ident]) && p.nth_at(1, T!['(']) {
+        let m = p.start();
+        // function name
+        parse_regular_identifier(p).or_add_diagnostic(p, expected_identifier);
+        p.eat(T!['(']);
+        let func_params_m = p.start();
+
+        loop {
+            // cubic-bezier(0.1, 0.7, 1.0, 0.1)
+            // repeating-radial-gradient(red, yellow 10%, green 15%);
+            let any_css_value = parse_any_css_value(p);
+            if p.eat(T![,]) {
+                continue;
+            }
+            if any_css_value.is_absent() {
+                break;
+            }
+        }
+
+        func_params_m.complete(p, CSS_PARAMETER_LIST);
+        p.expect(T![')']);
+
+        return Present(m.complete(p, CSS_SIMPLE_FUNCTION));
+    }
+    Absent
+}
+
+#[inline]
+pub(crate) fn parse_css_dimension(p: &mut CssParser) -> ParsedSyntax {
+    if p.at(CSS_NUMBER_LITERAL) && matches!(p.nth(1), T![%] | T![ident]) {
+        let m = p.start();
+        let _css_number = parse_css_number(p);
+        let _ident = parse_regular_identifier(p);
+        p.eat(T![%]);
         return Present(m.complete(p, CSS_DIMENSION));
+    }
+    Absent
+}
+
+#[inline]
+pub(crate) fn parse_css_ratio(p: &mut CssParser) -> ParsedSyntax {
+    if p.at(CSS_NUMBER_LITERAL) && p.nth_at(1, T![/]) {
+        let m = p.start();
+        let _css_number = parse_css_number(p);
+        p.eat(T![/]);
+        let _css_number = parse_css_number(p);
+        return Present(m.complete(p, CSS_RATIO));
     }
     Absent
 }
