@@ -672,15 +672,13 @@ fn with_token_tracking_disabled<F: FnOnce(&mut JsFormatter) -> R, R>(
 /// a function to group.
 fn has_only_simple_parameters(expression: &JsFunctionExpression) -> bool {
     expression.parameters().map_or(true, |parameters| {
-        for item in parameters.items() {
-            if let Ok(parameter) = item {
-                if !is_simple_parameter(parameter) {
-                    return false;
-                }
+        for parameter in parameters.items().into_iter().flatten() {
+            if !is_simple_parameter(parameter) {
+                return false;
             }
         }
 
-        return true;
+        true
     })
 }
 
