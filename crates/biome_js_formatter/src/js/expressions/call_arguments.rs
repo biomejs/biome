@@ -11,8 +11,9 @@ use crate::utils::test_call::is_test_call_expression;
 use crate::utils::{is_long_curried_call, write_arguments_multi_line};
 use biome_formatter::{format_args, format_element, write, VecBuffer};
 use biome_js_syntax::{
-    AnyJsCallArgument, AnyJsExpression, AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsStatement,
-    AnyTsReturnType, AnyTsType, JsBinaryExpressionFields, JsCallArgumentList, JsCallArguments,
+    AnyJsBinding, AnyJsBindingPattern, AnyJsCallArgument, AnyJsExpression, AnyJsFormalParameter,
+    AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsParameter, AnyJsStatement, AnyTsReturnType,
+    AnyTsType, JsBinaryExpressionFields, JsCallArgumentList, JsCallArguments,
     JsCallArgumentsFields, JsCallExpression, JsExpressionStatement, JsFunctionExpression,
     JsImportCallExpression, JsLanguage, TsAsExpressionFields, TsSatisfiesExpressionFields,
 };
@@ -359,7 +360,7 @@ fn write_grouped_arguments(
                 grouped_arg.cache_function_body(f);
             }
             AnyJsCallArgument::AnyJsExpression(AnyJsExpression::JsFunctionExpression(function))
-                if !other_args.is_empty() && !has_no_parameters(function) =>
+                if !other_args.is_empty() || has_only_simple_parameters(function) =>
             {
                 grouped_arg.cache_function_body(f);
             }
@@ -604,7 +605,7 @@ impl Format<JsFormatContext> for FormatGroupedLastArgument<'_> {
         // to remove any soft line breaks.
         match element.node()? {
             AnyJsCallArgument::AnyJsExpression(JsFunctionExpression(function))
-                if !self.is_only && !has_no_parameters(function) =>
+                if !self.is_only || has_only_simple_parameters(function) =>
             {
                 with_token_tracking_disabled(f, |f| {
                     write!(
@@ -667,12 +668,45 @@ fn with_token_tracking_disabled<F: FnOnce(&mut JsFormatter) -> R, R>(
     result
 }
 
-/// Tests if `expression` has an empty parameters list.
-fn has_no_parameters(expression: &JsFunctionExpression) -> bool {
-    match expression.parameters() {
-        // Use default formatting for expressions without parameters, will return `Err` anyway
-        Err(_) => true,
-        Ok(parameters) => parameters.items().is_empty(),
+/// Tests if all of the parameters of `expression` are simple enough to allow
+/// a function to group.
+fn has_only_simple_parameters(expression: &JsFunctionExpression) -> bool {
+    expression.parameters().map_or(true, |parameters| {
+        for item in parameters.items() {
+            if let Ok(parameter) = item {
+                if !is_simple_parameter(parameter) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    })
+}
+
+/// Tests if the single parameter is "simple", as in a plain identifier with no
+/// explicit type annotation and no initializer:
+///
+/// Examples:
+/// foo             => true
+/// foo?            => true
+/// foo = 'bar'     => false
+/// foo: string     => false
+/// {a, b}          => false
+/// {a, b} = {}     => false
+/// [a, b]          => false
+///
+fn is_simple_parameter(parameter: AnyJsParameter) -> bool {
+    match parameter {
+        AnyJsParameter::AnyJsFormalParameter(AnyJsFormalParameter::JsFormalParameter(param)) => {
+            match param.binding() {
+                Ok(AnyJsBindingPattern::AnyJsBinding(AnyJsBinding::JsIdentifierBinding(_))) => {
+                    param.type_annotation().is_none() && param.initializer().is_none()
+                }
+                _ => false,
+            }
+        }
+        _ => false,
     }
 }
 
