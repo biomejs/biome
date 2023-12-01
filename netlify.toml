@@ -1,9 +1,4 @@
 [build]
 base = "website/"
 publish = "dist/"
-
-[context.deploy-preview]
-command = "cargo install wasm-pack && pnpm build:wasm-dev && pnpm install && pnpm build:js"
-
-[context.production]
 command = "cargo install wasm-pack && pnpm build:wasm && pnpm install && pnpm build:js"
