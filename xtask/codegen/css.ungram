@@ -399,8 +399,7 @@ CssBlock =
 	declaration_list: CssDeclarationList
  	'}'
 
-
-CssDeclarationList = CssDeclaration*
+CssDeclarationList = CssDeclaration (';' CssDeclaration)* ';'?
 
 CssDeclaration =
 	name: CssIdentifier | CssCustomProperty
@@ -565,6 +564,7 @@ CssDimension =
 // 3 / 2
 CssRatio =
 	numerator: CssNumber
+	'/'
 	denominator: CssNumber
 
 
@@ -598,7 +598,7 @@ CssPercentage =
 // parsed with --ident
 CssCustomProperty = value: 'css_custom_property'
 
-CssParameterList = CssParameter*
+CssParameterList = CssParameter (',' CssParameter)* ','?
 
 CssParameter = AnyCssValue
 

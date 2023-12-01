@@ -895,11 +895,16 @@ pub fn css_pseudo_element_selector(
         ],
     ))
 }
-pub fn css_ratio(numerator: CssNumber, denominator: CssNumber) -> CssRatio {
+pub fn css_ratio(
+    numerator: CssNumber,
+    slash_token: SyntaxToken,
+    denominator: CssNumber,
+) -> CssRatio {
     CssRatio::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_RATIO,
         [
             Some(SyntaxElement::Node(numerator.into_syntax())),
+            Some(SyntaxElement::Token(slash_token)),
             Some(SyntaxElement::Node(denominator.into_syntax())),
         ],
     ))
@@ -1120,16 +1125,25 @@ where
         }),
     ))
 }
-pub fn css_declaration_list<I>(items: I) -> CssDeclarationList
+pub fn css_declaration_list<I, S>(items: I, separators: S) -> CssDeclarationList
 where
     I: IntoIterator<Item = CssDeclaration>,
     I::IntoIter: ExactSizeIterator,
+    S: IntoIterator<Item = CssSyntaxToken>,
+    S::IntoIter: ExactSizeIterator,
 {
+    let mut items = items.into_iter();
+    let mut separators = separators.into_iter();
+    let length = items.len() + separators.len();
     CssDeclarationList::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_DECLARATION_LIST,
-        items
-            .into_iter()
-            .map(|item| Some(item.into_syntax().into())),
+        (0..length).map(|index| {
+            if index % 2 == 0 {
+                Some(items.next()?.into_syntax().into())
+            } else {
+                Some(separators.next()?.into())
+            }
+        }),
     ))
 }
 pub fn css_keyframes_item_list<I>(items: I) -> CssKeyframesItemList
@@ -1186,16 +1200,25 @@ where
         }),
     ))
 }
-pub fn css_parameter_list<I>(items: I) -> CssParameterList
+pub fn css_parameter_list<I, S>(items: I, separators: S) -> CssParameterList
 where
     I: IntoIterator<Item = CssParameter>,
     I::IntoIter: ExactSizeIterator,
+    S: IntoIterator<Item = CssSyntaxToken>,
+    S::IntoIter: ExactSizeIterator,
 {
+    let mut items = items.into_iter();
+    let mut separators = separators.into_iter();
+    let length = items.len() + separators.len();
     CssParameterList::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_PARAMETER_LIST,
-        items
-            .into_iter()
-            .map(|item| Some(item.into_syntax().into())),
+        (0..length).map(|index| {
+            if index % 2 == 0 {
+                Some(items.next()?.into_syntax().into())
+            } else {
+                Some(separators.next()?.into())
+            }
+        }),
     ))
 }
 pub fn css_pseudo_value_list<I, S>(items: I, separators: S) -> CssPseudoValueList

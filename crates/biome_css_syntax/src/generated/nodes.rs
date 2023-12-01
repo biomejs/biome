@@ -2493,14 +2493,18 @@ impl CssRatio {
     pub fn as_fields(&self) -> CssRatioFields {
         CssRatioFields {
             numerator: self.numerator(),
+            slash_token: self.slash_token(),
             denominator: self.denominator(),
         }
     }
     pub fn numerator(&self) -> SyntaxResult<CssNumber> {
         support::required_node(&self.syntax, 0usize)
     }
+    pub fn slash_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
     pub fn denominator(&self) -> SyntaxResult<CssNumber> {
-        support::required_node(&self.syntax, 1usize)
+        support::required_node(&self.syntax, 2usize)
     }
 }
 #[cfg(feature = "serde")]
@@ -2515,6 +2519,7 @@ impl Serialize for CssRatio {
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct CssRatioFields {
     pub numerator: SyntaxResult<CssNumber>,
+    pub slash_token: SyntaxResult<SyntaxToken>,
     pub denominator: SyntaxResult<CssNumber>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -5909,6 +5914,10 @@ impl std::fmt::Debug for CssRatio {
         f.debug_struct("CssRatio")
             .field("numerator", &support::DebugSyntaxResult(self.numerator()))
             .field(
+                "slash_token",
+                &support::DebugSyntaxResult(self.slash_token()),
+            )
+            .field(
                 "denominator",
                 &support::DebugSyntaxResult(self.denominator()),
             )
@@ -8845,7 +8854,7 @@ impl Serialize for CssDeclarationList {
         seq.end()
     }
 }
-impl AstNodeList for CssDeclarationList {
+impl AstSeparatedList for CssDeclarationList {
     type Language = Language;
     type Node = CssDeclaration;
     fn syntax_list(&self) -> &SyntaxList {
@@ -8858,19 +8867,19 @@ impl AstNodeList for CssDeclarationList {
 impl Debug for CssDeclarationList {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         f.write_str("CssDeclarationList ")?;
-        f.debug_list().entries(self.iter()).finish()
+        f.debug_list().entries(self.elements()).finish()
     }
 }
-impl IntoIterator for &CssDeclarationList {
-    type Item = CssDeclaration;
-    type IntoIter = AstNodeListIterator<Language, CssDeclaration>;
+impl IntoIterator for CssDeclarationList {
+    type Item = SyntaxResult<CssDeclaration>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, CssDeclaration>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }
 }
-impl IntoIterator for CssDeclarationList {
-    type Item = CssDeclaration;
-    type IntoIter = AstNodeListIterator<Language, CssDeclaration>;
+impl IntoIterator for &CssDeclarationList {
+    type Item = SyntaxResult<CssDeclaration>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, CssDeclaration>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }
@@ -9177,7 +9186,7 @@ impl Serialize for CssParameterList {
         seq.end()
     }
 }
-impl AstNodeList for CssParameterList {
+impl AstSeparatedList for CssParameterList {
     type Language = Language;
     type Node = CssParameter;
     fn syntax_list(&self) -> &SyntaxList {
@@ -9190,19 +9199,19 @@ impl AstNodeList for CssParameterList {
 impl Debug for CssParameterList {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         f.write_str("CssParameterList ")?;
-        f.debug_list().entries(self.iter()).finish()
+        f.debug_list().entries(self.elements()).finish()
     }
 }
-impl IntoIterator for &CssParameterList {
-    type Item = CssParameter;
-    type IntoIter = AstNodeListIterator<Language, CssParameter>;
+impl IntoIterator for CssParameterList {
+    type Item = SyntaxResult<CssParameter>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, CssParameter>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }
 }
-impl IntoIterator for CssParameterList {
-    type Item = CssParameter;
-    type IntoIter = AstNodeListIterator<Language, CssParameter>;
+impl IntoIterator for &CssParameterList {
+    type Item = SyntaxResult<CssParameter>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, CssParameter>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }

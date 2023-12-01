@@ -1,0 +1,20 @@
+a {
+    prop1: value;
+    prop2: value;
+}
+
+a {
+    prop1: 1px;
+}
+
+a {
+    prop1: a();
+}
+
+a {
+    prop1: a(1);
+}
+
+a {
+    prop1: 2/3;
+}

@@ -1754,10 +1754,17 @@ impl SyntaxFactory for CssSyntaxFactory {
             }
             CSS_RATIO => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element {
                     if CssNumber::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if element.kind() == T ! [/] {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -2067,9 +2074,13 @@ impl SyntaxFactory for CssSyntaxFactory {
                 T ! [,],
                 false,
             ),
-            CSS_DECLARATION_LIST => {
-                Self::make_node_list_syntax(kind, children, CssDeclaration::can_cast)
-            }
+            CSS_DECLARATION_LIST => Self::make_separated_list_syntax(
+                kind,
+                children,
+                CssDeclaration::can_cast,
+                T ! [;],
+                true,
+            ),
             CSS_KEYFRAMES_ITEM_LIST => {
                 Self::make_node_list_syntax(kind, children, CssKeyframesBlock::can_cast)
             }
@@ -2087,9 +2098,13 @@ impl SyntaxFactory for CssSyntaxFactory {
                 T ! [,],
                 false,
             ),
-            CSS_PARAMETER_LIST => {
-                Self::make_node_list_syntax(kind, children, CssParameter::can_cast)
-            }
+            CSS_PARAMETER_LIST => Self::make_separated_list_syntax(
+                kind,
+                children,
+                CssParameter::can_cast,
+                T ! [,],
+                true,
+            ),
             CSS_PSEUDO_VALUE_LIST => Self::make_separated_list_syntax(
                 kind,
                 children,
