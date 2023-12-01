@@ -47,6 +47,7 @@ var r = new RegExp("[\u{1F476}\u{1F3FB}]", "u");
 var r = new RegExp("[🇯🇵]", "");
 var r = new RegExp("[🇯🇵]", "i");
 var r = new RegExp('[🇯🇵]', `i`);
+var r = new RegExp('[🇯🇵]', `${foo}`);
 var r = new RegExp("[🇯🇵]");
 var r = new RegExp("[🇯🇵]",);
 var r = new RegExp("[🇯🇵]", "u");

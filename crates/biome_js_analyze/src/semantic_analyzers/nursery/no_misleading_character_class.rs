@@ -199,7 +199,7 @@ impl Rule for NoMisleadingCharacterClass {
                     let mut prev_args = prev_node.args().iter();
 
                     let regex_pattern = prev_args.next().and_then(|a| a.ok())?;
-                    let flag = prev_args.next().and_then(|a| a.ok())?;
+                    let flag = prev_args.next().and_then(|a| a.ok());
 
                     match make_suggestion(regex_pattern, flag) {
                         Some(suggest) => {
@@ -222,7 +222,7 @@ impl Rule for NoMisleadingCharacterClass {
                     let mut prev_args = expr.arguments().ok()?.args().iter();
 
                     let regex_pattern = prev_args.next().and_then(|a| a.ok())?;
-                    let flag = prev_args.next().and_then(|a| a.ok())?;
+                    let flag = prev_args.next().and_then(|a| a.ok());
 
                     match make_suggestion(regex_pattern, flag) {
                         Some(suggest) => {
@@ -305,61 +305,73 @@ fn diagnostic_regex_pattern(
     None
 }
 
-fn make_suggestion(literal: AnyJsCallArgument, flag: AnyJsCallArgument) -> Option<JsCallArguments> {
-    let suggest = match flag {
-        AnyJsCallArgument::AnyJsExpression(expr) => match expr {
-            AnyJsExpression::AnyJsLiteralExpression(e) => {
-                let text = e.text();
-                if text.starts_with('\'') {
-                    Some(AnyJsCallArgument::AnyJsExpression(
-                        AnyJsExpression::AnyJsLiteralExpression(
-                            AnyJsLiteralExpression::JsStringLiteralExpression(
-                                make::js_string_literal_expression(make::js_string_literal(
-                                    &format!("'{}u'", text),
-                                )),
+fn make_suggestion(
+    literal: AnyJsCallArgument,
+    flag: Option<AnyJsCallArgument>,
+) -> Option<JsCallArguments> {
+    let suggestion = match flag {
+        None => Some(AnyJsCallArgument::AnyJsExpression(
+            AnyJsExpression::AnyJsLiteralExpression(
+                AnyJsLiteralExpression::JsStringLiteralExpression(
+                    make::js_string_literal_expression(make::js_string_literal("u")),
+                ),
+            ),
+        )),
+        Some(f) => match f {
+            AnyJsCallArgument::AnyJsExpression(expr) => match expr {
+                AnyJsExpression::AnyJsLiteralExpression(e) => {
+                    let text = e.text();
+                    if text.starts_with('\'') {
+                        Some(AnyJsCallArgument::AnyJsExpression(
+                            AnyJsExpression::AnyJsLiteralExpression(
+                                AnyJsLiteralExpression::JsStringLiteralExpression(
+                                    make::js_string_literal_expression(make::js_string_literal(
+                                        &format!("'{}u'", text),
+                                    )),
+                                ),
                             ),
-                        ),
-                    ))
-                } else {
-                    Some(AnyJsCallArgument::AnyJsExpression(
-                        AnyJsExpression::AnyJsLiteralExpression(
-                            AnyJsLiteralExpression::JsStringLiteralExpression(
-                                make::js_string_literal_expression(make::js_string_literal(
-                                    &format!("{}u", text.replace('"', "")),
-                                )),
+                        ))
+                    } else {
+                        Some(AnyJsCallArgument::AnyJsExpression(
+                            AnyJsExpression::AnyJsLiteralExpression(
+                                AnyJsLiteralExpression::JsStringLiteralExpression(
+                                    make::js_string_literal_expression(make::js_string_literal(
+                                        &format!("{}u", text.replace('"', "")),
+                                    )),
+                                ),
                             ),
+                        ))
+                    }
+                }
+                AnyJsExpression::JsTemplateExpression(expr) => {
+                    let mut elements = expr
+                        .elements()
+                        .iter()
+                        .collect::<Vec<AnyJsTemplateElement>>();
+
+                    let uflag = AnyJsTemplateElement::from(make::js_template_chunk_element(
+                        make::js_template_chunk("u"),
+                    ));
+                    elements.push(uflag);
+                    Some(AnyJsCallArgument::AnyJsExpression(
+                        AnyJsExpression::JsTemplateExpression(
+                            make::js_template_expression(
+                                make::token(T!['`']),
+                                make::js_template_element_list(elements),
+                                make::token(T!['`']),
+                            )
+                            .build(),
                         ),
                     ))
                 }
-            }
-            AnyJsExpression::JsTemplateExpression(expr) => {
-                let mut elements = expr
-                    .elements()
-                    .iter()
-                    .collect::<Vec<AnyJsTemplateElement>>();
-
-                let uflag = AnyJsTemplateElement::from(make::js_template_chunk_element(
-                    make::js_template_chunk("u"),
-                ));
-                elements.push(uflag);
-                Some(AnyJsCallArgument::AnyJsExpression(
-                    AnyJsExpression::JsTemplateExpression(
-                        make::js_template_expression(
-                            make::token(T!['`']),
-                            make::js_template_element_list(elements),
-                            make::token(T!['`']),
-                        )
-                        .build(),
-                    ),
-                ))
-            }
-            AnyJsExpression::JsIdentifierExpression(_) => None,
-            _ => None,
+                AnyJsExpression::JsIdentifierExpression(_) => None,
+                _ => None,
+            },
+            AnyJsCallArgument::JsSpread(_) => None,
         },
-        AnyJsCallArgument::JsSpread(_) => None,
     };
 
-    suggest.map(|s| {
+    suggestion.map(|s| {
         make::js_call_arguments(
             make::token(T!['(']),
             make::js_call_argument_list([literal, s], [make::token(T![,])]),
