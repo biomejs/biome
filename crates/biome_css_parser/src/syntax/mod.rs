@@ -144,6 +144,10 @@ pub(crate) fn parse_any_css_value(p: &mut CssParser) -> ParsedSyntax {
     if css_any_function.is_present() {
         return css_any_function;
     }
+    let css_custom_property = parse_css_custom_property(p);
+    if css_custom_property.is_present() {
+        return css_custom_property;
+    }
     let identifier = parse_regular_identifier(p);
     if identifier.is_present() {
         return identifier;
@@ -168,15 +172,14 @@ pub(crate) fn parse_any_css_value(p: &mut CssParser) -> ParsedSyntax {
         return css_number;
     }
 
-    let css_custom_property = parse_css_custom_property(p);
-    if css_custom_property.is_present() {
-        return css_custom_property;
-    }
+  
 
     Absent
 }
 
 // is_css_custom_property
+// TODO: why identifier start with '--'
+// FIX: fix lexer 
 #[inline]
 pub(crate) fn is_at_css_custom_property(p: &mut CssParser) -> bool {
     p.at(T![-]) && p.nth_at(1, T![-])
@@ -217,7 +220,6 @@ pub(crate) fn parse_css_any_function(p: &mut CssParser) -> ParsedSyntax {
             param.complete(p, CSS_PARAMETER);
             p.eat(T![,]);
         }
-     
 
         func_params_m.complete(p, CSS_PARAMETER_LIST);
         p.expect(T![')']);

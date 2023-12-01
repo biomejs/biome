@@ -213,22 +213,19 @@ pub fn css_custom_property(value_token: SyntaxToken) -> CssCustomProperty {
     ))
 }
 pub fn css_declaration(
-    name: CssIdentifier,
-    css_custom_property: CssCustomProperty,
+    name: CssDeclarationName,
     colon_token: SyntaxToken,
     value: AnyCssValue,
 ) -> CssDeclarationBuilder {
     CssDeclarationBuilder {
         name,
-        css_custom_property,
         colon_token,
         value,
         important: None,
     }
 }
 pub struct CssDeclarationBuilder {
-    name: CssIdentifier,
-    css_custom_property: CssCustomProperty,
+    name: CssDeclarationName,
     colon_token: SyntaxToken,
     value: AnyCssValue,
     important: Option<CssDeclarationImportant>,
@@ -243,7 +240,6 @@ impl CssDeclarationBuilder {
             CssSyntaxKind::CSS_DECLARATION,
             [
                 Some(SyntaxElement::Node(self.name.into_syntax())),
-                Some(SyntaxElement::Node(self.css_custom_property.into_syntax())),
                 Some(SyntaxElement::Token(self.colon_token)),
                 Some(SyntaxElement::Node(self.value.into_syntax())),
                 self.important

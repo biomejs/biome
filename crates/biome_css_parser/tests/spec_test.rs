@@ -135,24 +135,7 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 pub fn quick_test() {
     let code = r#"
     a {
-        prop1: value;
-        prop2: value;
-    }
-    
-    a {
-        prop1: 1px;
-    }
-    
-    a {
-        prop1: a();
-    }
-    
-    a {
-        prop1: a(1);
-    }
-    
-    a {
-        prop1: 2/3;
+        a: --abc;
     }
     
     
@@ -163,7 +146,7 @@ pub fn quick_test() {
         CssParserOptions::default().with_allow_wrong_line_comments(),
     );
     let syntax = root.syntax();
-    dbg!(&syntax, root.diagnostics(), root.has_errors());
+    dbg!(&syntax, root.diagnostics(), root.has_errors(), root.tree());
     if has_bogus_nodes_or_empty_slots(&syntax) {
         panic!(
             "modified tree has bogus nodes or empty slots:\n{syntax:#?} \n\n {}",
