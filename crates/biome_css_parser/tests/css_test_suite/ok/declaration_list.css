@@ -18,3 +18,8 @@ a {
 a {
     prop1: 2/3;
 }
+
+a {
+    prop1: --custom;
+}
+
