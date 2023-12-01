@@ -134,21 +134,7 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 #[test]
 pub fn quick_test() {
     let code = r#"
-a {
-        background: 1px;
-        background: 123 ;
-        background: 123.456 ;
-        background: "str" ;
-        background: ddff ;
-        background: a !important;
-        background: a ! important;
-        background: --custom;
-        background: 1 /2;
-        background: a();
-        background: a(1);
-        background: cubic-bezier(0.1, 0.7, 1.0, 0.1);
-        background: repeating-radial-gradient(red, yellow 10px, green 15%);
-}
+    .action {}
 
     "#;
     let root = parse_css(

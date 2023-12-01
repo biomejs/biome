@@ -83,8 +83,9 @@ pub(crate) fn parse_rule_block(p: &mut CssParser) -> ParsedSyntax {
 }
 
 pub(crate) fn parse_declaration_list(p: &mut CssParser) {
+    let m = p.start();
+
     if is_at_identifier(p) {
-        let m = p.start();
 
         // first parse declaration item
         parse_declaration_item(p);
@@ -96,8 +97,9 @@ pub(crate) fn parse_declaration_list(p: &mut CssParser) {
             parse_declaration_item(p);
         }
 
-        m.complete(p, CSS_DECLARATION_LIST);
     }
+    m.complete(p, CSS_DECLARATION_LIST);
+
 }
 
 // CssDeclaration =

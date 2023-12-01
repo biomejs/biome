@@ -23,7 +23,7 @@ CssRoot {
             prelude: CssSelectorList [
                 CssBogusSelector {
                     items: [
-                        ERROR_TOKEN@0..1 "!" [] [],
+                        BANG@0..1 "!" [] [],
                     ],
                 },
                 missing separator,
@@ -60,7 +60,7 @@ CssRoot {
     0: CSS_RULE@0..15
       0: CSS_SELECTOR_LIST@0..11
         0: CSS_BOGUS_SELECTOR@0..1
-          0: ERROR_TOKEN@0..1 "!" [] []
+          0: BANG@0..1 "!" [] []
         1: (empty)
         2: CSS_COMPOUND_SELECTOR@1..11
           0: (empty)
@@ -83,7 +83,14 @@ CssRoot {
 ```
 invalid_selector.css:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `!`
+  × Expected a selector but instead found '!'.
+  
+  > 1 │ !.selector {
+      │ ^
+    2 │ 
+    3 │ }
+  
+  i Expected a selector here.
   
   > 1 │ !.selector {
       │ ^
