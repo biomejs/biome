@@ -126,6 +126,10 @@ export default defineConfig({
 					label: "日本語",
 					lang: "ja",
 				},
+				"zh-cn": {
+					label: "简体中文",
+					lang: "zh-CN",
+				},
 			},
 			sidebar: [
 				{ label: "Home", link: "/" },
