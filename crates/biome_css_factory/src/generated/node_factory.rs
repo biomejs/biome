@@ -234,10 +234,10 @@ pub fn css_counter_style_at_rule(
         ],
     ))
 }
-pub fn css_custom_property(value_token: SyntaxToken) -> CssCustomProperty {
+pub fn css_custom_property(value: CssIdentifier) -> CssCustomProperty {
     CssCustomProperty::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_CUSTOM_PROPERTY,
-        [Some(SyntaxElement::Token(value_token))],
+        [Some(SyntaxElement::Node(value.into_syntax()))],
     ))
 }
 pub fn css_declaration(

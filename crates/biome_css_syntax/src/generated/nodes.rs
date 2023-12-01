@@ -601,11 +601,11 @@ impl CssCustomProperty {
     }
     pub fn as_fields(&self) -> CssCustomPropertyFields {
         CssCustomPropertyFields {
-            value_token: self.value_token(),
+            value: self.value(),
         }
     }
-    pub fn value_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
+    pub fn value(&self) -> SyntaxResult<CssIdentifier> {
+        support::required_node(&self.syntax, 0usize)
     }
 }
 #[cfg(feature = "serde")]
@@ -619,7 +619,7 @@ impl Serialize for CssCustomProperty {
 }
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct CssCustomPropertyFields {
-    pub value_token: SyntaxResult<SyntaxToken>,
+    pub value: SyntaxResult<CssIdentifier>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssDeclaration {
@@ -4185,10 +4185,7 @@ impl AstNode for CssCustomProperty {
 impl std::fmt::Debug for CssCustomProperty {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("CssCustomProperty")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
+            .field("value", &support::DebugSyntaxResult(self.value()))
             .finish()
     }
 }

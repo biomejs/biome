@@ -615,7 +615,7 @@ CssPercentage =
 
 
 // parsed with --ident
-CssCustomProperty = value: 'css_custom_property'
+CssCustomProperty = value: CssIdentifier
 
 CssParameterList = CssParameter (',' CssParameter)* ','?
 

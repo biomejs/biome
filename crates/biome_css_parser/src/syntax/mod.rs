@@ -16,6 +16,8 @@ use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::{token_set, CompletedMarker, Parser, ParserProgress, TokenSet};
 
+use self::parse_error::expected_number;
+
 const RULE_RECOVERY_SET: TokenSet<CssSyntaxKind> =
     token_set![T![#], T![.], T![*], T![ident], T![:], T![::], T!['{']];
 const SELECTOR_LIST_RECOVERY_SET: TokenSet<CssSyntaxKind> = token_set![T!['{'], T!['}'],];
@@ -171,7 +173,7 @@ pub(crate) fn parse_any_css_value(p: &mut CssParser) -> ParsedSyntax {
     if css_ratio.is_present() {
         return css_ratio;
     }
-    let css_number = parse_css_number(p);
+    let css_number = parse_regular_number(p);
     if css_number.is_present() {
         return css_number;
     }
@@ -179,12 +181,9 @@ pub(crate) fn parse_any_css_value(p: &mut CssParser) -> ParsedSyntax {
     Absent
 }
 
-// is_css_custom_property
-// TODO: why identifier start with '--'
-// FIX: fix lexer
 #[inline]
 pub(crate) fn is_at_css_custom_property(p: &mut CssParser) -> bool {
-    p.at(T![-]) && p.nth_at(1, T![-])
+    is_at_identifier(p) && p.cur_text().starts_with("--")
 }
 
 #[inline]
@@ -241,7 +240,7 @@ pub(crate) fn is_at_css_dimension(p: &mut CssParser) -> bool {
 pub(crate) fn parse_css_dimension(p: &mut CssParser) -> ParsedSyntax {
     if is_at_css_dimension(p) {
         let m = p.start();
-        let _css_number = parse_css_number(p);
+        let _css_number = parse_regular_number(p);
         let _ident = parse_regular_identifier(p);
         p.eat(T![%]);
         return Present(m.complete(p, CSS_DIMENSION));
@@ -258,9 +257,9 @@ pub(crate) fn is_at_css_ratio(p: &mut CssParser) -> bool {
 pub(crate) fn parse_css_ratio(p: &mut CssParser) -> ParsedSyntax {
     if is_at_css_ratio(p) {
         let m = p.start();
-        let _css_number = parse_css_number(p);
+         parse_regular_number(p).ok();
         p.eat(T![/]);
-        let _css_number = parse_css_number(p);
+        parse_regular_number(p).or_add_diagnostic(p, expected_number);
         return Present(m.complete(p, CSS_RATIO));
     }
     Absent
@@ -323,15 +322,3 @@ pub(crate) fn parse_string(p: &mut CssParser) -> ParsedSyntax {
     Present(m.complete(p, CSS_STRING))
 }
 
-#[inline]
-pub(crate) fn parse_css_number(p: &mut CssParser) -> ParsedSyntax {
-    if !p.at(CSS_NUMBER_LITERAL) {
-        return Absent;
-    }
-
-    let m = p.start();
-
-    p.bump(CSS_NUMBER_LITERAL);
-
-    Present(m.complete(p, CSS_NUMBER))
-}

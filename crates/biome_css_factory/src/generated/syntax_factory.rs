@@ -420,7 +420,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element {
-                    if element.kind() == CSS_CUSTOM_PROPERTY {
+                    if CssIdentifier::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
