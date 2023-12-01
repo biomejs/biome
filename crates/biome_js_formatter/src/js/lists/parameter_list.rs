@@ -67,20 +67,19 @@ impl Format<JsFormatContext> for FormatJsAnyParameterList<'_> {
                     FormatTrailingComma::All.trailing_separator(f.options())
                 };
 
-                let has_modifiers = self.list.iter().any(|node| {
-                    matches!(
-                        node,
-                        Ok(AnyParameter::AnyJsConstructorParameter(
-                            AnyJsConstructorParameter::TsPropertyParameter(_),
-                        ))
-                    )
-                });
-
                 if is_compact {
                     let mut joiner = f.join_nodes_with_space();
                     join_parameter_list(&mut joiner, self.list, trailing_separator)?;
                     joiner.finish()
                 } else {
+                    let has_modifiers = self.list.iter().any(|node| {
+                        matches!(
+                            node,
+                            Ok(AnyParameter::AnyJsConstructorParameter(
+                                AnyJsConstructorParameter::TsPropertyParameter(_),
+                            ))
+                        )
+                    });
                     let mut joiner = if has_modifiers {
                         f.join_nodes_with_hardline()
                     } else {
