@@ -29,8 +29,39 @@ var r = /[\uD83C\uDDEF\uD83C\uDDF5]/u;
 var r = /[\u{1F1EF}\u{1F1F5}]/u;
 var r = /[👨‍👩‍👦]/;
 var r = /[👨‍👩‍👦]/u;
-var r = /[\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC66]/u
-var r = /[\u{1F468}\u{200D}\u{1F469}\u{200D}\u{1F466}]/u
+var r = /[\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC66]/u;
+var r = /[\u{1F468}\u{200D}\u{1F469}\u{200D}\u{1F466}]/u;
+var r = new RegExp("[👍]", "");
+var r = new RegExp('[👍]', ``);
+var r = new RegExp("[👍]", flags);
+var r = new RegExp("[\uD83D\uDC4D]", "");
+var r = new RegExp("/(?<=[👍])", "");
+var r = new RegExp("[Á]", "");
+var r = new RegExp("[Á]", "u");
+var r = new RegExp("[\u0041\u0301]", "");
+var r = new RegExp("[\u0041\u0301]", "u");
+var r = new RegExp("[\u{41}\u{301}]", "u");
+var r = new RegExp("[❇️]", "");
+var r = new RegExp("[❇️]", "u");
+var r = new RegExp("[\u2747\uFE0F]", "");
+var r = new RegExp("[\u2747\uFE0F]", "u");
+var r = new RegExp("[\u{2747}\u{FE0F}]", "u");
+var r = new RegExp("[👶🏻]", "");
+var r = new RegExp("[👶🏻]", "u");
+var r = new RegExp("[\uD83D\uDC76\uD83C\uDFFB]", "u");
+var r = new RegExp("[\u{1F476}\u{1F3FB}]", "u");
+var r = new RegExp("[🇯🇵]", "");
+var r = new RegExp("[🇯🇵]", "i");
+var r = new RegExp('[🇯🇵]', `i`);
+var r = new RegExp("[🇯🇵]");
+var r = new RegExp("[🇯🇵]",);
+var r = new RegExp("[🇯🇵]", "u");
+var r = new RegExp("[\uD83C\uDDEF\uD83C\uDDF5]", "u");
+var r = new RegExp("[\u{1F1EF}\u{1F1F5}]", "u");
+var r = new RegExp("[👨‍👩‍👦]", "");
+var r = new RegExp("[👨‍👩‍👦]", "u");
+var r = new RegExp("[\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC66]", "u");
+var r = new RegExp("[\u{1F468}\u{200D}\u{1F469}\u{200D}\u{1F466}]", "u");
 ```
 
 # Diagnostics
@@ -419,7 +450,7 @@ invalid.js:24:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━�
   > 24 │ var r = /[👨�👩�👦]/;
        │         ^^^^^^^^^^
     25 │ var r = /[👨�👩�👦]/u;
-    26 │ var r = /[\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC66]/u
+    26 │ var r = /[\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC66]/u;
   
   i Unsafe fix: Add unicode u flag to regex
   
@@ -437,8 +468,8 @@ invalid.js:25:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━
     24 │ var r = /[👨�👩�👦]/;
   > 25 │ var r = /[👨�👩�👦]/u;
        │         ^^^^^^^^^^^
-    26 │ var r = /[\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC66]/u
-    27 │ var r = /[\u{1F468}\u{200D}\u{1F469}\u{200D}\u{1F466}]/u
+    26 │ var r = /[\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC66]/u;
+    27 │ var r = /[\u{1F468}\u{200D}\u{1F469}\u{200D}\u{1F466}]/u;
   
 
 ```
@@ -450,9 +481,10 @@ invalid.js:26:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━
   
     24 │ var r = /[👨�👩�👦]/;
     25 │ var r = /[👨�👩�👦]/u;
-  > 26 │ var r = /[\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC66]/u
+  > 26 │ var r = /[\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC66]/u;
        │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    27 │ var r = /[\u{1F468}\u{200D}\u{1F469}\u{200D}\u{1F466}]/u
+    27 │ var r = /[\u{1F468}\u{200D}\u{1F469}\u{200D}\u{1F466}]/u;
+    28 │ var r = new RegExp("[👍]", "");
   
 
 ```
@@ -463,9 +495,554 @@ invalid.js:27:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━
   ! Unexpected joined character sequence in character class.
   
     25 │ var r = /[👨�👩�👦]/u;
-    26 │ var r = /[\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC66]/u
-  > 27 │ var r = /[\u{1F468}\u{200D}\u{1F469}\u{200D}\u{1F466}]/u
+    26 │ var r = /[\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC66]/u;
+  > 27 │ var r = /[\u{1F468}\u{200D}\u{1F469}\u{200D}\u{1F466}]/u;
        │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    28 │ var r = new RegExp("[👍]", "");
+    29 │ var r = new RegExp('[👍]', ``);
+  
+
+```
+
+```
+invalid.js:28:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected surrogate pair in character class. Use 'u' flag.
+  
+    26 │ var r = /[\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC66]/u;
+    27 │ var r = /[\u{1F468}\u{200D}\u{1F469}\u{200D}\u{1F466}]/u;
+  > 28 │ var r = new RegExp("[👍]", "");
+       │         ^^^^^^^^^^^^^^^^^^^^^^
+    29 │ var r = new RegExp('[👍]', ``);
+    30 │ var r = new RegExp("[👍]", flags);
+  
+  i Unsafe fix: Add unicode u flag to regex
+  
+    26 26 │   var r = /[\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC66]/u;
+    27 27 │   var r = /[\u{1F468}\u{200D}\u{1F469}\u{200D}\u{1F466}]/u;
+    28    │ - var·r·=·new·RegExp("[👍]",·"");
+       28 │ + var·r·=·new·RegExp("[👍]","u");
+    29 29 │   var r = new RegExp('[👍]', ``);
+    30 30 │   var r = new RegExp("[👍]", flags);
+  
+
+```
+
+```
+invalid.js:29:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected surrogate pair in character class. Use 'u' flag.
+  
+    27 │ var r = /[\u{1F468}\u{200D}\u{1F469}\u{200D}\u{1F466}]/u;
+    28 │ var r = new RegExp("[👍]", "");
+  > 29 │ var r = new RegExp('[👍]', ``);
+       │         ^^^^^^^^^^^^^^^^^^^^^^
+    30 │ var r = new RegExp("[👍]", flags);
+    31 │ var r = new RegExp("[\uD83D\uDC4D]", "");
+  
+  i Unsafe fix: Add unicode u flag to regex
+  
+    27 27 │   var r = /[\u{1F468}\u{200D}\u{1F469}\u{200D}\u{1F466}]/u;
+    28 28 │   var r = new RegExp("[👍]", "");
+    29    │ - var·r·=·new·RegExp('[👍]',·``);
+       29 │ + var·r·=·new·RegExp('[👍]',`u`);
+    30 30 │   var r = new RegExp("[👍]", flags);
+    31 31 │   var r = new RegExp("[\uD83D\uDC4D]", "");
+  
+
+```
+
+```
+invalid.js:30:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected surrogate pair in character class. Use 'u' flag.
+  
+    28 │ var r = new RegExp("[👍]", "");
+    29 │ var r = new RegExp('[👍]', ``);
+  > 30 │ var r = new RegExp("[👍]", flags);
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^^
+    31 │ var r = new RegExp("[\uD83D\uDC4D]", "");
+    32 │ var r = new RegExp("/(?<=[👍])", "");
+  
+
+```
+
+```
+invalid.js:31:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected surrogate pair in character class. Use 'u' flag.
+  
+    29 │ var r = new RegExp('[👍]', ``);
+    30 │ var r = new RegExp("[👍]", flags);
+  > 31 │ var r = new RegExp("[\uD83D\uDC4D]", "");
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    32 │ var r = new RegExp("/(?<=[👍])", "");
+    33 │ var r = new RegExp("[A�]", "");
+  
+  i Unsafe fix: Add unicode u flag to regex
+  
+    29 29 │   var r = new RegExp('[👍]', ``);
+    30 30 │   var r = new RegExp("[👍]", flags);
+    31    │ - var·r·=·new·RegExp("[\uD83D\uDC4D]",·"");
+       31 │ + var·r·=·new·RegExp("[\uD83D\uDC4D]","u");
+    32 32 │   var r = new RegExp("/(?<=[👍])", "");
+    33 33 │   var r = new RegExp("[A�]", "");
+  
+
+```
+
+```
+invalid.js:32:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected surrogate pair in character class. Use 'u' flag.
+  
+    30 │ var r = new RegExp("[👍]", flags);
+    31 │ var r = new RegExp("[\uD83D\uDC4D]", "");
+  > 32 │ var r = new RegExp("/(?<=[👍])", "");
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    33 │ var r = new RegExp("[A�]", "");
+    34 │ var r = new RegExp("[A�]", "u");
+  
+  i Unsafe fix: Add unicode u flag to regex
+  
+    30 30 │   var r = new RegExp("[👍]", flags);
+    31 31 │   var r = new RegExp("[\uD83D\uDC4D]", "");
+    32    │ - var·r·=·new·RegExp("/(?<=[👍])",·"");
+       32 │ + var·r·=·new·RegExp("/(?<=[👍])","u");
+    33 33 │   var r = new RegExp("[A�]", "");
+    34 34 │   var r = new RegExp("[A�]", "u");
+  
+
+```
+
+```
+invalid.js:33:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected combined character in character class.
+  
+    31 │ var r = new RegExp("[\uD83D\uDC4D]", "");
+    32 │ var r = new RegExp("/(?<=[👍])", "");
+  > 33 │ var r = new RegExp("[A�]", "");
+       │         ^^^^^^^^^^^^^^^^^^^^^
+    34 │ var r = new RegExp("[A�]", "u");
+    35 │ var r = new RegExp("[\u0041\u0301]", "");
+  
+
+```
+
+```
+invalid.js:34:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected combined character in character class.
+  
+    32 │ var r = new RegExp("/(?<=[👍])", "");
+    33 │ var r = new RegExp("[A�]", "");
+  > 34 │ var r = new RegExp("[A�]", "u");
+       │         ^^^^^^^^^^^^^^^^^^^^^^
+    35 │ var r = new RegExp("[\u0041\u0301]", "");
+    36 │ var r = new RegExp("[\u0041\u0301]", "u");
+  
+
+```
+
+```
+invalid.js:35:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected combined character in character class.
+  
+    33 │ var r = new RegExp("[A�]", "");
+    34 │ var r = new RegExp("[A�]", "u");
+  > 35 │ var r = new RegExp("[\u0041\u0301]", "");
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    36 │ var r = new RegExp("[\u0041\u0301]", "u");
+    37 │ var r = new RegExp("[\u{41}\u{301}]", "u");
+  
+
+```
+
+```
+invalid.js:36:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected combined character in character class.
+  
+    34 │ var r = new RegExp("[A�]", "u");
+    35 │ var r = new RegExp("[\u0041\u0301]", "");
+  > 36 │ var r = new RegExp("[\u0041\u0301]", "u");
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    37 │ var r = new RegExp("[\u{41}\u{301}]", "u");
+    38 │ var r = new RegExp("[❇�]", "");
+  
+
+```
+
+```
+invalid.js:37:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected combined character in character class.
+  
+    35 │ var r = new RegExp("[\u0041\u0301]", "");
+    36 │ var r = new RegExp("[\u0041\u0301]", "u");
+  > 37 │ var r = new RegExp("[\u{41}\u{301}]", "u");
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    38 │ var r = new RegExp("[❇�]", "");
+    39 │ var r = new RegExp("[❇�]", "u");
+  
+
+```
+
+```
+invalid.js:38:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected combined character in character class.
+  
+    36 │ var r = new RegExp("[\u0041\u0301]", "u");
+    37 │ var r = new RegExp("[\u{41}\u{301}]", "u");
+  > 38 │ var r = new RegExp("[❇�]", "");
+       │         ^^^^^^^^^^^^^^^^^^^^^
+    39 │ var r = new RegExp("[❇�]", "u");
+    40 │ var r = new RegExp("[\u2747\uFE0F]", "");
+  
+
+```
+
+```
+invalid.js:39:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected combined character in character class.
+  
+    37 │ var r = new RegExp("[\u{41}\u{301}]", "u");
+    38 │ var r = new RegExp("[❇�]", "");
+  > 39 │ var r = new RegExp("[❇�]", "u");
+       │         ^^^^^^^^^^^^^^^^^^^^^^
+    40 │ var r = new RegExp("[\u2747\uFE0F]", "");
+    41 │ var r = new RegExp("[\u2747\uFE0F]", "u");
+  
+
+```
+
+```
+invalid.js:40:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected combined character in character class.
+  
+    38 │ var r = new RegExp("[❇�]", "");
+    39 │ var r = new RegExp("[❇�]", "u");
+  > 40 │ var r = new RegExp("[\u2747\uFE0F]", "");
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    41 │ var r = new RegExp("[\u2747\uFE0F]", "u");
+    42 │ var r = new RegExp("[\u{2747}\u{FE0F}]", "u");
+  
+
+```
+
+```
+invalid.js:41:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected combined character in character class.
+  
+    39 │ var r = new RegExp("[❇�]", "u");
+    40 │ var r = new RegExp("[\u2747\uFE0F]", "");
+  > 41 │ var r = new RegExp("[\u2747\uFE0F]", "u");
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    42 │ var r = new RegExp("[\u{2747}\u{FE0F}]", "u");
+    43 │ var r = new RegExp("[👶🏻]", "");
+  
+
+```
+
+```
+invalid.js:42:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected combined character in character class.
+  
+    40 │ var r = new RegExp("[\u2747\uFE0F]", "");
+    41 │ var r = new RegExp("[\u2747\uFE0F]", "u");
+  > 42 │ var r = new RegExp("[\u{2747}\u{FE0F}]", "u");
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    43 │ var r = new RegExp("[👶🏻]", "");
+    44 │ var r = new RegExp("[👶🏻]", "u");
+  
+
+```
+
+```
+invalid.js:43:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected surrogate pair in character class. Use 'u' flag.
+  
+    41 │ var r = new RegExp("[\u2747\uFE0F]", "u");
+    42 │ var r = new RegExp("[\u{2747}\u{FE0F}]", "u");
+  > 43 │ var r = new RegExp("[👶🏻]", "");
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^
+    44 │ var r = new RegExp("[👶🏻]", "u");
+    45 │ var r = new RegExp("[\uD83D\uDC76\uD83C\uDFFB]", "u");
+  
+  i Unsafe fix: Add unicode u flag to regex
+  
+    41 41 │   var r = new RegExp("[\u2747\uFE0F]", "u");
+    42 42 │   var r = new RegExp("[\u{2747}\u{FE0F}]", "u");
+    43    │ - var·r·=·new·RegExp("[👶🏻]",·"");
+       43 │ + var·r·=·new·RegExp("[👶🏻]","u");
+    44 44 │   var r = new RegExp("[👶🏻]", "u");
+    45 45 │   var r = new RegExp("[\uD83D\uDC76\uD83C\uDFFB]", "u");
+  
+
+```
+
+```
+invalid.js:44:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected modified Emoji in character class. 
+  
+    42 │ var r = new RegExp("[\u{2747}\u{FE0F}]", "u");
+    43 │ var r = new RegExp("[👶🏻]", "");
+  > 44 │ var r = new RegExp("[👶🏻]", "u");
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^^
+    45 │ var r = new RegExp("[\uD83D\uDC76\uD83C\uDFFB]", "u");
+    46 │ var r = new RegExp("[\u{1F476}\u{1F3FB}]", "u");
+  
+
+```
+
+```
+invalid.js:45:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected modified Emoji in character class. 
+  
+    43 │ var r = new RegExp("[👶🏻]", "");
+    44 │ var r = new RegExp("[👶🏻]", "u");
+  > 45 │ var r = new RegExp("[\uD83D\uDC76\uD83C\uDFFB]", "u");
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    46 │ var r = new RegExp("[\u{1F476}\u{1F3FB}]", "u");
+    47 │ var r = new RegExp("[🇯🇵]", "");
+  
+
+```
+
+```
+invalid.js:46:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected modified Emoji in character class. 
+  
+    44 │ var r = new RegExp("[👶🏻]", "u");
+    45 │ var r = new RegExp("[\uD83D\uDC76\uD83C\uDFFB]", "u");
+  > 46 │ var r = new RegExp("[\u{1F476}\u{1F3FB}]", "u");
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    47 │ var r = new RegExp("[🇯🇵]", "");
+    48 │ var r = new RegExp("[🇯🇵]", "i");
+  
+
+```
+
+```
+invalid.js:47:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected surrogate pair in character class. Use 'u' flag.
+  
+    45 │ var r = new RegExp("[\uD83D\uDC76\uD83C\uDFFB]", "u");
+    46 │ var r = new RegExp("[\u{1F476}\u{1F3FB}]", "u");
+  > 47 │ var r = new RegExp("[🇯🇵]", "");
+       │         ^^^^^^^^^^^^^^^^^^^^^^
+    48 │ var r = new RegExp("[🇯🇵]", "i");
+    49 │ var r = new RegExp('[🇯🇵]', `i`);
+  
+  i Unsafe fix: Add unicode u flag to regex
+  
+    45 45 │   var r = new RegExp("[\uD83D\uDC76\uD83C\uDFFB]", "u");
+    46 46 │   var r = new RegExp("[\u{1F476}\u{1F3FB}]", "u");
+    47    │ - var·r·=·new·RegExp("[🇯🇵]",·"");
+       47 │ + var·r·=·new·RegExp("[🇯🇵]","u");
+    48 48 │   var r = new RegExp("[🇯🇵]", "i");
+    49 49 │   var r = new RegExp('[🇯🇵]', `i`);
+  
+
+```
+
+```
+invalid.js:48:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected surrogate pair in character class. Use 'u' flag.
+  
+    46 │ var r = new RegExp("[\u{1F476}\u{1F3FB}]", "u");
+    47 │ var r = new RegExp("[🇯🇵]", "");
+  > 48 │ var r = new RegExp("[🇯🇵]", "i");
+       │         ^^^^^^^^^^^^^^^^^^^^^^^
+    49 │ var r = new RegExp('[🇯🇵]', `i`);
+    50 │ var r = new RegExp("[🇯🇵]");
+  
+  i Unsafe fix: Add unicode u flag to regex
+  
+    46 46 │   var r = new RegExp("[\u{1F476}\u{1F3FB}]", "u");
+    47 47 │   var r = new RegExp("[🇯🇵]", "");
+    48    │ - var·r·=·new·RegExp("[🇯🇵]",·"i");
+       48 │ + var·r·=·new·RegExp("[🇯🇵]","iu");
+    49 49 │   var r = new RegExp('[🇯🇵]', `i`);
+    50 50 │   var r = new RegExp("[🇯🇵]");
+  
+
+```
+
+```
+invalid.js:49:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected surrogate pair in character class. Use 'u' flag.
+  
+    47 │ var r = new RegExp("[🇯🇵]", "");
+    48 │ var r = new RegExp("[🇯🇵]", "i");
+  > 49 │ var r = new RegExp('[🇯🇵]', `i`);
+       │         ^^^^^^^^^^^^^^^^^^^^^^^
+    50 │ var r = new RegExp("[🇯🇵]");
+    51 │ var r = new RegExp("[🇯🇵]",);
+  
+  i Unsafe fix: Add unicode u flag to regex
+  
+    47 47 │   var r = new RegExp("[🇯🇵]", "");
+    48 48 │   var r = new RegExp("[🇯🇵]", "i");
+    49    │ - var·r·=·new·RegExp('[🇯🇵]',·`i`);
+       49 │ + var·r·=·new·RegExp('[🇯🇵]',`iu`);
+    50 50 │   var r = new RegExp("[🇯🇵]");
+    51 51 │   var r = new RegExp("[🇯🇵]",);
+  
+
+```
+
+```
+invalid.js:50:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected surrogate pair in character class. Use 'u' flag.
+  
+    48 │ var r = new RegExp("[🇯🇵]", "i");
+    49 │ var r = new RegExp('[🇯🇵]', `i`);
+  > 50 │ var r = new RegExp("[🇯🇵]");
+       │         ^^^^^^^^^^^^^^^^^^
+    51 │ var r = new RegExp("[🇯🇵]",);
+    52 │ var r = new RegExp("[🇯🇵]", "u");
+  
+
+```
+
+```
+invalid.js:51:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected surrogate pair in character class. Use 'u' flag.
+  
+    49 │ var r = new RegExp('[🇯🇵]', `i`);
+    50 │ var r = new RegExp("[🇯🇵]");
+  > 51 │ var r = new RegExp("[🇯🇵]",);
+       │         ^^^^^^^^^^^^^^^^^^^
+    52 │ var r = new RegExp("[🇯🇵]", "u");
+    53 │ var r = new RegExp("[\uD83C\uDDEF\uD83C\uDDF5]", "u");
+  
+
+```
+
+```
+invalid.js:52:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Regional indicator symbol characters should not be used in character class.
+  
+    50 │ var r = new RegExp("[🇯🇵]");
+    51 │ var r = new RegExp("[🇯🇵]",);
+  > 52 │ var r = new RegExp("[🇯🇵]", "u");
+       │         ^^^^^^^^^^^^^^^^^^^^^^^
+    53 │ var r = new RegExp("[\uD83C\uDDEF\uD83C\uDDF5]", "u");
+    54 │ var r = new RegExp("[\u{1F1EF}\u{1F1F5}]", "u");
+  
+
+```
+
+```
+invalid.js:53:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Regional indicator symbol characters should not be used in character class.
+  
+    51 │ var r = new RegExp("[🇯🇵]",);
+    52 │ var r = new RegExp("[🇯🇵]", "u");
+  > 53 │ var r = new RegExp("[\uD83C\uDDEF\uD83C\uDDF5]", "u");
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    54 │ var r = new RegExp("[\u{1F1EF}\u{1F1F5}]", "u");
+    55 │ var r = new RegExp("[👨�👩�👦]", "");
+  
+
+```
+
+```
+invalid.js:54:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Regional indicator symbol characters should not be used in character class.
+  
+    52 │ var r = new RegExp("[🇯🇵]", "u");
+    53 │ var r = new RegExp("[\uD83C\uDDEF\uD83C\uDDF5]", "u");
+  > 54 │ var r = new RegExp("[\u{1F1EF}\u{1F1F5}]", "u");
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    55 │ var r = new RegExp("[👨�👩�👦]", "");
+    56 │ var r = new RegExp("[👨�👩�👦]", "u");
+  
+
+```
+
+```
+invalid.js:55:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected surrogate pair in character class. Use 'u' flag.
+  
+    53 │ var r = new RegExp("[\uD83C\uDDEF\uD83C\uDDF5]", "u");
+    54 │ var r = new RegExp("[\u{1F1EF}\u{1F1F5}]", "u");
+  > 55 │ var r = new RegExp("[👨�👩�👦]", "");
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    56 │ var r = new RegExp("[👨�👩�👦]", "u");
+    57 │ var r = new RegExp("[\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC66]", "u");
+  
+  i Unsafe fix: Add unicode u flag to regex
+  
+    53 53 │   var r = new RegExp("[\uD83C\uDDEF\uD83C\uDDF5]", "u");
+    54 54 │   var r = new RegExp("[\u{1F1EF}\u{1F1F5}]", "u");
+    55    │ - var·r·=·new·RegExp("[👨�👩�👦]",·"");
+       55 │ + var·r·=·new·RegExp("[👨�👩�👦]","u");
+    56 56 │   var r = new RegExp("[👨�👩�👦]", "u");
+    57 57 │   var r = new RegExp("[\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC66]", "u");
+  
+
+```
+
+```
+invalid.js:56:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected joined character sequence in character class.
+  
+    54 │ var r = new RegExp("[\u{1F1EF}\u{1F1F5}]", "u");
+    55 │ var r = new RegExp("[👨�👩�👦]", "");
+  > 56 │ var r = new RegExp("[👨�👩�👦]", "u");
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    57 │ var r = new RegExp("[\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC66]", "u");
+    58 │ var r = new RegExp("[\u{1F468}\u{200D}\u{1F469}\u{200D}\u{1F466}]", "u");
+  
+
+```
+
+```
+invalid.js:57:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected joined character sequence in character class.
+  
+    55 │ var r = new RegExp("[👨�👩�👦]", "");
+    56 │ var r = new RegExp("[👨�👩�👦]", "u");
+  > 57 │ var r = new RegExp("[\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC66]", "u");
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    58 │ var r = new RegExp("[\u{1F468}\u{200D}\u{1F469}\u{200D}\u{1F466}]", "u");
+  
+
+```
+
+```
+invalid.js:58:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected joined character sequence in character class.
+  
+    56 │ var r = new RegExp("[👨�👩�👦]", "u");
+    57 │ var r = new RegExp("[\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC66]", "u");
+  > 58 │ var r = new RegExp("[\u{1F468}\u{200D}\u{1F469}\u{200D}\u{1F466}]", "u");
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
 
 ```
