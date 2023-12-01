@@ -1,6 +1,6 @@
 ## Overall Metrics
 
-**Average compatibility**: 96.35
+**Average compatibility**: 96.58
 
 <details>
     <summary>Definition</summary>
@@ -8,7 +8,7 @@
     $$average = \frac\{\sum_{file}^\{files}compatibility_\{file}}\{files}$$
 </details>
 
-**Compatible lines**: 97.33
+**Compatible lines**: 97.53
 
 <details>
     <summary>Definition</summary>
@@ -5028,51 +5028,6 @@
 **Prettier Similarity**: 100.00%
 
 
-### js/throw_expressions/throw_expression.js
-```diff
--function save(filename = throw new TypeError("Argument required")) {}
-+function save(filename = throw new TypeError("Argument required")
-+)
-+{
-+}
- 
- lint(ast, {
--  with: () => throw new Error("avoid using 'with' statements."),
-+  with: () => throw new Error("avoid using 'with' statements.")
- });
- 
- function getEncoder(encoding) {
--  const encoder =
--    encoding === "utf8"
--      ? new UTF8Encoder()
--      : encoding === "utf16le"
--        ? new UTF16Encoder(false)
--        : encoding === "utf16be"
--          ? new UTF16Encoder(true)
--          : throw new Error("Unsupported encoding");
-+  const encoder = encoding === "utf8" ? new UTF8Encoder()
-+                : encoding === "utf16le" ? new UTF16Encoder(false)
-+                : encoding === "utf16be" ? new UTF16Encoder(true)
-+                :
-+  throw new Error("Unsupported encoding");
- }
- 
- class Product {
-   get id() {
-     return this._id;
-   }
-   set id(value) {
--    this._id = value || throw new Error("Invalid value");
-+    this._id = value ||
-+    throw new Error("Invalid value");
-   }
- }
-
-```
-
-**Prettier Similarity**: 53.85%
-
-
 ### js/throw_statement/binaryish.js
 
 **Prettier Similarity**: 100.00%
@@ -5361,21 +5316,6 @@
 ### jsx/deprecated-jsx-bracket-same-line-option/jsx.js
 
 **Prettier Similarity**: 100.00%
-
-
-### jsx/do/do.js
-```diff
- <div>
-   {do {
--    1;
-+	  1
-   }}
--</div>;
-+</div>
-
-```
-
-**Prettier Similarity**: 60.00%
 
 
 ### jsx/escape/escape.js
@@ -6038,36 +5978,6 @@
 **Prettier Similarity**: 100.00%
 
 
-### jsx/template/styled-components.js
-```diff
- <style jsx>{`
-   p {
-     color: red;
-   }
- `}</style>;
- 
- <style jsx>{tpl`
-   p {
-     color: red;
-   }
- `}</style>;
- 
- <style jsx>
--  {`
--    p {
--      color: red;
--    }
-+  {`p {
-+     color: red;
-+     }
-   `}
- </style>;
-
-```
-
-**Prettier Similarity**: 78.95%
-
-
 ### jsx/text-wrap/test.js
 ```diff
  // Wrapping text
@@ -6650,19 +6560,6 @@
 ```
 
 **Prettier Similarity**: 98.96%
-
-
-### jsx/tuple/tuple.js
-```diff
- a = [<div />, <div />];
- 
--a = #[<div />, <div />];
-+a = #;
-+[<div />, <div />];
-
-```
-
-**Prettier Similarity**: 50.00%
 
 
 ### typescript/abstract-class/export-default.ts
@@ -8869,115 +8766,6 @@
 ### typescript/enum/multiline.ts
 
 **Prettier Similarity**: 100.00%
-
-
-### typescript/error-recovery/generic.ts
-```diff
- f1<>();
- 
- new f2<>();
- 
- function f3<>() {}
- 
- class f4 {
-   constructor<>() {}
- }
- 
--const f5 = function <>() {};
-+const f5 = function<>() {}
- 
- interface f6<> {
--  test<>();
-+    test<>();
- }
- 
- class f7<> {
--  test<>() {}
-+    test<>() {}
- }
-
-```
-
-**Prettier Similarity**: 84.21%
-
-
-### typescript/error-recovery/index-signature.ts
-```diff
- type A = { [key: string] };
- 
- type TwoParams = {
-   [a: string, b: string]: string;
--};
-+}
- type ThreeParams = {
-   [a: string, b: string, c: string]: string;
--};
-+}
- 
- type TooLong = {
--  [
--    loooooooooooooooooooooooooong: string,
--    looooooooooooooooooooooooooooooooooooooong: string,
--  ]: string;
--};
--type TooLong81 = {
--  [
--    loooooooooooooooooooooooooong: string,
--    loooooooooooooooooong: string,
--  ]: string;
--};
--type TooLong80 = {
--  [loooooooooooooooooooooooooong: string, looooooooooooooooong: string]: string;
--};
-+  [loooooooooooooooooooooooooong: string, looooooooooooooooooooooooooooooooooooooong: string]: string;
-+}
-+type TooLong81 =
-+  { [loooooooooooooooooooooooooong: string, loooooooooooooooooong: string]: string;
-+}
-+type TooLong80 =
-+  { [loooooooooooooooooooooooooong: string, looooooooooooooooong: string]: string;
-+}
- 
- // note lack of trailing comma in the index signature
- type TooLongSingleParam = {
-   [
-     looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong: string
-   ]: string;
- };
-
-```
-
-**Prettier Similarity**: 48.39%
-
-
-### typescript/error-recovery/jsdoc_only_types.ts
-```diff
--let a: *;
-+let a:
-+*
- function b(x: ?) {}
--let c: ?string;
--let d: string?;
--let e: ?(string | number);
--let f: !string;
--let g: string!;
--let h: !(string | number);
-+let c:
-+?string
-+let d: string;
-+?
-+let e:
-+?(string | number)
-+let f:
-+!string;
-+let g: string;
-+!;
-+let h:
-+!(string | number);
-
-```
-
-**Prettier Similarity**: 6.67%
 
 
 ### typescript/explicit-resource-management/await-using-with-type-declaration.ts
