@@ -5,7 +5,7 @@ import Page from "@astrojs/starlight/components/Page.astro";
 
 export interface Props {
   title: string;
-  description: string;
+  description?: string;
   slug: string;
   head?: Array<{
     tag: string;
