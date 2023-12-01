@@ -40,7 +40,7 @@ declare_rule! {
     ///
     ///   To represent an empty object, you should use `{ [k: string]: never }` or `Record<string, never>`.
     ///
-    ///   To avoid any confusion, the rule forbids the use of the type `{}`, except in two situation.
+    ///   To avoid any confusion, the rule forbids the use of the type `{}`, except in two situations:
     ///
     ///   1. In type constraints to restrict a generic type to non-nullable types:
     ///
