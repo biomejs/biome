@@ -91,7 +91,7 @@ pub(crate) fn parse_rule_block(p: &mut CssParser) -> ParsedSyntax {
 pub(crate) fn parse_declaration_list(p: &mut CssParser) {
     let m = p.start();
 
-    // first parse declaration item
+    // TODO: try ParseSeparatedList
     parse_declaration_item(p);
     loop {
         if !p.eat(T![;]) {
@@ -102,11 +102,6 @@ pub(crate) fn parse_declaration_list(p: &mut CssParser) {
     m.complete(p, CSS_DECLARATION_LIST);
 }
 
-// CssDeclaration =
-// 	name: CssIdentifier | CssCustomProperty
-// 	':'
-// 	value: AnyCssValue
-// 	important: CssDeclarationImportant?
 #[inline]
 pub(crate) fn parse_declaration_item(p: &mut CssParser) {
     if !is_at_identifier(p) {
@@ -117,22 +112,34 @@ pub(crate) fn parse_declaration_item(p: &mut CssParser) {
     parse_regular_identifier(p).ok();
 
     p.expect(T![:]);
+
+    // TODO: try ParseSeparatedList
     loop {
         let any_css_value = parse_any_css_value(p);
         if any_css_value.is_absent() {
             break;
         }
     }
-    parse_declaration_important(p);
+    parse_declaration_important(p).ok();
     m.complete(p, CSS_DECLARATION);
 }
 
 #[inline]
-pub(crate) fn parse_declaration_important(p: &mut CssParser) {
-    if p.eat(T![!]) {
-        p.expect(T![important]);
-    }
+fn at_declaration_important(p: &mut CssParser) -> bool {
+    p.at(T![!]) && p.nth_at(1, T![important])
 }
+
+#[inline]
+fn parse_declaration_important(p: &mut CssParser) -> ParsedSyntax {
+    if !at_declaration_important(p) {
+        return Absent;
+    }
+    let m = p.start();
+    p.bump(T![!]);
+    p.bump(T![important]);
+    Present(m.complete(p, CSS_DECLARATION_IMPORTANT))
+}
+
 #[inline]
 pub(crate) fn is_any_css_value(p: &mut CssParser) -> bool {
     is_at_css_any_function(p)
@@ -146,39 +153,23 @@ pub(crate) fn is_any_css_value(p: &mut CssParser) -> bool {
 
 #[inline]
 pub(crate) fn parse_any_css_value(p: &mut CssParser) -> ParsedSyntax {
-    let css_any_function = parse_css_any_function(p);
-    if css_any_function.is_present() {
-        return css_any_function;
+    if is_at_css_any_function(p) {
+        parse_css_any_function(p)
+    } else if is_at_css_custom_property(p) {
+        parse_css_custom_property(p)
+    } else if is_at_identifier(p) {
+        parse_regular_identifier(p)
+    } else if p.at(CSS_STRING_LITERAL) {
+        parse_string(p)
+    } else if is_at_css_dimension(p) {
+        parse_css_dimension(p)
+    } else if is_at_css_ratio(p) {
+        parse_css_ratio(p)
+    } else if p.at(CSS_NUMBER_LITERAL) {
+        parse_regular_number(p)
+    } else {
+        Absent
     }
-    let css_custom_property = parse_css_custom_property(p);
-    if css_custom_property.is_present() {
-        return css_custom_property;
-    }
-    let identifier = parse_regular_identifier(p);
-    if identifier.is_present() {
-        return identifier;
-    }
-    let css_string = parse_string(p);
-    if css_string.is_present() {
-        return css_string;
-    }
-    // Before css number
-    // eat dimension  or number or  ratio
-    let css_dimension = parse_css_dimension(p);
-    if css_dimension.is_present() {
-        return css_dimension;
-    }
-
-    let css_ratio = parse_css_ratio(p);
-    if css_ratio.is_present() {
-        return css_ratio;
-    }
-    let css_number = parse_regular_number(p);
-    if css_number.is_present() {
-        return css_number;
-    }
-
-    Absent
 }
 
 #[inline]
@@ -190,8 +181,7 @@ pub(crate) fn is_at_css_custom_property(p: &mut CssParser) -> bool {
 pub(crate) fn parse_css_custom_property(p: &mut CssParser) -> ParsedSyntax {
     if is_at_css_custom_property(p) {
         let m = p.start();
-        p.eat(T![-]);
-        p.eat(T![-]);
+        // identifier starting with --
         parse_regular_identifier(p).or_add_diagnostic(p, expected_identifier);
         return Present(m.complete(p, CSS_CUSTOM_PROPERTY));
     }
@@ -255,14 +245,14 @@ pub(crate) fn is_at_css_ratio(p: &mut CssParser) -> bool {
 
 #[inline]
 pub(crate) fn parse_css_ratio(p: &mut CssParser) -> ParsedSyntax {
-    if is_at_css_ratio(p) {
-        let m = p.start();
-         parse_regular_number(p).ok();
-        p.eat(T![/]);
-        parse_regular_number(p).or_add_diagnostic(p, expected_number);
-        return Present(m.complete(p, CSS_RATIO));
+    if !is_at_css_ratio(p) {
+        return Absent;
     }
-    Absent
+    let m = p.start();
+    parse_regular_number(p).ok();
+    p.eat(T![/]);
+    parse_regular_number(p).or_add_diagnostic(p, expected_number);
+    Present(m.complete(p, CSS_RATIO))
 }
 
 #[inline]
@@ -321,4 +311,3 @@ pub(crate) fn parse_string(p: &mut CssParser) -> ParsedSyntax {
 
     Present(m.complete(p, CSS_STRING))
 }
-
