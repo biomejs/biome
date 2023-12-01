@@ -13,7 +13,18 @@ Disallow unnecessary constructors.
 _ES2015_ provides a default class constructor if one is not specified.
 As such, providing an empty constructor or one that delegates into its parent is unnecessary.
 
+The rule ignores:
+
+- decorated classes;
+- constructors with at least one [parameter property](https://www.typescriptlang.org/docs/handbook/classes.html#parameter-properties);
+- `private` and `protected` constructors.
+
 Source: https://typescript-eslint.io/rules/no-useless-constructor
+
+## Caveat
+
+This rule reports on constructors whose sole purpose is to make a parent constructor public.
+See the last invalid example.
 
 ## Examples
 
@@ -105,6 +116,33 @@ class C {
     <strong>5</strong>  <strong> │ </strong><span style="color: Tomato;">-</span> <span style="color: Tomato;"><span style="opacity: 0.8;"><strong>·</strong></span></span><span style="color: Tomato;"><span style="opacity: 0.8;"><strong>·</strong></span></span><span style="color: Tomato;"><span style="opacity: 0.8;"><strong>·</strong></span></span><span style="color: Tomato;"><span style="opacity: 0.8;"><strong>·</strong></span></span><span style="color: Tomato;"><strong>c</strong></span><span style="color: Tomato;"><strong>o</strong></span><span style="color: Tomato;"><strong>n</strong></span><span style="color: Tomato;"><strong>s</strong></span><span style="color: Tomato;"><strong>t</strong></span><span style="color: Tomato;"><strong>r</strong></span><span style="color: Tomato;"><strong>u</strong></span><span style="color: Tomato;"><strong>c</strong></span><span style="color: Tomato;"><strong>t</strong></span><span style="color: Tomato;"><strong>o</strong></span><span style="color: Tomato;"><strong>r</strong></span><span style="color: Tomato;"><span style="opacity: 0.8;"><strong>·</strong></span></span><span style="color: Tomato;"><strong>(</strong></span><span style="color: Tomato;"><strong>)</strong></span><span style="color: Tomato;"><span style="opacity: 0.8;"><strong>·</strong></span></span><span style="color: Tomato;"><strong>{</strong></span><span style="color: Tomato;"><strong>}</strong></span>
     <strong>6</strong> <strong>2</strong><strong> │ </strong>  }
     <strong>7</strong> <strong>3</strong><strong> │ </strong>  
+  
+</code></pre>
+
+```jsx
+class A {
+    protected constructor() {
+        this.prop = 1;
+    }
+}
+
+class B extends A {
+    // Make the parent constructor public.
+    constructor () {
+        super();
+    }
+}
+```
+
+<pre class="language-text"><code class="language-text">complexity/noUselessConstructor.js:2:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">'protected' modifier can only be used in TypeScript files</span>
+  
+    <strong>1 │ </strong>class A {
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>2 │ </strong>    protected constructor() {
+   <strong>   │ </strong>    <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
+    <strong>3 │ </strong>        this.prop = 1;
+    <strong>4 │ </strong>    }
   
 </code></pre>
 
