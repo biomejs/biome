@@ -1,4 +1,4 @@
-name: 💅 Lint bug report
+name: 💅 Linter bug report
 description: Report a bug or regression of the linter
 title: "💅 <TITLE>"
 labels: ["S-To triage"]

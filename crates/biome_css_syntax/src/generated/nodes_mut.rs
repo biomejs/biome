@@ -147,6 +147,26 @@ impl CssClassSelector {
         )
     }
 }
+impl CssColorProfileAtRule {
+    pub fn with_color_profile_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_name(self, element: CssIdentifier) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_block(self, element: CssBlock) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
 impl CssComplexSelector {
     pub fn with_left(self, element: AnyCssSelector) -> Self {
         Self::unwrap_cast(
@@ -181,6 +201,26 @@ impl CssCompoundSelector {
         ))
     }
     pub fn with_sub_selectors(self, element: CssSubSelectorList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
+impl CssCounterStyleAtRule {
+    pub fn with_counter_style_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_name(self, element: CssIdentifier) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_block(self, element: CssBlock) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
@@ -640,10 +680,10 @@ impl CssPercentage {
     }
 }
 impl CssPseudoClassFunctionCompoundSelector {
-    pub fn with_name(self, element: CssIdentifier) -> Self {
+    pub fn with_name_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
     pub fn with_l_paren_token(self, element: SyntaxToken) -> Self {
@@ -666,10 +706,10 @@ impl CssPseudoClassFunctionCompoundSelector {
     }
 }
 impl CssPseudoClassFunctionCompoundSelectorList {
-    pub fn with_name(self, element: CssIdentifier) -> Self {
+    pub fn with_name_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
     pub fn with_l_paren_token(self, element: SyntaxToken) -> Self {
@@ -692,10 +732,10 @@ impl CssPseudoClassFunctionCompoundSelectorList {
     }
 }
 impl CssPseudoClassFunctionIdentifier {
-    pub fn with_name(self, element: CssIdentifier) -> Self {
+    pub fn with_name_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
     pub fn with_l_paren_token(self, element: SyntaxToken) -> Self {
@@ -718,10 +758,10 @@ impl CssPseudoClassFunctionIdentifier {
     }
 }
 impl CssPseudoClassFunctionNth {
-    pub fn with_name(self, element: CssIdentifier) -> Self {
+    pub fn with_name_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
     pub fn with_l_paren_token(self, element: SyntaxToken) -> Self {
@@ -744,10 +784,10 @@ impl CssPseudoClassFunctionNth {
     }
 }
 impl CssPseudoClassFunctionRelativeSelectorList {
-    pub fn with_name(self, element: CssIdentifier) -> Self {
+    pub fn with_name_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
     pub fn with_l_paren_token(self, element: SyntaxToken) -> Self {
@@ -770,10 +810,10 @@ impl CssPseudoClassFunctionRelativeSelectorList {
     }
 }
 impl CssPseudoClassFunctionSelector {
-    pub fn with_name(self, element: CssIdentifier) -> Self {
+    pub fn with_name_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
     pub fn with_l_paren_token(self, element: SyntaxToken) -> Self {
@@ -796,10 +836,10 @@ impl CssPseudoClassFunctionSelector {
     }
 }
 impl CssPseudoClassFunctionSelectorList {
-    pub fn with_name(self, element: CssIdentifier) -> Self {
+    pub fn with_name_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
     pub fn with_l_paren_token(self, element: SyntaxToken) -> Self {
@@ -822,10 +862,10 @@ impl CssPseudoClassFunctionSelectorList {
     }
 }
 impl CssPseudoClassFunctionValueList {
-    pub fn with_name(self, element: CssIdentifier) -> Self {
+    pub fn with_name_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
     pub fn with_l_paren_token(self, element: SyntaxToken) -> Self {

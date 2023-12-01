@@ -27,9 +27,7 @@ CssRoot {
                         CssPseudoClassSelector {
                             colon_token: COLON@0..1 ":" [] [],
                             class: CssPseudoClassFunctionCompoundSelectorList {
-                                name: CssIdentifier {
-                                    value_token: IDENT@1..5 "past" [] [],
-                                },
+                                name: PAST_KW@1..5 "past" [] [],
                                 l_paren_token: L_PAREN@5..6 "(" [] [],
                                 compound_selector_list: CssCompoundSelectorList [
                                     CssCompoundSelector {
@@ -98,9 +96,7 @@ CssRoot {
                             CssPseudoClassSelector {
                                 colon_token: COLON@23..25 ":" [Newline("\n")] [],
                                 class: CssPseudoClassFunctionCompoundSelectorList {
-                                    name: CssIdentifier {
-                                        value_token: IDENT@25..29 "past" [] [],
-                                    },
+                                    name: PAST_KW@25..29 "past" [] [],
                                     l_paren_token: L_PAREN@29..30 "(" [] [],
                                     compound_selector_list: CssCompoundSelectorList [
                                         CssCompoundSelector {
@@ -193,8 +189,7 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@0..21
               0: COLON@0..1 ":" [] []
               1: CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR_LIST@1..21
-                0: CSS_IDENTIFIER@1..5
-                  0: IDENT@1..5 "past" [] []
+                0: PAST_KW@1..5 "past" [] []
                 1: L_PAREN@5..6 "(" [] []
                 2: CSS_COMPOUND_SELECTOR_LIST@6..19
                   0: CSS_COMPOUND_SELECTOR@6..7
@@ -243,8 +238,7 @@ CssRoot {
               0: CSS_PSEUDO_CLASS_SELECTOR@23..44
                 0: COLON@23..25 ":" [Newline("\n")] []
                 1: CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR_LIST@25..44
-                  0: CSS_IDENTIFIER@25..29
-                    0: IDENT@25..29 "past" [] []
+                  0: PAST_KW@25..29 "past" [] []
                   1: L_PAREN@29..30 "(" [] []
                   2: CSS_COMPOUND_SELECTOR_LIST@30..43
                     0: CSS_COMPOUND_SELECTOR@30..31

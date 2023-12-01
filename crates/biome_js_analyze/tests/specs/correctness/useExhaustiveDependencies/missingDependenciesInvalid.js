@@ -6,7 +6,7 @@ function MyComponent1() {
     const b = a + 1;
     useEffect(() => {
       console.log(a, b);
-    });
+    }, []);
 }
 
 // interaction with other react hooks
@@ -38,12 +38,12 @@ function MyComponent2() {
 
 function MyComponent3() {
   let a = 1;
-  useEffect(() => console.log(a));
-  useCallback(() => console.log(a));
-  useMemo(() => console.log(a));
-  useImperativeHandle(ref, () => console.log(a));
-  useLayoutEffect(() => console.log(a));
-  useInsertionEffect(() => console.log(a));
+  useEffect(() => console.log(a), []);
+  useCallback(() => console.log(a), []);
+  useMemo(() => console.log(a), []);
+  useImperativeHandle(ref, () => console.log(a), []);
+  useLayoutEffect(() => console.log(a), []);
+  useInsertionEffect(() => console.log(a), []);
 }
 
 // inner closures
@@ -71,19 +71,19 @@ function MyComponent6() {
   let someObj = getObj();
   useEffect(() => {
       console.log(someObj.name)
-  });
+  }, []);
 }
 
 const MyComponent7 = React.memo(function ({ a }) {
   useEffect(() => {
       console.log(a);
-  });
+  }, []);
 });
 
 const MyComponent8 = React.memo(({ a }) => {
   useEffect(() => {
       console.log(a);
-  });
+  }, []);
 });
 
 // exported functions
@@ -91,14 +91,14 @@ export function MyComponent9() {
   let a = 1;
   useEffect(() => {
       console.log(a);
-  });
+  }, []);
 }
 
 export default function MyComponent10() {
   let a = 1;
   useEffect(() => {
       console.log(a);
-  });
+  }, []);
 }
 
 // named function
@@ -106,14 +106,14 @@ function MyComponent11() {
   let a = 1;
   useEffect(function inner() {
       console.log(a);
-  });
+  }, []);
 }
 
 function MyComponent12() {
   let a = 1;
   useEffect(async function inner() {
       console.log(a);
-  });
+  }, []);
 }
 
 // React.useXXX case
@@ -121,5 +121,5 @@ function MyComponent13() {
   let a = 1;
   React.useEffect(() => {
       console.log(a);
-  });
+  }, []);
 }

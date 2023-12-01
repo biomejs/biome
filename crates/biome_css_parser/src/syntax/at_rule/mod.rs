@@ -1,7 +1,15 @@
 mod charset;
+mod color_profile;
+mod counter_style;
 
 use crate::parser::CssParser;
-use crate::syntax::at_rule::charset::{is_at_charset_rule, parse_at_charset_rule};
+use crate::syntax::at_rule::charset::{is_at_charset_at_rule, parse_charset_at_rule};
+use crate::syntax::at_rule::color_profile::{
+    is_color_profile_at_rule, parse_color_profile_at_rule,
+};
+use crate::syntax::at_rule::counter_style::{
+    is_at_counter_style_at_rule, parse_counter_style_at_rule,
+};
 use crate::syntax::parse_error::expected_any_at_rule;
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::T;
@@ -37,8 +45,12 @@ pub(crate) fn parse_at_rule(p: &mut CssParser) -> ParsedSyntax {
 
 #[inline]
 pub(crate) fn parse_any_at_rule(p: &mut CssParser) -> ParsedSyntax {
-    if is_at_charset_rule(p) {
-        parse_at_charset_rule(p)
+    if is_at_charset_at_rule(p) {
+        parse_charset_at_rule(p)
+    } else if is_color_profile_at_rule(p) {
+        parse_color_profile_at_rule(p)
+    } else if is_at_counter_style_at_rule(p) {
+        parse_counter_style_at_rule(p)
     } else {
         Absent
     }

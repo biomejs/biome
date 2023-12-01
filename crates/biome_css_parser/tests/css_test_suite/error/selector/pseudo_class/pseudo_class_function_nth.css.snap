@@ -42,9 +42,7 @@ CssRoot {
                             colon_token: COLON@0..1 ":" [] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    CssIdentifier {
-                                        value_token: IDENT@1..10 "nth-child" [] [],
-                                    },
+                                    NTH_CHILD_KW@1..10 "nth-child" [] [],
                                     L_PAREN@10..11 "(" [] [],
                                     CssBogus {
                                         items: [
@@ -74,9 +72,7 @@ CssRoot {
                             colon_token: COLON@22..24 ":" [Newline("\n")] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    CssIdentifier {
-                                        value_token: IDENT@24..33 "nth-child" [] [],
-                                    },
+                                    NTH_CHILD_KW@24..33 "nth-child" [] [],
                                     L_PAREN@33..34 "(" [] [],
                                     CssPseudoClassNthSelector {
                                         nth: CssPseudoClassNth {
@@ -117,9 +113,7 @@ CssRoot {
                             colon_token: COLON@42..44 ":" [Newline("\n")] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    CssIdentifier {
-                                        value_token: IDENT@44..53 "nth-child" [] [],
-                                    },
+                                    NTH_CHILD_KW@44..53 "nth-child" [] [],
                                     L_PAREN@53..54 "(" [] [],
                                     CssPseudoClassNthSelector {
                                         nth: CssPseudoClassNth {
@@ -166,9 +160,7 @@ CssRoot {
                             colon_token: COLON@68..70 ":" [Newline("\n")] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    CssIdentifier {
-                                        value_token: IDENT@70..79 "nth-child" [] [],
-                                    },
+                                    NTH_CHILD_KW@70..79 "nth-child" [] [],
                                     L_PAREN@79..80 "(" [] [],
                                     CssPseudoClassNthSelector {
                                         nth: CssPseudoClassNth {
@@ -213,9 +205,7 @@ CssRoot {
                         CssPseudoClassSelector {
                             colon_token: COLON@93..95 ":" [Newline("\n")] [],
                             class: CssPseudoClassFunctionNth {
-                                name: CssIdentifier {
-                                    value_token: IDENT@95..104 "nth-child" [] [],
-                                },
+                                name: NTH_CHILD_KW@95..104 "nth-child" [] [],
                                 l_paren_token: L_PAREN@104..105 "(" [] [],
                                 selector: CssPseudoClassNthSelector {
                                     nth: CssPseudoClassNth {
@@ -255,9 +245,7 @@ CssRoot {
                             colon_token: COLON@116..118 ":" [Newline("\n")] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    CssIdentifier {
-                                        value_token: IDENT@118..127 "nth-child" [] [],
-                                    },
+                                    NTH_CHILD_KW@118..127 "nth-child" [] [],
                                     L_PAREN@127..128 "(" [] [],
                                     CssPseudoClassNthSelector {
                                         nth: CssPseudoClassNth {
@@ -299,9 +287,7 @@ CssRoot {
                             colon_token: COLON@145..147 ":" [Newline("\n")] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    CssIdentifier {
-                                        value_token: IDENT@147..156 "nth-child" [] [],
-                                    },
+                                    NTH_CHILD_KW@147..156 "nth-child" [] [],
                                     L_PAREN@156..157 "(" [] [],
                                     CssPseudoClassNthSelector {
                                         nth: CssPseudoClassNth {
@@ -341,9 +327,7 @@ CssRoot {
                             colon_token: COLON@167..169 ":" [Newline("\n")] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    CssIdentifier {
-                                        value_token: IDENT@169..178 "nth-child" [] [],
-                                    },
+                                    NTH_CHILD_KW@169..178 "nth-child" [] [],
                                     L_PAREN@178..179 "(" [] [],
                                     CssPseudoClassNthSelector {
                                         nth: CssPseudoClassNth {
@@ -387,9 +371,7 @@ CssRoot {
                             colon_token: COLON@191..193 ":" [Newline("\n")] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    CssIdentifier {
-                                        value_token: IDENT@193..202 "nth-child" [] [],
-                                    },
+                                    NTH_CHILD_KW@193..202 "nth-child" [] [],
                                     L_PAREN@202..203 "(" [] [],
                                     CssPseudoClassNthSelector {
                                         nth: CssPseudoClassNth {
@@ -432,9 +414,7 @@ CssRoot {
                             colon_token: COLON@214..216 ":" [Newline("\n")] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    CssIdentifier {
-                                        value_token: IDENT@216..225 "nth-child" [] [],
-                                    },
+                                    NTH_CHILD_KW@216..225 "nth-child" [] [],
                                     L_PAREN@225..226 "(" [] [],
                                     CssPseudoClassNthSelector {
                                         nth: CssPseudoClassNthIdentifier {
@@ -471,9 +451,7 @@ CssRoot {
                             colon_token: COLON@239..241 ":" [Newline("\n")] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    CssIdentifier {
-                                        value_token: IDENT@241..250 "nth-child" [] [],
-                                    },
+                                    NTH_CHILD_KW@241..250 "nth-child" [] [],
                                     L_PAREN@250..251 "(" [] [],
                                     CssPseudoClassNthSelector {
                                         nth: CssPseudoClassNthIdentifier {
@@ -508,9 +486,7 @@ CssRoot {
                         CssPseudoClassSelector {
                             colon_token: COLON@263..265 ":" [Newline("\n")] [],
                             class: CssPseudoClassFunctionNth {
-                                name: CssIdentifier {
-                                    value_token: IDENT@265..274 "nth-child" [] [],
-                                },
+                                name: NTH_CHILD_KW@265..274 "nth-child" [] [],
                                 l_paren_token: L_PAREN@274..275 "(" [] [],
                                 selector: CssPseudoClassNthSelector {
                                     nth: CssPseudoClassNthIdentifier {
@@ -562,9 +538,7 @@ CssRoot {
                             colon_token: COLON@292..294 ":" [Newline("\n")] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    CssIdentifier {
-                                        value_token: IDENT@294..303 "nth-child" [] [],
-                                    },
+                                    NTH_CHILD_KW@294..303 "nth-child" [] [],
                                     L_PAREN@303..304 "(" [] [],
                                     CssPseudoClassNthSelector {
                                         nth: CssPseudoClassNthIdentifier {
@@ -616,9 +590,7 @@ CssRoot {
                             colon_token: COLON@320..322 ":" [Newline("\n")] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    CssIdentifier {
-                                        value_token: IDENT@322..331 "nth-child" [] [],
-                                    },
+                                    NTH_CHILD_KW@322..331 "nth-child" [] [],
                                     L_PAREN@331..332 "(" [] [],
                                     CssPseudoClassNthSelector {
                                         nth: CssPseudoClassNthIdentifier {
@@ -657,9 +629,7 @@ CssRoot {
                             colon_token: COLON@347..349 ":" [Newline("\n")] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    CssIdentifier {
-                                        value_token: IDENT@349..358 "nth-child" [] [],
-                                    },
+                                    NTH_CHILD_KW@349..358 "nth-child" [] [],
                                     L_PAREN@358..359 "(" [] [],
                                     CssPseudoClassNthSelector {
                                         nth: CssPseudoClassNthIdentifier {
@@ -698,9 +668,7 @@ CssRoot {
                                 colon_token: COLON@373..375 ":" [Newline("\n")] [],
                                 class: CssBogusPseudoClass {
                                     items: [
-                                        CssIdentifier {
-                                            value_token: IDENT@375..384 "nth-child" [] [],
-                                        },
+                                        NTH_CHILD_KW@375..384 "nth-child" [] [],
                                         L_PAREN@384..385 "(" [] [],
                                         CssPseudoClassNthSelector {
                                             nth: CssPseudoClassNth {
@@ -746,8 +714,7 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@0..20
               0: COLON@0..1 ":" [] []
               1: CSS_BOGUS_PSEUDO_CLASS@1..20
-                0: CSS_IDENTIFIER@1..10
-                  0: IDENT@1..10 "nth-child" [] []
+                0: NTH_CHILD_KW@1..10 "nth-child" [] []
                 1: L_PAREN@10..11 "(" [] []
                 2: CSS_BOGUS@11..18
                   0: IDENT@11..18 "invalid" [] []
@@ -765,8 +732,7 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@22..40
               0: COLON@22..24 ":" [Newline("\n")] []
               1: CSS_BOGUS_PSEUDO_CLASS@24..40
-                0: CSS_IDENTIFIER@24..33
-                  0: IDENT@24..33 "nth-child" [] []
+                0: NTH_CHILD_KW@24..33 "nth-child" [] []
                 1: L_PAREN@33..34 "(" [] []
                 2: CSS_PSEUDO_CLASS_NTH_SELECTOR@34..36
                   0: CSS_PSEUDO_CLASS_NTH@34..36
@@ -792,8 +758,7 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@42..66
               0: COLON@42..44 ":" [Newline("\n")] []
               1: CSS_BOGUS_PSEUDO_CLASS@44..66
-                0: CSS_IDENTIFIER@44..53
-                  0: IDENT@44..53 "nth-child" [] []
+                0: NTH_CHILD_KW@44..53 "nth-child" [] []
                 1: L_PAREN@53..54 "(" [] []
                 2: CSS_PSEUDO_CLASS_NTH_SELECTOR@54..59
                   0: CSS_PSEUDO_CLASS_NTH@54..59
@@ -823,8 +788,7 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@68..91
               0: COLON@68..70 ":" [Newline("\n")] []
               1: CSS_BOGUS_PSEUDO_CLASS@70..91
-                0: CSS_IDENTIFIER@70..79
-                  0: IDENT@70..79 "nth-child" [] []
+                0: NTH_CHILD_KW@70..79 "nth-child" [] []
                 1: L_PAREN@79..80 "(" [] []
                 2: CSS_PSEUDO_CLASS_NTH_SELECTOR@80..85
                   0: CSS_PSEUDO_CLASS_NTH@80..85
@@ -853,8 +817,7 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@93..114
               0: COLON@93..95 ":" [Newline("\n")] []
               1: CSS_PSEUDO_CLASS_FUNCTION_NTH@95..114
-                0: CSS_IDENTIFIER@95..104
-                  0: IDENT@95..104 "nth-child" [] []
+                0: NTH_CHILD_KW@95..104 "nth-child" [] []
                 1: L_PAREN@104..105 "(" [] []
                 2: CSS_PSEUDO_CLASS_NTH_SELECTOR@105..112
                   0: CSS_PSEUDO_CLASS_NTH@105..112
@@ -881,8 +844,7 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@116..143
               0: COLON@116..118 ":" [Newline("\n")] []
               1: CSS_BOGUS_PSEUDO_CLASS@118..143
-                0: CSS_IDENTIFIER@118..127
-                  0: IDENT@118..127 "nth-child" [] []
+                0: NTH_CHILD_KW@118..127 "nth-child" [] []
                 1: L_PAREN@127..128 "(" [] []
                 2: CSS_PSEUDO_CLASS_NTH_SELECTOR@128..131
                   0: CSS_PSEUDO_CLASS_NTH@128..131
@@ -909,8 +871,7 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@145..165
               0: COLON@145..147 ":" [Newline("\n")] []
               1: CSS_BOGUS_PSEUDO_CLASS@147..165
-                0: CSS_IDENTIFIER@147..156
-                  0: IDENT@147..156 "nth-child" [] []
+                0: NTH_CHILD_KW@147..156 "nth-child" [] []
                 1: L_PAREN@156..157 "(" [] []
                 2: CSS_PSEUDO_CLASS_NTH_SELECTOR@157..165
                   0: CSS_PSEUDO_CLASS_NTH@157..165
@@ -936,8 +897,7 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@167..189
               0: COLON@167..169 ":" [Newline("\n")] []
               1: CSS_BOGUS_PSEUDO_CLASS@169..189
-                0: CSS_IDENTIFIER@169..178
-                  0: IDENT@169..178 "nth-child" [] []
+                0: NTH_CHILD_KW@169..178 "nth-child" [] []
                 1: L_PAREN@178..179 "(" [] []
                 2: CSS_PSEUDO_CLASS_NTH_SELECTOR@179..184
                   0: CSS_PSEUDO_CLASS_NTH@179..184
@@ -965,8 +925,7 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@191..212
               0: COLON@191..193 ":" [Newline("\n")] []
               1: CSS_BOGUS_PSEUDO_CLASS@193..212
-                0: CSS_IDENTIFIER@193..202
-                  0: IDENT@193..202 "nth-child" [] []
+                0: NTH_CHILD_KW@193..202 "nth-child" [] []
                 1: L_PAREN@202..203 "(" [] []
                 2: CSS_PSEUDO_CLASS_NTH_SELECTOR@203..208
                   0: CSS_PSEUDO_CLASS_NTH@203..208
@@ -993,8 +952,7 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@214..237
               0: COLON@214..216 ":" [Newline("\n")] []
               1: CSS_BOGUS_PSEUDO_CLASS@216..237
-                0: CSS_IDENTIFIER@216..225
-                  0: IDENT@216..225 "nth-child" [] []
+                0: NTH_CHILD_KW@216..225 "nth-child" [] []
                 1: L_PAREN@225..226 "(" [] []
                 2: CSS_PSEUDO_CLASS_NTH_SELECTOR@226..231
                   0: CSS_PSEUDO_CLASS_NTH_IDENTIFIER@226..231
@@ -1017,8 +975,7 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@239..261
               0: COLON@239..241 ":" [Newline("\n")] []
               1: CSS_BOGUS_PSEUDO_CLASS@241..261
-                0: CSS_IDENTIFIER@241..250
-                  0: IDENT@241..250 "nth-child" [] []
+                0: NTH_CHILD_KW@241..250 "nth-child" [] []
                 1: L_PAREN@250..251 "(" [] []
                 2: CSS_PSEUDO_CLASS_NTH_SELECTOR@251..256
                   0: CSS_PSEUDO_CLASS_NTH_IDENTIFIER@251..256
@@ -1040,8 +997,7 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@263..290
               0: COLON@263..265 ":" [Newline("\n")] []
               1: CSS_PSEUDO_CLASS_FUNCTION_NTH@265..290
-                0: CSS_IDENTIFIER@265..274
-                  0: IDENT@265..274 "nth-child" [] []
+                0: NTH_CHILD_KW@265..274 "nth-child" [] []
                 1: L_PAREN@274..275 "(" [] []
                 2: CSS_PSEUDO_CLASS_NTH_SELECTOR@275..288
                   0: CSS_PSEUDO_CLASS_NTH_IDENTIFIER@275..280
@@ -1074,8 +1030,7 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@292..318
               0: COLON@292..294 ":" [Newline("\n")] []
               1: CSS_BOGUS_PSEUDO_CLASS@294..318
-                0: CSS_IDENTIFIER@294..303
-                  0: IDENT@294..303 "nth-child" [] []
+                0: NTH_CHILD_KW@294..303 "nth-child" [] []
                 1: L_PAREN@303..304 "(" [] []
                 2: CSS_PSEUDO_CLASS_NTH_SELECTOR@304..318
                   0: CSS_PSEUDO_CLASS_NTH_IDENTIFIER@304..309
@@ -1107,8 +1062,7 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@320..345
               0: COLON@320..322 ":" [Newline("\n")] []
               1: CSS_BOGUS_PSEUDO_CLASS@322..345
-                0: CSS_IDENTIFIER@322..331
-                  0: IDENT@322..331 "nth-child" [] []
+                0: NTH_CHILD_KW@322..331 "nth-child" [] []
                 1: L_PAREN@331..332 "(" [] []
                 2: CSS_PSEUDO_CLASS_NTH_SELECTOR@332..337
                   0: CSS_PSEUDO_CLASS_NTH_IDENTIFIER@332..337
@@ -1133,8 +1087,7 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@347..371
               0: COLON@347..349 ":" [Newline("\n")] []
               1: CSS_BOGUS_PSEUDO_CLASS@349..371
-                0: CSS_IDENTIFIER@349..358
-                  0: IDENT@349..358 "nth-child" [] []
+                0: NTH_CHILD_KW@349..358 "nth-child" [] []
                 1: L_PAREN@358..359 "(" [] []
                 2: CSS_PSEUDO_CLASS_NTH_SELECTOR@359..364
                   0: CSS_PSEUDO_CLASS_NTH_IDENTIFIER@359..364
@@ -1158,8 +1111,7 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@373..391
               0: COLON@373..375 ":" [Newline("\n")] []
               1: CSS_BOGUS_PSEUDO_CLASS@375..391
-                0: CSS_IDENTIFIER@375..384
-                  0: IDENT@375..384 "nth-child" [] []
+                0: NTH_CHILD_KW@375..384 "nth-child" [] []
                 1: L_PAREN@384..385 "(" [] []
                 2: CSS_PSEUDO_CLASS_NTH_SELECTOR@385..391
                   0: CSS_PSEUDO_CLASS_NTH@385..391

@@ -108,6 +108,10 @@ export default defineConfig({
 
 	compressHTML: true,
 
+	image: {
+		domains: ["avatars.githubusercontent.com"],
+	},
+
 	integrations: [
 		react(),
 		starlight({
