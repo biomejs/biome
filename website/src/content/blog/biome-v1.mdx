@@ -176,9 +176,13 @@ Biome can parse comments inside JSON files. You can opt-in to this feature via t
 }
 ```
 
-> **NOTE**: the `biome.json` file **doesn't** allow comments.
+:::note
+The `biome.json` file **doesn't** allow comments.
+:::
 
-> **WARNING**: when enabling this feature, comments will be permitted in **all** JSON files encountered by Biome.
+:::caution
+When enabling this feature, comments will be permitted in **all** JSON files encountered by Biome.
+:::
 
 Plus, Biome now recognizes some **known** files as "JSON files that can have comments". For example, now Biome can
 format your `tsconfig.json` file with comments without emitting errors!
