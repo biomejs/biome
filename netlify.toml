@@ -1,4 +1,4 @@
 [build]
 base = "website/"
 publish = "dist/"
-command = "./build-netlify.sh"
+command = "cargo install wasm-pack && pnpm build:wasm && pnpm install && pnpm build:js"
