@@ -7,6 +7,7 @@ use biome_deserialize::{
     VisitableType,
 };
 use biome_js_semantic::{Capture, SemanticModel};
+use biome_js_syntax::TsTypeofType;
 use biome_js_syntax::{
     binding_ext::AnyJsBindingDeclaration, JsCallExpression, JsStaticMemberExpression, JsSyntaxKind,
     JsSyntaxNode, JsVariableDeclaration, TextRange,
@@ -422,6 +423,15 @@ fn capture_needs_to_be_in_the_dependency_list(
     model: &SemanticModel,
     options: &ReactExtensiveDependenciesOptions,
 ) -> Option<Capture> {
+    // Ignore if referenced in TS typeof
+    if capture
+        .node()
+        .ancestors()
+        .any(|a| TsTypeofType::can_cast(a.kind()))
+    {
+        return None;
+    }
+
     let binding = capture.binding();
 
     // Ignore if imported
