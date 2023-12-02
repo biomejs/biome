@@ -1,17 +1,10 @@
-@import "../_reset";
 @import "../_variables";
 @import "../_mixins";
-@import "../_fonts";
+@import "../_reset";
 @import "../_global";
-@import "../_variables";
 @import "../_mixins";
 @import "../_grid";
-@import "../_footer";
-@import "../_docs";
 @import "../_pre";
-@import "../_recommended";
-@import "../_content";
-@import "_props";
 @import "../_overrides";
 @import "_code";
 @import "_diagnostics";
@@ -40,7 +33,6 @@ body {
 	}
 
 	#root {
-		height: 100%;
 		display: flex;
 	}
 }
@@ -56,7 +48,6 @@ body {
 #root {
 	display: flex;
 	width: 100%;
-	height: calc(100vh - 80px);
 }
 
 h2 {
@@ -64,20 +55,20 @@ h2 {
 	display: flex;
 	line-height: 18px;
 	font-size: 14px;
-	font-weight: normal;
+	font-weight: 500;
 	box-shadow: inset 0 1px 0 var(--hard-border-color), inset 0 -1px 0 var(--hard-border-color);
-	background-color: rgba(#000, 0.05);
+	background-color: var(--sl-color-gray-6);
 
 	@include dark-mode {
-		background-color: rgba(#fff, 0.15);
+		background-color: var(--sl-color-gray-5);
 	}
 
 	&.biome {
-		background-color: rgba($color-4, 30%);
+		background-color: rgba($color-4, 30%) !important;
 	}
 
 	&.prettier {
-		background-color: rgba(#355F75, 40%);
+		background-color: rgba(#355F75, 40%) !important;
 	}
 
 	img {
