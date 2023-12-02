@@ -232,6 +232,10 @@ impl FormatElement {
     pub const fn is_space(&self) -> bool {
         matches!(self, FormatElement::Space)
     }
+
+    pub const fn is_line(&self) -> bool {
+        matches!(self, FormatElement::Line(_))
+    }
 }
 
 impl FormatElements for FormatElement {
@@ -251,6 +255,10 @@ impl FormatElements for FormatElement {
                 false
             }
         }
+    }
+
+    fn may_directly_break(&self) -> bool {
+        matches!(self, FormatElement::Line(_))
     }
 
     fn has_label(&self, label_id: LabelId) -> bool {
@@ -340,6 +348,15 @@ pub trait FormatElements {
     /// Use this with caution, this is only a heuristic and the printer may print the element over multiple
     /// lines if this element is part of a group and the group doesn't fit on a single line.
     fn will_break(&self) -> bool;
+
+    /// Returns true if this [FormatElement] has the potential to break across multiple lines when printed.
+    /// This is the case _only_ if this format element recursively contains a [FormatElement::Line].
+    ///
+    /// It's possible for [FormatElements::will_break] to return true while this function returns false,
+    /// such as when the group contains a [crate::builders::expand_parent] or some text within the group
+    /// contains a newline. Neither of those cases directly contain a [FormatElement::Line], and so they
+    /// do not _directly_ break.
+    fn may_directly_break(&self) -> bool;
 
     /// Returns true if the element has the given label.
     fn has_label(&self, label: LabelId) -> bool;

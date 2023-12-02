@@ -26,6 +26,10 @@ where
         let modifiers = sort_modifiers_by_precedence(&self.list);
         let should_expand = should_expand_decorators(&self.list);
 
+        if self.list.is_empty() {
+            return Ok(());
+        }
+
         // need to use peek the iterator to check if the current node is a decorator and don't advance the iterator
         let mut iter = modifiers.into_iter().peekable();
         let decorators = format_once(|f| {

@@ -14,17 +14,12 @@ mod language {
 fn quick_test() {
     let src = r#"
     
-const makeSomeFunction =
-(services = {logger:null}) =>
-  (a, b, c) =>
-    services.logger(a,b,c)
-
-const makeSomeFunction2 =
-(services = {
-  logger: null
-}) =>
-  (a, b, c) =>
-    services.logger(a, b, c)
+class Test {
+	prop2 = // test
+		2;
+	prop5 // test
+		= 5 // a
+}
 
     "#;
     let syntax = JsFileSource::tsx();
