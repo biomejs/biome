@@ -30,12 +30,12 @@ export function useTheme(): ThemeName {
 		}
 
 		window.addEventListener("colorschemechange", (event) => {
-			onColorSchemeChange(event as CustomEvent<ThemeChanged>)
+			onColorSchemeChange(event as CustomEvent<ThemeChanged>);
 		});
 
 		return function cleanup() {
 			window.removeEventListener("colorschemechange", (event) => {
-				onColorSchemeChange(event as CustomEvent<ThemeChanged>)
+				onColorSchemeChange(event as CustomEvent<ThemeChanged>);
 			});
 		};
 	});
