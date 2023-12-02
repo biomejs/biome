@@ -40,6 +40,13 @@ var r = /[🇵]/u;
 var r = /[\\u200D]/;
 var r = /[\\u200D]/u;
 
+// don't report and don't crash on invalid regex
+// FIXME: need to ecma regex parser to handle this case
+// var r = new RegExp('[Á] [ ');
+// var r = RegExp('{ [Á]', 'u');
+// var r = new globalThis.RegExp('[Á] [ ');
+// var r = globalThis.RegExp('{ [Á]', 'u');
+
 // v flag
 var r = /[👍]/v;
 var r = /^[\q{👶🏻}]$/v;
