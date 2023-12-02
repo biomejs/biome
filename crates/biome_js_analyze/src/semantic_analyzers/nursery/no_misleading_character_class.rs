@@ -234,7 +234,7 @@ impl Rule for NoMisleadingCharacterClass {
 
                     Some(JsRuleAction {
                         category: ActionCategory::QuickFix,
-                        applicability: Applicability::MaybeIncorrect,
+                        applicability: Applicability::Always,
                         message: markup! { "Add unicode "<Emphasis>"u"</Emphasis>" flag to regex" }
                             .to_owned(),
                         mutation,
@@ -254,7 +254,7 @@ impl Rule for NoMisleadingCharacterClass {
                             mutation.replace_node(prev_node, suggest);
                             Some(JsRuleAction {
                                 category: ActionCategory::QuickFix,
-                                applicability: Applicability::MaybeIncorrect,
+                                applicability: Applicability::Always,
                                 message: markup! { "Add unicode "<Emphasis>"u"</Emphasis>" flag to regex" }
                                     .to_owned(),
                                 mutation,
@@ -277,7 +277,7 @@ impl Rule for NoMisleadingCharacterClass {
                             mutation.replace_node(prev_node, suggest);
                             Some(JsRuleAction {
                                 category: ActionCategory::QuickFix,
-                                applicability: Applicability::MaybeIncorrect,
+                                applicability: Applicability::Always,
                                 message: markup! { "Add unicode "<Emphasis>"u"</Emphasis>" flag to regex" }
                                     .to_owned(),
                                 mutation,
