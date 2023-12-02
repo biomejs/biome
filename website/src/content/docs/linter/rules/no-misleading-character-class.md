@@ -1,5 +1,5 @@
 ---
-title: noMisleadingCharacterClass (since vnext)
+title: noMisleadingCharacterClass (since v1.3.0)
 ---
 
 **Diagnostic Category: `lint/nursery/noMisleadingCharacterClass`**
@@ -8,44 +8,54 @@ title: noMisleadingCharacterClass (since vnext)
 This rule is part of the [nursery](/linter/rules/#nursery) group.
 :::
 
-Succinct description of the rule.
+Disallow characters which are made with multiple code points in character class syntax
 
-Put context and details about the rule.
-As a starting point, you can take the description of the corresponding _ESLint_ rule (if any).
+Unicode includes the characters which are made with multiple code points. RegExp character class syntax (/[abc]/) cannot handle characters which are made by multiple code points as
+expected. This rule reports the regular expressions which include multiple code point characters in character class syntax.
 
-Try to stay consistent with the descriptions of implemented rules.
-
-Add a link to the corresponding ESLint rule (if any):
-
-Source: https://eslint.org/docs/latest/rules/rule-name
+Source: https://eslint.org/docs/latest/rules/no-misleading-character-class
 
 ## Examples
 
 ### Invalid
 
 ```jsx
-var a = 1;
-a = 2;
+/^[Á]$/u;
+/^[❇️]$/u;
+/^[👶🏻]$/u;
+/^[🇯🇵]$/u;
+/^[👨‍👩‍👦]$/u;
+/^[👍]$/;
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noMisleadingCharacterClass.js:1:11 <a href="https://biomejs.dev/linter/rules/no-misleading-character-class">lint/nursery/noMisleadingCharacterClass</a> ━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/noMisleadingCharacterClass.js:1:1 <a href="https://biomejs.dev/linter/rules/no-misleading-character-class">lint/nursery/noMisleadingCharacterClass</a> ━━━━━━━━━━━━━━━━━━
 
-<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Variable is read here.</span>
+<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Unexpected combined character in character class.</span>
   
-<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>var a = 1;
-   <strong>   │ </strong>          
-<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>2 │ </strong>a = 2;
-   <strong>   │ </strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
-    <strong>3 │ </strong>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>/^[Á]$/u;
+   <strong>   │ </strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
+    <strong>2 │ </strong>/^[❇️]$/u;
+    <strong>3 │ </strong>/^[👶🏻]$/u;
   
-<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">This note will give you more information.</span>
+nursery/noMisleadingCharacterClass.js:1:11 <a href="https://biomejs.dev/linter/rules/no-misleading-character-class">lint/nursery/noMisleadingCharacterClass</a> ━━━━━━━━━━━━━━━━━
+
+<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Unexpected combined character in character class.</span>
+  
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>/^[Á]$/u;
+   <strong>   │ </strong>         
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>2 │ </strong>/^[❇️]$/u;
+   <strong>   │ </strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
+    <strong>3 │ </strong>/^[👶🏻]$/u;
+    <strong>4 │ </strong>/^[🇯🇵]$/u;
   
 </code></pre>
 
 ## Valid
 
 ```jsx
-var a = 1;
+/^[abc]$/;
+/^[👍]$/u;
+/^[\q{👶🏻}]$/v;
 ```
 
 ## Related links

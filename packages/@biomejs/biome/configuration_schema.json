@@ -1148,7 +1148,7 @@
 					]
 				},
 				"noMisleadingCharacterClass": {
-					"description": "Succinct description of the rule.",
+					"description": "Disallow characters which are made with multiple code points in character class syntax",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

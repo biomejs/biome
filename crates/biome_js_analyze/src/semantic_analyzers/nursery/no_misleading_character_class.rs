@@ -14,6 +14,10 @@ use biome_rowan::{
 declare_rule! {
     /// Disallow characters which are made with multiple code points in character class syntax
     ///
+    /// Unicode includes the characters which are made with multiple code points. RegExp character class syntax (/[abc]/) cannot handle characters which are made by multiple code points as
+    /// expected. This rule reports the regular expressions which include multiple code point characters in character class syntax.
+    ///
+    /// Source: https://eslint.org/docs/latest/rules/no-misleading-character-class
     ///
     /// ## Examples
     ///
