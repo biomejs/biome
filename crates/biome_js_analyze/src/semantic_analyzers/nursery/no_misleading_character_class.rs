@@ -1,5 +1,7 @@
 use crate::{semantic_services::Semantic, JsRuleAction};
-use biome_analyze::{context::RuleContext, declare_rule, ActionCategory, Rule, RuleDiagnostic};
+use biome_analyze::{
+    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
+};
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make;
@@ -15,8 +17,9 @@ declare_rule! {
     /// Disallow characters which are made with multiple code points in character class syntax
     ///
     /// Unicode includes the characters which are made with multiple code points. e.g. Á, 🇯🇵, 👨‍👩‍👦.
-    /// RegExp character class syntax (/[abc]/) cannot handle characters which are made by multiple code points as
-    /// a character.
+    /// A RegExp character class `/[abc]/` cannot handle characters that consists of multiple code points.
+    /// For example, the character `❇️` consists of two code points: `❇` (U+2747) and `VARIATION SELECTOR-16` (U+FE0F).
+    /// If this character is in a RegExp character class, it will match to either `❇` or `VARIATION SELECTOR-16` rather than `❇️`.
     /// This rule reports the regular expressions which include multiple code point characters in character class syntax.
     ///
     /// Source: https://eslint.org/docs/latest/rules/no-misleading-character-class
@@ -27,10 +30,25 @@ declare_rule! {
     ///
     /// ```js,expect_diagnostic
     /// /^[Á]$/u;
+    /// ```
+    ///
+    /// ```js,expect_diagnostic
     /// /^[❇️]$/u;
+    /// ```
+    ///
+    /// ```js,expect_diagnostic
     /// /^[👶🏻]$/u;
+    /// ```
+    ///
+    /// ```js,expect_diagnostic
     /// /^[🇯🇵]$/u;
+    /// ```
+    ///
+    /// ```js,expect_diagnostic
     /// /^[👨‍👩‍👦]$/u;
+    /// ```
+    ///
+    /// ```js,expect_diagnostic
     /// /^[👍]$/; // surrogate pair without u flag
     /// ```
     ///
@@ -47,6 +65,7 @@ declare_rule! {
         version: "1.3.0",
         name: "noMisleadingCharacterClass",
         recommended: false,
+        fix_kind: FixKind::Safe,
     }
 }
 
