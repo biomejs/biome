@@ -14,11 +14,6 @@ use biome_rowan::{
 declare_rule! {
     /// Disallow characters which are made with multiple code points in character class syntax
     ///
-    /// Unicode includes the characters which are made with multiple code points.
-    /// RegExp character class syntax (/[abc]/) cannot handle characters which are made by multiple code points as a character; those characters will be dissolved to each code point. For example, ❇️ is made by ❇ (U+2747) and VARIATION SELECTOR-16 (U+FE0F). If this character is in RegExp character class, it will match to either ❇ (U+2747) or VARIATION SELECTOR-16 (U+FE0F) rather than ❇️.
-    /// This rule reports the regular expressions which include multiple code point characters in character class syntax. This rule considers the following characters as multiple code point characters.
-    ///
-    /// Source: https://eslint.org/docs/latest/rules/no-misleading-character-class/
     ///
     /// ## Examples
     ///
