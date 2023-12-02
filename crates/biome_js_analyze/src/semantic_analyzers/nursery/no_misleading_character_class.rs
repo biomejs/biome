@@ -96,6 +96,10 @@ impl Rule for NoMisleadingCharacterClass {
                 let Ok((pattern, flags)) = expr.decompose() else {
                     return None;
                 };
+
+                if flags.text().contains('v') {
+                    return None;
+                }
                 let regex_pattern = replace_escaped_unicode(pattern.text());
                 let has_u_flag = flags.text().contains('u');
                 let range = expr.syntax().text_range();
@@ -135,9 +139,13 @@ impl Rule for NoMisleadingCharacterClass {
                         .next()
                         .and_then(|arg| arg.ok())
                         .and_then(|arg| JsStringLiteralExpression::cast_ref(arg.syntax()))
-                        .map(|js_string_literal| js_string_literal.text());
+                        .map(|js_string_literal| js_string_literal.text())
+                        .unwrap_or_default();
 
-                    let has_u_flag = regexp_flags.unwrap_or_default().contains('u');
+                    if regexp_flags.contains('v') {
+                        return None;
+                    }
+                    let has_u_flag = regexp_flags.contains('u');
                     let range = expr.syntax().text_range();
                     return diagnostic_regex_pattern(&regex_pattern, has_u_flag, range);
                 }
@@ -162,9 +170,14 @@ impl Rule for NoMisleadingCharacterClass {
                         .next()
                         .and_then(|arg| arg.ok())
                         .and_then(|arg| JsStringLiteralExpression::cast_ref(arg.syntax()))
-                        .map(|js_string_literal| js_string_literal.text());
+                        .map(|js_string_literal| js_string_literal.text())
+                        .unwrap_or_default();
 
-                    let has_u_flag = regexp_flags.unwrap_or_default().contains('u');
+                    if regexp_flags.contains('v') {
+                        return None;
+                    }
+
+                    let has_u_flag = regexp_flags.contains('u');
                     let range = expr.syntax().text_range();
                     return diagnostic_regex_pattern(&regex_pattern, has_u_flag, range);
                 }

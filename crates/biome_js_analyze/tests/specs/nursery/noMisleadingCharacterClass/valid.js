@@ -33,3 +33,10 @@ var r = /[🇵]/u;
 // Ignore solo ZWJ.
 var r = /[\\u200D]/;
 var r = /[\\u200D]/u;
+
+// v flag
+var r = /[👍]/v;
+var r = /^[\q{👶🏻}]$/v;
+var r = /[🇯\q{abc}🇵]/v;
+var r = /[🇯[A]🇵]/v;
+var r = /[🇯[A--B]🇵]/v;
