@@ -10,8 +10,10 @@ This rule is part of the [nursery](/linter/rules/#nursery) group.
 
 Disallow characters which are made with multiple code points in character class syntax
 
-Unicode includes the characters which are made with multiple code points. RegExp character class syntax (/[abc]/) cannot handle characters which are made by multiple code points as
-expected. This rule reports the regular expressions which include multiple code point characters in character class syntax.
+Unicode includes the characters which are made with multiple code points. e.g. Á, 🇯🇵, 👨‍👩‍👦.
+RegExp character class syntax (/[abc]/) cannot handle characters which are made by multiple code points as
+a character.
+This rule reports the regular expressions which include multiple code point characters in character class syntax.
 
 Source: https://eslint.org/docs/latest/rules/no-misleading-character-class
 
@@ -25,7 +27,7 @@ Source: https://eslint.org/docs/latest/rules/no-misleading-character-class
 /^[👶🏻]$/u;
 /^[🇯🇵]$/u;
 /^[👨‍👩‍👦]$/u;
-/^[👍]$/;
+/^[👍]$/; // surrogate pair without u flag
 ```
 
 <pre class="language-text"><code class="language-text">nursery/noMisleadingCharacterClass.js:1:1 <a href="https://biomejs.dev/linter/rules/no-misleading-character-class">lint/nursery/noMisleadingCharacterClass</a> ━━━━━━━━━━━━━━━━━━
