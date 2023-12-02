@@ -9,12 +9,23 @@ mod language {
     include!("language.rs");
 }
 
-#[ignore]
 #[test]
 // use this test check if your snippet prints as you wish, without using a snapshot
 fn quick_test() {
     let src = r#"
-    foo( /*hi*/(a) => (b) => {})
+    
+const makeSomeFunction =
+(services = {logger:null}) =>
+  (a, b, c) =>
+    services.logger(a,b,c)
+
+const makeSomeFunction2 =
+(services = {
+  logger: null
+}) =>
+  (a, b, c) =>
+    services.logger(a, b, c)
+
     "#;
     let syntax = JsFileSource::tsx();
     let tree = parse(
