@@ -1,0 +1,66 @@
+---
+import js from "../assets/svg-new/js.svg";
+import json from "../assets/svg-new/json.svg";
+import ts from "../assets/svg-new/ts.svg";
+import css from "../assets/svg-new/css.svg";
+---
+
+<body>
+  <div class="gradient"></div>
+  <div class="grid"></div>
+
+  <div class="lang-sup">
+    <div class="svg-cont">
+      <img src={js.src} width={js.width} height={js.height} alt="js-svg" /><span
+        >JavaScript</span
+      >
+    </div>
+    <div class="svg-cont">
+      <img src={ts.src} width={ts.width} height={ts.height} alt="ts-svg" /><span
+        >TypeScript</span
+      >
+    </div>
+    <div class="svg-cont">
+      <img
+        src={json.src}
+        width={json.width}
+        height={json.height}
+        alt="json-svg"
+      /><span>Json</span>
+    </div>
+    <div class="svg-cont">
+      <img
+        src={css.src}
+        width={css.width}
+        height={css.height}
+        alt="css-svg"
+      /><span>Css</span>
+    </div>
+  </div>
+</body>
+
+<script>
+  import "../content/docs/srcipts/hover.ts";
+  import "../content/docs/srcipts/contributors.ts";
+</script>
+
+<style>
+  .lang-sup {
+    margin-top: 50px;
+    display: flex;
+    align-items: center;
+    gap: 30px;
+  }
+  .lang-sup > img {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  .svg-cont {
+    display: flex;
+    margin: 0 !important;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+  }
+</style>

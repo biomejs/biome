@@ -1,0 +1,102 @@
+---
+import Contributors from "@src/components/Contributors.astro";
+import { Icon } from "@astrojs/starlight/components";
+---
+
+<div class="community">
+  <div class="comm-grid"></div>
+  <div class="com-head">Community</div>
+  <div class="com-con">
+    <div class="com-des">Powered by Astro and our open-source contributors</div>
+    <div class="com-links">
+      <a class="discord"><Icon name="discord" /> Discord</a>
+      <a class="github"><Icon name="github" />Github</a>
+      <a class="x"><Icon name="x.com" />Twitter</a>
+      <a class="mastodon"><Icon name="mastodon" />Mastodon</a>
+    </div>
+  </div>
+  <div class="connect">
+    <Contributors class="contributors" />
+  </div>
+</div>
+
+<style>
+  .community > div > div > a {
+    display: flex;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    width: fit-content;
+    border-radius: 100px;
+    padding: 8px 21px;
+    background-color: rgba(36, 173, 243, 0.1);
+    cursor: pointer;
+  }
+
+  .community {
+    margin-top: 150px !important;
+    height: 100vh;
+    position: relative;
+  }
+
+  .com-head {
+    font-size: 50px;
+    font-weight: bold;
+    text-align: center;
+  }
+
+  .connect {
+    display: flex;
+    width: 500px;
+    position: absolute;
+    right: -160px !important;
+    top: 0px;
+  }
+
+  .com-con {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .com-des {
+    font-size: 25px;
+    text-align: center;
+  }
+
+  .github,
+  .mastodon,
+  .x,
+  .discord {
+    width: 150px !important;
+  }
+  .discord:hover {
+    background-color: rgb(114, 137, 218) !important;
+  }
+  .x:hover,
+  .github:hover {
+    background-color: black;
+  }
+  .mastodon:hover {
+    background-color: #6364ff;
+  }
+
+  .comm-grid {
+    z-index: -1;
+    position: absolute;
+    content: "";
+    inset: 0;
+    background-image: linear-gradient(
+        to right,
+        var(--sl-color-gray-6) 1px,
+        transparent 1px
+      ),
+      linear-gradient(to bottom, var(--sl-color-gray-6) 1px, transparent 1px);
+    background-position: top center;
+    background-size: 20px 20px;
+    -webkit-mask-image: radial-gradient(circle at 100%, white, transparent 80%);
+    mask-image: radial-gradient(circle at 100%, white, transparent 80%);
+  }
+</style>
