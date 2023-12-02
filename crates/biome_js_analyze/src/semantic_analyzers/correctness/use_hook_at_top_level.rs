@@ -1,12 +1,22 @@
+use crate::react::hooks::react_hook_configuration;
 use crate::semantic_analyzers::correctness::use_exhaustive_dependencies::{
     HooksOptions, ReactExtensiveDependenciesOptions,
 };
-use crate::{react::hooks::react_hook_configuration, semantic_services::Semantic};
+use crate::semantic_services::{SemanticModelBuilderVisitor, SemanticServices};
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
+use biome_analyze::{
+    AddVisitor, FromServices, MissingServicesDiagnostic, Phase, Phases, QueryMatch, Queryable,
+    RuleKey, ServiceBag, Visitor, VisitorContext, VisitorFinishContext,
+};
 use biome_console::markup;
 use biome_js_semantic::CallsExtensions;
-use biome_js_syntax::{AnyJsFunction, JsCallExpression, JsFunctionBody, JsSyntaxKind, TextRange};
-use biome_rowan::AstNode;
+use biome_js_syntax::{
+    AnyFunctionLike, AnyJsFunction, JsCallExpression, JsFunctionBody, JsLanguage,
+    JsReturnStatement, JsSyntaxKind, TextRange,
+};
+use biome_rowan::{AstNode, Language, SyntaxNode, WalkEvent};
+use std::collections::HashMap;
+use std::ops::{Deref, DerefMut};
 
 declare_rule! {
     /// Enforce that all React hooks are being called from the Top Level component functions.
@@ -22,6 +32,16 @@ declare_rule! {
     ///     if (a == 1) {
     ///         useEffect();
     ///     }
+    /// }
+    /// ```
+    ///
+    /// ```js,expect_diagnostic
+    /// function Component1({ a }) {
+    ///     if (a != 1) {
+    ///         return;
+    ///     }
+    ///
+    ///     useEffect();
     /// }
     /// ```
     ///
@@ -69,6 +89,7 @@ pub enum Suggestion {
     None {
         hook_name_range: TextRange,
         path: Vec<TextRange>,
+        early_return: Option<TextRange>,
     },
 }
 
@@ -100,6 +121,151 @@ fn enclosing_function_if_call_is_at_top_level(call: &JsCallExpression) -> Option
         .and_then(|body| body.parent::<AnyJsFunction>())
 }
 
+/// Model for tracking which function calls are preceeded by an early return.
+#[derive(Clone, Default)]
+struct EarlyReturnsModel(HashMap<JsCallExpression, TextRange>);
+
+impl Deref for EarlyReturnsModel {
+    type Target = HashMap<JsCallExpression, TextRange>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl DerefMut for EarlyReturnsModel {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
+
+#[derive(Default)]
+struct EarlyReturnDetectionVisitor {
+    early_returns: EarlyReturnsModel,
+    stack: Vec<EarlyReturnDetectionVisitorStackEntry>,
+}
+
+#[derive(Default)]
+struct EarlyReturnDetectionVisitorStackEntry {
+    early_return: Option<TextRange>,
+}
+
+impl Visitor for EarlyReturnDetectionVisitor {
+    type Language = JsLanguage;
+
+    fn visit(
+        &mut self,
+        event: &WalkEvent<SyntaxNode<Self::Language>>,
+        _ctx: VisitorContext<Self::Language>,
+    ) {
+        match event {
+            WalkEvent::Enter(node) => {
+                if AnyFunctionLike::can_cast(node.kind()) {
+                    self.stack
+                        .push(EarlyReturnDetectionVisitorStackEntry::default());
+                }
+            }
+            WalkEvent::Leave(node) => {
+                if AnyFunctionLike::can_cast(node.kind()) {
+                    self.stack.pop();
+                    return;
+                }
+
+                if let Some(entry) = self.stack.last_mut() {
+                    if let Some(early_return) = JsReturnStatement::cast_ref(node) {
+                        entry.early_return = Some(early_return.syntax().text_range());
+                    } else if let Some(call) = JsCallExpression::cast_ref(node) {
+                        if let Some(early_return) = entry.early_return {
+                            self.early_returns.insert(call.clone(), early_return);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    fn finish(self: Box<Self>, ctx: VisitorFinishContext<JsLanguage>) {
+        ctx.services.insert_service(self.early_returns);
+    }
+}
+
+#[derive(Default)]
+struct FunctionCallVisitor;
+
+impl Visitor for FunctionCallVisitor {
+    type Language = JsLanguage;
+
+    fn visit(
+        &mut self,
+        event: &WalkEvent<SyntaxNode<Self::Language>>,
+        mut ctx: VisitorContext<Self::Language>,
+    ) {
+        match event {
+            WalkEvent::Enter(_) => {}
+            WalkEvent::Leave(node) => {
+                if let Some(call) = JsCallExpression::cast_ref(node) {
+                    ctx.match_query(FunctionCall(call));
+                }
+            }
+        }
+    }
+}
+
+pub struct FunctionCallServices {
+    early_returns: EarlyReturnsModel,
+    semantic_services: SemanticServices,
+}
+
+impl FromServices for FunctionCallServices {
+    fn from_services(
+        rule_key: &RuleKey,
+        services: &ServiceBag,
+    ) -> Result<Self, MissingServicesDiagnostic> {
+        let early_returns: &EarlyReturnsModel = services.get_service().ok_or_else(|| {
+            MissingServicesDiagnostic::new(rule_key.rule_name(), &["EarlyReturnsModel"])
+        })?;
+        Ok(Self {
+            early_returns: early_returns.clone(),
+            semantic_services: SemanticServices::from_services(rule_key, services)?,
+        })
+    }
+}
+
+impl Phase for FunctionCallServices {
+    fn phase() -> Phases {
+        Phases::Semantic
+    }
+}
+
+#[derive(Clone)]
+pub(crate) struct FunctionCall(JsCallExpression);
+
+impl QueryMatch for FunctionCall {
+    fn text_range(&self) -> TextRange {
+        self.0.range()
+    }
+}
+
+impl Queryable for FunctionCall {
+    type Input = Self;
+    type Language = JsLanguage;
+    type Output = Self;
+    type Services = FunctionCallServices;
+
+    fn build_visitor(
+        analyzer: &mut impl AddVisitor<Self::Language>,
+        root: &<Self::Language as Language>::Root,
+    ) {
+        analyzer.add_visitor(Phases::Syntax, || SemanticModelBuilderVisitor::new(root));
+        analyzer.add_visitor(Phases::Syntax, EarlyReturnDetectionVisitor::default);
+        analyzer.add_visitor(Phases::Semantic, FunctionCallVisitor::default);
+    }
+
+    fn unwrap_match(_services: &ServiceBag, query: &Self::Input) -> Self::Output {
+        query.clone()
+    }
+}
+
 #[derive(Debug)]
 pub struct CallPath {
     call: JsCallExpression,
@@ -107,7 +273,7 @@ pub struct CallPath {
 }
 
 impl Rule for UseHookAtTopLevel {
-    type Query = Semantic<JsCallExpression>;
+    type Query = FunctionCall;
     type State = Suggestion;
     type Signals = Option<Self::State>;
     type Options = HooksOptions;
@@ -116,10 +282,11 @@ impl Rule for UseHookAtTopLevel {
         let options = ctx.options();
         let options = ReactExtensiveDependenciesOptions::new(options.clone());
 
-        let call = ctx.query();
+        let FunctionCall(call) = ctx.query();
         let hook_name_range = call.callee().ok()?.syntax().text_trimmed_range();
         if react_hook_configuration(call, &options.hooks_config).is_some() {
-            let model = ctx.model();
+            let model = ctx.semantic_services.model();
+            let early_returns = &ctx.early_returns;
 
             let root = CallPath {
                 call: call.clone(),
@@ -135,6 +302,14 @@ impl Rule for UseHookAtTopLevel {
 
                 if let Some(enclosing_function) = enclosing_function_if_call_is_at_top_level(&call)
                 {
+                    if let Some(early_return) = early_returns.get(&call) {
+                        return Some(Suggestion::None {
+                            hook_name_range,
+                            path,
+                            early_return: Some(*early_return),
+                        });
+                    }
+
                     if let Some(calls_iter) = enclosing_function.all_calls(model) {
                         for call in calls_iter {
                             calls.push(CallPath {
@@ -147,6 +322,7 @@ impl Rule for UseHookAtTopLevel {
                     return Some(Suggestion::None {
                         hook_name_range,
                         path,
+                        early_return: None,
                     });
                 }
             }
@@ -160,6 +336,7 @@ impl Rule for UseHookAtTopLevel {
             Suggestion::None {
                 hook_name_range,
                 path,
+                early_return,
             } => {
                 let call_deep = path.len() - 1;
 
@@ -191,6 +368,13 @@ impl Rule for UseHookAtTopLevel {
                     };
 
                     diag = diag.detail(range, msg);
+                }
+
+                if let Some(range) = early_return {
+                    diag = diag.detail(
+                        range,
+                        markup! { "Hooks should not be called after an early return." },
+                    )
                 }
 
                 let diag = diag.note(
