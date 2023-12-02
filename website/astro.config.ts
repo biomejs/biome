@@ -161,6 +161,7 @@ export default defineConfig({
 					items: [
 						{ label: "Analyzer", link: "/analyzer" },
 						{ label: "Formatter", link: "/formatter" },
+						{ label: "Formatter Option Philosophy", link: "/formatter/option-philosophy" },
 						{ label: "Linter", link: "/linter" },
 						{ label: "Lint rules", link: "/linter/rules" },
 					],
