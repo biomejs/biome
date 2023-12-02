@@ -29,3 +29,6 @@ serde             = { workspace = true }
 biome_json_parser = { path = "../biome_json_parser" }
 insta             = { workspace = true }
 tests_macros      = { path = "../tests_macros" }
+
+[lints]
+workspace = true

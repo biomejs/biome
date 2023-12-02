@@ -1,0 +1,4 @@
+[build]
+base = "website/"
+publish = "dist/"
+command = "npm i -g wasm-pack && pnpm build:wasm && pnpm install && pnpm build:js"

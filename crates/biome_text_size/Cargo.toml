@@ -22,3 +22,6 @@ static_assertions = "1.1"
 name              = "serde"
 path              = "tests/serde.rs"
 required-features = ["serde"]
+
+[lints]
+workspace = true

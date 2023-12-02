@@ -37,3 +37,6 @@ tracing            = { workspace = true, features = ["attributes"] }
 proptest = "1.0.0"
 tokio    = { workspace = true, features = ["rt", "rt-multi-thread", "macros"] }
 tower    = { version = "0.4.12", features = ["timeout"] }
+
+[lints]
+workspace = true

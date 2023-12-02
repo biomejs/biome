@@ -34,9 +34,7 @@ CssRoot {
                             colon_token: COLON@0..1 ":" [] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    CssIdentifier {
-                                        value_token: IDENT@1..5 "host" [] [],
-                                    },
+                                    HOST_KW@1..5 "host" [] [],
                                     L_PAREN@5..7 "(" [] [Whitespace(" ")],
                                 ],
                             },
@@ -60,9 +58,7 @@ CssRoot {
                             colon_token: COLON@9..11 ":" [Newline("\n")] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    CssIdentifier {
-                                        value_token: IDENT@11..15 "host" [] [],
-                                    },
+                                    HOST_KW@11..15 "host" [] [],
                                     L_PAREN@15..16 "(" [] [],
                                     R_PAREN@16..18 ")" [] [Whitespace(" ")],
                                 ],
@@ -87,9 +83,7 @@ CssRoot {
                             colon_token: COLON@20..22 ":" [Newline("\n")] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    CssIdentifier {
-                                        value_token: IDENT@22..26 "host" [] [],
-                                    },
+                                    HOST_KW@22..26 "host" [] [],
                                     L_PAREN@26..27 "(" [] [],
                                     CssCompoundSelector {
                                         nesting_selector_token: missing (optional),
@@ -133,9 +127,7 @@ CssRoot {
                             colon_token: COLON@43..45 ":" [Newline("\n")] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    CssIdentifier {
-                                        value_token: IDENT@45..49 "host" [] [],
-                                    },
+                                    HOST_KW@45..49 "host" [] [],
                                     L_PAREN@49..50 "(" [] [],
                                     CssCompoundSelector {
                                         nesting_selector_token: missing (optional),
@@ -178,9 +170,7 @@ CssRoot {
                             colon_token: COLON@65..67 ":" [Newline("\n")] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    CssIdentifier {
-                                        value_token: IDENT@67..71 "host" [] [],
-                                    },
+                                    HOST_KW@67..71 "host" [] [],
                                     L_PAREN@71..72 "(" [] [],
                                     CssCompoundSelector {
                                         nesting_selector_token: missing (optional),
@@ -224,9 +214,7 @@ CssRoot {
                             colon_token: COLON@87..89 ":" [Newline("\n")] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    CssIdentifier {
-                                        value_token: IDENT@89..93 "host" [] [],
-                                    },
+                                    HOST_KW@89..93 "host" [] [],
                                     L_PAREN@93..94 "(" [] [],
                                     CssCompoundSelector {
                                         nesting_selector_token: missing (optional),
@@ -269,9 +257,7 @@ CssRoot {
                             colon_token: COLON@108..110 ":" [Newline("\n")] [],
                             class: CssBogusPseudoClass {
                                 items: [
-                                    CssIdentifier {
-                                        value_token: IDENT@110..114 "host" [] [],
-                                    },
+                                    HOST_KW@110..114 "host" [] [],
                                     L_PAREN@114..115 "(" [] [],
                                     CssCompoundSelector {
                                         nesting_selector_token: missing (optional),
@@ -308,9 +294,7 @@ CssRoot {
                                 colon_token: COLON@122..124 ":" [Newline("\n")] [],
                                 class: CssBogusPseudoClass {
                                     items: [
-                                        CssIdentifier {
-                                            value_token: IDENT@124..128 "host" [] [],
-                                        },
+                                        HOST_KW@124..128 "host" [] [],
                                         L_PAREN@128..129 "(" [] [],
                                         CssCompoundSelector {
                                             nesting_selector_token: missing (optional),
@@ -352,8 +336,7 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@0..7
               0: COLON@0..1 ":" [] []
               1: CSS_BOGUS_PSEUDO_CLASS@1..7
-                0: CSS_IDENTIFIER@1..5
-                  0: IDENT@1..5 "host" [] []
+                0: HOST_KW@1..5 "host" [] []
                 1: L_PAREN@5..7 "(" [] [Whitespace(" ")]
       1: CSS_BLOCK@7..9
         0: L_CURLY@7..8 "{" [] []
@@ -368,8 +351,7 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@9..18
               0: COLON@9..11 ":" [Newline("\n")] []
               1: CSS_BOGUS_PSEUDO_CLASS@11..18
-                0: CSS_IDENTIFIER@11..15
-                  0: IDENT@11..15 "host" [] []
+                0: HOST_KW@11..15 "host" [] []
                 1: L_PAREN@15..16 "(" [] []
                 2: R_PAREN@16..18 ")" [] [Whitespace(" ")]
       1: CSS_BLOCK@18..20
@@ -385,8 +367,7 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@20..41
               0: COLON@20..22 ":" [Newline("\n")] []
               1: CSS_BOGUS_PSEUDO_CLASS@22..41
-                0: CSS_IDENTIFIER@22..26
-                  0: IDENT@22..26 "host" [] []
+                0: HOST_KW@22..26 "host" [] []
                 1: L_PAREN@26..27 "(" [] []
                 2: CSS_COMPOUND_SELECTOR@27..31
                   0: (empty)
@@ -414,8 +395,7 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@43..63
               0: COLON@43..45 ":" [Newline("\n")] []
               1: CSS_BOGUS_PSEUDO_CLASS@45..63
-                0: CSS_IDENTIFIER@45..49
-                  0: IDENT@45..49 "host" [] []
+                0: HOST_KW@45..49 "host" [] []
                 1: L_PAREN@49..50 "(" [] []
                 2: CSS_COMPOUND_SELECTOR@50..54
                   0: (empty)
@@ -442,8 +422,7 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@65..85
               0: COLON@65..67 ":" [Newline("\n")] []
               1: CSS_BOGUS_PSEUDO_CLASS@67..85
-                0: CSS_IDENTIFIER@67..71
-                  0: IDENT@67..71 "host" [] []
+                0: HOST_KW@67..71 "host" [] []
                 1: L_PAREN@71..72 "(" [] []
                 2: CSS_COMPOUND_SELECTOR@72..76
                   0: (empty)
@@ -471,8 +450,7 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@87..106
               0: COLON@87..89 ":" [Newline("\n")] []
               1: CSS_BOGUS_PSEUDO_CLASS@89..106
-                0: CSS_IDENTIFIER@89..93
-                  0: IDENT@89..93 "host" [] []
+                0: HOST_KW@89..93 "host" [] []
                 1: L_PAREN@93..94 "(" [] []
                 2: CSS_COMPOUND_SELECTOR@94..98
                   0: (empty)
@@ -499,8 +477,7 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@108..120
               0: COLON@108..110 ":" [Newline("\n")] []
               1: CSS_BOGUS_PSEUDO_CLASS@110..120
-                0: CSS_IDENTIFIER@110..114
-                  0: IDENT@110..114 "host" [] []
+                0: HOST_KW@110..114 "host" [] []
                 1: L_PAREN@114..115 "(" [] []
                 2: CSS_COMPOUND_SELECTOR@115..120
                   0: (empty)
@@ -523,8 +500,7 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@122..133
               0: COLON@122..124 ":" [Newline("\n")] []
               1: CSS_BOGUS_PSEUDO_CLASS@124..133
-                0: CSS_IDENTIFIER@124..128
-                  0: IDENT@124..128 "host" [] []
+                0: HOST_KW@124..128 "host" [] []
                 1: L_PAREN@128..129 "(" [] []
                 2: CSS_COMPOUND_SELECTOR@129..133
                   0: (empty)

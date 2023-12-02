@@ -26,3 +26,6 @@ tracing           = { workspace = true }
 
 [features]
 serde = ["schemars", "biome_diagnostics/schema"]
+
+[lints]
+workspace = true

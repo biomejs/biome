@@ -6,7 +6,7 @@ authors:
   - ema
   - core
 pubDate: 2023-08-29
-socialImage: social-logo.png
+socialImage: ../../assets/social-logo.png
 ---
 
 In Biome v1, the formatter has options for JSX quotes and parentheses in the arrow functions; the CLI adds a new command `biome lint`, `.jsonc` files are supported, and it's possible to extend the configuration file.
@@ -176,9 +176,13 @@ Biome can parse comments inside JSON files. You can opt-in to this feature via t
 }
 ```
 
-> **NOTE**: the `biome.json` file **doesn't** allow comments.
+:::note
+The `biome.json` file **doesn't** allow comments.
+:::
 
-> **WARNING**: when enabling this feature, comments will be permitted in **all** JSON files encountered by Biome.
+:::caution
+When enabling this feature, comments will be permitted in **all** JSON files encountered by Biome.
+:::
 
 Plus, Biome now recognizes some **known** files as "JSON files that can have comments". For example, now Biome can
 format your `tsconfig.json` file with comments without emitting errors!

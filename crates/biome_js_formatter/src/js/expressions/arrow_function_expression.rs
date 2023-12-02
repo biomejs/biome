@@ -1,4 +1,4 @@
-use crate::js::bindings::parameters::FormatJsParametersOptions;
+use crate::js::bindings::parameters::{has_only_simple_parameters, FormatJsParametersOptions};
 use crate::prelude::*;
 use biome_formatter::{
     format_args, write, CstFormatContext, FormatRuleWithOptions, RemoveSoftLinesBuffer,
@@ -317,8 +317,9 @@ fn format_signature(
 /// Returns a `true` result if the arrow function contains any elements which
 /// should force the chain to break onto multiple lines. This includes any kind
 /// of return type annotation if the function also takes parameters (e.g.,
-/// `(a, b): bool => ...`), or any kind of rest/object/array binding parameter
-/// (e.g., `({a, b: foo}) => ...`).
+/// `(a, b): bool => ...`), any kind of rest/object/array binding parameter
+/// (e.g., `({a, b: foo}) => ...`), and any kind of initializer for a parameter
+/// (e.g., `(a = 2) => ...`).
 ///
 /// The complexity of these expressions limits their legibility when printed
 /// inline, so they force the chain to break to preserve clarity. Any other
@@ -332,17 +333,20 @@ fn should_break_chain(arrow: &JsArrowFunctionExpression) -> SyntaxResult<bool> {
 
     let has_parameters = match &parameters {
         AnyJsArrowFunctionParameters::AnyJsBinding(_) => true,
-        AnyJsArrowFunctionParameters::JsParameters(parameters) => !parameters.items().is_empty(),
+        AnyJsArrowFunctionParameters::JsParameters(parameters) => {
+            // This matches Prettier, which allows type annotations when
+            // grouping arrow expressions, but disallows them when grouping
+            // normal function expressions.
+            if !has_only_simple_parameters(parameters, true) {
+                return Ok(true);
+            }
+            !parameters.items().is_empty()
+        }
     };
 
-    if arrow.return_type_annotation().is_some() && has_parameters {
-        return Ok(true);
-    }
+    let has_type_and_parameters = arrow.return_type_annotation().is_some() && has_parameters;
 
-    // Break if the function has any rest, object, or array parameter
-    let result = has_rest_object_or_array_parameter(&parameters);
-
-    Ok(result)
+    Ok(has_type_and_parameters || has_rest_object_or_array_parameter(&parameters))
 }
 
 fn should_add_parens(body: &AnyJsFunctionBody) -> bool {

@@ -1,6 +1,7 @@
 ---
 import type { CollectionEntry } from "astro:content";
 import BlogPostInfo from "@src/components/BlogPostInfo.astro";
+import { Image } from "astro:assets";
 
 export interface Props {
   post: CollectionEntry<"blog">["data"];
@@ -13,7 +14,7 @@ const { post } = Astro.props;
   {
     post.coverImage && (
       <figure class="blog-cover">
-        <img alt={post.coverImage.alt} src={`/img/${post.coverImage.src}`} />
+        <Image alt={post.coverImage.alt} src={post.coverImage.src} />
         {post.coverImage.caption && (
           <figcaption class="blog-cover-caption">
             {post.coverImage.caption}

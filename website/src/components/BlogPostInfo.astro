@@ -1,6 +1,7 @@
 ---
 import "@src/styles/blog/index.scss";
 import { getEntry, type CollectionEntry } from "astro:content";
+import { Image } from "astro:assets";
 
 export interface Props {
   post: CollectionEntry<"blog">["data"];
@@ -26,7 +27,7 @@ const authors = await getAuthorsData(
     {
       authors.map(({ data: author }) => (
         <span class="avatar">
-          <img src={author.avatar} />
+          <Image src={author.avatar} alt="" height="36" width="36" />
         </span>
       ))
     }

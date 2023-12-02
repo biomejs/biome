@@ -112,6 +112,7 @@ impl DiffReport {
             // Experimental syntax: `do {}`
             "js/async-do-expressions/",
             "js/do/",
+            "jsx/do/",
             // Experimental syntax: `export X from "mod"`
             "js/export-default/export-default-from/",
             "js/export-default/escaped/default-escaped.js",
@@ -130,6 +131,7 @@ impl DiffReport {
             "js/comments/tuple-and-record.js",
             "js/function-single-destructuring/tuple-and-record.js",
             "js/method-chain/tuple-and-record.js",
+            "jsx/tuple/",
             // Experimental syntax: pipeline operator `|>`
             "js/comments-pipeline-own-line",
             "js/partial-application",
@@ -147,6 +149,8 @@ impl DiffReport {
             "js/source-phase-imports/",
             // Experimental syntax: `import module`
             "js/import-reflection/",
+            // Experimental syntax: `throw` expressions
+            "js/throw_expressions/",
             // Embedded languages in template literals
             "js/comments-closure-typecast/styled-components.js",
             "js/multiparser-comments/",
@@ -162,9 +166,12 @@ impl DiffReport {
             "js/template-literals/styled-jsx.js",
             "js/range/issue-7082.js",
             "js/last-argument-expansion/embed.js",
+            "jsx/template/styled-components.js",
             "typescript/as/as-const-embedded.ts",
             "js/last-argument-expansion/embed.js",
             "typescript/as/as-const-embedded.ts",
+            // Syntax recovery
+            "typescript/error-recovery/",
             /*// Experimental syntax: property and class decorators
             "js/decorators",
             "js/decorator-auto-accessors/",

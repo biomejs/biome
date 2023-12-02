@@ -1,7 +1,11 @@
-use crate::aria_services::Aria;
-use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
+use crate::{aria_services::Aria, JsRuleAction};
+use biome_analyze::{
+    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
+};
+use biome_console::markup;
+use biome_diagnostics::Applicability;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
-use biome_rowan::AstNode;
+use biome_rowan::{AstNode, BatchMutationExt};
 
 declare_rule! {
     /// Enforce that non-interactive ARIA roles are not assigned to interactive HTML elements.
@@ -34,6 +38,7 @@ declare_rule! {
         version: "1.3.0",
         name: "noInteractiveElementToNoninteractiveRole",
         recommended: true,
+        fix_kind: FixKind::Unsafe,
     }
 }
 
@@ -94,5 +99,19 @@ impl Rule for NoInteractiveElementToNoninteractiveRole {
                 "Wrap your interactive element in a <div> with the desired role or put the content inside your interactive element."
             ),
         )
+    }
+
+    fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<JsRuleAction> {
+        let node = ctx.query();
+        let role_attribute = node.find_attribute_by_name("role")?;
+
+        let mut mutation = ctx.root().begin();
+        mutation.remove_node(role_attribute);
+        Some(JsRuleAction {
+            category: ActionCategory::QuickFix,
+            applicability: Applicability::MaybeIncorrect,
+            message: markup! { "Remove the "<Emphasis>"role"</Emphasis>" attribute." }.to_owned(),
+            mutation,
+        })
     }
 }

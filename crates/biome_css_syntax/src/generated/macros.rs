@@ -52,12 +52,20 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssClassSelector::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_COLOR_PROFILE_AT_RULE => {
+                    let $pattern = unsafe { $crate::CssColorProfileAtRule::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_COMPLEX_SELECTOR => {
                     let $pattern = unsafe { $crate::CssComplexSelector::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_COMPOUND_SELECTOR => {
                     let $pattern = unsafe { $crate::CssCompoundSelector::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_COUNTER_STYLE_AT_RULE => {
+                    let $pattern = unsafe { $crate::CssCounterStyleAtRule::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_CUSTOM_PROPERTY => {

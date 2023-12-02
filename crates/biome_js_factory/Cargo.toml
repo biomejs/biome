@@ -13,3 +13,6 @@ version              = "0.3.1"
 [dependencies]
 biome_js_syntax = { workspace = true }
 biome_rowan     = { workspace = true }
+
+[lints]
+workspace = true
