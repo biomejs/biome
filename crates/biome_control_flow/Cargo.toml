@@ -15,3 +15,6 @@ version              = "0.3.1"
 [dependencies]
 biome_rowan = { workspace = true }
 rustc-hash  = { workspace = true }
+
+[lints]
+workspace = true

@@ -1167,6 +1167,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useForOf": {
+					"description": "This rule recommends a for-of loop when the loop index is only used to read from an array that is being iterated.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useGroupedTypeImport": {
 					"description": "Enforce the use of import type when an import only has specifiers with type qualifier.",
 					"anyOf": [

@@ -22,3 +22,6 @@ biome_js_factory = { path = "../biome_js_factory" }
 
 [features]
 serde = ["dep:serde", "schemars", "biome_rowan/serde"]
+
+[lints]
+workspace = true

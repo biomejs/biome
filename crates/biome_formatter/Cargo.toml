@@ -39,3 +39,6 @@ serde = ["dep:serde", "schemars", "biome_rowan/serde"]
 # cargo-workspaces metadata
 [package.metadata.workspaces]
 independent = true
+
+[lints]
+workspace = true

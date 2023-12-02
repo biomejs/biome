@@ -44,3 +44,6 @@ tests_macros     = { path = "../tests_macros" }
 
 [features]
 schema = ["schemars", "biome_deserialize/schema"]
+
+[lints]
+workspace = true

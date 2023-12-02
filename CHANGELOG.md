@@ -32,6 +32,10 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 #### New features
 
+- Add [useForOf](https://biomejs.dev/linter/rules/use-for-of) rule.
+  The rule recommends a for-of loop when the loop index is only used to read from an array that is being iterated.
+  Contributed by @victor-teles
+
 #### Enhancement
 
 - Implements [#924](https://github.com/biomejs/biome/issues/924) and [#920](https://github.com/biomejs/biome/issues/920). [noUselessElse](https://biomejs.dev/linter/rules/no-useless-else) now ignores `else` clauses that follow at least one `if` statement that doesn't break early. Contributed by @Conaclos

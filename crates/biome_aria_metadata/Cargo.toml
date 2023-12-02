@@ -19,3 +19,6 @@ version              = "0.3.1"
 case        = "1.0.0"
 proc-macro2 = { version = "1.0.63", features = ["span-locations"] }
 quote       = { workspace = true }
+
+[lints]
+workspace = true
