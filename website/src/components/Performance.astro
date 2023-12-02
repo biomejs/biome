@@ -1,0 +1,149 @@
+---
+import Inputf from "@src/components/formatter/inputf.md";
+import Outputf from "@src/components/formatter/outputf.md";
+import Input from "@src/components/linter/input.md";
+import Output from "@src/components/linter/output.md";
+import { Tabs, TabItem } from "@astrojs/starlight/components";
+import ProgressBar from "../../src/playground/components/Progress.tsx";
+---
+
+<div class="hero-code">
+  <Tabs>
+    <TabItem label="formatter">
+      <div class="linter format">
+        <div class="inp"><span>CODE</span><Inputf /></div>
+        <div class="out"><span>OUTPUT</span><Outputf /></div>
+        <div class="perf-out">
+          <span>PERFORMANCE</span>
+          <div class="bench">
+            <div>
+              <ProgressBar client:visible duration={5} label="Biome" />
+              <ProgressBar client:visible duration={10} label="Dprint" />
+              <ProgressBar client:visible duration={20} label="Prettier" />
+            </div>
+          </div>
+          <div class="perf-comp">
+            <div class="comp">~25x</div>
+            <div class="comp-des">
+              Faster than Prettier when formatting 85,000 lines of code.
+            </div>
+          </div>
+        </div>
+      </div>
+    </TabItem>
+    <TabItem label="linter">
+      <div class="linter format">
+        <div class="inp"><span>CODE</span><Input /></div>
+        <div class="out"><span>OUTPUT</span><Output /></div>
+        <div class="perf-out">
+          <span>PERFORMANCE</span>
+          <div class="bench">
+            <div>
+              <ProgressBar client:visible duration={5} label="Biome" />
+              <ProgressBar client:visible duration={20} label="Eslint" />
+            </div>
+          </div>
+          <div class="perf-comp">
+            <div class="comp">~25x</div>
+            <div class="comp-des">
+              Faster than Prettier when formatting 85,000 lines of code.
+            </div>
+          </div>
+        </div>
+      </div>
+    </TabItem>
+  </Tabs>
+</div>
+
+<style>
+    .hero-code {
+      margin-top: 150px !important;
+    }
+    .perf {
+      font-size: 50px;
+      text-align: center;
+
+      margin-bottom: 150px;
+    }
+    .card-grid {
+      margin-top: 150px !important;
+    }
+    .bars {
+      display: flex;
+      align-items: center;
+      flex-direction: column;
+      gap: 15px;
+      margin-top: 100px;
+    }
+    .linter {
+      border: 1px solid var(--sl-perf-border);
+      background: var(--sl-perf-border);
+      padding: 0 !important;
+      gap: 1px;
+      display: grid;
+      grid-template-columns: repeat(3, 375px);
+      width: fit-content;
+      border-top-left-radius: 15px;
+      border-top-right-radius: 15px;
+      margin-top: 40px;
+    }
+
+    .format, .lint {
+        padding: 24px;
+    }
+
+    .inp, .out {
+        margin: 0 !important;
+    }
+
+    .inp>span {
+        color: #e63333;
+        background: var(--sl-perf-head);
+        border-top-left-radius: 15px;
+    }
+
+    .out>span {
+        color: #6364ff;
+        background: var(--sl-perf-head);
+    }
+
+    .perf-out {
+        background: var(--sl-perf);
+        margin: 0 !important;
+    }
+
+    .perf-out {
+        border-top-right-radius: 15px;
+    }
+
+    .perf-out>span {
+        color: rgb(10, 160, 10);
+    }
+
+    .inp>span, .out>span, .perf-out>span {
+        display: flex;
+        align-items:flex-end;
+        height: 40px;
+        padding-left: 20px;
+    }
+
+    .bench {
+      padding-top: 50px;
+      display: flex;
+      flex-direction: column;
+      margin-top: 0 !important;
+      background: var(--sl-perf);
+      border-top-right-radius: 15px;
+      /* border-bottom-right-radius: 15px; */
+    }
+
+    .comp {
+        font-size: 40px;
+        padding-left: 20px;
+        margin-top: 60px;
+        margin-bottom: -20px;
+    }
+
+    .comp-des {
+        padding-left: 20px;
+</style>
