@@ -124,7 +124,7 @@ impl ExtensionHandler for JsonFileHandler {
 fn is_file_allowed(path: &Path) -> bool {
     path.file_name()
         .and_then(|f| f.to_str())
-        .map(|f| super::Language::ALLOWED_FILES.contains(&f))
+        .map(|f| super::Language::KNOWN_FILES_AS_JSONC.contains(&f))
         // default is false
         .unwrap_or_default()
 }

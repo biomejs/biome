@@ -63,7 +63,7 @@ declare_rule! {
     /// ```
     ///
     pub(crate) NoUnusedPrivateClassMembers {
-        version: "next",
+        version: "1.3.3",
         name: "noUnusedPrivateClassMembers",
         recommended: false,
         fix_kind: FixKind::Unsafe,

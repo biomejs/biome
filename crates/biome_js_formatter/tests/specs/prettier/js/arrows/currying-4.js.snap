@@ -75,77 +75,7 @@ a(
 ```diff
 --- Prettier
 +++ Biome
-@@ -41,47 +41,49 @@
-   "sky.",
- ];
- 
--const x2 = () => () => [
--  "The",
--  "green",
--  "dragon",
--  "liked",
--  "to",
--  "knit",
--  "sweaters",
--  "for",
--  "the",
--  "fluffy",
--  "clouds",
--  "in",
--  "the",
--  "sky.",
--];
-+const x2 = () => () =>
-+  [
-+    "The",
-+    "green",
-+    "dragon",
-+    "liked",
-+    "to",
-+    "knit",
-+    "sweaters",
-+    "for",
-+    "the",
-+    "fluffy",
-+    "clouds",
-+    "in",
-+    "the",
-+    "sky.",
-+  ];
- 
--const x3 = () => () => () => [
--  "The",
--  "green",
--  "dragon",
--  "liked",
--  "to",
--  "knit",
--  "sweaters",
--  "for",
--  "the",
--  "fluffy",
--  "clouds",
--  "in",
--  "the",
--  "sky.",
--];
-+const x3 = () => () => () =>
-+  [
-+    "The",
-+    "green",
-+    "dragon",
-+    "liked",
-+    "to",
-+    "knit",
-+    "sweaters",
-+    "for",
-+    "the",
-+    "fluffy",
-+    "clouds",
-+    "in",
-+    "the",
-+    "sky.",
-+  ];
+@@ -77,11 +77,11 @@
  
  f((a) => (1, 2, 3) /* a */);
  f((a) => (b) => (1, 2, 3) /* b */ /* a */);
@@ -207,41 +137,39 @@ const x1 = () => [
   "sky.",
 ];
 
-const x2 = () => () =>
-  [
-    "The",
-    "green",
-    "dragon",
-    "liked",
-    "to",
-    "knit",
-    "sweaters",
-    "for",
-    "the",
-    "fluffy",
-    "clouds",
-    "in",
-    "the",
-    "sky.",
-  ];
+const x2 = () => () => [
+  "The",
+  "green",
+  "dragon",
+  "liked",
+  "to",
+  "knit",
+  "sweaters",
+  "for",
+  "the",
+  "fluffy",
+  "clouds",
+  "in",
+  "the",
+  "sky.",
+];
 
-const x3 = () => () => () =>
-  [
-    "The",
-    "green",
-    "dragon",
-    "liked",
-    "to",
-    "knit",
-    "sweaters",
-    "for",
-    "the",
-    "fluffy",
-    "clouds",
-    "in",
-    "the",
-    "sky.",
-  ];
+const x3 = () => () => () => [
+  "The",
+  "green",
+  "dragon",
+  "liked",
+  "to",
+  "knit",
+  "sweaters",
+  "for",
+  "the",
+  "fluffy",
+  "clouds",
+  "in",
+  "the",
+  "sky.",
+];
 
 f((a) => (1, 2, 3) /* a */);
 f((a) => (b) => (1, 2, 3) /* b */ /* a */);

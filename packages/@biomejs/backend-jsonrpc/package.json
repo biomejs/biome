@@ -12,7 +12,8 @@
 		"dist/",
 		"README.md",
 		"LICENSE-APACHE",
-		"LICENSE-MIT"
+		"LICENSE-MIT",
+		"ROME-LICENSE-MIT"
 	],
 	"homepage": "https://biomejs.dev",
   "repository": {

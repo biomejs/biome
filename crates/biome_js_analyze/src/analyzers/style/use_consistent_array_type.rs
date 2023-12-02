@@ -11,7 +11,7 @@ use serde::{Deserialize, Serialize};
 // use crate::JsRuleAction;
 
 declare_rule!{
-    /// When expressing array types, this rule promotes the usage of `T[]` shorthand instead of `Array<T>`.
+    /// Require consistently using either `T[]` or `Array<T>`
     ///
     /// ESLint (typescript-eslint) equivalent: [array-type](https://typescript-eslint.io/rules/array-type)
     /// ## Example
@@ -38,54 +38,77 @@ declare_rule!{
     /// const valid: readonly string[] = ['a', 'b'];
     /// ```
     ///
-    /// ## options
-    /// Allows to use generic array type, the default value is false.
+    /// ## Options
+    /// The rule provides two options that help to specify what type of array declarations to use.
+    ///
+    /// Default: "simple"
     ///
     /// ```json
     /// {
     ///     "//": "...",
     ///     "options": {
-    ///         "allow_array_generic": true
-    ///     }
+    ///         "consistentArrayType": "simple" | "generic"
+    ///     },
     /// }
     /// ```
     ///
+    /// By default, all array declarations will be converted to `T[]` or `readonly T[]`, which it means `simple`,
+    /// or if the options is set to the "generic", that all will converted to `Array<T>` or `ReadonlyArray<T>`.
+    ///
     pub(crate) UseConsistentArrayType {
-        version: "1.3.4",
+        version: "1.4.2",
         name: "useConsistentArrayType",
         recommended: false,
         fix_kind: FixKind::Unsafe,
     }
 }
 
-// #[derive(Debug, Copy, Clone)]
-// enum TsArrayKind {
-//     Simple,
-//     Generic,
-// }
+#[derive(Debug, Copy, Clone)]
+enum TsArrayKind {
+    /// `Array<T>` | `T[]`
+    Simple,
+    /// `readonly T[]`
+    Readonly,
+    /// `ReadonlyArray<T>`
+    ReadonlyArray,
+}
 
 impl Rule for UseConsistentArrayType {
     type Query = Ast<TsReferenceType>;
     type State = AnyTsType;
     type Signals = Option<Self::State>;
-    type Options = AllowArrayGenericOption;
+    type Options = ConsistentArrayType;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
         let type_arguments = node.type_arguments()?;
-        let AllowArrayGenericOption {
-            allow_array_generic
+        let ConsistentArrayType {
+            consistent_array_type
         } = ctx.options();
+
+        let name = node.name().ok()?;
+        println!("name:{:?}", name);
+        name.as_js_reference_identifier().and_then(|ident| {
+            let name = ident.value_token().ok()?;
+            match name.text_trimmed() {
+                "Array" => println!("Array"),
+                "Readonly" => println!("Readonly"),
+                "ReadonlyArray" => println!("ReadonlyArray"),
+                _ => (),
+            }
+            Some(())
+        });
 
         println!("node:{:?}", node);
         println!("arguments:{:?}", type_arguments);
-        println!("options:{:?}", allow_array_generic);
+        println!("name:{:?}", name);
+        println!("options:{:?}", consistent_array_type);
 
         None
     }
 
     // fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
-    //     let AllowArrayGenericOption {
+    //     let consistentArrayType {
     //         allow
     //     } = ctx.options();
     // }
@@ -97,14 +120,14 @@ impl Rule for UseConsistentArrayType {
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
-pub struct AllowArrayGenericOption {
-    pub allow_array_generic: bool
+pub struct ConsistentArrayType {
+    pub consistent_array_type: &'static str
 }
 
-impl Default for AllowArrayGenericOption {
+impl Default for ConsistentArrayType {
     fn default() -> Self {
         Self {
-            allow_array_generic: false
+            consistent_array_type: "simple"
         }
     }
 }

@@ -231,7 +231,7 @@ mod tests {
     };
     use crate::{analyze, AnalysisFilter, ControlFlow};
 
-    #[ignore]
+    // #[ignore]
     #[test]
     fn quick_test() {
         fn markup_to_string(markup: Markup) -> String {
@@ -258,7 +258,7 @@ mod tests {
             closure_index: Some(0),
             dependencies_index: Some(1),
         };
-        let rule_filter = RuleFilter::Rule("correctness", "noSelfAssign");
+        let rule_filter = RuleFilter::Rule("style", "useConsistentArrayType");
         options.configuration.rules.push_rule(
             RuleKey::new("nursery", "useHookAtTopLevel"),
             RuleOptions::new(HooksOptions { hooks: vec![hook] }),

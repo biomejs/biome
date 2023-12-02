@@ -1,0 +1,32 @@
+---
+title: 継続的インテグレーション
+description: CI環境でのBiomeの使用
+---
+
+CI環境でBiomeを動作させることは簡単です。以下の例を参考にしてください。
+
+## GitHub Actions
+
+Biomeをランナーにセットアップするためのファーストパーティ[GitHub Action](https://github.com/marketplace/actions/setup-biome)を提供します。
+シンプルなワークフローだと、以下のようになります：
+
+```yaml
+name: Code quality
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Biome
+        uses: biomejs/setup-biome@v1
+        with:
+          version: 1.2.2
+      - name: Run Biome
+        run: biome ci .
+```

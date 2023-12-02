@@ -1,0 +1,9 @@
+:past( {}
+:past() {}
+:past(^invalid) {}
+:past(^invalid {}
+:past(.div .class) {}
+:past(.div .class,) {}
+:past(.div .class {}
+:past(.div {}
+:past(.div

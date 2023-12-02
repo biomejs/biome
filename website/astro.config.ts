@@ -108,10 +108,14 @@ export default defineConfig({
 
 	compressHTML: true,
 
+	image: {
+		domains: ["avatars.githubusercontent.com"],
+	},
+
 	integrations: [
 		react(),
 		starlight({
-			title: "",
+			title: "Biome",
 			defaultLocale: "root",
 			locales: {
 				root: {
@@ -145,18 +149,10 @@ export default defineConfig({
 						{
 							label: "How Biome works",
 							link: "/guides/how-biome-works",
-							badge: {
-								text: "New",
-								variant: "note",
-							},
 						},
 						{
 							label: "Integrate Biome in your editor",
 							link: "/guides/integrate-in-editor",
-							badge: {
-								text: "New",
-								variant: "note",
-							},
 						},
 					],
 				},
@@ -205,6 +201,7 @@ export default defineConfig({
 			logo: {
 				light: "./src/assets/svg/biome-logo.svg",
 				dark: "./src/assets/svg/biome-logo.svg",
+				replacesTitle: true,
 			},
 			favicon: "/img/favicon.svg",
 			head: [

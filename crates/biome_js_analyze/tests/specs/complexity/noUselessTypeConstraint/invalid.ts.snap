@@ -22,6 +22,9 @@ function QuuzAny<T extends any>() {}
 
 function commented<T /*a*/ extends /*b*/ any /*c*/>() {}
 
+const A = <T extends unknown>() => {}
+const B = <T extends unknown = unknown>() => {}
+
 ```
 
 # Diagnostics
@@ -158,6 +161,7 @@ invalid.ts:17:28 lint/complexity/noUselessTypeConstraint  FIXABLE  ━━━━�
   > 17 │ function commented<T /*a*/ extends /*b*/ any /*c*/>() {}
        │                            ^^^^^^^^^^^^^^^^^
     18 │ 
+    19 │ const A = <T extends unknown>() => {}
   
   i All types are subtypes of any and unknown.
   
@@ -165,6 +169,46 @@ invalid.ts:17:28 lint/complexity/noUselessTypeConstraint  FIXABLE  ━━━━�
   
     17 │ function·commented<T·/*a*/·extends·/*b*/·any·/*c*/>()·{}
        │                           ------------------------      
+
+```
+
+```
+invalid.ts:19:14 lint/complexity/noUselessTypeConstraint  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Constraining a type parameter to any or unknown is useless.
+  
+    17 │ function commented<T /*a*/ extends /*b*/ any /*c*/>() {}
+    18 │ 
+  > 19 │ const A = <T extends unknown>() => {}
+       │              ^^^^^^^^^^^^^^^
+    20 │ const B = <T extends unknown = unknown>() => {}
+    21 │ 
+  
+  i All types are subtypes of any and unknown.
+  
+  i Safe fix: Remove the constraint.
+  
+    19 │ const·A·=·<T·extends·unknown>()·=>·{}
+       │             ----------------         
+
+```
+
+```
+invalid.ts:20:14 lint/complexity/noUselessTypeConstraint  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Constraining a type parameter to any or unknown is useless.
+  
+    19 │ const A = <T extends unknown>() => {}
+  > 20 │ const B = <T extends unknown = unknown>() => {}
+       │              ^^^^^^^^^^^^^^^
+    21 │ 
+  
+  i All types are subtypes of any and unknown.
+  
+  i Safe fix: Remove the constraint.
+  
+    20 │ const·B·=·<T·extends·unknown·=·unknown>()·=>·{}
+       │              ----------------                  
 
 ```
 

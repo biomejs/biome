@@ -4,6 +4,10 @@ title: useSimpleNumberKeys (since v1.0.0)
 
 **Diagnostic Category: `lint/complexity/useSimpleNumberKeys`**
 
+:::note
+This rule is recommended by Biome. A diagnostic error will appear when linting your code.
+:::
+
 Disallow number literal object member names which are not base10 or uses underscore as separator
 
 ## Examples
@@ -16,7 +20,7 @@ Disallow number literal object member names which are not base10 or uses undersc
 
 <pre class="language-text"><code class="language-text">complexity/useSimpleNumberKeys.js:1:4 <a href="https://biomejs.dev/linter/rules/use-simple-number-keys">lint/complexity/useSimpleNumberKeys</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━
 
-<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Hexadecimal number literal is not allowed here.</span>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Hexadecimal number literal is not allowed here.</span>
   
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>({ 0x1: 1 });
    <strong>   │ </strong>   <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
@@ -36,7 +40,7 @@ Disallow number literal object member names which are not base10 or uses undersc
 
 <pre class="language-text"><code class="language-text">complexity/useSimpleNumberKeys.js:1:4 <a href="https://biomejs.dev/linter/rules/use-simple-number-keys">lint/complexity/useSimpleNumberKeys</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━
 
-<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Number literal with underscore is not allowed here.</span>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Number literal with underscore is not allowed here.</span>
   
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>({ 11_1.11: &quot;ee&quot; });
    <strong>   │ </strong>   <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
@@ -56,7 +60,7 @@ Disallow number literal object member names which are not base10 or uses undersc
 
 <pre class="language-text"><code class="language-text">complexity/useSimpleNumberKeys.js:1:4 <a href="https://biomejs.dev/linter/rules/use-simple-number-keys">lint/complexity/useSimpleNumberKeys</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━
 
-<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Octal number literal is not allowed here.</span>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Octal number literal is not allowed here.</span>
   
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>({ 0o1: 1 });
    <strong>   │ </strong>   <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
@@ -76,7 +80,7 @@ Disallow number literal object member names which are not base10 or uses undersc
 
 <pre class="language-text"><code class="language-text">complexity/useSimpleNumberKeys.js:1:4 <a href="https://biomejs.dev/linter/rules/use-simple-number-keys">lint/complexity/useSimpleNumberKeys</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━
 
-<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Bigint is not allowed here.</span>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Bigint is not allowed here.</span>
   
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>({ 1n: 1 });
    <strong>   │ </strong>   <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
@@ -96,7 +100,7 @@ Disallow number literal object member names which are not base10 or uses undersc
 
 <pre class="language-text"><code class="language-text">complexity/useSimpleNumberKeys.js:1:4 <a href="https://biomejs.dev/linter/rules/use-simple-number-keys">lint/complexity/useSimpleNumberKeys</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━
 
-<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Number literal with underscore is not allowed here.</span>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Number literal with underscore is not allowed here.</span>
   
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>({ 11_1.11: &quot;ee&quot; });
    <strong>   │ </strong>   <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>

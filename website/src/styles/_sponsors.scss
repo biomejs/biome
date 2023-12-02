@@ -1,0 +1,11 @@
+.sponsors {
+	display: flex;
+	flex-wrap: wrap;
+	.sponsors-row {
+		flex-grow: 1;
+		width: 33%;
+		img {
+			height: 120px;
+		}
+	}
+}

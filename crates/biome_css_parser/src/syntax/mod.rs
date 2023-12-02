@@ -1,14 +1,16 @@
+mod at_rule;
 mod parse_error;
 mod selector;
 
 use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
-use crate::syntax::parse_error::expect_block;
+use crate::syntax::at_rule::{at_at_rule, parse_at_rule};
+use crate::syntax::parse_error::expected_block;
 use crate::syntax::selector::CssSelectorList;
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::ParseSeparatedList;
-use biome_parser::parse_recovery::ParseRecovery;
+use biome_parser::parse_recovery::{ParseRecovery, RecoveryResult};
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::{token_set, CompletedMarker, Parser, ParserProgress, TokenSet};
@@ -36,7 +38,11 @@ pub(crate) fn parse_rule_list(p: &mut CssParser) {
     while !p.at(EOF) {
         progress.assert_progressing(p);
 
-        parse_rule(p);
+        if at_at_rule(p) {
+            parse_at_rule(p).ok();
+        } else {
+            parse_rule(p);
+        }
     }
 
     rules.complete(p, CSS_RULE_LIST);
@@ -48,18 +54,22 @@ pub(crate) fn parse_rule(p: &mut CssParser) -> CompletedMarker {
 
     CssSelectorList::default().parse_list(p);
 
-    if parse_rule_block(p)
-        .or_recover(
-            p,
-            &ParseRecovery::new(CSS_BOGUS_BODY, BODY_RECOVERY_SET),
-            expect_block,
-        )
-        .is_err()
-    {
-        return m.complete(p, CSS_BOGUS_RULE);
-    }
+    let kind = if parse_or_recover_rule_block(p).is_ok() {
+        CSS_RULE
+    } else {
+        CSS_BOGUS_RULE
+    };
 
-    m.complete(p, CSS_RULE)
+    m.complete(p, kind)
+}
+
+#[inline]
+pub(crate) fn parse_or_recover_rule_block(p: &mut CssParser) -> RecoveryResult {
+    parse_rule_block(p).or_recover(
+        p,
+        &ParseRecovery::new(CSS_BOGUS_BODY, BODY_RECOVERY_SET).enable_recovery_on_line_break(),
+        expected_block,
+    )
 }
 
 #[inline]
@@ -120,7 +130,7 @@ pub(crate) fn parse_number(p: &mut CssParser, context: CssLexContext) -> ParsedS
 }
 
 #[inline]
-pub(crate) fn parse_css_string(p: &mut CssParser) -> ParsedSyntax {
+pub(crate) fn parse_string(p: &mut CssParser) -> ParsedSyntax {
     if !p.at(CSS_STRING_LITERAL) {
         return Absent;
     }

@@ -1825,7 +1825,7 @@ fn ignore_comments_error_when_allow_comments() {
     let code = r#"
 /*test*/ [1, 2, 3]
 	"#;
-    let file_path = Path::new("tsconfig.json");
+    let file_path = Path::new("somefile.json");
     fs.insert(file_path.into(), code.as_bytes());
     fs.insert(biome_config.into(), config_json);
 

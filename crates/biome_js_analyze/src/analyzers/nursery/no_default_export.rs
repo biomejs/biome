@@ -59,7 +59,7 @@ declare_rule! {
     /// ```
     ///
     pub(crate) NoDefaultExport {
-        version: "next",
+        version: "1.4.0",
         name: "noDefaultExport",
         recommended: false,
     }
