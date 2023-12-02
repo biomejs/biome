@@ -8,13 +8,7 @@ Read our [guidelines to categorize a change](https://biomejs.dev/internals/versi
 New entries must be placed in a section entitled `Unreleased`.
 Read our [guidelines for writing a good changelog entry](https://github.com/biomejs/biome/blob/main/CONTRIBUTING.md#changelog).
 
-## Unreleased
-
-### Analyzer
-
-### CLI
-
-### Configuration
+## 1.4.1 (2023-11-30)
 
 ### Editors
 
@@ -22,11 +16,25 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ### Formatter
 
-### JavaScript APIs
+#### Bug fixes
+
+- Fix some accidental line breaks when printing array expressions within arrow functions and other long lines [#917](https://github.com/biomejs/biome/pull/917). Contributed by @faultyserver
+
+- Match Prettier's breaking strategy for `ArrowChain` layouts [#934](https://github.com/biomejs/biome/pull/934). Contributed by @faultyserver
+
+- Fix double-printing of leading comments in arrow chain expressions [#951](https://github.com/biomejs/biome/pull/951). Contributed by @faultyserver
 
 ### Linter
 
+#### Bug fixes
+
+- Fix [#910](https://github.com/biomejs/biome/issues/910), where the rule `noSvgWithoutTitle` should skip elements that have `aria-hidden` attributes. Contributed by @vasucp1207
+
 #### New features
+
+- Add [useForOf](https://biomejs.dev/linter/rules/use-for-of) rule.
+  The rule recommends a for-of loop when the loop index is only used to read from an array that is being iterated.
+  Contributed by @victor-teles
 
 #### Enhancement
 

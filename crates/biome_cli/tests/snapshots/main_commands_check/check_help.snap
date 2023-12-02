@@ -96,7 +96,7 @@ Available positional items:
     PATH                      Single file, single path or list of paths
 
 Available options:
-        --apply               Apply safe fixes, formatting
+        --apply               Apply safe fixes, formatting and import sorting
         --apply-unsafe        Apply safe fixes and unsafe fixes, formatting and import sorting
         --formatter-enabled=<true|false>  Allow to enable or disable the formatter check.
         --linter-enabled=<true|false>  Allow to enable or disable the linter check.

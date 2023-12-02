@@ -27,7 +27,7 @@ Interactive ARIA roles include `button`, `link`, `checkbox`, `menuitem`, `menuit
 <h1 role="button">Some text</h1>
 ```
 
-<pre class="language-text"><code class="language-text">a11y/noNoninteractiveElementToInteractiveRole.js:1:5 <a href="https://biomejs.dev/linter/rules/no-noninteractive-element-to-interactive-role">lint/a11y/noNoninteractiveElementToInteractiveRole</a> ━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/noNoninteractiveElementToInteractiveRole.js:1:5 <a href="https://biomejs.dev/linter/rules/no-noninteractive-element-to-interactive-role">lint/a11y/noNoninteractiveElementToInteractiveRole</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">The HTML element </span><span style="color: Tomato;"><strong>h1</strong></span><span style="color: Tomato;"> is non-interactive and should not have an interactive role.</span>
   
@@ -37,6 +37,10 @@ Interactive ARIA roles include `button`, `link`, `checkbox`, `menuitem`, `menuit
   
 <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Replace </span><span style="color: lightgreen;"><strong>h1</strong></span><span style="color: lightgreen;"> with a div or a span.</span>
   
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Unsafe fix</span><span style="color: lightgreen;">: </span><span style="color: lightgreen;">Remove the </span><span style="color: lightgreen;"><strong>role</strong></span><span style="color: lightgreen;"> attribute.</span>
+  
+<strong>  </strong><strong>  1 │ </strong>&lt;h1<span style="opacity: 0.8;">·</span><span style="color: Tomato;">r</span><span style="color: Tomato;">o</span><span style="color: Tomato;">l</span><span style="color: Tomato;">e</span><span style="color: Tomato;">=</span><span style="color: Tomato;">&quot;</span><span style="color: Tomato;">b</span><span style="color: Tomato;">u</span><span style="color: Tomato;">t</span><span style="color: Tomato;">t</span><span style="color: Tomato;">o</span><span style="color: Tomato;">n</span><span style="color: Tomato;">&quot;</span>&gt;Some<span style="opacity: 0.8;">·</span>text&lt;/h1&gt;
+<strong>  </strong><strong>    │ </strong>    <span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span>               
 </code></pre>
 
 ### Valid

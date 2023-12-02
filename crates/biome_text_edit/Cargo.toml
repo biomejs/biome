@@ -18,3 +18,6 @@ similar         = { version = "2.1.0", features = ["unicode"] }
 
 [features]
 schemars = ["dep:schemars", "biome_text_size/schemars"]
+
+[lints]
+workspace = true
