@@ -818,6 +818,10 @@ export interface Nursery {
 	 */
 	useAwait?: RuleConfiguration;
 	/**
+	 * This rule recommends a for-of loop when in a for loop, the index used to extract an item from the iterated array.
+	 */
+	useForOf?: RuleConfiguration;
+	/**
 	 * Enforce the use of import type when an import only has specifiers with type qualifier.
 	 */
 	useGroupedTypeImport?: RuleConfiguration;
@@ -1507,6 +1511,7 @@ export type Category =
 	| "lint/nursery/noUselessLoneBlockStatements"
 	| "lint/nursery/useAwait"
 	| "lint/nursery/useBiomeSuppressionComment"
+	| "lint/nursery/useForOf"
 	| "lint/nursery/useGroupedTypeImport"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useRegexLiterals"
