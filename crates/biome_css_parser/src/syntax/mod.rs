@@ -1,22 +1,24 @@
 mod at_rule;
+mod css_dimension;
 mod parse_error;
 mod selector;
 
 use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use crate::syntax::at_rule::{at_at_rule, parse_at_rule};
+use crate::syntax::css_dimension::{is_at_css_dimension, parse_css_dimension};
 use crate::syntax::parse_error::expected_block;
 use crate::syntax::parse_error::expected_identifier;
 use crate::syntax::selector::CssSelectorList;
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
-use biome_parser::parse_lists::ParseSeparatedList;
+use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
 use biome_parser::parse_recovery::{ParseRecovery, RecoveryResult};
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::{token_set, CompletedMarker, Parser, ParserProgress, TokenSet};
 
-use self::parse_error::expected_number;
+use self::parse_error::{expected_component_value, expected_declaration_item, expected_number};
 
 const RULE_RECOVERY_SET: TokenSet<CssSyntaxKind> =
     token_set![T![#], T![.], T![*], T![ident], T![:], T![::], T!['{']];
@@ -82,30 +84,81 @@ pub(crate) fn parse_rule_block(p: &mut CssParser) -> ParsedSyntax {
     }
     let m = p.start();
     p.expect(T!['{']);
-    parse_declaration_list(p);
+    CssDeclarationList::default().parse_list(p);
+    // parse_declaration_list(p);
     p.expect(T!['}']);
 
     Present(m.complete(p, CSS_BLOCK))
 }
 
-pub(crate) fn parse_declaration_list(p: &mut CssParser) {
-    let m = p.start();
+#[derive(Default)]
+pub(crate) struct CssDeclarationList {}
 
-    // TODO: try ParseSeparatedList
-    parse_declaration_item(p);
-    loop {
-        if !p.eat(T![;]) {
-            break;
-        }
-        parse_declaration_item(p);
+impl ParseSeparatedList for CssDeclarationList {
+    type Kind = CssSyntaxKind;
+    type Parser<'source> = CssParser<'source>;
+    const LIST_KIND: Self::Kind = CSS_DECLARATION_LIST;
+
+    fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
+        parse_declaration_item(p)
     }
-    m.complete(p, CSS_DECLARATION_LIST);
+
+    fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
+        p.at(T!['}'])
+    }
+
+    fn allow_trailing_separating_element(&self) -> bool {
+        true
+    }
+
+    fn recover(
+        &mut self,
+        p: &mut Self::Parser<'_>,
+        parsed_element: ParsedSyntax,
+    ) -> RecoveryResult {
+        parsed_element.or_recover(
+            p,
+            &ParseRecovery::new(CSS_BOGUS_DECLARATION_ITEM, token_set!(T!['}'])),
+            expected_declaration_item,
+        )
+    }
+
+    fn separating_element_kind(&mut self) -> Self::Kind {
+        T![;]
+    }
 }
 
+#[derive(Default)]
+struct ListOfComponentValues {}
+impl ParseNodeList for ListOfComponentValues {
+    type Kind = CssSyntaxKind;
+    type Parser<'source> = CssParser<'source>;
+    const LIST_KIND: Self::Kind = CSS_LIST_OF_COMPONENT_VALUES;
+
+    fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
+        parse_any_css_value(p)
+    }
+
+    fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
+        !is_any_css_value(p)
+    }
+
+    fn recover(
+        &mut self,
+        p: &mut Self::Parser<'_>,
+        parsed_element: ParsedSyntax,
+    ) -> RecoveryResult {
+        parsed_element.or_recover(
+            p,
+            &ParseRecovery::new(CSS_BOGUS_COMPONENT_VALUE, token_set!(T!['}'], T![;])),
+            expected_component_value,
+        )
+    }
+}
 #[inline]
-pub(crate) fn parse_declaration_item(p: &mut CssParser) {
+pub(crate) fn parse_declaration_item(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_identifier(p) {
-        return;
+        return Absent;
     }
     let m = p.start();
     // name
@@ -113,15 +166,10 @@ pub(crate) fn parse_declaration_item(p: &mut CssParser) {
 
     p.expect(T![:]);
 
-    // TODO: try ParseSeparatedList
-    loop {
-        let any_css_value = parse_any_css_value(p);
-        if any_css_value.is_absent() {
-            break;
-        }
-    }
+    ListOfComponentValues::default().parse_list(p);
+
     parse_declaration_important(p).ok();
-    m.complete(p, CSS_DECLARATION);
+    Present(m.complete(p, CSS_DECLARATION))
 }
 
 #[inline]
@@ -217,23 +265,6 @@ pub(crate) fn parse_css_any_function(p: &mut CssParser) -> ParsedSyntax {
         simple_fn.complete(p, CSS_SIMPLE_FUNCTION);
 
         return Present(m.complete(p, CSS_ANY_FUNCTION));
-    }
-    Absent
-}
-
-#[inline]
-pub(crate) fn is_at_css_dimension(p: &mut CssParser) -> bool {
-    p.at(CSS_NUMBER_LITERAL) && matches!(p.nth(1), T![%] | T![ident])
-}
-
-#[inline]
-pub(crate) fn parse_css_dimension(p: &mut CssParser) -> ParsedSyntax {
-    if is_at_css_dimension(p) {
-        let m = p.start();
-        let _css_number = parse_regular_number(p);
-        let _ident = parse_regular_identifier(p);
-        p.eat(T![%]);
-        return Present(m.complete(p, CSS_DIMENSION));
     }
     Absent
 }

@@ -267,6 +267,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_VAR_FUNCTION_VALUE",
         "CSS_ATTRIBUTE_LIST",
         "CSS_DECLARATION_LIST",
+        "CSS_LIST_OF_COMPONENT_VALUES",
         "CSS_KEYFRAMES_SELECTOR_LIST",
         "CSS_PARAMETER_LIST",
         "CSS_DECLARATION_IMPORTANT",
@@ -339,5 +340,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_BOGUS_PSEUDO_CLASS",
         "CSS_BOGUS_PSEUDO_ELEMENT",
         "CSS_BOGUS_AT_RULE",
+        "CSS_BOGUS_DECLARATION_ITEM",
+        "CSS_BOGUS_COMPONENT_VALUE",
     ],
 };

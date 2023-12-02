@@ -358,6 +358,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssKeyframesSelectorList::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_LIST_OF_COMPONENT_VALUES => {
+                    let $pattern = unsafe { $crate::CssListOfComponentValues::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_MEDIA_QUERY_LIST => {
                     let $pattern = unsafe { $crate::CssMediaQueryList::new_unchecked(node) };
                     $body

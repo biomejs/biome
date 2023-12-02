@@ -453,7 +453,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if AnyCssValue::can_cast(element.kind()) {
+                    if CssListOfComponentValues::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -2161,6 +2161,9 @@ impl SyntaxFactory for CssSyntaxFactory {
                 T ! [,],
                 false,
             ),
+            CSS_LIST_OF_COMPONENT_VALUES => {
+                Self::make_node_list_syntax(kind, children, AnyCssValue::can_cast)
+            }
             CSS_MEDIA_QUERY_LIST => Self::make_separated_list_syntax(
                 kind,
                 children,

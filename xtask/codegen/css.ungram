@@ -404,8 +404,10 @@ CssDeclarationList = CssDeclaration (';' CssDeclaration)* ';'?
 CssDeclaration =
 	name: CssDeclarationName
 	':'
-	value: AnyCssValue
+	value: CssListOfComponentValues
 	important: CssDeclarationImportant?
+
+CssListOfComponentValues = AnyCssValue*
 
 CssDeclarationName = CssIdentifier | CssCustomProperty
 

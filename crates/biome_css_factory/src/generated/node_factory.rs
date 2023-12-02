@@ -243,7 +243,7 @@ pub fn css_custom_property(value: CssIdentifier) -> CssCustomProperty {
 pub fn css_declaration(
     name: CssDeclarationName,
     colon_token: SyntaxToken,
-    value: AnyCssValue,
+    value: CssListOfComponentValues,
 ) -> CssDeclarationBuilder {
     CssDeclarationBuilder {
         name,
@@ -255,7 +255,7 @@ pub fn css_declaration(
 pub struct CssDeclarationBuilder {
     name: CssDeclarationName,
     colon_token: SyntaxToken,
-    value: AnyCssValue,
+    value: CssListOfComponentValues,
     important: Option<CssDeclarationImportant>,
 }
 impl CssDeclarationBuilder {
@@ -1201,6 +1201,18 @@ where
                 Some(separators.next()?.into())
             }
         }),
+    ))
+}
+pub fn css_list_of_component_values<I>(items: I) -> CssListOfComponentValues
+where
+    I: IntoIterator<Item = AnyCssValue>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssListOfComponentValues::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_LIST_OF_COMPONENT_VALUES,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
     ))
 }
 pub fn css_media_query_list<I, S>(items: I, separators: S) -> CssMediaQueryList

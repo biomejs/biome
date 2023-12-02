@@ -649,8 +649,8 @@ impl CssDeclaration {
     pub fn colon_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 1usize)
     }
-    pub fn value(&self) -> SyntaxResult<AnyCssValue> {
-        support::required_node(&self.syntax, 2usize)
+    pub fn value(&self) -> CssListOfComponentValues {
+        support::list(&self.syntax, 2usize)
     }
     pub fn important(&self) -> Option<CssDeclarationImportant> {
         support::node(&self.syntax, 3usize)
@@ -669,7 +669,7 @@ impl Serialize for CssDeclaration {
 pub struct CssDeclarationFields {
     pub name: SyntaxResult<CssDeclarationName>,
     pub colon_token: SyntaxResult<SyntaxToken>,
-    pub value: SyntaxResult<AnyCssValue>,
+    pub value: CssListOfComponentValues,
     pub important: Option<CssDeclarationImportant>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -4228,7 +4228,7 @@ impl std::fmt::Debug for CssDeclaration {
                 "colon_token",
                 &support::DebugSyntaxResult(self.colon_token()),
             )
-            .field("value", &support::DebugSyntaxResult(self.value()))
+            .field("value", &self.value())
             .field(
                 "important",
                 &support::DebugOptionalElement(self.important()),
@@ -9354,6 +9354,89 @@ impl IntoIterator for CssKeyframesSelectorList {
 impl IntoIterator for &CssKeyframesSelectorList {
     type Item = SyntaxResult<CssKeyframesSelector>;
     type IntoIter = AstSeparatedListNodesIterator<Language, CssKeyframesSelector>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+#[derive(Clone, Eq, PartialEq, Hash)]
+pub struct CssListOfComponentValues {
+    syntax_list: SyntaxList,
+}
+impl CssListOfComponentValues {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self {
+            syntax_list: syntax.into_list(),
+        }
+    }
+}
+impl AstNode for CssListOfComponentValues {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_LIST_OF_COMPONENT_VALUES as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_LIST_OF_COMPONENT_VALUES
+    }
+    fn cast(syntax: SyntaxNode) -> Option<CssListOfComponentValues> {
+        if Self::can_cast(syntax.kind()) {
+            Some(CssListOfComponentValues {
+                syntax_list: syntax.into_list(),
+            })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        self.syntax_list.node()
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax_list.into_node()
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssListOfComponentValues {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(self.len()))?;
+        for e in self.iter() {
+            seq.serialize_element(&e)?;
+        }
+        seq.end()
+    }
+}
+impl AstNodeList for CssListOfComponentValues {
+    type Language = Language;
+    type Node = AnyCssValue;
+    fn syntax_list(&self) -> &SyntaxList {
+        &self.syntax_list
+    }
+    fn into_syntax_list(self) -> SyntaxList {
+        self.syntax_list
+    }
+}
+impl Debug for CssListOfComponentValues {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str("CssListOfComponentValues ")?;
+        f.debug_list().entries(self.iter()).finish()
+    }
+}
+impl IntoIterator for &CssListOfComponentValues {
+    type Item = AnyCssValue;
+    type IntoIter = AstNodeListIterator<Language, AnyCssValue>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+impl IntoIterator for CssListOfComponentValues {
+    type Item = AnyCssValue;
+    type IntoIter = AstNodeListIterator<Language, AnyCssValue>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }
