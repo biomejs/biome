@@ -83,19 +83,25 @@ impl Rule for NoStaticElementInteractions {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let aria_roles = ctx.aria_roles();
-        let attributes = ctx.extract_attributes(&node.attributes());
-        let is_not_interactive_element = is_not_interactive_element(node, aria_roles, attributes)?;
-        let has_interactive_handler = has_interactive_handler(node)?;
-        let is_interactive_role = is_interactive_role(node, aria_roles).unwrap_or(false);
-        let is_hidden_from_screen_reader = is_hidden_from_screen_reader(node).unwrap_or(false);
-        let is_presentation_role = is_presentation_role(node).unwrap_or(false);
-        let is_abstract_role = is_abstract_role(node).unwrap_or(false);
-        let has_valid_role = is_presentation_role || is_abstract_role || is_interactive_role;
 
-        (!is_hidden_from_screen_reader
-            && is_not_interactive_element
-            && has_interactive_handler
-            && !has_valid_role)
+        let attributes = ctx.extract_attributes(&node.attributes())?;
+        let element_name = node.name().ok()?.text();
+
+        let is_element = node.is_element();
+        let no_aria_hidden = !node.has_truthy_attribute("aria-hidden");
+        let no_explicit_role = node.has_truthy_attribute("role");
+        let no_implicit_role = aria_roles
+            .get_implicit_role(&element_name, &attributes)
+            .is_none();
+        let has_interaction_handler = INTERACTIVE_HANDLER_LIST
+            .iter()
+            .any(|handler| node.has_truthy_attribute(handler));
+
+        (is_element
+            && no_aria_hidden
+            && no_explicit_role
+            && no_implicit_role
+            && has_interaction_handler)
             .then_some(())
     }
 
@@ -129,13 +135,9 @@ fn is_not_interactive_element(
 }
 
 fn has_interactive_handler(node: &AnyJsxElement) -> Option<bool> {
-    let has_interactive_handler = INTERACTIVE_HANDLER_LIST.iter().find_map(|&handler_name| {
-        Some(
-            !node
-                .find_attribute_by_name(handler_name)?
-                .is_value_null_or_undefined(),
-        )
-    })?;
+    let has_interactive_handler = INTERACTIVE_HANDLER_LIST
+        .iter()
+        .any(|handler| node.has_truthy_attribute(handler));
 
     has_interactive_handler.then_some(true)
 }
