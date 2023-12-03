@@ -375,3 +375,46 @@ pub(crate) fn should_hug_function_parameters(
 
     Ok(result)
 }
+
+/// Tests if all of the parameters of `expression` are simple enough to allow
+/// a function to group.
+pub(crate) fn has_only_simple_parameters(
+    parameters: &JsParameters,
+    allow_type_annotations: bool,
+) -> bool {
+    parameters
+        .items()
+        .into_iter()
+        .flatten()
+        .all(|parameter| is_simple_parameter(&parameter, allow_type_annotations))
+}
+
+/// Tests if the single parameter is "simple", as in a plain identifier with no
+/// explicit type annotation and no initializer:
+///
+/// Examples:
+/// foo             => true
+/// foo?            => true
+/// foo = 'bar'     => false
+/// foo: string     => false
+/// {a, b}          => false
+/// {a, b} = {}     => false
+/// [a, b]          => false
+///
+pub(crate) fn is_simple_parameter(
+    parameter: &AnyJsParameter,
+    allow_type_annotations: bool,
+) -> bool {
+    match parameter {
+        AnyJsParameter::AnyJsFormalParameter(AnyJsFormalParameter::JsFormalParameter(param)) => {
+            matches!(
+                param.binding(),
+                Ok(AnyJsBindingPattern::AnyJsBinding(
+                    AnyJsBinding::JsIdentifierBinding(_)
+                ))
+            ) && (allow_type_annotations || param.type_annotation().is_none())
+                && param.initializer().is_none()
+        }
+        _ => false,
+    }
+}

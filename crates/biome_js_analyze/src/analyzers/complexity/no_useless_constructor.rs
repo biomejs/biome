@@ -17,7 +17,18 @@ declare_rule! {
     /// _ES2015_ provides a default class constructor if one is not specified.
     /// As such, providing an empty constructor or one that delegates into its parent is unnecessary.
     ///
+    /// The rule ignores:
+    ///
+    /// - decorated classes;
+    /// - constructors with at least one [parameter property](https://www.typescriptlang.org/docs/handbook/classes.html#parameter-properties);
+    /// - `private` and `protected` constructors.
+    ///
     /// Source: https://typescript-eslint.io/rules/no-useless-constructor
+    ///
+    /// ## Caveat
+    ///
+    /// This rule reports on constructors whose sole purpose is to make a parent constructor public.
+    /// See the last invalid example.
     ///
     /// ## Examples
     ///
@@ -43,6 +54,21 @@ declare_rule! {
     ///      * Documented constructor.
     ///      */
     ///     constructor () {}
+    /// }
+    /// ```
+    ///
+    /// ```js,expect_diagnostic
+    /// class A {
+    ///     protected constructor() {
+    ///         this.prop = 1;
+    ///     }
+    /// }
+    ///
+    /// class B extends A {
+    ///     // Make the parent constructor public.
+    ///     constructor () {
+    ///         super();
+    ///     }
     /// }
     /// ```
     ///

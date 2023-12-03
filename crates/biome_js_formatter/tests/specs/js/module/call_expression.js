@@ -46,3 +46,19 @@ test.expect(t => {
 }, false,
     // comment
     )
+
+// should group start of function expression onto the same line
+const Button1 = forwardRef(function Button(props, ref) {
+        return <button ref={ref} />;
+    }
+    );
+      
+const Button2 = forwardRef(function (props, ref) { return <button ref={ref} />; }
+    );
+
+// should break whole call before breaking parameter list
+const FilterButton = forwardRefWithLongFunctionName(function FilterButton(props, ref) {
+      return <button ref={ref} />;
+    }
+  );
+  

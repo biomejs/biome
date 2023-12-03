@@ -12,6 +12,50 @@ members = [
 ]
 resolver = "2"
 
+[workspace.lints.clippy]
+cargo_common_metadata   = "allow"
+multiple_crate_versions = "allow"
+
+# pedantic
+checked_conversions          = "warn"
+cloned_instead_of_copied     = "warn"
+copy_iterator                = "warn"
+dbg_macro                    = "warn"
+empty_enum                   = "warn"
+expl_impl_clone_on_copy      = "warn"
+explicit_into_iter_loop      = "warn"
+filter_map_next              = "warn"
+flat_map_option              = "warn"
+fn_params_excessive_bools    = "warn"
+from_iter_instead_of_collect = "warn"
+implicit_clone               = "warn"
+implicit_hasher              = "warn"
+index_refutable_slice        = "warn"
+inefficient_to_string        = "warn"
+invalid_upcast_comparisons   = "warn"
+iter_not_returning_iterator  = "warn"
+large_stack_arrays           = "warn"
+large_types_passed_by_value  = "warn"
+macro_use_imports            = "warn"
+manual_ok_or                 = "warn"
+manual_string_new            = "warn"
+mismatching_type_param_order = "warn"
+mut_mut                      = "warn"
+naive_bytecount              = "warn"
+needless_bitwise_bool        = "warn"
+needless_continue            = "warn"
+needless_for_each            = "warn"
+no_effect_underscore_binding = "warn"
+ref_binding_to_reference     = "warn"
+ref_option_ref               = "warn"
+stable_sort_primitive        = "warn"
+unnecessary_box_returns      = "warn"
+unnecessary_join             = "warn"
+unnested_or_patterns         = "warn"
+unreadable_literal           = "warn"
+verbose_bit_mask             = "warn"
+zero_sized_map_values        = "warn"
+
 [workspace.package]
 authors    = ["Biome Developers and Contributors"]
 categories = ["development-tools", "web-programming"]
