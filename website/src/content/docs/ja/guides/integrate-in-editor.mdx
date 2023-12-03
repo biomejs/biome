@@ -1,0 +1,142 @@
+---
+title: Biome とエディタの統合
+description: エディタやIDEで Biome を統合する方法を学びます
+---
+
+## 公式プラグイン
+
+これらは、Biome チームによってメンテナンスされているプラグインで、 [Biome organization](https://github.com/biomejs) によって管理されています。
+
+### VS Code
+
+Biome のプラグインを使うと、以下のことができます:
+
+* ファイルの保存時やコマンドを実行したときに、フォーマットを実行する
+* ファイルの静的解析をし、コードの修正を適用する
+
+
+Visual Studio Code マーケットプレイスページで、[Biome VS Code extension](https://marketplace.visualstudio.com/items?itemName=biomejs.biome) をインストールしてください。
+
+Biome をデフォルトのフォーマッターにするには、[supported file](/ja/internals/language-support/) を開いて、以下の手順に従ってください:
+
+- **コマンドパレット**を開く（<kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd title="Shift">⇧</kbd>+<kbd>P</kbd> または 表示 → コマンドパレット）
+- **ドキュメントのフォーマット...** を選択
+- **デフォルトのフォーマッターの設定...** を選択
+- Biomeを選択
+
+### IntelliJ
+
+Biome IntelliJ 向けのプラグインをインストールするには、[プラグインの公式ページ](https://plugins.jetbrains.com/plugin/22761-biome) にアクセスするか、以下の手順に従ってください:
+
+**JetBrains IDEs の場合:**
+
+1. IntelliJ IDEA を開く。
+2. **Settings/Preferences** に移動する。
+3. 左のメニューから **Plugins** を選択する。
+4. **Marketplace** タブをクリックする。
+5. 検索ボックスに "Biome" と入力し、**Install** をクリックする。
+6. IDEを再起動して、プラグインを有効にする。
+
+**ディスクからの場合:**
+
+1. releases タブからプラグインの .zip をダウンロードする。
+2. `⌘Сmd,` を押して IDE の設定を開き、**Plugins** を選択する。
+3. プラグインページで、**Settings** ボタンをクリックし、**Install Plugin from Disk...** をクリックする。
+
+## サードパーティのプラグイン
+
+これらは、各種エディタで使用できる、コミュニティによってメンテナンスされているプラグインです:
+- [`neovim`](https://neovim.io/): [`nvim-lspconfig`](https://github.com/neovim/nvim-lspconfig/) をインストールして、[instructions](https://github.com/neovim/nvim-lspconfig/blob/master/doc/server_configurations.md#biome) に従ってください
+- [`helix`](https://helix-editor.com/): [マニュアル](https://github.com/biomejs/biome/blob/main/editors/helix/manual.md) の手順に従ってください
+- [`coc-biome`](https://github.com/fannheyward/coc-biome): [`coc.nvim`](https://github.com/neoclide/coc.nvim) 向けの Biome 拡張機能
+
+:::note
+ここにのっていないエディタのプラグインがありますか？ぜひ PR を送って、ここに追加してください！
+:::
+
+## 自分でプラグインを書く
+
+Biome は [LSP](https://microsoft.github.io/language-server-protocol/) を第一級でサポートしています。
+エディタが LSP を実装している場合、Biome の統合をシームレスに行うことができます。
+
+### LSP プロキシを使う
+
+Biome には `lsp-proxy` というコマンドがあります。 実行すると、Biome は2つのプロセスを生成します:
+- 要求された操作を実行する [デーモン](/ja/internals/architecture#デーモン-wip)
+- クライアント（エディタ）とサーバー（デーモン）の間のリクエストをプロキシするサーバー
+
+エディタがサーバーとやり取りできて [JSON-RPC](https://www.jsonrpc.org/) リクエストを送信できる場合、エディタがコマンドを実行するように設定するだけで済みます。
+
+[`neo-vim biome プラグイン`](https://github.com/neovim/nvim-lspconfig/blob/master/lua/lspconfig/server_configurations/biome.lua) がどのようにその処理を行っているか確認してみてください。
+
+
+### `stdin` を使う
+
+エディタが LSP をサポートしていない場合は、 [標準入力](https://en.wikipedia.org/wiki/Standard_streams#Standard_input_(stdin)) を利用して `biome` バイナリを直接使用します。
+
+標準入力を介して以下のコマンドを呼び出すことができます:
+- [`format`](/reference/cli/#biome-format)
+- [`lint`](/reference/cli/#biome-lint)
+- [`check`](/reference/cli/#biome-check)
+
+Biome は、新しい出力（変更が発生していない場合は元の出力）を [標準出力](https://en.wikipedia.org/wiki/Standard_streams#Standard_output_(stdout)) に返し、診断を [標準エラー](https://en.wikipedia.org/wiki/Standard_streams#Standard_error_(stderr)) に返します。
+
+`stdin` を使用する場合は、 `--stdin-file-path` オプションを渡す必要があります。
+ファイルの `path` は、ファイルシステムに存在する必要はなく、任意の名前で構いません。 
+**重要**なのは、Biome が**どのようにファイルを扱うべきか**判断するために、正しいファイル拡張子を指定することです。
+
+バイナリのパスを解決し、必要に応じて呼び出すことは、エディタの責任です。
+バイナリは、サポートしているアーキテクチャと OS ごとに npm で公開されています:
+
+
+- `@biomejs/cli-darwin-arm64`
+- `@biomejs/cli-darwin-x64`
+- `@biomejs/cli-linux-arm64`
+- `@biomejs/cli-linux-x64`
+- `@biomejs/cli-win32-arm64`
+- `@biomejs/cli-win32-x64`
+
+バイナリの名前は `biome` または `biome.exe` で、ライブラリのルートディレクトリにあります。 例: `@biomejs/cli-darwin-arm64/biome`、`@biomejs/cli-win32-x64/biome.exe`。
+
+### バイナリを使ったデーモン
+
+CLI でバイナリを使うのは効率的ですが、ユーザーに[ログ](#デーモンのログ)を提供することができません。
+CLI からデーモンをブートストラップすることが可能で、その後はデーモンを介して CLI コマンドを使用することができます。
+
+そうしたい場合は、まず [`start`](/ja/reference/cli#biome-start) コマンドでデーモンプロセスを起動する必要があります:
+
+
+```shell
+biome start
+```
+
+その後、すべてのコマンドに `--use-server` オプションを追加する必要があります。 例:
+
+```shell
+echo "console.log('')" | biome format --use-server --stdin-file-path=dummy.js
+```
+
+:::note
+デーモンを使用する場合は、ゴーストプロセスを避けるために、[`stop`](/ja/reference/cli#biome-stop) コマンドでプロセスを再起動/終了する責任があります。
+:::
+
+:::caution
+デーモン経由の操作は、CLI 自体よりもかなり遅いので、単一のファイルに対してのみ実行することをお勧めします。
+:::
+
+### デーモンのログ
+
+Biome デーモンはファイルにログを保存します。ログは `biome-logs` というフォルダに保存されます。このフォルダは、OSの一時ディレクトリにあります。
+
+Windows の場合は、powershell で以下のコマンドを実行すると、一時ディレクトリの場所を確認できます:
+```shell
+$env:TEMP
+```
+
+Linux/macOS の場合は、ターミナルで以下のコマンドを実行して確認ができます:
+```shell
+echo $TMPDIR
+```
+
+ログファイルは、1時間ごとにローテーションされます。
+
