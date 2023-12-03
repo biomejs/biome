@@ -62,7 +62,7 @@ declare_rule! {
     ///
 
     pub(crate) NoMisleadingCharacterClass {
-        version: "1.3.0",
+        version: "next",
         name: "noMisleadingCharacterClass",
         recommended: false,
         fix_kind: FixKind::Safe,
