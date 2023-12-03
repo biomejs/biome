@@ -13,8 +13,8 @@
 		"build:wasm": "wasm-pack build --out-dir ../../packages/@biomejs/wasm-web --target web --release --scope biomedev ../crates/biome_wasm",
 		"build:wasm-dev": "wasm-pack build --out-dir ../../packages/@biomejs/wasm-web --target web --scope biomedev ../crates/biome_wasm",
 		"preview": "astro preview",
-		"textlint": "textlint './src/content/docs/**/*.{md,mdx}'",
-		"textlint:fix": "textlint --fix './src/content/docs/**/*.{md,mdx}'"
+		"textlint": "textlint './src/content/docs/ja/**/*.{md,mdx}'",
+		"textlint:fix": "textlint --fix './src/content/docs/ja/**/*.{md,mdx}'"
 	},
 	"devDependencies": {
 		"@astrojs/netlify": "^3.0.4",
