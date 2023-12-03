@@ -23,4 +23,4 @@ a:not(:not(:hover)) {}
 section:not(:not(h1, h2, h3, h4, h5, h6)) {}
 section:not(:not(h1, h2, h3, h4, h5, h6)) {}
 ul li:not(:first-of-type) {}
-
+:not(p) .div {}

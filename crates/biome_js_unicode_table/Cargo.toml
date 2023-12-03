@@ -8,8 +8,11 @@ keywords.workspace   = true
 license.workspace    = true
 name                 = "biome_js_unicode_table"
 repository.workspace = true
-version              = "0.1.0"
+version              = "0.3.1"
 
 [dependencies]
 
 [dev-dependencies]
+
+[lints]
+workspace = true

@@ -57,8 +57,11 @@ CssRoot {
                         CssBogusSubSelector {
                             items: [
                                 L_BRACK@11..14 "[" [Newline("\n"), Newline("\n")] [],
-                                CssIdentifier {
-                                    value_token: IDENT@14..19 "title" [] [],
+                                CssAttributeName {
+                                    namespace: missing (optional),
+                                    name: CssIdentifier {
+                                        value_token: IDENT@14..19 "title" [] [],
+                                    },
                                 },
                                 CssBogus {
                                     items: [
@@ -91,8 +94,11 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssAttributeSelector {
                             l_brack_token: L_BRACK@31..34 "[" [Newline("\n"), Newline("\n")] [],
-                            name: CssIdentifier {
-                                value_token: IDENT@34..39 "title" [] [],
+                            name: CssAttributeName {
+                                namespace: missing (optional),
+                                name: CssIdentifier {
+                                    value_token: IDENT@34..39 "title" [] [],
+                                },
                             },
                             matcher: CssAttributeMatcher {
                                 operator: EQ@39..40 "=" [] [],
@@ -123,8 +129,11 @@ CssRoot {
                         sub_selectors: CssSubSelectorList [
                             CssAttributeSelector {
                                 l_brack_token: L_BRACK@50..52 "[" [Newline("\n")] [],
-                                name: CssIdentifier {
-                                    value_token: IDENT@52..57 "title" [] [],
+                                name: CssAttributeName {
+                                    namespace: missing (optional),
+                                    name: CssIdentifier {
+                                        value_token: IDENT@52..57 "title" [] [],
+                                    },
                                 },
                                 matcher: CssAttributeMatcher {
                                     operator: EQ@57..58 "=" [] [],
@@ -176,8 +185,10 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@11..29
             0: CSS_BOGUS_SUB_SELECTOR@11..29
               0: L_BRACK@11..14 "[" [Newline("\n"), Newline("\n")] []
-              1: CSS_IDENTIFIER@14..19
-                0: IDENT@14..19 "title" [] []
+              1: CSS_ATTRIBUTE_NAME@14..19
+                0: (empty)
+                1: CSS_IDENTIFIER@14..19
+                  0: IDENT@14..19 "title" [] []
               2: CSS_BOGUS@19..27
                 0: EQ@19..20 "=" [] []
                 1: CSS_ATTRIBUTE_MATCHER_VALUE@20..26
@@ -197,8 +208,10 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@31..48
             0: CSS_ATTRIBUTE_SELECTOR@31..48
               0: L_BRACK@31..34 "[" [Newline("\n"), Newline("\n")] []
-              1: CSS_IDENTIFIER@34..39
-                0: IDENT@34..39 "title" [] []
+              1: CSS_ATTRIBUTE_NAME@34..39
+                0: (empty)
+                1: CSS_IDENTIFIER@34..39
+                  0: IDENT@34..39 "title" [] []
               2: CSS_ATTRIBUTE_MATCHER@39..48
                 0: EQ@39..40 "=" [] []
                 1: CSS_ATTRIBUTE_MATCHER_VALUE@40..46
@@ -218,8 +231,10 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@50..65
             0: CSS_ATTRIBUTE_SELECTOR@50..65
               0: L_BRACK@50..52 "[" [Newline("\n")] []
-              1: CSS_IDENTIFIER@52..57
-                0: IDENT@52..57 "title" [] []
+              1: CSS_ATTRIBUTE_NAME@52..57
+                0: (empty)
+                1: CSS_IDENTIFIER@52..57
+                  0: IDENT@52..57 "title" [] []
               2: CSS_ATTRIBUTE_MATCHER@57..65
                 0: EQ@57..58 "=" [] []
                 1: CSS_ATTRIBUTE_MATCHER_VALUE@58..64
@@ -234,22 +249,6 @@ CssRoot {
 ## Diagnostics
 
 ```
-attribute_selector.css:1:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected an identifier but instead found '.'.
-  
-  > 1 │ [ .class {}
-      │   ^
-    2 │ 
-    3 │ [title="foo" P] {}
-  
-  i Expected an identifier here.
-  
-  > 1 │ [ .class {}
-      │   ^
-    2 │ 
-    3 │ [title="foo" P] {}
-  
 attribute_selector.css:3:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a s, a S, an i, or a I but instead found 'P'.

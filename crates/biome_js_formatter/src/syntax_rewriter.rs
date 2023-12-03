@@ -2,8 +2,8 @@ use crate::comments::is_type_comment;
 use crate::parentheses::AnyJsParenthesized;
 use biome_formatter::{TransformSourceMap, TransformSourceMapBuilder};
 use biome_js_syntax::{
-    AnyJsAssignment, AnyJsExpression, AnyTsType, JsLanguage, JsLogicalExpression, JsSyntaxKind,
-    JsSyntaxNode,
+    AnyJsAssignment, AnyJsExpression, AnyJsOptionalChainExpression, AnyTsType, JsLanguage,
+    JsLogicalExpression, JsSyntaxKind, JsSyntaxNode,
 };
 use biome_rowan::syntax::SyntaxTrivia;
 use biome_rowan::{
@@ -140,7 +140,6 @@ impl JsFormatSyntaxRewriter {
         ) {
             (Ok(l_paren), Ok(inner), Ok(r_paren)) => {
                 let prev_token = l_paren.prev_token();
-
                 // Keep parentheses around unknown expressions. Biome can't know the precedence.
                 if inner.kind().is_bogus()
                     // Don't remove parentheses if the expression is a decorator
@@ -150,6 +149,9 @@ impl JsFormatSyntaxRewriter {
                     || has_type_cast_comment_or_skipped(&l_paren.leading_trivia())
                     || prev_token.map_or(false, |prev_token| has_type_cast_comment_or_skipped(&prev_token.trailing_trivia()))
                     || r_paren.leading_trivia().has_skipped()
+                    // Don't remove parentheses if it is an optional chain inside a chain that doesn't start by an optional token
+                    // (a?.b).c
+                    || (parenthesized.syntax().parent().and_then(AnyJsOptionalChainExpression::cast).is_some_and(|chain| chain.optional_chain_token().is_none()) && AnyJsOptionalChainExpression::cast_ref(&inner).is_some_and(|x| x.is_optional_chain()))
                 {
                     return VisitNodeSignal::Traverse(parenthesized.into_syntax());
                 } else {

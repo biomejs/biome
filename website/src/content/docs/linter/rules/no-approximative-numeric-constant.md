@@ -2,11 +2,7 @@
 title: noApproximativeNumericConstant (since v1.3.0)
 ---
 
-**Diagnostic Category: `lint/nursery/noApproximativeNumericConstant`**
-
-:::caution
-This rule is part of the [nursery](/linter/rules/#nursery) group.
-:::
+**Diagnostic Category: `lint/suspicious/noApproximativeNumericConstant`**
 
 Usually, the definition in the standard library is more precise than what people come up with or the used constant exceeds the maximum precision of the number type.
 
@@ -20,7 +16,7 @@ Source: https://rust-lang.github.io/rust-clippy/master/#approx_constant
 let x = 3.141;
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noApproximativeNumericConstant.js:1:9 <a href="https://biomejs.dev/linter/rules/no-approximative-numeric-constant">lint/nursery/noApproximativeNumericConstant</a> ━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noApproximativeNumericConstant.js:1:9 <a href="https://biomejs.dev/linter/rules/no-approximative-numeric-constant">lint/suspicious/noApproximativeNumericConstant</a> ━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Prefer constants from the standard library.</span>
   
@@ -36,7 +32,7 @@ let x = 3.141;
 let x = 2.302;
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noApproximativeNumericConstant.js:1:9 <a href="https://biomejs.dev/linter/rules/no-approximative-numeric-constant">lint/nursery/noApproximativeNumericConstant</a> ━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noApproximativeNumericConstant.js:1:9 <a href="https://biomejs.dev/linter/rules/no-approximative-numeric-constant">lint/suspicious/noApproximativeNumericConstant</a> ━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Prefer constants from the standard library.</span>
   

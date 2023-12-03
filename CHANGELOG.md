@@ -8,16 +8,74 @@ Read our [guidelines to categorize a change](https://biomejs.dev/internals/versi
 New entries must be placed in a section entitled `Unreleased`.
 Read our [guidelines for writing a good changelog entry](https://github.com/biomejs/biome/blob/main/CONTRIBUTING.md#changelog).
 
-## Unreleased
+## 1.4.1 (2023-11-30)
 
-### Analyzer
+### Editors
+
+- Fix [#933](https://github.com/biomejs/biome/issues/933). Some files are properly ignored in the LSP too. E.g. `package.json`, `tsconfig.json`, etc.
+
+### Formatter
+
+#### Bug fixes
+
+- Fix some accidental line breaks when printing array expressions within arrow functions and other long lines [#917](https://github.com/biomejs/biome/pull/917). Contributed by @faultyserver
+
+- Match Prettier's breaking strategy for `ArrowChain` layouts [#934](https://github.com/biomejs/biome/pull/934). Contributed by @faultyserver
+
+- Fix double-printing of leading comments in arrow chain expressions [#951](https://github.com/biomejs/biome/pull/951). Contributed by @faultyserver
+
+### Linter
+
+#### Bug fixes
+
+- Fix [#910](https://github.com/biomejs/biome/issues/910), where the rule `noSvgWithoutTitle` should skip elements that have `aria-hidden` attributes. Contributed by @vasucp1207
+
+#### New features
+
+- Add [useForOf](https://biomejs.dev/linter/rules/use-for-of) rule.
+  The rule recommends a for-of loop when the loop index is only used to read from an array that is being iterated.
+  Contributed by @victor-teles
+
+#### Enhancement
+
+- Implements [#924](https://github.com/biomejs/biome/issues/924) and [#920](https://github.com/biomejs/biome/issues/920). [noUselessElse](https://biomejs.dev/linter/rules/no-useless-else) now ignores `else` clauses that follow at least one `if` statement that doesn't break early. Contributed by @Conaclos
+
+  For example, the following code is no longer reported by the rule:
+
+  ```js
+  function f(x) {
+      if (x < 0) {
+        // this `if` doesn't break early.
+      } else if (x > 0) {
+          return x;
+      } else {
+          // This `else` block was previously reported as useless.
+      }
+  }
+  ```
+
+#### Bug fixes
+
+- Fix [#918](https://github.com/biomejs/biome/issues/918), [useSimpleNumberKeys](https://biomejs.dev/linter/rules/use-simple-number-keys) no longer repports false positive on comments. Contributed by @kalleep
+
+- Fix [#953](https://github.com/biomejs/biome/issues/953), [noRedeclare](https://biomejs.dev/linter/rules/no-redeclare) no longer reports type parameters with the same name in different mapped types as redeclarations. Contributed by @Conaclos
+
+- Fix [#608](https://github.com/biomejs/biome/issues/608), [useExhaustiveDependencies](https://biomejs.dev/linter/rules/use-exhaustive-dependencies) no longer repports missing dependencies for React hooks without dependency array. Contributed by @kalleep
+
+### Parser
+
+## 1.4.0 (2023-11-27)
 
 ### CLI
 
 - Remove the CLI options from the `lsp-proxy`, as they were never meant to be passed to that command. Contributed by @ematipico
+
 - Add option `--config-path` to `lsp-proxy` and `start` commands. It's now possible to tell the Daemon server to load `biome.json` from a custom path. Contributed by @ematipico
 
 - Add new `--diagnostic-level` option to let users control the level of diagnostics printed by the CLI. Possible values are: `"info"`, `"warn"`, `"hint"`. Contributed by @simonxabris
+- Add option `--line-feed` to the `format` command. Contributed by @SuperchupuDev
+- Add option `--bracket-same-line` to the `format` command. Contributed by @faultyserve
+- Add option `--bracket-spacing` to the `format` command. Contributed by @faultyserve
 
 #### Bug fixes
 
@@ -25,7 +83,9 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ### Configuration
 
-### Editors
+- Add option `formatter.lineFeed`. Contributed by @SuperchupuDev
+- Add option `javascript.formatter.bracketSameLine`. Contributed by @faultyserve
+- Add option `javascript.formatter.bracketSpacing`. Contributed by @faultyserve
 
 ### Formatter
 
@@ -33,6 +93,7 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 - Add a new option [`--line-ending`](https://biomejs.dev/reference/configuration/#formatterlineending). This option allows changing the type of line endings. Contributed by @SuperchupuDev
 - Added a new option called `--bracket-spacing` to the formatter. This option allows you to control whether spaces are inserted around the brackets of object literals. [#627](https://github.com/biomejs/biome/issues/627). Contributed by @faultyserver
+- Added a new option called `--bracket-same-line` to the formatter. This option allows you to control whether spaces are inserted around the brackets of object literals. [#627](https://github.com/biomejs/biome/issues/627). Contributed by @faultyserver
 
 #### Bug fixes
 
@@ -40,19 +101,59 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 - Fix [#301](https://github.com/biomejs/biome/issues/301), the formatter should not break before the `in` keyword. Contributed by @ematipico
 
-### JavaScript APIs
-
 ### Linter
+
+#### Promoted rules
+
+- [a11y/noInteractiveElementToNoninteractiveRole](https://biomejs.dev/linter/rules/no-interactive-element-to-noninteractive-role)
+- [complexity/noThisInStatic](https://biomejs.dev/linter/rules/no-this-in-static)
+- [complexity/useArrowFunction](https://biomejs.dev/linter/rules/use-arrow-function)
+- [correctness/noEmptyCharacterClassInRegex](https://biomejs.dev/linter/rules/no-empty-character-class-in-regex)
+- [correctness/noInvalidNewBuiltin](https://biomejs.dev/linter/rules/no-invalid-new-builtin)
+- [style/noUselessElse](https://biomejs.dev/linter/rules/no-useless-else)
+- [style/useAsConstAssertion](https://biomejs.dev/linter/rules/use-as-const-assertion)
+- [style/useShorthandAssign](https://biomejs.dev/linter/rules/use-shorthand-assign)
+- [suspicious/noApproximativeNumericConstant](https://biomejs.dev/linter/rules/no-approximative-numeric-constant)
+- [suspicious/noMisleadingInstantiator](https://biomejs.dev/linter/rules/no-misleading-instantiator)
+- [suspicious/noMisrefactoredShorthandAssign](https://biomejs.dev/linter/rules/no-misrefactored-shorthand-assign)
+
+The following rules are now recommended:
+
+- [a11y/noAccessKey](https://biomejs.dev/linter/rules/no-access-key)
+- [a11y/useHeadingContent](https://biomejs.dev/linter/rules/use-heading-content)
+- [complexity/useSimpleNumberKeys](https://biomejs.dev/linter/use-simple-number-keys)
+
+The following rules are now deprecated:
+
+- [correctness/noNewSymbol](https://biomejs.dev/linter/rules/no-new-symbol)
+  The rule is replaced by [correctness/noInvalidNewBuiltin](https://biomejs.dev/linter/rules/no-invalid-new-builtin)
 
 #### New features
 
 - Add [noDefaultExport](https://biomejs.dev/linter/rules/no-default-export) which disallows `export default`. Contributed by @Conaclos
 
+- Add [noAriaHiddenOnFocusable](https://biomejs.dev/linter/rules/no-aria-hidden-on-focusable) which reports hidden and focusable elements. Contributed by @vasucp1207
+
+- Add [noImplicitAnyLet](https://biomejs.dev/linter/rules/no-implicit-any-let) that reports variables declared with `let` and without initialization and type annotation. Contributed by @TaKO8Ki and @b4s36t4
+
+- Add [useAwait](https://biomejs.dev/linter/rules/use-await) that reports `async` functions that don't use an `await` expression.
+
+- Add [useValidAriaRole](https://biomejs.dev/linter/rules/use-valid-aria-role). Contributed by @vasucp1207
+
+- Add [useRegexLiterals](https://biomejs.dev/linter/use-regex-literals) that suggests turning call to the regex constructor into regex literals. COntributed by @Yuiki
+
+#### Enhancements
+
+- Add an unsafe code fix for [a11y/useAriaActivedescendantWithTabindex](https://biomejs.dev/linter/rules/use-aria-activedescendant-with-tabindex)
+
 #### Bug fixes
 
 - Fix [#639](https://github.com/biomejs/biome/issues/639) by ignoring unused TypeScript's mapped key. Contributed by @Conaclos
+
 - Fix [#565](https://github.com/biomejs/biome/issues/565) by handling several `infer` with the same name in extends clauses of TypeScript's conditional types. Contributed by @Conaclos
+
 - Fix [#653](https://github.com/biomejs/biome/issues/653). [noUnusedImports](https://biomejs.dev/linter/rules/no-unused-imports) now correctly removes the entire line where the unused `import` is. Contributed by @Conaclos
+
 - Fix [#607](https://github.com/biomejs/biome/issues/609) `useExhaustiveDependencies`, ignore optional chaining, Contributed by @msdlisper
 
 - Fix [#676](https://github.com/biomejs/biome/issues/676), by using the correct node for the `"noreferrer"` when applying the code action. Contributed by @ematipico
@@ -62,6 +163,16 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 - Fix [#727](https://github.com/biomejs/biome/issues/727). [noInferrableTypes](https://biomejs.dev/linter/rules/no-inferrable-types) now correctly keeps type annotations when the initialization expression is `null`. Contributed by @Conaclos
 
 - Fix [#784](https://github.com/biomejs/biome/issues/784), [noSvgWithoutTitle](https://biomejs.dev/linter/rules/no-svg-without-title) fixes false-positives to `aria-label` and reports svg's role attribute is implicit. Contributed by @unvalley
+
+- Fix [#834](https://github.com/biomejs/biome/issues/834) that made [noUselessLoneBlockStatements](https://biomejs.dev/linter/rules/no-useless-lone-block-statements) reports block statements of switch clauses. Contributed by @vasucp1207
+
+- Fix [#783](https://github.com/biomejs/biome/issues/834) that made [noUselessLoneBlockStatements](https://biomejs.dev/linter/rules/no-useless-lone-block-statements) reports block statements of `try-catch` structures. Contributed by @hougesen
+
+- Fix [#69](https://github.com/biomejs/biome/issues/69) that made [correctness/noUnnecessaryContinue](https://biomejs.dev/linter/rules/no-unnecessary-continue) incorrectly reports a `continue` used to break a switch clause. Contributed by @TaKO8Ki
+
+- Fix [#664](https://github.com/biomejs/biome/issues/664) by improving the diagnostic of [style/useNamingConvention](https://biomejs.dev/linter/use-naming-convention) when double capital are detected in strict camel case mode. Contributed by @vasucp1207
+
+- Fix [#643](https://github.com/biomejs/biome/issues/643) that erroneously parsed the option of [complexity/useExhaustiveDependencies](https://biomejs.dev/linter/use-naming-convention). Contributed by @arendjr
 
 ### Parser
 
@@ -103,6 +214,12 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ### Linter
 
+#### New features
+
+- Add [noUnusedPrivateClassMembers](https://biomejs.dev/linter/rules/no-unused-private-class-members) rule.
+  The rule disallow unused private class members.
+  Contributed by @victor-teles
+
 #### Bug fixes
 
 - Fix [#175](https://github.com/biomejs/biome/issues/175) which made [noRedeclare](https://biomejs.dev/linter/rules/no-redeclare) report index signatures using the name of a variable in the parent scope.
@@ -120,12 +237,6 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 - Fix [#609](https://github.com/biomejs/biome/issues/609) `useExhaustiveDependencies`, by removing `useContext`, `useId` and `useSyncExternalStore` from the known hooks. Contributed by @msdlisper
 - Fix `useExhaustiveDependencies`, by removing `useContext`, `useId` and `useSyncExternalStore` from the known hooks. Contributed by @msdlisper
 
-#### New features
-
-- Add [noUnusedPrivateClassMembers](https://biomejs.dev/linter/rules/no-unused-private-class-members) rule.
-  The rule disallow unused private class members.
-  Contributed by @victor-teles
-
 ### Parser
 
 #### Enhancements
@@ -140,7 +251,6 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 #### Bug fixes
 
 - Fix `rage` command, now it doesn't print info about running servers. Contributed by @ematipico
-
 
 ### Editors
 

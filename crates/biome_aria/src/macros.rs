@@ -9,8 +9,8 @@ macro_rules! define_role {
         struct $id;
 
         impl $id {
-            const PROPS: &[(&'static str, bool)] = &$p_value;
-            const ROLES: &[&'static str] = &$r_value;
+            const PROPS: &'static [(&'static str, bool)] = &$p_value;
+            const ROLES: &'static [&'static str] = &$r_value;
         }
 
         impl $crate::AriaRoleDefinition for $id {
@@ -33,8 +33,8 @@ macro_rules! define_role {
         struct $id;
 
         impl $id {
-            const PROPS: &[(&'static str, bool)] = &$p_value;
-            const ROLES: &[&'static str] = &$r_value;
+            const PROPS: &'static [(&'static str, bool)] = &$p_value;
+            const ROLES: &'static [&'static str] = &$r_value;
             const CONCEPTS: &'static [(&'static str, &'static [(&'static str, &'static str)])] =
                 $c_value;
         }
@@ -76,7 +76,7 @@ macro_rules! define_property {
 
         impl $id {
             const PROPERTY_TYPE: &'static str = &$property_type;
-            const VALUES: &[&'static str] = &$values;
+            const VALUES: &'static [&'static str] = &$values;
         }
 
         impl AriaPropertyDefinition for $id {

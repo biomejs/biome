@@ -1,4 +1,5 @@
 use crate::context::trailing_comma::FormatTrailingComma;
+use crate::js::bindings::parameters::has_only_simple_parameters;
 use crate::js::declarations::function_declaration::FormatFunctionOptions;
 use crate::js::expressions::arrow_function_expression::{
     is_multiline_template_starting_on_same_line, FormatJsArrowFunctionExpressionOptions,
@@ -359,7 +360,7 @@ fn write_grouped_arguments(
                 grouped_arg.cache_function_body(f);
             }
             AnyJsCallArgument::AnyJsExpression(AnyJsExpression::JsFunctionExpression(function))
-                if !other_args.is_empty() && !has_no_parameters(function) =>
+                if !other_args.is_empty() || function_has_only_simple_parameters(function) =>
             {
                 grouped_arg.cache_function_body(f);
             }
@@ -508,9 +509,14 @@ fn write_grouped_arguments(
         buffer.into_vec().into_boxed_slice()
     };
 
-    if grouped_breaks {
+    // If the grouped content breaks, then we can skip the most_flat variant,
+    // since we already know that it won't be fitting on a single line.
+    let variants = if grouped_breaks {
         write!(f, [expand_parent()])?;
-    }
+        vec![middle_variant, most_expanded.into_boxed_slice()]
+    } else {
+        vec![most_flat, middle_variant, most_expanded.into_boxed_slice()]
+    };
 
     // SAFETY: Safe because variants is guaranteed to contain exactly 3 entries:
     // * most flat
@@ -519,11 +525,7 @@ fn write_grouped_arguments(
     // ... and best fitting only requires the most flat/and expanded.
     unsafe {
         f.write_element(FormatElement::BestFitting(
-            format_element::BestFittingElement::from_vec_unchecked(vec![
-                most_flat,
-                middle_variant,
-                most_expanded.into_boxed_slice(),
-            ]),
+            format_element::BestFittingElement::from_vec_unchecked(variants),
         ))
     }
 }
@@ -603,7 +605,7 @@ impl Format<JsFormatContext> for FormatGroupedLastArgument<'_> {
         // to remove any soft line breaks.
         match element.node()? {
             AnyJsCallArgument::AnyJsExpression(JsFunctionExpression(function))
-                if !self.is_only && !has_no_parameters(function) =>
+                if !self.is_only || function_has_only_simple_parameters(function) =>
             {
                 with_token_tracking_disabled(f, |f| {
                     write!(
@@ -666,13 +668,10 @@ fn with_token_tracking_disabled<F: FnOnce(&mut JsFormatter) -> R, R>(
     result
 }
 
-/// Tests if `expression` has an empty parameters list.
-fn has_no_parameters(expression: &JsFunctionExpression) -> bool {
-    match expression.parameters() {
-        // Use default formatting for expressions without parameters, will return `Err` anyway
-        Err(_) => true,
-        Ok(parameters) => parameters.items().is_empty(),
-    }
+fn function_has_only_simple_parameters(expression: &JsFunctionExpression) -> bool {
+    expression.parameters().map_or(true, |parameters| {
+        has_only_simple_parameters(&parameters, false)
+    })
 }
 
 /// Helper for formatting a grouped call argument (see [should_group_first_argument] and [should_group_last_argument]).

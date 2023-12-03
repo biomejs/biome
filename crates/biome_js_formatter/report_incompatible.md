@@ -1,6 +1,6 @@
 ## Overall Metrics
 
-**Average compatibility**: 96.01
+**Average compatibility**: 96.58
 
 <details>
     <summary>Definition</summary>
@@ -8,7 +8,7 @@
     $$average = \frac\{\sum_{file}^\{files}compatibility_\{file}}\{files}$$
 </details>
 
-**Compatible lines**: 96.54
+**Compatible lines**: 97.53
 
 <details>
     <summary>Definition</summary>
@@ -19,35 +19,6 @@
 [Metric definition discussion](https://github.com/rome/tools/issues/2555#issuecomment-1124787893)
 
 ## Test cases
-
-### js/arrays/issue-10159.js
-```diff
- {
-   for (const srcPath of [src, `${src}.js`, `${src}/index`, `${src}/index.js`]) {
-   }
- }
- {
-   for (const srcPath of [123, 123_123_123, 123_123_123_1, 13_123_3123_31_43]) {
-   }
- }
- {
--  for (const srcPath of [123, 123_123_123, 123_123_123_1, 13_123_3123_31_432]) {
-+  for (const srcPath of [
-+    123, 123_123_123, 123_123_123_1, 13_123_3123_31_432,
-+  ]) {
-   }
- }
- {
-   for (const srcPath of [
-     123, 123_123_123, 123_123_123_1, 13_123_3123_31_4321,
-   ]) {
-   }
- }
-
-```
-
-**Prettier Similarity**: 85.00%
-
 
 ### js/arrays/numbers-negative.js
 ```diff
@@ -140,335 +111,6 @@
 **Prettier Similarity**: 54.55%
 
 
-### js/arrows/curried.js
-```diff
- const fn1 = (a) => 3;
- const fn2 = (a) => (b) => 3;
- const fn3 = (a) => (b) => (c) => 3;
- const fn4 = (a) => (b) => (c) => (d) => 3;
- const fn5 = (a) => (b) => (c) => (d) => (e) => 3;
- const fn6 = (a) => (b) => (c) => (d) => (e) => (g) => 3;
- const fn7 = (a) => (b) => (c) => (d) => (e) => (g) => (f) => 3;
- 
- const fn8 = (a) => ({ foo: bar, bar: baz, baz: foo });
- const fn9 = (a) => (b) => ({ foo: bar, bar: baz, baz: foo });
- const fn10 = (a) => (b) => (c) => ({ foo: bar, bar: baz, baz: foo });
- const fn11 = (a) => (b) => (c) => (d) => ({ foo: bar, bar: baz, baz: foo });
- const fn12 = (a) => (b) => (c) => (d) => (e) => ({
-   foo: bar,
-   bar: baz,
-   baz: foo,
- });
- const fn13 = (a) => (b) => (c) => (d) => (e) => (g) => ({
-   foo: bar,
-   bar: baz,
-   baz: foo,
- });
- const fn14 = (a) => (b) => (c) => (d) => (e) => (g) => (f) => ({
-   foo: bar,
-   bar: baz,
-   baz: foo,
- });
- 
- const curryTest =
-   (argument1) =>
-   (argument2) =>
-   (argument3) =>
-   (argument4) =>
-   (argument5) =>
-   (argument6) =>
-   (argument7) =>
-   (argument8) =>
-   (argument9) =>
-   (argument10) =>
-   (argument11) =>
-   (argument12) => ({
-     foo: argument1,
-     bar: argument2,
-   });
- 
- let curryTest2 =
-   (argument1) =>
-   (argument2) =>
-   (argument3) =>
-   (argument4) =>
-   (argument5) =>
-   (argument6) =>
-   (argument7) =>
-   (argument8) =>
-   (argument9) =>
-   (argument10) =>
-   (argument11) =>
-   (argument12) => {
-     const foo = "foo";
-     return foo + "bar";
-   };
- 
- curryTest2 =
-   (argument1) =>
-   (argument2) =>
-   (argument3) =>
-   (argument4) =>
-   (argument5) =>
-   (argument6) =>
-   (argument7) =>
-   (argument8) =>
-   (argument9) =>
-   (argument10) =>
-   (argument11) =>
-   (argument12) => {
-     const foo = "foo";
-     return foo + "bar";
-   };
- 
- throw (argument1) =>
-   (argument2) =>
-   (argument3) =>
-   (argument4) =>
-   (argument5) =>
-   (argument6) =>
-   (argument7) =>
-   (argument8) =>
-   (argument9) =>
-   (argument10) =>
-   (argument11) =>
-   (argument12) => {
-     const foo = "foo";
-     return foo + "bar";
-   };
- 
- foo(
-   (argument1) =>
-     (argument2) =>
-     (argument3) =>
-     (argument4) =>
-     (argument5) =>
-     (argument6) =>
-     (argument7) =>
-     (argument8) =>
-     (argument9) =>
-     (argument10) =>
-     (argument11) =>
-     (argument12) =>
-       3,
- );
- 
--foo(
--  (argument1) =>
--    (argument2) =>
--    (argument3) =>
--    (argument4) =>
--    (argument5) =>
--    (argument6) =>
--    (argument7) =>
--    (argument8) =>
--    (argument9) =>
--    (argument10) =>
--    (argument11) =>
--    (argument12) => ({
--      foo: bar,
--      bar: baz,
--      baz: foo,
--    }),
--);
-+foo((argument1) =>
-+  (argument2) =>
-+  (argument3) =>
-+  (argument4) =>
-+  (argument5) =>
-+  (argument6) =>
-+  (argument7) =>
-+  (argument8) =>
-+  (argument9) =>
-+  (argument10) =>
-+  (argument11) =>
-+  (argument12) => ({
-+    foo: bar,
-+    bar: baz,
-+    baz: foo,
-+  }));
- 
--foo(
--  (argument1) =>
--    (argument2) =>
--    (argument3) =>
--    (argument4) =>
--    (argument5) =>
--    (argument6) =>
--    (argument7) =>
--    (argument8) =>
--    (argument9) =>
--    (argument10) =>
--    (argument11) =>
--    (argument12) => {
--      const foo = "foo";
--      return foo + "bar";
--    },
--);
-+foo((argument1) =>
-+  (argument2) =>
-+  (argument3) =>
-+  (argument4) =>
-+  (argument5) =>
-+  (argument6) =>
-+  (argument7) =>
-+  (argument8) =>
-+  (argument9) =>
-+  (argument10) =>
-+  (argument11) =>
-+  (argument12) => {
-+    const foo = "foo";
-+    return foo + "bar";
-+  });
- 
- (
-   (argument1) =>
-   (argument2) =>
-   (argument3) =>
-   (argument4) =>
-   (argument5) =>
-   (argument6) =>
-   (argument7) =>
-   (argument8) =>
-   (argument9) =>
-   (argument10) =>
-   (argument11) =>
-   (argument12) =>
-     3
- )(3);
- 
- bar(
--  foo(
--    (argument1) =>
--      (argument2) =>
--      (argument3) =>
--      (argument4) =>
--      (argument5) =>
--      (argument6) =>
--      (argument7) =>
--      (argument8) =>
--      (argument9) =>
--      (argument10) =>
--      (argument11) =>
--      (argument12) => ({
--        foo: bar,
--        bar: baz,
--      }),
--  ),
-+  foo((argument1) =>
-+    (argument2) =>
-+    (argument3) =>
-+    (argument4) =>
-+    (argument5) =>
-+    (argument6) =>
-+    (argument7) =>
-+    (argument8) =>
-+    (argument9) =>
-+    (argument10) =>
-+    (argument11) =>
-+    (argument12) => ({
-+      foo: bar,
-+      bar: baz,
-+    })),
- );
- 
- const baaaz =
-   (aaaaa1, bbbbb1) =>
-   (aaaaa2, bbbbb2) =>
-   (aaaaa3, bbbbb3) =>
-   (aaaaa4, bbbbb4) => ({
-     foo: bar,
-   });
- 
- new Fooooooooooooooooooooooooooooooooooooooooooooooooooo(
-   (action) => (next) => (next) => (next) => (next) => (next) => (next) =>
-     dispatch(action),
- );
- 
- foo?.Fooooooooooooooooooooooooooooooooooooooooooooooooooo(
-   (action) => (next) => (next) => (next) => (next) => (next) => (next) =>
-     dispatch(action),
- );
- 
- foo((action) => (action) => action);
- 
--import(
--  (argument1) =>
--    (argument2) =>
--    (argument3) =>
--    (argument4) =>
--    (argument5) =>
--    (argument6) =>
--    (argument7) =>
--    (argument8) =>
--    (argument9) =>
--    (argument10) =>
--    (argument11) =>
--    (argument12) => {
--      const foo = "foo";
--      return foo + "bar";
--    }
--);
-+import((argument1) =>
-+  (argument2) =>
-+  (argument3) =>
-+  (argument4) =>
-+  (argument5) =>
-+  (argument6) =>
-+  (argument7) =>
-+  (argument8) =>
-+  (argument9) =>
-+  (argument10) =>
-+  (argument11) =>
-+  (argument12) => {
-+    const foo = "foo";
-+    return foo + "bar";
-+  });
-
-```
-
-**Prettier Similarity**: 68.78%
-
-
-### js/arrows/currying-2.js
-```diff
- const a = (x) => (y) => (z) =>
-   x / 0.123456789 + (y * calculateSomething(z)) / Math.PI;
- 
- request.get("https://preview-9992--prettier.netlify.app", (head) => (body) => {
-   console.log(head, body);
- });
- 
--request.get(
--  "https://preview-9992--prettier.netlify.app",
--  (head) => (body) => (mody) => {
-+request.get("https://preview-9992--prettier.netlify.app", (head) =>
-+  (body) =>
-+  (mody) => {
-     console.log(head, body);
--  },
--);
-+  });
- 
--request.get(
--  "https://preview-9992--prettier.netlify.app",
--  (head) =>
--    (body) =>
--    (modyLoremIpsumDolorAbstractProviderFactoryServiceModule) => {
--      console.log(head, body);
--    },
--);
-+request.get("https://preview-9992--prettier.netlify.app", (head) =>
-+  (body) =>
-+  (modyLoremIpsumDolorAbstractProviderFactoryServiceModule) => {
-+    console.log(head, body);
-+  });
-
-```
-
-**Prettier Similarity**: 40.91%
-
-
 ### js/arrows/currying-4.js
 ```diff
  Y(() => (a ? b : c));
@@ -514,73 +156,39 @@
    "sky.",
  ];
  
--const x2 = () => () => [
--  "The",
--  "green",
--  "dragon",
--  "liked",
--  "to",
--  "knit",
--  "sweaters",
--  "for",
--  "the",
--  "fluffy",
--  "clouds",
--  "in",
--  "the",
--  "sky.",
--];
-+const x2 = () => () =>
-+  [
-+    "The",
-+    "green",
-+    "dragon",
-+    "liked",
-+    "to",
-+    "knit",
-+    "sweaters",
-+    "for",
-+    "the",
-+    "fluffy",
-+    "clouds",
-+    "in",
-+    "the",
-+    "sky.",
-+  ];
+ const x2 = () => () => [
+   "The",
+   "green",
+   "dragon",
+   "liked",
+   "to",
+   "knit",
+   "sweaters",
+   "for",
+   "the",
+   "fluffy",
+   "clouds",
+   "in",
+   "the",
+   "sky.",
+ ];
  
--const x3 = () => () => () => [
--  "The",
--  "green",
--  "dragon",
--  "liked",
--  "to",
--  "knit",
--  "sweaters",
--  "for",
--  "the",
--  "fluffy",
--  "clouds",
--  "in",
--  "the",
--  "sky.",
--];
-+const x3 = () => () => () =>
-+  [
-+    "The",
-+    "green",
-+    "dragon",
-+    "liked",
-+    "to",
-+    "knit",
-+    "sweaters",
-+    "for",
-+    "the",
-+    "fluffy",
-+    "clouds",
-+    "in",
-+    "the",
-+    "sky.",
-+  ];
+ const x3 = () => () => () => [
+   "The",
+   "green",
+   "dragon",
+   "liked",
+   "to",
+   "knit",
+   "sweaters",
+   "for",
+   "the",
+   "fluffy",
+   "clouds",
+   "in",
+   "the",
+   "sky.",
+ ];
  
  f((a) => (1, 2, 3) /* a */);
  f((a) => (b) => (1, 2, 3) /* b */ /* a */);
@@ -619,7 +227,7 @@
 
 ```
 
-**Prettier Similarity**: 67.57%
+**Prettier Similarity**: 98.17%
 
 
 ### js/arrows/issue-1389-curry.js
@@ -693,26 +301,6 @@
 **Prettier Similarity**: 18.18%
 
 
-### js/chain-expression/test.js
-```diff
--(a?.b).c;
--(a?.()).b;
-+a?.b.c;
-+a?.().b;
- 
--(a?.b)();
--(a?.())();
-+a?.b();
-+a?.()();
- 
- new (a?.b)();
- new (a?.())();
-
-```
-
-**Prettier Similarity**: 50.00%
-
-
 ### js/comments-closure-typecast/satisfies.js
 ```diff
 -module.exports = /** @satisfies {Record<string, string>} */ ({
@@ -724,30 +312,6 @@
 ```
 
 **Prettier Similarity**: 33.33%
-
-
-### js/comments-closure-typecast/styled-components.js
-```diff
- const OverlapWrapper =
-   /** @type {import('styled-components').ThemedStyledFunction<'div',null,{overlap: boolean}>} */
-   (styled.div)`
--    position: relative;
-+position:relative;
-     > {
--      position: absolute;
--      bottom: ${(p) => p.overlap === "previous" && 0};
--      top: ${(p) => p.overlap === "next" && 0};
--    }
--  `;
-+  position: absolute;
-+  bottom: ${(p) => p.overlap === "previous" && 0};
-+top: ${(p) => p.overlap === "next" && 0};
-+}
-+`;
-
-```
-
-**Prettier Similarity**: 40.00%
 
 
 ### js/comments/empty-statements.js
@@ -2026,32 +1590,6 @@
 **Prettier Similarity**: 20.00%
 
 
-### js/last-argument-expansion/function-body-in-mode-break.js
-```diff
- fs.readdirSync(suiteLoc).forEach(function (testName) {
--  (skip ? it.skip : it)(
--    testName,
--    buildTest(binName, testName, opts),
--    2_000_000,
--  );
-+  (skip
-+    ? it.skip
-+    : it)(testName, buildTest(binName, testName, opts), 2_000_000);
- });
- 
- {
-   (skip ? it.skip : it)(
-     testName,
-     buildTest(binName, testName, opts),
-     2_000_000,
-   );
- }
-
-```
-
-**Prettier Similarity**: 66.67%
-
-
 ### js/objects/assignment-expression/object-property.js
 ```diff
  a = {
@@ -2072,111 +1610,6 @@
 ```
 
 **Prettier Similarity**: 0.00%
-
-
-### js/optional-chaining/chaining.js
-```diff
- var street = user.address?.street;
- var fooValue = myForm.querySelector("input[name=foo]")?.value;
- 
- obj?.prop;
- obj?.[expr];
- func?.(...args);
- 
- a?.();
- a?.[++x];
- a?.b.c(++x).d;
- a?.b[3].c?.(x).d;
- a?.b.c;
--(a?.b).c;
-+a?.b.c;
- a?.b?.c;
- delete a?.b;
- 
- a?.b[3].c?.(x).d.e?.f[3].g?.(y).h;
- 
--(a?.b).c();
--(a?.b[c]).c();
-+a?.b.c();
-+a?.b[c].c();
- 
- a?.b?.c.d?.e;
- (a ? b : c)?.d;
- 
- (list || list2)?.length;
- (list || list2)?.[list || list2];
- 
- async function HelloWorld() {
-   var x = (await foo.bar.blah)?.hi;
-   a?.[await b];
-   (await x)?.();
- }
- 
- a[b?.c].d();
- a?.[b?.c].d();
- a[b?.c]?.d();
- a?.[b?.c]?.d();
- 
- one?.fn();
--(one?.two).fn();
--(one?.two)();
--(one?.two())();
-+one?.two.fn();
-+one?.two();
-+one?.two()();
- one.two?.fn();
--(one.two?.three).fn();
-+one.two?.three.fn();
- one.two?.three?.fn();
- 
- one?.();
--(one?.())();
-+one?.()();
- one?.()?.();
- 
--(one?.()).two;
-+one?.().two;
- 
- a?.[b ? c : d];
- 
- (-1)?.toFixed();
- (void fn)?.();
- (a && b)?.();
- (a ? b : c)?.();
- (function () {})?.();
- (() => f)?.();
- (() => f)?.x;
--(a?.(x)).x;
-+a?.(x).x;
- (
-   aaaaaaaaaaaaaaaaaaaaaaaa &&
-   aaaaaaaaaaaaaaaaaaaaaaaa &&
-   aaaaaaaaaaaaaaaaaaaaaaaa
- )?.();
- 
- let f = () => ({})?.();
- let g = () => ({})?.b;
- a = () => ({})?.() && a;
- a = () => ({})?.()() && a;
- a = () => ({})?.().b && a;
- a = () => ({})?.b && a;
- a = () => ({})?.b() && a;
- (a) => ({})?.()?.b && 0;
- (a) => ({})?.b?.b && 0;
- (x) => ({})?.()();
- (x) => ({})?.().b;
- (x) => ({})?.b();
- (x) => ({})?.b.b;
- ({})?.a().b();
- ({ a: 1 })?.entries();
- 
- new (foo?.bar)();
- new (foo?.bar())();
- new (foo?.())();
-
-```
-
-**Prettier Similarity**: 88.51%
 
 
 ### js/quotes/objects.js
@@ -2520,51 +1953,6 @@
 **Prettier Similarity**: 87.10%
 
 
-### js/throw_expressions/throw_expression.js
-```diff
--function save(filename = throw new TypeError("Argument required")) {}
-+function save(filename = throw new TypeError("Argument required")
-+)
-+{
-+}
- 
- lint(ast, {
--  with: () => throw new Error("avoid using 'with' statements."),
-+  with: () => throw new Error("avoid using 'with' statements.")
- });
- 
- function getEncoder(encoding) {
--  const encoder =
--    encoding === "utf8"
--      ? new UTF8Encoder()
--      : encoding === "utf16le"
--        ? new UTF16Encoder(false)
--        : encoding === "utf16be"
--          ? new UTF16Encoder(true)
--          : throw new Error("Unsupported encoding");
-+  const encoder = encoding === "utf8" ? new UTF8Encoder()
-+                : encoding === "utf16le" ? new UTF16Encoder(false)
-+                : encoding === "utf16be" ? new UTF16Encoder(true)
-+                :
-+  throw new Error("Unsupported encoding");
- }
- 
- class Product {
-   get id() {
-     return this._id;
-   }
-   set id(value) {
--    this._id = value || throw new Error("Invalid value");
-+    this._id = value ||
-+    throw new Error("Invalid value");
-   }
- }
-
-```
-
-**Prettier Similarity**: 53.85%
-
-
 ### jsx/comments/in-attributes.js
 ```diff
  <div attr=/* comment */ "foo"></div>;
@@ -2668,21 +2056,6 @@
 ```
 
 **Prettier Similarity**: 50.00%
-
-
-### jsx/do/do.js
-```diff
- <div>
-   {do {
--    1;
-+	  1
-   }}
--</div>;
-+</div>
-
-```
-
-**Prettier Similarity**: 60.00%
 
 
 ### jsx/fbt/test.js
@@ -3183,36 +2556,6 @@
 ```
 
 **Prettier Similarity**: 84.38%
-
-
-### jsx/template/styled-components.js
-```diff
- <style jsx>{`
-   p {
-     color: red;
-   }
- `}</style>;
- 
- <style jsx>{tpl`
-   p {
-     color: red;
-   }
- `}</style>;
- 
- <style jsx>
--  {`
--    p {
--      color: red;
--    }
-+  {`p {
-+     color: red;
-+     }
-   `}
- </style>;
-
-```
-
-**Prettier Similarity**: 78.95%
 
 
 ### jsx/text-wrap/test.js
@@ -3799,19 +3142,6 @@
 **Prettier Similarity**: 98.96%
 
 
-### jsx/tuple/tuple.js
-```diff
- a = [<div />, <div />];
- 
--a = #[<div />, <div />];
-+a = #;
-+[<div />, <div />];
-
-```
-
-**Prettier Similarity**: 50.00%
-
-
 ### typescript/arrow/comments.ts
 ```diff
  const fn1 = () => {
@@ -3955,43 +3285,6 @@
 ```
 
 **Prettier Similarity**: 80.00%
-
-
-### typescript/class/parameter-properties.ts
-```diff
- class MyClass {
--  constructor(
--    protected x: number,
--    private y: string,
--  ) {}
-+  constructor(protected x: number, private y: string) {}
- }
- 
- [
-   class {
--    constructor(
--      protected x: number,
--      private y: string,
--    ) {}
-+    constructor(protected x: number, private y: string) {}
-   },
- ];
- 
- class Mixed {
--  constructor(
--    public a: number,
--    b: unknown,
--  ) {}
-+  constructor(public a: number, b: unknown) {}
- }
- 
- class OneParameterProperty {
-   constructor(public foobar: boolean) {}
- }
-
-```
-
-**Prettier Similarity**: 53.85%
 
 
 ### typescript/class/quoted-property.ts
@@ -4369,75 +3662,6 @@
 **Prettier Similarity**: 84.62%
 
 
-### typescript/conformance/classes/constructorDeclarations/constructorParameters/constructorImplementationWithDefaultValues2.ts
-```diff
- class C {
-   constructor(x);
-   constructor(public x: string = 1) {
-     var y = x;
-   }
- }
- 
- class D<T, U> {
-   constructor(x: T, y: U);
--  constructor(
--    x: T = 1,
--    public y: U = x,
--  ) {
-+  constructor(x: T = 1, public y: U = x) {
-     var z = x;
-   }
- }
- 
- class E<T extends Date> {
-   constructor(x);
-   constructor(x: T = new Date()) {
-     var y = x;
-   }
- }
-
-```
-
-**Prettier Similarity**: 82.61%
-
-
-### typescript/conformance/classes/constructorDeclarations/constructorParameters/constructorParameterProperties.ts
-```diff
- class C {
-   y: string;
--  constructor(
--    private x: string,
--    protected z: string,
--  ) {}
-+  constructor(private x: string, protected z: string) {}
- }
- 
- var c: C;
- var r = c.y;
- var r2 = c.x; // error
- var r3 = c.z; // error
- 
- class D<T> {
-   y: T;
--  constructor(
--    a: T,
--    private x: T,
--    protected z: T,
--  ) {}
-+  constructor(a: T, private x: T, protected z: T) {}
- }
- 
- var d: D<string>;
- var r = d.y;
- var r2 = d.x; // error
- var r3 = d.a; // error
- var r4 = d.z; // error
-
-```
-
-**Prettier Similarity**: 66.67%
-
-
 ### typescript/conformance/classes/constructorDeclarations/constructorParameters/readonlyInConstructorParameters.ts
 ```diff
  class C {
@@ -4472,309 +3696,6 @@
 ```
 
 **Prettier Similarity**: 50.00%
-
-
-### typescript/conformance/classes/mixinClassesAnnotated.ts
-```diff
- // @declaration: true
- 
- type Constructor<T> = new (...args: any[]) => T;
- 
- class Base {
--  constructor(
--    public x: number,
--    public y: number,
--  ) {}
-+  constructor(public x: number, public y: number) {}
- }
- 
- class Derived extends Base {
--  constructor(
--    x: number,
--    y: number,
--    public z: number,
--  ) {
-+  constructor(x: number, y: number, public z: number) {
-     super(x, y);
-   }
- }
- 
- const Printable = <T extends Constructor<Base>>(
-   superClass: T,
- ): Constructor<Printable> & { message: string } & T =>
-   class extends superClass {
-     static message = "hello";
-     print() {
-       const output = this.x + "," + this.y;
-     }
-   };
- 
- function Tagged<T extends Constructor<{}>>(
-   superClass: T,
- ): Constructor<Tagged> & T {
-   class C extends superClass {
-     _tag: string;
-     constructor(...args: any[]) {
-       super(...args);
-       this._tag = "hello";
-     }
-   }
-   return C;
- }
- 
- const Thing1 = Tagged(Derived);
- const Thing2 = Tagged(Printable(Derived));
- Thing2.message;
- 
- function f1() {
-   const thing = new Thing1(1, 2, 3);
-   thing.x;
-   thing._tag;
- }
- 
- function f2() {
-   const thing = new Thing2(1, 2, 3);
-   thing.x;
-   thing._tag;
-   thing.print();
- }
- 
- class Thing3 extends Thing2 {
-   constructor(tag: string) {
-     super(10, 20, 30);
-     this._tag = tag;
-   }
-   test() {
-     this.print();
-   }
- }
-
-```
-
-**Prettier Similarity**: 87.14%
-
-
-### typescript/conformance/classes/mixinClassesAnonymous.ts
-```diff
- type Constructor<T> = new (...args: any[]) => T;
- 
- class Base {
--  constructor(
--    public x: number,
--    public y: number,
--  ) {}
-+  constructor(public x: number, public y: number) {}
- }
- 
- class Derived extends Base {
--  constructor(
--    x: number,
--    y: number,
--    public z: number,
--  ) {
-+  constructor(x: number, y: number, public z: number) {
-     super(x, y);
-   }
- }
- 
- const Printable = <T extends Constructor<Base>>(superClass: T) =>
-   class extends superClass {
-     static message = "hello";
-     print() {
-       const output = this.x + "," + this.y;
-     }
-   };
- 
- function Tagged<T extends Constructor<{}>>(superClass: T) {
-   class C extends superClass {
-     _tag: string;
-     constructor(...args: any[]) {
-       super(...args);
-       this._tag = "hello";
-     }
-   }
-   return C;
- }
- 
- const Thing1 = Tagged(Derived);
- const Thing2 = Tagged(Printable(Derived));
- Thing2.message;
- 
- function f1() {
-   const thing = new Thing1(1, 2, 3);
-   thing.x;
-   thing._tag;
- }
- 
- function f2() {
-   const thing = new Thing2(1, 2, 3);
-   thing.x;
-   thing._tag;
-   thing.print();
- }
- 
- class Thing3 extends Thing2 {
-   constructor(tag: string) {
-     super(10, 20, 30);
-     this._tag = tag;
-   }
-   test() {
-     this.print();
-   }
- }
- 
- // Repro from #13805
- 
- const Timestamped = <CT extends Constructor<object>>(Base: CT) => {
-   return class extends Base {
-     timestamp = new Date();
-   };
- };
-
-```
-
-**Prettier Similarity**: 87.50%
-
-
-### typescript/conformance/internalModules/importDeclarations/exportImportAlias.ts
-```diff
- // expect no errors here
- 
- module A {
-   export var x = "hello world";
-   export class Point {
--    constructor(
--      public x: number,
--      public y: number,
--    ) {}
-+    constructor(public x: number, public y: number) {}
-   }
-   export module B {
-     export interface Id {
-       name: string;
-     }
-   }
- }
- 
- module C {
-   export import a = A;
- }
- 
- var a: string = C.a.x;
- var b: { x: number; y: number } = new C.a.Point(0, 0);
- var c: { name: string };
- var c: C.a.B.Id;
- 
- module X {
-   export function Y() {
-     return 42;
-   }
- 
-   export module Y {
-     export class Point {
--      constructor(
--        public x: number,
--        public y: number,
--      ) {}
-+      constructor(public x: number, public y: number) {}
-     }
-   }
- }
- 
- module Z {
-   // 'y' should be a fundule here
-   export import y = X.Y;
- }
- 
- var m: number = Z.y();
- var n: { x: number; y: number } = new Z.y.Point(0, 0);
- 
- module K {
-   export class L {
-     constructor(public name: string) {}
-   }
- 
-   export module L {
-     export var y = 12;
-     export interface Point {
-       x: number;
-       y: number;
-     }
-   }
- }
- 
- module M {
-   export import D = K.L;
- }
- 
- var o: { name: string };
- var o = new M.D("Hello");
- 
- var p: { x: number; y: number };
- var p: M.D.Point;
-
-```
-
-**Prettier Similarity**: 88.89%
-
-
-### typescript/conformance/internalModules/importDeclarations/importAliasIdentifiers.ts
-```diff
- module moduleA {
-   export class Point {
--    constructor(
--      public x: number,
--      public y: number,
--    ) {}
-+    constructor(public x: number, public y: number) {}
-   }
- }
- 
- import alias = moduleA;
- 
- var p: alias.Point;
- var p: moduleA.Point;
- var p: { x: number; y: number };
- 
- class clodule {
-   name: string;
- }
- 
- module clodule {
-   export interface Point {
-     x: number;
-     y: number;
-   }
-   var Point: Point = { x: 0, y: 0 };
- }
- 
- import clolias = clodule;
- 
- var p: clolias.Point;
- var p: clodule.Point;
- var p: { x: number; y: number };
- 
- function fundule() {
-   return { x: 0, y: 0 };
- }
- 
- module fundule {
-   export interface Point {
-     x: number;
-     y: number;
-   }
-   var Point: Point = { x: 0, y: 0 };
- }
- 
- import funlias = fundule;
- 
- var p: funlias.Point;
- var p: fundule.Point;
- var p: { x: number; y: number };
-
-```
-
-**Prettier Similarity**: 92.00%
 
 
 ### typescript/conformance/parser/ecmascript5/Statements/parserES5ForOfStatement21.ts
@@ -4995,115 +3916,6 @@
 ```
 
 **Prettier Similarity**: 25.00%
-
-
-### typescript/error-recovery/generic.ts
-```diff
- f1<>();
- 
- new f2<>();
- 
- function f3<>() {}
- 
- class f4 {
-   constructor<>() {}
- }
- 
--const f5 = function <>() {};
-+const f5 = function<>() {}
- 
- interface f6<> {
--  test<>();
-+    test<>();
- }
- 
- class f7<> {
--  test<>() {}
-+    test<>() {}
- }
-
-```
-
-**Prettier Similarity**: 84.21%
-
-
-### typescript/error-recovery/index-signature.ts
-```diff
- type A = { [key: string] };
- 
- type TwoParams = {
-   [a: string, b: string]: string;
--};
-+}
- type ThreeParams = {
-   [a: string, b: string, c: string]: string;
--};
-+}
- 
- type TooLong = {
--  [
--    loooooooooooooooooooooooooong: string,
--    looooooooooooooooooooooooooooooooooooooong: string,
--  ]: string;
--};
--type TooLong81 = {
--  [
--    loooooooooooooooooooooooooong: string,
--    loooooooooooooooooong: string,
--  ]: string;
--};
--type TooLong80 = {
--  [loooooooooooooooooooooooooong: string, looooooooooooooooong: string]: string;
--};
-+  [loooooooooooooooooooooooooong: string, looooooooooooooooooooooooooooooooooooooong: string]: string;
-+}
-+type TooLong81 =
-+  { [loooooooooooooooooooooooooong: string, loooooooooooooooooong: string]: string;
-+}
-+type TooLong80 =
-+  { [loooooooooooooooooooooooooong: string, looooooooooooooooong: string]: string;
-+}
- 
- // note lack of trailing comma in the index signature
- type TooLongSingleParam = {
-   [
-     looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong: string
-   ]: string;
- };
-
-```
-
-**Prettier Similarity**: 48.39%
-
-
-### typescript/error-recovery/jsdoc_only_types.ts
-```diff
--let a: *;
-+let a:
-+*
- function b(x: ?) {}
--let c: ?string;
--let d: string?;
--let e: ?(string | number);
--let f: !string;
--let g: string!;
--let h: !(string | number);
-+let c:
-+?string
-+let d: string;
-+?
-+let e:
-+?(string | number)
-+let f:
-+!string;
-+let g: string;
-+!;
-+let h:
-+!(string | number);
-
-```
-
-**Prettier Similarity**: 6.67%
 
 
 ### typescript/function-type/consistent.ts

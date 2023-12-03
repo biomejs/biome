@@ -1,0 +1,70 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@charset "UTF-8";
+@charset "iso-8859-15";
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssCharsetAtRule {
+                charset_token: CHARSET_KW@1..9 "charset" [] [Whitespace(" ")],
+                encoding: CssString {
+                    value_token: CSS_STRING_LITERAL@9..16 "\"UTF-8\"" [] [],
+                },
+                semicolon_token: SEMICOLON@16..17 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@17..19 "@" [Newline("\n")] [],
+            rule: CssCharsetAtRule {
+                charset_token: CHARSET_KW@19..27 "charset" [] [Whitespace(" ")],
+                encoding: CssString {
+                    value_token: CSS_STRING_LITERAL@27..40 "\"iso-8859-15\"" [] [],
+                },
+                semicolon_token: SEMICOLON@40..41 ";" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@41..42 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..42
+  0: (empty)
+  1: CSS_RULE_LIST@0..41
+    0: CSS_AT_RULE@0..17
+      0: AT@0..1 "@" [] []
+      1: CSS_CHARSET_AT_RULE@1..17
+        0: CHARSET_KW@1..9 "charset" [] [Whitespace(" ")]
+        1: CSS_STRING@9..16
+          0: CSS_STRING_LITERAL@9..16 "\"UTF-8\"" [] []
+        2: SEMICOLON@16..17 ";" [] []
+    1: CSS_AT_RULE@17..41
+      0: AT@17..19 "@" [Newline("\n")] []
+      1: CSS_CHARSET_AT_RULE@19..41
+        0: CHARSET_KW@19..27 "charset" [] [Whitespace(" ")]
+        1: CSS_STRING@27..40
+          0: CSS_STRING_LITERAL@27..40 "\"iso-8859-15\"" [] []
+        2: SEMICOLON@40..41 ";" [] []
+  2: EOF@41..42 "" [Newline("\n")] []
+
+```
+
+

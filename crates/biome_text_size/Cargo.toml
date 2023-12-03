@@ -8,7 +8,7 @@ keywords.workspace   = true
 license.workspace    = true
 name                 = "biome_text_size"
 repository.workspace = true
-version              = "0.1.0"
+version              = "0.3.1"
 
 [dependencies]
 schemars = { workspace = true, optional = true }
@@ -22,3 +22,6 @@ static_assertions = "1.1"
 name              = "serde"
 path              = "tests/serde.rs"
 required-features = ["serde"]
+
+[lints]
+workspace = true

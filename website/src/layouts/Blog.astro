@@ -1,27 +1,32 @@
 ---
+import type { CollectionEntry } from "astro:content";
+import BlogPostInfo from "@src/components/BlogPostInfo.astro";
+import { Image } from "astro:assets";
+
 export interface Props {
-  coverImage?: string;
-	coverImageCaption?: string;
-	coverImageAltText?: string;
-	subtitle: string;
-	title: string;
+  post: CollectionEntry<"blog">["data"];
 }
 
-import BlogPostInfo from "../components/BlogPostInfo.astro";
-
-const {coverImage, coverImageCaption, coverImageAltText, subtitle, title} = Astro.props.frontmatter;
+const { post } = Astro.props;
 ---
 
 <Fragment>
-	{coverImage && <figure class="blog-cover">
-		<img alt={coverImageAltText} src={`/img/${coverImage}`}>
-		{coverImageCaption && <figcaption class="blog-cover-caption">{coverImageCaption}</figcaption>}
-	</figure>}
+  {
+    post.coverImage && (
+      <figure class="blog-cover">
+        <Image alt={post.coverImage.alt} src={post.coverImage.src} />
+        {post.coverImage.caption && (
+          <figcaption class="blog-cover-caption">
+            {post.coverImage.caption}
+          </figcaption>
+        )}
+      </figure>
+    )
+  }
 
-	{subtitle && <div class="subtitle">{subtitle}</div>}
+  {post.subtitle && <div class="subtitle">{post.subtitle}</div>}
 
-	<BlogPostInfo {...Astro.props} />
+  <BlogPostInfo post={post} />
 
-	<slot />
+  <slot />
 </Fragment>
-

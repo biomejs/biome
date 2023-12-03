@@ -91,7 +91,7 @@ let a = <thead role="menuitem" />;
 
 # Diagnostics
 ```
-invalid.jsx:1:13 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:1:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element h1 is non-interactive and should not have an interactive role.
   
@@ -102,11 +102,15 @@ invalid.jsx:1:13 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━
   
   i Replace h1 with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    1 │ let·a·=·<h1·role="checkbox"></h1>;
+      │             ---------------       
 
 ```
 
 ```
-invalid.jsx:2:13 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:2:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element h1 is non-interactive and should not have an interactive role.
   
@@ -118,11 +122,15 @@ invalid.jsx:2:13 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━
   
   i Replace h1 with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    2 │ let·a·=·<h1·role="radio"></h1>;
+      │             ------------       
 
 ```
 
 ```
-invalid.jsx:3:13 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:3:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element h1 is non-interactive and should not have an interactive role.
   
@@ -135,11 +143,15 @@ invalid.jsx:3:13 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━
   
   i Replace h1 with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    3 │ let·a·=·<h1·role="button"></h1>;
+      │             -------------       
 
 ```
 
 ```
-invalid.jsx:4:13 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:4:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element h1 is non-interactive and should not have an interactive role.
   
@@ -152,11 +164,15 @@ invalid.jsx:4:13 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━
   
   i Replace h1 with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    4 │ let·a·=·<h1·role="combobox"></h1>;
+      │             ---------------       
 
 ```
 
 ```
-invalid.jsx:5:13 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:5:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element h1 is non-interactive and should not have an interactive role.
   
@@ -169,11 +185,15 @@ invalid.jsx:5:13 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━
   
   i Replace h1 with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    5 │ let·a·=·<h1·role="scrollbar"></h1>;
+      │             ----------------       
 
 ```
 
 ```
-invalid.jsx:6:13 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:6:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element h1 is non-interactive and should not have an interactive role.
   
@@ -186,11 +206,15 @@ invalid.jsx:6:13 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━
   
   i Replace h1 with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    6 │ let·a·=·<h1·role={"scrollbar"}></h1>;
+      │             ------------------       
 
 ```
 
 ```
-invalid.jsx:7:13 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:7:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element h1 is non-interactive and should not have an interactive role.
   
@@ -203,11 +227,15 @@ invalid.jsx:7:13 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━
   
   i Replace h1 with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    7 │ let·a·=·<h1·role={`scrollbar`}></h1>;
+      │             ------------------       
 
 ```
 
 ```
-invalid.jsx:8:13 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:8:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element ol is non-interactive and should not have an interactive role.
   
@@ -220,11 +248,15 @@ invalid.jsx:8:13 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━
   
   i Replace ol with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    8 │ let·a·=·<ol·role="menuitem"·/>;
+      │             ----------------   
 
 ```
 
 ```
-invalid.jsx:9:15 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:9:15 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element main is non-interactive and should not have an interactive role.
   
@@ -237,11 +269,15 @@ invalid.jsx:9:15 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━
   
   i Replace main with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    9 │ let·a·=·<main·role="button"·/>;
+      │               --------------   
 
 ```
 
 ```
-invalid.jsx:10:18 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:10:18 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element article is non-interactive and should not have an interactive role.
   
@@ -254,11 +290,15 @@ invalid.jsx:10:18 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace article with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    10 │ let·a·=·<article·role="button"·/>;
+       │                  --------------   
 
 ```
 
 ```
-invalid.jsx:11:16 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:11:16 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element aside is non-interactive and should not have an interactive role.
   
@@ -271,11 +311,15 @@ invalid.jsx:11:16 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace aside with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    11 │ let·a·=·<aside·role="button"·/>;
+       │                --------------   
 
 ```
 
 ```
-invalid.jsx:12:21 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:12:21 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element blockquote is non-interactive and should not have an interactive role.
   
@@ -288,11 +332,15 @@ invalid.jsx:12:21 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace blockquote with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    12 │ let·a·=·<blockquote·role="button"·/>;
+       │                     --------------   
 
 ```
 
 ```
-invalid.jsx:13:15 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:13:15 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element body is non-interactive and should not have an interactive role.
   
@@ -305,11 +353,15 @@ invalid.jsx:13:15 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace body with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    13 │ let·a·=·<body·role="button"·/>;
+       │               --------------   
 
 ```
 
 ```
-invalid.jsx:14:13 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:14:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element br is non-interactive and should not have an interactive role.
   
@@ -322,11 +374,15 @@ invalid.jsx:14:13 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace br with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    14 │ let·a·=·<br·role="button"·/>;
+       │             --------------   
 
 ```
 
 ```
-invalid.jsx:15:18 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:15:18 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element caption is non-interactive and should not have an interactive role.
   
@@ -339,11 +395,15 @@ invalid.jsx:15:18 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace caption with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    15 │ let·a·=·<caption·role="button"·/>;
+       │                  --------------   
 
 ```
 
 ```
-invalid.jsx:16:13 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:16:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element dd is non-interactive and should not have an interactive role.
   
@@ -356,11 +416,15 @@ invalid.jsx:16:13 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace dd with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    16 │ let·a·=·<dd·role="button"·/>;
+       │             --------------   
 
 ```
 
 ```
-invalid.jsx:17:18 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:17:18 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element details is non-interactive and should not have an interactive role.
   
@@ -373,11 +437,15 @@ invalid.jsx:17:18 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace details with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    17 │ let·a·=·<details·role="button"·/>;
+       │                  --------------   
 
 ```
 
 ```
-invalid.jsx:18:14 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:18:14 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element dir is non-interactive and should not have an interactive role.
   
@@ -390,11 +458,15 @@ invalid.jsx:18:14 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace dir with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    18 │ let·a·=·<dir·role="button"·/>;
+       │              --------------   
 
 ```
 
 ```
-invalid.jsx:19:13 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:19:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element dl is non-interactive and should not have an interactive role.
   
@@ -407,11 +479,15 @@ invalid.jsx:19:13 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace dl with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    19 │ let·a·=·<dl·role="button"·/>;
+       │             --------------   
 
 ```
 
 ```
-invalid.jsx:20:14 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:20:14 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element dfn is non-interactive and should not have an interactive role.
   
@@ -424,11 +500,15 @@ invalid.jsx:20:14 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace dfn with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    20 │ let·a·=·<dfn·role="button"·/>;
+       │              --------------   
 
 ```
 
 ```
-invalid.jsx:21:13 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:21:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element dt is non-interactive and should not have an interactive role.
   
@@ -441,11 +521,15 @@ invalid.jsx:21:13 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace dt with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    21 │ let·a·=·<dt·role="button"·/>;
+       │             --------------   
 
 ```
 
 ```
-invalid.jsx:22:19 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:22:19 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element fieldset is non-interactive and should not have an interactive role.
   
@@ -458,11 +542,15 @@ invalid.jsx:22:19 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace fieldset with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    22 │ let·a·=·<fieldset·role="button"·/>;
+       │                   --------------   
 
 ```
 
 ```
-invalid.jsx:23:21 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:23:21 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element figcaption is non-interactive and should not have an interactive role.
   
@@ -475,11 +563,15 @@ invalid.jsx:23:21 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace figcaption with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    23 │ let·a·=·<figcaption·role="button"·/>;
+       │                     --------------   
 
 ```
 
 ```
-invalid.jsx:24:17 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:24:17 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element figure is non-interactive and should not have an interactive role.
   
@@ -492,11 +584,15 @@ invalid.jsx:24:17 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace figure with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    24 │ let·a·=·<figure·role="button"·/>;
+       │                 --------------   
 
 ```
 
 ```
-invalid.jsx:25:17 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:25:17 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element footer is non-interactive and should not have an interactive role.
   
@@ -509,11 +605,15 @@ invalid.jsx:25:17 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace footer with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    25 │ let·a·=·<footer·role="button"·/>;
+       │                 --------------   
 
 ```
 
 ```
-invalid.jsx:26:15 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:26:15 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element form is non-interactive and should not have an interactive role.
   
@@ -526,11 +626,15 @@ invalid.jsx:26:15 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace form with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    26 │ let·a·=·<form·role="button"·/>;
+       │               --------------   
 
 ```
 
 ```
-invalid.jsx:27:16 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:27:16 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element frame is non-interactive and should not have an interactive role.
   
@@ -543,11 +647,15 @@ invalid.jsx:27:16 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace frame with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    27 │ let·a·=·<frame·role="button"·/>;
+       │                --------------   
 
 ```
 
 ```
-invalid.jsx:28:13 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:28:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element h1 is non-interactive and should not have an interactive role.
   
@@ -560,11 +668,15 @@ invalid.jsx:28:13 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace h1 with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    28 │ let·a·=·<h1·role="button"·/>;
+       │             --------------   
 
 ```
 
 ```
-invalid.jsx:29:13 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:29:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element h2 is non-interactive and should not have an interactive role.
   
@@ -577,11 +689,15 @@ invalid.jsx:29:13 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace h2 with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    29 │ let·a·=·<h2·role="button"·/>;
+       │             --------------   
 
 ```
 
 ```
-invalid.jsx:30:13 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:30:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element h3 is non-interactive and should not have an interactive role.
   
@@ -594,11 +710,15 @@ invalid.jsx:30:13 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace h3 with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    30 │ let·a·=·<h3·role="button"·/>;
+       │             --------------   
 
 ```
 
 ```
-invalid.jsx:31:13 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:31:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element h4 is non-interactive and should not have an interactive role.
   
@@ -611,11 +731,15 @@ invalid.jsx:31:13 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace h4 with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    31 │ let·a·=·<h4·role="button"·/>;
+       │             --------------   
 
 ```
 
 ```
-invalid.jsx:32:13 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:32:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element h5 is non-interactive and should not have an interactive role.
   
@@ -628,11 +752,15 @@ invalid.jsx:32:13 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace h5 with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    32 │ let·a·=·<h5·role="button"·/>;
+       │             --------------   
 
 ```
 
 ```
-invalid.jsx:33:13 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:33:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element h6 is non-interactive and should not have an interactive role.
   
@@ -645,11 +773,15 @@ invalid.jsx:33:13 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace h6 with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    33 │ let·a·=·<h6·role="button"·/>;
+       │             --------------   
 
 ```
 
 ```
-invalid.jsx:34:17 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:34:17 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element iframe is non-interactive and should not have an interactive role.
   
@@ -662,11 +794,15 @@ invalid.jsx:34:17 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace iframe with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    34 │ let·a·=·<iframe·role="button"·/>;
+       │                 --------------   
 
 ```
 
 ```
-invalid.jsx:35:14 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:35:14 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element img is non-interactive and should not have an interactive role.
   
@@ -679,11 +815,15 @@ invalid.jsx:35:14 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace img with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    35 │ let·a·=·<img·role="button"·/>;
+       │              --------------   
 
 ```
 
 ```
-invalid.jsx:36:16 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:36:16 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element label is non-interactive and should not have an interactive role.
   
@@ -696,11 +836,15 @@ invalid.jsx:36:16 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace label with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    36 │ let·a·=·<label·role="button"·/>;
+       │                --------------   
 
 ```
 
 ```
-invalid.jsx:37:17 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:37:17 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element legend is non-interactive and should not have an interactive role.
   
@@ -713,11 +857,15 @@ invalid.jsx:37:17 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace legend with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    37 │ let·a·=·<legend·role="button"·/>;
+       │                 --------------   
 
 ```
 
 ```
-invalid.jsx:38:13 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:38:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element li is non-interactive and should not have an interactive role.
   
@@ -730,11 +878,15 @@ invalid.jsx:38:13 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace li with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    38 │ let·a·=·<li·role="button"·/>;
+       │             --------------   
 
 ```
 
 ```
-invalid.jsx:39:15 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:39:15 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element mark is non-interactive and should not have an interactive role.
   
@@ -747,11 +899,15 @@ invalid.jsx:39:15 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace mark with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    39 │ let·a·=·<mark·role="button"·/>;
+       │               --------------   
 
 ```
 
 ```
-invalid.jsx:40:18 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:40:18 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element marquee is non-interactive and should not have an interactive role.
   
@@ -764,11 +920,15 @@ invalid.jsx:40:18 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace marquee with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    40 │ let·a·=·<marquee·role="button"·/>;
+       │                  --------------   
 
 ```
 
 ```
-invalid.jsx:41:15 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:41:15 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element menu is non-interactive and should not have an interactive role.
   
@@ -781,11 +941,15 @@ invalid.jsx:41:15 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace menu with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    41 │ let·a·=·<menu·role="button"·/>;
+       │               --------------   
 
 ```
 
 ```
-invalid.jsx:42:16 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:42:16 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element meter is non-interactive and should not have an interactive role.
   
@@ -798,11 +962,15 @@ invalid.jsx:42:16 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace meter with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    42 │ let·a·=·<meter·role="button"·/>;
+       │                --------------   
 
 ```
 
 ```
-invalid.jsx:43:14 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:43:14 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element nav is non-interactive and should not have an interactive role.
   
@@ -815,11 +983,15 @@ invalid.jsx:43:14 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace nav with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    43 │ let·a·=·<nav·role="button"·/>;
+       │              --------------   
 
 ```
 
 ```
-invalid.jsx:44:13 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:44:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element ol is non-interactive and should not have an interactive role.
   
@@ -832,11 +1004,15 @@ invalid.jsx:44:13 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace ol with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    44 │ let·a·=·<ol·role="button"·/>;
+       │             --------------   
 
 ```
 
 ```
-invalid.jsx:45:19 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:45:19 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element optgroup is non-interactive and should not have an interactive role.
   
@@ -849,11 +1025,15 @@ invalid.jsx:45:19 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace optgroup with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    45 │ let·a·=·<optgroup·role="button"·/>;
+       │                   --------------   
 
 ```
 
 ```
-invalid.jsx:46:17 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:46:17 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element output is non-interactive and should not have an interactive role.
   
@@ -866,11 +1046,15 @@ invalid.jsx:46:17 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace output with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    46 │ let·a·=·<output·role="button"·/>;
+       │                 --------------   
 
 ```
 
 ```
-invalid.jsx:47:14 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:47:14 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element pre is non-interactive and should not have an interactive role.
   
@@ -883,11 +1067,15 @@ invalid.jsx:47:14 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace pre with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    47 │ let·a·=·<pre·role="button"·/>;
+       │              --------------   
 
 ```
 
 ```
-invalid.jsx:48:19 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:48:19 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element progress is non-interactive and should not have an interactive role.
   
@@ -900,11 +1088,15 @@ invalid.jsx:48:19 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace progress with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    48 │ let·a·=·<progress·role="button"·/>;
+       │                   --------------   
 
 ```
 
 ```
-invalid.jsx:49:15 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:49:15 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element ruby is non-interactive and should not have an interactive role.
   
@@ -917,11 +1109,15 @@ invalid.jsx:49:15 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace ruby with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    49 │ let·a·=·<ruby·role="button"·/>;
+       │               --------------   
 
 ```
 
 ```
-invalid.jsx:50:16 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:50:16 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element table is non-interactive and should not have an interactive role.
   
@@ -934,11 +1130,15 @@ invalid.jsx:50:16 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace table with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    50 │ let·a·=·<table·role="button"·/>;
+       │                --------------   
 
 ```
 
 ```
-invalid.jsx:51:16 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:51:16 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element tbody is non-interactive and should not have an interactive role.
   
@@ -951,11 +1151,15 @@ invalid.jsx:51:16 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace tbody with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    51 │ let·a·=·<tbody·role="button"·/>;
+       │                --------------   
 
 ```
 
 ```
-invalid.jsx:52:13 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:52:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element td is non-interactive and should not have an interactive role.
   
@@ -968,11 +1172,15 @@ invalid.jsx:52:13 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace td with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    52 │ let·a·=·<td·role="button"·/>;
+       │             --------------   
 
 ```
 
 ```
-invalid.jsx:53:16 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:53:16 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element tfoot is non-interactive and should not have an interactive role.
   
@@ -985,11 +1193,15 @@ invalid.jsx:53:16 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace tfoot with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    53 │ let·a·=·<tfoot·role="button"·/>;
+       │                --------------   
 
 ```
 
 ```
-invalid.jsx:54:16 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:54:16 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element thead is non-interactive and should not have an interactive role.
   
@@ -1002,11 +1214,15 @@ invalid.jsx:54:16 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace thead with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    54 │ let·a·=·<thead·role="button"·/>;
+       │                --------------   
 
 ```
 
 ```
-invalid.jsx:55:15 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:55:15 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element time is non-interactive and should not have an interactive role.
   
@@ -1019,11 +1235,15 @@ invalid.jsx:55:15 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace time with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    55 │ let·a·=·<time·role="button"·/>;
+       │               --------------   
 
 ```
 
 ```
-invalid.jsx:56:13 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:56:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element ul is non-interactive and should not have an interactive role.
   
@@ -1036,11 +1256,15 @@ invalid.jsx:56:13 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace ul with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    56 │ let·a·=·<ul·role="button"·/>;
+       │             --------------   
 
 ```
 
 ```
-invalid.jsx:57:15 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:57:15 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element main is non-interactive and should not have an interactive role.
   
@@ -1053,11 +1277,15 @@ invalid.jsx:57:15 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace main with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    57 │ let·a·=·<main·role="menuitem"·/>;
+       │               ----------------   
 
 ```
 
 ```
-invalid.jsx:58:18 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:58:18 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element article is non-interactive and should not have an interactive role.
   
@@ -1070,11 +1298,15 @@ invalid.jsx:58:18 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace article with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    58 │ let·a·=·<article·role="menuitem"·/>;
+       │                  ----------------   
 
 ```
 
 ```
-invalid.jsx:59:13 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:59:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element dd is non-interactive and should not have an interactive role.
   
@@ -1087,11 +1319,15 @@ invalid.jsx:59:13 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace dd with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    59 │ let·a·=·<dd·role="menuitem"·/>;
+       │             ----------------   
 
 ```
 
 ```
-invalid.jsx:60:14 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:60:14 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element dfn is non-interactive and should not have an interactive role.
   
@@ -1104,11 +1340,15 @@ invalid.jsx:60:14 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace dfn with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    60 │ let·a·=·<dfn·role="menuitem"·/>;
+       │              ----------------   
 
 ```
 
 ```
-invalid.jsx:61:13 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:61:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element dt is non-interactive and should not have an interactive role.
   
@@ -1121,11 +1361,15 @@ invalid.jsx:61:13 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace dt with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    61 │ let·a·=·<dt·role="menuitem"·/>;
+       │             ----------------   
 
 ```
 
 ```
-invalid.jsx:62:19 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:62:19 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element fieldset is non-interactive and should not have an interactive role.
   
@@ -1138,11 +1382,15 @@ invalid.jsx:62:19 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace fieldset with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    62 │ let·a·=·<fieldset·role="menuitem"·/>;
+       │                   ----------------   
 
 ```
 
 ```
-invalid.jsx:63:17 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:63:17 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element figure is non-interactive and should not have an interactive role.
   
@@ -1155,11 +1403,15 @@ invalid.jsx:63:17 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace figure with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    63 │ let·a·=·<figure·role="menuitem"·/>;
+       │                 ----------------   
 
 ```
 
 ```
-invalid.jsx:64:15 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:64:15 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element form is non-interactive and should not have an interactive role.
   
@@ -1172,11 +1424,15 @@ invalid.jsx:64:15 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace form with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    64 │ let·a·=·<form·role="menuitem"·/>;
+       │               ----------------   
 
 ```
 
 ```
-invalid.jsx:65:16 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:65:16 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element frame is non-interactive and should not have an interactive role.
   
@@ -1189,11 +1445,15 @@ invalid.jsx:65:16 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace frame with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    65 │ let·a·=·<frame·role="menuitem"·/>;
+       │                ----------------   
 
 ```
 
 ```
-invalid.jsx:66:13 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:66:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element h1 is non-interactive and should not have an interactive role.
   
@@ -1206,11 +1466,15 @@ invalid.jsx:66:13 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace h1 with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    66 │ let·a·=·<h1·role="menuitem"·/>;
+       │             ----------------   
 
 ```
 
 ```
-invalid.jsx:67:13 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:67:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element h2 is non-interactive and should not have an interactive role.
   
@@ -1223,11 +1487,15 @@ invalid.jsx:67:13 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace h2 with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    67 │ let·a·=·<h2·role="menuitem"·/>;
+       │             ----------------   
 
 ```
 
 ```
-invalid.jsx:68:13 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:68:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element h3 is non-interactive and should not have an interactive role.
   
@@ -1240,11 +1508,15 @@ invalid.jsx:68:13 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace h3 with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    68 │ let·a·=·<h3·role="menuitem"·/>;
+       │             ----------------   
 
 ```
 
 ```
-invalid.jsx:69:13 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:69:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element h4 is non-interactive and should not have an interactive role.
   
@@ -1257,11 +1529,15 @@ invalid.jsx:69:13 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace h4 with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    69 │ let·a·=·<h4·role="menuitem"·/>;
+       │             ----------------   
 
 ```
 
 ```
-invalid.jsx:70:13 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:70:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element h5 is non-interactive and should not have an interactive role.
   
@@ -1274,11 +1550,15 @@ invalid.jsx:70:13 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace h5 with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    70 │ let·a·=·<h5·role="menuitem"·/>;
+       │             ----------------   
 
 ```
 
 ```
-invalid.jsx:71:13 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:71:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element h6 is non-interactive and should not have an interactive role.
   
@@ -1291,11 +1571,15 @@ invalid.jsx:71:13 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace h6 with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    71 │ let·a·=·<h6·role="menuitem"·/>;
+       │             ----------------   
 
 ```
 
 ```
-invalid.jsx:74:14 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:74:14 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element img is non-interactive and should not have an interactive role.
   
@@ -1308,11 +1592,15 @@ invalid.jsx:74:14 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace img with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    74 │ let·a·=·<img·role="menuitem"·/>;
+       │              ----------------   
 
 ```
 
 ```
-invalid.jsx:75:14 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:75:14 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element nav is non-interactive and should not have an interactive role.
   
@@ -1325,11 +1613,15 @@ invalid.jsx:75:14 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace nav with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    75 │ let·a·=·<nav·role="menuitem"·/>;
+       │              ----------------   
 
 ```
 
 ```
-invalid.jsx:76:13 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:76:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element ol is non-interactive and should not have an interactive role.
   
@@ -1342,11 +1634,15 @@ invalid.jsx:76:13 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace ol with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    76 │ let·a·=·<ol·role="menuitem"·/>;
+       │             ----------------   
 
 ```
 
 ```
-invalid.jsx:77:12 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:77:12 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element p is non-interactive and should not have an interactive role.
   
@@ -1359,11 +1655,15 @@ invalid.jsx:77:12 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace p with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    77 │ let·a·=·<p·role="button"·/>;
+       │            --------------   
 
 ```
 
 ```
-invalid.jsx:78:18 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:78:18 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element section is non-interactive and should not have an interactive role.
   
@@ -1376,11 +1676,15 @@ invalid.jsx:78:18 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace section with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    78 │ let·a·=·<section·role="button"·aria-label="Aardletk"·/>;
+       │                  --------------                         
 
 ```
 
 ```
-invalid.jsx:79:16 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:79:16 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element tbody is non-interactive and should not have an interactive role.
   
@@ -1393,11 +1697,15 @@ invalid.jsx:79:16 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace tbody with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    79 │ let·a·=·<tbody·role="menuitem"·/>;
+       │                ----------------   
 
 ```
 
 ```
-invalid.jsx:80:13 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:80:13 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element td is non-interactive and should not have an interactive role.
   
@@ -1410,11 +1718,15 @@ invalid.jsx:80:13 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace td with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    80 │ let·a·=·<td·role="menuitem"·/>;
+       │             ----------------   
 
 ```
 
 ```
-invalid.jsx:81:16 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:81:16 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element tfoot is non-interactive and should not have an interactive role.
   
@@ -1427,11 +1739,15 @@ invalid.jsx:81:16 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace tfoot with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    81 │ let·a·=·<tfoot·role="menuitem"·/>;
+       │                ----------------   
 
 ```
 
 ```
-invalid.jsx:82:16 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:82:16 lint/a11y/noNoninteractiveElementToInteractiveRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element thead is non-interactive and should not have an interactive role.
   
@@ -1443,6 +1759,10 @@ invalid.jsx:82:16 lint/a11y/noNoninteractiveElementToInteractiveRole ━━━�
   
   i Replace thead with a div or a span.
   
+  i Unsafe fix: Remove the role attribute.
+  
+    82 │ let·a·=·<thead·role="menuitem"·/>;
+       │                ----------------   
 
 ```
 

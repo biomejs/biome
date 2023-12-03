@@ -11,7 +11,7 @@ Biome allows to sort import statement using [natural ordering](https://en.wikipe
 
 This feature is enabled by default but can be opted-out via configuration:
 
-```json
+```json title="biome.json"
 {
   "organizeImports": {
     "enabled": false
@@ -35,7 +35,7 @@ Import statements are sorted by "distance". Modules that are "farther" from the 
 
 For example, given the following code:
 
-```ts
+```ts title="example.ts"
 import uncle from "../uncle";
 import sibling from "./sibling";
 import express from "npm:express";
@@ -52,7 +52,7 @@ import React from "react";
 
 They will be sorted like this:
 
-```ts
+```ts title="example.ts"
  import { expect } from "bun:test";
  import assert from "node:assert";
  import { mock, test } from "node:test";
@@ -73,7 +73,7 @@ You can apply the sorting in two ways: via [CLI](#import-sorting-via-cli) or [VS
 
 It's widespread to have import statements in a certain order, primarily when you work on a frontend project, and you import CSS files:
 
-```js
+```js title="example.js"
 import "../styles/reset.css";
 import "../styles/layout.css";
 import { Grid } from "../components/Grid.jsx";
@@ -81,7 +81,7 @@ import { Grid } from "../components/Grid.jsx";
 
 Another common case is import polyfills or shim files, that needs to stay at the top file:
 
-```js
+```js title="example.js"
 import "../polyfills/array/flatMap";
 import { functionThatUsesFlatMap } from "./utils.js";
 ```
@@ -92,7 +92,7 @@ To avoid this, create a "group" of imports. You create a "group" by adding a **n
 
 By doing so, Biome will limit the sorting only to the import statements that belong to the same group:
 
-```js
+```js title="example.js"
 // group 1, only these two files will be sorted
 import "../styles/reset.css";
 import "../styles/layout.css";
@@ -101,7 +101,7 @@ import "../styles/layout.css";
 import { Grid } from "../components/Grid.jsx";
 ```
 
-```js
+```js title="example.js"
 // group 1, the polyfill/shim
 import "../polyfills/array/flatMap";
 
@@ -114,7 +114,7 @@ import { functionThatUsesFlatMap } from "./utils.js";
 Using the command `check`, with the option `--apply`.
 
 ```shell
-biome check --apply-unsafe ./path/to/src
+biome check --apply ./path/to/src
 ```
 
 ### Import sorting via VSCode extension
@@ -124,7 +124,7 @@ By default, this action can be run using the <kbd title="Shift">⇧</kbd>+<kbd>A
 
 You can add the following to your editor configuration if you want the action to run automatically on save instead of calling it manually:
 
-```json
+```json title="biome.json"
 {
 	"editor.codeActionsOnSave":{
 		"source.organizeImports.biome": true

@@ -8,7 +8,7 @@ keywords.workspace   = true
 license.workspace    = true
 name                 = "biome_json_analyze"
 repository.workspace = true
-version              = "0.2.0"
+version              = "0.3.1"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -28,3 +28,6 @@ biome_service      = { path = "../biome_service" }
 biome_test_utils   = { path = "../biome_test_utils" }
 insta              = { workspace = true, features = ["glob"] }
 tests_macros       = { path = "../tests_macros" }
+
+[lints]
+workspace = true

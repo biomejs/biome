@@ -42,6 +42,15 @@ class C {
     ) {
     }
 }
+
+class MyClass {
+    constructor(
+        b: string,
+        protected x: number,
+        a: string,
+    ) {}
+}
+
 ```
 
 
@@ -72,7 +81,10 @@ class B {
 }
 
 class A {
-	constructor(private readonly a: string, readonly b: string) {}
+	constructor(
+		private readonly a: string,
+		readonly b: string,
+	) {}
 }
 
 class C {
@@ -91,6 +103,14 @@ class C {
 		readonly b11: string,
 		readonly b22: string,
 		readonly b33: string,
+	) {}
+}
+
+class MyClass {
+	constructor(
+		b: string,
+		protected x: number,
+		a: string,
 	) {}
 }
 ```
