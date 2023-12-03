@@ -72,14 +72,14 @@ Biome には `lsp-proxy` というコマンドがあります。 実行すると
 
 ### `stdin` を使う
 
-エディタが LSP をサポートしていない場合は、 [標準入力](https://en.wikipedia.org/wiki/Standard_streams#Standard_input_(stdin)) を利用して `biome` バイナリを直接使用します。
+エディタが LSP をサポートしていない場合は、 [標準入力](https://ja.wikipedia.org/wiki/%E6%A8%99%E6%BA%96%E3%82%B9%E3%83%88%E3%83%AA%E3%83%BC%E3%83%A0#%E6%A8%99%E6%BA%96%E5%85%A5%E5%8A%9B_(stdin)) を利用して `biome` バイナリを直接使用します。
 
 標準入力を介して以下のコマンドを呼び出すことができます:
 - [`format`](/reference/cli/#biome-format)
 - [`lint`](/reference/cli/#biome-lint)
 - [`check`](/reference/cli/#biome-check)
 
-Biome は、新しい出力（変更が発生していない場合は元の出力）を [標準出力](https://en.wikipedia.org/wiki/Standard_streams#Standard_output_(stdout)) に返し、診断を [標準エラー](https://en.wikipedia.org/wiki/Standard_streams#Standard_error_(stderr)) に返します。
+Biome は、新しい出力（変更が発生していない場合は元の出力）を [標準出力](https://ja.wikipedia.org/wiki/%E6%A8%99%E6%BA%96%E3%82%B9%E3%83%88%E3%83%AA%E3%83%BC%E3%83%A0#%E6%A8%99%E6%BA%96%E5%87%BA%E5%8A%9B_(stdout)) に返し、診断を [標準エラー](https://ja.wikipedia.org/wiki/%E6%A8%99%E6%BA%96%E3%82%B9%E3%83%88%E3%83%AA%E3%83%BC%E3%83%A0#%E6%A8%99%E6%BA%96%E3%82%A8%E3%83%A9%E3%83%BC%E5%87%BA%E5%8A%9B_(stderr)) に返します。
 
 `stdin` を使用する場合は、 `--stdin-file-path` オプションを渡す必要があります。
 ファイルの `path` は、ファイルシステムに存在する必要はなく、任意の名前で構いません。 
