@@ -714,47 +714,6 @@ pub struct CssDeclarationImportantFields {
     pub important_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub struct CssDimension {
-    pub(crate) syntax: SyntaxNode,
-}
-impl CssDimension {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> CssDimensionFields {
-        CssDimensionFields {
-            value: self.value(),
-            unit: self.unit(),
-        }
-    }
-    pub fn value(&self) -> SyntaxResult<CssNumber> {
-        support::required_node(&self.syntax, 0usize)
-    }
-    pub fn unit(&self) -> SyntaxResult<CssIdentifier> {
-        support::required_node(&self.syntax, 1usize)
-    }
-}
-#[cfg(feature = "serde")]
-impl Serialize for CssDimension {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[cfg_attr(feature = "serde", derive(Serialize))]
-pub struct CssDimensionFields {
-    pub value: SyntaxResult<CssNumber>,
-    pub unit: SyntaxResult<CssIdentifier>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssIdSelector {
     pub(crate) syntax: SyntaxNode,
 }
@@ -1632,11 +1591,11 @@ impl CssParameter {
     }
     pub fn as_fields(&self) -> CssParameterFields {
         CssParameterFields {
-            any_css_value: self.any_css_value(),
+            css_list_of_component_values: self.css_list_of_component_values(),
         }
     }
-    pub fn any_css_value(&self) -> SyntaxResult<AnyCssValue> {
-        support::required_node(&self.syntax, 0usize)
+    pub fn css_list_of_component_values(&self) -> CssListOfComponentValues {
+        support::list(&self.syntax, 0usize)
     }
 }
 #[cfg(feature = "serde")]
@@ -1650,7 +1609,48 @@ impl Serialize for CssParameter {
 }
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct CssParameterFields {
-    pub any_css_value: SyntaxResult<AnyCssValue>,
+    pub css_list_of_component_values: CssListOfComponentValues,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssPercentDimension {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssPercentDimension {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssPercentDimensionFields {
+        CssPercentDimensionFields {
+            value: self.value(),
+            unit_token: self.unit_token(),
+        }
+    }
+    pub fn value(&self) -> SyntaxResult<CssNumber> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn unit_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssPercentDimension {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssPercentDimensionFields {
+    pub value: SyntaxResult<CssNumber>,
+    pub unit_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssPercentage {
@@ -2610,6 +2610,47 @@ pub struct CssRatioFields {
     pub denominator: SyntaxResult<CssNumber>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssRegularDimension {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssRegularDimension {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssRegularDimensionFields {
+        CssRegularDimensionFields {
+            value: self.value(),
+            unit: self.unit(),
+        }
+    }
+    pub fn value(&self) -> SyntaxResult<CssNumber> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn unit(&self) -> SyntaxResult<CssIdentifier> {
+        support::required_node(&self.syntax, 1usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssRegularDimension {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssRegularDimensionFields {
+    pub value: SyntaxResult<CssNumber>,
+    pub unit: SyntaxResult<CssIdentifier>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssRelativeSelector {
     pub(crate) syntax: SyntaxNode,
 }
@@ -3129,6 +3170,26 @@ impl AnyCssCompoundSelector {
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
+pub enum AnyCssDimension {
+    CssPercentage(CssPercentage),
+    CssRegularDimension(CssRegularDimension),
+}
+impl AnyCssDimension {
+    pub fn as_css_percentage(&self) -> Option<&CssPercentage> {
+        match &self {
+            AnyCssDimension::CssPercentage(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_regular_dimension(&self) -> Option<&CssRegularDimension> {
+        match &self {
+            AnyCssDimension::CssRegularDimension(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum AnyCssMediaQueryFeatureType {
     CssMediaQueryFeatureBoolean(CssMediaQueryFeatureBoolean),
     CssMediaQueryFeatureCompare(CssMediaQueryFeatureCompare),
@@ -3539,15 +3600,21 @@ impl AnyCssSubSelector {
 #[derive(Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum AnyCssValue {
+    AnyCssDimension(AnyCssDimension),
     CssAnyFunction(CssAnyFunction),
     CssCustomProperty(CssCustomProperty),
-    CssDimension(CssDimension),
     CssIdentifier(CssIdentifier),
     CssNumber(CssNumber),
     CssRatio(CssRatio),
     CssString(CssString),
 }
 impl AnyCssValue {
+    pub fn as_any_css_dimension(&self) -> Option<&AnyCssDimension> {
+        match &self {
+            AnyCssValue::AnyCssDimension(item) => Some(item),
+            _ => None,
+        }
+    }
     pub fn as_css_any_function(&self) -> Option<&CssAnyFunction> {
         match &self {
             AnyCssValue::CssAnyFunction(item) => Some(item),
@@ -3557,12 +3624,6 @@ impl AnyCssValue {
     pub fn as_css_custom_property(&self) -> Option<&CssCustomProperty> {
         match &self {
             AnyCssValue::CssCustomProperty(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_css_dimension(&self) -> Option<&CssDimension> {
-        match &self {
-            AnyCssValue::CssDimension(item) => Some(item),
             _ => None,
         }
     }
@@ -4285,45 +4346,6 @@ impl From<CssDeclarationImportant> for SyntaxNode {
 }
 impl From<CssDeclarationImportant> for SyntaxElement {
     fn from(n: CssDeclarationImportant) -> SyntaxElement {
-        n.syntax.into()
-    }
-}
-impl AstNode for CssDimension {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_DIMENSION as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_DIMENSION
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for CssDimension {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssDimension")
-            .field("value", &support::DebugSyntaxResult(self.value()))
-            .field("unit", &support::DebugSyntaxResult(self.unit()))
-            .finish()
-    }
-}
-impl From<CssDimension> for SyntaxNode {
-    fn from(n: CssDimension) -> SyntaxNode {
-        n.syntax
-    }
-}
-impl From<CssDimension> for SyntaxElement {
-    fn from(n: CssDimension) -> SyntaxElement {
         n.syntax.into()
     }
 }
@@ -5194,8 +5216,8 @@ impl std::fmt::Debug for CssParameter {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("CssParameter")
             .field(
-                "any_css_value",
-                &support::DebugSyntaxResult(self.any_css_value()),
+                "css_list_of_component_values",
+                &self.css_list_of_component_values(),
             )
             .finish()
     }
@@ -5207,6 +5229,45 @@ impl From<CssParameter> for SyntaxNode {
 }
 impl From<CssParameter> for SyntaxElement {
     fn from(n: CssParameter) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssPercentDimension {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_PERCENT_DIMENSION as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_PERCENT_DIMENSION
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssPercentDimension {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssPercentDimension")
+            .field("value", &support::DebugSyntaxResult(self.value()))
+            .field("unit_token", &support::DebugSyntaxResult(self.unit_token()))
+            .finish()
+    }
+}
+impl From<CssPercentDimension> for SyntaxNode {
+    fn from(n: CssPercentDimension) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssPercentDimension> for SyntaxElement {
+    fn from(n: CssPercentDimension) -> SyntaxElement {
         n.syntax.into()
     }
 }
@@ -6134,6 +6195,45 @@ impl From<CssRatio> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for CssRegularDimension {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_REGULAR_DIMENSION as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_REGULAR_DIMENSION
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssRegularDimension {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssRegularDimension")
+            .field("value", &support::DebugSyntaxResult(self.value()))
+            .field("unit", &support::DebugSyntaxResult(self.unit()))
+            .finish()
+    }
+}
+impl From<CssRegularDimension> for SyntaxNode {
+    fn from(n: CssRegularDimension) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssRegularDimension> for SyntaxElement {
+    fn from(n: CssRegularDimension) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
 impl AstNode for CssRelativeSelector {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -6795,6 +6895,68 @@ impl From<AnyCssCompoundSelector> for SyntaxNode {
 }
 impl From<AnyCssCompoundSelector> for SyntaxElement {
     fn from(n: AnyCssCompoundSelector) -> SyntaxElement {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<CssPercentage> for AnyCssDimension {
+    fn from(node: CssPercentage) -> AnyCssDimension {
+        AnyCssDimension::CssPercentage(node)
+    }
+}
+impl From<CssRegularDimension> for AnyCssDimension {
+    fn from(node: CssRegularDimension) -> AnyCssDimension {
+        AnyCssDimension::CssRegularDimension(node)
+    }
+}
+impl AstNode for AnyCssDimension {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        CssPercentage::KIND_SET.union(CssRegularDimension::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, CSS_PERCENTAGE | CSS_REGULAR_DIMENSION)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_PERCENTAGE => AnyCssDimension::CssPercentage(CssPercentage { syntax }),
+            CSS_REGULAR_DIMENSION => {
+                AnyCssDimension::CssRegularDimension(CssRegularDimension { syntax })
+            }
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            AnyCssDimension::CssPercentage(it) => &it.syntax,
+            AnyCssDimension::CssRegularDimension(it) => &it.syntax,
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            AnyCssDimension::CssPercentage(it) => it.syntax,
+            AnyCssDimension::CssRegularDimension(it) => it.syntax,
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssDimension {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            AnyCssDimension::CssPercentage(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssDimension::CssRegularDimension(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssDimension> for SyntaxNode {
+    fn from(n: AnyCssDimension) -> SyntaxNode {
+        match n {
+            AnyCssDimension::CssPercentage(it) => it.into(),
+            AnyCssDimension::CssRegularDimension(it) => it.into(),
+        }
+    }
+}
+impl From<AnyCssDimension> for SyntaxElement {
+    fn from(n: AnyCssDimension) -> SyntaxElement {
         let node: SyntaxNode = n.into();
         node.into()
     }
@@ -7964,11 +8126,6 @@ impl From<CssCustomProperty> for AnyCssValue {
         AnyCssValue::CssCustomProperty(node)
     }
 }
-impl From<CssDimension> for AnyCssValue {
-    fn from(node: CssDimension) -> AnyCssValue {
-        AnyCssValue::CssDimension(node)
-    }
-}
 impl From<CssIdentifier> for AnyCssValue {
     fn from(node: CssIdentifier) -> AnyCssValue {
         AnyCssValue::CssIdentifier(node)
@@ -7991,35 +8148,35 @@ impl From<CssString> for AnyCssValue {
 }
 impl AstNode for AnyCssValue {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = CssAnyFunction::KIND_SET
+    const KIND_SET: SyntaxKindSet<Language> = AnyCssDimension::KIND_SET
+        .union(CssAnyFunction::KIND_SET)
         .union(CssCustomProperty::KIND_SET)
-        .union(CssDimension::KIND_SET)
         .union(CssIdentifier::KIND_SET)
         .union(CssNumber::KIND_SET)
         .union(CssRatio::KIND_SET)
         .union(CssString::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(
-            kind,
-            CSS_ANY_FUNCTION
-                | CSS_CUSTOM_PROPERTY
-                | CSS_DIMENSION
-                | CSS_IDENTIFIER
-                | CSS_NUMBER
-                | CSS_RATIO
-                | CSS_STRING
-        )
+        match kind {
+            CSS_ANY_FUNCTION | CSS_CUSTOM_PROPERTY | CSS_IDENTIFIER | CSS_NUMBER | CSS_RATIO
+            | CSS_STRING => true,
+            k if AnyCssDimension::can_cast(k) => true,
+            _ => false,
+        }
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             CSS_ANY_FUNCTION => AnyCssValue::CssAnyFunction(CssAnyFunction { syntax }),
             CSS_CUSTOM_PROPERTY => AnyCssValue::CssCustomProperty(CssCustomProperty { syntax }),
-            CSS_DIMENSION => AnyCssValue::CssDimension(CssDimension { syntax }),
             CSS_IDENTIFIER => AnyCssValue::CssIdentifier(CssIdentifier { syntax }),
             CSS_NUMBER => AnyCssValue::CssNumber(CssNumber { syntax }),
             CSS_RATIO => AnyCssValue::CssRatio(CssRatio { syntax }),
             CSS_STRING => AnyCssValue::CssString(CssString { syntax }),
-            _ => return None,
+            _ => {
+                if let Some(any_css_dimension) = AnyCssDimension::cast(syntax) {
+                    return Some(AnyCssValue::AnyCssDimension(any_css_dimension));
+                }
+                return None;
+            }
         };
         Some(res)
     }
@@ -8027,31 +8184,31 @@ impl AstNode for AnyCssValue {
         match self {
             AnyCssValue::CssAnyFunction(it) => &it.syntax,
             AnyCssValue::CssCustomProperty(it) => &it.syntax,
-            AnyCssValue::CssDimension(it) => &it.syntax,
             AnyCssValue::CssIdentifier(it) => &it.syntax,
             AnyCssValue::CssNumber(it) => &it.syntax,
             AnyCssValue::CssRatio(it) => &it.syntax,
             AnyCssValue::CssString(it) => &it.syntax,
+            AnyCssValue::AnyCssDimension(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
             AnyCssValue::CssAnyFunction(it) => it.syntax,
             AnyCssValue::CssCustomProperty(it) => it.syntax,
-            AnyCssValue::CssDimension(it) => it.syntax,
             AnyCssValue::CssIdentifier(it) => it.syntax,
             AnyCssValue::CssNumber(it) => it.syntax,
             AnyCssValue::CssRatio(it) => it.syntax,
             AnyCssValue::CssString(it) => it.syntax,
+            AnyCssValue::AnyCssDimension(it) => it.into_syntax(),
         }
     }
 }
 impl std::fmt::Debug for AnyCssValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            AnyCssValue::AnyCssDimension(it) => std::fmt::Debug::fmt(it, f),
             AnyCssValue::CssAnyFunction(it) => std::fmt::Debug::fmt(it, f),
             AnyCssValue::CssCustomProperty(it) => std::fmt::Debug::fmt(it, f),
-            AnyCssValue::CssDimension(it) => std::fmt::Debug::fmt(it, f),
             AnyCssValue::CssIdentifier(it) => std::fmt::Debug::fmt(it, f),
             AnyCssValue::CssNumber(it) => std::fmt::Debug::fmt(it, f),
             AnyCssValue::CssRatio(it) => std::fmt::Debug::fmt(it, f),
@@ -8062,9 +8219,9 @@ impl std::fmt::Debug for AnyCssValue {
 impl From<AnyCssValue> for SyntaxNode {
     fn from(n: AnyCssValue) -> SyntaxNode {
         match n {
+            AnyCssValue::AnyCssDimension(it) => it.into(),
             AnyCssValue::CssAnyFunction(it) => it.into(),
             AnyCssValue::CssCustomProperty(it) => it.into(),
-            AnyCssValue::CssDimension(it) => it.into(),
             AnyCssValue::CssIdentifier(it) => it.into(),
             AnyCssValue::CssNumber(it) => it.into(),
             AnyCssValue::CssRatio(it) => it.into(),
@@ -8151,6 +8308,11 @@ impl std::fmt::Display for AnyCssAttributeMatcherValue {
     }
 }
 impl std::fmt::Display for AnyCssCompoundSelector {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyCssDimension {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -8310,11 +8472,6 @@ impl std::fmt::Display for CssDeclarationImportant {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for CssDimension {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
 impl std::fmt::Display for CssIdSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -8411,6 +8568,11 @@ impl std::fmt::Display for CssNumber {
     }
 }
 impl std::fmt::Display for CssParameter {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssPercentDimension {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -8516,6 +8678,11 @@ impl std::fmt::Display for CssPseudoElementSelector {
     }
 }
 impl std::fmt::Display for CssRatio {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssRegularDimension {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

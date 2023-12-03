@@ -168,6 +168,9 @@ pub(crate) fn expected_block(p: &CssParser, range: TextRange) -> ParseDiagnostic
 pub(crate) fn expected_declaration_item(p: &CssParser, range: TextRange) -> ParseDiagnostic {
     expected_node("declaration item", range, p)
 }
+pub(crate) fn expected_unit(p: &CssParser, range: TextRange) -> ParseDiagnostic {
+    expected_node("unit", range, p)
+}
 
 pub(crate) fn expected_component_value(p: &CssParser, range: TextRange) -> ParseDiagnostic {
     expect_one_of(

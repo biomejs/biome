@@ -241,6 +241,55 @@ pub(crate) fn is_at_css_any_function(p: &mut CssParser) -> bool {
     p.at(T![ident]) && p.nth_at(1, T!['('])
 }
 
+#[derive(Default)]
+pub(crate) struct CssParameterList {}
+
+impl ParseSeparatedList for CssParameterList {
+    type Kind = CssSyntaxKind;
+    type Parser<'source> = CssParser<'source>;
+    const LIST_KIND: Self::Kind = CSS_PARAMETER_LIST;
+
+    fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
+        parse_css_parameter(p)
+    }
+
+    fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
+        p.at(T![')'])
+    }
+
+    fn allow_trailing_separating_element(&self) -> bool {
+        true
+    }
+
+    fn recover(
+        &mut self,
+        p: &mut Self::Parser<'_>,
+        parsed_element: ParsedSyntax,
+    ) -> RecoveryResult {
+        parsed_element.or_recover(
+            p,
+            &ParseRecovery::new(CSS_BOGUS_PARAMETER, token_set!(T![,], T![')'])),
+            expected_declaration_item,
+        )
+    }
+
+    fn separating_element_kind(&mut self) -> Self::Kind {
+        T![,]
+    }
+}
+
+#[inline]
+pub(crate) fn parse_css_parameter(p: &mut CssParser) -> ParsedSyntax {
+    if !is_any_css_value(p) {
+        return Absent;
+    }
+    let param = p.start();
+
+    ListOfComponentValues::default().parse_list(p);
+
+    Present(param.complete(p, CSS_PARAMETER))
+}
+
 #[inline]
 pub(crate) fn parse_css_any_function(p: &mut CssParser) -> ParsedSyntax {
     if is_at_css_any_function(p) {
@@ -249,18 +298,7 @@ pub(crate) fn parse_css_any_function(p: &mut CssParser) -> ParsedSyntax {
         // function name
         parse_regular_identifier(p).or_add_diagnostic(p, expected_identifier);
         p.eat(T!['(']);
-        let func_params_m = p.start();
-
-        while is_any_css_value(p) {
-            let param = p.start();
-            // cubic-bezier(0.1, 0.7, 1.0, 0.1)
-            // repeating-radial-gradient(red, yellow 10%, green 15%);
-            parse_any_css_value(p).ok();
-            param.complete(p, CSS_PARAMETER);
-            p.eat(T![,]);
-        }
-
-        func_params_m.complete(p, CSS_PARAMETER_LIST);
+        CssParameterList::default().parse_list(p);
         p.expect(T![')']);
         simple_fn.complete(p, CSS_SIMPLE_FUNCTION);
 

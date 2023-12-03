@@ -288,15 +288,6 @@ pub fn css_declaration_important(
         ],
     ))
 }
-pub fn css_dimension(value: CssNumber, unit: CssIdentifier) -> CssDimension {
-    CssDimension::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_DIMENSION,
-        [
-            Some(SyntaxElement::Node(value.into_syntax())),
-            Some(SyntaxElement::Node(unit.into_syntax())),
-        ],
-    ))
-}
 pub fn css_id_selector(hash_token: SyntaxToken, name: CssIdentifier) -> CssIdSelector {
     CssIdSelector::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_ID_SELECTOR,
@@ -596,10 +587,21 @@ pub fn css_number(value_token: SyntaxToken) -> CssNumber {
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
-pub fn css_parameter(any_css_value: AnyCssValue) -> CssParameter {
+pub fn css_parameter(css_list_of_component_values: CssListOfComponentValues) -> CssParameter {
     CssParameter::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_PARAMETER,
-        [Some(SyntaxElement::Node(any_css_value.into_syntax()))],
+        [Some(SyntaxElement::Node(
+            css_list_of_component_values.into_syntax(),
+        ))],
+    ))
+}
+pub fn css_percent_dimension(value: CssNumber, unit_token: SyntaxToken) -> CssPercentDimension {
+    CssPercentDimension::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_PERCENT_DIMENSION,
+        [
+            Some(SyntaxElement::Node(value.into_syntax())),
+            Some(SyntaxElement::Token(unit_token)),
+        ],
     ))
 }
 pub fn css_percentage(value: CssNumber, reminder_token: SyntaxToken) -> CssPercentage {
@@ -930,6 +932,15 @@ pub fn css_ratio(
             Some(SyntaxElement::Node(numerator.into_syntax())),
             Some(SyntaxElement::Token(slash_token)),
             Some(SyntaxElement::Node(denominator.into_syntax())),
+        ],
+    ))
+}
+pub fn css_regular_dimension(value: CssNumber, unit: CssIdentifier) -> CssRegularDimension {
+    CssRegularDimension::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_REGULAR_DIMENSION,
+        [
+            Some(SyntaxElement::Node(value.into_syntax())),
+            Some(SyntaxElement::Node(unit.into_syntax())),
         ],
     ))
 }

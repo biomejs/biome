@@ -253,7 +253,6 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_ANY_FUNCTION",
         "CSS_BLOCK",
         "CSS_DECLARATION",
-        "CSS_DIMENSION",
         "CSS_IDENTIFIER",
         "CSS_KEYFRAMES_BLOCK",
         "CSS_KEYFRAMES_SELECTOR",
@@ -271,6 +270,9 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_KEYFRAMES_SELECTOR_LIST",
         "CSS_PARAMETER_LIST",
         "CSS_DECLARATION_IMPORTANT",
+        "CSS_UNIT",
+        "CSS_PERCENT_DIMENSION",
+        "CSS_REGULAR_DIMENSION",
         // Selectors nodes
         "CSS_NAMESPACE",
         "CSS_NAMED_NAMESPACE_PREFIX",
@@ -342,5 +344,6 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_BOGUS_AT_RULE",
         "CSS_BOGUS_DECLARATION_ITEM",
         "CSS_BOGUS_COMPONENT_VALUE",
+        "CSS_BOGUS_PARAMETER",
     ],
 };

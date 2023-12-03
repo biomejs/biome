@@ -80,10 +80,6 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssDeclarationImportant::new_unchecked(node) };
                     $body
                 }
-                $crate::CssSyntaxKind::CSS_DIMENSION => {
-                    let $pattern = unsafe { $crate::CssDimension::new_unchecked(node) };
-                    $body
-                }
                 $crate::CssSyntaxKind::CSS_ID_SELECTOR => {
                     let $pattern = unsafe { $crate::CssIdSelector::new_unchecked(node) };
                     $body
@@ -166,6 +162,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::CssSyntaxKind::CSS_PARAMETER => {
                     let $pattern = unsafe { $crate::CssParameter::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_PERCENT_DIMENSION => {
+                    let $pattern = unsafe { $crate::CssPercentDimension::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_PERCENTAGE => {
@@ -267,6 +267,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::CssSyntaxKind::CSS_RATIO => {
                     let $pattern = unsafe { $crate::CssRatio::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_REGULAR_DIMENSION => {
+                    let $pattern = unsafe { $crate::CssRegularDimension::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_RELATIVE_SELECTOR => {

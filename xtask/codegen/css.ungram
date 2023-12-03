@@ -567,7 +567,7 @@ AnyCssValue =
 	CssIdentifier
 	| CssString
 	| CssNumber
-	| CssDimension
+	| AnyCssDimension
 	| CssRatio
 	| CssAnyFunction
 	| CssCustomProperty
@@ -577,10 +577,15 @@ AnyCssValue =
 // 100vh
 // 4rem
 // 1e-2
-CssDimension =
+AnyCssDimension =
+	CssRegularDimension | CssPercentage
+	
+CssRegularDimension = 
 	value: CssNumber
 	unit: CssIdentifier
-
+CssPercentDimension = 
+	value: CssNumber
+	unit: '%'
 
 // 3 / 2
 CssRatio =
@@ -621,7 +626,11 @@ CssCustomProperty = value: CssIdentifier
 
 CssParameterList = CssParameter (',' CssParameter)* ','?
 
-CssParameter = AnyCssValue
+// cubic-bezier(0.1, 0.7, 1.0, 0.1)
+//			    ^^^
+// repeating-radial-gradient(red, yellow 10%, green 15%);
+//                                ^^^^^^^^^^
+CssParameter = CssListOfComponentValues
 
 CssIdentifier = value: 'ident'
 CssString = value: 'css_string_literal'
