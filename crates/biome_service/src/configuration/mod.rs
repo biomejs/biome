@@ -105,18 +105,611 @@ pub struct Configuration {
     /// Specific configuration for the Json language
     #[partial(type, bpaf(external(partial_json_configuration), optional))]
     pub json: JsonConfiguration,
+    /// Allows to pass a path to a JSON schema file.
+    ///
+    /// We publish a JSON schema file for the `biome.json`.
+    ///
+    /// You can specify a relative path to the schema of the `@biomejs/biome` npm package if `@biomejs/biome` is installed in the `node_modules` folder:
+    ///
+    ///
+    /// ```json title="biome.json"
+    /// {
+    ///   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json"
+    /// }
+    /// ```
+    ///
+    /// If you have problems with resolving the physical file, you can use the one published in this site:
+    ///
+    ///
+    ///
+    /// ```json title="biome.json"
+    /// {
+    ///   "$schema": "https://biomejs.dev/schemas/1.4.0/schema.json"
+    /// }
+    /// ```
+    #[serde(rename(serialize = "$schema", deserialize = "$schema"))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[bpaf(hide)]
+    pub schema: Option<String>,
+
+    /// Set of properties to integrate Biome with a VCS software.
+    ///
+    /// ### `vcs.enabled`
+    ///
+    /// Whether Biome should integrate itself with the VCS client
+    ///
+    /// > Default: false
+    ///
+    /// ### `vcs.clientKind`
+    ///
+    /// The kind of client.
+    ///
+    /// Values:
+    /// - `"git"`
+    ///
+    /// ### `vcs.useIgnoreFile`
+    ///
+    /// Whether Biome should use the VCS ignore file. When `true`, Biome will ignore the files
+    /// specified in the ignore file.
+    ///
+    /// ### `vcs.root`
+    ///
+    /// The folder where Biome should check for VCS files. By default, Biome will use the same
+    /// folder where `biome.json` was found.
+    ///
+    /// If Biome can't find the configuration, it will attempt to use the current working directory.
+    /// If no current working directory can't be found, Biome won't use the VCS integration, and a diagnostic
+    /// will be emitted
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[bpaf(external(vcs_configuration), optional, hide_usage)]
+    pub vcs: Option<VcsConfiguration>,
+
+    /// ### `files.maxSize`
+    ///
+    /// The maximum allowed size for source code files in bytes. Files above
+    /// this limit will be ignored for performance reasons.
+    ///
+    /// > Default: 1024*1024 (1MB)
+    ///
+    /// :::caution
+    /// When both `include` and `ignore` are specified, `ignore` takes **precedence** over `include`
+    /// :::
+    ///
+    /// Given the following example:
+    ///
+    /// ```json title="biome.json"
+    /// {
+    ///   "files": {
+    ///     "include": ["scripts/**/*.js", "src/**/*.js"],
+    ///     "ignore": ["scripts/**/*.js"]
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// Only the files that match the pattern `src/**/*.js` will be handled, while the files that match the pattern
+    /// `scripts/**/*.js` will be ignored.
+    ///
+    ///  ### `files.ignoreUnknown`
+    ///
+    /// Biome won't emit diagnostics if it encounters files that can't handle.
+    ///
+    /// ```json title="biome.json"
+    /// {
+    ///   "files": {
+    ///     "ignoreUnknown": true
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// > Default: false
+    ///
+    /// For advanced configuration options, see the [documentation](/referece/configuration_example/##files).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[bpaf(external(files_configuration), optional, hide_usage)]
+    pub files: Option<FilesConfiguration>,
+
+    /// These options apply to all languages.  There are additional language-specific formatting options below.
+    ///
+    /// ### `formatter.enabled`
+    ///
+    /// Enables Biome's formatter
+    ///
+    /// > Default: `true`
+    ///
+    ///Given the following example:
+    ///
+    ///
+    ///
+    /// ```json title="biome.json"
+    /// {
+    ///   "formatter": {
+    ///     "include": ["scripts/**/*.js", "src/**/*.js"],
+    ///     "ignore": ["scripts/**/*.js"]
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// Only the files that match the patter `src/**/*.js` will be formatted, while the files that match the pattern
+    /// `scripts/**/*.js` will be ignored.
+    ///
+    /// ### `formatter.formatWithErrors`
+    ///
+    /// Allows to format a document that has syntax errors.
+    ///
+    ///
+    ///
+    /// ```json title="biome.json"
+    /// {
+    ///   "formatter": {
+    ///     "formatWithErrors": true
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// > Default: `false`
+    ///
+    /// ### `formatter.indentStyle`
+    ///
+    /// The style of the indentation. It can be `"tab"` or `"space"`.
+    ///
+    /// > Default: `tab`
+    ///
+    /// ### `formatter.indentSize`
+    ///
+    /// How big the indentation should be.
+    ///
+    /// > Default: `2`
+    ///
+    /// ### `formatter.indentWidth`
+    ///
+    /// How big the indentation should be.
+    ///
+    /// > Default: `2`
+    ///
+    /// ### `formatter.lineEnding`
+    ///
+    /// The type of line ending.
+    /// - `lf`, Line Feed only (`\n`), common on Linux and macOS as well as inside git repos
+    /// - `crlf` Carriage Return + Line Feed characters (`\r\n`), common on Windows
+    /// - `cr` Carriage Return character only (`\r`), used very rarely
+    ///
+    /// > Default: `lf`
+    ///
+    /// ### `formatter.lineWidth`
+    ///
+    /// How many characters can be written on a single line.
+    ///
+    /// > Default: `80`
+    ///
+    /// ### `formatter.bracketSameLine`
+    ///
+    /// Choose whether the ending `>` of a multi-line JSX element should be on the last attribute line or not
+    ///
+    /// > Default: false
+    ///
+    /// ### `formatter.bracketSpacing`
+    ///
+    /// Choose whether spaces should be added between brackets and inner values
+    ///
+    /// > Default: true
+    ///
+    /// For advanced configuration options, see the [documentation](/referece/configuration_example/##formatter.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[bpaf(external(formatter_configuration), optional)]
+    pub formatter: Option<FormatterConfiguration>,
+
+    /// ### `organizeImports.enabled`
+    ///
+    /// Enables Biome's sort imports.
+    ///
+    /// > Default: `true`
+    ///
+    /// :::caution
+    /// When both `include` and `ignore` are specified, `ignore` takes **precedence** over `include`
+    /// :::
+    ///
+    /// Given the following example:
+    ///
+    ///
+    ///
+    /// ```json title="biome.json"
+    /// {
+    ///   "organizeImports": {
+    ///     "include": ["scripts/**/*.js", "src/**/*.js"],
+    ///     "ignore": ["scripts/**/*.js"]
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// Only the files that match the patter `src/**/*.js` will have their imports sorted, while the files that match the pattern
+    /// `scripts/**/*.js` will be ignored.
+    ///
+    /// For advanced configuration options, see the [documentation](/referece/configuration_example/##organizeImports.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[bpaf(external, optional)]
+    pub organize_imports: Option<OrganizeImports>,
+
+    /// ### `linter.enabled`
+    ///
+    /// Enables Biome's linter
+    ///
+    /// > Default: `true`
+    ///
+    /// For detailed examples and advanced configuration options, see the [documentation]
+    /// (/referece/configuration_example/##linter).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[bpaf(external(linter_configuration), optional)]
+    pub linter: Option<LinterConfiguration>,
+
+    /// These options apply only to JavaScript (and TypeScript) files.
+    ///
+    /// ### `javascript.parser.unsafeParameterDecoratorsEnabled`
+    ///
+    /// Allows to support the unsafe/experimental parameter decorators.
+    ///
+    ///
+    ///
+    /// ```json title="biome.json"
+    /// {
+    ///   "javascript": {
+    ///     "parser": {
+    ///         "unsafeParameterDecoratorsEnabled": true
+    ///     }
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// > Default: `false`
+    ///
+    /// ### `javascript.formatter.quoteStyle`
+    ///
+    /// The type of quote used when representing string literals. It can be `single` or `double`.
+    ///
+    /// > Default: `double`
+    ///
+    /// ### `javascript.formatter.jsxQuoteStyle`
+    ///
+    /// The type of quote used when representing jsx string literals. It can be `single` or `double`.
+    ///
+    /// > Default: `double`
+    ///
+    /// ### `javascript.formatter.quoteProperties`
+    ///
+    /// When properties inside objects should be quoted. It can be `asNeeded` or `preserve`.
+    ///
+    /// > Default: `asNeeded`
+    ///
+    /// ### `javascript.formatter.trailingComma`
+    ///
+    /// Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Possible values:
+    /// - `all`, the trailing comma is always added;
+    /// - `es5`, the trailing comma is added only in places where it's supported by older version of JavaScript;
+    /// - `none`, trailing commas are never added;
+    ///
+    /// > Default: `all`
+    ///
+    /// ### `javascript.formatter.semicolons`
+    ///
+    /// It configures where the formatter prints semicolons:
+    /// - `always`, the semicolons is always added at the end of each statement;
+    /// - `asNeeded`, the semicolons are added only in places where it's needed, to protect from [ASI](https://en.wikibooks.org/wiki/JavaScript/Automatic_semicolon_insertion)
+    ///
+    /// > Default: `always`
+    ///
+    /// Example:
+    ///
+    ///
+    ///
+    /// ```json title="biome.json"
+    /// {
+    ///   "javascript": {
+    ///     "formatter": {
+    ///       "semicolons": "asNeeded"
+    ///     }
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// ### `javascript.formatter.arrowParentheses`
+    ///
+    /// Whether to add non-necessary parentheses to arrow functions:
+    /// - `always`, the parentheses are always added;
+    /// - `asNeeded`, the parentheses are added only when they are needed;
+    ///
+    /// > Default: `always`
+    ///
+    /// ### `javascript.formatter.enabled`
+    ///
+    /// Enables Biome's formatter for JavaScript (and its super languages) files.
+    ///
+    /// > Default: `true`
+    ///
+    /// ### `javascript.formatter.indentStyle`
+    ///
+    /// The style of the indentation for JavaScript (and its super languages) files. It can be `"tab"` or `"space"`.
+    ///
+    /// > Default: `tab`
+    ///
+    /// ### `javascript.formatter.indentSize`
+    ///
+    /// How big the indentation should be for JavaScript (and its super languages) files.
+    ///
+    /// > Default: `2`
+    ///
+    /// ### `javascript.formatter.lineEnding`
+    ///
+    /// The type of line ending for JavaScript (and its super languages) files:
+    /// - `lf`, Line Feed only (`\n`), common on Linux and macOS as well as inside git repos;
+    /// - `crlf` Carriage Return + Line Feed characters (`\r\n`), common on Windows;
+    /// - `cr` Carriage Return character only (`\r`), used very rarely;
+    ///
+    /// > Default: `lf`
+    ///
+    /// ### `javascript.formatter.lineWidth`
+    ///
+    /// How many characters can be written on a single line in JavaScript (and its super languages) files.
+    ///
+    /// > Default: `80`
+    ///
+    ///
+    /// ### `javascript.globals`
+    ///
+    /// A list of global names that Biome should ignore (analyzer, linter, etc.)
+    ///
+    ///
+    ///
+    /// ```json title="biome.json"
+    /// {
+    ///   "javascript": {
+    ///     "globals": ["$", "_", "externalVariable"]
+    ///   }
+    /// }
+    /// ```
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[bpaf(external(javascript_configuration), optional)]
+    pub javascript: Option<JavascriptConfiguration>,
+
+    /// Options applied to the JSON files.
+    ///
+    /// ### `json.parser.allowComments`
+    ///
+    /// Enables the parsing of comments in JSON files.
+    ///
+    ///
+    ///
+    /// ```json title="biome.json"
+    /// {
+    ///   "json": {
+    ///     "parser": {
+    ///       "allowComments": true
+    ///     }
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// ### `json.parser.allowTrailingCommas`
+    ///
+    /// Enables the parsing of trailing Commas in JSON files.
+    ///
+    ///
+    ///
+    /// ```json title="biome.json"
+    /// {
+    ///   "json": {
+    ///     "parser": {
+    ///       "allowTrailingCommas": true
+    ///     }
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// ### `json.formatter.enabled`
+    ///
+    /// Enables Biome's formatter for JSON (and its super languages) files.
+    ///
+    /// > Default: `true`
+    ///
+    /// ### `json.formatter.indentStyle`
+    ///
+    ///
+    /// The style of the indentation for JSON (and its super languages) files. It can be `"tab"` or `"space"`.
+    ///
+    /// > Default: `tab`
+    ///
+    ///
+    /// ### `json.formatter.indentSize`
+    ///
+    /// How big the indentation should be for JSON (and its super languages) files.
+    ///
+    /// > Default: `2`
+    ///
+    /// ### `json.formatter.lineEnding`
+    ///
+    /// The type of line ending for JSON (and its super languages) files:
+    /// - `lf`, Line Feed only (`\n`), common on Linux and macOS as well as inside git repos;
+    /// - `crlf` Carriage Return + Line Feed characters (`\r\n`), common on Windows;
+    /// - `cr` Carriage Return character only (`\r`), used very rarely;
+    ///
+    /// > Default: `lf`
+    ///
+    /// ### `json.formatter.lineWidth`
+    ///
+    /// How many characters can be written on a single line in JSON (and its super languages) files.
+    ///
+    /// > Default: `80`
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[bpaf(external(json_configuration), optional)]
+    pub json: Option<JsonConfiguration>,
 
     /// Specific configuration for the Css language
     #[partial(type, bpaf(external(partial_css_configuration), optional, hide))]
     pub css: CssConfiguration,
 
-    /// A list of paths to other JSON files, used to extends the current configuration.
-    #[partial(bpaf(hide))]
-    pub extends: StringSet,
+    /// A list of paths to other JSON files that will extend the current configuration file.
+    ///
+    /// The files defined in this array:
+    /// - must exist in the file system;
+    /// - are resolved from the path where the `biome.json` file is defined;
+    /// - must be relative paths. Paths to libraries are not resolved;
+    /// - must be reachable by Biome, e.g. symbolic links might not be resolved by Biome;
+    /// - will be processed in order: from the first one to the last one;
+    /// - can override the same properties, but ultimately only the last one will be used by Biome;
+    ///
+    /// For advanced configuration options, see the [documentation](/referece/configuration_example/##extends).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[bpaf(hide)]
+    pub extends: Option<StringSet>,
 
-    /// A list of granular patterns that should be applied only to a sub set of files
-    #[partial(bpaf(hide))]
-    pub overrides: Overrides,
+    /// A list of patterns.
+    ///
+    /// Use this configuration to change the behaviour of the tools for certain files.
+    ///
+    /// When a file is matched against an override pattern, the configuration specified in that pattern will be override the top-level configuration.
+    ///
+    /// The order of the patterns matter. If a file *can* match three patterns, only the first one is used.
+    ///
+    ///
+    /// It will include the options of [top level formatter](#formatter) configuration, minus `ignore` and `include`.
+    ///
+    /// #### Examples
+    ///
+    /// For example, it's possible to modify the formatter `lineWidth`, `indentStyle` for certain files that are included in the glob path `generated/**`:
+    ///
+    ///
+    ///
+    /// ```json title="biome.json"
+    /// {
+    ///   "formatter": {
+    ///     "lineWidth": 100
+    ///   },
+    ///   "overrides": [
+    ///     {
+    ///       "include": ["generated/**"],
+    ///       "formatter": {
+    ///         "lineWidth": 160,
+    ///         "indentStyle": "space"
+    ///       }
+    ///     }
+    ///   ]
+    /// }
+    /// ```
+    ///
+    /// ### `overrides.<ITEM>.linter`
+    ///
+    /// It will include the options of [top level linter](#linter) configuration, minus `ignore` and `include`.
+    ///
+    ///
+    /// #### Examples
+    ///
+    /// You can disable certain rules for certain glob paths, and disable the linter for other glob paths:
+    ///
+    ///
+    ///
+    /// ```json title="biome.json"
+    /// {
+    ///   "linter": {
+    ///     "enabled": true,
+    ///     "rules": {
+    ///       "recommended": true
+    ///     }
+    ///   },
+    ///   "overrides": [
+    ///     {
+    ///       "include": ["lib/**"],
+    ///       "linter": {
+    ///         "rules": {
+    ///           "suspicious": {
+    ///             "noDebugger": "off"
+    ///           }
+    ///         }
+    ///       }
+    ///     },
+    ///     {
+    ///       "include": ["shims/**"],
+    ///       "linter": {
+    ///         "enabled": false
+    ///       }
+    ///     }
+    ///   ]
+    /// }
+    /// ```
+    ///
+    /// ### `overrides.<ITEM>.organizeImports`
+    ///
+    /// It will include the options of [top level organize imports](#organizeimports), minus `ignore` and `include`.
+    ///
+    /// ### `overrides.<ITEM>.javascript`
+    ///
+    /// It will include the options of [top level javascript](#javascript) configuration.
+    ///
+    /// #### Examples
+    ///
+    /// You can change the formatting behaviour of JavaScript files in certain folders:
+    ///
+    ///
+    ///
+    /// ```json title="biome.json"
+    /// {
+    ///   "formatter": {
+    ///     "lineWidth": 120
+    ///   },
+    ///   "javascript": {
+    ///     "formatter": {
+    ///       "quoteStyle": "single"
+    ///     }
+    ///   },
+    ///   "overrides": [
+    ///     {
+    ///       "include": ["lib/**"],
+    ///       "javascript": {
+    ///         "formatter": {
+    ///           "quoteStyle": "double"
+    ///         }
+    ///       }
+    ///     }
+    ///   ]
+    /// }
+    /// ```
+    ///
+    ///
+    /// ### `overrides.<ITEM>.json`
+    ///
+    /// It will include the options of [top level json](#json) configuration.
+    ///
+    ///
+    /// #### Examples
+    ///
+    /// You can enable parsing features for certain JSON files:
+    ///
+    ///
+    ///
+    /// ```json title="biome.json"
+    /// {
+    ///   "linter": {
+    ///     "enabled": true,
+    ///     "rules": {
+    ///       "recommended": true
+    ///     }
+    ///   },
+    ///   "overrides": [
+    ///     {
+    ///       "include": [".vscode/**"],
+    ///       "json": {
+    ///         "parser": {
+    ///           "allowComments": true,
+    ///           "allowTrailingComma": true
+    ///         }
+    ///       }
+    ///     }
+    ///   ]
+    /// }
+    /// ```
+    ///
+    /// For advanced configuration options, see the [documentation]
+    /// (/referece/configuration_example/##override).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[bpaf(hide)]
+    pub overrides: Option<Overrides>,
 }
 
 impl PartialConfiguration {
