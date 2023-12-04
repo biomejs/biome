@@ -126,7 +126,7 @@ echo "console.log('')" | biome format --use-server --stdin-file-path=dummy.js
 
 ### デーモンのログ
 
-Biome デーモンはファイルにログを保存します。ログは `biome-logs` というフォルダに保存されます。このフォルダは、OSの一時ディレクトリにあります。
+Biome のデーモンは、ファイルシステムにログを保存します。ログは 、`biome-logs` というフォルダに保存され、このフォルダはOSの一時ディレクトリに作成されています。
 
 Windows の場合は、powershell で以下のコマンドを実行すると、一時ディレクトリの場所を確認できます:
 ```shell
