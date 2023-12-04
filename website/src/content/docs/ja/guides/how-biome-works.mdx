@@ -13,7 +13,7 @@ Biome はデフォルトで十分な機能を提供するので、設定ファ�
 Biome の設定ファイルは `biome.json` という名前で、プロジェクトのルートディレクトリに置く必要があります。
 通常、プロジェクトの `package.json` が置かれているところがルートディレクトリになります。
 
-例えば、以下の設定ファイルは formatter を有効にし、インデントスタイルと幅を設定します。linter は無効になっています:
+例えば、以下の設定ファイルは formatter を有効にし、インデントスタイルと幅を設定します。linter は無効になっています：
 
 ```json
 {
@@ -30,7 +30,7 @@ Biome の設定ファイルは `biome.json` という名前で、プロジェク
 
 ### デフォルトの設定
 
-`biome init` を実行すると、以下のデフォルト設定が出力されます:
+`biome init` を実行すると、以下のデフォルト設定が出力されます：
 
 <DefaultConfiguration />
 
@@ -38,11 +38,11 @@ Biome の設定ファイルは `biome.json` という名前で、プロジェク
 
 
 Biome は最も近い `biome.json` を自動で検出します。
-実行時のディレクトリから `biome.json` を探索し、以下の条件を満たすまで親ディレクトリを探索します:
-- `biome.json` ファイルが見つかった場合;
-- **`biome.json` が見つからなかった場合**、Biome のデフォルト設定を適用します;
+実行時のディレクトリから `biome.json` を探索し、以下の条件を満たすまで親ディレクトリを探索します：
+- `biome.json` ファイルが見つかった場合
+- **`biome.json` が見つからなかった場合**、Biome のデフォルト設定を適用します
 
-例えば以下のようなディレクトリ構成の場合:
+例えば以下のようなディレクトリ構成の場合：
 
 ```
 └── app
@@ -58,8 +58,8 @@ Biome は最も近い `biome.json` を自動で検出します。
 
 ```
 
-- `app/backend/package.json` で実行された biome コマンドは `app/backend/biome.json` を使用します;
-- `app/frontend/legacy/package.json` や `app/frontend/new/package.json` で実行された biome コマンドは `app/frontend/biome.json` を使用します;
+- `app/backend/package.json` で実行された biome コマンドは `app/backend/biome.json` を使用します
+- `app/frontend/legacy/package.json` や `app/frontend/new/package.json` で実行された biome コマンドは `app/frontend/biome.json` を使用します
 
 
 ## 既知のファイル
