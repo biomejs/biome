@@ -117,7 +117,7 @@ echo "console.log('')" | biome format --use-server --stdin-file-path=dummy.js
 ```
 
 :::note
-デーモンを使用する場合は、ゴーストプロセスを避けるために、[`stop`](/ja/reference/cli#biome-stop) コマンドでプロセスを再起動/終了する責任があります。
+デーモンを使用する場合は、プロセスが生き続けてしまうことを避けるために、[`stop`](/ja/reference/cli#biome-stop) コマンドでプロセスを再起動/終了する責任があります。
 :::
 
 :::caution
