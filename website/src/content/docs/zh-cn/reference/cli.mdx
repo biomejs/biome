@@ -1,0 +1,773 @@
+---
+title: CLI
+emoji: ⌨️
+category: reference
+description: Available commands and arguments in the Biome CLI.
+---
+
+[//]: # (Start-codegen)
+
+
+
+# Command summary
+
+  * [`biome`↴](#biome)
+  * [`biome version`↴](#biome-version)
+  * [`biome rage`↴](#biome-rage)
+  * [`biome start`↴](#biome-start)
+  * [`biome stop`↴](#biome-stop)
+  * [`biome check`↴](#biome-check)
+  * [`biome lint`↴](#biome-lint)
+  * [`biome format`↴](#biome-format)
+  * [`biome ci`↴](#biome-ci)
+  * [`biome init`↴](#biome-init)
+  * [`biome lsp-proxy`↴](#biome-lsp-proxy)
+  * [`biome migrate`↴](#biome-migrate)
+
+## biome
+
+Biome official CLI. Use it to check the health of your project or run it to check single files.
+
+**Usage**: **`biome`** _`COMMAND ...`_
+
+**Available options:**
+- **`-h`**, **`--help`** &mdash; 
+  Prints help information
+- **`-V`**, **`--version`** &mdash; 
+  Prints version information
+
+
+
+**Available commands:**
+- **`version`** &mdash; 
+  Shows the Biome version information and quit
+- **`rage`** &mdash; 
+  Prints information for debugging
+- **`start`** &mdash; 
+  Start the Biome daemon server process
+- **`stop`** &mdash; 
+  Stop the Biome daemon server process
+- **`check`** &mdash; 
+  Runs formatter, linter and import sorting to the requested files.
+- **`lint`** &mdash; 
+  Run various checks on a set of files.
+- **`format`** &mdash; 
+  Run the formatter on a set of files.
+- **`ci`** &mdash; 
+  Command to use in CI environments. Runs formatter, linter and import sorting to the requested files.
+- **`init`** &mdash; 
+  Bootstraps a new biome project. Creates a configuration file with some defaults.
+- **`lsp-proxy`** &mdash; 
+  Acts as a server for the Language Server Protocol over stdin/stdout
+- **`migrate`** &mdash; 
+  It updates the configuration when there are breaking changes
+
+
+## biome version
+
+Shows the Biome version information and quit
+
+**Usage**: **`biome`** **`version`** 
+
+**Global options applied to all commands**
+- **`    --colors`**=_`<off|force>`_ &mdash; 
+  Set the formatting mode for markup: "off" prints everything as plain text, "force" forces the formatting of markup using ANSI even if the console output is determined to be incompatible
+- **`    --use-server`** &mdash; 
+  Connect to a running instance of the Biome daemon server.
+- **`    --verbose`** &mdash; 
+  Print additional verbose advices on diagnostics
+- **`    --config-path`**=_`PATH`_ &mdash; 
+  Set the filesystem path to the directory of the biome.json configuration file
+- **`    --max-diagnostics`**=_`NUMBER`_ &mdash; 
+  Cap the amount of diagnostics displayed.
+   
+  [default: 20]
+- **`    --skip-errors`** &mdash; 
+  Skip over files containing syntax errors instead of emitting an error diagnostic.
+- **`    --no-errors-on-unmatched`** &mdash; 
+  Silence errors that would be emitted in case no files were processed during the execution of the command.
+- **`    --error-on-warnings`** &mdash; 
+  Tell Biome to exit with an error code if some diagnostics emit warnings.
+- **`    --log-level`**=_`<none|debug|info|warn|error>`_ &mdash; 
+  The level of logging. In order, from the most verbose to the least verbose: debug, info, warn, error.
+
+  The value `none` won't show any logging.
+   
+  [default: none]
+- **`    --log-kind`**=_`<pretty|compact|json>`_ &mdash; 
+  How the log should look like.
+   
+  [default: pretty]
+- **`    --diagnostic-level`**=_`<info|warn|error>`_ &mdash; 
+  The level of diagnostics to show. In order, from the lowest to the most important: info, warn, error. Passing `--diagnostic-level=error` will cause Biome to print only diagnostics that contain only errors.
+   
+  [default: info]
+
+
+
+**Available options:**
+- **`-h`**, **`--help`** &mdash; 
+  Prints help information
+
+
+## biome rage
+
+Prints information for debugging
+
+**Usage**: **`biome`** **`rage`** \[**`--daemon-logs`**\]
+
+**Global options applied to all commands**
+- **`    --colors`**=_`<off|force>`_ &mdash; 
+  Set the formatting mode for markup: "off" prints everything as plain text, "force" forces the formatting of markup using ANSI even if the console output is determined to be incompatible
+- **`    --use-server`** &mdash; 
+  Connect to a running instance of the Biome daemon server.
+- **`    --verbose`** &mdash; 
+  Print additional verbose advices on diagnostics
+- **`    --config-path`**=_`PATH`_ &mdash; 
+  Set the filesystem path to the directory of the biome.json configuration file
+- **`    --max-diagnostics`**=_`NUMBER`_ &mdash; 
+  Cap the amount of diagnostics displayed.
+   
+  [default: 20]
+- **`    --skip-errors`** &mdash; 
+  Skip over files containing syntax errors instead of emitting an error diagnostic.
+- **`    --no-errors-on-unmatched`** &mdash; 
+  Silence errors that would be emitted in case no files were processed during the execution of the command.
+- **`    --error-on-warnings`** &mdash; 
+  Tell Biome to exit with an error code if some diagnostics emit warnings.
+- **`    --log-level`**=_`<none|debug|info|warn|error>`_ &mdash; 
+  The level of logging. In order, from the most verbose to the least verbose: debug, info, warn, error.
+
+  The value `none` won't show any logging.
+   
+  [default: none]
+- **`    --log-kind`**=_`<pretty|compact|json>`_ &mdash; 
+  How the log should look like.
+   
+  [default: pretty]
+- **`    --diagnostic-level`**=_`<info|warn|error>`_ &mdash; 
+  The level of diagnostics to show. In order, from the lowest to the most important: info, warn, error. Passing `--diagnostic-level=error` will cause Biome to print only diagnostics that contain only errors.
+   
+  [default: info]
+
+
+
+**Available options:**
+- **`    --daemon-logs`** &mdash; 
+  Prints the Biome daemon server logs
+- **`-h`**, **`--help`** &mdash; 
+  Prints help information
+
+
+## biome start
+
+Start the Biome daemon server process
+
+**Usage**: **`biome`** **`start`** \[**`--config-path`**=_`PATH`_\]
+
+**Available options:**
+- **`    --config-path`**=_`PATH`_ &mdash; 
+  Allows to set a custom path when discovering the configuration file `biome.json`
+   
+  Uses environment variable **`BIOME_CONFIG_PATH`**
+- **`-h`**, **`--help`** &mdash; 
+  Prints help information
+
+
+## biome stop
+
+Stop the Biome daemon server process
+
+**Usage**: **`biome`** **`stop`** 
+
+**Available options:**
+- **`-h`**, **`--help`** &mdash; 
+  Prints help information
+
+
+## biome check
+
+Runs formatter, linter and import sorting to the requested files.
+
+**Usage**: **`biome`** **`check`** \[**`--apply`**\] \[**`--apply-unsafe`**\] \[_`PATH`_\]...
+
+**The configuration that is contained inside the file `biome.json`**
+- **`    --vcs-client-kind`**=_`<git>`_ &mdash; 
+  The kind of client.
+- **`    --vcs-enabled`**=_`<true|false>`_ &mdash; 
+  Whether Biome should integrate itself with the VCS client
+- **`    --vcs-use-ignore-file`**=_`<true|false>`_ &mdash; 
+  Whether Biome should use the VCS ignore file. When [true], Biome will ignore the files specified in the ignore file.
+- **`    --vcs-root`**=_`PATH`_ &mdash; 
+  The folder where Biome should check for VCS files. By default, Biome will use the same folder where `biome.json` was found.
+
+  If Biome can't find the configuration, it will attempt to use the current working directory. If no current working directory can't be found, Biome won't use the VCS integration, and a diagnostic will be emitted
+- **`    --files-max-size`**=_`NUMBER`_ &mdash; 
+  The maximum allowed size for source code files in bytes. Files above this limit will be ignored for performance reasons. Defaults to 1 MiB
+- **`    --files-ignore-unknown`**=_`<true|false>`_ &mdash; 
+  Tells Biome to not emit diagnostics when handling files that doesn't know
+- **`    --indent-style`**=_`<tab|space>`_ &mdash; 
+  The indent style.
+- **`    --indent-size`**=_`NUMBER`_ &mdash; 
+  The size of the indentation, 2 by default (deprecated, use `indent-width`)
+- **`    --indent-width`**=_`NUMBER`_ &mdash; 
+  The size of the indentation, 2 by default
+- **`    --line-ending`**=_`<lf|crlf|cr>`_ &mdash; 
+  The type of line ending.
+- **`    --line-width`**=_`NUMBER`_ &mdash; 
+  What's the max width of a line. Defaults to 80.
+- **`    --quote-style`**=_`<double|single>`_ &mdash; 
+  The type of quotes used in JavaScript code. Defaults to double.
+- **`    --jsx-quote-style`**=_`<double|single>`_ &mdash; 
+  The type of quotes used in JSX. Defaults to double.
+- **`    --quote-properties`**=_`<preserve|as-needed>`_ &mdash; 
+  When properties in objects are quoted. Defaults to asNeeded.
+- **`    --trailing-comma`**=_`<all|es5|none>`_ &mdash; 
+  Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to "all".
+- **`    --semicolons`**=_`<always|as-needed>`_ &mdash; 
+  Whether the formatter prints semicolons for all statements or only in for statements where it is necessary because of ASI.
+- **`    --arrow-parentheses`**=_`<always|as-needed>`_ &mdash; 
+  Whether to add non-necessary parentheses to arrow functions. Defaults to "always".
+- **`    --bracket-spacing`**=_`<true|false>`_ &mdash; 
+  Whether to insert spaces around brackets in object literals. Defaults to true.
+- **`    --bracket-same-line`**=_`<true|false>`_ &mdash; 
+  Whether to hug the closing bracket of multiline HTML/JSX tags to the end of the last line, rather than being alone on the following line. Defaults to false.
+- **`    --javascript-formatter-enabled`**=_`<true|false>`_ &mdash; 
+  Control the formatter for JavaScript (and its super languages) files.
+- **`    --javascript-formatter-indent-style`**=_`<tab|space>`_ &mdash; 
+  The indent style applied to JavaScript (and its super languages) files.
+- **`    --javascript-formatter-indent-size`**=_`NUMBER`_ &mdash; 
+  The size of the indentation applied to JavaScript (and its super languages) files. Default to 2.
+- **`    --javascript-formatter-indent-width`**=_`NUMBER`_ &mdash; 
+  The size of the indentation applied to JavaScript (and its super languages) files. Default to 2.
+- **`    --javascript-formatter-line-ending`**=_`<lf|crlf|cr>`_ &mdash; 
+  The type of line ending applied to JavaScript (and its super languages) files.
+- **`    --javascript-formatter-line-width`**=_`NUMBER`_ &mdash; 
+  What's the max width of a line applied to JavaScript (and its super languages) files. Defaults to 80.
+- **`    --json-formatter-enabled`**=_`<true|false>`_ &mdash; 
+  Control the formatter for JSON (and its super languages) files.
+- **`    --json-formatter-indent-style`**=_`<tab|space>`_ &mdash; 
+  The indent style applied to JSON (and its super languages) files.
+- **`    --json-formatter-indent-width`**=_`NUMBER`_ &mdash; 
+  The size of the indentation applied to JSON (and its super languages) files. Default to 2.
+- **`    --json-formatter-indent-size`**=_`NUMBER`_ &mdash; 
+  The size of the indentation applied to JSON (and its super languages) files. Default to 2.
+- **`    --json-formatter-line-ending`**=_`<lf|crlf|cr>`_ &mdash; 
+  The type of line ending applied to JSON (and its super languages) files.
+- **`    --json-formatter-line-width`**=_`NUMBER`_ &mdash; 
+  What's the max width of a line applied to JSON (and its super languages) files. Defaults to 80.
+
+
+
+**Global options applied to all commands**
+- **`    --colors`**=_`<off|force>`_ &mdash; 
+  Set the formatting mode for markup: "off" prints everything as plain text, "force" forces the formatting of markup using ANSI even if the console output is determined to be incompatible
+- **`    --use-server`** &mdash; 
+  Connect to a running instance of the Biome daemon server.
+- **`    --verbose`** &mdash; 
+  Print additional verbose advices on diagnostics
+- **`    --config-path`**=_`PATH`_ &mdash; 
+  Set the filesystem path to the directory of the biome.json configuration file
+- **`    --max-diagnostics`**=_`NUMBER`_ &mdash; 
+  Cap the amount of diagnostics displayed.
+   
+  [default: 20]
+- **`    --skip-errors`** &mdash; 
+  Skip over files containing syntax errors instead of emitting an error diagnostic.
+- **`    --no-errors-on-unmatched`** &mdash; 
+  Silence errors that would be emitted in case no files were processed during the execution of the command.
+- **`    --error-on-warnings`** &mdash; 
+  Tell Biome to exit with an error code if some diagnostics emit warnings.
+- **`    --log-level`**=_`<none|debug|info|warn|error>`_ &mdash; 
+  The level of logging. In order, from the most verbose to the least verbose: debug, info, warn, error.
+
+  The value `none` won't show any logging.
+   
+  [default: none]
+- **`    --log-kind`**=_`<pretty|compact|json>`_ &mdash; 
+  How the log should look like.
+   
+  [default: pretty]
+- **`    --diagnostic-level`**=_`<info|warn|error>`_ &mdash; 
+  The level of diagnostics to show. In order, from the lowest to the most important: info, warn, error. Passing `--diagnostic-level=error` will cause Biome to print only diagnostics that contain only errors.
+   
+  [default: info]
+
+
+
+**Available positional items:**
+- _`PATH`_ &mdash; 
+  Single file, single path or list of paths
+
+
+
+**Available options:**
+- **`    --apply`** &mdash; 
+  Apply safe fixes, formatting
+- **`    --apply-unsafe`** &mdash; 
+  Apply safe fixes and unsafe fixes, formatting and import sorting
+- **`    --formatter-enabled`**=_`<true|false>`_ &mdash; 
+  Allow to enable or disable the formatter check.
+- **`    --linter-enabled`**=_`<true|false>`_ &mdash; 
+  Allow to enable or disable the linter check.
+- **`    --organize-imports-enabled`**=_`<true|false>`_ &mdash; 
+  Allow to enable or disable the organize imports.
+- **`    --stdin-file-path`**=_`PATH`_ &mdash; 
+  Use this option when you want to format code piped from `stdin`, and print the output to `stdout`.
+
+  The file doesn't need to exist on disk, what matters is the extension of the file. Based on the extension, Biome knows how to check the code.
+
+  Example: `echo 'let a;' | biome check --stdin-file-path=file.js`
+- **`-h`**, **`--help`** &mdash; 
+  Prints help information
+
+
+## biome lint
+
+Run various checks on a set of files.
+
+**Usage**: **`biome`** **`lint`** \[**`--apply`**\] \[**`--apply-unsafe`**\] \[_`PATH`_\]...
+
+**Set of properties to integrate Biome with a VCS software.**
+- **`    --vcs-client-kind`**=_`<git>`_ &mdash; 
+  The kind of client.
+- **`    --vcs-enabled`**=_`<true|false>`_ &mdash; 
+  Whether Biome should integrate itself with the VCS client
+- **`    --vcs-use-ignore-file`**=_`<true|false>`_ &mdash; 
+  Whether Biome should use the VCS ignore file. When [true], Biome will ignore the files specified in the ignore file.
+- **`    --vcs-root`**=_`PATH`_ &mdash; 
+  The folder where Biome should check for VCS files. By default, Biome will use the same folder where `biome.json` was found.
+
+  If Biome can't find the configuration, it will attempt to use the current working directory. If no current working directory can't be found, Biome won't use the VCS integration, and a diagnostic will be emitted
+
+
+
+**The configuration of the filesystem**
+- **`    --files-max-size`**=_`NUMBER`_ &mdash; 
+  The maximum allowed size for source code files in bytes. Files above this limit will be ignored for performance reasons. Defaults to 1 MiB
+- **`    --files-ignore-unknown`**=_`<true|false>`_ &mdash; 
+  Tells Biome to not emit diagnostics when handling files that doesn't know
+
+
+
+**Global options applied to all commands**
+- **`    --colors`**=_`<off|force>`_ &mdash; 
+  Set the formatting mode for markup: "off" prints everything as plain text, "force" forces the formatting of markup using ANSI even if the console output is determined to be incompatible
+- **`    --use-server`** &mdash; 
+  Connect to a running instance of the Biome daemon server.
+- **`    --verbose`** &mdash; 
+  Print additional verbose advices on diagnostics
+- **`    --config-path`**=_`PATH`_ &mdash; 
+  Set the filesystem path to the directory of the biome.json configuration file
+- **`    --max-diagnostics`**=_`NUMBER`_ &mdash; 
+  Cap the amount of diagnostics displayed.
+   
+  [default: 20]
+- **`    --skip-errors`** &mdash; 
+  Skip over files containing syntax errors instead of emitting an error diagnostic.
+- **`    --no-errors-on-unmatched`** &mdash; 
+  Silence errors that would be emitted in case no files were processed during the execution of the command.
+- **`    --error-on-warnings`** &mdash; 
+  Tell Biome to exit with an error code if some diagnostics emit warnings.
+- **`    --log-level`**=_`<none|debug|info|warn|error>`_ &mdash; 
+  The level of logging. In order, from the most verbose to the least verbose: debug, info, warn, error.
+
+  The value `none` won't show any logging.
+   
+  [default: none]
+- **`    --log-kind`**=_`<pretty|compact|json>`_ &mdash; 
+  How the log should look like.
+   
+  [default: pretty]
+- **`    --diagnostic-level`**=_`<info|warn|error>`_ &mdash; 
+  The level of diagnostics to show. In order, from the lowest to the most important: info, warn, error. Passing `--diagnostic-level=error` will cause Biome to print only diagnostics that contain only errors.
+   
+  [default: info]
+
+
+
+**Available positional items:**
+- _`PATH`_ &mdash; 
+  Single file, single path or list of paths
+
+
+
+**Available options:**
+- **`    --apply`** &mdash; 
+  Apply safe fixes, formatting
+- **`    --apply-unsafe`** &mdash; 
+  Apply safe fixes and unsafe fixes, formatting and import sorting
+- **`    --stdin-file-path`**=_`PATH`_ &mdash; 
+  Use this option when you want to format code piped from `stdin`, and print the output to `stdout`.
+
+  The file doesn't need to exist on disk, what matters is the extension of the file. Based on the extension, Biome knows how to lint the code.
+
+  Example: `echo 'let a;' | biome lint --stdin-file-path=file.js`
+- **`-h`**, **`--help`** &mdash; 
+  Prints help information
+
+
+## biome format
+
+Run the formatter on a set of files.
+
+**Usage**: **`biome`** **`format`** \[**`--write`**\] \[_`PATH`_\]...
+
+**Generic options applied to all files**
+- **`    --indent-style`**=_`<tab|space>`_ &mdash; 
+  The indent style.
+- **`    --indent-size`**=_`NUMBER`_ &mdash; 
+  The size of the indentation, 2 by default (deprecated, use `indent-width`)
+- **`    --indent-width`**=_`NUMBER`_ &mdash; 
+  The size of the indentation, 2 by default
+- **`    --line-ending`**=_`<lf|crlf|cr>`_ &mdash; 
+  The type of line ending.
+- **`    --line-width`**=_`NUMBER`_ &mdash; 
+  What's the max width of a line. Defaults to 80.
+
+
+
+**Formatting options specific to the JavaScript files**
+- **`    --quote-style`**=_`<double|single>`_ &mdash; 
+  The type of quotes used in JavaScript code. Defaults to double.
+- **`    --jsx-quote-style`**=_`<double|single>`_ &mdash; 
+  The type of quotes used in JSX. Defaults to double.
+- **`    --quote-properties`**=_`<preserve|as-needed>`_ &mdash; 
+  When properties in objects are quoted. Defaults to asNeeded.
+- **`    --trailing-comma`**=_`<all|es5|none>`_ &mdash; 
+  Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to "all".
+- **`    --semicolons`**=_`<always|as-needed>`_ &mdash; 
+  Whether the formatter prints semicolons for all statements or only in for statements where it is necessary because of ASI.
+- **`    --arrow-parentheses`**=_`<always|as-needed>`_ &mdash; 
+  Whether to add non-necessary parentheses to arrow functions. Defaults to "always".
+- **`    --bracket-spacing`**=_`<true|false>`_ &mdash; 
+  Whether to insert spaces around brackets in object literals. Defaults to true.
+- **`    --bracket-same-line`**=_`<true|false>`_ &mdash; 
+  Whether to hug the closing bracket of multiline HTML/JSX tags to the end of the last line, rather than being alone on the following line. Defaults to false.
+- **`    --javascript-formatter-enabled`**=_`<true|false>`_ &mdash; 
+  Control the formatter for JavaScript (and its super languages) files.
+- **`    --javascript-formatter-indent-style`**=_`<tab|space>`_ &mdash; 
+  The indent style applied to JavaScript (and its super languages) files.
+- **`    --javascript-formatter-indent-size`**=_`NUMBER`_ &mdash; 
+  The size of the indentation applied to JavaScript (and its super languages) files. Default to 2.
+- **`    --javascript-formatter-indent-width`**=_`NUMBER`_ &mdash; 
+  The size of the indentation applied to JavaScript (and its super languages) files. Default to 2.
+- **`    --javascript-formatter-line-ending`**=_`<lf|crlf|cr>`_ &mdash; 
+  The type of line ending applied to JavaScript (and its super languages) files.
+- **`    --javascript-formatter-line-width`**=_`NUMBER`_ &mdash; 
+  What's the max width of a line applied to JavaScript (and its super languages) files. Defaults to 80.
+
+
+
+**Set of properties to integrate Biome with a VCS software.**
+- **`    --vcs-client-kind`**=_`<git>`_ &mdash; 
+  The kind of client.
+- **`    --vcs-enabled`**=_`<true|false>`_ &mdash; 
+  Whether Biome should integrate itself with the VCS client
+- **`    --vcs-use-ignore-file`**=_`<true|false>`_ &mdash; 
+  Whether Biome should use the VCS ignore file. When [true], Biome will ignore the files specified in the ignore file.
+- **`    --vcs-root`**=_`PATH`_ &mdash; 
+  The folder where Biome should check for VCS files. By default, Biome will use the same folder where `biome.json` was found.
+
+  If Biome can't find the configuration, it will attempt to use the current working directory. If no current working directory can't be found, Biome won't use the VCS integration, and a diagnostic will be emitted
+
+
+
+**The configuration of the filesystem**
+- **`    --files-max-size`**=_`NUMBER`_ &mdash; 
+  The maximum allowed size for source code files in bytes. Files above this limit will be ignored for performance reasons. Defaults to 1 MiB
+- **`    --files-ignore-unknown`**=_`<true|false>`_ &mdash; 
+  Tells Biome to not emit diagnostics when handling files that doesn't know
+
+
+
+**Global options applied to all commands**
+- **`    --colors`**=_`<off|force>`_ &mdash; 
+  Set the formatting mode for markup: "off" prints everything as plain text, "force" forces the formatting of markup using ANSI even if the console output is determined to be incompatible
+- **`    --use-server`** &mdash; 
+  Connect to a running instance of the Biome daemon server.
+- **`    --verbose`** &mdash; 
+  Print additional verbose advices on diagnostics
+- **`    --config-path`**=_`PATH`_ &mdash; 
+  Set the filesystem path to the directory of the biome.json configuration file
+- **`    --max-diagnostics`**=_`NUMBER`_ &mdash; 
+  Cap the amount of diagnostics displayed.
+   
+  [default: 20]
+- **`    --skip-errors`** &mdash; 
+  Skip over files containing syntax errors instead of emitting an error diagnostic.
+- **`    --no-errors-on-unmatched`** &mdash; 
+  Silence errors that would be emitted in case no files were processed during the execution of the command.
+- **`    --error-on-warnings`** &mdash; 
+  Tell Biome to exit with an error code if some diagnostics emit warnings.
+- **`    --log-level`**=_`<none|debug|info|warn|error>`_ &mdash; 
+  The level of logging. In order, from the most verbose to the least verbose: debug, info, warn, error.
+
+  The value `none` won't show any logging.
+   
+  [default: none]
+- **`    --log-kind`**=_`<pretty|compact|json>`_ &mdash; 
+  How the log should look like.
+   
+  [default: pretty]
+- **`    --diagnostic-level`**=_`<info|warn|error>`_ &mdash; 
+  The level of diagnostics to show. In order, from the lowest to the most important: info, warn, error. Passing `--diagnostic-level=error` will cause Biome to print only diagnostics that contain only errors.
+   
+  [default: info]
+
+
+
+**Available positional items:**
+- _`PATH`_ &mdash; 
+  Single file, single path or list of paths.
+
+
+
+**Available options:**
+- **`    --json-formatter-enabled`**=_`<true|false>`_ &mdash; 
+  Control the formatter for JSON (and its super languages) files.
+- **`    --json-formatter-indent-style`**=_`<tab|space>`_ &mdash; 
+  The indent style applied to JSON (and its super languages) files.
+- **`    --json-formatter-indent-width`**=_`NUMBER`_ &mdash; 
+  The size of the indentation applied to JSON (and its super languages) files. Default to 2.
+- **`    --json-formatter-indent-size`**=_`NUMBER`_ &mdash; 
+  The size of the indentation applied to JSON (and its super languages) files. Default to 2.
+- **`    --json-formatter-line-ending`**=_`<lf|crlf|cr>`_ &mdash; 
+  The type of line ending applied to JSON (and its super languages) files.
+- **`    --json-formatter-line-width`**=_`NUMBER`_ &mdash; 
+  What's the max width of a line applied to JSON (and its super languages) files. Defaults to 80.
+- **`    --stdin-file-path`**=_`PATH`_ &mdash; 
+  Use this option when you want to format code piped from `stdin`, and print the output to `stdout`.
+
+  The file doesn't need to exist on disk, what matters is the extension of the file. Based on the extension, Biome knows how to format the code.
+
+  Example: `echo 'let a;' | biome format --stdin-file-path=file.js`
+- **`    --write`** &mdash; 
+  Writes formatted files to file system.
+- **`-h`**, **`--help`** &mdash; 
+  Prints help information
+
+
+## biome ci
+
+Command to use in CI environments. Runs formatter, linter and import sorting to the requested files.
+
+Files won't be modified, the command is a read-only operation.
+
+**Usage**: **`biome`** **`ci`** \[**`--formatter-enabled`**=_`<true|false>`_\] \[**`--linter-enabled`**=_`<true|false>`_\] \[**`--organize-imports-enabled`**=_`<true|false>`_\] \[_`PATH`_\]...
+
+**The configuration that is contained inside the file `biome.json`**
+- **`    --vcs-client-kind`**=_`<git>`_ &mdash; 
+  The kind of client.
+- **`    --vcs-enabled`**=_`<true|false>`_ &mdash; 
+  Whether Biome should integrate itself with the VCS client
+- **`    --vcs-use-ignore-file`**=_`<true|false>`_ &mdash; 
+  Whether Biome should use the VCS ignore file. When [true], Biome will ignore the files specified in the ignore file.
+- **`    --vcs-root`**=_`PATH`_ &mdash; 
+  The folder where Biome should check for VCS files. By default, Biome will use the same folder where `biome.json` was found.
+
+  If Biome can't find the configuration, it will attempt to use the current working directory. If no current working directory can't be found, Biome won't use the VCS integration, and a diagnostic will be emitted
+- **`    --files-max-size`**=_`NUMBER`_ &mdash; 
+  The maximum allowed size for source code files in bytes. Files above this limit will be ignored for performance reasons. Defaults to 1 MiB
+- **`    --files-ignore-unknown`**=_`<true|false>`_ &mdash; 
+  Tells Biome to not emit diagnostics when handling files that doesn't know
+- **`    --indent-style`**=_`<tab|space>`_ &mdash; 
+  The indent style.
+- **`    --indent-size`**=_`NUMBER`_ &mdash; 
+  The size of the indentation, 2 by default (deprecated, use `indent-width`)
+- **`    --indent-width`**=_`NUMBER`_ &mdash; 
+  The size of the indentation, 2 by default
+- **`    --line-ending`**=_`<lf|crlf|cr>`_ &mdash; 
+  The type of line ending.
+- **`    --line-width`**=_`NUMBER`_ &mdash; 
+  What's the max width of a line. Defaults to 80.
+- **`    --quote-style`**=_`<double|single>`_ &mdash; 
+  The type of quotes used in JavaScript code. Defaults to double.
+- **`    --jsx-quote-style`**=_`<double|single>`_ &mdash; 
+  The type of quotes used in JSX. Defaults to double.
+- **`    --quote-properties`**=_`<preserve|as-needed>`_ &mdash; 
+  When properties in objects are quoted. Defaults to asNeeded.
+- **`    --trailing-comma`**=_`<all|es5|none>`_ &mdash; 
+  Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to "all".
+- **`    --semicolons`**=_`<always|as-needed>`_ &mdash; 
+  Whether the formatter prints semicolons for all statements or only in for statements where it is necessary because of ASI.
+- **`    --arrow-parentheses`**=_`<always|as-needed>`_ &mdash; 
+  Whether to add non-necessary parentheses to arrow functions. Defaults to "always".
+- **`    --bracket-spacing`**=_`<true|false>`_ &mdash; 
+  Whether to insert spaces around brackets in object literals. Defaults to true.
+- **`    --bracket-same-line`**=_`<true|false>`_ &mdash; 
+  Whether to hug the closing bracket of multiline HTML/JSX tags to the end of the last line, rather than being alone on the following line. Defaults to false.
+- **`    --javascript-formatter-enabled`**=_`<true|false>`_ &mdash; 
+  Control the formatter for JavaScript (and its super languages) files.
+- **`    --javascript-formatter-indent-style`**=_`<tab|space>`_ &mdash; 
+  The indent style applied to JavaScript (and its super languages) files.
+- **`    --javascript-formatter-indent-size`**=_`NUMBER`_ &mdash; 
+  The size of the indentation applied to JavaScript (and its super languages) files. Default to 2.
+- **`    --javascript-formatter-indent-width`**=_`NUMBER`_ &mdash; 
+  The size of the indentation applied to JavaScript (and its super languages) files. Default to 2.
+- **`    --javascript-formatter-line-ending`**=_`<lf|crlf|cr>`_ &mdash; 
+  The type of line ending applied to JavaScript (and its super languages) files.
+- **`    --javascript-formatter-line-width`**=_`NUMBER`_ &mdash; 
+  What's the max width of a line applied to JavaScript (and its super languages) files. Defaults to 80.
+- **`    --json-formatter-enabled`**=_`<true|false>`_ &mdash; 
+  Control the formatter for JSON (and its super languages) files.
+- **`    --json-formatter-indent-style`**=_`<tab|space>`_ &mdash; 
+  The indent style applied to JSON (and its super languages) files.
+- **`    --json-formatter-indent-width`**=_`NUMBER`_ &mdash; 
+  The size of the indentation applied to JSON (and its super languages) files. Default to 2.
+- **`    --json-formatter-indent-size`**=_`NUMBER`_ &mdash; 
+  The size of the indentation applied to JSON (and its super languages) files. Default to 2.
+- **`    --json-formatter-line-ending`**=_`<lf|crlf|cr>`_ &mdash; 
+  The type of line ending applied to JSON (and its super languages) files.
+- **`    --json-formatter-line-width`**=_`NUMBER`_ &mdash; 
+  What's the max width of a line applied to JSON (and its super languages) files. Defaults to 80.
+
+
+
+**Global options applied to all commands**
+- **`    --colors`**=_`<off|force>`_ &mdash; 
+  Set the formatting mode for markup: "off" prints everything as plain text, "force" forces the formatting of markup using ANSI even if the console output is determined to be incompatible
+- **`    --use-server`** &mdash; 
+  Connect to a running instance of the Biome daemon server.
+- **`    --verbose`** &mdash; 
+  Print additional verbose advices on diagnostics
+- **`    --config-path`**=_`PATH`_ &mdash; 
+  Set the filesystem path to the directory of the biome.json configuration file
+- **`    --max-diagnostics`**=_`NUMBER`_ &mdash; 
+  Cap the amount of diagnostics displayed.
+   
+  [default: 20]
+- **`    --skip-errors`** &mdash; 
+  Skip over files containing syntax errors instead of emitting an error diagnostic.
+- **`    --no-errors-on-unmatched`** &mdash; 
+  Silence errors that would be emitted in case no files were processed during the execution of the command.
+- **`    --error-on-warnings`** &mdash; 
+  Tell Biome to exit with an error code if some diagnostics emit warnings.
+- **`    --log-level`**=_`<none|debug|info|warn|error>`_ &mdash; 
+  The level of logging. In order, from the most verbose to the least verbose: debug, info, warn, error.
+
+  The value `none` won't show any logging.
+   
+  [default: none]
+- **`    --log-kind`**=_`<pretty|compact|json>`_ &mdash; 
+  How the log should look like.
+   
+  [default: pretty]
+- **`    --diagnostic-level`**=_`<info|warn|error>`_ &mdash; 
+  The level of diagnostics to show. In order, from the lowest to the most important: info, warn, error. Passing `--diagnostic-level=error` will cause Biome to print only diagnostics that contain only errors.
+   
+  [default: info]
+
+
+
+**Available positional items:**
+- _`PATH`_ &mdash; 
+  Single file, single path or list of paths
+
+
+
+**Available options:**
+- **`    --formatter-enabled`**=_`<true|false>`_ &mdash; 
+  Allow to enable or disable the formatter check.
+- **`    --linter-enabled`**=_`<true|false>`_ &mdash; 
+  Allow to enable or disable the linter check.
+- **`    --organize-imports-enabled`**=_`<true|false>`_ &mdash; 
+  Allow to enable or disable the organize imports.
+- **`-h`**, **`--help`** &mdash; 
+  Prints help information
+
+
+## biome init
+
+Bootstraps a new biome project. Creates a configuration file with some defaults.
+
+**Usage**: **`biome`** **`init`** 
+
+**Available options:**
+- **`-h`**, **`--help`** &mdash; 
+  Prints help information
+
+
+## biome lsp-proxy
+
+Acts as a server for the Language Server Protocol over stdin/stdout
+
+**Usage**: **`biome`** **`lsp-proxy`** \[**`--config-path`**=_`PATH`_\]
+
+**Available options:**
+- **`    --config-path`**=_`PATH`_ &mdash; 
+  Allows to set a custom path when discovering the configuration file `biome.json`
+   
+  Uses environment variable **`BIOME_CONFIG_PATH`**
+- **`-h`**, **`--help`** &mdash; 
+  Prints help information
+
+
+## biome migrate
+
+It updates the configuration when there are breaking changes
+
+**Usage**: **`biome`** **`migrate`** \[**`--write`**\]
+
+**Global options applied to all commands**
+- **`    --colors`**=_`<off|force>`_ &mdash; 
+  Set the formatting mode for markup: "off" prints everything as plain text, "force" forces the formatting of markup using ANSI even if the console output is determined to be incompatible
+- **`    --use-server`** &mdash; 
+  Connect to a running instance of the Biome daemon server.
+- **`    --verbose`** &mdash; 
+  Print additional verbose advices on diagnostics
+- **`    --config-path`**=_`PATH`_ &mdash; 
+  Set the filesystem path to the directory of the biome.json configuration file
+- **`    --max-diagnostics`**=_`NUMBER`_ &mdash; 
+  Cap the amount of diagnostics displayed.
+   
+  [default: 20]
+- **`    --skip-errors`** &mdash; 
+  Skip over files containing syntax errors instead of emitting an error diagnostic.
+- **`    --no-errors-on-unmatched`** &mdash; 
+  Silence errors that would be emitted in case no files were processed during the execution of the command.
+- **`    --error-on-warnings`** &mdash; 
+  Tell Biome to exit with an error code if some diagnostics emit warnings.
+- **`    --log-level`**=_`<none|debug|info|warn|error>`_ &mdash; 
+  The level of logging. In order, from the most verbose to the least verbose: debug, info, warn, error.
+
+  The value `none` won't show any logging.
+   
+  [default: none]
+- **`    --log-kind`**=_`<pretty|compact|json>`_ &mdash; 
+  How the log should look like.
+   
+  [default: pretty]
+- **`    --diagnostic-level`**=_`<info|warn|error>`_ &mdash; 
+  The level of diagnostics to show. In order, from the lowest to the most important: info, warn, error. Passing `--diagnostic-level=error` will cause Biome to print only diagnostics that contain only errors.
+   
+  [default: info]
+
+
+
+**Available options:**
+- **`    --write`** &mdash; 
+  Writes the new configuration file to disk
+- **`-h`**, **`--help`** &mdash; 
+  Prints help information
+
+
+
+[//]: # (End-codegen)
+
+## Environment Variables
+
+### `BIOME_BINARY`
+
+Overrides the Biome binary being used. This allows you, for example, to use a system-wide Biome binary.
+
+If you don't define this variable, Biome will automatically detect the correct binary for your platform.
+
+```
+# Nix derivation example; the binary path comes from "${pkgs.biome}/bin/biome"
+BIOME_BINARY=/nix/store/68fyfw1hidsqkal1839whi3nzgvqv4pa-biome-1.0.0/bin/biome npx @biomejs/biome format .
+```
+
+## Useful information
+
+- When encountering symbolic links, the CLI will expand them until three levels deep. Deeper levels will result into an error diagnostic.

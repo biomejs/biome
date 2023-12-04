@@ -1,0 +1,180 @@
+---
+title: Linter
+description: How to use the Biome linter.
+---
+
+import NumberOfRules from "@src/components/generated/NumberOfRules.astro";
+import RecommendedRules from "@src/components/generated/RecommendedRules.astro";
+
+Biome's linter statically analyzes your code to catch common errors and to help writing idiomatic code.
+
+<NumberOfRules />
+
+## Use the linter via CLI
+
+You can start by running the CLI to check for possible errors using the following command:
+
+```shell
+biome lint ./src
+```
+
+For more information about all the available options, check the [CLI page](/reference/cli#biome-lint)
+
+## Rule pillars
+
+We believe that rules should be informative and explain to the user why a rule is triggered and tell the user what they should to do fix the error. A rule should follow these **pillars**:
+1. Explain to the user the error. Generally, this is the message of the diagnostic.
+2. Explain to the user **why** the error is triggered. Generally, this is implemented with an additional node.
+3. Tell the user what they should do. Generally, this is implemented using a code action. If a code action is not applicable a note should tell the user what they should do to fix the error.
+
+If you think a rule doesn't follow these pillars, please [file an issue](https://github.com/biomejs/biome/issues/new?assignees=&labels=S-To+triage&projects=&template=01_bug.yml&title=%F0%9F%90%9B+%3CTITLE%3E).
+
+## Code fixes
+
+Lint rules may provide automatic code fixes. Biome distinguishes between two types of fixes.
+
+### Safe fixes
+
+Safe fixes are guaranteed to not change the semantic of your code. They can be applied without explicit review.
+
+To apply _safe fixes_, use `--apply`:
+
+```shell
+biome check --apply ./src
+```
+
+### Unsafe fixes
+
+Unsafe fixes may change the semantic of your program. Therefore, it's advised to manually review the changes.
+
+To apply _unsafe fixes_, use `--apply-unsafe`:
+
+```shell
+biome check --apply-unsafe ./src
+```
+
+
+## Recommended rules
+
+When the linter is enabled, it recommends a number of rules. Recommended rules will emit error diagnostics. Below the list of recommended rules:
+
+<RecommendedRules />
+
+
+## Ignoring Code
+
+There are times when a developer wants to ignore a lint rule for a specific line of the code.
+You can achieve this by adding a suppression comment above the line that emits the lint diagnostic.
+
+Suppression comments have the following format:
+
+```js
+// biome-ignore lint: <explanation>
+// biome-ignore lint/suspicious/noDebugger: <explanation>
+```
+
+Where
+
+- `biome-ignore` is the start of a suppression comment;
+- `lint` suppresses the linter;
+- `/suspicious/noDebugger`: **optional**, group and name of the rule you want to suppress;
+- `<explanation>` explanation why the rule is disabled
+
+Here's an example:
+
+```ts
+// biome-ignore lint: reason
+debugger;
+// biome-ignore lint/suspicious/noDebugger: reason
+debugger;
+```
+
+
+## Configuration
+
+### Enable a lint rule
+
+Recommended rules are enabled by default and emit diagnostics with the error severity.
+Rules that are not recommended are disabled by default, but they can be enabled via configuration.
+The diagnostics emitted by these rules are displayed with the warning severity in the documentation.
+
+To enable rules, you need to change their diagnostic severity based on your needs:
+
+```json title="biome.json"
+{
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "style": {
+        "useBlockStatements": "error",
+        "useShorthandArrayType": "error",
+        "noShoutyConstants": "warn"
+      }
+    }
+  }
+}
+```
+
+### Disable a lint rule
+
+Just add `"off"` as value inside its configuration. For example:
+
+```json title="biome.json"
+{
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "suspicious": {
+        "noCommentText": "off"
+      },
+      "style": {
+        "noUnusedTemplateLiteral": "off"
+      }
+    }
+  }
+}
+```
+
+### Change the diagnostic severity
+
+Most of Biome's rules will emit an **error**, but you are free to change their severity.
+Just add `"warn"` as value of the rule. Example:
+
+```json title="biome.json"
+{
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "suspicious": {
+        "noCommentText": "warn"
+      }
+    }
+  }
+}
+```
+
+This is useful in cases there's being a refactor going on and there's need to make the CI passing.
+
+## Rule options
+
+A few rules have options.
+When they do _accept_ some, you can pass them by shaping the value of the rule differently.
+
+```json title="biome.json"
+{
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "correctness": {
+        "noCommentText": {
+          "level": "warn",
+          "options": {}
+        }
+      }
+    }
+  }
+}
+```
+
+- `level` will indicate the severity of the diagnostic, valid values are: `"off"`, `"warn"` and `"error"`;
+- `options` will change based on the rule.

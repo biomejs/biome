@@ -1,0 +1,105 @@
+---
+title: Getting Started
+description: Learn how to set up a new project with Biome.
+---
+
+import PackageManagerBiomeCommand from "@src/components/PackageManagerBiomeCommand.astro";
+import PackageManagerCommand from "@src/components/PackageManagerCommand.astro";
+
+## System Requirements
+
+- Windows (including WSL), macOS, or Linux
+- x86_64 or ARM64
+- Node.js v14.18 or newer (not applicable if you use the standalone executable)
+
+## Installation
+
+The fastest way to download Biome is to use `npm` or your preferred package manager. The CLI is also available as a [standalone executable](/guides/manual-installation) if you want to use Biome without installing Node.js.
+
+To install Biome, run the following commands in a directory containing a `package.json` file.
+
+<PackageManagerCommand
+  npm="install --save-dev --save-exact @biomejs/biome"
+  pnpm="add --save-dev --save-exact @biomejs/biome"
+  yarn="add --dev --exact @biomejs/biome"
+  bun="add --dev --exact @biomejs/biome"
+/>
+
+:::note
+It is also possible to install Biome globally rather than locally.
+However, this is not recommended.
+:::
+
+It's **highly recommended** not to use range operators when installing Biome.
+Check the [versioning page](/internals/versioning/) for more information.
+
+## Configuration
+
+We recommend creating a `biome.json` configuration file for each project.
+It eliminates the need to repeat the CLI options every time you run a command and ensures that Biome applies the same configuration in your editor. If you're happy with Biome's defaults, you don't have to create the configuration.
+
+To create the configuration, run the `init` command in the root folder of your project:
+
+<PackageManagerBiomeCommand command="init" />
+
+After running the `init` command, you'll now have a new `biome.json` file in your directory:
+
+```json title="biome.json"
+{
+  "$schema": "https://biomejs.dev/schemas/1.4.0/schema.json",
+  "organizeImports": {
+    "enabled": false
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true
+    }
+  }
+}
+```
+
+The `linter.enabled: true` enables the linter and `rules.recommended: true` enables the [recommended rules](/linter/rules/).
+
+Formatting is enabled because the configuration doesn't explicitly [disable](/reference/configuration/#formatterenabled) formatting with `formatter.enabled: false`.
+
+## Usage
+
+Biome CLI comes with many commands and options, so you can use only what you need.
+
+You can format files and directories using the [`format`](/reference/cli#biome-format) command and the `--write` option:
+
+<PackageManagerBiomeCommand command="format <files> --write" />
+
+You can lint and apply [safe fixes](/linter#safe-fixes) to files and directories using the [`lint`](/reference/cli#biome-lint) command with the `--apply`:
+
+<PackageManagerBiomeCommand command="lint <files>" />
+
+You can apply **both** of them by leveraging the [`check`](/reference/cli#biome-check) command:
+
+<PackageManagerBiomeCommand command="check --apply <files>" />
+
+The command `check` is command meant to run multiple tools at once. Currently, it does:
+
+- format files
+- lint files
+- organize imports
+
+## Install an editor plugin
+
+We recommend installing an editor plugin to get the most out of Biome. Check out the [editor page](/guides/integrate-in-editor) to know which editors support Biome.
+
+## CI Setup
+
+If you're using Node.js, the recommended way to run Biome in CI is to use [your favourite package manager](/guides/getting-started#installation).
+This ensures that your CI pipeline uses the same version of Biome as you do inside the editor or when running local CLI commands.
+
+## Next Steps
+
+Success! You're now ready to use Biome. 🥳
+
+- Learn more about how to use and configure the [formatter](/formatter)
+- Learn more about how to use and configure the [linter](/linter)
+- Get familiar with the [CLI options](/reference/cli)
+- Get familiar with the [configuration options](/reference/configuration)
+- Join our [community on Discord](https://discord.gg/BypW39g6Yc)
