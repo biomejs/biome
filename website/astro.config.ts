@@ -236,7 +236,7 @@ export default defineConfig({
 			social: {
 				discord: "https://discord.gg/BypW39g6Yc",
 				github: "https://github.com/biomejs/biome",
-				twitter: "https://twitter.com/biomejs",
+				"x.com": "https://twitter.com/biomejs",
 				mastodon: "https://fosstodon.org/@biomejs",
 			},
 			editLink: {
