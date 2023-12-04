@@ -38,3 +38,11 @@ export function MyComponent2() {
         if (selectedArticle?.redirectUrl) {}
     }, [selectedArticle?.redirectUrl]);
 }
+
+// Excludes captures from TS typeof
+export function MyComponent3({ outer }: { outer: string[] }) {
+		useEffect(() => {
+			const a: (typeof outer)[number] = "foo";
+			console.log(a)
+		}, []);
+}
