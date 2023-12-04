@@ -1,50 +1,50 @@
 ---
-title: Manual installation
-description: Install the Biome manually
+title: 手动安装
+description: 手动安装 Biome
 ---
 
-## Use Biome without Node.js
+## 不使用 Node.js 使用 Biome
 
-Using Biome's standalone CLI binary can be a great choice if you aren't already using Node or npm (or any other package manager).
-Or in other words, Biome shouldn't be the only reason for you to have a `package.json`.
+如果您还没有使用 Node 或 npm（或任何其他包管理器），那么使用 Biome 的独立 CLI 二进制文件可能是一个很好的选择。
+换句话说，Biome 不应该是您拥有 `package.json` 的唯一原因。
 
 :::note
-If you're already using npm or another package manager, then using the package manager is the [preferred way to install](/guides/getting-started#installation) Biome.
-You're already familiar with the tooling, and installing and updating are simpler.
+如果您已经使用 npm 或其他包管理器，那么使用包管理器是安装 Biome 的[首选方式](/guides/getting-started#installation)。
+您已经熟悉了工具，安装和更新更简单。
 :::
 
 ### Homebrew
 
-Biome is available as a [Homebrew formula](https://formulae.brew.sh/formula/biome) for macOS and Linux users.
+Biome 可以作为 macOS 和 Linux 用户的 [Homebrew formula](https://formulae.brew.sh/formula/biome)。
 
 ```shell
 brew install biome
 ```
 
-## System Requirements
+## 系统要求
 
-- Windows (including WSL), macOS, or Linux
-- x86_64 or ARM64
+- Windows（包括 WSL）、macOS 或 Linux
+- x86_64 或 ARM64
 
-## Supported platforms
+## 支持的平台
 
-You have to pick the correct binary for your platform for Biome work. The following table should help you do so.
+您必须为 Biome 选择正确的平台二进制文件。以下表格应该可以帮助您做到这一点。
 
-| CPU Architecture | Windows       | macOS                        | Linux         | Linux (musl)       |
+| CPU 架构 | Windows       | macOS                        | Linux         | Linux (musl)       |
 | ---------------- | ------------- | ---------------------------- | ------------- | ------------------ |
-| `arm64`          | `win32-arm64` | `darwin-arm64` (M1 or newer) | `linux-arm64` | `linux-arm64-musl` |
+| `arm64`          | `win32-arm64` | `darwin-arm64` (M1 或更新) | `linux-arm64` | `linux-arm64-musl` |
 | `x64`            | `win32-x64`   | `darwin-x64`                 | `linux-x64`   | `linux-x64-musl`   |
 
 :::note
-Use the Linux variant for Windows Subsystem for Linux (WSL).
+对于 Windows Subsystem for Linux (WSL)，请使用 Linux 变体。
 :::
 
-## Install Biome
+## 安装 Biome
 
-To install Biome, grab the executable for your platform from the [latest CLI release](https://github.com/biomejs/biome/releases) on GitHub and give it execution permission.
+要安装 Biome，从 GitHub 上的 [最新 CLI 发布](https://github.com/biomejs/biome/releases)中获取适用于您平台的可执行文件，并赋予其执行权限。
 
 ```shell
-# macOS arm (M1 or newer)
+# macOS arm (M1 或更新)
 curl -L https://github.com/biomejs/biome/releases/download/cli%2Fv<version>/biome-darwin-arm64 -o biome
 chmod +x biome
 
@@ -57,11 +57,11 @@ Invoke-WebRequest -Uri "https://github.com/biomejs/biome/releases/download/cli%2
 ```
 
 :::note
-Make sure to replace `<version>` with the Biome version you want to install.
+请确保将 `<version>` 替换为您要安装的 Biome 版本。
 :::
 
-Now you can use Biome by simply running `./biome`.
+现在，您可以通过简单地运行 `./biome` 来使用 Biome。
 
-## Next Steps
+## 下一步
 
-Read more about how to use Biome in our [getting started section](/guides/getting-started#next-steps).
+在我们的 [入门部分](/guides/getting-started#next-steps)中阅读更多关于如何使用 Biome 的信息。

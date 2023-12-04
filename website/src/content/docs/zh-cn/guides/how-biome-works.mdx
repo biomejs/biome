@@ -1,19 +1,17 @@
 ---
-title: How Biome works
-description: Learn how to set up a new project with Biome.
+title: Biome 如何工作
+description: 学习如何使用 Biome 设置新项目。
 ---
 import DefaultConfiguration from "@src/components/generated/DefaultConfiguration.mdx";
 
 
-## Configuration
+## 配置
 
-The configuration file is considered **optional**, Biome has good defaults. Use the configuration
-file to change those defaults.
+配置文件被视为**可选的**，Biome 有良好的默认设置。使用配置文件更改这些默认设置。
 
-The Biome configuration file is named `biome.json` and should be placed in the root directory of your project. The root
-directory is usually the directory containing your project's `package.json`.
+Biome 的配置文件名为 `biome.json`，应放在项目的根目录中。根目录通常是包含项目 `package.json` 的目录。
 
-This configuration file enables the formatter and sets the preferred indent style and width. The linter is disabled:
+此配置文件启用格式化器，并设置首选的缩进样式和宽度。禁用了 linter：
 
 ```json title="biome.json"
 {
@@ -28,20 +26,19 @@ This configuration file enables the formatter and sets the preferred indent styl
 }
 ```
 
-### Default configuration
+### 默认配置
 
-When you run `biome init`, the default configuration emitted is the following:
+当你运行 `biome init` 时，发出的默认配置如下：
 
 <DefaultConfiguration />
 
-### Configuration file resolution
+### 配置文件解析
 
-Biome uses auto discovery to find the nearest `biome.json` file. It starts looking for `biome.json` in the current
-working directory, and then it starts looking in the parent directories until:
-- it finds a `biome.json` file;
-- it applies Biome's defaults if **no `biome.json` is found**;
+Biome 使用自动发现来查找最近的 `biome.json` 文件。它开始在当前工作目录中查找 `biome.json`，然后开始在父目录中查找，直到：
+- 找到一个 `biome.json` 文件；
+- 如果**没有找到 `biome.json`**，则应用 Biome 的默认值；
 
-Here's an example:
+这是一个例子：
 
 ```
 └── app
@@ -57,14 +54,13 @@ Here's an example:
 
 ```
 
-- biome commands that run in `app/backend/package.json` will use the configuration file `app/backend/biome.json`;
-- biome commands that run in `app/frontend/legacy/package.json` and `app/frontend/new/package.json`
-will use the configuration file `app/frontend/biome.json`;
+- 在 `app/backend/package.json` 中运行的 biome 命令将使用配置文件 `app/backend/biome.json`；
+- 在 `app/frontend/legacy/package.json` 和 `app/frontend/new/package.json` 中运行的 biome 命令将使用配置文件 `app/frontend/biome.json`；
 
 
-## Known Files
+## 已知文件
 
-The following files are currently ignored by Biome. This means that no diagnostics will be ever emitted by Biome for those files.
+以下文件目前被 Biome 忽略。这意味着 Biome 永远不会为这些文件发出诊断。
 
 - `package.json`
 - `package-lock.json`
@@ -80,7 +76,7 @@ The following files are currently ignored by Biome. This means that no diagnosti
 
 
 
-The following files are parsed as **`JSON` files** with  the options `json.parser.allowComments` and `json.parser.allowTrailingCommas` set to `true`. This is because editor tools like VSCode treat them like this.
+以下文件被解析为**`JSON` 文件**，选项 `json.parser.allowComments` 和 `json.parser.allowTrailingCommas` 设置为 `true`。这是因为像 VSCode 这样的编辑器工具就是这样处理它们的。
 
 - `tslint.json`
 - `babel.config.json`

@@ -1,22 +1,22 @@
 ---
-title: Getting Started
-description: Learn how to set up a new project with Biome.
+title: 入门指南
+description: 学习如何使用 Biome 设置新项目。
 ---
 
 import PackageManagerBiomeCommand from "@src/components/PackageManagerBiomeCommand.astro";
 import PackageManagerCommand from "@src/components/PackageManagerCommand.astro";
 
-## System Requirements
+## 系统要求
 
-- Windows (including WSL), macOS, or Linux
-- x86_64 or ARM64
-- Node.js v14.18 or newer (not applicable if you use the standalone executable)
+- Windows（包括 WSL）、macOS 或 Linux
+- x86_64 或 ARM64
+- Node.js v14.18 或更高版本（如果使用独立可执行文件则不适用）
 
-## Installation
+## 安装
 
-The fastest way to download Biome is to use `npm` or your preferred package manager. The CLI is also available as a [standalone executable](/guides/manual-installation) if you want to use Biome without installing Node.js.
+下载 Biome 的最快方式是使用 `npm` 或你喜欢的包管理器。如果你想在不安装 Node.js 的情况下使用 Biome，CLI 也提供了[独立可执行文件](/guides/manual-installation)。
 
-To install Biome, run the following commands in a directory containing a `package.json` file.
+要安装 Biome，请在包含 `package.json` 文件的目录中运行以下命令。
 
 <PackageManagerCommand
   npm="install --save-dev --save-exact @biomejs/biome"
@@ -26,23 +26,23 @@ To install Biome, run the following commands in a directory containing a `packag
 />
 
 :::note
-It is also possible to install Biome globally rather than locally.
-However, this is not recommended.
+也可以全局安装 Biome 而不是本地安装。
+但是，我们不推荐这样做。
 :::
 
-It's **highly recommended** not to use range operators when installing Biome.
-Check the [versioning page](/internals/versioning/) for more information.
+我们**强烈建议**在安装 Biome 时不要使用范围操作符。
+更多信息请查看[版本页面](/internals/versioning/)。
 
-## Configuration
+## 配置
 
-We recommend creating a `biome.json` configuration file for each project.
-It eliminates the need to repeat the CLI options every time you run a command and ensures that Biome applies the same configuration in your editor. If you're happy with Biome's defaults, you don't have to create the configuration.
+我们建议为每个项目创建一个 `biome.json` 配置文件。
+这样可以避免每次运行命令时都要重复 CLI 选项，并确保 Biome 在你的编辑器中应用相同的配置。如果你对 Biome 的默认设置感到满意，你不必创建配置。
 
-To create the configuration, run the `init` command in the root folder of your project:
+要创建配置，请在项目的根文件夹中运行 `init` 命令：
 
 <PackageManagerBiomeCommand command="init" />
 
-After running the `init` command, you'll now have a new `biome.json` file in your directory:
+运行 `init` 命令后，你的目录中现在会有一个新的 `biome.json` 文件：
 
 ```json title="biome.json"
 {
@@ -59,47 +59,48 @@ After running the `init` command, you'll now have a new `biome.json` file in you
 }
 ```
 
-The `linter.enabled: true` enables the linter and `rules.recommended: true` enables the [recommended rules](/linter/rules/).
+`linter.enabled: true` 启用了 linter，`rules.recommended: true` 启用了[推荐规则](/linter/rules/)。
 
-Formatting is enabled because the configuration doesn't explicitly [disable](/reference/configuration/#formatterenabled) formatting with `formatter.enabled: false`.
+因为配置没有明确地使用 `formatter.enabled: false` [禁用](/reference/configuration/#formatterenabled) 格式化，所以格式化是启用的。
 
-## Usage
+## 使用
 
-Biome CLI comes with many commands and options, so you can use only what you need.
+Biome CLI 提供了许多命令和选项，所以你可以只使用你需要的部分。
 
-You can format files and directories using the [`format`](/reference/cli#biome-format) command and the `--write` option:
+你可以使用 [`format`](/reference/cli#biome-format) 命令和 `--write` 选项格式化文件和目录：
 
 <PackageManagerBiomeCommand command="format <files> --write" />
 
-You can lint and apply [safe fixes](/linter#safe-fixes) to files and directories using the [`lint`](/reference/cli#biome-lint) command with the `--apply`:
+你可以使用 [`lint`](/reference/cli#biome-lint) 命令和 `--apply` 选项对文件和目录进行 lint 并应用[安全修复](/linter#safe-fixes)：
 
 <PackageManagerBiomeCommand command="lint <files>" />
 
-You can apply **both** of them by leveraging the [`check`](/reference/cli#biome-check) command:
+你可以通过使用 [`check`](/reference/cli#biome-check) 命令应用**两者**：
 
 <PackageManagerBiomeCommand command="check --apply <files>" />
 
-The command `check` is command meant to run multiple tools at once. Currently, it does:
+`check` 命令是用于一次运行多个工具的命令。目前，它可以：
 
-- format files
-- lint files
-- organize imports
+- 格式化文件
+- lint 文件
+- 组织导入
 
-## Install an editor plugin
+## 安装编辑器插件
 
-We recommend installing an editor plugin to get the most out of Biome. Check out the [editor page](/guides/integrate-in-editor) to know which editors support Biome.
+我们建议安装编辑器插件以充分利用 Biome。查看[编辑器页面](/guides/integrate-in-editor)了解哪些编辑器支持 Biome。
 
-## CI Setup
+## CI 设置
 
-If you're using Node.js, the recommended way to run Biome in CI is to use [your favourite package manager](/guides/getting-started#installation).
-This ensures that your CI pipeline uses the same version of Biome as you do inside the editor or when running local CLI commands.
+如果你正在使用 Node.js，那么在 CI 中运行 Biome 的推荐方式是使用[你最喜欢的包管理器](/guides/getting-started#installation)。
+这确保你的 CI 流水线使用的 Biome 版本与你在编辑器中或运行本地 CLI 命令时使用的版本相同。
 
-## Next Steps
+## 下一步
 
-Success! You're now ready to use Biome. 🥳
+成功！你现在已经准备好使用 Biome 了。🥳
 
-- Learn more about how to use and configure the [formatter](/formatter)
-- Learn more about how to use and configure the [linter](/linter)
-- Get familiar with the [CLI options](/reference/cli)
-- Get familiar with the [configuration options](/reference/configuration)
-- Join our [community on Discord](https://discord.gg/BypW39g6Yc)
+- 了解更多关于如何使用和配置[格式化器](/formatter)的信息
+- 了解更多关于如何使用和配置[linter](/linter)的信息
+- 熟悉[CLI 选项](/reference/cli)
+- 熟悉[配置选项](/reference/configuration)
+- 加入我们的[Discord 社区](https://discord.gg/BypW39g6Yc)
+

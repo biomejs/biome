@@ -1,15 +1,15 @@
 ---
-title: Analyzer
-description: What the Biome analyzer provides
+title: 分析器
+description: Biome 分析器提供的内容
 ---
 
-Biome's analyzer provides a series of features that users can leverage.
+Biome 的分析器提供了一系列用户可以利用的功能。
 
-## Imports Sorting
+## 导入排序
 
-Biome allows to sort import statement using [natural ordering](https://en.wikipedia.org/wiki/Natural_sort_order).
+Biome 允许使用 [自然排序](https://en.wikipedia.org/wiki/Natural_sort_order) 对导入语句进行排序。
 
-This feature is enabled by default but can be opted-out via configuration:
+此功能默认启用，但可以通过配置选择退出：
 
 ```json title="biome.json"
 {
@@ -19,21 +19,21 @@ This feature is enabled by default but can be opted-out via configuration:
 }
 ```
 
-### How imports are sorted
+### 导入如何排序
 
-Import statements are sorted by "distance". Modules that are "farther" from the user are put on the top, modules "closer" to the user are put on the bottom:
+导入语句按照 "距离" 排序。距用户 "更远" 的模块放在顶部，距用户 "更近" 的模块放在底部：
 
-1. modules imported via `bun:` protocol. This is applicable when writing code run by Bun;
-2. built-in Node.js modules that are explicitly imported using the `node:` protocol and common Node built-ins such as `assert`;
-3. modules imported via `npm:` protocol. This is applicable when writing code run by Deno;
-4. modules imported via URL;
-5. modules imported from libraries;
-6. modules imported via absolute imports;
-7. modules imported from a name prefixed by `#`. This is applicable when using [Node's subpath imports](https://nodejs.org/api/packages.html#subpath-imports);
-8. modules imported via relative imports;
-9. modules that couldn't be identified by the previous criteria;
+1. 通过 `bun:` 协议导入的模块。这适用于编写由 Bun 运行的代码；
+2. 使用 `node:` 协议明确导入的内置 Node.js 模块和常见的 Node 内置模块，如 `assert`；
+3. 通过 `npm:` 协议导入的模块。这适用于编写由 Deno 运行的代码；
+4. 通过 URL 导入的模块；
+5. 从库中导入的模块；
+6. 通过绝对导入导入的模块；
+7. 从以 `#` 为前缀的名称导入的模块。这适用于使用 [Node 的子路径导入](https://nodejs.org/api/packages.html#subpath-imports)；
+8. 通过相对导入导入的模块；
+9. 未能通过前述标准识别的模块；
 
-For example, given the following code:
+例如，给定以下代码：
 
 ```ts title="example.ts"
 import uncle from "../uncle";
@@ -50,7 +50,7 @@ import { secret } from "/absolute/path";
 import React from "react";
 ```
 
-They will be sorted like this:
+它们将被排序如下：
 
 ```ts title="example.ts"
  import { expect } from "bun:test";
@@ -67,11 +67,11 @@ They will be sorted like this:
  import imageUrl from "url:./image.png";
 ```
 
-You can apply the sorting in two ways: via [CLI](#import-sorting-via-cli) or [VSCode extension](#import-sorting-via-vscode-extension).
+您可以通过两种方式应用排序：通过 [CLI](#import-sorting-via-cli) 或 [VSCode 扩展](#import-sorting-via-vscode-extension)。
 
-### Grouped imports
+### 分组导入
 
-It's widespread to have import statements in a certain order, primarily when you work on a frontend project, and you import CSS files:
+在某种顺序中有导入语句是很普遍的，主要是当你在一个前端项目上工作，并且你导入 CSS 文件：
 
 ```js title="example.js"
 import "../styles/reset.css";
@@ -79,50 +79,50 @@ import "../styles/layout.css";
 import { Grid } from "../components/Grid.jsx";
 ```
 
-Another common case is import polyfills or shim files, that needs to stay at the top file:
+另一个常见的情况是导入 polyfills 或 shim 文件，这些文件需要保持在文件的顶部：
 
 ```js title="example.js"
 import "../polyfills/array/flatMap";
 import { functionThatUsesFlatMap } from "./utils.js";
 ```
 
-In these cases, Biome will sort all these three imports, and it might happen that the order will **break** your application.
+在这些情况下，Biome 将对这三个导入进行排序，可能会导致应用程序的顺序**破裂**。
 
-To avoid this, create a "group" of imports. You create a "group" by adding a **new line** to separate the groups.
+为了避免这种情况，创建一个导入的 "组"。您可以通过添加**新行**来分隔组来创建 "组"。
 
-By doing so, Biome will limit the sorting only to the import statements that belong to the same group:
+这样做，Biome 将只对属于同一组的导入语句进行排序：
 
 ```js title="example.js"
-// group 1, only these two files will be sorted
+// 组 1，只有这两个文件会被排序
 import "../styles/reset.css";
 import "../styles/layout.css";
 
-// group 2, only this one is sorted
+// 组 2，只有这一个被排序
 import { Grid } from "../components/Grid.jsx";
 ```
 
 ```js title="example.js"
-// group 1, the polyfill/shim
+// 组 1，polyfill/shim
 import "../polyfills/array/flatMap";
 
-// group 2, the files tha require the polyfill/shim
+// 组 2，需要 polyfill/shim 的文件
 import { functionThatUsesFlatMap } from "./utils.js";
 ```
 
-### Import sorting via CLI
+### 通过 CLI 进行导入排序
 
-Using the command `check`, with the option `--apply`.
+使用命令 `check`，带有选项 `--apply`。
 
 ```shell
 biome check --apply ./path/to/src
 ```
 
-### Import sorting via VSCode extension
+### 通过 VSCode 扩展进行导入排序
 
-The Biome VS Code extension supports imports sorting through the "Organize Imports" code action.
-By default, this action can be run using the <kbd title="Shift">⇧</kbd>+<kbd>Alt</kbd>+<kbd>O</kbd> keyboard shortcut, or is accessible through the _Command Palette_ (<kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd title="Shift">⇧</kbd>+<kbd>P</kbd>) by selecting _Organize Imports_.
+Biome 的 VS Code 扩展通过 "Organize Imports" 代码操作支持导入排序。
+默认情况下，可以使用 <kbd title="Shift">⇧</kbd>+<kbd>Alt</kbd>+<kbd>O</kbd> 键盘快捷键运行此操作，或通过 _Command Palette_ (<kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd title="Shift">⇧</kbd>+<kbd>P</kbd>) 选择 _Organize Imports_。
 
-You can add the following to your editor configuration if you want the action to run automatically on save instead of calling it manually:
+如果你希望此操作在保存时自动运行，而不是手动调用，可以将以下内容添加到你的编辑器配置中：
 
 ```json title="biome.json"
 {

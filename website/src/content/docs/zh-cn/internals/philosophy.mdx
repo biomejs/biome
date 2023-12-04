@@ -1,42 +1,43 @@
 ---
-title: Philosophy
-description: How we think about building Biome.
+title: 哲学
+description: 我们如何思考构建Biome。
 ---
 
-This list includes general ethos that the project should abide by.
-This list is not comprehensive. Some of these are obvious but are stated for completeness.
+这个列表包括项目应遵守的一般精神。
+这个列表并不全面。有些是显而易见的，但为了完整性而列出。
 
-## Project Management
+## 项目管理
 
-- **Set clear expectations.** Make project intent and decisions known well in advance.
-  Nothing should be a surprise.
+- **设定明确的期望。** 提前明确项目的意图和决策。
+  不应有任何意外。
 
-- **Clear messaging of decisions.** The team might evaluate options and make decisions using private channels.
-  While the team will try to keep discussions using public channels like [GitHub discussions](https://github.com/biomejs/biome/discussions) or [Discord](https://discord.gg/BypW39g6Yc), frequent private check-in are the norm, due to the nature of the private company.
-  When decisions occur via private channels, the team has to commit to communicate these decisions using the public channels.
+- **清晰的决策信息。** 团队可能会使用私人渠道评估选项并做出决策。
+  虽然团队会尽量使用公共渠道进行讨论，如[GitHub讨论](https://github.com/biomejs/biome/discussions)或[Discord](https://discord.gg/BypW39g6Yc)，但由于私人公司的性质，频繁的私人检查是常态。
+  当通过私人渠道做出决策时，团队必须承诺通过公共渠道传达这些决策。
 
-## Technical
+## 技术
 
-- **Errors should suggest fixes and hints where possible.** These should be inferred and filtered from usage to reduce surfacing irrelevant and unhelpful messages.
+- **错误应尽可能提供修复和提示。** 这些应从使用中推断和过滤，以减少无关和无帮助的信息的出现。
 
-- **Unique and specific error messages.** No generic error messages.
-  This helps users understand what went wrong and should provide maintainers with a unique call site and the necessary information to debug.
+- **独特且具体的错误信息。** 不使用通用的错误信息。
+  这有助于用户理解出了什么问题，并应为维护者提供一个独特的调用站点和调试所需的信息。
 
-- **Optimise API.** Question the existence of all options and flags.
-  Are they necessary? Can they be combined? How can we reduce code branching?
+- **优化API。** 对所有选项和标志的存在提出疑问。
+  它们是否必要？它们可以合并吗？我们如何减少代码分支？
 
-- **Reduce jargon.** Don't assume that users will understand specific terminology.
-  Strive to provide precise meaning for experts and beginners.
-  For example, use "character" where you would traditionally use "token" when producing parser errors.
+- **减少行话。** 不要假设用户会理解特定的术语。
+  努力为专家和初学者提供精确的含义。
+  例如，在生成解析器错误时，使用"字符"而不是传统的"令牌"。
 
-- **Utilize verbosity when naming commands and flags.** No unnecessary and confusing abbreviations.
+- **在命名命令和标志时使用详细性。** 不使用不必要且混淆的缩写。
 
-- **Use inclusive terminology.** Use gender-neutral pronouns. No ableist slurs.
-  No usage of terms that could be considered insensitive.
+- **使用包容性的术语。** 使用中性的代词。不使用能力主义的侮辱语。
+  不使用可能被认为是敏感的术语。
 
-- **Build for generic clients.** Don't assume that a terminal will only consume output using ANSI codes.
-  Use abstractions that could be generalized for viewing in an IDE, browser, or other environments.
+- **为通用客户端构建。** 不要假设终端只会使用ANSI代码消耗输出。
+  使用可以为在IDE、浏览器或其他环境中查看而概括的抽象。
 
-- **Terminal output should be unambiguous.** When designing terminal output, don't rely purely on formatting cues like color.
-  Always use a combination of formatting, symbols, and spacing.
-  If all ANSI codes are stripped, all the output should still be understood.
+- **终端输出应该是明确的。** 在设计终端输出时，不要仅依赖于格式化提示，如颜色。
+  始终使用格式化、符号和间距的组合。
+  如果所有的ANSI代码都被剥离，所有的输出仍应该能被理解。
+

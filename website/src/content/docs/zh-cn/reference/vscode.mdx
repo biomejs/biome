@@ -1,76 +1,76 @@
 ---
-title: VSCode extension
-description: Notes about the Biome's VSCode extension
+title: VSCode 扩展
+description: 关于 Biome 的 VSCode 扩展的说明
 ---
-# Biome VS Code Extension
+# Biome VS Code 扩展
 
-[Biome](https://biomejs.dev/) unifies your development stack by combining the functionality of separate tools. It uses a single configuration file, has fantastic performance, and works with any stack. This extension brings Biome to your editor so that you can:
+[Biome](https://biomejs.dev/) 通过整合多个工具的功能，统一了你的开发栈。它使用单一的配置文件，具有出色的性能，并且可以与任何栈一起工作。这个扩展将 Biome 带到你的编辑器中，使你可以：
 
-- Format files *on save* or when issuing the *Format Document* command
-- See lints while you type and apply code fixes
-- Perform refactors
+- 在*保存*文件或发出*格式化文档*命令时格式化文件
+- 在你输入时看到 lint 并应用代码修复
+- 执行重构
 
-## Installation
+## 安装
 
-You can install the code extension by heading to the extension's [Visual Studio Code Market Place page](https://marketplace.visualstudio.com/items?itemName=biomejs.biome) or from within VS Code by either:
+你可以通过前往扩展的 [Visual Studio Code 市场页面](https://marketplace.visualstudio.com/items?itemName=biomejs.biome) 或者在 VS Code 内部来安装代码扩展，方法如下：
 
-- Open the *extensions* tab (_View_ → _Extensions)_ and search for Biome.
-- Open the _Quick Open Overlay_ (<kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd>P</kbd> or _Go -> Go to File_), enter `ext install biomejs.biome`, and hit enter.
+- 打开*扩展*标签页（视图 → 扩展）并搜索 Biome。
+- 打开 _快速打开浮层_ (<kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd>P</kbd> 或 _转到 -> 转到文件_), 输入 `ext install biomejs.biome`，然后按回车。
 
-## Getting Started
+## 入门
 
-### Default Formatter
+### 默认格式化器
 
-Configure Biome as the default formatter for supported files to ensure that VS Code uses Biome over other formatters that you may have installed. You can do so by opening a JavaScript or TypeScript and then:
+为支持的文件配置 Biome 作为默认格式化器，以确保 VS Code 使用 Biome 而不是你可能已经安装的其他格式化器。你可以通过打开一个 JavaScript 或 TypeScript 文件，然后：
 
-- Open the Command Palette (<kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd title="Shift">⇧</kbd>+<kbd>P</kbd> or View → Command Palette)
-- Select _Format Document With…_
-- Select _Configure Default Formatter…_
-- Select Biome
+- 打开命令面板 (<kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd title="Shift">⇧</kbd>+<kbd>P</kbd> 或 视图 → 命令面板)
+- 选择 _使用...格式化文档_
+- 选择 _配置默认格式化程序..._
+- 选择 Biome
 
-You can also enable Biome for specific languages only:
+你也可以只为特定语言启用 Biome：
 
-- [Open the `settings.json`](https://code.visualstudio.com/docs/getstarted/settings#_settingsjson): open the _Command Palette_(<kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd title="Shift">⇧</kbd>+<kbd>P</kbd>) and select _Preferences: Open User Settings (JSON)_
-- And set the `editor.defaultFormatter` to `biomejs.biome` for the desired language
+- [打开 `settings.json`](https://code.visualstudio.com/docs/getstarted/settings#_settingsjson): 打开 _命令面板_(<kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd title="Shift">⇧</kbd>+<kbd>P</kbd>) 并选择 _首选项: 打开用户设置 (JSON)_
+- 并为所需的语言将 `editor.defaultFormatter` 设置为 `biomejs.biome`
 
 ```json title="settings.json"
 {
-	"editor.defaultFormatter": "<other formatter>",
+	"editor.defaultFormatter": "<其他格式化程序>",
 	"[javascript]": {
 		"editor.defaultFormatter": "biomejs.biome"
 	}
 }
 ```
 
-This configuration sets Biome as the default formatter for JavaScript files. All other files will be formatted using `<other formatter>`
+此配置将 Biome 设置为 JavaScript 文件的默认格式化程序。所有其他文件将使用 `<其他格式化程序>` 进行格式化
 
-## Configuration Resolution
+## 配置解析
 
-The extension automatically loads the `biome.json` file from the workspace’s root directory.
+扩展程序会自动从工作区的根目录加载 `biome.json` 文件。
 
-## Biome Resolution
+## Biome 解析
 
-The extension tries to use Biome from your project's local dependencies (`node_modules/@biomejs/biome`). We recommend adding Biome as a project dependency to ensure that NPM scripts and the extension use the same Biome version.
+扩展程序试图使用你项目的本地依赖（`node_modules/@biomejs/biome`）中的 Biome。我们建议将 Biome 添加为项目依赖，以确保 NPM 脚本和扩展程序使用相同的 Biome 版本。
 
-You can also explicitly specify the `Biome` binary the extension should use by configuring the `biome.lspBin` setting in your editor options.
+你也可以通过在编辑器选项中配置 `biome.lspBin` 设置来明确指定扩展程序应使用的 `Biome` 二进制文件。
 
-If the project has no dependency on Biome and no explicit path is configured, the extension uses the Biome version included in its bundle.
+如果项目没有依赖 Biome，也没有配置明确的路径，那么扩展程序将使用其包中包含的 Biome 版本。
 
-## Usage
+## 使用
 
-### Format document
+### 格式化文档
 
-To format an entire document, open the _Command Palette_ (<kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd title="Shift">⇧</kbd>+<kbd>P</kbd>) and select _Format Document_.
+要格式化整个文档，打开 _命令面板_ (<kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd title="Shift">⇧</kbd>+<kbd>P</kbd>) 并选择 _格式化文档_。
 
-To format a text range, select the text you want to format, open the _Command Palette_ (<kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd title="Shift">⇧</kbd>+<kbd>P</kbd>), and select _Format Selection_.
+要格式化文本范围，选择你想要格式化的文本，打开 _命令面板_ (<kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd title="Shift">⇧</kbd>+<kbd>P</kbd>)，并选择 _格式化选择_。
 
-### Format on save
+### 保存时格式化
 
-Biome respects VS Code's _Format on Save_ setting. To enable format on save, open the settings (_File_ -> _Preferences_ -> _Settings_), search for `editor.formatOnSave`, and enable the option.
+Biome 尊重 VS Code 的 _保存时格式化_ 设置。要启用保存时格式化，打开设置（_文件_ -> _首选项_ -> _设置_），搜索 `editor.formatOnSave`，并启用该选项。
 
-### Fix on save
+### 保存时修复
 
-Biome respects VS Code's _Code Actions On Save_ setting. To enable fix on save, add
+Biome 尊重 VS Code 的 _保存时代码操作_ 设置。要启用保存时修复，添加
 
 
 ```json title="settings.json"
@@ -81,13 +81,13 @@ Biome respects VS Code's _Code Actions On Save_ setting. To enable fix on save, 
 }
 ```
 
-in vscode `settings.json`.
+在 vscode 的 `settings.json` 中。
 
-### Imports Sorting [Experimental]
+### import排序 [实验性]
 
-The Biome VS Code extension supports imports sorting through the "Organize Imports" code action. By default this action can be run using the <kbd title="Shift">⇧</kbd>+<kbd>Alt</kbd>+<kbd>O</kbd> keyboard shortcut, or is accessible through the _Command Palette_ (<kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd title="Shift">⇧</kbd>+<kbd>P</kbd>) by selecting _Organize Imports_.
+Biome VS Code 扩展通过 "整理导入" 代码操作支持导入排序。默认情况下，可以使用 <kbd title="Shift">⇧</kbd>+<kbd>Alt</kbd>+<kbd>O</kbd> 键盘快捷键运行此操作，或通过 _命令面板_ (<kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd title="Shift">⇧</kbd>+<kbd>P</kbd>) 选择 _整理导入_。
 
-You can add the following to your editor configuration if you want the action to run automatically on save instead of calling it manually:
+如果你希望该操作在保存时自动运行，而不是手动调用，可以将以下内容添加到你的编辑器配置中：
 
 ```json title="settings.json"
 {
@@ -97,41 +97,41 @@ You can add the following to your editor configuration if you want the action to
 }
 ```
 
-## Extension Settings
+## 扩展设置
 
 ### `biome.lspBin`
 
-The `biome.lspBin` option overrides the Biome binary used by the extension.
-The workspace folder is used as the base path if the path is relative.
+`biome.lspBin` 选项覆盖了扩展使用的 Biome 二进制文件。
+如果路径是相对的，那么工作区文件夹将被用作基础路径。
 
 ### `biome.rename`
 
-Enables Biome to handle renames in the workspace (experimental).
+启用 Biome 在工作区处理重命名（实验性）。
 
 ### `biome.requireConfiguration`
 
-Disables formatting, linting, and syntax errors for projects without a `biome.json` file.
-Enabled by default.
+对没有 `biome.json` 文件的项目禁用格式化、linting 和语法错误。
+默认启用。
 
-## Versioning
+## 版本控制
 
-We follow the specs suggested by [the official documentation](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#prerelease-extensions):
+我们遵循[官方文档](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#prerelease-extensions)建议的规范：
 
-Odd minor versions are dedicated to pre-releases, e.g. `*.5.*` .
-Even minor versions are dedicated to official releases, e.g. `*.6.*`.
+奇数的次版本号用于预发布，例如 `*.5.*` 。
+偶数的次版本号用于正式发布，例如 `*.6.*`。
 
 
-## Troubleshooting
+## 故障排除
 
-> I installed `@biomejs/biome`, but the extension shows a warning saying that it could not resolve library.
+> 我安装了 `@biomejs/biome`，但扩展显示警告说无法解析库。
 
-The library `@biomejs/biome` specifies some optional dependencies that are installed based on your OS and architecture.
+库 `@biomejs/biome` 指定了一些基于你的操作系统和架构安装的可选依赖。
 
-It's possible though, that the extension can't resolve the binary when loading the extension. This is caused - probably - by your package manager.
+然而，可能的是，当加载扩展时，扩展无法解析二进制文件。这可能是由你的包管理器引起的。
 
-**To resolve the issue**, try to install the binary manually. The warning should show you the binary that belongs to your machine.
+**要解决这个问题**，尝试手动安装二进制文件。警告应该会显示属于你的机器的二进制文件。
 
-**If you work in a team that use different OSs/architectures**, it's advised to install all the binaries:
+**如果你在一个使用不同操作系统/架构的团队中工作**，建议安装所有的二进制文件：
 
 - `@biomejs/cli-darwin-arm64`
 - `@biomejs/cli-darwin-x64`

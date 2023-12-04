@@ -1,86 +1,86 @@
 ---
-title: Linter
-description: How to use the Biome linter.
+title: 语法检查器
+description: 如何使用 Biome 语法检查器。
 ---
 
 import NumberOfRules from "@src/components/generated/NumberOfRules.astro";
 import RecommendedRules from "@src/components/generated/RecommendedRules.astro";
 
-Biome's linter statically analyzes your code to catch common errors and to help writing idiomatic code.
+Biome 的语法检查器静态分析您的代码，以捕获常见错误并帮助编写符合规范的代码。
 
 <NumberOfRules />
 
-## Use the linter via CLI
+## 通过 CLI 使用语法检查器
 
-You can start by running the CLI to check for possible errors using the following command:
+您可以通过运行 CLI 来检查可能的错误，使用以下命令：
 
 ```shell
 biome lint ./src
 ```
 
-For more information about all the available options, check the [CLI page](/reference/cli#biome-lint)
+有关所有可用选项的更多信息，请查看 [CLI 页面](/reference/cli#biome-lint)
 
-## Rule pillars
+## 规则支柱
 
-We believe that rules should be informative and explain to the user why a rule is triggered and tell the user what they should to do fix the error. A rule should follow these **pillars**:
-1. Explain to the user the error. Generally, this is the message of the diagnostic.
-2. Explain to the user **why** the error is triggered. Generally, this is implemented with an additional node.
-3. Tell the user what they should do. Generally, this is implemented using a code action. If a code action is not applicable a note should tell the user what they should do to fix the error.
+我们认为规则应该具有信息性，并向用户解释为什么会触发规则，并告诉用户应该如何修复错误。规则应遵循以下**支柱**：
+1. 向用户解释错误。通常，这是诊断的消息。
+2. 向用户解释**为什么**触发错误。通常，这是通过附加节点实现的。
+3. 告诉用户他们应该做什么。通常，这是通过代码操作实现的。如果代码操作不适用，注释应告诉用户应该如何修复错误。
 
-If you think a rule doesn't follow these pillars, please [file an issue](https://github.com/biomejs/biome/issues/new?assignees=&labels=S-To+triage&projects=&template=01_bug.yml&title=%F0%9F%90%9B+%3CTITLE%3E).
+如果您认为规则没有遵循这些支柱，请[提交问题](https://github.com/biomejs/biome/issues/new?assignees=&labels=S-To+triage&projects=&template=01_bug.yml&title=%F0%9F%90%9B+%3CTITLE%3E)。
 
-## Code fixes
+## 代码修复
 
-Lint rules may provide automatic code fixes. Biome distinguishes between two types of fixes.
+语法检查规则可能提供自动代码修复。Biome 区分了两种类型的修复。
 
-### Safe fixes
+### 安全修复
 
-Safe fixes are guaranteed to not change the semantic of your code. They can be applied without explicit review.
+安全修复保证不会改变您的代码的语义。他们可以在没有明确审查的情况下应用。
 
-To apply _safe fixes_, use `--apply`:
+要应用 _安全修复_，使用 `--apply`：
 
 ```shell
 biome check --apply ./src
 ```
 
-### Unsafe fixes
+### 不安全修复
 
-Unsafe fixes may change the semantic of your program. Therefore, it's advised to manually review the changes.
+不安全修复可能会改变您的程序的语义。因此，建议手动审查更改。
 
-To apply _unsafe fixes_, use `--apply-unsafe`:
+要应用 _不安全修复_，使用 `--apply-unsafe`：
 
 ```shell
 biome check --apply-unsafe ./src
 ```
 
 
-## Recommended rules
+## 推荐规则
 
-When the linter is enabled, it recommends a number of rules. Recommended rules will emit error diagnostics. Below the list of recommended rules:
+当启用语法检查器时，它会推荐一些规则。推荐的规则将发出错误诊断。以下是推荐规则的列表：
 
 <RecommendedRules />
 
 
-## Ignoring Code
+## 忽略代码
 
-There are times when a developer wants to ignore a lint rule for a specific line of the code.
-You can achieve this by adding a suppression comment above the line that emits the lint diagnostic.
+有时，开发人员希望忽略特定代码行的语法检查规则。
+您可以通过在发出语法检查诊断的行上方添加抑制注释来实现此目的。
 
-Suppression comments have the following format:
+抑制注释的格式如下：
 
 ```js
 // biome-ignore lint: <explanation>
 // biome-ignore lint/suspicious/noDebugger: <explanation>
 ```
 
-Where
+其中
 
-- `biome-ignore` is the start of a suppression comment;
-- `lint` suppresses the linter;
-- `/suspicious/noDebugger`: **optional**, group and name of the rule you want to suppress;
-- `<explanation>` explanation why the rule is disabled
+- `biome-ignore` 是抑制注释的开始；
+- `lint` 抑制语法检查器；
+- `/suspicious/noDebugger`：**可选**，您要抑制的规则的组和名称；
+- `<explanation>` 解释为什么禁用规则
 
-Here's an example:
+这是一个例子：
 
 ```ts
 // biome-ignore lint: reason
@@ -90,15 +90,15 @@ debugger;
 ```
 
 
-## Configuration
+## 配置
 
-### Enable a lint rule
+### 启用语法检查规则
 
-Recommended rules are enabled by default and emit diagnostics with the error severity.
-Rules that are not recommended are disabled by default, but they can be enabled via configuration.
-The diagnostics emitted by these rules are displayed with the warning severity in the documentation.
+推荐的规则默认启用，并发出错误严重性的诊断。
+默认情况下禁用不推荐的规则，但可以通过配置启用它们。
+这些规则发出的诊断在文档中以警告严重性显示。
 
-To enable rules, you need to change their diagnostic severity based on your needs:
+要启用规则，您需要根据您的需要更改其诊断严重性：
 
 ```json title="biome.json"
 {
@@ -115,9 +115,9 @@ To enable rules, you need to change their diagnostic severity based on your need
 }
 ```
 
-### Disable a lint rule
+### 禁用语法检查规则
 
-Just add `"off"` as value inside its configuration. For example:
+只需在其配置中添加 `"off"` 作为值。例如：
 
 ```json title="biome.json"
 {
@@ -135,10 +135,10 @@ Just add `"off"` as value inside its configuration. For example:
 }
 ```
 
-### Change the diagnostic severity
+### 更改诊断严重性
 
-Most of Biome's rules will emit an **error**, but you are free to change their severity.
-Just add `"warn"` as value of the rule. Example:
+Biome 的大多数规则都会发出**错误**，但您可以自由更改其严重性。
+只需将 `"warn"` 添加为规则的值。示例：
 
 ```json title="biome.json"
 {
@@ -153,12 +153,12 @@ Just add `"warn"` as value of the rule. Example:
 }
 ```
 
-This is useful in cases there's being a refactor going on and there's need to make the CI passing.
+在进行重构并需要使 CI 通过的情况下，这是有用的。
 
-## Rule options
+## 规则选项
 
-A few rules have options.
-When they do _accept_ some, you can pass them by shaping the value of the rule differently.
+一些规则有选项。
+当他们确实接受一些选项时，您可以通过改变规则的值的形状来传递它们。
 
 ```json title="biome.json"
 {
@@ -176,5 +176,5 @@ When they do _accept_ some, you can pass them by shaping the value of the rule d
 }
 ```
 
-- `level` will indicate the severity of the diagnostic, valid values are: `"off"`, `"warn"` and `"error"`;
-- `options` will change based on the rule.
+- `level` 将指示诊断的严重性，有效值为：`"off"`、`"warn"` 和 `"error"`；
+- `options` 将根据规则改变。

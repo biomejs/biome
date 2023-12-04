@@ -1,21 +1,21 @@
 ---
-title: Configuration
+title: 配置
 emoji: ⚙️
-category: reference
-description: How to customize and configure Biome with biome.json.
+category: 参考
+description: 如何使用biome.json自定义和配置Biome。
 ---
 
 import LintGroups from "@src/components/generated/Groups.astro";
 
-{/** Make sure to update the redirect in `static/_redirects` when changing the configuration title --> **/}
+{/** 当更改配置标题时，请确保更新`static/_redirects`中的重定向 --> **/}
 
 ## `$schema`
 
-Allows to pass a path to a JSON schema file.
+允许传递一个JSON模式文件的路径。
 
-We publish a JSON schema file for the `biome.json`.
+我们发布了一个`biome.json`的JSON模式文件。
 
-You can specify a relative path to the schema of the `@biomejs/biome` npm package if `@biomejs/biome` is installed in the `node_modules` folder:
+如果`@biomejs/biome`安装在`node_modules`文件夹中，您可以指定一个相对路径到`@biomejs/biome` npm包的模式：
 
 
 ```json title="biome.json"
@@ -24,7 +24,7 @@ You can specify a relative path to the schema of the `@biomejs/biome` npm packag
 }
 ```
 
-If you have problems with resolving the physical file, you can use the one published in this site:
+如果您在解析物理文件时遇到问题，您可以使用在此站点发布的一个：
 
 
 
@@ -36,7 +36,7 @@ If you have problems with resolving the physical file, you can use the one publi
 
 ## `extends`
 
-A list of paths to other JSON files that will extend the current configuration file.
+一个指向将扩展当前配置文件的其他JSON文件的路径列表。
 
 
 ```json title="biome.json"
@@ -73,27 +73,25 @@ A list of paths to other JSON files that will extend the current configuration f
 }
 ```
 
-The files defined in this array:
-- must exist in the file system;
-- are resolved from the path where the `biome.json` file is defined;
-- must be relative paths. Paths to libraries are not resolved;
-- must be reachable by Biome, e.g. symbolic links might not be resolved by Biome;
-- will be processed in order: from the first one to the last one;
-- can override the same properties, but ultimately only the last one will be used by Biome;
+此数组中定义的文件：
+- 必须存在于文件系统中；
+- 从定义`biome.json`文件的路径解析；
+- 必须是相对路径。不解析库路径；
+- 必须可以由Biome访问，例如，Biome可能无法解析符号链接；
+- 将按顺序处理：从第一个到最后一个；
+- 可以覆盖相同的属性，但最终只有最后一个将被Biome使用；
 
 ## `files`
 
 ### `files.maxSize`
 
-The maximum allowed size for source code files in bytes. Files above
-this limit will be ignored for performance reasons.
+源代码文件的最大允许大小（以字节为单位）。超过此限制的文件将因性能原因被忽略。
 
-> Default: 1024*1024 (1MB)
+> 默认值：1024*1024（1MB）
 
  ### `files.ignore`
 
-A list of Unix shell style patterns. Biome ignores files and folders that
-match these patterns.
+一组Unix shell样式的模式。Biome会忽略与这些模式匹配的文件和文件夹。
 
 
 ```json title="biome.json"
@@ -107,7 +105,7 @@ match these patterns.
 
 ### `files.include`
 
-A list of Unix shell style patterns. Biome handles only the files and folders that match these patterns.
+一组Unix shell样式的模式。Biome只处理与这些模式匹配的文件和文件夹。
 
 
 
@@ -120,10 +118,10 @@ A list of Unix shell style patterns. Biome handles only the files and folders th
 ```
 
 :::caution
-When both `include` and `ignore` are specified, `ignore` takes **precedence** over `include`
+当`include`和`ignore`都被指定时，`ignore`优先于`include`
 :::
 
-Given the following example:
+给出以下示例：
 
 
 
@@ -136,12 +134,11 @@ Given the following example:
 }
 ```
 
-Only the files that match the pattern `src/**/*.js` will be handled, while the files that match the pattern
-`scripts/**/*.js` will be ignored.
+只有与模式`src/**/*.js`匹配的文件将被处理，而与模式`scripts/**/*.js`匹配的文件将被忽略。
 
  ### `files.ignoreUnknown`
 
-Biome won't emit diagnostics if it encounters files that can't handle.
+如果Biome遇到无法处理的文件，它不会发出诊断。
 
 
 
@@ -153,50 +150,46 @@ Biome won't emit diagnostics if it encounters files that can't handle.
 }
 ```
 
-> Default: false
+> 默认值：false
 
 ## `vcs`
 
-Set of properties to integrate Biome with a VCS software.
+一组用于将Biome与VCS软件集成的属性。
 
 ### `vcs.enabled`
 
-Whether Biome should integrate itself with the VCS client
+Biome是否应与VCS客户端集成
 
-> Default: false
+> 默认值：false
 
 ### `vcs.clientKind`
 
-The kind of client.
+客户端的类型。
 
-Values:
+值：
 - `"git"`
 
 ### `vcs.useIgnoreFile`
 
-Whether Biome should use the VCS ignore file. When `true`, Biome will ignore the files
-specified in the ignore file.
+Biome是否应使用VCS忽略文件。当`true`时，Biome将忽略忽略文件中指定的文件。
 
 ### `vcs.root`
 
-The folder where Biome should check for VCS files. By default, Biome will use the same
-folder where `biome.json` was found.
+Biome应检查VCS文件的文件夹。默认情况下，Biome将使用找到`biome.json`的同一文件夹。
 
-If Biome can't find the configuration, it will attempt to use the current working directory.
-If no current working directory can't be found, Biome won't use the VCS integration, and a diagnostic
-will be emitted
+如果Biome找不到配置，它将尝试使用当前工作目录。如果找不到当前工作目录，Biome将不使用VCS集成，并将发出诊断
 
 ## `linter`
 
 ### `linter.enabled`
 
-Enables Biome's linter
+启用Biome的linter
 
-> Default: `true`
+> 默认值：`true`
 
 ### `linter.ignore`
 
-An array of Unix shell style patterns.
+一组Unix shell样式的模式。
 
 
 
@@ -211,8 +204,7 @@ An array of Unix shell style patterns.
 
 ### `linter.include`
 
-A list of Unix shell style patterns. Biome handles only the files and folders that
-match these patterns.
+一组Unix shell样式的模式。Biome只处理与这些模式匹配的文件和文件夹。
 
 
 
@@ -225,10 +217,10 @@ match these patterns.
 ```
 
 :::caution
-When both `include` and `ignore` are specified, `ignore` takes **precedence** over `include`
+当`include`和`ignore`都被指定时，`ignore`优先于`include`
 :::
 
-Given the following example:
+给出以下示例：
 
 
 
@@ -241,21 +233,20 @@ Given the following example:
 }
 ```
 
-Only the files that match the patter `src/**/*.js` will be linted, while the files that match the pattern
-`scripts/**/*.js` will be ignored.
+只有与模式`src/**/*.js`匹配的文件将被linted，而与模式`scripts/**/*.js`匹配的文件将被忽略。
 
 ### `linter.rules.recommended`
 
-Enables the [recommended rules](/linter/rules) for all groups.
+启用所有组的[推荐规则](/linter/rules)。
 
-> Default: `true`
+> 默认值：`true`
 
 
 ### `linter.rules.all`
 
-Enable or disable all [rules](/linter/rules) for all groups.
+启用或禁用所有组的所有[规则](/linter/rules)。
 
-If `recommended` and `all` are both `true`, Biome will emit a diagnostic and fallback to its defaults.
+如果`recommended`和`all`都是`true`，Biome将发出诊断并回退到其默认值。
 
 
 
@@ -270,7 +261,7 @@ If `recommended` and `all` are both `true`, Biome will emit a diagnostic and fal
 }
 ```
 
-It's also possible to combine this flag to enable/disable different rule groups:
+也可以组合此标志以启用/禁用不同的规则组：
 
 
 
@@ -291,20 +282,20 @@ It's also possible to combine this flag to enable/disable different rule groups:
 }
 ```
 
-In the previous example, Biome will enable all rules, exception for rules that belong to the `style` and `complexity` groups.
+在上一个示例中，Biome将启用所有规则，除了属于`style`和`complexity`组的规则。
 
 
 ### `linter.rules.[group]`
 
-Options that influence the rules of a single group. Biome supports the following groups:
+影响单个组规则的选项。Biome支持以下组：
 
 <LintGroups />
 
 ### `linter.rules.[group].recommended`
 
-Enables the recommended rules for a single group.
+启用单个组的推荐规则。
 
-Example:
+示例：
 
 
 
@@ -324,9 +315,9 @@ Example:
 
 ### `linter.rules.[group].all`
 
-Enables all rules for a single group.
+启用单个组的所有规则。
 
-Example:
+示例：
 
 
 
@@ -345,17 +336,17 @@ Example:
 
 ## `formatter`
 
-These options apply to all languages.  There are additional language-specific formatting options below.
+这些选项适用于所有语言。下面还有一些特定于语言的格式化选项。
 
 ### `formatter.enabled`
 
-Enables Biome's formatter
+启用Biome的formatter
 
-> Default: `true`
+> 默认值：`true`
 
 ### `formatter.ignore`
 
-An array of Unix shell style patterns.
+一组Unix shell样式的模式。
 
 
 
@@ -369,8 +360,7 @@ An array of Unix shell style patterns.
 
 ### `formatter.include`
 
-A list of Unix shell style patterns. Biome handles only the files and folders that
-match these patterns.
+一组Unix shell样式的模式。Biome只处理与这些模式匹配的文件和文件夹。
 
 
 
@@ -383,10 +373,10 @@ match these patterns.
 ```
 
 :::caution
-When both `include` and `ignore` are specified, `ignore` takes **precedence** over `include`
+当`include`和`ignore`都被指定时，`ignore`优先于`include`
 :::
 
-Given the following example:
+给出以下示例：
 
 
 
@@ -399,12 +389,11 @@ Given the following example:
 }
 ```
 
-Only the files that match the patter `src/**/*.js` will be formatted, while the files that match the pattern
-`scripts/**/*.js` will be ignored.
+只有与模式`src/**/*.js`匹配的文件将被格式化，而与模式`scripts/**/*.js`匹配的文件将被忽略。
 
 ### `formatter.formatWithErrors`
 
-Allows to format a document that has syntax errors.
+允许格式化具有语法错误的文档。
 
 
 
@@ -416,53 +405,53 @@ Allows to format a document that has syntax errors.
 }
 ```
 
-> Default: `false`
+> 默认值：`false`
 
 ### `formatter.indentStyle`
 
-The style of the indentation. It can be `"tab"` or `"space"`.
+缩进的样式。可以是`"tab"`或`"space"`。
 
-> Default: `tab`
+> 默认值：`tab`
 
 ### `formatter.indentSize`
 
-How big the indentation should be.
+缩进应该有多大。
 
-> Default: `2`
+> 默认值：`2`
 
 ### `formatter.indentWidth`
 
-How big the indentation should be.
+缩进应该有多大。
 
-> Default: `2`
+> 默认值：`2`
 
 ### `formatter.lineEnding`
 
-The type of line ending.
-- `lf`, Line Feed only (`\n`), common on Linux and macOS as well as inside git repos
-- `crlf` Carriage Return + Line Feed characters (`\r\n`), common on Windows
-- `cr` Carriage Return character only (`\r`), used very rarely
+行结束的类型。
+- `lf`，仅换行符(`\n`)，在Linux和macOS以及git仓库内部常见
+- `crlf` 回车+换行符(`\r\n`)，在Windows上常见
+- `cr` 仅回车符(`\r`)，很少使用
 
-> Default: `lf`
+> 默认值：`lf`
 
 ### `formatter.lineWidth`
 
-How many characters can be written on a single line.
+单行可以写多少个字符。
 
-> Default: `80`
+> 默认值：`80`
 
 ## `organizeImports`
 
 ### `organizeImports.enabled`
 
-Enables Biome's sort imports.
+启用Biome的导入排序功能。
 
-> Default: `true`
+> 默认值：`true`
 
 ### `organizeImports.ignore`
 
 
-A list of Unix shell style patterns. Biome ignores files and folders that match these patterns.
+Unix shell样式的模式列表。Biome会忽略与这些模式匹配的文件和文件夹。
 
 
 
@@ -477,8 +466,7 @@ A list of Unix shell style patterns. Biome ignores files and folders that match 
 
 ### `organizeImports.include`
 
-A list of Unix shell style patterns. Biome handles only the files and folders that
-match these patterns.
+Unix shell样式的模式列表。Biome只处理与这些模式匹配的文件和文件夹。
 
 
 
@@ -491,10 +479,10 @@ match these patterns.
 ```
 
 :::caution
-When both `include` and `ignore` are specified, `ignore` takes **precedence** over `include`
+当同时指定`include`和`ignore`时，`ignore`优先于`include`
 :::
 
-Given the following example:
+给出以下示例：
 
 
 
@@ -507,17 +495,16 @@ Given the following example:
 }
 ```
 
-Only the files that match the patter `src/**/*.js` will have their imports sorted, while the files that match the pattern
-`scripts/**/*.js` will be ignored.
+只有与模式`src/**/*.js`匹配的文件会进行导入排序，而与模式`scripts/**/*.js`匹配的文件将被忽略。
 
 
 ## `javascript`
 
-These options apply only to JavaScript (and TypeScript) files.
+这些选项仅适用于JavaScript（和TypeScript）文件。
 
 ### `javascript.parser.unsafeParameterDecoratorsEnabled`
 
-Allows to support the unsafe/experimental parameter decorators.
+允许支持不安全/实验性的参数装饰器。
 
 
 
@@ -531,44 +518,44 @@ Allows to support the unsafe/experimental parameter decorators.
 }
 ```
 
-> Default: `false`
+> 默认值：`false`
 
 ### `javascript.formatter.quoteStyle`
 
-The type of quote used when representing string literals. It can be `single` or `double`.
+表示字符串字面量时使用的引号类型。可以是`single`或`double`。
 
-> Default: `double`
+> 默认值：`double`
 
 ### `javascript.formatter.jsxQuoteStyle`
 
-The type of quote used when representing jsx string literals. It can be `single` or `double`.
+表示jsx字符串字面量时使用的引号类型。可以是`single`或`double`。
 
-> Default: `double`
+> 默认值：`double`
 
 ### `javascript.formatter.quoteProperties`
 
-When properties inside objects should be quoted. It can be `asNeeded` or `preserve`.
+对象内的属性何时应该被引用。可以是`asNeeded`或`preserve`。
 
-> Default: `asNeeded`
+> 默认值：`asNeeded`
 
 ### `javascript.formatter.trailingComma`
 
-Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Possible values:
-- `all`, the trailing comma is always added
-- `es5`, the trailing comma is added only in places where it's supported by older version of JavaScript
-- `none`, trailing commas are never added
+在多行逗号分隔的语法结构中尽可能打印尾随逗号。可能的值：
+- `all`，总是添加尾随逗号
+- `es5`，只在旧版本的JavaScript支持的地方添加尾随逗号
+- `none`，永不添加尾随逗号
 
-> Default: `all`
+> 默认值：`all`
 
 ### `javascript.formatter.semicolons`
 
-It configures where the formatter prints semicolons:
-- `always`, the semicolons is always added at the end of each statement;
-- `asNeeded`, the semicolons are added only in places where it's needed, to protect from [ASI](https://en.wikibooks.org/wiki/JavaScript/Automatic_semicolon_insertion)
+配置格式化程序在何处打印分号：
+- `always`，每个语句的末尾总是添加分号；
+- `asNeeded`，只在需要的地方添加分号，以防止[ASI](https://en.wikibooks.org/wiki/JavaScript/Automatic_semicolon_insertion)
 
-> Default: `always`
+> 默认值：`always`
 
-Example:
+示例：
 
 
 
@@ -584,49 +571,49 @@ Example:
 
 ### `javascript.formatter.arrowParentheses`
 
-Whether to add non-necessary parentheses to arrow functions:
-- `always`, the parentheses are always added;
-- `asNeeded`, the parentheses are added only when they are needed;
+是否在箭头函数中添加不必要的括号：
+- `always`，总是添加括号；
+- `asNeeded`，只在需要的时候添加括号；
 
-> Default: `always`
+> 默认值：`always`
 
 ### `javascript.formatter.enabled`
 
-Enables Biome's formatter for JavaScript (and its super languages) files.
+启用Biome的JavaScript（及其超级语言）文件的格式化程序。
 
-> Default: `true`
+> 默认值：`true`
 
 ### `javascript.formatter.indentStyle`
 
-The style of the indentation for JavaScript (and its super languages) files. It can be `"tab"` or `"space"`.
+JavaScript（及其超级语言）文件的缩进样式。可以是`"tab"`或`"space"`。
 
-> Default: `tab`
+> 默认值：`tab`
 
 ### `javascript.formatter.indentSize`
 
-How big the indentation should be for JavaScript (and its super languages) files.
+JavaScript（及其超级语言）文件的缩进应该有多大。
 
-> Default: `2`
+> 默认值：`2`
 
 ### `javascript.formatter.lineEnding`
 
-The type of line ending for JavaScript (and its super languages) files.
-- `lf`, Line Feed only (`\n`), common on Linux and macOS as well as inside git repos
-- `crlf` Carriage Return + Line Feed characters (`\r\n`), common on Windows
-- `cr` Carriage Return character only (`\r`), used very rarely
+JavaScript（及其超级语言）文件的行结束类型。
+- `lf`，仅换行符(`\n`)，在Linux和macOS以及git仓库内部常见
+- `crlf` 回车+换行符(`\r\n`)，在Windows上常见
+- `cr` 仅回车符(`\r`)，很少使用
 
-> Default: `lf`
+> 默认值：`lf`
 
 ### `javascript.formatter.lineWidth`
 
-How many characters can be written on a single line in JavaScript (and its super languages) files.
+JavaScript（及其超级语言）文件中单行可以写多少个字符。
 
-> Default: `80`
+> 默认值：`80`
 
 
 ### `javascript.globals`
 
-A list of global names that Biome should ignore (analyzer, linter, etc.)
+Biome应忽略的全局名称列表（分析器，linter等）
 
 
 
@@ -640,11 +627,11 @@ A list of global names that Biome should ignore (analyzer, linter, etc.)
 
 ## `json`
 
-Options applied to the JSON files.
+应用于JSON文件的选项。
 
 ### `json.parser.allowComments`
 
-Enables the parsing of comments in JSON files.
+启用在JSON文件中解析注释。
 
 
 
@@ -660,7 +647,7 @@ Enables the parsing of comments in JSON files.
 
 ### `json.parser.allowTrailingCommas`
 
-Enables the parsing of trailing Commas in JSON files.
+启用在JSON文件中解析尾随逗号。
 
 
 
@@ -676,52 +663,52 @@ Enables the parsing of trailing Commas in JSON files.
 
 ### `json.formatter.enabled`
 
-Enables Biome's formatter for JSON (and its super languages) files.
+启用Biome的JSON（及其超级语言）文件的格式化程序。
 
-> Default: `true`
+> 默认值：`true`
 
 ### `json.formatter.indentStyle`
 
 
-The style of the indentation for JSON (and its super languages) files. It can be `"tab"` or `"space"`.
+JSON（及其超级语言）文件的缩进样式。可以是`"tab"`或`"space"`。
 
-> Default: `tab`
+> 默认值：`tab`
 
 
 ### `json.formatter.indentSize`
 
-How big the indentation should be for JSON (and its super languages) files.
+JSON（及其超级语言）文件的缩进应该有多大。
 
-> Default: `2`
+> 默认值：`2`
 
 ### `json.formatter.lineEnding`
 
-The type of line ending for JSON (and its super languages) files.
-- `lf`, Line Feed only (`\n`), common on Linux and macOS as well as inside git repos
-- `crlf` Carriage Return + Line Feed characters (`\r\n`), common on Windows
-- `cr` Carriage Return character only (`\r`), used very rarely
+JSON（及其超级语言）文件的行结束类型。
+- `lf`，仅换行符(`\n`)，在Linux和macOS以及git仓库内部常见
+- `crlf` 回车+换行符(`\r\n`)，在Windows上常见
+- `cr` 仅回车符(`\r`)，很少使用
 
-> Default: `lf`
+> 默认值：`lf`
 
 ### `json.formatter.lineWidth`
 
-How many characters can be written on a single line in JSON (and its super languages) files.
+JSON（及其超级语言）文件中单行可以写多少个字符。
 
-> Default: `80`
+> 默认值：`80`
 
 ## `overrides`
 
-A list of patterns.
+模式列表。
 
-Use this configuration to change the behaviour of the tools for certain files.
+使用此配置更改某些文件的工具行为。
 
-When a file is matched against an override pattern, the configuration specified in that pattern will be override the top-level configuration.
+当文件与覆盖模式匹配时，该模式中指定的配置将覆盖顶级配置。
 
-The order of the patterns matter. If a file *can* match three patterns, only the first one is used.
+模式的顺序很重要。如果一个文件*可以*匹配三个模式，只使用第一个。
 
 ### `overrides.<ITEM>.ignore`
 
-A list of Unix shell style patterns. Biome will not apply the override to files that match the pattern.
+Unix shell样式的模式列表。Biome不会将覆盖应用于与模式匹配的文件。
 
 
 
@@ -735,7 +722,7 @@ A list of Unix shell style patterns. Biome will not apply the override to files 
 
 ### `overrides.<ITEM>.include`
 
-A list of Unix shell style patterns. Biome will apply the override only to files that match the pattern.
+Unix shell样式的模式列表。Biome只会将覆盖应用于与模式匹配的文件。
 
 
 
@@ -749,11 +736,11 @@ A list of Unix shell style patterns. Biome will apply the override only to files
 
 ### `overrides.<ITEM>.formatter`
 
-It will include the options of [top level formatter](#formatter) configuration, minus `ignore` and `include`.
+它将包括[顶级格式化程序](#formatter)配置的选项，减去`ignore`和`include`。
 
-#### Examples
+#### 示例
 
-For example, it's possible to modify the formatter `lineWidth`, `indentStyle` for certain files that are included in the glob path `generated/**`:
+例如，可以修改某些包含在glob路径`generated/**`中的文件的格式化程序`lineWidth`，`indentStyle`：
 
 
 
@@ -776,12 +763,12 @@ For example, it's possible to modify the formatter `lineWidth`, `indentStyle` fo
 
 ### `overrides.<ITEM>.linter`
 
-It will include the options of [top level linter](#linter) configuration, minus `ignore` and `include`.
+它将包括[顶级linter](#linter)配置的选项，减去`ignore`和`include`。
 
 
-#### Examples
+#### 示例
 
-You can disable certain rules for certain glob paths, and disable the linter for other glob paths:
+您可以为某些glob路径禁用某些规则，并为其他glob路径禁用linter：
 
 
 
@@ -816,15 +803,15 @@ You can disable certain rules for certain glob paths, and disable the linter for
 
 ### `overrides.<ITEM>.organizeImports`
 
-It will include the options of [top level organize imports](#organizeimports), minus `ignore` and `include`.
+它将包括[顶级组织导入](#organizeimports)的选项，减去`ignore`和`include`。
 
 ### `overrides.<ITEM>.javascript`
 
-It will include the options of [top level javascript](#javascript) configuration.
+它将包括[顶级javascript](#javascript)配置的选项。
 
-#### Examples
+#### 示例
 
-You can change the formatting behaviour of JavaScript files in certain folders:
+您可以更改某些文件夹中的JavaScript文件的格式化行为：
 
 
 
@@ -854,12 +841,12 @@ You can change the formatting behaviour of JavaScript files in certain folders:
 
 ### `overrides.<ITEM>.json`
 
-It will include the options of [top level json](#json) configuration.
+它将包括[顶级json](#json)配置的选项。
 
 
-#### Examples
+#### 示例
 
-You can enable parsing features for certain JSON files:
+您可以为某些JSON文件启用解析功能：
 
 
 

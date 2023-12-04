@@ -1,87 +1,87 @@
 ---
-title: Integrate Biome in your editor
-description: Learn how you can integrate Biome with editors and IDEs
+title: 在您的编辑器中集成 Biome
+description: 学习如何将 Biome 与编辑器和 IDE 集成
 ---
 
-## First-party plugins
+## 第一方插件
 
-These are plugins that are maintained by the Biome team and part of the [Biome organization](https://github.com/biomejs).
+这些插件由 Biome 团队维护，并且是 [Biome 组织](https://github.com/biomejs)的一部分。
 
 ### VS Code
 
-The Biome editor integration allows you to:
+Biome 编辑器集成允许您：
 
-* Format files on save or when issuing the Format command.
-* Lint files and apply code fixes
+* 在保存文件或发出格式化命令时格式化文件。
+* 对文件进行 lint 并应用代码修复
 
-Install our official [Biome VS Code extension](https://marketplace.visualstudio.com/items?itemName=biomejs.biome) from the Visual Studio Marketplace.
+从 Visual Studio Marketplace 安装我们的官方 [Biome VS Code 扩展](https://marketplace.visualstudio.com/items?itemName=biomejs.biome)。
 
-To make Biome the default formatter open a [supported file](/internals/language-support/) and:
+要使 Biome 成为默认的格式化程序，打开一个 [支持的文件](/internals/language-support/) 并：
 
-* open the *Command Palette* (View or <kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd title="Shift">⇧</kbd>+<kbd>P</kbd>)
-* select  *Format Document With...*
-* select *Configure Default Formatter*
-* select *Biome*.
+* 打开 *命令面板* (查看或 <kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd title="Shift">⇧</kbd>+<kbd>P</kbd>)
+* 选择 *使用...格式化文档*
+* 选择 *配置默认格式化程序*
+* 选择 *Biome*。
 
 ### IntelliJ
 
-To install the Biome IntelliJ plugin, head over to [official plugin page](https://plugins.jetbrains.com/plugin/22761-biome) or follow these steps:
+要安装 Biome IntelliJ 插件，请转到 [官方插件页面](https://plugins.jetbrains.com/plugin/22761-biome) 或按照以下步骤操作：
 
-**From JetBrains IDEs:**
+**从 JetBrains IDEs：**
 
-1. Open IntelliJ IDEA.
-2. Go to **Settings/Preferences**.
-3. Select **Plugins** from the left-hand menu.
-4. Click on the **Marketplace** tab.
-5. Search for "Biome" and click **Install**.
-6. Restart the IDE to activate the plugin.
+1. 打开 IntelliJ IDEA。
+2. 转到 **设置/首选项**。
+3. 从左侧菜单中选择 **插件**。
+4. 点击 **市场** 标签。
+5. 搜索 "Biome" 并点击 **安装**。
+6. 重启 IDE 以激活插件。
 
-**From disk:**
+**从磁盘：**
 
-1. Download the plugin .zip from releases tab.
-2. Press `⌘Сmd,` to open the IDE settings and then select Plugins.
-3. On the Plugins page, click The Settings button and then click Install Plugin from Disk….
+1. 从发布标签下载插件 .zip。
+2. 按 `⌘Сmd,` 打开 IDE 设置，然后选择插件。
+3. 在插件页面上，点击设置按钮，然后点击从磁盘安装插件…。
 
-## Third-party plugins
+## 第三方插件
 
-These are plugin maintained by other communities, that you install in your editor:
-- [`neovim`](https://neovim.io/): you'll have to install [`nvim-lspconfig`](https://github.com/neovim/nvim-lspconfig/), and follow the [instructions](https://github.com/neovim/nvim-lspconfig/blob/master/doc/server_configurations.md#biome);
-- [`helix`](https://helix-editor.com/): follow the instruction of [this manual](https://github.com/biomejs/biome/blob/main/editors/helix/manual.md)
-- [`coc-biome`](https://github.com/fannheyward/coc-biome): Biome extension for [`coc.nvim`](https://github.com/neoclide/coc.nvim)
-- [`sublime text`](http://www.sublimetext.com/): follow the [`LSP-biome`](https://github.com/sublimelsp/LSP-biome) installation instructions
+这些是由其他社区维护的插件，您可以在编辑器中安装：
+- [`neovim`](https://neovim.io/): 您需要安装 [`nvim-lspconfig`](https://github.com/neovim/nvim-lspconfig/)，并按照 [说明](https://github.com/neovim/nvim-lspconfig/blob/master/doc/server_configurations.md#biome) 操作；
+- [`helix`](https://helix-editor.com/): 按照 [此手册](https://github.com/biomejs/biome/blob/main/editors/helix/manual.md) 的指示操作
+- [`coc-biome`](https://github.com/fannheyward/coc-biome): [`coc.nvim`](https://github.com/neoclide/coc.nvim) 的 Biome 扩展
+- [`sublime text`](http://www.sublimetext.com/): 按照 [`LSP-biome`](https://github.com/sublimelsp/LSP-biome) 的安装说明操作
 
 :::note
-Is there a plugin for an editor that isn't listed here? Please file a PR and we will be happy to add it to the list
+这里有没有列出的编辑器的插件？ 请提交 PR，我们将很高兴将其添加到列表中
 :::
 
-## Write your own plugin
+## 编写您自己的插件
 
-Biome has [LSP](https://microsoft.github.io/language-server-protocol/) first-class support. If your editor does implement LSP, then the integration of Biome should be seamless.
+Biome 对 [LSP](https://microsoft.github.io/language-server-protocol/) 有一流的支持。 如果您的编辑器实现了 LSP，那么 Biome 的集成应该是无缝的。
 
-### Use the LSP proxy
+### 使用 LSP 代理
 
-Biome has a command called `lsp-proxy`. When executed, Biome will spawn two processes:
-- a [daemon](/internals/architecture#daemon) that does execute the requested operations;
-- a server that functions as a proxy between the requests of the client - the editor - and the server - the daemon;
+Biome 有一个名为 `lsp-proxy` 的命令。 执行时，Biome 将生成两个进程：
+- 执行请求操作的 [守护进程](/internals/architecture#daemon)；
+- 作为客户端 - 编辑器 - 的请求和服务器 - 守护进程 - 之间的代理的服务器；
 
-If your editor is able to interact with a server and send [JSON-RPC](https://www.jsonrpc.org/) request, you only need to configure the editor run that command.
+如果您的编辑器能够与服务器交互并发送 [JSON-RPC](https://www.jsonrpc.org/) 请求，您只需要配置编辑器运行该命令。
 
-You can check how the [`neo-vim biome plugin`](https://github.com/neovim/nvim-lspconfig/blob/master/lua/lspconfig/server_configurations/biome.lua) does it.
+您可以查看 [`neo-vim biome 插件`](https://github.com/neovim/nvim-lspconfig/blob/master/lua/lspconfig/server_configurations/biome.lua) 是如何做到的。
 
-### Use `stdin`
+### 使用 `stdin`
 
-If your editor doesn't support LSP, you use directly the binary `biome` and call it using [standard input](https://en.wikipedia.org/wiki/Standard_streams#Standard_input_(stdin)).
+如果您的编辑器不支持 LSP，您可以直接使用二进制文件 `biome` 并通过 [标准输入](https://en.wikipedia.org/wiki/Standard_streams#Standard_input_(stdin)) 调用它。
 
-The following commands can be called via standard input:
+以下命令可以通过标准输入调用：
 - [`format`](/reference/cli/#biome-format)
 - [`lint`](/reference/cli/#biome-lint)
 - [`check`](/reference/cli/#biome-check)
 
-Biome will return the new output (or the original output if changes haven't occurred) to [standard output](https://en.wikipedia.org/wiki/Standard_streams#Standard_output_(stdout)) and the diagnostics to [standard error](https://en.wikipedia.org/wiki/Standard_streams#Standard_error_(stderr)).
+Biome 将新的输出（或者如果没有发生更改，则为原始输出）返回到 [标准输出](https://en.wikipedia.org/wiki/Standard_streams#Standard_output_(stdout))，并将诊断信息返回到 [标准错误](https://en.wikipedia.org/wiki/Standard_streams#Standard_error_(stderr))。
 
-When you use `stdin`, you must pass the `--stdin-file-path` option. The file `path` **doesn't need to exist** in your file system, it can be any name. **What's important** is to provide the correct file extension, so Biome knows **how to treat** your file.
+当您使用 `stdin` 时，您必须传递 `--stdin-file-path` 选项。 文件 `path` **不需要存在** 在您的文件系统中，它可以是任何名称。 **重要的是** 提供正确的文件扩展名，以便 Biome 知道 **如何处理** 您的文件。
 
-It's the editor's responsibility to locate the resolve the path of the binary and then call it when it's needed. The binaries are shipped to npm based on the architectures and OS that we support:
+定位二进制文件的路径然后在需要时调用它是编辑器的责任。 我们根据我们支持的架构和操作系统将二进制文件发布到 npm：
 
 - `@biomejs/cli-darwin-arm64`
 - `@biomejs/cli-darwin-x64`
@@ -90,46 +90,46 @@ It's the editor's responsibility to locate the resolve the path of the binary an
 - `@biomejs/cli-win32-arm64`
 - `@biomejs/cli-win32-x64`
 
-The binary name is `biome` or `biome.exe`, and it can be found in the root directory of the library, e.g.: `@biomejs/cli-darwin-arm64/biome`, `@biomejs/cli-win32-x64/biome.exe`.
+二进制文件的名称是 `biome` 或 `biome.exe`，可以在库的根目录中找到，例如：`@biomejs/cli-darwin-arm64/biome`，`@biomejs/cli-win32-x64/biome.exe`。
 
-### Use the daemon with the binary
+### 使用守护进程与二进制文件
 
-Using the binary via CLI is very efficient, although you won't be able to provide [logs](#daemon-logs) to your users. The CLI allows you to bootstrap a daemon and then use the CLI commands through the daemon itself.
+通过 CLI 使用二进制文件非常高效，尽管您将无法向用户提供 [日志](#daemon-logs)。 CLI 允许您引导一个守护进程，然后通过守护进程本身使用 CLI 命令。
 
-If order to do so, you first need to start a daemon process with the [`start`](/reference/cli#biome-start) command:
+为了做到这一点，您首先需要使用 [`start`](/reference/cli#biome-start) 命令启动一个守护进程进程：
 
 ```shell
 biome start
 ```
-Then, every command needs to add the `--use-server` options, e.g.:
+然后，每个命令都需要添加 `--use-server` 选项，例如：
 
 ```shell
 echo "console.log('')" | biome format --use-server --stdin-file-path=dummy.js
 ```
 
 :::note
-If you decide to use the daemon, you're also responsible to restart/kill the process with the [`stop`](/reference/cli#biome-stop) command, to avoid having ghost processes.
+如果您决定使用守护进程，您也有责任使用 [`stop`](/reference/cli#biome-stop) 命令重启/杀死进程，以避免出现幽灵进程。
 :::
 
 :::caution
-Operations via the daemon are significantly slower than the CLI itself, so it's advised to run operations only on single files.
+通过守护进程的操作明显比 CLI 本身慢，因此建议仅在单个文件上运行操作。
 :::
 
-### Daemon logs
+### 守护进程日志
 
-The Biome daemon saves logs in your file system. Logs are store in a folder called `biome-logs`. You can find this folder in the temporary directory of your operating system.
+Biome 守护进程在您的文件系统中保存日志。 日志存储在一个名为 `biome-logs` 的文件夹中。 您可以在操作系统的临时目录中找到此文件夹。
 
-From Windows, using a powershell:
+从 Windows，使用 powershell：
 ```shell
 $env:TEMP
 ```
 
-From Linux/macOS, using a terminal:
+从 Linux/macOS，使用终端：
 
 ```shell
 echo $TMPDIR
 ```
 
-The log files are rotated on an hourly basis.
+日志文件每小时旋转一次。
 
 

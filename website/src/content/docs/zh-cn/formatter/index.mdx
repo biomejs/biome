@@ -1,45 +1,45 @@
 ---
-title: Formatter
-description: How to use the Biome formatter.
+title: 格式化器
+description: 如何使用 Biome 格式化器。
 ---
 
 import PackageManagerBiomeCommand from "@src/components/PackageManagerBiomeCommand.astro";
 
-Biome is an opinionated formatter that has the goal to stop all ongoing debates over styles.
-It follows a similar [philosophy to Prettier](https://prettier.io/docs/en/option-philosophy.html),
-only supporting a few options to avoid debates over styles, turning into debates over Biome options.
-It deliberately [resists the urge to add new options](https://github.com/prettier/prettier/issues/40) to prevent [bike-shed discussions](https://en.wikipedia.org/wiki/Law_of_triviality) in teams so they can focus on what really matters instead.
+Biome 是一个有自己观点的格式化器，其目标是停止所有关于样式的争论。
+它遵循类似于 [Prettier 的哲学](https://prettier.io/docs/en/option-philosophy.html)，
+只支持少数几个选项，以避免关于样式的争论变成关于 Biome 选项的争论。
+它故意 [抵制增加新选项的冲动](https://github.com/prettier/prettier/issues/40)，以防止团队中的 [无意义的讨论](https://en.wikipedia.org/wiki/Law_of_triviality)，使他们可以专注于真正重要的事情。
 
-## Options
+## 选项
 
-The language agnostic options supported by Biome are:
+Biome 支持的语言无关选项包括：
 
-- indent style (default: `tab`): Use spaces or tabs for indention
-- tab width (default: `2`): The number of spaces per indention level
-- line width (default: `80`): The column width at which Biome wraps code
+- 缩进样式（默认：`tab`）：使用空格或制表符进行缩进
+- 制表符宽度（默认：`2`）：每个缩进级别的空格数
+- 行宽（默认：`80`）：Biome 包装代码的列宽
 
-Other formatting options are available for specific languages as well.  See the [configuration](/reference/configuration) options for details.
+特定语言也有其他格式化选项。有关详细信息，请参阅 [配置](/reference/configuration) 选项。
 
-## Use the formatter with the CLI
+## 使用 CLI 使用格式化器
 
-By default, the formatter **checks** the code and emit diagnostics if there are changes in formatting:
+默认情况下，格式化器**检查**代码，并在格式更改时发出诊断：
 
 <PackageManagerBiomeCommand command="format ./src" />
 
-If you want to **apply** the new formatting, pass the `--write` option:
+如果你想要**应用**新的格式，传递 `--write` 选项：
 
 <PackageManagerBiomeCommand command="format --write ./src" />
 
-Use the  `--help` flag to know what are the available options:
+使用 `--help` 标志了解可用选项：
 
 <PackageManagerBiomeCommand command="format --help" />
 
-Or check the [CLI reference section](/reference/cli#biomeformat).
+或者查看 [CLI 参考部分](/reference/cli#biomeformat)。
 
-## Configuration
+## 配置
 
-You may want to [configure Biome](/reference/configuration/#formatter) using `biome.json`.
-The following defaults are applied:
+你可能想要使用 `biome.json` [配置 Biome](/reference/configuration/#formatter)。
+应用以下默认设置：
 
 ```json title="biome.json"
 {
@@ -54,17 +54,17 @@ The following defaults are applied:
 }
 ```
 
-## Ignoring Code
+## 忽略代码
 
-There are times when the formatted code isn't ideal.
+有时格式化的代码并不理想。
 
-For these cases, you can use a format suppression comment:
+对于这些情况，你可以使用格式抑制注释：
 
 ```js title="example.js"
 // biome-ignore format: <explanation>
 ```
 
-Example:
+示例：
 
 ```js title="example.js"
 const expr =
@@ -89,21 +89,21 @@ const expr =
   ];
 ```
 
-## Differences with Prettier
+## 与 Prettier 的差异
 
-There are some divergences with Prettier.
+有一些与 Prettier 的分歧。
 
-### Prettier doesn't unquote some object properties that are valid JavaScript identifiers.
+### Prettier 不会取消引用一些有效的 JavaScript 标识符的对象属性。
 
-Prettier and Biome unquote object and class properties that are valid JavaScript identifiers.
-Prettier [unquotes only valid ES5 identifiers](https://github.com/prettier/prettier/blob/a5d502513e5de4819a41fd90b9be7247146effc7/src/language-js/utils/index.js#L646).
+Prettier 和 Biome 取消引用对象和类属性，这些属性是有效的 JavaScript 标识符。
+Prettier [只取消引用有效的 ES5 标识符](https://github.com/prettier/prettier/blob/a5d502513e5de4819a41fd90b9be7247146effc7/src/language-js/utils/index.js#L646)。
 
-This is a legacy restriction in an ecosystem where ES2015 is now widespread.
-Thus, we decided to diverge here by un-quoting all valid JavaScript identifiers in ES2015+.
+这是一个遗留的限制，在 ES2015 现在广泛使用的生态系统中。
+因此，我们决定在这里分歧，通过取消引用所有在 ES2015+ 中有效的 JavaScript 标识符。
 
-A possible workaround would be to introduce a configuration to set the ECMAScript version a project uses.
-We could then adjust the un-quoting behaviour based on that version.
-Setting the ECMAScript version to `ES5` could match Prettier's behaviour.
+可能的解决方案是引入一个配置来设置项目使用的 ECMAScript 版本。
+然后我们可以根据该版本调整取消引用的行为。
+将 ECMAScript 版本设置为 `ES5` 可以匹配 Prettier 的行为。
 
 ```js title="example.js"
 const obj = {
@@ -113,7 +113,7 @@ const obj = {
 }
 ```
 
-Diff
+差异
 
 ```js title="exmaple.js" del={4} ins={5}
 const obj = {
@@ -125,14 +125,14 @@ const obj = {
 ```
 
 
-### Prettier has an inconsistent behavior for assignment in computed keys.
+### Prettier 对计算键中的赋值有不一致的行为。
 
-Prettier and Biome enclose some assignment expressions between parentheses, particularly in conditionals.
-This allows Biome to identify an expression that should be a comparison.
+Prettier 和 Biome 将一些赋值表达式封装在括号中，特别是在条件语句中。
+这使 Biome 能够识别应该是比较的表达式。
 
-Prettier has inconsistent behaviour because it adds parentheses for an assignment in a computed key of an object property and doesn't for a computed key of a class property, as demonstrated by the following example:
+Prettier 的行为不一致，因为它为对象属性的计算键中的赋值添加了括号，但没有为类属性的计算键添加括号，如下例所示：
 
-Input
+输入
 
 ```js title="example.js"
 a = {
@@ -144,7 +144,7 @@ class C {
 }
 ```
 
-Diff
+差异
 
 ```js title="example.js" del={2} ins={3}
 a = {
@@ -157,25 +157,25 @@ class C {
 }
 ```
 
-[Playground link](https://biomejs.dev/playground?enabledLinting=false&code=YQAgAD0AIAB7AAoAIAAgAFsAeAAgAD0AIAAwAF0AOgAgADEALAAKAH0ACgAKAGMAbABhAHMAcwAgAEMAIAB7AAoAIAAgACAAIABbAHgAIAA9ACAAMABdACAAPQAgADEACgB9AAoA)
+[Playground 链接](https://biomejs.dev/playground?enabledLinting=false&code=YQAgAD0AIAB7AAoAIAAgAFsAeAAgAD0AIAAwAF0AOgAgADEALAAKAH0ACgAKAGMAbABhAHMAcwAgAEMAIAB7AAoAIAAgACAAIABbAHgAIAA9ACAAMABdACAAPQAgADEACgB9AAoA)
 
-To be consistent, we decided to diverge and omit the parentheses.
-Alternatively, we could enclose any assignment in a computed key of an object or of a class.
+为了保持一致，我们决定分歧并省略括号。
+或者，我们可以将任何赋值封装在对象或类的计算键中。
 
 
-### Prettier adds a trailing comma to type parameters of arrow functions even when it is not required.
+### Prettier 即使不需要也会在箭头函数的类型参数后添加尾随逗号。
 
-In some specific cases, a type parameter list of an arrow function requires a trailing comma to distinguish it from a JSX element.
-When a default type is provided, this trailing comma is not required.
-Here, we diverge from Prettier because we think it better respects the original intent of Prettier, which was to add a trailing comma only when required.
+在某些特定情况下，箭头函数的类型参数列表需要尾随逗号以区分它和 JSX 元素。
+当提供默认类型时，不需要这个尾随逗号。
+在这里，我们与 Prettier 分歧，因为我们认为它更好地尊重了 Prettier 的原始意图，即只在需要时添加尾随逗号。
 
-Input
+输入
 
 ```tsx title="example.tsx"
 <T = unknown>() => {};
 ```
 
-Diff
+差异
 
 ```tsx title="example.tsx" del={1} ins={2}
 <T = unknown,>() => {};
@@ -183,123 +183,123 @@ Diff
 ```
 
 
-### Prettier formats invalid syntaxes
+### Prettier 格式化无效的语法
 
-Prettier's Babel-based parsing for JavaScript and TypeScript is very loose and [allows multiple errors](https://github.com/prettier/prettier/blob/e4a74c05f4502dd4ec70495c3130ff08ab088e05/src/language-js/parse/babel.js#L177-L218) to be ignored.
-Biome's parser is intentionally stricter than the Prettier parser.
-It correctly identifies the following syntax errors:
+Prettier 的基于 Babel 的 JavaScript 和 TypeScript 解析非常宽松，[允许忽略多个错误](https://github.com/prettier/prettier/blob/e4a74c05f4502dd4ec70495c3130ff08ab088e05/src/language-js/parse/babel.js#L177-L218)。
+Biome 的解析器比 Prettier 的解析器有意地更严格。
+它正确地识别了以下语法错误：
 
-- A function cannot have duplicate modifiers
-- invalid order of properties' modifiers
-- Function declarations are not allowed to have bodies
-- non-abstract classes cannot have abstract properties
-- An optional chain cannot be assigned
-- The `const` modifier cannot be set on a type parameter of an interface
-- top-level return
-- etc.
+- 函数不能有重复的修饰符
+- 属性修饰符的无效顺序
+- 函数声明不允许有主体
+- 非抽象类不能有抽象属性
+- 一个可选链不能被赋值
+- 接口的类型参数不能设置为 `const` 修饰符
+- 顶级返回
+- 等等。
 
-In Prettier, these errors aren't considered parse errors, and the AST is still built "correctly" with the appropriate nodes.
-When formatting, Prettier treats these nodes as normal and formats them accordingly.
+在 Prettier 中，这些错误不被视为解析错误，AST 仍然被正确地构建，包含适当的节点。
+在格式化时，Prettier 将这些节点视为正常节点并相应地格式化它们。
 
-In Biome, the parsing errors result in `Bogus` nodes, which may contain any number of valid nodes, invalid nodes, and/or raw characters.
-When formatting, Biome treats bogus nodes as effectively plain text, printing them out verbatim into the resulting code without any formatting since attempting to format them could be incorrect and cause semantic changes.
+在 Biome 中，解析错误会导致 `Bogus` 节点，这些节点可能包含任意数量的有效节点、无效节点和/或原始字符。
+在格式化时，Biome 将 bogus 节点视为实际上的纯文本，将它们原样打印到结果代码中，不进行任何格式化，因为尝试格式化它们可能是不正确的，并可能导致语义变化。
 
-For class properties, Prettier's current parsing strategy also uses boolean fields for modifiers, meaning only one of each kind of modifier can ever be present (accessibility modifiers are stored as a single string).
-When printing, Prettier looks at the list of booleans and decides which modifiers to print out again. Biome instead keeps a list of modifiers, meaning duplicates are kept around and can be analyzed (hence the parsing error messages about duplicate modifiers and ordering).
-When printing out the bogus nodes, this list is kept intact, and printing out the unformatted text results in those modifiers continuing to exist.
+对于类属性，Prettier 的当前解析策略也使用布尔字段作为修饰符，这意味着每种类型的修饰符只能存在一个（访问修饰符存储为单个字符串）。
+在打印时，Prettier 查看布尔列表并决定打印哪些修饰符。Biome 保留修饰符列表，这意味着重复的修饰符被保留下来并可以被分析（因此有关重复修饰符和排序的解析错误消息）。
+在打印出 bogus 节点时，这个列表保持不变，打印出未格式化的文本会导致这些修饰符继续存在。
 
-There are ways that Biome can address this.
-One possibility is to try to interpret the Bogus nodes when formatting and construct valid nodes out of them.
-If a valid node can be built, then it would just format that node like normal, otherwise, it prints the bogus text verbatim as it does currently.
-However, this is messy and introduces a form of parsing logic into the formatter that is not meaningful.
+Biome 有几种解决这个问题的方法。
+一种可能性是在格式化时尝试解释 Bogus 节点并从中构造有效节点。
+如果可以构建有效节点，那么它就像正常节点一样格式化，否则，它像现在一样原样打印 bogus 文本。
+然而，这是混乱的，并在格式化器中引入了一种无意义的解析逻辑。
 
-Another option is to introduce some form of "syntactically-valid bogus node" into the parser, which accepts these kinds of purely semantic errors (duplicate modifiers, abstract properties in non-abstract classes).
+另一种选择是在解析器中引入一种 "语法有效的 bogus 节点"，它接受这种纯粹的语义错误（重复的修饰符，非抽象类中的抽象属性）。
 
-It would continue to build the nodes like normal (effectively matching the behavior in Prettier) but store them inside of a new kind of bogus node, including the diagnostics along with it.
-When formatting, these particular bogus nodes would just attempt to format the inner node and then fallback if there's an error (the existing `format_or_verbatim` utility would do this already).
-This keeps the parsing and formatting logic separate from each other but introduces more complexity to the parser, allowing invalid states to be considered semi-valid.
+它会像正常一样继续构建节点（实际上匹配了 Prettier 中的行为），但是将它们存储在一种新的 bogus 节点中，包括诊断信息。
+在格式化时，这些特定的 bogus 节点只会尝试格式化内部节点，然后如果有错误就回退（现有的 `format_or_verbatim` 工具已经可以做到这一点）。
+这保持了解析和格式化逻辑的分离，但是为解析器引入了更多的复杂性，允许无效状态被视为半有效。
 
-#### Duplicate modifiers on class properties
+#### 类属性上的重复修饰符
 
-Input
+输入
 
 ```ts title="example.ts"
-// Multiple accessibility modifiers
+// 多个访问修饰符
 class Foo {
   private public a  = 1;
 }
 
-// Declare function with body
+// 声明有主体的函数
 declare function foo ( ) {  }
 
-// Invalid use of abstract
+// 抽象的无效使用
 class Bar {
   abstract  foo  ;
 }
 
-// Duplicate Readonly
+// 重复的 Readonly
 class Read {
   readonly readonly   x: number;
 }
 ```
 
-Diff
+差异
 
 ```ts title="example.ts" del={3, 8, 13, 19} ins={4, 9, 14, 20}
-// Multiple accessibility modifiers
+// 多个访问修饰符
 class Foo {
   private a = 1;
   private public a  = 1;
 }
 
-// Declare function with body
+// 声明有主体的函数
 declare function foo() {};
 declare function foo ( ) {  }
 
-// Invalid use of abstract
+// 抽象的无效使用
 class Bar {
   abstract foo;
   abstract  foo  ;
 }
 
-// Duplicate Readonly
+// 重复的 Readonly
 class Read {
   readonly x: number;
   readonly readonly   x: number;
 }
 
 
-#### Assignment to an optional chain
+#### 对可选链的赋值
 
-Input
+输入
 
 ```js title="example.js"
 (a?.b) = c;
 ```
 
-Diff
+差异
 
 ```js title="example.js" del={1} ins={2}
 a?.b = c;
 (a?.b) = c;
 ```
 
-#### Incorrect modifier for the type parameters of an interface
+#### 接口的类型参数的修饰符不正确
 
-Input
+输入
 
 ```ts title="example.js"
 interface L<in const T> {}
 ```
 
-Diff
+差异
 
 ```ts title="example.js" del={1} ins={2}
 interface L<const in T> {}
 interface L<in const T> {}
 ```
 
-#### Top-level return
+#### 顶级返回
 
 ```js title="example.js"
 return someVeryLongStringA && someVeryLongStringB && someVeryLongStringC && someVeryLongStringD
@@ -315,9 +315,9 @@ return (
 return someVeryLongStringA && someVeryLongStringB && someVeryLongStringC && someVeryLongStringD
 ```
 
-#### Erroneous self-increment and self-decrement
+#### 错误的自增和自减
 
-Input
+输入
 
 ```js title="example.js"
 (1)++;
@@ -328,9 +328,9 @@ Input
 (1)++;
 ```
 
-#### Use of `abstract` modifier in non-abstract classes
+#### 在非抽象类中使用 `abstract` 修饰符
 
-Input
+输入
 
 ```ts title="example.js"
 class C {
@@ -338,7 +338,7 @@ class C {
 }
 ```
 
-Diff
+差异
 
 
 ```ts title="example.js" del{2} add={3}

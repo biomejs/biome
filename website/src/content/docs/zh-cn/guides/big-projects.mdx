@@ -1,20 +1,20 @@
 ---
-title: Use Biome in big projects
-description: A small guide how to set Biome in big projects
+title: 在大型项目中使用 Biome
+description: 如何在大型项目中设置 Biome 的小指南
 ---
 
-Biome can provide some tools that can help you to use it properly in big projects, such as monorepo or workspaces that contain multiple projects.
+Biome 可以提供一些工具，帮助你在大型项目中正确使用它，例如包含多个项目的单仓库或工作区。
 
 
-## Use multiple configuration files
+## 使用多个配置文件
 
-When you use Biome's features - either with the CLI or LSP - the tool looks for the nearest configuration file using the current working directory.
+当你使用 Biome 的功能 - 无论是使用 CLI 还是 LSP - 该工具会使用当前工作目录查找最近的配置文件。
 
-If Biome doesn't find the configuration file there, it **starts walking upwards** the directories of the file system, until it finds one.
+如果 Biome 在那里找不到配置文件，它会**开始向上**遍历文件系统的目录，直到找到一个。
 
-You can leverage this feature to apply different settings based on the project/folder.
+你可以利用这个功能，根据项目/文件夹应用不同的设置。
 
-Let's suppose we have a project that contains a backend app and new frontend app.
+假设我们有一个项目，包含一个后端应用和新的前端应用。
 
 
 ```
@@ -30,21 +30,21 @@ app
         └── package.json
 ```
 
-This means that when you run a script from the file `app/backend/package.json`, Biome will use the configuration file `app/backend/biome.json`.
+这意味着当你从文件 `app/backend/package.json` 运行脚本时，Biome 将使用配置文件 `app/backend/biome.json`。
 
-When you run a script from `app/frontend/legacy-app/package.json` or `app/frontend/new-app/package.json`, Biome will use the configuration file `app/frontend/biome.json`.
+当你从 `app/frontend/legacy-app/package.json` 或 `app/frontend/new-app/package.json` 运行脚本时，Biome 将使用配置文件 `app/frontend/biome.json`。
 
-## Share the configuration
+## 分享配置
 
-It's possible to use the [`extends`](/reference/configuration#extends) configuration option to breakdown options across files.
+可以使用 [`extends`](/reference/configuration#extends) 配置选项在文件之间分解选项。
 
-Let's assume that we have these requirements:
-- `legacy-app` have to format using spaces;
-- `backend` and `new-app` have to format using tabs;
-- all apps have to format using line width 120;
-- `backend` app needs some extra linting;
+假设我们有以下需求：
+- `legacy-app` 必须使用空格进行格式化；
+- `backend` 和 `new-app` 必须使用制表符进行格式化；
+- 所有应用必须使用 120 的行宽进行格式化；
+- `backend` 应用需要一些额外的 linting；
 
-We start by creating a new configuration file at `app/biome.json`, and put there the shared options:
+我们首先在 `app/biome.json` 创建一个新的配置文件，并在那里放置共享选项：
 
 
 ```json title="app/biome.json"
@@ -56,7 +56,7 @@ We start by creating a new configuration file at `app/biome.json`, and put there
 }
 ```
 
-Now let's **move** `app/frontend/biome.json` to `app/frontend/legacy-app/`, because that's where we need to use a different formatting.
+现在让我们**移动** `app/frontend/biome.json` 到 `app/frontend/legacy-app/`，因为那是我们需要使用不同格式化的地方。
 
 
 ```json title="app/frontend/legacy-app/biome.json"
@@ -67,7 +67,7 @@ Now let's **move** `app/frontend/biome.json` to `app/frontend/legacy-app/`, beca
 }
 ```
 
-Then, we tell Biome to inherit all the options from the main `app/biome.json` file, using the `extends` property:
+然后，我们告诉 Biome 使用 `extends` 属性从主 `app/biome.json` 文件继承所有选项：
 
 ```json title="app/frontend/legacy-app/biome.json" ins={2}
 {
@@ -78,7 +78,7 @@ Then, we tell Biome to inherit all the options from the main `app/biome.json` fi
 }
 ```
 
-Let's jump to `app/backend/biome.json`, where we need to enable the linting:
+让我们跳到 `app/backend/biome.json`，在那里我们需要启用 linting：
 
 
 ```json title="app/backend/biome.json"

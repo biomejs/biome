@@ -1,49 +1,50 @@
 ---
-title: Versioning
-description: How we version Biome.
+title: 版本控制
+description: 我们如何版本控制Biome。
 ---
 
-Fixes to lint rules, formatting layouts, etc. might prevent your scripts from passing. Due to the nature of these changes,
-it's **highly recommended** to save the _exact_ version in your `package.json`, instead of using range operators.
+修复lint规则、格式化布局等可能会阻止你的脚本通过。由于这些更改的性质，
+我们**强烈建议**在你的`package.json`中保存_确切_的版本，而不是使用范围操作符。
 
-This methodology will make sure that your script won't fail unexpectedly.
+这种方法将确保你的脚本不会意外失败。
 
-## Semantic Versioning
+## 语义版本控制
 
-Biome follows [semantic versioning](https://semver.org/). Due to the nature of Biome as a toolchain, it can be unclear what changes are considered major, minor, or patch. That's why Biome uses the following versioning guide:
+Biome遵循[语义版本控制](https://semver.org/)。由于Biome作为一个工具链的性质，可能不清楚哪些更改被认为是主要的、次要的或补丁。这就是为什么Biome使用以下版本控制指南：
 
-### Patch Release
+### 补丁发布
 
-* Fixing a lint rule that raises lint errors for valid code (false positives)
-* Fixing incorrect code suggestions
-* Fixing the formatting of a syntax that results in invalid code or changes the semantics of the program.
-* Improvements to the documentation
-* Internal changes that don't change Biome's functionality:
-  * Refactors
-  * Performance improvements
-  * Increase or change in test coverage
-* Improving the wording of diagnostics or fixing the rendering of diagnostics.
-* Re-releases after a failed release
-* Changing the formatting of established syntax.
+* 修复一个lint规则，该规则对有效代码提出lint错误（假阳性）
+* 修复错误的代码建议
+* 修复格式化语法，导致代码无效或改变程序的语义。
+* 对文档的改进
+* 不改变Biome功能的内部更改：
+  * 重构
+  * 性能改进
+  * 增加或改变测试覆盖率
+* 改进诊断的措辞或修复诊断的呈现。
+* 发布失败后的重新发布
+* 改变已建立语法的格式化。
 
-### Minor Release
+### 次要发布
 
-* Adding a new rule or promoting an existing lint rule to a stable group that is not recommended by default.
-* Adding linting and formatting support for a recently introduced language feature, even if that results in more reported linting errors.
-* Removal of recommended rules
-* Deprecation of existing rules
-* Adding new configuration optional configuration options that do not change the formatting or report more lint errors.
-* Adding a new recommended lint rule or promoting an existing lint rule from the nursery group to a recommended lint rule in a stable group.
-* Removal of a non-*nursery* rule or demoting a rule to the *nursery* group.
+* 添加一个新的规则或将现有的lint规则提升到默认不推荐的稳定组。
+* 为最近引入的语言特性添加lint和格式化支持，即使这导致更多的lint错误报告。
+* 删除推荐的规则
+* 废弃现有的规则
+* 添加新的配置可选配置选项，不改变格式化或报告更多的lint错误。
+* 添加一个新的推荐lint规则或将现有的lint规则从nursery组提升到稳定组的推荐lint规则。
+* 删除非*nursery*规则或将规则降级到*nursery*组。
 
-### Major Release
-* Changes to the configuration that result in different formatting or more reported lint errors (adding/removing options, changing the default value)
-* Changes to Biome's public API
-* Promotion of new features or tools that require some spotlight
+### 主要发布
+* 更改配置，导致不同的格式化或更多的lint错误报告（添加/删除选项，更改默认值）
+* 更改Biome的公共API
+* 需要一些聚光灯的新特性或工具的推广
 
-## Visual Studio Code Extension
+## Visual Studio Code扩展
 
-Visual Studio Code [doesn't support pre-release tags](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#prerelease-extensions) for extensions. That's why Biome uses the following version schema to distinguish stable and previews:
-* Stable releases use even version numbers: 10, 12, 14, 16, ...
-* Previews use odd version numbers: 11, 13, 15, 17, ...
+Visual Studio Code [不支持预发布标签](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#prerelease-extensions)的扩展。这就是为什么Biome使用以下版本模式来区分稳定和预览：
+* 稳定版本使用偶数版本号：10、12、14、16、...
+* 预览使用奇数版本号：11、13、15、17、...
+
 
