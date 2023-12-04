@@ -73,7 +73,7 @@ var r = new globalThis.RegExp("[\u{1F468}\u{200D}\u{1F469}\u{200D}\u{1F466}]", "
 ```
 invalid.js:1:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected surrogate pair in character class. Use 'u' flag.
+  ! Unexpected surrogate pair in character class. Use the 'u' flag.
   
   > 1 │ var r = /[👍]/;
       │         ^^^^^^
@@ -90,7 +90,7 @@ invalid.js:1:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━━
 ```
 invalid.js:2:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected surrogate pair in character class. Use 'u' flag.
+  ! Unexpected surrogate pair in character class. Use the 'u' flag.
   
     1 │ var r = /[👍]/;
   > 2 │ var r = /[\uD83D\uDC4D]/;
@@ -108,7 +108,7 @@ invalid.js:2:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━━
 ```
 invalid.js:3:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected surrogate pair in character class. Use 'u' flag.
+  ! Unexpected surrogate pair in character class. Use the 'u' flag.
   
     1 │ var r = /[👍]/;
     2 │ var r = /[\uD83D\uDC4D]/;
@@ -127,7 +127,7 @@ invalid.js:3:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━━
 ```
 invalid.js:4:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected surrogate pair in character class. Use 'u' flag.
+  ! Unexpected surrogate pair in character class. Use the 'u' flag.
   
     2 │ var r = /[\uD83D\uDC4D]/;
     3 │ var r = /[👍]\\a/;
@@ -146,7 +146,7 @@ invalid.js:4:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━━
 ```
 invalid.js:5:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected combined character in character class.
+  ! Unexpected combined character in the character class.
   
     3 │ var r = /[👍]\\a/;
     4 │ var r = /(?<=[👍])/;
@@ -161,7 +161,7 @@ invalid.js:5:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━�
 ```
 invalid.js:6:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected combined character in character class.
+  ! Unexpected combined character in the character class.
   
     4 │ var r = /(?<=[👍])/;
     5 │ var r = /[A�]/;
@@ -176,7 +176,7 @@ invalid.js:6:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━�
 ```
 invalid.js:7:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected combined character in character class.
+  ! Unexpected combined character in the character class.
   
     5 │ var r = /[A�]/;
     6 │ var r = /[A�]/u;
@@ -191,7 +191,7 @@ invalid.js:7:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━�
 ```
 invalid.js:8:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected combined character in character class.
+  ! Unexpected combined character in the character class.
   
      6 │ var r = /[A�]/u;
      7 │ var r = /[\u0041\u0301]/;
@@ -206,7 +206,7 @@ invalid.js:8:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━�
 ```
 invalid.js:9:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected combined character in character class.
+  ! Unexpected combined character in the character class.
   
      7 │ var r = /[\u0041\u0301]/;
      8 │ var r = /[\u0041\u0301]/u;
@@ -221,7 +221,7 @@ invalid.js:9:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━�
 ```
 invalid.js:10:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected combined character in character class.
+  ! Unexpected combined character in the character class.
   
      8 │ var r = /[\u0041\u0301]/u;
      9 │ var r = /[\u{41}\u{301}]/u;
@@ -236,7 +236,7 @@ invalid.js:10:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━
 ```
 invalid.js:11:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected combined character in character class.
+  ! Unexpected combined character in the character class.
   
      9 │ var r = /[\u{41}\u{301}]/u;
     10 │ var r = /[❇�]/;
@@ -251,7 +251,7 @@ invalid.js:11:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━
 ```
 invalid.js:12:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected combined character in character class.
+  ! Unexpected combined character in the character class.
   
     10 │ var r = /[❇�]/;
     11 │ var r = /[❇�]/u;
@@ -266,7 +266,7 @@ invalid.js:12:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━
 ```
 invalid.js:13:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected combined character in character class.
+  ! Unexpected combined character in the character class.
   
     11 │ var r = /[❇�]/u;
     12 │ var r = /[\u2747\uFE0F]/;
@@ -281,7 +281,7 @@ invalid.js:13:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━
 ```
 invalid.js:14:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected combined character in character class.
+  ! Unexpected combined character in the character class.
   
     12 │ var r = /[\u2747\uFE0F]/;
     13 │ var r = /[\u2747\uFE0F]/u;
@@ -296,7 +296,7 @@ invalid.js:14:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━
 ```
 invalid.js:15:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected surrogate pair in character class. Use 'u' flag.
+  ! Unexpected surrogate pair in character class. Use the 'u' flag.
   
     13 │ var r = /[\u2747\uFE0F]/u;
     14 │ var r = /[\u{2747}\u{FE0F}]/u;
@@ -315,7 +315,7 @@ invalid.js:15:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━�
 ```
 invalid.js:16:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected modified Emoji in character class. 
+  ! Unexpected modified Emoji in the character class. 
   
     14 │ var r = /[\u{2747}\u{FE0F}]/u;
     15 │ var r = /[👶🏻]/;
@@ -330,7 +330,7 @@ invalid.js:16:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━
 ```
 invalid.js:17:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected modified Emoji in character class. 
+  ! Unexpected modified Emoji in the character class. 
   
     15 │ var r = /[👶🏻]/;
     16 │ var r = /[👶🏻]/u;
@@ -345,7 +345,7 @@ invalid.js:17:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━
 ```
 invalid.js:18:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected modified Emoji in character class. 
+  ! Unexpected modified Emoji in the character class. 
   
     16 │ var r = /[👶🏻]/u;
     17 │ var r = /[\uD83D\uDC76\uD83C\uDFFB]/u;
@@ -360,7 +360,7 @@ invalid.js:18:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━
 ```
 invalid.js:19:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected surrogate pair in character class. Use 'u' flag.
+  ! Unexpected surrogate pair in character class. Use the 'u' flag.
   
     17 │ var r = /[\uD83D\uDC76\uD83C\uDFFB]/u;
     18 │ var r = /[\u{1F476}\u{1F3FB}]/u;
@@ -379,7 +379,7 @@ invalid.js:19:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━�
 ```
 invalid.js:20:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected surrogate pair in character class. Use 'u' flag.
+  ! Unexpected surrogate pair in character class. Use the 'u' flag.
   
     18 │ var r = /[\u{1F476}\u{1F3FB}]/u;
     19 │ var r = /[🇯🇵]/;
@@ -403,7 +403,7 @@ invalid.js:20:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━�
 ```
 invalid.js:21:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Regional indicator symbol characters should not be used in character class.
+  ! Regional indicator symbol characters should not be used in the character class.
   
     19 │ var r = /[🇯🇵]/;
     20 │ var r = /[🇯🇵]/i;
@@ -418,7 +418,7 @@ invalid.js:21:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━
 ```
 invalid.js:22:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Regional indicator symbol characters should not be used in character class.
+  ! Regional indicator symbol characters should not be used in the character class.
   
     20 │ var r = /[🇯🇵]/i;
     21 │ var r = /[🇯🇵]/u;
@@ -433,7 +433,7 @@ invalid.js:22:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━
 ```
 invalid.js:23:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Regional indicator symbol characters should not be used in character class.
+  ! Regional indicator symbol characters should not be used in the character class.
   
     21 │ var r = /[🇯🇵]/u;
     22 │ var r = /[\uD83C\uDDEF\uD83C\uDDF5]/u;
@@ -448,7 +448,7 @@ invalid.js:23:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━
 ```
 invalid.js:24:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected surrogate pair in character class. Use 'u' flag.
+  ! Unexpected surrogate pair in character class. Use the 'u' flag.
   
     22 │ var r = /[\uD83C\uDDEF\uD83C\uDDF5]/u;
     23 │ var r = /[\u{1F1EF}\u{1F1F5}]/u;
@@ -512,7 +512,7 @@ invalid.js:27:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━
 ```
 invalid.js:28:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected surrogate pair in character class. Use 'u' flag.
+  ! Unexpected surrogate pair in character class. Use the 'u' flag.
   
     26 │ var r = /[\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC66]/u;
     27 │ var r = /[\u{1F468}\u{200D}\u{1F469}\u{200D}\u{1F466}]/u;
@@ -536,7 +536,7 @@ invalid.js:28:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━�
 ```
 invalid.js:29:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected surrogate pair in character class. Use 'u' flag.
+  ! Unexpected surrogate pair in character class. Use the 'u' flag.
   
     27 │ var r = /[\u{1F468}\u{200D}\u{1F469}\u{200D}\u{1F466}]/u;
     28 │ var r = new RegExp("[👍]", "");
@@ -560,7 +560,7 @@ invalid.js:29:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━�
 ```
 invalid.js:30:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected surrogate pair in character class. Use 'u' flag.
+  ! Unexpected surrogate pair in character class. Use the 'u' flag.
   
     28 │ var r = new RegExp("[👍]", "");
     29 │ var r = new RegExp('[👍]', ``);
@@ -575,7 +575,7 @@ invalid.js:30:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━
 ```
 invalid.js:31:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected surrogate pair in character class. Use 'u' flag.
+  ! Unexpected surrogate pair in character class. Use the 'u' flag.
   
     29 │ var r = new RegExp('[👍]', ``);
     30 │ var r = new RegExp("[👍]", flags);
@@ -599,7 +599,7 @@ invalid.js:31:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━�
 ```
 invalid.js:32:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected surrogate pair in character class. Use 'u' flag.
+  ! Unexpected surrogate pair in character class. Use the 'u' flag.
   
     30 │ var r = new RegExp("[👍]", flags);
     31 │ var r = new RegExp("[\uD83D\uDC4D]", "");
@@ -623,7 +623,7 @@ invalid.js:32:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━�
 ```
 invalid.js:33:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected combined character in character class.
+  ! Unexpected combined character in the character class.
   
     31 │ var r = new RegExp("[\uD83D\uDC4D]", "");
     32 │ var r = new RegExp("/(?<=[👍])", "");
@@ -638,7 +638,7 @@ invalid.js:33:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━
 ```
 invalid.js:34:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected combined character in character class.
+  ! Unexpected combined character in the character class.
   
     32 │ var r = new RegExp("/(?<=[👍])", "");
     33 │ var r = new RegExp("[A�]", "");
@@ -653,7 +653,7 @@ invalid.js:34:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━
 ```
 invalid.js:35:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected combined character in character class.
+  ! Unexpected combined character in the character class.
   
     33 │ var r = new RegExp("[A�]", "");
     34 │ var r = new RegExp("[A�]", "u");
@@ -668,7 +668,7 @@ invalid.js:35:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━
 ```
 invalid.js:36:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected combined character in character class.
+  ! Unexpected combined character in the character class.
   
     34 │ var r = new RegExp("[A�]", "u");
     35 │ var r = new RegExp("[\u0041\u0301]", "");
@@ -683,7 +683,7 @@ invalid.js:36:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━
 ```
 invalid.js:37:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected combined character in character class.
+  ! Unexpected combined character in the character class.
   
     35 │ var r = new RegExp("[\u0041\u0301]", "");
     36 │ var r = new RegExp("[\u0041\u0301]", "u");
@@ -698,7 +698,7 @@ invalid.js:37:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━
 ```
 invalid.js:38:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected combined character in character class.
+  ! Unexpected combined character in the character class.
   
     36 │ var r = new RegExp("[\u0041\u0301]", "u");
     37 │ var r = new RegExp("[\u{41}\u{301}]", "u");
@@ -713,7 +713,7 @@ invalid.js:38:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━
 ```
 invalid.js:39:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected combined character in character class.
+  ! Unexpected combined character in the character class.
   
     37 │ var r = new RegExp("[\u{41}\u{301}]", "u");
     38 │ var r = new RegExp("[❇�]", "");
@@ -728,7 +728,7 @@ invalid.js:39:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━
 ```
 invalid.js:40:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected combined character in character class.
+  ! Unexpected combined character in the character class.
   
     38 │ var r = new RegExp("[❇�]", "");
     39 │ var r = new RegExp("[❇�]", "u");
@@ -743,7 +743,7 @@ invalid.js:40:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━
 ```
 invalid.js:41:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected combined character in character class.
+  ! Unexpected combined character in the character class.
   
     39 │ var r = new RegExp("[❇�]", "u");
     40 │ var r = new RegExp("[\u2747\uFE0F]", "");
@@ -758,7 +758,7 @@ invalid.js:41:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━
 ```
 invalid.js:42:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected combined character in character class.
+  ! Unexpected combined character in the character class.
   
     40 │ var r = new RegExp("[\u2747\uFE0F]", "");
     41 │ var r = new RegExp("[\u2747\uFE0F]", "u");
@@ -773,7 +773,7 @@ invalid.js:42:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━
 ```
 invalid.js:43:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected surrogate pair in character class. Use 'u' flag.
+  ! Unexpected surrogate pair in character class. Use the 'u' flag.
   
     41 │ var r = new RegExp("[\u2747\uFE0F]", "u");
     42 │ var r = new RegExp("[\u{2747}\u{FE0F}]", "u");
@@ -797,7 +797,7 @@ invalid.js:43:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━�
 ```
 invalid.js:44:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected modified Emoji in character class. 
+  ! Unexpected modified Emoji in the character class. 
   
     42 │ var r = new RegExp("[\u{2747}\u{FE0F}]", "u");
     43 │ var r = new RegExp("[👶🏻]", "");
@@ -812,7 +812,7 @@ invalid.js:44:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━
 ```
 invalid.js:45:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected modified Emoji in character class. 
+  ! Unexpected modified Emoji in the character class. 
   
     43 │ var r = new RegExp("[👶🏻]", "");
     44 │ var r = new RegExp("[👶🏻]", "u");
@@ -827,7 +827,7 @@ invalid.js:45:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━
 ```
 invalid.js:46:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected modified Emoji in character class. 
+  ! Unexpected modified Emoji in the character class. 
   
     44 │ var r = new RegExp("[👶🏻]", "u");
     45 │ var r = new RegExp("[\uD83D\uDC76\uD83C\uDFFB]", "u");
@@ -842,7 +842,7 @@ invalid.js:46:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━
 ```
 invalid.js:47:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected surrogate pair in character class. Use 'u' flag.
+  ! Unexpected surrogate pair in character class. Use the 'u' flag.
   
     45 │ var r = new RegExp("[\uD83D\uDC76\uD83C\uDFFB]", "u");
     46 │ var r = new RegExp("[\u{1F476}\u{1F3FB}]", "u");
@@ -866,7 +866,7 @@ invalid.js:47:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━�
 ```
 invalid.js:48:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected surrogate pair in character class. Use 'u' flag.
+  ! Unexpected surrogate pair in character class. Use the 'u' flag.
   
     46 │ var r = new RegExp("[\u{1F476}\u{1F3FB}]", "u");
     47 │ var r = new RegExp("[🇯🇵]", "");
@@ -890,7 +890,7 @@ invalid.js:48:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━�
 ```
 invalid.js:49:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected surrogate pair in character class. Use 'u' flag.
+  ! Unexpected surrogate pair in character class. Use the 'u' flag.
   
     47 │ var r = new RegExp("[🇯🇵]", "");
     48 │ var r = new RegExp("[🇯🇵]", "i");
@@ -914,7 +914,7 @@ invalid.js:49:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━�
 ```
 invalid.js:50:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected surrogate pair in character class. Use 'u' flag.
+  ! Unexpected surrogate pair in character class. Use the 'u' flag.
   
     48 │ var r = new RegExp("[🇯🇵]", "i");
     49 │ var r = new RegExp('[🇯🇵]', `i`);
@@ -938,7 +938,7 @@ invalid.js:50:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━�
 ```
 invalid.js:51:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected surrogate pair in character class. Use 'u' flag.
+  ! Unexpected surrogate pair in character class. Use the 'u' flag.
   
     49 │ var r = new RegExp('[🇯🇵]', `i`);
     50 │ var r = new RegExp('[🇯🇵]', `${foo}`);
@@ -957,7 +957,7 @@ invalid.js:51:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━�
 ```
 invalid.js:52:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected surrogate pair in character class. Use 'u' flag.
+  ! Unexpected surrogate pair in character class. Use the 'u' flag.
   
     50 │ var r = new RegExp('[🇯🇵]', `${foo}`);
     51 │ var r = new RegExp("[🇯🇵]");
@@ -976,7 +976,7 @@ invalid.js:52:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━�
 ```
 invalid.js:53:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Regional indicator symbol characters should not be used in character class.
+  ! Regional indicator symbol characters should not be used in the character class.
   
     51 │ var r = new RegExp("[🇯🇵]");
     52 │ var r = new RegExp("[🇯🇵]",);
@@ -991,7 +991,7 @@ invalid.js:53:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━
 ```
 invalid.js:54:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Regional indicator symbol characters should not be used in character class.
+  ! Regional indicator symbol characters should not be used in the character class.
   
     52 │ var r = new RegExp("[🇯🇵]",);
     53 │ var r = new RegExp("[🇯🇵]", "u");
@@ -1006,7 +1006,7 @@ invalid.js:54:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━
 ```
 invalid.js:55:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Regional indicator symbol characters should not be used in character class.
+  ! Regional indicator symbol characters should not be used in the character class.
   
     53 │ var r = new RegExp("[🇯🇵]", "u");
     54 │ var r = new RegExp("[\uD83C\uDDEF\uD83C\uDDF5]", "u");
@@ -1021,7 +1021,7 @@ invalid.js:55:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━
 ```
 invalid.js:56:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected surrogate pair in character class. Use 'u' flag.
+  ! Unexpected surrogate pair in character class. Use the 'u' flag.
   
     54 │ var r = new RegExp("[\uD83C\uDDEF\uD83C\uDDF5]", "u");
     55 │ var r = new RegExp("[\u{1F1EF}\u{1F1F5}]", "u");
@@ -1090,7 +1090,7 @@ invalid.js:59:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━
 ```
 invalid.js:60:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected combined character in character class.
+  ! Unexpected combined character in the character class.
   
     58 │ var r = new RegExp("[\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC66]", "u");
     59 │ var r = new RegExp("[\u{1F468}\u{200D}\u{1F469}\u{200D}\u{1F466}]", "u");
@@ -1105,7 +1105,7 @@ invalid.js:60:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━
 ```
 invalid.js:61:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected modified Emoji in character class. 
+  ! Unexpected modified Emoji in the character class. 
   
     59 │ var r = new RegExp("[\u{1F468}\u{200D}\u{1F469}\u{200D}\u{1F466}]", "u");
     60 │ var r = new globalThis.RegExp("[❇�]", "");
@@ -1120,7 +1120,7 @@ invalid.js:61:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━
 ```
 invalid.js:62:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Unexpected surrogate pair in character class. Use 'u' flag.
+  ! Unexpected surrogate pair in character class. Use the 'u' flag.
   
     60 │ var r = new globalThis.RegExp("[❇�]", "");
     61 │ var r = new globalThis.RegExp("[👶🏻]", "u");
