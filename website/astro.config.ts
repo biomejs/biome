@@ -1,5 +1,3 @@
-import fs from "node:fs/promises";
-import path from "node:path";
 import { netlifyStatic } from "@astrojs/netlify";
 import react from "@astrojs/react";
 import starlight from "@astrojs/starlight";
@@ -7,98 +5,9 @@ import { defineConfig } from "astro/config";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import rehypeSlug from "rehype-slug";
 import remarkToc from "remark-toc";
+import {searchForWorkspaceRoot} from "vite";
 
-function resolveFile(relative: string, parent: string, root: string): string {
-	if (relative[0] === "/") {
-		return `${root}${relative}`;
-	}
-	return path.resolve(path.join(parent, relative));
-}
 
-const IMPORT_REGEX = /^import"(.*?)";?$/;
-
-async function readFile(
-	loc: string,
-	root: string,
-	cache: Files,
-): Promise<string> {
-	let content = cache.get(loc);
-	if (content === undefined) {
-		content = await fs.readFile(loc, "utf8");
-		content = content.trim();
-		cache.set(loc, content);
-	}
-
-	const importMatch = content.match(IMPORT_REGEX);
-	if (importMatch != null) {
-		return readFile(
-			resolveFile(importMatch[1], path.dirname(loc), root),
-			root,
-			cache,
-		);
-	}
-
-	return content;
-}
-
-type Files = Map<string, string>;
-
-async function inline({
-	files,
-	root,
-	replacements,
-}: {
-	files: Files;
-	root: string;
-	replacements: {
-		regex: RegExp;
-		tagBefore: string;
-		tagAfter: string;
-	}[];
-}): Promise<void> {
-	const cache: Files = new Map();
-
-	await Promise.all(
-		Array.from(files.entries(), async ([htmlPath, file]) => {
-			if (htmlPath.includes("playground")) {
-				return;
-			}
-
-			const matches: {
-				key: string;
-				match: string;
-				tagBefore: string;
-				tagAfter: string;
-			}[] = [];
-
-			for (const { regex, tagBefore, tagAfter } of replacements) {
-				file = file.replace(regex, (match, p1) => {
-					const key = `{{INLINE:${matches.length - 1}}}`;
-					matches.push({ key, match: p1, tagBefore, tagAfter });
-					return key;
-				});
-			}
-
-			const sources: string[] = await Promise.all(
-				matches.map(async ({ match }) => {
-					const resolvedPath = resolveFile(match, path.dirname(htmlPath), root);
-					return await readFile(resolvedPath, root, cache);
-				}),
-			);
-
-			for (let i = 0; i < matches.length; i++) {
-				const { key, tagBefore, tagAfter } = matches[i];
-				const source = sources[i];
-				const index = file.indexOf(key);
-				const start = file.slice(0, index);
-				const end = file.slice(index + key.length);
-				file = `${start}${tagBefore}${source}${tagAfter}${end}`;
-			}
-
-			files.set(htmlPath, file);
-		}),
-	);
-}
 
 const site = "https://biomejs.dev";
 // https://astro.build/config
@@ -112,8 +21,14 @@ export default defineConfig({
 		domains: ["avatars.githubusercontent.com"],
 	},
 
+	devOverlay: {
+		enabled: true,
+	},
+
 	integrations: [
-		react(),
+		react({
+			include: ["playground/**"]
+		}),
 		starlight({
 			title: "Biome",
 			defaultLocale: "root",
@@ -275,8 +190,8 @@ export default defineConfig({
 
 		server: {
 			fs: {
-				// https://vitejs.dev/config/server-options.html#server-fs-allow
-				allow: [process.cwd(), "../packages/@biomejs/wasm-web"],
+		// 		https://vitejs.dev/config/server-options.html#server-fs-allow
+				allow: [searchForWorkspaceRoot(process.cwd()), "../packages/@biomejs/wasm-web"],
 			},
 		},
 	},

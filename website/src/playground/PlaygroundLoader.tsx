@@ -311,38 +311,38 @@ function initState(
 					String(defaultPlaygroundState.settings.lineWidth),
 			),
 			indentStyle:
-				(searchParams.get("indentStyle") as IndentStyle) ??
+				(searchParams.get("indentStyle") as IndentStyle) ||
 				defaultPlaygroundState.settings.indentStyle,
 			quoteStyle:
-				(searchParams.get("quoteStyle") as QuoteStyle) ??
+				(searchParams.get("quoteStyle") as QuoteStyle) ||
 				defaultPlaygroundState.settings.quoteStyle,
 			jsxQuoteStyle:
-				(searchParams.get("jsxQuoteStyle") as QuoteStyle) ??
+				(searchParams.get("jsxQuoteStyle") as QuoteStyle) ||
 				defaultPlaygroundState.settings.jsxQuoteStyle,
 			quoteProperties:
-				(searchParams.get("quoteProperties") as QuoteProperties) ??
+				(searchParams.get("quoteProperties") as QuoteProperties) ||
 				defaultPlaygroundState.settings.quoteProperties,
 			trailingComma:
-				(searchParams.get("trailingComma") as TrailingComma) ??
+				(searchParams.get("trailingComma") as TrailingComma) ||
 				defaultPlaygroundState.settings.trailingComma,
 			indentWidth: parseInt(
-				searchParams.get("indentWidth") ??
+				searchParams.get("indentWidth") ||
 					String(defaultPlaygroundState.settings.indentWidth),
 			),
 			semicolons:
-				(searchParams.get("semicolons") as Semicolons) ??
+				(searchParams.get("semicolons") as Semicolons) ||
 				defaultPlaygroundState.settings.semicolons,
 			arrowParentheses:
-				(searchParams.get("arrowParentheses") as ArrowParentheses) ??
+				(searchParams.get("arrowParentheses") as ArrowParentheses) ||
 				defaultPlaygroundState.settings.arrowParentheses,
 			bracketSpacing:
 				searchParams.get("bracketSpacing") === "true" ||
 				defaultPlaygroundState.settings.bracketSpacing,
 			bracketSameLine:
-				searchParams.get("bracketSameLine") === "true" ??
+				searchParams.get("bracketSameLine") === "true" ||
 				defaultPlaygroundState.settings.bracketSameLine,
 			lintRules:
-				(searchParams.get("lintRules") as LintRules) ??
+				(searchParams.get("lintRules") as LintRules) ||
 				defaultPlaygroundState.settings.lintRules,
 			enabledLinting:
 				searchParams.get("enabledLinting") === "true" ||
