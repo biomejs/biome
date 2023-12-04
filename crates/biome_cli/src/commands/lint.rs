@@ -108,13 +108,6 @@ pub(crate) fn lint(
         None
     };
 
-    session
-        .app
-        .workspace
-        .update_settings(UpdateSettingsParams {
-            configuration: fs_configuration,
-        })?;
-
     execute_mode(
         Execution::new(TraversalMode::Lint {
             fix_file_mode,
