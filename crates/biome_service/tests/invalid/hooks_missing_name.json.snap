@@ -31,6 +31,7 @@ hooks_missing_name.json:6:5 deserialize ━━━━━━━━━━━━━�
   - useGroupedTypeImport
   - useImportRestrictions
   - useRegexLiterals
+  - useShorthandFunctionType
   - useValidAriaRole
   
 
