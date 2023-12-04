@@ -209,6 +209,7 @@ impl StableReactHookConfiguration {
 /// ```
 pub fn is_binding_react_stable(
     binding: &AnyJsIdentifierBinding,
+    model: &SemanticModel,
     stable_config: &FxHashSet<StableReactHookConfiguration>,
 ) -> bool {
     fn array_binding_declarator_index(
@@ -232,26 +233,22 @@ pub fn is_binding_react_stable(
     array_binding_declarator_index(binding)
         .or_else(|| assignment_declarator(binding))
         .and_then(|(declarator, index)| {
-            let hook_name = declarator
+            let callee = declarator
                 .initializer()?
                 .expression()
                 .ok()?
                 .as_js_call_expression()?
                 .callee()
-                .ok()?
-                .as_js_identifier_expression()?
-                .name()
-                .ok()?
-                .value_token()
-                .ok()?
-                .token_text_trimmed();
+                .ok()?;
 
-            let stable = StableReactHookConfiguration {
-                hook_name: hook_name.to_string(),
-                index,
-            };
-
-            Some(stable_config.contains(&stable))
+            Some(stable_config.iter().any(|config| {
+                is_react_call_api(
+                    callee.clone(),
+                    model,
+                    ReactLibrary::React,
+                    &config.hook_name,
+                ) && index == config.index
+            }))
         })
         .unwrap_or(false)
 }
@@ -260,12 +257,16 @@ pub fn is_binding_react_stable(
 mod test {
     use super::*;
     use biome_js_parser::JsParserOptions;
+    use biome_js_semantic::{semantic_model, SemanticModelOptions};
     use biome_js_syntax::JsFileSource;
 
     #[test]
     pub fn ok_react_stable_captures() {
         let r = biome_js_parser::parse(
-            "const ref = useRef();",
+            r#"
+                import { useRef } from "react";
+                const ref = useRef();
+            "#,
             JsFileSource::js_module(),
             JsParserOptions::default(),
         );
@@ -282,6 +283,40 @@ mod test {
             StableReactHookConfiguration::new("useState", Some(1)),
         ]);
 
-        assert!(is_binding_react_stable(&set_name, &config));
+        assert!(is_binding_react_stable(
+            &set_name,
+            &semantic_model(&r.ok().unwrap(), SemanticModelOptions::default()),
+            &config
+        ));
+    }
+
+    #[test]
+    pub fn ok_react_stable_captures_with_default_import() {
+        let r = biome_js_parser::parse(
+            r#"
+                import * as React from "react";
+                const ref = React.useRef();
+            "#,
+            JsFileSource::js_module(),
+            JsParserOptions::default(),
+        );
+        let node = r
+            .syntax()
+            .descendants()
+            .filter(|x| x.text_trimmed() == "ref")
+            .last()
+            .unwrap();
+        let set_name = AnyJsIdentifierBinding::cast(node).unwrap();
+
+        let config = FxHashSet::from_iter([
+            StableReactHookConfiguration::new("useRef", None),
+            StableReactHookConfiguration::new("useState", Some(1)),
+        ]);
+
+        assert!(is_binding_react_stable(
+            &set_name,
+            &semantic_model(&r.ok().unwrap(), SemanticModelOptions::default()),
+            &config
+        ));
     }
 }

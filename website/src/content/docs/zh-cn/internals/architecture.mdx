@@ -1,0 +1,107 @@
+---
+title: 架构
+description: Biome在幕后是如何工作的。
+---
+
+这篇文档涵盖了Biome的一些内部工作原理，以及它们在项目中的使用方式。
+
+## 解析器和CST
+
+解析器的架构使用了一个内部的[rowan]分支，它是一个实现[绿树和红树模式]的库。
+
+CST（具体语法树）是一种与AST（抽象语法树）非常相似的数据结构，它跟踪程序的所有信息，包括空白和注释。
+
+**空白和注释**是程序运行所需的所有重要信息：
+
+- 空格
+- 制表符
+- 注释
+
+空白和注释被附加到一个节点上。一个节点可以有前导空白和尾随空白。如果你从左到右阅读代码，前导空白出现在关键字之前，尾随空白出现在关键字之后。
+
+前导空白和尾随空白被分类如下：
+
+- 直到令牌/关键字之前的所有空白（包括换行符）将是**前导空白**；
+- 直到下一个换行符之前的所有内容（不包括换行符）将是**尾随空白**；
+
+给定以下JavaScript代码片段，`// comment 1`是分号`';'`的尾随空白，`// comment 2`是`const`关键字的前导空白。以下是Biome表示的CST的简化版本：
+
+```js
+const a = "foo"; // comment 1
+// comment 2
+const b = "bar";
+```
+
+```
+0: JS_MODULE@0..55
+    ...
+      1: SEMICOLON@15..27 ";" [] [Whitespace(" "), Comments("// comment 1")]
+    1: JS_VARIABLE_STATEMENT@27..55
+        ...
+        1: CONST_KW@27..45 "const" [Newline("\n"), Comments("// comment 2"), Newline("\n")] [Whitespace(" ")]
+  3: EOF@55..55 "" [] []
+```
+
+由于设计原因，CST本身无法直接访问，开发人员可以使用Red树读取其信息，使用一系列从语言语法自动生成的API。
+
+#### 弹性和可恢复的解析器
+
+为了构建CST，解析器需要具备弹性和可恢复性：
+
+- 弹性：解析器能够在遇到属于语言的语法错误后恢复解析；
+- 可恢复性：解析器能够**理解**发生错误的位置，并能够通过创建**正确的**信息来恢复解析；
+
+解析器在恢复阶段无法正确理解语法的情况下，需要使用`Bogus`节点来标记某些语法为错误的。注意`JsBogusStatement`：
+
+```js
+function}
+```
+
+```
+JsModule {
+  interpreter_token: missing (optional),
+  directives: JsDirectiveList [],
+  items: JsModuleItemList [
+    TsDeclareFunctionDeclaration {
+      async_token: missing (optional),
+      function_token: FUNCTION_KW@0..8 "function" [] [],
+      id: missing (required),
+      type_parameters: missing (optional),
+      parameters: missing (required),
+      return_type_annotation: missing (optional),
+      semicolon_token: missing (optional),
+    },
+    JsBogusStatement {
+      items: [
+        R_CURLY@8..9 "}" [] [],
+      ],
+    },
+  ],
+  eof_token: EOF@9..9 "" [] [],
+}
+```
+
+以下是解析阶段的错误信息：
+
+```
+main.tsx:1:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ✖ expected a name for the function in a function declaration, but found none
+
+  > 1 │ function}
+      │         ^
+```
+
+## 格式化程序（WIP）
+
+## 静态检查器（WIP）
+
+## 守护进程（WIP）
+
+Biome使用了一个服务器-客户端架构来运行其任务。
+
+[守护进程]是一个长时间运行的服务器，Biome在后台生成并用于处理来自编辑器和CLI的请求。
+
+[rowan]: https://github.com/rust-analyzer/rowan
+[绿树和红树模式]: https://learn.microsoft.com/en-us/archive/blogs/ericlippert/persistence-facades-and-roslyns-red-green-trees
+[守护进程]: https://en.wikipedia.org/wiki/Daemon_(computing)
