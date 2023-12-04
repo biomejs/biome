@@ -1147,6 +1147,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noMisleadingCharacterClass": {
+					"description": "Disallow characters made with multiple code points in character class syntax.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUnusedImports": {
 					"description": "Disallow unused imports.",
 					"anyOf": [

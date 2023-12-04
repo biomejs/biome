@@ -6,7 +6,7 @@ use unicode_width::UnicodeWidthStr;
 
 mod backtrace;
 mod diff;
-mod frame;
+pub(super) mod frame;
 mod message;
 
 use crate::display::frame::SourceFile;

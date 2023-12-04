@@ -224,7 +224,9 @@ pub(crate) fn process_file(ctx: &TraversalOptions, path: &Path) -> FileResult {
             TraversalMode::Check { .. } => {
                 check_file(shared_context, path, &file_features, category!("check"))
             }
-            TraversalMode::CI => check_file(shared_context, path, &file_features, category!("ci")),
+            TraversalMode::CI { .. } => {
+                check_file(shared_context, path, &file_features, category!("ci"))
+            }
             TraversalMode::Migrate { .. } => {
                 unreachable!("The migration should not be called for this file")
             }
