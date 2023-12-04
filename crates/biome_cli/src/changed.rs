@@ -1,18 +1,18 @@
-use biome_deserialize::StringSet;
+use std::ffi::OsString;
+
 use biome_fs::RomePath;
 use biome_service::{
-    configuration::FilesConfiguration,
     workspace::{FeatureName, IsPathIgnoredParams},
     Configuration,
 };
 
 use crate::{CliDiagnostic, CliSession};
 
-pub(crate) fn store_changed_files(
+pub(crate) fn get_changed_files(
     session: &mut CliSession,
     configuration: &mut Configuration,
     since: Option<String>,
-) -> Result<(), CliDiagnostic> {
+) -> Result<Vec<OsString>, CliDiagnostic> {
     let default_branch = configuration
         .vcs
         .as_ref()
@@ -30,9 +30,7 @@ pub(crate) fn store_changed_files(
 
     let changed_files = fs.get_changed_files(base)?;
 
-    println!("changed files: {:?}", changed_files);
-
-    let filtered_changed_files: Vec<String> = changed_files
+    let filtered_changed_files = changed_files
         .iter()
         .filter(|file| {
             !ws.is_path_ignored(IsPathIgnoredParams {
@@ -41,23 +39,12 @@ pub(crate) fn store_changed_files(
             })
             .unwrap_or(false)
         })
-        .map(|file| file.to_string())
-        .collect();
-
-    println!("filtered changed files: {:?}", filtered_changed_files);
+        .map(|file| OsString::from(file))
+        .collect::<Vec<_>>();
 
     if filtered_changed_files.is_empty() {
         return Err(CliDiagnostic::no_files_processed());
     }
 
-    let files_config = configuration
-        .files
-        .get_or_insert_with(FilesConfiguration::default);
-
-    let included_files = &mut files_config.include.get_or_insert_with(StringSet::default);
-
-    included_files.clear();
-    included_files.extend(filtered_changed_files);
-
-    Ok(())
+    Ok(filtered_changed_files)
 }

@@ -1,4 +1,4 @@
-use crate::changed::store_changed_files;
+use crate::changed::get_changed_files;
 use crate::cli_options::CliOptions;
 use crate::configuration::{load_configuration, LoadedConfiguration};
 use crate::vcs::store_path_to_ignore_from_vcs;
@@ -35,7 +35,7 @@ pub(crate) fn lint(
         apply_unsafe,
         cli_options,
         linter_configuration,
-        paths,
+        mut paths,
         stdin_file_path,
         vcs_configuration,
         files_configuration,
@@ -70,13 +70,6 @@ pub(crate) fn lint(
     fs_configuration.merge_with(files_configuration);
     fs_configuration.merge_with(vcs_configuration);
 
-    session
-        .app
-        .workspace
-        .update_settings(UpdateSettingsParams {
-            configuration: fs_configuration.clone(),
-        })?;
-
     // check if support of git ignore files is enabled
     let vcs_base_path = configuration_path.or(session.app.fs.working_directory());
     store_path_to_ignore_from_vcs(
@@ -91,7 +84,7 @@ pub(crate) fn lint(
     }
 
     if changed {
-        store_changed_files(&mut session, &mut fs_configuration, since)?;
+        paths = get_changed_files(&mut session, &mut fs_configuration, since)?;
     }
 
     let stdin = if let Some(stdin_file_path) = stdin_file_path {
