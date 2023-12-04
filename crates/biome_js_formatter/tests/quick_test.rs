@@ -9,39 +9,13 @@ mod language {
     include!("language.rs");
 }
 
-// #[ignore]
+#[ignore]
 #[test]
 // use this test check if your snippet prints as you wish, without using a snapshot
 fn quick_test() {
     let src = r#"
-    somePromise.then(({ reallyLongArguments }) => (makeTheChainFullyBreak) => [
-    dontIndentTwice,
-  ]);
-  somePromise.then(({ reallyLongArguments }) => (makeTheChainFullyBreak) => {
-    dontIndentTwice();
-  });
-
-  somePromise.then(({ reallyLongArguments }) => (makeTheChainFullyBreak) => (andNowAllLines) => (keepGoing) =>
-    dontIndentTwice());
-
-    somePromise.then(
-        ({ reallyLongArguments }) =>
-          (makeTheChainFullyBreak) =>
-          () => {
-            dontIndentTwice();
-          },
-      );
-    function foo() { 
-        // Unmount clean up
-        React.useLayoutEffect(() => () => {
-          callSomeLongNamedFunction();
-        });
-      }
-
-      function foo() { 
-        // Unmount clean up
-        React.useLayoutEffect(() => () => [hello, what, is, this, going, too, doehwharht]);
-      }
+    ((C) => (props) => <C {...props} />);
+    (({C}) => (props) => <C {...props} />);
     "#;
     let source_type = JsFileSource::tsx();
     let tree = parse(
