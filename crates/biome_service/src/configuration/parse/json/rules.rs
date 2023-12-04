@@ -937,6 +937,13 @@ impl Deserializable for Nursery {
                                 diagnostics,
                             );
                         }
+                        "noMisleadingCharacterClass" => {
+                            result.no_misleading_character_class = Deserializable::deserialize(
+                                &value,
+                                "noMisleadingCharacterClass",
+                                diagnostics,
+                            );
+                        }
                         "noUnusedImports" => {
                             result.no_unused_imports =
                                 Deserializable::deserialize(&value, "noUnusedImports", diagnostics);
@@ -1003,6 +1010,7 @@ impl Deserializable for Nursery {
                                     "noDuplicateJsonKeys",
                                     "noEmptyBlockStatements",
                                     "noImplicitAnyLet",
+                                    "noMisleadingCharacterClass",
                                     "noUnusedImports",
                                     "noUnusedPrivateClassMembers",
                                     "noUselessLoneBlockStatements",
