@@ -3,7 +3,7 @@ use crate::configuration::LoadedConfiguration;
 use crate::vcs::store_path_to_ignore_from_vcs;
 use crate::{
     configuration::load_configuration, execute_mode, setup_cli_subscriber, CliDiagnostic,
-    CliSession, Execution, TraversalMode,
+    CliSession, Execution,
 };
 use biome_service::configuration::organize_imports::OrganizeImports;
 use biome_service::configuration::{FormatterConfiguration, LinterConfiguration};
@@ -94,7 +94,7 @@ pub(crate) fn ci(mut session: CliSession, payload: CiCommandPayload) -> Result<(
         .update_settings(UpdateSettingsParams { configuration })?;
 
     execute_mode(
-        Execution::new(TraversalMode::CI),
+        Execution::new_ci(),
         session,
         &payload.cli_options,
         payload.paths,
