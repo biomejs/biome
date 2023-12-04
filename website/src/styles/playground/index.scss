@@ -48,7 +48,7 @@ body {
 #root {
 	display: flex;
 	width: 100%;
-	height: calc(100vh - 60px);
+	height: calc(100vh - 65px); // header size + border
 }
 
 h2 {
@@ -105,3 +105,6 @@ h2 {
 	width: 100%;
 }
 
+input[type=checkbox] {
+	accent-color: var(--sl-color-text-accent);
+}
