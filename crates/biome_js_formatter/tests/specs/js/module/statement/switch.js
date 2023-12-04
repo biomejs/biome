@@ -2,9 +2,11 @@ switch (key) {
 	case // comment
 	value:
 
+	case value: // fallthrough same-line
 	case value:
 		// fallthrough
 
+	case fallthrough:
 	case value:
 		break;
 

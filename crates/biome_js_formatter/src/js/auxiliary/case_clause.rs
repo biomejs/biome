@@ -51,7 +51,7 @@ impl FormatNodeRule<JsCaseClause> for FormatJsCaseClause {
         // Lastly, the default case is just to break and indent the body.
         //
         // switch (key) {
-        //   case fallthrough:
+        //   case fallthrough: // trailing comment
         //   case normalBody:
         //     someWork();
         //     break;
@@ -71,10 +71,10 @@ impl FormatNodeRule<JsCaseClause> for FormatJsCaseClause {
         //     break;
         // }
         if consequent.is_empty() {
-            // Skip inserting an indent block if the consequent is empty to print
-            // the trailing comments for the case clause inline if there is no
-            // block to push them into
-            write!(f, [hard_line_break()])
+            // Print nothing to ensure that trailing comments on the same line
+            // are printed on the same line. The parent list formatter takes
+            // care of inserting a hard line break between cases.
+            Ok(())
         } else if is_single_block_statement {
             write![f, [space(), consequent.format()]]
         } else {
