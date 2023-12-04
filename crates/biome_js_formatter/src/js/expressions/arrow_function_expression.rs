@@ -519,6 +519,7 @@ impl Format<JsFormatContext> for ArrowChain {
                     AnyJsExpression::JsObjectExpression(_)
                         | AnyJsExpression::JsArrayExpression(_)
                         | AnyJsExpression::JsSequenceExpression(_)
+                        | AnyJsExpression::JsxTagExpression(_)
                 )
         );
 
@@ -667,13 +668,25 @@ impl Format<JsFormatContext> for ArrowChain {
         });
 
         let format_tail_body = format_with(|f| {
+            // if it's inside a JSXExpression (e.g. an attribute) we should align the expression's closing } with the line with the opening {.
+            let should_add_soft_line = matches!(
+                head_parent.kind(),
+                Some(
+                    JsSyntaxKind::JSX_EXPRESSION_CHILD
+                        | JsSyntaxKind::JSX_EXPRESSION_ATTRIBUTE_VALUE
+                )
+            );
+
             if body_on_separate_line {
                 write!(
                     f,
-                    [indent(&format_args![
-                        soft_line_break_or_space(),
-                        format_tail_body_inner
-                    ])]
+                    [
+                        indent(&format_args![
+                            soft_line_break_or_space(),
+                            format_tail_body_inner
+                        ]),
+                        should_add_soft_line.then_some(soft_line_break())
+                    ]
                 )
             } else {
                 write!(f, [space(), format_tail_body_inner])
