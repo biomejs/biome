@@ -481,6 +481,7 @@ impl Format<JsFormatContext> for ArrowChain {
         let head_parent = head.syntax().parent();
         let tail_body = tail.body()?;
         let is_assignment_rhs = self.options.assignment_layout.is_some();
+        let is_grouped_call_arg_layout = self.options.call_arg_layout.is_some();
         let ancestor_call_expr_or_logical_expr = head.syntax().ancestors().any(|ancestor| {
             matches!(
                 ancestor.kind(),
@@ -540,8 +541,6 @@ impl Format<JsFormatContext> for ArrowChain {
             if is_callee || is_assignment_rhs {
                 write!(f, [soft_line_break()])?;
             }
-
-            let is_grouped_call_arg_layout = self.options.call_arg_layout.is_some();
 
             let join_signatures = format_with(|f: &mut JsFormatter| {
                 let mut is_first_in_chain = true;
@@ -680,6 +679,12 @@ impl Format<JsFormatContext> for ArrowChain {
                         format_tail_body_inner
                     ])]
                 )
+            } else if is_grouped_call_arg_layout {
+                // Since the body is starting on the same line, it will
+                // have the normal indention _plus_ the indent from
+                // breaking the parent. Dedenting here ensures that
+                // hugged expressions only indent once when they break.
+                write!(f, [space(), dedent(&format_tail_body_inner)])
             } else {
                 write!(f, [space(), format_tail_body_inner])
             }
