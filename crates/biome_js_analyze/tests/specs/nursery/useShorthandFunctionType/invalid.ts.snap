@@ -27,7 +27,7 @@ invalid.ts:2:2 lint/nursery/useShorthandFunctionType  FIXABLE  ━━━━━�
   
   i Types containing only a call signature can be shortened to a function type.
   
-  i Safe fix: Convert empty interface to type alias.
+  i Safe fix: Alias a function type instead of using an interface with a call signature.
   
     1   │ - interface·Example·{
     2   │ - ·():·string;
@@ -53,7 +53,7 @@ invalid.ts:5:25 lint/nursery/useShorthandFunctionType  FIXABLE  ━━━━━�
   
   i Types containing only a call signature can be shortened to a function type.
   
-  i Safe fix: Convert object type to type alias.
+  i Safe fix: Use a function type instead of an object type with a call signature.
   
     3 3 │   }
     4 4 │   
