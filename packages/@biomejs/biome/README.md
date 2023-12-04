@@ -28,7 +28,7 @@
 
 <div align="center">
 
-English | [简体中文](https://github.com/biome/biome/blob/main/packages/%40biomejs/biome/README.zh-CN.md)
+English | [简体中文](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.zh-CN.md)
 
 </div>
 
