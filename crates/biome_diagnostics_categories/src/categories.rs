@@ -115,6 +115,7 @@ define_categories! {
     "lint/nursery/useImportRestrictions": "https://biomejs.dev/linter/rules/use-import-restrictions",
     "lint/nursery/useRegexLiterals": "https://biomejs.dev/linter/rules/use-regex-literals",
     "lint/nursery/useValidAriaRole": "https://biomejs.dev/lint/rules/use-valid-aria-role",
+    "lint/nursery/useShorthandFunctionType": "https://biomejs.dev/lint/rules/use-shorthand-function-type",
     "lint/performance/noAccumulatingSpread": "https://biomejs.dev/linter/rules/no-accumulating-spread",
     "lint/performance/noDelete": "https://biomejs.dev/linter/rules/no-delete",
     "lint/security/noDangerouslySetInnerHtml": "https://biomejs.dev/linter/rules/no-dangerously-set-inner-html",
