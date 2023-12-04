@@ -17,13 +17,13 @@ fn quick_test() {
     ((C) => (props) => <C {...props} />);
     (({C}) => (props) => <C {...props} />);
     "#;
-    let syntax = JsFileSource::tsx();
+    let source_type = JsFileSource::tsx();
     let tree = parse(
         src,
-        syntax,
+        source_type,
         JsParserOptions::default().with_parse_class_parameter_decorators(),
     );
-    let options = JsFormatOptions::new(syntax)
+    let options = JsFormatOptions::new(source_type)
         .with_indent_style(IndentStyle::Space)
         .with_semicolons(Semicolons::Always)
         .with_quote_style(QuoteStyle::Double)
@@ -32,7 +32,6 @@ fn quick_test() {
 
     let doc = format_node(options.clone(), &tree.syntax()).unwrap();
     let result = doc.print().unwrap();
-    let source_type = JsFileSource::js_module();
 
     println!("{}", doc.into_document());
     eprintln!("{}", result.as_code());
