@@ -7,10 +7,9 @@ rules:
     patterns:
       - リンター
       - リンタ
-  - expected: formatter
+  - expected: format
     patterns:
-      - フォーマッター
-      - フォーマッタ
+      - フォーマット
   - expected: analyzer
     patterns:
       - アナライザー
