@@ -1,1 +1,0 @@
-./packages/@biomejs/biome/README.zh-CN.md
