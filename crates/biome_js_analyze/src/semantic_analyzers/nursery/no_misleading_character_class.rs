@@ -14,10 +14,10 @@ use biome_rowan::{
     declare_node_union, AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, TextRange,
 };
 declare_rule! {
-    /// Disallow characters which are made with multiple code points in character class syntax
+    /// Disallow characters made with multiple code points in character class syntax.
     ///
     /// Unicode includes the characters which are made with multiple code points. e.g. Á, 🇯🇵, 👨‍👩‍👦.
-    /// A RegExp character class `/[abc]/` cannot handle characters that consists of multiple code points.
+    /// A RegExp character class `/[abc]/` cannot handle characters with multiple code points.
     /// For example, the character `❇️` consists of two code points: `❇` (U+2747) and `VARIATION SELECTOR-16` (U+FE0F).
     /// If this character is in a RegExp character class, it will match to either `❇` or `VARIATION SELECTOR-16` rather than `❇️`.
     /// This rule reports the regular expressions which include multiple code point characters in character class syntax.
@@ -84,13 +84,13 @@ pub enum Message {
 impl Message {
     fn as_str(&self) -> &str {
         match self {
-            Self::CombiningClassOrVs16 => "Unexpected combined character in character class.",
+            Self::CombiningClassOrVs16 => "Unexpected combined character in the character class.",
             Self::SurrogatePairWithoutUFlag => {
-                "Unexpected surrogate pair in character class. Use 'u' flag."
+                "Unexpected surrogate pair in character class. Use the 'u' flag."
             }
-            Self::EmojiModifier => "Unexpected modified Emoji in character class. ",
+            Self::EmojiModifier => "Unexpected modified Emoji in the character class. ",
             Self::RegionalIndicatorSymbol => {
-                "Regional indicator symbol characters should not be used in character class."
+                "Regional indicator symbol characters should not be used in the character class."
             }
             Self::JoinedCharSequence => "Unexpected joined character sequence in character class.",
         }

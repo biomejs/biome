@@ -2786,7 +2786,7 @@ pub struct Nursery {
     #[bpaf(long("no-implicit-any-let"), argument("on|off|warn"), optional, hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_implicit_any_let: Option<RuleConfiguration>,
-    #[doc = "Disallow characters which are made with multiple code points in character class syntax"]
+    #[doc = "Disallow characters made with multiple code points in character class syntax."]
     #[bpaf(
         long("no-misleading-character-class"),
         argument("on|off|warn"),

@@ -798,7 +798,7 @@ export interface Nursery {
 	 */
 	noImplicitAnyLet?: RuleConfiguration;
 	/**
-	 * Disallow characters which are made with multiple code points in character class syntax
+	 * Disallow characters made with multiple code points in character class syntax.
 	 */
 	noMisleadingCharacterClass?: RuleConfiguration;
 	/**
