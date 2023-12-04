@@ -133,10 +133,10 @@ export default defineConfig({
 			},
 			sidebar: [
 				{ label: "Home", link: "/" },
-				{ label: "Blog", link: "/blog" },
+				{ label: "Blog", link: "../blog" },
 				{
 					label: "Playground",
-					link: "/playground",
+					link: "../playground",
 				},
 				{
 					label: "Guides",
