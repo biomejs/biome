@@ -1,0 +1,464 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+::cure( {}
+::cure() {}
+::cure(.div, .class) {}
+::cure(.div, .class {}
+::cure(.div .class {}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selector_token: missing (optional),
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssPseudoElementSelector {
+                            double_colon_token: COLON2@0..2 "::" [] [],
+                            element: CssBogusPseudoElement {
+                                items: [
+                                    CssIdentifier {
+                                        value_token: IDENT@2..6 "cure" [] [],
+                                    },
+                                    L_PAREN@6..8 "(" [] [Whitespace(" ")],
+                                ],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssBlock {
+                l_curly_token: L_CURLY@8..9 "{" [] [],
+                declaration_list: CssDeclarationList [],
+                r_curly_token: R_CURLY@9..10 "}" [] [],
+            },
+        },
+        CssRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selector_token: missing (optional),
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssPseudoElementSelector {
+                            double_colon_token: COLON2@10..13 "::" [Newline("\n")] [],
+                            element: CssBogusPseudoElement {
+                                items: [
+                                    CssIdentifier {
+                                        value_token: IDENT@13..17 "cure" [] [],
+                                    },
+                                    L_PAREN@17..18 "(" [] [],
+                                    R_PAREN@18..20 ")" [] [Whitespace(" ")],
+                                ],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssBlock {
+                l_curly_token: L_CURLY@20..21 "{" [] [],
+                declaration_list: CssDeclarationList [],
+                r_curly_token: R_CURLY@21..22 "}" [] [],
+            },
+        },
+        CssRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selector_token: missing (optional),
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssPseudoElementSelector {
+                            double_colon_token: COLON2@22..25 "::" [Newline("\n")] [],
+                            element: CssBogusPseudoElement {
+                                items: [
+                                    CssIdentifier {
+                                        value_token: IDENT@25..29 "cure" [] [],
+                                    },
+                                    L_PAREN@29..30 "(" [] [],
+                                    CssCompoundSelector {
+                                        nesting_selector_token: missing (optional),
+                                        simple_selector: missing (optional),
+                                        sub_selectors: CssSubSelectorList [
+                                            CssClassSelector {
+                                                dot_token: DOT@30..31 "." [] [],
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@31..34 "div" [] [],
+                                                },
+                                            },
+                                        ],
+                                    },
+                                    CssBogus {
+                                        items: [
+                                            COMMA@34..36 "," [] [Whitespace(" ")],
+                                            DOT@36..37 "." [] [],
+                                            IDENT@37..42 "class" [] [],
+                                        ],
+                                    },
+                                    R_PAREN@42..44 ")" [] [Whitespace(" ")],
+                                ],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssBlock {
+                l_curly_token: L_CURLY@44..45 "{" [] [],
+                declaration_list: CssDeclarationList [],
+                r_curly_token: R_CURLY@45..46 "}" [] [],
+            },
+        },
+        CssRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selector_token: missing (optional),
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssPseudoElementSelector {
+                            double_colon_token: COLON2@46..49 "::" [Newline("\n")] [],
+                            element: CssBogusPseudoElement {
+                                items: [
+                                    CssIdentifier {
+                                        value_token: IDENT@49..53 "cure" [] [],
+                                    },
+                                    L_PAREN@53..54 "(" [] [],
+                                    CssCompoundSelector {
+                                        nesting_selector_token: missing (optional),
+                                        simple_selector: missing (optional),
+                                        sub_selectors: CssSubSelectorList [
+                                            CssClassSelector {
+                                                dot_token: DOT@54..55 "." [] [],
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@55..58 "div" [] [],
+                                                },
+                                            },
+                                        ],
+                                    },
+                                    CssBogus {
+                                        items: [
+                                            COMMA@58..60 "," [] [Whitespace(" ")],
+                                            DOT@60..61 "." [] [],
+                                            IDENT@61..67 "class" [] [Whitespace(" ")],
+                                        ],
+                                    },
+                                ],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssBlock {
+                l_curly_token: L_CURLY@67..68 "{" [] [],
+                declaration_list: CssDeclarationList [],
+                r_curly_token: R_CURLY@68..69 "}" [] [],
+            },
+        },
+        CssRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selector_token: missing (optional),
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssPseudoElementSelector {
+                            double_colon_token: COLON2@69..72 "::" [Newline("\n")] [],
+                            element: CssBogusPseudoElement {
+                                items: [
+                                    CssIdentifier {
+                                        value_token: IDENT@72..76 "cure" [] [],
+                                    },
+                                    L_PAREN@76..77 "(" [] [],
+                                    CssComplexSelector {
+                                        left: CssCompoundSelector {
+                                            nesting_selector_token: missing (optional),
+                                            simple_selector: missing (optional),
+                                            sub_selectors: CssSubSelectorList [
+                                                CssClassSelector {
+                                                    dot_token: DOT@77..78 "." [] [],
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@78..81 "div" [] [],
+                                                    },
+                                                },
+                                            ],
+                                        },
+                                        combinator: CSS_SPACE_LITERAL@81..82 " " [] [],
+                                        right: CssCompoundSelector {
+                                            nesting_selector_token: missing (optional),
+                                            simple_selector: missing (optional),
+                                            sub_selectors: CssSubSelectorList [
+                                                CssClassSelector {
+                                                    dot_token: DOT@82..83 "." [] [],
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@83..89 "class" [] [Whitespace(" ")],
+                                                    },
+                                                },
+                                            ],
+                                        },
+                                    },
+                                ],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssBlock {
+                l_curly_token: L_CURLY@89..90 "{" [] [],
+                declaration_list: CssDeclarationList [],
+                r_curly_token: R_CURLY@90..91 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@91..92 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..92
+  0: (empty)
+  1: CSS_RULE_LIST@0..91
+    0: CSS_RULE@0..10
+      0: CSS_SELECTOR_LIST@0..8
+        0: CSS_COMPOUND_SELECTOR@0..8
+          0: (empty)
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@0..8
+            0: CSS_PSEUDO_ELEMENT_SELECTOR@0..8
+              0: COLON2@0..2 "::" [] []
+              1: CSS_BOGUS_PSEUDO_ELEMENT@2..8
+                0: CSS_IDENTIFIER@2..6
+                  0: IDENT@2..6 "cure" [] []
+                1: L_PAREN@6..8 "(" [] [Whitespace(" ")]
+      1: CSS_BLOCK@8..10
+        0: L_CURLY@8..9 "{" [] []
+        1: CSS_DECLARATION_LIST@9..9
+        2: R_CURLY@9..10 "}" [] []
+    1: CSS_RULE@10..22
+      0: CSS_SELECTOR_LIST@10..20
+        0: CSS_COMPOUND_SELECTOR@10..20
+          0: (empty)
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@10..20
+            0: CSS_PSEUDO_ELEMENT_SELECTOR@10..20
+              0: COLON2@10..13 "::" [Newline("\n")] []
+              1: CSS_BOGUS_PSEUDO_ELEMENT@13..20
+                0: CSS_IDENTIFIER@13..17
+                  0: IDENT@13..17 "cure" [] []
+                1: L_PAREN@17..18 "(" [] []
+                2: R_PAREN@18..20 ")" [] [Whitespace(" ")]
+      1: CSS_BLOCK@20..22
+        0: L_CURLY@20..21 "{" [] []
+        1: CSS_DECLARATION_LIST@21..21
+        2: R_CURLY@21..22 "}" [] []
+    2: CSS_RULE@22..46
+      0: CSS_SELECTOR_LIST@22..44
+        0: CSS_COMPOUND_SELECTOR@22..44
+          0: (empty)
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@22..44
+            0: CSS_PSEUDO_ELEMENT_SELECTOR@22..44
+              0: COLON2@22..25 "::" [Newline("\n")] []
+              1: CSS_BOGUS_PSEUDO_ELEMENT@25..44
+                0: CSS_IDENTIFIER@25..29
+                  0: IDENT@25..29 "cure" [] []
+                1: L_PAREN@29..30 "(" [] []
+                2: CSS_COMPOUND_SELECTOR@30..34
+                  0: (empty)
+                  1: (empty)
+                  2: CSS_SUB_SELECTOR_LIST@30..34
+                    0: CSS_CLASS_SELECTOR@30..34
+                      0: DOT@30..31 "." [] []
+                      1: CSS_IDENTIFIER@31..34
+                        0: IDENT@31..34 "div" [] []
+                3: CSS_BOGUS@34..42
+                  0: COMMA@34..36 "," [] [Whitespace(" ")]
+                  1: DOT@36..37 "." [] []
+                  2: IDENT@37..42 "class" [] []
+                4: R_PAREN@42..44 ")" [] [Whitespace(" ")]
+      1: CSS_BLOCK@44..46
+        0: L_CURLY@44..45 "{" [] []
+        1: CSS_DECLARATION_LIST@45..45
+        2: R_CURLY@45..46 "}" [] []
+    3: CSS_RULE@46..69
+      0: CSS_SELECTOR_LIST@46..67
+        0: CSS_COMPOUND_SELECTOR@46..67
+          0: (empty)
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@46..67
+            0: CSS_PSEUDO_ELEMENT_SELECTOR@46..67
+              0: COLON2@46..49 "::" [Newline("\n")] []
+              1: CSS_BOGUS_PSEUDO_ELEMENT@49..67
+                0: CSS_IDENTIFIER@49..53
+                  0: IDENT@49..53 "cure" [] []
+                1: L_PAREN@53..54 "(" [] []
+                2: CSS_COMPOUND_SELECTOR@54..58
+                  0: (empty)
+                  1: (empty)
+                  2: CSS_SUB_SELECTOR_LIST@54..58
+                    0: CSS_CLASS_SELECTOR@54..58
+                      0: DOT@54..55 "." [] []
+                      1: CSS_IDENTIFIER@55..58
+                        0: IDENT@55..58 "div" [] []
+                3: CSS_BOGUS@58..67
+                  0: COMMA@58..60 "," [] [Whitespace(" ")]
+                  1: DOT@60..61 "." [] []
+                  2: IDENT@61..67 "class" [] [Whitespace(" ")]
+      1: CSS_BLOCK@67..69
+        0: L_CURLY@67..68 "{" [] []
+        1: CSS_DECLARATION_LIST@68..68
+        2: R_CURLY@68..69 "}" [] []
+    4: CSS_RULE@69..91
+      0: CSS_SELECTOR_LIST@69..89
+        0: CSS_COMPOUND_SELECTOR@69..89
+          0: (empty)
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@69..89
+            0: CSS_PSEUDO_ELEMENT_SELECTOR@69..89
+              0: COLON2@69..72 "::" [Newline("\n")] []
+              1: CSS_BOGUS_PSEUDO_ELEMENT@72..89
+                0: CSS_IDENTIFIER@72..76
+                  0: IDENT@72..76 "cure" [] []
+                1: L_PAREN@76..77 "(" [] []
+                2: CSS_COMPLEX_SELECTOR@77..89
+                  0: CSS_COMPOUND_SELECTOR@77..81
+                    0: (empty)
+                    1: (empty)
+                    2: CSS_SUB_SELECTOR_LIST@77..81
+                      0: CSS_CLASS_SELECTOR@77..81
+                        0: DOT@77..78 "." [] []
+                        1: CSS_IDENTIFIER@78..81
+                          0: IDENT@78..81 "div" [] []
+                  1: CSS_SPACE_LITERAL@81..82 " " [] []
+                  2: CSS_COMPOUND_SELECTOR@82..89
+                    0: (empty)
+                    1: (empty)
+                    2: CSS_SUB_SELECTOR_LIST@82..89
+                      0: CSS_CLASS_SELECTOR@82..89
+                        0: DOT@82..83 "." [] []
+                        1: CSS_IDENTIFIER@83..89
+                          0: IDENT@83..89 "class" [] [Whitespace(" ")]
+      1: CSS_BLOCK@89..91
+        0: L_CURLY@89..90 "{" [] []
+        1: CSS_DECLARATION_LIST@90..90
+        2: R_CURLY@90..91 "}" [] []
+  2: EOF@91..92 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+pseudo_element_function_selector.css:1:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a selector but instead found '{'.
+  
+  > 1 │ ::cure( {}
+      │         ^
+    2 │ ::cure() {}
+    3 │ ::cure(.div, .class) {}
+  
+  i Expected a selector here.
+  
+  > 1 │ ::cure( {}
+      │         ^
+    2 │ ::cure() {}
+    3 │ ::cure(.div, .class) {}
+  
+pseudo_element_function_selector.css:2:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a selector but instead found ')'.
+  
+    1 │ ::cure( {}
+  > 2 │ ::cure() {}
+      │        ^
+    3 │ ::cure(.div, .class) {}
+    4 │ ::cure(.div, .class {}
+  
+  i Expected a selector here.
+  
+    1 │ ::cure( {}
+  > 2 │ ::cure() {}
+      │        ^
+    3 │ ::cure(.div, .class) {}
+    4 │ ::cure(.div, .class {}
+  
+pseudo_element_function_selector.css:3:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a selector but instead found '.div, .class'.
+  
+    1 │ ::cure( {}
+    2 │ ::cure() {}
+  > 3 │ ::cure(.div, .class) {}
+      │        ^^^^^^^^^^^^
+    4 │ ::cure(.div, .class {}
+    5 │ ::cure(.div .class {}
+  
+  i Expected a selector here.
+  
+    1 │ ::cure( {}
+    2 │ ::cure() {}
+  > 3 │ ::cure(.div, .class) {}
+      │        ^^^^^^^^^^^^
+    4 │ ::cure(.div, .class {}
+    5 │ ::cure(.div .class {}
+  
+pseudo_element_function_selector.css:4:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a selector but instead found '.div, .class'.
+  
+    2 │ ::cure() {}
+    3 │ ::cure(.div, .class) {}
+  > 4 │ ::cure(.div, .class {}
+      │        ^^^^^^^^^^^^
+    5 │ ::cure(.div .class {}
+    6 │ 
+  
+  i Expected a selector here.
+  
+    2 │ ::cure() {}
+    3 │ ::cure(.div, .class) {}
+  > 4 │ ::cure(.div, .class {}
+      │        ^^^^^^^^^^^^
+    5 │ ::cure(.div .class {}
+    6 │ 
+  
+pseudo_element_function_selector.css:4:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `)` but instead found `{`
+  
+    2 │ ::cure() {}
+    3 │ ::cure(.div, .class) {}
+  > 4 │ ::cure(.div, .class {}
+      │                     ^
+    5 │ ::cure(.div .class {}
+    6 │ 
+  
+  i Remove {
+  
+pseudo_element_function_selector.css:5:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `)` but instead found `{`
+  
+    3 │ ::cure(.div, .class) {}
+    4 │ ::cure(.div, .class {}
+  > 5 │ ::cure(.div .class {}
+      │                    ^
+    6 │ 
+  
+  i Remove {
+  
+```
+
+

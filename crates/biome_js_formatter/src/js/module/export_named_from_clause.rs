@@ -21,6 +21,7 @@ impl FormatNodeRule<JsExportNamedFromClause> for FormatJsExportNamedFromClause {
             assertion,
             semicolon_token,
         } = node.as_fields();
+        let should_insert_space_around_brackets = f.options().bracket_spacing().value();
 
         if let Some(type_token) = &type_token {
             write!(f, [type_token.format(), space()])?;
@@ -33,13 +34,19 @@ impl FormatNodeRule<JsExportNamedFromClause> for FormatJsExportNamedFromClause {
                 node: Ok(node),
                 trailing_separator: Ok(separator),
             }) if specifiers.len() == 1 && !f.comments().has_comments(node.syntax()) => {
-                write!(f, [space(), node.format()])?;
+                write!(
+                    f,
+                    [
+                        maybe_space(should_insert_space_around_brackets),
+                        node.format()
+                    ]
+                )?;
 
                 if let Some(separator) = separator {
                     write!(f, [format_removed(&separator)])?;
                 }
 
-                write!(f, [space()])?;
+                write!(f, [maybe_space(should_insert_space_around_brackets)])?;
             }
             _ => {
                 if specifiers.syntax().has_leading_newline() {
@@ -47,7 +54,10 @@ impl FormatNodeRule<JsExportNamedFromClause> for FormatJsExportNamedFromClause {
                 } else {
                     write!(
                         f,
-                        [group(&soft_space_or_block_indent(&specifiers.format())),]
+                        [group(&soft_block_indent_with_maybe_space(
+                            &specifiers.format(),
+                            should_insert_space_around_brackets
+                        )),]
                     )?;
                 };
             }
@@ -65,7 +75,7 @@ impl FormatNodeRule<JsExportNamedFromClause> for FormatJsExportNamedFromClause {
         ]?;
 
         if let Some(assertion) = &assertion {
-            write!(f, [space(), assertion.format()])?;
+            write!(f, [assertion.format()])?;
         }
 
         write!(f, [FormatStatementSemicolon::new(semicolon_token.as_ref())])

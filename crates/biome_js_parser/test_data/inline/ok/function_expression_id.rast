@@ -1,4 +1,5 @@
 JsScript {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     statements: JsStatementList [
@@ -120,8 +121,9 @@ JsScript {
 
 0: JS_SCRIPT@0..108
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_STATEMENT_LIST@0..107
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_STATEMENT_LIST@0..107
     0: JS_EXPRESSION_STATEMENT@0..32
       0: JS_PARENTHESIZED_EXPRESSION@0..31
         0: L_PAREN@0..11 "(" [Comments("// SCRIPT"), Newline("\n")] []
@@ -210,4 +212,4 @@ JsScript {
             3: R_CURLY@105..106 "}" [] []
         2: R_PAREN@106..107 ")" [] []
       1: (empty)
-  3: EOF@107..108 "" [Newline("\n")] []
+  4: EOF@107..108 "" [Newline("\n")] []

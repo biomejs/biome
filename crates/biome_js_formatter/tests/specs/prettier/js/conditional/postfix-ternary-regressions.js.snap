@@ -157,6 +157,21 @@ function foo7() {
   )
 }
 
+const badComments =
+  schema.model ? schema
+    // If model is an array where the items schema is a referred model then we need to use that
+  : schema.type === 'array' ? schema.items
+  : schema;
+
+const anotherBadComment =
+  refModel ?
+    // If we're in a shared params file then reference the model name directly
+    inSharedParamsFile ? refModel
+      // If we're not in a shared params file then reference the in-file type
+    : classRef()
+    // We don't have a model name, use the in-file name
+  : classRef()
+
 ```
 
 
@@ -221,15 +236,15 @@ function foo() {
   return !linkTo
     ? false
     : typeof linkTo === "function"
-    ? linkTo(record, reference)
-    : linkToRecord(rootPath, sourceId, linkTo_as_string);
+      ? linkTo(record, reference)
+      : linkToRecord(rootPath, sourceId, linkTo_as_string);
 }
 function foo2() {
   return React.isValidElement(emptyText)
     ? React.cloneElement(emptyText)
     : emptyText === ""
-    ? " " // em space, forces the display of an empty line of normal height
-    : translate(emptyText, { _: emptyText });
+      ? " " // em space, forces the display of an empty line of normal height
+      : translate(emptyText, { _: emptyText });
 }
 
 // Function call ideally wouldnt break break
@@ -276,13 +291,13 @@ resolveRedirectTo(
   payload
     ? payload.id || (payload.data ? payload.data.id : null)
     : requestPayload
-    ? requestPayload.id
-    : null,
+      ? requestPayload.id
+      : null,
   payload && payload.data
     ? payload.data
     : requestPayload && requestPayload.data
-    ? requestPayload.data
-    : null,
+      ? requestPayload.data
+      : null,
 );
 
 const delayedDataProvider = new Proxy(restProvider, {
@@ -322,6 +337,22 @@ function foo7() {
     ? linethatisverylongandbreaksthelinehoorayjustabitlonger
     : match[1] + match[2] + match[3] + match[4];
 }
+
+const badComments = schema.model
+  ? schema
+  : // If model is an array where the items schema is a referred model then we need to use that
+    schema.type === "array"
+    ? schema.items
+    : schema;
+
+const anotherBadComment = refModel
+  ? // If we're in a shared params file then reference the model name directly
+    inSharedParamsFile
+    ? refModel
+    : // If we're not in a shared params file then reference the in-file type
+      classRef()
+  : // We don't have a model name, use the in-file name
+    classRef();
 ```
 
 # Lines exceeding max width of 80 characters
@@ -329,6 +360,7 @@ function foo7() {
     1: // concatened string in consequent should be visually distinguishable from alternate
    70: // I think we should indent after the inner || on this, and do better wtih the parens around the &&
   107:       ? // as we await for the dataProvider, JS calls then on it. We must trap that call or else the dataProvider will be called with the then method
+  144:   : // If model is an array where the items schema is a referred model then we need to use that
 ```
 
 

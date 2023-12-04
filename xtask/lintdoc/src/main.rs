@@ -10,7 +10,7 @@ use biome_console::{
 use biome_diagnostics::termcolor::NoColor;
 use biome_diagnostics::{Diagnostic, DiagnosticExt, PrintDiagnostic};
 use biome_js_parser::JsParserOptions;
-use biome_js_syntax::{JsFileSource, JsLanguage, Language, LanguageVariant, ModuleKind};
+use biome_js_syntax::{JsFileSource, JsLanguage, Language, ModuleKind};
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonLanguage;
 use biome_service::settings::WorkspaceSettings;
@@ -364,9 +364,8 @@ fn parse_documentation(
                                 Language::JavaScript => write!(content, "js")?,
                                 Language::TypeScript { .. } => write!(content, "ts")?,
                             }
-                            match source_type.variant() {
-                                LanguageVariant::Standard => {}
-                                LanguageVariant::Jsx => write!(content, "x")?,
+                            if source_type.variant().is_jsx() {
+                                write!(content, "x")?;
                             }
                         }
                         BlockType::Json => write!(content, "json")?,
@@ -431,16 +430,19 @@ fn parse_documentation(
             }
 
             Event::Start(Tag::Link(kind, _, _)) => match kind {
-                LinkType::Inline => {
-                    write!(content, "[")?;
+                LinkType::Autolink => {
+                    write!(content, "<")?;
                 }
-                LinkType::Shortcut => {
+                LinkType::Inline | LinkType::Reference | LinkType::Shortcut => {
                     write!(content, "[")?;
                 }
                 _ => {
                     panic!("unimplemented link type")
                 }
             },
+            Event::End(Tag::Link(LinkType::Autolink, url, _)) => {
+                write!(content, "{url}>")?;
+            }
             Event::End(Tag::Link(_, url, title)) => {
                 write!(content, "]({url}")?;
                 if !title.is_empty() {

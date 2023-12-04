@@ -1,6 +1,6 @@
 {
     "name": "@biomejs/biome",
-    "version": "1.3.3",
+    "version": "1.4.1",
     "bin": "bin/biome",
     "scripts": {
         "postinstall": "node scripts/postinstall.js"
@@ -12,14 +12,17 @@
       "directory": "packages/@biomejs/biome"
     },
     "author": "Emanuele Stoppa",
-    "license": "MIT",
+    "license": "MIT OR Apache-2.0",
     "bugs": "https://github.com/biomejs/biome/issues",
     "description": "Biome is a toolchain for the web: formatter, linter and more",
     "files": [
         "bin/biome",
         "scripts/postinstall.js",
         "configuration_schema.json",
-        "README.md"
+        "README.md",
+        "LICENSE-APACHE",
+        "LICENSE-MIT",
+        "ROME-LICENSE-MIT"
     ],
     "keywords": [
         "JavaScript",

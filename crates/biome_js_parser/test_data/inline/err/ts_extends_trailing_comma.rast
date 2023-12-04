@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -42,8 +43,9 @@ JsModule {
 
 0: JS_MODULE@0..41
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..40
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..40
     0: TS_INTERFACE_DECLARATION@0..14
       0: INTERFACE_KW@0..10 "interface" [] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@10..12
@@ -70,7 +72,7 @@ JsModule {
       4: L_CURLY@38..39 "{" [] []
       5: TS_TYPE_MEMBER_LIST@39..39
       6: R_CURLY@39..40 "}" [] []
-  3: EOF@40..41 "" [Newline("\n")] []
+  4: EOF@40..41 "" [Newline("\n")] []
 --
 ts_extends_trailing_comma.ts:2:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

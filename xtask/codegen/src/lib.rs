@@ -81,7 +81,7 @@ impl LanguageKind {
         match self {
             LanguageKind::Js => quote! { JsSyntaxKind },
             LanguageKind::Css => quote! { CssSyntaxKind },
-            LanguageKind::Json => quote! {JsonSyntaxKind},
+            LanguageKind::Json => quote! { JsonSyntaxKind },
         }
     }
 

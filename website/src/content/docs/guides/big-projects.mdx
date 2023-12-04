@@ -3,9 +3,6 @@ title: Use Biome in big projects
 description: A small guide how to set Biome in big projects
 ---
 
-import CodeBlockHeader from "@src/components/CodeBlockHeader.astro";
-
-
 Biome can provide some tools that can help you to use it properly in big projects, such as monorepo or workspaces that contain multiple projects.
 
 
@@ -43,15 +40,14 @@ It's possible to use the [`extends`](/reference/configuration#extends) configura
 
 Let's assume that we have these requirements:
 - `legacy-app` have to format using spaces;
-- `backend` and `new-pp` have to format using tabs;
+- `backend` and `new-app` have to format using tabs;
 - all apps have to format using line width 120;
 - `backend` app needs some extra linting;
 
 We start by creating a new configuration file at `app/biome.json`, and put there the shared options:
 
-<CodeBlockHeader filename="app/biome.json" />
 
-```json
+```json title="app/biome.json"
 {
   "formatter": {
     "enabled": true,
@@ -62,10 +58,8 @@ We start by creating a new configuration file at `app/biome.json`, and put there
 
 Now let's **move** `app/frontend/biome.json` to `app/frontend/legacy-app/`, because that's where we need to use a different formatting.
 
-<CodeBlockHeader filename="app/frontend/legacy-app/biome.json" />
 
-
-```json
+```json title="app/frontend/legacy-app/biome.json"
 {
   "formatter": {
     "indentStyle": "space"
@@ -75,11 +69,9 @@ Now let's **move** `app/frontend/biome.json` to `app/frontend/legacy-app/`, beca
 
 Then, we tell Biome to inherit all the options from the main `app/biome.json` file, using the `extends` property:
 
-<CodeBlockHeader filename="app/frontend/legacy-app/biome.json" />
-
-```diff
+```json title="app/frontend/legacy-app/biome.json" ins={2}
 {
-+  "extends": ["../../biome.json"],
+   "extends": ["../../biome.json"],
    "formatter": {
      "indentStyle": "space"
    }
@@ -88,9 +80,8 @@ Then, we tell Biome to inherit all the options from the main `app/biome.json` fi
 
 Let's jump to `app/backend/biome.json`, where we need to enable the linting:
 
-<CodeBlockHeader filename="app/backend/biome.json" />
 
-```json
+```json title="app/backend/biome.json"
 {
   "extends": ["../biome.json"],
     "linter": {

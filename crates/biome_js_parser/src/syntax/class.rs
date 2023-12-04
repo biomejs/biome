@@ -1712,7 +1712,8 @@ pub(crate) fn is_nth_at_modifier(p: &mut JsParser, n: usize, constructor_paramet
         return false;
     }
 
-    if p.has_nth_preceding_line_break(n + 1) {
+    // The new line is allowed between the `static` and the member name.
+    if !matches!(p.nth(n), T![static]) && p.has_nth_preceding_line_break(n + 1) {
         return false;
     }
 
@@ -1737,6 +1738,13 @@ fn is_at_constructor(p: &JsParser, modifiers: &ClassMemberModifiers) -> bool {
 // class A { public() {} }
 // class A { static protected() {} }
 // class A { static }
+
+// test js class_member_modifiers_no_asi
+// class A {
+//   static
+//   foo() {}
+// }
+//
 
 /// Parses all possible modifiers regardless of what the current member is. It's up to the caller
 /// to create diagnostics for not allowed modifiers.

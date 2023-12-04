@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -82,8 +83,9 @@ JsModule {
 
 0: JS_MODULE@0..75
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..74
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..74
     0: JS_CLASS_DECLARATION@0..74
       0: JS_DECORATOR_LIST@0..0
       1: (empty)
@@ -143,7 +145,7 @@ JsModule {
           5: R_PAREN@71..72 ")" [] []
           6: (empty)
       9: R_CURLY@72..74 "}" [Newline("\n")] []
-  3: EOF@74..75 "" [Newline("\n")] []
+  4: EOF@74..75 "" [Newline("\n")] []
 --
 ts_method_members_with_missing_body.ts:2:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

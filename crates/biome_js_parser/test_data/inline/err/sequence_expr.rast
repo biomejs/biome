@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -30,8 +31,9 @@ JsModule {
 
 0: JS_MODULE@0..10
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..9
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..9
     0: JS_EXPRESSION_STATEMENT@0..9
       0: JS_SEQUENCE_EXPRESSION@0..9
         0: JS_SEQUENCE_EXPRESSION@0..6
@@ -47,7 +49,7 @@ JsModule {
         2: JS_NUMBER_LITERAL_EXPRESSION@8..9
           0: JS_NUMBER_LITERAL@8..9 "4" [] []
       1: (empty)
-  3: EOF@9..10 "" [Newline("\n")] []
+  4: EOF@9..10 "" [Newline("\n")] []
 --
 sequence_expr.js:1:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

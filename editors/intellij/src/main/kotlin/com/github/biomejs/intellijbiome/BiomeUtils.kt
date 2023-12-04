@@ -56,6 +56,16 @@ object BiomeUtils {
         return biomeBinFile?.path
     }
 
+    fun getBiomeConfigPath(project: Project): String? {
+        val configPath = BiomeSettings.getInstance(project).configPath
+
+        if (!configPath.isEmpty()) {
+            return configPath
+        }
+
+        return null
+    }
+
     fun createNodeCommandLine(project: Project, executable: String): GeneralCommandLine {
         val interpreter = NodeJsInterpreterManager.getInstance(project).interpreter
         if (interpreter !is NodeJsLocalInterpreter && interpreter !is WslNodeInterpreter) {

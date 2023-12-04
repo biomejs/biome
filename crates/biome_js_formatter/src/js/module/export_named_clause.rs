@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use biome_formatter::{format_args, write};
+use biome_formatter::write;
 
 use crate::utils::FormatStatementSemicolon;
 
@@ -31,12 +31,13 @@ impl FormatNodeRule<JsExportNamedClause> for FormatJsExportNamedClause {
                 [format_dangling_comments(node.syntax()).with_block_indent()]
             )?;
         } else {
+            let should_insert_space_around_brackets = f.options().bracket_spacing().value();
             write!(
                 f,
-                [group(&format_args![
-                    soft_line_indent_or_space(&specifiers.format()),
-                    soft_line_break_or_space(),
-                ])]
+                [group(&soft_block_indent_with_maybe_space(
+                    &specifiers.format(),
+                    should_insert_space_around_brackets
+                ),)]
             )?;
         }
 

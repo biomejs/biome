@@ -65,6 +65,8 @@ pub(crate) struct Session {
     documents: RwLock<FxHashMap<lsp_types::Url, Document>>,
 
     pub(crate) cancellation: Arc<Notify>,
+
+    pub(crate) config_path: Option<PathBuf>,
 }
 
 /// The parameters provided by the client in the "initialize" request
@@ -145,7 +147,12 @@ impl Session {
             extension_settings: config,
             fs: DynRef::Owned(Box::new(OsFileSystem)),
             cancellation,
+            config_path: None,
         }
+    }
+
+    pub(crate) fn set_config_path(&mut self, path: PathBuf) {
+        self.config_path = Some(path);
     }
 
     /// Initialize this session instance with the incoming initialization parameters from the client
@@ -389,14 +396,19 @@ impl Session {
     /// the root URI and update the workspace settings accordingly
     #[tracing::instrument(level = "debug", skip(self))]
     pub(crate) async fn load_workspace_settings(&self) {
-        let base_path = match self.base_path() {
-            None => ConfigurationBasePath::default(),
-            Some(path) => ConfigurationBasePath::Lsp(path),
+        let base_path = if let Some(config_path) = &self.config_path {
+            ConfigurationBasePath::FromUser(config_path.clone())
+        } else {
+            match self.base_path() {
+                None => ConfigurationBasePath::default(),
+                Some(path) => ConfigurationBasePath::Lsp(path),
+            }
         };
 
         let status = match load_config(&self.fs, base_path) {
             Ok(Some(payload)) => {
                 let (configuration, diagnostics) = payload.deserialized.consume();
+                let configuration = configuration.unwrap_or_default();
                 if !diagnostics.is_empty() {
                     warn!("The deserialization of the configuration resulted in errors. Biome will use its defaults where possible.");
                 }

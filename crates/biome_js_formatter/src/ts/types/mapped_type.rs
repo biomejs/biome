@@ -65,11 +65,10 @@ impl FormatNodeRule<TsMappedType> for FormatTsMappedType {
                         property_name.format(),
                         space(),
                         in_token.format(),
-                        soft_line_indent_or_space(&format_args![
-                            keys_type.format(),
-                            as_clause.as_ref().map(|_| space()),
-                            as_clause.format(),
-                        ]),
+                        space(),
+                        keys_type.format(),
+                        as_clause.as_ref().map(|_| space()),
+                        as_clause.format(),
                         r_brack_token.format(),
                     ]),
                     optional_modifier.format(),
@@ -80,11 +79,16 @@ impl FormatNodeRule<TsMappedType> for FormatTsMappedType {
             )
         });
 
+        let should_insert_space_around_brackets = f.options().bracket_spacing().value();
         write!(
             f,
             [
                 &l_curly_token.format(),
-                group(&soft_space_or_block_indent(&format_inner)).should_expand(should_expand),
+                group(&soft_block_indent_with_maybe_space(
+                    &format_inner,
+                    should_insert_space_around_brackets
+                ))
+                .should_expand(should_expand),
                 r_curly_token.format(),
             ]
         )

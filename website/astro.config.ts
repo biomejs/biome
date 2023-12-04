@@ -1,8 +1,8 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import { netlifyStatic } from "@astrojs/netlify";
 import react from "@astrojs/react";
 import starlight from "@astrojs/starlight";
-import vercel from "@astrojs/vercel/static";
 import { defineConfig } from "astro/config";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import rehypeSlug from "rehype-slug";
@@ -108,10 +108,29 @@ export default defineConfig({
 
 	compressHTML: true,
 
+	image: {
+		domains: ["avatars.githubusercontent.com"],
+	},
+
 	integrations: [
 		react(),
 		starlight({
-			title: "",
+			title: "Biome",
+			defaultLocale: "root",
+			locales: {
+				root: {
+					label: "English",
+					lang: "en",
+				},
+				ja: {
+					label: "日本語",
+					lang: "ja",
+				},
+				"zh-cn": {
+					label: "简体中文",
+					lang: "zh-CN",
+				},
+			},
 			sidebar: [
 				{ label: "Home", link: "/" },
 				{ label: "Blog", link: "/blog" },
@@ -134,18 +153,10 @@ export default defineConfig({
 						{
 							label: "How Biome works",
 							link: "/guides/how-biome-works",
-							badge: {
-								text: "New",
-								variant: "note",
-							},
 						},
 						{
 							label: "Integrate Biome in your editor",
 							link: "/guides/integrate-in-editor",
-							badge: {
-								text: "New",
-								variant: "note",
-							},
 						},
 					],
 				},
@@ -194,6 +205,7 @@ export default defineConfig({
 			logo: {
 				light: "./src/assets/svg/biome-logo.svg",
 				dark: "./src/assets/svg/biome-logo.svg",
+				replacesTitle: true,
 			},
 			favicon: "/img/favicon.svg",
 			head: [
@@ -224,7 +236,7 @@ export default defineConfig({
 			social: {
 				discord: "https://discord.gg/BypW39g6Yc",
 				github: "https://github.com/biomejs/biome",
-				twitter: "https://twitter.com/biomejs",
+				"x.com": "https://twitter.com/biomejs",
 				mastodon: "https://fosstodon.org/@biomejs",
 			},
 			editLink: {
@@ -252,7 +264,7 @@ export default defineConfig({
 		],
 	},
 
-	adapter: vercel(),
+	adapter: netlifyStatic(),
 
 	vite: {
 		plugins: [],

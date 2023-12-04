@@ -162,6 +162,12 @@ impl<'a> Printer<'a> {
                         _ => {
                             self.state.measured_group_fits = true;
 
+                            if let Some(id) = group.id() {
+                                self.state
+                                    .group_modes
+                                    .insert_print_mode(id, PrintMode::Flat);
+                            }
+
                             // Measure to see if the group fits up on a single line. If that's the case,
                             // print the group in "flat" mode, otherwise continue in expanded mode
                             stack.push(TagKind::Group, args.with_print_mode(PrintMode::Flat));
@@ -1260,7 +1266,8 @@ struct FitsState {
 #[cfg(test)]
 mod tests {
     use crate::prelude::*;
-    use crate::printer::{LineEnding, PrintWidth, Printer, PrinterOptions};
+    use crate::printer::{PrintWidth, Printer, PrinterOptions};
+    use crate::LineEnding;
     use crate::{format_args, write, Document, FormatState, IndentStyle, Printed, VecBuffer};
 
     fn format(root: &dyn Format<SimpleFormatContext>) -> Printed {
@@ -1269,6 +1276,7 @@ mod tests {
             PrinterOptions {
                 indent_style: IndentStyle::Space,
                 indent_width: 2.into(),
+                line_ending: LineEnding::Lf,
                 ..PrinterOptions::default()
             },
         )
@@ -1331,7 +1339,7 @@ a"#,
     #[test]
     fn it_converts_line_endings() {
         let options = PrinterOptions {
-            line_ending: LineEnding::CarriageReturnLineFeed,
+            line_ending: LineEnding::Crlf,
             ..PrinterOptions::default()
         };
 

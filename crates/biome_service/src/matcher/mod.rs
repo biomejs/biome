@@ -73,7 +73,15 @@ impl Matcher {
                     // Here we cover cases where the user specifies single files inside the patterns.
                     // The pattern library doesn't support single files, we here we just do a check
                     // on contains
-                    source_as_string.map_or(false, |source| source.contains(pattern.as_str()))
+                    //
+                    // Given the pattern `out`:
+                    // - `out/index.html` -> matches
+                    // - `out/` -> matches
+                    // - `layout.tsx` -> does not match
+                    // - `routes/foo.ts` -> does not match
+                    source
+                        .ancestors()
+                        .any(|ancestor| ancestor.ends_with(pattern.as_str()))
                 };
 
                 if matches {
@@ -127,6 +135,25 @@ mod test {
         let mut ignore = Matcher::new(MatchOptions::default());
         ignore.add_pattern(&dir).unwrap();
         let path = env::current_dir().unwrap().join("src/workspace.rs");
+        let result = ignore.matches_path(path.as_path());
+
+        assert!(result);
+    }
+
+    #[test]
+    fn matches_path_for_single_file_or_directory_name() {
+        let dir = "inv";
+        let valid_test_dir = "valid/";
+        let mut ignore = Matcher::new(MatchOptions::default());
+        ignore.add_pattern(dir).unwrap();
+        ignore.add_pattern(valid_test_dir).unwrap();
+
+        let path = env::current_dir().unwrap().join("tests").join("invalid");
+        let result = ignore.matches_path(path.as_path());
+
+        assert!(!result);
+
+        let path = env::current_dir().unwrap().join("tests").join("valid");
         let result = ignore.matches_path(path.as_path());
 
         assert!(result);

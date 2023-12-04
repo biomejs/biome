@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -50,8 +51,9 @@ JsModule {
 
 0: JS_MODULE@0..54
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..53
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..53
     0: JS_WHILE_STATEMENT@0..53
       0: WHILE_KW@0..6 "while" [] [Whitespace(" ")]
       1: L_PAREN@6..7 "(" [] []
@@ -82,7 +84,7 @@ JsModule {
                   1: SEMICOLON@46..47 ";" [] []
               3: R_CURLY@47..51 "}" [Newline("\n"), Whitespace("  ")] []
         2: R_CURLY@51..53 "}" [Newline("\n")] []
-  3: EOF@53..54 "" [Newline("\n")] []
+  4: EOF@53..54 "" [Newline("\n")] []
 --
 break_in_nested_function.js:3:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

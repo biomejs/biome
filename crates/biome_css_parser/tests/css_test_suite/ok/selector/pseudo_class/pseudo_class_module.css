@@ -1,0 +1,3 @@
+:global(.class div) {}
+:local(.class div + #id) {}
+:global(.class div) .div {}

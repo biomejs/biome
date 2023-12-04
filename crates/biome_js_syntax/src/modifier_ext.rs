@@ -1,10 +1,10 @@
 use crate::{
     AnyJsMethodModifier, AnyJsPropertyModifier, AnyTsIndexSignatureModifier,
     AnyTsMethodSignatureModifier, AnyTsPropertyParameterModifier, AnyTsPropertySignatureModifier,
-    JsSyntaxKind, TsAccessibilityModifier,
+    AnyTsTypeParameterModifier, JsSyntaxKind, TsAccessibilityModifier,
 };
 
-/// Helpful data structure to make the order modifiers predictable inside the formatter
+/// Helpful data structure to make the order of modifiers predictable inside the formatter
 #[derive(Debug, Ord, PartialOrd, Eq, PartialEq)]
 pub enum Modifiers {
     // modifiers must be sorted by precedence.
@@ -84,6 +84,24 @@ impl From<&AnyTsPropertySignatureModifier> for Modifiers {
             AnyTsPropertySignatureModifier::TsAbstractModifier(_) => Modifiers::Abstract,
             AnyTsPropertySignatureModifier::TsOverrideModifier(_) => Modifiers::Override,
             AnyTsPropertySignatureModifier::TsReadonlyModifier(_) => Modifiers::Readonly,
+        }
+    }
+}
+
+/// Helpful data structure to make the order of type parameter modifiers predictable inside the formatter
+#[derive(Debug, Ord, PartialOrd, Eq, PartialEq)]
+pub enum TypeParameterModifiers {
+    Const,
+    In,
+    Out,
+}
+
+impl From<&AnyTsTypeParameterModifier> for TypeParameterModifiers {
+    fn from(modifier: &AnyTsTypeParameterModifier) -> Self {
+        match modifier {
+            AnyTsTypeParameterModifier::TsConstModifier(_) => Self::Const,
+            AnyTsTypeParameterModifier::TsInModifier(_) => Self::In,
+            AnyTsTypeParameterModifier::TsOutModifier(_) => Self::Out,
         }
     }
 }

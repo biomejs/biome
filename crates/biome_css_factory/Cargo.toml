@@ -8,10 +8,13 @@ keywords.workspace   = true
 license.workspace    = true
 name                 = "biome_css_factory"
 repository.workspace = true
-version              = "0.1.0"
+version              = "0.3.1"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 biome_css_syntax = { workspace = true }
 biome_rowan      = { workspace = true }
+
+[lints]
+workspace = true

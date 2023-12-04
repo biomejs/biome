@@ -1,44 +1,36 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
-        JsBogusStatement {
-            items: [
-                JsBogus {
-                    items: [
-                        LET_KW@0..4 "let" [] [Whitespace(" ")],
-                        JsBogus {
-                            items: [
-                                JsBogus {
-                                    items: [
-                                        JsIdentifierBinding {
-                                            name_token: IDENT@4..5 "a" [] [],
-                                        },
-                                        TsDefiniteVariableAnnotation {
-                                            excl_token: BANG@5..6 "!" [] [],
-                                            type_annotation: TsTypeAnnotation {
-                                                colon_token: COLON@6..8 ":" [] [Whitespace(" ")],
-                                                ty: TsStringType {
-                                                    string_token: STRING_KW@8..15 "string" [] [Whitespace(" ")],
-                                                },
-                                            },
-                                        },
-                                        JsBogus {
-                                            items: [
-                                                EQ@15..17 "=" [] [Whitespace(" ")],
-                                                JsStringLiteralExpression {
-                                                    value_token: JS_STRING_LITERAL@17..23 "\"test\"" [] [],
-                                                },
-                                            ],
-                                        },
-                                    ],
-                                },
-                            ],
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: LET_KW@0..4 "let" [] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@4..5 "a" [] [],
                         },
-                    ],
-                },
-                SEMICOLON@23..24 ";" [] [],
-            ],
+                        variable_annotation: TsDefiniteVariableAnnotation {
+                            excl_token: BANG@5..6 "!" [] [],
+                            type_annotation: TsTypeAnnotation {
+                                colon_token: COLON@6..8 ":" [] [Whitespace(" ")],
+                                ty: TsStringType {
+                                    string_token: STRING_KW@8..15 "string" [] [Whitespace(" ")],
+                                },
+                            },
+                        },
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@15..17 "=" [] [Whitespace(" ")],
+                            expression: JsStringLiteralExpression {
+                                value_token: JS_STRING_LITERAL@17..23 "\"test\"" [] [],
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: SEMICOLON@23..24 ";" [] [],
         },
     ],
     eof_token: EOF@24..25 "" [Newline("\n")] [],
@@ -46,13 +38,15 @@ JsModule {
 
 0: JS_MODULE@0..25
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..24
-    0: JS_BOGUS_STATEMENT@0..24
-      0: JS_BOGUS@0..23
-        0: LET_KW@0..4 "let" [] [Whitespace(" ")]
-        1: JS_BOGUS@4..23
-          0: JS_BOGUS@4..23
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..24
+    0: JS_VARIABLE_STATEMENT@0..24
+      0: JS_VARIABLE_DECLARATION@0..23
+        0: (empty)
+        1: LET_KW@0..4 "let" [] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@4..23
+          0: JS_VARIABLE_DECLARATOR@4..23
             0: JS_IDENTIFIER_BINDING@4..5
               0: IDENT@4..5 "a" [] []
             1: TS_DEFINITE_VARIABLE_ANNOTATION@5..15
@@ -61,12 +55,12 @@ JsModule {
                 0: COLON@6..8 ":" [] [Whitespace(" ")]
                 1: TS_STRING_TYPE@8..15
                   0: STRING_KW@8..15 "string" [] [Whitespace(" ")]
-            2: JS_BOGUS@15..23
+            2: JS_INITIALIZER_CLAUSE@15..23
               0: EQ@15..17 "=" [] [Whitespace(" ")]
               1: JS_STRING_LITERAL_EXPRESSION@17..23
                 0: JS_STRING_LITERAL@17..23 "\"test\"" [] []
       1: SEMICOLON@23..24 ";" [] []
-  3: EOF@24..25 "" [Newline("\n")] []
+  4: EOF@24..25 "" [Newline("\n")] []
 --
 ts_definite_variable_with_initializer.ts:1:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

@@ -27,11 +27,11 @@ type T = test extends B
     */
     foo
   : test extends B
-  ? /* comment
+    ? /* comment
   comment
     comment */
-    foo
-  : bar;
+      foo
+    : bar;
 
 type T = test extends B ? /* comment */ foo : bar;
 
@@ -51,13 +51,13 @@ type T = test extends B
      comment
            comment
     */
-  test extends B
-  ? foo
-  : /* comment
+    test extends B
+    ? foo
+    : /* comment
   comment
     comment
    */
-    bar;
+      bar;
 
 type T = test extends B ? foo : /* comment */ bar;
 

@@ -14,6 +14,7 @@ expression: snapshot
 
 ```
 JsonRoot {
+    bom_token: missing (optional),
     value: JsonBogusValue {
         items: [
             ERROR_TOKEN@0..1 "*" [] [],
@@ -27,9 +28,10 @@ JsonRoot {
 
 ```
 0: JSON_ROOT@0..1
-  0: JSON_BOGUS_VALUE@0..1
+  0: (empty)
+  1: JSON_BOGUS_VALUE@0..1
     0: ERROR_TOKEN@0..1 "*" [] []
-  1: EOF@1..1 "" [] []
+  2: EOF@1..1 "" [] []
 
 ```
 

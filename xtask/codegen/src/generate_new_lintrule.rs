@@ -54,7 +54,7 @@ declare_rule! {{
     /// ```
     ///
     pub(crate) {rule_name_upper_camel} {{
-        version: "1.3.0",
+        version: "next",
         name: "{rule_name_lower_camel}",
         recommended: false,
     }}
@@ -73,6 +73,10 @@ impl Rule for {rule_name_upper_camel} {{
     }}
 
     fn diagnostic(_: &RuleContext<Self>, reference: &Self::State) -> Option<RuleDiagnostic> {{
+        //
+        // Read our guidelines to write great diagnostics:
+        // https://docs.rs/biome_analyze/latest/biome_analyze/#what-a-rule-should-say-to-the-user
+        //
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
@@ -99,7 +103,7 @@ impl Rule for {rule_name_upper_camel} {{
         let kebab_case_rule = rule_name_lower_camel.to_case(Case::Kebab);
         // We sort rules to reduce conflicts between contributions made in parallel.
         let rule_line = format!(
-            r#"    "lint/nursery/{rule_name_lower_camel}": "https://biomejs.dev/lint/rules/{kebab_case_rule}","#
+            r#"    "lint/nursery/{rule_name_lower_camel}": "https://biomejs.dev/linter/rules/{kebab_case_rule}","#
         );
         let lint_start = "define_categories! {\n";
         let lint_end = "\n    ;\n";

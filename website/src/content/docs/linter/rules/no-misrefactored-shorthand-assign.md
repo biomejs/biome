@@ -2,11 +2,7 @@
 title: noMisrefactoredShorthandAssign (since v1.3.0)
 ---
 
-**Diagnostic Category: `lint/nursery/noMisrefactoredShorthandAssign`**
-
-:::caution
-This rule is part of the [nursery](/linter/rules/#nursery) group.
-:::
+**Diagnostic Category: `lint/suspicious/noMisrefactoredShorthandAssign`**
 
 Disallow shorthand assign when variable appears on both sides.
 
@@ -23,7 +19,7 @@ Source: https://rust-lang.github.io/rust-clippy/master/#/misrefactored_assign_op
 a += a + b
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noMisrefactoredShorthandAssign.js:1:1 <a href="https://biomejs.dev/lint/rules/no-misrefactored-shorthand-assign">lint/nursery/noMisrefactoredShorthandAssign</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noMisrefactoredShorthandAssign.js:1:1 <a href="https://biomejs.dev/linter/rules/no-misrefactored-shorthand-assign">lint/suspicious/noMisrefactoredShorthandAssign</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Variable appears on both sides of an assignment operation.</span>
   
@@ -43,7 +39,7 @@ a += a + b
 a -= a - b
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noMisrefactoredShorthandAssign.js:1:1 <a href="https://biomejs.dev/lint/rules/no-misrefactored-shorthand-assign">lint/nursery/noMisrefactoredShorthandAssign</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noMisrefactoredShorthandAssign.js:1:1 <a href="https://biomejs.dev/linter/rules/no-misrefactored-shorthand-assign">lint/suspicious/noMisrefactoredShorthandAssign</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Variable appears on both sides of an assignment operation.</span>
   
@@ -63,7 +59,7 @@ a -= a - b
 a *= a * b
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noMisrefactoredShorthandAssign.js:1:1 <a href="https://biomejs.dev/lint/rules/no-misrefactored-shorthand-assign">lint/nursery/noMisrefactoredShorthandAssign</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noMisrefactoredShorthandAssign.js:1:1 <a href="https://biomejs.dev/linter/rules/no-misrefactored-shorthand-assign">lint/suspicious/noMisrefactoredShorthandAssign</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Variable appears on both sides of an assignment operation.</span>
   

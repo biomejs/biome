@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -658,8 +659,9 @@ JsModule {
 
 0: JS_MODULE@0..572
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..571
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..571
     0: JS_EXPRESSION_STATEMENT@0..15
       0: JS_UNARY_EXPRESSION@0..14
         0: DELETE_KW@0..7 "delete" [] [Whitespace(" ")]
@@ -1103,4 +1105,4 @@ JsModule {
                 0: IDENT@566..569 "obj" [] []
           2: R_PAREN@569..570 ")" [] []
       1: SEMICOLON@570..571 ";" [] []
-  3: EOF@571..572 "" [Newline("\n")] []
+  4: EOF@571..572 "" [Newline("\n")] []

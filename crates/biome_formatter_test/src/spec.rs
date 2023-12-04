@@ -200,7 +200,7 @@ where
 
         let (output_code, printed) = self.formatted(&parsed, self.options.clone());
 
-        let max_width = self.options.line_width().value() as usize;
+        let max_width = self.options.line_width().get() as usize;
 
         snapshot_builder = snapshot_builder
             .with_output_and_options(
@@ -220,9 +220,19 @@ where
                 .deserialize_format_options(options_path.get_buffer_from_file().as_str());
 
             for (index, options) in test_options.into_iter().enumerate() {
-                let (output_code, printed) = self.formatted(&parsed, options.clone());
+                let (mut output_code, printed) = self.formatted(&parsed, options.clone());
 
-                let max_width = options.line_width().value() as usize;
+                let max_width = options.line_width().get() as usize;
+
+                // There are some logs that print different line endings, and we can't snapshot those
+                // otherwise we risk automatically having them replaced with LF by git.
+                //
+                // This is a workaround, and it might not work for all cases.
+                const CRLF_PATTERN: &str = "\r\n";
+                const CR_PATTERN: &str = "\r";
+                output_code = output_code
+                    .replace(CRLF_PATTERN, "<CRLF>\n")
+                    .replace(CR_PATTERN, "<CR>\n");
 
                 snapshot_builder = snapshot_builder
                     .with_output_and_options(

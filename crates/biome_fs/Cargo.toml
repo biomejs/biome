@@ -8,7 +8,7 @@ keywords.workspace   = true
 license.workspace    = true
 name                 = "biome_fs"
 repository.workspace = true
-version              = "0.1.0"
+version              = "0.3.1"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -26,3 +26,6 @@ tracing           = { workspace = true }
 
 [features]
 serde = ["schemars", "biome_diagnostics/schema"]
+
+[lints]
+workspace = true

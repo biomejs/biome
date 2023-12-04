@@ -55,7 +55,7 @@ pub fn create_analyzer_options(
             );
             None
         } else {
-            let configuration = deserialized.into_deserialized();
+            let configuration = deserialized.into_deserialized().unwrap_or_default();
             let mut settings = WorkspaceSettings::default();
             settings.merge_with_configuration(configuration).unwrap();
             let configuration = AnalyzerConfiguration {

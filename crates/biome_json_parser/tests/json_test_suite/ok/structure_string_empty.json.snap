@@ -14,6 +14,7 @@ expression: snapshot
 
 ```
 JsonRoot {
+    bom_token: missing (optional),
     value: JsonStringValue {
         value_token: JSON_STRING_LITERAL@0..2 "\"\"" [] [],
     },
@@ -25,8 +26,11 @@ JsonRoot {
 
 ```
 0: JSON_ROOT@0..2
-  0: JSON_STRING_VALUE@0..2
+  0: (empty)
+  1: JSON_STRING_VALUE@0..2
     0: JSON_STRING_LITERAL@0..2 "\"\"" [] []
-  1: EOF@2..2 "" [] []
+  2: EOF@2..2 "" [] []
 
 ```
+
+

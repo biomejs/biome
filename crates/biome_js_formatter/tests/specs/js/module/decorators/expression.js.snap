@@ -40,6 +40,7 @@ class Foo extends (@deco class {}){}
 -----
 Indent style: Tab
 Indent width: 2
+Line ending: LF
 Line width: 80
 Quote style: Double Quotes
 JSX quote style: Double Quotes
@@ -47,32 +48,26 @@ Quote properties: As needed
 Trailing comma: All
 Semicolons: Always
 Arrow parentheses: Always
+Bracket spacing: true
+Bracket same line: false
 -----
 
 ```js
 console.log(
-	(
-		@deco
-		class Foo {}
-	),
+	@deco
+	class Foo {},
 );
 console.log(
-	(
-		@deco
-		class {}
-	),
+	@deco
+	class {},
 );
 
 const a1 =
-	(
-		@deco
-		class Foo {}
-	);
+	@deco
+	class Foo {};
 const a2 =
-	(
-		@deco
-		class {}
-	);
+	@deco
+	class {};
 
 (
 	@deco
@@ -94,10 +89,8 @@ const b2 = [];
 	@deco
 	class {}
 )(
-	(
-		@deco
-		class Foo {}
-	),
+	@deco
+	class Foo {},
 ).name;
 (
 	@deco

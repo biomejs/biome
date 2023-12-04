@@ -57,3 +57,6 @@ schema = [
 [dev-dependencies]
 insta        = { workspace = true }
 tests_macros = { workspace = true }
+
+[lints]
+workspace = true

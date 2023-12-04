@@ -18,9 +18,12 @@ use tracing_subscriber::{
 };
 use tracing_tree::HierarchicalLayer;
 
-pub(crate) fn start(session: CliSession) -> Result<(), CliDiagnostic> {
+pub(crate) fn start(
+    session: CliSession,
+    config_path: Option<PathBuf>,
+) -> Result<(), CliDiagnostic> {
     let rt = Runtime::new()?;
-    let did_spawn = rt.block_on(ensure_daemon(false))?;
+    let did_spawn = rt.block_on(ensure_daemon(false, config_path))?;
 
     if did_spawn {
         session.app.console.log(markup! {
@@ -59,7 +62,10 @@ pub(crate) fn stop(session: CliSession) -> Result<(), CliDiagnostic> {
     Ok(())
 }
 
-pub(crate) fn run_server(stop_on_disconnect: bool) -> Result<(), CliDiagnostic> {
+pub(crate) fn run_server(
+    stop_on_disconnect: bool,
+    config_path: Option<PathBuf>,
+) -> Result<(), CliDiagnostic> {
     setup_tracing_subscriber();
 
     let rt = Runtime::new()?;
@@ -69,7 +75,7 @@ pub(crate) fn run_server(stop_on_disconnect: bool) -> Result<(), CliDiagnostic> 
 
     rt.block_on(async move {
         tokio::select! {
-            res = run_daemon(factory).instrument(span) => {
+            res = run_daemon(factory, config_path).instrument(span) => {
                 match res {
                     Ok(never) => match never {},
                     Err(err) => Err(err.into()),
@@ -89,9 +95,9 @@ pub(crate) fn print_socket() -> Result<(), CliDiagnostic> {
     Ok(())
 }
 
-pub(crate) fn lsp_proxy() -> Result<(), CliDiagnostic> {
+pub(crate) fn lsp_proxy(config_path: Option<PathBuf>) -> Result<(), CliDiagnostic> {
     let rt = Runtime::new()?;
-    rt.block_on(start_lsp_proxy(&rt))?;
+    rt.block_on(start_lsp_proxy(&rt, config_path))?;
 
     Ok(())
 }
@@ -99,8 +105,8 @@ pub(crate) fn lsp_proxy() -> Result<(), CliDiagnostic> {
 /// Start a proxy process.
 /// Receives a process via `stdin` and then copy the content to the LSP socket.
 /// Copy to the process on `stdout` when the LSP responds to a message
-async fn start_lsp_proxy(rt: &Runtime) -> Result<(), CliDiagnostic> {
-    ensure_daemon(true).await?;
+async fn start_lsp_proxy(rt: &Runtime, config_path: Option<PathBuf>) -> Result<(), CliDiagnostic> {
+    ensure_daemon(true, config_path).await?;
 
     match open_socket().await? {
         Some((mut owned_read_half, mut owned_write_half)) => {

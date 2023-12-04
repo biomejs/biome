@@ -30,7 +30,7 @@ pub trait JsBatchMutation {
 
     /// Transfer leading trivia to the next sibling.
     /// If there is no next sibling, then transfer to the previous sibling.
-    /// Otherwise do nothings.
+    /// Otherwise do nothing.
     fn transfer_leading_trivia_to_sibling(&mut self, node: &JsSyntaxNode);
 
     /// It attempts to add a new element after the given element

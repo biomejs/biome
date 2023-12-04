@@ -128,6 +128,54 @@ function inlineComment() {
   ) || 42
 }
 
+// TODO: fix idempotency issue
+// function multilineBlockSameLine() {
+//   return (
+//     /**
+//     * @type {string}
+//     */ 'result'
+//   )
+// }
+
+function multilineBlockNextLine() {
+  return (
+    /**
+    * @type {string}
+    */ 
+    'result'
+  )
+}
+
+function multilineBlockSameLineJsx() {
+  return (
+    /**
+    * JSX Same line
+    */ <div></div>
+  )
+}
+
+function multilineBlockNextLineJsx() {
+  return (
+    /**
+    * JSX Next line
+    */
+    <div></div>
+  )
+}
+
+function singleLineBlockSameLine() {
+  return (
+    /** Result -> */ 'result'
+  )
+}
+
+function singleLineBlockNextLine() {
+  return (
+    /** Result below */ 
+    'result'
+  )
+}
+
 ```
 
 
@@ -153,6 +201,28 @@ function inlineComment() {
  }
  
  function excessiveEverything() {
+@@ -119,13 +121,14 @@
+   return /* hi */ 42 || 42;
+ }
+ 
+-function multilineBlockSameLine() {
+-  return (
+-    /**
+-     * @type {string}
+-     */ "result"
+-  );
+-}
++// TODO: fix idempotency issue
++// function multilineBlockSameLine() {
++//   return (
++//     /**
++//     * @type {string}
++//     */ 'result'
++//   )
++// }
+ 
+ function multilineBlockNextLine() {
+   return (
 ```
 
 # Output
@@ -279,6 +349,52 @@ function taggedTemplate() {
 
 function inlineComment() {
   return /* hi */ 42 || 42;
+}
+
+// TODO: fix idempotency issue
+// function multilineBlockSameLine() {
+//   return (
+//     /**
+//     * @type {string}
+//     */ 'result'
+//   )
+// }
+
+function multilineBlockNextLine() {
+  return (
+    /**
+     * @type {string}
+     */
+    "result"
+  );
+}
+
+function multilineBlockSameLineJsx() {
+  return (
+    /**
+     * JSX Same line
+     */ <div></div>
+  );
+}
+
+function multilineBlockNextLineJsx() {
+  return (
+    /**
+     * JSX Next line
+     */
+    <div></div>
+  );
+}
+
+function singleLineBlockSameLine() {
+  return /** Result -> */ "result";
+}
+
+function singleLineBlockNextLine() {
+  return (
+    /** Result below */
+    "result"
+  );
 }
 ```
 

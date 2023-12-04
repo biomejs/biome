@@ -51,6 +51,7 @@ expression: snapshot
 
 ```
 CssRoot {
+    bom_token: missing (optional),
     rules: CssRuleList [
         CssRule {
             prelude: CssSelectorList [
@@ -108,6 +109,7 @@ CssRoot {
                         right: CssCompoundSelector {
                             nesting_selector_token: missing (optional),
                             simple_selector: CssTypeSelector {
+                                namespace: missing (optional),
                                 ident: CssIdentifier {
                                     value_token: IDENT@25..29 "div" [] [Whitespace(" ")],
                                 },
@@ -192,6 +194,7 @@ CssRoot {
                         right: CssCompoundSelector {
                             nesting_selector_token: missing (optional),
                             simple_selector: CssTypeSelector {
+                                namespace: missing (optional),
                                 ident: CssIdentifier {
                                     value_token: IDENT@66..70 "div" [] [Whitespace(" ")],
                                 },
@@ -276,6 +279,7 @@ CssRoot {
                         right: CssCompoundSelector {
                             nesting_selector_token: missing (optional),
                             simple_selector: CssTypeSelector {
+                                namespace: missing (optional),
                                 ident: CssIdentifier {
                                     value_token: IDENT@107..111 "div" [] [Whitespace(" ")],
                                 },
@@ -360,6 +364,7 @@ CssRoot {
                         right: CssCompoundSelector {
                             nesting_selector_token: missing (optional),
                             simple_selector: CssTypeSelector {
+                                namespace: missing (optional),
                                 ident: CssIdentifier {
                                     value_token: IDENT@150..154 "div" [] [Whitespace(" ")],
                                 },
@@ -410,6 +415,7 @@ CssRoot {
                                 right: CssCompoundSelector {
                                     nesting_selector_token: missing (optional),
                                     simple_selector: CssTypeSelector {
+                                        namespace: missing (optional),
                                         ident: CssIdentifier {
                                             value_token: IDENT@176..180 "div" [] [Whitespace(" ")],
                                         },
@@ -435,6 +441,7 @@ CssRoot {
                         right: CssCompoundSelector {
                             nesting_selector_token: missing (optional),
                             simple_selector: CssTypeSelector {
+                                namespace: missing (optional),
                                 ident: CssIdentifier {
                                     value_token: IDENT@188..192 "span" [] [],
                                 },
@@ -526,6 +533,7 @@ CssRoot {
                         right: CssCompoundSelector {
                             nesting_selector_token: missing (optional),
                             simple_selector: CssTypeSelector {
+                                namespace: missing (optional),
                                 ident: CssIdentifier {
                                     value_token: IDENT@236..239 "div" [] [],
                                 },
@@ -564,8 +572,11 @@ CssRoot {
                             sub_selectors: CssSubSelectorList [
                                 CssAttributeSelector {
                                     l_brack_token: L_BRACK@249..252 "[" [Newline("\n"), Newline("\n")] [],
-                                    name: CssIdentifier {
-                                        value_token: IDENT@252..256 "lang" [] [],
+                                    name: CssAttributeName {
+                                        namespace: missing (optional),
+                                        name: CssIdentifier {
+                                            value_token: IDENT@252..256 "lang" [] [],
+                                        },
                                     },
                                     matcher: CssAttributeMatcher {
                                         operator: PIPEEQ@256..258 "|=" [] [],
@@ -587,8 +598,11 @@ CssRoot {
                             sub_selectors: CssSubSelectorList [
                                 CssAttributeSelector {
                                     l_brack_token: L_BRACK@266..267 "[" [] [],
-                                    name: CssIdentifier {
-                                        value_token: IDENT@267..271 "lang" [] [],
+                                    name: CssAttributeName {
+                                        namespace: missing (optional),
+                                        name: CssIdentifier {
+                                            value_token: IDENT@267..271 "lang" [] [],
+                                        },
                                     },
                                     matcher: CssAttributeMatcher {
                                         operator: PIPEEQ@271..273 "|=" [] [],
@@ -611,8 +625,11 @@ CssRoot {
                         sub_selectors: CssSubSelectorList [
                             CssAttributeSelector {
                                 l_brack_token: L_BRACK@281..282 "[" [] [],
-                                name: CssIdentifier {
-                                    value_token: IDENT@282..286 "lang" [] [],
+                                name: CssAttributeName {
+                                    namespace: missing (optional),
+                                    name: CssIdentifier {
+                                        value_token: IDENT@282..286 "lang" [] [],
+                                    },
                                 },
                                 matcher: CssAttributeMatcher {
                                     operator: PIPEEQ@286..288 "|=" [] [],
@@ -644,7 +661,8 @@ CssRoot {
 
 ```
 0: CSS_ROOT@0..299
-  0: CSS_RULE_LIST@0..298
+  0: (empty)
+  1: CSS_RULE_LIST@0..298
     0: CSS_RULE@0..14
       0: CSS_SELECTOR_LIST@0..12
         0: CSS_COMPLEX_SELECTOR@0..12
@@ -685,7 +703,8 @@ CssRoot {
             2: CSS_COMPOUND_SELECTOR@25..29
               0: (empty)
               1: CSS_TYPE_SELECTOR@25..29
-                0: CSS_IDENTIFIER@25..29
+                0: (empty)
+                1: CSS_IDENTIFIER@25..29
                   0: IDENT@25..29 "div" [] [Whitespace(" ")]
               2: CSS_SUB_SELECTOR_LIST@29..29
           1: R_ANGLE@29..31 ">" [] [Whitespace(" ")]
@@ -741,7 +760,8 @@ CssRoot {
             2: CSS_COMPOUND_SELECTOR@66..70
               0: (empty)
               1: CSS_TYPE_SELECTOR@66..70
-                0: CSS_IDENTIFIER@66..70
+                0: (empty)
+                1: CSS_IDENTIFIER@66..70
                   0: IDENT@66..70 "div" [] [Whitespace(" ")]
               2: CSS_SUB_SELECTOR_LIST@70..70
           1: PLUS@70..72 "+" [] [Whitespace(" ")]
@@ -797,7 +817,8 @@ CssRoot {
             2: CSS_COMPOUND_SELECTOR@107..111
               0: (empty)
               1: CSS_TYPE_SELECTOR@107..111
-                0: CSS_IDENTIFIER@107..111
+                0: (empty)
+                1: CSS_IDENTIFIER@107..111
                   0: IDENT@107..111 "div" [] [Whitespace(" ")]
               2: CSS_SUB_SELECTOR_LIST@111..111
           1: TILDE@111..113 "~" [] [Whitespace(" ")]
@@ -853,7 +874,8 @@ CssRoot {
             2: CSS_COMPOUND_SELECTOR@150..154
               0: (empty)
               1: CSS_TYPE_SELECTOR@150..154
-                0: CSS_IDENTIFIER@150..154
+                0: (empty)
+                1: CSS_IDENTIFIER@150..154
                   0: IDENT@150..154 "div" [] [Whitespace(" ")]
               2: CSS_SUB_SELECTOR_LIST@154..154
           1: PIPE2@154..157 "||" [] [Whitespace(" ")]
@@ -887,7 +909,8 @@ CssRoot {
                 2: CSS_COMPOUND_SELECTOR@176..180
                   0: (empty)
                   1: CSS_TYPE_SELECTOR@176..180
-                    0: CSS_IDENTIFIER@176..180
+                    0: (empty)
+                    1: CSS_IDENTIFIER@176..180
                       0: IDENT@176..180 "div" [] [Whitespace(" ")]
                   2: CSS_SUB_SELECTOR_LIST@180..180
               1: PLUS@180..182 "+" [] [Whitespace(" ")]
@@ -903,7 +926,8 @@ CssRoot {
             2: CSS_COMPOUND_SELECTOR@188..198
               0: (empty)
               1: CSS_TYPE_SELECTOR@188..192
-                0: CSS_IDENTIFIER@188..192
+                0: (empty)
+                1: CSS_IDENTIFIER@188..192
                   0: IDENT@188..192 "span" [] []
               2: CSS_SUB_SELECTOR_LIST@192..198
                 0: CSS_CLASS_SELECTOR@192..198
@@ -963,7 +987,8 @@ CssRoot {
             2: CSS_COMPOUND_SELECTOR@236..239
               0: (empty)
               1: CSS_TYPE_SELECTOR@236..239
-                0: CSS_IDENTIFIER@236..239
+                0: (empty)
+                1: CSS_IDENTIFIER@236..239
                   0: IDENT@236..239 "div" [] []
               2: CSS_SUB_SELECTOR_LIST@239..239
           1: CSS_SPACE_LITERAL@239..241 " " [] [Whitespace(" ")]
@@ -989,8 +1014,10 @@ CssRoot {
               2: CSS_SUB_SELECTOR_LIST@249..264
                 0: CSS_ATTRIBUTE_SELECTOR@249..264
                   0: L_BRACK@249..252 "[" [Newline("\n"), Newline("\n")] []
-                  1: CSS_IDENTIFIER@252..256
-                    0: IDENT@252..256 "lang" [] []
+                  1: CSS_ATTRIBUTE_NAME@252..256
+                    0: (empty)
+                    1: CSS_IDENTIFIER@252..256
+                      0: IDENT@252..256 "lang" [] []
                   2: CSS_ATTRIBUTE_MATCHER@256..262
                     0: PIPEEQ@256..258 "|=" [] []
                     1: CSS_ATTRIBUTE_MATCHER_VALUE@258..262
@@ -1005,8 +1032,10 @@ CssRoot {
               2: CSS_SUB_SELECTOR_LIST@266..279
                 0: CSS_ATTRIBUTE_SELECTOR@266..279
                   0: L_BRACK@266..267 "[" [] []
-                  1: CSS_IDENTIFIER@267..271
-                    0: IDENT@267..271 "lang" [] []
+                  1: CSS_ATTRIBUTE_NAME@267..271
+                    0: (empty)
+                    1: CSS_IDENTIFIER@267..271
+                      0: IDENT@267..271 "lang" [] []
                   2: CSS_ATTRIBUTE_MATCHER@271..277
                     0: PIPEEQ@271..273 "|=" [] []
                     1: CSS_ATTRIBUTE_MATCHER_VALUE@273..277
@@ -1021,8 +1050,10 @@ CssRoot {
             2: CSS_SUB_SELECTOR_LIST@281..294
               0: CSS_ATTRIBUTE_SELECTOR@281..294
                 0: L_BRACK@281..282 "[" [] []
-                1: CSS_IDENTIFIER@282..286
-                  0: IDENT@282..286 "lang" [] []
+                1: CSS_ATTRIBUTE_NAME@282..286
+                  0: (empty)
+                  1: CSS_IDENTIFIER@282..286
+                    0: IDENT@282..286 "lang" [] []
                 2: CSS_ATTRIBUTE_MATCHER@286..292
                   0: PIPEEQ@286..288 "|=" [] []
                   1: CSS_ATTRIBUTE_MATCHER_VALUE@288..292
@@ -1034,7 +1065,7 @@ CssRoot {
         0: L_CURLY@294..295 "{" [] []
         1: CSS_DECLARATION_LIST@295..295
         2: R_CURLY@295..298 "}" [Newline("\n"), Newline("\n")] []
-  1: EOF@298..299 "" [Newline("\n")] []
+  2: EOF@298..299 "" [Newline("\n")] []
 
 ```
 

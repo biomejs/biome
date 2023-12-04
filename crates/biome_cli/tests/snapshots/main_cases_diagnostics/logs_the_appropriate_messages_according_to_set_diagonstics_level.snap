@@ -1,0 +1,34 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `biome.json`
+
+```json
+{
+  "files": {
+    "include": ["test.js"]
+  },
+  "linter": {
+    "rules": {
+      "suspicious": {
+        "noDebugger": "warn"
+      }
+    }
+  }
+}
+```
+
+## `test.js`
+
+```js
+debugger;
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file(s) in <TIME>
+```
+
+

@@ -51,7 +51,8 @@ pub fn generate_parser_tests(mode: Mode) -> Result<()> {
         }
         // ok is never actually read, but it needs to be specified to create a Test in existing_tests
         let existing = existing_tests(&tests_dir, true)?;
-        for t in existing.keys().filter(|&t| !tests.contains_key(t)) {
+
+        if let Some(t) = existing.keys().find(|&t| !tests.contains_key(t)) {
             panic!("Test is deleted: '{}'", t);
         }
 

@@ -7,7 +7,6 @@ use xtask::{project_root, Mode, Result};
 use xtask_codegen::update;
 
 pub(crate) fn generate_configuration_schema(mode: Mode) -> Result<()> {
-    let schema_path_vscode = project_root().join("editors/vscode/configuration_schema.json");
     let schema_path_npm = project_root().join("packages/@biomejs/biome/configuration_schema.json");
 
     let schema = schema_for!(Configuration);
@@ -20,7 +19,6 @@ pub(crate) fn generate_configuration_schema(mode: Mode) -> Result<()> {
             .print()
             .unwrap();
 
-    update(&schema_path_vscode, formatted.as_code(), &mode)?;
     update(&schema_path_npm, formatted.as_code(), &mode)?;
 
     Ok(())

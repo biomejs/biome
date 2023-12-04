@@ -1,0 +1,109 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: ts/module/import_type/import_types.ts
+---
+
+# Input
+
+```ts
+import type {
+	a,
+	b,
+	c,
+} from "D";
+
+import type {
+	adsadasdasdasdasdasdasdasdasdasdas,
+	d,
+	e, } from "W";
+
+import type TheDefault from 'foo';
+
+
+// Single named alias import
+import type {foo as bar   } from "foo";
+// Multiple named imports
+import type {   foo as baz,   aaa} from "foo";
+
+// Type imports within specifier list
+import {foo, type Foo} from 'foo';
+import {type Bar} from 'bar';
+import {bar, type Bar as Baz} from 'baz';
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing comma: All
+Semicolons: Always
+Arrow parentheses: Always
+Bracket spacing: true
+Bracket same line: false
+-----
+
+```ts
+import type { a, b, c } from "D";
+
+import type { adsadasdasdasdasdasdasdasdasdasdas, d, e } from "W";
+
+import type TheDefault from "foo";
+
+// Single named alias import
+import type { foo as bar } from "foo";
+// Multiple named imports
+import type { foo as baz, aaa } from "foo";
+
+// Type imports within specifier list
+import { foo, type Foo } from "foo";
+import { type Bar } from "bar";
+import { bar, type Bar as Baz } from "baz";
+```
+
+## Output 2
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing comma: All
+Semicolons: Always
+Arrow parentheses: Always
+Bracket spacing: false
+Bracket same line: false
+-----
+
+```ts
+import type {a, b, c} from "D";
+
+import type {adsadasdasdasdasdasdasdasdasdasdas, d, e} from "W";
+
+import type TheDefault from "foo";
+
+// Single named alias import
+import type {foo as bar} from "foo";
+// Multiple named imports
+import type {foo as baz, aaa} from "foo";
+
+// Type imports within specifier list
+import {foo, type Foo} from "foo";
+import {type Bar} from "bar";
+import {bar, type Bar as Baz} from "baz";
+```
+
+

@@ -17,25 +17,20 @@ hooks_missing_name.json:6:5 deserialize ━━━━━━━━━━━━━�
   
   - recommended
   - all
-  - noApproximativeNumericConstant
+  - noAriaHiddenOnFocusable
+  - noDefaultExport
   - noDuplicateJsonKeys
   - noEmptyBlockStatements
-  - noEmptyCharacterClassInRegex
-  - noInteractiveElementToNoninteractiveRole
-  - noInvalidNewBuiltin
-  - noMisleadingInstantiator
-  - noMisrefactoredShorthandAssign
-  - noThisInStatic
+  - noImplicitAnyLet
   - noUnusedImports
-  - noUselessElse
+  - noUnusedPrivateClassMembers
   - noUselessLoneBlockStatements
-  - useAriaActivedescendantWithTabindex
-  - useArrowFunction
-  - useAsConstAssertion
+  - useAwait
+  - useForOf
   - useGroupedTypeImport
   - useImportRestrictions
-  - useShorthandAssign
-  - useShorthandFunctionType
+  - useRegexLiterals
+  - useValidAriaRole
   
 
 

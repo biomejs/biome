@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -20,8 +21,9 @@ JsModule {
 
 0: JS_MODULE@0..15
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..15
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..15
     0: JS_EXPRESSION_STATEMENT@0..15
       0: JS_ASSIGNMENT_EXPRESSION@0..15
         0: JS_BOGUS_ASSIGNMENT@0..8
@@ -29,7 +31,7 @@ JsModule {
         1: EQ@8..15 "=" [] [Comments("/*_:|\n")]
         2: (empty)
       1: (empty)
-  3: EOF@15..15 "" [] []
+  4: EOF@15..15 "" [] []
 --
 js_regex_assignment.js:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

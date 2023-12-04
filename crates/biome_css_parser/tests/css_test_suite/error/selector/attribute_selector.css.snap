@@ -10,6 +10,9 @@ expression: snapshot
 
 [title="foo" P] {}
 
+[title="foo" s {}
+[title="foo" s
+
 ```
 
 
@@ -17,6 +20,7 @@ expression: snapshot
 
 ```
 CssRoot {
+    bom_token: missing (optional),
     rules: CssRuleList [
         CssRule {
             prelude: CssSelectorList [
@@ -24,17 +28,16 @@ CssRoot {
                     nesting_selector_token: missing (optional),
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
-                        CssAttributeSelector {
-                            l_brack_token: L_BRACK@0..2 "[" [] [Whitespace(" ")],
-                            name: missing (required),
-                            matcher: missing (optional),
-                            r_brack_token: missing (required),
-                        },
-                        CssClassSelector {
-                            dot_token: DOT@2..3 "." [] [],
-                            name: CssIdentifier {
-                                value_token: IDENT@3..9 "class" [] [Whitespace(" ")],
-                            },
+                        CssBogusSubSelector {
+                            items: [
+                                L_BRACK@0..2 "[" [] [Whitespace(" ")],
+                                CssBogus {
+                                    items: [
+                                        DOT@2..3 "." [] [],
+                                        IDENT@3..9 "class" [] [Whitespace(" ")],
+                                    ],
+                                },
+                            ],
                         },
                     ],
                 },
@@ -54,8 +57,11 @@ CssRoot {
                         CssBogusSubSelector {
                             items: [
                                 L_BRACK@11..14 "[" [Newline("\n"), Newline("\n")] [],
-                                CssIdentifier {
-                                    value_token: IDENT@14..19 "title" [] [],
+                                CssAttributeName {
+                                    namespace: missing (optional),
+                                    name: CssIdentifier {
+                                        value_token: IDENT@14..19 "title" [] [],
+                                    },
                                 },
                                 CssBogus {
                                     items: [
@@ -80,31 +86,93 @@ CssRoot {
                 r_curly_token: R_CURLY@30..31 "}" [] [],
             },
         },
+        CssRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selector_token: missing (optional),
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssAttributeSelector {
+                            l_brack_token: L_BRACK@31..34 "[" [Newline("\n"), Newline("\n")] [],
+                            name: CssAttributeName {
+                                namespace: missing (optional),
+                                name: CssIdentifier {
+                                    value_token: IDENT@34..39 "title" [] [],
+                                },
+                            },
+                            matcher: CssAttributeMatcher {
+                                operator: EQ@39..40 "=" [] [],
+                                value: CssAttributeMatcherValue {
+                                    name: CssString {
+                                        value_token: CSS_STRING_LITERAL@40..46 "\"foo\"" [] [Whitespace(" ")],
+                                    },
+                                },
+                                modifier: S_KW@46..48 "s" [] [Whitespace(" ")],
+                            },
+                            r_brack_token: missing (required),
+                        },
+                    ],
+                },
+            ],
+            block: CssBlock {
+                l_curly_token: L_CURLY@48..49 "{" [] [],
+                declaration_list: CssDeclarationList [],
+                r_curly_token: R_CURLY@49..50 "}" [] [],
+            },
+        },
+        CssBogusRule {
+            items: [
+                CssSelectorList [
+                    CssCompoundSelector {
+                        nesting_selector_token: missing (optional),
+                        simple_selector: missing (optional),
+                        sub_selectors: CssSubSelectorList [
+                            CssAttributeSelector {
+                                l_brack_token: L_BRACK@50..52 "[" [Newline("\n")] [],
+                                name: CssAttributeName {
+                                    namespace: missing (optional),
+                                    name: CssIdentifier {
+                                        value_token: IDENT@52..57 "title" [] [],
+                                    },
+                                },
+                                matcher: CssAttributeMatcher {
+                                    operator: EQ@57..58 "=" [] [],
+                                    value: CssAttributeMatcherValue {
+                                        name: CssString {
+                                            value_token: CSS_STRING_LITERAL@58..64 "\"foo\"" [] [Whitespace(" ")],
+                                        },
+                                    },
+                                    modifier: S_KW@64..65 "s" [] [],
+                                },
+                                r_brack_token: missing (required),
+                            },
+                        ],
+                    },
+                ],
+            ],
+        },
     ],
-    eof_token: EOF@31..32 "" [Newline("\n")] [],
+    eof_token: EOF@65..66 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..32
-  0: CSS_RULE_LIST@0..31
+0: CSS_ROOT@0..66
+  0: (empty)
+  1: CSS_RULE_LIST@0..65
     0: CSS_RULE@0..11
       0: CSS_SELECTOR_LIST@0..9
         0: CSS_COMPOUND_SELECTOR@0..9
           0: (empty)
           1: (empty)
           2: CSS_SUB_SELECTOR_LIST@0..9
-            0: CSS_ATTRIBUTE_SELECTOR@0..2
+            0: CSS_BOGUS_SUB_SELECTOR@0..9
               0: L_BRACK@0..2 "[" [] [Whitespace(" ")]
-              1: (empty)
-              2: (empty)
-              3: (empty)
-            1: CSS_CLASS_SELECTOR@2..9
-              0: DOT@2..3 "." [] []
-              1: CSS_IDENTIFIER@3..9
-                0: IDENT@3..9 "class" [] [Whitespace(" ")]
+              1: CSS_BOGUS@2..9
+                0: DOT@2..3 "." [] []
+                1: IDENT@3..9 "class" [] [Whitespace(" ")]
       1: CSS_BLOCK@9..11
         0: L_CURLY@9..10 "{" [] []
         1: CSS_DECLARATION_LIST@10..10
@@ -117,8 +185,10 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@11..29
             0: CSS_BOGUS_SUB_SELECTOR@11..29
               0: L_BRACK@11..14 "[" [Newline("\n"), Newline("\n")] []
-              1: CSS_IDENTIFIER@14..19
-                0: IDENT@14..19 "title" [] []
+              1: CSS_ATTRIBUTE_NAME@14..19
+                0: (empty)
+                1: CSS_IDENTIFIER@14..19
+                  0: IDENT@14..19 "title" [] []
               2: CSS_BOGUS@19..27
                 0: EQ@19..20 "=" [] []
                 1: CSS_ATTRIBUTE_MATCHER_VALUE@20..26
@@ -130,29 +200,55 @@ CssRoot {
         0: L_CURLY@29..30 "{" [] []
         1: CSS_DECLARATION_LIST@30..30
         2: R_CURLY@30..31 "}" [] []
-  1: EOF@31..32 "" [Newline("\n")] []
+    2: CSS_RULE@31..50
+      0: CSS_SELECTOR_LIST@31..48
+        0: CSS_COMPOUND_SELECTOR@31..48
+          0: (empty)
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@31..48
+            0: CSS_ATTRIBUTE_SELECTOR@31..48
+              0: L_BRACK@31..34 "[" [Newline("\n"), Newline("\n")] []
+              1: CSS_ATTRIBUTE_NAME@34..39
+                0: (empty)
+                1: CSS_IDENTIFIER@34..39
+                  0: IDENT@34..39 "title" [] []
+              2: CSS_ATTRIBUTE_MATCHER@39..48
+                0: EQ@39..40 "=" [] []
+                1: CSS_ATTRIBUTE_MATCHER_VALUE@40..46
+                  0: CSS_STRING@40..46
+                    0: CSS_STRING_LITERAL@40..46 "\"foo\"" [] [Whitespace(" ")]
+                2: S_KW@46..48 "s" [] [Whitespace(" ")]
+              3: (empty)
+      1: CSS_BLOCK@48..50
+        0: L_CURLY@48..49 "{" [] []
+        1: CSS_DECLARATION_LIST@49..49
+        2: R_CURLY@49..50 "}" [] []
+    3: CSS_BOGUS_RULE@50..65
+      0: CSS_SELECTOR_LIST@50..65
+        0: CSS_COMPOUND_SELECTOR@50..65
+          0: (empty)
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@50..65
+            0: CSS_ATTRIBUTE_SELECTOR@50..65
+              0: L_BRACK@50..52 "[" [Newline("\n")] []
+              1: CSS_ATTRIBUTE_NAME@52..57
+                0: (empty)
+                1: CSS_IDENTIFIER@52..57
+                  0: IDENT@52..57 "title" [] []
+              2: CSS_ATTRIBUTE_MATCHER@57..65
+                0: EQ@57..58 "=" [] []
+                1: CSS_ATTRIBUTE_MATCHER_VALUE@58..64
+                  0: CSS_STRING@58..64
+                    0: CSS_STRING_LITERAL@58..64 "\"foo\"" [] [Whitespace(" ")]
+                2: S_KW@64..65 "s" [] []
+              3: (empty)
+  2: EOF@65..66 "" [Newline("\n")] []
 
 ```
 
 ## Diagnostics
 
 ```
-attribute_selector.css:1:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected an identifier but instead found '.'.
-  
-  > 1 │ [ .class {}
-      │   ^
-    2 │ 
-    3 │ [title="foo" P] {}
-  
-  i Expected an identifier here.
-  
-  > 1 │ [ .class {}
-      │   ^
-    2 │ 
-    3 │ [title="foo" P] {}
-  
 attribute_selector.css:3:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a s, a S, an i, or a I but instead found 'P'.
@@ -162,6 +258,7 @@ attribute_selector.css:3:14 parse ━━━━━━━━━━━━━━━�
   > 3 │ [title="foo" P] {}
       │              ^
     4 │ 
+    5 │ [title="foo" s {}
   
   i Expected a s, a S, an i, or a I here.
   
@@ -170,6 +267,36 @@ attribute_selector.css:3:14 parse ━━━━━━━━━━━━━━━�
   > 3 │ [title="foo" P] {}
       │              ^
     4 │ 
+    5 │ [title="foo" s {}
+  
+attribute_selector.css:5:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `]` but instead found `{`
+  
+    3 │ [title="foo" P] {}
+    4 │ 
+  > 5 │ [title="foo" s {}
+      │                ^
+    6 │ [title="foo" s
+    7 │ 
+  
+  i Remove {
+  
+attribute_selector.css:7:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `]` but instead the file ends
+  
+    5 │ [title="foo" s {}
+    6 │ [title="foo" s
+  > 7 │ 
+      │ 
+  
+  i the file ends here
+  
+    5 │ [title="foo" s {}
+    6 │ [title="foo" s
+  > 7 │ 
+      │ 
   
 ```
 

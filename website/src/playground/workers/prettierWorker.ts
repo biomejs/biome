@@ -37,6 +37,8 @@ self.addEventListener("message", async (e) => {
 				trailingComma,
 				semicolons,
 				arrowParentheses,
+				bracketSpacing,
+				bracketSameLine,
 			} = settings;
 			const code = e.data.code as string;
 			const filename = e.data.filename as string;
@@ -52,6 +54,8 @@ self.addEventListener("message", async (e) => {
 				trailingComma,
 				semicolons,
 				arrowParentheses,
+				bracketSpacing,
+				bracketSameLine,
 			});
 
 			self.postMessage({
@@ -81,6 +85,8 @@ async function formatWithPrettier(
 		trailingComma: TrailingComma;
 		semicolons: Semicolons;
 		arrowParentheses: ArrowParentheses;
+		bracketSpacing: boolean;
+		bracketSameLine: boolean;
 	},
 ): Promise<PrettierOutput> {
 	try {
@@ -100,6 +106,8 @@ async function formatWithPrettier(
 				options.arrowParentheses === ArrowParentheses.Always
 					? "always"
 					: "avoid",
+			bracketSpacing: options.bracketSpacing,
+			bracketSameLine: options.bracketSameLine,
 		};
 
 		// @ts-expect-error

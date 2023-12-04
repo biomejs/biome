@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -74,14 +75,30 @@ JsModule {
             },
             semicolon_token: SEMICOLON@137..138 ";" [] [],
         },
+        JsImport {
+            import_token: IMPORT_KW@138..146 "import" [Newline("\n")] [Whitespace(" ")],
+            import_clause: JsImportDefaultClause {
+                type_token: TYPE_KW@146..151 "type" [] [Whitespace(" ")],
+                local_name: JsIdentifierBinding {
+                    name_token: IDENT@151..156 "from" [] [Whitespace(" ")],
+                },
+                from_token: FROM_KW@156..161 "from" [] [Whitespace(" ")],
+                source: JsModuleSource {
+                    value_token: JS_STRING_LITERAL@161..168 "\"./mod\"" [] [],
+                },
+                assertion: missing (optional),
+            },
+            semicolon_token: SEMICOLON@168..169 ";" [] [],
+        },
     ],
-    eof_token: EOF@138..139 "" [Newline("\n")] [],
+    eof_token: EOF@169..170 "" [Newline("\n")] [],
 }
 
-0: JS_MODULE@0..139
+0: JS_MODULE@0..170
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..138
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..169
     0: JS_IMPORT@0..39
       0: IMPORT_KW@0..7 "import" [] [Whitespace(" ")]
       1: JS_IMPORT_DEFAULT_CLAUSE@7..24
@@ -135,4 +152,15 @@ JsModule {
           0: JS_STRING_LITERAL@132..137 "\"mod\"" [] []
         5: (empty)
       2: SEMICOLON@137..138 ";" [] []
-  3: EOF@138..139 "" [Newline("\n")] []
+    4: JS_IMPORT@138..169
+      0: IMPORT_KW@138..146 "import" [Newline("\n")] [Whitespace(" ")]
+      1: JS_IMPORT_DEFAULT_CLAUSE@146..168
+        0: TYPE_KW@146..151 "type" [] [Whitespace(" ")]
+        1: JS_IDENTIFIER_BINDING@151..156
+          0: IDENT@151..156 "from" [] [Whitespace(" ")]
+        2: FROM_KW@156..161 "from" [] [Whitespace(" ")]
+        3: JS_MODULE_SOURCE@161..168
+          0: JS_STRING_LITERAL@161..168 "\"./mod\"" [] []
+        4: (empty)
+      2: SEMICOLON@168..169 ";" [] []
+  4: EOF@169..170 "" [Newline("\n")] []

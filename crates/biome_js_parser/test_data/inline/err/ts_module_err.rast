@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -43,8 +44,9 @@ JsModule {
 
 0: JS_MODULE@0..89
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..88
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..88
     0: TS_DECLARE_STATEMENT@0..16
       0: DECLARE_KW@0..8 "declare" [] [Whitespace(" ")]
       1: TS_MODULE_DECLARATION@8..16
@@ -69,7 +71,7 @@ JsModule {
           0: JS_STRING_LITERAL@68..71 "\"b\"" [] []
         2: TS_EMPTY_EXTERNAL_MODULE_DECLARATION_BODY@71..88
           0: SEMICOLON@71..88 ";" [] [Whitespace(" "), Comments("// missing semi")]
-  3: EOF@88..89 "" [Newline("\n")] []
+  4: EOF@88..89 "" [Newline("\n")] []
 --
 ts_module_err.ts:1:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

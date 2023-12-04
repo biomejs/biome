@@ -7,7 +7,6 @@ on:
     branches:
       - main
     paths:
-      - editors/vscode/package.json
       - editors/intellij/gradle.properties
 
 jobs:
@@ -23,7 +22,6 @@ jobs:
       biome_version: ${{ env.biome_version }}
       prerelease: ${{ env.prerelease }}
       nightly: ${{ env.nightly }}
-      version_changed: ${{ steps.version.outputs.changed }}
       intellij_version_changed: ${{ steps.intellij_version.outputs.changed }}
     steps:
       - uses: actions/checkout@v4
@@ -32,14 +30,6 @@ jobs:
         id: nightly
         if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         run: echo "nightly=true" >> $GITHUB_ENV
-
-      - name: Check VSCode version changes
-        uses: EndBug/version-check@v2
-        if: env.nightly != 'true'
-        id: version
-        with:
-          diff-search: true
-          file-name: editors/vscode/package.json
 
       - name: Check intellij plugin version changes
         uses: victor-teles/gradle-properties-diff-checker@v1
@@ -59,22 +49,16 @@ jobs:
 
       - name: Set version name
         run: |
-          echo "version=${{ steps.version.outputs.version }}" >> $GITHUB_ENV
           echo "biome_version=${{ steps.biome_version.outputs.version }}" >> $GITHUB_ENV
           echo "intellij_version=${{ steps.intellij_version.outputs.version }}" >> $GITHUB_ENV
 
       - name: Check prerelease status
         id: prerelease
-        if: env.nightly == 'true' || steps.version.outputs.type == 'prerelease' || steps.version.outputs.type == 'prepatch' || steps.version.outputs.type == 'premajor' || steps.version.outputs.type == 'preminor'
+        if: env.nightly == 'true'
         run: |
           echo "prerelease=true" >> $GITHUB_ENV
-          node ./editors/vscode/scripts/update-nightly-version.mjs >> $GITHUB_ENV
           echo "biome_version=$(node packages/@biomejs/biome/scripts/update-nightly-version.mjs)" >> $GITHUB_ENV
           echo "intellij_version=$(node ./editors/intellij/scripts/update-nightly-version.mjs)" >> $GITHUB_ENV
-
-      - name: Check VSCode version status
-        if: steps.version.outputs.changed == 'true'
-        run: 'echo "VSCode Version change found! New version: ${{ steps.version.outputs.version }} (${{ steps.version.outputs.version_type }})"'
 
       - name: Check intellij version status
         if: steps.intellij_version.outputs.changed == 'true'
@@ -83,195 +67,6 @@ jobs:
       - name: Biome Check version status
         if: steps.biome_version.outputs.changed == 'true'
         run: 'echo "Biome Version change found! New version: ${{ steps.biome_version.outputs.version }} (${{ steps.biome_version.outputs.version_type }})"'
-
-  build:
-    strategy:
-      matrix:
-        include:
-          - os: windows-2022
-            target: x86_64-pc-windows-msvc
-            code-target: win32-x64
-          - os: windows-2022
-            target: aarch64-pc-windows-msvc
-            code-target: win32-arm64
-          - os: ubuntu-20.04
-            target: x86_64-unknown-linux-gnu
-            code-target: linux-x64
-          - os: ubuntu-20.04
-            target: aarch64-unknown-linux-gnu
-            code-target: linux-arm64
-          - os: macos-11
-            target: x86_64-apple-darwin
-            code-target: darwin-x64
-          - os: macos-11
-            target: aarch64-apple-darwin
-            code-target: darwin-arm64
-
-    name: Package VSCode ${{ matrix.code-target }}
-    runs-on: ${{ matrix.os }}
-
-    needs: check
-    env:
-      version: ${{ needs.check.outputs.version }}
-      prerelease: ${{ needs.check.outputs.prerelease }}
-
-    if: needs.check.outputs.version_changed == 'true' || needs.check.outputs.nightly == 'true'
-    outputs:
-      version: ${{ env.version }}
-      prerelease: ${{ env.prerelease }}
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Install toolchain
-        uses: moonrepo/setup-rust@v1
-        with:
-          targets: ${{ matrix.target }}
-
-      - name: Install arm64 toolchain
-        if: matrix.code-target == 'linux-arm64'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y gcc-aarch64-linux-gnu
-
-      - name: Audit crates.io dependencies
-        if: matrix.code-target == 'linux-x64'
-        run: cargo audit
-
-      # Build the LSP binary
-      - name: Build binaries
-        run: cargo build -p biome_cli --release --target ${{ matrix.target }}
-        env:
-          CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER: aarch64-linux-gnu-gcc
-          # Strip all debug symbols from the resulting binaries
-          RUSTFLAGS: "-C strip=symbols"
-          BIOME_VERSION: ${{ needs.check.outputs.biome_version }}
-
-      - name: Copy LSP binary
-        if: matrix.os == 'windows-2022'
-        run: |
-          mkdir dist
-          mkdir editors/vscode/server
-          cp target/${{ matrix.target }}/release/biome.exe editors/vscode/server/biome.exe
-      - name: Copy LSP binary
-        if: matrix.os != 'windows-2022'
-        run: |
-          mkdir dist
-          mkdir editors/vscode/server
-          cp target/${{ matrix.target }}/release/biome editors/vscode/server/biome
-
-      - name: Install Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2.4.0
-        with:
-          version: latest
-          run_install: true
-
-      - name: Update package.json version
-        if: needs.check.outputs.prerelease == 'true'
-        working-directory: editors/vscode
-        run: |
-          node ./scripts/update-nightly-version.mjs >> $GITHUB_ENV
-
-      - name: Install VCSE
-        run: pnpm add -g @vscode/vsce
-
-      - name: Package extension
-        run: |
-          pnpm install
-          pnpm run compile
-          vsce package -o "../../dist/biome_lsp-${{ matrix.code-target }}.vsix" --target ${{ matrix.code-target }}
-        working-directory: editors/vscode
-        if: needs.check.outputs.prerelease != 'true'
-      - name: Package extension (pre-release)
-        run: |
-          pnpm install
-          pnpm run compile
-          vsce package --pre-release -o "../../dist/biome_lsp-${{ matrix.code-target }}.vsix" --target ${{ matrix.code-target }}
-        working-directory: editors/vscode
-        if: needs.check.outputs.prerelease == 'true'
-
-      - name: Upload VSCode extension artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: vscode_packages
-          path: ./dist/biome_lsp-${{ matrix.code-target }}.vsix
-          if-no-files-found: error
-
-  publish:
-    name: Publish VSCode
-    runs-on: ubuntu-latest
-    needs: build
-    environment: marketplace
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Download extension artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: vscode_packages
-
-      - name: Install Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-          registry-url: 'https://registry.npmjs.org'
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2.4.0
-        with:
-          version: latest
-          run_install: true
-
-      - name: Install VCSE
-        run: pnpm add -g @vscode/vsce
-
-      - name: Publish extension to Microsoft Marketplace (pre-release)
-        run: vsce publish --pre-release --packagePath biome_lsp-*.vsix
-        if: needs.build.outputs.prerelease == 'true'
-        env:
-          VSCE_PAT: ${{ secrets.VSCE_PAT }}
-      - name: Publish extension to Microsoft Marketplace
-        run: vsce publish --packagePath biome_lsp-*.vsix
-        if: needs.build.outputs.prerelease != 'true'
-        env:
-          VSCE_PAT: ${{ secrets.VSCE_PAT }}
-
-      - name: Publish extension to Open VSX (pre-release)
-        run: npx ovsx publish --pre-release --packagePath biome_lsp-*.vsix
-        if: needs.build.outputs.prerelease == 'true'
-        env:
-          OVSX_PAT: ${{ secrets.OVSX_PAT }}
-      - name: Publish extension to Open VSX
-        run: npx ovsx publish --packagePath biome_lsp-*.vsix
-        if: needs.build.outputs.prerelease != 'true'
-        env:
-          OVSX_PAT: ${{ secrets.OVSX_PAT }}
-
-      - name: Extract changelog
-        run: |
-          bash scripts/print-changelog.sh ${{ needs.build.outputs.version }} >| ${{ github.workspace }}/RELEASE_NOTES
-      - name: Create GitHub release and tag
-        uses: softprops/action-gh-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          name: VSCode Extension v${{ needs.build.outputs.version }}
-          tag_name: lsp/v${{ needs.build.outputs.version }}
-          draft: false
-          prerelease: ${{ needs.build.outputs.prerelease == 'true' }}
-          body_path: ${{ github.workspace }}/RELEASE_NOTES
-          files: |
-            biome_lsp-*.vsix
-          fail_on_unmatched_files: true
-          generate_release_notes: true
 
   build-intellij:
     name: Build Intellij LSP
@@ -289,7 +84,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Java
         uses: actions/setup-java@v3
@@ -342,7 +137,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Download gradle properties file
         uses: actions/download-artifact@v3

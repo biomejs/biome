@@ -54,6 +54,22 @@ test.expect(t => {
 }, false,
     // comment
     )
+
+// should group start of function expression onto the same line
+const Button1 = forwardRef(function Button(props, ref) {
+        return <button ref={ref} />;
+    }
+    );
+      
+const Button2 = forwardRef(function (props, ref) { return <button ref={ref} />; }
+    );
+
+// should break whole call before breaking parameter list
+const FilterButton = forwardRefWithLongFunctionName(function FilterButton(props, ref) {
+      return <button ref={ref} />;
+    }
+  );
+  
 ```
 
 
@@ -66,6 +82,7 @@ test.expect(t => {
 -----
 Indent style: Tab
 Indent width: 2
+Line ending: LF
 Line width: 80
 Quote style: Double Quotes
 JSX quote style: Double Quotes
@@ -73,6 +90,8 @@ Quote properties: As needed
 Trailing comma: All
 Semicolons: Always
 Arrow parentheses: Always
+Bracket spacing: true
+Bracket same line: false
 -----
 
 ```js
@@ -124,6 +143,22 @@ test.expect(
 	},
 	false,
 	// comment
+);
+
+// should group start of function expression onto the same line
+const Button1 = forwardRef(function Button(props, ref) {
+	return <button ref={ref} />;
+});
+
+const Button2 = forwardRef(function (props, ref) {
+	return <button ref={ref} />;
+});
+
+// should break whole call before breaking parameter list
+const FilterButton = forwardRefWithLongFunctionName(
+	function FilterButton(props, ref) {
+		return <button ref={ref} />;
+	},
 );
 ```
 

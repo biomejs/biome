@@ -7,6 +7,13 @@ info: ts/type/mapped_type.ts
 
 ```ts
 type LongNameHereToCauseLineBreak_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa ={ [K in "foo"]: string };
+
+export type OmitIndexSignature<ObjectType> = {
+	[KeyType in keyof ObjectType as {} extends Record<KeyType, unknown>
+		? never
+		: KeyType]: ObjectType[KeyType];
+};
+
 ```
 
 
@@ -19,6 +26,7 @@ type LongNameHereToCauseLineBreak_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 -----
 Indent style: Tab
 Indent width: 2
+Line ending: LF
 Line width: 80
 Quote style: Double Quotes
 JSX quote style: Double Quotes
@@ -26,11 +34,19 @@ Quote properties: As needed
 Trailing comma: All
 Semicolons: Always
 Arrow parentheses: Always
+Bracket spacing: true
+Bracket same line: false
 -----
 
 ```ts
 type LongNameHereToCauseLineBreak_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa =
 	{ [K in "foo"]: string };
+
+export type OmitIndexSignature<ObjectType> = {
+	[KeyType in keyof ObjectType as {} extends Record<KeyType, unknown>
+		? never
+		: KeyType]: ObjectType[KeyType];
+};
 ```
 
 # Lines exceeding max width of 80 characters

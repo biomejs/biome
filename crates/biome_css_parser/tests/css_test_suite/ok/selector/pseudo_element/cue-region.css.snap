@@ -17,12 +17,14 @@ video::cue-region(   #scroll   ) {}
 
 ```
 CssRoot {
+    bom_token: missing (optional),
     rules: CssRuleList [
         CssRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
                     simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
                         ident: CssIdentifier {
                             value_token: IDENT@0..5 "video" [] [],
                         },
@@ -31,7 +33,7 @@ CssRoot {
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@5..7 "::" [] [],
                             element: CssPseudoElementIdentifier {
-                                ident: CssIdentifier {
+                                name: CssIdentifier {
                                     value_token: IDENT@7..18 "cue-region" [] [Whitespace(" ")],
                                 },
                             },
@@ -50,6 +52,7 @@ CssRoot {
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
                     simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
                         ident: CssIdentifier {
                             value_token: IDENT@20..26 "video" [Newline("\n")] [],
                         },
@@ -57,7 +60,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@26..28 "::" [] [],
-                            element: CssPseudoElementFunction {
+                            element: CssPseudoElementFunctionSelector {
                                 name: CssIdentifier {
                                     value_token: IDENT@28..38 "cue-region" [] [],
                                 },
@@ -91,6 +94,7 @@ CssRoot {
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
                     simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
                         ident: CssIdentifier {
                             value_token: IDENT@50..56 "video" [Newline("\n")] [],
                         },
@@ -98,7 +102,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@56..58 "::" [] [],
-                            element: CssPseudoElementFunction {
+                            element: CssPseudoElementFunctionSelector {
                                 name: CssIdentifier {
                                     value_token: IDENT@58..68 "cue-region" [] [],
                                 },
@@ -136,13 +140,15 @@ CssRoot {
 
 ```
 0: CSS_ROOT@0..87
-  0: CSS_RULE_LIST@0..86
+  0: (empty)
+  1: CSS_RULE_LIST@0..86
     0: CSS_RULE@0..20
       0: CSS_SELECTOR_LIST@0..18
         0: CSS_COMPOUND_SELECTOR@0..18
           0: (empty)
           1: CSS_TYPE_SELECTOR@0..5
-            0: CSS_IDENTIFIER@0..5
+            0: (empty)
+            1: CSS_IDENTIFIER@0..5
               0: IDENT@0..5 "video" [] []
           2: CSS_SUB_SELECTOR_LIST@5..18
             0: CSS_PSEUDO_ELEMENT_SELECTOR@5..18
@@ -159,12 +165,13 @@ CssRoot {
         0: CSS_COMPOUND_SELECTOR@20..48
           0: (empty)
           1: CSS_TYPE_SELECTOR@20..26
-            0: CSS_IDENTIFIER@20..26
+            0: (empty)
+            1: CSS_IDENTIFIER@20..26
               0: IDENT@20..26 "video" [Newline("\n")] []
           2: CSS_SUB_SELECTOR_LIST@26..48
             0: CSS_PSEUDO_ELEMENT_SELECTOR@26..48
               0: COLON2@26..28 "::" [] []
-              1: CSS_PSEUDO_ELEMENT_FUNCTION@28..48
+              1: CSS_PSEUDO_ELEMENT_FUNCTION_SELECTOR@28..48
                 0: CSS_IDENTIFIER@28..38
                   0: IDENT@28..38 "cue-region" [] []
                 1: L_PAREN@38..39 "(" [] []
@@ -186,12 +193,13 @@ CssRoot {
         0: CSS_COMPOUND_SELECTOR@50..84
           0: (empty)
           1: CSS_TYPE_SELECTOR@50..56
-            0: CSS_IDENTIFIER@50..56
+            0: (empty)
+            1: CSS_IDENTIFIER@50..56
               0: IDENT@50..56 "video" [Newline("\n")] []
           2: CSS_SUB_SELECTOR_LIST@56..84
             0: CSS_PSEUDO_ELEMENT_SELECTOR@56..84
               0: COLON2@56..58 "::" [] []
-              1: CSS_PSEUDO_ELEMENT_FUNCTION@58..84
+              1: CSS_PSEUDO_ELEMENT_FUNCTION_SELECTOR@58..84
                 0: CSS_IDENTIFIER@58..68
                   0: IDENT@58..68 "cue-region" [] []
                 1: L_PAREN@68..72 "(" [] [Whitespace("   ")]
@@ -208,7 +216,7 @@ CssRoot {
         0: L_CURLY@84..85 "{" [] []
         1: CSS_DECLARATION_LIST@85..85
         2: R_CURLY@85..86 "}" [] []
-  1: EOF@86..87 "" [Newline("\n")] []
+  2: EOF@86..87 "" [Newline("\n")] []
 
 ```
 

@@ -1,0 +1,5 @@
+:host(.special-custom-element) {}
+:host(   .special-custom-element   ) {}
+:host(.footer) {}
+:host {}
+:host(.footer) .div {}

@@ -20,6 +20,7 @@ video::cue(#cue1) {}
 
 ```
 CssRoot {
+    bom_token: missing (optional),
     rules: CssRuleList [
         CssRule {
             prelude: CssSelectorList [
@@ -30,7 +31,7 @@ CssRoot {
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@0..2 "::" [] [],
                             element: CssPseudoElementIdentifier {
-                                ident: CssIdentifier {
+                                name: CssIdentifier {
                                     value_token: IDENT@2..6 "cue" [] [Whitespace(" ")],
                                 },
                             },
@@ -52,7 +53,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@8..11 "::" [Newline("\n")] [],
-                            element: CssPseudoElementFunction {
+                            element: CssPseudoElementFunctionSelector {
                                 name: CssIdentifier {
                                     value_token: IDENT@11..14 "cue" [] [],
                                 },
@@ -60,6 +61,7 @@ CssRoot {
                                 selector: CssCompoundSelector {
                                     nesting_selector_token: missing (optional),
                                     simple_selector: CssTypeSelector {
+                                        namespace: missing (optional),
                                         ident: CssIdentifier {
                                             value_token: IDENT@15..16 "v" [] [],
                                         },
@@ -67,8 +69,11 @@ CssRoot {
                                     sub_selectors: CssSubSelectorList [
                                         CssAttributeSelector {
                                             l_brack_token: L_BRACK@16..17 "[" [] [],
-                                            name: CssIdentifier {
-                                                value_token: IDENT@17..22 "voice" [] [],
+                                            name: CssAttributeName {
+                                                namespace: missing (optional),
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@17..22 "voice" [] [],
+                                                },
                                             },
                                             matcher: CssAttributeMatcher {
                                                 operator: EQ@22..23 "=" [] [],
@@ -103,7 +108,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@34..37 "::" [Newline("\n")] [],
-                            element: CssPseudoElementFunction {
+                            element: CssPseudoElementFunctionSelector {
                                 name: CssIdentifier {
                                     value_token: IDENT@37..40 "cue" [] [],
                                 },
@@ -111,6 +116,7 @@ CssRoot {
                                 selector: CssCompoundSelector {
                                     nesting_selector_token: missing (optional),
                                     simple_selector: CssTypeSelector {
+                                        namespace: missing (optional),
                                         ident: CssIdentifier {
                                             value_token: IDENT@44..45 "v" [] [],
                                         },
@@ -118,8 +124,11 @@ CssRoot {
                                     sub_selectors: CssSubSelectorList [
                                         CssAttributeSelector {
                                             l_brack_token: L_BRACK@45..46 "[" [] [],
-                                            name: CssIdentifier {
-                                                value_token: IDENT@46..51 "voice" [] [],
+                                            name: CssAttributeName {
+                                                namespace: missing (optional),
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@46..51 "voice" [] [],
+                                                },
                                             },
                                             matcher: CssAttributeMatcher {
                                                 operator: EQ@51..52 "=" [] [],
@@ -151,6 +160,7 @@ CssRoot {
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
                     simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
                         ident: CssIdentifier {
                             value_token: IDENT@66..72 "video" [Newline("\n")] [],
                         },
@@ -159,7 +169,7 @@ CssRoot {
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@72..74 "::" [] [],
                             element: CssPseudoElementIdentifier {
-                                ident: CssIdentifier {
+                                name: CssIdentifier {
                                     value_token: IDENT@74..78 "cue" [] [Whitespace(" ")],
                                 },
                             },
@@ -178,6 +188,7 @@ CssRoot {
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
                     simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
                         ident: CssIdentifier {
                             value_token: IDENT@80..86 "video" [Newline("\n")] [],
                         },
@@ -185,7 +196,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@86..88 "::" [] [],
-                            element: CssPseudoElementFunction {
+                            element: CssPseudoElementFunctionSelector {
                                 name: CssIdentifier {
                                     value_token: IDENT@88..91 "cue" [] [],
                                 },
@@ -193,6 +204,7 @@ CssRoot {
                                 selector: CssCompoundSelector {
                                     nesting_selector_token: missing (optional),
                                     simple_selector: CssTypeSelector {
+                                        namespace: missing (optional),
                                         ident: CssIdentifier {
                                             value_token: IDENT@92..93 "b" [] [],
                                         },
@@ -216,6 +228,7 @@ CssRoot {
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
                     simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
                         ident: CssIdentifier {
                             value_token: IDENT@97..103 "video" [Newline("\n")] [],
                         },
@@ -223,7 +236,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@103..105 "::" [] [],
-                            element: CssPseudoElementFunction {
+                            element: CssPseudoElementFunctionSelector {
                                 name: CssIdentifier {
                                     value_token: IDENT@105..108 "cue" [] [],
                                 },
@@ -261,7 +274,8 @@ CssRoot {
 
 ```
 0: CSS_ROOT@0..119
-  0: CSS_RULE_LIST@0..118
+  0: (empty)
+  1: CSS_RULE_LIST@0..118
     0: CSS_RULE@0..8
       0: CSS_SELECTOR_LIST@0..6
         0: CSS_COMPOUND_SELECTOR@0..6
@@ -285,20 +299,23 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@8..32
             0: CSS_PSEUDO_ELEMENT_SELECTOR@8..32
               0: COLON2@8..11 "::" [Newline("\n")] []
-              1: CSS_PSEUDO_ELEMENT_FUNCTION@11..32
+              1: CSS_PSEUDO_ELEMENT_FUNCTION_SELECTOR@11..32
                 0: CSS_IDENTIFIER@11..14
                   0: IDENT@11..14 "cue" [] []
                 1: L_PAREN@14..15 "(" [] []
                 2: CSS_COMPOUND_SELECTOR@15..30
                   0: (empty)
                   1: CSS_TYPE_SELECTOR@15..16
-                    0: CSS_IDENTIFIER@15..16
+                    0: (empty)
+                    1: CSS_IDENTIFIER@15..16
                       0: IDENT@15..16 "v" [] []
                   2: CSS_SUB_SELECTOR_LIST@16..30
                     0: CSS_ATTRIBUTE_SELECTOR@16..30
                       0: L_BRACK@16..17 "[" [] []
-                      1: CSS_IDENTIFIER@17..22
-                        0: IDENT@17..22 "voice" [] []
+                      1: CSS_ATTRIBUTE_NAME@17..22
+                        0: (empty)
+                        1: CSS_IDENTIFIER@17..22
+                          0: IDENT@17..22 "voice" [] []
                       2: CSS_ATTRIBUTE_MATCHER@22..29
                         0: EQ@22..23 "=" [] []
                         1: CSS_ATTRIBUTE_MATCHER_VALUE@23..29
@@ -319,20 +336,23 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@34..64
             0: CSS_PSEUDO_ELEMENT_SELECTOR@34..64
               0: COLON2@34..37 "::" [Newline("\n")] []
-              1: CSS_PSEUDO_ELEMENT_FUNCTION@37..64
+              1: CSS_PSEUDO_ELEMENT_FUNCTION_SELECTOR@37..64
                 0: CSS_IDENTIFIER@37..40
                   0: IDENT@37..40 "cue" [] []
                 1: L_PAREN@40..44 "(" [] [Whitespace("   ")]
                 2: CSS_COMPOUND_SELECTOR@44..62
                   0: (empty)
                   1: CSS_TYPE_SELECTOR@44..45
-                    0: CSS_IDENTIFIER@44..45
+                    0: (empty)
+                    1: CSS_IDENTIFIER@44..45
                       0: IDENT@44..45 "v" [] []
                   2: CSS_SUB_SELECTOR_LIST@45..62
                     0: CSS_ATTRIBUTE_SELECTOR@45..62
                       0: L_BRACK@45..46 "[" [] []
-                      1: CSS_IDENTIFIER@46..51
-                        0: IDENT@46..51 "voice" [] []
+                      1: CSS_ATTRIBUTE_NAME@46..51
+                        0: (empty)
+                        1: CSS_IDENTIFIER@46..51
+                          0: IDENT@46..51 "voice" [] []
                       2: CSS_ATTRIBUTE_MATCHER@51..58
                         0: EQ@51..52 "=" [] []
                         1: CSS_ATTRIBUTE_MATCHER_VALUE@52..58
@@ -350,7 +370,8 @@ CssRoot {
         0: CSS_COMPOUND_SELECTOR@66..78
           0: (empty)
           1: CSS_TYPE_SELECTOR@66..72
-            0: CSS_IDENTIFIER@66..72
+            0: (empty)
+            1: CSS_IDENTIFIER@66..72
               0: IDENT@66..72 "video" [Newline("\n")] []
           2: CSS_SUB_SELECTOR_LIST@72..78
             0: CSS_PSEUDO_ELEMENT_SELECTOR@72..78
@@ -367,19 +388,21 @@ CssRoot {
         0: CSS_COMPOUND_SELECTOR@80..95
           0: (empty)
           1: CSS_TYPE_SELECTOR@80..86
-            0: CSS_IDENTIFIER@80..86
+            0: (empty)
+            1: CSS_IDENTIFIER@80..86
               0: IDENT@80..86 "video" [Newline("\n")] []
           2: CSS_SUB_SELECTOR_LIST@86..95
             0: CSS_PSEUDO_ELEMENT_SELECTOR@86..95
               0: COLON2@86..88 "::" [] []
-              1: CSS_PSEUDO_ELEMENT_FUNCTION@88..95
+              1: CSS_PSEUDO_ELEMENT_FUNCTION_SELECTOR@88..95
                 0: CSS_IDENTIFIER@88..91
                   0: IDENT@88..91 "cue" [] []
                 1: L_PAREN@91..92 "(" [] []
                 2: CSS_COMPOUND_SELECTOR@92..93
                   0: (empty)
                   1: CSS_TYPE_SELECTOR@92..93
-                    0: CSS_IDENTIFIER@92..93
+                    0: (empty)
+                    1: CSS_IDENTIFIER@92..93
                       0: IDENT@92..93 "b" [] []
                   2: CSS_SUB_SELECTOR_LIST@93..93
                 3: R_PAREN@93..95 ")" [] [Whitespace(" ")]
@@ -392,12 +415,13 @@ CssRoot {
         0: CSS_COMPOUND_SELECTOR@97..116
           0: (empty)
           1: CSS_TYPE_SELECTOR@97..103
-            0: CSS_IDENTIFIER@97..103
+            0: (empty)
+            1: CSS_IDENTIFIER@97..103
               0: IDENT@97..103 "video" [Newline("\n")] []
           2: CSS_SUB_SELECTOR_LIST@103..116
             0: CSS_PSEUDO_ELEMENT_SELECTOR@103..116
               0: COLON2@103..105 "::" [] []
-              1: CSS_PSEUDO_ELEMENT_FUNCTION@105..116
+              1: CSS_PSEUDO_ELEMENT_FUNCTION_SELECTOR@105..116
                 0: CSS_IDENTIFIER@105..108
                   0: IDENT@105..108 "cue" [] []
                 1: L_PAREN@108..109 "(" [] []
@@ -414,7 +438,7 @@ CssRoot {
         0: L_CURLY@116..117 "{" [] []
         1: CSS_DECLARATION_LIST@117..117
         2: R_CURLY@117..118 "}" [] []
-  1: EOF@118..119 "" [Newline("\n")] []
+  2: EOF@118..119 "" [Newline("\n")] []
 
 ```
 

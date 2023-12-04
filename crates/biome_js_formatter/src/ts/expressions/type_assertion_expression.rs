@@ -87,7 +87,8 @@ pub(super) fn type_cast_like_needs_parens(node: &JsSyntaxNode, parent: &JsSyntax
     ));
 
     match parent.kind() {
-        JsSyntaxKind::JS_EXTENDS_CLAUSE
+        JsSyntaxKind::JS_EXPORT_DEFAULT_EXPRESSION_CLAUSE
+        | JsSyntaxKind::JS_EXTENDS_CLAUSE
         | JsSyntaxKind::TS_TYPE_ASSERTION_EXPRESSION
         | JsSyntaxKind::JS_UNARY_EXPRESSION
         | JsSyntaxKind::JS_AWAIT_EXPRESSION

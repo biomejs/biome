@@ -1510,6 +1510,29 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsVariableDeclarator {
         )
     }
 }
+impl FormatRule<biome_js_syntax::JsLabel> for crate::js::auxiliary::label::FormatJsLabel {
+    type Context = JsFormatContext;
+    #[inline(always)]
+    fn fmt(&self, node: &biome_js_syntax::JsLabel, f: &mut JsFormatter) -> FormatResult<()> {
+        FormatNodeRule::<biome_js_syntax::JsLabel>::fmt(self, node, f)
+    }
+}
+impl AsFormat<JsFormatContext> for biome_js_syntax::JsLabel {
+    type Format<'a> =
+        FormatRefWithRule<'a, biome_js_syntax::JsLabel, crate::js::auxiliary::label::FormatJsLabel>;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(self, crate::js::auxiliary::label::FormatJsLabel::default())
+    }
+}
+impl IntoFormat<JsFormatContext> for biome_js_syntax::JsLabel {
+    type Format =
+        FormatOwnedWithRule<biome_js_syntax::JsLabel, crate::js::auxiliary::label::FormatJsLabel>;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(self, crate::js::auxiliary::label::FormatJsLabel::default())
+    }
+}
 impl FormatRule<biome_js_syntax::JsCaseClause>
     for crate::js::auxiliary::case_clause::FormatJsCaseClause
 {

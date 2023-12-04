@@ -5,7 +5,9 @@ use crate::parentheses::{unary_like_expression_needs_parentheses, NeedsParenthes
 
 use biome_js_syntax::JsSyntaxNode;
 use biome_js_syntax::JsUnaryExpression;
-use biome_js_syntax::{JsUnaryExpressionFields, JsUnaryOperator};
+use biome_js_syntax::{
+    JsInExpression, JsInstanceofExpression, JsUnaryExpressionFields, JsUnaryOperator,
+};
 use biome_rowan::match_ast;
 
 #[derive(Debug, Clone, Default)]
@@ -65,6 +67,12 @@ impl NeedsParentheses for JsUnaryExpression {
                     matches!(operator, Ok(JsUnaryOperator::Plus | JsUnaryOperator::Minus))
                         && parent_operator == operator
                 },
+                // A user typing `!foo instanceof Bar` probably intended `!(foo instanceof Bar)`,
+                // so format to `(!foo) instance Bar` to what is really happening
+                JsInstanceofExpression(_) => true,
+                // A user typing `!foo in bar` probably intended `!(foo instanceof Bar)`,
+                // so format to `(!foo) in bar` to what is really happening
+                JsInExpression(_) => true,
                 _ => {
                     unary_like_expression_needs_parentheses(self.syntax(), parent)
                 }
@@ -82,6 +90,11 @@ mod tests {
     #[test]
     fn needs_parentheses() {
         assert_needs_parentheses!("class A extends (!B) {}", JsUnaryExpression);
+
+        assert_needs_parentheses!("(!foo) instanceof Bar", JsUnaryExpression);
+        assert_needs_parentheses!("(!foo) instanceof Bar", JsUnaryExpression);
+        assert_needs_parentheses!("(~foo) in bar", JsUnaryExpression);
+        assert_needs_parentheses!("(~foo) in bar", JsUnaryExpression);
 
         assert_needs_parentheses!("(+a).b", JsUnaryExpression);
         assert_needs_parentheses!("(+a)[b]", JsUnaryExpression);

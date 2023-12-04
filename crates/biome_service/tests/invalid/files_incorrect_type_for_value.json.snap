@@ -4,7 +4,7 @@ expression: files_incorrect_type_for_value.json
 ---
 files_incorrect_type_for_value.json:3:14 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The value of key maxSize is incorrect. Expected a number.
+  × maxSize has an incorrect type, expected a number, but received a string.
   
     1 │ {
     2 │ 	"files": {

@@ -42,7 +42,7 @@ function component() {
     let a = 1;
     useEffect(() => {
         console.log(a);
-    });
+    }, []);
 }
 ```
 
@@ -55,7 +55,7 @@ function component() {
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>5 │ </strong>    useEffect(() =&gt; {
    <strong>   │ </strong>    <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
     <strong>6 │ </strong>        console.log(a);
-    <strong>7 │ </strong>    });
+    <strong>7 │ </strong>    }, []);
   
 <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">This dependency is not specified in the hook dependency list.</span>
   
@@ -63,8 +63,10 @@ function component() {
     <strong>5 │ </strong>    useEffect(() =&gt; {
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>6 │ </strong>        console.log(a);
    <strong>   │ </strong>                    <strong><span style="color: Tomato;">^</span></strong>
-    <strong>7 │ </strong>    });
+    <strong>7 │ </strong>    }, []);
     <strong>8 │ </strong>}
+  
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Either include it or remove the dependency array</span>
   
 </code></pre>
 
@@ -142,7 +144,7 @@ function component() {
     const b = a + 1;
     useEffect(() => {
         console.log(b);
-    });
+    }, []);
 }
 ```
 
@@ -155,7 +157,7 @@ function component() {
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>6 │ </strong>    useEffect(() =&gt; {
    <strong>   │ </strong>    <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
     <strong>7 │ </strong>        console.log(b);
-    <strong>8 │ </strong>    });
+    <strong>8 │ </strong>    }, []);
   
 <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">This dependency is not specified in the hook dependency list.</span>
   
@@ -163,8 +165,10 @@ function component() {
     <strong>6 │ </strong>    useEffect(() =&gt; {
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>7 │ </strong>        console.log(b);
    <strong>   │ </strong>                    <strong><span style="color: Tomato;">^</span></strong>
-    <strong>8 │ </strong>    });
+    <strong>8 │ </strong>    }, []);
     <strong>9 │ </strong>}
+  
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Either include it or remove the dependency array</span>
   
 </code></pre>
 
@@ -193,7 +197,7 @@ function component() {
 ```
 
 ```jsx
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 function component() {
     const [name, setName] = useState();

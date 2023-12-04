@@ -38,7 +38,7 @@ impl NeedsParentheses for JsObjectExpression {
 
 #[cfg(test)]
 mod tests {
-    use crate::assert_needs_parentheses;
+    use crate::{assert_needs_parentheses, assert_not_needs_parentheses};
     use biome_js_syntax::JsObjectExpression;
 
     #[test]
@@ -59,5 +59,10 @@ mod tests {
         assert_needs_parentheses!("({ a: 'test' }) && true", JsObjectExpression);
         assert_needs_parentheses!("({ a: 'test' }) instanceof A", JsObjectExpression);
         assert_needs_parentheses!("({ a: 'test' }) in B", JsObjectExpression);
+
+        assert_not_needs_parentheses!("() => ({}, a);", JsObjectExpression);
+        assert_not_needs_parentheses!("() => (a = {});", JsObjectExpression);
+        assert_not_needs_parentheses!("() => ({}.prop = 0);", JsObjectExpression);
+        assert_not_needs_parentheses!("() => ({}['prop'] = 0);", JsObjectExpression);
     }
 }

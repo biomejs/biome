@@ -16,12 +16,14 @@ tabbed-custom-element::part(   active   ) {}
 
 ```
 CssRoot {
+    bom_token: missing (optional),
     rules: CssRuleList [
         CssRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
                     simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
                         ident: CssIdentifier {
                             value_token: IDENT@0..21 "tabbed-custom-element" [] [],
                         },
@@ -29,8 +31,8 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@21..23 "::" [] [],
-                            element: CssPseudoElementPart {
-                                name_token: PART_KW@23..27 "part" [] [],
+                            element: CssPseudoElementFunctionIdentifier {
+                                name: PART_KW@23..27 "part" [] [],
                                 l_paren_token: L_PAREN@27..28 "(" [] [],
                                 ident: CssIdentifier {
                                     value_token: IDENT@28..34 "active" [] [],
@@ -52,6 +54,7 @@ CssRoot {
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
                     simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
                         ident: CssIdentifier {
                             value_token: IDENT@38..60 "tabbed-custom-element" [Newline("\n")] [],
                         },
@@ -59,8 +62,8 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@60..62 "::" [] [],
-                            element: CssPseudoElementPart {
-                                name_token: PART_KW@62..66 "part" [] [],
+                            element: CssPseudoElementFunctionIdentifier {
+                                name: PART_KW@62..66 "part" [] [],
                                 l_paren_token: L_PAREN@66..70 "(" [] [Whitespace("   ")],
                                 ident: CssIdentifier {
                                     value_token: IDENT@70..79 "active" [] [Whitespace("   ")],
@@ -86,18 +89,20 @@ CssRoot {
 
 ```
 0: CSS_ROOT@0..84
-  0: CSS_RULE_LIST@0..83
+  0: (empty)
+  1: CSS_RULE_LIST@0..83
     0: CSS_RULE@0..38
       0: CSS_SELECTOR_LIST@0..36
         0: CSS_COMPOUND_SELECTOR@0..36
           0: (empty)
           1: CSS_TYPE_SELECTOR@0..21
-            0: CSS_IDENTIFIER@0..21
+            0: (empty)
+            1: CSS_IDENTIFIER@0..21
               0: IDENT@0..21 "tabbed-custom-element" [] []
           2: CSS_SUB_SELECTOR_LIST@21..36
             0: CSS_PSEUDO_ELEMENT_SELECTOR@21..36
               0: COLON2@21..23 "::" [] []
-              1: CSS_PSEUDO_ELEMENT_PART@23..36
+              1: CSS_PSEUDO_ELEMENT_FUNCTION_IDENTIFIER@23..36
                 0: PART_KW@23..27 "part" [] []
                 1: L_PAREN@27..28 "(" [] []
                 2: CSS_IDENTIFIER@28..34
@@ -112,12 +117,13 @@ CssRoot {
         0: CSS_COMPOUND_SELECTOR@38..81
           0: (empty)
           1: CSS_TYPE_SELECTOR@38..60
-            0: CSS_IDENTIFIER@38..60
+            0: (empty)
+            1: CSS_IDENTIFIER@38..60
               0: IDENT@38..60 "tabbed-custom-element" [Newline("\n")] []
           2: CSS_SUB_SELECTOR_LIST@60..81
             0: CSS_PSEUDO_ELEMENT_SELECTOR@60..81
               0: COLON2@60..62 "::" [] []
-              1: CSS_PSEUDO_ELEMENT_PART@62..81
+              1: CSS_PSEUDO_ELEMENT_FUNCTION_IDENTIFIER@62..81
                 0: PART_KW@62..66 "part" [] []
                 1: L_PAREN@66..70 "(" [] [Whitespace("   ")]
                 2: CSS_IDENTIFIER@70..79
@@ -127,7 +133,7 @@ CssRoot {
         0: L_CURLY@81..82 "{" [] []
         1: CSS_DECLARATION_LIST@82..82
         2: R_CURLY@82..83 "}" [] []
-  1: EOF@83..84 "" [Newline("\n")] []
+  2: EOF@83..84 "" [Newline("\n")] []
 
 ```
 

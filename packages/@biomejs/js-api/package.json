@@ -7,8 +7,8 @@
     "format": "cargo biome-cli-dev format ./ --write",
     "ci": "cargo biome-cli-dev ci ./src && tsc --noEmit",
     "check": "pnpm biome:check && tsc --noEmit",
-	"biome:check": "cargo biome-cli-dev check ./",
-	"check:apply": "cargo biome-cli-dev check ./ --apply-unsafe",
+		"biome:check": "cargo biome-cli-dev check ./",
+		"check:apply": "cargo biome-cli-dev check ./ --apply-unsafe",
     "build:wasm-bundler-dev": "wasm-pack build --out-dir ../../packages/@biomejs/wasm-bundler --target bundler --dev --scope biomedev ../../../crates/biome_wasm",
     "build:wasm-bundler": "wasm-pack build --out-dir ../../packages/@biomejs/wasm-bundler --target bundler --release --scope biomedev ../../../crates/biome_wasm",
     "build:wasm-node-dev": "wasm-pack build --out-dir ../../packages/@biomejs/wasm-nodejs --target nodejs --dev --scope biomedev ../../../crates/biome_wasm",
@@ -21,6 +21,9 @@
   },
   "files": [
     "README.md",
+		"LICENSE-APACHE",
+		"LICENSE-MIT",
+    "ROME-LICENSE-MIT",
     "dist/"
   ],
   "main": "./dist/index.js",
@@ -31,7 +34,7 @@
     "APIs",
     "biome"
   ],
-  "license": "MIT",
+  "license": "MIT OR Apache-2.0",
   "homepage": "https://biomejs.dev",
   "repository": {
     "type": "git",

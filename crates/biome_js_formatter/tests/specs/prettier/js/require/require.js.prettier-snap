@@ -25,3 +25,13 @@ const {
 } = require("./my-utils");
 
 const MyReallyExtrememlyLongModuleName = require("MyReallyExtrememlyLongModuleName");
+
+const plugin = require(
+  global.STANDALONE
+    ? path.join(__dirname, "../standalone.js")
+    : path.join(__dirname, ".."),
+);
+
+const plugin2 = require(
+  path.join(__dirname, global.STANDALONE ? "../standalone.js" : ".."),
+);

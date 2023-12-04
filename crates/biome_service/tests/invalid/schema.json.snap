@@ -4,7 +4,7 @@ expression: schema.json
 ---
 schema.json:2:13 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The value of key $schema is incorrect. Expected a string.
+  × $schema has an incorrect type, expected a string, but received a boolean.
   
     1 │ {
   > 2 │ 	"$schema": false

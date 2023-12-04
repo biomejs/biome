@@ -9,12 +9,14 @@ use std::time::Duration;
 use biome_css_syntax::CssSyntaxKind::EOF;
 use biome_parser::lexer::Lexer;
 use crate::lexer::CssLexContext;
+use crate::CssParserOptions;
 
 // Assert the result of lexing a piece of source code,
 // and make sure the tokens yielded are fully lossless and the source can be reconstructed from only the tokens
 macro_rules! assert_lex {
     ($src:expr, $($kind:ident:$len:expr $(,)?)*) => {{
-        let mut lexer = CssLexer::from_str($src);
+        let config = CssParserOptions::default().with_allow_wrong_line_comments();
+        let mut lexer = CssLexer::from_str($src).with_config(config);
         let mut idx = 0;
         let mut tok_idx = TextSize::default();
 
@@ -346,7 +348,7 @@ fn identifier() {
 }
 
 #[test]
-fn single_line_comments() {
+fn wrong_line_comments() {
     assert_lex! {
         "//abc
     ",

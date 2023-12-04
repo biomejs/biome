@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -56,8 +57,9 @@ JsModule {
 
 0: JS_MODULE@0..25
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..24
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..24
     0: JS_EXPRESSION_STATEMENT@0..10
       0: JS_LOGICAL_EXPRESSION@0..10
         0: JS_IDENTIFIER_EXPRESSION@0..4
@@ -88,4 +90,4 @@ JsModule {
           0: JS_REFERENCE_IDENTIFIER@23..24
             0: IDENT@23..24 "b" [] []
       1: (empty)
-  3: EOF@24..25 "" [Newline("\n")] []
+  4: EOF@24..25 "" [Newline("\n")] []

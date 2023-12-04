@@ -25,7 +25,7 @@ impl FormatNodeRule<TsPropertySignatureTypeMember> for FormatTsPropertySignature
             f,
             [
                 readonly_token.format(),
-                space(),
+                maybe_space(readonly_token.is_some()),
                 name.format(),
                 optional_token.format(),
                 type_annotation.format(),

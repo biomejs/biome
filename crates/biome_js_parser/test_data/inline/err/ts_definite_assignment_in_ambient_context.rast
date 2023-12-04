@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -79,8 +80,9 @@ JsModule {
 
 0: JS_MODULE@0..68
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..67
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..67
     0: TS_DECLARE_STATEMENT@0..33
       0: DECLARE_KW@0..8 "declare" [] [Whitespace(" ")]
       1: JS_CLASS_DECLARATION@8..33
@@ -129,7 +131,7 @@ JsModule {
               1: TS_STRING_TYPE@59..66
                 0: STRING_KW@59..66 "string" [] [Whitespace(" ")]
       9: R_CURLY@66..67 "}" [] []
-  3: EOF@67..68 "" [Newline("\n")] []
+  4: EOF@67..68 "" [Newline("\n")] []
 --
 ts_definite_assignment_in_ambient_context.ts:1:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

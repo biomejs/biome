@@ -9,6 +9,13 @@ info: ts/parenthesis.ts
 const a = (c && b) as boolean;
 const a = <any>(c && b) as boolean;
 const a = !(c && b) as boolean;
+
+// typeof operator precedence
+type T1 = typeof obj[number];
+type T2 = (typeof obj)[number];
+type T3 = keyof typeof obj[number];
+type T4 = keyof (typeof obj)[number];
+type T5 = (keyof typeof obj)['toString'];
 ```
 
 
@@ -21,6 +28,7 @@ const a = !(c && b) as boolean;
 -----
 Indent style: Tab
 Indent width: 2
+Line ending: LF
 Line width: 80
 Quote style: Double Quotes
 JSX quote style: Double Quotes
@@ -28,12 +36,21 @@ Quote properties: As needed
 Trailing comma: All
 Semicolons: Always
 Arrow parentheses: Always
+Bracket spacing: true
+Bracket same line: false
 -----
 
 ```ts
 const a = (c && b) as boolean;
 const a = (<any>(c && b)) as boolean;
 const a = !(c && b) as boolean;
+
+// typeof operator precedence
+type T1 = (typeof obj)[number];
+type T2 = (typeof obj)[number];
+type T3 = keyof (typeof obj)[number];
+type T4 = keyof (typeof obj)[number];
+type T5 = (keyof typeof obj)["toString"];
 ```
 
 

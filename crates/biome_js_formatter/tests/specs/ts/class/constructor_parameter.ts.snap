@@ -42,6 +42,15 @@ class C {
     ) {
     }
 }
+
+class MyClass {
+    constructor(
+        b: string,
+        protected x: number,
+        a: string,
+    ) {}
+}
+
 ```
 
 
@@ -54,6 +63,7 @@ class C {
 -----
 Indent style: Tab
 Indent width: 2
+Line ending: LF
 Line width: 80
 Quote style: Double Quotes
 JSX quote style: Double Quotes
@@ -61,6 +71,8 @@ Quote properties: As needed
 Trailing comma: All
 Semicolons: Always
 Arrow parentheses: Always
+Bracket spacing: true
+Bracket same line: false
 -----
 
 ```ts
@@ -69,7 +81,10 @@ class B {
 }
 
 class A {
-	constructor(private readonly a: string, readonly b: string) {}
+	constructor(
+		private readonly a: string,
+		readonly b: string,
+	) {}
 }
 
 class C {
@@ -88,6 +103,14 @@ class C {
 		readonly b11: string,
 		readonly b22: string,
 		readonly b33: string,
+	) {}
+}
+
+class MyClass {
+	constructor(
+		b: string,
+		protected x: number,
+		a: string,
 	) {}
 }
 ```

@@ -39,7 +39,7 @@ declare_rule! {
     pub(crate) NoAccessKey {
         version: "1.0.0",
         name: "noAccessKey",
-        recommended: false,
+        recommended: true,
         fix_kind: FixKind::Unsafe,
     }
 }

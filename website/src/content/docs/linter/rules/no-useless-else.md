@@ -2,10 +2,10 @@
 title: noUselessElse (since v1.3.0)
 ---
 
-**Diagnostic Category: `lint/nursery/noUselessElse`**
+**Diagnostic Category: `lint/style/noUselessElse`**
 
-:::caution
-This rule is part of the [nursery](/linter/rules/#nursery) group.
+:::note
+This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
 Disallow `else` block when the `if` block breaks early.
@@ -13,6 +13,13 @@ Disallow `else` block when the `if` block breaks early.
 If an `if` block breaks early using a breaking statement (`return`, `break`, `continue`, or `throw`),
 then the `else` block becomes useless.
 Its contents can be placed outside of the block.
+
+If an `if` block breaks early using a breaking statement (`return`, `break`, `continue`, or `throw`),
+then the `else` block becomes unnecessary.
+This is because the content of the `else` block will never be executed in conjunction with the `if` block,
+as the breaking statement ensures the control flow exits the `if` block immediately.
+Therefore, the `else` block is redundant, and its content can be placed outside of the block,
+reducing the indentation level by one.
 
 ## Examples
 
@@ -28,7 +35,7 @@ while (x > 0) {
 }
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noUselessElse.js:4:7 <a href="https://biomejs.dev/lint/rules/no-useless-else">lint/nursery/noUselessElse</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/noUselessElse.js:4:7 <a href="https://biomejs.dev/linter/rules/no-useless-else">lint/style/noUselessElse</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This </span><span style="color: Tomato;"><strong>else</strong></span><span style="color: Tomato;"> clause can be omitted.</span>
   
@@ -69,7 +76,7 @@ while (x > 0) {
 </code></pre>
 
 ```jsx
-function f() {
+function f(x) {
     if (x < 0) {
         return 0;
     } else {
@@ -78,7 +85,7 @@ function f() {
 }
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noUselessElse.js:4:7 <a href="https://biomejs.dev/lint/rules/no-useless-else">lint/nursery/noUselessElse</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/noUselessElse.js:4:7 <a href="https://biomejs.dev/linter/rules/no-useless-else">lint/style/noUselessElse</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This </span><span style="color: Tomato;"><strong>else</strong></span><span style="color: Tomato;"> clause can be omitted.</span>
   
@@ -94,7 +101,7 @@ function f() {
   
 <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">This </span><span style="color: lightgreen;"><strong>if</strong></span><span style="color: lightgreen;"> statement uses an early breaking statement.</span>
   
-    <strong>1 │ </strong>function f() {
+    <strong>1 │ </strong>function f(x) {
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>2 │ </strong>    if (x &lt; 0) {
    <strong>   │ </strong>    <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>3 │ </strong>        return 0;
@@ -119,7 +126,7 @@ function f() {
 </code></pre>
 
 ```jsx
-function f() {
+function f(x) {
     if (x < 0) {
         throw new RangeError();
     } else {
@@ -128,7 +135,7 @@ function f() {
 }
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noUselessElse.js:4:7 <a href="https://biomejs.dev/lint/rules/no-useless-else">lint/nursery/noUselessElse</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">style/noUselessElse.js:4:7 <a href="https://biomejs.dev/linter/rules/no-useless-else">lint/style/noUselessElse</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This </span><span style="color: Tomato;"><strong>else</strong></span><span style="color: Tomato;"> clause can be omitted.</span>
   
@@ -144,7 +151,7 @@ function f() {
   
 <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">This </span><span style="color: lightgreen;"><strong>if</strong></span><span style="color: lightgreen;"> statement uses an early breaking statement.</span>
   
-    <strong>1 │ </strong>function f() {
+    <strong>1 │ </strong>function f(x) {
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>2 │ </strong>    if (x &lt; 0) {
    <strong>   │ </strong>    <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>3 │ </strong>        throw new RangeError();
@@ -171,11 +178,23 @@ function f() {
 ## Valid
 
 ```jsx
-function f() {
+function f(x) {
     if (x < 0) {
         return 0;
     }
     return x;
+}
+```
+
+```jsx
+function f(x) {
+    if (x < 0) {
+        console.info("negative number");
+    } else if (x > 0) {
+        return x;
+    } else {
+        console.info("number 0");
+    }
 }
 ```
 

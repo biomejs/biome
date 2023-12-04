@@ -1,5 +1,4 @@
 packages:
-  - "editors/vscode"
   - "editors/intellij/src/test"
   - "packages/**"
   - "website"

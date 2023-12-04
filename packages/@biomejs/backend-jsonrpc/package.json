@@ -8,7 +8,14 @@
     "tsc": "tsc --noEmit",
     "build": "tsc"
   },
-  "homepage": "https://biomejs.dev",
+	"files": [
+		"dist/",
+		"README.md",
+		"LICENSE-APACHE",
+		"LICENSE-MIT",
+		"ROME-LICENSE-MIT"
+	],
+	"homepage": "https://biomejs.dev",
   "repository": {
     "type": "git",
     "url": "https://github.com/biomejs/biome.git",
@@ -27,7 +34,7 @@
   "engines": {
     "node": ">=14.*"
   },
-  "license": "MIT",
+  "license": "MIT OR Apache-2.0",
   "devDependencies": {
     "@types/node": "^18.7.2",
     "typescript": "^4.8.2",

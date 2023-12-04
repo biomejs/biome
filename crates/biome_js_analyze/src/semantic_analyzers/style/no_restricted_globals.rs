@@ -2,12 +2,13 @@ use crate::semantic_services::SemanticServices;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
-use biome_deserialize::json::{report_unknown_map_key, VisitJsonNode};
-use biome_deserialize::{DeserializationDiagnostic, VisitNode};
+use biome_deserialize::{
+    Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor, Text,
+    VisitableType,
+};
 use biome_js_semantic::{Binding, BindingExtensions};
 use biome_js_syntax::{AnyJsIdentifierUsage, TextRange};
-use biome_json_syntax::JsonLanguage;
-use biome_rowan::{AstNode, SyntaxNode};
+use biome_rowan::AstNode;
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
@@ -69,10 +70,6 @@ pub struct RestrictedGlobalsOptions {
     denied_globals: Option<Vec<String>>,
 }
 
-impl RestrictedGlobalsOptions {
-    const ALLOWED_KEYS: &'static [&'static str] = &["deniedGlobals"];
-}
-
 // Required by [Bpaf].
 impl FromStr for RestrictedGlobalsOptions {
     type Err = &'static str;
@@ -83,23 +80,47 @@ impl FromStr for RestrictedGlobalsOptions {
     }
 }
 
-impl VisitNode<JsonLanguage> for RestrictedGlobalsOptions {
-    fn visit_map(
-        &mut self,
-        key: &SyntaxNode<JsonLanguage>,
-        value: &SyntaxNode<JsonLanguage>,
+impl Deserializable for RestrictedGlobalsOptions {
+    fn deserialize(
+        value: &impl DeserializableValue,
+        name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<()> {
-        let (name, value) = self.get_key_and_value(key, value)?;
-        let name_text = name.inner_string_text().ok()?;
-        let name_text = name_text.text();
-        if name_text == "deniedGlobals" {
-            self.denied_globals = self.map_to_array_of_strings(&value, name_text, diagnostics);
-        } else {
-            report_unknown_map_key(&name, Self::ALLOWED_KEYS, diagnostics);
-        }
+    ) -> Option<Self> {
+        value.deserialize(RestrictedGlobalsOptionsVisitor, name, diagnostics)
+    }
+}
 
-        Some(())
+struct RestrictedGlobalsOptionsVisitor;
+impl DeserializationVisitor for RestrictedGlobalsOptionsVisitor {
+    type Output = RestrictedGlobalsOptions;
+
+    const EXPECTED_TYPE: VisitableType = VisitableType::MAP;
+
+    fn visit_map(
+        self,
+        members: impl Iterator<Item = Option<(impl DeserializableValue, impl DeserializableValue)>>,
+        _range: TextRange,
+        _name: &str,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> Option<Self::Output> {
+        const ALLOWED_KEYS: &[&str] = &["deniedGlobals"];
+        let mut denied_globals = None;
+        for (key, value) in members.flatten() {
+            let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
+                continue;
+            };
+            match key_text.text() {
+                "deniedGlobals" => {
+                    denied_globals = Deserializable::deserialize(&value, &key_text, diagnostics);
+                }
+                unknown_key => diagnostics.push(DeserializationDiagnostic::new_unknown_key(
+                    unknown_key,
+                    key.range(),
+                    ALLOWED_KEYS,
+                )),
+            }
+        }
+        Some(Self::Output { denied_globals })
     }
 }
 

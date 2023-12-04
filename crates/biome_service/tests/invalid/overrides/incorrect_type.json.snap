@@ -4,7 +4,7 @@ expression: incorrect_type.json
 ---
 incorrect_type.json:2:15 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The value of key overrides is incorrect. Expected a array.
+  × overrides has an incorrect type, expected an array, but received an object.
   
     1 │ {
   > 2 │ 	"overrides": {}

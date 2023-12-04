@@ -192,12 +192,22 @@ impl FormatJsxChildList {
                         // </div>
                         // ```
                         else if let Some(JsxChild::Word(next_word)) = children_iter.peek() {
+                            let next_next_element = children_iter.peek_next();
+                            let is_next_next_element_new_line =
+                                matches!(next_next_element, Some(JsxChild::Newline));
                             let is_next_next_element_self_closing = matches!(
-                                children_iter.peek_next(),
+                                next_next_element,
                                 Some(JsxChild::NonText(AnyJsxChild::JsxSelfClosingElement(_)))
                             );
+                            let has_new_line_and_self_closing = is_next_next_element_new_line
+                                && matches!(
+                                    children_iter.peek_next_next(),
+                                    Some(JsxChild::NonText(AnyJsxChild::JsxSelfClosingElement(_)))
+                                );
 
-                            !is_next_next_element_self_closing && next_word.is_ascii_punctuation()
+                            !has_new_line_and_self_closing
+                                && !is_next_next_element_self_closing
+                                && next_word.is_ascii_punctuation()
                         } else {
                             false
                         }

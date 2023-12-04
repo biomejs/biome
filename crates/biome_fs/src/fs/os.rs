@@ -239,19 +239,6 @@ fn handle_dir_entry<'scope>(
     }
 
     if file_type.is_file() {
-        if matches!(
-            path.file_name().and_then(OsStr::to_str),
-            Some(
-                "package.json"
-                    | "package-lock.json"
-                    | "typescript.json"
-                    | "tsconfig.json"
-                    | "jsconfig.json"
-            )
-        ) {
-            return;
-        }
-
         // In case the file is inside a directory that is behind a symbolic link,
         // the unresolved origin path is used to construct a new path.
         // This is required to support ignore patterns to symbolic links.

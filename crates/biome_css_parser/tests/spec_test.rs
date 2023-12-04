@@ -22,7 +22,6 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
         "ok" => ExpectedOutcome::Pass,
         "error" => ExpectedOutcome::Fail,
         "undefined" => ExpectedOutcome::Undefined,
-        "allow_single_line_comments" => ExpectedOutcome::Pass,
         _ => panic!("Invalid expected outcome {outcome_str}"),
     };
 
@@ -37,9 +36,7 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
     let content = fs::read_to_string(test_case_path)
         .expect("Expected test path to be a readable file in UTF8 encoding");
 
-    let parse_config = CssParserOptions {
-        allow_single_line_comments: outcome_str == "allow_single_line_comments",
-    };
+    let parse_config = CssParserOptions::default().with_allow_wrong_line_comments();
     let parsed = parse_css(&content, parse_config);
     let formatted_ast = format!("{:#?}", parsed.tree());
 
@@ -136,8 +133,14 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 #[ignore]
 #[test]
 pub fn quick_test() {
-    let code = r#"::part(sample) {}"#;
-    let root = parse_css(code, CssParserOptions::default());
+    let code = r#"
+   :host(.footer) {}
+
+    "#;
+    let root = parse_css(
+        code,
+        CssParserOptions::default().with_allow_wrong_line_comments(),
+    );
     let syntax = root.syntax();
     dbg!(&syntax, root.diagnostics(), root.has_errors());
 

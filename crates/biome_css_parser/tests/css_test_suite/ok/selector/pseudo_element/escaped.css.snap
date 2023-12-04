@@ -15,12 +15,14 @@ div::bef\ore {}
 
 ```
 CssRoot {
+    bom_token: missing (optional),
     rules: CssRuleList [
         CssRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
                     simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
                         ident: CssIdentifier {
                             value_token: IDENT@0..3 "div" [] [],
                         },
@@ -29,7 +31,7 @@ CssRoot {
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@3..5 "::" [] [],
                             element: CssPseudoElementIdentifier {
-                                ident: CssIdentifier {
+                                name: CssIdentifier {
                                     value_token: IDENT@5..13 "bef\\ore" [] [Whitespace(" ")],
                                 },
                             },
@@ -52,13 +54,15 @@ CssRoot {
 
 ```
 0: CSS_ROOT@0..16
-  0: CSS_RULE_LIST@0..15
+  0: (empty)
+  1: CSS_RULE_LIST@0..15
     0: CSS_RULE@0..15
       0: CSS_SELECTOR_LIST@0..13
         0: CSS_COMPOUND_SELECTOR@0..13
           0: (empty)
           1: CSS_TYPE_SELECTOR@0..3
-            0: CSS_IDENTIFIER@0..3
+            0: (empty)
+            1: CSS_IDENTIFIER@0..3
               0: IDENT@0..3 "div" [] []
           2: CSS_SUB_SELECTOR_LIST@3..13
             0: CSS_PSEUDO_ELEMENT_SELECTOR@3..13
@@ -70,7 +74,7 @@ CssRoot {
         0: L_CURLY@13..14 "{" [] []
         1: CSS_DECLARATION_LIST@14..14
         2: R_CURLY@14..15 "}" [] []
-  1: EOF@15..16 "" [Newline("\n")] []
+  2: EOF@15..16 "" [Newline("\n")] []
 
 ```
 

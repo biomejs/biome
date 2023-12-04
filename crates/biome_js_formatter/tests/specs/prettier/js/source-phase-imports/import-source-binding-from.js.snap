@@ -1,0 +1,73 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: js/source-phase-imports/import-source-binding-from.js
+---
+
+# Input
+
+```js
+import source from from "x";
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1 +1,3 @@
+-import source from from "x";
++import source from
++from;
++("x");
+```
+
+# Output
+
+```js
+import source from
+from;
+("x");
+```
+
+# Errors
+```
+import-source-binding-from.js:1:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a string literal but instead found 'from'.
+  
+  > 1 │ import source from from "x";
+      │                    ^^^^
+    2 │ 
+  
+  i Expected a string literal here.
+  
+  > 1 │ import source from from "x";
+      │                    ^^^^
+    2 │ 
+  
+import-source-binding-from.js:1:25 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a semicolon or an implicit semicolon after a statement, but found none
+  
+  > 1 │ import source from from "x";
+      │                         ^^^
+    2 │ 
+  
+  i An explicit or implicit semicolon is expected here...
+  
+  > 1 │ import source from from "x";
+      │                         ^^^
+    2 │ 
+  
+  i ...Which is required to end this statement
+  
+  > 1 │ import source from from "x";
+      │                    ^^^^^^^^
+    2 │ 
+  
+
+```
+
+

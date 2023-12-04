@@ -1,0 +1,275 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@charset dsadsa;
+@charset ;
+@charset "iso-8859-15"
+@charset "UTF-8" 12321321;
+@charset "UTF-8" 12321321
+@charset
+
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssBogusAtRule {
+                items: [
+                    CHARSET_KW@1..9 "charset" [] [Whitespace(" ")],
+                    CssBogus {
+                        items: [
+                            IDENT@9..15 "dsadsa" [] [],
+                        ],
+                    },
+                    SEMICOLON@15..16 ";" [] [],
+                ],
+            },
+        },
+        CssAtRule {
+            at_token: AT@16..18 "@" [Newline("\n")] [],
+            rule: CssBogusAtRule {
+                items: [
+                    CHARSET_KW@18..26 "charset" [] [Whitespace(" ")],
+                    SEMICOLON@26..27 ";" [] [],
+                ],
+            },
+        },
+        CssAtRule {
+            at_token: AT@27..29 "@" [Newline("\n")] [],
+            rule: CssBogusAtRule {
+                items: [
+                    CHARSET_KW@29..37 "charset" [] [Whitespace(" ")],
+                    CssString {
+                        value_token: CSS_STRING_LITERAL@37..50 "\"iso-8859-15\"" [] [],
+                    },
+                ],
+            },
+        },
+        CssAtRule {
+            at_token: AT@50..52 "@" [Newline("\n")] [],
+            rule: CssBogusAtRule {
+                items: [
+                    CHARSET_KW@52..60 "charset" [] [Whitespace(" ")],
+                    CssString {
+                        value_token: CSS_STRING_LITERAL@60..68 "\"UTF-8\"" [] [Whitespace(" ")],
+                    },
+                    CssBogus {
+                        items: [
+                            CSS_NUMBER_LITERAL@68..76 "12321321" [] [],
+                        ],
+                    },
+                    SEMICOLON@76..77 ";" [] [],
+                ],
+            },
+        },
+        CssAtRule {
+            at_token: AT@77..79 "@" [Newline("\n")] [],
+            rule: CssBogusAtRule {
+                items: [
+                    CHARSET_KW@79..87 "charset" [] [Whitespace(" ")],
+                    CssString {
+                        value_token: CSS_STRING_LITERAL@87..95 "\"UTF-8\"" [] [Whitespace(" ")],
+                    },
+                    CssBogus {
+                        items: [
+                            CSS_NUMBER_LITERAL@95..103 "12321321" [] [],
+                        ],
+                    },
+                ],
+            },
+        },
+        CssAtRule {
+            at_token: AT@103..105 "@" [Newline("\n")] [],
+            rule: CssBogusAtRule {
+                items: [
+                    CHARSET_KW@105..112 "charset" [] [],
+                ],
+            },
+        },
+    ],
+    eof_token: EOF@112..114 "" [Newline("\n"), Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..114
+  0: (empty)
+  1: CSS_RULE_LIST@0..112
+    0: CSS_AT_RULE@0..16
+      0: AT@0..1 "@" [] []
+      1: CSS_BOGUS_AT_RULE@1..16
+        0: CHARSET_KW@1..9 "charset" [] [Whitespace(" ")]
+        1: CSS_BOGUS@9..15
+          0: IDENT@9..15 "dsadsa" [] []
+        2: SEMICOLON@15..16 ";" [] []
+    1: CSS_AT_RULE@16..27
+      0: AT@16..18 "@" [Newline("\n")] []
+      1: CSS_BOGUS_AT_RULE@18..27
+        0: CHARSET_KW@18..26 "charset" [] [Whitespace(" ")]
+        1: SEMICOLON@26..27 ";" [] []
+    2: CSS_AT_RULE@27..50
+      0: AT@27..29 "@" [Newline("\n")] []
+      1: CSS_BOGUS_AT_RULE@29..50
+        0: CHARSET_KW@29..37 "charset" [] [Whitespace(" ")]
+        1: CSS_STRING@37..50
+          0: CSS_STRING_LITERAL@37..50 "\"iso-8859-15\"" [] []
+    3: CSS_AT_RULE@50..77
+      0: AT@50..52 "@" [Newline("\n")] []
+      1: CSS_BOGUS_AT_RULE@52..77
+        0: CHARSET_KW@52..60 "charset" [] [Whitespace(" ")]
+        1: CSS_STRING@60..68
+          0: CSS_STRING_LITERAL@60..68 "\"UTF-8\"" [] [Whitespace(" ")]
+        2: CSS_BOGUS@68..76
+          0: CSS_NUMBER_LITERAL@68..76 "12321321" [] []
+        3: SEMICOLON@76..77 ";" [] []
+    4: CSS_AT_RULE@77..103
+      0: AT@77..79 "@" [Newline("\n")] []
+      1: CSS_BOGUS_AT_RULE@79..103
+        0: CHARSET_KW@79..87 "charset" [] [Whitespace(" ")]
+        1: CSS_STRING@87..95
+          0: CSS_STRING_LITERAL@87..95 "\"UTF-8\"" [] [Whitespace(" ")]
+        2: CSS_BOGUS@95..103
+          0: CSS_NUMBER_LITERAL@95..103 "12321321" [] []
+    5: CSS_AT_RULE@103..112
+      0: AT@103..105 "@" [Newline("\n")] []
+      1: CSS_BOGUS_AT_RULE@105..112
+        0: CHARSET_KW@105..112 "charset" [] []
+  2: EOF@112..114 "" [Newline("\n"), Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+at_rule_charset_error.css:1:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a string but instead found 'dsadsa'.
+  
+  > 1 │ @charset dsadsa;
+      │          ^^^^^^
+    2 │ @charset ;
+    3 │ @charset "iso-8859-15"
+  
+  i Expected a string here.
+  
+  > 1 │ @charset dsadsa;
+      │          ^^^^^^
+    2 │ @charset ;
+    3 │ @charset "iso-8859-15"
+  
+at_rule_charset_error.css:2:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a string but instead found ';'.
+  
+    1 │ @charset dsadsa;
+  > 2 │ @charset ;
+      │          ^
+    3 │ @charset "iso-8859-15"
+    4 │ @charset "UTF-8" 12321321;
+  
+  i Expected a string here.
+  
+    1 │ @charset dsadsa;
+  > 2 │ @charset ;
+      │          ^
+    3 │ @charset "iso-8859-15"
+    4 │ @charset "UTF-8" 12321321;
+  
+at_rule_charset_error.css:4:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `;` but instead found `@`
+  
+    2 │ @charset ;
+    3 │ @charset "iso-8859-15"
+  > 4 │ @charset "UTF-8" 12321321;
+      │ ^
+    5 │ @charset "UTF-8" 12321321
+    6 │ @charset
+  
+  i Remove @
+  
+at_rule_charset_error.css:4:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a string but instead found '"UTF-8" 12321321'.
+  
+    2 │ @charset ;
+    3 │ @charset "iso-8859-15"
+  > 4 │ @charset "UTF-8" 12321321;
+      │          ^^^^^^^^^^^^^^^^
+    5 │ @charset "UTF-8" 12321321
+    6 │ @charset
+  
+  i Expected a string here.
+  
+    2 │ @charset ;
+    3 │ @charset "iso-8859-15"
+  > 4 │ @charset "UTF-8" 12321321;
+      │          ^^^^^^^^^^^^^^^^
+    5 │ @charset "UTF-8" 12321321
+    6 │ @charset
+  
+at_rule_charset_error.css:5:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a string but instead found '"UTF-8" 12321321'.
+  
+    3 │ @charset "iso-8859-15"
+    4 │ @charset "UTF-8" 12321321;
+  > 5 │ @charset "UTF-8" 12321321
+      │          ^^^^^^^^^^^^^^^^
+    6 │ @charset
+    7 │ 
+  
+  i Expected a string here.
+  
+    3 │ @charset "iso-8859-15"
+    4 │ @charset "UTF-8" 12321321;
+  > 5 │ @charset "UTF-8" 12321321
+      │          ^^^^^^^^^^^^^^^^
+    6 │ @charset
+    7 │ 
+  
+at_rule_charset_error.css:6:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `;` but instead found `@`
+  
+    4 │ @charset "UTF-8" 12321321;
+    5 │ @charset "UTF-8" 12321321
+  > 6 │ @charset
+      │ ^
+    7 │ 
+  
+  i Remove @
+  
+at_rule_charset_error.css:8:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a string but instead found the end of the file.
+  
+    6 │ @charset
+    7 │ 
+  > 8 │ 
+      │ 
+  
+  i Expected a string here.
+  
+    6 │ @charset
+    7 │ 
+  > 8 │ 
+      │ 
+  
+```
+
+

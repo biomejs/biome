@@ -2,6 +2,7 @@
 
 use biome_analyze::declare_group;
 
+pub(crate) mod no_approximative_numeric_constant;
 pub(crate) mod no_assign_in_expressions;
 pub(crate) mod no_async_promise_executor;
 pub(crate) mod no_comment_text;
@@ -20,6 +21,8 @@ pub(crate) mod no_empty_interface;
 pub(crate) mod no_explicit_any;
 pub(crate) mod no_extra_non_null_assertion;
 pub(crate) mod no_fallthrough_switch_clause;
+pub(crate) mod no_misleading_instantiator;
+pub(crate) mod no_misrefactored_shorthand_assign;
 pub(crate) mod no_prototype_builtins;
 pub(crate) mod no_redundant_use_strict;
 pub(crate) mod no_self_compare;
@@ -35,6 +38,7 @@ declare_group! {
     pub (crate) Suspicious {
         name : "suspicious" ,
         rules : [
+            self :: no_approximative_numeric_constant :: NoApproximativeNumericConstant ,
             self :: no_assign_in_expressions :: NoAssignInExpressions ,
             self :: no_async_promise_executor :: NoAsyncPromiseExecutor ,
             self :: no_comment_text :: NoCommentText ,
@@ -53,6 +57,8 @@ declare_group! {
             self :: no_explicit_any :: NoExplicitAny ,
             self :: no_extra_non_null_assertion :: NoExtraNonNullAssertion ,
             self :: no_fallthrough_switch_clause :: NoFallthroughSwitchClause ,
+            self :: no_misleading_instantiator :: NoMisleadingInstantiator ,
+            self :: no_misrefactored_shorthand_assign :: NoMisrefactoredShorthandAssign ,
             self :: no_prototype_builtins :: NoPrototypeBuiltins ,
             self :: no_redundant_use_strict :: NoRedundantUseStrict ,
             self :: no_self_compare :: NoSelfCompare ,

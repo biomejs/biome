@@ -1,0 +1,26 @@
+:not(p) {}
+:not(   p   ) {}
+:not(
+p
+) {}
+button:not([DISABLED]) {}
+*:not(FOO) {}
+*:not(:link):not(:visited) {}
+.selector:not(*:root) {}
+:not(:not(argument)) {}
+p:not(.fancy) {}
+body :not(p) {}
+body :not(div):not(span) {}
+body :not(div, .fancy) {}
+h2 :not(span.foo) {}
+body > h2:not(:first-of-type):not(:last-of-type) {}
+:not(em, strong#foo) {}
+*:not(:link):not(:visited) {}
+*:not(FOO) {}
+button:not([DISABLED]) {}
+a:not(:hover) {}
+a:not(:not(:hover)) {}
+section:not(:not(h1, h2, h3, h4, h5, h6)) {}
+section:not(:not(h1, h2, h3, h4, h5, h6)) {}
+ul li:not(:first-of-type) {}
+:not(p) .div {}

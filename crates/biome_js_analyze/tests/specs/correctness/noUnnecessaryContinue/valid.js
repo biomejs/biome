@@ -56,3 +56,17 @@ for (const x of []) {
 		doSomeStuff();
 	}
 }
+
+function f(xs) {
+	for (const x of xs) {
+		switch (x) {
+			case 0:
+				if (isConstValid) {
+					continue;
+				}
+			// falls through
+			case 1:
+				break;
+		}
+	}
+}

@@ -1,0 +1,14 @@
+
+[
+    "export default function f() {};",
+    "export default class C {};",
+    "export default function () {};",
+    "export default class {};",
+    "export default X;",
+    "export default { f() {} };",
+    "export { X as default };",
+    "export { X as 'default' };",
+    "export { default } from './module';",
+    "export { X as default } from './module';",
+    "export { X as 'default' } from './module';"
+]

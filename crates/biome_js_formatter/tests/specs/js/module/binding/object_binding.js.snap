@@ -23,6 +23,7 @@ let {aaaaaaaaaaaaaaaaaaaa,bbbbbbbbbbbbbbbbbbbb=cccccccccccccccccccc,dddddddddddd
 -----
 Indent style: Tab
 Indent width: 2
+Line ending: LF
 Line width: 80
 Quote style: Double Quotes
 JSX quote style: Double Quotes
@@ -30,12 +31,43 @@ Quote properties: As needed
 Trailing comma: All
 Semicolons: Always
 Arrow parentheses: Always
+Bracket spacing: true
+Bracket same line: false
 -----
 
 ```js
 let { a } = b;
 let { d, b: c } = d;
 let { x, y = c, z: pp = f, ...g } = h;
+let {
+	aaaaaaaaaaaaaaaaaaaa,
+	bbbbbbbbbbbbbbbbbbbb = cccccccccccccccccccc,
+	dddddddddddddddddddd: eeeeeeeeeeeeeeeeeeee = ffffffffffffffffffff,
+	...gggggggggggggggggggg
+} = h;
+```
+
+## Output 2
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing comma: All
+Semicolons: Always
+Arrow parentheses: Always
+Bracket spacing: false
+Bracket same line: false
+-----
+
+```js
+let {a} = b;
+let {d, b: c} = d;
+let {x, y = c, z: pp = f, ...g} = h;
 let {
 	aaaaaaaaaaaaaaaaaaaa,
 	bbbbbbbbbbbbbbbbbbbb = cccccccccccccccccccc,

@@ -19,6 +19,7 @@ expression: snapshot
 
 ```
 CssRoot {
+    bom_token: missing (optional),
     rules: CssRuleList [
         CssRule {
             prelude: CssSelectorList [
@@ -28,7 +29,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@0..2 "::" [] [],
-                            element: CssPseudoElementFunction {
+                            element: CssPseudoElementFunctionSelector {
                                 name: CssIdentifier {
                                     value_token: IDENT@2..9 "slotted" [] [],
                                 },
@@ -36,6 +37,7 @@ CssRoot {
                                 selector: CssCompoundSelector {
                                     nesting_selector_token: missing (optional),
                                     simple_selector: CssUniversalSelector {
+                                        namespace: missing (optional),
                                         star_token: STAR@10..11 "*" [] [],
                                     },
                                     sub_selectors: CssSubSelectorList [],
@@ -60,7 +62,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@15..18 "::" [Newline("\n")] [],
-                            element: CssPseudoElementFunction {
+                            element: CssPseudoElementFunctionSelector {
                                 name: CssIdentifier {
                                     value_token: IDENT@18..25 "slotted" [] [],
                                 },
@@ -68,6 +70,7 @@ CssRoot {
                                 selector: CssCompoundSelector {
                                     nesting_selector_token: missing (optional),
                                     simple_selector: CssTypeSelector {
+                                        namespace: missing (optional),
                                         ident: CssIdentifier {
                                             value_token: IDENT@26..30 "span" [] [],
                                         },
@@ -94,7 +97,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@34..37 "::" [Newline("\n")] [],
-                            element: CssPseudoElementFunction {
+                            element: CssPseudoElementFunctionSelector {
                                 name: CssIdentifier {
                                     value_token: IDENT@37..44 "slotted" [] [],
                                 },
@@ -102,6 +105,7 @@ CssRoot {
                                 selector: CssCompoundSelector {
                                     nesting_selector_token: missing (optional),
                                     simple_selector: CssTypeSelector {
+                                        namespace: missing (optional),
                                         ident: CssIdentifier {
                                             value_token: IDENT@48..55 "span" [] [Whitespace("   ")],
                                         },
@@ -128,7 +132,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssPseudoElementSelector {
                             double_colon_token: COLON2@59..62 "::" [Newline("\n")] [],
-                            element: CssPseudoElementFunction {
+                            element: CssPseudoElementFunctionSelector {
                                 name: CssIdentifier {
                                     value_token: IDENT@62..69 "SLOTTED" [] [],
                                 },
@@ -136,6 +140,7 @@ CssRoot {
                                 selector: CssCompoundSelector {
                                     nesting_selector_token: missing (optional),
                                     simple_selector: CssTypeSelector {
+                                        namespace: missing (optional),
                                         ident: CssIdentifier {
                                             value_token: IDENT@70..74 "SPAN" [] [],
                                         },
@@ -163,7 +168,8 @@ CssRoot {
 
 ```
 0: CSS_ROOT@0..80
-  0: CSS_RULE_LIST@0..79
+  0: (empty)
+  1: CSS_RULE_LIST@0..79
     0: CSS_RULE@0..15
       0: CSS_SELECTOR_LIST@0..13
         0: CSS_COMPOUND_SELECTOR@0..13
@@ -172,14 +178,15 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@0..13
             0: CSS_PSEUDO_ELEMENT_SELECTOR@0..13
               0: COLON2@0..2 "::" [] []
-              1: CSS_PSEUDO_ELEMENT_FUNCTION@2..13
+              1: CSS_PSEUDO_ELEMENT_FUNCTION_SELECTOR@2..13
                 0: CSS_IDENTIFIER@2..9
                   0: IDENT@2..9 "slotted" [] []
                 1: L_PAREN@9..10 "(" [] []
                 2: CSS_COMPOUND_SELECTOR@10..11
                   0: (empty)
                   1: CSS_UNIVERSAL_SELECTOR@10..11
-                    0: STAR@10..11 "*" [] []
+                    0: (empty)
+                    1: STAR@10..11 "*" [] []
                   2: CSS_SUB_SELECTOR_LIST@11..11
                 3: R_PAREN@11..13 ")" [] [Whitespace(" ")]
       1: CSS_BLOCK@13..15
@@ -194,14 +201,15 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@15..32
             0: CSS_PSEUDO_ELEMENT_SELECTOR@15..32
               0: COLON2@15..18 "::" [Newline("\n")] []
-              1: CSS_PSEUDO_ELEMENT_FUNCTION@18..32
+              1: CSS_PSEUDO_ELEMENT_FUNCTION_SELECTOR@18..32
                 0: CSS_IDENTIFIER@18..25
                   0: IDENT@18..25 "slotted" [] []
                 1: L_PAREN@25..26 "(" [] []
                 2: CSS_COMPOUND_SELECTOR@26..30
                   0: (empty)
                   1: CSS_TYPE_SELECTOR@26..30
-                    0: CSS_IDENTIFIER@26..30
+                    0: (empty)
+                    1: CSS_IDENTIFIER@26..30
                       0: IDENT@26..30 "span" [] []
                   2: CSS_SUB_SELECTOR_LIST@30..30
                 3: R_PAREN@30..32 ")" [] [Whitespace(" ")]
@@ -217,14 +225,15 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@34..57
             0: CSS_PSEUDO_ELEMENT_SELECTOR@34..57
               0: COLON2@34..37 "::" [Newline("\n")] []
-              1: CSS_PSEUDO_ELEMENT_FUNCTION@37..57
+              1: CSS_PSEUDO_ELEMENT_FUNCTION_SELECTOR@37..57
                 0: CSS_IDENTIFIER@37..44
                   0: IDENT@37..44 "slotted" [] []
                 1: L_PAREN@44..48 "(" [] [Whitespace("   ")]
                 2: CSS_COMPOUND_SELECTOR@48..55
                   0: (empty)
                   1: CSS_TYPE_SELECTOR@48..55
-                    0: CSS_IDENTIFIER@48..55
+                    0: (empty)
+                    1: CSS_IDENTIFIER@48..55
                       0: IDENT@48..55 "span" [] [Whitespace("   ")]
                   2: CSS_SUB_SELECTOR_LIST@55..55
                 3: R_PAREN@55..57 ")" [] [Whitespace(" ")]
@@ -240,14 +249,15 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@59..76
             0: CSS_PSEUDO_ELEMENT_SELECTOR@59..76
               0: COLON2@59..62 "::" [Newline("\n")] []
-              1: CSS_PSEUDO_ELEMENT_FUNCTION@62..76
+              1: CSS_PSEUDO_ELEMENT_FUNCTION_SELECTOR@62..76
                 0: CSS_IDENTIFIER@62..69
                   0: IDENT@62..69 "SLOTTED" [] []
                 1: L_PAREN@69..70 "(" [] []
                 2: CSS_COMPOUND_SELECTOR@70..74
                   0: (empty)
                   1: CSS_TYPE_SELECTOR@70..74
-                    0: CSS_IDENTIFIER@70..74
+                    0: (empty)
+                    1: CSS_IDENTIFIER@70..74
                       0: IDENT@70..74 "SPAN" [] []
                   2: CSS_SUB_SELECTOR_LIST@74..74
                 3: R_PAREN@74..76 ")" [] [Whitespace(" ")]
@@ -255,7 +265,7 @@ CssRoot {
         0: L_CURLY@76..77 "{" [] []
         1: CSS_DECLARATION_LIST@77..77
         2: R_CURLY@77..79 "}" [Newline("\n")] []
-  1: EOF@79..80 "" [Newline("\n")] []
+  2: EOF@79..80 "" [Newline("\n")] []
 
 ```
 

@@ -6,11 +6,15 @@ These test snapshots were extracted from the
 # Usage
 
 These tests are run as part of the `biome_js_formatter` test suite but can be
-explicitely called with `cargo test -p biome_js_formatter --test prettier_tests`
+explicitly called with `cargo test -p biome_js_formatter --test prettier_tests`
 
 Setting the `REPORT_PRETTIER=1` environment variable when running these tests
 will emit a `report.md` file containing an exhaustive difference between the
-output of `biome_js_formatter` and Prettier's own snapshots
+output of `biome_js_formatter` and Prettier's own snapshots.
+Setting the `REPORT_TYPE=json | markdown` environment variable will dictate the format of the report.
+Setting the environment variable `INCOMPATIBLE_ONLY=1` will emit an `incompatible_report.md`
+file containing only incompatible test cases.
+
 
 # Updating
 
@@ -25,5 +29,4 @@ the snapshots:
 3. Go to `crates/biome_formatter_test/src/prettier` directory
 4. Install prettier ``pnpm install``
 5. Go to `crates/biome_js_formatter/tests/specs/prettier` directory
-6. Run
-   `node crates/biome_js_formatter/tests/specs/prettier/prepare_tests.js <prettier root directory>`
+6. Run `node prepare_tests.js <prettier root directory>`

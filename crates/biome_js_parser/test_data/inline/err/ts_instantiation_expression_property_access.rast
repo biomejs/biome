@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -140,8 +141,9 @@ JsModule {
 
 0: JS_MODULE@0..39
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..38
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..38
     0: JS_EXPRESSION_STATEMENT@0..7
       0: JS_STATIC_MEMBER_EXPRESSION@0..6
         0: TS_INSTANTIATION_EXPRESSION@0..4
@@ -227,7 +229,7 @@ JsModule {
               1: (empty)
           2: R_ANGLE@36..37 ">" [] []
       1: SEMICOLON@37..38 ";" [] []
-  3: EOF@38..39 "" [Newline("\n")] []
+  4: EOF@38..39 "" [Newline("\n")] []
 --
 ts_instantiation_expression_property_access.ts:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

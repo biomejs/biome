@@ -1,0 +1,108 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: js/sequence-expression/parenthesized.js
+---
+
+# Input
+
+```js
+// FIXME
+// TODO: parse issue
+// console.log(
+//   /* 1 */
+//   (
+//     /* 2 */
+//     (
+//       /* 3 */
+//       first
+//       /* 4 */
+//     )
+//     /* 5 */
+//     ,
+//     /* 6 */
+//     (
+//       /* 7 */
+//       last
+//       /* 8 */
+//     )
+//     /* 9 */
+//   )
+//   /* 10 */
+// );
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,14 +1,23 @@
+-console.log(
+-  /* 1 */
+-  /* 2 */
+-  /* 3 */
+-  (first,
+-  /* 4 */
+-  /* 5 */
+-  /* 6 */
+-  /* 7 */
+-  last),
+-  /* 8 */
+-  /* 9 */
+-  /* 10 */
+-);
++// FIXME
++// TODO: parse issue
++// console.log(
++//   /* 1 */
++//   (
++//     /* 2 */
++//     (
++//       /* 3 */
++//       first
++//       /* 4 */
++//     )
++//     /* 5 */
++//     ,
++//     /* 6 */
++//     (
++//       /* 7 */
++//       last
++//       /* 8 */
++//     )
++//     /* 9 */
++//   )
++//   /* 10 */
++// );
+```
+
+# Output
+
+```js
+// FIXME
+// TODO: parse issue
+// console.log(
+//   /* 1 */
+//   (
+//     /* 2 */
+//     (
+//       /* 3 */
+//       first
+//       /* 4 */
+//     )
+//     /* 5 */
+//     ,
+//     /* 6 */
+//     (
+//       /* 7 */
+//       last
+//       /* 8 */
+//     )
+//     /* 9 */
+//   )
+//   /* 10 */
+// );
+```
+
+

@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -174,8 +175,9 @@ JsModule {
 
 0: JS_MODULE@0..156
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..155
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..155
     0: JS_VARIABLE_STATEMENT@0..22
       0: JS_VARIABLE_DECLARATION@0..21
         0: (empty)
@@ -285,4 +287,4 @@ JsModule {
                 2: TS_NUMBER_TYPE@148..154
                   0: NUMBER_KW@148..154 "number" [] []
       1: SEMICOLON@154..155 ";" [] []
-  3: EOF@155..156 "" [Newline("\n")] []
+  4: EOF@155..156 "" [Newline("\n")] []

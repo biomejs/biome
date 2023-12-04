@@ -10,9 +10,11 @@ switch (key) {
 	case // comment
 	value:
 
+	case value: // fallthrough same-line
 	case value:
 		// fallthrough
 
+	case fallthrough:
 	case value:
 		break;
 
@@ -26,6 +28,19 @@ switch ("test") {
   case "test": {}
 }
 
+switch (key) {
+	case blockBody: {
+		const a = 1;
+		break;
+	}
+
+	// The block is not the only statement in the case body,
+	// so it doesn't hug the same line as the case here.
+	case separateBlockBody: {
+		const a = 1;
+	}
+	break;
+}
 ```
 
 
@@ -38,6 +53,7 @@ switch ("test") {
 -----
 Indent style: Tab
 Indent width: 2
+Line ending: LF
 Line width: 80
 Quote style: Double Quotes
 JSX quote style: Double Quotes
@@ -45,6 +61,8 @@ Quote properties: As needed
 Trailing comma: All
 Semicolons: Always
 Arrow parentheses: Always
+Bracket spacing: true
+Bracket same line: false
 -----
 
 ```js
@@ -52,9 +70,11 @@ switch (key) {
 	case // comment
 	value:
 
+	case value: // fallthrough same-line
 	case value:
 	// fallthrough
 
+	case fallthrough:
 	case value:
 		break;
 
@@ -65,6 +85,21 @@ switch (key) {
 switch ("test") {
 	case "test": {
 	}
+}
+
+switch (key) {
+	case blockBody: {
+		const a = 1;
+		break;
+	}
+
+	// The block is not the only statement in the case body,
+	// so it doesn't hug the same line as the case here.
+	case separateBlockBody:
+		{
+			const a = 1;
+		}
+		break;
 }
 ```
 

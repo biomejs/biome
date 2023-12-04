@@ -1,0 +1,60 @@
+name: 💅 Linter bug report
+description: Report a bug or regression of the linter
+title: "💅 <TITLE>"
+labels: ["S-To triage"]
+body:
+  - type: markdown
+    attributes:
+      value: Thank you for submitting the bug! We'll try to triage it ASAP!
+  - type: markdown
+    attributes:
+      value: |
+        Bug reports that don't follow this template will be closed.
+        Please provide a clear and concise description of what the bug is.
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment information
+      description: Run the command `biome rage` and paste its output here. Please review it, in case there are sensitive information you don't want to share.
+      render: bash
+    validations:
+      required: true
+  - type: input
+    id: rule-name
+    attributes:
+      label: Rule name
+      description: The name of the rule
+    validations:
+      required: true
+  - type: input
+    id: playground-link
+    attributes:
+      label: Playground link
+      description: |
+        Provide a detailed list of steps that reproduce the issue
+        The more information and included steps, the quicker your report can be triaged and addressed!
+
+        You can also use the [playground](https://biomejs.dev/playground/) to share code snippets.
+        This is useful to reproduce the issue.
+
+        If you can't use the playground, use our official [CBS template](https://codesandbox.io/p/sandbox/biome-starter-cbs-rky6zq).
+        Fork it and share a reproduction.
+      placeholder: https://biomejs.dev/playground/...
+    validations:
+      required: true
+  - type: textarea
+    id: expected-result
+    attributes:
+      label: Expected result
+      description: Describe what you expected to happen.
+      placeholder: It should not throw an error.
+    validations:
+      required: true
+  - type: checkboxes
+    id: coc
+    attributes:
+      label: Code of Conduct
+      description: By submitting this issue, you agree to follow our [Code of Conduct](https://github.com/biomejs/biome/blob/main/CODE_OF_CONDUCT.md)
+      options:
+        - label: I agree to follow Biome's Code of Conduct
+          required: true

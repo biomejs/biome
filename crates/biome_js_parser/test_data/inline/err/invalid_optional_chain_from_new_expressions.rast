@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -223,8 +224,9 @@ JsModule {
 
 0: JS_MODULE@0..104
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..103
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..103
     0: JS_EXPRESSION_STATEMENT@0..25
       0: JS_CALL_EXPRESSION@0..24
         0: JS_STATIC_MEMBER_EXPRESSION@0..22
@@ -378,7 +380,7 @@ JsModule {
           1: JS_CALL_ARGUMENT_LIST@102..102
           2: R_PAREN@102..103 ")" [] []
       1: (empty)
-  3: EOF@103..104 "" [Newline("\n")] []
+  4: EOF@103..104 "" [Newline("\n")] []
 --
 invalid_optional_chain_from_new_expressions.ts:1:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

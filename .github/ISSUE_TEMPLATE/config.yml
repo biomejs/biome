@@ -1,5 +1,11 @@
 blank_issues_enabled: false
 contact_links:
+  - name: ✅ Linter rule requests
+    url: https://github.com/biomejs/biome/discussions/3
+    about: Please add a comment to the discussion named "Linter rules from other sources"
+  - name: 💡 Feature requests
+    url: https://github.com/biomejs/biome/discussions/new
+    about: Please use a new Github discussion to propose ideas of feature requests
   - name: 🗣️ Chat
     url: https://discord.gg/BypW39g6Yc
     about: Our Discord server is active and is used for real-time discussions including contribution collaboration, questions, and more!
@@ -9,6 +15,4 @@ contact_links:
   - name: 🆘 Code of Conduct Reports
     url: https://github.com/biomejs/biome/blob/main/CODE_OF_CONDUCT.md#contributor-covenant-code-of-conduct
     about: Please use the contact information in Code of Conduct as issues created here are public
-  - name: 💡 Feature requests
-    url: https://github.com/biomejs/biome/discussions/new
-    about: Please use a new Github discussion to propose ideas of feature requests
+

@@ -53,10 +53,12 @@ biome.json:6:13 deserialize ━━━━━━━━━━━━━━━━━�
   - noConstAssign
   - noConstantCondition
   - noConstructorReturn
+  - noEmptyCharacterClassInRegex
   - noEmptyPattern
   - noGlobalObjectCalls
   - noInnerDeclarations
   - noInvalidConstructorSuper
+  - noInvalidNewBuiltin
   - noNewSymbol
   - noNonoctalDecimalEscape
   - noPrecisionLoss
@@ -112,7 +114,9 @@ biome.json:9:13 deserialize ━━━━━━━━━━━━━━━━━�
   - noRestrictedGlobals
   - noShoutyConstants
   - noUnusedTemplateLiteral
+  - noUselessElse
   - noVar
+  - useAsConstAssertion
   - useBlockStatements
   - useCollapsedElseIf
   - useConst
@@ -125,6 +129,7 @@ biome.json:9:13 deserialize ━━━━━━━━━━━━━━━━━�
   - useNumericLiterals
   - useSelfClosingElements
   - useShorthandArrayType
+  - useShorthandAssign
   - useSingleCaseStatement
   - useSingleVarDeclarator
   - useTemplate

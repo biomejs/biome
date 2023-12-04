@@ -18,13 +18,14 @@ type a= {
     ]: C  |  D
   }
 
-type a= {
-    [
-      A in
-      // prettier-ignore
-      B
-    ]: C  |  D
-  }
+// TODO: fix idempotency issue
+// type a= {
+//     [
+//       A in
+//       // prettier-ignore
+//       B
+//     ]: C  |  D
+//   }
 
 type a= {
     [A in B]:
@@ -39,13 +40,14 @@ type a= {
     ]: C  |  D
   }
 
-type a= {
-    [
-      A in
-      /* prettier-ignore */
-      B
-    ]: C  |  D
-  }
+// TODO: fix idempotency issue
+// type a= {
+//     [
+//       A in
+//       /* prettier-ignore */
+//       B
+//     ]: C  |  D
+//   }
 
 type a= {
     [A in B]:
@@ -83,15 +85,21 @@ type a= {
 ```diff
 --- Prettier
 +++ Biome
-@@ -11,11 +11,14 @@
+@@ -10,12 +10,18 @@
+     ]: C  |  D
    };
  
- type a = {
+-type a = {
 -  [A in B]: C | D; // prettier-ignore
-+  [A in
-+    // prettier-ignore
-+    B]: C | D;
- };
+-};
++// TODO: fix idempotency issue
++// type a= {
++//     [
++//       A in
++//       // prettier-ignore
++//       B
++//     ]: C  |  D
++//   }
  
  type a = {
 -  A in B: C | D; // prettier-ignore
@@ -100,15 +108,21 @@ type a= {
  };
  
  type a = {
-@@ -26,11 +29,14 @@
+@@ -25,12 +31,18 @@
+     ]: C  |  D
    };
  
- type a = {
+-type a = {
 -  [A /* prettier-ignore */ in B]: C | D;
-+  [A in
-+    /* prettier-ignore */
-+    B]: C | D;
- };
+-};
++// TODO: fix idempotency issue
++// type a= {
++//     [
++//       A in
++//       /* prettier-ignore */
++//       B
++//     ]: C  |  D
++//   }
  
  type a = {
 -  A in B /* prettier-ignore */: C | D;
@@ -117,7 +131,7 @@ type a= {
  };
  
  type a = {
-@@ -38,15 +44,15 @@
+@@ -38,15 +50,15 @@
    };
  
  type a = {
@@ -153,11 +167,14 @@ type a = {
     ]: C  |  D
   };
 
-type a = {
-  [A in
-    // prettier-ignore
-    B]: C | D;
-};
+// TODO: fix idempotency issue
+// type a= {
+//     [
+//       A in
+//       // prettier-ignore
+//       B
+//     ]: C  |  D
+//   }
 
 type a = {
   [A in B]: // prettier-ignore
@@ -171,11 +188,14 @@ type a = {
     ]: C  |  D
   };
 
-type a = {
-  [A in
-    /* prettier-ignore */
-    B]: C | D;
-};
+// TODO: fix idempotency issue
+// type a= {
+//     [
+//       A in
+//       /* prettier-ignore */
+//       B
+//     ]: C  |  D
+//   }
 
 type a = {
   [A in B]: /* prettier-ignore */

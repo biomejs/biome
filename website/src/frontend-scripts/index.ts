@@ -12,7 +12,7 @@ import { getCurrentTheme, matchesDark, setCurrentTheme } from "./util";
  */
 function randomShuffle<T>(array: T[]): T[] {
 	let count = array.length;
-	let index;
+	let index: number;
 	while (count) {
 		index = Math.floor(Math.random() * count--);
 		const temp = array[count]!;

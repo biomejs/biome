@@ -133,7 +133,11 @@ impl Quote {
 ///
 /// By default the formatter uses `\n` as a newline. The function replaces
 /// `\r\n` with `\n`,
-pub fn normalize_string(raw_content: &str, preferred_quote: Quote) -> Cow<str> {
+pub fn normalize_string(
+    raw_content: &str,
+    preferred_quote: Quote,
+    is_escape_preserved: bool,
+) -> Cow<str> {
     let alternate_quote = preferred_quote.other();
 
     // A string should be manipulated only if its raw content contains backslash or quotes
@@ -196,6 +200,9 @@ pub fn normalize_string(raw_content: &str, preferred_quote: Quote) -> Cow<str> {
                         // escape removed: "\a" => "a"
                         // So we ignore the current slash and we continue
                         // to the next iteration
+                        if is_escape_preserved {
+                            reduced_string.push(current_char);
+                        }
                         continue;
                     }
                 } else {

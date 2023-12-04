@@ -48,7 +48,7 @@ export default function FormatterCodeTab({
 	prettier,
 	extensions,
 }: Props) {
-	let hint;
+	let hint: string | JSX.Element;
 	if (prettier.type === "SUCCESS") {
 		hint = calculateHint(prettier.code, biome);
 	} else {

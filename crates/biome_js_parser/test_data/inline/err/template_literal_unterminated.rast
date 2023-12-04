@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -46,8 +47,9 @@ JsModule {
 
 0: JS_MODULE@0..20
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..20
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..20
     0: JS_VARIABLE_STATEMENT@0..20
       0: JS_VARIABLE_DECLARATION@0..20
         0: (empty)
@@ -74,7 +76,7 @@ JsModule {
                     0: TEMPLATE_CHUNK@15..20 " bar\n" [] []
                 4: (empty)
       1: (empty)
-  3: EOF@20..20 "" [] []
+  4: EOF@20..20 "" [] []
 --
 template_literal_unterminated.js:1:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
