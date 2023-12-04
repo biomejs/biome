@@ -26,6 +26,12 @@
 
 </div>
 
+<div align="center">
+
+English | [简体中文](./README.zh-CN.md)
+
+</div>
+
 **Biome** is a performant toolchain for web projects, it aims to provide developer tools to maintain the health of said projects.
 
 **Biome is a [fast formatter](./benchmark#formatting)** for _JavaScript_, _TypeScript_, _JSX_, and _JSON_ that scores **[96% compatibility with _Prettier_](https://console.algora.io/challenges/prettier)**.
