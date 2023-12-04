@@ -39,7 +39,7 @@ pub(crate) fn get_changed_files(
             })
             .unwrap_or(false)
         })
-        .map(|file| OsString::from(file))
+        .map(OsString::from)
         .collect::<Vec<_>>();
 
     if filtered_changed_files.is_empty() {
