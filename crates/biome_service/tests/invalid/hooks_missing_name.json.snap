@@ -22,6 +22,7 @@ hooks_missing_name.json:6:5 deserialize ━━━━━━━━━━━━━�
   - noDuplicateJsonKeys
   - noEmptyBlockStatements
   - noImplicitAnyLet
+  - noMisleadingCharacterClass
   - noUnusedImports
   - noUnusedPrivateClassMembers
   - noUselessLoneBlockStatements
