@@ -984,6 +984,13 @@ impl Deserializable for Nursery {
                                 diagnostics,
                             );
                         }
+                        "useShorthandFunctionType" => {
+                            result.use_shorthand_function_type = Deserializable::deserialize(
+                                &value,
+                                "useShorthandFunctionType",
+                                diagnostics,
+                            );
+                        }
                         "useValidAriaRole" => {
                             result.use_valid_aria_role = Deserializable::deserialize(
                                 &value,
@@ -1011,6 +1018,7 @@ impl Deserializable for Nursery {
                                     "useGroupedTypeImport",
                                     "useImportRestrictions",
                                     "useRegexLiterals",
+                                    "useShorthandFunctionType",
                                     "useValidAriaRole",
                                 ],
                             ));

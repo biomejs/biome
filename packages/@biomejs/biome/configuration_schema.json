@@ -1207,15 +1207,15 @@
 						{ "type": "null" }
 					]
 				},
-				"useValidAriaRole": {
-					"description": "Elements with ARIA roles must use a valid, non-abstract ARIA role.",
+				"useShorthandFunctionType": {
+					"description": "Enforce using function types instead of object type with call signatures.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
 				},
-				"useShorthandFunctionType": {
-					"description": "Enforce using function types instead of object type with call signatures.",
+				"useValidAriaRole": {
+					"description": "Elements with ARIA roles must use a valid, non-abstract ARIA role.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

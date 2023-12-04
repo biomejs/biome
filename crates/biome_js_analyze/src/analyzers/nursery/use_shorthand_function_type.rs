@@ -75,12 +75,12 @@ declare_rule! {
     ///   (data: string): number;
     ///   (id: number): string;
     /// }
-    /// // this is equivelent to Overloaded interface.
+    /// // this is equivalent to Overloaded interface.
     /// type Intersection = ((data: string) => number) & ((id: number) => string);
     ///```
     ///
     pub(crate) UseShorthandFunctionType {
-        version: "1.3.0",
+        version: "next",
         name: "useShorthandFunctionType",
         recommended: false,
         fix_kind: FixKind::Safe,
@@ -150,7 +150,7 @@ impl Rule for UseShorthandFunctionType {
             return Some(JsRuleAction {
                 category: ActionCategory::QuickFix,
                 applicability: Applicability::Always,
-                message: markup! { "Convert empty interface to type alias." }.to_owned(),
+                message: markup! { "Alias a function type instead of using an interface with a call signature." }.to_owned(),
                 mutation,
             });
         }
@@ -166,7 +166,7 @@ impl Rule for UseShorthandFunctionType {
             return Some(JsRuleAction {
                 category: ActionCategory::QuickFix,
                 applicability: Applicability::Always,
-                message: markup! { "Convert object type to type alias." }.to_owned(),
+                message: markup! { "Use a function type instead of an object type with a call signature." }.to_owned(),
                 mutation,
             });
         }

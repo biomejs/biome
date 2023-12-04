@@ -834,6 +834,10 @@ export interface Nursery {
 	 */
 	useRegexLiterals?: RuleConfiguration;
 	/**
+	 * Enforce using function types instead of object type with call signatures.
+	 */
+	useShorthandFunctionType?: RuleConfiguration;
+	/**
 	 * Elements with ARIA roles must use a valid, non-abstract ARIA role.
 	 */
 	useValidAriaRole?: RuleConfiguration;
@@ -1516,6 +1520,7 @@ export type Category =
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useRegexLiterals"
 	| "lint/nursery/useValidAriaRole"
+	| "lint/nursery/useShorthandFunctionType"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noDelete"
 	| "lint/security/noDangerouslySetInnerHtml"
