@@ -640,25 +640,18 @@ impl Format<JsFormatContext> for ArrowChain {
                 }
             } else {
                 let should_add_parens = should_add_parens(&tail_body);
-                write!(
-                    f,
-                    [format_with(|f| {
-                        if should_add_parens {
-                            write!(
-                                f,
-                                [
-                                    if_group_fits_on_line(&text("(")),
-                                    format_tail_body,
-                                    if_group_fits_on_line(&text(")"))
-                                ]
-                            )?;
-                        } else {
-                            write!(f, [format_tail_body])?;
-                        }
-
-                        Ok(())
-                    })]
-                )?;
+                if should_add_parens {
+                    write!(
+                        f,
+                        [
+                            if_group_fits_on_line(&text("(")),
+                            format_tail_body,
+                            if_group_fits_on_line(&text(")"))
+                        ]
+                    )?;
+                } else {
+                    write!(f, [format_tail_body])?;
+                }
             }
 
             // Format the trailing comments of all arrow function EXCEPT the first one because
@@ -679,12 +672,6 @@ impl Format<JsFormatContext> for ArrowChain {
                         format_tail_body_inner
                     ])]
                 )
-            } else if is_grouped_call_arg_layout {
-                // Since the body is starting on the same line, it will
-                // have the normal indention _plus_ the indent from
-                // breaking the parent. Dedenting here ensures that
-                // hugged expressions only indent once when they break.
-                write!(f, [space(), dedent(&format_tail_body_inner)])
             } else {
                 write!(f, [space(), format_tail_body_inner])
             }
@@ -701,9 +688,14 @@ impl Format<JsFormatContext> for ArrowChain {
                         .should_expand(break_signatures),
                     space(),
                     tail.fat_arrow_token().format(),
-                    indent_if_group_breaks(&format_tail_body, group_id),
                 ]
             )?;
+
+            if is_grouped_call_arg_layout {
+                write!(f, [group(&format_tail_body)])?;
+            } else {
+                write!(f, [indent_if_group_breaks(&format_tail_body, group_id)])?;
+            }
 
             if is_callee {
                 write!(
