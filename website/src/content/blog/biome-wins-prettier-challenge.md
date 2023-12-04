@@ -406,4 +406,4 @@ In the next months we will focus on:
 
 ## Translations
 
-- [中文翻译:Biome赢得了Prettier挑战](https://juejin.cn/post/7308643782375768118)
+- [中文翻译: Biome赢得了Prettier挑战](https://juejin.cn/post/7308643782375768118)
