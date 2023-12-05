@@ -452,6 +452,12 @@ CssCounterStyleAtRule =
 	name: CssIdentifier
 	block: CssBlock
 
+// @font-face {}
+// ^^^^^^^^^^^^^
+CssFontFaceAtRule =
+	'font-face'
+	block: CssBlock
+
 // @keyframes "something" { from {} to {} }
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 CssKeyframesAtRule =
@@ -579,11 +585,11 @@ AnyCssValue =
 // 1e-2
 AnyCssDimension =
 	CssRegularDimension | CssPercentage
-	
-CssRegularDimension = 
+
+CssRegularDimension =
 	value: CssNumber
 	unit: CssIdentifier
-CssPercentDimension = 
+CssPercentDimension =
 	value: CssNumber
 	unit: '%'
 
