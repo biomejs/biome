@@ -130,6 +130,10 @@ export default defineConfig({
 					label: "简体中文",
 					lang: "zh-CN",
 				},
+				"pt-br": {
+					label: "Português",
+					lang: "pt-br",
+				},
 			},
 			sidebar: [
 				{ label: "Home", link: "/" },
