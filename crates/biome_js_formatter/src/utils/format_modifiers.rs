@@ -26,6 +26,35 @@ where
         let modifiers = sort_modifiers_by_precedence(&self.list);
         let should_expand = should_expand_decorators(&self.list);
 
+        // Returning early here is important, because otherwise this node
+        // returns a group that always has a soft line break, which causes
+        // `may_directly_break` to return true, even if there is no
+        // possibility for the break to be used, since it's at the start of
+        // a line with no content before it. An example case this affects is:
+        //
+        // ```js
+        // class Test {
+        //   prop1 = // comment
+        //     true;
+        // }
+        // ```
+        //
+        // Here, the modifier list is present before `prop1`, but part of the
+        // statement as a whole. The statement checks if it _may_ break when
+        // determining how to position the trailing comment. If it does break,
+        // the comment is placed on a new line and the value on a line after
+        // that. But if it doesn't break, then the whole statement can remnain
+        // on a single line, which is desirable and important for preserving
+        // semantics of things like ignore comments.
+        //
+        // ```js
+        // class Test {
+        //   prop1 = true; // comment
+        // }
+        if self.list.is_empty() {
+            return Ok(());
+        }
+
         // need to use peek the iterator to check if the current node is a decorator and don't advance the iterator
         let mut iter = modifiers.into_iter().peekable();
         let decorators = format_once(|f| {

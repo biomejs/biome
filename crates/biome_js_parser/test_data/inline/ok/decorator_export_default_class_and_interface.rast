@@ -1,0 +1,123 @@
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsExport {
+            decorators: JsDecoratorList [],
+            export_token: EXPORT_KW@0..7 "export" [] [Whitespace(" ")],
+            export_clause: JsExportDefaultDeclarationClause {
+                default_token: DEFAULT_KW@7..15 "default" [] [Whitespace(" ")],
+                declaration: TsInterfaceDeclaration {
+                    interface_token: INTERFACE_KW@15..25 "interface" [] [Whitespace(" ")],
+                    id: TsIdentifierBinding {
+                        name_token: IDENT@25..29 "Foo" [] [Whitespace(" ")],
+                    },
+                    type_parameters: missing (optional),
+                    extends_clause: missing (optional),
+                    l_curly_token: L_CURLY@29..31 "{" [] [Whitespace(" ")],
+                    members: TsTypeMemberList [],
+                    r_curly_token: R_CURLY@31..32 "}" [] [],
+                },
+                semicolon_token: missing (optional),
+            },
+        },
+        JsExport {
+            decorators: JsDecoratorList [],
+            export_token: EXPORT_KW@32..40 "export" [Newline("\n")] [Whitespace(" ")],
+            export_clause: JsExportDefaultDeclarationClause {
+                default_token: DEFAULT_KW@40..48 "default" [] [Whitespace(" ")],
+                declaration: JsClassExportDefaultDeclaration {
+                    decorators: JsDecoratorList [],
+                    abstract_token: missing (optional),
+                    class_token: CLASS_KW@48..54 "class" [] [Whitespace(" ")],
+                    id: JsIdentifierBinding {
+                        name_token: IDENT@54..58 "Foo" [] [Whitespace(" ")],
+                    },
+                    type_parameters: missing (optional),
+                    extends_clause: missing (optional),
+                    implements_clause: missing (optional),
+                    l_curly_token: L_CURLY@58..60 "{" [] [Whitespace(" ")],
+                    members: JsClassMemberList [],
+                    r_curly_token: R_CURLY@60..61 "}" [] [],
+                },
+                semicolon_token: missing (optional),
+            },
+        },
+        JsExport {
+            decorators: JsDecoratorList [],
+            export_token: EXPORT_KW@61..69 "export" [Newline("\n")] [Whitespace(" ")],
+            export_clause: JsExportDefaultDeclarationClause {
+                default_token: DEFAULT_KW@69..77 "default" [] [Whitespace(" ")],
+                declaration: TsInterfaceDeclaration {
+                    interface_token: INTERFACE_KW@77..87 "interface" [] [Whitespace(" ")],
+                    id: TsIdentifierBinding {
+                        name_token: IDENT@87..91 "Foo" [] [Whitespace(" ")],
+                    },
+                    type_parameters: missing (optional),
+                    extends_clause: missing (optional),
+                    l_curly_token: L_CURLY@91..93 "{" [] [Whitespace(" ")],
+                    members: TsTypeMemberList [],
+                    r_curly_token: R_CURLY@93..94 "}" [] [],
+                },
+                semicolon_token: missing (optional),
+            },
+        },
+    ],
+    eof_token: EOF@94..94 "" [] [],
+}
+
+0: JS_MODULE@0..94
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..94
+    0: JS_EXPORT@0..32
+      0: JS_DECORATOR_LIST@0..0
+      1: EXPORT_KW@0..7 "export" [] [Whitespace(" ")]
+      2: JS_EXPORT_DEFAULT_DECLARATION_CLAUSE@7..32
+        0: DEFAULT_KW@7..15 "default" [] [Whitespace(" ")]
+        1: TS_INTERFACE_DECLARATION@15..32
+          0: INTERFACE_KW@15..25 "interface" [] [Whitespace(" ")]
+          1: TS_IDENTIFIER_BINDING@25..29
+            0: IDENT@25..29 "Foo" [] [Whitespace(" ")]
+          2: (empty)
+          3: (empty)
+          4: L_CURLY@29..31 "{" [] [Whitespace(" ")]
+          5: TS_TYPE_MEMBER_LIST@31..31
+          6: R_CURLY@31..32 "}" [] []
+        2: (empty)
+    1: JS_EXPORT@32..61
+      0: JS_DECORATOR_LIST@32..32
+      1: EXPORT_KW@32..40 "export" [Newline("\n")] [Whitespace(" ")]
+      2: JS_EXPORT_DEFAULT_DECLARATION_CLAUSE@40..61
+        0: DEFAULT_KW@40..48 "default" [] [Whitespace(" ")]
+        1: JS_CLASS_EXPORT_DEFAULT_DECLARATION@48..61
+          0: JS_DECORATOR_LIST@48..48
+          1: (empty)
+          2: CLASS_KW@48..54 "class" [] [Whitespace(" ")]
+          3: JS_IDENTIFIER_BINDING@54..58
+            0: IDENT@54..58 "Foo" [] [Whitespace(" ")]
+          4: (empty)
+          5: (empty)
+          6: (empty)
+          7: L_CURLY@58..60 "{" [] [Whitespace(" ")]
+          8: JS_CLASS_MEMBER_LIST@60..60
+          9: R_CURLY@60..61 "}" [] []
+        2: (empty)
+    2: JS_EXPORT@61..94
+      0: JS_DECORATOR_LIST@61..61
+      1: EXPORT_KW@61..69 "export" [Newline("\n")] [Whitespace(" ")]
+      2: JS_EXPORT_DEFAULT_DECLARATION_CLAUSE@69..94
+        0: DEFAULT_KW@69..77 "default" [] [Whitespace(" ")]
+        1: TS_INTERFACE_DECLARATION@77..94
+          0: INTERFACE_KW@77..87 "interface" [] [Whitespace(" ")]
+          1: TS_IDENTIFIER_BINDING@87..91
+            0: IDENT@87..91 "Foo" [] [Whitespace(" ")]
+          2: (empty)
+          3: (empty)
+          4: L_CURLY@91..93 "{" [] [Whitespace(" ")]
+          5: TS_TYPE_MEMBER_LIST@93..93
+          6: R_CURLY@93..94 "}" [] []
+        2: (empty)
+  4: EOF@94..94 "" [] []

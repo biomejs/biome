@@ -403,3 +403,7 @@ In the next months we will focus on:
 - Publishing a Roadmap. **Keep an eye on it**, it will involve a lot of **interesting** work.
 - Rebranding the website with a new logo.
 - Translate the website in Japanese.
+
+## Translations
+
+- [中文翻译: Biome赢得了Prettier挑战](https://juejin.cn/post/7308643782375768118)

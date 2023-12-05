@@ -798,6 +798,10 @@ export interface Nursery {
 	 */
 	noImplicitAnyLet?: RuleConfiguration;
 	/**
+	 * Disallow characters made with multiple code points in character class syntax.
+	 */
+	noMisleadingCharacterClass?: RuleConfiguration;
+	/**
 	 * Disallow unused imports.
 	 */
 	noUnusedImports?: RuleConfiguration;
@@ -833,6 +837,10 @@ export interface Nursery {
 	 * Enforce the use of the regular expression literals instead of the RegExp constructor if possible.
 	 */
 	useRegexLiterals?: RuleConfiguration;
+	/**
+	 * Enforce using function types instead of object type with call signatures.
+	 */
+	useShorthandFunctionType?: RuleConfiguration;
 	/**
 	 * Elements with ARIA roles must use a valid, non-abstract ARIA role.
 	 */
@@ -1506,6 +1514,7 @@ export type Category =
 	| "lint/nursery/noDuplicateJsonKeys"
 	| "lint/nursery/noEmptyBlockStatements"
 	| "lint/nursery/noImplicitAnyLet"
+	| "lint/nursery/noMisleadingCharacterClass"
 	| "lint/nursery/noUnusedImports"
 	| "lint/nursery/noUnusedPrivateClassMembers"
 	| "lint/nursery/noUselessLoneBlockStatements"
@@ -1516,6 +1525,7 @@ export type Category =
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useRegexLiterals"
 	| "lint/nursery/useValidAriaRole"
+	| "lint/nursery/useShorthandFunctionType"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noDelete"
 	| "lint/security/noDangerouslySetInnerHtml"
