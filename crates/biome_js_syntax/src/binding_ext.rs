@@ -115,6 +115,11 @@ impl AnyJsBindingDeclaration {
                 | AnyJsBindingDeclaration::TsDeclareFunctionDeclaration(_),
             ) => true,
             (
+                AnyJsBindingDeclaration::TsDeclareFunctionExportDefaultDeclaration(_),
+                AnyJsBindingDeclaration::JsFunctionExportDefaultDeclaration(_)
+                | AnyJsBindingDeclaration::TsDeclareFunctionExportDefaultDeclaration(_),
+            ) => true,
+            (
                 AnyJsBindingDeclaration::TsEnumDeclaration(_),
                 AnyJsBindingDeclaration::TsEnumDeclaration(_),
             ) => true,
