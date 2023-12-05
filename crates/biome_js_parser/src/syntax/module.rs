@@ -1308,8 +1308,7 @@ fn parse_export_default_clause(p: &mut JsParser) -> ParsedSyntax {
         if let Some(existing_default_item) =
             p.state().default_item.as_ref().filter(|_| p.is_module())
         {
-            if existing_default_item.kind.is_overload()
-                && (default_item_kind.is_overload() || default_item_kind.is_function_declaration())
+            if existing_default_item.kind.is_mergeable(&default_item_kind)
             {
                 // It's ok to have multiple overload declarations and an implementation.
                 // This check won't catch if there are multiple implementations for the same overload
@@ -1358,7 +1357,7 @@ fn parse_class_export_default_declaration_clause(
 
     (
         Present(m.complete(p, JS_EXPORT_DEFAULT_DECLARATION_CLAUSE)),
-        ExportDefaultItemKind::Declaration,
+        ExportDefaultItemKind::ClassDeclaration,
     )
 }
 

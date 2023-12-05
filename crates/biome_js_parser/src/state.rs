@@ -28,10 +28,10 @@ pub(crate) enum ExportDefaultItemKind {
     FunctionOverload,
     FunctionDeclaration,
     Interface,
+    ClassDeclaration,
     // Any other declaration
     Declaration,
 }
-
 impl ExportDefaultItemKind {
     pub(crate) fn is_overload(&self) -> bool {
         matches!(self, ExportDefaultItemKind::FunctionOverload)
@@ -43,6 +43,29 @@ impl ExportDefaultItemKind {
 
     pub(crate) fn is_interface(&self) -> bool {
         matches!(self, ExportDefaultItemKind::Interface)
+    }
+
+    pub const fn is_mergeable(&self, other: &ExportDefaultItemKind) -> bool {
+        Self::can_merge(self, other) || Self::can_merge(other, self)
+    }
+
+    const fn can_merge(a: &ExportDefaultItemKind, b: &ExportDefaultItemKind) -> bool {
+        match (a, b) {
+            // export default function a():void;
+            // export default function a(){
+            // }
+            (
+                ExportDefaultItemKind::FunctionOverload,
+                ExportDefaultItemKind::FunctionDeclaration,
+            ) => true,
+            // export default function a(){};
+            // export default interface A{};
+            (ExportDefaultItemKind::FunctionDeclaration, ExportDefaultItemKind::Interface) => true,
+            // export default interface A{};
+            // export default class A{};
+            (ExportDefaultItemKind::Interface, ExportDefaultItemKind::ClassDeclaration) => true,
+            (_, _) => false,
+        }
     }
 }
 
