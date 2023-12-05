@@ -11,3 +11,7 @@ interface Foo<T> extends Bar<T> {}
 declare module FooBar {
   export interface Bar extends Baz {}
 }
+
+namespace Ns {
+  export interface Bar extends Baz {}
+}
