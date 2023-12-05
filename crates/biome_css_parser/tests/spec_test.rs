@@ -177,7 +177,7 @@ pub fn quick_test() {
         CssParserOptions::default().with_allow_wrong_line_comments(),
     );
     let syntax = root.syntax();
-    dbg!(&syntax, root.diagnostics(), root.has_errors(), root.tree());
+    dbg!(&syntax, root.diagnostics(), root.has_errors());
     if has_bogus_nodes_or_empty_slots(&syntax) {
         panic!(
             "modified tree has bogus nodes or empty slots:\n{syntax:#?} \n\n {}",
