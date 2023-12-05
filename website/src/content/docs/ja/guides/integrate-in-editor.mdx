@@ -9,24 +9,24 @@ description: エディタやIDEで Biome を導入する方法を学びます
 
 ### VS Code
 
-Biome のプラグインを使うと、以下のことができます:
+Biome のプラグインを使うと、以下のことができます：
 
-* ファイルの保存時やコマンドを実行したときに、フォーマットを実行する
+* ファイルの保存時やコマンドを実行したときに、formatを実行する
 * ファイルの静的解析をし、コードの修正を適用する
 
 
 Visual Studio Code マーケットプレイスページで、[Biome VS Code extension](https://marketplace.visualstudio.com/items?itemName=biomejs.biome) をインストールしてください。
 
-Biome をデフォルトのフォーマッターにするには、[サポート対象の言語に関するファイル](/ja/internals/language-support/) を開いて、以下の手順に従ってください:
+Biome をデフォルトのformatterにするには、[サポート対象の言語に関するファイル](/ja/internals/language-support/) を開いて、以下の手順に従ってください：
 
-- **コマンドパレット**を開く（<kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd title="Shift">⇧</kbd>+<kbd>P</kbd> または 表示 → コマンドパレット）
-- **ドキュメントのフォーマット...** を選択
-- **デフォルトのフォーマッターの設定...** を選択
+- **コマンドパレット**を開く（<kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd title="Shift">⇧</kbd>+<kbd>P</kbd> または表示 → コマンドパレット）
+- **ドキュメントのformat...** を選択
+- **デフォルトのformatterの設定...** を選択
 - Biomeを選択
 
 ### IntelliJ
 
-Biome IntelliJ 向けのプラグインをインストールするには、[プラグインの公式ページ](https://plugins.jetbrains.com/plugin/22761-biome) にアクセスするか、以下の手順に従ってください:
+Biome IntelliJ 向けのプラグインをインストールするには、[プラグインの公式ページ](https://plugins.jetbrains.com/plugin/22761-biome) にアクセスするか、以下の手順に従ってください：
 
 **JetBrains IDEs の場合:**
 
@@ -45,7 +45,7 @@ Biome IntelliJ 向けのプラグインをインストールするには、[プ�
 
 ## サードパーティのプラグイン
 
-これらは、各種エディタで使用できる、コミュニティによってメンテナンスされているプラグインです:
+これらは、各種エディタで使用できる、コミュニティによってメンテナンスされているプラグインです：
 - [`neovim`](https://neovim.io/): [`nvim-lspconfig`](https://github.com/neovim/nvim-lspconfig/) をインストールして、[マニュアルの手順](https://github.com/neovim/nvim-lspconfig/blob/master/doc/server_configurations.md#biome) に従ってください
 - [`helix`](https://helix-editor.com/): [マニュアルの手順](https://github.com/biomejs/biome/blob/main/editors/helix/manual.md) に従ってください
 - [`coc-biome`](https://github.com/fannheyward/coc-biome): [`coc.nvim`](https://github.com/neoclide/coc.nvim) 向けの Biome 拡張機能
@@ -62,7 +62,7 @@ Biome は [LSP](https://microsoft.github.io/language-server-protocol/) を優先
 
 ### LSP プロキシを使う
 
-Biome には `lsp-proxy` というコマンドがあります。 実行すると、Biome は2つのプロセスを生成します:
+Biome には `lsp-proxy` というコマンドがあります。 実行すると、Biome は2つのプロセスを生成します：
 - 要求された操作を実行する [デーモン](/ja/internals/architecture#デーモン-wip)
 - クライアント（エディタ）とサーバー（デーモン）の間のリクエストをプロキシするサーバー
 
@@ -75,7 +75,7 @@ Biome には `lsp-proxy` というコマンドがあります。 実行すると
 
 エディタが LSP をサポートしていない場合は、 [標準入力](https://ja.wikipedia.org/wiki/%E6%A8%99%E6%BA%96%E3%82%B9%E3%83%88%E3%83%AA%E3%83%BC%E3%83%A0#%E6%A8%99%E6%BA%96%E5%85%A5%E5%8A%9B_(stdin)) を利用して `biome` バイナリを直接操作します。
 
-標準入力を介して以下のコマンドを呼び出すことができます:
+標準入力を介して以下のコマンドを呼び出すことができます：
 - [`format`](/reference/cli/#biome-format)
 - [`lint`](/reference/cli/#biome-lint)
 - [`check`](/reference/cli/#biome-check)
@@ -87,7 +87,7 @@ Biome は、新しい出力（変更が発生していない場合は元の出�
 重要なのは、Biome が**どのようにファイルを扱うべきか**判断するために、正しいファイルの拡張子を指定することです。
 
 バイナリのパスを解決し、必要に応じて呼び出すことは、エディタの責任です。
-バイナリは、サポートしているアーキテクチャと OS ごとに npm で公開されています:
+バイナリは、サポートしているアーキテクチャと OS ごとに npm で公開されています：
 
 
 - `@biomejs/cli-darwin-arm64`
@@ -97,21 +97,21 @@ Biome は、新しい出力（変更が発生していない場合は元の出�
 - `@biomejs/cli-win32-arm64`
 - `@biomejs/cli-win32-x64`
 
-バイナリの名前は `biome` または `biome.exe` で、ライブラリのルートディレクトリにあります。 例: `@biomejs/cli-darwin-arm64/biome`, `@biomejs/cli-win32-x64/biome.exe`
+バイナリの名前は `biome` または `biome.exe` で、ライブラリのルートディレクトリにあります。 例： `@biomejs/cli-darwin-arm64/biome`, `@biomejs/cli-win32-x64/biome.exe`
 
 ### バイナリを使ったデーモン
 
 CLI でバイナリを使うのは効率的ですが、ユーザーに[ログ](#デーモンのログ)を提供することができません。
 CLI からデーモンを起動することが可能で、その後はデーモンを介して CLI コマンドを使用することができます。
 
-この方法を試す場合は、まず [`start`](/ja/reference/cli#biome-start) コマンドでデーモンプロセスを起動する必要があります:
+この方法を試す場合は、まず [`start`](/ja/reference/cli#biome-start) コマンドでデーモンプロセスを起動する必要があります：
 
 
 ```shell
 biome start
 ```
 
-その後、すべてのコマンドに `--use-server` オプションを追加する必要があります。 例:
+その後、すべてのコマンドに `--use-server` オプションを追加する必要があります。 例：
 
 ```shell
 echo "console.log('')" | biome format --use-server --stdin-file-path=dummy.js
@@ -129,12 +129,12 @@ echo "console.log('')" | biome format --use-server --stdin-file-path=dummy.js
 
 Biome のデーモンは、ファイルシステムにログを保存します。ログは 、`biome-logs` というフォルダに保存され、このフォルダはOSの一時ディレクトリに作成されています。
 
-Windows の場合は、powershell で以下のコマンドを実行すると、一時ディレクトリの場所を確認できます:
+Windows の場合は、powershell で以下のコマンドを実行すると、一時ディレクトリの場所を確認できます：
 ```shell
 $env:TEMP
 ```
 
-Linux/macOS の場合は、ターミナルで以下のコマンドを実行して確認ができます:
+Linux/macOS の場合は、ターミナルで以下のコマンドを実行して確認ができます：
 ```shell
 echo $TMPDIR
 ```
