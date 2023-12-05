@@ -172,8 +172,8 @@ impl Visitor for EarlyReturnDetectionVisitor {
                 }
 
                 if let Some(entry) = self.stack.last_mut() {
-                    if let Some(early_return) = JsReturnStatement::cast_ref(node) {
-                        entry.early_return = Some(early_return.syntax().text_range());
+                    if JsReturnStatement::can_cast(node.kind()) {
+                        entry.early_return = Some(node.text_range());
                     } else if let Some(call) = JsCallExpression::cast_ref(node) {
                         if let Some(early_return) = entry.early_return {
                             self.early_returns.insert(call.clone(), early_return);
