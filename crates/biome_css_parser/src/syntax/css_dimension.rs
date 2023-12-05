@@ -33,7 +33,7 @@ fn parse_percentage_dimension(p: &mut CssParser) -> ParsedSyntax {
         return Absent;
     }
     let m = p.start();
-     parse_regular_number(p).ok();
+    parse_regular_number(p).ok();
     p.expect(T![%]);
     Present(m.complete(p, CSS_PERCENTAGE))
 }
