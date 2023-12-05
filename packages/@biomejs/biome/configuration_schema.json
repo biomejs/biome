@@ -1187,7 +1187,7 @@
 					]
 				},
 				"useExportType": {
-					"description": "Promotes the use of export type for type-only types.",
+					"description": "Promotes the use of export type for types.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

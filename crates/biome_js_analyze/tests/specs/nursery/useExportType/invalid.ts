@@ -16,3 +16,7 @@ enum Enum {}
 function func() {}
 class Class {}
 export { Interface, TypeAlias, Enum, func as f, Class };
+
+export /*0*/ { /*1*/ type /*2*/ func /*3*/, /*4*/ type Class as C /*5*/ } /*6*/;
+
+export {}

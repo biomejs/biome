@@ -822,7 +822,7 @@ export interface Nursery {
 	 */
 	useAwait?: RuleConfiguration;
 	/**
-	 * Promotes the use of export type for type-only types.
+	 * Promotes the use of export type for types.
 	 */
 	useExportType?: RuleConfiguration;
 	/**
