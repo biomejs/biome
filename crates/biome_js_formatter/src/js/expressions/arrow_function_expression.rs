@@ -476,6 +476,7 @@ impl Format<JsFormatContext> for ArrowChain {
         let head_parent = head.syntax().parent();
         let tail_body = tail.body()?;
         let is_assignment_rhs = self.options.assignment_layout.is_some();
+        let is_grouped_call_arg_layout = self.options.call_arg_layout.is_some();
         let ancestor_call_expr_or_logical_expr = head.syntax().ancestors().any(|ancestor| {
             matches!(
                 ancestor.kind(),
@@ -536,8 +537,6 @@ impl Format<JsFormatContext> for ArrowChain {
             if is_callee || is_assignment_rhs {
                 write!(f, [soft_line_break()])?;
             }
-
-            let is_grouped_call_arg_layout = self.options.call_arg_layout.is_some();
 
             let join_signatures = format_with(|f: &mut JsFormatter| {
                 let mut is_first_in_chain = true;
@@ -637,25 +636,18 @@ impl Format<JsFormatContext> for ArrowChain {
                 }
             } else {
                 let should_add_parens = should_add_parens(&tail_body);
-                write!(
-                    f,
-                    [format_with(|f| {
-                        if should_add_parens {
-                            write!(
-                                f,
-                                [
-                                    if_group_fits_on_line(&text("(")),
-                                    format_tail_body,
-                                    if_group_fits_on_line(&text(")"))
-                                ]
-                            )?;
-                        } else {
-                            write!(f, [format_tail_body])?;
-                        }
-
-                        Ok(())
-                    })]
-                )?;
+                if should_add_parens {
+                    write!(
+                        f,
+                        [
+                            if_group_fits_on_line(&text("(")),
+                            format_tail_body,
+                            if_group_fits_on_line(&text(")"))
+                        ]
+                    )?;
+                } else {
+                    write!(f, [format_tail_body])?;
+                }
             }
 
             // Format the trailing comments of all arrow function EXCEPT the first one because
@@ -704,9 +696,14 @@ impl Format<JsFormatContext> for ArrowChain {
                         .should_expand(break_signatures),
                     space(),
                     tail.fat_arrow_token().format(),
-                    indent_if_group_breaks(&format_tail_body, group_id),
                 ]
             )?;
+
+            if is_grouped_call_arg_layout {
+                write!(f, [group(&format_tail_body)])?;
+            } else {
+                write!(f, [indent_if_group_breaks(&format_tail_body, group_id)])?;
+            }
 
             if is_callee {
                 write!(
