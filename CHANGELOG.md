@@ -45,6 +45,18 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
   }
   ```
 
+- Fix [#1061](https://github.com/biomejs/biome/issues/1061). [noRedeclare](https://biomejs.dev/linter/rules/no-redeclare) no longer reports overloads of `export default function`. Contributed by @Conaclos
+
+  The following code is no longer reported:
+
+  ```ts
+  export default function(a: boolean): boolean;
+  export default function(a: number): number;
+  export default function(a: number | boolean): number | boolean {
+  	return a;
+  }
+  ```
+
 ### Parser
 
 
