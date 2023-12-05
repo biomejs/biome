@@ -1,12 +1,43 @@
 ---
-import BaseLayout from "@src/layouts/BaseLayout.astro";
 import "@src/styles/playground/index.scss";
+
+import StarlightSplashLayout from "@src/layouts/StarlightSplashLayout.astro";
+import PlaygroundLoader from "@src/playground/PlaygroundLoader";
 ---
 
-<BaseLayout title="Biome Playground" bodyClass="playground-body">
-  <div id="root"></div>
+<StarlightSplashLayout title="Playground" description="Biome's interactive playground" slug="">
+	<div id="root" class="not-content">
+		<PlaygroundLoader client:only />
+	</div>
+</StarlightSplashLayout>
 
-  <script>
-    import "/src/playground/main.tsx";
-  </script>
-</BaseLayout>
+<style>
+	:global(div.content-panel) {
+		padding: 0;
+	}
+	:global(.content-panel:nth-of-type(1)) {
+		display: none;
+	}
+	:global(div.sl-container) {
+		margin: 0;
+		max-width: none;
+	}
+	:global(div.sl-container footer) {
+		display: none;
+	}
+	:global(.main-pane main) {
+		padding-bottom: 0;
+		height: 100%;
+	}
+</style>
+
+<script>
+	import type { ThemeChanged } from "@src/frontend-scripts/util";
+
+	//May this change when we have our own theme switcher component
+	const themeSelect = document.querySelector("starlight-theme-select select");
+
+	themeSelect?.addEventListener("change", (event) => {
+		window.dispatchEvent(new CustomEvent<ThemeChanged>("colorschemechange", { detail: { theme: (event.target as HTMLSelectElement)?.value }}));
+	});
+</script>

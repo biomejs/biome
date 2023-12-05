@@ -52,7 +52,7 @@
         border-right: 1px solid #E9ECEF;
 
         @include dark-mode {
-            border-color: var(--soft-border-color);
+            border-color: var(--sl-border);
         }
     }
 
