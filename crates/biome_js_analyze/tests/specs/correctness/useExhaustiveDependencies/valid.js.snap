@@ -230,6 +230,16 @@ function MyComponent21() {
 	}, [])
 }
 
+let outer = false;
+
+// Capture from outer scope
+// https://github.com/biomejs/biome/issues/651
+function MyComponent22() {
+  useEffect(() => {
+    outer = true;
+  }, [])
+}
+
 ```
 
 

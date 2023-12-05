@@ -131,6 +131,16 @@ declare_rule! {
     /// }
     /// ```
     ///
+    /// ```js
+    /// import { useEffect } from "react";
+    /// let outer = false;
+    /// function component() {
+    ///     useEffect(() => {
+    ///         outer = true;
+    ///     }, []);
+    /// }
+    /// ```
+    ///
     /// ## Options
     ///
     /// Allows to specify custom hooks - from libraries or internal projects - that can be considered stable.
@@ -450,7 +460,6 @@ fn capture_needs_to_be_in_the_dependency_list(
         | AnyJsBindingDeclaration::TsInferType(_)
         | AnyJsBindingDeclaration::TsMappedType(_)
         | AnyJsBindingDeclaration::TsTypeParameter(_) => None,
-
         // Variable declarators are stable if ...
         AnyJsBindingDeclaration::JsVariableDeclarator(declarator) => {
             let declaration = declarator
@@ -459,10 +468,10 @@ fn capture_needs_to_be_in_the_dependency_list(
                 .find_map(JsVariableDeclaration::cast)?;
             let declaration_range = declaration.syntax().text_range();
 
-            if declaration.is_const() {
-                // ... they are `const` and declared outside of the component function
-                let _ = component_function_range.intersect(declaration_range)?;
+            // ... they are declared outside of the component function
+            let _ = component_function_range.intersect(declaration_range)?;
 
+            if declaration.is_const() {
                 // ... they are `const` and their initializer is constant
                 let initializer = declarator.initializer()?;
                 let expr = initializer.expression().ok()?;
