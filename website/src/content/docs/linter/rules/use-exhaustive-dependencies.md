@@ -208,6 +208,16 @@ function component() {
 }
 ```
 
+```jsx
+import { useEffect } from "react";
+let outer = false;
+function component() {
+    useEffect(() => {
+        outer = true;
+    }, []);
+}
+```
+
 ## Options
 
 Allows to specify custom hooks - from libraries or internal projects - that can be considered stable.
