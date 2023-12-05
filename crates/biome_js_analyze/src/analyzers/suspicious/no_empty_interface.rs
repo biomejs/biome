@@ -1,3 +1,4 @@
+use crate::control_flow::AnyJsControlFlowRoot;
 use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic};
@@ -8,39 +9,46 @@ use biome_js_factory::{
     syntax::{AnyTsType, T},
 };
 use biome_js_syntax::{
-    AnyJsDeclarationClause, TriviaPieceKind, TsInterfaceDeclaration, TsTypeAliasDeclaration,
+    AnyJsDeclarationClause, TriviaPieceKind, TsExternalModuleDeclaration, TsInterfaceDeclaration,
+    TsTypeAliasDeclaration,
 };
-use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
+use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, BatchMutationExt};
 
 declare_rule! {
     /// Disallow the declaration of empty interfaces.
     ///
-    /// > An empty interface in TypeScript does very little: any non-nullable value is assignable to `{}`. Using an empty interface is often a sign of programmer error, such as misunderstanding the concept of `{}` or forgetting to fill in fields.
+    /// An empty interface in TypeScript does very little: any non-nullable value is assignable to `{}`.
+    /// Using an empty interface is often a sign of programmer error, such as misunderstanding the concept of `{}` or forgetting to fill in fields.
     ///
     /// Source: https://typescript-eslint.io/rules/no-empty-interface
     ///
     /// ## Examples
     ///
     /// ### Invalid
+    ///
     /// ```ts,expect_diagnostic
     /// interface A {}
     /// ```
     ///
     /// ```ts,expect_diagnostic
-    /// // A === B
     /// interface A extends B {}
     /// ```
     ///
     /// ### Valid
+    ///
     /// ```ts
     /// interface A {
     ///   prop: string;
     /// }
     ///
-    /// // The interface can be used as an union type.
+    /// // Allow empty interfaces that extend at least two types.
     /// interface A extends B, C {}
-    /// ```
     ///
+    /// declare module "@external/module" {
+    ///   // Allow empty interfaces that extend at least one type in external module.
+    ///   interface Existing extends A {}
+    /// }
+    /// ```
     pub(crate) NoEmptyInterface {
         version: "1.0.0",
         name: "noEmptyInterface",
@@ -104,28 +112,35 @@ impl Rule for NoEmptyInterface {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let has_no_members = node.members().is_empty();
-        let extends_clause_count = if let Some(extends_clause) = node.extends_clause() {
-            extends_clause.types().into_iter().count()
-        } else {
-            0
-        };
-
-        if extends_clause_count == 0 && has_no_members {
-            return Some(DiagnosticMessage::NoEmptyInterface);
+        if !node.members().is_empty() {
+            return None;
         }
-
-        if extends_clause_count == 1 && has_no_members {
+        let Some(extends_clause) = node.extends_clause() else {
+            return Some(DiagnosticMessage::NoEmptyInterface);
+        };
+        if node
+            .syntax()
+            .ancestors()
+            .skip(1)
+            .find(|x| AnyJsControlFlowRoot::can_cast(x.kind()))
+            .is_some_and(|x| TsExternalModuleDeclaration::can_cast(x.kind()))
+        {
+            // Ignore interfaces that extend a type in an external module declaration.
+            // The interface can be merged with an existing interface.
+            return None;
+        }
+        if extends_clause.types().len() == 1 {
             return Some(DiagnosticMessage::NoEmptyInterfaceWithSuper);
         }
-
         None
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        let diagnostic = RuleDiagnostic::new(rule_category!(), ctx.query().range(), state.as_str());
-
-        Some(diagnostic)
+        Some(RuleDiagnostic::new(
+            rule_category!(),
+            ctx.query().range(),
+            state.as_str(),
+        ))
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
