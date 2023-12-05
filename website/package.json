@@ -45,10 +45,6 @@
 		"prettier": "^3.1.0",
 		"react": "^18.2.0",
 		"react-dom": "^18.2.0",
-		"rehype-autolink-headings": "^6.1.1",
-		"rehype-slug": "^5.1.0",
-		"rehype-toc": "^3.0.2",
-		"remark-toc": "^8.0.1",
 		"rollup": "^3.29.4",
 		"sass": "^1.68.0",
 		"sharp": "^0.32.6",
@@ -60,6 +56,6 @@
 		"pnpm": "^8.0.0"
 	},
 	"dependencies": {
-		"astro": "4.0.0-beta.5"
+		"astro": "4.0.0-beta.7"
 	}
 }

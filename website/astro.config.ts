@@ -2,12 +2,7 @@ import { netlifyStatic } from "@astrojs/netlify";
 import react from "@astrojs/react";
 import starlight from "@astrojs/starlight";
 import { defineConfig } from "astro/config";
-import rehypeAutolinkHeadings from "rehype-autolink-headings";
-import rehypeSlug from "rehype-slug";
-import remarkToc from "remark-toc";
-import {searchForWorkspaceRoot} from "vite";
-
-
+import { searchForWorkspaceRoot } from "vite";
 
 const site = "https://biomejs.dev";
 // https://astro.build/config
@@ -21,13 +16,13 @@ export default defineConfig({
 		domains: ["avatars.githubusercontent.com"],
 	},
 
-	devOverlay: {
+	devToolbar: {
 		enabled: true,
 	},
 
 	integrations: [
 		react({
-			include: ["playground/**"]
+			include: ["playground/**"],
 		}),
 		starlight({
 			title: "Biome",
@@ -163,22 +158,6 @@ export default defineConfig({
 	build: {
 		format: "directory",
 	},
-
-	markdown: {
-		syntaxHighlight: "prism",
-		remarkPlugins: [remarkToc],
-		rehypePlugins: [
-			rehypeSlug,
-			[
-				rehypeAutolinkHeadings,
-				{
-					behavior: "append",
-					content: [],
-				},
-			],
-		],
-	},
-
 	adapter: netlifyStatic(),
 
 	vite: {
@@ -190,8 +169,11 @@ export default defineConfig({
 
 		server: {
 			fs: {
-		// 		https://vitejs.dev/config/server-options.html#server-fs-allow
-				allow: [searchForWorkspaceRoot(process.cwd()), "../packages/@biomejs/wasm-web"],
+				// https://vitejs.dev/config/server-options.html#server-fs-allow
+				allow: [
+					searchForWorkspaceRoot(process.cwd()),
+					"../packages/@biomejs/wasm-web",
+				],
 			},
 		},
 	},
