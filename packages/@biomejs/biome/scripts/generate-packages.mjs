@@ -17,6 +17,7 @@ function getName(platform, arch, prefix = 'cli') {
 }
 
 function generateNativePackage(platform, arch) {
+	const os = platform.split('-')[0];
 	const buildName = getName(platform, arch)
 	const packageName = `@biomejs/${buildName}`
 	const packageRoot = resolve(PACKAGES_ROOT, buildName);
@@ -39,7 +40,7 @@ function generateNativePackage(platform, arch) {
 		repository,
 		engines,
 		homepage,
-		os: [platform],
+		os: [os],
 		cpu: [arch],
 	});
 
@@ -48,7 +49,7 @@ function generateNativePackage(platform, arch) {
 	fs.writeFileSync(manifestPath, manifest);
 
 	// Copy the CLI binary
-	const ext = platform === "win32" ? ".exe" : "";
+	const ext = os === "win32" ? ".exe" : "";
 	const binarySource = resolve(REPO_ROOT, `${getName(platform, arch, 'biome')}${ext}`);
 	const binaryTarget = resolve(packageRoot, `biome${ext}`);
 
