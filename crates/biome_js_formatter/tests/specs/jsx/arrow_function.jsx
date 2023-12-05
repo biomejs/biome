@@ -27,3 +27,14 @@ function ArrowBodyIsJsxWithComment({ action }) {
 			<li/>
 		);
 }
+
+
+
+function ArrowCurryWithPlainParameters() {
+	return (C) => (props) => <C {...props} />;
+}
+
+function ArrowCurryWithDestructuringParameters() {
+	return ({ C }) =>
+  (props) => <C {...props} />;
+}

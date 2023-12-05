@@ -1,6 +1,6 @@
 use super::{write, Arguments, FormatElement};
 use crate::format_element::Interned;
-use crate::prelude::LineMode;
+use crate::prelude::{LineMode, PrintMode, Tag};
 use crate::{Format, FormatResult, FormatState};
 use rustc_hash::FxHashMap;
 use std::any::{Any, TypeId};
@@ -487,6 +487,11 @@ pub struct RemoveSoftLinesBuffer<'a, Context> {
     /// It's fine to not snapshot the cache. The worst that can happen is that it holds on interned elements
     /// that are now unused. But there's little harm in that and the cache is cleaned when dropping the buffer.
     interned_cache: FxHashMap<Interned, Interned>,
+
+    /// Marker for whether a `StartConditionalContent(mode: Expanded)` has been
+    /// written but not yet closed. Expanded content gets removed from this
+    /// buffer, so anything written while in this state simply gets dropped.
+    is_in_expanded_conditional_content: bool,
 }
 
 impl<'a, Context> RemoveSoftLinesBuffer<'a, Context> {
@@ -495,6 +500,7 @@ impl<'a, Context> RemoveSoftLinesBuffer<'a, Context> {
         Self {
             inner,
             interned_cache: FxHashMap::default(),
+            is_in_expanded_conditional_content: false,
         }
     }
 
@@ -512,12 +518,20 @@ fn clean_interned(
     match interned_cache.get(interned) {
         Some(cleaned) => cleaned.clone(),
         None => {
-            // Find the first soft line break element or interned element that must be changed
+            // Find the first soft line break element, interned element, or conditional expanded
+            // content that must be changed.
             let result = interned
                 .iter()
                 .enumerate()
                 .find_map(|(index, element)| match element {
                     FormatElement::Line(LineMode::Soft | LineMode::SoftOrSpace) => {
+                        let mut cleaned = Vec::new();
+                        cleaned.extend_from_slice(&interned[..index]);
+                        Some((cleaned, &interned[index..]))
+                    }
+                    FormatElement::Tag(Tag::StartConditionalContent(condition))
+                        if condition.mode == PrintMode::Expanded =>
+                    {
                         let mut cleaned = Vec::new();
                         cleaned.extend_from_slice(&interned[..index]);
                         Some((cleaned, &interned[index..]))
@@ -541,10 +555,32 @@ fn clean_interned(
             let result = match result {
                 // Copy the whole interned buffer so that becomes possible to change the necessary elements.
                 Some((mut cleaned, rest)) => {
+                    let mut is_in_expanded_conditional_content = false;
                     for element in rest {
+                        if is_in_expanded_conditional_content {
+                            continue;
+                        }
+
                         let element = match element {
+                            FormatElement::Tag(Tag::StartConditionalContent(condition))
+                                if condition.mode == PrintMode::Expanded =>
+                            {
+                                is_in_expanded_conditional_content = true;
+                                continue;
+                            }
+                            FormatElement::Tag(Tag::EndConditionalContent)
+                                if is_in_expanded_conditional_content =>
+                            {
+                                is_in_expanded_conditional_content = false;
+                                continue;
+                            }
+                            // All content within an expanded conditional gets dropped. If there's a
+                            // matching flat variant, that will still get kept.
+                            _ if is_in_expanded_conditional_content => continue,
+
                             FormatElement::Line(LineMode::Soft) => continue,
                             FormatElement::Line(LineMode::SoftOrSpace) => FormatElement::Space,
+
                             FormatElement::Interned(interned) => {
                                 FormatElement::Interned(clean_interned(interned, interned_cache))
                             }
@@ -570,8 +606,25 @@ impl<Context> Buffer for RemoveSoftLinesBuffer<'_, Context> {
 
     fn write_element(&mut self, element: FormatElement) -> FormatResult<()> {
         let element = match element {
+            FormatElement::Tag(Tag::StartConditionalContent(condition))
+                if condition.mode == PrintMode::Expanded =>
+            {
+                self.is_in_expanded_conditional_content = true;
+                return Ok(());
+            }
+            FormatElement::Tag(Tag::EndConditionalContent)
+                if self.is_in_expanded_conditional_content =>
+            {
+                self.is_in_expanded_conditional_content = false;
+                return Ok(());
+            }
+            // All content within an expanded conditional gets dropped. If there's a
+            // matching flat variant, that will still get kept.
+            _ if self.is_in_expanded_conditional_content => return Ok(()),
+
             FormatElement::Line(LineMode::Soft) => return Ok(()),
             FormatElement::Line(LineMode::SoftOrSpace) => FormatElement::Space,
+
             FormatElement::Interned(interned) => {
                 FormatElement::Interned(self.clean_interned(&interned))
             }

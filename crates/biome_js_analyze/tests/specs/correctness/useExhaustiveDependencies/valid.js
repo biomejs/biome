@@ -1,7 +1,19 @@
 /* should not generate diagnostics */
 
 import React from "react";
-import { useEffect, useSyncExternalStore, useMemo } from "react";
+import {
+	useEffect,
+	useSyncExternalStore,
+	useRef,
+	useState,
+	useContext,
+	useReducer,
+	useCallback,
+	useMemo,
+	useTransition,
+	useId,
+} from "react";
+import { useRef as uR } from "react"
 import doSomething from 'a';
 
 // No captures
@@ -193,4 +205,21 @@ function MyComponent19() {
     useEffect(() => {
         console.log(a);
     });
+}
+
+// Namespaced imports
+// https://github.com/biomejs/biome/issues/578
+function MyComponent20() {
+	const ref = React.useRef()
+	React.useEffect(() => {
+		console.log(ref.current)
+	}, [])
+}
+
+// Aliased imports
+function MyComponent21() {
+	const ref = uR()
+	useEffect(() => {
+			console.log(ref.current)
+	}, [])
 }

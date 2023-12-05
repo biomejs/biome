@@ -1,0 +1,90 @@
+---
+title: Biome工作原理
+description: 学习如何使用Biome设置新项目。
+---
+
+import DefaultConfiguration from "@src/components/generated/DefaultConfiguration.mdx";
+
+## 配置
+
+配置文件被认为是**可选的**，Biome有很好的默认值。使用配置文件来更改这些默认值。
+
+Biome的配置文件名为`biome.json`，应放置在项目的根目录中。根目录通常是包含项目的`package.json`的目录。
+
+此配置文件启用了格式化工具，并设置了首选的缩进样式和宽度。禁用了代码检查器：
+
+```json title="biome.json"
+{
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "tab",
+    "lineWidth": 120
+  },
+  "linter": {
+    "enabled": false
+  }
+}
+```
+
+### 默认配置
+
+运行`biome init`时，生成的默认配置如下：
+
+<DefaultConfiguration />
+
+### 配置文件解析
+
+Biome使用自动发现来查找最近的`biome.json`文件。它从当前工作目录开始查找`biome.json`，然后向上级目录查找，直到：
+
+- 找到`biome.json`文件；
+- 如果**找不到`biome.json`文件**，则应用Biome的默认值；
+
+以下是一个示例：
+
+```
+└── app
+    ├── backend
+    │   ├── package.json
+    │   └── biome.json
+    └── frontend
+        ├── legacy
+        │   └── package.json
+        ├── new
+        │   └── package.json
+        └── biome.json
+
+```
+
+- 在`app/backend/package.json`中运行的biome命令将使用配置文件`app/backend/biome.json`；
+- 在`app/frontend/legacy/package.json`和`app/frontend/new/package.json`中运行的biome命令将使用配置文件`app/frontend/biome.json`；
+
+## 已知文件
+
+以下文件目前被Biome忽略。这意味着Biome不会为这些文件发出任何诊断信息。
+
+- `package.json`
+- `package-lock.json`
+- `npm-shrinkwrap.json`
+- `yarn.lock`
+- `composer.json`
+- `composer.lock`
+- `typescript.json`
+- `tsconfig.json`
+- `jsconfig.json`
+- `deno.json`
+- `deno.jsonc`
+
+以下文件被解析为**`JSON`文件**，选项`json.parser.allowComments`和`json.parser.allowTrailingCommas`设置为`true`。这是因为像VSCode这样的编辑器工具将其视为这种格式。
+
+- `tslint.json`
+- `babel.config.json`
+- `.babelrc.json`
+- `.ember-cli`
+- `typedoc.json`
+- `.eslintrc`
+- `.eslintrc.json`
+- `.jsfmtrc`
+- `.jshintrc`
+- `.swcrc`
+- `.hintrc`
+- `.babelrc`

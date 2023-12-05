@@ -407,17 +407,17 @@ fn show_invisible_char(char: char) -> Option<&'static str> {
 
 /// A user-facing location in a source file.
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
-pub(super) struct SourceLocation {
+pub struct SourceLocation {
     /// The user-facing line number.
-    pub(super) line_number: OneIndexed,
+    pub line_number: OneIndexed,
     /// The user-facing column number.
-    pub(super) column_number: OneIndexed,
+    pub column_number: OneIndexed,
 }
 
 /// Representation of a single source file holding additional information for
 /// efficiently rendering code frames
 #[derive(Clone)]
-pub(super) struct SourceFile<'diagnostic> {
+pub struct SourceFile<'diagnostic> {
     /// The source code of the file.
     source: &'diagnostic str,
     /// The starting byte indices in the source code.
@@ -426,7 +426,7 @@ pub(super) struct SourceFile<'diagnostic> {
 
 impl<'diagnostic> SourceFile<'diagnostic> {
     /// Create a new [SourceFile] from a slice of text
-    pub(super) fn new(source_code: BorrowedSourceCode<'diagnostic>) -> Self {
+    pub fn new(source_code: BorrowedSourceCode<'diagnostic>) -> Self {
         // Either re-use the existing line index provided by the diagnostic or create one
         Self {
             source: source_code.text,
@@ -484,7 +484,7 @@ impl<'diagnostic> SourceFile<'diagnostic> {
     }
 
     /// Get a source location from a byte index into the text of this file
-    pub(super) fn location(&self, byte_index: TextSize) -> io::Result<SourceLocation> {
+    pub fn location(&self, byte_index: TextSize) -> io::Result<SourceLocation> {
         let line_index = self.line_index(byte_index);
 
         Ok(SourceLocation {

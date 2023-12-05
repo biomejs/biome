@@ -126,13 +126,17 @@ export default defineConfig({
 					label: "日本語",
 					lang: "ja",
 				},
+				"zh-cn": {
+					label: "简体中文",
+					lang: "zh-CN",
+				},
 			},
 			sidebar: [
 				{ label: "Home", link: "/" },
-				{ label: "Blog", link: "/blog" },
+				{ label: "Blog", link: "../blog" },
 				{
 					label: "Playground",
-					link: "/playground",
+					link: "../playground",
 				},
 				{
 					label: "Guides",
@@ -161,6 +165,10 @@ export default defineConfig({
 					items: [
 						{ label: "Analyzer", link: "/analyzer" },
 						{ label: "Formatter", link: "/formatter" },
+						{
+							label: "Formatter Option Philosophy",
+							link: "/formatter/option-philosophy",
+						},
 						{ label: "Linter", link: "/linter" },
 						{ label: "Lint rules", link: "/linter/rules" },
 					],
