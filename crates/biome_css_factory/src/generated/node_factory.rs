@@ -288,6 +288,15 @@ pub fn css_declaration_important(
         ],
     ))
 }
+pub fn css_font_face_at_rule(font_face_token: SyntaxToken, block: CssBlock) -> CssFontFaceAtRule {
+    CssFontFaceAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_FONT_FACE_AT_RULE,
+        [
+            Some(SyntaxElement::Token(font_face_token)),
+            Some(SyntaxElement::Node(block.into_syntax())),
+        ],
+    ))
+}
 pub fn css_id_selector(hash_token: SyntaxToken, name: CssIdentifier) -> CssIdSelector {
     CssIdSelector::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_ID_SELECTOR,
