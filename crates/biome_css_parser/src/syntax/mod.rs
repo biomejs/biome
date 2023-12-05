@@ -6,7 +6,7 @@ mod selector;
 use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use crate::syntax::at_rule::{at_at_rule, parse_at_rule};
-use crate::syntax::css_dimension::{is_at_css_dimension, parse_css_dimension};
+use crate::syntax::css_dimension::{is_at_dimension, parse_dimension};
 use crate::syntax::parse_error::expected_block;
 use crate::syntax::parse_error::expected_identifier;
 use crate::syntax::selector::CssSelectorList;
@@ -85,7 +85,6 @@ pub(crate) fn parse_rule_block(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
     p.expect(T!['{']);
     CssDeclarationList::default().parse_list(p);
-    // parse_declaration_list(p);
     p.expect(T!['}']);
 
     Present(m.complete(p, CSS_BLOCK))
@@ -136,11 +135,11 @@ impl ParseNodeList for ListOfComponentValues {
     const LIST_KIND: Self::Kind = CSS_LIST_OF_COMPONENT_VALUES;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        parse_any_css_value(p)
+        parse_any_value(p)
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        !is_any_css_value(p)
+        !is_any_value(p)
     }
 
     fn recover(
@@ -161,7 +160,6 @@ pub(crate) fn parse_declaration_item(p: &mut CssParser) -> ParsedSyntax {
         return Absent;
     }
     let m = p.start();
-    // name
     parse_regular_identifier(p).ok();
 
     p.expect(T![:]);
@@ -189,30 +187,30 @@ fn parse_declaration_important(p: &mut CssParser) -> ParsedSyntax {
 }
 
 #[inline]
-pub(crate) fn is_any_css_value(p: &mut CssParser) -> bool {
-    is_at_css_any_function(p)
+pub(crate) fn is_any_value(p: &mut CssParser) -> bool {
+    is_at_any_function(p)
         || is_at_identifier(p)
         || p.at(CSS_STRING_LITERAL)
-        || is_at_css_dimension(p)
+        || is_at_dimension(p)
         || p.at(CSS_NUMBER_LITERAL)
-        || is_at_css_custom_property(p)
-        || is_at_css_ratio(p)
+        || is_at_custom_property(p)
+        || is_at_ratio(p)
 }
 
 #[inline]
-pub(crate) fn parse_any_css_value(p: &mut CssParser) -> ParsedSyntax {
-    if is_at_css_any_function(p) {
-        parse_css_any_function(p)
-    } else if is_at_css_custom_property(p) {
-        parse_css_custom_property(p)
+pub(crate) fn parse_any_value(p: &mut CssParser) -> ParsedSyntax {
+    if is_at_any_function(p) {
+        parse_any_function(p)
+    } else if is_at_custom_property(p) {
+        parse_custom_property(p)
     } else if is_at_identifier(p) {
         parse_regular_identifier(p)
     } else if p.at(CSS_STRING_LITERAL) {
         parse_string(p)
-    } else if is_at_css_dimension(p) {
-        parse_css_dimension(p)
-    } else if is_at_css_ratio(p) {
-        parse_css_ratio(p)
+    } else if is_at_dimension(p) {
+        parse_dimension(p)
+    } else if is_at_ratio(p) {
+        parse_ratio(p)
     } else if p.at(CSS_NUMBER_LITERAL) {
         parse_regular_number(p)
     } else {
@@ -221,15 +219,14 @@ pub(crate) fn parse_any_css_value(p: &mut CssParser) -> ParsedSyntax {
 }
 
 #[inline]
-pub(crate) fn is_at_css_custom_property(p: &mut CssParser) -> bool {
+pub(crate) fn is_at_custom_property(p: &mut CssParser) -> bool {
     is_at_identifier(p) && p.cur_text().starts_with("--")
 }
 
 #[inline]
-pub(crate) fn parse_css_custom_property(p: &mut CssParser) -> ParsedSyntax {
-    if is_at_css_custom_property(p) {
+pub(crate) fn parse_custom_property(p: &mut CssParser) -> ParsedSyntax {
+    if is_at_custom_property(p) {
         let m = p.start();
-        // identifier starting with --
         parse_regular_identifier(p).or_add_diagnostic(p, expected_identifier);
         return Present(m.complete(p, CSS_CUSTOM_PROPERTY));
     }
@@ -237,7 +234,7 @@ pub(crate) fn parse_css_custom_property(p: &mut CssParser) -> ParsedSyntax {
 }
 
 #[inline]
-pub(crate) fn is_at_css_any_function(p: &mut CssParser) -> bool {
+pub(crate) fn is_at_any_function(p: &mut CssParser) -> bool {
     p.at(T![ident]) && p.nth_at(1, T!['('])
 }
 
@@ -250,7 +247,7 @@ impl ParseSeparatedList for CssParameterList {
     const LIST_KIND: Self::Kind = CSS_PARAMETER_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        parse_css_parameter(p)
+        parse_parameter(p)
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
@@ -279,8 +276,8 @@ impl ParseSeparatedList for CssParameterList {
 }
 
 #[inline]
-pub(crate) fn parse_css_parameter(p: &mut CssParser) -> ParsedSyntax {
-    if !is_any_css_value(p) {
+pub(crate) fn parse_parameter(p: &mut CssParser) -> ParsedSyntax {
+    if !is_any_value(p) {
         return Absent;
     }
     let param = p.start();
@@ -291,11 +288,10 @@ pub(crate) fn parse_css_parameter(p: &mut CssParser) -> ParsedSyntax {
 }
 
 #[inline]
-pub(crate) fn parse_css_any_function(p: &mut CssParser) -> ParsedSyntax {
-    if is_at_css_any_function(p) {
+pub(crate) fn parse_any_function(p: &mut CssParser) -> ParsedSyntax {
+    if is_at_any_function(p) {
         let m = p.start();
         let simple_fn = p.start();
-        // function name
         parse_regular_identifier(p).or_add_diagnostic(p, expected_identifier);
         p.eat(T!['(']);
         CssParameterList::default().parse_list(p);
@@ -308,13 +304,13 @@ pub(crate) fn parse_css_any_function(p: &mut CssParser) -> ParsedSyntax {
 }
 
 #[inline]
-pub(crate) fn is_at_css_ratio(p: &mut CssParser) -> bool {
+pub(crate) fn is_at_ratio(p: &mut CssParser) -> bool {
     p.at(CSS_NUMBER_LITERAL) && p.nth_at(1, T![/])
 }
 
 #[inline]
-pub(crate) fn parse_css_ratio(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_css_ratio(p) {
+pub(crate) fn parse_ratio(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_ratio(p) {
         return Absent;
     }
     let m = p.start();

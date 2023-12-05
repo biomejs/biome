@@ -9,50 +9,50 @@ use super::parse_error::expected_unit;
 use super::{parse_regular_identifier, parse_regular_number};
 
 #[inline]
-pub(crate) fn is_at_css_dimension(p: &mut CssParser) -> bool {
-    is_at_css_percentage_dimension(p) || is_at_css_regular_dimension(p)
+pub(crate) fn is_at_dimension(p: &mut CssParser) -> bool {
+    is_at_percentage_dimension(p) || is_at_regular_dimension(p)
 }
 
 #[inline]
-pub(crate) fn parse_css_dimension(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_css_dimension(p) {
+pub(crate) fn parse_dimension(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_dimension(p) {
         return Absent;
     }
-    if is_at_css_percentage_dimension(p) {
-        return parse_css_percentage_dimension(p);
+    if is_at_percentage_dimension(p) {
+        return parse_percentage_dimension(p);
     }
-    parse_css_regular_dimension(p)
+    parse_regular_dimension(p)
 }
 
-fn is_at_css_percentage_dimension(p: &mut CssParser) -> bool {
+fn is_at_percentage_dimension(p: &mut CssParser) -> bool {
     p.at(CSS_NUMBER_LITERAL) && matches!(p.nth(1), T![%])
 }
 #[inline]
-fn parse_css_percentage_dimension(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_css_percentage_dimension(p) {
+fn parse_percentage_dimension(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_percentage_dimension(p) {
         return Absent;
     }
     let m = p.start();
-    let _css_number = parse_regular_number(p);
+     parse_regular_number(p).ok();
     p.expect(T![%]);
     Present(m.complete(p, CSS_PERCENTAGE))
 }
-fn is_at_css_regular_dimension(p: &mut CssParser) -> bool {
+fn is_at_regular_dimension(p: &mut CssParser) -> bool {
     p.at(CSS_NUMBER_LITERAL) && p.nth_at(1, T![ident])
 }
 #[inline]
-fn parse_css_regular_dimension(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_css_regular_dimension(p) {
+fn parse_regular_dimension(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_regular_dimension(p) {
         return Absent;
     }
     let m = p.start();
-    let _css_number = parse_regular_number(p);
-    parse_css_unit(p).or_add_diagnostic(p, expected_unit);
+    parse_regular_number(p).ok();
+    parse_unit(p).or_add_diagnostic(p, expected_unit);
     Present(m.complete(p, CSS_REGULAR_DIMENSION))
 }
 
 #[inline]
-fn parse_css_unit(p: &mut CssParser) -> ParsedSyntax {
+fn parse_unit(p: &mut CssParser) -> ParsedSyntax {
     if !(p.at(T![ident]) && is_unit_str(p.cur_text())) {
         return Absent;
     }

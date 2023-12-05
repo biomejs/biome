@@ -643,7 +643,7 @@ impl CssDeclaration {
             important: self.important(),
         }
     }
-    pub fn name(&self) -> SyntaxResult<CssDeclarationName> {
+    pub fn name(&self) -> SyntaxResult<AnyCssDeclarationName> {
         support::required_node(&self.syntax, 0usize)
     }
     pub fn colon_token(&self) -> SyntaxResult<SyntaxToken> {
@@ -667,7 +667,7 @@ impl Serialize for CssDeclaration {
 }
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct CssDeclarationFields {
-    pub name: SyntaxResult<CssDeclarationName>,
+    pub name: SyntaxResult<AnyCssDeclarationName>,
     pub colon_token: SyntaxResult<SyntaxToken>,
     pub value: CssListOfComponentValues,
     pub important: Option<CssDeclarationImportant>,
@@ -3170,6 +3170,26 @@ impl AnyCssCompoundSelector {
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
+pub enum AnyCssDeclarationName {
+    CssCustomProperty(CssCustomProperty),
+    CssIdentifier(CssIdentifier),
+}
+impl AnyCssDeclarationName {
+    pub fn as_css_custom_property(&self) -> Option<&CssCustomProperty> {
+        match &self {
+            AnyCssDeclarationName::CssCustomProperty(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_identifier(&self) -> Option<&CssIdentifier> {
+        match &self {
+            AnyCssDeclarationName::CssIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum AnyCssDimension {
     CssPercentage(CssPercentage),
     CssRegularDimension(CssRegularDimension),
@@ -3648,26 +3668,6 @@ impl AnyCssValue {
     pub fn as_css_string(&self) -> Option<&CssString> {
         match &self {
             AnyCssValue::CssString(item) => Some(item),
-            _ => None,
-        }
-    }
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
-pub enum CssDeclarationName {
-    CssCustomProperty(CssCustomProperty),
-    CssIdentifier(CssIdentifier),
-}
-impl CssDeclarationName {
-    pub fn as_css_custom_property(&self) -> Option<&CssCustomProperty> {
-        match &self {
-            CssDeclarationName::CssCustomProperty(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_css_identifier(&self) -> Option<&CssIdentifier> {
-        match &self {
-            CssDeclarationName::CssIdentifier(item) => Some(item),
             _ => None,
         }
     }
@@ -6899,6 +6899,68 @@ impl From<AnyCssCompoundSelector> for SyntaxElement {
         node.into()
     }
 }
+impl From<CssCustomProperty> for AnyCssDeclarationName {
+    fn from(node: CssCustomProperty) -> AnyCssDeclarationName {
+        AnyCssDeclarationName::CssCustomProperty(node)
+    }
+}
+impl From<CssIdentifier> for AnyCssDeclarationName {
+    fn from(node: CssIdentifier) -> AnyCssDeclarationName {
+        AnyCssDeclarationName::CssIdentifier(node)
+    }
+}
+impl AstNode for AnyCssDeclarationName {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        CssCustomProperty::KIND_SET.union(CssIdentifier::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, CSS_CUSTOM_PROPERTY | CSS_IDENTIFIER)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_CUSTOM_PROPERTY => {
+                AnyCssDeclarationName::CssCustomProperty(CssCustomProperty { syntax })
+            }
+            CSS_IDENTIFIER => AnyCssDeclarationName::CssIdentifier(CssIdentifier { syntax }),
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            AnyCssDeclarationName::CssCustomProperty(it) => &it.syntax,
+            AnyCssDeclarationName::CssIdentifier(it) => &it.syntax,
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            AnyCssDeclarationName::CssCustomProperty(it) => it.syntax,
+            AnyCssDeclarationName::CssIdentifier(it) => it.syntax,
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssDeclarationName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            AnyCssDeclarationName::CssCustomProperty(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssDeclarationName::CssIdentifier(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssDeclarationName> for SyntaxNode {
+    fn from(n: AnyCssDeclarationName) -> SyntaxNode {
+        match n {
+            AnyCssDeclarationName::CssCustomProperty(it) => it.into(),
+            AnyCssDeclarationName::CssIdentifier(it) => it.into(),
+        }
+    }
+}
+impl From<AnyCssDeclarationName> for SyntaxElement {
+    fn from(n: AnyCssDeclarationName) -> SyntaxElement {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<CssPercentage> for AnyCssDimension {
     fn from(node: CssPercentage) -> AnyCssDimension {
         AnyCssDimension::CssPercentage(node)
@@ -8235,68 +8297,6 @@ impl From<AnyCssValue> for SyntaxElement {
         node.into()
     }
 }
-impl From<CssCustomProperty> for CssDeclarationName {
-    fn from(node: CssCustomProperty) -> CssDeclarationName {
-        CssDeclarationName::CssCustomProperty(node)
-    }
-}
-impl From<CssIdentifier> for CssDeclarationName {
-    fn from(node: CssIdentifier) -> CssDeclarationName {
-        CssDeclarationName::CssIdentifier(node)
-    }
-}
-impl AstNode for CssDeclarationName {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        CssCustomProperty::KIND_SET.union(CssIdentifier::KIND_SET);
-    fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, CSS_CUSTOM_PROPERTY | CSS_IDENTIFIER)
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        let res = match syntax.kind() {
-            CSS_CUSTOM_PROPERTY => {
-                CssDeclarationName::CssCustomProperty(CssCustomProperty { syntax })
-            }
-            CSS_IDENTIFIER => CssDeclarationName::CssIdentifier(CssIdentifier { syntax }),
-            _ => return None,
-        };
-        Some(res)
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        match self {
-            CssDeclarationName::CssCustomProperty(it) => &it.syntax,
-            CssDeclarationName::CssIdentifier(it) => &it.syntax,
-        }
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        match self {
-            CssDeclarationName::CssCustomProperty(it) => it.syntax,
-            CssDeclarationName::CssIdentifier(it) => it.syntax,
-        }
-    }
-}
-impl std::fmt::Debug for CssDeclarationName {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            CssDeclarationName::CssCustomProperty(it) => std::fmt::Debug::fmt(it, f),
-            CssDeclarationName::CssIdentifier(it) => std::fmt::Debug::fmt(it, f),
-        }
-    }
-}
-impl From<CssDeclarationName> for SyntaxNode {
-    fn from(n: CssDeclarationName) -> SyntaxNode {
-        match n {
-            CssDeclarationName::CssCustomProperty(it) => it.into(),
-            CssDeclarationName::CssIdentifier(it) => it.into(),
-        }
-    }
-}
-impl From<CssDeclarationName> for SyntaxElement {
-    fn from(n: CssDeclarationName) -> SyntaxElement {
-        let node: SyntaxNode = n.into();
-        node.into()
-    }
-}
 impl std::fmt::Display for AnyCssAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -8308,6 +8308,11 @@ impl std::fmt::Display for AnyCssAttributeMatcherValue {
     }
 }
 impl std::fmt::Display for AnyCssCompoundSelector {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyCssDeclarationName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -8383,11 +8388,6 @@ impl std::fmt::Display for AnyCssSubSelector {
     }
 }
 impl std::fmt::Display for AnyCssValue {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
-impl std::fmt::Display for CssDeclarationName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

@@ -241,7 +241,7 @@ pub fn css_custom_property(value: CssIdentifier) -> CssCustomProperty {
     ))
 }
 pub fn css_declaration(
-    name: CssDeclarationName,
+    name: AnyCssDeclarationName,
     colon_token: SyntaxToken,
     value: CssListOfComponentValues,
 ) -> CssDeclarationBuilder {
@@ -253,7 +253,7 @@ pub fn css_declaration(
     }
 }
 pub struct CssDeclarationBuilder {
-    name: CssDeclarationName,
+    name: AnyCssDeclarationName,
     colon_token: SyntaxToken,
     value: CssListOfComponentValues,
     important: Option<CssDeclarationImportant>,

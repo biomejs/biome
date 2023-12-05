@@ -402,14 +402,14 @@ CssBlock =
 CssDeclarationList = CssDeclaration (';' CssDeclaration)* ';'?
 
 CssDeclaration =
-	name: CssDeclarationName
+	name: AnyCssDeclarationName
 	':'
 	value: CssListOfComponentValues
 	important: CssDeclarationImportant?
 
 CssListOfComponentValues = AnyCssValue*
 
-CssDeclarationName = CssIdentifier | CssCustomProperty
+AnyCssDeclarationName = CssIdentifier | CssCustomProperty
 
 CssDeclarationImportant =
 	'!'

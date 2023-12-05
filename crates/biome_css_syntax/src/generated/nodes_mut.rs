@@ -236,7 +236,7 @@ impl CssCustomProperty {
     }
 }
 impl CssDeclaration {
-    pub fn with_name(self, element: CssDeclarationName) -> Self {
+    pub fn with_name(self, element: AnyCssDeclarationName) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
