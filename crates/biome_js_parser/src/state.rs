@@ -33,14 +33,6 @@ pub(crate) enum ExportDefaultItemKind {
     Declaration,
 }
 impl ExportDefaultItemKind {
-    pub(crate) fn is_overload(&self) -> bool {
-        matches!(self, ExportDefaultItemKind::FunctionOverload)
-    }
-
-    pub(crate) fn is_function_declaration(&self) -> bool {
-        matches!(self, ExportDefaultItemKind::FunctionDeclaration)
-    }
-
     pub(crate) fn is_interface(&self) -> bool {
         matches!(self, ExportDefaultItemKind::Interface)
     }
