@@ -132,7 +132,7 @@ export default defineConfig({
 				},
 				"pt-br": {
 					label: "Português",
-					lang: "pt-br",
+					lang: "pt-BR",
 				},
 			},
 			sidebar: [
