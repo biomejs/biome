@@ -42,6 +42,10 @@ function generateNativePackage(platform, arch) {
 		homepage,
 		os: [os],
 		cpu: [arch],
+		libc: os === "linux"
+			? packageName.endsWith('musl')
+				? ['musl'] : ['glibc']
+			: undefined
 	});
 
 	const manifestPath = resolve(packageRoot, "package.json");
