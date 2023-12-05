@@ -780,6 +780,10 @@ fn should_group_first_argument(
         ) if iter.next().is_none() => {
             match &first {
                 JsFunctionExpression(_) => {}
+                // Arrow expressions that are a plain expression or are a chain
+                // don't get grouped as the first argument, since they'll either
+                // fit entirely on the line or break fully. Only a single arrow
+                // with a block body can be grouped to collapse the braces.
                 JsArrowFunctionExpression(arrow) => {
                     if !matches!(arrow.body(), Ok(AnyJsFunctionBody::JsFunctionBody(_))) {
                         return Ok(false);
@@ -944,9 +948,17 @@ fn is_relatively_short_argument(argument: AnyJsExpression) -> bool {
         AnyJsExpression::AnyJsLiteralExpression(
             AnyJsLiteralExpression::JsRegexLiteralExpression(_),
         ) => true,
-        AnyJsExpression::JsCallExpression(call) => call
-            .arguments()
-            .map_or(false, |args| args.args().len() <= 1),
+        AnyJsExpression::JsCallExpression(call) => {
+            if let Ok(arguments) = call.arguments() {
+                match arguments.args().len() {
+                    0 => true,
+                    1 => SimpleArgument::from(AnyJsExpression::from(call)).is_simple(),
+                    _ => false,
+                }
+            } else {
+                true
+            }
+        }
         _ => SimpleArgument::from(argument).is_simple(),
     }
 }
