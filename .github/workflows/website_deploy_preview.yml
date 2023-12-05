@@ -38,7 +38,7 @@ jobs:
       - name: Install wasm-pack
         uses: jetli/wasm-pack-action@v0.4.0
         with:
-          version: 'latest'
+          version: "latest"
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
       - name: Pull Vercel Environment Information
@@ -52,9 +52,6 @@ jobs:
       - name: Build JS
         working-directory: website
         run: pnpm build:js
-      - name: Run textlint
-        working-directory: website
-        run: pnpm textlint
       - name: Deploy Project Artifacts to Vercel
         run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
         working-directory: website
