@@ -234,31 +234,28 @@ pub fn css_counter_style_at_rule(
         ],
     ))
 }
-pub fn css_custom_property(value_token: SyntaxToken) -> CssCustomProperty {
+pub fn css_custom_property(value: CssIdentifier) -> CssCustomProperty {
     CssCustomProperty::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_CUSTOM_PROPERTY,
-        [Some(SyntaxElement::Token(value_token))],
+        [Some(SyntaxElement::Node(value.into_syntax()))],
     ))
 }
 pub fn css_declaration(
-    name: CssIdentifier,
-    css_custom_property: CssCustomProperty,
+    name: AnyCssDeclarationName,
     colon_token: SyntaxToken,
-    value: AnyCssValue,
+    value: CssListOfComponentValues,
 ) -> CssDeclarationBuilder {
     CssDeclarationBuilder {
         name,
-        css_custom_property,
         colon_token,
         value,
         important: None,
     }
 }
 pub struct CssDeclarationBuilder {
-    name: CssIdentifier,
-    css_custom_property: CssCustomProperty,
+    name: AnyCssDeclarationName,
     colon_token: SyntaxToken,
-    value: AnyCssValue,
+    value: CssListOfComponentValues,
     important: Option<CssDeclarationImportant>,
 }
 impl CssDeclarationBuilder {
@@ -271,7 +268,6 @@ impl CssDeclarationBuilder {
             CssSyntaxKind::CSS_DECLARATION,
             [
                 Some(SyntaxElement::Node(self.name.into_syntax())),
-                Some(SyntaxElement::Node(self.css_custom_property.into_syntax())),
                 Some(SyntaxElement::Token(self.colon_token)),
                 Some(SyntaxElement::Node(self.value.into_syntax())),
                 self.important
@@ -289,15 +285,6 @@ pub fn css_declaration_important(
         [
             Some(SyntaxElement::Token(excl_token)),
             Some(SyntaxElement::Token(important_token)),
-        ],
-    ))
-}
-pub fn css_dimension(value: CssNumber, unit: CssIdentifier) -> CssDimension {
-    CssDimension::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_DIMENSION,
-        [
-            Some(SyntaxElement::Node(value.into_syntax())),
-            Some(SyntaxElement::Node(unit.into_syntax())),
         ],
     ))
 }
@@ -600,10 +587,21 @@ pub fn css_number(value_token: SyntaxToken) -> CssNumber {
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
-pub fn css_parameter(any_css_value: AnyCssValue) -> CssParameter {
+pub fn css_parameter(css_list_of_component_values: CssListOfComponentValues) -> CssParameter {
     CssParameter::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_PARAMETER,
-        [Some(SyntaxElement::Node(any_css_value.into_syntax()))],
+        [Some(SyntaxElement::Node(
+            css_list_of_component_values.into_syntax(),
+        ))],
+    ))
+}
+pub fn css_percent_dimension(value: CssNumber, unit_token: SyntaxToken) -> CssPercentDimension {
+    CssPercentDimension::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_PERCENT_DIMENSION,
+        [
+            Some(SyntaxElement::Node(value.into_syntax())),
+            Some(SyntaxElement::Token(unit_token)),
+        ],
     ))
 }
 pub fn css_percentage(value: CssNumber, reminder_token: SyntaxToken) -> CssPercentage {
@@ -923,12 +921,26 @@ pub fn css_pseudo_element_selector(
         ],
     ))
 }
-pub fn css_ratio(numerator: CssNumber, denominator: CssNumber) -> CssRatio {
+pub fn css_ratio(
+    numerator: CssNumber,
+    slash_token: SyntaxToken,
+    denominator: CssNumber,
+) -> CssRatio {
     CssRatio::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_RATIO,
         [
             Some(SyntaxElement::Node(numerator.into_syntax())),
+            Some(SyntaxElement::Token(slash_token)),
             Some(SyntaxElement::Node(denominator.into_syntax())),
+        ],
+    ))
+}
+pub fn css_regular_dimension(value: CssNumber, unit: CssIdentifier) -> CssRegularDimension {
+    CssRegularDimension::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_REGULAR_DIMENSION,
+        [
+            Some(SyntaxElement::Node(value.into_syntax())),
+            Some(SyntaxElement::Node(unit.into_syntax())),
         ],
     ))
 }
@@ -1148,16 +1160,25 @@ where
         }),
     ))
 }
-pub fn css_declaration_list<I>(items: I) -> CssDeclarationList
+pub fn css_declaration_list<I, S>(items: I, separators: S) -> CssDeclarationList
 where
     I: IntoIterator<Item = CssDeclaration>,
     I::IntoIter: ExactSizeIterator,
+    S: IntoIterator<Item = CssSyntaxToken>,
+    S::IntoIter: ExactSizeIterator,
 {
+    let mut items = items.into_iter();
+    let mut separators = separators.into_iter();
+    let length = items.len() + separators.len();
     CssDeclarationList::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_DECLARATION_LIST,
-        items
-            .into_iter()
-            .map(|item| Some(item.into_syntax().into())),
+        (0..length).map(|index| {
+            if index % 2 == 0 {
+                Some(items.next()?.into_syntax().into())
+            } else {
+                Some(separators.next()?.into())
+            }
+        }),
     ))
 }
 pub fn css_keyframes_item_list<I>(items: I) -> CssKeyframesItemList
@@ -1193,6 +1214,18 @@ where
         }),
     ))
 }
+pub fn css_list_of_component_values<I>(items: I) -> CssListOfComponentValues
+where
+    I: IntoIterator<Item = AnyCssValue>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssListOfComponentValues::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_LIST_OF_COMPONENT_VALUES,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
+    ))
+}
 pub fn css_media_query_list<I, S>(items: I, separators: S) -> CssMediaQueryList
 where
     I: IntoIterator<Item = CssMediaQuery>,
@@ -1214,16 +1247,25 @@ where
         }),
     ))
 }
-pub fn css_parameter_list<I>(items: I) -> CssParameterList
+pub fn css_parameter_list<I, S>(items: I, separators: S) -> CssParameterList
 where
     I: IntoIterator<Item = CssParameter>,
     I::IntoIter: ExactSizeIterator,
+    S: IntoIterator<Item = CssSyntaxToken>,
+    S::IntoIter: ExactSizeIterator,
 {
+    let mut items = items.into_iter();
+    let mut separators = separators.into_iter();
+    let length = items.len() + separators.len();
     CssParameterList::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_PARAMETER_LIST,
-        items
-            .into_iter()
-            .map(|item| Some(item.into_syntax().into())),
+        (0..length).map(|index| {
+            if index % 2 == 0 {
+                Some(items.next()?.into_syntax().into())
+            } else {
+                Some(separators.next()?.into())
+            }
+        }),
     ))
 }
 pub fn css_pseudo_value_list<I, S>(items: I, separators: S) -> CssPseudoValueList

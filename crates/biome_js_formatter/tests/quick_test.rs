@@ -1,4 +1,4 @@
-use biome_formatter::IndentStyle;
+use biome_formatter::{IndentStyle, LineWidth};
 use biome_formatter_test::check_reformat::CheckReformat;
 use biome_js_formatter::context::{ArrowParentheses, JsFormatOptions, QuoteStyle, Semicolons};
 use biome_js_formatter::format_node;
@@ -25,6 +25,7 @@ fn quick_test() {
     );
     let options = JsFormatOptions::new(source_type)
         .with_indent_style(IndentStyle::Space)
+        .with_line_width(LineWidth::try_from(120).unwrap())
         .with_semicolons(Semicolons::Always)
         .with_quote_style(QuoteStyle::Double)
         .with_jsx_quote_style(QuoteStyle::Single)

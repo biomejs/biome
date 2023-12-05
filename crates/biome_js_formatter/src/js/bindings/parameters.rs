@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use biome_formatter::{write, CstFormatContext, FormatRuleWithOptions};
+use biome_formatter::{write, CstFormatContext};
 
 use crate::js::expressions::arrow_function_expression::can_avoid_parentheses;
 use crate::js::lists::parameter_list::FormatJsAnyParameterList;
@@ -13,59 +13,21 @@ use biome_js_syntax::{
 use biome_rowan::{declare_node_union, AstNode, SyntaxResult};
 
 #[derive(Debug, Copy, Clone, Default)]
-pub(crate) struct FormatJsParameters {
-    options: FormatJsParametersOptions,
-}
-
-#[derive(Debug, Clone, Copy, Default)]
-pub(crate) struct FormatJsParametersOptions {
-    /// Whether the parameters should include soft line breaks to allow them to
-    /// break naturally over multiple lines when they can't fit on one line.
-    ///
-    /// This is particularly important for arrow chains passed as arguments in
-    /// call expressions, where it must be set to false to avoid having the
-    /// parameters break onto lines before the entire expression expands.
-    ///
-    /// When `true`, parameters will _not_ include any soft line break points.
-    pub prevent_soft_line_breaks: bool,
-}
-
-impl FormatRuleWithOptions<JsParameters> for FormatJsParameters {
-    type Options = FormatJsParametersOptions;
-
-    fn with_options(mut self, options: Self::Options) -> Self {
-        self.options = options;
-        self
-    }
-}
+pub(crate) struct FormatJsParameters();
 
 impl FormatNodeRule<JsParameters> for FormatJsParameters {
     fn fmt_fields(&self, node: &JsParameters, f: &mut JsFormatter) -> FormatResult<()> {
-        FormatAnyJsParameters::new(AnyJsParameters::JsParameters(node.clone()), self.options).fmt(f)
+        FormatAnyJsParameters::from(node.clone()).fmt(f)
     }
 
     fn fmt_dangling_comments(&self, _: &JsParameters, _: &mut JsFormatter) -> FormatResult<()> {
-        // Formatted inside of `FormatJsAnyParameters
+        // Formatted inside of `FormatJsAnyParameters`
         Ok(())
     }
 }
 
 declare_node_union! {
-    pub(crate) AnyJsParameters = JsParameters | JsConstructorParameters
-}
-
-pub(crate) struct FormatAnyJsParameters {
-    pub(crate) parameters: AnyJsParameters,
-    pub(crate) options: FormatJsParametersOptions,
-}
-
-impl FormatAnyJsParameters {
-    pub(crate) fn new(parameters: AnyJsParameters, options: FormatJsParametersOptions) -> Self {
-        Self {
-            parameters,
-            options,
-        }
-    }
+    pub(crate) FormatAnyJsParameters = JsParameters | JsConstructorParameters
 }
 
 impl Format<JsFormatContext> for FormatAnyJsParameters {
@@ -81,8 +43,6 @@ impl Format<JsFormatContext> for FormatAnyJsParameters {
             ParameterLayout::NoParameters
         } else if can_hug || self.is_in_test_call()? {
             ParameterLayout::Hug
-        } else if self.options.prevent_soft_line_breaks {
-            ParameterLayout::Compact
         } else {
             ParameterLayout::Default
         };
@@ -100,7 +60,7 @@ impl Format<JsFormatContext> for FormatAnyJsParameters {
                     f,
                     [
                         l_paren_token.format(),
-                        format_dangling_comments(self.parameters_syntax()).with_soft_block_indent(),
+                        format_dangling_comments(self.syntax()).with_soft_block_indent(),
                         r_paren_token.format()
                     ]
                 )
@@ -151,86 +111,67 @@ impl Format<JsFormatContext> for FormatAnyJsParameters {
 
                 Ok(())
             }
-            ParameterLayout::Compact => {
-                if !parentheses_not_needed {
-                    write!(f, [l_paren_token.format()])?;
-                } else {
-                    write!(f, [format_removed(&l_paren_token)])?;
-                }
-
-                write!(
-                    f,
-                    [FormatJsAnyParameterList::with_layout(
-                        &list,
-                        ParameterLayout::Compact
-                    )]
-                )?;
-
-                if !parentheses_not_needed {
-                    write!(f, [r_paren_token.format()])?;
-                } else {
-                    write!(f, [format_removed(&r_paren_token)])?;
-                }
-
-                Ok(())
-            }
         }
     }
 }
 
 impl FormatAnyJsParameters {
     fn l_paren_token(&self) -> SyntaxResult<JsSyntaxToken> {
-        match &self.parameters {
-            AnyJsParameters::JsParameters(parameters) => parameters.l_paren_token(),
-            AnyJsParameters::JsConstructorParameters(parameters) => parameters.l_paren_token(),
+        match self {
+            FormatAnyJsParameters::JsParameters(parameters) => parameters.l_paren_token(),
+            FormatAnyJsParameters::JsConstructorParameters(parameters) => {
+                parameters.l_paren_token()
+            }
         }
     }
 
     fn list(&self) -> AnyJsParameterList {
-        match &self.parameters {
-            AnyJsParameters::JsParameters(parameters) => {
+        match self {
+            FormatAnyJsParameters::JsParameters(parameters) => {
                 AnyJsParameterList::from(parameters.items())
             }
-            AnyJsParameters::JsConstructorParameters(parameters) => {
+            FormatAnyJsParameters::JsConstructorParameters(parameters) => {
                 AnyJsParameterList::from(parameters.parameters())
             }
         }
     }
 
     fn r_paren_token(&self) -> SyntaxResult<JsSyntaxToken> {
-        match &self.parameters {
-            AnyJsParameters::JsParameters(parameters) => parameters.r_paren_token(),
-            AnyJsParameters::JsConstructorParameters(parameters) => parameters.r_paren_token(),
+        match self {
+            FormatAnyJsParameters::JsParameters(parameters) => parameters.r_paren_token(),
+            FormatAnyJsParameters::JsConstructorParameters(parameters) => {
+                parameters.r_paren_token()
+            }
         }
     }
 
     /// Returns `true` for function parameters if the function is an argument of a [test `CallExpression`](is_test_call_expression).
     fn is_in_test_call(&self) -> SyntaxResult<bool> {
-        let result = match &self.parameters {
-            AnyJsParameters::JsParameters(parameters) => match parameters.syntax().parent() {
+        let result = match self {
+            FormatAnyJsParameters::JsParameters(parameters) => match parameters.syntax().parent() {
                 Some(function) => is_test_call_argument(&function)?,
                 None => false,
             },
-            AnyJsParameters::JsConstructorParameters(_) => false,
+            FormatAnyJsParameters::JsConstructorParameters(_) => false,
         };
 
         Ok(result)
     }
 
     fn as_arrow_function_expression(&self) -> Option<JsArrowFunctionExpression> {
-        match &self.parameters {
-            AnyJsParameters::JsParameters(parameters) => parameters
+        match self {
+            FormatAnyJsParameters::JsParameters(parameters) => parameters
                 .syntax()
                 .parent()
                 .and_then(JsArrowFunctionExpression::cast),
-            AnyJsParameters::JsConstructorParameters(_) => None,
+            FormatAnyJsParameters::JsConstructorParameters(_) => None,
         }
     }
 
-    fn parameters_syntax(&self) -> &JsSyntaxNode {
-        match &self.parameters {
-            AnyJsParameters::JsParameters(parameters) => parameters.syntax(),
-            AnyJsParameters::JsConstructorParameters(parameters) => parameters.syntax(),
+    fn syntax(&self) -> &JsSyntaxNode {
+        match self {
+            FormatAnyJsParameters::JsParameters(parameters) => parameters.syntax(),
+            FormatAnyJsParameters::JsConstructorParameters(parameters) => parameters.syntax(),
         }
     }
 }
@@ -266,17 +207,6 @@ pub enum ParameterLayout {
     /// ) {}
     /// ```
     Default,
-
-    /// Compact layout forces all parameters to try to render on the same line,
-    /// with no breaks added around the brackets. This should likely only be
-    /// used in a `best_fitting!` context where one variant attempts to fit the
-    /// parameters on a single line, and a default expanded version that is
-    /// used in case that does not fit.
-    ///
-    /// ```javascript
-    /// function test(firstParameter, secondParameter, thirdParameter, evenOverlyLong) {}
-    /// ```
-    Compact,
 }
 
 pub(crate) fn should_hug_function_parameters(

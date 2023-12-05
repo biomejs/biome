@@ -8,6 +8,58 @@ Read our [guidelines to categorize a change](https://biomejs.dev/internals/versi
 New entries must be placed in a section entitled `Unreleased`.
 Read our [guidelines for writing a good changelog entry](https://github.com/biomejs/biome/blob/main/CONTRIBUTING.md#changelog).
 
+## Unreleased
+
+### Analyzer
+
+### CLI
+
+### Configuration
+
+### Editors
+
+### Formatter
+
+### JavaScript APIs
+
+### Linter
+
+#### New features
+
+#### Enhancements
+
+#### Bug fixes
+
+- Fix [#959](https://github.com/biomejs/biome/issues/959). [noEmptyInterface](https://biomejs.dev/linter/rules/no-empty-interface) no longer reports interface that extends a type and is in an external module. COntributed by @Conaclos
+
+  Empty interface that extends a type are sometimes used to extend an existing interface.
+  This is generally used to extend an interface of an external module.
+
+  ```ts
+  interface Extension {
+    metadata: unknown;
+  }
+
+  declare module "@external/module" {
+    export interface ExistingInterface extends Extension {}
+  }
+  ```
+
+- Fix [#1061](https://github.com/biomejs/biome/issues/1061). [noRedeclare](https://biomejs.dev/linter/rules/no-redeclare) no longer reports overloads of `export default function`. Contributed by @Conaclos
+
+  The following code is no longer reported:
+
+  ```ts
+  export default function(a: boolean): boolean;
+  export default function(a: number): number;
+  export default function(a: number | boolean): number | boolean {
+  	return a;
+  }
+  ```
+
+### Parser
+
+
 ## 1.4.1 (2023-11-30)
 
 ### Editors

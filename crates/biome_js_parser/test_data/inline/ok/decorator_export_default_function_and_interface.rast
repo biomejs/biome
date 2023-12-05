@@ -1,0 +1,135 @@
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsExport {
+            decorators: JsDecoratorList [],
+            export_token: EXPORT_KW@0..7 "export" [] [Whitespace(" ")],
+            export_clause: JsExportDefaultDeclarationClause {
+                default_token: DEFAULT_KW@7..15 "default" [] [Whitespace(" ")],
+                declaration: TsInterfaceDeclaration {
+                    interface_token: INTERFACE_KW@15..25 "interface" [] [Whitespace(" ")],
+                    id: TsIdentifierBinding {
+                        name_token: IDENT@25..29 "Foo" [] [Whitespace(" ")],
+                    },
+                    type_parameters: missing (optional),
+                    extends_clause: missing (optional),
+                    l_curly_token: L_CURLY@29..31 "{" [] [Whitespace(" ")],
+                    members: TsTypeMemberList [],
+                    r_curly_token: R_CURLY@31..32 "}" [] [],
+                },
+                semicolon_token: missing (optional),
+            },
+        },
+        JsExport {
+            decorators: JsDecoratorList [],
+            export_token: EXPORT_KW@32..40 "export" [Newline("\n")] [Whitespace(" ")],
+            export_clause: JsExportDefaultDeclarationClause {
+                default_token: DEFAULT_KW@40..48 "default" [] [Whitespace(" ")],
+                declaration: JsFunctionExportDefaultDeclaration {
+                    async_token: missing (optional),
+                    function_token: FUNCTION_KW@48..57 "function" [] [Whitespace(" ")],
+                    star_token: missing (optional),
+                    id: JsIdentifierBinding {
+                        name_token: IDENT@57..61 "Foo" [] [Whitespace(" ")],
+                    },
+                    type_parameters: missing (optional),
+                    parameters: JsParameters {
+                        l_paren_token: L_PAREN@61..62 "(" [] [],
+                        items: JsParameterList [],
+                        r_paren_token: R_PAREN@62..64 ")" [] [Whitespace(" ")],
+                    },
+                    return_type_annotation: missing (optional),
+                    body: JsFunctionBody {
+                        l_curly_token: L_CURLY@64..66 "{" [] [Whitespace(" ")],
+                        directives: JsDirectiveList [],
+                        statements: JsStatementList [],
+                        r_curly_token: R_CURLY@66..67 "}" [] [],
+                    },
+                },
+                semicolon_token: missing (optional),
+            },
+        },
+        JsExport {
+            decorators: JsDecoratorList [],
+            export_token: EXPORT_KW@67..75 "export" [Newline("\n")] [Whitespace(" ")],
+            export_clause: JsExportDefaultDeclarationClause {
+                default_token: DEFAULT_KW@75..83 "default" [] [Whitespace(" ")],
+                declaration: TsInterfaceDeclaration {
+                    interface_token: INTERFACE_KW@83..93 "interface" [] [Whitespace(" ")],
+                    id: TsIdentifierBinding {
+                        name_token: IDENT@93..97 "Foo" [] [Whitespace(" ")],
+                    },
+                    type_parameters: missing (optional),
+                    extends_clause: missing (optional),
+                    l_curly_token: L_CURLY@97..99 "{" [] [Whitespace(" ")],
+                    members: TsTypeMemberList [],
+                    r_curly_token: R_CURLY@99..100 "}" [] [],
+                },
+                semicolon_token: missing (optional),
+            },
+        },
+    ],
+    eof_token: EOF@100..100 "" [] [],
+}
+
+0: JS_MODULE@0..100
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..100
+    0: JS_EXPORT@0..32
+      0: JS_DECORATOR_LIST@0..0
+      1: EXPORT_KW@0..7 "export" [] [Whitespace(" ")]
+      2: JS_EXPORT_DEFAULT_DECLARATION_CLAUSE@7..32
+        0: DEFAULT_KW@7..15 "default" [] [Whitespace(" ")]
+        1: TS_INTERFACE_DECLARATION@15..32
+          0: INTERFACE_KW@15..25 "interface" [] [Whitespace(" ")]
+          1: TS_IDENTIFIER_BINDING@25..29
+            0: IDENT@25..29 "Foo" [] [Whitespace(" ")]
+          2: (empty)
+          3: (empty)
+          4: L_CURLY@29..31 "{" [] [Whitespace(" ")]
+          5: TS_TYPE_MEMBER_LIST@31..31
+          6: R_CURLY@31..32 "}" [] []
+        2: (empty)
+    1: JS_EXPORT@32..67
+      0: JS_DECORATOR_LIST@32..32
+      1: EXPORT_KW@32..40 "export" [Newline("\n")] [Whitespace(" ")]
+      2: JS_EXPORT_DEFAULT_DECLARATION_CLAUSE@40..67
+        0: DEFAULT_KW@40..48 "default" [] [Whitespace(" ")]
+        1: JS_FUNCTION_EXPORT_DEFAULT_DECLARATION@48..67
+          0: (empty)
+          1: FUNCTION_KW@48..57 "function" [] [Whitespace(" ")]
+          2: (empty)
+          3: JS_IDENTIFIER_BINDING@57..61
+            0: IDENT@57..61 "Foo" [] [Whitespace(" ")]
+          4: (empty)
+          5: JS_PARAMETERS@61..64
+            0: L_PAREN@61..62 "(" [] []
+            1: JS_PARAMETER_LIST@62..62
+            2: R_PAREN@62..64 ")" [] [Whitespace(" ")]
+          6: (empty)
+          7: JS_FUNCTION_BODY@64..67
+            0: L_CURLY@64..66 "{" [] [Whitespace(" ")]
+            1: JS_DIRECTIVE_LIST@66..66
+            2: JS_STATEMENT_LIST@66..66
+            3: R_CURLY@66..67 "}" [] []
+        2: (empty)
+    2: JS_EXPORT@67..100
+      0: JS_DECORATOR_LIST@67..67
+      1: EXPORT_KW@67..75 "export" [Newline("\n")] [Whitespace(" ")]
+      2: JS_EXPORT_DEFAULT_DECLARATION_CLAUSE@75..100
+        0: DEFAULT_KW@75..83 "default" [] [Whitespace(" ")]
+        1: TS_INTERFACE_DECLARATION@83..100
+          0: INTERFACE_KW@83..93 "interface" [] [Whitespace(" ")]
+          1: TS_IDENTIFIER_BINDING@93..97
+            0: IDENT@93..97 "Foo" [] [Whitespace(" ")]
+          2: (empty)
+          3: (empty)
+          4: L_CURLY@97..99 "{" [] [Whitespace(" ")]
+          5: TS_TYPE_MEMBER_LIST@99..99
+          6: R_CURLY@99..100 "}" [] []
+        2: (empty)
+  4: EOF@100..100 "" [] []

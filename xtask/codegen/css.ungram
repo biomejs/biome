@@ -399,15 +399,17 @@ CssBlock =
 	declaration_list: CssDeclarationList
  	'}'
 
-
-CssDeclarationList = CssDeclaration*
+CssDeclarationList = CssDeclaration (';' CssDeclaration)* ';'?
 
 CssDeclaration =
-	name: CssIdentifier | CssCustomProperty
+	name: AnyCssDeclarationName
 	':'
-	value: AnyCssValue
+	value: CssListOfComponentValues
 	important: CssDeclarationImportant?
 
+CssListOfComponentValues = AnyCssValue*
+
+AnyCssDeclarationName = CssIdentifier | CssCustomProperty
 
 CssDeclarationImportant =
 	'!'
@@ -565,7 +567,7 @@ AnyCssValue =
 	CssIdentifier
 	| CssString
 	| CssNumber
-	| CssDimension
+	| AnyCssDimension
 	| CssRatio
 	| CssAnyFunction
 	| CssCustomProperty
@@ -575,14 +577,20 @@ AnyCssValue =
 // 100vh
 // 4rem
 // 1e-2
-CssDimension =
+AnyCssDimension =
+	CssRegularDimension | CssPercentage
+	
+CssRegularDimension = 
 	value: CssNumber
 	unit: CssIdentifier
-
+CssPercentDimension = 
+	value: CssNumber
+	unit: '%'
 
 // 3 / 2
 CssRatio =
 	numerator: CssNumber
+	'/'
 	denominator: CssNumber
 
 
@@ -614,11 +622,15 @@ CssPercentage =
 
 
 // parsed with --ident
-CssCustomProperty = value: 'css_custom_property'
+CssCustomProperty = value: CssIdentifier
 
-CssParameterList = CssParameter*
+CssParameterList = CssParameter (',' CssParameter)* ','?
 
-CssParameter = AnyCssValue
+// cubic-bezier(0.1, 0.7, 1.0, 0.1)
+//			    ^^^
+// repeating-radial-gradient(red, yellow 10%, green 15%);
+//                                ^^^^^^^^^^
+CssParameter = CssListOfComponentValues
 
 CssIdentifier = value: 'ident'
 CssString = value: 'css_string_literal'

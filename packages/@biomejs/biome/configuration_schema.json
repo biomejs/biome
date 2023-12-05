@@ -1147,6 +1147,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noMisleadingCharacterClass": {
+					"description": "Disallow characters made with multiple code points in character class syntax.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUnusedImports": {
 					"description": "Disallow unused imports.",
 					"anyOf": [
@@ -1202,6 +1209,13 @@
 				},
 				"useRegexLiterals": {
 					"description": "Enforce the use of the regular expression literals instead of the RegExp constructor if possible.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useShorthandFunctionType": {
+					"description": "Enforce using function types instead of object type with call signatures.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
