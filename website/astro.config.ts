@@ -68,77 +68,135 @@ export default defineConfig({
 				},
 			},
 			sidebar: [
-				{ label: "Home", link: "/" },
-				{ label: "Blog", link: "../blog" },
+				{ label: "Home", link: "/", translations: { ja: "ホーム" } },
+				{ label: "Blog", link: "../blog", translations: { ja: "ブログ" } },
 				{
 					label: "Playground",
 					link: "../playground",
+					translations: { ja: "プレイグラウンド" },
 				},
 				{
 					label: "Guides",
+					translations: { ja: "ガイド" },
 					items: [
-						{ label: "Getting Started", link: "/guides/getting-started" },
+						{
+							label: "Getting Started",
+							link: "/guides/getting-started",
+							translations: { ja: "はじめる" },
+						},
 						{
 							label: "Manual installation",
 							link: "/guides/manual-installation",
+							translations: { ja: "手動インストール" },
 						},
 						{
 							label: "Use Biome in big projects",
 							link: "/guides/big-projects",
+							translations: { ja: "大きなプロジェクトでのBiomeの使用方法" },
 						},
 						{
 							label: "How Biome works",
 							link: "/guides/how-biome-works",
+							translations: { ja: "Biome の振る舞い" },
 						},
 						{
 							label: "Integrate Biome in your editor",
 							link: "/guides/integrate-in-editor",
+							translations: { ja: "Biome をあなたのエディタに導入する" },
 						},
 					],
 				},
 				{
 					label: "Tools",
+					translations: { ja: "ツール" },
 					items: [
-						{ label: "Analyzer", link: "/analyzer" },
-						{ label: "Formatter", link: "/formatter" },
+						{
+							label: "Analyzer",
+							link: "/analyzer",
+							translations: { ja: "Analyzer" },
+						},
+						{
+							label: "Formatter",
+							link: "/formatter",
+							translations: { ja: "Formatter" },
+						},
 						{
 							label: "Formatter Option Philosophy",
 							link: "/formatter/option-philosophy",
 						},
-						{ label: "Linter", link: "/linter" },
-						{ label: "Lint rules", link: "/linter/rules" },
+						{
+							label: "Linter",
+							link: "/linter",
+						},
+						{
+							label: "Lint rules",
+							link: "/linter/rules",
+						},
 					],
 				},
-
 				{
 					label: "Reference",
+					translations: { ja: "リファレンス" },
 					items: [
-						{ label: "CLI", link: "/reference/cli" },
-						{ label: "Configuration", link: "/reference/configuration" },
-						{ label: "VSCode extension", link: "/reference/vscode" },
+						{
+							label: "CLI",
+							link: "/reference/cli",
+						},
+						{
+							label: "Configuration",
+							link: "/reference/configuration",
+						},
+						{
+							label: "VSCode extension",
+							link: "/reference/vscode",
+							translations: { ja: "VSCode拡張機能" },
+						},
 					],
 				},
 				{
 					label: "Recipes",
+					translations: { ja: "レシピ" },
 					items: [
 						{
 							label: "Continuous Integration",
 							link: "/recipes/continuous-integration",
+							translations: { ja: "継続的インテグレーション" },
 						},
 					],
 				},
 				{
 					label: "Internals",
+					translations: { ja: "内部" },
 					items: [
-						{ label: "Philosophy", link: "/internals/philosophy" },
-						{ label: "Language support", link: "/internals/language-support" },
+						{
+							label: "Philosophy",
+							link: "/internals/philosophy",
+							translations: { ja: "理念" },
+						},
+						{
+							label: "Language support",
+							link: "/internals/language-support",
+							translations: { ja: "言語サポート" },
+						},
 						{
 							label: "Architecture",
 							link: "/internals/architecture",
+							translations: { ja: "アーキテクチャ" },
 						},
-						{ label: "Credits", link: "/internals/credits" },
-						{ label: "Versioning", link: "/internals/versioning" },
-						{ label: "Changelog", link: "/internals/changelog" },
+						{
+							label: "Credits",
+							link: "/internals/credits",
+							translations: { ja: "クレジット" },
+						},
+						{
+							label: "Versioning",
+							link: "/internals/versioning",
+							translations: { ja: "バージョニング" },
+						},
+						{
+							label: "Changelog",
+							link: "/internals/changelog",
+						},
 					],
 				},
 			],
