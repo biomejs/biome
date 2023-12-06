@@ -128,6 +128,12 @@ importers:
       hast-util-to-html:
         specifier: ^8.0.4
         version: 8.0.4
+      hastscript:
+        specifier: ^8.0.0
+        version: 8.0.0
+      html-escaper:
+        specifier: ^3.0.3
+        version: 3.0.3
       lang-rome-formatter-ir:
         specifier: 0.0.2
         version: 0.0.2
