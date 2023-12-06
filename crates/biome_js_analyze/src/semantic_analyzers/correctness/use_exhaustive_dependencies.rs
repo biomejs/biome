@@ -766,7 +766,7 @@ impl Rule for UseExhaustiveDependencies {
                     if is_out_of_function_scope(dep, component_function, model).unwrap_or(false) {
                         diag = diag.detail(
                             dep.syntax().text_trimmed_range(),
-                            "Outer scope values aren't valid dependencies because mutating them doesn't re-render the component ",
+                            "Outer scope values aren't valid dependencies because mutating them doesn't re-render the component.",
 
                         );
                     } else {

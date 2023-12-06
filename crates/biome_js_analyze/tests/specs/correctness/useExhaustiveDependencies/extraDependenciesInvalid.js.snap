@@ -197,7 +197,7 @@ extraDependenciesInvalid.js:36:3 lint/correctness/useExhaustiveDependencies ━�
     37 │       outer = true;
     38 │   }, [outer]);
   
-  i Outer scope values aren't valid dependencies because mutating them doesn't re-render the component 
+  i Outer scope values aren't valid dependencies because mutating them doesn't re-render the component.
   
     36 │   useEffect(() => {
     37 │       outer = true;
