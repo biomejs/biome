@@ -3,32 +3,38 @@ import vscode from "../assets/svg-new/vscode.svg";
 import PackageManagerCommand from "@src/components/PackageManagerCommand.astro";
 ---
 
-<div class="installation">
-  <div class="ins-left">
-    <div class="ins-head">Try Biome</div>
-    <div class="ins-des">
-      Install Biome using your preferred package manager or get it as a VS Code
-      extension.
+<div class="ins-body">
+  <div class="installation">
+    <div class="ins-left">
+      <div class="ins-head">Try Biome</div>
+      <div class="ins-des">
+        Install Biome using your preferred package manager or get it as a VS
+        Code extension.
+      </div>
+      <a
+        href="https://marketplace.visualstudio.com/items?itemName=biomejs.biome"
+        class="vscode-ext"
+      >
+        <img src={vscode.src} alt="vscode-ext" />
+         Get VS Code Extension
+      </a>
+      <PackageManagerCommand
+        npm="install --save-dev --save-exact @biomejs/biome"
+        pnpm="add --save-dev --save-exact @biomejs/biome"
+        yarn="add --dev --exact @biomejs/biome"
+        bun="add --dev --exact @biomejs/biome"
+      />
     </div>
-    <a
-      href="https://marketplace.visualstudio.com/items?itemName=biomejs.biome"
-      class="vscode-ext"
-    >
-      <img src={vscode.src} alt="vscode-ext" />
-       Get VS Code Extension
-    </a>
-    <PackageManagerCommand
-      npm="install --save-dev --save-exact @biomejs/biome"
-      pnpm="add --save-dev --save-exact @biomejs/biome"
-      yarn="add --dev --exact @biomejs/biome"
-      bun="add --dev --exact @biomejs/biome"
-    />
-  </div>
 
-  <div class="ext-img"></div>
+    <div class="ext-img"></div>
+  </div>
 </div>
 
 <style>
+  .ins-body {
+    display: flex;
+    justify-content: center;
+  }
   .installation {
     position: relative;
     border: 1px solid var(--sl-color-gray-5);
@@ -81,5 +87,14 @@ import PackageManagerCommand from "@src/components/PackageManagerCommand.astro";
     background-size: 330%;
     right: -115px;
     bottom: -29px;
+  }
+
+  @media only screen and (max-width: 1080px) {
+    .installation {
+      overflow: scroll;
+    }
+    .ext-img {
+      display: none;
+    }
   }
 </style>

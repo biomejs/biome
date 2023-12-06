@@ -20,6 +20,10 @@ import { Icon } from "@astrojs/starlight/components";
   </div>
 </div>
 
+<script>
+  import "../content/docs/srcipts/contributors.ts";
+</script>
+
 <style>
   .community > div > div > a {
     display: flex;
@@ -52,7 +56,7 @@ import { Icon } from "@astrojs/starlight/components";
     width: 500px;
     position: absolute;
     right: -160px !important;
-    top: 0px;
+    top: 10px;
   }
 
   .com-con {
@@ -74,13 +78,16 @@ import { Icon } from "@astrojs/starlight/components";
   }
   .discord:hover {
     background-color: rgb(114, 137, 218) !important;
+    color: var(--sl-community-link) !important;
   }
   .x:hover,
   .github:hover {
     background-color: black;
+    color: var(--sl-community-link) !important;
   }
   .mastodon:hover {
     background-color: #6364ff;
+    color: var(--sl-community-link) !important;
   }
 
   .comm-grid {
@@ -98,5 +105,11 @@ import { Icon } from "@astrojs/starlight/components";
     background-size: 20px 20px;
     -webkit-mask-image: radial-gradient(circle at 100%, white, transparent 80%);
     mask-image: radial-gradient(circle at 100%, white, transparent 80%);
+  }
+
+  @media only screen and (max-width: 1000px) {
+    .connect {
+      display: none;
+    }
   }
 </style>
