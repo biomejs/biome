@@ -66,6 +66,10 @@ export default defineConfig({
 					label: "简体中文",
 					lang: "zh-CN",
 				},
+				"pt-br": {
+					label: "Português",
+					lang: "pt-BR",
+				},
 			},
 			sidebar: [
 				{ label: "Home", link: "/", translations: { ja: "ホーム" } },

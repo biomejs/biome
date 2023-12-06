@@ -1,0 +1,349 @@
+---
+title: Formatter
+description: How to use the Biome formatter.
+---
+
+import PackageManagerBiomeCommand from "@src/components/PackageManagerBiomeCommand.astro";
+
+Biome is an opinionated formatter that has the goal to stop all ongoing debates over styles.
+It follows a similar [philosophy to Prettier](https://prettier.io/docs/en/option-philosophy.html),
+only supporting a few options to avoid debates over styles, turning into debates over Biome options.
+It deliberately [resists the urge to add new options](https://github.com/prettier/prettier/issues/40) to prevent [bike-shed discussions](https://en.wikipedia.org/wiki/Law_of_triviality) in teams so they can focus on what really matters instead.
+
+## Options
+
+The language agnostic options supported by Biome are:
+
+- indent style (default: `tab`): Use spaces or tabs for indention
+- tab width (default: `2`): The number of spaces per indention level
+- line width (default: `80`): The column width at which Biome wraps code
+
+Other formatting options are available for specific languages as well.  See the [configuration](/reference/configuration) options for details.
+
+## Use the formatter with the CLI
+
+By default, the formatter **checks** the code and emit diagnostics if there are changes in formatting:
+
+<PackageManagerBiomeCommand command="format ./src" />
+
+If you want to **apply** the new formatting, pass the `--write` option:
+
+<PackageManagerBiomeCommand command="format --write ./src" />
+
+Use the  `--help` flag to know what are the available options:
+
+<PackageManagerBiomeCommand command="format --help" />
+
+Or check the [CLI reference section](/reference/cli#biomeformat).
+
+## Configuration
+
+You may want to [configure Biome](/reference/configuration/#formatter) using `biome.json`.
+The following defaults are applied:
+
+```json title="biome.json"
+{
+  "formatter": {
+    "enabled": true,
+    "formatWithErrors": false,
+    "indentStyle": "tab",
+    "indentWidth": 2,
+    "lineWidth": 80,
+    "ignore": []
+  }
+}
+```
+
+## Ignoring Code
+
+There are times when the formatted code isn't ideal.
+
+For these cases, you can use a format suppression comment:
+
+```js title="example.js"
+// biome-ignore format: <explanation>
+```
+
+Example:
+
+```js title="example.js"
+const expr =
+  // biome-ignore format: the array should not be formatted
+  [
+    (2 * n) / (r - l),
+    0,
+    (r + l) / (r - l),
+    0,
+    0,
+    (2 * n) / (t - b),
+    (t + b) / (t - b),
+    0,
+    0,
+    0,
+    -(f + n) / (f - n),
+    -(2 * f * n) / (f - n),
+    0,
+    0,
+    -1,
+    0,
+  ];
+```
+
+## Differences with Prettier
+
+There are some divergences with Prettier.
+
+### Prettier doesn't unquote some object properties that are valid JavaScript identifiers.
+
+Prettier and Biome unquote object and class properties that are valid JavaScript identifiers.
+Prettier [unquotes only valid ES5 identifiers](https://github.com/prettier/prettier/blob/a5d502513e5de4819a41fd90b9be7247146effc7/src/language-js/utils/index.js#L646).
+
+This is a legacy restriction in an ecosystem where ES2015 is now widespread.
+Thus, we decided to diverge here by un-quoting all valid JavaScript identifiers in ES2015+.
+
+A possible workaround would be to introduce a configuration to set the ECMAScript version a project uses.
+We could then adjust the un-quoting behaviour based on that version.
+Setting the ECMAScript version to `ES5` could match Prettier's behaviour.
+
+```js title="example.js"
+const obj = {
+ 'a': true,
+ b: true,
+ "𐊧": true,
+}
+```
+
+Diff
+
+```js title="exmaple.js" del={4} ins={5}
+const obj = {
+  a: true,
+  b: true,
+  "𐊧": true,
+  𐊧: true,
+};
+```
+
+
+### Prettier has an inconsistent behavior for assignment in computed keys.
+
+Prettier and Biome enclose some assignment expressions between parentheses, particularly in conditionals.
+This allows Biome to identify an expression that should be a comparison.
+
+Prettier has inconsistent behaviour because it adds parentheses for an assignment in a computed key of an object property and doesn't for a computed key of a class property, as demonstrated by the following example:
+
+Input
+
+```js title="example.js"
+a = {
+  [x = 0]: 1,
+}
+
+class C {
+  [x = 0] = 1
+}
+```
+
+Diff
+
+```js title="example.js" del={2} ins={3}
+a = {
+  [(x = 0)]: 1,
+  [x = 0]: 1,
+};
+
+class C {
+  [x = 0] = 1;
+}
+```
+
+[Playground link](https://biomejs.dev/playground?enabledLinting=false&code=YQAgAD0AIAB7AAoAIAAgAFsAeAAgAD0AIAAwAF0AOgAgADEALAAKAH0ACgAKAGMAbABhAHMAcwAgAEMAIAB7AAoAIAAgACAAIABbAHgAIAA9ACAAMABdACAAPQAgADEACgB9AAoA)
+
+To be consistent, we decided to diverge and omit the parentheses.
+Alternatively, we could enclose any assignment in a computed key of an object or of a class.
+
+
+### Prettier adds a trailing comma to type parameters of arrow functions even when it is not required.
+
+In some specific cases, a type parameter list of an arrow function requires a trailing comma to distinguish it from a JSX element.
+When a default type is provided, this trailing comma is not required.
+Here, we diverge from Prettier because we think it better respects the original intent of Prettier, which was to add a trailing comma only when required.
+
+Input
+
+```tsx title="example.tsx"
+<T = unknown>() => {};
+```
+
+Diff
+
+```tsx title="example.tsx" del={1} ins={2}
+<T = unknown,>() => {};
+<T = unknown>() => {};
+```
+
+
+### Prettier formats invalid syntaxes
+
+Prettier's Babel-based parsing for JavaScript and TypeScript is very loose and [allows multiple errors](https://github.com/prettier/prettier/blob/e4a74c05f4502dd4ec70495c3130ff08ab088e05/src/language-js/parse/babel.js#L177-L218) to be ignored.
+Biome's parser is intentionally stricter than the Prettier parser.
+It correctly identifies the following syntax errors:
+
+- A function cannot have duplicate modifiers
+- invalid order of properties' modifiers
+- Function declarations are not allowed to have bodies
+- non-abstract classes cannot have abstract properties
+- An optional chain cannot be assigned
+- The `const` modifier cannot be set on a type parameter of an interface
+- top-level return
+- etc.
+
+In Prettier, these errors aren't considered parse errors, and the AST is still built "correctly" with the appropriate nodes.
+When formatting, Prettier treats these nodes as normal and formats them accordingly.
+
+In Biome, the parsing errors result in `Bogus` nodes, which may contain any number of valid nodes, invalid nodes, and/or raw characters.
+When formatting, Biome treats bogus nodes as effectively plain text, printing them out verbatim into the resulting code without any formatting since attempting to format them could be incorrect and cause semantic changes.
+
+For class properties, Prettier's current parsing strategy also uses boolean fields for modifiers, meaning only one of each kind of modifier can ever be present (accessibility modifiers are stored as a single string).
+When printing, Prettier looks at the list of booleans and decides which modifiers to print out again. Biome instead keeps a list of modifiers, meaning duplicates are kept around and can be analyzed (hence the parsing error messages about duplicate modifiers and ordering).
+When printing out the bogus nodes, this list is kept intact, and printing out the unformatted text results in those modifiers continuing to exist.
+
+There are ways that Biome can address this.
+One possibility is to try to interpret the Bogus nodes when formatting and construct valid nodes out of them.
+If a valid node can be built, then it would just format that node like normal, otherwise, it prints the bogus text verbatim as it does currently.
+However, this is messy and introduces a form of parsing logic into the formatter that is not meaningful.
+
+Another option is to introduce some form of "syntactically-valid bogus node" into the parser, which accepts these kinds of purely semantic errors (duplicate modifiers, abstract properties in non-abstract classes).
+
+It would continue to build the nodes like normal (effectively matching the behavior in Prettier) but store them inside of a new kind of bogus node, including the diagnostics along with it.
+When formatting, these particular bogus nodes would just attempt to format the inner node and then fallback if there's an error (the existing `format_or_verbatim` utility would do this already).
+This keeps the parsing and formatting logic separate from each other but introduces more complexity to the parser, allowing invalid states to be considered semi-valid.
+
+#### Duplicate modifiers on class properties
+
+Input
+
+```ts title="example.ts"
+// Multiple accessibility modifiers
+class Foo {
+  private public a  = 1;
+}
+
+// Declare function with body
+declare function foo ( ) {  }
+
+// Invalid use of abstract
+class Bar {
+  abstract  foo  ;
+}
+
+// Duplicate Readonly
+class Read {
+  readonly readonly   x: number;
+}
+```
+
+Diff
+
+```ts title="example.ts" del={3, 8, 13, 19} ins={4, 9, 14, 20}
+// Multiple accessibility modifiers
+class Foo {
+  private a = 1;
+  private public a  = 1;
+}
+
+// Declare function with body
+declare function foo() {};
+declare function foo ( ) {  }
+
+// Invalid use of abstract
+class Bar {
+  abstract foo;
+  abstract  foo  ;
+}
+
+// Duplicate Readonly
+class Read {
+  readonly x: number;
+  readonly readonly   x: number;
+}
+
+
+#### Assignment to an optional chain
+
+Input
+
+```js title="example.js"
+(a?.b) = c;
+```
+
+Diff
+
+```js title="example.js" del={1} ins={2}
+a?.b = c;
+(a?.b) = c;
+```
+
+#### Incorrect modifier for the type parameters of an interface
+
+Input
+
+```ts title="example.js"
+interface L<in const T> {}
+```
+
+Diff
+
+```ts title="example.js" del={1} ins={2}
+interface L<const in T> {}
+interface L<in const T> {}
+```
+
+#### Top-level return
+
+```js title="example.js"
+return someVeryLongStringA && someVeryLongStringB && someVeryLongStringC && someVeryLongStringD
+```
+
+```js title="example.js" del={1, 2, 3, 4, 5, 6} ins={7}
+return (
+  someVeryLongStringA &&
+  someVeryLongStringB &&
+  someVeryLongStringC &&
+  someVeryLongStringD
+);
+return someVeryLongStringA && someVeryLongStringB && someVeryLongStringC && someVeryLongStringD
+```
+
+#### Erroneous self-increment and self-decrement
+
+Input
+
+```js title="example.js"
+(1)++;
+```
+
+```js title="example.js" del{1} add={2}
+1++;
+(1)++;
+```
+
+#### Use of `abstract` modifier in non-abstract classes
+
+Input
+
+```ts title="example.js"
+class C {
+  abstract f() : number;
+}
+```
+
+Diff
+
+
+```ts title="example.js" del{2} add={3}
+class C {
+  abstract f(): number;
+  abstract f() : number;
+}
+```
