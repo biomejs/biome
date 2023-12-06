@@ -196,7 +196,6 @@ export default defineConfig({
 						{
 							label: "Changelog",
 							link: "/internals/changelog",
-							translations: { ja: "Changelog" },
 						},
 					],
 				},
