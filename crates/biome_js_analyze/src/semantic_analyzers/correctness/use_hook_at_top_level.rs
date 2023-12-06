@@ -9,13 +9,13 @@ use biome_analyze::{
     RuleKey, ServiceBag, Visitor, VisitorContext, VisitorFinishContext,
 };
 use biome_console::markup;
-use biome_js_semantic::CallsExtensions;
+use biome_js_semantic::{CallsExtensions, SemanticModel};
 use biome_js_syntax::{
     AnyFunctionLike, AnyJsFunction, JsCallExpression, JsFunctionBody, JsLanguage,
     JsReturnStatement, JsSyntaxKind, TextRange,
 };
 use biome_rowan::{AstNode, Language, SyntaxNode, WalkEvent};
-use std::collections::HashMap;
+use rustc_hash::FxHashMap;
 use std::ops::{Deref, DerefMut};
 
 declare_rule! {
@@ -123,10 +123,10 @@ fn enclosing_function_if_call_is_at_top_level(call: &JsCallExpression) -> Option
 
 /// Model for tracking which function calls are preceeded by an early return.
 #[derive(Clone, Default)]
-struct EarlyReturnsModel(HashMap<JsCallExpression, TextRange>);
+struct EarlyReturnsModel(FxHashMap<JsCallExpression, TextRange>);
 
 impl Deref for EarlyReturnsModel {
-    type Target = HashMap<JsCallExpression, TextRange>;
+    type Target = FxHashMap<JsCallExpression, TextRange>;
 
     fn deref(&self) -> &Self::Target {
         &self.0
@@ -216,6 +216,16 @@ pub struct FunctionCallServices {
     semantic_services: SemanticServices,
 }
 
+impl FunctionCallServices {
+    fn early_returns_model(&self) -> &EarlyReturnsModel {
+        &self.early_returns
+    }
+
+    fn semantic_model(&self) -> &SemanticModel {
+        self.semantic_services.model()
+    }
+}
+
 impl FromServices for FunctionCallServices {
     fn from_services(
         rule_key: &RuleKey,
@@ -285,8 +295,8 @@ impl Rule for UseHookAtTopLevel {
         let FunctionCall(call) = ctx.query();
         let hook_name_range = call.callee().ok()?.syntax().text_trimmed_range();
         if react_hook_configuration(call, &options.hooks_config).is_some() {
-            let model = ctx.semantic_services.model();
-            let early_returns = &ctx.early_returns;
+            let model = ctx.semantic_model();
+            let early_returns = ctx.early_returns_model();
 
             let root = CallPath {
                 call: call.clone(),
