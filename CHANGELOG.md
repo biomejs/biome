@@ -57,7 +57,7 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
   }
   ```
 
-- Fix [#651](https://github.com/biomejs/biome/issues/651), [useExhaustiveDependencies](https://biomejs.dev/linter/rules/use-exhaustive-dependencies) no longer repports out of scope dependecies. Contributed by @kalleep
+- Fix [#651](https://github.com/biomejs/biome/issues/651), [useExhaustiveDependencies](https://biomejs.dev/linter/rules/use-exhaustive-dependencies) no longer reports out of scope dependecies. Contributed by @kalleep
 
   The following code is no longer reported:
   ```ts
