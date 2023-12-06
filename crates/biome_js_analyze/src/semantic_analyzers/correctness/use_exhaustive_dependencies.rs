@@ -529,7 +529,7 @@ fn function_of_hook_call(call: &JsCallExpression) -> Option<JsSyntaxNode> {
     })
 }
 
-// check if identifier is declared outside of function scope
+/// Check if `identifier` is declared outside of `function` scope
 fn is_out_of_function_scope(
     identifier: &AnyJsExpression,
     function: &JsSyntaxNode,
