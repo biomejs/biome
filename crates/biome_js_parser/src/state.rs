@@ -44,18 +44,24 @@ impl ExportDefaultItemKind {
     const fn can_merge(a: &ExportDefaultItemKind, b: &ExportDefaultItemKind) -> bool {
         match (a, b) {
             // export default function a():void;
-            // export default function a(){
+            // export default function a(v: number):void;
+            // export default function a(v: any){
             // }
             (
                 ExportDefaultItemKind::FunctionOverload,
-                ExportDefaultItemKind::FunctionDeclaration,
+                ExportDefaultItemKind::FunctionDeclaration
+                | ExportDefaultItemKind::FunctionOverload,
             ) => true,
             // export default function a(){};
             // export default interface A{};
-            (ExportDefaultItemKind::FunctionDeclaration, ExportDefaultItemKind::Interface) => true,
             // export default interface A{};
             // export default class A{};
-            (ExportDefaultItemKind::Interface, ExportDefaultItemKind::ClassDeclaration) => true,
+            (
+                ExportDefaultItemKind::Interface,
+                ExportDefaultItemKind::ClassDeclaration
+                | ExportDefaultItemKind::FunctionDeclaration
+                | ExportDefaultItemKind::Interface,
+            ) => true,
             (_, _) => false,
         }
     }

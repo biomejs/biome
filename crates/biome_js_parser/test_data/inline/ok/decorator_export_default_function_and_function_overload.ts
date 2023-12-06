@@ -1,2 +1,4 @@
-export default function Foo(): void;
-export default function Foo(): any { }
+export default function a(): void;
+export default function a(v: number): void;
+export default function a(v?: any) {
+}

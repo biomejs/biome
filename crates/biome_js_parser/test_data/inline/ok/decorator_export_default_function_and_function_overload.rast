@@ -12,113 +12,204 @@ JsModule {
                     async_token: missing (optional),
                     function_token: FUNCTION_KW@15..24 "function" [] [Whitespace(" ")],
                     id: JsIdentifierBinding {
-                        name_token: IDENT@24..27 "Foo" [] [],
+                        name_token: IDENT@24..25 "a" [] [],
                     },
                     type_parameters: missing (optional),
                     parameters: JsParameters {
-                        l_paren_token: L_PAREN@27..28 "(" [] [],
+                        l_paren_token: L_PAREN@25..26 "(" [] [],
                         items: JsParameterList [],
-                        r_paren_token: R_PAREN@28..29 ")" [] [],
+                        r_paren_token: R_PAREN@26..27 ")" [] [],
                     },
                     return_type_annotation: TsReturnTypeAnnotation {
-                        colon_token: COLON@29..31 ":" [] [Whitespace(" ")],
+                        colon_token: COLON@27..29 ":" [] [Whitespace(" ")],
                         ty: TsVoidType {
-                            void_token: VOID_KW@31..35 "void" [] [],
+                            void_token: VOID_KW@29..33 "void" [] [],
                         },
                     },
-                    semicolon_token: SEMICOLON@35..36 ";" [] [],
+                    semicolon_token: SEMICOLON@33..34 ";" [] [],
                 },
                 semicolon_token: missing (optional),
             },
         },
         JsExport {
             decorators: JsDecoratorList [],
-            export_token: EXPORT_KW@36..44 "export" [Newline("\n")] [Whitespace(" ")],
+            export_token: EXPORT_KW@34..42 "export" [Newline("\n")] [Whitespace(" ")],
             export_clause: JsExportDefaultDeclarationClause {
-                default_token: DEFAULT_KW@44..52 "default" [] [Whitespace(" ")],
-                declaration: JsFunctionExportDefaultDeclaration {
+                default_token: DEFAULT_KW@42..50 "default" [] [Whitespace(" ")],
+                declaration: TsDeclareFunctionExportDefaultDeclaration {
                     async_token: missing (optional),
-                    function_token: FUNCTION_KW@52..61 "function" [] [Whitespace(" ")],
-                    star_token: missing (optional),
+                    function_token: FUNCTION_KW@50..59 "function" [] [Whitespace(" ")],
                     id: JsIdentifierBinding {
-                        name_token: IDENT@61..64 "Foo" [] [],
+                        name_token: IDENT@59..60 "a" [] [],
                     },
                     type_parameters: missing (optional),
                     parameters: JsParameters {
-                        l_paren_token: L_PAREN@64..65 "(" [] [],
-                        items: JsParameterList [],
-                        r_paren_token: R_PAREN@65..66 ")" [] [],
+                        l_paren_token: L_PAREN@60..61 "(" [] [],
+                        items: JsParameterList [
+                            JsFormalParameter {
+                                decorators: JsDecoratorList [],
+                                binding: JsIdentifierBinding {
+                                    name_token: IDENT@61..62 "v" [] [],
+                                },
+                                question_mark_token: missing (optional),
+                                type_annotation: TsTypeAnnotation {
+                                    colon_token: COLON@62..64 ":" [] [Whitespace(" ")],
+                                    ty: TsNumberType {
+                                        number_token: NUMBER_KW@64..70 "number" [] [],
+                                    },
+                                },
+                                initializer: missing (optional),
+                            },
+                        ],
+                        r_paren_token: R_PAREN@70..71 ")" [] [],
                     },
                     return_type_annotation: TsReturnTypeAnnotation {
-                        colon_token: COLON@66..68 ":" [] [Whitespace(" ")],
-                        ty: TsAnyType {
-                            any_token: ANY_KW@68..72 "any" [] [Whitespace(" ")],
+                        colon_token: COLON@71..73 ":" [] [Whitespace(" ")],
+                        ty: TsVoidType {
+                            void_token: VOID_KW@73..77 "void" [] [],
                         },
                     },
+                    semicolon_token: SEMICOLON@77..78 ";" [] [],
+                },
+                semicolon_token: missing (optional),
+            },
+        },
+        JsExport {
+            decorators: JsDecoratorList [],
+            export_token: EXPORT_KW@78..86 "export" [Newline("\n")] [Whitespace(" ")],
+            export_clause: JsExportDefaultDeclarationClause {
+                default_token: DEFAULT_KW@86..94 "default" [] [Whitespace(" ")],
+                declaration: JsFunctionExportDefaultDeclaration {
+                    async_token: missing (optional),
+                    function_token: FUNCTION_KW@94..103 "function" [] [Whitespace(" ")],
+                    star_token: missing (optional),
+                    id: JsIdentifierBinding {
+                        name_token: IDENT@103..104 "a" [] [],
+                    },
+                    type_parameters: missing (optional),
+                    parameters: JsParameters {
+                        l_paren_token: L_PAREN@104..105 "(" [] [],
+                        items: JsParameterList [
+                            JsFormalParameter {
+                                decorators: JsDecoratorList [],
+                                binding: JsIdentifierBinding {
+                                    name_token: IDENT@105..106 "v" [] [],
+                                },
+                                question_mark_token: QUESTION@106..107 "?" [] [],
+                                type_annotation: TsTypeAnnotation {
+                                    colon_token: COLON@107..109 ":" [] [Whitespace(" ")],
+                                    ty: TsAnyType {
+                                        any_token: ANY_KW@109..112 "any" [] [],
+                                    },
+                                },
+                                initializer: missing (optional),
+                            },
+                        ],
+                        r_paren_token: R_PAREN@112..114 ")" [] [Whitespace(" ")],
+                    },
+                    return_type_annotation: missing (optional),
                     body: JsFunctionBody {
-                        l_curly_token: L_CURLY@72..74 "{" [] [Whitespace(" ")],
+                        l_curly_token: L_CURLY@114..115 "{" [] [],
                         directives: JsDirectiveList [],
                         statements: JsStatementList [],
-                        r_curly_token: R_CURLY@74..75 "}" [] [],
+                        r_curly_token: R_CURLY@115..117 "}" [Newline("\n")] [],
                     },
                 },
                 semicolon_token: missing (optional),
             },
         },
     ],
-    eof_token: EOF@75..75 "" [] [],
+    eof_token: EOF@117..117 "" [] [],
 }
 
-0: JS_MODULE@0..75
+0: JS_MODULE@0..117
   0: (empty)
   1: (empty)
   2: JS_DIRECTIVE_LIST@0..0
-  3: JS_MODULE_ITEM_LIST@0..75
-    0: JS_EXPORT@0..36
+  3: JS_MODULE_ITEM_LIST@0..117
+    0: JS_EXPORT@0..34
       0: JS_DECORATOR_LIST@0..0
       1: EXPORT_KW@0..7 "export" [] [Whitespace(" ")]
-      2: JS_EXPORT_DEFAULT_DECLARATION_CLAUSE@7..36
+      2: JS_EXPORT_DEFAULT_DECLARATION_CLAUSE@7..34
         0: DEFAULT_KW@7..15 "default" [] [Whitespace(" ")]
-        1: TS_DECLARE_FUNCTION_EXPORT_DEFAULT_DECLARATION@15..36
+        1: TS_DECLARE_FUNCTION_EXPORT_DEFAULT_DECLARATION@15..34
           0: (empty)
           1: FUNCTION_KW@15..24 "function" [] [Whitespace(" ")]
-          2: JS_IDENTIFIER_BINDING@24..27
-            0: IDENT@24..27 "Foo" [] []
+          2: JS_IDENTIFIER_BINDING@24..25
+            0: IDENT@24..25 "a" [] []
           3: (empty)
-          4: JS_PARAMETERS@27..29
-            0: L_PAREN@27..28 "(" [] []
-            1: JS_PARAMETER_LIST@28..28
-            2: R_PAREN@28..29 ")" [] []
-          5: TS_RETURN_TYPE_ANNOTATION@29..35
-            0: COLON@29..31 ":" [] [Whitespace(" ")]
-            1: TS_VOID_TYPE@31..35
-              0: VOID_KW@31..35 "void" [] []
-          6: SEMICOLON@35..36 ";" [] []
+          4: JS_PARAMETERS@25..27
+            0: L_PAREN@25..26 "(" [] []
+            1: JS_PARAMETER_LIST@26..26
+            2: R_PAREN@26..27 ")" [] []
+          5: TS_RETURN_TYPE_ANNOTATION@27..33
+            0: COLON@27..29 ":" [] [Whitespace(" ")]
+            1: TS_VOID_TYPE@29..33
+              0: VOID_KW@29..33 "void" [] []
+          6: SEMICOLON@33..34 ";" [] []
         2: (empty)
-    1: JS_EXPORT@36..75
-      0: JS_DECORATOR_LIST@36..36
-      1: EXPORT_KW@36..44 "export" [Newline("\n")] [Whitespace(" ")]
-      2: JS_EXPORT_DEFAULT_DECLARATION_CLAUSE@44..75
-        0: DEFAULT_KW@44..52 "default" [] [Whitespace(" ")]
-        1: JS_FUNCTION_EXPORT_DEFAULT_DECLARATION@52..75
+    1: JS_EXPORT@34..78
+      0: JS_DECORATOR_LIST@34..34
+      1: EXPORT_KW@34..42 "export" [Newline("\n")] [Whitespace(" ")]
+      2: JS_EXPORT_DEFAULT_DECLARATION_CLAUSE@42..78
+        0: DEFAULT_KW@42..50 "default" [] [Whitespace(" ")]
+        1: TS_DECLARE_FUNCTION_EXPORT_DEFAULT_DECLARATION@50..78
           0: (empty)
-          1: FUNCTION_KW@52..61 "function" [] [Whitespace(" ")]
-          2: (empty)
-          3: JS_IDENTIFIER_BINDING@61..64
-            0: IDENT@61..64 "Foo" [] []
-          4: (empty)
-          5: JS_PARAMETERS@64..66
-            0: L_PAREN@64..65 "(" [] []
-            1: JS_PARAMETER_LIST@65..65
-            2: R_PAREN@65..66 ")" [] []
-          6: TS_RETURN_TYPE_ANNOTATION@66..72
-            0: COLON@66..68 ":" [] [Whitespace(" ")]
-            1: TS_ANY_TYPE@68..72
-              0: ANY_KW@68..72 "any" [] [Whitespace(" ")]
-          7: JS_FUNCTION_BODY@72..75
-            0: L_CURLY@72..74 "{" [] [Whitespace(" ")]
-            1: JS_DIRECTIVE_LIST@74..74
-            2: JS_STATEMENT_LIST@74..74
-            3: R_CURLY@74..75 "}" [] []
+          1: FUNCTION_KW@50..59 "function" [] [Whitespace(" ")]
+          2: JS_IDENTIFIER_BINDING@59..60
+            0: IDENT@59..60 "a" [] []
+          3: (empty)
+          4: JS_PARAMETERS@60..71
+            0: L_PAREN@60..61 "(" [] []
+            1: JS_PARAMETER_LIST@61..70
+              0: JS_FORMAL_PARAMETER@61..70
+                0: JS_DECORATOR_LIST@61..61
+                1: JS_IDENTIFIER_BINDING@61..62
+                  0: IDENT@61..62 "v" [] []
+                2: (empty)
+                3: TS_TYPE_ANNOTATION@62..70
+                  0: COLON@62..64 ":" [] [Whitespace(" ")]
+                  1: TS_NUMBER_TYPE@64..70
+                    0: NUMBER_KW@64..70 "number" [] []
+                4: (empty)
+            2: R_PAREN@70..71 ")" [] []
+          5: TS_RETURN_TYPE_ANNOTATION@71..77
+            0: COLON@71..73 ":" [] [Whitespace(" ")]
+            1: TS_VOID_TYPE@73..77
+              0: VOID_KW@73..77 "void" [] []
+          6: SEMICOLON@77..78 ";" [] []
         2: (empty)
-  4: EOF@75..75 "" [] []
+    2: JS_EXPORT@78..117
+      0: JS_DECORATOR_LIST@78..78
+      1: EXPORT_KW@78..86 "export" [Newline("\n")] [Whitespace(" ")]
+      2: JS_EXPORT_DEFAULT_DECLARATION_CLAUSE@86..117
+        0: DEFAULT_KW@86..94 "default" [] [Whitespace(" ")]
+        1: JS_FUNCTION_EXPORT_DEFAULT_DECLARATION@94..117
+          0: (empty)
+          1: FUNCTION_KW@94..103 "function" [] [Whitespace(" ")]
+          2: (empty)
+          3: JS_IDENTIFIER_BINDING@103..104
+            0: IDENT@103..104 "a" [] []
+          4: (empty)
+          5: JS_PARAMETERS@104..114
+            0: L_PAREN@104..105 "(" [] []
+            1: JS_PARAMETER_LIST@105..112
+              0: JS_FORMAL_PARAMETER@105..112
+                0: JS_DECORATOR_LIST@105..105
+                1: JS_IDENTIFIER_BINDING@105..106
+                  0: IDENT@105..106 "v" [] []
+                2: QUESTION@106..107 "?" [] []
+                3: TS_TYPE_ANNOTATION@107..112
+                  0: COLON@107..109 ":" [] [Whitespace(" ")]
+                  1: TS_ANY_TYPE@109..112
+                    0: ANY_KW@109..112 "any" [] []
+                4: (empty)
+            2: R_PAREN@112..114 ")" [] [Whitespace(" ")]
+          6: (empty)
+          7: JS_FUNCTION_BODY@114..117
+            0: L_CURLY@114..115 "{" [] []
+            1: JS_DIRECTIVE_LIST@115..115
+            2: JS_STATEMENT_LIST@115..115
+            3: R_CURLY@115..117 "}" [Newline("\n")] []
+        2: (empty)
+  4: EOF@117..117 "" [] []
