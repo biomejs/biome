@@ -165,7 +165,7 @@ impl<'app> CliSession<'app> {
                 },
             ),
             BiomeCommand::Init => commands::init::init(self),
-            BiomeCommand::LspProxy(config_path) => commands::daemon::lsp_proxy(config_path),
+            BiomeCommand::LspProxy(config_path) => Ok(()),
             BiomeCommand::Migrate(cli_options, write) => {
                 commands::migrate::migrate(self, cli_options, write)
             }

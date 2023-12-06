@@ -1,6 +1,8 @@
+#[cfg(not(target_os = "wasi"))]
+use crate::open_socket;
 use crate::{
     open_transport,
-    service::{self, ensure_daemon, open_socket, run_daemon},
+    service::{self, ensure_daemon, run_daemon},
     CliDiagnostic, CliSession,
 };
 use biome_console::{markup, ConsoleExt};
@@ -77,7 +79,7 @@ pub(crate) fn run_server(
         tokio::select! {
             res = run_daemon(factory, config_path).instrument(span) => {
                 match res {
-                    Ok(never) => match never {},
+                    Ok(()) => Ok(()),
                     Err(err) => Err(err.into()),
                 }
             }
@@ -95,6 +97,7 @@ pub(crate) fn print_socket() -> Result<(), CliDiagnostic> {
     Ok(())
 }
 
+#[cfg(not(target_os = "wasi"))]
 pub(crate) fn lsp_proxy(config_path: Option<PathBuf>) -> Result<(), CliDiagnostic> {
     let rt = Runtime::new()?;
     rt.block_on(start_lsp_proxy(&rt, config_path))?;
@@ -102,50 +105,52 @@ pub(crate) fn lsp_proxy(config_path: Option<PathBuf>) -> Result<(), CliDiagnosti
     Ok(())
 }
 
+#[cfg(not(target_os = "wasi"))]
 /// Start a proxy process.
 /// Receives a process via `stdin` and then copy the content to the LSP socket.
 /// Copy to the process on `stdout` when the LSP responds to a message
 async fn start_lsp_proxy(rt: &Runtime, config_path: Option<PathBuf>) -> Result<(), CliDiagnostic> {
-    ensure_daemon(true, config_path).await?;
+    // ensure_daemon(true, config_path).await?;
 
-    match open_socket().await? {
-        Some((mut owned_read_half, mut owned_write_half)) => {
-            // forward stdin to socket
-            let mut stdin = io::stdin();
-            let input_handle = rt.spawn(async move {
-                loop {
-                    match io::copy(&mut stdin, &mut owned_write_half).await {
-                        Ok(b) => {
-                            if b == 0 {
-                                return Ok(());
-                            }
-                        }
-                        Err(err) => return Err(err),
-                    };
-                }
-            });
+    // match open_socket().await? {
+    //     Some((mut owned_read_half, mut owned_write_half)) => {
+    //         // forward stdin to socket
+    //         let mut stdin = io::stdin();
+    //         let input_handle = rt.spawn(async move {
+    //             loop {
+    //                 match io::copy(&mut stdin, &mut owned_write_half).await {
+    //                     Ok(b) => {
+    //                         if b == 0 {
+    //                             return Ok(());
+    //                         }
+    //                     }
+    //                     Err(err) => return Err(err),
+    //                 };
+    //             }
+    //         });
 
-            // receive socket response to stdout
-            let mut stdout = io::stdout();
-            let out_put_handle = rt.spawn(async move {
-                loop {
-                    match io::copy(&mut owned_read_half, &mut stdout).await {
-                        Ok(b) => {
-                            if b == 0 {
-                                return Ok(());
-                            }
-                        }
-                        Err(err) => return Err(err),
-                    };
-                }
-            });
+    //         // receive socket response to stdout
+    //         let mut stdout = io::stdout();
+    //         let out_put_handle = rt.spawn(async move {
+    //             loop {
+    //                 match io::copy(&mut owned_read_half, &mut stdout).await {
+    //                     Ok(b) => {
+    //                         if b == 0 {
+    //                             return Ok(());
+    //                         }
+    //                     }
+    //                     Err(err) => return Err(err),
+    //                 };
+    //             }
+    //         });
 
-            let _ = input_handle.await;
-            let _ = out_put_handle.await;
-            Ok(())
-        }
-        None => Ok(()),
-    }
+    //         let _ = input_handle.await;
+    //         let _ = out_put_handle.await;
+    //         Ok(())
+    //     }
+    //     None => Ok(()),
+    // }
+    Ok(())
 }
 
 const fn log_file_name_prefix() -> &'static str {

@@ -17,7 +17,7 @@ biome_console     = { workspace = true }
 biome_diagnostics = { workspace = true }
 crossbeam         = "0.8.2"
 indexmap          = { workspace = true }
-parking_lot       = { version = "0.12.0", features = ["arc_lock"] }
+parking_lot       = { version = "0.12.0", features = ["arc_lock", "nightly"] }
 rayon             = "1.7.0"
 rustc-hash        = { workspace = true }
 schemars          = { workspace = true, optional = true }
