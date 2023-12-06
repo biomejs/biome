@@ -534,25 +534,18 @@ fn is_out_of_function_scope(
     identifier: &AnyJsExpression,
     function: &JsSyntaxNode,
     model: &SemanticModel,
-) -> bool {
-    let Some(identifier) = JsIdentifierExpression::cast_ref(identifier.syntax()) else {
-        return false;
-    };
+) -> Option<bool> {
+    let identifier_name = JsIdentifierExpression::cast_ref(identifier.syntax())?
+        .name()
+        .ok()?;
 
-    let Some(identifier_name) = identifier.name().ok() else {
-        return false;
-    };
+    let declaration = model.binding(&identifier_name)?.tree().declaration()?;
 
-    let Some(binding) = model.binding(&identifier_name) else {
-        return false;
-    };
-
-    let Some(declaration) = binding.tree().declaration() else {
-        return false;
-    };
-
-    let declaration_scope = model.scope(declaration.syntax());
-    declaration_scope.is_ancestor_of(&model.scope(function))
+    Some(
+        model
+            .scope(declaration.syntax())
+            .is_ancestor_of(&model.scope(function)),
+    )
 }
 
 impl Rule for UseExhaustiveDependencies {
@@ -770,7 +763,7 @@ impl Rule for UseExhaustiveDependencies {
 
                 let model = ctx.model();
                 for dep in dependencies {
-                    if is_out_of_function_scope(dep, component_function, model) {
+                    if is_out_of_function_scope(dep, component_function, model).unwrap_or(false) {
                         diag = diag.detail(
                             dep.syntax().text_trimmed_range(),
                             "Outer scope values aren't valid dependencies because mutating them doesn't re-render the component ",
