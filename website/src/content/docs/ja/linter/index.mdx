@@ -1,0 +1,181 @@
+---
+title: Linter
+description: Biome linter の使い方について。
+---
+
+import NumberOfRules from "@src/components/generated/NumberOfRules.astro";
+import RecommendedRules from "@src/components/generated/RecommendedRules.astro";
+
+Biomeのリンターはあなたのコードを静的に分析し、頻出するエラーを検出してより自然なコードを書く手助けをします。
+
+<NumberOfRules />
+
+## CLI経由でリンターを使用する
+
+CLIから以下のコマンドを実行することでエラーを検出を開始できます：
+
+```shell
+biome lint ./src
+```
+
+利用可能なすべてのオプションの詳細については、[CLIページ](/reference/cli#biome-lint)を確認してください。
+
+## ルールの基盤
+
+私たちは、ただルールを指示的に指摘するのではなく、なぜそのルールがトリガーされた理由をユーザーに説明し、エラーを修正する方法をユーザーに伝えることが大切だと考えています。ルールは以下のような**重要な要素**に沿って選定されています：
+
+1. ユーザーに対してエラーの説明を行います。これは基本的に診断のメッセージです。
+2. 次に、ユーザーに対してエラーがトリガーされた理由を説明します。これは基本的に追加のノードで実装されます。
+3. 最後にユーザーに何をすべきかを伝えます。これは基本的にコードアクションを使用して実装されます。コードアクションが適用できない場合は、ノートでユーザーに何をすべきかを伝えます。
+
+もしルールがこれらの要素に従っていないと感じたのであれば、[イシューを作成](https://github.com/biomejs/biome/issues/new?assignees=&labels=S-To+triage&projects=&template=01_bug.yml&title=%F0%9F%90%9B+%3CTITLE%3E)してください。
+
+## コード修正
+
+リントルールは自動的なコード修正を提供する場合があります。Biomeでは、2種類の修正を区別しています。
+
+### 安全な修正
+
+安全な修正は、コードのセマンティクスを変更しないことが保証されています。明示的なレビューなしに適用できます。
+
+_安全な修正_を適用するには、`--apply`を使用します：
+
+```shell
+biome check --apply ./src
+```
+
+### 危険な修正
+
+危険な修正は、プログラムのセマンティクスを変更する可能性があります。そのため、変更を手動でレビューすることをお勧めします。
+
+_危険な修正_を適用するには、`--apply-unsafe`を使用します：
+
+```shell
+biome check --apply-unsafe ./src
+```
+
+
+## 推奨ルール
+
+リンターが有効になっている場合、いくつかのルールが推奨されます。推奨ルールはエラー診断を発行します。推奨ルールの一覧は以下に記載されています：
+
+<RecommendedRules />
+
+
+## コードの無視
+
+開発者が特定のコード行に対してリントルールを無視したい場合があります。
+これは、リント診断を発行する行の上に抑制コメントを追加することで実現できます。
+
+抑制コメントは以下の形式で記述します：
+
+```js
+// biome-ignore lint: <explanation>
+// biome-ignore lint/suspicious/noDebugger: <explanation>
+```
+
+ここで
+
+- `biome-ignore` は抑制コメントの開始です；
+- `lint` はリンターを抑制します；
+- `/suspicious/noDebugger`: **任意**、抑制したいルールのグループと名前を記載します；
+- `<explanation>` ルールが無効になっている理由を記載します；
+
+例：
+
+```ts
+// biome-ignore lint: reason
+debugger;
+// biome-ignore lint/suspicious/noDebugger: reason
+debugger;
+```
+
+
+## 設定
+
+### リントルールの有効化
+
+推奨されるルールはデフォルトで有効になっており、エラーの重大度で診断を発行します。
+推奨されないルールはデフォルトで無効になっていますが、設定を通じて有効にすることができます。
+これらのルールによって発行される診断は、ドキュメント内で警告の重大度で表示されます。
+
+ルールを有効にするには、診断の重大度を必要に応じて変更する必要があります：
+
+```json
+{
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "style": {
+        "useBlockStatements": "error",
+        "useShorthandArrayType": "error",
+        "noShoutyConstants": "warn"
+      }
+    }
+  }
+}
+```
+
+### リントルールの無効化
+
+ルールを無効化するには無効にしたい設定の項目に`"off"`という値を追加します。例：
+
+```json
+{
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "suspicious": {
+        "noCommentText": "off"
+      },
+      "style": {
+        "noUnusedTemplateLiteral": "off"
+      }
+    }
+  }
+}
+```
+
+### 診断の重大度の変更
+
+Biomeのほとんどのルールは**エラー**を発行しますが、その重大度は自由に変更することができます。
+ルールの値として`"warn"`を追記することで変更が適用されます。例：
+
+```json
+{
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "suspicious": {
+        "noCommentText": "warn"
+      }
+    }
+  }
+}
+```
+
+これは、リファクタリングが行われている最中や、CIをパスする必要がある場合に便利です。
+
+## ルールの設定
+
+いくつかのルールにはより詳細な設定があります。
+ルールがいくつかのオプションを_受け入れる_場合は、ルールの値を異なる形に整えることでそれらを渡すことができます。
+
+```json
+{
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "correctness": {
+        "noCommentText": {
+          "level": "warn",
+          "options": {}
+        }
+      }
+    }
+  }
+}
+```
+
+- `level` は診断の重大度を示し、有効な値は`"off"`、`"warn"`、`"error"`です；
+- `options` はルールに基づいて変更されます。
