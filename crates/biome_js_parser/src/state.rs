@@ -54,7 +54,7 @@ impl ExportDefaultItemKind {
             // export default function a(){};
             // export default interface A{};
             // export default interface A{};
-            // or 
+            // or
             // export default class A{};
             // export default interface A{};
             // export default interface A{};
