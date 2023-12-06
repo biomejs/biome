@@ -183,6 +183,38 @@ Diff
 ```
 
 
+### Prettier has an inconsistent behavior for parenthesized non-null-asserted optional chains
+
+In _TypeScript_, the non-null assertion operator `!` allows asserting that a value is non-null.
+When applied on an optional chain, the assertion applies to the entire chain regardless of the presence of parentheses,
+making equivalent `(a.?.b)!` and `a.?.b!`.
+
+The previous code examples are already well-formatted, according to Prettier.
+Prettier is used to enforce the presence or the absence of parentheses.
+This looks like a missed opportunity to normalize the code.
+
+Moreover, Prettier doesn't remove the parentheses even when they enclose the non-null assertion.
+Instead, it moves the operator outside the parentheses.
+
+Input:
+
+```ts title="example.ts"
+a.?.b!
+(a.?.b)!
+(a.?.b!)
+```
+
+Diff
+
+```ts title="example.ts" del={2, 4} ins={3, 5}
+a.?.b!
+(a.?.b)!
+a.?.b!
+(a.?.b)!
+a.?.b!
+```
+
+
 ### Prettier formats invalid syntaxes
 
 Prettier's Babel-based parsing for JavaScript and TypeScript is very loose and [allows multiple errors](https://github.com/prettier/prettier/blob/e4a74c05f4502dd4ec70495c3130ff08ab088e05/src/language-js/parse/babel.js#L177-L218) to be ignored.
