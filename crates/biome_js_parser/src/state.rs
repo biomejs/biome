@@ -40,7 +40,6 @@ impl ExportDefaultItemKind {
     pub const fn is_mergeable(&self, other: &ExportDefaultItemKind) -> bool {
         Self::can_merge(self, other) || Self::can_merge(other, self)
     }
-
     const fn can_merge(a: &ExportDefaultItemKind, b: &ExportDefaultItemKind) -> bool {
         match (a, b) {
             // export default function a():void;
@@ -55,7 +54,10 @@ impl ExportDefaultItemKind {
             // export default function a(){};
             // export default interface A{};
             // export default interface A{};
+            // or 
             // export default class A{};
+            // export default interface A{};
+            // export default interface A{};
             (
                 ExportDefaultItemKind::Interface,
                 ExportDefaultItemKind::ClassDeclaration
