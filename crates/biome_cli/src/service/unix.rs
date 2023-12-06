@@ -9,17 +9,14 @@ use std::{
 use biome_lsp::{ServerConnection, ServerFactory};
 use tokio::{
     io::Interest,
-    net::UnixStream,
+    net::{
+        unix::{OwnedReadHalf, OwnedWriteHalf},
+        UnixListener, UnixStream,
+    },
     process::{Child, Command},
     time,
 };
 use tracing::{debug, info, Instrument};
-
-#[cfg(not(target_os = "wasi"))]
-use tokio::net::{
-    unix::{OwnedReadHalf, OwnedWriteHalf},
-    UnixListener,
-};
 
 /// Returns the filesystem path of the global socket used to communicate with
 /// the server daemon
@@ -45,14 +42,14 @@ pub(crate) fn enumerate_pipes() -> io::Result<impl Iterator<Item = String>> {
 }
 
 /// Try to connect to the global socket and wait for the connection to become ready
-async fn try_connect() -> io::Result<()> {
-    // let socket_name = get_socket_name();
-    // info!("Trying to connect to socket {}", socket_name.display());
-    // let stream = UnixStream::connect(socket_name).await?;
-    // stream
-    //     .ready(Interest::READABLE | Interest::WRITABLE)
-    //     .await?;
-    Ok(())
+async fn try_connect() -> io::Result<UnixStream> {
+    let socket_name = get_socket_name();
+    info!("Trying to connect to socket {}", socket_name.display());
+    let stream = UnixStream::connect(socket_name).await?;
+    stream
+        .ready(Interest::READABLE | Interest::WRITABLE)
+        .await?;
+    Ok(stream)
 }
 
 /// Spawn the daemon server process in the background
@@ -81,12 +78,12 @@ fn spawn_daemon(stop_on_disconnect: bool, config_path: Option<PathBuf>) -> io::R
     // The only thing we do here is issuing a syscall, which is safe to do in
     // this state but still "unsafe" in Rust semantics because it's technically
     // mutating the shared global state of the process
-    // unsafe {
-    //     cmd.pre_exec(|| {
-    //         libc::setsid();
-    //         Ok(())
-    //     });
-    // }
+    unsafe {
+        cmd.pre_exec(|| {
+            libc::setsid();
+            Ok(())
+        });
+    }
 
     let child = cmd.spawn()?;
     Ok(child)
@@ -94,22 +91,21 @@ fn spawn_daemon(stop_on_disconnect: bool, config_path: Option<PathBuf>) -> io::R
 
 /// Open a connection to the daemon server process, returning [None] if the
 /// server is not running
-pub(crate) async fn open_socket() -> io::Result<Option<((), ())>> {
-    // match try_connect().await {
-    //     Ok(socket) => Ok(Some(socket.into_split())),
-    //     Err(err)
-    //         // The OS will return `ConnectionRefused` if the socket file exists
-    //         // but no server process is listening on it
-    //         if matches!(
-    //             err.kind(),
-    //             ErrorKind::NotFound | ErrorKind::ConnectionRefused
-    //         ) =>
-    //     {
-    //         Ok(None)
-    //     }
-    //     Err(err) => Err(err),
-    // }
-    io::Result::Ok(None::<((), ())>)
+pub(crate) async fn open_socket() -> io::Result<Option<(OwnedReadHalf, OwnedWriteHalf)>> {
+    match try_connect().await {
+        Ok(socket) => Ok(Some(socket.into_split())),
+        Err(err)
+            // The OS will return `ConnectionRefused` if the socket file exists
+            // but no server process is listening on it
+            if matches!(
+                err.kind(),
+                ErrorKind::NotFound | ErrorKind::ConnectionRefused
+            ) =>
+        {
+            Ok(None)
+        }
+        Err(err) => Err(err),
+    }
 }
 
 /// Ensure the server daemon is running and ready to receive connections
@@ -189,30 +185,29 @@ pub(crate) async fn print_socket() -> io::Result<()> {
 pub(crate) async fn run_daemon(
     factory: ServerFactory,
     config_path: Option<PathBuf>,
-) -> io::Result<()> {
-    // let path = get_socket_name();
+) -> io::Result<Infallible> {
+    let path = get_socket_name();
 
-    // info!("Trying to connect to socket {}", path.display());
+    info!("Trying to connect to socket {}", path.display());
 
-    // // Try to remove the socket file if it already exists
-    // if path.exists() {
-    //     info!("Remove socket folder {}", path.display());
-    //     fs::remove_file(&path)?;
-    // }
+    // Try to remove the socket file if it already exists
+    if path.exists() {
+        info!("Remove socket folder {}", path.display());
+        fs::remove_file(&path)?;
+    }
 
-    // let listener = UnixListener::bind(path)?;
+    let listener = UnixListener::bind(path)?;
 
-    // loop {
-    //     let (stream, _) = listener.accept().await?;
-    //     let connection = factory.create(config_path.clone());
-    //     let span = tracing::trace_span!("run_server");
-    //     tokio::spawn(run_server(connection, stream).instrument(span.or_current()));
-    // }
-    Ok(())
+    loop {
+        let (stream, _) = listener.accept().await?;
+        let connection = factory.create(config_path.clone());
+        let span = tracing::trace_span!("run_server");
+        tokio::spawn(run_server(connection, stream).instrument(span.or_current()));
+    }
 }
 
 /// Async task driving a single client connection
 async fn run_server(connection: ServerConnection, stream: UnixStream) {
-    // let (read, write) = stream.into_split();
-    // connection.accept(read, write).await;
+    let (read, write) = stream.into_split();
+    connection.accept(read, write).await;
 }
