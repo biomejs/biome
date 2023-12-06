@@ -1,10 +1,10 @@
-import { h } from "hastscript";
 import { netlifyStatic } from "@astrojs/netlify";
 import react from "@astrojs/react";
 import starlight from "@astrojs/starlight";
 import { defineConfig } from "astro/config";
+import { h } from "hastscript";
+import { escape as htmlEscape } from "html-escaper";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
-import { escape } from "html-escaper";
 import rehypeSlug from "rehype-slug";
 import remarkToc from "remark-toc";
 
@@ -25,7 +25,7 @@ const anchorLinkSRLabel = (text: string) =>
 	h(
 		"span",
 		{ "is:raw": true, class: "sr-only" },
-		`Section titled ${escape(text)}`,
+		`Section titled ${htmlEscape(text)}`,
 	);
 
 const autolinkConfig = {
