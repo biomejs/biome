@@ -98,67 +98,12 @@ pub(crate) async fn ensure_daemon(
     stop_on_disconnect: bool,
     config_path: Option<PathBuf>,
 ) -> io::Result<bool> {
-    let mut current_child: Option<Child> = None;
-    let mut last_error = None;
-
-    // Try to initialize the connection a few times
-    for _ in 0..10 {
-        // Try to open a connection on the global socket
-        match try_connect().await {
-            // The connection is open and ready
-            Ok(_) => {
-                return Ok(current_child.is_some());
-            }
-
-            // There's no process listening on the global socket
-            Err(err)
-                if matches!(
-                    err.kind(),
-                    ErrorKind::NotFound | ErrorKind::ConnectionRefused
-                ) =>
-            {
-                last_error = Some(err);
-
-                if let Some(current_child) = &mut current_child {
-                    // If we have a handle to the daemon process, wait for a few
-                    // milliseconds for it to exit, or retry the connection
-                    tokio::select! {
-                        result = current_child.wait() => {
-                            let _status = result?;
-                            return Err(io::Error::new(
-                                io::ErrorKind::ConnectionReset,
-                                "the server process exited before the connection could be established",
-                            ));
-                        }
-                        _ = time::sleep(Duration::from_millis(50)) => {}
-                    }
-                } else {
-                    // Spawn the daemon process and wait a few milliseconds for
-                    // it to become ready then retry the connection
-                    current_child = Some(spawn_daemon(stop_on_disconnect, config_path.clone())?);
-                    time::sleep(Duration::from_millis(50)).await;
-                }
-            }
-
-            Err(err) => return Err(err),
-        }
-    }
-
-    // If the connection couldn't be opened after 10 tries fail with the last
-    // error message from the OS, or a generic error message otherwise
-    Err(last_error.unwrap_or_else(|| {
-        io::Error::new(
-            io::ErrorKind::Other,
-            "could not connect to the daemon socket",
-        )
-    }))
+    Ok(false)
 }
 
 /// Ensure the server daemon is running and ready to receive connections and
 /// print the global socket name in the standard output
 pub(crate) async fn print_socket() -> io::Result<()> {
-    ensure_daemon(true, None).await?;
-    println!("{}", get_socket_name().display());
     Ok(())
 }
 
