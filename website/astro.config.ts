@@ -3,9 +3,7 @@ import { netlifyStatic } from "@astrojs/netlify";
 import react from "@astrojs/react";
 import starlight from "@astrojs/starlight";
 import { defineConfig } from "astro/config";
-import rehypeAutolinkHeadings, {
-	type Options as AutolinkOptions,
-} from "rehype-autolink-headings";
+import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import { escape } from "html-escaper";
 import rehypeSlug from "rehype-slug";
 import remarkToc from "remark-toc";
