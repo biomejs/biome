@@ -70,6 +70,8 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
   }
   ```
 
+- Fix [#728](https://github.com/biomejs/biome/issues/728). [useSingleVarDeclarator](https://biomejs.dev/linter/rules/use-single-var-declarator) no longer outputs invalid code. Contributed by @Conaclos
+
 ### Parser
 
 
