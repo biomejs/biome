@@ -1,104 +1,42 @@
-import fs from "node:fs/promises";
-import path from "node:path";
+import { h } from "hastscript";
 import { netlifyStatic } from "@astrojs/netlify";
 import react from "@astrojs/react";
 import starlight from "@astrojs/starlight";
 import { defineConfig } from "astro/config";
-import rehypeAutolinkHeadings from "rehype-autolink-headings";
+import rehypeAutolinkHeadings, {
+	type Options as AutolinkOptions,
+} from "rehype-autolink-headings";
+import { escape } from "html-escaper";
 import rehypeSlug from "rehype-slug";
 import remarkToc from "remark-toc";
 
-function resolveFile(relative: string, parent: string, root: string): string {
-	if (relative[0] === "/") {
-		return `${root}${relative}`;
-	}
-	return path.resolve(path.join(parent, relative));
-}
-
-const IMPORT_REGEX = /^import"(.*?)";?$/;
-
-async function readFile(
-	loc: string,
-	root: string,
-	cache: Files,
-): Promise<string> {
-	let content = cache.get(loc);
-	if (content === undefined) {
-		content = await fs.readFile(loc, "utf8");
-		content = content.trim();
-		cache.set(loc, content);
-	}
-
-	const importMatch = content.match(IMPORT_REGEX);
-	if (importMatch != null) {
-		return readFile(
-			resolveFile(importMatch[1], path.dirname(loc), root),
-			root,
-			cache,
-		);
-	}
-
-	return content;
-}
-
-type Files = Map<string, string>;
-
-async function inline({
-	files,
-	root,
-	replacements,
-}: {
-	files: Files;
-	root: string;
-	replacements: {
-		regex: RegExp;
-		tagBefore: string;
-		tagAfter: string;
-	}[];
-}): Promise<void> {
-	const cache: Files = new Map();
-
-	await Promise.all(
-		Array.from(files.entries(), async ([htmlPath, file]) => {
-			if (htmlPath.includes("playground")) {
-				return;
-			}
-
-			const matches: {
-				key: string;
-				match: string;
-				tagBefore: string;
-				tagAfter: string;
-			}[] = [];
-
-			for (const { regex, tagBefore, tagAfter } of replacements) {
-				file = file.replace(regex, (match, p1) => {
-					const key = `{{INLINE:${matches.length - 1}}}`;
-					matches.push({ key, match: p1, tagBefore, tagAfter });
-					return key;
-				});
-			}
-
-			const sources: string[] = await Promise.all(
-				matches.map(async ({ match }) => {
-					const resolvedPath = resolveFile(match, path.dirname(htmlPath), root);
-					return await readFile(resolvedPath, root, cache);
-				}),
-			);
-
-			for (let i = 0; i < matches.length; i++) {
-				const { key, tagBefore, tagAfter } = matches[i];
-				const source = sources[i];
-				const index = file.indexOf(key);
-				const start = file.slice(0, index);
-				const end = file.slice(index + key.length);
-				file = `${start}${tagBefore}${source}${tagAfter}${end}`;
-			}
-
-			files.set(htmlPath, file);
+const anchorLinkIcon = h(
+	"span",
+	{ ariaHidden: "true", class: "anchor-icon" },
+	h(
+		"svg",
+		{ width: 16, height: 16, viewBox: "0 0 24 24" },
+		h("path", {
+			fill: "currentcolor",
+			d: "m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z",
 		}),
+	),
+);
+
+const anchorLinkSRLabel = (text: string) =>
+	h(
+		"span",
+		{ "is:raw": true, class: "sr-only" },
+		`Section titled ${escape(text)}`,
 	);
-}
+
+const autolinkConfig = {
+	properties: { class: "anchor-link" },
+	behavior: "after",
+	group: ({ tagName }) =>
+		h("div", { tabIndex: -1, class: `heading-wrapper level-${tagName}` }),
+	content: ({ heading }) => [anchorLinkIcon, anchorLinkSRLabel("test")],
+};
 
 const site = "https://biomejs.dev";
 // https://astro.build/config
@@ -256,16 +194,7 @@ export default defineConfig({
 	markdown: {
 		syntaxHighlight: "prism",
 		remarkPlugins: [remarkToc],
-		rehypePlugins: [
-			rehypeSlug,
-			[
-				rehypeAutolinkHeadings,
-				{
-					behavior: "append",
-					content: [],
-				},
-			],
-		],
+		rehypePlugins: [rehypeSlug, [rehypeAutolinkHeadings, autolinkConfig]],
 	},
 
 	adapter: netlifyStatic(),

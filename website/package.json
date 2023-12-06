@@ -39,6 +39,8 @@
 		"codemirror-lang-rome-ast": "0.0.6",
 		"fast-diff": "^1.3.0",
 		"hast-util-to-html": "^8.0.4",
+		"hastscript": "^8.0.0",
+		"html-escaper": "^3.0.3",
 		"lang-rome-formatter-ir": "0.0.2",
 		"mdast-util-to-hast": "^12.3.0",
 		"mermaid": "^9.4.3",
