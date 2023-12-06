@@ -122,6 +122,12 @@ fn enclosing_function_if_call_is_at_top_level(call: &JsCallExpression) -> Option
 }
 
 /// Model for tracking which function calls are preceeded by an early return.
+///
+/// The keys in the model are call sites and each value is the text range of an
+/// early return that preceeds such call site. Call sites without preceeding
+/// early returns are not included in the model. For call sites that are
+/// preceeded by multiple early returns, the return statement that we map to is
+/// implementation-defined.
 #[derive(Clone, Default)]
 struct EarlyReturnsModel(FxHashMap<JsCallExpression, TextRange>);
 
