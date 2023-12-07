@@ -18,6 +18,10 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ### Editors
 
+#### New features
+
+- The LSP register formatting without the need of using dynamic capabilities from the client.
+
 ### Formatter
 
 ### JavaScript APIs
