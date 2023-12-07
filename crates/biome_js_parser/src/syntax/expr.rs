@@ -445,7 +445,7 @@ pub(super) fn parse_conditional_expr(p: &mut JsParser, context: ExpressionContex
 
 // test jsx jsx_arrow_exrp_in_alternative
 // bar ? (foo) : (<a>{() => {}}</a>);
-fn parse_conditional_expr_consequence(
+fn parse_conditional_expr_consequent(
     p: &mut JsParser,
     context: ExpressionContext,
 ) -> ParsedSyntax {
