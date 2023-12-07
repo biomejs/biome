@@ -437,7 +437,7 @@ pub(super) fn parse_conditional_expr(p: &mut JsParser, context: ExpressionContex
 /// Specialized version of [parse_assignment_expression_or_higher].
 /// We need to make sure that on a successful arrow_expression parse that
 /// the next token is `:`.
-// test js arrow_expr_in_alternative
+// test js arrow_expr_in_alternate
 // a ? (b) : a => {};
 
 // test ts ts_arrow_exrp_in_alternative
