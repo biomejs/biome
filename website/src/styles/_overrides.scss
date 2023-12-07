@@ -1,8 +1,7 @@
-
 /* Light mode colors. */
 :root[data-theme='light'] {
   --sl-color-accent-low: #c7d6ff;
-  --sl-color-accent: #e75115;
+  --sl-color-accent: #0a72f1;
   --sl-color-accent-high: #182775;
   --sl-color-white: #17181c;
   --sl-color-gray-1: #24272f;
@@ -13,13 +12,18 @@
   --sl-color-gray-6: #eceef2;
   --sl-color-gray-7: #f5f6f8;
   --sl-color-black: #ffffff;
+  --sl-perf-head: #f5f6f8;
+  --sl-perf-border: #eceef2;
+  --sl-perf: #f8f9fa;
+  --sl-hue-blue: 210;
+  --sl-community-link: #ffffff;
 }
 
 /* Dark mode colors. */
 :root {
-  --sl-color-accent-low: #302100;
-  --sl-color-accent: #876300;
-  --sl-color-accent-high: #f7b911;
+  --sl-color-accent-low: #131e4f;
+  --sl-color-accent: #3447ff;
+  --sl-color-accent-high: #60a5fa;
   --sl-color-white: #ffffff;
   --sl-color-gray-1: #eceef2;
   --sl-color-gray-2: #c0c2c7;
@@ -28,4 +32,46 @@
   --sl-color-gray-5: #353841;
   --sl-color-gray-6: #24272f;
   --sl-color-black: #17181c;
+  --sl-perf-head: #25272f;
+  --sl-perf-border: #353841;
+  --sl-perf: #1b1b1d;
+  --sl-hue-blue: 234;
+  --sl-community-link: #ffffff;
+}
+
+.hero>.sl-flex>.actions>.primary,
+.hero>.sl-flex>.actions>.secondary {
+  border-radius: 0.3rem;
+}
+
+.card-cnt {
+  margin-top: 12.5rem !important;
+}
+
+.card-cnt>.card-grid>.card {
+  transition: all 0.5s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.card-cnt>.card-grid>.card:hover {
+  font-size: 1.24em;
+  border: 0.06rem solid var(--sl-color-accent-high);
+}
+
+.card-cnt>.card-grid>.card::before {
+  --size: 0;
+  content: '';
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: calc(4 * var(--size));
+  height: calc(4 * var(--size));
+  background: radial-gradient(hsla(var(--sl-hue-blue), 78%, 62%, 26%), transparent 40%);
+  transform: translate(-50%, -50%);
+  transition: width .2s ease, height .2s ease;
+}
+
+.card-cnt>.card-grid>.card:hover::before {
+  --size: 15vw;
 }
