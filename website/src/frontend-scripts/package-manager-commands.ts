@@ -1,5 +1,5 @@
 // Yes TS I am a module.
-export {};
+export type {};
 
 const selectorButtons = document.querySelectorAll(
 	".package-manager-selector li",
