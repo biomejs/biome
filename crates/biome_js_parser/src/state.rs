@@ -42,19 +42,26 @@ impl ExportDefaultItemKind {
     }
     const fn can_merge(a: &ExportDefaultItemKind, b: &ExportDefaultItemKind) -> bool {
         match (a, b) {
+            // test ts decorator_export_default_function_and_function_overload
             // export default function a():void;
             // export default function a(v: number):void;
-            // export default function a(v: any){
+            // export default function a(v?: any){
             // }
             (
                 ExportDefaultItemKind::FunctionOverload,
                 ExportDefaultItemKind::FunctionDeclaration
                 | ExportDefaultItemKind::FunctionOverload,
             ) => true,
+            // test ts decorator_export_default_function_and_interface
+            // export default interface A{};
+            // export default interface A{};
             // export default function a(){};
             // export default interface A{};
             // export default interface A{};
-            // or
+            //
+            // test ts decorator_export_default_class_and_interface
+            // export default interface A{};
+            // export default interface A{};
             // export default class A{};
             // export default interface A{};
             // export default interface A{};
