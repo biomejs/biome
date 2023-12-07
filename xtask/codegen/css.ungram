@@ -427,6 +427,7 @@ AnyCssAtRule =
 	CssCharsetAtRule
 	| CssColorProfileAtRule
 	| CssCounterStyleAtRule
+	| CssContainerAtRule
 	| CssFontFaceAtRule
 	| CssKeyframesAtRule
 	| CssMediaAtRule
@@ -458,6 +459,154 @@ CssCounterStyleAtRule =
 CssFontFaceAtRule =
 	'font-face'
 	block: CssBlock
+
+
+// <container-condition> = [ <container-name> ]? <container-query>
+// <container-name> = <custom-ident>
+// <container-query>     = not <query-in-parens>
+//                      | <query-in-parens> [ [ and <query-in-parens> ]* | [ or <query-in-parens> ]* ]
+//
+// <query-in-parens>     = ( <container-query> )
+//                       | ( <size-feature> )
+//                       | style( <style-query> )
+//                       | <general-enclosed>
+//
+// <style-query>         = not <style-in-parens>
+//                       | <style-in-parens> [ [ and <style-in-parens> ]* | [ or <style-in-parens> ]* ]
+//                       | <style-feature>
+//
+// <style-in-parens>     = ( <style-query> )
+//                       | ( <style-feature> )
+//                       | <general-enclosed>
+
+// <container-condition> = [ <container-name> ]? <container-query>
+CssContainerAtRule =
+	'container'
+	name: CssIdentifier?
+	query: AnyCssContainerQuery
+	block: CssBlock
+
+// <container-query>
+AnyCssContainerQuery =
+	CssContainerNotQuery
+	| AnyCssContainerCombinableQuery
+
+AnyCssContainerCombinableQuery =
+	CssContainerAndQuery
+	| CssContainerOrQuery
+	| AnyCssContainerQueryInParens
+
+CssContainerNotQuery =
+	'not'
+	query: AnyCssContainerQueryInParens
+
+CssContainerAndQuery =
+	left: AnyCssContainerQueryInParens
+	'and'
+	right: AnyCssContainerCombinableQuery
+
+CssContainerOrQuery =
+	left: AnyCssContainerQueryInParens
+	'or'
+	right: AnyCssContainerCombinableQuery
+
+// <query-in-parens>
+AnyCssContainerQueryInParens =
+	CssContainerQueryInParens
+	| CssContainerSizeFeatureInParens
+	| CssContainerStyleQueryInParens
+
+// ( <container-query> )
+CssContainerQueryInParens =
+	'('
+	query: AnyCssContainerQuery
+	')'
+
+// ( <size-feature> )
+CssContainerSizeFeatureInParens =
+	'('
+	query: AnyCssContainerSizeFeature
+	')'
+
+AnyCssContainerSizeFeature =
+	CssSizeFeaturePlain
+	| CssSizeFeatureBoolean
+	| CssSizeFeatureRange
+	| CssSizeFeatureRangeInterval
+
+CssSizeFeaturePlain =
+	name: CssIdentifier
+	':'
+	value: AnyCssSizeFeatureValue
+
+CssSizeFeatureBoolean =
+	name: CssIdentifier
+
+CssSizeFeatureRange =
+	left: CssIdentifier
+	comparison: CssSizeFeatureRangeComparison
+	right: AnyCssSizeFeatureValue
+
+CssSizeFeatureRangeInterval =
+	left: AnyCssSizeFeatureValue
+	left_comparison: CssSizeFeatureRangeComparison
+	name: CssIdentifier
+	right_comparison: CssSizeFeatureRangeComparison
+	right: AnyCssSizeFeatureValue
+
+CssSizeFeatureRangeComparison =
+	operator: ('>' | '<' | '>=' | '<=')
+
+AnyCssSizeFeatureValue =
+	CssNumber
+	| AnyCssDimension
+	| CssIdentifier
+	| CssRatio
+	| CssAnyFunction
+
+// style( <style-query> )
+CssContainerStyleQueryInParens =
+	'style'
+	'('
+	query: AnyCssContainerStyleQuery
+	')'
+
+// <style-query>
+AnyCssContainerStyleQuery =
+	CssContainerStyleNotQuery
+	| CssDeclaration
+	| AnyCssContainerStyleCombinableQuery
+
+AnyCssContainerStyleCombinableQuery =
+	CssContainerStyleAndQuery
+	| CssContainerStyleOrQuery
+	| CssContainerStyleInParens
+
+CssContainerStyleNotQuery =
+	'not'
+	query: CssContainerStyleInParens
+
+CssContainerStyleAndQuery =
+	left: CssContainerStyleInParens
+	'and'
+	right: AnyCssContainerStyleCombinableQuery
+
+CssContainerStyleOrQuery =
+	left: CssContainerStyleInParens
+	'or'
+	right: AnyCssContainerStyleCombinableQuery
+
+// <style-in-parens>
+CssContainerStyleInParens =
+	'('
+	query: AnyCssContainerStyleInParens
+	')'
+
+// ( <style-query> )
+// ( <style-feature> )
+AnyCssContainerStyleInParens =
+	AnyCssContainerStyleQuery
+	| CssDeclaration
 
 // @keyframes "something" { from {} to {} }
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

@@ -220,6 +220,180 @@ impl CssCompoundSelectorBuilder {
         ))
     }
 }
+pub fn css_container_and_query(
+    left: AnyCssContainerQueryInParens,
+    and_token: SyntaxToken,
+    right: AnyCssContainerCombinableQuery,
+) -> CssContainerAndQuery {
+    CssContainerAndQuery::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_CONTAINER_AND_QUERY,
+        [
+            Some(SyntaxElement::Node(left.into_syntax())),
+            Some(SyntaxElement::Token(and_token)),
+            Some(SyntaxElement::Node(right.into_syntax())),
+        ],
+    ))
+}
+pub fn css_container_at_rule(
+    container_token: SyntaxToken,
+    query: AnyCssContainerQuery,
+    block: CssBlock,
+) -> CssContainerAtRuleBuilder {
+    CssContainerAtRuleBuilder {
+        container_token,
+        query,
+        block,
+        name: None,
+    }
+}
+pub struct CssContainerAtRuleBuilder {
+    container_token: SyntaxToken,
+    query: AnyCssContainerQuery,
+    block: CssBlock,
+    name: Option<CssIdentifier>,
+}
+impl CssContainerAtRuleBuilder {
+    pub fn with_name(mut self, name: CssIdentifier) -> Self {
+        self.name = Some(name);
+        self
+    }
+    pub fn build(self) -> CssContainerAtRule {
+        CssContainerAtRule::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::CSS_CONTAINER_AT_RULE,
+            [
+                Some(SyntaxElement::Token(self.container_token)),
+                self.name
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Node(self.query.into_syntax())),
+                Some(SyntaxElement::Node(self.block.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn css_container_not_query(
+    not_token: SyntaxToken,
+    query: AnyCssContainerQueryInParens,
+) -> CssContainerNotQuery {
+    CssContainerNotQuery::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_CONTAINER_NOT_QUERY,
+        [
+            Some(SyntaxElement::Token(not_token)),
+            Some(SyntaxElement::Node(query.into_syntax())),
+        ],
+    ))
+}
+pub fn css_container_or_query(
+    left: AnyCssContainerQueryInParens,
+    or_token: SyntaxToken,
+    right: AnyCssContainerCombinableQuery,
+) -> CssContainerOrQuery {
+    CssContainerOrQuery::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_CONTAINER_OR_QUERY,
+        [
+            Some(SyntaxElement::Node(left.into_syntax())),
+            Some(SyntaxElement::Token(or_token)),
+            Some(SyntaxElement::Node(right.into_syntax())),
+        ],
+    ))
+}
+pub fn css_container_query_in_parens(
+    l_paren_token: SyntaxToken,
+    query: AnyCssContainerQuery,
+    r_paren_token: SyntaxToken,
+) -> CssContainerQueryInParens {
+    CssContainerQueryInParens::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_CONTAINER_QUERY_IN_PARENS,
+        [
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(query.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
+pub fn css_container_size_feature_in_parens(
+    l_paren_token: SyntaxToken,
+    query: AnyCssContainerSizeFeature,
+    r_paren_token: SyntaxToken,
+) -> CssContainerSizeFeatureInParens {
+    CssContainerSizeFeatureInParens::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_CONTAINER_SIZE_FEATURE_IN_PARENS,
+        [
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(query.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
+pub fn css_container_style_and_query(
+    left: CssContainerStyleInParens,
+    and_token: SyntaxToken,
+    right: AnyCssContainerStyleCombinableQuery,
+) -> CssContainerStyleAndQuery {
+    CssContainerStyleAndQuery::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_CONTAINER_STYLE_AND_QUERY,
+        [
+            Some(SyntaxElement::Node(left.into_syntax())),
+            Some(SyntaxElement::Token(and_token)),
+            Some(SyntaxElement::Node(right.into_syntax())),
+        ],
+    ))
+}
+pub fn css_container_style_in_parens(
+    l_paren_token: SyntaxToken,
+    query: AnyCssContainerStyleInParens,
+    r_paren_token: SyntaxToken,
+) -> CssContainerStyleInParens {
+    CssContainerStyleInParens::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_CONTAINER_STYLE_IN_PARENS,
+        [
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(query.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
+pub fn css_container_style_not_query(
+    not_token: SyntaxToken,
+    query: CssContainerStyleInParens,
+) -> CssContainerStyleNotQuery {
+    CssContainerStyleNotQuery::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_CONTAINER_STYLE_NOT_QUERY,
+        [
+            Some(SyntaxElement::Token(not_token)),
+            Some(SyntaxElement::Node(query.into_syntax())),
+        ],
+    ))
+}
+pub fn css_container_style_or_query(
+    left: CssContainerStyleInParens,
+    or_token: SyntaxToken,
+    right: AnyCssContainerStyleCombinableQuery,
+) -> CssContainerStyleOrQuery {
+    CssContainerStyleOrQuery::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_CONTAINER_STYLE_OR_QUERY,
+        [
+            Some(SyntaxElement::Node(left.into_syntax())),
+            Some(SyntaxElement::Token(or_token)),
+            Some(SyntaxElement::Node(right.into_syntax())),
+        ],
+    ))
+}
+pub fn css_container_style_query_in_parens(
+    style_token: SyntaxToken,
+    l_paren_token: SyntaxToken,
+    query: AnyCssContainerStyleQuery,
+    r_paren_token: SyntaxToken,
+) -> CssContainerStyleQueryInParens {
+    CssContainerStyleQueryInParens::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_CONTAINER_STYLE_QUERY_IN_PARENS,
+        [
+            Some(SyntaxElement::Token(style_token)),
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(query.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
 pub fn css_counter_style_at_rule(
     counter_style_token: SyntaxToken,
     name: CssIdentifier,
@@ -1029,6 +1203,66 @@ pub fn css_simple_function(
             Some(SyntaxElement::Token(l_paren_token)),
             Some(SyntaxElement::Node(items.into_syntax())),
             Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
+pub fn css_size_feature_boolean(name: CssIdentifier) -> CssSizeFeatureBoolean {
+    CssSizeFeatureBoolean::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_SIZE_FEATURE_BOOLEAN,
+        [Some(SyntaxElement::Node(name.into_syntax()))],
+    ))
+}
+pub fn css_size_feature_plain(
+    name: CssIdentifier,
+    colon_token: SyntaxToken,
+    value: AnyCssSizeFeatureValue,
+) -> CssSizeFeaturePlain {
+    CssSizeFeaturePlain::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_SIZE_FEATURE_PLAIN,
+        [
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Token(colon_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
+        ],
+    ))
+}
+pub fn css_size_feature_range(
+    left: CssIdentifier,
+    comparison: CssSizeFeatureRangeComparison,
+    right: AnyCssSizeFeatureValue,
+) -> CssSizeFeatureRange {
+    CssSizeFeatureRange::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_SIZE_FEATURE_RANGE,
+        [
+            Some(SyntaxElement::Node(left.into_syntax())),
+            Some(SyntaxElement::Node(comparison.into_syntax())),
+            Some(SyntaxElement::Node(right.into_syntax())),
+        ],
+    ))
+}
+pub fn css_size_feature_range_comparison(
+    operator_token: SyntaxToken,
+) -> CssSizeFeatureRangeComparison {
+    CssSizeFeatureRangeComparison::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_SIZE_FEATURE_RANGE_COMPARISON,
+        [Some(SyntaxElement::Token(operator_token))],
+    ))
+}
+pub fn css_size_feature_range_interval(
+    left: AnyCssSizeFeatureValue,
+    left_comparison: CssSizeFeatureRangeComparison,
+    name: CssIdentifier,
+    right_comparison: CssSizeFeatureRangeComparison,
+    right: AnyCssSizeFeatureValue,
+) -> CssSizeFeatureRangeInterval {
+    CssSizeFeatureRangeInterval::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_SIZE_FEATURE_RANGE_INTERVAL,
+        [
+            Some(SyntaxElement::Node(left.into_syntax())),
+            Some(SyntaxElement::Node(left_comparison.into_syntax())),
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Node(right_comparison.into_syntax())),
+            Some(SyntaxElement::Node(right.into_syntax())),
         ],
     ))
 }

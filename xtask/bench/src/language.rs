@@ -43,7 +43,7 @@ impl<'a> Parse<'a> {
             )),
             Parse::Css(code) => Parsed::Css(biome_css_parser::parse_css(
                 code,
-                CssParserOptions::default().with_allow_wrong_line_comments(),
+                CssParserOptions::default().allow_wrong_line_comments(),
             )),
         }
     }
@@ -67,7 +67,7 @@ impl<'a> Parse<'a> {
             Parse::Css(code) => Parsed::Css(biome_css_parser::parse_css_with_cache(
                 code,
                 cache,
-                CssParserOptions::default().with_allow_wrong_line_comments(),
+                CssParserOptions::default().allow_wrong_line_comments(),
             )),
         }
     }
