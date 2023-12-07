@@ -228,41 +228,35 @@ impl CssCounterStyleAtRule {
     }
 }
 impl CssCustomProperty {
-    pub fn with_value_token(self, element: SyntaxToken) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(0usize..=0usize, once(Some(element.into()))),
-        )
-    }
-}
-impl CssDeclaration {
-    pub fn with_name(self, element: CssIdentifier) -> Self {
+    pub fn with_value(self, element: CssIdentifier) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
         )
     }
-    pub fn with_css_custom_property(self, element: CssCustomProperty) -> Self {
+}
+impl CssDeclaration {
+    pub fn with_name(self, element: AnyCssDeclarationName) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
         )
     }
     pub fn with_colon_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(2usize..=2usize, once(Some(element.into()))),
+                .splice_slots(1usize..=1usize, once(Some(element.into()))),
         )
     }
-    pub fn with_value(self, element: AnyCssValue) -> Self {
+    pub fn with_value(self, element: CssListOfComponentValues) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(3usize..=3usize, once(Some(element.into_syntax().into()))),
+                .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
         )
     }
     pub fn with_important(self, element: Option<CssDeclarationImportant>) -> Self {
         Self::unwrap_cast(self.syntax.splice_slots(
-            4usize..=4usize,
+            3usize..=3usize,
             once(element.map(|element| element.into_syntax().into())),
         ))
     }
@@ -278,20 +272,6 @@ impl CssDeclarationImportant {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into()))),
-        )
-    }
-}
-impl CssDimension {
-    pub fn with_value(self, element: CssNumber) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
-        )
-    }
-    pub fn with_unit(self, element: CssIdentifier) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
         )
     }
 }
@@ -664,10 +644,24 @@ impl CssNumber {
     }
 }
 impl CssParameter {
-    pub fn with_any_css_value(self, element: AnyCssValue) -> Self {
+    pub fn with_css_list_of_component_values(self, element: CssListOfComponentValues) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
+impl CssPercentDimension {
+    pub fn with_value(self, element: CssNumber) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_unit_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into()))),
         )
     }
 }
@@ -1072,7 +1066,27 @@ impl CssRatio {
                 .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
         )
     }
+    pub fn with_slash_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into()))),
+        )
+    }
     pub fn with_denominator(self, element: CssNumber) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
+impl CssRegularDimension {
+    pub fn with_value(self, element: CssNumber) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_unit(self, element: CssIdentifier) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),

@@ -164,3 +164,26 @@ pub(crate) fn expected_any_at_rule(p: &CssParser, range: TextRange) -> ParseDiag
 pub(crate) fn expected_block(p: &CssParser, range: TextRange) -> ParseDiagnostic {
     expected_node("body", range, p)
 }
+
+pub(crate) fn expected_declaration_item(p: &CssParser, range: TextRange) -> ParseDiagnostic {
+    expected_node("declaration item", range, p)
+}
+pub(crate) fn expected_unit(p: &CssParser, range: TextRange) -> ParseDiagnostic {
+    expected_node("unit", range, p)
+}
+
+pub(crate) fn expected_component_value(p: &CssParser, range: TextRange) -> ParseDiagnostic {
+    expect_one_of(
+        &[
+            "identifier",
+            "string",
+            "number",
+            "dimension",
+            "ratio",
+            "custom property",
+            "function",
+        ],
+        range,
+    )
+    .into_diagnostic(p)
+}

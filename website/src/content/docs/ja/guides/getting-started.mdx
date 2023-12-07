@@ -59,13 +59,13 @@ Biomeをインストールする際には、バージョン範囲演算子を使
 
 `linter.enabled: true` はLinterを有効にし、 `rules.recommended: true` は[推奨ルール](/linter/rules/)を有効にします。
 
-この設定では、`formatter.enabled: false` で明示的にフォーマットを[無効化](/reference/configuration/#formatterenabled)していないため、フォーマットは有効になっています。
+この設定では、`formatter.enabled: false` で明示的にformatを[無効化](/reference/configuration/#formatterenabled)していないため、formatは有効になっています。
 
 ## 使い方
 
 Biome CLIには多くのコマンドとオプションが用意されているので、あなたが必要なものだけを使用できます。
 
-[`format`](/reference/cli#biome-format) コマンドを `--write` オプションを指定し実行することで、ファイルやディレクトリをフォーマットできます。
+[`format`](/reference/cli#biome-format) コマンドを `--write` オプションを指定し実行することで、ファイルやディレクトリをformatできます。
 
 <PackageManagerBiomeCommand command="format <files> --write" />
 
@@ -79,8 +79,8 @@ Biome CLIには多くのコマンドとオプションが用意されている�
 
 `check` コマンドは複数のツールを一度に実行するためのコマンドです。現在は以下のことを行います。
 
-- ファイルのフォーマット
-- ファイルのLint
+- ファイルのformat
+- ファイルのlint
 - インポートの整理
 
 ## エディタプラグインのインストール

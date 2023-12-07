@@ -1,0 +1,137 @@
+---
+title: 在编辑器中集成Biome
+description: 学习如何将Biome与编辑器和集成开发环境（IDE）结合使用
+---
+
+## 官方插件
+
+这些插件由Biome团队维护，并属于[Biome组织](https://github.com/biomejs)的一部分。
+
+### VS Code
+
+Biome编辑器集成功能允许您：
+
+- 在保存文件时或发出格式化命令时格式化文件。
+- 对文件进行代码检查并应用代码修复。
+
+从[Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=biomejs.biome)安装我们官方的[Biome VS Code扩展](https://marketplace.visualstudio.com/items?itemName=biomejs.biome)。
+
+要将Biome设置为默认格式化程序，请打开[支持的文件](/internals/language-support/)并执行以下操作：
+
+- 打开*命令面板*（视图或<kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd title="Shift">⇧</kbd>+<kbd>P</kbd>）
+- 选择*使用...格式化文档*
+- 选择*配置默认格式化程序*
+- 选择*Biome*。
+
+### IntelliJ
+
+要安装Biome IntelliJ插件，请前往[官方插件页面](https://plugins.jetbrains.com/plugin/22761-biome)或按照以下步骤操作：
+
+**从JetBrains IDE：**
+
+1. 打开IntelliJ IDEA。
+2. 转到**设置/首选项**。
+3. 从左侧菜单中选择**插件**。
+4. 单击**Marketplace**选项卡。
+5. 搜索"Biome"并单击**安装**。
+6. 重新启动IDE以激活插件。
+
+**从磁盘：**
+
+1. 从发布选项卡下载插件.zip文件。
+2. 按下`⌘Cmd,`打开IDE设置，然后选择插件。
+3. 在插件页面上，单击设置按钮，然后单击从磁盘安装插件...。
+
+## 第三方插件
+
+这些是由其他社区维护的插件，您可以在您的编辑器中安装：
+
+- [`neovim`](https://neovim.io/): 您需要安装[`nvim-lspconfig`](https://github.com/neovim/nvim-lspconfig/)，并按照[说明](https://github.com/neovim/nvim-lspconfig/blob/master/doc/server_configurations.md#biome)进行设置；
+- [`helix`](https://helix-editor.com/):请按照[此手册](https://github.com/biomejs/biome/blob/main/editors/helix/manual.md)的说明操作；
+- [`coc-biome`](https://github.com/fannheyward/coc-biome): [`coc.nvim`](https://github.com/neoclide/coc.nvim)的Biome扩展
+
+:::note
+是否有适用于未在此处列出的编辑器的插件？请提交PR，我们将很乐意将其添加到列表中。
+:::
+
+## 编写自己的插件
+
+Biome对[LSP](https://microsoft.github.io/language-server-protocol/)具有完全支持。如果您的编辑器实现了LSP，则Biome的集成应该是无缝的。
+
+### 使用LSP代理
+
+Biome有一个名为`lsp-proxy`的命令。当执行此命令时，Biome将生成两个进程：
+
+- 一个[守护进程](/internals/architecture#daemon)，用于执行请求的操作；
+- 一个服务器，作为客户端（编辑器）和服务器（守护进程）之间请求的代理；
+
+如果您的编辑器能够与服务器交互并发送[JSON-RPC](https://www.jsonrpc.org/)请求，您只需要配置编辑器运行该命令即可。
+
+您可以查看[`neo-vim biome插件`](https://github.com/neovim/nvim-lspconfig/blob/master/lua/lspconfig/server_configurations/biome.lua)的实现方式。
+
+### 使用`stdin`
+
+如果您的编辑器不支持LSP，则可以直接使用`biome`二进制文件，并使用[标准输入流](<https://en.wikipedia.org/wiki/Standard_streams#Standard_input_(stdin)>)调用它。
+
+以下命令可以通过标准输入流调用：
+
+- [`format`](/reference/cli/#biome-format)
+- [`lint`](/reference/cli/#biome-lint)
+- [`check`](/reference/cli/#biome-check)
+
+Biome将将新的输出（如果没有更改，则为原始输出）返回到[标准输出流](<https://en.wikipedia.org/wiki/Standard_streams#Standard_output_(stdout)>)，并将诊断信息返回到[标准错误流](<https://en.wikipedia.org/wiki/Standard_streams#Standard_error_(stderr)>)。
+
+使用`stdin`时，您必须传递`--stdin-file-path`选项。文件`path`**不需要存在**于文件系统中，它可以是任何名称。**重要的是**提供正确的文件扩展名，以便Biome知道如何处理您的文件。
+
+编辑器的责任是找到二进制文件的路径，然后在需要时调用它。二进制文件是基于我们支持的体系结构和操作系统进行npm发布的：
+
+- `@biomejs/cli-darwin-arm64`
+- `@biomejs/cli-darwin-x64`
+- `@biomejs/cli-linux-arm64`
+- `@biomejs/cli-linux-x64`
+- `@biomejs/cli-win32-arm64`
+- `@biomejs/cli-win32-x64`
+
+二进制文件的名称是`biome`或`biome.exe`，可以在库的根目录中找到，例如：`@biomejs/cli-darwin-arm64/biome`、`@biomejs/cli-win32-x64/biome.exe`。
+
+### 使用带有二进制文件的守护进程
+
+通过CLI使用二进制文件非常高效，尽管您将无法为用户提供[日志](#daemon-logs)。CLI允许您启动一个守护进程，然后通过守护进程本身使用CLI命令。
+
+为此，您首先需要使用[`start`](/reference/cli#biome-start)命令启动守护进程：
+
+```shell
+biome start
+```
+
+然后，每个命令都需要添加`--use-server`选项，例如：
+
+```shell
+echo "console.log('')" | biome format --use-server --stdin-file-path=dummy.js
+```
+
+:::note
+如果决定使用守护进程，则您还需要负责使用[`stop`](/reference/cli#biome-stop)命令重新启动/终止进程，以避免产生僵尸进程。
+:::
+
+:::caution
+通过守护进程的操作比CLI本身要慢得多，因此建议仅对单个文件运行操作。
+:::
+
+### 守护进程日志
+
+Biome守护进程将日志保存在文件系统中。日志存储在名为`biome-logs`的文件夹中。您可以在操作系统的临时目录中找到这个文件夹。
+
+在Windows上，使用powershell：
+
+```shell
+$env:TEMP
+```
+
+在Linux/macOS上，使用终端：
+
+```shell
+echo $TMPDIR
+```
+
+日志文件每小时进行一次轮换。

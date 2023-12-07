@@ -381,3 +381,20 @@ fn block_comment() {
         COMMENT:4
     }
 }
+
+
+#[test]
+fn char() {
+    assert_lex! {
+        "!",
+        BANG:1
+    }
+    assert_lex! {
+        "%",
+        PERCENT:1
+    }
+    assert_lex! {
+        "/",
+        SLASH:1
+    }
+}

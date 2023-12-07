@@ -134,8 +134,43 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 #[test]
 pub fn quick_test() {
     let code = r#"
-   :host(.footer) {}
-
+    a {
+        prop1: value;
+        prop2: value;
+    }
+    
+    a {
+        prop1: 1px;
+    }
+    
+    a {
+        prop1: a();
+    }
+    
+    a {
+        prop1: a(1);
+    }
+    
+    a {
+        prop1: a(1,1);
+    }
+    
+    a {
+        prop1: a(1,1 1);
+    }
+    
+    a {
+        prop1: 2/3;
+    }
+    
+    a {
+        prop1: --custom;
+    }
+    
+    
+    
+    
+    
     "#;
     let root = parse_css(
         code,
@@ -143,7 +178,6 @@ pub fn quick_test() {
     );
     let syntax = root.syntax();
     dbg!(&syntax, root.diagnostics(), root.has_errors());
-
     if has_bogus_nodes_or_empty_slots(&syntax) {
         panic!(
             "modified tree has bogus nodes or empty slots:\n{syntax:#?} \n\n {}",

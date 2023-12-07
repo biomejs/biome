@@ -1,0 +1,23 @@
+{
+	"plugins": {
+		"@textlint/markdown": {
+			"extensions": [".mdx"]
+		}
+	},
+	"rules": {
+		"preset-jtf-style": {
+			"1.1.3.箇条書き": false,
+			"1.2.1.句点(。)と読点(、)": false,
+			"1.2.2.ピリオド(.)とカンマ(,)": false,
+			"3.1.1.全角文字と半角文字の間": false,
+			"4.1.1.句点(。)": false,
+			"4.2.1.感嘆符(！)": false,
+			"4.2.2.疑問符(？)": false,
+			"4.3.7.山かっこ<>": false,
+			"4.3.2.大かっこ［］": false
+		},
+		"prh": {
+			"rulePaths": ["./prh.yml"]
+		}
+	}
+}

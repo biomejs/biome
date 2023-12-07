@@ -61,4 +61,10 @@ const FilterButton = forwardRefWithLongFunctionName(function FilterButton(props,
       return <button ref={ref} />;
     }
   );
-  
+
+// Object destructuring should break at exactly the line width. If a conditional
+// trailing comma is rendered, this breaks one character too early.
+aLongFunctionName(({ parameter1, parameter2, parameter3, parameter4, and }) => {
+    const a = 1;
+  }
+);

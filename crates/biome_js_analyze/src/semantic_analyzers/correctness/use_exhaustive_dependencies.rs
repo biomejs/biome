@@ -7,6 +7,7 @@ use biome_deserialize::{
     VisitableType,
 };
 use biome_js_semantic::{Capture, SemanticModel};
+use biome_js_syntax::TsTypeofType;
 use biome_js_syntax::{
     binding_ext::AnyJsBindingDeclaration, JsCallExpression, JsStaticMemberExpression, JsSyntaxKind,
     JsSyntaxNode, JsVariableDeclaration, TextRange,
@@ -119,7 +120,7 @@ declare_rule! {
     /// ```
     ///
     /// ```js
-    /// import { useEffect } from "react";
+    /// import { useEffect, useState } from "react";
     ///
     /// function component() {
     ///     const [name, setName] = useState();
@@ -422,6 +423,15 @@ fn capture_needs_to_be_in_the_dependency_list(
     model: &SemanticModel,
     options: &ReactExtensiveDependenciesOptions,
 ) -> Option<Capture> {
+    // Ignore if referenced in TS typeof
+    if capture
+        .node()
+        .ancestors()
+        .any(|a| TsTypeofType::can_cast(a.kind()))
+    {
+        return None;
+    }
+
     let binding = capture.binding();
 
     // Ignore if imported
@@ -462,7 +472,8 @@ fn capture_needs_to_be_in_the_dependency_list(
             }
 
             // ... they are assign to stable returns of another React function
-            let not_stable = !is_binding_react_stable(&binding.tree(), &options.stable_config);
+            let not_stable =
+                !is_binding_react_stable(&binding.tree(), model, &options.stable_config);
             not_stable.then_some(capture)
         }
 
