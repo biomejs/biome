@@ -1,4 +1,20 @@
 const { platform, arch } = process;
+const { execSync } = require("child_process");
+
+function isMusl() {
+	let stderr;
+	try {
+		stderr = execSync("ldd --version", {
+			stdio: ['pipe', 'pipe', 'pipe']
+		});
+	} catch (err) {
+		stderr = err.stderr;
+	}
+	if (stderr.indexOf("musl") > -1) {
+		return true;
+	}
+	return false;
+}
 
 const PLATFORMS = {
 	win32: {
@@ -13,9 +29,17 @@ const PLATFORMS = {
 		x64: "@biomejs/cli-linux-x64/biome",
 		arm64: "@biomejs/cli-linux-arm64/biome",
 	},
+	"linux-musl": {
+		x64: "@biomejs/cli-linux-x64-musl/biome",
+		arm64: "@biomejs/cli-linux-arm64-musl/biome",
+	},
 };
 
-const binName = PLATFORMS?.[platform]?.[arch];
+const binName =
+	platform === "linux" && isMusl()
+		? PLATFORMS?.["linux-musl"]?.[arch]
+		: PLATFORMS?.[platform]?.[arch];
+
 if (binName) {
 	let binPath;
 	try {
