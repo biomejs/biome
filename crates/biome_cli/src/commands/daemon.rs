@@ -79,7 +79,7 @@ pub(crate) fn run_server(
         tokio::select! {
             res = run_daemon(factory, config_path).instrument(span) => {
                 match res {
-                    Ok(_) => Ok(()),
+                    Ok(never) => match never {},
                     Err(err) => Err(err.into()),
                 }
             }

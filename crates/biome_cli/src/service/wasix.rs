@@ -1,4 +1,5 @@
 use std::{
+    convert::Infallible,
     env, fs,
     io::{self, ErrorKind},
     path::PathBuf,
@@ -112,8 +113,8 @@ pub(crate) async fn print_socket() -> io::Result<()> {
 pub(crate) async fn run_daemon(
     factory: ServerFactory,
     config_path: Option<PathBuf>,
-) -> io::Result<()> {
-    Ok(())
+) -> io::Result<Infallible> {
+    loop {}
 }
 
 /// Async task driving a single client connection
