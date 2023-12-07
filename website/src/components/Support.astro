@@ -1,0 +1,41 @@
+---
+
+---
+
+<body>
+  <div class="gradient"></div>
+  <div class="grid"></div>
+</body>
+
+<style>
+  .grid {
+    z-index: -1;
+    position: absolute;
+    content: "";
+    inset: 0;
+    background-image: linear-gradient(
+        to right,
+        var(--sl-color-gray-6) 0.06rem,
+        transparent 0.06rem
+      ),
+      linear-gradient(to bottom, var(--sl-color-gray-6) 0.06rem, transparent 0.06rem);
+    background-position: top center;
+    background-size: 1.3rem 1.3rem;
+    -webkit-mask-image: radial-gradient(circle at 100%, white, transparent 80%);
+    mask-image: radial-gradient(circle at 100%, white, transparent 80%);
+  }
+
+  .gradient {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: -1;
+    height: 100vh;
+    width: 100vw;
+    background:
+      radial-gradient(var(--sl-color-accent-low), transparent 50%) no-repeat -60vw -50vh /
+        105vw 200vh,
+      radial-gradient(var(--sl-color-accent-low), transparent 50%) no-repeat
+        30vw -100vh / 105vw 200vh;
+  }
+</style>
