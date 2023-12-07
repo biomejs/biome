@@ -40,3 +40,11 @@ const Component7 = () => {
     const value = useRef().value;
     const [_val, _setter] = useState(useMemo('hello'));
 }
+
+function Component8() {
+    const a = () => {
+        return;
+    };
+
+    useEffect();
+};
