@@ -404,10 +404,10 @@ CssDeclarationList = CssDeclaration (';' CssDeclaration)* ';'?
 CssDeclaration =
 	name: AnyCssDeclarationName
 	':'
-	value: CssListOfComponentValues
+	value: CssComponentValueList
 	important: CssDeclarationImportant?
 
-CssListOfComponentValues = AnyCssValue*
+CssComponentValueList = AnyCssValue*
 
 AnyCssDeclarationName = CssIdentifier | CssCustomProperty
 
@@ -786,7 +786,7 @@ CssParameterList = CssParameter (',' CssParameter)* ','?
 //			    ^^^
 // repeating-radial-gradient(red, yellow 10%, green 15%);
 //                                ^^^^^^^^^^
-CssParameter = CssListOfComponentValues
+CssParameter = CssComponentValueList
 
 CssIdentifier = value: 'ident'
 CssString = value: 'css_string_literal'

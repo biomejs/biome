@@ -1155,7 +1155,7 @@ impl CssDeclaration {
     pub fn colon_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 1usize)
     }
-    pub fn value(&self) -> CssListOfComponentValues {
+    pub fn value(&self) -> CssComponentValueList {
         support::list(&self.syntax, 2usize)
     }
     pub fn important(&self) -> Option<CssDeclarationImportant> {
@@ -1175,7 +1175,7 @@ impl Serialize for CssDeclaration {
 pub struct CssDeclarationFields {
     pub name: SyntaxResult<AnyCssDeclarationName>,
     pub colon_token: SyntaxResult<SyntaxToken>,
-    pub value: CssListOfComponentValues,
+    pub value: CssComponentValueList,
     pub important: Option<CssDeclarationImportant>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -2138,10 +2138,10 @@ impl CssParameter {
     }
     pub fn as_fields(&self) -> CssParameterFields {
         CssParameterFields {
-            css_list_of_component_values: self.css_list_of_component_values(),
+            css_component_value_list: self.css_component_value_list(),
         }
     }
-    pub fn css_list_of_component_values(&self) -> CssListOfComponentValues {
+    pub fn css_component_value_list(&self) -> CssComponentValueList {
         support::list(&self.syntax, 0usize)
     }
 }
@@ -2156,7 +2156,7 @@ impl Serialize for CssParameter {
 }
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct CssParameterFields {
-    pub css_list_of_component_values: CssListOfComponentValues,
+    pub css_component_value_list: CssComponentValueList,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssPercentDimension {
@@ -6735,10 +6735,7 @@ impl AstNode for CssParameter {
 impl std::fmt::Debug for CssParameter {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("CssParameter")
-            .field(
-                "css_list_of_component_values",
-                &self.css_list_of_component_values(),
-            )
+            .field("css_component_value_list", &self.css_component_value_list())
             .finish()
     }
 }
@@ -11769,6 +11766,89 @@ impl From<CssBogusSubSelector> for SyntaxElement {
     }
 }
 #[derive(Clone, Eq, PartialEq, Hash)]
+pub struct CssComponentValueList {
+    syntax_list: SyntaxList,
+}
+impl CssComponentValueList {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self {
+            syntax_list: syntax.into_list(),
+        }
+    }
+}
+impl AstNode for CssComponentValueList {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_COMPONENT_VALUE_LIST as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_COMPONENT_VALUE_LIST
+    }
+    fn cast(syntax: SyntaxNode) -> Option<CssComponentValueList> {
+        if Self::can_cast(syntax.kind()) {
+            Some(CssComponentValueList {
+                syntax_list: syntax.into_list(),
+            })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        self.syntax_list.node()
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax_list.into_node()
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssComponentValueList {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(self.len()))?;
+        for e in self.iter() {
+            seq.serialize_element(&e)?;
+        }
+        seq.end()
+    }
+}
+impl AstNodeList for CssComponentValueList {
+    type Language = Language;
+    type Node = AnyCssValue;
+    fn syntax_list(&self) -> &SyntaxList {
+        &self.syntax_list
+    }
+    fn into_syntax_list(self) -> SyntaxList {
+        self.syntax_list
+    }
+}
+impl Debug for CssComponentValueList {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str("CssComponentValueList ")?;
+        f.debug_list().entries(self.iter()).finish()
+    }
+}
+impl IntoIterator for &CssComponentValueList {
+    type Item = AnyCssValue;
+    type IntoIter = AstNodeListIterator<Language, AnyCssValue>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+impl IntoIterator for CssComponentValueList {
+    type Item = AnyCssValue;
+    type IntoIter = AstNodeListIterator<Language, AnyCssValue>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+#[derive(Clone, Eq, PartialEq, Hash)]
 pub struct CssCompoundSelectorList {
     syntax_list: SyntaxList,
 }
@@ -12096,89 +12176,6 @@ impl IntoIterator for CssKeyframesSelectorList {
 impl IntoIterator for &CssKeyframesSelectorList {
     type Item = SyntaxResult<CssKeyframesSelector>;
     type IntoIter = AstSeparatedListNodesIterator<Language, CssKeyframesSelector>;
-    fn into_iter(self) -> Self::IntoIter {
-        self.iter()
-    }
-}
-#[derive(Clone, Eq, PartialEq, Hash)]
-pub struct CssListOfComponentValues {
-    syntax_list: SyntaxList,
-}
-impl CssListOfComponentValues {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self {
-            syntax_list: syntax.into_list(),
-        }
-    }
-}
-impl AstNode for CssListOfComponentValues {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_LIST_OF_COMPONENT_VALUES as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_LIST_OF_COMPONENT_VALUES
-    }
-    fn cast(syntax: SyntaxNode) -> Option<CssListOfComponentValues> {
-        if Self::can_cast(syntax.kind()) {
-            Some(CssListOfComponentValues {
-                syntax_list: syntax.into_list(),
-            })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        self.syntax_list.node()
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax_list.into_node()
-    }
-}
-#[cfg(feature = "serde")]
-impl Serialize for CssListOfComponentValues {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let mut seq = serializer.serialize_seq(Some(self.len()))?;
-        for e in self.iter() {
-            seq.serialize_element(&e)?;
-        }
-        seq.end()
-    }
-}
-impl AstNodeList for CssListOfComponentValues {
-    type Language = Language;
-    type Node = AnyCssValue;
-    fn syntax_list(&self) -> &SyntaxList {
-        &self.syntax_list
-    }
-    fn into_syntax_list(self) -> SyntaxList {
-        self.syntax_list
-    }
-}
-impl Debug for CssListOfComponentValues {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str("CssListOfComponentValues ")?;
-        f.debug_list().entries(self.iter()).finish()
-    }
-}
-impl IntoIterator for &CssListOfComponentValues {
-    type Item = AnyCssValue;
-    type IntoIter = AstNodeListIterator<Language, AnyCssValue>;
-    fn into_iter(self) -> Self::IntoIter {
-        self.iter()
-    }
-}
-impl IntoIterator for CssListOfComponentValues {
-    type Item = AnyCssValue;
-    type IntoIter = AstNodeListIterator<Language, AnyCssValue>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }

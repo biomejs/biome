@@ -417,7 +417,7 @@ pub fn css_custom_property(value: CssIdentifier) -> CssCustomProperty {
 pub fn css_declaration(
     name: AnyCssDeclarationName,
     colon_token: SyntaxToken,
-    value: CssListOfComponentValues,
+    value: CssComponentValueList,
 ) -> CssDeclarationBuilder {
     CssDeclarationBuilder {
         name,
@@ -429,7 +429,7 @@ pub fn css_declaration(
 pub struct CssDeclarationBuilder {
     name: AnyCssDeclarationName,
     colon_token: SyntaxToken,
-    value: CssListOfComponentValues,
+    value: CssComponentValueList,
     important: Option<CssDeclarationImportant>,
 }
 impl CssDeclarationBuilder {
@@ -770,11 +770,11 @@ pub fn css_number(value_token: SyntaxToken) -> CssNumber {
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
-pub fn css_parameter(css_list_of_component_values: CssListOfComponentValues) -> CssParameter {
+pub fn css_parameter(css_component_value_list: CssComponentValueList) -> CssParameter {
     CssParameter::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_PARAMETER,
         [Some(SyntaxElement::Node(
-            css_list_of_component_values.into_syntax(),
+            css_component_value_list.into_syntax(),
         ))],
     ))
 }
@@ -1382,6 +1382,18 @@ pub fn css_var_function_value(
         ],
     ))
 }
+pub fn css_component_value_list<I>(items: I) -> CssComponentValueList
+where
+    I: IntoIterator<Item = AnyCssValue>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssComponentValueList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_COMPONENT_VALUE_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
+    ))
+}
 pub fn css_compound_selector_list<I, S>(items: I, separators: S) -> CssCompoundSelectorList
 where
     I: IntoIterator<Item = AnyCssCompoundSelector>,
@@ -1455,18 +1467,6 @@ where
                 Some(separators.next()?.into())
             }
         }),
-    ))
-}
-pub fn css_list_of_component_values<I>(items: I) -> CssListOfComponentValues
-where
-    I: IntoIterator<Item = AnyCssValue>,
-    I::IntoIter: ExactSizeIterator,
-{
-    CssListOfComponentValues::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_LIST_OF_COMPONENT_VALUES,
-        items
-            .into_iter()
-            .map(|item| Some(item.into_syntax().into())),
     ))
 }
 pub fn css_media_query_list<I, S>(items: I, separators: S) -> CssMediaQueryList

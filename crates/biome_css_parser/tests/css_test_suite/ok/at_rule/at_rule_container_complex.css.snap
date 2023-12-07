@@ -424,7 +424,7 @@ CssRoot {
                                     value_token: IDENT@425..428 "--a" [] [],
                                 },
                                 colon_token: COLON@428..430 ":" [] [Whitespace(" ")],
-                                value: CssListOfComponentValues [
+                                value: CssComponentValueList [
                                     CssIdentifier {
                                         value_token: IDENT@430..434 "blue" [] [],
                                     },
@@ -488,7 +488,7 @@ CssRoot {
                                     value_token: IDENT@507..510 "--a" [] [],
                                 },
                                 colon_token: COLON@510..512 ":" [] [Whitespace(" ")],
-                                value: CssListOfComponentValues [
+                                value: CssComponentValueList [
                                     CssIdentifier {
                                         value_token: IDENT@512..516 "blue" [] [],
                                     },
@@ -505,7 +505,7 @@ CssRoot {
                                     value_token: IDENT@523..526 "--b" [] [],
                                 },
                                 colon_token: COLON@526..528 ":" [] [Whitespace(" ")],
-                                value: CssListOfComponentValues [
+                                value: CssComponentValueList [
                                     CssIdentifier {
                                         value_token: IDENT@528..531 "red" [] [],
                                     },
@@ -542,7 +542,7 @@ CssRoot {
                                     value_token: IDENT@562..565 "--a" [] [],
                                 },
                                 colon_token: COLON@565..567 ":" [] [Whitespace(" ")],
-                                value: CssListOfComponentValues [
+                                value: CssComponentValueList [
                                     CssIdentifier {
                                         value_token: IDENT@567..571 "blue" [] [],
                                     },
@@ -560,7 +560,7 @@ CssRoot {
                                         value_token: IDENT@578..581 "--b" [] [],
                                     },
                                     colon_token: COLON@581..583 ":" [] [Whitespace(" ")],
-                                    value: CssListOfComponentValues [
+                                    value: CssComponentValueList [
                                         CssIdentifier {
                                             value_token: IDENT@583..586 "red" [] [],
                                         },
@@ -577,7 +577,7 @@ CssRoot {
                                         value_token: IDENT@592..595 "--c" [] [],
                                     },
                                     colon_token: COLON@595..597 ":" [] [Whitespace(" ")],
-                                    value: CssListOfComponentValues [
+                                    value: CssComponentValueList [
                                         CssIdentifier {
                                             value_token: IDENT@597..602 "green" [] [],
                                         },
@@ -619,7 +619,7 @@ CssRoot {
                                             value_token: IDENT@638..641 "--b" [] [],
                                         },
                                         colon_token: COLON@641..643 ":" [] [Whitespace(" ")],
-                                        value: CssListOfComponentValues [
+                                        value: CssComponentValueList [
                                             CssIdentifier {
                                                 value_token: IDENT@643..646 "red" [] [],
                                             },
@@ -639,7 +639,7 @@ CssRoot {
                                     value_token: IDENT@653..656 "--c" [] [],
                                 },
                                 colon_token: COLON@656..658 ":" [] [Whitespace(" ")],
-                                value: CssListOfComponentValues [
+                                value: CssComponentValueList [
                                     CssIdentifier {
                                         value_token: IDENT@658..663 "green" [] [],
                                     },
@@ -680,7 +680,7 @@ CssRoot {
                                             value_token: IDENT@699..702 "--b" [] [],
                                         },
                                         colon_token: COLON@702..704 ":" [] [Whitespace(" ")],
-                                        value: CssListOfComponentValues [
+                                        value: CssComponentValueList [
                                             CssIdentifier {
                                                 value_token: IDENT@704..707 "red" [] [],
                                             },
@@ -704,7 +704,7 @@ CssRoot {
                                             value_token: IDENT@719..722 "--c" [] [],
                                         },
                                         colon_token: COLON@722..724 ":" [] [Whitespace(" ")],
-                                        value: CssListOfComponentValues [
+                                        value: CssComponentValueList [
                                             CssIdentifier {
                                                 value_token: IDENT@724..729 "green" [] [],
                                             },
@@ -748,7 +748,7 @@ CssRoot {
                                             value_token: IDENT@766..769 "--b" [] [],
                                         },
                                         colon_token: COLON@769..771 ":" [] [Whitespace(" ")],
-                                        value: CssListOfComponentValues [
+                                        value: CssComponentValueList [
                                             CssIdentifier {
                                                 value_token: IDENT@771..774 "red" [] [],
                                             },
@@ -773,7 +773,7 @@ CssRoot {
                                                 value_token: IDENT@786..789 "--c" [] [],
                                             },
                                             colon_token: COLON@789..791 ":" [] [Whitespace(" ")],
-                                            value: CssListOfComponentValues [
+                                            value: CssComponentValueList [
                                                 CssIdentifier {
                                                     value_token: IDENT@791..796 "green" [] [],
                                                 },
@@ -793,7 +793,7 @@ CssRoot {
                                         value_token: IDENT@804..814 "background" [] [],
                                     },
                                     colon_token: COLON@814..816 ":" [] [Whitespace(" ")],
-                                    value: CssListOfComponentValues [
+                                    value: CssComponentValueList [
                                         CssIdentifier {
                                             value_token: IDENT@816..819 "red" [] [],
                                         },
@@ -836,7 +836,7 @@ CssRoot {
                                             value_token: IDENT@859..862 "--b" [] [],
                                         },
                                         colon_token: COLON@862..864 ":" [] [Whitespace(" ")],
-                                        value: CssListOfComponentValues [
+                                        value: CssComponentValueList [
                                             CssIdentifier {
                                                 value_token: IDENT@864..867 "red" [] [],
                                             },
@@ -902,7 +902,7 @@ CssRoot {
                                                 value_token: IDENT@926..929 "--b" [] [],
                                             },
                                             colon_token: COLON@929..931 ":" [] [Whitespace(" ")],
-                                            value: CssListOfComponentValues [
+                                            value: CssComponentValueList [
                                                 CssIdentifier {
                                                     value_token: IDENT@931..934 "red" [] [],
                                                 },
@@ -927,7 +927,7 @@ CssRoot {
                                                     value_token: IDENT@946..949 "--c" [] [],
                                                 },
                                                 colon_token: COLON@949..951 ":" [] [Whitespace(" ")],
-                                                value: CssListOfComponentValues [
+                                                value: CssComponentValueList [
                                                     CssIdentifier {
                                                         value_token: IDENT@951..956 "green" [] [],
                                                     },
@@ -947,7 +947,7 @@ CssRoot {
                                             value_token: IDENT@964..974 "background" [] [],
                                         },
                                         colon_token: COLON@974..976 ":" [] [Whitespace(" ")],
-                                        value: CssListOfComponentValues [
+                                        value: CssComponentValueList [
                                             CssIdentifier {
                                                 value_token: IDENT@976..979 "red" [] [],
                                             },
@@ -1246,7 +1246,7 @@ CssRoot {
                 0: CSS_IDENTIFIER@425..428
                   0: IDENT@425..428 "--a" [] []
                 1: COLON@428..430 ":" [] [Whitespace(" ")]
-                2: CSS_LIST_OF_COMPONENT_VALUES@430..434
+                2: CSS_COMPONENT_VALUE_LIST@430..434
                   0: CSS_IDENTIFIER@430..434
                     0: IDENT@430..434 "blue" [] []
                 3: (empty)
@@ -1291,7 +1291,7 @@ CssRoot {
                 0: CSS_IDENTIFIER@507..510
                   0: IDENT@507..510 "--a" [] []
                 1: COLON@510..512 ":" [] [Whitespace(" ")]
-                2: CSS_LIST_OF_COMPONENT_VALUES@512..516
+                2: CSS_COMPONENT_VALUE_LIST@512..516
                   0: CSS_IDENTIFIER@512..516
                     0: IDENT@512..516 "blue" [] []
                 3: (empty)
@@ -1303,7 +1303,7 @@ CssRoot {
                 0: CSS_IDENTIFIER@523..526
                   0: IDENT@523..526 "--b" [] []
                 1: COLON@526..528 ":" [] [Whitespace(" ")]
-                2: CSS_LIST_OF_COMPONENT_VALUES@528..531
+                2: CSS_COMPONENT_VALUE_LIST@528..531
                   0: CSS_IDENTIFIER@528..531
                     0: IDENT@528..531 "red" [] []
                 3: (empty)
@@ -1329,7 +1329,7 @@ CssRoot {
                 0: CSS_IDENTIFIER@562..565
                   0: IDENT@562..565 "--a" [] []
                 1: COLON@565..567 ":" [] [Whitespace(" ")]
-                2: CSS_LIST_OF_COMPONENT_VALUES@567..571
+                2: CSS_COMPONENT_VALUE_LIST@567..571
                   0: CSS_IDENTIFIER@567..571
                     0: IDENT@567..571 "blue" [] []
                 3: (empty)
@@ -1342,7 +1342,7 @@ CssRoot {
                   0: CSS_IDENTIFIER@578..581
                     0: IDENT@578..581 "--b" [] []
                   1: COLON@581..583 ":" [] [Whitespace(" ")]
-                  2: CSS_LIST_OF_COMPONENT_VALUES@583..586
+                  2: CSS_COMPONENT_VALUE_LIST@583..586
                     0: CSS_IDENTIFIER@583..586
                       0: IDENT@583..586 "red" [] []
                   3: (empty)
@@ -1354,7 +1354,7 @@ CssRoot {
                   0: CSS_IDENTIFIER@592..595
                     0: IDENT@592..595 "--c" [] []
                   1: COLON@595..597 ":" [] [Whitespace(" ")]
-                  2: CSS_LIST_OF_COMPONENT_VALUES@597..602
+                  2: CSS_COMPONENT_VALUE_LIST@597..602
                     0: CSS_IDENTIFIER@597..602
                       0: IDENT@597..602 "green" [] []
                   3: (empty)
@@ -1384,7 +1384,7 @@ CssRoot {
                     0: CSS_IDENTIFIER@638..641
                       0: IDENT@638..641 "--b" [] []
                     1: COLON@641..643 ":" [] [Whitespace(" ")]
-                    2: CSS_LIST_OF_COMPONENT_VALUES@643..646
+                    2: CSS_COMPONENT_VALUE_LIST@643..646
                       0: CSS_IDENTIFIER@643..646
                         0: IDENT@643..646 "red" [] []
                     3: (empty)
@@ -1397,7 +1397,7 @@ CssRoot {
                 0: CSS_IDENTIFIER@653..656
                   0: IDENT@653..656 "--c" [] []
                 1: COLON@656..658 ":" [] [Whitespace(" ")]
-                2: CSS_LIST_OF_COMPONENT_VALUES@658..663
+                2: CSS_COMPONENT_VALUE_LIST@658..663
                   0: CSS_IDENTIFIER@658..663
                     0: IDENT@658..663 "green" [] []
                 3: (empty)
@@ -1427,7 +1427,7 @@ CssRoot {
                     0: CSS_IDENTIFIER@699..702
                       0: IDENT@699..702 "--b" [] []
                     1: COLON@702..704 ":" [] [Whitespace(" ")]
-                    2: CSS_LIST_OF_COMPONENT_VALUES@704..707
+                    2: CSS_COMPONENT_VALUE_LIST@704..707
                       0: CSS_IDENTIFIER@704..707
                         0: IDENT@704..707 "red" [] []
                     3: (empty)
@@ -1444,7 +1444,7 @@ CssRoot {
                     0: CSS_IDENTIFIER@719..722
                       0: IDENT@719..722 "--c" [] []
                     1: COLON@722..724 ":" [] [Whitespace(" ")]
-                    2: CSS_LIST_OF_COMPONENT_VALUES@724..729
+                    2: CSS_COMPONENT_VALUE_LIST@724..729
                       0: CSS_IDENTIFIER@724..729
                         0: IDENT@724..729 "green" [] []
                     3: (empty)
@@ -1475,7 +1475,7 @@ CssRoot {
                     0: CSS_IDENTIFIER@766..769
                       0: IDENT@766..769 "--b" [] []
                     1: COLON@769..771 ":" [] [Whitespace(" ")]
-                    2: CSS_LIST_OF_COMPONENT_VALUES@771..774
+                    2: CSS_COMPONENT_VALUE_LIST@771..774
                       0: CSS_IDENTIFIER@771..774
                         0: IDENT@771..774 "red" [] []
                     3: (empty)
@@ -1493,7 +1493,7 @@ CssRoot {
                       0: CSS_IDENTIFIER@786..789
                         0: IDENT@786..789 "--c" [] []
                       1: COLON@789..791 ":" [] [Whitespace(" ")]
-                      2: CSS_LIST_OF_COMPONENT_VALUES@791..796
+                      2: CSS_COMPONENT_VALUE_LIST@791..796
                         0: CSS_IDENTIFIER@791..796
                           0: IDENT@791..796 "green" [] []
                       3: (empty)
@@ -1506,7 +1506,7 @@ CssRoot {
                   0: CSS_IDENTIFIER@804..814
                     0: IDENT@804..814 "background" [] []
                   1: COLON@814..816 ":" [] [Whitespace(" ")]
-                  2: CSS_LIST_OF_COMPONENT_VALUES@816..819
+                  2: CSS_COMPONENT_VALUE_LIST@816..819
                     0: CSS_IDENTIFIER@816..819
                       0: IDENT@816..819 "red" [] []
                   3: (empty)
@@ -1537,7 +1537,7 @@ CssRoot {
                     0: CSS_IDENTIFIER@859..862
                       0: IDENT@859..862 "--b" [] []
                     1: COLON@862..864 ":" [] [Whitespace(" ")]
-                    2: CSS_LIST_OF_COMPONENT_VALUES@864..867
+                    2: CSS_COMPONENT_VALUE_LIST@864..867
                       0: CSS_IDENTIFIER@864..867
                         0: IDENT@864..867 "red" [] []
                     3: (empty)
@@ -1583,7 +1583,7 @@ CssRoot {
                       0: CSS_IDENTIFIER@926..929
                         0: IDENT@926..929 "--b" [] []
                       1: COLON@929..931 ":" [] [Whitespace(" ")]
-                      2: CSS_LIST_OF_COMPONENT_VALUES@931..934
+                      2: CSS_COMPONENT_VALUE_LIST@931..934
                         0: CSS_IDENTIFIER@931..934
                           0: IDENT@931..934 "red" [] []
                       3: (empty)
@@ -1601,7 +1601,7 @@ CssRoot {
                         0: CSS_IDENTIFIER@946..949
                           0: IDENT@946..949 "--c" [] []
                         1: COLON@949..951 ":" [] [Whitespace(" ")]
-                        2: CSS_LIST_OF_COMPONENT_VALUES@951..956
+                        2: CSS_COMPONENT_VALUE_LIST@951..956
                           0: CSS_IDENTIFIER@951..956
                             0: IDENT@951..956 "green" [] []
                         3: (empty)
@@ -1614,7 +1614,7 @@ CssRoot {
                     0: CSS_IDENTIFIER@964..974
                       0: IDENT@964..974 "background" [] []
                     1: COLON@974..976 ":" [] [Whitespace(" ")]
-                    2: CSS_LIST_OF_COMPONENT_VALUES@976..979
+                    2: CSS_COMPONENT_VALUE_LIST@976..979
                       0: CSS_IDENTIFIER@976..979
                         0: IDENT@976..979 "red" [] []
                     3: (empty)

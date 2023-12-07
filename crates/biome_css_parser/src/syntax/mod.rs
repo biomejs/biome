@@ -132,7 +132,7 @@ struct ListOfComponentValues {}
 impl ParseNodeList for ListOfComponentValues {
     type Kind = CssSyntaxKind;
     type Parser<'source> = CssParser<'source>;
-    const LIST_KIND: Self::Kind = CSS_LIST_OF_COMPONENT_VALUES;
+    const LIST_KIND: Self::Kind = CSS_COMPONENT_VALUE_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
         parse_any_value(p)

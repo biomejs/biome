@@ -155,7 +155,7 @@ CssRoot {
                                 value_token: IDENT@137..149 "--responsive" [] [],
                             },
                             colon_token: COLON@149..151 ":" [] [Whitespace(" ")],
-                            value: CssListOfComponentValues [
+                            value: CssComponentValueList [
                                 CssIdentifier {
                                     value_token: IDENT@151..155 "true" [] [],
                                 },
@@ -456,7 +456,7 @@ CssRoot {
                             value_token: IDENT@487..499 "--responsive" [] [],
                         },
                         colon_token: COLON@499..501 ":" [] [Whitespace(" ")],
-                        value: CssListOfComponentValues [
+                        value: CssComponentValueList [
                             CssIdentifier {
                                 value_token: IDENT@501..505 "true" [] [],
                             },
@@ -582,7 +582,7 @@ CssRoot {
                                 l_paren_token: L_PAREN@670..671 "(" [] [],
                                 items: CssParameterList [
                                     CssParameter {
-                                        css_list_of_component_values: CssListOfComponentValues [
+                                        css_component_value_list: CssComponentValueList [
                                             CssRegularDimension {
                                                 value: CssNumber {
                                                     value_token: CSS_NUMBER_LITERAL@671..674 "200" [] [],
@@ -726,7 +726,7 @@ CssRoot {
               0: CSS_IDENTIFIER@137..149
                 0: IDENT@137..149 "--responsive" [] []
               1: COLON@149..151 ":" [] [Whitespace(" ")]
-              2: CSS_LIST_OF_COMPONENT_VALUES@151..155
+              2: CSS_COMPONENT_VALUE_LIST@151..155
                 0: CSS_IDENTIFIER@151..155
                   0: IDENT@151..155 "true" [] []
               3: (empty)
@@ -932,7 +932,7 @@ CssRoot {
             0: CSS_IDENTIFIER@487..499
               0: IDENT@487..499 "--responsive" [] []
             1: COLON@499..501 ":" [] [Whitespace(" ")]
-            2: CSS_LIST_OF_COMPONENT_VALUES@501..505
+            2: CSS_COMPONENT_VALUE_LIST@501..505
               0: CSS_IDENTIFIER@501..505
                 0: IDENT@501..505 "true" [] []
             3: (empty)
@@ -1021,7 +1021,7 @@ CssRoot {
                 1: L_PAREN@670..671 "(" [] []
                 2: CSS_PARAMETER_LIST@671..676
                   0: CSS_PARAMETER@671..676
-                    0: CSS_LIST_OF_COMPONENT_VALUES@671..676
+                    0: CSS_COMPONENT_VALUE_LIST@671..676
                       0: CSS_REGULAR_DIMENSION@671..676
                         0: CSS_NUMBER@671..674
                           0: CSS_NUMBER_LITERAL@671..674 "200" [] []
