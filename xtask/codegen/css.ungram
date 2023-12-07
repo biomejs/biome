@@ -427,6 +427,7 @@ AnyCssAtRule =
 	CssCharsetAtRule
 	| CssColorProfileAtRule
 	| CssCounterStyleAtRule
+	| CssFontFaceAtRule
 	| CssKeyframesAtRule
 	| CssMediaAtRule
 	| CssBogusAtRule
