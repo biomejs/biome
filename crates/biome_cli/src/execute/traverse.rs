@@ -1,4 +1,5 @@
 use super::process_file::{process_file, DiffKind, FileStatus, Message};
+use super::ExecutionEnvironment;
 use crate::cli_options::CliOptions;
 use crate::execute::diagnostics::{
     CIFormatDiffDiagnostic, CIOrganizeImportsDiffDiagnostic, ContentDiffAdvice,
@@ -9,6 +10,7 @@ use crate::{
     Report, ReportDiagnostic, ReportDiff, ReportErrorKind, ReportKind, TraversalMode,
 };
 use biome_console::{fmt, markup, Console, ConsoleExt};
+use biome_diagnostics::PrintGitHubDiagnostic;
 use biome_diagnostics::{
     adapters::StdError, category, DiagnosticExt, Error, PrintDescription, PrintDiagnostic,
     Resource, Severity,
@@ -570,12 +572,22 @@ fn process_messages(options: ProcessMessagesOptions) {
             }
         }
     }
+    let running_on_github = matches!(
+        mode.traversal_mode(),
+        TraversalMode::CI {
+            environment: Some(ExecutionEnvironment::GitHub),
+        }
+    );
 
     for diagnostic in diagnostics_to_print {
         if diagnostic.severity() >= *diagnostic_level {
             console.error(markup! {
                 {if verbose { PrintDiagnostic::verbose(&diagnostic) } else { PrintDiagnostic::simple(&diagnostic) }}
             });
+        }
+
+        if running_on_github {
+            console.log(markup! {{PrintGitHubDiagnostic::simple(&diagnostic)}});
         }
     }
 

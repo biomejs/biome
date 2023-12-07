@@ -38,11 +38,7 @@ impl<'a> FormatJsAnyParameterList<'a> {
 impl Format<JsFormatContext> for FormatJsAnyParameterList<'_> {
     fn fmt(&self, f: &mut Formatter<JsFormatContext>) -> FormatResult<()> {
         match self.layout {
-            None
-            | Some(
-                ParameterLayout::Default | ParameterLayout::Compact | ParameterLayout::NoParameters,
-            ) => {
-                let is_compact = matches!(self.layout, Some(ParameterLayout::Compact));
+            None | Some(ParameterLayout::Default | ParameterLayout::NoParameters) => {
                 let has_trailing_rest = match self.list.last() {
                     Some(elem) => matches!(
                         elem?,
@@ -54,40 +50,30 @@ impl Format<JsFormatContext> for FormatJsAnyParameterList<'_> {
                     None => false,
                 };
 
-                // If the list is being printed compactly, then the closing
-                // bracket _must_ appear immediately next to the last element,
-                // so a trailing separator would appear incorrect.
-                //
                 // If it's a rest parameter, the assumption is no more
                 // parameters could be added afterward, so no separator is
                 // added there either.
-                let trailing_separator = if is_compact || has_trailing_rest {
+                let trailing_separator = if has_trailing_rest {
                     TrailingSeparator::Disallowed
                 } else {
                     FormatTrailingComma::All.trailing_separator(f.options())
                 };
 
-                if is_compact {
-                    let mut joiner = f.join_nodes_with_space();
-                    join_parameter_list(&mut joiner, self.list, trailing_separator)?;
-                    joiner.finish()
+                let has_modifiers = self.list.iter().any(|node| {
+                    matches!(
+                        node,
+                        Ok(AnyParameter::AnyJsConstructorParameter(
+                            AnyJsConstructorParameter::TsPropertyParameter(_),
+                        ))
+                    )
+                });
+                let mut joiner = if has_modifiers {
+                    f.join_nodes_with_hardline()
                 } else {
-                    let has_modifiers = self.list.iter().any(|node| {
-                        matches!(
-                            node,
-                            Ok(AnyParameter::AnyJsConstructorParameter(
-                                AnyJsConstructorParameter::TsPropertyParameter(_),
-                            ))
-                        )
-                    });
-                    let mut joiner = if has_modifiers {
-                        f.join_nodes_with_hardline()
-                    } else {
-                        f.join_nodes_with_soft_line()
-                    };
-                    join_parameter_list(&mut joiner, self.list, trailing_separator)?;
-                    joiner.finish()
-                }
+                    f.join_nodes_with_soft_line()
+                };
+                join_parameter_list(&mut joiner, self.list, trailing_separator)?;
+                joiner.finish()
             }
             Some(ParameterLayout::Hug) => {
                 let mut join = f.join_with(space());

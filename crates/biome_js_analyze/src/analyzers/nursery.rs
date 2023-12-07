@@ -11,6 +11,7 @@ pub(crate) mod use_await;
 pub(crate) mod use_grouped_type_import;
 pub(crate) mod use_import_restrictions;
 pub(crate) mod use_regex_literals;
+pub(crate) mod use_shorthand_function_type;
 
 declare_group! {
     pub (crate) Nursery {
@@ -25,6 +26,7 @@ declare_group! {
             self :: use_grouped_type_import :: UseGroupedTypeImport ,
             self :: use_import_restrictions :: UseImportRestrictions ,
             self :: use_regex_literals :: UseRegexLiterals ,
+            self :: use_shorthand_function_type :: UseShorthandFunctionType ,
         ]
      }
 }

@@ -15,7 +15,6 @@ $gray-6: lighten(#27272A, 45%);
 $gray-7: lighten(#27272A, 70%);
 $gray-8: lighten(#27272A, 80%);
 
-$body-font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, Cantarell, "Noto Sans", sans-serif, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
 $code-font: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 $body-line-height: 1.5em;
 
@@ -23,3 +22,16 @@ $unit: 16px;
 $unit-border-radius: 4px;
 
 $mobile-breakpoint: 768px;
+
+
+// CSS variables
+
+:root,
+::backdrop {
+	--sl-border: var(--sl-color-gray-5);
+}
+
+:root[data-theme='light'],
+[data-theme='light'] ::backdrop {
+	--sl-border: var(--sl-color-gray-6);
+}

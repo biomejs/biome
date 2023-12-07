@@ -197,7 +197,7 @@ function component() {
 ```
 
 ```jsx
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 function component() {
     const [name, setName] = useState();
@@ -205,6 +205,16 @@ function component() {
         console.log(name);
         setName("");
     }, [name]);
+}
+```
+
+```jsx
+import { useEffect } from "react";
+let outer = false;
+function component() {
+    useEffect(() => {
+        outer = true;
+    }, []);
 }
 ```
 

@@ -1,0 +1,810 @@
+---
+title: 配置
+emoji: ⚙️
+category: 参考
+description: 如何使用biome.json自定义和配置Biome。
+---
+
+import LintGroups from "@src/components/generated/Groups.astro";
+
+{/* * 当更改配置标题时，请确保更新 `static/_redirects` 中的重定向 * */}
+
+## `$schema`
+
+允许传递一个JSON模式文件的路径。
+
+我们为 `biome.json` 发布了一个JSON模式文件。
+
+如果 `@biomejs/biome` 安装在 `node_modules` 文件夹中，你可以指定一个相对路径到 `@biomejs/biome` npm包的模式：
+
+```json title="biome.json"
+{
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json"
+}
+```
+
+如果你在解析物理文件时遇到问题，你可以使用在这个网站发布的文件：
+
+```json title="biome.json"
+{
+  "$schema": "https://biomejs.dev/schemas/1.4.0/schema.json"
+}
+```
+
+## `extends`
+
+一个指向其他JSON文件的路径列表，这些文件将扩展当前的配置文件。
+
+```json title="biome.json"
+{
+  "$schema": "https://biomejs.dev/schemas/1.4.0/schema.json",
+  "extends": ["./formatter.json", "./linter.json"]
+}
+```
+
+```json title="formatter.json"
+{
+  "$schema": "https://biomejs.dev/schemas/1.4.0/schema.json",
+  "formatter": {
+    "indentSize": 2
+  },
+  "javascript": {
+    "formatter": {
+      "semicolons": "asNeeded"
+    }
+  }
+}
+```
+
+```json title="linter.json"
+{
+  "$schema": "https://biomejs.dev/schemas/1.4.0/schema.json",
+  "linter": {
+    "rules": {
+      "complexity": {
+        "noUselessConstructor": "off"
+      }
+    }
+  }
+}
+```
+
+这个数组中定义的文件：
+
+- 必须存在于文件系统中；
+- 从定义 `biome.json` 文件的路径解析；
+- 必须是相对路径。不解析库路径；
+- 必须能被Biome访问，例如，Biome可能无法解析符号链接；
+- 将按顺序处理：从第一个到最后一个；
+- 可以覆盖相同的属性，但最终只有最后一个会被Biome使用；
+
+## `files`
+
+### `files.maxSize`
+
+源代码文件的最大允许大小（字节）。超过此限制的文件将出于性能原因被忽略。
+
+> 默认值：1024\*1024 (1MB)
+
+### `files.ignore`
+
+一组Unix shell样式的模式。Biome会忽略匹配这些模式的文件和文件夹。
+
+```json title="biome.json"
+{
+  "files": {
+    "ignore": ["scripts/*.js"]
+  }
+}
+```
+
+### `files.include`
+
+一组Unix shell样式的模式。Biome只处理匹配这些模式的文件和文件夹。
+
+```json title="biome.json"
+{
+  "files": {
+    "include": ["scripts/*.js"]
+  }
+}
+```
+
+:::caution
+当 `include` 和 `ignore` 同时指定时， `ignore` 对 `include` 有**优先权**
+:::
+
+给出以下例子：
+
+```json title="biome.json"
+{
+  "files": {
+    "include": ["scripts/**/*.js", "src/**/*.js"],
+    "ignore": ["scripts/**/*.js"]
+  }
+}
+```
+
+只有匹配 `src/**/*.js` 模式的文件将被处理，而匹配 `scripts/**/*.js` 模式的文件将被忽略。
+
+### `files.ignoreUnknown`
+
+如果Biome遇到无法处理的文件，它将不会发出诊断。
+
+```json title="biome.json"
+{
+  "files": {
+    "ignoreUnknown": true
+  }
+}
+```
+
+> 默认值：false
+
+## `vcs`
+
+一组用于将Biome与VCS软件集成的属性。
+
+### `vcs.enabled`
+
+是否应让Biome与VCS客户端集成
+
+> 默认值：false
+
+### `vcs.clientKind`
+
+客户端种类。
+
+值：
+
+- `"git"`
+
+### `vcs.useIgnoreFile`
+
+Biome是否应使用VCS忽略文件。当 `true` 时，Biome将忽略ignore文件中指定的文件。
+
+### `vcs.root`
+
+Biome应检查VCS文件的文件夹。默认情况下，Biome将使用找到 `biome.json` 的同一文件夹。
+
+如果Biome找不到配置，它将尝试使用当前工作目录。如果找不到当前工作目录，Biome将不使用VCS集成，并将发出诊断。
+
+## `linter`
+
+### `linter.enabled`
+
+启用Biome的linter
+
+> 默认值：`true`
+
+### `linter.ignore`
+
+一组Unix shell样式的模式。
+
+```json title="biome.json"
+{
+  "linter": {
+    "ignore": ["scripts/*.js"]
+  }
+}
+```
+
+### `linter.include`
+
+一组Unix shell样式的模式。Biome只处理匹配这些模式的文件和文件夹。
+
+```json title="biome.json"
+{
+  "linter": {
+    "include": ["scripts/*.js"]
+  }
+}
+```
+
+:::caution
+当 `include` 和 `ignore` 同时指定时， `ignore` 对 `include` 有**优先权**
+:::
+
+给出以下例子：
+
+```json title="biome.json"
+{
+  "linter": {
+    "include": ["scripts/**/*.js", "src/**/*.js"],
+    "ignore": ["scripts/**/*.js"]
+  }
+}
+```
+
+只有匹配 `src/**/*.js` 模式的文件将被lint，而匹配 `scripts/**/*.js` 模式的文件将被忽略。
+
+### `linter.rules.recommended`
+
+启用所有组的[推荐规则](/linter/rules)。
+
+> 默认值：`true`
+
+### `linter.rules.all`
+
+启用或禁用所有组的所有[规则](/linter/rules)。
+
+如果 `recommended` 和 `all` 都为 `true`，Biome将发出诊断信息并回退到默认设置。
+
+```json title="biome.json"
+{
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "all": true
+    }
+  }
+}
+```
+
+也可以组合此标志以启用/禁用不同的规则组：
+
+```json title="biome.json"
+{
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "all": true,
+      "style": {
+        "all": false
+      },
+      "complexity": {
+        "all": false
+      }
+    }
+  }
+}
+```
+
+在上面的例子中，Biome将启用所有规则，除了属于 `style` 和 `complexity` 组的规则。
+
+### `linter.rules.[group]`
+
+影响单个组规则的选项。Biome支持以下组：
+
+<LintGroups />
+
+### `linter.rules.[group].recommended`
+
+启用单个组的推荐规则。
+
+例子：
+
+```json title="biome.json"
+{
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "nursery": {
+        "recommended": true
+      }
+    }
+  }
+}
+```
+
+### `linter.rules.[group].all`
+
+启用单个组的所有规则。
+
+例子：
+
+```json title="biome.json"
+{
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "nursery": {
+        "all": true
+      }
+    }
+  }
+}
+```
+
+## `formatter`
+
+这些选项适用于所有语言。 以下还有一些特定于语言的格式化选项。
+
+### `formatter.enabled`
+
+启用 Biome 的格式化器
+
+> 默认值：`true`
+
+### `formatter.ignore`
+
+一组Unix shell样式的模式。
+
+```json title="biome.json"
+{
+  "formatter": {
+    "ignore": ["scripts/*.js"]
+  }
+}
+```
+
+### `formatter.include`
+
+一组Unix shell样式的模式。Biome只处理匹配这些模式的文件和文件夹。
+
+```json title="biome.json"
+{
+  "formatter": {
+    "include": ["scripts/*.js"]
+  }
+}
+```
+
+:::caution
+当 `include` 和 `ignore` 同时指定时， `ignore` 对 `include` 有**优先权**
+:::
+
+给出以下例子：
+
+```json title="biome.json"
+{
+  "formatter": {
+    "include": ["scripts/**/*.js", "src/**/*.js"],
+    "ignore": ["scripts/**/*.js"]
+  }
+}
+```
+
+只有匹配 `src/**/*.js` 模式的文件将被格式化，而匹配 `scripts/**/*.js` 模式的文件将被忽略。
+
+### `formatter.formatWithErrors`
+
+允许格式化包含语法错误的文档。
+
+```json title="biome.json"
+{
+  "formatter": {
+    "formatWithErrors": true
+  }
+}
+```
+
+> 默认值：`false`
+
+### `formatter.indentStyle`
+
+缩进的样式。可以是`"tab"`或`"space"`。
+
+> 默认值：`tab`
+
+### `formatter.indentSize`
+
+缩进应该是多大。
+
+> 默认值：`2`
+
+### `formatter.indentWidth`
+
+缩进应该是多大。
+
+> 默认值：`2`
+
+### `formatter.lineEnding`
+
+行结束的类型。
+
+- `lf`，仅换行符(`\n`)，在Linux和macOS以及git仓库内部常见
+- `crlf` 回车 + 换行字符(`\r\n`)，在Windows上常见
+- `cr` 仅回车字符(`\r`)，非常罕见
+
+> 默认值：`lf`
+
+### `formatter.lineWidth`
+
+一行可以写多少个字符。
+
+> 默认值：`80`
+
+## `organizeImports`
+
+### `organizeImports.enabled`
+
+启用Biome的排序导入。
+
+> 默认值：`true`
+
+### `organizeImports.ignore`
+
+一组Unix shell样式的模式。Biome会忽略匹配这些模式的文件和文件夹。
+
+```json title="biome.json"
+{
+  "organizeImports": {
+    "ignore": ["scripts/*.js"]
+  }
+}
+```
+
+### `organizeImports.include`
+
+一组Unix shell样式的模式。Biome只处理匹配这些模式的文件和文件夹。
+
+```json title="biome.json"
+{
+  "organizeImports": {
+    "include": ["scripts/*.js"]
+  }
+}
+```
+
+:::caution
+当 `include` 和 `ignore` 同时指定时， `ignore` 对 `include` 有**优先权**
+:::
+
+给出以下例子：
+
+```json title="biome.json"
+{
+  "organizeImports": {
+    "include": ["scripts/**/*.js", "src/**/*.js"],
+    "ignore": ["scripts/**/*.js"]
+  }
+}
+```
+
+只有匹配 `src/**/*.js` 模式的文件会排序其导入，而匹配 `scripts/**/*.js` 模式的文件将被忽略。
+
+## `javascript`
+
+这些选项仅适用于JavaScript (和TypeScript) 文件。
+
+### `javascript.parser.unsafeParameterDecoratorsEnabled`
+
+允许支持不安全/实验性参数装饰器。
+
+```json title="biome.json"
+{
+  "javascript": {
+    "parser": {
+      "unsafeParameterDecoratorsEnabled": true
+    }
+  }
+}
+```
+
+> 默认值：`false`
+
+### `javascript.formatter.quoteStyle`
+
+表示字符串字面值时使用的引号类型。可以是 `single` 或 `double`。
+
+> 默认值：`double`
+
+### `javascript.formatter.jsxQuoteStyle`
+
+表示jsx字符串字面值时使用的引号类型。可以是 `single` 或 `double`。
+
+> 默认值：`double`
+
+### `javascript.formatter.quoteProperties`
+
+对象内属性何时应该被引号包围。可以是 `asNeeded` 或 `preserve`。
+
+> 默认值：`asNeeded`
+
+### `javascript.formatter.trailingComma`
+
+在多行逗号分隔的语法结构中尽可能地打印尾随逗号。可能的值：
+
+- `all`,尾随逗号总是被添加
+- `es5`,尾随逗号只在旧版本的JavaScript支持的地方被添加
+- `none`,尾随逗号从不被添加
+
+> 默认值：`all`
+
+### `javascript.formatter.semicolons`
+
+配置格式化器在哪里打印分号：
+
+- `always`,在每个语句的末尾总是添加分号；
+- `asNeeded`,只在需要的地方添加分号，以防止[ASI](https://en.wikibooks.org/wiki/JavaScript/Automatic_semicolon_insertion)
+
+> 默认值：`always`
+
+例子：
+
+```json title="biome.json"
+{
+  "javascript": {
+    "formatter": {
+      "semicolons": "asNeeded"
+    }
+  }
+}
+```
+
+### `javascript.formatter.arrowParentheses`
+
+是否在箭头函数中添加非必须的括号：
+
+- `always`,总是添加括号；
+- `asNeeded`,只在需要时添加括号；
+
+> 默认值：`always`
+
+### `javascript.formatter.enabled`
+
+启用Biome的格式化器用于JavaScript (和其超级语言) 文件。
+
+> 默认值：`true`
+
+### `javascript.formatter.indentStyle`
+
+JavaScript (和其超级语言) 文件的缩进样式。可以是`"tab"`或`"space"`。
+
+> 默认值：`tab`
+
+### `javascript.formatter.indentSize`
+
+JavaScript (和其超级语言) 文件的缩进应该是多大。
+
+> 默认值：`2`
+
+### `javascript.formatter.lineEnding`
+
+JavaScript (和其超级语言) 文件的行结束类型。
+
+- `lf`,仅换行符(`\n`)，在Linux和macOS以及git仓库内部常见
+- `crlf` 回车 + 换行字符(`\r\n`)，在Windows上常见
+- `cr` 仅回车字符(`\r`)，非常罕见
+
+> 默认值：`lf`
+
+### `javascript.formatter.lineWidth`
+
+在JavaScript (和其超级语言) 文件中一行可以写多少个字符。
+
+> 默认值：`80`
+
+### `javascript.globals`
+
+Biome应忽略的全局名称列表(分析器，linter等)
+
+```json title="biome.json"
+{
+  "javascript": {
+    "globals": ["$", "_", "externalVariable"]
+  }
+}
+```
+
+## `json`
+
+应用于JSON文件的选项。
+
+### `json.parser.allowComments`
+
+在JSON文件中启用注释的解析。
+
+```json title="biome.json"
+{
+  "json": {
+    "parser": {
+      "allowComments": true
+    }
+  }
+}
+```
+
+### `json.parser.allowTrailingCommas`
+
+在JSON文件中启用尾随逗号的解析。
+
+```json title="biome.json"
+{
+  "json": {
+    "parser": {
+      "allowTrailingCommas": true
+    }
+  }
+}
+```
+
+### `json.formatter.enabled`
+
+启用Biome的格式化器用于JSON (和其超级语言) 文件。
+
+> 默认值：`true`
+
+### `json.formatter.indentStyle`
+
+JSON (和其超级语言) 文件的缩进样式。可以是`"tab"`或`"space"`。
+
+> 默认值：`tab`
+
+### `json.formatter.indentSize`
+
+JSON (和其超级语言) 文件的缩进应该是多大。
+
+> 默认值：`2`
+
+### `json.formatter.lineEnding`
+
+JSON (和其超级语言) 文件的行结束类型。
+
+- `lf`，仅换行符(`\n`)，在Linux和macOS以及git仓库内部常见
+- `crlf` 回车 + 换行字符(`\r\n`)，在Windows上常见
+- `cr` 仅回车字符(`\r`)，非常罕见
+
+> 默认值：`lf`
+
+### `json.formatter.lineWidth`
+
+在JSON (和其超级语言) 文件中一行可以写多少个字符。
+
+> 默认值：`80`
+
+## `overrides`
+
+模式列表。
+
+使用此配置更改某些文件的工具行为。
+
+当文件与覆盖模式匹配时，该模式中指定的配置将覆盖顶级配置。
+
+模式的顺序很重要。如果一个文件*可以*匹配三个模式，只使用第一个。
+
+### `overrides.<ITEM>.ignore`
+
+一组Unix shell样式的模式。Biome将不对匹配该模式的文件应用覆盖。
+
+```json title="biome.json"
+{
+  "overrides": [
+    {
+      "ignore": ["scripts/*.js"]
+    }
+  ]
+}
+```
+
+### `overrides.<ITEM>.include`
+
+一组Unix shell样式的模式。Biome将只对匹配这些模式的文件应用覆盖。
+
+```json title="biome.json"
+{
+  "overrides": [
+    {
+      "include": ["scripts/*.js"]
+    }
+  ]
+}
+```
+
+### `overrides.<ITEM>.formatter`
+
+它将包括 [顶级格式化器](#formatter) 配置的选项，减去 `ignore` 和 `include`。
+
+#### 示例
+
+例如，可以修改在 glob 路径 `generated/**` 包含的某些文件的格式化器 `lineWidth`，`indentStyle`：
+
+```json title="biome.json"
+{
+  "formatter": {
+    "lineWidth": 100
+  },
+  "overrides": [
+    {
+      "include": ["generated/**"],
+      "formatter": {
+        "lineWidth": 160,
+        "indentStyle": "space"
+      }
+    }
+  ]
+}
+```
+
+### `overrides.<ITEM>.linter`
+
+它将包括 [顶级 linter](#linter) 配置的选项，减去 `ignore` 和 `include` 。
+
+#### 示例
+
+可以为某些 glob 路径禁用某些规则，并为其他 glob 路径禁用 linter：
+
+```json title="biome.json"
+{
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true
+    }
+  },
+  "overrides": [
+    {
+      "include": ["lib/**"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noDebugger": "off"
+          }
+        }
+      }
+    },
+    {
+      "include": ["shims/**"],
+      "linter": {
+        "enabled": false
+      }
+    }
+  ]
+}
+```
+
+### `overrides.<ITEM>.organizeImports`
+
+它将包括 [顶级组织导入](#organizeimports) 的选项，减去 `ignore` 和 `include`。
+
+### `overrides.<ITEM>.javascript`
+
+它将包括 [顶级 javascript](#javascript) 配置的选项。
+
+#### 示例
+
+可以更改某些文件夹中的JavaScript文件的格式化行为：
+
+```json title="biome.json"
+{
+  "formatter": {
+    "lineWidth": 120
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single"
+    }
+  },
+  "overrides": [
+    {
+      "include": ["lib/**"],
+      "javascript": {
+        "formatter": {
+          "quoteStyle": "double"
+        }
+      }
+    }
+  ]
+}
+```
+
+### `overrides.<ITEM>.json`
+
+它将包括 [顶级 json](#json) 配置的选项。
+
+#### 示例
+
+可以为某些JSON文件启用解析特性：
+
+```json title="biome.json"
+{
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true
+    }
+  },
+  "overrides": [
+    {
+      "include": [".vscode/**"],
+      "json": {
+        "parser": {
+          "allowComments": true,
+          "allowTrailingComma": true
+        }
+      }
+    }
+  ]
+}
+```

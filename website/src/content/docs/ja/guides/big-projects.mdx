@@ -38,12 +38,12 @@ app
 [`extends`](/reference/configuration#extends)オプションを使用して、オプションを複数ファイルに分割することができる。
 
 例えば、以下の要件があるとします：
-- `legacy-app`ディレクトリでは、スペースでフォーマットする
-- `backend`ディレクトリと`new-app`ディレクトリでは、タブでフォーマットする
-- すべてのディレクトリでは、行幅を120でフォーマットする
+- `legacy-app`ディレクトリでは、スペースでformatする
+- `backend`ディレクトリと`new-app`ディレクトリでは、タブでformatする
+- すべてのディレクトリでは、行幅を120でformatする
 - `backend`ディレクトリでは、追加で他のlint設定を行う
 
-まず、`app/biome.json`に新しい設定ファイルを作成し、共通オプションの設定を行います:
+まず、`app/biome.json`に新しい設定ファイルを作成し、共通オプションの設定を行います：
 
 
 ```json title="app/biome.json"
@@ -55,7 +55,7 @@ app
 }
 ```
 
-ここで、`legacy-app`ディレクトリで別のオプションを使用するため、`app/frontend/biome.json`を`app/frontend/legacy-app/`に**移動**します:
+ここで、`legacy-app`ディレクトリで別のオプションを使用するため、`app/frontend/biome.json`を`app/frontend/legacy-app/`に**移動**します：
 
 
 ```json title="app/frontend/legacy-app/biome.json"
@@ -66,7 +66,7 @@ app
 }
 ```
 
-次に、`extends`プロパティを使って、`app/biome.json`のすべてのオプションを継承するように設定を加えます:
+次に、`extends`プロパティを使って、`app/biome.json`のすべてのオプションを継承するように設定を加えます：
 
 ```json title="app/frontend/legacy-app/biome.json" ins={2}
 {
@@ -77,7 +77,7 @@ app
 }
 ```
 
-最後に、`app/backend/biome.json`でlinterを有効にします:
+最後に、`app/backend/biome.json`でlinterを有効にします：
 
 
 ```json title="app/backend/biome.json"

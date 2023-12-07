@@ -400,6 +400,7 @@ dependencies = [
  "countme",
  "insta",
  "lazy_static",
+ "log",
  "natord",
  "roaring",
  "rustc-hash",

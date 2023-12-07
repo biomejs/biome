@@ -106,7 +106,7 @@ impl FormatJsxChildList {
                             is_soft_line_break: !matches!(
                                 next_child,
                                 AnyJsxChild::JsxSelfClosingElement(_)
-                            ) || word.is_ascii_punctuation(),
+                            ) || word.is_single_character(),
                         }),
 
                         Some(JsxChild::Newline | JsxChild::Whitespace | JsxChild::EmptyLine) => {
@@ -166,7 +166,7 @@ impl FormatJsxChildList {
                 // A new line between some JSX text and an element
                 JsxChild::Newline => {
                     let is_soft_break = {
-                        // Here we handle the case when we have a newline between an ascii punctuation word and a jsx element
+                        // Here we handle the case when we have a newline between a single-character word and a jsx element
                         // We need to use the previous and the next element
                         // [JsxChild::Word, JsxChild::Newline, JsxChild::NonText]
                         // ```
@@ -180,9 +180,9 @@ impl FormatJsxChildList {
                                 children_iter.peek(),
                                 Some(JsxChild::NonText(AnyJsxChild::JsxSelfClosingElement(_)))
                             );
-                            !is_next_element_self_closing && word.is_ascii_punctuation()
+                            !is_next_element_self_closing && word.is_single_character()
                         }
-                        // Here we handle the case when we have an ascii punctuation word between a new line and a jsx element
+                        // Here we handle the case when we have a single-character word between a new line and a jsx element
                         // Here we need to look ahead two elements
                         // [JsxChild::Newline, JsxChild::Word, JsxChild::NonText]
                         // ```
@@ -207,7 +207,7 @@ impl FormatJsxChildList {
 
                             !has_new_line_and_self_closing
                                 && !is_next_next_element_self_closing
-                                && next_word.is_ascii_punctuation()
+                                && next_word.is_single_character()
                         } else {
                             false
                         }
@@ -225,7 +225,29 @@ impl FormatJsxChildList {
                 JsxChild::EmptyLine => {
                     child_breaks = true;
 
-                    multiline.write_separator(&empty_line(), f);
+                    // Additional empty lines are not preserved when any of
+                    // the children are a meaningful text node.
+                    //
+                    // <>
+                    //   <div>First</div>
+                    //
+                    //   <div>Second</div>
+                    //
+                    //   Third
+                    // </>
+                    //
+                    // Becomes:
+                    //
+                    // <>
+                    //   <div>First</div>
+                    //   <div>Second</div>
+                    //   Third
+                    // </>
+                    if children_meta.meaningful_text {
+                        multiline.write_separator(&hard_line_break(), f);
+                    } else {
+                        multiline.write_separator(&empty_line(), f);
+                    }
                 }
 
                 // Any child that isn't text
@@ -242,7 +264,7 @@ impl FormatJsxChildList {
                             // adefg
                             // ```
                             if matches!(non_text, AnyJsxChild::JsxSelfClosingElement(_))
-                                && !word.is_ascii_punctuation()
+                                && !word.is_single_character()
                             {
                                 Some(LineMode::Hard)
                             } else {

@@ -1,0 +1,61 @@
+---
+title: 手动安装
+description: 手动安装Biome
+---
+
+## 在没有Node.js的情况下使用Biome
+
+如果您还没有使用Node或npm（或任何其他软件包管理器），那么使用Biome的独立CLI二进制文件可能是一个很好的选择。
+换句话说，Biome不应该是您拥有`package.json`的唯一原因。
+
+> 注意：如果您已经使用npm或其他软件包管理器，则使用软件包管理器是[安装](/guides/getting-started#installation) Biome的[首选方式](/guides/getting-started#installation)。
+> 您已经熟悉工具链，并且安装和更新更加简单。
+
+### Homebrew
+
+Biome可以作为[Homebrew formula](https://formulae.brew.sh/formula/biome)提供给macOS和Linux用户。
+
+```shell
+brew install biome
+```
+
+## 系统要求
+
+- Windows（包括WSL），macOS或Linux
+- x86_64或ARM64
+
+## 支持的平台
+
+你必须为你的平台选择正确的二进制文件才能使用Biome。下表将帮助您完成此操作。
+
+| CPU架构 | Windows       | macOS                         | Linux         | Linux（musl）      |
+| ------- | ------------- | ----------------------------- | ------------- | ------------------ |
+| `arm64` | `win32-arm64` | `darwin-arm64` (M1或更新版本) | `linux-arm64` | `linux-arm64-musl` |
+| `x64`   | `win32-x64`   | `darwin-x64`                  | `linux-x64`   | `linux-x64-musl`   |
+
+> 注意：在Windows Subsystem for Linux (WSL)中使用Linux变体
+
+## 安装Biome
+
+要安装Biome，请从GitHub的[最新CLI版本](https://github.com/biomejs/biome/releases)中获取适用于您平台的可执行文件，并给它执行权限。
+
+```shell
+# macOS arm (M1或更新版本)
+curl -L https://github.com/biomejs/biome/releases/download/cli%2Fv<version>/biome-darwin-arm64 -o biome
+chmod +x biome
+
+# Linux (x86_64)
+curl -L https://github.com/biomejs/biome/releases/download/cli%2Fv<version>/biome-linux-x64 -o biome
+chmod +x biome
+
+# Windows (x86_64, Powershell)
+Invoke-WebRequest -Uri "https://github.com/biomejs/biome/releases/download/cli%2Fv<version>/biome-win32-x64.exe" -OutFile "biome.exe"
+```
+
+> 注意：请确保将`<version>`替换为您要安装的Biome版本。
+
+现在，您可以通过运行`./biome`来使用Biome。
+
+## 下一步
+
+在我们的[入门指南](/guides/getting-started#next-steps)中阅读更多关于如何使用Biome的内容。

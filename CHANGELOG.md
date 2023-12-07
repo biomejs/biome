@@ -8,6 +8,91 @@ Read our [guidelines to categorize a change](https://biomejs.dev/internals/versi
 New entries must be placed in a section entitled `Unreleased`.
 Read our [guidelines for writing a good changelog entry](https://github.com/biomejs/biome/blob/main/CONTRIBUTING.md#changelog).
 
+## Unreleased
+
+### Analyzer
+
+### CLI
+
+### Configuration
+
+### Editors
+
+#### New features
+
+- The LSP register formatting without the need of using dynamic capabilities from the client.
+
+### Formatter
+
+### JavaScript APIs
+
+### Linter
+
+#### New features
+
+- Add [useExportType](https://biomejs.dev/linter/rules/use-export-type) that enforces the use of type-only exports for names that are only types. Contributed by @Conaclos
+
+  ```diff
+    interface A {}
+    interface B {}
+    class C {}
+
+  - export type { A, C }
+  + export { type A, C }
+
+  - export { type B }
+  + export type { B }
+  ```
+
+#### Enhancements
+
+#### Bug fixes
+
+- Fix [#959](https://github.com/biomejs/biome/issues/959). [noEmptyInterface](https://biomejs.dev/linter/rules/no-empty-interface) no longer reports interface that extends a type and is in an external module. COntributed by @Conaclos
+
+  Empty interface that extends a type are sometimes used to extend an existing interface.
+  This is generally used to extend an interface of an external module.
+
+  ```ts
+  interface Extension {
+    metadata: unknown;
+  }
+
+  declare module "@external/module" {
+    export interface ExistingInterface extends Extension {}
+  }
+  ```
+
+- Fix [#1061](https://github.com/biomejs/biome/issues/1061). [noRedeclare](https://biomejs.dev/linter/rules/no-redeclare) no longer reports overloads of `export default function`. Contributed by @Conaclos
+
+  The following code is no longer reported:
+
+  ```ts
+  export default function(a: boolean): boolean;
+  export default function(a: number): number;
+  export default function(a: number | boolean): number | boolean {
+  	return a;
+  }
+  ```
+
+- Fix [#651](https://github.com/biomejs/biome/issues/651), [useExhaustiveDependencies](https://biomejs.dev/linter/rules/use-exhaustive-dependencies) no longer reports out of scope dependecies. Contributed by @kalleep
+
+  The following code is no longer reported:
+  ```ts
+  let outer = false;
+
+  const Component = ({}) => {
+    useEffect(() => {
+      outer = true;
+    }, []);
+  }
+  ```
+
+- Fix [#728](https://github.com/biomejs/biome/issues/728). [useSingleVarDeclarator](https://biomejs.dev/linter/rules/use-single-var-declarator) no longer outputs invalid code. Contributed by @Conaclos
+
+### Parser
+
+
 ## 1.4.1 (2023-11-30)
 
 ### Editors
@@ -31,6 +116,10 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 - Fix [#910](https://github.com/biomejs/biome/issues/910), where the rule `noSvgWithoutTitle` should skip elements that have `aria-hidden` attributes. Contributed by @vasucp1207
 
 #### New features
+
+- Add [useForOf](https://biomejs.dev/linter/rules/use-for-of) rule.
+  The rule recommends a for-of loop when the loop index is only used to read from an array that is being iterated.
+  Contributed by @victor-teles
 
 #### Enhancement
 

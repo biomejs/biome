@@ -2786,6 +2786,15 @@ pub struct Nursery {
     #[bpaf(long("no-implicit-any-let"), argument("on|off|warn"), optional, hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_implicit_any_let: Option<RuleConfiguration>,
+    #[doc = "Disallow characters made with multiple code points in character class syntax."]
+    #[bpaf(
+        long("no-misleading-character-class"),
+        argument("on|off|warn"),
+        optional,
+        hide
+    )]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_misleading_character_class: Option<RuleConfiguration>,
     #[doc = "Disallow unused imports."]
     #[bpaf(long("no-unused-imports"), argument("on|off|warn"), optional, hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -2812,6 +2821,14 @@ pub struct Nursery {
     #[bpaf(long("use-await"), argument("on|off|warn"), optional, hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_await: Option<RuleConfiguration>,
+    #[doc = "Promotes the use of export type for types."]
+    #[bpaf(long("use-export-type"), argument("on|off|warn"), optional, hide)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_export_type: Option<RuleConfiguration>,
+    #[doc = "This rule recommends a for-of loop when in a for loop, the index used to extract an item from the iterated array."]
+    #[bpaf(long("use-for-of"), argument("on|off|warn"), optional, hide)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_for_of: Option<RuleConfiguration>,
     #[doc = "Enforce the use of import type when an import only has specifiers with type qualifier."]
     #[bpaf(
         long("use-grouped-type-import"),
@@ -2834,6 +2851,15 @@ pub struct Nursery {
     #[bpaf(long("use-regex-literals"), argument("on|off|warn"), optional, hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_regex_literals: Option<RuleConfiguration>,
+    #[doc = "Enforce using function types instead of object type with call signatures."]
+    #[bpaf(
+        long("use-shorthand-function-type"),
+        argument("on|off|warn"),
+        optional,
+        hide
+    )]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_shorthand_function_type: Option<RuleConfiguration>,
     #[doc = "Elements with ARIA roles must use a valid, non-abstract ARIA role."]
     #[bpaf(long("use-valid-aria-role"), argument("on|off|warn"), optional, hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -2856,6 +2882,9 @@ impl MergeWith<Nursery> for Nursery {
         if let Some(no_implicit_any_let) = other.no_implicit_any_let {
             self.no_implicit_any_let = Some(no_implicit_any_let);
         }
+        if let Some(no_misleading_character_class) = other.no_misleading_character_class {
+            self.no_misleading_character_class = Some(no_misleading_character_class);
+        }
         if let Some(no_unused_imports) = other.no_unused_imports {
             self.no_unused_imports = Some(no_unused_imports);
         }
@@ -2868,6 +2897,12 @@ impl MergeWith<Nursery> for Nursery {
         if let Some(use_await) = other.use_await {
             self.use_await = Some(use_await);
         }
+        if let Some(use_export_type) = other.use_export_type {
+            self.use_export_type = Some(use_export_type);
+        }
+        if let Some(use_for_of) = other.use_for_of {
+            self.use_for_of = Some(use_for_of);
+        }
         if let Some(use_grouped_type_import) = other.use_grouped_type_import {
             self.use_grouped_type_import = Some(use_grouped_type_import);
         }
@@ -2876,6 +2911,9 @@ impl MergeWith<Nursery> for Nursery {
         }
         if let Some(use_regex_literals) = other.use_regex_literals {
             self.use_regex_literals = Some(use_regex_literals);
+        }
+        if let Some(use_shorthand_function_type) = other.use_shorthand_function_type {
+            self.use_shorthand_function_type = Some(use_shorthand_function_type);
         }
         if let Some(use_valid_aria_role) = other.use_valid_aria_role {
             self.use_valid_aria_role = Some(use_valid_aria_role);
@@ -2892,38 +2930,44 @@ impl MergeWith<Nursery> for Nursery {
 }
 impl Nursery {
     const GROUP_NAME: &'static str = "nursery";
-    pub(crate) const GROUP_RULES: [&'static str; 13] = [
+    pub(crate) const GROUP_RULES: [&'static str; 17] = [
         "noAriaHiddenOnFocusable",
         "noDefaultExport",
         "noDuplicateJsonKeys",
         "noEmptyBlockStatements",
         "noImplicitAnyLet",
+        "noMisleadingCharacterClass",
         "noUnusedImports",
         "noUnusedPrivateClassMembers",
         "noUselessLoneBlockStatements",
         "useAwait",
+        "useExportType",
+        "useForOf",
         "useGroupedTypeImport",
         "useImportRestrictions",
         "useRegexLiterals",
+        "useShorthandFunctionType",
         "useValidAriaRole",
     ];
-    const RECOMMENDED_RULES: [&'static str; 6] = [
+    const RECOMMENDED_RULES: [&'static str; 7] = [
         "noAriaHiddenOnFocusable",
         "noDuplicateJsonKeys",
         "noImplicitAnyLet",
         "useAwait",
+        "useExportType",
         "useGroupedTypeImport",
         "useValidAriaRole",
     ];
-    const RECOMMENDED_RULES_AS_FILTERS: [RuleFilter<'static>; 6] = [
+    const RECOMMENDED_RULES_AS_FILTERS: [RuleFilter<'static>; 7] = [
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[8]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[12]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]),
     ];
-    const ALL_RULES_AS_FILTERS: [RuleFilter<'static>; 13] = [
+    const ALL_RULES_AS_FILTERS: [RuleFilter<'static>; 17] = [
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
@@ -2937,6 +2981,10 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[12]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[13]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]),
     ];
     #[doc = r" Retrieves the recommended rules"]
     pub(crate) fn is_recommended(&self) -> bool {
@@ -2978,44 +3026,64 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]));
             }
         }
-        if let Some(rule) = self.no_unused_imports.as_ref() {
+        if let Some(rule) = self.no_misleading_character_class.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]));
             }
         }
-        if let Some(rule) = self.no_unused_private_class_members.as_ref() {
+        if let Some(rule) = self.no_unused_imports.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[6]));
             }
         }
-        if let Some(rule) = self.no_useless_lone_block_statements.as_ref() {
+        if let Some(rule) = self.no_unused_private_class_members.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]));
             }
         }
-        if let Some(rule) = self.use_await.as_ref() {
+        if let Some(rule) = self.no_useless_lone_block_statements.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[8]));
             }
         }
-        if let Some(rule) = self.use_grouped_type_import.as_ref() {
+        if let Some(rule) = self.use_await.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]));
             }
         }
-        if let Some(rule) = self.use_import_restrictions.as_ref() {
+        if let Some(rule) = self.use_export_type.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]));
             }
         }
-        if let Some(rule) = self.use_regex_literals.as_ref() {
+        if let Some(rule) = self.use_for_of.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]));
             }
         }
-        if let Some(rule) = self.use_valid_aria_role.as_ref() {
+        if let Some(rule) = self.use_grouped_type_import.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[12]));
+            }
+        }
+        if let Some(rule) = self.use_import_restrictions.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[13]));
+            }
+        }
+        if let Some(rule) = self.use_regex_literals.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]));
+            }
+        }
+        if let Some(rule) = self.use_shorthand_function_type.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]));
+            }
+        }
+        if let Some(rule) = self.use_valid_aria_role.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]));
             }
         }
         index_set
@@ -3047,44 +3115,64 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]));
             }
         }
-        if let Some(rule) = self.no_unused_imports.as_ref() {
+        if let Some(rule) = self.no_misleading_character_class.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]));
             }
         }
-        if let Some(rule) = self.no_unused_private_class_members.as_ref() {
+        if let Some(rule) = self.no_unused_imports.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[6]));
             }
         }
-        if let Some(rule) = self.no_useless_lone_block_statements.as_ref() {
+        if let Some(rule) = self.no_unused_private_class_members.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]));
             }
         }
-        if let Some(rule) = self.use_await.as_ref() {
+        if let Some(rule) = self.no_useless_lone_block_statements.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[8]));
             }
         }
-        if let Some(rule) = self.use_grouped_type_import.as_ref() {
+        if let Some(rule) = self.use_await.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]));
             }
         }
-        if let Some(rule) = self.use_import_restrictions.as_ref() {
+        if let Some(rule) = self.use_export_type.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]));
             }
         }
-        if let Some(rule) = self.use_regex_literals.as_ref() {
+        if let Some(rule) = self.use_for_of.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]));
             }
         }
-        if let Some(rule) = self.use_valid_aria_role.as_ref() {
+        if let Some(rule) = self.use_grouped_type_import.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[12]));
+            }
+        }
+        if let Some(rule) = self.use_import_restrictions.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[13]));
+            }
+        }
+        if let Some(rule) = self.use_regex_literals.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]));
+            }
+        }
+        if let Some(rule) = self.use_shorthand_function_type.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]));
+            }
+        }
+        if let Some(rule) = self.use_valid_aria_role.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]));
             }
         }
         index_set
@@ -3097,10 +3185,10 @@ impl Nursery {
     pub(crate) fn is_recommended_rule(rule_name: &str) -> bool {
         Self::RECOMMENDED_RULES.contains(&rule_name)
     }
-    pub(crate) fn recommended_rules_as_filters() -> [RuleFilter<'static>; 6] {
+    pub(crate) fn recommended_rules_as_filters() -> [RuleFilter<'static>; 7] {
         Self::RECOMMENDED_RULES_AS_FILTERS
     }
-    pub(crate) fn all_rules_as_filters() -> [RuleFilter<'static>; 13] {
+    pub(crate) fn all_rules_as_filters() -> [RuleFilter<'static>; 17] {
         Self::ALL_RULES_AS_FILTERS
     }
     #[doc = r" Select preset rules"]
@@ -3128,13 +3216,17 @@ impl Nursery {
             "noDuplicateJsonKeys" => self.no_duplicate_json_keys.as_ref(),
             "noEmptyBlockStatements" => self.no_empty_block_statements.as_ref(),
             "noImplicitAnyLet" => self.no_implicit_any_let.as_ref(),
+            "noMisleadingCharacterClass" => self.no_misleading_character_class.as_ref(),
             "noUnusedImports" => self.no_unused_imports.as_ref(),
             "noUnusedPrivateClassMembers" => self.no_unused_private_class_members.as_ref(),
             "noUselessLoneBlockStatements" => self.no_useless_lone_block_statements.as_ref(),
             "useAwait" => self.use_await.as_ref(),
+            "useExportType" => self.use_export_type.as_ref(),
+            "useForOf" => self.use_for_of.as_ref(),
             "useGroupedTypeImport" => self.use_grouped_type_import.as_ref(),
             "useImportRestrictions" => self.use_import_restrictions.as_ref(),
             "useRegexLiterals" => self.use_regex_literals.as_ref(),
+            "useShorthandFunctionType" => self.use_shorthand_function_type.as_ref(),
             "useValidAriaRole" => self.use_valid_aria_role.as_ref(),
             _ => None,
         }

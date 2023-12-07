@@ -62,7 +62,7 @@ With this challenge, we added new options to the formatter:
 - [`bracketSameLine`](/reference/configuration#formatterbracketsameline)
 
   ```jsx title="example.js"
-  // Existing behavior. Now also the default, meaning `bracketSameLine: true`.
+  // Existing behavior. Now also the default, meaning `bracketSameLine: false`.
   <Foo
     className={somethingReallyLongThatForcesThisToWrap}
     anotherReallyLongAttribute={withAValueThatsSurelyTooLong}
@@ -81,7 +81,7 @@ With this challenge, we added new options to the formatter:
   After formatting with `"bracketSameLine": true`:
 
   ```jsx title="example.js"
-  // New behavior, with `bracketSameLine: false`.
+  // New behavior, with `bracketSameLine: true`.
   <Foo
     className={somethingReallyLongThatForcesThisToWrap}
     anotherReallyLongAttribute={withAValueThatsSurelyTooLong}
@@ -105,8 +105,8 @@ With this challenge, we added new options to the formatter:
   After formatting with `"bracketSpacing": false`:
 
   ```js title="example.js"
-  import { sort } from "sort.js";
-  const value = { sort };
+  import {sort} from "sort.js";
+  const value = {sort};
   ```
 
 ## VSCode extension goodies
@@ -403,3 +403,7 @@ In the next months we will focus on:
 - Publishing a Roadmap. **Keep an eye on it**, it will involve a lot of **interesting** work.
 - Rebranding the website with a new logo.
 - Translate the website in Japanese.
+
+## Translations
+
+- [中文翻译: Biome赢得了Prettier挑战](https://juejin.cn/post/7308643782375768118)
