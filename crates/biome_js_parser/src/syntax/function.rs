@@ -1252,7 +1252,6 @@ pub(super) fn parse_parameter_list(
     if !p.at(T!['(']) {
         return Absent;
     }
-
     let m = p.start();
     parse_parameters_list(
         p,
@@ -1327,6 +1326,7 @@ pub(super) fn parse_parameter_list(
                     })
                     .into()
             };
+
             parse_any_parameter(
                 p,
                 decorator_list,
