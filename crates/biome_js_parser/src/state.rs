@@ -40,22 +40,37 @@ impl ExportDefaultItemKind {
     pub const fn is_mergeable(&self, other: &ExportDefaultItemKind) -> bool {
         Self::can_merge(self, other) || Self::can_merge(other, self)
     }
-
     const fn can_merge(a: &ExportDefaultItemKind, b: &ExportDefaultItemKind) -> bool {
         match (a, b) {
+            // test ts decorator_export_default_function_and_function_overload
             // export default function a():void;
-            // export default function a(){
+            // export default function a(v: number):void;
+            // export default function a(v?: any){
             // }
             (
                 ExportDefaultItemKind::FunctionOverload,
-                ExportDefaultItemKind::FunctionDeclaration,
+                ExportDefaultItemKind::FunctionDeclaration
+                | ExportDefaultItemKind::FunctionOverload,
             ) => true,
+            // test ts decorator_export_default_function_and_interface
+            // export default interface A{};
+            // export default interface A{};
             // export default function a(){};
             // export default interface A{};
-            (ExportDefaultItemKind::FunctionDeclaration, ExportDefaultItemKind::Interface) => true,
+            // export default interface A{};
+            //
+            // test ts decorator_export_default_class_and_interface
+            // export default interface A{};
             // export default interface A{};
             // export default class A{};
-            (ExportDefaultItemKind::Interface, ExportDefaultItemKind::ClassDeclaration) => true,
+            // export default interface A{};
+            // export default interface A{};
+            (
+                ExportDefaultItemKind::Interface,
+                ExportDefaultItemKind::ClassDeclaration
+                | ExportDefaultItemKind::FunctionDeclaration
+                | ExportDefaultItemKind::Interface,
+            ) => true,
             (_, _) => false,
         }
     }
