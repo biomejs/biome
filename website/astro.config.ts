@@ -129,13 +129,13 @@ export default defineConfig({
 								},
 								{
 									label: "Differences with Prettier",
-									link: "/formatter/differences-with-prettier"
+									link: "/formatter/differences-with-prettier",
 								},
 								{
 									label: "Formatter Option Philosophy",
 									link: "/formatter/option-philosophy",
-								}
-							]
+								},
+							],
 						},
 						{
 							label: "Linter",
