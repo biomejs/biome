@@ -121,12 +121,21 @@ export default defineConfig({
 						},
 						{
 							label: "Formatter",
-							link: "/formatter",
-							translations: { ja: "Formatter" },
-						},
-						{
-							label: "Formatter Option Philosophy",
-							link: "/formatter/option-philosophy",
+							items: [
+								{
+									label: "Introduction",
+									link: "/formatter",
+									translations: { ja: "Formatter" },
+								},
+								{
+									label: "Differences with Prettier",
+									link: "/formatter/differences-with-prettier"
+								},
+								{
+									label: "Formatter Option Philosophy",
+									link: "/formatter/option-philosophy",
+								}
+							]
 						},
 						{
 							label: "Linter",
