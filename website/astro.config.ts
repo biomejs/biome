@@ -72,52 +72,71 @@ export default defineConfig({
 				},
 			},
 			sidebar: [
-				{ label: "Home", link: "/", translations: { ja: "ホーム" } },
+				{
+					label: "Home",
+					link: "/",
+					translations: { ja: "ホーム", "pt-BR": "Início" },
+				},
 				{ label: "Blog", link: "../blog", translations: { ja: "ブログ" } },
 				{
 					label: "Playground",
 					link: "../playground",
-					translations: { ja: "プレイグラウンド" },
+					translations: {
+						ja: "プレイグラウンド",
+						"pt-BR": "Ambiente de testes",
+					},
 				},
 				{
 					label: "Guides",
-					translations: { ja: "ガイド" },
+					translations: { ja: "ガイド", "pt-BR": "Guias" },
 					items: [
 						{
 							label: "Getting Started",
 							link: "/guides/getting-started",
-							translations: { ja: "はじめる" },
+							translations: { ja: "はじめる", "pt-BR": "Primeiros passos" },
 						},
 						{
 							label: "Manual installation",
 							link: "/guides/manual-installation",
-							translations: { ja: "手動インストール" },
+							translations: {
+								ja: "手動インストール",
+								"pt-BR": "Instalação manual",
+							},
 						},
 						{
 							label: "Use Biome in big projects",
 							link: "/guides/big-projects",
-							translations: { ja: "大きなプロジェクトでのBiomeの使用方法" },
+							translations: {
+								ja: "大きなプロジェクトでのBiomeの使用方法",
+								"pt-BR": "Usando o Biome em projetos grandes",
+							},
 						},
 						{
 							label: "How Biome works",
 							link: "/guides/how-biome-works",
-							translations: { ja: "Biome の振る舞い" },
+							translations: {
+								ja: "Biome の振る舞い",
+								"pt-BR": "Como o Biome funciona",
+							},
 						},
 						{
 							label: "Integrate Biome in your editor",
 							link: "/guides/integrate-in-editor",
-							translations: { ja: "Biome をあなたのエディタに導入する" },
+							translations: {
+								ja: "Biome をあなたのエディタに導入する",
+								"pt-BR": "Integrando o Biome no seu editor",
+							},
 						},
 					],
 				},
 				{
 					label: "Tools",
-					translations: { ja: "ツール" },
+					translations: { ja: "ツール", "pt-BR": "Ferramentas" },
 					items: [
 						{
 							label: "Analyzer",
 							link: "/analyzer",
-							translations: { ja: "Analyzer" },
+							translations: { ja: "Analyzer", "pt-BR": "Analisador" },
 						},
 						{
 							label: "Formatter",
@@ -125,17 +144,24 @@ export default defineConfig({
 								{
 									label: "Introduction",
 									link: "/formatter",
-									translations: { ja: "Formatter" },
+									translations: { "pt-BR": "Introdução" },
 								},
 								{
 									label: "Differences with Prettier",
 									link: "/formatter/differences-with-prettier",
+									translations: {
+										"pt-BR": "Diferenças em relação ao Prettier",
+									},
 								},
 								{
 									label: "Formatter Option Philosophy",
 									link: "/formatter/option-philosophy",
+									translations: {
+										"pt-BR": "Princípios de configuração",
+									},
 								},
 							],
+							translations: { ja: "Formatter", "pt-BR": "Formatador" },
 						},
 						{
 							label: "Linter",
@@ -144,12 +170,13 @@ export default defineConfig({
 						{
 							label: "Lint rules",
 							link: "/linter/rules",
+							translations: { "pt-BR": "Regras do Linter" },
 						},
 					],
 				},
 				{
 					label: "Reference",
-					translations: { ja: "リファレンス" },
+					translations: { ja: "リファレンス", "pt-BR": "Referências" },
 					items: [
 						{
 							label: "CLI",
@@ -158,57 +185,68 @@ export default defineConfig({
 						{
 							label: "Configuration",
 							link: "/reference/configuration",
+							translations: { "pt-BR": "Configuração" },
 						},
 						{
 							label: "VSCode extension",
 							link: "/reference/vscode",
-							translations: { ja: "VSCode拡張機能" },
+							translations: {
+								ja: "VSCode拡張機能",
+								"pt-BR": "Extensão do VSCode",
+							},
 						},
 					],
 				},
 				{
 					label: "Recipes",
-					translations: { ja: "レシピ" },
+					translations: { ja: "レシピ", "pt-BR": "Receitas" },
 					items: [
 						{
 							label: "Continuous Integration",
 							link: "/recipes/continuous-integration",
-							translations: { ja: "継続的インテグレーション" },
+							translations: {
+								ja: "継続的インテグレーション",
+								"pt-BR": "Integração Contínua",
+							},
 						},
 					],
 				},
 				{
 					label: "Internals",
-					translations: { ja: "内部" },
+					translations: { ja: "内部", "pt-BR": "Aspectos Internos" },
 					items: [
 						{
 							label: "Philosophy",
 							link: "/internals/philosophy",
-							translations: { ja: "理念" },
+							translations: { ja: "理念", "pt-BR": "Filosofia" },
 						},
 						{
 							label: "Language support",
 							link: "/internals/language-support",
-							translations: { ja: "言語サポート" },
+							translations: {
+								ja: "言語サポート",
+								"pt-BR": "Suporte de linguagens",
+							},
 						},
 						{
 							label: "Architecture",
 							link: "/internals/architecture",
-							translations: { ja: "アーキテクチャ" },
+							translations: { ja: "アーキテクチャ", "pt-BR": "Arquitetura" },
 						},
 						{
 							label: "Credits",
 							link: "/internals/credits",
-							translations: { ja: "クレジット" },
+							translations: { ja: "クレジット", "pt-BR": "Créditos" },
 						},
 						{
 							label: "Versioning",
 							link: "/internals/versioning",
-							translations: { ja: "バージョニング" },
+							translations: { ja: "バージョニング", "pt-BR": "Versionamento" },
 						},
 						{
 							label: "Changelog",
 							link: "/internals/changelog",
+							translations: { "pt-BR": "Alterações" },
 						},
 					],
 				},
