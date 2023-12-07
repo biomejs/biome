@@ -483,6 +483,7 @@ impl<'src> CssLexer<'src> {
             CRT => self.consume_ctr(),
             COL => self.consume_col(),
             AT_ => self.consume_byte(T![@]),
+            SEM => self.consume_byte(T![;]),
             HAS => self.consume_byte(T![#]),
             PNO => self.consume_byte(T!['(']),
             PNC => self.consume_byte(T![')']),
@@ -495,6 +496,8 @@ impl<'src> CssLexer<'src> {
             TLD => self.consume_tilde(),
             PIP => self.consume_pipe(),
             EQL => self.consume_byte(T![=]),
+            EXL => self.consume_byte(T![!]),
+            PRC => self.consume_byte(T![%]),
 
             UNI => {
                 // A BOM can only appear at the start of a file, so if we haven't advanced at all yet,
@@ -740,13 +743,13 @@ impl<'src> CssLexer<'src> {
             b"dir" => DIR_KW,
             b"global" => GLOBAL_KW,
             b"local" => LOCAL_KW,
-            b"-moz-any" => MOZANY_KW,
-            b"-webkit-any" => WEBKITANY_KW,
+            b"-moz-any" => _MOZ_ANY_KW,
+            b"-webkit-any" => _WEBKIT_ANY_KW,
             b"past" => PAST_KW,
             b"current" => CURRENT_KW,
             b"future" => FUTURE_KW,
             b"host" => HOST_KW,
-            b"host-context" => HOSTCONTEXT_KW,
+            b"host-context" => HOST_CONTEXT_KW,
             b"not" => NOT_KW,
             b"matches" => MATCHES_KW,
             b"is" => IS_KW,
@@ -756,14 +759,18 @@ impl<'src> CssLexer<'src> {
             b"n" => N_KW,
             b"even" => EVEN_KW,
             b"odd" => ODD_KW,
-            b"nth-child" => NTHCHILD_KW,
-            b"nth-last-child" => NTHLASTCHILD_KW,
-            b"nth-of-type" => NTHOFTYPE_KW,
-            b"nth-last-of-type" => NTHLASTOFTYPE_KW,
-            b"nth-col" => NTHCOL_KW,
-            b"nth-last-col" => NTHLASTCOL_KW,
+            b"nth-child" => NTH_CHILD_KW,
+            b"nth-last-child" => NTH_LAST_CHILD_KW,
+            b"nth-of-type" => NTH_OF_TYPE_KW,
+            b"nth-last-of-type" => NTH_LAST_OF_TYPE_KW,
+            b"nth-col" => NTH_COL_KW,
+            b"nth-last-col" => NTH_LAST_COL_KW,
             b"ltr" => LTR_KW,
             b"rtl" => RTL_KW,
+            b"charset" => CHARSET_KW,
+            b"color-profile" => COLOR_PROFILE_KW,
+            b"counter-style" => COUNTER_STYLE_KW,
+            b"font-face" => FONT_FACE_KW,
             _ => IDENT,
         }
     }
@@ -940,7 +947,7 @@ impl<'src> CssLexer<'src> {
 
                 COMMENT
             }
-            _ => self.consume_unexpected_character(),
+            _ => self.consume_byte(T![/]),
         }
     }
 

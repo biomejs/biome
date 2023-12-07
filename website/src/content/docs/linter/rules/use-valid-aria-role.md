@@ -1,5 +1,5 @@
 ---
-title: useValidAriaRole (since vnext)
+title: useValidAriaRole (since v1.4.0)
 ---
 
 **Diagnostic Category: `lint/nursery/useValidAriaRole`**

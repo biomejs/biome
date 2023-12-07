@@ -1,0 +1,141 @@
+---
+title: VSCode拡張機能
+description: BiomeのVSCode拡張機能について
+---
+# Biome VS Code 拡張機能
+
+[Biome](https://biomejs.dev/) は、開発スタックを統合し、複数のツールの機能を1つにまとめます。単一の設定ファイルを使用し、素晴らしいパフォーマンスで、あらゆる環境で動作します。この拡張機能はエディタ上で、以下のことを可能にします：
+
+- ファイルを*保存時*にformat、*ドキュメントのフォーマット*コマンドの使用
+- タイプ中に静的解析の結果を確認し、コード修正を適用
+- リファクタリングの実行
+
+## インストール方法
+
+VS Codeの拡張機能をインストールするには、[Visual Studio Code マーケットプレイスページ](https://marketplace.visualstudio.com/items?itemName=biomejs.biome)にアクセスするか、VS Code内で以下の方法でインストールできます：
+
+- *拡張機能* タブ（_表示_ → _拡張機能_）を開き、Biomeを検索する。
+- _コマンドパレット_（<kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd>P</kbd>または _移動_ → _ファイルに移動_）で `ext install biomejs.biome` と入力し、Enterキーを押す。
+
+## はじめに
+
+### デフォルトのformatterに設定する
+
+Biomeを、サポートされているファイルのデフォルトformatterとして設定し、VS Codeが他にインストールされているformatterではなくBiomeを使用するようにします。これを行うには、JavaScriptまたはTypeScript形式のファイルを開いて次の操作を行います：
+
+- コマンドパレットを開く（<kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd title="Shift">⇧</kbd>+<kbd>P</kbd> または表示 → コマンドパレット）
+- _ドキュメントのフォーマット..._ を選択
+- _デフォルトのフォーマッターの設定..._ を選択
+- Biomeを選択
+
+また、特定の言語のみにBiomeを有効にすることもできます：
+
+- [`settings.json`を開く](https://code.visualstudio.com/docs/getstarted/settings#_settingsjson): _コマンドパレット_（<kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd title="Shift">⇧</kbd>+<kbd>P</kbd>）を開き、_設定: ユーザー設定（JSON）を開く_ を選択
+- Biomeを有効にしたい言語の`editor.defaultFormatter`に`biomejs.biome`を設定する
+
+```json title="settings.json"
+{
+	"editor.defaultFormatter": "<other formatter>",
+	"[javascript]": {
+		"editor.defaultFormatter": "biomejs.biome"
+	}
+}
+```
+
+この設定の場合、BiomeをJavaScriptファイルのデフォルトformatterとして設定します。その他のファイルは`<other formatter>`を使ってformatされます。
+
+## 設定の読み込み
+
+拡張機能は、ワークスペースのルートディレクトリから`biome.json`ファイルを自動的に読み込みます。
+
+## Biomeの読み込み
+
+拡張機能は、プロジェクトのローカル依存関係（`node_modules/@biomejs/biome`）からBiomeを使用しようとします。npmスクリプトと拡張機能が同じバージョンを使用することを確実にするために、Biomeをプロジェクトの依存関係に追加することをおすすめします。
+
+また、エディタのオプションで`biome.lspBin`設定を構成することにより、拡張機能が使用すべきBiomeバイナリを明示的に指定することもできます。
+
+プロジェクトがBiomeに依存しておらず、明示的なパスも設定されていない場合、拡張機能はバンドルされたBiomeのバージョンを使用します。
+
+## 使用方法
+
+### ドキュメントのformat
+
+ドキュメント全体をformatするには、_コマンドパレット_（<kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd title="Shift">⇧</kbd>+<kbd>P</kbd>）を開き、_ドキュメントのフォーマット_ を選択します。
+
+ドキュメントの一部をformatするには、formatしたいテキストを選択し、_コマンドパレット_（<kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd title="Shift">⇧</kbd>+<kbd>P</kbd>）を開き、_選択範囲のフォーマット_ を選択します。
+
+### 保存時のformat
+
+Biomeは、VS Codeの _保存時のフォーマット_ 設定を尊重します。保存時のformatを有効にするには、設定を開き（_ファイル_ -> _設定_ -> _設定_）、`editor.formatOnSave`を検索し、オプションを有効にします。
+
+### 保存時の修正
+
+Biomeは、VS Codeの _保存時のコードアクション_ 設定を尊重します。保存時の修正を有効にするには、以下を追加してください。
+
+
+```json title="settings.json"
+{
+  "editor.codeActionsOnSave": {
+    "quickfix.biome": true
+  }
+}
+```
+
+これは、VS Codeの`settings.json`で行います。
+
+### インポートの並び替え [実験的機能]
+
+BiomeのVS Code拡張機能は、Organize Imports コードアクションを通じてインポートの並び替えをサポートしています。デフォルトでは、このアクションは<kbd title="Shift">⇧</kbd>+<kbd>Alt</kbd>+<kbd>O</kbd>のキーボードショートカットを使用して実行することができます。または、_コマンドパレット_ (<kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd title="Shift">⇧</kbd>+<kbd>P</kbd>) を開き、Organize Imports を選択してアクセスすることもできます。
+
+保存時に自動的にこのアクションを実行したい場合は、エディタの設定に以下を追加してください：
+
+```json title="settings.json"
+{
+	"editor.codeActionsOnSave":{
+		"source.organizeImports.biome": true
+	}
+}
+```
+
+## 拡張機能の設定
+
+### `biome.lspBin`
+
+`biome.lspBin`オプションは、拡張機能が使用するBiomeのバイナリを上書きします。
+相対パスを指定した場合は、ワークスペースフォルダが基準パスとして使用されます。
+
+### `biome.rename`
+
+Biomeがワークスペース内の名前変更を処理することを有効にします（実験的機能）。
+
+### `biome.requireConfiguration`
+
+`biome.json`ファイルのないプロジェクトに対して、format、lint、構文エラーを無効にします。
+デフォルトでは有効化されています。
+
+## バージョン管理
+
+[公式ドキュメント](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#prerelease-extensions)で提案された仕様に従っています：
+
+奇数のマイナーバージョンはプレリリース専用として割り振られています。例：`*.5.*`
+偶数のマイナーバージョンは正式リリース専用として割り振られています。例：`*.6.*`
+
+
+## トラブルシューティング
+
+> `@biomejs/biome`をインストールしましたが、拡張機能で「ライブラリを解決できませんでした」という警告が表示されます。
+
+ライブラリ`@biomejs/biome`は、OSやアーキテクチャに基づいてインストールされるいくつかのオプションの依存関係を指定しています。
+
+しかし、拡張機能の読み込み時にバイナリを解決できない場合があります。これはおそらくあなたのパッケージマネージャーによるものです。
+
+**問題を解決するには**、バイナリを手動でインストールしてみてください。警告には、あなたのマシンに適したバイナリが表示されるはずです。
+
+**異なるOSやアーキテクチャを使用するチームで作業する場合は**、すべてのバイナリをインストールすることをお勧めします：
+
+- `@biomejs/cli-darwin-arm64`
+- `@biomejs/cli-darwin-x64`
+- `@biomejs/cli-linux-arm64`
+- `@biomejs/cli-linux-x64`
+- `@biomejs/cli-win32-arm64`
+- `@biomejs/cli-win32-x64`

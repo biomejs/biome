@@ -4,14 +4,10 @@
 .settings-panel {
   flex-shrink: 0;
   overflow: auto;
-  font-size: 14px;
+  font-size: 0.8125rem;
   display: flex;
-  border-right: 1px solid var(--playground-border);
-  background-color: var(--container-color);
-
-  @include dark-mode {
-    background-color: rgba(255, 255, 255, 0.2);
-  }
+  border-right: 1px solid var(--sl-border);
+  background-color: var(--sl-color-bg-nav);
 
   .fields {
     width: 250px;
@@ -22,7 +18,7 @@
   .collapser {
     width: 5px;
     height: 100%;
-    background-color: var(--hard-border-color);
+    background-color: var(--sl-border);
     flex-shrink: 0;
     opacity: 0.5;
     cursor: w-resize;
@@ -70,7 +66,7 @@
   }
 
   select, input[type=number] {
-    width: 110px;
+    width: 120px;
   }
 
   select, input[type=number], .input-container {
@@ -86,13 +82,12 @@
 
   input[type=text], input[type=number] {
     border-radius: 6px;
-    border: 1px solid rgba(0, 0, 0, 0.2);
-    padding: 2px 10px;
+    border: 1px solid var(--sl-color-gray-5);
+    padding: 0 10px;
 
     @include dark-mode {
       color: inherit;
-      background-color: rgba(255, 255, 255, 0.3);
-      border-color: rgba(0, 0, 0, 0.5);
+      background-color: transparent;
     }
   }
 
@@ -101,26 +96,26 @@
     border-radius: 6px;
     padding: 2px 6px;
     color: inherit;
-    border: 1px solid rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--sl-color-gray-5);
 
-    @include dark-mode {
-      border-color: rgba(255, 255, 255, 0.1);
-    }
+		@include dark-mode {
+			border: 1px solid var(--sl-color-gray-4);
+
+			& option {
+				background-color: var(--sl-color-gray-6)
+			}
+		}
   }
 
 
   button {
     @include button;
     border-radius: 0;
-    border: 1px solid rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--sl-color-gray-5);
     padding: 2px 6px;
     color: inherit;
     border-radius: 6px;
     cursor: pointer;
-
-    @include dark-mode {
-      border-color: rgba(255, 255, 255, 0.1);
-    }
 
     &:disabled {
       opacity: 0.5;
@@ -216,7 +211,12 @@
 
       &.active {
         font-weight: bold;
-        background: rgba(#000, 10%);
+
+				background-color: var(--sl-color-gray-6);
+
+				@include dark-mode {
+					background-color: var(--sl-color-gray-5);
+				}
       }
 
       button {

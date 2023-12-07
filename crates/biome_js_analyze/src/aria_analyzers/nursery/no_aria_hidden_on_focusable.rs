@@ -45,7 +45,7 @@ declare_rule! {
     /// - [MDN aria-hidden](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-hidden)
     ///
     pub(crate) NoAriaHiddenOnFocusable {
-        version: "1.3.0",
+        version: "1.4.0",
         name: "noAriaHiddenOnFocusable",
         recommended: true,
         fix_kind: FixKind::Unsafe,

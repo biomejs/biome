@@ -29,3 +29,11 @@ function MyComponent1() {
       console.log(someObj)
   }, [someObj.id]);
 }
+
+let outer = false;
+// Dependencies from outer scope should not be valid
+function MyComponent3() {
+  useEffect(() => {
+      outer = true;
+  }, [outer]);
+}

@@ -5,14 +5,12 @@ description: Learn how to set up a new project with Biome.
 
 import PackageManagerBiomeCommand from "@src/components/PackageManagerBiomeCommand.astro";
 import PackageManagerCommand from "@src/components/PackageManagerCommand.astro";
-import CodeBlockHeader from "@src/components/CodeBlockHeader.astro";
-
 
 ## System Requirements
 
-* Windows (including WSL), macOS, or Linux
-* x86_64 or ARM64
-* Node.js v14.18 or newer (not applicable if you use the standalone executable)
+- Windows (including WSL), macOS, or Linux
+- x86_64 or ARM64
+- Node.js v14.18 or newer (not applicable if you use the standalone executable)
 
 ## Installation
 
@@ -27,17 +25,18 @@ To install Biome, run the following commands in a directory containing a `packag
   bun="add --dev --exact @biomejs/biome"
 />
 
-> **Note**: It is also possible to install Biome globally rather than locally.
+:::note
+It is also possible to install Biome globally rather than locally.
 However, this is not recommended.
+:::
 
 It's **highly recommended** not to use range operators when installing Biome.
 Check the [versioning page](/internals/versioning/) for more information.
 
-
 ## Configuration
 
 We recommend creating a `biome.json` configuration file for each project.
-It eliminates  the need to repeat the CLI options every time you run a command and ensures that Biome applies the same configuration in your editor. If you're happy with Biome's defaults, you don't have to create the configuration.
+It eliminates the need to repeat the CLI options every time you run a command and ensures that Biome applies the same configuration in your editor. If you're happy with Biome's defaults, you don't have to create the configuration.
 
 To create the configuration, run the `init` command in the root folder of your project:
 
@@ -45,11 +44,9 @@ To create the configuration, run the `init` command in the root folder of your p
 
 After running the `init` command, you'll now have a new `biome.json` file in your directory:
 
-<CodeBlockHeader filename="biome.json" />
-
-```json
+```json title="biome.json"
 {
-  "$schema": "https://biomejs.dev/schemas/1.2.2/schema.json",
+  "$schema": "https://biomejs.dev/schemas/1.4.0/schema.json",
   "organizeImports": {
     "enabled": false
   },
@@ -83,6 +80,7 @@ You can apply **both** of them by leveraging the [`check`](/reference/cli#biome-
 <PackageManagerBiomeCommand command="check --apply <files>" />
 
 The command `check` is command meant to run multiple tools at once. Currently, it does:
+
 - format files
 - lint files
 - organize imports
@@ -91,19 +89,17 @@ The command `check` is command meant to run multiple tools at once. Currently, i
 
 We recommend installing an editor plugin to get the most out of Biome. Check out the [editor page](/guides/integrate-in-editor) to know which editors support Biome.
 
-
 ## CI Setup
 
 If you're using Node.js, the recommended way to run Biome in CI is to use [your favourite package manager](/guides/getting-started#installation).
 This ensures that your CI pipeline uses the same version of Biome as you do inside the editor or when running local CLI commands.
 
-
 ## Next Steps
 
 Success! You're now ready to use Biome. 🥳
 
-* Learn more about how to use and configure the [formatter](/formatter)
-* Learn more about how to use and configure the [linter](/linter)
-* Get familiar with the [CLI options](/reference/cli)
-* Get familiar with the [configuration options](/reference/configuration)
-* Join our [community on Discord](https://discord.gg/BypW39g6Yc)
+- Learn more about how to use and configure the [formatter](/formatter)
+- Learn more about how to use and configure the [linter](/linter)
+- Get familiar with the [CLI options](/reference/cli)
+- Get familiar with the [configuration options](/reference/configuration)
+- Join our [community on Discord](https://discord.gg/BypW39g6Yc)

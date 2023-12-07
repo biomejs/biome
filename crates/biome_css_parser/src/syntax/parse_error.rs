@@ -11,15 +11,27 @@ pub(crate) fn expected_number(p: &CssParser, range: TextRange) -> ParseDiagnosti
     expected_node("number", range, p)
 }
 
-pub(crate) fn expected_pseudo_class_nth(p: &CssParser, range: TextRange) -> ParseDiagnostic {
+pub(crate) fn expected_string(p: &CssParser, range: TextRange) -> ParseDiagnostic {
+    expected_node("string", range, p)
+}
+
+pub(crate) fn expected_any_pseudo_class_nth(p: &CssParser, range: TextRange) -> ParseDiagnostic {
     expected_any(&["even", "odd", "n", "<An+B>", "number"], range, p)
 }
 
-pub(crate) fn expect_any_selector(p: &CssParser, range: TextRange) -> ParseDiagnostic {
+pub(crate) fn expected_selector(p: &CssParser, range: TextRange) -> ParseDiagnostic {
     expected_node("selector", range, p)
 }
 
-pub(crate) fn expect_any_sub_selector(p: &CssParser, range: TextRange) -> ParseDiagnostic {
+pub(crate) fn expected_relative_selector(p: &CssParser, range: TextRange) -> ParseDiagnostic {
+    expected_node("relative selector", range, p)
+}
+
+pub(crate) fn expected_compound_selector(p: &CssParser, range: TextRange) -> ParseDiagnostic {
+    expected_node("compound selector", range, p)
+}
+
+pub(crate) fn expected_any_sub_selector(p: &CssParser, range: TextRange) -> ParseDiagnostic {
     expected_any(
         &[
             "id selector",
@@ -33,18 +45,18 @@ pub(crate) fn expect_any_sub_selector(p: &CssParser, range: TextRange) -> ParseD
     )
 }
 
-pub(crate) fn expect_any_attribute_matcher_name(
+pub(crate) fn expected_any_attribute_matcher_name(
     p: &CssParser,
     range: TextRange,
 ) -> ParseDiagnostic {
     expected_any(&["identifier", "string literal"], range, p)
 }
 
-pub(crate) fn expect_any_attribute_modifier(p: &CssParser, range: TextRange) -> ParseDiagnostic {
+pub(crate) fn expected_any_attribute_modifier(p: &CssParser, range: TextRange) -> ParseDiagnostic {
     expected_any(&["s", "S", "i", "I"], range, p)
 }
 
-pub(crate) fn expect_any_pseudo_element(p: &CssParser, range: TextRange) -> ParseDiagnostic {
+pub(crate) fn expected_any_pseudo_element(p: &CssParser, range: TextRange) -> ParseDiagnostic {
     expect_one_of(
         &[
             "after",
@@ -68,7 +80,7 @@ pub(crate) fn expect_any_pseudo_element(p: &CssParser, range: TextRange) -> Pars
     .into_diagnostic(p)
 }
 
-pub(crate) fn expect_any_pseudo_class(p: &CssParser, range: TextRange) -> ParseDiagnostic {
+pub(crate) fn expected_any_pseudo_class(p: &CssParser, range: TextRange) -> ParseDiagnostic {
     expect_one_of(
         &[
             "hover",
@@ -122,6 +134,56 @@ pub(crate) fn expect_any_pseudo_class(p: &CssParser, range: TextRange) -> ParseD
     .into_diagnostic(p)
 }
 
-pub(crate) fn expect_block(p: &CssParser, range: TextRange) -> ParseDiagnostic {
+pub(crate) fn expected_any_at_rule(p: &CssParser, range: TextRange) -> ParseDiagnostic {
+    expect_one_of(
+        &[
+            "charset",
+            "color-profile",
+            "container",
+            "counter-style",
+            "document",
+            "font-face",
+            "font-feature-values",
+            "font-palette-values",
+            "import",
+            "keyframes",
+            "layer",
+            "media",
+            "namespace",
+            "page",
+            "property",
+            "supports",
+            "viewport",
+            "scope",
+        ],
+        range,
+    )
+    .into_diagnostic(p)
+}
+
+pub(crate) fn expected_block(p: &CssParser, range: TextRange) -> ParseDiagnostic {
     expected_node("body", range, p)
+}
+
+pub(crate) fn expected_declaration_item(p: &CssParser, range: TextRange) -> ParseDiagnostic {
+    expected_node("declaration item", range, p)
+}
+pub(crate) fn expected_unit(p: &CssParser, range: TextRange) -> ParseDiagnostic {
+    expected_node("unit", range, p)
+}
+
+pub(crate) fn expected_component_value(p: &CssParser, range: TextRange) -> ParseDiagnostic {
+    expect_one_of(
+        &[
+            "identifier",
+            "string",
+            "number",
+            "dimension",
+            "ratio",
+            "custom property",
+            "function",
+        ],
+        range,
+    )
+    .into_diagnostic(p)
 }

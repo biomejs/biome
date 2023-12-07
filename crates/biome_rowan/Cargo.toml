@@ -33,3 +33,6 @@ serde = ["dep:serde", "schemars", "biome_text_size/serde"]
 [[bench]]
 harness = false
 name    = "mutation"
+
+[lints]
+workspace = true

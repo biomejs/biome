@@ -15,6 +15,16 @@ var x = 1,
 	// comment
     y = 2
 
+let
+	a = 0,
+	b = 1;
+
+let // comment
+	c = 0, // trailing comment
+	/*0*/d;
+
+while(true) var v = 0, u = 1;
+
 ```
 
 # Diagnostics
@@ -77,6 +87,7 @@ invalid.js:8:1 lint/style/useSingleVarDeclarator  FIXABLE  ━━━━━━━
   > 10 │     y = 2
        │     ^^^^^
     11 │ 
+    12 │ let
   
   i Unsafe fix: Break out into multiple declarations
   
@@ -89,6 +100,86 @@ invalid.js:8:1 lint/style/useSingleVarDeclarator  FIXABLE  ━━━━━━━
         9 │ + //·comment
        10 │ + var·y·=·2
     11 11 │   
+    12 12 │   let
+  
+
+```
+
+```
+invalid.js:12:1 lint/style/useSingleVarDeclarator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Declare variables separately
+  
+    10 │     y = 2
+    11 │ 
+  > 12 │ let
+       │ ^^^
+  > 13 │ 	a = 0,
+  > 14 │ 	b = 1;
+       │ 	^^^^^^
+    15 │ 
+    16 │ let // comment
+  
+  i Unsafe fix: Break out into multiple declarations
+  
+    10 10 │       y = 2
+    11 11 │   
+    12    │ - let
+    13    │ - → a·=·0,
+    14    │ - → b·=·1;
+       12 │ + let·a·=·0;
+       13 │ + let·b·=·1;
+    15 14 │   
+    16 15 │   let // comment
+  
+
+```
+
+```
+invalid.js:16:1 lint/style/useSingleVarDeclarator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Declare variables separately
+  
+    14 │ 	b = 1;
+    15 │ 
+  > 16 │ let // comment
+       │ ^^^^^^^^^^^^^^
+  > 17 │ 	c = 0, // trailing comment
+  > 18 │ 	/*0*/d;
+       │ 	^^^^^^^
+    19 │ 
+    20 │ while(true) var v = 0, u = 1;
+  
+  i Unsafe fix: Break out into multiple declarations
+  
+    12 12 │   let
+    13 13 │   	a = 0,
+    14    │ - → b·=·1;
+    15    │ - 
+    16    │ - let·//·comment
+    17    │ - → c·=·0,·//·trailing·comment
+    18    │ - → /*0*/d;
+       14 │ + → b·=·1;//·comment
+       15 │ + 
+       16 │ + let·c·=·0;·//·trailing·comment
+       17 │ + /*0*/
+       18 │ + let·d;
+    19 19 │   
+    20 20 │   while(true) var v = 0, u = 1;
+  
+
+```
+
+```
+invalid.js:20:13 lint/style/useSingleVarDeclarator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Declare variables separately
+  
+    18 │ 	/*0*/d;
+    19 │ 
+  > 20 │ while(true) var v = 0, u = 1;
+       │             ^^^^^^^^^^^^^^^^^
+    21 │ 
   
 
 ```

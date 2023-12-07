@@ -658,6 +658,7 @@ impl AnyJsAssignmentLike {
     fn layout(
         &self,
         is_left_short: bool,
+        left_may_break: bool,
         f: &mut Formatter<JsFormatContext>,
     ) -> FormatResult<AssignmentLikeLayout> {
         if self.has_only_left_hand_side() {
@@ -726,17 +727,19 @@ impl AnyJsAssignmentLike {
             return Ok(AssignmentLikeLayout::BreakAfterOperator);
         }
 
-        if matches!(
-            right_expression,
-            Some(
-                AnyJsExpression::JsClassExpression(_)
-                    | AnyJsExpression::JsTemplateExpression(_)
-                    | AnyJsExpression::AnyJsLiteralExpression(
-                        AnyJsLiteralExpression::JsBooleanLiteralExpression(_)
-                            | AnyJsLiteralExpression::JsNumberLiteralExpression(_)
-                    )
+        if !left_may_break
+            && matches!(
+                right_expression,
+                Some(
+                    AnyJsExpression::JsClassExpression(_)
+                        | AnyJsExpression::JsTemplateExpression(_)
+                        | AnyJsExpression::AnyJsLiteralExpression(
+                            AnyJsLiteralExpression::JsBooleanLiteralExpression(_)
+                                | AnyJsLiteralExpression::JsNumberLiteralExpression(_)
+                        )
+                )
             )
-        ) {
+        {
             return Ok(AssignmentLikeLayout::NeverBreakAfterOperator);
         }
 
@@ -1011,11 +1014,12 @@ impl Format<JsFormatContext> for AnyJsAssignmentLike {
             let mut buffer = VecBuffer::new(f.state_mut());
             let is_left_short = self.write_left(&mut Formatter::new(&mut buffer))?;
             let formatted_left = buffer.into_vec();
+            let left_may_break = formatted_left.may_directly_break();
 
             // Compare name only if we are in a position of computing it.
             // If not (for example, left is not an identifier), then let's fallback to false,
             // so we can continue the chain of checks
-            let layout = self.layout(is_left_short, f)?;
+            let layout = self.layout(is_left_short, left_may_break, f)?;
 
             let left = format_once(|f| f.write_elements(formatted_left));
             let right = format_with(|f| self.write_right(f, layout));

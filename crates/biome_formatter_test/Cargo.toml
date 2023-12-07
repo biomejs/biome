@@ -28,3 +28,6 @@ similar           = "2.1.0"
 similar-asserts   = "1.2.0"
 
 [dev-dependencies]
+
+[lints]
+workspace = true

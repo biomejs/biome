@@ -44,7 +44,6 @@ declare_rule! {
     /// }
     /// ```
     ///
-    /// ```
     pub(crate) NoConstructorReturn {
         version: "1.0.0",
         name: "noConstructorReturn",

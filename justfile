@@ -5,6 +5,7 @@ alias f := format
 alias t := test
 alias r := ready
 alias l := lint
+alias qt := test-quick
 
 
 # Installs the tools needed to develop
@@ -100,6 +101,10 @@ test-lintrule name:
 test-transformation name:
   just _touch crates/biome_js_transform/tests/spec_tests.rs
   cargo test -p biome_js_transform -- {{snakecase(name)}}
+
+# Run the quick_test for the given package.
+test-quick package:
+  cargo test -p {{package}} --test quick_test -- quick_test --nocapture
 
 
 # Alias for `cargo lint`, it runs clippy on the whole codebase

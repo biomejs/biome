@@ -1,36 +1,64 @@
 ---
 import "@src/styles/blog/index.scss";
+import { getEntry, type CollectionEntry } from "astro:content";
+import { Image } from "astro:assets";
+
 export interface Props {
-	frontmatter: {
-		coauthorName?: string;
-		coauthorAvatar?: string;
-		authorName: string;
-		authorUrl?: string;
-		authorAvatar?: string;
-		pubDate: string;
-	};
+  post: CollectionEntry<"blog">["data"];
 }
 
-const {coauthorName, coauthorAvatar, authorName, authorUrl, authorAvatar, pubDate} = Astro.props.frontmatter;
+async function getAuthorsData(
+  authors: CollectionEntry<"authors">["id"][]
+): Promise<CollectionEntry<"authors">[]> {
+  const authorsData = await Promise.all(
+    authors.map((author) => getEntry("authors", author))
+  );
+  return authorsData;
+}
+
+const { post } = Astro.props;
+const authors = await getAuthorsData(
+  post.authors as CollectionEntry<"authors">["id"][]
+);
 ---
 
 <div class="blog-info">
-	<div>
+  <span class="avatar-stack">
+    {
+      authors.map(({ data: author }) => (
+        <span class="avatar">
+          <Image src={author.avatar} alt="" height="36" width="36" />
+        </span>
+      ))
+    }
+  </span>
 
-		<span class="avatar-stack">
-			<span class="avatar"><img src={authorAvatar}></span>
-			{coauthorAvatar && <span class="avatar"><img src={coauthorAvatar}></span>}
-		</span>
+  <div class="author-list">
+    {
+      authors.map((author, index) => (
+        <>
+          {author.data.url ? (
+            <a href={author.data.url}>
+              <span>{author.data.name}</span>
+            </a>
+          ) : (
+            <span>{author.data.name}</span>
+          )}
+          {authors.length > 1 && index + 1 == authors.length - 1 ? " & " : ""}
+          {authors.length > 1 && index + 1 < authors.length - 1 ? ", " : ""}
+        </>
+      ))
+    }
+  </div>
 
-		{authorUrl ? <a href={authorUrl}><span>{authorName}</span></a> : <span>{authorName}</span>}
-
-		{coauthorName && <span> &amp; {coauthorName}</span>}
-	</div>
-
-	<time datetime={pubDate}>{new Date(pubDate).toLocaleDateString(undefined, {
-		year: "numeric",
-		month: "long",
-		day: "numeric",
-		timeZone: "UTC",
-	})}</time>
+  <time datetime={post.pubDate.toString()}
+    >{
+      post.pubDate.toLocaleDateString(undefined, {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        timeZone: "UTC",
+      })
+    }</time
+  >
 </div>

@@ -5,14 +5,25 @@ expression: missingDependenciesInvalid.js
 # Input
 ```js
 import React from "react";
-import { useEffect, useCallback, useMemo, useLayoutEffect, useInsertionEffect, useImperativeHandle } from "react";
+import {
+	useEffect,
+	useCallback,
+	useMemo,
+	useLayoutEffect,
+	useInsertionEffect,
+	useImperativeHandle,
+	useState,
+	useReducer,
+	useTransition,
+} from "react";
+import { useRef } from "preact/hooks"
 
 function MyComponent1() {
     let a = 1;
     const b = a + 1;
     useEffect(() => {
       console.log(a, b);
-    });
+    }, []);
 }
 
 // interaction with other react hooks
@@ -44,12 +55,12 @@ function MyComponent2() {
 
 function MyComponent3() {
   let a = 1;
-  useEffect(() => console.log(a));
-  useCallback(() => console.log(a));
-  useMemo(() => console.log(a));
-  useImperativeHandle(ref, () => console.log(a));
-  useLayoutEffect(() => console.log(a));
-  useInsertionEffect(() => console.log(a));
+  useEffect(() => console.log(a), []);
+  useCallback(() => console.log(a), []);
+  useMemo(() => console.log(a), []);
+  useImperativeHandle(ref, () => console.log(a), []);
+  useLayoutEffect(() => console.log(a), []);
+  useInsertionEffect(() => console.log(a), []);
 }
 
 // inner closures
@@ -77,19 +88,19 @@ function MyComponent6() {
   let someObj = getObj();
   useEffect(() => {
       console.log(someObj.name)
-  });
+  }, []);
 }
 
 const MyComponent7 = React.memo(function ({ a }) {
   useEffect(() => {
       console.log(a);
-  });
+  }, []);
 });
 
 const MyComponent8 = React.memo(({ a }) => {
   useEffect(() => {
       console.log(a);
-  });
+  }, []);
 });
 
 // exported functions
@@ -97,14 +108,14 @@ export function MyComponent9() {
   let a = 1;
   useEffect(() => {
       console.log(a);
-  });
+  }, []);
 }
 
 export default function MyComponent10() {
   let a = 1;
   useEffect(() => {
       console.log(a);
-  });
+  }, []);
 }
 
 // named function
@@ -112,14 +123,14 @@ function MyComponent11() {
   let a = 1;
   useEffect(function inner() {
       console.log(a);
-  });
+  }, []);
 }
 
 function MyComponent12() {
   let a = 1;
   useEffect(async function inner() {
       console.log(a);
-  });
+  }, []);
 }
 
 // React.useXXX case
@@ -127,343 +138,260 @@ function MyComponent13() {
   let a = 1;
   React.useEffect(() => {
       console.log(a);
-  });
+  }, []);
+}
+
+// imports from other libraries
+function MyComponent14() {
+	const ref = useRef();
+	useEffect(() => {
+			console.log(ref.current);
+	}, []);
+}
+
+// local overrides
+function MyComponent15() {
+	const useRef = () => {
+		return { current: 1 }
+	}
+	const ref = useRef();
+	useEffect(() => {
+			console.log(ref.current);
+	}, []);
 }
 
 ```
 
 # Diagnostics
 ```
-missingDependenciesInvalid.js:7:5 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━━
+missingDependenciesInvalid.js:18:5 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━
 
   ! This hook does not specify all of its dependencies.
   
-    5 │     let a = 1;
-    6 │     const b = a + 1;
-  > 7 │     useEffect(() => {
-      │     ^^^^^^^^^
-    8 │       console.log(a, b);
-    9 │     });
+    16 │     let a = 1;
+    17 │     const b = a + 1;
+  > 18 │     useEffect(() => {
+       │     ^^^^^^^^^
+    19 │       console.log(a, b);
+    20 │     }, []);
   
   i This dependency is not specified in the hook dependency list.
   
-     6 │     const b = a + 1;
-     7 │     useEffect(() => {
-   > 8 │       console.log(a, b);
+    17 │     const b = a + 1;
+    18 │     useEffect(() => {
+  > 19 │       console.log(a, b);
        │                   ^
-     9 │     });
-    10 │ }
+    20 │     }, []);
+    21 │ }
+  
+  i Either include it or remove the dependency array
   
 
 ```
 
 ```
-missingDependenciesInvalid.js:7:5 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━━
+missingDependenciesInvalid.js:18:5 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━
 
   ! This hook does not specify all of its dependencies.
   
-    5 │     let a = 1;
-    6 │     const b = a + 1;
-  > 7 │     useEffect(() => {
-      │     ^^^^^^^^^
-    8 │       console.log(a, b);
-    9 │     });
+    16 │     let a = 1;
+    17 │     const b = a + 1;
+  > 18 │     useEffect(() => {
+       │     ^^^^^^^^^
+    19 │       console.log(a, b);
+    20 │     }, []);
   
   i This dependency is not specified in the hook dependency list.
   
-     6 │     const b = a + 1;
-     7 │     useEffect(() => {
-   > 8 │       console.log(a, b);
+    17 │     const b = a + 1;
+    18 │     useEffect(() => {
+  > 19 │       console.log(a, b);
        │                      ^
-     9 │     });
-    10 │ }
+    20 │     }, []);
+    21 │ }
+  
+  i Either include it or remove the dependency array
   
 
 ```
 
 ```
-missingDependenciesInvalid.js:21:3 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━
+missingDependenciesInvalid.js:32:3 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━
 
   ! This hook does not specify all of its dependencies.
   
-    19 │   const deferredValue = useDeferredValue(value);
-    20 │   const [isPending, startTransition] = useTransition();
-  > 21 │   useEffect(() => {
+    30 │   const deferredValue = useDeferredValue(value);
+    31 │   const [isPending, startTransition] = useTransition();
+  > 32 │   useEffect(() => {
        │   ^^^^^^^^^
-    22 │       console.log(name);
-    23 │       setName(1);
+    33 │       console.log(name);
+    34 │       setName(1);
   
   i This dependency is not specified in the hook dependency list.
   
-    28 │       console.log(memoizedCallback);
-    29 │       console.log(memoizedValue);
-  > 30 │       console.log(deferredValue);
+    39 │       console.log(memoizedCallback);
+    40 │       console.log(memoizedValue);
+  > 41 │       console.log(deferredValue);
        │                   ^^^^^^^^^^^^^
-    31 │ 
-    32 │       console.log(isPending);
+    42 │ 
+    43 │       console.log(isPending);
+  
+  i Either include it or remove the dependency array
   
 
 ```
 
 ```
-missingDependenciesInvalid.js:21:3 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━
+missingDependenciesInvalid.js:32:3 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━
 
   ! This hook does not specify all of its dependencies.
   
-    19 │   const deferredValue = useDeferredValue(value);
-    20 │   const [isPending, startTransition] = useTransition();
-  > 21 │   useEffect(() => {
+    30 │   const deferredValue = useDeferredValue(value);
+    31 │   const [isPending, startTransition] = useTransition();
+  > 32 │   useEffect(() => {
        │   ^^^^^^^^^
-    22 │       console.log(name);
-    23 │       setName(1);
+    33 │       console.log(name);
+    34 │       setName(1);
   
   i This dependency is not specified in the hook dependency list.
   
-    26 │       dispatch(1);
-    27 │ 
-  > 28 │       console.log(memoizedCallback);
+    37 │       dispatch(1);
+    38 │ 
+  > 39 │       console.log(memoizedCallback);
        │                   ^^^^^^^^^^^^^^^^
-    29 │       console.log(memoizedValue);
-    30 │       console.log(deferredValue);
+    40 │       console.log(memoizedValue);
+    41 │       console.log(deferredValue);
+  
+  i Either include it or remove the dependency array
   
 
 ```
 
 ```
-missingDependenciesInvalid.js:21:3 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━
+missingDependenciesInvalid.js:32:3 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━
 
   ! This hook does not specify all of its dependencies.
   
-    19 │   const deferredValue = useDeferredValue(value);
-    20 │   const [isPending, startTransition] = useTransition();
-  > 21 │   useEffect(() => {
+    30 │   const deferredValue = useDeferredValue(value);
+    31 │   const [isPending, startTransition] = useTransition();
+  > 32 │   useEffect(() => {
        │   ^^^^^^^^^
-    22 │       console.log(name);
-    23 │       setName(1);
+    33 │       console.log(name);
+    34 │       setName(1);
   
   i This dependency is not specified in the hook dependency list.
   
-    23 │       setName(1);
-    24 │ 
-  > 25 │       console.log(state);
+    34 │       setName(1);
+    35 │ 
+  > 36 │       console.log(state);
        │                   ^^^^^
-    26 │       dispatch(1);
-    27 │ 
+    37 │       dispatch(1);
+    38 │ 
+  
+  i Either include it or remove the dependency array
   
 
 ```
 
 ```
-missingDependenciesInvalid.js:21:3 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━
+missingDependenciesInvalid.js:32:3 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━
 
   ! This hook does not specify all of its dependencies.
   
-    19 │   const deferredValue = useDeferredValue(value);
-    20 │   const [isPending, startTransition] = useTransition();
-  > 21 │   useEffect(() => {
+    30 │   const deferredValue = useDeferredValue(value);
+    31 │   const [isPending, startTransition] = useTransition();
+  > 32 │   useEffect(() => {
        │   ^^^^^^^^^
-    22 │       console.log(name);
-    23 │       setName(1);
+    33 │       console.log(name);
+    34 │       setName(1);
   
   i This dependency is not specified in the hook dependency list.
   
-    20 │   const [isPending, startTransition] = useTransition();
-    21 │   useEffect(() => {
-  > 22 │       console.log(name);
+    31 │   const [isPending, startTransition] = useTransition();
+    32 │   useEffect(() => {
+  > 33 │       console.log(name);
        │                   ^^^^
-    23 │       setName(1);
-    24 │ 
+    34 │       setName(1);
+    35 │ 
+  
+  i Either include it or remove the dependency array
   
 
 ```
 
 ```
-missingDependenciesInvalid.js:21:3 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━
+missingDependenciesInvalid.js:32:3 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━
 
   ! This hook does not specify all of its dependencies.
   
-    19 │   const deferredValue = useDeferredValue(value);
-    20 │   const [isPending, startTransition] = useTransition();
-  > 21 │   useEffect(() => {
+    30 │   const deferredValue = useDeferredValue(value);
+    31 │   const [isPending, startTransition] = useTransition();
+  > 32 │   useEffect(() => {
        │   ^^^^^^^^^
-    22 │       console.log(name);
-    23 │       setName(1);
+    33 │       console.log(name);
+    34 │       setName(1);
   
   i This dependency is not specified in the hook dependency list.
   
-    30 │       console.log(deferredValue);
-    31 │ 
-  > 32 │       console.log(isPending);
+    41 │       console.log(deferredValue);
+    42 │ 
+  > 43 │       console.log(isPending);
        │                   ^^^^^^^^^
-    33 │       startTransition();
-    34 │   }, []);
+    44 │       startTransition();
+    45 │   }, []);
+  
+  i Either include it or remove the dependency array
   
 
 ```
 
 ```
-missingDependenciesInvalid.js:21:3 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━
+missingDependenciesInvalid.js:32:3 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━
 
   ! This hook does not specify all of its dependencies.
   
-    19 │   const deferredValue = useDeferredValue(value);
-    20 │   const [isPending, startTransition] = useTransition();
-  > 21 │   useEffect(() => {
+    30 │   const deferredValue = useDeferredValue(value);
+    31 │   const [isPending, startTransition] = useTransition();
+  > 32 │   useEffect(() => {
        │   ^^^^^^^^^
-    22 │       console.log(name);
-    23 │       setName(1);
+    33 │       console.log(name);
+    34 │       setName(1);
   
   i This dependency is not specified in the hook dependency list.
   
-    28 │       console.log(memoizedCallback);
-  > 29 │       console.log(memoizedValue);
+    39 │       console.log(memoizedCallback);
+  > 40 │       console.log(memoizedValue);
        │                   ^^^^^^^^^^^^^
-    30 │       console.log(deferredValue);
-    31 │ 
+    41 │       console.log(deferredValue);
+    42 │ 
+  
+  i Either include it or remove the dependency array
   
 
 ```
 
 ```
-missingDependenciesInvalid.js:41:3 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━
+missingDependenciesInvalid.js:52:3 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━
 
   ! This hook does not specify all of its dependencies.
   
-    39 │ function MyComponent3() {
-    40 │   let a = 1;
-  > 41 │   useEffect(() => console.log(a));
+    50 │ function MyComponent3() {
+    51 │   let a = 1;
+  > 52 │   useEffect(() => console.log(a), []);
        │   ^^^^^^^^^
-    42 │   useCallback(() => console.log(a));
-    43 │   useMemo(() => console.log(a));
+    53 │   useCallback(() => console.log(a), []);
+    54 │   useMemo(() => console.log(a), []);
   
   i This dependency is not specified in the hook dependency list.
   
-    39 │ function MyComponent3() {
-    40 │   let a = 1;
-  > 41 │   useEffect(() => console.log(a));
+    50 │ function MyComponent3() {
+    51 │   let a = 1;
+  > 52 │   useEffect(() => console.log(a), []);
        │                               ^
-    42 │   useCallback(() => console.log(a));
-    43 │   useMemo(() => console.log(a));
+    53 │   useCallback(() => console.log(a), []);
+    54 │   useMemo(() => console.log(a), []);
   
-
-```
-
-```
-missingDependenciesInvalid.js:42:3 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This hook does not specify all of its dependencies.
-  
-    40 │   let a = 1;
-    41 │   useEffect(() => console.log(a));
-  > 42 │   useCallback(() => console.log(a));
-       │   ^^^^^^^^^^^
-    43 │   useMemo(() => console.log(a));
-    44 │   useImperativeHandle(ref, () => console.log(a));
-  
-  i This dependency is not specified in the hook dependency list.
-  
-    40 │   let a = 1;
-    41 │   useEffect(() => console.log(a));
-  > 42 │   useCallback(() => console.log(a));
-       │                                 ^
-    43 │   useMemo(() => console.log(a));
-    44 │   useImperativeHandle(ref, () => console.log(a));
-  
-
-```
-
-```
-missingDependenciesInvalid.js:43:3 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This hook does not specify all of its dependencies.
-  
-    41 │   useEffect(() => console.log(a));
-    42 │   useCallback(() => console.log(a));
-  > 43 │   useMemo(() => console.log(a));
-       │   ^^^^^^^
-    44 │   useImperativeHandle(ref, () => console.log(a));
-    45 │   useLayoutEffect(() => console.log(a));
-  
-  i This dependency is not specified in the hook dependency list.
-  
-    41 │   useEffect(() => console.log(a));
-    42 │   useCallback(() => console.log(a));
-  > 43 │   useMemo(() => console.log(a));
-       │                             ^
-    44 │   useImperativeHandle(ref, () => console.log(a));
-    45 │   useLayoutEffect(() => console.log(a));
-  
-
-```
-
-```
-missingDependenciesInvalid.js:44:3 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This hook does not specify all of its dependencies.
-  
-    42 │   useCallback(() => console.log(a));
-    43 │   useMemo(() => console.log(a));
-  > 44 │   useImperativeHandle(ref, () => console.log(a));
-       │   ^^^^^^^^^^^^^^^^^^^
-    45 │   useLayoutEffect(() => console.log(a));
-    46 │   useInsertionEffect(() => console.log(a));
-  
-  i This dependency is not specified in the hook dependency list.
-  
-    42 │   useCallback(() => console.log(a));
-    43 │   useMemo(() => console.log(a));
-  > 44 │   useImperativeHandle(ref, () => console.log(a));
-       │                                              ^
-    45 │   useLayoutEffect(() => console.log(a));
-    46 │   useInsertionEffect(() => console.log(a));
-  
-
-```
-
-```
-missingDependenciesInvalid.js:45:3 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This hook does not specify all of its dependencies.
-  
-    43 │   useMemo(() => console.log(a));
-    44 │   useImperativeHandle(ref, () => console.log(a));
-  > 45 │   useLayoutEffect(() => console.log(a));
-       │   ^^^^^^^^^^^^^^^
-    46 │   useInsertionEffect(() => console.log(a));
-    47 │ }
-  
-  i This dependency is not specified in the hook dependency list.
-  
-    43 │   useMemo(() => console.log(a));
-    44 │   useImperativeHandle(ref, () => console.log(a));
-  > 45 │   useLayoutEffect(() => console.log(a));
-       │                                     ^
-    46 │   useInsertionEffect(() => console.log(a));
-    47 │ }
-  
-
-```
-
-```
-missingDependenciesInvalid.js:46:3 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This hook does not specify all of its dependencies.
-  
-    44 │   useImperativeHandle(ref, () => console.log(a));
-    45 │   useLayoutEffect(() => console.log(a));
-  > 46 │   useInsertionEffect(() => console.log(a));
-       │   ^^^^^^^^^^^^^^^^^^
-    47 │ }
-    48 │ 
-  
-  i This dependency is not specified in the hook dependency list.
-  
-    44 │   useImperativeHandle(ref, () => console.log(a));
-    45 │   useLayoutEffect(() => console.log(a));
-  > 46 │   useInsertionEffect(() => console.log(a));
-       │                                        ^
-    47 │ }
-    48 │ 
+  i Either include it or remove the dependency array
   
 
 ```
@@ -473,244 +401,446 @@ missingDependenciesInvalid.js:53:3 lint/correctness/useExhaustiveDependencies �
 
   ! This hook does not specify all of its dependencies.
   
-    51 │ function MyComponent4() {
-    52 │   let a = 1;
-  > 53 │   useEffect(() => {
-       │   ^^^^^^^^^
-    54 │       return () => console.log(a)
-    55 │   }, []);
+    51 │   let a = 1;
+    52 │   useEffect(() => console.log(a), []);
+  > 53 │   useCallback(() => console.log(a), []);
+       │   ^^^^^^^^^^^
+    54 │   useMemo(() => console.log(a), []);
+    55 │   useImperativeHandle(ref, () => console.log(a), []);
   
   i This dependency is not specified in the hook dependency list.
   
-    52 │   let a = 1;
-    53 │   useEffect(() => {
-  > 54 │       return () => console.log(a)
+    51 │   let a = 1;
+    52 │   useEffect(() => console.log(a), []);
+  > 53 │   useCallback(() => console.log(a), []);
+       │                                 ^
+    54 │   useMemo(() => console.log(a), []);
+    55 │   useImperativeHandle(ref, () => console.log(a), []);
+  
+  i Either include it or remove the dependency array
+  
+
+```
+
+```
+missingDependenciesInvalid.js:54:3 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This hook does not specify all of its dependencies.
+  
+    52 │   useEffect(() => console.log(a), []);
+    53 │   useCallback(() => console.log(a), []);
+  > 54 │   useMemo(() => console.log(a), []);
+       │   ^^^^^^^
+    55 │   useImperativeHandle(ref, () => console.log(a), []);
+    56 │   useLayoutEffect(() => console.log(a), []);
+  
+  i This dependency is not specified in the hook dependency list.
+  
+    52 │   useEffect(() => console.log(a), []);
+    53 │   useCallback(() => console.log(a), []);
+  > 54 │   useMemo(() => console.log(a), []);
+       │                             ^
+    55 │   useImperativeHandle(ref, () => console.log(a), []);
+    56 │   useLayoutEffect(() => console.log(a), []);
+  
+  i Either include it or remove the dependency array
+  
+
+```
+
+```
+missingDependenciesInvalid.js:55:3 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This hook does not specify all of its dependencies.
+  
+    53 │   useCallback(() => console.log(a), []);
+    54 │   useMemo(() => console.log(a), []);
+  > 55 │   useImperativeHandle(ref, () => console.log(a), []);
+       │   ^^^^^^^^^^^^^^^^^^^
+    56 │   useLayoutEffect(() => console.log(a), []);
+    57 │   useInsertionEffect(() => console.log(a), []);
+  
+  i This dependency is not specified in the hook dependency list.
+  
+    53 │   useCallback(() => console.log(a), []);
+    54 │   useMemo(() => console.log(a), []);
+  > 55 │   useImperativeHandle(ref, () => console.log(a), []);
+       │                                              ^
+    56 │   useLayoutEffect(() => console.log(a), []);
+    57 │   useInsertionEffect(() => console.log(a), []);
+  
+  i Either include it or remove the dependency array
+  
+
+```
+
+```
+missingDependenciesInvalid.js:56:3 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This hook does not specify all of its dependencies.
+  
+    54 │   useMemo(() => console.log(a), []);
+    55 │   useImperativeHandle(ref, () => console.log(a), []);
+  > 56 │   useLayoutEffect(() => console.log(a), []);
+       │   ^^^^^^^^^^^^^^^
+    57 │   useInsertionEffect(() => console.log(a), []);
+    58 │ }
+  
+  i This dependency is not specified in the hook dependency list.
+  
+    54 │   useMemo(() => console.log(a), []);
+    55 │   useImperativeHandle(ref, () => console.log(a), []);
+  > 56 │   useLayoutEffect(() => console.log(a), []);
+       │                                     ^
+    57 │   useInsertionEffect(() => console.log(a), []);
+    58 │ }
+  
+  i Either include it or remove the dependency array
+  
+
+```
+
+```
+missingDependenciesInvalid.js:57:3 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This hook does not specify all of its dependencies.
+  
+    55 │   useImperativeHandle(ref, () => console.log(a), []);
+    56 │   useLayoutEffect(() => console.log(a), []);
+  > 57 │   useInsertionEffect(() => console.log(a), []);
+       │   ^^^^^^^^^^^^^^^^^^
+    58 │ }
+    59 │ 
+  
+  i This dependency is not specified in the hook dependency list.
+  
+    55 │   useImperativeHandle(ref, () => console.log(a), []);
+    56 │   useLayoutEffect(() => console.log(a), []);
+  > 57 │   useInsertionEffect(() => console.log(a), []);
+       │                                        ^
+    58 │ }
+    59 │ 
+  
+  i Either include it or remove the dependency array
+  
+
+```
+
+```
+missingDependenciesInvalid.js:64:3 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This hook does not specify all of its dependencies.
+  
+    62 │ function MyComponent4() {
+    63 │   let a = 1;
+  > 64 │   useEffect(() => {
+       │   ^^^^^^^^^
+    65 │       return () => console.log(a)
+    66 │   }, []);
+  
+  i This dependency is not specified in the hook dependency list.
+  
+    63 │   let a = 1;
+    64 │   useEffect(() => {
+  > 65 │       return () => console.log(a)
        │                                ^
-    55 │   }, []);
-    56 │ }
+    66 │   }, []);
+    67 │ }
+  
+  i Either include it or remove the dependency array
   
 
 ```
 
 ```
-missingDependenciesInvalid.js:62:3 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━
+missingDependenciesInvalid.js:73:3 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━
 
   ! This hook does not specify all of its dependencies.
   
-    60 │ function MyComponent5() {
-    61 │   let a = 1;
-  > 62 │   useEffect(() => {
+    71 │ function MyComponent5() {
+    72 │   let a = 1;
+  > 73 │   useEffect(() => {
        │   ^^^^^^^^^
-    63 │     console.log(a);
-    64 │     return () => console.log(a);
+    74 │     console.log(a);
+    75 │     return () => console.log(a);
   
   i This dependency is not specified in the hook dependency list.
   
-    61 │   let a = 1;
-    62 │   useEffect(() => {
-  > 63 │     console.log(a);
+    72 │   let a = 1;
+    73 │   useEffect(() => {
+  > 74 │     console.log(a);
        │                 ^
-    64 │     return () => console.log(a);
-    65 │   }, []);
+    75 │     return () => console.log(a);
+    76 │   }, []);
   
   i This dependency is not specified in the hook dependency list.
   
-    62 │   useEffect(() => {
-    63 │     console.log(a);
-  > 64 │     return () => console.log(a);
+    73 │   useEffect(() => {
+    74 │     console.log(a);
+  > 75 │     return () => console.log(a);
        │                              ^
-    65 │   }, []);
-    66 │ }
+    76 │   }, []);
+    77 │ }
+  
+  i Either include them or remove the dependency array
   
 
 ```
 
 ```
-missingDependenciesInvalid.js:72:3 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━
+missingDependenciesInvalid.js:83:3 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━
 
   ! This hook does not specify all of its dependencies.
   
-    70 │ function MyComponent6() {
-    71 │   let someObj = getObj();
-  > 72 │   useEffect(() => {
+    81 │ function MyComponent6() {
+    82 │   let someObj = getObj();
+  > 83 │   useEffect(() => {
        │   ^^^^^^^^^
-    73 │       console.log(someObj.name)
-    74 │   });
+    84 │       console.log(someObj.name)
+    85 │   }, []);
   
   i This dependency is not specified in the hook dependency list.
   
-    71 │   let someObj = getObj();
-    72 │   useEffect(() => {
-  > 73 │       console.log(someObj.name)
+    82 │   let someObj = getObj();
+    83 │   useEffect(() => {
+  > 84 │       console.log(someObj.name)
        │                   ^^^^^^^^^^^^
-    74 │   });
-    75 │ }
+    85 │   }, []);
+    86 │ }
+  
+  i Either include it or remove the dependency array
   
 
 ```
 
 ```
-missingDependenciesInvalid.js:78:3 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━
+missingDependenciesInvalid.js:89:3 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━
 
   ! This hook does not specify all of its dependencies.
   
-    77 │ const MyComponent7 = React.memo(function ({ a }) {
-  > 78 │   useEffect(() => {
+    88 │ const MyComponent7 = React.memo(function ({ a }) {
+  > 89 │   useEffect(() => {
        │   ^^^^^^^^^
-    79 │       console.log(a);
-    80 │   });
+    90 │       console.log(a);
+    91 │   }, []);
   
   i This dependency is not specified in the hook dependency list.
   
-    77 │ const MyComponent7 = React.memo(function ({ a }) {
-    78 │   useEffect(() => {
-  > 79 │       console.log(a);
+    88 │ const MyComponent7 = React.memo(function ({ a }) {
+    89 │   useEffect(() => {
+  > 90 │       console.log(a);
        │                   ^
-    80 │   });
-    81 │ });
+    91 │   }, []);
+    92 │ });
+  
+  i Either include it or remove the dependency array
   
 
 ```
 
 ```
-missingDependenciesInvalid.js:84:3 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━
+missingDependenciesInvalid.js:95:3 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━
 
   ! This hook does not specify all of its dependencies.
   
-    83 │ const MyComponent8 = React.memo(({ a }) => {
-  > 84 │   useEffect(() => {
+    94 │ const MyComponent8 = React.memo(({ a }) => {
+  > 95 │   useEffect(() => {
        │   ^^^^^^^^^
-    85 │       console.log(a);
-    86 │   });
+    96 │       console.log(a);
+    97 │   }, []);
   
   i This dependency is not specified in the hook dependency list.
   
-    83 │ const MyComponent8 = React.memo(({ a }) => {
-    84 │   useEffect(() => {
-  > 85 │       console.log(a);
+    94 │ const MyComponent8 = React.memo(({ a }) => {
+    95 │   useEffect(() => {
+  > 96 │       console.log(a);
        │                   ^
-    86 │   });
-    87 │ });
+    97 │   }, []);
+    98 │ });
+  
+  i Either include it or remove the dependency array
   
 
 ```
 
 ```
-missingDependenciesInvalid.js:92:3 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━
+missingDependenciesInvalid.js:103:3 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━
 
   ! This hook does not specify all of its dependencies.
   
-    90 │ export function MyComponent9() {
-    91 │   let a = 1;
-  > 92 │   useEffect(() => {
-       │   ^^^^^^^^^
-    93 │       console.log(a);
-    94 │   });
-  
-  i This dependency is not specified in the hook dependency list.
-  
-    91 │   let a = 1;
-    92 │   useEffect(() => {
-  > 93 │       console.log(a);
-       │                   ^
-    94 │   });
-    95 │ }
-  
-
-```
-
-```
-missingDependenciesInvalid.js:99:3 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This hook does not specify all of its dependencies.
-  
-     97 │ export default function MyComponent10() {
-     98 │   let a = 1;
-   > 99 │   useEffect(() => {
+    101 │ export function MyComponent9() {
+    102 │   let a = 1;
+  > 103 │   useEffect(() => {
         │   ^^^^^^^^^
-    100 │       console.log(a);
-    101 │   });
+    104 │       console.log(a);
+    105 │   }, []);
   
   i This dependency is not specified in the hook dependency list.
   
-     98 │   let a = 1;
-     99 │   useEffect(() => {
-  > 100 │       console.log(a);
+    102 │   let a = 1;
+    103 │   useEffect(() => {
+  > 104 │       console.log(a);
         │                   ^
-    101 │   });
-    102 │ }
+    105 │   }, []);
+    106 │ }
+  
+  i Either include it or remove the dependency array
   
 
 ```
 
 ```
-missingDependenciesInvalid.js:107:3 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━
+missingDependenciesInvalid.js:110:3 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━
 
   ! This hook does not specify all of its dependencies.
   
-    105 │ function MyComponent11() {
-    106 │   let a = 1;
-  > 107 │   useEffect(function inner() {
+    108 │ export default function MyComponent10() {
+    109 │   let a = 1;
+  > 110 │   useEffect(() => {
         │   ^^^^^^^^^
-    108 │       console.log(a);
-    109 │   });
+    111 │       console.log(a);
+    112 │   }, []);
   
   i This dependency is not specified in the hook dependency list.
   
-    106 │   let a = 1;
-    107 │   useEffect(function inner() {
-  > 108 │       console.log(a);
+    109 │   let a = 1;
+    110 │   useEffect(() => {
+  > 111 │       console.log(a);
         │                   ^
-    109 │   });
-    110 │ }
+    112 │   }, []);
+    113 │ }
+  
+  i Either include it or remove the dependency array
   
 
 ```
 
 ```
-missingDependenciesInvalid.js:114:3 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━
+missingDependenciesInvalid.js:118:3 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━
 
   ! This hook does not specify all of its dependencies.
   
-    112 │ function MyComponent12() {
-    113 │   let a = 1;
-  > 114 │   useEffect(async function inner() {
+    116 │ function MyComponent11() {
+    117 │   let a = 1;
+  > 118 │   useEffect(function inner() {
         │   ^^^^^^^^^
-    115 │       console.log(a);
-    116 │   });
+    119 │       console.log(a);
+    120 │   }, []);
   
   i This dependency is not specified in the hook dependency list.
   
-    113 │   let a = 1;
-    114 │   useEffect(async function inner() {
-  > 115 │       console.log(a);
+    117 │   let a = 1;
+    118 │   useEffect(function inner() {
+  > 119 │       console.log(a);
         │                   ^
-    116 │   });
-    117 │ }
+    120 │   }, []);
+    121 │ }
+  
+  i Either include it or remove the dependency array
   
 
 ```
 
 ```
-missingDependenciesInvalid.js:122:9 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━
+missingDependenciesInvalid.js:125:3 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━
 
   ! This hook does not specify all of its dependencies.
   
-    120 │ function MyComponent13() {
-    121 │   let a = 1;
-  > 122 │   React.useEffect(() => {
+    123 │ function MyComponent12() {
+    124 │   let a = 1;
+  > 125 │   useEffect(async function inner() {
+        │   ^^^^^^^^^
+    126 │       console.log(a);
+    127 │   }, []);
+  
+  i This dependency is not specified in the hook dependency list.
+  
+    124 │   let a = 1;
+    125 │   useEffect(async function inner() {
+  > 126 │       console.log(a);
+        │                   ^
+    127 │   }, []);
+    128 │ }
+  
+  i Either include it or remove the dependency array
+  
+
+```
+
+```
+missingDependenciesInvalid.js:133:9 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━
+
+  ! This hook does not specify all of its dependencies.
+  
+    131 │ function MyComponent13() {
+    132 │   let a = 1;
+  > 133 │   React.useEffect(() => {
         │         ^^^^^^^^^
-    123 │       console.log(a);
-    124 │   });
+    134 │       console.log(a);
+    135 │   }, []);
   
   i This dependency is not specified in the hook dependency list.
   
-    121 │   let a = 1;
-    122 │   React.useEffect(() => {
-  > 123 │       console.log(a);
+    132 │   let a = 1;
+    133 │   React.useEffect(() => {
+  > 134 │       console.log(a);
         │                   ^
-    124 │   });
-    125 │ }
+    135 │   }, []);
+    136 │ }
+  
+  i Either include it or remove the dependency array
+  
+
+```
+
+```
+missingDependenciesInvalid.js:141:2 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━
+
+  ! This hook does not specify all of its dependencies.
+  
+    139 │ function MyComponent14() {
+    140 │ 	const ref = useRef();
+  > 141 │ 	useEffect(() => {
+        │ 	^^^^^^^^^
+    142 │ 			console.log(ref.current);
+    143 │ 	}, []);
+  
+  i This dependency is not specified in the hook dependency list.
+  
+    140 │ 	const ref = useRef();
+    141 │ 	useEffect(() => {
+  > 142 │ 			console.log(ref.current);
+        │ 			            ^^^^^^^^^^^
+    143 │ 	}, []);
+    144 │ }
+  
+  i Either include it or remove the dependency array
+  
+
+```
+
+```
+missingDependenciesInvalid.js:152:2 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━
+
+  ! This hook does not specify all of its dependencies.
+  
+    150 │ 	}
+    151 │ 	const ref = useRef();
+  > 152 │ 	useEffect(() => {
+        │ 	^^^^^^^^^
+    153 │ 			console.log(ref.current);
+    154 │ 	}, []);
+  
+  i This dependency is not specified in the hook dependency list.
+  
+    151 │ 	const ref = useRef();
+    152 │ 	useEffect(() => {
+  > 153 │ 			console.log(ref.current);
+        │ 			            ^^^^^^^^^^^
+    154 │ 	}, []);
+    155 │ }
+  
+  i Either include it or remove the dependency array
   
 
 ```

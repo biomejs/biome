@@ -45,7 +45,7 @@ pub enum Language {
 
 impl Language {
     /// Files that can be bypassed, because correctly handled by the JSON parser
-    pub(crate) const ALLOWED_FILES: &'static [&'static str; 12] = &[
+    pub(crate) const KNOWN_FILES_AS_JSONC: &'static [&'static str; 12] = &[
         "tslint.json",
         "babel.config.json",
         ".babelrc.json",
@@ -74,7 +74,7 @@ impl Language {
     }
 
     pub fn from_known_filename(s: &str) -> Self {
-        if Self::ALLOWED_FILES.contains(&s.to_lowercase().as_str()) {
+        if Self::KNOWN_FILES_AS_JSONC.contains(&s.to_lowercase().as_str()) {
             Language::Jsonc
         } else {
             Language::Unknown

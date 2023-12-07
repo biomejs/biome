@@ -47,6 +47,14 @@ const Component7 = () => {
     const [_val, _setter] = useState(useMemo('hello'));
 }
 
+function Component8() {
+    const a = () => {
+        return;
+    };
+
+    useEffect();
+};
+
 ```
 
 

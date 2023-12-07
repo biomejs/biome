@@ -17,3 +17,6 @@ biome_diagnostics = { workspace = true }
 biome_rowan       = { workspace = true }
 bitflags          = { workspace = true }
 drop_bomb         = "0.1.5"
+
+[lints]
+workspace = true

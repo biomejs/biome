@@ -90,3 +90,39 @@ const Component9 = () => {
     a ? useEffect() : null;
     a ?? useEffect();
 };
+
+function Component10() {
+    return;
+
+    useEffect();
+}
+
+function Component11() {
+    if (!a) {
+        return;
+    }
+
+    useEffect();
+}
+
+function Component12() {
+    if (!a) {
+        return;
+    }
+
+    {
+        useEffect();
+    }
+}
+
+function Component13() {
+    useEffect();
+};
+
+function Component14() {
+    if (!a) {
+        return;
+    }
+
+    Component13();
+}

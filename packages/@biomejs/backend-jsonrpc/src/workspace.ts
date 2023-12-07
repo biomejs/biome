@@ -423,6 +423,10 @@ export interface A11y {
 	 */
 	noHeaderScope?: RuleConfiguration;
 	/**
+	 * Enforce that non-interactive ARIA roles are not assigned to interactive HTML elements.
+	 */
+	noInteractiveElementToNoninteractiveRole?: RuleConfiguration;
+	/**
 	 * Enforce that interactive ARIA roles are not assigned to non-interactive HTML elements.
 	 */
 	noNoninteractiveElementToInteractiveRole?: RuleConfiguration;
@@ -458,6 +462,10 @@ export interface A11y {
 	 * Enforce that anchors have content and that the content is accessible to screen readers.
 	 */
 	useAnchorContent?: RuleConfiguration;
+	/**
+	 * Enforce that tabIndex is assigned to non-interactive HTML elements with aria-activedescendant.
+	 */
+	useAriaActivedescendantWithTabindex?: RuleConfiguration;
 	/**
 	 * Enforce that elements with ARIA roles must have all required ARIA attributes for that role.
 	 */
@@ -540,6 +548,10 @@ export interface Complexity {
 	 */
 	noStaticOnlyClass?: RuleConfiguration;
 	/**
+	 * Disallow this and super in static contexts.
+	 */
+	noThisInStatic?: RuleConfiguration;
+	/**
 	 * Disallow unnecessary catch clauses.
 	 */
 	noUselessCatch?: RuleConfiguration;
@@ -588,6 +600,10 @@ export interface Complexity {
 	 */
 	recommended?: boolean;
 	/**
+	 * Use arrow functions over function expressions.
+	 */
+	useArrowFunction?: RuleConfiguration;
+	/**
 	 * Promotes the use of .flatMap() when map().flat() are used together.
 	 */
 	useFlatMap?: RuleConfiguration;
@@ -633,6 +649,10 @@ export interface Correctness {
 	 */
 	noConstructorReturn?: RuleConfiguration;
 	/**
+	 * Disallow empty character classes in regular expression literals.
+	 */
+	noEmptyCharacterClassInRegex?: RuleConfiguration;
+	/**
 	 * Disallows empty destructuring patterns.
 	 */
 	noEmptyPattern?: RuleConfiguration;
@@ -648,6 +668,10 @@ export interface Correctness {
 	 * Prevents the incorrect use of super() inside classes. It also checks whether a call super() is missing from classes that extends other constructors.
 	 */
 	noInvalidConstructorSuper?: RuleConfiguration;
+	/**
+	 * Disallow new operators with global non-constructor functions.
+	 */
+	noInvalidNewBuiltin?: RuleConfiguration;
 	/**
 	 * Disallow new operators with the Symbol object.
 	 */
@@ -754,10 +778,6 @@ export interface Nursery {
 	 */
 	all?: boolean;
 	/**
-	 * Usually, the definition in the standard library is more precise than what people come up with or the used constant exceeds the maximum precision of the number type.
-	 */
-	noApproximativeNumericConstant?: RuleConfiguration;
-	/**
 	 * Enforce that aria-hidden="true" is not set on focusable elements.
 	 */
 	noAriaHiddenOnFocusable?: RuleConfiguration;
@@ -774,33 +794,13 @@ export interface Nursery {
 	 */
 	noEmptyBlockStatements?: RuleConfiguration;
 	/**
-	 * Disallow empty character classes in regular expression literals.
-	 */
-	noEmptyCharacterClassInRegex?: RuleConfiguration;
-	/**
 	 * Disallow use of implicit any type on variable declarations.
 	 */
 	noImplicitAnyLet?: RuleConfiguration;
 	/**
-	 * Enforce that non-interactive ARIA roles are not assigned to interactive HTML elements.
+	 * Disallow characters made with multiple code points in character class syntax.
 	 */
-	noInteractiveElementToNoninteractiveRole?: RuleConfiguration;
-	/**
-	 * Disallow new operators with global non-constructor functions.
-	 */
-	noInvalidNewBuiltin?: RuleConfiguration;
-	/**
-	 * Enforce proper usage of new and constructor.
-	 */
-	noMisleadingInstantiator?: RuleConfiguration;
-	/**
-	 * Disallow shorthand assign when variable appears on both sides.
-	 */
-	noMisrefactoredShorthandAssign?: RuleConfiguration;
-	/**
-	 * Disallow this and super in static contexts.
-	 */
-	noThisInStatic?: RuleConfiguration;
+	noMisleadingCharacterClass?: RuleConfiguration;
 	/**
 	 * Disallow unused imports.
 	 */
@@ -810,10 +810,6 @@ export interface Nursery {
 	 */
 	noUnusedPrivateClassMembers?: RuleConfiguration;
 	/**
-	 * Disallow else block when the if block breaks early.
-	 */
-	noUselessElse?: RuleConfiguration;
-	/**
 	 * Disallow unnecessary nested block statements.
 	 */
 	noUselessLoneBlockStatements?: RuleConfiguration;
@@ -822,21 +818,13 @@ export interface Nursery {
 	 */
 	recommended?: boolean;
 	/**
-	 * Enforce that tabIndex is assigned to non-interactive HTML elements with aria-activedescendant.
-	 */
-	useAriaActivedescendantWithTabindex?: RuleConfiguration;
-	/**
-	 * Use arrow functions over function expressions.
-	 */
-	useArrowFunction?: RuleConfiguration;
-	/**
-	 * Enforce the use of as const over literal type and type annotation.
-	 */
-	useAsConstAssertion?: RuleConfiguration;
-	/**
 	 * Ensure async functions utilize await.
 	 */
 	useAwait?: RuleConfiguration;
+	/**
+	 * This rule recommends a for-of loop when in a for loop, the index used to extract an item from the iterated array.
+	 */
+	useForOf?: RuleConfiguration;
 	/**
 	 * Enforce the use of import type when an import only has specifiers with type qualifier.
 	 */
@@ -850,9 +838,9 @@ export interface Nursery {
 	 */
 	useRegexLiterals?: RuleConfiguration;
 	/**
-	 * Require assignment operator shorthand where possible.
+	 * Enforce using function types instead of object type with call signatures.
 	 */
-	useShorthandAssign?: RuleConfiguration;
+	useShorthandFunctionType?: RuleConfiguration;
 	/**
 	 * Elements with ARIA roles must use a valid, non-abstract ARIA role.
 	 */
@@ -957,6 +945,10 @@ export interface Style {
 	 */
 	noUnusedTemplateLiteral?: RuleConfiguration;
 	/**
+	 * Disallow else block when the if block breaks early.
+	 */
+	noUselessElse?: RuleConfiguration;
+	/**
 	 * Disallow the use of var
 	 */
 	noVar?: RuleConfiguration;
@@ -964,6 +956,10 @@ export interface Style {
 	 * It enables the recommended rules for this group
 	 */
 	recommended?: boolean;
+	/**
+	 * Enforce the use of as const over literal type and type annotation.
+	 */
+	useAsConstAssertion?: RuleConfiguration;
 	/**
 	 * Requires following curly brace conventions.
 	 */
@@ -1013,6 +1009,10 @@ export interface Style {
 	 */
 	useShorthandArrayType?: RuleConfiguration;
 	/**
+	 * Require assignment operator shorthand where possible.
+	 */
+	useShorthandAssign?: RuleConfiguration;
+	/**
 	 * Enforces switch clauses have a single statement, emits a quick fix wrapping the statements in a block.
 	 */
 	useSingleCaseStatement?: RuleConfiguration;
@@ -1037,6 +1037,10 @@ export interface Suspicious {
 	 * It enables ALL rules for this group.
 	 */
 	all?: boolean;
+	/**
+	 * Usually, the definition in the standard library is more precise than what people come up with or the used constant exceeds the maximum precision of the number type.
+	 */
+	noApproximativeNumericConstant?: RuleConfiguration;
 	/**
 	 * Discourage the usage of Array index in keys.
 	 */
@@ -1149,6 +1153,14 @@ export interface Suspicious {
 	 * Disallow labels that share a name with a variable
 	 */
 	noLabelVar?: RuleConfiguration;
+	/**
+	 * Enforce proper usage of new and constructor.
+	 */
+	noMisleadingInstantiator?: RuleConfiguration;
+	/**
+	 * Disallow shorthand assign when variable appears on both sides.
+	 */
+	noMisrefactoredShorthandAssign?: RuleConfiguration;
 	/**
 	 * Disallow direct use of Object.prototype builtins.
 	 */
@@ -1417,6 +1429,7 @@ export type Category =
 	| "lint/a11y/noBlankTarget"
 	| "lint/a11y/noDistractingElements"
 	| "lint/a11y/noHeaderScope"
+	| "lint/a11y/noInteractiveElementToNoninteractiveRole"
 	| "lint/a11y/noNoninteractiveElementToInteractiveRole"
 	| "lint/a11y/noNoninteractiveTabindex"
 	| "lint/a11y/noPositiveTabindex"
@@ -1425,6 +1438,7 @@ export type Category =
 	| "lint/a11y/noSvgWithoutTitle"
 	| "lint/a11y/useAltText"
 	| "lint/a11y/useAnchorContent"
+	| "lint/a11y/useAriaActivedescendantWithTabindex"
 	| "lint/a11y/useAriaPropsForRole"
 	| "lint/a11y/useButtonType"
 	| "lint/a11y/useHeadingContent"
@@ -1443,6 +1457,7 @@ export type Category =
 	| "lint/complexity/noForEach"
 	| "lint/complexity/noMultipleSpacesInRegularExpressionLiterals"
 	| "lint/complexity/noStaticOnlyClass"
+	| "lint/complexity/noThisInStatic"
 	| "lint/complexity/noUselessCatch"
 	| "lint/complexity/noUselessConstructor"
 	| "lint/complexity/noUselessEmptyExport"
@@ -1454,6 +1469,7 @@ export type Category =
 	| "lint/complexity/noUselessTypeConstraint"
 	| "lint/complexity/noVoid"
 	| "lint/complexity/noWith"
+	| "lint/complexity/useArrowFunction"
 	| "lint/complexity/useFlatMap"
 	| "lint/complexity/useLiteralKeys"
 	| "lint/complexity/useOptionalChain"
@@ -1463,10 +1479,12 @@ export type Category =
 	| "lint/correctness/noConstAssign"
 	| "lint/correctness/noConstantCondition"
 	| "lint/correctness/noConstructorReturn"
+	| "lint/correctness/noEmptyCharacterClassInRegex"
 	| "lint/correctness/noEmptyPattern"
 	| "lint/correctness/noGlobalObjectCalls"
 	| "lint/correctness/noInnerDeclarations"
 	| "lint/correctness/noInvalidConstructorSuper"
+	| "lint/correctness/noInvalidNewBuiltin"
 	| "lint/correctness/noNewSymbol"
 	| "lint/correctness/noNonoctalDecimalEscape"
 	| "lint/correctness/noPrecisionLoss"
@@ -1495,27 +1513,19 @@ export type Category =
 	| "lint/nursery/noDefaultExport"
 	| "lint/nursery/noDuplicateJsonKeys"
 	| "lint/nursery/noEmptyBlockStatements"
-	| "lint/nursery/noEmptyCharacterClassInRegex"
 	| "lint/nursery/noImplicitAnyLet"
-	| "lint/nursery/noInteractiveElementToNoninteractiveRole"
-	| "lint/nursery/noInvalidNewBuiltin"
-	| "lint/nursery/noMisleadingInstantiator"
-	| "lint/nursery/noMisrefactoredShorthandAssign"
-	| "lint/nursery/noThisInStatic"
+	| "lint/nursery/noMisleadingCharacterClass"
 	| "lint/nursery/noUnusedImports"
 	| "lint/nursery/noUnusedPrivateClassMembers"
-	| "lint/nursery/noUselessElse"
 	| "lint/nursery/noUselessLoneBlockStatements"
-	| "lint/nursery/useAriaActivedescendantWithTabindex"
-	| "lint/nursery/useArrowFunction"
-	| "lint/nursery/useAsConstAssertion"
 	| "lint/nursery/useAwait"
 	| "lint/nursery/useBiomeSuppressionComment"
+	| "lint/nursery/useForOf"
 	| "lint/nursery/useGroupedTypeImport"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useRegexLiterals"
-	| "lint/nursery/useShorthandAssign"
 	| "lint/nursery/useValidAriaRole"
+	| "lint/nursery/useShorthandFunctionType"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noDelete"
 	| "lint/security/noDangerouslySetInnerHtml"
@@ -1532,7 +1542,9 @@ export type Category =
 	| "lint/style/noRestrictedGlobals"
 	| "lint/style/noShoutyConstants"
 	| "lint/style/noUnusedTemplateLiteral"
+	| "lint/style/noUselessElse"
 	| "lint/style/noVar"
+	| "lint/style/useAsConstAssertion"
 	| "lint/style/useBlockStatements"
 	| "lint/style/useCollapsedElseIf"
 	| "lint/style/useConst"
@@ -1545,10 +1557,12 @@ export type Category =
 	| "lint/style/useNumericLiterals"
 	| "lint/style/useSelfClosingElements"
 	| "lint/style/useShorthandArrayType"
+	| "lint/style/useShorthandAssign"
 	| "lint/style/useSingleCaseStatement"
 	| "lint/style/useSingleVarDeclarator"
 	| "lint/style/useTemplate"
 	| "lint/style/useWhile"
+	| "lint/suspicious/noApproximativeNumericConstant"
 	| "lint/suspicious/noArrayIndexKey"
 	| "lint/suspicious/noAssignInExpressions"
 	| "lint/suspicious/noAsyncPromiseExecutor"
@@ -1577,6 +1591,8 @@ export type Category =
 	| "lint/suspicious/noGlobalIsNan"
 	| "lint/suspicious/noImportAssign"
 	| "lint/suspicious/noLabelVar"
+	| "lint/suspicious/noMisleadingInstantiator"
+	| "lint/suspicious/noMisrefactoredShorthandAssign"
 	| "lint/suspicious/noPrototypeBuiltins"
 	| "lint/suspicious/noRedeclare"
 	| "lint/suspicious/noRedundantUseStrict"

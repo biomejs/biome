@@ -1,5 +1,5 @@
 ---
-title: noUnusedPrivateClassMembers (since vnext)
+title: noUnusedPrivateClassMembers (since v1.3.3)
 ---
 
 **Diagnostic Category: `lint/nursery/noUnusedPrivateClassMembers`**

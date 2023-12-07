@@ -3,7 +3,7 @@
 
 .diagnostics-pane {
   height: 200px;
-  border-top: 1px solid var(--playground-border);
+  border-top: 1px solid var(--sl-border);
 
   @include dark-mode {
     .empty-panel {

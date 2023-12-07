@@ -29,3 +29,6 @@ json_comments     = "0.2.1"
 serde             = { workspace = true }
 serde_json        = { workspace = true }
 similar           = { version = "2.2.1" }
+
+[lints]
+workspace = true

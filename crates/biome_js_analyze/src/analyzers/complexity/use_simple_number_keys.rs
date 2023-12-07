@@ -1,4 +1,5 @@
 use crate::JsRuleAction;
+
 use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
 };
@@ -47,7 +48,7 @@ declare_rule! {
     pub(crate) UseSimpleNumberKeys {
         version: "1.0.0",
         name: "useSimpleNumberKeys",
-        recommended: false,
+        recommended: true,
         fix_kind: FixKind::Safe,
     }
 }
@@ -101,7 +102,7 @@ impl TryFrom<AnyJsObjectMember> for NumberLiteral {
         let token = literal_member_name.value().unwrap();
         match token.kind() {
             JsSyntaxKind::JS_NUMBER_LITERAL | JsSyntaxKind::JS_BIGINT_LITERAL => {
-                let chars: Vec<char> = token.to_string().chars().collect();
+                let chars: Vec<char> = token.text_trimmed().chars().collect();
                 let mut value = String::new();
 
                 let mut is_first_char_zero: bool = false;

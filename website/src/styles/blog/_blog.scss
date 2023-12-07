@@ -1,5 +1,5 @@
 @import "../_variables";
-@import "../_card.scss";
+@import "../card";
 
 .blog {
 	margin: 0 auto;
@@ -174,10 +174,6 @@ a.tag {
 
 		@include mobile-only {
 			border-radius: 0;
-		}
-
-		@media only screen and (min-width: 840px) {
-			height: 400px;
 		}
 	}
 
