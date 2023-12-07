@@ -18,6 +18,10 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ### Editors
 
+#### New features
+
+- The LSP register formatting without the need of using dynamic capabilities from the client.
+
 ### Formatter
 
 ### JavaScript APIs
@@ -25,6 +29,20 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 ### Linter
 
 #### New features
+
+- Add [useExportType](https://biomejs.dev/linter/rules/use-export-type) that enforces the use of type-only exports for names that are only types. Contributed by @Conaclos
+
+  ```diff
+    interface A {}
+    interface B {}
+    class C {}
+
+  - export type { A, C }
+  + export { type A, C }
+
+  - export { type B }
+  + export type { B }
+  ```
 
 #### Enhancements
 

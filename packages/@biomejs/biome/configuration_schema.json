@@ -1186,6 +1186,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useExportType": {
+					"description": "Promotes the use of export type for types.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useForOf": {
 					"description": "This rule recommends a for-of loop when in a for loop, the index used to extract an item from the iterated array.",
 					"anyOf": [
