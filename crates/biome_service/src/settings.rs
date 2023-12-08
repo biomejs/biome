@@ -1,7 +1,8 @@
+use crate::configuration::diagnostics::InvalidIgnorePattern;
 use crate::configuration::{push_to_analyzer_rules, JavascriptConfiguration, JsonConfiguration};
 use crate::{
-    configuration::FilesConfiguration, Configuration, ConfigurationDiagnostic, MatchOptions,
-    Matcher, MergeWith, Rules, WorkspaceError,
+    configuration::FilesConfiguration, Configuration, ConfigurationDiagnostic, Matcher, MergeWith,
+    Rules, WorkspaceError,
 };
 use biome_analyze::{AnalyzerRules, RuleFilter};
 use biome_deserialize::StringSet;
@@ -15,6 +16,7 @@ use biome_js_syntax::JsLanguage;
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonLanguage;
+use globset::{Glob, GlobSetBuilder};
 use indexmap::IndexSet;
 use std::ops::{BitOr, Sub};
 use std::path::Path;
@@ -732,20 +734,22 @@ pub struct OverrideSettingPattern {
 /// It can raise an error if the patterns aren't valid
 pub fn to_matcher(string_set: Option<&StringSet>) -> Result<Option<Matcher>, WorkspaceError> {
     if let Some(string_set) = string_set {
-        let mut matcher = Matcher::new(MatchOptions {
-            case_sensitive: true,
-            require_literal_leading_dot: false,
-            require_literal_separator: false,
-        });
+        let mut builder = GlobSetBuilder::new();
         for pattern in string_set.iter() {
-            matcher.add_pattern(pattern).map_err(|err| {
+            builder.add(Glob::new(pattern).map_err(|err| {
                 WorkspaceError::Configuration(ConfigurationDiagnostic::new_invalid_ignore_pattern(
                     pattern.to_string(),
-                    err.msg.to_string(),
+                    err.to_string(),
                 ))
-            })?;
+            })?);
         }
-        Ok(Some(matcher))
+        Ok(Some(Matcher::new(builder.build().map_err(|err| {
+            WorkspaceError::Configuration(ConfigurationDiagnostic::InvalidIgnorePattern(
+                InvalidIgnorePattern {
+                    message: err.to_string(),
+                },
+            ))
+        })?)))
     } else {
         Ok(None)
     }

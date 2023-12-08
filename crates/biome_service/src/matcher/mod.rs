@@ -1,8 +1,4 @@
-pub mod pattern;
-
-use biome_console::markup;
-use biome_diagnostics::Diagnostic;
-pub use pattern::{MatchOptions, Pattern, PatternError};
+use globset::GlobSet;
 use std::collections::HashMap;
 use std::path::Path;
 use std::sync::RwLock;
@@ -11,8 +7,7 @@ use std::sync::RwLock;
 /// a unix shell style patterns
 #[derive(Debug)]
 pub struct Matcher {
-    patterns: Vec<Pattern>,
-    options: MatchOptions,
+    glob: GlobSet,
     /// Whether the string was already checked
     already_checked: RwLock<HashMap<String, bool>>,
 }
@@ -21,19 +16,11 @@ impl Matcher {
     /// Creates a new Matcher with given options.
     ///
     /// Check [glob website](https://docs.rs/glob/latest/glob/struct.MatchOptions.html) for [MatchOptions]
-    pub fn new(options: MatchOptions) -> Self {
+    pub fn new(glob: GlobSet) -> Self {
         Self {
-            patterns: Vec::new(),
-            options,
+            glob,
             already_checked: RwLock::new(HashMap::default()),
         }
-    }
-
-    /// It adds a unix shell style pattern
-    pub fn add_pattern(&mut self, pattern: &str) -> Result<(), PatternError> {
-        let pattern = Pattern::new(pattern)?;
-        self.patterns.push(pattern);
-        Ok(())
     }
 
     /// It matches the given string against the stored patterns.
@@ -44,11 +31,9 @@ impl Matcher {
         if let Some(matches) = already_ignored.get(source) {
             return *matches;
         }
-        for pattern in &self.patterns {
-            if pattern.matches_with(source, self.options) || source.contains(pattern.as_str()) {
-                already_ignored.insert(source.to_string(), true);
-                return true;
-            }
+        if self.glob.is_match(source) {
+            already_ignored.insert(source.to_string(), true);
+            return true;
         }
         already_ignored.insert(source.to_string(), false);
         false
@@ -65,32 +50,7 @@ impl Matcher {
                 return *matches;
             }
         }
-        let matches = {
-            for pattern in &self.patterns {
-                let matches = if pattern.matches_path_with(source, self.options) {
-                    true
-                } else {
-                    // Here we cover cases where the user specifies single files inside the patterns.
-                    // The pattern library doesn't support single files, we here we just do a check
-                    // on contains
-                    //
-                    // Given the pattern `out`:
-                    // - `out/index.html` -> matches
-                    // - `out/` -> matches
-                    // - `layout.tsx` -> does not match
-                    // - `routes/foo.ts` -> does not match
-                    source
-                        .ancestors()
-                        .any(|ancestor| ancestor.ends_with(pattern.as_str()))
-                };
-
-                if matches {
-                    return true;
-                }
-            }
-
-            false
-        };
+        let matches = self.glob.is_match(source);
 
         if let Some(source_as_string) = source_as_string {
             already_checked.insert(source_as_string.to_string(), matches);
@@ -100,28 +60,22 @@ impl Matcher {
     }
 }
 
-impl Diagnostic for PatternError {
-    fn description(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(fmt, "{}", self.msg)
-    }
-
-    fn message(&self, fmt: &mut biome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
-        fmt.write_markup(markup!({ self.msg }))
-    }
-}
-
 #[cfg(test)]
 mod test {
-    use crate::matcher::pattern::MatchOptions;
     use crate::matcher::Matcher;
+    use globset::{Glob, GlobSetBuilder};
     use std::env;
 
     #[test]
     fn matches() {
         let current = env::current_dir().unwrap();
         let dir = format!("{}/**/*.rs", current.display());
-        let mut ignore = Matcher::new(MatchOptions::default());
-        ignore.add_pattern(&dir).unwrap();
+        let ignore = Matcher::new(
+            GlobSetBuilder::new()
+                .add(Glob::new(&dir).unwrap())
+                .build()
+                .unwrap(),
+        );
         let path = env::current_dir().unwrap().join("src/workspace.rs");
         let result = ignore.matches(path.to_str().unwrap());
 
@@ -132,8 +86,12 @@ mod test {
     fn matches_path() {
         let current = env::current_dir().unwrap();
         let dir = format!("{}/**/*.rs", current.display());
-        let mut ignore = Matcher::new(MatchOptions::default());
-        ignore.add_pattern(&dir).unwrap();
+        let ignore = Matcher::new(
+            GlobSetBuilder::new()
+                .add(Glob::new(&dir).unwrap())
+                .build()
+                .unwrap(),
+        );
         let path = env::current_dir().unwrap().join("src/workspace.rs");
         let result = ignore.matches_path(path.as_path());
 
@@ -143,10 +101,14 @@ mod test {
     #[test]
     fn matches_path_for_single_file_or_directory_name() {
         let dir = "inv";
-        let valid_test_dir = "valid/";
-        let mut ignore = Matcher::new(MatchOptions::default());
-        ignore.add_pattern(dir).unwrap();
-        ignore.add_pattern(valid_test_dir).unwrap();
+        let valid_test_dir = "**/valid";
+        let ignore = Matcher::new(
+            GlobSetBuilder::new()
+                .add(Glob::new(&dir).unwrap())
+                .add(Glob::new(&valid_test_dir).unwrap())
+                .build()
+                .unwrap(),
+        );
 
         let path = env::current_dir().unwrap().join("tests").join("invalid");
         let result = ignore.matches_path(path.as_path());
@@ -161,13 +123,13 @@ mod test {
 
     #[test]
     fn matches_single_path() {
-        let dir = "workspace.rs";
-        let mut ignore = Matcher::new(MatchOptions {
-            require_literal_separator: true,
-            case_sensitive: true,
-            require_literal_leading_dot: true,
-        });
-        ignore.add_pattern(dir).unwrap();
+        let dir = "**.rs";
+        let ignore = Matcher::new(
+            GlobSetBuilder::new()
+                .add(Glob::new(&dir).unwrap())
+                .build()
+                .unwrap(),
+        );
         let path = env::current_dir().unwrap().join("src/workspace.rs");
         let result = ignore.matches(path.to_str().unwrap());
 

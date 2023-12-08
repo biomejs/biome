@@ -5,7 +5,9 @@ use crate::{
     fs::{TraversalContext, TraversalScope},
     FileSystem, RomePath,
 };
+use biome_diagnostics::adapters::IgnoreError;
 use biome_diagnostics::{adapters::IoError, DiagnosticExt, Error, Severity};
+use ignore::WalkBuilder;
 use rayon::{scope, Scope};
 use std::fs::{DirEntry, FileType};
 use std::{
@@ -106,6 +108,32 @@ impl<'scope> OsTraversalScope<'scope> {
 }
 
 impl<'scope> TraversalScope<'scope> for OsTraversalScope<'scope> {
+    fn traverse_paths(&self, context: &'scope dyn TraversalContext, paths: Vec<PathBuf>) {
+        let mut inputs = paths.iter();
+        let mut walker = WalkBuilder::new(inputs.next().unwrap());
+        walker
+            .follow_links(true)
+            .git_ignore(true)
+            .same_file_system(true)
+            .build_parallel()
+            .run(|| {
+                Box::new(move |result| {
+                    use ignore::WalkState::*;
+
+                    match result {
+                        Ok(directory) => {
+                            self.spawn(context, PathBuf::from(directory.path()));
+                        }
+                        Err(error) => {
+                            let diagnostic = Error::from(IgnoreError::from(error));
+                            context.push_diagnostic(Error::from(diagnostic));
+                        }
+                    }
+
+                    Continue
+                })
+            });
+    }
     fn spawn(&self, ctx: &'scope dyn TraversalContext, mut path: PathBuf) {
         let mut file_type = match path.metadata() {
             Ok(meta) => meta.file_type(),

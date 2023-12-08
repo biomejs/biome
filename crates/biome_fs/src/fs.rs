@@ -250,6 +250,8 @@ pub trait TraversalScope<'scope> {
     /// [`can_handle`](TraversalContext::can_handle) method of the context
     /// returns true for will be handled as well
     fn spawn(&self, context: &'scope dyn TraversalContext, path: PathBuf);
+
+    fn traverse_paths(&self, context: &'scope dyn TraversalContext, path: Vec<PathBuf>);
 }
 
 pub trait TraversalContext: Sync {

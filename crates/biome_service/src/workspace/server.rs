@@ -267,9 +267,9 @@ impl Workspace for WorkspaceServer {
                     let language = self.get_language(&params.path);
                     if language == Language::Unknown {
                         file_features.ignore_not_supported();
+                        return Ok(entry.insert(file_features).clone());
                     }
                 }
-
                 for feature in params.feature {
                     let is_ignored = self.is_path_ignored(IsPathIgnoredParams {
                         rome_path: params.path.clone(),
@@ -280,6 +280,7 @@ impl Workspace for WorkspaceServer {
                         file_features.ignored(feature);
                     }
                 }
+
                 Ok(entry.insert(file_features).clone())
             }
         }

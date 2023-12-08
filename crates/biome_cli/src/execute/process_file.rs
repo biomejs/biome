@@ -212,6 +212,7 @@ pub(crate) fn process_file(ctx: &TraversalOptions, path: &Path) -> FileResult {
 
         let shared_context = &SharedTraversalOptions::new(ctx);
         ctx.increment_processed();
+
         match ctx.execution.traversal_mode {
             TraversalMode::Lint { .. } => {
                 // the unsupported case should be handled already at this point

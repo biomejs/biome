@@ -218,8 +218,8 @@ pub const CONFIG_FORMATTER_IGNORED_DIRECTORIES: &str = r#"{
   "formatter": {
     "ignore": [
       "test1.js",
-      "./test2.js",
-      "./test3/**/*",
+      "test2.js",
+      "test3/**/*",
       "/test4/**/*",
       "test5/**/*",
       "**/test6/*.js",

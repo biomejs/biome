@@ -90,7 +90,7 @@ pub(crate) fn traverse(
     let mut report = Report::default();
 
     let duration = thread::scope(|s| {
-        thread::Builder::new()
+        let handler = thread::Builder::new()
             .name(String::from("biome::console"))
             .spawn_scoped(s, || {
                 process_messages(ProcessMessagesOptions {
@@ -112,7 +112,7 @@ pub(crate) fn traverse(
 
         // The traversal context is scoped to ensure all the channels it
         // contains are properly closed once the traversal finishes
-        traverse_inputs(
+        let elapsed = traverse_inputs(
             fs,
             inputs,
             &TraversalOptions {
@@ -126,7 +126,12 @@ pub(crate) fn traverse(
                 sender_reports,
                 remaining_diagnostics: &remaining_diagnostics,
             },
-        )
+        );
+
+        // wait for the main thread to finish
+        handler.join().unwrap();
+
+        elapsed
     });
 
     let count = processed.load(Ordering::Relaxed);
@@ -244,11 +249,8 @@ fn init_thread_pool() {
 /// run it to completion, returning the duration of the process
 fn traverse_inputs(fs: &dyn FileSystem, inputs: Vec<OsString>, ctx: &TraversalOptions) -> Duration {
     let start = Instant::now();
-
     fs.traversal(Box::new(move |scope: &dyn TraversalScope| {
-        for input in inputs {
-            scope.spawn(ctx, PathBuf::from(input));
-        }
+        scope.traverse_paths(ctx, inputs.iter().map(PathBuf::from).collect());
     }));
 
     start.elapsed()

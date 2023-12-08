@@ -16,6 +16,22 @@ internalError/io ━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
+flags/invalid  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × File system loop found: <TEMP_DIR>/lint_rome_test_infinite_symlink_expansion_to_dirs/foo/bar/symlink2/symlink1 points to an ancestor <TEMP_DIR>/lint_rome_test_infinite_symlink_expansion_to_dirs/foo/bar
+  
+
+```
+
+```block
+flags/invalid  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × File system loop found: <TEMP_DIR>/lint_rome_test_infinite_symlink_expansion_to_dirs/prefix/symlink1/symlink2 points to an ancestor <TEMP_DIR>/lint_rome_test_infinite_symlink_expansion_to_dirs/prefix
+  
+
+```
+
+```block
 Checked 0 file(s) in <TIME>
 ```
 

@@ -16,6 +16,14 @@ internalError/io ━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
+flags/invalid  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × <TEMP_DIR>/check_rome_test_broken_symlink/broken_symlink: No such file or directory (os error 2)
+  
+
+```
+
+```block
 <TEMP_DIR>/check_rome_test_broken_symlink/broken_symlink internalError/fs ━━━━━━━━━━━━━━━━━━━━
 
   ! Dereferenced symlink

@@ -66,8 +66,7 @@ impl Diagnostic for IoError {
     }
 
     fn message(&self, fmt: &mut fmt::Formatter<'_>) -> io::Result<()> {
-        let error = self.error.to_string();
-        fmt.write_str(&error)
+        fmt.write_markup(markup!({ AsConsoleDisplay(&self.error) }))
     }
 }
 
@@ -105,5 +104,35 @@ impl Diagnostic for BpafError {
             fmt.write_str(&error)?;
         }
         Ok(())
+    }
+}
+
+#[derive(Debug)]
+pub struct IgnoreError {
+    error: ignore::Error,
+}
+
+impl From<ignore::Error> for IgnoreError {
+    fn from(error: ignore::Error) -> Self {
+        Self { error }
+    }
+}
+
+impl Diagnostic for IgnoreError {
+    fn category(&self) -> Option<&'static Category> {
+        Some(category!("flags/invalid"))
+    }
+
+    fn tags(&self) -> DiagnosticTags {
+        DiagnosticTags::FIXABLE
+    }
+
+    fn description(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let error = self.error.to_string();
+        fmt.write_str(&error)
+    }
+
+    fn message(&self, fmt: &mut fmt::Formatter<'_>) -> io::Result<()> {
+        fmt.write_markup(markup!({ AsConsoleDisplay(&self.error) }))
     }
 }

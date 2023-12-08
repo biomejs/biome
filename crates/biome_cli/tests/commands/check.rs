@@ -1940,7 +1940,7 @@ fn ignores_file_inside_directory() {
     let mut console = BufferConsole::default();
 
     let git_ignore = r#"
-ignored/
+ignored/**
 "#;
 
     let code1 = r#"array.map(sentence => sentence.split('    ')).flat();"#;

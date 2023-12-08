@@ -13,7 +13,19 @@ rome.json internalError/fs ━━━━━━━━━━━━━━━━━�
 ```
 
 ```block
-Fixed 2 file(s) in <TIME>
+<TEMP_DIR>/lint_rome_test_files_ignore_symlink/src/symlink_testcase1_3 files/missingHandler ━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome doesn't know how to process this file
+  
+
+```
+
+```block
+Fixed 8 file(s) in <TIME>
+```
+
+```block
+Skipped 1 file(s)
 ```
 
 

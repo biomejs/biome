@@ -12,7 +12,7 @@ expression: content
 
 ```gitignore
 
-ignored/
+ignored/**
 
 ```
 
