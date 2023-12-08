@@ -52,6 +52,9 @@ export default defineConfig({
 		react(),
 		starlight({
 			title: "Biome",
+			components: {
+				Hero: "./src/components/starlight/Hero.astro",
+			},
 			defaultLocale: "root",
 			locales: {
 				root: {
@@ -317,20 +320,12 @@ export default defineConfig({
 				},
 			],
 			logo: {
-				light: "./src/assets/svg/biome-logo.svg",
-				dark: "./src/assets/svg/biome-logo.svg",
+				light: "./src/assets/svg/logo-light-transparent.svg",
+				dark: "./src/assets/svg/logo-dark-transparent.svg",
 				replacesTitle: true,
 			},
 			favicon: "/img/favicon.svg",
 			head: [
-				{
-					tag: "link",
-					attrs: {
-						rel: "icon",
-						href: "/images/favicon-32x32.png",
-						sizes: "32x32",
-					},
-				},
 				{
 					tag: "meta",
 					attrs: { property: "og:image", content: `${site}/img/og.png?v=1` },

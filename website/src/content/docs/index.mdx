@@ -2,14 +2,19 @@
 title: Biome
 template: splash
 description: Format, lint, and more in a fraction of a second.
+banner:
+  content: |
+    Biome claims the bounty of the <a href="/blog/biome-wins-prettier-challenge">Prettier challenge</a>!
+editUrl: false
+next: false
 hero:
-    title: One toolchain for your web project
-    tagline: Format, lint, and more in a fraction of a second.
-    image:
-        alt: Biome, Toolchain of the web
-        dark: ../../assets/svg/slogan-dark-transparent.svg
-        light: ../../assets/svg/slogan-light-transparent.svg
-    actions:
+  title: One toolchain for your web project
+  tagline: Format, lint, and more in a fraction of a second.
+  image:
+    alt: Biome, Toolchain of the web
+    dark: ../../assets/svg/slogan-dark-transparent.svg
+    light: ../../assets/svg/slogan-light-transparent.svg
+  actions:
     - text: Get started
       link: /guides/getting-started/
       icon: right-arrow
@@ -20,8 +25,44 @@ hero:
       variant: secondary
 ---
 
-import Support from '../../components/Support.astro';
-import Cardsinfo from '../../components/Cardsinfo.astro';
+import { Card, CardGrid } from "@astrojs/starlight/components";
 
-<Support />
-<Cardsinfo />
+<div class="card-cnt">
+  <CardGrid>
+    <Card title="Fast" icon="rocket">
+      Built with Rust and an innovative architecture inspired by rust-analyzer.
+    </Card>
+    <Card title="Simple" icon="pencil">
+      Zero configuration needed to get started. Extensive options available for
+      when you need them.
+    </Card>
+    <Card title="Scalable" icon="random">
+      Designed to handle codebases of any size. Focus on growing product instead
+      of your tools.
+    </Card>
+    <Card title="Optimized" icon="setting">
+      With tight internal integration we are able to reuse previous work and any
+      improvement to one tool improves them all.
+    </Card>
+    <Card title="Actionable & Informative" icon="information">
+      Avoid obscure error messages, when we tell you something is wrong, we tell
+      you exactly where the problem is and how to fix it.
+    </Card>
+    <Card title="Batteries Included" icon="add-document">
+      Out of the box support for all the language features you use today. First
+      class support for TypeScript and JSX.
+    </Card>
+  </CardGrid>
+</div>
+
+## Sponsors
+
+<div class="sponsors">
+  <a class="sponsors-row" href="https://shiguredo.jp/" rel="nofollow">
+    <img
+      title="Shiguredō"
+      src="https://camo.githubusercontent.com/58b1dd652b0e2bfb67b97b59c2785bd5694dc0e9e8f6ce2a4182eacc35ed1fec/68747470733a2f2f73686967757265646f2e6a702f6f6666696369616c5f73686967757265646f5f6c6f676f2e737667"
+      data-canonical-src="https://shiguredo.jp/official_shiguredo_logo.svg"
+    />
+  </a>
+</div>
