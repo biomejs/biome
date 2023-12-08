@@ -68,13 +68,6 @@ export default defineConfig({
 				},
 			},
 			sidebar: [
-				{ label: "Home", link: "/", translations: { ja: "ホーム" } },
-				{ label: "Blog", link: "../blog", translations: { ja: "ブログ" } },
-				{
-					label: "Playground",
-					link: "../playground",
-					translations: { ja: "プレイグラウンド" },
-				},
 				{
 					label: "Guides",
 					translations: { ja: "ガイド" },
@@ -240,6 +233,9 @@ export default defineConfig({
 			editLink: {
 				baseUrl: "https://github.com/biomejs/biome/edit/main/website/",
 			},
+			components: {
+				SiteTitle: './src/components/SiteTitle.astro'
+			}
 		}),
 	],
 
