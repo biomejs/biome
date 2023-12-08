@@ -1,19 +1,19 @@
 ---
-title: How Biome works
-description: Learn how to set up a new project with Biome.
+title: Como o Biome funciona
+description: Aprenda como configurar um novo projeto com Biome.
 ---
+
 import DefaultConfiguration from "@src/components/generated/DefaultConfiguration.mdx";
 
+## Configuração
 
-## Configuration
+O arquivo de configuração é considerado **opcional**, o Biome já inclui configurações padrão robustas.
+Use o arquivo de configuração para alterar essas configurações predefinidas.
 
-The configuration file is considered **optional**, Biome has good defaults. Use the configuration
-file to change those defaults.
+O arquivo de configuração do Biome é chamado `biome.json` e deve ser colocado no diretório raíz do projeto. Geralmente,
+o diretório raíz é o diretório onde fica o `package.json` do projeto.
 
-The Biome configuration file is named `biome.json` and should be placed in the root directory of your project. The root
-directory is usually the directory containing your project's `package.json`.
-
-This configuration file enables the formatter and sets the preferred indent style and width. The linter is disabled:
+Esse arquivo de configuração habilita o [formatador](/pt-br/formatter) e define o estilo de indentação e seu tamanho, além de desabilitar o [linter](/pt-br/linter):
 
 ```json title="biome.json"
 {
@@ -28,20 +28,21 @@ This configuration file enables the formatter and sets the preferred indent styl
 }
 ```
 
-### Default configuration
+### Configuração padrão
 
-When you run `biome init`, the default configuration emitted is the following:
+Quando você executa o comando `biome init`, ele gera o seguinte arquivo de configuração:
 
 <DefaultConfiguration />
 
-### Configuration file resolution
+### Resolução do arquivo de configuração
 
-Biome uses auto discovery to find the nearest `biome.json` file. It starts looking for `biome.json` in the current
-working directory, and then it starts looking in the parent directories until:
-- it finds a `biome.json` file;
-- it applies Biome's defaults if **no `biome.json` is found**;
+O Biome busca de forma automática o arquivo `biome.json` mais próximo. Ele começa procurando o `biome.json` no diretório de trabalho atual,
+e, em seguida, continua procurando nos diretórios pai até:
 
-Here's an example:
+- Ele achar um arquivo `biome.json`;
+- Ele aplicar a configuração padrão do Biome **caso não encontre o arquivo `biome.json`**;
+
+Aqui está um exemplo:
 
 ```
 └── app
@@ -57,14 +58,12 @@ Here's an example:
 
 ```
 
-- biome commands that run in `app/backend/package.json` will use the configuration file `app/backend/biome.json`;
-- biome commands that run in `app/frontend/legacy/package.json` and `app/frontend/new/package.json`
-will use the configuration file `app/frontend/biome.json`;
+- Comandos do Biome executados em `app/backend/package.json` utilizarão o arquivo de configuração `app/backend/biome.json`;
+- Comandos do Biome executados em `app/frontend/legacy/package.json` e `app/frontend/new/package.json` utilizarão o arquivo de configuração `app/frontend/biome.json`;
 
+## Arquivos ignorados
 
-## Known Files
-
-The following files are currently ignored by Biome. This means that no diagnostics will be ever emitted by Biome for those files.
+Os seguintes arquivos são ignorados pelo Biome. Isso significa que nenhum diagnóstico será emitido pelo Biome nesses arquivos.
 
 - `package.json`
 - `package-lock.json`
@@ -78,9 +77,7 @@ The following files are currently ignored by Biome. This means that no diagnosti
 - `deno.json`
 - `deno.jsonc`
 
-
-
-The following files are parsed as **`JSON` files** with  the options `json.parser.allowComments` and `json.parser.allowTrailingCommas` set to `true`. This is because editor tools like VSCode treat them like this.
+Os seguintes arquivos são analisadas como **arquivos `JSON`** com as opções `json.parser.allowComments` e `json.parser.allowTrailingCommas` definidas como `true`. Isso ocorre porque editores, como o VSCode, os tratam dessa maneira.
 
 - `tslint.json`
 - `babel.config.json`
