@@ -1,10 +1,13 @@
-var cards = document.querySelectorAll(".card");
+// Yes TS I am a module.
+export type {};
 
-cards.forEach((card: any) => {
-    card.addEventListener("mousemove", (e: MouseEvent) => {
-        var x = e.pageX - card.offsetLeft;
-        var y = e.pageY - card.offsetTop;
-        card.style.setProperty("--x", x + "px");
-        card.style.setProperty("--y", y + "px");
-    });
-});
+const cards: NodeListOf<HTMLDivElement> = document.querySelectorAll(".card");
+
+for (const card of cards) {
+	card.addEventListener("mousemove", (e: MouseEvent) => {
+		const x = e.pageX - card.offsetLeft;
+		const y = e.pageY - card.offsetTop;
+		card.style.setProperty("--x", `${x}px`);
+		card.style.setProperty("--y", `${y}px`);
+	});
+}
