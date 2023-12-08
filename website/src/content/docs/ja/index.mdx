@@ -2,15 +2,18 @@
 title: Biome
 template: splash
 description: Web開発のためのたった1つのツールチェーン
+editUrl: false
+next: false
 hero:
-    title: Web開発のためのたった1つのツールチェーン
-    tagline: format、lintなど一瞬で完了させます！
-    image:
-        alt: Biome, ウェブツールチェイン
-        file: ../../../assets/biome-logo-slogan.svg
-    actions:
+  title: Web開発のためのたった1つのツールチェーン
+  tagline: format、lintなど一瞬で完了させます！
+  image:
+    alt: Biome，Web 工具链
+    dark: ../../../assets/svg/slogan-dark-transparent.svg
+    light: ../../../assets/svg/slogan-light-transparent.svg
+  actions:
     - text: はじめる
-      link: ./guides/getting-started/
+      link: /ja/guides/getting-started/
       icon: right-arrow
       variant: primary
     - text: GitHub
@@ -19,36 +22,39 @@ hero:
       variant: secondary
 ---
 
+import { Card, CardGrid } from "@astrojs/starlight/components";
 
-import { Card, CardGrid } from '@astrojs/starlight/components';
-
-
-<CardGrid stagger>
+<div class="card-cnt">
+  <CardGrid>
     <Card title="高速" icon="rocket">
-        Rustで構築され、rust-analyzerにインスパイアされた革新的なアーキテクチャを採用しています。
+      Rustで構築され、rust-analyzerにインスパイアされた革新的なアーキテクチャを採用しています。
     </Card>
     <Card title="シンプル" icon="pencil">
-        設定なしで始められます。必要に応じて豊富なオプションが利用可能です。
+      設定なしで始められます。必要に応じて豊富なオプションが利用可能です。
     </Card>
     <Card title="スケーラブル" icon="random">
-        あらゆる規模のコードベースに対応するよう設計されているので、ツールではなく製品の成長に集中できます。
+      あらゆる規模のコードベースに対応するよう設計されているので、ツールではなく製品の成長に集中できます。
     </Card>
     <Card title="最適化済み" icon="setting">
-        各機能の内部処理は、可能な限り統合され、再利用されています。このため、あるツールの改善がすべてのツールを向上させることがあります。
+      各機能の内部処理は、可能な限り統合され、再利用されています。このため、あるツールの改善がすべてのツールを向上させることがあります。
     </Card>
     <Card title="豊富な情報量" icon="information">
-        曖昧なエラーメッセージを極力避けます。問題がある場合は、その位置を明示して、解決のためのステップを提供します。
+      曖昧なエラーメッセージを極力避けます。問題がある場合は、その位置を明示して、解決のためのステップを提供します。
     </Card>
     <Card title="すぐに使える" icon="add-document">
-        フロントエンド開発で利用される言語に対して、優れたサポートを提供します。特にTypeScriptおよびJSXへのサポートを第一にしています。
+      フロントエンド開発で利用される言語に対して、優れたサポートを提供します。特にTypeScriptおよびJSXへのサポートを第一にしています。
     </Card>
-</CardGrid>
-
+  </CardGrid>
+</div>
 
 ## スポンサー
 
 <div class="sponsors">
-    <a class="sponsors-row" href="https://shiguredo.jp/" rel="nofollow">
-      <img title="Shiguredō" src="https://camo.githubusercontent.com/58b1dd652b0e2bfb67b97b59c2785bd5694dc0e9e8f6ce2a4182eacc35ed1fec/68747470733a2f2f73686967757265646f2e6a702f6f6666696369616c5f73686967757265646f5f6c6f676f2e737667" data-canonical-src="https://shiguredo.jp/official_shiguredo_logo.svg"  />
-    </a>
+  <a class="sponsors-row" href="https://shiguredo.jp/" rel="nofollow">
+    <img
+      title="Shiguredō"
+      src="https://camo.githubusercontent.com/58b1dd652b0e2bfb67b97b59c2785bd5694dc0e9e8f6ce2a4182eacc35ed1fec/68747470733a2f2f73686967757265646f2e6a702f6f6666696369616c5f73686967757265646f5f6c6f676f2e737667"
+      data-canonical-src="https://shiguredo.jp/official_shiguredo_logo.svg"
+    />
+  </a>
 </div>

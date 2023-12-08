@@ -65,7 +65,7 @@ h2 {
 	}
 
 	&.biome {
-		background-color: rgba($color-4, 30%) !important;
+		background-color: rgba(#60a5fa, 20%) !important;
 	}
 
 	&.prettier {
@@ -77,6 +77,7 @@ h2 {
 		height: 18px;
 		width: 18px;
 		margin-right: 10px;
+		object-fit: contain;
 	}
 
 	&.collapsible {
