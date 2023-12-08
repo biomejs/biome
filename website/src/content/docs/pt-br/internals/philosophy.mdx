@@ -1,42 +1,42 @@
 ---
-title: Philosophy
-description: How we think about building Biome.
+title: Filosofia
+description: Como pensamos em construir o Biome
 ---
 
-This list includes general ethos that the project should abide by.
-This list is not comprehensive. Some of these are obvious but are stated for completeness.
+Esta lista inclui princípios gerais que o projeto deveria respeitar.
+A lista não é abrangente. Alguns desses princípios são óbvios, mas são mencionados para garantir a completude.
 
-## Project Management
+## Gestão do Projeto
 
-- **Set clear expectations.** Make project intent and decisions known well in advance.
-  Nothing should be a surprise.
+- **Estabelecer expectativas claras.** Torne a intenção do projeto e suas decisões conhecidas com bastante antecedência.
+  Nada deve ser uma surpresa.
 
-- **Clear messaging of decisions.** The team might evaluate options and make decisions using private channels.
-  While the team will try to keep discussions using public channels like [GitHub discussions](https://github.com/biomejs/biome/discussions) or [Discord](https://discord.gg/BypW39g6Yc), frequent private check-in are the norm, due to the nature of the private company.
-  When decisions occur via private channels, the team has to commit to communicate these decisions using the public channels.
+- **Comunicação clara das decisões.** A equipe pode avaliar opções e tomar decisões por meio de canais privados.
+  Embora a equipe tente manter discussões em canais públicos como [discussões no Github](https://github.com/biomejs/biome/discussions) ou no [Discord](https://discord.gg/BypW39g6Yc), verificações privadas frequentes são comuns, dada a natureza de uma empresa privada.
+  Quando decisões ocorrem por meio de canais privados, a equipe precisa se comprometer a comunicar essas decisões usando canais públicos.
 
-## Technical
+## Técnico
 
-- **Errors should suggest fixes and hints where possible.** These should be inferred and filtered from usage to reduce surfacing irrelevant and unhelpful messages.
+- **Erros devem sugerir correções e sugestões quando possível.** Essas devem ser inferidas e filtradas a partir do uso para reduzir a apresentação de mensagens irrelevantes e inúteis.
 
-- **Unique and specific error messages.** No generic error messages.
-  This helps users understand what went wrong and should provide maintainers with a unique call site and the necessary information to debug.
+- **Mensagens de erro únicas e específicas.** Sem mensagens de erro genéricas.
+  Isso ajuda os usuários a entenderem o que deu errado e deve fornecer aos mantenedores um local de chamada único e as informações necessárias para depuração.
 
-- **Optimise API.** Question the existence of all options and flags.
-  Are they necessary? Can they be combined? How can we reduce code branching?
+- **Otimizar a API.** Questione a existência de todas as opções.
+  Elas são realmente necessárias? Podem ser combinadas? Como podemos reduzir as ramificações de código?
 
-- **Reduce jargon.** Don't assume that users will understand specific terminology.
-  Strive to provide precise meaning for experts and beginners.
-  For example, use "character" where you would traditionally use "token" when producing parser errors.
+- **Reduzir jargões.** Não assuma que os usuários entenderão termos específicos.
+  Esforce-se para fornecer significados precisos para especialistas e iniciantes.
+  Por exemplo, use "caractere" onde normalmente usaria "token" ao gerar erros de análise sintática.
 
-- **Utilize verbosity when naming commands and flags.** No unnecessary and confusing abbreviations.
+- **Utilizar verbosidade ao nomear comandos e opções.** Sem abreviações desnecessárias e confusas.
 
-- **Use inclusive terminology.** Use gender-neutral pronouns. No ableist slurs.
-  No usage of terms that could be considered insensitive.
+- **Usar termos inclusivos** Use pronomes de gênero neutro. Evite termos pejorativos relacionados a capacidades.
+  Evite termos que possam ser considerados insensíveis.
 
-- **Build for generic clients.** Don't assume that a terminal will only consume output using ANSI codes.
-  Use abstractions that could be generalized for viewing in an IDE, browser, or other environments.
+- **Construir para clientes genéricos.** Não assuma que o terminal consumirá somente saídas usando códigos ANSI.
+  Use abstrações que possam ser generalizadas para visualização em uma IDE, navegador ou outros ambientes.
 
-- **Terminal output should be unambiguous.** When designing terminal output, don't rely purely on formatting cues like color.
-  Always use a combination of formatting, symbols, and spacing.
-  If all ANSI codes are stripped, all the output should still be understood.
+- **A saída do terminal não deve ser ambígua.** Ao projetar a saída do terminal, não se baseie apenas em sinais de formatação como cores.
+  Sempre use uma combinação de formatação, símbolos e espaçamento.
+  Se todos os códigos ANSI forem removidos, toda a saída ainda deve ser compreensível.
