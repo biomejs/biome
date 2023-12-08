@@ -2,12 +2,18 @@
 title: Biome
 template: splash
 description: 瞬间完成 Format、Lint 等！
+banner:
+  content: |
+    Biome 赢得了 <a href="/blog/biome-wins-prettier-challenge">Prettier挑战</a> 的奖金！
+editUrl: false
+next: false
 hero:
   title: Web 项目的唯一工具链
   tagline: 瞬间完成 Format、Lint 等！
   image:
     alt: Biome，Web 工具链
-    file: ../../../assets/biome-logo-slogan.svg
+    dark: ../../../assets/svg/slogan-dark-transparent.svg
+    light: ../../../assets/svg/slogan-light-transparent.svg
   actions:
     - text: 开始使用
       link: /zh-cn/guides/getting-started/
@@ -17,33 +23,32 @@ hero:
       link: https://github.com/biomejs/biome
       icon: external
       variant: secondary
-banner:
-  content: |
-    Biome 赢得了 <a href="/blog/biome-wins-prettier-challenge">Prettier挑战</a> 的奖金！
 ---
 
 import { Card, CardGrid } from "@astrojs/starlight/components";
 
-<CardGrid stagger>
-  <Card title="快速" icon="rocket">
-    使用 Rust 构建，灵感来自 rust-analyzer 的革命性架构。
-  </Card>
-  <Card title="简单" icon="pencil">
-    无需任何配置直接使用。若需要，也有大量配置选项可用。
-  </Card>
-  <Card title="可扩展" icon="random">
-    为处理任何规模的代码库而设计。专注于产品的开发而不是工具。
-  </Card>
-  <Card title="优化" icon="setting">
-    每项功能的内部处理都尽可能地进行整合与重复使用。这就使一个工具的改进也可以让其他所有工具都更好用。
-  </Card>
-  <Card title="可操作且信息丰富" icon="information">
-    避免晦涩的错误消息，当出现问题时，我们会准确告诉您问题的位置以及如何修复它。
-  </Card>
-  <Card title="一应俱全" icon="add-document">
-    开箱即用，支持前端各种语言特性。尤其对 TypeScript 与 JSX 提供完美支持。
-  </Card>
-</CardGrid>
+<div class="card-cnt">
+  <CardGrid>
+    <Card title="快速" icon="rocket">
+      使用 Rust 构建，灵感来自 rust-analyzer 的革命性架构。
+    </Card>
+    <Card title="简单" icon="pencil">
+      无需任何配置直接使用。若需要，也有大量配置选项可用。
+    </Card>
+    <Card title="可扩展" icon="random">
+      为处理任何规模的代码库而设计。专注于产品的开发而不是工具。
+    </Card>
+    <Card title="优化" icon="setting">
+      每项功能的内部处理都尽可能地进行整合与重复使用。这就使一个工具的改进也可以让其他所有工具都更好用。
+    </Card>
+    <Card title="可操作且信息丰富" icon="information">
+      避免晦涩的错误消息，当出现问题时，我们会准确告诉您问题的位置以及如何修复它。
+    </Card>
+    <Card title="一应俱全" icon="add-document">
+      开箱即用，支持前端各种语言特性。尤其对 TypeScript 与 JSX 提供完美支持。
+    </Card>
+  </CardGrid>
+</div>
 
 ## 赞助商
 
