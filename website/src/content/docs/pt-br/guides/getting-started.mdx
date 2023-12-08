@@ -1,0 +1,105 @@
+---
+title: Primeiros passos
+description: Aprenda a criar um novo projeto com Biome.
+---
+
+import PackageManagerBiomeCommand from "@src/components/PackageManagerBiomeCommand.astro";
+import PackageManagerCommand from "@src/components/PackageManagerCommand.astro";
+
+## Requisitos
+
+- Windows (incluindo WSL), macOS, ou Linux
+- x86_64 ou ARM64
+- Node.js v14.18 ou mais recente (não aplicável se você utilizar o executável independente)
+
+## Instalação
+
+A forma mais rápida de baixar o Biome é usando `npm` ou o seu package manager favorito. O CLI também está disponível como um [executável independente](/guides/manual-installation) caso você queira usar Biome sem instalar o Node.js.
+
+Para instalar o Biome, execute o seguinte comando em um diretório que possua o arquivo `package.json`.
+
+<PackageManagerCommand
+  npm="install --save-dev --save-exact @biomejs/biome"
+  pnpm="add --save-dev --save-exact @biomejs/biome"
+  yarn="add --dev --exact @biomejs/biome"
+  bun="add --dev --exact @biomejs/biome"
+/>
+
+:::note
+É possível instalar o Biome de forma global em vez de local.
+Mas isso não é recomendado.
+:::
+
+É **altamente recomendado** não utilizar "range operators" ao instalar o Biome.
+Dê uma olhada na [página de versionamento](/pt-br/internals/versioning/) para mais informações.
+
+## Configuração
+
+Recomendamos criar um arquivo de configuração `biome.json` para cada projeto.
+Isso elimina a necessidade de repetir as opções do CLI toda vez que você executar um comando e garante que o Biome aplique as mesmas configurações em seu editor. Se você está contente com a configuração padrão, você não precisa fazer isso.
+
+Para criar o arquivo de configuração, use o comando de `init` dentro da pasta raíz do seu projeto:
+
+<PackageManagerBiomeCommand command="init" />
+
+Após utilizar o comando, você terá um novo arquivo `biome.json` no seu diretório:
+
+```json title="biome.json"
+{
+  "$schema": "https://biomejs.dev/schemas/1.4.0/schema.json",
+  "organizeImports": {
+    "enabled": false
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true
+    }
+  }
+}
+```
+
+O `linter.enabled: true` habilita o linter e o `rules.recommended: true` habilita as [regras recomendadas](/linter/rules/).
+
+A formatação está ativada porque a configuração não [desabilita](/reference/configuration/#formatterenabled) explicitamente a formatação com `formatter.enabled: false`.
+
+## Como usar
+
+O CLI do Biome vem com vários comandos e opções, então você utiliza só o que precisar.
+
+Você pode formatar arquivos e diretórios usando o comando [`format`](/reference/cli#biome-format) com o parâmetro `--write`:
+
+<PackageManagerBiomeCommand command="format <files> --write" />
+
+Você pode analisar e aplicar [correções seguras](/pt-br/linter#correções-seguras) em arquivos e diretórios utilizando o comando [`lint`](/reference/cli#biome-lint) com o parâmetro `--apply`:
+
+<PackageManagerBiomeCommand command="lint <files>" />
+
+Você pode aplicar **ambos** com o comando [`check`](/reference/cli#biome-check)
+
+<PackageManagerBiomeCommand command="check --apply <files>" />
+
+O comando `check` executa múltiplas ferramentas de uma vez. Até o momento, ele:
+
+- formata arquivos
+- analisa arquivos
+- organiza as importações
+
+## Instale um plugin de editor
+
+Recomendamos instalar um plugin de editor para aproveitar ao máximo o Biome. Dê uma olhada na [página de editores](/pt-br/guides/integrate-in-editor) para saber qual oferece suporte ao Biome.
+
+## Configuração para integração contínua (CI)
+
+Se você está usando Node.js, a forma recomendada de executar o Biome em CI é utilizando o seu [package manager favorito](/pt-br/guides/getting-started#instalação).
+Isso garante que sua pipeline de integração contínua (CI) utilize a mesma versão do Biome que você usa dentro do editor ou ao executar comandos locais pelo CLI.
+
+## Próximos passos
+
+Parabéns! Agora você está pronto para utilizar o Biome. 🥳
+
+- Saiba mais sobre como usar e configurar o [formatter](/formatter)
+- Saiba mais sobre como usar e configurar o [linter](/pt-br/linter)
+- Familiarize-se com as [opções do CLI](/reference/cli)
+- Familiarize-se com as [opções de configuração](/reference/configuration)
+- Entre na nossa [comunidade do Discord](https://discord.gg/BypW39g6Yc)

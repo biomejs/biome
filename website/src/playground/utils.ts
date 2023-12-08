@@ -1,5 +1,5 @@
 import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
-import type { ThemeName } from "../frontend-scripts/util";
+import type { ThemeChanged, ThemeName } from "../frontend-scripts/util";
 import { getCurrentTheme } from "../frontend-scripts/util";
 import {
 	type PlaygroundFileState,
@@ -25,14 +25,18 @@ export function useTheme(): ThemeName {
 	const [theme, setTheme] = useState(getCurrentTheme());
 
 	useEffect(() => {
-		function onColorSchemeChange() {
-			setTheme(getCurrentTheme());
+		function onColorSchemeChange(event: CustomEvent<ThemeChanged>) {
+			setTheme(getCurrentTheme(event.detail.theme));
 		}
 
-		window.addEventListener("colorschemechange", onColorSchemeChange);
+		window.addEventListener("colorschemechange", (event) => {
+			onColorSchemeChange(event as CustomEvent<ThemeChanged>);
+		});
 
 		return function cleanup() {
-			window.removeEventListener("colorschemechange", onColorSchemeChange);
+			window.removeEventListener("colorschemechange", (event) => {
+				onColorSchemeChange(event as CustomEvent<ThemeChanged>);
+			});
 		};
 	});
 

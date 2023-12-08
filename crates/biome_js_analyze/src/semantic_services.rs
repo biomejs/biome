@@ -86,13 +86,13 @@ where
     }
 }
 
-struct SemanticModelBuilderVisitor {
+pub(crate) struct SemanticModelBuilderVisitor {
     extractor: SemanticEventExtractor,
     builder: SemanticModelBuilder,
 }
 
 impl SemanticModelBuilderVisitor {
-    fn new(root: &AnyJsRoot) -> Self {
+    pub(crate) fn new(root: &AnyJsRoot) -> Self {
         Self {
             extractor: SemanticEventExtractor::default(),
             builder: SemanticModelBuilder::new(root.clone()),

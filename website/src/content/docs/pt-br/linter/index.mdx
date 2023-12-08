@@ -1,0 +1,178 @@
+---
+title: Linter
+description: Como utilizar o Linter do Biome.
+---
+
+import NumberOfRules from "@src/components/generated/NumberOfRules.astro";
+import RecommendedRules from "@src/components/generated/RecommendedRules.astro";
+
+O Linter do Biome analisa de forma estática o seu código para encontrar erros comuns e ajudar você a escrever códigos idiomáticos.
+
+<NumberOfRules />
+
+## Usar o Linter via CLI
+
+Você pode começar executando a CLI para verificar possíveis erros usando o seguinte comando:
+
+```shell
+biome lint ./src
+```
+
+Para mais informações sobre todas as opções disponíveis, veja a página sobre [o CLI](/reference/cli#biome-lint)
+
+## Princípios das Regras
+
+Nós acreditamos que as regras devem ser informativas e que expliquem ao usuário porque uma regra é acionada, além de orientar o usuário sobre o que deve ser feito para corrigí-lo. Uma regra deve seguir esses **princípios**:
+
+1. Explicar o erro para o usuário. Geralmente, essa é a mensagem do diagnóstico.
+2. Explicar para o usuário porque o erro foi acionado. Geralmente, isso é implementado com um parâmetro adicional.
+3. Falar para o usuário o que ele precisa fazer. Geralmente, isso é implementado usando uma ação no código. Se uma ação no código não for aplicável uma nota deve dizer o que o usuário precisa fazer para arrumar o erro.
+
+Se você acha que uma regra não siga esses princípios, por favor [abra uma Issue](https://github.com/biomejs/biome/issues/new?assignees=&labels=S-To+triage&projects=&template=01_bug.yml&title=%F0%9F%90%9B+%3CTITLE%3E).
+
+## Correções de código
+
+As regras de Lint podem fornecer correções automáticas de código. O Biome classifica as correções em dois tipos.
+
+### Correções seguras
+
+As correções seguras não alteram a semântica do seu código. Elas podem ser aplicadas sem uma análise explicita.
+
+Para aplicar _correções seguras_, utilize o parâmetro `--apply`:
+
+```shell
+biome check --apply ./src
+```
+
+### Correções não seguras
+
+Correções não seguras podem alterar a semântica do seu código. Portanto, é aconselhável revisar manualmente as alterações.
+
+Para aplicar _correções não seguras_, utilize o parâmetro `--apply-unsafe`:
+
+```shell
+biome check --apply-unsafe ./src
+```
+
+## Regras recomendadas
+
+Quando o Linter está ativado, ele recomenda uma série de regras. Essas regras emitirão diagnósticos de erro. Veja as regras recomendadas logo abaixo:
+
+<RecommendedRules />
+
+## Ignorando um erro
+
+As vezes você só quer ignorar um erro de lint em uma linha específica de código.
+Você pode fazer isso usando um comentário de supressão acima da linha que emite o diagnóstico.
+
+Os comentários de supressão segue o seguinte formato:
+
+```js
+// biome-ignore lint: <explanation>
+// biome-ignore lint/suspicious/noDebugger: <explanation>
+```
+
+Onde
+
+- `biome-ignore` é o começo de um comentário de supressão;
+- `lint` desativa o linter;
+- `/suspicious/noDebugger`: **opcional**, grupo e o nome da regra que você quer desativar;
+- `<explanation>` explicação do motivo pelo qual a regra está desativada
+
+Aqui está um exemplo:
+
+```ts
+// biome-ignore lint: reason
+debugger;
+// biome-ignore lint/suspicious/noDebugger: reason
+debugger;
+```
+
+## Configuração
+
+### Ativar uma regra do Lint
+
+As regras recomendadas são ativadas por padrão e emitem diagnósticos com a severidade do erro.
+Regras que não são recomendadas são desativadas por padrão, mas podem ser ativadas pelo arquivo de configuração.
+Os diagnósticos emitidos por essas regras são mostrados com a gravidade de aviso (warning) na documentação.
+
+Para ativar essas regras, você precisa alterar a gravidade do diagnóstico baseado nas suas necessidades:
+
+```json title="biome.json"
+{
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "style": {
+        "useBlockStatements": "error",
+        "useShorthandArrayType": "error",
+        "noShoutyConstants": "warn"
+      }
+    }
+  }
+}
+```
+
+### Desativar uma regra do Lint
+
+Apenas adicione `"off"` como um valor dentro da configuração da regra. Por exemplo:
+
+```json title="biome.json"
+{
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "suspicious": {
+        "noCommentText": "off"
+      },
+      "style": {
+        "noUnusedTemplateLiteral": "off"
+      }
+    }
+  }
+}
+```
+
+### Alterar a gravidade do diagnóstico
+
+A maioria das regras do Biome vão emitir um **erro**, mas você pode alterar isso.
+Apenas adicione `"warn"` como um valor da regra. Exemplo:
+
+```json title="biome.json"
+{
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "suspicious": {
+        "noCommentText": "warn"
+      }
+    }
+  }
+}
+```
+
+Isso é útil em casos onde está rolando uma refatoração e é necessário fazer com que o CI seja aprovado.
+
+## Configurações de regras
+
+Algumas regras tem configurações.
+Quando elas aceitam, você pode contorná-las ajustando o valor da regra de uma forma diferente.
+
+```json title="biome.json"
+{
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "correctness": {
+        "noCommentText": {
+          "level": "warn",
+          "options": {}
+        }
+      }
+    }
+  }
+}
+```
+
+- `level` indica a gravidade do diagnóstico, os valores válidos são: `"off"`, `"warn"` e `"error"`;
+- `options` vai mudar dependendo da regra.

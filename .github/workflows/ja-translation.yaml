@@ -1,0 +1,32 @@
+name: Checks for Japanese Documentation
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "website/src/content/docs/ja/**"
+
+jobs:
+  ja-docs-check:
+    name: Checks on JA Docs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR Branch
+        uses: actions/checkout@v4
+      - name: Cache pnpm modules
+        uses: actions/cache@v3
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-
+      - uses: pnpm/action-setup@v2.2.4
+        with:
+          version: 8
+      - name: Install libraries
+        working-directory: website
+        run: pnpm i
+      - name: Run textlint
+        working-directory: website
+        run: pnpm textlint

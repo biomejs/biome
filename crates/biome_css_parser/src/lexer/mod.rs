@@ -496,6 +496,8 @@ impl<'src> CssLexer<'src> {
             TLD => self.consume_tilde(),
             PIP => self.consume_pipe(),
             EQL => self.consume_byte(T![=]),
+            EXL => self.consume_byte(T![!]),
+            PRC => self.consume_byte(T![%]),
 
             UNI => {
                 // A BOM can only appear at the start of a file, so if we haven't advanced at all yet,
@@ -768,6 +770,7 @@ impl<'src> CssLexer<'src> {
             b"charset" => CHARSET_KW,
             b"color-profile" => COLOR_PROFILE_KW,
             b"counter-style" => COUNTER_STYLE_KW,
+            b"font-face" => FONT_FACE_KW,
             _ => IDENT,
         }
     }
@@ -944,7 +947,7 @@ impl<'src> CssLexer<'src> {
 
                 COMMENT
             }
-            _ => self.consume_unexpected_character(),
+            _ => self.consume_byte(T![/]),
         }
     }
 

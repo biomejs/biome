@@ -18,6 +18,10 @@ declare module FooBar {
   export interface Bar extends Baz {}
 }
 
+namespace Ns {
+  export interface Bar extends Baz {}
+}
+
 ```
 
 # Diagnostics
@@ -156,6 +160,29 @@ invalid.ts:12:10 lint/suspicious/noEmptyInterface  FIXABLE  ━━━━━━�
        12 │ + ··export·type·Bar·=·Baz
     13 13 │   }
     14 14 │   
+  
+
+```
+
+```
+invalid.ts:16:10 lint/suspicious/noEmptyInterface  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! An interface declaring no members is equivalent to its supertype.
+  
+    15 │ namespace Ns {
+  > 16 │   export interface Bar extends Baz {}
+       │          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │ }
+    18 │ 
+  
+  i Safe fix: Convert empty interface to type alias.
+  
+    14 14 │   
+    15 15 │   namespace Ns {
+    16    │ - ··export·interface·Bar·extends·Baz·{}
+       16 │ + ··export·type·Bar·=·Baz
+    17 17 │   }
+    18 18 │   
   
 
 ```

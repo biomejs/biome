@@ -413,13 +413,8 @@ impl JsxWord {
         }
     }
 
-    pub(crate) fn is_ascii_punctuation(&self) -> bool {
+    pub(crate) fn is_single_character(&self) -> bool {
         self.text.chars().count() == 1
-            && self
-                .text
-                .chars()
-                .next()
-                .map_or(false, |char| char.is_ascii_punctuation())
     }
 }
 

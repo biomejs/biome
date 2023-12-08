@@ -576,6 +576,38 @@ impl FormatElements for [FormatElement] {
         false
     }
 
+    fn may_directly_break(&self) -> bool {
+        use Tag::*;
+        let mut ignore_depth = 0usize;
+
+        for element in self {
+            match element {
+                // Line suffix
+                // Ignore if any of its content breaks
+                FormatElement::Tag(StartLineSuffix) => {
+                    ignore_depth += 1;
+                }
+                FormatElement::Tag(EndLineSuffix) => {
+                    ignore_depth -= 1;
+                }
+                FormatElement::Interned(interned) if ignore_depth == 0 => {
+                    if interned.may_directly_break() {
+                        return true;
+                    }
+                }
+
+                element if ignore_depth == 0 && element.may_directly_break() => {
+                    return true;
+                }
+                _ => continue,
+            }
+        }
+
+        debug_assert_eq!(ignore_depth, 0, "Unclosed start container");
+
+        false
+    }
+
     fn has_label(&self, expected: LabelId) -> bool {
         self.first()
             .map_or(false, |element| element.has_label(expected))

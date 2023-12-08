@@ -7,7 +7,7 @@ html {
 }
 
 html {
-	background: var(--background-color);
+	background: var(--sl-color-bg);
 }
 
 html.transition {
@@ -21,10 +21,9 @@ html.transition {
 
 body {
 	font-size: 16px;
-	font-family: $body-font;
 	text-rendering: optimizelegibility;
 	-webkit-font-smoothing: antialiased;
-	color: var(--font-color);
+	color: var(--sl-color-text);
 	line-height: 1.5;
 	margin: 0;
 }
@@ -70,21 +69,6 @@ h4,
 h5 {
 	color: var(--logo-font-color);
 	font-weight: bold;
-}
-
-a, .link {
-	color: var(--logo-font-color);
-	text-decoration: underline;
-	cursor: pointer;
-
-	&:hover {
-		text-decoration: none;
-		color: var(--link-hover-color);
-	}
-
-	&:active {
-		color: var(--primary-color);
-	}
 }
 
 .no-scroll {

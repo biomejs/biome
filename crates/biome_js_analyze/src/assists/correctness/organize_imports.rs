@@ -311,7 +311,7 @@ impl From<JsImport> for ImportNode {
 
             for element in named_import_specifiers.specifiers().elements() {
                 let node = element.node.ok()?;
-                let key = node.local_name()?.token_text_trimmed();
+                let key = node.imported_name()?.token_text_trimmed();
 
                 let trailing_separator = element.trailing_separator.ok()?;
                 separator_count += usize::from(trailing_separator.is_some());

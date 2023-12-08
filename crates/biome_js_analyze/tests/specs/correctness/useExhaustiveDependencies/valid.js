@@ -223,3 +223,13 @@ function MyComponent21() {
 			console.log(ref.current)
 	}, [])
 }
+
+let outer = false;
+
+// Capture from outer scope
+// https://github.com/biomejs/biome/issues/651
+function MyComponent22() {
+  useEffect(() => {
+    outer = true;
+  }, [])
+}
