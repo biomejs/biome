@@ -1154,6 +1154,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noNodejsModules": {
+					"description": "Disallow Node.js builtin modules.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUnusedImports": {
 					"description": "Disallow unused imports.",
 					"anyOf": [
