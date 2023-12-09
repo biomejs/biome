@@ -127,24 +127,24 @@ impl Rule for NoMisleadingCharacterClass {
             }
 
             AnyRegexExpression::JsNewExpression(expr) => {
-                let is_reg_exp = match expr.callee().ok()? {
+                let is_regexp = match expr.callee().ok()? {
                     AnyJsExpression::JsIdentifierExpression(callee) => {
                         callee.name().ok()?.has_name("RegExp")
                     }
                     AnyJsExpression::JsStaticMemberExpression(callee) => {
-                        let is_regexp =
+                        let is_member_regexp =
                             callee.member().ok()?.value_token().ok()?.text() == "RegExp";
                         let callee = callee.object().ok()?;
                         let (_, name) = global_identifier(&callee)?;
                         let is_global_obj = name.text() == "globalThis"
                             || name.text() == "global"
                             || name.text() == "window";
-                        is_global_obj && is_regexp
+                        is_global_obj && is_member_regexp
                     }
                     _ => false,
                 };
 
-                if is_reg_exp {
+                if is_regexp {
                     let mut args = expr.arguments()?.args().iter();
                     let raw_regex_pattern = args
                         .next()
@@ -170,11 +170,23 @@ impl Rule for NoMisleadingCharacterClass {
                 }
             }
             AnyRegexExpression::JsCallExpression(expr) => {
-                let callee = match expr.callee().ok()? {
-                    AnyJsExpression::JsIdentifierExpression(callee) => callee,
+                let is_regexp = match expr.callee().ok()? {
+                    AnyJsExpression::JsIdentifierExpression(callee) => {
+                        callee.name().ok()?.has_name("RegExp")
+                    }
+                    AnyJsExpression::JsStaticMemberExpression(callee) => {
+                        let is_member_regexp =
+                            callee.member().ok()?.value_token().ok()?.text() == "RegExp";
+                        let callee = callee.object().ok()?;
+                        let (_, name) = global_identifier(&callee)?;
+                        let is_global_obj = name.text() == "globalThis"
+                            || name.text() == "global"
+                            || name.text() == "window";
+                        is_global_obj && is_member_regexp
+                    }
                     _ => return None,
                 };
-                if callee.name().ok()?.has_name("RegExp") {
+                if is_regexp {
                     let mut args = expr.arguments().ok()?.args().iter();
                     let raw_regex_pattern = args
                         .next()

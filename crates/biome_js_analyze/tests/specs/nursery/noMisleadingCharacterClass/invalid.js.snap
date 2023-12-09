@@ -73,6 +73,10 @@ var r = new global.RegExp("[❇️]", "");
 var r = new global.RegExp("[👍]", "");
 var r = new globalThis.globalThis.globalThis.RegExp("[❇️]", "");
 var r = new globalThis.globalThis.globalThis.RegExp("[👍]", "");
+var r = RegExp("[👍]", "");
+var r = window.RegExp("[👍]", "");
+var r = global.RegExp("[👍]", "");
+var r = globalThis.RegExp("[👍]", "");
 
 ```
 
@@ -1251,7 +1255,7 @@ invalid.js:68:9 lint/nursery/noMisleadingCharacterClass ━━━━━━━━
   > 68 │ var r = new globalThis.globalThis.globalThis.RegExp("[❇�]", "");
        │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     69 │ var r = new globalThis.globalThis.globalThis.RegExp("[👍]", "");
-    70 │ 
+    70 │ var r = RegExp("[👍]", "");
   
 
 ```
@@ -1265,7 +1269,8 @@ invalid.js:69:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━�
     68 │ var r = new globalThis.globalThis.globalThis.RegExp("[❇�]", "");
   > 69 │ var r = new globalThis.globalThis.globalThis.RegExp("[👍]", "");
        │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    70 │ 
+    70 │ var r = RegExp("[👍]", "");
+    71 │ var r = window.RegExp("[👍]", "");
   
   i Safe fix: Add unicode u flag to regex
   
@@ -1273,7 +1278,102 @@ invalid.js:69:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━�
     68 68 │   var r = new globalThis.globalThis.globalThis.RegExp("[❇�]", "");
     69    │ - var·r·=·new·globalThis.globalThis.globalThis.RegExp("[👍]",·"");
        69 │ + var·r·=·new·globalThis.globalThis.globalThis.RegExp("[👍]","u");
-    70 70 │   
+    70 70 │   var r = RegExp("[👍]", "");
+    71 71 │   var r = window.RegExp("[👍]", "");
+  
+
+```
+
+```
+invalid.js:70:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected surrogate pair in character class. Use the 'u' flag.
+  
+    68 │ var r = new globalThis.globalThis.globalThis.RegExp("[❇�]", "");
+    69 │ var r = new globalThis.globalThis.globalThis.RegExp("[👍]", "");
+  > 70 │ var r = RegExp("[👍]", "");
+       │         ^^^^^^^^^^^^^^^^^^
+    71 │ var r = window.RegExp("[👍]", "");
+    72 │ var r = global.RegExp("[👍]", "");
+  
+  i Safe fix: Add unicode u flag to regex
+  
+    68 68 │   var r = new globalThis.globalThis.globalThis.RegExp("[❇�]", "");
+    69 69 │   var r = new globalThis.globalThis.globalThis.RegExp("[👍]", "");
+    70    │ - var·r·=·RegExp("[👍]",·"");
+       70 │ + var·r·=·RegExp("[👍]","u");
+    71 71 │   var r = window.RegExp("[👍]", "");
+    72 72 │   var r = global.RegExp("[👍]", "");
+  
+
+```
+
+```
+invalid.js:71:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected surrogate pair in character class. Use the 'u' flag.
+  
+    69 │ var r = new globalThis.globalThis.globalThis.RegExp("[👍]", "");
+    70 │ var r = RegExp("[👍]", "");
+  > 71 │ var r = window.RegExp("[👍]", "");
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^^
+    72 │ var r = global.RegExp("[👍]", "");
+    73 │ var r = globalThis.RegExp("[👍]", "");
+  
+  i Safe fix: Add unicode u flag to regex
+  
+    69 69 │   var r = new globalThis.globalThis.globalThis.RegExp("[👍]", "");
+    70 70 │   var r = RegExp("[👍]", "");
+    71    │ - var·r·=·window.RegExp("[👍]",·"");
+       71 │ + var·r·=·window.RegExp("[👍]","u");
+    72 72 │   var r = global.RegExp("[👍]", "");
+    73 73 │   var r = globalThis.RegExp("[👍]", "");
+  
+
+```
+
+```
+invalid.js:72:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected surrogate pair in character class. Use the 'u' flag.
+  
+    70 │ var r = RegExp("[👍]", "");
+    71 │ var r = window.RegExp("[👍]", "");
+  > 72 │ var r = global.RegExp("[👍]", "");
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^^
+    73 │ var r = globalThis.RegExp("[👍]", "");
+    74 │ 
+  
+  i Safe fix: Add unicode u flag to regex
+  
+    70 70 │   var r = RegExp("[👍]", "");
+    71 71 │   var r = window.RegExp("[👍]", "");
+    72    │ - var·r·=·global.RegExp("[👍]",·"");
+       72 │ + var·r·=·global.RegExp("[👍]","u");
+    73 73 │   var r = globalThis.RegExp("[👍]", "");
+    74 74 │   
+  
+
+```
+
+```
+invalid.js:73:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected surrogate pair in character class. Use the 'u' flag.
+  
+    71 │ var r = window.RegExp("[👍]", "");
+    72 │ var r = global.RegExp("[👍]", "");
+  > 73 │ var r = globalThis.RegExp("[👍]", "");
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    74 │ 
+  
+  i Safe fix: Add unicode u flag to regex
+  
+    71 71 │   var r = window.RegExp("[👍]", "");
+    72 72 │   var r = global.RegExp("[👍]", "");
+    73    │ - var·r·=·globalThis.RegExp("[👍]",·"");
+       73 │ + var·r·=·globalThis.RegExp("[👍]","u");
+    74 74 │   
   
 
 ```

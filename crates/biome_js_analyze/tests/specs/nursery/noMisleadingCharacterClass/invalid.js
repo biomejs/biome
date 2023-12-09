@@ -67,3 +67,7 @@ var r = new global.RegExp("[❇️]", "");
 var r = new global.RegExp("[👍]", "");
 var r = new globalThis.globalThis.globalThis.RegExp("[❇️]", "");
 var r = new globalThis.globalThis.globalThis.RegExp("[👍]", "");
+var r = RegExp("[👍]", "");
+var r = window.RegExp("[👍]", "");
+var r = global.RegExp("[👍]", "");
+var r = globalThis.RegExp("[👍]", "");
