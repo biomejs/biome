@@ -6,9 +6,9 @@ use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_syntax::{
-    AnyJsCallArgument, AnyJsExpression, AnyJsLiteralExpression, AnyJsTemplateElement,
-    JsCallArguments, JsCallExpression, JsNewExpression, JsRegexLiteralExpression,
-    JsStringLiteralExpression, JsSyntaxKind, JsSyntaxToken, T,
+    global_identifier, AnyJsCallArgument, AnyJsExpression, AnyJsLiteralExpression,
+    AnyJsTemplateElement, JsCallArguments, JsCallExpression, JsNewExpression,
+    JsRegexLiteralExpression, JsStringLiteralExpression, JsSyntaxKind, JsSyntaxToken, T,
 };
 use biome_rowan::{
     declare_node_union, AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, TextRange,
@@ -132,15 +132,14 @@ impl Rule for NoMisleadingCharacterClass {
                         callee.name().ok()?.has_name("RegExp")
                     }
                     AnyJsExpression::JsStaticMemberExpression(callee) => {
-                        let is_global_this = match callee.object().ok()? {
-                            AnyJsExpression::JsIdentifierExpression(e) => {
-                                e.name().ok()?.has_name("globalThis")
-                            }
-                            _ => false,
-                        };
-
-                        is_global_this
-                            && callee.member().ok()?.value_token().ok()?.text() == "RegExp"
+                        let is_regexp =
+                            callee.member().ok()?.value_token().ok()?.text() == "RegExp";
+                        let callee = callee.object().ok()?;
+                        let (_, name) = global_identifier(&callee)?;
+                        let is_global_obj = name.text() == "globalThis"
+                            || name.text() == "global"
+                            || name.text() == "window";
+                        is_global_obj && is_regexp
                     }
                     _ => false,
                 };
