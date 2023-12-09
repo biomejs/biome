@@ -93,40 +93,6 @@ impl Rule for UseNodeImportProtocol {
     }
 }
 
-const NODE_BUILTINS: &[&str] = &[
-    "assert",
-    "buffer",
-    "child_process",
-    "cluster",
-    "console",
-    "constants",
-    "crypto",
-    "dgram",
-    "dns",
-    "domain",
-    "events",
-    "fs",
-    "http",
-    "https",
-    "module",
-    "net",
-    "os",
-    "path",
-    "punycode",
-    "querystring",
-    "readline",
-    "repl",
-    "stream",
-    "string_decoder",
-    "sys",
-    "timers",
-    "tls",
-    "tty",
-    "url",
-    "util",
-    "vm",
-    "zlib",
-];
 
 fn is_builtin_module(module_name: &str) -> bool {
     NODE_BUILTINS.contains(&module_name)
