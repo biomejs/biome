@@ -16,7 +16,7 @@ function pathsMatch(pathA: string, pathB: string): boolean {
 <div>
   <AstrolightSiteTitle {...Astro.props} />
 
-  <div class="separator"></div>
+  <div class="sl-hidden separator"></div>
 
   <div class="sl-hidden menu-items">
     {
@@ -67,6 +67,9 @@ function pathsMatch(pathA: string, pathB: string): boolean {
 	@media (min-width: 50rem) {
 		.menu-items {
 			display: flex;
+		}
+		.separator {
+			display: block;
 		}
 	}
 }
