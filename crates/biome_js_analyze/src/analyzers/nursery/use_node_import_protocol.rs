@@ -3,6 +3,8 @@ use biome_console::markup;
 use biome_js_syntax::JsModuleSource;
 use biome_rowan::{AstNode, TextRange};
 
+use crate::globals::node::NODE_BUILTINS;
+
 declare_rule! {
     /// Enforces using the `node:` protocol for Node.js builtin modules.
     ///
@@ -95,5 +97,5 @@ impl Rule for UseNodeImportProtocol {
 
 
 fn is_builtin_module(module_name: &str) -> bool {
-    NODE_BUILTINS.contains(&module_name)
+    NODE_BUILTINS.binary_search(&module_name).is_ok()
 }
