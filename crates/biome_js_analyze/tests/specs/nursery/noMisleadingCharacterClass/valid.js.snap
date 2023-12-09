@@ -53,6 +53,12 @@ var r = /^[\q{👶🏻}]$/v;
 var r = /[🇯\q{abc}🇵]/v;
 var r = /[🇯[A]🇵]/v;
 var r = /[🇯[A--B]🇵]/v;
+
+var r = new window.RegExp(/[👍]/u);
+var r = new global.RegExp(/[👍]/u);
+var r = new globalThis.RegExp(/[👍]/u);
+var r = new globalThis.globalThis.globalThis.RegExp(/[👍]/u);
+
 ```
 
 
