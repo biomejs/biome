@@ -75,12 +75,12 @@ export default defineConfig({
 				{
 					label: "Blog",
 					link: "../blog",
-          translations: { ja: "ブログ" }
+					translations: { ja: "ブログ" },
 				},
 				{
 					label: "Playground",
 					link: "../playground",
-        	translations: {
+					translations: {
 						ja: "プレイグラウンド",
 						"pt-BR": "Ambiente de testes",
 					},
