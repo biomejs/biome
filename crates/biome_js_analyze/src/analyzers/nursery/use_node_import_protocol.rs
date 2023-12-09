@@ -1,7 +1,7 @@
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_js_syntax::JsModuleSource;
-use biome_rowan::{AstNode, TextRange};
+use biome_rowan::AstNode;
 
 use crate::globals::node::NODE_BUILTINS;
 
@@ -49,17 +49,9 @@ declare_rule! {
     }
 }
 
-pub(crate) struct NodeImportProtocolState {
-    /// The range of the import statement in the source code.
-    range: TextRange,
-
-    /// The builtin module name that was imported.
-    module_name: String,
-}
-
 impl Rule for UseNodeImportProtocol {
     type Query = Ast<JsModuleSource>;
-    type State = NodeImportProtocolState;
+    type State = ();
     type Signals = Option<Self::State>;
     type Options = ();
 
@@ -73,18 +65,17 @@ impl Rule for UseNodeImportProtocol {
             return None;
         }
 
-        Some(NodeImportProtocolState {
-            range: binding.range(),
-            module_name: module_name.to_string(),
-        })
+        Some(())
     }
 
-    fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        let NodeImportProtocolState { range, module_name } = state;
+    fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
+        let binding: &JsModuleSource = ctx.query();
+        let module_name = binding.inner_string_text().ok()?.to_string();
+        let range = binding.range();
 
         Some(RuleDiagnostic::new(
             rule_category!(),
-            *range,
+            range,
             markup! {
                 "Import from Node.js builtin module \""{module_name}"\" should use the \"node:\" protocol."
             },
@@ -94,7 +85,6 @@ impl Rule for UseNodeImportProtocol {
         }))
     }
 }
-
 
 fn is_builtin_module(module_name: &str) -> bool {
     NODE_BUILTINS.binary_search(&module_name).is_ok()
