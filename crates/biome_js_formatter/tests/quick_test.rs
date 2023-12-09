@@ -9,13 +9,16 @@ mod language {
     include!("language.rs");
 }
 
-#[ignore]
+// #[ignore]
 #[test]
 // use this test check if your snippet prints as you wish, without using a snapshot
 fn quick_test() {
     let src = r#"
-    ((C) => (props) => <C {...props} />);
-    (({C}) => (props) => <C {...props} />);
+  <div>
+    <span a b>
+      <Hi />
+    </span> ({variable})
+  </div>;
     "#;
     let source_type = JsFileSource::tsx();
     let tree = parse(
