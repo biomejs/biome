@@ -18,6 +18,10 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ### Editors
 
+#### New features
+
+- The LSP register formatting without the need of using dynamic capabilities from the client.
+
 ### Formatter
 
 ### JavaScript APIs
@@ -25,6 +29,20 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 ### Linter
 
 #### New features
+
+- Add [useExportType](https://biomejs.dev/linter/rules/use-export-type) that enforces the use of type-only exports for names that are only types. Contributed by @Conaclos
+
+  ```diff
+    interface A {}
+    interface B {}
+    class C {}
+
+  - export type { A, C }
+  + export { type A, C }
+
+  - export { type B }
+  + export type { B }
+  ```
 
 #### Enhancements
 
@@ -74,6 +92,23 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ### Parser
 
+- Fix [#1077](https://github.com/biomejs/biome/issues/1077), fix issues when parsing conditional expression where parenthesized identifier was being parsed as arrow expression. Contributed by @kalleep
+
+These cases are now properly parsed:
+
+javascript:
+```javascript
+  a ? (b) : a => {};
+```
+
+typescript:
+```ts
+  a ? (b) : a => {};
+```
+jsx:
+```jsx
+  bar ? (foo) : (<a>{() => {}}</a>);
+```
 
 ## 1.4.1 (2023-11-30)
 

@@ -770,6 +770,7 @@ impl<'src> CssLexer<'src> {
             b"charset" => CHARSET_KW,
             b"color-profile" => COLOR_PROFILE_KW,
             b"counter-style" => COUNTER_STYLE_KW,
+            b"font-face" => FONT_FACE_KW,
             _ => IDENT,
         }
     }

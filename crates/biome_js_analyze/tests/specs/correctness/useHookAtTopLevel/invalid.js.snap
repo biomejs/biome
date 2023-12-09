@@ -97,6 +97,42 @@ const Component9 = () => {
     a ?? useEffect();
 };
 
+function Component10() {
+    return;
+
+    useEffect();
+}
+
+function Component11() {
+    if (!a) {
+        return;
+    }
+
+    useEffect();
+}
+
+function Component12() {
+    if (!a) {
+        return;
+    }
+
+    {
+        useEffect();
+    }
+}
+
+function Component13() {
+    useEffect();
+};
+
+function Component14() {
+    if (!a) {
+        return;
+    }
+
+    Component13();
+}
+
 ```
 
 # Diagnostics
@@ -458,6 +494,133 @@ invalid.js:91:10 lint/correctness/useHookAtTopLevel ━━━━━━━━━�
        │          ^^^^^^^^^
     92 │ };
     93 │ 
+  
+  i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
+  
+  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  
+
+```
+
+```
+invalid.js:97:5 lint/correctness/useHookAtTopLevel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This hook is being called conditionally, but all hooks must be called in the exact same order in every component render.
+  
+    95 │     return;
+    96 │ 
+  > 97 │     useEffect();
+       │     ^^^^^^^^^
+    98 │ }
+    99 │ 
+  
+  i Hooks should not be called after an early return.
+  
+    92 │ };
+    93 │ 
+  > 94 │ function Component10() {
+       │                         
+  > 95 │     return;
+       │     ^^^^^^^
+    96 │ 
+    97 │     useEffect();
+  
+  i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
+  
+  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  
+
+```
+
+```
+invalid.js:105:5 lint/correctness/useHookAtTopLevel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This hook is being called conditionally, but all hooks must be called in the exact same order in every component render.
+  
+    103 │     }
+    104 │ 
+  > 105 │     useEffect();
+        │     ^^^^^^^^^
+    106 │ }
+    107 │ 
+  
+  i Hooks should not be called after an early return.
+  
+    100 │ function Component11() {
+  > 101 │     if (!a) {
+        │              
+  > 102 │         return;
+        │         ^^^^^^^
+    103 │     }
+    104 │ 
+  
+  i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
+  
+  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  
+
+```
+
+```
+invalid.js:114:9 lint/correctness/useHookAtTopLevel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This hook is being called conditionally, but all hooks must be called in the exact same order in every component render.
+  
+    113 │     {
+  > 114 │         useEffect();
+        │         ^^^^^^^^^
+    115 │     }
+    116 │ }
+  
+  i Hooks should not be called after an early return.
+  
+    108 │ function Component12() {
+  > 109 │     if (!a) {
+        │              
+  > 110 │         return;
+        │         ^^^^^^^
+    111 │     }
+    112 │ 
+  
+  i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
+  
+  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  
+
+```
+
+```
+invalid.js:119:5 lint/correctness/useHookAtTopLevel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This hook is being called indirectly and conditionally, but all hooks must be called in the exact same order in every component render.
+  
+    118 │ function Component13() {
+  > 119 │     useEffect();
+        │     ^^^^^^^^^
+    120 │ };
+    121 │ 
+  
+  i This is the call path until the hook.
+  
+    123 │     if (!a) {
+    124 │         return;
+  > 125 │     }
+        │      
+  > 126 │ 
+  > 127 │     Component13();
+        │     ^^^^^^^^^^^^^
+    128 │ }
+    129 │ 
+  
+  i Hooks should not be called after an early return.
+  
+    122 │ function Component14() {
+  > 123 │     if (!a) {
+        │              
+  > 124 │         return;
+        │         ^^^^^^^
+    125 │     }
+    126 │ 
   
   i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
   

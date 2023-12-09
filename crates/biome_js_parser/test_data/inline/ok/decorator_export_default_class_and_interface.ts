@@ -1,3 +1,5 @@
-export default interface Foo { }
-export default class Foo { }
-export default interface Foo { }
+export default interface A{};
+export default interface A{};
+export default class A{};
+export default interface A{};
+export default interface A{};

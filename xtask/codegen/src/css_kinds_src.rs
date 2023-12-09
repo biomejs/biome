@@ -230,6 +230,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "from",
         "to",
         "var",
+        "font-face",
     ],
     literals: &[
         "CSS_STRING_LITERAL",
@@ -320,6 +321,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_CHARSET_AT_RULE",
         "CSS_COLOR_PROFILE_AT_RULE",
         "CSS_COUNTER_STYLE_AT_RULE",
+        "CSS_FONT_FACE_AT_RULE",
         "CSS_KEYFRAMES_AT_RULE",
         "CSS_KEYFRAMES_BODY",
         "CSS_MEDIA_AT_RULE",

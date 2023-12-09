@@ -1,3 +1,5 @@
-export default interface Foo { }
-export default function Foo () { }
-export default interface Foo { }
+export default interface A{};
+export default interface A{};
+export default function a(){};
+export default interface A{};
+export default interface A{};
