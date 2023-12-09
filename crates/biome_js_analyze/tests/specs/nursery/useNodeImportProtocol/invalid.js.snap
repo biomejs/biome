@@ -1,0 +1,64 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+import fs from 'fs';
+
+import os from 'os';
+
+import path from 'path';
+
+```
+
+# Diagnostics
+```
+invalid.js:1:16 lint/nursery/useNodeImportProtocol ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Import from Node.js builtin module "fs" should use the "node:" protocol.
+  
+  > 1 │ import fs from 'fs';
+      │                ^^^^
+    2 │ 
+    3 │ import os from 'os';
+  
+  i Please change to "node:fs".
+  
+
+```
+
+```
+invalid.js:3:16 lint/nursery/useNodeImportProtocol ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Import from Node.js builtin module "os" should use the "node:" protocol.
+  
+    1 │ import fs from 'fs';
+    2 │ 
+  > 3 │ import os from 'os';
+      │                ^^^^
+    4 │ 
+    5 │ import path from 'path';
+  
+  i Please change to "node:os".
+  
+
+```
+
+```
+invalid.js:5:18 lint/nursery/useNodeImportProtocol ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Import from Node.js builtin module "path" should use the "node:" protocol.
+  
+    3 │ import os from 'os';
+    4 │ 
+  > 5 │ import path from 'path';
+      │                  ^^^^^^
+    6 │ 
+  
+  i Please change to "node:path".
+  
+
+```
+
+
