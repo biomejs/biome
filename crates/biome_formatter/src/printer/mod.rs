@@ -105,29 +105,38 @@ impl<'a> Printer<'a> {
             } => self.print_text(slice, Some(*source_position)),
 
             FormatElement::Line(line_mode) => {
-                if args.mode().is_flat()
-                    && matches!(line_mode, LineMode::Soft | LineMode::SoftOrSpace)
-                {
-                    if line_mode == &LineMode::SoftOrSpace && self.state.line_width > 0 {
-                        self.state.pending_space = true;
+                if args.mode().is_flat() {
+                    match line_mode {
+                        LineMode::Soft | LineMode::SoftOrSpace => {
+                            if line_mode == &LineMode::SoftOrSpace && self.state.line_width > 0 {
+                                self.state.pending_space = true;
+                            }
+                            return Ok(());
+                        }
+                        LineMode::Hard | LineMode::Empty => {
+                            self.state.measured_group_fits = false;
+                        }
                     }
-                } else if self.state.line_suffixes.has_pending() {
-                    self.flush_line_suffixes(queue, stack, Some(element));
-                } else {
-                    // Only print a newline if the current line isn't already empty
-                    if self.state.line_width > 0 {
-                        self.print_str("\n");
-                    }
-
-                    // Print a second line break if this is an empty line
-                    if line_mode == &LineMode::Empty && !self.state.has_empty_line {
-                        self.print_str("\n");
-                        self.state.has_empty_line = true;
-                    }
-
-                    self.state.pending_space = false;
-                    self.state.pending_indent = args.indention();
                 }
+
+                if self.state.line_suffixes.has_pending() {
+                    self.flush_line_suffixes(queue, stack, Some(element));
+                    return Ok(());
+                }
+
+                // Only print a newline if the current line isn't already empty
+                if self.state.line_width > 0 {
+                    self.print_str("\n");
+                }
+
+                // Print a second line break if this is an empty line
+                if line_mode == &LineMode::Empty && !self.state.has_empty_line {
+                    self.print_str("\n");
+                    self.state.has_empty_line = true;
+                }
+
+                self.state.pending_space = false;
+                self.state.pending_indent = args.indention();
             }
 
             FormatElement::ExpandParent => {
@@ -858,8 +867,6 @@ struct FitsMeasurer<'a, 'print> {
     bomb: DebugDropBomb,
 }
 
-impl<'a, 'print> FitsMeasurer<'a, 'print> {}
-
 impl<'a, 'print> FitsMeasurer<'a, 'print> {
     fn new_flat(
         print_queue: &'print PrintQueue<'a>,
@@ -912,9 +919,7 @@ impl<'a, 'print> FitsMeasurer<'a, 'print> {
         while let Some(element) = self.queue.pop() {
             match self.fits_element(element)? {
                 Fits::Yes => return Ok(true),
-                Fits::No => {
-                    return Ok(false);
-                }
+                Fits::No => return Ok(false),
                 Fits::Maybe => {
                     if predicate.is_end(element)? {
                         break;
@@ -989,11 +994,48 @@ impl<'a, 'print> FitsMeasurer<'a, 'print> {
                         }
                         LineMode::Soft => {}
                         LineMode::Hard | LineMode::Empty => {
-                            return Ok(if self.must_be_flat {
-                                Fits::No
-                            } else {
-                                Fits::Yes
-                            });
+                            // Even in flat mode, content that _directly_ contains a hard or empty
+                            // line is considered to fit when a hard break is reached, since that
+                            // break is always going to exist, regardless of the print mode.
+                            // This is particularly important for `Fill` entries, where _ungrouped_
+                            // content that contains hard breaks shouldn't force the surrounding
+                            // elements to also expand. Example:
+                            //   [
+                            //     -1, -2, 3
+                            //     // leading comment
+                            //     -4, -5, -6
+                            //   ]
+                            // Here, `-4` contains a hardline because of the leading comment, but that
+                            // doesn't cause the element (`-4`) nor the separator (`,`) to print in
+                            // expanded mode, allowing the rest of the elements to fill in. If this
+                            // _did_ respect `must_be_flat` and returned `Fits::No` instead, the result
+                            // would put the `-4` on its own line, which is not preferable (at least,
+                            // it doesn't match Prettier):
+                            //   [
+                            //     -1, -2, 3
+                            //     // leading comment
+                            //     -4,
+                            //     -5, -6
+                            //   ]
+                            // The perception here is that most comments inline for fills are used to
+                            // separate _groups_ rather than to single out an individual element.
+                            //
+                            // The alternative case is when the fill entry is grouped, in which case
+                            // this fit returns `Yes`, but the parent group is already known to
+                            // expand _because_ of this hard line, and so the fill entry and separator
+                            // are automatically printed in expanded mode anyway, and this fit check
+                            // has no bearing on that (so it doesn't need to care about flat or not):
+                            //   <div>
+                            //     <span a b>
+                            //       <Foo />
+                            //     </span>{" "}
+                            //     ({variable})
+                            //   </div>
+                            // Here the `<span>...</span>` _is_ grouped and contains a hardline, so it
+                            // is known to break and _not_ fit already because the check is performed
+                            // on the group. But within the group itself, the content with hardlines
+                            // (the `\n<Foo />\n`) _does_ fit, for the same logic in the first case.
+                            return Ok(Fits::Yes);
                         }
                     }
                 } else {
