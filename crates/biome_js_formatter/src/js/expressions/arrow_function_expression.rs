@@ -65,12 +65,7 @@ impl FormatNodeRule<JsArrowFunctionExpression> for FormatJsArrowFunctionExpressi
                     write!(
                         f,
                         [
-                            format_signature(
-                                &arrow,
-                                self.options.call_arg_layout.is_some(),
-                                false,
-                                true
-                            ),
+                            format_signature(&arrow, self.options.call_arg_layout.is_some(), true),
                             space(),
                             arrow.fat_arrow_token().format()
                         ]
@@ -211,7 +206,6 @@ impl FormatNodeRule<JsArrowFunctionExpression> for FormatJsArrowFunctionExpressi
 fn format_signature(
     arrow: &JsArrowFunctionExpression,
     is_first_or_last_call_argument: bool,
-    ancestor_call_expr_or_logical_expr: bool,
     is_first_in_chain: bool,
 ) -> impl Format<JsFormatContext> + '_ {
     format_with(move |f| {
@@ -255,11 +249,7 @@ fn format_signature(
                     }
                 }
                 AnyJsArrowFunctionParameters::JsParameters(params) => {
-                    if ancestor_call_expr_or_logical_expr && !is_first_or_last_call_argument {
-                        write!(f, [group(&params.format())])?;
-                    } else {
-                        write!(f, [params.format()])?;
-                    }
+                    write!(f, [params.format()])?;
                 }
             };
 
@@ -477,12 +467,6 @@ impl Format<JsFormatContext> for ArrowChain {
         let tail_body = tail.body()?;
         let is_assignment_rhs = self.options.assignment_layout.is_some();
         let is_grouped_call_arg_layout = self.options.call_arg_layout.is_some();
-        let ancestor_call_expr_or_logical_expr = head.syntax().ancestors().any(|ancestor| {
-            matches!(
-                ancestor.kind(),
-                JsSyntaxKind::JS_CALL_EXPRESSION | JsSyntaxKind::JS_LOGICAL_EXPRESSION
-            )
-        });
 
         // If this chain is the callee in a parent call expression, then we
         // want it to break onto a new line to clearly show that the arrow
@@ -577,12 +561,8 @@ impl Format<JsFormatContext> for ArrowChain {
                         }
                     }
 
-                    let formatted_signature = format_signature(
-                        arrow,
-                        is_grouped_call_arg_layout,
-                        ancestor_call_expr_or_logical_expr,
-                        is_first_in_chain,
-                    );
+                    let formatted_signature =
+                        format_signature(arrow, is_grouped_call_arg_layout, is_first_in_chain);
 
                     // Arrow chains indent a second level for every item other than the first:
                     //   (a) =>
