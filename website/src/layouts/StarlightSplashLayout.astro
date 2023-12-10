@@ -38,7 +38,7 @@ function getPageProps({ title, description, slug, head = [], editUrl }: Props) {
       slug,
     },
     entryMeta,
-    hasSidebar: false,
+    hasSidebar: true,
     headings: [],
     id: slug,
     lastUpdated: undefined,
@@ -46,7 +46,35 @@ function getPageProps({ title, description, slug, head = [], editUrl }: Props) {
       next: undefined,
       prev: undefined,
     },
-    sidebar: [],
+    sidebar: [
+      {
+        type: "link",
+        label: "Docs",
+        href: "/guides/getting-started",
+        isCurrent: Astro.url.pathname.includes("/guides/getting-started"),
+        attrs: {
+          class: "",
+        },
+      },
+      {
+        type: "link",
+        label: "Blog",
+        href: "/blog",
+        isCurrent: Astro.url.pathname.includes("/blog"),
+        attrs: {
+          class: "",
+        },
+      },
+      {
+        type: "link",
+        label: "Playground",
+        href: "/playground",
+        isCurrent: Astro.url.pathname.includes("/playground"),
+        attrs: {
+          class: "",
+        },
+      },
+    ],
     slug,
     toc: {
       items: [],
@@ -64,6 +92,11 @@ const pageProps = getPageProps(Astro.props);
 </Page>
 
 <style>
+  :global(:root) {
+    --sl-content-width: 67.5rem;
+    --sl-content-inline-start: 0rem;
+  }
+
   :global(.right-sidebar-container) {
     display: none;
   }
@@ -76,11 +109,21 @@ const pageProps = getPageProps(Astro.props);
     padding-top: var(--sl-nav-height);
   }
 
-  :global(:root) {
-    --__toc-width: 0rem;
+  :global(.main-pane) {
+    width: 100% !important;
+  }
+
+  :global(.sl-container) {
+    margin-inline: auto;
   }
 
   :global(starlight-lang-select) {
     display: none;
+  }
+
+  :global(@media (min-width: 50rem)) {
+    #starlight__sidebar {
+      display: none;
+    }
   }
 </style>
