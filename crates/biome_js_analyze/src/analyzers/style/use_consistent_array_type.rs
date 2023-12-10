@@ -479,7 +479,7 @@ pub struct ConsistentArrayType {
 impl Default for ConsistentArrayType {
     fn default() -> Self {
         Self {
-            consistent_array_type: "generic",
+            consistent_array_type: "simple",
         }
     }
 }
