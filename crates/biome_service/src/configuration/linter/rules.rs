@@ -3548,6 +3548,15 @@ pub struct Style {
     #[bpaf(long("use-collapsed-else-if"), argument("on|off|warn"), optional, hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_collapsed_else_if: Option<RuleConfiguration>,
+    #[doc = "Require consistently using either `T[]` or `Array<T>`."]
+    #[bpaf(
+        long("use-consistent-array-type"),
+        argument("on|off|warn"),
+        optional,
+        hide
+    )]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_consistent_array_type: Option<RuleConfiguration>,
     #[doc = "Require const declarations for variables that are never reassigned after declared."]
     #[bpaf(long("use-const"), argument("on|off|warn"), optional, hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -3697,6 +3706,9 @@ impl MergeWith<Style> for Style {
         if let Some(use_collapsed_else_if) = other.use_collapsed_else_if {
             self.use_collapsed_else_if = Some(use_collapsed_else_if);
         }
+        if let Some(use_consistent_array_type) = other.use_consistent_array_type {
+            self.use_consistent_array_type = Some(use_consistent_array_type);
+        }
         if let Some(use_const) = other.use_const {
             self.use_const = Some(use_const);
         }
@@ -3754,7 +3766,7 @@ impl MergeWith<Style> for Style {
 }
 impl Style {
     const GROUP_NAME: &'static str = "style";
-    pub(crate) const GROUP_RULES: [&'static str; 32] = [
+    pub(crate) const GROUP_RULES: [&'static str; 33] = [
         "noArguments",
         "noCommaOperator",
         "noImplicitBoolean",
@@ -3772,6 +3784,7 @@ impl Style {
         "useAsConstAssertion",
         "useBlockStatements",
         "useCollapsedElseIf",
+        "useConsistentArrayType",
         "useConst",
         "useDefaultParameterLast",
         "useEnumInitializers",
@@ -3964,6 +3977,11 @@ impl Style {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]));
             }
         }
+        if let Some(rule) = self.use_consistent_array_type.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[26]));
+            }
+        }
         if let Some(rule) = self.use_const.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]));
@@ -4128,6 +4146,11 @@ impl Style {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]));
             }
         }
+        if let Some(rule) = self.use_consistent_array_type.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[26]));
+            }
+        }
         if let Some(rule) = self.use_const.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]));
@@ -4256,6 +4279,7 @@ impl Style {
             "useAsConstAssertion" => self.use_as_const_assertion.as_ref(),
             "useBlockStatements" => self.use_block_statements.as_ref(),
             "useCollapsedElseIf" => self.use_collapsed_else_if.as_ref(),
+            "useConsistentArrayType" => self.use_consistent_array_type.as_ref(),
             "useConst" => self.use_const.as_ref(),
             "useDefaultParameterLast" => self.use_default_parameter_last.as_ref(),
             "useEnumInitializers" => self.use_enum_initializers.as_ref(),

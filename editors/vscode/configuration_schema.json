@@ -1628,6 +1628,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useConsistentArrayType": {
+					"description": "Require consistently using either `T[]` or `Array<T>`",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useConst": {
 					"description": "Require const declarations for variables that are never reassigned after declared.",
 					"anyOf": [

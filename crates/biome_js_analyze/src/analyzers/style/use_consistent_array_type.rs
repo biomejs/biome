@@ -1,16 +1,19 @@
 use biome_analyze::{
-    Ast, context::RuleContext, declare_rule, FixKind, Rule,
-    // RuleAction, RuleDiagnostic
+    context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
 };
+use biome_console::{markup, Markup, MarkupBuf};
+use biome_diagnostics::Applicability;
+use biome_js_factory::make;
 use biome_js_syntax::{
-    AnyTsType, TsReferenceType
+    AnyTsName, AnyTsType, JsSyntaxKind, JsSyntaxToken, TriviaPieceKind, TsReferenceType,
+    TsTypeAnnotation, TsTypeArguments, T,
 };
-
+use biome_rowan::{declare_node_union, AstNode, AstSeparatedList, BatchMutationExt, TriviaPiece};
 use serde::{Deserialize, Serialize};
 
-// use crate::JsRuleAction;
+use crate::JsRuleAction;
 
-declare_rule!{
+declare_rule! {
     /// Require consistently using either `T[]` or `Array<T>`
     ///
     /// ESLint (typescript-eslint) equivalent: [array-type](https://typescript-eslint.io/rules/array-type)
@@ -63,71 +66,420 @@ declare_rule!{
     }
 }
 
+declare_node_union! {
+    pub(crate) Query = TsTypeAnnotation | TsReferenceType
+}
+
 #[derive(Debug, Copy, Clone)]
 enum TsArrayKind {
-    /// `Array<T>` | `T[]`
+    /// `T[]`
     Simple,
+    /// `Array<T>`
+    GenericArray,
     /// `readonly T[]`
     Readonly,
     /// `ReadonlyArray<T>`
-    ReadonlyArray,
+    ReadonlyGenericArray,
 }
 
 impl Rule for UseConsistentArrayType {
-    type Query = Ast<TsReferenceType>;
+    type Query = Ast<Query>;
     type State = AnyTsType;
     type Signals = Option<Self::State>;
     type Options = ConsistentArrayType;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
-        let node = ctx.query();
-        let type_arguments = node.type_arguments()?;
-        let ConsistentArrayType {
-            consistent_array_type
-        } = ctx.options();
+        let query = ctx.query();
+        let options = ctx.options();
 
-        let name = node.name().ok()?;
-        println!("name:{:?}", name);
-        name.as_js_reference_identifier().and_then(|ident| {
-            let name = ident.value_token().ok()?;
-            match name.text_trimmed() {
-                "Array" => println!("Array"),
-                "Readonly" => println!("Readonly"),
-                "ReadonlyArray" => println!("ReadonlyArray"),
-                _ => (),
+        match query {
+            Query::TsTypeAnnotation(ty) => {
+                if options.consistent_array_type == "simple" {
+                    return None;
+                }
+
+                let ty: AnyTsType = ty.ty().ok()?;
+                match get_array_kind_by_any_type(&ty) {
+                    Some(array_kind) => transform_array_type(ty, array_kind),
+                    _ => None,
+                }
             }
-            Some(())
-        });
+            Query::TsReferenceType(ty) => {
+                if options.consistent_array_type == "generic" {
+                    return None;
+                }
 
-        println!("node:{:?}", node);
-        println!("arguments:{:?}", type_arguments);
-        println!("name:{:?}", name);
-        println!("options:{:?}", consistent_array_type);
+                match get_array_kind_by_reference(ty) {
+                    Some(array_kind) => {
+                        let type_arguments = &ty.type_arguments()?;
+                        convert_to_array_type(type_arguments, array_kind)
+                    }
+                    _ => None,
+                }
+            }
+        }
+    }
+
+    fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
+        let query = ctx.query();
+        let options = ctx.options();
+
+        match query {
+            Query::TsTypeAnnotation(ty) => {
+                if options.consistent_array_type == "simple" {
+                    return None;
+                }
+
+                let ty = ty.ty().ok()?;
+
+                if let AnyTsType::TsArrayType(_) = ty {
+                    return Some(RuleDiagnostic::new(
+                        rule_category!(),
+                        ty.range(),
+                        get_diagnostic_title(TsArrayKind::Simple),
+                    ));
+                } else if let AnyTsType::TsTypeOperatorType(opt_ty) = ty {
+                    if let AnyTsType::TsArrayType(_) = opt_ty.ty().ok()? {
+                        return Some(RuleDiagnostic::new(
+                            rule_category!(),
+                            opt_ty.range(),
+                            get_diagnostic_title(TsArrayKind::Readonly),
+                        ));
+                    }
+                }
+            }
+            Query::TsReferenceType(ty) => {
+                if options.consistent_array_type == "generic" {
+                    return None;
+                }
+
+                if let Some(kind) = get_array_kind_by_reference(ty) {
+                    return Some(RuleDiagnostic::new(
+                        rule_category!(),
+                        ty.range(),
+                        get_diagnostic_title(kind),
+                    ));
+                }
+            }
+        }
 
         None
     }
 
-    // fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
-    //     let consistentArrayType {
-    //         allow
-    //     } = ctx.options();
-    // }
+    fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
+        let query = ctx.query();
+        let mut mutation = ctx.root().begin();
 
-    // fn action(ctx: &RuleContext<Self>, state: &Self::State,
-    // ) -> Option<JsRuleAction> {
+        match query {
+            Query::TsReferenceType(ty) => {
+                mutation.replace_node(AnyTsType::TsReferenceType(ty.clone()), state.clone());
+                if let Some(kind) = get_array_kind_by_reference(ty) {
+                    return Some(JsRuleAction {
+                        category: ActionCategory::QuickFix,
+                        applicability: Applicability::MaybeIncorrect,
+                        message: get_action_message(kind),
+                        mutation,
+                    });
+                }
+            }
+            Query::TsTypeAnnotation(ty) => {
+                let ty = ty.ty().ok()?;
+                if let AnyTsType::TsTypeOperatorType(opt_ty) = &ty {
+                    mutation
+                        .replace_node(AnyTsType::TsTypeOperatorType(opt_ty.clone()), state.clone());
+                    if let Some(kind) = get_array_kind_by_any_type(&ty) {
+                        return Some(JsRuleAction {
+                            category: ActionCategory::QuickFix,
+                            applicability: Applicability::MaybeIncorrect,
+                            message: get_action_message(kind),
+                            mutation,
+                        });
+                    }
+                } else if let AnyTsType::TsArrayType(array_type) = &ty {
+                    mutation
+                        .replace_node(AnyTsType::TsArrayType(array_type.clone()), state.clone());
+                    if let Some(kind) = get_array_kind_by_any_type(&ty) {
+                        return Some(JsRuleAction {
+                            category: ActionCategory::QuickFix,
+                            applicability: Applicability::MaybeIncorrect,
+                            message: get_action_message(kind),
+                            mutation,
+                        });
+                    }
+                }
+            }
+        }
 
-    // }
+        None
+    }
+}
+
+fn get_array_kind_by_reference(ty: &TsReferenceType) -> Option<TsArrayKind> {
+    let name = ty.name().ok()?;
+    name.as_js_reference_identifier().and_then(|ident| {
+        let name = ident.value_token().ok()?;
+        match name.text_trimmed() {
+            "Array" => Some(TsArrayKind::GenericArray),
+            "ReadonlyArray" => Some(TsArrayKind::ReadonlyGenericArray),
+            _ => None,
+        }
+    })
+}
+
+fn get_array_kind_by_any_type(ty: &AnyTsType) -> Option<TsArrayKind> {
+    if let AnyTsType::TsTypeOperatorType(ty) = ty {
+        let operator_token = ty.operator_token().ok()?;
+        let is_readonly = operator_token.text_trimmed() == "readonly";
+
+        if let AnyTsType::TsArrayType(_) = ty.ty().ok()? {
+            if is_readonly {
+                return Some(TsArrayKind::Readonly);
+            }
+        }
+    } else if let AnyTsType::TsArrayType(_) = ty {
+        return Some(TsArrayKind::Simple);
+    }
+
+    None
+}
+
+fn transform_array_type(ty: AnyTsType, array_kind: TsArrayKind) -> Option<AnyTsType> {
+    if let AnyTsType::TsArrayType(_) = ty {
+        let array_types = transform_array_element_type(ty, array_kind)
+            .into_iter()
+            .collect::<Vec<_>>();
+
+        return get_array_type(array_types);
+    } else if let AnyTsType::TsTypeOperatorType(opt_ty) = ty {
+        let ty = opt_ty.ty().ok()?;
+        return transform_array_type(ty, array_kind);
+    }
+
+    None
+}
+
+fn convert_to_array_type(
+    type_arguments: &TsTypeArguments,
+    array_kind: TsArrayKind,
+) -> Option<AnyTsType> {
+    if type_arguments.ts_type_argument_list().len() > 0 {
+        let types_array = type_arguments
+            .ts_type_argument_list()
+            .into_iter()
+            .filter_map(|param| {
+                let param = param.ok()?;
+                transform_array_element_type(param, array_kind)
+            })
+            .collect::<Vec<_>>();
+
+        return get_array_type(types_array);
+    }
+    None
+}
+
+fn get_array_type(array_types: Vec<AnyTsType>) -> Option<AnyTsType> {
+    match array_types.len() {
+        0 => None,
+        1 => {
+            // SAFETY: We know that `length` of `array_types` is 1, so unwrap the first element should be safe.
+            let first_type = array_types.into_iter().next().unwrap();
+            Some(first_type)
+        }
+        length => {
+            let ts_union_type_builder = make::ts_union_type(make::ts_union_type_variant_list(
+                array_types,
+                (0..length - 1).map(|_| {
+                    make::token(T![|])
+                        .with_leading_trivia([(TriviaPieceKind::Whitespace, " ")])
+                        .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")])
+                }),
+            ));
+            Some(AnyTsType::TsUnionType(ts_union_type_builder.build()))
+        }
+    }
+}
+
+fn transform_array_element_type(param: AnyTsType, array_kind: TsArrayKind) -> Option<AnyTsType> {
+    let element_type = match &param {
+        // Intersection or higher types
+        AnyTsType::TsUnionType(_)
+        | AnyTsType::TsIntersectionType(_)
+        | AnyTsType::TsFunctionType(_)
+        | AnyTsType::TsConstructorType(_)
+        | AnyTsType::TsConditionalType(_)
+        | AnyTsType::TsTypeOperatorType(_)
+        | AnyTsType::TsInferType(_)
+        | AnyTsType::TsObjectType(_)
+        | AnyTsType::TsMappedType(_) => None,
+
+        AnyTsType::TsReferenceType(ty) => match get_array_kind_by_reference(ty) {
+            Some(array_kind) => {
+                if let Some(type_arguments) = ty.type_arguments() {
+                    convert_to_array_type(&type_arguments, array_kind)
+                } else {
+                    Some(param)
+                }
+            }
+            None => Some(param),
+        },
+
+        _ => Some(param),
+    };
+
+    element_type.map(|element_type| match array_kind {
+        TsArrayKind::GenericArray => AnyTsType::TsArrayType(make::ts_array_type(
+            element_type,
+            make::token(T!['[']),
+            make::token(T![']']),
+        )),
+        TsArrayKind::ReadonlyGenericArray => {
+            let readonly_token = JsSyntaxToken::new_detached(
+                JsSyntaxKind::TS_READONLY_MODIFIER,
+                "readonly ",
+                [],
+                [TriviaPiece::new(TriviaPieceKind::Whitespace, 1)],
+            );
+
+            // Modify `ReadonlyArray<ReadonlyArray<T>>` to `readonly (readonly T[])[]`
+            if let AnyTsType::TsTypeOperatorType(op) = &element_type {
+                if let Ok(op) = op.operator_token() {
+                    if op.text_trimmed() == "readonly" {
+                        return AnyTsType::TsTypeOperatorType(make::ts_type_operator_type(
+                            readonly_token,
+                            // wrap ArrayType
+                            AnyTsType::TsArrayType(make::ts_array_type(
+                                AnyTsType::TsParenthesizedType(make::ts_parenthesized_type(
+                                    make::token(T!['(']),
+                                    element_type,
+                                    make::token(T![')']),
+                                )),
+                                make::token(T!['[']),
+                                make::token(T![']']),
+                            )),
+                        ));
+                    }
+                }
+            }
+
+            AnyTsType::TsTypeOperatorType(make::ts_type_operator_type(
+                readonly_token,
+                AnyTsType::TsArrayType(make::ts_array_type(
+                    element_type,
+                    make::token(T!['[']),
+                    make::token(T![']']),
+                )),
+            ))
+        }
+
+        TsArrayKind::Simple => {
+            let element_type = if let AnyTsType::TsArrayType(array_type) = element_type {
+                array_type.element_type().ok()
+            } else {
+                Some(element_type)
+            };
+            generate_array_type(element_type, false)
+        }
+        TsArrayKind::Readonly => {
+            let element_type = if let AnyTsType::TsArrayType(array_type) = element_type {
+                array_type.element_type().ok().unwrap()
+            } else {
+                element_type
+            };
+
+            let element_type = if let AnyTsType::TsParenthesizedType(paren_type) = element_type {
+                let ty = paren_type.ty().ok().unwrap();
+                if let AnyTsType::TsTypeOperatorType(opt_ty) = ty {
+                    let ele_type =
+                        if let AnyTsType::TsArrayType(array_type) = opt_ty.ty().ok().unwrap() {
+                            array_type.element_type().ok()
+                        } else {
+                            None
+                        };
+                    Some(generate_array_type(ele_type, true))
+                } else if let AnyTsType::TsArrayType(array_type) = ty {
+                    let ele_type = array_type.element_type().ok();
+                    Some(generate_array_type(ele_type, false))
+                } else {
+                    None
+                }
+            } else {
+                Some(element_type)
+            };
+
+            generate_array_type(element_type, true)
+        }
+    })
+}
+
+fn get_diagnostic_title<'a>(array_kind: TsArrayKind) -> Markup<'a> {
+    match array_kind {
+        TsArrayKind::GenericArray => {
+            markup! {"Use "<Emphasis>"shorthand T[] syntax"</Emphasis>" instead of "<Emphasis>"Array<T> syntax."</Emphasis>}
+        }
+        TsArrayKind::ReadonlyGenericArray => {
+            markup! {"Use "<Emphasis>"shorthand readonly T[] syntax"</Emphasis>" instead of "<Emphasis>"ReadonlyArray<T> syntax."</Emphasis>}
+        }
+        TsArrayKind::Simple => {
+            markup! {"Use "<Emphasis>"Array<T> syntax"</Emphasis>" instead of "<Emphasis>"shorthand T[] syntax."</Emphasis>}
+        }
+        TsArrayKind::Readonly => {
+            markup! {"Use "<Emphasis>"ReadonlyArray<T> syntax"</Emphasis>" instead of "<Emphasis>"shorthand readonly T[] syntax."</Emphasis>}
+        }
+    }
+}
+
+fn get_action_message(array_kind: TsArrayKind) -> MarkupBuf {
+    match array_kind {
+        TsArrayKind::GenericArray => {
+            markup! { "Use "<Emphasis>"shorthand T[] syntax"</Emphasis>" to replace" }.to_owned()
+        }
+        TsArrayKind::ReadonlyGenericArray => {
+            markup! { "Use "<Emphasis>"shorthand readonly T[] syntax"</Emphasis>" to replace" }
+                .to_owned()
+        }
+        TsArrayKind::Simple => {
+            markup! { "Use "<Emphasis>"Array<T> syntax"</Emphasis>" to replace"}.to_owned()
+        }
+        TsArrayKind::Readonly => {
+            markup! { "Use "<Emphasis>"ReadonlyArray<T> syntax"</Emphasis>" to replace"}.to_owned()
+        }
+    }
+}
+
+fn generate_array_type<I>(element_type: I, is_readonly: bool) -> AnyTsType
+where
+    I: IntoIterator<Item = AnyTsType>,
+    I::IntoIter: ExactSizeIterator,
+{
+    let ident = if is_readonly {
+        make::ident("ReadonlyArray")
+    } else {
+        make::ident("Array")
+    };
+
+    AnyTsType::TsReferenceType(
+        make::ts_reference_type(AnyTsName::JsReferenceIdentifier(
+            make::js_reference_identifier(ident),
+        ))
+        .with_type_arguments(make::ts_type_arguments(
+            make::token(T![<]),
+            make::ts_type_argument_list(element_type, None),
+            make::token(T![>]),
+        ))
+        .build(),
+    )
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct ConsistentArrayType {
-    pub consistent_array_type: &'static str
+    /// "simple" | "generic"
+    pub consistent_array_type: &'static str,
 }
 
 impl Default for ConsistentArrayType {
     fn default() -> Self {
         Self {
-            consistent_array_type: "simple"
+            consistent_array_type: "generic",
         }
     }
 }

@@ -136,6 +136,7 @@ define_categories! {
     "lint/style/useBlockStatements": "https://biomejs.dev/linter/rules/use-block-statements",
     "lint/style/useCollapsedElseIf": "https://biomejs.dev/linter/rules/use-collapsed-else-if",
     "lint/style/useConst": "https://biomejs.dev/linter/rules/use-const",
+    "lint/style/useConsistentArrayType": "https://biomejs.dev/linter/rules/use-consistent-arrray-type",
     "lint/style/useDefaultParameterLast": "https://biomejs.dev/linter/rules/use-default-parameter-last",
     "lint/style/useEnumInitializers": "https://biomejs.dev/linter/rules/use-enum-initializers",
     "lint/style/useExponentiationOperator": "https://biomejs.dev/linter/rules/use-exponentiation-operator",
