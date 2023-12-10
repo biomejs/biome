@@ -3,7 +3,7 @@ title: Analyzer
 description: BiomeのAnalyzerが提供する機能
 ---
 
-BiomeのAnalyzerは、ユーザーが利用できる次の一連の機能を提供します。
+Biomeのanalyzerは、ユーザーが利用できる次の一連の機能を提供します。
 
 ## Import文のソート
 
@@ -29,7 +29,7 @@ import文は、"距離" によってソートされます。ユーザーから "
 4. URLを介してインポートされたモジュール。
 5. ライブラリからインポートされたモジュール。
 6. 絶対インポート (absolute import) を使用してインポートされたモジュール
-7. `#`の接頭辞が付いた名前からインポートされたモジュール。これは、[Nodeのサブパスインポート]((https://nodejs.org/api/packages.html#subpath-imports))を使用する場合に適用されます。
+7. `#`の接頭辞が付いた名前からインポートされたモジュール。これは、[Nodeのサブパスインポート](https://nodejs.org/api/packages.html#subpath-imports)を使用する場合に適用されます。
 8. 相対インポート (relative import) を使用してインポートされたモジュール。
 9. 前述の基準で識別できなかったモジュール。
 
@@ -53,21 +53,21 @@ import React from "react";
 次のようにソートされます。
 
 ```ts
- import { expect } from "bun:test";
- import assert from "node:assert";
- import { mock, test } from "node:test";
- import express from "npm:express";
- import { VERSION } from "https://deno.land/std/version.ts";
- import React from "react";
- import { secret } from "/absolute/path";
- import { internal } from "#internal";
- import aunt from "../aunt";
- import uncle from "../uncle";
- import sibling from "./sibling";
- import imageUrl from "url:./image.png";
+import { expect } from "bun:test";
+import assert from "node:assert";
+import { mock, test } from "node:test";
+import express from "npm:express";
+import { VERSION } from "https://deno.land/std/version.ts";
+import React from "react";
+import { secret } from "/absolute/path";
+import { internal } from "#internal";
+import aunt from "../aunt";
+import uncle from "../uncle";
+import sibling from "./sibling";
+import imageUrl from "url:./image.png";
 ```
 
-ソートを適用する方法は、[CLI](#CLIを使用した場合)または[VSCode extension](#VS-Code拡張機能を使用した場合)の2つあります。
+ソートを適用する方法は、[CLIを使用した場合](#cliを使用した場合)または[VS Code拡張機能を使用した場合](#vs-code拡張機能を使用した場合)の2つあります。
 
 ### グループインポート
 
@@ -127,8 +127,8 @@ BiomeのVS Code拡張機能は、_Organize Imports_ コードアクションに�
 
 ```json
 {
-	"editor.codeActionsOnSave":{
-		"source.organizeImports.biome": true
-	}
+  "editor.codeActionsOnSave": {
+    "source.organizeImports.biome": true
+  }
 }
 ```

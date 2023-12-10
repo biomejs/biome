@@ -937,6 +937,13 @@ impl Deserializable for Nursery {
                                 diagnostics,
                             );
                         }
+                        "noMisleadingCharacterClass" => {
+                            result.no_misleading_character_class = Deserializable::deserialize(
+                                &value,
+                                "noMisleadingCharacterClass",
+                                diagnostics,
+                            );
+                        }
                         "noUnusedImports" => {
                             result.no_unused_imports =
                                 Deserializable::deserialize(&value, "noUnusedImports", diagnostics);
@@ -958,6 +965,10 @@ impl Deserializable for Nursery {
                         "useAwait" => {
                             result.use_await =
                                 Deserializable::deserialize(&value, "useAwait", diagnostics);
+                        }
+                        "useExportType" => {
+                            result.use_export_type =
+                                Deserializable::deserialize(&value, "useExportType", diagnostics);
                         }
                         "useForOf" => {
                             result.use_for_of =
@@ -984,6 +995,13 @@ impl Deserializable for Nursery {
                                 diagnostics,
                             );
                         }
+                        "useShorthandFunctionType" => {
+                            result.use_shorthand_function_type = Deserializable::deserialize(
+                                &value,
+                                "useShorthandFunctionType",
+                                diagnostics,
+                            );
+                        }
                         "useValidAriaRole" => {
                             result.use_valid_aria_role = Deserializable::deserialize(
                                 &value,
@@ -1003,14 +1021,17 @@ impl Deserializable for Nursery {
                                     "noDuplicateJsonKeys",
                                     "noEmptyBlockStatements",
                                     "noImplicitAnyLet",
+                                    "noMisleadingCharacterClass",
                                     "noUnusedImports",
                                     "noUnusedPrivateClassMembers",
                                     "noUselessLoneBlockStatements",
                                     "useAwait",
+                                    "useExportType",
                                     "useForOf",
                                     "useGroupedTypeImport",
                                     "useImportRestrictions",
                                     "useRegexLiterals",
+                                    "useShorthandFunctionType",
                                     "useValidAriaRole",
                                 ],
                             ));

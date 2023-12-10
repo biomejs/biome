@@ -1,7 +1,4 @@
-use crate::js::bindings::parameters::{
-    should_hug_function_parameters, AnyJsParameters, FormatAnyJsParameters,
-    FormatJsParametersOptions,
-};
+use crate::js::bindings::parameters::{should_hug_function_parameters, FormatAnyJsParameters};
 use crate::prelude::*;
 use crate::JsFormatContext;
 use biome_formatter::formatter::Formatter;
@@ -10,7 +7,7 @@ use biome_formatter::{Format, FormatResult};
 use biome_js_syntax::{
     AnyJsAssignmentPattern, AnyJsBindingPattern, AnyJsFormalParameter,
     AnyJsObjectAssignmentPatternMember, AnyJsObjectBindingPatternMember, JsObjectAssignmentPattern,
-    JsObjectBindingPattern, JsParameters, JsSyntaxKind, JsSyntaxToken,
+    JsObjectBindingPattern, JsSyntaxKind, JsSyntaxToken,
 };
 use biome_rowan::{declare_node_union, AstNode, SyntaxNodeOptionExt, SyntaxResult};
 
@@ -64,19 +61,18 @@ impl JsObjectPatternLike {
     fn should_break_properties(&self) -> bool {
         let parent_kind = self.syntax().parent().kind();
 
-        let parent_where_not_to_break = matches!(
+        // Catch only has a single expression in the declaration, so it will
+        // be the direct parent of the object pattern, and the pattern should
+        // not break unless it has to there.
+        //
+        // Parameters in function-like expressions are also kept inline, and
+        // all parameters end up wrapped by a `JsFormalParameter` node, as
+        // checked here. Note that this is also checked ahead of time by the
+        // `is_inline` function.
+        if matches!(
             parent_kind,
-            Some(
-                // These parents are the kinds where we want to prevent
-                // to go to multiple lines.
-                JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION
-                    | JsSyntaxKind::JS_OBJECT_ASSIGNMENT_PATTERN_PROPERTY
-                    | JsSyntaxKind::JS_CATCH_DECLARATION
-                    | JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_PROPERTY
-            )
-        );
-
-        if parent_where_not_to_break {
+            Some(JsSyntaxKind::JS_CATCH_DECLARATION | JsSyntaxKind::JS_FORMAL_PARAMETER)
+        ) {
             return false;
         }
 
@@ -132,16 +128,9 @@ impl JsObjectPatternLike {
             JsObjectPatternLike::JsObjectBindingPattern(binding) => binding
                 .parent::<AnyJsFormalParameter>()
                 .and_then(|parameter| parameter.syntax().grand_parent())
-                .and_then(JsParameters::cast)
+                .and_then(FormatAnyJsParameters::cast)
                 .map_or(false, |parameters| {
-                    should_hug_function_parameters(
-                        &FormatAnyJsParameters::new(
-                            AnyJsParameters::JsParameters(parameters),
-                            FormatJsParametersOptions::default(),
-                        ),
-                        comments,
-                    )
-                    .unwrap_or(false)
+                    should_hug_function_parameters(&parameters, comments).unwrap_or(false)
                 }),
         }
     }

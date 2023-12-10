@@ -7,11 +7,11 @@ use biome_deserialize::{
     VisitableType,
 };
 use biome_js_semantic::{Capture, SemanticModel};
-use biome_js_syntax::TsTypeofType;
 use biome_js_syntax::{
     binding_ext::AnyJsBindingDeclaration, JsCallExpression, JsStaticMemberExpression, JsSyntaxKind,
     JsSyntaxNode, JsVariableDeclaration, TextRange,
 };
+use biome_js_syntax::{AnyJsExpression, JsIdentifierExpression, TsTypeofType};
 use biome_rowan::{AstNode, SyntaxNodeCast};
 use bpaf::Bpaf;
 use rustc_hash::{FxHashMap, FxHashSet};
@@ -120,7 +120,7 @@ declare_rule! {
     /// ```
     ///
     /// ```js
-    /// import { useEffect } from "react";
+    /// import { useEffect, useState } from "react";
     ///
     /// function component() {
     ///     const [name, setName] = useState();
@@ -128,6 +128,16 @@ declare_rule! {
     ///         console.log(name);
     ///         setName("");
     ///     }, [name]);
+    /// }
+    /// ```
+    ///
+    /// ```js
+    /// import { useEffect } from "react";
+    /// let outer = false;
+    /// function component() {
+    ///     useEffect(() => {
+    ///         outer = true;
+    ///     }, []);
     /// }
     /// ```
     ///
@@ -394,7 +404,8 @@ pub enum Fix {
     /// When a dependency needs to be removed.
     RemoveDependency {
         function_name_range: TextRange,
-        dependencies: Vec<TextRange>,
+        component_function: JsSyntaxNode,
+        dependencies: Vec<AnyJsExpression>,
     },
     /// When a dependency is more deep than the capture
     DependencyTooDeep {
@@ -450,7 +461,6 @@ fn capture_needs_to_be_in_the_dependency_list(
         | AnyJsBindingDeclaration::TsInferType(_)
         | AnyJsBindingDeclaration::TsMappedType(_)
         | AnyJsBindingDeclaration::TsTypeParameter(_) => None,
-
         // Variable declarators are stable if ...
         AnyJsBindingDeclaration::JsVariableDeclarator(declarator) => {
             let declaration = declarator
@@ -459,10 +469,10 @@ fn capture_needs_to_be_in_the_dependency_list(
                 .find_map(JsVariableDeclaration::cast)?;
             let declaration_range = declaration.syntax().text_range();
 
-            if declaration.is_const() {
-                // ... they are `const` and declared outside of the component function
-                let _ = component_function_range.intersect(declaration_range)?;
+            // ... they are declared outside of the component function
+            let _ = component_function_range.intersect(declaration_range)?;
 
+            if declaration.is_const() {
                 // ... they are `const` and their initializer is constant
                 let initializer = declarator.initializer()?;
                 let expr = initializer.expression().ok()?;
@@ -472,7 +482,8 @@ fn capture_needs_to_be_in_the_dependency_list(
             }
 
             // ... they are assign to stable returns of another React function
-            let not_stable = !is_binding_react_stable(&binding.tree(), &options.stable_config);
+            let not_stable =
+                !is_binding_react_stable(&binding.tree(), model, &options.stable_config);
             not_stable.then_some(capture)
         }
 
@@ -516,6 +527,25 @@ fn function_of_hook_call(call: &JsCallExpression) -> Option<JsSyntaxNode> {
                 | JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION
         )
     })
+}
+
+/// Check if `identifier` is declared outside of `function` scope
+fn is_out_of_function_scope(
+    identifier: &AnyJsExpression,
+    function: &JsSyntaxNode,
+    model: &SemanticModel,
+) -> Option<bool> {
+    let identifier_name = JsIdentifierExpression::cast_ref(identifier.syntax())?
+        .name()
+        .ok()?;
+
+    let declaration = model.binding(&identifier_name)?.tree().declaration()?;
+
+    Some(
+        model
+            .scope(declaration.syntax())
+            .is_ancestor_of(&model.scope(function)),
+    )
 }
 
 impl Rule for UseExhaustiveDependencies {
@@ -573,33 +603,26 @@ impl Rule for UseExhaustiveDependencies {
                 })
                 .collect();
 
-            let deps: Vec<(String, TextRange)> = result
-                .all_dependencies()
-                .map(|dep| {
-                    (
-                        dep.syntax().text_trimmed().to_string(),
-                        dep.syntax().text_trimmed_range(),
-                    )
-                })
-                .collect();
+            let deps: Vec<_> = result.all_dependencies().collect();
             let dependencies_len = deps.len();
 
             let mut add_deps: BTreeMap<String, Vec<TextRange>> = BTreeMap::new();
-            let mut remove_deps: Vec<TextRange> = vec![];
 
             // Evaluate all the captures
             for (capture_text, capture_range, _) in captures.iter() {
                 let mut suggested_fix = None;
                 let mut is_captured_covered = false;
-                for (dependency_text, dependency_range) in deps.iter() {
+                for dep in deps.iter() {
                     // capture_text and dependency_text should filter the "?" inside
                     // in order to ignore optional chaining
                     let filter_capture_text = capture_text.replace('?', "");
-                    let filter_dependency_text = dependency_text.replace('?', "");
+                    let filter_dependency_text =
+                        dep.syntax().text_trimmed().to_string().replace('?', "");
                     let capture_deeper_than_dependency =
                         filter_capture_text.starts_with(&filter_dependency_text);
                     let dependency_deeper_than_capture =
                         filter_dependency_text.starts_with(&filter_capture_text);
+
                     match (
                         capture_deeper_than_dependency,
                         dependency_deeper_than_capture,
@@ -630,7 +653,7 @@ impl Rule for UseExhaustiveDependencies {
                             suggested_fix = Some(Fix::DependencyTooDeep {
                                 function_name_range: result.function_name_range,
                                 capture_range: *capture_range,
-                                dependency_range: *dependency_range,
+                                dependency_range: dep.syntax().text_trimmed_range(),
                             });
                         }
                         _ => {}
@@ -647,14 +670,16 @@ impl Rule for UseExhaustiveDependencies {
                 }
             }
 
+            let mut remove_deps: Vec<AnyJsExpression> = vec![];
             // Search for dependencies not captured
-            for (dependency_text, dep_range) in deps {
+            for dep in deps {
                 let mut covers_any_capture = false;
                 for (capture_text, _, _) in captures.iter() {
                     // capture_text and dependency_text should filter the "?" inside
                     // in order to ignore optional chaining
                     let filter_capture_text = capture_text.replace('?', "");
-                    let filter_dependency_text = dependency_text.replace('?', "");
+                    let filter_dependency_text =
+                        dep.syntax().text_trimmed().to_string().replace('?', "");
                     let capture_deeper_dependency =
                         filter_capture_text.starts_with(&filter_dependency_text);
                     let dependency_deeper_capture =
@@ -666,7 +691,7 @@ impl Rule for UseExhaustiveDependencies {
                 }
 
                 if !covers_any_capture {
-                    remove_deps.push(dep_range);
+                    remove_deps.push(dep);
                 }
             }
 
@@ -682,6 +707,7 @@ impl Rule for UseExhaustiveDependencies {
             if !remove_deps.is_empty() {
                 signals.push(Fix::RemoveDependency {
                     function_name_range: result.function_name_range,
+                    component_function,
                     dependencies: remove_deps,
                 });
             }
@@ -690,7 +716,7 @@ impl Rule for UseExhaustiveDependencies {
         signals
     }
 
-    fn diagnostic(_: &RuleContext<Self>, dep: &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(ctx: &RuleContext<Self>, dep: &Self::State) -> Option<RuleDiagnostic> {
         match dep {
             Fix::AddDependency {
                 function_name_range,
@@ -725,6 +751,7 @@ impl Rule for UseExhaustiveDependencies {
             Fix::RemoveDependency {
                 function_name_range,
                 dependencies,
+                component_function,
             } => {
                 let mut diag = RuleDiagnostic::new(
                     rule_category!(),
@@ -734,8 +761,20 @@ impl Rule for UseExhaustiveDependencies {
                     },
                 );
 
-                for range in dependencies {
-                    diag = diag.detail(range, "This dependency can be removed from the list.");
+                let model = ctx.model();
+                for dep in dependencies {
+                    if is_out_of_function_scope(dep, component_function, model).unwrap_or(false) {
+                        diag = diag.detail(
+                            dep.syntax().text_trimmed_range(),
+                            "Outer scope values aren't valid dependencies because mutating them doesn't re-render the component.",
+
+                        );
+                    } else {
+                        diag = diag.detail(
+                            dep.syntax().text_trimmed_range(),
+                            "This dependency can be removed from the list.",
+                        );
+                    }
                 }
 
                 Some(diag)

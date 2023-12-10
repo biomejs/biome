@@ -26,6 +26,12 @@
 
 </div>
 
+<div align="center">
+
+English | [简体中文](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.zh-CN.md)
+
+</div>
+
 **Biome** is a performant toolchain for web projects, it aims to provide developer tools to maintain the health of said projects.
 
 **Biome is a [fast formatter](./benchmark#formatting)** for _JavaScript_, _TypeScript_, _JSX_, and _JSON_ that scores **[96% compatibility with _Prettier_](https://console.algora.io/challenges/prettier)**.
@@ -102,6 +108,9 @@ Read more about our [project philosophy][biome-philosophy].
     <tr>
       <td align="center" valign="middle">
         <a href="https://www.kanamekey.com" target="_blank"><img src="https://images.opencollective.com/kaname/d15fd98/logo/256.png?height=80" width="80"></a>
+      </td>
+      <td align="center" valign="middle">
+        <a href="https://nanabit.dev/" target="_blank"><img src="https://images.opencollective.com/nanabit/d15fd98/logo/256.png?height=80" width="80"></a>
       </td>
     </tr>
   </tbody>

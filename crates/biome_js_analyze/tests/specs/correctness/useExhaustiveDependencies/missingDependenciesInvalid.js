@@ -1,5 +1,16 @@
 import React from "react";
-import { useEffect, useCallback, useMemo, useLayoutEffect, useInsertionEffect, useImperativeHandle } from "react";
+import {
+	useEffect,
+	useCallback,
+	useMemo,
+	useLayoutEffect,
+	useInsertionEffect,
+	useImperativeHandle,
+	useState,
+	useReducer,
+	useTransition,
+} from "react";
+import { useRef } from "preact/hooks"
 
 function MyComponent1() {
     let a = 1;
@@ -122,4 +133,23 @@ function MyComponent13() {
   React.useEffect(() => {
       console.log(a);
   }, []);
+}
+
+// imports from other libraries
+function MyComponent14() {
+	const ref = useRef();
+	useEffect(() => {
+			console.log(ref.current);
+	}, []);
+}
+
+// local overrides
+function MyComponent15() {
+	const useRef = () => {
+		return { current: 1 }
+	}
+	const ref = useRef();
+	useEffect(() => {
+			console.log(ref.current);
+	}, []);
 }

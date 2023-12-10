@@ -1,0 +1,178 @@
+---
+title: Linter
+description: 如何使用 Biome linter。
+---
+
+import NumberOfRules from "@src/components/generated/NumberOfRules.astro";
+import RecommendedRules from "@src/components/generated/RecommendedRules.astro";
+
+Biome 的 linter 静态分析你的代码以捕获常见错误并帮助编写符合规范的代码。
+
+<NumberOfRules />
+
+## 通过 CLI 使用 linter
+
+你可以通过运行 CLI 来开始，使用以下命令来检查可能的错误：
+
+```shell
+biome lint ./src
+```
+
+有关所有可用选项的更多信息，请查看 [CLI 页面](/reference/cli#biome-lint)
+
+## 规则支柱
+
+我们认为规则应该是有信息量的，并向用户解释为什么一个规则被触发，并告诉用户他们应该做什么来修复错误。规则应遵循这些**支柱**：
+
+1. 向用户解释错误。通常，这是诊断消息。
+2. 向用户解释**为什么**错误被触发。通常，这是通过附加节点实现的。
+3. 告诉用户他们应该做什么。通常，这是通过代码操作实现的。如果代码操作不适用，注释应告诉用户他们应该做什么来修复错误。
+
+如果你认为规则没有遵循这些支柱，请[提交一个问题](https://github.com/biomejs/biome/issues/new?assignees=&labels=S-To+triage&projects=&template=01_bug.yml&title=%F0%9F%90%9B+%3CTITLE%3E)。
+
+## 代码修复
+
+lint规则可能提供自动代码修复。Biome 区分两种类型的修复。
+
+### 安全修复
+
+安全修复保证不会改变你的代码的语义。他们可以在没有明确审查的情况下应用。
+
+要应用 _安全修复_，使用 `--apply`：
+
+```shell
+biome check --apply ./src
+```
+
+### 不安全的修复
+
+不安全的修复可能改变你的程序的语义。因此，建议手动审查更改。
+
+要应用 _不安全的修复_，使用 `--apply-unsafe`：
+
+```shell
+biome check --apply-unsafe ./src
+```
+
+## 推荐的规则
+
+当 linter 启用时，它会推荐一些规则。推荐的规则将发出错误诊断。以下是推荐规则的列表：
+
+<RecommendedRules />
+
+## 忽略代码
+
+有时，开发者希望忽略代码中的某一行的 lint 规则。
+你可以通过在发出 lint 诊断的行上方添加一个抑制注释来实现这一点。
+
+抑制注释的格式如下：
+
+```js
+// biome-ignore lint: <explanation>
+// biome-ignore lint/suspicious/noDebugger: <explanation>
+```
+
+其中
+
+- `biome-ignore` 是抑制注释的开始；
+- `lint` 抑制 linter；
+- `/suspicious/noDebugger`: **可选**, 你想要抑制的规则的组和名称；
+- `<explanation>` 解释为什么禁用规则
+
+这里有一个例子：
+
+```ts
+// biome-ignore lint: reason
+debugger;
+// biome-ignore lint/suspicious/noDebugger: reason
+debugger;
+```
+
+## 配置
+
+### 启用 lint 规则
+
+推荐的规则默认启用，并发出错误严重性的诊断。
+默认情况下禁用不推荐的规则，但可以通过配置启用它们。
+这些规则发出的诊断在文档中以警告严重性显示。
+
+要启用规则，你需要根据你的需要改变它们的诊断严重性：
+
+```json title="biome.json"
+{
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "style": {
+        "useBlockStatements": "error",
+        "useShorthandArrayType": "error",
+        "noShoutyConstants": "warn"
+      }
+    }
+  }
+}
+```
+
+### 禁用 lint 规则
+
+只需在其配置中添加 `"off"` 作为值。例如：
+
+```json title="biome.json"
+{
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "suspicious": {
+        "noCommentText": "off"
+      },
+      "style": {
+        "noUnusedTemplateLiteral": "off"
+      }
+    }
+  }
+}
+```
+
+### 改变诊断严重性
+
+Biome 的大多数规则会发出一个**错误**，但你可以自由改变它们的严重性。
+只需添加 `"warn"` 作为规则的值。例如：
+
+```json title="biome.json"
+{
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "suspicious": {
+        "noCommentText": "warn"
+      }
+    }
+  }
+}
+```
+
+这在需要进行重构并需要使 CI 通过的情况下很有用。
+
+## 规则选项
+
+一些规则有选项。
+当他们确实接受一些选项时，你可以通过改变规则的值方式传递它们。
+
+```json title="biome.json"
+{
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "correctness": {
+        "noCommentText": {
+          "level": "warn",
+          "options": {}
+        }
+      }
+    }
+  }
+}
+```
+
+- `level` 将指示诊断的严重性，有效值为："off"、"warn" 和 "error"；
+- `options` 将根据规则改变。

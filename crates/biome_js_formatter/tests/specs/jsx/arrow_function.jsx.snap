@@ -36,6 +36,17 @@ function ArrowBodyIsJsxWithComment({ action }) {
 		);
 }
 
+
+
+function ArrowCurryWithPlainParameters() {
+	return (C) => (props) => <C {...props} />;
+}
+
+function ArrowCurryWithDestructuringParameters() {
+	return ({ C }) =>
+  (props) => <C {...props} />;
+}
+
 ```
 
 
@@ -91,6 +102,15 @@ function ArrowBodyIsJsxWithComment({ action }) {
 		// eslint-disable-next-line react/no-array-index-key
 		<li />
 	);
+}
+
+function ArrowCurryWithPlainParameters() {
+	return (C) => (props) => <C {...props} />;
+}
+
+function ArrowCurryWithDestructuringParameters() {
+	return ({ C }) =>
+		(props) => <C {...props} />;
 }
 ```
 
