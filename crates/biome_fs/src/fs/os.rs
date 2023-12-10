@@ -126,7 +126,7 @@ impl<'scope> TraversalScope<'scope> for OsTraversalScope<'scope> {
                         }
                         Err(error) => {
                             let diagnostic = Error::from(IgnoreError::from(error));
-                            context.push_diagnostic(Error::from(diagnostic));
+                            context.push_diagnostic(diagnostic);
                         }
                     }
 

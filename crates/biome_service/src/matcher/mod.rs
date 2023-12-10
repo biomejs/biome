@@ -104,8 +104,8 @@ mod test {
         let valid_test_dir = "**/valid";
         let ignore = Matcher::new(
             GlobSetBuilder::new()
-                .add(Glob::new(&dir).unwrap())
-                .add(Glob::new(&valid_test_dir).unwrap())
+                .add(Glob::new(dir).unwrap())
+                .add(Glob::new(valid_test_dir).unwrap())
                 .build()
                 .unwrap(),
         );
@@ -126,7 +126,7 @@ mod test {
         let dir = "**.rs";
         let ignore = Matcher::new(
             GlobSetBuilder::new()
-                .add(Glob::new(&dir).unwrap())
+                .add(Glob::new(dir).unwrap())
                 .build()
                 .unwrap(),
         );
