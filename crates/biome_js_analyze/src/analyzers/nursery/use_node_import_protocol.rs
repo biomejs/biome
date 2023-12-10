@@ -71,11 +71,10 @@ impl Rule for UseNodeImportProtocol {
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
         let binding: &JsModuleSource = ctx.query();
         let module_name = binding.inner_string_text().ok()?.to_string();
-        let range = binding.range();
 
         Some(RuleDiagnostic::new(
             rule_category!(),
-            range,
+            &binding.range(),
             markup! {
                 "Import from Node.js builtin module \""{module_name}"\" should use the \"node:\" protocol."
             },
