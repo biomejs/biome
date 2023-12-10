@@ -256,7 +256,7 @@ fn format_signature(
                 }
                 AnyJsArrowFunctionParameters::JsParameters(params) => {
                     if ancestor_call_expr_or_logical_expr && !is_first_or_last_call_argument {
-                        write!(f, [group(&dedent(&params.format()))])?;
+                        write!(f, [group(&params.format())])?;
                     } else {
                         write!(f, [params.format()])?;
                     }
@@ -533,11 +533,20 @@ impl Format<JsFormatContext> for ArrowChain {
                 Some(AssignmentLikeLayout::ChainTailArrowFunction)
             );
 
-        let format_arrow_signatures = format_with(|f| {
-            if is_callee || is_assignment_rhs {
-                write!(f, [soft_line_break()])?;
-            }
+        // Arrow chains as callees or as the right side of an assignment
+        // indent the entire signature chain a single level and do _not_
+        // indent a second level for additional signatures after the first:
+        //   const foo =
+        //     (a) =>
+        //     (b) =>
+        //     (c) =>
+        //       0;
+        // This tracks that state and is used to prevent the insertion of
+        // additional indents under `format_arrow_signatures`, then also to
+        // add the outer indent under `format_inner`.
+        let has_initial_indent = is_callee || is_assignment_rhs;
 
+        let format_arrow_signatures = format_with(|f| {
             let join_signatures = format_with(|f: &mut JsFormatter| {
                 let mut is_first_in_chain = true;
                 for arrow in self.arrows() {
@@ -568,17 +577,28 @@ impl Format<JsFormatContext> for ArrowChain {
                         }
                     }
 
-                    write!(
-                        f,
-                        [format_signature(
-                            arrow,
-                            is_grouped_call_arg_layout,
-                            ancestor_call_expr_or_logical_expr,
-                            is_first_in_chain,
-                        )]
-                    )?;
+                    let formatted_signature = format_signature(
+                        arrow,
+                        is_grouped_call_arg_layout,
+                        ancestor_call_expr_or_logical_expr,
+                        is_first_in_chain,
+                    );
 
-                    is_first_in_chain = false;
+                    // Arrow chains indent a second level for every item other than the first:
+                    //   (a) =>
+                    //     (b) =>
+                    //     (c) =>
+                    //       0
+                    // Because the chain is printed as a flat list, each entry needs to set
+                    // its own indention. This ensures that the first item keeps the same
+                    // level as the surrounding content, and then each subsequent item has
+                    // one additional level, as shown above.
+                    if is_first_in_chain || has_initial_indent {
+                        is_first_in_chain = false;
+                        write!(f, [formatted_signature])?;
+                    } else {
+                        write!(f, [indent(&formatted_signature)])?;
+                    }
 
                     // The arrow of the tail is formatted outside of the group to ensure it never
                     // breaks from the body
@@ -688,16 +708,26 @@ impl Format<JsFormatContext> for ArrowChain {
         let group_id = f.group_id("arrow-chain");
 
         let format_inner = format_once(|f| {
-            write!(
-                f,
-                [
-                    group(&indent(&format_arrow_signatures))
+            if has_initial_indent {
+                write!(
+                    f,
+                    [group(&indent(&format_args![
+                        soft_line_break(),
+                        format_arrow_signatures
+                    ]))
+                    .with_group_id(Some(group_id))
+                    .should_expand(break_signatures)]
+                )?;
+            } else {
+                write!(
+                    f,
+                    [group(&format_arrow_signatures)
                         .with_group_id(Some(group_id))
-                        .should_expand(break_signatures),
-                    space(),
-                    tail.fat_arrow_token().format(),
-                ]
-            )?;
+                        .should_expand(break_signatures)]
+                )?;
+            };
+
+            write!(f, [space(), tail.fat_arrow_token().format()])?;
 
             if is_grouped_call_arg_layout {
                 write!(f, [group(&format_tail_body)])?;
