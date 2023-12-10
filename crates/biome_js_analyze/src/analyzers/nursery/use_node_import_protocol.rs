@@ -74,7 +74,7 @@ impl Rule for UseNodeImportProtocol {
 
         Some(RuleDiagnostic::new(
             rule_category!(),
-            &binding.range(),
+            binding.range(),
             markup! {
                 "Import from Node.js builtin module \""{module_name}"\" should use the \"node:\" protocol."
             },
