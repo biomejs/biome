@@ -8,10 +8,10 @@ title: noUselessTernary (since vnext)
 This rule is part of the [nursery](/linter/rules/#nursery) group.
 :::
 
-Disallow ternary operators when simpler alternatives exist
+Disallow ternary operators when simpler alternatives exist.
 
 It’s a common mistake in JavaScript to use a conditional expression to select between two
-Boolean values instead of using ! to convert the test to a Boolean.
+boolean values instead of using the logical NOT (`!`) or double NOT (`!!`) to convert the test to a boolean.
 Here are some examples:
 
 Source: https://eslint.org/docs/latest/rules/no-unneeded-ternary/
@@ -35,6 +35,9 @@ var a = x ? true : true;
 <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Unnecessary use of boolean literals in conditional expression.
 </span><span style="color: lightgreen;">  </span><span style="color: lightgreen;">  </span><span style="color: lightgreen;"> Simplify your code by directly assigning the result without using a ternary operator.</span>
   
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">If your goal is negation, you may use the logical NOT (!) or double NOT (!!) operator for clearer and concise code.
+</span><span style="color: lightgreen;">  </span><span style="color: lightgreen;">  </span><span style="color: lightgreen;"> Check for more details about </span><span style="color: lightgreen;"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Logical_NOT">NOT</a></span><span style="color: lightgreen;"> operator.</span>
+  
 </code></pre>
 
 ```jsx
@@ -51,6 +54,9 @@ var a = foo === 1 ? false : true;
   
 <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Unnecessary use of boolean literals in conditional expression.
 </span><span style="color: lightgreen;">  </span><span style="color: lightgreen;">  </span><span style="color: lightgreen;"> Simplify your code by directly assigning the result without using a ternary operator.</span>
+  
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">If your goal is negation, you may use the logical NOT (!) or double NOT (!!) operator for clearer and concise code.
+</span><span style="color: lightgreen;">  </span><span style="color: lightgreen;">  </span><span style="color: lightgreen;"> Check for more details about </span><span style="color: lightgreen;"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Logical_NOT">NOT</a></span><span style="color: lightgreen;"> operator.</span>
   
 </code></pre>
 
@@ -69,6 +75,9 @@ var a = foo + 1 ? false : true;
 <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Unnecessary use of boolean literals in conditional expression.
 </span><span style="color: lightgreen;">  </span><span style="color: lightgreen;">  </span><span style="color: lightgreen;"> Simplify your code by directly assigning the result without using a ternary operator.</span>
   
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">If your goal is negation, you may use the logical NOT (!) or double NOT (!!) operator for clearer and concise code.
+</span><span style="color: lightgreen;">  </span><span style="color: lightgreen;">  </span><span style="color: lightgreen;"> Check for more details about </span><span style="color: lightgreen;"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Logical_NOT">NOT</a></span><span style="color: lightgreen;"> operator.</span>
+  
 </code></pre>
 
 ```jsx
@@ -86,6 +95,9 @@ var a = foo + 1 ? true : false;
 <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Unnecessary use of boolean literals in conditional expression.
 </span><span style="color: lightgreen;">  </span><span style="color: lightgreen;">  </span><span style="color: lightgreen;"> Simplify your code by directly assigning the result without using a ternary operator.</span>
   
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">If your goal is negation, you may use the logical NOT (!) or double NOT (!!) operator for clearer and concise code.
+</span><span style="color: lightgreen;">  </span><span style="color: lightgreen;">  </span><span style="color: lightgreen;"> Check for more details about </span><span style="color: lightgreen;"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Logical_NOT">NOT</a></span><span style="color: lightgreen;"> operator.</span>
+  
 </code></pre>
 
 ## Valid
@@ -97,6 +109,10 @@ var a = x === 2 ? 'Yes' : 'No';
 ```jsx
 var a = x === 2 ? 'Yes' : false;
 ```
+
+## Resources
+
+Logical NOT: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Logical_NOT
 
 ## Related links
 

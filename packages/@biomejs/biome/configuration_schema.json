@@ -1176,7 +1176,7 @@
 					]
 				},
 				"noUselessTernary": {
-					"description": "Disallow ternary operators when simpler alternatives exist",
+					"description": "Disallow ternary operators when simpler alternatives exist.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

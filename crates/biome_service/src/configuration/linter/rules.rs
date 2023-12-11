@@ -2817,7 +2817,7 @@ pub struct Nursery {
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_useless_lone_block_statements: Option<RuleConfiguration>,
-    #[doc = "Disallow ternary operators when simpler alternatives exist"]
+    #[doc = "Disallow ternary operators when simpler alternatives exist."]
     #[bpaf(long("no-useless-ternary"), argument("on|off|warn"), optional, hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_useless_ternary: Option<RuleConfiguration>,

@@ -814,7 +814,7 @@ export interface Nursery {
 	 */
 	noUselessLoneBlockStatements?: RuleConfiguration;
 	/**
-	 * Disallow ternary operators when simpler alternatives exist
+	 * Disallow ternary operators when simpler alternatives exist.
 	 */
 	noUselessTernary?: RuleConfiguration;
 	/**

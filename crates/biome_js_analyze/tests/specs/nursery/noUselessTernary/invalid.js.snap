@@ -32,6 +32,9 @@ invalid.js:1:9 lint/nursery/noUselessTernary ━━━━━━━━━━━�
   i Unnecessary use of boolean literals in conditional expression.
      Simplify your code by directly assigning the result without using a ternary operator.
   
+  i If your goal is negation, you may use the logical NOT (!) or double NOT (!!) operator for clearer and concise code.
+     Check for more details about NOT operator.
+  
 
 ```
 
@@ -48,6 +51,9 @@ invalid.js:2:9 lint/nursery/noUselessTernary ━━━━━━━━━━━�
   
   i Unnecessary use of boolean literals in conditional expression.
      Simplify your code by directly assigning the result without using a ternary operator.
+  
+  i If your goal is negation, you may use the logical NOT (!) or double NOT (!!) operator for clearer and concise code.
+     Check for more details about NOT operator.
   
 
 ```
@@ -67,6 +73,9 @@ invalid.js:4:9 lint/nursery/noUselessTernary ━━━━━━━━━━━�
   i Unnecessary use of boolean literals in conditional expression.
      Simplify your code by directly assigning the result without using a ternary operator.
   
+  i If your goal is negation, you may use the logical NOT (!) or double NOT (!!) operator for clearer and concise code.
+     Check for more details about NOT operator.
+  
 
 ```
 
@@ -83,6 +92,9 @@ invalid.js:5:9 lint/nursery/noUselessTernary ━━━━━━━━━━━�
   
   i Unnecessary use of boolean literals in conditional expression.
      Simplify your code by directly assigning the result without using a ternary operator.
+  
+  i If your goal is negation, you may use the logical NOT (!) or double NOT (!!) operator for clearer and concise code.
+     Check for more details about NOT operator.
   
 
 ```
@@ -102,6 +114,9 @@ invalid.js:6:9 lint/nursery/noUselessTernary ━━━━━━━━━━━�
   i Unnecessary use of boolean literals in conditional expression.
      Simplify your code by directly assigning the result without using a ternary operator.
   
+  i If your goal is negation, you may use the logical NOT (!) or double NOT (!!) operator for clearer and concise code.
+     Check for more details about NOT operator.
+  
 
 ```
 
@@ -119,6 +134,9 @@ invalid.js:7:9 lint/nursery/noUselessTernary ━━━━━━━━━━━�
   
   i Unnecessary use of boolean literals in conditional expression.
      Simplify your code by directly assigning the result without using a ternary operator.
+  
+  i If your goal is negation, you may use the logical NOT (!) or double NOT (!!) operator for clearer and concise code.
+     Check for more details about NOT operator.
   
 
 ```
@@ -138,6 +156,9 @@ invalid.js:9:9 lint/nursery/noUselessTernary ━━━━━━━━━━━�
   i Unnecessary use of boolean literals in conditional expression.
      Simplify your code by directly assigning the result without using a ternary operator.
   
+  i If your goal is negation, you may use the logical NOT (!) or double NOT (!!) operator for clearer and concise code.
+     Check for more details about NOT operator.
+  
 
 ```
 
@@ -154,6 +175,9 @@ invalid.js:10:9 lint/nursery/noUselessTernary ━━━━━━━━━━━�
   
   i Unnecessary use of boolean literals in conditional expression.
      Simplify your code by directly assigning the result without using a ternary operator.
+  
+  i If your goal is negation, you may use the logical NOT (!) or double NOT (!!) operator for clearer and concise code.
+     Check for more details about NOT operator.
   
 
 ```
@@ -172,6 +196,9 @@ invalid.js:11:9 lint/nursery/noUselessTernary ━━━━━━━━━━━�
   i Unnecessary use of boolean literals in conditional expression.
      Simplify your code by directly assigning the result without using a ternary operator.
   
+  i If your goal is negation, you may use the logical NOT (!) or double NOT (!!) operator for clearer and concise code.
+     Check for more details about NOT operator.
+  
 
 ```
 
@@ -187,6 +214,9 @@ invalid.js:12:9 lint/nursery/noUselessTernary ━━━━━━━━━━━�
   
   i Unnecessary use of boolean literals in conditional expression.
      Simplify your code by directly assigning the result without using a ternary operator.
+  
+  i If your goal is negation, you may use the logical NOT (!) or double NOT (!!) operator for clearer and concise code.
+     Check for more details about NOT operator.
   
 
 ```
