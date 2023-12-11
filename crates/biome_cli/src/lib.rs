@@ -25,6 +25,7 @@ mod service;
 use crate::cli_options::ColorsArg;
 use crate::commands::check::CheckCommandPayload;
 use crate::commands::ci::CiCommandPayload;
+use crate::commands::explain::ExplainCommandPayload;
 use crate::commands::format::FormatCommandPayload;
 use crate::commands::lint::LintCommandPayload;
 pub use crate::commands::{biome_command, BiomeCommand};
@@ -181,6 +182,9 @@ impl<'app> CliSession<'app> {
                     since,
                 },
             ),
+            BiomeCommand::Explain { explanations } => {
+                commands::explain::explain(self, ExplainCommandPayload { explanations })
+            }
             BiomeCommand::Init => commands::init::init(self),
             BiomeCommand::LspProxy(config_path) => commands::daemon::lsp_proxy(config_path),
             BiomeCommand::Migrate(cli_options, write) => {
