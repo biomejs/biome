@@ -267,7 +267,7 @@ Input
 (1)++;
 ```
 
-```js title="example.js" del{1} add={2}
+```js title="example.js" del={1} add={2}
 1++;
 (1)++;
 ```
@@ -285,7 +285,7 @@ class C {
 Diff
 
 
-```ts title="example.js" del{2} add={3}
+```ts title="example.js" del={2} add={3}
 class C {
   abstract f(): number;
   abstract f() : number;
@@ -316,7 +316,7 @@ function someFunctionName(
 Diff
 
 
-```ts title="example.js" del{5} ins={6,7,8,9}
+```ts title="example.js" del={5} ins={6,7,8,9}
 function someFunctionName(
   someLongBreakingParameterName,
   anotherLongParameterName,
