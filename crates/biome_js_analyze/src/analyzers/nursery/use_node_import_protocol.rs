@@ -8,11 +8,8 @@ use crate::globals::node::NODE_BUILTINS;
 declare_rule! {
     /// Enforces using the `node:` protocol for Node.js builtin modules.
     ///
-    /// The prefer-node-protocol rule in ESLint enforces the use of the node: protocol
-    /// when importing Node.js builtin modules in JavaScript code.
-    /// This helps differentiate between built-in modules and third-party ones, improving code clarity.
-    /// The rule marks traditional imports like import fs from 'fs'; as invalid,
-    /// suggesting the format import fs from 'node:fs'; instead.
+    /// The rule marks traditional imports like import fs from `'fs'`; as invalid,
+    /// suggesting the format import fs from `'node:fs'`; instead.
     ///
     /// Source: https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/prefer-node-protocol.md
     ///
