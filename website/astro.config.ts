@@ -82,7 +82,7 @@ export default defineConfig({
 					link: "../playground",
 					translations: {
 						ja: "プレイグラウンド",
-						"zh-CN": "在线编辑器",
+						"zh-CN": "演练场",
 						"pt-BR": "Ambiente de testes",
 					},
 				},
@@ -161,7 +161,7 @@ export default defineConfig({
 									label: "Introduction",
 									link: "/formatter",
 									translations: {
-                    ja: "イントロダクション",
+										ja: "イントロダクション",
 										"zh-CN": "介绍",
 										"pt-BR": "Introdução",
 									},
@@ -170,7 +170,7 @@ export default defineConfig({
 									label: "Differences with Prettier",
 									link: "/formatter/differences-with-prettier",
 									translations: {
-                    ja: "Prettier との違い",
+										ja: "Prettier との違い",
 										"zh-CN": "与 Prettier 的区别",
 										"pt-BR": "Diferenças em relação ao Prettier",
 									},
@@ -179,7 +179,7 @@ export default defineConfig({
 									label: "Formatter Option Philosophy",
 									link: "/formatter/option-philosophy",
 									translations: {
-                    ja: "Formatterオプションに対する考え方",
+										ja: "Formatterオプションに対する考え方",
 										"zh-CN": "格式化配置理念",
 										"pt-BR": "Princípios de configuração",
 									},
@@ -198,7 +198,7 @@ export default defineConfig({
 							label: "Lint rules",
 							link: "/linter/rules",
 							translations: {
-                ja: "Lintルール",
+								ja: "Lintルール",
 								"zh-CN": "Lint 规则",
 								"pt-BR": "Regras do Linter",
 							},
@@ -221,7 +221,7 @@ export default defineConfig({
 							label: "Configuration",
 							link: "/reference/configuration",
 							translations: {
-                ja: "設定",
+								ja: "設定",
 								"zh-CN": "配置",
 								"pt-BR": "Configuração",
 							},
