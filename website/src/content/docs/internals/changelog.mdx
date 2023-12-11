@@ -98,6 +98,23 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ### Parser
 
+- Fix [#1077](https://github.com/biomejs/biome/issues/1077), fix issues when parsing conditional expression where parenthesized identifier was being parsed as arrow expression. Contributed by @kalleep
+
+These cases are now properly parsed:
+
+javascript:
+```javascript
+  a ? (b) : a => {};
+```
+
+typescript:
+```ts
+  a ? (b) : a => {};
+```
+jsx:
+```jsx
+  bar ? (foo) : (<a>{() => {}}</a>);
+```
 
 ## 1.4.1 (2023-11-30)
 

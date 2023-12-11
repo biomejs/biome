@@ -407,6 +407,7 @@ fn parse_yield_expression(p: &mut JsParser, context: ExpressionContext) -> Compl
 // test js conditional_expr
 // foo ? bar : baz
 // foo ? bar : baz ? bar : baz
+
 pub(super) fn parse_conditional_expr(p: &mut JsParser, context: ExpressionContext) -> ParsedSyntax {
     // test_err js conditional_expr_err
     // foo ? bar baz
@@ -419,7 +420,7 @@ pub(super) fn parse_conditional_expr(p: &mut JsParser, context: ExpressionContex
             let m = marker.precede(p);
             p.bump(T![?]);
 
-            parse_assignment_expression_or_higher(p, ExpressionContext::default())
+            parse_conditional_expr_consequent(p, ExpressionContext::default())
                 .or_add_diagnostic(p, js_parse_error::expected_expression_assignment);
 
             p.expect(T![:]);
@@ -431,6 +432,29 @@ pub(super) fn parse_conditional_expr(p: &mut JsParser, context: ExpressionContex
     } else {
         lhs
     }
+}
+
+/// Specialized version of [parse_assignment_expression_or_higher].
+/// We need to make sure that on a successful arrow expression parse that
+/// the next token is `:`.
+// test js arrow_expr_in_alternate
+// a ? (b) : a => {};
+
+// test ts ts_arrow_exrp_in_alternate
+// a ? (b) : a => {};
+
+// test jsx jsx_arrow_exrp_in_alternate
+// bar ? (foo) : (<a>{() => {}}</a>);
+fn parse_conditional_expr_consequent(p: &mut JsParser, context: ExpressionContext) -> ParsedSyntax {
+    let checkpoint = p.checkpoint();
+
+    let arrow_expression = parse_arrow_function_expression(p);
+    if arrow_expression.is_present() && p.at(T![:]) {
+        return arrow_expression;
+    }
+
+    p.rewind(checkpoint);
+    parse_assignment_expression_or_higher_base(p, context)
 }
 
 pub(crate) fn is_at_binary_operator(p: &JsParser, context: ExpressionContext) -> bool {

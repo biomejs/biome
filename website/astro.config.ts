@@ -161,6 +161,7 @@ export default defineConfig({
 									label: "Introduction",
 									link: "/formatter",
 									translations: {
+                    ja: "イントロダクション",
 										"zh-CN": "介绍",
 										"pt-BR": "Introdução",
 									},
@@ -169,6 +170,7 @@ export default defineConfig({
 									label: "Differences with Prettier",
 									link: "/formatter/differences-with-prettier",
 									translations: {
+                    ja: "Prettier との違い",
 										"zh-CN": "与 Prettier 的区别",
 										"pt-BR": "Diferenças em relação ao Prettier",
 									},
@@ -177,13 +179,13 @@ export default defineConfig({
 									label: "Formatter Option Philosophy",
 									link: "/formatter/option-philosophy",
 									translations: {
+                    ja: "Formatterオプションに対する考え方",
 										"zh-CN": "格式化配置理念",
 										"pt-BR": "Princípios de configuração",
 									},
 								},
 							],
 							translations: {
-								ja: "Formatter",
 								"zh-CN": "格式化程序",
 								"pt-BR": "Formatador",
 							},
@@ -196,6 +198,7 @@ export default defineConfig({
 							label: "Lint rules",
 							link: "/linter/rules",
 							translations: {
+                ja: "Lintルール",
 								"zh-CN": "Lint 规则",
 								"pt-BR": "Regras do Linter",
 							},
@@ -218,6 +221,7 @@ export default defineConfig({
 							label: "Configuration",
 							link: "/reference/configuration",
 							translations: {
+                ja: "設定",
 								"zh-CN": "配置",
 								"pt-BR": "Configuração",
 							},
@@ -251,7 +255,7 @@ export default defineConfig({
 				{
 					label: "Internals",
 					translations: {
-						ja: "内部",
+						ja: "内部原理",
 						"zh-CN": "内部原理",
 						"pt-BR": "Aspectos Internos",
 					},
@@ -351,6 +355,9 @@ export default defineConfig({
 			},
 			editLink: {
 				baseUrl: "https://github.com/biomejs/biome/edit/main/website/",
+			},
+			components: {
+				SiteTitle: "./src/components/SiteTitle.astro",
 			},
 		}),
 	],

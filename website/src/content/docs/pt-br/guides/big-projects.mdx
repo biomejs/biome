@@ -1,21 +1,19 @@
 ---
-title: Use Biome in big projects
-description: A small guide how to set Biome in big projects
+title: Usando o Biome em projetos grandes
+description: Um pequeno guia sobre como configurar o Biome em projetos grandes
 ---
 
-Biome can provide some tools that can help you to use it properly in big projects, such as monorepo or workspaces that contain multiple projects.
+O Biome disponibiliza algumas ferramentas que podem ajudar você a utilizá-lo em projetos grandes, como ambientes de trabalho com múltiplos projetos ou em projetos monorepos.
 
+## Usando múltiplos arquivos de configuração
 
-## Use multiple configuration files
+Quando você utiliza o Biome - seja com a CLI ou com o LSP - ele busca o arquivo de configuração mais próximo usando o diretório de trabalho atual.
 
-When you use Biome's features - either with the CLI or LSP - the tool looks for the nearest configuration file using the current working directory.
+Se o Biome não encontrar o arquivo de configuração no diretório, ele começa a procurar nos **diretórios pai** até ecnontrar um arquivo de configuração.
 
-If Biome doesn't find the configuration file there, it **starts walking upwards** the directories of the file system, until it finds one.
+Você pode aproveitar essa funcionalidade para aplicar diferentes configuração baseado no projeto/pasta.
 
-You can leverage this feature to apply different settings based on the project/folder.
-
-Let's suppose we have a project that contains a backend app and new frontend app.
-
+Vamos supor que nós temos um projeto que contém um aplicativo backend e um novo aplicativo frontend.
 
 ```
 app
@@ -30,22 +28,22 @@ app
         └── package.json
 ```
 
-This means that when you run a script from the file `app/backend/package.json`, Biome will use the configuration file `app/backend/biome.json`.
+Isso signifca que quando você executa um script do arquivo `app/backend/package.json`, o Biome vai usar o arquivo de configuração `app/backend/biome.json`.
 
-When you run a script from `app/frontend/legacy-app/package.json` or `app/frontend/new-app/package.json`, Biome will use the configuration file `app/frontend/biome.json`.
+Quando você executa um script do arquivo `app/frontend/legacy-app/package.json` ou `app/frontend/new-app/package.json`, o Biome vai usar o arquivo de configuração `app/frontend/biome.json`.
 
-## Share the configuration
+## Compartilhando o arquivo de configuração
 
-It's possible to use the [`extends`](/reference/configuration#extends) configuration option to breakdown options across files.
+É possível usar a opção de configuração [`extends`](/reference/configuration#extends) para dividir opções entre vários arquivos.
 
-Let's assume that we have these requirements:
-- `legacy-app` have to format using spaces;
-- `backend` and `new-app` have to format using tabs;
-- all apps have to format using line width 120;
-- `backend` app needs some extra linting;
+Vamos supor que temos esses requisitos:
 
-We start by creating a new configuration file at `app/biome.json`, and put there the shared options:
+- O projeto `legacy-app` deve ser formatado usando espaços;
+- Os projetos `backend` e `new-app` devem ser formatados usando tabulações;
+- Todos os projetos devem ser formatados com uma largura de linha de 120 caracteres;
+- O projeto `backend` precisa de algumas verficações adicionais;
 
+Começamos criando um novo arquivo de configuração em `app/biome.json`, e colocamos nele as opções compartilhadas:
 
 ```json title="app/biome.json"
 {
@@ -56,8 +54,7 @@ We start by creating a new configuration file at `app/biome.json`, and put there
 }
 ```
 
-Now let's **move** `app/frontend/biome.json` to `app/frontend/legacy-app/`, because that's where we need to use a different formatting.
-
+Agora, vamos **mover** `app/frontend/biome.json` para `app/frontend/legacy-app/`, pois é lá que precisamos usar uma formatação diferente.
 
 ```json title="app/frontend/legacy-app/biome.json"
 {
@@ -67,28 +64,27 @@ Now let's **move** `app/frontend/biome.json` to `app/frontend/legacy-app/`, beca
 }
 ```
 
-Then, we tell Biome to inherit all the options from the main `app/biome.json` file, using the `extends` property:
+Em seguida, falamos para o Biome herdar todas as opções do arquivo principal `app/biome.json`, utilizando a propriedade `extends`:
 
 ```json title="app/frontend/legacy-app/biome.json" ins={2}
 {
-   "extends": ["../../biome.json"],
-   "formatter": {
-     "indentStyle": "space"
-   }
+  "extends": ["../../biome.json"],
+  "formatter": {
+    "indentStyle": "space"
+  }
 }
 ```
 
-Let's jump to `app/backend/biome.json`, where we need to enable the linting:
-
+Vamos para o arquivo `app/backend/biome.json`, onde precisamos habilitar o [linting](/pt-br/linter):
 
 ```json title="app/backend/biome.json"
 {
   "extends": ["../biome.json"],
-    "linter": {
-      "enabled": "true",
-      "rules": {
-        "recommended": true
-      }
-   }
+  "linter": {
+    "enabled": "true",
+    "rules": {
+      "recommended": true
+    }
+  }
 }
 ```
