@@ -73,11 +73,6 @@ export default defineConfig({
 			},
 			sidebar: [
 				{
-					label: "Home",
-					link: "/",
-					translations: { ja: "ホーム", "zh-CN": "首页", "pt-BR": "Início" },
-				},
-				{
 					label: "Blog",
 					link: "../blog",
 					translations: { ja: "ブログ", "zh-CN": "博客" },
