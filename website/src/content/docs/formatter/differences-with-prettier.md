@@ -3,7 +3,7 @@ title: Differences with Prettier
 description: In-depth explanation of the differences with Prettier.
 ---
 
-There are some divergences with Prettier.
+In some cases, Biome has intentionally decided to format code in a way that doesn't match Prettier's output. These divergences are explained below.
 
 ### Prettier doesn't unquote some object properties that are valid JavaScript identifiers.
 
@@ -291,3 +291,42 @@ class C {
   abstract f() : number;
 }
 ```
+
+### Prettier has inconsistencies between TypeScript and Babel parsing
+
+Prettier supports a number of different parsers for JavaScript and TypeScript code, all of which are meant to be compatible with the [`estree` spec](https://github.com/estree/estree). Most of the time, Prettier uses Babel as the default parser for JavaScript code, but when parsing TypeScript, it will try to use TypeScript's own parser first and only fall back to Babel with TypeScript enabled afterward. While the TypeScript parser is generally compatible with `estree`, it's not exact, and [this can lead to some inconsistencies](https://github.com/prettier/prettier/issues/15785) that affect the output that Prettier creates. In general, these are considered bugs in Prettier itself, since the output should be the same regardless of which parser is used.
+
+Biome implements its own parsing that handles all forms of JavaScript and TypeScript code, meaning there should not be any inconsistencies between the two. However, when migrating a TypeScript codebase from Prettier to Biome, it's possible that some formatting will appear to have changed because of those discrepancies between parsers from Prettier.
+
+These cases are not considered bugs or incompatibilities in Biome. If formatted code only appears different using the `typescript` parser setting in Prettier, but matches when using `babel` and/or `babel-ts`, then Biome considers the output to be compatible.
+
+As an example, consider this case, formatted using Biome and Prettier 3.1.0 with the `typescript` parser:
+
+Input
+
+```ts title="example.js"
+function someFunctionName(
+  someLongBreakingParameterName,
+  anotherLongParameterName,
+) {
+  return isEqual(a?.map(([t, _]) => t?.id), b?.map(([t, _]) => t?.id));
+}
+```
+
+Diff
+
+
+```ts title="example.js" del{5} ins={6,7,8,9}
+function someFunctionName(
+  someLongBreakingParameterName,
+  anotherLongParameterName,
+) {
+  return isEqual(a?.map(([t, _]) => t?.id), b?.map(([t, _]) => t?.id));
+  return isEqual(
+    a?.map(([t, _]) => t?.id),
+    b?.map(([t, _]) => t?.id),
+  );
+}
+```
+
+Prettier with the TypeScript parser chooses to write the `isEqual` call on a single line, while Biome matches the output of Prettier with the `babel` and `babel-ts` parsers. As such, this is _not_ considered an incompatibility with Biome and is instead considered a bug in Prettier.
