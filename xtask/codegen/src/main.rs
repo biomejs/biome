@@ -2,6 +2,8 @@
 mod generate_bindings;
 #[cfg(feature = "configuration")]
 mod generate_configuration;
+#[cfg(feature = "explanations")]
+mod generate_explanations;
 #[cfg(feature = "license")]
 mod generate_license;
 mod generate_new_lintrule;
@@ -27,6 +29,9 @@ use crate::generate_schema::generate_configuration_schema;
 #[cfg(feature = "website")]
 use crate::generate_website::generate_files;
 use crate::promote_rule::promote_rule;
+#[cfg(feature = "explanations")]
+use generate_explanations::generate_explanations;
+
 use generate_new_lintrule::*;
 use xtask_codegen::{
     generate_analyzer, generate_ast, generate_formatters, generate_parser_tests, generate_tables,
@@ -73,6 +78,11 @@ fn main() -> Result<()> {
         #[cfg(feature = "configuration")]
         "configuration" => {
             generate_rules_configuration(Mode::Overwrite)?;
+            Ok(())
+        }
+        #[cfg(feature = "explanations")]
+        "explanations" => {
+            generate_explanations(Mode::Overwrite)?;
             Ok(())
         }
         #[cfg(feature = "schema")]
