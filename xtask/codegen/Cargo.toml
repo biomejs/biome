@@ -48,13 +48,7 @@ configuration = [
   "biome_json_syntax",
   "pulldown-cmark",
 ]
-explanations = [
-  "biome_analyze",
-  "biome_js_analyze",
-  "biome_js_syntax",
-  "biome_json_analyze",
-  "biome_json_syntax",
-]
+explanations = ["biome_analyze", "biome_js_analyze", "biome_js_syntax", "biome_json_analyze", "biome_json_syntax"]
 license = ["ureq/default", "ureq/json", "ureq/serde_json", "serde", "serde_json"]
 schema = [
   "schemars",
