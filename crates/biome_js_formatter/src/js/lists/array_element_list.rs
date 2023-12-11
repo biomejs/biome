@@ -45,8 +45,11 @@ impl FormatRule<JsArrayElementList> for FormatJsArrayElementList {
                 ) {
                     filler.entry(
                         &format_once(|f| {
-                            if get_lines_before(element?.syntax()) > 1 {
+                            let element = element?;
+                            if get_lines_before(element.syntax()) > 1 {
                                 write!(f, [empty_line()])
+                            } else if f.comments().has_leading_own_line_comment(element.syntax()) {
+                                write!(f, [hard_line_break()])
                             } else {
                                 write!(f, [soft_line_break_or_space()])
                             }

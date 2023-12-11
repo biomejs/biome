@@ -665,7 +665,29 @@ impl Format<JsFormatContext> for FormatMultilineChildren {
             Ok(())
         });
 
-        write!(f, [block_indent(&format_inner)])
+        // This indent is wrapped with a group to ensure that the print mode is
+        // set to `Expanded` when the group prints and will guarantee that the
+        // content _does not_ fit when printed as part of a `Fill`. Example:
+        //   <div>
+        //     <span a b>
+        //       <Foo />
+        //     </span>{" "}
+        //     ({variable})
+        //   </div>
+        // The `<span>...</span>` is the element that gets wrapped in the group
+        // by this line. Importantly, it contains a hard line break, and because
+        // [FitsMeasurer::fits_element] considers all hard lines as `Fits::Yes`,
+        // it will cause the element and the following separator to be printed
+        // in flat mode due to the logic of `Fill`. But because the we know the
+        // item breaks over multiple lines, we want it to _not_ fit and print
+        // both the content and the separator in Expanded mode, keeping the
+        // formatting as shown above.
+        //
+        // The `group` here allows us to opt-in to telling the `FitsMeasurer`
+        // that content that breaks shouldn't be considered flat and should be
+        // expanded. This is in contrast to something like a concise array fill,
+        // which _does_ allow breaks to fit and preserves density.
+        write!(f, [group(&block_indent(&format_inner))])
     }
 }
 
