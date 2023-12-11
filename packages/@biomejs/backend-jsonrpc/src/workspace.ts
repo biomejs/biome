@@ -814,6 +814,10 @@ export interface Nursery {
 	 */
 	noUselessLoneBlockStatements?: RuleConfiguration;
 	/**
+	 * Disallow ternary operators when simpler alternatives exist
+	 */
+	noUselessTernary?: RuleConfiguration;
+	/**
 	 * It enables the recommended rules for this group
 	 */
 	recommended?: boolean;
@@ -1522,6 +1526,7 @@ export type Category =
 	| "lint/nursery/noUnusedImports"
 	| "lint/nursery/noUnusedPrivateClassMembers"
 	| "lint/nursery/noUselessLoneBlockStatements"
+	| "lint/nursery/noUselessTernary"
 	| "lint/nursery/useAwait"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useExportType"
@@ -1529,8 +1534,8 @@ export type Category =
 	| "lint/nursery/useGroupedTypeImport"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useRegexLiterals"
-	| "lint/nursery/useValidAriaRole"
 	| "lint/nursery/useShorthandFunctionType"
+	| "lint/nursery/useValidAriaRole"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noDelete"
 	| "lint/security/noDangerouslySetInnerHtml"
