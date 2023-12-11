@@ -9,8 +9,8 @@ use std::os::windows::fs::{symlink_dir, symlink_file};
 use std::path::{Path, PathBuf};
 
 use crate::configs::{
-    CONFIG_FILE_SIZE_LIMIT, CONFIG_IGNORE_SYMLINK, CONFIG_LINTER_AND_FILES_IGNORE,
-    CONFIG_LINTER_DISABLED, CONFIG_LINTER_DOWNGRADE_DIAGNOSTIC, CONFIG_LINTER_IGNORED_FILES,
+    CONFIG_FILE_SIZE_LIMIT, CONFIG_IGNORE_SYMLINK, CONFIG_LINTER_DISABLED,
+    CONFIG_LINTER_DOWNGRADE_DIAGNOSTIC, CONFIG_LINTER_IGNORED_FILES,
     CONFIG_LINTER_SUPPRESSED_GROUP, CONFIG_LINTER_SUPPRESSED_RULE,
     CONFIG_LINTER_UPGRADE_DIAGNOSTIC, CONFIG_RECOMMENDED_GROUP,
 };
@@ -709,7 +709,19 @@ fn no_lint_if_files_are_listed_in_ignore_option() {
     let mut console = BufferConsole::default();
 
     let file_path = Path::new("biome.json");
-    fs.insert(file_path.into(), CONFIG_LINTER_AND_FILES_IGNORE.as_bytes());
+    fs.insert(
+        file_path.into(),
+        r#"{
+  "files": {
+    "ignore": ["test1.js"]
+  },
+  "linter": {
+    "enabled": true,
+    "ignore": ["test2.js"]
+  }
+}"#
+        .as_bytes(),
+    );
 
     let file_path_test1 = Path::new("test1.js");
     fs.insert(file_path_test1.into(), FIX_BEFORE.as_bytes());
@@ -733,21 +745,8 @@ fn no_lint_if_files_are_listed_in_ignore_option() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    let mut buffer = String::new();
-    fs.open(file_path_test1)
-        .unwrap()
-        .read_to_string(&mut buffer)
-        .unwrap();
-
-    assert_eq!(buffer, FIX_BEFORE);
-
-    let mut buffer = String::new();
-    fs.open(file_path_test2)
-        .unwrap()
-        .read_to_string(&mut buffer)
-        .unwrap();
-
-    assert_eq!(buffer, CHECK_FORMAT_AFTER);
+    assert_file_contents(&fs, file_path_test1, FIX_BEFORE);
+    assert_file_contents(&fs, file_path_test2, CHECK_FORMAT_AFTER);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),

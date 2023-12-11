@@ -234,7 +234,10 @@ impl Rules {
                     .suspicious
                     .as_ref()
                     .and_then(|suspicious| suspicious.get_rule_configuration(rule_name))
-                    .map(|rule_setting| rule_setting.into())
+                    .map(|rule_setting| {
+                        //
+                        rule_setting.into()
+                    })
                     .unwrap_or_else(|| {
                         if Suspicious::is_recommended_rule(rule_name) {
                             Severity::Error

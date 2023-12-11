@@ -1,5 +1,10 @@
 use crate::configuration::diagnostics::InvalidIgnorePattern;
-use crate::configuration::{push_to_analyzer_rules, JavascriptConfiguration, JsonConfiguration};
+use crate::configuration::formatter::to_format_settings;
+use crate::configuration::linter::to_linter_settings;
+use crate::configuration::organize_imports::to_organize_imports_settings;
+use crate::configuration::{
+    push_to_analyzer_rules, to_override_settings, JavascriptConfiguration, JsonConfiguration,
+};
 use crate::{
     configuration::FilesConfiguration, Configuration, ConfigurationDiagnostic, Matcher, MergeWith,
     Rules, WorkspaceError,
@@ -19,7 +24,7 @@ use biome_json_syntax::JsonLanguage;
 use globset::{Glob, GlobSetBuilder};
 use indexmap::IndexSet;
 use std::ops::{BitOr, Sub};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::{
     num::NonZeroU64,
     sync::{RwLock, RwLockReadGuard},
@@ -75,28 +80,36 @@ impl WorkspaceSettings {
     pub fn merge_with_configuration(
         &mut self,
         configuration: Configuration,
+        vcs_path: Option<PathBuf>,
+        gitignore_matches: &[String],
     ) -> Result<(), WorkspaceError> {
         // formatter part
         if let Some(formatter) = configuration.formatter {
-            self.formatter = FormatSettings::try_from(formatter)?;
+            self.formatter = to_format_settings(formatter, vcs_path.clone(), gitignore_matches)?;
         }
 
         // linter part
         if let Some(linter) = configuration.linter {
-            self.linter = LinterSettings::try_from(linter)?;
+            self.linter = to_linter_settings(linter, vcs_path.clone(), gitignore_matches)?;
         }
 
         // Filesystem settings
-        if let Some(files) = configuration.files {
-            self.files = FilesSettings::try_from(files)?;
+        if let Some(files) =
+            to_file_settings(configuration.files, vcs_path.clone(), gitignore_matches)?
+        {
+            self.files = files;
         }
 
         if let Some(organize_imports) = configuration.organize_imports {
-            self.organize_imports = OrganizeImportsSettings::try_from(organize_imports)?;
+            self.organize_imports = to_organize_imports_settings(
+                organize_imports,
+                vcs_path.clone(),
+                gitignore_matches,
+            )?;
         }
 
         if let Some(overrides) = configuration.overrides {
-            self.override_settings = OverrideSettings::try_from(overrides)?;
+            self.override_settings = to_override_settings(overrides, vcs_path, gitignore_matches)?;
         }
 
         // javascript settings
@@ -151,9 +164,9 @@ pub struct FormatSettings {
     pub line_ending: Option<LineEnding>,
     pub line_width: Option<LineWidth>,
     /// List of ignore paths/files
-    pub ignored_files: Option<Matcher>,
+    pub ignored_files: Matcher,
     /// List of included paths/files
-    pub included_files: Option<Matcher>,
+    pub included_files: Matcher,
 }
 
 impl Default for FormatSettings {
@@ -165,8 +178,8 @@ impl Default for FormatSettings {
             indent_width: Some(IndentWidth::default()),
             line_ending: Some(LineEnding::default()),
             line_width: Some(LineWidth::default()),
-            ignored_files: None,
-            included_files: None,
+            ignored_files: Matcher::empty(),
+            included_files: Matcher::empty(),
         }
     }
 }
@@ -195,10 +208,10 @@ pub struct LinterSettings {
     pub rules: Option<Rules>,
 
     /// List of ignored paths/files to match
-    pub ignored_files: Option<Matcher>,
+    pub ignored_files: Matcher,
 
     /// List of included paths/files to match
-    pub included_files: Option<Matcher>,
+    pub included_files: Matcher,
 }
 
 impl Default for LinterSettings {
@@ -206,8 +219,8 @@ impl Default for LinterSettings {
         Self {
             enabled: true,
             rules: Some(Rules::default()),
-            ignored_files: None,
-            included_files: None,
+            ignored_files: Matcher::empty(),
+            included_files: Matcher::empty(),
         }
     }
 }
@@ -229,18 +242,18 @@ pub struct OrganizeImportsSettings {
     pub enabled: bool,
 
     /// List of ignored paths/files to match
-    pub ignored_files: Option<Matcher>,
+    pub ignored_files: Matcher,
 
     /// List of ignored paths/files to match
-    pub included_files: Option<Matcher>,
+    pub included_files: Matcher,
 }
 
 impl Default for OrganizeImportsSettings {
     fn default() -> Self {
         Self {
             enabled: true,
-            ignored_files: None,
-            included_files: None,
+            ignored_files: Matcher::empty(),
+            included_files: Matcher::empty(),
         }
     }
 }
@@ -370,10 +383,10 @@ pub struct FilesSettings {
     pub max_size: NonZeroU64,
 
     /// List of paths/files to matcher
-    pub ignored_files: Option<Matcher>,
+    pub ignored_files: Matcher,
 
     /// List of paths/files to matcher
-    pub included_files: Option<Matcher>,
+    pub included_files: Matcher,
 
     /// Files not recognized by Biome should not emit a diagnostic
     pub ignore_unknown: bool,
@@ -388,24 +401,44 @@ impl Default for FilesSettings {
     fn default() -> Self {
         Self {
             max_size: DEFAULT_FILE_SIZE_LIMIT,
-            ignored_files: None,
-            included_files: None,
+            ignored_files: Matcher::empty(),
+            included_files: Matcher::empty(),
             ignore_unknown: false,
         }
     }
 }
 
-impl TryFrom<FilesConfiguration> for FilesSettings {
-    type Error = WorkspaceError;
+fn to_file_settings(
+    config: Option<FilesConfiguration>,
+    vcs_config_path: Option<PathBuf>,
+    gitignore_matches: &[String],
+) -> Result<Option<FilesSettings>, WorkspaceError> {
+    let config = if let Some(config) = config {
+        Some(config)
+    } else if vcs_config_path.is_some() {
+        Some(FilesConfiguration::default())
+    } else {
+        None
+    };
 
-    fn try_from(config: FilesConfiguration) -> Result<Self, Self::Error> {
-        Ok(Self {
+    Ok(if let Some(config) = config {
+        Some(FilesSettings {
             max_size: config.max_size.unwrap_or(DEFAULT_FILE_SIZE_LIMIT),
-            ignored_files: to_matcher(config.ignore.as_ref())?,
-            included_files: to_matcher(config.include.as_ref())?,
+            ignored_files: to_matcher(
+                config.ignore.as_ref(),
+                vcs_config_path.clone(),
+                gitignore_matches,
+            )?,
+            included_files: to_matcher(
+                config.include.as_ref(),
+                vcs_config_path,
+                gitignore_matches,
+            )?,
             ignore_unknown: config.ignore_unknown.unwrap_or_default(),
         })
-    }
+    } else {
+        None
+    })
 }
 
 /// Handle object holding a temporary lock on the workspace settings until
@@ -453,10 +486,8 @@ impl OverrideSettings {
     /// Checks whether at least one override excludes the provided `path`
     pub fn is_path_excluded(&self, path: &Path) -> Option<bool> {
         for pattern in &self.patterns {
-            if let Some(exclude) = pattern.exclude.as_ref() {
-                if exclude.matches_path(path) {
-                    return Some(true);
-                }
+            if !pattern.exclude.is_empty() && pattern.exclude.matches_path(path) {
+                return Some(true);
             }
         }
         None
@@ -464,10 +495,8 @@ impl OverrideSettings {
     /// Checks whether at least one override include the provided `path`
     pub fn is_path_included(&self, path: &Path) -> Option<bool> {
         for pattern in &self.patterns {
-            if let Some(include) = pattern.include.as_ref() {
-                if include.matches_path(path) {
-                    return Some(true);
-                }
+            if !pattern.include.is_empty() && pattern.include.matches_path(path) {
+                return Some(true);
             }
         }
         None
@@ -480,14 +509,14 @@ impl OverrideSettings {
         options: JsFormatOptions,
     ) -> JsFormatOptions {
         self.patterns.iter().fold(options, |mut options, pattern| {
-            let included = pattern.include.as_ref().map(|p| p.matches_path(path));
-            let excluded = pattern.exclude.as_ref().map(|p| p.matches_path(path));
+            let included = !pattern.include.is_empty() && pattern.include.matches_path(path);
+            let excluded = !pattern.exclude.is_empty() && pattern.exclude.matches_path(path);
 
-            if excluded == Some(true) {
+            if excluded == true {
                 return options;
             }
 
-            if included == Some(true) {
+            if included == true {
                 let js_formatter = &pattern.languages.javascript.formatter;
                 let formatter = &pattern.formatter;
 
@@ -538,12 +567,12 @@ impl OverrideSettings {
         options: JsonFormatOptions,
     ) -> JsonFormatOptions {
         self.patterns.iter().fold(options, |mut options, pattern| {
-            let included = pattern.include.as_ref().map(|p| p.matches_path(path));
-            let excluded = pattern.exclude.as_ref().map(|p| p.matches_path(path));
-            if excluded == Some(true) {
+            let included = !pattern.include.is_empty() && pattern.include.matches_path(path);
+            let excluded = !pattern.exclude.is_empty() && pattern.exclude.matches_path(path);
+            if excluded == true {
                 return options;
             }
-            if included == Some(true) {
+            if included == true {
                 let json_formatter = &pattern.languages.json.formatter;
 
                 if let Some(indent_style) = json_formatter
@@ -575,12 +604,12 @@ impl OverrideSettings {
         options: JsParserOptions,
     ) -> JsParserOptions {
         self.patterns.iter().fold(options, |mut options, pattern| {
-            let included = pattern.include.as_ref().map(|p| p.matches_path(path));
-            let excluded = pattern.exclude.as_ref().map(|p| p.matches_path(path));
-            if excluded == Some(true) {
+            let included = !pattern.include.is_empty() && pattern.include.matches_path(path);
+            let excluded = !pattern.exclude.is_empty() && pattern.exclude.matches_path(path);
+            if excluded == true {
                 return options;
             }
-            if included == Some(true) {
+            if included == true {
                 let js_parser = &pattern.languages.javascript.parser;
 
                 options.parse_class_parameter_decorators =
@@ -592,10 +621,10 @@ impl OverrideSettings {
 
     pub fn as_json_parser_options(&self, path: &Path) -> Option<JsonParserOptions> {
         for pattern in &self.patterns {
-            let included = pattern.include.as_ref().map(|p| p.matches_path(path));
-            let excluded = pattern.exclude.as_ref().map(|p| p.matches_path(path));
+            let included = !pattern.include.is_empty() && pattern.include.matches_path(path);
+            let excluded = !pattern.exclude.is_empty() && pattern.exclude.matches_path(path);
 
-            if included == Some(true) || excluded == Some(false) {
+            if included == true || excluded == false {
                 let json_parser = &pattern.languages.json.parser;
 
                 return Some(JsonParserOptions {
@@ -617,14 +646,13 @@ impl OverrideSettings {
         self.patterns
             .iter()
             .fold(analyzer_rules, |mut analyzer_rules, pattern| {
-                let included = pattern.include.as_ref().map(|p| p.matches_path(path));
-                let excluded = pattern.exclude.as_ref().map(|p| p.matches_path(path));
-
-                if included == Some(true) || excluded == Some(false) {
+                let excluded = !pattern.exclude.is_empty() && pattern.exclude.matches_path(path);
+                if !excluded && !pattern.include.is_empty() && pattern.include.matches_path(path) {
                     if let Some(rules) = pattern.linter.rules.as_ref() {
                         push_to_analyzer_rules(rules, metadata(), &mut analyzer_rules);
                     }
                 }
+
                 analyzer_rules
             })
     }
@@ -636,10 +664,8 @@ impl OverrideSettings {
         rules: IndexSet<RuleFilter<'a>>,
     ) -> IndexSet<RuleFilter> {
         self.patterns.iter().fold(rules, move |mut rules, pattern| {
-            let included = pattern.include.as_ref().map(|p| p.matches_path(path));
-            let excluded = pattern.exclude.as_ref().map(|p| p.matches_path(path));
-
-            if included == Some(true) || excluded == Some(false) {
+            let excluded = !pattern.exclude.is_empty() && pattern.exclude.matches_path(path);
+            if !excluded && !pattern.include.is_empty() && pattern.include.matches_path(path) {
                 if let Some(pattern_rules) = pattern.linter.rules.as_ref() {
                     let disabled_rules = pattern_rules.as_disabled_rules();
                     let enabled_rules = pattern_rules.as_enabled_rules();
@@ -654,10 +680,8 @@ impl OverrideSettings {
 
     pub fn override_as_rules(&self, path: &Path, rules: Rules) -> Rules {
         self.patterns.iter().fold(rules, |mut rules, pattern| {
-            let included = pattern.include.as_ref().map(|p| p.matches_path(path));
-            let excluded = pattern.exclude.as_ref().map(|p| p.matches_path(path));
-
-            if included == Some(true) || excluded == Some(false) {
+            let excluded = !pattern.exclude.is_empty() && pattern.exclude.matches_path(path);
+            if !excluded && !pattern.include.is_empty() && pattern.include.matches_path(path) {
                 let pattern_rules = pattern.linter.rules.as_ref();
                 if let Some(patter_rules) = pattern_rules {
                     rules.merge_with(patter_rules.clone())
@@ -671,13 +695,14 @@ impl OverrideSettings {
     /// Scans the overrides and checks if there's an override that disable the formatter for `path`
     pub fn formatter_disabled(&self, path: &Path) -> Option<bool> {
         for pattern in &self.patterns {
-            let included = pattern.include.as_ref().map(|p| p.matches_path(path));
-            let excluded = pattern.exclude.as_ref().map(|p| p.matches_path(path));
-
-            if included == Some(true) || excluded == Some(false) {
+            if !pattern.exclude.is_empty() && pattern.exclude.matches_path(path) {
+                continue;
+            }
+            if !pattern.include.is_empty() && pattern.include.matches_path(path) {
                 if let Some(enabled) = pattern.formatter.enabled {
-                    return Some(!enabled);
+                    return Some(enabled == false);
                 }
+                continue;
             }
         }
         None
@@ -686,13 +711,14 @@ impl OverrideSettings {
     /// Scans the overrides and checks if there's an override that disable the linter for `path`
     pub fn linter_disabled(&self, path: &Path) -> Option<bool> {
         for pattern in &self.patterns {
-            let included = pattern.include.as_ref().map(|p| p.matches_path(path));
-            let excluded = pattern.exclude.as_ref().map(|p| p.matches_path(path));
-
-            if included == Some(true) || excluded == Some(false) {
+            if !pattern.exclude.is_empty() && pattern.exclude.matches_path(path) {
+                continue;
+            }
+            if !pattern.include.is_empty() && pattern.include.matches_path(path) {
                 if let Some(enabled) = pattern.linter.enabled {
-                    return Some(!enabled);
+                    return Some(enabled == false);
                 }
+                continue;
             }
         }
         None
@@ -701,13 +727,14 @@ impl OverrideSettings {
     /// Scans the overrides and checks if there's an override that disable the organize imports for `path`
     pub fn organize_imports_disabled(&self, path: &Path) -> Option<bool> {
         for pattern in &self.patterns {
-            let included = pattern.include.as_ref().map(|p| p.matches_path(path));
-            let excluded = pattern.exclude.as_ref().map(|p| p.matches_path(path));
-
-            if included == Some(true) || excluded == Some(false) {
+            if !pattern.exclude.is_empty() && pattern.exclude.matches_path(path) {
+                continue;
+            }
+            if !pattern.include.is_empty() && pattern.include.matches_path(path) {
                 if let Some(enabled) = pattern.organize_imports.enabled {
-                    return Some(!enabled);
+                    return Some(enabled == false);
                 }
+                continue;
             }
         }
         None
@@ -715,8 +742,8 @@ impl OverrideSettings {
 }
 #[derive(Debug)]
 pub struct OverrideSettingPattern {
-    pub exclude: Option<Matcher>,
-    pub include: Option<Matcher>,
+    pub exclude: Matcher,
+    pub include: Matcher,
     /// Formatter settings applied to all files in the workspaces
     pub formatter: OverrideFormatSettings,
     /// Linter settings applied to all files in the workspace
@@ -732,9 +759,13 @@ pub struct OverrideSettingPattern {
 /// ## Errors
 ///
 /// It can raise an error if the patterns aren't valid
-pub fn to_matcher(string_set: Option<&StringSet>) -> Result<Option<Matcher>, WorkspaceError> {
+pub fn to_matcher(
+    string_set: Option<&StringSet>,
+    vcs_path: Option<PathBuf>,
+    git_ignore_matches: &[String],
+) -> Result<Matcher, WorkspaceError> {
+    let mut builder = GlobSetBuilder::new();
     if let Some(string_set) = string_set {
-        let mut builder = GlobSetBuilder::new();
         for pattern in string_set.iter() {
             builder.add(Glob::new(pattern).map_err(|err| {
                 WorkspaceError::Configuration(ConfigurationDiagnostic::new_invalid_ignore_pattern(
@@ -743,14 +774,18 @@ pub fn to_matcher(string_set: Option<&StringSet>) -> Result<Option<Matcher>, Wor
                 ))
             })?);
         }
-        Ok(Some(Matcher::new(builder.build().map_err(|err| {
-            WorkspaceError::Configuration(ConfigurationDiagnostic::InvalidIgnorePattern(
-                InvalidIgnorePattern {
-                    message: err.to_string(),
-                },
-            ))
-        })?)))
-    } else {
-        Ok(None)
     }
+    let mut matcher = Matcher::new(builder.build().map_err(|err| {
+        WorkspaceError::Configuration(ConfigurationDiagnostic::InvalidIgnorePattern(
+            InvalidIgnorePattern {
+                message: err.to_string(),
+            },
+        ))
+    })?);
+
+    if let Some(vcs_path) = vcs_path {
+        matcher.add_gitignore_matches(vcs_path, git_ignore_matches)?;
+    }
+
+    Ok(matcher)
 }

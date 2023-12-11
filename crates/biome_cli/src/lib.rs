@@ -13,7 +13,6 @@ use std::env;
 
 mod cli_options;
 mod commands;
-mod configuration;
 mod diagnostics;
 mod execute;
 mod logging;

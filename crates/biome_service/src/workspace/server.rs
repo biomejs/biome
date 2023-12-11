@@ -222,25 +222,13 @@ impl WorkspaceServer {
     fn is_ignored_by_top_level_config(&self, path: &Path) -> bool {
         let settings = self.settings();
 
-        let is_ignored_by_file_config = settings
-            .as_ref()
-            .files
-            .ignored_files
-            .as_ref()
-            .map(|matcher| matcher.matches_path(path));
-        let is_included_by_file_config = settings
-            .as_ref()
-            .files
-            .included_files
-            .as_ref()
-            .map(|matcher| matcher.matches_path(path));
-        if let Some(ignored) = is_ignored_by_file_config {
-            ignored
-        } else if let Some(included) = is_included_by_file_config {
-            !included
-        } else {
-            false
+        if !settings.as_ref().files.ignored_files.is_empty() {
+            return settings.as_ref().files.ignored_files.matches_path(path);
+        } else if !settings.as_ref().files.included_files.is_empty() {
+            return !settings.as_ref().files.included_files.matches_path(path);
         }
+
+        false
     }
 }
 
@@ -280,6 +268,7 @@ impl Workspace for WorkspaceServer {
                         file_features.ignored(feature);
                     }
                 }
+                dbg!(params.path, &file_features);
 
                 Ok(entry.insert(file_features).clone())
             }
@@ -306,54 +295,36 @@ impl Workspace for WorkspaceServer {
             }
         }
 
-        Ok(match params.feature {
+        let (ignored_files, included_files) = match params.feature {
             FeatureName::Format => {
-                if let Some(matcher) = settings.as_ref().formatter.ignored_files.as_ref() {
-                    let ignored = matcher.matches_path(path);
-                    if ignored {
-                        return Ok(ignored);
-                    }
-                } else if let Some(matcher) = settings.as_ref().formatter.included_files.as_ref() {
-                    let included = matcher.matches_path(path);
-                    if included {
-                        return Ok(!included);
-                    }
-                }
-                self.is_ignored_by_top_level_config(path)
+                let formatter = &settings.as_ref().formatter;
+
+                (&formatter.ignored_files, &formatter.included_files)
             }
             FeatureName::Lint => {
-                if let Some(matcher) = settings.as_ref().linter.ignored_files.as_ref() {
-                    let ignored = matcher.matches_path(path);
-                    if ignored {
-                        return Ok(ignored);
-                    }
-                } else if let Some(matcher) = settings.as_ref().linter.included_files.as_ref() {
-                    let included = matcher.matches_path(path);
-                    if included {
-                        return Ok(!included);
-                    }
-                }
-
-                self.is_ignored_by_top_level_config(path)
+                let linter = &settings.as_ref().linter;
+                (&linter.ignored_files, &linter.included_files)
             }
             FeatureName::OrganizeImports => {
-                if let Some(matcher) = settings.as_ref().organize_imports.ignored_files.as_ref() {
-                    let ignored = matcher.matches_path(path);
-                    if ignored {
-                        return Ok(ignored);
-                    }
-                } else if let Some(matcher) =
-                    settings.as_ref().organize_imports.included_files.as_ref()
-                {
-                    let included = matcher.matches_path(path);
-                    if included {
-                        return Ok(!included);
-                    }
-                }
-
-                self.is_ignored_by_top_level_config(path)
+                let organize_imports = &settings.as_ref().organize_imports;
+                (
+                    &organize_imports.ignored_files,
+                    &organize_imports.included_files,
+                )
             }
-        })
+        };
+
+        if !ignored_files.is_empty() {
+            if ignored_files.matches_path(path) == true {
+                return Ok(true);
+            }
+        } else if !included_files.is_empty() == true {
+            if included_files.matches_path(path) == true {
+                return Ok(false);
+            }
+        }
+
+        Ok(self.is_ignored_by_top_level_config(path))
     }
 
     /// Update the global settings for this workspace
@@ -364,7 +335,13 @@ impl Workspace for WorkspaceServer {
     #[tracing::instrument(level = "debug", skip(self))]
     fn update_settings(&self, params: UpdateSettingsParams) -> Result<(), WorkspaceError> {
         let mut settings = self.settings.write().unwrap();
-        settings.merge_with_configuration(params.configuration)?;
+
+        settings.merge_with_configuration(
+            params.configuration,
+            params.vcs_base_path,
+            params.gitignore_matches.as_slice(),
+        )?;
+
         // settings changed, hence everything that is computed from the settings needs to be purged
         self.file_features.clear();
         Ok(())

@@ -6,12 +6,14 @@ use crate::utils;
 use anyhow::Result;
 use biome_analyze::RuleCategories;
 use biome_console::markup;
+use biome_diagnostics::PrintDescription;
 use biome_fs::{FileSystem, OsFileSystem, RomePath};
+use biome_service::configuration::{load_configuration, LoadedConfiguration};
 use biome_service::workspace::{
     FeatureName, FeaturesBuilder, PullDiagnosticsParams, SupportsFeatureParams,
 };
 use biome_service::workspace::{RageEntry, RageParams, RageResult, UpdateSettingsParams};
-use biome_service::{load_config, ConfigurationBasePath, Workspace};
+use biome_service::{ConfigurationBasePath, Workspace};
 use biome_service::{DynRef, WorkspaceError};
 use futures::stream::futures_unordered::FuturesUnordered;
 use futures::StreamExt;
@@ -25,10 +27,10 @@ use std::sync::RwLock;
 use tokio::sync::Notify;
 use tokio::sync::OnceCell;
 use tower_lsp::lsp_types;
-use tower_lsp::lsp_types::Registration;
 use tower_lsp::lsp_types::Unregistration;
 use tower_lsp::lsp_types::Url;
-use tracing::{error, info, warn};
+use tower_lsp::lsp_types::{MessageType, Registration};
+use tracing::{debug, error, info};
 
 pub(crate) struct ClientInformation {
     /// The name of the client
@@ -387,7 +389,7 @@ impl Session {
         }
     }
 
-    /// Returns a reference to the client informations for this session
+    /// Returns a reference to the client information for this session
     pub(crate) fn client_information(&self) -> Option<&ClientInformation> {
         self.initialize_params.get()?.client_information.as_ref()
     }
@@ -405,33 +407,56 @@ impl Session {
             }
         };
 
-        let status = match load_config(&self.fs, base_path) {
-            Ok(Some(payload)) => {
-                let (configuration, diagnostics) = payload.deserialized.consume();
-                let configuration = configuration.unwrap_or_default();
-                if !diagnostics.is_empty() {
-                    warn!("The deserialization of the configuration resulted in errors. Biome will use its defaults where possible.");
-                }
-
-                info!("Loaded workspace settings: {configuration:#?}");
-
-                let result = self
-                    .workspace
-                    .update_settings(UpdateSettingsParams { configuration });
-
-                if let Err(error) = result {
-                    error!("Failed to set workspace settings: {}", error);
+        let status = match load_configuration(&self.fs, base_path) {
+            Ok(loaded_configuration) => {
+                if loaded_configuration.has_errors() {
+                    error!("Couldn't load the configuration file, reasons:",);
+                    for (diagnostic, _) in loaded_configuration.as_diagnostics_iter() {
+                        let message = PrintDescription(diagnostic).to_string();
+                        self.client.log_message(MessageType::ERROR, message).await;
+                    }
                     ConfigurationStatus::Error
                 } else {
-                    ConfigurationStatus::Loaded
+                    let LoadedConfiguration {
+                        configuration,
+                        directory_path: configuration_path,
+                        ..
+                    } = loaded_configuration;
+                    info!("Loaded workspace setting");
+                    debug!("{configuration:#?}");
+                    let fs = &self.fs;
+
+                    let result = configuration.retrieve_gitignore_matches(
+                        fs,
+                        configuration_path.as_ref().map(|path| path.as_path()),
+                    );
+
+                    match result {
+                        Ok(gitignore_matches) => {
+                            let vcs_base_path = configuration_path.or(self.fs.working_directory());
+                            let result = self.workspace.update_settings(UpdateSettingsParams {
+                                configuration,
+                                vcs_base_path,
+                                gitignore_matches,
+                            });
+
+                            if let Err(error) = result {
+                                error!("Failed to set workspace settings: {}", error);
+                                ConfigurationStatus::Error
+                            } else {
+                                ConfigurationStatus::Loaded
+                            }
+                        }
+                        Err(err) => {
+                            error!("Couldn't load the configuration file, reason:\n {}", err);
+                            ConfigurationStatus::Error
+                        }
+                    }
                 }
             }
-            Ok(None) => {
-                // Ignore, load_config already logs an error in this case
-                ConfigurationStatus::Missing
-            }
+
             Err(err) => {
-                error!("Couldn't load the workspace settings, reason:\n {}", err);
+                error!("Couldn't load the configuration file, reason:\n {}", err);
                 ConfigurationStatus::Error
             }
         };

@@ -736,6 +736,7 @@ dependencies = [
  "bpaf",
  "dashmap",
  "globset",
+ "ignore",
  "indexmap",
  "insta",
  "lazy_static",

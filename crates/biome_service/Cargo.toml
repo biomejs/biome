@@ -38,6 +38,7 @@ biome_text_edit      = { workspace = true }
 bpaf                 = { workspace = true }
 dashmap              = { workspace = true }
 globset              = "0.4.14"
+ignore               = { workspace = true }
 indexmap             = { workspace = true, features = ["serde"] }
 lazy_static          = { workspace = true }
 rustc-hash           = { workspace = true }

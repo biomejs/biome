@@ -1,8 +1,8 @@
 use crate::cli_options::CliOptions;
-use crate::configuration::{load_configuration, LoadedConfiguration};
+use crate::commands::validate_configuration_diagnostics;
 use crate::diagnostics::DeprecatedArgument;
 use crate::execute::ReportMode;
-use crate::vcs::store_path_to_ignore_from_vcs;
+use crate::vcs::retrieve_gitignore_matches;
 use crate::{
     execute_mode, setup_cli_subscriber, CliDiagnostic, CliSession, Execution, TraversalMode,
 };
@@ -10,9 +10,11 @@ use biome_console::{markup, ConsoleExt};
 use biome_diagnostics::PrintDiagnostic;
 use biome_service::configuration::json::JsonFormatter;
 use biome_service::configuration::vcs::VcsConfiguration;
-use biome_service::configuration::{FilesConfiguration, FormatterConfiguration};
+use biome_service::configuration::{
+    load_configuration, FilesConfiguration, FormatterConfiguration, LoadedConfiguration,
+};
 use biome_service::workspace::UpdateSettingsParams;
-use biome_service::{JavascriptFormatter, MergeWith};
+use biome_service::{ConfigurationBasePath, JavascriptFormatter, MergeWith};
 use std::ffi::OsString;
 use std::path::PathBuf;
 
@@ -46,10 +48,17 @@ pub(crate) fn format(
     } = payload;
     setup_cli_subscriber(cli_options.log_level.clone(), cli_options.log_kind.clone());
 
-    let loaded_configuration = load_configuration(&mut session, &cli_options)?.with_file_path();
+    let base_path = match cli_options.config_path.as_ref() {
+        None => ConfigurationBasePath::default(),
+        Some(path) => ConfigurationBasePath::FromUser(PathBuf::from(path)),
+    };
 
-    loaded_configuration.check_for_errors(session.app.console, cli_options.verbose)?;
-
+    let loaded_configuration = load_configuration(&session.app.fs, base_path)?;
+    validate_configuration_diagnostics(
+        &loaded_configuration,
+        session.app.console,
+        cli_options.verbose,
+    )?;
     let LoadedConfiguration {
         mut configuration,
         directory_path: configuration_path,
@@ -103,16 +112,17 @@ pub(crate) fn format(
 
     // check if support of git ignore files is enabled
     let vcs_base_path = configuration_path.or(session.app.fs.working_directory());
-    store_path_to_ignore_from_vcs(
-        &mut session,
-        &mut configuration,
-        vcs_base_path,
-        &cli_options,
-    )?;
+    let (vcs_base_path, gitignore_matches) =
+        retrieve_gitignore_matches(&session.app.fs, &configuration, vcs_base_path.clone())?;
+
     session
         .app
         .workspace
-        .update_settings(UpdateSettingsParams { configuration })?;
+        .update_settings(UpdateSettingsParams {
+            configuration,
+            vcs_base_path,
+            gitignore_matches,
+        })?;
 
     let stdin = if let Some(stdin_file_path) = stdin_file_path {
         let console = &mut session.app.console;

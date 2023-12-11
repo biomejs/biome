@@ -1,14 +1,17 @@
 use crate::cli_options::{cli_options, CliOptions, ColorsArg};
+use crate::diagnostics::DeprecatedConfigurationFile;
 use crate::logging::LoggingKind;
-use crate::{LoggingLevel, VERSION};
+use crate::{CliDiagnostic, LoggingLevel, VERSION};
+use biome_console::{markup, Console, ConsoleExt};
+use biome_diagnostics::PrintDiagnostic;
 use biome_service::configuration::json::JsonFormatter;
 use biome_service::configuration::vcs::VcsConfiguration;
 use biome_service::configuration::{
     configuration, files_configuration, formatter_configuration, javascript::javascript_formatter,
     json::json_formatter, linter_configuration, vcs::vcs_configuration, FilesConfiguration,
-    FormatterConfiguration, JavascriptFormatter, LinterConfiguration,
+    FormatterConfiguration, JavascriptFormatter, LinterConfiguration, LoadedConfiguration,
 };
-use biome_service::Configuration;
+use biome_service::{Configuration, ConfigurationDiagnostic, WorkspaceError};
 use bpaf::Bpaf;
 use std::ffi::OsString;
 use std::path::PathBuf;
@@ -310,4 +313,42 @@ impl BiomeCommand {
             | BiomeCommand::PrintSocket => LoggingKind::default(),
         }
     }
+}
+
+/// It accepts a [LoadedConfiguration] and it prints the diagnostics emitted during parsing and deserialization.
+///
+/// If it contains errors, it return an error.
+pub(crate) fn validate_configuration_diagnostics(
+    loaded_configuration: &LoadedConfiguration,
+    console: &mut dyn Console,
+    verbose: bool,
+) -> Result<(), CliDiagnostic> {
+    if let Some(file_path) = loaded_configuration
+        .file_path
+        .as_ref()
+        .and_then(|f| f.file_name())
+        .and_then(|f| f.to_str())
+    {
+        if file_path == "rome.json" {
+            let diagnostic = DeprecatedConfigurationFile::new(file_path);
+            console.error(markup!{
+                {if verbose { PrintDiagnostic::verbose(&diagnostic) } else { PrintDiagnostic::simple(&diagnostic) }}
+            });
+        }
+    }
+    let diagnostics = loaded_configuration.as_diagnostics_iter();
+    for (diagnostic, path) in diagnostics {
+        console.error(markup!{
+            {if verbose { PrintDiagnostic::verbose(diagnostic) } else { PrintDiagnostic::simple(diagnostic) }}
+        });
+    }
+    if loaded_configuration.has_errors() {
+        return Err(CliDiagnostic::workspace_error(
+            WorkspaceError::Configuration(ConfigurationDiagnostic::invalid_configuration(
+                "Biome exited because the configuration resulted in errors. Please fix them.",
+            )),
+        ));
+    }
+
+    Ok(())
 }

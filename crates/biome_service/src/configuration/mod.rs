@@ -14,6 +14,7 @@ mod overrides;
 mod parse;
 pub mod vcs;
 
+use crate::configuration::diagnostics::CantLoadExtendFile;
 pub use crate::configuration::diagnostics::ConfigurationDiagnostic;
 pub(crate) use crate::configuration::generated::push_to_analyzer_rules;
 use crate::configuration::json::JsonFormatter;
@@ -21,11 +22,14 @@ pub use crate::configuration::merge::MergeWith;
 use crate::configuration::organize_imports::{organize_imports, OrganizeImports};
 use crate::configuration::overrides::Overrides;
 use crate::configuration::vcs::{vcs_configuration, VcsConfiguration};
+use crate::diagnostics::{DisabledVcs, VcsDiagnostic};
 use crate::settings::WorkspaceSettings;
 use crate::{DynRef, WorkspaceError, VERSION};
 use biome_analyze::AnalyzerRules;
+use biome_console::markup;
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize::{Deserialized, StringSet};
+use biome_diagnostics::{DiagnosticExt, Error, Severity};
 use biome_fs::{AutoSearchResult, FileSystem, OpenOptions};
 use biome_js_analyze::metadata;
 use biome_json_formatter::context::JsonFormatOptions;
@@ -38,9 +42,11 @@ pub use formatter::{
 pub use javascript::{javascript_configuration, JavascriptConfiguration, JavascriptFormatter};
 pub use json::{json_configuration, JsonConfiguration};
 pub use linter::{linter_configuration, LinterConfiguration, RuleConfiguration, Rules};
+pub use overrides::to_override_settings;
 use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
 use std::io::ErrorKind;
+use std::iter::FusedIterator;
 use std::num::NonZeroU64;
 use std::path::{Path, PathBuf};
 
@@ -121,33 +127,6 @@ impl Default for Configuration {
     }
 }
 
-impl Configuration {
-    pub fn is_formatter_disabled(&self) -> bool {
-        self.formatter
-            .as_ref()
-            .map(|f| f.is_disabled())
-            .unwrap_or(false)
-    }
-
-    pub fn is_linter_disabled(&self) -> bool {
-        self.linter
-            .as_ref()
-            .map(|f| f.is_disabled())
-            .unwrap_or(false)
-    }
-
-    pub fn is_organize_imports_disabled(&self) -> bool {
-        self.organize_imports
-            .as_ref()
-            .map(|f| f.is_disabled())
-            .unwrap_or(false)
-    }
-
-    pub fn is_vcs_disabled(&self) -> bool {
-        self.vcs.as_ref().map(|f| f.is_disabled()).unwrap_or(true)
-    }
-}
-
 impl MergeWith<Configuration> for Configuration {
     fn merge_with(&mut self, other_configuration: Configuration) {
         // files
@@ -184,6 +163,70 @@ impl MergeWith<Configuration> for Configuration {
         self.merge_with_if_not_default(other_configuration.vcs);
         // overrides
         self.merge_with_if_not_default(other_configuration.overrides);
+    }
+}
+
+impl Configuration {
+    pub fn is_formatter_disabled(&self) -> bool {
+        self.formatter
+            .as_ref()
+            .map(|f| f.is_disabled())
+            .unwrap_or(false)
+    }
+
+    pub fn is_linter_disabled(&self) -> bool {
+        self.linter
+            .as_ref()
+            .map(|f| f.is_disabled())
+            .unwrap_or(false)
+    }
+
+    pub fn is_organize_imports_disabled(&self) -> bool {
+        self.organize_imports
+            .as_ref()
+            .map(|f| f.is_disabled())
+            .unwrap_or(false)
+    }
+
+    pub fn is_vcs_disabled(&self) -> bool {
+        self.vcs.as_ref().map(|f| f.is_disabled()).unwrap_or(true)
+    }
+
+    pub fn retrieve_gitignore_matches(
+        &self,
+        file_system: &DynRef<'_, dyn FileSystem>,
+        vcs_base_path: Option<&Path>,
+    ) -> Result<Vec<String>, WorkspaceError> {
+        let Some(vcs) = &self.vcs else {
+            return Ok(vec![]);
+        };
+        if vcs.is_enabled() {
+            let vcs_base_path = match (vcs_base_path, &vcs.root) {
+                (Some(vcs_base_path), Some(root)) => vcs_base_path.join(root),
+                (None, Some(root)) => PathBuf::from(root),
+                (Some(vcs_base_path), None) => PathBuf::from(vcs_base_path),
+                (None, None) => {
+                    return Err(VcsDiagnostic::DisabledVcs(DisabledVcs {}).into());
+                }
+            };
+
+            if let Some(client_kind) = &vcs.client_kind {
+                if !vcs.ignore_file_disabled() {
+                    let result = file_system
+                        .auto_search(vcs_base_path, client_kind.ignore_file(), false)
+                        .map_err(WorkspaceError::from)?;
+
+                    if let Some(result) = result {
+                        return Ok(result
+                            .content
+                            .lines()
+                            .map(String::from)
+                            .collect::<Vec<String>>());
+                    }
+                }
+            }
+        }
+        Ok(vec![])
     }
 }
 
@@ -439,6 +482,17 @@ impl ConfigurationBasePath {
     }
 }
 
+/// Load the configuration for this session of the CLI, merging the content of
+/// the `biome.json` file if it exists on disk with common command line options
+pub fn load_configuration(
+    fs: &DynRef<'_, dyn FileSystem>,
+    config_path: ConfigurationBasePath,
+) -> Result<LoadedConfiguration, WorkspaceError> {
+    let config = load_config(fs, config_path)?;
+    let loaded_configuration = LoadedConfiguration::from(config);
+    Ok(loaded_configuration.apply_extends(fs)?)
+}
+
 /// Load the configuration from the file system.
 ///
 /// The configuration file will be read from the `file_system`. A [base path](ConfigurationBasePath) should be provided.
@@ -448,8 +502,8 @@ impl ConfigurationBasePath {
 ///
 /// If a the configuration base path was provided by the user, the function will error. If not, Biome will use
 /// its defaults.
-pub fn load_config(
-    file_system: &DynRef<dyn FileSystem>,
+fn load_config(
+    file_system: &DynRef<'_, dyn FileSystem>,
     base_path: ConfigurationBasePath,
 ) -> LoadConfig {
     let config_name = file_system.config_name();
@@ -569,4 +623,190 @@ pub fn to_analyzer_rules(settings: &WorkspaceSettings, path: &Path) -> AnalyzerR
     }
 
     overrides.override_analyzer_rules(path, analyzer_rules)
+}
+
+#[derive(Default, Debug)]
+pub struct LoadedConfiguration {
+    pub directory_path: Option<PathBuf>,
+    pub file_path: Option<PathBuf>,
+    pub configuration: Configuration,
+    pub diagnostics: Vec<Error>,
+}
+
+impl LoadedConfiguration {
+    /// Consumes itself to generate a new [LoadedConfiguration] where the new `configuration`
+    /// is the result of its `extends` fields applied from left to right, and the last one element
+    /// applied is itself.
+    ///
+    /// If a configuration can't be resolved from the file system, the operation will fail.
+    pub fn apply_extends(
+        mut self,
+        fs: &DynRef<'_, dyn FileSystem>,
+    ) -> Result<Self, WorkspaceError> {
+        let deserialized = self.deserialize_extends(fs)?;
+        let (configurations, errors): (Vec<_>, Vec<_>) = deserialized
+            .into_iter()
+            .map(|d| d.consume())
+            .map(|(config, diagnostics)| (config.unwrap_or_default(), diagnostics))
+            .unzip();
+
+        let extended_configuration = configurations.into_iter().reduce(
+            |mut previous_configuration, current_configuration| {
+                previous_configuration.merge_with(current_configuration);
+                previous_configuration
+            },
+        );
+        let configuration = if let Some(mut extended_configuration) = extended_configuration {
+            // Here we want to keep only the values that aren't a default
+            extended_configuration.merge_with_if_not_default(self.configuration);
+            extended_configuration
+        } else {
+            self.configuration
+        };
+        self.diagnostics.extend(
+            errors
+                .into_iter()
+                .flatten()
+                .map(|diagnostic| {
+                    diagnostic.with_file_path(
+                        self.file_path
+                            .as_ref()
+                            .map(|path| path.display().to_string()),
+                    )
+                })
+                .collect::<Vec<_>>(),
+        );
+
+        Ok(Self {
+            configuration,
+            diagnostics: self.diagnostics,
+            file_path: self.file_path,
+            directory_path: self.directory_path,
+        })
+    }
+
+    fn deserialize_extends(
+        &mut self,
+        fs: &DynRef<'_, dyn FileSystem>,
+    ) -> Result<Vec<Deserialized<Configuration>>, WorkspaceError> {
+        let Some(extends) = &self.configuration.extends else {
+            return Ok(vec![]);
+        };
+
+        let directory_path = self
+            .directory_path
+            .as_ref()
+            .cloned()
+            .unwrap_or(fs.working_directory().unwrap_or(PathBuf::from("./")));
+        let mut deserialized_configurations = vec![];
+        for path in extends.iter() {
+            let config_path = directory_path.join(path);
+            let mut file = fs
+                .open_with_options(config_path.as_path(), OpenOptions::default().read(true))
+                .map_err(|err| {
+                    CantLoadExtendFile::new(config_path.display().to_string(), err.to_string()).with_verbose_advice(
+                        markup!{
+								"Biome tried to load the configuration file "<Emphasis>{directory_path.display().to_string()}</Emphasis>" using "<Emphasis>{config_path.display().to_string()}</Emphasis>" as base path."
+							}
+                    )
+                })?;
+            let mut content = String::new();
+            file.read_to_string(&mut content).map_err(|err| {
+                CantLoadExtendFile::new(config_path.display().to_string(), err.to_string()).with_verbose_advice(
+                    markup!{
+							"It's possible that the file was created with a different user/group. Make sure you have the rights to read the file."
+						}
+                )
+
+            })?;
+            let deserialized = deserialize_from_json_str::<Configuration>(
+                content.as_str(),
+                JsonParserOptions::default(),
+            );
+            deserialized_configurations.push(deserialized)
+        }
+        Ok(deserialized_configurations)
+    }
+
+    /// Return the path of the **directory** where the configuration is
+    pub fn directory_path(&self) -> Option<&Path> {
+        self.directory_path.as_ref().map(|path| path.as_path())
+    }
+
+    /// Return the path of the **file** where the configuration is
+    pub fn file_path(&self) -> Option<&Path> {
+        self.file_path.as_ref().map(|path| path.as_path())
+    }
+
+    pub fn has_errors(&self) -> bool {
+        self.diagnostics
+            .iter()
+            .any(|diagnostic| diagnostic.severity() >= Severity::Error)
+    }
+
+    /// It extracts diagnostics emitted during the resolution of the configuration file
+    pub fn as_diagnostics_iter(&self) -> ConfigurationDiagnosticsIter {
+        ConfigurationDiagnosticsIter::new(self.file_path.as_ref(), self.diagnostics.as_slice())
+    }
+}
+
+pub struct ConfigurationDiagnosticsIter<'a> {
+    path: Option<&'a PathBuf>,
+    errors: &'a [Error],
+    len: usize,
+    index: usize,
+}
+
+impl<'a> ConfigurationDiagnosticsIter<'a> {
+    fn new(path: Option<&'a PathBuf>, errors: &'a [Error]) -> Self {
+        Self {
+            len: errors.len(),
+            index: 0,
+            errors,
+            path,
+        }
+    }
+}
+
+impl<'a> Iterator for ConfigurationDiagnosticsIter<'a> {
+    type Item = (&'a Error, Option<&'a PathBuf>);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.len == self.index {
+            return None;
+        }
+
+        let item = (self.errors.get(self.index).unwrap(), self.path);
+
+        self.index += 1;
+        return Some(item);
+    }
+}
+
+impl FusedIterator for ConfigurationDiagnosticsIter<'_> {}
+
+impl From<Option<ConfigurationPayload>> for LoadedConfiguration {
+    fn from(value: Option<ConfigurationPayload>) -> Self {
+        if let Some(value) = value {
+            let ConfigurationPayload {
+                configuration_directory_path,
+                configuration_file_path,
+                deserialized,
+            } = value;
+            let (configuration, diagnostics) = deserialized.consume();
+            LoadedConfiguration {
+                configuration: configuration.unwrap_or_default(),
+                diagnostics: diagnostics
+                    .into_iter()
+                    .map(|diagnostic| {
+                        diagnostic.with_file_path(configuration_file_path.display().to_string())
+                    })
+                    .collect(),
+                directory_path: Some(configuration_directory_path),
+                file_path: Some(configuration_file_path),
+            }
+        } else {
+            LoadedConfiguration::default()
+        }
+    }
 }

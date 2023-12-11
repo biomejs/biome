@@ -63,7 +63,7 @@ use biome_js_syntax::{TextRange, TextSize};
 use biome_text_edit::TextEdit;
 use std::collections::HashMap;
 use std::ffi::OsStr;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::{borrow::Cow, panic::RefUnwindSafe, sync::Arc};
 use tracing::debug;
 
@@ -306,6 +306,8 @@ impl FeaturesBuilder {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct UpdateSettingsParams {
     pub configuration: Configuration,
+    pub vcs_base_path: Option<PathBuf>,
+    pub gitignore_matches: Vec<String>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
