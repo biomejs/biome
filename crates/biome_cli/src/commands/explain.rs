@@ -4,24 +4,27 @@ use biome_service::explanations::Explanations;
 use crate::{CliDiagnostic, CliSession};
 
 #[allow(dead_code)]
-fn print_rule(rule: &RuleMetadata) {
-    println!("# {} v{}", rule.name, rule.version);
+fn print_rule(metadata: &RuleMetadata) {
+    println!("# {}", metadata.name);
+    println!();
 
-    if let Some(deprecated) = rule.deprecated {
-        println!("Deprecated: {}", deprecated);
-    }
-
-    if rule.recommended {
-        println!("Recommended: Yes");
+    print!("This rule is ");
+    if metadata.recommended {
+        println!("recommended.");
     } else {
-        println!("Recommended: No");
+        println!("not recommended.");
     }
+    println!();
 
-    if let Some(fix_kind) = &rule.fix_kind {
-        println!("Fix: {}", fix_kind.to_string());
+    if let Some(fix) = &metadata.fix_kind {
+        println!("Fix is {}.", fix.to_string());
+    } else {
+        println!("No fix available.")
     }
+    println!();
 
-    println!("{}", rule.docs);
+    println!("# Description");
+    println!("{}", metadata.docs);
 }
 
 #[allow(dead_code)]

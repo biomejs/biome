@@ -60,21 +60,15 @@ pub(crate) fn generate_explanations(mode: Mode) -> Result<()> {
 
     let rule_match_arms = visitor.rules.values().map(generate_rule_match_arm);
 
-    let nl = Punct::new('\n', Spacing::Alone);
-
     let rules = quote! {
         use biome_analyze::{RuleMetadata, FixKind};
-        #nl #nl
+
         pub(super) fn get_rule_metadata(s: &str) -> Option<RuleMetadata> {
             match s {
                 #( #rule_match_arms ),*,
                 _ => None,
             }
         }
-
-
-
-
     };
 
     update(
@@ -89,7 +83,8 @@ pub(crate) fn generate_explanations(mode: Mode) -> Result<()> {
 fn generate_rule_match_arm(metadata: &RuleMetadata) -> TokenStream {
     let name = Literal::string(metadata.name);
     let name_ident = Ident::new(metadata.name, Span::call_site());
-    let docs = Literal::string(metadata.docs);
+
+    let docs = Literal::string(&format_docs(metadata.docs));
     let version = Literal::string(metadata.version);
     let recommended = Ident::new(&metadata.recommended.to_string(), Span::call_site());
 
@@ -109,10 +104,8 @@ fn generate_rule_match_arm(metadata: &RuleMetadata) -> TokenStream {
         None => quote! {None},
     };
 
-    let nl = Punct::new('\n', Spacing::Alone);
-
     quote! {
-        #name => Some(RuleMetadata{ #nl
+        #name => Some(RuleMetadata{
             name: #name,
             version: #version,
             fix_kind: #fix_kind,
@@ -121,4 +114,11 @@ fn generate_rule_match_arm(metadata: &RuleMetadata) -> TokenStream {
             docs: #docs,
         })
     }
+}
+
+fn format_docs(docs: &str) -> String {
+    docs.lines()
+        .map(|line| line.trim_start())
+        .collect::<Vec<&str>>()
+        .join("\n")
 }
