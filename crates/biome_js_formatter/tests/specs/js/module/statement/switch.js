@@ -33,3 +33,20 @@ switch (key) {
 	}
 	break;
 }
+
+
+switch (key) {
+	default: {
+		const a = 1;
+		break;
+	}
+}
+
+switch (key) {
+	// The block is not the only statement in the case body,
+	// so it doesn't hug the same line as the case here.
+	default: {
+		const a = 1;
+	}
+	break;
+}
