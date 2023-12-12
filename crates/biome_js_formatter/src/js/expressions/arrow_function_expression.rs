@@ -539,30 +539,40 @@ impl Format<JsFormatContext> for ArrowChain {
                     // rest of the arrows in the chain need to format their
                     // comments manually, since they won't have their own
                     // Format node to handle it.
-                    if !is_first_in_chain
-                        && f.context().comments().has_leading_comments(arrow.syntax())
-                    {
-                        // A grouped layout implies that the arrow chain is trying to be rendered
-                        // in a condensend, single-line format (at least the signatures, not
-                        // necessarily the body). In that case, we _need_ to prevent the leading
-                        // comments from inserting line breaks. But if it's _not_ a grouped layout,
-                        // then we want to _force_ the line break so that the leading comments
-                        // don't inadvertently end up on the previous line after the fat arrow.
-                        if is_grouped_call_arg_layout {
-                            write!(f, [space(), format_leading_comments(arrow.syntax())])?;
-                        } else {
-                            write!(
-                                f,
-                                [
-                                    soft_line_break_or_space(),
-                                    format_leading_comments(arrow.syntax())
-                                ]
-                            )?;
-                        }
-                    }
+                    let should_format_comments = !is_first_in_chain
+                        && f.context().comments().has_leading_comments(arrow.syntax());
+                    let is_first = is_first_in_chain;
 
-                    let formatted_signature =
-                        format_signature(arrow, is_grouped_call_arg_layout, is_first_in_chain);
+                    let formatted_signature = format_with(|f: &mut JsFormatter| {
+                        if should_format_comments {
+                            // A grouped layout implies that the arrow chain is trying to be rendered
+                            // in a condensend, single-line format (at least the signatures, not
+                            // necessarily the body). In that case, we _need_ to prevent the leading
+                            // comments from inserting line breaks. But if it's _not_ a grouped layout,
+                            // then we want to _force_ the line break so that the leading comments
+                            // don't inadvertently end up on the previous line after the fat arrow.
+                            if is_grouped_call_arg_layout {
+                                write!(f, [space(), format_leading_comments(arrow.syntax())])?;
+                            } else {
+                                write!(
+                                    f,
+                                    [
+                                        soft_line_break_or_space(),
+                                        format_leading_comments(arrow.syntax())
+                                    ]
+                                )?;
+                            }
+                        }
+
+                        write!(
+                            f,
+                            [format_signature(
+                                arrow,
+                                is_grouped_call_arg_layout,
+                                is_first
+                            )]
+                        )
+                    });
 
                     // Arrow chains indent a second level for every item other than the first:
                     //   (a) =>
@@ -578,7 +588,7 @@ impl Format<JsFormatContext> for ArrowChain {
                         write!(f, [formatted_signature])?;
                     } else {
                         write!(f, [indent(&formatted_signature)])?;
-                    }
+                    };
 
                     // The arrow of the tail is formatted outside of the group to ensure it never
                     // breaks from the body
