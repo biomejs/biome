@@ -15,7 +15,8 @@ use biome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsStatement,
     AnyTsReturnType, AnyTsType, JsBinaryExpressionFields, JsCallArgumentList, JsCallArguments,
     JsCallArgumentsFields, JsCallExpression, JsExpressionStatement, JsFunctionExpression,
-    JsImportCallExpression, JsLanguage, TsAsExpressionFields, TsSatisfiesExpressionFields,
+    JsImportCallExpression, JsLanguage, JsLogicalExpressionFields, TsAsExpressionFields,
+    TsSatisfiesExpressionFields,
 };
 use biome_rowan::{AstSeparatedElement, AstSeparatedList, SyntaxResult};
 
@@ -915,6 +916,18 @@ fn is_relatively_short_argument(argument: AnyJsExpression) -> bool {
                 operator_token: _,
                 right: Ok(right),
             } = binary_expression.as_fields()
+            {
+                SimpleArgument::from(left).is_simple() && SimpleArgument::from(right).is_simple()
+            } else {
+                false
+            }
+        }
+        AnyJsExpression::JsLogicalExpression(logical_expression) => {
+            if let JsLogicalExpressionFields {
+                left: Ok(left),
+                operator_token: _,
+                right: Ok(right),
+            } = logical_expression.as_fields()
             {
                 SimpleArgument::from(left).is_simple() && SimpleArgument::from(right).is_simple()
             } else {
