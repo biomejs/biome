@@ -1,5 +1,4 @@
-#![allow(unused)]
-use std::collections::{BTreeMap, HashMap};
+use std::collections::BTreeMap;
 
 use biome_analyze::{RegistryVisitor, RuleMetadata};
 use biome_js_syntax::JsLanguage;
@@ -56,9 +55,13 @@ pub(crate) fn generate_explanations(mode: Mode) -> Result<()> {
     biome_js_analyze::visit_registry(&mut visitor);
     biome_json_analyze::visit_registry(&mut visitor);
 
-    let keys: Vec<_> = visitor.rules.keys().collect();
+    let (rule_docs_constants, rule_match_arms): (Vec<_>, Vec<_>) = visitor
+        .rules
+        .values()
+        .map(generate_rule_match_arm_and_docs_constant)
+        .unzip();
 
-    let rule_match_arms = visitor.rules.values().map(generate_rule_match_arm);
+    let nl = Punct::new('\n', Spacing::Alone);
 
     let rules = quote! {
         use biome_analyze::{RuleMetadata, FixKind};
@@ -69,6 +72,9 @@ pub(crate) fn generate_explanations(mode: Mode) -> Result<()> {
                 _ => None,
             }
         }
+
+        #( #rule_docs_constants #nl )*
+
     };
 
     update(
@@ -80,11 +86,11 @@ pub(crate) fn generate_explanations(mode: Mode) -> Result<()> {
     Ok(())
 }
 
-fn generate_rule_match_arm(metadata: &RuleMetadata) -> TokenStream {
+fn generate_rule_match_arm_and_docs_constant(
+    metadata: &RuleMetadata,
+) -> (TokenStream, TokenStream) {
     let name = Literal::string(metadata.name);
-    let name_ident = Ident::new(metadata.name, Span::call_site());
 
-    let docs = Literal::string(&format_docs(metadata.docs));
     let version = Literal::string(metadata.version);
     let recommended = Ident::new(&metadata.recommended.to_string(), Span::call_site());
 
@@ -104,16 +110,24 @@ fn generate_rule_match_arm(metadata: &RuleMetadata) -> TokenStream {
         None => quote! {None},
     };
 
-    quote! {
-        #name => Some(RuleMetadata{
-            name: #name,
-            version: #version,
-            fix_kind: #fix_kind,
-            recommended: #recommended,
-            deprecated: #deprecated,
-            docs: #docs,
-        })
-    }
+    let docs = Literal::string(&format_docs(metadata.docs));
+    let docs_ident = Ident::new(&to_upper_snake_case(metadata.name), Span::call_site());
+
+    (
+        quote! {
+            const #docs_ident: &str = #docs;
+        },
+        quote! {
+            #name => Some(RuleMetadata{
+                name: #name,
+                version: #version,
+                fix_kind: #fix_kind,
+                recommended: #recommended,
+                deprecated: #deprecated,
+                docs: #docs_ident,
+            })
+        },
+    )
 }
 
 fn format_docs(docs: &str) -> String {
@@ -121,4 +135,28 @@ fn format_docs(docs: &str) -> String {
         .map(|line| line.trim_start())
         .collect::<Vec<&str>>()
         .join("\n")
+}
+
+fn to_upper_snake_case(s: &str) -> String {
+    let mut out = String::with_capacity(s.len());
+
+    for c in s.chars() {
+        if c.is_ascii_uppercase() {
+            out.push('_');
+        }
+
+        out.push(c.to_ascii_uppercase());
+    }
+
+    out
+}
+
+#[cfg(test)]
+mod test {
+    use super::to_upper_snake_case;
+
+    #[test]
+    fn to_upper_snake_case_works() {
+        assert_eq!(to_upper_snake_case("noAccessKey"), "NO_ACCESS_KEY");
+    }
 }
