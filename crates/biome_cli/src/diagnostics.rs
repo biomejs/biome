@@ -35,6 +35,8 @@ pub enum CliDiagnostic {
     EmptyArguments(EmptyArguments),
     /// Returned when a subcommand is called with an unsupported combination of arguments
     IncompatibleArguments(IncompatibleArguments),
+    // Returned when explain command cannot find anything to explain
+    ExplainNotFound(ExplainNotFound),
     /// Returned by a traversal command when error diagnostics were emitted
     CheckError(CheckError),
     /// Emitted when a file is fixed, but it still contains diagnostics.
@@ -146,6 +148,19 @@ pub struct EmptyArguments;
 pub struct IncompatibleArguments {
     first_argument: String,
     second_argument: String,
+}
+
+#[derive(Debug, Diagnostic)]
+#[diagnostic(
+    category = "flags/invalid",
+    severity = Error,
+    message(
+        description = "No rule with {name} found.",
+        message("No rule with "<Emphasis>{self.name}</Emphasis>" found.")
+    )
+)]
+pub struct ExplainNotFound {
+    name: String,
 }
 
 #[derive(Debug, Diagnostic)]

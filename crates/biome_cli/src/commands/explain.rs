@@ -4,7 +4,7 @@ use biome_service::explain::Explain;
 
 use crate::{CliDiagnostic, CliSession};
 
-fn print_rule(session: CliSession, metadata: &RuleMetadata) {
+fn print_rule(session: CliSession, metadata: &RuleMetadata) -> Result<(), CliDiagnostic> {
     session.app.console.log(markup! {
         "# "{metadata.name}
         "\n\n"
@@ -15,12 +15,18 @@ fn print_rule(session: CliSession, metadata: &RuleMetadata) {
         "# Description\n"
         {metadata.docs}
     });
+
+    Ok(())
 }
 
 pub(crate) fn explain(session: CliSession, explain: Explain) -> Result<(), CliDiagnostic> {
-    if let Some(metadata) = explain.rule {
-        print_rule(session, &metadata);
+    if let Some(rule) = explain.rule {
+        return print_rule(session, &rule);
     }
 
-    Ok(())
+    if let Some(unknown) = explain.unknown {
+        return Err(CliDiagnostic::unexpected_argument(unknown, "explain"));
+    }
+
+    unreachable!();
 }

@@ -254,10 +254,10 @@ pub enum BiomeCommand {
         bool,
     ),
 
-    /// Explain rules
+    /// Explain a rule
     #[bpaf(command)]
     Explain {
-        #[bpaf(positional, hide)]
+        #[bpaf(positional("NAME"))]
         explain: Explain,
     },
 

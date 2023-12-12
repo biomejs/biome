@@ -1,0 +1,17 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+# Emitted Messages
+
+```block
+Explain a rule
+
+Usage: explain NAME
+
+Available options:
+    -h, --help  Prints help information
+
+```
+
+
