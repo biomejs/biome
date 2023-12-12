@@ -962,6 +962,13 @@ impl Deserializable for Nursery {
                                 diagnostics,
                             );
                         }
+                        "noUselessTernary" => {
+                            result.no_useless_ternary = Deserializable::deserialize(
+                                &value,
+                                "noUselessTernary",
+                                diagnostics,
+                            );
+                        }
                         "useAwait" => {
                             result.use_await =
                                 Deserializable::deserialize(&value, "useAwait", diagnostics);
@@ -1025,6 +1032,7 @@ impl Deserializable for Nursery {
                                     "noUnusedImports",
                                     "noUnusedPrivateClassMembers",
                                     "noUselessLoneBlockStatements",
+                                    "noUselessTernary",
                                     "useAwait",
                                     "useExportType",
                                     "useForOf",
