@@ -334,6 +334,11 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::JsImportDefaultClause::new_unchecked(node) };
                     $body
                 }
+                $crate::JsSyntaxKind::JS_IMPORT_DEFAULT_EXTRA_CLAUSE => {
+                    let $pattern =
+                        unsafe { $crate::JsImportDefaultExtraClause::new_unchecked(node) };
+                    $body
+                }
                 $crate::JsSyntaxKind::JS_IMPORT_META_EXPRESSION => {
                     let $pattern = unsafe { $crate::JsImportMetaExpression::new_unchecked(node) };
                     $body

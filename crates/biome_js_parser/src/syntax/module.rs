@@ -20,7 +20,7 @@ use crate::syntax::js_parse_error::{
     decorators_not_allowed, duplicate_assertion_keys_error, expected_binding, expected_declaration,
     expected_export_clause, expected_export_default_declaration, expected_export_name_specifier,
     expected_expression, expected_identifier, expected_literal_export_name, expected_module_source,
-    expected_named_import, expected_named_import_specifier, expected_statement,
+    expected_named_import_specifier, expected_namespace_or_named_import, expected_statement,
 };
 use crate::syntax::stmt::{parse_statement, semi, StatementContext, STMT_RECOVERY_SET};
 use crate::syntax::typescript::ts_parse_error::ts_only_syntax_error;
@@ -39,6 +39,7 @@ use biome_parser::ParserProgress;
 use rustc_hash::FxHashMap;
 
 use super::auxiliary::{is_nth_at_declaration_clause, parse_declaration_clause};
+use super::js_parse_error::{expected_named_import, expected_namespace_import};
 
 // test js module
 // import a from "b";
@@ -296,8 +297,10 @@ fn parse_import_clause(p: &mut JsParser) -> ParsedSyntax {
         T![*] => parse_import_namespace_clause_rest(p, m),
         T!['{'] => parse_import_named_clause_rest(p, m),
         _ if is_at_identifier_binding(p) => {
+            let default_specifier = p.start();
             parse_identifier_binding(p).unwrap();
-            parse_import_default_or_named_clause_rest(p, m, is_typed)
+            default_specifier.complete(p, JS_DEFAULT_IMPORT_SPECIFIER);
+            parse_import_default_clauses_rest(p, m, is_typed)
         }
         _ => {
             // SAFETY: Safe because the parser only eats the "type" keyword if it's followed by
@@ -317,47 +320,42 @@ fn parse_import_clause(p: &mut JsParser) -> ParsedSyntax {
     }
 }
 
-/// Parses the rest of an import named or default clause.
+// test js import_default_clauses
+// import e, { f } from "b";
+
+// import g, * as lorem from "c";
+/// Parses the rest of a default clause or default named clause.
 /// Rest meaning, everything after `type binding`
-fn parse_import_default_or_named_clause_rest(
+fn parse_import_default_clauses_rest(
     p: &mut JsParser,
     m: Marker,
     is_typed: bool,
 ) -> CompletedMarker {
-    match p.cur() {
-        T![,] | T!['{'] => {
+    let syntax_type = match p.cur() {
+        T![,] | T!['{'] | T![*] => {
             p.expect(T![,]);
-
-            let default_specifier = m.complete(p, JS_DEFAULT_IMPORT_SPECIFIER);
-            let default_start = default_specifier.range(p).start();
-
-            let named_clause = default_specifier.precede(p);
-
-            parse_named_import(p).or_add_diagnostic(p, expected_named_import);
-
+            match p.cur() {
+                T![*] => parse_namespace_import_specifier(p),
+                _ => parse_named_import_specifier_list(p),
+            }
+            .or_add_diagnostic(p, expected_namespace_or_named_import);
             if is_typed {
+                let start = m.start();
                 let end = p.last_end().unwrap_or_else(|| p.cur_range().start());
 
                 // test_err ts ts_typed_default_import_with_named
                 // import type A, { B, C } from './a';
                 p.error(p.err_builder("A type-only import can specify a default import or named bindings, but not both.",
-                    default_start..end,))
+                    start..end,))
             }
-
-            p.expect(T![from]);
-            parse_module_source(p).or_add_diagnostic(p, expected_module_source);
-            parse_import_assertion(p).ok();
-
-            named_clause.complete(p, JS_IMPORT_NAMED_CLAUSE)
+            JS_IMPORT_DEFAULT_EXTRA_CLAUSE
         }
-        _ => {
-            p.expect(T![from]);
-            parse_module_source(p).or_add_diagnostic(p, expected_module_source);
-            parse_import_assertion(p).ok();
-
-            m.complete(p, JS_IMPORT_DEFAULT_CLAUSE)
-        }
-    }
+        _ => JS_IMPORT_DEFAULT_CLAUSE,
+    };
+    p.expect(T![from]);
+    parse_module_source(p).or_add_diagnostic(p, expected_module_source);
+    parse_import_assertion(p).ok();
+    m.complete(p, syntax_type)
 }
 
 // test js import_bare_clause
@@ -374,10 +372,7 @@ fn parse_import_bare_clause(p: &mut JsParser) -> ParsedSyntax {
 // test js import_decl
 // import * as foo from "bla";
 fn parse_import_namespace_clause_rest(p: &mut JsParser, m: Marker) -> CompletedMarker {
-    p.expect(T![*]);
-
-    p.expect(T![as]);
-    parse_binding(p).or_add_diagnostic(p, expected_binding);
+    parse_namespace_import_specifier(p).or_add_diagnostic(p, expected_namespace_import);
     p.expect(T![from]);
     parse_module_source(p).or_add_diagnostic(p, expected_module_source);
     parse_import_assertion(p).ok();
@@ -388,32 +383,14 @@ fn parse_import_namespace_clause_rest(p: &mut JsParser, m: Marker) -> CompletedM
 // test js import_named_clause
 // import {} from "a";
 // import { a, b, c, } from "b";
-// import e, { f } from "b";
-// import g, * as lorem from "c";
 // import { f as x, default as w, "a-b-c" as y } from "b";
 fn parse_import_named_clause_rest(p: &mut JsParser, m: Marker) -> CompletedMarker {
-    parse_default_import_specifier(p).ok();
-    parse_named_import(p).or_add_diagnostic(p, expected_named_import);
+    parse_named_import_specifier_list(p).or_add_diagnostic(p, expected_named_import);
     p.expect(T![from]);
     parse_module_source(p).or_add_diagnostic(p, expected_module_source);
     parse_import_assertion(p).ok();
 
     m.complete(p, JS_IMPORT_NAMED_CLAUSE)
-}
-
-fn parse_default_import_specifier(p: &mut JsParser) -> ParsedSyntax {
-    parse_binding(p).map(|binding| {
-        let m = binding.precede(p);
-        p.expect(T![,]);
-        m.complete(p, JS_DEFAULT_IMPORT_SPECIFIER)
-    })
-}
-
-fn parse_named_import(p: &mut JsParser) -> ParsedSyntax {
-    match p.cur() {
-        T![*] => parse_namespace_import_specifier(p),
-        _ => parse_named_import_specifier_list(p),
-    }
 }
 
 fn parse_namespace_import_specifier(p: &mut JsParser) -> ParsedSyntax {

@@ -7,8 +7,8 @@ use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_syntax::{
-    AnyJsImportClause, AnyJsModuleItem, AnyJsNamedImport, AnyJsNamedImportSpecifier, JsImport,
-    JsLanguage, JsModule, JsSyntaxToken, TextRange, TriviaPieceKind, T,
+    AnyJsImportClause, AnyJsModuleItem, AnyJsNamedImportSpecifier, JsImport, JsLanguage, JsModule,
+    JsSyntaxToken, TextRange, TriviaPieceKind, T,
 };
 use biome_rowan::{
     chain_trivia_pieces, syntax::SyntaxTrivia, AstNode, AstNodeExt, AstNodeList, AstSeparatedList,
@@ -300,13 +300,7 @@ impl From<JsImport> for ImportNode {
             let AnyJsImportClause::JsImportNamedClause(import_named_clause) = import_clause else {
                 return None;
             };
-
-            let named_import = import_named_clause.named_import().ok()?;
-            let AnyJsNamedImport::JsNamedImportSpecifiers(named_import_specifiers) = named_import
-            else {
-                return None;
-            };
-
+            let named_import_specifiers = import_named_clause.named_specifiers().ok()?;
             let mut result = BTreeMap::new();
 
             for element in named_import_specifiers.specifiers().elements() {
@@ -353,9 +347,7 @@ impl ImportNode {
         let Ok(AnyJsImportClause::JsImportNamedClause(import_named_clause)) = import_clause else {
             return import;
         };
-
-        let named_import = import_named_clause.named_import();
-        let Ok(AnyJsNamedImport::JsNamedImportSpecifiers(old_specifiers)) = named_import else {
+        let Ok(old_specifiers) = import_named_clause.named_specifiers() else {
             return import;
         };
 

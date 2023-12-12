@@ -1734,14 +1734,10 @@ impl JsDefaultImportSpecifier {
     pub fn as_fields(&self) -> JsDefaultImportSpecifierFields {
         JsDefaultImportSpecifierFields {
             local_name: self.local_name(),
-            trailing_comma_token: self.trailing_comma_token(),
         }
     }
     pub fn local_name(&self) -> SyntaxResult<AnyJsBinding> {
         support::required_node(&self.syntax, 0usize)
-    }
-    pub fn trailing_comma_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 1usize)
     }
 }
 #[cfg(feature = "serde")]
@@ -1756,7 +1752,6 @@ impl Serialize for JsDefaultImportSpecifier {
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct JsDefaultImportSpecifierFields {
     pub local_name: SyntaxResult<AnyJsBinding>,
-    pub trailing_comma_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct JsDirective {
@@ -3772,7 +3767,7 @@ impl JsImportDefaultClause {
     pub fn as_fields(&self) -> JsImportDefaultClauseFields {
         JsImportDefaultClauseFields {
             type_token: self.type_token(),
-            local_name: self.local_name(),
+            default_specifier: self.default_specifier(),
             from_token: self.from_token(),
             source: self.source(),
             assertion: self.assertion(),
@@ -3781,7 +3776,7 @@ impl JsImportDefaultClause {
     pub fn type_token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, 0usize)
     }
-    pub fn local_name(&self) -> SyntaxResult<AnyJsBinding> {
+    pub fn default_specifier(&self) -> SyntaxResult<JsDefaultImportSpecifier> {
         support::required_node(&self.syntax, 1usize)
     }
     pub fn from_token(&self) -> SyntaxResult<SyntaxToken> {
@@ -3806,7 +3801,68 @@ impl Serialize for JsImportDefaultClause {
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct JsImportDefaultClauseFields {
     pub type_token: Option<SyntaxToken>,
-    pub local_name: SyntaxResult<AnyJsBinding>,
+    pub default_specifier: SyntaxResult<JsDefaultImportSpecifier>,
+    pub from_token: SyntaxResult<SyntaxToken>,
+    pub source: SyntaxResult<JsModuleSource>,
+    pub assertion: Option<JsImportAssertion>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct JsImportDefaultExtraClause {
+    pub(crate) syntax: SyntaxNode,
+}
+impl JsImportDefaultExtraClause {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> JsImportDefaultExtraClauseFields {
+        JsImportDefaultExtraClauseFields {
+            default_specifier: self.default_specifier(),
+            comma_token: self.comma_token(),
+            extra_specifier: self.extra_specifier(),
+            from_token: self.from_token(),
+            source: self.source(),
+            assertion: self.assertion(),
+        }
+    }
+    pub fn default_specifier(&self) -> SyntaxResult<JsDefaultImportSpecifier> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn comma_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn extra_specifier(&self) -> SyntaxResult<AnyJsExtraImportSpecifier> {
+        support::required_node(&self.syntax, 2usize)
+    }
+    pub fn from_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 3usize)
+    }
+    pub fn source(&self) -> SyntaxResult<JsModuleSource> {
+        support::required_node(&self.syntax, 4usize)
+    }
+    pub fn assertion(&self) -> Option<JsImportAssertion> {
+        support::node(&self.syntax, 5usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for JsImportDefaultExtraClause {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct JsImportDefaultExtraClauseFields {
+    pub default_specifier: SyntaxResult<JsDefaultImportSpecifier>,
+    pub comma_token: SyntaxResult<SyntaxToken>,
+    pub extra_specifier: SyntaxResult<AnyJsExtraImportSpecifier>,
     pub from_token: SyntaxResult<SyntaxToken>,
     pub source: SyntaxResult<JsModuleSource>,
     pub assertion: Option<JsImportAssertion>,
@@ -3874,8 +3930,7 @@ impl JsImportNamedClause {
     pub fn as_fields(&self) -> JsImportNamedClauseFields {
         JsImportNamedClauseFields {
             type_token: self.type_token(),
-            default_specifier: self.default_specifier(),
-            named_import: self.named_import(),
+            named_specifiers: self.named_specifiers(),
             from_token: self.from_token(),
             source: self.source(),
             assertion: self.assertion(),
@@ -3884,20 +3939,17 @@ impl JsImportNamedClause {
     pub fn type_token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, 0usize)
     }
-    pub fn default_specifier(&self) -> Option<JsDefaultImportSpecifier> {
-        support::node(&self.syntax, 1usize)
-    }
-    pub fn named_import(&self) -> SyntaxResult<AnyJsNamedImport> {
-        support::required_node(&self.syntax, 2usize)
+    pub fn named_specifiers(&self) -> SyntaxResult<JsNamedImportSpecifiers> {
+        support::required_node(&self.syntax, 1usize)
     }
     pub fn from_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 3usize)
+        support::required_token(&self.syntax, 2usize)
     }
     pub fn source(&self) -> SyntaxResult<JsModuleSource> {
-        support::required_node(&self.syntax, 4usize)
+        support::required_node(&self.syntax, 3usize)
     }
     pub fn assertion(&self) -> Option<JsImportAssertion> {
-        support::node(&self.syntax, 5usize)
+        support::node(&self.syntax, 4usize)
     }
 }
 #[cfg(feature = "serde")]
@@ -3912,8 +3964,7 @@ impl Serialize for JsImportNamedClause {
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct JsImportNamedClauseFields {
     pub type_token: Option<SyntaxToken>,
-    pub default_specifier: Option<JsDefaultImportSpecifier>,
-    pub named_import: SyntaxResult<AnyJsNamedImport>,
+    pub named_specifiers: SyntaxResult<JsNamedImportSpecifiers>,
     pub from_token: SyntaxResult<SyntaxToken>,
     pub source: SyntaxResult<JsModuleSource>,
     pub assertion: Option<JsImportAssertion>,
@@ -3935,9 +3986,7 @@ impl JsImportNamespaceClause {
     pub fn as_fields(&self) -> JsImportNamespaceClauseFields {
         JsImportNamespaceClauseFields {
             type_token: self.type_token(),
-            star_token: self.star_token(),
-            as_token: self.as_token(),
-            local_name: self.local_name(),
+            namespace_specifier: self.namespace_specifier(),
             from_token: self.from_token(),
             source: self.source(),
             assertion: self.assertion(),
@@ -3946,23 +3995,17 @@ impl JsImportNamespaceClause {
     pub fn type_token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, 0usize)
     }
-    pub fn star_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 1usize)
-    }
-    pub fn as_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 2usize)
-    }
-    pub fn local_name(&self) -> SyntaxResult<AnyJsBinding> {
-        support::required_node(&self.syntax, 3usize)
+    pub fn namespace_specifier(&self) -> SyntaxResult<JsNamespaceImportSpecifier> {
+        support::required_node(&self.syntax, 1usize)
     }
     pub fn from_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 4usize)
+        support::required_token(&self.syntax, 2usize)
     }
     pub fn source(&self) -> SyntaxResult<JsModuleSource> {
-        support::required_node(&self.syntax, 5usize)
+        support::required_node(&self.syntax, 3usize)
     }
     pub fn assertion(&self) -> Option<JsImportAssertion> {
-        support::node(&self.syntax, 6usize)
+        support::node(&self.syntax, 4usize)
     }
 }
 #[cfg(feature = "serde")]
@@ -3977,9 +4020,7 @@ impl Serialize for JsImportNamespaceClause {
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct JsImportNamespaceClauseFields {
     pub type_token: Option<SyntaxToken>,
-    pub star_token: SyntaxResult<SyntaxToken>,
-    pub as_token: SyntaxResult<SyntaxToken>,
-    pub local_name: SyntaxResult<AnyJsBinding>,
+    pub namespace_specifier: SyntaxResult<JsNamespaceImportSpecifier>,
     pub from_token: SyntaxResult<SyntaxToken>,
     pub source: SyntaxResult<JsModuleSource>,
     pub assertion: Option<JsImportAssertion>,
@@ -14501,6 +14542,26 @@ impl AnyJsExpression {
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
+pub enum AnyJsExtraImportSpecifier {
+    JsNamedImportSpecifiers(JsNamedImportSpecifiers),
+    JsNamespaceImportSpecifier(JsNamespaceImportSpecifier),
+}
+impl AnyJsExtraImportSpecifier {
+    pub fn as_js_named_import_specifiers(&self) -> Option<&JsNamedImportSpecifiers> {
+        match &self {
+            AnyJsExtraImportSpecifier::JsNamedImportSpecifiers(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_js_namespace_import_specifier(&self) -> Option<&JsNamespaceImportSpecifier> {
+        match &self {
+            AnyJsExtraImportSpecifier::JsNamespaceImportSpecifier(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum AnyJsForInOrOfInitializer {
     AnyJsAssignmentPattern(AnyJsAssignmentPattern),
     JsForVariableDeclaration(JsForVariableDeclaration),
@@ -14640,6 +14701,7 @@ impl AnyJsImportAssertionEntry {
 pub enum AnyJsImportClause {
     JsImportBareClause(JsImportBareClause),
     JsImportDefaultClause(JsImportDefaultClause),
+    JsImportDefaultExtraClause(JsImportDefaultExtraClause),
     JsImportNamedClause(JsImportNamedClause),
     JsImportNamespaceClause(JsImportNamespaceClause),
 }
@@ -14653,6 +14715,12 @@ impl AnyJsImportClause {
     pub fn as_js_import_default_clause(&self) -> Option<&JsImportDefaultClause> {
         match &self {
             AnyJsImportClause::JsImportDefaultClause(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_js_import_default_extra_clause(&self) -> Option<&JsImportDefaultExtraClause> {
+        match &self {
+            AnyJsImportClause::JsImportDefaultExtraClause(item) => Some(item),
             _ => None,
         }
     }
@@ -14814,26 +14882,6 @@ impl AnyJsName {
     pub fn as_js_private_name(&self) -> Option<&JsPrivateName> {
         match &self {
             AnyJsName::JsPrivateName(item) => Some(item),
-            _ => None,
-        }
-    }
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
-pub enum AnyJsNamedImport {
-    JsNamedImportSpecifiers(JsNamedImportSpecifiers),
-    JsNamespaceImportSpecifier(JsNamespaceImportSpecifier),
-}
-impl AnyJsNamedImport {
-    pub fn as_js_named_import_specifiers(&self) -> Option<&JsNamedImportSpecifiers> {
-        match &self {
-            AnyJsNamedImport::JsNamedImportSpecifiers(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_js_namespace_import_specifier(&self) -> Option<&JsNamespaceImportSpecifier> {
-        match &self {
-            AnyJsNamedImport::JsNamespaceImportSpecifier(item) => Some(item),
             _ => None,
         }
     }
@@ -18011,10 +18059,6 @@ impl std::fmt::Debug for JsDefaultImportSpecifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("JsDefaultImportSpecifier")
             .field("local_name", &support::DebugSyntaxResult(self.local_name()))
-            .field(
-                "trailing_comma_token",
-                &support::DebugSyntaxResult(self.trailing_comma_token()),
-            )
             .finish()
     }
 }
@@ -19933,7 +19977,10 @@ impl std::fmt::Debug for JsImportDefaultClause {
                 "type_token",
                 &support::DebugOptionalElement(self.type_token()),
             )
-            .field("local_name", &support::DebugSyntaxResult(self.local_name()))
+            .field(
+                "default_specifier",
+                &support::DebugSyntaxResult(self.default_specifier()),
+            )
             .field("from_token", &support::DebugSyntaxResult(self.from_token()))
             .field("source", &support::DebugSyntaxResult(self.source()))
             .field(
@@ -19950,6 +19997,61 @@ impl From<JsImportDefaultClause> for SyntaxNode {
 }
 impl From<JsImportDefaultClause> for SyntaxElement {
     fn from(n: JsImportDefaultClause) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for JsImportDefaultExtraClause {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(JS_IMPORT_DEFAULT_EXTRA_CLAUSE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == JS_IMPORT_DEFAULT_EXTRA_CLAUSE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for JsImportDefaultExtraClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("JsImportDefaultExtraClause")
+            .field(
+                "default_specifier",
+                &support::DebugSyntaxResult(self.default_specifier()),
+            )
+            .field(
+                "comma_token",
+                &support::DebugSyntaxResult(self.comma_token()),
+            )
+            .field(
+                "extra_specifier",
+                &support::DebugSyntaxResult(self.extra_specifier()),
+            )
+            .field("from_token", &support::DebugSyntaxResult(self.from_token()))
+            .field("source", &support::DebugSyntaxResult(self.source()))
+            .field(
+                "assertion",
+                &support::DebugOptionalElement(self.assertion()),
+            )
+            .finish()
+    }
+}
+impl From<JsImportDefaultExtraClause> for SyntaxNode {
+    fn from(n: JsImportDefaultExtraClause) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<JsImportDefaultExtraClause> for SyntaxElement {
+    fn from(n: JsImportDefaultExtraClause) -> SyntaxElement {
         n.syntax.into()
     }
 }
@@ -20025,12 +20127,8 @@ impl std::fmt::Debug for JsImportNamedClause {
                 &support::DebugOptionalElement(self.type_token()),
             )
             .field(
-                "default_specifier",
-                &support::DebugOptionalElement(self.default_specifier()),
-            )
-            .field(
-                "named_import",
-                &support::DebugSyntaxResult(self.named_import()),
+                "named_specifiers",
+                &support::DebugSyntaxResult(self.named_specifiers()),
             )
             .field("from_token", &support::DebugSyntaxResult(self.from_token()))
             .field("source", &support::DebugSyntaxResult(self.source()))
@@ -20079,9 +20177,10 @@ impl std::fmt::Debug for JsImportNamespaceClause {
                 "type_token",
                 &support::DebugOptionalElement(self.type_token()),
             )
-            .field("star_token", &support::DebugSyntaxResult(self.star_token()))
-            .field("as_token", &support::DebugSyntaxResult(self.as_token()))
-            .field("local_name", &support::DebugSyntaxResult(self.local_name()))
+            .field(
+                "namespace_specifier",
+                &support::DebugSyntaxResult(self.namespace_specifier()),
+            )
             .field("from_token", &support::DebugSyntaxResult(self.from_token()))
             .field("source", &support::DebugSyntaxResult(self.source()))
             .field(
@@ -32061,6 +32160,79 @@ impl From<AnyJsExpression> for SyntaxElement {
         node.into()
     }
 }
+impl From<JsNamedImportSpecifiers> for AnyJsExtraImportSpecifier {
+    fn from(node: JsNamedImportSpecifiers) -> AnyJsExtraImportSpecifier {
+        AnyJsExtraImportSpecifier::JsNamedImportSpecifiers(node)
+    }
+}
+impl From<JsNamespaceImportSpecifier> for AnyJsExtraImportSpecifier {
+    fn from(node: JsNamespaceImportSpecifier) -> AnyJsExtraImportSpecifier {
+        AnyJsExtraImportSpecifier::JsNamespaceImportSpecifier(node)
+    }
+}
+impl AstNode for AnyJsExtraImportSpecifier {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        JsNamedImportSpecifiers::KIND_SET.union(JsNamespaceImportSpecifier::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(
+            kind,
+            JS_NAMED_IMPORT_SPECIFIERS | JS_NAMESPACE_IMPORT_SPECIFIER
+        )
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            JS_NAMED_IMPORT_SPECIFIERS => {
+                AnyJsExtraImportSpecifier::JsNamedImportSpecifiers(JsNamedImportSpecifiers {
+                    syntax,
+                })
+            }
+            JS_NAMESPACE_IMPORT_SPECIFIER => {
+                AnyJsExtraImportSpecifier::JsNamespaceImportSpecifier(JsNamespaceImportSpecifier {
+                    syntax,
+                })
+            }
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            AnyJsExtraImportSpecifier::JsNamedImportSpecifiers(it) => &it.syntax,
+            AnyJsExtraImportSpecifier::JsNamespaceImportSpecifier(it) => &it.syntax,
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            AnyJsExtraImportSpecifier::JsNamedImportSpecifiers(it) => it.syntax,
+            AnyJsExtraImportSpecifier::JsNamespaceImportSpecifier(it) => it.syntax,
+        }
+    }
+}
+impl std::fmt::Debug for AnyJsExtraImportSpecifier {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            AnyJsExtraImportSpecifier::JsNamedImportSpecifiers(it) => std::fmt::Debug::fmt(it, f),
+            AnyJsExtraImportSpecifier::JsNamespaceImportSpecifier(it) => {
+                std::fmt::Debug::fmt(it, f)
+            }
+        }
+    }
+}
+impl From<AnyJsExtraImportSpecifier> for SyntaxNode {
+    fn from(n: AnyJsExtraImportSpecifier) -> SyntaxNode {
+        match n {
+            AnyJsExtraImportSpecifier::JsNamedImportSpecifiers(it) => it.into(),
+            AnyJsExtraImportSpecifier::JsNamespaceImportSpecifier(it) => it.into(),
+        }
+    }
+}
+impl From<AnyJsExtraImportSpecifier> for SyntaxElement {
+    fn from(n: AnyJsExtraImportSpecifier) -> SyntaxElement {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<JsForVariableDeclaration> for AnyJsForInOrOfInitializer {
     fn from(node: JsForVariableDeclaration) -> AnyJsForInOrOfInitializer {
         AnyJsForInOrOfInitializer::JsForVariableDeclaration(node)
@@ -32501,6 +32673,11 @@ impl From<JsImportDefaultClause> for AnyJsImportClause {
         AnyJsImportClause::JsImportDefaultClause(node)
     }
 }
+impl From<JsImportDefaultExtraClause> for AnyJsImportClause {
+    fn from(node: JsImportDefaultExtraClause) -> AnyJsImportClause {
+        AnyJsImportClause::JsImportDefaultExtraClause(node)
+    }
+}
 impl From<JsImportNamedClause> for AnyJsImportClause {
     fn from(node: JsImportNamedClause) -> AnyJsImportClause {
         AnyJsImportClause::JsImportNamedClause(node)
@@ -32515,6 +32692,7 @@ impl AstNode for AnyJsImportClause {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = JsImportBareClause::KIND_SET
         .union(JsImportDefaultClause::KIND_SET)
+        .union(JsImportDefaultExtraClause::KIND_SET)
         .union(JsImportNamedClause::KIND_SET)
         .union(JsImportNamespaceClause::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
@@ -32522,6 +32700,7 @@ impl AstNode for AnyJsImportClause {
             kind,
             JS_IMPORT_BARE_CLAUSE
                 | JS_IMPORT_DEFAULT_CLAUSE
+                | JS_IMPORT_DEFAULT_EXTRA_CLAUSE
                 | JS_IMPORT_NAMED_CLAUSE
                 | JS_IMPORT_NAMESPACE_CLAUSE
         )
@@ -32533,6 +32712,9 @@ impl AstNode for AnyJsImportClause {
             }
             JS_IMPORT_DEFAULT_CLAUSE => {
                 AnyJsImportClause::JsImportDefaultClause(JsImportDefaultClause { syntax })
+            }
+            JS_IMPORT_DEFAULT_EXTRA_CLAUSE => {
+                AnyJsImportClause::JsImportDefaultExtraClause(JsImportDefaultExtraClause { syntax })
             }
             JS_IMPORT_NAMED_CLAUSE => {
                 AnyJsImportClause::JsImportNamedClause(JsImportNamedClause { syntax })
@@ -32548,6 +32730,7 @@ impl AstNode for AnyJsImportClause {
         match self {
             AnyJsImportClause::JsImportBareClause(it) => &it.syntax,
             AnyJsImportClause::JsImportDefaultClause(it) => &it.syntax,
+            AnyJsImportClause::JsImportDefaultExtraClause(it) => &it.syntax,
             AnyJsImportClause::JsImportNamedClause(it) => &it.syntax,
             AnyJsImportClause::JsImportNamespaceClause(it) => &it.syntax,
         }
@@ -32556,6 +32739,7 @@ impl AstNode for AnyJsImportClause {
         match self {
             AnyJsImportClause::JsImportBareClause(it) => it.syntax,
             AnyJsImportClause::JsImportDefaultClause(it) => it.syntax,
+            AnyJsImportClause::JsImportDefaultExtraClause(it) => it.syntax,
             AnyJsImportClause::JsImportNamedClause(it) => it.syntax,
             AnyJsImportClause::JsImportNamespaceClause(it) => it.syntax,
         }
@@ -32566,6 +32750,7 @@ impl std::fmt::Debug for AnyJsImportClause {
         match self {
             AnyJsImportClause::JsImportBareClause(it) => std::fmt::Debug::fmt(it, f),
             AnyJsImportClause::JsImportDefaultClause(it) => std::fmt::Debug::fmt(it, f),
+            AnyJsImportClause::JsImportDefaultExtraClause(it) => std::fmt::Debug::fmt(it, f),
             AnyJsImportClause::JsImportNamedClause(it) => std::fmt::Debug::fmt(it, f),
             AnyJsImportClause::JsImportNamespaceClause(it) => std::fmt::Debug::fmt(it, f),
         }
@@ -32576,6 +32761,7 @@ impl From<AnyJsImportClause> for SyntaxNode {
         match n {
             AnyJsImportClause::JsImportBareClause(it) => it.into(),
             AnyJsImportClause::JsImportDefaultClause(it) => it.into(),
+            AnyJsImportClause::JsImportDefaultExtraClause(it) => it.into(),
             AnyJsImportClause::JsImportNamedClause(it) => it.into(),
             AnyJsImportClause::JsImportNamespaceClause(it) => it.into(),
         }
@@ -33004,73 +33190,6 @@ impl From<AnyJsName> for SyntaxNode {
 }
 impl From<AnyJsName> for SyntaxElement {
     fn from(n: AnyJsName) -> SyntaxElement {
-        let node: SyntaxNode = n.into();
-        node.into()
-    }
-}
-impl From<JsNamedImportSpecifiers> for AnyJsNamedImport {
-    fn from(node: JsNamedImportSpecifiers) -> AnyJsNamedImport {
-        AnyJsNamedImport::JsNamedImportSpecifiers(node)
-    }
-}
-impl From<JsNamespaceImportSpecifier> for AnyJsNamedImport {
-    fn from(node: JsNamespaceImportSpecifier) -> AnyJsNamedImport {
-        AnyJsNamedImport::JsNamespaceImportSpecifier(node)
-    }
-}
-impl AstNode for AnyJsNamedImport {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        JsNamedImportSpecifiers::KIND_SET.union(JsNamespaceImportSpecifier::KIND_SET);
-    fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(
-            kind,
-            JS_NAMED_IMPORT_SPECIFIERS | JS_NAMESPACE_IMPORT_SPECIFIER
-        )
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        let res = match syntax.kind() {
-            JS_NAMED_IMPORT_SPECIFIERS => {
-                AnyJsNamedImport::JsNamedImportSpecifiers(JsNamedImportSpecifiers { syntax })
-            }
-            JS_NAMESPACE_IMPORT_SPECIFIER => {
-                AnyJsNamedImport::JsNamespaceImportSpecifier(JsNamespaceImportSpecifier { syntax })
-            }
-            _ => return None,
-        };
-        Some(res)
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        match self {
-            AnyJsNamedImport::JsNamedImportSpecifiers(it) => &it.syntax,
-            AnyJsNamedImport::JsNamespaceImportSpecifier(it) => &it.syntax,
-        }
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        match self {
-            AnyJsNamedImport::JsNamedImportSpecifiers(it) => it.syntax,
-            AnyJsNamedImport::JsNamespaceImportSpecifier(it) => it.syntax,
-        }
-    }
-}
-impl std::fmt::Debug for AnyJsNamedImport {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            AnyJsNamedImport::JsNamedImportSpecifiers(it) => std::fmt::Debug::fmt(it, f),
-            AnyJsNamedImport::JsNamespaceImportSpecifier(it) => std::fmt::Debug::fmt(it, f),
-        }
-    }
-}
-impl From<AnyJsNamedImport> for SyntaxNode {
-    fn from(n: AnyJsNamedImport) -> SyntaxNode {
-        match n {
-            AnyJsNamedImport::JsNamedImportSpecifiers(it) => it.into(),
-            AnyJsNamedImport::JsNamespaceImportSpecifier(it) => it.into(),
-        }
-    }
-}
-impl From<AnyJsNamedImport> for SyntaxElement {
-    fn from(n: AnyJsNamedImport) -> SyntaxElement {
         let node: SyntaxNode = n.into();
         node.into()
     }
@@ -37070,6 +37189,11 @@ impl std::fmt::Display for AnyJsExpression {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for AnyJsExtraImportSpecifier {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AnyJsForInOrOfInitializer {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -37126,11 +37250,6 @@ impl std::fmt::Display for AnyJsModuleItem {
     }
 }
 impl std::fmt::Display for AnyJsName {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
-impl std::fmt::Display for AnyJsNamedImport {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -37696,6 +37815,11 @@ impl std::fmt::Display for JsImportCallExpression {
     }
 }
 impl std::fmt::Display for JsImportDefaultClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for JsImportDefaultExtraClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

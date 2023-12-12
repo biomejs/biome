@@ -1,6 +1,6 @@
 use crate::{
     inner_string_text, AnyJsBinding, AnyJsImportClause, AnyJsNamedImportSpecifier, JsImport,
-    JsImportNamedClause, JsModuleSource, JsSyntaxToken,
+    JsModuleSource, JsSyntaxToken,
 };
 use biome_rowan::{AstNode, SyntaxResult, TokenText};
 
@@ -15,7 +15,8 @@ impl JsImport {
     ///
     /// let source = make::js_module_source(make::js_string_literal("react"));
     /// let binding = make::js_identifier_binding(make::ident("React"));
-    /// let clause = make::js_import_default_clause(binding.into(), make::token(T![from]), source).build();
+    /// let specifier = make::js_default_import_specifier(binding.into());
+    /// let clause = make::js_import_default_clause(specifier, make::token(T![from]), source).build();
     /// let import = make::js_import(make::token(T![import]), clause.into()).build();
     ///
     /// assert_eq!(import.source_text().unwrap().text(), "react");
@@ -38,6 +39,7 @@ impl AnyJsImportClause {
             Self::JsImportDefaultClause(clause) => clause.type_token(),
             Self::JsImportNamedClause(clause) => clause.type_token(),
             Self::JsImportNamespaceClause(clause) => clause.type_token(),
+            Self::JsImportDefaultExtraClause(_) => None,
         }
     }
 
@@ -49,16 +51,18 @@ impl AnyJsImportClause {
     ///
     /// let source = make::js_module_source(make::js_string_literal("react"));
     /// let binding = make::js_identifier_binding(make::ident("React"));
-    /// let clause = make::js_import_default_clause(binding.into(), make::token(T![from]), source).build();
+    /// let specifier = make::js_default_import_specifier(binding.into());
+    /// let clause = make::js_import_default_clause(specifier, make::token(T![from]), source).build();
     ///
     /// assert_eq!(clause.source().unwrap().inner_string_text().unwrap().text(), "react");
     /// ```
     pub fn source(&self) -> SyntaxResult<JsModuleSource> {
         match self {
-            Self::JsImportBareClause(node) => node.source(),
-            Self::JsImportDefaultClause(node) => node.source(),
-            Self::JsImportNamedClause(node) => node.source(),
-            Self::JsImportNamespaceClause(node) => node.source(),
+            Self::JsImportBareClause(clause) => clause.source(),
+            Self::JsImportDefaultClause(clause) => clause.source(),
+            Self::JsImportNamedClause(clause) => clause.source(),
+            Self::JsImportNamespaceClause(clause) => clause.source(),
+            Self::JsImportDefaultExtraClause(clause) => clause.source(),
         }
     }
 }
@@ -79,17 +83,13 @@ impl AnyJsNamedImportSpecifier {
     }
 
     /// Returns the import clause that includes this specifier.
-    pub fn import_named_clause(&self) -> Option<JsImportNamedClause> {
-        JsImportNamedClause::cast(self.syntax().ancestors().nth(3)?)
+    pub fn import_clause(&self) -> Option<AnyJsImportClause> {
+        AnyJsImportClause::cast(self.syntax().ancestors().nth(3)?)
     }
 
     /// Returns `true` if this specifier or its import clause has **only** a type modifier.
     pub fn imports_only_types(&self) -> bool {
-        self.type_token().is_some()
-            || self
-                .import_named_clause()
-                .and_then(|x| x.type_token())
-                .is_some()
+        self.type_token().is_some() || self.import_clause().and_then(|x| x.type_token()).is_some()
     }
 
     /// Imported name of this import specifier

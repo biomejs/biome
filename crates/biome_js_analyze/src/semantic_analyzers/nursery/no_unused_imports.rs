@@ -7,12 +7,10 @@ use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_semantic::ReferencesExtensions;
 use biome_js_syntax::{
-    binding_ext::AnyJsBindingDeclaration, AnyJsImportClause, JsIdentifierBinding, JsImport,
-    JsImportNamedClause, JsLanguage, JsNamedImportSpecifierList, T,
+    binding_ext::AnyJsBindingDeclaration, AnyJsExtraImportSpecifier, AnyJsImportClause,
+    JsIdentifierBinding, JsImport, JsLanguage, JsNamedImportSpecifierList, JsSyntaxNode, T,
 };
-use biome_rowan::{
-    AstNode, AstSeparatedList, BatchMutation, BatchMutationExt, NodeOrToken, SyntaxResult,
-};
+use biome_rowan::{AstNode, AstSeparatedList, BatchMutation, BatchMutationExt};
 
 declare_rule! {
     /// Disallow unused imports.
@@ -108,20 +106,12 @@ impl Rule for NoUnusedImports {
         let declaration = ctx.query().declaration()?;
         let mut mutation = ctx.root().begin();
         match declaration {
-            AnyJsBindingDeclaration::JsImportDefaultClause(_)
-            | AnyJsBindingDeclaration::JsImportNamespaceClause(_) => {
-                let import = declaration.parent::<JsImport>()?;
-                mutation.transfer_leading_trivia_to_sibling(import.syntax());
-                mutation.remove_node(import);
-            }
             AnyJsBindingDeclaration::JsShorthandNamedImportSpecifier(_)
             | AnyJsBindingDeclaration::JsNamedImportSpecifier(_)
             | AnyJsBindingDeclaration::JsBogusNamedImportSpecifier(_) => {
                 let specifier_list = declaration.parent::<JsNamedImportSpecifierList>()?;
-                if specifier_list.iter().count() == 1 {
-                    let import_clause =
-                        JsImportNamedClause::cast(specifier_list.syntax().parent()?.parent()?)?;
-                    remove_named_import_from_import_clause(&mut mutation, import_clause).ok()?;
+                if specifier_list.len() == 1 {
+                    remove_import_specifier(&mut mutation, &specifier_list.syntax().parent()?)?;
                 } else {
                     let following_separator = specifier_list
                         .iter()
@@ -138,12 +128,9 @@ impl Rule for NoUnusedImports {
                     mutation.remove_node(declaration);
                 }
             }
-            AnyJsBindingDeclaration::JsDefaultImportSpecifier(declaration) => {
-                mutation.remove_node(declaration);
-            }
-            AnyJsBindingDeclaration::JsNamespaceImportSpecifier(_) => {
-                let import_clause = JsImportNamedClause::cast(declaration.syntax().parent()?)?;
-                remove_named_import_from_import_clause(&mut mutation, import_clause).ok()?;
+            AnyJsBindingDeclaration::JsDefaultImportSpecifier(_)
+            | AnyJsBindingDeclaration::JsNamespaceImportSpecifier(_) => {
+                remove_import_specifier(&mut mutation, declaration.syntax())?;
             }
             AnyJsBindingDeclaration::TsImportEqualsDeclaration(_) => {
                 mutation.remove_node(declaration);
@@ -161,34 +148,74 @@ impl Rule for NoUnusedImports {
     }
 }
 
-fn remove_named_import_from_import_clause(
+fn remove_import_specifier(
     mutation: &mut BatchMutation<JsLanguage>,
-    import_clause: JsImportNamedClause,
-) -> SyntaxResult<()> {
-    if let Some(default_specifier) = import_clause.default_specifier() {
-        let default_clause = make::js_import_default_clause(
-            default_specifier.local_name()?,
-            make::token_decorated_with_space(T![from]),
-            import_clause.source()?,
-        )
-        .build();
-        mutation.replace_node(
-            AnyJsImportClause::from(import_clause),
-            default_clause.into(),
-        );
-    } else if let Some(import) = import_clause.syntax().parent() {
-        mutation.transfer_leading_trivia_to_sibling(&import);
-        mutation.remove_element(NodeOrToken::Node(import));
+    specifier: &JsSyntaxNode,
+) -> Option<()> {
+    let clause = specifier.parent().and_then(AnyJsImportClause::cast)?;
+    match &clause {
+        AnyJsImportClause::JsImportDefaultExtraClause(default_extra_clause) => {
+            let default_specifier = default_extra_clause.default_specifier().ok()?;
+            let from_token = default_extra_clause.from_token().ok()?;
+            let source = default_extra_clause.source().ok()?;
+            let assertion = default_extra_clause.assertion();
+            if default_specifier.syntax() == specifier {
+                let new_clause = match default_extra_clause.extra_specifier().ok()? {
+                    AnyJsExtraImportSpecifier::JsNamedImportSpecifiers(named_specifier) => {
+                        let named_clause =
+                            make::js_import_named_clause(named_specifier, from_token, source);
+                        let named_clause = if let Some(assertion) = assertion {
+                            named_clause.with_assertion(assertion)
+                        } else {
+                            named_clause
+                        };
+                        AnyJsImportClause::JsImportNamedClause(named_clause.build())
+                    }
+                    AnyJsExtraImportSpecifier::JsNamespaceImportSpecifier(namespace_specifier) => {
+                        let namespace_clause = make::js_import_namespace_clause(
+                            namespace_specifier,
+                            from_token,
+                            source,
+                        );
+                        let namespace_clause = if let Some(assertion) = assertion {
+                            namespace_clause.with_assertion(assertion)
+                        } else {
+                            namespace_clause
+                        };
+                        AnyJsImportClause::JsImportNamespaceClause(namespace_clause.build())
+                    }
+                };
+                mutation.replace_node(clause, new_clause);
+            } else {
+                let from_token = make::token_decorated_with_space(T![from])
+                    .with_trailing_trivia_pieces(from_token.trailing_trivia().pieces());
+                let default_clause =
+                    make::js_import_default_clause(default_specifier, from_token, source);
+                let default_clause = if let Some(assertion) = assertion {
+                    default_clause.with_assertion(assertion)
+                } else {
+                    default_clause
+                };
+                mutation.replace_node(clause, default_clause.build().into());
+            }
+        }
+        AnyJsImportClause::JsImportBareClause(_)
+        | AnyJsImportClause::JsImportDefaultClause(_)
+        | AnyJsImportClause::JsImportNamedClause(_)
+        | AnyJsImportClause::JsImportNamespaceClause(_) => {
+            // Remove the entire statement
+            let import = clause.parent::<JsImport>()?;
+            mutation.transfer_leading_trivia_to_sibling(import.syntax());
+            mutation.remove_node(import);
+        }
     }
-    Ok(())
+    Some(())
 }
 
 const fn is_import(declaration: &AnyJsBindingDeclaration) -> bool {
     matches!(
         declaration,
         AnyJsBindingDeclaration::JsDefaultImportSpecifier(_)
-            | AnyJsBindingDeclaration::JsImportDefaultClause(_)
-            | AnyJsBindingDeclaration::JsImportNamespaceClause(_)
             | AnyJsBindingDeclaration::JsNamedImportSpecifier(_)
             | AnyJsBindingDeclaration::JsNamespaceImportSpecifier(_)
             | AnyJsBindingDeclaration::JsShorthandNamedImportSpecifier(_)

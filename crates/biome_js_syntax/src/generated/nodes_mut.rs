@@ -817,12 +817,6 @@ impl JsDefaultImportSpecifier {
                 .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
         )
     }
-    pub fn with_trailing_comma_token(self, element: SyntaxToken) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(1usize..=1usize, once(Some(element.into()))),
-        )
-    }
 }
 impl JsDirective {
     pub fn with_value_token(self, element: SyntaxToken) -> Self {
@@ -1857,7 +1851,7 @@ impl JsImportDefaultClause {
                 .splice_slots(0usize..=0usize, once(element.map(|element| element.into()))),
         )
     }
-    pub fn with_local_name(self, element: AnyJsBinding) -> Self {
+    pub fn with_default_specifier(self, element: JsDefaultImportSpecifier) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
@@ -1878,6 +1872,44 @@ impl JsImportDefaultClause {
     pub fn with_assertion(self, element: Option<JsImportAssertion>) -> Self {
         Self::unwrap_cast(self.syntax.splice_slots(
             4usize..=4usize,
+            once(element.map(|element| element.into_syntax().into())),
+        ))
+    }
+}
+impl JsImportDefaultExtraClause {
+    pub fn with_default_specifier(self, element: JsDefaultImportSpecifier) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_comma_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_extra_specifier(self, element: AnyJsExtraImportSpecifier) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_from_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(3usize..=3usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_source(self, element: JsModuleSource) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(4usize..=4usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_assertion(self, element: Option<JsImportAssertion>) -> Self {
+        Self::unwrap_cast(self.syntax.splice_slots(
+            5usize..=5usize,
             once(element.map(|element| element.into_syntax().into())),
         ))
     }
@@ -1909,33 +1941,27 @@ impl JsImportNamedClause {
                 .splice_slots(0usize..=0usize, once(element.map(|element| element.into()))),
         )
     }
-    pub fn with_default_specifier(self, element: Option<JsDefaultImportSpecifier>) -> Self {
-        Self::unwrap_cast(self.syntax.splice_slots(
-            1usize..=1usize,
-            once(element.map(|element| element.into_syntax().into())),
-        ))
-    }
-    pub fn with_named_import(self, element: AnyJsNamedImport) -> Self {
+    pub fn with_named_specifiers(self, element: JsNamedImportSpecifiers) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
+                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
         )
     }
     pub fn with_from_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(3usize..=3usize, once(Some(element.into()))),
+                .splice_slots(2usize..=2usize, once(Some(element.into()))),
         )
     }
     pub fn with_source(self, element: JsModuleSource) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(4usize..=4usize, once(Some(element.into_syntax().into()))),
+                .splice_slots(3usize..=3usize, once(Some(element.into_syntax().into()))),
         )
     }
     pub fn with_assertion(self, element: Option<JsImportAssertion>) -> Self {
         Self::unwrap_cast(self.syntax.splice_slots(
-            5usize..=5usize,
+            4usize..=4usize,
             once(element.map(|element| element.into_syntax().into())),
         ))
     }
@@ -1947,39 +1973,27 @@ impl JsImportNamespaceClause {
                 .splice_slots(0usize..=0usize, once(element.map(|element| element.into()))),
         )
     }
-    pub fn with_star_token(self, element: SyntaxToken) -> Self {
+    pub fn with_namespace_specifier(self, element: JsNamespaceImportSpecifier) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(1usize..=1usize, once(Some(element.into()))),
-        )
-    }
-    pub fn with_as_token(self, element: SyntaxToken) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(2usize..=2usize, once(Some(element.into()))),
-        )
-    }
-    pub fn with_local_name(self, element: AnyJsBinding) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(3usize..=3usize, once(Some(element.into_syntax().into()))),
+                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
         )
     }
     pub fn with_from_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(4usize..=4usize, once(Some(element.into()))),
+                .splice_slots(2usize..=2usize, once(Some(element.into()))),
         )
     }
     pub fn with_source(self, element: JsModuleSource) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(5usize..=5usize, once(Some(element.into_syntax().into()))),
+                .splice_slots(3usize..=3usize, once(Some(element.into_syntax().into()))),
         )
     }
     pub fn with_assertion(self, element: Option<JsImportAssertion>) -> Self {
         Self::unwrap_cast(self.syntax.splice_slots(
-            6usize..=6usize,
+            4usize..=4usize,
             once(element.map(|element| element.into_syntax().into())),
         ))
     }
