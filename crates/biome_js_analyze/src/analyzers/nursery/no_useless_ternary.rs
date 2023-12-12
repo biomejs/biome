@@ -79,11 +79,11 @@ impl Rule for NoUselessTernary {
                 rule_category!(),
                 node.range(),
                 markup! {
-                    "Disallow ternary operators when simpler alternatives exist."
+                    "Unnecessary use of boolean literals in conditional expression."
                 },
             )
             .note(markup! {
-                "Unnecessary use of boolean literals in conditional expression.\n Simplify your code by directly assigning the result without using a ternary operator."
+                "Simplify your code by directly assigning the result without using a ternary operator."
             })
             .note(markup! {
                 "If your goal is negation, you may use the logical NOT (!) or double NOT (!!) operator for clearer and concise code.\n Check for more details about "<Hyperlink href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Logical_NOT">"NOT"</Hyperlink>" operator."
