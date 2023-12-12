@@ -5,23 +5,19 @@ use rules::get_rule_metadata;
 use std::str::FromStr;
 
 #[derive(Debug, Clone)]
-pub struct Explain {
-    pub rule: Option<RuleMetadata>,
-    pub unknown: Option<String>,
+pub enum Explain {
+    Rule(RuleMetadata),
+    Unknown(String),
 }
 
 impl FromStr for Explain {
     type Err = String;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let rule = get_rule_metadata(s);
+        if let Some(metadata) = get_rule_metadata(s) {
+            return Ok(Explain::Rule(metadata));
+        }
 
-        let unknown = if rule.is_none() {
-            Some(s.to_owned())
-        } else {
-            None
-        };
-
-        Ok(Explain { rule, unknown })
+        Ok(Explain::Unknown(s.to_owned()))
     }
 }

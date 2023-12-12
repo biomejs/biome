@@ -20,13 +20,8 @@ fn print_rule(session: CliSession, metadata: &RuleMetadata) -> Result<(), CliDia
 }
 
 pub(crate) fn explain(session: CliSession, explain: Explain) -> Result<(), CliDiagnostic> {
-    if let Some(rule) = explain.rule {
-        return print_rule(session, &rule);
+    match explain {
+        Explain::Rule(metadata) => print_rule(session, &metadata),
+        Explain::Unknown(arg) => Err(CliDiagnostic::unexpected_argument(arg, "explain")),
     }
-
-    if let Some(unknown) = explain.unknown {
-        return Err(CliDiagnostic::unexpected_argument(unknown, "explain"));
-    }
-
-    unreachable!();
 }
