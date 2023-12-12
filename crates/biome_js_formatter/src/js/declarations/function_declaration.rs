@@ -269,14 +269,12 @@ pub(crate) fn should_group_function_parameters(
 
     if let Some(type_parameters) = type_parameters {
         match type_parameters.items().len() {
-            0 => {
-                // fall through
-            }
+            0 => {} // fall through
             1 => {
                 // SAFETY: Safe because the length is 1
                 let first = type_parameters.items().iter().next().unwrap()?;
 
-                if first.constraint().is_none() || first.default().is_some() {
+                if first.constraint().is_some() || first.default().is_some() {
                     return Ok(false);
                 }
             }
