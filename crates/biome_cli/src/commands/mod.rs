@@ -13,7 +13,7 @@ use biome_service::configuration::{
     vcs::vcs_configuration, FilesConfiguration, FormatterConfiguration, JavascriptFormatter,
     LinterConfiguration, LoadedConfiguration,
 };
-use biome_service::explanations::Explanations;
+use biome_service::explain::Explain;
 use biome_service::{Configuration, ConfigurationDiagnostic, WorkspaceError};
 use bpaf::Bpaf;
 use std::ffi::OsString;
@@ -258,7 +258,7 @@ pub enum BiomeCommand {
     #[bpaf(command)]
     Explain {
         #[bpaf(positional, hide)]
-        explanations: Explanations,
+        explain: Explain,
     },
 
     #[bpaf(command("__run_server"), hide)]

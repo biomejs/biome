@@ -1,10 +1,9 @@
 use biome_analyze::RuleMetadata;
 use biome_console::{markup, ConsoleExt};
-use biome_service::explanations::Explanations;
+use biome_service::explain::Explain;
 
 use crate::{CliDiagnostic, CliSession};
 
-#[allow(dead_code)]
 fn print_rule(session: CliSession, metadata: &RuleMetadata) {
     session.app.console.log(markup! {
         "# "{metadata.name}
@@ -18,18 +17,8 @@ fn print_rule(session: CliSession, metadata: &RuleMetadata) {
     });
 }
 
-#[allow(dead_code)]
-pub(crate) struct ExplainCommandPayload {
-    pub(crate) explanations: Explanations,
-}
-
-pub(crate) fn explain(
-    session: CliSession,
-    payload: ExplainCommandPayload,
-) -> Result<(), CliDiagnostic> {
-    let ExplainCommandPayload { explanations } = payload;
-
-    if let Some(metadata) = explanations.rule {
+pub(crate) fn explain(session: CliSession, explain: Explain) -> Result<(), CliDiagnostic> {
+    if let Some(metadata) = explain.rule {
         print_rule(session, &metadata);
     }
 

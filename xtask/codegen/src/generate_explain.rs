@@ -47,8 +47,8 @@ impl RegistryVisitor<JsonLanguage> for RulesVisitor {
     }
 }
 
-pub(crate) fn generate_explanations(mode: Mode) -> Result<()> {
-    let explanations_root = project_root().join("crates/biome_service/src/explanations");
+pub(crate) fn generate_explain(mode: Mode) -> Result<()> {
+    let explain_root = project_root().join("crates/biome_service/src/explain");
 
     let mut visitor = RulesVisitor::new();
 
@@ -78,7 +78,7 @@ pub(crate) fn generate_explanations(mode: Mode) -> Result<()> {
     };
 
     update(
-        &explanations_root.join("rules.rs"),
+        &explain_root.join("rules.rs"),
         &xtask::reformat(rules.to_string())?,
         &mode,
     )?;

@@ -175,8 +175,8 @@ jobs:
       - name: Run the bindings codegen
         run: cargo codegen-bindings
       - name: Run the website codegen
-        run: cargo codegen-explanations
-      - name: Run the explanations codegen
+        run: cargo codegen-explain
+      - name: Run the explain codegen
         run: |
           cargo lintdoc
           cargo codegen-website

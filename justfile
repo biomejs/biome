@@ -22,7 +22,7 @@ upgrade-tools:
 codegen:
   cargo codegen all
   cargo codegen-configuration
-  cargo codegen-explanations
+  cargo codegen-explain
   cargo lintdoc
   just codegen-bindings
   cargo codegen-website
