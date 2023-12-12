@@ -337,7 +337,7 @@ pub(crate) fn validate_configuration_diagnostics(
         }
     }
     let diagnostics = loaded_configuration.as_diagnostics_iter();
-    for (diagnostic, path) in diagnostics {
+    for diagnostic in diagnostics {
         console.error(markup!{
             {if verbose { PrintDiagnostic::verbose(diagnostic) } else { PrintDiagnostic::simple(diagnostic) }}
         });

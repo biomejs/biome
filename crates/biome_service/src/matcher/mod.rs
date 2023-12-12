@@ -49,7 +49,7 @@ impl Matcher {
 
         for the_match in matches {
             gitignore_builder
-                .add_line(Some(path.clone()), &the_match)
+                .add_line(Some(path.clone()), the_match)
                 .map_err(|err| {
                     WorkspaceError::Configuration(ConfigurationDiagnostic::InvalidIgnorePattern(
                         InvalidIgnorePattern {

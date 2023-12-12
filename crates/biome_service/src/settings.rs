@@ -512,11 +512,11 @@ impl OverrideSettings {
             let included = !pattern.include.is_empty() && pattern.include.matches_path(path);
             let excluded = !pattern.exclude.is_empty() && pattern.exclude.matches_path(path);
 
-            if excluded == true {
+            if excluded {
                 return options;
             }
 
-            if included == true {
+            if included {
                 let js_formatter = &pattern.languages.javascript.formatter;
                 let formatter = &pattern.formatter;
 
@@ -569,10 +569,10 @@ impl OverrideSettings {
         self.patterns.iter().fold(options, |mut options, pattern| {
             let included = !pattern.include.is_empty() && pattern.include.matches_path(path);
             let excluded = !pattern.exclude.is_empty() && pattern.exclude.matches_path(path);
-            if excluded == true {
+            if excluded {
                 return options;
             }
-            if included == true {
+            if included {
                 let json_formatter = &pattern.languages.json.formatter;
 
                 if let Some(indent_style) = json_formatter
@@ -606,10 +606,10 @@ impl OverrideSettings {
         self.patterns.iter().fold(options, |mut options, pattern| {
             let included = !pattern.include.is_empty() && pattern.include.matches_path(path);
             let excluded = !pattern.exclude.is_empty() && pattern.exclude.matches_path(path);
-            if excluded == true {
+            if excluded {
                 return options;
             }
-            if included == true {
+            if included {
                 let js_parser = &pattern.languages.javascript.parser;
 
                 options.parse_class_parameter_decorators =
@@ -624,7 +624,7 @@ impl OverrideSettings {
             let included = !pattern.include.is_empty() && pattern.include.matches_path(path);
             let excluded = !pattern.exclude.is_empty() && pattern.exclude.matches_path(path);
 
-            if included == true || excluded == false {
+            if included || !excluded {
                 let json_parser = &pattern.languages.json.parser;
 
                 return Some(JsonParserOptions {
@@ -700,7 +700,7 @@ impl OverrideSettings {
             }
             if !pattern.include.is_empty() && pattern.include.matches_path(path) {
                 if let Some(enabled) = pattern.formatter.enabled {
-                    return Some(enabled == false);
+                    return Some(!enabled);
                 }
                 continue;
             }
@@ -716,7 +716,7 @@ impl OverrideSettings {
             }
             if !pattern.include.is_empty() && pattern.include.matches_path(path) {
                 if let Some(enabled) = pattern.linter.enabled {
-                    return Some(enabled == false);
+                    return Some(!enabled);
                 }
                 continue;
             }
@@ -732,7 +732,7 @@ impl OverrideSettings {
             }
             if !pattern.include.is_empty() && pattern.include.matches_path(path) {
                 if let Some(enabled) = pattern.organize_imports.enabled {
-                    return Some(enabled == false);
+                    return Some(!enabled);
                 }
                 continue;
             }

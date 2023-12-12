@@ -42,5 +42,5 @@ pub(crate) fn retrieve_gitignore_matches(
             }
         }
     }
-    return Ok((None, vec![]));
+    Ok((None, vec![]))
 }

@@ -410,8 +410,8 @@ impl Session {
         let status = match load_configuration(&self.fs, base_path) {
             Ok(loaded_configuration) => {
                 if loaded_configuration.has_errors() {
-                    error!("Couldn't load the configuration file, reasons:",);
-                    for (diagnostic, _) in loaded_configuration.as_diagnostics_iter() {
+                    error!("Couldn't load the configuration file, reasons:");
+                    for diagnostic in loaded_configuration.as_diagnostics_iter() {
                         let message = PrintDescription(diagnostic).to_string();
                         self.client.log_message(MessageType::ERROR, message).await;
                     }
@@ -426,10 +426,8 @@ impl Session {
                     debug!("{configuration:#?}");
                     let fs = &self.fs;
 
-                    let result = configuration.retrieve_gitignore_matches(
-                        fs,
-                        configuration_path.as_ref().map(|path| path.as_path()),
-                    );
+                    let result =
+                        configuration.retrieve_gitignore_matches(fs, configuration_path.as_deref());
 
                     match result {
                         Ok(gitignore_matches) => {

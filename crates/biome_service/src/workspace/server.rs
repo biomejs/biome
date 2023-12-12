@@ -268,7 +268,6 @@ impl Workspace for WorkspaceServer {
                         file_features.ignored(feature);
                     }
                 }
-                dbg!(params.path, &file_features);
 
                 Ok(entry.insert(file_features).clone())
             }
@@ -315,13 +314,11 @@ impl Workspace for WorkspaceServer {
         };
 
         if !ignored_files.is_empty() {
-            if ignored_files.matches_path(path) == true {
+            if ignored_files.matches_path(path) {
                 return Ok(true);
             }
-        } else if !included_files.is_empty() == true {
-            if included_files.matches_path(path) == true {
-                return Ok(false);
-            }
+        } else if !included_files.is_empty() && included_files.matches_path(path) {
+            return Ok(false);
         }
 
         Ok(self.is_ignored_by_top_level_config(path))

@@ -490,7 +490,7 @@ pub fn load_configuration(
 ) -> Result<LoadedConfiguration, WorkspaceError> {
     let config = load_config(fs, config_path)?;
     let loaded_configuration = LoadedConfiguration::from(config);
-    Ok(loaded_configuration.apply_extends(fs)?)
+    loaded_configuration.apply_extends(fs)
 }
 
 /// Load the configuration from the file system.
@@ -730,12 +730,12 @@ impl LoadedConfiguration {
 
     /// Return the path of the **directory** where the configuration is
     pub fn directory_path(&self) -> Option<&Path> {
-        self.directory_path.as_ref().map(|path| path.as_path())
+        self.directory_path.as_deref()
     }
 
     /// Return the path of the **file** where the configuration is
     pub fn file_path(&self) -> Option<&Path> {
-        self.file_path.as_ref().map(|path| path.as_path())
+        self.file_path.as_deref()
     }
 
     pub fn has_errors(&self) -> bool {
@@ -746,40 +746,37 @@ impl LoadedConfiguration {
 
     /// It extracts diagnostics emitted during the resolution of the configuration file
     pub fn as_diagnostics_iter(&self) -> ConfigurationDiagnosticsIter {
-        ConfigurationDiagnosticsIter::new(self.file_path.as_ref(), self.diagnostics.as_slice())
+        ConfigurationDiagnosticsIter::new(self.diagnostics.as_slice())
     }
 }
 
 pub struct ConfigurationDiagnosticsIter<'a> {
-    path: Option<&'a PathBuf>,
     errors: &'a [Error],
     len: usize,
     index: usize,
 }
 
 impl<'a> ConfigurationDiagnosticsIter<'a> {
-    fn new(path: Option<&'a PathBuf>, errors: &'a [Error]) -> Self {
+    fn new(errors: &'a [Error]) -> Self {
         Self {
             len: errors.len(),
             index: 0,
             errors,
-            path,
         }
     }
 }
 
 impl<'a> Iterator for ConfigurationDiagnosticsIter<'a> {
-    type Item = (&'a Error, Option<&'a PathBuf>);
+    type Item = &'a Error;
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.len == self.index {
             return None;
         }
 
-        let item = (self.errors.get(self.index).unwrap(), self.path);
-
+        let item = self.errors.get(self.index);
         self.index += 1;
-        return Some(item);
+        item
     }
 }
 
