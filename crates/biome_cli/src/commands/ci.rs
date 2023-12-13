@@ -1,6 +1,5 @@
 use crate::cli_options::CliOptions;
 use crate::commands::validate_configuration_diagnostics;
-use crate::vcs::retrieve_gitignore_matches;
 use crate::{execute_mode, setup_cli_subscriber, CliDiagnostic, CliSession, Execution};
 use biome_service::configuration::organize_imports::OrganizeImports;
 use biome_service::configuration::{
@@ -91,7 +90,7 @@ pub(crate) fn ci(session: CliSession, payload: CiCommandPayload) -> Result<(), C
     // check if support of git ignore files is enabled
     let vcs_base_path = configuration_path.or(session.app.fs.working_directory());
     let (vcs_base_path, gitignore_matches) =
-        retrieve_gitignore_matches(&session.app.fs, &configuration, vcs_base_path.clone())?;
+        configuration.retrieve_gitignore_matches(&session.app.fs, vcs_base_path.as_deref())?;
 
     session
         .app

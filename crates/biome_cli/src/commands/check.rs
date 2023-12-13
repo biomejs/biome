@@ -1,6 +1,5 @@
 use crate::cli_options::CliOptions;
 use crate::commands::validate_configuration_diagnostics;
-use crate::vcs::retrieve_gitignore_matches;
 use crate::{
     execute_mode, setup_cli_subscriber, CliDiagnostic, CliSession, Execution, TraversalMode,
 };
@@ -103,7 +102,7 @@ pub(crate) fn check(
     // check if support of git ignore files is enabled
     let vcs_base_path = configuration_path.or(session.app.fs.working_directory());
     let (vcs_base_path, gitignore_matches) =
-        retrieve_gitignore_matches(&session.app.fs, &fs_configuration, vcs_base_path.clone())?;
+        fs_configuration.retrieve_gitignore_matches(&session.app.fs, vcs_base_path.as_deref())?;
 
     let stdin = if let Some(stdin_file_path) = stdin_file_path {
         let console = &mut session.app.console;

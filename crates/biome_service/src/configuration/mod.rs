@@ -22,7 +22,6 @@ pub use crate::configuration::merge::MergeWith;
 use crate::configuration::organize_imports::{organize_imports, OrganizeImports};
 use crate::configuration::overrides::Overrides;
 use crate::configuration::vcs::{vcs_configuration, VcsConfiguration};
-use crate::diagnostics::{DisabledVcs, VcsDiagnostic};
 use crate::settings::WorkspaceSettings;
 use crate::{DynRef, WorkspaceError, VERSION};
 use biome_analyze::AnalyzerRules;
@@ -192,24 +191,27 @@ impl Configuration {
         self.vcs.as_ref().map(|f| f.is_disabled()).unwrap_or(true)
     }
 
+    /// This function checks if the VCS integration is enabled, and if so, it will attempts to resolve the
+    /// VCS root directory and the `.gitignore` file.
+    ///
+    /// ## Returns
+    ///
+    /// A tuple with VCS root folder and the contents of the `.gitignore` file
     pub fn retrieve_gitignore_matches(
         &self,
         file_system: &DynRef<'_, dyn FileSystem>,
         vcs_base_path: Option<&Path>,
-    ) -> Result<Vec<String>, WorkspaceError> {
+    ) -> Result<(Option<PathBuf>, Vec<String>), WorkspaceError> {
         let Some(vcs) = &self.vcs else {
-            return Ok(vec![]);
+            return Ok((None, vec![]));
         };
         if vcs.is_enabled() {
             let vcs_base_path = match (vcs_base_path, &vcs.root) {
                 (Some(vcs_base_path), Some(root)) => vcs_base_path.join(root),
                 (None, Some(root)) => PathBuf::from(root),
                 (Some(vcs_base_path), None) => PathBuf::from(vcs_base_path),
-                (None, None) => {
-                    return Err(VcsDiagnostic::DisabledVcs(DisabledVcs {}).into());
-                }
+                (None, None) => return Err(WorkspaceError::vcs_disabled()),
             };
-
             if let Some(client_kind) = &vcs.client_kind {
                 if !vcs.ignore_file_disabled() {
                     let result = file_system
@@ -217,16 +219,19 @@ impl Configuration {
                         .map_err(WorkspaceError::from)?;
 
                     if let Some(result) = result {
-                        return Ok(result
-                            .content
-                            .lines()
-                            .map(String::from)
-                            .collect::<Vec<String>>());
+                        return Ok((
+                            Some(result.directory_path),
+                            result
+                                .content
+                                .lines()
+                                .map(String::from)
+                                .collect::<Vec<String>>(),
+                        ));
                     }
                 }
             }
         }
-        Ok(vec![])
+        Ok((None, vec![]))
     }
 }
 
@@ -625,11 +630,16 @@ pub fn to_analyzer_rules(settings: &WorkspaceSettings, path: &Path) -> AnalyzerR
     overrides.override_analyzer_rules(path, analyzer_rules)
 }
 
+/// Yield information regarding the configuration that was found
 #[derive(Default, Debug)]
 pub struct LoadedConfiguration {
+    /// If present, the path of the directory where it was found
     pub directory_path: Option<PathBuf>,
+    /// If present, the path of the file where it was found
     pub file_path: Option<PathBuf>,
+    /// The Deserialized configuration
     pub configuration: Configuration,
+    /// All diagnostics that were emitted during parsing and deserialization
     pub diagnostics: Vec<Error>,
 }
 
@@ -685,6 +695,7 @@ impl LoadedConfiguration {
         })
     }
 
+    /// It attempts to deserialize all the configuration files that were specified in the `extends` property
     fn deserialize_extends(
         &mut self,
         fs: &DynRef<'_, dyn FileSystem>,
@@ -738,13 +749,14 @@ impl LoadedConfiguration {
         self.file_path.as_deref()
     }
 
+    /// Whether the are errors emitted. Error are [Severity::Error] or greater.
     pub fn has_errors(&self) -> bool {
         self.diagnostics
             .iter()
             .any(|diagnostic| diagnostic.severity() >= Severity::Error)
     }
 
-    /// It extracts diagnostics emitted during the resolution of the configuration file
+    /// It return an iterator over the diagnostics emitted during the resolution of the configuration file
     pub fn as_diagnostics_iter(&self) -> ConfigurationDiagnosticsIter {
         ConfigurationDiagnosticsIter::new(self.diagnostics.as_slice())
     }

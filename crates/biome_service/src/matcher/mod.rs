@@ -14,8 +14,6 @@ pub struct Matcher {
     glob: GlobSet,
     /// Whether the string was already checked
     already_checked: RwLock<HashMap<String, bool>>,
-
-    empty: bool,
 }
 
 impl Matcher {
@@ -24,7 +22,6 @@ impl Matcher {
             git_ignore: None,
             glob: GlobSet::empty(),
             already_checked: RwLock::new(HashMap::default()),
-            empty: true,
         }
     }
 
@@ -33,7 +30,6 @@ impl Matcher {
     /// Check [glob website](https://docs.rs/glob/latest/glob/struct.MatchOptions.html) for [MatchOptions]
     pub fn new(glob: GlobSet) -> Self {
         Self {
-            empty: glob.is_empty(),
             glob,
             git_ignore: None,
             already_checked: RwLock::new(HashMap::default()),
@@ -65,9 +61,6 @@ impl Matcher {
                 },
             ))
         })?;
-        if self.is_empty() {
-            self.empty = gitignore.is_empty();
-        }
         self.git_ignore = Some(gitignore);
         Ok(())
     }
@@ -90,7 +83,12 @@ impl Matcher {
 
     /// If no globs haven't been stored, the function returns [true]
     pub fn is_empty(&self) -> bool {
-        self.empty
+        self.glob.is_empty()
+            && self
+                .git_ignore
+                .as_ref()
+                .map(|ignore| ignore.is_empty())
+                .unwrap_or(true)
     }
 
     /// It matches the given path against the stored patterns

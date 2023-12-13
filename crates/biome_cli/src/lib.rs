@@ -20,7 +20,6 @@ mod metrics;
 mod panic;
 mod reports;
 mod service;
-mod vcs;
 
 use crate::cli_options::ColorsArg;
 use crate::commands::check::CheckCommandPayload;

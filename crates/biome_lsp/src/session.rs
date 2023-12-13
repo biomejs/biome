@@ -430,8 +430,7 @@ impl Session {
                         configuration.retrieve_gitignore_matches(fs, configuration_path.as_deref());
 
                     match result {
-                        Ok(gitignore_matches) => {
-                            let vcs_base_path = configuration_path.or(self.fs.working_directory());
+                        Ok((vcs_base_path, gitignore_matches)) => {
                             let result = self.workspace.update_settings(UpdateSettingsParams {
                                 configuration,
                                 vcs_base_path,
