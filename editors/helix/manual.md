@@ -14,27 +14,27 @@ biome = { command = "biome", args = ["lsp-proxy"] }
 
 [[language]]
 name = "javascript"
-language-servers = [ { name = "typescript-language-server", except-features = [ "format" ] }, "biome"]
+language-servers = [ { name = "typescript-language-server", except-features = [ "format" ] }, "biome" ]
 auto-format = true
 
 [[language]]
 name = "typescript"
-language-servers = [ { name = "typescript-language-server", except-features = [ "format" ] }, "biome"]
+language-servers = [ { name = "typescript-language-server", except-features = [ "format" ] }, "biome" ]
 auto-format = true
 
 [[language]]
 name = "tsx"
 auto-format = true
-language-servers = [ { name = "typescript-language-server", except-features = [ "format" ] }, "biome"]
+language-servers = [ { name = "typescript-language-server", except-features = [ "format" ] }, "biome" ]
 
 [[language]]
 name = "jsx"
 auto-format = true
-language-servers = [ { name = "typescript-language-server", except-features = [ "format" ] }, "biome"]
+language-servers = [ { name = "typescript-language-server", except-features = [ "format" ] }, "biome" ]
 
 [[language]]
 name = "json"
-language-servers = [ { name = "vscode-json-language-server", except-features = [ "format" ] }, "biome"]
+language-servers = [ { name = "vscode-json-language-server", except-features = [ "format" ] }, "biome" ]
 ```
 
 # Video record
