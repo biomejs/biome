@@ -11,96 +11,31 @@ Helix 23.10 has [support for multiple language servers](https://github.com/helix
 ```toml
 [language-server]
 biome = { command = "biome", args = ["lsp-proxy"] }
+vscode-json-language-server = { command = "vscode-json-language-server", args = ["--stdio"], config = { provideFormatter = false, json = { validate = { enable = true } } } }
 
 [[language]]
 name = "javascript"
+language-servers = [ { name = "typescript-language-server", except-features = [ "format" ] }, "biome"]
 auto-format = true
-comment-token = "//"
-file-types = ["js", "mjs", "cjs"]
-injection-regex = "(js|javascript)"
-language-id = "javascript"
-language-servers = ["typescript-language-server", "biome"]
-roots = []
-scope = "source.js"
-shebangs = ["node"]
-
-[language.formatter]
-command = "biome"
-args = ["format", "--stdin-file-path", "test.js"]
-
-[language.indent]
-tab-width = 2
-unit = "  "
 
 [[language]]
 name = "typescript"
+language-servers = [ { name = "typescript-language-server", except-features = [ "format" ] }, "biome"]
 auto-format = true
-file-types = ["ts", "mts", "cts"]
-injection-regex = "(ts|typescript)"
-language-id = "typescript"
-language-servers = ["typescript-language-server", "biome"]
-roots = []
-scope = "source.ts"
-shebangs = []
-
-[language.formatter]
-command = "biome"
-args = ["format", "--stdin-file-path", "test.ts"]
-
-[language.indent]
-tab-width = 2
-unit = "  "
 
 [[language]]
 name = "tsx"
 auto-format = true
-file-types = ["tsx"]
-injection-regex = "(tsx)"
-language-id = "typescriptreact"
-language-servers = ["typescript-language-server", "biome"]
-roots = []
-scope = "source.tsx"
-
-[language.formatter]
-command = "biome"
-args = ["format", "--stdin-file-path", "test.tsx"]
-
-[language.indent]
-tab-width = 2
-unit = "  "
+language-servers = [ { name = "typescript-language-server", except-features = [ "format" ] }, "biome"]
 
 [[language]]
 name = "jsx"
 auto-format = true
-comment-token = "//"
-file-types = ["jsx"]
-grammar = "javascript"
-injection-regex = "jsx"
-language-id = "javascriptreact"
-language-servers = ["typescript-language-server", "biome"]
-roots = []
-scope = "source.jsx"
-
-[language.formatter]
-command = "biome"
-args = ["format", "--stdin-file-path", "test.jsx"]
-
-[language.indent]
-tab-width = 2
-unit = "  "
+language-servers = [ { name = "typescript-language-server", except-features = [ "format" ] }, "biome"]
 
 [[language]]
 name = "json"
-auto-format = true
-file-types = ["json", "jsonc", "arb", "ipynb", "geojson"]
-injection-regex = "json"
-language-servers = ["biome"]
-roots = []
-scope = "source.json"
-
-[language.formatter]
-command = "biome"
-args = ["format", "--stdin-file-path", "test.json"]
+language-servers = [ { name = "vscode-json-language-server", except-features = [ "format" ] }, "biome"]
 ```
 
 # Video record
