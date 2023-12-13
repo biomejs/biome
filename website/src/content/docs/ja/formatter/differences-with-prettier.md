@@ -1,5 +1,5 @@
 ---
-title: Differences with Prettier
+title: Prettier との違い
 description: Prettier との違いを深く解説
 ---
 
