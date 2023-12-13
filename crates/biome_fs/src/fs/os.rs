@@ -107,6 +107,18 @@ impl<'scope> OsTraversalScope<'scope> {
     }
 }
 
+/// We want to avoid raising errors around I/O and symbolic link loops because they are
+/// already handled inside the inner traversal
+fn can_track_error(error: &ignore::Error) -> bool {
+    !error.is_io()
+        && !matches!(error, ignore::Error::Loop { .. })
+        && if let ignore::Error::WithDepth { err, .. } = error {
+            !err.is_io() && !matches!(err.as_ref(), ignore::Error::Loop { .. })
+        } else {
+            true
+        }
+}
+
 impl<'scope> TraversalScope<'scope> for OsTraversalScope<'scope> {
     fn traverse_paths(&self, context: &'scope dyn TraversalContext, paths: Vec<PathBuf>) {
         let mut inputs = paths.iter();
@@ -125,8 +137,9 @@ impl<'scope> TraversalScope<'scope> for OsTraversalScope<'scope> {
                             self.spawn(context, PathBuf::from(directory.path()));
                         }
                         Err(error) => {
-                            // IO errors are handled by our inner traversal, and we emit specific error messages
-                            if !error.is_io() {
+                            // - IO errors are handled by our inner traversal, and we emit specific error messages.
+                            // - Symbolic link loops are handled in the inner traversal.
+                            if can_track_error(&error) {
                                 let diagnostic = Error::from(IgnoreError::from(error));
                                 context.push_diagnostic(diagnostic);
                             }
