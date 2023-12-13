@@ -71,7 +71,7 @@ class C {
 
 [プレイグラウンドのリンク](https://biomejs.dev/playground?enabledLinting=false&code=YQAgAD0AIAB7AAoAIAAgAFsAeAAgAD0AIAAwAF0AOgAgADEALAAKAH0ACgAKAGMAbABhAHMAcwAgAEMAIAB7AAoAIAAgACAAIABbAHgAIAA9ACAAMABdACAAPQAgADEACgB9AAoA)
 
-一貫性を保つために、私たちはここで異なる道を選び、括弧を省略することにしました。
+一貫性を保つために、私たちは Prettier のformatに合わせることなく括弧を省略することにしました。
 代替案としては、オブジェクトまたはクラスの計算プロパティでの代入を常に括弧で囲むことができます。
 
 ### Prettierは必要ない場合でも矢印関数の型パラメータに末尾のカンマを追加します
