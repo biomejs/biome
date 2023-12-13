@@ -123,10 +123,6 @@ impl Diagnostic for IgnoreError {
         Some(category!("flags/invalid"))
     }
 
-    fn tags(&self) -> DiagnosticTags {
-        DiagnosticTags::FIXABLE
-    }
-
     fn description(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let error = self.error.to_string();
         fmt.write_str(&error)

@@ -125,8 +125,11 @@ impl<'scope> TraversalScope<'scope> for OsTraversalScope<'scope> {
                             self.spawn(context, PathBuf::from(directory.path()));
                         }
                         Err(error) => {
-                            let diagnostic = Error::from(IgnoreError::from(error));
-                            context.push_diagnostic(diagnostic);
+                            // IO errors are handled by our inner traversal, and we emit specific error messages
+                            if !error.is_io() {
+                                let diagnostic = Error::from(IgnoreError::from(error));
+                                context.push_diagnostic(diagnostic);
+                            }
                         }
                     }
 
