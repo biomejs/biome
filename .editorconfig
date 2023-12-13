@@ -13,5 +13,5 @@ indent_size = 2
 [{**.yml,**.md,**.rs,**.mdx,justfile}]
 indent_style = space
 
-[*.rs]
+[{*.rs,*.kt}]
 indent_size = 4

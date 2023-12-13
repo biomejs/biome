@@ -33,8 +33,14 @@
                              groupId="language"
                              nonDefaultProject="false"
                              key="biome.settings.name"
-                             instance="com.github.biomejs.intellijbiome.settings.BiomeSettingsConfigurable"/>
-        <formattingService implementation="com.github.biomejs.intellijbiome.formatter.BiomeFormatterProvider"/>
+                             instance="com.github.biomejs.intellijbiome.settings.BiomeConfigurable"/>
+				<formattingService implementation="com.github.biomejs.intellijbiome.formatter.BiomeFormatterProvider" order="after FormatOnSaveAction, after ESLintActionOnSave" />
+				<actionOnSaveInfoProvider id="BiomeOnSaveInfoProvider"
+																	implementation="com.github.biomejs.intellijbiome.formatter.BiomeOnSaveInfoProvider"
+																	order="after FormatOnSaveInfoProvider, after EsLintOnSaveInfoProvider, before BuildOnSaveInfoProvider, before FileWatcherOnSaveInfoProvider, before UploadOnSaveInfoProvider"/>
+				<actionOnSave id="BiomeActionOnSave"
+											implementation="com.github.biomejs.intellijbiome.actions.BiomeFormatOnSaveAction"
+											order="after FormatOnSaveAction, after ESLintActionOnSave"/>
     </extensions>
     <projectListeners>
         <listener class="com.github.biomejs.intellijbiome.listeners.BiomeConfigListener"
