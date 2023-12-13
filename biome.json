@@ -4,25 +4,5 @@
 		"enabled": true,
 		"clientKind": "git",
 		"useIgnoreFile": true
-	},
-	"files": {
-		"ignore": ["types.d.ts", "./editors/intellij"]
-	},
-	"formatter": {
-		"ignore": [
-			"configuration-schema.json"
-		]
-	},
-	"linter": {
-		"enabled": true,
-		"rules": {
-			"recommended": true,
-			"style": {
-				"noNonNullAssertion": "off"
-			}
-		}
-	},
-	"organizeImports": {
-		"enabled": true
 	}
 }

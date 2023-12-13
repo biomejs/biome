@@ -7,13 +7,13 @@ use crate::{
 };
 use biome_diagnostics::adapters::IgnoreError;
 use biome_diagnostics::{adapters::IoError, DiagnosticExt, Error, Severity};
+use ignore::overrides::OverrideBuilder;
 use ignore::WalkBuilder;
 use rayon::{scope, Scope};
+use std::ffi::OsStr;
 use std::fs::{DirEntry, FileType};
 use std::{
-    env,
-    ffi::OsStr,
-    fs,
+    env, fs,
     io::{self, ErrorKind as IoErrorKind, Read, Seek, Write},
     mem,
     path::{Path, PathBuf},
@@ -119,10 +119,31 @@ fn can_track_error(error: &ignore::Error) -> bool {
         }
 }
 
+fn add_overrides<'a>(inputs_iter: impl Iterator<Item = &'a PathBuf>, walker: &mut WalkBuilder) {
+    for item in inputs_iter {
+        let mut override_builder = OverrideBuilder::new(item);
+        for default_ignore in DEFAULT_IGNORE_GLOBS {
+            // SAFETY: these are internal globs, so we have control over them
+            override_builder.add(default_ignore).unwrap();
+        }
+        let overrides = override_builder.build().unwrap();
+
+        // SAFETY: these are internal globs, so we have control over them
+        walker.overrides(overrides);
+    }
+}
+
 impl<'scope> TraversalScope<'scope> for OsTraversalScope<'scope> {
     fn traverse_paths(&self, context: &'scope dyn TraversalContext, paths: Vec<PathBuf>) {
         let mut inputs = paths.iter();
-        let mut walker = WalkBuilder::new(inputs.next().unwrap());
+        // SAFETY: absence of positional arguments should in a CLI error and should not arrive here
+        let first_input = inputs.next().unwrap();
+        let mut walker = WalkBuilder::new(first_input);
+        for input in inputs {
+            walker.add(input);
+        }
+
+        add_overrides(paths.iter(), &mut walker);
         walker
             .follow_links(true)
             .git_ignore(true)
@@ -172,7 +193,8 @@ impl<'scope> TraversalScope<'scope> for OsTraversalScope<'scope> {
 
         let _ = ctx.interner().intern_path(path.clone());
 
-        if file_type.is_file() {
+        let rome_path = RomePath::new(&path);
+        if file_type.is_file() && ctx.can_handle(&rome_path) {
             self.scope.spawn(move |_| {
                 ctx.handle_file(&path);
             });
@@ -198,6 +220,14 @@ impl<'scope> TraversalScope<'scope> for OsTraversalScope<'scope> {
 /// detecting and parsing .ignore files
 const DEFAULT_IGNORE: &[&str; 5] = &[".git", ".svn", ".hg", ".yarn", "node_modules"];
 
+const DEFAULT_IGNORE_GLOBS: &[&str; 5] = &[
+    ".git/**",
+    ".svn/**",
+    ".hg/**",
+    ".yarn/**",
+    "**/node_modules/**",
+];
+
 /// Traverse a single directory
 fn handle_dir<'scope>(
     scope: &Scope<'scope>,
@@ -206,6 +236,9 @@ fn handle_dir<'scope>(
     // The unresolved origin path in case the directory is behind a symbolic link
     origin_path: Option<PathBuf>,
 ) {
+    // Paths like . or ./ should be normalized and converted to the current working directory.
+    // This would allow us to have always absolute paths, and make the overrides working as expected.
+    // TODO: remove this once . or ./ paths are normalized
     if let Some(file_name) = path.file_name().and_then(OsStr::to_str) {
         if DEFAULT_IGNORE.contains(&file_name) {
             return;

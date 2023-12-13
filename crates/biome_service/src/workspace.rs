@@ -227,6 +227,13 @@ impl FileFeaturesResult {
     pub fn support_kind_for(&self, feature: &FeatureName) -> Option<&SupportKind> {
         self.features_supported.get(feature)
     }
+
+    /// Check whether is file has some kind of support
+    pub fn is_supported(&self) -> bool {
+        self.features_supported
+            .values()
+            .any(|support_kind| support_kind.is_supported())
+    }
 }
 
 impl SupportsFeatureResult {
@@ -265,6 +272,10 @@ impl SupportKind {
     }
     pub const fn is_not_enabled(&self) -> bool {
         matches!(self, SupportKind::FeatureNotEnabled)
+    }
+
+    pub const fn is_not_supported(&self) -> bool {
+        matches!(self, SupportKind::FileNotSupported)
     }
 }
 
@@ -306,7 +317,9 @@ impl FeaturesBuilder {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct UpdateSettingsParams {
     pub configuration: Configuration,
+    // @ematipico TODO: have a better data structure for this
     pub vcs_base_path: Option<PathBuf>,
+    // @ematipico TODO: have a better data structure for this
     pub gitignore_matches: Vec<String>,
 }
 

@@ -690,7 +690,12 @@ impl<'ctx, 'app> TraversalContext for TraversalOptions<'ctx, 'app> {
         });
 
         let file_features = match file_features {
-            Ok(file_features) => file_features,
+            Ok(file_features) => {
+                if !file_features.is_supported() {
+                    return false;
+                }
+                file_features
+            }
             Err(err) => {
                 self.miss_handler_err(err, rome_path);
 
