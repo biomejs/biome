@@ -23,12 +23,11 @@
 [open-vsx-badge]: https://badgen.net/open-vsx/version/biomejs/biome?label=open-vsx&color=green
 [open-vsx-url]: https://open-vsx.org/extension/biomejs/biome
 
-
 </div>
 
 <div align="center">
 
-[English](./README.md) | 简体中文
+[English](./README.md) | 简体中文 | [日本語](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.ja.md)
 
 </div>
 
