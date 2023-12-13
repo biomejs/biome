@@ -163,7 +163,7 @@ class Foo {
   private public a  = 1;
 }
 
-// 本体を持つ関数の宣言
+// 処理を持つ関数の宣言
 declare function foo() {};
 declare function foo ( ) {  }
 
