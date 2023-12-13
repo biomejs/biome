@@ -8,7 +8,7 @@ Prettier との間にいくつかの相違点が存在します。
 ### Prettierは有効なJavaScript識別子である一部のオブジェクトプロパティの引用符を外しません
 
 PrettierとBiomeは、有効なJavaScript識別子であるオブジェクトおよびクラスプロパティの引用符を外します。
-Prettierは[ES5の有効な識別子のみ引用符を外します](https://github.com/prettier/prettier/blob/a5d502513e5de4819a41fd90b9be7247146effc7/src/language-js/utils/index.js#L646)。
+Prettierは、特に[ES5において有効な識別子のみ引用符を外します](https://github.com/prettier/prettier/blob/a5d502513e5de4819a41fd90b9be7247146effc7/src/language-js/utils/index.js#L646)。
 
 ES2015が広まっている現在のエコシステムにおいて、これは古い制限です。
 そのため、私たちはES2015以降の全ての有効なJavaScript識別子の引用符を外すことにしました。
