@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "scripts": {
-    "test": ""
+    "check:apply": "cargo biome-cli-dev check --apply-unsafe editors website packages/@biomejs/js-api"
   },
   "keywords": [],
   "author": "",

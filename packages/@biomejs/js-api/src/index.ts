@@ -125,7 +125,7 @@ export class Biome {
 		try {
 			this.workspace.updateSettings({
 				configuration,
-				gitignore_matches: []
+				gitignore_matches: [],
 			});
 		} catch (e) {
 			throw wrapError(e);
