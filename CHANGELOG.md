@@ -24,6 +24,8 @@ is enabled to process only the files that were changed. Contributed by @simonxab
   biome format --write --changed
   ```
 
+- Introduced a new command called `biome explain`, which has the capability to display documentation lint rules. Contributed by @kalleep
+
 #### Bug fixes
 
 - Fix [#709](https://github.com/biomejs/biome/issues/709), by correctly parsing allow list patterns in `.gitignore` files. Contributed by @ematipico
