@@ -2027,6 +2027,50 @@ pub fn js_import_call_expression(
         ],
     ))
 }
+pub fn js_import_combined_clause(
+    default_specifier: JsDefaultImportSpecifier,
+    comma_token: SyntaxToken,
+    specifier: AnyJsCombinedSpecifier,
+    from_token: SyntaxToken,
+    source: JsModuleSource,
+) -> JsImportCombinedClauseBuilder {
+    JsImportCombinedClauseBuilder {
+        default_specifier,
+        comma_token,
+        specifier,
+        from_token,
+        source,
+        assertion: None,
+    }
+}
+pub struct JsImportCombinedClauseBuilder {
+    default_specifier: JsDefaultImportSpecifier,
+    comma_token: SyntaxToken,
+    specifier: AnyJsCombinedSpecifier,
+    from_token: SyntaxToken,
+    source: JsModuleSource,
+    assertion: Option<JsImportAssertion>,
+}
+impl JsImportCombinedClauseBuilder {
+    pub fn with_assertion(mut self, assertion: JsImportAssertion) -> Self {
+        self.assertion = Some(assertion);
+        self
+    }
+    pub fn build(self) -> JsImportCombinedClause {
+        JsImportCombinedClause::unwrap_cast(SyntaxNode::new_detached(
+            JsSyntaxKind::JS_IMPORT_COMBINED_CLAUSE,
+            [
+                Some(SyntaxElement::Node(self.default_specifier.into_syntax())),
+                Some(SyntaxElement::Token(self.comma_token)),
+                Some(SyntaxElement::Node(self.specifier.into_syntax())),
+                Some(SyntaxElement::Token(self.from_token)),
+                Some(SyntaxElement::Node(self.source.into_syntax())),
+                self.assertion
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
+}
 pub fn js_import_default_clause(
     default_specifier: JsDefaultImportSpecifier,
     from_token: SyntaxToken,
@@ -2062,50 +2106,6 @@ impl JsImportDefaultClauseBuilder {
             [
                 self.type_token.map(|token| SyntaxElement::Token(token)),
                 Some(SyntaxElement::Node(self.default_specifier.into_syntax())),
-                Some(SyntaxElement::Token(self.from_token)),
-                Some(SyntaxElement::Node(self.source.into_syntax())),
-                self.assertion
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-            ],
-        ))
-    }
-}
-pub fn js_import_default_extra_clause(
-    default_specifier: JsDefaultImportSpecifier,
-    comma_token: SyntaxToken,
-    extra_specifier: AnyJsExtraImportSpecifier,
-    from_token: SyntaxToken,
-    source: JsModuleSource,
-) -> JsImportDefaultExtraClauseBuilder {
-    JsImportDefaultExtraClauseBuilder {
-        default_specifier,
-        comma_token,
-        extra_specifier,
-        from_token,
-        source,
-        assertion: None,
-    }
-}
-pub struct JsImportDefaultExtraClauseBuilder {
-    default_specifier: JsDefaultImportSpecifier,
-    comma_token: SyntaxToken,
-    extra_specifier: AnyJsExtraImportSpecifier,
-    from_token: SyntaxToken,
-    source: JsModuleSource,
-    assertion: Option<JsImportAssertion>,
-}
-impl JsImportDefaultExtraClauseBuilder {
-    pub fn with_assertion(mut self, assertion: JsImportAssertion) -> Self {
-        self.assertion = Some(assertion);
-        self
-    }
-    pub fn build(self) -> JsImportDefaultExtraClause {
-        JsImportDefaultExtraClause::unwrap_cast(SyntaxNode::new_detached(
-            JsSyntaxKind::JS_IMPORT_DEFAULT_EXTRA_CLAUSE,
-            [
-                Some(SyntaxElement::Node(self.default_specifier.into_syntax())),
-                Some(SyntaxElement::Token(self.comma_token)),
-                Some(SyntaxElement::Node(self.extra_specifier.into_syntax())),
                 Some(SyntaxElement::Token(self.from_token)),
                 Some(SyntaxElement::Node(self.source.into_syntax())),
                 self.assertion

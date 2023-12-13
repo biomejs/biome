@@ -1228,7 +1228,7 @@ AnyJsImportClause =
     | JsImportNamedClause
     | JsImportDefaultClause
     | JsImportNamespaceClause
-	| JsImportDefaultExtraClause
+	| JsImportCombinedClause
 
 // import "abcd"
 // import "abcd" assert ...
@@ -1273,15 +1273,15 @@ JsImportNamedClause =
 //        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 // import foo, * as bar from "mod";
 //        ^^^^^^^^^^^^^^^^^^^^^^^^
-JsImportDefaultExtraClause =
+JsImportCombinedClause =
 	default_specifier: JsDefaultImportSpecifier
 	','
-	extra_specifier: AnyJsExtraImportSpecifier
+	specifier: AnyJsCombinedSpecifier
 	'from'
 	source: JsModuleSource
 	assertion: JsImportAssertion?
 
-AnyJsExtraImportSpecifier = JsNamedImportSpecifiers | JsNamespaceImportSpecifier
+AnyJsCombinedSpecifier = JsNamedImportSpecifiers | JsNamespaceImportSpecifier
 
 // import a, { b, c } from "d";
 //        ^^

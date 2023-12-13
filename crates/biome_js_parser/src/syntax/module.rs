@@ -348,7 +348,7 @@ fn parse_import_default_clauses_rest(
                 p.error(p.err_builder("A type-only import can specify a default import or named bindings, but not both.",
                     start..end,))
             }
-            JS_IMPORT_DEFAULT_EXTRA_CLAUSE
+            JS_IMPORT_COMBINED_CLAUSE
         }
         _ => JS_IMPORT_DEFAULT_CLAUSE,
     };

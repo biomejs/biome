@@ -5,14 +5,14 @@ JsModule {
     items: JsModuleItemList [
         JsImport {
             import_token: IMPORT_KW@0..7 "import" [] [Whitespace(" ")],
-            import_clause: JsImportDefaultExtraClause {
+            import_clause: JsImportCombinedClause {
                 default_specifier: JsDefaultImportSpecifier {
                     local_name: JsIdentifierBinding {
                         name_token: IDENT@7..8 "e" [] [],
                     },
                 },
                 comma_token: COMMA@8..10 "," [] [Whitespace(" ")],
-                extra_specifier: JsNamedImportSpecifiers {
+                specifier: JsNamedImportSpecifiers {
                     l_curly_token: L_CURLY@10..12 "{" [] [Whitespace(" ")],
                     specifiers: JsNamedImportSpecifierList [
                         JsShorthandNamedImportSpecifier {
@@ -43,7 +43,7 @@ JsModule {
   3: JS_MODULE_ITEM_LIST@0..25
     0: JS_IMPORT@0..25
       0: IMPORT_KW@0..7 "import" [] [Whitespace(" ")]
-      1: JS_IMPORT_DEFAULT_EXTRA_CLAUSE@7..24
+      1: JS_IMPORT_COMBINED_CLAUSE@7..24
         0: JS_DEFAULT_IMPORT_SPECIFIER@7..8
           0: JS_IDENTIFIER_BINDING@7..8
             0: IDENT@7..8 "e" [] []

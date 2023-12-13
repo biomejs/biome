@@ -1,22 +1,18 @@
 use crate::prelude::*;
 
 use biome_formatter::write;
-use biome_js_syntax::JsImportDefaultExtraClause;
-use biome_js_syntax::JsImportDefaultExtraClauseFields;
+use biome_js_syntax::JsImportCombinedClause;
+use biome_js_syntax::JsImportCombinedClauseFields;
 
 #[derive(Debug, Clone, Default)]
-pub(crate) struct FormatJsImportDefaultExtraClause;
+pub(crate) struct FormatJsImportCombinedClause;
 
-impl FormatNodeRule<JsImportDefaultExtraClause> for FormatJsImportDefaultExtraClause {
-    fn fmt_fields(
-        &self,
-        node: &JsImportDefaultExtraClause,
-        f: &mut JsFormatter,
-    ) -> FormatResult<()> {
-        let JsImportDefaultExtraClauseFields {
+impl FormatNodeRule<JsImportCombinedClause> for FormatJsImportCombinedClause {
+    fn fmt_fields(&self, node: &JsImportCombinedClause, f: &mut JsFormatter) -> FormatResult<()> {
+        let JsImportCombinedClauseFields {
             default_specifier,
             comma_token,
-            extra_specifier,
+            specifier,
             from_token,
             source,
             assertion,
@@ -27,7 +23,7 @@ impl FormatNodeRule<JsImportDefaultExtraClause> for FormatJsImportDefaultExtraCl
                 default_specifier.format(),
                 comma_token.format(),
                 space(),
-                extra_specifier.format(),
+                specifier.format(),
                 space(),
                 from_token.format(),
                 space(),

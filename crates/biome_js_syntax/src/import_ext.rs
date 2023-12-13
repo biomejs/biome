@@ -39,7 +39,7 @@ impl AnyJsImportClause {
             Self::JsImportDefaultClause(clause) => clause.type_token(),
             Self::JsImportNamedClause(clause) => clause.type_token(),
             Self::JsImportNamespaceClause(clause) => clause.type_token(),
-            Self::JsImportDefaultExtraClause(_) => None,
+            Self::JsImportCombinedClause(_) => None,
         }
     }
 
@@ -62,7 +62,7 @@ impl AnyJsImportClause {
             Self::JsImportDefaultClause(clause) => clause.source(),
             Self::JsImportNamedClause(clause) => clause.source(),
             Self::JsImportNamespaceClause(clause) => clause.source(),
-            Self::JsImportDefaultExtraClause(clause) => clause.source(),
+            Self::JsImportCombinedClause(clause) => clause.source(),
         }
     }
 }

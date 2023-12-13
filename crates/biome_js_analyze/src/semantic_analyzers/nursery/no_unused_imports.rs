@@ -7,7 +7,7 @@ use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_semantic::ReferencesExtensions;
 use biome_js_syntax::{
-    binding_ext::AnyJsBindingDeclaration, AnyJsExtraImportSpecifier, AnyJsImportClause,
+    binding_ext::AnyJsBindingDeclaration, AnyJsCombinedSpecifier, AnyJsImportClause,
     JsIdentifierBinding, JsImport, JsLanguage, JsNamedImportSpecifierList, JsSyntaxNode, T,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutation, BatchMutationExt};
@@ -154,14 +154,14 @@ fn remove_import_specifier(
 ) -> Option<()> {
     let clause = specifier.parent().and_then(AnyJsImportClause::cast)?;
     match &clause {
-        AnyJsImportClause::JsImportDefaultExtraClause(default_extra_clause) => {
+        AnyJsImportClause::JsImportCombinedClause(default_extra_clause) => {
             let default_specifier = default_extra_clause.default_specifier().ok()?;
             let from_token = default_extra_clause.from_token().ok()?;
             let source = default_extra_clause.source().ok()?;
             let assertion = default_extra_clause.assertion();
             if default_specifier.syntax() == specifier {
-                let new_clause = match default_extra_clause.extra_specifier().ok()? {
-                    AnyJsExtraImportSpecifier::JsNamedImportSpecifiers(named_specifier) => {
+                let new_clause = match default_extra_clause.specifier().ok()? {
+                    AnyJsCombinedSpecifier::JsNamedImportSpecifiers(named_specifier) => {
                         let named_clause =
                             make::js_import_named_clause(named_specifier, from_token, source);
                         let named_clause = if let Some(assertion) = assertion {
@@ -171,7 +171,7 @@ fn remove_import_specifier(
                         };
                         AnyJsImportClause::JsImportNamedClause(named_clause.build())
                     }
-                    AnyJsExtraImportSpecifier::JsNamespaceImportSpecifier(namespace_specifier) => {
+                    AnyJsCombinedSpecifier::JsNamespaceImportSpecifier(namespace_specifier) => {
                         let namespace_clause = make::js_import_namespace_clause(
                             namespace_specifier,
                             from_token,
