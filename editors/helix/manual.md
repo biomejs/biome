@@ -11,7 +11,6 @@ Helix 23.10 has [support for multiple language servers](https://github.com/helix
 ```toml
 [language-server]
 biome = { command = "biome", args = ["lsp-proxy"] }
-vscode-json-language-server = { command = "vscode-json-language-server", args = ["--stdio"], config = { provideFormatter = false, json = { validate = { enable = true } } } }
 
 [[language]]
 name = "javascript"
