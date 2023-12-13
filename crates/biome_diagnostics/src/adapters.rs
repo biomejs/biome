@@ -120,7 +120,7 @@ impl From<ignore::Error> for IgnoreError {
 
 impl Diagnostic for IgnoreError {
     fn category(&self) -> Option<&'static Category> {
-        Some(category!("flags/invalid"))
+        Some(category!("internalError/fs"))
     }
 
     fn description(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
