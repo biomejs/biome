@@ -90,6 +90,8 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 - Fix [#728](https://github.com/biomejs/biome/issues/728). [useSingleVarDeclarator](https://biomejs.dev/linter/rules/use-single-var-declarator) no longer outputs invalid code. Contributed by @Conaclos
 
+- Fix [#1167](https://github.com/biomejs/biome/issues/1167). [useValidAriaProps] no longer reports `aria-atomic` as invalid. Contributed by @unvalley
+
 ### Parser
 
 - Fix [#1077](https://github.com/biomejs/biome/issues/1077), fix issues when parsing conditional expression where parenthesized identifier was being parsed as arrow expression. Contributed by @kalleep
