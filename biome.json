@@ -1,8 +1,21 @@
 {
 	"$schema": "./packages/@biomejs/biome/configuration_schema.json",
-	"vcs": {
+	"files": {
+		"ignore": ["**/dist/**", "**/.astro/**", "**/assets/**"]
+	},
+	"formatter": {
+		"ignore": ["configuration-schema.json"]
+	},
+	"linter": {
 		"enabled": true,
-		"clientKind": "git",
-		"useIgnoreFile": true
+		"rules": {
+			"recommended": true,
+			"style": {
+				"noNonNullAssertion": "off"
+			}
+		}
+	},
+	"organizeImports": {
+		"enabled": true
 	}
 }

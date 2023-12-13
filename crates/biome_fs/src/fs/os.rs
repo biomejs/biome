@@ -307,11 +307,6 @@ fn handle_dir_entry<'scope>(
     }
 
     if file_type.is_dir() {
-        if ctx.can_handle(&RomePath::new(path.clone())) {
-            scope.spawn(move |scope| {
-                handle_dir(scope, ctx, &path, origin_path);
-            });
-        }
         return;
     }
 

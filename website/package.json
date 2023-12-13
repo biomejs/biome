@@ -5,7 +5,7 @@
 		"start": "astro dev",
 		"format": "cargo biome-cli-dev format --write .",
 		"tsc": "tsc --skipLibCheck",
-		"check": "cargo biome-cli-dev check ./",
+		"check": "cargo biome-cli-dev check src",
 		"check:apply": "cargo biome-cli-dev check ./ --apply-unsafe",
 		"start:playground": "pnpm build:wasm-dev && pnpm start",
 		"build": "pnpm build:wasm && pnpm build:js",

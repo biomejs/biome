@@ -17,7 +17,7 @@ use biome_diagnostics::{
 };
 use biome_fs::{FileSystem, PathInterner, RomePath};
 use biome_fs::{TraversalContext, TraversalScope};
-use biome_service::workspace::{FeaturesBuilder, IsPathIgnoredParams};
+use biome_service::workspace::FeaturesBuilder;
 use biome_service::{
     workspace::{FeatureName, SupportsFeatureParams},
     Workspace, WorkspaceError,
@@ -666,20 +666,6 @@ impl<'ctx, 'app> TraversalContext for TraversalOptions<'ctx, 'app> {
     }
 
     fn can_handle(&self, rome_path: &RomePath) -> bool {
-        if rome_path.is_dir() {
-            let can_handle = !self
-                .workspace
-                .is_path_ignored(IsPathIgnoredParams {
-                    rome_path: rome_path.clone(),
-                    feature: self.execution.as_feature_name(),
-                })
-                .unwrap_or_else(|err| {
-                    self.push_diagnostic(err.into());
-                    false
-                });
-            return can_handle;
-        }
-
         let file_features = self.workspace.file_features(SupportsFeatureParams {
             path: rome_path.clone(),
             feature: FeaturesBuilder::new()
