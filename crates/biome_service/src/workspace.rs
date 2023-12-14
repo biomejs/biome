@@ -119,9 +119,9 @@ impl FileFeaturesResult {
 
     /// By default, all features are not supported by a file.
     const WORKSPACE_FEATURES: [(FeatureName, SupportKind); 3] = [
-        (FeatureName::Lint, SupportKind::FileNotSupported),
-        (FeatureName::Format, SupportKind::FileNotSupported),
-        (FeatureName::OrganizeImports, SupportKind::FileNotSupported),
+        (FeatureName::Lint, SupportKind::Ignored),
+        (FeatureName::Format, SupportKind::Ignored),
+        (FeatureName::OrganizeImports, SupportKind::Ignored),
     ];
 
     pub fn new() -> Self {

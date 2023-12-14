@@ -714,13 +714,6 @@ impl<'ctx, 'app> TraversalContext for TraversalOptions<'ctx, 'app> {
                 .build(),
         });
 
-        if rome_path.extension().and_then(|p| p.to_str()) == Some("png") {
-            dbg!(
-                &rome_path,
-                // &file_features.is_ignored(),
-                // &file_features.is_supported()
-            );
-        }
         let file_features = match file_features {
             Ok(file_features) => {
                 if !file_features.is_supported() || !file_features.is_ignored() {
