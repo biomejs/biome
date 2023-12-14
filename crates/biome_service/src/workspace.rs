@@ -228,28 +228,32 @@ impl FileFeaturesResult {
         self.features_supported.get(feature)
     }
 
-    /// Check whether is file has some kind of support
+    /// If at least one feature is supported, the file is supported
     pub fn is_supported(&self) -> bool {
         self.features_supported
             .values()
             .any(|support_kind| support_kind.is_supported())
     }
 
+    /// The file is ignored only if all the features marked it as ignored
     pub fn is_ignored(&self) -> bool {
         self.features_supported
             .values()
-            .any(|support_kind| support_kind.is_ignored())
+            .all(|support_kind| support_kind.is_ignored())
     }
 
+    /// The file is not supported if all the featured marked it as not supported
     pub fn is_not_supported(&self) -> bool {
         self.features_supported
             .values()
-            .any(|support_kind| support_kind.is_not_supported())
+            .all(|support_kind| support_kind.is_not_supported())
     }
+
+    /// The file is not enabled if all the features marked it as not enabled
     pub fn is_not_enabled(&self) -> bool {
         self.features_supported
             .values()
-            .any(|support_kind| support_kind.is_not_enabled())
+            .all(|support_kind| support_kind.is_not_enabled())
     }
 }
 

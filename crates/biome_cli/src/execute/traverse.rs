@@ -716,7 +716,7 @@ impl<'ctx, 'app> TraversalContext for TraversalOptions<'ctx, 'app> {
 
         let file_features = match file_features {
             Ok(file_features) => {
-                if !file_features.is_supported() || !file_features.is_ignored() {
+                if file_features.is_not_supported() {
                     return false;
                 }
                 file_features
@@ -727,10 +727,6 @@ impl<'ctx, 'app> TraversalContext for TraversalOptions<'ctx, 'app> {
                 return false;
             }
         };
-
-        if file_features.is_ignored() {
-            return false;
-        }
 
         match self.execution.traversal_mode() {
             TraversalMode::Check { .. } => {
