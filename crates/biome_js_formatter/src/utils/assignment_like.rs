@@ -4,6 +4,7 @@ use crate::prelude::*;
 use crate::utils::member_chain::is_member_call_chain;
 use crate::utils::object::write_member_name;
 use crate::utils::AnyJsBinaryLikeExpression;
+use crate::utils::{FormatLiteralStringToken, StringLiteralParentKind};
 use biome_formatter::{format_args, write, CstFormatContext, FormatOptions, VecBuffer};
 use biome_js_syntax::{
     AnyJsAssignmentPattern, AnyJsBindingPattern, AnyJsCallArgument, AnyJsClassMemberName,
@@ -1170,9 +1171,7 @@ fn is_poorly_breakable_member_or_call_chain(
         let is_breakable_call = match args.len() {
             0 => false,
             1 => match args.iter().next() {
-                Some(first_argument) => {
-                    !is_short_argument(first_argument?, threshold, f.context().comments())?
-                }
+                Some(first_argument) => !is_short_argument(first_argument?, threshold, f)?,
                 None => false,
             },
             _ => true,
@@ -1202,8 +1201,10 @@ fn is_poorly_breakable_member_or_call_chain(
 fn is_short_argument(
     argument: AnyJsCallArgument,
     threshold: u16,
-    comments: &JsComments,
+    f: &Formatter<JsFormatContext>,
 ) -> SyntaxResult<bool> {
+    let comments = f.comments();
+
     if comments.has_comments(argument.syntax()) {
         return Ok(false);
     }
@@ -1225,7 +1226,11 @@ fn is_short_argument(
                     pattern.text().chars().count() <= threshold as usize
                 }
                 AnyJsLiteralExpression::JsStringLiteralExpression(string) => {
-                    string.value_token()?.text_trimmed().len() <= threshold as usize
+                    let token = string.value_token()?;
+                    let formatter =
+                        FormatLiteralStringToken::new(&token, StringLiteralParentKind::Expression);
+
+                    formatter.clean_text(f.options()).width() <= threshold as usize
                 }
                 _ => true,
             },
