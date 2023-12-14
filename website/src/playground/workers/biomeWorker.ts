@@ -146,6 +146,7 @@ self.addEventListener("message", async (e) => {
 
 			workspace.updateSettings({
 				configuration,
+				git_ignore_matches: []
 			});
 			break;
 		}
