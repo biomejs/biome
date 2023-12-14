@@ -4,12 +4,6 @@
     margin-top: 12.5rem !important;
 }
 
-.formatter>.head {
-    font-size: 3.7rem;
-    text-align: center;
-    text-decoration: underline;
-}
-
 .perf {
     font-size: 3.1rem;
     text-align: center;
@@ -26,8 +20,8 @@
 }
 
 .linter {
-    border: 1px solid var(--sl-perf-border);
-    background: var(--sl-perf-border);
+    border: 1px solid var(--sl-color-gray-5);
+    background: var(--sl-color-gray-5);
     padding: 0 !important;
     gap: 1px;
     display: grid;
@@ -49,27 +43,26 @@
 }
 
 .inp>span {
-    color: var(--sl-perf-red);
-    background: var(--sl-perf-head);
+    background: var(--sl-color-gray-7);
     border-top-left-radius: 1rem;
 }
 
 .out>span {
-    color: var(--sl-perf-purple);
-    background: var(--sl-perf-head);
+    background: var(--sl-color-gray-7);
+}
+
+[data-theme='dark'] .inp>span,
+[data-theme='dark'] .out>span {
+    background-color: var(--sl-color-gray-6);
 }
 
 .perf-out {
-    background: var(--sl-perf);
+    background: var(--sl-color-gray-6);
     margin: 0 !important;
 }
 
 .perf-out {
     border-top-right-radius: 1rem;
-}
-
-.perf-out>span {
-    color: var(--sl-perf-green);
 }
 
 .inp>span,
@@ -86,7 +79,7 @@
     display: flex;
     flex-direction: column;
     margin-top: 0 !important;
-    background: var(--sl-perf);
+    background: var(--sl-color-gray-6);
     border-top-right-radius: 1rem;
 }
 
@@ -153,19 +146,17 @@
     position: absolute;
     content: "";
     inset: 0;
-    background-image: linear-gradient(
-        to right,
-        var(--sl-color-gray-6) 0.06rem,
-        transparent 0.06rem
-      ),
-      linear-gradient(to bottom, var(--sl-color-gray-6) 0.06rem, transparent 0.06rem);
+    background-image: linear-gradient(to right,
+            var(--sl-color-gray-6) 0.06rem,
+            transparent 0.06rem),
+        linear-gradient(to bottom, var(--sl-color-gray-6) 0.06rem, transparent 0.06rem);
     background-position: top center;
     background-size: 1.3rem 1.3rem;
     -webkit-mask-image: radial-gradient(circle at 100%, white, transparent 80%);
     mask-image: radial-gradient(circle at 100%, white, transparent 80%);
-  }
+}
 
-  .gradient {
+.gradient {
     position: absolute;
     top: 0;
     left: 0;
@@ -173,8 +164,6 @@
     height: 100vh;
     width: 100vw;
     background:
-      radial-gradient(var(--sl-color-accent-low), transparent 50%) no-repeat -60vw -50vh /
-        105vw 200vh,
-      radial-gradient(var(--sl-color-accent-low), transparent 50%) no-repeat
-        30vw -100vh / 105vw 200vh;
-  }
+        radial-gradient(var(--sl-color-accent-low), transparent 50%) no-repeat -60vw -50vh / 105vw 200vh,
+        radial-gradient(var(--sl-color-accent-low), transparent 50%) no-repeat 30vw -100vh / 105vw 200vh;
+}
