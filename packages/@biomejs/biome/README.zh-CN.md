@@ -23,13 +23,6 @@
 [open-vsx-badge]: https://badgen.net/open-vsx/version/biomejs/biome?label=open-vsx&color=green
 [open-vsx-url]: https://open-vsx.org/extension/biomejs/biome
 
-
-</div>
-
-<div align="center">
-
-[English](./README.md) | 简体中文
-
 </div>
 
 **Biome** 是一个用于网络项目的高性能工具链，旨在为开发者提供维护这些项目的工具。
@@ -113,7 +106,11 @@ npx @biomejs/biome ci ./src
   </tbody>
 </table>
 
-[bench]: https://github.com/biomejs/biome/blob/main/benchmark/README.md
+## 翻译
+
+- [English](./README.md)
+- 简体中文
+
 [biomejs]: https://biomejs.dev/zh-cn/
 [biome-philosophy]: https://biomejs.dev/zh-cn/internals/philosophy/
 [language-support]: https://biomejs.dev/zh-cn/internals/language-support/
