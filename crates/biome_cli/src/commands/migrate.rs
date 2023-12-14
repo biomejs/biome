@@ -34,6 +34,7 @@ pub(crate) fn migrate(
             session,
             &cli_options,
             vec![],
+            false,
         )
     } else {
         Err(CliDiagnostic::MigrateError(MigrationDiagnostic {

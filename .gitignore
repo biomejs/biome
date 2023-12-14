@@ -13,6 +13,7 @@ Profile-*.json
 **/dist
 **/build
 packages/@biomejs/cli-*
+**/editors/intellij/**
 .pnpm-debug.log
 
 # https://github.com/nnethercote/dhat-rs output file

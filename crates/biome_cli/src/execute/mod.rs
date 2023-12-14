@@ -9,7 +9,7 @@ use crate::execute::traverse::traverse;
 use crate::{CliDiagnostic, CliSession};
 use biome_diagnostics::{category, Category, MAXIMUM_DISPLAYABLE_DIAGNOSTICS};
 use biome_fs::RomePath;
-use biome_service::workspace::FixFileMode;
+use biome_service::workspace::{FeatureName, FixFileMode};
 use std::ffi::OsString;
 use std::fmt::{Display, Formatter};
 use std::path::PathBuf;
@@ -24,6 +24,15 @@ pub(crate) struct Execution {
 
     /// The maximum number of diagnostics that can be printed in console
     max_diagnostics: u16,
+}
+
+impl Execution {
+    pub(crate) fn as_feature_name(&self) -> FeatureName {
+        match self.traversal_mode {
+            TraversalMode::Format { .. } => FeatureName::Format,
+            _ => FeatureName::Lint,
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -247,6 +256,7 @@ pub(crate) fn execute_mode(
     session: CliSession,
     cli_options: &CliOptions,
     paths: Vec<OsString>,
+    vcs_enabled: bool,
 ) -> Result<(), CliDiagnostic> {
     if cli_options.max_diagnostics > MAXIMUM_DISPLAYABLE_DIAGNOSTICS {
         return Err(CliDiagnostic::overflown_argument(
@@ -275,6 +285,6 @@ pub(crate) fn execute_mode(
             cli_options.verbose,
         )
     } else {
-        traverse(mode, session, cli_options, paths)
+        traverse(mode, session, cli_options, paths, vcs_enabled)
     }
 }

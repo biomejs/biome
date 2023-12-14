@@ -10,7 +10,6 @@ use biome_diagnostics::{adapters::IoError, DiagnosticExt, Error, Severity};
 use ignore::overrides::OverrideBuilder;
 use ignore::WalkBuilder;
 use rayon::{scope, Scope};
-use std::ffi::OsStr;
 use std::fs::{DirEntry, FileType};
 use std::{
     env, fs,
@@ -134,7 +133,12 @@ fn add_overrides<'a>(inputs_iter: impl Iterator<Item = &'a PathBuf>, walker: &mu
 }
 
 impl<'scope> TraversalScope<'scope> for OsTraversalScope<'scope> {
-    fn traverse_paths(&self, context: &'scope dyn TraversalContext, paths: Vec<PathBuf>) {
+    fn traverse_paths(
+        &self,
+        context: &'scope dyn TraversalContext,
+        paths: Vec<PathBuf>,
+        use_gitignore: bool,
+    ) {
         let mut inputs = paths.iter();
         // SAFETY: absence of positional arguments should in a CLI error and should not arrive here
         let first_input = inputs.next().unwrap();
@@ -146,7 +150,7 @@ impl<'scope> TraversalScope<'scope> for OsTraversalScope<'scope> {
         add_overrides(paths.iter(), &mut walker);
         walker
             .follow_links(true)
-            .git_ignore(true)
+            .git_ignore(use_gitignore)
             .same_file_system(true)
             .build_parallel()
             .run(|| {
@@ -193,17 +197,16 @@ impl<'scope> TraversalScope<'scope> for OsTraversalScope<'scope> {
 
         let _ = ctx.interner().intern_path(path.clone());
 
-        let rome_path = RomePath::new(&path);
-        if file_type.is_file() && ctx.can_handle(&rome_path) {
-            self.scope.spawn(move |_| {
-                ctx.handle_file(&path);
+        if file_type.is_dir() {
+            self.scope.spawn(move |scope| {
+                handle_dir(scope, ctx, &path, None);
             });
             return;
         }
 
-        if file_type.is_dir() {
-            self.scope.spawn(move |scope| {
-                handle_dir(scope, ctx, &path, None);
+        if file_type.is_file() {
+            self.scope.spawn(move |_| {
+                ctx.handle_file(&path);
             });
             return;
         }
@@ -216,16 +219,21 @@ impl<'scope> TraversalScope<'scope> for OsTraversalScope<'scope> {
     }
 }
 
+// TODO: remove in Biome 2.0, and directly use `.gitignore`
 /// Default list of ignored directories, in the future will be supplanted by
 /// detecting and parsing .ignore files
-const DEFAULT_IGNORE: &[&str; 5] = &[".git", ".svn", ".hg", ".yarn", "node_modules"];
-
+///
+///
+/// The semantics of the overrides are different there: https://docs.rs/ignore/0.4.20/ignore/overrides/struct.OverrideBuilder.html#method.add
+/// TLDR:
+/// - presence of `!` means ignore the files that match the glob
+/// - absence of  `!` means include the files that match the glob
 const DEFAULT_IGNORE_GLOBS: &[&str; 5] = &[
-    ".git/**",
-    ".svn/**",
-    ".hg/**",
-    ".yarn/**",
-    "**/node_modules/**",
+    "!**/.git/**",
+    "!**/.svn/**",
+    "!**/.hg/**",
+    "!**.yarn/**",
+    "!**/node_modules/**",
 ];
 
 /// Traverse a single directory
@@ -236,15 +244,6 @@ fn handle_dir<'scope>(
     // The unresolved origin path in case the directory is behind a symbolic link
     origin_path: Option<PathBuf>,
 ) {
-    // Paths like . or ./ should be normalized and converted to the current working directory.
-    // This would allow us to have always absolute paths, and make the overrides working as expected.
-    // TODO: remove this once . or ./ paths are normalized
-    if let Some(file_name) = path.file_name().and_then(OsStr::to_str) {
-        if DEFAULT_IGNORE.contains(&file_name) {
-            return;
-        }
-    }
-
     let iter = match fs::read_dir(path) {
         Ok(iter) => iter,
         Err(err) => {
@@ -307,6 +306,11 @@ fn handle_dir_entry<'scope>(
     }
 
     if file_type.is_dir() {
+        if ctx.can_handle(&RomePath::new(path.clone())) {
+            scope.spawn(move |scope| {
+                handle_dir(scope, ctx, &path, origin_path);
+            });
+        }
         return;
     }
 

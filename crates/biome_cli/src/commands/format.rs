@@ -114,6 +114,8 @@ pub(crate) fn format(
     let (vcs_base_path, gitignore_matches) =
         configuration.retrieve_gitignore_matches(&session.app.fs, vcs_base_path.as_deref())?;
 
+    let vcs_enabled = configuration.is_vcs_enabled();
+
     session
         .app
         .workspace
@@ -154,5 +156,5 @@ pub(crate) fn format(
         })
     };
 
-    execute_mode(execution, session, &cli_options, paths)
+    execute_mode(execution, session, &cli_options, paths, vcs_enabled)
 }

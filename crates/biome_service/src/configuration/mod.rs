@@ -191,6 +191,10 @@ impl Configuration {
         self.vcs.as_ref().map(|f| f.is_disabled()).unwrap_or(true)
     }
 
+    pub fn is_vcs_enabled(&self) -> bool {
+        !self.is_vcs_disabled()
+    }
+
     /// This function checks if the VCS integration is enabled, and if so, it will attempts to resolve the
     /// VCS root directory and the `.gitignore` file.
     ///

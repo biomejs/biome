@@ -17,7 +17,7 @@ use biome_diagnostics::{
 };
 use biome_fs::{FileSystem, PathInterner, RomePath};
 use biome_fs::{TraversalContext, TraversalScope};
-use biome_service::workspace::FeaturesBuilder;
+use biome_service::workspace::{FeaturesBuilder, IsPathIgnoredParams};
 use biome_service::{
     workspace::{FeatureName, SupportsFeatureParams},
     Workspace, WorkspaceError,
@@ -62,6 +62,7 @@ pub(crate) fn traverse(
     session: CliSession,
     cli_options: &CliOptions,
     inputs: Vec<OsString>,
+    use_git_ignore: bool,
 ) -> Result<(), CliDiagnostic> {
     init_thread_pool();
     if inputs.is_empty() && execution.as_stdin_file().is_none() {
@@ -126,6 +127,7 @@ pub(crate) fn traverse(
                 sender_reports,
                 remaining_diagnostics: &remaining_diagnostics,
             },
+            use_git_ignore,
         );
 
         // wait for the main thread to finish
@@ -247,10 +249,33 @@ fn init_thread_pool() {
 
 /// Initiate the filesystem traversal tasks with the provided input paths and
 /// run it to completion, returning the duration of the process
-fn traverse_inputs(fs: &dyn FileSystem, inputs: Vec<OsString>, ctx: &TraversalOptions) -> Duration {
+fn traverse_inputs(
+    fs: &dyn FileSystem,
+    inputs: Vec<OsString>,
+    ctx: &TraversalOptions,
+    use_gitignore: bool,
+) -> Duration {
     let start = Instant::now();
     fs.traversal(Box::new(move |scope: &dyn TraversalScope| {
-        scope.traverse_paths(ctx, inputs.iter().map(PathBuf::from).collect());
+        scope.traverse_paths(
+            ctx,
+            inputs
+                .iter()
+                .map(PathBuf::from)
+                .map(|path| {
+                    if let Some(working_directory) = fs.working_directory() {
+                        if path.starts_with(".") || path.starts_with("./") {
+                            working_directory
+                        } else {
+                            working_directory.join(path)
+                        }
+                    } else {
+                        path
+                    }
+                })
+                .collect(),
+            use_gitignore,
+        );
     }));
 
     start.elapsed()
@@ -666,6 +691,20 @@ impl<'ctx, 'app> TraversalContext for TraversalOptions<'ctx, 'app> {
     }
 
     fn can_handle(&self, rome_path: &RomePath) -> bool {
+        if rome_path.is_dir() {
+            let can_handle = !self
+                .workspace
+                .is_path_ignored(IsPathIgnoredParams {
+                    rome_path: rome_path.clone(),
+                    feature: self.execution.as_feature_name(),
+                })
+                .unwrap_or_else(|err| {
+                    self.push_diagnostic(err.into());
+                    false
+                });
+            return can_handle;
+        }
+
         let file_features = self.workspace.file_features(SupportsFeatureParams {
             path: rome_path.clone(),
             feature: FeaturesBuilder::new()
@@ -675,9 +714,16 @@ impl<'ctx, 'app> TraversalContext for TraversalOptions<'ctx, 'app> {
                 .build(),
         });
 
+        if rome_path.extension().and_then(|p| p.to_str()) == Some("png") {
+            dbg!(
+                &rome_path,
+                // &file_features.is_ignored(),
+                // &file_features.is_supported()
+            );
+        }
         let file_features = match file_features {
             Ok(file_features) => {
-                if !file_features.is_supported() {
+                if !file_features.is_supported() || !file_features.is_ignored() {
                     return false;
                 }
                 file_features
@@ -688,6 +734,10 @@ impl<'ctx, 'app> TraversalContext for TraversalOptions<'ctx, 'app> {
                 return false;
             }
         };
+
+        if file_features.is_ignored() {
+            return false;
+        }
 
         match self.execution.traversal_mode() {
             TraversalMode::Check { .. } => {

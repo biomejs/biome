@@ -234,6 +234,23 @@ impl FileFeaturesResult {
             .values()
             .any(|support_kind| support_kind.is_supported())
     }
+
+    pub fn is_ignored(&self) -> bool {
+        self.features_supported
+            .values()
+            .any(|support_kind| support_kind.is_ignored())
+    }
+
+    pub fn is_not_supported(&self) -> bool {
+        self.features_supported
+            .values()
+            .any(|support_kind| support_kind.is_not_supported())
+    }
+    pub fn is_not_enabled(&self) -> bool {
+        self.features_supported
+            .values()
+            .any(|support_kind| support_kind.is_not_enabled())
+    }
 }
 
 impl SupportsFeatureResult {
@@ -276,6 +293,9 @@ impl SupportKind {
 
     pub const fn is_not_supported(&self) -> bool {
         matches!(self, SupportKind::FileNotSupported)
+    }
+    pub const fn is_ignored(&self) -> bool {
+        matches!(self, SupportKind::Ignored)
     }
 }
 

@@ -255,7 +255,7 @@ pub trait TraversalScope<'scope> {
     /// This function starts the traversal of the file system.
     ///
     /// It accepts a list of paths that should be traversed.
-    fn traverse_paths(&self, context: &'scope dyn TraversalContext, path: Vec<PathBuf>);
+    fn traverse_paths(&self, context: &'scope dyn TraversalContext, path: Vec<PathBuf>,  use_gitignore: bool);
 }
 
 pub trait TraversalContext: Sync {

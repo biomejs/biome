@@ -117,6 +117,7 @@ pub(crate) fn check(
     } else {
         None
     };
+    let vcs_enabled = fs_configuration.is_vcs_enabled();
 
     session
         .app
@@ -135,5 +136,6 @@ pub(crate) fn check(
         session,
         &cli_options,
         paths,
+        vcs_enabled,
     )
 }

@@ -93,6 +93,8 @@ pub(crate) fn lint(
         None
     };
 
+    let vcs_enabled = fs_configuration.is_vcs_enabled();
+
     session
         .app
         .workspace
@@ -110,5 +112,6 @@ pub(crate) fn lint(
         session,
         &cli_options,
         paths,
+        vcs_enabled,
     )
 }

@@ -92,6 +92,8 @@ pub(crate) fn ci(session: CliSession, payload: CiCommandPayload) -> Result<(), C
     let (vcs_base_path, gitignore_matches) =
         configuration.retrieve_gitignore_matches(&session.app.fs, vcs_base_path.as_deref())?;
 
+    let vcs_enabled = configuration.is_vcs_enabled();
+
     session
         .app
         .workspace
@@ -106,5 +108,6 @@ pub(crate) fn ci(session: CliSession, payload: CiCommandPayload) -> Result<(), C
         session,
         &payload.cli_options,
         payload.paths,
+        vcs_enabled,
     )
 }

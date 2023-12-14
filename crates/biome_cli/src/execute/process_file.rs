@@ -128,6 +128,14 @@ pub(crate) fn process_file(ctx: &TraversalOptions, path: &Path) -> FileResult {
                 category!("files/missingHandler"),
             )?;
 
+        if file_features.is_ignored() || file_features.is_not_enabled() {
+            return Ok(FileStatus::Ignored);
+        } else if file_features.is_not_supported() {
+            return Err(Message::from(
+                UnhandledDiagnostic.with_file_path(path.display().to_string()),
+            ));
+        }
+
         let unsupported_reason = match ctx.execution.traversal_mode() {
             TraversalMode::Check { .. } => file_features
                 .support_kind_for(&FeatureName::Lint)
