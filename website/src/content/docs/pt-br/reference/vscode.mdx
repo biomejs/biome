@@ -1,76 +1,78 @@
 ---
-title: VSCode extension
-description: Notes about the Biome's VSCode extension
+title: Extensão VSCode
+description: Notas sobre a extensão Biome para o VSCode
 ---
-# Biome VS Code Extension
+# Extensão Biome para o VS Code
 
-[Biome](https://biomejs.dev/) unifies your development stack by combining the functionality of separate tools. It uses a single configuration file, has fantastic performance, and works with any stack. This extension brings Biome to your editor so that you can:
+[Biome](https://biomejs.dev/) unifica sua pilha de desenvolvimento combinando a funcionalidade de ferramentas separadas. Ele usa um único arquivo de configuração, possui desempenho fantástico e funciona com qualquer pilha. Esta extensão traz o Biome para o seu editor para que você possa:
 
-- Format files *on save* or when issuing the *Format Document* command
-- See lints while you type and apply code fixes
-- Perform refactors
+- Formatar arquivos *ao salvar* ou ao emitir o comando *Formatar Documento*
+- Ver lints enquanto digita e aplicar correções de código
+- Realizar refatorações
 
-## Installation
+## Instalação
 
-You can install the code extension by heading to the extension's [Visual Studio Code Market Place page](https://marketplace.visualstudio.com/items?itemName=biomejs.biome) or from within VS Code by either:
+Você pode instalar a extensão do código acessando a [página do Visual Studio Code Market Place da extensão](https://marketplace.visualstudio.com/items?itemName=biomejs.biome) ou dentro do VS Code, por:
 
-- Open the *extensions* tab (_View_ → _Extensions)_ and search for Biome.
-- Open the _Quick Open Overlay_ (<kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd>P</kbd> or _Go -> Go to File_), enter `ext install biomejs.biome`, and hit enter.
+- Abrir a aba *extensões* (_Exibir_ → _Extensões)_ e procurar por Biome.
+- Abrir a _Sobreposição de Abertura Rápida_ (<kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd>P</kbd> ou _Ir -> Ir para Arquivo_), digitar `ext install biomejs.biome` e pressionar enter.
 
-## Getting Started
+## Primeiros Passos
 
-### Default Formatter
+### Formatador Padrão
 
-Configure Biome as the default formatter for supported files to ensure that VS Code uses Biome over other formatters that you may have installed. You can do so by opening a JavaScript or TypeScript and then:
+Configure o Biome como o formatador padrão para arquivos suportados para garantir que o VS Code use o Biome em vez de outros formatadores que você possa ter instalado. Você pode fazer isso abrindo um JavaScript ou TypeScript e depois:
 
-- Open the Command Palette (<kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd title="Shift">⇧</kbd>+<kbd>P</kbd> or View → Command Palette)
-- Select _Format Document With…_
-- Select _Configure Default Formatter…_
-- Select Biome
+- Abrir a Paleta de Comandos (<kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd title="Shift">⇧</kbd>+<kbd>P</kbd> ou Exibir → Paleta de Comandos)
+- Selecionar _Formatar Documento Com…_
+- Selecionar _Configurar Formatador Padrão…_
+- Selecionar Biome
 
-You can also enable Biome for specific languages only:
+Você também pode habilitar o Biome apenas para linguagens específicas:
 
-- [Open the `settings.json`](https://code.visualstudio.com/docs/getstarted/settings#_settingsjson): open the _Command Palette_(<kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd title="Shift">⇧</kbd>+<kbd>P</kbd>) and select _Preferences: Open User Settings (JSON)_
-- And set the `editor.defaultFormatter` to `biomejs.biome` for the desired language
+- [Abrir o `settings.json`](https://code.visualstudio.com/docs/getstarted/settings#_settingsjson): abrir a _Paleta de Comandos_(<kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd title="Shift">⇧</kbd>+<kbd>P</kbd>) e selecionar _Preferências: Abrir Configurações do Usuário (JSON)_
+- E definir o `editor.defaultFormatter` como `biomejs.biome` para a linguagem desejada
 
 ```json title="settings.json"
 {
-	"editor.defaultFormatter": "<other formatter>",
+	"editor.defaultFormatter": "<outro formatador>",
 	"[javascript]": {
 		"editor.defaultFormatter": "biomejs.biome"
 	}
 }
 ```
 
-This configuration sets Biome as the default formatter for JavaScript files. All other files will be formatted using `<other formatter>`
+Esta configuração define o Biome como o formatador padrão para arquivos JavaScript. Todos os outros arquivos serão formatados usando `<outro formatador>`
 
-## Configuration Resolution
+## Resolução de Configuração
 
-The extension automatically loads the `biome.json` file from the workspace’s root directory.
+A extensão carrega automaticamente o arquivo `biome.json` do diretório raiz do workspace.
 
-## Biome Resolution
+## Resolução do Biome
 
-The extension tries to use Biome from your project's local dependencies (`node_modules/@biomejs/biome`). We recommend adding Biome as a project dependency to ensure that NPM scripts and the extension use the same Biome version.
+A extensão tenta usar o Biome das dependências locais do seu projeto (`node_modules/@biomejs/biome`). Recomendamos adicionar o Biome como uma dependência do projeto para garantir que os scripts do NPM e a extensão usem a mesma versão do Biome.
 
-You can also explicitly specify the `Biome` binary the extension should use by configuring the `biome.lspBin` setting in your editor options.
+Você também pode especificar explicitamente o binário `Biome` que a extensão deve usar configurando a configuração `biome.lspBin` nas opções do seu editor.
 
-If the project has no dependency on Biome and no explicit path is configured, the extension uses the Biome version included in its bundle.
+Se o projeto não tiver dependência do Biome e nenhum caminho explícito estiver configurado, a extensão usa a versão do Biome incluída em seu pacote.
 
-## Usage
+## Uso
 
-### Format document
+### Formatar documento
 
-To format an entire document, open the _Command Palette_ (<kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd title="Shift">⇧</kbd>+<kbd>P</kbd>) and select _Format Document_.
+Para formatar um documento inteiro, abra a _Paleta de Comandos_ (<kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd title="Shift">⇧</kbd>+<kbd>P</kbd>) e selecione _Formatar Documento_.
 
-To format a text range, select the text you want to format, open the _Command Palette_ (<kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd title="Shift">⇧</kbd>+<kbd>P</kbd>), and select _Format Selection_.
+Para formatar um intervalo de texto, selecione o texto que deseja formatar, abra a _Paleta de Comandos_ (<kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd title="Shift">⇧</kbd>+<kbd>P</kbd>), e selecione _
 
-### Format on save
+Formatar Seleção_.
 
-Biome respects VS Code's _Format on Save_ setting. To enable format on save, open the settings (_File_ -> _Preferences_ -> _Settings_), search for `editor.formatOnSave`, and enable the option.
+### Formatar ao salvar
 
-### Fix on save
+O Biome respeita a configuração _Formatar ao Salvar_ do VS Code. Para habilitar a formatação ao salvar, abra as configurações (_Arquivo_ -> _Preferências_ -> _Configurações_), procure por `editor.formatOnSave` e habilite a opção.
 
-Biome respects VS Code's _Code Actions On Save_ setting. To enable fix on save, add
+### Corrigir ao salvar
+
+O Biome respeita a configuração _Ações de Código ao Salvar_ do VS Code. Para habilitar a correção ao salvar, adicione
 
 
 ```json title="settings.json"
@@ -81,13 +83,13 @@ Biome respects VS Code's _Code Actions On Save_ setting. To enable fix on save, 
 }
 ```
 
-in vscode `settings.json`.
+no `settings.json` do vscode.
 
-### Imports Sorting [Experimental]
+### Ordenação de Importações [Experimental]
 
-The Biome VS Code extension supports imports sorting through the "Organize Imports" code action. By default this action can be run using the <kbd title="Shift">⇧</kbd>+<kbd>Alt</kbd>+<kbd>O</kbd> keyboard shortcut, or is accessible through the _Command Palette_ (<kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd title="Shift">⇧</kbd>+<kbd>P</kbd>) by selecting _Organize Imports_.
+A extensão Biome do VS Code suporta a ordenação de importações através da ação de código "Organizar Importações". Por padrão, essa ação pode ser executada usando o atalho de teclado <kbd title="Shift">⇧</kbd>+<kbd>Alt</kbd>+<kbd>O</kbd>, ou é acessível através da _Paleta de Comandos_ (<kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd title="Shift">⇧</kbd>+<kbd>P</kbd>) selecionando _Organizar Importações_.
 
-You can add the following to your editor configuration if you want the action to run automatically on save instead of calling it manually:
+Você pode adicionar o seguinte à sua configuração do editor se desejar que a ação seja executada automaticamente ao salvar, em vez de chamá-la manualmente:
 
 ```json title="settings.json"
 {
@@ -97,41 +99,41 @@ You can add the following to your editor configuration if you want the action to
 }
 ```
 
-## Extension Settings
+## Configurações da Extensão
 
 ### `biome.lspBin`
 
-The `biome.lspBin` option overrides the Biome binary used by the extension.
-The workspace folder is used as the base path if the path is relative.
+A opção `biome.lspBin` substitui o binário Biome usado pela extensão.
+A pasta do workspace é usada como caminho base se o caminho for relativo.
 
 ### `biome.rename`
 
-Enables Biome to handle renames in the workspace (experimental).
+Habilita o Biome para lidar com renomeações no workspace (experimental).
 
 ### `biome.requireConfiguration`
 
-Disables formatting, linting, and syntax errors for projects without a `biome.json` file.
-Enabled by default.
+Desabilita a formatação, linting e erros de sintaxe para projetos sem um arquivo `biome.json`.
+Habilitado por padrão.
 
-## Versioning
+## Versionamento
 
-We follow the specs suggested by [the official documentation](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#prerelease-extensions):
+Seguimos as especificações sugeridas pela [documentação oficial](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#prerelease-extensions):
 
-Odd minor versions are dedicated to pre-releases, e.g. `*.5.*` .
-Even minor versions are dedicated to official releases, e.g. `*.6.*`.
+Versões ímpares menores são dedicadas a pré-lançamentos, por exemplo, `*.5.*`.
+Versões menores pares são dedicadas a lançamentos oficiais, por exemplo, `*.6.*`.
 
 
-## Troubleshooting
+## Solução de Problemas
 
-> I installed `@biomejs/biome`, but the extension shows a warning saying that it could not resolve library.
+> Eu instalei `@biomejs/biome`, mas a extensão mostra um aviso dizendo que não conseguiu resolver a biblioteca.
 
-The library `@biomejs/biome` specifies some optional dependencies that are installed based on your OS and architecture.
+A biblioteca `@biomejs/biome` especifica algumas dependências opcionais que são instaladas com base no seu sistema operacional e arquitetura.
 
-It's possible though, that the extension can't resolve the binary when loading the extension. This is caused - probably - by your package manager.
+No entanto, é possível que a extensão não consiga resolver o binário ao carregar a extensão. Isso é causado - provavelmente - pelo seu gerenciador de pacotes.
 
-**To resolve the issue**, try to install the binary manually. The warning should show you the binary that belongs to your machine.
+**Para resolver o problema**, tente instalar o binário manualmente. O aviso deve mostrar o binário que pertence à sua máquina.
 
-**If you work in a team that use different OSs/architectures**, it's advised to install all the binaries:
+**Se você trabalha em uma equipe que usa diferentes sistemas operacionais/arquiteturas**, é aconselhável instalar todos os binários:
 
 - `@biomejs/cli-darwin-arm64`
 - `@biomejs/cli-darwin-x64`
