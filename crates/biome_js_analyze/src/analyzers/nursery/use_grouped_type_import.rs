@@ -125,19 +125,7 @@ impl Rule for UseGroupedTypeImport {
             named_import_specifiers_list
                 .iter()
                 .filter_map(|specifier| specifier.ok())
-                .map(|specifier| match specifier {
-                    AnyJsNamedImportSpecifier::JsNamedImportSpecifier(specifier) => {
-                        AnyJsNamedImportSpecifier::JsNamedImportSpecifier(
-                            specifier.with_type_token(None),
-                        )
-                    }
-                    AnyJsNamedImportSpecifier::JsShorthandNamedImportSpecifier(specifier) => {
-                        AnyJsNamedImportSpecifier::JsShorthandNamedImportSpecifier(
-                            specifier.with_type_token(None),
-                        )
-                    }
-                    specifier => specifier,
-                })
+                .map(|specifier| specifier.with_type_token(None))
                 .collect::<Vec<_>>(),
             named_import_specifiers_list
                 .separators()

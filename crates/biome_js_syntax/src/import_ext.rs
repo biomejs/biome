@@ -160,6 +160,16 @@ impl AnyJsNamedImportSpecifier {
             Self::JsShorthandNamedImportSpecifier(specifier) => specifier.local_name().ok(),
         }
     }
+
+    pub fn with_type_token(self, type_token: Option<JsSyntaxToken>) -> AnyJsNamedImportSpecifier {
+        match self {
+            Self::JsBogusNamedImportSpecifier(_) => self,
+            Self::JsNamedImportSpecifier(specifier) => specifier.with_type_token(type_token).into(),
+            Self::JsShorthandNamedImportSpecifier(specifier) => {
+                specifier.with_type_token(type_token).into()
+            }
+        }
+    }
 }
 
 impl JsModuleSource {

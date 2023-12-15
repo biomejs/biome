@@ -9,6 +9,7 @@ pub(crate) mod no_then_property;
 pub(crate) mod no_unused_imports;
 pub(crate) mod use_export_type;
 pub(crate) mod use_for_of;
+pub(crate) mod use_import_type;
 pub(crate) mod use_number_namespace;
 
 declare_group! {
@@ -22,6 +23,7 @@ declare_group! {
             self :: no_unused_imports :: NoUnusedImports ,
             self :: use_export_type :: UseExportType ,
             self :: use_for_of :: UseForOf ,
+            self :: use_import_type :: UseImportType ,
             self :: use_number_namespace :: UseNumberNamespace ,
         ]
      }
