@@ -1220,6 +1220,12 @@ pub fn is_alignable_comment<L: Language>(comment: &SyntaxTriviaPieceComments<L>)
     })
 }
 
+/// **TODO:** This is really JS-specific logic, both in syntax and semantics.
+/// It should probably be moved to `biome_js_formatter` when possible, but is
+/// currently tied to other behavior about formatting sets of comments (which
+/// might also be best to move as well, since it relates to the same specific
+/// behavior).
+///
 /// Returns `true` if `comment` is a documentation-style comment, specifically
 /// matching the JSDoc format where the comment:
 /// - spans over multiple lines

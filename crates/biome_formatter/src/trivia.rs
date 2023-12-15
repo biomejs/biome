@@ -66,7 +66,8 @@ where
             FormatLeadingComments::Comments(comments) => comments,
         };
 
-        for (index, comment) in leading_comments.iter().enumerate() {
+        let mut leading_comments_iter = leading_comments.iter().peekable();
+        while let Some(comment) = leading_comments_iter.next() {
             let format_comment = FormatRefWithRule::new(comment, Context::CommentRule::default());
             write!(f, [format_comment])?;
 
@@ -75,11 +76,9 @@ where
                     match comment.lines_after() {
                         0 => {
                             let should_nestle =
-                                leading_comments
-                                    .get(index + 1)
-                                    .map_or(false, |next_comment| {
-                                        should_nestle_adjacent_doc_comments(comment, next_comment)
-                                    });
+                                leading_comments_iter.peek().map_or(false, |next_comment| {
+                                    should_nestle_adjacent_doc_comments(comment, next_comment)
+                                });
 
                             write!(f, [maybe_space(!should_nestle)])?;
                         }
