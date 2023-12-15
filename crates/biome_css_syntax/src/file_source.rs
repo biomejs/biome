@@ -4,6 +4,8 @@ use std::path::Path;
 
 #[derive(Debug, Default, Clone)]
 pub struct CssFileSource {
+    // Unused until we potentially support postcss/less/sass
+    #[allow(unused)]
     variant: CssVariant,
 }
 

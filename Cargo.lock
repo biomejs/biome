@@ -733,6 +733,9 @@ version = "0.0.0"
 dependencies = [
  "biome_analyze",
  "biome_console",
+ "biome_css_formatter",
+ "biome_css_parser",
+ "biome_css_syntax",
  "biome_deserialize",
  "biome_diagnostics",
  "biome_flags",
@@ -3737,6 +3740,7 @@ dependencies = [
  "ansi_rgb",
  "biome_analyze",
  "biome_console",
+ "biome_css_formatter",
  "biome_css_parser",
  "biome_css_syntax",
  "biome_diagnostics",

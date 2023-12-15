@@ -30,6 +30,8 @@ where
     }
 }
 
+// Unused currently because CSS formatting is very barebones for now
+#[allow(unused)]
 type CssFormatSeparatedIter<Node> = FormatSeparatedIter<
     AstSeparatedListElementsIterator<CssLanguage, Node>,
     Node,

@@ -1,4 +1,7 @@
-use self::{javascript::JsFileHandler, json::JsonFileHandler, unknown::UnknownFileHandler};
+use self::{
+    css::CssFileHandler, javascript::JsFileHandler, json::JsonFileHandler,
+    unknown::UnknownFileHandler,
+};
 use crate::workspace::{FixFileMode, OrganizeImportsResult};
 use crate::{
     settings::SettingsHandle,
@@ -18,6 +21,7 @@ pub use javascript::JsFormatterSettings;
 use std::ffi::OsStr;
 use std::path::Path;
 
+mod css;
 mod javascript;
 mod json;
 mod unknown;
@@ -38,6 +42,8 @@ pub enum Language {
     Json,
     /// JSONC
     Jsonc,
+    /// CSS
+    Css,
     /// Any language that is not supported
     #[default]
     Unknown,
@@ -161,6 +167,7 @@ impl biome_console::fmt::Display for Language {
             Language::TypeScriptReact => fmt.write_markup(markup! { "TSX" }),
             Language::Json => fmt.write_markup(markup! { "JSON" }),
             Language::Jsonc => fmt.write_markup(markup! { "JSONC" }),
+            Language::Css => fmt.write_markup(markup! { "CSS" }),
             Language::Unknown => fmt.write_markup(markup! { "Unknown" }),
         }
     }
@@ -317,6 +324,7 @@ pub(crate) trait ExtensionHandler {
 pub(crate) struct Features {
     js: JsFileHandler,
     json: JsonFileHandler,
+    css: CssFileHandler,
     unknown: UnknownFileHandler,
 }
 
@@ -325,6 +333,7 @@ impl Features {
         Features {
             js: JsFileHandler {},
             json: JsonFileHandler {},
+            css: CssFileHandler {},
             unknown: UnknownFileHandler::default(),
         }
     }
@@ -354,6 +363,7 @@ impl Features {
             | Language::TypeScript
             | Language::TypeScriptReact => self.js.capabilities(),
             Language::Json | Language::Jsonc => self.json.capabilities(),
+            Language::Css => self.css.capabilities(),
             Language::Unknown => self.unknown.capabilities(),
         }
     }

@@ -328,21 +328,10 @@ mod tests {
 
     #[test]
     fn smoke_test() {
-        let src = r#"
-{
-    "a": 5,
-    "b": [1, 2, 3, 4],
-    "c": null,
-    "d": true,
-    "e": false
-}
-"#;
+        let src = r#"html {}"#;
         let parse = parse_css(src, CssParserOptions::default());
         let options = CssFormatOptions::default();
         let formatted = format_node(options, &parse.syntax()).unwrap();
-        assert_eq!(
-            formatted.print().unwrap().as_code(),
-            "{\n\t\"a\": 5,\n\t\"b\": [1, 2, 3, 4],\n\t\"c\": null,\n\t\"d\": true,\n\t\"e\": false\n}\n"
-        );
+        assert_eq!(formatted.print().unwrap().as_code(), "html {}");
     }
 }
