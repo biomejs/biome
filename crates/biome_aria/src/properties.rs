@@ -391,6 +391,7 @@ impl AriaProperties {
             "aria-valuemin" => &AriaValuemin as &dyn AriaPropertyDefinition,
             "aria-valuenow" => &AriaValuenow as &dyn AriaPropertyDefinition,
             "aria-valuetext" => &AriaValuetext as &dyn AriaPropertyDefinition,
+            "aria-atomic" => &AriaAtomic as &dyn AriaPropertyDefinition,
             _ => return None,
         })
     }

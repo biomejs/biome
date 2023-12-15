@@ -11,8 +11,10 @@ JsModule {
                         IMPORT_KW@1..10 "import" [Newline("\n"), Whitespace(" ")] [Whitespace(" ")],
                         JsImportDefaultClause {
                             type_token: missing (optional),
-                            local_name: JsIdentifierBinding {
-                                name_token: IDENT@10..14 "foo" [] [Whitespace(" ")],
+                            default_specifier: JsDefaultImportSpecifier {
+                                local_name: JsIdentifierBinding {
+                                    name_token: IDENT@10..14 "foo" [] [Whitespace(" ")],
+                                },
                             },
                             from_token: FROM_KW@14..19 "from" [] [Whitespace(" ")],
                             source: JsModuleSource {
@@ -42,8 +44,9 @@ JsModule {
           0: IMPORT_KW@1..10 "import" [Newline("\n"), Whitespace(" ")] [Whitespace(" ")]
           1: JS_IMPORT_DEFAULT_CLAUSE@10..24
             0: (empty)
-            1: JS_IDENTIFIER_BINDING@10..14
-              0: IDENT@10..14 "foo" [] [Whitespace(" ")]
+            1: JS_DEFAULT_IMPORT_SPECIFIER@10..14
+              0: JS_IDENTIFIER_BINDING@10..14
+                0: IDENT@10..14 "foo" [] [Whitespace(" ")]
             2: FROM_KW@14..19 "from" [] [Whitespace(" ")]
             3: JS_MODULE_SOURCE@19..24
               0: JS_STRING_LITERAL@19..24 "\"bar\"" [] []

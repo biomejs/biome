@@ -25,12 +25,6 @@
 
 </div>
 
-<div align="center">
-
-[English](./README.md) | 简体中文 | [日本語](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.ja.md)
-
-</div>
-
 **Biome** 是一个用于网络项目的高性能工具链，旨在为开发者提供维护这些项目的工具。
 
 **Biome 是一个[快速的格式化器](./benchmark#formatting)**，适用于 _JavaScript_、_TypeScript_、_JSX_ 和 _JSON_，与 _Prettier_ 的兼容性达到了 **[96%](https://console.algora.io/challenges/prettier)**。
@@ -112,7 +106,11 @@ npx @biomejs/biome ci ./src
   </tbody>
 </table>
 
-[bench]: https://github.com/biomejs/biome/blob/main/benchmark/README.md
+## 翻译
+
+- [English](./README.md)
+- 简体中文
+
 [biomejs]: https://biomejs.dev/zh-cn/
 [biome-philosophy]: https://biomejs.dev/zh-cn/internals/philosophy/
 [language-support]: https://biomejs.dev/zh-cn/internals/language-support/

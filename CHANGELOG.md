@@ -24,6 +24,8 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ### Formatter
 
+- Fix [#1169](https://github.com/biomejs/biome/issues/1169). Account for escaped strings when computing layout for assignments. Contributed by @kalleep
+
 ### JavaScript APIs
 
 ### Linter
@@ -75,7 +77,7 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
   }
   ```
 
-- Fix [#651](https://github.com/biomejs/biome/issues/651), [useExhaustiveDependencies](https://biomejs.dev/linter/rules/use-exhaustive-dependencies) no longer reports out of scope dependecies. Contributed by @kalleep
+- Fix [#651](https://github.com/biomejs/biome/issues/651), [useExhaustiveDependencies](https://biomejs.dev/linter/rules/use-exhaustive-dependencies) no longer reports out of scope dependencies. Contributed by @kalleep
 
   The following code is no longer reported:
   ```ts
@@ -89,6 +91,8 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
   ```
 
 - Fix [#728](https://github.com/biomejs/biome/issues/728). [useSingleVarDeclarator](https://biomejs.dev/linter/rules/use-single-var-declarator) no longer outputs invalid code. Contributed by @Conaclos
+
+- Fix [#1167](https://github.com/biomejs/biome/issues/1167). [useValidAriaProps] no longer reports `aria-atomic` as invalid. Contributed by @unvalley
 
 ### Parser
 

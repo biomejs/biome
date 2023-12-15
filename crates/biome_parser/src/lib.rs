@@ -461,6 +461,14 @@ pub trait Parser: Sized {
         self.nth(n) == kind
     }
 
+    /// Checks if a token set lookahead is something
+    fn nth_at_ts(&mut self, n: usize, kinds: TokenSet<Self::Kind>) -> bool
+    where
+        Self::Source: NthToken,
+    {
+        kinds.contains(self.nth(n))
+    }
+
     /// Tests if there's a line break before the nth token.
     #[inline]
     fn has_nth_preceding_line_break(&mut self, n: usize) -> bool
@@ -483,7 +491,7 @@ pub trait Parser: Sized {
         self.do_bump(kind)
     }
 
-    /// Consume the current token if `kind` matches.
+    /// Consume the current token if token set matches.
     fn bump_ts(&mut self, kinds: TokenSet<Self::Kind>) {
         assert!(
             kinds.contains(self.cur()),

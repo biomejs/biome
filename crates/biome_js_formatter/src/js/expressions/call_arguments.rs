@@ -15,7 +15,8 @@ use biome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsStatement,
     AnyTsReturnType, AnyTsType, JsBinaryExpressionFields, JsCallArgumentList, JsCallArguments,
     JsCallArgumentsFields, JsCallExpression, JsExpressionStatement, JsFunctionExpression,
-    JsImportCallExpression, JsLanguage, TsAsExpressionFields, TsSatisfiesExpressionFields,
+    JsImportCallExpression, JsLanguage, JsLogicalExpressionFields, TsAsExpressionFields,
+    TsSatisfiesExpressionFields,
 };
 use biome_rowan::{AstSeparatedElement, AstSeparatedList, SyntaxResult};
 
@@ -873,11 +874,48 @@ fn should_group_last_argument(
 ///     HTMLElement     => true
 ///     string | object => false
 ///     Foo<string>     => false
-///
-/// Note that Prettier allows extracting the inner type from arrays and
-/// single-argument generic types, but for now, this implementation does not.
-fn is_simple_ts_type(ty: AnyTsType) -> bool {
-    match ty {
+/// This function also introspects into array and generic types to extract the
+/// core type, but only to a limited extent:
+///     string[]        => string
+///     string[][]      => string
+///     string[][][]    => string
+///     Foo<string>[][] => string
+///     Foo<string[]>[] => string[]
+///     Foo<string[][]> => string[][]
+fn is_simple_ts_type(ty: &AnyTsType) -> bool {
+    // Reach up to two-levels deep into array types:
+    //     string[]     => string
+    //     string[][]   => string
+    //     string[][][] => string[]
+    let extracted_array_type = match ty {
+        AnyTsType::TsArrayType(array) => match array.element_type() {
+            Ok(AnyTsType::TsArrayType(inner_array)) => inner_array.element_type().ok(),
+            Ok(element_type) => Some(element_type),
+            _ => None,
+        },
+        _ => None,
+    };
+
+    // Then, extract the first type parameter of a Generic as long as it's the
+    // only parameter:
+    //     Foo<number> => number
+    //     Foo<number, string> => Foo<number, string>
+    let extracted_generic_type = match &extracted_array_type {
+        Some(AnyTsType::TsReferenceType(generic)) => {
+            generic.type_arguments().and_then(|type_arguments| {
+                let argument_list = type_arguments.ts_type_argument_list();
+                if argument_list.len() == 1 {
+                    argument_list.first().and_then(|first| first.ok())
+                } else {
+                    extracted_array_type
+                }
+            })
+        }
+        _ => extracted_array_type,
+    };
+
+    let resolved_type = extracted_generic_type.as_ref().unwrap_or(ty);
+    match resolved_type {
         // Any keyword or literal types
         AnyTsType::TsAnyType(_)
         | AnyTsType::TsBigintLiteralType(_)
@@ -921,6 +959,18 @@ fn is_relatively_short_argument(argument: AnyJsExpression) -> bool {
                 false
             }
         }
+        AnyJsExpression::JsLogicalExpression(logical_expression) => {
+            if let JsLogicalExpressionFields {
+                left: Ok(left),
+                operator_token: _,
+                right: Ok(right),
+            } = logical_expression.as_fields()
+            {
+                SimpleArgument::from(left).is_simple() && SimpleArgument::from(right).is_simple()
+            } else {
+                false
+            }
+        }
         AnyJsExpression::TsAsExpression(as_expression) => {
             if let TsAsExpressionFields {
                 expression: Ok(expression),
@@ -928,7 +978,7 @@ fn is_relatively_short_argument(argument: AnyJsExpression) -> bool {
                 ty: Ok(annotation),
             } = as_expression.as_fields()
             {
-                is_simple_ts_type(annotation) && SimpleArgument::from(expression).is_simple()
+                is_simple_ts_type(&annotation) && SimpleArgument::from(expression).is_simple()
             } else {
                 false
             }
@@ -940,7 +990,7 @@ fn is_relatively_short_argument(argument: AnyJsExpression) -> bool {
                 ty: Ok(annotation),
             } = as_expression.as_fields()
             {
-                is_simple_ts_type(annotation) && SimpleArgument::from(expression).is_simple()
+                is_simple_ts_type(&annotation) && SimpleArgument::from(expression).is_simple()
             } else {
                 false
             }

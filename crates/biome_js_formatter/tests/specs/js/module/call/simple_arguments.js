@@ -26,6 +26,16 @@ foo( () => {
 	},
 	arr[Math.floor(1 + 2)],
 );
+foo( () => {
+		foo;
+	},
+	a || b + 1,
+);
+foo( () => {
+		foo;
+	},
+	a + b ?? 1,
+);
 
 
 // Cases where the second argument is simple enough to group.
@@ -49,6 +59,9 @@ foo(() => {
   },
   a + b,
 );
+foo(() => {
+  foo;
+}, a || b);
 foo(() => {
     foo
   },

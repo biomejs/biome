@@ -1,0 +1,214 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+var a = x ? true : true;
+var a = x ? false : false;
+
+var a = foo() ? false : true;
+var a = foo ? false : true;
+var a = foo === 1 ? false : true;
+var a = foo + 1 ? false : true;
+
+var a = foo() ? true : false;
+var a = foo ? true : false;
+var a = foo === 1 ? true : false;
+var a = foo + 1 ? true : false;
+```
+
+# Diagnostics
+```
+invalid.js:1:9 lint/nursery/noUselessTernary ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary use of boolean literals in conditional expression.
+  
+  > 1 │ var a = x ? true : true;
+      │         ^^^^^^^^^^^^^^^
+    2 │ var a = x ? false : false;
+    3 │ 
+  
+  i Simplify your code by directly assigning the result without using a ternary operator.
+  
+  i If your goal is negation, you may use the logical NOT (!) or double NOT (!!) operator for clearer and concise code.
+     Check for more details about NOT operator.
+  
+
+```
+
+```
+invalid.js:2:9 lint/nursery/noUselessTernary ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary use of boolean literals in conditional expression.
+  
+    1 │ var a = x ? true : true;
+  > 2 │ var a = x ? false : false;
+      │         ^^^^^^^^^^^^^^^^^
+    3 │ 
+    4 │ var a = foo() ? false : true;
+  
+  i Simplify your code by directly assigning the result without using a ternary operator.
+  
+  i If your goal is negation, you may use the logical NOT (!) or double NOT (!!) operator for clearer and concise code.
+     Check for more details about NOT operator.
+  
+
+```
+
+```
+invalid.js:4:9 lint/nursery/noUselessTernary ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary use of boolean literals in conditional expression.
+  
+    2 │ var a = x ? false : false;
+    3 │ 
+  > 4 │ var a = foo() ? false : true;
+      │         ^^^^^^^^^^^^^^^^^^^^
+    5 │ var a = foo ? false : true;
+    6 │ var a = foo === 1 ? false : true;
+  
+  i Simplify your code by directly assigning the result without using a ternary operator.
+  
+  i If your goal is negation, you may use the logical NOT (!) or double NOT (!!) operator for clearer and concise code.
+     Check for more details about NOT operator.
+  
+
+```
+
+```
+invalid.js:5:9 lint/nursery/noUselessTernary ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary use of boolean literals in conditional expression.
+  
+    4 │ var a = foo() ? false : true;
+  > 5 │ var a = foo ? false : true;
+      │         ^^^^^^^^^^^^^^^^^^
+    6 │ var a = foo === 1 ? false : true;
+    7 │ var a = foo + 1 ? false : true;
+  
+  i Simplify your code by directly assigning the result without using a ternary operator.
+  
+  i If your goal is negation, you may use the logical NOT (!) or double NOT (!!) operator for clearer and concise code.
+     Check for more details about NOT operator.
+  
+
+```
+
+```
+invalid.js:6:9 lint/nursery/noUselessTernary ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary use of boolean literals in conditional expression.
+  
+    4 │ var a = foo() ? false : true;
+    5 │ var a = foo ? false : true;
+  > 6 │ var a = foo === 1 ? false : true;
+      │         ^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ var a = foo + 1 ? false : true;
+    8 │ 
+  
+  i Simplify your code by directly assigning the result without using a ternary operator.
+  
+  i If your goal is negation, you may use the logical NOT (!) or double NOT (!!) operator for clearer and concise code.
+     Check for more details about NOT operator.
+  
+
+```
+
+```
+invalid.js:7:9 lint/nursery/noUselessTernary ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary use of boolean literals in conditional expression.
+  
+    5 │ var a = foo ? false : true;
+    6 │ var a = foo === 1 ? false : true;
+  > 7 │ var a = foo + 1 ? false : true;
+      │         ^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 
+    9 │ var a = foo() ? true : false;
+  
+  i Simplify your code by directly assigning the result without using a ternary operator.
+  
+  i If your goal is negation, you may use the logical NOT (!) or double NOT (!!) operator for clearer and concise code.
+     Check for more details about NOT operator.
+  
+
+```
+
+```
+invalid.js:9:9 lint/nursery/noUselessTernary ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary use of boolean literals in conditional expression.
+  
+     7 │ var a = foo + 1 ? false : true;
+     8 │ 
+   > 9 │ var a = foo() ? true : false;
+       │         ^^^^^^^^^^^^^^^^^^^^
+    10 │ var a = foo ? true : false;
+    11 │ var a = foo === 1 ? true : false;
+  
+  i Simplify your code by directly assigning the result without using a ternary operator.
+  
+  i If your goal is negation, you may use the logical NOT (!) or double NOT (!!) operator for clearer and concise code.
+     Check for more details about NOT operator.
+  
+
+```
+
+```
+invalid.js:10:9 lint/nursery/noUselessTernary ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary use of boolean literals in conditional expression.
+  
+     9 │ var a = foo() ? true : false;
+  > 10 │ var a = foo ? true : false;
+       │         ^^^^^^^^^^^^^^^^^^
+    11 │ var a = foo === 1 ? true : false;
+    12 │ var a = foo + 1 ? true : false;
+  
+  i Simplify your code by directly assigning the result without using a ternary operator.
+  
+  i If your goal is negation, you may use the logical NOT (!) or double NOT (!!) operator for clearer and concise code.
+     Check for more details about NOT operator.
+  
+
+```
+
+```
+invalid.js:11:9 lint/nursery/noUselessTernary ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary use of boolean literals in conditional expression.
+  
+     9 │ var a = foo() ? true : false;
+    10 │ var a = foo ? true : false;
+  > 11 │ var a = foo === 1 ? true : false;
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ var a = foo + 1 ? true : false;
+  
+  i Simplify your code by directly assigning the result without using a ternary operator.
+  
+  i If your goal is negation, you may use the logical NOT (!) or double NOT (!!) operator for clearer and concise code.
+     Check for more details about NOT operator.
+  
+
+```
+
+```
+invalid.js:12:9 lint/nursery/noUselessTernary ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary use of boolean literals in conditional expression.
+  
+    10 │ var a = foo ? true : false;
+    11 │ var a = foo === 1 ? true : false;
+  > 12 │ var a = foo + 1 ? true : false;
+       │         ^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Simplify your code by directly assigning the result without using a ternary operator.
+  
+  i If your goal is negation, you may use the logical NOT (!) or double NOT (!!) operator for clearer and concise code.
+     Check for more details about NOT operator.
+  
+
+```
+
+
