@@ -233,6 +233,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_css_formatter"
+version = "0.3.1"
+dependencies = [
+ "biome_css_factory",
+ "biome_css_parser",
+ "biome_css_syntax",
+ "biome_diagnostics",
+ "biome_formatter",
+ "biome_formatter_test",
+ "biome_fs",
+ "biome_parser",
+ "biome_rowan",
+ "biome_suppression",
+ "countme",
+ "insta",
+ "serde",
+ "serde_json",
+ "tests_macros",
+]
+
+[[package]]
 name = "biome_css_parser"
 version = "0.3.1"
 dependencies = [
