@@ -11,6 +11,11 @@
     margin-bottom: 9.3rem;
 }
 
+.formatter>.head {
+    font-size: 3.7rem;
+    text-align: center;
+}
+
 .bars {
     display: flex;
     align-items: center;
@@ -72,6 +77,7 @@
     align-items: flex-end;
     height: 2.5rem;
     padding-left: 1.2rem;
+    font-weight: bold;
 }
 
 .bench {
