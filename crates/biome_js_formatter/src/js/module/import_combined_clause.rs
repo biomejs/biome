@@ -1,30 +1,29 @@
 use crate::prelude::*;
 
 use biome_formatter::write;
-use biome_js_syntax::JsImportDefaultClause;
-use biome_js_syntax::JsImportDefaultClauseFields;
+use biome_js_syntax::JsImportCombinedClause;
+use biome_js_syntax::JsImportCombinedClauseFields;
 
 #[derive(Debug, Clone, Default)]
-pub(crate) struct FormatJsImportDefaultClause;
+pub(crate) struct FormatJsImportCombinedClause;
 
-impl FormatNodeRule<JsImportDefaultClause> for FormatJsImportDefaultClause {
-    fn fmt_fields(&self, node: &JsImportDefaultClause, f: &mut JsFormatter) -> FormatResult<()> {
-        let JsImportDefaultClauseFields {
-            type_token,
+impl FormatNodeRule<JsImportCombinedClause> for FormatJsImportCombinedClause {
+    fn fmt_fields(&self, node: &JsImportCombinedClause, f: &mut JsFormatter) -> FormatResult<()> {
+        let JsImportCombinedClauseFields {
             default_specifier,
+            comma_token,
+            specifier,
             from_token,
             source,
             assertion,
         } = node.as_fields();
-
-        if let Some(type_token) = type_token {
-            write!(f, [type_token.format(), space()])?;
-        }
-
         write![
             f,
             [
                 default_specifier.format(),
+                comma_token.format(),
+                space(),
+                specifier.format(),
                 space(),
                 from_token.format(),
                 space(),

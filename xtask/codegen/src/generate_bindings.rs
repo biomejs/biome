@@ -3,10 +3,9 @@ use biome_js_formatter::{context::JsFormatOptions, format_node};
 use biome_js_syntax::{
     AnyJsBinding, AnyJsBindingPattern, AnyJsCallArgument, AnyJsDeclaration, AnyJsDeclarationClause,
     AnyJsExportClause, AnyJsExpression, AnyJsFormalParameter, AnyJsImportClause,
-    AnyJsLiteralExpression, AnyJsModuleItem, AnyJsName, AnyJsNamedImport,
-    AnyJsNamedImportSpecifier, AnyJsObjectMember, AnyJsObjectMemberName, AnyJsParameter,
-    AnyJsStatement, AnyTsName, AnyTsReturnType, AnyTsType, AnyTsTypeMember, JsFileSource,
-    TriviaPieceKind, T,
+    AnyJsLiteralExpression, AnyJsModuleItem, AnyJsName, AnyJsNamedImportSpecifier,
+    AnyJsObjectMember, AnyJsObjectMemberName, AnyJsParameter, AnyJsStatement, AnyTsName,
+    AnyTsReturnType, AnyTsType, AnyTsTypeMember, JsFileSource, TriviaPieceKind, T,
 };
 use biome_rowan::AstNode;
 use biome_service::workspace_types::{generate_type, methods, ModuleQueue};
@@ -167,7 +166,7 @@ pub(crate) fn generate_workspace_bindings(mode: Mode) -> Result<()> {
             make::token(T![import]).with_leading_trivia(leading_comment.into_iter()),
             AnyJsImportClause::JsImportNamedClause(
                 make::js_import_named_clause(
-                    AnyJsNamedImport::JsNamedImportSpecifiers(make::js_named_import_specifiers(
+                    make::js_named_import_specifiers(
                         make::token(T!['{']),
                         make::js_named_import_specifier_list(
                             Some(AnyJsNamedImportSpecifier::JsShorthandNamedImportSpecifier(
@@ -181,7 +180,7 @@ pub(crate) fn generate_workspace_bindings(mode: Mode) -> Result<()> {
                             None,
                         ),
                         make::token(T!['}']),
-                    )),
+                    ),
                     make::token(T![from]),
                     make::js_module_source(make::js_string_literal("./transport")),
                 )
