@@ -840,8 +840,7 @@ impl Named {
             AnyJsBindingDeclaration::JsCatchDeclaration(_) => Some(Named::CatchParameter),
             AnyJsBindingDeclaration::TsPropertyParameter(_) => Some(Named::ParameterProperty),
             AnyJsBindingDeclaration::TsIndexSignatureParameter(_) => Some(Named::IndexParameter),
-            AnyJsBindingDeclaration::JsNamespaceImportSpecifier(_)
-            | AnyJsBindingDeclaration::JsImportNamespaceClause(_) => Some(Named::ImportNamespace),
+            AnyJsBindingDeclaration::JsNamespaceImportSpecifier(_) => Some(Named::ImportNamespace),
             AnyJsBindingDeclaration::JsFunctionDeclaration(_)
             | AnyJsBindingDeclaration::JsFunctionExpression(_)
             | AnyJsBindingDeclaration::JsFunctionExportDefaultDeclaration(_)
@@ -849,8 +848,7 @@ impl Named {
             | AnyJsBindingDeclaration::TsDeclareFunctionExportDefaultDeclaration(_) => {
                 Some(Named::Function)
             }
-            AnyJsBindingDeclaration::JsImportDefaultClause(_)
-            | AnyJsBindingDeclaration::TsImportEqualsDeclaration(_)
+            AnyJsBindingDeclaration::TsImportEqualsDeclaration(_)
             | AnyJsBindingDeclaration::JsDefaultImportSpecifier(_)
             | AnyJsBindingDeclaration::JsNamedImportSpecifier(_) => Some(Named::ImportAlias),
             AnyJsBindingDeclaration::TsModuleDeclaration(_) => Some(Named::Namespace),

@@ -124,6 +124,17 @@ pub(crate) fn expected_module_source(p: &JsParser, range: TextRange) -> ParseDia
 }
 
 pub(crate) fn expected_named_import(p: &JsParser, range: TextRange) -> ParseDiagnostic {
+    expected_any(&["named imports"], range, p)
+}
+
+pub(crate) fn expected_namespace_import(p: &JsParser, range: TextRange) -> ParseDiagnostic {
+    expected_any(&["namespace imports"], range, p)
+}
+
+pub(crate) fn expected_namespace_or_named_import(
+    p: &JsParser,
+    range: TextRange,
+) -> ParseDiagnostic {
     expected_any(&["namespace import", "named imports"], range, p)
 }
 

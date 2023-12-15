@@ -24,6 +24,8 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ### Formatter
 
+- Fix [#1169](https://github.com/biomejs/biome/issues/1169). Account for escaped strings when computing layout for assignments. Contributed by @kalleep
+
 ### JavaScript APIs
 
 ### Linter
