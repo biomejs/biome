@@ -260,7 +260,7 @@ fn traverse_inputs(
         scope.traverse_paths(
             ctx,
             inputs
-                .iter()
+                .into_iter()
                 .map(PathBuf::from)
                 .map(|path| {
                     if let Some(working_directory) = fs.working_directory() {
