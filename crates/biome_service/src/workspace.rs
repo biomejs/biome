@@ -56,6 +56,7 @@ use crate::{Configuration, Deserialize, Serialize, WorkspaceError};
 use biome_analyze::ActionCategory;
 pub use biome_analyze::RuleCategories;
 use biome_console::{markup, Markup, MarkupBuf};
+use biome_css_formatter::can_format_css_yet;
 use biome_diagnostics::CodeSuggestion;
 use biome_formatter::Printed;
 use biome_fs::RomePath;
@@ -163,6 +164,10 @@ impl FileFeaturesResult {
                     !settings.formatter().enabled || settings.javascript_formatter_disabled()
                 } else if language.is_json_like() {
                     !settings.formatter().enabled || settings.json_formatter_disabled()
+                } else if language.is_css_like() {
+                    !can_format_css_yet()
+                        || !settings.formatter().enabled
+                        || settings.json_formatter_disabled()
                 } else {
                     !settings.formatter().enabled
                 };

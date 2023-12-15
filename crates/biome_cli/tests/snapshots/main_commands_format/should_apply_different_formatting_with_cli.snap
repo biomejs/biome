@@ -12,6 +12,12 @@ expression: content
 }
 ```
 
+## `input.css`
+
+```css
+html {}
+```
+
 ## `input.js`
 
 ```js
@@ -52,6 +58,14 @@ internalError/fs  DEPRECATED  ━━━━━━━━━━━━━━━━�
 internalError/fs  DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The argument --json-formatter-indent-size is deprecated, it will be removed in the next major release. Use --json-formatter-indent-width instead.
+  
+
+```
+
+```block
+internalError/fs  DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The argument --css-formatter-indent-size is deprecated, it will be removed in the next major release. Use --css-formatter-indent-width instead.
   
 
 ```

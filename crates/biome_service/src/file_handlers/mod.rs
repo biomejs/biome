@@ -75,6 +75,7 @@ impl Language {
             "tsx" => Language::TypeScriptReact,
             "json" => Language::Json,
             "jsonc" => Language::Jsonc,
+            "css" => Language::Css,
             _ => Language::Unknown,
         }
     }
@@ -109,6 +110,7 @@ impl Language {
             "typescriptreact" => Language::TypeScriptReact,
             "json" => Language::Json,
             "jsonc" => Language::Jsonc,
+            "css" => Language::Css,
             _ => Language::Unknown,
         }
     }
@@ -155,6 +157,10 @@ impl Language {
 
     pub const fn is_json_like(&self) -> bool {
         matches!(self, Language::Json | Language::Jsonc)
+    }
+
+    pub const fn is_css_like(&self) -> bool {
+        matches!(self, Language::Css)
     }
 }
 

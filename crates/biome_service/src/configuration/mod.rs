@@ -100,7 +100,7 @@ pub struct Configuration {
 
     /// Specific configuration for the Css language
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(external(css_configuration), optional)]
+    #[bpaf(external(css_configuration), optional, hide)]
     pub css: Option<CssConfiguration>,
 
     /// A list of paths to other JSON files, used to extends the current configuration.

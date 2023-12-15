@@ -3667,6 +3667,126 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssBogusRule {
         )
     }
 }
+impl FormatRule<biome_css_syntax::CssBogusParameter>
+    for crate::css::bogus::bogus_parameter::FormatCssBogusParameter
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssBogusParameter,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatBogusNodeRule::<biome_css_syntax::CssBogusParameter>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssBogusParameter {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssBogusParameter,
+        crate::css::bogus::bogus_parameter::FormatCssBogusParameter,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::css::bogus::bogus_parameter::FormatCssBogusParameter::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssBogusParameter {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssBogusParameter,
+        crate::css::bogus::bogus_parameter::FormatCssBogusParameter,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::bogus::bogus_parameter::FormatCssBogusParameter::default(),
+        )
+    }
+}
+impl FormatRule<biome_css_syntax::CssBogusDeclarationItem>
+    for crate::css::bogus::bogus_declaration_item::FormatCssBogusDeclarationItem
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssBogusDeclarationItem,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatBogusNodeRule::<biome_css_syntax::CssBogusDeclarationItem>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssBogusDeclarationItem {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssBogusDeclarationItem,
+        crate::css::bogus::bogus_declaration_item::FormatCssBogusDeclarationItem,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::css::bogus::bogus_declaration_item::FormatCssBogusDeclarationItem::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssBogusDeclarationItem {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssBogusDeclarationItem,
+        crate::css::bogus::bogus_declaration_item::FormatCssBogusDeclarationItem,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::bogus::bogus_declaration_item::FormatCssBogusDeclarationItem::default(),
+        )
+    }
+}
+impl FormatRule<biome_css_syntax::CssBogusComponentValue>
+    for crate::css::bogus::bogus_component_value::FormatCssBogusComponentValue
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssBogusComponentValue,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatBogusNodeRule::<biome_css_syntax::CssBogusComponentValue>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssBogusComponentValue {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssBogusComponentValue,
+        crate::css::bogus::bogus_component_value::FormatCssBogusComponentValue,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::css::bogus::bogus_component_value::FormatCssBogusComponentValue::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssBogusComponentValue {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssBogusComponentValue,
+        crate::css::bogus::bogus_component_value::FormatCssBogusComponentValue,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::bogus::bogus_component_value::FormatCssBogusComponentValue::default(),
+        )
+    }
+}
 impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssRule {
     type Format<'a> = FormatRefWithRule<
         'a,

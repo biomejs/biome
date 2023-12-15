@@ -1978,6 +1978,12 @@ fn should_apply_different_formatting() {
                 "lineWidth": 80,
                 "indentSize": 2
             }
+        },
+        "css": {
+            "formatter": {
+                "lineWidth": 40,
+                "indentSize": 6
+            }
         }
     }"#,
     );
@@ -1989,6 +1995,9 @@ fn should_apply_different_formatting() {
 	"#;
     let json_file = Path::new("input.json");
     fs.insert(json_file.into(), code.as_bytes());
+    let code = r#"html {}"#;
+    let css_file = Path::new("input.css");
+    fs.insert(css_file.into(), code.as_bytes());
 
     let code = r#"
 const a = {
@@ -2007,6 +2016,7 @@ const a = {
                 "--write",
                 json_file.as_os_str().to_str().unwrap(),
                 js_file.as_os_str().to_str().unwrap(),
+                css_file.as_os_str().to_str().unwrap(),
             ]
             .as_slice(),
         ),
@@ -2046,6 +2056,10 @@ fn should_apply_different_formatting_with_cli() {
     let json_file = Path::new("input.json");
     fs.insert(json_file.into(), json_file_content.as_bytes());
 
+    let css_file_content = r#"html {}"#;
+    let css_file = Path::new("input.css");
+    fs.insert(css_file.into(), css_file_content.as_bytes());
+
     let js_file_content = r#"
 const a = {
     "array": ["lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum"]
@@ -2065,8 +2079,11 @@ const a = {
                 "--javascript-formatter-indent-size=8",
                 "--json-formatter-line-width=20",
                 "--json-formatter-indent-size=2",
+                "--css-formatter-line-width=40",
+                "--css-formatter-indent-size=6",
                 json_file.as_os_str().to_str().unwrap(),
                 js_file.as_os_str().to_str().unwrap(),
+                css_file.as_os_str().to_str().unwrap(),
             ]
             .as_slice(),
         ),
@@ -2222,6 +2239,75 @@ const a = {
 }
 
 #[test]
+fn should_not_format_css_files_if_disabled() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let biome_json = Path::new("biome.json");
+    fs.insert(
+        biome_json.into(),
+        r#"{
+        "formatter": {
+            "indentStyle": "space"
+        },
+        "javascript": {
+            "formatter": {
+                "lineWidth": 80,
+                "indentSize": 4
+            }
+        },
+        "css": {
+            "formatter": {
+                "enabled": false
+            }
+        }
+    }"#,
+    );
+
+    let css_file_content = r#"html {
+
+
+    }
+	"#;
+    let css_file = Path::new("input.css");
+    fs.insert(css_file.into(), css_file_content.as_bytes());
+
+    let js_file_content = r#"
+const a = {
+    "array": ["lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum", "lorem ipsum"]
+}
+	"#;
+    let js_file = Path::new("input.js");
+    fs.insert(js_file.into(), js_file_content.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("format"),
+                "--write",
+                css_file.as_os_str().to_str().unwrap(),
+                js_file.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, css_file, css_file_content);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_not_format_css_files_if_disabled",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn should_apply_different_indent_style() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
@@ -2290,7 +2376,7 @@ const a = {
     file.read_to_string(&mut content)
         .expect("failed to read file from memory FS");
 
-    assert!(content.contains('\t'), "should not contain tabs");
+    assert!(content.contains('\t'), "should contain tabs");
 
     drop(file);
 
@@ -2302,7 +2388,7 @@ const a = {
     file.read_to_string(&mut content)
         .expect("failed to read file from memory FS");
 
-    assert!(content.contains('\t'), "should not contain tabs");
+    assert!(content.contains('\t'), "should contain tabs");
 
     drop(file);
 

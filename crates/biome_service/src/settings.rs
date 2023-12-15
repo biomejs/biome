@@ -633,12 +633,12 @@ impl OverrideSettings {
         options: CssFormatOptions,
     ) -> CssFormatOptions {
         self.patterns.iter().fold(options, |mut options, pattern| {
-            let included = pattern.include.as_ref().map(|p| p.matches_path(path));
-            let excluded = pattern.exclude.as_ref().map(|p| p.matches_path(path));
-            if excluded == Some(true) {
+            let included = !pattern.include.is_empty() && pattern.include.matches_path(path);
+            let excluded = !pattern.exclude.is_empty() && pattern.exclude.matches_path(path);
+            if excluded {
                 return options;
             }
-            if included == Some(true) {
+            if included {
                 let css_formatter = &pattern.languages.css.formatter;
 
                 if let Some(indent_style) = css_formatter
@@ -705,10 +705,10 @@ impl OverrideSettings {
 
     pub fn as_css_parser_options(&self, path: &Path) -> Option<CssParserOptions> {
         for pattern in &self.patterns {
-            let included = pattern.include.as_ref().map(|p| p.matches_path(path));
-            let excluded = pattern.exclude.as_ref().map(|p| p.matches_path(path));
+            let included = !pattern.include.is_empty() && pattern.include.matches_path(path);
+            let excluded = !pattern.exclude.is_empty() && pattern.exclude.matches_path(path);
 
-            if included == Some(true) || excluded == Some(false) {
+            if included || !excluded {
                 let css_parser = &pattern.languages.css.parser;
 
                 return Some(CssParserOptions {
