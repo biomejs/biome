@@ -166,6 +166,7 @@ version = "0.0.0"
 dependencies = [
  "anyhow",
  "biome_console",
+ "biome_css_formatter",
  "biome_deserialize",
  "biome_diagnostics",
  "biome_flags",
