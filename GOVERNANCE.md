@@ -212,6 +212,7 @@ The reviewers will determine responses based on the information gathered and the
 ## OpenCollective fund allocation
 
 - Funds will be allocated for project-specific services such as domain registration and website hosting.
+- Core contributors are allowed to claim expenses related to conferences and workshops. Expenses that can be claimed are but not limited to: trip (plane, train, etc.), meals, transport, parking.
 - Expenses will be approved by the [leads](#lead).
 
 > [!NOTE]
