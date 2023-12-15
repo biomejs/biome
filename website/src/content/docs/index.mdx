@@ -26,6 +26,43 @@ hero:
 ---
 
 import { Card, CardGrid } from "@astrojs/starlight/components";
+import Inputf from "@src/components/formatter/input.md";
+import Outputf from "@src/components/formatter/output.md";
+import ProgressBar from "../../playground/components/Progress.tsx";
+import "../../styles/_performance.scss";
+
+<body>
+  <div class="gradient"></div>
+  <div class="grid"></div>
+</body>
+
+<div class="hero-code">
+  <div class="formatter">
+    <h2 class="head">Biome is fast</h2>
+    <div class="linter format">
+      <div class="inp"><span>CODE</span><Inputf /></div>
+      <div class="out"><span>OUTPUT</span><Outputf /></div>
+      <div class="perf-out">
+        <span>PERFORMANCE</span>
+        <div class="bench-comp">
+          <div class="bench">
+            <div>
+              <ProgressBar client:visible duration={5} label="Biome" />
+              <ProgressBar client:visible duration={10} label="Dprint" />
+              <ProgressBar client:visible duration={20} label="Prettier" />
+            </div>
+          </div>
+          <div class="perf-comp">
+            <div class="comp">~25x</div>
+            <div class="comp-des">
+              Faster than Prettier when formatting 85,000 lines of code.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <div class="card-cnt">
   <CardGrid>
