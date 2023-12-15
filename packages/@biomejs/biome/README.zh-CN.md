@@ -110,6 +110,7 @@ npx @biomejs/biome ci ./src
 
 - [English](./README.md)
 - 简体中文
+- [日本語](./README.ja.md)
 
 [biomejs]: https://biomejs.dev/zh-cn/
 [biome-philosophy]: https://biomejs.dev/zh-cn/internals/philosophy/
