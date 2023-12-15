@@ -25,19 +25,13 @@
 
 </div>
 
-<div align="center">
+**Biome** はウェブプロジェクトのための高性能なツールチェーンであり、プロジェクトの健全性を維持するための開発者ツールの提供を目的としています。
 
-[English](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.md) | [简体中文](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.zh-CN.md) | 日本語
+**Biome は _JavaScript_, _TypeScript_, _JSX_ そして _JSON_ 向けの[高速なFormatter](./benchmark#formatting)**であり、**[_Prettier_ との互換性は96%](https://console.algora.io/challenges/prettier)** を達成しています。
 
-</div>
+**Biome は _JavaScript_, _TypeScript_, _JSX_ のための[高性能なLinter](https://github.com/biomejs/biome/tree/main/benchmark#linting)** であり、ESLint, TypeScript ESLint, [その他のソース](https://github.com/biomejs/biome/discussions/3)から **[170以上のルール](https://biomejs.dev/linter/rules/)**を提供しています。Biome は**詳細で文脈に沿った結果を出力**するため、コードを改善し、より良いプログラマになるための手助けをします！
 
-**Biome** はウェブプロジェクトのための高性能なツールチェーンであり、プロジェクトの健全性を維持するための開発者ツールを提供することを目的としています。
-
-**Biome は _JavaScript_, _TypeScript_, _JSX_ そして _JSON_ 向けの[高速なフォーマッター](./benchmark#formatting)**であり、**[_Prettier_ との互換性は96%](https://console.algora.io/challenges/prettier)** を達成しています。
-
-**Biome は _JavaScript_, _TypeScript_, _JSX_ のための[高性能なリンター](https://github.com/biomejs/biome/tree/main/benchmark#linting)** であり、ESLint, TypeScript ESLint, [その他のソース](https://github.com/biomejs/biome/discussions/3)から **[170以上のルール](https://biomejs.dev/linter/rules/)**を提供しています。Biome は**詳細で文脈に沿った結果を出力**するため、コードを改善し、より良いプログラマになるための手助けをします！
-
-**Biome** は最初から[**エディタ内で対話的に**](https://biomejs.dev/ja/guides/integrate-in-editor/)使用するように設計されています。
+**Biome** は最初から[**エディタ内で対話的に**](https://biomejs.dev/ja/guides/integrate-in-editor/)使用できるように設計されています。
 あなたがコードを書いているときに、形の崩れたコードを format と lint することができます。
 
 ### インストール
@@ -58,7 +52,7 @@ npx @biomejs/biome lint ./src
 # format、lintなどを実行し、安全な提案を適用する
 npx @biomejs/biome check --apply ./src
 
-# CI環境では、すべてのファイルをformatやlintなどに照らしてチェックする
+# CI環境では、すべてのファイルを対象にformatやlintをチェックする
 npx @biomejs/biome ci ./src
 ```
 
@@ -76,11 +70,11 @@ Biome についてもっと知るために[ホームページ][biomejs]をチェ
 
 **Biome** は動作するために Node.js を必要としません。
 
-**Biome** はソーステキストを完全に表現し、最高のエラー回復を提供する洗練されたパーサーを持つ、最高級の LSP サポートを提供します。
+**Biome** はソーステキストの完全な表現力とエラー回復能力を持つ洗練されたParserによって、優れたLSPサポートを提供します。
 
-**Biome** は以前は別々のツールだった機能を統合します。共通基盤を構築することで、コードの処理、エラーの表示、並列処理、キャッシュ、設定について統一的な体験を提供することができます。
+**Biome** は、以前は別々のツールで提供されていた機能を統合します。共通基盤を構築することで、コードの処理、エラーの表示、並列処理、キャッシュ、設定について統一的な体験を提供します。
 
-私たちの[プロジェクトの哲学][biome-philosophy]について詳しく読んでください。
+興味のある方は、[プロジェクトの理念][biome-philosophy]もご覧ください。
 
 **Biome** は [MIT ライセンス](https://github.com/biomejs/biome/tree/main/LICENSE-MIT)または [Apache 2.0 ライセンス](https://github.com/biomejs/biome/tree/main/LICENSE-APACHE)であり、[コントリビューター行動規範](https://github.com/biomejs/biome/tree/main/CODE_OF_CONDUCT.md)の下で管理されています。
 
@@ -112,6 +106,12 @@ Biome についてもっと知るために[ホームページ][biomejs]をチェ
     </tr>
   </tbody>
 </table>
+
+## 翻訳
+
+- [English](./README.md)
+- [简体中文](./README.zh-CN.md)
+- 日本語
 
 [bench]: https://github.com/biomejs/biome/blob/main/benchmark/README.md
 [biomejs]: https://biomejs.dev/ja/
