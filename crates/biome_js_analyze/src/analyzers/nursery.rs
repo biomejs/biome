@@ -23,7 +23,7 @@ declare_group! {
             self :: no_empty_block_statements :: NoEmptyBlockStatements ,
             self :: no_implicit_any_let :: NoImplicitAnyLet ,
             self :: no_unused_private_class_members :: NoUnusedPrivateClassMembers ,
-            self :: no_useless_backreference :: noUselessBackrefInRegex ,
+            self :: no_useless_backreference :: NoUselessBackreference ,
             self :: no_useless_lone_block_statements :: NoUselessLoneBlockStatements ,
             self :: no_useless_ternary :: NoUselessTernary ,
             self :: use_await :: UseAwait ,

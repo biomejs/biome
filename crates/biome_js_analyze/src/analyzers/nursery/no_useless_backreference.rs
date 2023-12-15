@@ -35,7 +35,7 @@ declare_rule! {
     /// let regex = /(\d+)\1/; // Necessary backreference
     /// ```
     ///
-    pub(crate) noUselessBackrefInRegex {
+    pub(crate) NoUselessBackrefInRegex {
         version: "nightly",
         name: "noUselessBackrefInRegex",
         recommended: true,
@@ -43,7 +43,7 @@ declare_rule! {
     }
 }
 
-impl Rule for noUselessBackrefInRegex {
+impl Rule for NoUselessBackrefInRegex {
     type Query = Ast<JsRegexLiteral>;
     type State = ();
     type Signals = Option<Self::State>;
