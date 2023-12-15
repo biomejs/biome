@@ -6,6 +6,7 @@ pub(crate) mod no_default_export;
 pub(crate) mod no_empty_block_statements;
 pub(crate) mod no_implicit_any_let;
 pub(crate) mod no_unused_private_class_members;
+pub(crate) mod no_useless_backreference;
 pub(crate) mod no_useless_lone_block_statements;
 pub(crate) mod no_useless_ternary;
 pub(crate) mod use_await;
@@ -22,6 +23,7 @@ declare_group! {
             self :: no_empty_block_statements :: NoEmptyBlockStatements ,
             self :: no_implicit_any_let :: NoImplicitAnyLet ,
             self :: no_unused_private_class_members :: NoUnusedPrivateClassMembers ,
+            self :: no_useless_backreference :: noUselessBackrefInRegex ,
             self :: no_useless_lone_block_statements :: NoUselessLoneBlockStatements ,
             self :: no_useless_ternary :: NoUselessTernary ,
             self :: use_await :: UseAwait ,
