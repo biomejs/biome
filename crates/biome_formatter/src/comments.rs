@@ -1174,7 +1174,58 @@ where
     }
 }
 
-/// Returns `true` if `comment` is a multi line block comment:
+/// Returns `true` if `comment` is a multi line block comment where each line
+/// starts with a star (`*`). These comments can be formatted to always have
+/// the leading stars line up in a column.
+///
+/// # Examples
+///
+/// ```rs,ignore
+/// assert!(is_alignable_comment(&parse_comment(r#"
+///     /**
+///      * Multiline doc comment
+///      */
+/// "#)));
+///
+/// assert!(is_alignable_comment(&parse_comment(r#"
+///     /*
+///      * Single star
+///      */
+/// "#)));
+///
+///
+/// // Non indentable-comments
+/// assert!(!is_alignable_comment(&parse_comment(r#"/** has no line break */"#)));
+///
+/// assert!(!is_alignable_comment(&parse_comment(r#"
+/// /*
+///  *
+///  this line doesn't start with a star
+///  */
+/// "#)));
+/// ```
+pub fn is_alignable_comment<L: Language>(comment: &SyntaxTriviaPieceComments<L>) -> bool {
+    if !comment.has_newline() {
+        return false;
+    }
+
+    let text = comment.text();
+
+    text.lines().enumerate().all(|(index, line)| {
+        if index == 0 {
+            line.starts_with("/*")
+        } else {
+            line.trim_start().starts_with('*')
+        }
+    })
+}
+
+/// Returns `true` if `comment` is a documentation-style comment, specifically
+/// matching the JSDoc format where the comment:
+/// - spans over multiple lines
+/// - starts with two stars (like `/**`)
+///
+/// This is a special case of [self::is_alignable_comment].
 ///
 /// # Examples
 ///
@@ -1185,21 +1236,20 @@ where
 ///      */
 /// "#)));
 ///
-/// assert!(is_doc_comment(&parse_comment(r#"
+/// // Non doc-comments
+/// assert!(!is_doc_comment(&parse_comment(r#"
 ///     /*
 ///      * Single star
 ///      */
 /// "#)));
 ///
-///
-/// // Non doc-comments
 /// assert!(!is_doc_comment(&parse_comment(r#"/** has no line break */"#)));
 ///
 /// assert!(!is_doc_comment(&parse_comment(r#"
-/// /*
-///  *
-///  this line doesn't start with a star
-///  */
+///     /**
+///      *
+///     this line doesn't start with a star
+///     */
 /// "#)));
 /// ```
 pub fn is_doc_comment<L: Language>(comment: &SyntaxTriviaPieceComments<L>) -> bool {
@@ -1211,7 +1261,7 @@ pub fn is_doc_comment<L: Language>(comment: &SyntaxTriviaPieceComments<L>) -> bo
 
     text.lines().enumerate().all(|(index, line)| {
         if index == 0 {
-            line.starts_with("/*")
+            line.starts_with("/**")
         } else {
             line.trim_start().starts_with('*')
         }

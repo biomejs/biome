@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use crate::utils::AnyJsConditional;
 use biome_diagnostics_categories::category;
-use biome_formatter::comments::is_doc_comment;
+use biome_formatter::comments::is_alignable_comment;
 use biome_formatter::{
     comments::{
         CommentKind, CommentPlacement, CommentStyle, CommentTextPosition, Comments,
@@ -33,12 +33,12 @@ impl FormatRule<SourceComment<JsLanguage>> for FormatJsLeadingComment {
         comment: &SourceComment<JsLanguage>,
         f: &mut Formatter<Self::Context>,
     ) -> FormatResult<()> {
-        if is_doc_comment(comment.piece()) {
+        if is_alignable_comment(comment.piece()) {
             let mut source_offset = comment.piece().text_range().start();
 
             let mut lines = comment.piece().text().lines();
 
-            // SAFETY: Safe, `is_doc_comment` only returns `true` for multiline comments
+            // SAFETY: Safe, `is_alignable_comment` only returns `true` for multiline comments
             let first_line = lines.next().unwrap();
             write!(f, [dynamic_text(first_line.trim_end(), source_offset)])?;
 
