@@ -228,13 +228,8 @@ impl<'scope> TraversalScope<'scope> for OsTraversalScope<'scope> {
 /// TLDR:
 /// - presence of `!` means ignore the files that match the glob
 /// - absence of  `!` means include the files that match the glob
-const DEFAULT_IGNORE_GLOBS: &[&str; 5] = &[
-    "!**/.git/**",
-    "!**/.svn/**",
-    "!**/.hg/**",
-    "!**.yarn/**",
-    "!**/node_modules/**",
-];
+const DEFAULT_IGNORE_GLOBS: &[&str; 5] =
+    &["!**.git", "!**.svn", "!**.hg", "!**.yarn", "!node_modules"];
 
 /// Traverse a single directory
 fn handle_dir<'scope>(

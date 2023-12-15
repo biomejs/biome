@@ -7,11 +7,11 @@
 	},
 	"files": {
 		"ignore": [
-			"**/dist/**",
-			"**/.astro/**",
-			"**/assets/**",
-			"**/public/**",
-			"**/__snapshots__/**",
+			"**/dist",
+			"**/.astro",
+			"**/assets",
+			"**/public",
+			"**/__snapshots__",
 			"*.astro",
 			"*.mdx",
 			"*.md",
