@@ -4,7 +4,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make;
-use biome_js_syntax::AnyJsTemplateElement::{self, JsTemplateElement};
+use biome_js_syntax::AnyJsTemplateElement;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, JsBinaryExpression, JsBinaryOperator,
     JsParenthesizedExpression, JsStringLiteralExpression, JsSyntaxKind, JsSyntaxToken,
@@ -82,7 +82,7 @@ impl Rule for UseTemplate {
             rule_category!(),
             node.range(),
             markup! {
-                ""<Emphasis>"Template"</Emphasis>" literals are preferred over "<Emphasis>"string concatenation."</Emphasis>""
+                <Emphasis>"Template"</Emphasis>" literals are preferred over "<Emphasis>"string concatenation."</Emphasis>
             },
         ))
     }
@@ -153,36 +153,43 @@ fn template_expression_from_binary_expression(
     // While `template_elements` is empty, we keep track of the last left node.
     // Once we see the first string/template literal,
     // we insert `last_left_node` in `template_elements` and the seen string/template literal.
-    // ANy subsequent expression is directly inserted in `template_elements`.
+    // Any subsequent expression is directly inserted in `template_elements`.
     let mut template_elements = vec![];
-    let mut last_left_node = None;
+    let mut left_nodes_stack = vec![];
     let mut iter = node.syntax().preorder();
     while let Some(walk) = iter.next() {
         match walk {
             WalkEvent::Enter(node) => {
                 let node = AnyJsExpression::cast(node)?;
                 match node {
-                    AnyJsExpression::JsParenthesizedExpression(_) => continue,
-                    AnyJsExpression::JsBinaryExpression(node)
-                        if matches!(node.operator().ok()?, JsBinaryOperator::Plus) =>
+                    AnyJsExpression::JsParenthesizedExpression(_) => {
+                        continue;
+                    }
+                    AnyJsExpression::JsBinaryExpression(ref binary)
+                        if matches!(binary.operator().ok()?, JsBinaryOperator::Plus)
+                            && evaluates_to_string(binary)? =>
                     {
                         continue;
                     }
                     AnyJsExpression::JsTemplateExpression(ref template)
                         if template.tag().is_none() =>
                     {
-                        if let Some(last_node) = last_left_node.take() {
-                            template_elements.push(template_element_from(last_node)?)
+                        if !left_nodes_stack.is_empty() {
+                            for left_node in left_nodes_stack.drain(..) {
+                                template_elements.push(template_element_from(left_node)?)
+                            }
                         }
                         flatten_template_element_list(&mut template_elements, template.elements())?;
                     }
                     AnyJsExpression::AnyJsLiteralExpression(
                         AnyJsLiteralExpression::JsStringLiteralExpression(string_literal),
                     ) => {
-                        if let Some(last_node) = last_left_node.take() {
-                            template_elements.push(template_element_from(last_node)?)
+                        if !left_nodes_stack.is_empty() {
+                            for left_node in left_nodes_stack.drain(..) {
+                                template_elements.push(template_element_from(left_node)?)
+                            }
                         }
-                        template_elements.push(template_chuck_from(&string_literal)?);
+                        template_elements.push(template_chunk_from(&string_literal)?);
                     }
                     node if !template_elements.is_empty() => {
                         template_elements.push(template_element_from(node)?)
@@ -192,7 +199,13 @@ fn template_expression_from_binary_expression(
                 iter.skip_subtree();
             }
             WalkEvent::Leave(node) if template_elements.is_empty() => {
-                last_left_node = AnyJsExpression::cast(node);
+                let node = AnyJsExpression::cast(node)?;
+                // Skip parenthesized expressions, because they would be added twice:
+                // First the contained expression and then the parenthesized expression itself.
+                if let AnyJsExpression::JsParenthesizedExpression(_) = node {
+                    continue;
+                }
+                left_nodes_stack.push(node);
             }
             _ => {}
         }
@@ -207,7 +220,7 @@ fn template_expression_from_binary_expression(
     )
 }
 
-fn template_chuck_from(string_literal: &JsStringLiteralExpression) -> Option<AnyJsTemplateElement> {
+fn template_chunk_from(string_literal: &JsStringLiteralExpression) -> Option<AnyJsTemplateElement> {
     let text = string_literal.inner_string_text().ok()?;
     Some(AnyJsTemplateElement::from(make::js_template_chunk_element(
         make::js_template_chunk(text.text()),
@@ -238,7 +251,7 @@ fn flatten_template_element_list(
     for element in list {
         match element {
             AnyJsTemplateElement::JsTemplateChunkElement(_) => result.push(element),
-            JsTemplateElement(ref ele) => {
+            AnyJsTemplateElement::JsTemplateElement(ref ele) => {
                 let expr = ele.expression().ok()?;
                 match expr {
                     AnyJsExpression::JsTemplateExpression(template) => {
@@ -252,4 +265,33 @@ fn flatten_template_element_list(
         }
     }
     Some(())
+}
+
+/// Returns true if the given binary expression evaluates to a string.
+fn evaluates_to_string(node: &JsBinaryExpression) -> Option<bool> {
+    let mut iter = node.syntax().preorder();
+    while let Some(walk) = iter.next() {
+        if let WalkEvent::Enter(node) = walk {
+            let node = AnyJsExpression::cast(node)?;
+            match node {
+                AnyJsExpression::JsParenthesizedExpression(_) => continue,
+                AnyJsExpression::JsBinaryExpression(node)
+                    if node.operator().ok()? == JsBinaryOperator::Plus =>
+                {
+                    continue
+                }
+                AnyJsExpression::AnyJsLiteralExpression(
+                    AnyJsLiteralExpression::JsStringLiteralExpression(_),
+                ) => {
+                    return Some(true);
+                }
+                AnyJsExpression::JsTemplateExpression(ref template) if template.tag().is_none() => {
+                    return Some(true);
+                }
+                _ => {}
+            }
+            iter.skip_subtree();
+        }
+    }
+    Some(false)
 }

@@ -94,6 +94,8 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 - Fix [#1167](https://github.com/biomejs/biome/issues/1167). [useValidAriaProps] no longer reports `aria-atomic` as invalid. Contributed by @unvalley
 
+- Fix [#1192](https://github.com/biomejs/biome/issues/1192). [useTemplate](https://biomejs.dev/linter/rules/use-template/) now correctly handles parenthesized expressions and respects type coercions. Contributed by @n-gude
+
 ### Parser
 
 - Fix [#1077](https://github.com/biomejs/biome/issues/1077), fix issues when parsing conditional expression where parenthesized identifier was being parsed as arrow expression. Contributed by @kalleep
