@@ -12,11 +12,11 @@
   --sl-color-gray-6: #eceef2;
   --sl-color-gray-7: #f5f6f8;
   --sl-color-black: #ffffff;
-  --sl-perf-head: #f5f6f8;
-  --sl-perf-border: #eceef2;
-  --sl-perf: #f8f9fa;
   --sl-hue-blue: 210;
   --sl-community-link: #ffffff;
+  --sl-hue-blue: 210;
+  --sl-community-link: #ffffff;
+  --sl-perf-progress: #60a5fa;
 }
 
 /* Dark mode colors. */
@@ -32,11 +32,11 @@
   --sl-color-gray-5: #353841;
   --sl-color-gray-6: #24272f;
   --sl-color-black: #17181c;
-  --sl-perf-head: #25272f;
-  --sl-perf-border: #353841;
-  --sl-perf: #1b1b1d;
   --sl-hue-blue: 234;
   --sl-community-link: #ffffff;
+  --sl-hue-blue: 234;
+  --sl-community-link: #ffffff;
+  --sl-perf-progress: #60a5fa;
 }
 
 .hero>.sl-flex>.actions>.primary,
@@ -74,4 +74,35 @@
 
 .card-cnt>.card-grid>.card:hover::before {
   --size: 15vw;
+}
+
+.expressive-code:nth-child(-n+2) {
+  margin-top: 0 !important;
+}
+
+.expressive-code:nth-child(-n+2)>figure>pre {
+  border: none;
+  padding: 1.2rem;
+}
+
+.expressive-code:nth-child(-n+2)>figure>pre>code {
+  height: 400px !important;
+  overflow: scroll;
+  font-size: 0.7rem;
+}
+
+.expressive-code:first-child>figure>pre {
+  border-bottom-left-radius: 1rem;
+}
+
+.expressive-code:nth-child(-n+2)>figure>pre>code>.copy {
+  display: hidden;
+}
+
+@media only screen and (max-width: 960px) {
+  .expressive-code:nth-child(-n+2)>figure>pre>code {
+    height: 250px !important;
+    overflow: scroll;
+    font-size: 0.7rem;
+  }
 }
