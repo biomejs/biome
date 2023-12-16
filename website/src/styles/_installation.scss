@@ -1,0 +1,76 @@
+.inst-body {
+    display: flex;
+    justify-content: center;
+}
+
+.installation {
+    position: relative;
+    border: 1px solid var(--sl-color-gray-5);
+    overflow: hidden;
+    margin-top: 9.5rem !important;
+    width: 80vw;
+    display: flex;
+    gap: 2.5rem;
+    background:
+        radial-gradient(hsla(var(--sl-hue-red), 68%, 52%, 16%), transparent 40%) no-repeat -60vw -50vh / 105vw 200vh,
+        radial-gradient(var(--sl-color-blue-low), transparent 40%) no-repeat 30vw -100vh / 105vw 200vh;
+}
+
+.inst-left {
+    padding: 2.5rem 2.5rem 2.5rem;
+}
+
+.inst-left>a>p {
+    margin: 0;
+}
+
+.inst-left>a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.inst-head {
+    font-size: 3.1rem;
+    font-weight: bold;
+}
+
+.inst-des {
+    max-width: 25rem;
+}
+
+.vscode-ext {
+    display: flex;
+    margin-top: 1.3rem;
+    margin-bottom: 1.3rem;
+    align-items: center;
+    gap: 0.6rem;
+    text-decoration: none;
+    width: fit-content;
+    border-radius: 6.3rem;
+    padding: 0.5rem 1.3rem;
+    background: hsla(var(--sl-hue-blue), 68%, 52%, 16%);
+    cursor: pointer;
+}
+
+.ext-img {
+    position: absolute;
+    height: 26rem;
+    width: 31rem;
+    border-top-left-radius: 0.6rem;
+    background-repeat: no-repeat;
+    background-image: url("../assets/svg/vscode-ext.png");
+    background-size: 330%;
+    right: -7.2rem;
+    bottom: -1.8rem;
+}
+
+@media only screen and (max-width: 1080px) {
+    .installation {
+        overflow: scroll;
+    }
+
+    .ext-img {
+        display: none;
+    }
+}

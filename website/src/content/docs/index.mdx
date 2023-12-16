@@ -29,7 +29,10 @@ import { Card, CardGrid } from "@astrojs/starlight/components";
 import Inputf from "@src/components/formatter/input.md";
 import Outputf from "@src/components/formatter/output.md";
 import ProgressBar from "../../playground/components/Progress.tsx";
+import PackageManagerCommand from "@src/components/PackageManagerCommand.astro";
+import vscode from "../../assets/svg/vscode.svg";
 import "../../styles/_performance.scss";
+import "../../styles/_installation.scss";
 
 <body>
   <div class="gradient"></div>
@@ -40,8 +43,14 @@ import "../../styles/_performance.scss";
   <div class="formatter">
     <h2 class="head">Biome is fast</h2>
     <div class="linter format">
-      <div class="inp"><span>CODE</span><Inputf /></div>
-      <div class="out"><span>OUTPUT</span><Outputf /></div>
+      <div class="inp">
+        <span>CODE</span>
+        <Inputf />
+      </div>
+      <div class="out">
+        <span>OUTPUT</span>
+        <Outputf />
+      </div>
       <div class="perf-out">
         <span>PERFORMANCE</span>
         <div class="bench-comp">
@@ -90,6 +99,34 @@ import "../../styles/_performance.scss";
       class support for TypeScript and JSX.
     </Card>
   </CardGrid>
+</div>
+
+<div class="inst-body">
+  <div class="installation">
+    <div class="inst-left">
+      <div class="inst-head">Try Biome</div>
+      <div class="inst-des">
+        Install Biome using your preferred package manager or get it as a VS
+        Code extension.
+      </div>
+      <a
+        href="https://marketplace.visualstudio.com/items?itemName=biomejs.biome"
+        class="vscode-ext"
+      >
+        <img src={vscode.src} alt="vscode-ext" />
+         Get VS Code Extension
+      </a>
+      <PackageManagerCommand
+        npm="install --save-dev --save-exact @biomejs/biome"
+        pnpm="add --save-dev --save-exact @biomejs/biome"
+        yarn="add --dev --exact @biomejs/biome"
+        bun="add --dev --exact @biomejs/biome"
+      />
+    </div>
+
+    <div class="ext-img"></div>
+
+  </div>
 </div>
 
 ## Sponsors
