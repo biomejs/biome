@@ -810,6 +810,10 @@ export interface Nursery {
 	 */
 	noUnusedPrivateClassMembers?: RuleConfiguration;
 	/**
+	 * Detects and warns about unnecessary backreferences in regular expressions.
+	 */
+	noUselessBackrefInRegex?: RuleConfiguration;
+	/**
 	 * Disallow unnecessary nested block statements.
 	 */
 	noUselessLoneBlockStatements?: RuleConfiguration;
@@ -1525,6 +1529,7 @@ export type Category =
 	| "lint/nursery/noMisleadingCharacterClass"
 	| "lint/nursery/noUnusedImports"
 	| "lint/nursery/noUnusedPrivateClassMembers"
+	| "lint/nursery/noUselessBackrefInRegex"
 	| "lint/nursery/noUselessLoneBlockStatements"
 	| "lint/nursery/noUselessTernary"
 	| "lint/nursery/useAwait"

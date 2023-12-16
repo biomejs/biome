@@ -1168,6 +1168,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUselessBackrefInRegex": {
+					"description": "Detects and warns about unnecessary backreferences in regular expressions.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUselessLoneBlockStatements": {
 					"description": "Disallow unnecessary nested block statements.",
 					"anyOf": [

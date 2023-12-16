@@ -34,17 +34,13 @@ declare_rule! {
 
 impl Rule for NoUselessBackrefInRegex {
     type Query = Ast<JsRegexLiteralExpression>;
-    type State = (); // You might need a more complex state to track capturing groups and backreferences
+    type State = ();
     type Signals = Option<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let regex_literal = ctx.query();
-        // Implement logic here to parse the regex and check for useless backreferences
-        // This is a complex task and might require a regex parsing library or custom implementation
 
-        // Placeholder logic
-        // Check if the regex contains a backreference that might be unnecessary
         if is_useless_backref(&regex_literal.text()) {
             Some(())
         } else {
@@ -55,7 +51,7 @@ impl Rule for NoUselessBackrefInRegex {
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
         Some(RuleDiagnostic::new(
             rule_category!(),
-            ctx.query().range(),
+            ctx.query().syntax().text_range(),
             markup! {
                 "This regular expression contains an unnecessary backreference."
             },
@@ -64,11 +60,15 @@ impl Rule for NoUselessBackrefInRegex {
 }
 
 fn is_useless_backref(regex: &str) -> bool {
-    if regex.contains(r"\1") {
-        // Placeholder logic
-        // Check if the regex contains a backreference that might be unnecessary
-        true
-    } else {
-        false
+    let mut chars = regex.chars().peekable();
+    while let Some(c) = chars.next() {
+        if c == '\\' {
+            if let Some(next) = chars.peek() {
+                if next.is_digit(10) {
+                    return true;
+                }
+            }
+        }
     }
+    false
 }
