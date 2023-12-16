@@ -1,45 +1,45 @@
 ---
-title: Formatter
-description: How to use the Biome formatter.
+title: Formatador
+description: Como usar o formatador do Biome.
 ---
 
 import PackageManagerBiomeCommand from "@src/components/PackageManagerBiomeCommand.astro";
 
-Biome is an opinionated formatter that has the goal to stop all ongoing debates over styles.
-It follows a similar [philosophy to Prettier](https://prettier.io/docs/en/option-philosophy.html),
-only supporting a few options to avoid debates over styles, turning into debates over Biome options.
-It deliberately [resists the urge to add new options](https://github.com/prettier/prettier/issues/40) to prevent [bike-shed discussions](https://en.wikipedia.org/wiki/Law_of_triviality) in teams so they can focus on what really matters instead.
+O Biome é uma ferramenta de formatação com convicções fortes que tem o objetivo de acabar com os contínuos debates sobre estilo de código.
+Ele segue uma [filosofia semelhante à do Prettier](https://prettier.io/docs/en/option-philosophy.html) (link em inglês),
+dando suporte a apenas algumas opções para evitar que debates sobre estilos se tornem debates sobre as opções de configuração do Biome.
+Ele deliberadamente [resiste ao afã de adicionar novas opções](https://github.com/prettier/prettier/issues/40) para evitar [discussões triviais](https://pt.wikipedia.org/wiki/Lei_da_trivialidade) nas equipes, para que elas possam se concentrar no que realmente importa.
 
-## Options
+## Opções
 
-The language agnostic options supported by Biome are:
+As opções, agnósticas da linguagem, suportadas pelo Biome são:
 
-- indent style (default: `tab`): Use spaces or tabs for indention
-- tab width (default: `2`): The number of spaces per indention level
-- line width (default: `80`): The column width at which Biome wraps code
+- estilo de indentação (padrão: `tab`): Use espaços ou tabulações para a indentação
+- largura da tabulação (padrão: `2`): O número de espaços por nível de indentação
+- comprimento de linha (padrão: `80`): Número de colunas máximo a partir do qual Biome quebra a linha
 
-Other formatting options are available for specific languages as well.  See the [configuration](/reference/configuration) options for details.
+Outras opções de formatação também estão disponíveis para linguagens específicas. Consulte as opções de [configuração](/reference/configuration) para obter detalhes.
 
-## Use the formatter with the CLI
+## Use o formatador com comando de linha
 
-By default, the formatter **checks** the code and emit diagnostics if there are changes in formatting:
+Por padrão, o formatador **verifica** o código e emite diagnósticos se houver alterações na formatação:
 
 <PackageManagerBiomeCommand command="format ./src" />
 
-If you want to **apply** the new formatting, pass the `--write` option:
+Se você quiser **aplicar** a nova formatação, passe a opção `--write`:
 
 <PackageManagerBiomeCommand command="format --write ./src" />
 
-Use the  `--help` flag to know what are the available options:
+Use a flag `--help` para saber quais são as opções disponíveis:
 
 <PackageManagerBiomeCommand command="format --help" />
 
-Or check the [CLI reference section](/reference/cli#biomeformat).
+Ou confira a [seção de referência dos comandos de linha](/reference/cli#biomeformat).
 
-## Configuration
+## Configuração
 
-You may want to [configure Biome](/reference/configuration/#formatter) using `biome.json`.
-The following defaults are applied:
+Você pode querer [configurar o Biome](/reference/configuration/#formatter) usando `biome.json`.
+Os seguintes padrões são aplicados:
 
 ```json title="biome.json"
 {
@@ -54,21 +54,21 @@ The following defaults are applied:
 }
 ```
 
-## Ignoring Code
+## Ignorando Código
 
-There are times when the formatted code isn't ideal.
+Há ocasiões em que o código formatado não é ideal.
 
-For these cases, you can use a format suppression comment:
+Para esses casos, você pode usar um comentário de supressão de formatação:
 
 ```js title="example.js"
-// biome-ignore format: <explanation>
+// biome-ignore format: <explicação>
 ```
 
-Example:
+Exemplo:
 
 ```js title="example.js"
 const expr =
-  // biome-ignore format: the array should not be formatted
+  // biome-ignore format: este array não deve ser formatado
   [
     (2 * n) / (r - l),
     0,
@@ -89,21 +89,21 @@ const expr =
   ];
 ```
 
-## Differences with Prettier
+## Diferenças com o Prettier
 
-There are some divergences with Prettier.
+Há algumas divergências com o Prettier.
 
-### Prettier doesn't unquote some object properties that are valid JavaScript identifiers.
+### O Prettier não remove aspas de algumas propriedades de objeto que seriam identificadores JavaScript válidos.
 
-Prettier and Biome unquote object and class properties that are valid JavaScript identifiers.
-Prettier [unquotes only valid ES5 identifiers](https://github.com/prettier/prettier/blob/a5d502513e5de4819a41fd90b9be7247146effc7/src/language-js/utils/index.js#L646).
+O Prettier e o Biome removem as aspas de propriedades de objetos e classes que são identificadores JavaScript válidos.
+O Prettier [faz isso apenas para identificadores válidos pelo ES5](https://github.com/prettier/prettier/blob/a5d502513e5de4819a41fd90b9be7247146effc7/src/language-js/utils/index.js#L646).
 
-This is a legacy restriction in an ecosystem where ES2015 is now widespread.
-Thus, we decided to diverge here by un-quoting all valid JavaScript identifiers in ES2015+.
+Esta é um restrição considerada legado em um ecossistema no qual o ES2015 já está bastante difundido.
+Portanto, decidimos divergir aqui, retirando as aspas de todos os identificadores JavaScript válidos a partir do ES2015.
 
-A possible workaround would be to introduce a configuration to set the ECMAScript version a project uses.
-We could then adjust the un-quoting behaviour based on that version.
-Setting the ECMAScript version to `ES5` could match Prettier's behaviour.
+Uma alternativa possível seria introduzir uma configuração para a versão do ECMAScript usado pelo projeto.
+Assim, poderíamos ajustar o comportamento de remoção de aspas com base na versão.
+Definir a versão do ECMAScript como `ES5` emularia o comportamento do Prettier.
 
 ```js title="example.js"
 const obj = {
@@ -125,12 +125,12 @@ const obj = {
 ```
 
 
-### Prettier has an inconsistent behavior for assignment in computed keys.
+### Prettier tem um comportamento inconsistente com atribuição em chaves computadas.
 
-Prettier and Biome enclose some assignment expressions between parentheses, particularly in conditionals.
-This allows Biome to identify an expression that should be a comparison.
+O Prettier e o Biome colocam algumas expressões de atribuição entre parênteses, especialmente em condicionais.
+Isso permite que o Biome identifique uma expressão que deveria ser uma comparação.
 
-Prettier has inconsistent behaviour because it adds parentheses for an assignment in a computed key of an object property and doesn't for a computed key of a class property, as demonstrated by the following example:
+O Prettier tem um comportamento inconsistente porque adiciona parênteses para uma atribuição em uma chave computada de uma propriedade de objeto e não o faz para uma chave computada de uma propriedade de classe, conforme demonstrado no exemplo a seguir:
 
 Input
 
@@ -157,17 +157,17 @@ class C {
 }
 ```
 
-[Playground link](https://biomejs.dev/playground?enabledLinting=false&code=YQAgAD0AIAB7AAoAIAAgAFsAeAAgAD0AIAAwAF0AOgAgADEALAAKAH0ACgAKAGMAbABhAHMAcwAgAEMAIAB7AAoAIAAgACAAIABbAHgAIAA9ACAAMABdACAAPQAgADEACgB9AAoA)
+[Link do playground](https://biomejs.dev/playground?enabledLinting=false&code=YQAgAD0AIAB7AAoAIAAgAFsAeAAgAD0AIAAwAF0AOgAgADEALAAKAH0ACgAKAGMAbABhAHMAcwAgAEMAIAB7AAoAIAAgACAAIABbAHgAIAA9ACAAMABdACAAPQAgADEACgB9AAoA)
 
-To be consistent, we decided to diverge and omit the parentheses.
-Alternatively, we could enclose any assignment in a computed key of an object or of a class.
+Para sermos consistentes, decidimos divergir e omitir os parênteses.
+De forma alternativa, poderíamos incluir parênteses ao redor de qualquer atribuição em uma chave computada de um objeto ou de uma classe.
 
 
-### Prettier adds a trailing comma to type parameters of arrow functions even when it is not required.
+### O Prettier adiciona uma vírgula final aos parâmetros de tipo das arrow functions, mesmo quando não é necessário.
 
-In some specific cases, a type parameter list of an arrow function requires a trailing comma to distinguish it from a JSX element.
-When a default type is provided, this trailing comma is not required.
-Here, we diverge from Prettier because we think it better respects the original intent of Prettier, which was to add a trailing comma only when required.
+Em alguns casos específicos, uma lista de parâmetros de tipo de uma arrow fuction requer uma vírgula final para distingui-la de um elemento JSX.
+Quando um tipo padrão é fornecido, essa vírgula final não é necessária.
+Aqui, divergimos do Prettier porque acreditamos respeitar melhor a intenção original do próprio Prettier, que era adicionar uma vírgula final somente quando necessário.
 
 Input
 
@@ -183,61 +183,61 @@ Diff
 ```
 
 
-### Prettier formats invalid syntaxes
+### Prettier formata sintax inválida
 
-Prettier's Babel-based parsing for JavaScript and TypeScript is very loose and [allows multiple errors](https://github.com/prettier/prettier/blob/e4a74c05f4502dd4ec70495c3130ff08ab088e05/src/language-js/parse/babel.js#L177-L218) to be ignored.
-Biome's parser is intentionally stricter than the Prettier parser.
-It correctly identifies the following syntax errors:
+A análise do Prettier, com base no Babel, para JavaScript e TypeScript é flexível até demais e [permite que muitos erros](https://github.com/prettier/prettier/blob/e4a74c05f4502dd4ec70495c3130ff08ab088e05/src/language-js/parse/babel.js#L177-L218) sejam ignorados. 
+O analisador sintático do Biome é propositalmente mais rigoroso do que o analisador do Prettier.
+Ele identifica corretamente os seguintes erros de sintaxe:
 
-- A function cannot have duplicate modifiers
-- invalid order of properties' modifiers
-- Function declarations are not allowed to have bodies
-- non-abstract classes cannot have abstract properties
-- An optional chain cannot be assigned
-- The `const` modifier cannot be set on a type parameter of an interface
-- top-level return
+- Uma função não pode ter modificadores duplicados
+- Ordem inválida dos modificadores de propriedades
+- Não é permitido que as declarações de função tenham corpo
+- Classes não abstratas não podem ter propriedades abstratas
+- Uma cadeia opcional não pode ser atribuída
+- O modificador `const` não pode ser definido em um parâmetro de tipo de uma interface.
+- retorno no nível mais alto
 - etc.
 
-In Prettier, these errors aren't considered parse errors, and the AST is still built "correctly" with the appropriate nodes.
-When formatting, Prettier treats these nodes as normal and formats them accordingly.
+No Prettier, esses erros não são considerados erros de análise sintática, e a AST (árvore sintática abstrata) ainda é construída "corretamente" com os nós apropriados.
+Ao formatar, o Prettier trata esses nós como normais e os formata de acordo.
 
-In Biome, the parsing errors result in `Bogus` nodes, which may contain any number of valid nodes, invalid nodes, and/or raw characters.
-When formatting, Biome treats bogus nodes as effectively plain text, printing them out verbatim into the resulting code without any formatting since attempting to format them could be incorrect and cause semantic changes.
+No Biome, os erros de análise resultam em nós do tipo `Bogus` (defeituosos), que podem conter um número qualquer de nós válidos, nós inválidos e/ou caracteres crus.
+Ao formatar, o Biome trata os nós defeituosos como texto simples, copiando-os literalmente no código resultante sem nenhuma formatação, pois a tentativa de formatá-los poderia ser incorreta e causar alterações semânticas.
 
-For class properties, Prettier's current parsing strategy also uses boolean fields for modifiers, meaning only one of each kind of modifier can ever be present (accessibility modifiers are stored as a single string).
-When printing, Prettier looks at the list of booleans and decides which modifiers to print out again. Biome instead keeps a list of modifiers, meaning duplicates are kept around and can be analyzed (hence the parsing error messages about duplicate modifiers and ordering).
-When printing out the bogus nodes, this list is kept intact, and printing out the unformatted text results in those modifiers continuing to exist.
+Para propriedades de classe, a estratégia de análise atual do Prettier também usa campos booleanos para modificadores, o que significa que apenas um de cada tipo de modificador pode estar presente (os modificadores de acessibilidade são armazenados como uma única string).
+Ao renderizar, o Prettier examina a lista de booleanos e decide quais modificadores devem ser copiados novamente. Em vez disso, o Biome mantém uma lista de modificadores, o que significa que as duplicatas são mantidas e podem ser analisadas (daí as mensagens de erro de análise sobre modificadores duplicados e ordenação).
+Ao imprimir os nós defeituosos, essa lista é mantida intacta, e a cópia do texto não formatado faz com que esses modificadores continuem existindo.
 
-There are ways that Biome can address this.
-One possibility is to try to interpret the Bogus nodes when formatting and construct valid nodes out of them.
-If a valid node can be built, then it would just format that node like normal, otherwise, it prints the bogus text verbatim as it does currently.
-However, this is messy and introduces a form of parsing logic into the formatter that is not meaningful.
+O Biome pode resolver isso de várias maneiras.
+Uma possibilidade é tentar interpretar os nós defeituosos durante a formatação e construir nós válidos a partir deles.
+Se um nó válido puder ser criado, ele apenas formataria esse nó normalmente; caso contrário, renderizaria o texto defeituoso literalmente, como faz atualmente.
+No entanto, isso pode ser confuso e introduz uma lógica de análise sintática no formatador que não agrega valor.
 
-Another option is to introduce some form of "syntactically-valid bogus node" into the parser, which accepts these kinds of purely semantic errors (duplicate modifiers, abstract properties in non-abstract classes).
+Outra opção é introduzir alguma forma de "nó defeituoso sintaticamente válido" no analisador, que aceita esses tipos de erros puramente semânticos (modificadores duplicados, propriedades abstratas em classes não abstratas).
 
-It would continue to build the nodes like normal (effectively matching the behavior in Prettier) but store them inside of a new kind of bogus node, including the diagnostics along with it.
-When formatting, these particular bogus nodes would just attempt to format the inner node and then fallback if there's an error (the existing `format_or_verbatim` utility would do this already).
-This keeps the parsing and formatting logic separate from each other but introduces more complexity to the parser, allowing invalid states to be considered semi-valid.
+Ele continuaria a criar os nós normalmente (efetivamente correspondendo ao comportamento do Prettier), mas os armazenaria dentro de um novo tipo de nó defeituoso, incluindo os diagnósticos junto.
+Durante a formatação, esses nós defeituosos em específico tentariam formatar o nó interno, voltando atrás se houvesse um erro (o utilitário `format_or_verbatim` existente já faria isso).
+Isso mantém a lógica de análise e formatação separada uma da outra, mas introduz mais complexidade ao analisador, permitindo que estados inválidos sejam considerados semi-válidos.
 
-#### Duplicate modifiers on class properties
+#### Modificadores duplicados em propriedades de classe
 
 Input
 
 ```ts title="example.ts"
-// Multiple accessibility modifiers
+// Vários modificadores de acessibilidade
 class Foo {
   private public a  = 1;
 }
 
-// Declare function with body
+// Declarando função com corpo
 declare function foo ( ) {  }
 
-// Invalid use of abstract
+// Uso inválido de `abstract`
 class Bar {
   abstract  foo  ;
 }
 
-// Duplicate Readonly
+// Duplicação de `readonly`
 class Read {
   readonly readonly   x: number;
 }
@@ -246,30 +246,31 @@ class Read {
 Diff
 
 ```ts title="example.ts" del={3, 8, 13, 19} ins={4, 9, 14, 20}
-// Multiple accessibility modifiers
+// Vários modificadores de acessibilidade
 class Foo {
   private a = 1;
   private public a  = 1;
 }
 
-// Declare function with body
+// Declarando função com corpo
 declare function foo() {};
 declare function foo ( ) {  }
 
-// Invalid use of abstract
+// Uso inválido de `abstract`
 class Bar {
   abstract foo;
   abstract  foo  ;
 }
 
-// Duplicate Readonly
+// Duplicação de `readonly`
 class Read {
   readonly x: number;
   readonly readonly   x: number;
 }
+```
 
 
-#### Assignment to an optional chain
+#### Atribuição a uma cadeia opcional
 
 Input
 
@@ -284,7 +285,7 @@ a?.b = c;
 (a?.b) = c;
 ```
 
-#### Incorrect modifier for the type parameters of an interface
+#### Modificador incorreto para os parâmetros de tipo de uma interface
 
 Input
 
@@ -299,23 +300,23 @@ interface L<const in T> {}
 interface L<in const T> {}
 ```
 
-#### Top-level return
+#### Retorno de nível superior
 
 ```js title="example.js"
-return someVeryLongStringA && someVeryLongStringB && someVeryLongStringC && someVeryLongStringD
+return umaStringMuitoLongaA && umaStringMuitoLongaB && umaStringMuitoLongaC && umaStringMuitoLongaD
 ```
 
 ```js title="example.js" del={1, 2, 3, 4, 5, 6} ins={7}
 return (
-  someVeryLongStringA &&
-  someVeryLongStringB &&
-  someVeryLongStringC &&
-  someVeryLongStringD
+  umaStringMuitoLongaA &&
+  umaStringMuitoLongaB &&
+  umaStringMuitoLongaC &&
+  umaStringMuitoLongaD
 );
-return someVeryLongStringA && someVeryLongStringB && someVeryLongStringC && someVeryLongStringD
+return umaStringMuitoLongaA && umaStringMuitoLongaB && umaStringMuitoLongaC && umaStringMuitoLongaD
 ```
 
-#### Erroneous self-increment and self-decrement
+#### Autoincremento e autodecremento errôneos
 
 Input
 
@@ -328,7 +329,7 @@ Input
 (1)++;
 ```
 
-#### Use of `abstract` modifier in non-abstract classes
+#### Uso do modificador `abstract` em classes não abstratas
 
 Input
 
