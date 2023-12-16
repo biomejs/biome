@@ -12,6 +12,7 @@
 			"**/assets",
 			"**/public",
 			"**/__snapshots__",
+			"**/editors/intellij/**",
 			"*.astro",
 			"*.mdx",
 			"*.md",
