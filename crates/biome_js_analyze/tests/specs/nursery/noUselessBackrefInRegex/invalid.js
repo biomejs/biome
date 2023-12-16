@@ -1,27 +1,102 @@
-/^(?:(a)|\1b)$/; // reference to (a) into another alternative
+// generally invalid
+/(b)(\2a)/;
+/\k<foo>(?<foo>a)/;
+RegExp("(a|bc)|\\1");
+new RegExp("(?!(?<foo>\\n))\\1");
+/(?<!(a)\1)b/;
 
-/^(?:(a)|b(?:c|\1))$/; // reference to (a) into another alternative
+// nested
+new RegExp("(\\1)");
+/^(a\1)$/;
+/^((a)\1)$/;
+new RegExp("^(a\\1b)$");
+RegExp("^((\\1))$");
+/((\2))/;
+/a(?<foo>(.)b\1)/;
+/a(?<foo>\k<foo>)b/;
+/^(\1)*$/;
+/^(?:a)(?:((?:\1)))*$/;
+/(?!(\1))/;
+/a|(b\1c)/;
+/(a|(\1))/;
+/(a|(\2))/;
+/(?:a|(\1))/;
+/(a)?(b)*(\3)/;
+/(?<=(a\1))b/;
 
-/^(?:a|b(?:(c)|\1))$/; // reference to (c) into another alternative
+// forward
+/\1(a)/;
+/\1.(a)/;
+/(?:\1)(?:(a))/;
+/(?:\1)(?:((a)))/;
+/(?:\2)(?:((a)))/;
+/(?:\1)(?:((?:a)))/;
+/(\2)(a)/;
+RegExp("(a)\\2(b)");
+/(?:a)(b)\2(c)/;
+/\k<foo>(?<foo>a)/;
+/(?:a(b)\2)(c)/;
+new RegExp("(a)(b)\\3(c)");
+/\1(?<=(a))./;
+/\1(?<!(a))./;
+/(?<=\1)(?<=(a))/;
+/(?<!\1)(?<!(a))/;
+/(?=\1(a))./;
+/(?!\1(a))./;
 
-/\1(a)/; // forward reference to (a)
+// backward in the same lookbehind
+/(?<=(a)\1)b/;
+/(?<!.(a).\1.)b/;
+/(.)(?<!(b|c)\2)d/;
+/(?<=(?:(a)\1))b/;
+/(?<=(?:(a))\1)b/;
+/(?<=(a)(?:\1))b/;
+/(?<!(?:(a))(?:\1))b/;
+/(?<!(?:(a))(?:\1)|.)b/;
+/.(?!(?<!(a)\1))./;
+/.(?=(?<!(a)\1))./;
+/.(?!(?<=(a)\1))./;
+/.(?=(?<=(a)\1))./;
 
-RegExp("(a)\\2(b)"); // forward reference to (b)
+// into another alternative
+/(a)|\1b/;
+/^(?:(a)|\1b)$/;
+/^(?:(a)|b(?:c|\1))$/;
+/^(?:a|b(?:(c)|\1))$/;
+/^(?:(a(?!b))|\1b)+$/;
+/^(?:(?:(a)(?!b))|\1b)+$/;
+/^(?:(a(?=a))|\1b)+$/;
+/^(?:(a)(?=a)|\1b)+$/;
+/.(?:a|(b)).|(?:(\1)|c)./;
+/.(?!(a)|\1)./;
+/.(?<=\1|(a))./;
 
-/(?:a)(b)\2(c)/; // forward reference to (c)
+// into a negative lookaround
+/a(?!(b)).\1/;
+/(?<!(a))b\1/;
+/(?<!(a))(?:\1)/;
+/.(?<!a|(b)).\1/;
+/.(?!(a)).(?!\1)./;
+/.(?<!(a)).(?<!\1)./;
+/.(?=(?!(a))\1)./;
+/.(?<!\1(?!(a)))/;
 
-/\k<foo>(?<foo>a)/; // forward reference to (?<foo>a)
+// valid and invalid
+/\1(a)(b)\2/;
+/\1(a)\1/;
 
-/(?<=(a)\1)b/; // backward reference to (a) from within the same lookbehind
+// multiple invalid
+/\1(a)\2(b)/;
+/\1.(?<=(a)\1)/;
+/(?!\1(a)).\1/;
+/(a)\2(b)/;
+RegExp("(\\1)");
 
-/(?<!(a)\1)b/; // backward reference to (a) from within the same lookbehind
+// when flags cannot be evaluated, it is assumed that the regex doesn't have 'u' flag set, so this will be a correct regex with a useless backreference
+RegExp("\\1(a){", flags);
 
-new RegExp("(\\1)"); // nested reference to (\1)
-
-/^((a)\1)$/; // nested reference to ((a)\1)
-
-/a(?<foo>(.)b\1)/; // nested reference to (?<foo>(.)b\1)
-
-/a(?!(b)).\1/; // reference to (b) into a negative lookahead
-
-/(?<!(a))b\1/; // reference to (a) into a negative lookbehind
+// able to evaluate some statically known expressions
+const r = RegExp;
+const p = "\\1";
+const s = "(a)";
+new r(p + s);
