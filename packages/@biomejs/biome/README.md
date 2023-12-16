@@ -23,13 +23,6 @@
 [open-vsx-badge]: https://badgen.net/open-vsx/version/biomejs/biome?label=open-vsx&color=green
 [open-vsx-url]: https://open-vsx.org/extension/biomejs/biome
 
-
-</div>
-
-<div align="center">
-
-English | [简体中文](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.zh-CN.md)
-
 </div>
 
 **Biome** is a performant toolchain for web projects, it aims to provide developer tools to maintain the health of said projects.
@@ -116,7 +109,12 @@ Read more about our [project philosophy][biome-philosophy].
   </tbody>
 </table>
 
-[bench]: https://github.com/biomejs/biome/blob/main/benchmark/README.md
+## Translations
+
+- English
+- [简体中文](./packages/%40biomejs/biome/README.zh-CN.md)
+- [日本語](./packages/%40biomejs/biome/README.ja.md)
+
 [biomejs]: https://biomejs.dev/
 [biome-philosophy]: https://biomejs.dev/internals/philosophy/
 [language-support]: https://biomejs.dev/internals/language-support/

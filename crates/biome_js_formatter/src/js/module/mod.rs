@@ -15,6 +15,7 @@ pub(crate) mod import;
 pub(crate) mod import_assertion;
 pub(crate) mod import_assertion_entry;
 pub(crate) mod import_bare_clause;
+pub(crate) mod import_combined_clause;
 pub(crate) mod import_default_clause;
 pub(crate) mod import_named_clause;
 pub(crate) mod import_namespace_clause;
