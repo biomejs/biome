@@ -14,6 +14,10 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ### CLI
 
+#### New features
+
+- The command `biome migrate` now updates the `$schema` if there's an outdated version.
+
 ### Configuration
 
 ### Editors
