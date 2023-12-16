@@ -21,11 +21,11 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 - Fix [#709](https://github.com/biomejs/biome/issues/709), by correctly parsing allow list patterns in `.gitignore` files. Contributed by @ematipico
 - Fix [#805](https://github.com/biomejs/biome/issues/805), by correctly parsing these kind of patterns. Contributed by @ematipico
 
-- Fix [1117](https://github.com/biomejs/biome/issues/1117) by correctly respecting the matching. Contributed by @ematipico
+- Fix [#1117](https://github.com/biomejs/biome/issues/1117) by correctly respecting the matching. Contributed by @ematipico
 
 ### Configuration
 
-##### New features
+#### New features
 
 - Users can specify git ignore patterns inside `ignore` and `include` properties, for example it's possible to **allow list** globs of files using the `!` character:
 
