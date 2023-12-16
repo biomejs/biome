@@ -39,7 +39,8 @@
     max-width: 25rem;
 }
 
-.inst-ext, .inst-biome {
+.inst-ext,
+.inst-biome {
     display: flex;
     margin-top: 1rem;
     align-items: center;
@@ -50,7 +51,8 @@
     cursor: pointer;
 }
 
-.inst-ext:hover, .inst-biome:hover {
+.inst-ext:hover,
+.inst-biome:hover {
     background: hsla(var(--sl-hue-blue), 68%, 52%, 16%);
     text-decoration: underline;
 }
