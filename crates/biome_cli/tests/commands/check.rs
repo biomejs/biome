@@ -1072,6 +1072,7 @@ fn fs_files_ignore_symlink() {
         Args::from(
             [
                 ("check"),
+                "--log-level=info",
                 ("--config-path"),
                 (root_path.display().to_string().as_str()),
                 ("--apply-unsafe"),
