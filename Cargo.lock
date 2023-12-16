@@ -407,7 +407,6 @@ dependencies = [
  "biome_text_edit",
  "bpaf",
  "countme",
- "fancy-regex",
  "insta",
  "lazy_static",
  "log",
@@ -1341,16 +1340,6 @@ checksum = "30d9eafeadd538e68fb28016364c9732d78e420b9ff8853fa5e4058861e9f8d3"
 dependencies = [
  "dissimilar",
  "once_cell",
-]
-
-[[package]]
-name = "fancy-regex"
-version = "0.12.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7493d4c459da9f84325ad297371a6b2b8a162800873a22e3b6b6512e61d18c05"
-dependencies = [
- "bit-set",
- "regex",
 ]
 
 [[package]]

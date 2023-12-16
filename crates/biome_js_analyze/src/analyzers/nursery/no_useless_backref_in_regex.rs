@@ -2,6 +2,7 @@ use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnosti
 use biome_console::markup;
 use biome_js_syntax::JsRegexLiteralExpression;
 use biome_rowan::AstNode;
+use std::collections::HashSet;
 
 declare_rule! {
     /// Detects and warns about unnecessary backreferences in regular expressions.
@@ -41,7 +42,7 @@ impl Rule for NoUselessBackrefInRegex {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let regex_literal = ctx.query();
 
-        if is_useless_backref(&regex_literal.text()) {
+        if contains_useless_backreference(&regex_literal.text()) {
             Some(())
         } else {
             None
@@ -59,16 +60,34 @@ impl Rule for NoUselessBackrefInRegex {
     }
 }
 
-fn is_useless_backref(regex: &str) -> bool {
+fn contains_useless_backreference(regex: &str) -> bool {
+    let mut defined_groups = HashSet::new();
+    let mut current_group = 0;
     let mut chars = regex.chars().peekable();
+
     while let Some(c) = chars.next() {
-        if c == '\\' {
-            if let Some(next) = chars.peek() {
-                if next.is_digit(10) {
-                    return true;
+        match c {
+            '(' => {
+                // Increase group count when a new group is opened
+                current_group += 1;
+                defined_groups.insert(current_group);
+            }
+            '\\' => {
+                // Check if it's a backreference
+                if let Some(next_char) = chars.peek() {
+                    if next_char.is_digit(10) {
+                        let group_ref: usize = next_char.to_string().parse().unwrap();
+
+                        // Check if the referred group is not yet defined
+                        if !defined_groups.contains(&group_ref) {
+                            return true; // Useless backreference found
+                        }
+                    }
                 }
             }
+            _ => {}
         }
     }
+
     false
 }
