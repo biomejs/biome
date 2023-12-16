@@ -90,6 +90,36 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
   }
   ```
 
+- Fix [#1191](https://github.com/biomejs/biome/issues/1191). [noUselessElse](https://biomejs.dev/linter/rules/no-useless-else) now preserve comments of the `else` clause. Contributed by @Conaclos
+
+  For example, the rule suggested the following fix:
+
+  ```diff
+    function f(x) {
+      if (x <0) {
+        return 0;
+      }
+  -   // Comment
+  -   else {
+        return x;
+  -   }
+    }
+  ```
+
+  Now the rule suggests a fix that preserves the comment of the `else` clause:
+
+  ```diff
+    function f(x) {
+      if (x <0) {
+        return 0;
+      }
+      // Comment
+  -   else {
+        return x;
+  -   }
+    }
+  ```
+
 - Fix [#728](https://github.com/biomejs/biome/issues/728). [useSingleVarDeclarator](https://biomejs.dev/linter/rules/use-single-var-declarator) no longer outputs invalid code. Contributed by @Conaclos
 
 - Fix [#1167](https://github.com/biomejs/biome/issues/1167). [useValidAriaProps] no longer reports `aria-atomic` as invalid. Contributed by @unvalley
