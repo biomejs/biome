@@ -2,6 +2,7 @@ use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnosti
 use biome_console::markup;
 use biome_js_syntax::JsRegexLiteralExpression;
 use biome_rowan::AstNode;
+use regex::Regex;
 use std::collections::HashSet;
 
 declare_rule! {
@@ -42,6 +43,11 @@ impl Rule for NoUselessBackrefInRegex {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let regex_literal = ctx.query();
 
+        // Check is the regex valid
+        if Regex::new(&regex_literal.text()).is_err() {
+            return None;
+        }
+
         if contains_useless_backreference(&regex_literal.text()) {
             Some(())
         } else {
@@ -52,7 +58,7 @@ impl Rule for NoUselessBackrefInRegex {
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
         Some(RuleDiagnostic::new(
             rule_category!(),
-            ctx.query().syntax().text_range(),
+            ctx.query().range(),
             markup! {
                 "This regular expression contains an unnecessary backreference."
             },
@@ -64,28 +70,34 @@ fn contains_useless_backreference(regex: &str) -> bool {
     let mut defined_groups = HashSet::new();
     let mut current_group = 0;
     let mut chars = regex.chars().peekable();
+    let mut previous_was_backslash = false;
 
     while let Some(c) = chars.next() {
         match c {
             '(' => {
-                // Increase group count when a new group is opened
                 current_group += 1;
                 defined_groups.insert(current_group);
             }
             '\\' => {
-                // Check if it's a backreference
-                if let Some(next_char) = chars.peek() {
-                    if next_char.is_digit(10) {
-                        let group_ref: usize = next_char.to_string().parse().unwrap();
-
-                        // Check if the referred group is not yet defined
-                        if !defined_groups.contains(&group_ref) {
-                            return true; // Useless backreference found
-                        }
-                    }
+                if previous_was_backslash {
+                    // This is an escaped backslash, reset flag
+                    previous_was_backslash = false;
+                } else {
+                    // This is a backslash, set flag and handle next char
+                    previous_was_backslash = true;
+                    continue;
                 }
             }
-            _ => {}
+            _ if previous_was_backslash && c.is_digit(10) => {
+                let group_ref: usize = c.to_string().parse().unwrap();
+                if !defined_groups.contains(&group_ref) {
+                    return true; // Useless backreference found
+                }
+                previous_was_backslash = false;
+            }
+            _ => {
+                previous_was_backslash = false;
+            }
         }
     }
 
