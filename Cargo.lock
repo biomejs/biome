@@ -411,7 +411,6 @@ dependencies = [
  "lazy_static",
  "log",
  "natord",
- "regex-syntax 0.8.2",
  "roaring",
  "rustc-hash",
  "schemars",

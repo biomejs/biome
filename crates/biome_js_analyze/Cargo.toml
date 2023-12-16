@@ -28,7 +28,6 @@ bpaf.workspace         = true
 lazy_static            = { workspace = true }
 log                    = "0.4.20"
 natord                 = "1.0.9"
-regex-syntax           = "0.8.2"
 roaring                = "0.10.1"
 rustc-hash             = { workspace = true }
 schemars               = { workspace = true, optional = true }

@@ -2,9 +2,6 @@ use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnosti
 use biome_console::markup;
 use biome_js_syntax::JsRegexLiteralExpression;
 use biome_rowan::AstNode;
-use regex_syntax::ast::GroupKind;
-use regex_syntax::hir::{Hir, HirKind};
-use regex_syntax::Parser;
 
 declare_rule! {
     /// Detects and warns about unnecessary backreferences in regular expressions.
@@ -67,5 +64,11 @@ impl Rule for NoUselessBackrefInRegex {
 }
 
 fn is_useless_backref(regex: &str) -> bool {
-    false
+    if regex.contains(r"\1") {
+        // Placeholder logic
+        // Check if the regex contains a backreference that might be unnecessary
+        true
+    } else {
+        false
+    }
 }
