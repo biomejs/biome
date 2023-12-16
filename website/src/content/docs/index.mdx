@@ -30,7 +30,7 @@ import Inputf from "@src/components/formatter/input.md";
 import Outputf from "@src/components/formatter/output.md";
 import ProgressBar from "../../playground/components/Progress.tsx";
 import PackageManagerCommand from "@src/components/PackageManagerCommand.astro";
-import vscode from "../../assets/svg/vscode.svg";
+import arrow from "../../assets/svg/arrow-right.svg";
 import "../../styles/_performance.scss";
 import "../../styles/_installation.scss";
 
@@ -106,22 +106,19 @@ import "../../styles/_installation.scss";
     <div class="inst-left">
       <div class="inst-head">Try Biome</div>
       <div class="inst-des">
-        Install Biome using your preferred package manager or get it as a VS
-        Code extension.
+        Install Biome using your preferred package manager AND integrate it in your editor.
       </div>
-      <a
-        href="https://marketplace.visualstudio.com/items?itemName=biomejs.biome"
-        class="vscode-ext"
-      >
-        <img src={vscode.src} alt="vscode-ext" />
-         Get VS Code Extension
+      <a class="inst-biome" href="https://biomejs.dev/guides/getting-started/#installation">
+        Install with package manager
+        <img src={arrow.src} alt="arrow" />
       </a>
-      <PackageManagerCommand
-        npm="install --save-dev --save-exact @biomejs/biome"
-        pnpm="add --save-dev --save-exact @biomejs/biome"
-        yarn="add --dev --exact @biomejs/biome"
-        bun="add --dev --exact @biomejs/biome"
-      />
+      <a
+        href="https://biomejs.dev/guides/integrate-in-editor/"
+        class="inst-ext"
+      >
+         Integrate Biome in your editor
+        <img src={arrow.src} alt="arrow" />
+      </a>
     </div>
 
     <div class="ext-img"></div>

@@ -17,17 +17,17 @@
 }
 
 .inst-left {
-    padding: 2.5rem 2.5rem 2.5rem;
+    padding: 2.5rem 2.5rem 4.5rem;
 }
 
-.inst-left>a>p {
+.inst-left>a>img {
     margin: 0;
 }
 
 .inst-left>a {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
 }
 
 .inst-head {
@@ -39,23 +39,25 @@
     max-width: 25rem;
 }
 
-.vscode-ext {
+.inst-ext, .inst-biome {
     display: flex;
-    margin-top: 1.3rem;
-    margin-bottom: 1.3rem;
+    margin-top: 1rem;
     align-items: center;
-    gap: 0.6rem;
     text-decoration: none;
-    width: fit-content;
-    border-radius: 6.3rem;
-    padding: 0.5rem 1.3rem;
-    background: hsla(var(--sl-hue-blue), 68%, 52%, 16%);
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 0.5rem;
     cursor: pointer;
+}
+
+.inst-ext:hover, .inst-biome:hover {
+    background: hsla(var(--sl-hue-blue), 68%, 52%, 16%);
+    text-decoration: underline;
 }
 
 .ext-img {
     position: absolute;
-    height: 26rem;
+    height: 24rem;
     width: 31rem;
     border-top-left-radius: 0.6rem;
     background-repeat: no-repeat;
