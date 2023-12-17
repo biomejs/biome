@@ -71,9 +71,7 @@ atau langsung ke [Panduan Memulai][getting-started] untuk mulai menggunakan Biom
 
 **Biome** bertujuan untuk mendukung [semua bahasa utama][language-support] pengembangan web modern.
 
-**Biome** [tidak mem
-
-erlukan Node.js](<https://biomejs.dev/guides/manual-installation/>) untuk berfungsi.
+**Biome** [tidak memerlukan Node.js](<https://biomejs.dev/guides/manual-installation/>) untuk berfungsi.
 
 **Biome** memiliki dukungan LSP kelas satu, dengan parser canggih yang merepresentasikan teks sumber secara penuh dan pemulihan kesalahan yang sangat baik.
 
