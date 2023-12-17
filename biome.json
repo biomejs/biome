@@ -6,7 +6,7 @@
 		"useIgnoreFile": true
 	},
 	"files": {
-		"ignore": ["types.d.ts", "./editors/intellij"]
+		"ignore": ["types.d.ts"]
 	},
 	"formatter": {
 		"ignore": [

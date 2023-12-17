@@ -20,10 +20,6 @@ We can use help in a bunch of areas and any help is greatly appreciated!
         - [`cargo codegen test`](#cargo-codegen-test)
         - [`cargo codegen analyzer`](#cargo-codegen-analyzer)
     - [crate dependencies](#crate-dependencies)
-  - [Intellij plugin development](#intellij-plugin-development)
-    - [Running the plugin on IDEA](#running-the-plugin-on-idea)
-    - [Build the plugin](#build-the-plugin)
-    - [UI Testing intellij plugin](#ui-testing-intellij-plugin)
   - [Node.js development](#nodejs-development)
   - [Website development](#website-development)
   - [Commit messages](#commit-messages)
@@ -186,35 +182,6 @@ This command will detect linter rules declared in the `analyzers`, `assists` and
 [Workspace dependencies](https://doc.rust-lang.org/cargo/reference/workspaces.html#the-dependencies-table) are used, and many dependencies are defined in Cargo.toml in the root.
 
 Internal crates are loaded with `workspace = true` for each crate. About `dev-dependencies`, we use [path dependencies](https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html#specifying-path-dependencies) to avoid requiring the published version of these crates.
-
-## Intellij plugin development
-
-To start development from source, navigate to the `editors/intellij` directory.
-
-Build and run the plugin requires:
-
-- Java development kit 17+
-- IntelliJ IDEA Ultimate edition
-
-### Running the plugin on IDEA
-```bash
-./gradlew runIde
-```
-
-### Build the plugin
-```bash
-./gradlew buildPlugin
-```
-
-### UI Testing intellij plugin
-
-Before start testing the plugin you will need to start IDE by invoking the `./gradlew runIdeForUiTests &` and wait IDE startup
-
-You can now run the test task:
-
-```bash
-./gradlew test
-```
 
 ## Node.js development
 
