@@ -10,6 +10,6 @@ pub fn ensure_data_dir() -> PathBuf {
     } else {
         env::temp_dir()
     };
-    fs::create_dir_all(&project_data_dir).expect("fail to create biome base dir");
+    fs::create_dir_all(&project_data_dir).expect("failed to create biome data directory");
     project_data_dir
 }
