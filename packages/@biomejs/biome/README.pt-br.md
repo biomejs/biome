@@ -7,7 +7,7 @@
 <div align="center">
 
 [![Chat no Discord][discord-badge]][discord-url]
-[![CI na principal][ci-badge]][ci-url]
+[![CI na `main`][ci-badge]][ci-url]
 [![versão npm][npm-badge]][npm-url]
 [![versão VSCode][vscode-badge]][vscode-url]
 [![versão Open VSX][open-vsx-badge]][open-vsx-url]
