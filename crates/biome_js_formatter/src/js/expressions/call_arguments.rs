@@ -902,14 +902,16 @@ fn is_simple_ts_type(ty: &AnyTsType) -> bool {
     //     Foo<number, string> => Foo<number, string>
     let extracted_generic_type = match &extracted_array_type {
         Some(AnyTsType::TsReferenceType(generic)) => {
-            generic.type_arguments().and_then(|type_arguments| {
+            if let Some(type_arguments) = generic.type_arguments() {
                 let argument_list = type_arguments.ts_type_argument_list();
                 if argument_list.len() == 1 {
                     argument_list.first().and_then(|first| first.ok())
                 } else {
                     extracted_array_type
                 }
-            })
+            } else {
+                extracted_array_type
+            }
         }
         _ => extracted_array_type,
     };
@@ -924,9 +926,9 @@ fn is_simple_ts_type(ty: &AnyTsType) -> bool {
         | AnyTsType::TsBooleanType(_)
         | AnyTsType::TsNeverType(_)
         | AnyTsType::TsNullLiteralType(_)
+        | AnyTsType::TsNonPrimitiveType(_)
         | AnyTsType::TsNumberLiteralType(_)
         | AnyTsType::TsNumberType(_)
-        | AnyTsType::TsObjectType(_)
         | AnyTsType::TsStringLiteralType(_)
         | AnyTsType::TsStringType(_)
         | AnyTsType::TsSymbolType(_)
