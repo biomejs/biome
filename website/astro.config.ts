@@ -93,7 +93,12 @@ export default defineConfig({
 				},
 				{
 					label: "Guides",
-					translations: { ja: "ガイド", "zh-CN": "指南", "pt-BR": "Guias", id: "Panduan" },
+					translations: {
+						ja: "ガイド",
+						"zh-CN": "指南",
+						"pt-BR": "Guias",
+						id: "Panduan",
+					},
 					items: [
 						{
 							label: "Getting Started",
@@ -259,7 +264,12 @@ export default defineConfig({
 				},
 				{
 					label: "Recipes",
-					translations: { ja: "レシピ", "zh-CN": "实例", "pt-BR": "Receitas", id: "Resep" },
+					translations: {
+						ja: "レシピ",
+						"zh-CN": "实例",
+						"pt-BR": "Receitas",
+						id: "Resep",
+					},
 					items: [
 						{
 							label: "Continuous Integration",
