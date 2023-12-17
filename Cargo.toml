@@ -120,6 +120,7 @@ bitflags          = "2.3.1"
 bpaf              = { version = "0.9.5", features = ["derive"] }
 countme           = "3.0.1"
 dashmap           = "5.4.0"
+ignore            = "0.4.20"
 indexmap          = "1.9.3"
 insta             = "1.29.0"
 lazy_static       = "1.4.0"
@@ -132,9 +133,9 @@ serde             = { version = "1.0.163", features = ["derive"] }
 serde_json        = "1.0.96"
 smallvec          = { version = "1.10.0", features = ["union", "const_new"] }
 tracing           = { version = "0.1.37", default-features = false, features = ["std"] }
+unicode-bom       = "2.0.3"
 # pinning to version 1.18 to avoid multiple versions of windows-sys as dependency
-tokio       = { version = "~1.18.5" }
-unicode-bom = "2.0.3"
+tokio = { version = "~1.18.5" }
 
 
 [profile.dev.package.biome_wasm]

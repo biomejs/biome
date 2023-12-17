@@ -16,10 +16,10 @@ mod diagnostics;
 pub mod workspace_types;
 
 pub use crate::configuration::{
-    create_config, load_config, Configuration, ConfigurationBasePath, ConfigurationDiagnostic,
+    create_config, Configuration, ConfigurationBasePath, ConfigurationDiagnostic,
     JavascriptFormatter, MergeWith, RuleConfiguration, Rules,
 };
-pub use crate::matcher::{MatchOptions, Matcher, Pattern};
+pub use crate::matcher::Matcher;
 
 pub use crate::diagnostics::{TransportError, WorkspaceError};
 /// Exports only for this crate

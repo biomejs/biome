@@ -792,10 +792,6 @@ file2.js
     let file_path2 = Path::new("file2.js");
     fs.insert(file_path2.into(), code2.as_bytes());
 
-    // git folder
-    let git_folder = Path::new("./.git");
-    fs.insert(git_folder.into(), "".as_bytes());
-
     // git ignore file
     let ignore_file = Path::new("./.gitignore");
     fs.insert(ignore_file.into(), git_ignore.as_bytes());

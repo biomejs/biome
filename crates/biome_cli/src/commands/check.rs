@@ -1,13 +1,14 @@
 use crate::cli_options::CliOptions;
-use crate::configuration::{load_configuration, LoadedConfiguration};
-use crate::vcs::store_path_to_ignore_from_vcs;
+use crate::commands::validate_configuration_diagnostics;
 use crate::{
     execute_mode, setup_cli_subscriber, CliDiagnostic, CliSession, Execution, TraversalMode,
 };
 use biome_service::configuration::organize_imports::OrganizeImports;
-use biome_service::configuration::{FormatterConfiguration, LinterConfiguration};
+use biome_service::configuration::{
+    load_configuration, FormatterConfiguration, LinterConfiguration, LoadedConfiguration,
+};
 use biome_service::workspace::{FixFileMode, UpdateSettingsParams};
-use biome_service::{Configuration, MergeWith};
+use biome_service::{Configuration, ConfigurationBasePath, MergeWith};
 use std::ffi::OsString;
 use std::path::PathBuf;
 
@@ -54,9 +55,17 @@ pub(crate) fn check(
         Some(FixFileMode::SafeAndUnsafeFixes)
     };
 
-    let loaded_configuration = load_configuration(&mut session, &cli_options)?.with_file_path();
+    let base_path = match cli_options.config_path.as_ref() {
+        None => ConfigurationBasePath::default(),
+        Some(path) => ConfigurationBasePath::FromUser(PathBuf::from(path)),
+    };
 
-    loaded_configuration.check_for_errors(session.app.console, cli_options.verbose)?;
+    let loaded_configuration = load_configuration(&session.app.fs, base_path)?;
+    validate_configuration_diagnostics(
+        &loaded_configuration,
+        session.app.console,
+        cli_options.verbose,
+    )?;
 
     let LoadedConfiguration {
         configuration: mut fs_configuration,
@@ -92,12 +101,8 @@ pub(crate) fn check(
 
     // check if support of git ignore files is enabled
     let vcs_base_path = configuration_path.or(session.app.fs.working_directory());
-    store_path_to_ignore_from_vcs(
-        &mut session,
-        &mut fs_configuration,
-        vcs_base_path,
-        &cli_options,
-    )?;
+    let (vcs_base_path, gitignore_matches) =
+        fs_configuration.retrieve_gitignore_matches(&session.app.fs, vcs_base_path.as_deref())?;
 
     let stdin = if let Some(stdin_file_path) = stdin_file_path {
         let console = &mut session.app.console;
@@ -112,12 +117,15 @@ pub(crate) fn check(
     } else {
         None
     };
+    let vcs_enabled = fs_configuration.is_vcs_enabled();
 
     session
         .app
         .workspace
         .update_settings(UpdateSettingsParams {
             configuration: fs_configuration,
+            vcs_base_path,
+            gitignore_matches,
         })?;
 
     execute_mode(
@@ -128,5 +136,6 @@ pub(crate) fn check(
         session,
         &cli_options,
         paths,
+        vcs_enabled,
     )
 }

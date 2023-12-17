@@ -7,7 +7,7 @@ Profile-*.json
 # Release artifacts
 **/target
 # Ignore test files that contributors could create locally
-/test.*
+**/test.*
 # Ignore third-party files
 **/node_modules
 **/dist
