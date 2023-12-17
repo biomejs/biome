@@ -7,7 +7,7 @@ expression: content
 ```block
 Run the formatter on a set of files.
 
-Usage: format [--write] [PATH]...
+Usage: format [--write] [--changed] [--since=REF] [PATH]...
 
 Generic options applied to all files
         --indent-style=<tab|space>  The indent style.
@@ -109,6 +109,10 @@ Available options:
                               the file. Based on the extension, Biome knows how to format the code.
                               Example: `echo 'let a;' | biome format --stdin-file-path=file.js`
         --write               Writes formatted files to file system.
+        --changed             When set to true, only the files that have been changed compared to your
+                              `defaultBranch` configuration will be linted.
+        --since=REF           Use this to specify the base branch to compare against when you're using
+                              the --changed flag and the `defaultBranch` is not set in your biome.json
     -h, --help                Prints help information
 
 ```

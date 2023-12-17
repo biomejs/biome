@@ -9,6 +9,7 @@ use biome_service::workspace::UpdateSettingsParams;
 use biome_service::{Configuration, ConfigurationBasePath, MergeWith};
 use std::ffi::OsString;
 use std::path::PathBuf;
+use crate::changed::get_changed_files;
 
 pub(crate) struct CiCommandPayload {
     pub(crate) formatter_enabled: Option<bool>,
@@ -17,10 +18,12 @@ pub(crate) struct CiCommandPayload {
     pub(crate) paths: Vec<OsString>,
     pub(crate) rome_configuration: Configuration,
     pub(crate) cli_options: CliOptions,
+    pub(crate) changed: bool,
+    pub(crate) since: Option<String>,
 }
 
 /// Handler for the "ci" command of the Biome CLI
-pub(crate) fn ci(session: CliSession, payload: CiCommandPayload) -> Result<(), CliDiagnostic> {
+pub(crate) fn ci(session: CliSession, mut payload: CiCommandPayload) -> Result<(), CliDiagnostic> {
     setup_cli_subscriber(
         payload.cli_options.log_level.clone(),
         payload.cli_options.log_kind.clone(),
@@ -94,6 +97,14 @@ pub(crate) fn ci(session: CliSession, payload: CiCommandPayload) -> Result<(), C
 
     let vcs_enabled = configuration.is_vcs_enabled();
 
+    if payload.since.is_some() && !payload.changed {
+        return Err(CliDiagnostic::incompatible_arguments("since", "changed"));
+    }
+
+    if payload.changed {
+        payload.paths = get_changed_files(&session.app.fs, &configuration, payload.since)?;
+    }
+    
     session
         .app
         .workspace

@@ -1,3 +1,4 @@
+use crate::changed::get_changed_files;
 use crate::cli_options::CliOptions;
 use crate::commands::validate_configuration_diagnostics;
 use crate::{
@@ -22,6 +23,8 @@ pub(crate) struct CheckCommandPayload {
     pub(crate) formatter_enabled: Option<bool>,
     pub(crate) linter_enabled: Option<bool>,
     pub(crate) organize_imports_enabled: Option<bool>,
+    pub(crate) changed: bool,
+    pub(crate) since: Option<String>,
 }
 
 /// Handler for the "check" command of the Biome CLI
@@ -34,11 +37,13 @@ pub(crate) fn check(
         apply_unsafe,
         cli_options,
         configuration,
-        paths,
+        mut paths,
         stdin_file_path,
         linter_enabled,
         organize_imports_enabled,
         formatter_enabled,
+        since,
+        changed,
     } = payload;
     setup_cli_subscriber(cli_options.log_level.clone(), cli_options.log_kind.clone());
 
@@ -119,6 +124,13 @@ pub(crate) fn check(
     };
     let vcs_enabled = fs_configuration.is_vcs_enabled();
 
+    if since.is_some() && !changed {
+        return Err(CliDiagnostic::incompatible_arguments("since", "changed"));
+    }
+
+    if changed {
+        paths = get_changed_files(&session.app.fs, &fs_configuration, since)?;
+    }
     session
         .app
         .workspace
