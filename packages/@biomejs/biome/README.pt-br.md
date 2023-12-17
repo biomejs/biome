@@ -1,5 +1,5 @@
 <p align="center">
-    <img alt="Biome - Toolchain of the web"
+    <img alt="Biome - Cadeia de ferramentas da web"
          src="https://raw.githubusercontent.com/biomejs/resources/main/biome-logo-slogan.svg"
          width="400">
 </p>
@@ -33,7 +33,7 @@
 Ele **fornece diagnósticos detalhados e contextualizados** que ajudam você a melhorar seu código e se tornar um programador melhor!
 
 **Biome** é projetado desde o início para ser usado [interativamente dentro de um editor](https://biomejs.dev/guides/integrate-in-editor/).
-Pode formatar e lintar código malformado enquanto você está escrevendo.
+Isso permite formatar e lintar códigos malformados enquanto você programa.
 
 ### Instalação
 
@@ -66,7 +66,7 @@ ou vá ao [Guia de Introdução][getting-started] para começar a usar o Biome.
 
 ## Mais sobre o Biome
 
-**Biome** tem padrões sensatos e não requer configuração.
+**Biome** tem padrões robustos e não requer configuração.
 
 **Biome** visa suportar [todas as principais linguagens][language-support] do desenvolvimento web moderno.
 
@@ -118,7 +118,7 @@ Leia mais sobre nossa [filosofia de projeto][biome-philosophy].
 - [日本語](./README.ja.md)
 - Português do Brasil
 
-[biomejs]: https://biomejs.dev/
-[biome-philosophy]: https://biomejs.dev/internals/philosophy/
-[language-support]: https://biomejs.dev/internals/language-support/
-[getting-started]: https://biomejs.dev/guides/getting-started/
+[biomejs]: https://biomejs.dev/pt-br/
+[biome-philosophy]: https://biomejs.dev/pt-br/internals/philosophy/
+[language-support]: https://biomejs.dev/pt-br/internals/language-support/
+[getting-started]: https://biomejs.dev/pt-br/guides/getting-started/
