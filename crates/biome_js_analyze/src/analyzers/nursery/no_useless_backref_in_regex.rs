@@ -3,6 +3,7 @@ use biome_console::markup;
 use biome_js_syntax::JsRegexLiteralExpression;
 use biome_rowan::AstNode;
 use fancy_regex::Regex;
+use std::clone::Clone;
 use std::collections::{HashMap, HashSet};
 
 declare_rule! {
@@ -34,9 +35,26 @@ declare_rule! {
     }
 }
 
+#[derive(Clone)]
+enum UselessBackreferenceType {
+    Nested,
+    Forward,
+    Backward,
+    Disjunctive,
+    IntoNegativeLookaround,
+}
+
+type Backref = (String, String, UselessBackreferenceType);
+
+pub(crate) struct BackrefState {
+    backref: String,
+    group: String,
+    backref_type: UselessBackreferenceType,
+}
+
 impl Rule for NoUselessBackrefInRegex {
     type Query = Ast<JsRegexLiteralExpression>;
-    type State = ();
+    type State = BackrefState;
     type Signals = Option<Self::State>;
     type Options = ();
 
@@ -48,86 +66,84 @@ impl Rule for NoUselessBackrefInRegex {
             Ok(_) => {}
             Err(e) => match e {
                 fancy_regex::Error::ParseError(_pos, parse_err) => {
-                    if let fancy_regex::ParseError::InvalidBackref = parse_err {
+                    // If the parse error other than invalid backreference, ignore it.
+                    if !parse_err.to_string().contains("backreference") {
                         return None;
                     }
-
-                    return Some(());
                 }
                 _ => {
-                    return Some(());
+                    return None;
                 }
             },
         }
 
-        if contains_useless_backreference(&regex_literal.text()) {
-            Some(())
+        if let Some(backref) = find_useless_backref(regex_literal) {
+            Some(backref)
         } else {
             None
         }
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
-        Some(RuleDiagnostic::new(
+    fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+        let BackrefState {
+            backref,
+            group,
+            backref_type,
+        } = state;
+        let type_msg = match backref_type {
+            UselessBackreferenceType::Nested => "from within that group",
+            UselessBackreferenceType::Forward => "which appears later in the pattern",
+            UselessBackreferenceType::Backward => "which appears before in the same lookbehind",
+            UselessBackreferenceType::Disjunctive => "which is in another alternative",
+            UselessBackreferenceType::IntoNegativeLookaround => "which is in a negative lookaround",
+        };
+        let diag = RuleDiagnostic::new(
             rule_category!(),
             ctx.query().range(),
-            markup! {
-                "This regular expression contains an unnecessary backreference."
-            },
-        ))
+            markup!(
+                "Backreference '"{ backref }"' will be ignored. It references group '"{ group }"' "{type_msg}"."
+            ),
+        );
+        Some(diag)
     }
 }
 
-fn contains_useless_backreference(regex: &str) -> bool {
-    let mut defined_groups = HashSet::new();
-    let mut named_groups = HashMap::new();
-    let mut current_group = 0;
-    let mut chars = regex.chars().peekable();
-    let mut previous_was_backslash = false;
-    let mut in_named_group = false;
-    let mut named_group_name = String::new();
+fn get_path_to_root(node: &JsRegexLiteralExpression) -> Vec<JsRegexLiteralExpression> {
+    let mut path = vec![];
+    let mut current_node = node.clone();
+    while let Some(parent) = current_node.syntax().parent() {
+        if let Some(regex) = JsRegexLiteralExpression::cast(parent.clone()) {
+            path.push(regex);
+        }
+        current_node = parent;
+    }
+    path
+}
 
-    while let Some(c) = chars.next() {
-        if previous_was_backslash {
-            match c {
-                'k' if chars.next_if_eq(&'<').is_some() => {
-                    in_named_group = true;
-                    continue;
+fn is_lookaround(node: &JsRegexLiteralExpression) -> bool {
+    let path = get_path_to_root(node);
+    for regex in path {
+        if let Some(parent) = regex.syntax().parent() {
+            if let Some(lookaround) = JsRegexLookaround::cast(parent.clone()) {
+                if lookaround.is_negative() {
+                    return true;
                 }
-                _ if c.is_digit(10) => {
-                    let group_ref: usize = c.to_string().parse().unwrap();
-                    if !defined_groups.contains(&group_ref) {
-                        return true;
-                    }
-                }
-                _ => {}
-            }
-            previous_was_backslash = false;
-        } else {
-            match c {
-                '(' if chars.peek() == Some(&'?') => {
-                    chars.next(); // Consume '?'
-                    if chars.peek() == Some(&'<') {
-                        chars.next(); // Consume '<'
-                        in_named_group = true;
-                    } else {
-                        current_group += 1;
-                        defined_groups.insert(current_group);
-                    }
-                }
-                '\\' => previous_was_backslash = true,
-                '>' if in_named_group => {
-                    in_named_group = false;
-                    named_groups.insert(named_group_name.clone(), current_group);
-                    named_group_name.clear();
-                    current_group += 1;
-                    defined_groups.insert(current_group);
-                }
-                _ if in_named_group => named_group_name.push(c),
-                _ => {}
             }
         }
     }
+    false
+}
 
+fn is_negative_lookaround(node: &JsRegexLiteralExpression) -> bool {
+    let path = get_path_to_root(node);
+    for regex in path {
+        if let Some(parent) = regex.syntax().parent() {
+            if let Some(lookaround) = JsRegexLookaround::cast(parent.clone()) {
+                if lookaround.is_negative() {
+                    return true;
+                }
+            }
+        }
+    }
     false
 }

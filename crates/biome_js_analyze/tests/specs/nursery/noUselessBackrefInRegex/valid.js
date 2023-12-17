@@ -9,12 +9,13 @@ RegExp(p);
 new RegExp(p, "u");
 RegExp(`\\1(a)${suffix}`);
 new RegExp(`${prefix}\\\\1(a)`);
+// TODO
 // not the global RegExp
 // let RegExp; new RegExp('\\1(a)');;
 // function foo() { var RegExp; RegExp('\\1(a)', 'u'); };
 // function foo(RegExp) { new RegExp('\\1(a)'); };
 // if (foo) { const RegExp = bar; RegExp('\\1(a)'); };
-/* globals RegExp:off */ new RegExp("\\1(a)");
+// /* globals RegExp:off */ new RegExp("\\1(a)");
 // {
 // 	code: RegExp('\\1(a)'),
 // 	globals: { RegExp: "off" },
