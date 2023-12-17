@@ -62,7 +62,7 @@ Se você quiser experimentar o Biome sem instalá-lo, use o [playground online](
 ## Documentação
 
 Confira nossa [página inicial][biomejs] para saber mais sobre o Biome,
-ou vá diretamente para o [Guia de Introdução][getting-started] para começar a usar o Biome.
+ou vá ao [Guia de Introdução][getting-started] para começar a usar o Biome.
 
 ## Mais sobre o Biome
 
