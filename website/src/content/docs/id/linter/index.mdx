@@ -1,0 +1,182 @@
+---
+title: Linter
+description: Cara menggunakan linter Biome.
+---
+
+import NumberOfRules from "@src/components/generated/NumberOfRules.astro";
+import RecommendedRules from "@src/components/generated/RecommendedRules.astro";
+
+Linter Biome menganalisis kode Anda secara statis untuk menangkap kesalahan umum dan membantu menulis kode yang idiomatis.
+
+<NumberOfRules />
+
+## Gunakan linter melalui CLI
+
+Anda dapat memulai dengan menjalankan CLI untuk memeriksa kemungkinan kesalahan menggunakan perintah berikut:
+
+```shell
+biome lint ./src
+```
+
+Untuk informasi lebih lanjut tentang semua opsi yang tersedia, cek halaman [CLI](/reference/cli#biome-lint)
+
+## Pilar aturan
+
+Kami percaya bahwa aturan harus informatif dan menjelaskan kepada pengguna mengapa sebuah aturan dipicu dan memberitahu pengguna apa yang harus mereka lakukan untuk memperbaiki kesalahan. Aturan harus mengikuti **pilar** ini:
+1. Jelaskan kepada pengguna kesalahannya. Umumnya, ini adalah pesan dari diagnostik.
+2. Jelaskan kepada pengguna **mengapa** kesalahan dipicu. Umumnya, ini diimplementasikan dengan node tambahan.
+3. Katakan kepada pengguna apa yang harus mereka lakukan. Umumnya, ini diimplementasikan menggunakan aksi kode. Jika aksi kode tidak berlaku, catatan harus memberitahu pengguna apa yang harus mereka lakukan untuk memperbaiki kesalahan.
+
+Jika Anda berpikir sebuah aturan tidak mengikuti pilar ini, silakan [mengajukan masalah](https://github.com/biomejs/biome/issues/new?assignees=&labels=S-To+triage&projects=&template=01_bug.yml&title=%F0%9F%90%9B+%3CTITLE%3E).
+
+## Perbaikan Kode
+
+Aturan lint mungkin menyediakan perbaikan kode otomatis. Biome membedakan antara dua jenis perbaikan.
+
+### Perbaikan Aman
+
+Perbaikan aman dijamin tidak akan mengubah semantik kode Anda. Mereka dapat diterapkan tanpa tinjauan eksplisit.
+
+Untuk menerapkan _perbaikan aman_, gunakan `--apply`:
+
+```shell
+biome check --apply ./src
+```
+
+### Perbaikan Tidak Aman
+
+Perbaikan tidak aman mungkin mengubah semantik program Anda. Oleh karena itu, disarankan untuk meninjau secara manual perubahan tersebut.
+
+Untuk menerapkan _perbaikan tidak aman_, gunakan `--apply-unsafe`:
+
+```shell
+biome check --apply-unsafe ./src
+```
+
+
+## Aturan yang Disarankan
+
+Ketika linter diaktifkan, ia merekomendasikan sejumlah aturan. Aturan yang disarankan akan memunculkan diagnostik kesalahan. Berikut daftar aturan yang disarankan:
+
+<RecommendedRules />
+
+
+## Mengabaikan Kode
+
+Ada kalanya pengembang ingin mengabaikan aturan lint untuk baris kode tertentu.
+Anda dapat mencapainya dengan menambahkan komentar pengecualian di atas baris yang memunculkan diagnostik lint.
+
+Komentar pengecualian memiliki format berikut:
+
+```js
+// biome-ignore lint: <penjelasan>
+// biome-ignore lint/suspicious/noDebugger: <penjelasan>
+```
+
+Dimana
+
+- `biome-ignore` adalah awal dari komentar pengecualian;
+- `lint` menekan linter;
+- `/suspicious/noDebugger`: **opsional**, grup dan nama aturan yang ingin Anda tekan;
+- `<penjelasan>` penjelasan mengapa aturan dinonaktifkan
+
+Berikut contohnya:
+
+```ts
+// biome-ignore lint: alasan
+debugger;
+// biome-ignore lint/suspicious/noDebugger: alasan
+debugger;
+```
+
+
+## Konfigurasi
+
+### Mengaktifkan aturan lint
+
+Aturan yang disarankan diaktifkan secara default dan memunculkan diagnostik dengan tingkat kesalahan.
+Aturan yang tidak disarankan dinonaktifkan secara default, tetapi dapat diaktifkan melalui konfigurasi.
+Diagnostik yang dipancarkan oleh aturan ini ditampilkan dengan tingkat peringatan dalam dokumentasi.
+
+Untuk mengaktifkan aturan, Anda perlu mengubah tingkat diagnostik mereka berdasarkan ke
+
+butuhan Anda:
+
+```json title="biome.json"
+{
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "style": {
+        "useBlockStatements": "error",
+        "useShorthandArrayType": "error",
+        "noShoutyConstants": "warn"
+      }
+    }
+  }
+}
+```
+
+### Menonaktifkan aturan lint
+
+Cukup tambahkan `"off"` sebagai nilai di dalam konfigurasinya. Sebagai contoh:
+
+```json title="biome.json"
+{
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "suspicious": {
+        "noCommentText": "off"
+      },
+      "style": {
+        "noUnusedTemplateLiteral": "off"
+      }
+    }
+  }
+}
+```
+
+### Mengubah tingkat kesalahan diagnostik
+
+Kebanyakan aturan Biome akan memunculkan **kesalahan**, tetapi Anda bebas untuk mengubah tingkat kesalahan mereka.
+Cukup tambahkan `"warn"` sebagai nilai aturan tersebut. Contoh:
+
+```json title="biome.json"
+{
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "suspicious": {
+        "noCommentText": "warn"
+      }
+    }
+  }
+}
+```
+
+Ini berguna dalam kasus di mana ada pembaruan yang sedang berlangsung dan perlu membuat CI lulus.
+
+## Opsi Aturan
+
+Beberapa aturan memiliki opsi.
+Ketika mereka _menerima_ beberapa, Anda dapat meneruskannya dengan membentuk nilai aturan berbeda.
+
+```json title="biome.json"
+{
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "correctness": {
+        "noCommentText": {
+          "level": "warn",
+          "options": {}
+        }
+      }
+    }
+  }
+}
+```
+
+- `level` akan menunjukkan tingkat kesalahan diagnostik, nilai yang valid adalah: `"off"`, `"warn"` dan `"error"`;
+- `options` akan berubah berdasarkan aturan.
