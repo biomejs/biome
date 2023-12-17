@@ -88,13 +88,6 @@ pub(crate) fn lint(
         return Err(CliDiagnostic::incompatible_arguments("since", "changed"));
     }
 
-    session
-        .app
-        .workspace
-        .update_settings(UpdateSettingsParams {
-            configuration: fs_configuration.clone(),
-        })?;
-
     if changed {
         paths = get_changed_files(&mut session, &mut fs_configuration, since)?;
     }
