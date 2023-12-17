@@ -3,6 +3,7 @@ use crate::prelude::*;
 use biome_formatter::token::string::normalize_string;
 use biome_js_syntax::JsSyntaxKind::{JSX_STRING_LITERAL, JS_STRING_LITERAL};
 use biome_js_syntax::{JsFileSource, JsSyntaxToken};
+use biome_js_unicode_table::is_js_ident;
 use std::borrow::Cow;
 use unicode_width::UnicodeWidthStr;
 
@@ -245,37 +246,27 @@ impl<'token> LiteralStringNormaliser<'token> {
         }
 
         let text_to_check = self.raw_content();
-        // Text here is quoteless. If it's empty, it means it is an empty string and we can't
-        // do any transformation
-        if text_to_check.is_empty() {
-            return false;
-        }
 
-        let mut has_seen_number = false;
-        text_to_check.chars().enumerate().all(|(index, c)| {
-            if index == 0 && c.is_ascii_digit() {
-                // We can't remove quotes if the member is octal literals.
-                if c == '0' && text_to_check.len() > 1 {
-                    return false;
-                }
-
+        if text_to_check
+            .chars()
+            .next()
+            .map_or(false, |c| c.is_ascii_digit())
+        {
+            if let Ok(parsed) = text_to_check.parse::<f64>() {
                 // In TypeScript, numbers like members have different meaning from numbers.
                 // Hence, if we see a number, we bail straightaway
                 if file_source == SourceFileKind::TypeScript {
                     return false;
-                } else {
-                    has_seen_number = true;
                 }
+
+                // Rule out inexact floats and octal literals
+                return parsed.to_string() == text_to_check;
             }
 
-            let is_eligible_character = if has_seen_number {
-                // as we've seen a number, now eligible characters can only contain numbers
-                c.is_ascii_digit()
-            } else {
-                c.is_alphabetic() || c.is_ascii_digit()
-            };
-            is_eligible_character || matches!(c, '_' | '$')
-        })
+            return false;
+        }
+
+        is_js_ident(text_to_check)
     }
 
     fn normalise_type_member(
@@ -318,12 +309,16 @@ impl<'token> LiteralStringNormaliser<'token> {
 
     fn normalize_string(&self, string_information: &StringInformation) -> Cow<'token, str> {
         let raw_content = self.raw_content();
+        let is_escape_preserved = matches!(self.token.token.kind(), JSX_STRING_LITERAL);
 
         if matches!(self.token.parent_kind, StringLiteralParentKind::Directive) {
             return Cow::Borrowed(raw_content);
         }
-
-        normalize_string(raw_content, string_information.preferred_quote.into())
+        normalize_string(
+            raw_content,
+            string_information.preferred_quote.into(),
+            is_escape_preserved,
+        )
     }
 
     fn raw_content(&self) -> &'token str {

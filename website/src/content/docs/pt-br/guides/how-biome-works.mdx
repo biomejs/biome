@@ -1,0 +1,93 @@
+---
+title: Como o Biome funciona
+description: Aprenda como configurar um novo projeto com Biome.
+---
+
+import DefaultConfiguration from "@src/components/generated/DefaultConfiguration.mdx";
+
+## Configuração
+
+O arquivo de configuração é considerado **opcional**, o Biome já inclui configurações padrões robustas.
+Use o arquivo de configuração para alterar essas configurações predefinidas.
+
+O arquivo de configuração do Biome é chamado `biome.json` e deve ser colocado no diretório raíz do projeto. Geralmente,
+o diretório raíz é o diretório onde fica o `package.json` do projeto.
+
+Esse arquivo de configuração habilita o [formatador](/pt-br/formatter) e define o estilo de indentação e seu tamanho, além de desabilitar o [linter](/pt-br/linter):
+
+```json title="biome.json"
+{
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "tab",
+    "lineWidth": 120
+  },
+  "linter": {
+    "enabled": false
+  }
+}
+```
+
+### Configuração padrão
+
+Quando você executa o comando `biome init`, ele gera o seguinte arquivo de configuração:
+
+<DefaultConfiguration />
+
+### Resolução do arquivo de configuração
+
+O Biome busca de forma automática o arquivo `biome.json` mais próximo. Ele começa procurando o `biome.json` no diretório de trabalho atual,
+e, em seguida, continua procurando nos diretórios pai até:
+
+- Ele achar um arquivo `biome.json`;
+- Ele aplicar a configuração padrão do Biome **caso não encontre o arquivo `biome.json`**;
+
+Aqui está um exemplo:
+
+```
+└── app
+    ├── backend
+    │   ├── package.json
+    │   └── biome.json
+    └── frontend
+        ├── legacy
+        │   └── package.json
+        ├── new
+        │   └── package.json
+        └── biome.json
+
+```
+
+- Comandos do Biome executados no `app/backend/package.json` utilizarão o arquivo de configuração `app/backend/biome.json`;
+- Comandos do Biome executados no `app/frontend/legacy/package.json` e `app/frontend/new/package.json` utilizarão o arquivo de configuração `app/frontend/biome.json`;
+
+## Arquivos ignorados
+
+Os seguintes arquivos são ignorados pelo Biome. Isso significa que nenhum diagnóstico será emitido pelo Biome nesses arquivos.
+
+- `package.json`
+- `package-lock.json`
+- `npm-shrinkwrap.json`
+- `yarn.lock`
+- `composer.json`
+- `composer.lock`
+- `typescript.json`
+- `tsconfig.json`
+- `jsconfig.json`
+- `deno.json`
+- `deno.jsonc`
+
+Os seguintes arquivos são analisados como **arquivos `JSON`** com as opções `json.parser.allowComments` e `json.parser.allowTrailingCommas` definidas como `true`. Isso ocorre porque editores, como o VSCode, os tratam dessa maneira.
+
+- `tslint.json`
+- `babel.config.json`
+- `.babelrc.json`
+- `.ember-cli`
+- `typedoc.json`
+- `.eslintrc`
+- `.eslintrc.json`
+- `.jsfmtrc`
+- `.jshintrc`
+- `.swcrc`
+- `.hintrc`
+- `.babelrc`

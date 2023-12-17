@@ -246,6 +246,16 @@ pub struct MemoryTraversalScope<'scope> {
 }
 
 impl<'scope> TraversalScope<'scope> for MemoryTraversalScope<'scope> {
+    fn traverse_paths(
+        &self,
+        context: &'scope dyn TraversalContext,
+        paths: Vec<PathBuf>,
+        _use_git_ignore: bool,
+    ) {
+        for input in paths {
+            self.spawn(context, input)
+        }
+    }
     fn spawn(&self, ctx: &'scope dyn TraversalContext, base: PathBuf) {
         // Traversal is implemented by iterating on all keys, and matching on
         // those that are prefixed with the provided `base` path

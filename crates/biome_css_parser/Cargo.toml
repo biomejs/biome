@@ -8,7 +8,7 @@ keywords.workspace   = true
 license.workspace    = true
 name                 = "biome_css_parser"
 repository.workspace = true
-version              = "0.1.0"
+version              = "0.3.1"
 
 [dependencies]
 biome_console          = { workspace = true }
@@ -19,6 +19,7 @@ biome_js_unicode_table = { workspace = true }
 biome_parser           = { workspace = true }
 biome_rowan            = { workspace = true }
 tracing                = { workspace = true }
+unicode-bom            = { workspace = true }
 
 [dev-dependencies]
 biome_test_utils  = { path = "../biome_test_utils" }
@@ -30,3 +31,6 @@ tests_macros      = { path = "../tests_macros" }
 # cargo-workspaces metadata
 [package.metadata.workspaces]
 independent = true
+
+[lints]
+workspace = true

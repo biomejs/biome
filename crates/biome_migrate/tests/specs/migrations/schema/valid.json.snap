@@ -1,0 +1,13 @@
+---
+source: crates/biome_migrate/tests/spec_tests.rs
+expression: valid.json
+---
+# Input
+```js
+{
+	"$schema": "./node_modules/@biomejs/biome/configuration_schema.json"
+}
+
+```
+
+

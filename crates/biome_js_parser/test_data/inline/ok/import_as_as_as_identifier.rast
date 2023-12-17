@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -6,8 +7,7 @@ JsModule {
             import_token: IMPORT_KW@0..7 "import" [] [Whitespace(" ")],
             import_clause: JsImportNamedClause {
                 type_token: missing (optional),
-                default_specifier: missing (optional),
-                named_import: JsNamedImportSpecifiers {
+                named_specifiers: JsNamedImportSpecifiers {
                     l_curly_token: L_CURLY@7..9 "{" [] [Whitespace(" ")],
                     specifiers: JsNamedImportSpecifierList [
                         JsNamedImportSpecifier {
@@ -37,14 +37,14 @@ JsModule {
 
 0: JS_MODULE@0..33
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..32
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..32
     0: JS_IMPORT@0..32
       0: IMPORT_KW@0..7 "import" [] [Whitespace(" ")]
       1: JS_IMPORT_NAMED_CLAUSE@7..31
         0: (empty)
-        1: (empty)
-        2: JS_NAMED_IMPORT_SPECIFIERS@7..20
+        1: JS_NAMED_IMPORT_SPECIFIERS@7..20
           0: L_CURLY@7..9 "{" [] [Whitespace(" ")]
           1: JS_NAMED_IMPORT_SPECIFIER_LIST@9..18
             0: JS_NAMED_IMPORT_SPECIFIER@9..18
@@ -55,9 +55,9 @@ JsModule {
               3: JS_IDENTIFIER_BINDING@15..18
                 0: IDENT@15..18 "as" [] [Whitespace(" ")]
           2: R_CURLY@18..20 "}" [] [Whitespace(" ")]
-        3: FROM_KW@20..25 "from" [] [Whitespace(" ")]
-        4: JS_MODULE_SOURCE@25..31
+        2: FROM_KW@20..25 "from" [] [Whitespace(" ")]
+        3: JS_MODULE_SOURCE@25..31
           0: JS_STRING_LITERAL@25..31 "\"test\"" [] []
-        5: (empty)
+        4: (empty)
       2: SEMICOLON@31..32 ";" [] []
-  3: EOF@32..33 "" [Newline("\n")] []
+  4: EOF@32..33 "" [Newline("\n")] []

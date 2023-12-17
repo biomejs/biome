@@ -9,8 +9,8 @@ expression: content
   "formatter": {
     "ignore": [
       "test1.js",
-      "./test2.js",
-      "./test3/**/*",
+      "test2.js",
+      "test3/**/*",
       "/test4/**/*",
       "test5/**/*",
       "**/test6/*.js",

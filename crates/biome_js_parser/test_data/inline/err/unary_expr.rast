@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -29,8 +30,9 @@ JsModule {
 
 0: JS_MODULE@0..13
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..12
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..12
     0: JS_EXPRESSION_STATEMENT@0..4
       0: JS_PRE_UPDATE_EXPRESSION@0..3
         0: PLUS2@0..3 "++" [] [Whitespace(" ")]
@@ -46,7 +48,7 @@ JsModule {
         0: MINUS@9..11 "-" [Newline("\n")] []
         1: (empty)
       1: SEMICOLON@11..12 ";" [] []
-  3: EOF@12..13 "" [Newline("\n")] []
+  4: EOF@12..13 "" [Newline("\n")] []
 --
 unary_expr.js:1:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

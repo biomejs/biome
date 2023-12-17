@@ -23,10 +23,17 @@
 [open-vsx-badge]: https://badgen.net/open-vsx/version/biomejs/biome?label=open-vsx&color=green
 [open-vsx-url]: https://open-vsx.org/extension/biomejs/biome
 
-
 </div>
 
-**Biome** is a toolchain for web projects, it aims to provide developer tools to maintain the health of said projects.
+**Biome** is a performant toolchain for web projects, it aims to provide developer tools to maintain the health of said projects.
+
+**Biome is a [fast formatter](./benchmark#formatting)** for _JavaScript_, _TypeScript_, _JSX_, and _JSON_ that scores **[96% compatibility with _Prettier_](https://console.algora.io/challenges/prettier)**.
+
+**Biome is a [performant linter](https://github.com/biomejs/biome/tree/main/benchmark#linting)** for _JavaScript_, _TypeScript_, and _JSX_ that features **[more than 170 rules](https://biomejs.dev/linter/rules/)** from ESLint, TypeSCript ESLint, and [other sources](https://github.com/biomejs/biome/discussions/3).
+It **outputs detailed and contextualized diagnostics** that help you to improve your code and become a better programmer!
+
+**Biome** is designed from the start to be used [interactively within an editor](https://biomejs.dev/guides/integrate-in-editor/).
+It can format and lint malformed code as you are writing it.
 
 ### Installation
 
@@ -57,25 +64,57 @@ If you want to give Biome a run without installing it, use the [online playgroun
 Check out our [homepage][biomejs] to learn more about Biome,
 or directly head to the [Getting Started guide][getting-started] to start using Biome.
 
-## About Biome
+## More about Biome
 
-**Biome** formats and lints your code in a [fraction of a second][bench].
+**Biome** has sane defaults and it doesn't require configuration.
+
+**Biome** aims to support [all main languages][language-support] of modern web development.
 
 **Biome** [doesn't require Node.js](https://biomejs.dev/guides/manual-installation/) to function.
 
 **Biome** has first-class LSP support, with a sophisticated parser that represents the source text in full fidelity and top-notch error recovery.
 
-**Biome** supports JavaScript, TypeScript, JSON, and more. It aims to support [all main languages][language-support] of modern web development.
-
-**Biome** has sane defaults and it doesn't require configuration.
-
-**Biome** helps you as much as possible by displaying detailed and contextualized diagnostics. Read more about our [project philosophy][biome-philosophy].
-
 **Biome** unifies functionality that has previously been separate tools. Building upon a shared base allows us to provide a cohesive experience for processing code, displaying errors, parallelize work, caching, and configuration.
+
+Read more about our [project philosophy][biome-philosophy].
 
 **Biome** is [MIT licensed](https://github.com/biomejs/biome/tree/main/LICENSE-MIT) or [Apache 2.0 licensed](https://github.com/biomejs/biome/tree/main/LICENSE-APACHE) and moderated under the [Contributor Covenant Code of Conduct](https://github.com/biomejs/biome/tree/main/CODE_OF_CONDUCT.md).
 
-[bench]: https://github.com/biomejs/biome/blob/main/benchmark/README.md
+## Sponsors
+
+### Gold Sponsors
+
+<table>
+  <tbody>
+    <tr>
+      <td align="center" valign="middle">
+        <a href="https://shiguredo.jp/" target="_blank"><img src="https://shiguredo.jp/official_shiguredo_logo.svg" height="120"></a>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+### Bronze Sponsors
+
+<table>
+  <tbody>
+    <tr>
+      <td align="center" valign="middle">
+        <a href="https://www.kanamekey.com" target="_blank"><img src="https://images.opencollective.com/kaname/d15fd98/logo/256.png?height=80" width="80"></a>
+      </td>
+      <td align="center" valign="middle">
+        <a href="https://nanabit.dev/" target="_blank"><img src="https://images.opencollective.com/nanabit/d15fd98/logo/256.png?height=80" width="80"></a>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+## Translations
+
+- English
+- [简体中文](./packages/%40biomejs/biome/README.zh-CN.md)
+- [日本語](./packages/%40biomejs/biome/README.ja.md)
+
 [biomejs]: https://biomejs.dev/
 [biome-philosophy]: https://biomejs.dev/internals/philosophy/
 [language-support]: https://biomejs.dev/internals/language-support/

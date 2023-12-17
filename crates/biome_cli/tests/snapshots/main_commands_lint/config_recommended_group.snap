@@ -37,12 +37,14 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
-check.js:1:1 lint/correctness/noNewSymbol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+check.js:1:1 lint/correctness/noInvalidNewBuiltin  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Symbol cannot be called as a constructor.
   
   > 1 │ new Symbol("");
       │ ^^^^^^^^^^^^^^
+  
+  i Calling Symbol with the new operator throws a TypeError.
   
   i Unsafe fix: Remove new.
   

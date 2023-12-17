@@ -2,3 +2,4 @@
 :host(   .special-custom-element   ) {}
 :host(.footer) {}
 :host {}
+:host(.footer) .div {}

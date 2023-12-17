@@ -8,12 +8,12 @@ use biome_js_syntax::parameter_ext::{AnyJsParameterList, AnyParameter};
 use biome_js_syntax::{
     AnyJsBinding, AnyJsBindingPattern, AnyJsConstructorParameter, AnyJsExpression,
     AnyJsFormalParameter, AnyJsParameter, AnyTsType, JsArrowFunctionExpression,
-    JsConstructorParameters, JsParameters, JsSyntaxToken,
+    JsConstructorParameters, JsParameters, JsSyntaxNode, JsSyntaxToken,
 };
-use biome_rowan::{declare_node_union, SyntaxResult};
+use biome_rowan::{declare_node_union, AstNode, SyntaxResult};
 
-#[derive(Debug, Clone, Default)]
-pub(crate) struct FormatJsParameters;
+#[derive(Debug, Copy, Clone, Default)]
+pub(crate) struct FormatJsParameters();
 
 impl FormatNodeRule<JsParameters> for FormatJsParameters {
     fn fmt_fields(&self, node: &JsParameters, f: &mut JsFormatter) -> FormatResult<()> {
@@ -21,7 +21,7 @@ impl FormatNodeRule<JsParameters> for FormatJsParameters {
     }
 
     fn fmt_dangling_comments(&self, _: &JsParameters, _: &mut JsFormatter) -> FormatResult<()> {
-        // Formatted inside of `FormatJsAnyParameters
+        // Formatted inside of `FormatJsAnyParameters`
         Ok(())
     }
 }
@@ -99,7 +99,7 @@ impl Format<JsFormatContext> for FormatAnyJsParameters {
                     f,
                     [soft_block_indent(&FormatJsAnyParameterList::with_layout(
                         &list,
-                        ParameterLayout::Default
+                        ParameterLayout::Default,
                     ))]
                 )?;
 
@@ -167,6 +167,13 @@ impl FormatAnyJsParameters {
             FormatAnyJsParameters::JsConstructorParameters(_) => None,
         }
     }
+
+    fn syntax(&self) -> &JsSyntaxNode {
+        match self {
+            FormatAnyJsParameters::JsParameters(parameters) => parameters.syntax(),
+            FormatAnyJsParameters::JsConstructorParameters(parameters) => parameters.syntax(),
+        }
+    }
 }
 
 #[derive(Copy, Debug, Clone, Eq, PartialEq)]
@@ -190,7 +197,8 @@ pub enum ParameterLayout {
     Hug,
 
     /// The default layout formats all parameters on the same line if they fit or breaks after the `(`
-    /// and before the `(`.
+    /// and before the `)`.
+    ///
     /// ```javascript
     /// function test(
     ///     firstParameter,
@@ -296,4 +304,47 @@ pub(crate) fn should_hug_function_parameters(
     };
 
     Ok(result)
+}
+
+/// Tests if all of the parameters of `expression` are simple enough to allow
+/// a function to group.
+pub(crate) fn has_only_simple_parameters(
+    parameters: &JsParameters,
+    allow_type_annotations: bool,
+) -> bool {
+    parameters
+        .items()
+        .into_iter()
+        .flatten()
+        .all(|parameter| is_simple_parameter(&parameter, allow_type_annotations))
+}
+
+/// Tests if the single parameter is "simple", as in a plain identifier with no
+/// explicit type annotation and no initializer:
+///
+/// Examples:
+/// foo             => true
+/// foo?            => true
+/// foo = 'bar'     => false
+/// foo: string     => false
+/// {a, b}          => false
+/// {a, b} = {}     => false
+/// [a, b]          => false
+///
+pub(crate) fn is_simple_parameter(
+    parameter: &AnyJsParameter,
+    allow_type_annotations: bool,
+) -> bool {
+    match parameter {
+        AnyJsParameter::AnyJsFormalParameter(AnyJsFormalParameter::JsFormalParameter(param)) => {
+            matches!(
+                param.binding(),
+                Ok(AnyJsBindingPattern::AnyJsBinding(
+                    AnyJsBinding::JsIdentifierBinding(_)
+                ))
+            ) && (allow_type_annotations || param.type_annotation().is_none())
+                && param.initializer().is_none()
+        }
+        _ => false,
+    }
 }

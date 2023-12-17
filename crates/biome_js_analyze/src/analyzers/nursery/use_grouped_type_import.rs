@@ -5,9 +5,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make;
-use biome_js_syntax::{
-    AnyJsNamedImport, AnyJsNamedImportSpecifier, JsImportNamedClause, TriviaPieceKind, T,
-};
+use biome_js_syntax::{AnyJsNamedImportSpecifier, JsImportNamedClause, TriviaPieceKind, T};
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
 
 declare_rule! {
@@ -75,24 +73,16 @@ impl Rule for UseGroupedTypeImport {
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let node = ctx.query();
-        if node.type_token().is_some() || node.default_specifier().is_some() {
+        let import_clause = ctx.query();
+        if import_clause.type_token().is_some() {
             return None;
         }
-        if node
-            .named_import()
-            .ok()?
-            .as_js_named_import_specifiers()?
-            .specifiers()
-            .is_empty()
-        {
+        let specifiers = import_clause.named_specifiers().ok()?.specifiers();
+        if specifiers.is_empty() {
             // import {} from ...
             return None;
         }
-        node.named_import()
-            .ok()?
-            .as_js_named_import_specifiers()?
-            .specifiers()
+        specifiers
             .iter()
             .all(|specifier| {
                 let Ok(specifier) = specifier else {
@@ -112,11 +102,11 @@ impl Rule for UseGroupedTypeImport {
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
-        let node = ctx.query();
+        let import_clause = ctx.query();
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                node.named_import().ok()?.range(),
+                import_clause.named_specifiers().ok()?.range(),
                 markup! {
                     "The "<Emphasis>"type"</Emphasis>" qualifier can be moved just after "<Emphasis>"import"</Emphasis>" to completely remove the "<Emphasis>"import"</Emphasis>" at compile time."
                 },
@@ -128,10 +118,8 @@ impl Rule for UseGroupedTypeImport {
     }
 
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
-        let node = ctx.query();
-        let mut mutation = ctx.root().begin();
-        let named_import = node.named_import().ok()?;
-        let named_import_specifiers = named_import.as_js_named_import_specifiers()?;
+        let import_clause = ctx.query();
+        let named_import_specifiers = import_clause.named_specifiers().ok()?;
         let named_import_specifiers_list = named_import_specifiers.specifiers();
         let new_named_import_specifiers_list = make::js_named_import_specifier_list(
             named_import_specifiers_list
@@ -156,17 +144,18 @@ impl Rule for UseGroupedTypeImport {
                 .filter_map(|separator| separator.ok())
                 .collect::<Vec<_>>(),
         );
-        let new_node = node
+        let new_node = import_clause
             .clone()
             .with_type_token(Some(
                 make::token(T![type]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
             ))
-            .with_named_import(AnyJsNamedImport::JsNamedImportSpecifiers(
+            .with_named_specifiers(
                 named_import_specifiers
                     .clone()
                     .with_specifiers(new_named_import_specifiers_list),
-            ));
-        mutation.replace_node(node.clone(), new_node);
+            );
+        let mut mutation = ctx.root().begin();
+        mutation.replace_node(import_clause.clone(), new_node);
         Some(JsRuleAction {
             category: ActionCategory::QuickFix,
             applicability: Applicability::MaybeIncorrect,

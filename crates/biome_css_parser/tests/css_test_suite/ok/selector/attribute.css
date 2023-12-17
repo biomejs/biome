@@ -38,3 +38,11 @@ a[href='te"s"t'] {}
 [foo=\(] {}
 [foo=yes\:\(it\'s\ work\)] {}
 [attr=\;] { }
+[*|attr|="test"] {}
+[foo|attr|="test"] {}
+[foo|att=val] {}
+[*|att] {}
+[   *|att   ] {}
+[|att] {}
+[ |att ] {}
+[   |att   ] {}

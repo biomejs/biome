@@ -36,6 +36,17 @@ function ArrowBodyIsJsxWithComment({ action }) {
 		);
 }
 
+
+
+function ArrowCurryWithPlainParameters() {
+	return (C) => (props) => <C {...props} />;
+}
+
+function ArrowCurryWithDestructuringParameters() {
+	return ({ C }) =>
+  (props) => <C {...props} />;
+}
+
 ```
 
 
@@ -48,6 +59,7 @@ function ArrowBodyIsJsxWithComment({ action }) {
 -----
 Indent style: Tab
 Indent width: 2
+Line ending: LF
 Line width: 80
 Quote style: Double Quotes
 JSX quote style: Double Quotes
@@ -55,6 +67,8 @@ Quote properties: As needed
 Trailing comma: All
 Semicolons: Always
 Arrow parentheses: Always
+Bracket spacing: true
+Bracket same line: false
 -----
 
 ```jsx
@@ -88,6 +102,15 @@ function ArrowBodyIsJsxWithComment({ action }) {
 		// eslint-disable-next-line react/no-array-index-key
 		<li />
 	);
+}
+
+function ArrowCurryWithPlainParameters() {
+	return (C) => (props) => <C {...props} />;
+}
+
+function ArrowCurryWithDestructuringParameters() {
+	return ({ C }) =>
+		(props) => <C {...props} />;
 }
 ```
 

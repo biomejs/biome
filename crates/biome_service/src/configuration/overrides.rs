@@ -10,9 +10,10 @@ use crate::settings::{
 };
 use crate::{MergeWith, Rules, WorkspaceError};
 use biome_deserialize::StringSet;
-use biome_formatter::{IndentStyle, LineWidth};
+use biome_formatter::{IndentStyle, LineEnding, LineWidth};
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
+use std::path::PathBuf;
 use std::str::FromStr;
 
 #[derive(Debug, Default, Serialize, Deserialize, Eq, PartialEq, Clone, Bpaf)]
@@ -215,6 +216,11 @@ pub struct OverrideFormatterConfiguration {
     #[bpaf(long("indent-width"), argument("NUMBER"), optional)]
     pub indent_width: Option<u8>,
 
+    /// The type of line ending.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[bpaf(long("line-ending"), argument("lf|crlf|cr"), optional)]
+    pub line_ending: Option<LineEnding>,
+
     /// What's the max width of a line. Defaults to 80.
     #[serde(
         deserialize_with = "deserialize_line_width",
@@ -320,44 +326,52 @@ impl MergeWith<OverrideOrganizeImportsConfiguration> for OverrideOrganizeImports
     }
 }
 
-impl TryFrom<Overrides> for OverrideSettings {
-    type Error = WorkspaceError;
+pub fn to_override_settings(
+    overrides: Overrides,
+    vcs_base_path: Option<PathBuf>,
+    gitignore_matches: &[String],
+) -> Result<OverrideSettings, WorkspaceError> {
+    let mut override_settings = OverrideSettings::default();
+    for mut pattern in overrides.0 {
+        let formatter = pattern.formatter.take().unwrap_or_default();
+        let formatter = OverrideFormatSettings::try_from(formatter)?;
 
-    fn try_from(overrides: Overrides) -> Result<Self, Self::Error> {
-        let mut override_settings = OverrideSettings::default();
-        for mut pattern in overrides.0 {
-            let formatter = pattern.formatter.take().unwrap_or_default();
-            let formatter = OverrideFormatSettings::try_from(formatter)?;
+        let linter = pattern.linter.take().unwrap_or_default();
+        let linter = OverrideLinterSettings::try_from(linter)?;
 
-            let linter = pattern.linter.take().unwrap_or_default();
-            let linter = OverrideLinterSettings::try_from(linter)?;
+        let organize_imports = pattern.organize_imports.take().unwrap_or_default();
+        let organize_imports = OverrideOrganizeImportsSettings::try_from(organize_imports)?;
 
-            let organize_imports = pattern.organize_imports.take().unwrap_or_default();
-            let organize_imports = OverrideOrganizeImportsSettings::try_from(organize_imports)?;
-
-            let mut languages = LanguageListSettings::default();
-            if let Some(javascript) = pattern.javascript {
-                languages.javascript = javascript.into();
-            }
-
-            if let Some(json) = pattern.json {
-                languages.json = json.into();
-            }
-
-            let pattern_setting = OverrideSettingPattern {
-                include: to_matcher(pattern.include.as_ref())?,
-                exclude: to_matcher(pattern.ignore.as_ref())?,
-                formatter,
-                linter,
-                organize_imports,
-                languages,
-            };
-
-            override_settings.patterns.push(pattern_setting);
+        let mut languages = LanguageListSettings::default();
+        if let Some(javascript) = pattern.javascript {
+            languages.javascript = javascript.into();
         }
 
-        Ok(override_settings)
+        if let Some(json) = pattern.json {
+            languages.json = json.into();
+        }
+
+        let pattern_setting = OverrideSettingPattern {
+            include: to_matcher(
+                pattern.include.as_ref(),
+                vcs_base_path.clone(),
+                gitignore_matches,
+            )?,
+            exclude: to_matcher(
+                pattern.ignore.as_ref(),
+                vcs_base_path.clone(),
+                gitignore_matches,
+            )?,
+            formatter,
+            linter,
+            organize_imports,
+            languages,
+        };
+
+        override_settings.patterns.push(pattern_setting);
     }
+
+    Ok(override_settings)
 }
 
 impl TryFrom<OverrideFormatterConfiguration> for OverrideFormatSettings {
@@ -379,6 +393,7 @@ impl TryFrom<OverrideFormatterConfiguration> for OverrideFormatSettings {
             enabled: conf.enabled,
             indent_style: Some(indent_style),
             indent_width: Some(indent_width),
+            line_ending: conf.line_ending,
             line_width: conf.line_width,
             format_with_errors: conf.format_with_errors.unwrap_or_default(),
         })

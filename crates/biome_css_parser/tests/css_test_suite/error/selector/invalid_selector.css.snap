@@ -17,12 +17,13 @@ expression: snapshot
 
 ```
 CssRoot {
+    bom_token: missing (optional),
     rules: CssRuleList [
         CssRule {
             prelude: CssSelectorList [
                 CssBogusSelector {
                     items: [
-                        ERROR_TOKEN@0..1 "!" [] [],
+                        BANG@0..1 "!" [] [],
                     ],
                 },
                 missing separator,
@@ -54,11 +55,12 @@ CssRoot {
 
 ```
 0: CSS_ROOT@0..16
-  0: CSS_RULE_LIST@0..15
+  0: (empty)
+  1: CSS_RULE_LIST@0..15
     0: CSS_RULE@0..15
       0: CSS_SELECTOR_LIST@0..11
         0: CSS_BOGUS_SELECTOR@0..1
-          0: ERROR_TOKEN@0..1 "!" [] []
+          0: BANG@0..1 "!" [] []
         1: (empty)
         2: CSS_COMPOUND_SELECTOR@1..11
           0: (empty)
@@ -72,7 +74,7 @@ CssRoot {
         0: L_CURLY@11..12 "{" [] []
         1: CSS_DECLARATION_LIST@12..12
         2: R_CURLY@12..15 "}" [Newline("\n"), Newline("\n")] []
-  1: EOF@15..16 "" [Newline("\n")] []
+  2: EOF@15..16 "" [Newline("\n")] []
 
 ```
 
@@ -81,7 +83,14 @@ CssRoot {
 ```
 invalid_selector.css:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × unexpected character `!`
+  × Expected a selector but instead found '!'.
+  
+  > 1 │ !.selector {
+      │ ^
+    2 │ 
+    3 │ }
+  
+  i Expected a selector here.
   
   > 1 │ !.selector {
       │ ^

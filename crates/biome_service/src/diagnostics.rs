@@ -51,6 +51,8 @@ pub enum WorkspaceError {
     FileTooLarge(FileTooLarge),
     /// Diagnostics emitted when querying the file system
     FileSystem(FileSystemDiagnostic),
+    /// Raised when there's an issue around the VCS integration
+    Vcs(VcsDiagnostic),
 }
 
 impl WorkspaceError {
@@ -90,6 +92,10 @@ impl WorkspaceError {
         Self::ReportNotSerializable(ReportNotSerializable {
             reason: reason.into(),
         })
+    }
+
+    pub fn vcs_disabled() -> Self {
+        Self::Vcs(VcsDiagnostic::DisabledVcs(DisabledVcs {}))
     }
 }
 
@@ -132,6 +138,7 @@ impl Diagnostic for WorkspaceError {
             WorkspaceError::FileIgnored(error) => error.category(),
             WorkspaceError::FileTooLarge(error) => error.category(),
             WorkspaceError::FileSystem(error) => error.category(),
+            WorkspaceError::Vcs(error) => error.category(),
         }
     }
 
@@ -153,6 +160,7 @@ impl Diagnostic for WorkspaceError {
             WorkspaceError::FileIgnored(error) => error.description(fmt),
             WorkspaceError::FileTooLarge(error) => error.description(fmt),
             WorkspaceError::FileSystem(error) => error.description(fmt),
+            WorkspaceError::Vcs(error) => error.description(fmt),
         }
     }
 
@@ -174,6 +182,7 @@ impl Diagnostic for WorkspaceError {
             WorkspaceError::FileIgnored(error) => error.message(fmt),
             WorkspaceError::FileTooLarge(error) => error.message(fmt),
             WorkspaceError::FileSystem(error) => error.message(fmt),
+            WorkspaceError::Vcs(error) => error.message(fmt),
         }
     }
 
@@ -195,6 +204,7 @@ impl Diagnostic for WorkspaceError {
             WorkspaceError::FileIgnored(error) => error.severity(),
             WorkspaceError::FileTooLarge(error) => error.severity(),
             WorkspaceError::FileSystem(error) => error.severity(),
+            WorkspaceError::Vcs(error) => error.severity(),
         }
     }
 
@@ -216,6 +226,7 @@ impl Diagnostic for WorkspaceError {
             WorkspaceError::FileIgnored(error) => error.tags(),
             WorkspaceError::FileTooLarge(error) => error.tags(),
             WorkspaceError::FileSystem(error) => error.tags(),
+            WorkspaceError::Vcs(error) => error.tags(),
         }
     }
 
@@ -237,6 +248,7 @@ impl Diagnostic for WorkspaceError {
             WorkspaceError::FileIgnored(error) => error.location(),
             WorkspaceError::FileTooLarge(error) => error.location(),
             WorkspaceError::FileSystem(error) => error.location(),
+            WorkspaceError::Vcs(error) => error.location(),
         }
     }
 
@@ -258,6 +270,7 @@ impl Diagnostic for WorkspaceError {
             WorkspaceError::FileIgnored(error) => Diagnostic::source(error),
             WorkspaceError::FileTooLarge(error) => Diagnostic::source(error),
             WorkspaceError::FileSystem(error) => Diagnostic::source(error),
+            WorkspaceError::Vcs(error) => Diagnostic::source(error),
         }
     }
 
@@ -279,6 +292,7 @@ impl Diagnostic for WorkspaceError {
             WorkspaceError::FileIgnored(error) => error.advices(visitor),
             WorkspaceError::FileTooLarge(error) => error.advices(visitor),
             WorkspaceError::FileSystem(error) => error.advices(visitor),
+            WorkspaceError::Vcs(error) => error.advices(visitor),
         }
     }
     fn verbose_advices(&self, visitor: &mut dyn Visit) -> std::io::Result<()> {
@@ -299,6 +313,7 @@ impl Diagnostic for WorkspaceError {
             WorkspaceError::FileIgnored(error) => error.verbose_advices(visitor),
             WorkspaceError::FileTooLarge(error) => error.verbose_advices(visitor),
             WorkspaceError::FileSystem(error) => error.verbose_advices(visitor),
+            WorkspaceError::Vcs(error) => error.verbose_advices(visitor),
         }
     }
 }
@@ -523,6 +538,105 @@ impl Diagnostic for TransportError {
         DiagnosticTags::INTERNAL
     }
 }
+
+#[derive(Debug, Serialize, Deserialize)]
+pub enum VcsDiagnostic {
+    /// When the VCS folder couldn't be found
+    NoVcsFolderFound(NoVcsFolderFound),
+    /// VCS is disabled
+    DisabledVcs(DisabledVcs),
+}
+
+impl Diagnostic for VcsDiagnostic {
+    fn category(&self) -> Option<&'static Category> {
+        match self {
+            VcsDiagnostic::NoVcsFolderFound(diagnostic) => diagnostic.category(),
+            VcsDiagnostic::DisabledVcs(diagnostic) => diagnostic.category(),
+        }
+    }
+
+    fn severity(&self) -> Severity {
+        match self {
+            VcsDiagnostic::NoVcsFolderFound(diagnostic) => diagnostic.severity(),
+            VcsDiagnostic::DisabledVcs(diagnostic) => diagnostic.severity(),
+        }
+    }
+
+    fn description(&self, fmt: &mut Formatter<'_>) -> fmt::Result {
+        match self {
+            VcsDiagnostic::NoVcsFolderFound(diagnostic) => diagnostic.description(fmt),
+            VcsDiagnostic::DisabledVcs(diagnostic) => diagnostic.description(fmt),
+        }
+    }
+
+    fn message(&self, fmt: &mut biome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
+        match self {
+            VcsDiagnostic::NoVcsFolderFound(diagnostic) => diagnostic.message(fmt),
+            VcsDiagnostic::DisabledVcs(diagnostic) => diagnostic.message(fmt),
+        }
+    }
+    fn advices(&self, visitor: &mut dyn Visit) -> std::io::Result<()> {
+        match self {
+            VcsDiagnostic::NoVcsFolderFound(diagnostic) => diagnostic.advices(visitor),
+            VcsDiagnostic::DisabledVcs(diagnostic) => diagnostic.advices(visitor),
+        }
+    }
+
+    fn verbose_advices(&self, visitor: &mut dyn Visit) -> std::io::Result<()> {
+        match self {
+            VcsDiagnostic::NoVcsFolderFound(diagnostic) => diagnostic.verbose_advices(visitor),
+            VcsDiagnostic::DisabledVcs(diagnostic) => diagnostic.verbose_advices(visitor),
+        }
+    }
+    fn location(&self) -> Location<'_> {
+        match self {
+            VcsDiagnostic::NoVcsFolderFound(diagnostic) => diagnostic.location(),
+            VcsDiagnostic::DisabledVcs(diagnostic) => diagnostic.location(),
+        }
+    }
+
+    fn tags(&self) -> DiagnosticTags {
+        match self {
+            VcsDiagnostic::NoVcsFolderFound(diagnostic) => diagnostic.tags(),
+            VcsDiagnostic::DisabledVcs(diagnostic) => diagnostic.tags(),
+        }
+    }
+
+    fn source(&self) -> Option<&dyn Diagnostic> {
+        match self {
+            VcsDiagnostic::NoVcsFolderFound(diagnostic) => diagnostic.source(),
+            VcsDiagnostic::DisabledVcs(diagnostic) => diagnostic.source(),
+        }
+    }
+}
+
+impl From<VcsDiagnostic> for WorkspaceError {
+    fn from(value: VcsDiagnostic) -> Self {
+        Self::Vcs(value)
+    }
+}
+
+#[derive(Debug, Diagnostic, Serialize, Deserialize)]
+#[diagnostic(
+    category = "internalError/fs",
+    severity = Error,
+    message(
+        description = "Biome couldn't find the VCS folder at the following path: {path}",
+        message("Biome couldn't find the VCS folder at the following path: "<Emphasis>{self.path}</Emphasis>),
+    )
+)]
+pub struct NoVcsFolderFound {
+    #[location(resource)]
+    pub path: String,
+}
+
+#[derive(Debug, Diagnostic, Serialize, Deserialize)]
+#[diagnostic(
+    category = "internalError/fs",
+    severity = Warning,
+    message = "Biome couldn't determine a directory for the VCS integration. VCS integration will be disabled."
+)]
+pub struct DisabledVcs {}
 
 #[cfg(test)]
 mod test {

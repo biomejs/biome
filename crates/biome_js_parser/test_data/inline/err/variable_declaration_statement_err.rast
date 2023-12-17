@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -176,8 +177,9 @@ JsModule {
 
 0: JS_MODULE@0..87
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..86
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..86
     0: JS_VARIABLE_STATEMENT@0..24
       0: JS_VARIABLE_DECLARATION@0..24
         0: (empty)
@@ -292,7 +294,7 @@ JsModule {
             1: (empty)
             2: (empty)
       1: SEMICOLON@85..86 ";" [] []
-  3: EOF@86..87 "" [Newline("\n")] []
+  4: EOF@86..87 "" [Newline("\n")] []
 --
 variable_declaration_statement_err.js:3:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

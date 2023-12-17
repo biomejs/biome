@@ -19,6 +19,7 @@ expression: snapshot
 
 ```
 CssRoot {
+    bom_token: missing (optional),
     rules: CssRuleList [
         CssRule {
             prelude: CssSelectorList [
@@ -36,6 +37,7 @@ CssRoot {
                                 selector: CssCompoundSelector {
                                     nesting_selector_token: missing (optional),
                                     simple_selector: CssUniversalSelector {
+                                        namespace: missing (optional),
                                         star_token: STAR@10..11 "*" [] [],
                                     },
                                     sub_selectors: CssSubSelectorList [],
@@ -68,6 +70,7 @@ CssRoot {
                                 selector: CssCompoundSelector {
                                     nesting_selector_token: missing (optional),
                                     simple_selector: CssTypeSelector {
+                                        namespace: missing (optional),
                                         ident: CssIdentifier {
                                             value_token: IDENT@26..30 "span" [] [],
                                         },
@@ -102,6 +105,7 @@ CssRoot {
                                 selector: CssCompoundSelector {
                                     nesting_selector_token: missing (optional),
                                     simple_selector: CssTypeSelector {
+                                        namespace: missing (optional),
                                         ident: CssIdentifier {
                                             value_token: IDENT@48..55 "span" [] [Whitespace("   ")],
                                         },
@@ -136,6 +140,7 @@ CssRoot {
                                 selector: CssCompoundSelector {
                                     nesting_selector_token: missing (optional),
                                     simple_selector: CssTypeSelector {
+                                        namespace: missing (optional),
                                         ident: CssIdentifier {
                                             value_token: IDENT@70..74 "SPAN" [] [],
                                         },
@@ -163,7 +168,8 @@ CssRoot {
 
 ```
 0: CSS_ROOT@0..80
-  0: CSS_RULE_LIST@0..79
+  0: (empty)
+  1: CSS_RULE_LIST@0..79
     0: CSS_RULE@0..15
       0: CSS_SELECTOR_LIST@0..13
         0: CSS_COMPOUND_SELECTOR@0..13
@@ -179,7 +185,8 @@ CssRoot {
                 2: CSS_COMPOUND_SELECTOR@10..11
                   0: (empty)
                   1: CSS_UNIVERSAL_SELECTOR@10..11
-                    0: STAR@10..11 "*" [] []
+                    0: (empty)
+                    1: STAR@10..11 "*" [] []
                   2: CSS_SUB_SELECTOR_LIST@11..11
                 3: R_PAREN@11..13 ")" [] [Whitespace(" ")]
       1: CSS_BLOCK@13..15
@@ -201,7 +208,8 @@ CssRoot {
                 2: CSS_COMPOUND_SELECTOR@26..30
                   0: (empty)
                   1: CSS_TYPE_SELECTOR@26..30
-                    0: CSS_IDENTIFIER@26..30
+                    0: (empty)
+                    1: CSS_IDENTIFIER@26..30
                       0: IDENT@26..30 "span" [] []
                   2: CSS_SUB_SELECTOR_LIST@30..30
                 3: R_PAREN@30..32 ")" [] [Whitespace(" ")]
@@ -224,7 +232,8 @@ CssRoot {
                 2: CSS_COMPOUND_SELECTOR@48..55
                   0: (empty)
                   1: CSS_TYPE_SELECTOR@48..55
-                    0: CSS_IDENTIFIER@48..55
+                    0: (empty)
+                    1: CSS_IDENTIFIER@48..55
                       0: IDENT@48..55 "span" [] [Whitespace("   ")]
                   2: CSS_SUB_SELECTOR_LIST@55..55
                 3: R_PAREN@55..57 ")" [] [Whitespace(" ")]
@@ -247,7 +256,8 @@ CssRoot {
                 2: CSS_COMPOUND_SELECTOR@70..74
                   0: (empty)
                   1: CSS_TYPE_SELECTOR@70..74
-                    0: CSS_IDENTIFIER@70..74
+                    0: (empty)
+                    1: CSS_IDENTIFIER@70..74
                       0: IDENT@70..74 "SPAN" [] []
                   2: CSS_SUB_SELECTOR_LIST@74..74
                 3: R_PAREN@74..76 ")" [] [Whitespace(" ")]
@@ -255,7 +265,7 @@ CssRoot {
         0: L_CURLY@76..77 "{" [] []
         1: CSS_DECLARATION_LIST@77..77
         2: R_CURLY@77..79 "}" [Newline("\n")] []
-  1: EOF@79..80 "" [Newline("\n")] []
+  2: EOF@79..80 "" [Newline("\n")] []
 
 ```
 

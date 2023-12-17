@@ -29,13 +29,18 @@ pub fn generate_syntax_kinds(grammar: KindsSrc, language_kind: LanguageKind) -> 
         .map(|(_token, name)| format_ident!("{}", name))
         .collect::<Vec<_>>();
 
-    let full_keywords_values = &grammar.keywords;
-    let full_keywords = full_keywords_values
+    // we need to replace "-" with "_" for the keywords
+    // e.g. we have `color-profile` in css but it's an invalid ident in rust code
+    let all_keywords_values = &grammar
+        .keywords
+        .iter()
+        .map(|kw| kw.replace('-', "_"))
+        .collect::<Vec<_>>();
+    let full_keywords = all_keywords_values
         .iter()
         .map(|kw| format_ident!("{}_KW", to_upper_snake_case(kw)))
         .collect::<Vec<_>>();
 
-    let all_keywords_values = grammar.keywords.to_vec();
     let all_keywords_idents = all_keywords_values
         .iter()
         .map(|kw| format_ident!("{}", kw))
@@ -129,8 +134,11 @@ pub fn generate_syntax_kinds(grammar: KindsSrc, language_kind: LanguageKind) -> 
             // but never end up in the final tree
             #[doc(hidden)]
             TOMBSTONE,
-            /// Marks the end of the file.May have trivia attached
+            /// Marks the end of the file. May have trivia attached
             EOF,
+            /// Any Unicode BOM character that may be present at the start of
+            /// a file.
+            UNICODE_BOM,
             #(#punctuation,)*
             #(#all_keywords,)*
             #(#literals,)*
@@ -167,7 +175,7 @@ pub fn generate_syntax_kinds(grammar: KindsSrc, language_kind: LanguageKind) -> 
 
             pub fn from_keyword(ident: &str) -> Option<#syntax_kind> {
                 let kw = match ident {
-                    #(#full_keywords_values => #full_keywords,)*
+                    #(#all_keywords_values => #full_keywords,)*
                     _ => return None,
                 };
                 Some(kw)
@@ -184,6 +192,7 @@ pub fn generate_syntax_kinds(grammar: KindsSrc, language_kind: LanguageKind) -> 
             #([#all_keywords_idents] => { $crate::#syntax_kind::#all_keywords };)*
             [ident] => { $crate::#syntax_kind::IDENT };
             [EOF] => { $crate::#syntax_kind::EOF };
+            [UNICODE_BOM] => { $crate::#syntax_kind::UNICODE_BOM };
             [#] => { $crate::#syntax_kind::HASH };
         }
     };

@@ -41,7 +41,7 @@ Or check the [CLI reference section](/reference/cli#biomeformat).
 You may want to [configure Biome](/reference/configuration/#formatter) using `biome.json`.
 The following defaults are applied:
 
-```json
+```json title="biome.json"
 {
   "formatter": {
     "enabled": true,
@@ -49,6 +49,7 @@ The following defaults are applied:
     "indentStyle": "tab",
     "indentWidth": 2,
     "lineWidth": 80,
+    "lineEnding": "lf",
     "ignore": []
   }
 }
@@ -60,13 +61,13 @@ There are times when the formatted code isn't ideal.
 
 For these cases, you can use a format suppression comment:
 
-```js
+```js title="example.js"
 // biome-ignore format: <explanation>
 ```
 
 Example:
 
-```js
+```js title="example.js"
 const expr =
   // biome-ignore format: the array should not be formatted
   [
@@ -87,4 +88,27 @@ const expr =
     -1,
     0,
   ];
+```
+## Per language configuration
+
+Differently from other tools, Biome places options belong to a language in a different place of its configuration.
+
+### JavaScript
+
+Following, the default applied to JavaScript files:
+
+```json title="biome.json"
+{
+  "javascript": {
+    "formatter": {
+      "arrowParentheses":"always",
+      "jsxQuoteStyle": "double",
+      "semicolons": "always",
+      "trailingComma": "all",
+      "quoteProperties": "asNeeded",
+      "bracketSpacing": true,
+      "bracketSameLine": false
+    }
+  }
+}
 ```

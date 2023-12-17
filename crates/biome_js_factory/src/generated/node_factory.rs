@@ -232,18 +232,18 @@ pub fn js_boolean_literal_expression(value_token_token: SyntaxToken) -> JsBoolea
 pub fn js_break_statement(break_token: SyntaxToken) -> JsBreakStatementBuilder {
     JsBreakStatementBuilder {
         break_token,
-        label_token: None,
+        label: None,
         semicolon_token: None,
     }
 }
 pub struct JsBreakStatementBuilder {
     break_token: SyntaxToken,
-    label_token: Option<SyntaxToken>,
+    label: Option<JsLabel>,
     semicolon_token: Option<SyntaxToken>,
 }
 impl JsBreakStatementBuilder {
-    pub fn with_label_token(mut self, label_token: SyntaxToken) -> Self {
-        self.label_token = Some(label_token);
+    pub fn with_label(mut self, label: JsLabel) -> Self {
+        self.label = Some(label);
         self
     }
     pub fn with_semicolon_token(mut self, semicolon_token: SyntaxToken) -> Self {
@@ -255,7 +255,8 @@ impl JsBreakStatementBuilder {
             JsSyntaxKind::JS_BREAK_STATEMENT,
             [
                 Some(SyntaxElement::Token(self.break_token)),
-                self.label_token.map(|token| SyntaxElement::Token(token)),
+                self.label
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
                 self.semicolon_token
                     .map(|token| SyntaxElement::Token(token)),
             ],
@@ -732,18 +733,18 @@ pub fn js_constructor_parameters(
 pub fn js_continue_statement(continue_token: SyntaxToken) -> JsContinueStatementBuilder {
     JsContinueStatementBuilder {
         continue_token,
-        label_token: None,
+        label: None,
         semicolon_token: None,
     }
 }
 pub struct JsContinueStatementBuilder {
     continue_token: SyntaxToken,
-    label_token: Option<SyntaxToken>,
+    label: Option<JsLabel>,
     semicolon_token: Option<SyntaxToken>,
 }
 impl JsContinueStatementBuilder {
-    pub fn with_label_token(mut self, label_token: SyntaxToken) -> Self {
-        self.label_token = Some(label_token);
+    pub fn with_label(mut self, label: JsLabel) -> Self {
+        self.label = Some(label);
         self
     }
     pub fn with_semicolon_token(mut self, semicolon_token: SyntaxToken) -> Self {
@@ -755,7 +756,8 @@ impl JsContinueStatementBuilder {
             JsSyntaxKind::JS_CONTINUE_STATEMENT,
             [
                 Some(SyntaxElement::Token(self.continue_token)),
-                self.label_token.map(|token| SyntaxElement::Token(token)),
+                self.label
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
                 self.semicolon_token
                     .map(|token| SyntaxElement::Token(token)),
             ],
@@ -811,16 +813,10 @@ pub fn js_default_clause(
         ],
     ))
 }
-pub fn js_default_import_specifier(
-    local_name: AnyJsBinding,
-    trailing_comma_token: SyntaxToken,
-) -> JsDefaultImportSpecifier {
+pub fn js_default_import_specifier(local_name: AnyJsBinding) -> JsDefaultImportSpecifier {
     JsDefaultImportSpecifier::unwrap_cast(SyntaxNode::new_detached(
         JsSyntaxKind::JS_DEFAULT_IMPORT_SPECIFIER,
-        [
-            Some(SyntaxElement::Node(local_name.into_syntax())),
-            Some(SyntaxElement::Token(trailing_comma_token)),
-        ],
+        [Some(SyntaxElement::Node(local_name.into_syntax()))],
     ))
 }
 pub fn js_directive(value_token: SyntaxToken) -> JsDirectiveBuilder {
@@ -2031,13 +2027,57 @@ pub fn js_import_call_expression(
         ],
     ))
 }
+pub fn js_import_combined_clause(
+    default_specifier: JsDefaultImportSpecifier,
+    comma_token: SyntaxToken,
+    specifier: AnyJsCombinedSpecifier,
+    from_token: SyntaxToken,
+    source: JsModuleSource,
+) -> JsImportCombinedClauseBuilder {
+    JsImportCombinedClauseBuilder {
+        default_specifier,
+        comma_token,
+        specifier,
+        from_token,
+        source,
+        assertion: None,
+    }
+}
+pub struct JsImportCombinedClauseBuilder {
+    default_specifier: JsDefaultImportSpecifier,
+    comma_token: SyntaxToken,
+    specifier: AnyJsCombinedSpecifier,
+    from_token: SyntaxToken,
+    source: JsModuleSource,
+    assertion: Option<JsImportAssertion>,
+}
+impl JsImportCombinedClauseBuilder {
+    pub fn with_assertion(mut self, assertion: JsImportAssertion) -> Self {
+        self.assertion = Some(assertion);
+        self
+    }
+    pub fn build(self) -> JsImportCombinedClause {
+        JsImportCombinedClause::unwrap_cast(SyntaxNode::new_detached(
+            JsSyntaxKind::JS_IMPORT_COMBINED_CLAUSE,
+            [
+                Some(SyntaxElement::Node(self.default_specifier.into_syntax())),
+                Some(SyntaxElement::Token(self.comma_token)),
+                Some(SyntaxElement::Node(self.specifier.into_syntax())),
+                Some(SyntaxElement::Token(self.from_token)),
+                Some(SyntaxElement::Node(self.source.into_syntax())),
+                self.assertion
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
+}
 pub fn js_import_default_clause(
-    local_name: AnyJsBinding,
+    default_specifier: JsDefaultImportSpecifier,
     from_token: SyntaxToken,
     source: JsModuleSource,
 ) -> JsImportDefaultClauseBuilder {
     JsImportDefaultClauseBuilder {
-        local_name,
+        default_specifier,
         from_token,
         source,
         type_token: None,
@@ -2045,7 +2085,7 @@ pub fn js_import_default_clause(
     }
 }
 pub struct JsImportDefaultClauseBuilder {
-    local_name: AnyJsBinding,
+    default_specifier: JsDefaultImportSpecifier,
     from_token: SyntaxToken,
     source: JsModuleSource,
     type_token: Option<SyntaxToken>,
@@ -2065,7 +2105,7 @@ impl JsImportDefaultClauseBuilder {
             JsSyntaxKind::JS_IMPORT_DEFAULT_CLAUSE,
             [
                 self.type_token.map(|token| SyntaxElement::Token(token)),
-                Some(SyntaxElement::Node(self.local_name.into_syntax())),
+                Some(SyntaxElement::Node(self.default_specifier.into_syntax())),
                 Some(SyntaxElement::Token(self.from_token)),
                 Some(SyntaxElement::Node(self.source.into_syntax())),
                 self.assertion
@@ -2089,34 +2129,28 @@ pub fn js_import_meta_expression(
     ))
 }
 pub fn js_import_named_clause(
-    named_import: AnyJsNamedImport,
+    named_specifiers: JsNamedImportSpecifiers,
     from_token: SyntaxToken,
     source: JsModuleSource,
 ) -> JsImportNamedClauseBuilder {
     JsImportNamedClauseBuilder {
-        named_import,
+        named_specifiers,
         from_token,
         source,
         type_token: None,
-        default_specifier: None,
         assertion: None,
     }
 }
 pub struct JsImportNamedClauseBuilder {
-    named_import: AnyJsNamedImport,
+    named_specifiers: JsNamedImportSpecifiers,
     from_token: SyntaxToken,
     source: JsModuleSource,
     type_token: Option<SyntaxToken>,
-    default_specifier: Option<JsDefaultImportSpecifier>,
     assertion: Option<JsImportAssertion>,
 }
 impl JsImportNamedClauseBuilder {
     pub fn with_type_token(mut self, type_token: SyntaxToken) -> Self {
         self.type_token = Some(type_token);
-        self
-    }
-    pub fn with_default_specifier(mut self, default_specifier: JsDefaultImportSpecifier) -> Self {
-        self.default_specifier = Some(default_specifier);
         self
     }
     pub fn with_assertion(mut self, assertion: JsImportAssertion) -> Self {
@@ -2128,9 +2162,7 @@ impl JsImportNamedClauseBuilder {
             JsSyntaxKind::JS_IMPORT_NAMED_CLAUSE,
             [
                 self.type_token.map(|token| SyntaxElement::Token(token)),
-                self.default_specifier
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-                Some(SyntaxElement::Node(self.named_import.into_syntax())),
+                Some(SyntaxElement::Node(self.named_specifiers.into_syntax())),
                 Some(SyntaxElement::Token(self.from_token)),
                 Some(SyntaxElement::Node(self.source.into_syntax())),
                 self.assertion
@@ -2140,16 +2172,12 @@ impl JsImportNamedClauseBuilder {
     }
 }
 pub fn js_import_namespace_clause(
-    star_token: SyntaxToken,
-    as_token: SyntaxToken,
-    local_name: AnyJsBinding,
+    namespace_specifier: JsNamespaceImportSpecifier,
     from_token: SyntaxToken,
     source: JsModuleSource,
 ) -> JsImportNamespaceClauseBuilder {
     JsImportNamespaceClauseBuilder {
-        star_token,
-        as_token,
-        local_name,
+        namespace_specifier,
         from_token,
         source,
         type_token: None,
@@ -2157,9 +2185,7 @@ pub fn js_import_namespace_clause(
     }
 }
 pub struct JsImportNamespaceClauseBuilder {
-    star_token: SyntaxToken,
-    as_token: SyntaxToken,
-    local_name: AnyJsBinding,
+    namespace_specifier: JsNamespaceImportSpecifier,
     from_token: SyntaxToken,
     source: JsModuleSource,
     type_token: Option<SyntaxToken>,
@@ -2179,9 +2205,7 @@ impl JsImportNamespaceClauseBuilder {
             JsSyntaxKind::JS_IMPORT_NAMESPACE_CLAUSE,
             [
                 self.type_token.map(|token| SyntaxElement::Token(token)),
-                Some(SyntaxElement::Token(self.star_token)),
-                Some(SyntaxElement::Token(self.as_token)),
-                Some(SyntaxElement::Node(self.local_name.into_syntax())),
+                Some(SyntaxElement::Node(self.namespace_specifier.into_syntax())),
                 Some(SyntaxElement::Token(self.from_token)),
                 Some(SyntaxElement::Node(self.source.into_syntax())),
                 self.assertion
@@ -2230,15 +2254,21 @@ pub fn js_instanceof_expression(
         ],
     ))
 }
+pub fn js_label(value_token: SyntaxToken) -> JsLabel {
+    JsLabel::unwrap_cast(SyntaxNode::new_detached(
+        JsSyntaxKind::JS_LABEL,
+        [Some(SyntaxElement::Token(value_token))],
+    ))
+}
 pub fn js_labeled_statement(
-    label_token: SyntaxToken,
+    label: JsLabel,
     colon_token: SyntaxToken,
     body: AnyJsStatement,
 ) -> JsLabeledStatement {
     JsLabeledStatement::unwrap_cast(SyntaxNode::new_detached(
         JsSyntaxKind::JS_LABELED_STATEMENT,
         [
-            Some(SyntaxElement::Token(label_token)),
+            Some(SyntaxElement::Node(label.into_syntax())),
             Some(SyntaxElement::Token(colon_token)),
             Some(SyntaxElement::Node(body.into_syntax())),
         ],
@@ -2413,6 +2443,7 @@ pub fn js_module(
         directives,
         items,
         eof_token,
+        bom_token: None,
         interpreter_token: None,
     }
 }
@@ -2420,9 +2451,14 @@ pub struct JsModuleBuilder {
     directives: JsDirectiveList,
     items: JsModuleItemList,
     eof_token: SyntaxToken,
+    bom_token: Option<SyntaxToken>,
     interpreter_token: Option<SyntaxToken>,
 }
 impl JsModuleBuilder {
+    pub fn with_bom_token(mut self, bom_token: SyntaxToken) -> Self {
+        self.bom_token = Some(bom_token);
+        self
+    }
     pub fn with_interpreter_token(mut self, interpreter_token: SyntaxToken) -> Self {
         self.interpreter_token = Some(interpreter_token);
         self
@@ -2431,6 +2467,7 @@ impl JsModuleBuilder {
         JsModule::unwrap_cast(SyntaxNode::new_detached(
             JsSyntaxKind::JS_MODULE,
             [
+                self.bom_token.map(|token| SyntaxElement::Token(token)),
                 self.interpreter_token
                     .map(|token| SyntaxElement::Token(token)),
                 Some(SyntaxElement::Node(self.directives.into_syntax())),
@@ -3018,6 +3055,7 @@ pub fn js_script(
         directives,
         statements,
         eof_token,
+        bom_token: None,
         interpreter_token: None,
     }
 }
@@ -3025,9 +3063,14 @@ pub struct JsScriptBuilder {
     directives: JsDirectiveList,
     statements: JsStatementList,
     eof_token: SyntaxToken,
+    bom_token: Option<SyntaxToken>,
     interpreter_token: Option<SyntaxToken>,
 }
 impl JsScriptBuilder {
+    pub fn with_bom_token(mut self, bom_token: SyntaxToken) -> Self {
+        self.bom_token = Some(bom_token);
+        self
+    }
     pub fn with_interpreter_token(mut self, interpreter_token: SyntaxToken) -> Self {
         self.interpreter_token = Some(interpreter_token);
         self
@@ -3036,6 +3079,7 @@ impl JsScriptBuilder {
         JsScript::unwrap_cast(SyntaxNode::new_detached(
             JsSyntaxKind::JS_SCRIPT,
             [
+                self.bom_token.map(|token| SyntaxElement::Token(token)),
                 self.interpreter_token
                     .map(|token| SyntaxElement::Token(token)),
                 Some(SyntaxElement::Node(self.directives.into_syntax())),

@@ -1,22 +1,32 @@
 ---
 import InlineSVG from "@src/components/InlineSVG.astro";
 import BlogPostInfo from "@src/components/BlogPostInfo.astro";
-import "@src/styles/blog/index.scss";
+import { getCollection } from "astro:content";
 
-let posts = await Astro.glob("../content/docs/blog/**/*.mdx");
-posts = posts.sort((a, b) => {
-    return new Date(b.frontmatter.pubDate).valueOf() - new Date(a.frontmatter.pubDate).valueOf();
-});
+const posts = (await getCollection("blog")).sort(
+  (a, b) =>
+    new Date(b.data.pubDate).valueOf() - new Date(a.data.pubDate).valueOf()
+);
 ---
 
 <div class="blog">
-    <a href="/feed.xml" class="rss-icon"><InlineSVG src="rss" /><span class="sr-only">RSS</span></a>
+  <a href="/feed.xml" class="rss-icon"
+    ><InlineSVG src="rss" /><span class="sr-only">RSS</span></a
+  >
 
-    <section class="blog"></section>
-    {posts.filter(post => !post.url.includes("index.mdx")).map((post) => <article>
-        <h2><a href={post.frontmatter.url}>{post.frontmatter.title}</a></h2>
-        <BlogPostInfo frontmatter={post.frontmatter} />
-        <Fragment set:html={post.frontmatter.summary} />
-        <p><a href={post.frontmatter.url}>Read more</a></p>
-    </article>)}
+  <section class="blog"></section>
+  {
+    posts.map(async (post) => (
+      <article>
+        <h2>
+          <a href={`/blog/${post.slug}`}>{post.data.title}</a>
+        </h2>
+        <BlogPostInfo post={post.data} />
+        <Fragment set:html={post.data.summary} />
+        <p>
+          <a href={`/blog/${post.slug}`}>Read more</a>
+        </p>
+      </article>
+    ))
+  }
 </div>

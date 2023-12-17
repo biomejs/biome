@@ -1,0 +1,45 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: js/script/script_with_bom.js
+---
+
+# Input
+
+```js
+﻿#!/usr/bin/env node
+"use strict";
+'use asm'
+var express = require("express")
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing comma: All
+Semicolons: Always
+Arrow parentheses: Always
+Bracket spacing: true
+Bracket same line: false
+-----
+
+```js
+﻿#!/usr/bin/env node
+"use strict";
+"use asm";
+var express = require("express");
+```
+
+

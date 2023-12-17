@@ -1,6 +1,8 @@
 //! Definitions for the ECMAScript AST used for codegen
 //! Based on the rust analyzer parser and ast definitions
 
+use crate::css_kinds_src::CSS_KINDS_SRC;
+use crate::json_kinds_src::JSON_KINDS_SRC;
 use crate::LanguageKind;
 use quote::format_ident;
 use std::collections::BTreeMap;
@@ -357,6 +359,7 @@ pub const JS_KINDS_SRC: KindsSrc = KindsSrc {
         "JS_IMPORT_DEFAULT_CLAUSE",
         "JS_IMPORT_NAMESPACE_CLAUSE",
         "JS_IMPORT_NAMED_CLAUSE",
+        "JS_IMPORT_COMBINED_CLAUSE",
         "JS_NAMED_IMPORT_SPECIFIERS",
         "JS_NAMED_IMPORT_SPECIFIER_LIST",
         "JS_NAMESPACE_IMPORT_SPECIFIER",
@@ -388,6 +391,7 @@ pub const JS_KINDS_SRC: KindsSrc = KindsSrc {
         "JS_AWAIT_EXPRESSION",
         "JS_DECORATOR",
         "JS_DECORATOR_LIST",
+        "JS_LABEL",
         // TypeScript
         "TS_IDENTIFIER_BINDING",
         "TS_ANY_TYPE",
@@ -684,7 +688,20 @@ impl Field {
                     (",", _) => "comma",
                     _ => name,
                 };
-                format_ident!("{}_token", name)
+
+                let kind_source = match language_kind {
+                    LanguageKind::Js => JS_KINDS_SRC,
+                    LanguageKind::Css => CSS_KINDS_SRC,
+                    LanguageKind::Json => JSON_KINDS_SRC,
+                };
+
+                // we need to replace "-" with "_" for the keywords
+                // e.g. we have `color-profile` in css but it's an invalid ident in rust code
+                if kind_source.keywords.contains(&name) {
+                    format_ident!("{}_token", name.replace('-', "_"))
+                } else {
+                    format_ident!("{}_token", name)
+                }
             }
             Field::Node { name, .. } => {
                 let (prefix, tail) = name.split_once('_').unwrap_or(("", name));

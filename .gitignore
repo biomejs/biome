@@ -2,15 +2,12 @@
 Profile-*.json
 # Editor configuration
 .vscode/*
-!.vscode/extensions.json
-!.vscode/launch.json
-!.vscode/tasks.json
 .idea
 .vs
 # Release artifacts
 **/target
 # Ignore test files that contributors could create locally
-/test.*
+**/test.*
 # Ignore third-party files
 **/node_modules
 **/dist

@@ -1,4 +1,5 @@
 use super::process_file::{process_file, DiffKind, FileStatus, Message};
+use super::ExecutionEnvironment;
 use crate::cli_options::CliOptions;
 use crate::execute::diagnostics::{
     CIFormatDiffDiagnostic, CIOrganizeImportsDiffDiagnostic, ContentDiffAdvice,
@@ -9,6 +10,7 @@ use crate::{
     Report, ReportDiagnostic, ReportDiff, ReportErrorKind, ReportKind, TraversalMode,
 };
 use biome_console::{fmt, markup, Console, ConsoleExt};
+use biome_diagnostics::PrintGitHubDiagnostic;
 use biome_diagnostics::{
     adapters::StdError, category, DiagnosticExt, Error, PrintDescription, PrintDiagnostic,
     Resource, Severity,
@@ -60,6 +62,7 @@ pub(crate) fn traverse(
     session: CliSession,
     cli_options: &CliOptions,
     inputs: Vec<OsString>,
+    use_git_ignore: bool,
 ) -> Result<(), CliDiagnostic> {
     init_thread_pool();
     if inputs.is_empty() && execution.as_stdin_file().is_none() {
@@ -88,7 +91,7 @@ pub(crate) fn traverse(
     let mut report = Report::default();
 
     let duration = thread::scope(|s| {
-        thread::Builder::new()
+        let handler = thread::Builder::new()
             .name(String::from("biome::console"))
             .spawn_scoped(s, || {
                 process_messages(ProcessMessagesOptions {
@@ -110,7 +113,7 @@ pub(crate) fn traverse(
 
         // The traversal context is scoped to ensure all the channels it
         // contains are properly closed once the traversal finishes
-        traverse_inputs(
+        let elapsed = traverse_inputs(
             fs,
             inputs,
             &TraversalOptions {
@@ -124,7 +127,13 @@ pub(crate) fn traverse(
                 sender_reports,
                 remaining_diagnostics: &remaining_diagnostics,
             },
-        )
+            use_git_ignore,
+        );
+
+        // wait for the main thread to finish
+        handler.join().unwrap();
+
+        elapsed
     });
 
     let count = processed.load(Ordering::Relaxed);
@@ -240,13 +249,33 @@ fn init_thread_pool() {
 
 /// Initiate the filesystem traversal tasks with the provided input paths and
 /// run it to completion, returning the duration of the process
-fn traverse_inputs(fs: &dyn FileSystem, inputs: Vec<OsString>, ctx: &TraversalOptions) -> Duration {
+fn traverse_inputs(
+    fs: &dyn FileSystem,
+    inputs: Vec<OsString>,
+    ctx: &TraversalOptions,
+    use_gitignore: bool,
+) -> Duration {
     let start = Instant::now();
-
     fs.traversal(Box::new(move |scope: &dyn TraversalScope| {
-        for input in inputs {
-            scope.spawn(ctx, PathBuf::from(input));
-        }
+        scope.traverse_paths(
+            ctx,
+            inputs
+                .into_iter()
+                .map(PathBuf::from)
+                .map(|path| {
+                    if let Some(working_directory) = fs.working_directory() {
+                        if path.starts_with(".") || path.starts_with("./") {
+                            working_directory
+                        } else {
+                            working_directory.join(path)
+                        }
+                    } else {
+                        path
+                    }
+                })
+                .collect(),
+            use_gitignore,
+        );
     }));
 
     start.elapsed()
@@ -570,12 +599,22 @@ fn process_messages(options: ProcessMessagesOptions) {
             }
         }
     }
+    let running_on_github = matches!(
+        mode.traversal_mode(),
+        TraversalMode::CI {
+            environment: Some(ExecutionEnvironment::GitHub),
+        }
+    );
 
     for diagnostic in diagnostics_to_print {
         if diagnostic.severity() >= *diagnostic_level {
             console.error(markup! {
                 {if verbose { PrintDiagnostic::verbose(&diagnostic) } else { PrintDiagnostic::simple(&diagnostic) }}
             });
+        }
+
+        if running_on_github {
+            console.log(markup! {{PrintGitHubDiagnostic::simple(&diagnostic)}});
         }
     }
 
@@ -676,7 +715,12 @@ impl<'ctx, 'app> TraversalContext for TraversalOptions<'ctx, 'app> {
         });
 
         let file_features = match file_features {
-            Ok(file_features) => file_features,
+            Ok(file_features) => {
+                if file_features.is_not_supported() {
+                    return false;
+                }
+                file_features
+            }
             Err(err) => {
                 self.miss_handler_err(err, rome_path);
 

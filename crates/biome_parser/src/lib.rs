@@ -461,6 +461,14 @@ pub trait Parser: Sized {
         self.nth(n) == kind
     }
 
+    /// Checks if a token set lookahead is something
+    fn nth_at_ts(&mut self, n: usize, kinds: TokenSet<Self::Kind>) -> bool
+    where
+        Self::Source: NthToken,
+    {
+        kinds.contains(self.nth(n))
+    }
+
     /// Tests if there's a line break before the nth token.
     #[inline]
     fn has_nth_preceding_line_break(&mut self, n: usize) -> bool
@@ -481,6 +489,18 @@ pub trait Parser: Sized {
         );
 
         self.do_bump(kind)
+    }
+
+    /// Consume the current token if token set matches.
+    fn bump_ts(&mut self, kinds: TokenSet<Self::Kind>) {
+        assert!(
+            kinds.contains(self.cur()),
+            "expected {:?} but at {:?}",
+            kinds,
+            self.cur()
+        );
+
+        self.bump_any()
     }
 
     /// Consume any token but cast it as a different kind using the specified `context.
@@ -582,6 +602,35 @@ pub trait Parser: Sized {
         }
 
         self.do_bump(kind);
+
+        true
+    }
+
+    /// Consume the next token if token set matches.
+    fn eat_ts(&mut self, kinds: TokenSet<Self::Kind>) -> bool {
+        if !self.at_ts(kinds) {
+            return false;
+        }
+
+        self.do_bump(self.cur());
+
+        true
+    }
+
+    /// Consume the next token if token set matches using the specified `context.
+    fn eat_ts_with_context(
+        &mut self,
+        kinds: TokenSet<Self::Kind>,
+        context: <Self::Source as BumpWithContext>::Context,
+    ) -> bool
+    where
+        Self::Source: BumpWithContext,
+    {
+        if !self.at_ts(kinds) {
+            return false;
+        }
+
+        self.do_bump_with_context(self.cur(), context);
 
         true
     }

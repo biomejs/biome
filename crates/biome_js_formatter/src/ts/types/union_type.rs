@@ -26,7 +26,7 @@ impl FormatNodeRule<TsUnionType> for FormatTsUnionType {
         // } | null | void
         // ```
         // should be inlined and not be printed in the multi-line variant
-        let should_hug = should_hug_type(&node.clone().into());
+        let should_hug = should_hug_type(&node.clone().into(), f);
         if should_hug {
             return write!(
                 f,

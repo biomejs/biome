@@ -56,6 +56,7 @@ connect(
 -----
 Indent style: Tab
 Indent width: 2
+Line ending: LF
 Line width: 80
 Quote style: Double Quotes
 JSX quote style: Double Quotes
@@ -63,6 +64,8 @@ Quote properties: As needed
 Trailing comma: All
 Semicolons: Always
 Arrow parentheses: Always
+Bracket spacing: true
+Bracket same line: false
 -----
 
 ```ts
@@ -112,6 +115,7 @@ connect(
 -----
 Indent style: Tab
 Indent width: 2
+Line ending: LF
 Line width: 80
 Quote style: Double Quotes
 JSX quote style: Double Quotes
@@ -119,13 +123,15 @@ Quote properties: As needed
 Trailing comma: ES5
 Semicolons: Always
 Arrow parentheses: Always
+Bracket spacing: true
+Bracket same line: false
 -----
 
 ```ts
 function test<
 	longlonglonglonglonglonglongT1,
 	longlonglonglonglonglonglongT2,
-	longlonglonglonglonglonglongT3
+	longlonglonglonglonglonglongT3,
 >(
 	longlonglonglonglonglonglongItem1,
 	longlonglonglonglonglonglongItem2,
@@ -134,7 +140,7 @@ function test<
 const test1 = <
 	longlonglonglonglonglonglongT1,
 	longlonglonglonglonglonglongT2,
-	longlonglonglonglonglonglongT3
+	longlonglonglonglonglonglongT3,
 >(
 	longlonglonglonglonglonglongItem1,
 	longlonglonglonglonglonglongItem2,
@@ -168,6 +174,7 @@ connect(
 -----
 Indent style: Tab
 Indent width: 2
+Line ending: LF
 Line width: 80
 Quote style: Double Quotes
 JSX quote style: Double Quotes
@@ -175,6 +182,8 @@ Quote properties: As needed
 Trailing comma: None
 Semicolons: Always
 Arrow parentheses: Always
+Bracket spacing: true
+Bracket same line: false
 -----
 
 ```ts

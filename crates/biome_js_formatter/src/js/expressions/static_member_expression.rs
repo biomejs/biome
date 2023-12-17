@@ -172,7 +172,7 @@ impl AnyJsStaticMemberLike {
 
 impl NeedsParentheses for JsStaticMemberExpression {
     fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
-        if self.is_optional_chain() && matches!(parent.kind(), JsSyntaxKind::JS_NEW_EXPRESSION) {
+        if matches!(parent.kind(), JsSyntaxKind::JS_NEW_EXPRESSION) && self.is_optional_chain() {
             return true;
         }
 
@@ -216,8 +216,6 @@ mod tests {
         assert_needs_parentheses!("new (test()[a].b)()", JsStaticMemberExpression);
         assert_needs_parentheses!("new (test()`template`.length)()", JsStaticMemberExpression);
         assert_needs_parentheses!("new (test()!.member)()", JsStaticMemberExpression);
-
-        assert_needs_parentheses!("new (foo?.bar)();", JsStaticMemberExpression);
 
         assert_not_needs_parentheses!("new (test.a)()", JsStaticMemberExpression);
     }

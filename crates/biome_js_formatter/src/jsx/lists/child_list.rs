@@ -106,7 +106,7 @@ impl FormatJsxChildList {
                             is_soft_line_break: !matches!(
                                 next_child,
                                 AnyJsxChild::JsxSelfClosingElement(_)
-                            ) || word.is_ascii_punctuation(),
+                            ) || word.is_single_character(),
                         }),
 
                         Some(JsxChild::Newline | JsxChild::Whitespace | JsxChild::EmptyLine) => {
@@ -166,7 +166,7 @@ impl FormatJsxChildList {
                 // A new line between some JSX text and an element
                 JsxChild::Newline => {
                     let is_soft_break = {
-                        // Here we handle the case when we have a newline between an ascii punctuation word and a jsx element
+                        // Here we handle the case when we have a newline between a single-character word and a jsx element
                         // We need to use the previous and the next element
                         // [JsxChild::Word, JsxChild::Newline, JsxChild::NonText]
                         // ```
@@ -180,9 +180,9 @@ impl FormatJsxChildList {
                                 children_iter.peek(),
                                 Some(JsxChild::NonText(AnyJsxChild::JsxSelfClosingElement(_)))
                             );
-                            !is_next_element_self_closing && word.is_ascii_punctuation()
+                            !is_next_element_self_closing && word.is_single_character()
                         }
-                        // Here we handle the case when we have an ascii punctuation word between a new line and a jsx element
+                        // Here we handle the case when we have a single-character word between a new line and a jsx element
                         // Here we need to look ahead two elements
                         // [JsxChild::Newline, JsxChild::Word, JsxChild::NonText]
                         // ```
@@ -207,7 +207,7 @@ impl FormatJsxChildList {
 
                             !has_new_line_and_self_closing
                                 && !is_next_next_element_self_closing
-                                && next_word.is_ascii_punctuation()
+                                && next_word.is_single_character()
                         } else {
                             false
                         }
@@ -225,7 +225,29 @@ impl FormatJsxChildList {
                 JsxChild::EmptyLine => {
                     child_breaks = true;
 
-                    multiline.write_separator(&empty_line(), f);
+                    // Additional empty lines are not preserved when any of
+                    // the children are a meaningful text node.
+                    //
+                    // <>
+                    //   <div>First</div>
+                    //
+                    //   <div>Second</div>
+                    //
+                    //   Third
+                    // </>
+                    //
+                    // Becomes:
+                    //
+                    // <>
+                    //   <div>First</div>
+                    //   <div>Second</div>
+                    //   Third
+                    // </>
+                    if children_meta.meaningful_text {
+                        multiline.write_separator(&hard_line_break(), f);
+                    } else {
+                        multiline.write_separator(&empty_line(), f);
+                    }
                 }
 
                 // Any child that isn't text
@@ -242,7 +264,7 @@ impl FormatJsxChildList {
                             // adefg
                             // ```
                             if matches!(non_text, AnyJsxChild::JsxSelfClosingElement(_))
-                                && !word.is_ascii_punctuation()
+                                && !word.is_single_character()
                             {
                                 Some(LineMode::Hard)
                             } else {
@@ -643,7 +665,29 @@ impl Format<JsFormatContext> for FormatMultilineChildren {
             Ok(())
         });
 
-        write!(f, [block_indent(&format_inner)])
+        // This indent is wrapped with a group to ensure that the print mode is
+        // set to `Expanded` when the group prints and will guarantee that the
+        // content _does not_ fit when printed as part of a `Fill`. Example:
+        //   <div>
+        //     <span a b>
+        //       <Foo />
+        //     </span>{" "}
+        //     ({variable})
+        //   </div>
+        // The `<span>...</span>` is the element that gets wrapped in the group
+        // by this line. Importantly, it contains a hard line break, and because
+        // [FitsMeasurer::fits_element] considers all hard lines as `Fits::Yes`,
+        // it will cause the element and the following separator to be printed
+        // in flat mode due to the logic of `Fill`. But because the we know the
+        // item breaks over multiple lines, we want it to _not_ fit and print
+        // both the content and the separator in Expanded mode, keeping the
+        // formatting as shown above.
+        //
+        // The `group` here allows us to opt-in to telling the `FitsMeasurer`
+        // that content that breaks shouldn't be considered flat and should be
+        // expanded. This is in contrast to something like a concise array fill,
+        // which _does_ allow breaks to fit and preserves density.
+        write!(f, [group(&block_indent(&format_inner))])
     }
 }
 

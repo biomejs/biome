@@ -1,0 +1,32 @@
+---
+title: Integração Contínua
+description: Usando Biome em um ambiente CI
+---
+
+Rodar o Biome em um ambiente CI é fácil. Dê uma olhada nos exemplos abaixo para ter uma inspiração.
+
+## GitHub Actions
+
+Nós fornecemos uma [GitHub Action](https://github.com/marketplace/actions/setup-biome) para configurar o Biome em seu ambiente de execução.
+Aqui está como ficaria um simples Workflow:
+
+```yaml title="pull_request.yml"
+name: Code quality
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Biome
+        uses: biomejs/setup-biome@v1
+        with:
+          version: 1.2.2
+      - name: Run Biome
+        run: biome ci .
+```

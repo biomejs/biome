@@ -1,9 +1,12 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
         JsLabeledStatement {
-            label_token: IDENT@0..6 "label1" [] [],
+            label: JsLabel {
+                value_token: IDENT@0..6 "label1" [] [],
+            },
             colon_token: COLON@6..8 ":" [] [Whitespace(" ")],
             body: JsBogusStatement {
                 items: [
@@ -31,10 +34,12 @@ JsModule {
 
 0: JS_MODULE@0..24
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..23
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..23
     0: JS_LABELED_STATEMENT@0..23
-      0: IDENT@0..6 "label1" [] []
+      0: JS_LABEL@0..6
+        0: IDENT@0..6 "label1" [] []
       1: COLON@6..8 ":" [] [Whitespace(" ")]
       2: JS_BOGUS_STATEMENT@8..23
         0: FUNCTION_KW@8..17 "function" [] [Whitespace(" ")]
@@ -49,7 +54,7 @@ JsModule {
           1: JS_DIRECTIVE_LIST@22..22
           2: JS_STATEMENT_LIST@22..22
           3: R_CURLY@22..23 "}" [] []
-  3: EOF@23..24 "" [Newline("\n")] []
+  4: EOF@23..24 "" [Newline("\n")] []
 --
 labelled_function_declaration_strict_mode.js:1:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

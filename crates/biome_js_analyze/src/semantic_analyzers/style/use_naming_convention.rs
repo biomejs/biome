@@ -840,8 +840,7 @@ impl Named {
             AnyJsBindingDeclaration::JsCatchDeclaration(_) => Some(Named::CatchParameter),
             AnyJsBindingDeclaration::TsPropertyParameter(_) => Some(Named::ParameterProperty),
             AnyJsBindingDeclaration::TsIndexSignatureParameter(_) => Some(Named::IndexParameter),
-            AnyJsBindingDeclaration::JsNamespaceImportSpecifier(_)
-            | AnyJsBindingDeclaration::JsImportNamespaceClause(_) => Some(Named::ImportNamespace),
+            AnyJsBindingDeclaration::JsNamespaceImportSpecifier(_) => Some(Named::ImportNamespace),
             AnyJsBindingDeclaration::JsFunctionDeclaration(_)
             | AnyJsBindingDeclaration::JsFunctionExpression(_)
             | AnyJsBindingDeclaration::JsFunctionExportDefaultDeclaration(_)
@@ -849,8 +848,7 @@ impl Named {
             | AnyJsBindingDeclaration::TsDeclareFunctionExportDefaultDeclaration(_) => {
                 Some(Named::Function)
             }
-            AnyJsBindingDeclaration::JsImportDefaultClause(_)
-            | AnyJsBindingDeclaration::TsImportEqualsDeclaration(_)
+            AnyJsBindingDeclaration::TsImportEqualsDeclaration(_)
             | AnyJsBindingDeclaration::JsDefaultImportSpecifier(_)
             | AnyJsBindingDeclaration::JsNamedImportSpecifier(_) => Some(Named::ImportAlias),
             AnyJsBindingDeclaration::TsModuleDeclaration(_) => Some(Named::Namespace),
@@ -872,12 +870,19 @@ impl Named {
     }
 
     fn from_variable_declarator(var: &JsVariableDeclarator) -> Option<Named> {
-        let is_top_level_level = matches!(
-            var.syntax()
-                .ancestors()
-                .find_map(AnyJsControlFlowRoot::cast),
-            Some(AnyJsControlFlowRoot::JsModule(_) | AnyJsControlFlowRoot::JsScript(_))
-        );
+        let is_top_level_level = var
+            .syntax()
+            .ancestors()
+            .find(|x| AnyJsControlFlowRoot::can_cast(x.kind()))
+            .is_some_and(|x| {
+                matches!(
+                    x.kind(),
+                    JsSyntaxKind::JS_MODULE
+                        | JsSyntaxKind::JS_SCRIPT
+                        | JsSyntaxKind::TS_MODULE_DECLARATION
+                        | JsSyntaxKind::TS_EXTERNAL_MODULE_DECLARATION
+                )
+            });
         let var_declaration = var
             .syntax()
             .ancestors()

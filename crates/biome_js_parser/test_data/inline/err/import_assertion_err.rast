@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -60,8 +61,7 @@ JsModule {
             import_token: IMPORT_KW@80..88 "import" [Newline("\n")] [Whitespace(" ")],
             import_clause: JsImportNamedClause {
                 type_token: missing (optional),
-                default_specifier: missing (optional),
-                named_import: JsNamedImportSpecifiers {
+                named_specifiers: JsNamedImportSpecifiers {
                     l_curly_token: L_CURLY@88..90 "{" [] [Whitespace(" ")],
                     specifiers: JsNamedImportSpecifierList [
                         JsShorthandNamedImportSpecifier {
@@ -112,7 +112,9 @@ JsModule {
             l_curly_token: L_CURLY@143..145 "{" [] [Whitespace(" ")],
             statements: JsStatementList [
                 JsLabeledStatement {
-                    label_token: IDENT@145..149 "type" [] [],
+                    label: JsLabel {
+                        value_token: IDENT@145..149 "type" [] [],
+                    },
                     colon_token: COLON@149..151 ":" [] [Whitespace(" ")],
                     body: JsExpressionStatement {
                         expression: JsStringLiteralExpression {
@@ -128,8 +130,10 @@ JsModule {
             import_token: IMPORT_KW@159..167 "import" [Newline("\n")] [Whitespace(" ")],
             import_clause: JsImportDefaultClause {
                 type_token: missing (optional),
-                local_name: JsIdentifierBinding {
-                    name_token: IDENT@167..172 "foo2" [] [Whitespace(" ")],
+                default_specifier: JsDefaultImportSpecifier {
+                    local_name: JsIdentifierBinding {
+                        name_token: IDENT@167..172 "foo2" [] [Whitespace(" ")],
+                    },
                 },
                 from_token: FROM_KW@172..177 "from" [] [Whitespace(" ")],
                 source: JsModuleSource {
@@ -185,8 +189,10 @@ JsModule {
             import_token: IMPORT_KW@261..269 "import" [Newline("\n")] [Whitespace(" ")],
             import_clause: JsImportDefaultClause {
                 type_token: missing (optional),
-                local_name: JsIdentifierBinding {
-                    name_token: IDENT@269..275 "ipsum" [] [Whitespace(" ")],
+                default_specifier: JsDefaultImportSpecifier {
+                    local_name: JsIdentifierBinding {
+                        name_token: IDENT@269..275 "ipsum" [] [Whitespace(" ")],
+                    },
                 },
                 from_token: FROM_KW@275..280 "from" [] [Whitespace(" ")],
                 source: JsModuleSource {
@@ -235,8 +241,7 @@ JsModule {
             import_token: IMPORT_KW@345..353 "import" [Newline("\n")] [Whitespace(" ")],
             import_clause: JsImportNamedClause {
                 type_token: missing (optional),
-                default_specifier: missing (optional),
-                named_import: JsNamedImportSpecifiers {
+                named_specifiers: JsNamedImportSpecifiers {
                     l_curly_token: L_CURLY@353..355 "{" [] [Whitespace(" ")],
                     specifiers: JsNamedImportSpecifierList [
                         JsShorthandNamedImportSpecifier {
@@ -267,8 +272,9 @@ JsModule {
 
 0: JS_MODULE@0..380
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..379
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..379
     0: JS_IMPORT@0..37
       0: IMPORT_KW@0..7 "import" [] [Whitespace(" ")]
       1: JS_IMPORT_BARE_CLAUSE@7..36
@@ -308,8 +314,7 @@ JsModule {
       0: IMPORT_KW@80..88 "import" [Newline("\n")] [Whitespace(" ")]
       1: JS_IMPORT_NAMED_CLAUSE@88..119
         0: (empty)
-        1: (empty)
-        2: JS_NAMED_IMPORT_SPECIFIERS@88..96
+        1: JS_NAMED_IMPORT_SPECIFIERS@88..96
           0: L_CURLY@88..90 "{" [] [Whitespace(" ")]
           1: JS_NAMED_IMPORT_SPECIFIER_LIST@90..94
             0: JS_SHORTHAND_NAMED_IMPORT_SPECIFIER@90..94
@@ -317,9 +322,9 @@ JsModule {
               1: JS_IDENTIFIER_BINDING@90..94
                 0: IDENT@90..94 "foo" [] [Whitespace(" ")]
           2: R_CURLY@94..96 "}" [] [Whitespace(" ")]
+        2: (empty)
         3: (empty)
-        4: (empty)
-        5: JS_IMPORT_ASSERTION@96..119
+        4: JS_IMPORT_ASSERTION@96..119
           0: ASSERT_KW@96..103 "assert" [] [Whitespace(" ")]
           1: L_CURLY@103..105 "{" [] [Whitespace(" ")]
           2: JS_IMPORT_ASSERTION_ENTRY_LIST@105..118
@@ -345,7 +350,8 @@ JsModule {
       0: L_CURLY@143..145 "{" [] [Whitespace(" ")]
       1: JS_STATEMENT_LIST@145..158
         0: JS_LABELED_STATEMENT@145..158
-          0: IDENT@145..149 "type" [] []
+          0: JS_LABEL@145..149
+            0: IDENT@145..149 "type" [] []
           1: COLON@149..151 ":" [] [Whitespace(" ")]
           2: JS_EXPRESSION_STATEMENT@151..158
             0: JS_STRING_LITERAL_EXPRESSION@151..158
@@ -356,8 +362,9 @@ JsModule {
       0: IMPORT_KW@159..167 "import" [Newline("\n")] [Whitespace(" ")]
       1: JS_IMPORT_DEFAULT_CLAUSE@167..241
         0: (empty)
-        1: JS_IDENTIFIER_BINDING@167..172
-          0: IDENT@167..172 "foo2" [] [Whitespace(" ")]
+        1: JS_DEFAULT_IMPORT_SPECIFIER@167..172
+          0: JS_IDENTIFIER_BINDING@167..172
+            0: IDENT@167..172 "foo2" [] [Whitespace(" ")]
         2: FROM_KW@172..177 "from" [] [Whitespace(" ")]
         3: JS_MODULE_SOURCE@177..188
           0: JS_STRING_LITERAL@177..188 "\"foo.json\"" [] [Whitespace(" ")]
@@ -396,8 +403,9 @@ JsModule {
       0: IMPORT_KW@261..269 "import" [Newline("\n")] [Whitespace(" ")]
       1: JS_IMPORT_DEFAULT_CLAUSE@269..344
         0: (empty)
-        1: JS_IDENTIFIER_BINDING@269..275
-          0: IDENT@269..275 "ipsum" [] [Whitespace(" ")]
+        1: JS_DEFAULT_IMPORT_SPECIFIER@269..275
+          0: JS_IDENTIFIER_BINDING@269..275
+            0: IDENT@269..275 "ipsum" [] [Whitespace(" ")]
         2: FROM_KW@275..280 "from" [] [Whitespace(" ")]
         3: JS_MODULE_SOURCE@280..293
           0: JS_STRING_LITERAL@280..293 "\"ipsum.json\"" [] [Whitespace(" ")]
@@ -433,8 +441,7 @@ JsModule {
       0: IMPORT_KW@345..353 "import" [Newline("\n")] [Whitespace(" ")]
       1: JS_IMPORT_NAMED_CLAUSE@353..379
         0: (empty)
-        1: (empty)
-        2: JS_NAMED_IMPORT_SPECIFIERS@353..359
+        1: JS_NAMED_IMPORT_SPECIFIERS@353..359
           0: L_CURLY@353..355 "{" [] [Whitespace(" ")]
           1: JS_NAMED_IMPORT_SPECIFIER_LIST@355..357
             0: JS_SHORTHAND_NAMED_IMPORT_SPECIFIER@355..357
@@ -442,16 +449,16 @@ JsModule {
               1: JS_IDENTIFIER_BINDING@355..357
                 0: IDENT@355..357 "a" [] [Whitespace(" ")]
           2: R_CURLY@357..359 "}" [] [Whitespace(" ")]
-        3: FROM_KW@359..364 "from" [] [Whitespace(" ")]
-        4: JS_MODULE_SOURCE@364..373
+        2: FROM_KW@359..364 "from" [] [Whitespace(" ")]
+        3: JS_MODULE_SOURCE@364..373
           0: JS_STRING_LITERAL@364..373 "\"a.json\"" [] [Whitespace(" ")]
-        5: JS_IMPORT_ASSERTION@373..379
+        4: JS_IMPORT_ASSERTION@373..379
           0: ASSERT_KW@373..379 "assert" [] []
           1: (empty)
           2: JS_IMPORT_ASSERTION_ENTRY_LIST@379..379
           3: (empty)
       2: (empty)
-  3: EOF@379..380 "" [Newline("\n")] []
+  4: EOF@379..380 "" [Newline("\n")] []
 --
 import_assertion_err.js:1:27 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

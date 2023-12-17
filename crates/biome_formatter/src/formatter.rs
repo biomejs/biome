@@ -114,7 +114,7 @@ impl<'buf, Context> Formatter<'buf, Context> {
     /// Specialized version of [crate::Formatter::join_with] for joining SyntaxNodes separated by a space, soft
     /// line break or empty line depending on the input file.
     ///
-    /// This functions inspects the input source and separates consecutive elements with either
+    /// This function inspects the input source and separates consecutive elements with either
     /// a [crate::builders::soft_line_break_or_space] or [crate::builders::empty_line] depending on how many line breaks were
     /// separating the elements in the original file.
     pub fn join_nodes_with_soft_line<'a>(
@@ -126,11 +126,24 @@ impl<'buf, Context> Formatter<'buf, Context> {
     /// Specialized version of [crate::Formatter::join_with] for joining SyntaxNodes separated by one or more
     /// line breaks depending on the input file.
     ///
-    /// This functions inspects the input source and separates consecutive elements with either
+    /// This function inspects the input source and separates consecutive elements with either
     /// a [crate::builders::hard_line_break] or [crate::builders::empty_line] depending on how many line breaks were separating the
     /// elements in the original file.
     pub fn join_nodes_with_hardline<'a>(&'a mut self) -> JoinNodesBuilder<'a, 'buf, Line, Context> {
         JoinNodesBuilder::new(hard_line_break(), self)
+    }
+
+    /// Specialized version of [crate::Formatter::join_with] for joining SyntaxNodes separated by a simple space.
+    ///
+    /// This function *disregards* the input source and always separates consecutive elements with a plain
+    /// [crate::builders::space], forcing a flat layout regardless of any line breaks or spaces were separating
+    /// the elements in the original file.
+    ///
+    /// This function should likely only be used in a `best_fitting!` context, where one variant attempts to
+    /// force a list of nodes onto a single line without any possible breaks, then falls back to a broken
+    /// out variant if the content does not fit.
+    pub fn join_nodes_with_space<'a>(&'a mut self) -> JoinNodesBuilder<'a, 'buf, Space, Context> {
+        JoinNodesBuilder::new(space(), self)
     }
 
     /// Concatenates a list of [crate::Format] objects with spaces and line breaks to fit

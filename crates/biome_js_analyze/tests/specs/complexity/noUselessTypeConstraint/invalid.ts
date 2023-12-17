@@ -15,3 +15,6 @@ const QuuxAny = <T extends any>() => {};
 function QuuzAny<T extends any>() {}
 
 function commented<T /*a*/ extends /*b*/ any /*c*/>() {}
+
+const A = <T extends unknown>() => {}
+const B = <T extends unknown = unknown>() => {}

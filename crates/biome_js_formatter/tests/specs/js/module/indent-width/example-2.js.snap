@@ -36,6 +36,7 @@ function foo() {
 -----
 Indent style: Tab
 Indent width: 2
+Line ending: LF
 Line width: 80
 Quote style: Double Quotes
 JSX quote style: Double Quotes
@@ -43,6 +44,8 @@ Quote properties: As needed
 Trailing comma: All
 Semicolons: Always
 Arrow parentheses: Always
+Bracket spacing: true
+Bracket same line: false
 -----
 
 ```js
@@ -70,6 +73,7 @@ function foo() {
 -----
 Indent style: Tab
 Indent width: 4
+Line ending: LF
 Line width: 80
 Quote style: Double Quotes
 JSX quote style: Double Quotes
@@ -77,6 +81,8 @@ Quote properties: As needed
 Trailing comma: All
 Semicolons: Always
 Arrow parentheses: Always
+Bracket spacing: true
+Bracket same line: false
 -----
 
 ```js
@@ -104,6 +110,7 @@ function foo() {
 -----
 Indent style: Tab
 Indent width: 8
+Line ending: LF
 Line width: 80
 Quote style: Double Quotes
 JSX quote style: Double Quotes
@@ -111,6 +118,8 @@ Quote properties: As needed
 Trailing comma: All
 Semicolons: Always
 Arrow parentheses: Always
+Bracket spacing: true
+Bracket same line: false
 -----
 
 ```js

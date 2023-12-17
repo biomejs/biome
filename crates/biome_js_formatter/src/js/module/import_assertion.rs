@@ -28,6 +28,7 @@ impl FormatNodeRule<JsImportAssertion> for FormatJsImportAssertion {
                 ]
             )
         } else {
+            let should_insert_space_around_brackets = f.options().bracket_spacing().value();
             write!(
                 f,
                 [
@@ -35,7 +36,10 @@ impl FormatNodeRule<JsImportAssertion> for FormatJsImportAssertion {
                     assertion_kind.format(),
                     space(),
                     l_curly_token.format(),
-                    group(&soft_space_or_block_indent(&assertions.format())),
+                    group(&soft_block_indent_with_maybe_space(
+                        &assertions.format(),
+                        should_insert_space_around_brackets
+                    )),
                     r_curly_token.format()
                 ]
             )

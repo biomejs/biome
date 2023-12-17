@@ -1,0 +1,103 @@
+---
+title: はじめる
+description: Biomeと共に新しいプロジェクトを立ち上げる方法を学びます。
+---
+
+import PackageManagerBiomeCommand from "@src/components/PackageManagerBiomeCommand.astro";
+import PackageManagerCommand from "@src/components/PackageManagerCommand.astro";
+
+## 動作環境
+
+- Windows（WSLを含む）、macOS、またはLinux
+- x86_64またはARM64
+- Node.js v14.18以上（スタンドアロン実行形式を使用する場合は不要）
+
+## インストール方法
+
+Biomeをインストールする最も速い方法は、 `npm` またはお好みのパッケージマネージャーを使用することです。Node.jsをインストールせずにBiomeを使用したい場合は、[スタンドアロン実行形式](/guides/manual-installation)としてCLIを利用できます。
+
+Biomeをインストールするには、 `package.json` ファイルが含まれるディレクトリで次のコマンドを実行します。
+
+<PackageManagerCommand
+  npm="install --save-dev --save-exact @biomejs/biome"
+  pnpm="add --save-dev --save-exact @biomejs/biome"
+  yarn="add --dev --exact @biomejs/biome"
+  bun="add --dev --exact @biomejs/biome"
+/>
+
+:::note[注]
+Biomeをローカルではなくグローバルにインストールすることも可能ですが、推奨されていません。
+:::
+
+Biomeをインストールする際には、バージョン範囲演算子を使用しないことを**強く推奨**しています。詳しくは、[バージョニング ページ](/internals/versioning/)をご覧ください。
+
+## 設定
+
+プロジェクトごとに `biome.json`（設定ファイル）を作成することを推奨します。
+これにより、コマンドを実行するたびにCLIのオプションを繰り返し指定する必要がなくなり、エディタ上で同じ設定を適用できるようになります。もしBiomeのデフォルト設定に満足している場合は、新たに設定ファイルを作成する必要はありません。
+
+設定を作成するには、プロジェクトのルートディレクトリで `init` コマンドを実行します。
+
+<PackageManagerBiomeCommand command="init" />
+
+`init` コマンドを実行すると、そのディレクトリに `biome.json` ファイルが新規作成されます。
+
+```json title="biome.json"
+{
+  "$schema": "https://biomejs.dev/schemas/1.4.0/schema.json",
+  "organizeImports": {
+    "enabled": false
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true
+    }
+  }
+}
+```
+
+`linter.enabled: true` はlinterを有効にし、 `rules.recommended: true` は[推奨ルール](/linter/rules/)を有効にします。
+
+この設定では、`formatter.enabled: false` で明示的にformatを[無効化](/reference/configuration/#formatterenabled)していないため、formatは有効になっています。
+
+## 使い方
+
+Biome CLIには多くのコマンドとオプションが用意されているので、あなたが必要なものだけを使用できます。
+
+[`format`](/reference/cli#biome-format) コマンドを `--write` オプションを指定し実行することで、ファイルやディレクトリをformatできます。
+
+<PackageManagerBiomeCommand command="format <files> --write" />
+
+[`lint`](/reference/cli#biome-lint) コマンドを `--apply` オプションを指定し実行することで、ファイルやディレクトリに対してLintを実行し、[安全な修正](/linter#safe-fixes)を適用できます。
+
+<PackageManagerBiomeCommand command="lint <files>" />
+
+[`check`](/reference/cli#biome-check) コマンドを実行することで、それら**両方**のコマンドを実行できます。
+
+<PackageManagerBiomeCommand command="check --apply <files>" />
+
+`check` コマンドは複数のツールを一度に実行するためのコマンドです。現在は以下のことを行います。
+
+- ファイルのformat
+- ファイルのlint
+- インポートの整理
+
+## エディタプラグインのインストール
+
+Biomeの機能を最大限活用するために、エディタプラグインをインストールすることを推奨しています。[エディタのページ](/guides/integrate-in-editor)を参照して、どのエディタがBiomeをサポートしているかを確認してください。
+
+## CIのセットアップ
+
+Node.jsを使用している場合、BiomeをCIで実行するには、[お気に入りのパッケージマネージャ](/guides/getting-started#installation)を使用することが推奨されます。
+このようにすることで、CIパイプラインがエディタ上やローカルでCLIコマンドを実行するときと同じバージョンのBiomeを使用することを保証できます。
+
+## 次のステップ
+
+成功です！これでBiomeを使う準備が整いました。🥳
+
+- [Formatter](/formatter)の使い方と設定方法について詳しく知る
+- [Linter](/linter)の使い方と設定方法について詳しく知る
+- [CLIオプション](/reference/cli)を使いこなす
+- [設定オプション](/reference/configuration)を使いこなす
+- [Discordのコミュニティ](https://discord.gg/BypW39g6Yc)に参加する

@@ -13,6 +13,7 @@ html:lang(de) {}
 html:lang(de, fr) {}
 :lang(fr-be) > q {}
 :lang(de) > q {}
+:lang(fr-be) .class {}
 
 ```
 
@@ -21,6 +22,7 @@ html:lang(de, fr) {}
 
 ```
 CssRoot {
+    bom_token: missing (optional),
     rules: CssRuleList [
         CssRule {
             prelude: CssSelectorList [
@@ -31,9 +33,7 @@ CssRoot {
                         CssPseudoClassSelector {
                             colon_token: COLON@0..1 ":" [] [],
                             class: CssPseudoClassFunctionValueList {
-                                name: CssIdentifier {
-                                    value_token: IDENT@1..5 "lang" [] [],
-                                },
+                                name_token: LANG_KW@1..5 "lang" [] [],
                                 l_paren_token: L_PAREN@5..6 "(" [] [],
                                 value_list: CssPseudoValueList [
                                     CssIdentifier {
@@ -61,9 +61,7 @@ CssRoot {
                         CssPseudoClassSelector {
                             colon_token: COLON@17..19 ":" [Newline("\n")] [],
                             class: CssPseudoClassFunctionValueList {
-                                name: CssIdentifier {
-                                    value_token: IDENT@19..23 "lang" [] [],
-                                },
+                                name_token: LANG_KW@19..23 "lang" [] [],
                                 l_paren_token: L_PAREN@23..24 "(" [] [],
                                 value_list: CssPseudoValueList [
                                     CssString {
@@ -87,6 +85,7 @@ CssRoot {
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
                     simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
                         ident: CssIdentifier {
                             value_token: IDENT@36..41 "html" [Newline("\n")] [],
                         },
@@ -95,9 +94,7 @@ CssRoot {
                         CssPseudoClassSelector {
                             colon_token: COLON@41..42 ":" [] [],
                             class: CssPseudoClassFunctionValueList {
-                                name: CssIdentifier {
-                                    value_token: IDENT@42..46 "lang" [] [],
-                                },
+                                name_token: LANG_KW@42..46 "lang" [] [],
                                 l_paren_token: L_PAREN@46..47 "(" [] [],
                                 value_list: CssPseudoValueList [
                                     CssIdentifier {
@@ -121,6 +118,7 @@ CssRoot {
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
                     simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
                         ident: CssIdentifier {
                             value_token: IDENT@56..61 "html" [Newline("\n")] [],
                         },
@@ -129,9 +127,7 @@ CssRoot {
                         CssPseudoClassSelector {
                             colon_token: COLON@61..62 ":" [] [],
                             class: CssPseudoClassFunctionValueList {
-                                name: CssIdentifier {
-                                    value_token: IDENT@62..66 "lang" [] [],
-                                },
+                                name_token: LANG_KW@62..66 "lang" [] [],
                                 l_paren_token: L_PAREN@66..67 "(" [] [],
                                 value_list: CssPseudoValueList [
                                     CssIdentifier {
@@ -155,6 +151,7 @@ CssRoot {
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
                     simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
                         ident: CssIdentifier {
                             value_token: IDENT@73..78 "html" [Newline("\n")] [],
                         },
@@ -163,9 +160,7 @@ CssRoot {
                         CssPseudoClassSelector {
                             colon_token: COLON@78..79 ":" [] [],
                             class: CssPseudoClassFunctionValueList {
-                                name: CssIdentifier {
-                                    value_token: IDENT@79..83 "lang" [] [],
-                                },
+                                name_token: LANG_KW@79..83 "lang" [] [],
                                 l_paren_token: L_PAREN@83..84 "(" [] [],
                                 value_list: CssPseudoValueList [
                                     CssIdentifier {
@@ -198,9 +193,7 @@ CssRoot {
                             CssPseudoClassSelector {
                                 colon_token: COLON@94..96 ":" [Newline("\n")] [],
                                 class: CssPseudoClassFunctionValueList {
-                                    name: CssIdentifier {
-                                        value_token: IDENT@96..100 "lang" [] [],
-                                    },
+                                    name_token: LANG_KW@96..100 "lang" [] [],
                                     l_paren_token: L_PAREN@100..101 "(" [] [],
                                     value_list: CssPseudoValueList [
                                         CssIdentifier {
@@ -216,6 +209,7 @@ CssRoot {
                     right: CssCompoundSelector {
                         nesting_selector_token: missing (optional),
                         simple_selector: CssTypeSelector {
+                            namespace: missing (optional),
                             ident: CssIdentifier {
                                 value_token: IDENT@110..112 "q" [] [Whitespace(" ")],
                             },
@@ -240,9 +234,7 @@ CssRoot {
                             CssPseudoClassSelector {
                                 colon_token: COLON@114..116 ":" [Newline("\n")] [],
                                 class: CssPseudoClassFunctionValueList {
-                                    name: CssIdentifier {
-                                        value_token: IDENT@116..120 "lang" [] [],
-                                    },
+                                    name_token: LANG_KW@116..120 "lang" [] [],
                                     l_paren_token: L_PAREN@120..121 "(" [] [],
                                     value_list: CssPseudoValueList [
                                         CssIdentifier {
@@ -258,6 +250,7 @@ CssRoot {
                     right: CssCompoundSelector {
                         nesting_selector_token: missing (optional),
                         simple_selector: CssTypeSelector {
+                            namespace: missing (optional),
                             ident: CssIdentifier {
                                 value_token: IDENT@127..129 "q" [] [Whitespace(" ")],
                             },
@@ -272,16 +265,60 @@ CssRoot {
                 r_curly_token: R_CURLY@130..131 "}" [] [],
             },
         },
+        CssRule {
+            prelude: CssSelectorList [
+                CssComplexSelector {
+                    left: CssCompoundSelector {
+                        nesting_selector_token: missing (optional),
+                        simple_selector: missing (optional),
+                        sub_selectors: CssSubSelectorList [
+                            CssPseudoClassSelector {
+                                colon_token: COLON@131..133 ":" [Newline("\n")] [],
+                                class: CssPseudoClassFunctionValueList {
+                                    name_token: LANG_KW@133..137 "lang" [] [],
+                                    l_paren_token: L_PAREN@137..138 "(" [] [],
+                                    value_list: CssPseudoValueList [
+                                        CssIdentifier {
+                                            value_token: IDENT@138..143 "fr-be" [] [],
+                                        },
+                                    ],
+                                    r_paren_token: R_PAREN@143..144 ")" [] [],
+                                },
+                            },
+                        ],
+                    },
+                    combinator: CSS_SPACE_LITERAL@144..145 " " [] [],
+                    right: CssCompoundSelector {
+                        nesting_selector_token: missing (optional),
+                        simple_selector: missing (optional),
+                        sub_selectors: CssSubSelectorList [
+                            CssClassSelector {
+                                dot_token: DOT@145..146 "." [] [],
+                                name: CssIdentifier {
+                                    value_token: IDENT@146..152 "class" [] [Whitespace(" ")],
+                                },
+                            },
+                        ],
+                    },
+                },
+            ],
+            block: CssBlock {
+                l_curly_token: L_CURLY@152..153 "{" [] [],
+                declaration_list: CssDeclarationList [],
+                r_curly_token: R_CURLY@153..154 "}" [] [],
+            },
+        },
     ],
-    eof_token: EOF@131..132 "" [Newline("\n")] [],
+    eof_token: EOF@154..155 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..132
-  0: CSS_RULE_LIST@0..131
+0: CSS_ROOT@0..155
+  0: (empty)
+  1: CSS_RULE_LIST@0..154
     0: CSS_RULE@0..17
       0: CSS_SELECTOR_LIST@0..15
         0: CSS_COMPOUND_SELECTOR@0..15
@@ -291,8 +328,7 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@0..15
               0: COLON@0..1 ":" [] []
               1: CSS_PSEUDO_CLASS_FUNCTION_VALUE_LIST@1..15
-                0: CSS_IDENTIFIER@1..5
-                  0: IDENT@1..5 "lang" [] []
+                0: LANG_KW@1..5 "lang" [] []
                 1: L_PAREN@5..6 "(" [] []
                 2: CSS_PSEUDO_VALUE_LIST@6..13
                   0: CSS_IDENTIFIER@6..13
@@ -311,8 +347,7 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@17..34
               0: COLON@17..19 ":" [Newline("\n")] []
               1: CSS_PSEUDO_CLASS_FUNCTION_VALUE_LIST@19..34
-                0: CSS_IDENTIFIER@19..23
-                  0: IDENT@19..23 "lang" [] []
+                0: LANG_KW@19..23 "lang" [] []
                 1: L_PAREN@23..24 "(" [] []
                 2: CSS_PSEUDO_VALUE_LIST@24..32
                   0: CSS_STRING@24..32
@@ -327,14 +362,14 @@ CssRoot {
         0: CSS_COMPOUND_SELECTOR@36..54
           0: (empty)
           1: CSS_TYPE_SELECTOR@36..41
-            0: CSS_IDENTIFIER@36..41
+            0: (empty)
+            1: CSS_IDENTIFIER@36..41
               0: IDENT@36..41 "html" [Newline("\n")] []
           2: CSS_SUB_SELECTOR_LIST@41..54
             0: CSS_PSEUDO_CLASS_SELECTOR@41..54
               0: COLON@41..42 ":" [] []
               1: CSS_PSEUDO_CLASS_FUNCTION_VALUE_LIST@42..54
-                0: CSS_IDENTIFIER@42..46
-                  0: IDENT@42..46 "lang" [] []
+                0: LANG_KW@42..46 "lang" [] []
                 1: L_PAREN@46..47 "(" [] []
                 2: CSS_PSEUDO_VALUE_LIST@47..52
                   0: CSS_IDENTIFIER@47..52
@@ -349,14 +384,14 @@ CssRoot {
         0: CSS_COMPOUND_SELECTOR@56..71
           0: (empty)
           1: CSS_TYPE_SELECTOR@56..61
-            0: CSS_IDENTIFIER@56..61
+            0: (empty)
+            1: CSS_IDENTIFIER@56..61
               0: IDENT@56..61 "html" [Newline("\n")] []
           2: CSS_SUB_SELECTOR_LIST@61..71
             0: CSS_PSEUDO_CLASS_SELECTOR@61..71
               0: COLON@61..62 ":" [] []
               1: CSS_PSEUDO_CLASS_FUNCTION_VALUE_LIST@62..71
-                0: CSS_IDENTIFIER@62..66
-                  0: IDENT@62..66 "lang" [] []
+                0: LANG_KW@62..66 "lang" [] []
                 1: L_PAREN@66..67 "(" [] []
                 2: CSS_PSEUDO_VALUE_LIST@67..69
                   0: CSS_IDENTIFIER@67..69
@@ -371,14 +406,14 @@ CssRoot {
         0: CSS_COMPOUND_SELECTOR@73..92
           0: (empty)
           1: CSS_TYPE_SELECTOR@73..78
-            0: CSS_IDENTIFIER@73..78
+            0: (empty)
+            1: CSS_IDENTIFIER@73..78
               0: IDENT@73..78 "html" [Newline("\n")] []
           2: CSS_SUB_SELECTOR_LIST@78..92
             0: CSS_PSEUDO_CLASS_SELECTOR@78..92
               0: COLON@78..79 ":" [] []
               1: CSS_PSEUDO_CLASS_FUNCTION_VALUE_LIST@79..92
-                0: CSS_IDENTIFIER@79..83
-                  0: IDENT@79..83 "lang" [] []
+                0: LANG_KW@79..83 "lang" [] []
                 1: L_PAREN@83..84 "(" [] []
                 2: CSS_PSEUDO_VALUE_LIST@84..90
                   0: CSS_IDENTIFIER@84..86
@@ -401,8 +436,7 @@ CssRoot {
               0: CSS_PSEUDO_CLASS_SELECTOR@94..108
                 0: COLON@94..96 ":" [Newline("\n")] []
                 1: CSS_PSEUDO_CLASS_FUNCTION_VALUE_LIST@96..108
-                  0: CSS_IDENTIFIER@96..100
-                    0: IDENT@96..100 "lang" [] []
+                  0: LANG_KW@96..100 "lang" [] []
                   1: L_PAREN@100..101 "(" [] []
                   2: CSS_PSEUDO_VALUE_LIST@101..106
                     0: CSS_IDENTIFIER@101..106
@@ -412,7 +446,8 @@ CssRoot {
           2: CSS_COMPOUND_SELECTOR@110..112
             0: (empty)
             1: CSS_TYPE_SELECTOR@110..112
-              0: CSS_IDENTIFIER@110..112
+              0: (empty)
+              1: CSS_IDENTIFIER@110..112
                 0: IDENT@110..112 "q" [] [Whitespace(" ")]
             2: CSS_SUB_SELECTOR_LIST@112..112
       1: CSS_BLOCK@112..114
@@ -429,8 +464,7 @@ CssRoot {
               0: CSS_PSEUDO_CLASS_SELECTOR@114..125
                 0: COLON@114..116 ":" [Newline("\n")] []
                 1: CSS_PSEUDO_CLASS_FUNCTION_VALUE_LIST@116..125
-                  0: CSS_IDENTIFIER@116..120
-                    0: IDENT@116..120 "lang" [] []
+                  0: LANG_KW@116..120 "lang" [] []
                   1: L_PAREN@120..121 "(" [] []
                   2: CSS_PSEUDO_VALUE_LIST@121..123
                     0: CSS_IDENTIFIER@121..123
@@ -440,14 +474,44 @@ CssRoot {
           2: CSS_COMPOUND_SELECTOR@127..129
             0: (empty)
             1: CSS_TYPE_SELECTOR@127..129
-              0: CSS_IDENTIFIER@127..129
+              0: (empty)
+              1: CSS_IDENTIFIER@127..129
                 0: IDENT@127..129 "q" [] [Whitespace(" ")]
             2: CSS_SUB_SELECTOR_LIST@129..129
       1: CSS_BLOCK@129..131
         0: L_CURLY@129..130 "{" [] []
         1: CSS_DECLARATION_LIST@130..130
         2: R_CURLY@130..131 "}" [] []
-  1: EOF@131..132 "" [Newline("\n")] []
+    7: CSS_RULE@131..154
+      0: CSS_SELECTOR_LIST@131..152
+        0: CSS_COMPLEX_SELECTOR@131..152
+          0: CSS_COMPOUND_SELECTOR@131..144
+            0: (empty)
+            1: (empty)
+            2: CSS_SUB_SELECTOR_LIST@131..144
+              0: CSS_PSEUDO_CLASS_SELECTOR@131..144
+                0: COLON@131..133 ":" [Newline("\n")] []
+                1: CSS_PSEUDO_CLASS_FUNCTION_VALUE_LIST@133..144
+                  0: LANG_KW@133..137 "lang" [] []
+                  1: L_PAREN@137..138 "(" [] []
+                  2: CSS_PSEUDO_VALUE_LIST@138..143
+                    0: CSS_IDENTIFIER@138..143
+                      0: IDENT@138..143 "fr-be" [] []
+                  3: R_PAREN@143..144 ")" [] []
+          1: CSS_SPACE_LITERAL@144..145 " " [] []
+          2: CSS_COMPOUND_SELECTOR@145..152
+            0: (empty)
+            1: (empty)
+            2: CSS_SUB_SELECTOR_LIST@145..152
+              0: CSS_CLASS_SELECTOR@145..152
+                0: DOT@145..146 "." [] []
+                1: CSS_IDENTIFIER@146..152
+                  0: IDENT@146..152 "class" [] [Whitespace(" ")]
+      1: CSS_BLOCK@152..154
+        0: L_CURLY@152..153 "{" [] []
+        1: CSS_DECLARATION_LIST@153..153
+        2: R_CURLY@153..154 "}" [] []
+  2: EOF@154..155 "" [Newline("\n")] []
 
 ```
 

@@ -34,3 +34,11 @@ class C {
     ) {
     }
 }
+
+class MyClass {
+    constructor(
+        b: string,
+        protected x: number,
+        a: string,
+    ) {}
+}

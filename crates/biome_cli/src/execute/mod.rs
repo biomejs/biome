@@ -36,6 +36,11 @@ impl Execution {
 }
 
 #[derive(Debug)]
+pub(crate) enum ExecutionEnvironment {
+    GitHub,
+}
+
+#[derive(Debug)]
 pub(crate) enum TraversalMode {
     /// This mode is enabled when running the command `biome check`
     Check {
@@ -62,7 +67,10 @@ pub(crate) enum TraversalMode {
         stdin: Option<(PathBuf, String)>,
     },
     /// This mode is enabled when running the command `biome ci`
-    CI,
+    CI {
+        /// Whether the CI is running in a specific environment, e.g. GitHub, GitLab, etc.
+        environment: Option<ExecutionEnvironment>,
+    },
     /// This mode is enabled when running the command `biome format`
     Format {
         /// It ignores parse errors
@@ -113,6 +121,26 @@ impl Execution {
         }
     }
 
+    pub(crate) fn new_ci() -> Self {
+        // Ref: https://docs.github.com/actions/learn-github-actions/variables#default-environment-variables
+        let is_github = std::env::var("GITHUB_ACTIONS")
+            .ok()
+            .map(|value| value == "true")
+            .unwrap_or(false);
+
+        Self {
+            report_mode: ReportMode::default(),
+            traversal_mode: TraversalMode::CI {
+                environment: if is_github {
+                    Some(ExecutionEnvironment::GitHub)
+                } else {
+                    None
+                },
+            },
+            max_diagnostics: MAXIMUM_DISPLAYABLE_DIAGNOSTICS,
+        }
+    }
+
     /// Creates an instance of [Execution] by passing [traversal mode](TraversalMode) and [report mode](ReportMode)
     pub(crate) fn with_report(traversal_mode: TraversalMode, report_mode: ReportMode) -> Self {
         Self {
@@ -140,9 +168,9 @@ impl Execution {
         match &self.traversal_mode {
             TraversalMode::Check { fix_file_mode, .. }
             | TraversalMode::Lint { fix_file_mode, .. } => fix_file_mode.as_ref(),
-            TraversalMode::Format { .. } | TraversalMode::CI | TraversalMode::Migrate { .. } => {
-                None
-            }
+            TraversalMode::Format { .. }
+            | TraversalMode::CI { .. }
+            | TraversalMode::Migrate { .. } => None,
         }
     }
 
@@ -150,7 +178,7 @@ impl Execution {
         match self.traversal_mode {
             TraversalMode::Check { .. } => category!("check"),
             TraversalMode::Lint { .. } => category!("lint"),
-            TraversalMode::CI => category!("ci"),
+            TraversalMode::CI { .. } => category!("ci"),
             TraversalMode::Format { .. } => category!("format"),
             TraversalMode::Migrate { .. } => category!("migrate"),
         }
@@ -205,7 +233,7 @@ impl Execution {
         match self.traversal_mode {
             TraversalMode::Check { fix_file_mode, .. }
             | TraversalMode::Lint { fix_file_mode, .. } => fix_file_mode.is_some(),
-            TraversalMode::CI => false,
+            TraversalMode::CI { .. } => false,
             TraversalMode::Format { write, .. } => write,
             TraversalMode::Migrate { write: dry_run, .. } => dry_run,
         }
@@ -228,6 +256,7 @@ pub(crate) fn execute_mode(
     session: CliSession,
     cli_options: &CliOptions,
     paths: Vec<OsString>,
+    vcs_enabled: bool,
 ) -> Result<(), CliDiagnostic> {
     if cli_options.max_diagnostics > MAXIMUM_DISPLAYABLE_DIAGNOSTICS {
         return Err(CliDiagnostic::overflown_argument(
@@ -256,6 +285,6 @@ pub(crate) fn execute_mode(
             cli_options.verbose,
         )
     } else {
-        traverse(mode, session, cli_options, paths)
+        traverse(mode, session, cli_options, paths, vcs_enabled)
     }
 }

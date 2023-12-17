@@ -30,6 +30,7 @@ class C<    	longlonglonglonglonglonglongT1,
 -----
 Indent style: Tab
 Indent width: 2
+Line ending: LF
 Line width: 80
 Quote style: Double Quotes
 JSX quote style: Double Quotes
@@ -37,6 +38,8 @@ Quote properties: As needed
 Trailing comma: All
 Semicolons: Always
 Arrow parentheses: Always
+Bracket spacing: true
+Bracket same line: false
 -----
 
 ```ts
@@ -72,6 +75,7 @@ class C<
 -----
 Indent style: Tab
 Indent width: 2
+Line ending: LF
 Line width: 80
 Quote style: Double Quotes
 JSX quote style: Double Quotes
@@ -79,6 +83,8 @@ Quote properties: As needed
 Trailing comma: ES5
 Semicolons: Always
 Arrow parentheses: Always
+Bracket spacing: true
+Bracket same line: false
 -----
 
 ```ts
@@ -86,12 +92,12 @@ Arrow parentheses: Always
 class C<
 	longlonglonglonglonglonglongT1,
 	longlonglonglonglonglonglongT2,
-	longlonglonglonglonglonglongT3
+	longlonglonglonglonglonglongT3,
 > {
 	one<
 		longlonglonglonglonglonglongT1,
 		longlonglonglonglonglonglongT2,
-		longlonglonglonglonglonglongT3
+		longlonglonglonglonglonglongT3,
 	>(
 		adsadasdasdasdasdasdasdasdasdasdas1,
 		dsadsadasdasdasdasdasdasdasd2,
@@ -100,7 +106,7 @@ class C<
 	two<
 		longlonglonglonglonglonglongT1,
 		longlonglonglonglonglonglongT2,
-		longlonglonglonglonglonglongT3
+		longlonglonglonglonglonglongT3,
 	>(
 		adsadasdasdasdasdasdasdasdasdasdas1,
 		dsadsadasdasdasdasdasdasdasd2,
@@ -114,6 +120,7 @@ class C<
 -----
 Indent style: Tab
 Indent width: 2
+Line ending: LF
 Line width: 80
 Quote style: Double Quotes
 JSX quote style: Double Quotes
@@ -121,6 +128,8 @@ Quote properties: As needed
 Trailing comma: None
 Semicolons: Always
 Arrow parentheses: Always
+Bracket spacing: true
+Bracket same line: false
 -----
 
 ```ts

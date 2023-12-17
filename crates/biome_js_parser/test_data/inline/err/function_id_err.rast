@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -63,8 +64,9 @@ JsModule {
 
 0: JS_MODULE@0..47
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..46
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..46
     0: JS_FUNCTION_DECLARATION@0..46
       0: (empty)
       1: FUNCTION_KW@0..8 "function" [] []
@@ -106,7 +108,7 @@ JsModule {
               2: JS_STATEMENT_LIST@43..43
               3: R_CURLY@43..44 "}" [] []
         3: R_CURLY@44..46 "}" [Newline("\n")] []
-  3: EOF@46..47 "" [Newline("\n")] []
+  4: EOF@46..47 "" [Newline("\n")] []
 --
 function_id_err.js:2:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

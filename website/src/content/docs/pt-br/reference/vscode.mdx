@@ -1,0 +1,143 @@
+---
+title: Extensão VSCode
+description: Notas sobre a extensão do Biome para o VSCode
+---
+# Extensão do Biome para o VS Code
+
+[O Biome](https://biomejs.dev/) unifica sua pilha de desenvolvimento combinando a funcionalidade de ferramentas separadas. Ele usa um único arquivo de configuração, possui desempenho fantástico e funciona com qualquer pilha. Esta extensão traz o Biome para o seu editor para que você possa:
+
+- Formatar arquivos *ao salvar* ou ao emitir o comando *Formatar Documento*
+- Ver lints enquanto digita e aplicar correções de código
+- Realizar refatorações
+
+## Instalação
+
+Você pode instalar a extensão do código acessando a [página do Visual Studio Code Market Place da extensão](https://marketplace.visualstudio.com/items?itemName=biomejs.biome) ou a partir do VS Code:
+
+- Abra a aba *extensões* (_Exibir_ → _Extensões)_ e procure por Biome.
+- Abra a _Sobreposição de Abertura Rápida_ (<kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd>P</kbd> ou _Acessar -> Ir para Arquivo_), digite `ext install biomejs.biome` e pressione enter.
+
+## Primeiros Passos
+
+### Formatador Padrão
+
+Configure o Biome como o formatador padrão para arquivos suportados para garantir que o VS Code use o Biome em vez de outros formatadores que você possa ter instalado. Você pode fazer isso abrindo um JavaScript ou TypeScript e depois:
+
+- Abra a Paleta de Comandos (<kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd title="Shift">⇧</kbd>+<kbd>P</kbd> ou Ver → Paleta de Comandos)
+- Selecione _Formatar Documento Com…_
+- Selecione _Configurar Formatador Padrão…_
+- Selecione Biome
+
+Você também pode habilitar o Biome apenas para linguagens específicas:
+
+- [Abra o `settings.json`](https://code.visualstudio.com/docs/getstarted/settings#_settingsjson): abra a _Paleta de Comandos_(<kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd title="Shift">⇧</kbd>+<kbd>P</kbd>) e selecione _Preferências: Abrir Configurações do Usuário (JSON)_
+- E defina o `editor.defaultFormatter` como `biomejs.biome` para a linguagem desejada
+
+```json title="settings.json"
+{
+	"editor.defaultFormatter": "<outro formatador>",
+	"[javascript]": {
+		"editor.defaultFormatter": "biomejs.biome"
+	}
+}
+```
+
+Esta configuração define o Biome como o formatador padrão para arquivos JavaScript. Todos os outros arquivos serão formatados usando `<outro formatador>`
+
+## Resolução de Configuração
+
+A extensão carrega automaticamente o arquivo `biome.json` do diretório raiz do workspace.
+
+## Resolução do Biome
+
+A extensão tenta usar o Biome das dependências locais do seu projeto (`node_modules/@biomejs/biome`). Recomendamos adicionar o Biome como uma dependência do projeto para garantir que os scripts do NPM e a extensão usem a mesma versão do Biome.
+
+Você também pode especificar explicitamente o binário `Biome` que a extensão deve usar configurando a configuração `biome.lspBin` nas opções do seu editor.
+
+Se o projeto não tiver dependência do Biome e nenhum caminho explícito estiver configurado, a extensão usa a versão do Biome incluída em seu pacote.
+
+## Uso
+
+### Formatar documento
+
+Para formatar um documento inteiro, abra a _Paleta de Comandos_ (<kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd title="Shift">⇧</kbd>+<kbd>P</kbd>) e selecione _Formatar Documento_.
+
+Para formatar um intervalo de texto, selecione o texto que deseja formatar, abra a _Paleta de Comandos_ (<kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd title="Shift">⇧</kbd>+<kbd>P</kbd>), e selecione _
+
+Formatar Seleção_.
+
+### Formatar ao salvar
+
+O Biome respeita a configuração _Formatar ao Salvar_ do VS Code. Para habilitar a formatação ao salvar, abra as configurações (_Arquivo_ -> _Preferências_ -> _Configurações_), procure por `editor.formatOnSave` e habilite a opção.
+
+### Corrigir ao salvar
+
+O Biome respeita a configuração _Ações de Código ao Salvar_ do VS Code. Para habilitar a correção ao salvar, adicione
+
+
+```json title="settings.json"
+{
+  "editor.codeActionsOnSave": {
+    "quickfix.biome": true
+  }
+}
+```
+
+no `settings.json` do vscode.
+
+### Ordenação de Importações [Experimental]
+
+A extensão Biome do VS Code suporta a ordenação de importações através da ação de código "Organizar Importações". Por padrão, essa ação pode ser executada usando o atalho de teclado <kbd title="Shift">⇧</kbd>+<kbd>Alt</kbd>+<kbd>O</kbd>, ou é acessível através da _Paleta de Comandos_ (<kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd title="Shift">⇧</kbd>+<kbd>P</kbd>) selecionando _Organizar Importações_.
+
+Você pode adicionar o seguinte à sua configuração do editor se desejar que a ação seja executada automaticamente ao salvar, em vez de chamá-la manualmente:
+
+```json title="settings.json"
+{
+	"editor.codeActionsOnSave":{
+		"source.organizeImports.biome": true
+	}
+}
+```
+
+## Configurações da Extensão
+
+### `biome.lspBin`
+
+A opção `biome.lspBin` substitui o binário Biome usado pela extensão.
+A pasta do workspace é usada como caminho base se o caminho for relativo.
+
+### `biome.rename`
+
+Habilita o Biome para lidar com renomeações no workspace (experimental).
+
+### `biome.requireConfiguration`
+
+Desabilita a formatação, linting e erros de sintaxe para projetos sem um arquivo `biome.json`.
+Habilitado por padrão.
+
+## Versionamento
+
+Seguimos as especificações sugeridas pela [documentação oficial](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#prerelease-extensions):
+
+Versões ímpares menores são dedicadas a pré-lançamentos, por exemplo, `*.5.*`.
+Versões menores pares são dedicadas a lançamentos oficiais, por exemplo, `*.6.*`.
+
+
+## Solução de Problemas
+
+> Eu instalei `@biomejs/biome`, mas a extensão mostra um aviso dizendo que não conseguiu resolver a biblioteca.
+
+A biblioteca `@biomejs/biome` especifica algumas dependências opcionais que são instaladas com base no seu sistema operacional e arquitetura.
+
+No entanto, é possível que a extensão não consiga resolver o binário ao carregar a extensão. Isso é causado - provavelmente - pelo seu gerenciador de pacotes.
+
+**Para resolver o problema**, tente instalar o binário manualmente. O aviso deve mostrar o binário que pertence à sua máquina.
+
+**Se você trabalha em uma equipe que usa diferentes sistemas operacionais/arquiteturas**, é aconselhável instalar todos os binários:
+
+- `@biomejs/cli-darwin-arm64`
+- `@biomejs/cli-darwin-x64`
+- `@biomejs/cli-linux-arm64`
+- `@biomejs/cli-linux-x64`
+- `@biomejs/cli-win32-arm64`
+- `@biomejs/cli-win32-x64`

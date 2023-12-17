@@ -108,3 +108,16 @@ export enum Orientation2 {
 	East = 2,
 	West = 3,
 }
+
+// overloads
+function f(a: boolean): boolean;
+function f(a: number): number;
+function f(a: number | boolean): number | boolean {
+	return a;
+}
+
+export default function(a: boolean): boolean;
+export default function(a: number): number;
+export default function(a: number | boolean): number | boolean {
+	return a;
+}

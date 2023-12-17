@@ -11,9 +11,9 @@ use biome_js_syntax::binding_ext::{
 };
 use biome_js_syntax::declaration_ext::is_in_ambient_context;
 use biome_js_syntax::{
-    AnyJsExpression, JsClassExpression, JsExpressionStatement, JsFileSource, JsForStatement,
-    JsFunctionExpression, JsIdentifierExpression, JsParenthesizedExpression, JsSequenceExpression,
-    JsSyntaxKind, JsSyntaxNode, TsConditionalType, TsInferType,
+    AnyJsExpression, JsClassExpression, JsFileSource, JsForStatement, JsFunctionExpression,
+    JsIdentifierExpression, JsSequenceExpression, JsSyntaxKind, JsSyntaxNode, TsConditionalType,
+    TsInferType,
 };
 use biome_rowan::{AstNode, BatchMutationExt, SyntaxResult};
 
@@ -223,8 +223,6 @@ fn suggested_fix_if_unused(binding: &AnyJsIdentifierBinding) -> Option<Suggested
         // Bindings under unknown parameter are never ok to be unused
         AnyJsBindingDeclaration::JsBogusParameter(_)
         // Imports are never ok to be unused
-        | AnyJsBindingDeclaration::JsImportDefaultClause(_)
-        | AnyJsBindingDeclaration::JsImportNamespaceClause(_)
         | AnyJsBindingDeclaration::JsShorthandNamedImportSpecifier(_)
         | AnyJsBindingDeclaration::JsNamedImportSpecifier(_)
         | AnyJsBindingDeclaration::JsBogusNamedImportSpecifier(_)
@@ -317,7 +315,11 @@ impl Rule for NoUnusedVariables {
                 Some(ref_parent)
             })
             .all(|ref_parent| {
-                if declaration.kind() == JsSyntaxKind::TS_MAPPED_TYPE {
+                if matches!(
+                    declaration.kind(),
+                    JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION | JsSyntaxKind::TS_MAPPED_TYPE
+                ) {
+                    // Expression in an return position inside an arrow function expression are used.
                     // Type parameters declared in mapped types are only used in the mapped type.
                     return false;
                 }
@@ -420,28 +422,30 @@ fn is_unused_expression(expr: &JsSyntaxNode) -> SyntaxResult<bool> {
     // We use range as a way to identify nodes without owning them.
     let mut previous = expr.text_trimmed_range();
     for parent in expr.ancestors().skip(1) {
-        if JsExpressionStatement::can_cast(parent.kind()) {
-            return Ok(true);
-        }
-        if JsParenthesizedExpression::can_cast(parent.kind()) {
-            previous = parent.text_trimmed_range();
-            continue;
-        }
-        if let Some(seq_expr) = JsSequenceExpression::cast_ref(&parent) {
-            // If the expression is not the righmost node in a comma sequence
-            if seq_expr.left()?.range() == previous {
+        match parent.kind() {
+            JsSyntaxKind::JS_EXPRESSION_STATEMENT => return Ok(true),
+            JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION => {
+                previous = parent.text_trimmed_range();
+                continue;
+            }
+            JsSyntaxKind::JS_SEQUENCE_EXPRESSION => {
+                let seq_expr = JsSequenceExpression::unwrap_cast(parent);
+                // If the expression is not the rightmost node in a comma sequence
+                if seq_expr.left()?.range() == previous {
+                    return Ok(true);
+                }
+                previous = seq_expr.range();
+                continue;
+            }
+            JsSyntaxKind::JS_FOR_STATEMENT => {
+                let for_stmt = JsForStatement::unwrap_cast(parent);
+                if let Some(for_test) = for_stmt.test() {
+                    return Ok(for_test.range() != previous);
+                }
                 return Ok(true);
             }
-            previous = seq_expr.range();
-            continue;
+            _ => break,
         }
-        if let Some(for_stmt) = JsForStatement::cast(parent) {
-            if let Some(for_test) = for_stmt.test() {
-                return Ok(for_test.range() != previous);
-            }
-            return Ok(true);
-        }
-        break;
     }
     Ok(false)
 }

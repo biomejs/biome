@@ -17,7 +17,7 @@ use crate::{Configuration, Rules, WorkspaceError};
 use biome_analyze::{AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never, RuleCategories};
 use biome_deserialize::json::deserialize_from_json_ast;
 use biome_diagnostics::{category, Diagnostic, DiagnosticExt, Severity};
-use biome_formatter::{FormatError, IndentStyle, IndentWidth, LineWidth, Printed};
+use biome_formatter::{FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed};
 use biome_fs::{RomePath, BIOME_JSON, ROME_JSON};
 use biome_json_analyze::analyze;
 use biome_json_formatter::context::JsonFormatOptions;
@@ -32,6 +32,7 @@ use std::path::{Path, PathBuf};
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct JsonFormatterSettings {
+    pub line_ending: Option<LineEnding>,
     pub line_width: Option<LineWidth>,
     pub indent_width: Option<IndentWidth>,
     pub indent_style: Option<IndentStyle>,
@@ -123,7 +124,7 @@ impl ExtensionHandler for JsonFileHandler {
 fn is_file_allowed(path: &Path) -> bool {
     path.file_name()
         .and_then(|f| f.to_str())
-        .map(|f| super::Language::ALLOWED_FILES.contains(&f))
+        .map(|f| super::Language::KNOWN_FILES_AS_JSONC.contains(&f))
         // default is false
         .unwrap_or_default()
 }

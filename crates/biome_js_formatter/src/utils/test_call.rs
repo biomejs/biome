@@ -366,7 +366,7 @@ fn contains_a_test_pattern(callee: &AnyJsExpression) -> SyntaxResult<bool> {
             Some("only" | "skip" | "step") => third.is_none(),
             Some("describe") => match third {
                 None => true,
-                Some("only") => true,
+                Some("only") => fourth.is_none(),
                 Some("parallel" | "serial") => match fourth {
                     None => true,
                     Some("only") => fifth.is_none(),

@@ -103,23 +103,7 @@ impl FormatRule<AnyJsConditional> for FormatJsAnyConditionalRule {
                     space()
                 ]
             )?;
-
-            let is_alternate_nested = alternate.syntax().kind() == syntax.kind();
-
-            // Don't "indent" a nested alternate by two spaces so that the consequent and alternates nicely align
-            // ```
-            // // Prefer **this** over                          // **this**
-            // aLongLongLongLong                                 aLongLongLongLong
-            // 	? bLongLongLongLong                             ? bLongLongLongLong
-            // 	: cLongLongLong                                 : cLongLongLong
-            // 	? dLongLongLong                                   ? dLongLong
-            // 	: eLongLongLong;                                  : eLongLongLong
-            // ```
-            if is_alternate_nested {
-                write!(f, [alternate])
-            } else {
-                write!(f, [align(2, &alternate)])
-            }
+            write!(f, [align(2, &alternate)])
         });
 
         let format_tail_with_indent = format_with(|f: &mut JsFormatter| {

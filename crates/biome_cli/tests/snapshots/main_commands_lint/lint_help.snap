@@ -56,7 +56,7 @@ Available positional items:
     PATH                      Single file, single path or list of paths
 
 Available options:
-        --apply               Apply safe fixes, formatting
+        --apply               Apply safe fixes, formatting and import sorting
         --apply-unsafe        Apply safe fixes and unsafe fixes, formatting and import sorting
         --stdin-file-path=PATH  Use this option when you want to format code piped from `stdin`, and
                               print the output to `stdout`.

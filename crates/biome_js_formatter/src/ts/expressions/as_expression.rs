@@ -62,7 +62,6 @@ impl Format<JsFormatContext> for TsAsOrSatisfiesExpression {
         let expression = self.expression();
         let operation_token = self.operation_token()?;
         let ty = self.ty()?;
-
         let format_inner = format_with(|f| {
             write!(f, [expression.format(), space(), operation_token.format()])?;
 
@@ -91,6 +90,20 @@ impl NeedsParentheses for TsAsOrSatisfiesExpression {
     fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
         match parent.kind() {
             JsSyntaxKind::JS_CONDITIONAL_EXPRESSION => true,
+
+            // `export default (function foo() {} as bar)` needs to be special
+            // cased. All other default-exported as expressions can be written
+            // without parentheses, but function expressions _without_ the
+            // parentheses because `JsExportDefaultFunctionDeclaration`s and
+            // the cast becomes invalid.
+            JsSyntaxKind::JS_EXPORT_DEFAULT_EXPRESSION_CLAUSE => {
+                self.expression().map_or(false, |expression| {
+                    matches!(
+                        expression.syntax().kind(),
+                        JsSyntaxKind::JS_FUNCTION_EXPRESSION
+                    )
+                })
+            }
 
             _ => {
                 type_cast_like_needs_parens(self.syntax(), parent)
@@ -153,5 +166,14 @@ mod tests {
         assert_needs_parentheses!("(x as any) instanceof (y as any)", TsAsExpression[1]);
 
         assert_not_needs_parentheses!("x as number as string", TsAsExpression[1]);
+
+        // default-exported function expressions require parentheses, otherwise
+        // the end of the function ends the export declaration, and the `as`
+        // gets treated as a new statement.
+        assert_needs_parentheses!(
+            "export default (function foo(){} as typeof console.log)",
+            TsAsExpression
+        );
+        assert_not_needs_parentheses!("export default foo as bar", TsAsExpression);
     }
 }

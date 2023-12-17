@@ -1,7 +1,7 @@
 use crate::configuration::PlainIndentStyle;
 use crate::configuration::{deserialize_line_width, serialize_line_width};
 use crate::MergeWith;
-use biome_formatter::LineWidth;
+use biome_formatter::{LineEnding, LineWidth};
 use biome_js_formatter::context::trailing_comma::TrailingComma;
 use biome_js_formatter::context::{ArrowParentheses, QuoteProperties, QuoteStyle, Semicolons};
 use bpaf::Bpaf;
@@ -36,6 +36,14 @@ pub struct JavascriptFormatter {
     #[bpaf(long("arrow-parentheses"), argument("always|as-needed"), optional)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub arrow_parentheses: Option<ArrowParentheses>,
+    /// Whether to insert spaces around brackets in object literals. Defaults to true.
+    #[bpaf(long("bracket-spacing"), argument("true|false"), optional)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub bracket_spacing: Option<bool>,
+    /// Whether to hug the closing bracket of multiline HTML/JSX tags to the end of the last line, rather than being alone on the following line. Defaults to false.
+    #[bpaf(long("bracket-same-line"), argument("true|false"), optional)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub bracket_same_line: Option<bool>,
 
     /// Control the formatter for JavaScript (and its super languages) files.
     #[bpaf(long("javascript-formatter-enabled"), argument("true|false"), optional)]
@@ -65,7 +73,16 @@ pub struct JavascriptFormatter {
     )]
     pub indent_width: Option<u8>,
 
-    /// What's the max width of a line, applied to JavaScript (and its super languages) files. Defaults to 80.
+    /// The type of line ending applied to JavaScript (and its super languages) files.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[bpaf(
+        long("javascript-formatter-line-ending"),
+        argument("lf|crlf|cr"),
+        optional
+    )]
+    pub line_ending: Option<LineEnding>,
+
+    /// What's the max width of a line applied to JavaScript (and its super languages) files. Defaults to 80.
     #[serde(
         deserialize_with = "deserialize_line_width",
         serialize_with = "serialize_line_width"
@@ -79,6 +96,12 @@ impl MergeWith<JavascriptFormatter> for JavascriptFormatter {
     fn merge_with(&mut self, other: JavascriptFormatter) {
         if let Some(arrow_parentheses) = other.arrow_parentheses {
             self.arrow_parentheses = Some(arrow_parentheses);
+        }
+        if let Some(bracket_spacing) = other.bracket_spacing {
+            self.bracket_spacing = Some(bracket_spacing);
+        }
+        if let Some(bracket_same_line) = other.bracket_same_line {
+            self.bracket_same_line = Some(bracket_same_line);
         }
         if let Some(quote_properties) = other.quote_properties {
             self.quote_properties = Some(quote_properties);

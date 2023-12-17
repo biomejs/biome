@@ -2,7 +2,7 @@
 
 use biome_js_syntax::binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding};
 use biome_js_syntax::{
-    AnyJsExportNamedSpecifier, AnyJsNamedImportSpecifier, AnyTsType, JsImportNamedClause,
+    AnyJsExportNamedSpecifier, AnyJsImportClause, AnyJsNamedImportSpecifier, AnyTsType,
 };
 use biome_js_syntax::{
     AnyJsIdentifierUsage, JsLanguage, JsSyntaxKind, JsSyntaxNode, TextRange, TsTypeParameterName,
@@ -279,6 +279,7 @@ impl SemanticEventExtractor {
     /// See [SemanticEvent] for a more detailed description of which events [SyntaxNode] generates.
     #[inline]
     pub fn enter(&mut self, node: &JsSyntaxNode) {
+        // If you push a scope for a given node type, don't forget to also update `Self::leave`.
         match node.kind() {
             JS_IDENTIFIER_BINDING | TS_IDENTIFIER_BINDING | TS_TYPE_PARAMETER_NAME => {
                 self.enter_identifier_binding(&AnyJsIdentifierBinding::unwrap_cast(node.clone()));
@@ -355,9 +356,15 @@ impl SemanticEventExtractor {
     fn enter_any_type(&mut self, node: &AnyTsType) {
         if node.in_conditional_true_type() {
             self.push_conditional_true_scope(node);
-        } else if let Some(node) = node.as_ts_function_type() {
+            return;
+        }
+        let node = node.syntax();
+        if matches!(
+            node.kind(),
+            JsSyntaxKind::TS_FUNCTION_TYPE | JsSyntaxKind::TS_MAPPED_TYPE
+        ) {
             self.push_scope(
-                node.syntax().text_range(),
+                node.text_range(),
                 ScopeHoisting::DontHoistDeclarationsToParent,
                 false,
             );
@@ -435,20 +442,6 @@ impl SemanticEventExtractor {
                     | AnyJsBindingDeclaration::TsTypeParameter(_) => {
                         self.push_binding(None, BindingName::Type(name), info);
                     }
-                    AnyJsBindingDeclaration::JsImportDefaultClause(clause) => {
-                        let info = info.into_imported();
-                        if clause.type_token().is_none() {
-                            self.push_binding(None, BindingName::Value(name.clone()), info.clone());
-                        }
-                        self.push_binding(None, BindingName::Type(name), info);
-                    }
-                    AnyJsBindingDeclaration::JsImportNamespaceClause(clause) => {
-                        let info = info.into_imported();
-                        if clause.type_token().is_none() {
-                            self.push_binding(None, BindingName::Value(name.clone()), info.clone());
-                        }
-                        self.push_binding(None, BindingName::Type(name), info);
-                    }
                     AnyJsBindingDeclaration::TsImportEqualsDeclaration(declaration) => {
                         let info = info.into_imported();
                         if declaration.type_token().is_none() {
@@ -458,12 +451,11 @@ impl SemanticEventExtractor {
                     }
                     AnyJsBindingDeclaration::JsDefaultImportSpecifier(_)
                     | AnyJsBindingDeclaration::JsNamespaceImportSpecifier(_) => {
-                        let is_import_type = declaration
-                            .parent::<JsImportNamedClause>()
-                            .map(|clause| clause.type_token().is_none())
-                            .unwrap_or(false);
+                        let type_token = declaration
+                            .parent::<AnyJsImportClause>()
+                            .and_then(|clause| clause.type_token());
                         let info = info.into_imported();
-                        if is_import_type {
+                        if type_token.is_none() {
                             self.push_binding(None, BindingName::Value(name.clone()), info.clone());
                         }
                         self.push_binding(None, BindingName::Type(name), info);
@@ -589,8 +581,9 @@ impl SemanticEventExtractor {
     #[inline]
     pub fn leave(&mut self, node: &JsSyntaxNode) {
         match node.kind() {
-            JS_MODULE | JS_SCRIPT => self.pop_scope(node.text_range()),
-            JS_FUNCTION_DECLARATION
+            JS_MODULE
+            | JS_SCRIPT
+            | JS_FUNCTION_DECLARATION
             | JS_FUNCTION_EXPORT_DEFAULT_DECLARATION
             | JS_FUNCTION_EXPRESSION
             | JS_ARROW_FUNCTION_EXPRESSION
@@ -636,8 +629,14 @@ impl SemanticEventExtractor {
     fn leave_any_type(&mut self, node: &AnyTsType) {
         if node.in_conditional_true_type() {
             self.pop_scope(node.syntax().text_range());
-        } else if let Some(node) = node.as_ts_function_type() {
-            self.pop_scope(node.syntax().text_range());
+            return;
+        }
+        let node = node.syntax();
+        if matches!(
+            node.kind(),
+            JsSyntaxKind::TS_FUNCTION_TYPE | JsSyntaxKind::TS_MAPPED_TYPE
+        ) {
+            self.pop_scope(node.text_range());
         }
     }
 
@@ -922,6 +921,8 @@ impl Iterator for SemanticEventIterator {
                         if let Some(e) = self.extractor.pop() {
                             break Some(e);
                         } else {
+                            // Check that every scope was pop.
+                            debug_assert!(self.extractor.scopes.is_empty());
                             break None;
                         }
                     }

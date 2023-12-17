@@ -34,7 +34,7 @@ type TooLongSingleParam = {
 ```diff
 --- Prettier
 +++ Biome
-@@ -2,30 +2,22 @@
+@@ -2,26 +2,20 @@
  
  type TwoParams = {
    [a: string, b: string]: string;
@@ -71,11 +71,6 @@ type TooLongSingleParam = {
  
  // note lack of trailing comma in the index signature
  type TooLongSingleParam = {
--  [
--    looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong: string
--  ]: string;
-+  [looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong: string]: string;
- };
 ```
 
 # Output
@@ -102,7 +97,9 @@ type TooLong80 =
 
 // note lack of trailing comma in the index signature
 type TooLongSingleParam = {
-  [looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong: string]: string;
+  [
+    looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong: string
+  ]: string;
 };
 ```
 
@@ -447,7 +444,7 @@ index-signature.ts:14:99 parse ━━━━━━━━━━━━━━━━�
    11:   [loooooooooooooooooooooooooong: string, looooooooooooooooooooooooooooooooooooooong: string]: string;
    14:   { [loooooooooooooooooooooooooong: string, loooooooooooooooooong: string]: string;
    17:   { [loooooooooooooooooooooooooong: string, looooooooooooooooong: string]: string;
-   22:   [looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong: string]: string;
+   23:     looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong: string
 ```
 
 

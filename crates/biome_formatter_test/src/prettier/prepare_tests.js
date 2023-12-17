@@ -58,38 +58,67 @@ async function traverseDir(dir, input_config) {
 				'jsfmt.spec.js.snap'
 			);
 			const snapFile = path.basename(file) + '.prettier-snap';
+			const snapOriginalFile = path.basename(file) + '.prettier-snap-original';
 
 			const snapshot = require(snapshotPath);
 
 			const key = `${file} format 1`;
-			let snapshotContent = snapshot[key];
 
-			if (snapshotContent !== undefined) {
+			if (key in snapshot) {
+				let snapshotContent = String(snapshot[key]);
+
 				// Copy the snapshot input file, ensuring the
 				// parent directory exists
 				const outDir = path.resolve(outPath, '..');
 				await fs.mkdir(outDir, { recursive: true });
 				await fs.copyFile(filePath, outPath);
 				// Extract the expected output from the snapshot text
+				const INPUT =
+					"=====================================input======================================";
 				const OUTPUT =
 					'=====================================output=====================================';
+				const OPTIONS =
+					"====================================options=====================================";
 				const FOOTER =
 					'================================================================================';
 
-				const start = snapshotContent.match(new RegExp(OUTPUT + '\\n'));
-				const end = snapshotContent.match(new RegExp('\\n' + FOOTER));
+				// extract options string
+				const optionsStart = snapshotContent.match(new RegExp(OPTIONS + '\\n'));
+				const optionsEnd = snapshotContent.match(new RegExp('\\n' + INPUT));
+				const optionsStartOffset = optionsStart.index + optionsStart[0].length;
+				const optionsEndOffset = optionsEnd.index;
+				const optionsContent = snapshotContent.substring(optionsStartOffset, optionsEndOffset);
 
-				const startOffset = start.index + start[0].length;
-				const endOffset = end.index;
-				snapshotContent = snapshotContent.substring(startOffset, endOffset);
+				// if range options are not defined, use default value
+				// https://prettier.io/docs/en/options#range
+				const rangeOptions = {
+					rangeStart: Number(optionsContent.match(new RegExp(/rangeStart: (\d+)/))?.[1] ?? 0),
+					rangeEnd: Number(optionsContent.match(new RegExp(/rangeEnd: (\d+)/))?.[1] ?? Infinity)
+				};
 
+				// extract output string
+				const outputStart = snapshotContent.match(new RegExp(OUTPUT + '\\n'));
+				const outputEnd = snapshotContent.match(new RegExp('\\n' + FOOTER));
+
+				const outputStartOffset = outputStart.index + outputStart[0].length;
+				const outputEndOffset = outputEnd.index;
+				snapshotContent = snapshotContent.substring(outputStartOffset, outputEndOffset);
+
+				let originalSnapshot = snapshotContent;
 				try {
 					// We need to reformat prettier snapshot
-					// because Rome and Prettier have different default options
-					snapshotContent = await prettier.format(snapshotContent, config);
+					// because Biome and Prettier have different default options
+					const updatedOptions = { ...rangeOptions, ...config };
+					snapshotContent = await prettier.format(snapshotContent, updatedOptions);
 				} catch (error) {
 					console.error(`Prettier format error in ${filePath}: ${error}`);
 				}
+
+				if (originalSnapshot !== snapshotContent) {
+					// Prettier has a reformat issue
+					await fs.writeFile(path.resolve(outDir, snapOriginalFile), originalSnapshot);
+				}
+
 				// Write the expected output to an additional prettier-snap
 				// file in the specs directory
 				await fs.writeFile(path.resolve(outDir, snapFile), snapshotContent);

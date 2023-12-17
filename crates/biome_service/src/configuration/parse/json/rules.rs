@@ -173,6 +173,14 @@ impl Deserializable for A11y {
                             result.no_header_scope =
                                 Deserializable::deserialize(&value, "noHeaderScope", diagnostics);
                         }
+                        "noInteractiveElementToNoninteractiveRole" => {
+                            result.no_interactive_element_to_noninteractive_role =
+                                Deserializable::deserialize(
+                                    &value,
+                                    "noInteractiveElementToNoninteractiveRole",
+                                    diagnostics,
+                                );
+                        }
                         "noNoninteractiveElementToInteractiveRole" => {
                             result.no_noninteractive_element_to_interactive_role =
                                 Deserializable::deserialize(
@@ -223,6 +231,14 @@ impl Deserializable for A11y {
                                 "useAnchorContent",
                                 diagnostics,
                             );
+                        }
+                        "useAriaActivedescendantWithTabindex" => {
+                            result.use_aria_activedescendant_with_tabindex =
+                                Deserializable::deserialize(
+                                    &value,
+                                    "useAriaActivedescendantWithTabindex",
+                                    diagnostics,
+                                );
                         }
                         "useAriaPropsForRole" => {
                             result.use_aria_props_for_role = Deserializable::deserialize(
@@ -303,6 +319,7 @@ impl Deserializable for A11y {
                                     "noBlankTarget",
                                     "noDistractingElements",
                                     "noHeaderScope",
+                                    "noInteractiveElementToNoninteractiveRole",
                                     "noNoninteractiveElementToInteractiveRole",
                                     "noNoninteractiveTabindex",
                                     "noPositiveTabindex",
@@ -311,6 +328,7 @@ impl Deserializable for A11y {
                                     "noSvgWithoutTitle",
                                     "useAltText",
                                     "useAnchorContent",
+                                    "useAriaActivedescendantWithTabindex",
                                     "useAriaPropsForRole",
                                     "useButtonType",
                                     "useHeadingContent",
@@ -413,6 +431,10 @@ impl Deserializable for Complexity {
                                 diagnostics,
                             );
                         }
+                        "noThisInStatic" => {
+                            result.no_this_in_static =
+                                Deserializable::deserialize(&value, "noThisInStatic", diagnostics);
+                        }
                         "noUselessCatch" => {
                             result.no_useless_catch =
                                 Deserializable::deserialize(&value, "noUselessCatch", diagnostics);
@@ -475,6 +497,13 @@ impl Deserializable for Complexity {
                             result.no_with =
                                 Deserializable::deserialize(&value, "noWith", diagnostics);
                         }
+                        "useArrowFunction" => {
+                            result.use_arrow_function = Deserializable::deserialize(
+                                &value,
+                                "useArrowFunction",
+                                diagnostics,
+                            );
+                        }
                         "useFlatMap" => {
                             result.use_flat_map =
                                 Deserializable::deserialize(&value, "useFlatMap", diagnostics);
@@ -517,6 +546,7 @@ impl Deserializable for Complexity {
                                     "noForEach",
                                     "noMultipleSpacesInRegularExpressionLiterals",
                                     "noStaticOnlyClass",
+                                    "noThisInStatic",
                                     "noUselessCatch",
                                     "noUselessConstructor",
                                     "noUselessEmptyExport",
@@ -528,6 +558,7 @@ impl Deserializable for Complexity {
                                     "noUselessTypeConstraint",
                                     "noVoid",
                                     "noWith",
+                                    "useArrowFunction",
                                     "useFlatMap",
                                     "useLiteralKeys",
                                     "useOptionalChain",
@@ -608,6 +639,13 @@ impl Deserializable for Correctness {
                                 diagnostics,
                             );
                         }
+                        "noEmptyCharacterClassInRegex" => {
+                            result.no_empty_character_class_in_regex = Deserializable::deserialize(
+                                &value,
+                                "noEmptyCharacterClassInRegex",
+                                diagnostics,
+                            );
+                        }
                         "noEmptyPattern" => {
                             result.no_empty_pattern =
                                 Deserializable::deserialize(&value, "noEmptyPattern", diagnostics);
@@ -630,6 +668,13 @@ impl Deserializable for Correctness {
                             result.no_invalid_constructor_super = Deserializable::deserialize(
                                 &value,
                                 "noInvalidConstructorSuper",
+                                diagnostics,
+                            );
+                        }
+                        "noInvalidNewBuiltin" => {
+                            result.no_invalid_new_builtin = Deserializable::deserialize(
+                                &value,
+                                "noInvalidNewBuiltin",
                                 diagnostics,
                             );
                         }
@@ -778,10 +823,12 @@ impl Deserializable for Correctness {
                                     "noConstAssign",
                                     "noConstantCondition",
                                     "noConstructorReturn",
+                                    "noEmptyCharacterClassInRegex",
                                     "noEmptyPattern",
                                     "noGlobalObjectCalls",
                                     "noInnerDeclarations",
                                     "noInvalidConstructorSuper",
+                                    "noInvalidNewBuiltin",
                                     "noNewSymbol",
                                     "noNonoctalDecimalEscape",
                                     "noPrecisionLoss",
@@ -858,10 +905,10 @@ impl Deserializable for Nursery {
                             result.all =
                                 Deserializable::deserialize(&value, &key_text, diagnostics);
                         }
-                        "noApproximativeNumericConstant" => {
-                            result.no_approximative_numeric_constant = Deserializable::deserialize(
+                        "noAriaHiddenOnFocusable" => {
+                            result.no_aria_hidden_on_focusable = Deserializable::deserialize(
                                 &value,
-                                "noApproximativeNumericConstant",
+                                "noAriaHiddenOnFocusable",
                                 diagnostics,
                             );
                         }
@@ -883,13 +930,6 @@ impl Deserializable for Nursery {
                                 diagnostics,
                             );
                         }
-                        "noEmptyCharacterClassInRegex" => {
-                            result.no_empty_character_class_in_regex = Deserializable::deserialize(
-                                &value,
-                                "noEmptyCharacterClassInRegex",
-                                diagnostics,
-                            );
-                        }
                         "noImplicitAnyLet" => {
                             result.no_implicit_any_let = Deserializable::deserialize(
                                 &value,
@@ -897,38 +937,12 @@ impl Deserializable for Nursery {
                                 diagnostics,
                             );
                         }
-                        "noInteractiveElementToNoninteractiveRole" => {
-                            result.no_interactive_element_to_noninteractive_role =
-                                Deserializable::deserialize(
-                                    &value,
-                                    "noInteractiveElementToNoninteractiveRole",
-                                    diagnostics,
-                                );
-                        }
-                        "noInvalidNewBuiltin" => {
-                            result.no_invalid_new_builtin = Deserializable::deserialize(
+                        "noMisleadingCharacterClass" => {
+                            result.no_misleading_character_class = Deserializable::deserialize(
                                 &value,
-                                "noInvalidNewBuiltin",
+                                "noMisleadingCharacterClass",
                                 diagnostics,
                             );
-                        }
-                        "noMisleadingInstantiator" => {
-                            result.no_misleading_instantiator = Deserializable::deserialize(
-                                &value,
-                                "noMisleadingInstantiator",
-                                diagnostics,
-                            );
-                        }
-                        "noMisrefactoredShorthandAssign" => {
-                            result.no_misrefactored_shorthand_assign = Deserializable::deserialize(
-                                &value,
-                                "noMisrefactoredShorthandAssign",
-                                diagnostics,
-                            );
-                        }
-                        "noThisInStatic" => {
-                            result.no_this_in_static =
-                                Deserializable::deserialize(&value, "noThisInStatic", diagnostics);
                         }
                         "noUnusedImports" => {
                             result.no_unused_imports =
@@ -941,10 +955,6 @@ impl Deserializable for Nursery {
                                 diagnostics,
                             );
                         }
-                        "noUselessElse" => {
-                            result.no_useless_else =
-                                Deserializable::deserialize(&value, "noUselessElse", diagnostics);
-                        }
                         "noUselessLoneBlockStatements" => {
                             result.no_useless_lone_block_statements = Deserializable::deserialize(
                                 &value,
@@ -952,31 +962,24 @@ impl Deserializable for Nursery {
                                 diagnostics,
                             );
                         }
-                        "useAriaActivedescendantWithTabindex" => {
-                            result.use_aria_activedescendant_with_tabindex =
-                                Deserializable::deserialize(
-                                    &value,
-                                    "useAriaActivedescendantWithTabindex",
-                                    diagnostics,
-                                );
-                        }
-                        "useArrowFunction" => {
-                            result.use_arrow_function = Deserializable::deserialize(
+                        "noUselessTernary" => {
+                            result.no_useless_ternary = Deserializable::deserialize(
                                 &value,
-                                "useArrowFunction",
-                                diagnostics,
-                            );
-                        }
-                        "useAsConstAssertion" => {
-                            result.use_as_const_assertion = Deserializable::deserialize(
-                                &value,
-                                "useAsConstAssertion",
+                                "noUselessTernary",
                                 diagnostics,
                             );
                         }
                         "useAwait" => {
                             result.use_await =
                                 Deserializable::deserialize(&value, "useAwait", diagnostics);
+                        }
+                        "useExportType" => {
+                            result.use_export_type =
+                                Deserializable::deserialize(&value, "useExportType", diagnostics);
+                        }
+                        "useForOf" => {
+                            result.use_for_of =
+                                Deserializable::deserialize(&value, "useForOf", diagnostics);
                         }
                         "useGroupedTypeImport" => {
                             result.use_grouped_type_import = Deserializable::deserialize(
@@ -992,10 +995,17 @@ impl Deserializable for Nursery {
                                 diagnostics,
                             );
                         }
-                        "useShorthandAssign" => {
-                            result.use_shorthand_assign = Deserializable::deserialize(
+                        "useRegexLiterals" => {
+                            result.use_regex_literals = Deserializable::deserialize(
                                 &value,
-                                "useShorthandAssign",
+                                "useRegexLiterals",
+                                diagnostics,
+                            );
+                        }
+                        "useShorthandFunctionType" => {
+                            result.use_shorthand_function_type = Deserializable::deserialize(
+                                &value,
+                                "useShorthandFunctionType",
                                 diagnostics,
                             );
                         }
@@ -1013,28 +1023,23 @@ impl Deserializable for Nursery {
                                 &[
                                     "recommended",
                                     "all",
-                                    "noApproximativeNumericConstant",
+                                    "noAriaHiddenOnFocusable",
                                     "noDefaultExport",
                                     "noDuplicateJsonKeys",
                                     "noEmptyBlockStatements",
-                                    "noEmptyCharacterClassInRegex",
                                     "noImplicitAnyLet",
-                                    "noInteractiveElementToNoninteractiveRole",
-                                    "noInvalidNewBuiltin",
-                                    "noMisleadingInstantiator",
-                                    "noMisrefactoredShorthandAssign",
-                                    "noThisInStatic",
+                                    "noMisleadingCharacterClass",
                                     "noUnusedImports",
                                     "noUnusedPrivateClassMembers",
-                                    "noUselessElse",
                                     "noUselessLoneBlockStatements",
-                                    "useAriaActivedescendantWithTabindex",
-                                    "useArrowFunction",
-                                    "useAsConstAssertion",
+                                    "noUselessTernary",
                                     "useAwait",
+                                    "useExportType",
+                                    "useForOf",
                                     "useGroupedTypeImport",
                                     "useImportRestrictions",
-                                    "useShorthandAssign",
+                                    "useRegexLiterals",
+                                    "useShorthandFunctionType",
                                     "useValidAriaRole",
                                 ],
                             ));
@@ -1306,9 +1311,20 @@ impl Deserializable for Style {
                                 diagnostics,
                             );
                         }
+                        "noUselessElse" => {
+                            result.no_useless_else =
+                                Deserializable::deserialize(&value, "noUselessElse", diagnostics);
+                        }
                         "noVar" => {
                             result.no_var =
                                 Deserializable::deserialize(&value, "noVar", diagnostics);
+                        }
+                        "useAsConstAssertion" => {
+                            result.use_as_const_assertion = Deserializable::deserialize(
+                                &value,
+                                "useAsConstAssertion",
+                                diagnostics,
+                            );
                         }
                         "useBlockStatements" => {
                             result.use_block_statements = Deserializable::deserialize(
@@ -1391,6 +1407,13 @@ impl Deserializable for Style {
                                 diagnostics,
                             );
                         }
+                        "useShorthandAssign" => {
+                            result.use_shorthand_assign = Deserializable::deserialize(
+                                &value,
+                                "useShorthandAssign",
+                                diagnostics,
+                            );
+                        }
                         "useSingleCaseStatement" => {
                             result.use_single_case_statement = Deserializable::deserialize(
                                 &value,
@@ -1432,7 +1455,9 @@ impl Deserializable for Style {
                                     "noRestrictedGlobals",
                                     "noShoutyConstants",
                                     "noUnusedTemplateLiteral",
+                                    "noUselessElse",
                                     "noVar",
+                                    "useAsConstAssertion",
                                     "useBlockStatements",
                                     "useCollapsedElseIf",
                                     "useConst",
@@ -1445,6 +1470,7 @@ impl Deserializable for Style {
                                     "useNumericLiterals",
                                     "useSelfClosingElements",
                                     "useShorthandArrayType",
+                                    "useShorthandAssign",
                                     "useSingleCaseStatement",
                                     "useSingleVarDeclarator",
                                     "useTemplate",
@@ -1501,6 +1527,13 @@ impl Deserializable for Suspicious {
                         "all" => {
                             result.all =
                                 Deserializable::deserialize(&value, &key_text, diagnostics);
+                        }
+                        "noApproximativeNumericConstant" => {
+                            result.no_approximative_numeric_constant = Deserializable::deserialize(
+                                &value,
+                                "noApproximativeNumericConstant",
+                                diagnostics,
+                            );
                         }
                         "noArrayIndexKey" => {
                             result.no_array_index_key =
@@ -1659,6 +1692,20 @@ impl Deserializable for Suspicious {
                             result.no_label_var =
                                 Deserializable::deserialize(&value, "noLabelVar", diagnostics);
                         }
+                        "noMisleadingInstantiator" => {
+                            result.no_misleading_instantiator = Deserializable::deserialize(
+                                &value,
+                                "noMisleadingInstantiator",
+                                diagnostics,
+                            );
+                        }
+                        "noMisrefactoredShorthandAssign" => {
+                            result.no_misrefactored_shorthand_assign = Deserializable::deserialize(
+                                &value,
+                                "noMisrefactoredShorthandAssign",
+                                diagnostics,
+                            );
+                        }
                         "noPrototypeBuiltins" => {
                             result.no_prototype_builtins = Deserializable::deserialize(
                                 &value,
@@ -1739,6 +1786,7 @@ impl Deserializable for Suspicious {
                                 &[
                                     "recommended",
                                     "all",
+                                    "noApproximativeNumericConstant",
                                     "noArrayIndexKey",
                                     "noAssignInExpressions",
                                     "noAsyncPromiseExecutor",
@@ -1767,6 +1815,8 @@ impl Deserializable for Suspicious {
                                     "noGlobalIsNan",
                                     "noImportAssign",
                                     "noLabelVar",
+                                    "noMisleadingInstantiator",
+                                    "noMisrefactoredShorthandAssign",
                                     "noPrototypeBuiltins",
                                     "noRedeclare",
                                     "noRedundantUseStrict",

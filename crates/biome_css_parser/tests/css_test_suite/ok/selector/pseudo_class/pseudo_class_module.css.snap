@@ -8,6 +8,7 @@ expression: snapshot
 ```css
 :global(.class div) {}
 :local(.class div + #id) {}
+:global(.class div) .div {}
 
 ```
 
@@ -16,6 +17,7 @@ expression: snapshot
 
 ```
 CssRoot {
+    bom_token: missing (optional),
     rules: CssRuleList [
         CssRule {
             prelude: CssSelectorList [
@@ -26,9 +28,7 @@ CssRoot {
                         CssPseudoClassSelector {
                             colon_token: COLON@0..1 ":" [] [],
                             class: CssPseudoClassFunctionSelector {
-                                name: CssIdentifier {
-                                    value_token: IDENT@1..7 "global" [] [],
-                                },
+                                name: GLOBAL_KW@1..7 "global" [] [],
                                 l_paren_token: L_PAREN@7..8 "(" [] [],
                                 selector: CssComplexSelector {
                                     left: CssCompoundSelector {
@@ -47,6 +47,7 @@ CssRoot {
                                     right: CssCompoundSelector {
                                         nesting_selector_token: missing (optional),
                                         simple_selector: CssTypeSelector {
+                                            namespace: missing (optional),
                                             ident: CssIdentifier {
                                                 value_token: IDENT@15..18 "div" [] [],
                                             },
@@ -75,9 +76,7 @@ CssRoot {
                         CssPseudoClassSelector {
                             colon_token: COLON@22..24 ":" [Newline("\n")] [],
                             class: CssPseudoClassFunctionSelector {
-                                name: CssIdentifier {
-                                    value_token: IDENT@24..29 "local" [] [],
-                                },
+                                name: LOCAL_KW@24..29 "local" [] [],
                                 l_paren_token: L_PAREN@29..30 "(" [] [],
                                 selector: CssComplexSelector {
                                     left: CssComplexSelector {
@@ -97,6 +96,7 @@ CssRoot {
                                         right: CssCompoundSelector {
                                             nesting_selector_token: missing (optional),
                                             simple_selector: CssTypeSelector {
+                                                namespace: missing (optional),
                                                 ident: CssIdentifier {
                                                     value_token: IDENT@37..41 "div" [] [Whitespace(" ")],
                                                 },
@@ -130,16 +130,80 @@ CssRoot {
                 r_curly_token: R_CURLY@49..50 "}" [] [],
             },
         },
+        CssRule {
+            prelude: CssSelectorList [
+                CssComplexSelector {
+                    left: CssCompoundSelector {
+                        nesting_selector_token: missing (optional),
+                        simple_selector: missing (optional),
+                        sub_selectors: CssSubSelectorList [
+                            CssPseudoClassSelector {
+                                colon_token: COLON@50..52 ":" [Newline("\n")] [],
+                                class: CssPseudoClassFunctionSelector {
+                                    name: GLOBAL_KW@52..58 "global" [] [],
+                                    l_paren_token: L_PAREN@58..59 "(" [] [],
+                                    selector: CssComplexSelector {
+                                        left: CssCompoundSelector {
+                                            nesting_selector_token: missing (optional),
+                                            simple_selector: missing (optional),
+                                            sub_selectors: CssSubSelectorList [
+                                                CssClassSelector {
+                                                    dot_token: DOT@59..60 "." [] [],
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@60..65 "class" [] [],
+                                                    },
+                                                },
+                                            ],
+                                        },
+                                        combinator: CSS_SPACE_LITERAL@65..66 " " [] [],
+                                        right: CssCompoundSelector {
+                                            nesting_selector_token: missing (optional),
+                                            simple_selector: CssTypeSelector {
+                                                namespace: missing (optional),
+                                                ident: CssIdentifier {
+                                                    value_token: IDENT@66..69 "div" [] [],
+                                                },
+                                            },
+                                            sub_selectors: CssSubSelectorList [],
+                                        },
+                                    },
+                                    r_paren_token: R_PAREN@69..70 ")" [] [],
+                                },
+                            },
+                        ],
+                    },
+                    combinator: CSS_SPACE_LITERAL@70..71 " " [] [],
+                    right: CssCompoundSelector {
+                        nesting_selector_token: missing (optional),
+                        simple_selector: missing (optional),
+                        sub_selectors: CssSubSelectorList [
+                            CssClassSelector {
+                                dot_token: DOT@71..72 "." [] [],
+                                name: CssIdentifier {
+                                    value_token: IDENT@72..76 "div" [] [Whitespace(" ")],
+                                },
+                            },
+                        ],
+                    },
+                },
+            ],
+            block: CssBlock {
+                l_curly_token: L_CURLY@76..77 "{" [] [],
+                declaration_list: CssDeclarationList [],
+                r_curly_token: R_CURLY@77..78 "}" [] [],
+            },
+        },
     ],
-    eof_token: EOF@50..51 "" [Newline("\n")] [],
+    eof_token: EOF@78..79 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..51
-  0: CSS_RULE_LIST@0..50
+0: CSS_ROOT@0..79
+  0: (empty)
+  1: CSS_RULE_LIST@0..78
     0: CSS_RULE@0..22
       0: CSS_SELECTOR_LIST@0..20
         0: CSS_COMPOUND_SELECTOR@0..20
@@ -149,8 +213,7 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@0..20
               0: COLON@0..1 ":" [] []
               1: CSS_PSEUDO_CLASS_FUNCTION_SELECTOR@1..20
-                0: CSS_IDENTIFIER@1..7
-                  0: IDENT@1..7 "global" [] []
+                0: GLOBAL_KW@1..7 "global" [] []
                 1: L_PAREN@7..8 "(" [] []
                 2: CSS_COMPLEX_SELECTOR@8..18
                   0: CSS_COMPOUND_SELECTOR@8..14
@@ -165,7 +228,8 @@ CssRoot {
                   2: CSS_COMPOUND_SELECTOR@15..18
                     0: (empty)
                     1: CSS_TYPE_SELECTOR@15..18
-                      0: CSS_IDENTIFIER@15..18
+                      0: (empty)
+                      1: CSS_IDENTIFIER@15..18
                         0: IDENT@15..18 "div" [] []
                     2: CSS_SUB_SELECTOR_LIST@18..18
                 3: R_PAREN@18..20 ")" [] [Whitespace(" ")]
@@ -182,8 +246,7 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@22..48
               0: COLON@22..24 ":" [Newline("\n")] []
               1: CSS_PSEUDO_CLASS_FUNCTION_SELECTOR@24..48
-                0: CSS_IDENTIFIER@24..29
-                  0: IDENT@24..29 "local" [] []
+                0: LOCAL_KW@24..29 "local" [] []
                 1: L_PAREN@29..30 "(" [] []
                 2: CSS_COMPLEX_SELECTOR@30..46
                   0: CSS_COMPLEX_SELECTOR@30..41
@@ -199,7 +262,8 @@ CssRoot {
                     2: CSS_COMPOUND_SELECTOR@37..41
                       0: (empty)
                       1: CSS_TYPE_SELECTOR@37..41
-                        0: CSS_IDENTIFIER@37..41
+                        0: (empty)
+                        1: CSS_IDENTIFIER@37..41
                           0: IDENT@37..41 "div" [] [Whitespace(" ")]
                       2: CSS_SUB_SELECTOR_LIST@41..41
                   1: PLUS@41..43 "+" [] [Whitespace(" ")]
@@ -216,7 +280,50 @@ CssRoot {
         0: L_CURLY@48..49 "{" [] []
         1: CSS_DECLARATION_LIST@49..49
         2: R_CURLY@49..50 "}" [] []
-  1: EOF@50..51 "" [Newline("\n")] []
+    2: CSS_RULE@50..78
+      0: CSS_SELECTOR_LIST@50..76
+        0: CSS_COMPLEX_SELECTOR@50..76
+          0: CSS_COMPOUND_SELECTOR@50..70
+            0: (empty)
+            1: (empty)
+            2: CSS_SUB_SELECTOR_LIST@50..70
+              0: CSS_PSEUDO_CLASS_SELECTOR@50..70
+                0: COLON@50..52 ":" [Newline("\n")] []
+                1: CSS_PSEUDO_CLASS_FUNCTION_SELECTOR@52..70
+                  0: GLOBAL_KW@52..58 "global" [] []
+                  1: L_PAREN@58..59 "(" [] []
+                  2: CSS_COMPLEX_SELECTOR@59..69
+                    0: CSS_COMPOUND_SELECTOR@59..65
+                      0: (empty)
+                      1: (empty)
+                      2: CSS_SUB_SELECTOR_LIST@59..65
+                        0: CSS_CLASS_SELECTOR@59..65
+                          0: DOT@59..60 "." [] []
+                          1: CSS_IDENTIFIER@60..65
+                            0: IDENT@60..65 "class" [] []
+                    1: CSS_SPACE_LITERAL@65..66 " " [] []
+                    2: CSS_COMPOUND_SELECTOR@66..69
+                      0: (empty)
+                      1: CSS_TYPE_SELECTOR@66..69
+                        0: (empty)
+                        1: CSS_IDENTIFIER@66..69
+                          0: IDENT@66..69 "div" [] []
+                      2: CSS_SUB_SELECTOR_LIST@69..69
+                  3: R_PAREN@69..70 ")" [] []
+          1: CSS_SPACE_LITERAL@70..71 " " [] []
+          2: CSS_COMPOUND_SELECTOR@71..76
+            0: (empty)
+            1: (empty)
+            2: CSS_SUB_SELECTOR_LIST@71..76
+              0: CSS_CLASS_SELECTOR@71..76
+                0: DOT@71..72 "." [] []
+                1: CSS_IDENTIFIER@72..76
+                  0: IDENT@72..76 "div" [] [Whitespace(" ")]
+      1: CSS_BLOCK@76..78
+        0: L_CURLY@76..77 "{" [] []
+        1: CSS_DECLARATION_LIST@77..77
+        2: R_CURLY@77..78 "}" [] []
+  2: EOF@78..79 "" [Newline("\n")] []
 
 ```
 

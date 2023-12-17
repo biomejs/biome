@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -127,8 +128,9 @@ JsModule {
 
 0: JS_MODULE@0..93
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..92
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..92
     0: JS_CLASS_DECLARATION@0..27
       0: JS_DECORATOR_LIST@0..0
       1: (empty)
@@ -212,7 +214,7 @@ JsModule {
             2: JS_STATEMENT_LIST@89..89
             3: R_CURLY@89..91 "}" [] [Whitespace(" ")]
       9: R_CURLY@91..92 "}" [] []
-  3: EOF@92..93 "" [Newline("\n")] []
+  4: EOF@92..93 "" [Newline("\n")] []
 --
 class_invalid_modifiers.js:1:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

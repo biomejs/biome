@@ -1510,6 +1510,29 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsVariableDeclarator {
         )
     }
 }
+impl FormatRule<biome_js_syntax::JsLabel> for crate::js::auxiliary::label::FormatJsLabel {
+    type Context = JsFormatContext;
+    #[inline(always)]
+    fn fmt(&self, node: &biome_js_syntax::JsLabel, f: &mut JsFormatter) -> FormatResult<()> {
+        FormatNodeRule::<biome_js_syntax::JsLabel>::fmt(self, node, f)
+    }
+}
+impl AsFormat<JsFormatContext> for biome_js_syntax::JsLabel {
+    type Format<'a> =
+        FormatRefWithRule<'a, biome_js_syntax::JsLabel, crate::js::auxiliary::label::FormatJsLabel>;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(self, crate::js::auxiliary::label::FormatJsLabel::default())
+    }
+}
+impl IntoFormat<JsFormatContext> for biome_js_syntax::JsLabel {
+    type Format =
+        FormatOwnedWithRule<biome_js_syntax::JsLabel, crate::js::auxiliary::label::FormatJsLabel>;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(self, crate::js::auxiliary::label::FormatJsLabel::default())
+    }
+}
 impl FormatRule<biome_js_syntax::JsCaseClause>
     for crate::js::auxiliary::case_clause::FormatJsCaseClause
 {
@@ -6361,6 +6384,46 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsImportNamespaceClause {
         )
     }
 }
+impl FormatRule<biome_js_syntax::JsImportCombinedClause>
+    for crate::js::module::import_combined_clause::FormatJsImportCombinedClause
+{
+    type Context = JsFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_js_syntax::JsImportCombinedClause,
+        f: &mut JsFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_js_syntax::JsImportCombinedClause>::fmt(self, node, f)
+    }
+}
+impl AsFormat<JsFormatContext> for biome_js_syntax::JsImportCombinedClause {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_js_syntax::JsImportCombinedClause,
+        crate::js::module::import_combined_clause::FormatJsImportCombinedClause,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::js::module::import_combined_clause::FormatJsImportCombinedClause::default(),
+        )
+    }
+}
+impl IntoFormat<JsFormatContext> for biome_js_syntax::JsImportCombinedClause {
+    type Format = FormatOwnedWithRule<
+        biome_js_syntax::JsImportCombinedClause,
+        crate::js::module::import_combined_clause::FormatJsImportCombinedClause,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::js::module::import_combined_clause::FormatJsImportCombinedClause::default(),
+        )
+    }
+}
 impl FormatRule<biome_js_syntax::JsModuleSource>
     for crate::js::module::module_source::FormatJsModuleSource
 {
@@ -6477,6 +6540,40 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsDefaultImportSpecifier {
         )
     }
 }
+impl FormatRule<biome_js_syntax::JsNamespaceImportSpecifier>
+    for crate::js::module::namespace_import_specifier::FormatJsNamespaceImportSpecifier
+{
+    type Context = JsFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_js_syntax::JsNamespaceImportSpecifier,
+        f: &mut JsFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_js_syntax::JsNamespaceImportSpecifier>::fmt(self, node, f)
+    }
+}
+impl AsFormat<JsFormatContext> for biome_js_syntax::JsNamespaceImportSpecifier {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_js_syntax::JsNamespaceImportSpecifier,
+        crate::js::module::namespace_import_specifier::FormatJsNamespaceImportSpecifier,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule :: new (self , crate :: js :: module :: namespace_import_specifier :: FormatJsNamespaceImportSpecifier :: default ())
+    }
+}
+impl IntoFormat<JsFormatContext> for biome_js_syntax::JsNamespaceImportSpecifier {
+    type Format = FormatOwnedWithRule<
+        biome_js_syntax::JsNamespaceImportSpecifier,
+        crate::js::module::namespace_import_specifier::FormatJsNamespaceImportSpecifier,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule :: new (self , crate :: js :: module :: namespace_import_specifier :: FormatJsNamespaceImportSpecifier :: default ())
+    }
+}
 impl FormatRule<biome_js_syntax::JsNamedImportSpecifiers>
     for crate::js::module::named_import_specifiers::FormatJsNamedImportSpecifiers
 {
@@ -6515,40 +6612,6 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsNamedImportSpecifiers {
             self,
             crate::js::module::named_import_specifiers::FormatJsNamedImportSpecifiers::default(),
         )
-    }
-}
-impl FormatRule<biome_js_syntax::JsNamespaceImportSpecifier>
-    for crate::js::module::namespace_import_specifier::FormatJsNamespaceImportSpecifier
-{
-    type Context = JsFormatContext;
-    #[inline(always)]
-    fn fmt(
-        &self,
-        node: &biome_js_syntax::JsNamespaceImportSpecifier,
-        f: &mut JsFormatter,
-    ) -> FormatResult<()> {
-        FormatNodeRule::<biome_js_syntax::JsNamespaceImportSpecifier>::fmt(self, node, f)
-    }
-}
-impl AsFormat<JsFormatContext> for biome_js_syntax::JsNamespaceImportSpecifier {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        biome_js_syntax::JsNamespaceImportSpecifier,
-        crate::js::module::namespace_import_specifier::FormatJsNamespaceImportSpecifier,
-    >;
-    fn format(&self) -> Self::Format<'_> {
-        #![allow(clippy::default_constructed_unit_structs)]
-        FormatRefWithRule :: new (self , crate :: js :: module :: namespace_import_specifier :: FormatJsNamespaceImportSpecifier :: default ())
-    }
-}
-impl IntoFormat<JsFormatContext> for biome_js_syntax::JsNamespaceImportSpecifier {
-    type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsNamespaceImportSpecifier,
-        crate::js::module::namespace_import_specifier::FormatJsNamespaceImportSpecifier,
-    >;
-    fn into_format(self) -> Self::Format {
-        #![allow(clippy::default_constructed_unit_structs)]
-        FormatOwnedWithRule :: new (self , crate :: js :: module :: namespace_import_specifier :: FormatJsNamespaceImportSpecifier :: default ())
     }
 }
 impl FormatRule<biome_js_syntax::JsShorthandNamedImportSpecifier>
@@ -12768,30 +12831,30 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsImportClause {
         )
     }
 }
-impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsNamedImport {
+impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsCombinedSpecifier {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyJsNamedImport,
-        crate::js::any::named_import::FormatAnyJsNamedImport,
+        biome_js_syntax::AnyJsCombinedSpecifier,
+        crate::js::any::combined_specifier::FormatAnyJsCombinedSpecifier,
     >;
     fn format(&self) -> Self::Format<'_> {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::any::named_import::FormatAnyJsNamedImport::default(),
+            crate::js::any::combined_specifier::FormatAnyJsCombinedSpecifier::default(),
         )
     }
 }
-impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsNamedImport {
+impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsCombinedSpecifier {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyJsNamedImport,
-        crate::js::any::named_import::FormatAnyJsNamedImport,
+        biome_js_syntax::AnyJsCombinedSpecifier,
+        crate::js::any::combined_specifier::FormatAnyJsCombinedSpecifier,
     >;
     fn into_format(self) -> Self::Format {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::any::named_import::FormatAnyJsNamedImport::default(),
+            crate::js::any::combined_specifier::FormatAnyJsCombinedSpecifier::default(),
         )
     }
 }

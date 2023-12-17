@@ -1,3 +1,4 @@
+use crate::js::bindings::parameters::has_only_simple_parameters;
 use crate::prelude::*;
 use biome_formatter::{
     format_args, write, CstFormatContext, FormatRuleWithOptions, RemoveSoftLinesBuffer,
@@ -60,11 +61,11 @@ impl FormatNodeRule<JsArrowFunctionExpression> for FormatJsArrowFunctionExpressi
 
                 let body = arrow.body()?;
 
-                let format_signature = format_with(|f| {
+                let formatted_signature = format_with(|f| {
                     write!(
                         f,
                         [
-                            format_signature(&arrow, self.options.call_arg_layout.is_some()),
+                            format_signature(&arrow, self.options.call_arg_layout.is_some(), true),
                             space(),
                             arrow.fat_arrow_token().format()
                         ]
@@ -102,11 +103,26 @@ impl FormatNodeRule<JsArrowFunctionExpression> for FormatJsArrowFunctionExpressi
                     AnyJsExpression(JsTemplateExpression(template)) => {
                         is_multiline_template_starting_on_same_line(template)
                     }
-                    AnyJsExpression(JsSequenceExpression(_)) => {
+                    AnyJsExpression(JsSequenceExpression(sequence)) => {
+                        let has_comment = f.context().comments().has_comments(sequence.syntax());
+                        if has_comment {
+                            return write!(
+                                f,
+                                [group(&format_args![
+                                    formatted_signature,
+                                    group(&format_args![indent(&format_args![
+                                        hard_line_break(),
+                                        text("("),
+                                        soft_block_indent(&format_body),
+                                        text(")")
+                                    ]),])
+                                ])]
+                            );
+                        }
                         return write!(
                             f,
                             [group(&format_args![
-                                format_signature,
+                                formatted_signature,
                                 group(&format_args![
                                     space(),
                                     text("("),
@@ -120,26 +136,9 @@ impl FormatNodeRule<JsArrowFunctionExpression> for FormatJsArrowFunctionExpressi
                 };
 
                 if body_has_soft_line_break {
-                    write![f, [format_signature, space(), format_body]]
+                    write![f, [formatted_signature, space(), format_body]]
                 } else {
-                    // Add parentheses to avoid confusion between `a => b ? c : d` and `a <= b ? c : d`
-                    // but only if the body isn't an object/function or class expression because parentheses are always required in that
-                    // case and added by the object expression itself
-                    let should_add_parens = match &body {
-                        AnyJsExpression(expression @ JsConditionalExpression(_)) => {
-                            let are_parentheses_mandatory = matches!(
-                                resolve_left_most_expression(expression),
-                                AnyJsExpressionLeftSide::AnyJsExpression(
-                                    JsObjectExpression(_)
-                                        | JsFunctionExpression(_)
-                                        | JsClassExpression(_)
-                                )
-                            );
-
-                            !are_parentheses_mandatory
-                        }
-                        _ => false,
-                    };
+                    let should_add_parens = should_add_parens(&body);
 
                     let is_last_call_arg = matches!(
                         self.options.call_arg_layout,
@@ -154,7 +153,7 @@ impl FormatNodeRule<JsArrowFunctionExpression> for FormatJsArrowFunctionExpressi
                     write!(
                         f,
                         [
-                            format_signature,
+                            formatted_signature,
                             group(&format_args![
                                 soft_line_indent_or_space(&format_with(|f| {
                                     if should_add_parens {
@@ -207,18 +206,25 @@ impl FormatNodeRule<JsArrowFunctionExpression> for FormatJsArrowFunctionExpressi
 fn format_signature(
     arrow: &JsArrowFunctionExpression,
     is_first_or_last_call_argument: bool,
+    is_first_in_chain: bool,
 ) -> impl Format<JsFormatContext> + '_ {
     format_with(move |f| {
-        if let Some(async_token) = arrow.async_token() {
-            write!(f, [async_token.format(), space()])?;
-        }
+        let formatted_async_token = format_with(|f: &mut JsFormatter| {
+            if let Some(async_token) = arrow.async_token() {
+                write!(f, [async_token.format(), space()])?;
+                Ok(())
+            } else {
+                Ok(())
+            }
+        });
 
-        let format_parameters = format_with(|f: &mut JsFormatter| {
+        let formatted_parameters = format_with(|f: &mut JsFormatter| {
             write!(f, [arrow.type_parameters().format()])?;
 
             match arrow.parameters()? {
                 AnyJsArrowFunctionParameters::AnyJsBinding(binding) => {
-                    let should_hug = is_test_call_argument(arrow.syntax())?;
+                    let should_hug =
+                        is_test_call_argument(arrow.syntax())? || is_first_or_last_call_argument;
 
                     let parentheses_not_needed = can_avoid_parentheses(arrow, f);
 
@@ -257,7 +263,9 @@ fn format_signature(
             write!(
                 recording,
                 [group(&format_args![
-                    group(&format_parameters),
+                    maybe_space(!is_first_in_chain),
+                    formatted_async_token,
+                    group(&formatted_parameters),
                     group(&arrow.return_type_annotation().format())
                 ])]
             )?;
@@ -268,10 +276,18 @@ fn format_signature(
         } else {
             write!(
                 f,
-                [group(&format_args![
-                    format_parameters,
-                    arrow.return_type_annotation().format()
-                ])]
+                [
+                    // This soft break is placed outside of the group to ensure
+                    // that the parameter group only tries to write on a single
+                    // line and can't break pre-emptively without also causing
+                    // the parent (i.e., this ArrowChain) to break first.
+                    (!is_first_in_chain).then_some(soft_line_break_or_space()),
+                    group(&format_args![
+                        formatted_async_token,
+                        formatted_parameters,
+                        arrow.return_type_annotation().format()
+                    ])
+                ]
             )?;
         }
 
@@ -283,6 +299,16 @@ fn format_signature(
     })
 }
 
+/// Returns a `true` result if the arrow function contains any elements which
+/// should force the chain to break onto multiple lines. This includes any kind
+/// of return type annotation if the function also takes parameters (e.g.,
+/// `(a, b): bool => ...`), any kind of rest/object/array binding parameter
+/// (e.g., `({a, b: foo}) => ...`), and any kind of initializer for a parameter
+/// (e.g., `(a = 2) => ...`).
+///
+/// The complexity of these expressions limits their legibility when printed
+/// inline, so they force the chain to break to preserve clarity. Any other
+/// cases are considered simple enough to print in a single line.
 fn should_break_chain(arrow: &JsArrowFunctionExpression) -> SyntaxResult<bool> {
     if arrow.type_parameters().is_some() {
         return Ok(true);
@@ -292,17 +318,43 @@ fn should_break_chain(arrow: &JsArrowFunctionExpression) -> SyntaxResult<bool> {
 
     let has_parameters = match &parameters {
         AnyJsArrowFunctionParameters::AnyJsBinding(_) => true,
-        AnyJsArrowFunctionParameters::JsParameters(parameters) => !parameters.items().is_empty(),
+        AnyJsArrowFunctionParameters::JsParameters(parameters) => {
+            // This matches Prettier, which allows type annotations when
+            // grouping arrow expressions, but disallows them when grouping
+            // normal function expressions.
+            if !has_only_simple_parameters(parameters, true) {
+                return Ok(true);
+            }
+            !parameters.items().is_empty()
+        }
     };
 
-    if arrow.return_type_annotation().is_some() && has_parameters {
-        return Ok(true);
+    let has_type_and_parameters = arrow.return_type_annotation().is_some() && has_parameters;
+
+    Ok(has_type_and_parameters || has_rest_object_or_array_parameter(&parameters))
+}
+
+fn should_add_parens(body: &AnyJsFunctionBody) -> bool {
+    // Add parentheses to avoid confusion between `a => b ? c : d` and `a <= b ? c : d`
+    // but only if the body isn't an object/function or class expression because parentheses are always required in that
+    // case and added by the object expression itself
+    match &body {
+        AnyJsFunctionBody::AnyJsExpression(
+            expression @ AnyJsExpression::JsConditionalExpression(_),
+        ) => {
+            let are_parentheses_mandatory = matches!(
+                resolve_left_most_expression(expression),
+                AnyJsExpressionLeftSide::AnyJsExpression(
+                    AnyJsExpression::JsObjectExpression(_)
+                        | AnyJsExpression::JsFunctionExpression(_)
+                        | AnyJsExpression::JsClassExpression(_)
+                )
+            );
+
+            !are_parentheses_mandatory
+        }
+        _ => false,
     }
-
-    // Break if the function has any rest, object, or array parameter
-    let result = has_rest_object_or_array_parameter(&parameters);
-
-    Ok(result)
 }
 
 fn has_rest_object_or_array_parameter(parameters: &AnyJsArrowFunctionParameters) -> bool {
@@ -413,54 +465,135 @@ impl Format<JsFormatContext> for ArrowChain {
 
         let head_parent = head.syntax().parent();
         let tail_body = tail.body()?;
-
         let is_assignment_rhs = self.options.assignment_layout.is_some();
+        let is_grouped_call_arg_layout = self.options.call_arg_layout.is_some();
 
+        // If this chain is the callee in a parent call expression, then we
+        // want it to break onto a new line to clearly show that the arrow
+        // chain is distinct and the _result_ is what's being called.
+        // Example:
+        //      (() => () => a)()
+        // becomes
+        //      (
+        //        () => () =>
+        //          a
+        //      )();
         let is_callee = head_parent
             .as_ref()
             .map_or(false, |parent| is_callee(head.syntax(), parent));
 
+        // With arrays, objects, sequence expressions, and block function bodies,
+        // the opening brace gives a convenient boundary to insert a line break,
+        // allowing that token to live immediately after the last arrow token
+        // and save a line from being printed with just the punctuation.
+        //
+        // (foo) => (bar) => [a, b]
+        //
+        // (foo) => (bar) => [
+        //   a,
+        //   b
+        // ]
+        //
+        // If the body is _not_ one of those kinds, then we'll want to insert a
+        // soft line break before the body so that it prints on a separate line
+        // in its entirety.
         let body_on_separate_line = !matches!(
             tail_body,
             AnyJsFunctionBody::JsFunctionBody(_)
                 | AnyJsFunctionBody::AnyJsExpression(
                     AnyJsExpression::JsObjectExpression(_)
+                        | AnyJsExpression::JsArrayExpression(_)
                         | AnyJsExpression::JsSequenceExpression(_)
+                        | AnyJsExpression::JsxTagExpression(_)
                 )
         );
 
-        let break_before_chain = (is_callee && body_on_separate_line)
+        // If the arrow chain will break onto multiple lines, either because
+        // it's a callee or because the body is printed on its own line, then
+        // the signatures should be expanded first.
+        let break_signatures = (is_callee && body_on_separate_line)
             || matches!(
                 self.options.assignment_layout,
                 Some(AssignmentLikeLayout::ChainTailArrowFunction)
             );
 
-        let format_arrow_signatures = format_with(|f| {
-            if is_callee || is_assignment_rhs {
-                write!(f, [soft_line_break()])?;
-            }
+        // Arrow chains as callees or as the right side of an assignment
+        // indent the entire signature chain a single level and do _not_
+        // indent a second level for additional signatures after the first:
+        //   const foo =
+        //     (a) =>
+        //     (b) =>
+        //     (c) =>
+        //       0;
+        // This tracks that state and is used to prevent the insertion of
+        // additional indents under `format_arrow_signatures`, then also to
+        // add the outer indent under `format_inner`.
+        let has_initial_indent = is_callee || is_assignment_rhs;
 
-            let join_signatures = format_with(|f| {
+        let format_arrow_signatures = format_with(|f| {
+            let join_signatures = format_with(|f: &mut JsFormatter| {
+                let mut is_first_in_chain = true;
                 for arrow in self.arrows() {
-                    write!(
-                        f,
-                        [
-                            format_leading_comments(arrow.syntax()),
-                            format_signature(arrow, self.options.call_arg_layout.is_some())
-                        ]
-                    )?;
+                    // The first comment in the chain gets formatted by the
+                    // parent (the FormatJsArrowFunctionExpression), but the
+                    // rest of the arrows in the chain need to format their
+                    // comments manually, since they won't have their own
+                    // Format node to handle it.
+                    let should_format_comments = !is_first_in_chain
+                        && f.context().comments().has_leading_comments(arrow.syntax());
+                    let is_first = is_first_in_chain;
+
+                    let formatted_signature = format_with(|f: &mut JsFormatter| {
+                        if should_format_comments {
+                            // A grouped layout implies that the arrow chain is trying to be rendered
+                            // in a condensend, single-line format (at least the signatures, not
+                            // necessarily the body). In that case, we _need_ to prevent the leading
+                            // comments from inserting line breaks. But if it's _not_ a grouped layout,
+                            // then we want to _force_ the line break so that the leading comments
+                            // don't inadvertently end up on the previous line after the fat arrow.
+                            if is_grouped_call_arg_layout {
+                                write!(f, [space(), format_leading_comments(arrow.syntax())])?;
+                            } else {
+                                write!(
+                                    f,
+                                    [
+                                        soft_line_break_or_space(),
+                                        format_leading_comments(arrow.syntax())
+                                    ]
+                                )?;
+                            }
+                        }
+
+                        write!(
+                            f,
+                            [format_signature(
+                                arrow,
+                                is_grouped_call_arg_layout,
+                                is_first
+                            )]
+                        )
+                    });
+
+                    // Arrow chains indent a second level for every item other than the first:
+                    //   (a) =>
+                    //     (b) =>
+                    //     (c) =>
+                    //       0
+                    // Because the chain is printed as a flat list, each entry needs to set
+                    // its own indention. This ensures that the first item keeps the same
+                    // level as the surrounding content, and then each subsequent item has
+                    // one additional level, as shown above.
+                    if is_first_in_chain || has_initial_indent {
+                        is_first_in_chain = false;
+                        write!(f, [formatted_signature])?;
+                    } else {
+                        write!(f, [indent(&formatted_signature)])?;
+                    };
 
                     // The arrow of the tail is formatted outside of the group to ensure it never
                     // breaks from the body
                     if arrow != tail {
-                        write!(
-                            f,
-                            [
-                                space(),
-                                arrow.fat_arrow_token().format(),
-                                soft_line_break_or_space()
-                            ]
-                        )?;
+                        write!(f, [space(), arrow.fat_arrow_token().format()])?;
                     }
                 }
 
@@ -472,6 +605,12 @@ impl Format<JsFormatContext> for ArrowChain {
                 [group(&join_signatures).should_expand(*expand_signatures)]
             )
         });
+
+        let has_comment = matches!(
+          &tail_body,
+          AnyJsFunctionBody::AnyJsExpression(AnyJsExpression::JsSequenceExpression(sequence))
+          if f.context().comments().has_comments(sequence.syntax())
+        );
 
         let format_tail_body_inner = format_with(|f| {
             let format_tail_body = FormatMaybeCachedFunctionBody {
@@ -485,16 +624,40 @@ impl Format<JsFormatContext> for ArrowChain {
                 tail_body,
                 AnyJsFunctionBody::AnyJsExpression(AnyJsExpression::JsSequenceExpression(_))
             ) {
-                write!(
-                    f,
-                    [group(&format_args![
-                        text("("),
-                        soft_block_indent(&format_tail_body),
-                        text(")")
-                    ])]
-                )?;
+                if has_comment {
+                    write!(
+                        f,
+                        [group(&format_args![indent(&format_args![
+                            hard_line_break(),
+                            text("("),
+                            soft_block_indent(&format_tail_body),
+                            text(")")
+                        ]),])]
+                    )?;
+                } else {
+                    write!(
+                        f,
+                        [group(&format_args![
+                            text("("),
+                            soft_block_indent(&format_tail_body),
+                            text(")")
+                        ])]
+                    )?;
+                }
             } else {
-                write!(f, [format_tail_body])?;
+                let should_add_parens = should_add_parens(&tail_body);
+                if should_add_parens {
+                    write!(
+                        f,
+                        [
+                            if_group_fits_on_line(&text("(")),
+                            format_tail_body,
+                            if_group_fits_on_line(&text(")"))
+                        ]
+                    )?;
+                } else {
+                    write!(f, [format_tail_body])?;
+                }
             }
 
             // Format the trailing comments of all arrow function EXCEPT the first one because
@@ -507,13 +670,25 @@ impl Format<JsFormatContext> for ArrowChain {
         });
 
         let format_tail_body = format_with(|f| {
+            // if it's inside a JSXExpression (e.g. an attribute) we should align the expression's closing } with the line with the opening {.
+            let should_add_soft_line = matches!(
+                head_parent.kind(),
+                Some(
+                    JsSyntaxKind::JSX_EXPRESSION_CHILD
+                        | JsSyntaxKind::JSX_EXPRESSION_ATTRIBUTE_VALUE
+                )
+            );
+
             if body_on_separate_line {
                 write!(
                     f,
-                    [indent(&format_args![
-                        soft_line_break_or_space(),
-                        format_tail_body_inner
-                    ])]
+                    [
+                        indent(&format_args![
+                            soft_line_break_or_space(),
+                            format_tail_body_inner
+                        ]),
+                        should_add_soft_line.then_some(soft_line_break())
+                    ]
                 )
             } else {
                 write!(f, [space(), format_tail_body_inner])
@@ -523,17 +698,32 @@ impl Format<JsFormatContext> for ArrowChain {
         let group_id = f.group_id("arrow-chain");
 
         let format_inner = format_once(|f| {
-            write!(
-                f,
-                [
-                    group(&indent(&format_arrow_signatures))
+            if has_initial_indent {
+                write!(
+                    f,
+                    [group(&indent(&format_args![
+                        soft_line_break(),
+                        format_arrow_signatures
+                    ]))
+                    .with_group_id(Some(group_id))
+                    .should_expand(break_signatures)]
+                )?;
+            } else {
+                write!(
+                    f,
+                    [group(&format_arrow_signatures)
                         .with_group_id(Some(group_id))
-                        .should_expand(break_before_chain),
-                    space(),
-                    tail.fat_arrow_token().format(),
-                    indent_if_group_breaks(&format_tail_body, group_id),
-                ]
-            )?;
+                        .should_expand(break_signatures)]
+                )?;
+            };
+
+            write!(f, [space(), tail.fat_arrow_token().format()])?;
+
+            if is_grouped_call_arg_layout {
+                write!(f, [group(&format_tail_body)])?;
+            } else {
+                write!(f, [indent_if_group_breaks(&format_tail_body, group_id)])?;
+            }
 
             if is_callee {
                 write!(
@@ -636,7 +826,7 @@ fn template_literal_contains_new_line(template: &JsTemplateExpression) -> bool {
 ///
 ///
 /// # Examples
-//
+///
 /// ```javascript
 /// "test" + `
 ///   some content

@@ -73,6 +73,8 @@ self.addEventListener("message", async (e) => {
 				trailingComma,
 				semicolons,
 				arrowParentheses,
+				bracketSpacing,
+				bracketSameLine,
 				importSortingEnabled,
 				unsafeParameterDecoratorsEnabled,
 				allowComments,
@@ -111,6 +113,8 @@ self.addEventListener("message", async (e) => {
 							arrowParentheses === ArrowParentheses.Always
 								? "always"
 								: "asNeeded",
+						bracketSpacing,
+						bracketSameLine,
 					},
 					parser: {
 						unsafeParameterDecoratorsEnabled,
@@ -142,6 +146,7 @@ self.addEventListener("message", async (e) => {
 
 			workspace.updateSettings({
 				configuration,
+				gitignore_matches: [],
 			});
 			break;
 		}

@@ -1,0 +1,93 @@
+---
+title: 大きなプロジェクトでのBiomeの使用方法
+description: 大きなプロジェクトでBiomeを使用するための簡単なガイド
+---
+
+Biomeは、モノレポや複数のプロジェクトを含むワークスペースなどの大きなプロジェクトで、適切に使用するためのツールを提供しています。
+
+## 複数の設定ファイルの使用
+
+Biomeの機能をCLIやLSPで使用する場合、ツールは現在の作業ディレクトリから最も近い設定ファイルを参照します。
+
+設定ファイルが見つからない場合、Biomeは設定ファイルが見つかるまで、**上へ上へ**とディレクトリを移動します。
+
+この機能を活用して、プロジェクトやディレクトリごとに異なるオプションを適用することができます。
+
+例えば、backendディレクトリとfrontendディレクトリを含むプロジェクトがあるとします。
+
+
+```
+app
+├── backend
+│   ├── biome.json
+│   └── package.json
+└── frontend
+    ├── biome.json
+    ├── legacy-app
+    │   └── package.json
+    └── new-app
+        └── package.json
+```
+
+この場合、`app/backend/package.json`からスクリプトを実行すると、Biomeは`app/backend/biome.json`を設定ファイルとして使用します。
+
+`app/frontend/legacy-app/package.json`または`app/frontend/new-app/package.json`からスクリプトを実行すると、Biomeは`app/frontend/biome.json`を設定ファイルとして使用します。
+
+## 設定の共有
+
+[`extends`](/reference/configuration#extends)オプションを使用して、オプションを複数ファイルに分割することができる。
+
+例えば、以下の要件があるとします：
+- `legacy-app`ディレクトリでは、スペースでformatする
+- `backend`ディレクトリと`new-app`ディレクトリでは、タブでformatする
+- すべてのディレクトリでは、行幅を120でformatする
+- `backend`ディレクトリでは、追加で他のlint設定を行う
+
+まず、`app/biome.json`に新しい設定ファイルを作成し、共通オプションの設定を行います：
+
+
+```json title="app/biome.json"
+{
+  "formatter": {
+    "enabled": true,
+    "lineWidth": 120
+  }
+}
+```
+
+ここで、`legacy-app`ディレクトリで別のオプションを使用するため、`app/frontend/biome.json`を`app/frontend/legacy-app/`に**移動**します：
+
+
+```json title="app/frontend/legacy-app/biome.json"
+{
+  "formatter": {
+    "indentStyle": "space"
+  }
+}
+```
+
+次に、`extends`プロパティを使って、`app/biome.json`のすべてのオプションを継承するように設定を加えます：
+
+```json title="app/frontend/legacy-app/biome.json" ins={2}
+{
+   "extends": ["../../biome.json"],
+   "formatter": {
+     "indentStyle": "space"
+   }
+}
+```
+
+最後に、`app/backend/biome.json`でlinterを有効にします：
+
+
+```json title="app/backend/biome.json"
+{
+  "extends": ["../biome.json"],
+    "linter": {
+      "enabled": "true",
+      "rules": {
+        "recommended": true
+      }
+   }
+}
+```

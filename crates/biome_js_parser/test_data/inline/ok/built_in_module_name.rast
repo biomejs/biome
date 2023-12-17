@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -44,8 +45,9 @@ JsModule {
 
 0: JS_MODULE@0..103
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..102
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..102
     0: TS_MODULE_DECLARATION@0..61
       0: MODULE_KW@0..52 "module" [Comments("// https://github.com ..."), Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@52..59
@@ -72,4 +74,4 @@ JsModule {
           0: L_CURLY@100..101 "{" [] []
           1: JS_MODULE_ITEM_LIST@101..101
           2: R_CURLY@101..102 "}" [] []
-  3: EOF@102..103 "" [Newline("\n")] []
+  4: EOF@102..103 "" [Newline("\n")] []

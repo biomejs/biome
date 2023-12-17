@@ -48,12 +48,14 @@ a, b > .foo::before {}
 
 ```
 CssRoot {
+    bom_token: missing (optional),
     rules: CssRuleList [
         CssRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
                     simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
                         ident: CssIdentifier {
                             value_token: IDENT@0..1 "a" [] [],
                         },
@@ -81,6 +83,7 @@ CssRoot {
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
                     simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
                         ident: CssIdentifier {
                             value_token: IDENT@11..19 "dialog" [Newline("\n"), Newline("\n")] [],
                         },
@@ -108,6 +111,7 @@ CssRoot {
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
                     simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
                         ident: CssIdentifier {
                             value_token: IDENT@32..35 "a" [Newline("\n"), Newline("\n")] [],
                         },
@@ -135,6 +139,7 @@ CssRoot {
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
                     simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
                         ident: CssIdentifier {
                             value_token: IDENT@46..53 "video" [Newline("\n"), Newline("\n")] [],
                         },
@@ -162,6 +167,7 @@ CssRoot {
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
                     simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
                         ident: CssIdentifier {
                             value_token: IDENT@61..67 "video" [Newline("\n")] [],
                         },
@@ -177,6 +183,7 @@ CssRoot {
                                 selector: CssCompoundSelector {
                                     nesting_selector_token: missing (optional),
                                     simple_selector: CssTypeSelector {
+                                        namespace: missing (optional),
                                         ident: CssIdentifier {
                                             value_token: IDENT@73..74 "b" [] [],
                                         },
@@ -200,6 +207,7 @@ CssRoot {
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
                     simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
                         ident: CssIdentifier {
                             value_token: IDENT@78..85 "video" [Newline("\n"), Newline("\n")] [],
                         },
@@ -227,6 +235,7 @@ CssRoot {
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
                     simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
                         ident: CssIdentifier {
                             value_token: IDENT@100..106 "video" [Newline("\n")] [],
                         },
@@ -329,6 +338,7 @@ CssRoot {
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
                     simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
                         ident: CssIdentifier {
                             value_token: IDENT@170..193 "tabbed-custom-element" [Newline("\n"), Newline("\n")] [],
                         },
@@ -416,6 +426,7 @@ CssRoot {
                                 selector: CssCompoundSelector {
                                     nesting_selector_token: missing (optional),
                                     simple_selector: CssUniversalSelector {
+                                        namespace: missing (optional),
                                         star_token: STAR@253..254 "*" [] [],
                                     },
                                     sub_selectors: CssSubSelectorList [],
@@ -448,6 +459,7 @@ CssRoot {
                                 selector: CssCompoundSelector {
                                     nesting_selector_token: missing (optional),
                                     simple_selector: CssTypeSelector {
+                                        namespace: missing (optional),
                                         ident: CssIdentifier {
                                             value_token: IDENT@269..273 "span" [] [],
                                         },
@@ -546,6 +558,7 @@ CssRoot {
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
                     simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
                         ident: CssIdentifier {
                             value_token: IDENT@354..357 "a" [Newline("\n"), Newline("\n")] [],
                         },
@@ -573,6 +586,7 @@ CssRoot {
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
                     simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
                         ident: CssIdentifier {
                             value_token: IDENT@368..371 "a" [Newline("\n"), Newline("\n")] [],
                         },
@@ -584,6 +598,7 @@ CssRoot {
                     left: CssCompoundSelector {
                         nesting_selector_token: missing (optional),
                         simple_selector: CssTypeSelector {
+                            namespace: missing (optional),
                             ident: CssIdentifier {
                                 value_token: IDENT@373..375 "b" [] [Whitespace(" ")],
                             },
@@ -628,13 +643,15 @@ CssRoot {
 
 ```
 0: CSS_ROOT@0..393
-  0: CSS_RULE_LIST@0..392
+  0: (empty)
+  1: CSS_RULE_LIST@0..392
     0: CSS_RULE@0..11
       0: CSS_SELECTOR_LIST@0..9
         0: CSS_COMPOUND_SELECTOR@0..9
           0: (empty)
           1: CSS_TYPE_SELECTOR@0..1
-            0: CSS_IDENTIFIER@0..1
+            0: (empty)
+            1: CSS_IDENTIFIER@0..1
               0: IDENT@0..1 "a" [] []
           2: CSS_SUB_SELECTOR_LIST@1..9
             0: CSS_PSEUDO_ELEMENT_SELECTOR@1..9
@@ -651,7 +668,8 @@ CssRoot {
         0: CSS_COMPOUND_SELECTOR@11..30
           0: (empty)
           1: CSS_TYPE_SELECTOR@11..19
-            0: CSS_IDENTIFIER@11..19
+            0: (empty)
+            1: CSS_IDENTIFIER@11..19
               0: IDENT@11..19 "dialog" [Newline("\n"), Newline("\n")] []
           2: CSS_SUB_SELECTOR_LIST@19..30
             0: CSS_PSEUDO_ELEMENT_SELECTOR@19..30
@@ -668,7 +686,8 @@ CssRoot {
         0: CSS_COMPOUND_SELECTOR@32..44
           0: (empty)
           1: CSS_TYPE_SELECTOR@32..35
-            0: CSS_IDENTIFIER@32..35
+            0: (empty)
+            1: CSS_IDENTIFIER@32..35
               0: IDENT@32..35 "a" [Newline("\n"), Newline("\n")] []
           2: CSS_SUB_SELECTOR_LIST@35..44
             0: CSS_PSEUDO_ELEMENT_SELECTOR@35..44
@@ -685,7 +704,8 @@ CssRoot {
         0: CSS_COMPOUND_SELECTOR@46..59
           0: (empty)
           1: CSS_TYPE_SELECTOR@46..53
-            0: CSS_IDENTIFIER@46..53
+            0: (empty)
+            1: CSS_IDENTIFIER@46..53
               0: IDENT@46..53 "video" [Newline("\n"), Newline("\n")] []
           2: CSS_SUB_SELECTOR_LIST@53..59
             0: CSS_PSEUDO_ELEMENT_SELECTOR@53..59
@@ -702,7 +722,8 @@ CssRoot {
         0: CSS_COMPOUND_SELECTOR@61..76
           0: (empty)
           1: CSS_TYPE_SELECTOR@61..67
-            0: CSS_IDENTIFIER@61..67
+            0: (empty)
+            1: CSS_IDENTIFIER@61..67
               0: IDENT@61..67 "video" [Newline("\n")] []
           2: CSS_SUB_SELECTOR_LIST@67..76
             0: CSS_PSEUDO_ELEMENT_SELECTOR@67..76
@@ -714,7 +735,8 @@ CssRoot {
                 2: CSS_COMPOUND_SELECTOR@73..74
                   0: (empty)
                   1: CSS_TYPE_SELECTOR@73..74
-                    0: CSS_IDENTIFIER@73..74
+                    0: (empty)
+                    1: CSS_IDENTIFIER@73..74
                       0: IDENT@73..74 "b" [] []
                   2: CSS_SUB_SELECTOR_LIST@74..74
                 3: R_PAREN@74..76 ")" [] [Whitespace(" ")]
@@ -727,7 +749,8 @@ CssRoot {
         0: CSS_COMPOUND_SELECTOR@78..98
           0: (empty)
           1: CSS_TYPE_SELECTOR@78..85
-            0: CSS_IDENTIFIER@78..85
+            0: (empty)
+            1: CSS_IDENTIFIER@78..85
               0: IDENT@78..85 "video" [Newline("\n"), Newline("\n")] []
           2: CSS_SUB_SELECTOR_LIST@85..98
             0: CSS_PSEUDO_ELEMENT_SELECTOR@85..98
@@ -744,7 +767,8 @@ CssRoot {
         0: CSS_COMPOUND_SELECTOR@100..135
           0: (empty)
           1: CSS_TYPE_SELECTOR@100..106
-            0: CSS_IDENTIFIER@100..106
+            0: (empty)
+            1: CSS_IDENTIFIER@100..106
               0: IDENT@100..106 "video" [Newline("\n")] []
           2: CSS_SUB_SELECTOR_LIST@106..135
             0: CSS_PSEUDO_ELEMENT_SELECTOR@106..135
@@ -811,7 +835,8 @@ CssRoot {
         0: CSS_COMPOUND_SELECTOR@170..205
           0: (empty)
           1: CSS_TYPE_SELECTOR@170..193
-            0: CSS_IDENTIFIER@170..193
+            0: (empty)
+            1: CSS_IDENTIFIER@170..193
               0: IDENT@170..193 "tabbed-custom-element" [Newline("\n"), Newline("\n")] []
           2: CSS_SUB_SELECTOR_LIST@193..205
             0: CSS_PSEUDO_ELEMENT_SELECTOR@193..205
@@ -871,7 +896,8 @@ CssRoot {
                 2: CSS_COMPOUND_SELECTOR@253..254
                   0: (empty)
                   1: CSS_UNIVERSAL_SELECTOR@253..254
-                    0: STAR@253..254 "*" [] []
+                    0: (empty)
+                    1: STAR@253..254 "*" [] []
                   2: CSS_SUB_SELECTOR_LIST@254..254
                 3: R_PAREN@254..256 ")" [] [Whitespace(" ")]
       1: CSS_BLOCK@256..258
@@ -893,7 +919,8 @@ CssRoot {
                 2: CSS_COMPOUND_SELECTOR@269..273
                   0: (empty)
                   1: CSS_TYPE_SELECTOR@269..273
-                    0: CSS_IDENTIFIER@269..273
+                    0: (empty)
+                    1: CSS_IDENTIFIER@269..273
                       0: IDENT@269..273 "span" [] []
                   2: CSS_SUB_SELECTOR_LIST@273..273
                 3: R_PAREN@273..275 ")" [] [Whitespace(" ")]
@@ -955,7 +982,8 @@ CssRoot {
         0: CSS_COMPOUND_SELECTOR@354..366
           0: (empty)
           1: CSS_TYPE_SELECTOR@354..357
-            0: CSS_IDENTIFIER@354..357
+            0: (empty)
+            1: CSS_IDENTIFIER@354..357
               0: IDENT@354..357 "a" [Newline("\n"), Newline("\n")] []
           2: CSS_SUB_SELECTOR_LIST@357..366
             0: CSS_PSEUDO_ELEMENT_SELECTOR@357..366
@@ -972,7 +1000,8 @@ CssRoot {
         0: CSS_COMPOUND_SELECTOR@368..371
           0: (empty)
           1: CSS_TYPE_SELECTOR@368..371
-            0: CSS_IDENTIFIER@368..371
+            0: (empty)
+            1: CSS_IDENTIFIER@368..371
               0: IDENT@368..371 "a" [Newline("\n"), Newline("\n")] []
           2: CSS_SUB_SELECTOR_LIST@371..371
         1: COMMA@371..373 "," [] [Whitespace(" ")]
@@ -980,7 +1009,8 @@ CssRoot {
           0: CSS_COMPOUND_SELECTOR@373..375
             0: (empty)
             1: CSS_TYPE_SELECTOR@373..375
-              0: CSS_IDENTIFIER@373..375
+              0: (empty)
+              1: CSS_IDENTIFIER@373..375
                 0: IDENT@373..375 "b" [] [Whitespace(" ")]
             2: CSS_SUB_SELECTOR_LIST@375..375
           1: R_ANGLE@375..377 ">" [] [Whitespace(" ")]
@@ -1001,7 +1031,7 @@ CssRoot {
         0: L_CURLY@390..391 "{" [] []
         1: CSS_DECLARATION_LIST@391..391
         2: R_CURLY@391..392 "}" [] []
-  1: EOF@392..393 "" [Newline("\n")] []
+  2: EOF@392..393 "" [Newline("\n")] []
 
 ```
 

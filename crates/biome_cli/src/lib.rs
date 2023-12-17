@@ -14,7 +14,6 @@ use std::env;
 mod changed;
 mod cli_options;
 mod commands;
-mod configuration;
 mod diagnostics;
 mod execute;
 mod logging;
@@ -22,7 +21,6 @@ mod metrics;
 mod panic;
 mod reports;
 mod service;
-mod vcs;
 
 use crate::cli_options::ColorsArg;
 use crate::commands::check::CheckCommandPayload;

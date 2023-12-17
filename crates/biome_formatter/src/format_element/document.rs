@@ -2,11 +2,10 @@ use super::tag::Tag;
 use crate::format_element::tag::DedentMode;
 use crate::prelude::tag::GroupMode;
 use crate::prelude::*;
-use crate::printer::LineEnding;
 use crate::{format, write};
 use crate::{
     BufferExtensions, Format, FormatContext, FormatElement, FormatOptions, FormatResult, Formatter,
-    IndentStyle, IndentWidth, LineWidth, PrinterOptions, TransformSourceMap,
+    IndentStyle, IndentWidth, LineEnding, LineWidth, PrinterOptions, TransformSourceMap,
 };
 use biome_rowan::TextSize;
 use rustc_hash::FxHashMap;
@@ -73,10 +72,43 @@ impl Document {
                             propagate_expands(variant, enclosing, checked_interned);
                         }
 
-                        // Best fitting acts as a boundary
-                        expands = false;
                         enclosing.pop();
-                        continue;
+                        // BestFitting acts as a boundary, meaning there is no need to continue
+                        // processing this element and we can move onto the next. However, we
+                        // _don't_ set `expands = false`, because that ends up negating the
+                        // expansion when processing `Interned` elements.
+                        //
+                        // Only interned lists are affected, because they cache the expansion value
+                        // based on the value of `expands` at the end of iterating the children. If
+                        // a `best_fitting` element occurs after the last expanding element, and we
+                        // end up setting `expands = false` here, then the interned element ends up
+                        // thinking that its content doesn't expand, even though it might. Example:
+                        //   group(1,
+                        //     interned 1 [
+                        //       expand_parent,
+                        //       best_fitting,
+                        //     ]
+                        //   )
+                        //   group(2,
+                        //     [ref interned 1]
+                        //   )
+                        // Here, `group(1)` gets expanded directly by the `expand_parent` element.
+                        // This happens immediately, and then `expands = true` is set. The interned
+                        // element continues processing, and encounters the `best_fitting`. If
+                        // we set `expands = false` there, then the interned element's result ends
+                        // up being `false`, even though it does actually expand. Then, when
+                        // `group(2)` checks for expansion, it looks at the ref to `interned 1`,
+                        // which thinks it doesn't expand, and so `group(2)` stays flat.
+                        //
+                        // By _not_ setting `expands = false`, even though `best_fitting` is a
+                        // boundary for expansion, we ensure that any references to the interned
+                        // element will get the correct value for whether the contained content
+                        // actually expands, regardless of the order of elements within it.
+                        //
+                        // Instead, just returning false here enforces that `best_fitting` doesn't
+                        // think it expands _itself_, but allows other sibling elements to still
+                        // propagate their expansion.
+                        false
                     }
                     FormatElement::StaticText { text } => text.contains('\n'),
                     FormatElement::DynamicText { text, .. } => text.contains('\n'),
@@ -163,11 +195,15 @@ impl FormatOptions for IrFormatOptions {
         LineWidth::default()
     }
 
+    fn line_ending(&self) -> LineEnding {
+        LineEnding::Lf
+    }
+
     fn as_print_options(&self) -> PrinterOptions {
         PrinterOptions {
             indent_width: self.indent_width(),
             print_width: self.line_width().into(),
-            line_ending: LineEnding::LineFeed,
+            line_ending: LineEnding::Lf,
             indent_style: IndentStyle::Space,
         }
     }
@@ -573,6 +609,38 @@ impl FormatElements for [FormatElement] {
         false
     }
 
+    fn may_directly_break(&self) -> bool {
+        use Tag::*;
+        let mut ignore_depth = 0usize;
+
+        for element in self {
+            match element {
+                // Line suffix
+                // Ignore if any of its content breaks
+                FormatElement::Tag(StartLineSuffix) => {
+                    ignore_depth += 1;
+                }
+                FormatElement::Tag(EndLineSuffix) => {
+                    ignore_depth -= 1;
+                }
+                FormatElement::Interned(interned) if ignore_depth == 0 => {
+                    if interned.may_directly_break() {
+                        return true;
+                    }
+                }
+
+                element if ignore_depth == 0 && element.may_directly_break() => {
+                    return true;
+                }
+                _ => continue,
+            }
+        }
+
+        debug_assert_eq!(ignore_depth, 0, "Unclosed start container");
+
+        false
+    }
+
     fn has_label(&self, expected: LabelId) -> bool {
         self.first()
             .map_or(false, |element| element.has_label(expected))
@@ -711,6 +779,55 @@ mod tests {
   "]"<END_TAG_WITHOUT_START<Indent>>,
   indent([])
   <START_WITHOUT_END<Indent>>
+]"#
+        );
+    }
+
+    #[test]
+    fn interned_best_fitting_allows_sibling_expand_propagation() {
+        use Tag::*;
+
+        // An interned element containing something that expands the parent,
+        // and a best_fitting element after it.
+        //
+        // interned 1 [
+        //   expand_parent,
+        //   best_fitting(...)
+        // ]
+        let interned = Interned::new(vec![FormatElement::ExpandParent, unsafe {
+            FormatElement::BestFitting(BestFittingElement::from_vec_unchecked(vec![
+                Box::new([FormatElement::StaticText { text: "a" }]),
+                Box::new([FormatElement::StaticText { text: "b" }]),
+            ]))
+        }]);
+
+        let mut document = Document::from(vec![
+            // First group, processes the interned element for the first time.
+            FormatElement::Tag(StartGroup(tag::Group::new())),
+            FormatElement::Interned(interned.clone()),
+            FormatElement::Tag(EndGroup),
+            // Second group, references the already-processed interned element.
+            FormatElement::Tag(StartGroup(tag::Group::new())),
+            FormatElement::Interned(interned),
+            FormatElement::Tag(EndGroup),
+        ]);
+
+        // After propagation, both groups _should_ be expanded.
+        document.propagate_expand();
+
+        assert_eq!(
+            &std::format!("{document}"),
+            r#"[
+  group(expand: propagated, [
+    <interned 0> [
+      expand_parent,
+      best_fitting([
+        ["a"]
+        ["b"]
+      ])
+    ]
+  ]),
+  group(expand: propagated, [<ref interned *0>])
 ]"#
         );
     }

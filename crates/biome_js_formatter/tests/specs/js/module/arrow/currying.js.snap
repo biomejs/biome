@@ -24,6 +24,39 @@ const middleware = options => (req, res, next) => {
   // ...
 };
 
+// Ensure tail bodies only indent a single level when necessary
+somePromise.then(({default: ComponentName}) => (props) => [longerSingleElement]);
+
+somePromise.then((reallyLongArguments) => (makeTheChainFullyBreak) => (moreThanItWould) => [longerSingleElement]);
+
+somePromise.then(({ reallyLongArguments }) => (makeTheChainFullyBreak) => [
+  dontIndentTwice,
+]);
+somePromise.then(({ reallyLongArguments }) => (makeTheChainFullyBreak) => {
+  dontIndentTwice();
+});
+
+somePromise.then(({ reallyLongArguments }) => (makeTheChainFullyBreak) => (andNowAllLines) => (keepGoing) =>
+  dontIndentTwice());
+
+  somePromise.then(
+      ({ reallyLongArguments }) =>
+        (makeTheChainFullyBreak) =>
+        () => {
+          dontIndentTwice();
+        },
+    );
+  function foo() { 
+      // Unmount clean up
+      React.useLayoutEffect(() => () => {
+        callSomeLongNamedFunction();
+      });
+    }
+
+    function foo() { 
+      // Unmount clean up
+      React.useLayoutEffect(() => () => [hello, what, is, this, going, too, doehwharht]);
+    }
 ```
 
 
@@ -36,6 +69,7 @@ const middleware = options => (req, res, next) => {
 -----
 Indent style: Tab
 Indent width: 2
+Line ending: LF
 Line width: 80
 Quote style: Double Quotes
 JSX quote style: Double Quotes
@@ -43,6 +77,8 @@ Quote properties: As needed
 Trailing comma: All
 Semicolons: Always
 Arrow parentheses: Always
+Bracket spacing: true
+Bracket same line: false
 -----
 
 ```js
@@ -63,6 +99,59 @@ const mw = (store) => (next) => (action) => {
 const middleware = (options) => (req, res, next) => {
 	// ...
 };
+
+// Ensure tail bodies only indent a single level when necessary
+somePromise.then(({ default: ComponentName }) => (props) => [
+	longerSingleElement,
+]);
+
+somePromise.then(
+	(reallyLongArguments) => (makeTheChainFullyBreak) => (moreThanItWould) => [
+		longerSingleElement,
+	],
+);
+
+somePromise.then(({ reallyLongArguments }) => (makeTheChainFullyBreak) => [
+	dontIndentTwice,
+]);
+somePromise.then(({ reallyLongArguments }) => (makeTheChainFullyBreak) => {
+	dontIndentTwice();
+});
+
+somePromise.then(
+	({ reallyLongArguments }) =>
+		(makeTheChainFullyBreak) =>
+		(andNowAllLines) =>
+		(keepGoing) =>
+			dontIndentTwice(),
+);
+
+somePromise.then(
+	({ reallyLongArguments }) =>
+		(makeTheChainFullyBreak) =>
+		() => {
+			dontIndentTwice();
+		},
+);
+function foo() {
+	// Unmount clean up
+	React.useLayoutEffect(() => () => {
+		callSomeLongNamedFunction();
+	});
+}
+
+function foo() {
+	// Unmount clean up
+	React.useLayoutEffect(() => () => [
+		hello,
+		what,
+		is,
+		this,
+		going,
+		too,
+		doehwharht,
+	]);
+}
 ```
 
 ## Output 2
@@ -70,6 +159,7 @@ const middleware = (options) => (req, res, next) => {
 -----
 Indent style: Tab
 Indent width: 2
+Line ending: LF
 Line width: 80
 Quote style: Double Quotes
 JSX quote style: Double Quotes
@@ -77,6 +167,8 @@ Quote properties: As needed
 Trailing comma: All
 Semicolons: Always
 Arrow parentheses: As needed
+Bracket spacing: true
+Bracket same line: false
 -----
 
 ```js
@@ -97,6 +189,55 @@ const mw = store => next => action => {
 const middleware = options => (req, res, next) => {
 	// ...
 };
+
+// Ensure tail bodies only indent a single level when necessary
+somePromise.then(({ default: ComponentName }) => props => [
+	longerSingleElement,
+]);
+
+somePromise.then(
+	reallyLongArguments => makeTheChainFullyBreak => moreThanItWould => [
+		longerSingleElement,
+	],
+);
+
+somePromise.then(({ reallyLongArguments }) => makeTheChainFullyBreak => [
+	dontIndentTwice,
+]);
+somePromise.then(({ reallyLongArguments }) => makeTheChainFullyBreak => {
+	dontIndentTwice();
+});
+
+somePromise.then(
+	({ reallyLongArguments }) =>
+		makeTheChainFullyBreak =>
+		andNowAllLines =>
+		keepGoing =>
+			dontIndentTwice(),
+);
+
+somePromise.then(({ reallyLongArguments }) => makeTheChainFullyBreak => () => {
+	dontIndentTwice();
+});
+function foo() {
+	// Unmount clean up
+	React.useLayoutEffect(() => () => {
+		callSomeLongNamedFunction();
+	});
+}
+
+function foo() {
+	// Unmount clean up
+	React.useLayoutEffect(() => () => [
+		hello,
+		what,
+		is,
+		this,
+		going,
+		too,
+		doehwharht,
+	]);
+}
 ```
 
 

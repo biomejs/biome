@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -30,8 +31,9 @@ JsModule {
 
 0: JS_MODULE@0..21
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..20
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..20
     0: JS_EXPORT@0..16
       0: JS_DECORATOR_LIST@0..0
       1: EXPORT_KW@0..7 "export" [] [Whitespace(" ")]
@@ -46,7 +48,7 @@ JsModule {
       1: IDENT@18..19 "b" [] []
     2: JS_EMPTY_STATEMENT@19..20
       0: SEMICOLON@19..20 ";" [] []
-  3: EOF@20..21 "" [Newline("\n")] []
+  4: EOF@20..21 "" [Newline("\n")] []
 --
 export_default_expression_clause_err.js:1:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

@@ -10,9 +10,18 @@ static ALLOCATOR: dhat::Alloc = dhat::Alloc;
 #[global_allocator]
 static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
-#[cfg(all(not(target_os = "windows"), not(feature = "dhat-heap")))]
+#[cfg(all(
+    any(target_os = "macos", target_os = "linux"),
+    not(target_env = "musl"),
+    not(feature = "dhat-heap")
+))]
 #[global_allocator]
 static GLOBAL: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
+
+// Jemallocator does not work on aarch64 with musl, so we'll use the system allocator instead
+#[cfg(all(target_env = "musl", target_os = "linux", target_arch = "aarch64"))]
+#[global_allocator]
+static GLOBAL: std::alloc::System = std::alloc::System;
 
 fn main() -> Result<(), pico_args::Error> {
     #[cfg(feature = "dhat-heap")]

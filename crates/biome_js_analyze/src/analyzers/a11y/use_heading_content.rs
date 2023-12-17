@@ -47,7 +47,7 @@ declare_rule! {
     pub(crate) UseHeadingContent {
         version: "1.0.0",
         name: "useHeadingContent",
-        recommended: false,
+        recommended: true,
     }
 }
 

@@ -31,7 +31,7 @@ while (false) function foo(){}
 ```
 function-declaration-in-while.js:1:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × In strict mode code, functions can only be declared at top level or inside a block
+  × In non-strict mode code, functions can only be declared at top level, inside a block, or as the body of an if or labelled statement
   
   > 1 │ while (false) function foo(){}
       │               ^^^^^^^^^^^^^^^^

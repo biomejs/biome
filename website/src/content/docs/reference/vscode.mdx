@@ -33,7 +33,7 @@ You can also enable Biome for specific languages only:
 - [Open the `settings.json`](https://code.visualstudio.com/docs/getstarted/settings#_settingsjson): open the _Command Palette_(<kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd title="Shift">⇧</kbd>+<kbd>P</kbd>) and select _Preferences: Open User Settings (JSON)_
 - And set the `editor.defaultFormatter` to `biomejs.biome` for the desired language
 
-```json
+```json title="settings.json"
 {
 	"editor.defaultFormatter": "<other formatter>",
 	"[javascript]": {
@@ -46,11 +46,11 @@ This configuration sets Biome as the default formatter for JavaScript files. All
 
 ## Configuration Resolution
 
-The extension automatically loads the `Biome.json` file from the workspace’s root directory.
+The extension automatically loads the `biome.json` file from the workspace’s root directory.
 
 ## Biome Resolution
 
-The extension tries to use Biome from your project's local dependencies (`node_modules/Biome`). We recommend adding Biome as a project dependency to ensure that NPM scripts and the extension use the same Biome version.
+The extension tries to use Biome from your project's local dependencies (`node_modules/@biomejs/biome`). We recommend adding Biome as a project dependency to ensure that NPM scripts and the extension use the same Biome version.
 
 You can also explicitly specify the `Biome` binary the extension should use by configuring the `biome.lspBin` setting in your editor options.
 
@@ -73,7 +73,7 @@ Biome respects VS Code's _Format on Save_ setting. To enable format on save, ope
 Biome respects VS Code's _Code Actions On Save_ setting. To enable fix on save, add
 
 
-```json
+```json title="settings.json"
 {
   "editor.codeActionsOnSave": {
     "quickfix.biome": true
@@ -89,7 +89,7 @@ The Biome VS Code extension supports imports sorting through the "Organize Impor
 
 You can add the following to your editor configuration if you want the action to run automatically on save instead of calling it manually:
 
-```json
+```json title="settings.json"
 {
 	"editor.codeActionsOnSave":{
 		"source.organizeImports.biome": true

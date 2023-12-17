@@ -128,6 +128,16 @@ pub(crate) fn process_file(ctx: &TraversalOptions, path: &Path) -> FileResult {
                 category!("files/missingHandler"),
             )?;
 
+        // first we stop if there are some files that don't have ALL features enabled, e.g. images, fonts, etc.
+        if file_features.is_ignored() || file_features.is_not_enabled() {
+            return Ok(FileStatus::Ignored);
+        } else if file_features.is_not_supported() {
+            return Err(Message::from(
+                UnhandledDiagnostic.with_file_path(path.display().to_string()),
+            ));
+        }
+
+        // then we pick the specific features for this file
         let unsupported_reason = match ctx.execution.traversal_mode() {
             TraversalMode::Check { .. } => file_features
                 .support_kind_for(&FeatureName::Lint)
@@ -212,6 +222,7 @@ pub(crate) fn process_file(ctx: &TraversalOptions, path: &Path) -> FileResult {
 
         let shared_context = &SharedTraversalOptions::new(ctx);
         ctx.increment_processed();
+
         match ctx.execution.traversal_mode {
             TraversalMode::Lint { .. } => {
                 // the unsupported case should be handled already at this point
@@ -224,7 +235,9 @@ pub(crate) fn process_file(ctx: &TraversalOptions, path: &Path) -> FileResult {
             TraversalMode::Check { .. } => {
                 check_file(shared_context, path, &file_features, category!("check"))
             }
-            TraversalMode::CI => check_file(shared_context, path, &file_features, category!("ci")),
+            TraversalMode::CI { .. } => {
+                check_file(shared_context, path, &file_features, category!("ci"))
+            }
             TraversalMode::Migrate { .. } => {
                 unreachable!("The migration should not be called for this file")
             }

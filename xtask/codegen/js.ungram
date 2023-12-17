@@ -52,12 +52,14 @@ AnyJsRoot =
 	JsScript | JsModule | JsExpressionSnipped
 
 JsScript =
+	bom: 'UNICODE_BOM'?
 	interpreter: 'js_shebang'?
 	directives: JsDirectiveList
 	statements: JsStatementList
 	eof: 'EOF'
 
 JsModule =
+	bom: 'UNICODE_BOM'?
 	interpreter: 'js_shebang'?
 	directives: JsDirectiveList
 	items: JsModuleItemList
@@ -196,12 +198,12 @@ JsForVariableDeclaration =
 
 JsBreakStatement =
     'break'
-    (label: 'ident')?
+    (label: JsLabel)?
     ';'?
 
 JsContinueStatement =
     'continue'
-    (label: 'ident')?
+    (label: JsLabel)?
     ';'?
 
 
@@ -217,9 +219,10 @@ JsWithStatement =
 
 
 JsLabeledStatement =
-    label: 'ident' ':'
+    label: JsLabel ':'
     body: AnyJsStatement
 
+JsLabel = value: 'ident'
 
 JsSwitchStatement =
     'switch' '(' discriminant: AnyJsExpression ')'
@@ -1225,6 +1228,7 @@ AnyJsImportClause =
     | JsImportNamedClause
     | JsImportDefaultClause
     | JsImportNamespaceClause
+	| JsImportCombinedClause
 
 // import "abcd"
 // import "abcd" assert ...
@@ -1235,51 +1239,54 @@ JsImportBareClause =
 // import foo from "mod"
 // import type foo from "mod"
 JsImportDefaultClause =
-		'type'?
-		local_name: AnyJsBinding
-		'from'
-		source: JsModuleSource
-		assertion: JsImportAssertion?
-
-// import * as foo from "mod";
-// import type * as foo from "mod";
-JsImportNamespaceClause =
-  'type'?
-	'*'
-	'as'
-	local_name: AnyJsBinding
+	'type'?
+	default_specifier: JsDefaultImportSpecifier
 	'from'
 	source: JsModuleSource
 	assertion: JsImportAssertion?
 
-// import { a, b: c } from "d"
+// import * as foo from "mod";
+// import type * as foo from "mod";
+JsImportNamespaceClause =
+	'type'?
+	namespace_specifier: JsNamespaceImportSpecifier
+	'from'
+	source: JsModuleSource
+	assertion: JsImportAssertion?
+
+// import { a, b: c } from "d";
 //        ^^^^^^^^^^^^^^^^^^^^
-// import c, { b } from "c"
-//        ^^^^^^^^^^^^^^^^^
-// import { type a } from "c"
+// import { type a } from "c";
 //        ^^^^^^^^^^^^^^^^^^^
-// import foo, * as bar from "mod"
-//        ^^^^^^^^^^^^^^^^^^^^^^^^
 // import type { foo } from "mod";
 //        ^^^^^^^^^^^^^^^^^^^^^^^
-// import foo, { type bar } from "mod";
 JsImportNamedClause =
     'type'?
-    default_specifier: JsDefaultImportSpecifier?
-    named_import: AnyJsNamedImport
+	named_specifiers: JsNamedImportSpecifiers
     'from'
     source: JsModuleSource
     assertion: JsImportAssertion?
+
+// import c, { b } from "c"
+//        ^^^^^^^^^^^^^^^^^
+// import foo, { type bar } from "mod";
+//        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+// import foo, * as bar from "mod";
+//        ^^^^^^^^^^^^^^^^^^^^^^^^
+JsImportCombinedClause =
+	default_specifier: JsDefaultImportSpecifier
+	','
+	specifier: AnyJsCombinedSpecifier
+	'from'
+	source: JsModuleSource
+	assertion: JsImportAssertion?
+
+AnyJsCombinedSpecifier = JsNamedImportSpecifiers | JsNamespaceImportSpecifier
 
 // import a, { b, c } from "d";
 //        ^^
 JsDefaultImportSpecifier =
     local_name: AnyJsBinding
-    trailing_comma: ','
-
-AnyJsNamedImport =
-	JsNamedImportSpecifiers
-	|  JsNamespaceImportSpecifier
 
 // import a, * as b from "d";
 //           ^^^^^^

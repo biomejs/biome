@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -34,8 +35,9 @@ JsModule {
 
 0: JS_MODULE@0..79
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..78
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..78
     0: JS_BLOCK_STATEMENT@0..78
       0: L_CURLY@0..1 "{" [] []
       1: JS_STATEMENT_LIST@1..76
@@ -55,7 +57,7 @@ JsModule {
           8: COLON@67..69 ":" [] [Whitespace(" ")]
           9: JS_STRING_LITERAL@69..76 "\"0.0.1\"" [] []
       2: R_CURLY@76..78 "}" [Newline("\n")] []
-  3: EOF@78..79 "" [Newline("\n")] []
+  4: EOF@78..79 "" [Newline("\n")] []
 --
 statements_closing_curly.js:2:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

@@ -8,8 +8,10 @@ description: Install the Biome manually
 Using Biome's standalone CLI binary can be a great choice if you aren't already using Node or npm (or any other package manager).
 Or in other words, Biome shouldn't be the only reason for you to have a `package.json`.
 
-> Note: If you're already using npm or another package manager, then using the package manager is the [preferred way to install](/guides/getting-started#installation) Biome.
+:::note
+If you're already using npm or another package manager, then using the package manager is the [preferred way to install](/guides/getting-started#installation) Biome.
 You're already familiar with the tooling, and installing and updating are simpler.
+:::
 
 ### Homebrew
 
@@ -21,19 +23,21 @@ brew install biome
 
 ## System Requirements
 
-* Windows (including WSL), macOS, or Linux
-* x86_64 or ARM64
+- Windows (including WSL), macOS, or Linux
+- x86_64 or ARM64
 
 ## Supported platforms
 
 You have to pick the correct binary for your platform for Biome work. The following table should help you do so.
 
-| CPU Architecture | Windows        | macOS                          | Linux         |
-|------------------|----------------|--------------------------------|---------------|
-| `arm64`          | `win32-arm64`  | `darwin-arm64` (M1 or newer)   | `linux-arm64` |
-| `x64`            | `win32-x64`    | `darwin-x64`                   | `linux-x64`   |
+| CPU Architecture | Windows       | macOS                        | Linux         | Linux (musl)       |
+| ---------------- | ------------- | ---------------------------- | ------------- | ------------------ |
+| `arm64`          | `win32-arm64` | `darwin-arm64` (M1 or newer) | `linux-arm64` | `linux-arm64-musl` |
+| `x64`            | `win32-x64`   | `darwin-x64`                 | `linux-x64`   | `linux-x64-musl`   |
 
-> NOTE: Use the Linux variant for Windows Subsystem for Linux (WSL)
+:::note
+Use the Linux variant for Windows Subsystem for Linux (WSL).
+:::
 
 ## Install Biome
 
@@ -52,7 +56,9 @@ chmod +x biome
 Invoke-WebRequest -Uri "https://github.com/biomejs/biome/releases/download/cli%2Fv<version>/biome-win32-x64.exe" -OutFile "biome.exe"
 ```
 
-> Note: Make sure to replace `<version>` with the Biome version you want to install.
+:::note
+Make sure to replace `<version>` with the Biome version you want to install.
+:::
 
 Now you can use Biome by simply running `./biome`.
 

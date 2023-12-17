@@ -38,6 +38,7 @@ bpaf                 = { workspace = true, features = ["bright-color"] }
 crossbeam            = "0.8.1"
 dashmap              = { workspace = true }
 hdrhistogram         = { version = "7.5.0", default-features = false }
+ignore               = { workspace = true }
 indexmap             = { workspace = true }
 lazy_static          = { workspace = true }
 rayon                = "1.5.1"
@@ -57,7 +58,7 @@ tokio = { workspace = true, features = ["process"] }
 [target.'cfg(windows)'.dependencies]
 mimalloc = "0.1.29"
 
-[target.'cfg(not(windows))'.dependencies]
+[target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dependencies]
 tikv-jemallocator = "0.5.0"
 
 [dev-dependencies]
@@ -69,3 +70,6 @@ tokio                = { workspace = true, features = ["io-util"] }
 
 [features]
 docgen = ["bpaf/docgen"]
+
+[lints]
+workspace = true

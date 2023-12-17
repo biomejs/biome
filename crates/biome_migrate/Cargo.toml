@@ -29,3 +29,6 @@ biome_service      = { path = "../biome_service" }
 biome_test_utils   = { path = "../biome_test_utils" }
 insta              = { workspace = true, features = ["glob"] }
 tests_macros       = { path = "../tests_macros" }
+
+[lints]
+workspace = true

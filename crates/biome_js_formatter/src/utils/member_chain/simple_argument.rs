@@ -1,7 +1,8 @@
 use crate::utils::is_call_like_expression;
 use biome_js_syntax::{
-    AnyJsArrayElement, AnyJsCallArgument, AnyJsExpression, AnyJsLiteralExpression, AnyJsName,
-    AnyJsObjectMember, AnyJsObjectMemberName, AnyJsTemplateElement, JsSpread,
+    AnyJsArrayElement, AnyJsAssignment, AnyJsCallArgument, AnyJsExpression, AnyJsLiteralExpression,
+    AnyJsName, AnyJsObjectMember, AnyJsObjectMemberName, AnyJsTemplateElement,
+    JsComputedMemberExpressionFields, JsPostUpdateOperator, JsPreUpdateOperator, JsSpread,
     JsStaticMemberExpressionFields, JsTemplateExpression, JsUnaryOperator,
 };
 use biome_rowan::{AstSeparatedList, SyntaxResult};
@@ -20,10 +21,11 @@ use biome_rowan::{AstSeparatedList, SyntaxResult};
 /// - *simple*: the argument is a [JsThisExpression]
 /// - *simple*: the argument is a [JsIdentifierExpression]
 /// - *simple*: the argument is a [JsSuperExpression]
-/// - *simple*: the argument is a [JsUnaryExpression], has `!` or `-` operator and the argument is simple
+/// - *simple*: the argument is a [JsUnaryExpression], has a trivial operator (`!`, `-`, `~`, or `+`), and the argument is simple
+/// - *simple*: the argument is a [JsPreUpdateExpression] or [JsPostUpdateExpression], with a trivial operator (`++` or `--`), and the argument is simple.
 /// - *simple*: the argument is a [TsNonNullAssertionExpression] and the argument is simple
 /// - if the argument is a template literal, check [is_simple_template_literal]
-/// - if the argument is an object expression, all its members are checked if they are simple or not. Check [is_simple_static_member_expression]
+/// - if the argument is an object expression, all its members are checked if they are simple or not. Check [is_simple_object_expression]
 /// - if the argument is an array expression, all its elements are checked if they are simple or not. Check [is_simple_array_expression]
 ///
 /// This algorithm is inspired from [Prettier].
@@ -31,14 +33,17 @@ use biome_rowan::{AstSeparatedList, SyntaxResult};
 /// [JsThisExpression]: [biome_js_syntax::JsThisExpression]
 /// [JsIdentifierExpression]: [biome_js_syntax::JsIdentifierExpression]
 /// [JsSuperExpression]: [biome_js_syntax::JsSuperExpression]
-/// [is_simple_static_member_expression]: [Simple::is_simple_static_member_expression]
+/// [is_simple_object_expression]: [Simple::is_simple_object_expression]
 /// [is_simple_array_expression]: [Simple::is_simple_array_expression]
 /// [JsUnaryExpression]: [biome_js_syntax::JsUnaryExpression]
+/// [JsPreUpdateExpression]: [biome_js_syntax::JsPreUpdateExpression]
+/// [JsPostUpdateExpression]: [biome_js_syntax::JsPostUpdateExpression]
 /// [TsNonNullAssertionExpression]: [biome_js_syntax::TsNonNullAssertionExpression]
 /// [Prettier]: https://github.com/prettier/prettier/blob/a9de2a128cc8eea84ddd90efdc210378a894ab6b/src/language-js/utils/index.js#L802-L886
 #[derive(Debug)]
-pub(crate) enum SimpleArgument {
+pub enum SimpleArgument {
     Expression(AnyJsExpression),
+    Assignment(AnyJsAssignment),
     Name(AnyJsName),
     Spread,
 }
@@ -68,12 +73,11 @@ impl SimpleArgument {
             || self.is_simple_object_expression(depth)
             || self.is_simple_array_expression(depth)
             || self.is_simple_unary_expression(depth).unwrap_or(false)
+            || self.is_simple_update_expression(depth).unwrap_or(false)
             || self
                 .is_simple_non_null_assertion_expression(depth)
                 .unwrap_or(false)
-            || self
-                .is_simple_static_member_expression(depth)
-                .unwrap_or(false)
+            || self.is_simple_member_expression(depth).unwrap_or(false)
             || self.is_simple_call_like_expression(depth).unwrap_or(false)
             || self.is_simple_object_expression(depth)
             || self.is_simple_regex_expression()
@@ -102,17 +106,23 @@ impl SimpleArgument {
                     _ => unreachable!("The check is done inside `is_call_like_expression`"),
                 };
 
-                let simple_arguments = if let Some(arguments) = arguments {
-                    arguments.args().iter().all(|argument| {
-                        argument.map_or(true, |argument| {
-                            SimpleArgument::from(argument).is_simple_impl(depth + 1)
+                if !is_import_call_expression && !is_simple_callee {
+                    return Ok(false);
+                }
+
+                if let Some(arguments) = arguments {
+                    // This is a little awkward, but because we _increment_
+                    // depth, we need to add it to the left and compare to the
+                    // max we allow (2), versus just comparing `len <= depth`.
+                    arguments.args().len() + usize::from(depth) <= 2
+                        && arguments.args().iter().all(|argument| {
+                            argument.map_or(true, |argument| {
+                                SimpleArgument::from(argument).is_simple_impl(depth + 1)
+                            })
                         })
-                    })
                 } else {
                     true
-                };
-
-                (is_import_call_expression || is_simple_callee) && simple_arguments
+                }
             } else {
                 false
             }
@@ -123,15 +133,24 @@ impl SimpleArgument {
         Ok(result)
     }
 
-    fn is_simple_static_member_expression(&self, depth: u8) -> SyntaxResult<bool> {
-        if let SimpleArgument::Expression(AnyJsExpression::JsStaticMemberExpression(
-            static_expression,
-        )) = self
-        {
-            let JsStaticMemberExpressionFields { member, object, .. } =
-                static_expression.as_fields();
+    fn is_simple_member_expression(&self, depth: u8) -> SyntaxResult<bool> {
+        if let SimpleArgument::Expression(expression) = self {
+            match expression {
+                AnyJsExpression::JsStaticMemberExpression(static_expression) => {
+                    let JsStaticMemberExpressionFields { member, object, .. } =
+                        static_expression.as_fields();
 
-            Ok(member.is_ok() && SimpleArgument::from(object?).is_simple_impl(depth))
+                    Ok(member.is_ok() && SimpleArgument::from(object?).is_simple_impl(depth))
+                }
+                AnyJsExpression::JsComputedMemberExpression(computed_expression) => {
+                    let JsComputedMemberExpressionFields { member, object, .. } =
+                        computed_expression.as_fields();
+
+                    Ok(SimpleArgument::from(member?).is_simple_impl(depth)
+                        && SimpleArgument::from(object?).is_simple_impl(depth))
+                }
+                _ => Ok(false),
+            }
         } else {
             Ok(false)
         }
@@ -154,7 +173,10 @@ impl SimpleArgument {
         {
             if matches!(
                 unary_expression.operator()?,
-                JsUnaryOperator::LogicalNot | JsUnaryOperator::Minus
+                JsUnaryOperator::LogicalNot
+                    | JsUnaryOperator::Minus
+                    | JsUnaryOperator::Plus
+                    | JsUnaryOperator::BitwiseNot
             ) {
                 Ok(SimpleArgument::from(unary_expression.argument()?).is_simple_impl(depth))
             } else {
@@ -162,6 +184,39 @@ impl SimpleArgument {
             }
         } else {
             Ok(false)
+        }
+    }
+
+    fn is_simple_update_expression(&self, depth: u8) -> SyntaxResult<bool> {
+        // Both PreUpdate and PostUpdate expressions have Increment and Decrement
+        // operators, but they are typed separately, so must be handled that way.
+        // These arms should be equivalent.
+        match self {
+            SimpleArgument::Expression(AnyJsExpression::JsPreUpdateExpression(
+                update_expression,
+            )) => {
+                if matches!(
+                    update_expression.operator()?,
+                    JsPreUpdateOperator::Decrement | JsPreUpdateOperator::Increment
+                ) {
+                    Ok(SimpleArgument::from(update_expression.operand()?).is_simple_impl(depth))
+                } else {
+                    Ok(false)
+                }
+            }
+            SimpleArgument::Expression(AnyJsExpression::JsPostUpdateExpression(
+                update_expression,
+            )) => {
+                if matches!(
+                    update_expression.operator()?,
+                    JsPostUpdateOperator::Decrement | JsPostUpdateOperator::Increment
+                ) {
+                    Ok(SimpleArgument::from(update_expression.operand()?).is_simple_impl(depth))
+                } else {
+                    Ok(false)
+                }
+            }
+            _ => Ok(false),
         }
     }
 
@@ -225,7 +280,7 @@ impl SimpleArgument {
                     | AnyJsExpression::JsThisExpression(_)
                     | AnyJsExpression::JsIdentifierExpression(_)
                     | AnyJsExpression::JsSuperExpression(_)
-            )
+            ) | SimpleArgument::Assignment(AnyJsAssignment::JsIdentifierAssignment(_))
         )
     }
 
@@ -266,6 +321,12 @@ impl SimpleArgument {
 impl From<AnyJsExpression> for SimpleArgument {
     fn from(expr: AnyJsExpression) -> Self {
         Self::Expression(expr)
+    }
+}
+
+impl From<AnyJsAssignment> for SimpleArgument {
+    fn from(assignment: AnyJsAssignment) -> Self {
+        Self::Assignment(assignment)
     }
 }
 

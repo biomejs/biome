@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -17,8 +18,9 @@ JsModule {
 
 0: JS_MODULE@0..5
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..4
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..4
     0: JS_EXPRESSION_STATEMENT@0..4
       0: JS_NEW_EXPRESSION@0..3
         0: NEW_KW@0..3 "new" [] []
@@ -26,7 +28,7 @@ JsModule {
         2: (empty)
         3: (empty)
       1: SEMICOLON@3..4 ";" [] []
-  3: EOF@4..5 "" [Newline("\n")] []
+  4: EOF@4..5 "" [Newline("\n")] []
 --
 new_exprs.js:1:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

@@ -27,17 +27,55 @@ impl FormatNodeRule<JsCaseClause> for FormatJsCaseClause {
             ]
         )?;
 
-        let is_first_child_block_stmt = matches!(
+        // Whether the first statement in the clause is a BlockStatement, and
+        // there are no other non-empty statements. Empties may show up when
+        // parsing depending on if the input code includes certain newlines.
+        let is_single_block_statement = matches!(
             consequent.iter().next(),
             Some(AnyJsStatement::JsBlockStatement(_))
-        );
+        ) && consequent
+            .iter()
+            .filter(|statement| !matches!(statement, AnyJsStatement::JsEmptyStatement(_)))
+            .count()
+            == 1;
 
+        // When the case block is empty, the case becomes a fallthrough, so it
+        // is collapsed directly on top of the next case (just a single
+        // hardline).
+        // When the block is a single statement _and_ it's a block statement,
+        // then the opening brace of the block can hug the same line as the
+        // case. But, if there's more than one statement, then the block
+        // _cannot_ hug. This distinction helps clarify that the case continues
+        // past the end of the block statement, despite the braces making it
+        // seem like it might end.
+        // Lastly, the default case is just to break and indent the body.
+        //
+        // switch (key) {
+        //   case fallthrough: // trailing comment
+        //   case normalBody:
+        //     someWork();
+        //     break;
+        //
+        //   case blockBody: {
+        //     const a = 1;
+        //     break;
+        //   }
+        //
+        //   case separateBlockBody:
+        //     {
+        //       breakIsNotInsideTheBlock();
+        //     }
+        //     break;
+        //
+        //   default:
+        //     break;
+        // }
         if consequent.is_empty() {
-            // Skip inserting an indent block is the consequent is empty to print
-            // the trailing comments for the case clause inline if there is no
-            // block to push them into
-            write!(f, [hard_line_break()])
-        } else if is_first_child_block_stmt {
+            // Print nothing to ensure that trailing comments on the same line
+            // are printed on the same line. The parent list formatter takes
+            // care of inserting a hard line break between cases.
+            Ok(())
+        } else if is_single_block_statement {
             write![f, [space(), consequent.format()]]
         } else {
             // no line break needed after because it is added by the indent in the switch statement

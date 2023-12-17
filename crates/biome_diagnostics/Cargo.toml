@@ -8,7 +8,7 @@ keywords.workspace   = true
 license.workspace    = true
 name                 = "biome_diagnostics"
 repository.workspace = true
-version              = "0.1.0"
+version              = "0.3.1"
 
 [[example]]
 name = "cli"
@@ -36,6 +36,7 @@ biome_text_edit              = { workspace = true }
 biome_text_size              = { workspace = true }
 bitflags                     = { workspace = true }
 bpaf                         = { workspace = true }
+ignore                       = { workspace = true }
 schemars                     = { workspace = true, optional = true }
 serde                        = { workspace = true, features = ["derive"] }
 termcolor                    = "1.1.2"
@@ -47,3 +48,6 @@ schema = ["schemars", "biome_text_edit/schemars", "biome_diagnostics_categories/
 [dev-dependencies]
 serde_json = { workspace = true }
 trybuild   = "1.0.80"
+
+[lints]
+workspace = true

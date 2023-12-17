@@ -41,23 +41,34 @@ To make svg accessible, the following methods are available:
     <title></title>
     <circle />
 </svg>
-``
+```
 
-```js,expect_diagnostic
+<pre class="language-text"><code class="language-text">a11y/noSvgWithoutTitle.js:1:1 <a href="https://biomejs.dev/linter/rules/no-svg-without-title">lint/a11y/noSvgWithoutTitle</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Alternative text </span><span style="color: Tomato;"><strong>title</strong></span><span style="color: Tomato;"> element cannot be empty</span>
+  
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>&lt;svg&gt;
+   <strong>   │ </strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
+    <strong>2 │ </strong>    &lt;title&gt;&lt;/title&gt;
+    <strong>3 │ </strong>    &lt;circle /&gt;
+  
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">For accessibility purposes, </span><span style="color: lightgreen;"><strong>SVGs</strong></span><span style="color: lightgreen;"> should have an alternative text, provided via </span><span style="color: lightgreen;"><strong>title</strong></span><span style="color: lightgreen;"> element. If the svg element has role=&quot;img&quot;, you should add the </span><span style="color: lightgreen;"><strong>aria-label</strong></span><span style="color: lightgreen;"> or </span><span style="color: lightgreen;"><strong>aria-labelledby</strong></span><span style="color: lightgreen;"> attribute.</span>
+  
+</code></pre>
+
+```jsx
 <svg>foo</svg>
 ```
 
-<pre class="language-text"><code class="language-text">a11y/noSvgWithoutTitle.js:7:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/noSvgWithoutTitle.js:1:1 <a href="https://biomejs.dev/linter/rules/no-svg-without-title">lint/a11y/noSvgWithoutTitle</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">unterminated template literal</span>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Alternative text </span><span style="color: Tomato;"><strong>title</strong></span><span style="color: Tomato;"> element cannot be empty</span>
   
-    <strong>5 │ </strong>``
-    <strong>6 │ </strong>
-<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>7 │ </strong>```js,expect_diagnostic
-   <strong>   │ </strong>   <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
-<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>8 │ </strong>&lt;svg&gt;foo&lt;/svg&gt;
-<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>9 │ </strong>
-   <strong>   │ </strong>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>&lt;svg&gt;foo&lt;/svg&gt;
+   <strong>   │ </strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
+    <strong>2 │ </strong>
+  
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">For accessibility purposes, </span><span style="color: lightgreen;"><strong>SVGs</strong></span><span style="color: lightgreen;"> should have an alternative text, provided via </span><span style="color: lightgreen;"><strong>title</strong></span><span style="color: lightgreen;"> element. If the svg element has role=&quot;img&quot;, you should add the </span><span style="color: lightgreen;"><strong>aria-label</strong></span><span style="color: lightgreen;"> or </span><span style="color: lightgreen;"><strong>aria-labelledby</strong></span><span style="color: lightgreen;"> attribute.</span>
   
 </code></pre>
 
@@ -89,6 +100,12 @@ To make svg accessible, the following methods are available:
 <svg>
     <title>Pass</title>
     <circle />
+</svg>
+```
+
+```jsx
+<svg role="img" aria-labelledby="title">
+    <span id="title">Pass</span>
 </svg>
 ```
 

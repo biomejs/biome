@@ -1,0 +1,32 @@
+---
+title: 持续集成
+description: 在 CI 环境中使用 Biome
+---
+
+在 CI 环境中运行 Biome 非常简单。查看以下示例以获取一些灵感。
+
+## GitHub Actions
+
+我们提供了一个第一方 [GitHub Action](https://github.com/marketplace/actions/setup-biome) 来在您的运行器中设置 Biome。
+以下是一个简单工作流程的样子：
+
+```yaml title="pull_request.yml"
+name: Code quality
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Biome
+        uses: biomejs/setup-biome@v1
+        with:
+          version: 1.2.2
+      - name: Run Biome
+        run: biome ci .
+```

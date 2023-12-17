@@ -81,11 +81,12 @@ impl Format<JsFormatContext> for AnyJsxOpeningElement {
                         ]
                     )?;
 
-                    let bracket_same_line = attributes.is_empty() && !name_has_comments;
+                    let force_bracket_same_line = f.options().bracket_same_line().value();
+                    let wants_bracket_same_line = attributes.is_empty() && !name_has_comments;
 
                     if self.is_self_closing() {
                         write!(f, [soft_line_break_or_space(), format_close])
-                    } else if bracket_same_line {
+                    } else if force_bracket_same_line || wants_bracket_same_line {
                         write!(f, [format_close])
                     } else {
                         write!(f, [soft_line_break(), format_close])

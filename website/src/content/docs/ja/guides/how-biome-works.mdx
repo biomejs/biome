@@ -1,0 +1,98 @@
+---
+title: Biome の振る舞い
+description: Biome を使用して新しいプロジェクトをセットアップする方法を学ぶ
+---
+import DefaultConfiguration from "@src/components/generated/DefaultConfiguration.mdx";
+
+
+## 設定ファイル
+
+Biome はデフォルトで十分な機能を提供するので、設定ファイルの使用は**オプショナル**です。
+デフォルトの挙動を変更したい時に設定ファイルを使用してください。
+
+Biome の設定ファイルは `biome.json` という名前で、プロジェクトのルートディレクトリに置く必要があります。
+通常、プロジェクトの `package.json` が置かれているところがルートディレクトリになります。
+
+例えば、以下の設定ファイルは formatter を有効にし、インデントスタイルと幅を設定します。linter は無効になっています：
+
+```json
+{
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "tab",
+    "lineWidth": 120
+  },
+  "linter": {
+    "enabled": false
+  }
+}
+```
+
+### デフォルトの設定
+
+`biome init` を実行すると、以下のデフォルト設定が出力されます：
+
+<DefaultConfiguration />
+
+### 設定ファイルの解決
+
+
+Biome は最も近い `biome.json` を自動で検出します。
+実行時のディレクトリから `biome.json` を探索し、以下の条件を満たすまで親ディレクトリを探索します：
+- `biome.json` ファイルが見つかった場合
+- **`biome.json` が見つからなかった場合**、Biome のデフォルト設定を適用します
+
+例えば以下のようなディレクトリ構成の場合：
+
+```
+└── app
+    ├── backend
+    │   ├── package.json
+    │   └── biome.json
+    └── frontend
+        ├── legacy
+        │   └── package.json
+        ├── new
+        │   └── package.json
+        └── biome.json
+
+```
+
+- `app/backend/package.json` で実行された biome コマンドは `app/backend/biome.json` を使用します
+- `app/frontend/legacy/package.json` や `app/frontend/new/package.json` で実行された biome コマンドは `app/frontend/biome.json` を使用します
+
+
+## 既知のファイル
+
+以下のファイルは現在 Biome によって無視されます。
+つまり、これらのファイルに対して Biome は何も診断を行いません。
+
+- `package.json`
+- `package-lock.json`
+- `npm-shrinkwrap.json`
+- `yarn.lock`
+- `composer.json`
+- `composer.lock`
+- `typescript.json`
+- `tsconfig.json`
+- `jsconfig.json`
+- `deno.json`
+- `deno.jsonc`
+
+
+
+`json.parser.allowComments` と `json.parser.allowTrailingCommas` オプションが `true` に設定されている時、以下のファイルは **`JSON` ファイル** としてパースされます。
+これは、VSCode などのエディタがそのように扱うためです。
+
+- `tslint.json`
+- `babel.config.json`
+- `.babelrc.json`
+- `.ember-cli`
+- `typedoc.json`
+- `.eslintrc`
+- `.eslintrc.json`
+- `.jsfmtrc`
+- `.jshintrc`
+- `.swcrc`
+- `.hintrc`
+- `.babelrc`

@@ -61,19 +61,18 @@ impl JsObjectPatternLike {
     fn should_break_properties(&self) -> bool {
         let parent_kind = self.syntax().parent().kind();
 
-        let parent_where_not_to_break = matches!(
+        // Catch only has a single expression in the declaration, so it will
+        // be the direct parent of the object pattern, and the pattern should
+        // not break unless it has to there.
+        //
+        // Parameters in function-like expressions are also kept inline, and
+        // all parameters end up wrapped by a `JsFormalParameter` node, as
+        // checked here. Note that this is also checked ahead of time by the
+        // `is_inline` function.
+        if matches!(
             parent_kind,
-            Some(
-                // These parents are the kinds where we want to prevent
-                // to go to multiple lines.
-                JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION
-                    | JsSyntaxKind::JS_OBJECT_ASSIGNMENT_PATTERN_PROPERTY
-                    | JsSyntaxKind::JS_CATCH_DECLARATION
-                    | JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_PROPERTY
-            )
-        );
-
-        if parent_where_not_to_break {
+            Some(JsSyntaxKind::JS_CATCH_DECLARATION | JsSyntaxKind::JS_FORMAL_PARAMETER)
+        ) {
             return false;
         }
 
@@ -161,12 +160,14 @@ impl JsObjectPatternLike {
 
 impl Format<JsFormatContext> for JsObjectPatternLike {
     fn fmt(&self, f: &mut Formatter<JsFormatContext>) -> FormatResult<()> {
+        let should_insert_space_around_brackets = f.options().bracket_spacing().value();
         let format_properties = format_with(|f| {
             write!(
                 f,
-                [soft_space_or_block_indent(&format_with(
-                    |f| self.write_properties(f)
-                ))]
+                [soft_block_indent_with_maybe_space(
+                    &format_with(|f| self.write_properties(f)),
+                    should_insert_space_around_brackets
+                )]
             )
         });
 

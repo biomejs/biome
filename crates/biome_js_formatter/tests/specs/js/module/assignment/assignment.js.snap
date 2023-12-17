@@ -169,6 +169,13 @@ function* f() {
 		yield setup(2);
 }
 
+export const MSG_WITH_REMOVED_ESCAPE_CHARACTER_TEST =
+  goog.getMsg("That\'s all we know");
+
+export const MSG_WITHOUT_ESCAPE_CHARACTER_TEST = goog.getMsg(
+	"That's all we know",
+);
+
 ```
 
 
@@ -181,6 +188,7 @@ function* f() {
 -----
 Indent style: Tab
 Indent width: 2
+Line ending: LF
 Line width: 80
 Quote style: Double Quotes
 JSX quote style: Double Quotes
@@ -188,6 +196,8 @@ Quote properties: As needed
 Trailing comma: All
 Semicolons: Always
 Arrow parentheses: Always
+Bracket spacing: true
+Bracket same line: false
 -----
 
 ```js
@@ -423,6 +433,12 @@ function* f() {
 	const { looooooooooooooooooooooooooooooooooooooooooooongValue } =
 		yield setup(2);
 }
+
+export const MSG_WITH_REMOVED_ESCAPE_CHARACTER_TEST =
+	goog.getMsg("That's all we know");
+
+export const MSG_WITHOUT_ESCAPE_CHARACTER_TEST =
+	goog.getMsg("That's all we know");
 ```
 
 # Lines exceeding max width of 80 characters

@@ -1,0 +1,56 @@
+---
+title: クレジット
+description: これまでのコントリビューターと Biome に影響を与えたプロジェクトへの謝辞
+---
+
+import Contributors from "@src/components/Contributors.astro";
+
+<Contributors />
+
+## 謝辞
+
+Biome には、他のプロジェクトから大きな影響を受けたコードが含まれています。それらは、 Biome のインフラストラクチャに適応されています。
+
+- [Prettier](https://github.com/prettier/prettier/)
+  - [ライセンス](https://github.com/biomejs/biome/blob/main/crates/biome_js_formatter/LICENSE)
+
+## フォークしたプロジェクト
+
+Biomeは、[Rome Tools](https://github.com/biomejs/biome/)のコミュニティによるフォークです。
+_Rome Tools_ と _Biome_ は、MITライセンスに基づいています。
+
+
+Biomeには、他のプロジェクトからフォークしたコードが含まれています。
+それらのコードは、自分たちのコードに合うように変換されたり、ときには大幅に書き直されたりしています。
+
+- [`crates/biome_diagnostics`](https://github.com/biomejs/biome/tree/main/crates/biome_diagnostics)
+  - **オリジナル**: [`rslint/rslint_errors`](https://github.com/rslint/rslint/tree/master/crates/rslint_errors)
+  - **ライセンス**: MIT
+
+- [`crates/biome_console/src/codespan`](https://github.com/biomejs/biome/tree/main/crates/biome_console/src/codespan)
+  - **オリジナル**: [`brendanzab/codespan`](https://github.com/brendanzab/codespan)
+  - **ライセンス**: Apache License, Version 2.0
+
+- [`crates/biome_js_parser`](https://github.com/biomejs/biome/tree/main/crates/biome_js_parser)
+  - **オリジナル**: [`rslint/rslint_parser`](https://github.com/rslint/rslint/tree/master/crates/rslint_parser)
+  - **ライセンス**: MIT
+
+- [`crates/biome_js_parser/lexer`](https://github.com/biomejs/biome/tree/main/crates/biome_js_parser/src/lexer)
+  - **オリジナル**:  [`rslint/rslint_lexer`](https://github.com/rslint/rslint/tree/master/crates/rslint_lexer)
+  - **ライセンス**: MIT
+
+- [`crates/biome_js_syntax`](https://github.com/biomejs/biome/tree/main/crates/biome_js_syntax)
+	- **オリジナル**: [`rslint/rslint_syntax`](https://github.com/rslint/rslint/tree/master/crates/rslint_syntax)
+	- **ライセンス**: MIT
+
+- [`crates/biome_text_edit`](https://github.com/biomejs/biome/tree/main/crates/biome_text_edit)
+	- **オリジナル**: [`rslint/rslint_text_edit`](https://github.com/rslint/rslint/tree/master/crates/rslint_text_edit)
+	- **ライセンス**: MIT
+
+- [`crates/biome_rowan`](https://github.com/biomejs/biome/tree/main/crates/biome_rowan)
+	- **オリジナル**: [`rust-analyzer/rowan`](https://github.com/rust-analyzer/rowan)
+	- **ライセンス**: Apache License, Version 2.0
+
+- [`crates/biome_text_size`](https://github.com/biomejs/biome/tree/main/crates/biome_text_size)
+  - **オリジナル**: [`rust-analyzer/text-size`](https://github.com/rust-analyzer/text-size)
+  - **ライセンス**: Apache License, Version 2.0 or MIT

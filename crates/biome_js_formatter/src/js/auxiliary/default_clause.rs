@@ -15,10 +15,19 @@ impl FormatNodeRule<JsDefaultClause> for FormatJsDefaultClause {
             consequent,
         } = node.as_fields();
 
-        let first_child_is_block_stmt = matches!(
+        // Whether the first statement in the clause is a BlockStatement, and
+        // there are no other non-empty statements. Empties may show up when
+        // parsing depending on if the input code includes certain newlines.
+        //
+        // See the comments in `case_clause.rs` for a detailed example.
+        let is_single_block_statement = matches!(
             consequent.iter().next(),
             Some(AnyJsStatement::JsBlockStatement(_))
-        );
+        ) && consequent
+            .iter()
+            .filter(|statement| !matches!(statement, AnyJsStatement::JsEmptyStatement(_)))
+            .count()
+            == 1;
 
         write!(f, [default_token.format(), colon_token.format()])?;
 
@@ -27,8 +36,10 @@ impl FormatNodeRule<JsDefaultClause> for FormatJsDefaultClause {
         }
 
         if consequent.is_empty() {
-            write!(f, [hard_line_break()])
-        } else if first_child_is_block_stmt {
+            return Ok(());
+        }
+
+        if is_single_block_statement {
             write!(f, [space(), consequent.format()])
         } else {
             // no line break needed after because it is added by the indent in the switch statement

@@ -1,0 +1,67 @@
+---
+title: 手動インストール
+description: Biome を手動でインストールする
+---
+
+## Biome を Node.js を使わずに使用する
+
+もしあなたが Node.js や npm（あるいは他のパッケージマネージャー）を使用してない場合、代わりに Biome のスタンドアロンなCLIバイナリを使用できます。
+言い換えれば、`package.json` を持たずに Biome を利用できます。
+
+:::note
+すでにnpmや他のパッケージマネージャーを使用している場合は、パッケージマネージャーを使用することがBiomeの[推奨されるインストール方法](/ja/guides/getting-started#installation)です。
+慣れているツールの利用は、インストールや更新を簡単にします。
+:::
+
+### Homebrew
+
+Biome は macOS と Linux ユーザー向けに [Homebrew formula](https://formulae.brew.sh/formula/biome) から利用可能です。
+
+```shell
+brew install biome
+```
+
+## システム要件
+
+- Windows（WSL 含む）, macOS, または Linux
+- x86_64 または ARM64
+
+## サポートされるプラットフォーム
+
+Biomeを動作させるためには、プラットフォームに適したバイナリを選択する必要があります。次の表を参考にしてください。
+
+| CPU アーキテクチャ | Windows       | macOS                        | Linux         | Linux (musl)       |
+| ------------------ | ------------- | ---------------------------- | ------------- | ------------------ |
+| `arm64`            | `win32-arm64` | `darwin-arm64` (M1以降)      | `linux-arm64` | `linux-arm64-musl` |
+| `x64`              | `win32-x64`   | `darwin-x64`                 | `linux-x64`   | `linux-x64-musl`   |
+
+:::note
+Windows Subsystem for Linux (WSL) の場合は、Linux版を使用してください。
+:::
+
+## Biomeのインストール
+
+Biome をインストールするには、GitHub上の[最新のCLIリリース](https://github.com/biomejs/biome/releases) からプラットフォームに合った実行可能ファイルを取得し、実行権限を与えてください。
+
+```shell
+# macOS arm (M1以降)
+curl -L https://github.com/biomejs/biome/releases/download/cli%2Fv<version>/biome-darwin-arm64 -o biome
+chmod +x biome
+
+# Linux (x86_64)
+curl -L https://github.com/biomejs/biome/releases/download/cli%2Fv<version>/biome-linux-x64 -o biome
+chmod +x biome
+
+# Windows (x86_64, Powershell)
+Invoke-WebRequest -Uri "https://github.com/biomejs/biome/releases/download/cli%2Fv<version>/biome-win32-x64.exe" -OutFile "biome.exe"
+```
+
+:::note
+`<version>` の項目を、インストールされたBiome のバージョンに置き換えて下さい。
+:::
+
+これで、 `./biome` を実行することでBiome を使用できます。
+
+## 次のステップ
+
+Biome の使用方法については [getting started セクション](/ja/guides/getting-started#next-steps) で詳しく読むことができます。

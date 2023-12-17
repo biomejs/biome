@@ -2,7 +2,7 @@
 @import "../../styles/_mixins";
 
 .results-pane {
-  border-left: 1px solid var(--playground-border);
+  border-left: 1px solid var(--sl-border);
   display: flex;
   flex-direction: column;
   overflow: hidden;

@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -95,8 +96,9 @@ JsModule {
 
 0: JS_MODULE@0..87
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..86
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..86
     0: JS_BOGUS_STATEMENT@0..34
       0: JS_DECORATOR_LIST@0..0
       1: CLASS_KW@0..6 "class" [] [Whitespace(" ")]
@@ -150,7 +152,7 @@ JsModule {
       4: L_CURLY@84..85 "{" [] []
       5: JS_CLASS_MEMBER_LIST@85..85
       6: R_CURLY@85..86 "}" [] []
-  3: EOF@86..87 "" [Newline("\n")] []
+  4: EOF@86..87 "" [Newline("\n")] []
 --
 class_extends_err.js:1:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

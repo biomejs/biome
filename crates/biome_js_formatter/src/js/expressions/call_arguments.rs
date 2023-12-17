@@ -1,4 +1,5 @@
 use crate::context::trailing_comma::FormatTrailingComma;
+use crate::js::bindings::parameters::has_only_simple_parameters;
 use crate::js::declarations::function_declaration::FormatFunctionOptions;
 use crate::js::expressions::arrow_function_expression::{
     is_multiline_template_starting_on_same_line, FormatJsArrowFunctionExpressionOptions,
@@ -6,14 +7,16 @@ use crate::js::expressions::arrow_function_expression::{
 use crate::js::lists::array_element_list::can_concisely_print_array_list;
 use crate::prelude::*;
 use crate::utils::function_body::FunctionBodyCacheMode;
+use crate::utils::member_chain::SimpleArgument;
 use crate::utils::test_call::is_test_call_expression;
 use crate::utils::{is_long_curried_call, write_arguments_multi_line};
 use biome_formatter::{format_args, format_element, write, VecBuffer};
 use biome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsStatement,
-    AnyTsReturnType, AnyTsType, JsCallArgumentList, JsCallArguments, JsCallArgumentsFields,
-    JsCallExpression, JsExpressionStatement, JsFunctionExpression, JsImportCallExpression,
-    JsLanguage,
+    AnyTsReturnType, AnyTsType, JsBinaryExpressionFields, JsCallArgumentList, JsCallArguments,
+    JsCallArgumentsFields, JsCallExpression, JsExpressionStatement, JsFunctionExpression,
+    JsImportCallExpression, JsLanguage, JsLogicalExpressionFields, TsAsExpressionFields,
+    TsSatisfiesExpressionFields,
 };
 use biome_rowan::{AstSeparatedElement, AstSeparatedList, SyntaxResult};
 
@@ -358,7 +361,7 @@ fn write_grouped_arguments(
                 grouped_arg.cache_function_body(f);
             }
             AnyJsCallArgument::AnyJsExpression(AnyJsExpression::JsFunctionExpression(function))
-                if !other_args.is_empty() && !has_no_parameters(function) =>
+                if !other_args.is_empty() || function_has_only_simple_parameters(function) =>
             {
                 grouped_arg.cache_function_body(f);
             }
@@ -507,9 +510,14 @@ fn write_grouped_arguments(
         buffer.into_vec().into_boxed_slice()
     };
 
-    if grouped_breaks {
+    // If the grouped content breaks, then we can skip the most_flat variant,
+    // since we already know that it won't be fitting on a single line.
+    let variants = if grouped_breaks {
         write!(f, [expand_parent()])?;
-    }
+        vec![middle_variant, most_expanded.into_boxed_slice()]
+    } else {
+        vec![most_flat, middle_variant, most_expanded.into_boxed_slice()]
+    };
 
     // SAFETY: Safe because variants is guaranteed to contain exactly 3 entries:
     // * most flat
@@ -518,11 +526,7 @@ fn write_grouped_arguments(
     // ... and best fitting only requires the most flat/and expanded.
     unsafe {
         f.write_element(FormatElement::BestFitting(
-            format_element::BestFittingElement::from_vec_unchecked(vec![
-                most_flat,
-                middle_variant,
-                most_expanded.into_boxed_slice(),
-            ]),
+            format_element::BestFittingElement::from_vec_unchecked(variants),
         ))
     }
 }
@@ -602,7 +606,7 @@ impl Format<JsFormatContext> for FormatGroupedLastArgument<'_> {
         // to remove any soft line breaks.
         match element.node()? {
             AnyJsCallArgument::AnyJsExpression(JsFunctionExpression(function))
-                if !self.is_only && !has_no_parameters(function) =>
+                if !self.is_only || function_has_only_simple_parameters(function) =>
             {
                 with_token_tracking_disabled(f, |f| {
                     write!(
@@ -665,13 +669,10 @@ fn with_token_tracking_disabled<F: FnOnce(&mut JsFormatter) -> R, R>(
     result
 }
 
-/// Tests if `expression` has an empty parameters list.
-fn has_no_parameters(expression: &JsFunctionExpression) -> bool {
-    match expression.parameters() {
-        // Use default formatting for expressions without parameters, will return `Err` anyway
-        Err(_) => true,
-        Ok(parameters) => parameters.items().is_empty(),
-    }
+fn function_has_only_simple_parameters(expression: &JsFunctionExpression) -> bool {
+    expression.parameters().map_or(true, |parameters| {
+        has_only_simple_parameters(&parameters, false)
+    })
 }
 
 /// Helper for formatting a grouped call argument (see [should_group_first_argument] and [should_group_last_argument]).
@@ -780,6 +781,10 @@ fn should_group_first_argument(
         ) if iter.next().is_none() => {
             match &first {
                 JsFunctionExpression(_) => {}
+                // Arrow expressions that are a plain expression or are a chain
+                // don't get grouped as the first argument, since they'll either
+                // fit entirely on the line or break fully. Only a single arrow
+                // with a block body can be grouped to collapse the braces.
                 JsArrowFunctionExpression(arrow) => {
                     if !matches!(arrow.body(), Ok(AnyJsFunctionBody::JsFunctionBody(_))) {
                         return Ok(false);
@@ -796,7 +801,8 @@ fn should_group_first_argument(
             }
 
             Ok(!comments.has_comments(first.syntax())
-                && !can_group_expression_argument(&second, false, comments)?)
+                && !can_group_expression_argument(&second, false, comments)?
+                && is_relatively_short_argument(second))
         }
         _ => Ok(false),
     }
@@ -856,6 +862,156 @@ fn should_group_last_argument(
             }
         }
         _ => Ok(false),
+    }
+}
+
+/// Check if `ty` is a relatively simple type annotation, allowing a few
+/// additional cases through. The simplicity is determined as
+/// either being a keyword type or any reference type with no additional type
+/// parameters. For example:
+///     number          => true
+///     unknown         => true
+///     HTMLElement     => true
+///     string | object => false
+///     Foo<string>     => false
+/// This function also introspects into array and generic types to extract the
+/// core type, but only to a limited extent:
+///     string[]        => string
+///     string[][]      => string
+///     string[][][]    => string
+///     Foo<string>[][] => string
+///     Foo<string[]>[] => string[]
+///     Foo<string[][]> => string[][]
+fn is_simple_ts_type(ty: &AnyTsType) -> bool {
+    // Reach up to two-levels deep into array types:
+    //     string[]     => string
+    //     string[][]   => string
+    //     string[][][] => string[]
+    let extracted_array_type = match ty {
+        AnyTsType::TsArrayType(array) => match array.element_type() {
+            Ok(AnyTsType::TsArrayType(inner_array)) => inner_array.element_type().ok(),
+            Ok(element_type) => Some(element_type),
+            _ => None,
+        },
+        _ => None,
+    };
+
+    // Then, extract the first type parameter of a Generic as long as it's the
+    // only parameter:
+    //     Foo<number> => number
+    //     Foo<number, string> => Foo<number, string>
+    let extracted_generic_type = match &extracted_array_type {
+        Some(AnyTsType::TsReferenceType(generic)) => {
+            if let Some(type_arguments) = generic.type_arguments() {
+                let argument_list = type_arguments.ts_type_argument_list();
+                if argument_list.len() == 1 {
+                    argument_list.first().and_then(|first| first.ok())
+                } else {
+                    extracted_array_type
+                }
+            } else {
+                extracted_array_type
+            }
+        }
+        _ => extracted_array_type,
+    };
+
+    let resolved_type = extracted_generic_type.as_ref().unwrap_or(ty);
+    match resolved_type {
+        // Any keyword or literal types
+        AnyTsType::TsAnyType(_)
+        | AnyTsType::TsBigintLiteralType(_)
+        | AnyTsType::TsBigintType(_)
+        | AnyTsType::TsBooleanLiteralType(_)
+        | AnyTsType::TsBooleanType(_)
+        | AnyTsType::TsNeverType(_)
+        | AnyTsType::TsNullLiteralType(_)
+        | AnyTsType::TsNonPrimitiveType(_)
+        | AnyTsType::TsNumberLiteralType(_)
+        | AnyTsType::TsNumberType(_)
+        | AnyTsType::TsStringLiteralType(_)
+        | AnyTsType::TsStringType(_)
+        | AnyTsType::TsSymbolType(_)
+        | AnyTsType::TsTemplateLiteralType(_)
+        | AnyTsType::TsThisType(_)
+        | AnyTsType::TsUndefinedType(_)
+        | AnyTsType::TsUnknownType(_)
+        | AnyTsType::TsVoidType(_) => true,
+
+        // Any reference with no generic type arguments
+        AnyTsType::TsReferenceType(reference) => reference.type_arguments().is_none(),
+
+        _ => false,
+    }
+}
+
+/// Checks if `argument` is "short" enough to be groupable. This aims to be
+/// logically similar to Prettier's [`isHopefullyShortCallArgument`](https://github.com/prettier/prettier/blob/093745f0ec429d3db47c1edd823357e0ef24e226/src/language-js/print/call-arguments.js#L279),
+fn is_relatively_short_argument(argument: AnyJsExpression) -> bool {
+    match argument {
+        AnyJsExpression::JsBinaryExpression(binary_expression) => {
+            if let JsBinaryExpressionFields {
+                left: Ok(left),
+                operator_token: _,
+                right: Ok(right),
+            } = binary_expression.as_fields()
+            {
+                SimpleArgument::from(left).is_simple() && SimpleArgument::from(right).is_simple()
+            } else {
+                false
+            }
+        }
+        AnyJsExpression::JsLogicalExpression(logical_expression) => {
+            if let JsLogicalExpressionFields {
+                left: Ok(left),
+                operator_token: _,
+                right: Ok(right),
+            } = logical_expression.as_fields()
+            {
+                SimpleArgument::from(left).is_simple() && SimpleArgument::from(right).is_simple()
+            } else {
+                false
+            }
+        }
+        AnyJsExpression::TsAsExpression(as_expression) => {
+            if let TsAsExpressionFields {
+                expression: Ok(expression),
+                as_token: _,
+                ty: Ok(annotation),
+            } = as_expression.as_fields()
+            {
+                is_simple_ts_type(&annotation) && SimpleArgument::from(expression).is_simple()
+            } else {
+                false
+            }
+        }
+        AnyJsExpression::TsSatisfiesExpression(as_expression) => {
+            if let TsSatisfiesExpressionFields {
+                expression: Ok(expression),
+                satisfies_token: _,
+                ty: Ok(annotation),
+            } = as_expression.as_fields()
+            {
+                is_simple_ts_type(&annotation) && SimpleArgument::from(expression).is_simple()
+            } else {
+                false
+            }
+        }
+        AnyJsExpression::AnyJsLiteralExpression(
+            AnyJsLiteralExpression::JsRegexLiteralExpression(_),
+        ) => true,
+        AnyJsExpression::JsCallExpression(call) => {
+            if let Ok(arguments) = call.arguments() {
+                match arguments.args().len() {
+                    0 => true,
+                    1 => SimpleArgument::from(AnyJsExpression::from(call)).is_simple(),
+                    _ => false,
+                }
+            } else {
+                true
+            }
+        }
+        _ => SimpleArgument::from(argument).is_simple(),
     }
 }
 
@@ -954,7 +1110,34 @@ fn is_commonjs_or_amd_call(
         return Ok(false);
     };
     let result = match reference.name()?.text() {
-        "require" => true,
+        "require" => {
+            let args = arguments.args();
+            match args.len() {
+                0 => false,
+                // `require` can be called with any expression that resolves to a
+                // string. This check is only an escape hatch to allow a complex
+                // expression to break rather than group onto the previous line.
+                //
+                // EX: `require(path.join(__dirname, 'relative/path'))`
+                // Without condition:
+                //   require(path.join(
+                //     __dirname,
+                //     'relative/path'));
+                // With condition:
+                //   require(
+                //     path.join(__dirname, 'relative/path')
+                //   );
+                1 => matches!(
+                    args.first(),
+                    Some(Ok(AnyJsCallArgument::AnyJsExpression(
+                        AnyJsExpression::AnyJsLiteralExpression(
+                            AnyJsLiteralExpression::JsStringLiteralExpression(_)
+                        )
+                    )))
+                ),
+                _ => true,
+            }
+        }
         "define" => {
             let in_statement = call.parent::<JsExpressionStatement>().is_some();
             if in_statement {

@@ -330,6 +330,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::JsImportCallExpression::new_unchecked(node) };
                     $body
                 }
+                $crate::JsSyntaxKind::JS_IMPORT_COMBINED_CLAUSE => {
+                    let $pattern = unsafe { $crate::JsImportCombinedClause::new_unchecked(node) };
+                    $body
+                }
                 $crate::JsSyntaxKind::JS_IMPORT_DEFAULT_CLAUSE => {
                     let $pattern = unsafe { $crate::JsImportDefaultClause::new_unchecked(node) };
                     $body
@@ -356,6 +360,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::JsSyntaxKind::JS_INSTANCEOF_EXPRESSION => {
                     let $pattern = unsafe { $crate::JsInstanceofExpression::new_unchecked(node) };
+                    $body
+                }
+                $crate::JsSyntaxKind::JS_LABEL => {
+                    let $pattern = unsafe { $crate::JsLabel::new_unchecked(node) };
                     $body
                 }
                 $crate::JsSyntaxKind::JS_LABELED_STATEMENT => {

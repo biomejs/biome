@@ -4,8 +4,8 @@ use crate::prelude::*;
 use crate::utils::member_chain::is_member_call_chain;
 use crate::utils::object::write_member_name;
 use crate::utils::AnyJsBinaryLikeExpression;
+use crate::utils::{FormatLiteralStringToken, StringLiteralParentKind};
 use biome_formatter::{format_args, write, CstFormatContext, FormatOptions, VecBuffer};
-use biome_js_syntax::AnyJsLiteralExpression;
 use biome_js_syntax::{
     AnyJsAssignmentPattern, AnyJsBindingPattern, AnyJsCallArgument, AnyJsClassMemberName,
     AnyJsExpression, AnyJsFunctionBody, AnyJsObjectAssignmentPatternMember,
@@ -17,6 +17,7 @@ use biome_js_syntax::{
     TsInitializedPropertySignatureClassMemberFields, TsPropertySignatureClassMember,
     TsPropertySignatureClassMemberFields, TsTypeAliasDeclaration, TsTypeArguments,
 };
+use biome_js_syntax::{AnyJsLiteralExpression, JsUnaryExpression};
 use biome_rowan::{declare_node_union, AstNode, SyntaxNodeOptionExt, SyntaxResult};
 use std::iter;
 
@@ -658,6 +659,7 @@ impl AnyJsAssignmentLike {
     fn layout(
         &self,
         is_left_short: bool,
+        left_may_break: bool,
         f: &mut Formatter<JsFormatContext>,
     ) -> FormatResult<AssignmentLikeLayout> {
         if self.has_only_left_hand_side() {
@@ -726,17 +728,19 @@ impl AnyJsAssignmentLike {
             return Ok(AssignmentLikeLayout::BreakAfterOperator);
         }
 
-        if matches!(
-            right_expression,
-            Some(
-                AnyJsExpression::JsClassExpression(_)
-                    | AnyJsExpression::JsTemplateExpression(_)
-                    | AnyJsExpression::AnyJsLiteralExpression(
-                        AnyJsLiteralExpression::JsBooleanLiteralExpression(_)
-                            | AnyJsLiteralExpression::JsNumberLiteralExpression(_)
-                    )
+        if !left_may_break
+            && matches!(
+                right_expression,
+                Some(
+                    AnyJsExpression::JsClassExpression(_)
+                        | AnyJsExpression::JsTemplateExpression(_)
+                        | AnyJsExpression::AnyJsLiteralExpression(
+                            AnyJsLiteralExpression::JsBooleanLiteralExpression(_)
+                                | AnyJsLiteralExpression::JsNumberLiteralExpression(_)
+                        )
+                )
             )
-        ) {
+        {
             return Ok(AssignmentLikeLayout::NeverBreakAfterOperator);
         }
 
@@ -949,7 +953,21 @@ pub(crate) fn should_break_after_operator(
                 AnyJsExpression::JsYieldExpression(expression) => {
                     expression.argument().and_then(|arg| arg.expression().ok())
                 }
-                AnyJsExpression::JsUnaryExpression(expression) => expression.argument().ok(),
+                AnyJsExpression::JsUnaryExpression(expression) => {
+                    if let Some(argument) = get_last_non_unary_argument(expression) {
+                        match argument {
+                            AnyJsExpression::JsAwaitExpression(expression) => {
+                                expression.argument().ok()
+                            }
+                            AnyJsExpression::JsYieldExpression(expression) => {
+                                expression.argument().and_then(|arg| arg.expression().ok())
+                            }
+                            _ => Some(argument),
+                        }
+                    } else {
+                        None
+                    }
+                }
                 _ => None,
             };
 
@@ -963,6 +981,21 @@ pub(crate) fn should_break_after_operator(
     };
 
     Ok(result)
+}
+
+/// Iterate over unary expression arguments to get last non-unary
+/// Example: void !!(await test()) -> returns await as last argument
+fn get_last_non_unary_argument(unary_expression: &JsUnaryExpression) -> Option<AnyJsExpression> {
+    let mut argument = unary_expression.argument().ok()?;
+
+    while let AnyJsExpression::JsUnaryExpression(ref unary) = argument {
+        argument = match unary.argument() {
+            Ok(arg) => arg,
+            _ => break,
+        };
+    }
+
+    Some(argument)
 }
 
 impl Format<JsFormatContext> for AnyJsAssignmentLike {
@@ -982,11 +1015,12 @@ impl Format<JsFormatContext> for AnyJsAssignmentLike {
             let mut buffer = VecBuffer::new(f.state_mut());
             let is_left_short = self.write_left(&mut Formatter::new(&mut buffer))?;
             let formatted_left = buffer.into_vec();
+            let left_may_break = formatted_left.may_directly_break();
 
             // Compare name only if we are in a position of computing it.
             // If not (for example, left is not an identifier), then let's fallback to false,
             // so we can continue the chain of checks
-            let layout = self.layout(is_left_short, f)?;
+            let layout = self.layout(is_left_short, left_may_break, f)?;
 
             let left = format_once(|f| f.write_elements(formatted_left));
             let right = format_with(|f| self.write_right(f, layout));
@@ -1013,7 +1047,7 @@ impl Format<JsFormatContext> for AnyJsAssignmentLike {
                         write![
                             f,
                             [
-                                group(&indent(&soft_line_break_or_space()),)
+                                group(&indent(&soft_line_break_or_space()))
                                     .with_group_id(Some(group_id)),
                                 line_suffix_boundary(),
                                 indent_if_group_breaks(&right, group_id)
@@ -1021,13 +1055,7 @@ impl Format<JsFormatContext> for AnyJsAssignmentLike {
                         ]
                     }
                     AssignmentLikeLayout::BreakAfterOperator => {
-                        write![
-                            f,
-                            [group(&indent(&format_args![
-                                soft_line_break_or_space(),
-                                right,
-                            ]))]
-                        ]
+                        write![f, [group(&soft_line_indent_or_space(&right))]]
                     }
                     AssignmentLikeLayout::NeverBreakAfterOperator => {
                         write![f, [space(), right]]
@@ -1143,9 +1171,7 @@ fn is_poorly_breakable_member_or_call_chain(
         let is_breakable_call = match args.len() {
             0 => false,
             1 => match args.iter().next() {
-                Some(first_argument) => {
-                    !is_short_argument(first_argument?, threshold, f.context().comments())?
-                }
+                Some(first_argument) => !is_short_argument(first_argument?, threshold, f)?,
                 None => false,
             },
             _ => true,
@@ -1175,8 +1201,10 @@ fn is_poorly_breakable_member_or_call_chain(
 fn is_short_argument(
     argument: AnyJsCallArgument,
     threshold: u16,
-    comments: &JsComments,
+    f: &Formatter<JsFormatContext>,
 ) -> SyntaxResult<bool> {
+    let comments = f.comments();
+
     if comments.has_comments(argument.syntax()) {
         return Ok(false);
     }
@@ -1198,7 +1226,11 @@ fn is_short_argument(
                     pattern.text().chars().count() <= threshold as usize
                 }
                 AnyJsLiteralExpression::JsStringLiteralExpression(string) => {
-                    string.value_token()?.text_trimmed().len() <= threshold as usize
+                    let token = string.value_token()?;
+                    let formatter =
+                        FormatLiteralStringToken::new(&token, StringLiteralParentKind::Expression);
+
+                    formatter.clean_text(f.options()).width() <= threshold as usize
                 }
                 _ => true,
             },

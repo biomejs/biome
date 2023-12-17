@@ -46,6 +46,14 @@ a[href='te"s"t'] {}
 [foo=\(] {}
 [foo=yes\:\(it\'s\ work\)] {}
 [attr=\;] { }
+[*|attr|="test"] {}
+[foo|attr|="test"] {}
+[foo|att=val] {}
+[*|att] {}
+[   *|att   ] {}
+[|att] {}
+[ |att ] {}
+[   |att   ] {}
 
 ```
 
@@ -54,6 +62,7 @@ a[href='te"s"t'] {}
 
 ```
 CssRoot {
+    bom_token: missing (optional),
     rules: CssRuleList [
         CssRule {
             prelude: CssSelectorList [
@@ -63,8 +72,11 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssAttributeSelector {
                             l_brack_token: L_BRACK@0..1 "[" [] [],
-                            name: CssIdentifier {
-                                value_token: IDENT@1..6 "title" [] [],
+                            name: CssAttributeName {
+                                namespace: missing (optional),
+                                name: CssIdentifier {
+                                    value_token: IDENT@1..6 "title" [] [],
+                                },
                             },
                             matcher: missing (optional),
                             r_brack_token: R_BRACK@6..8 "]" [] [Whitespace(" ")],
@@ -86,8 +98,11 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssAttributeSelector {
                             l_brack_token: L_BRACK@10..12 "[" [Newline("\n")] [],
-                            name: CssIdentifier {
-                                value_token: IDENT@12..17 "title" [] [],
+                            name: CssAttributeName {
+                                namespace: missing (optional),
+                                name: CssIdentifier {
+                                    value_token: IDENT@12..17 "title" [] [],
+                                },
                             },
                             matcher: CssAttributeMatcher {
                                 operator: EQ@17..18 "=" [] [],
@@ -117,8 +132,11 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssAttributeSelector {
                             l_brack_token: L_BRACK@25..27 "[" [Newline("\n")] [],
-                            name: CssIdentifier {
-                                value_token: IDENT@27..32 "title" [] [],
+                            name: CssAttributeName {
+                                namespace: missing (optional),
+                                name: CssIdentifier {
+                                    value_token: IDENT@27..32 "title" [] [],
+                                },
                             },
                             matcher: CssAttributeMatcher {
                                 operator: EQ@32..33 "=" [] [],
@@ -148,8 +166,11 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssAttributeSelector {
                             l_brack_token: L_BRACK@42..45 "[" [Newline("\n")] [Whitespace(" ")],
-                            name: CssIdentifier {
-                                value_token: IDENT@45..51 "title" [] [Whitespace(" ")],
+                            name: CssAttributeName {
+                                namespace: missing (optional),
+                                name: CssIdentifier {
+                                    value_token: IDENT@45..51 "title" [] [Whitespace(" ")],
+                                },
                             },
                             matcher: CssAttributeMatcher {
                                 operator: EQ@51..53 "=" [] [Whitespace(" ")],
@@ -179,8 +200,11 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssAttributeSelector {
                             l_brack_token: L_BRACK@63..68 "[" [Newline("\n")] [Whitespace("   ")],
-                            name: CssIdentifier {
-                                value_token: IDENT@68..76 "title" [] [Whitespace("   ")],
+                            name: CssAttributeName {
+                                namespace: missing (optional),
+                                name: CssIdentifier {
+                                    value_token: IDENT@68..76 "title" [] [Whitespace("   ")],
+                                },
                             },
                             matcher: CssAttributeMatcher {
                                 operator: EQ@76..80 "=" [] [Whitespace("   ")],
@@ -210,8 +234,11 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssAttributeSelector {
                             l_brack_token: L_BRACK@92..94 "[" [Newline("\n")] [],
-                            name: CssIdentifier {
-                                value_token: IDENT@94..98 "lang" [] [],
+                            name: CssAttributeName {
+                                namespace: missing (optional),
+                                name: CssIdentifier {
+                                    value_token: IDENT@94..98 "lang" [] [],
+                                },
                             },
                             matcher: CssAttributeMatcher {
                                 operator: TILDE_EQ@98..100 "~=" [] [],
@@ -241,8 +268,11 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssAttributeSelector {
                             l_brack_token: L_BRACK@111..113 "[" [Newline("\n")] [],
-                            name: CssIdentifier {
-                                value_token: IDENT@113..117 "lang" [] [],
+                            name: CssAttributeName {
+                                namespace: missing (optional),
+                                name: CssIdentifier {
+                                    value_token: IDENT@113..117 "lang" [] [],
+                                },
                             },
                             matcher: CssAttributeMatcher {
                                 operator: PIPEEQ@117..119 "|=" [] [],
@@ -272,8 +302,11 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssAttributeSelector {
                             l_brack_token: L_BRACK@127..129 "[" [Newline("\n")] [],
-                            name: CssIdentifier {
-                                value_token: IDENT@129..133 "href" [] [],
+                            name: CssAttributeName {
+                                namespace: missing (optional),
+                                name: CssIdentifier {
+                                    value_token: IDENT@129..133 "href" [] [],
+                                },
                             },
                             matcher: CssAttributeMatcher {
                                 operator: CARETEQ@133..135 "^=" [] [],
@@ -303,8 +336,11 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssAttributeSelector {
                             l_brack_token: L_BRACK@142..144 "[" [Newline("\n")] [],
-                            name: CssIdentifier {
-                                value_token: IDENT@144..149 "href$" [] [],
+                            name: CssAttributeName {
+                                namespace: missing (optional),
+                                name: CssIdentifier {
+                                    value_token: IDENT@144..149 "href$" [] [],
+                                },
                             },
                             matcher: CssAttributeMatcher {
                                 operator: EQ@149..150 "=" [] [],
@@ -334,8 +370,11 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssAttributeSelector {
                             l_brack_token: L_BRACK@160..162 "[" [Newline("\n")] [],
-                            name: CssIdentifier {
-                                value_token: IDENT@162..166 "href" [] [],
+                            name: CssAttributeName {
+                                namespace: missing (optional),
+                                name: CssIdentifier {
+                                    value_token: IDENT@162..166 "href" [] [],
+                                },
                             },
                             matcher: CssAttributeMatcher {
                                 operator: STAREQ@166..168 "*=" [] [],
@@ -365,8 +404,11 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssAttributeSelector {
                             l_brack_token: L_BRACK@181..183 "[" [Newline("\n")] [],
-                            name: CssIdentifier {
-                                value_token: IDENT@183..187 "href" [] [],
+                            name: CssAttributeName {
+                                namespace: missing (optional),
+                                name: CssIdentifier {
+                                    value_token: IDENT@183..187 "href" [] [],
+                                },
                             },
                             matcher: CssAttributeMatcher {
                                 operator: STAREQ@187..189 "*=" [] [],
@@ -396,8 +438,11 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssAttributeSelector {
                             l_brack_token: L_BRACK@208..210 "[" [Newline("\n")] [],
-                            name: CssIdentifier {
-                                value_token: IDENT@210..214 "href" [] [],
+                            name: CssAttributeName {
+                                namespace: missing (optional),
+                                name: CssIdentifier {
+                                    value_token: IDENT@210..214 "href" [] [],
+                                },
                             },
                             matcher: CssAttributeMatcher {
                                 operator: STAREQ@214..216 "*=" [] [],
@@ -427,8 +472,11 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssAttributeSelector {
                             l_brack_token: L_BRACK@235..237 "[" [Newline("\n")] [],
-                            name: CssIdentifier {
-                                value_token: IDENT@237..241 "href" [] [],
+                            name: CssAttributeName {
+                                namespace: missing (optional),
+                                name: CssIdentifier {
+                                    value_token: IDENT@237..241 "href" [] [],
+                                },
                             },
                             matcher: CssAttributeMatcher {
                                 operator: STAREQ@241..243 "*=" [] [],
@@ -458,8 +506,11 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssAttributeSelector {
                             l_brack_token: L_BRACK@255..257 "[" [Newline("\n")] [],
-                            name: CssIdentifier {
-                                value_token: IDENT@257..261 "href" [] [],
+                            name: CssAttributeName {
+                                namespace: missing (optional),
+                                name: CssIdentifier {
+                                    value_token: IDENT@257..261 "href" [] [],
+                                },
                             },
                             matcher: CssAttributeMatcher {
                                 operator: STAREQ@261..263 "*=" [] [],
@@ -489,8 +540,11 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssAttributeSelector {
                             l_brack_token: L_BRACK@275..277 "[" [Newline("\n")] [],
-                            name: CssIdentifier {
-                                value_token: IDENT@277..280 "att" [] [],
+                            name: CssAttributeName {
+                                namespace: missing (optional),
+                                name: CssIdentifier {
+                                    value_token: IDENT@277..280 "att" [] [],
+                                },
                             },
                             matcher: missing (optional),
                             r_brack_token: R_BRACK@280..282 "]" [] [Whitespace(" ")],
@@ -512,8 +566,11 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssAttributeSelector {
                             l_brack_token: L_BRACK@284..287 "[" [Newline("\n")] [Whitespace(" ")],
-                            name: CssIdentifier {
-                                value_token: IDENT@287..291 "att" [] [Whitespace(" ")],
+                            name: CssAttributeName {
+                                namespace: missing (optional),
+                                name: CssIdentifier {
+                                    value_token: IDENT@287..291 "att" [] [Whitespace(" ")],
+                                },
                             },
                             matcher: missing (optional),
                             r_brack_token: R_BRACK@291..293 "]" [] [Whitespace(" ")],
@@ -535,8 +592,11 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssAttributeSelector {
                             l_brack_token: L_BRACK@295..300 "[" [Newline("\n")] [Whitespace("   ")],
-                            name: CssIdentifier {
-                                value_token: IDENT@300..306 "att" [] [Whitespace("   ")],
+                            name: CssAttributeName {
+                                namespace: missing (optional),
+                                name: CssIdentifier {
+                                    value_token: IDENT@300..306 "att" [] [Whitespace("   ")],
+                                },
                             },
                             matcher: missing (optional),
                             r_brack_token: R_BRACK@306..308 "]" [] [Whitespace(" ")],
@@ -555,6 +615,7 @@ CssRoot {
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
                     simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
                         ident: CssIdentifier {
                             value_token: IDENT@310..312 "a" [Newline("\n")] [],
                         },
@@ -562,8 +623,11 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssAttributeSelector {
                             l_brack_token: L_BRACK@312..314 "[" [] [Whitespace(" ")],
-                            name: CssIdentifier {
-                                value_token: IDENT@314..320 "class" [] [Whitespace(" ")],
+                            name: CssAttributeName {
+                                namespace: missing (optional),
+                                name: CssIdentifier {
+                                    value_token: IDENT@314..320 "class" [] [Whitespace(" ")],
+                                },
                             },
                             matcher: CssAttributeMatcher {
                                 operator: EQ@320..322 "=" [] [Whitespace(" ")],
@@ -590,6 +654,7 @@ CssRoot {
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
                     simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
                         ident: CssIdentifier {
                             value_token: IDENT@333..335 "a" [Newline("\n")] [],
                         },
@@ -597,8 +662,11 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssAttributeSelector {
                             l_brack_token: L_BRACK@335..339 "[" [] [Whitespace("   ")],
-                            name: CssIdentifier {
-                                value_token: IDENT@339..347 "class" [] [Whitespace("   ")],
+                            name: CssAttributeName {
+                                namespace: missing (optional),
+                                name: CssIdentifier {
+                                    value_token: IDENT@339..347 "class" [] [Whitespace("   ")],
+                                },
                             },
                             matcher: CssAttributeMatcher {
                                 operator: EQ@347..351 "=" [] [Whitespace("   ")],
@@ -628,8 +696,11 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssAttributeSelector {
                             l_brack_token: L_BRACK@364..366 "[" [Newline("\n")] [],
-                            name: CssIdentifier {
-                                value_token: IDENT@366..370 "href" [] [],
+                            name: CssAttributeName {
+                                namespace: missing (optional),
+                                name: CssIdentifier {
+                                    value_token: IDENT@366..370 "href" [] [],
+                                },
                             },
                             matcher: CssAttributeMatcher {
                                 operator: STAREQ@370..372 "*=" [] [],
@@ -659,8 +730,11 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssAttributeSelector {
                             l_brack_token: L_BRACK@393..398 "[" [Newline("\n")] [Whitespace("   ")],
-                            name: CssIdentifier {
-                                value_token: IDENT@398..402 "href" [] [],
+                            name: CssAttributeName {
+                                namespace: missing (optional),
+                                name: CssIdentifier {
+                                    value_token: IDENT@398..402 "href" [] [],
+                                },
                             },
                             matcher: CssAttributeMatcher {
                                 operator: STAREQ@402..404 "*=" [] [],
@@ -690,8 +764,11 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssAttributeSelector {
                             l_brack_token: L_BRACK@428..433 "[" [Newline("\n")] [Whitespace("   ")],
-                            name: CssIdentifier {
-                                value_token: IDENT@433..440 "href" [] [Whitespace("   ")],
+                            name: CssAttributeName {
+                                namespace: missing (optional),
+                                name: CssIdentifier {
+                                    value_token: IDENT@433..440 "href" [] [Whitespace("   ")],
+                                },
                             },
                             matcher: CssAttributeMatcher {
                                 operator: STAREQ@440..445 "*=" [] [Whitespace("   ")],
@@ -721,8 +798,11 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssAttributeSelector {
                             l_brack_token: L_BRACK@469..474 "[" [Newline("\n")] [Whitespace("   ")],
-                            name: CssIdentifier {
-                                value_token: IDENT@474..481 "href" [] [Whitespace("   ")],
+                            name: CssAttributeName {
+                                namespace: missing (optional),
+                                name: CssIdentifier {
+                                    value_token: IDENT@474..481 "href" [] [Whitespace("   ")],
+                                },
                             },
                             matcher: missing (optional),
                             r_brack_token: R_BRACK@481..483 "]" [] [Whitespace(" ")],
@@ -744,8 +824,11 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssAttributeSelector {
                             l_brack_token: L_BRACK@485..487 "[" [Newline("\n")] [],
-                            name: CssIdentifier {
-                                value_token: IDENT@487..492 "frame" [] [],
+                            name: CssAttributeName {
+                                namespace: missing (optional),
+                                name: CssIdentifier {
+                                    value_token: IDENT@487..492 "frame" [] [],
+                                },
                             },
                             matcher: CssAttributeMatcher {
                                 operator: EQ@492..493 "=" [] [],
@@ -787,8 +870,11 @@ CssRoot {
                         },
                         CssAttributeSelector {
                             l_brack_token: L_BRACK@515..516 "[" [] [],
-                            name: CssIdentifier {
-                                value_token: IDENT@516..522 "target" [] [],
+                            name: CssAttributeName {
+                                namespace: missing (optional),
+                                name: CssIdentifier {
+                                    value_token: IDENT@516..522 "target" [] [],
+                                },
                             },
                             matcher: missing (optional),
                             r_brack_token: R_BRACK@522..524 "]" [] [Whitespace(" ")],
@@ -816,8 +902,11 @@ CssRoot {
                         },
                         CssAttributeSelector {
                             l_brack_token: L_BRACK@530..531 "[" [] [],
-                            name: CssIdentifier {
-                                value_token: IDENT@531..537 "target" [] [],
+                            name: CssAttributeName {
+                                namespace: missing (optional),
+                                name: CssIdentifier {
+                                    value_token: IDENT@531..537 "target" [] [],
+                                },
                             },
                             matcher: missing (optional),
                             r_brack_token: R_BRACK@537..539 "]" [] [Whitespace(" ")],
@@ -839,8 +928,11 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssAttributeSelector {
                             l_brack_token: L_BRACK@541..543 "[" [Newline("\n")] [],
-                            name: CssIdentifier {
-                                value_token: IDENT@543..549 "target" [] [],
+                            name: CssAttributeName {
+                                namespace: missing (optional),
+                                name: CssIdentifier {
+                                    value_token: IDENT@543..549 "target" [] [],
+                                },
                             },
                             matcher: missing (optional),
                             r_brack_token: R_BRACK@549..550 "]" [] [],
@@ -868,8 +960,11 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssAttributeSelector {
                             l_brack_token: L_BRACK@559..561 "[" [Newline("\n")] [],
-                            name: CssIdentifier {
-                                value_token: IDENT@561..566 "title" [] [],
+                            name: CssAttributeName {
+                                namespace: missing (optional),
+                                name: CssIdentifier {
+                                    value_token: IDENT@561..566 "title" [] [],
+                                },
                             },
                             matcher: CssAttributeMatcher {
                                 operator: EQ@566..567 "=" [] [],
@@ -899,8 +994,11 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssAttributeSelector {
                             l_brack_token: L_BRACK@576..578 "[" [Newline("\n")] [],
-                            name: CssIdentifier {
-                                value_token: IDENT@578..588 "data-style" [] [],
+                            name: CssAttributeName {
+                                namespace: missing (optional),
+                                name: CssIdentifier {
+                                    value_token: IDENT@578..588 "data-style" [] [],
+                                },
                             },
                             matcher: CssAttributeMatcher {
                                 operator: EQ@588..589 "=" [] [],
@@ -915,8 +1013,11 @@ CssRoot {
                         },
                         CssAttributeSelector {
                             l_brack_token: L_BRACK@597..598 "[" [] [],
-                            name: CssIdentifier {
-                                value_token: IDENT@598..610 "data-loading" [] [],
+                            name: CssAttributeName {
+                                namespace: missing (optional),
+                                name: CssIdentifier {
+                                    value_token: IDENT@598..610 "data-loading" [] [],
+                                },
                             },
                             matcher: missing (optional),
                             r_brack_token: R_BRACK@610..612 "]" [] [Whitespace(" ")],
@@ -938,8 +1039,11 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssAttributeSelector {
                             l_brack_token: L_BRACK@614..616 "[" [Newline("\n")] [],
-                            name: CssIdentifier {
-                                value_token: IDENT@616..627 "-data-style" [] [],
+                            name: CssAttributeName {
+                                namespace: missing (optional),
+                                name: CssIdentifier {
+                                    value_token: IDENT@616..627 "-data-style" [] [],
+                                },
                             },
                             matcher: CssAttributeMatcher {
                                 operator: EQ@627..628 "=" [] [],
@@ -954,8 +1058,11 @@ CssRoot {
                         },
                         CssAttributeSelector {
                             l_brack_token: L_BRACK@636..637 "[" [] [],
-                            name: CssIdentifier {
-                                value_token: IDENT@637..651 "--data-loading" [] [],
+                            name: CssAttributeName {
+                                namespace: missing (optional),
+                                name: CssIdentifier {
+                                    value_token: IDENT@637..651 "--data-loading" [] [],
+                                },
                             },
                             matcher: missing (optional),
                             r_brack_token: R_BRACK@651..653 "]" [] [Whitespace(" ")],
@@ -974,6 +1081,7 @@ CssRoot {
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
                     simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
                         ident: CssIdentifier {
                             value_token: IDENT@655..657 "a" [Newline("\n")] [],
                         },
@@ -981,8 +1089,11 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssAttributeSelector {
                             l_brack_token: L_BRACK@657..658 "[" [] [],
-                            name: CssIdentifier {
-                                value_token: IDENT@658..662 "href" [] [],
+                            name: CssAttributeName {
+                                namespace: missing (optional),
+                                name: CssIdentifier {
+                                    value_token: IDENT@658..662 "href" [] [],
+                                },
                             },
                             matcher: CssAttributeMatcher {
                                 operator: EQ@662..663 "=" [] [],
@@ -1009,6 +1120,7 @@ CssRoot {
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
                     simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
                         ident: CssIdentifier {
                             value_token: IDENT@675..677 "a" [Newline("\n")] [],
                         },
@@ -1016,8 +1128,11 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssAttributeSelector {
                             l_brack_token: L_BRACK@677..678 "[" [] [],
-                            name: CssIdentifier {
-                                value_token: IDENT@678..682 "href" [] [],
+                            name: CssAttributeName {
+                                namespace: missing (optional),
+                                name: CssIdentifier {
+                                    value_token: IDENT@678..682 "href" [] [],
+                                },
                             },
                             matcher: CssAttributeMatcher {
                                 operator: EQ@682..683 "=" [] [],
@@ -1047,8 +1162,11 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssAttributeSelector {
                             l_brack_token: L_BRACK@695..697 "[" [Newline("\n")] [],
-                            name: CssIdentifier {
-                                value_token: IDENT@697..706 "ng\\:cloak" [] [],
+                            name: CssAttributeName {
+                                namespace: missing (optional),
+                                name: CssIdentifier {
+                                    value_token: IDENT@697..706 "ng\\:cloak" [] [],
+                                },
                             },
                             matcher: missing (optional),
                             r_brack_token: R_BRACK@706..708 "]" [] [Whitespace(" ")],
@@ -1070,8 +1188,11 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssAttributeSelector {
                             l_brack_token: L_BRACK@710..712 "[" [Newline("\n")] [],
-                            name: CssIdentifier {
-                                value_token: IDENT@712..723 "ng\\3a cloak" [] [],
+                            name: CssAttributeName {
+                                namespace: missing (optional),
+                                name: CssIdentifier {
+                                    value_token: IDENT@712..723 "ng\\3a cloak" [] [],
+                                },
                             },
                             matcher: missing (optional),
                             r_brack_token: R_BRACK@723..725 "]" [] [Whitespace(" ")],
@@ -1093,8 +1214,11 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssAttributeSelector {
                             l_brack_token: L_BRACK@727..729 "[" [Newline("\n")] [],
-                            name: CssIdentifier {
-                                value_token: IDENT@729..743 "ng\\00003acloak" [] [],
+                            name: CssAttributeName {
+                                namespace: missing (optional),
+                                name: CssIdentifier {
+                                    value_token: IDENT@729..743 "ng\\00003acloak" [] [],
+                                },
                             },
                             matcher: missing (optional),
                             r_brack_token: R_BRACK@743..745 "]" [] [Whitespace(" ")],
@@ -1116,8 +1240,11 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssAttributeSelector {
                             l_brack_token: L_BRACK@747..749 "[" [Newline("\n")] [],
-                            name: CssIdentifier {
-                                value_token: IDENT@749..752 "foo" [] [],
+                            name: CssAttributeName {
+                                namespace: missing (optional),
+                                name: CssIdentifier {
+                                    value_token: IDENT@749..752 "foo" [] [],
+                                },
                             },
                             matcher: CssAttributeMatcher {
                                 operator: EQ@752..753 "=" [] [],
@@ -1147,8 +1274,11 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssAttributeSelector {
                             l_brack_token: L_BRACK@759..761 "[" [Newline("\n")] [],
-                            name: CssIdentifier {
-                                value_token: IDENT@761..764 "foo" [] [],
+                            name: CssAttributeName {
+                                namespace: missing (optional),
+                                name: CssIdentifier {
+                                    value_token: IDENT@761..764 "foo" [] [],
+                                },
                             },
                             matcher: CssAttributeMatcher {
                                 operator: EQ@764..765 "=" [] [],
@@ -1178,8 +1308,11 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssAttributeSelector {
                             l_brack_token: L_BRACK@771..773 "[" [Newline("\n")] [],
-                            name: CssIdentifier {
-                                value_token: IDENT@773..776 "foo" [] [],
+                            name: CssAttributeName {
+                                namespace: missing (optional),
+                                name: CssIdentifier {
+                                    value_token: IDENT@773..776 "foo" [] [],
+                                },
                             },
                             matcher: CssAttributeMatcher {
                                 operator: EQ@776..777 "=" [] [],
@@ -1209,8 +1342,11 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssAttributeSelector {
                             l_brack_token: L_BRACK@783..785 "[" [Newline("\n")] [],
-                            name: CssIdentifier {
-                                value_token: IDENT@785..788 "foo" [] [],
+                            name: CssAttributeName {
+                                namespace: missing (optional),
+                                name: CssIdentifier {
+                                    value_token: IDENT@785..788 "foo" [] [],
+                                },
                             },
                             matcher: CssAttributeMatcher {
                                 operator: EQ@788..789 "=" [] [],
@@ -1240,8 +1376,11 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssAttributeSelector {
                             l_brack_token: L_BRACK@813..815 "[" [Newline("\n")] [],
-                            name: CssIdentifier {
-                                value_token: IDENT@815..819 "attr" [] [],
+                            name: CssAttributeName {
+                                namespace: missing (optional),
+                                name: CssIdentifier {
+                                    value_token: IDENT@815..819 "attr" [] [],
+                                },
                             },
                             matcher: CssAttributeMatcher {
                                 operator: EQ@819..820 "=" [] [],
@@ -1263,16 +1402,287 @@ CssRoot {
                 r_curly_token: R_CURLY@826..827 "}" [] [],
             },
         },
+        CssRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selector_token: missing (optional),
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssAttributeSelector {
+                            l_brack_token: L_BRACK@827..829 "[" [Newline("\n")] [],
+                            name: CssAttributeName {
+                                namespace: CssNamespace {
+                                    prefix: CssUniversalNamespacePrefix {
+                                        star_token: STAR@829..830 "*" [] [],
+                                    },
+                                    bitwise_or_token: PIPE@830..831 "|" [] [],
+                                },
+                                name: CssIdentifier {
+                                    value_token: IDENT@831..835 "attr" [] [],
+                                },
+                            },
+                            matcher: CssAttributeMatcher {
+                                operator: PIPEEQ@835..837 "|=" [] [],
+                                value: CssAttributeMatcherValue {
+                                    name: CssString {
+                                        value_token: CSS_STRING_LITERAL@837..843 "\"test\"" [] [],
+                                    },
+                                },
+                                modifier: missing (optional),
+                            },
+                            r_brack_token: R_BRACK@843..845 "]" [] [Whitespace(" ")],
+                        },
+                    ],
+                },
+            ],
+            block: CssBlock {
+                l_curly_token: L_CURLY@845..846 "{" [] [],
+                declaration_list: CssDeclarationList [],
+                r_curly_token: R_CURLY@846..847 "}" [] [],
+            },
+        },
+        CssRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selector_token: missing (optional),
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssAttributeSelector {
+                            l_brack_token: L_BRACK@847..849 "[" [Newline("\n")] [],
+                            name: CssAttributeName {
+                                namespace: CssNamespace {
+                                    prefix: CssNamedNamespacePrefix {
+                                        name: CssIdentifier {
+                                            value_token: IDENT@849..852 "foo" [] [],
+                                        },
+                                    },
+                                    bitwise_or_token: PIPE@852..853 "|" [] [],
+                                },
+                                name: CssIdentifier {
+                                    value_token: IDENT@853..857 "attr" [] [],
+                                },
+                            },
+                            matcher: CssAttributeMatcher {
+                                operator: PIPEEQ@857..859 "|=" [] [],
+                                value: CssAttributeMatcherValue {
+                                    name: CssString {
+                                        value_token: CSS_STRING_LITERAL@859..865 "\"test\"" [] [],
+                                    },
+                                },
+                                modifier: missing (optional),
+                            },
+                            r_brack_token: R_BRACK@865..867 "]" [] [Whitespace(" ")],
+                        },
+                    ],
+                },
+            ],
+            block: CssBlock {
+                l_curly_token: L_CURLY@867..868 "{" [] [],
+                declaration_list: CssDeclarationList [],
+                r_curly_token: R_CURLY@868..869 "}" [] [],
+            },
+        },
+        CssRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selector_token: missing (optional),
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssAttributeSelector {
+                            l_brack_token: L_BRACK@869..871 "[" [Newline("\n")] [],
+                            name: CssAttributeName {
+                                namespace: CssNamespace {
+                                    prefix: CssNamedNamespacePrefix {
+                                        name: CssIdentifier {
+                                            value_token: IDENT@871..874 "foo" [] [],
+                                        },
+                                    },
+                                    bitwise_or_token: PIPE@874..875 "|" [] [],
+                                },
+                                name: CssIdentifier {
+                                    value_token: IDENT@875..878 "att" [] [],
+                                },
+                            },
+                            matcher: CssAttributeMatcher {
+                                operator: EQ@878..879 "=" [] [],
+                                value: CssAttributeMatcherValue {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@879..882 "val" [] [],
+                                    },
+                                },
+                                modifier: missing (optional),
+                            },
+                            r_brack_token: R_BRACK@882..884 "]" [] [Whitespace(" ")],
+                        },
+                    ],
+                },
+            ],
+            block: CssBlock {
+                l_curly_token: L_CURLY@884..885 "{" [] [],
+                declaration_list: CssDeclarationList [],
+                r_curly_token: R_CURLY@885..886 "}" [] [],
+            },
+        },
+        CssRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selector_token: missing (optional),
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssAttributeSelector {
+                            l_brack_token: L_BRACK@886..888 "[" [Newline("\n")] [],
+                            name: CssAttributeName {
+                                namespace: CssNamespace {
+                                    prefix: CssUniversalNamespacePrefix {
+                                        star_token: STAR@888..889 "*" [] [],
+                                    },
+                                    bitwise_or_token: PIPE@889..890 "|" [] [],
+                                },
+                                name: CssIdentifier {
+                                    value_token: IDENT@890..893 "att" [] [],
+                                },
+                            },
+                            matcher: missing (optional),
+                            r_brack_token: R_BRACK@893..895 "]" [] [Whitespace(" ")],
+                        },
+                    ],
+                },
+            ],
+            block: CssBlock {
+                l_curly_token: L_CURLY@895..896 "{" [] [],
+                declaration_list: CssDeclarationList [],
+                r_curly_token: R_CURLY@896..897 "}" [] [],
+            },
+        },
+        CssRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selector_token: missing (optional),
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssAttributeSelector {
+                            l_brack_token: L_BRACK@897..902 "[" [Newline("\n")] [Whitespace("   ")],
+                            name: CssAttributeName {
+                                namespace: CssNamespace {
+                                    prefix: CssUniversalNamespacePrefix {
+                                        star_token: STAR@902..903 "*" [] [],
+                                    },
+                                    bitwise_or_token: PIPE@903..904 "|" [] [],
+                                },
+                                name: CssIdentifier {
+                                    value_token: IDENT@904..910 "att" [] [Whitespace("   ")],
+                                },
+                            },
+                            matcher: missing (optional),
+                            r_brack_token: R_BRACK@910..912 "]" [] [Whitespace(" ")],
+                        },
+                    ],
+                },
+            ],
+            block: CssBlock {
+                l_curly_token: L_CURLY@912..913 "{" [] [],
+                declaration_list: CssDeclarationList [],
+                r_curly_token: R_CURLY@913..914 "}" [] [],
+            },
+        },
+        CssRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selector_token: missing (optional),
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssAttributeSelector {
+                            l_brack_token: L_BRACK@914..916 "[" [Newline("\n")] [],
+                            name: CssAttributeName {
+                                namespace: CssNamespace {
+                                    prefix: missing (optional),
+                                    bitwise_or_token: PIPE@916..917 "|" [] [],
+                                },
+                                name: CssIdentifier {
+                                    value_token: IDENT@917..920 "att" [] [],
+                                },
+                            },
+                            matcher: missing (optional),
+                            r_brack_token: R_BRACK@920..922 "]" [] [Whitespace(" ")],
+                        },
+                    ],
+                },
+            ],
+            block: CssBlock {
+                l_curly_token: L_CURLY@922..923 "{" [] [],
+                declaration_list: CssDeclarationList [],
+                r_curly_token: R_CURLY@923..924 "}" [] [],
+            },
+        },
+        CssRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selector_token: missing (optional),
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssAttributeSelector {
+                            l_brack_token: L_BRACK@924..927 "[" [Newline("\n")] [Whitespace(" ")],
+                            name: CssAttributeName {
+                                namespace: CssNamespace {
+                                    prefix: missing (optional),
+                                    bitwise_or_token: PIPE@927..928 "|" [] [],
+                                },
+                                name: CssIdentifier {
+                                    value_token: IDENT@928..932 "att" [] [Whitespace(" ")],
+                                },
+                            },
+                            matcher: missing (optional),
+                            r_brack_token: R_BRACK@932..934 "]" [] [Whitespace(" ")],
+                        },
+                    ],
+                },
+            ],
+            block: CssBlock {
+                l_curly_token: L_CURLY@934..935 "{" [] [],
+                declaration_list: CssDeclarationList [],
+                r_curly_token: R_CURLY@935..936 "}" [] [],
+            },
+        },
+        CssRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selector_token: missing (optional),
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssAttributeSelector {
+                            l_brack_token: L_BRACK@936..941 "[" [Newline("\n")] [Whitespace("   ")],
+                            name: CssAttributeName {
+                                namespace: CssNamespace {
+                                    prefix: missing (optional),
+                                    bitwise_or_token: PIPE@941..942 "|" [] [],
+                                },
+                                name: CssIdentifier {
+                                    value_token: IDENT@942..948 "att" [] [Whitespace("   ")],
+                                },
+                            },
+                            matcher: missing (optional),
+                            r_brack_token: R_BRACK@948..950 "]" [] [Whitespace(" ")],
+                        },
+                    ],
+                },
+            ],
+            block: CssBlock {
+                l_curly_token: L_CURLY@950..951 "{" [] [],
+                declaration_list: CssDeclarationList [],
+                r_curly_token: R_CURLY@951..952 "}" [] [],
+            },
+        },
     ],
-    eof_token: EOF@827..828 "" [Newline("\n")] [],
+    eof_token: EOF@952..953 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..828
-  0: CSS_RULE_LIST@0..827
+0: CSS_ROOT@0..953
+  0: (empty)
+  1: CSS_RULE_LIST@0..952
     0: CSS_RULE@0..10
       0: CSS_SELECTOR_LIST@0..8
         0: CSS_COMPOUND_SELECTOR@0..8
@@ -1281,8 +1691,10 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@0..8
             0: CSS_ATTRIBUTE_SELECTOR@0..8
               0: L_BRACK@0..1 "[" [] []
-              1: CSS_IDENTIFIER@1..6
-                0: IDENT@1..6 "title" [] []
+              1: CSS_ATTRIBUTE_NAME@1..6
+                0: (empty)
+                1: CSS_IDENTIFIER@1..6
+                  0: IDENT@1..6 "title" [] []
               2: (empty)
               3: R_BRACK@6..8 "]" [] [Whitespace(" ")]
       1: CSS_BLOCK@8..10
@@ -1297,8 +1709,10 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@10..23
             0: CSS_ATTRIBUTE_SELECTOR@10..23
               0: L_BRACK@10..12 "[" [Newline("\n")] []
-              1: CSS_IDENTIFIER@12..17
-                0: IDENT@12..17 "title" [] []
+              1: CSS_ATTRIBUTE_NAME@12..17
+                0: (empty)
+                1: CSS_IDENTIFIER@12..17
+                  0: IDENT@12..17 "title" [] []
               2: CSS_ATTRIBUTE_MATCHER@17..21
                 0: EQ@17..18 "=" [] []
                 1: CSS_ATTRIBUTE_MATCHER_VALUE@18..21
@@ -1318,8 +1732,10 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@25..40
             0: CSS_ATTRIBUTE_SELECTOR@25..40
               0: L_BRACK@25..27 "[" [Newline("\n")] []
-              1: CSS_IDENTIFIER@27..32
-                0: IDENT@27..32 "title" [] []
+              1: CSS_ATTRIBUTE_NAME@27..32
+                0: (empty)
+                1: CSS_IDENTIFIER@27..32
+                  0: IDENT@27..32 "title" [] []
               2: CSS_ATTRIBUTE_MATCHER@32..38
                 0: EQ@32..33 "=" [] []
                 1: CSS_ATTRIBUTE_MATCHER_VALUE@33..38
@@ -1339,8 +1755,10 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@42..61
             0: CSS_ATTRIBUTE_SELECTOR@42..61
               0: L_BRACK@42..45 "[" [Newline("\n")] [Whitespace(" ")]
-              1: CSS_IDENTIFIER@45..51
-                0: IDENT@45..51 "title" [] [Whitespace(" ")]
+              1: CSS_ATTRIBUTE_NAME@45..51
+                0: (empty)
+                1: CSS_IDENTIFIER@45..51
+                  0: IDENT@45..51 "title" [] [Whitespace(" ")]
               2: CSS_ATTRIBUTE_MATCHER@51..59
                 0: EQ@51..53 "=" [] [Whitespace(" ")]
                 1: CSS_ATTRIBUTE_MATCHER_VALUE@53..59
@@ -1360,8 +1778,10 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@63..90
             0: CSS_ATTRIBUTE_SELECTOR@63..90
               0: L_BRACK@63..68 "[" [Newline("\n")] [Whitespace("   ")]
-              1: CSS_IDENTIFIER@68..76
-                0: IDENT@68..76 "title" [] [Whitespace("   ")]
+              1: CSS_ATTRIBUTE_NAME@68..76
+                0: (empty)
+                1: CSS_IDENTIFIER@68..76
+                  0: IDENT@68..76 "title" [] [Whitespace("   ")]
               2: CSS_ATTRIBUTE_MATCHER@76..88
                 0: EQ@76..80 "=" [] [Whitespace("   ")]
                 1: CSS_ATTRIBUTE_MATCHER_VALUE@80..88
@@ -1381,8 +1801,10 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@92..109
             0: CSS_ATTRIBUTE_SELECTOR@92..109
               0: L_BRACK@92..94 "[" [Newline("\n")] []
-              1: CSS_IDENTIFIER@94..98
-                0: IDENT@94..98 "lang" [] []
+              1: CSS_ATTRIBUTE_NAME@94..98
+                0: (empty)
+                1: CSS_IDENTIFIER@94..98
+                  0: IDENT@94..98 "lang" [] []
               2: CSS_ATTRIBUTE_MATCHER@98..107
                 0: TILDE_EQ@98..100 "~=" [] []
                 1: CSS_ATTRIBUTE_MATCHER_VALUE@100..107
@@ -1402,8 +1824,10 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@111..125
             0: CSS_ATTRIBUTE_SELECTOR@111..125
               0: L_BRACK@111..113 "[" [Newline("\n")] []
-              1: CSS_IDENTIFIER@113..117
-                0: IDENT@113..117 "lang" [] []
+              1: CSS_ATTRIBUTE_NAME@113..117
+                0: (empty)
+                1: CSS_IDENTIFIER@113..117
+                  0: IDENT@113..117 "lang" [] []
               2: CSS_ATTRIBUTE_MATCHER@117..123
                 0: PIPEEQ@117..119 "|=" [] []
                 1: CSS_ATTRIBUTE_MATCHER_VALUE@119..123
@@ -1423,8 +1847,10 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@127..140
             0: CSS_ATTRIBUTE_SELECTOR@127..140
               0: L_BRACK@127..129 "[" [Newline("\n")] []
-              1: CSS_IDENTIFIER@129..133
-                0: IDENT@129..133 "href" [] []
+              1: CSS_ATTRIBUTE_NAME@129..133
+                0: (empty)
+                1: CSS_IDENTIFIER@129..133
+                  0: IDENT@129..133 "href" [] []
               2: CSS_ATTRIBUTE_MATCHER@133..138
                 0: CARETEQ@133..135 "^=" [] []
                 1: CSS_ATTRIBUTE_MATCHER_VALUE@135..138
@@ -1444,8 +1870,10 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@142..158
             0: CSS_ATTRIBUTE_SELECTOR@142..158
               0: L_BRACK@142..144 "[" [Newline("\n")] []
-              1: CSS_IDENTIFIER@144..149
-                0: IDENT@144..149 "href$" [] []
+              1: CSS_ATTRIBUTE_NAME@144..149
+                0: (empty)
+                1: CSS_IDENTIFIER@144..149
+                  0: IDENT@144..149 "href$" [] []
               2: CSS_ATTRIBUTE_MATCHER@149..156
                 0: EQ@149..150 "=" [] []
                 1: CSS_ATTRIBUTE_MATCHER_VALUE@150..156
@@ -1465,8 +1893,10 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@160..179
             0: CSS_ATTRIBUTE_SELECTOR@160..179
               0: L_BRACK@160..162 "[" [Newline("\n")] []
-              1: CSS_IDENTIFIER@162..166
-                0: IDENT@162..166 "href" [] []
+              1: CSS_ATTRIBUTE_NAME@162..166
+                0: (empty)
+                1: CSS_IDENTIFIER@162..166
+                  0: IDENT@162..166 "href" [] []
               2: CSS_ATTRIBUTE_MATCHER@166..177
                 0: STAREQ@166..168 "*=" [] []
                 1: CSS_ATTRIBUTE_MATCHER_VALUE@168..177
@@ -1486,8 +1916,10 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@181..206
             0: CSS_ATTRIBUTE_SELECTOR@181..206
               0: L_BRACK@181..183 "[" [Newline("\n")] []
-              1: CSS_IDENTIFIER@183..187
-                0: IDENT@183..187 "href" [] []
+              1: CSS_ATTRIBUTE_NAME@183..187
+                0: (empty)
+                1: CSS_IDENTIFIER@183..187
+                  0: IDENT@183..187 "href" [] []
               2: CSS_ATTRIBUTE_MATCHER@187..204
                 0: STAREQ@187..189 "*=" [] []
                 1: CSS_ATTRIBUTE_MATCHER_VALUE@189..203
@@ -1507,8 +1939,10 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@208..233
             0: CSS_ATTRIBUTE_SELECTOR@208..233
               0: L_BRACK@208..210 "[" [Newline("\n")] []
-              1: CSS_IDENTIFIER@210..214
-                0: IDENT@210..214 "href" [] []
+              1: CSS_ATTRIBUTE_NAME@210..214
+                0: (empty)
+                1: CSS_IDENTIFIER@210..214
+                  0: IDENT@210..214 "href" [] []
               2: CSS_ATTRIBUTE_MATCHER@214..231
                 0: STAREQ@214..216 "*=" [] []
                 1: CSS_ATTRIBUTE_MATCHER_VALUE@216..230
@@ -1528,8 +1962,10 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@235..253
             0: CSS_ATTRIBUTE_SELECTOR@235..253
               0: L_BRACK@235..237 "[" [Newline("\n")] []
-              1: CSS_IDENTIFIER@237..241
-                0: IDENT@237..241 "href" [] []
+              1: CSS_ATTRIBUTE_NAME@237..241
+                0: (empty)
+                1: CSS_IDENTIFIER@237..241
+                  0: IDENT@237..241 "href" [] []
               2: CSS_ATTRIBUTE_MATCHER@241..251
                 0: STAREQ@241..243 "*=" [] []
                 1: CSS_ATTRIBUTE_MATCHER_VALUE@243..250
@@ -1549,8 +1985,10 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@255..273
             0: CSS_ATTRIBUTE_SELECTOR@255..273
               0: L_BRACK@255..257 "[" [Newline("\n")] []
-              1: CSS_IDENTIFIER@257..261
-                0: IDENT@257..261 "href" [] []
+              1: CSS_ATTRIBUTE_NAME@257..261
+                0: (empty)
+                1: CSS_IDENTIFIER@257..261
+                  0: IDENT@257..261 "href" [] []
               2: CSS_ATTRIBUTE_MATCHER@261..271
                 0: STAREQ@261..263 "*=" [] []
                 1: CSS_ATTRIBUTE_MATCHER_VALUE@263..270
@@ -1570,8 +2008,10 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@275..282
             0: CSS_ATTRIBUTE_SELECTOR@275..282
               0: L_BRACK@275..277 "[" [Newline("\n")] []
-              1: CSS_IDENTIFIER@277..280
-                0: IDENT@277..280 "att" [] []
+              1: CSS_ATTRIBUTE_NAME@277..280
+                0: (empty)
+                1: CSS_IDENTIFIER@277..280
+                  0: IDENT@277..280 "att" [] []
               2: (empty)
               3: R_BRACK@280..282 "]" [] [Whitespace(" ")]
       1: CSS_BLOCK@282..284
@@ -1586,8 +2026,10 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@284..293
             0: CSS_ATTRIBUTE_SELECTOR@284..293
               0: L_BRACK@284..287 "[" [Newline("\n")] [Whitespace(" ")]
-              1: CSS_IDENTIFIER@287..291
-                0: IDENT@287..291 "att" [] [Whitespace(" ")]
+              1: CSS_ATTRIBUTE_NAME@287..291
+                0: (empty)
+                1: CSS_IDENTIFIER@287..291
+                  0: IDENT@287..291 "att" [] [Whitespace(" ")]
               2: (empty)
               3: R_BRACK@291..293 "]" [] [Whitespace(" ")]
       1: CSS_BLOCK@293..295
@@ -1602,8 +2044,10 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@295..308
             0: CSS_ATTRIBUTE_SELECTOR@295..308
               0: L_BRACK@295..300 "[" [Newline("\n")] [Whitespace("   ")]
-              1: CSS_IDENTIFIER@300..306
-                0: IDENT@300..306 "att" [] [Whitespace("   ")]
+              1: CSS_ATTRIBUTE_NAME@300..306
+                0: (empty)
+                1: CSS_IDENTIFIER@300..306
+                  0: IDENT@300..306 "att" [] [Whitespace("   ")]
               2: (empty)
               3: R_BRACK@306..308 "]" [] [Whitespace(" ")]
       1: CSS_BLOCK@308..310
@@ -1615,13 +2059,16 @@ CssRoot {
         0: CSS_COMPOUND_SELECTOR@310..331
           0: (empty)
           1: CSS_TYPE_SELECTOR@310..312
-            0: CSS_IDENTIFIER@310..312
+            0: (empty)
+            1: CSS_IDENTIFIER@310..312
               0: IDENT@310..312 "a" [Newline("\n")] []
           2: CSS_SUB_SELECTOR_LIST@312..331
             0: CSS_ATTRIBUTE_SELECTOR@312..331
               0: L_BRACK@312..314 "[" [] [Whitespace(" ")]
-              1: CSS_IDENTIFIER@314..320
-                0: IDENT@314..320 "class" [] [Whitespace(" ")]
+              1: CSS_ATTRIBUTE_NAME@314..320
+                0: (empty)
+                1: CSS_IDENTIFIER@314..320
+                  0: IDENT@314..320 "class" [] [Whitespace(" ")]
               2: CSS_ATTRIBUTE_MATCHER@320..329
                 0: EQ@320..322 "=" [] [Whitespace(" ")]
                 1: CSS_ATTRIBUTE_MATCHER_VALUE@322..329
@@ -1638,13 +2085,16 @@ CssRoot {
         0: CSS_COMPOUND_SELECTOR@333..362
           0: (empty)
           1: CSS_TYPE_SELECTOR@333..335
-            0: CSS_IDENTIFIER@333..335
+            0: (empty)
+            1: CSS_IDENTIFIER@333..335
               0: IDENT@333..335 "a" [Newline("\n")] []
           2: CSS_SUB_SELECTOR_LIST@335..362
             0: CSS_ATTRIBUTE_SELECTOR@335..362
               0: L_BRACK@335..339 "[" [] [Whitespace("   ")]
-              1: CSS_IDENTIFIER@339..347
-                0: IDENT@339..347 "class" [] [Whitespace("   ")]
+              1: CSS_ATTRIBUTE_NAME@339..347
+                0: (empty)
+                1: CSS_IDENTIFIER@339..347
+                  0: IDENT@339..347 "class" [] [Whitespace("   ")]
               2: CSS_ATTRIBUTE_MATCHER@347..360
                 0: EQ@347..351 "=" [] [Whitespace("   ")]
                 1: CSS_ATTRIBUTE_MATCHER_VALUE@351..360
@@ -1664,8 +2114,10 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@364..391
             0: CSS_ATTRIBUTE_SELECTOR@364..391
               0: L_BRACK@364..366 "[" [Newline("\n")] []
-              1: CSS_IDENTIFIER@366..370
-                0: IDENT@366..370 "href" [] []
+              1: CSS_ATTRIBUTE_NAME@366..370
+                0: (empty)
+                1: CSS_IDENTIFIER@366..370
+                  0: IDENT@366..370 "href" [] []
               2: CSS_ATTRIBUTE_MATCHER@370..389
                 0: STAREQ@370..372 "*=" [] []
                 1: CSS_ATTRIBUTE_MATCHER_VALUE@372..388
@@ -1685,8 +2137,10 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@393..426
             0: CSS_ATTRIBUTE_SELECTOR@393..426
               0: L_BRACK@393..398 "[" [Newline("\n")] [Whitespace("   ")]
-              1: CSS_IDENTIFIER@398..402
-                0: IDENT@398..402 "href" [] []
+              1: CSS_ATTRIBUTE_NAME@398..402
+                0: (empty)
+                1: CSS_IDENTIFIER@398..402
+                  0: IDENT@398..402 "href" [] []
               2: CSS_ATTRIBUTE_MATCHER@402..424
                 0: STAREQ@402..404 "*=" [] []
                 1: CSS_ATTRIBUTE_MATCHER_VALUE@404..420
@@ -1706,8 +2160,10 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@428..467
             0: CSS_ATTRIBUTE_SELECTOR@428..467
               0: L_BRACK@428..433 "[" [Newline("\n")] [Whitespace("   ")]
-              1: CSS_IDENTIFIER@433..440
-                0: IDENT@433..440 "href" [] [Whitespace("   ")]
+              1: CSS_ATTRIBUTE_NAME@433..440
+                0: (empty)
+                1: CSS_IDENTIFIER@433..440
+                  0: IDENT@433..440 "href" [] [Whitespace("   ")]
               2: CSS_ATTRIBUTE_MATCHER@440..465
                 0: STAREQ@440..445 "*=" [] [Whitespace("   ")]
                 1: CSS_ATTRIBUTE_MATCHER_VALUE@445..461
@@ -1727,8 +2183,10 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@469..483
             0: CSS_ATTRIBUTE_SELECTOR@469..483
               0: L_BRACK@469..474 "[" [Newline("\n")] [Whitespace("   ")]
-              1: CSS_IDENTIFIER@474..481
-                0: IDENT@474..481 "href" [] [Whitespace("   ")]
+              1: CSS_ATTRIBUTE_NAME@474..481
+                0: (empty)
+                1: CSS_IDENTIFIER@474..481
+                  0: IDENT@474..481 "href" [] [Whitespace("   ")]
               2: (empty)
               3: R_BRACK@481..483 "]" [] [Whitespace(" ")]
       1: CSS_BLOCK@483..485
@@ -1743,8 +2201,10 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@485..503
             0: CSS_ATTRIBUTE_SELECTOR@485..503
               0: L_BRACK@485..487 "[" [Newline("\n")] []
-              1: CSS_IDENTIFIER@487..492
-                0: IDENT@487..492 "frame" [] []
+              1: CSS_ATTRIBUTE_NAME@487..492
+                0: (empty)
+                1: CSS_IDENTIFIER@487..492
+                  0: IDENT@487..492 "frame" [] []
               2: CSS_ATTRIBUTE_MATCHER@492..501
                 0: EQ@492..493 "=" [] []
                 1: CSS_ATTRIBUTE_MATCHER_VALUE@493..500
@@ -1772,8 +2232,10 @@ CssRoot {
                 0: IDENT@510..515 "class" [] []
             2: CSS_ATTRIBUTE_SELECTOR@515..524
               0: L_BRACK@515..516 "[" [] []
-              1: CSS_IDENTIFIER@516..522
-                0: IDENT@516..522 "target" [] []
+              1: CSS_ATTRIBUTE_NAME@516..522
+                0: (empty)
+                1: CSS_IDENTIFIER@516..522
+                  0: IDENT@516..522 "target" [] []
               2: (empty)
               3: R_BRACK@522..524 "]" [] [Whitespace(" ")]
       1: CSS_BLOCK@524..526
@@ -1792,8 +2254,10 @@ CssRoot {
                 0: IDENT@528..530 "id" [] []
             1: CSS_ATTRIBUTE_SELECTOR@530..539
               0: L_BRACK@530..531 "[" [] []
-              1: CSS_IDENTIFIER@531..537
-                0: IDENT@531..537 "target" [] []
+              1: CSS_ATTRIBUTE_NAME@531..537
+                0: (empty)
+                1: CSS_IDENTIFIER@531..537
+                  0: IDENT@531..537 "target" [] []
               2: (empty)
               3: R_BRACK@537..539 "]" [] [Whitespace(" ")]
       1: CSS_BLOCK@539..541
@@ -1808,8 +2272,10 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@541..557
             0: CSS_ATTRIBUTE_SELECTOR@541..550
               0: L_BRACK@541..543 "[" [Newline("\n")] []
-              1: CSS_IDENTIFIER@543..549
-                0: IDENT@543..549 "target" [] []
+              1: CSS_ATTRIBUTE_NAME@543..549
+                0: (empty)
+                1: CSS_IDENTIFIER@543..549
+                  0: IDENT@543..549 "target" [] []
               2: (empty)
               3: R_BRACK@549..550 "]" [] []
             1: CSS_CLASS_SELECTOR@550..557
@@ -1828,8 +2294,10 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@559..574
             0: CSS_ATTRIBUTE_SELECTOR@559..574
               0: L_BRACK@559..561 "[" [Newline("\n")] []
-              1: CSS_IDENTIFIER@561..566
-                0: IDENT@561..566 "title" [] []
+              1: CSS_ATTRIBUTE_NAME@561..566
+                0: (empty)
+                1: CSS_IDENTIFIER@561..566
+                  0: IDENT@561..566 "title" [] []
               2: CSS_ATTRIBUTE_MATCHER@566..572
                 0: EQ@566..567 "=" [] []
                 1: CSS_ATTRIBUTE_MATCHER_VALUE@567..572
@@ -1849,8 +2317,10 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@576..612
             0: CSS_ATTRIBUTE_SELECTOR@576..597
               0: L_BRACK@576..578 "[" [Newline("\n")] []
-              1: CSS_IDENTIFIER@578..588
-                0: IDENT@578..588 "data-style" [] []
+              1: CSS_ATTRIBUTE_NAME@578..588
+                0: (empty)
+                1: CSS_IDENTIFIER@578..588
+                  0: IDENT@578..588 "data-style" [] []
               2: CSS_ATTRIBUTE_MATCHER@588..596
                 0: EQ@588..589 "=" [] []
                 1: CSS_ATTRIBUTE_MATCHER_VALUE@589..596
@@ -1860,8 +2330,10 @@ CssRoot {
               3: R_BRACK@596..597 "]" [] []
             1: CSS_ATTRIBUTE_SELECTOR@597..612
               0: L_BRACK@597..598 "[" [] []
-              1: CSS_IDENTIFIER@598..610
-                0: IDENT@598..610 "data-loading" [] []
+              1: CSS_ATTRIBUTE_NAME@598..610
+                0: (empty)
+                1: CSS_IDENTIFIER@598..610
+                  0: IDENT@598..610 "data-loading" [] []
               2: (empty)
               3: R_BRACK@610..612 "]" [] [Whitespace(" ")]
       1: CSS_BLOCK@612..614
@@ -1876,8 +2348,10 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@614..653
             0: CSS_ATTRIBUTE_SELECTOR@614..636
               0: L_BRACK@614..616 "[" [Newline("\n")] []
-              1: CSS_IDENTIFIER@616..627
-                0: IDENT@616..627 "-data-style" [] []
+              1: CSS_ATTRIBUTE_NAME@616..627
+                0: (empty)
+                1: CSS_IDENTIFIER@616..627
+                  0: IDENT@616..627 "-data-style" [] []
               2: CSS_ATTRIBUTE_MATCHER@627..635
                 0: EQ@627..628 "=" [] []
                 1: CSS_ATTRIBUTE_MATCHER_VALUE@628..635
@@ -1887,8 +2361,10 @@ CssRoot {
               3: R_BRACK@635..636 "]" [] []
             1: CSS_ATTRIBUTE_SELECTOR@636..653
               0: L_BRACK@636..637 "[" [] []
-              1: CSS_IDENTIFIER@637..651
-                0: IDENT@637..651 "--data-loading" [] []
+              1: CSS_ATTRIBUTE_NAME@637..651
+                0: (empty)
+                1: CSS_IDENTIFIER@637..651
+                  0: IDENT@637..651 "--data-loading" [] []
               2: (empty)
               3: R_BRACK@651..653 "]" [] [Whitespace(" ")]
       1: CSS_BLOCK@653..655
@@ -1900,13 +2376,16 @@ CssRoot {
         0: CSS_COMPOUND_SELECTOR@655..673
           0: (empty)
           1: CSS_TYPE_SELECTOR@655..657
-            0: CSS_IDENTIFIER@655..657
+            0: (empty)
+            1: CSS_IDENTIFIER@655..657
               0: IDENT@655..657 "a" [Newline("\n")] []
           2: CSS_SUB_SELECTOR_LIST@657..673
             0: CSS_ATTRIBUTE_SELECTOR@657..673
               0: L_BRACK@657..658 "[" [] []
-              1: CSS_IDENTIFIER@658..662
-                0: IDENT@658..662 "href" [] []
+              1: CSS_ATTRIBUTE_NAME@658..662
+                0: (empty)
+                1: CSS_IDENTIFIER@658..662
+                  0: IDENT@658..662 "href" [] []
               2: CSS_ATTRIBUTE_MATCHER@662..671
                 0: EQ@662..663 "=" [] []
                 1: CSS_ATTRIBUTE_MATCHER_VALUE@663..671
@@ -1923,13 +2402,16 @@ CssRoot {
         0: CSS_COMPOUND_SELECTOR@675..693
           0: (empty)
           1: CSS_TYPE_SELECTOR@675..677
-            0: CSS_IDENTIFIER@675..677
+            0: (empty)
+            1: CSS_IDENTIFIER@675..677
               0: IDENT@675..677 "a" [Newline("\n")] []
           2: CSS_SUB_SELECTOR_LIST@677..693
             0: CSS_ATTRIBUTE_SELECTOR@677..693
               0: L_BRACK@677..678 "[" [] []
-              1: CSS_IDENTIFIER@678..682
-                0: IDENT@678..682 "href" [] []
+              1: CSS_ATTRIBUTE_NAME@678..682
+                0: (empty)
+                1: CSS_IDENTIFIER@678..682
+                  0: IDENT@678..682 "href" [] []
               2: CSS_ATTRIBUTE_MATCHER@682..691
                 0: EQ@682..683 "=" [] []
                 1: CSS_ATTRIBUTE_MATCHER_VALUE@683..691
@@ -1949,8 +2431,10 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@695..708
             0: CSS_ATTRIBUTE_SELECTOR@695..708
               0: L_BRACK@695..697 "[" [Newline("\n")] []
-              1: CSS_IDENTIFIER@697..706
-                0: IDENT@697..706 "ng\\:cloak" [] []
+              1: CSS_ATTRIBUTE_NAME@697..706
+                0: (empty)
+                1: CSS_IDENTIFIER@697..706
+                  0: IDENT@697..706 "ng\\:cloak" [] []
               2: (empty)
               3: R_BRACK@706..708 "]" [] [Whitespace(" ")]
       1: CSS_BLOCK@708..710
@@ -1965,8 +2449,10 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@710..725
             0: CSS_ATTRIBUTE_SELECTOR@710..725
               0: L_BRACK@710..712 "[" [Newline("\n")] []
-              1: CSS_IDENTIFIER@712..723
-                0: IDENT@712..723 "ng\\3a cloak" [] []
+              1: CSS_ATTRIBUTE_NAME@712..723
+                0: (empty)
+                1: CSS_IDENTIFIER@712..723
+                  0: IDENT@712..723 "ng\\3a cloak" [] []
               2: (empty)
               3: R_BRACK@723..725 "]" [] [Whitespace(" ")]
       1: CSS_BLOCK@725..727
@@ -1981,8 +2467,10 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@727..745
             0: CSS_ATTRIBUTE_SELECTOR@727..745
               0: L_BRACK@727..729 "[" [Newline("\n")] []
-              1: CSS_IDENTIFIER@729..743
-                0: IDENT@729..743 "ng\\00003acloak" [] []
+              1: CSS_ATTRIBUTE_NAME@729..743
+                0: (empty)
+                1: CSS_IDENTIFIER@729..743
+                  0: IDENT@729..743 "ng\\00003acloak" [] []
               2: (empty)
               3: R_BRACK@743..745 "]" [] [Whitespace(" ")]
       1: CSS_BLOCK@745..747
@@ -1997,8 +2485,10 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@747..757
             0: CSS_ATTRIBUTE_SELECTOR@747..757
               0: L_BRACK@747..749 "[" [Newline("\n")] []
-              1: CSS_IDENTIFIER@749..752
-                0: IDENT@749..752 "foo" [] []
+              1: CSS_ATTRIBUTE_NAME@749..752
+                0: (empty)
+                1: CSS_IDENTIFIER@749..752
+                  0: IDENT@749..752 "foo" [] []
               2: CSS_ATTRIBUTE_MATCHER@752..755
                 0: EQ@752..753 "=" [] []
                 1: CSS_ATTRIBUTE_MATCHER_VALUE@753..755
@@ -2018,8 +2508,10 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@759..769
             0: CSS_ATTRIBUTE_SELECTOR@759..769
               0: L_BRACK@759..761 "[" [Newline("\n")] []
-              1: CSS_IDENTIFIER@761..764
-                0: IDENT@761..764 "foo" [] []
+              1: CSS_ATTRIBUTE_NAME@761..764
+                0: (empty)
+                1: CSS_IDENTIFIER@761..764
+                  0: IDENT@761..764 "foo" [] []
               2: CSS_ATTRIBUTE_MATCHER@764..767
                 0: EQ@764..765 "=" [] []
                 1: CSS_ATTRIBUTE_MATCHER_VALUE@765..767
@@ -2039,8 +2531,10 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@771..781
             0: CSS_ATTRIBUTE_SELECTOR@771..781
               0: L_BRACK@771..773 "[" [Newline("\n")] []
-              1: CSS_IDENTIFIER@773..776
-                0: IDENT@773..776 "foo" [] []
+              1: CSS_ATTRIBUTE_NAME@773..776
+                0: (empty)
+                1: CSS_IDENTIFIER@773..776
+                  0: IDENT@773..776 "foo" [] []
               2: CSS_ATTRIBUTE_MATCHER@776..779
                 0: EQ@776..777 "=" [] []
                 1: CSS_ATTRIBUTE_MATCHER_VALUE@777..779
@@ -2060,8 +2554,10 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@783..811
             0: CSS_ATTRIBUTE_SELECTOR@783..811
               0: L_BRACK@783..785 "[" [Newline("\n")] []
-              1: CSS_IDENTIFIER@785..788
-                0: IDENT@785..788 "foo" [] []
+              1: CSS_ATTRIBUTE_NAME@785..788
+                0: (empty)
+                1: CSS_IDENTIFIER@785..788
+                  0: IDENT@785..788 "foo" [] []
               2: CSS_ATTRIBUTE_MATCHER@788..809
                 0: EQ@788..789 "=" [] []
                 1: CSS_ATTRIBUTE_MATCHER_VALUE@789..809
@@ -2081,8 +2577,10 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@813..824
             0: CSS_ATTRIBUTE_SELECTOR@813..824
               0: L_BRACK@813..815 "[" [Newline("\n")] []
-              1: CSS_IDENTIFIER@815..819
-                0: IDENT@815..819 "attr" [] []
+              1: CSS_ATTRIBUTE_NAME@815..819
+                0: (empty)
+                1: CSS_IDENTIFIER@815..819
+                  0: IDENT@815..819 "attr" [] []
               2: CSS_ATTRIBUTE_MATCHER@819..822
                 0: EQ@819..820 "=" [] []
                 1: CSS_ATTRIBUTE_MATCHER_VALUE@820..822
@@ -2094,7 +2592,189 @@ CssRoot {
         0: L_CURLY@824..826 "{" [] [Whitespace(" ")]
         1: CSS_DECLARATION_LIST@826..826
         2: R_CURLY@826..827 "}" [] []
-  1: EOF@827..828 "" [Newline("\n")] []
+    40: CSS_RULE@827..847
+      0: CSS_SELECTOR_LIST@827..845
+        0: CSS_COMPOUND_SELECTOR@827..845
+          0: (empty)
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@827..845
+            0: CSS_ATTRIBUTE_SELECTOR@827..845
+              0: L_BRACK@827..829 "[" [Newline("\n")] []
+              1: CSS_ATTRIBUTE_NAME@829..835
+                0: CSS_NAMESPACE@829..831
+                  0: CSS_UNIVERSAL_NAMESPACE_PREFIX@829..830
+                    0: STAR@829..830 "*" [] []
+                  1: PIPE@830..831 "|" [] []
+                1: CSS_IDENTIFIER@831..835
+                  0: IDENT@831..835 "attr" [] []
+              2: CSS_ATTRIBUTE_MATCHER@835..843
+                0: PIPEEQ@835..837 "|=" [] []
+                1: CSS_ATTRIBUTE_MATCHER_VALUE@837..843
+                  0: CSS_STRING@837..843
+                    0: CSS_STRING_LITERAL@837..843 "\"test\"" [] []
+                2: (empty)
+              3: R_BRACK@843..845 "]" [] [Whitespace(" ")]
+      1: CSS_BLOCK@845..847
+        0: L_CURLY@845..846 "{" [] []
+        1: CSS_DECLARATION_LIST@846..846
+        2: R_CURLY@846..847 "}" [] []
+    41: CSS_RULE@847..869
+      0: CSS_SELECTOR_LIST@847..867
+        0: CSS_COMPOUND_SELECTOR@847..867
+          0: (empty)
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@847..867
+            0: CSS_ATTRIBUTE_SELECTOR@847..867
+              0: L_BRACK@847..849 "[" [Newline("\n")] []
+              1: CSS_ATTRIBUTE_NAME@849..857
+                0: CSS_NAMESPACE@849..853
+                  0: CSS_NAMED_NAMESPACE_PREFIX@849..852
+                    0: CSS_IDENTIFIER@849..852
+                      0: IDENT@849..852 "foo" [] []
+                  1: PIPE@852..853 "|" [] []
+                1: CSS_IDENTIFIER@853..857
+                  0: IDENT@853..857 "attr" [] []
+              2: CSS_ATTRIBUTE_MATCHER@857..865
+                0: PIPEEQ@857..859 "|=" [] []
+                1: CSS_ATTRIBUTE_MATCHER_VALUE@859..865
+                  0: CSS_STRING@859..865
+                    0: CSS_STRING_LITERAL@859..865 "\"test\"" [] []
+                2: (empty)
+              3: R_BRACK@865..867 "]" [] [Whitespace(" ")]
+      1: CSS_BLOCK@867..869
+        0: L_CURLY@867..868 "{" [] []
+        1: CSS_DECLARATION_LIST@868..868
+        2: R_CURLY@868..869 "}" [] []
+    42: CSS_RULE@869..886
+      0: CSS_SELECTOR_LIST@869..884
+        0: CSS_COMPOUND_SELECTOR@869..884
+          0: (empty)
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@869..884
+            0: CSS_ATTRIBUTE_SELECTOR@869..884
+              0: L_BRACK@869..871 "[" [Newline("\n")] []
+              1: CSS_ATTRIBUTE_NAME@871..878
+                0: CSS_NAMESPACE@871..875
+                  0: CSS_NAMED_NAMESPACE_PREFIX@871..874
+                    0: CSS_IDENTIFIER@871..874
+                      0: IDENT@871..874 "foo" [] []
+                  1: PIPE@874..875 "|" [] []
+                1: CSS_IDENTIFIER@875..878
+                  0: IDENT@875..878 "att" [] []
+              2: CSS_ATTRIBUTE_MATCHER@878..882
+                0: EQ@878..879 "=" [] []
+                1: CSS_ATTRIBUTE_MATCHER_VALUE@879..882
+                  0: CSS_IDENTIFIER@879..882
+                    0: IDENT@879..882 "val" [] []
+                2: (empty)
+              3: R_BRACK@882..884 "]" [] [Whitespace(" ")]
+      1: CSS_BLOCK@884..886
+        0: L_CURLY@884..885 "{" [] []
+        1: CSS_DECLARATION_LIST@885..885
+        2: R_CURLY@885..886 "}" [] []
+    43: CSS_RULE@886..897
+      0: CSS_SELECTOR_LIST@886..895
+        0: CSS_COMPOUND_SELECTOR@886..895
+          0: (empty)
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@886..895
+            0: CSS_ATTRIBUTE_SELECTOR@886..895
+              0: L_BRACK@886..888 "[" [Newline("\n")] []
+              1: CSS_ATTRIBUTE_NAME@888..893
+                0: CSS_NAMESPACE@888..890
+                  0: CSS_UNIVERSAL_NAMESPACE_PREFIX@888..889
+                    0: STAR@888..889 "*" [] []
+                  1: PIPE@889..890 "|" [] []
+                1: CSS_IDENTIFIER@890..893
+                  0: IDENT@890..893 "att" [] []
+              2: (empty)
+              3: R_BRACK@893..895 "]" [] [Whitespace(" ")]
+      1: CSS_BLOCK@895..897
+        0: L_CURLY@895..896 "{" [] []
+        1: CSS_DECLARATION_LIST@896..896
+        2: R_CURLY@896..897 "}" [] []
+    44: CSS_RULE@897..914
+      0: CSS_SELECTOR_LIST@897..912
+        0: CSS_COMPOUND_SELECTOR@897..912
+          0: (empty)
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@897..912
+            0: CSS_ATTRIBUTE_SELECTOR@897..912
+              0: L_BRACK@897..902 "[" [Newline("\n")] [Whitespace("   ")]
+              1: CSS_ATTRIBUTE_NAME@902..910
+                0: CSS_NAMESPACE@902..904
+                  0: CSS_UNIVERSAL_NAMESPACE_PREFIX@902..903
+                    0: STAR@902..903 "*" [] []
+                  1: PIPE@903..904 "|" [] []
+                1: CSS_IDENTIFIER@904..910
+                  0: IDENT@904..910 "att" [] [Whitespace("   ")]
+              2: (empty)
+              3: R_BRACK@910..912 "]" [] [Whitespace(" ")]
+      1: CSS_BLOCK@912..914
+        0: L_CURLY@912..913 "{" [] []
+        1: CSS_DECLARATION_LIST@913..913
+        2: R_CURLY@913..914 "}" [] []
+    45: CSS_RULE@914..924
+      0: CSS_SELECTOR_LIST@914..922
+        0: CSS_COMPOUND_SELECTOR@914..922
+          0: (empty)
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@914..922
+            0: CSS_ATTRIBUTE_SELECTOR@914..922
+              0: L_BRACK@914..916 "[" [Newline("\n")] []
+              1: CSS_ATTRIBUTE_NAME@916..920
+                0: CSS_NAMESPACE@916..917
+                  0: (empty)
+                  1: PIPE@916..917 "|" [] []
+                1: CSS_IDENTIFIER@917..920
+                  0: IDENT@917..920 "att" [] []
+              2: (empty)
+              3: R_BRACK@920..922 "]" [] [Whitespace(" ")]
+      1: CSS_BLOCK@922..924
+        0: L_CURLY@922..923 "{" [] []
+        1: CSS_DECLARATION_LIST@923..923
+        2: R_CURLY@923..924 "}" [] []
+    46: CSS_RULE@924..936
+      0: CSS_SELECTOR_LIST@924..934
+        0: CSS_COMPOUND_SELECTOR@924..934
+          0: (empty)
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@924..934
+            0: CSS_ATTRIBUTE_SELECTOR@924..934
+              0: L_BRACK@924..927 "[" [Newline("\n")] [Whitespace(" ")]
+              1: CSS_ATTRIBUTE_NAME@927..932
+                0: CSS_NAMESPACE@927..928
+                  0: (empty)
+                  1: PIPE@927..928 "|" [] []
+                1: CSS_IDENTIFIER@928..932
+                  0: IDENT@928..932 "att" [] [Whitespace(" ")]
+              2: (empty)
+              3: R_BRACK@932..934 "]" [] [Whitespace(" ")]
+      1: CSS_BLOCK@934..936
+        0: L_CURLY@934..935 "{" [] []
+        1: CSS_DECLARATION_LIST@935..935
+        2: R_CURLY@935..936 "}" [] []
+    47: CSS_RULE@936..952
+      0: CSS_SELECTOR_LIST@936..950
+        0: CSS_COMPOUND_SELECTOR@936..950
+          0: (empty)
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@936..950
+            0: CSS_ATTRIBUTE_SELECTOR@936..950
+              0: L_BRACK@936..941 "[" [Newline("\n")] [Whitespace("   ")]
+              1: CSS_ATTRIBUTE_NAME@941..948
+                0: CSS_NAMESPACE@941..942
+                  0: (empty)
+                  1: PIPE@941..942 "|" [] []
+                1: CSS_IDENTIFIER@942..948
+                  0: IDENT@942..948 "att" [] [Whitespace("   ")]
+              2: (empty)
+              3: R_BRACK@948..950 "]" [] [Whitespace(" ")]
+      1: CSS_BLOCK@950..952
+        0: L_CURLY@950..951 "{" [] []
+        1: CSS_DECLARATION_LIST@951..951
+        2: R_CURLY@951..952 "}" [] []
+  2: EOF@952..953 "" [Newline("\n")] []
 
 ```
 

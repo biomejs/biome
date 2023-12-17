@@ -1,4 +1,5 @@
 JsModule {
+    bom_token: missing (optional),
     interpreter_token: missing (optional),
     directives: JsDirectiveList [],
     items: JsModuleItemList [
@@ -93,8 +94,9 @@ JsModule {
 
 0: JS_MODULE@0..78
   0: (empty)
-  1: JS_DIRECTIVE_LIST@0..0
-  2: JS_MODULE_ITEM_LIST@0..77
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..77
     0: JS_IF_STATEMENT@0..34
       0: IF_KW@0..3 "if" [] [Whitespace(" ")]
       1: L_PAREN@3..4 "(" [] []
@@ -158,4 +160,4 @@ JsModule {
             8: JS_CLASS_MEMBER_LIST@74..74
             9: R_CURLY@74..75 "}" [] []
         3: R_CURLY@75..77 "}" [Newline("\n")] []
-  3: EOF@77..78 "" [Newline("\n")] []
+  4: EOF@77..78 "" [Newline("\n")] []

@@ -23,6 +23,7 @@ expression: snapshot
 :-webkit-any(:link:focus),
 #container-div :-webkit-any(:link, :hover),
 h1:-webkit-any(.h1class, #bar) {}
+:-moz-any(textarea) .div {}
 
 ```
 
@@ -31,6 +32,7 @@ h1:-webkit-any(.h1class, #bar) {}
 
 ```
 CssRoot {
+    bom_token: missing (optional),
     rules: CssRuleList [
         CssRule {
             prelude: CssSelectorList [
@@ -41,14 +43,13 @@ CssRoot {
                         CssPseudoClassSelector {
                             colon_token: COLON@0..1 ":" [] [],
                             class: CssPseudoClassFunctionCompoundSelectorList {
-                                name: CssIdentifier {
-                                    value_token: IDENT@1..12 "-webkit-any" [] [],
-                                },
+                                name: _WEBKIT_ANY_KW@1..12 "-webkit-any" [] [],
                                 l_paren_token: L_PAREN@12..13 "(" [] [],
                                 compound_selector_list: CssCompoundSelectorList [
                                     CssCompoundSelector {
                                         nesting_selector_token: missing (optional),
                                         simple_selector: CssTypeSelector {
+                                            namespace: missing (optional),
                                             ident: CssIdentifier {
                                                 value_token: IDENT@13..21 "textarea" [] [],
                                             },
@@ -77,14 +78,13 @@ CssRoot {
                         CssPseudoClassSelector {
                             colon_token: COLON@25..27 ":" [Newline("\n")] [],
                             class: CssPseudoClassFunctionCompoundSelectorList {
-                                name: CssIdentifier {
-                                    value_token: IDENT@27..35 "-moz-any" [] [],
-                                },
+                                name: _MOZ_ANY_KW@27..35 "-moz-any" [] [],
                                 l_paren_token: L_PAREN@35..36 "(" [] [],
                                 compound_selector_list: CssCompoundSelectorList [
                                     CssCompoundSelector {
                                         nesting_selector_token: missing (optional),
                                         simple_selector: CssTypeSelector {
+                                            namespace: missing (optional),
                                             ident: CssIdentifier {
                                                 value_token: IDENT@36..44 "textarea" [] [],
                                             },
@@ -114,14 +114,13 @@ CssRoot {
                             CssPseudoClassSelector {
                                 colon_token: COLON@48..50 ":" [Newline("\n")] [],
                                 class: CssPseudoClassFunctionCompoundSelectorList {
-                                    name: CssIdentifier {
-                                        value_token: IDENT@50..61 "-webkit-any" [] [],
-                                    },
+                                    name: _WEBKIT_ANY_KW@50..61 "-webkit-any" [] [],
                                     l_paren_token: L_PAREN@61..62 "(" [] [],
                                     compound_selector_list: CssCompoundSelectorList [
                                         CssCompoundSelector {
                                             nesting_selector_token: missing (optional),
                                             simple_selector: CssTypeSelector {
+                                                namespace: missing (optional),
                                                 ident: CssIdentifier {
                                                     value_token: IDENT@62..68 "header" [] [],
                                                 },
@@ -132,6 +131,7 @@ CssRoot {
                                         CssCompoundSelector {
                                             nesting_selector_token: missing (optional),
                                             simple_selector: CssTypeSelector {
+                                                namespace: missing (optional),
                                                 ident: CssIdentifier {
                                                     value_token: IDENT@70..74 "main" [] [],
                                                 },
@@ -142,6 +142,7 @@ CssRoot {
                                         CssCompoundSelector {
                                             nesting_selector_token: missing (optional),
                                             simple_selector: CssTypeSelector {
+                                                namespace: missing (optional),
                                                 ident: CssIdentifier {
                                                     value_token: IDENT@76..82 "footer" [] [],
                                                 },
@@ -158,6 +159,7 @@ CssRoot {
                     right: CssCompoundSelector {
                         nesting_selector_token: missing (optional),
                         simple_selector: CssTypeSelector {
+                            namespace: missing (optional),
                             ident: CssIdentifier {
                                 value_token: IDENT@84..85 "p" [] [],
                             },
@@ -191,14 +193,13 @@ CssRoot {
                             CssPseudoClassSelector {
                                 colon_token: COLON@94..96 ":" [Newline("\n")] [],
                                 class: CssPseudoClassFunctionCompoundSelectorList {
-                                    name: CssIdentifier {
-                                        value_token: IDENT@96..104 "-moz-any" [] [],
-                                    },
+                                    name: _MOZ_ANY_KW@96..104 "-moz-any" [] [],
                                     l_paren_token: L_PAREN@104..105 "(" [] [],
                                     compound_selector_list: CssCompoundSelectorList [
                                         CssCompoundSelector {
                                             nesting_selector_token: missing (optional),
                                             simple_selector: CssTypeSelector {
+                                                namespace: missing (optional),
                                                 ident: CssIdentifier {
                                                     value_token: IDENT@105..111 "header" [] [],
                                                 },
@@ -209,6 +210,7 @@ CssRoot {
                                         CssCompoundSelector {
                                             nesting_selector_token: missing (optional),
                                             simple_selector: CssTypeSelector {
+                                                namespace: missing (optional),
                                                 ident: CssIdentifier {
                                                     value_token: IDENT@113..117 "main" [] [],
                                                 },
@@ -219,6 +221,7 @@ CssRoot {
                                         CssCompoundSelector {
                                             nesting_selector_token: missing (optional),
                                             simple_selector: CssTypeSelector {
+                                                namespace: missing (optional),
                                                 ident: CssIdentifier {
                                                     value_token: IDENT@119..125 "footer" [] [],
                                                 },
@@ -235,6 +238,7 @@ CssRoot {
                     right: CssCompoundSelector {
                         nesting_selector_token: missing (optional),
                         simple_selector: CssTypeSelector {
+                            namespace: missing (optional),
                             ident: CssIdentifier {
                                 value_token: IDENT@127..128 "p" [] [],
                             },
@@ -267,9 +271,7 @@ CssRoot {
                         CssPseudoClassSelector {
                             colon_token: COLON@137..139 ":" [Newline("\n")] [],
                             class: CssPseudoClassFunctionCompoundSelectorList {
-                                name: CssIdentifier {
-                                    value_token: IDENT@139..150 "-webkit-any" [] [],
-                                },
+                                name: _WEBKIT_ANY_KW@139..150 "-webkit-any" [] [],
                                 l_paren_token: L_PAREN@150..151 "(" [] [],
                                 compound_selector_list: CssCompoundSelectorList [
                                     CssCompoundSelector {
@@ -284,8 +286,11 @@ CssRoot {
                                             },
                                             CssAttributeSelector {
                                                 l_brack_token: L_BRACK@157..158 "[" [] [],
-                                                name: CssIdentifier {
-                                                    value_token: IDENT@158..162 "test" [] [],
+                                                name: CssAttributeName {
+                                                    namespace: missing (optional),
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@158..162 "test" [] [],
+                                                    },
                                                 },
                                                 matcher: missing (optional),
                                                 r_brack_token: R_BRACK@162..163 "]" [] [],
@@ -314,9 +319,7 @@ CssRoot {
                         CssPseudoClassSelector {
                             colon_token: COLON@167..169 ":" [Newline("\n")] [],
                             class: CssPseudoClassFunctionCompoundSelectorList {
-                                name: CssIdentifier {
-                                    value_token: IDENT@169..177 "-moz-any" [] [],
-                                },
+                                name: _MOZ_ANY_KW@169..177 "-moz-any" [] [],
                                 l_paren_token: L_PAREN@177..178 "(" [] [],
                                 compound_selector_list: CssCompoundSelectorList [
                                     CssCompoundSelector {
@@ -331,8 +334,11 @@ CssRoot {
                                             },
                                             CssAttributeSelector {
                                                 l_brack_token: L_BRACK@184..185 "[" [] [],
-                                                name: CssIdentifier {
-                                                    value_token: IDENT@185..189 "test" [] [],
+                                                name: CssAttributeName {
+                                                    namespace: missing (optional),
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@185..189 "test" [] [],
+                                                    },
                                                 },
                                                 matcher: missing (optional),
                                                 r_brack_token: R_BRACK@189..190 "]" [] [],
@@ -361,9 +367,7 @@ CssRoot {
                         CssPseudoClassSelector {
                             colon_token: COLON@194..196 ":" [Newline("\n")] [],
                             class: CssPseudoClassFunctionCompoundSelectorList {
-                                name: CssIdentifier {
-                                    value_token: IDENT@196..207 "-webkit-any" [] [],
-                                },
+                                name: _WEBKIT_ANY_KW@196..207 "-webkit-any" [] [],
                                 l_paren_token: L_PAREN@207..208 "(" [] [],
                                 compound_selector_list: CssCompoundSelectorList [
                                     CssCompoundSelector {
@@ -378,8 +382,11 @@ CssRoot {
                                             },
                                             CssAttributeSelector {
                                                 l_brack_token: L_BRACK@214..215 "[" [] [],
-                                                name: CssIdentifier {
-                                                    value_token: IDENT@215..219 "test" [] [],
+                                                name: CssAttributeName {
+                                                    namespace: missing (optional),
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@215..219 "test" [] [],
+                                                    },
                                                 },
                                                 matcher: missing (optional),
                                                 r_brack_token: R_BRACK@219..220 "]" [] [],
@@ -421,9 +428,7 @@ CssRoot {
                         CssPseudoClassSelector {
                             colon_token: COLON@232..234 ":" [Newline("\n")] [],
                             class: CssPseudoClassFunctionCompoundSelectorList {
-                                name: CssIdentifier {
-                                    value_token: IDENT@234..242 "-moz-any" [] [],
-                                },
+                                name: _MOZ_ANY_KW@234..242 "-moz-any" [] [],
                                 l_paren_token: L_PAREN@242..243 "(" [] [],
                                 compound_selector_list: CssCompoundSelectorList [
                                     CssCompoundSelector {
@@ -438,8 +443,11 @@ CssRoot {
                                             },
                                             CssAttributeSelector {
                                                 l_brack_token: L_BRACK@249..250 "[" [] [],
-                                                name: CssIdentifier {
-                                                    value_token: IDENT@250..254 "test" [] [],
+                                                name: CssAttributeName {
+                                                    namespace: missing (optional),
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@250..254 "test" [] [],
+                                                    },
                                                 },
                                                 matcher: missing (optional),
                                                 r_brack_token: R_BRACK@254..255 "]" [] [],
@@ -481,14 +489,13 @@ CssRoot {
                         CssPseudoClassSelector {
                             colon_token: COLON@267..269 ":" [Newline("\n")] [],
                             class: CssPseudoClassFunctionCompoundSelectorList {
-                                name: CssIdentifier {
-                                    value_token: IDENT@269..280 "-webkit-any" [] [],
-                                },
+                                name: _WEBKIT_ANY_KW@269..280 "-webkit-any" [] [],
                                 l_paren_token: L_PAREN@280..281 "(" [] [],
                                 compound_selector_list: CssCompoundSelectorList [
                                     CssCompoundSelector {
                                         nesting_selector_token: missing (optional),
                                         simple_selector: CssTypeSelector {
+                                            namespace: missing (optional),
                                             ident: CssIdentifier {
                                                 value_token: IDENT@281..283 "h1" [] [],
                                             },
@@ -509,9 +516,7 @@ CssRoot {
                         CssPseudoClassSelector {
                             colon_token: COLON@285..287 ":" [Newline("\n")] [],
                             class: CssPseudoClassFunctionCompoundSelectorList {
-                                name: CssIdentifier {
-                                    value_token: IDENT@287..298 "-webkit-any" [] [],
-                                },
+                                name: _WEBKIT_ANY_KW@287..298 "-webkit-any" [] [],
                                 l_paren_token: L_PAREN@298..300 "(" [] [Whitespace(" ")],
                                 compound_selector_list: CssCompoundSelectorList [
                                     CssCompoundSelector {
@@ -530,6 +535,7 @@ CssRoot {
                                     CssCompoundSelector {
                                         nesting_selector_token: missing (optional),
                                         simple_selector: CssTypeSelector {
+                                            namespace: missing (optional),
                                             ident: CssIdentifier {
                                                 value_token: IDENT@307..309 "b" [] [Whitespace(" ")],
                                             },
@@ -550,9 +556,7 @@ CssRoot {
                         CssPseudoClassSelector {
                             colon_token: COLON@311..313 ":" [Newline("\n")] [],
                             class: CssPseudoClassFunctionCompoundSelectorList {
-                                name: CssIdentifier {
-                                    value_token: IDENT@313..324 "-webkit-any" [] [],
-                                },
+                                name: _WEBKIT_ANY_KW@313..324 "-webkit-any" [] [],
                                 l_paren_token: L_PAREN@324..325 "(" [] [],
                                 compound_selector_list: CssCompoundSelectorList [
                                     CssCompoundSelector {
@@ -594,14 +598,13 @@ CssRoot {
                         CssPseudoClassSelector {
                             colon_token: COLON@337..339 ":" [Newline("\n")] [],
                             class: CssPseudoClassFunctionCompoundSelectorList {
-                                name: CssIdentifier {
-                                    value_token: IDENT@339..350 "-webkit-any" [] [],
-                                },
+                                name: _WEBKIT_ANY_KW@339..350 "-webkit-any" [] [],
                                 l_paren_token: L_PAREN@350..351 "(" [] [],
                                 compound_selector_list: CssCompoundSelectorList [
                                     CssCompoundSelector {
                                         nesting_selector_token: missing (optional),
                                         simple_selector: CssTypeSelector {
+                                            namespace: missing (optional),
                                             ident: CssIdentifier {
                                                 value_token: IDENT@351..352 "i" [] [],
                                             },
@@ -612,6 +615,7 @@ CssRoot {
                                     CssCompoundSelector {
                                         nesting_selector_token: missing (optional),
                                         simple_selector: CssTypeSelector {
+                                            namespace: missing (optional),
                                             ident: CssIdentifier {
                                                 value_token: IDENT@353..354 "p" [] [],
                                             },
@@ -637,6 +641,7 @@ CssRoot {
                                     CssCompoundSelector {
                                         nesting_selector_token: missing (optional),
                                         simple_selector: CssTypeSelector {
+                                            namespace: missing (optional),
                                             ident: CssIdentifier {
                                                 value_token: IDENT@361..365 "span" [] [],
                                             },
@@ -688,9 +693,7 @@ CssRoot {
                             CssPseudoClassSelector {
                                 colon_token: COLON@394..395 ":" [] [],
                                 class: CssPseudoClassFunctionCompoundSelectorList {
-                                    name: CssIdentifier {
-                                        value_token: IDENT@395..406 "-webkit-any" [] [],
-                                    },
+                                    name: _WEBKIT_ANY_KW@395..406 "-webkit-any" [] [],
                                     l_paren_token: L_PAREN@406..407 "(" [] [],
                                     compound_selector_list: CssCompoundSelectorList [
                                         CssCompoundSelector {
@@ -722,9 +725,7 @@ CssRoot {
                         CssPseudoClassSelector {
                             colon_token: COLON@420..422 ":" [Newline("\n")] [],
                             class: CssPseudoClassFunctionCompoundSelectorList {
-                                name: CssIdentifier {
-                                    value_token: IDENT@422..433 "-webkit-any" [] [],
-                                },
+                                name: _WEBKIT_ANY_KW@422..433 "-webkit-any" [] [],
                                 l_paren_token: L_PAREN@433..434 "(" [] [],
                                 compound_selector_list: CssCompoundSelectorList [
                                     CssCompoundSelector {
@@ -777,9 +778,7 @@ CssRoot {
                             CssPseudoClassSelector {
                                 colon_token: COLON@463..464 ":" [] [],
                                 class: CssPseudoClassFunctionCompoundSelectorList {
-                                    name: CssIdentifier {
-                                        value_token: IDENT@464..475 "-webkit-any" [] [],
-                                    },
+                                    name: _WEBKIT_ANY_KW@464..475 "-webkit-any" [] [],
                                     l_paren_token: L_PAREN@475..476 "(" [] [],
                                     compound_selector_list: CssCompoundSelectorList [
                                         CssCompoundSelector {
@@ -822,6 +821,7 @@ CssRoot {
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
                     simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
                         ident: CssIdentifier {
                             value_token: IDENT@491..494 "h1" [Newline("\n")] [],
                         },
@@ -830,9 +830,7 @@ CssRoot {
                         CssPseudoClassSelector {
                             colon_token: COLON@494..495 ":" [] [],
                             class: CssPseudoClassFunctionCompoundSelectorList {
-                                name: CssIdentifier {
-                                    value_token: IDENT@495..506 "-webkit-any" [] [],
-                                },
+                                name: _WEBKIT_ANY_KW@495..506 "-webkit-any" [] [],
                                 l_paren_token: L_PAREN@506..507 "(" [] [],
                                 compound_selector_list: CssCompoundSelectorList [
                                     CssCompoundSelector {
@@ -873,16 +871,67 @@ CssRoot {
                 r_curly_token: R_CURLY@524..525 "}" [] [],
             },
         },
+        CssRule {
+            prelude: CssSelectorList [
+                CssComplexSelector {
+                    left: CssCompoundSelector {
+                        nesting_selector_token: missing (optional),
+                        simple_selector: missing (optional),
+                        sub_selectors: CssSubSelectorList [
+                            CssPseudoClassSelector {
+                                colon_token: COLON@525..527 ":" [Newline("\n")] [],
+                                class: CssPseudoClassFunctionCompoundSelectorList {
+                                    name: _MOZ_ANY_KW@527..535 "-moz-any" [] [],
+                                    l_paren_token: L_PAREN@535..536 "(" [] [],
+                                    compound_selector_list: CssCompoundSelectorList [
+                                        CssCompoundSelector {
+                                            nesting_selector_token: missing (optional),
+                                            simple_selector: CssTypeSelector {
+                                                namespace: missing (optional),
+                                                ident: CssIdentifier {
+                                                    value_token: IDENT@536..544 "textarea" [] [],
+                                                },
+                                            },
+                                            sub_selectors: CssSubSelectorList [],
+                                        },
+                                    ],
+                                    r_paren_token: R_PAREN@544..545 ")" [] [],
+                                },
+                            },
+                        ],
+                    },
+                    combinator: CSS_SPACE_LITERAL@545..546 " " [] [],
+                    right: CssCompoundSelector {
+                        nesting_selector_token: missing (optional),
+                        simple_selector: missing (optional),
+                        sub_selectors: CssSubSelectorList [
+                            CssClassSelector {
+                                dot_token: DOT@546..547 "." [] [],
+                                name: CssIdentifier {
+                                    value_token: IDENT@547..551 "div" [] [Whitespace(" ")],
+                                },
+                            },
+                        ],
+                    },
+                },
+            ],
+            block: CssBlock {
+                l_curly_token: L_CURLY@551..552 "{" [] [],
+                declaration_list: CssDeclarationList [],
+                r_curly_token: R_CURLY@552..553 "}" [] [],
+            },
+        },
     ],
-    eof_token: EOF@525..526 "" [Newline("\n")] [],
+    eof_token: EOF@553..554 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..526
-  0: CSS_RULE_LIST@0..525
+0: CSS_ROOT@0..554
+  0: (empty)
+  1: CSS_RULE_LIST@0..553
     0: CSS_RULE@0..25
       0: CSS_SELECTOR_LIST@0..23
         0: CSS_COMPOUND_SELECTOR@0..23
@@ -892,14 +941,14 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@0..23
               0: COLON@0..1 ":" [] []
               1: CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR_LIST@1..23
-                0: CSS_IDENTIFIER@1..12
-                  0: IDENT@1..12 "-webkit-any" [] []
+                0: _WEBKIT_ANY_KW@1..12 "-webkit-any" [] []
                 1: L_PAREN@12..13 "(" [] []
                 2: CSS_COMPOUND_SELECTOR_LIST@13..21
                   0: CSS_COMPOUND_SELECTOR@13..21
                     0: (empty)
                     1: CSS_TYPE_SELECTOR@13..21
-                      0: CSS_IDENTIFIER@13..21
+                      0: (empty)
+                      1: CSS_IDENTIFIER@13..21
                         0: IDENT@13..21 "textarea" [] []
                     2: CSS_SUB_SELECTOR_LIST@21..21
                 3: R_PAREN@21..23 ")" [] [Whitespace(" ")]
@@ -916,14 +965,14 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@25..46
               0: COLON@25..27 ":" [Newline("\n")] []
               1: CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR_LIST@27..46
-                0: CSS_IDENTIFIER@27..35
-                  0: IDENT@27..35 "-moz-any" [] []
+                0: _MOZ_ANY_KW@27..35 "-moz-any" [] []
                 1: L_PAREN@35..36 "(" [] []
                 2: CSS_COMPOUND_SELECTOR_LIST@36..44
                   0: CSS_COMPOUND_SELECTOR@36..44
                     0: (empty)
                     1: CSS_TYPE_SELECTOR@36..44
-                      0: CSS_IDENTIFIER@36..44
+                      0: (empty)
+                      1: CSS_IDENTIFIER@36..44
                         0: IDENT@36..44 "textarea" [] []
                     2: CSS_SUB_SELECTOR_LIST@44..44
                 3: R_PAREN@44..46 ")" [] [Whitespace(" ")]
@@ -941,28 +990,30 @@ CssRoot {
               0: CSS_PSEUDO_CLASS_SELECTOR@48..83
                 0: COLON@48..50 ":" [Newline("\n")] []
                 1: CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR_LIST@50..83
-                  0: CSS_IDENTIFIER@50..61
-                    0: IDENT@50..61 "-webkit-any" [] []
+                  0: _WEBKIT_ANY_KW@50..61 "-webkit-any" [] []
                   1: L_PAREN@61..62 "(" [] []
                   2: CSS_COMPOUND_SELECTOR_LIST@62..82
                     0: CSS_COMPOUND_SELECTOR@62..68
                       0: (empty)
                       1: CSS_TYPE_SELECTOR@62..68
-                        0: CSS_IDENTIFIER@62..68
+                        0: (empty)
+                        1: CSS_IDENTIFIER@62..68
                           0: IDENT@62..68 "header" [] []
                       2: CSS_SUB_SELECTOR_LIST@68..68
                     1: COMMA@68..70 "," [] [Whitespace(" ")]
                     2: CSS_COMPOUND_SELECTOR@70..74
                       0: (empty)
                       1: CSS_TYPE_SELECTOR@70..74
-                        0: CSS_IDENTIFIER@70..74
+                        0: (empty)
+                        1: CSS_IDENTIFIER@70..74
                           0: IDENT@70..74 "main" [] []
                       2: CSS_SUB_SELECTOR_LIST@74..74
                     3: COMMA@74..76 "," [] [Whitespace(" ")]
                     4: CSS_COMPOUND_SELECTOR@76..82
                       0: (empty)
                       1: CSS_TYPE_SELECTOR@76..82
-                        0: CSS_IDENTIFIER@76..82
+                        0: (empty)
+                        1: CSS_IDENTIFIER@76..82
                           0: IDENT@76..82 "footer" [] []
                       2: CSS_SUB_SELECTOR_LIST@82..82
                   3: R_PAREN@82..83 ")" [] []
@@ -970,7 +1021,8 @@ CssRoot {
           2: CSS_COMPOUND_SELECTOR@84..92
             0: (empty)
             1: CSS_TYPE_SELECTOR@84..85
-              0: CSS_IDENTIFIER@84..85
+              0: (empty)
+              1: CSS_IDENTIFIER@84..85
                 0: IDENT@84..85 "p" [] []
             2: CSS_SUB_SELECTOR_LIST@85..92
               0: CSS_PSEUDO_CLASS_SELECTOR@85..92
@@ -992,28 +1044,30 @@ CssRoot {
               0: CSS_PSEUDO_CLASS_SELECTOR@94..126
                 0: COLON@94..96 ":" [Newline("\n")] []
                 1: CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR_LIST@96..126
-                  0: CSS_IDENTIFIER@96..104
-                    0: IDENT@96..104 "-moz-any" [] []
+                  0: _MOZ_ANY_KW@96..104 "-moz-any" [] []
                   1: L_PAREN@104..105 "(" [] []
                   2: CSS_COMPOUND_SELECTOR_LIST@105..125
                     0: CSS_COMPOUND_SELECTOR@105..111
                       0: (empty)
                       1: CSS_TYPE_SELECTOR@105..111
-                        0: CSS_IDENTIFIER@105..111
+                        0: (empty)
+                        1: CSS_IDENTIFIER@105..111
                           0: IDENT@105..111 "header" [] []
                       2: CSS_SUB_SELECTOR_LIST@111..111
                     1: COMMA@111..113 "," [] [Whitespace(" ")]
                     2: CSS_COMPOUND_SELECTOR@113..117
                       0: (empty)
                       1: CSS_TYPE_SELECTOR@113..117
-                        0: CSS_IDENTIFIER@113..117
+                        0: (empty)
+                        1: CSS_IDENTIFIER@113..117
                           0: IDENT@113..117 "main" [] []
                       2: CSS_SUB_SELECTOR_LIST@117..117
                     3: COMMA@117..119 "," [] [Whitespace(" ")]
                     4: CSS_COMPOUND_SELECTOR@119..125
                       0: (empty)
                       1: CSS_TYPE_SELECTOR@119..125
-                        0: CSS_IDENTIFIER@119..125
+                        0: (empty)
+                        1: CSS_IDENTIFIER@119..125
                           0: IDENT@119..125 "footer" [] []
                       2: CSS_SUB_SELECTOR_LIST@125..125
                   3: R_PAREN@125..126 ")" [] []
@@ -1021,7 +1075,8 @@ CssRoot {
           2: CSS_COMPOUND_SELECTOR@127..135
             0: (empty)
             1: CSS_TYPE_SELECTOR@127..128
-              0: CSS_IDENTIFIER@127..128
+              0: (empty)
+              1: CSS_IDENTIFIER@127..128
                 0: IDENT@127..128 "p" [] []
             2: CSS_SUB_SELECTOR_LIST@128..135
               0: CSS_PSEUDO_CLASS_SELECTOR@128..135
@@ -1042,8 +1097,7 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@137..165
               0: COLON@137..139 ":" [Newline("\n")] []
               1: CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR_LIST@139..165
-                0: CSS_IDENTIFIER@139..150
-                  0: IDENT@139..150 "-webkit-any" [] []
+                0: _WEBKIT_ANY_KW@139..150 "-webkit-any" [] []
                 1: L_PAREN@150..151 "(" [] []
                 2: CSS_COMPOUND_SELECTOR_LIST@151..163
                   0: CSS_COMPOUND_SELECTOR@151..163
@@ -1056,8 +1110,10 @@ CssRoot {
                           0: IDENT@152..157 "class" [] []
                       1: CSS_ATTRIBUTE_SELECTOR@157..163
                         0: L_BRACK@157..158 "[" [] []
-                        1: CSS_IDENTIFIER@158..162
-                          0: IDENT@158..162 "test" [] []
+                        1: CSS_ATTRIBUTE_NAME@158..162
+                          0: (empty)
+                          1: CSS_IDENTIFIER@158..162
+                            0: IDENT@158..162 "test" [] []
                         2: (empty)
                         3: R_BRACK@162..163 "]" [] []
                 3: R_PAREN@163..165 ")" [] [Whitespace(" ")]
@@ -1074,8 +1130,7 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@167..192
               0: COLON@167..169 ":" [Newline("\n")] []
               1: CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR_LIST@169..192
-                0: CSS_IDENTIFIER@169..177
-                  0: IDENT@169..177 "-moz-any" [] []
+                0: _MOZ_ANY_KW@169..177 "-moz-any" [] []
                 1: L_PAREN@177..178 "(" [] []
                 2: CSS_COMPOUND_SELECTOR_LIST@178..190
                   0: CSS_COMPOUND_SELECTOR@178..190
@@ -1088,8 +1143,10 @@ CssRoot {
                           0: IDENT@179..184 "class" [] []
                       1: CSS_ATTRIBUTE_SELECTOR@184..190
                         0: L_BRACK@184..185 "[" [] []
-                        1: CSS_IDENTIFIER@185..189
-                          0: IDENT@185..189 "test" [] []
+                        1: CSS_ATTRIBUTE_NAME@185..189
+                          0: (empty)
+                          1: CSS_IDENTIFIER@185..189
+                            0: IDENT@185..189 "test" [] []
                         2: (empty)
                         3: R_BRACK@189..190 "]" [] []
                 3: R_PAREN@190..192 ")" [] [Whitespace(" ")]
@@ -1106,8 +1163,7 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@194..230
               0: COLON@194..196 ":" [Newline("\n")] []
               1: CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR_LIST@196..230
-                0: CSS_IDENTIFIER@196..207
-                  0: IDENT@196..207 "-webkit-any" [] []
+                0: _WEBKIT_ANY_KW@196..207 "-webkit-any" [] []
                 1: L_PAREN@207..208 "(" [] []
                 2: CSS_COMPOUND_SELECTOR_LIST@208..228
                   0: CSS_COMPOUND_SELECTOR@208..220
@@ -1120,8 +1176,10 @@ CssRoot {
                           0: IDENT@209..214 "class" [] []
                       1: CSS_ATTRIBUTE_SELECTOR@214..220
                         0: L_BRACK@214..215 "[" [] []
-                        1: CSS_IDENTIFIER@215..219
-                          0: IDENT@215..219 "test" [] []
+                        1: CSS_ATTRIBUTE_NAME@215..219
+                          0: (empty)
+                          1: CSS_IDENTIFIER@215..219
+                            0: IDENT@215..219 "test" [] []
                         2: (empty)
                         3: R_BRACK@219..220 "]" [] []
                   1: COMMA@220..222 "," [] [Whitespace(" ")]
@@ -1147,8 +1205,7 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@232..265
               0: COLON@232..234 ":" [Newline("\n")] []
               1: CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR_LIST@234..265
-                0: CSS_IDENTIFIER@234..242
-                  0: IDENT@234..242 "-moz-any" [] []
+                0: _MOZ_ANY_KW@234..242 "-moz-any" [] []
                 1: L_PAREN@242..243 "(" [] []
                 2: CSS_COMPOUND_SELECTOR_LIST@243..263
                   0: CSS_COMPOUND_SELECTOR@243..255
@@ -1161,8 +1218,10 @@ CssRoot {
                           0: IDENT@244..249 "class" [] []
                       1: CSS_ATTRIBUTE_SELECTOR@249..255
                         0: L_BRACK@249..250 "[" [] []
-                        1: CSS_IDENTIFIER@250..254
-                          0: IDENT@250..254 "test" [] []
+                        1: CSS_ATTRIBUTE_NAME@250..254
+                          0: (empty)
+                          1: CSS_IDENTIFIER@250..254
+                            0: IDENT@250..254 "test" [] []
                         2: (empty)
                         3: R_BRACK@254..255 "]" [] []
                   1: COMMA@255..257 "," [] [Whitespace(" ")]
@@ -1188,14 +1247,14 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@267..284
               0: COLON@267..269 ":" [Newline("\n")] []
               1: CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR_LIST@269..284
-                0: CSS_IDENTIFIER@269..280
-                  0: IDENT@269..280 "-webkit-any" [] []
+                0: _WEBKIT_ANY_KW@269..280 "-webkit-any" [] []
                 1: L_PAREN@280..281 "(" [] []
                 2: CSS_COMPOUND_SELECTOR_LIST@281..283
                   0: CSS_COMPOUND_SELECTOR@281..283
                     0: (empty)
                     1: CSS_TYPE_SELECTOR@281..283
-                      0: CSS_IDENTIFIER@281..283
+                      0: (empty)
+                      1: CSS_IDENTIFIER@281..283
                         0: IDENT@281..283 "h1" [] []
                     2: CSS_SUB_SELECTOR_LIST@283..283
                 3: R_PAREN@283..284 ")" [] []
@@ -1207,8 +1266,7 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@285..310
               0: COLON@285..287 ":" [Newline("\n")] []
               1: CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR_LIST@287..310
-                0: CSS_IDENTIFIER@287..298
-                  0: IDENT@287..298 "-webkit-any" [] []
+                0: _WEBKIT_ANY_KW@287..298 "-webkit-any" [] []
                 1: L_PAREN@298..300 "(" [] [Whitespace(" ")]
                 2: CSS_COMPOUND_SELECTOR_LIST@300..309
                   0: CSS_COMPOUND_SELECTOR@300..305
@@ -1223,7 +1281,8 @@ CssRoot {
                   2: CSS_COMPOUND_SELECTOR@307..309
                     0: (empty)
                     1: CSS_TYPE_SELECTOR@307..309
-                      0: CSS_IDENTIFIER@307..309
+                      0: (empty)
+                      1: CSS_IDENTIFIER@307..309
                         0: IDENT@307..309 "b" [] [Whitespace(" ")]
                     2: CSS_SUB_SELECTOR_LIST@309..309
                 3: R_PAREN@309..310 ")" [] []
@@ -1235,8 +1294,7 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@311..336
               0: COLON@311..313 ":" [Newline("\n")] []
               1: CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR_LIST@313..336
-                0: CSS_IDENTIFIER@313..324
-                  0: IDENT@313..324 "-webkit-any" [] []
+                0: _WEBKIT_ANY_KW@313..324 "-webkit-any" [] []
                 1: L_PAREN@324..325 "(" [] []
                 2: CSS_COMPOUND_SELECTOR_LIST@325..335
                   0: CSS_COMPOUND_SELECTOR@325..329
@@ -1265,21 +1323,22 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@337..373
               0: COLON@337..339 ":" [Newline("\n")] []
               1: CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR_LIST@339..373
-                0: CSS_IDENTIFIER@339..350
-                  0: IDENT@339..350 "-webkit-any" [] []
+                0: _WEBKIT_ANY_KW@339..350 "-webkit-any" [] []
                 1: L_PAREN@350..351 "(" [] []
                 2: CSS_COMPOUND_SELECTOR_LIST@351..371
                   0: CSS_COMPOUND_SELECTOR@351..352
                     0: (empty)
                     1: CSS_TYPE_SELECTOR@351..352
-                      0: CSS_IDENTIFIER@351..352
+                      0: (empty)
+                      1: CSS_IDENTIFIER@351..352
                         0: IDENT@351..352 "i" [] []
                     2: CSS_SUB_SELECTOR_LIST@352..352
                   1: COMMA@352..353 "," [] []
                   2: CSS_COMPOUND_SELECTOR@353..354
                     0: (empty)
                     1: CSS_TYPE_SELECTOR@353..354
-                      0: CSS_IDENTIFIER@353..354
+                      0: (empty)
+                      1: CSS_IDENTIFIER@353..354
                         0: IDENT@353..354 "p" [] []
                     2: CSS_SUB_SELECTOR_LIST@354..354
                   3: COMMA@354..355 "," [] []
@@ -1296,7 +1355,8 @@ CssRoot {
                   6: CSS_COMPOUND_SELECTOR@361..371
                     0: (empty)
                     1: CSS_TYPE_SELECTOR@361..365
-                      0: CSS_IDENTIFIER@361..365
+                      0: (empty)
+                      1: CSS_IDENTIFIER@361..365
                         0: IDENT@361..365 "span" [] []
                     2: CSS_SUB_SELECTOR_LIST@365..371
                       0: CSS_PSEUDO_CLASS_SELECTOR@365..371
@@ -1328,8 +1388,7 @@ CssRoot {
               0: CSS_PSEUDO_CLASS_SELECTOR@394..419
                 0: COLON@394..395 ":" [] []
                 1: CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR_LIST@395..419
-                  0: CSS_IDENTIFIER@395..406
-                    0: IDENT@395..406 "-webkit-any" [] []
+                  0: _WEBKIT_ANY_KW@395..406 "-webkit-any" [] []
                   1: L_PAREN@406..407 "(" [] []
                   2: CSS_COMPOUND_SELECTOR_LIST@407..418
                     0: CSS_COMPOUND_SELECTOR@407..418
@@ -1350,8 +1409,7 @@ CssRoot {
             0: CSS_PSEUDO_CLASS_SELECTOR@420..446
               0: COLON@420..422 ":" [Newline("\n")] []
               1: CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR_LIST@422..446
-                0: CSS_IDENTIFIER@422..433
-                  0: IDENT@422..433 "-webkit-any" [] []
+                0: _WEBKIT_ANY_KW@422..433 "-webkit-any" [] []
                 1: L_PAREN@433..434 "(" [] []
                 2: CSS_COMPOUND_SELECTOR_LIST@434..445
                   0: CSS_COMPOUND_SELECTOR@434..445
@@ -1387,8 +1445,7 @@ CssRoot {
               0: CSS_PSEUDO_CLASS_SELECTOR@463..490
                 0: COLON@463..464 ":" [] []
                 1: CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR_LIST@464..490
-                  0: CSS_IDENTIFIER@464..475
-                    0: IDENT@464..475 "-webkit-any" [] []
+                  0: _WEBKIT_ANY_KW@464..475 "-webkit-any" [] []
                   1: L_PAREN@475..476 "(" [] []
                   2: CSS_COMPOUND_SELECTOR_LIST@476..489
                     0: CSS_COMPOUND_SELECTOR@476..481
@@ -1415,14 +1472,14 @@ CssRoot {
         6: CSS_COMPOUND_SELECTOR@491..523
           0: (empty)
           1: CSS_TYPE_SELECTOR@491..494
-            0: CSS_IDENTIFIER@491..494
+            0: (empty)
+            1: CSS_IDENTIFIER@491..494
               0: IDENT@491..494 "h1" [Newline("\n")] []
           2: CSS_SUB_SELECTOR_LIST@494..523
             0: CSS_PSEUDO_CLASS_SELECTOR@494..523
               0: COLON@494..495 ":" [] []
               1: CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR_LIST@495..523
-                0: CSS_IDENTIFIER@495..506
-                  0: IDENT@495..506 "-webkit-any" [] []
+                0: _WEBKIT_ANY_KW@495..506 "-webkit-any" [] []
                 1: L_PAREN@506..507 "(" [] []
                 2: CSS_COMPOUND_SELECTOR_LIST@507..521
                   0: CSS_COMPOUND_SELECTOR@507..515
@@ -1447,7 +1504,41 @@ CssRoot {
         0: L_CURLY@523..524 "{" [] []
         1: CSS_DECLARATION_LIST@524..524
         2: R_CURLY@524..525 "}" [] []
-  1: EOF@525..526 "" [Newline("\n")] []
+    10: CSS_RULE@525..553
+      0: CSS_SELECTOR_LIST@525..551
+        0: CSS_COMPLEX_SELECTOR@525..551
+          0: CSS_COMPOUND_SELECTOR@525..545
+            0: (empty)
+            1: (empty)
+            2: CSS_SUB_SELECTOR_LIST@525..545
+              0: CSS_PSEUDO_CLASS_SELECTOR@525..545
+                0: COLON@525..527 ":" [Newline("\n")] []
+                1: CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR_LIST@527..545
+                  0: _MOZ_ANY_KW@527..535 "-moz-any" [] []
+                  1: L_PAREN@535..536 "(" [] []
+                  2: CSS_COMPOUND_SELECTOR_LIST@536..544
+                    0: CSS_COMPOUND_SELECTOR@536..544
+                      0: (empty)
+                      1: CSS_TYPE_SELECTOR@536..544
+                        0: (empty)
+                        1: CSS_IDENTIFIER@536..544
+                          0: IDENT@536..544 "textarea" [] []
+                      2: CSS_SUB_SELECTOR_LIST@544..544
+                  3: R_PAREN@544..545 ")" [] []
+          1: CSS_SPACE_LITERAL@545..546 " " [] []
+          2: CSS_COMPOUND_SELECTOR@546..551
+            0: (empty)
+            1: (empty)
+            2: CSS_SUB_SELECTOR_LIST@546..551
+              0: CSS_CLASS_SELECTOR@546..551
+                0: DOT@546..547 "." [] []
+                1: CSS_IDENTIFIER@547..551
+                  0: IDENT@547..551 "div" [] [Whitespace(" ")]
+      1: CSS_BLOCK@551..553
+        0: L_CURLY@551..552 "{" [] []
+        1: CSS_DECLARATION_LIST@552..552
+        2: R_CURLY@552..553 "}" [] []
+  2: EOF@553..554 "" [Newline("\n")] []
 
 ```
 
