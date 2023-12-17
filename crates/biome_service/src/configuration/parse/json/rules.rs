@@ -955,6 +955,13 @@ impl Deserializable for Nursery {
                                 diagnostics,
                             );
                         }
+                        "noUselessBackrefInRegex" => {
+                            result.no_useless_backref_in_regex = Deserializable::deserialize(
+                                &value,
+                                "noUselessBackrefInRegex",
+                                diagnostics,
+                            );
+                        }
                         "noUselessLoneBlockStatements" => {
                             result.no_useless_lone_block_statements = Deserializable::deserialize(
                                 &value,
@@ -1031,6 +1038,7 @@ impl Deserializable for Nursery {
                                     "noMisleadingCharacterClass",
                                     "noUnusedImports",
                                     "noUnusedPrivateClassMembers",
+                                    "noUselessBackrefInRegex",
                                     "noUselessLoneBlockStatements",
                                     "noUselessTernary",
                                     "useAwait",
