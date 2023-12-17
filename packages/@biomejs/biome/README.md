@@ -114,6 +114,7 @@ Read more about our [project philosophy][biome-philosophy].
 - English
 - [简体中文](./packages/%40biomejs/biome/README.zh-CN.md)
 - [日本語](./packages/%40biomejs/biome/README.ja.md)
+- [Türkçe](./packages/%40biomejs/biome/README.tr.md)
 
 [biomejs]: https://biomejs.dev/
 [biome-philosophy]: https://biomejs.dev/internals/philosophy/

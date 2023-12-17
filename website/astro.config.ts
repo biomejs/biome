@@ -70,12 +70,21 @@ export default defineConfig({
 					label: "Português",
 					lang: "pt-BR",
 				},
+				tr: {
+					label: "Türkçe",
+					lang: "tr",
+				},
 			},
 			sidebar: [
 				{
 					label: "Blog",
 					link: "../blog",
-					translations: { ja: "ブログ", "zh-CN": "博客" },
+					translations: {
+						ja: "ブログ",
+						"zh-CN": "博客",
+						"pt-BR": "Blog",
+						tr: "Blog",
+					},
 				},
 				{
 					label: "Playground",
@@ -84,11 +93,17 @@ export default defineConfig({
 						ja: "プレイグラウンド",
 						"zh-CN": "演练场",
 						"pt-BR": "Ambiente de testes",
+						tr: "Oyun alanı",
 					},
 				},
 				{
 					label: "Guides",
-					translations: { ja: "ガイド", "zh-CN": "指南", "pt-BR": "Guias" },
+					translations: {
+						ja: "ガイド",
+						"zh-CN": "指南",
+						"pt-BR": "Guias",
+						tr: "Kılavuzlar",
+					},
 					items: [
 						{
 							label: "Getting Started",
@@ -97,6 +112,7 @@ export default defineConfig({
 								ja: "はじめる",
 								"zh-CN": "入门",
 								"pt-BR": "Primeiros passos",
+								tr: "Başlarken",
 							},
 						},
 						{
@@ -106,6 +122,7 @@ export default defineConfig({
 								ja: "手動インストール",
 								"zh-CN": "手动安装",
 								"pt-BR": "Instalação manual",
+								tr: "El ile kurulum",
 							},
 						},
 						{
@@ -115,6 +132,7 @@ export default defineConfig({
 								ja: "大きなプロジェクトでのBiomeの使用方法",
 								"zh-CN": "大型项目使用 Biome",
 								"pt-BR": "Usando o Biome em projetos grandes",
+								tr: "Büyük projelerde Biome kullanma",
 							},
 						},
 						{
@@ -124,6 +142,7 @@ export default defineConfig({
 								ja: "Biome の振る舞い",
 								"zh-CN": "Biome 工作原理",
 								"pt-BR": "Como o Biome funciona",
+								tr: "Biome nasıl çalışır",
 							},
 						},
 						{
@@ -133,6 +152,7 @@ export default defineConfig({
 								ja: "Biome をあなたのエディタに導入する",
 								"zh-CN": "编辑器中使用 Biome",
 								"pt-BR": "Integrando o Biome no seu editor",
+								tr: "Biome'u editörünüze entegre edin",
 							},
 						},
 					],
@@ -143,6 +163,7 @@ export default defineConfig({
 						ja: "ツール",
 						"zh-CN": "工具",
 						"pt-BR": "Ferramentas",
+						tr: "Araçlar",
 					},
 					items: [
 						{
@@ -152,6 +173,7 @@ export default defineConfig({
 								ja: "Analyzer",
 								"zh-CN": "分析器",
 								"pt-BR": "Analisador",
+								tr: "Analizör",
 							},
 						},
 						{
@@ -164,6 +186,7 @@ export default defineConfig({
 										ja: "イントロダクション",
 										"zh-CN": "介绍",
 										"pt-BR": "Introdução",
+										tr: "Giriş",
 									},
 								},
 								{
@@ -173,6 +196,7 @@ export default defineConfig({
 										ja: "Prettier との違い",
 										"zh-CN": "与 Prettier 的区别",
 										"pt-BR": "Diferenças em relação ao Prettier",
+										tr: "Prettier ile farklılıklar",
 									},
 								},
 								{
@@ -182,12 +206,14 @@ export default defineConfig({
 										ja: "Formatterオプションに対する考え方",
 										"zh-CN": "格式化配置理念",
 										"pt-BR": "Princípios de configuração",
+										tr: "Biçimlendirici seçenek felsefesi",
 									},
 								},
 							],
 							translations: {
 								"zh-CN": "格式化程序",
 								"pt-BR": "Formatador",
+								tr: "Biçimlendirici",
 							},
 						},
 						{
@@ -201,6 +227,7 @@ export default defineConfig({
 								ja: "Lintルール",
 								"zh-CN": "Lint 规则",
 								"pt-BR": "Regras do Linter",
+								tr: "Lint kuralları",
 							},
 						},
 					],
@@ -211,6 +238,7 @@ export default defineConfig({
 						ja: "リファレンス",
 						"zh-CN": "参考",
 						"pt-BR": "Referências",
+						tr: "Referans",
 					},
 					items: [
 						{
@@ -224,6 +252,7 @@ export default defineConfig({
 								ja: "設定",
 								"zh-CN": "配置",
 								"pt-BR": "Configuração",
+								tr: "Yapılandırma",
 							},
 						},
 						{
@@ -233,13 +262,19 @@ export default defineConfig({
 								ja: "VSCode拡張機能",
 								"zh-CN": "VSCode 扩展",
 								"pt-BR": "Extensão do VSCode",
+								tr: "VSCode uzantısı",
 							},
 						},
 					],
 				},
 				{
 					label: "Recipes",
-					translations: { ja: "レシピ", "zh-CN": "实例", "pt-BR": "Receitas" },
+					translations: {
+						ja: "レシピ",
+						"zh-CN": "实例",
+						"pt-BR": "Receitas",
+						tr: "Tarifler",
+					},
 					items: [
 						{
 							label: "Continuous Integration",
@@ -248,6 +283,7 @@ export default defineConfig({
 								ja: "継続的インテグレーション",
 								"zh-CN": "持续集成",
 								"pt-BR": "Integração Contínua",
+								tr: "Sürekli entegrasyon",
 							},
 						},
 					],
@@ -258,6 +294,7 @@ export default defineConfig({
 						ja: "内部原理",
 						"zh-CN": "内部原理",
 						"pt-BR": "Aspectos Internos",
+						tr: "İçerikler",
 					},
 					items: [
 						{
@@ -267,6 +304,7 @@ export default defineConfig({
 								ja: "理念",
 								"zh-CN": "理念",
 								"pt-BR": "Filosofia",
+								tr: "Felsefe",
 							},
 						},
 						{
@@ -276,6 +314,7 @@ export default defineConfig({
 								ja: "言語サポート",
 								"zh-CN": "语言支持",
 								"pt-BR": "Suporte de linguagens",
+								tr: "Dil desteği",
 							},
 						},
 						{
@@ -285,6 +324,7 @@ export default defineConfig({
 								ja: "アーキテクチャ",
 								"zh-CN": "架构",
 								"pt-BR": "Arquitetura",
+								tr: "Mimari",
 							},
 						},
 						{
@@ -294,6 +334,7 @@ export default defineConfig({
 								ja: "クレジット",
 								"zh-CN": "鸣谢",
 								"pt-BR": "Créditos",
+								tr: "Krediler",
 							},
 						},
 						{
@@ -303,6 +344,7 @@ export default defineConfig({
 								ja: "バージョニング",
 								"zh-CN": "版本控制",
 								"pt-BR": "Versionamento",
+								tr: "Sürümleme",
 							},
 						},
 						{
@@ -311,6 +353,7 @@ export default defineConfig({
 							translations: {
 								"zh-CN": "更新日志",
 								"pt-BR": "Alterações",
+								tr: "Değişiklikler",
 							},
 						},
 					],
