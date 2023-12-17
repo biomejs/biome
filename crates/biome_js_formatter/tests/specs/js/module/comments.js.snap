@@ -187,8 +187,7 @@ function name(
 
 /* leading of opening */ /* trailing of opening */ 4 + 3;
 
-/* leading of closing */
-/* trailing of closing */
+/* leading of closing */ /* trailing of closing */
 
 [3 /* trailing num */ /* trailing sep */];
 

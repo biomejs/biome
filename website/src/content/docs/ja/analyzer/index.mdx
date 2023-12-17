@@ -28,7 +28,7 @@ import文は、"距離" によってソートされます。ユーザーから "
 3. `npm:`プロトコルを介してインポートされたモジュール。これはDenoで実行されるコードを書く場合に適用されます。
 4. URLを介してインポートされたモジュール。
 5. ライブラリからインポートされたモジュール。
-6. 絶対インポート (absolute import) を使用してインポートされたモジュール
+6. 絶対インポート (absolute import) を使用してインポートされたモジュール。
 7. `#`の接頭辞が付いた名前からインポートされたモジュール。これは、[Nodeのサブパスインポート](https://nodejs.org/api/packages.html#subpath-imports)を使用する場合に適用されます。
 8. 相対インポート (relative import) を使用してインポートされたモジュール。
 9. 前述の基準で識別できなかったモジュール。
@@ -125,7 +125,7 @@ BiomeのVS Code拡張機能は、_Organize Imports_ コードアクションに�
 
 ファイル保存時に自動で実行したい場合は、エディタの設定に以下を追加することで実現できます。
 
-```json
+```json title="settings.json"
 {
   "editor.codeActionsOnSave": {
     "source.organizeImports.biome": true

@@ -28,8 +28,8 @@ impl FormatNodeRule<JsCaseClause> for FormatJsCaseClause {
         )?;
 
         // Whether the first statement in the clause is a BlockStatement, and
-        // there are no other non-empty statements. Empties may show up
-        // depending on whether the input code includes certain newlines.
+        // there are no other non-empty statements. Empties may show up when
+        // parsing depending on if the input code includes certain newlines.
         let is_single_block_statement = matches!(
             consequent.iter().next(),
             Some(AnyJsStatement::JsBlockStatement(_))

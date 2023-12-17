@@ -1,5 +1,6 @@
 //! Provides builders for comments and skipped token trivia.
 
+use crate::comments::is_doc_comment;
 use crate::format_element::tag::VerbatimKind;
 use crate::prelude::*;
 use crate::{
@@ -7,9 +8,37 @@ use crate::{
     write, Argument, Arguments, CstFormatContext, FormatRefWithRule, GroupId, SourceComment,
     TextRange,
 };
-use biome_rowan::{Language, SyntaxNode, SyntaxToken};
+use biome_rowan::{Language, SyntaxNode, SyntaxToken, TextSize};
 #[cfg(debug_assertions)]
 use std::cell::Cell;
+use std::ops::Sub;
+
+/// Returns true if:
+/// - `next_comment` is Some, and
+/// - both comments are documentation comments, and
+/// - both comments are multiline, and
+/// - the two comments are immediately adjacent to each other, with no characters between them.
+///
+/// In this case, the comments are considered "nestled" - a pattern that JSDoc uses to represent
+/// overloaded types, which get merged together to create the final type for the subject. The
+/// comments must be kept immediately adjacent after formatting to preserve this behavior.
+///
+/// There isn't much documentation about this behavior, but it is mentioned on the JSDoc repo
+/// for documentation: https://github.com/jsdoc/jsdoc.github.io/issues/40. Prettier also
+/// implements the same behavior: https://github.com/prettier/prettier/pull/13445/files#diff-3d5eaa2a1593372823589e6e55e7ca905f7c64203ecada0aa4b3b0cdddd5c3ddR160-R178
+fn should_nestle_adjacent_doc_comments<L: Language>(
+    first_comment: &SourceComment<L>,
+    second_comment: &SourceComment<L>,
+) -> bool {
+    let first = first_comment.piece();
+    let second = second_comment.piece();
+
+    first.has_newline()
+        && second.has_newline()
+        && (second.text_range().start()).sub(first.text_range().end()) == TextSize::from(0)
+        && is_doc_comment(first)
+        && is_doc_comment(second)
+}
 
 /// Formats the leading comments of `node`
 pub const fn format_leading_comments<L: Language>(
@@ -37,14 +66,22 @@ where
             FormatLeadingComments::Comments(comments) => comments,
         };
 
-        for comment in leading_comments {
+        let mut leading_comments_iter = leading_comments.iter().peekable();
+        while let Some(comment) = leading_comments_iter.next() {
             let format_comment = FormatRefWithRule::new(comment, Context::CommentRule::default());
             write!(f, [format_comment])?;
 
             match comment.kind() {
                 CommentKind::Block | CommentKind::InlineBlock => {
                     match comment.lines_after() {
-                        0 => write!(f, [space()])?,
+                        0 => {
+                            let should_nestle =
+                                leading_comments_iter.peek().map_or(false, |next_comment| {
+                                    should_nestle_adjacent_doc_comments(comment, next_comment)
+                                });
+
+                            write!(f, [maybe_space(!should_nestle)])?;
+                        }
                         1 => {
                             if comment.lines_before() == 0 {
                                 write!(f, [soft_line_break_or_space()])?;
@@ -94,11 +131,16 @@ where
         };
 
         let mut total_lines_before = 0;
+        let mut previous_comment: Option<&SourceComment<Context::Language>> = None;
 
         for comment in trailing_comments {
             total_lines_before += comment.lines_before();
 
             let format_comment = FormatRefWithRule::new(comment, Context::CommentRule::default());
+
+            let should_nestle = previous_comment.map_or(false, |previous_comment| {
+                should_nestle_adjacent_doc_comments(previous_comment, comment)
+            });
 
             // This allows comments at the end of nested structures:
             // {
@@ -117,7 +159,25 @@ where
                     [
                         line_suffix(&format_with(|f| {
                             match comment.lines_before() {
-                                0 | 1 => write!(f, [hard_line_break()])?,
+                                _ if should_nestle => {}
+                                0 => {
+                                    // If the comment is immediately following a block-like comment,
+                                    // then it can stay on the same line with just a space between.
+                                    // Otherwise, it gets a hard break.
+                                    //
+                                    //   /** hello */ // hi
+                                    //   /**
+                                    //    * docs
+                                    //   */ /* still on the same line */
+                                    if previous_comment.map_or(false, |previous_comment| {
+                                        previous_comment.kind().is_line()
+                                    }) {
+                                        write!(f, [hard_line_break()])?;
+                                    } else {
+                                        write!(f, [space()])?;
+                                    }
+                                }
+                                1 => write!(f, [hard_line_break()])?,
                                 _ => write!(f, [empty_line()])?,
                             };
 
@@ -127,7 +187,8 @@ where
                     ]
                 )?;
             } else {
-                let content = format_with(|f| write!(f, [space(), format_comment]));
+                let content =
+                    format_with(|f| write!(f, [maybe_space(!should_nestle), format_comment]));
                 if comment.kind().is_line() {
                     write!(f, [line_suffix(&content), expand_parent()])?;
                 } else {
@@ -135,6 +196,7 @@ where
                 }
             }
 
+            previous_comment = Some(comment);
             comment.mark_formatted();
         }
 
@@ -245,20 +307,29 @@ where
         if dangling_comments.is_empty() {
             return Ok(());
         }
-
+        // Write all comments up to the first skipped token trivia or the token
         let format_dangling_comments = format_with(|f| {
-            // Write all comments up to the first skipped token trivia or the token
-            let mut join = f.join_with(hard_line_break());
+            let mut previous_comment: Option<&SourceComment<Context::Language>> = None;
 
             for comment in dangling_comments {
                 let format_comment =
                     FormatRefWithRule::new(comment, Context::CommentRule::default());
-                join.entry(&format_comment);
 
+                let should_nestle = previous_comment.map_or(false, |previous_comment| {
+                    should_nestle_adjacent_doc_comments(previous_comment, comment)
+                });
+
+                write!(
+                    f,
+                    [
+                        (previous_comment.is_some() && !should_nestle).then_some(hard_line_break()),
+                        format_comment
+                    ]
+                )?;
+
+                previous_comment = Some(comment);
                 comment.mark_formatted();
             }
-
-            join.finish()?;
 
             if matches!(self.indent(), DanglingIndentMode::Soft)
                 && dangling_comments

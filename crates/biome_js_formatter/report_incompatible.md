@@ -1,6 +1,6 @@
 ## Overall Metrics
 
-**Average compatibility**: 96.78
+**Average compatibility**: 96.88
 
 <details>
     <summary>Definition</summary>
@@ -8,7 +8,7 @@
     $$average = \frac\{\sum_{file}^\{files}compatibility_\{file}}\{files}$$
 </details>
 
-**Compatible lines**: 97.79
+**Compatible lines**: 97.88
 
 <details>
     <summary>Definition</summary>
@@ -19,38 +19,6 @@
 [Metric definition discussion](https://github.com/rome/tools/issues/2555#issuecomment-1124787893)
 
 ## Test cases
-
-### js/arrays/numbers-negative.js
-```diff
- const numbers1 = [
-   -2017, -506252, -744011292, -7224, -70.4, -83353.6, -708.4, -174023963.52,
-   -40385,
-   // comment1
--  -380014, -253951682, -728, -15.84, -2058467564.56, -43, -33, -85134845,
--  -67092, -1, -78820379, -2371.6, -16, 7,
-+  -380014,
-+  -253951682, -728, -15.84, -2058467564.56, -43, -33, -85134845, -67092, -1,
-+  -78820379, -2371.6, -16, 7,
-   // comment2
--  -62454, -4282239912, -10816495.36, 0.88, -100622682, 8.8, -67087.68000000001,
-+  -62454,
-+  -4282239912, -10816495.36, 0.88, -100622682, 8.8, -67087.68000000001,
-   -3758276, -25.5211, -54, -1184265243, -46073628, -280423.44, -41833463,
-   -27961.12, -305.36, -199875.28,
- ];
- 
- const numbers2 = [
-   -234,
-   -342, // comment3
-   -223,
-   -333333.33,
-   12345,
- ];
-
-```
-
-**Prettier Similarity**: 76.19%
-
 
 ### js/arrays/numbers-with-holes.js
 ```diff
@@ -87,28 +55,6 @@
 ```
 
 **Prettier Similarity**: 96.43%
-
-
-### js/arrays/numbers-with-tricky-comments.js
-```diff
- const lazyCatererNumbers = [
-   1, 2, 4, 7, 11, 16, 22, 29, 37, 46, 56, 67, 79, 92, 106, 121, 137, 154, 172,
-   191, 211, 232, 254, 277, 301, 326, 352, 379, 407, 436, 466 /*block*/,
-   // line
--  497, 529, 562, 596, 631, 667, 704, 742, 781, 821, 862, 904, 947, 991, 1036,
--  1082, 1129, 1177, 1226,
-+  497,
-+  529, 562, 596, 631, 667, 704, 742, 781, 821, 862, 904, 947, 991, 1036, 1082,
-+  1129, 1177, 1226,
-   // line 2
--  1276, 1327, 1379,
-+  1276,
-+  1327, 1379,
- ];
-
-```
-
-**Prettier Similarity**: 54.55%
 
 
 ### js/arrows/currying-4.js
@@ -1767,24 +1713,6 @@
 **Prettier Similarity**: 74.07%
 
 
-### js/ternaries/func-call.js
-```diff
- fn(
-   bifornCringerMoshedPerplexSawder,
-   askTrovenaBeenaDependsRowans,
-   glimseGlyphsHazardNoopsTieTie === averredBathersBoxroomBuggyNurl &&
--    anodyneCondosMalateOverateRetinol
-+  anodyneCondosMalateOverateRetinol
-     ? annularCooeedSplicesWalksWayWay
-     : kochabCooieGameOnOboleUnweave,
- );
- // TODO(rattrayalex): try to indent consequent/alternate here.
-
-```
-
-**Prettier Similarity**: 88.89%
-
-
 ### js/test-declarations/angularjs_inject.js
 ```diff
  beforeEach(inject(($fooService, $barService) => {
@@ -3031,69 +2959,6 @@
 ```
 
 **Prettier Similarity**: 25.00%
-
-
-### typescript/function-type/consistent.ts
-```diff
- // TSFunctionType
- type A = (
-   tpl: TemplateStringsArray,
-   ...args: Array<unknown>
- ) => (replacements?: PublicReplacements) => T;
- 
- // TSConstructorType
- type B = new (
-   tpl: TemplateStringsArray,
-   ...args: Array<unknown>
- ) => (replacements?: PublicReplacements) => T;
- 
- type X = {
-   // TSCallSignatureDeclaration
--  (
--    tpl: TemplateStringsArray,
--    ...args: Array<unknown>
--  ): (replacements?: PublicReplacements) => T;
-+  (tpl: TemplateStringsArray, ...args: Array<unknown>): (
-+    replacements?: PublicReplacements,
-+  ) => T;
- 
-   // TSConstructSignatureDeclaration
--  new (
--    tpl: TemplateStringsArray,
--    ...args: Array<unknown>
--  ): (replacements?: PublicReplacements) => T;
-+  new (tpl: TemplateStringsArray, ...args: Array<unknown>): (
-+    replacements?: PublicReplacements,
-+  ) => T;
- };
-
-```
-
-**Prettier Similarity**: 68.00%
-
-
-### typescript/generic/ungrouped-parameters.ts
-```diff
--function filterTooltipWithFoo<F extends Field>(
--  oldEncoding: Encoding<F>,
--): {
-+function filterTooltipWithFoo<F extends Field>(oldEncoding: Encoding<F>): {
-   customTooltipWithoutAggregatedField?:
-     | StringFieldDefWithCondition<F>
-     | StringValueDefWithCondition<F>
-     | StringFieldDef<F>[];
-   filteredEncoding: Encoding<F>;
- } {
-   const { tooltip, ...filteredEncoding } = oldEncoding;
-   if (!tooltip) {
-     return { filteredEncoding };
-   }
-   // ...
- }
-
-```
-
-**Prettier Similarity**: 80.00%
 
 
 ### typescript/import-export/type-modifier.ts

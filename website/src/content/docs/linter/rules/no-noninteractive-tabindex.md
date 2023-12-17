@@ -24,7 +24,7 @@ ESLint (eslint-plugin-jsx-a11y) Equivalent: [no-noninteractive-tabindex](https:/
 <div tabIndex="0" />
 ```
 
-<pre class="language-text"><code class="language-text">a11y/noNoninteractiveTabindex.js:1:6 <a href="https://biomejs.dev/linter/rules/no-noninteractive-tabindex">lint/a11y/noNoninteractiveTabindex</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/noNoninteractiveTabindex.js:1:6 <a href="https://biomejs.dev/linter/rules/no-noninteractive-tabindex">lint/a11y/noNoninteractiveTabindex</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">The HTML element </span><span style="color: Tomato;"><strong>div</strong></span><span style="color: Tomato;"> is non-interactive. Do not use </span><span style="color: Tomato;"><strong>tabIndex</strong></span><span style="color: Tomato;">.</span>
   
@@ -34,13 +34,17 @@ ESLint (eslint-plugin-jsx-a11y) Equivalent: [no-noninteractive-tabindex](https:/
   
 <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Adding non-interactive elements to the keyboard navigation flow can confuse users.</span>
   
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Unsafe fix</span><span style="color: lightgreen;">: </span><span style="color: lightgreen;">Remove the </span><span style="color: lightgreen;"><strong>tabIndex</strong></span><span style="color: lightgreen;"> attribute.</span>
+  
+<strong>  </strong><strong>  1 │ </strong>&lt;div<span style="opacity: 0.8;">·</span><span style="color: Tomato;">t</span><span style="color: Tomato;">a</span><span style="color: Tomato;">b</span><span style="color: Tomato;">I</span><span style="color: Tomato;">n</span><span style="color: Tomato;">d</span><span style="color: Tomato;">e</span><span style="color: Tomato;">x</span><span style="color: Tomato;">=</span><span style="color: Tomato;">&quot;</span><span style="color: Tomato;">0</span><span style="color: Tomato;">&quot;</span><span style="opacity: 0.8;"><span style="color: Tomato;">·</span></span>/&gt;
+<strong>  </strong><strong>    │ </strong>     <span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span>  
 </code></pre>
 
 ```jsx
 <div role="article" tabIndex="0" />
 ```
 
-<pre class="language-text"><code class="language-text">a11y/noNoninteractiveTabindex.js:1:21 <a href="https://biomejs.dev/linter/rules/no-noninteractive-tabindex">lint/a11y/noNoninteractiveTabindex</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/noNoninteractiveTabindex.js:1:21 <a href="https://biomejs.dev/linter/rules/no-noninteractive-tabindex">lint/a11y/noNoninteractiveTabindex</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">The HTML element </span><span style="color: Tomato;"><strong>div</strong></span><span style="color: Tomato;"> is non-interactive. Do not use </span><span style="color: Tomato;"><strong>tabIndex</strong></span><span style="color: Tomato;">.</span>
   
@@ -50,13 +54,17 @@ ESLint (eslint-plugin-jsx-a11y) Equivalent: [no-noninteractive-tabindex](https:/
   
 <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Adding non-interactive elements to the keyboard navigation flow can confuse users.</span>
   
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Unsafe fix</span><span style="color: lightgreen;">: </span><span style="color: lightgreen;">Remove the </span><span style="color: lightgreen;"><strong>tabIndex</strong></span><span style="color: lightgreen;"> attribute.</span>
+  
+<strong>  </strong><strong>  1 │ </strong>&lt;div<span style="opacity: 0.8;">·</span>role=&quot;article&quot;<span style="opacity: 0.8;">·</span><span style="color: Tomato;">t</span><span style="color: Tomato;">a</span><span style="color: Tomato;">b</span><span style="color: Tomato;">I</span><span style="color: Tomato;">n</span><span style="color: Tomato;">d</span><span style="color: Tomato;">e</span><span style="color: Tomato;">x</span><span style="color: Tomato;">=</span><span style="color: Tomato;">&quot;</span><span style="color: Tomato;">0</span><span style="color: Tomato;">&quot;</span><span style="opacity: 0.8;"><span style="color: Tomato;">·</span></span>/&gt;
+<strong>  </strong><strong>    │ </strong>                    <span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span>  
 </code></pre>
 
 ```jsx
 <article tabIndex="0" />
 ```
 
-<pre class="language-text"><code class="language-text">a11y/noNoninteractiveTabindex.js:1:10 <a href="https://biomejs.dev/linter/rules/no-noninteractive-tabindex">lint/a11y/noNoninteractiveTabindex</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/noNoninteractiveTabindex.js:1:10 <a href="https://biomejs.dev/linter/rules/no-noninteractive-tabindex">lint/a11y/noNoninteractiveTabindex</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">The HTML element </span><span style="color: Tomato;"><strong>article</strong></span><span style="color: Tomato;"> is non-interactive. Do not use </span><span style="color: Tomato;"><strong>tabIndex</strong></span><span style="color: Tomato;">.</span>
   
@@ -66,6 +74,10 @@ ESLint (eslint-plugin-jsx-a11y) Equivalent: [no-noninteractive-tabindex](https:/
   
 <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Adding non-interactive elements to the keyboard navigation flow can confuse users.</span>
   
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Unsafe fix</span><span style="color: lightgreen;">: </span><span style="color: lightgreen;">Remove the </span><span style="color: lightgreen;"><strong>tabIndex</strong></span><span style="color: lightgreen;"> attribute.</span>
+  
+<strong>  </strong><strong>  1 │ </strong>&lt;article<span style="opacity: 0.8;">·</span><span style="color: Tomato;">t</span><span style="color: Tomato;">a</span><span style="color: Tomato;">b</span><span style="color: Tomato;">I</span><span style="color: Tomato;">n</span><span style="color: Tomato;">d</span><span style="color: Tomato;">e</span><span style="color: Tomato;">x</span><span style="color: Tomato;">=</span><span style="color: Tomato;">&quot;</span><span style="color: Tomato;">0</span><span style="color: Tomato;">&quot;</span><span style="opacity: 0.8;"><span style="color: Tomato;">·</span></span>/&gt;
+<strong>  </strong><strong>    │ </strong>         <span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span>  
 </code></pre>
 
 ## Valid

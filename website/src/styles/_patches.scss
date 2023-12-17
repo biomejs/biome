@@ -70,3 +70,22 @@
 		margin: 0;
 	}
 }
+
+/* Show blog/playground only as part of mobile hamburger menu */
+.sidebar-content>ul>li:nth-child(1) {
+	display: none;
+}
+
+.sidebar-content>ul>li:nth-child(2) {
+	display: none;
+}
+
+@media (max-width: 50rem) {
+	.sidebar-content>ul>li:nth-child(1) {
+		display: block;
+	}
+
+	.sidebar-content>ul>li:nth-child(2) {
+		display: block;
+	}
+}

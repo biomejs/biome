@@ -1,34 +1,31 @@
 ---
-title: Language support
-description: Languages and features supported by Biome.
+title: Suporte de linguagens
+description: Linguagens e funcionalidades suportados pelo Biome
 ---
 
-| Language                                | Parsing                                                 | Formatting                                              | Linting                                                 |
-|-----------------------------------------|---------------------------------------------------------|---------------------------------------------------------|---------------------------------------------------------|
-| [JavaScript](#javascript-support)       | <span aria-label="Supported" role="img">✅</span>        | <span aria-label="Supported" role="img">✅</span>        | <span aria-label="Supported" role="img">✅</span>        |
-| [TypeScript](#typescript-support)       | <span aria-label="Supported" role="img">✅</span>        | <span aria-label="Supported" role="img">✅</span>        | <span aria-label="Supported" role="img">✅</span>        |
-| JSX                                     | <span aria-label="Supported" role="img">✅</span>        | <span aria-label="Supported" role="img">✅</span>        | <span aria-label="Supported" role="img">✅</span>        |
-| JSON                                    | <span aria-label="Supported" role="img">✅</span>        | <span aria-label="Supported" role="img">✅</span>        | <span aria-label="Supported" role="img">✅</span>        |
-| JSONC                                   | <span aria-label="Supported" role="img">✅</span>        | <span aria-label="Supported" role="img">✅</span>        | <span aria-label="Supported" role="img">✅</span>        |
-| HTML                                    | <span aria-label="Not in Progress" role="img">🚫</span> | <span aria-label="Not in Progress" role="img">🚫</span> | <span aria-label="Not in Progress" role="img">🚫</span> |
-| [Vue](#html-super-languages-support)    | <span aria-label="Not in Progress" role="img">🚫</span> | <span aria-label="Not in Progress" role="img">🚫</span> | <span aria-label="Not in Progress" role="img">🚫</span> |
-| [Svelte](#html-super-languages-support) | <span aria-label="Not in Progress" role="img">🚫</span> | <span aria-label="Not in Progress" role="img">🚫</span> | <span aria-label="Not in Progress" role="img">🚫</span> |
-| CSS                                     | <span aria-label="In Progress" role="img">⌛️</span>     | <span aria-label="Not in Progress" role="img">🚫</span> | <span aria-label="Not in Progress" role="img">🚫</span> |
-| Markdown                                | <span aria-label="Not in progress" role="img">🚫</span> | <span aria-label="Not in Progress" role="img">🚫</span> | <span aria-label="Not in Progress" role="img">🚫</span> |
+| Linguagem                                     | Análise Sintática                                      | Formatação                                             | Linting                                                |
+| --------------------------------------------- | ------------------------------------------------------ | ------------------------------------------------------ | ------------------------------------------------------ |
+| [JavaScript](#suporte-a-javascript)           | <span aria-label="Disponível" role="img">✅</span>     | <span aria-label="Disponível" role="img">✅</span>     | <span aria-label="Disponível" role="img">✅</span>     |
+| [TypeScript](#suporte-a-typescript)           | <span aria-label="Disponível" role="img">✅</span>     | <span aria-label="Disponível" role="img">✅</span>     | <span aria-label="Disponível" role="img">✅</span>     |
+| JSX                                           | <span aria-label="Disponível" role="img">✅</span>     | <span aria-label="Disponível" role="img">✅</span>     | <span aria-label="Disponível" role="img">✅</span>     |
+| JSON                                          | <span aria-label="Disponível" role="img">✅</span>     | <span aria-label="Disponível" role="img">✅</span>     | <span aria-label="Disponível" role="img">✅</span>     |
+| JSONC                                         | <span aria-label="Disponível" role="img">✅</span>     | <span aria-label="Disponível" role="img">✅</span>     | <span aria-label="Disponível" role="img">✅</span>     |
+| HTML                                          | <span aria-label="Não disponível" role="img">🚫</span> | <span aria-label="Não disponível" role="img">🚫</span> | <span aria-label="Não disponível" role="img">🚫</span> |
+| [Vue](#suporte-a-super-linguagens-no-html)    | <span aria-label="Não disponível" role="img">🚫</span> | <span aria-label="Não disponível" role="img">🚫</span> | <span aria-label="Não disponível" role="img">🚫</span> |
+| [Svelte](#suporte-a-super-linguagens-no-html) | <span aria-label="Não disponível" role="img">🚫</span> | <span aria-label="Não disponível" role="img">🚫</span> | <span aria-label="Não disponível" role="img">🚫</span> |
+| CSS                                           | <span aria-label="Em progresso" role="img">⌛️</span>   | <span aria-label="Não disponível" role="img">🚫</span> | <span aria-label="Não disponível" role="img">🚫</span> |
+| Markdown                                      | <span aria-label="Não disponível" role="img">🚫</span> | <span aria-label="Não disponível" role="img">🚫</span> | <span aria-label="Não disponível" role="img">🚫</span> |
 
+## Suporte a JavaScript
 
-## JavaScript support
+O Biome suporta a versão ES2023 do JavaScript.
 
-Biome supports the ES2023 version of the language.
+O Biome suporta apenas a síntaxe oficial. O time inicia o desenvolvimento de uma nova síntaxe quando uma proposta chega no [estágio 3](https://github.com/tc39/proposals#stage-3).
 
-Biome supports only the official syntax. The team starts development of the new syntax when a proposal reaches
-[Stage 3](https://github.com/tc39/proposals#stage-3).
+## Suporte a TypeScript
 
-## TypeScript support
+O Biome suporta a versão 5.2 do TypeScript.
 
-Biome supports TypeScript version 5.2.
+## Suporte a super linguagens no HTML
 
-## HTML super languages support
-
-These languages require CSS, HTML and JavaScript parsing to be supported properly. Once those parsers are
-available, the works around these super languages can start.
+Essas linguagens requerem suporte adequado para a análise sintática de CSS, HTML e JavaScript. Uma vez que esses analisadores sintáticos estejam disponíveis, será possível começar a trabalhar com essas super linguagens.
