@@ -112,9 +112,8 @@ Biome についてもっと知るために[ホームページ][biomejs]をチェ
 - [English](./README.md)
 - [简体中文](./README.zh-CN.md)
 - 日本語
+- [العربية](./README.ar.md)
 
-[bench]: https://github.com/biomejs/biome/blob/main/benchmark/README.md
 [biomejs]: https://biomejs.dev/ja/
 [biome-philosophy]: https://biomejs.dev/ja/internals/philosophy/
 [language-support]: https://biomejs.dev/ja/internals/language-support/
-[getting-started]: https://biomejs.dev/ja/guides/getting-started/
