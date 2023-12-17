@@ -534,13 +534,8 @@ invalid.js:28:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━�
   
   i Safe fix: Add unicode u flag to regex
   
-    26 26 │   var r = /[\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC66]/u;
-    27 27 │   var r = /[\u{1F468}\u{200D}\u{1F469}\u{200D}\u{1F466}]/u;
-    28    │ - var·r·=·new·RegExp("[👍]",·"");
-       28 │ + var·r·=·new·RegExp("[👍]","u");
-    29 29 │   var r = new RegExp('[👍]', ``);
-    30 30 │   var r = new RegExp("[👍]", flags);
-  
+    28 │ var·r·=·new·RegExp("[👍]",·"u");
+       │                             +   
 
 ```
 
@@ -558,13 +553,8 @@ invalid.js:29:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━�
   
   i Safe fix: Add unicode u flag to regex
   
-    27 27 │   var r = /[\u{1F468}\u{200D}\u{1F469}\u{200D}\u{1F466}]/u;
-    28 28 │   var r = new RegExp("[👍]", "");
-    29    │ - var·r·=·new·RegExp('[👍]',·``);
-       29 │ + var·r·=·new·RegExp('[👍]',`u`);
-    30 30 │   var r = new RegExp("[👍]", flags);
-    31 31 │   var r = new RegExp("[\uD83D\uDC4D]", "");
-  
+    29 │ var·r·=·new·RegExp('[👍]',·`u`);
+       │                             +   
 
 ```
 
@@ -597,13 +587,8 @@ invalid.js:31:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━�
   
   i Safe fix: Add unicode u flag to regex
   
-    29 29 │   var r = new RegExp('[👍]', ``);
-    30 30 │   var r = new RegExp("[👍]", flags);
-    31    │ - var·r·=·new·RegExp("[\uD83D\uDC4D]",·"");
-       31 │ + var·r·=·new·RegExp("[\uD83D\uDC4D]","u");
-    32 32 │   var r = new RegExp("/(?<=[👍])", "");
-    33 33 │   var r = new RegExp("[A�]", "");
-  
+    31 │ var·r·=·new·RegExp("[\uD83D\uDC4D]",·"u");
+       │                                       +   
 
 ```
 
@@ -621,13 +606,8 @@ invalid.js:32:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━�
   
   i Safe fix: Add unicode u flag to regex
   
-    30 30 │   var r = new RegExp("[👍]", flags);
-    31 31 │   var r = new RegExp("[\uD83D\uDC4D]", "");
-    32    │ - var·r·=·new·RegExp("/(?<=[👍])",·"");
-       32 │ + var·r·=·new·RegExp("/(?<=[👍])","u");
-    33 33 │   var r = new RegExp("[A�]", "");
-    34 34 │   var r = new RegExp("[A�]", "u");
-  
+    32 │ var·r·=·new·RegExp("/(?<=[👍])",·"u");
+       │                                   +   
 
 ```
 
@@ -795,13 +775,8 @@ invalid.js:43:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━�
   
   i Safe fix: Add unicode u flag to regex
   
-    41 41 │   var r = new RegExp("[\u2747\uFE0F]", "u");
-    42 42 │   var r = new RegExp("[\u{2747}\u{FE0F}]", "u");
-    43    │ - var·r·=·new·RegExp("[👶🏻]",·"");
-       43 │ + var·r·=·new·RegExp("[👶🏻]","u");
-    44 44 │   var r = new RegExp("[👶🏻]", "u");
-    45 45 │   var r = new RegExp("[\uD83D\uDC76\uD83C\uDFFB]", "u");
-  
+    43 │ var·r·=·new·RegExp("[👶🏻]",·"u");
+       │                               +   
 
 ```
 
@@ -864,13 +839,8 @@ invalid.js:47:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━�
   
   i Safe fix: Add unicode u flag to regex
   
-    45 45 │   var r = new RegExp("[\uD83D\uDC76\uD83C\uDFFB]", "u");
-    46 46 │   var r = new RegExp("[\u{1F476}\u{1F3FB}]", "u");
-    47    │ - var·r·=·new·RegExp("[🇯🇵]",·"");
-       47 │ + var·r·=·new·RegExp("[🇯🇵]","u");
-    48 48 │   var r = new RegExp("[🇯🇵]", "i");
-    49 49 │   var r = new RegExp('[🇯🇵]', `i`);
-  
+    47 │ var·r·=·new·RegExp("[🇯🇵]",·"u");
+       │                             +   
 
 ```
 
@@ -891,7 +861,7 @@ invalid.js:48:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━�
     46 46 │   var r = new RegExp("[\u{1F476}\u{1F3FB}]", "u");
     47 47 │   var r = new RegExp("[🇯🇵]", "");
     48    │ - var·r·=·new·RegExp("[🇯🇵]",·"i");
-       48 │ + var·r·=·new·RegExp("[🇯🇵]","iu");
+       48 │ + var·r·=·new·RegExp("[🇯🇵]",·"iu");
     49 49 │   var r = new RegExp('[🇯🇵]', `i`);
     50 50 │   var r = new RegExp('[🇯🇵]', `${foo}`);
   
@@ -915,7 +885,7 @@ invalid.js:49:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━�
     47 47 │   var r = new RegExp("[🇯🇵]", "");
     48 48 │   var r = new RegExp("[🇯🇵]", "i");
     49    │ - var·r·=·new·RegExp('[🇯🇵]',·`i`);
-       49 │ + var·r·=·new·RegExp('[🇯🇵]',`iu`);
+       49 │ + var·r·=·new·RegExp('[🇯🇵]',·`iu`);
     50 50 │   var r = new RegExp('[🇯🇵]', `${foo}`);
     51 51 │   var r = new RegExp("[🇯🇵]");
   
@@ -936,13 +906,8 @@ invalid.js:50:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━�
   
   i Safe fix: Add unicode u flag to regex
   
-    48 48 │   var r = new RegExp("[🇯🇵]", "i");
-    49 49 │   var r = new RegExp('[🇯🇵]', `i`);
-    50    │ - var·r·=·new·RegExp('[🇯🇵]',·`${foo}`);
-       50 │ + var·r·=·new·RegExp('[🇯🇵]',`${foo}u`);
-    51 51 │   var r = new RegExp("[🇯🇵]");
-    52 52 │   var r = new RegExp("[🇯🇵]",);
-  
+    50 │ var·r·=·new·RegExp('[🇯🇵]',·`${foo}u`);
+       │                                   +   
 
 ```
 
@@ -960,8 +925,8 @@ invalid.js:51:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━�
   
   i Safe fix: Add unicode u flag to regex
   
-    51 │ var·r·=·new·RegExp("[🇯🇵]","u");
-       │                          ++++  
+    51 │ var·r·=·new·RegExp("[🇯🇵]",·"u");
+       │                          +++++  
 
 ```
 
@@ -979,8 +944,8 @@ invalid.js:52:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━�
   
   i Safe fix: Add unicode u flag to regex
   
-    52 │ var·r·=·new·RegExp("[🇯🇵]","u");
-       │                           +++  
+    52 │ var·r·=·new·RegExp("[🇯🇵]",·"u");
+       │                           ++++  
 
 ```
 
@@ -1043,13 +1008,8 @@ invalid.js:56:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━�
   
   i Safe fix: Add unicode u flag to regex
   
-    54 54 │   var r = new RegExp("[\uD83C\uDDEF\uD83C\uDDF5]", "u");
-    55 55 │   var r = new RegExp("[\u{1F1EF}\u{1F1F5}]", "u");
-    56    │ - var·r·=·new·RegExp("[👨�👩�👦]",·"");
-       56 │ + var·r·=·new·RegExp("[👨�👩�👦]","u");
-    57 57 │   var r = new RegExp("[👨�👩�👦]", "u");
-    58 58 │   var r = new RegExp("[\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC66]", "u");
-  
+    56 │ var·r·=·new·RegExp("[👨�👩�👦]",·"u");
+       │                                 +   
 
 ```
 
@@ -1142,13 +1102,8 @@ invalid.js:62:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━�
   
   i Safe fix: Add unicode u flag to regex
   
-    60 60 │   var r = new globalThis.RegExp("[❇�]", "");
-    61 61 │   var r = new globalThis.RegExp("[👶🏻]", "u");
-    62    │ - var·r·=·new·globalThis.RegExp("[🇯🇵]",·"");
-       62 │ + var·r·=·new·globalThis.RegExp("[🇯🇵]","u");
-    63 63 │   var r = new globalThis.RegExp("[\u{1F468}\u{200D}\u{1F469}\u{200D}\u{1F466}]", "u");
-    64 64 │   var r = new window.RegExp("[❇�]", "");
-  
+    62 │ var·r·=·new·globalThis.RegExp("[🇯🇵]",·"u");
+       │                                        +   
 
 ```
 
@@ -1196,13 +1151,8 @@ invalid.js:65:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━�
   
   i Safe fix: Add unicode u flag to regex
   
-    63 63 │   var r = new globalThis.RegExp("[\u{1F468}\u{200D}\u{1F469}\u{200D}\u{1F466}]", "u");
-    64 64 │   var r = new window.RegExp("[❇�]", "");
-    65    │ - var·r·=·new·window.RegExp("[👍]",·"");
-       65 │ + var·r·=·new·window.RegExp("[👍]","u");
-    66 66 │   var r = new global.RegExp("[❇�]", "");
-    67 67 │   var r = new global.RegExp("[👍]", "");
-  
+    65 │ var·r·=·new·window.RegExp("[👍]",·"u");
+       │                                    +   
 
 ```
 
@@ -1235,13 +1185,8 @@ invalid.js:67:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━�
   
   i Safe fix: Add unicode u flag to regex
   
-    65 65 │   var r = new window.RegExp("[👍]", "");
-    66 66 │   var r = new global.RegExp("[❇�]", "");
-    67    │ - var·r·=·new·global.RegExp("[👍]",·"");
-       67 │ + var·r·=·new·global.RegExp("[👍]","u");
-    68 68 │   var r = new globalThis.globalThis.globalThis.RegExp("[❇�]", "");
-    69 69 │   var r = new globalThis.globalThis.globalThis.RegExp("[👍]", "");
-  
+    67 │ var·r·=·new·global.RegExp("[👍]",·"u");
+       │                                    +   
 
 ```
 
@@ -1274,13 +1219,8 @@ invalid.js:69:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━�
   
   i Safe fix: Add unicode u flag to regex
   
-    67 67 │   var r = new global.RegExp("[👍]", "");
-    68 68 │   var r = new globalThis.globalThis.globalThis.RegExp("[❇�]", "");
-    69    │ - var·r·=·new·globalThis.globalThis.globalThis.RegExp("[👍]",·"");
-       69 │ + var·r·=·new·globalThis.globalThis.globalThis.RegExp("[👍]","u");
-    70 70 │   var r = RegExp("[👍]", "");
-    71 71 │   var r = window.RegExp("[👍]", "");
-  
+    69 │ var·r·=·new·globalThis.globalThis.globalThis.RegExp("[👍]",·"u");
+       │                                                              +   
 
 ```
 
@@ -1298,13 +1238,8 @@ invalid.js:70:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━�
   
   i Safe fix: Add unicode u flag to regex
   
-    68 68 │   var r = new globalThis.globalThis.globalThis.RegExp("[❇�]", "");
-    69 69 │   var r = new globalThis.globalThis.globalThis.RegExp("[👍]", "");
-    70    │ - var·r·=·RegExp("[👍]",·"");
-       70 │ + var·r·=·RegExp("[👍]","u");
-    71 71 │   var r = window.RegExp("[👍]", "");
-    72 72 │   var r = global.RegExp("[👍]", "");
-  
+    70 │ var·r·=·RegExp("[👍]",·"u");
+       │                         +   
 
 ```
 
@@ -1322,13 +1257,8 @@ invalid.js:71:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━�
   
   i Safe fix: Add unicode u flag to regex
   
-    69 69 │   var r = new globalThis.globalThis.globalThis.RegExp("[👍]", "");
-    70 70 │   var r = RegExp("[👍]", "");
-    71    │ - var·r·=·window.RegExp("[👍]",·"");
-       71 │ + var·r·=·window.RegExp("[👍]","u");
-    72 72 │   var r = global.RegExp("[👍]", "");
-    73 73 │   var r = globalThis.RegExp("[👍]", "");
-  
+    71 │ var·r·=·window.RegExp("[👍]",·"u");
+       │                                +   
 
 ```
 
@@ -1346,13 +1276,8 @@ invalid.js:72:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━�
   
   i Safe fix: Add unicode u flag to regex
   
-    70 70 │   var r = RegExp("[👍]", "");
-    71 71 │   var r = window.RegExp("[👍]", "");
-    72    │ - var·r·=·global.RegExp("[👍]",·"");
-       72 │ + var·r·=·global.RegExp("[👍]","u");
-    73 73 │   var r = globalThis.RegExp("[👍]", "");
-    74 74 │   
-  
+    72 │ var·r·=·global.RegExp("[👍]",·"u");
+       │                                +   
 
 ```
 
@@ -1369,12 +1294,8 @@ invalid.js:73:9 lint/nursery/noMisleadingCharacterClass  FIXABLE  ━━━━�
   
   i Safe fix: Add unicode u flag to regex
   
-    71 71 │   var r = window.RegExp("[👍]", "");
-    72 72 │   var r = global.RegExp("[👍]", "");
-    73    │ - var·r·=·globalThis.RegExp("[👍]",·"");
-       73 │ + var·r·=·globalThis.RegExp("[👍]","u");
-    74 74 │   
-  
+    73 │ var·r·=·globalThis.RegExp("[👍]",·"u");
+       │                                    +   
 
 ```
 

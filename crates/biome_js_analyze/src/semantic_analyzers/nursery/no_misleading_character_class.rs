@@ -12,6 +12,7 @@ use biome_js_syntax::{
 };
 use biome_rowan::{
     declare_node_union, AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, TextRange,
+    TriviaPieceKind,
 };
 declare_rule! {
     /// Disallow characters made with multiple code points in character class syntax.
@@ -416,7 +417,10 @@ fn make_suggestion(
     suggestion.map(|s| {
         make::js_call_arguments(
             make::token(T!['(']),
-            make::js_call_argument_list([literal, s], Some(make::token(T![,]))),
+            make::js_call_argument_list(
+                [literal, s],
+                Some(make::token(T![,]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")])),
+            ),
             make::token(T![')']),
         )
     })
