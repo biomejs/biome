@@ -1,3 +1,4 @@
+use crate::changed::get_changed_files;
 use crate::cli_options::CliOptions;
 use crate::commands::validate_configuration_diagnostics;
 use crate::{execute_mode, setup_cli_subscriber, CliDiagnostic, CliSession, Execution};
@@ -9,7 +10,6 @@ use biome_service::workspace::UpdateSettingsParams;
 use biome_service::{Configuration, ConfigurationBasePath, MergeWith};
 use std::ffi::OsString;
 use std::path::PathBuf;
-use crate::changed::get_changed_files;
 
 pub(crate) struct CiCommandPayload {
     pub(crate) formatter_enabled: Option<bool>,
@@ -104,7 +104,7 @@ pub(crate) fn ci(session: CliSession, mut payload: CiCommandPayload) -> Result<(
     if payload.changed {
         payload.paths = get_changed_files(&session.app.fs, &configuration, payload.since)?;
     }
-    
+
     session
         .app
         .workspace
