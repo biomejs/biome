@@ -19,16 +19,6 @@ body:
       placeholder: https://biomejs.dev/guides/getting-started/
     validations:
       required: true
-  - type: dropdown
-    id: language
-    attributes:
-      label: Language
-      description: Language of the documentation page
-      options:
-        - English (en)
-        - Portuguese (pt)
-        - Japanese (ja)
-        - Chinese (zh-CN)
   - type: textarea
     id: description
     attributes:
