@@ -25,7 +25,7 @@
 
 </div>
 
-**Biome** é uma cadeia de ferramentas de alto desempenho para projetos web, visando fornecer ferramentas de desenvolvimento para manter a saúde desses projetos.
+**Biome** é um conjunto de ferramentas de alto desempenho para projetos web, visando fornecer recursos de desenvolvimento para manter a saúde desses projetos.
 
 **Biome é um [formatador rápido](./benchmark#formatting)** para _JavaScript_, _TypeScript_, _JSX_, e _JSON_ que atinge **[96% de compatibilidade com o _Prettier_](https://console.algora.io/challenges/prettier)**.
 
