@@ -8,7 +8,7 @@ Este documento abrange alguns dos elementos internos do Biome e como eles são u
 ## Parser e CST
 
 A arquitetura do parser é impulsionada por um fork interno do [rowan], uma biblioteca
-que implementa o padrão [Árvore Verde e Vermelha].
+que implementa o padrão [Green and Red tree].
 
 O CST (Árvore de Sintaxe Concreta) é uma estrutura de dados muito semelhante à AST (Árvore de Sintaxe Abstrata) que mantém o registro de todas as informações de um programa, incluindo trivialidades.
 
@@ -34,10 +34,10 @@ const b = "bar";
 ```
 0: JS_MODULE@0..55
     ...
-      1: SEMICOLON@15..27 ";" [] [Espaço(" "), Comentários("// comentário 1")]
+      1: SEMICOLON@15..27 ";" [] [Whitespace(" "), Comments("// comment 1")]
     1: JS_VARIABLE_STATEMENT@27..55
         ...
-        1: CONST_KW@27..45 "const" [NovaLinha("\n"), Comentários("// comentário 2"), NovaLinha("\n")] [Espaço(" ")]
+        1: CONST_KW@27..45 "const" [Newline("\n"), Comments("// comment 2"), Newline("\n")] [Whitespace(" ")]
   3: EOF@55..55 "" [] []
 ```
 
@@ -66,7 +66,7 @@ JsModule {
   directives: JsDirectiveList [],
   items: JsModuleItemList [
     JsWhileStatement {
-      while_token: WHILE_KW@0..6 "while" [] [Espaço(" ")],
+      while_token: WHILE_KW@0..6 "while" [] [Whitespace(" ")],
       l_paren_token: missing (required),
       test: missing (required),
       r_paren_token: missing (required),
@@ -77,9 +77,7 @@ JsModule {
       },
     },
   ],
-  eof_token: EOF@8..8 ""
-
- [] [],
+  eof_token: EOF@8..8 "" [] [],
 }
 ```
 
@@ -88,12 +86,12 @@ Este é o erro emitido durante a análise:
 ```
 main.tsx:1:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ✖ esperado `(` mas em vez disso encontrou `{`
+  ✖ expected `(` but instead found `{`
 
   > 1 │ while {}
       │       ^
 
-  ℹ Remova {
+  ℹ Remove {
 ```
 
 O mesmo não pode ser dito para o seguinte trecho. O parser não consegue entender corretamente a sintaxe durante a fase de recuperação, então ele precisa confiar nos nós de bogus para marcar alguma sintaxe como errônea. Note o `JsBogusStatement`:
@@ -131,7 +129,7 @@ Este é o erro que obtemos da fase de análise:
 ```
 main.tsx:1:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ✖ esperado um nome para a função em uma declaração de função, mas não encontrou nenhum
+  ✖ expected a name for the function in a function declaration, but found none
 
   > 1 │ function}
       │         ^
@@ -150,5 +148,5 @@ que o Biome inicia em segundo plano e usa para processar solicitações do edito
 
 
 [rowan]: https://github.com/rust-analyzer/rowan
-[Árvore Verde e Vermelha]: https://learn.microsoft.com/en-us/archive/blogs/ericlippert/persistence-facades-and-roslyns-red-green-trees
+[Green and Red tree]: https://learn.microsoft.com/en-us/archive/blogs/ericlippert/persistence-facades-and-roslyns-red-green-trees
 [daemon]: https://pt.wikipedia.org/wiki/Daemon_(computa%C3%A7%C3%A3o)
