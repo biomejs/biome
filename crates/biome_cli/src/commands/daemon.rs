@@ -202,7 +202,7 @@ fn setup_tracing_subscriber() {
 pub(super) fn rome_log_dir() -> PathBuf {
     match env::var_os("BIOME_LOG_DIR") {
         Some(directory) => PathBuf::from(directory),
-        None => env::temp_dir().join("biome-logs"),
+        None => biome_fs::ensure_data_dir().join("biome-logs"),
     }
 }
 
