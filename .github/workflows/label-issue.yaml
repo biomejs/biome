@@ -20,3 +20,4 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           configuration-path: .github/documentation-issue-labeler.yaml
           enable-versioned-regex: 0
+          sync-labels: 1
