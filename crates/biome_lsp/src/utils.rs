@@ -294,7 +294,7 @@ fn print_markup(markup: &MarkupBuf) -> String {
 pub(crate) fn into_lsp_error(msg: impl Display + Debug) -> LspError {
     let mut error = LspError::internal_error();
     error!("Error: {}", msg);
-    error.message = msg.to_string();
+    error.message = msg.to_string().into();
     error.data = Some(format!("{msg:?}").into());
     error
 }
@@ -304,14 +304,14 @@ pub(crate) fn panic_to_lsp_error(err: Box<dyn Any + Send>) -> LspError {
 
     match err.downcast::<String>() {
         Ok(msg) => {
-            error.message = *msg;
+            error.message = (*msg).into();
         }
         Err(err) => match err.downcast::<&str>() {
             Ok(msg) => {
-                error.message = msg.to_string();
+                error.message = msg.to_string().into();
             }
             Err(_) => {
-                error.message = String::from("Biome encountered an unknown error");
+                error.message = String::from("Biome encountered an unknown error").into();
             }
         },
     }

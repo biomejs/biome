@@ -4,6 +4,18 @@ bench_formatter = "run -p xtask_bench --release -- --feature formatter"
 bench_parser = "run -p xtask_bench --release -- --feature parser"
 biome-cli = "run -p biome_cli --release --"
 biome-cli-dev = "run -p biome_cli --"
+build-wasix = """
+    --config patch.crates-io.socket2.git=\"https://github.com/wasix-org/socket2.git\" \
+    --config patch.crates-io.socket2.branch=\"v0.4.9\" \
+    --config patch.crates-io.dashmap.git=\"https://github.com/xacrimon/dashmap\" \
+    --config patch.crates-io.dashmap.tag=\"v5.1.0\" \
+    --config patch.crates-io.tokio.git=\"https://github.com/wasix-org/tokio.git\" \
+    --config patch.crates-io.tokio.branch=\"epoll\" \
+    --config patch.crates-io.tower.git=\"https://github.com/wasix-org/tower.git\" \
+    --config patch.crates-io.tower-lsp.git=\"https://github.com/wasix-org/tower-lsp.git\" \
+    --config patch.crates-io.tower-lsp.tag=\"v0.20.0\" \
+    wasix build --bin biome
+"""
 codegen = "run -p xtask_codegen --"
 codegen-bindings = "run -p xtask_codegen --features schema -- bindings"
 codegen-configuration = "run -p xtask_codegen --features configuration -- configuration"

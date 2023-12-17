@@ -1,6 +1,8 @@
+#[cfg(not(target_os = "wasi"))]
+use crate::service::open_socket;
 use crate::{
     open_transport,
-    service::{self, ensure_daemon, open_socket, run_daemon},
+    service::{self, ensure_daemon, run_daemon},
     CliDiagnostic, CliSession,
 };
 use biome_console::{markup, ConsoleExt};
@@ -102,6 +104,12 @@ pub(crate) fn lsp_proxy(config_path: Option<PathBuf>) -> Result<(), CliDiagnosti
     Ok(())
 }
 
+#[cfg(target_os = "wasi")]
+async fn start_lsp_proxy(rt: &Runtime, config_path: Option<PathBuf>) -> Result<(), CliDiagnostic> {
+    Ok(())
+}
+
+#[cfg(not(target_os = "wasi"))]
 /// Start a proxy process.
 /// Receives a process via `stdin` and then copy the content to the LSP socket.
 /// Copy to the process on `stdout` when the LSP responds to a message

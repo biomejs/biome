@@ -184,3 +184,18 @@ jobs:
             git status
             exit 1
           fi
+
+  wasix:
+    name: WASIX compilation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Install toolchain
+        uses: moonrepo/setup-rust@v1
+        with:
+          bins: cargo-wasix
+      - name: Build (WASIX)
+        run: cargo build-wasix
+      - name: Clean cache
+        run: cargo cache --autoclean

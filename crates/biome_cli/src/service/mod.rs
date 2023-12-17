@@ -54,6 +54,19 @@ pub(crate) use self::unix::{
     ensure_daemon, enumerate_pipes, open_socket, print_socket, run_daemon,
 };
 
+#[cfg(target_os = "wasi")]
+mod wasix;
+#[cfg(target_os = "wasi")]
+pub(crate) use self::wasix::{
+    ensure_daemon, enumerate_pipes, open_socket, print_socket, run_daemon,
+};
+
+#[cfg(target_os = "wasi")]
+pub fn open_transport(_runtime: Runtime) -> io::Result<Option<impl WorkspaceTransport>> {
+    Ok(None::<SocketTransport>)
+}
+
+#[cfg(not(target_os = "wasi"))]
 /// Tries to open a connection to a running daemon instance, returning a
 /// [WorkspaceTransport] instance if the socket is currently active
 pub fn open_transport(runtime: Runtime) -> io::Result<Option<impl WorkspaceTransport>> {

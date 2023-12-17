@@ -119,7 +119,7 @@ tests_macros         = { path = "./crates/tests_macros" }
 bitflags          = "2.3.1"
 bpaf              = { version = "0.9.5", features = ["derive"] }
 countme           = "3.0.1"
-dashmap           = "5.4.0"
+dashmap           = "=5.1.0"
 indexmap          = "1.9.3"
 insta             = "1.29.0"
 lazy_static       = "1.4.0"
@@ -133,13 +133,21 @@ serde_json        = "1.0.96"
 smallvec          = { version = "1.10.0", features = ["union", "const_new"] }
 tracing           = { version = "0.1.37", default-features = false, features = ["std"] }
 # pinning to version 1.18 to avoid multiple versions of windows-sys as dependency
-tokio       = { version = "~1.18.5" }
+# tokio = { version = "~1.18.5" }
+tokio       = { git = "https://github.com/wasix-org/tokio.git", branch = "epoll" }
 unicode-bom = "2.0.3"
 
+# tower-lsp = { version = "0.19.0" }
+tower     = { version = "0.4.12" }
+tower-lsp = { git = "https://github.com/wasix-org/tower-lsp.git" }
 
 [profile.dev.package.biome_wasm]
 debug     = true
 opt-level = "s"
+
+[profile.dev]
+incremental = true
+opt-level   = 1
 
 [profile.test.package.biome_wasm]
 debug     = true
