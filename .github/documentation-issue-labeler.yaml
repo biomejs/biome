@@ -4,11 +4,11 @@
 # negative lookahead in the english regex, so that it doesn't match the english
 # documentation URL.
 
-chinese:
+'Lang-Chinese':
   - 'https://biomejs.dev/zh-cn/'
-english:
+'Lang-English':
   - 'https://biomejs.dev/(?!(zh-cn|ja|pt-br))'
-japanese:
+'Lang-Japanese':
   - 'https://biomejs.dev/ja/'
-portuguese:
+'Lang-Portuguese':
   - 'https://biomejs.dev/pt-br/'
