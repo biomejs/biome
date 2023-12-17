@@ -13,9 +13,9 @@ expression: snapshot
 ## AST
 
 ```
-CssRoot {
+CssStyleSheet {
     bom_token: missing (optional),
-    rules: CssRuleList [],
+    content: CssStyleSheetContent [],
     eof_token: EOF@0..0 "" [] [],
 }
 ```
@@ -23,9 +23,9 @@ CssRoot {
 ## CST
 
 ```
-0: CSS_ROOT@0..0
+0: CSS_STYLE_SHEET@0..0
   0: (empty)
-  1: CSS_RULE_LIST@0..0
+  1: CSS_STYLE_SHEET_CONTENT@0..0
   2: EOF@0..0 "" [] []
 
 ```

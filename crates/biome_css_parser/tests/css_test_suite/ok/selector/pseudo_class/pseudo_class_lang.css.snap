@@ -21,290 +21,223 @@ html:lang(de, fr) {}
 ## AST
 
 ```
-CssRoot {
+CssStyleSheet {
     bom_token: missing (optional),
-    rules: CssRuleList [
-        CssRule {
-            prelude: CssSelectorList [
-                CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
-                    simple_selector: missing (optional),
-                    sub_selectors: CssSubSelectorList [
-                        CssPseudoClassSelector {
-                            colon_token: COLON@0..1 ":" [] [],
-                            class: CssPseudoClassFunctionValueList {
-                                name_token: LANG_KW@1..5 "lang" [] [],
-                                l_paren_token: L_PAREN@5..6 "(" [] [],
-                                value_list: CssPseudoValueList [
-                                    CssIdentifier {
-                                        value_token: IDENT@6..13 "\\*-Latn" [] [],
-                                    },
-                                ],
-                                r_paren_token: R_PAREN@13..15 ")" [] [Whitespace(" ")],
-                            },
+    content: CssStyleSheetContent [
+        CssQualifiedRule {
+            prelude: CssQualifiedRulePrelude [
+                CssPreservedTokenKey {
+                    value: COLON@0..1 ":" [] [],
+                },
+                CssFunctionBlock {
+                    css_function_token: CssFunctionToken {
+                        valye_token: FUNCTION_TOKEN@1..6 "lang(" [] [],
+                    },
+                    css_component_value_list: CssComponentValueList [
+                        CssIdentifier {
+                            value_token: IDENT@6..13 "\\*-Latn" [] [],
                         },
                     ],
+                    r_paren_token: R_PAREN@13..15 ")" [] [Whitespace(" ")],
                 },
             ],
-            block: CssBlock {
+            block: CssCurlyBracketsBlock {
                 l_curly_token: L_CURLY@15..16 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                content: CssCurlyBracketsBlockContent [],
                 r_curly_token: R_CURLY@16..17 "}" [] [],
             },
         },
-        CssRule {
-            prelude: CssSelectorList [
-                CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
-                    simple_selector: missing (optional),
-                    sub_selectors: CssSubSelectorList [
-                        CssPseudoClassSelector {
-                            colon_token: COLON@17..19 ":" [Newline("\n")] [],
-                            class: CssPseudoClassFunctionValueList {
-                                name_token: LANG_KW@19..23 "lang" [] [],
-                                l_paren_token: L_PAREN@23..24 "(" [] [],
-                                value_list: CssPseudoValueList [
-                                    CssString {
-                                        value_token: CSS_STRING_LITERAL@24..32 "\"*-Latn\"" [] [],
-                                    },
-                                ],
-                                r_paren_token: R_PAREN@32..34 ")" [] [Whitespace(" ")],
-                            },
+        CssQualifiedRule {
+            prelude: CssQualifiedRulePrelude [
+                CssPreservedTokenKey {
+                    value: COLON@17..19 ":" [Newline("\n")] [],
+                },
+                CssFunctionBlock {
+                    css_function_token: CssFunctionToken {
+                        valye_token: FUNCTION_TOKEN@19..24 "lang(" [] [],
+                    },
+                    css_component_value_list: CssComponentValueList [
+                        CssString {
+                            value_token: CSS_STRING_LITERAL@24..32 "\"*-Latn\"" [] [],
                         },
                     ],
+                    r_paren_token: R_PAREN@32..34 ")" [] [Whitespace(" ")],
                 },
             ],
-            block: CssBlock {
+            block: CssCurlyBracketsBlock {
                 l_curly_token: L_CURLY@34..35 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                content: CssCurlyBracketsBlockContent [],
                 r_curly_token: R_CURLY@35..36 "}" [] [],
             },
         },
-        CssRule {
-            prelude: CssSelectorList [
-                CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
-                    simple_selector: CssTypeSelector {
-                        namespace: missing (optional),
-                        ident: CssIdentifier {
-                            value_token: IDENT@36..41 "html" [Newline("\n")] [],
-                        },
+        CssQualifiedRule {
+            prelude: CssQualifiedRulePrelude [
+                CssIdentifier {
+                    value_token: IDENT@36..41 "html" [Newline("\n")] [],
+                },
+                CssPreservedTokenKey {
+                    value: COLON@41..42 ":" [] [],
+                },
+                CssFunctionBlock {
+                    css_function_token: CssFunctionToken {
+                        valye_token: FUNCTION_TOKEN@42..47 "lang(" [] [],
                     },
-                    sub_selectors: CssSubSelectorList [
-                        CssPseudoClassSelector {
-                            colon_token: COLON@41..42 ":" [] [],
-                            class: CssPseudoClassFunctionValueList {
-                                name_token: LANG_KW@42..46 "lang" [] [],
-                                l_paren_token: L_PAREN@46..47 "(" [] [],
-                                value_list: CssPseudoValueList [
-                                    CssIdentifier {
-                                        value_token: IDENT@47..52 "fr-be" [] [],
-                                    },
-                                ],
-                                r_paren_token: R_PAREN@52..54 ")" [] [Whitespace(" ")],
-                            },
+                    css_component_value_list: CssComponentValueList [
+                        CssIdentifier {
+                            value_token: IDENT@47..52 "fr-be" [] [],
                         },
                     ],
+                    r_paren_token: R_PAREN@52..54 ")" [] [Whitespace(" ")],
                 },
             ],
-            block: CssBlock {
+            block: CssCurlyBracketsBlock {
                 l_curly_token: L_CURLY@54..55 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                content: CssCurlyBracketsBlockContent [],
                 r_curly_token: R_CURLY@55..56 "}" [] [],
             },
         },
-        CssRule {
-            prelude: CssSelectorList [
-                CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
-                    simple_selector: CssTypeSelector {
-                        namespace: missing (optional),
-                        ident: CssIdentifier {
-                            value_token: IDENT@56..61 "html" [Newline("\n")] [],
-                        },
+        CssQualifiedRule {
+            prelude: CssQualifiedRulePrelude [
+                CssIdentifier {
+                    value_token: IDENT@56..61 "html" [Newline("\n")] [],
+                },
+                CssPreservedTokenKey {
+                    value: COLON@61..62 ":" [] [],
+                },
+                CssFunctionBlock {
+                    css_function_token: CssFunctionToken {
+                        valye_token: FUNCTION_TOKEN@62..67 "lang(" [] [],
                     },
-                    sub_selectors: CssSubSelectorList [
-                        CssPseudoClassSelector {
-                            colon_token: COLON@61..62 ":" [] [],
-                            class: CssPseudoClassFunctionValueList {
-                                name_token: LANG_KW@62..66 "lang" [] [],
-                                l_paren_token: L_PAREN@66..67 "(" [] [],
-                                value_list: CssPseudoValueList [
-                                    CssIdentifier {
-                                        value_token: IDENT@67..69 "de" [] [],
-                                    },
-                                ],
-                                r_paren_token: R_PAREN@69..71 ")" [] [Whitespace(" ")],
-                            },
+                    css_component_value_list: CssComponentValueList [
+                        CssIdentifier {
+                            value_token: IDENT@67..69 "de" [] [],
                         },
                     ],
+                    r_paren_token: R_PAREN@69..71 ")" [] [Whitespace(" ")],
                 },
             ],
-            block: CssBlock {
+            block: CssCurlyBracketsBlock {
                 l_curly_token: L_CURLY@71..72 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                content: CssCurlyBracketsBlockContent [],
                 r_curly_token: R_CURLY@72..73 "}" [] [],
             },
         },
-        CssRule {
-            prelude: CssSelectorList [
-                CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
-                    simple_selector: CssTypeSelector {
-                        namespace: missing (optional),
-                        ident: CssIdentifier {
-                            value_token: IDENT@73..78 "html" [Newline("\n")] [],
-                        },
+        CssQualifiedRule {
+            prelude: CssQualifiedRulePrelude [
+                CssIdentifier {
+                    value_token: IDENT@73..78 "html" [Newline("\n")] [],
+                },
+                CssPreservedTokenKey {
+                    value: COLON@78..79 ":" [] [],
+                },
+                CssFunctionBlock {
+                    css_function_token: CssFunctionToken {
+                        valye_token: FUNCTION_TOKEN@79..84 "lang(" [] [],
                     },
-                    sub_selectors: CssSubSelectorList [
-                        CssPseudoClassSelector {
-                            colon_token: COLON@78..79 ":" [] [],
-                            class: CssPseudoClassFunctionValueList {
-                                name_token: LANG_KW@79..83 "lang" [] [],
-                                l_paren_token: L_PAREN@83..84 "(" [] [],
-                                value_list: CssPseudoValueList [
-                                    CssIdentifier {
-                                        value_token: IDENT@84..86 "de" [] [],
-                                    },
-                                    COMMA@86..88 "," [] [Whitespace(" ")],
-                                    CssIdentifier {
-                                        value_token: IDENT@88..90 "fr" [] [],
-                                    },
-                                ],
-                                r_paren_token: R_PAREN@90..92 ")" [] [Whitespace(" ")],
-                            },
+                    css_component_value_list: CssComponentValueList [
+                        CssIdentifier {
+                            value_token: IDENT@84..86 "de" [] [],
+                        },
+                        CssDelim {
+                            value_token: DELIM@86..88 "," [] [Whitespace(" ")],
+                        },
+                        CssIdentifier {
+                            value_token: IDENT@88..90 "fr" [] [],
                         },
                     ],
+                    r_paren_token: R_PAREN@90..92 ")" [] [Whitespace(" ")],
                 },
             ],
-            block: CssBlock {
+            block: CssCurlyBracketsBlock {
                 l_curly_token: L_CURLY@92..93 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                content: CssCurlyBracketsBlockContent [],
                 r_curly_token: R_CURLY@93..94 "}" [] [],
             },
         },
-        CssRule {
-            prelude: CssSelectorList [
-                CssComplexSelector {
-                    left: CssCompoundSelector {
-                        nesting_selector_token: missing (optional),
-                        simple_selector: missing (optional),
-                        sub_selectors: CssSubSelectorList [
-                            CssPseudoClassSelector {
-                                colon_token: COLON@94..96 ":" [Newline("\n")] [],
-                                class: CssPseudoClassFunctionValueList {
-                                    name_token: LANG_KW@96..100 "lang" [] [],
-                                    l_paren_token: L_PAREN@100..101 "(" [] [],
-                                    value_list: CssPseudoValueList [
-                                        CssIdentifier {
-                                            value_token: IDENT@101..106 "fr-be" [] [],
-                                        },
-                                    ],
-                                    r_paren_token: R_PAREN@106..108 ")" [] [Whitespace(" ")],
-                                },
-                            },
-                        ],
+        CssQualifiedRule {
+            prelude: CssQualifiedRulePrelude [
+                CssPreservedTokenKey {
+                    value: COLON@94..96 ":" [Newline("\n")] [],
+                },
+                CssFunctionBlock {
+                    css_function_token: CssFunctionToken {
+                        valye_token: FUNCTION_TOKEN@96..101 "lang(" [] [],
                     },
-                    combinator: R_ANGLE@108..110 ">" [] [Whitespace(" ")],
-                    right: CssCompoundSelector {
-                        nesting_selector_token: missing (optional),
-                        simple_selector: CssTypeSelector {
-                            namespace: missing (optional),
-                            ident: CssIdentifier {
-                                value_token: IDENT@110..112 "q" [] [Whitespace(" ")],
-                            },
+                    css_component_value_list: CssComponentValueList [
+                        CssIdentifier {
+                            value_token: IDENT@101..106 "fr-be" [] [],
                         },
-                        sub_selectors: CssSubSelectorList [],
-                    },
+                    ],
+                    r_paren_token: R_PAREN@106..108 ")" [] [Whitespace(" ")],
+                },
+                CssDelim {
+                    value_token: DELIM@108..110 ">" [] [Whitespace(" ")],
+                },
+                CssIdentifier {
+                    value_token: IDENT@110..112 "q" [] [Whitespace(" ")],
                 },
             ],
-            block: CssBlock {
+            block: CssCurlyBracketsBlock {
                 l_curly_token: L_CURLY@112..113 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                content: CssCurlyBracketsBlockContent [],
                 r_curly_token: R_CURLY@113..114 "}" [] [],
             },
         },
-        CssRule {
-            prelude: CssSelectorList [
-                CssComplexSelector {
-                    left: CssCompoundSelector {
-                        nesting_selector_token: missing (optional),
-                        simple_selector: missing (optional),
-                        sub_selectors: CssSubSelectorList [
-                            CssPseudoClassSelector {
-                                colon_token: COLON@114..116 ":" [Newline("\n")] [],
-                                class: CssPseudoClassFunctionValueList {
-                                    name_token: LANG_KW@116..120 "lang" [] [],
-                                    l_paren_token: L_PAREN@120..121 "(" [] [],
-                                    value_list: CssPseudoValueList [
-                                        CssIdentifier {
-                                            value_token: IDENT@121..123 "de" [] [],
-                                        },
-                                    ],
-                                    r_paren_token: R_PAREN@123..125 ")" [] [Whitespace(" ")],
-                                },
-                            },
-                        ],
+        CssQualifiedRule {
+            prelude: CssQualifiedRulePrelude [
+                CssPreservedTokenKey {
+                    value: COLON@114..116 ":" [Newline("\n")] [],
+                },
+                CssFunctionBlock {
+                    css_function_token: CssFunctionToken {
+                        valye_token: FUNCTION_TOKEN@116..121 "lang(" [] [],
                     },
-                    combinator: R_ANGLE@125..127 ">" [] [Whitespace(" ")],
-                    right: CssCompoundSelector {
-                        nesting_selector_token: missing (optional),
-                        simple_selector: CssTypeSelector {
-                            namespace: missing (optional),
-                            ident: CssIdentifier {
-                                value_token: IDENT@127..129 "q" [] [Whitespace(" ")],
-                            },
+                    css_component_value_list: CssComponentValueList [
+                        CssIdentifier {
+                            value_token: IDENT@121..123 "de" [] [],
                         },
-                        sub_selectors: CssSubSelectorList [],
-                    },
+                    ],
+                    r_paren_token: R_PAREN@123..125 ")" [] [Whitespace(" ")],
+                },
+                CssDelim {
+                    value_token: DELIM@125..127 ">" [] [Whitespace(" ")],
+                },
+                CssIdentifier {
+                    value_token: IDENT@127..129 "q" [] [Whitespace(" ")],
                 },
             ],
-            block: CssBlock {
+            block: CssCurlyBracketsBlock {
                 l_curly_token: L_CURLY@129..130 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                content: CssCurlyBracketsBlockContent [],
                 r_curly_token: R_CURLY@130..131 "}" [] [],
             },
         },
-        CssRule {
-            prelude: CssSelectorList [
-                CssComplexSelector {
-                    left: CssCompoundSelector {
-                        nesting_selector_token: missing (optional),
-                        simple_selector: missing (optional),
-                        sub_selectors: CssSubSelectorList [
-                            CssPseudoClassSelector {
-                                colon_token: COLON@131..133 ":" [Newline("\n")] [],
-                                class: CssPseudoClassFunctionValueList {
-                                    name_token: LANG_KW@133..137 "lang" [] [],
-                                    l_paren_token: L_PAREN@137..138 "(" [] [],
-                                    value_list: CssPseudoValueList [
-                                        CssIdentifier {
-                                            value_token: IDENT@138..143 "fr-be" [] [],
-                                        },
-                                    ],
-                                    r_paren_token: R_PAREN@143..144 ")" [] [],
-                                },
-                            },
-                        ],
+        CssQualifiedRule {
+            prelude: CssQualifiedRulePrelude [
+                CssPreservedTokenKey {
+                    value: COLON@131..133 ":" [Newline("\n")] [],
+                },
+                CssFunctionBlock {
+                    css_function_token: CssFunctionToken {
+                        valye_token: FUNCTION_TOKEN@133..138 "lang(" [] [],
                     },
-                    combinator: CSS_SPACE_LITERAL@144..145 " " [] [],
-                    right: CssCompoundSelector {
-                        nesting_selector_token: missing (optional),
-                        simple_selector: missing (optional),
-                        sub_selectors: CssSubSelectorList [
-                            CssClassSelector {
-                                dot_token: DOT@145..146 "." [] [],
-                                name: CssIdentifier {
-                                    value_token: IDENT@146..152 "class" [] [Whitespace(" ")],
-                                },
-                            },
-                        ],
-                    },
+                    css_component_value_list: CssComponentValueList [
+                        CssIdentifier {
+                            value_token: IDENT@138..143 "fr-be" [] [],
+                        },
+                    ],
+                    r_paren_token: R_PAREN@143..145 ")" [] [Whitespace(" ")],
+                },
+                CssDelim {
+                    value_token: DELIM@145..146 "." [] [],
+                },
+                CssIdentifier {
+                    value_token: IDENT@146..152 "class" [] [Whitespace(" ")],
                 },
             ],
-            block: CssBlock {
+            block: CssCurlyBracketsBlock {
                 l_curly_token: L_CURLY@152..153 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                content: CssCurlyBracketsBlockContent [],
                 r_curly_token: R_CURLY@153..154 "}" [] [],
             },
         },
@@ -316,200 +249,150 @@ CssRoot {
 ## CST
 
 ```
-0: CSS_ROOT@0..155
+0: CSS_STYLE_SHEET@0..155
   0: (empty)
-  1: CSS_RULE_LIST@0..154
-    0: CSS_RULE@0..17
-      0: CSS_SELECTOR_LIST@0..15
-        0: CSS_COMPOUND_SELECTOR@0..15
-          0: (empty)
-          1: (empty)
-          2: CSS_SUB_SELECTOR_LIST@0..15
-            0: CSS_PSEUDO_CLASS_SELECTOR@0..15
-              0: COLON@0..1 ":" [] []
-              1: CSS_PSEUDO_CLASS_FUNCTION_VALUE_LIST@1..15
-                0: LANG_KW@1..5 "lang" [] []
-                1: L_PAREN@5..6 "(" [] []
-                2: CSS_PSEUDO_VALUE_LIST@6..13
-                  0: CSS_IDENTIFIER@6..13
-                    0: IDENT@6..13 "\\*-Latn" [] []
-                3: R_PAREN@13..15 ")" [] [Whitespace(" ")]
-      1: CSS_BLOCK@15..17
+  1: CSS_STYLE_SHEET_CONTENT@0..154
+    0: CSS_QUALIFIED_RULE@0..17
+      0: CSS_QUALIFIED_RULE_PRELUDE@0..15
+        0: CSS_PRESERVED_TOKEN_KEY@0..1
+          0: COLON@0..1 ":" [] []
+        1: CSS_FUNCTION_BLOCK@1..15
+          0: CSS_FUNCTION_TOKEN@1..6
+            0: FUNCTION_TOKEN@1..6 "lang(" [] []
+          1: CSS_COMPONENT_VALUE_LIST@6..13
+            0: CSS_IDENTIFIER@6..13
+              0: IDENT@6..13 "\\*-Latn" [] []
+          2: R_PAREN@13..15 ")" [] [Whitespace(" ")]
+      1: CSS_CURLY_BRACKETS_BLOCK@15..17
         0: L_CURLY@15..16 "{" [] []
-        1: CSS_DECLARATION_LIST@16..16
+        1: CSS_CURLY_BRACKETS_BLOCK_CONTENT@16..16
         2: R_CURLY@16..17 "}" [] []
-    1: CSS_RULE@17..36
-      0: CSS_SELECTOR_LIST@17..34
-        0: CSS_COMPOUND_SELECTOR@17..34
-          0: (empty)
-          1: (empty)
-          2: CSS_SUB_SELECTOR_LIST@17..34
-            0: CSS_PSEUDO_CLASS_SELECTOR@17..34
-              0: COLON@17..19 ":" [Newline("\n")] []
-              1: CSS_PSEUDO_CLASS_FUNCTION_VALUE_LIST@19..34
-                0: LANG_KW@19..23 "lang" [] []
-                1: L_PAREN@23..24 "(" [] []
-                2: CSS_PSEUDO_VALUE_LIST@24..32
-                  0: CSS_STRING@24..32
-                    0: CSS_STRING_LITERAL@24..32 "\"*-Latn\"" [] []
-                3: R_PAREN@32..34 ")" [] [Whitespace(" ")]
-      1: CSS_BLOCK@34..36
+    1: CSS_QUALIFIED_RULE@17..36
+      0: CSS_QUALIFIED_RULE_PRELUDE@17..34
+        0: CSS_PRESERVED_TOKEN_KEY@17..19
+          0: COLON@17..19 ":" [Newline("\n")] []
+        1: CSS_FUNCTION_BLOCK@19..34
+          0: CSS_FUNCTION_TOKEN@19..24
+            0: FUNCTION_TOKEN@19..24 "lang(" [] []
+          1: CSS_COMPONENT_VALUE_LIST@24..32
+            0: CSS_STRING@24..32
+              0: CSS_STRING_LITERAL@24..32 "\"*-Latn\"" [] []
+          2: R_PAREN@32..34 ")" [] [Whitespace(" ")]
+      1: CSS_CURLY_BRACKETS_BLOCK@34..36
         0: L_CURLY@34..35 "{" [] []
-        1: CSS_DECLARATION_LIST@35..35
+        1: CSS_CURLY_BRACKETS_BLOCK_CONTENT@35..35
         2: R_CURLY@35..36 "}" [] []
-    2: CSS_RULE@36..56
-      0: CSS_SELECTOR_LIST@36..54
-        0: CSS_COMPOUND_SELECTOR@36..54
-          0: (empty)
-          1: CSS_TYPE_SELECTOR@36..41
-            0: (empty)
-            1: CSS_IDENTIFIER@36..41
-              0: IDENT@36..41 "html" [Newline("\n")] []
-          2: CSS_SUB_SELECTOR_LIST@41..54
-            0: CSS_PSEUDO_CLASS_SELECTOR@41..54
-              0: COLON@41..42 ":" [] []
-              1: CSS_PSEUDO_CLASS_FUNCTION_VALUE_LIST@42..54
-                0: LANG_KW@42..46 "lang" [] []
-                1: L_PAREN@46..47 "(" [] []
-                2: CSS_PSEUDO_VALUE_LIST@47..52
-                  0: CSS_IDENTIFIER@47..52
-                    0: IDENT@47..52 "fr-be" [] []
-                3: R_PAREN@52..54 ")" [] [Whitespace(" ")]
-      1: CSS_BLOCK@54..56
+    2: CSS_QUALIFIED_RULE@36..56
+      0: CSS_QUALIFIED_RULE_PRELUDE@36..54
+        0: CSS_IDENTIFIER@36..41
+          0: IDENT@36..41 "html" [Newline("\n")] []
+        1: CSS_PRESERVED_TOKEN_KEY@41..42
+          0: COLON@41..42 ":" [] []
+        2: CSS_FUNCTION_BLOCK@42..54
+          0: CSS_FUNCTION_TOKEN@42..47
+            0: FUNCTION_TOKEN@42..47 "lang(" [] []
+          1: CSS_COMPONENT_VALUE_LIST@47..52
+            0: CSS_IDENTIFIER@47..52
+              0: IDENT@47..52 "fr-be" [] []
+          2: R_PAREN@52..54 ")" [] [Whitespace(" ")]
+      1: CSS_CURLY_BRACKETS_BLOCK@54..56
         0: L_CURLY@54..55 "{" [] []
-        1: CSS_DECLARATION_LIST@55..55
+        1: CSS_CURLY_BRACKETS_BLOCK_CONTENT@55..55
         2: R_CURLY@55..56 "}" [] []
-    3: CSS_RULE@56..73
-      0: CSS_SELECTOR_LIST@56..71
-        0: CSS_COMPOUND_SELECTOR@56..71
-          0: (empty)
-          1: CSS_TYPE_SELECTOR@56..61
-            0: (empty)
-            1: CSS_IDENTIFIER@56..61
-              0: IDENT@56..61 "html" [Newline("\n")] []
-          2: CSS_SUB_SELECTOR_LIST@61..71
-            0: CSS_PSEUDO_CLASS_SELECTOR@61..71
-              0: COLON@61..62 ":" [] []
-              1: CSS_PSEUDO_CLASS_FUNCTION_VALUE_LIST@62..71
-                0: LANG_KW@62..66 "lang" [] []
-                1: L_PAREN@66..67 "(" [] []
-                2: CSS_PSEUDO_VALUE_LIST@67..69
-                  0: CSS_IDENTIFIER@67..69
-                    0: IDENT@67..69 "de" [] []
-                3: R_PAREN@69..71 ")" [] [Whitespace(" ")]
-      1: CSS_BLOCK@71..73
+    3: CSS_QUALIFIED_RULE@56..73
+      0: CSS_QUALIFIED_RULE_PRELUDE@56..71
+        0: CSS_IDENTIFIER@56..61
+          0: IDENT@56..61 "html" [Newline("\n")] []
+        1: CSS_PRESERVED_TOKEN_KEY@61..62
+          0: COLON@61..62 ":" [] []
+        2: CSS_FUNCTION_BLOCK@62..71
+          0: CSS_FUNCTION_TOKEN@62..67
+            0: FUNCTION_TOKEN@62..67 "lang(" [] []
+          1: CSS_COMPONENT_VALUE_LIST@67..69
+            0: CSS_IDENTIFIER@67..69
+              0: IDENT@67..69 "de" [] []
+          2: R_PAREN@69..71 ")" [] [Whitespace(" ")]
+      1: CSS_CURLY_BRACKETS_BLOCK@71..73
         0: L_CURLY@71..72 "{" [] []
-        1: CSS_DECLARATION_LIST@72..72
+        1: CSS_CURLY_BRACKETS_BLOCK_CONTENT@72..72
         2: R_CURLY@72..73 "}" [] []
-    4: CSS_RULE@73..94
-      0: CSS_SELECTOR_LIST@73..92
-        0: CSS_COMPOUND_SELECTOR@73..92
-          0: (empty)
-          1: CSS_TYPE_SELECTOR@73..78
-            0: (empty)
-            1: CSS_IDENTIFIER@73..78
-              0: IDENT@73..78 "html" [Newline("\n")] []
-          2: CSS_SUB_SELECTOR_LIST@78..92
-            0: CSS_PSEUDO_CLASS_SELECTOR@78..92
-              0: COLON@78..79 ":" [] []
-              1: CSS_PSEUDO_CLASS_FUNCTION_VALUE_LIST@79..92
-                0: LANG_KW@79..83 "lang" [] []
-                1: L_PAREN@83..84 "(" [] []
-                2: CSS_PSEUDO_VALUE_LIST@84..90
-                  0: CSS_IDENTIFIER@84..86
-                    0: IDENT@84..86 "de" [] []
-                  1: COMMA@86..88 "," [] [Whitespace(" ")]
-                  2: CSS_IDENTIFIER@88..90
-                    0: IDENT@88..90 "fr" [] []
-                3: R_PAREN@90..92 ")" [] [Whitespace(" ")]
-      1: CSS_BLOCK@92..94
+    4: CSS_QUALIFIED_RULE@73..94
+      0: CSS_QUALIFIED_RULE_PRELUDE@73..92
+        0: CSS_IDENTIFIER@73..78
+          0: IDENT@73..78 "html" [Newline("\n")] []
+        1: CSS_PRESERVED_TOKEN_KEY@78..79
+          0: COLON@78..79 ":" [] []
+        2: CSS_FUNCTION_BLOCK@79..92
+          0: CSS_FUNCTION_TOKEN@79..84
+            0: FUNCTION_TOKEN@79..84 "lang(" [] []
+          1: CSS_COMPONENT_VALUE_LIST@84..90
+            0: CSS_IDENTIFIER@84..86
+              0: IDENT@84..86 "de" [] []
+            1: CSS_DELIM@86..88
+              0: DELIM@86..88 "," [] [Whitespace(" ")]
+            2: CSS_IDENTIFIER@88..90
+              0: IDENT@88..90 "fr" [] []
+          2: R_PAREN@90..92 ")" [] [Whitespace(" ")]
+      1: CSS_CURLY_BRACKETS_BLOCK@92..94
         0: L_CURLY@92..93 "{" [] []
-        1: CSS_DECLARATION_LIST@93..93
+        1: CSS_CURLY_BRACKETS_BLOCK_CONTENT@93..93
         2: R_CURLY@93..94 "}" [] []
-    5: CSS_RULE@94..114
-      0: CSS_SELECTOR_LIST@94..112
-        0: CSS_COMPLEX_SELECTOR@94..112
-          0: CSS_COMPOUND_SELECTOR@94..108
-            0: (empty)
-            1: (empty)
-            2: CSS_SUB_SELECTOR_LIST@94..108
-              0: CSS_PSEUDO_CLASS_SELECTOR@94..108
-                0: COLON@94..96 ":" [Newline("\n")] []
-                1: CSS_PSEUDO_CLASS_FUNCTION_VALUE_LIST@96..108
-                  0: LANG_KW@96..100 "lang" [] []
-                  1: L_PAREN@100..101 "(" [] []
-                  2: CSS_PSEUDO_VALUE_LIST@101..106
-                    0: CSS_IDENTIFIER@101..106
-                      0: IDENT@101..106 "fr-be" [] []
-                  3: R_PAREN@106..108 ")" [] [Whitespace(" ")]
-          1: R_ANGLE@108..110 ">" [] [Whitespace(" ")]
-          2: CSS_COMPOUND_SELECTOR@110..112
-            0: (empty)
-            1: CSS_TYPE_SELECTOR@110..112
-              0: (empty)
-              1: CSS_IDENTIFIER@110..112
-                0: IDENT@110..112 "q" [] [Whitespace(" ")]
-            2: CSS_SUB_SELECTOR_LIST@112..112
-      1: CSS_BLOCK@112..114
+    5: CSS_QUALIFIED_RULE@94..114
+      0: CSS_QUALIFIED_RULE_PRELUDE@94..112
+        0: CSS_PRESERVED_TOKEN_KEY@94..96
+          0: COLON@94..96 ":" [Newline("\n")] []
+        1: CSS_FUNCTION_BLOCK@96..108
+          0: CSS_FUNCTION_TOKEN@96..101
+            0: FUNCTION_TOKEN@96..101 "lang(" [] []
+          1: CSS_COMPONENT_VALUE_LIST@101..106
+            0: CSS_IDENTIFIER@101..106
+              0: IDENT@101..106 "fr-be" [] []
+          2: R_PAREN@106..108 ")" [] [Whitespace(" ")]
+        2: CSS_DELIM@108..110
+          0: DELIM@108..110 ">" [] [Whitespace(" ")]
+        3: CSS_IDENTIFIER@110..112
+          0: IDENT@110..112 "q" [] [Whitespace(" ")]
+      1: CSS_CURLY_BRACKETS_BLOCK@112..114
         0: L_CURLY@112..113 "{" [] []
-        1: CSS_DECLARATION_LIST@113..113
+        1: CSS_CURLY_BRACKETS_BLOCK_CONTENT@113..113
         2: R_CURLY@113..114 "}" [] []
-    6: CSS_RULE@114..131
-      0: CSS_SELECTOR_LIST@114..129
-        0: CSS_COMPLEX_SELECTOR@114..129
-          0: CSS_COMPOUND_SELECTOR@114..125
-            0: (empty)
-            1: (empty)
-            2: CSS_SUB_SELECTOR_LIST@114..125
-              0: CSS_PSEUDO_CLASS_SELECTOR@114..125
-                0: COLON@114..116 ":" [Newline("\n")] []
-                1: CSS_PSEUDO_CLASS_FUNCTION_VALUE_LIST@116..125
-                  0: LANG_KW@116..120 "lang" [] []
-                  1: L_PAREN@120..121 "(" [] []
-                  2: CSS_PSEUDO_VALUE_LIST@121..123
-                    0: CSS_IDENTIFIER@121..123
-                      0: IDENT@121..123 "de" [] []
-                  3: R_PAREN@123..125 ")" [] [Whitespace(" ")]
-          1: R_ANGLE@125..127 ">" [] [Whitespace(" ")]
-          2: CSS_COMPOUND_SELECTOR@127..129
-            0: (empty)
-            1: CSS_TYPE_SELECTOR@127..129
-              0: (empty)
-              1: CSS_IDENTIFIER@127..129
-                0: IDENT@127..129 "q" [] [Whitespace(" ")]
-            2: CSS_SUB_SELECTOR_LIST@129..129
-      1: CSS_BLOCK@129..131
+    6: CSS_QUALIFIED_RULE@114..131
+      0: CSS_QUALIFIED_RULE_PRELUDE@114..129
+        0: CSS_PRESERVED_TOKEN_KEY@114..116
+          0: COLON@114..116 ":" [Newline("\n")] []
+        1: CSS_FUNCTION_BLOCK@116..125
+          0: CSS_FUNCTION_TOKEN@116..121
+            0: FUNCTION_TOKEN@116..121 "lang(" [] []
+          1: CSS_COMPONENT_VALUE_LIST@121..123
+            0: CSS_IDENTIFIER@121..123
+              0: IDENT@121..123 "de" [] []
+          2: R_PAREN@123..125 ")" [] [Whitespace(" ")]
+        2: CSS_DELIM@125..127
+          0: DELIM@125..127 ">" [] [Whitespace(" ")]
+        3: CSS_IDENTIFIER@127..129
+          0: IDENT@127..129 "q" [] [Whitespace(" ")]
+      1: CSS_CURLY_BRACKETS_BLOCK@129..131
         0: L_CURLY@129..130 "{" [] []
-        1: CSS_DECLARATION_LIST@130..130
+        1: CSS_CURLY_BRACKETS_BLOCK_CONTENT@130..130
         2: R_CURLY@130..131 "}" [] []
-    7: CSS_RULE@131..154
-      0: CSS_SELECTOR_LIST@131..152
-        0: CSS_COMPLEX_SELECTOR@131..152
-          0: CSS_COMPOUND_SELECTOR@131..144
-            0: (empty)
-            1: (empty)
-            2: CSS_SUB_SELECTOR_LIST@131..144
-              0: CSS_PSEUDO_CLASS_SELECTOR@131..144
-                0: COLON@131..133 ":" [Newline("\n")] []
-                1: CSS_PSEUDO_CLASS_FUNCTION_VALUE_LIST@133..144
-                  0: LANG_KW@133..137 "lang" [] []
-                  1: L_PAREN@137..138 "(" [] []
-                  2: CSS_PSEUDO_VALUE_LIST@138..143
-                    0: CSS_IDENTIFIER@138..143
-                      0: IDENT@138..143 "fr-be" [] []
-                  3: R_PAREN@143..144 ")" [] []
-          1: CSS_SPACE_LITERAL@144..145 " " [] []
-          2: CSS_COMPOUND_SELECTOR@145..152
-            0: (empty)
-            1: (empty)
-            2: CSS_SUB_SELECTOR_LIST@145..152
-              0: CSS_CLASS_SELECTOR@145..152
-                0: DOT@145..146 "." [] []
-                1: CSS_IDENTIFIER@146..152
-                  0: IDENT@146..152 "class" [] [Whitespace(" ")]
-      1: CSS_BLOCK@152..154
+    7: CSS_QUALIFIED_RULE@131..154
+      0: CSS_QUALIFIED_RULE_PRELUDE@131..152
+        0: CSS_PRESERVED_TOKEN_KEY@131..133
+          0: COLON@131..133 ":" [Newline("\n")] []
+        1: CSS_FUNCTION_BLOCK@133..145
+          0: CSS_FUNCTION_TOKEN@133..138
+            0: FUNCTION_TOKEN@133..138 "lang(" [] []
+          1: CSS_COMPONENT_VALUE_LIST@138..143
+            0: CSS_IDENTIFIER@138..143
+              0: IDENT@138..143 "fr-be" [] []
+          2: R_PAREN@143..145 ")" [] [Whitespace(" ")]
+        2: CSS_DELIM@145..146
+          0: DELIM@145..146 "." [] []
+        3: CSS_IDENTIFIER@146..152
+          0: IDENT@146..152 "class" [] [Whitespace(" ")]
+      1: CSS_CURLY_BRACKETS_BLOCK@152..154
         0: L_CURLY@152..153 "{" [] []
-        1: CSS_DECLARATION_LIST@153..153
+        1: CSS_CURLY_BRACKETS_BLOCK_CONTENT@153..153
         2: R_CURLY@153..154 "}" [] []
   2: EOF@154..155 "" [Newline("\n")] []
 

@@ -106,10 +106,12 @@ fn losslessness(string: String) -> bool {
     string == new_str
 }
 
+
+
 #[test]
 fn empty() {
     assert_lex! {
-        "",
+       "",
     }
 }
 
@@ -266,25 +268,55 @@ fn cdo_and_cdc() {
 }
 
 #[test]
-fn dimension() {
+fn url() {
     assert_lex! {
-        "100vh",
-        CSS_NUMBER_LITERAL:3,
-        IDENT:2
+        "url(foo)",
+        URL:8,
+    }
+    assert_lex! {
+        r#"url(\")"#,
+        URL:7,
     }
 }
 
 #[test]
+fn function_token() {
+    assert_lex! {
+        "div(foo)",
+        FUNCTION_TOKEN:4,
+        IDENT:3,
+        R_PAREN:1
+    }
+}
+
+#[test]
+fn bad_url() {
+    assert_lex! {
+        r#"url(a")"#,
+        BAD_URL:7,
+    }
+    assert_lex! {
+        r#"url(d')"#,
+        BAD_URL:7,
+    }
+    assert_lex! {
+        r#"url(()"#,
+        BAD_URL:6,
+    }
+    assert_lex! {
+        r#"url(\)"#,
+        BAD_URL:6,
+    }
+}
+
+
+
+
+#[test]
 fn keywords() {
     assert_lex! {
-        "media keyframes important from",
-        MEDIA_KW:5,
-        WHITESPACE:1,
-        KEYFRAMES_KW:9,
-        WHITESPACE:1,
+        "important",
         IMPORTANT_KW:9,
-        WHITESPACE:1,
-        FROM_KW:4
     }
 }
 
@@ -383,18 +415,4 @@ fn block_comment() {
 }
 
 
-#[test]
-fn char() {
-    assert_lex! {
-        "!",
-        BANG:1
-    }
-    assert_lex! {
-        "%",
-        PERCENT:1
-    }
-    assert_lex! {
-        "/",
-        SLASH:1
-    }
-}
+

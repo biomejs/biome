@@ -15,26 +15,32 @@ expression: snapshot
 ## AST
 
 ```
-CssRoot {
+CssStyleSheet {
     bom_token: missing (optional),
-    rules: CssRuleList [
+    content: CssStyleSheetContent [
         CssAtRule {
-            at_token: AT@0..1 "@" [] [],
-            rule: CssCharsetAtRule {
-                charset_token: CHARSET_KW@1..9 "charset" [] [Whitespace(" ")],
-                encoding: CssString {
+            name: CssAtKeyword {
+                value_token: AT_IDENT@0..9 "@charset" [] [Whitespace(" ")],
+            },
+            prelude: CssAtRuleComponentValue [
+                CssString {
                     value_token: CSS_STRING_LITERAL@9..16 "\"UTF-8\"" [] [],
                 },
+            ],
+            css_at_rule_content: CssAtRuleSemicolon {
                 semicolon_token: SEMICOLON@16..17 ";" [] [],
             },
         },
         CssAtRule {
-            at_token: AT@17..19 "@" [Newline("\n")] [],
-            rule: CssCharsetAtRule {
-                charset_token: CHARSET_KW@19..27 "charset" [] [Whitespace(" ")],
-                encoding: CssString {
+            name: CssAtKeyword {
+                value_token: AT_IDENT@17..27 "@charset" [Newline("\n")] [Whitespace(" ")],
+            },
+            prelude: CssAtRuleComponentValue [
+                CssString {
                     value_token: CSS_STRING_LITERAL@27..40 "\"iso-8859-15\"" [] [],
                 },
+            ],
+            css_at_rule_content: CssAtRuleSemicolon {
                 semicolon_token: SEMICOLON@40..41 ";" [] [],
             },
         },
@@ -46,23 +52,25 @@ CssRoot {
 ## CST
 
 ```
-0: CSS_ROOT@0..42
+0: CSS_STYLE_SHEET@0..42
   0: (empty)
-  1: CSS_RULE_LIST@0..41
+  1: CSS_STYLE_SHEET_CONTENT@0..41
     0: CSS_AT_RULE@0..17
-      0: AT@0..1 "@" [] []
-      1: CSS_CHARSET_AT_RULE@1..17
-        0: CHARSET_KW@1..9 "charset" [] [Whitespace(" ")]
-        1: CSS_STRING@9..16
+      0: CSS_AT_KEYWORD@0..9
+        0: AT_IDENT@0..9 "@charset" [] [Whitespace(" ")]
+      1: CSS_AT_RULE_COMPONENT_VALUE@9..16
+        0: CSS_STRING@9..16
           0: CSS_STRING_LITERAL@9..16 "\"UTF-8\"" [] []
-        2: SEMICOLON@16..17 ";" [] []
+      2: CSS_AT_RULE_SEMICOLON@16..17
+        0: SEMICOLON@16..17 ";" [] []
     1: CSS_AT_RULE@17..41
-      0: AT@17..19 "@" [Newline("\n")] []
-      1: CSS_CHARSET_AT_RULE@19..41
-        0: CHARSET_KW@19..27 "charset" [] [Whitespace(" ")]
-        1: CSS_STRING@27..40
+      0: CSS_AT_KEYWORD@17..27
+        0: AT_IDENT@17..27 "@charset" [Newline("\n")] [Whitespace(" ")]
+      1: CSS_AT_RULE_COMPONENT_VALUE@27..40
+        0: CSS_STRING@27..40
           0: CSS_STRING_LITERAL@27..40 "\"iso-8859-15\"" [] []
-        2: SEMICOLON@40..41 ";" [] []
+      2: CSS_AT_RULE_SEMICOLON@40..41
+        0: SEMICOLON@40..41 ";" [] []
   2: EOF@41..42 "" [Newline("\n")] []
 
 ```

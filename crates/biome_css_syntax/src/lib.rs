@@ -38,24 +38,24 @@ impl CssSyntaxKind {
         true
     }
 
-    /// Returns `true` for contextual keywords
-    #[inline]
-    pub const fn is_contextual_keyword(self) -> bool {
-        (self as u16) >= (ALICEBLUE_KW as u16) && (self as u16) <= (VAR_KW as u16)
-    }
+    // /// Returns `true` for contextual keywords
+    // #[inline]
+    // pub const fn is_contextual_keyword(self) -> bool {
+    //     (self as u16) >= (ALICEBLUE_KW as u16) && (self as u16) <= (VAR_KW as u16)
+    // }
 
-    /// Returns `true` for contextual attribute modifier keywords
-    #[inline]
-    pub const fn is_attribute_modifier_keyword(self) -> bool {
-        let k = self as u16;
-        k == (I_KW as u16) || k == (S_KW as u16)
-    }
+    // /// Returns `true` for contextual attribute modifier keywords
+    // #[inline]
+    // pub const fn is_attribute_modifier_keyword(self) -> bool {
+    //     let k = self as u16;
+    //     k == (I_KW as u16) || k == (S_KW as u16)
+    // }
 
-    /// Returns true for all non-contextual keywords (includes future reserved keywords)
-    #[inline]
-    pub const fn is_non_contextual_keyword(self) -> bool {
-        self.is_keyword() && !self.is_contextual_keyword()
-    }
+    // /// Returns true for all non-contextual keywords (includes future reserved keywords)
+    // #[inline]
+    // pub const fn is_non_contextual_keyword(self) -> bool {
+    //     self.is_keyword() && !self.is_contextual_keyword()
+    // }
 }
 
 impl biome_rowan::SyntaxKind for CssSyntaxKind {
@@ -63,28 +63,11 @@ impl biome_rowan::SyntaxKind for CssSyntaxKind {
     const EOF: Self = EOF;
 
     fn is_bogus(&self) -> bool {
-        matches!(
-            self,
-            CSS_BOGUS
-                | CSS_BOGUS_RULE
-                | CSS_BOGUS_SELECTOR
-                | CSS_BOGUS_SUB_SELECTOR
-                | CSS_BOGUS_BODY
-                | CSS_BOGUS_PSEUDO_CLASS
-                | CSS_BOGUS_PSEUDO_ELEMENT
-                | CSS_BOGUS_AT_RULE
-        )
+        matches!(self, CSS_BOGUS)
     }
 
     fn to_bogus(&self) -> Self {
         match self {
-            kind if AnyCssSubSelector::can_cast(*kind) => CSS_BOGUS_SUB_SELECTOR,
-            kind if AnyCssSelector::can_cast(*kind) => CSS_BOGUS_SELECTOR,
-            kind if AnyCssRule::can_cast(*kind) => CSS_BOGUS_RULE,
-            kind if AnyCssPseudoClass::can_cast(*kind) => CSS_BOGUS_PSEUDO_CLASS,
-            kind if AnyCssPseudoElement::can_cast(*kind) => CSS_BOGUS_PSEUDO_ELEMENT,
-            kind if AnyCssAtRule::can_cast(*kind) => CSS_BOGUS_AT_RULE,
-
             _ => CSS_BOGUS,
         }
     }

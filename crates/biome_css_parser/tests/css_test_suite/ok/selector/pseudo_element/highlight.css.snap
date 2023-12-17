@@ -21,94 +21,90 @@ div::highlight(foo) {
 ## AST
 
 ```
-CssRoot {
+CssStyleSheet {
     bom_token: missing (optional),
-    rules: CssRuleList [
-        CssRule {
-            prelude: CssSelectorList [
-                CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
-                    simple_selector: missing (optional),
-                    sub_selectors: CssSubSelectorList [
-                        CssPseudoElementSelector {
-                            double_colon_token: COLON2@0..2 "::" [] [],
-                            element: CssPseudoElementFunctionIdentifier {
-                                name: HIGHLIGHT_KW@2..11 "highlight" [] [],
-                                l_paren_token: L_PAREN@11..12 "(" [] [],
-                                ident: CssIdentifier {
-                                    value_token: IDENT@12..18 "sample" [] [],
-                                },
-                                r_paren_token: R_PAREN@18..20 ")" [] [Whitespace(" ")],
-                            },
+    content: CssStyleSheetContent [
+        CssQualifiedRule {
+            prelude: CssQualifiedRulePrelude [
+                CssPreservedTokenKey {
+                    value: COLON@0..1 ":" [] [],
+                },
+                CssPreservedTokenKey {
+                    value: COLON@1..2 ":" [] [],
+                },
+                CssFunctionBlock {
+                    css_function_token: CssFunctionToken {
+                        valye_token: FUNCTION_TOKEN@2..12 "highlight(" [] [],
+                    },
+                    css_component_value_list: CssComponentValueList [
+                        CssIdentifier {
+                            value_token: IDENT@12..18 "sample" [] [],
                         },
                     ],
+                    r_paren_token: R_PAREN@18..20 ")" [] [Whitespace(" ")],
                 },
             ],
-            block: CssBlock {
+            block: CssCurlyBracketsBlock {
                 l_curly_token: L_CURLY@20..21 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                content: CssCurlyBracketsBlockContent [],
                 r_curly_token: R_CURLY@21..23 "}" [Newline("\n")] [],
             },
         },
-        CssRule {
-            prelude: CssSelectorList [
-                CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
-                    simple_selector: CssTypeSelector {
-                        namespace: missing (optional),
-                        ident: CssIdentifier {
-                            value_token: IDENT@23..28 "div" [Newline("\n"), Newline("\n")] [],
-                        },
+        CssQualifiedRule {
+            prelude: CssQualifiedRulePrelude [
+                CssIdentifier {
+                    value_token: IDENT@23..28 "div" [Newline("\n"), Newline("\n")] [],
+                },
+                CssPreservedTokenKey {
+                    value: COLON@28..29 ":" [] [],
+                },
+                CssPreservedTokenKey {
+                    value: COLON@29..30 ":" [] [],
+                },
+                CssFunctionBlock {
+                    css_function_token: CssFunctionToken {
+                        valye_token: FUNCTION_TOKEN@30..40 "highlight(" [] [],
                     },
-                    sub_selectors: CssSubSelectorList [
-                        CssPseudoElementSelector {
-                            double_colon_token: COLON2@28..30 "::" [] [],
-                            element: CssPseudoElementFunctionIdentifier {
-                                name: HIGHLIGHT_KW@30..39 "highlight" [] [],
-                                l_paren_token: L_PAREN@39..40 "(" [] [],
-                                ident: CssIdentifier {
-                                    value_token: IDENT@40..43 "bar" [] [],
-                                },
-                                r_paren_token: R_PAREN@43..45 ")" [] [Whitespace(" ")],
-                            },
+                    css_component_value_list: CssComponentValueList [
+                        CssIdentifier {
+                            value_token: IDENT@40..43 "bar" [] [],
                         },
                     ],
+                    r_paren_token: R_PAREN@43..45 ")" [] [Whitespace(" ")],
                 },
             ],
-            block: CssBlock {
+            block: CssCurlyBracketsBlock {
                 l_curly_token: L_CURLY@45..46 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                content: CssCurlyBracketsBlockContent [],
                 r_curly_token: R_CURLY@46..48 "}" [Newline("\n")] [],
             },
         },
-        CssRule {
-            prelude: CssSelectorList [
-                CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
-                    simple_selector: CssTypeSelector {
-                        namespace: missing (optional),
-                        ident: CssIdentifier {
-                            value_token: IDENT@48..53 "div" [Newline("\n"), Newline("\n")] [],
-                        },
+        CssQualifiedRule {
+            prelude: CssQualifiedRulePrelude [
+                CssIdentifier {
+                    value_token: IDENT@48..53 "div" [Newline("\n"), Newline("\n")] [],
+                },
+                CssPreservedTokenKey {
+                    value: COLON@53..54 ":" [] [],
+                },
+                CssPreservedTokenKey {
+                    value: COLON@54..55 ":" [] [],
+                },
+                CssFunctionBlock {
+                    css_function_token: CssFunctionToken {
+                        valye_token: FUNCTION_TOKEN@55..65 "highlight(" [] [],
                     },
-                    sub_selectors: CssSubSelectorList [
-                        CssPseudoElementSelector {
-                            double_colon_token: COLON2@53..55 "::" [] [],
-                            element: CssPseudoElementFunctionIdentifier {
-                                name: HIGHLIGHT_KW@55..64 "highlight" [] [],
-                                l_paren_token: L_PAREN@64..65 "(" [] [],
-                                ident: CssIdentifier {
-                                    value_token: IDENT@65..68 "foo" [] [],
-                                },
-                                r_paren_token: R_PAREN@68..70 ")" [] [Whitespace(" ")],
-                            },
+                    css_component_value_list: CssComponentValueList [
+                        CssIdentifier {
+                            value_token: IDENT@65..68 "foo" [] [],
                         },
                     ],
+                    r_paren_token: R_PAREN@68..70 ")" [] [Whitespace(" ")],
                 },
             ],
-            block: CssBlock {
+            block: CssCurlyBracketsBlock {
                 l_curly_token: L_CURLY@70..71 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                content: CssCurlyBracketsBlockContent [],
                 r_curly_token: R_CURLY@71..73 "}" [Newline("\n")] [],
             },
         },
@@ -120,68 +116,63 @@ CssRoot {
 ## CST
 
 ```
-0: CSS_ROOT@0..74
+0: CSS_STYLE_SHEET@0..74
   0: (empty)
-  1: CSS_RULE_LIST@0..73
-    0: CSS_RULE@0..23
-      0: CSS_SELECTOR_LIST@0..20
-        0: CSS_COMPOUND_SELECTOR@0..20
-          0: (empty)
-          1: (empty)
-          2: CSS_SUB_SELECTOR_LIST@0..20
-            0: CSS_PSEUDO_ELEMENT_SELECTOR@0..20
-              0: COLON2@0..2 "::" [] []
-              1: CSS_PSEUDO_ELEMENT_FUNCTION_IDENTIFIER@2..20
-                0: HIGHLIGHT_KW@2..11 "highlight" [] []
-                1: L_PAREN@11..12 "(" [] []
-                2: CSS_IDENTIFIER@12..18
-                  0: IDENT@12..18 "sample" [] []
-                3: R_PAREN@18..20 ")" [] [Whitespace(" ")]
-      1: CSS_BLOCK@20..23
+  1: CSS_STYLE_SHEET_CONTENT@0..73
+    0: CSS_QUALIFIED_RULE@0..23
+      0: CSS_QUALIFIED_RULE_PRELUDE@0..20
+        0: CSS_PRESERVED_TOKEN_KEY@0..1
+          0: COLON@0..1 ":" [] []
+        1: CSS_PRESERVED_TOKEN_KEY@1..2
+          0: COLON@1..2 ":" [] []
+        2: CSS_FUNCTION_BLOCK@2..20
+          0: CSS_FUNCTION_TOKEN@2..12
+            0: FUNCTION_TOKEN@2..12 "highlight(" [] []
+          1: CSS_COMPONENT_VALUE_LIST@12..18
+            0: CSS_IDENTIFIER@12..18
+              0: IDENT@12..18 "sample" [] []
+          2: R_PAREN@18..20 ")" [] [Whitespace(" ")]
+      1: CSS_CURLY_BRACKETS_BLOCK@20..23
         0: L_CURLY@20..21 "{" [] []
-        1: CSS_DECLARATION_LIST@21..21
+        1: CSS_CURLY_BRACKETS_BLOCK_CONTENT@21..21
         2: R_CURLY@21..23 "}" [Newline("\n")] []
-    1: CSS_RULE@23..48
-      0: CSS_SELECTOR_LIST@23..45
-        0: CSS_COMPOUND_SELECTOR@23..45
-          0: (empty)
-          1: CSS_TYPE_SELECTOR@23..28
-            0: (empty)
-            1: CSS_IDENTIFIER@23..28
-              0: IDENT@23..28 "div" [Newline("\n"), Newline("\n")] []
-          2: CSS_SUB_SELECTOR_LIST@28..45
-            0: CSS_PSEUDO_ELEMENT_SELECTOR@28..45
-              0: COLON2@28..30 "::" [] []
-              1: CSS_PSEUDO_ELEMENT_FUNCTION_IDENTIFIER@30..45
-                0: HIGHLIGHT_KW@30..39 "highlight" [] []
-                1: L_PAREN@39..40 "(" [] []
-                2: CSS_IDENTIFIER@40..43
-                  0: IDENT@40..43 "bar" [] []
-                3: R_PAREN@43..45 ")" [] [Whitespace(" ")]
-      1: CSS_BLOCK@45..48
+    1: CSS_QUALIFIED_RULE@23..48
+      0: CSS_QUALIFIED_RULE_PRELUDE@23..45
+        0: CSS_IDENTIFIER@23..28
+          0: IDENT@23..28 "div" [Newline("\n"), Newline("\n")] []
+        1: CSS_PRESERVED_TOKEN_KEY@28..29
+          0: COLON@28..29 ":" [] []
+        2: CSS_PRESERVED_TOKEN_KEY@29..30
+          0: COLON@29..30 ":" [] []
+        3: CSS_FUNCTION_BLOCK@30..45
+          0: CSS_FUNCTION_TOKEN@30..40
+            0: FUNCTION_TOKEN@30..40 "highlight(" [] []
+          1: CSS_COMPONENT_VALUE_LIST@40..43
+            0: CSS_IDENTIFIER@40..43
+              0: IDENT@40..43 "bar" [] []
+          2: R_PAREN@43..45 ")" [] [Whitespace(" ")]
+      1: CSS_CURLY_BRACKETS_BLOCK@45..48
         0: L_CURLY@45..46 "{" [] []
-        1: CSS_DECLARATION_LIST@46..46
+        1: CSS_CURLY_BRACKETS_BLOCK_CONTENT@46..46
         2: R_CURLY@46..48 "}" [Newline("\n")] []
-    2: CSS_RULE@48..73
-      0: CSS_SELECTOR_LIST@48..70
-        0: CSS_COMPOUND_SELECTOR@48..70
-          0: (empty)
-          1: CSS_TYPE_SELECTOR@48..53
-            0: (empty)
-            1: CSS_IDENTIFIER@48..53
-              0: IDENT@48..53 "div" [Newline("\n"), Newline("\n")] []
-          2: CSS_SUB_SELECTOR_LIST@53..70
-            0: CSS_PSEUDO_ELEMENT_SELECTOR@53..70
-              0: COLON2@53..55 "::" [] []
-              1: CSS_PSEUDO_ELEMENT_FUNCTION_IDENTIFIER@55..70
-                0: HIGHLIGHT_KW@55..64 "highlight" [] []
-                1: L_PAREN@64..65 "(" [] []
-                2: CSS_IDENTIFIER@65..68
-                  0: IDENT@65..68 "foo" [] []
-                3: R_PAREN@68..70 ")" [] [Whitespace(" ")]
-      1: CSS_BLOCK@70..73
+    2: CSS_QUALIFIED_RULE@48..73
+      0: CSS_QUALIFIED_RULE_PRELUDE@48..70
+        0: CSS_IDENTIFIER@48..53
+          0: IDENT@48..53 "div" [Newline("\n"), Newline("\n")] []
+        1: CSS_PRESERVED_TOKEN_KEY@53..54
+          0: COLON@53..54 ":" [] []
+        2: CSS_PRESERVED_TOKEN_KEY@54..55
+          0: COLON@54..55 ":" [] []
+        3: CSS_FUNCTION_BLOCK@55..70
+          0: CSS_FUNCTION_TOKEN@55..65
+            0: FUNCTION_TOKEN@55..65 "highlight(" [] []
+          1: CSS_COMPONENT_VALUE_LIST@65..68
+            0: CSS_IDENTIFIER@65..68
+              0: IDENT@65..68 "foo" [] []
+          2: R_PAREN@68..70 ")" [] [Whitespace(" ")]
+      1: CSS_CURLY_BRACKETS_BLOCK@70..73
         0: L_CURLY@70..71 "{" [] []
-        1: CSS_DECLARATION_LIST@71..71
+        1: CSS_CURLY_BRACKETS_BLOCK_CONTENT@71..71
         2: R_CURLY@71..73 "}" [Newline("\n")] []
   2: EOF@73..74 "" [Newline("\n")] []
 

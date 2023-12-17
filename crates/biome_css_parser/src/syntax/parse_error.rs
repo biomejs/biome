@@ -175,13 +175,7 @@ pub(crate) fn expected_unit(p: &CssParser, range: TextRange) -> ParseDiagnostic 
 pub(crate) fn expected_component_value(p: &CssParser, range: TextRange) -> ParseDiagnostic {
     expect_one_of(
         &[
-            "identifier",
-            "string",
-            "number",
-            "dimension",
-            "ratio",
-            "custom property",
-            "function",
+            "component value",
         ],
         range,
     )

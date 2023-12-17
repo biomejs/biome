@@ -15,157 +15,94 @@ expression: snapshot
 ## AST
 
 ```
-CssRoot {
+CssStyleSheet {
     bom_token: missing (optional),
-    rules: CssRuleList [
-        CssRule {
-            prelude: CssSelectorList [
-                CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
-                    simple_selector: missing (optional),
-                    sub_selectors: CssSubSelectorList [
-                        CssPseudoClassSelector {
-                            colon_token: COLON@0..1 ":" [] [],
-                            class: CssPseudoClassFunctionCompoundSelectorList {
-                                name: CURRENT_KW@1..8 "current" [] [],
-                                l_paren_token: L_PAREN@8..9 "(" [] [],
-                                compound_selector_list: CssCompoundSelectorList [
-                                    CssCompoundSelector {
-                                        nesting_selector_token: missing (optional),
-                                        simple_selector: CssTypeSelector {
-                                            namespace: missing (optional),
-                                            ident: CssIdentifier {
-                                                value_token: IDENT@9..10 "p" [] [],
-                                            },
-                                        },
-                                        sub_selectors: CssSubSelectorList [],
-                                    },
-                                    COMMA@10..12 "," [] [Whitespace(" ")],
-                                    CssCompoundSelector {
-                                        nesting_selector_token: missing (optional),
-                                        simple_selector: CssTypeSelector {
-                                            namespace: missing (optional),
-                                            ident: CssIdentifier {
-                                                value_token: IDENT@12..14 "li" [] [],
-                                            },
-                                        },
-                                        sub_selectors: CssSubSelectorList [],
-                                    },
-                                    COMMA@14..16 "," [] [Whitespace(" ")],
-                                    CssCompoundSelector {
-                                        nesting_selector_token: missing (optional),
-                                        simple_selector: CssTypeSelector {
-                                            namespace: missing (optional),
-                                            ident: CssIdentifier {
-                                                value_token: IDENT@16..18 "dt" [] [],
-                                            },
-                                        },
-                                        sub_selectors: CssSubSelectorList [],
-                                    },
-                                    COMMA@18..20 "," [] [Whitespace(" ")],
-                                    CssCompoundSelector {
-                                        nesting_selector_token: missing (optional),
-                                        simple_selector: CssTypeSelector {
-                                            namespace: missing (optional),
-                                            ident: CssIdentifier {
-                                                value_token: IDENT@20..22 "dd" [] [],
-                                            },
-                                        },
-                                        sub_selectors: CssSubSelectorList [],
-                                    },
-                                ],
-                                r_paren_token: R_PAREN@22..24 ")" [] [Whitespace(" ")],
-                            },
+    content: CssStyleSheetContent [
+        CssQualifiedRule {
+            prelude: CssQualifiedRulePrelude [
+                CssPreservedTokenKey {
+                    value: COLON@0..1 ":" [] [],
+                },
+                CssFunctionBlock {
+                    css_function_token: CssFunctionToken {
+                        valye_token: FUNCTION_TOKEN@1..9 "current(" [] [],
+                    },
+                    css_component_value_list: CssComponentValueList [
+                        CssIdentifier {
+                            value_token: IDENT@9..10 "p" [] [],
+                        },
+                        CssDelim {
+                            value_token: DELIM@10..12 "," [] [Whitespace(" ")],
+                        },
+                        CssIdentifier {
+                            value_token: IDENT@12..14 "li" [] [],
+                        },
+                        CssDelim {
+                            value_token: DELIM@14..16 "," [] [Whitespace(" ")],
+                        },
+                        CssIdentifier {
+                            value_token: IDENT@16..18 "dt" [] [],
+                        },
+                        CssDelim {
+                            value_token: DELIM@18..20 "," [] [Whitespace(" ")],
+                        },
+                        CssIdentifier {
+                            value_token: IDENT@20..22 "dd" [] [],
                         },
                     ],
+                    r_paren_token: R_PAREN@22..24 ")" [] [Whitespace(" ")],
                 },
             ],
-            block: CssBlock {
+            block: CssCurlyBracketsBlock {
                 l_curly_token: L_CURLY@24..25 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                content: CssCurlyBracketsBlockContent [],
                 r_curly_token: R_CURLY@25..26 "}" [] [],
             },
         },
-        CssRule {
-            prelude: CssSelectorList [
-                CssComplexSelector {
-                    left: CssCompoundSelector {
-                        nesting_selector_token: missing (optional),
-                        simple_selector: missing (optional),
-                        sub_selectors: CssSubSelectorList [
-                            CssPseudoClassSelector {
-                                colon_token: COLON@26..28 ":" [Newline("\n")] [],
-                                class: CssPseudoClassFunctionCompoundSelectorList {
-                                    name: CURRENT_KW@28..35 "current" [] [],
-                                    l_paren_token: L_PAREN@35..36 "(" [] [],
-                                    compound_selector_list: CssCompoundSelectorList [
-                                        CssCompoundSelector {
-                                            nesting_selector_token: missing (optional),
-                                            simple_selector: CssTypeSelector {
-                                                namespace: missing (optional),
-                                                ident: CssIdentifier {
-                                                    value_token: IDENT@36..37 "p" [] [],
-                                                },
-                                            },
-                                            sub_selectors: CssSubSelectorList [],
-                                        },
-                                        COMMA@37..39 "," [] [Whitespace(" ")],
-                                        CssCompoundSelector {
-                                            nesting_selector_token: missing (optional),
-                                            simple_selector: CssTypeSelector {
-                                                namespace: missing (optional),
-                                                ident: CssIdentifier {
-                                                    value_token: IDENT@39..41 "li" [] [],
-                                                },
-                                            },
-                                            sub_selectors: CssSubSelectorList [],
-                                        },
-                                        COMMA@41..43 "," [] [Whitespace(" ")],
-                                        CssCompoundSelector {
-                                            nesting_selector_token: missing (optional),
-                                            simple_selector: CssTypeSelector {
-                                                namespace: missing (optional),
-                                                ident: CssIdentifier {
-                                                    value_token: IDENT@43..45 "dt" [] [],
-                                                },
-                                            },
-                                            sub_selectors: CssSubSelectorList [],
-                                        },
-                                        COMMA@45..47 "," [] [Whitespace(" ")],
-                                        CssCompoundSelector {
-                                            nesting_selector_token: missing (optional),
-                                            simple_selector: CssTypeSelector {
-                                                namespace: missing (optional),
-                                                ident: CssIdentifier {
-                                                    value_token: IDENT@47..49 "dd" [] [],
-                                                },
-                                            },
-                                            sub_selectors: CssSubSelectorList [],
-                                        },
-                                    ],
-                                    r_paren_token: R_PAREN@49..50 ")" [] [],
-                                },
-                            },
-                        ],
+        CssQualifiedRule {
+            prelude: CssQualifiedRulePrelude [
+                CssPreservedTokenKey {
+                    value: COLON@26..28 ":" [Newline("\n")] [],
+                },
+                CssFunctionBlock {
+                    css_function_token: CssFunctionToken {
+                        valye_token: FUNCTION_TOKEN@28..36 "current(" [] [],
                     },
-                    combinator: CSS_SPACE_LITERAL@50..51 " " [] [],
-                    right: CssCompoundSelector {
-                        nesting_selector_token: missing (optional),
-                        simple_selector: missing (optional),
-                        sub_selectors: CssSubSelectorList [
-                            CssClassSelector {
-                                dot_token: DOT@51..52 "." [] [],
-                                name: CssIdentifier {
-                                    value_token: IDENT@52..56 "div" [] [Whitespace(" ")],
-                                },
-                            },
-                        ],
-                    },
+                    css_component_value_list: CssComponentValueList [
+                        CssIdentifier {
+                            value_token: IDENT@36..37 "p" [] [],
+                        },
+                        CssDelim {
+                            value_token: DELIM@37..39 "," [] [Whitespace(" ")],
+                        },
+                        CssIdentifier {
+                            value_token: IDENT@39..41 "li" [] [],
+                        },
+                        CssDelim {
+                            value_token: DELIM@41..43 "," [] [Whitespace(" ")],
+                        },
+                        CssIdentifier {
+                            value_token: IDENT@43..45 "dt" [] [],
+                        },
+                        CssDelim {
+                            value_token: DELIM@45..47 "," [] [Whitespace(" ")],
+                        },
+                        CssIdentifier {
+                            value_token: IDENT@47..49 "dd" [] [],
+                        },
+                    ],
+                    r_paren_token: R_PAREN@49..51 ")" [] [Whitespace(" ")],
+                },
+                CssDelim {
+                    value_token: DELIM@51..52 "." [] [],
+                },
+                CssIdentifier {
+                    value_token: IDENT@52..56 "div" [] [Whitespace(" ")],
                 },
             ],
-            block: CssBlock {
+            block: CssCurlyBracketsBlock {
                 l_curly_token: L_CURLY@56..57 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                content: CssCurlyBracketsBlockContent [],
                 r_curly_token: R_CURLY@57..58 "}" [] [],
             },
         },
@@ -177,114 +114,66 @@ CssRoot {
 ## CST
 
 ```
-0: CSS_ROOT@0..59
+0: CSS_STYLE_SHEET@0..59
   0: (empty)
-  1: CSS_RULE_LIST@0..58
-    0: CSS_RULE@0..26
-      0: CSS_SELECTOR_LIST@0..24
-        0: CSS_COMPOUND_SELECTOR@0..24
-          0: (empty)
-          1: (empty)
-          2: CSS_SUB_SELECTOR_LIST@0..24
-            0: CSS_PSEUDO_CLASS_SELECTOR@0..24
-              0: COLON@0..1 ":" [] []
-              1: CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR_LIST@1..24
-                0: CURRENT_KW@1..8 "current" [] []
-                1: L_PAREN@8..9 "(" [] []
-                2: CSS_COMPOUND_SELECTOR_LIST@9..22
-                  0: CSS_COMPOUND_SELECTOR@9..10
-                    0: (empty)
-                    1: CSS_TYPE_SELECTOR@9..10
-                      0: (empty)
-                      1: CSS_IDENTIFIER@9..10
-                        0: IDENT@9..10 "p" [] []
-                    2: CSS_SUB_SELECTOR_LIST@10..10
-                  1: COMMA@10..12 "," [] [Whitespace(" ")]
-                  2: CSS_COMPOUND_SELECTOR@12..14
-                    0: (empty)
-                    1: CSS_TYPE_SELECTOR@12..14
-                      0: (empty)
-                      1: CSS_IDENTIFIER@12..14
-                        0: IDENT@12..14 "li" [] []
-                    2: CSS_SUB_SELECTOR_LIST@14..14
-                  3: COMMA@14..16 "," [] [Whitespace(" ")]
-                  4: CSS_COMPOUND_SELECTOR@16..18
-                    0: (empty)
-                    1: CSS_TYPE_SELECTOR@16..18
-                      0: (empty)
-                      1: CSS_IDENTIFIER@16..18
-                        0: IDENT@16..18 "dt" [] []
-                    2: CSS_SUB_SELECTOR_LIST@18..18
-                  5: COMMA@18..20 "," [] [Whitespace(" ")]
-                  6: CSS_COMPOUND_SELECTOR@20..22
-                    0: (empty)
-                    1: CSS_TYPE_SELECTOR@20..22
-                      0: (empty)
-                      1: CSS_IDENTIFIER@20..22
-                        0: IDENT@20..22 "dd" [] []
-                    2: CSS_SUB_SELECTOR_LIST@22..22
-                3: R_PAREN@22..24 ")" [] [Whitespace(" ")]
-      1: CSS_BLOCK@24..26
+  1: CSS_STYLE_SHEET_CONTENT@0..58
+    0: CSS_QUALIFIED_RULE@0..26
+      0: CSS_QUALIFIED_RULE_PRELUDE@0..24
+        0: CSS_PRESERVED_TOKEN_KEY@0..1
+          0: COLON@0..1 ":" [] []
+        1: CSS_FUNCTION_BLOCK@1..24
+          0: CSS_FUNCTION_TOKEN@1..9
+            0: FUNCTION_TOKEN@1..9 "current(" [] []
+          1: CSS_COMPONENT_VALUE_LIST@9..22
+            0: CSS_IDENTIFIER@9..10
+              0: IDENT@9..10 "p" [] []
+            1: CSS_DELIM@10..12
+              0: DELIM@10..12 "," [] [Whitespace(" ")]
+            2: CSS_IDENTIFIER@12..14
+              0: IDENT@12..14 "li" [] []
+            3: CSS_DELIM@14..16
+              0: DELIM@14..16 "," [] [Whitespace(" ")]
+            4: CSS_IDENTIFIER@16..18
+              0: IDENT@16..18 "dt" [] []
+            5: CSS_DELIM@18..20
+              0: DELIM@18..20 "," [] [Whitespace(" ")]
+            6: CSS_IDENTIFIER@20..22
+              0: IDENT@20..22 "dd" [] []
+          2: R_PAREN@22..24 ")" [] [Whitespace(" ")]
+      1: CSS_CURLY_BRACKETS_BLOCK@24..26
         0: L_CURLY@24..25 "{" [] []
-        1: CSS_DECLARATION_LIST@25..25
+        1: CSS_CURLY_BRACKETS_BLOCK_CONTENT@25..25
         2: R_CURLY@25..26 "}" [] []
-    1: CSS_RULE@26..58
-      0: CSS_SELECTOR_LIST@26..56
-        0: CSS_COMPLEX_SELECTOR@26..56
-          0: CSS_COMPOUND_SELECTOR@26..50
-            0: (empty)
-            1: (empty)
-            2: CSS_SUB_SELECTOR_LIST@26..50
-              0: CSS_PSEUDO_CLASS_SELECTOR@26..50
-                0: COLON@26..28 ":" [Newline("\n")] []
-                1: CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR_LIST@28..50
-                  0: CURRENT_KW@28..35 "current" [] []
-                  1: L_PAREN@35..36 "(" [] []
-                  2: CSS_COMPOUND_SELECTOR_LIST@36..49
-                    0: CSS_COMPOUND_SELECTOR@36..37
-                      0: (empty)
-                      1: CSS_TYPE_SELECTOR@36..37
-                        0: (empty)
-                        1: CSS_IDENTIFIER@36..37
-                          0: IDENT@36..37 "p" [] []
-                      2: CSS_SUB_SELECTOR_LIST@37..37
-                    1: COMMA@37..39 "," [] [Whitespace(" ")]
-                    2: CSS_COMPOUND_SELECTOR@39..41
-                      0: (empty)
-                      1: CSS_TYPE_SELECTOR@39..41
-                        0: (empty)
-                        1: CSS_IDENTIFIER@39..41
-                          0: IDENT@39..41 "li" [] []
-                      2: CSS_SUB_SELECTOR_LIST@41..41
-                    3: COMMA@41..43 "," [] [Whitespace(" ")]
-                    4: CSS_COMPOUND_SELECTOR@43..45
-                      0: (empty)
-                      1: CSS_TYPE_SELECTOR@43..45
-                        0: (empty)
-                        1: CSS_IDENTIFIER@43..45
-                          0: IDENT@43..45 "dt" [] []
-                      2: CSS_SUB_SELECTOR_LIST@45..45
-                    5: COMMA@45..47 "," [] [Whitespace(" ")]
-                    6: CSS_COMPOUND_SELECTOR@47..49
-                      0: (empty)
-                      1: CSS_TYPE_SELECTOR@47..49
-                        0: (empty)
-                        1: CSS_IDENTIFIER@47..49
-                          0: IDENT@47..49 "dd" [] []
-                      2: CSS_SUB_SELECTOR_LIST@49..49
-                  3: R_PAREN@49..50 ")" [] []
-          1: CSS_SPACE_LITERAL@50..51 " " [] []
-          2: CSS_COMPOUND_SELECTOR@51..56
-            0: (empty)
-            1: (empty)
-            2: CSS_SUB_SELECTOR_LIST@51..56
-              0: CSS_CLASS_SELECTOR@51..56
-                0: DOT@51..52 "." [] []
-                1: CSS_IDENTIFIER@52..56
-                  0: IDENT@52..56 "div" [] [Whitespace(" ")]
-      1: CSS_BLOCK@56..58
+    1: CSS_QUALIFIED_RULE@26..58
+      0: CSS_QUALIFIED_RULE_PRELUDE@26..56
+        0: CSS_PRESERVED_TOKEN_KEY@26..28
+          0: COLON@26..28 ":" [Newline("\n")] []
+        1: CSS_FUNCTION_BLOCK@28..51
+          0: CSS_FUNCTION_TOKEN@28..36
+            0: FUNCTION_TOKEN@28..36 "current(" [] []
+          1: CSS_COMPONENT_VALUE_LIST@36..49
+            0: CSS_IDENTIFIER@36..37
+              0: IDENT@36..37 "p" [] []
+            1: CSS_DELIM@37..39
+              0: DELIM@37..39 "," [] [Whitespace(" ")]
+            2: CSS_IDENTIFIER@39..41
+              0: IDENT@39..41 "li" [] []
+            3: CSS_DELIM@41..43
+              0: DELIM@41..43 "," [] [Whitespace(" ")]
+            4: CSS_IDENTIFIER@43..45
+              0: IDENT@43..45 "dt" [] []
+            5: CSS_DELIM@45..47
+              0: DELIM@45..47 "," [] [Whitespace(" ")]
+            6: CSS_IDENTIFIER@47..49
+              0: IDENT@47..49 "dd" [] []
+          2: R_PAREN@49..51 ")" [] [Whitespace(" ")]
+        2: CSS_DELIM@51..52
+          0: DELIM@51..52 "." [] []
+        3: CSS_IDENTIFIER@52..56
+          0: IDENT@52..56 "div" [] [Whitespace(" ")]
+      1: CSS_CURLY_BRACKETS_BLOCK@56..58
         0: L_CURLY@56..57 "{" [] []
-        1: CSS_DECLARATION_LIST@57..57
+        1: CSS_CURLY_BRACKETS_BLOCK_CONTENT@57..57
         2: R_CURLY@57..58 "}" [] []
   2: EOF@58..59 "" [Newline("\n")] []
 

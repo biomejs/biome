@@ -1,0 +1,65 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+# .class {}
+
+```
+
+
+## AST
+
+```
+CssStyleSheet {
+    bom_token: missing (optional),
+    content: CssStyleSheetContent [
+        CssQualifiedRule {
+            prelude: CssQualifiedRulePrelude [
+                CssDelim {
+                    value_token: DELIM@0..2 "#" [] [Whitespace(" ")],
+                },
+                CssDelim {
+                    value_token: DELIM@2..3 "." [] [],
+                },
+                CssIdentifier {
+                    value_token: IDENT@3..9 "class" [] [Whitespace(" ")],
+                },
+            ],
+            block: CssCurlyBracketsBlock {
+                l_curly_token: L_CURLY@9..10 "{" [] [],
+                content: CssCurlyBracketsBlockContent [],
+                r_curly_token: R_CURLY@10..11 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@11..12 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_STYLE_SHEET@0..12
+  0: (empty)
+  1: CSS_STYLE_SHEET_CONTENT@0..11
+    0: CSS_QUALIFIED_RULE@0..11
+      0: CSS_QUALIFIED_RULE_PRELUDE@0..9
+        0: CSS_DELIM@0..2
+          0: DELIM@0..2 "#" [] [Whitespace(" ")]
+        1: CSS_DELIM@2..3
+          0: DELIM@2..3 "." [] []
+        2: CSS_IDENTIFIER@3..9
+          0: IDENT@3..9 "class" [] [Whitespace(" ")]
+      1: CSS_CURLY_BRACKETS_BLOCK@9..11
+        0: L_CURLY@9..10 "{" [] []
+        1: CSS_CURLY_BRACKETS_BLOCK_CONTENT@10..10
+        2: R_CURLY@10..11 "}" [] []
+  2: EOF@11..12 "" [Newline("\n")] []
+
+```
+
+

@@ -9,6 +9,7 @@ use biome_parser::ParserContext;
 
 pub(crate) struct CssParser<'source> {
     context: ParserContext<CssSyntaxKind>,
+    pub nested: bool,
     source: CssTokenSource<'source>,
 }
 
@@ -28,6 +29,7 @@ impl<'source> CssParser<'source> {
     pub fn new(source: &'source str, config: CssParserOptions) -> Self {
         Self {
             context: ParserContext::default(),
+            nested: false,
             source: CssTokenSource::from_str(source, config),
         }
     }

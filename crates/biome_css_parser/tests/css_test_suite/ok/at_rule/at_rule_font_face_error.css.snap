@@ -1,0 +1,97 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@font-face foo {}
+@font-face foo;
+@font-face ;
+```
+
+
+## AST
+
+```
+CssStyleSheet {
+    bom_token: missing (optional),
+    content: CssStyleSheetContent [
+        CssAtRule {
+            name: CssAtKeyword {
+                value_token: AT_IDENT@0..11 "@font-face" [] [Whitespace(" ")],
+            },
+            prelude: CssAtRuleComponentValue [
+                CssIdentifier {
+                    value_token: IDENT@11..15 "foo" [] [Whitespace(" ")],
+                },
+            ],
+            css_at_rule_content: CssCurlyBracketsBlock {
+                l_curly_token: L_CURLY@15..16 "{" [] [],
+                content: CssCurlyBracketsBlockContent [],
+                r_curly_token: R_CURLY@16..17 "}" [] [],
+            },
+        },
+        CssAtRule {
+            name: CssAtKeyword {
+                value_token: AT_IDENT@17..29 "@font-face" [Newline("\n")] [Whitespace(" ")],
+            },
+            prelude: CssAtRuleComponentValue [
+                CssIdentifier {
+                    value_token: IDENT@29..32 "foo" [] [],
+                },
+            ],
+            css_at_rule_content: CssAtRuleSemicolon {
+                semicolon_token: SEMICOLON@32..33 ";" [] [],
+            },
+        },
+        CssAtRule {
+            name: CssAtKeyword {
+                value_token: AT_IDENT@33..45 "@font-face" [Newline("\n")] [Whitespace(" ")],
+            },
+            prelude: CssAtRuleComponentValue [],
+            css_at_rule_content: CssAtRuleSemicolon {
+                semicolon_token: SEMICOLON@45..46 ";" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@46..46 "" [] [],
+}
+```
+
+## CST
+
+```
+0: CSS_STYLE_SHEET@0..46
+  0: (empty)
+  1: CSS_STYLE_SHEET_CONTENT@0..46
+    0: CSS_AT_RULE@0..17
+      0: CSS_AT_KEYWORD@0..11
+        0: AT_IDENT@0..11 "@font-face" [] [Whitespace(" ")]
+      1: CSS_AT_RULE_COMPONENT_VALUE@11..15
+        0: CSS_IDENTIFIER@11..15
+          0: IDENT@11..15 "foo" [] [Whitespace(" ")]
+      2: CSS_CURLY_BRACKETS_BLOCK@15..17
+        0: L_CURLY@15..16 "{" [] []
+        1: CSS_CURLY_BRACKETS_BLOCK_CONTENT@16..16
+        2: R_CURLY@16..17 "}" [] []
+    1: CSS_AT_RULE@17..33
+      0: CSS_AT_KEYWORD@17..29
+        0: AT_IDENT@17..29 "@font-face" [Newline("\n")] [Whitespace(" ")]
+      1: CSS_AT_RULE_COMPONENT_VALUE@29..32
+        0: CSS_IDENTIFIER@29..32
+          0: IDENT@29..32 "foo" [] []
+      2: CSS_AT_RULE_SEMICOLON@32..33
+        0: SEMICOLON@32..33 ";" [] []
+    2: CSS_AT_RULE@33..46
+      0: CSS_AT_KEYWORD@33..45
+        0: AT_IDENT@33..45 "@font-face" [Newline("\n")] [Whitespace(" ")]
+      1: CSS_AT_RULE_COMPONENT_VALUE@45..45
+      2: CSS_AT_RULE_SEMICOLON@45..46
+        0: SEMICOLON@45..46 ";" [] []
+  2: EOF@46..46 "" [] []
+
+```
+
+

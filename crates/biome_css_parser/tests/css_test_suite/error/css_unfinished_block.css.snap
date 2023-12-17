@@ -14,27 +14,21 @@ expression: snapshot
 ## AST
 
 ```
-CssRoot {
+CssStyleSheet {
     bom_token: missing (optional),
-    rules: CssRuleList [
-        CssRule {
-            prelude: CssSelectorList [
-                CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
-                    simple_selector: missing (optional),
-                    sub_selectors: CssSubSelectorList [
-                        CssClassSelector {
-                            dot_token: DOT@0..1 "." [] [],
-                            name: CssIdentifier {
-                                value_token: IDENT@1..8 "action" [] [Whitespace(" ")],
-                            },
-                        },
-                    ],
+    content: CssStyleSheetContent [
+        CssQualifiedRule {
+            prelude: CssQualifiedRulePrelude [
+                CssDelim {
+                    value_token: DELIM@0..1 "." [] [],
+                },
+                CssIdentifier {
+                    value_token: IDENT@1..8 "action" [] [Whitespace(" ")],
                 },
             ],
-            block: CssBlock {
+            block: CssCurlyBracketsBlock {
                 l_curly_token: L_CURLY@8..9 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                content: CssCurlyBracketsBlockContent [],
                 r_curly_token: missing (required),
             },
         },
@@ -46,22 +40,18 @@ CssRoot {
 ## CST
 
 ```
-0: CSS_ROOT@0..10
+0: CSS_STYLE_SHEET@0..10
   0: (empty)
-  1: CSS_RULE_LIST@0..9
-    0: CSS_RULE@0..9
-      0: CSS_SELECTOR_LIST@0..8
-        0: CSS_COMPOUND_SELECTOR@0..8
-          0: (empty)
-          1: (empty)
-          2: CSS_SUB_SELECTOR_LIST@0..8
-            0: CSS_CLASS_SELECTOR@0..8
-              0: DOT@0..1 "." [] []
-              1: CSS_IDENTIFIER@1..8
-                0: IDENT@1..8 "action" [] [Whitespace(" ")]
-      1: CSS_BLOCK@8..9
+  1: CSS_STYLE_SHEET_CONTENT@0..9
+    0: CSS_QUALIFIED_RULE@0..9
+      0: CSS_QUALIFIED_RULE_PRELUDE@0..8
+        0: CSS_DELIM@0..1
+          0: DELIM@0..1 "." [] []
+        1: CSS_IDENTIFIER@1..8
+          0: IDENT@1..8 "action" [] [Whitespace(" ")]
+      1: CSS_CURLY_BRACKETS_BLOCK@8..9
         0: L_CURLY@8..9 "{" [] []
-        1: CSS_DECLARATION_LIST@9..9
+        1: CSS_CURLY_BRACKETS_BLOCK_CONTENT@9..9
         2: (empty)
   2: EOF@9..10 "" [Newline("\n")] []
 

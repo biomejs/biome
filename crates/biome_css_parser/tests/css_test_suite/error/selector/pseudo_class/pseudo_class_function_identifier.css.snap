@@ -24,331 +24,243 @@ expression: snapshot
 ## AST
 
 ```
-CssRoot {
+CssStyleSheet {
     bom_token: missing (optional),
-    rules: CssRuleList [
-        CssRule {
-            prelude: CssSelectorList [
-                CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
-                    simple_selector: missing (optional),
-                    sub_selectors: CssSubSelectorList [
-                        CssPseudoClassSelector {
-                            colon_token: COLON@0..1 ":" [] [],
-                            class: CssBogusPseudoClass {
-                                items: [
-                                    DIR_KW@1..4 "dir" [] [],
-                                    L_PAREN@4..6 "(" [] [Whitespace(" ")],
-                                ],
-                            },
-                        },
-                    ],
+    content: CssStyleSheetContent [
+        CssQualifiedRule {
+            prelude: CssQualifiedRulePrelude [
+                CssPreservedTokenKey {
+                    value: COLON@0..1 ":" [] [],
                 },
-            ],
-            block: CssBlock {
-                l_curly_token: L_CURLY@6..7 "{" [] [],
-                declaration_list: CssDeclarationList [],
-                r_curly_token: R_CURLY@7..8 "}" [] [],
-            },
-        },
-        CssRule {
-            prelude: CssSelectorList [
-                CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
-                    simple_selector: missing (optional),
-                    sub_selectors: CssSubSelectorList [
-                        CssPseudoClassSelector {
-                            colon_token: COLON@8..10 ":" [Newline("\n")] [],
-                            class: CssBogusPseudoClass {
-                                items: [
-                                    DIR_KW@10..13 "dir" [] [],
-                                    L_PAREN@13..14 "(" [] [],
-                                    R_PAREN@14..16 ")" [] [Whitespace(" ")],
-                                ],
-                            },
+                CssFunctionBlock {
+                    css_function_token: CssFunctionToken {
+                        valye_token: FUNCTION_TOKEN@1..6 "dir(" [] [Whitespace(" ")],
+                    },
+                    css_component_value_list: CssComponentValueList [
+                        CssSimpleCurlyBracketsBlock {
+                            l_curly_token: L_CURLY@6..7 "{" [] [],
+                            content: CssSimpleComponentValueList [],
+                            r_curly_token: R_CURLY@7..8 "}" [] [],
                         },
-                    ],
-                },
-            ],
-            block: CssBlock {
-                l_curly_token: L_CURLY@16..17 "{" [] [],
-                declaration_list: CssDeclarationList [],
-                r_curly_token: R_CURLY@17..18 "}" [] [],
-            },
-        },
-        CssRule {
-            prelude: CssSelectorList [
-                CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
-                    simple_selector: missing (optional),
-                    sub_selectors: CssSubSelectorList [
-                        CssPseudoClassSelector {
-                            colon_token: COLON@18..20 ":" [Newline("\n")] [],
-                            class: CssBogusPseudoClass {
-                                items: [
-                                    DIR_KW@20..23 "dir" [] [],
-                                    L_PAREN@23..24 "(" [] [],
-                                    CssIdentifier {
-                                        value_token: IDENT@24..28 "ltr" [] [Whitespace(" ")],
-                                    },
-                                ],
-                            },
+                        CssPreservedTokenKey {
+                            value: COLON@8..10 ":" [Newline("\n")] [],
                         },
-                    ],
-                },
-            ],
-            block: CssBlock {
-                l_curly_token: L_CURLY@28..29 "{" [] [],
-                declaration_list: CssDeclarationList [],
-                r_curly_token: R_CURLY@29..30 "}" [] [],
-            },
-        },
-        CssRule {
-            prelude: CssSelectorList [
-                CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
-                    simple_selector: missing (optional),
-                    sub_selectors: CssSubSelectorList [
-                        CssPseudoClassSelector {
-                            colon_token: COLON@30..32 ":" [Newline("\n")] [],
-                            class: CssBogusPseudoClass {
-                                items: [
-                                    DIR_KW@32..35 "dir" [] [],
-                                    L_PAREN@35..36 "(" [] [],
-                                    CssBogus {
-                                        items: [
-                                            IDENT@36..44 "invalid" [] [Whitespace(" ")],
-                                        ],
-                                    },
-                                ],
+                        CssFunctionBlock {
+                            css_function_token: CssFunctionToken {
+                                valye_token: FUNCTION_TOKEN@10..14 "dir(" [] [],
                             },
+                            css_component_value_list: CssComponentValueList [],
+                            r_paren_token: R_PAREN@14..16 ")" [] [Whitespace(" ")],
                         },
-                    ],
-                },
-            ],
-            block: CssBlock {
-                l_curly_token: L_CURLY@44..45 "{" [] [],
-                declaration_list: CssDeclarationList [],
-                r_curly_token: R_CURLY@45..46 "}" [] [],
-            },
-        },
-        CssRule {
-            prelude: CssSelectorList [
-                CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
-                    simple_selector: missing (optional),
-                    sub_selectors: CssSubSelectorList [
-                        CssPseudoClassSelector {
-                            colon_token: COLON@46..48 ":" [Newline("\n")] [],
-                            class: CssBogusPseudoClass {
-                                items: [
-                                    DIR_KW@48..51 "dir" [] [],
-                                    L_PAREN@51..52 "(" [] [],
-                                    CssBogus {
-                                        items: [
-                                            DOT@52..53 "." [] [],
-                                            IDENT@53..60 "invalid" [] [],
-                                        ],
-                                    },
-                                    R_PAREN@60..62 ")" [] [Whitespace(" ")],
-                                ],
+                        CssSimpleCurlyBracketsBlock {
+                            l_curly_token: L_CURLY@16..17 "{" [] [],
+                            content: CssSimpleComponentValueList [],
+                            r_curly_token: R_CURLY@17..18 "}" [] [],
+                        },
+                        CssPreservedTokenKey {
+                            value: COLON@18..20 ":" [Newline("\n")] [],
+                        },
+                        CssFunctionBlock {
+                            css_function_token: CssFunctionToken {
+                                valye_token: FUNCTION_TOKEN@20..24 "dir(" [] [],
                             },
-                        },
-                    ],
-                },
-            ],
-            block: CssBlock {
-                l_curly_token: L_CURLY@62..63 "{" [] [],
-                declaration_list: CssDeclarationList [],
-                r_curly_token: R_CURLY@63..64 "}" [] [],
-            },
-        },
-        CssRule {
-            prelude: CssSelectorList [
-                CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
-                    simple_selector: missing (optional),
-                    sub_selectors: CssSubSelectorList [
-                        CssPseudoClassSelector {
-                            colon_token: COLON@64..66 ":" [Newline("\n")] [],
-                            class: CssBogusPseudoClass {
-                                items: [
-                                    DIR_KW@66..69 "dir" [] [],
-                                    L_PAREN@69..70 "(" [] [],
-                                    CssBogus {
-                                        items: [
-                                            DOT@70..71 "." [] [],
-                                            IDENT@71..79 "invalid" [] [Whitespace(" ")],
-                                        ],
+                            css_component_value_list: CssComponentValueList [
+                                CssIdentifier {
+                                    value_token: IDENT@24..28 "ltr" [] [Whitespace(" ")],
+                                },
+                                CssSimpleCurlyBracketsBlock {
+                                    l_curly_token: L_CURLY@28..29 "{" [] [],
+                                    content: CssSimpleComponentValueList [],
+                                    r_curly_token: R_CURLY@29..30 "}" [] [],
+                                },
+                                CssPreservedTokenKey {
+                                    value: COLON@30..32 ":" [Newline("\n")] [],
+                                },
+                                CssFunctionBlock {
+                                    css_function_token: CssFunctionToken {
+                                        valye_token: FUNCTION_TOKEN@32..36 "dir(" [] [],
                                     },
-                                ],
-                            },
-                        },
-                    ],
-                },
-            ],
-            block: CssBlock {
-                l_curly_token: L_CURLY@79..80 "{" [] [],
-                declaration_list: CssDeclarationList [],
-                r_curly_token: R_CURLY@80..81 "}" [] [],
-            },
-        },
-        CssRule {
-            prelude: CssSelectorList [
-                CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
-                    simple_selector: missing (optional),
-                    sub_selectors: CssSubSelectorList [
-                        CssPseudoClassSelector {
-                            colon_token: COLON@81..83 ":" [Newline("\n")] [],
-                            class: CssBogusPseudoClass {
-                                items: [
-                                    DIR_KW@83..86 "dir" [] [],
-                                    L_PAREN@86..87 "(" [] [],
-                                    CssIdentifier {
-                                        value_token: IDENT@87..91 "ltr" [] [Whitespace(" ")],
-                                    },
-                                    CssBogus {
-                                        items: [
-                                            DOT@91..92 "." [] [],
-                                            IDENT@92..98 "class" [] [Whitespace(" ")],
-                                        ],
-                                    },
-                                ],
-                            },
-                        },
-                    ],
-                },
-            ],
-            block: CssBlock {
-                l_curly_token: L_CURLY@98..99 "{" [] [],
-                declaration_list: CssDeclarationList [],
-                r_curly_token: R_CURLY@99..100 "}" [] [],
-            },
-        },
-        CssRule {
-            prelude: CssSelectorList [
-                CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
-                    simple_selector: missing (optional),
-                    sub_selectors: CssSubSelectorList [
-                        CssPseudoClassSelector {
-                            colon_token: COLON@100..102 ":" [Newline("\n")] [],
-                            class: CssBogusPseudoClass {
-                                items: [
-                                    DIR_KW@102..105 "dir" [] [],
-                                    L_PAREN@105..106 "(" [] [],
-                                    CssIdentifier {
-                                        value_token: IDENT@106..110 "ltr" [] [Whitespace(" ")],
-                                    },
-                                    CssBogus {
-                                        items: [
-                                            DOT@110..111 "." [] [],
-                                            IDENT@111..116 "class" [] [],
-                                        ],
-                                    },
-                                    R_PAREN@116..118 ")" [] [Whitespace(" ")],
-                                ],
-                            },
-                        },
-                    ],
-                },
-            ],
-            block: CssBlock {
-                l_curly_token: L_CURLY@118..119 "{" [] [],
-                declaration_list: CssDeclarationList [],
-                r_curly_token: R_CURLY@119..120 "}" [] [],
-            },
-        },
-        CssRule {
-            prelude: CssSelectorList [
-                CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
-                    simple_selector: missing (optional),
-                    sub_selectors: CssSubSelectorList [
-                        CssPseudoClassSelector {
-                            colon_token: COLON@120..122 ":" [Newline("\n")] [],
-                            class: CssBogusPseudoClass {
-                                items: [
-                                    DIR_KW@122..125 "dir" [] [],
-                                    L_PAREN@125..126 "(" [] [],
-                                    CssBogus {
-                                        items: [
-                                            IDENT@126..134 "invalid" [] [Whitespace(" ")],
-                                            DOT@134..135 "." [] [],
-                                            IDENT@135..141 "class" [] [Whitespace(" ")],
-                                        ],
-                                    },
-                                ],
-                            },
-                        },
-                    ],
-                },
-            ],
-            block: CssBlock {
-                l_curly_token: L_CURLY@141..142 "{" [] [],
-                declaration_list: CssDeclarationList [],
-                r_curly_token: R_CURLY@142..143 "}" [] [],
-            },
-        },
-        CssRule {
-            prelude: CssSelectorList [
-                CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
-                    simple_selector: missing (optional),
-                    sub_selectors: CssSubSelectorList [
-                        CssPseudoClassSelector {
-                            colon_token: COLON@143..145 ":" [Newline("\n")] [],
-                            class: CssBogusPseudoClass {
-                                items: [
-                                    DIR_KW@145..148 "dir" [] [],
-                                    L_PAREN@148..149 "(" [] [],
-                                    CssBogus {
-                                        items: [
-                                            IDENT@149..157 "invalid" [] [Whitespace(" ")],
-                                            DOT@157..158 "." [] [],
-                                            IDENT@158..163 "class" [] [],
-                                        ],
-                                    },
-                                    R_PAREN@163..165 ")" [] [Whitespace(" ")],
-                                ],
-                            },
-                        },
-                    ],
-                },
-            ],
-            block: CssBlock {
-                l_curly_token: L_CURLY@165..166 "{" [] [],
-                declaration_list: CssDeclarationList [],
-                r_curly_token: R_CURLY@166..167 "}" [] [],
-            },
-        },
-        CssBogusRule {
-            items: [
-                CssSelectorList [
-                    CssCompoundSelector {
-                        nesting_selector_token: missing (optional),
-                        simple_selector: missing (optional),
-                        sub_selectors: CssSubSelectorList [
-                            CssPseudoClassSelector {
-                                colon_token: COLON@167..169 ":" [Newline("\n")] [],
-                                class: CssBogusPseudoClass {
-                                    items: [
-                                        DIR_KW@169..172 "dir" [] [],
-                                        L_PAREN@172..173 "(" [] [],
-                                        CssBogus {
-                                            items: [
-                                                DOT@173..174 "." [] [],
-                                                IDENT@174..181 "invalid" [] [],
+                                    css_component_value_list: CssComponentValueList [
+                                        CssIdentifier {
+                                            value_token: IDENT@36..44 "invalid" [] [Whitespace(" ")],
+                                        },
+                                        CssSimpleCurlyBracketsBlock {
+                                            l_curly_token: L_CURLY@44..45 "{" [] [],
+                                            content: CssSimpleComponentValueList [],
+                                            r_curly_token: R_CURLY@45..46 "}" [] [],
+                                        },
+                                        CssPreservedTokenKey {
+                                            value: COLON@46..48 ":" [Newline("\n")] [],
+                                        },
+                                        CssFunctionBlock {
+                                            css_function_token: CssFunctionToken {
+                                                valye_token: FUNCTION_TOKEN@48..52 "dir(" [] [],
+                                            },
+                                            css_component_value_list: CssComponentValueList [
+                                                CssDelim {
+                                                    value_token: DELIM@52..53 "." [] [],
+                                                },
+                                                CssIdentifier {
+                                                    value_token: IDENT@53..60 "invalid" [] [],
+                                                },
                                             ],
+                                            r_paren_token: R_PAREN@60..62 ")" [] [Whitespace(" ")],
+                                        },
+                                        CssSimpleCurlyBracketsBlock {
+                                            l_curly_token: L_CURLY@62..63 "{" [] [],
+                                            content: CssSimpleComponentValueList [],
+                                            r_curly_token: R_CURLY@63..64 "}" [] [],
+                                        },
+                                        CssPreservedTokenKey {
+                                            value: COLON@64..66 ":" [Newline("\n")] [],
+                                        },
+                                        CssFunctionBlock {
+                                            css_function_token: CssFunctionToken {
+                                                valye_token: FUNCTION_TOKEN@66..70 "dir(" [] [],
+                                            },
+                                            css_component_value_list: CssComponentValueList [
+                                                CssDelim {
+                                                    value_token: DELIM@70..71 "." [] [],
+                                                },
+                                                CssIdentifier {
+                                                    value_token: IDENT@71..79 "invalid" [] [Whitespace(" ")],
+                                                },
+                                                CssSimpleCurlyBracketsBlock {
+                                                    l_curly_token: L_CURLY@79..80 "{" [] [],
+                                                    content: CssSimpleComponentValueList [],
+                                                    r_curly_token: R_CURLY@80..81 "}" [] [],
+                                                },
+                                                CssPreservedTokenKey {
+                                                    value: COLON@81..83 ":" [Newline("\n")] [],
+                                                },
+                                                CssFunctionBlock {
+                                                    css_function_token: CssFunctionToken {
+                                                        valye_token: FUNCTION_TOKEN@83..87 "dir(" [] [],
+                                                    },
+                                                    css_component_value_list: CssComponentValueList [
+                                                        CssIdentifier {
+                                                            value_token: IDENT@87..91 "ltr" [] [Whitespace(" ")],
+                                                        },
+                                                        CssDelim {
+                                                            value_token: DELIM@91..92 "." [] [],
+                                                        },
+                                                        CssIdentifier {
+                                                            value_token: IDENT@92..98 "class" [] [Whitespace(" ")],
+                                                        },
+                                                        CssSimpleCurlyBracketsBlock {
+                                                            l_curly_token: L_CURLY@98..99 "{" [] [],
+                                                            content: CssSimpleComponentValueList [],
+                                                            r_curly_token: R_CURLY@99..100 "}" [] [],
+                                                        },
+                                                        CssPreservedTokenKey {
+                                                            value: COLON@100..102 ":" [Newline("\n")] [],
+                                                        },
+                                                        CssFunctionBlock {
+                                                            css_function_token: CssFunctionToken {
+                                                                valye_token: FUNCTION_TOKEN@102..106 "dir(" [] [],
+                                                            },
+                                                            css_component_value_list: CssComponentValueList [
+                                                                CssIdentifier {
+                                                                    value_token: IDENT@106..110 "ltr" [] [Whitespace(" ")],
+                                                                },
+                                                                CssDelim {
+                                                                    value_token: DELIM@110..111 "." [] [],
+                                                                },
+                                                                CssIdentifier {
+                                                                    value_token: IDENT@111..116 "class" [] [],
+                                                                },
+                                                            ],
+                                                            r_paren_token: R_PAREN@116..118 ")" [] [Whitespace(" ")],
+                                                        },
+                                                        CssSimpleCurlyBracketsBlock {
+                                                            l_curly_token: L_CURLY@118..119 "{" [] [],
+                                                            content: CssSimpleComponentValueList [],
+                                                            r_curly_token: R_CURLY@119..120 "}" [] [],
+                                                        },
+                                                        CssPreservedTokenKey {
+                                                            value: COLON@120..122 ":" [Newline("\n")] [],
+                                                        },
+                                                        CssFunctionBlock {
+                                                            css_function_token: CssFunctionToken {
+                                                                valye_token: FUNCTION_TOKEN@122..126 "dir(" [] [],
+                                                            },
+                                                            css_component_value_list: CssComponentValueList [
+                                                                CssIdentifier {
+                                                                    value_token: IDENT@126..134 "invalid" [] [Whitespace(" ")],
+                                                                },
+                                                                CssDelim {
+                                                                    value_token: DELIM@134..135 "." [] [],
+                                                                },
+                                                                CssIdentifier {
+                                                                    value_token: IDENT@135..141 "class" [] [Whitespace(" ")],
+                                                                },
+                                                                CssSimpleCurlyBracketsBlock {
+                                                                    l_curly_token: L_CURLY@141..142 "{" [] [],
+                                                                    content: CssSimpleComponentValueList [],
+                                                                    r_curly_token: R_CURLY@142..143 "}" [] [],
+                                                                },
+                                                                CssPreservedTokenKey {
+                                                                    value: COLON@143..145 ":" [Newline("\n")] [],
+                                                                },
+                                                                CssFunctionBlock {
+                                                                    css_function_token: CssFunctionToken {
+                                                                        valye_token: FUNCTION_TOKEN@145..149 "dir(" [] [],
+                                                                    },
+                                                                    css_component_value_list: CssComponentValueList [
+                                                                        CssIdentifier {
+                                                                            value_token: IDENT@149..157 "invalid" [] [Whitespace(" ")],
+                                                                        },
+                                                                        CssDelim {
+                                                                            value_token: DELIM@157..158 "." [] [],
+                                                                        },
+                                                                        CssIdentifier {
+                                                                            value_token: IDENT@158..163 "class" [] [],
+                                                                        },
+                                                                    ],
+                                                                    r_paren_token: R_PAREN@163..165 ")" [] [Whitespace(" ")],
+                                                                },
+                                                                CssSimpleCurlyBracketsBlock {
+                                                                    l_curly_token: L_CURLY@165..166 "{" [] [],
+                                                                    content: CssSimpleComponentValueList [],
+                                                                    r_curly_token: R_CURLY@166..167 "}" [] [],
+                                                                },
+                                                                CssPreservedTokenKey {
+                                                                    value: COLON@167..169 ":" [Newline("\n")] [],
+                                                                },
+                                                                CssFunctionBlock {
+                                                                    css_function_token: CssFunctionToken {
+                                                                        valye_token: FUNCTION_TOKEN@169..173 "dir(" [] [],
+                                                                    },
+                                                                    css_component_value_list: CssComponentValueList [
+                                                                        CssDelim {
+                                                                            value_token: DELIM@173..174 "." [] [],
+                                                                        },
+                                                                        CssIdentifier {
+                                                                            value_token: IDENT@174..181 "invalid" [] [],
+                                                                        },
+                                                                    ],
+                                                                    r_paren_token: missing (required),
+                                                                },
+                                                            ],
+                                                            r_paren_token: missing (required),
+                                                        },
+                                                    ],
+                                                    r_paren_token: missing (required),
+                                                },
+                                            ],
+                                            r_paren_token: missing (required),
                                         },
                                     ],
+                                    r_paren_token: missing (required),
                                 },
-                            },
-                        ],
-                    },
-                ],
+                            ],
+                            r_paren_token: missing (required),
+                        },
+                    ],
+                    r_paren_token: missing (required),
+                },
             ],
+            block: missing (required),
         },
     ],
     eof_token: EOF@181..182 "" [Newline("\n")] [],
@@ -358,205 +270,169 @@ CssRoot {
 ## CST
 
 ```
-0: CSS_ROOT@0..182
+0: CSS_STYLE_SHEET@0..182
   0: (empty)
-  1: CSS_RULE_LIST@0..181
-    0: CSS_RULE@0..8
-      0: CSS_SELECTOR_LIST@0..6
-        0: CSS_COMPOUND_SELECTOR@0..6
-          0: (empty)
-          1: (empty)
-          2: CSS_SUB_SELECTOR_LIST@0..6
-            0: CSS_PSEUDO_CLASS_SELECTOR@0..6
-              0: COLON@0..1 ":" [] []
-              1: CSS_BOGUS_PSEUDO_CLASS@1..6
-                0: DIR_KW@1..4 "dir" [] []
-                1: L_PAREN@4..6 "(" [] [Whitespace(" ")]
-      1: CSS_BLOCK@6..8
-        0: L_CURLY@6..7 "{" [] []
-        1: CSS_DECLARATION_LIST@7..7
-        2: R_CURLY@7..8 "}" [] []
-    1: CSS_RULE@8..18
-      0: CSS_SELECTOR_LIST@8..16
-        0: CSS_COMPOUND_SELECTOR@8..16
-          0: (empty)
-          1: (empty)
-          2: CSS_SUB_SELECTOR_LIST@8..16
-            0: CSS_PSEUDO_CLASS_SELECTOR@8..16
+  1: CSS_STYLE_SHEET_CONTENT@0..181
+    0: CSS_QUALIFIED_RULE@0..181
+      0: CSS_QUALIFIED_RULE_PRELUDE@0..181
+        0: CSS_PRESERVED_TOKEN_KEY@0..1
+          0: COLON@0..1 ":" [] []
+        1: CSS_FUNCTION_BLOCK@1..181
+          0: CSS_FUNCTION_TOKEN@1..6
+            0: FUNCTION_TOKEN@1..6 "dir(" [] [Whitespace(" ")]
+          1: CSS_COMPONENT_VALUE_LIST@6..181
+            0: CSS_SIMPLE_CURLY_BRACKETS_BLOCK@6..8
+              0: L_CURLY@6..7 "{" [] []
+              1: CSS_SIMPLE_COMPONENT_VALUE_LIST@7..7
+              2: R_CURLY@7..8 "}" [] []
+            1: CSS_PRESERVED_TOKEN_KEY@8..10
               0: COLON@8..10 ":" [Newline("\n")] []
-              1: CSS_BOGUS_PSEUDO_CLASS@10..16
-                0: DIR_KW@10..13 "dir" [] []
-                1: L_PAREN@13..14 "(" [] []
-                2: R_PAREN@14..16 ")" [] [Whitespace(" ")]
-      1: CSS_BLOCK@16..18
-        0: L_CURLY@16..17 "{" [] []
-        1: CSS_DECLARATION_LIST@17..17
-        2: R_CURLY@17..18 "}" [] []
-    2: CSS_RULE@18..30
-      0: CSS_SELECTOR_LIST@18..28
-        0: CSS_COMPOUND_SELECTOR@18..28
-          0: (empty)
-          1: (empty)
-          2: CSS_SUB_SELECTOR_LIST@18..28
-            0: CSS_PSEUDO_CLASS_SELECTOR@18..28
+            2: CSS_FUNCTION_BLOCK@10..16
+              0: CSS_FUNCTION_TOKEN@10..14
+                0: FUNCTION_TOKEN@10..14 "dir(" [] []
+              1: CSS_COMPONENT_VALUE_LIST@14..14
+              2: R_PAREN@14..16 ")" [] [Whitespace(" ")]
+            3: CSS_SIMPLE_CURLY_BRACKETS_BLOCK@16..18
+              0: L_CURLY@16..17 "{" [] []
+              1: CSS_SIMPLE_COMPONENT_VALUE_LIST@17..17
+              2: R_CURLY@17..18 "}" [] []
+            4: CSS_PRESERVED_TOKEN_KEY@18..20
               0: COLON@18..20 ":" [Newline("\n")] []
-              1: CSS_BOGUS_PSEUDO_CLASS@20..28
-                0: DIR_KW@20..23 "dir" [] []
-                1: L_PAREN@23..24 "(" [] []
-                2: CSS_IDENTIFIER@24..28
+            5: CSS_FUNCTION_BLOCK@20..181
+              0: CSS_FUNCTION_TOKEN@20..24
+                0: FUNCTION_TOKEN@20..24 "dir(" [] []
+              1: CSS_COMPONENT_VALUE_LIST@24..181
+                0: CSS_IDENTIFIER@24..28
                   0: IDENT@24..28 "ltr" [] [Whitespace(" ")]
-      1: CSS_BLOCK@28..30
-        0: L_CURLY@28..29 "{" [] []
-        1: CSS_DECLARATION_LIST@29..29
-        2: R_CURLY@29..30 "}" [] []
-    3: CSS_RULE@30..46
-      0: CSS_SELECTOR_LIST@30..44
-        0: CSS_COMPOUND_SELECTOR@30..44
-          0: (empty)
-          1: (empty)
-          2: CSS_SUB_SELECTOR_LIST@30..44
-            0: CSS_PSEUDO_CLASS_SELECTOR@30..44
-              0: COLON@30..32 ":" [Newline("\n")] []
-              1: CSS_BOGUS_PSEUDO_CLASS@32..44
-                0: DIR_KW@32..35 "dir" [] []
-                1: L_PAREN@35..36 "(" [] []
-                2: CSS_BOGUS@36..44
-                  0: IDENT@36..44 "invalid" [] [Whitespace(" ")]
-      1: CSS_BLOCK@44..46
-        0: L_CURLY@44..45 "{" [] []
-        1: CSS_DECLARATION_LIST@45..45
-        2: R_CURLY@45..46 "}" [] []
-    4: CSS_RULE@46..64
-      0: CSS_SELECTOR_LIST@46..62
-        0: CSS_COMPOUND_SELECTOR@46..62
-          0: (empty)
-          1: (empty)
-          2: CSS_SUB_SELECTOR_LIST@46..62
-            0: CSS_PSEUDO_CLASS_SELECTOR@46..62
-              0: COLON@46..48 ":" [Newline("\n")] []
-              1: CSS_BOGUS_PSEUDO_CLASS@48..62
-                0: DIR_KW@48..51 "dir" [] []
-                1: L_PAREN@51..52 "(" [] []
-                2: CSS_BOGUS@52..60
-                  0: DOT@52..53 "." [] []
-                  1: IDENT@53..60 "invalid" [] []
-                3: R_PAREN@60..62 ")" [] [Whitespace(" ")]
-      1: CSS_BLOCK@62..64
-        0: L_CURLY@62..63 "{" [] []
-        1: CSS_DECLARATION_LIST@63..63
-        2: R_CURLY@63..64 "}" [] []
-    5: CSS_RULE@64..81
-      0: CSS_SELECTOR_LIST@64..79
-        0: CSS_COMPOUND_SELECTOR@64..79
-          0: (empty)
-          1: (empty)
-          2: CSS_SUB_SELECTOR_LIST@64..79
-            0: CSS_PSEUDO_CLASS_SELECTOR@64..79
-              0: COLON@64..66 ":" [Newline("\n")] []
-              1: CSS_BOGUS_PSEUDO_CLASS@66..79
-                0: DIR_KW@66..69 "dir" [] []
-                1: L_PAREN@69..70 "(" [] []
-                2: CSS_BOGUS@70..79
-                  0: DOT@70..71 "." [] []
-                  1: IDENT@71..79 "invalid" [] [Whitespace(" ")]
-      1: CSS_BLOCK@79..81
-        0: L_CURLY@79..80 "{" [] []
-        1: CSS_DECLARATION_LIST@80..80
-        2: R_CURLY@80..81 "}" [] []
-    6: CSS_RULE@81..100
-      0: CSS_SELECTOR_LIST@81..98
-        0: CSS_COMPOUND_SELECTOR@81..98
-          0: (empty)
-          1: (empty)
-          2: CSS_SUB_SELECTOR_LIST@81..98
-            0: CSS_PSEUDO_CLASS_SELECTOR@81..98
-              0: COLON@81..83 ":" [Newline("\n")] []
-              1: CSS_BOGUS_PSEUDO_CLASS@83..98
-                0: DIR_KW@83..86 "dir" [] []
-                1: L_PAREN@86..87 "(" [] []
-                2: CSS_IDENTIFIER@87..91
-                  0: IDENT@87..91 "ltr" [] [Whitespace(" ")]
-                3: CSS_BOGUS@91..98
-                  0: DOT@91..92 "." [] []
-                  1: IDENT@92..98 "class" [] [Whitespace(" ")]
-      1: CSS_BLOCK@98..100
-        0: L_CURLY@98..99 "{" [] []
-        1: CSS_DECLARATION_LIST@99..99
-        2: R_CURLY@99..100 "}" [] []
-    7: CSS_RULE@100..120
-      0: CSS_SELECTOR_LIST@100..118
-        0: CSS_COMPOUND_SELECTOR@100..118
-          0: (empty)
-          1: (empty)
-          2: CSS_SUB_SELECTOR_LIST@100..118
-            0: CSS_PSEUDO_CLASS_SELECTOR@100..118
-              0: COLON@100..102 ":" [Newline("\n")] []
-              1: CSS_BOGUS_PSEUDO_CLASS@102..118
-                0: DIR_KW@102..105 "dir" [] []
-                1: L_PAREN@105..106 "(" [] []
-                2: CSS_IDENTIFIER@106..110
-                  0: IDENT@106..110 "ltr" [] [Whitespace(" ")]
-                3: CSS_BOGUS@110..116
-                  0: DOT@110..111 "." [] []
-                  1: IDENT@111..116 "class" [] []
-                4: R_PAREN@116..118 ")" [] [Whitespace(" ")]
-      1: CSS_BLOCK@118..120
-        0: L_CURLY@118..119 "{" [] []
-        1: CSS_DECLARATION_LIST@119..119
-        2: R_CURLY@119..120 "}" [] []
-    8: CSS_RULE@120..143
-      0: CSS_SELECTOR_LIST@120..141
-        0: CSS_COMPOUND_SELECTOR@120..141
-          0: (empty)
-          1: (empty)
-          2: CSS_SUB_SELECTOR_LIST@120..141
-            0: CSS_PSEUDO_CLASS_SELECTOR@120..141
-              0: COLON@120..122 ":" [Newline("\n")] []
-              1: CSS_BOGUS_PSEUDO_CLASS@122..141
-                0: DIR_KW@122..125 "dir" [] []
-                1: L_PAREN@125..126 "(" [] []
-                2: CSS_BOGUS@126..141
-                  0: IDENT@126..134 "invalid" [] [Whitespace(" ")]
-                  1: DOT@134..135 "." [] []
-                  2: IDENT@135..141 "class" [] [Whitespace(" ")]
-      1: CSS_BLOCK@141..143
-        0: L_CURLY@141..142 "{" [] []
-        1: CSS_DECLARATION_LIST@142..142
-        2: R_CURLY@142..143 "}" [] []
-    9: CSS_RULE@143..167
-      0: CSS_SELECTOR_LIST@143..165
-        0: CSS_COMPOUND_SELECTOR@143..165
-          0: (empty)
-          1: (empty)
-          2: CSS_SUB_SELECTOR_LIST@143..165
-            0: CSS_PSEUDO_CLASS_SELECTOR@143..165
-              0: COLON@143..145 ":" [Newline("\n")] []
-              1: CSS_BOGUS_PSEUDO_CLASS@145..165
-                0: DIR_KW@145..148 "dir" [] []
-                1: L_PAREN@148..149 "(" [] []
-                2: CSS_BOGUS@149..163
-                  0: IDENT@149..157 "invalid" [] [Whitespace(" ")]
-                  1: DOT@157..158 "." [] []
-                  2: IDENT@158..163 "class" [] []
-                3: R_PAREN@163..165 ")" [] [Whitespace(" ")]
-      1: CSS_BLOCK@165..167
-        0: L_CURLY@165..166 "{" [] []
-        1: CSS_DECLARATION_LIST@166..166
-        2: R_CURLY@166..167 "}" [] []
-    10: CSS_BOGUS_RULE@167..181
-      0: CSS_SELECTOR_LIST@167..181
-        0: CSS_COMPOUND_SELECTOR@167..181
-          0: (empty)
-          1: (empty)
-          2: CSS_SUB_SELECTOR_LIST@167..181
-            0: CSS_PSEUDO_CLASS_SELECTOR@167..181
-              0: COLON@167..169 ":" [Newline("\n")] []
-              1: CSS_BOGUS_PSEUDO_CLASS@169..181
-                0: DIR_KW@169..172 "dir" [] []
-                1: L_PAREN@172..173 "(" [] []
-                2: CSS_BOGUS@173..181
-                  0: DOT@173..174 "." [] []
-                  1: IDENT@174..181 "invalid" [] []
+                1: CSS_SIMPLE_CURLY_BRACKETS_BLOCK@28..30
+                  0: L_CURLY@28..29 "{" [] []
+                  1: CSS_SIMPLE_COMPONENT_VALUE_LIST@29..29
+                  2: R_CURLY@29..30 "}" [] []
+                2: CSS_PRESERVED_TOKEN_KEY@30..32
+                  0: COLON@30..32 ":" [Newline("\n")] []
+                3: CSS_FUNCTION_BLOCK@32..181
+                  0: CSS_FUNCTION_TOKEN@32..36
+                    0: FUNCTION_TOKEN@32..36 "dir(" [] []
+                  1: CSS_COMPONENT_VALUE_LIST@36..181
+                    0: CSS_IDENTIFIER@36..44
+                      0: IDENT@36..44 "invalid" [] [Whitespace(" ")]
+                    1: CSS_SIMPLE_CURLY_BRACKETS_BLOCK@44..46
+                      0: L_CURLY@44..45 "{" [] []
+                      1: CSS_SIMPLE_COMPONENT_VALUE_LIST@45..45
+                      2: R_CURLY@45..46 "}" [] []
+                    2: CSS_PRESERVED_TOKEN_KEY@46..48
+                      0: COLON@46..48 ":" [Newline("\n")] []
+                    3: CSS_FUNCTION_BLOCK@48..62
+                      0: CSS_FUNCTION_TOKEN@48..52
+                        0: FUNCTION_TOKEN@48..52 "dir(" [] []
+                      1: CSS_COMPONENT_VALUE_LIST@52..60
+                        0: CSS_DELIM@52..53
+                          0: DELIM@52..53 "." [] []
+                        1: CSS_IDENTIFIER@53..60
+                          0: IDENT@53..60 "invalid" [] []
+                      2: R_PAREN@60..62 ")" [] [Whitespace(" ")]
+                    4: CSS_SIMPLE_CURLY_BRACKETS_BLOCK@62..64
+                      0: L_CURLY@62..63 "{" [] []
+                      1: CSS_SIMPLE_COMPONENT_VALUE_LIST@63..63
+                      2: R_CURLY@63..64 "}" [] []
+                    5: CSS_PRESERVED_TOKEN_KEY@64..66
+                      0: COLON@64..66 ":" [Newline("\n")] []
+                    6: CSS_FUNCTION_BLOCK@66..181
+                      0: CSS_FUNCTION_TOKEN@66..70
+                        0: FUNCTION_TOKEN@66..70 "dir(" [] []
+                      1: CSS_COMPONENT_VALUE_LIST@70..181
+                        0: CSS_DELIM@70..71
+                          0: DELIM@70..71 "." [] []
+                        1: CSS_IDENTIFIER@71..79
+                          0: IDENT@71..79 "invalid" [] [Whitespace(" ")]
+                        2: CSS_SIMPLE_CURLY_BRACKETS_BLOCK@79..81
+                          0: L_CURLY@79..80 "{" [] []
+                          1: CSS_SIMPLE_COMPONENT_VALUE_LIST@80..80
+                          2: R_CURLY@80..81 "}" [] []
+                        3: CSS_PRESERVED_TOKEN_KEY@81..83
+                          0: COLON@81..83 ":" [Newline("\n")] []
+                        4: CSS_FUNCTION_BLOCK@83..181
+                          0: CSS_FUNCTION_TOKEN@83..87
+                            0: FUNCTION_TOKEN@83..87 "dir(" [] []
+                          1: CSS_COMPONENT_VALUE_LIST@87..181
+                            0: CSS_IDENTIFIER@87..91
+                              0: IDENT@87..91 "ltr" [] [Whitespace(" ")]
+                            1: CSS_DELIM@91..92
+                              0: DELIM@91..92 "." [] []
+                            2: CSS_IDENTIFIER@92..98
+                              0: IDENT@92..98 "class" [] [Whitespace(" ")]
+                            3: CSS_SIMPLE_CURLY_BRACKETS_BLOCK@98..100
+                              0: L_CURLY@98..99 "{" [] []
+                              1: CSS_SIMPLE_COMPONENT_VALUE_LIST@99..99
+                              2: R_CURLY@99..100 "}" [] []
+                            4: CSS_PRESERVED_TOKEN_KEY@100..102
+                              0: COLON@100..102 ":" [Newline("\n")] []
+                            5: CSS_FUNCTION_BLOCK@102..118
+                              0: CSS_FUNCTION_TOKEN@102..106
+                                0: FUNCTION_TOKEN@102..106 "dir(" [] []
+                              1: CSS_COMPONENT_VALUE_LIST@106..116
+                                0: CSS_IDENTIFIER@106..110
+                                  0: IDENT@106..110 "ltr" [] [Whitespace(" ")]
+                                1: CSS_DELIM@110..111
+                                  0: DELIM@110..111 "." [] []
+                                2: CSS_IDENTIFIER@111..116
+                                  0: IDENT@111..116 "class" [] []
+                              2: R_PAREN@116..118 ")" [] [Whitespace(" ")]
+                            6: CSS_SIMPLE_CURLY_BRACKETS_BLOCK@118..120
+                              0: L_CURLY@118..119 "{" [] []
+                              1: CSS_SIMPLE_COMPONENT_VALUE_LIST@119..119
+                              2: R_CURLY@119..120 "}" [] []
+                            7: CSS_PRESERVED_TOKEN_KEY@120..122
+                              0: COLON@120..122 ":" [Newline("\n")] []
+                            8: CSS_FUNCTION_BLOCK@122..181
+                              0: CSS_FUNCTION_TOKEN@122..126
+                                0: FUNCTION_TOKEN@122..126 "dir(" [] []
+                              1: CSS_COMPONENT_VALUE_LIST@126..181
+                                0: CSS_IDENTIFIER@126..134
+                                  0: IDENT@126..134 "invalid" [] [Whitespace(" ")]
+                                1: CSS_DELIM@134..135
+                                  0: DELIM@134..135 "." [] []
+                                2: CSS_IDENTIFIER@135..141
+                                  0: IDENT@135..141 "class" [] [Whitespace(" ")]
+                                3: CSS_SIMPLE_CURLY_BRACKETS_BLOCK@141..143
+                                  0: L_CURLY@141..142 "{" [] []
+                                  1: CSS_SIMPLE_COMPONENT_VALUE_LIST@142..142
+                                  2: R_CURLY@142..143 "}" [] []
+                                4: CSS_PRESERVED_TOKEN_KEY@143..145
+                                  0: COLON@143..145 ":" [Newline("\n")] []
+                                5: CSS_FUNCTION_BLOCK@145..165
+                                  0: CSS_FUNCTION_TOKEN@145..149
+                                    0: FUNCTION_TOKEN@145..149 "dir(" [] []
+                                  1: CSS_COMPONENT_VALUE_LIST@149..163
+                                    0: CSS_IDENTIFIER@149..157
+                                      0: IDENT@149..157 "invalid" [] [Whitespace(" ")]
+                                    1: CSS_DELIM@157..158
+                                      0: DELIM@157..158 "." [] []
+                                    2: CSS_IDENTIFIER@158..163
+                                      0: IDENT@158..163 "class" [] []
+                                  2: R_PAREN@163..165 ")" [] [Whitespace(" ")]
+                                6: CSS_SIMPLE_CURLY_BRACKETS_BLOCK@165..167
+                                  0: L_CURLY@165..166 "{" [] []
+                                  1: CSS_SIMPLE_COMPONENT_VALUE_LIST@166..166
+                                  2: R_CURLY@166..167 "}" [] []
+                                7: CSS_PRESERVED_TOKEN_KEY@167..169
+                                  0: COLON@167..169 ":" [Newline("\n")] []
+                                8: CSS_FUNCTION_BLOCK@169..181
+                                  0: CSS_FUNCTION_TOKEN@169..173
+                                    0: FUNCTION_TOKEN@169..173 "dir(" [] []
+                                  1: CSS_COMPONENT_VALUE_LIST@173..181
+                                    0: CSS_DELIM@173..174
+                                      0: DELIM@173..174 "." [] []
+                                    1: CSS_IDENTIFIER@174..181
+                                      0: IDENT@174..181 "invalid" [] []
+                                  2: (empty)
+                              2: (empty)
+                          2: (empty)
+                      2: (empty)
+                  2: (empty)
+              2: (empty)
+          2: (empty)
+      1: (empty)
   2: EOF@181..182 "" [Newline("\n")] []
 
 ```
@@ -564,263 +440,6 @@ CssRoot {
 ## Diagnostics
 
 ```
-pseudo_class_function_identifier.css:1:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a ltr, or a rtl but instead found '{'.
-  
-  > 1 │ :dir( {}
-      │       ^
-    2 │ :dir() {}
-    3 │ :dir(ltr {}
-  
-  i Expected a ltr, or a rtl here.
-  
-  > 1 │ :dir( {}
-      │       ^
-    2 │ :dir() {}
-    3 │ :dir(ltr {}
-  
-pseudo_class_function_identifier.css:2:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a ltr, or a rtl but instead found ')'.
-  
-    1 │ :dir( {}
-  > 2 │ :dir() {}
-      │      ^
-    3 │ :dir(ltr {}
-    4 │ :dir(invalid {}
-  
-  i Expected a ltr, or a rtl here.
-  
-    1 │ :dir( {}
-  > 2 │ :dir() {}
-      │      ^
-    3 │ :dir(ltr {}
-    4 │ :dir(invalid {}
-  
-pseudo_class_function_identifier.css:3:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `)` but instead found `{`
-  
-    1 │ :dir( {}
-    2 │ :dir() {}
-  > 3 │ :dir(ltr {}
-      │          ^
-    4 │ :dir(invalid {}
-    5 │ :dir(.invalid) {}
-  
-  i Remove {
-  
-pseudo_class_function_identifier.css:4:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a ltr, or a rtl but instead found 'invalid'.
-  
-    2 │ :dir() {}
-    3 │ :dir(ltr {}
-  > 4 │ :dir(invalid {}
-      │      ^^^^^^^
-    5 │ :dir(.invalid) {}
-    6 │ :dir(.invalid {}
-  
-  i Expected a ltr, or a rtl here.
-  
-    2 │ :dir() {}
-    3 │ :dir(ltr {}
-  > 4 │ :dir(invalid {}
-      │      ^^^^^^^
-    5 │ :dir(.invalid) {}
-    6 │ :dir(.invalid {}
-  
-pseudo_class_function_identifier.css:4:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `)` but instead found `{`
-  
-    2 │ :dir() {}
-    3 │ :dir(ltr {}
-  > 4 │ :dir(invalid {}
-      │              ^
-    5 │ :dir(.invalid) {}
-    6 │ :dir(.invalid {}
-  
-  i Remove {
-  
-pseudo_class_function_identifier.css:5:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a ltr, or a rtl but instead found '.invalid'.
-  
-    3 │ :dir(ltr {}
-    4 │ :dir(invalid {}
-  > 5 │ :dir(.invalid) {}
-      │      ^^^^^^^^
-    6 │ :dir(.invalid {}
-    7 │ :dir(ltr .class {}
-  
-  i Expected a ltr, or a rtl here.
-  
-    3 │ :dir(ltr {}
-    4 │ :dir(invalid {}
-  > 5 │ :dir(.invalid) {}
-      │      ^^^^^^^^
-    6 │ :dir(.invalid {}
-    7 │ :dir(ltr .class {}
-  
-pseudo_class_function_identifier.css:6:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a ltr, or a rtl but instead found '.invalid'.
-  
-    4 │ :dir(invalid {}
-    5 │ :dir(.invalid) {}
-  > 6 │ :dir(.invalid {}
-      │      ^^^^^^^^
-    7 │ :dir(ltr .class {}
-    8 │ :dir(ltr .class) {}
-  
-  i Expected a ltr, or a rtl here.
-  
-    4 │ :dir(invalid {}
-    5 │ :dir(.invalid) {}
-  > 6 │ :dir(.invalid {}
-      │      ^^^^^^^^
-    7 │ :dir(ltr .class {}
-    8 │ :dir(ltr .class) {}
-  
-pseudo_class_function_identifier.css:6:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `)` but instead found `{`
-  
-    4 │ :dir(invalid {}
-    5 │ :dir(.invalid) {}
-  > 6 │ :dir(.invalid {}
-      │               ^
-    7 │ :dir(ltr .class {}
-    8 │ :dir(ltr .class) {}
-  
-  i Remove {
-  
-pseudo_class_function_identifier.css:7:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a ltr, or a rtl but instead found 'ltr .class'.
-  
-    5 │ :dir(.invalid) {}
-    6 │ :dir(.invalid {}
-  > 7 │ :dir(ltr .class {}
-      │      ^^^^^^^^^^
-    8 │ :dir(ltr .class) {}
-    9 │ :dir(invalid .class {}
-  
-  i Expected a ltr, or a rtl here.
-  
-    5 │ :dir(.invalid) {}
-    6 │ :dir(.invalid {}
-  > 7 │ :dir(ltr .class {}
-      │      ^^^^^^^^^^
-    8 │ :dir(ltr .class) {}
-    9 │ :dir(invalid .class {}
-  
-pseudo_class_function_identifier.css:7:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `)` but instead found `{`
-  
-    5 │ :dir(.invalid) {}
-    6 │ :dir(.invalid {}
-  > 7 │ :dir(ltr .class {}
-      │                 ^
-    8 │ :dir(ltr .class) {}
-    9 │ :dir(invalid .class {}
-  
-  i Remove {
-  
-pseudo_class_function_identifier.css:8:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a ltr, or a rtl but instead found 'ltr .class'.
-  
-     6 │ :dir(.invalid {}
-     7 │ :dir(ltr .class {}
-   > 8 │ :dir(ltr .class) {}
-       │      ^^^^^^^^^^
-     9 │ :dir(invalid .class {}
-    10 │ :dir(invalid .class) {}
-  
-  i Expected a ltr, or a rtl here.
-  
-     6 │ :dir(.invalid {}
-     7 │ :dir(ltr .class {}
-   > 8 │ :dir(ltr .class) {}
-       │      ^^^^^^^^^^
-     9 │ :dir(invalid .class {}
-    10 │ :dir(invalid .class) {}
-  
-pseudo_class_function_identifier.css:9:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a ltr, or a rtl but instead found 'invalid .class'.
-  
-     7 │ :dir(ltr .class {}
-     8 │ :dir(ltr .class) {}
-   > 9 │ :dir(invalid .class {}
-       │      ^^^^^^^^^^^^^^
-    10 │ :dir(invalid .class) {}
-    11 │ :dir(.invalid
-  
-  i Expected a ltr, or a rtl here.
-  
-     7 │ :dir(ltr .class {}
-     8 │ :dir(ltr .class) {}
-   > 9 │ :dir(invalid .class {}
-       │      ^^^^^^^^^^^^^^
-    10 │ :dir(invalid .class) {}
-    11 │ :dir(.invalid
-  
-pseudo_class_function_identifier.css:9:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `)` but instead found `{`
-  
-     7 │ :dir(ltr .class {}
-     8 │ :dir(ltr .class) {}
-   > 9 │ :dir(invalid .class {}
-       │                     ^
-    10 │ :dir(invalid .class) {}
-    11 │ :dir(.invalid
-  
-  i Remove {
-  
-pseudo_class_function_identifier.css:10:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a ltr, or a rtl but instead found 'invalid .class'.
-  
-     8 │ :dir(ltr .class) {}
-     9 │ :dir(invalid .class {}
-  > 10 │ :dir(invalid .class) {}
-       │      ^^^^^^^^^^^^^^
-    11 │ :dir(.invalid
-    12 │ 
-  
-  i Expected a ltr, or a rtl here.
-  
-     8 │ :dir(ltr .class) {}
-     9 │ :dir(invalid .class {}
-  > 10 │ :dir(invalid .class) {}
-       │      ^^^^^^^^^^^^^^
-    11 │ :dir(.invalid
-    12 │ 
-  
-pseudo_class_function_identifier.css:11:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a ltr, or a rtl but instead found '.invalid'.
-  
-     9 │ :dir(invalid .class {}
-    10 │ :dir(invalid .class) {}
-  > 11 │ :dir(.invalid
-       │      ^^^^^^^^
-    12 │ 
-  
-  i Expected a ltr, or a rtl here.
-  
-     9 │ :dir(invalid .class {}
-    10 │ :dir(invalid .class) {}
-  > 11 │ :dir(.invalid
-       │      ^^^^^^^^
-    12 │ 
-  
 pseudo_class_function_identifier.css:12:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `)` but instead the file ends

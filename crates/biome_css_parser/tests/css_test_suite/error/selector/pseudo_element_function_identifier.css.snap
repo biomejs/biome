@@ -16,87 +16,77 @@ expression: snapshot
 ## AST
 
 ```
-CssRoot {
+CssStyleSheet {
     bom_token: missing (optional),
-    rules: CssRuleList [
-        CssRule {
-            prelude: CssSelectorList [
-                CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
-                    simple_selector: missing (optional),
-                    sub_selectors: CssSubSelectorList [
-                        CssPseudoElementSelector {
-                            double_colon_token: COLON2@0..2 "::" [] [],
-                            element: CssBogusPseudoElement {
-                                items: [
-                                    HIGHLIGHT_KW@2..11 "highlight" [] [],
-                                    L_PAREN@11..12 "(" [] [],
-                                    CssIdentifier {
-                                        value_token: IDENT@12..16 "div" [] [Whitespace(" ")],
-                                    },
-                                    CssBogus {
-                                        items: [
-                                            PLUS@16..18 "+" [] [Whitespace(" ")],
-                                            IDENT@18..21 "div" [] [],
-                                        ],
-                                    },
-                                    R_PAREN@21..23 ")" [] [Whitespace(" ")],
-                                ],
-                            },
+    content: CssStyleSheetContent [
+        CssQualifiedRule {
+            prelude: CssQualifiedRulePrelude [
+                CssPreservedTokenKey {
+                    value: COLON@0..1 ":" [] [],
+                },
+                CssPreservedTokenKey {
+                    value: COLON@1..2 ":" [] [],
+                },
+                CssFunctionBlock {
+                    css_function_token: CssFunctionToken {
+                        valye_token: FUNCTION_TOKEN@2..12 "highlight(" [] [],
+                    },
+                    css_component_value_list: CssComponentValueList [
+                        CssIdentifier {
+                            value_token: IDENT@12..16 "div" [] [Whitespace(" ")],
+                        },
+                        CssDelim {
+                            value_token: DELIM@16..18 "+" [] [Whitespace(" ")],
+                        },
+                        CssIdentifier {
+                            value_token: IDENT@18..21 "div" [] [],
                         },
                     ],
+                    r_paren_token: R_PAREN@21..23 ")" [] [Whitespace(" ")],
                 },
             ],
-            block: CssBlock {
+            block: CssCurlyBracketsBlock {
                 l_curly_token: L_CURLY@23..24 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                content: CssCurlyBracketsBlockContent [],
                 r_curly_token: R_CURLY@24..25 "}" [] [],
             },
         },
-        CssRule {
-            prelude: CssSelectorList [
-                CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
-                    simple_selector: missing (optional),
-                    sub_selectors: CssSubSelectorList [
-                        CssPseudoElementSelector {
-                            double_colon_token: COLON2@25..28 "::" [Newline("\n")] [],
-                            element: CssBogusPseudoElement {
-                                items: [
-                                    HIGHLIGHT_KW@28..37 "highlight" [] [],
-                                    L_PAREN@37..39 "(" [] [Whitespace(" ")],
-                                ],
+        CssQualifiedRule {
+            prelude: CssQualifiedRulePrelude [
+                CssPreservedTokenKey {
+                    value: COLON@25..27 ":" [Newline("\n")] [],
+                },
+                CssPreservedTokenKey {
+                    value: COLON@27..28 ":" [] [],
+                },
+                CssFunctionBlock {
+                    css_function_token: CssFunctionToken {
+                        valye_token: FUNCTION_TOKEN@28..39 "highlight(" [] [Whitespace(" ")],
+                    },
+                    css_component_value_list: CssComponentValueList [
+                        CssSimpleCurlyBracketsBlock {
+                            l_curly_token: L_CURLY@39..40 "{" [] [],
+                            content: CssSimpleComponentValueList [],
+                            r_curly_token: R_CURLY@40..41 "}" [] [],
+                        },
+                        CssPreservedTokenKey {
+                            value: COLON@41..43 ":" [Newline("\n")] [],
+                        },
+                        CssPreservedTokenKey {
+                            value: COLON@43..44 ":" [] [],
+                        },
+                        CssFunctionBlock {
+                            css_function_token: CssFunctionToken {
+                                valye_token: FUNCTION_TOKEN@44..54 "highlight(" [] [],
                             },
+                            css_component_value_list: CssComponentValueList [],
+                            r_paren_token: missing (required),
                         },
                     ],
+                    r_paren_token: missing (required),
                 },
             ],
-            block: CssBlock {
-                l_curly_token: L_CURLY@39..40 "{" [] [],
-                declaration_list: CssDeclarationList [],
-                r_curly_token: R_CURLY@40..41 "}" [] [],
-            },
-        },
-        CssBogusRule {
-            items: [
-                CssSelectorList [
-                    CssCompoundSelector {
-                        nesting_selector_token: missing (optional),
-                        simple_selector: missing (optional),
-                        sub_selectors: CssSubSelectorList [
-                            CssPseudoElementSelector {
-                                double_colon_token: COLON2@41..44 "::" [Newline("\n")] [],
-                                element: CssBogusPseudoElement {
-                                    items: [
-                                        HIGHLIGHT_KW@44..53 "highlight" [] [],
-                                        L_PAREN@53..54 "(" [] [],
-                                    ],
-                                },
-                            },
-                        ],
-                    },
-                ],
-            ],
+            block: missing (required),
         },
     ],
     eof_token: EOF@54..55 "" [Newline("\n")] [],
@@ -106,56 +96,55 @@ CssRoot {
 ## CST
 
 ```
-0: CSS_ROOT@0..55
+0: CSS_STYLE_SHEET@0..55
   0: (empty)
-  1: CSS_RULE_LIST@0..54
-    0: CSS_RULE@0..25
-      0: CSS_SELECTOR_LIST@0..23
-        0: CSS_COMPOUND_SELECTOR@0..23
-          0: (empty)
-          1: (empty)
-          2: CSS_SUB_SELECTOR_LIST@0..23
-            0: CSS_PSEUDO_ELEMENT_SELECTOR@0..23
-              0: COLON2@0..2 "::" [] []
-              1: CSS_BOGUS_PSEUDO_ELEMENT@2..23
-                0: HIGHLIGHT_KW@2..11 "highlight" [] []
-                1: L_PAREN@11..12 "(" [] []
-                2: CSS_IDENTIFIER@12..16
-                  0: IDENT@12..16 "div" [] [Whitespace(" ")]
-                3: CSS_BOGUS@16..21
-                  0: PLUS@16..18 "+" [] [Whitespace(" ")]
-                  1: IDENT@18..21 "div" [] []
-                4: R_PAREN@21..23 ")" [] [Whitespace(" ")]
-      1: CSS_BLOCK@23..25
+  1: CSS_STYLE_SHEET_CONTENT@0..54
+    0: CSS_QUALIFIED_RULE@0..25
+      0: CSS_QUALIFIED_RULE_PRELUDE@0..23
+        0: CSS_PRESERVED_TOKEN_KEY@0..1
+          0: COLON@0..1 ":" [] []
+        1: CSS_PRESERVED_TOKEN_KEY@1..2
+          0: COLON@1..2 ":" [] []
+        2: CSS_FUNCTION_BLOCK@2..23
+          0: CSS_FUNCTION_TOKEN@2..12
+            0: FUNCTION_TOKEN@2..12 "highlight(" [] []
+          1: CSS_COMPONENT_VALUE_LIST@12..21
+            0: CSS_IDENTIFIER@12..16
+              0: IDENT@12..16 "div" [] [Whitespace(" ")]
+            1: CSS_DELIM@16..18
+              0: DELIM@16..18 "+" [] [Whitespace(" ")]
+            2: CSS_IDENTIFIER@18..21
+              0: IDENT@18..21 "div" [] []
+          2: R_PAREN@21..23 ")" [] [Whitespace(" ")]
+      1: CSS_CURLY_BRACKETS_BLOCK@23..25
         0: L_CURLY@23..24 "{" [] []
-        1: CSS_DECLARATION_LIST@24..24
+        1: CSS_CURLY_BRACKETS_BLOCK_CONTENT@24..24
         2: R_CURLY@24..25 "}" [] []
-    1: CSS_RULE@25..41
-      0: CSS_SELECTOR_LIST@25..39
-        0: CSS_COMPOUND_SELECTOR@25..39
-          0: (empty)
-          1: (empty)
-          2: CSS_SUB_SELECTOR_LIST@25..39
-            0: CSS_PSEUDO_ELEMENT_SELECTOR@25..39
-              0: COLON2@25..28 "::" [Newline("\n")] []
-              1: CSS_BOGUS_PSEUDO_ELEMENT@28..39
-                0: HIGHLIGHT_KW@28..37 "highlight" [] []
-                1: L_PAREN@37..39 "(" [] [Whitespace(" ")]
-      1: CSS_BLOCK@39..41
-        0: L_CURLY@39..40 "{" [] []
-        1: CSS_DECLARATION_LIST@40..40
-        2: R_CURLY@40..41 "}" [] []
-    2: CSS_BOGUS_RULE@41..54
-      0: CSS_SELECTOR_LIST@41..54
-        0: CSS_COMPOUND_SELECTOR@41..54
-          0: (empty)
-          1: (empty)
-          2: CSS_SUB_SELECTOR_LIST@41..54
-            0: CSS_PSEUDO_ELEMENT_SELECTOR@41..54
-              0: COLON2@41..44 "::" [Newline("\n")] []
-              1: CSS_BOGUS_PSEUDO_ELEMENT@44..54
-                0: HIGHLIGHT_KW@44..53 "highlight" [] []
-                1: L_PAREN@53..54 "(" [] []
+    1: CSS_QUALIFIED_RULE@25..54
+      0: CSS_QUALIFIED_RULE_PRELUDE@25..54
+        0: CSS_PRESERVED_TOKEN_KEY@25..27
+          0: COLON@25..27 ":" [Newline("\n")] []
+        1: CSS_PRESERVED_TOKEN_KEY@27..28
+          0: COLON@27..28 ":" [] []
+        2: CSS_FUNCTION_BLOCK@28..54
+          0: CSS_FUNCTION_TOKEN@28..39
+            0: FUNCTION_TOKEN@28..39 "highlight(" [] [Whitespace(" ")]
+          1: CSS_COMPONENT_VALUE_LIST@39..54
+            0: CSS_SIMPLE_CURLY_BRACKETS_BLOCK@39..41
+              0: L_CURLY@39..40 "{" [] []
+              1: CSS_SIMPLE_COMPONENT_VALUE_LIST@40..40
+              2: R_CURLY@40..41 "}" [] []
+            1: CSS_PRESERVED_TOKEN_KEY@41..43
+              0: COLON@41..43 ":" [Newline("\n")] []
+            2: CSS_PRESERVED_TOKEN_KEY@43..44
+              0: COLON@43..44 ":" [] []
+            3: CSS_FUNCTION_BLOCK@44..54
+              0: CSS_FUNCTION_TOKEN@44..54
+                0: FUNCTION_TOKEN@44..54 "highlight(" [] []
+              1: CSS_COMPONENT_VALUE_LIST@54..54
+              2: (empty)
+          2: (empty)
+      1: (empty)
   2: EOF@54..55 "" [Newline("\n")] []
 
 ```
@@ -163,50 +152,16 @@ CssRoot {
 ## Diagnostics
 
 ```
-pseudo_element_function_identifier.css:1:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected an identifier but instead found 'div + div'.
-  
-  > 1 │ ::highlight(div + div) {}
-      │             ^^^^^^^^^
-    2 │ ::highlight( {}
-    3 │ ::highlight(
-  
-  i Expected an identifier here.
-  
-  > 1 │ ::highlight(div + div) {}
-      │             ^^^^^^^^^
-    2 │ ::highlight( {}
-    3 │ ::highlight(
-  
-pseudo_element_function_identifier.css:2:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected an identifier but instead found '{'.
-  
-    1 │ ::highlight(div + div) {}
-  > 2 │ ::highlight( {}
-      │              ^
-    3 │ ::highlight(
-    4 │ 
-  
-  i Expected an identifier here.
-  
-    1 │ ::highlight(div + div) {}
-  > 2 │ ::highlight( {}
-      │              ^
-    3 │ ::highlight(
-    4 │ 
-  
 pseudo_element_function_identifier.css:4:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected an identifier but instead found the end of the file.
+  × expected `)` but instead the file ends
   
     2 │ ::highlight( {}
     3 │ ::highlight(
   > 4 │ 
       │ 
   
-  i Expected an identifier here.
+  i the file ends here
   
     2 │ ::highlight( {}
     3 │ ::highlight(

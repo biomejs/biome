@@ -19,137 +19,94 @@ expression: snapshot
 ## AST
 
 ```
-CssRoot {
+CssStyleSheet {
     bom_token: missing (optional),
-    rules: CssRuleList [
-        CssRule {
-            prelude: CssSelectorList [
-                CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
-                    simple_selector: missing (optional),
-                    sub_selectors: CssSubSelectorList [
-                        CssBogusSubSelector {
-                            items: [
-                                L_BRACK@0..2 "[" [] [Whitespace(" ")],
-                                CssBogus {
-                                    items: [
-                                        DOT@2..3 "." [] [],
-                                        IDENT@3..9 "class" [] [Whitespace(" ")],
-                                    ],
+    content: CssStyleSheetContent [
+        CssQualifiedRule {
+            prelude: CssQualifiedRulePrelude [
+                CssSimpleSquareBracketsBlock {
+                    l_brack_token: L_BRACK@0..2 "[" [] [Whitespace(" ")],
+                    content: CssSimpleComponentValueList [
+                        CssDelim {
+                            value_token: DELIM@2..3 "." [] [],
+                        },
+                        CssIdentifier {
+                            value_token: IDENT@3..9 "class" [] [Whitespace(" ")],
+                        },
+                        CssSimpleCurlyBracketsBlock {
+                            l_curly_token: L_CURLY@9..10 "{" [] [],
+                            content: CssSimpleComponentValueList [],
+                            r_curly_token: R_CURLY@10..11 "}" [] [],
+                        },
+                        CssSimpleSquareBracketsBlock {
+                            l_brack_token: L_BRACK@11..14 "[" [Newline("\n"), Newline("\n")] [],
+                            content: CssSimpleComponentValueList [
+                                CssIdentifier {
+                                    value_token: IDENT@14..19 "title" [] [],
+                                },
+                                CssDelim {
+                                    value_token: DELIM@19..20 "=" [] [],
+                                },
+                                CssString {
+                                    value_token: CSS_STRING_LITERAL@20..26 "\"foo\"" [] [Whitespace(" ")],
+                                },
+                                CssIdentifier {
+                                    value_token: IDENT@26..27 "P" [] [],
                                 },
                             ],
+                            r_brack_token: R_BRACK@27..29 "]" [] [Whitespace(" ")],
                         },
-                    ],
-                },
-            ],
-            block: CssBlock {
-                l_curly_token: L_CURLY@9..10 "{" [] [],
-                declaration_list: CssDeclarationList [],
-                r_curly_token: R_CURLY@10..11 "}" [] [],
-            },
-        },
-        CssRule {
-            prelude: CssSelectorList [
-                CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
-                    simple_selector: missing (optional),
-                    sub_selectors: CssSubSelectorList [
-                        CssBogusSubSelector {
-                            items: [
-                                L_BRACK@11..14 "[" [Newline("\n"), Newline("\n")] [],
-                                CssAttributeName {
-                                    namespace: missing (optional),
-                                    name: CssIdentifier {
-                                        value_token: IDENT@14..19 "title" [] [],
-                                    },
-                                },
-                                CssBogus {
-                                    items: [
-                                        EQ@19..20 "=" [] [],
-                                        CssAttributeMatcherValue {
-                                            name: CssString {
-                                                value_token: CSS_STRING_LITERAL@20..26 "\"foo\"" [] [Whitespace(" ")],
-                                            },
-                                        },
-                                        IDENT@26..27 "P" [] [],
-                                    ],
-                                },
-                                R_BRACK@27..29 "]" [] [Whitespace(" ")],
-                            ],
+                        CssSimpleCurlyBracketsBlock {
+                            l_curly_token: L_CURLY@29..30 "{" [] [],
+                            content: CssSimpleComponentValueList [],
+                            r_curly_token: R_CURLY@30..31 "}" [] [],
                         },
-                    ],
-                },
-            ],
-            block: CssBlock {
-                l_curly_token: L_CURLY@29..30 "{" [] [],
-                declaration_list: CssDeclarationList [],
-                r_curly_token: R_CURLY@30..31 "}" [] [],
-            },
-        },
-        CssRule {
-            prelude: CssSelectorList [
-                CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
-                    simple_selector: missing (optional),
-                    sub_selectors: CssSubSelectorList [
-                        CssAttributeSelector {
+                        CssSimpleSquareBracketsBlock {
                             l_brack_token: L_BRACK@31..34 "[" [Newline("\n"), Newline("\n")] [],
-                            name: CssAttributeName {
-                                namespace: missing (optional),
-                                name: CssIdentifier {
+                            content: CssSimpleComponentValueList [
+                                CssIdentifier {
                                     value_token: IDENT@34..39 "title" [] [],
                                 },
-                            },
-                            matcher: CssAttributeMatcher {
-                                operator: EQ@39..40 "=" [] [],
-                                value: CssAttributeMatcherValue {
-                                    name: CssString {
-                                        value_token: CSS_STRING_LITERAL@40..46 "\"foo\"" [] [Whitespace(" ")],
-                                    },
+                                CssDelim {
+                                    value_token: DELIM@39..40 "=" [] [],
                                 },
-                                modifier: S_KW@46..48 "s" [] [Whitespace(" ")],
-                            },
+                                CssString {
+                                    value_token: CSS_STRING_LITERAL@40..46 "\"foo\"" [] [Whitespace(" ")],
+                                },
+                                CssIdentifier {
+                                    value_token: IDENT@46..48 "s" [] [Whitespace(" ")],
+                                },
+                                CssSimpleCurlyBracketsBlock {
+                                    l_curly_token: L_CURLY@48..49 "{" [] [],
+                                    content: CssSimpleComponentValueList [],
+                                    r_curly_token: R_CURLY@49..50 "}" [] [],
+                                },
+                                CssSimpleSquareBracketsBlock {
+                                    l_brack_token: L_BRACK@50..52 "[" [Newline("\n")] [],
+                                    content: CssSimpleComponentValueList [
+                                        CssIdentifier {
+                                            value_token: IDENT@52..57 "title" [] [],
+                                        },
+                                        CssDelim {
+                                            value_token: DELIM@57..58 "=" [] [],
+                                        },
+                                        CssString {
+                                            value_token: CSS_STRING_LITERAL@58..64 "\"foo\"" [] [Whitespace(" ")],
+                                        },
+                                        CssIdentifier {
+                                            value_token: IDENT@64..65 "s" [] [],
+                                        },
+                                    ],
+                                    r_brack_token: missing (required),
+                                },
+                            ],
                             r_brack_token: missing (required),
                         },
                     ],
+                    r_brack_token: missing (required),
                 },
             ],
-            block: CssBlock {
-                l_curly_token: L_CURLY@48..49 "{" [] [],
-                declaration_list: CssDeclarationList [],
-                r_curly_token: R_CURLY@49..50 "}" [] [],
-            },
-        },
-        CssBogusRule {
-            items: [
-                CssSelectorList [
-                    CssCompoundSelector {
-                        nesting_selector_token: missing (optional),
-                        simple_selector: missing (optional),
-                        sub_selectors: CssSubSelectorList [
-                            CssAttributeSelector {
-                                l_brack_token: L_BRACK@50..52 "[" [Newline("\n")] [],
-                                name: CssAttributeName {
-                                    namespace: missing (optional),
-                                    name: CssIdentifier {
-                                        value_token: IDENT@52..57 "title" [] [],
-                                    },
-                                },
-                                matcher: CssAttributeMatcher {
-                                    operator: EQ@57..58 "=" [] [],
-                                    value: CssAttributeMatcherValue {
-                                        name: CssString {
-                                            value_token: CSS_STRING_LITERAL@58..64 "\"foo\"" [] [Whitespace(" ")],
-                                        },
-                                    },
-                                    modifier: S_KW@64..65 "s" [] [],
-                                },
-                                r_brack_token: missing (required),
-                            },
-                        ],
-                    },
-                ],
-            ],
+            block: missing (required),
         },
     ],
     eof_token: EOF@65..66 "" [Newline("\n")] [],
@@ -159,89 +116,68 @@ CssRoot {
 ## CST
 
 ```
-0: CSS_ROOT@0..66
+0: CSS_STYLE_SHEET@0..66
   0: (empty)
-  1: CSS_RULE_LIST@0..65
-    0: CSS_RULE@0..11
-      0: CSS_SELECTOR_LIST@0..9
-        0: CSS_COMPOUND_SELECTOR@0..9
-          0: (empty)
-          1: (empty)
-          2: CSS_SUB_SELECTOR_LIST@0..9
-            0: CSS_BOGUS_SUB_SELECTOR@0..9
-              0: L_BRACK@0..2 "[" [] [Whitespace(" ")]
-              1: CSS_BOGUS@2..9
-                0: DOT@2..3 "." [] []
-                1: IDENT@3..9 "class" [] [Whitespace(" ")]
-      1: CSS_BLOCK@9..11
-        0: L_CURLY@9..10 "{" [] []
-        1: CSS_DECLARATION_LIST@10..10
-        2: R_CURLY@10..11 "}" [] []
-    1: CSS_RULE@11..31
-      0: CSS_SELECTOR_LIST@11..29
-        0: CSS_COMPOUND_SELECTOR@11..29
-          0: (empty)
-          1: (empty)
-          2: CSS_SUB_SELECTOR_LIST@11..29
-            0: CSS_BOGUS_SUB_SELECTOR@11..29
+  1: CSS_STYLE_SHEET_CONTENT@0..65
+    0: CSS_QUALIFIED_RULE@0..65
+      0: CSS_QUALIFIED_RULE_PRELUDE@0..65
+        0: CSS_SIMPLE_SQUARE_BRACKETS_BLOCK@0..65
+          0: L_BRACK@0..2 "[" [] [Whitespace(" ")]
+          1: CSS_SIMPLE_COMPONENT_VALUE_LIST@2..65
+            0: CSS_DELIM@2..3
+              0: DELIM@2..3 "." [] []
+            1: CSS_IDENTIFIER@3..9
+              0: IDENT@3..9 "class" [] [Whitespace(" ")]
+            2: CSS_SIMPLE_CURLY_BRACKETS_BLOCK@9..11
+              0: L_CURLY@9..10 "{" [] []
+              1: CSS_SIMPLE_COMPONENT_VALUE_LIST@10..10
+              2: R_CURLY@10..11 "}" [] []
+            3: CSS_SIMPLE_SQUARE_BRACKETS_BLOCK@11..29
               0: L_BRACK@11..14 "[" [Newline("\n"), Newline("\n")] []
-              1: CSS_ATTRIBUTE_NAME@14..19
-                0: (empty)
-                1: CSS_IDENTIFIER@14..19
+              1: CSS_SIMPLE_COMPONENT_VALUE_LIST@14..27
+                0: CSS_IDENTIFIER@14..19
                   0: IDENT@14..19 "title" [] []
-              2: CSS_BOGUS@19..27
-                0: EQ@19..20 "=" [] []
-                1: CSS_ATTRIBUTE_MATCHER_VALUE@20..26
-                  0: CSS_STRING@20..26
-                    0: CSS_STRING_LITERAL@20..26 "\"foo\"" [] [Whitespace(" ")]
-                2: IDENT@26..27 "P" [] []
-              3: R_BRACK@27..29 "]" [] [Whitespace(" ")]
-      1: CSS_BLOCK@29..31
-        0: L_CURLY@29..30 "{" [] []
-        1: CSS_DECLARATION_LIST@30..30
-        2: R_CURLY@30..31 "}" [] []
-    2: CSS_RULE@31..50
-      0: CSS_SELECTOR_LIST@31..48
-        0: CSS_COMPOUND_SELECTOR@31..48
-          0: (empty)
-          1: (empty)
-          2: CSS_SUB_SELECTOR_LIST@31..48
-            0: CSS_ATTRIBUTE_SELECTOR@31..48
+                1: CSS_DELIM@19..20
+                  0: DELIM@19..20 "=" [] []
+                2: CSS_STRING@20..26
+                  0: CSS_STRING_LITERAL@20..26 "\"foo\"" [] [Whitespace(" ")]
+                3: CSS_IDENTIFIER@26..27
+                  0: IDENT@26..27 "P" [] []
+              2: R_BRACK@27..29 "]" [] [Whitespace(" ")]
+            4: CSS_SIMPLE_CURLY_BRACKETS_BLOCK@29..31
+              0: L_CURLY@29..30 "{" [] []
+              1: CSS_SIMPLE_COMPONENT_VALUE_LIST@30..30
+              2: R_CURLY@30..31 "}" [] []
+            5: CSS_SIMPLE_SQUARE_BRACKETS_BLOCK@31..65
               0: L_BRACK@31..34 "[" [Newline("\n"), Newline("\n")] []
-              1: CSS_ATTRIBUTE_NAME@34..39
-                0: (empty)
-                1: CSS_IDENTIFIER@34..39
+              1: CSS_SIMPLE_COMPONENT_VALUE_LIST@34..65
+                0: CSS_IDENTIFIER@34..39
                   0: IDENT@34..39 "title" [] []
-              2: CSS_ATTRIBUTE_MATCHER@39..48
-                0: EQ@39..40 "=" [] []
-                1: CSS_ATTRIBUTE_MATCHER_VALUE@40..46
-                  0: CSS_STRING@40..46
-                    0: CSS_STRING_LITERAL@40..46 "\"foo\"" [] [Whitespace(" ")]
-                2: S_KW@46..48 "s" [] [Whitespace(" ")]
-              3: (empty)
-      1: CSS_BLOCK@48..50
-        0: L_CURLY@48..49 "{" [] []
-        1: CSS_DECLARATION_LIST@49..49
-        2: R_CURLY@49..50 "}" [] []
-    3: CSS_BOGUS_RULE@50..65
-      0: CSS_SELECTOR_LIST@50..65
-        0: CSS_COMPOUND_SELECTOR@50..65
-          0: (empty)
-          1: (empty)
-          2: CSS_SUB_SELECTOR_LIST@50..65
-            0: CSS_ATTRIBUTE_SELECTOR@50..65
-              0: L_BRACK@50..52 "[" [Newline("\n")] []
-              1: CSS_ATTRIBUTE_NAME@52..57
-                0: (empty)
-                1: CSS_IDENTIFIER@52..57
-                  0: IDENT@52..57 "title" [] []
-              2: CSS_ATTRIBUTE_MATCHER@57..65
-                0: EQ@57..58 "=" [] []
-                1: CSS_ATTRIBUTE_MATCHER_VALUE@58..64
-                  0: CSS_STRING@58..64
-                    0: CSS_STRING_LITERAL@58..64 "\"foo\"" [] [Whitespace(" ")]
-                2: S_KW@64..65 "s" [] []
-              3: (empty)
+                1: CSS_DELIM@39..40
+                  0: DELIM@39..40 "=" [] []
+                2: CSS_STRING@40..46
+                  0: CSS_STRING_LITERAL@40..46 "\"foo\"" [] [Whitespace(" ")]
+                3: CSS_IDENTIFIER@46..48
+                  0: IDENT@46..48 "s" [] [Whitespace(" ")]
+                4: CSS_SIMPLE_CURLY_BRACKETS_BLOCK@48..50
+                  0: L_CURLY@48..49 "{" [] []
+                  1: CSS_SIMPLE_COMPONENT_VALUE_LIST@49..49
+                  2: R_CURLY@49..50 "}" [] []
+                5: CSS_SIMPLE_SQUARE_BRACKETS_BLOCK@50..65
+                  0: L_BRACK@50..52 "[" [Newline("\n")] []
+                  1: CSS_SIMPLE_COMPONENT_VALUE_LIST@52..65
+                    0: CSS_IDENTIFIER@52..57
+                      0: IDENT@52..57 "title" [] []
+                    1: CSS_DELIM@57..58
+                      0: DELIM@57..58 "=" [] []
+                    2: CSS_STRING@58..64
+                      0: CSS_STRING_LITERAL@58..64 "\"foo\"" [] [Whitespace(" ")]
+                    3: CSS_IDENTIFIER@64..65
+                      0: IDENT@64..65 "s" [] []
+                  2: (empty)
+              2: (empty)
+          2: (empty)
+      1: (empty)
   2: EOF@65..66 "" [Newline("\n")] []
 
 ```
@@ -249,39 +185,6 @@ CssRoot {
 ## Diagnostics
 
 ```
-attribute_selector.css:3:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a s, a S, an i, or a I but instead found 'P'.
-  
-    1 │ [ .class {}
-    2 │ 
-  > 3 │ [title="foo" P] {}
-      │              ^
-    4 │ 
-    5 │ [title="foo" s {}
-  
-  i Expected a s, a S, an i, or a I here.
-  
-    1 │ [ .class {}
-    2 │ 
-  > 3 │ [title="foo" P] {}
-      │              ^
-    4 │ 
-    5 │ [title="foo" s {}
-  
-attribute_selector.css:5:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `]` but instead found `{`
-  
-    3 │ [title="foo" P] {}
-    4 │ 
-  > 5 │ [title="foo" s {}
-      │                ^
-    6 │ [title="foo" s
-    7 │ 
-  
-  i Remove {
-  
 attribute_selector.css:7:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `]` but instead the file ends

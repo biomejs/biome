@@ -15,12 +15,6 @@ pub enum CssLexContext {
     /// Default context: no particular rules are applied to the lexer logic.
     #[default]
     Regular,
-    /// Applied when lexing CSS selectors.
-    /// Doesn't skip whitespace trivia for a combinator.
-    Selector,
-    /// Applied when lexing CSS pseudo nth selectors.
-    /// Distinct '-' from identifiers and '+' from numbers.
-    PseudoNthSelector,
 }
 
 impl LexContext for CssLexContext {
@@ -100,8 +94,6 @@ impl<'src> Lexer<'src> for CssLexer<'src> {
         let kind = match self.current_byte() {
             Some(current) => match context {
                 CssLexContext::Regular => self.consume_token(current),
-                CssLexContext::Selector => self.consume_selector_token(current),
-                CssLexContext::PseudoNthSelector => self.consume_pseudo_nth_selector_token(current),
             },
             None => EOF,
         };
@@ -443,6 +435,7 @@ impl<'src> CssLexer<'src> {
     /// Guaranteed to not be at the end of the file
     // A lookup table of `byte -> fn(l: &mut Lexer) -> Token` is exponentially slower than this approach
     fn consume_token(&mut self, current: u8) -> CssSyntaxKind {
+        // dbg!(self.current_char_unchecked());
         // The speed difference comes from the difference in table size, a 2kb table is easily fit into cpu cache
         // While a 16kb table will be ejected from cache very often leading to slowdowns, this also allows LLVM
         // to do more aggressive optimizations on the match regarding how to map it to instructions
@@ -451,53 +444,42 @@ impl<'src> CssLexer<'src> {
         match dispatched {
             WHS => self.consume_newline_or_whitespaces(),
             QOT => self.consume_string_literal(current),
-            SLH => self.consume_slash(),
-
-            DIG | ZER => self.consume_number(current),
-
-            MIN => self.consume_min(current),
-
+            HAS => self.consume_hash_token(),
+            PNO => self.consume_byte(T!['(']),
+            PNC => self.consume_byte(T![')']),
             PLS => {
                 if self.is_number_start() {
                     self.consume_number(current)
                 } else {
-                    self.consume_byte(T![+])
+                    self.consume_byte(DELIM)
                 }
             }
+
+            DIG | ZER => self.consume_number(current),
+            SLH => self.consume_slash(),
+
+            MIN => self.consume_min(current),
+            COM => self.consume_byte(DELIM),
 
             PRD => {
                 if self.is_number_start() {
                     self.consume_number(current)
                 } else {
-                    self.consume_byte(T![.])
+                    self.consume_byte(DELIM)
                 }
             }
-
-            LSS => self.consume_lss(),
-
-            IDT | UNI | BSL if self.is_ident_start() => self.consume_identifier(),
-
-            IDT if self.next_byte() == Some(b'=') => self.consume_byte(T!["$="]),
-
-            MUL => self.consume_mul(),
-            CRT => self.consume_ctr(),
-            COL => self.consume_col(),
-            AT_ => self.consume_byte(T![@]),
             SEM => self.consume_byte(T![;]),
-            HAS => self.consume_byte(T![#]),
-            PNO => self.consume_byte(T!['(']),
-            PNC => self.consume_byte(T![')']),
+            COL => self.consume_byte(T![:]),
             BEO => self.consume_byte(T!['{']),
             BEC => self.consume_byte(T!['}']),
             BTO => self.consume_byte(T!('[')),
             BTC => self.consume_byte(T![']']),
-            COM => self.consume_byte(T![,]),
-            MOR => self.consume_byte(T![>]),
-            TLD => self.consume_tilde(),
-            PIP => self.consume_pipe(),
-            EQL => self.consume_byte(T![=]),
-            EXL => self.consume_byte(T![!]),
-            PRC => self.consume_byte(T![%]),
+
+            LSS => self.consume_lss(),
+
+            AT_ => self.consume_at_ident_token(),
+
+            BSL => self.consume_reverse_solidus(),
 
             UNI => {
                 // A BOM can only appear at the start of a file, so if we haven't advanced at all yet,
@@ -509,22 +491,122 @@ impl<'src> CssLexer<'src> {
                 }
             }
 
-            _ => self.consume_unexpected_character(),
+            _ => {
+                if self.is_ident_start() {
+                    self.consume_like_identifier()
+                } else {
+                    self.consume_unexpected_character()
+                }
+            }
         }
+    }
+
+    fn consume_hash_token(&mut self) -> CssSyntaxKind {
+        self.advance(1);
+        if self.is_ident_start() {
+            self.consume_identifier();
+            return HASH_TOKEN;
+        }
+
+        return DELIM
+    }
+
+    fn consume_at_ident_token(&mut self) -> CssSyntaxKind {
+        self.advance(1);
+        if self.is_ident_start() {
+            self.consume_identifier();
+            return AT_IDENT;
+        }
+
+        return DELIM
+    }
+    fn consume_reverse_solidus(&mut self) -> CssSyntaxKind {
+        let start = self.text_position();
+        if self.is_valid_escape_at(1) {
+            return self.consume_like_identifier();
+        }
+        self.advance(1);
+        let diagnostic =
+            ParseDiagnostic::new("Invalid reverse solidus", start..self.text_position());
+        self.diagnostics.push(diagnostic);
+        DELIM
+    }
+
+    fn consume_like_identifier(&mut self) -> CssSyntaxKind {
+        // Note to keep the buffer large enough to fit every possible keyword that
+        // the lexer can return
+        let mut buf = [0u8; 20];
+        let count = self.consume_ident_sequence(&mut buf);
+        let binding = buf[..count].to_ascii_lowercase();
+        let ident = binding.as_slice();
+        if self.current_byte() == Some(b'(') {
+            self.advance(1);
+            if ident == b"url" {
+                if matches!(self.current_byte(), Some(b'"') | Some(b'\'')) {
+                    return FUNCTION_TOKEN;
+                }
+                return self.consume_url_token();
+            } else {
+                return FUNCTION_TOKEN;
+            }
+        }
+        if ident == b"important" {
+            return IMPORTANT_KW
+        }
+        IDENT
+    }
+
+    fn consume_url_token(&mut self) -> CssSyntaxKind {
+        let start = self.text_position();
+        self.consume_whitespaces();
+
+        while let Some(current) = self.current_byte() {
+            match current {
+                // TODO: no print char point
+                b'"' | b'\'' | b'(' => {
+                    return self.consume_the_remnants_of_a_bad_url();
+                }
+                b'\\' => {
+                    if self.is_valid_escape_at(1) {
+                       let _ = self.consume_an_escape_code_point();
+                    } else {
+                        let diagnostic =
+                            ParseDiagnostic::new("Invalid url token", start..self.text_position());
+                        self.diagnostics.push(diagnostic);
+                        return self.consume_the_remnants_of_a_bad_url();
+                    }
+
+                }
+                b')' => {
+                    self.advance(1);
+                    return URL;
+                }
+                _ => self.advance(1),
+            }
+        }
+        if self.is_eof() {
+            let diagnostic =
+                ParseDiagnostic::new("Invalid url token", start..self.text_position());
+            self.diagnostics.push(diagnostic);
+        }
+        return BAD_URL;
+    }
+
+    fn consume_the_remnants_of_a_bad_url(&mut self) -> CssSyntaxKind {
+        while !matches!(self.current_byte(), Some(b')')) {
+            if self.is_eof() {
+                break;
+            }
+            self.advance(1);
+        }
+        // ')'
+        self.advance(1);
+        return BAD_URL;
     }
 
     fn consume_selector_token(&mut self, current: u8) -> CssSyntaxKind {
         match current {
             b' ' => self.consume_byte(CSS_SPACE_LITERAL),
-            _ => self.consume_token(current),
-        }
-    }
-
-    fn consume_pseudo_nth_selector_token(&mut self, current: u8) -> CssSyntaxKind {
-        match current {
-            b'-' => self.consume_byte(T![-]),
-            b'+' => self.consume_byte(T![+]),
-            b'n' | b'N' => self.consume_byte(T![n]),
             _ => self.consume_token(current),
         }
     }
@@ -726,51 +808,7 @@ impl<'src> CssLexer<'src> {
         let count = self.consume_ident_sequence(&mut buf);
 
         match buf[..count].to_ascii_lowercase().as_slice() {
-            b"media" => MEDIA_KW,
-            b"keyframes" => KEYFRAMES_KW,
-            b"and" => AND_KW,
-            b"only" => ONLY_KW,
-            b"or" => OR_KW,
-            b"i" => I_KW,
-            b"s" => S_KW,
             b"important" => IMPORTANT_KW,
-            b"from" => FROM_KW,
-            b"to" => TO_KW,
-            b"var" => VAR_KW,
-            b"highlight" => HIGHLIGHT_KW,
-            b"part" => PART_KW,
-            b"has" => HAS_KW,
-            b"dir" => DIR_KW,
-            b"global" => GLOBAL_KW,
-            b"local" => LOCAL_KW,
-            b"-moz-any" => _MOZ_ANY_KW,
-            b"-webkit-any" => _WEBKIT_ANY_KW,
-            b"past" => PAST_KW,
-            b"current" => CURRENT_KW,
-            b"future" => FUTURE_KW,
-            b"host" => HOST_KW,
-            b"host-context" => HOST_CONTEXT_KW,
-            b"not" => NOT_KW,
-            b"matches" => MATCHES_KW,
-            b"is" => IS_KW,
-            b"where" => WHERE_KW,
-            b"lang" => LANG_KW,
-            b"of" => OF_KW,
-            b"n" => N_KW,
-            b"even" => EVEN_KW,
-            b"odd" => ODD_KW,
-            b"nth-child" => NTH_CHILD_KW,
-            b"nth-last-child" => NTH_LAST_CHILD_KW,
-            b"nth-of-type" => NTH_OF_TYPE_KW,
-            b"nth-last-of-type" => NTH_LAST_OF_TYPE_KW,
-            b"nth-col" => NTH_COL_KW,
-            b"nth-last-col" => NTH_LAST_COL_KW,
-            b"ltr" => LTR_KW,
-            b"rtl" => RTL_KW,
-            b"charset" => CHARSET_KW,
-            b"color-profile" => COLOR_PROFILE_KW,
-            b"counter-style" => COUNTER_STYLE_KW,
-            b"font-face" => FONT_FACE_KW,
             _ => IDENT,
         }
     }
@@ -845,46 +883,51 @@ impl<'src> CssLexer<'src> {
             // If the first and second code points are a valid escape, continue consume.
             // Otherwise, break.
             // BSL if self.is_valid_escape_at(1) => '\\',
-            BSL if self.is_valid_escape_at(1) => {
-                let escape_start = self.text_position();
-                self.advance(1);
-
-                match self.current_byte() {
-                    Some(c) if c.is_ascii_hexdigit() => {
-                        let hex = self.consume_escape_sequence(c);
-
-                        if hex == REPLACEMENT_CHARACTER {
-                            let diagnostic = ParseDiagnostic::new(
-                                "Invalid escape sequence",
-                                escape_start..self.text_position(),
-                            );
-                            self.diagnostics.push(diagnostic);
-                        }
-
-                        hex
-                    }
-
-                    Some(_) => {
-                        let chr = self.current_char_unchecked();
-                        self.advance(chr.len_utf8());
-                        chr
-                    }
-
-                    None => {
-                        let diagnostic = ParseDiagnostic::new(
-                            "Invalid escape sequence",
-                            escape_start..self.text_position(),
-                        );
-                        self.diagnostics.push(diagnostic);
-
-                        return None;
-                    }
-                }
-            }
+            BSL if self.is_valid_escape_at(1) => match self.consume_an_escape_code_point() {
+                Ok(value) => value,
+                Err(value) => return value,
+            },
             _ => return None,
         };
 
         Some(chr)
+    }
+
+    fn consume_an_escape_code_point(&mut self) -> Result<char, Option<char>> {
+        let escape_start = self.text_position();
+        self.advance(1);
+
+        match self.current_byte() {
+            Some(c) if c.is_ascii_hexdigit() => {
+                let hex = self.consume_escape_sequence(c);
+
+                if hex == REPLACEMENT_CHARACTER {
+                    let diagnostic = ParseDiagnostic::new(
+                        "Invalid escape sequence",
+                        escape_start..self.text_position(),
+                    );
+                    self.diagnostics.push(diagnostic);
+                }
+
+                Ok(hex)
+            }
+
+            Some(_) => {
+                let chr = self.current_char_unchecked();
+                self.advance(chr.len_utf8());
+                Ok(chr)
+            }
+
+            None => {
+                let diagnostic = ParseDiagnostic::new(
+                    "Invalid escape sequence",
+                    escape_start..self.text_position(),
+                );
+                self.diagnostics.push(diagnostic);
+
+                return Err(None);
+            }
+        }
     }
 
     /// Lexes a comment.
@@ -947,7 +990,7 @@ impl<'src> CssLexer<'src> {
 
                 COMMENT
             }
-            _ => self.consume_byte(T![/]),
+            _ => self.consume_byte(DELIM),
         }
     }
 
@@ -1016,7 +1059,7 @@ impl<'src> CssLexer<'src> {
             return CDO;
         }
 
-        self.consume_byte(T![<])
+        self.consume_byte(DELIM)
     }
 
     #[inline]
@@ -1053,14 +1096,14 @@ impl<'src> CssLexer<'src> {
         self.assert_current_char_boundary();
 
         let char = self.current_char_unchecked();
-        let err = ParseDiagnostic::new(
-            format!("unexpected character `{}`", char),
-            self.text_position()..self.text_position() + char.text_len(),
-        );
-        self.diagnostics.push(err);
+        // let err = ParseDiagnostic::new(
+        //     format!("unexpected character `{}`", char),
+        //     self.text_position()..self.text_position() + char.text_len(),
+        // );
+        // self.diagnostics.push(err);
         self.advance(char.len_utf8());
 
-        ERROR_TOKEN
+        DELIM
     }
 
     /// Check if the lexer starts a number.

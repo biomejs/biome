@@ -2,9 +2,9 @@
 
 use crate::parser::CssParser;
 
-use crate::syntax::parse_root;
+use crate::syntax::parse_style_sheet;
 use biome_css_factory::CssSyntaxFactory;
-use biome_css_syntax::{CssLanguage, CssRoot, CssSyntaxNode};
+use biome_css_syntax::{CssLanguage, CssStyleSheet, CssSyntaxNode};
 pub use biome_parser::prelude::*;
 use biome_parser::tree_sink::LosslessTreeSink;
 use biome_rowan::{AstNode, NodeCache};
@@ -33,7 +33,7 @@ pub fn parse_css_with_cache(
     tracing::debug_span!("Parsing phase").in_scope(move || {
         let mut parser = CssParser::new(source, config);
 
-        parse_root(&mut parser);
+        parse_style_sheet(&mut parser);
 
         let (events, diagnostics, trivia) = parser.finish();
 
@@ -101,8 +101,8 @@ impl CssParse {
     ///
     /// # Panics
     /// Panics if the node represented by this parse result mismatches.
-    pub fn tree(&self) -> CssRoot {
-        CssRoot::unwrap_cast(self.syntax())
+    pub fn tree(&self) -> CssStyleSheet {
+        CssStyleSheet::unwrap_cast(self.syntax())
     }
 }
 

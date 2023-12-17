@@ -14,34 +14,27 @@ div::bef\ore {}
 ## AST
 
 ```
-CssRoot {
+CssStyleSheet {
     bom_token: missing (optional),
-    rules: CssRuleList [
-        CssRule {
-            prelude: CssSelectorList [
-                CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
-                    simple_selector: CssTypeSelector {
-                        namespace: missing (optional),
-                        ident: CssIdentifier {
-                            value_token: IDENT@0..3 "div" [] [],
-                        },
-                    },
-                    sub_selectors: CssSubSelectorList [
-                        CssPseudoElementSelector {
-                            double_colon_token: COLON2@3..5 "::" [] [],
-                            element: CssPseudoElementIdentifier {
-                                name: CssIdentifier {
-                                    value_token: IDENT@5..13 "bef\\ore" [] [Whitespace(" ")],
-                                },
-                            },
-                        },
-                    ],
+    content: CssStyleSheetContent [
+        CssQualifiedRule {
+            prelude: CssQualifiedRulePrelude [
+                CssIdentifier {
+                    value_token: IDENT@0..3 "div" [] [],
+                },
+                CssPreservedTokenKey {
+                    value: COLON@3..4 ":" [] [],
+                },
+                CssPreservedTokenKey {
+                    value: COLON@4..5 ":" [] [],
+                },
+                CssIdentifier {
+                    value_token: IDENT@5..13 "bef\\ore" [] [Whitespace(" ")],
                 },
             ],
-            block: CssBlock {
+            block: CssCurlyBracketsBlock {
                 l_curly_token: L_CURLY@13..14 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                content: CssCurlyBracketsBlockContent [],
                 r_curly_token: R_CURLY@14..15 "}" [] [],
             },
         },
@@ -53,26 +46,22 @@ CssRoot {
 ## CST
 
 ```
-0: CSS_ROOT@0..16
+0: CSS_STYLE_SHEET@0..16
   0: (empty)
-  1: CSS_RULE_LIST@0..15
-    0: CSS_RULE@0..15
-      0: CSS_SELECTOR_LIST@0..13
-        0: CSS_COMPOUND_SELECTOR@0..13
-          0: (empty)
-          1: CSS_TYPE_SELECTOR@0..3
-            0: (empty)
-            1: CSS_IDENTIFIER@0..3
-              0: IDENT@0..3 "div" [] []
-          2: CSS_SUB_SELECTOR_LIST@3..13
-            0: CSS_PSEUDO_ELEMENT_SELECTOR@3..13
-              0: COLON2@3..5 "::" [] []
-              1: CSS_PSEUDO_ELEMENT_IDENTIFIER@5..13
-                0: CSS_IDENTIFIER@5..13
-                  0: IDENT@5..13 "bef\\ore" [] [Whitespace(" ")]
-      1: CSS_BLOCK@13..15
+  1: CSS_STYLE_SHEET_CONTENT@0..15
+    0: CSS_QUALIFIED_RULE@0..15
+      0: CSS_QUALIFIED_RULE_PRELUDE@0..13
+        0: CSS_IDENTIFIER@0..3
+          0: IDENT@0..3 "div" [] []
+        1: CSS_PRESERVED_TOKEN_KEY@3..4
+          0: COLON@3..4 ":" [] []
+        2: CSS_PRESERVED_TOKEN_KEY@4..5
+          0: COLON@4..5 ":" [] []
+        3: CSS_IDENTIFIER@5..13
+          0: IDENT@5..13 "bef\\ore" [] [Whitespace(" ")]
+      1: CSS_CURLY_BRACKETS_BLOCK@13..15
         0: L_CURLY@13..14 "{" [] []
-        1: CSS_DECLARATION_LIST@14..14
+        1: CSS_CURLY_BRACKETS_BLOCK_CONTENT@14..14
         2: R_CURLY@14..15 "}" [] []
   2: EOF@15..16 "" [Newline("\n")] []
 

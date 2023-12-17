@@ -15,68 +15,64 @@ tabbed-custom-element::part(   active   ) {}
 ## AST
 
 ```
-CssRoot {
+CssStyleSheet {
     bom_token: missing (optional),
-    rules: CssRuleList [
-        CssRule {
-            prelude: CssSelectorList [
-                CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
-                    simple_selector: CssTypeSelector {
-                        namespace: missing (optional),
-                        ident: CssIdentifier {
-                            value_token: IDENT@0..21 "tabbed-custom-element" [] [],
-                        },
+    content: CssStyleSheetContent [
+        CssQualifiedRule {
+            prelude: CssQualifiedRulePrelude [
+                CssIdentifier {
+                    value_token: IDENT@0..21 "tabbed-custom-element" [] [],
+                },
+                CssPreservedTokenKey {
+                    value: COLON@21..22 ":" [] [],
+                },
+                CssPreservedTokenKey {
+                    value: COLON@22..23 ":" [] [],
+                },
+                CssFunctionBlock {
+                    css_function_token: CssFunctionToken {
+                        valye_token: FUNCTION_TOKEN@23..28 "part(" [] [],
                     },
-                    sub_selectors: CssSubSelectorList [
-                        CssPseudoElementSelector {
-                            double_colon_token: COLON2@21..23 "::" [] [],
-                            element: CssPseudoElementFunctionIdentifier {
-                                name: PART_KW@23..27 "part" [] [],
-                                l_paren_token: L_PAREN@27..28 "(" [] [],
-                                ident: CssIdentifier {
-                                    value_token: IDENT@28..34 "active" [] [],
-                                },
-                                r_paren_token: R_PAREN@34..36 ")" [] [Whitespace(" ")],
-                            },
+                    css_component_value_list: CssComponentValueList [
+                        CssIdentifier {
+                            value_token: IDENT@28..34 "active" [] [],
                         },
                     ],
+                    r_paren_token: R_PAREN@34..36 ")" [] [Whitespace(" ")],
                 },
             ],
-            block: CssBlock {
+            block: CssCurlyBracketsBlock {
                 l_curly_token: L_CURLY@36..37 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                content: CssCurlyBracketsBlockContent [],
                 r_curly_token: R_CURLY@37..38 "}" [] [],
             },
         },
-        CssRule {
-            prelude: CssSelectorList [
-                CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
-                    simple_selector: CssTypeSelector {
-                        namespace: missing (optional),
-                        ident: CssIdentifier {
-                            value_token: IDENT@38..60 "tabbed-custom-element" [Newline("\n")] [],
-                        },
+        CssQualifiedRule {
+            prelude: CssQualifiedRulePrelude [
+                CssIdentifier {
+                    value_token: IDENT@38..60 "tabbed-custom-element" [Newline("\n")] [],
+                },
+                CssPreservedTokenKey {
+                    value: COLON@60..61 ":" [] [],
+                },
+                CssPreservedTokenKey {
+                    value: COLON@61..62 ":" [] [],
+                },
+                CssFunctionBlock {
+                    css_function_token: CssFunctionToken {
+                        valye_token: FUNCTION_TOKEN@62..70 "part(" [] [Whitespace("   ")],
                     },
-                    sub_selectors: CssSubSelectorList [
-                        CssPseudoElementSelector {
-                            double_colon_token: COLON2@60..62 "::" [] [],
-                            element: CssPseudoElementFunctionIdentifier {
-                                name: PART_KW@62..66 "part" [] [],
-                                l_paren_token: L_PAREN@66..70 "(" [] [Whitespace("   ")],
-                                ident: CssIdentifier {
-                                    value_token: IDENT@70..79 "active" [] [Whitespace("   ")],
-                                },
-                                r_paren_token: R_PAREN@79..81 ")" [] [Whitespace(" ")],
-                            },
+                    css_component_value_list: CssComponentValueList [
+                        CssIdentifier {
+                            value_token: IDENT@70..79 "active" [] [Whitespace("   ")],
                         },
                     ],
+                    r_paren_token: R_PAREN@79..81 ")" [] [Whitespace(" ")],
                 },
             ],
-            block: CssBlock {
+            block: CssCurlyBracketsBlock {
                 l_curly_token: L_CURLY@81..82 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                content: CssCurlyBracketsBlockContent [],
                 r_curly_token: R_CURLY@82..83 "}" [] [],
             },
         },
@@ -88,50 +84,46 @@ CssRoot {
 ## CST
 
 ```
-0: CSS_ROOT@0..84
+0: CSS_STYLE_SHEET@0..84
   0: (empty)
-  1: CSS_RULE_LIST@0..83
-    0: CSS_RULE@0..38
-      0: CSS_SELECTOR_LIST@0..36
-        0: CSS_COMPOUND_SELECTOR@0..36
-          0: (empty)
-          1: CSS_TYPE_SELECTOR@0..21
-            0: (empty)
-            1: CSS_IDENTIFIER@0..21
-              0: IDENT@0..21 "tabbed-custom-element" [] []
-          2: CSS_SUB_SELECTOR_LIST@21..36
-            0: CSS_PSEUDO_ELEMENT_SELECTOR@21..36
-              0: COLON2@21..23 "::" [] []
-              1: CSS_PSEUDO_ELEMENT_FUNCTION_IDENTIFIER@23..36
-                0: PART_KW@23..27 "part" [] []
-                1: L_PAREN@27..28 "(" [] []
-                2: CSS_IDENTIFIER@28..34
-                  0: IDENT@28..34 "active" [] []
-                3: R_PAREN@34..36 ")" [] [Whitespace(" ")]
-      1: CSS_BLOCK@36..38
+  1: CSS_STYLE_SHEET_CONTENT@0..83
+    0: CSS_QUALIFIED_RULE@0..38
+      0: CSS_QUALIFIED_RULE_PRELUDE@0..36
+        0: CSS_IDENTIFIER@0..21
+          0: IDENT@0..21 "tabbed-custom-element" [] []
+        1: CSS_PRESERVED_TOKEN_KEY@21..22
+          0: COLON@21..22 ":" [] []
+        2: CSS_PRESERVED_TOKEN_KEY@22..23
+          0: COLON@22..23 ":" [] []
+        3: CSS_FUNCTION_BLOCK@23..36
+          0: CSS_FUNCTION_TOKEN@23..28
+            0: FUNCTION_TOKEN@23..28 "part(" [] []
+          1: CSS_COMPONENT_VALUE_LIST@28..34
+            0: CSS_IDENTIFIER@28..34
+              0: IDENT@28..34 "active" [] []
+          2: R_PAREN@34..36 ")" [] [Whitespace(" ")]
+      1: CSS_CURLY_BRACKETS_BLOCK@36..38
         0: L_CURLY@36..37 "{" [] []
-        1: CSS_DECLARATION_LIST@37..37
+        1: CSS_CURLY_BRACKETS_BLOCK_CONTENT@37..37
         2: R_CURLY@37..38 "}" [] []
-    1: CSS_RULE@38..83
-      0: CSS_SELECTOR_LIST@38..81
-        0: CSS_COMPOUND_SELECTOR@38..81
-          0: (empty)
-          1: CSS_TYPE_SELECTOR@38..60
-            0: (empty)
-            1: CSS_IDENTIFIER@38..60
-              0: IDENT@38..60 "tabbed-custom-element" [Newline("\n")] []
-          2: CSS_SUB_SELECTOR_LIST@60..81
-            0: CSS_PSEUDO_ELEMENT_SELECTOR@60..81
-              0: COLON2@60..62 "::" [] []
-              1: CSS_PSEUDO_ELEMENT_FUNCTION_IDENTIFIER@62..81
-                0: PART_KW@62..66 "part" [] []
-                1: L_PAREN@66..70 "(" [] [Whitespace("   ")]
-                2: CSS_IDENTIFIER@70..79
-                  0: IDENT@70..79 "active" [] [Whitespace("   ")]
-                3: R_PAREN@79..81 ")" [] [Whitespace(" ")]
-      1: CSS_BLOCK@81..83
+    1: CSS_QUALIFIED_RULE@38..83
+      0: CSS_QUALIFIED_RULE_PRELUDE@38..81
+        0: CSS_IDENTIFIER@38..60
+          0: IDENT@38..60 "tabbed-custom-element" [Newline("\n")] []
+        1: CSS_PRESERVED_TOKEN_KEY@60..61
+          0: COLON@60..61 ":" [] []
+        2: CSS_PRESERVED_TOKEN_KEY@61..62
+          0: COLON@61..62 ":" [] []
+        3: CSS_FUNCTION_BLOCK@62..81
+          0: CSS_FUNCTION_TOKEN@62..70
+            0: FUNCTION_TOKEN@62..70 "part(" [] [Whitespace("   ")]
+          1: CSS_COMPONENT_VALUE_LIST@70..79
+            0: CSS_IDENTIFIER@70..79
+              0: IDENT@70..79 "active" [] [Whitespace("   ")]
+          2: R_PAREN@79..81 ")" [] [Whitespace(" ")]
+      1: CSS_CURLY_BRACKETS_BLOCK@81..83
         0: L_CURLY@81..82 "{" [] []
-        1: CSS_DECLARATION_LIST@82..82
+        1: CSS_CURLY_BRACKETS_BLOCK_CONTENT@82..82
         2: R_CURLY@82..83 "}" [] []
   2: EOF@83..84 "" [Newline("\n")] []
 
