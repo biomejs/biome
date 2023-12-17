@@ -223,7 +223,7 @@ impl CssCompoundSelectorBuilder {
 pub fn css_container_and_query(
     left: AnyCssContainerQueryInParens,
     and_token: SyntaxToken,
-    right: AnyCssContainerCombinableQuery,
+    right: AnyCssContainerAndCombinableQuery,
 ) -> CssContainerAndQuery {
     CssContainerAndQuery::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_CONTAINER_AND_QUERY,
@@ -285,7 +285,7 @@ pub fn css_container_not_query(
 pub fn css_container_or_query(
     left: AnyCssContainerQueryInParens,
     or_token: SyntaxToken,
-    right: AnyCssContainerCombinableQuery,
+    right: AnyCssContainerOrCombinableQuery,
 ) -> CssContainerOrQuery {
     CssContainerOrQuery::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_CONTAINER_OR_QUERY,
@@ -312,14 +312,14 @@ pub fn css_container_query_in_parens(
 }
 pub fn css_container_size_feature_in_parens(
     l_paren_token: SyntaxToken,
-    query: AnyCssContainerSizeFeature,
+    feature: AnyCssQueryFeature,
     r_paren_token: SyntaxToken,
 ) -> CssContainerSizeFeatureInParens {
     CssContainerSizeFeatureInParens::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_CONTAINER_SIZE_FEATURE_IN_PARENS,
         [
             Some(SyntaxElement::Token(l_paren_token)),
-            Some(SyntaxElement::Node(query.into_syntax())),
+            Some(SyntaxElement::Node(feature.into_syntax())),
             Some(SyntaxElement::Token(r_paren_token)),
         ],
     ))
@@ -327,7 +327,7 @@ pub fn css_container_size_feature_in_parens(
 pub fn css_container_style_and_query(
     left: CssContainerStyleInParens,
     and_token: SyntaxToken,
-    right: AnyCssContainerStyleCombinableQuery,
+    right: AnyCssContainerStyleAndCombinableQuery,
 ) -> CssContainerStyleAndQuery {
     CssContainerStyleAndQuery::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_CONTAINER_STYLE_AND_QUERY,
@@ -367,7 +367,7 @@ pub fn css_container_style_not_query(
 pub fn css_container_style_or_query(
     left: CssContainerStyleInParens,
     or_token: SyntaxToken,
-    right: AnyCssContainerStyleCombinableQuery,
+    right: AnyCssContainerStyleOrCombinableQuery,
 ) -> CssContainerStyleOrQuery {
     CssContainerStyleOrQuery::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_CONTAINER_STYLE_OR_QUERY,
@@ -546,106 +546,75 @@ pub fn css_keyframes_selector(
         ],
     ))
 }
+pub fn css_media_and_condition(
+    left: AnyCssMediaInParens,
+    and_token: SyntaxToken,
+    right: AnyCssMediaAndCombinableCondition,
+) -> CssMediaAndCondition {
+    CssMediaAndCondition::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_MEDIA_AND_CONDITION,
+        [
+            Some(SyntaxElement::Node(left.into_syntax())),
+            Some(SyntaxElement::Token(and_token)),
+            Some(SyntaxElement::Node(right.into_syntax())),
+        ],
+    ))
+}
+pub fn css_media_and_type_query(
+    left: CssMediaTypeQuery,
+    and_token: SyntaxToken,
+    right: AnyCssMediaTypeCondition,
+) -> CssMediaAndTypeQuery {
+    CssMediaAndTypeQuery::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_MEDIA_AND_TYPE_QUERY,
+        [
+            Some(SyntaxElement::Node(left.into_syntax())),
+            Some(SyntaxElement::Token(and_token)),
+            Some(SyntaxElement::Node(right.into_syntax())),
+        ],
+    ))
+}
 pub fn css_media_at_rule(
     media_token: SyntaxToken,
     query_list: CssMediaQueryList,
-    l_curly_token: SyntaxToken,
-    body: AnyCssRule,
-    r_curly_token: SyntaxToken,
+    block: CssBlock,
 ) -> CssMediaAtRule {
     CssMediaAtRule::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_MEDIA_AT_RULE,
         [
             Some(SyntaxElement::Token(media_token)),
             Some(SyntaxElement::Node(query_list.into_syntax())),
-            Some(SyntaxElement::Token(l_curly_token)),
-            Some(SyntaxElement::Node(body.into_syntax())),
-            Some(SyntaxElement::Token(r_curly_token)),
+            Some(SyntaxElement::Node(block.into_syntax())),
         ],
     ))
 }
-pub fn css_media_query(
-    condition_token: SyntaxToken,
-    or_token: SyntaxToken,
-    ty: AnyCssMediaQueryType,
-) -> CssMediaQueryBuilder {
-    CssMediaQueryBuilder {
-        condition_token,
-        or_token,
-        ty,
-        only_token: None,
-        consequent: None,
-    }
-}
-pub struct CssMediaQueryBuilder {
-    condition_token: SyntaxToken,
-    or_token: SyntaxToken,
-    ty: AnyCssMediaQueryType,
-    only_token: Option<SyntaxToken>,
-    consequent: Option<CssMediaQueryConsequent>,
-}
-impl CssMediaQueryBuilder {
-    pub fn with_only_token(mut self, only_token: SyntaxToken) -> Self {
-        self.only_token = Some(only_token);
-        self
-    }
-    pub fn with_consequent(mut self, consequent: CssMediaQueryConsequent) -> Self {
-        self.consequent = Some(consequent);
-        self
-    }
-    pub fn build(self) -> CssMediaQuery {
-        CssMediaQuery::unwrap_cast(SyntaxNode::new_detached(
-            CssSyntaxKind::CSS_MEDIA_QUERY,
-            [
-                Some(SyntaxElement::Token(self.condition_token)),
-                Some(SyntaxElement::Token(self.or_token)),
-                self.only_token.map(|token| SyntaxElement::Token(token)),
-                Some(SyntaxElement::Node(self.ty.into_syntax())),
-                self.consequent
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-            ],
-        ))
-    }
-}
-pub fn css_media_query_consequent(
-    and_token: SyntaxToken,
-    ty: AnyCssMediaQueryType,
-) -> CssMediaQueryConsequentBuilder {
-    CssMediaQueryConsequentBuilder {
-        and_token,
-        ty,
-        condition_token: None,
-    }
-}
-pub struct CssMediaQueryConsequentBuilder {
-    and_token: SyntaxToken,
-    ty: AnyCssMediaQueryType,
-    condition_token: Option<SyntaxToken>,
-}
-impl CssMediaQueryConsequentBuilder {
-    pub fn with_condition_token(mut self, condition_token: SyntaxToken) -> Self {
-        self.condition_token = Some(condition_token);
-        self
-    }
-    pub fn build(self) -> CssMediaQueryConsequent {
-        CssMediaQueryConsequent::unwrap_cast(SyntaxNode::new_detached(
-            CssSyntaxKind::CSS_MEDIA_QUERY_CONSEQUENT,
-            [
-                Some(SyntaxElement::Token(self.and_token)),
-                self.condition_token
-                    .map(|token| SyntaxElement::Token(token)),
-                Some(SyntaxElement::Node(self.ty.into_syntax())),
-            ],
-        ))
-    }
-}
-pub fn css_media_query_feature(
+pub fn css_media_condition_in_parens(
     l_paren_token: SyntaxToken,
-    feature: AnyCssMediaQueryFeatureType,
+    condition: AnyCssMediaCondition,
     r_paren_token: SyntaxToken,
-) -> CssMediaQueryFeature {
-    CssMediaQueryFeature::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_MEDIA_QUERY_FEATURE,
+) -> CssMediaConditionInParens {
+    CssMediaConditionInParens::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_MEDIA_CONDITION_IN_PARENS,
+        [
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(condition.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
+pub fn css_media_condition_query(condition: AnyCssMediaCondition) -> CssMediaConditionQuery {
+    CssMediaConditionQuery::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_MEDIA_CONDITION_QUERY,
+        [Some(SyntaxElement::Node(condition.into_syntax()))],
+    ))
+}
+pub fn css_media_feature_in_parens(
+    l_paren_token: SyntaxToken,
+    feature: AnyCssQueryFeature,
+    r_paren_token: SyntaxToken,
+) -> CssMediaFeatureInParens {
+    CssMediaFeatureInParens::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_MEDIA_FEATURE_IN_PARENS,
         [
             Some(SyntaxElement::Token(l_paren_token)),
             Some(SyntaxElement::Node(feature.into_syntax())),
@@ -653,75 +622,62 @@ pub fn css_media_query_feature(
         ],
     ))
 }
-pub fn css_media_query_feature_boolean(
-    css_identifier: CssIdentifier,
-) -> CssMediaQueryFeatureBoolean {
-    CssMediaQueryFeatureBoolean::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_MEDIA_QUERY_FEATURE_BOOLEAN,
-        [Some(SyntaxElement::Node(css_identifier.into_syntax()))],
-    ))
-}
-pub fn css_media_query_feature_compare(
-    name: CssIdentifier,
-    range: CssMediaQueryRange,
-    value: AnyCssValue,
-) -> CssMediaQueryFeatureCompare {
-    CssMediaQueryFeatureCompare::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_MEDIA_QUERY_FEATURE_COMPARE,
+pub fn css_media_not_condition(
+    not_token: SyntaxToken,
+    condition: AnyCssMediaInParens,
+) -> CssMediaNotCondition {
+    CssMediaNotCondition::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_MEDIA_NOT_CONDITION,
         [
-            Some(SyntaxElement::Node(name.into_syntax())),
-            Some(SyntaxElement::Node(range.into_syntax())),
-            Some(SyntaxElement::Node(value.into_syntax())),
+            Some(SyntaxElement::Token(not_token)),
+            Some(SyntaxElement::Node(condition.into_syntax())),
         ],
     ))
 }
-pub fn css_media_query_feature_plain(
-    name: CssIdentifier,
-    colon_token: SyntaxToken,
-    value: AnyCssValue,
-) -> CssMediaQueryFeaturePlain {
-    CssMediaQueryFeaturePlain::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_MEDIA_QUERY_FEATURE_PLAIN,
+pub fn css_media_or_condition(
+    left: AnyCssMediaInParens,
+    or_token: SyntaxToken,
+    right: AnyCssMediaOrCombinableCondition,
+) -> CssMediaOrCondition {
+    CssMediaOrCondition::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_MEDIA_OR_CONDITION,
         [
-            Some(SyntaxElement::Node(name.into_syntax())),
-            Some(SyntaxElement::Token(colon_token)),
-            Some(SyntaxElement::Node(value.into_syntax())),
+            Some(SyntaxElement::Node(left.into_syntax())),
+            Some(SyntaxElement::Token(or_token)),
+            Some(SyntaxElement::Node(right.into_syntax())),
         ],
     ))
 }
-pub fn css_media_query_feature_range(
-    first_value: AnyCssValue,
-    first_range: CssMediaQueryRange,
-    name: CssIdentifier,
-    second_value: AnyCssValue,
-    second_range: CssMediaQueryRange,
-) -> CssMediaQueryFeatureRange {
-    CssMediaQueryFeatureRange::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_MEDIA_QUERY_FEATURE_RANGE,
-        [
-            Some(SyntaxElement::Node(first_value.into_syntax())),
-            Some(SyntaxElement::Node(first_range.into_syntax())),
-            Some(SyntaxElement::Node(name.into_syntax())),
-            Some(SyntaxElement::Node(second_value.into_syntax())),
-            Some(SyntaxElement::Node(second_range.into_syntax())),
-        ],
+pub fn css_media_type(value: CssIdentifier) -> CssMediaType {
+    CssMediaType::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_MEDIA_TYPE,
+        [Some(SyntaxElement::Node(value.into_syntax()))],
     ))
 }
-pub fn css_media_query_range(
-    r_angle_token: SyntaxToken,
-    l_angle_token: SyntaxToken,
-    greater_than_equal_token: SyntaxToken,
-    less_than_equal_token: SyntaxToken,
-) -> CssMediaQueryRange {
-    CssMediaQueryRange::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_MEDIA_QUERY_RANGE,
-        [
-            Some(SyntaxElement::Token(r_angle_token)),
-            Some(SyntaxElement::Token(l_angle_token)),
-            Some(SyntaxElement::Token(greater_than_equal_token)),
-            Some(SyntaxElement::Token(less_than_equal_token)),
-        ],
-    ))
+pub fn css_media_type_query(ty: CssMediaType) -> CssMediaTypeQueryBuilder {
+    CssMediaTypeQueryBuilder {
+        ty,
+        modifier_token: None,
+    }
+}
+pub struct CssMediaTypeQueryBuilder {
+    ty: CssMediaType,
+    modifier_token: Option<SyntaxToken>,
+}
+impl CssMediaTypeQueryBuilder {
+    pub fn with_modifier_token(mut self, modifier_token: SyntaxToken) -> Self {
+        self.modifier_token = Some(modifier_token);
+        self
+    }
+    pub fn build(self) -> CssMediaTypeQuery {
+        CssMediaTypeQuery::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::CSS_MEDIA_TYPE_QUERY,
+            [
+                self.modifier_token.map(|token| SyntaxElement::Token(token)),
+                Some(SyntaxElement::Node(self.ty.into_syntax())),
+            ],
+        ))
+    }
 }
 pub fn css_named_namespace_prefix(name: CssIdentifier) -> CssNamedNamespacePrefix {
     CssNamedNamespacePrefix::unwrap_cast(SyntaxNode::new_detached(
@@ -1104,6 +1060,80 @@ pub fn css_pseudo_element_selector(
         ],
     ))
 }
+pub fn css_query_feature_boolean(name: CssIdentifier) -> CssQueryFeatureBoolean {
+    CssQueryFeatureBoolean::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_QUERY_FEATURE_BOOLEAN,
+        [Some(SyntaxElement::Node(name.into_syntax()))],
+    ))
+}
+pub fn css_query_feature_plain(
+    name: CssIdentifier,
+    colon_token: SyntaxToken,
+    value: AnyCssQueryFeatureValue,
+) -> CssQueryFeaturePlain {
+    CssQueryFeaturePlain::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_QUERY_FEATURE_PLAIN,
+        [
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Token(colon_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
+        ],
+    ))
+}
+pub fn css_query_feature_range(
+    left: CssIdentifier,
+    comparison: CssQueryFeatureRangeComparison,
+    right: AnyCssQueryFeatureValue,
+) -> CssQueryFeatureRange {
+    CssQueryFeatureRange::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_QUERY_FEATURE_RANGE,
+        [
+            Some(SyntaxElement::Node(left.into_syntax())),
+            Some(SyntaxElement::Node(comparison.into_syntax())),
+            Some(SyntaxElement::Node(right.into_syntax())),
+        ],
+    ))
+}
+pub fn css_query_feature_range_comparison(
+    operator_token: SyntaxToken,
+) -> CssQueryFeatureRangeComparison {
+    CssQueryFeatureRangeComparison::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_QUERY_FEATURE_RANGE_COMPARISON,
+        [Some(SyntaxElement::Token(operator_token))],
+    ))
+}
+pub fn css_query_feature_range_interval(
+    left: AnyCssQueryFeatureValue,
+    left_comparison: CssQueryFeatureRangeComparison,
+    name: CssIdentifier,
+    right_comparison: CssQueryFeatureRangeComparison,
+    right: AnyCssQueryFeatureValue,
+) -> CssQueryFeatureRangeInterval {
+    CssQueryFeatureRangeInterval::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_QUERY_FEATURE_RANGE_INTERVAL,
+        [
+            Some(SyntaxElement::Node(left.into_syntax())),
+            Some(SyntaxElement::Node(left_comparison.into_syntax())),
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Node(right_comparison.into_syntax())),
+            Some(SyntaxElement::Node(right.into_syntax())),
+        ],
+    ))
+}
+pub fn css_query_feature_reverse_range(
+    left: AnyCssQueryFeatureValue,
+    comparison: CssQueryFeatureRangeComparison,
+    right: CssIdentifier,
+) -> CssQueryFeatureReverseRange {
+    CssQueryFeatureReverseRange::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_QUERY_FEATURE_REVERSE_RANGE,
+        [
+            Some(SyntaxElement::Node(left.into_syntax())),
+            Some(SyntaxElement::Node(comparison.into_syntax())),
+            Some(SyntaxElement::Node(right.into_syntax())),
+        ],
+    ))
+}
 pub fn css_ratio(
     numerator: CssNumber,
     slash_token: SyntaxToken,
@@ -1203,66 +1233,6 @@ pub fn css_simple_function(
             Some(SyntaxElement::Token(l_paren_token)),
             Some(SyntaxElement::Node(items.into_syntax())),
             Some(SyntaxElement::Token(r_paren_token)),
-        ],
-    ))
-}
-pub fn css_size_feature_boolean(name: CssIdentifier) -> CssSizeFeatureBoolean {
-    CssSizeFeatureBoolean::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_SIZE_FEATURE_BOOLEAN,
-        [Some(SyntaxElement::Node(name.into_syntax()))],
-    ))
-}
-pub fn css_size_feature_plain(
-    name: CssIdentifier,
-    colon_token: SyntaxToken,
-    value: AnyCssSizeFeatureValue,
-) -> CssSizeFeaturePlain {
-    CssSizeFeaturePlain::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_SIZE_FEATURE_PLAIN,
-        [
-            Some(SyntaxElement::Node(name.into_syntax())),
-            Some(SyntaxElement::Token(colon_token)),
-            Some(SyntaxElement::Node(value.into_syntax())),
-        ],
-    ))
-}
-pub fn css_size_feature_range(
-    left: CssIdentifier,
-    comparison: CssSizeFeatureRangeComparison,
-    right: AnyCssSizeFeatureValue,
-) -> CssSizeFeatureRange {
-    CssSizeFeatureRange::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_SIZE_FEATURE_RANGE,
-        [
-            Some(SyntaxElement::Node(left.into_syntax())),
-            Some(SyntaxElement::Node(comparison.into_syntax())),
-            Some(SyntaxElement::Node(right.into_syntax())),
-        ],
-    ))
-}
-pub fn css_size_feature_range_comparison(
-    operator_token: SyntaxToken,
-) -> CssSizeFeatureRangeComparison {
-    CssSizeFeatureRangeComparison::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_SIZE_FEATURE_RANGE_COMPARISON,
-        [Some(SyntaxElement::Token(operator_token))],
-    ))
-}
-pub fn css_size_feature_range_interval(
-    left: AnyCssSizeFeatureValue,
-    left_comparison: CssSizeFeatureRangeComparison,
-    name: CssIdentifier,
-    right_comparison: CssSizeFeatureRangeComparison,
-    right: AnyCssSizeFeatureValue,
-) -> CssSizeFeatureRangeInterval {
-    CssSizeFeatureRangeInterval::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_SIZE_FEATURE_RANGE_INTERVAL,
-        [
-            Some(SyntaxElement::Node(left.into_syntax())),
-            Some(SyntaxElement::Node(left_comparison.into_syntax())),
-            Some(SyntaxElement::Node(name.into_syntax())),
-            Some(SyntaxElement::Node(right_comparison.into_syntax())),
-            Some(SyntaxElement::Node(right.into_syntax())),
         ],
     ))
 }
@@ -1471,7 +1441,7 @@ where
 }
 pub fn css_media_query_list<I, S>(items: I, separators: S) -> CssMediaQueryList
 where
-    I: IntoIterator<Item = CssMediaQuery>,
+    I: IntoIterator<Item = AnyCssMediaQuery>,
     I::IntoIter: ExactSizeIterator,
     S: IntoIterator<Item = CssSyntaxToken>,
     S::IntoIter: ExactSizeIterator,
@@ -1642,6 +1612,16 @@ where
 {
     CssBogusDeclarationItem::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_BOGUS_DECLARATION_ITEM,
+        slots,
+    ))
+}
+pub fn css_bogus_media_query<I>(slots: I) -> CssBogusMediaQuery
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssBogusMediaQuery::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_BOGUS_MEDIA_QUERY,
         slots,
     ))
 }

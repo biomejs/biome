@@ -84,14 +84,13 @@ pub(crate) fn parse_rule_block(p: &mut CssParser) -> ParsedSyntax {
     }
     let m = p.start();
     p.expect(T!['{']);
-    CssDeclarationList::default().parse_list(p);
+    CssDeclarationList.parse_list(p);
     p.expect(T!['}']);
 
     Present(m.complete(p, CSS_BLOCK))
 }
 
-#[derive(Default)]
-pub(crate) struct CssDeclarationList {}
+pub(crate) struct CssDeclarationList;
 
 impl ParseSeparatedList for CssDeclarationList {
     type Kind = CssSyntaxKind;
@@ -104,10 +103,6 @@ impl ParseSeparatedList for CssDeclarationList {
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
         p.at(T!['}'])
-    }
-
-    fn allow_trailing_separating_element(&self) -> bool {
-        true
     }
 
     fn recover(
@@ -125,10 +120,13 @@ impl ParseSeparatedList for CssDeclarationList {
     fn separating_element_kind(&mut self) -> Self::Kind {
         T![;]
     }
+
+    fn allow_trailing_separating_element(&self) -> bool {
+        true
+    }
 }
 
-#[derive(Default)]
-struct ListOfComponentValues {}
+struct ListOfComponentValues;
 impl ParseNodeList for ListOfComponentValues {
     type Kind = CssSyntaxKind;
     type Parser<'source> = CssParser<'source>;
@@ -164,7 +162,7 @@ pub(crate) fn parse_declaration(p: &mut CssParser) -> ParsedSyntax {
 
     p.expect(T![:]);
 
-    ListOfComponentValues::default().parse_list(p);
+    ListOfComponentValues.parse_list(p);
 
     parse_declaration_important(p).ok();
     Present(m.complete(p, CSS_DECLARATION))
@@ -254,10 +252,6 @@ impl ParseSeparatedList for CssParameterList {
         p.at(T![')'])
     }
 
-    fn allow_trailing_separating_element(&self) -> bool {
-        true
-    }
-
     fn recover(
         &mut self,
         p: &mut Self::Parser<'_>,
@@ -273,6 +267,10 @@ impl ParseSeparatedList for CssParameterList {
     fn separating_element_kind(&mut self) -> Self::Kind {
         T![,]
     }
+
+    fn allow_trailing_separating_element(&self) -> bool {
+        true
+    }
 }
 
 #[inline]
@@ -282,7 +280,7 @@ pub(crate) fn parse_parameter(p: &mut CssParser) -> ParsedSyntax {
     }
     let param = p.start();
 
-    ListOfComponentValues::default().parse_list(p);
+    ListOfComponentValues.parse_list(p);
 
     Present(param.complete(p, CSS_PARAMETER))
 }
