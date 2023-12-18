@@ -264,10 +264,10 @@ fn traverse_inputs(
                 .map(PathBuf::from)
                 .map(|path| {
                     if let Some(working_directory) = fs.working_directory() {
-                        if path.starts_with(".") || path.starts_with("./") {
-                            working_directory
-                        } else {
+                        if path.to_str() == Some(".") || path.to_str() == Some("./") {
                             working_directory.join(path)
+                        } else {
+                            path
                         }
                     } else {
                         path
