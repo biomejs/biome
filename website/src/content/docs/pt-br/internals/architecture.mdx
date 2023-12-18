@@ -47,7 +47,7 @@ O CST nunca é diretamente acessível por design, um desenvolvedor pode ler suas
 #### Parser resiliente e recuperável
 
 Para construir um CST, é necessário um parser resiliente e recuperável:
-- resiliente: um parser capaz de retomar a análise após encontrar um erro de sintaxe pertencente ao idioma;
+- resiliente: um parser capaz de retomar a análise após encontrar um erro de sintaxe pertencente à linguagem;
 - recuperável: um parser capaz de **entender** onde ocorreu um erro e ser capaz de retomar a análise criando informações **corretas**;
 
 A parte recuperável do parser não é uma ciência exata, e não há regras definitivas. Isso significa que, dependendo do que o parser estava analisando e onde ocorreu um erro, ele pode se recuperar de maneiras esperadas.
