@@ -279,7 +279,6 @@ fn handle_dir_entry<'scope>(
             scope.spawn(move |_| {
                 ctx.handle_file(&path);
             });
-            return;
         }
     }
 }

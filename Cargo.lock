@@ -367,7 +367,6 @@ dependencies = [
  "biome_console",
  "biome_diagnostics",
  "crossbeam",
- "globset",
  "indexmap",
  "parking_lot",
  "rayon",

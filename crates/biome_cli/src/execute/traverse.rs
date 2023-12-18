@@ -694,7 +694,7 @@ impl<'ctx, 'app> TraversalContext for TraversalOptions<'ctx, 'app> {
             Ok(file_features) => {
                 if file_features.is_not_supported() && !file_features.is_ignored() {
                     // we should throw a diagnostic if we can't handle a file that isn't ignored
-                    self.miss_handler_err(extension_error(&rome_path), rome_path);
+                    self.miss_handler_err(extension_error(rome_path), rome_path);
                     return false;
                 }
                 file_features
