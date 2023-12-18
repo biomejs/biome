@@ -63,7 +63,7 @@ use biome_js_syntax::{TextRange, TextSize};
 use biome_text_edit::TextEdit;
 use std::collections::HashMap;
 use std::ffi::OsStr;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::{borrow::Cow, panic::RefUnwindSafe, sync::Arc};
 use tracing::debug;
 
@@ -119,9 +119,9 @@ impl FileFeaturesResult {
 
     /// By default, all features are not supported by a file.
     const WORKSPACE_FEATURES: [(FeatureName, SupportKind); 3] = [
-        (FeatureName::Lint, SupportKind::FileNotSupported),
-        (FeatureName::Format, SupportKind::FileNotSupported),
-        (FeatureName::OrganizeImports, SupportKind::FileNotSupported),
+        (FeatureName::Lint, SupportKind::Ignored),
+        (FeatureName::Format, SupportKind::Ignored),
+        (FeatureName::OrganizeImports, SupportKind::Ignored),
     ];
 
     pub fn new() -> Self {
@@ -227,6 +227,34 @@ impl FileFeaturesResult {
     pub fn support_kind_for(&self, feature: &FeatureName) -> Option<&SupportKind> {
         self.features_supported.get(feature)
     }
+
+    /// If at least one feature is supported, the file is supported
+    pub fn is_supported(&self) -> bool {
+        self.features_supported
+            .values()
+            .any(|support_kind| support_kind.is_supported())
+    }
+
+    /// The file is ignored only if all the features marked it as ignored
+    pub fn is_ignored(&self) -> bool {
+        self.features_supported
+            .values()
+            .all(|support_kind| support_kind.is_ignored())
+    }
+
+    /// The file is not supported if all the featured marked it as not supported
+    pub fn is_not_supported(&self) -> bool {
+        self.features_supported
+            .values()
+            .all(|support_kind| support_kind.is_not_supported())
+    }
+
+    /// The file is not enabled if all the features marked it as not enabled
+    pub fn is_not_enabled(&self) -> bool {
+        self.features_supported
+            .values()
+            .all(|support_kind| support_kind.is_not_enabled())
+    }
 }
 
 impl SupportsFeatureResult {
@@ -265,6 +293,13 @@ impl SupportKind {
     }
     pub const fn is_not_enabled(&self) -> bool {
         matches!(self, SupportKind::FeatureNotEnabled)
+    }
+
+    pub const fn is_not_supported(&self) -> bool {
+        matches!(self, SupportKind::FileNotSupported)
+    }
+    pub const fn is_ignored(&self) -> bool {
+        matches!(self, SupportKind::Ignored)
     }
 }
 
@@ -306,6 +341,10 @@ impl FeaturesBuilder {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct UpdateSettingsParams {
     pub configuration: Configuration,
+    // @ematipico TODO: have a better data structure for this
+    pub vcs_base_path: Option<PathBuf>,
+    // @ematipico TODO: have a better data structure for this
+    pub gitignore_matches: Vec<String>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
