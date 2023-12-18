@@ -28,6 +28,14 @@ function f() {
 # Emitted Messages
 
 ```block
+rome.json internalError/fs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The configuration file rome.json is deprecated. Use biome.json instead.
+  
+
+```
+
+```block
 /test/rome.json:6:5 deserialize  DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The property indentSize is deprecated. Use formatter.indentWidth instead.
@@ -38,14 +46,6 @@ function f() {
       │     ^^^^^^^^^^^^
     7 │   }
     8 │ }
-  
-
-```
-
-```block
-rome.json internalError/fs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! The configuration file rome.json is deprecated. Use biome.json instead.
   
 
 ```

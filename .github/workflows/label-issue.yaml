@@ -1,0 +1,23 @@
+name: Label issue
+
+on:
+  issues:
+    types: [opened, reopened, edited]
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  label-documentation-issue:
+    name: Label documentation issue
+    if: contains(github.event.issue.labels.*.name, 'A-Documentation')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Label documentation issues
+        uses: github/issue-labeler@v3.3
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          configuration-path: .github/documentation-issue-labeler.yaml
+          enable-versioned-regex: 0
+          sync-labels: 1
