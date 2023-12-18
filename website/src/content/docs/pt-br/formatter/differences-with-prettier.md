@@ -144,7 +144,7 @@ No Prettier, esses erros não são considerados erros de análise, e a AST ainda
 Quando formatando, o Prettier trata esses nós como normais e os formata de acordo.
 
 No Biome, os erros de análise resultam em nós `Bogus`, que podem conter vários nós válidos, inválidos e/ou caracteres brutos.
-Quando formatando, o Biome trata nós bogus como texto simples, imprimindo-os verbatim no código resultante sem qualquer formatação, já que tentar formatá-los poderia ser incorreto e causar mudanças semânticas.
+Quando formatando, o Biome trata nós bogus como texto simples, imprimindo-os literalmente no código resultante sem qualquer formatação, já que tentar formatá-los poderia ser incorreto e causar mudanças semânticas.
 
 Para propriedades de classe, a estratégia atual de análise do Prettier também usa campos booleanos para modificadores, significando que apenas um de cada tipo de modificador pode estar presente (modificadores de acessibilidade são armazenados como uma única string).
 Quando imprimindo, o Prettier olha para a lista de booleanos e decide quais modificadores imprimir novamente. Biome, por outro lado, mantém uma lista de modificadores, significando que duplicatas são mantidas e podem ser analisadas (daí as mensagens de erro de análise sobre modificadores duplicados e ordenação).
