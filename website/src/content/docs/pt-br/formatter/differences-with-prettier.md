@@ -11,7 +11,7 @@ Prettier e Biome retiram as aspas de propriedades de objetos e classes que são 
 O Prettier [retira as aspas apenas de identificadores ES5 válidos](https://github.com/prettier/prettier/blob/a5d502513e5de4819a41fd90b9be7247146effc7/src/language-js/utils/index.js#L646).
 
 Isso é uma restrição legada em um ecossistema onde o ES2015 já é amplamente utilizado.
-Por isso, decidimos divergir aqui, retirando as aspas de todos os identificadores JavaScript válidos no ES2015+.
+Por isso, decidimos divergir aqui, retirando as aspas de todos os identificadores JavaScript válidos para ES2015+.
 
 Uma possível solução seria introduzir uma configuração para definir a versão ECMAScript que um projeto utiliza.
 Poderíamos então ajustar o comportamento de retirada de aspas com base nessa versão.
@@ -142,7 +142,7 @@ No Prettier, esses erros não são considerados erros de análise, e a AST ainda
 Quando formatando, o Prettier trata esses nós como normais e os formata de acordo.
 
 No Biome, os erros de análise resultam em nós `Bogus`, que podem conter vários nós válidos, inválidos e/ou caracteres brutos.
-Quando formatando, o Biome trata nós bogus como texto simples, imprimindo-os verbatim no código resultante sem qualquer formatação, já que tentar formatá-los poderia ser incorreto e causar mudanças semânticas.
+Quando formatando, o Biome trata nós bogus como texto simples, imprimindo-os literalmente no código resultante sem qualquer formatação, já que tentar formatá-los poderia ser incorreto e causar mudanças semânticas.
 
 Para propriedades de classe, a estratégia atual de análise do Prettier também usa campos booleanos para modificadores, significando que apenas um de cada tipo de modificador pode estar presente (modificadores de acessibilidade são armazenados como uma única string).
 Quando imprimindo, o Prettier olha para a lista de booleanos e decide quais modificadores imprimir novamente. Biome, por outro lado, mantém uma lista de modificadores, significando que duplicatas são mantidas e podem ser analisadas (daí as mensagens de erro de análise sobre modificadores duplicados e ordenação).
@@ -150,13 +150,13 @@ Quando imprimindo os nós bogus, esta lista é mantida intacta, e imprimir o tex
 
 Existem maneiras de o Biome abordar isso.
 Uma possibilidade é tentar interpretar os nós Bogus ao formatar e construir nós válidos a partir deles.
-Se um nó válido puder ser construído, então ele apenas formataria esse nó como normal, caso contrário, ele imprime o texto bogus verbatim como faz atualmente.
-No entanto, isso é bagunçado e introduz uma forma de lógica de análise no formatador que não é significativa.
+Se um nó válido puder ser construído, então ele apenas formataria esse nó normalmente, caso contrário, ele imprime o texto bogus verbatim como faz atualmente.
+No entanto, isso é confuso e introduz uma forma de lógica de análise no formatador que não é significativa.
 
 Outra opção é introduzir algum tipo de "nó bogus sintaticamente válido" no analisador, que aceita esses tipos de erros puramente semânticos (modificadores duplicados, propriedades abstratas em classes não abstratas).
 
-Ele continuaria a construir os nós como normal (efetivamente correspondendo ao comportamento no Prettier) mas os armazenaria dentro de um novo tipo de nó bogus, incluindo os diagnósticos junto com ele.
-Ao formatar, esses nós bogus particulares apenas tentariam formatar o nó interno e então recuar se houver um erro (a utilidade existente `format_or_verbatim` já faria isso).
+Ele continuaria a construir os nós normalmente (efetivamente correspondendo ao comportamento no Prettier) mas os armazenaria dentro de um novo tipo de nó bogus, incluindo os diagnósticos junto com ele.
+Ao formatar, esses nós bogus específicos tentariam apenas formatar o nó interno e, em seguida, voltariam atrás se houvesse um erro (o método utilitário `format_or_verbatim` já faria isso).
 Isso mantém a lógica de análise e formatação separadas uma da outra, mas introduz mais complexidade ao analisador, permitindo que estados inválidos sejam considerados semi-válidos.
 
 #### Modificadores duplicados em propriedades de classe
