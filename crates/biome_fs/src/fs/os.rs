@@ -11,6 +11,7 @@ use ignore::overrides::OverrideBuilder;
 use ignore::WalkBuilder;
 use rayon::{scope, Scope};
 use std::fs::{DirEntry, FileType};
+use std::process::Command;
 use std::{
     env, fs,
     io::{self, ErrorKind as IoErrorKind, Read, Seek, Write},
@@ -47,6 +48,19 @@ impl FileSystem for OsFileSystem {
 
     fn path_exists(&self, path: &Path) -> bool {
         path.exists()
+    }
+
+    fn get_changed_files(&self, base: &str) -> io::Result<Vec<String>> {
+        let output = Command::new("git")
+            .arg("diff")
+            .arg("--name-only")
+            .arg(format!("{}...HEAD", base))
+            .output()?;
+
+        Ok(String::from_utf8_lossy(&output.stdout)
+            .lines()
+            .map(|l| l.to_string())
+            .collect())
     }
 }
 

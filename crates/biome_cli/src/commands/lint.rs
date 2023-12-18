@@ -1,3 +1,4 @@
+use crate::changed::get_changed_files;
 use crate::cli_options::CliOptions;
 use crate::commands::validate_configuration_diagnostics;
 use crate::{
@@ -21,6 +22,8 @@ pub(crate) struct LintCommandPayload {
     pub(crate) files_configuration: Option<FilesConfiguration>,
     pub(crate) paths: Vec<OsString>,
     pub(crate) stdin_file_path: Option<String>,
+    pub(crate) changed: bool,
+    pub(crate) since: Option<String>,
 }
 
 /// Handler for the "lint" command of the Biome CLI
@@ -33,10 +36,12 @@ pub(crate) fn lint(
         apply_unsafe,
         cli_options,
         linter_configuration,
-        paths,
+        mut paths,
         stdin_file_path,
         vcs_configuration,
         files_configuration,
+        changed,
+        since,
     } = payload;
     setup_cli_subscriber(cli_options.log_level.clone(), cli_options.log_kind.clone());
 
@@ -78,6 +83,14 @@ pub(crate) fn lint(
     let vcs_base_path = configuration_path.or(session.app.fs.working_directory());
     let (vcs_base_path, gitignore_matches) =
         fs_configuration.retrieve_gitignore_matches(&session.app.fs, vcs_base_path.as_deref())?;
+
+    if since.is_some() && !changed {
+        return Err(CliDiagnostic::incompatible_arguments("since", "changed"));
+    }
+
+    if changed {
+        paths = get_changed_files(&session.app.fs, &fs_configuration, since)?;
+    }
 
     let stdin = if let Some(stdin_file_path) = stdin_file_path {
         let console = &mut session.app.console;
