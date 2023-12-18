@@ -141,7 +141,7 @@ Ele identifica corretamente os seguintes erros de sintaxe:
 No Prettier, esses erros não são considerados erros de análise, e a AST ainda é construída "corretamente" com os nós apropriados.
 Quando formatando, o Prettier trata esses nós como normais e os formata de acordo.
 
-No Biome, os erros de análise resultam em nós `Bogus`, que podem conter vários nós válidos, inválidos e/ou caracteres brutos.
+No Biome, os erros de análise resultam em nós `Falsos`, que podem conter vários nós válidos, inválidos e/ou caracteres brutos.
 Quando formatando, o Biome trata nós falsos como texto simples, imprimindo-os literalmente no código resultante sem qualquer formatação, já que tentar formatá-los poderia ser incorreto e causar mudanças semânticas.
 
 Para propriedades de classe, a estratégia atual de análise do Prettier também usa campos booleanos para modificadores, significando que apenas um de cada tipo de modificador pode estar presente (modificadores de acessibilidade são armazenados como uma única string).
@@ -150,12 +150,12 @@ Quando imprimindo os nós falsos, esta lista é mantida intacta, e imprimir o te
 
 Existem maneiras de o Biome abordar isso.
 Uma possibilidade é tentar interpretar os nós falsos ao formatar e construir nós válidos a partir deles.
-Se um nó válido puder ser construído, então ele apenas formataria esse nó normalmente, caso contrário, ele imprime o texto bogus verbatim como faz atualmente.
+Se um nó válido puder ser construído, então ele apenas formataria esse nó normalmente, caso contrário, ele imprime o texto falsos verbatim como faz atualmente.
 No entanto, isso é confuso e introduz uma forma de lógica de análise no formatador que não é significativa.
 
-Outra opção é introduzir algum tipo de "nó bogus sintaticamente válido" no analisador, que aceita esses tipos de erros puramente semânticos (modificadores duplicados, propriedades abstratas em classes não abstratas).
+Outra opção é introduzir algum tipo de "nó falsos sintaticamente válido" no analisador, que aceita esses tipos de erros puramente semânticos (modificadores duplicados, propriedades abstratas em classes não abstratas).
 
-Ele continuaria a construir os nós normalmente (efetivamente correspondendo ao comportamento no Prettier) mas os armazenaria dentro de um novo tipo de nó bogus, incluindo os diagnósticos junto com ele.
+Ele continuaria a construir os nós normalmente (efetivamente correspondendo ao comportamento no Prettier) mas os armazenaria dentro de um novo tipo de nó falsos, incluindo os diagnósticos junto com ele.
 Ao formatar, esses nós falsos específicos tentariam apenas formatar o nó interno e, em seguida, voltariam atrás se houvesse um erro (o método utilitário `format_or_verbatim` já faria isso).
 Isso mantém a lógica de análise e formatação separadas uma da outra, mas introduz mais complexidade ao analisador, permitindo que estados inválidos sejam considerados semi-válidos.
 
