@@ -265,7 +265,7 @@ fn traverse_inputs(
                 .map(|path| {
                     if let Some(working_directory) = fs.working_directory() {
                         if path.to_str() == Some(".") || path.to_str() == Some("./") {
-                            working_directory.join(path)
+                            working_directory
                         } else {
                             path
                         }
