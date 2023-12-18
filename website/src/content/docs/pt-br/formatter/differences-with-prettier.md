@@ -152,7 +152,7 @@ Quando imprimindo os nós bogus, esta lista é mantida intacta, e imprimir o tex
 
 Existem maneiras de o Biome abordar isso.
 Uma possibilidade é tentar interpretar os nós Bogus ao formatar e construir nós válidos a partir deles.
-Se um nó válido puder ser construído, então ele apenas formataria esse nó como normal, caso contrário, ele imprime o texto bogus verbatim como faz atualmente.
+Se um nó válido puder ser construído, então ele apenas formataria esse nó normalmente, caso contrário, ele imprime o texto bogus verbatim como faz atualmente.
 No entanto, isso é confuso e introduz uma forma de lógica de análise no formatador que não é significativa.
 
 Outra opção é introduzir algum tipo de "nó bogus sintaticamente válido" no analisador, que aceita esses tipos de erros puramente semânticos (modificadores duplicados, propriedades abstratas em classes não abstratas).
