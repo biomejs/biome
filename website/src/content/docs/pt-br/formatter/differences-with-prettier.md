@@ -11,7 +11,7 @@ Prettier e Biome retiram as aspas de propriedades de objetos e classes que são 
 O Prettier [retira as aspas apenas de identificadores ES5 válidos](https://github.com/prettier/prettier/blob/a5d502513e5de4819a41fd90b9be7247146effc7/src/language-js/utils/index.js#L646).
 
 Isso é uma restrição legada em um ecossistema onde o ES2015 já é amplamente utilizado.
-Por isso, decidimos divergir aqui, retirando as aspas de todos os identificadores JavaScript válidos no ES2015+.
+Por isso, decidimos divergir aqui, retirando as aspas de todos os identificadores JavaScript válidos para ES2015+.
 
 Uma possível solução seria introduzir uma configuração para definir a versão ECMAScript que um projeto utiliza.
 Poderíamos então ajustar o comportamento de retirada de aspas com base nessa versão.
