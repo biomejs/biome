@@ -49,6 +49,7 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 ### Formatter
 
 - Fix [#1169](https://github.com/biomejs/biome/issues/1169). Account for escaped strings when computing layout for assignments. Contributed by @kalleep
+- Fix [#1220](https://github.com/biomejs/biome/issues/1220). Avoid duplicating comments in type unions for mapped, empty object, and empty tuple types. [#1240](https://github.com/biomejs/biome/pull/1240) Contributed by @faultyserver
 
 ### JavaScript APIs
 
