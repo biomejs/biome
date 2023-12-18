@@ -30,6 +30,32 @@ banner:
 import { Card, CardGrid } from '@astrojs/starlight/components';
 import Netlify from "@src/components/Netlify.astro";
 
+<Card >
+  <h2>
+    What's Biome
+  </h2>
+  <p>
+    Biome is a performant toolchain for web projects, it aims to provide developer tools to maintain the health of said projects.
+
+    ```shell
+    npm install --save-dev --save-exact @biomejs/biome
+    ```
+  </p>
+
+  **Biome is a [fast formatter](./benchmark#formatting)** for _JavaScript_, _TypeScript_, _JSX_, and _JSON_ that scores **[96% compatibility with _Prettier_](https://console.algora.io/challenges/prettier)**.
+
+  ```shell
+  npx @biomejs/biome format ./src
+  ```
+
+  **Biome is a [performant linter](https://github.com/biomejs/biome/tree/main/benchmark#linting)** for _JavaScript_, _TypeScript_, and _JSX_ that features **[more than 170 rules](https://biomejs.dev/linter/rules/)** from ESLint, TypeSCript ESLint, and [other sources](https://github.com/biomejs/biome/discussions/3).
+  It **outputs detailed and contextualized diagnostics** that help you to improve your code and become a better programmer!
+
+  ```shell
+  npx @biomejs/biome lint ./src
+  ```
+</Card>
+
 <CardGrid stagger>
     <Card title="Fast" icon="rocket">
         Built with Rust and an innovative architecture inspired by rust-analyzer.

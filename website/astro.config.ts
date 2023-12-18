@@ -135,6 +135,10 @@ export default defineConfig({
 								"pt-BR": "Integrando o Biome no seu editor",
 							},
 						},
+						{
+							label: "Integrate Biome with your VCS",
+							link: "/guides/integrate-in-vcs",
+						},
 					],
 				},
 				{

@@ -1,0 +1,67 @@
+---
+title: Integrate Biome with your VCS
+description: Learn how Biome works, like assumptions, configuration and more.
+---
+
+The VCS (Version Control System) integration is meant to take advantage of **additional** features that only a VCS can provide, allowing to customise
+your development experience even further.
+
+The integration is *opt-in**, and it requires two mandatory fields. The `vcs.enabled` field, and the `vcs.clientKind` field, both in the configuration file:
+
+```json title="biome.json"
+{
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git"
+  }
+}
+```
+
+This configuration doesn't do **anything per se**. You have to opt-in new features.
+
+### Use the ignore file
+
+This is a feature that allows Biome to read the ignore file of the VCS and ignore all the files and folders that were specified in it. This is an opt-in feature, and you have to enable the `vcs.useIgnoreFile` field:
+
+```json title="biome.json" ins={5}
+{
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  }
+}
+```
+
+### Process only changed files
+
+This is a feature that is available only via CLI, and allows to process **only** the files that **changed** from one revision and another.
+
+First, you have to update your configuration file and tell Biome what's the default branch via `vcs.defaultBranch` field:
+
+```json title="biome.json" ins={6}
+{
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true,
+    "defaultBranch": "main"
+  }
+}
+```
+
+Then, add the `--changed` option to your command, to process only those files that your VCS acknowledged as "changed". Biome, with the help of the VCS, will determine the changed file from the branch `main` and your current revision:
+
+```shell
+biome format --changed
+```
+
+:::caution
+Biome doesn't check what's changed, this means that even adding spaces or newlines to a file, will mark this file as "changed"
+:::
+
+Alternatively, you can use the option `--since` to specify an arbitrary branch. This option **takes precedence** over the option `vcs.defaultBranch`. For example, you might want to check your changes against the `next` branch:
+
+```shell
+biome format --changed --since=next
+```
