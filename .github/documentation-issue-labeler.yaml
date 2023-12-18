@@ -1,0 +1,14 @@
+# Automatically add language labels to documentation issues that provide a link
+# to the documentation page by extracting the language from the given URL. When
+# adding a new language, make sure to add the corresponding language code to the
+# negative lookahead in the english regex, so that it doesn't match the english
+# documentation URL.
+
+'Lang-Chinese':
+  - 'https://biomejs.dev/zh-cn/'
+'Lang-English':
+  - 'https://biomejs.dev/(?!(zh-cn|ja|pt-br))'
+'Lang-Japanese':
+  - 'https://biomejs.dev/ja/'
+'Lang-Portuguese':
+  - 'https://biomejs.dev/pt-br/'

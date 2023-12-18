@@ -212,6 +212,9 @@ The reviewers will determine responses based on the information gathered and the
 ## OpenCollective fund allocation
 
 - Funds will be allocated for project-specific services such as domain registration and website hosting.
+- Core contributors are allowed to claim expenses related to conferences where they talk about Biome, or Biome workshops that they run. Expenses that can be claimed are but not limited to: trip (plane, train, etc.), meals, transport, parking.
+  - The person will have to provide proof of attendance (badge, video, etc.);
+  - Expenses will have to be uploaded via the open collective website.
 - Expenses will be approved by the [leads](#lead).
 
 > [!NOTE]

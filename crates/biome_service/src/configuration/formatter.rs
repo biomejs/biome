@@ -1,11 +1,12 @@
 use crate::configuration::merge::MergeWith;
 use crate::configuration::overrides::OverrideFormatterConfiguration;
 use crate::settings::{to_matcher, FormatSettings};
-use crate::WorkspaceError;
+use crate::{Matcher, WorkspaceError};
 use biome_deserialize::StringSet;
 use biome_formatter::{IndentStyle, LineEnding, LineWidth};
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
+use std::path::PathBuf;
 use std::str::FromStr;
 
 /// Generic options applied to all files
@@ -137,32 +138,32 @@ impl MergeWith<FormatterConfiguration> for FormatterConfiguration {
     }
 }
 
-impl TryFrom<FormatterConfiguration> for FormatSettings {
-    type Error = WorkspaceError;
+pub fn to_format_settings(
+    conf: FormatterConfiguration,
+    vcs_path: Option<PathBuf>,
+    gitignore_matches: &[String],
+) -> Result<FormatSettings, WorkspaceError> {
+    let indent_style = match conf.indent_style {
+        Some(PlainIndentStyle::Tab) => IndentStyle::Tab,
+        Some(PlainIndentStyle::Space) => IndentStyle::Space,
+        None => IndentStyle::default(),
+    };
+    let indent_width = conf
+        .indent_width
+        .map(Into::into)
+        .or(conf.indent_size.map(Into::into))
+        .unwrap_or_default();
 
-    fn try_from(conf: FormatterConfiguration) -> Result<Self, Self::Error> {
-        let indent_style = match conf.indent_style {
-            Some(PlainIndentStyle::Tab) => IndentStyle::Tab,
-            Some(PlainIndentStyle::Space) => IndentStyle::Space,
-            None => IndentStyle::default(),
-        };
-        let indent_width = conf
-            .indent_width
-            .map(Into::into)
-            .or(conf.indent_size.map(Into::into))
-            .unwrap_or_default();
-
-        Ok(Self {
-            enabled: conf.enabled.unwrap_or_default(),
-            indent_style: Some(indent_style),
-            indent_width: Some(indent_width),
-            line_ending: conf.line_ending,
-            line_width: conf.line_width,
-            format_with_errors: conf.format_with_errors.unwrap_or_default(),
-            ignored_files: to_matcher(conf.ignore.as_ref())?,
-            included_files: to_matcher(conf.include.as_ref())?,
-        })
-    }
+    Ok(FormatSettings {
+        enabled: conf.enabled.unwrap_or_default(),
+        indent_style: Some(indent_style),
+        indent_width: Some(indent_width),
+        line_ending: conf.line_ending,
+        line_width: conf.line_width,
+        format_with_errors: conf.format_with_errors.unwrap_or_default(),
+        ignored_files: to_matcher(conf.ignore.as_ref(), vcs_path.clone(), gitignore_matches)?,
+        included_files: to_matcher(conf.include.as_ref(), vcs_path, gitignore_matches)?,
+    })
 }
 
 impl TryFrom<OverrideFormatterConfiguration> for FormatSettings {
@@ -187,8 +188,8 @@ impl TryFrom<OverrideFormatterConfiguration> for FormatSettings {
             line_ending: conf.line_ending,
             line_width: conf.line_width,
             format_with_errors: conf.format_with_errors.unwrap_or_default(),
-            ignored_files: None,
-            included_files: None,
+            ignored_files: Matcher::empty(),
+            included_files: Matcher::empty(),
         })
     }
 }
