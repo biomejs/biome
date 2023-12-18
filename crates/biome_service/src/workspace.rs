@@ -95,7 +95,7 @@ pub struct FileFeaturesResult {
 
 impl FileFeaturesResult {
     /// Files that should not be processed no matter the cases
-    pub(crate) const FILES_TO_NOT_PROCESS: &'static [&'static str; 11] = &[
+    pub(crate) const FILES_TO_NOT_PROCESS: &'static [&'static str; 12] = &[
         "package.json",
         "package-lock.json",
         "npm-shrinkwrap.json",
@@ -107,6 +107,8 @@ impl FileFeaturesResult {
         "jsconfig.json",
         "deno.json",
         "deno.jsonc",
+        // TODO: remove this when are able to handle nested .gitignore files
+        ".gitignore",
     ];
 
     /// Checks whether this file can be processed
@@ -119,9 +121,9 @@ impl FileFeaturesResult {
 
     /// By default, all features are not supported by a file.
     const WORKSPACE_FEATURES: [(FeatureName, SupportKind); 3] = [
-        (FeatureName::Lint, SupportKind::Ignored),
-        (FeatureName::Format, SupportKind::Ignored),
-        (FeatureName::OrganizeImports, SupportKind::Ignored),
+        (FeatureName::Lint, SupportKind::FileNotSupported),
+        (FeatureName::Format, SupportKind::FileNotSupported),
+        (FeatureName::OrganizeImports, SupportKind::FileNotSupported),
     ];
 
     pub fn new() -> Self {
@@ -199,6 +201,13 @@ impl FileFeaturesResult {
         );
 
         self
+    }
+
+    /// The file will be ignored for all features
+    pub fn set_ignored_for_all_features(&mut self) {
+        for support_kind in self.features_supported.values_mut() {
+            *support_kind = SupportKind::Ignored;
+        }
     }
 
     pub fn ignored(&mut self, feature: FeatureName) {

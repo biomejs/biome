@@ -3,7 +3,8 @@ use super::{
     LintResults, Mime, ParserCapabilities,
 };
 use crate::configuration::to_analyzer_rules;
-use crate::file_handlers::{is_diagnostic_error, Features, FixAllParams, Language as LanguageId};
+use crate::diagnostics::extension_error;
+use crate::file_handlers::{is_diagnostic_error, FixAllParams, Language as LanguageId};
 use crate::settings::OverrideSettings;
 use crate::workspace::OrganizeImportsResult;
 use crate::{
@@ -39,7 +40,6 @@ use biome_js_syntax::{
 use biome_parser::AnyParse;
 use biome_rowan::{AstNode, BatchMutationExt, Direction, FileSource, NodeCache};
 use std::borrow::Cow;
-use std::ffi::OsStr;
 use std::fmt::Debug;
 use std::path::PathBuf;
 use tracing::{debug, error, info, trace};
@@ -173,19 +173,6 @@ impl ExtensionHandler for JsFileHandler {
         }
     }
 }
-
-fn extension_error(path: &RomePath) -> WorkspaceError {
-    let language = Features::get_language(path).or(LanguageId::from_path(path));
-    WorkspaceError::source_file_not_supported(
-        language,
-        path.clone().display().to_string(),
-        path.clone()
-            .extension()
-            .and_then(OsStr::to_str)
-            .map(|s| s.to_string()),
-    )
-}
-
 fn parse(
     rome_path: &RomePath,
     language_hint: LanguageId,

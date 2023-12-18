@@ -122,7 +122,6 @@ pub(crate) fn check(
     } else {
         None
     };
-    let vcs_enabled = fs_configuration.is_vcs_enabled();
 
     if since.is_some() && !changed {
         return Err(CliDiagnostic::incompatible_arguments("since", "changed"));
@@ -148,6 +147,5 @@ pub(crate) fn check(
         session,
         &cli_options,
         paths,
-        vcs_enabled,
     )
 }

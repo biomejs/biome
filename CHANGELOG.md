@@ -17,7 +17,6 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 #### New features
 
 - The command `biome migrate` now updates the `$schema` if there's an outdated version.
-- The CLI now supports nested `.gitignore` files during the traversal. The users don't need to do anything to avail of this feature. Contributed by @ematipico
 - The commands `format`, `lint`, `check` and `ci` now accepts two new arguments: `--changed` and `--since`. Use these options when the VCS integration
 is enabled to process only the files that were changed. Contributed by @simonxabris
 
@@ -30,6 +29,7 @@ is enabled to process only the files that were changed. Contributed by @simonxab
 - Fix [#709](https://github.com/biomejs/biome/issues/709), by correctly parsing allow list patterns in `.gitignore` files. Contributed by @ematipico
 - Fix [#805](https://github.com/biomejs/biome/issues/805), by correctly parsing these kind of patterns. Contributed by @ematipico
 - Fix [#1117](https://github.com/biomejs/biome/issues/1117) by correctly respecting the matching. Contributed by @ematipico
+- Fix [#1247](https://github.com/biomejs/biome/issues/1247), Biome now prints a **warning** diagnostic if it encounters files that can't handle. Contributed by @ematipico
 
 ### Configuration
 
