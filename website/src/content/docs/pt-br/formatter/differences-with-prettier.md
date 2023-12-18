@@ -94,9 +94,7 @@ Diff
 
 ### O Prettier tem um comportamento inconsistente para cadeias opcionais com asserção de não nulo entre parênteses
 
-Em _TypeScript_, o operador de asserção de não nulo `!` permite afirmar que um
-
- valor não é nulo.
+Em _TypeScript_, o operador de asserção de não nulo `!` permite afirmar que um valor não é nulo.
 Quando aplicado em uma cadeia opcional, a asserção se aplica a toda a cadeia, independentemente da presença de parênteses,
 tornando equivalente `(a.?.b)!` e `a.?.b!`.
 
