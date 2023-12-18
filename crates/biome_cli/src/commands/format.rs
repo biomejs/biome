@@ -1,3 +1,4 @@
+use crate::changed::get_changed_files;
 use crate::cli_options::CliOptions;
 use crate::commands::validate_configuration_diagnostics;
 use crate::diagnostics::DeprecatedArgument;
@@ -27,6 +28,8 @@ pub(crate) struct FormatCommandPayload {
     pub(crate) write: bool,
     pub(crate) cli_options: CliOptions,
     pub(crate) paths: Vec<OsString>,
+    pub(crate) changed: bool,
+    pub(crate) since: Option<String>,
 }
 
 /// Handler for the "format" command of the Biome CLI
@@ -38,12 +41,14 @@ pub(crate) fn format(
         javascript_formatter,
         formatter_configuration,
         vcs_configuration,
-        paths,
+        mut paths,
         cli_options,
         stdin_file_path,
         files_configuration,
         write,
         json_formatter,
+        since,
+        changed,
     } = payload;
     setup_cli_subscriber(cli_options.log_level.clone(), cli_options.log_kind.clone());
 
@@ -115,6 +120,14 @@ pub(crate) fn format(
         configuration.retrieve_gitignore_matches(&session.app.fs, vcs_base_path.as_deref())?;
 
     let vcs_enabled = configuration.is_vcs_enabled();
+
+    if since.is_some() && !changed {
+        return Err(CliDiagnostic::incompatible_arguments("since", "changed"));
+    }
+
+    if changed {
+        paths = get_changed_files(&session.app.fs, &configuration, since)?;
+    }
 
     session
         .app

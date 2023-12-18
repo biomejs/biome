@@ -1,3 +1,4 @@
+use crate::changed::get_changed_files;
 use crate::cli_options::CliOptions;
 use crate::commands::validate_configuration_diagnostics;
 use crate::{execute_mode, setup_cli_subscriber, CliDiagnostic, CliSession, Execution};
@@ -17,10 +18,12 @@ pub(crate) struct CiCommandPayload {
     pub(crate) paths: Vec<OsString>,
     pub(crate) rome_configuration: Configuration,
     pub(crate) cli_options: CliOptions,
+    pub(crate) changed: bool,
+    pub(crate) since: Option<String>,
 }
 
 /// Handler for the "ci" command of the Biome CLI
-pub(crate) fn ci(session: CliSession, payload: CiCommandPayload) -> Result<(), CliDiagnostic> {
+pub(crate) fn ci(session: CliSession, mut payload: CiCommandPayload) -> Result<(), CliDiagnostic> {
     setup_cli_subscriber(
         payload.cli_options.log_level.clone(),
         payload.cli_options.log_kind.clone(),
@@ -93,6 +96,14 @@ pub(crate) fn ci(session: CliSession, payload: CiCommandPayload) -> Result<(), C
         configuration.retrieve_gitignore_matches(&session.app.fs, vcs_base_path.as_deref())?;
 
     let vcs_enabled = configuration.is_vcs_enabled();
+
+    if payload.since.is_some() && !payload.changed {
+        return Err(CliDiagnostic::incompatible_arguments("since", "changed"));
+    }
+
+    if payload.changed {
+        payload.paths = get_changed_files(&session.app.fs, &configuration, payload.since)?;
+    }
 
     session
         .app

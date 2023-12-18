@@ -201,6 +201,10 @@ export interface VcsConfiguration {
 	 */
 	clientKind?: VcsClientKind;
 	/**
+	 * The main branch of the project
+	 */
+	defaultBranch?: string;
+	/**
 	 * Whether Biome should integrate itself with the VCS client
 	 */
 	enabled?: boolean;
@@ -1525,6 +1529,7 @@ export type Category =
 	| "lint/nursery/noEmptyBlockStatements"
 	| "lint/nursery/noImplicitAnyLet"
 	| "lint/nursery/noMisleadingCharacterClass"
+	| "lint/nursery/noTypeOnlyImportAttributes"
 	| "lint/nursery/noUnusedImports"
 	| "lint/nursery/noUnusedPrivateClassMembers"
 	| "lint/nursery/noUselessLoneBlockStatements"

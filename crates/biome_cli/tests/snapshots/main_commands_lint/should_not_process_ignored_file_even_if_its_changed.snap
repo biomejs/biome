@@ -1,0 +1,47 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `biome.json`
+
+```json
+{
+  "files": {
+    "ignore": ["file.js"]
+  },
+  "vcs": {
+    "defaultBranch": "main"
+  }
+}
+```
+
+## `file.js`
+
+```js
+console.log('file');
+```
+
+## `file2.js`
+
+```js
+console.log('file2');
+```
+
+# Termination Message
+
+```block
+internalError/io ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × No files were processed in the specified paths.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+Checked 0 file(s) in <TIME>
+```
+
+

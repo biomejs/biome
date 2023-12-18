@@ -18,9 +18,17 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 - The command `biome migrate` now updates the `$schema` if there's an outdated version.
 - The CLI now supports nested `.gitignore` files during the traversal. The users don't need to do anything to avail of this feature. Contributed by @ematipico
+- The commands `format`, `lint`, `check` and `ci` now accepts two new arguments: `--changed` and `--since`. Use these options when the VCS integration
+is enabled to process only the files that were changed. Contributed by @simonxabris
+
+  ```shell
+  biome format --write --changed
+  ```
+
+#### Bug fixes
+
 - Fix [#709](https://github.com/biomejs/biome/issues/709), by correctly parsing allow list patterns in `.gitignore` files. Contributed by @ematipico
 - Fix [#805](https://github.com/biomejs/biome/issues/805), by correctly parsing these kind of patterns. Contributed by @ematipico
-
 - Fix [#1117](https://github.com/biomejs/biome/issues/1117) by correctly respecting the matching. Contributed by @ematipico
 
 ### Configuration
@@ -74,7 +82,7 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 #### Bug fixes
 
-- Fix [#959](https://github.com/biomejs/biome/issues/959). [noEmptyInterface](https://biomejs.dev/linter/rules/no-empty-interface) no longer reports interface that extends a type and is in an external module. COntributed by @Conaclos
+- Fix [#959](https://github.com/biomejs/biome/issues/959). [noEmptyInterface](https://biomejs.dev/linter/rules/no-empty-interface) no longer reports interface that extends a type and is in an external module or a global declaration. Contributed by @Conaclos
 
   Empty interface that extends a type are sometimes used to extend an existing interface.
   This is generally used to extend an interface of an external module.

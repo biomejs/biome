@@ -2,9 +2,10 @@
 
 We can use help in a bunch of areas and any help is greatly appreciated!
 
-# Table of Contents
+## Table of Contents
+
 - [🚀 Contributing](#-contributing)
-- [Table of Contents](#table-of-contents)
+  - [Table of Contents](#table-of-contents)
   - [Asking questions, making proposals](#asking-questions-making-proposals)
   - [Reporting bugs](#reporting-bugs)
   - [Getting Started](#getting-started)
@@ -26,6 +27,7 @@ We can use help in a bunch of areas and any help is greatly appreciated!
     - [UI Testing intellij plugin](#ui-testing-intellij-plugin)
   - [Node.js development](#nodejs-development)
   - [Website development](#website-development)
+    - [Translations](#translations)
   - [Commit messages](#commit-messages)
   - [Creating pull requests](#creating-pull-requests)
     - [Changelog](#changelog)
@@ -176,7 +178,6 @@ These tests are generated from inline comments found inside the source code.
 
 On the other hand, we are moving away from this approach and have a straightforward process in other parser implementation like CSS.
 
-
 ##### `cargo codegen analyzer`
 
 This command will detect linter rules declared in the `analyzers`, `assists` and `syntax` directories in the analyzer crates, e.g. `biome_js_analyze`, `biome_json_analyze`, etc., and regenerate the `registry.rs` file and its dependents to include all the rules.
@@ -197,11 +198,13 @@ Build and run the plugin requires:
 - IntelliJ IDEA Ultimate edition
 
 ### Running the plugin on IDEA
+
 ```bash
 ./gradlew runIde
 ```
 
 ### Build the plugin
+
 ```bash
 ./gradlew buildPlugin
 ```
@@ -245,6 +248,10 @@ pnpm install
 pnpm start
 ```
 
+### Translations
+
+For more information on how to help with translation, please see the [translation contribution guidelines for our docs](./website/TRANSLATIONS.md).
+
 ## Commit messages
 
 Internally, the Biome team adheres as closely as possible to the [conventional commit specification](https://www.conventionalcommits.org/en/v1.0.0-beta.2/).
@@ -262,7 +269,7 @@ The following commit prefixes are supported:
 
 Below are examples of well-formatted commits:
 
-```
+```txt
 feat(compiler): implement parsing for new type of files
 fix: fix nasty unhandled error
 docs: fix link to website page
@@ -272,7 +279,7 @@ test(lint): add more cases to handle invalid rules
 ## Creating pull requests
 
 When creating a new pull request, it's preferable to use a conventional commit-formatted title, as this title will be used as the default commit message on the squashed commit after merging.
-See the [dedicated section](#Commit-messages) about conventional commit format.
+See the [dedicated section](#commit-messages) about conventional commit format.
 
 Please use the template provided.
 

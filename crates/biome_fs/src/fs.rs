@@ -132,6 +132,8 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
             };
         }
     }
+
+    fn get_changed_files(&self, base: &str) -> io::Result<Vec<String>>;
 }
 
 /// Result of the auto search
@@ -300,6 +302,10 @@ where
 
     fn path_exists(&self, path: &Path) -> bool {
         T::path_exists(self, path)
+    }
+
+    fn get_changed_files(&self, base: &str) -> io::Result<Vec<String>> {
+        T::get_changed_files(self, base)
     }
 }
 
