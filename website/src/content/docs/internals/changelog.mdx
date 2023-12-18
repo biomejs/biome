@@ -80,7 +80,7 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 #### Bug fixes
 
-- Fix [#959](https://github.com/biomejs/biome/issues/959). [noEmptyInterface](https://biomejs.dev/linter/rules/no-empty-interface) no longer reports interface that extends a type and is in an external module. COntributed by @Conaclos
+- Fix [#959](https://github.com/biomejs/biome/issues/959). [noEmptyInterface](https://biomejs.dev/linter/rules/no-empty-interface) no longer reports interface that extends a type and is in an external module or a global declaration. Contributed by @Conaclos
 
   Empty interface that extends a type are sometimes used to extend an existing interface.
   This is generally used to extend an interface of an external module.
