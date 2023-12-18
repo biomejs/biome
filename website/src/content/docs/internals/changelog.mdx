@@ -27,6 +27,12 @@ Biome now scores 97% compatibility with Prettier and features more than 180 lint
 - Biome now shows a diagnostic when it encounters a protected file. Contributed by @ematipico
 
 - The command `biome migrate` now updates the `$schema` if there's an outdated version.
+- The `biome ci` command is now able to print [GitHub Workflow Commands](https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions) when there are diagnostics in our code. Contributed by @nikeee
+  This will **might** require setting the proper permissions on your GitHub action:
+  ```yaml
+  permissions:
+    pull-requests: write
+  ```
 
 - The CLI now takes in consideration the `.gitignore` in the home directory of the user, if it exists. Contributed by @ematipico
 - The `biome ci` command is now able to print [GitHub Workflow Commands](https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions) when there are diagnostics in our code. Contributed by @nikeee
