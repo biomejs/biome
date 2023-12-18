@@ -1,4 +1,4 @@
-use crate::file_handlers::Language;
+use crate::file_handlers::{Features, Language};
 use crate::ConfigurationDiagnostic;
 use biome_console::fmt::Bytes;
 use biome_console::markup;
@@ -6,11 +6,12 @@ use biome_diagnostics::{
     category, Category, Diagnostic, DiagnosticTags, Location, Severity, Visit,
 };
 use biome_formatter::{FormatError, PrintError};
-use biome_fs::FileSystemDiagnostic;
+use biome_fs::{FileSystemDiagnostic, RomePath};
 use biome_js_analyze::utils::rename::RenameError;
 use biome_js_analyze::RuleError;
 use serde::{Deserialize, Serialize};
 use std::error::Error;
+use std::ffi::OsStr;
 use std::fmt;
 use std::fmt::{Debug, Display, Formatter};
 use std::process::{ExitCode, Termination};
@@ -451,11 +452,11 @@ pub struct SourceFileNotSupported {
 
 impl Diagnostic for SourceFileNotSupported {
     fn category(&self) -> Option<&'static Category> {
-        Some(category!("internalError/io"))
+        Some(category!("files/missingHandler"))
     }
 
     fn severity(&self) -> Severity {
-        Severity::Error
+        Severity::Warning
     }
 
     fn location(&self) -> Location<'_> {
@@ -479,6 +480,18 @@ impl Diagnostic for SourceFileNotSupported {
             )
         }
     }
+}
+
+pub fn extension_error(path: &RomePath) -> WorkspaceError {
+    let language = Features::get_language(path).or(Language::from_path(path));
+    WorkspaceError::source_file_not_supported(
+        language,
+        path.clone().display().to_string(),
+        path.clone()
+            .extension()
+            .and_then(OsStr::to_str)
+            .map(|s| s.to_string()),
+    )
 }
 
 #[derive(Debug, Serialize, Deserialize)]

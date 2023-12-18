@@ -95,8 +95,6 @@ pub(crate) fn ci(session: CliSession, mut payload: CiCommandPayload) -> Result<(
     let (vcs_base_path, gitignore_matches) =
         configuration.retrieve_gitignore_matches(&session.app.fs, vcs_base_path.as_deref())?;
 
-    let vcs_enabled = configuration.is_vcs_enabled();
-
     if payload.since.is_some() && !payload.changed {
         return Err(CliDiagnostic::incompatible_arguments("since", "changed"));
     }
@@ -119,6 +117,5 @@ pub(crate) fn ci(session: CliSession, mut payload: CiCommandPayload) -> Result<(
         session,
         &payload.cli_options,
         payload.paths,
-        vcs_enabled,
     )
 }
