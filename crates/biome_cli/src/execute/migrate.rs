@@ -8,6 +8,7 @@ use biome_json_syntax::JsonRoot;
 use biome_migrate::{migrate_configuration, ControlFlow};
 use biome_rowan::AstNode;
 use biome_service::workspace::FixAction;
+use biome_service::VERSION;
 use std::borrow::Cow;
 use std::ffi::OsStr;
 use std::path::PathBuf;
@@ -39,8 +40,11 @@ pub(crate) fn run(
     let mut tree = parsed.tree();
     let mut actions = Vec::new();
     loop {
-        let (action, _) =
-            migrate_configuration(&tree, configuration_file_path.as_path(), |signal| {
+        let (action, _) = migrate_configuration(
+            &tree,
+            configuration_file_path.as_path(),
+            VERSION.to_string(),
+            |signal| {
                 let current_diagnostic = signal.diagnostic();
                 if current_diagnostic.is_some() {
                     errors += 1;
@@ -51,7 +55,8 @@ pub(crate) fn run(
                 }
 
                 ControlFlow::Continue(())
-            });
+            },
+        );
 
         match action {
             Some(action) => {

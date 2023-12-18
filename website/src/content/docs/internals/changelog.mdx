@@ -20,7 +20,31 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ### CLI
 
+#### New features
+
+- The command `biome migrate` now updates the `$schema` if there's an outdated version.
+- The CLI now supports nested `.gitignore` files during the traversal. The users don't need to do anything to avail of this feature. Contributed by @ematipico
+- Fix [#709](https://github.com/biomejs/biome/issues/709), by correctly parsing allow list patterns in `.gitignore` files. Contributed by @ematipico
+- Fix [#805](https://github.com/biomejs/biome/issues/805), by correctly parsing these kind of patterns. Contributed by @ematipico
+
+- Fix [#1117](https://github.com/biomejs/biome/issues/1117) by correctly respecting the matching. Contributed by @ematipico
+
 ### Configuration
+
+#### New features
+
+- Users can specify git ignore patterns inside `ignore` and `include` properties, for example it's possible to **allow list** globs of files using the `!` character:
+
+  ```json5
+  {
+    "files": {
+      "ignore": [
+        "node_modules/**",
+        "!**/dist/**" // this is now accepted and allow list files inside the `dist` folder
+      ]
+    }
+  }
+  ```
 
 ### Editors
 
@@ -94,6 +118,36 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
       outer = true;
     }, []);
   }
+  ```
+
+- Fix [#1191](https://github.com/biomejs/biome/issues/1191). [noUselessElse](https://biomejs.dev/linter/rules/no-useless-else) now preserve comments of the `else` clause. Contributed by @Conaclos
+
+  For example, the rule suggested the following fix:
+
+  ```diff
+    function f(x) {
+      if (x <0) {
+        return 0;
+      }
+  -   // Comment
+  -   else {
+        return x;
+  -   }
+    }
+  ```
+
+  Now the rule suggests a fix that preserves the comment of the `else` clause:
+
+  ```diff
+    function f(x) {
+      if (x <0) {
+        return 0;
+      }
+      // Comment
+  -   else {
+        return x;
+  -   }
+    }
   ```
 
 - Fix [#728](https://github.com/biomejs/biome/issues/728). [useSingleVarDeclarator](https://biomejs.dev/linter/rules/use-single-var-declarator) no longer outputs invalid code. Contributed by @Conaclos

@@ -18,6 +18,8 @@ export type SupportKind =
 	| "FileNotSupported";
 export interface UpdateSettingsParams {
 	configuration: Configuration;
+	gitignore_matches: string[];
+	vcs_base_path?: string;
 }
 /**
  * The configuration that is contained inside the file `biome.json`
