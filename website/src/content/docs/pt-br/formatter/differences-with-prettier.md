@@ -157,7 +157,7 @@ No entanto, isso é bagunçado e introduz uma forma de lógica de análise no fo
 
 Outra opção é introduzir algum tipo de "nó bogus sintaticamente válido" no analisador, que aceita esses tipos de erros puramente semânticos (modificadores duplicados, propriedades abstratas em classes não abstratas).
 
-Ele continuaria a construir os nós como normal (efetivamente correspondendo ao comportamento no Prettier) mas os armazenaria dentro de um novo tipo de nó bogus, incluindo os diagnósticos junto com ele.
+Ele continuaria a construir os nós normalmente (efetivamente correspondendo ao comportamento no Prettier) mas os armazenaria dentro de um novo tipo de nó bogus, incluindo os diagnósticos junto com ele.
 Ao formatar, esses nós bogus específicos tentariam apenas formatar o nó interno e, em seguida, voltariam atrás se houvesse um erro (o método utilitário `format_or_verbatim` já faria isso).
 Isso mantém a lógica de análise e formatação separadas uma da outra, mas introduz mais complexidade ao analisador, permitindo que estados inválidos sejam considerados semi-válidos.
 
