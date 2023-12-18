@@ -8,7 +8,7 @@ Read our [guidelines to categorize a change](https://biomejs.dev/internals/versi
 New entries must be placed in a section entitled `Unreleased`.
 Read our [guidelines for writing a good changelog entry](https://github.com/biomejs/biome/blob/main/CONTRIBUTING.md#changelog).
 
-## Unreleased
+## 1.5.0
 
 Biome now scores 97% compatibility with Prettier and features more than 180 linter rules.
 
@@ -22,9 +22,9 @@ Biome now scores 97% compatibility with Prettier and features more than 180 lint
 
 - The command `biome migrate` now updates the `$schema` if there's an outdated version.
 
-- The commands `format`, `lint`, `check` and `ci` now accepts two new arguments: `--changed` and `--since`.
-  Use these options when the VCS integration is enabled to process only the files that were changed.
-  Contributed by @simonxabris
+- The CLI now takes in consideration the `.gitignore` in the home directory of the user, if it exists. Contributed by @ematipico
+- The commands `format`, `lint`, `check` and `ci` now accepts two new arguments: `--changed` and `--since`. Use these options when the VCS integration
+  is enabled to process only the files that were changed. Contributed by @simonxabris
 
   ```shell
   biome format --write --changed
@@ -95,14 +95,14 @@ Biome now scores 97% compatibility with Prettier and features more than 180 lint
 - Fix [#1024](https://github.com/biomejs/biome/issues/1024). Allow JSX expressions to nestle in arrow chains [#1033](https://github.com/biomejs/biome/pull/1033) Contributed by @faultyserver
 - Fix incorrect breaking on the left side of assignments by always using fluid assignment. [#1021](https://github.com/biomejs/biome/pull/1021) Contributed by @faultyserver
 - Fix breaking strategy for nested object patterns in function parameters [#1054](https://github.com/biomejs/biome/pull/1054) Contributed by @faultyserver
-- Fix over-indention of arrow chain expressions by simplifying the way each chain is grouped [#1036](https://github.com/biomejs/biome/pull/1036), [#1136](https://github.com/biomejs/biome/pull/1136), and [#1162](https://github.com/biomejs/biome/pull/1162) Contributed by @faultyserver. 
+- Fix over-indention of arrow chain expressions by simplifying the way each chain is grouped [#1036](https://github.com/biomejs/biome/pull/1036), [#1136](https://github.com/biomejs/biome/pull/1136), and [#1162](https://github.com/biomejs/biome/pull/1162) Contributed by @faultyserver.
 - Fix "simple" checks for calls and member expressions to correctly handle array accesses, complex arguments to single-argument function calls, and multiple-argument function calls. [#1057](https://github.com/biomejs/biome/pull/1057) Contributed by @faultyserver
 - Fix text wrapping and empty line handling for JSX Text elements to match Prettier's behavior. [#1075](https://github.com/biomejs/biome/pull/1075) Contributed by @faultyserver
 - Fix leading comments in concisely-printed arrays to prevent unwanted line breaks. [#1135](https://github.com/biomejs/biome/pull/1135) Contributed by @faultyserver
 - Fix `best_fitting` and interned elements preventing expansion propagation from sibling elements. [#1141](https://github.com/biomejs/biome/pull/1141) Contributed by @faultyserver
 - Fix heuristic for grouping function parameters when type parameters with constraints are present. [#1153](https://github.com/biomejs/biome/pull/1153).  Contributed by @faultyserver.
 - Fix binary-ish and type annotation handling for grouping call arguments in function expressions and call signatures. [#1152](https://github.com/biomejs/biome/pull/1152) and [#1160](https://github.com/biomejs/biome/pull/1160) Contributed by @faultyserver
-- Fix handling of nestled JSDoc comments to preserve behavior for overloads. [#1195](https://github.com/biomejs/biome/pull/1195) Contributed by @faultyserver 
+- Fix handling of nestled JSDoc comments to preserve behavior for overloads. [#1195](https://github.com/biomejs/biome/pull/1195) Contributed by @faultyserver
 - Fix [#1208](https://github.com/biomejs/biome/issues/1208). Fix extraction of inner types when checking for simple type annotations in call arguments. [#1195](https://github.com/biomejs/biome/pull/1195) Contributed by @faultyserver
 
 - Fix [#1220](https://github.com/biomejs/biome/issues/1220). Avoid duplicating comments in type unions for mapped, empty object, and empty tuple types. [#1240](https://github.com/biomejs/biome/pull/1240) Contributed by @faultyserver
