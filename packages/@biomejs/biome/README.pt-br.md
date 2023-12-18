@@ -1,5 +1,5 @@
 <p align="center">
-    <img alt="Biome - Cadeia de ferramentas da web"
+    <img alt="Biome - Conjunto de ferramentas da web"
          src="https://raw.githubusercontent.com/biomejs/resources/main/biome-logo-slogan.svg"
          width="400">
 </p>
