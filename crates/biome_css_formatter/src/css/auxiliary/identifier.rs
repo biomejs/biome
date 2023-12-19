@@ -1,10 +1,13 @@
 use crate::prelude::*;
-use biome_css_syntax::CssIdentifier;
-use biome_rowan::AstNode;
+use biome_css_syntax::{CssIdentifier, CssIdentifierFields};
+use biome_formatter::write;
+
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatCssIdentifier;
 impl FormatNodeRule<CssIdentifier> for FormatCssIdentifier {
     fn fmt_fields(&self, node: &CssIdentifier, f: &mut CssFormatter) -> FormatResult<()> {
-        format_verbatim_node(node.syntax()).fmt(f)
+        let CssIdentifierFields { value_token } = node.as_fields();
+
+        write!(f, [value_token.format()])
     }
 }
