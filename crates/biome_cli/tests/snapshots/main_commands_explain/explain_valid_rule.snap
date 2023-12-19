@@ -7,8 +7,14 @@ expression: content
 ```block
 # noBlankTarget
 
+```
+
+```block
 Fix is Safe.
 
+```
+
+```block
 This rule is recommended.
 
 # Description
