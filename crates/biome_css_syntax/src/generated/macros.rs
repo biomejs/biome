@@ -134,6 +134,11 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssFontFaceAtRule::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_FONT_PALETTE_VALUES_AT_RULE => {
+                    let $pattern =
+                        unsafe { $crate::CssFontPaletteValuesAtRule::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_ID_SELECTOR => {
                     let $pattern = unsafe { $crate::CssIdSelector::new_unchecked(node) };
                     $body

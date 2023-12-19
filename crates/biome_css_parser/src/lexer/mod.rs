@@ -773,6 +773,7 @@ impl<'src> CssLexer<'src> {
             b"container" => CONTAINER_KW,
             b"style" => STYLE_KW,
             b"font-face" => FONT_FACE_KW,
+            b"font-palette-values" => FONT_PALETTE_VALUES_KW,
             _ => IDENT,
         }
     }
