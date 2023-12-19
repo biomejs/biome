@@ -206,7 +206,7 @@ export default defineConfig({
 										ja: "Formatterオプションに対する考え方",
 										"zh-CN": "格式化配置理念",
 										"pt-BR": "Princípios de configuração",
-										tr: "Biçimlendirici seçenek felsefesi",
+										tr: "Biçimlendirici prensipleri",
 									},
 								},
 							],
