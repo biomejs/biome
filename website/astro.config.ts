@@ -132,7 +132,7 @@ export default defineConfig({
 								ja: "大きなプロジェクトでのBiomeの使用方法",
 								"zh-CN": "大型项目使用 Biome",
 								"pt-BR": "Usando o Biome em projetos grandes",
-								tr: "Büyük projelerde Biome kullanma",
+								tr: "Büyük projelerde Biome",
 							},
 						},
 						{
