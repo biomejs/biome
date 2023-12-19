@@ -6,11 +6,15 @@ pub(crate) struct FormatCssDeclarationList;
 impl FormatRule<CssDeclarationList> for FormatCssDeclarationList {
     type Context = CssFormatContext;
     fn fmt(&self, node: &CssDeclarationList, f: &mut CssFormatter) -> FormatResult<()> {
-        f.join_with(&hard_line_break())
-            .entries(
-                node.format_separated(",")
-                    .with_trailing_separator(TrailingSeparator::Mandatory),
-            )
-            .finish()
+        let mut join = f.join_nodes_with_hardline();
+
+        for (rule, formatted) in node.elements().zip(
+            node.format_separated(";")
+                .with_trailing_separator(TrailingSeparator::Mandatory),
+        ) {
+            join.entry(rule.node()?.syntax(), &formatted);
+        }
+
+        join.finish()
     }
 }

@@ -1,0 +1,24 @@
+.empty {  }
+.oneDeclaration { color     : blue; }
+.multipleDeclarations { color     : blue   ;  background-color  : red; }
+
+.newline {
+    color: blue; background-color: red;
+}
+
+.empty-line {
+    color: blue;
+    
+    background-color: red;
+}
+.grouping {
+color: blue   ;color: green    ;
+    color  : red ;
+    
+
+        background-color:      red;
+    font-size:   12px;
+    
+    
+    font-weight   :   700;
+}
