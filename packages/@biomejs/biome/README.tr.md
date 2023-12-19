@@ -68,7 +68,7 @@ veya Biome'u kullanmaya başlamak için doğrudan [Başlangıç Rehberi'ne][gett
 
 **Biome**, sağlam varsayılanlara sahiptir ve yapılandırma gerektirmez.
 
-**Biome**, modern web geliştirmenin [tüm ana dillerini][language-support] desteklemeyi amaçlar.
+**Biome**, modern web geliştirmenin [tüm dillerini][language-support] desteklemeyi amaçlar.
 
 **Biome**'un işlev görmesi için [Node.js gerektirmez](https://biomejs.dev/guides/manual-installation/).
 
