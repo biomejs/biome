@@ -323,10 +323,10 @@ pub fn format_sub_tree(options: CssFormatOptions, root: &CssSyntaxNode) -> Forma
 ///
 /// Until the formatter is sufficiently ready, we're disabling its use in any
 /// external projects, but we still want to be able to run test suites in the
-/// meantime. This flag controls that visibility, and only returns true in
-/// tests for now.
+/// meantime. This flag controls that visibility, and only returns true for
+/// non-release builds.
 pub const fn can_format_css_yet() -> bool {
-    cfg!(test)
+    cfg!(debug_assertions)
 }
 
 #[cfg(test)]
@@ -341,6 +341,6 @@ mod tests {
         let parse = parse_css(src, CssParserOptions::default());
         let options = CssFormatOptions::default();
         let formatted = format_node(options, &parse.syntax()).unwrap();
-        assert_eq!(formatted.print().unwrap().as_code(), "html {\n}\n");
+        assert_eq!(formatted.print().unwrap().as_code(), "html {}");
     }
 }

@@ -10,7 +10,7 @@ use crate::settings::{
 use crate::workspace::GetSyntaxTreeResult;
 use crate::WorkspaceError;
 use biome_css_formatter::context::CssFormatOptions;
-use biome_css_formatter::format_node;
+use biome_css_formatter::{can_format_css_yet, format_node};
 use biome_css_parser::CssParserOptions;
 use biome_css_syntax::{CssFileSource, CssLanguage, CssRoot, CssSyntaxNode};
 use biome_formatter::{FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed};
@@ -108,10 +108,23 @@ impl ExtensionHandler for CssFileHandler {
                 fix_all: None,
                 organize_imports: None,
             },
-            formatter: FormatterCapabilities {
-                format: Some(format),
-                format_range: Some(format_range),
-                format_on_type: Some(format_on_type),
+            // TODO(faulty): Once the CSS formatter is sufficiently stable, we
+            // will unhide its capabilities from services. But in the meantime,
+            // we don't want to give the illusion that CSS is supported. Adding
+            // the capabilities at all is necessary to support snapshot tests,
+            // though, so it needs to exist here when in development.
+            formatter: if can_format_css_yet() {
+                FormatterCapabilities {
+                    format: Some(format),
+                    format_range: Some(format_range),
+                    format_on_type: Some(format_on_type),
+                }
+            } else {
+                FormatterCapabilities {
+                    format: None,
+                    format_range: None,
+                    format_on_type: None,
+                }
             },
         }
     }
