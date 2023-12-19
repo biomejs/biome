@@ -95,6 +95,12 @@ pub(crate) fn print_socket() -> Result<(), CliDiagnostic> {
     Ok(())
 }
 
+pub(crate) fn print_cache_dir() -> Result<(), CliDiagnostic> {
+    let cache_dir = biome_fs::ensure_cache_dir().as_path().display().to_string();
+    println!("{cache_dir}");
+    Ok(())
+}
+
 pub(crate) fn lsp_proxy(config_path: Option<PathBuf>) -> Result<(), CliDiagnostic> {
     let rt = Runtime::new()?;
     rt.block_on(start_lsp_proxy(&rt, config_path))?;
