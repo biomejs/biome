@@ -461,7 +461,8 @@ fn process_messages(options: ProcessMessagesOptions) {
                             *warnings += 1;
                         }
 
-                        let should_print = printed_diagnostics < max_diagnostics;
+                        let should_print = printed_diagnostics < max_diagnostics
+                            && diag.severity() >= *diagnostic_level;
                         if should_print {
                             printed_diagnostics += 1;
                             remaining_diagnostics.store(
