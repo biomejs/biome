@@ -17,8 +17,36 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 #### New features
 
 - The command `biome migrate` now updates the `$schema` if there's an outdated version.
+- The commands `format`, `lint`, `check` and `ci` now accepts two new arguments: `--changed` and `--since`. Use these options when the VCS integration
+is enabled to process only the files that were changed. Contributed by @simonxabris
+
+  ```shell
+  biome format --write --changed
+  ```
+
+#### Bug fixes
+
+- Fix [#709](https://github.com/biomejs/biome/issues/709), by correctly parsing allow list patterns in `.gitignore` files. Contributed by @ematipico
+- Fix [#805](https://github.com/biomejs/biome/issues/805), by correctly parsing these kind of patterns. Contributed by @ematipico
+- Fix [#1117](https://github.com/biomejs/biome/issues/1117) by correctly respecting the matching. Contributed by @ematipico
+- Fix [#1247](https://github.com/biomejs/biome/issues/1247), Biome now prints a **warning** diagnostic if it encounters files that can't handle. Contributed by @ematipico
 
 ### Configuration
+
+#### New features
+
+- Users can specify git ignore patterns inside `ignore` and `include` properties, for example it's possible to **allow list** globs of files using the `!` character:
+
+  ```json5
+  {
+    "files": {
+      "ignore": [
+        "node_modules/**",
+        "!**/dist/**" // this is now accepted and allow list files inside the `dist` folder
+      ]
+    }
+  }
+  ```
 
 ### Editors
 
@@ -29,6 +57,7 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 ### Formatter
 
 - Fix [#1169](https://github.com/biomejs/biome/issues/1169). Account for escaped strings when computing layout for assignments. Contributed by @kalleep
+- Fix [#1220](https://github.com/biomejs/biome/issues/1220). Avoid duplicating comments in type unions for mapped, empty object, and empty tuple types. [#1240](https://github.com/biomejs/biome/pull/1240) Contributed by @faultyserver
 
 ### JavaScript APIs
 
@@ -54,7 +83,7 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 #### Bug fixes
 
-- Fix [#959](https://github.com/biomejs/biome/issues/959). [noEmptyInterface](https://biomejs.dev/linter/rules/no-empty-interface) no longer reports interface that extends a type and is in an external module. COntributed by @Conaclos
+- Fix [#959](https://github.com/biomejs/biome/issues/959). [noEmptyInterface](https://biomejs.dev/linter/rules/no-empty-interface) no longer reports interface that extends a type and is in an external module or a global declaration. Contributed by @Conaclos
 
   Empty interface that extends a type are sometimes used to extend an existing interface.
   This is generally used to extend an interface of an external module.

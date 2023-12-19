@@ -1,4 +1,3 @@
-use crate::control_flow::AnyJsControlFlowRoot;
 use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic};
@@ -9,7 +8,7 @@ use biome_js_factory::{
     syntax::{AnyTsType, T},
 };
 use biome_js_syntax::{
-    AnyJsDeclarationClause, TriviaPieceKind, TsExternalModuleDeclaration, TsInterfaceDeclaration,
+    AnyJsDeclarationClause, JsSyntaxKind, TriviaPieceKind, TsInterfaceDeclaration,
     TsTypeAliasDeclaration,
 };
 use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, BatchMutationExt};
@@ -118,13 +117,12 @@ impl Rule for NoEmptyInterface {
         let Some(extends_clause) = node.extends_clause() else {
             return Some(DiagnosticMessage::NoEmptyInterface);
         };
-        if node
-            .syntax()
-            .ancestors()
-            .skip(1)
-            .find(|x| AnyJsControlFlowRoot::can_cast(x.kind()))
-            .is_some_and(|x| TsExternalModuleDeclaration::can_cast(x.kind()))
-        {
+        if node.syntax().ancestors().skip(1).any(|x| {
+            matches!(
+                x.kind(),
+                JsSyntaxKind::TS_EXTERNAL_MODULE_DECLARATION | JsSyntaxKind::TS_GLOBAL_DECLARATION
+            )
+        }) {
             // Ignore interfaces that extend a type in an external module declaration.
             // The interface can be merged with an existing interface.
             return None;

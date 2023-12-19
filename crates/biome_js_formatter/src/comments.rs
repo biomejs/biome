@@ -16,7 +16,7 @@ use biome_js_syntax::{
     JsBlockStatement, JsCallArguments, JsCatchClause, JsEmptyStatement, JsFinallyClause,
     JsFormalParameter, JsFunctionBody, JsIdentifierBinding, JsIdentifierExpression, JsIfStatement,
     JsLanguage, JsParameters, JsSyntaxKind, JsSyntaxNode, JsVariableDeclarator, JsWhileStatement,
-    TsInterfaceDeclaration,
+    TsInterfaceDeclaration, TsMappedType,
 };
 use biome_rowan::{AstNode, SyntaxNodeOptionExt, SyntaxTriviaPieceComments, TextLen};
 
@@ -1166,11 +1166,31 @@ fn handle_parameter_comment(comment: DecoratedComment<JsLanguage>) -> CommentPla
 fn handle_mapped_type_comment(
     comment: DecoratedComment<JsLanguage>,
 ) -> CommentPlacement<JsLanguage> {
-    if let (JsSyntaxKind::TS_MAPPED_TYPE, Some(following)) =
-        (comment.enclosing_node().kind(), comment.following_node())
-    {
-        if following.kind() == JsSyntaxKind::TS_TYPE_PARAMETER_NAME {
-            return CommentPlacement::dangling(comment.enclosing_node().clone(), comment);
+    if !matches!(
+        comment.enclosing_node().kind(),
+        JsSyntaxKind::TS_MAPPED_TYPE
+    ) {
+        return CommentPlacement::Default(comment);
+    }
+
+    if matches!(
+        comment.following_node().kind(),
+        Some(
+            JsSyntaxKind::TS_TYPE_PARAMETER_NAME
+                | JsSyntaxKind::TS_MAPPED_TYPE_READONLY_MODIFIER_CLAUSE,
+        )
+    ) {
+        return CommentPlacement::dangling(comment.enclosing_node().clone(), comment);
+    }
+
+    if matches!(
+        comment.preceding_node().kind(),
+        Some(JsSyntaxKind::TS_TYPE_PARAMETER_NAME)
+    ) {
+        if let Some(enclosing) = TsMappedType::cast_ref(comment.enclosing_node()) {
+            if let Ok(keys_type) = enclosing.keys_type() {
+                return CommentPlacement::trailing(keys_type.into_syntax(), comment);
+            }
         }
     }
 

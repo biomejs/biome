@@ -60,7 +60,7 @@ Biome をインストールせずに試したい場合は、WebAssembly にコ�
 
 ## ドキュメント
 
-Biome についてもっと知るために[ホームページ][biomejs]をチェックするか、Biome を使い始めるために[はじめる](getting-started)に進んでください。
+Biome についてもっと知るために[ホームページ][biomejs]をチェックするか、Biome を使い始めるために[はじめる][getting-started]に進んでください。
 
 ## Biome をもっと詳しく
 
@@ -112,6 +112,7 @@ Biome についてもっと知るために[ホームページ][biomejs]をチェ
 - [English](./README.md)
 - [简体中文](./README.zh-CN.md)
 - 日本語
+- [Português do Brasil](./README.pt-br.md)
 - [Türkçe](./README.tr.md)
 
 [biomejs]: https://biomejs.dev/ja/

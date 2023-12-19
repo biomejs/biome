@@ -1,6 +1,6 @@
 use crate::{
     inner_string_text, AnyJsBinding, AnyJsImportClause, AnyJsNamedImportSpecifier, JsImport,
-    JsModuleSource, JsSyntaxToken,
+    JsImportAssertion, JsModuleSource, JsSyntaxToken,
 };
 use biome_rowan::{AstNode, SyntaxResult, TokenText};
 
@@ -63,6 +63,29 @@ impl AnyJsImportClause {
             Self::JsImportNamedClause(clause) => clause.source(),
             Self::JsImportNamespaceClause(clause) => clause.source(),
             Self::JsImportCombinedClause(clause) => clause.source(),
+        }
+    }
+
+    /// Assertion of this import clause.
+    ///
+    /// ```
+    /// use biome_js_factory::make;
+    /// use biome_js_syntax::T;
+    ///
+    /// let source = make::js_module_source(make::js_string_literal("react"));
+    /// let binding = make::js_identifier_binding(make::ident("React"));
+    /// let specifier = make::js_default_import_specifier(binding.into());
+    /// let clause = make::js_import_default_clause(specifier, make::token(T![from]), source).build();
+    ///
+    /// assert_eq!(clause.source().unwrap().inner_string_text().unwrap().text(), "react");
+    /// ```
+    pub fn assertion(&self) -> Option<JsImportAssertion> {
+        match self {
+            Self::JsImportBareClause(clause) => clause.assertion(),
+            Self::JsImportDefaultClause(clause) => clause.assertion(),
+            Self::JsImportNamedClause(clause) => clause.assertion(),
+            Self::JsImportNamespaceClause(clause) => clause.assertion(),
+            Self::JsImportCombinedClause(clause) => clause.assertion(),
         }
     }
 }

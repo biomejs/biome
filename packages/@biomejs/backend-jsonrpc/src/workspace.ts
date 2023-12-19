@@ -18,6 +18,8 @@ export type SupportKind =
 	| "FileNotSupported";
 export interface UpdateSettingsParams {
 	configuration: Configuration;
+	gitignore_matches: string[];
+	vcs_base_path?: string;
 }
 /**
  * The configuration that is contained inside the file `biome.json`
@@ -198,6 +200,10 @@ export interface VcsConfiguration {
 	 * The kind of client.
 	 */
 	clientKind?: VcsClientKind;
+	/**
+	 * The main branch of the project
+	 */
+	defaultBranch?: string;
 	/**
 	 * Whether Biome should integrate itself with the VCS client
 	 */
@@ -1523,6 +1529,7 @@ export type Category =
 	| "lint/nursery/noEmptyBlockStatements"
 	| "lint/nursery/noImplicitAnyLet"
 	| "lint/nursery/noMisleadingCharacterClass"
+	| "lint/nursery/noTypeOnlyImportAttributes"
 	| "lint/nursery/noUnusedImports"
 	| "lint/nursery/noUnusedPrivateClassMembers"
 	| "lint/nursery/noUselessLoneBlockStatements"

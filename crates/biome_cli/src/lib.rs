@@ -11,9 +11,9 @@ use biome_fs::OsFileSystem;
 use biome_service::{App, DynRef, Workspace, WorkspaceRef};
 use std::env;
 
+mod changed;
 mod cli_options;
 mod commands;
-mod configuration;
 mod diagnostics;
 mod execute;
 mod logging;
@@ -21,7 +21,6 @@ mod metrics;
 mod panic;
 mod reports;
 mod service;
-mod vcs;
 
 use crate::cli_options::ColorsArg;
 use crate::commands::check::CheckCommandPayload;
@@ -86,6 +85,8 @@ impl<'app> CliSession<'app> {
                 linter_enabled,
                 organize_imports_enabled,
                 formatter_enabled,
+                changed,
+                since,
             } => commands::check::check(
                 self,
                 CheckCommandPayload {
@@ -98,6 +99,8 @@ impl<'app> CliSession<'app> {
                     linter_enabled,
                     organize_imports_enabled,
                     formatter_enabled,
+                    changed,
+                    since,
                 },
             ),
             BiomeCommand::Lint {
@@ -109,6 +112,8 @@ impl<'app> CliSession<'app> {
                 stdin_file_path,
                 vcs_configuration,
                 files_configuration,
+                changed,
+                since,
             } => commands::lint::lint(
                 self,
                 LintCommandPayload {
@@ -120,6 +125,8 @@ impl<'app> CliSession<'app> {
                     stdin_file_path,
                     vcs_configuration,
                     files_configuration,
+                    changed,
+                    since,
                 },
             ),
             BiomeCommand::Ci {
@@ -129,6 +136,8 @@ impl<'app> CliSession<'app> {
                 configuration: rome_configuration,
                 paths,
                 cli_options,
+                changed,
+                since,
             } => commands::ci::ci(
                 self,
                 CiCommandPayload {
@@ -138,6 +147,8 @@ impl<'app> CliSession<'app> {
                     rome_configuration,
                     paths,
                     cli_options,
+                    changed,
+                    since,
                 },
             ),
             BiomeCommand::Format {
@@ -150,6 +161,8 @@ impl<'app> CliSession<'app> {
                 vcs_configuration,
                 files_configuration,
                 json_formatter,
+                changed,
+                since,
             } => commands::format::format(
                 self,
                 FormatCommandPayload {
@@ -162,6 +175,8 @@ impl<'app> CliSession<'app> {
                     vcs_configuration,
                     files_configuration,
                     json_formatter,
+                    changed,
+                    since,
                 },
             ),
             BiomeCommand::Init => commands::init::init(self),
