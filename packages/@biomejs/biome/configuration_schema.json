@@ -1301,6 +1301,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useNodeImportProtocol": {
+					"description": "Enforces using the node: protocol for Node.js builtin modules.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useRegexLiterals": {
 					"description": "Enforce the use of the regular expression literals instead of the RegExp constructor if possible.",
 					"anyOf": [

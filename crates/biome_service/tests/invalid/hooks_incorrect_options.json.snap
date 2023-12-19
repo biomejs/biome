@@ -32,6 +32,7 @@ hooks_incorrect_options.json:6:5 deserialize ━━━━━━━━━━━�
   - useForOf
   - useGroupedTypeImport
   - useImportRestrictions
+  - useNodeImportProtocol
   - useRegexLiterals
   - useShorthandFunctionType
   - useValidAriaRole

@@ -2855,6 +2855,15 @@ pub struct Nursery {
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_import_restrictions: Option<RuleConfiguration>,
+    #[doc = "Enforces using the node: protocol for Node.js builtin modules."]
+    #[bpaf(
+        long("use-node-import-protocol"),
+        argument("on|off|warn"),
+        optional,
+        hide
+    )]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_node_import_protocol: Option<RuleConfiguration>,
     #[doc = "Enforce the use of the regular expression literals instead of the RegExp constructor if possible."]
     #[bpaf(long("use-regex-literals"), argument("on|off|warn"), optional, hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -2923,6 +2932,9 @@ impl MergeWith<Nursery> for Nursery {
         if let Some(use_import_restrictions) = other.use_import_restrictions {
             self.use_import_restrictions = Some(use_import_restrictions);
         }
+        if let Some(use_node_import_protocol) = other.use_node_import_protocol {
+            self.use_node_import_protocol = Some(use_node_import_protocol);
+        }
         if let Some(use_regex_literals) = other.use_regex_literals {
             self.use_regex_literals = Some(use_regex_literals);
         }
@@ -2961,6 +2973,7 @@ impl Nursery {
         "useForOf",
         "useGroupedTypeImport",
         "useImportRestrictions",
+        "useNodeImportProtocol",
         "useRegexLiterals",
         "useShorthandFunctionType",
         "useValidAriaRole",
@@ -2980,6 +2993,7 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[12]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[13]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]),
@@ -3090,6 +3104,7 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[13]));
             }
         }
+        if let Some(rule) = self.use_node_import_protocol.as_ref() {
         if let Some(rule) = self.use_import_restrictions.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]));
@@ -3185,6 +3200,7 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[13]));
             }
         }
+        if let Some(rule) = self.use_node_import_protocol.as_ref() {
         if let Some(rule) = self.use_import_restrictions.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]));
@@ -3257,6 +3273,7 @@ impl Nursery {
             "useForOf" => self.use_for_of.as_ref(),
             "useGroupedTypeImport" => self.use_grouped_type_import.as_ref(),
             "useImportRestrictions" => self.use_import_restrictions.as_ref(),
+            "useNodeImportProtocol" => self.use_node_import_protocol.as_ref(),
             "useRegexLiterals" => self.use_regex_literals.as_ref(),
             "useShorthandFunctionType" => self.use_shorthand_function_type.as_ref(),
             "useValidAriaRole" => self.use_valid_aria_role.as_ref(),

@@ -908,6 +908,10 @@ export interface Nursery {
 	 */
 	useImportRestrictions?: RuleConfiguration;
 	/**
+	 * Enforces using the node: protocol for Node.js builtin modules.
+	 */
+	useNodeImportProtocol?: RuleConfiguration;
+	/**
 	 * Enforce the use of the regular expression literals instead of the RegExp constructor if possible.
 	 */
 	useRegexLiterals?: RuleConfiguration;
@@ -1602,6 +1606,7 @@ export type Category =
 	| "lint/nursery/useForOf"
 	| "lint/nursery/useGroupedTypeImport"
 	| "lint/nursery/useImportRestrictions"
+	| "lint/nursery/useNodeImportProtocol"
 	| "lint/nursery/useRegexLiterals"
 	| "lint/nursery/useShorthandFunctionType"
 	| "lint/nursery/useValidAriaRole"
