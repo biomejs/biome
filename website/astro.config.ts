@@ -173,7 +173,7 @@ export default defineConfig({
 								ja: "Analyzer",
 								"zh-CN": "分析器",
 								"pt-BR": "Analisador",
-								tr: "Analizör",
+								tr: "İnceleyici",
 							},
 						},
 						{
