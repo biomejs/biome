@@ -64,9 +64,7 @@ Biome'u yüklemek istemeden denemek istiyorsanız, WebAssembly'ye derlenmiş [oy
 Biome hakkında daha fazla bilgi edinmek için [ana sayfamızı][biomejs] ziyaret edin,
 veya Biome'u kullanmaya başlamak için doğrudan [Başlangıç Rehberi'ne][getting-started] gidin.
 
-## Biome H
-
-akkında Daha Fazlası
+## Biome Hakkında Daha Fazlası
 
 **Biome**, sağlam varsayılanlara sahiptir ve yapılandırma gerektirmez.
 
