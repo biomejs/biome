@@ -150,19 +150,6 @@ pub struct IncompatibleArguments {
 
 #[derive(Debug, Diagnostic)]
 #[diagnostic(
-    category = "flags/invalid",
-    severity = Error,
-    message(
-        description = "No rule with {name} found.",
-        message("No rule with "<Emphasis>{self.name}</Emphasis>" found.")
-    )
-)]
-pub struct ExplainNotFound {
-    name: String,
-}
-
-#[derive(Debug, Diagnostic)]
-#[diagnostic(
     severity = Error,
 )]
 pub struct CheckError {

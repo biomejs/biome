@@ -13,7 +13,7 @@ use biome_service::configuration::{
     vcs::vcs_configuration, FilesConfiguration, FormatterConfiguration, JavascriptFormatter,
     LinterConfiguration, LoadedConfiguration,
 };
-use biome_service::explain::Explain;
+use biome_service::documentation::Doc;
 use biome_service::{Configuration, ConfigurationDiagnostic, WorkspaceError};
 use bpaf::Bpaf;
 use std::ffi::OsString;
@@ -254,11 +254,12 @@ pub enum BiomeCommand {
         bool,
     ),
 
-    /// Explain a rule
+    /// A command to retrieve the documentation of various aspects of the CLI.
     #[bpaf(command)]
     Explain {
+        /// Single name to display documentation for.
         #[bpaf(positional("NAME"))]
-        explain: Explain,
+        doc: Doc,
     },
 
     #[bpaf(command("__run_server"), hide)]

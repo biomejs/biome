@@ -5,20 +5,20 @@ use biome_json_syntax::JsonLanguage;
 use std::{collections::BTreeMap, str::FromStr};
 
 #[derive(Debug, Clone)]
-pub enum Explain {
+pub enum Doc {
     Rule(RuleMetadata),
     Unknown(String),
 }
 
-impl FromStr for Explain {
+impl FromStr for Doc {
     type Err = String;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         if let Some(metadata) = LintRulesVisitor::new().get_metadata(s) {
-            return Ok(Explain::Rule(metadata));
+            return Ok(Doc::Rule(metadata));
         };
 
-        Ok(Explain::Unknown(s.to_string()))
+        Ok(Doc::Unknown(s.to_string()))
     }
 }
 

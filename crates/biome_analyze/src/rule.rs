@@ -43,11 +43,11 @@ pub enum FixKind {
     Unsafe,
 }
 
-impl FixKind {
-    pub const fn to_string(&self) -> &'static str {
+impl biome_console::fmt::Display for FixKind {
+    fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
         match self {
-            FixKind::Safe => "Safe",
-            FixKind::Unsafe => "Unsafe",
+            FixKind::Safe => fmt.write_str("Safe"),
+            FixKind::Unsafe => fmt.write_str("Unsafe"),
         }
     }
 }
