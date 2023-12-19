@@ -23,6 +23,7 @@ hooks_incorrect_options.json:6:5 deserialize ━━━━━━━━━━━�
   - noEmptyBlockStatements
   - noImplicitAnyLet
   - noMisleadingCharacterClass
+  - noNodejsModules
   - noUnusedImports
   - noUnusedPrivateClassMembers
   - noUselessLoneBlockStatements
@@ -32,6 +33,7 @@ hooks_incorrect_options.json:6:5 deserialize ━━━━━━━━━━━�
   - useForOf
   - useGroupedTypeImport
   - useImportRestrictions
+  - useNodeImportProtocol
   - useRegexLiterals
   - useShorthandFunctionType
   - useValidAriaRole

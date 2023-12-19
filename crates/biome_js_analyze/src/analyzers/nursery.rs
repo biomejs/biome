@@ -11,6 +11,7 @@ pub(crate) mod no_useless_ternary;
 pub(crate) mod use_await;
 pub(crate) mod use_grouped_type_import;
 pub(crate) mod use_import_restrictions;
+pub(crate) mod use_node_import_protocol;
 pub(crate) mod use_regex_literals;
 pub(crate) mod use_shorthand_function_type;
 
@@ -27,6 +28,7 @@ declare_group! {
             self :: use_await :: UseAwait ,
             self :: use_grouped_type_import :: UseGroupedTypeImport ,
             self :: use_import_restrictions :: UseImportRestrictions ,
+            self :: use_node_import_protocol :: UseNodeImportProtocol ,
             self :: use_regex_literals :: UseRegexLiterals ,
             self :: use_shorthand_function_type :: UseShorthandFunctionType ,
         ]
