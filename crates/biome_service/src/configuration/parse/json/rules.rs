@@ -937,6 +937,13 @@ impl Deserializable for Nursery {
                                 diagnostics,
                             );
                         }
+                        "noInvalidUseBeforeDeclaration" => {
+                            result.no_invalid_use_before_declaration = Deserializable::deserialize(
+                                &value,
+                                "noInvalidUseBeforeDeclaration",
+                                diagnostics,
+                            );
+                        }
                         "noMisleadingCharacterClass" => {
                             result.no_misleading_character_class = Deserializable::deserialize(
                                 &value,
@@ -1039,6 +1046,7 @@ impl Deserializable for Nursery {
                                     "noDuplicateJsonKeys",
                                     "noEmptyBlockStatements",
                                     "noImplicitAnyLet",
+                                    "noInvalidUseBeforeDeclaration",
                                     "noMisleadingCharacterClass",
                                     "noNodejsModules",
                                     "noUnusedImports",

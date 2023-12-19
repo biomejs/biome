@@ -83,6 +83,15 @@ is enabled to process only the files that were changed. Contributed by @simonxab
 
 - Add [useNodeImportProtocol](https://biomejs.dev/linter/rules/use-node-import-protocol) that forces the use of the `node:` protocol when importing Node.js modules. Contributed by @2-NOW
 
+- Add [noInvalidUseBeforeDeclaration](https://biomejs.dev/linter/rules/no-invalid-use-before-declaration) that reports variables and function parameters used before their declaration. Contributed by @Conaclos
+
+  ```js
+  function f() {
+    console.log(c); // Use of `c` before its declaration.
+    const c = 0;
+  }
+  ```
+
 #### Enhancements
 
 #### Bug fixes
