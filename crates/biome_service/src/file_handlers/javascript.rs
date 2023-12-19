@@ -70,13 +70,6 @@ pub struct JsParserSettings {
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-pub struct JsonParserSettings {
-    pub allow_comments: bool,
-    pub allow_trailing_commas: bool,
-}
-
-#[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct JsLinterSettings {
     pub globals: Vec<String>,
 }

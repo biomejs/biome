@@ -18,6 +18,7 @@ packages/@biomejs/cli-*
 # https://github.com/nnethercote/dhat-rs output file
 dhat-heap.json
 
+crates/biome_css_formatter/report.*
 crates/biome_js_formatter/report.*
 crates/biome_json_formatter/report.*
 crates/biome_json_formatter/report_incompatible.*

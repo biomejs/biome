@@ -1625,6 +1625,36 @@ where
         slots,
     ))
 }
+pub fn css_bogus_component_value<I>(slots: I) -> CssBogusComponentValue
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssBogusComponentValue::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_BOGUS_COMPONENT_VALUE,
+        slots,
+    ))
+}
+pub fn css_bogus_declaration_item<I>(slots: I) -> CssBogusDeclarationItem
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssBogusDeclarationItem::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_BOGUS_DECLARATION_ITEM,
+        slots,
+    ))
+}
+pub fn css_bogus_parameter<I>(slots: I) -> CssBogusParameter
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssBogusParameter::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_BOGUS_PARAMETER,
+        slots,
+    ))
+}
 pub fn css_bogus_pseudo_class<I>(slots: I) -> CssBogusPseudoClass
 where
     I: IntoIterator<Item = Option<SyntaxElement>>,
