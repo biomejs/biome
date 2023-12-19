@@ -196,7 +196,7 @@ export default defineConfig({
 										ja: "Prettier との違い",
 										"zh-CN": "与 Prettier 的区别",
 										"pt-BR": "Diferenças em relação ao Prettier",
-										tr: "Prettier ile farklılıklar",
+										tr: "Prettier arasındaki farklar",
 									},
 								},
 								{
