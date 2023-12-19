@@ -27,7 +27,6 @@ use crate::generate_schema::generate_configuration_schema;
 #[cfg(feature = "website")]
 use crate::generate_website::generate_files;
 use crate::promote_rule::promote_rule;
-
 use generate_new_lintrule::*;
 use xtask_codegen::{
     generate_analyzer, generate_ast, generate_formatters, generate_parser_tests, generate_tables,
