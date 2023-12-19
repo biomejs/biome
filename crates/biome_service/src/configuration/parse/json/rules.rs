@@ -916,6 +916,13 @@ impl Deserializable for Nursery {
                             result.no_default_export =
                                 Deserializable::deserialize(&value, "noDefaultExport", diagnostics);
                         }
+                        "noDuplicateImports" => {
+                            result.no_duplicate_imports = Deserializable::deserialize(
+                                &value,
+                                "noDuplicateImports",
+                                diagnostics,
+                            );
+                        }
                         "noDuplicateJsonKeys" => {
                             result.no_duplicate_json_keys = Deserializable::deserialize(
                                 &value,
@@ -1036,6 +1043,7 @@ impl Deserializable for Nursery {
                                     "all",
                                     "noAriaHiddenOnFocusable",
                                     "noDefaultExport",
+                                    "noDuplicateImports",
                                     "noDuplicateJsonKeys",
                                     "noEmptyBlockStatements",
                                     "noImplicitAnyLet",
