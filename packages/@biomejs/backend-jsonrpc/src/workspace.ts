@@ -864,6 +864,10 @@ export interface Nursery {
 	 */
 	noMisleadingCharacterClass?: RuleConfiguration;
 	/**
+	 * Disallow Node.js builtin modules.
+	 */
+	noNodejsModules?: RuleConfiguration;
+	/**
 	 * Disallow unused imports.
 	 */
 	noUnusedImports?: RuleConfiguration;
@@ -1586,6 +1590,7 @@ export type Category =
 	| "lint/nursery/noEmptyBlockStatements"
 	| "lint/nursery/noImplicitAnyLet"
 	| "lint/nursery/noMisleadingCharacterClass"
+	| "lint/nursery/noNodejsModules"
 	| "lint/nursery/noTypeOnlyImportAttributes"
 	| "lint/nursery/noUnusedImports"
 	| "lint/nursery/noUnusedPrivateClassMembers"

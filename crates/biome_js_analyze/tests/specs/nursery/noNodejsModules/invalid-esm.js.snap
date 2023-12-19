@@ -1,0 +1,28 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-esm.js
+---
+# Input
+```js
+import hello from './hello.js'
+import fs from 'node:fs'
+
+```
+
+# Diagnostics
+```
+invalid-esm.js:2:16 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Using Node.js modules are forbidden.
+  
+    1 │ import hello from './hello.js'
+  > 2 │ import fs from 'node:fs'
+      │                ^^^^^^^^^
+    3 │ 
+  
+  i Can be useful for client-side web projects that do not have access to those modules.
+  
+
+```
+
+

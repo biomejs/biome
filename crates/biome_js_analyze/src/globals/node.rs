@@ -71,6 +71,63 @@ pub const NODE: [&str; 34] = [
 /// Sorted array of CommonJs builtin
 pub const COMMON_JS: [&str; 4] = ["exports", "global", "module", "require"];
 
+/// Available at https://github.com/nodejs/node/blob/main/lib/internal/bootstrap/realm.js#L89
+/// These list also includes "node:" prefixed modules.
+/// TODO(@anonrig): Move this to import context.
+/// Similar to `importType(name, context) === 'builtin'`
+pub const NODE_BUILTIN_MODULES: &[&str] = &[
+    "buffer",
+    "cares_wrap",
+    "config",
+    "constants",
+    "contextify",
+    "fs",
+    "fs/promises",
+    "fs_event_wrap",
+    "icu",
+    "inspector",
+    "js_stream",
+    "os",
+    "pipe_wrap",
+    "process_wrap",
+    "spawn_sync",
+    "stream_wrap",
+    "tcp_wrap",
+    "timers",
+    "timers/promises",
+    "tls_wrap",
+    "tty_wrap",
+    "udp_wrap",
+    "uv",
+    "zlib",
+    "node:buffer",
+    "node:cares_wrap",
+    "node:config",
+    "node:constants",
+    "node:contextify",
+    "node:fs",
+    "node:fs/promises",
+    "node:fs_event_wrap",
+    "node:icu",
+    "node:inspector",
+    "node:js_stream",
+    "node:os",
+    "node:pipe_wrap",
+    "node:process_wrap",
+    "node:spawn_sync",
+    "node:stream_wrap",
+    "node:tcp_wrap",
+    "node:timers",
+    "node:timers/promises",
+    "node:tls_wrap",
+    "node:tty_wrap",
+    "node:udp_wrap",
+    "node:uv",
+    "node:zlib",
+    "node:test",
+    "node:test/reporters",
+];
+
 #[test]
 fn test_order() {
     for items in BUILTIN.windows(2) {

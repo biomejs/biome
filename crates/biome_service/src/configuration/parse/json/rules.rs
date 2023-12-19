@@ -944,6 +944,10 @@ impl Deserializable for Nursery {
                                 diagnostics,
                             );
                         }
+                        "noNodejsModules" => {
+                            result.no_nodejs_modules =
+                                Deserializable::deserialize(&value, "noNodejsModules", diagnostics);
+                        }
                         "noUnusedImports" => {
                             result.no_unused_imports =
                                 Deserializable::deserialize(&value, "noUnusedImports", diagnostics);
@@ -1029,6 +1033,7 @@ impl Deserializable for Nursery {
                                     "noEmptyBlockStatements",
                                     "noImplicitAnyLet",
                                     "noMisleadingCharacterClass",
+                                    "noNodejsModules",
                                     "noUnusedImports",
                                     "noUnusedPrivateClassMembers",
                                     "noUselessLoneBlockStatements",
