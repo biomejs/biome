@@ -112,7 +112,7 @@ export default defineConfig({
 								ja: "はじめる",
 								"zh-CN": "入门",
 								"pt-BR": "Primeiros passos",
-								tr: "Başlarken",
+								tr: "Başla",
 							},
 						},
 						{
