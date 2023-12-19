@@ -353,7 +353,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_MEDIA_QUERY_RANGE",
         "CSS_KEYFRAMES_ITEM_LIST",
         "CSS_MEDIA_QUERY_LIST",
-        // Bogs nodes
+        // Bogus nodes
         "CSS_BOGUS",
         "CSS_BOGUS_BODY",
         "CSS_BOGUS_RULE",

@@ -44,6 +44,9 @@ CssBogusPseudoElement = SyntaxElement*
 CssBogusAtRule = SyntaxElement*
 CssBogusBody =  SyntaxElement*
 CssBogusRule =  SyntaxElement*
+CssBogusParameter = SyntaxElement*
+CssBogusDeclarationItem = SyntaxElement*
+CssBogusComponentValue = SyntaxElement*
 
 CssRoot =
 	bom: 'UNICODE_BOM'?

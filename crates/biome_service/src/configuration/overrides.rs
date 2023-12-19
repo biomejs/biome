@@ -1,8 +1,8 @@
 use crate::configuration::formatter::{deserialize_line_width, serialize_line_width};
 use crate::configuration::linter::rules;
 use crate::configuration::{
-    javascript_configuration, json_configuration, JavascriptConfiguration, JsonConfiguration,
-    PlainIndentStyle,
+    css_configuration, javascript_configuration, json_configuration, CssConfiguration,
+    JavascriptConfiguration, JsonConfiguration, PlainIndentStyle,
 };
 use crate::settings::{
     to_matcher, LanguageListSettings, OverrideFormatSettings, OverrideLinterSettings,
@@ -75,6 +75,11 @@ pub struct OverridePattern {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[bpaf(external(json_configuration), optional, hide)]
     pub json: Option<JsonConfiguration>,
+
+    /// Specific configuration for the Css language
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[bpaf(external(css_configuration), optional, hide)]
+    pub css: Option<CssConfiguration>,
 
     /// Specific configuration for the Json language
     #[serde(skip_serializing_if = "Option::is_none")]

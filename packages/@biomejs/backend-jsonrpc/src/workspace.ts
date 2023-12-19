@@ -30,6 +30,10 @@ export interface Configuration {
 	 */
 	$schema?: string;
 	/**
+	 * Specific configuration for the Css language
+	 */
+	css?: CssConfiguration;
+	/**
 	 * A list of paths to other JSON files, used to extends the current configuration.
 	 */
 	extends?: StringSet;
@@ -65,6 +69,19 @@ export interface Configuration {
 	 * The configuration of the VCS integration
 	 */
 	vcs?: VcsConfiguration;
+}
+/**
+ * Options applied to CSS files
+ */
+export interface CssConfiguration {
+	/**
+	 * Formatting options
+	 */
+	formatter?: CssFormatter;
+	/**
+	 * Parsing options
+	 */
+	parser?: CssParser;
 }
 export type StringSet = string[];
 /**
@@ -219,6 +236,41 @@ If Biome can't find the configuration, it will attempt to use the current workin
 	 */
 	useIgnoreFile?: boolean;
 }
+export interface CssFormatter {
+	/**
+	 * Control the formatter for CSS (and its super languages) files.
+	 */
+	enabled?: boolean;
+	/**
+	 * The size of the indentation applied to CSS (and its super languages) files. Default to 2.
+	 */
+	indentSize?: number;
+	/**
+	 * The indent style applied to CSS (and its super languages) files.
+	 */
+	indentStyle?: PlainIndentStyle;
+	/**
+	 * The size of the indentation applied to CSS (and its super languages) files. Default to 2.
+	 */
+	indentWidth?: number;
+	/**
+	 * The type of line ending applied to CSS (and its super languages) files.
+	 */
+	lineEnding?: LineEnding;
+	/**
+	 * What's the max width of a line applied to CSS (and its super languages) files. Defaults to 80.
+	 */
+	lineWidth?: LineWidth;
+}
+/**
+ * Options that changes how the CSS parser behaves
+ */
+export interface CssParser {
+	/**
+	 * Allow comments to appear on incorrect lines in `.css` files
+	 */
+	allowWrongLineComments?: boolean;
+}
 export type PlainIndentStyle = "tab" | "space";
 export type LineEnding = "lf" | "crlf" | "cr";
 /**
@@ -358,6 +410,10 @@ export interface Rules {
 	suspicious?: Suspicious;
 }
 export interface OverridePattern {
+	/**
+	 * Specific configuration for the Css language
+	 */
+	css?: CssConfiguration;
 	/**
 	 * Specific configuration for the Json language
 	 */
@@ -1371,6 +1427,7 @@ export type Language =
 	| "TypeScriptReact"
 	| "Json"
 	| "Jsonc"
+	| "Css"
 	| "Unknown";
 export interface ChangeFileParams {
 	content: string;

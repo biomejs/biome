@@ -17,6 +17,9 @@ impl SyntaxFactory for CssSyntaxFactory {
             CSS_BOGUS
             | CSS_BOGUS_AT_RULE
             | CSS_BOGUS_BODY
+            | CSS_BOGUS_COMPONENT_VALUE
+            | CSS_BOGUS_DECLARATION_ITEM
+            | CSS_BOGUS_PARAMETER
             | CSS_BOGUS_PSEUDO_CLASS
             | CSS_BOGUS_PSEUDO_ELEMENT
             | CSS_BOGUS_RULE

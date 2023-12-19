@@ -402,6 +402,18 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssBogusBody::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_BOGUS_COMPONENT_VALUE => {
+                    let $pattern = unsafe { $crate::CssBogusComponentValue::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_BOGUS_DECLARATION_ITEM => {
+                    let $pattern = unsafe { $crate::CssBogusDeclarationItem::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_BOGUS_PARAMETER => {
+                    let $pattern = unsafe { $crate::CssBogusParameter::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_BOGUS_PSEUDO_CLASS => {
                     let $pattern = unsafe { $crate::CssBogusPseudoClass::new_unchecked(node) };
                     $body
