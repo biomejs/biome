@@ -57,7 +57,7 @@ npx @biomejs/biome check --apply ./src
 npx @biomejs/biome ci ./src
 ```
 
-Biome'u yüklemek istemeden denemek istiyorsanız, WebAssembly'ye derlenmiş [çevrimiçi oyun alanını](https://biomejs.dev/playground/) kullanın.
+Biome'u yüklemek istemeden denemek istiyorsanız, WebAssembly'ye derlenmiş [oyun alanını](https://biomejs.dev/playground/) kullanabilirsiniz.
 
 ## Dokümantasyon
 
