@@ -13,7 +13,6 @@ mod language {
 fn quick_test() {
     let src = r#"
 div.one, div.three#four { color: blue; background-color: red;}
-html {}
 "#;
     let parse = parse_css(src, CssParserOptions::default());
 
@@ -23,8 +22,6 @@ html {}
 
     let root = &parse.syntax();
     let language = language::CssTestFormatLanguage::default();
-
-    println!("{:#?}\n\n", parse);
 
     println!("{}", doc.into_document());
     eprintln!("{}", result.as_code());
