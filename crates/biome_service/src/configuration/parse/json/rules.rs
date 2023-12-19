@@ -944,6 +944,10 @@ impl Deserializable for Nursery {
                                 diagnostics,
                             );
                         }
+                        "noNodejsModules" => {
+                            result.no_nodejs_modules =
+                                Deserializable::deserialize(&value, "noNodejsModules", diagnostics);
+                        }
                         "noUnusedImports" => {
                             result.no_unused_imports =
                                 Deserializable::deserialize(&value, "noUnusedImports", diagnostics);
@@ -995,6 +999,13 @@ impl Deserializable for Nursery {
                                 diagnostics,
                             );
                         }
+                        "useNodeImportProtocol" => {
+                            result.use_node_import_protocol = Deserializable::deserialize(
+                                &value,
+                                "useNodeImportProtocol",
+                                diagnostics,
+                            );
+                        }
                         "useRegexLiterals" => {
                             result.use_regex_literals = Deserializable::deserialize(
                                 &value,
@@ -1029,6 +1040,7 @@ impl Deserializable for Nursery {
                                     "noEmptyBlockStatements",
                                     "noImplicitAnyLet",
                                     "noMisleadingCharacterClass",
+                                    "noNodejsModules",
                                     "noUnusedImports",
                                     "noUnusedPrivateClassMembers",
                                     "noUselessLoneBlockStatements",
@@ -1038,6 +1050,7 @@ impl Deserializable for Nursery {
                                     "useForOf",
                                     "useGroupedTypeImport",
                                     "useImportRestrictions",
+                                    "useNodeImportProtocol",
                                     "useRegexLiterals",
                                     "useShorthandFunctionType",
                                     "useValidAriaRole",
