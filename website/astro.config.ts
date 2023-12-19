@@ -238,7 +238,7 @@ export default defineConfig({
 						ja: "リファレンス",
 						"zh-CN": "参考",
 						"pt-BR": "Referências",
-						tr: "Referans",
+						tr: "Referanslar",
 					},
 					items: [
 						{
