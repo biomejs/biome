@@ -848,6 +848,10 @@ export interface Nursery {
 	 */
 	noDefaultExport?: RuleConfiguration;
 	/**
+	 * Disallow duplicate module imports
+	 */
+	noDuplicateImports?: RuleConfiguration;
+	/**
 	 * Disallow two keys with the same name inside a JSON object.
 	 */
 	noDuplicateJsonKeys?: RuleConfiguration;

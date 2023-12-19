@@ -1199,6 +1199,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noDuplicateImports": {
+					"description": "Disallow duplicate module imports",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noDuplicateJsonKeys": {
 					"description": "Disallow two keys with the same name inside a JSON object.",
 					"anyOf": [
