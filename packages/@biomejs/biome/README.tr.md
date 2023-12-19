@@ -33,7 +33,7 @@
 Kodunuzu geliştirmenize ve daha iyi bir programcı olmanıza yardımcı olacak **ayrıntılı ve bağlamsal tanılar sunar**!
 
 **Biome**, [bir editör içinde etkileşimli olarak kullanılmak](https://biomejs.dev/guides/integrate-in-editor/) üzere baştan tasarlanmıştır.
-Yazarken hatalı kodu formatlayabilir ve lintleyebilir.
+Yazarken hatalı kodu formatlayabilir ve lintleyebilirsiniz.
 
 ### Kurulum
 
