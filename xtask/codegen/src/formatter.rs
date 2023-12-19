@@ -525,6 +525,7 @@ enum NodeDialect {
     Ts,
     Jsx,
     Json,
+    Css,
 }
 
 impl NodeDialect {
@@ -534,6 +535,7 @@ impl NodeDialect {
             NodeDialect::Ts,
             NodeDialect::Jsx,
             NodeDialect::Json,
+            NodeDialect::Css,
         ]
     }
 
@@ -547,6 +549,7 @@ impl NodeDialect {
             NodeDialect::Ts => "ts",
             NodeDialect::Jsx => "jsx",
             NodeDialect::Json => "json",
+            NodeDialect::Css => "css",
         }
     }
 
@@ -556,6 +559,7 @@ impl NodeDialect {
             "Js" => NodeDialect::Js,
             "Ts" => NodeDialect::Ts,
             "Json" => NodeDialect::Json,
+            "Css" => NodeDialect::Css,
             _ => {
                 eprintln!("missing prefix {}", name);
                 NodeDialect::Js
@@ -584,8 +588,10 @@ enum NodeConcept {
     Tag,
     Attribute,
 
-    // JSON
+    // JSON / CSS
     Value,
+    Pseudo,
+    Selector,
 }
 
 impl NodeConcept {
@@ -607,6 +613,8 @@ impl NodeConcept {
             NodeConcept::Attribute => "attribute",
             NodeConcept::Auxiliary => "auxiliary",
             NodeConcept::Value => "value",
+            NodeConcept::Pseudo => "pseudo",
+            NodeConcept::Selector => "selectors",
         }
     }
 }
@@ -727,7 +735,17 @@ fn name_to_module(kind: &NodeKind, in_name: &str, language: LanguageKind) -> Nod
                 _ if name.ends_with("Value") => NodeConcept::Value,
                 _ => NodeConcept::Auxiliary,
             },
-            LanguageKind::Css => NodeConcept::Auxiliary,
+            LanguageKind::Css => match name {
+                _ if name.ends_with("AtRule") => NodeConcept::Statement,
+                _ if name.ends_with("Selector") => NodeConcept::Selector,
+                _ if name.starts_with("Pseudo") => NodeConcept::Pseudo,
+                _ if matches!(name, "Number" | "Percentage" | "Ratio" | "String")
+                    || name.ends_with("Dimension") =>
+                {
+                    NodeConcept::Value
+                }
+                _ => NodeConcept::Auxiliary,
+            },
         }
     };
 

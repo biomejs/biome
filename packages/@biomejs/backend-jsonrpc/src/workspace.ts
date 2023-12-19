@@ -18,6 +18,8 @@ export type SupportKind =
 	| "FileNotSupported";
 export interface UpdateSettingsParams {
 	configuration: Configuration;
+	gitignore_matches: string[];
+	vcs_base_path?: string;
 }
 /**
  * The configuration that is contained inside the file `biome.json`
@@ -27,6 +29,10 @@ export interface Configuration {
 	 * A field for the [JSON schema](https://json-schema.org/) specification
 	 */
 	$schema?: string;
+	/**
+	 * Specific configuration for the Css language
+	 */
+	css?: CssConfiguration;
 	/**
 	 * A list of paths to other JSON files, used to extends the current configuration.
 	 */
@@ -63,6 +69,19 @@ export interface Configuration {
 	 * The configuration of the VCS integration
 	 */
 	vcs?: VcsConfiguration;
+}
+/**
+ * Options applied to CSS files
+ */
+export interface CssConfiguration {
+	/**
+	 * Formatting options
+	 */
+	formatter?: CssFormatter;
+	/**
+	 * Parsing options
+	 */
+	parser?: CssParser;
 }
 export type StringSet = string[];
 /**
@@ -199,6 +218,10 @@ export interface VcsConfiguration {
 	 */
 	clientKind?: VcsClientKind;
 	/**
+	 * The main branch of the project
+	 */
+	defaultBranch?: string;
+	/**
 	 * Whether Biome should integrate itself with the VCS client
 	 */
 	enabled?: boolean;
@@ -212,6 +235,41 @@ If Biome can't find the configuration, it will attempt to use the current workin
 	 * Whether Biome should use the VCS ignore file. When [true], Biome will ignore the files specified in the ignore file.
 	 */
 	useIgnoreFile?: boolean;
+}
+export interface CssFormatter {
+	/**
+	 * Control the formatter for CSS (and its super languages) files.
+	 */
+	enabled?: boolean;
+	/**
+	 * The size of the indentation applied to CSS (and its super languages) files. Default to 2.
+	 */
+	indentSize?: number;
+	/**
+	 * The indent style applied to CSS (and its super languages) files.
+	 */
+	indentStyle?: PlainIndentStyle;
+	/**
+	 * The size of the indentation applied to CSS (and its super languages) files. Default to 2.
+	 */
+	indentWidth?: number;
+	/**
+	 * The type of line ending applied to CSS (and its super languages) files.
+	 */
+	lineEnding?: LineEnding;
+	/**
+	 * What's the max width of a line applied to CSS (and its super languages) files. Defaults to 80.
+	 */
+	lineWidth?: LineWidth;
+}
+/**
+ * Options that changes how the CSS parser behaves
+ */
+export interface CssParser {
+	/**
+	 * Allow comments to appear on incorrect lines in `.css` files
+	 */
+	allowWrongLineComments?: boolean;
 }
 export type PlainIndentStyle = "tab" | "space";
 export type LineEnding = "lf" | "crlf" | "cr";
@@ -352,6 +410,10 @@ export interface Rules {
 	suspicious?: Suspicious;
 }
 export interface OverridePattern {
+	/**
+	 * Specific configuration for the Css language
+	 */
+	css?: CssConfiguration;
 	/**
 	 * Specific configuration for the Json language
 	 */
@@ -813,6 +875,10 @@ export interface Nursery {
 	 * Disallow unnecessary nested block statements.
 	 */
 	noUselessLoneBlockStatements?: RuleConfiguration;
+	/**
+	 * Disallow ternary operators when simpler alternatives exist.
+	 */
+	noUselessTernary?: RuleConfiguration;
 	/**
 	 * It enables the recommended rules for this group
 	 */
@@ -1365,6 +1431,7 @@ export type Language =
 	| "TypeScriptReact"
 	| "Json"
 	| "Jsonc"
+	| "Css"
 	| "Unknown";
 export interface ChangeFileParams {
 	content: string;
@@ -1523,9 +1590,11 @@ export type Category =
 	| "lint/nursery/noEmptyBlockStatements"
 	| "lint/nursery/noImplicitAnyLet"
 	| "lint/nursery/noMisleadingCharacterClass"
+	| "lint/nursery/noTypeOnlyImportAttributes"
 	| "lint/nursery/noUnusedImports"
 	| "lint/nursery/noUnusedPrivateClassMembers"
 	| "lint/nursery/noUselessLoneBlockStatements"
+	| "lint/nursery/noUselessTernary"
 	| "lint/nursery/useAwait"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useExportType"

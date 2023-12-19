@@ -92,3 +92,13 @@ function f (x) { // 0
     } // g
     // 2
 } // 3
+
+function f (x) {
+    if (x > 0 && x < 5) {
+        return 0;
+    }
+    // Some explanations
+    else {
+        return x;
+    }
+}

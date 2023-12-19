@@ -2,12 +2,6 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: content
 ---
-## `./.git`
-
-```git
-
-```
-
 ## `./.gitignore`
 
 ```gitignore

@@ -12,13 +12,13 @@ use crate::{
 use biome_console::{fmt, markup, Console, ConsoleExt};
 use biome_diagnostics::PrintGitHubDiagnostic;
 use biome_diagnostics::{
-    adapters::StdError, category, DiagnosticExt, Error, PrintDescription, PrintDiagnostic,
-    Resource, Severity,
+    category, DiagnosticExt, Error, PrintDescription, PrintDiagnostic, Resource, Severity,
 };
 use biome_fs::{FileSystem, PathInterner, RomePath};
 use biome_fs::{TraversalContext, TraversalScope};
 use biome_service::workspace::{FeaturesBuilder, IsPathIgnoredParams};
 use biome_service::{
+    extension_error,
     workspace::{FeatureName, SupportsFeatureParams},
     Workspace, WorkspaceError,
 };
@@ -90,7 +90,7 @@ pub(crate) fn traverse(
     let mut report = Report::default();
 
     let duration = thread::scope(|s| {
-        thread::Builder::new()
+        let handler = thread::Builder::new()
             .name(String::from("biome::console"))
             .spawn_scoped(s, || {
                 process_messages(ProcessMessagesOptions {
@@ -112,7 +112,7 @@ pub(crate) fn traverse(
 
         // The traversal context is scoped to ensure all the channels it
         // contains are properly closed once the traversal finishes
-        traverse_inputs(
+        let elapsed = traverse_inputs(
             fs,
             inputs,
             &TraversalOptions {
@@ -126,7 +126,12 @@ pub(crate) fn traverse(
                 sender_reports,
                 remaining_diagnostics: &remaining_diagnostics,
             },
-        )
+        );
+
+        // wait for the main thread to finish
+        handler.join().unwrap();
+
+        elapsed
     });
 
     let count = processed.load(Ordering::Relaxed);
@@ -244,7 +249,6 @@ fn init_thread_pool() {
 /// run it to completion, returning the duration of the process
 fn traverse_inputs(fs: &dyn FileSystem, inputs: Vec<OsString>, ctx: &TraversalOptions) -> Duration {
     let start = Instant::now();
-
     fs.traversal(Box::new(move |scope: &dyn TraversalScope| {
         for input in inputs {
             scope.spawn(ctx, PathBuf::from(input));
@@ -647,8 +651,7 @@ impl<'ctx, 'app> TraversalOptions<'ctx, 'app> {
 
     pub(crate) fn miss_handler_err(&self, err: WorkspaceError, rome_path: &RomePath) {
         self.push_diagnostic(
-            StdError::from(err)
-                .with_category(category!("files/missingHandler"))
+            err.with_category(category!("files/missingHandler"))
                 .with_file_path(rome_path.display().to_string()),
         );
     }
@@ -688,7 +691,14 @@ impl<'ctx, 'app> TraversalContext for TraversalOptions<'ctx, 'app> {
         });
 
         let file_features = match file_features {
-            Ok(file_features) => file_features,
+            Ok(file_features) => {
+                if file_features.is_not_supported() && !file_features.is_ignored() {
+                    // we should throw a diagnostic if we can't handle a file that isn't ignored
+                    self.miss_handler_err(extension_error(rome_path), rome_path);
+                    return false;
+                }
+                file_features
+            }
             Err(err) => {
                 self.miss_handler_err(err, rome_path);
 

@@ -7,6 +7,7 @@ pub(crate) mod no_empty_block_statements;
 pub(crate) mod no_implicit_any_let;
 pub(crate) mod no_unused_private_class_members;
 pub(crate) mod no_useless_lone_block_statements;
+pub(crate) mod no_useless_ternary;
 pub(crate) mod use_await;
 pub(crate) mod use_grouped_type_import;
 pub(crate) mod use_import_restrictions;
@@ -23,6 +24,7 @@ declare_group! {
             self :: no_implicit_any_let :: NoImplicitAnyLet ,
             self :: no_unused_private_class_members :: NoUnusedPrivateClassMembers ,
             self :: no_useless_lone_block_statements :: NoUselessLoneBlockStatements ,
+            self :: no_useless_ternary :: NoUselessTernary ,
             self :: use_await :: UseAwait ,
             self :: use_grouped_type_import :: UseGroupedTypeImport ,
             self :: use_import_restrictions :: UseImportRestrictions ,
