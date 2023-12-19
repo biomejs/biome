@@ -864,7 +864,7 @@ export interface Nursery {
 	 */
 	noMisleadingCharacterClass?: RuleConfiguration;
 	/**
-	 * Disallow Node.js builtin modules.
+	 * Forbid the use of Node.js builtin modules. Can be useful for client-side web projects that do not have access to those modules.
 	 */
 	noNodejsModules?: RuleConfiguration;
 	/**

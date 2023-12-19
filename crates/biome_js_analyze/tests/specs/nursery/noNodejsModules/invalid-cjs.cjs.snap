@@ -14,16 +14,16 @@ const path = require('node:path');
 invalid-cjs.cjs:1:20 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
   > 1 │ const fs = require('fs');
       │                    ^^^^
     2 │ const path = require('node:path');
-    3 │
-
+    3 │ 
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 

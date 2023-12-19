@@ -13,8 +13,6 @@ declare_rule! {
     /// Forbid the use of Node.js builtin modules. Can be useful for client-side web projects that
     /// do not have access to those modules.
     ///
-    /// TODO(@anonrig): Add "allow" array option to allow specific modules.
-    ///
     /// Source: https://github.com/import-js/eslint-plugin-import/blob/main/docs/rules/no-nodejs-modules.md
     ///
     /// ## Examples
@@ -44,7 +42,7 @@ impl Rule for NoNodejsModules {
         match node {
             AnyJsImportLike::JsModuleSource(source) => {
                 let source_text = source.inner_string_text().ok()?;
-                if is_node_module(&source_text.text()) {
+                if is_node_module(source_text.text()) {
                     return Some(source.range());
                 }
             }

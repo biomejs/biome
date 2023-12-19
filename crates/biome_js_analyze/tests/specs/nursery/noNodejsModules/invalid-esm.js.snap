@@ -234,16 +234,16 @@ import("node:zlib");
 invalid-esm.js:1:20 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
   > 1 │ import assert from "assert";
       │                    ^^^^^^^^
     2 │ import assert_strict from "assert/strict";
     3 │ import async_hooks from "async_hooks";
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -251,17 +251,17 @@ invalid-esm.js:1:20 lint/nursery/noNodejsModules ━━━━━━━━━━�
 invalid-esm.js:2:27 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     1 │ import assert from "assert";
   > 2 │ import assert_strict from "assert/strict";
       │                           ^^^^^^^^^^^^^^^
     3 │ import async_hooks from "async_hooks";
     4 │ import buffer from "buffer";
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -269,18 +269,18 @@ invalid-esm.js:2:27 lint/nursery/noNodejsModules ━━━━━━━━━━�
 invalid-esm.js:3:25 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     1 │ import assert from "assert";
     2 │ import assert_strict from "assert/strict";
   > 3 │ import async_hooks from "async_hooks";
       │                         ^^^^^^^^^^^^^
     4 │ import buffer from "buffer";
     5 │ import child_process from "child_process";
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -288,18 +288,18 @@ invalid-esm.js:3:25 lint/nursery/noNodejsModules ━━━━━━━━━━�
 invalid-esm.js:4:20 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     2 │ import assert_strict from "assert/strict";
     3 │ import async_hooks from "async_hooks";
   > 4 │ import buffer from "buffer";
       │                    ^^^^^^^^
     5 │ import child_process from "child_process";
     6 │ import cluster from "cluster";
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -307,18 +307,18 @@ invalid-esm.js:4:20 lint/nursery/noNodejsModules ━━━━━━━━━━�
 invalid-esm.js:5:27 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     3 │ import async_hooks from "async_hooks";
     4 │ import buffer from "buffer";
   > 5 │ import child_process from "child_process";
       │                           ^^^^^^^^^^^^^^^
     6 │ import cluster from "cluster";
     7 │ import console from "console";
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -326,18 +326,18 @@ invalid-esm.js:5:27 lint/nursery/noNodejsModules ━━━━━━━━━━�
 invalid-esm.js:6:21 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     4 │ import buffer from "buffer";
     5 │ import child_process from "child_process";
   > 6 │ import cluster from "cluster";
       │                     ^^^^^^^^^
     7 │ import console from "console";
     8 │ import constants from "constants";
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -345,18 +345,18 @@ invalid-esm.js:6:21 lint/nursery/noNodejsModules ━━━━━━━━━━�
 invalid-esm.js:7:21 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     5 │ import child_process from "child_process";
     6 │ import cluster from "cluster";
   > 7 │ import console from "console";
       │                     ^^^^^^^^^
     8 │ import constants from "constants";
     9 │ import crypto from "crypto";
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -364,18 +364,18 @@ invalid-esm.js:7:21 lint/nursery/noNodejsModules ━━━━━━━━━━�
 invalid-esm.js:8:23 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
      6 │ import cluster from "cluster";
      7 │ import console from "console";
    > 8 │ import constants from "constants";
        │                       ^^^^^^^^^^^
      9 │ import crypto from "crypto";
     10 │ import dgram from "dgram";
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -383,18 +383,18 @@ invalid-esm.js:8:23 lint/nursery/noNodejsModules ━━━━━━━━━━�
 invalid-esm.js:9:20 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
      7 │ import console from "console";
      8 │ import constants from "constants";
    > 9 │ import crypto from "crypto";
        │                    ^^^^^^^^
     10 │ import dgram from "dgram";
     11 │ import diagnostics_channel from "diagnostics_channel";
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -402,18 +402,18 @@ invalid-esm.js:9:20 lint/nursery/noNodejsModules ━━━━━━━━━━�
 invalid-esm.js:10:19 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
      8 │ import constants from "constants";
      9 │ import crypto from "crypto";
   > 10 │ import dgram from "dgram";
        │                   ^^^^^^^
     11 │ import diagnostics_channel from "diagnostics_channel";
     12 │ import dns from "dns";
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -421,18 +421,18 @@ invalid-esm.js:10:19 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:11:33 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
      9 │ import crypto from "crypto";
     10 │ import dgram from "dgram";
   > 11 │ import diagnostics_channel from "diagnostics_channel";
        │                                 ^^^^^^^^^^^^^^^^^^^^^
     12 │ import dns from "dns";
     13 │ import dns_promises from "dns/promises";
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -440,18 +440,18 @@ invalid-esm.js:11:33 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:12:17 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     10 │ import dgram from "dgram";
     11 │ import diagnostics_channel from "diagnostics_channel";
   > 12 │ import dns from "dns";
        │                 ^^^^^
     13 │ import dns_promises from "dns/promises";
     14 │ import domain from "domain";
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -459,18 +459,18 @@ invalid-esm.js:12:17 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:13:26 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     11 │ import diagnostics_channel from "diagnostics_channel";
     12 │ import dns from "dns";
   > 13 │ import dns_promises from "dns/promises";
        │                          ^^^^^^^^^^^^^^
     14 │ import domain from "domain";
     15 │ import events from "events";
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -478,18 +478,18 @@ invalid-esm.js:13:26 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:14:20 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     12 │ import dns from "dns";
     13 │ import dns_promises from "dns/promises";
   > 14 │ import domain from "domain";
        │                    ^^^^^^^^
     15 │ import events from "events";
     16 │ import fs from "fs";
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -497,18 +497,18 @@ invalid-esm.js:14:20 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:15:20 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     13 │ import dns_promises from "dns/promises";
     14 │ import domain from "domain";
   > 15 │ import events from "events";
        │                    ^^^^^^^^
     16 │ import fs from "fs";
     17 │ import fs_promises from "fs/promises";
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -516,18 +516,18 @@ invalid-esm.js:15:20 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:16:16 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     14 │ import domain from "domain";
     15 │ import events from "events";
   > 16 │ import fs from "fs";
        │                ^^^^
     17 │ import fs_promises from "fs/promises";
     18 │ import http from "http";
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -535,18 +535,18 @@ invalid-esm.js:16:16 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:17:25 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     15 │ import events from "events";
     16 │ import fs from "fs";
   > 17 │ import fs_promises from "fs/promises";
        │                         ^^^^^^^^^^^^^
     18 │ import http from "http";
     19 │ import http2 from "http2";
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -554,18 +554,18 @@ invalid-esm.js:17:25 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:18:18 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     16 │ import fs from "fs";
     17 │ import fs_promises from "fs/promises";
   > 18 │ import http from "http";
        │                  ^^^^^^
     19 │ import http2 from "http2";
     20 │ import https from "https";
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -573,18 +573,18 @@ invalid-esm.js:18:18 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:19:19 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     17 │ import fs_promises from "fs/promises";
     18 │ import http from "http";
   > 19 │ import http2 from "http2";
        │                   ^^^^^^^
     20 │ import https from "https";
     21 │ import inspector from "inspector";
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -592,18 +592,18 @@ invalid-esm.js:19:19 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:20:19 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     18 │ import http from "http";
     19 │ import http2 from "http2";
   > 20 │ import https from "https";
        │                   ^^^^^^^
     21 │ import inspector from "inspector";
     22 │ import inspector_promises from "inspector/promises";
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -611,18 +611,18 @@ invalid-esm.js:20:19 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:21:23 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     19 │ import http2 from "http2";
     20 │ import https from "https";
   > 21 │ import inspector from "inspector";
        │                       ^^^^^^^^^^^
     22 │ import inspector_promises from "inspector/promises";
     23 │ import module from "module";
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -630,18 +630,18 @@ invalid-esm.js:21:23 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:22:32 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     20 │ import https from "https";
     21 │ import inspector from "inspector";
   > 22 │ import inspector_promises from "inspector/promises";
        │                                ^^^^^^^^^^^^^^^^^^^^
     23 │ import module from "module";
     24 │ import net from "net";
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -649,18 +649,18 @@ invalid-esm.js:22:32 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:23:20 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     21 │ import inspector from "inspector";
     22 │ import inspector_promises from "inspector/promises";
   > 23 │ import module from "module";
        │                    ^^^^^^^^
     24 │ import net from "net";
     25 │ import os from "os";
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -668,18 +668,18 @@ invalid-esm.js:23:20 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:24:17 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     22 │ import inspector_promises from "inspector/promises";
     23 │ import module from "module";
   > 24 │ import net from "net";
        │                 ^^^^^
     25 │ import os from "os";
     26 │ import path from "path";
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -687,18 +687,18 @@ invalid-esm.js:24:17 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:25:16 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     23 │ import module from "module";
     24 │ import net from "net";
   > 25 │ import os from "os";
        │                ^^^^
     26 │ import path from "path";
     27 │ import path_posix from "path/posix";
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -706,18 +706,18 @@ invalid-esm.js:25:16 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:26:18 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     24 │ import net from "net";
     25 │ import os from "os";
   > 26 │ import path from "path";
        │                  ^^^^^^
     27 │ import path_posix from "path/posix";
     28 │ import path_win32 from "path/win32";
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -725,18 +725,18 @@ invalid-esm.js:26:18 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:27:24 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     25 │ import os from "os";
     26 │ import path from "path";
   > 27 │ import path_posix from "path/posix";
        │                        ^^^^^^^^^^^^
     28 │ import path_win32 from "path/win32";
     29 │ import perf_hooks from "perf_hooks";
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -744,18 +744,18 @@ invalid-esm.js:27:24 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:28:24 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     26 │ import path from "path";
     27 │ import path_posix from "path/posix";
   > 28 │ import path_win32 from "path/win32";
        │                        ^^^^^^^^^^^^
     29 │ import perf_hooks from "perf_hooks";
     30 │ import process from "process";
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -763,18 +763,18 @@ invalid-esm.js:28:24 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:29:24 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     27 │ import path_posix from "path/posix";
     28 │ import path_win32 from "path/win32";
   > 29 │ import perf_hooks from "perf_hooks";
        │                        ^^^^^^^^^^^^
     30 │ import process from "process";
     31 │ import punycode from "punycode";
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -782,18 +782,18 @@ invalid-esm.js:29:24 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:30:21 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     28 │ import path_win32 from "path/win32";
     29 │ import perf_hooks from "perf_hooks";
   > 30 │ import process from "process";
        │                     ^^^^^^^^^
     31 │ import punycode from "punycode";
     32 │ import querystring from "querystring";
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -801,18 +801,18 @@ invalid-esm.js:30:21 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:31:22 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     29 │ import perf_hooks from "perf_hooks";
     30 │ import process from "process";
   > 31 │ import punycode from "punycode";
        │                      ^^^^^^^^^^
     32 │ import querystring from "querystring";
     33 │ import readline from "readline";
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -820,18 +820,18 @@ invalid-esm.js:31:22 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:32:25 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     30 │ import process from "process";
     31 │ import punycode from "punycode";
   > 32 │ import querystring from "querystring";
        │                         ^^^^^^^^^^^^^
     33 │ import readline from "readline";
     34 │ import readline_promises from "readline/promises";
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -839,18 +839,18 @@ invalid-esm.js:32:25 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:33:22 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     31 │ import punycode from "punycode";
     32 │ import querystring from "querystring";
   > 33 │ import readline from "readline";
        │                      ^^^^^^^^^^
     34 │ import readline_promises from "readline/promises";
     35 │ import repl from "repl";
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -858,18 +858,18 @@ invalid-esm.js:33:22 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:34:31 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     32 │ import querystring from "querystring";
     33 │ import readline from "readline";
   > 34 │ import readline_promises from "readline/promises";
        │                               ^^^^^^^^^^^^^^^^^^^
     35 │ import repl from "repl";
     36 │ import stream from "stream";
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -877,18 +877,18 @@ invalid-esm.js:34:31 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:35:18 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     33 │ import readline from "readline";
     34 │ import readline_promises from "readline/promises";
   > 35 │ import repl from "repl";
        │                  ^^^^^^
     36 │ import stream from "stream";
     37 │ import stream_consumers from "stream/consumers";
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -896,18 +896,18 @@ invalid-esm.js:35:18 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:36:20 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     34 │ import readline_promises from "readline/promises";
     35 │ import repl from "repl";
   > 36 │ import stream from "stream";
        │                    ^^^^^^^^
     37 │ import stream_consumers from "stream/consumers";
     38 │ import stream_promises from "stream/promises";
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -915,18 +915,18 @@ invalid-esm.js:36:20 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:37:30 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     35 │ import repl from "repl";
     36 │ import stream from "stream";
   > 37 │ import stream_consumers from "stream/consumers";
        │                              ^^^^^^^^^^^^^^^^^^
     38 │ import stream_promises from "stream/promises";
     39 │ import stream_web from "stream/web";
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -934,18 +934,18 @@ invalid-esm.js:37:30 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:38:29 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     36 │ import stream from "stream";
     37 │ import stream_consumers from "stream/consumers";
   > 38 │ import stream_promises from "stream/promises";
        │                             ^^^^^^^^^^^^^^^^^
     39 │ import stream_web from "stream/web";
     40 │ import string_decoder from "string_decoder";
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -953,18 +953,18 @@ invalid-esm.js:38:29 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:39:24 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     37 │ import stream_consumers from "stream/consumers";
     38 │ import stream_promises from "stream/promises";
   > 39 │ import stream_web from "stream/web";
        │                        ^^^^^^^^^^^^
     40 │ import string_decoder from "string_decoder";
     41 │ import sys from "sys";
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -972,18 +972,18 @@ invalid-esm.js:39:24 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:40:28 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     38 │ import stream_promises from "stream/promises";
     39 │ import stream_web from "stream/web";
   > 40 │ import string_decoder from "string_decoder";
        │                            ^^^^^^^^^^^^^^^^
     41 │ import sys from "sys";
     42 │ import timers from "timers";
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -991,18 +991,18 @@ invalid-esm.js:40:28 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:41:17 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     39 │ import stream_web from "stream/web";
     40 │ import string_decoder from "string_decoder";
   > 41 │ import sys from "sys";
        │                 ^^^^^
     42 │ import timers from "timers";
     43 │ import timers_promises from "timers/promises";
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -1010,18 +1010,18 @@ invalid-esm.js:41:17 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:42:20 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     40 │ import string_decoder from "string_decoder";
     41 │ import sys from "sys";
   > 42 │ import timers from "timers";
        │                    ^^^^^^^^
     43 │ import timers_promises from "timers/promises";
     44 │ import tls from "tls";
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -1029,18 +1029,18 @@ invalid-esm.js:42:20 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:43:29 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     41 │ import sys from "sys";
     42 │ import timers from "timers";
   > 43 │ import timers_promises from "timers/promises";
        │                             ^^^^^^^^^^^^^^^^^
     44 │ import tls from "tls";
     45 │ import trace_events from "trace_events";
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -1048,18 +1048,18 @@ invalid-esm.js:43:29 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:44:17 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     42 │ import timers from "timers";
     43 │ import timers_promises from "timers/promises";
   > 44 │ import tls from "tls";
        │                 ^^^^^
     45 │ import trace_events from "trace_events";
     46 │ import tty from "tty";
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -1067,18 +1067,18 @@ invalid-esm.js:44:17 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:45:26 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     43 │ import timers_promises from "timers/promises";
     44 │ import tls from "tls";
   > 45 │ import trace_events from "trace_events";
        │                          ^^^^^^^^^^^^^^
     46 │ import tty from "tty";
     47 │ import url from "url";
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -1086,18 +1086,18 @@ invalid-esm.js:45:26 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:46:17 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     44 │ import tls from "tls";
     45 │ import trace_events from "trace_events";
   > 46 │ import tty from "tty";
        │                 ^^^^^
     47 │ import url from "url";
     48 │ import util from "util";
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -1105,18 +1105,18 @@ invalid-esm.js:46:17 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:47:17 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     45 │ import trace_events from "trace_events";
     46 │ import tty from "tty";
   > 47 │ import url from "url";
        │                 ^^^^^
     48 │ import util from "util";
     49 │ import util_types from "util/types";
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -1124,18 +1124,18 @@ invalid-esm.js:47:17 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:48:18 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     46 │ import tty from "tty";
     47 │ import url from "url";
   > 48 │ import util from "util";
        │                  ^^^^^^
     49 │ import util_types from "util/types";
     50 │ import v8 from "v8";
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -1143,18 +1143,18 @@ invalid-esm.js:48:18 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:49:24 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     47 │ import url from "url";
     48 │ import util from "util";
   > 49 │ import util_types from "util/types";
        │                        ^^^^^^^^^^^^
     50 │ import v8 from "v8";
     51 │ import vm from "vm";
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -1162,18 +1162,18 @@ invalid-esm.js:49:24 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:50:16 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     48 │ import util from "util";
     49 │ import util_types from "util/types";
   > 50 │ import v8 from "v8";
        │                ^^^^
     51 │ import vm from "vm";
     52 │ import wasi from "wasi";
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -1181,18 +1181,18 @@ invalid-esm.js:50:16 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:51:16 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     49 │ import util_types from "util/types";
     50 │ import v8 from "v8";
   > 51 │ import vm from "vm";
        │                ^^^^
     52 │ import wasi from "wasi";
     53 │ import worker_threads from "worker_threads";
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -1200,18 +1200,18 @@ invalid-esm.js:51:16 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:52:18 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     50 │ import v8 from "v8";
     51 │ import vm from "vm";
   > 52 │ import wasi from "wasi";
        │                  ^^^^^^
     53 │ import worker_threads from "worker_threads";
     54 │ import zlib from "zlib";
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -1219,18 +1219,18 @@ invalid-esm.js:52:18 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:53:28 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     51 │ import vm from "vm";
     52 │ import wasi from "wasi";
   > 53 │ import worker_threads from "worker_threads";
        │                            ^^^^^^^^^^^^^^^^
     54 │ import zlib from "zlib";
-    55 │
-
+    55 │ 
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -1238,18 +1238,18 @@ invalid-esm.js:53:28 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:54:18 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     52 │ import wasi from "wasi";
     53 │ import worker_threads from "worker_threads";
   > 54 │ import zlib from "zlib";
        │                  ^^^^^^
-    55 │
+    55 │ 
     56 │ // with node: protocol
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -1257,18 +1257,18 @@ invalid-esm.js:54:18 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:60:20 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     58 │ import assert_strict from "node:assert/strict";
     59 │ import async_hooks from "node:async_hooks";
   > 60 │ import buffer from "node:buffer";
        │                    ^^^^^^^^^^^^^
     61 │ import child_process from "node:child_process";
     62 │ import cluster from "node:cluster";
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -1276,18 +1276,18 @@ invalid-esm.js:60:20 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:64:23 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     62 │ import cluster from "node:cluster";
     63 │ import console from "node:console";
   > 64 │ import constants from "node:constants";
        │                       ^^^^^^^^^^^^^^^^
     65 │ import crypto from "node:crypto";
     66 │ import dgram from "node:dgram";
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -1295,18 +1295,18 @@ invalid-esm.js:64:23 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:72:16 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     70 │ import domain from "node:domain";
     71 │ import events from "node:events";
   > 72 │ import fs from "node:fs";
        │                ^^^^^^^^^
     73 │ import fs_promises from "node:fs/promises";
     74 │ import http from "node:http";
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -1314,18 +1314,18 @@ invalid-esm.js:72:16 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:73:25 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     71 │ import events from "node:events";
     72 │ import fs from "node:fs";
   > 73 │ import fs_promises from "node:fs/promises";
        │                         ^^^^^^^^^^^^^^^^^^
     74 │ import http from "node:http";
     75 │ import http2 from "node:http2";
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -1333,18 +1333,18 @@ invalid-esm.js:73:25 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:77:23 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     75 │ import http2 from "node:http2";
     76 │ import https from "node:https";
   > 77 │ import inspector from "node:inspector";
        │                       ^^^^^^^^^^^^^^^^
     78 │ import inspector_promises from "node:inspector/promises";
     79 │ import module from "node:module";
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -1352,18 +1352,18 @@ invalid-esm.js:77:23 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:81:16 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     79 │ import module from "node:module";
     80 │ import net from "node:net";
   > 81 │ import os from "node:os";
        │                ^^^^^^^^^
     82 │ import path from "node:path";
     83 │ import path_posix from "node:path/posix";
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -1371,18 +1371,18 @@ invalid-esm.js:81:16 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:98:20 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
      96 │ import string_decoder from "node:string_decoder";
      97 │ import sys from "node:sys";
    > 98 │ import timers from "node:timers";
         │                    ^^^^^^^^^^^^^
      99 │ import timers_promises from "node:timers/promises";
     100 │ import tls from "node:tls";
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -1390,18 +1390,18 @@ invalid-esm.js:98:20 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:99:29 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
      97 │ import sys from "node:sys";
      98 │ import timers from "node:timers";
    > 99 │ import timers_promises from "node:timers/promises";
         │                             ^^^^^^^^^^^^^^^^^^^^^^
     100 │ import tls from "node:tls";
     101 │ import trace_events from "node:trace_events";
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -1409,18 +1409,18 @@ invalid-esm.js:99:29 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:110:18 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     108 │ import wasi from "node:wasi";
     109 │ import worker_threads from "node:worker_threads";
   > 110 │ import zlib from "node:zlib";
         │                  ^^^^^^^^^^^
-    111 │
+    111 │ 
     112 │ // dynamic import
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -1428,17 +1428,17 @@ invalid-esm.js:110:18 lint/nursery/noNodejsModules ━━━━━━━━━�
 invalid-esm.js:113:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     112 │ // dynamic import
   > 113 │ import("assert");
         │        ^^^^^^^^
     114 │ import("assert/strict");
     115 │ import("async_hooks");
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -1446,18 +1446,18 @@ invalid-esm.js:113:8 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:114:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     112 │ // dynamic import
     113 │ import("assert");
   > 114 │ import("assert/strict");
         │        ^^^^^^^^^^^^^^^
     115 │ import("async_hooks");
     116 │ import("buffer");
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -1465,18 +1465,18 @@ invalid-esm.js:114:8 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:115:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     113 │ import("assert");
     114 │ import("assert/strict");
   > 115 │ import("async_hooks");
         │        ^^^^^^^^^^^^^
     116 │ import("buffer");
     117 │ import("child_process");
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -1484,18 +1484,18 @@ invalid-esm.js:115:8 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:116:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     114 │ import("assert/strict");
     115 │ import("async_hooks");
   > 116 │ import("buffer");
         │        ^^^^^^^^
     117 │ import("child_process");
     118 │ import("cluster");
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -1503,18 +1503,18 @@ invalid-esm.js:116:8 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:117:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     115 │ import("async_hooks");
     116 │ import("buffer");
   > 117 │ import("child_process");
         │        ^^^^^^^^^^^^^^^
     118 │ import("cluster");
     119 │ import("console");
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -1522,18 +1522,18 @@ invalid-esm.js:117:8 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:118:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     116 │ import("buffer");
     117 │ import("child_process");
   > 118 │ import("cluster");
         │        ^^^^^^^^^
     119 │ import("console");
     120 │ import("constants");
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -1541,18 +1541,18 @@ invalid-esm.js:118:8 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:119:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     117 │ import("child_process");
     118 │ import("cluster");
   > 119 │ import("console");
         │        ^^^^^^^^^
     120 │ import("constants");
     121 │ import("crypto");
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -1560,18 +1560,18 @@ invalid-esm.js:119:8 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:120:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     118 │ import("cluster");
     119 │ import("console");
   > 120 │ import("constants");
         │        ^^^^^^^^^^^
     121 │ import("crypto");
     122 │ import("dgram");
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -1579,18 +1579,18 @@ invalid-esm.js:120:8 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:121:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     119 │ import("console");
     120 │ import("constants");
   > 121 │ import("crypto");
         │        ^^^^^^^^
     122 │ import("dgram");
     123 │ import("diagnostics_channel");
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -1598,18 +1598,18 @@ invalid-esm.js:121:8 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:122:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     120 │ import("constants");
     121 │ import("crypto");
   > 122 │ import("dgram");
         │        ^^^^^^^
     123 │ import("diagnostics_channel");
     124 │ import("dns");
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -1617,18 +1617,18 @@ invalid-esm.js:122:8 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:123:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     121 │ import("crypto");
     122 │ import("dgram");
   > 123 │ import("diagnostics_channel");
         │        ^^^^^^^^^^^^^^^^^^^^^
     124 │ import("dns");
     125 │ import("dns/promises");
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -1636,18 +1636,18 @@ invalid-esm.js:123:8 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:124:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     122 │ import("dgram");
     123 │ import("diagnostics_channel");
   > 124 │ import("dns");
         │        ^^^^^
     125 │ import("dns/promises");
     126 │ import("domain");
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -1655,18 +1655,18 @@ invalid-esm.js:124:8 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:125:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     123 │ import("diagnostics_channel");
     124 │ import("dns");
   > 125 │ import("dns/promises");
         │        ^^^^^^^^^^^^^^
     126 │ import("domain");
     127 │ import("events");
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -1674,18 +1674,18 @@ invalid-esm.js:125:8 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:126:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     124 │ import("dns");
     125 │ import("dns/promises");
   > 126 │ import("domain");
         │        ^^^^^^^^
     127 │ import("events");
     128 │ import("fs");
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -1693,18 +1693,18 @@ invalid-esm.js:126:8 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:127:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     125 │ import("dns/promises");
     126 │ import("domain");
   > 127 │ import("events");
         │        ^^^^^^^^
     128 │ import("fs");
     129 │ import("fs/promises");
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -1712,18 +1712,18 @@ invalid-esm.js:127:8 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:128:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     126 │ import("domain");
     127 │ import("events");
   > 128 │ import("fs");
         │        ^^^^
     129 │ import("fs/promises");
     130 │ import("http");
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -1731,18 +1731,18 @@ invalid-esm.js:128:8 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:129:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     127 │ import("events");
     128 │ import("fs");
   > 129 │ import("fs/promises");
         │        ^^^^^^^^^^^^^
     130 │ import("http");
     131 │ import("http2");
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -1750,18 +1750,18 @@ invalid-esm.js:129:8 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:130:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     128 │ import("fs");
     129 │ import("fs/promises");
   > 130 │ import("http");
         │        ^^^^^^
     131 │ import("http2");
     132 │ import("https");
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -1769,18 +1769,18 @@ invalid-esm.js:130:8 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:131:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     129 │ import("fs/promises");
     130 │ import("http");
   > 131 │ import("http2");
         │        ^^^^^^^
     132 │ import("https");
     133 │ import("inspector");
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -1788,18 +1788,18 @@ invalid-esm.js:131:8 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:132:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     130 │ import("http");
     131 │ import("http2");
   > 132 │ import("https");
         │        ^^^^^^^
     133 │ import("inspector");
     134 │ import("inspector/promises");
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -1807,18 +1807,18 @@ invalid-esm.js:132:8 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:133:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     131 │ import("http2");
     132 │ import("https");
   > 133 │ import("inspector");
         │        ^^^^^^^^^^^
     134 │ import("inspector/promises");
     135 │ import("module");
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -1826,18 +1826,18 @@ invalid-esm.js:133:8 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:134:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     132 │ import("https");
     133 │ import("inspector");
   > 134 │ import("inspector/promises");
         │        ^^^^^^^^^^^^^^^^^^^^
     135 │ import("module");
     136 │ import("net");
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -1845,18 +1845,18 @@ invalid-esm.js:134:8 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:135:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     133 │ import("inspector");
     134 │ import("inspector/promises");
   > 135 │ import("module");
         │        ^^^^^^^^
     136 │ import("net");
     137 │ import("os");
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -1864,18 +1864,18 @@ invalid-esm.js:135:8 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:136:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     134 │ import("inspector/promises");
     135 │ import("module");
   > 136 │ import("net");
         │        ^^^^^
     137 │ import("os");
     138 │ import("path");
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -1883,18 +1883,18 @@ invalid-esm.js:136:8 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:137:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     135 │ import("module");
     136 │ import("net");
   > 137 │ import("os");
         │        ^^^^
     138 │ import("path");
     139 │ import("path/posix");
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -1902,18 +1902,18 @@ invalid-esm.js:137:8 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:138:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     136 │ import("net");
     137 │ import("os");
   > 138 │ import("path");
         │        ^^^^^^
     139 │ import("path/posix");
     140 │ import("path/win32");
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -1921,18 +1921,18 @@ invalid-esm.js:138:8 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:139:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     137 │ import("os");
     138 │ import("path");
   > 139 │ import("path/posix");
         │        ^^^^^^^^^^^^
     140 │ import("path/win32");
     141 │ import("perf_hooks");
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -1940,18 +1940,18 @@ invalid-esm.js:139:8 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:140:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     138 │ import("path");
     139 │ import("path/posix");
   > 140 │ import("path/win32");
         │        ^^^^^^^^^^^^
     141 │ import("perf_hooks");
     142 │ import("process");
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -1959,18 +1959,18 @@ invalid-esm.js:140:8 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:141:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     139 │ import("path/posix");
     140 │ import("path/win32");
   > 141 │ import("perf_hooks");
         │        ^^^^^^^^^^^^
     142 │ import("process");
     143 │ import("punycode");
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -1978,18 +1978,18 @@ invalid-esm.js:141:8 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:142:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     140 │ import("path/win32");
     141 │ import("perf_hooks");
   > 142 │ import("process");
         │        ^^^^^^^^^
     143 │ import("punycode");
     144 │ import("querystring");
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -1997,18 +1997,18 @@ invalid-esm.js:142:8 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:143:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     141 │ import("perf_hooks");
     142 │ import("process");
   > 143 │ import("punycode");
         │        ^^^^^^^^^^
     144 │ import("querystring");
     145 │ import("readline");
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -2016,18 +2016,18 @@ invalid-esm.js:143:8 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:144:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     142 │ import("process");
     143 │ import("punycode");
   > 144 │ import("querystring");
         │        ^^^^^^^^^^^^^
     145 │ import("readline");
     146 │ import("readline/promises");
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -2035,18 +2035,18 @@ invalid-esm.js:144:8 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:145:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     143 │ import("punycode");
     144 │ import("querystring");
   > 145 │ import("readline");
         │        ^^^^^^^^^^
     146 │ import("readline/promises");
     147 │ import("repl");
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -2054,18 +2054,18 @@ invalid-esm.js:145:8 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:146:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     144 │ import("querystring");
     145 │ import("readline");
   > 146 │ import("readline/promises");
         │        ^^^^^^^^^^^^^^^^^^^
     147 │ import("repl");
     148 │ import("stream");
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -2073,18 +2073,18 @@ invalid-esm.js:146:8 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:147:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     145 │ import("readline");
     146 │ import("readline/promises");
   > 147 │ import("repl");
         │        ^^^^^^
     148 │ import("stream");
     149 │ import("stream/consumers");
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -2092,18 +2092,18 @@ invalid-esm.js:147:8 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:148:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     146 │ import("readline/promises");
     147 │ import("repl");
   > 148 │ import("stream");
         │        ^^^^^^^^
     149 │ import("stream/consumers");
     150 │ import("stream/promises");
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -2111,18 +2111,18 @@ invalid-esm.js:148:8 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:149:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     147 │ import("repl");
     148 │ import("stream");
   > 149 │ import("stream/consumers");
         │        ^^^^^^^^^^^^^^^^^^
     150 │ import("stream/promises");
     151 │ import("stream/web");
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -2130,18 +2130,18 @@ invalid-esm.js:149:8 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:150:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     148 │ import("stream");
     149 │ import("stream/consumers");
   > 150 │ import("stream/promises");
         │        ^^^^^^^^^^^^^^^^^
     151 │ import("stream/web");
     152 │ import("string_decoder");
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -2149,18 +2149,18 @@ invalid-esm.js:150:8 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:151:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     149 │ import("stream/consumers");
     150 │ import("stream/promises");
   > 151 │ import("stream/web");
         │        ^^^^^^^^^^^^
     152 │ import("string_decoder");
     153 │ import("sys");
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -2168,18 +2168,18 @@ invalid-esm.js:151:8 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:152:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     150 │ import("stream/promises");
     151 │ import("stream/web");
   > 152 │ import("string_decoder");
         │        ^^^^^^^^^^^^^^^^
     153 │ import("sys");
     154 │ import("timers");
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -2187,18 +2187,18 @@ invalid-esm.js:152:8 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:153:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     151 │ import("stream/web");
     152 │ import("string_decoder");
   > 153 │ import("sys");
         │        ^^^^^
     154 │ import("timers");
     155 │ import("timers/promises");
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -2206,18 +2206,18 @@ invalid-esm.js:153:8 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:154:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     152 │ import("string_decoder");
     153 │ import("sys");
   > 154 │ import("timers");
         │        ^^^^^^^^
     155 │ import("timers/promises");
     156 │ import("tls");
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -2225,18 +2225,18 @@ invalid-esm.js:154:8 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:155:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     153 │ import("sys");
     154 │ import("timers");
   > 155 │ import("timers/promises");
         │        ^^^^^^^^^^^^^^^^^
     156 │ import("tls");
     157 │ import("trace_events");
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -2244,18 +2244,18 @@ invalid-esm.js:155:8 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:156:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     154 │ import("timers");
     155 │ import("timers/promises");
   > 156 │ import("tls");
         │        ^^^^^
     157 │ import("trace_events");
     158 │ import("tty");
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -2263,18 +2263,18 @@ invalid-esm.js:156:8 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:157:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     155 │ import("timers/promises");
     156 │ import("tls");
   > 157 │ import("trace_events");
         │        ^^^^^^^^^^^^^^
     158 │ import("tty");
     159 │ import("url");
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -2282,18 +2282,18 @@ invalid-esm.js:157:8 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:158:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     156 │ import("tls");
     157 │ import("trace_events");
   > 158 │ import("tty");
         │        ^^^^^
     159 │ import("url");
     160 │ import("util");
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -2301,18 +2301,18 @@ invalid-esm.js:158:8 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:159:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     157 │ import("trace_events");
     158 │ import("tty");
   > 159 │ import("url");
         │        ^^^^^
     160 │ import("util");
     161 │ import("util/types");
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -2320,18 +2320,18 @@ invalid-esm.js:159:8 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:160:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     158 │ import("tty");
     159 │ import("url");
   > 160 │ import("util");
         │        ^^^^^^
     161 │ import("util/types");
     162 │ import("v8");
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -2339,18 +2339,18 @@ invalid-esm.js:160:8 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:161:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     159 │ import("url");
     160 │ import("util");
   > 161 │ import("util/types");
         │        ^^^^^^^^^^^^
     162 │ import("v8");
     163 │ import("vm");
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -2358,18 +2358,18 @@ invalid-esm.js:161:8 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:162:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     160 │ import("util");
     161 │ import("util/types");
   > 162 │ import("v8");
         │        ^^^^
     163 │ import("vm");
     164 │ import("wasi");
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -2377,18 +2377,18 @@ invalid-esm.js:162:8 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:163:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     161 │ import("util/types");
     162 │ import("v8");
   > 163 │ import("vm");
         │        ^^^^
     164 │ import("wasi");
     165 │ import("worker_threads");
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -2396,18 +2396,18 @@ invalid-esm.js:163:8 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:164:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     162 │ import("v8");
     163 │ import("vm");
   > 164 │ import("wasi");
         │        ^^^^^^
     165 │ import("worker_threads");
     166 │ import("zlib");
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -2415,18 +2415,18 @@ invalid-esm.js:164:8 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:165:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     163 │ import("vm");
     164 │ import("wasi");
   > 165 │ import("worker_threads");
         │        ^^^^^^^^^^^^^^^^
     166 │ import("zlib");
-    167 │
-
+    167 │ 
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -2434,18 +2434,18 @@ invalid-esm.js:165:8 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:166:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     164 │ import("wasi");
     165 │ import("worker_threads");
   > 166 │ import("zlib");
         │        ^^^^^^
-    167 │
+    167 │ 
     168 │ // with node: protocol
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -2453,18 +2453,18 @@ invalid-esm.js:166:8 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:172:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     170 │ import("node:assert/strict");
     171 │ import("node:async_hooks");
   > 172 │ import("node:buffer");
         │        ^^^^^^^^^^^^^
     173 │ import("node:child_process");
     174 │ import("node:cluster");
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -2472,18 +2472,18 @@ invalid-esm.js:172:8 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:176:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     174 │ import("node:cluster");
     175 │ import("node:console");
   > 176 │ import("node:constants");
         │        ^^^^^^^^^^^^^^^^
     177 │ import("node:crypto");
     178 │ import("node:dgram");
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -2491,18 +2491,18 @@ invalid-esm.js:176:8 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:184:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     182 │ import("node:domain");
     183 │ import("node:events");
   > 184 │ import("node:fs");
         │        ^^^^^^^^^
     185 │ import("node:fs/promises");
     186 │ import("node:http");
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -2510,18 +2510,18 @@ invalid-esm.js:184:8 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:185:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     183 │ import("node:events");
     184 │ import("node:fs");
   > 185 │ import("node:fs/promises");
         │        ^^^^^^^^^^^^^^^^^^
     186 │ import("node:http");
     187 │ import("node:http2");
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -2529,18 +2529,18 @@ invalid-esm.js:185:8 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:189:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     187 │ import("node:http2");
     188 │ import("node:https");
   > 189 │ import("node:inspector");
         │        ^^^^^^^^^^^^^^^^
     190 │ import("node:inspector/promises");
     191 │ import("node:module");
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -2548,18 +2548,18 @@ invalid-esm.js:189:8 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:193:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     191 │ import("node:module");
     192 │ import("node:net");
   > 193 │ import("node:os");
         │        ^^^^^^^^^
     194 │ import("node:path");
     195 │ import("node:path/posix");
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -2567,18 +2567,18 @@ invalid-esm.js:193:8 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:210:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     208 │ import("node:string_decoder");
     209 │ import("node:sys");
   > 210 │ import("node:timers");
         │        ^^^^^^^^^^^^^
     211 │ import("node:timers/promises");
     212 │ import("node:tls");
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -2586,18 +2586,18 @@ invalid-esm.js:210:8 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:211:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     209 │ import("node:sys");
     210 │ import("node:timers");
   > 211 │ import("node:timers/promises");
         │        ^^^^^^^^^^^^^^^^^^^^^^
     212 │ import("node:tls");
     213 │ import("node:trace_events");
-
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
@@ -2605,17 +2605,17 @@ invalid-esm.js:211:8 lint/nursery/noNodejsModules ━━━━━━━━━━
 invalid-esm.js:222:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
-
+  
     220 │ import("node:wasi");
     221 │ import("node:worker_threads");
   > 222 │ import("node:zlib");
         │        ^^^^^^^^^^^
-    223 │
-
+    223 │ 
+  
   i Can be useful for client-side web projects that do not have access to those modules.
-
+  
   i Remove the import module.
-
+  
 
 ```
 
