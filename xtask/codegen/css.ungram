@@ -461,6 +461,14 @@ CssFontFaceAtRule =
 	block: CssBlock
 
 
+// @font-palette-values {}
+// ^^^^^^^^^^^^^^^^^^^^^^^
+CssFontPaletteValuesAtRule =
+	'font-palette-values'
+	name: CssIdentifier
+	block: CssBlock
+
+
 // <container-condition> = [ <container-name> ]? <container-query>
 // <container-name> = <custom-ident>
 // <container-query>     = not <query-in-parens>
