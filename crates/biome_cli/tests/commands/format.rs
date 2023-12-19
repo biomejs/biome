@@ -2266,9 +2266,8 @@ fn should_not_format_css_files_if_disabled() {
 
     let css_file_content = r#"html {
 
-
     }
-	"#;
+    "#;
     let css_file = Path::new("input.css");
     fs.insert(css_file.into(), css_file_content.as_bytes());
 

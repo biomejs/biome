@@ -28,9 +28,8 @@ expression: content
 ```css
 html {
 
-
     }
-	
+    
 ```
 
 ## `input.js`

@@ -130,6 +130,10 @@ impl WorkspaceSettings {
         if let Some(json) = configuration.json {
             self.languages.json = json.into();
         }
+        // css settings
+        if let Some(css) = configuration.css {
+            self.languages.css = css.into();
+        }
 
         Ok(())
     }

@@ -167,7 +167,7 @@ impl FileFeaturesResult {
                 } else if language.is_css_like() {
                     !can_format_css_yet()
                         || !settings.formatter().enabled
-                        || settings.json_formatter_disabled()
+                        || settings.css_formatter_disabled()
                 } else {
                     !settings.formatter().enabled
                 };
