@@ -253,16 +253,6 @@ pub trait TraversalScope<'scope> {
     /// [`can_handle`](TraversalContext::can_handle) method of the context
     /// returns true for will be handled as well
     fn spawn(&self, context: &'scope dyn TraversalContext, path: PathBuf);
-
-    /// This function starts the traversal of the file system.
-    ///
-    /// It accepts a list of paths that should be traversed.
-    fn traverse_paths(
-        &self,
-        context: &'scope dyn TraversalContext,
-        path: Vec<PathBuf>,
-        use_gitignore: bool,
-    );
 }
 
 pub trait TraversalContext: Sync {

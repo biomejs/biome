@@ -14,9 +14,8 @@ mod language {
 // use this test check if your snippet prints as you wish, without using a snapshot
 fn quick_test() {
     let src = r#"
-    setTimeout(() => {
-      updateDebouncedQuery(query);
-    }, debounceTime ?? 500);
+    type A2 = {
+        readonly [A in B]: T}
     "#;
     let source_type = JsFileSource::tsx();
     let tree = parse(

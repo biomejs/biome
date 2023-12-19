@@ -12,13 +12,13 @@ use crate::{
 use biome_console::{fmt, markup, Console, ConsoleExt};
 use biome_diagnostics::PrintGitHubDiagnostic;
 use biome_diagnostics::{
-    adapters::StdError, category, DiagnosticExt, Error, PrintDescription, PrintDiagnostic,
-    Resource, Severity,
+    category, DiagnosticExt, Error, PrintDescription, PrintDiagnostic, Resource, Severity,
 };
 use biome_fs::{FileSystem, PathInterner, RomePath};
 use biome_fs::{TraversalContext, TraversalScope};
 use biome_service::workspace::{FeaturesBuilder, IsPathIgnoredParams};
 use biome_service::{
+    extension_error,
     workspace::{FeatureName, SupportsFeatureParams},
     Workspace, WorkspaceError,
 };
@@ -62,7 +62,6 @@ pub(crate) fn traverse(
     session: CliSession,
     cli_options: &CliOptions,
     inputs: Vec<OsString>,
-    use_git_ignore: bool,
 ) -> Result<(), CliDiagnostic> {
     init_thread_pool();
     if inputs.is_empty() && execution.as_stdin_file().is_none() {
@@ -127,7 +126,6 @@ pub(crate) fn traverse(
                 sender_reports,
                 remaining_diagnostics: &remaining_diagnostics,
             },
-            use_git_ignore,
         );
 
         // wait for the main thread to finish
@@ -249,33 +247,12 @@ fn init_thread_pool() {
 
 /// Initiate the filesystem traversal tasks with the provided input paths and
 /// run it to completion, returning the duration of the process
-fn traverse_inputs(
-    fs: &dyn FileSystem,
-    inputs: Vec<OsString>,
-    ctx: &TraversalOptions,
-    use_gitignore: bool,
-) -> Duration {
+fn traverse_inputs(fs: &dyn FileSystem, inputs: Vec<OsString>, ctx: &TraversalOptions) -> Duration {
     let start = Instant::now();
     fs.traversal(Box::new(move |scope: &dyn TraversalScope| {
-        scope.traverse_paths(
-            ctx,
-            inputs
-                .into_iter()
-                .map(PathBuf::from)
-                .map(|path| {
-                    if let Some(working_directory) = fs.working_directory() {
-                        if path.to_str() == Some(".") || path.to_str() == Some("./") {
-                            working_directory.join(path)
-                        } else {
-                            path
-                        }
-                    } else {
-                        path
-                    }
-                })
-                .collect(),
-            use_gitignore,
-        );
+        for input in inputs {
+            scope.spawn(ctx, PathBuf::from(input));
+        }
     }));
 
     start.elapsed()
@@ -674,8 +651,7 @@ impl<'ctx, 'app> TraversalOptions<'ctx, 'app> {
 
     pub(crate) fn miss_handler_err(&self, err: WorkspaceError, rome_path: &RomePath) {
         self.push_diagnostic(
-            StdError::from(err)
-                .with_category(category!("files/missingHandler"))
+            err.with_category(category!("files/missingHandler"))
                 .with_file_path(rome_path.display().to_string()),
         );
     }
@@ -716,7 +692,9 @@ impl<'ctx, 'app> TraversalContext for TraversalOptions<'ctx, 'app> {
 
         let file_features = match file_features {
             Ok(file_features) => {
-                if file_features.is_not_supported() {
+                if file_features.is_not_supported() && !file_features.is_ignored() {
+                    // we should throw a diagnostic if we can't handle a file that isn't ignored
+                    self.miss_handler_err(extension_error(rome_path), rome_path);
                     return false;
                 }
                 file_features

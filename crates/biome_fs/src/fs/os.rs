@@ -5,11 +5,9 @@ use crate::{
     fs::{TraversalContext, TraversalScope},
     FileSystem, RomePath,
 };
-use biome_diagnostics::adapters::IgnoreError;
 use biome_diagnostics::{adapters::IoError, DiagnosticExt, Error, Severity};
-use ignore::overrides::OverrideBuilder;
-use ignore::WalkBuilder;
 use rayon::{scope, Scope};
+use std::ffi::OsStr;
 use std::fs::{DirEntry, FileType};
 use std::process::Command;
 use std::{
@@ -120,75 +118,7 @@ impl<'scope> OsTraversalScope<'scope> {
     }
 }
 
-/// We want to avoid raising errors around I/O and symbolic link loops because they are
-/// already handled inside the inner traversal
-fn can_track_error(error: &ignore::Error) -> bool {
-    !error.is_io()
-        && !matches!(error, ignore::Error::Loop { .. })
-        && if let ignore::Error::WithDepth { err, .. } = error {
-            !err.is_io() && !matches!(err.as_ref(), ignore::Error::Loop { .. })
-        } else {
-            true
-        }
-}
-
-fn add_overrides<'a>(inputs_iter: impl Iterator<Item = &'a PathBuf>, walker: &mut WalkBuilder) {
-    for item in inputs_iter {
-        let mut override_builder = OverrideBuilder::new(item);
-        for default_ignore in DEFAULT_IGNORE_GLOBS {
-            // SAFETY: these are internal globs, so we have control over them
-            override_builder.add(default_ignore).unwrap();
-        }
-        let overrides = override_builder.build().unwrap();
-
-        // SAFETY: these are internal globs, so we have control over them
-        walker.overrides(overrides);
-    }
-}
-
 impl<'scope> TraversalScope<'scope> for OsTraversalScope<'scope> {
-    fn traverse_paths(
-        &self,
-        context: &'scope dyn TraversalContext,
-        paths: Vec<PathBuf>,
-        use_gitignore: bool,
-    ) {
-        let mut inputs = paths.iter();
-        // SAFETY: absence of positional arguments should in a CLI error and should not arrive here
-        let first_input = inputs.next().unwrap();
-        let mut walker = WalkBuilder::new(first_input);
-        for input in inputs {
-            walker.add(input);
-        }
-
-        add_overrides(paths.iter(), &mut walker);
-        walker
-            .follow_links(true)
-            .git_ignore(use_gitignore)
-            .same_file_system(true)
-            .build_parallel()
-            .run(|| {
-                Box::new(move |result| {
-                    use ignore::WalkState::*;
-
-                    match result {
-                        Ok(directory) => {
-                            self.spawn(context, PathBuf::from(directory.path()));
-                        }
-                        Err(error) => {
-                            // - IO errors are handled by our inner traversal, and we emit specific error messages.
-                            // - Symbolic link loops are handled in the inner traversal.
-                            if can_track_error(&error) {
-                                let diagnostic = Error::from(IgnoreError::from(error));
-                                context.push_diagnostic(diagnostic);
-                            }
-                        }
-                    }
-
-                    Continue
-                })
-            });
-    }
     fn spawn(&self, ctx: &'scope dyn TraversalContext, mut path: PathBuf) {
         let mut file_type = match path.metadata() {
             Ok(meta) => meta.file_type(),
@@ -236,14 +166,7 @@ impl<'scope> TraversalScope<'scope> for OsTraversalScope<'scope> {
 // TODO: remove in Biome 2.0, and directly use `.gitignore`
 /// Default list of ignored directories, in the future will be supplanted by
 /// detecting and parsing .ignore files
-///
-///
-/// The semantics of the overrides are different there: https://docs.rs/ignore/0.4.20/ignore/overrides/struct.OverrideBuilder.html#method.add
-/// TLDR:
-/// - presence of `!` means ignore the files that match the glob
-/// - absence of  `!` means include the files that match the glob
-const DEFAULT_IGNORE_GLOBS: &[&str; 5] =
-    &["!**.git", "!**.svn", "!**.hg", "!**.yarn", "!node_modules"];
+const DEFAULT_IGNORE: &[&str; 5] = &[".git", ".svn", ".hg", ".yarn", "node_modules"];
 
 /// Traverse a single directory
 fn handle_dir<'scope>(
@@ -253,6 +176,11 @@ fn handle_dir<'scope>(
     // The unresolved origin path in case the directory is behind a symbolic link
     origin_path: Option<PathBuf>,
 ) {
+    if let Some(file_name) = path.file_name().and_then(OsStr::to_str) {
+        if DEFAULT_IGNORE.contains(&file_name) {
+            return;
+        }
+    }
     let iter = match fs::read_dir(path) {
         Ok(iter) => iter,
         Err(err) => {
@@ -347,21 +275,12 @@ fn handle_dir_entry<'scope>(
         // doing a directory traversal, but printing an error message if the
         // user explicitly requests an unsupported file to be handled.
         // This check also works for symbolic links.
-        if !ctx.can_handle(&rome_path) {
-            return;
+        if ctx.can_handle(&rome_path) {
+            scope.spawn(move |_| {
+                ctx.handle_file(&path);
+            });
         }
-
-        scope.spawn(move |_| {
-            ctx.handle_file(&path);
-        });
-        return;
     }
-
-    ctx.push_diagnostic(Error::from(FileSystemDiagnostic {
-        path: path.to_string_lossy().to_string(),
-        error_kind: ErrorKind::from(file_type),
-        severity: Severity::Warning,
-    }));
 }
 
 /// Indicates a symbolic link could not be expanded.

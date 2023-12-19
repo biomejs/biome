@@ -246,8 +246,21 @@ impl Workspace for WorkspaceServer {
             Entry::Vacant(entry) => {
                 let capabilities = self.get_file_capabilities(&params.path);
                 let language = Language::from_path(&params.path);
+                let file_name = params
+                    .path
+                    .file_name()
+                    .and_then(|file_name| file_name.to_str());
                 let settings = self.settings.read().unwrap();
-                let mut file_features = FileFeaturesResult::new()
+                let mut file_features = FileFeaturesResult::new();
+
+                if let Some(file_name) = file_name {
+                    if FileFeaturesResult::FILES_TO_NOT_PROCESS.contains(&file_name) {
+                        file_features.set_ignored_for_all_features();
+                        return Ok(entry.insert(file_features).clone());
+                    }
+                }
+
+                file_features = file_features
                     .with_capabilities(&capabilities)
                     .with_settings_and_language(&settings, &language, params.path.as_path());
 

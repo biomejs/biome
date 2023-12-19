@@ -185,7 +185,6 @@ dependencies = [
  "crossbeam",
  "dashmap",
  "hdrhistogram",
- "ignore",
  "indexmap",
  "insta",
  "lazy_static",
@@ -290,7 +289,6 @@ dependencies = [
  "biome_text_size",
  "bitflags 2.3.1",
  "bpaf",
- "ignore",
  "schemars",
  "serde",
  "serde_json",
@@ -370,7 +368,6 @@ dependencies = [
  "biome_diagnostics",
  "crossbeam",
  "directories",
- "ignore",
  "indexmap",
  "parking_lot",
  "rayon",
@@ -1692,17 +1689,16 @@ dependencies = [
 
 [[package]]
 name = "ignore"
-version = "0.4.20"
+version = "0.4.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dbe7873dab538a9a44ad79ede1faf5f30d49f9a5c883ddbab48bce81b64b7492"
+checksum = "747ad1b4ae841a78e8aba0d63adbfbeaea26b517b63705d47856b73015d27060"
 dependencies = [
+ "crossbeam-deque",
  "globset",
- "lazy_static",
  "log",
  "memchr",
- "regex",
+ "regex-automata 0.4.3",
  "same-file",
- "thread_local",
  "walkdir",
  "winapi-util",
 ]
@@ -3485,12 +3481,11 @@ dependencies = [
 
 [[package]]
 name = "walkdir"
-version = "2.3.2"
+version = "2.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "808cf2735cd4b6866113f648b791c6adc5714537bc222d9347bb203386ffda56"
+checksum = "d71d857dc86794ca4c280d616f7da00d2dbfd8cd788846559a6813e6aa4b54ee"
 dependencies = [
  "same-file",
- "winapi",
  "winapi-util",
 ]
 

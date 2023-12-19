@@ -20,7 +20,8 @@
 			"*.scss",
 			"*.svg",
 			"*.png",
-			"*.yml"
+			"*.yml",
+			"**/undefined/**"
 		]
 	},
 	"formatter": {

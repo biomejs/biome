@@ -37,7 +37,7 @@ biome_rowan          = { workspace = true, features = ["serde"] }
 biome_text_edit      = { workspace = true }
 bpaf                 = { workspace = true }
 dashmap              = { workspace = true }
-globset              = "0.4.14"
+globset              = { workspace = true }
 ignore               = { workspace = true }
 indexmap             = { workspace = true, features = ["serde"] }
 lazy_static          = { workspace = true }
