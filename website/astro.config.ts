@@ -262,7 +262,7 @@ export default defineConfig({
 								ja: "VSCode拡張機能",
 								"zh-CN": "VSCode 扩展",
 								"pt-BR": "Extensão do VSCode",
-								tr: "VSCode uzantısı",
+								tr: "VSCode eklentisi",
 							},
 						},
 					],
