@@ -122,7 +122,7 @@ export default defineConfig({
 								ja: "手動インストール",
 								"zh-CN": "手动安装",
 								"pt-BR": "Instalação manual",
-								tr: "El ile kurulum",
+								tr: "Kurulum kılavuzu",
 							},
 						},
 						{
