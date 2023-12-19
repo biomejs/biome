@@ -29,7 +29,7 @@
 
 **Biome, _JavaScript_, _TypeScript_, _JSX_ ve _JSON_ için [hızlı bir formatlayıcıdır](./benchmark#formatting)** ve **[_Prettier_ ile %96 uyumludur](https://console.algora.io/challenges/prettier)**.
 
-**Biome, _JavaScript_, _TypeScript_ ve _JSX_ için [performanslı bir lintleyicidir](https://github.com/biomejs/biome/tree/main/benchmark#linting)** ve ESLint, TypeScript ESLint ve [diğer kaynaklardan](https://github.com/biomejs/biome/discussions/3) **170'den fazla kural** içerir.
+**Biome, _JavaScript_, _TypeScript_ ve _JSX_ için [performanslı bir derleyicidir](https://github.com/biomejs/biome/tree/main/benchmark#linting)** ve ESLint, TypeScript ESLint ve [diğer kaynaklardan](https://github.com/biomejs/biome/discussions/3) **170'den fazla kural** içerir.
 Kodunuzu geliştirmenize ve daha iyi bir programcı olmanıza yardımcı olacak **ayrıntılı ve bağlamsal tanılar sunar**!
 
 **Biome**, [bir editör içinde etkileşimli olarak kullanılmak](https://biomejs.dev/guides/integrate-in-editor/) üzere baştan tasarlanmıştır.
