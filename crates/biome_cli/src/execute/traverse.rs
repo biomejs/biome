@@ -392,7 +392,8 @@ fn process_messages(options: ProcessMessagesOptions) {
                     }
                 }
 
-                let should_print = printed_diagnostics < max_diagnostics;
+                let should_print =
+                    printed_diagnostics < max_diagnostics && err.severity() >= *diagnostic_level;
                 if should_print {
                     printed_diagnostics += 1;
                     remaining_diagnostics.store(
