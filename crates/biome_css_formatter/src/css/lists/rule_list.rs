@@ -5,6 +5,12 @@ pub(crate) struct FormatCssRuleList;
 impl FormatRule<CssRuleList> for FormatCssRuleList {
     type Context = CssFormatContext;
     fn fmt(&self, node: &CssRuleList, f: &mut CssFormatter) -> FormatResult<()> {
-        f.join().entries(node.iter().formatted()).finish()
+        let mut join = f.join_nodes_with_hardline();
+
+        for rule in node {
+            join.entry(rule.syntax(), &rule.format());
+        }
+
+        join.finish()
     }
 }
