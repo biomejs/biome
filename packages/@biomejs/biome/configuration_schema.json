@@ -1228,7 +1228,7 @@
 					]
 				},
 				"noNodejsModules": {
-					"description": "Disallow Node.js builtin modules.",
+					"description": "Succinct description of the rule.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

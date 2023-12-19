@@ -130,33 +130,31 @@ pub const COMMON_JS: [&str; 4] = ["exports", "global", "module", "require"];
 
 /// Available at https://github.com/nodejs/node/blob/main/lib/internal/bootstrap/realm.js#L89
 /// These list also includes "node:" prefixed modules.
-/// TODO(@anonrig): Move this to import context.
-/// Similar to `importType(name, context) === 'builtin'`
-pub const NODE_BUILTIN_MODULES: &[&str] = &[
+pub const NODE_BUILTINS: &[&str] = &[
+    "assert",
+    "assert/strict",
+    "async_hooks",
     "buffer",
-    "cares_wrap",
-    "config",
+    "child_process",
+    "cluster",
+    "console",
     "constants",
-    "contextify",
+    "crypto",
+    "dgram",
+    "diagnostics_channel",
+    "dns",
+    "dns/promises",
+    "domain",
+    "events",
     "fs",
     "fs/promises",
-    "fs_event_wrap",
-    "icu",
+    "http",
+    "http2",
+    "https",
     "inspector",
-    "js_stream",
-    "os",
-    "pipe_wrap",
-    "process_wrap",
-    "spawn_sync",
-    "stream_wrap",
-    "tcp_wrap",
-    "timers",
-    "timers/promises",
-    "tls_wrap",
-    "tty_wrap",
-    "udp_wrap",
-    "uv",
-    "zlib",
+    "inspector/promises",
+    "module",
+    "net",
     "node:buffer",
     "node:cares_wrap",
     "node:config",
@@ -174,6 +172,8 @@ pub const NODE_BUILTIN_MODULES: &[&str] = &[
     "node:spawn_sync",
     "node:stream_wrap",
     "node:tcp_wrap",
+    "node:test",
+    "node:test/reporters",
     "node:timers",
     "node:timers/promises",
     "node:tls_wrap",
@@ -181,8 +181,36 @@ pub const NODE_BUILTIN_MODULES: &[&str] = &[
     "node:udp_wrap",
     "node:uv",
     "node:zlib",
-    "node:test",
-    "node:test/reporters",
+    "os",
+    "path",
+    "path/posix",
+    "path/win32",
+    "perf_hooks",
+    "process",
+    "punycode",
+    "querystring",
+    "readline",
+    "readline/promises",
+    "repl",
+    "stream",
+    "stream/consumers",
+    "stream/promises",
+    "stream/web",
+    "string_decoder",
+    "sys",
+    "timers",
+    "timers/promises",
+    "tls",
+    "trace_events",
+    "tty",
+    "url",
+    "util",
+    "util/types",
+    "v8",
+    "vm",
+    "wasi",
+    "worker_threads",
+    "zlib",
 ];
 
 #[test]
@@ -191,6 +219,10 @@ fn test_order() {
         assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
     }
     for items in COMMON_JS.windows(2) {
+        assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
+    }
+
+    for items in NODE_BUILTINS.windows(2) {
         assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
     }
 }

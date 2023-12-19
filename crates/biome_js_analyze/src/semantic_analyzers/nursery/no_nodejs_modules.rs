@@ -1,9 +1,13 @@
-use crate::globals::node::NODE_BUILTIN_MODULES;
+use crate::globals::node::NODE_BUILTINS;
 use crate::semantic_services::Semantic;
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
-use biome_js_syntax::{JsCallExpression, JsImportDefaultClause, JsImportNamespaceClause};
+use biome_js_syntax::{JsCallExpression, JsImportCallExpression, JsModuleSource};
 use biome_rowan::{declare_node_union, AstNode, AstSeparatedList, TextRange};
+
+declare_node_union! {
+    pub(crate) AnyJsImportLike = JsModuleSource | JsCallExpression | JsImportCallExpression
+}
 
 declare_rule! {
     /// Forbid the use of Node.js builtin modules. Can be useful for client-side web projects that
@@ -35,35 +39,53 @@ impl Rule for NoNodejsModules {
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let label_statement = ctx.query();
+        let node = ctx.query();
 
-        // Handle require() calls.
-        if let AnyJsImportLike::JsCallExpression(call) = label_statement {
-            let args = call.arguments().ok()?.args();
-            let first_arg = args.first()?.ok()?;
-            let literal_expression = first_arg
-                .as_any_js_expression()?
-                .as_any_js_literal_expression()?
-                .as_js_string_literal_expression()?;
-            return if is_node_module(literal_expression.inner_string_text().ok()?.text()) {
-                Some(literal_expression.range())
-            } else {
-                None
-            };
-        }
-
-        // Handle import statements.
-        let statement = match label_statement {
-            AnyJsImportLike::JsImportDefaultClause(clause) => clause.source().ok()?,
-            AnyJsImportLike::JsImportNamespaceClause(clause) => clause.source().ok()?,
-            _ => unreachable!(),
+        match node {
+            AnyJsImportLike::JsModuleSource(source) => {
+                let source_text = source.inner_string_text().ok()?;
+                if is_node_module(&source_text.text()) {
+                    return Some(source.range());
+                }
+            }
+            AnyJsImportLike::JsCallExpression(expression) => {
+                let callee = expression.callee().ok()?;
+                let callee = callee.as_js_identifier_expression()?;
+                let name = callee.name().ok()?.name().ok()?;
+                if name.text() == "require" || name.text() == "import" {
+                    let arguments = expression.arguments().ok()?.args();
+                    if arguments.len() == 1 {
+                        // SAFETY: the list has one argument, checked by the if before
+                        let argument = arguments.iter().next().unwrap().ok()?;
+                        let argument = argument
+                            .as_any_js_expression()?
+                            .as_any_js_literal_expression()?
+                            .as_js_string_literal_expression()?;
+                        let argument_text = argument.inner_string_text().ok()?;
+                        if is_node_module(argument_text.text()) {
+                            return Some(argument.range());
+                        }
+                    }
+                }
+            }
+            AnyJsImportLike::JsImportCallExpression(import_call) => {
+                let arguments = import_call.arguments().ok()?.args();
+                if arguments.len() == 1 {
+                    // SAFETY: the list has one argument, checked by the if before
+                    let argument = arguments.iter().next().unwrap().ok()?;
+                    let argument = argument
+                        .as_any_js_expression()?
+                        .as_any_js_literal_expression()?
+                        .as_js_string_literal_expression()?;
+                    let argument_text = argument.inner_string_text().ok()?;
+                    if is_node_module(argument_text.text()) {
+                        return Some(argument.range());
+                    }
+                }
+            }
         };
 
-        if is_node_module(statement.inner_string_text().ok()?.text()) {
-            Some(statement.range())
-        } else {
-            None
-        }
+        None
     }
 
     fn diagnostic(_: &RuleContext<Self>, reference: &Self::State) -> Option<RuleDiagnostic> {
@@ -77,6 +99,8 @@ impl Rule for NoNodejsModules {
             )
             .note(markup! {
                 "Can be useful for client-side web projects that do not have access to those modules."
+            }).note(markup!{
+                "Remove the import module."
             }),
         )
     }
@@ -84,9 +108,5 @@ impl Rule for NoNodejsModules {
 
 /// TODO(@anonrig): Use https://github.com/inspect-js/is-core-module/blob/main/core.json
 fn is_node_module(name: &str) -> bool {
-    NODE_BUILTIN_MODULES.contains(&name)
-}
-
-declare_node_union! {
-    pub(crate) AnyJsImportLike = JsImportDefaultClause | JsImportNamespaceClause | JsCallExpression
+    NODE_BUILTINS.contains(&name)
 }
