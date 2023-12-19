@@ -1,50 +1,50 @@
 ---
-title: Manual installation
-description: Install the Biome manually
+title: Instalação manual
+description: Instale o Biome de forma manual
 ---
 
-## Use Biome without Node.js
+## Usando o Biome sem Node.js
 
-Using Biome's standalone CLI binary can be a great choice if you aren't already using Node or npm (or any other package manager).
-Or in other words, Biome shouldn't be the only reason for you to have a `package.json`.
+Utlizar a CLI independente do Biome é uma boa alternativa caso você ainda não esteja usando Node, npm ou qualquer outro gerenciador de pacotes.
+Em outras palavras, o Biome não deve ser a única razão para você ter um `package.json`.
 
 :::note
-If you're already using npm or another package manager, then using the package manager is the [preferred way to install](/guides/getting-started#installation) Biome.
-You're already familiar with the tooling, and installing and updating are simpler.
+Se você já estiver utilizando npm ou outro gerenciador de pacotes, usar ele é a [melhor maneira de instalar](/pt-br/guides/getting-started#instalação) o Biome.
+Provavelmente, você já está familiarizado com ele, tornando a instalação e atualização mais simples.
 :::
 
 ### Homebrew
 
-Biome is available as a [Homebrew formula](https://formulae.brew.sh/formula/biome) for macOS and Linux users.
+O Biome está disponível no [Homebrew](https://formulae.brew.sh/formula/biome) para usuários macOS e Linux.
 
 ```shell
 brew install biome
 ```
 
-## System Requirements
+## Requisitos
 
-- Windows (including WSL), macOS, or Linux
-- x86_64 or ARM64
+- Windows (incluindo WSL), macOS ou Linux
+- Arquitetura x86_64 ou ARM64
 
-## Supported platforms
+## Arquiteturas suportadas
 
-You have to pick the correct binary for your platform for Biome work. The following table should help you do so.
+Você precisa escolher o binário correto para a sua arquitetura para que o Biome funcione. A tabela a seguir deve ajudá-lo a fazer isso.
 
-| CPU Architecture | Windows       | macOS                        | Linux         | Linux (musl)       |
-| ---------------- | ------------- | ---------------------------- | ------------- | ------------------ |
-| `arm64`          | `win32-arm64` | `darwin-arm64` (M1 or newer) | `linux-arm64` | `linux-arm64-musl` |
-| `x64`            | `win32-x64`   | `darwin-x64`                 | `linux-x64`   | `linux-x64-musl`   |
+| Arquitetura do CPU | Windows       | macOS                           | Linux         | Linux (musl)       |
+| ------------------ | ------------- | ------------------------------- | ------------- | ------------------ |
+| `arm64`            | `win32-arm64` | `darwin-arm64` (M1 ou superior) | `linux-arm64` | `linux-arm64-musl` |
+| `x64`              | `win32-x64`   | `darwin-x64`                    | `linux-x64`   | `linux-x64-musl`   |
 
 :::note
-Use the Linux variant for Windows Subsystem for Linux (WSL).
+Utilize a versão Linux para o Windows Subsystem for Linux (WSL).
 :::
 
-## Install Biome
+## Instalando o Biome
 
-To install Biome, grab the executable for your platform from the [latest CLI release](https://github.com/biomejs/biome/releases) on GitHub and give it execution permission.
+Para instalar o Biome, baixe o [executável mais recente](https://github.com/biomejs/biome/releases) para a sua arquitetura no GitHub e conceda permissão de execução a ele.
 
 ```shell
-# macOS arm (M1 or newer)
+# macOS arm (M1 ou superior)
 curl -L https://github.com/biomejs/biome/releases/download/cli%2Fv<version>/biome-darwin-arm64 -o biome
 chmod +x biome
 
@@ -57,11 +57,11 @@ Invoke-WebRequest -Uri "https://github.com/biomejs/biome/releases/download/cli%2
 ```
 
 :::note
-Make sure to replace `<version>` with the Biome version you want to install.
+Não se esqueça de substituir o `<version>` para a versão do Biome que você quer instalar.
 :::
 
-Now you can use Biome by simply running `./biome`.
+Agora você pode utilizar o Biome apenas executando `./biome`.
 
-## Next Steps
+## Próximos passos
 
-Read more about how to use Biome in our [getting started section](/guides/getting-started#next-steps).
+Saiba mais em como usar o Biome na nossa seção de [primeiros passos](/pt-br/guides/getting-started#próximos-passos).

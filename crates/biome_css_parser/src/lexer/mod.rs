@@ -492,7 +492,7 @@ impl<'src> CssLexer<'src> {
             BTO => self.consume_byte(T!('[')),
             BTC => self.consume_byte(T![']']),
             COM => self.consume_byte(T![,]),
-            MOR => self.consume_byte(T![>]),
+            MOR => self.consume_mor(),
             TLD => self.consume_tilde(),
             PIP => self.consume_pipe(),
             EQL => self.consume_byte(T![=]),
@@ -770,6 +770,8 @@ impl<'src> CssLexer<'src> {
             b"charset" => CHARSET_KW,
             b"color-profile" => COLOR_PROFILE_KW,
             b"counter-style" => COUNTER_STYLE_KW,
+            b"container" => CONTAINER_KW,
+            b"style" => STYLE_KW,
             b"font-face" => FONT_FACE_KW,
             _ => IDENT,
         }
@@ -963,6 +965,16 @@ impl<'src> CssLexer<'src> {
     }
 
     #[inline]
+    fn consume_mor(&mut self) -> CssSyntaxKind {
+        self.assert_byte(b'>');
+
+        match self.next_byte() {
+            Some(b'=') => self.consume_byte(T![>=]),
+            _ => T![>],
+        }
+    }
+
+    #[inline]
     fn consume_tilde(&mut self) -> CssSyntaxKind {
         self.assert_byte(b'~');
 
@@ -1016,7 +1028,10 @@ impl<'src> CssLexer<'src> {
             return CDO;
         }
 
-        self.consume_byte(T![<])
+        match self.next_byte() {
+            Some(b'=') => self.consume_byte(T![<=]),
+            _ => T![<],
+        }
     }
 
     #[inline]

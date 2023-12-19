@@ -8,6 +8,13 @@
 			"description": "A field for the [JSON schema](https://json-schema.org/) specification",
 			"type": ["string", "null"]
 		},
+		"css": {
+			"description": "Specific configuration for the Css language",
+			"anyOf": [
+				{ "$ref": "#/definitions/CssConfiguration" },
+				{ "type": "null" }
+			]
+		},
 		"extends": {
 			"description": "A list of paths to other JSON files, used to extends the current configuration.",
 			"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
@@ -717,6 +724,72 @@
 				}
 			}
 		},
+		"CssConfiguration": {
+			"description": "Options applied to CSS files",
+			"type": "object",
+			"properties": {
+				"formatter": {
+					"description": "Formatting options",
+					"anyOf": [
+						{ "$ref": "#/definitions/CssFormatter" },
+						{ "type": "null" }
+					]
+				},
+				"parser": {
+					"description": "Parsing options",
+					"anyOf": [{ "$ref": "#/definitions/CssParser" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"CssFormatter": {
+			"type": "object",
+			"properties": {
+				"enabled": {
+					"description": "Control the formatter for CSS (and its super languages) files.",
+					"type": ["boolean", "null"]
+				},
+				"indentSize": {
+					"description": "The size of the indentation applied to CSS (and its super languages) files. Default to 2.",
+					"type": ["integer", "null"],
+					"format": "uint8",
+					"minimum": 0.0
+				},
+				"indentStyle": {
+					"description": "The indent style applied to CSS (and its super languages) files.",
+					"anyOf": [
+						{ "$ref": "#/definitions/PlainIndentStyle" },
+						{ "type": "null" }
+					]
+				},
+				"indentWidth": {
+					"description": "The size of the indentation applied to CSS (and its super languages) files. Default to 2.",
+					"type": ["integer", "null"],
+					"format": "uint8",
+					"minimum": 0.0
+				},
+				"lineEnding": {
+					"description": "The type of line ending applied to CSS (and its super languages) files.",
+					"anyOf": [{ "$ref": "#/definitions/LineEnding" }, { "type": "null" }]
+				},
+				"lineWidth": {
+					"description": "What's the max width of a line applied to CSS (and its super languages) files. Defaults to 80.",
+					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"CssParser": {
+			"description": "Options that changes how the CSS parser behaves",
+			"type": "object",
+			"properties": {
+				"allowWrongLineComments": {
+					"description": "Allow comments to appear on incorrect lines in `.css` files",
+					"type": ["boolean", "null"]
+				}
+			},
+			"additionalProperties": false
+		},
 		"EnumMemberCase": {
 			"description": "Supported cases for TypeScript `enum` member names.",
 			"oneOf": [
@@ -1182,6 +1255,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUselessTernary": {
+					"description": "Disallow ternary operators when simpler alternatives exist.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"recommended": {
 					"description": "It enables the recommended rules for this group",
 					"type": ["boolean", "null"]
@@ -1330,6 +1410,13 @@
 		"OverridePattern": {
 			"type": "object",
 			"properties": {
+				"css": {
+					"description": "Specific configuration for the Css language",
+					"anyOf": [
+						{ "$ref": "#/definitions/CssConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"formatter": {
 					"description": "Specific configuration for the Json language",
 					"anyOf": [
@@ -2159,6 +2246,10 @@
 						{ "$ref": "#/definitions/VcsClientKind" },
 						{ "type": "null" }
 					]
+				},
+				"defaultBranch": {
+					"description": "The main branch of the project",
+					"type": ["string", "null"]
 				},
 				"enabled": {
 					"description": "Whether Biome should integrate itself with the VCS client",

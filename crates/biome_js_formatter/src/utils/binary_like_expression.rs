@@ -530,6 +530,7 @@ impl AnyJsBinaryLikeExpression {
                             | JsSyntaxKind::JS_THROW_STATEMENT
                             | JsSyntaxKind::JS_CALL_EXPRESSION
                             | JsSyntaxKind::JS_IMPORT_CALL_EXPRESSION
+                            | JsSyntaxKind::JS_CALL_ARGUMENT_LIST
                             | JsSyntaxKind::META
                     )
                 })

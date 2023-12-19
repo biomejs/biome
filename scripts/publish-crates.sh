@@ -43,6 +43,7 @@ published_crates=(
   "biome_js_transform"
   "biome_json_analyze"
   "biome_json_formatter"
+  "biome_css_formatter"
 )
 
 for crate in "${published_crates[@]}"; do

@@ -14,7 +14,39 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ### CLI
 
+#### New features
+
+- The command `biome migrate` now updates the `$schema` if there's an outdated version.
+- The commands `format`, `lint`, `check` and `ci` now accepts two new arguments: `--changed` and `--since`. Use these options when the VCS integration
+is enabled to process only the files that were changed. Contributed by @simonxabris
+
+  ```shell
+  biome format --write --changed
+  ```
+
+#### Bug fixes
+
+- Fix [#709](https://github.com/biomejs/biome/issues/709), by correctly parsing allow list patterns in `.gitignore` files. Contributed by @ematipico
+- Fix [#805](https://github.com/biomejs/biome/issues/805), by correctly parsing these kind of patterns. Contributed by @ematipico
+- Fix [#1117](https://github.com/biomejs/biome/issues/1117) by correctly respecting the matching. Contributed by @ematipico
+- Fix [#1247](https://github.com/biomejs/biome/issues/1247), Biome now prints a **warning** diagnostic if it encounters files that can't handle. Contributed by @ematipico
+
 ### Configuration
+
+#### New features
+
+- Users can specify git ignore patterns inside `ignore` and `include` properties, for example it's possible to **allow list** globs of files using the `!` character:
+
+  ```json5
+  {
+    "files": {
+      "ignore": [
+        "node_modules/**",
+        "!**/dist/**" // this is now accepted and allow list files inside the `dist` folder
+      ]
+    }
+  }
+  ```
 
 ### Editors
 
@@ -23,6 +55,9 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 - The LSP register formatting without the need of using dynamic capabilities from the client.
 
 ### Formatter
+
+- Fix [#1169](https://github.com/biomejs/biome/issues/1169). Account for escaped strings when computing layout for assignments. Contributed by @kalleep
+- Fix [#1220](https://github.com/biomejs/biome/issues/1220). Avoid duplicating comments in type unions for mapped, empty object, and empty tuple types. [#1240](https://github.com/biomejs/biome/pull/1240) Contributed by @faultyserver
 
 ### JavaScript APIs
 
@@ -48,7 +83,7 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 #### Bug fixes
 
-- Fix [#959](https://github.com/biomejs/biome/issues/959). [noEmptyInterface](https://biomejs.dev/linter/rules/no-empty-interface) no longer reports interface that extends a type and is in an external module. COntributed by @Conaclos
+- Fix [#959](https://github.com/biomejs/biome/issues/959). [noEmptyInterface](https://biomejs.dev/linter/rules/no-empty-interface) no longer reports interface that extends a type and is in an external module or a global declaration. Contributed by @Conaclos
 
   Empty interface that extends a type are sometimes used to extend an existing interface.
   This is generally used to extend an interface of an external module.
@@ -75,7 +110,7 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
   }
   ```
 
-- Fix [#651](https://github.com/biomejs/biome/issues/651), [useExhaustiveDependencies](https://biomejs.dev/linter/rules/use-exhaustive-dependencies) no longer reports out of scope dependecies. Contributed by @kalleep
+- Fix [#651](https://github.com/biomejs/biome/issues/651), [useExhaustiveDependencies](https://biomejs.dev/linter/rules/use-exhaustive-dependencies) no longer reports out of scope dependencies. Contributed by @kalleep
 
   The following code is no longer reported:
   ```ts
@@ -88,10 +123,59 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
   }
   ```
 
+- Fix [#1191](https://github.com/biomejs/biome/issues/1191). [noUselessElse](https://biomejs.dev/linter/rules/no-useless-else) now preserve comments of the `else` clause. Contributed by @Conaclos
+
+  For example, the rule suggested the following fix:
+
+  ```diff
+    function f(x) {
+      if (x <0) {
+        return 0;
+      }
+  -   // Comment
+  -   else {
+        return x;
+  -   }
+    }
+  ```
+
+  Now the rule suggests a fix that preserves the comment of the `else` clause:
+
+  ```diff
+    function f(x) {
+      if (x <0) {
+        return 0;
+      }
+      // Comment
+  -   else {
+        return x;
+  -   }
+    }
+  ```
+
 - Fix [#728](https://github.com/biomejs/biome/issues/728). [useSingleVarDeclarator](https://biomejs.dev/linter/rules/use-single-var-declarator) no longer outputs invalid code. Contributed by @Conaclos
+
+- Fix [#1167](https://github.com/biomejs/biome/issues/1167). [useValidAriaProps] no longer reports `aria-atomic` as invalid. Contributed by @unvalley
 
 ### Parser
 
+- Fix [#1077](https://github.com/biomejs/biome/issues/1077), fix issues when parsing conditional expression where parenthesized identifier was being parsed as arrow expression. Contributed by @kalleep
+
+These cases are now properly parsed:
+
+javascript:
+```javascript
+  a ? (b) : a => {};
+```
+
+typescript:
+```ts
+  a ? (b) : a => {};
+```
+jsx:
+```jsx
+  bar ? (foo) : (<a>{() => {}}</a>);
+```
 
 ## 1.4.1 (2023-11-30)
 

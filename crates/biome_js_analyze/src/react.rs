@@ -5,8 +5,7 @@ pub mod hooks;
 use biome_js_semantic::{Binding, SemanticModel};
 use biome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, AnyJsMemberExpression, AnyJsNamedImportSpecifier,
-    AnyJsObjectMember, JsCallExpression, JsIdentifierBinding, JsImport, JsImportNamedClause,
-    JsNamedImportSpecifierList, JsNamedImportSpecifiers, JsObjectExpression,
+    AnyJsObjectMember, JsCallExpression, JsIdentifierBinding, JsImport, JsObjectExpression,
     JsPropertyObjectMember, JsxMemberName, JsxReferenceIdentifier,
 };
 use biome_rowan::{AstNode, AstSeparatedList};
@@ -290,10 +289,6 @@ fn is_named_react_export(binding: &Binding, lib: ReactLibrary, name: &str) -> Op
         return Some(false);
     }
 
-    let import_specifier_list = import_specifier.parent::<JsNamedImportSpecifierList>()?;
-    let import_specifiers = import_specifier_list.parent::<JsNamedImportSpecifiers>()?;
-    let import_clause = import_specifiers.parent::<JsImportNamedClause>()?;
-    let import = import_clause.parent::<JsImport>()?;
-
+    let import = import_specifier.import_clause()?.parent::<JsImport>()?;
     Some(import.source_text().ok()?.text() == lib.import_name())
 }
