@@ -8,8 +8,8 @@ use crate::globals::node::NODE_BUILTINS;
 declare_rule! {
     /// Enforces using the `node:` protocol for Node.js builtin modules.
     ///
-    /// The rule marks traditional imports like import fs from `'fs'`; as invalid,
-    /// suggesting the format import fs from `'node:fs'`; instead.
+    /// The rule marks traditional imports like `import fs from "fs";` as invalid,
+    /// suggesting the format `import fs from "node:fs";` instead.
     ///
     /// Source: https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/prefer-node-protocol.md
     ///
@@ -53,16 +53,10 @@ impl Rule for UseNodeImportProtocol {
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let binding: &JsModuleSource = ctx.query();
-        let Ok(module_name) = binding.inner_string_text() else {
-            return None;
-        };
+        let binding = ctx.query();
+        let module_name = binding.inner_string_text().ok()?;
 
-        if !is_builtin_module(&module_name) {
-            return None;
-        }
-
-        Some(())
+        (!is_builtin_module(&module_name)).then_some(())
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
@@ -73,7 +67,7 @@ impl Rule for UseNodeImportProtocol {
             rule_category!(),
             binding.range(),
             markup! {
-                "Import from Node.js builtin module \""{module_name}"\" should use the \"node:\" protocol."
+                "Import from Node.js builtin module \""<Emphasis>{module_name}</Emphasis>"\" should use the \""<Emphasis>"node:"</Emphasis>"\" protocol."
             },
         )
         .note(markup! {
