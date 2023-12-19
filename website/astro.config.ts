@@ -152,7 +152,7 @@ export default defineConfig({
 								ja: "Biome をあなたのエディタに導入する",
 								"zh-CN": "编辑器中使用 Biome",
 								"pt-BR": "Integrando o Biome no seu editor",
-								tr: "Biome'u editörünüze entegre edin",
+								tr: "Biome'u editörünüze ekleyin",
 							},
 						},
 					],
