@@ -29,7 +29,11 @@ import { Card, CardGrid } from "@astrojs/starlight/components";
 import Inputf from "@src/components/formatter/input.md";
 import Outputf from "@src/components/formatter/output.md";
 import ProgressBar from "../../playground/components/Progress.tsx";
+import PackageManagerCommand from "@src/components/PackageManagerCommand.astro";
+import arrow from "../../assets/svg/arrow-right.svg";
+import { Image } from "astro:assets";
 import "../../styles/_performance.scss";
+import "../../styles/_installation.scss";
 
 <body>
   <div class="gradient"></div>
@@ -40,8 +44,14 @@ import "../../styles/_performance.scss";
   <div class="formatter">
     <h2 class="head">Biome is fast</h2>
     <div class="linter format">
-      <div class="inp"><span>CODE</span><Inputf /></div>
-      <div class="out"><span>OUTPUT</span><Outputf /></div>
+      <div class="inp">
+        <span>CODE</span>
+        <Inputf />
+      </div>
+      <div class="out">
+        <span>OUTPUT</span>
+        <Outputf />
+      </div>
       <div class="perf-out">
         <span>PERFORMANCE</span>
         <div class="bench-comp">
@@ -90,6 +100,31 @@ import "../../styles/_performance.scss";
       class support for TypeScript and JSX.
     </Card>
   </CardGrid>
+</div>
+
+<div class="installation-body">
+  <div class="installation">
+    <div class="installation-left">
+      <div class="installation-head">Try Biome</div>
+      <div class="installation-description">
+        Install Biome using your preferred package manager AND integrate it in your editor.
+      </div>
+      <a class="installation-biome" href="/guides/getting-started/#installation">
+        Install with package manager
+        <Image src={arrow} alt="arrow" />
+      </a>
+      <a
+        href="/guides/integrate-in-editor/"
+        class="installation-extension"
+      >
+         Integrate Biome in your editor
+        <Image src={arrow} alt="arrow" />
+      </a>
+    </div>
+
+    <div class="extension-img"></div>
+
+  </div>
 </div>
 
 ## Sponsors

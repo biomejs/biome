@@ -59,3 +59,9 @@
         width: 300px;
     }
 }
+
+@media only screen and (max-width: 400px) {
+    .progress-bar-container {
+        width: 230px;
+    }
+}
