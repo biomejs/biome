@@ -466,8 +466,8 @@ CssFontFaceAtRule =
 	block: CssBlock
 
 
-// @font-palette-values {}
-// ^^^^^^^^^^^^^^^^^^^^
+// @font-palette-values --ident {}
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 CssFontPaletteValuesAtRule =
 	'font-palette-values'
 	name: CssIdentifier
