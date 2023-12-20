@@ -3,7 +3,7 @@
 	"formatter": {
 		"indentSize": 2
 	},
-	"json": {
+	"css": {
 		"formatter": {
 			"enabled": true,
 			"indentStyle": "space",
