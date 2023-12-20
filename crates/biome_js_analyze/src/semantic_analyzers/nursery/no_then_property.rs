@@ -1,11 +1,13 @@
 use crate::semantic_services::Semantic;
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
 use biome_js_syntax::{
-    AnyJsClassMemberName, AnyJsExpression, AnyJsObjectMemberName, AnyJsTemplateElement,
+    AnyJsAssignment, AnyJsAssignmentPattern, AnyJsClassMemberName, AnyJsExpression,
+    AnyJsObjectMemberName, AnyJsTemplateElement,
 };
 use biome_js_syntax::{
-    JsComputedMemberName, JsGetterClassMember, JsGetterObjectMember, JsMethodClassMember,
-    JsMethodObjectMember, JsPropertyClassMember, JsPropertyObjectMember, JsSetterClassMember,
+    JsAssignmentExpression, JsComputedMemberName, JsGetterClassMember, JsGetterObjectMember,
+    JsMethodClassMember, JsMethodObjectMember, JsPropertyClassMember, JsPropertyObjectMember,
+    JsSetterClassMember,
 };
 use biome_rowan::{declare_node_union, AstNode};
 
@@ -44,7 +46,7 @@ declare_rule! {
 }
 
 declare_node_union! {
-    pub(crate) NoThenPropertyQuery = JsComputedMemberName | JsMethodObjectMember | JsPropertyObjectMember | JsGetterObjectMember | JsPropertyClassMember | JsMethodClassMember | JsGetterClassMember | JsSetterClassMember
+    pub(crate) NoThenPropertyQuery = JsComputedMemberName | JsMethodObjectMember | JsPropertyObjectMember | JsGetterObjectMember | JsPropertyClassMember | JsMethodClassMember | JsGetterClassMember | JsSetterClassMember | JsAssignmentExpression
 }
 
 pub enum NoThenPropertyState {
@@ -160,6 +162,24 @@ impl Rule for NoThenProperty {
                     }
                 }
             }
+            NoThenPropertyQuery::JsAssignmentExpression(node) => match node.left().ok()? {
+                AnyJsAssignmentPattern::AnyJsAssignment(assignment) => match assignment {
+                    AnyJsAssignment::JsComputedMemberAssignment(c) => {
+                        if c.member().ok()?.text() == "\"then\""
+                            || c.member().ok()?.text() == "`then`"
+                        {
+                            return Some(NoThenPropertyState::Object);
+                        }
+                    }
+                    AnyJsAssignment::JsStaticMemberAssignment(m) => {
+                        if m.member().ok()?.text() == "then" {
+                            return Some(NoThenPropertyState::Object);
+                        }
+                    }
+                    _ => return None,
+                },
+                _ => return None,
+            },
         }
         None
     }
@@ -175,6 +195,7 @@ impl Rule for NoThenProperty {
             NoThenPropertyQuery::JsSetterClassMember(node) => node.name().ok()?.range(),
             NoThenPropertyQuery::JsComputedMemberName(node) => node.range(),
             NoThenPropertyQuery::JsMethodObjectMember(node) => node.range(),
+            NoThenPropertyQuery::JsAssignmentExpression(node) => node.left().ok()?.range(),
         };
         Some(RuleDiagnostic::new(
             rule_category!(),

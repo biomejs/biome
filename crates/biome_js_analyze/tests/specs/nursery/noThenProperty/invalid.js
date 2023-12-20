@@ -37,3 +37,10 @@ class Foo {static get then() {}}
 class Foo {static get ["then"]() {}}
 class Foo {static get [`then`]() {}}
 // const THEN = "then";class Foo {static get [THEN]() {}}
+
+foo.then = 1
+foo["then"] = 1
+foo[`then`] = 1
+foo.then += 1
+foo.then ||= 1
+foo.then ??= 1

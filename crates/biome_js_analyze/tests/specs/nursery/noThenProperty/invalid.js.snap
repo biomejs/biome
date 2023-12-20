@@ -43,6 +43,13 @@ class Foo {static get then() {}}
 class Foo {static get ["then"]() {}}
 class Foo {static get [`then`]() {}}
 // const THEN = "then";class Foo {static get [THEN]() {}}
+
+foo.then = 1
+foo["then"] = 1
+foo[`then`] = 1
+foo.then += 1
+foo.then ||= 1
+foo.then ??= 1
 ```
 
 # Diagnostics
@@ -757,6 +764,7 @@ invalid.js:38:23 lint/nursery/noThenProperty ━━━━━━━━━━━�
   > 38 │ class Foo {static get [`then`]() {}}
        │                       ^^^^^^^^
     39 │ // const THEN = "then";class Foo {static get [THEN]() {}}
+    40 │ 
   
 
 ```
@@ -771,6 +779,93 @@ invalid.js:38:23 lint/nursery/noThenProperty ━━━━━━━━━━━�
   > 38 │ class Foo {static get [`then`]() {}}
        │                       ^^^^^^^^
     39 │ // const THEN = "then";class Foo {static get [THEN]() {}}
+    40 │ 
+  
+
+```
+
+```
+invalid.js:41:1 lint/nursery/noThenProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not add `then` to an object.
+  
+    39 │ // const THEN = "then";class Foo {static get [THEN]() {}}
+    40 │ 
+  > 41 │ foo.then = 1
+       │ ^^^^^^^^
+    42 │ foo["then"] = 1
+    43 │ foo[`then`] = 1
+  
+
+```
+
+```
+invalid.js:42:1 lint/nursery/noThenProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not add `then` to an object.
+  
+    41 │ foo.then = 1
+  > 42 │ foo["then"] = 1
+       │ ^^^^^^^^^^^
+    43 │ foo[`then`] = 1
+    44 │ foo.then += 1
+  
+
+```
+
+```
+invalid.js:43:1 lint/nursery/noThenProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not add `then` to an object.
+  
+    41 │ foo.then = 1
+    42 │ foo["then"] = 1
+  > 43 │ foo[`then`] = 1
+       │ ^^^^^^^^^^^
+    44 │ foo.then += 1
+    45 │ foo.then ||= 1
+  
+
+```
+
+```
+invalid.js:44:1 lint/nursery/noThenProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not add `then` to an object.
+  
+    42 │ foo["then"] = 1
+    43 │ foo[`then`] = 1
+  > 44 │ foo.then += 1
+       │ ^^^^^^^^
+    45 │ foo.then ||= 1
+    46 │ foo.then ??= 1
+  
+
+```
+
+```
+invalid.js:45:1 lint/nursery/noThenProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not add `then` to an object.
+  
+    43 │ foo[`then`] = 1
+    44 │ foo.then += 1
+  > 45 │ foo.then ||= 1
+       │ ^^^^^^^^
+    46 │ foo.then ??= 1
+  
+
+```
+
+```
+invalid.js:46:1 lint/nursery/noThenProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not add `then` to an object.
+  
+    44 │ foo.then += 1
+    45 │ foo.then ||= 1
+  > 46 │ foo.then ??= 1
+       │ ^^^^^^^^
   
 
 ```

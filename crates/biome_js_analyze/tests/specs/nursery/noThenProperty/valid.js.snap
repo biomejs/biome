@@ -33,6 +33,16 @@ class Foo {static get notThen() {}}
 class Foo {static get #then() {}}
 class Foo {static get [then]() {}}
 class Foo {notThen = then}
+
+foo[then] = 1
+foo.notThen = 1
+then.notThen = then.then
+const NOT_THEN = "no-then";foo[NOT_THEN] = 1
+foo.then ++
+++ foo.then
+delete foo.then
+typeof foo.then
+foo.then != 1
 ```
 
 
