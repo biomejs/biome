@@ -16,7 +16,7 @@ use crate::syntax::at_rule::counter_style::{
 };
 use crate::syntax::at_rule::font_face::{is_at_font_face_at_rule, parse_font_face_at_rule};
 use crate::syntax::at_rule::font_palette_values::{
-    is_at_font_palette_values, parse_font_palette_values_at_rule,
+    is_at_font_palette_values_at_rule, parse_font_palette_values_at_rule,
 };
 use crate::syntax::parse_error::expected_any_at_rule;
 use biome_css_syntax::CssSyntaxKind::*;
@@ -63,7 +63,7 @@ pub(crate) fn parse_any_at_rule(p: &mut CssParser) -> ParsedSyntax {
         parse_container_at_rule(p)
     } else if is_at_font_face_at_rule(p) {
         parse_font_face_at_rule(p)
-    } else if is_at_font_palette_values(p) {
+    } else if is_at_font_palette_values_at_rule(p) {
         parse_font_palette_values_at_rule(p)
     } else {
         Absent

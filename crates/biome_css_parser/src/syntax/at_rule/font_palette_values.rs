@@ -16,13 +16,13 @@ use biome_parser::{
 };
 
 #[inline]
-pub(crate) fn is_at_font_palette_values(p: &mut CssParser) -> bool {
+pub(crate) fn is_at_font_palette_values_at_rule(p: &mut CssParser) -> bool {
     p.at(T![font_palette_values])
 }
 
 #[inline]
 pub(crate) fn parse_font_palette_values_at_rule(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_font_palette_values(p) {
+    if !is_at_font_palette_values_at_rule(p) {
         return Absent;
     }
 
