@@ -161,6 +161,7 @@ impl<'app> CliSession<'app> {
                 vcs_configuration,
                 files_configuration,
                 json_formatter,
+                css_formatter,
                 changed,
                 since,
             } => commands::format::format(
@@ -175,6 +176,7 @@ impl<'app> CliSession<'app> {
                     vcs_configuration,
                     files_configuration,
                     json_formatter,
+                    css_formatter,
                     changed,
                     since,
                 },

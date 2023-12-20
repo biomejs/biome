@@ -8,6 +8,7 @@ use crate::{
 };
 use biome_console::{markup, ConsoleExt};
 use biome_diagnostics::PrintDiagnostic;
+use biome_service::configuration::css::CssFormatter;
 use biome_service::configuration::json::JsonFormatter;
 use biome_service::configuration::vcs::VcsConfiguration;
 use biome_service::configuration::{
@@ -21,6 +22,7 @@ use std::path::PathBuf;
 pub(crate) struct FormatCommandPayload {
     pub(crate) javascript_formatter: Option<JavascriptFormatter>,
     pub(crate) json_formatter: Option<JsonFormatter>,
+    pub(crate) css_formatter: Option<CssFormatter>,
     pub(crate) formatter_configuration: Option<FormatterConfiguration>,
     pub(crate) vcs_configuration: Option<VcsConfiguration>,
     pub(crate) files_configuration: Option<FilesConfiguration>,
@@ -47,6 +49,7 @@ pub(crate) fn format(
         files_configuration,
         write,
         json_formatter,
+        css_formatter,
         since,
         changed,
     } = payload;
@@ -107,9 +110,23 @@ pub(crate) fn format(
             {PrintDiagnostic::simple(&diagnostic)}
         })
     }
+    // TODO: remove in biome 2.0
+    if css_formatter
+        .as_ref()
+        .is_some_and(|f| f.indent_size.is_some())
+    {
+        let console = &mut session.app.console;
+        let diagnostic = DeprecatedArgument::new(markup! {
+            "The argument "<Emphasis>"--css-formatter-indent-size"</Emphasis>" is deprecated, it will be removed in the next major release. Use "<Emphasis>"--css-formatter-indent-width"</Emphasis>" instead."
+        });
+        console.error(markup! {
+            {PrintDiagnostic::simple(&diagnostic)}
+        })
+    }
 
     configuration.merge_with(javascript_formatter);
     configuration.merge_with(json_formatter);
+    configuration.merge_with(css_formatter);
     configuration.merge_with(formatter_configuration);
     configuration.merge_with(vcs_configuration);
     configuration.merge_with(files_configuration);
@@ -118,8 +135,6 @@ pub(crate) fn format(
     let vcs_base_path = configuration_path.or(session.app.fs.working_directory());
     let (vcs_base_path, gitignore_matches) =
         configuration.retrieve_gitignore_matches(&session.app.fs, vcs_base_path.as_deref())?;
-
-    let vcs_enabled = configuration.is_vcs_enabled();
 
     if since.is_some() && !changed {
         return Err(CliDiagnostic::incompatible_arguments("since", "changed"));
@@ -169,5 +184,5 @@ pub(crate) fn format(
         })
     };
 
-    execute_mode(execution, session, &cli_options, paths, vcs_enabled)
+    execute_mode(execution, session, &cli_options, paths)
 }

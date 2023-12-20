@@ -2786,6 +2786,15 @@ pub struct Nursery {
     #[bpaf(long("no-implicit-any-let"), argument("on|off|warn"), optional, hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_implicit_any_let: Option<RuleConfiguration>,
+    #[doc = "Disallow the use of variables and function parameters before their declaration"]
+    #[bpaf(
+        long("no-invalid-use-before-declaration"),
+        argument("on|off|warn"),
+        optional,
+        hide
+    )]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_invalid_use_before_declaration: Option<RuleConfiguration>,
     #[doc = "Disallow characters made with multiple code points in character class syntax."]
     #[bpaf(
         long("no-misleading-character-class"),
@@ -2795,6 +2804,10 @@ pub struct Nursery {
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_misleading_character_class: Option<RuleConfiguration>,
+    #[doc = "Forbid the use of Node.js builtin modules. Can be useful for client-side web projects that do not have access to those modules."]
+    #[bpaf(long("no-nodejs-modules"), argument("on|off|warn"), optional, hide)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_nodejs_modules: Option<RuleConfiguration>,
     #[doc = "Disallow unused imports."]
     #[bpaf(long("no-unused-imports"), argument("on|off|warn"), optional, hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -2851,6 +2864,15 @@ pub struct Nursery {
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_import_restrictions: Option<RuleConfiguration>,
+    #[doc = "Enforces using the node: protocol for Node.js builtin modules."]
+    #[bpaf(
+        long("use-node-import-protocol"),
+        argument("on|off|warn"),
+        optional,
+        hide
+    )]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_node_import_protocol: Option<RuleConfiguration>,
     #[doc = "Enforce the use of the regular expression literals instead of the RegExp constructor if possible."]
     #[bpaf(long("use-regex-literals"), argument("on|off|warn"), optional, hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -2886,8 +2908,14 @@ impl MergeWith<Nursery> for Nursery {
         if let Some(no_implicit_any_let) = other.no_implicit_any_let {
             self.no_implicit_any_let = Some(no_implicit_any_let);
         }
+        if let Some(no_invalid_use_before_declaration) = other.no_invalid_use_before_declaration {
+            self.no_invalid_use_before_declaration = Some(no_invalid_use_before_declaration);
+        }
         if let Some(no_misleading_character_class) = other.no_misleading_character_class {
             self.no_misleading_character_class = Some(no_misleading_character_class);
+        }
+        if let Some(no_nodejs_modules) = other.no_nodejs_modules {
+            self.no_nodejs_modules = Some(no_nodejs_modules);
         }
         if let Some(no_unused_imports) = other.no_unused_imports {
             self.no_unused_imports = Some(no_unused_imports);
@@ -2916,6 +2944,9 @@ impl MergeWith<Nursery> for Nursery {
         if let Some(use_import_restrictions) = other.use_import_restrictions {
             self.use_import_restrictions = Some(use_import_restrictions);
         }
+        if let Some(use_node_import_protocol) = other.use_node_import_protocol {
+            self.use_node_import_protocol = Some(use_node_import_protocol);
+        }
         if let Some(use_regex_literals) = other.use_regex_literals {
             self.use_regex_literals = Some(use_regex_literals);
         }
@@ -2937,13 +2968,15 @@ impl MergeWith<Nursery> for Nursery {
 }
 impl Nursery {
     const GROUP_NAME: &'static str = "nursery";
-    pub(crate) const GROUP_RULES: [&'static str; 18] = [
+    pub(crate) const GROUP_RULES: [&'static str; 21] = [
         "noAriaHiddenOnFocusable",
         "noDefaultExport",
         "noDuplicateJsonKeys",
         "noEmptyBlockStatements",
         "noImplicitAnyLet",
+        "noInvalidUseBeforeDeclaration",
         "noMisleadingCharacterClass",
+        "noNodejsModules",
         "noUnusedImports",
         "noUnusedPrivateClassMembers",
         "noUselessLoneBlockStatements",
@@ -2953,6 +2986,7 @@ impl Nursery {
         "useForOf",
         "useGroupedTypeImport",
         "useImportRestrictions",
+        "useNodeImportProtocol",
         "useRegexLiterals",
         "useShorthandFunctionType",
         "useValidAriaRole",
@@ -2971,13 +3005,13 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[12]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[13]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]),
     ];
-    const ALL_RULES_AS_FILTERS: [RuleFilter<'static>; 18] = [
+    const ALL_RULES_AS_FILTERS: [RuleFilter<'static>; 21] = [
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
@@ -2996,6 +3030,9 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]),
     ];
     #[doc = r" Retrieves the recommended rules"]
     pub(crate) fn is_recommended(&self) -> bool {
@@ -3037,69 +3074,84 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]));
             }
         }
-        if let Some(rule) = self.no_misleading_character_class.as_ref() {
+        if let Some(rule) = self.no_invalid_use_before_declaration.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]));
             }
         }
-        if let Some(rule) = self.no_unused_imports.as_ref() {
+        if let Some(rule) = self.no_misleading_character_class.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[6]));
             }
         }
-        if let Some(rule) = self.no_unused_private_class_members.as_ref() {
+        if let Some(rule) = self.no_nodejs_modules.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]));
             }
         }
-        if let Some(rule) = self.no_useless_lone_block_statements.as_ref() {
+        if let Some(rule) = self.no_unused_imports.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[8]));
             }
         }
-        if let Some(rule) = self.no_useless_ternary.as_ref() {
+        if let Some(rule) = self.no_unused_private_class_members.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]));
             }
         }
-        if let Some(rule) = self.use_await.as_ref() {
+        if let Some(rule) = self.no_useless_lone_block_statements.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]));
             }
         }
-        if let Some(rule) = self.use_export_type.as_ref() {
+        if let Some(rule) = self.no_useless_ternary.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]));
             }
         }
-        if let Some(rule) = self.use_for_of.as_ref() {
+        if let Some(rule) = self.use_await.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[12]));
             }
         }
-        if let Some(rule) = self.use_grouped_type_import.as_ref() {
+        if let Some(rule) = self.use_export_type.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[13]));
             }
         }
-        if let Some(rule) = self.use_import_restrictions.as_ref() {
+        if let Some(rule) = self.use_for_of.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]));
             }
         }
-        if let Some(rule) = self.use_regex_literals.as_ref() {
+        if let Some(rule) = self.use_grouped_type_import.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]));
             }
         }
-        if let Some(rule) = self.use_shorthand_function_type.as_ref() {
+        if let Some(rule) = self.use_import_restrictions.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]));
             }
         }
-        if let Some(rule) = self.use_valid_aria_role.as_ref() {
+        if let Some(rule) = self.use_node_import_protocol.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]));
+            }
+        }
+        if let Some(rule) = self.use_regex_literals.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]));
+            }
+        }
+        if let Some(rule) = self.use_shorthand_function_type.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]));
+            }
+        }
+        if let Some(rule) = self.use_valid_aria_role.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]));
             }
         }
         index_set
@@ -3131,69 +3183,84 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]));
             }
         }
-        if let Some(rule) = self.no_misleading_character_class.as_ref() {
+        if let Some(rule) = self.no_invalid_use_before_declaration.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]));
             }
         }
-        if let Some(rule) = self.no_unused_imports.as_ref() {
+        if let Some(rule) = self.no_misleading_character_class.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[6]));
             }
         }
-        if let Some(rule) = self.no_unused_private_class_members.as_ref() {
+        if let Some(rule) = self.no_nodejs_modules.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]));
             }
         }
-        if let Some(rule) = self.no_useless_lone_block_statements.as_ref() {
+        if let Some(rule) = self.no_unused_imports.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[8]));
             }
         }
-        if let Some(rule) = self.no_useless_ternary.as_ref() {
+        if let Some(rule) = self.no_unused_private_class_members.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]));
             }
         }
-        if let Some(rule) = self.use_await.as_ref() {
+        if let Some(rule) = self.no_useless_lone_block_statements.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]));
             }
         }
-        if let Some(rule) = self.use_export_type.as_ref() {
+        if let Some(rule) = self.no_useless_ternary.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]));
             }
         }
-        if let Some(rule) = self.use_for_of.as_ref() {
+        if let Some(rule) = self.use_await.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[12]));
             }
         }
-        if let Some(rule) = self.use_grouped_type_import.as_ref() {
+        if let Some(rule) = self.use_export_type.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[13]));
             }
         }
-        if let Some(rule) = self.use_import_restrictions.as_ref() {
+        if let Some(rule) = self.use_for_of.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]));
             }
         }
-        if let Some(rule) = self.use_regex_literals.as_ref() {
+        if let Some(rule) = self.use_grouped_type_import.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]));
             }
         }
-        if let Some(rule) = self.use_shorthand_function_type.as_ref() {
+        if let Some(rule) = self.use_import_restrictions.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]));
             }
         }
-        if let Some(rule) = self.use_valid_aria_role.as_ref() {
+        if let Some(rule) = self.use_node_import_protocol.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]));
+            }
+        }
+        if let Some(rule) = self.use_regex_literals.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]));
+            }
+        }
+        if let Some(rule) = self.use_shorthand_function_type.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]));
+            }
+        }
+        if let Some(rule) = self.use_valid_aria_role.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]));
             }
         }
         index_set
@@ -3209,7 +3276,7 @@ impl Nursery {
     pub(crate) fn recommended_rules_as_filters() -> [RuleFilter<'static>; 8] {
         Self::RECOMMENDED_RULES_AS_FILTERS
     }
-    pub(crate) fn all_rules_as_filters() -> [RuleFilter<'static>; 18] {
+    pub(crate) fn all_rules_as_filters() -> [RuleFilter<'static>; 21] {
         Self::ALL_RULES_AS_FILTERS
     }
     #[doc = r" Select preset rules"]
@@ -3237,7 +3304,9 @@ impl Nursery {
             "noDuplicateJsonKeys" => self.no_duplicate_json_keys.as_ref(),
             "noEmptyBlockStatements" => self.no_empty_block_statements.as_ref(),
             "noImplicitAnyLet" => self.no_implicit_any_let.as_ref(),
+            "noInvalidUseBeforeDeclaration" => self.no_invalid_use_before_declaration.as_ref(),
             "noMisleadingCharacterClass" => self.no_misleading_character_class.as_ref(),
+            "noNodejsModules" => self.no_nodejs_modules.as_ref(),
             "noUnusedImports" => self.no_unused_imports.as_ref(),
             "noUnusedPrivateClassMembers" => self.no_unused_private_class_members.as_ref(),
             "noUselessLoneBlockStatements" => self.no_useless_lone_block_statements.as_ref(),
@@ -3247,6 +3316,7 @@ impl Nursery {
             "useForOf" => self.use_for_of.as_ref(),
             "useGroupedTypeImport" => self.use_grouped_type_import.as_ref(),
             "useImportRestrictions" => self.use_import_restrictions.as_ref(),
+            "useNodeImportProtocol" => self.use_node_import_protocol.as_ref(),
             "useRegexLiterals" => self.use_regex_literals.as_ref(),
             "useShorthandFunctionType" => self.use_shorthand_function_type.as_ref(),
             "useValidAriaRole" => self.use_valid_aria_role.as_ref(),

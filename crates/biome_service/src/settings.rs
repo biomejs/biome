@@ -3,13 +3,17 @@ use crate::configuration::formatter::to_format_settings;
 use crate::configuration::linter::to_linter_settings;
 use crate::configuration::organize_imports::to_organize_imports_settings;
 use crate::configuration::{
-    push_to_analyzer_rules, to_override_settings, JavascriptConfiguration, JsonConfiguration,
+    push_to_analyzer_rules, to_override_settings, CssConfiguration, JavascriptConfiguration,
+    JsonConfiguration,
 };
 use crate::{
     configuration::FilesConfiguration, Configuration, ConfigurationDiagnostic, Matcher, MergeWith,
     Rules, WorkspaceError,
 };
 use biome_analyze::{AnalyzerRules, RuleFilter};
+use biome_css_formatter::context::CssFormatOptions;
+use biome_css_parser::CssParserOptions;
+use biome_css_syntax::CssLanguage;
 use biome_deserialize::StringSet;
 use biome_diagnostics::Category;
 use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth};
@@ -62,6 +66,12 @@ impl WorkspaceSettings {
     /// Whether the formatter is disabled for JSON files
     pub fn json_formatter_disabled(&self) -> bool {
         let enabled = self.languages.json.formatter.enabled.as_ref();
+        enabled == Some(&false)
+    }
+
+    /// Whether the formatter is disabled for CSS files
+    pub fn css_formatter_disabled(&self) -> bool {
+        let enabled = self.languages.css.formatter.enabled.as_ref();
         enabled == Some(&false)
     }
 
@@ -119,6 +129,10 @@ impl WorkspaceSettings {
         // json settings
         if let Some(json) = configuration.json {
             self.languages.json = json.into();
+        }
+        // css settings
+        if let Some(css) = configuration.css {
+            self.languages.css = css.into();
         }
 
         Ok(())
@@ -270,6 +284,7 @@ pub struct OverrideOrganizeImportsSettings {
 pub struct LanguageListSettings {
     pub javascript: LanguageSettings<JsLanguage>,
     pub json: LanguageSettings<JsonLanguage>,
+    pub css: LanguageSettings<CssLanguage>,
 }
 
 impl From<JavascriptConfiguration> for LanguageSettings<JsLanguage> {
@@ -330,6 +345,23 @@ impl From<JsonConfiguration> for LanguageSettings<JsonLanguage> {
         language_setting
     }
 }
+
+impl From<CssConfiguration> for LanguageSettings<CssLanguage> {
+    fn from(css: CssConfiguration) -> Self {
+        let mut language_setting: LanguageSettings<CssLanguage> = LanguageSettings::default();
+        if let Some(formatter) = css.formatter {
+            language_setting.formatter.enabled = formatter.enabled;
+            language_setting.formatter.line_width = formatter.line_width;
+            language_setting.formatter.indent_width = formatter
+                .indent_width
+                .map(Into::into)
+                .or(formatter.indent_size.map(Into::into));
+            language_setting.formatter.indent_style = formatter.indent_style.map(Into::into);
+        }
+        language_setting
+    }
+}
+
 pub trait Language: biome_rowan::Language {
     /// Formatter settings type for this language
     type FormatterSettings: Default;
@@ -598,6 +630,44 @@ impl OverrideSettings {
         })
     }
 
+    /// It scans the current override rules and return the formatting options that of the first override is matched
+    pub fn override_css_format_options(
+        &self,
+        path: &Path,
+        options: CssFormatOptions,
+    ) -> CssFormatOptions {
+        self.patterns.iter().fold(options, |mut options, pattern| {
+            let included = !pattern.include.is_empty() && pattern.include.matches_path(path);
+            let excluded = !pattern.exclude.is_empty() && pattern.exclude.matches_path(path);
+            if excluded {
+                return options;
+            }
+            if included {
+                let css_formatter = &pattern.languages.css.formatter;
+
+                if let Some(indent_style) = css_formatter
+                    .indent_style
+                    .or(pattern.formatter.indent_style)
+                {
+                    options.set_indent_style(indent_style);
+                }
+
+                if let Some(indent_width) = css_formatter
+                    .indent_width
+                    .or(pattern.formatter.indent_width)
+                {
+                    options.set_indent_width(indent_width)
+                }
+                if let Some(line_width) = css_formatter.line_width.or(pattern.formatter.line_width)
+                {
+                    options.set_line_width(line_width);
+                }
+            }
+
+            options
+        })
+    }
+
     pub fn override_js_parser_options(
         &self,
         path: &Path,
@@ -630,6 +700,23 @@ impl OverrideSettings {
                 return Some(JsonParserOptions {
                     allow_comments: json_parser.allow_comments,
                     allow_trailing_commas: json_parser.allow_trailing_commas,
+                });
+            }
+        }
+
+        None
+    }
+
+    pub fn as_css_parser_options(&self, path: &Path) -> Option<CssParserOptions> {
+        for pattern in &self.patterns {
+            let included = !pattern.include.is_empty() && pattern.include.matches_path(path);
+            let excluded = !pattern.exclude.is_empty() && pattern.exclude.matches_path(path);
+
+            if included || !excluded {
+                let css_parser = &pattern.languages.css.parser;
+
+                return Some(CssParserOptions {
+                    allow_wrong_line_comments: css_parser.allow_wrong_line_comments,
                 });
             }
         }

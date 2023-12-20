@@ -4,12 +4,14 @@ use crate::logging::LoggingKind;
 use crate::{CliDiagnostic, LoggingLevel, VERSION};
 use biome_console::{markup, Console, ConsoleExt};
 use biome_diagnostics::PrintDiagnostic;
+use biome_service::configuration::css::CssFormatter;
 use biome_service::configuration::json::JsonFormatter;
 use biome_service::configuration::vcs::VcsConfiguration;
 use biome_service::configuration::{
-    configuration, files_configuration, formatter_configuration, javascript::javascript_formatter,
-    json::json_formatter, linter_configuration, vcs::vcs_configuration, FilesConfiguration,
-    FormatterConfiguration, JavascriptFormatter, LinterConfiguration, LoadedConfiguration,
+    configuration, css::css_formatter, files_configuration, formatter_configuration,
+    javascript::javascript_formatter, json::json_formatter, linter_configuration,
+    vcs::vcs_configuration, FilesConfiguration, FormatterConfiguration, JavascriptFormatter,
+    LinterConfiguration, LoadedConfiguration,
 };
 use biome_service::{Configuration, ConfigurationDiagnostic, WorkspaceError};
 use bpaf::Bpaf;
@@ -158,6 +160,9 @@ pub enum BiomeCommand {
 
         #[bpaf(external, optional, hide_usage)]
         json_formatter: Option<JsonFormatter>,
+
+        #[bpaf(external, optional, hide_usage, hide)]
+        css_formatter: Option<CssFormatter>,
 
         #[bpaf(external, optional, hide_usage)]
         vcs_configuration: Option<VcsConfiguration>,

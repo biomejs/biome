@@ -38,7 +38,6 @@ bpaf                 = { workspace = true, features = ["bright-color"] }
 crossbeam            = "0.8.1"
 dashmap              = { workspace = true }
 hdrhistogram         = { version = "7.5.0", default-features = false }
-ignore               = { workspace = true }
 indexmap             = { workspace = true }
 lazy_static          = { workspace = true }
 rayon                = "1.5.1"
@@ -62,6 +61,7 @@ mimalloc = "0.1.29"
 tikv-jemallocator = "0.5.0"
 
 [dev-dependencies]
+biome_css_formatter  = { workspace = true }
 biome_js_formatter   = { workspace = true }
 biome_json_formatter = { workspace = true }
 biome_json_parser    = { workspace = true }

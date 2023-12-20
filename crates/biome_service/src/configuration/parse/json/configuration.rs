@@ -34,6 +34,7 @@ impl DeserializationVisitor for ConfigurationVisitor {
             "formatter",
             "javascript",
             "json",
+            "css",
             "$schema",
             "organizeImports",
             "extends",
@@ -65,6 +66,9 @@ impl DeserializationVisitor for ConfigurationVisitor {
                 }
                 "json" => {
                     result.json = Deserializable::deserialize(&value, &key_text, diagnostics);
+                }
+                "css" => {
+                    result.css = Deserializable::deserialize(&value, &key_text, diagnostics);
                 }
                 "organizeImports" => {
                     result.organize_imports =
