@@ -1,7 +1,5 @@
 use crate::semantic_services::Semantic;
-use biome_analyze::{
-    context::RuleContext, declare_rule, Rule, RuleDiagnostic,
-};
+use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_js_semantic::{Reference, ReferencesExtensions};
 use biome_js_syntax::JsIdentifierBinding;
@@ -40,10 +38,26 @@ declare_rule! {
     }
 }
 
+pub enum NoThenPropertyState {
+    Object,
+    Export,
+    Class,
+}
+
+impl NoThenPropertyState {
+    fn diagnostic_message(&self) -> &str {
+        match self {
+            NoThenPropertyState::Object => "Do not add `then` to an object.",
+            NoThenPropertyState::Export => "Do not export `then`.",
+            NoThenPropertyState::Class => "Do not add `then` to a class.",
+        }
+    }
+}
+
 impl Rule for NoThenProperty {
     type Query = Semantic<JsIdentifierBinding>;
-    type State = Reference;
-    type Signals = Vec<Self::State>;
+    type State = NoThenPropertyState;
+    type Signals = Option<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
