@@ -31,6 +31,7 @@ import Outputf from "@src/components/formatter/output.md";
 import ProgressBar from "../../playground/components/Progress.tsx";
 import PackageManagerCommand from "@src/components/PackageManagerCommand.astro";
 import arrow from "../../assets/svg/arrow-right.svg";
+import { Image } from "astro:assets";
 import "../../styles/_performance.scss";
 import "../../styles/_installation.scss";
 
@@ -101,23 +102,23 @@ import "../../styles/_installation.scss";
   </CardGrid>
 </div>
 
-<div class="inst-body">
+<div class="installation-body">
   <div class="installation">
-    <div class="inst-left">
-      <div class="inst-head">Try Biome</div>
-      <div class="inst-des">
+    <div class="installation-left">
+      <div class="installation-head">Try Biome</div>
+      <div class="installation-des">
         Install Biome using your preferred package manager AND integrate it in your editor.
       </div>
-      <a class="inst-biome" href="https://biomejs.dev/guides/getting-started/#installation">
+      <a class="installation-biome" href="https://biomejs.dev/guides/getting-started/#installation">
         Install with package manager
-        <img src={arrow.src} alt="arrow" />
+        <Image src={arrow} alt="arrow" />
       </a>
       <a
         href="https://biomejs.dev/guides/integrate-in-editor/"
-        class="inst-ext"
+        class="installation-ext"
       >
          Integrate Biome in your editor
-        <img src={arrow.src} alt="arrow" />
+        <Image src={arrow} alt="arrow" />
       </a>
     </div>
 

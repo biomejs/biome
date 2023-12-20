@@ -1,4 +1,4 @@
-.inst-body {
+.installation-body {
     display: flex;
     justify-content: center;
 }
@@ -7,7 +7,7 @@
     position: relative;
     border: 1px solid var(--sl-color-gray-5);
     overflow: hidden;
-    margin-top: 9.5rem !important;
+    margin-top: 9.5rem;
     width: 80vw;
     display: flex;
     gap: 2.5rem;
@@ -16,31 +16,31 @@
         radial-gradient(var(--sl-color-blue-low), transparent 40%) no-repeat 30vw -100vh / 105vw 200vh;
 }
 
-.inst-left {
+.installation-left {
     padding: 2.5rem 2.5rem 4.5rem;
 }
 
-.inst-left>a>img {
+.installation-left>a>img {
     margin: 0;
 }
 
-.inst-left>a {
+.installation-left>a {
     display: flex;
     align-items: center;
     justify-content: space-between;
 }
 
-.inst-head {
+.installation-head {
     font-size: 3.1rem;
     font-weight: bold;
 }
 
-.inst-des {
+.installation-des {
     max-width: 25rem;
 }
 
-.inst-ext,
-.inst-biome {
+.installation-ext,
+.installation-biome {
     display: flex;
     margin-top: 1rem;
     align-items: center;
@@ -51,8 +51,8 @@
     cursor: pointer;
 }
 
-.inst-ext:hover,
-.inst-biome:hover {
+.installation-ext:hover,
+.installation-biome:hover {
     background: hsla(var(--sl-hue-blue), 68%, 52%, 16%);
     text-decoration: underline;
 }
