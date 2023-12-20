@@ -39,7 +39,7 @@
     max-width: 25rem;
 }
 
-.installation-ext,
+.installation-extension,
 .installation-biome {
     display: flex;
     margin-top: 1rem;
@@ -51,13 +51,13 @@
     cursor: pointer;
 }
 
-.installation-ext:hover,
+.installation-extension:hover,
 .installation-biome:hover {
     background: hsla(var(--sl-hue-blue), 68%, 52%, 16%);
     text-decoration: underline;
 }
 
-.ext-img {
+.extension-img {
     position: absolute;
     height: 24rem;
     width: 31rem;
@@ -71,7 +71,7 @@
 
 @media only screen and (max-width: 900px) {
     // hide vscode extension image on smaller screens
-    .ext-img {
+    .extension-img {
         display: none;
     }
 }
