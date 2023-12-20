@@ -8,7 +8,7 @@
     border: 1px solid var(--sl-color-gray-5);
     overflow: hidden;
     margin-top: 9.5rem;
-    width: 80vw;
+    width: 68rem;
     display: flex;
     gap: 2.5rem;
     background:
@@ -69,11 +69,8 @@
     bottom: -1.8rem;
 }
 
-@media only screen and (max-width: 1080px) {
-    .installation {
-        overflow: scroll;
-    }
-
+@media only screen and (max-width: 900px) {
+    // hide vscode extension image on smaller screens
     .ext-img {
         display: none;
     }
