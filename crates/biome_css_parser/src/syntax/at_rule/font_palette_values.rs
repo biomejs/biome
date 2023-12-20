@@ -21,7 +21,7 @@ pub(crate) fn is_at_font_palette_values(p: &mut CssParser) -> bool {
 }
 
 #[inline]
-pub(crate) fn parse_font_palette_values(p: &mut CssParser) -> ParsedSyntax {
+pub(crate) fn parse_font_palette_values_at_rule(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_font_palette_values(p) {
         return Absent;
     }

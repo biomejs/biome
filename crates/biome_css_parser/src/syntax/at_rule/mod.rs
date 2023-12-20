@@ -21,7 +21,7 @@ use biome_css_syntax::T;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::prelude::*;
 
-use self::font_palette_values::{is_at_font_palette_values, parse_font_palette_values};
+use self::font_palette_values::{is_at_font_palette_values, parse_font_palette_values_at_rule};
 
 #[inline]
 pub(crate) fn at_at_rule(p: &mut CssParser) -> bool {
@@ -63,7 +63,7 @@ pub(crate) fn parse_any_at_rule(p: &mut CssParser) -> ParsedSyntax {
     } else if is_at_font_face_at_rule(p) {
         parse_font_face_at_rule(p)
     } else if is_at_font_palette_values(p) {
-        parse_font_palette_values(p)
+        parse_font_palette_values_at_rule(p)
     } else {
         Absent
     }
