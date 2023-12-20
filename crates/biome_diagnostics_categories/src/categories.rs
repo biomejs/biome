@@ -104,6 +104,7 @@ define_categories! {
     "lint/nursery/noDuplicateJsonKeys": "https://biomejs.dev/linter/rules/no-duplicate-json-keys",
     "lint/nursery/noEmptyBlockStatements": "https://biomejs.dev/linter/rules/no-empty-block-statements",
     "lint/nursery/noImplicitAnyLet": "https://biomejs.dev/lint/rules/no-implicit-any-let",
+    "lint/nursery/noInvalidUseBeforeDeclaration": "https://biomejs.dev/linter/rules/no-invalid-use-before-declaration",
     "lint/nursery/noMisleadingCharacterClass": "https://biomejs.dev/linter/rules/no-misleading-character-class",
     "lint/nursery/noNodejsModules": "https://biomejs.dev/linter/rules/no-nodejs-modules",
     "lint/nursery/noTypeOnlyImportAttributes": "https://biomejs.dev/linter/rules/no-type-only-import-attributes",
