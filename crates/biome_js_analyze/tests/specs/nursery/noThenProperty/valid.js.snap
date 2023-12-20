@@ -43,6 +43,16 @@ foo.then ++
 delete foo.then
 typeof foo.then
 foo.then != 1
+
+Object.defineProperty(foo, then, 1)
+Object.defineProperty(foo, "not-then", 1)
+// const then = "no-then";Object.defineProperty(foo, then, 1)
+Reflect.defineProperty(foo, then, 1)
+Reflect.defineProperty(foo, "not-then", 1)
+// const then = "no-then";Reflect.defineProperty(foo, then, 1)
+Object.defineProperty(foo, "then", )
+Object.defineProperty(...foo, "then", 1)
+Object.defineProperty(foo, ...["then", 1])
 ```
 
 

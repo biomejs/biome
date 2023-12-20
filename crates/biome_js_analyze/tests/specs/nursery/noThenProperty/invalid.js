@@ -12,7 +12,7 @@ class Foo {then}
 const Foo = class {then}
 class Foo {["then"]}
 class Foo {[`then`]}
-// const THEN = "then";class Foo {[THEN]}'
+// const THEN = "then";class Foo {[THEN]}
 class Foo {then() {}}
 class Foo {["then"]() {}}
 class Foo {[`then`]() {}}
@@ -44,3 +44,10 @@ foo[`then`] = 1
 foo.then += 1
 foo.then ||= 1
 foo.then ??= 1
+
+Object.defineProperty(foo, "then", 1)
+Object.defineProperty(foo, `then`, 1)
+// const THEN = "then";Object.defineProperty(foo, THEN, 1)
+Reflect.defineProperty(foo, "then", 1)
+Reflect.defineProperty(foo, `then`, 1)
+// const THEN = "then";Reflect.defineProperty(foo, THEN, 1)
