@@ -13,11 +13,9 @@ use biome_js_syntax::{
 };
 use biome_js_syntax::{AnyJsExpression, JsIdentifierExpression, TsTypeofType};
 use biome_rowan::{AstNode, SyntaxNodeCast};
-use bpaf::Bpaf;
 use rustc_hash::{FxHashMap, FxHashSet};
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
-use std::str::FromStr;
 
 #[cfg(feature = "schemars")]
 use schemars::JsonSchema;
@@ -220,21 +218,12 @@ impl Default for ReactExtensiveDependenciesOptions {
 }
 
 /// Options for the rule `useExhaustiveDependencies` and `useHookAtTopLevel`
-#[derive(Default, Deserialize, Serialize, Eq, PartialEq, Debug, Clone, Bpaf)]
+#[derive(Default, Deserialize, Serialize, Eq, PartialEq, Debug, Clone)]
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct HooksOptions {
-    #[bpaf(external, hide, many)]
     /// List of safe hooks
     pub hooks: Vec<Hooks>,
-}
-
-impl FromStr for HooksOptions {
-    type Err = ();
-
-    fn from_str(_s: &str) -> Result<Self, Self::Err> {
-        Ok(HooksOptions::default())
-    }
 }
 
 impl Deserializable for HooksOptions {
@@ -289,29 +278,18 @@ impl DeserializationVisitor for HooksOptionsVisitor {
     }
 }
 
-#[derive(Default, Deserialize, Serialize, Eq, PartialEq, Debug, Clone, Bpaf)]
+#[derive(Default, Deserialize, Serialize, Eq, PartialEq, Debug, Clone)]
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Hooks {
-    #[bpaf(hide)]
     /// The name of the hook
     pub name: String,
-    #[bpaf(hide)]
     /// The "position" of the closure function, starting from zero.
     ///
     /// ### Example
     pub closure_index: Option<usize>,
-    #[bpaf(hide)]
     /// The "position" of the array of dependencies, starting from zero.
     pub dependencies_index: Option<usize>,
-}
-
-impl FromStr for Hooks {
-    type Err = ();
-
-    fn from_str(_s: &str) -> Result<Self, Self::Err> {
-        Ok(Hooks::default())
-    }
 }
 
 impl Deserializable for Hooks {

@@ -9,9 +9,7 @@ use biome_deserialize::{
 use biome_js_semantic::{Binding, BindingExtensions};
 use biome_js_syntax::{AnyJsIdentifierUsage, TextRange};
 use biome_rowan::AstNode;
-use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
-use std::str::FromStr;
 
 declare_rule! {
     /// This rule allows you to specify global variable names that you don’t want to use in your application.
@@ -60,24 +58,13 @@ declare_rule! {
 const RESTRICTED_GLOBALS: [&str; 2] = ["event", "error"];
 
 /// Options for the rule `noRestrictedGlobals`.
-#[derive(Default, Deserialize, Serialize, Eq, PartialEq, Debug, Clone, Bpaf)]
+#[derive(Default, Deserialize, Serialize, Eq, PartialEq, Debug, Clone)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct RestrictedGlobalsOptions {
     /// A list of names that should trigger the rule
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(hide, argument::<String>("NUM"), many, optional)]
     denied_globals: Option<Vec<String>>,
-}
-
-// Required by [Bpaf].
-impl FromStr for RestrictedGlobalsOptions {
-    type Err = &'static str;
-
-    fn from_str(_s: &str) -> Result<Self, Self::Err> {
-        // WARNING: should not be used.
-        Ok(Self::default())
-    }
 }
 
 impl Deserializable for RestrictedGlobalsOptions {

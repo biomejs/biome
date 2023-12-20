@@ -8,7 +8,7 @@ use crate::settings::{to_matcher, LinterSettings};
 use crate::{Matcher, WorkspaceError};
 use biome_deserialize::StringSet;
 use biome_diagnostics::Severity;
-use biome_js_analyze::options::{possible_options, PossibleOptions};
+use biome_js_analyze::options::PossibleOptions;
 use bpaf::Bpaf;
 pub use rules::*;
 #[cfg(feature = "schema")]
@@ -199,7 +199,7 @@ impl FromStr for RulePlainConfiguration {
 pub struct RuleWithOptions {
     pub level: RulePlainConfiguration,
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(external(possible_options), hide, optional)]
+    #[bpaf(pure(PossibleOptions::default()), hide, optional)]
     pub options: Option<PossibleOptions>,
 }
 
