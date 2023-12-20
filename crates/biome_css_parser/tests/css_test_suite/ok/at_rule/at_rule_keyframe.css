@@ -1,0 +1,54 @@
+@keyframes foo { /* ... */ }
+@keyframes "foo" { /* ... */ }
+@keyframes    foo    { /* ... */ }
+
+@keyframes slidein {
+	from {
+		transform: translateX(0%);
+	}
+
+	to {
+		transform: translateX(100%);
+	}
+}
+
+@-ms-keyframes identifier {
+	0% { top: 0; left: 0; }
+	30% { top: 50px; }
+	68%, 72% { left: 50px; }
+	100% { top: 100px; left: 100%; }
+}
+
+@keyframes FOO {}
+@keyframes "initial" {}
+@-o-keyframes "None" {}
+@-webkit-keyframes slide-right {
+
+	from {
+		margin-left: 0px;
+	}
+
+	50% {
+		margin-left: 110px;
+		opacity: 1;
+	}
+
+	50% {
+		opacity: 0.9;
+	}
+
+	to {
+		margin-left: 200px;
+	}
+
+}
+
+@-moz-keyframes slidein-up {
+	fRoM {
+		transform: translateX(0%);
+	}
+
+	tO {
+		transform: translateX(100%);
+	}
+}

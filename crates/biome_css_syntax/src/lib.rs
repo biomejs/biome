@@ -30,11 +30,14 @@ impl CssSyntaxKind {
     pub fn is_trivia(self) -> bool {
         matches!(
             self,
-            CssSyntaxKind::NEWLINE | CssSyntaxKind::WHITESPACE | CssSyntaxKind::COMMENT
+            CssSyntaxKind::NEWLINE
+                | CssSyntaxKind::WHITESPACE
+                | CssSyntaxKind::COMMENT
+                | CssSyntaxKind::MULTILINE_COMMENT
         )
     }
 
-    /// Returns `true` for any contextual (await) or non-contextual keyword
+    /// Returns `true` for any contextual or non-contextual keyword
     #[inline]
     pub const fn is_keyword(self) -> bool {
         true
@@ -43,7 +46,7 @@ impl CssSyntaxKind {
     /// Returns `true` for contextual keywords
     #[inline]
     pub const fn is_contextual_keyword(self) -> bool {
-        (self as u16) >= (ALICEBLUE_KW as u16) && (self as u16) <= (VAR_KW as u16)
+        (self as u16) >= (MEDIA_KW as u16) && (self as u16) <= (FONT_FACE_KW as u16)
     }
 
     /// Returns `true` for contextual attribute modifier keywords
@@ -71,11 +74,12 @@ impl biome_rowan::SyntaxKind for CssSyntaxKind {
                 | CSS_BOGUS_RULE
                 | CSS_BOGUS_SELECTOR
                 | CSS_BOGUS_SUB_SELECTOR
-                | CSS_BOGUS_BODY
+                | CSS_BOGUS_BLOCK
                 | CSS_BOGUS_PSEUDO_CLASS
                 | CSS_BOGUS_PSEUDO_ELEMENT
                 | CSS_BOGUS_AT_RULE
                 | CSS_BOGUS_MEDIA_QUERY
+                | CSS_BOGUS_KEYFRAMES_ITEM
         )
     }
 
@@ -88,6 +92,9 @@ impl biome_rowan::SyntaxKind for CssSyntaxKind {
             kind if AnyCssPseudoElement::can_cast(*kind) => CSS_BOGUS_PSEUDO_ELEMENT,
             kind if AnyCssAtRule::can_cast(*kind) => CSS_BOGUS_AT_RULE,
             kind if AnyCssMediaQuery::can_cast(*kind) => CSS_BOGUS_MEDIA_QUERY,
+            kind if AnyCssDeclarationListBlock::can_cast(*kind) => CSS_BOGUS_BLOCK,
+            kind if AnyCssRuleListBlock::can_cast(*kind) => CSS_BOGUS_BLOCK,
+            kind if AnyCssKeyframesSelector::can_cast(*kind) => CSS_BOGUS_SELECTOR,
 
             _ => CSS_BOGUS,
         }

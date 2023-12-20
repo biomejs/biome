@@ -40,7 +40,7 @@ CssRoot {
                     ],
                 },
             ],
-            block: CssBlock {
+            block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@11..12 "{" [] [],
                 declaration_list: CssDeclarationList [],
                 r_curly_token: R_CURLY@12..15 "}" [Newline("\n"), Newline("\n")] [],
@@ -70,7 +70,7 @@ CssRoot {
               0: DOT@1..2 "." [] []
               1: CSS_IDENTIFIER@2..11
                 0: IDENT@2..11 "selector" [] [Whitespace(" ")]
-      1: CSS_BLOCK@11..15
+      1: CSS_DECLARATION_LIST_BLOCK@11..15
         0: L_CURLY@11..12 "{" [] []
         1: CSS_DECLARATION_LIST@12..12
         2: R_CURLY@12..15 "}" [Newline("\n"), Newline("\n")] []

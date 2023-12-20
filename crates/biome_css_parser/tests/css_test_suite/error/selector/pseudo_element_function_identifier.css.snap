@@ -47,7 +47,7 @@ CssRoot {
                     ],
                 },
             ],
-            block: CssBlock {
+            block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@23..24 "{" [] [],
                 declaration_list: CssDeclarationList [],
                 r_curly_token: R_CURLY@24..25 "}" [] [],
@@ -71,7 +71,7 @@ CssRoot {
                     ],
                 },
             ],
-            block: CssBlock {
+            block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@39..40 "{" [] [],
                 declaration_list: CssDeclarationList [],
                 r_curly_token: R_CURLY@40..41 "}" [] [],
@@ -126,7 +126,7 @@ CssRoot {
                   0: PLUS@16..18 "+" [] [Whitespace(" ")]
                   1: IDENT@18..21 "div" [] []
                 4: R_PAREN@21..23 ")" [] [Whitespace(" ")]
-      1: CSS_BLOCK@23..25
+      1: CSS_DECLARATION_LIST_BLOCK@23..25
         0: L_CURLY@23..24 "{" [] []
         1: CSS_DECLARATION_LIST@24..24
         2: R_CURLY@24..25 "}" [] []
@@ -141,7 +141,7 @@ CssRoot {
               1: CSS_BOGUS_PSEUDO_ELEMENT@28..39
                 0: HIGHLIGHT_KW@28..37 "highlight" [] []
                 1: L_PAREN@37..39 "(" [] [Whitespace(" ")]
-      1: CSS_BLOCK@39..41
+      1: CSS_DECLARATION_LIST_BLOCK@39..41
         0: L_CURLY@39..40 "{" [] []
         1: CSS_DECLARATION_LIST@40..40
         2: R_CURLY@40..41 "}" [] []

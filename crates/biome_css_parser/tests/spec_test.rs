@@ -134,8 +134,17 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 #[test]
 pub fn quick_test() {
     let code = r#"
-    @media (600px < height), not all and not (600px < height) {}
+@keyframes slidein {
+	{
+		transform: translateX(0%);
+	}
+}
     "#;
+    // let code: String = fs::read_to_string("./tests/bootstrap.css")
+    //     .unwrap()
+    //     .parse()
+    //     .unwrap();
+
     let root = parse_css(
         code,
         CssParserOptions::default().allow_wrong_line_comments(),
