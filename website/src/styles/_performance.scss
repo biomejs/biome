@@ -69,7 +69,6 @@
 .perf-out {
     background: var(--sl-color-gray-6);
     margin: 0 !important;
-    overflow: scroll;
 }
 
 .perf-out {
@@ -140,6 +139,7 @@
 
     .bench-comp {
         display: flex;
+        justify-content: center;
     }
 
     .bench {
