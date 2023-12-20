@@ -2,8 +2,11 @@ mod charset;
 mod color_profile;
 mod container;
 mod counter_style;
+mod feature;
 mod font_face;
 mod font_palette_values;
+mod media;
+mod parse_error;
 
 use crate::parser::CssParser;
 use crate::syntax::at_rule::charset::{is_at_charset_at_rule, parse_charset_at_rule};
@@ -18,6 +21,7 @@ use crate::syntax::at_rule::font_face::{is_at_font_face_at_rule, parse_font_face
 use crate::syntax::at_rule::font_palette_values::{
     is_at_font_palette_values_at_rule, parse_font_palette_values_at_rule,
 };
+use crate::syntax::at_rule::media::{is_at_media_at_rule, parse_media_at_rule};
 use crate::syntax::parse_error::expected_any_at_rule;
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::T;
@@ -65,6 +69,8 @@ pub(crate) fn parse_any_at_rule(p: &mut CssParser) -> ParsedSyntax {
         parse_font_face_at_rule(p)
     } else if is_at_font_palette_values_at_rule(p) {
         parse_font_palette_values_at_rule(p)
+    } else if is_at_media_at_rule(p) {
+        parse_media_at_rule(p)
     } else {
         Absent
     }

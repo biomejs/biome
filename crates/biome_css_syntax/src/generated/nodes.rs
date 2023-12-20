@@ -566,7 +566,7 @@ impl CssContainerAndQuery {
     pub fn and_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 1usize)
     }
-    pub fn right(&self) -> SyntaxResult<AnyCssContainerCombinableQuery> {
+    pub fn right(&self) -> SyntaxResult<AnyCssContainerAndCombinableQuery> {
         support::required_node(&self.syntax, 2usize)
     }
 }
@@ -583,7 +583,7 @@ impl Serialize for CssContainerAndQuery {
 pub struct CssContainerAndQueryFields {
     pub left: SyntaxResult<AnyCssContainerQueryInParens>,
     pub and_token: SyntaxResult<SyntaxToken>,
-    pub right: SyntaxResult<AnyCssContainerCombinableQuery>,
+    pub right: SyntaxResult<AnyCssContainerAndCombinableQuery>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssContainerAtRule {
@@ -704,7 +704,7 @@ impl CssContainerOrQuery {
     pub fn or_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 1usize)
     }
-    pub fn right(&self) -> SyntaxResult<AnyCssContainerCombinableQuery> {
+    pub fn right(&self) -> SyntaxResult<AnyCssContainerOrCombinableQuery> {
         support::required_node(&self.syntax, 2usize)
     }
 }
@@ -721,7 +721,7 @@ impl Serialize for CssContainerOrQuery {
 pub struct CssContainerOrQueryFields {
     pub left: SyntaxResult<AnyCssContainerQueryInParens>,
     pub or_token: SyntaxResult<SyntaxToken>,
-    pub right: SyntaxResult<AnyCssContainerCombinableQuery>,
+    pub right: SyntaxResult<AnyCssContainerOrCombinableQuery>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssContainerQueryInParens {
@@ -786,14 +786,14 @@ impl CssContainerSizeFeatureInParens {
     pub fn as_fields(&self) -> CssContainerSizeFeatureInParensFields {
         CssContainerSizeFeatureInParensFields {
             l_paren_token: self.l_paren_token(),
-            query: self.query(),
+            feature: self.feature(),
             r_paren_token: self.r_paren_token(),
         }
     }
     pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn query(&self) -> SyntaxResult<AnyCssContainerSizeFeature> {
+    pub fn feature(&self) -> SyntaxResult<AnyCssQueryFeature> {
         support::required_node(&self.syntax, 1usize)
     }
     pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
@@ -812,7 +812,7 @@ impl Serialize for CssContainerSizeFeatureInParens {
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct CssContainerSizeFeatureInParensFields {
     pub l_paren_token: SyntaxResult<SyntaxToken>,
-    pub query: SyntaxResult<AnyCssContainerSizeFeature>,
+    pub feature: SyntaxResult<AnyCssQueryFeature>,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -842,7 +842,7 @@ impl CssContainerStyleAndQuery {
     pub fn and_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 1usize)
     }
-    pub fn right(&self) -> SyntaxResult<AnyCssContainerStyleCombinableQuery> {
+    pub fn right(&self) -> SyntaxResult<AnyCssContainerStyleAndCombinableQuery> {
         support::required_node(&self.syntax, 2usize)
     }
 }
@@ -859,7 +859,7 @@ impl Serialize for CssContainerStyleAndQuery {
 pub struct CssContainerStyleAndQueryFields {
     pub left: SyntaxResult<CssContainerStyleInParens>,
     pub and_token: SyntaxResult<SyntaxToken>,
-    pub right: SyntaxResult<AnyCssContainerStyleCombinableQuery>,
+    pub right: SyntaxResult<AnyCssContainerStyleAndCombinableQuery>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssContainerStyleInParens {
@@ -975,7 +975,7 @@ impl CssContainerStyleOrQuery {
     pub fn or_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 1usize)
     }
-    pub fn right(&self) -> SyntaxResult<AnyCssContainerStyleCombinableQuery> {
+    pub fn right(&self) -> SyntaxResult<AnyCssContainerStyleOrCombinableQuery> {
         support::required_node(&self.syntax, 2usize)
     }
 }
@@ -992,7 +992,7 @@ impl Serialize for CssContainerStyleOrQuery {
 pub struct CssContainerStyleOrQueryFields {
     pub left: SyntaxResult<CssContainerStyleInParens>,
     pub or_token: SyntaxResult<SyntaxToken>,
-    pub right: SyntaxResult<AnyCssContainerStyleCombinableQuery>,
+    pub right: SyntaxResult<AnyCssContainerStyleOrCombinableQuery>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssContainerStyleQueryInParens {
@@ -1578,6 +1578,98 @@ pub struct CssKeyframesSelectorFields {
     pub css_percentage: SyntaxResult<CssPercentage>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssMediaAndCondition {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssMediaAndCondition {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssMediaAndConditionFields {
+        CssMediaAndConditionFields {
+            left: self.left(),
+            and_token: self.and_token(),
+            right: self.right(),
+        }
+    }
+    pub fn left(&self) -> SyntaxResult<AnyCssMediaInParens> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn and_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn right(&self) -> SyntaxResult<AnyCssMediaAndCombinableCondition> {
+        support::required_node(&self.syntax, 2usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssMediaAndCondition {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssMediaAndConditionFields {
+    pub left: SyntaxResult<AnyCssMediaInParens>,
+    pub and_token: SyntaxResult<SyntaxToken>,
+    pub right: SyntaxResult<AnyCssMediaAndCombinableCondition>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssMediaAndTypeQuery {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssMediaAndTypeQuery {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssMediaAndTypeQueryFields {
+        CssMediaAndTypeQueryFields {
+            left: self.left(),
+            and_token: self.and_token(),
+            right: self.right(),
+        }
+    }
+    pub fn left(&self) -> SyntaxResult<CssMediaTypeQuery> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn and_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn right(&self) -> SyntaxResult<AnyCssMediaTypeCondition> {
+        support::required_node(&self.syntax, 2usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssMediaAndTypeQuery {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssMediaAndTypeQueryFields {
+    pub left: SyntaxResult<CssMediaTypeQuery>,
+    pub and_token: SyntaxResult<SyntaxToken>,
+    pub right: SyntaxResult<AnyCssMediaTypeCondition>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssMediaAtRule {
     pub(crate) syntax: SyntaxNode,
 }
@@ -1595,9 +1687,7 @@ impl CssMediaAtRule {
         CssMediaAtRuleFields {
             media_token: self.media_token(),
             query_list: self.query_list(),
-            l_curly_token: self.l_curly_token(),
-            body: self.body(),
-            r_curly_token: self.r_curly_token(),
+            block: self.block(),
         }
     }
     pub fn media_token(&self) -> SyntaxResult<SyntaxToken> {
@@ -1606,14 +1696,8 @@ impl CssMediaAtRule {
     pub fn query_list(&self) -> CssMediaQueryList {
         support::list(&self.syntax, 1usize)
     }
-    pub fn l_curly_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 2usize)
-    }
-    pub fn body(&self) -> SyntaxResult<AnyCssRule> {
-        support::required_node(&self.syntax, 3usize)
-    }
-    pub fn r_curly_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 4usize)
+    pub fn block(&self) -> SyntaxResult<CssBlock> {
+        support::required_node(&self.syntax, 2usize)
     }
 }
 #[cfg(feature = "serde")]
@@ -1629,15 +1713,13 @@ impl Serialize for CssMediaAtRule {
 pub struct CssMediaAtRuleFields {
     pub media_token: SyntaxResult<SyntaxToken>,
     pub query_list: CssMediaQueryList,
-    pub l_curly_token: SyntaxResult<SyntaxToken>,
-    pub body: SyntaxResult<AnyCssRule>,
-    pub r_curly_token: SyntaxResult<SyntaxToken>,
+    pub block: SyntaxResult<CssBlock>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub struct CssMediaQuery {
+pub struct CssMediaConditionInParens {
     pub(crate) syntax: SyntaxNode,
 }
-impl CssMediaQuery {
+impl CssMediaConditionInParens {
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -1647,33 +1729,25 @@ impl CssMediaQuery {
     pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
         Self { syntax }
     }
-    pub fn as_fields(&self) -> CssMediaQueryFields {
-        CssMediaQueryFields {
-            condition_token: self.condition_token(),
-            or_token: self.or_token(),
-            only_token: self.only_token(),
-            ty: self.ty(),
-            consequent: self.consequent(),
+    pub fn as_fields(&self) -> CssMediaConditionInParensFields {
+        CssMediaConditionInParensFields {
+            l_paren_token: self.l_paren_token(),
+            condition: self.condition(),
+            r_paren_token: self.r_paren_token(),
         }
     }
-    pub fn condition_token(&self) -> SyntaxResult<SyntaxToken> {
+    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn or_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 1usize)
+    pub fn condition(&self) -> SyntaxResult<AnyCssMediaCondition> {
+        support::required_node(&self.syntax, 1usize)
     }
-    pub fn only_token(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, 2usize)
-    }
-    pub fn ty(&self) -> SyntaxResult<AnyCssMediaQueryType> {
-        support::required_node(&self.syntax, 3usize)
-    }
-    pub fn consequent(&self) -> Option<CssMediaQueryConsequent> {
-        support::node(&self.syntax, 4usize)
+    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
     }
 }
 #[cfg(feature = "serde")]
-impl Serialize for CssMediaQuery {
+impl Serialize for CssMediaConditionInParens {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
@@ -1682,18 +1756,16 @@ impl Serialize for CssMediaQuery {
     }
 }
 #[cfg_attr(feature = "serde", derive(Serialize))]
-pub struct CssMediaQueryFields {
-    pub condition_token: SyntaxResult<SyntaxToken>,
-    pub or_token: SyntaxResult<SyntaxToken>,
-    pub only_token: Option<SyntaxToken>,
-    pub ty: SyntaxResult<AnyCssMediaQueryType>,
-    pub consequent: Option<CssMediaQueryConsequent>,
+pub struct CssMediaConditionInParensFields {
+    pub l_paren_token: SyntaxResult<SyntaxToken>,
+    pub condition: SyntaxResult<AnyCssMediaCondition>,
+    pub r_paren_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub struct CssMediaQueryConsequent {
+pub struct CssMediaConditionQuery {
     pub(crate) syntax: SyntaxNode,
 }
-impl CssMediaQueryConsequent {
+impl CssMediaConditionQuery {
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -1703,25 +1775,17 @@ impl CssMediaQueryConsequent {
     pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
         Self { syntax }
     }
-    pub fn as_fields(&self) -> CssMediaQueryConsequentFields {
-        CssMediaQueryConsequentFields {
-            and_token: self.and_token(),
-            condition_token: self.condition_token(),
-            ty: self.ty(),
+    pub fn as_fields(&self) -> CssMediaConditionQueryFields {
+        CssMediaConditionQueryFields {
+            condition: self.condition(),
         }
     }
-    pub fn and_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
-    }
-    pub fn condition_token(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, 1usize)
-    }
-    pub fn ty(&self) -> SyntaxResult<AnyCssMediaQueryType> {
-        support::required_node(&self.syntax, 2usize)
+    pub fn condition(&self) -> SyntaxResult<AnyCssMediaCondition> {
+        support::required_node(&self.syntax, 0usize)
     }
 }
 #[cfg(feature = "serde")]
-impl Serialize for CssMediaQueryConsequent {
+impl Serialize for CssMediaConditionQuery {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
@@ -1730,16 +1794,14 @@ impl Serialize for CssMediaQueryConsequent {
     }
 }
 #[cfg_attr(feature = "serde", derive(Serialize))]
-pub struct CssMediaQueryConsequentFields {
-    pub and_token: SyntaxResult<SyntaxToken>,
-    pub condition_token: Option<SyntaxToken>,
-    pub ty: SyntaxResult<AnyCssMediaQueryType>,
+pub struct CssMediaConditionQueryFields {
+    pub condition: SyntaxResult<AnyCssMediaCondition>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub struct CssMediaQueryFeature {
+pub struct CssMediaFeatureInParens {
     pub(crate) syntax: SyntaxNode,
 }
-impl CssMediaQueryFeature {
+impl CssMediaFeatureInParens {
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -1749,8 +1811,8 @@ impl CssMediaQueryFeature {
     pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
         Self { syntax }
     }
-    pub fn as_fields(&self) -> CssMediaQueryFeatureFields {
-        CssMediaQueryFeatureFields {
+    pub fn as_fields(&self) -> CssMediaFeatureInParensFields {
+        CssMediaFeatureInParensFields {
             l_paren_token: self.l_paren_token(),
             feature: self.feature(),
             r_paren_token: self.r_paren_token(),
@@ -1759,7 +1821,7 @@ impl CssMediaQueryFeature {
     pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn feature(&self) -> SyntaxResult<AnyCssMediaQueryFeatureType> {
+    pub fn feature(&self) -> SyntaxResult<AnyCssQueryFeature> {
         support::required_node(&self.syntax, 1usize)
     }
     pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
@@ -1767,7 +1829,7 @@ impl CssMediaQueryFeature {
     }
 }
 #[cfg(feature = "serde")]
-impl Serialize for CssMediaQueryFeature {
+impl Serialize for CssMediaFeatureInParens {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
@@ -1776,16 +1838,16 @@ impl Serialize for CssMediaQueryFeature {
     }
 }
 #[cfg_attr(feature = "serde", derive(Serialize))]
-pub struct CssMediaQueryFeatureFields {
+pub struct CssMediaFeatureInParensFields {
     pub l_paren_token: SyntaxResult<SyntaxToken>,
-    pub feature: SyntaxResult<AnyCssMediaQueryFeatureType>,
+    pub feature: SyntaxResult<AnyCssQueryFeature>,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub struct CssMediaQueryFeatureBoolean {
+pub struct CssMediaNotCondition {
     pub(crate) syntax: SyntaxNode,
 }
-impl CssMediaQueryFeatureBoolean {
+impl CssMediaNotCondition {
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -1795,213 +1857,21 @@ impl CssMediaQueryFeatureBoolean {
     pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
         Self { syntax }
     }
-    pub fn as_fields(&self) -> CssMediaQueryFeatureBooleanFields {
-        CssMediaQueryFeatureBooleanFields {
-            css_identifier: self.css_identifier(),
+    pub fn as_fields(&self) -> CssMediaNotConditionFields {
+        CssMediaNotConditionFields {
+            not_token: self.not_token(),
+            condition: self.condition(),
         }
     }
-    pub fn css_identifier(&self) -> SyntaxResult<CssIdentifier> {
-        support::required_node(&self.syntax, 0usize)
-    }
-}
-#[cfg(feature = "serde")]
-impl Serialize for CssMediaQueryFeatureBoolean {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[cfg_attr(feature = "serde", derive(Serialize))]
-pub struct CssMediaQueryFeatureBooleanFields {
-    pub css_identifier: SyntaxResult<CssIdentifier>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
-pub struct CssMediaQueryFeatureCompare {
-    pub(crate) syntax: SyntaxNode,
-}
-impl CssMediaQueryFeatureCompare {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> CssMediaQueryFeatureCompareFields {
-        CssMediaQueryFeatureCompareFields {
-            name: self.name(),
-            range: self.range(),
-            value: self.value(),
-        }
-    }
-    pub fn name(&self) -> SyntaxResult<CssIdentifier> {
-        support::required_node(&self.syntax, 0usize)
-    }
-    pub fn range(&self) -> SyntaxResult<CssMediaQueryRange> {
-        support::required_node(&self.syntax, 1usize)
-    }
-    pub fn value(&self) -> SyntaxResult<AnyCssValue> {
-        support::required_node(&self.syntax, 2usize)
-    }
-}
-#[cfg(feature = "serde")]
-impl Serialize for CssMediaQueryFeatureCompare {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[cfg_attr(feature = "serde", derive(Serialize))]
-pub struct CssMediaQueryFeatureCompareFields {
-    pub name: SyntaxResult<CssIdentifier>,
-    pub range: SyntaxResult<CssMediaQueryRange>,
-    pub value: SyntaxResult<AnyCssValue>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
-pub struct CssMediaQueryFeaturePlain {
-    pub(crate) syntax: SyntaxNode,
-}
-impl CssMediaQueryFeaturePlain {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> CssMediaQueryFeaturePlainFields {
-        CssMediaQueryFeaturePlainFields {
-            name: self.name(),
-            colon_token: self.colon_token(),
-            value: self.value(),
-        }
-    }
-    pub fn name(&self) -> SyntaxResult<CssIdentifier> {
-        support::required_node(&self.syntax, 0usize)
-    }
-    pub fn colon_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 1usize)
-    }
-    pub fn value(&self) -> SyntaxResult<AnyCssValue> {
-        support::required_node(&self.syntax, 2usize)
-    }
-}
-#[cfg(feature = "serde")]
-impl Serialize for CssMediaQueryFeaturePlain {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[cfg_attr(feature = "serde", derive(Serialize))]
-pub struct CssMediaQueryFeaturePlainFields {
-    pub name: SyntaxResult<CssIdentifier>,
-    pub colon_token: SyntaxResult<SyntaxToken>,
-    pub value: SyntaxResult<AnyCssValue>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
-pub struct CssMediaQueryFeatureRange {
-    pub(crate) syntax: SyntaxNode,
-}
-impl CssMediaQueryFeatureRange {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> CssMediaQueryFeatureRangeFields {
-        CssMediaQueryFeatureRangeFields {
-            first_value: self.first_value(),
-            first_range: self.first_range(),
-            name: self.name(),
-            second_value: self.second_value(),
-            second_range: self.second_range(),
-        }
-    }
-    pub fn first_value(&self) -> SyntaxResult<AnyCssValue> {
-        support::required_node(&self.syntax, 0usize)
-    }
-    pub fn first_range(&self) -> SyntaxResult<CssMediaQueryRange> {
-        support::required_node(&self.syntax, 1usize)
-    }
-    pub fn name(&self) -> SyntaxResult<CssIdentifier> {
-        support::required_node(&self.syntax, 2usize)
-    }
-    pub fn second_value(&self) -> SyntaxResult<AnyCssValue> {
-        support::required_node(&self.syntax, 3usize)
-    }
-    pub fn second_range(&self) -> SyntaxResult<CssMediaQueryRange> {
-        support::required_node(&self.syntax, 4usize)
-    }
-}
-#[cfg(feature = "serde")]
-impl Serialize for CssMediaQueryFeatureRange {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[cfg_attr(feature = "serde", derive(Serialize))]
-pub struct CssMediaQueryFeatureRangeFields {
-    pub first_value: SyntaxResult<AnyCssValue>,
-    pub first_range: SyntaxResult<CssMediaQueryRange>,
-    pub name: SyntaxResult<CssIdentifier>,
-    pub second_value: SyntaxResult<AnyCssValue>,
-    pub second_range: SyntaxResult<CssMediaQueryRange>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
-pub struct CssMediaQueryRange {
-    pub(crate) syntax: SyntaxNode,
-}
-impl CssMediaQueryRange {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> CssMediaQueryRangeFields {
-        CssMediaQueryRangeFields {
-            r_angle_token: self.r_angle_token(),
-            l_angle_token: self.l_angle_token(),
-            greater_than_equal_token: self.greater_than_equal_token(),
-            less_than_equal_token: self.less_than_equal_token(),
-        }
-    }
-    pub fn r_angle_token(&self) -> SyntaxResult<SyntaxToken> {
+    pub fn not_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn l_angle_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 1usize)
-    }
-    pub fn greater_than_equal_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 2usize)
-    }
-    pub fn less_than_equal_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 3usize)
+    pub fn condition(&self) -> SyntaxResult<AnyCssMediaInParens> {
+        support::required_node(&self.syntax, 1usize)
     }
 }
 #[cfg(feature = "serde")]
-impl Serialize for CssMediaQueryRange {
+impl Serialize for CssMediaNotCondition {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
@@ -2010,11 +1880,132 @@ impl Serialize for CssMediaQueryRange {
     }
 }
 #[cfg_attr(feature = "serde", derive(Serialize))]
-pub struct CssMediaQueryRangeFields {
-    pub r_angle_token: SyntaxResult<SyntaxToken>,
-    pub l_angle_token: SyntaxResult<SyntaxToken>,
-    pub greater_than_equal_token: SyntaxResult<SyntaxToken>,
-    pub less_than_equal_token: SyntaxResult<SyntaxToken>,
+pub struct CssMediaNotConditionFields {
+    pub not_token: SyntaxResult<SyntaxToken>,
+    pub condition: SyntaxResult<AnyCssMediaInParens>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssMediaOrCondition {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssMediaOrCondition {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssMediaOrConditionFields {
+        CssMediaOrConditionFields {
+            left: self.left(),
+            or_token: self.or_token(),
+            right: self.right(),
+        }
+    }
+    pub fn left(&self) -> SyntaxResult<AnyCssMediaInParens> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn or_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn right(&self) -> SyntaxResult<AnyCssMediaOrCombinableCondition> {
+        support::required_node(&self.syntax, 2usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssMediaOrCondition {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssMediaOrConditionFields {
+    pub left: SyntaxResult<AnyCssMediaInParens>,
+    pub or_token: SyntaxResult<SyntaxToken>,
+    pub right: SyntaxResult<AnyCssMediaOrCombinableCondition>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssMediaType {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssMediaType {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssMediaTypeFields {
+        CssMediaTypeFields {
+            value: self.value(),
+        }
+    }
+    pub fn value(&self) -> SyntaxResult<CssIdentifier> {
+        support::required_node(&self.syntax, 0usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssMediaType {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssMediaTypeFields {
+    pub value: SyntaxResult<CssIdentifier>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssMediaTypeQuery {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssMediaTypeQuery {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssMediaTypeQueryFields {
+        CssMediaTypeQueryFields {
+            modifier: self.modifier(),
+            ty: self.ty(),
+        }
+    }
+    pub fn modifier(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 0usize)
+    }
+    pub fn ty(&self) -> SyntaxResult<CssMediaType> {
+        support::required_node(&self.syntax, 1usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssMediaTypeQuery {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssMediaTypeQueryFields {
+    pub modifier: Option<SyntaxToken>,
+    pub ty: SyntaxResult<CssMediaType>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssNamedNamespacePrefix {
@@ -3157,6 +3148,270 @@ pub struct CssPseudoElementSelectorFields {
     pub element: SyntaxResult<AnyCssPseudoElement>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssQueryFeatureBoolean {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssQueryFeatureBoolean {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssQueryFeatureBooleanFields {
+        CssQueryFeatureBooleanFields { name: self.name() }
+    }
+    pub fn name(&self) -> SyntaxResult<CssIdentifier> {
+        support::required_node(&self.syntax, 0usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssQueryFeatureBoolean {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssQueryFeatureBooleanFields {
+    pub name: SyntaxResult<CssIdentifier>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssQueryFeaturePlain {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssQueryFeaturePlain {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssQueryFeaturePlainFields {
+        CssQueryFeaturePlainFields {
+            name: self.name(),
+            colon_token: self.colon_token(),
+            value: self.value(),
+        }
+    }
+    pub fn name(&self) -> SyntaxResult<CssIdentifier> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn colon_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn value(&self) -> SyntaxResult<AnyCssQueryFeatureValue> {
+        support::required_node(&self.syntax, 2usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssQueryFeaturePlain {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssQueryFeaturePlainFields {
+    pub name: SyntaxResult<CssIdentifier>,
+    pub colon_token: SyntaxResult<SyntaxToken>,
+    pub value: SyntaxResult<AnyCssQueryFeatureValue>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssQueryFeatureRange {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssQueryFeatureRange {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssQueryFeatureRangeFields {
+        CssQueryFeatureRangeFields {
+            left: self.left(),
+            comparison: self.comparison(),
+            right: self.right(),
+        }
+    }
+    pub fn left(&self) -> SyntaxResult<CssIdentifier> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn comparison(&self) -> SyntaxResult<CssQueryFeatureRangeComparison> {
+        support::required_node(&self.syntax, 1usize)
+    }
+    pub fn right(&self) -> SyntaxResult<AnyCssQueryFeatureValue> {
+        support::required_node(&self.syntax, 2usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssQueryFeatureRange {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssQueryFeatureRangeFields {
+    pub left: SyntaxResult<CssIdentifier>,
+    pub comparison: SyntaxResult<CssQueryFeatureRangeComparison>,
+    pub right: SyntaxResult<AnyCssQueryFeatureValue>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssQueryFeatureRangeComparison {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssQueryFeatureRangeComparison {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssQueryFeatureRangeComparisonFields {
+        CssQueryFeatureRangeComparisonFields {
+            operator: self.operator(),
+        }
+    }
+    pub fn operator(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssQueryFeatureRangeComparison {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssQueryFeatureRangeComparisonFields {
+    pub operator: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssQueryFeatureRangeInterval {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssQueryFeatureRangeInterval {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssQueryFeatureRangeIntervalFields {
+        CssQueryFeatureRangeIntervalFields {
+            left: self.left(),
+            left_comparison: self.left_comparison(),
+            name: self.name(),
+            right_comparison: self.right_comparison(),
+            right: self.right(),
+        }
+    }
+    pub fn left(&self) -> SyntaxResult<AnyCssQueryFeatureValue> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn left_comparison(&self) -> SyntaxResult<CssQueryFeatureRangeComparison> {
+        support::required_node(&self.syntax, 1usize)
+    }
+    pub fn name(&self) -> SyntaxResult<CssIdentifier> {
+        support::required_node(&self.syntax, 2usize)
+    }
+    pub fn right_comparison(&self) -> SyntaxResult<CssQueryFeatureRangeComparison> {
+        support::required_node(&self.syntax, 3usize)
+    }
+    pub fn right(&self) -> SyntaxResult<AnyCssQueryFeatureValue> {
+        support::required_node(&self.syntax, 4usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssQueryFeatureRangeInterval {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssQueryFeatureRangeIntervalFields {
+    pub left: SyntaxResult<AnyCssQueryFeatureValue>,
+    pub left_comparison: SyntaxResult<CssQueryFeatureRangeComparison>,
+    pub name: SyntaxResult<CssIdentifier>,
+    pub right_comparison: SyntaxResult<CssQueryFeatureRangeComparison>,
+    pub right: SyntaxResult<AnyCssQueryFeatureValue>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssQueryFeatureReverseRange {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssQueryFeatureReverseRange {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssQueryFeatureReverseRangeFields {
+        CssQueryFeatureReverseRangeFields {
+            left: self.left(),
+            comparison: self.comparison(),
+            right: self.right(),
+        }
+    }
+    pub fn left(&self) -> SyntaxResult<AnyCssQueryFeatureValue> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn comparison(&self) -> SyntaxResult<CssQueryFeatureRangeComparison> {
+        support::required_node(&self.syntax, 1usize)
+    }
+    pub fn right(&self) -> SyntaxResult<CssIdentifier> {
+        support::required_node(&self.syntax, 2usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssQueryFeatureReverseRange {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssQueryFeatureReverseRangeFields {
+    pub left: SyntaxResult<AnyCssQueryFeatureValue>,
+    pub comparison: SyntaxResult<CssQueryFeatureRangeComparison>,
+    pub right: SyntaxResult<CssIdentifier>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssRatio {
     pub(crate) syntax: SyntaxNode,
 }
@@ -3421,224 +3676,6 @@ pub struct CssSimpleFunctionFields {
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub items: CssParameterList,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
-pub struct CssSizeFeatureBoolean {
-    pub(crate) syntax: SyntaxNode,
-}
-impl CssSizeFeatureBoolean {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> CssSizeFeatureBooleanFields {
-        CssSizeFeatureBooleanFields { name: self.name() }
-    }
-    pub fn name(&self) -> SyntaxResult<CssIdentifier> {
-        support::required_node(&self.syntax, 0usize)
-    }
-}
-#[cfg(feature = "serde")]
-impl Serialize for CssSizeFeatureBoolean {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[cfg_attr(feature = "serde", derive(Serialize))]
-pub struct CssSizeFeatureBooleanFields {
-    pub name: SyntaxResult<CssIdentifier>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
-pub struct CssSizeFeaturePlain {
-    pub(crate) syntax: SyntaxNode,
-}
-impl CssSizeFeaturePlain {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> CssSizeFeaturePlainFields {
-        CssSizeFeaturePlainFields {
-            name: self.name(),
-            colon_token: self.colon_token(),
-            value: self.value(),
-        }
-    }
-    pub fn name(&self) -> SyntaxResult<CssIdentifier> {
-        support::required_node(&self.syntax, 0usize)
-    }
-    pub fn colon_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 1usize)
-    }
-    pub fn value(&self) -> SyntaxResult<AnyCssSizeFeatureValue> {
-        support::required_node(&self.syntax, 2usize)
-    }
-}
-#[cfg(feature = "serde")]
-impl Serialize for CssSizeFeaturePlain {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[cfg_attr(feature = "serde", derive(Serialize))]
-pub struct CssSizeFeaturePlainFields {
-    pub name: SyntaxResult<CssIdentifier>,
-    pub colon_token: SyntaxResult<SyntaxToken>,
-    pub value: SyntaxResult<AnyCssSizeFeatureValue>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
-pub struct CssSizeFeatureRange {
-    pub(crate) syntax: SyntaxNode,
-}
-impl CssSizeFeatureRange {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> CssSizeFeatureRangeFields {
-        CssSizeFeatureRangeFields {
-            left: self.left(),
-            comparison: self.comparison(),
-            right: self.right(),
-        }
-    }
-    pub fn left(&self) -> SyntaxResult<CssIdentifier> {
-        support::required_node(&self.syntax, 0usize)
-    }
-    pub fn comparison(&self) -> SyntaxResult<CssSizeFeatureRangeComparison> {
-        support::required_node(&self.syntax, 1usize)
-    }
-    pub fn right(&self) -> SyntaxResult<AnyCssSizeFeatureValue> {
-        support::required_node(&self.syntax, 2usize)
-    }
-}
-#[cfg(feature = "serde")]
-impl Serialize for CssSizeFeatureRange {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[cfg_attr(feature = "serde", derive(Serialize))]
-pub struct CssSizeFeatureRangeFields {
-    pub left: SyntaxResult<CssIdentifier>,
-    pub comparison: SyntaxResult<CssSizeFeatureRangeComparison>,
-    pub right: SyntaxResult<AnyCssSizeFeatureValue>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
-pub struct CssSizeFeatureRangeComparison {
-    pub(crate) syntax: SyntaxNode,
-}
-impl CssSizeFeatureRangeComparison {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> CssSizeFeatureRangeComparisonFields {
-        CssSizeFeatureRangeComparisonFields {
-            operator: self.operator(),
-        }
-    }
-    pub fn operator(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
-    }
-}
-#[cfg(feature = "serde")]
-impl Serialize for CssSizeFeatureRangeComparison {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[cfg_attr(feature = "serde", derive(Serialize))]
-pub struct CssSizeFeatureRangeComparisonFields {
-    pub operator: SyntaxResult<SyntaxToken>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
-pub struct CssSizeFeatureRangeInterval {
-    pub(crate) syntax: SyntaxNode,
-}
-impl CssSizeFeatureRangeInterval {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> CssSizeFeatureRangeIntervalFields {
-        CssSizeFeatureRangeIntervalFields {
-            left: self.left(),
-            left_comparison: self.left_comparison(),
-            name: self.name(),
-            right_comparison: self.right_comparison(),
-            right: self.right(),
-        }
-    }
-    pub fn left(&self) -> SyntaxResult<AnyCssSizeFeatureValue> {
-        support::required_node(&self.syntax, 0usize)
-    }
-    pub fn left_comparison(&self) -> SyntaxResult<CssSizeFeatureRangeComparison> {
-        support::required_node(&self.syntax, 1usize)
-    }
-    pub fn name(&self) -> SyntaxResult<CssIdentifier> {
-        support::required_node(&self.syntax, 2usize)
-    }
-    pub fn right_comparison(&self) -> SyntaxResult<CssSizeFeatureRangeComparison> {
-        support::required_node(&self.syntax, 3usize)
-    }
-    pub fn right(&self) -> SyntaxResult<AnyCssSizeFeatureValue> {
-        support::required_node(&self.syntax, 4usize)
-    }
-}
-#[cfg(feature = "serde")]
-impl Serialize for CssSizeFeatureRangeInterval {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[cfg_attr(feature = "serde", derive(Serialize))]
-pub struct CssSizeFeatureRangeIntervalFields {
-    pub left: SyntaxResult<AnyCssSizeFeatureValue>,
-    pub left_comparison: SyntaxResult<CssSizeFeatureRangeComparison>,
-    pub name: SyntaxResult<CssIdentifier>,
-    pub right_comparison: SyntaxResult<CssSizeFeatureRangeComparison>,
-    pub right: SyntaxResult<AnyCssSizeFeatureValue>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssString {
@@ -4002,27 +4039,40 @@ impl AnyCssCompoundSelector {
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
-pub enum AnyCssContainerCombinableQuery {
+pub enum AnyCssContainerAndCombinableQuery {
     AnyCssContainerQueryInParens(AnyCssContainerQueryInParens),
     CssContainerAndQuery(CssContainerAndQuery),
-    CssContainerOrQuery(CssContainerOrQuery),
 }
-impl AnyCssContainerCombinableQuery {
+impl AnyCssContainerAndCombinableQuery {
     pub fn as_any_css_container_query_in_parens(&self) -> Option<&AnyCssContainerQueryInParens> {
         match &self {
-            AnyCssContainerCombinableQuery::AnyCssContainerQueryInParens(item) => Some(item),
+            AnyCssContainerAndCombinableQuery::AnyCssContainerQueryInParens(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_css_container_and_query(&self) -> Option<&CssContainerAndQuery> {
         match &self {
-            AnyCssContainerCombinableQuery::CssContainerAndQuery(item) => Some(item),
+            AnyCssContainerAndCombinableQuery::CssContainerAndQuery(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub enum AnyCssContainerOrCombinableQuery {
+    AnyCssContainerQueryInParens(AnyCssContainerQueryInParens),
+    CssContainerOrQuery(CssContainerOrQuery),
+}
+impl AnyCssContainerOrCombinableQuery {
+    pub fn as_any_css_container_query_in_parens(&self) -> Option<&AnyCssContainerQueryInParens> {
+        match &self {
+            AnyCssContainerOrCombinableQuery::AnyCssContainerQueryInParens(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_css_container_or_query(&self) -> Option<&CssContainerOrQuery> {
         match &self {
-            AnyCssContainerCombinableQuery::CssContainerOrQuery(item) => Some(item),
+            AnyCssContainerOrCombinableQuery::CssContainerOrQuery(item) => Some(item),
             _ => None,
         }
     }
@@ -4030,19 +4080,33 @@ impl AnyCssContainerCombinableQuery {
 #[derive(Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum AnyCssContainerQuery {
-    AnyCssContainerCombinableQuery(AnyCssContainerCombinableQuery),
+    AnyCssContainerQueryInParens(AnyCssContainerQueryInParens),
+    CssContainerAndQuery(CssContainerAndQuery),
     CssContainerNotQuery(CssContainerNotQuery),
+    CssContainerOrQuery(CssContainerOrQuery),
 }
 impl AnyCssContainerQuery {
-    pub fn as_any_css_container_combinable_query(&self) -> Option<&AnyCssContainerCombinableQuery> {
+    pub fn as_any_css_container_query_in_parens(&self) -> Option<&AnyCssContainerQueryInParens> {
         match &self {
-            AnyCssContainerQuery::AnyCssContainerCombinableQuery(item) => Some(item),
+            AnyCssContainerQuery::AnyCssContainerQueryInParens(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_container_and_query(&self) -> Option<&CssContainerAndQuery> {
+        match &self {
+            AnyCssContainerQuery::CssContainerAndQuery(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_css_container_not_query(&self) -> Option<&CssContainerNotQuery> {
         match &self {
             AnyCssContainerQuery::CssContainerNotQuery(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_container_or_query(&self) -> Option<&CssContainerOrQuery> {
+        match &self {
+            AnyCssContainerQuery::CssContainerOrQuery(item) => Some(item),
             _ => None,
         }
     }
@@ -4080,61 +4144,20 @@ impl AnyCssContainerQueryInParens {
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
-pub enum AnyCssContainerSizeFeature {
-    CssSizeFeatureBoolean(CssSizeFeatureBoolean),
-    CssSizeFeaturePlain(CssSizeFeaturePlain),
-    CssSizeFeatureRange(CssSizeFeatureRange),
-    CssSizeFeatureRangeInterval(CssSizeFeatureRangeInterval),
-}
-impl AnyCssContainerSizeFeature {
-    pub fn as_css_size_feature_boolean(&self) -> Option<&CssSizeFeatureBoolean> {
-        match &self {
-            AnyCssContainerSizeFeature::CssSizeFeatureBoolean(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_css_size_feature_plain(&self) -> Option<&CssSizeFeaturePlain> {
-        match &self {
-            AnyCssContainerSizeFeature::CssSizeFeaturePlain(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_css_size_feature_range(&self) -> Option<&CssSizeFeatureRange> {
-        match &self {
-            AnyCssContainerSizeFeature::CssSizeFeatureRange(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_css_size_feature_range_interval(&self) -> Option<&CssSizeFeatureRangeInterval> {
-        match &self {
-            AnyCssContainerSizeFeature::CssSizeFeatureRangeInterval(item) => Some(item),
-            _ => None,
-        }
-    }
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
-pub enum AnyCssContainerStyleCombinableQuery {
+pub enum AnyCssContainerStyleAndCombinableQuery {
     CssContainerStyleAndQuery(CssContainerStyleAndQuery),
     CssContainerStyleInParens(CssContainerStyleInParens),
-    CssContainerStyleOrQuery(CssContainerStyleOrQuery),
 }
-impl AnyCssContainerStyleCombinableQuery {
+impl AnyCssContainerStyleAndCombinableQuery {
     pub fn as_css_container_style_and_query(&self) -> Option<&CssContainerStyleAndQuery> {
         match &self {
-            AnyCssContainerStyleCombinableQuery::CssContainerStyleAndQuery(item) => Some(item),
+            AnyCssContainerStyleAndCombinableQuery::CssContainerStyleAndQuery(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_css_container_style_in_parens(&self) -> Option<&CssContainerStyleInParens> {
         match &self {
-            AnyCssContainerStyleCombinableQuery::CssContainerStyleInParens(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_css_container_style_or_query(&self) -> Option<&CssContainerStyleOrQuery> {
-        match &self {
-            AnyCssContainerStyleCombinableQuery::CssContainerStyleOrQuery(item) => Some(item),
+            AnyCssContainerStyleAndCombinableQuery::CssContainerStyleInParens(item) => Some(item),
             _ => None,
         }
     }
@@ -4161,23 +4184,55 @@ impl AnyCssContainerStyleInParens {
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
+pub enum AnyCssContainerStyleOrCombinableQuery {
+    CssContainerStyleInParens(CssContainerStyleInParens),
+    CssContainerStyleOrQuery(CssContainerStyleOrQuery),
+}
+impl AnyCssContainerStyleOrCombinableQuery {
+    pub fn as_css_container_style_in_parens(&self) -> Option<&CssContainerStyleInParens> {
+        match &self {
+            AnyCssContainerStyleOrCombinableQuery::CssContainerStyleInParens(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_container_style_or_query(&self) -> Option<&CssContainerStyleOrQuery> {
+        match &self {
+            AnyCssContainerStyleOrCombinableQuery::CssContainerStyleOrQuery(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum AnyCssContainerStyleQuery {
-    AnyCssContainerStyleCombinableQuery(AnyCssContainerStyleCombinableQuery),
+    CssContainerStyleAndQuery(CssContainerStyleAndQuery),
+    CssContainerStyleInParens(CssContainerStyleInParens),
     CssContainerStyleNotQuery(CssContainerStyleNotQuery),
+    CssContainerStyleOrQuery(CssContainerStyleOrQuery),
     CssDeclaration(CssDeclaration),
 }
 impl AnyCssContainerStyleQuery {
-    pub fn as_any_css_container_style_combinable_query(
-        &self,
-    ) -> Option<&AnyCssContainerStyleCombinableQuery> {
+    pub fn as_css_container_style_and_query(&self) -> Option<&CssContainerStyleAndQuery> {
         match &self {
-            AnyCssContainerStyleQuery::AnyCssContainerStyleCombinableQuery(item) => Some(item),
+            AnyCssContainerStyleQuery::CssContainerStyleAndQuery(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_container_style_in_parens(&self) -> Option<&CssContainerStyleInParens> {
+        match &self {
+            AnyCssContainerStyleQuery::CssContainerStyleInParens(item) => Some(item),
             _ => None,
         }
     }
     pub fn as_css_container_style_not_query(&self) -> Option<&CssContainerStyleNotQuery> {
         match &self {
             AnyCssContainerStyleQuery::CssContainerStyleNotQuery(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_container_style_or_query(&self) -> Option<&CssContainerStyleOrQuery> {
+        match &self {
+            AnyCssContainerStyleQuery::CssContainerStyleOrQuery(item) => Some(item),
             _ => None,
         }
     }
@@ -4230,54 +4285,168 @@ impl AnyCssDimension {
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
-pub enum AnyCssMediaQueryFeatureType {
-    CssMediaQueryFeatureBoolean(CssMediaQueryFeatureBoolean),
-    CssMediaQueryFeatureCompare(CssMediaQueryFeatureCompare),
-    CssMediaQueryFeaturePlain(CssMediaQueryFeaturePlain),
-    CssMediaQueryFeatureRange(CssMediaQueryFeatureRange),
+pub enum AnyCssMediaAndCombinableCondition {
+    AnyCssMediaInParens(AnyCssMediaInParens),
+    CssMediaAndCondition(CssMediaAndCondition),
 }
-impl AnyCssMediaQueryFeatureType {
-    pub fn as_css_media_query_feature_boolean(&self) -> Option<&CssMediaQueryFeatureBoolean> {
+impl AnyCssMediaAndCombinableCondition {
+    pub fn as_any_css_media_in_parens(&self) -> Option<&AnyCssMediaInParens> {
         match &self {
-            AnyCssMediaQueryFeatureType::CssMediaQueryFeatureBoolean(item) => Some(item),
+            AnyCssMediaAndCombinableCondition::AnyCssMediaInParens(item) => Some(item),
             _ => None,
         }
     }
-    pub fn as_css_media_query_feature_compare(&self) -> Option<&CssMediaQueryFeatureCompare> {
+    pub fn as_css_media_and_condition(&self) -> Option<&CssMediaAndCondition> {
         match &self {
-            AnyCssMediaQueryFeatureType::CssMediaQueryFeatureCompare(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_css_media_query_feature_plain(&self) -> Option<&CssMediaQueryFeaturePlain> {
-        match &self {
-            AnyCssMediaQueryFeatureType::CssMediaQueryFeaturePlain(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_css_media_query_feature_range(&self) -> Option<&CssMediaQueryFeatureRange> {
-        match &self {
-            AnyCssMediaQueryFeatureType::CssMediaQueryFeatureRange(item) => Some(item),
+            AnyCssMediaAndCombinableCondition::CssMediaAndCondition(item) => Some(item),
             _ => None,
         }
     }
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
-pub enum AnyCssMediaQueryType {
-    CssIdentifier(CssIdentifier),
-    CssMediaQueryFeature(CssMediaQueryFeature),
+pub enum AnyCssMediaCondition {
+    AnyCssMediaInParens(AnyCssMediaInParens),
+    CssMediaAndCondition(CssMediaAndCondition),
+    CssMediaNotCondition(CssMediaNotCondition),
+    CssMediaOrCondition(CssMediaOrCondition),
 }
-impl AnyCssMediaQueryType {
-    pub fn as_css_identifier(&self) -> Option<&CssIdentifier> {
+impl AnyCssMediaCondition {
+    pub fn as_any_css_media_in_parens(&self) -> Option<&AnyCssMediaInParens> {
         match &self {
-            AnyCssMediaQueryType::CssIdentifier(item) => Some(item),
+            AnyCssMediaCondition::AnyCssMediaInParens(item) => Some(item),
             _ => None,
         }
     }
-    pub fn as_css_media_query_feature(&self) -> Option<&CssMediaQueryFeature> {
+    pub fn as_css_media_and_condition(&self) -> Option<&CssMediaAndCondition> {
         match &self {
-            AnyCssMediaQueryType::CssMediaQueryFeature(item) => Some(item),
+            AnyCssMediaCondition::CssMediaAndCondition(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_media_not_condition(&self) -> Option<&CssMediaNotCondition> {
+        match &self {
+            AnyCssMediaCondition::CssMediaNotCondition(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_media_or_condition(&self) -> Option<&CssMediaOrCondition> {
+        match &self {
+            AnyCssMediaCondition::CssMediaOrCondition(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub enum AnyCssMediaInParens {
+    CssMediaConditionInParens(CssMediaConditionInParens),
+    CssMediaFeatureInParens(CssMediaFeatureInParens),
+}
+impl AnyCssMediaInParens {
+    pub fn as_css_media_condition_in_parens(&self) -> Option<&CssMediaConditionInParens> {
+        match &self {
+            AnyCssMediaInParens::CssMediaConditionInParens(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_media_feature_in_parens(&self) -> Option<&CssMediaFeatureInParens> {
+        match &self {
+            AnyCssMediaInParens::CssMediaFeatureInParens(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub enum AnyCssMediaOrCombinableCondition {
+    AnyCssMediaInParens(AnyCssMediaInParens),
+    CssMediaOrCondition(CssMediaOrCondition),
+}
+impl AnyCssMediaOrCombinableCondition {
+    pub fn as_any_css_media_in_parens(&self) -> Option<&AnyCssMediaInParens> {
+        match &self {
+            AnyCssMediaOrCombinableCondition::AnyCssMediaInParens(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_media_or_condition(&self) -> Option<&CssMediaOrCondition> {
+        match &self {
+            AnyCssMediaOrCombinableCondition::CssMediaOrCondition(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub enum AnyCssMediaQuery {
+    AnyCssMediaTypeQuery(AnyCssMediaTypeQuery),
+    CssBogusMediaQuery(CssBogusMediaQuery),
+    CssMediaConditionQuery(CssMediaConditionQuery),
+}
+impl AnyCssMediaQuery {
+    pub fn as_any_css_media_type_query(&self) -> Option<&AnyCssMediaTypeQuery> {
+        match &self {
+            AnyCssMediaQuery::AnyCssMediaTypeQuery(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_bogus_media_query(&self) -> Option<&CssBogusMediaQuery> {
+        match &self {
+            AnyCssMediaQuery::CssBogusMediaQuery(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_media_condition_query(&self) -> Option<&CssMediaConditionQuery> {
+        match &self {
+            AnyCssMediaQuery::CssMediaConditionQuery(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub enum AnyCssMediaTypeCondition {
+    AnyCssMediaInParens(AnyCssMediaInParens),
+    CssMediaAndCondition(CssMediaAndCondition),
+    CssMediaNotCondition(CssMediaNotCondition),
+}
+impl AnyCssMediaTypeCondition {
+    pub fn as_any_css_media_in_parens(&self) -> Option<&AnyCssMediaInParens> {
+        match &self {
+            AnyCssMediaTypeCondition::AnyCssMediaInParens(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_media_and_condition(&self) -> Option<&CssMediaAndCondition> {
+        match &self {
+            AnyCssMediaTypeCondition::CssMediaAndCondition(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_media_not_condition(&self) -> Option<&CssMediaNotCondition> {
+        match &self {
+            AnyCssMediaTypeCondition::CssMediaNotCondition(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub enum AnyCssMediaTypeQuery {
+    CssMediaAndTypeQuery(CssMediaAndTypeQuery),
+    CssMediaTypeQuery(CssMediaTypeQuery),
+}
+impl AnyCssMediaTypeQuery {
+    pub fn as_css_media_and_type_query(&self) -> Option<&CssMediaAndTypeQuery> {
+        match &self {
+            AnyCssMediaTypeQuery::CssMediaAndTypeQuery(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_media_type_query(&self) -> Option<&CssMediaTypeQuery> {
+        match &self {
+            AnyCssMediaTypeQuery::CssMediaTypeQuery(item) => Some(item),
             _ => None,
         }
     }
@@ -4497,6 +4666,88 @@ impl AnyCssPseudoValue {
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
+pub enum AnyCssQueryFeature {
+    CssQueryFeatureBoolean(CssQueryFeatureBoolean),
+    CssQueryFeaturePlain(CssQueryFeaturePlain),
+    CssQueryFeatureRange(CssQueryFeatureRange),
+    CssQueryFeatureRangeInterval(CssQueryFeatureRangeInterval),
+    CssQueryFeatureReverseRange(CssQueryFeatureReverseRange),
+}
+impl AnyCssQueryFeature {
+    pub fn as_css_query_feature_boolean(&self) -> Option<&CssQueryFeatureBoolean> {
+        match &self {
+            AnyCssQueryFeature::CssQueryFeatureBoolean(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_query_feature_plain(&self) -> Option<&CssQueryFeaturePlain> {
+        match &self {
+            AnyCssQueryFeature::CssQueryFeaturePlain(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_query_feature_range(&self) -> Option<&CssQueryFeatureRange> {
+        match &self {
+            AnyCssQueryFeature::CssQueryFeatureRange(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_query_feature_range_interval(&self) -> Option<&CssQueryFeatureRangeInterval> {
+        match &self {
+            AnyCssQueryFeature::CssQueryFeatureRangeInterval(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_query_feature_reverse_range(&self) -> Option<&CssQueryFeatureReverseRange> {
+        match &self {
+            AnyCssQueryFeature::CssQueryFeatureReverseRange(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub enum AnyCssQueryFeatureValue {
+    AnyCssDimension(AnyCssDimension),
+    CssAnyFunction(CssAnyFunction),
+    CssIdentifier(CssIdentifier),
+    CssNumber(CssNumber),
+    CssRatio(CssRatio),
+}
+impl AnyCssQueryFeatureValue {
+    pub fn as_any_css_dimension(&self) -> Option<&AnyCssDimension> {
+        match &self {
+            AnyCssQueryFeatureValue::AnyCssDimension(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_any_function(&self) -> Option<&CssAnyFunction> {
+        match &self {
+            AnyCssQueryFeatureValue::CssAnyFunction(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_identifier(&self) -> Option<&CssIdentifier> {
+        match &self {
+            AnyCssQueryFeatureValue::CssIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_number(&self) -> Option<&CssNumber> {
+        match &self {
+            AnyCssQueryFeatureValue::CssNumber(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_ratio(&self) -> Option<&CssRatio> {
+        match &self {
+            AnyCssQueryFeatureValue::CssRatio(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum AnyCssRelativeSelector {
     CssBogusSelector(CssBogusSelector),
     CssRelativeSelector(CssRelativeSelector),
@@ -4585,47 +4836,6 @@ impl AnyCssSimpleSelector {
     pub fn as_css_universal_selector(&self) -> Option<&CssUniversalSelector> {
         match &self {
             AnyCssSimpleSelector::CssUniversalSelector(item) => Some(item),
-            _ => None,
-        }
-    }
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
-pub enum AnyCssSizeFeatureValue {
-    AnyCssDimension(AnyCssDimension),
-    CssAnyFunction(CssAnyFunction),
-    CssIdentifier(CssIdentifier),
-    CssNumber(CssNumber),
-    CssRatio(CssRatio),
-}
-impl AnyCssSizeFeatureValue {
-    pub fn as_any_css_dimension(&self) -> Option<&AnyCssDimension> {
-        match &self {
-            AnyCssSizeFeatureValue::AnyCssDimension(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_css_any_function(&self) -> Option<&CssAnyFunction> {
-        match &self {
-            AnyCssSizeFeatureValue::CssAnyFunction(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_css_identifier(&self) -> Option<&CssIdentifier> {
-        match &self {
-            AnyCssSizeFeatureValue::CssIdentifier(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_css_number(&self) -> Option<&CssNumber> {
-        match &self {
-            AnyCssSizeFeatureValue::CssNumber(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_css_ratio(&self) -> Option<&CssRatio> {
-        match &self {
-            AnyCssSizeFeatureValue::CssRatio(item) => Some(item),
             _ => None,
         }
     }
@@ -5477,7 +5687,7 @@ impl std::fmt::Debug for CssContainerSizeFeatureInParens {
                 "l_paren_token",
                 &support::DebugSyntaxResult(self.l_paren_token()),
             )
-            .field("query", &support::DebugSyntaxResult(self.query()))
+            .field("feature", &support::DebugSyntaxResult(self.feature()))
             .field(
                 "r_paren_token",
                 &support::DebugSyntaxResult(self.r_paren_token()),
@@ -6225,6 +6435,86 @@ impl From<CssKeyframesSelector> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for CssMediaAndCondition {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_MEDIA_AND_CONDITION as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_MEDIA_AND_CONDITION
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssMediaAndCondition {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssMediaAndCondition")
+            .field("left", &support::DebugSyntaxResult(self.left()))
+            .field("and_token", &support::DebugSyntaxResult(self.and_token()))
+            .field("right", &support::DebugSyntaxResult(self.right()))
+            .finish()
+    }
+}
+impl From<CssMediaAndCondition> for SyntaxNode {
+    fn from(n: CssMediaAndCondition) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssMediaAndCondition> for SyntaxElement {
+    fn from(n: CssMediaAndCondition) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssMediaAndTypeQuery {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_MEDIA_AND_TYPE_QUERY as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_MEDIA_AND_TYPE_QUERY
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssMediaAndTypeQuery {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssMediaAndTypeQuery")
+            .field("left", &support::DebugSyntaxResult(self.left()))
+            .field("and_token", &support::DebugSyntaxResult(self.and_token()))
+            .field("right", &support::DebugSyntaxResult(self.right()))
+            .finish()
+    }
+}
+impl From<CssMediaAndTypeQuery> for SyntaxNode {
+    fn from(n: CssMediaAndTypeQuery) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssMediaAndTypeQuery> for SyntaxElement {
+    fn from(n: CssMediaAndTypeQuery) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
 impl AstNode for CssMediaAtRule {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -6254,15 +6544,7 @@ impl std::fmt::Debug for CssMediaAtRule {
                 &support::DebugSyntaxResult(self.media_token()),
             )
             .field("query_list", &self.query_list())
-            .field(
-                "l_curly_token",
-                &support::DebugSyntaxResult(self.l_curly_token()),
-            )
-            .field("body", &support::DebugSyntaxResult(self.body()))
-            .field(
-                "r_curly_token",
-                &support::DebugSyntaxResult(self.r_curly_token()),
-            )
+            .field("block", &support::DebugSyntaxResult(self.block()))
             .finish()
     }
 }
@@ -6276,12 +6558,12 @@ impl From<CssMediaAtRule> for SyntaxElement {
         n.syntax.into()
     }
 }
-impl AstNode for CssMediaQuery {
+impl AstNode for CssMediaConditionInParens {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_MEDIA_QUERY as u16));
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_MEDIA_CONDITION_IN_PARENS as u16));
     fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_MEDIA_QUERY
+        kind == CSS_MEDIA_CONDITION_IN_PARENS
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
@@ -6297,42 +6579,37 @@ impl AstNode for CssMediaQuery {
         self.syntax
     }
 }
-impl std::fmt::Debug for CssMediaQuery {
+impl std::fmt::Debug for CssMediaConditionInParens {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssMediaQuery")
+        f.debug_struct("CssMediaConditionInParens")
             .field(
-                "condition_token",
-                &support::DebugSyntaxResult(self.condition_token()),
+                "l_paren_token",
+                &support::DebugSyntaxResult(self.l_paren_token()),
             )
-            .field("or_token", &support::DebugSyntaxResult(self.or_token()))
+            .field("condition", &support::DebugSyntaxResult(self.condition()))
             .field(
-                "only_token",
-                &support::DebugOptionalElement(self.only_token()),
-            )
-            .field("ty", &support::DebugSyntaxResult(self.ty()))
-            .field(
-                "consequent",
-                &support::DebugOptionalElement(self.consequent()),
+                "r_paren_token",
+                &support::DebugSyntaxResult(self.r_paren_token()),
             )
             .finish()
     }
 }
-impl From<CssMediaQuery> for SyntaxNode {
-    fn from(n: CssMediaQuery) -> SyntaxNode {
+impl From<CssMediaConditionInParens> for SyntaxNode {
+    fn from(n: CssMediaConditionInParens) -> SyntaxNode {
         n.syntax
     }
 }
-impl From<CssMediaQuery> for SyntaxElement {
-    fn from(n: CssMediaQuery) -> SyntaxElement {
+impl From<CssMediaConditionInParens> for SyntaxElement {
+    fn from(n: CssMediaConditionInParens) -> SyntaxElement {
         n.syntax.into()
     }
 }
-impl AstNode for CssMediaQueryConsequent {
+impl AstNode for CssMediaConditionQuery {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_MEDIA_QUERY_CONSEQUENT as u16));
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_MEDIA_CONDITION_QUERY as u16));
     fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_MEDIA_QUERY_CONSEQUENT
+        kind == CSS_MEDIA_CONDITION_QUERY
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
@@ -6348,34 +6625,29 @@ impl AstNode for CssMediaQueryConsequent {
         self.syntax
     }
 }
-impl std::fmt::Debug for CssMediaQueryConsequent {
+impl std::fmt::Debug for CssMediaConditionQuery {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssMediaQueryConsequent")
-            .field("and_token", &support::DebugSyntaxResult(self.and_token()))
-            .field(
-                "condition_token",
-                &support::DebugOptionalElement(self.condition_token()),
-            )
-            .field("ty", &support::DebugSyntaxResult(self.ty()))
+        f.debug_struct("CssMediaConditionQuery")
+            .field("condition", &support::DebugSyntaxResult(self.condition()))
             .finish()
     }
 }
-impl From<CssMediaQueryConsequent> for SyntaxNode {
-    fn from(n: CssMediaQueryConsequent) -> SyntaxNode {
+impl From<CssMediaConditionQuery> for SyntaxNode {
+    fn from(n: CssMediaConditionQuery) -> SyntaxNode {
         n.syntax
     }
 }
-impl From<CssMediaQueryConsequent> for SyntaxElement {
-    fn from(n: CssMediaQueryConsequent) -> SyntaxElement {
+impl From<CssMediaConditionQuery> for SyntaxElement {
+    fn from(n: CssMediaConditionQuery) -> SyntaxElement {
         n.syntax.into()
     }
 }
-impl AstNode for CssMediaQueryFeature {
+impl AstNode for CssMediaFeatureInParens {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_MEDIA_QUERY_FEATURE as u16));
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_MEDIA_FEATURE_IN_PARENS as u16));
     fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_MEDIA_QUERY_FEATURE
+        kind == CSS_MEDIA_FEATURE_IN_PARENS
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
@@ -6391,9 +6663,9 @@ impl AstNode for CssMediaQueryFeature {
         self.syntax
     }
 }
-impl std::fmt::Debug for CssMediaQueryFeature {
+impl std::fmt::Debug for CssMediaFeatureInParens {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssMediaQueryFeature")
+        f.debug_struct("CssMediaFeatureInParens")
             .field(
                 "l_paren_token",
                 &support::DebugSyntaxResult(self.l_paren_token()),
@@ -6406,22 +6678,22 @@ impl std::fmt::Debug for CssMediaQueryFeature {
             .finish()
     }
 }
-impl From<CssMediaQueryFeature> for SyntaxNode {
-    fn from(n: CssMediaQueryFeature) -> SyntaxNode {
+impl From<CssMediaFeatureInParens> for SyntaxNode {
+    fn from(n: CssMediaFeatureInParens) -> SyntaxNode {
         n.syntax
     }
 }
-impl From<CssMediaQueryFeature> for SyntaxElement {
-    fn from(n: CssMediaQueryFeature) -> SyntaxElement {
+impl From<CssMediaFeatureInParens> for SyntaxElement {
+    fn from(n: CssMediaFeatureInParens) -> SyntaxElement {
         n.syntax.into()
     }
 }
-impl AstNode for CssMediaQueryFeatureBoolean {
+impl AstNode for CssMediaNotCondition {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_MEDIA_QUERY_FEATURE_BOOLEAN as u16));
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_MEDIA_NOT_CONDITION as u16));
     fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_MEDIA_QUERY_FEATURE_BOOLEAN
+        kind == CSS_MEDIA_NOT_CONDITION
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
@@ -6437,32 +6709,30 @@ impl AstNode for CssMediaQueryFeatureBoolean {
         self.syntax
     }
 }
-impl std::fmt::Debug for CssMediaQueryFeatureBoolean {
+impl std::fmt::Debug for CssMediaNotCondition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssMediaQueryFeatureBoolean")
-            .field(
-                "css_identifier",
-                &support::DebugSyntaxResult(self.css_identifier()),
-            )
+        f.debug_struct("CssMediaNotCondition")
+            .field("not_token", &support::DebugSyntaxResult(self.not_token()))
+            .field("condition", &support::DebugSyntaxResult(self.condition()))
             .finish()
     }
 }
-impl From<CssMediaQueryFeatureBoolean> for SyntaxNode {
-    fn from(n: CssMediaQueryFeatureBoolean) -> SyntaxNode {
+impl From<CssMediaNotCondition> for SyntaxNode {
+    fn from(n: CssMediaNotCondition) -> SyntaxNode {
         n.syntax
     }
 }
-impl From<CssMediaQueryFeatureBoolean> for SyntaxElement {
-    fn from(n: CssMediaQueryFeatureBoolean) -> SyntaxElement {
+impl From<CssMediaNotCondition> for SyntaxElement {
+    fn from(n: CssMediaNotCondition) -> SyntaxElement {
         n.syntax.into()
     }
 }
-impl AstNode for CssMediaQueryFeatureCompare {
+impl AstNode for CssMediaOrCondition {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_MEDIA_QUERY_FEATURE_COMPARE as u16));
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_MEDIA_OR_CONDITION as u16));
     fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_MEDIA_QUERY_FEATURE_COMPARE
+        kind == CSS_MEDIA_OR_CONDITION
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
@@ -6478,31 +6748,69 @@ impl AstNode for CssMediaQueryFeatureCompare {
         self.syntax
     }
 }
-impl std::fmt::Debug for CssMediaQueryFeatureCompare {
+impl std::fmt::Debug for CssMediaOrCondition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssMediaQueryFeatureCompare")
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field("range", &support::DebugSyntaxResult(self.range()))
+        f.debug_struct("CssMediaOrCondition")
+            .field("left", &support::DebugSyntaxResult(self.left()))
+            .field("or_token", &support::DebugSyntaxResult(self.or_token()))
+            .field("right", &support::DebugSyntaxResult(self.right()))
+            .finish()
+    }
+}
+impl From<CssMediaOrCondition> for SyntaxNode {
+    fn from(n: CssMediaOrCondition) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssMediaOrCondition> for SyntaxElement {
+    fn from(n: CssMediaOrCondition) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssMediaType {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_MEDIA_TYPE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_MEDIA_TYPE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssMediaType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssMediaType")
             .field("value", &support::DebugSyntaxResult(self.value()))
             .finish()
     }
 }
-impl From<CssMediaQueryFeatureCompare> for SyntaxNode {
-    fn from(n: CssMediaQueryFeatureCompare) -> SyntaxNode {
+impl From<CssMediaType> for SyntaxNode {
+    fn from(n: CssMediaType) -> SyntaxNode {
         n.syntax
     }
 }
-impl From<CssMediaQueryFeatureCompare> for SyntaxElement {
-    fn from(n: CssMediaQueryFeatureCompare) -> SyntaxElement {
+impl From<CssMediaType> for SyntaxElement {
+    fn from(n: CssMediaType) -> SyntaxElement {
         n.syntax.into()
     }
 }
-impl AstNode for CssMediaQueryFeaturePlain {
+impl AstNode for CssMediaTypeQuery {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_MEDIA_QUERY_FEATURE_PLAIN as u16));
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_MEDIA_TYPE_QUERY as u16));
     fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_MEDIA_QUERY_FEATURE_PLAIN
+        kind == CSS_MEDIA_TYPE_QUERY
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
@@ -6518,132 +6826,21 @@ impl AstNode for CssMediaQueryFeaturePlain {
         self.syntax
     }
 }
-impl std::fmt::Debug for CssMediaQueryFeaturePlain {
+impl std::fmt::Debug for CssMediaTypeQuery {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssMediaQueryFeaturePlain")
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "colon_token",
-                &support::DebugSyntaxResult(self.colon_token()),
-            )
-            .field("value", &support::DebugSyntaxResult(self.value()))
+        f.debug_struct("CssMediaTypeQuery")
+            .field("modifier", &support::DebugOptionalElement(self.modifier()))
+            .field("ty", &support::DebugSyntaxResult(self.ty()))
             .finish()
     }
 }
-impl From<CssMediaQueryFeaturePlain> for SyntaxNode {
-    fn from(n: CssMediaQueryFeaturePlain) -> SyntaxNode {
+impl From<CssMediaTypeQuery> for SyntaxNode {
+    fn from(n: CssMediaTypeQuery) -> SyntaxNode {
         n.syntax
     }
 }
-impl From<CssMediaQueryFeaturePlain> for SyntaxElement {
-    fn from(n: CssMediaQueryFeaturePlain) -> SyntaxElement {
-        n.syntax.into()
-    }
-}
-impl AstNode for CssMediaQueryFeatureRange {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_MEDIA_QUERY_FEATURE_RANGE as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_MEDIA_QUERY_FEATURE_RANGE
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for CssMediaQueryFeatureRange {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssMediaQueryFeatureRange")
-            .field(
-                "first_value",
-                &support::DebugSyntaxResult(self.first_value()),
-            )
-            .field(
-                "first_range",
-                &support::DebugSyntaxResult(self.first_range()),
-            )
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "second_value",
-                &support::DebugSyntaxResult(self.second_value()),
-            )
-            .field(
-                "second_range",
-                &support::DebugSyntaxResult(self.second_range()),
-            )
-            .finish()
-    }
-}
-impl From<CssMediaQueryFeatureRange> for SyntaxNode {
-    fn from(n: CssMediaQueryFeatureRange) -> SyntaxNode {
-        n.syntax
-    }
-}
-impl From<CssMediaQueryFeatureRange> for SyntaxElement {
-    fn from(n: CssMediaQueryFeatureRange) -> SyntaxElement {
-        n.syntax.into()
-    }
-}
-impl AstNode for CssMediaQueryRange {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_MEDIA_QUERY_RANGE as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_MEDIA_QUERY_RANGE
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for CssMediaQueryRange {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssMediaQueryRange")
-            .field(
-                "r_angle_token",
-                &support::DebugSyntaxResult(self.r_angle_token()),
-            )
-            .field(
-                "l_angle_token",
-                &support::DebugSyntaxResult(self.l_angle_token()),
-            )
-            .field(
-                "greater_than_equal_token",
-                &support::DebugSyntaxResult(self.greater_than_equal_token()),
-            )
-            .field(
-                "less_than_equal_token",
-                &support::DebugSyntaxResult(self.less_than_equal_token()),
-            )
-            .finish()
-    }
-}
-impl From<CssMediaQueryRange> for SyntaxNode {
-    fn from(n: CssMediaQueryRange) -> SyntaxNode {
-        n.syntax
-    }
-}
-impl From<CssMediaQueryRange> for SyntaxElement {
-    fn from(n: CssMediaQueryRange) -> SyntaxElement {
+impl From<CssMediaTypeQuery> for SyntaxElement {
+    fn from(n: CssMediaTypeQuery) -> SyntaxElement {
         n.syntax.into()
     }
 }
@@ -7762,6 +7959,253 @@ impl From<CssPseudoElementSelector> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for CssQueryFeatureBoolean {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_QUERY_FEATURE_BOOLEAN as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_QUERY_FEATURE_BOOLEAN
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssQueryFeatureBoolean {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssQueryFeatureBoolean")
+            .field("name", &support::DebugSyntaxResult(self.name()))
+            .finish()
+    }
+}
+impl From<CssQueryFeatureBoolean> for SyntaxNode {
+    fn from(n: CssQueryFeatureBoolean) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssQueryFeatureBoolean> for SyntaxElement {
+    fn from(n: CssQueryFeatureBoolean) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssQueryFeaturePlain {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_QUERY_FEATURE_PLAIN as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_QUERY_FEATURE_PLAIN
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssQueryFeaturePlain {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssQueryFeaturePlain")
+            .field("name", &support::DebugSyntaxResult(self.name()))
+            .field(
+                "colon_token",
+                &support::DebugSyntaxResult(self.colon_token()),
+            )
+            .field("value", &support::DebugSyntaxResult(self.value()))
+            .finish()
+    }
+}
+impl From<CssQueryFeaturePlain> for SyntaxNode {
+    fn from(n: CssQueryFeaturePlain) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssQueryFeaturePlain> for SyntaxElement {
+    fn from(n: CssQueryFeaturePlain) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssQueryFeatureRange {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_QUERY_FEATURE_RANGE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_QUERY_FEATURE_RANGE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssQueryFeatureRange {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssQueryFeatureRange")
+            .field("left", &support::DebugSyntaxResult(self.left()))
+            .field("comparison", &support::DebugSyntaxResult(self.comparison()))
+            .field("right", &support::DebugSyntaxResult(self.right()))
+            .finish()
+    }
+}
+impl From<CssQueryFeatureRange> for SyntaxNode {
+    fn from(n: CssQueryFeatureRange) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssQueryFeatureRange> for SyntaxElement {
+    fn from(n: CssQueryFeatureRange) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssQueryFeatureRangeComparison {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_QUERY_FEATURE_RANGE_COMPARISON as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_QUERY_FEATURE_RANGE_COMPARISON
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssQueryFeatureRangeComparison {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssQueryFeatureRangeComparison")
+            .field("operator", &support::DebugSyntaxResult(self.operator()))
+            .finish()
+    }
+}
+impl From<CssQueryFeatureRangeComparison> for SyntaxNode {
+    fn from(n: CssQueryFeatureRangeComparison) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssQueryFeatureRangeComparison> for SyntaxElement {
+    fn from(n: CssQueryFeatureRangeComparison) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssQueryFeatureRangeInterval {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_QUERY_FEATURE_RANGE_INTERVAL as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_QUERY_FEATURE_RANGE_INTERVAL
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssQueryFeatureRangeInterval {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssQueryFeatureRangeInterval")
+            .field("left", &support::DebugSyntaxResult(self.left()))
+            .field(
+                "left_comparison",
+                &support::DebugSyntaxResult(self.left_comparison()),
+            )
+            .field("name", &support::DebugSyntaxResult(self.name()))
+            .field(
+                "right_comparison",
+                &support::DebugSyntaxResult(self.right_comparison()),
+            )
+            .field("right", &support::DebugSyntaxResult(self.right()))
+            .finish()
+    }
+}
+impl From<CssQueryFeatureRangeInterval> for SyntaxNode {
+    fn from(n: CssQueryFeatureRangeInterval) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssQueryFeatureRangeInterval> for SyntaxElement {
+    fn from(n: CssQueryFeatureRangeInterval) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssQueryFeatureReverseRange {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_QUERY_FEATURE_REVERSE_RANGE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_QUERY_FEATURE_REVERSE_RANGE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssQueryFeatureReverseRange {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssQueryFeatureReverseRange")
+            .field("left", &support::DebugSyntaxResult(self.left()))
+            .field("comparison", &support::DebugSyntaxResult(self.comparison()))
+            .field("right", &support::DebugSyntaxResult(self.right()))
+            .finish()
+    }
+}
+impl From<CssQueryFeatureReverseRange> for SyntaxNode {
+    fn from(n: CssQueryFeatureReverseRange) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssQueryFeatureReverseRange> for SyntaxElement {
+    fn from(n: CssQueryFeatureReverseRange) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
 impl AstNode for CssRatio {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -8015,213 +8459,6 @@ impl From<CssSimpleFunction> for SyntaxNode {
 }
 impl From<CssSimpleFunction> for SyntaxElement {
     fn from(n: CssSimpleFunction) -> SyntaxElement {
-        n.syntax.into()
-    }
-}
-impl AstNode for CssSizeFeatureBoolean {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_SIZE_FEATURE_BOOLEAN as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_SIZE_FEATURE_BOOLEAN
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for CssSizeFeatureBoolean {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssSizeFeatureBoolean")
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .finish()
-    }
-}
-impl From<CssSizeFeatureBoolean> for SyntaxNode {
-    fn from(n: CssSizeFeatureBoolean) -> SyntaxNode {
-        n.syntax
-    }
-}
-impl From<CssSizeFeatureBoolean> for SyntaxElement {
-    fn from(n: CssSizeFeatureBoolean) -> SyntaxElement {
-        n.syntax.into()
-    }
-}
-impl AstNode for CssSizeFeaturePlain {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_SIZE_FEATURE_PLAIN as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_SIZE_FEATURE_PLAIN
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for CssSizeFeaturePlain {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssSizeFeaturePlain")
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "colon_token",
-                &support::DebugSyntaxResult(self.colon_token()),
-            )
-            .field("value", &support::DebugSyntaxResult(self.value()))
-            .finish()
-    }
-}
-impl From<CssSizeFeaturePlain> for SyntaxNode {
-    fn from(n: CssSizeFeaturePlain) -> SyntaxNode {
-        n.syntax
-    }
-}
-impl From<CssSizeFeaturePlain> for SyntaxElement {
-    fn from(n: CssSizeFeaturePlain) -> SyntaxElement {
-        n.syntax.into()
-    }
-}
-impl AstNode for CssSizeFeatureRange {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_SIZE_FEATURE_RANGE as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_SIZE_FEATURE_RANGE
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for CssSizeFeatureRange {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssSizeFeatureRange")
-            .field("left", &support::DebugSyntaxResult(self.left()))
-            .field("comparison", &support::DebugSyntaxResult(self.comparison()))
-            .field("right", &support::DebugSyntaxResult(self.right()))
-            .finish()
-    }
-}
-impl From<CssSizeFeatureRange> for SyntaxNode {
-    fn from(n: CssSizeFeatureRange) -> SyntaxNode {
-        n.syntax
-    }
-}
-impl From<CssSizeFeatureRange> for SyntaxElement {
-    fn from(n: CssSizeFeatureRange) -> SyntaxElement {
-        n.syntax.into()
-    }
-}
-impl AstNode for CssSizeFeatureRangeComparison {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_SIZE_FEATURE_RANGE_COMPARISON as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_SIZE_FEATURE_RANGE_COMPARISON
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for CssSizeFeatureRangeComparison {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssSizeFeatureRangeComparison")
-            .field("operator", &support::DebugSyntaxResult(self.operator()))
-            .finish()
-    }
-}
-impl From<CssSizeFeatureRangeComparison> for SyntaxNode {
-    fn from(n: CssSizeFeatureRangeComparison) -> SyntaxNode {
-        n.syntax
-    }
-}
-impl From<CssSizeFeatureRangeComparison> for SyntaxElement {
-    fn from(n: CssSizeFeatureRangeComparison) -> SyntaxElement {
-        n.syntax.into()
-    }
-}
-impl AstNode for CssSizeFeatureRangeInterval {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_SIZE_FEATURE_RANGE_INTERVAL as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_SIZE_FEATURE_RANGE_INTERVAL
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for CssSizeFeatureRangeInterval {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssSizeFeatureRangeInterval")
-            .field("left", &support::DebugSyntaxResult(self.left()))
-            .field(
-                "left_comparison",
-                &support::DebugSyntaxResult(self.left_comparison()),
-            )
-            .field("name", &support::DebugSyntaxResult(self.name()))
-            .field(
-                "right_comparison",
-                &support::DebugSyntaxResult(self.right_comparison()),
-            )
-            .field("right", &support::DebugSyntaxResult(self.right()))
-            .finish()
-    }
-}
-impl From<CssSizeFeatureRangeInterval> for SyntaxNode {
-    fn from(n: CssSizeFeatureRangeInterval) -> SyntaxNode {
-        n.syntax
-    }
-}
-impl From<CssSizeFeatureRangeInterval> for SyntaxElement {
-    fn from(n: CssSizeFeatureRangeInterval) -> SyntaxElement {
         n.syntax.into()
     }
 }
@@ -8759,24 +8996,18 @@ impl From<AnyCssCompoundSelector> for SyntaxElement {
         node.into()
     }
 }
-impl From<CssContainerAndQuery> for AnyCssContainerCombinableQuery {
-    fn from(node: CssContainerAndQuery) -> AnyCssContainerCombinableQuery {
-        AnyCssContainerCombinableQuery::CssContainerAndQuery(node)
+impl From<CssContainerAndQuery> for AnyCssContainerAndCombinableQuery {
+    fn from(node: CssContainerAndQuery) -> AnyCssContainerAndCombinableQuery {
+        AnyCssContainerAndCombinableQuery::CssContainerAndQuery(node)
     }
 }
-impl From<CssContainerOrQuery> for AnyCssContainerCombinableQuery {
-    fn from(node: CssContainerOrQuery) -> AnyCssContainerCombinableQuery {
-        AnyCssContainerCombinableQuery::CssContainerOrQuery(node)
-    }
-}
-impl AstNode for AnyCssContainerCombinableQuery {
+impl AstNode for AnyCssContainerAndCombinableQuery {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = AnyCssContainerQueryInParens::KIND_SET
-        .union(CssContainerAndQuery::KIND_SET)
-        .union(CssContainerOrQuery::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> =
+        AnyCssContainerQueryInParens::KIND_SET.union(CssContainerAndQuery::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
-            CSS_CONTAINER_AND_QUERY | CSS_CONTAINER_OR_QUERY => true,
+            CSS_CONTAINER_AND_QUERY => true,
             k if AnyCssContainerQueryInParens::can_cast(k) => true,
             _ => false,
         }
@@ -8784,19 +9015,16 @@ impl AstNode for AnyCssContainerCombinableQuery {
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             CSS_CONTAINER_AND_QUERY => {
-                AnyCssContainerCombinableQuery::CssContainerAndQuery(CssContainerAndQuery {
+                AnyCssContainerAndCombinableQuery::CssContainerAndQuery(CssContainerAndQuery {
                     syntax,
                 })
-            }
-            CSS_CONTAINER_OR_QUERY => {
-                AnyCssContainerCombinableQuery::CssContainerOrQuery(CssContainerOrQuery { syntax })
             }
             _ => {
                 if let Some(any_css_container_query_in_parens) =
                     AnyCssContainerQueryInParens::cast(syntax)
                 {
                     return Some(
-                        AnyCssContainerCombinableQuery::AnyCssContainerQueryInParens(
+                        AnyCssContainerAndCombinableQuery::AnyCssContainerQueryInParens(
                             any_css_container_query_in_parens,
                         ),
                     );
@@ -8808,43 +9036,123 @@ impl AstNode for AnyCssContainerCombinableQuery {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyCssContainerCombinableQuery::CssContainerAndQuery(it) => &it.syntax,
-            AnyCssContainerCombinableQuery::CssContainerOrQuery(it) => &it.syntax,
-            AnyCssContainerCombinableQuery::AnyCssContainerQueryInParens(it) => it.syntax(),
+            AnyCssContainerAndCombinableQuery::CssContainerAndQuery(it) => &it.syntax,
+            AnyCssContainerAndCombinableQuery::AnyCssContainerQueryInParens(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyCssContainerCombinableQuery::CssContainerAndQuery(it) => it.syntax,
-            AnyCssContainerCombinableQuery::CssContainerOrQuery(it) => it.syntax,
-            AnyCssContainerCombinableQuery::AnyCssContainerQueryInParens(it) => it.into_syntax(),
+            AnyCssContainerAndCombinableQuery::CssContainerAndQuery(it) => it.syntax,
+            AnyCssContainerAndCombinableQuery::AnyCssContainerQueryInParens(it) => it.into_syntax(),
         }
     }
 }
-impl std::fmt::Debug for AnyCssContainerCombinableQuery {
+impl std::fmt::Debug for AnyCssContainerAndCombinableQuery {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyCssContainerCombinableQuery::AnyCssContainerQueryInParens(it) => {
+            AnyCssContainerAndCombinableQuery::AnyCssContainerQueryInParens(it) => {
                 std::fmt::Debug::fmt(it, f)
             }
-            AnyCssContainerCombinableQuery::CssContainerAndQuery(it) => std::fmt::Debug::fmt(it, f),
-            AnyCssContainerCombinableQuery::CssContainerOrQuery(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssContainerAndCombinableQuery::CssContainerAndQuery(it) => {
+                std::fmt::Debug::fmt(it, f)
+            }
         }
     }
 }
-impl From<AnyCssContainerCombinableQuery> for SyntaxNode {
-    fn from(n: AnyCssContainerCombinableQuery) -> SyntaxNode {
+impl From<AnyCssContainerAndCombinableQuery> for SyntaxNode {
+    fn from(n: AnyCssContainerAndCombinableQuery) -> SyntaxNode {
         match n {
-            AnyCssContainerCombinableQuery::AnyCssContainerQueryInParens(it) => it.into(),
-            AnyCssContainerCombinableQuery::CssContainerAndQuery(it) => it.into(),
-            AnyCssContainerCombinableQuery::CssContainerOrQuery(it) => it.into(),
+            AnyCssContainerAndCombinableQuery::AnyCssContainerQueryInParens(it) => it.into(),
+            AnyCssContainerAndCombinableQuery::CssContainerAndQuery(it) => it.into(),
         }
     }
 }
-impl From<AnyCssContainerCombinableQuery> for SyntaxElement {
-    fn from(n: AnyCssContainerCombinableQuery) -> SyntaxElement {
+impl From<AnyCssContainerAndCombinableQuery> for SyntaxElement {
+    fn from(n: AnyCssContainerAndCombinableQuery) -> SyntaxElement {
         let node: SyntaxNode = n.into();
         node.into()
+    }
+}
+impl From<CssContainerOrQuery> for AnyCssContainerOrCombinableQuery {
+    fn from(node: CssContainerOrQuery) -> AnyCssContainerOrCombinableQuery {
+        AnyCssContainerOrCombinableQuery::CssContainerOrQuery(node)
+    }
+}
+impl AstNode for AnyCssContainerOrCombinableQuery {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        AnyCssContainerQueryInParens::KIND_SET.union(CssContainerOrQuery::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        match kind {
+            CSS_CONTAINER_OR_QUERY => true,
+            k if AnyCssContainerQueryInParens::can_cast(k) => true,
+            _ => false,
+        }
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_CONTAINER_OR_QUERY => {
+                AnyCssContainerOrCombinableQuery::CssContainerOrQuery(CssContainerOrQuery {
+                    syntax,
+                })
+            }
+            _ => {
+                if let Some(any_css_container_query_in_parens) =
+                    AnyCssContainerQueryInParens::cast(syntax)
+                {
+                    return Some(
+                        AnyCssContainerOrCombinableQuery::AnyCssContainerQueryInParens(
+                            any_css_container_query_in_parens,
+                        ),
+                    );
+                }
+                return None;
+            }
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            AnyCssContainerOrCombinableQuery::CssContainerOrQuery(it) => &it.syntax,
+            AnyCssContainerOrCombinableQuery::AnyCssContainerQueryInParens(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            AnyCssContainerOrCombinableQuery::CssContainerOrQuery(it) => it.syntax,
+            AnyCssContainerOrCombinableQuery::AnyCssContainerQueryInParens(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssContainerOrCombinableQuery {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            AnyCssContainerOrCombinableQuery::AnyCssContainerQueryInParens(it) => {
+                std::fmt::Debug::fmt(it, f)
+            }
+            AnyCssContainerOrCombinableQuery::CssContainerOrQuery(it) => {
+                std::fmt::Debug::fmt(it, f)
+            }
+        }
+    }
+}
+impl From<AnyCssContainerOrCombinableQuery> for SyntaxNode {
+    fn from(n: AnyCssContainerOrCombinableQuery) -> SyntaxNode {
+        match n {
+            AnyCssContainerOrCombinableQuery::AnyCssContainerQueryInParens(it) => it.into(),
+            AnyCssContainerOrCombinableQuery::CssContainerOrQuery(it) => it.into(),
+        }
+    }
+}
+impl From<AnyCssContainerOrCombinableQuery> for SyntaxElement {
+    fn from(n: AnyCssContainerOrCombinableQuery) -> SyntaxElement {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<CssContainerAndQuery> for AnyCssContainerQuery {
+    fn from(node: CssContainerAndQuery) -> AnyCssContainerQuery {
+        AnyCssContainerQuery::CssContainerAndQuery(node)
     }
 }
 impl From<CssContainerNotQuery> for AnyCssContainerQuery {
@@ -8852,28 +9160,41 @@ impl From<CssContainerNotQuery> for AnyCssContainerQuery {
         AnyCssContainerQuery::CssContainerNotQuery(node)
     }
 }
+impl From<CssContainerOrQuery> for AnyCssContainerQuery {
+    fn from(node: CssContainerOrQuery) -> AnyCssContainerQuery {
+        AnyCssContainerQuery::CssContainerOrQuery(node)
+    }
+}
 impl AstNode for AnyCssContainerQuery {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        AnyCssContainerCombinableQuery::KIND_SET.union(CssContainerNotQuery::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> = AnyCssContainerQueryInParens::KIND_SET
+        .union(CssContainerAndQuery::KIND_SET)
+        .union(CssContainerNotQuery::KIND_SET)
+        .union(CssContainerOrQuery::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
-            CSS_CONTAINER_NOT_QUERY => true,
-            k if AnyCssContainerCombinableQuery::can_cast(k) => true,
+            CSS_CONTAINER_AND_QUERY | CSS_CONTAINER_NOT_QUERY | CSS_CONTAINER_OR_QUERY => true,
+            k if AnyCssContainerQueryInParens::can_cast(k) => true,
             _ => false,
         }
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
+            CSS_CONTAINER_AND_QUERY => {
+                AnyCssContainerQuery::CssContainerAndQuery(CssContainerAndQuery { syntax })
+            }
             CSS_CONTAINER_NOT_QUERY => {
                 AnyCssContainerQuery::CssContainerNotQuery(CssContainerNotQuery { syntax })
             }
+            CSS_CONTAINER_OR_QUERY => {
+                AnyCssContainerQuery::CssContainerOrQuery(CssContainerOrQuery { syntax })
+            }
             _ => {
-                if let Some(any_css_container_combinable_query) =
-                    AnyCssContainerCombinableQuery::cast(syntax)
+                if let Some(any_css_container_query_in_parens) =
+                    AnyCssContainerQueryInParens::cast(syntax)
                 {
-                    return Some(AnyCssContainerQuery::AnyCssContainerCombinableQuery(
-                        any_css_container_combinable_query,
+                    return Some(AnyCssContainerQuery::AnyCssContainerQueryInParens(
+                        any_css_container_query_in_parens,
                     ));
                 }
                 return None;
@@ -8883,30 +9204,38 @@ impl AstNode for AnyCssContainerQuery {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
+            AnyCssContainerQuery::CssContainerAndQuery(it) => &it.syntax,
             AnyCssContainerQuery::CssContainerNotQuery(it) => &it.syntax,
-            AnyCssContainerQuery::AnyCssContainerCombinableQuery(it) => it.syntax(),
+            AnyCssContainerQuery::CssContainerOrQuery(it) => &it.syntax,
+            AnyCssContainerQuery::AnyCssContainerQueryInParens(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
+            AnyCssContainerQuery::CssContainerAndQuery(it) => it.syntax,
             AnyCssContainerQuery::CssContainerNotQuery(it) => it.syntax,
-            AnyCssContainerQuery::AnyCssContainerCombinableQuery(it) => it.into_syntax(),
+            AnyCssContainerQuery::CssContainerOrQuery(it) => it.syntax,
+            AnyCssContainerQuery::AnyCssContainerQueryInParens(it) => it.into_syntax(),
         }
     }
 }
 impl std::fmt::Debug for AnyCssContainerQuery {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyCssContainerQuery::AnyCssContainerCombinableQuery(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssContainerQuery::AnyCssContainerQueryInParens(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssContainerQuery::CssContainerAndQuery(it) => std::fmt::Debug::fmt(it, f),
             AnyCssContainerQuery::CssContainerNotQuery(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssContainerQuery::CssContainerOrQuery(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
 impl From<AnyCssContainerQuery> for SyntaxNode {
     fn from(n: AnyCssContainerQuery) -> SyntaxNode {
         match n {
-            AnyCssContainerQuery::AnyCssContainerCombinableQuery(it) => it.into(),
+            AnyCssContainerQuery::AnyCssContainerQueryInParens(it) => it.into(),
+            AnyCssContainerQuery::CssContainerAndQuery(it) => it.into(),
             AnyCssContainerQuery::CssContainerNotQuery(it) => it.into(),
+            AnyCssContainerQuery::CssContainerOrQuery(it) => it.into(),
         }
     }
 }
@@ -9010,149 +9339,36 @@ impl From<AnyCssContainerQueryInParens> for SyntaxElement {
         node.into()
     }
 }
-impl From<CssSizeFeatureBoolean> for AnyCssContainerSizeFeature {
-    fn from(node: CssSizeFeatureBoolean) -> AnyCssContainerSizeFeature {
-        AnyCssContainerSizeFeature::CssSizeFeatureBoolean(node)
+impl From<CssContainerStyleAndQuery> for AnyCssContainerStyleAndCombinableQuery {
+    fn from(node: CssContainerStyleAndQuery) -> AnyCssContainerStyleAndCombinableQuery {
+        AnyCssContainerStyleAndCombinableQuery::CssContainerStyleAndQuery(node)
     }
 }
-impl From<CssSizeFeaturePlain> for AnyCssContainerSizeFeature {
-    fn from(node: CssSizeFeaturePlain) -> AnyCssContainerSizeFeature {
-        AnyCssContainerSizeFeature::CssSizeFeaturePlain(node)
+impl From<CssContainerStyleInParens> for AnyCssContainerStyleAndCombinableQuery {
+    fn from(node: CssContainerStyleInParens) -> AnyCssContainerStyleAndCombinableQuery {
+        AnyCssContainerStyleAndCombinableQuery::CssContainerStyleInParens(node)
     }
 }
-impl From<CssSizeFeatureRange> for AnyCssContainerSizeFeature {
-    fn from(node: CssSizeFeatureRange) -> AnyCssContainerSizeFeature {
-        AnyCssContainerSizeFeature::CssSizeFeatureRange(node)
-    }
-}
-impl From<CssSizeFeatureRangeInterval> for AnyCssContainerSizeFeature {
-    fn from(node: CssSizeFeatureRangeInterval) -> AnyCssContainerSizeFeature {
-        AnyCssContainerSizeFeature::CssSizeFeatureRangeInterval(node)
-    }
-}
-impl AstNode for AnyCssContainerSizeFeature {
+impl AstNode for AnyCssContainerStyleAndCombinableQuery {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = CssSizeFeatureBoolean::KIND_SET
-        .union(CssSizeFeaturePlain::KIND_SET)
-        .union(CssSizeFeatureRange::KIND_SET)
-        .union(CssSizeFeatureRangeInterval::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> =
+        CssContainerStyleAndQuery::KIND_SET.union(CssContainerStyleInParens::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            CSS_SIZE_FEATURE_BOOLEAN
-                | CSS_SIZE_FEATURE_PLAIN
-                | CSS_SIZE_FEATURE_RANGE
-                | CSS_SIZE_FEATURE_RANGE_INTERVAL
-        )
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        let res = match syntax.kind() {
-            CSS_SIZE_FEATURE_BOOLEAN => {
-                AnyCssContainerSizeFeature::CssSizeFeatureBoolean(CssSizeFeatureBoolean { syntax })
-            }
-            CSS_SIZE_FEATURE_PLAIN => {
-                AnyCssContainerSizeFeature::CssSizeFeaturePlain(CssSizeFeaturePlain { syntax })
-            }
-            CSS_SIZE_FEATURE_RANGE => {
-                AnyCssContainerSizeFeature::CssSizeFeatureRange(CssSizeFeatureRange { syntax })
-            }
-            CSS_SIZE_FEATURE_RANGE_INTERVAL => {
-                AnyCssContainerSizeFeature::CssSizeFeatureRangeInterval(
-                    CssSizeFeatureRangeInterval { syntax },
-                )
-            }
-            _ => return None,
-        };
-        Some(res)
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        match self {
-            AnyCssContainerSizeFeature::CssSizeFeatureBoolean(it) => &it.syntax,
-            AnyCssContainerSizeFeature::CssSizeFeaturePlain(it) => &it.syntax,
-            AnyCssContainerSizeFeature::CssSizeFeatureRange(it) => &it.syntax,
-            AnyCssContainerSizeFeature::CssSizeFeatureRangeInterval(it) => &it.syntax,
-        }
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        match self {
-            AnyCssContainerSizeFeature::CssSizeFeatureBoolean(it) => it.syntax,
-            AnyCssContainerSizeFeature::CssSizeFeaturePlain(it) => it.syntax,
-            AnyCssContainerSizeFeature::CssSizeFeatureRange(it) => it.syntax,
-            AnyCssContainerSizeFeature::CssSizeFeatureRangeInterval(it) => it.syntax,
-        }
-    }
-}
-impl std::fmt::Debug for AnyCssContainerSizeFeature {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            AnyCssContainerSizeFeature::CssSizeFeatureBoolean(it) => std::fmt::Debug::fmt(it, f),
-            AnyCssContainerSizeFeature::CssSizeFeaturePlain(it) => std::fmt::Debug::fmt(it, f),
-            AnyCssContainerSizeFeature::CssSizeFeatureRange(it) => std::fmt::Debug::fmt(it, f),
-            AnyCssContainerSizeFeature::CssSizeFeatureRangeInterval(it) => {
-                std::fmt::Debug::fmt(it, f)
-            }
-        }
-    }
-}
-impl From<AnyCssContainerSizeFeature> for SyntaxNode {
-    fn from(n: AnyCssContainerSizeFeature) -> SyntaxNode {
-        match n {
-            AnyCssContainerSizeFeature::CssSizeFeatureBoolean(it) => it.into(),
-            AnyCssContainerSizeFeature::CssSizeFeaturePlain(it) => it.into(),
-            AnyCssContainerSizeFeature::CssSizeFeatureRange(it) => it.into(),
-            AnyCssContainerSizeFeature::CssSizeFeatureRangeInterval(it) => it.into(),
-        }
-    }
-}
-impl From<AnyCssContainerSizeFeature> for SyntaxElement {
-    fn from(n: AnyCssContainerSizeFeature) -> SyntaxElement {
-        let node: SyntaxNode = n.into();
-        node.into()
-    }
-}
-impl From<CssContainerStyleAndQuery> for AnyCssContainerStyleCombinableQuery {
-    fn from(node: CssContainerStyleAndQuery) -> AnyCssContainerStyleCombinableQuery {
-        AnyCssContainerStyleCombinableQuery::CssContainerStyleAndQuery(node)
-    }
-}
-impl From<CssContainerStyleInParens> for AnyCssContainerStyleCombinableQuery {
-    fn from(node: CssContainerStyleInParens) -> AnyCssContainerStyleCombinableQuery {
-        AnyCssContainerStyleCombinableQuery::CssContainerStyleInParens(node)
-    }
-}
-impl From<CssContainerStyleOrQuery> for AnyCssContainerStyleCombinableQuery {
-    fn from(node: CssContainerStyleOrQuery) -> AnyCssContainerStyleCombinableQuery {
-        AnyCssContainerStyleCombinableQuery::CssContainerStyleOrQuery(node)
-    }
-}
-impl AstNode for AnyCssContainerStyleCombinableQuery {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = CssContainerStyleAndQuery::KIND_SET
-        .union(CssContainerStyleInParens::KIND_SET)
-        .union(CssContainerStyleOrQuery::KIND_SET);
-    fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(
-            kind,
-            CSS_CONTAINER_STYLE_AND_QUERY
-                | CSS_CONTAINER_STYLE_IN_PARENS
-                | CSS_CONTAINER_STYLE_OR_QUERY
+            CSS_CONTAINER_STYLE_AND_QUERY | CSS_CONTAINER_STYLE_IN_PARENS
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             CSS_CONTAINER_STYLE_AND_QUERY => {
-                AnyCssContainerStyleCombinableQuery::CssContainerStyleAndQuery(
+                AnyCssContainerStyleAndCombinableQuery::CssContainerStyleAndQuery(
                     CssContainerStyleAndQuery { syntax },
                 )
             }
             CSS_CONTAINER_STYLE_IN_PARENS => {
-                AnyCssContainerStyleCombinableQuery::CssContainerStyleInParens(
+                AnyCssContainerStyleAndCombinableQuery::CssContainerStyleInParens(
                     CssContainerStyleInParens { syntax },
-                )
-            }
-            CSS_CONTAINER_STYLE_OR_QUERY => {
-                AnyCssContainerStyleCombinableQuery::CssContainerStyleOrQuery(
-                    CssContainerStyleOrQuery { syntax },
                 )
             }
             _ => return None,
@@ -9161,45 +9377,39 @@ impl AstNode for AnyCssContainerStyleCombinableQuery {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyCssContainerStyleCombinableQuery::CssContainerStyleAndQuery(it) => &it.syntax,
-            AnyCssContainerStyleCombinableQuery::CssContainerStyleInParens(it) => &it.syntax,
-            AnyCssContainerStyleCombinableQuery::CssContainerStyleOrQuery(it) => &it.syntax,
+            AnyCssContainerStyleAndCombinableQuery::CssContainerStyleAndQuery(it) => &it.syntax,
+            AnyCssContainerStyleAndCombinableQuery::CssContainerStyleInParens(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyCssContainerStyleCombinableQuery::CssContainerStyleAndQuery(it) => it.syntax,
-            AnyCssContainerStyleCombinableQuery::CssContainerStyleInParens(it) => it.syntax,
-            AnyCssContainerStyleCombinableQuery::CssContainerStyleOrQuery(it) => it.syntax,
+            AnyCssContainerStyleAndCombinableQuery::CssContainerStyleAndQuery(it) => it.syntax,
+            AnyCssContainerStyleAndCombinableQuery::CssContainerStyleInParens(it) => it.syntax,
         }
     }
 }
-impl std::fmt::Debug for AnyCssContainerStyleCombinableQuery {
+impl std::fmt::Debug for AnyCssContainerStyleAndCombinableQuery {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyCssContainerStyleCombinableQuery::CssContainerStyleAndQuery(it) => {
+            AnyCssContainerStyleAndCombinableQuery::CssContainerStyleAndQuery(it) => {
                 std::fmt::Debug::fmt(it, f)
             }
-            AnyCssContainerStyleCombinableQuery::CssContainerStyleInParens(it) => {
-                std::fmt::Debug::fmt(it, f)
-            }
-            AnyCssContainerStyleCombinableQuery::CssContainerStyleOrQuery(it) => {
+            AnyCssContainerStyleAndCombinableQuery::CssContainerStyleInParens(it) => {
                 std::fmt::Debug::fmt(it, f)
             }
         }
     }
 }
-impl From<AnyCssContainerStyleCombinableQuery> for SyntaxNode {
-    fn from(n: AnyCssContainerStyleCombinableQuery) -> SyntaxNode {
+impl From<AnyCssContainerStyleAndCombinableQuery> for SyntaxNode {
+    fn from(n: AnyCssContainerStyleAndCombinableQuery) -> SyntaxNode {
         match n {
-            AnyCssContainerStyleCombinableQuery::CssContainerStyleAndQuery(it) => it.into(),
-            AnyCssContainerStyleCombinableQuery::CssContainerStyleInParens(it) => it.into(),
-            AnyCssContainerStyleCombinableQuery::CssContainerStyleOrQuery(it) => it.into(),
+            AnyCssContainerStyleAndCombinableQuery::CssContainerStyleAndQuery(it) => it.into(),
+            AnyCssContainerStyleAndCombinableQuery::CssContainerStyleInParens(it) => it.into(),
         }
     }
 }
-impl From<AnyCssContainerStyleCombinableQuery> for SyntaxElement {
-    fn from(n: AnyCssContainerStyleCombinableQuery) -> SyntaxElement {
+impl From<AnyCssContainerStyleAndCombinableQuery> for SyntaxElement {
+    fn from(n: AnyCssContainerStyleAndCombinableQuery) -> SyntaxElement {
         let node: SyntaxNode = n.into();
         node.into()
     }
@@ -9274,9 +9484,99 @@ impl From<AnyCssContainerStyleInParens> for SyntaxElement {
         node.into()
     }
 }
+impl From<CssContainerStyleInParens> for AnyCssContainerStyleOrCombinableQuery {
+    fn from(node: CssContainerStyleInParens) -> AnyCssContainerStyleOrCombinableQuery {
+        AnyCssContainerStyleOrCombinableQuery::CssContainerStyleInParens(node)
+    }
+}
+impl From<CssContainerStyleOrQuery> for AnyCssContainerStyleOrCombinableQuery {
+    fn from(node: CssContainerStyleOrQuery) -> AnyCssContainerStyleOrCombinableQuery {
+        AnyCssContainerStyleOrCombinableQuery::CssContainerStyleOrQuery(node)
+    }
+}
+impl AstNode for AnyCssContainerStyleOrCombinableQuery {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        CssContainerStyleInParens::KIND_SET.union(CssContainerStyleOrQuery::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(
+            kind,
+            CSS_CONTAINER_STYLE_IN_PARENS | CSS_CONTAINER_STYLE_OR_QUERY
+        )
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_CONTAINER_STYLE_IN_PARENS => {
+                AnyCssContainerStyleOrCombinableQuery::CssContainerStyleInParens(
+                    CssContainerStyleInParens { syntax },
+                )
+            }
+            CSS_CONTAINER_STYLE_OR_QUERY => {
+                AnyCssContainerStyleOrCombinableQuery::CssContainerStyleOrQuery(
+                    CssContainerStyleOrQuery { syntax },
+                )
+            }
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            AnyCssContainerStyleOrCombinableQuery::CssContainerStyleInParens(it) => &it.syntax,
+            AnyCssContainerStyleOrCombinableQuery::CssContainerStyleOrQuery(it) => &it.syntax,
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            AnyCssContainerStyleOrCombinableQuery::CssContainerStyleInParens(it) => it.syntax,
+            AnyCssContainerStyleOrCombinableQuery::CssContainerStyleOrQuery(it) => it.syntax,
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssContainerStyleOrCombinableQuery {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            AnyCssContainerStyleOrCombinableQuery::CssContainerStyleInParens(it) => {
+                std::fmt::Debug::fmt(it, f)
+            }
+            AnyCssContainerStyleOrCombinableQuery::CssContainerStyleOrQuery(it) => {
+                std::fmt::Debug::fmt(it, f)
+            }
+        }
+    }
+}
+impl From<AnyCssContainerStyleOrCombinableQuery> for SyntaxNode {
+    fn from(n: AnyCssContainerStyleOrCombinableQuery) -> SyntaxNode {
+        match n {
+            AnyCssContainerStyleOrCombinableQuery::CssContainerStyleInParens(it) => it.into(),
+            AnyCssContainerStyleOrCombinableQuery::CssContainerStyleOrQuery(it) => it.into(),
+        }
+    }
+}
+impl From<AnyCssContainerStyleOrCombinableQuery> for SyntaxElement {
+    fn from(n: AnyCssContainerStyleOrCombinableQuery) -> SyntaxElement {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<CssContainerStyleAndQuery> for AnyCssContainerStyleQuery {
+    fn from(node: CssContainerStyleAndQuery) -> AnyCssContainerStyleQuery {
+        AnyCssContainerStyleQuery::CssContainerStyleAndQuery(node)
+    }
+}
+impl From<CssContainerStyleInParens> for AnyCssContainerStyleQuery {
+    fn from(node: CssContainerStyleInParens) -> AnyCssContainerStyleQuery {
+        AnyCssContainerStyleQuery::CssContainerStyleInParens(node)
+    }
+}
 impl From<CssContainerStyleNotQuery> for AnyCssContainerStyleQuery {
     fn from(node: CssContainerStyleNotQuery) -> AnyCssContainerStyleQuery {
         AnyCssContainerStyleQuery::CssContainerStyleNotQuery(node)
+    }
+}
+impl From<CssContainerStyleOrQuery> for AnyCssContainerStyleQuery {
+    fn from(node: CssContainerStyleOrQuery) -> AnyCssContainerStyleQuery {
+        AnyCssContainerStyleQuery::CssContainerStyleOrQuery(node)
     }
 }
 impl From<CssDeclaration> for AnyCssContainerStyleQuery {
@@ -9286,61 +9586,74 @@ impl From<CssDeclaration> for AnyCssContainerStyleQuery {
 }
 impl AstNode for AnyCssContainerStyleQuery {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = AnyCssContainerStyleCombinableQuery::KIND_SET
+    const KIND_SET: SyntaxKindSet<Language> = CssContainerStyleAndQuery::KIND_SET
+        .union(CssContainerStyleInParens::KIND_SET)
         .union(CssContainerStyleNotQuery::KIND_SET)
+        .union(CssContainerStyleOrQuery::KIND_SET)
         .union(CssDeclaration::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        match kind {
-            CSS_CONTAINER_STYLE_NOT_QUERY | CSS_DECLARATION => true,
-            k if AnyCssContainerStyleCombinableQuery::can_cast(k) => true,
-            _ => false,
-        }
+        matches!(
+            kind,
+            CSS_CONTAINER_STYLE_AND_QUERY
+                | CSS_CONTAINER_STYLE_IN_PARENS
+                | CSS_CONTAINER_STYLE_NOT_QUERY
+                | CSS_CONTAINER_STYLE_OR_QUERY
+                | CSS_DECLARATION
+        )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
+            CSS_CONTAINER_STYLE_AND_QUERY => {
+                AnyCssContainerStyleQuery::CssContainerStyleAndQuery(CssContainerStyleAndQuery {
+                    syntax,
+                })
+            }
+            CSS_CONTAINER_STYLE_IN_PARENS => {
+                AnyCssContainerStyleQuery::CssContainerStyleInParens(CssContainerStyleInParens {
+                    syntax,
+                })
+            }
             CSS_CONTAINER_STYLE_NOT_QUERY => {
                 AnyCssContainerStyleQuery::CssContainerStyleNotQuery(CssContainerStyleNotQuery {
                     syntax,
                 })
             }
-            CSS_DECLARATION => AnyCssContainerStyleQuery::CssDeclaration(CssDeclaration { syntax }),
-            _ => {
-                if let Some(any_css_container_style_combinable_query) =
-                    AnyCssContainerStyleCombinableQuery::cast(syntax)
-                {
-                    return Some(
-                        AnyCssContainerStyleQuery::AnyCssContainerStyleCombinableQuery(
-                            any_css_container_style_combinable_query,
-                        ),
-                    );
-                }
-                return None;
+            CSS_CONTAINER_STYLE_OR_QUERY => {
+                AnyCssContainerStyleQuery::CssContainerStyleOrQuery(CssContainerStyleOrQuery {
+                    syntax,
+                })
             }
+            CSS_DECLARATION => AnyCssContainerStyleQuery::CssDeclaration(CssDeclaration { syntax }),
+            _ => return None,
         };
         Some(res)
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
+            AnyCssContainerStyleQuery::CssContainerStyleAndQuery(it) => &it.syntax,
+            AnyCssContainerStyleQuery::CssContainerStyleInParens(it) => &it.syntax,
             AnyCssContainerStyleQuery::CssContainerStyleNotQuery(it) => &it.syntax,
+            AnyCssContainerStyleQuery::CssContainerStyleOrQuery(it) => &it.syntax,
             AnyCssContainerStyleQuery::CssDeclaration(it) => &it.syntax,
-            AnyCssContainerStyleQuery::AnyCssContainerStyleCombinableQuery(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
+            AnyCssContainerStyleQuery::CssContainerStyleAndQuery(it) => it.syntax,
+            AnyCssContainerStyleQuery::CssContainerStyleInParens(it) => it.syntax,
             AnyCssContainerStyleQuery::CssContainerStyleNotQuery(it) => it.syntax,
+            AnyCssContainerStyleQuery::CssContainerStyleOrQuery(it) => it.syntax,
             AnyCssContainerStyleQuery::CssDeclaration(it) => it.syntax,
-            AnyCssContainerStyleQuery::AnyCssContainerStyleCombinableQuery(it) => it.into_syntax(),
         }
     }
 }
 impl std::fmt::Debug for AnyCssContainerStyleQuery {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyCssContainerStyleQuery::AnyCssContainerStyleCombinableQuery(it) => {
-                std::fmt::Debug::fmt(it, f)
-            }
+            AnyCssContainerStyleQuery::CssContainerStyleAndQuery(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssContainerStyleQuery::CssContainerStyleInParens(it) => std::fmt::Debug::fmt(it, f),
             AnyCssContainerStyleQuery::CssContainerStyleNotQuery(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssContainerStyleQuery::CssContainerStyleOrQuery(it) => std::fmt::Debug::fmt(it, f),
             AnyCssContainerStyleQuery::CssDeclaration(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -9348,8 +9661,10 @@ impl std::fmt::Debug for AnyCssContainerStyleQuery {
 impl From<AnyCssContainerStyleQuery> for SyntaxNode {
     fn from(n: AnyCssContainerStyleQuery) -> SyntaxNode {
         match n {
-            AnyCssContainerStyleQuery::AnyCssContainerStyleCombinableQuery(it) => it.into(),
+            AnyCssContainerStyleQuery::CssContainerStyleAndQuery(it) => it.into(),
+            AnyCssContainerStyleQuery::CssContainerStyleInParens(it) => it.into(),
             AnyCssContainerStyleQuery::CssContainerStyleNotQuery(it) => it.into(),
+            AnyCssContainerStyleQuery::CssContainerStyleOrQuery(it) => it.into(),
             AnyCssContainerStyleQuery::CssDeclaration(it) => it.into(),
         }
     }
@@ -9484,140 +9799,199 @@ impl From<AnyCssDimension> for SyntaxElement {
         node.into()
     }
 }
-impl From<CssMediaQueryFeatureBoolean> for AnyCssMediaQueryFeatureType {
-    fn from(node: CssMediaQueryFeatureBoolean) -> AnyCssMediaQueryFeatureType {
-        AnyCssMediaQueryFeatureType::CssMediaQueryFeatureBoolean(node)
+impl From<CssMediaAndCondition> for AnyCssMediaAndCombinableCondition {
+    fn from(node: CssMediaAndCondition) -> AnyCssMediaAndCombinableCondition {
+        AnyCssMediaAndCombinableCondition::CssMediaAndCondition(node)
     }
 }
-impl From<CssMediaQueryFeatureCompare> for AnyCssMediaQueryFeatureType {
-    fn from(node: CssMediaQueryFeatureCompare) -> AnyCssMediaQueryFeatureType {
-        AnyCssMediaQueryFeatureType::CssMediaQueryFeatureCompare(node)
-    }
-}
-impl From<CssMediaQueryFeaturePlain> for AnyCssMediaQueryFeatureType {
-    fn from(node: CssMediaQueryFeaturePlain) -> AnyCssMediaQueryFeatureType {
-        AnyCssMediaQueryFeatureType::CssMediaQueryFeaturePlain(node)
-    }
-}
-impl From<CssMediaQueryFeatureRange> for AnyCssMediaQueryFeatureType {
-    fn from(node: CssMediaQueryFeatureRange) -> AnyCssMediaQueryFeatureType {
-        AnyCssMediaQueryFeatureType::CssMediaQueryFeatureRange(node)
-    }
-}
-impl AstNode for AnyCssMediaQueryFeatureType {
+impl AstNode for AnyCssMediaAndCombinableCondition {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = CssMediaQueryFeatureBoolean::KIND_SET
-        .union(CssMediaQueryFeatureCompare::KIND_SET)
-        .union(CssMediaQueryFeaturePlain::KIND_SET)
-        .union(CssMediaQueryFeatureRange::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> =
+        AnyCssMediaInParens::KIND_SET.union(CssMediaAndCondition::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(
-            kind,
-            CSS_MEDIA_QUERY_FEATURE_BOOLEAN
-                | CSS_MEDIA_QUERY_FEATURE_COMPARE
-                | CSS_MEDIA_QUERY_FEATURE_PLAIN
-                | CSS_MEDIA_QUERY_FEATURE_RANGE
-        )
+        match kind {
+            CSS_MEDIA_AND_CONDITION => true,
+            k if AnyCssMediaInParens::can_cast(k) => true,
+            _ => false,
+        }
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            CSS_MEDIA_QUERY_FEATURE_BOOLEAN => {
-                AnyCssMediaQueryFeatureType::CssMediaQueryFeatureBoolean(
-                    CssMediaQueryFeatureBoolean { syntax },
-                )
-            }
-            CSS_MEDIA_QUERY_FEATURE_COMPARE => {
-                AnyCssMediaQueryFeatureType::CssMediaQueryFeatureCompare(
-                    CssMediaQueryFeatureCompare { syntax },
-                )
-            }
-            CSS_MEDIA_QUERY_FEATURE_PLAIN => {
-                AnyCssMediaQueryFeatureType::CssMediaQueryFeaturePlain(CssMediaQueryFeaturePlain {
+            CSS_MEDIA_AND_CONDITION => {
+                AnyCssMediaAndCombinableCondition::CssMediaAndCondition(CssMediaAndCondition {
                     syntax,
                 })
             }
-            CSS_MEDIA_QUERY_FEATURE_RANGE => {
-                AnyCssMediaQueryFeatureType::CssMediaQueryFeatureRange(CssMediaQueryFeatureRange {
-                    syntax,
-                })
+            _ => {
+                if let Some(any_css_media_in_parens) = AnyCssMediaInParens::cast(syntax) {
+                    return Some(AnyCssMediaAndCombinableCondition::AnyCssMediaInParens(
+                        any_css_media_in_parens,
+                    ));
+                }
+                return None;
             }
-            _ => return None,
         };
         Some(res)
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyCssMediaQueryFeatureType::CssMediaQueryFeatureBoolean(it) => &it.syntax,
-            AnyCssMediaQueryFeatureType::CssMediaQueryFeatureCompare(it) => &it.syntax,
-            AnyCssMediaQueryFeatureType::CssMediaQueryFeaturePlain(it) => &it.syntax,
-            AnyCssMediaQueryFeatureType::CssMediaQueryFeatureRange(it) => &it.syntax,
+            AnyCssMediaAndCombinableCondition::CssMediaAndCondition(it) => &it.syntax,
+            AnyCssMediaAndCombinableCondition::AnyCssMediaInParens(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyCssMediaQueryFeatureType::CssMediaQueryFeatureBoolean(it) => it.syntax,
-            AnyCssMediaQueryFeatureType::CssMediaQueryFeatureCompare(it) => it.syntax,
-            AnyCssMediaQueryFeatureType::CssMediaQueryFeaturePlain(it) => it.syntax,
-            AnyCssMediaQueryFeatureType::CssMediaQueryFeatureRange(it) => it.syntax,
+            AnyCssMediaAndCombinableCondition::CssMediaAndCondition(it) => it.syntax,
+            AnyCssMediaAndCombinableCondition::AnyCssMediaInParens(it) => it.into_syntax(),
         }
     }
 }
-impl std::fmt::Debug for AnyCssMediaQueryFeatureType {
+impl std::fmt::Debug for AnyCssMediaAndCombinableCondition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyCssMediaQueryFeatureType::CssMediaQueryFeatureBoolean(it) => {
+            AnyCssMediaAndCombinableCondition::AnyCssMediaInParens(it) => {
                 std::fmt::Debug::fmt(it, f)
             }
-            AnyCssMediaQueryFeatureType::CssMediaQueryFeatureCompare(it) => {
-                std::fmt::Debug::fmt(it, f)
-            }
-            AnyCssMediaQueryFeatureType::CssMediaQueryFeaturePlain(it) => {
-                std::fmt::Debug::fmt(it, f)
-            }
-            AnyCssMediaQueryFeatureType::CssMediaQueryFeatureRange(it) => {
+            AnyCssMediaAndCombinableCondition::CssMediaAndCondition(it) => {
                 std::fmt::Debug::fmt(it, f)
             }
         }
     }
 }
-impl From<AnyCssMediaQueryFeatureType> for SyntaxNode {
-    fn from(n: AnyCssMediaQueryFeatureType) -> SyntaxNode {
+impl From<AnyCssMediaAndCombinableCondition> for SyntaxNode {
+    fn from(n: AnyCssMediaAndCombinableCondition) -> SyntaxNode {
         match n {
-            AnyCssMediaQueryFeatureType::CssMediaQueryFeatureBoolean(it) => it.into(),
-            AnyCssMediaQueryFeatureType::CssMediaQueryFeatureCompare(it) => it.into(),
-            AnyCssMediaQueryFeatureType::CssMediaQueryFeaturePlain(it) => it.into(),
-            AnyCssMediaQueryFeatureType::CssMediaQueryFeatureRange(it) => it.into(),
+            AnyCssMediaAndCombinableCondition::AnyCssMediaInParens(it) => it.into(),
+            AnyCssMediaAndCombinableCondition::CssMediaAndCondition(it) => it.into(),
         }
     }
 }
-impl From<AnyCssMediaQueryFeatureType> for SyntaxElement {
-    fn from(n: AnyCssMediaQueryFeatureType) -> SyntaxElement {
+impl From<AnyCssMediaAndCombinableCondition> for SyntaxElement {
+    fn from(n: AnyCssMediaAndCombinableCondition) -> SyntaxElement {
         let node: SyntaxNode = n.into();
         node.into()
     }
 }
-impl From<CssIdentifier> for AnyCssMediaQueryType {
-    fn from(node: CssIdentifier) -> AnyCssMediaQueryType {
-        AnyCssMediaQueryType::CssIdentifier(node)
+impl From<CssMediaAndCondition> for AnyCssMediaCondition {
+    fn from(node: CssMediaAndCondition) -> AnyCssMediaCondition {
+        AnyCssMediaCondition::CssMediaAndCondition(node)
     }
 }
-impl From<CssMediaQueryFeature> for AnyCssMediaQueryType {
-    fn from(node: CssMediaQueryFeature) -> AnyCssMediaQueryType {
-        AnyCssMediaQueryType::CssMediaQueryFeature(node)
+impl From<CssMediaNotCondition> for AnyCssMediaCondition {
+    fn from(node: CssMediaNotCondition) -> AnyCssMediaCondition {
+        AnyCssMediaCondition::CssMediaNotCondition(node)
     }
 }
-impl AstNode for AnyCssMediaQueryType {
+impl From<CssMediaOrCondition> for AnyCssMediaCondition {
+    fn from(node: CssMediaOrCondition) -> AnyCssMediaCondition {
+        AnyCssMediaCondition::CssMediaOrCondition(node)
+    }
+}
+impl AstNode for AnyCssMediaCondition {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        CssIdentifier::KIND_SET.union(CssMediaQueryFeature::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> = AnyCssMediaInParens::KIND_SET
+        .union(CssMediaAndCondition::KIND_SET)
+        .union(CssMediaNotCondition::KIND_SET)
+        .union(CssMediaOrCondition::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, CSS_IDENTIFIER | CSS_MEDIA_QUERY_FEATURE)
+        match kind {
+            CSS_MEDIA_AND_CONDITION | CSS_MEDIA_NOT_CONDITION | CSS_MEDIA_OR_CONDITION => true,
+            k if AnyCssMediaInParens::can_cast(k) => true,
+            _ => false,
+        }
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            CSS_IDENTIFIER => AnyCssMediaQueryType::CssIdentifier(CssIdentifier { syntax }),
-            CSS_MEDIA_QUERY_FEATURE => {
-                AnyCssMediaQueryType::CssMediaQueryFeature(CssMediaQueryFeature { syntax })
+            CSS_MEDIA_AND_CONDITION => {
+                AnyCssMediaCondition::CssMediaAndCondition(CssMediaAndCondition { syntax })
+            }
+            CSS_MEDIA_NOT_CONDITION => {
+                AnyCssMediaCondition::CssMediaNotCondition(CssMediaNotCondition { syntax })
+            }
+            CSS_MEDIA_OR_CONDITION => {
+                AnyCssMediaCondition::CssMediaOrCondition(CssMediaOrCondition { syntax })
+            }
+            _ => {
+                if let Some(any_css_media_in_parens) = AnyCssMediaInParens::cast(syntax) {
+                    return Some(AnyCssMediaCondition::AnyCssMediaInParens(
+                        any_css_media_in_parens,
+                    ));
+                }
+                return None;
+            }
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            AnyCssMediaCondition::CssMediaAndCondition(it) => &it.syntax,
+            AnyCssMediaCondition::CssMediaNotCondition(it) => &it.syntax,
+            AnyCssMediaCondition::CssMediaOrCondition(it) => &it.syntax,
+            AnyCssMediaCondition::AnyCssMediaInParens(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            AnyCssMediaCondition::CssMediaAndCondition(it) => it.syntax,
+            AnyCssMediaCondition::CssMediaNotCondition(it) => it.syntax,
+            AnyCssMediaCondition::CssMediaOrCondition(it) => it.syntax,
+            AnyCssMediaCondition::AnyCssMediaInParens(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssMediaCondition {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            AnyCssMediaCondition::AnyCssMediaInParens(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssMediaCondition::CssMediaAndCondition(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssMediaCondition::CssMediaNotCondition(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssMediaCondition::CssMediaOrCondition(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssMediaCondition> for SyntaxNode {
+    fn from(n: AnyCssMediaCondition) -> SyntaxNode {
+        match n {
+            AnyCssMediaCondition::AnyCssMediaInParens(it) => it.into(),
+            AnyCssMediaCondition::CssMediaAndCondition(it) => it.into(),
+            AnyCssMediaCondition::CssMediaNotCondition(it) => it.into(),
+            AnyCssMediaCondition::CssMediaOrCondition(it) => it.into(),
+        }
+    }
+}
+impl From<AnyCssMediaCondition> for SyntaxElement {
+    fn from(n: AnyCssMediaCondition) -> SyntaxElement {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<CssMediaConditionInParens> for AnyCssMediaInParens {
+    fn from(node: CssMediaConditionInParens) -> AnyCssMediaInParens {
+        AnyCssMediaInParens::CssMediaConditionInParens(node)
+    }
+}
+impl From<CssMediaFeatureInParens> for AnyCssMediaInParens {
+    fn from(node: CssMediaFeatureInParens) -> AnyCssMediaInParens {
+        AnyCssMediaInParens::CssMediaFeatureInParens(node)
+    }
+}
+impl AstNode for AnyCssMediaInParens {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        CssMediaConditionInParens::KIND_SET.union(CssMediaFeatureInParens::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(
+            kind,
+            CSS_MEDIA_CONDITION_IN_PARENS | CSS_MEDIA_FEATURE_IN_PARENS
+        )
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_MEDIA_CONDITION_IN_PARENS => {
+                AnyCssMediaInParens::CssMediaConditionInParens(CssMediaConditionInParens { syntax })
+            }
+            CSS_MEDIA_FEATURE_IN_PARENS => {
+                AnyCssMediaInParens::CssMediaFeatureInParens(CssMediaFeatureInParens { syntax })
             }
             _ => return None,
         };
@@ -9625,35 +9999,332 @@ impl AstNode for AnyCssMediaQueryType {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyCssMediaQueryType::CssIdentifier(it) => &it.syntax,
-            AnyCssMediaQueryType::CssMediaQueryFeature(it) => &it.syntax,
+            AnyCssMediaInParens::CssMediaConditionInParens(it) => &it.syntax,
+            AnyCssMediaInParens::CssMediaFeatureInParens(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyCssMediaQueryType::CssIdentifier(it) => it.syntax,
-            AnyCssMediaQueryType::CssMediaQueryFeature(it) => it.syntax,
+            AnyCssMediaInParens::CssMediaConditionInParens(it) => it.syntax,
+            AnyCssMediaInParens::CssMediaFeatureInParens(it) => it.syntax,
         }
     }
 }
-impl std::fmt::Debug for AnyCssMediaQueryType {
+impl std::fmt::Debug for AnyCssMediaInParens {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyCssMediaQueryType::CssIdentifier(it) => std::fmt::Debug::fmt(it, f),
-            AnyCssMediaQueryType::CssMediaQueryFeature(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssMediaInParens::CssMediaConditionInParens(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssMediaInParens::CssMediaFeatureInParens(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
-impl From<AnyCssMediaQueryType> for SyntaxNode {
-    fn from(n: AnyCssMediaQueryType) -> SyntaxNode {
+impl From<AnyCssMediaInParens> for SyntaxNode {
+    fn from(n: AnyCssMediaInParens) -> SyntaxNode {
         match n {
-            AnyCssMediaQueryType::CssIdentifier(it) => it.into(),
-            AnyCssMediaQueryType::CssMediaQueryFeature(it) => it.into(),
+            AnyCssMediaInParens::CssMediaConditionInParens(it) => it.into(),
+            AnyCssMediaInParens::CssMediaFeatureInParens(it) => it.into(),
         }
     }
 }
-impl From<AnyCssMediaQueryType> for SyntaxElement {
-    fn from(n: AnyCssMediaQueryType) -> SyntaxElement {
+impl From<AnyCssMediaInParens> for SyntaxElement {
+    fn from(n: AnyCssMediaInParens) -> SyntaxElement {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<CssMediaOrCondition> for AnyCssMediaOrCombinableCondition {
+    fn from(node: CssMediaOrCondition) -> AnyCssMediaOrCombinableCondition {
+        AnyCssMediaOrCombinableCondition::CssMediaOrCondition(node)
+    }
+}
+impl AstNode for AnyCssMediaOrCombinableCondition {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        AnyCssMediaInParens::KIND_SET.union(CssMediaOrCondition::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        match kind {
+            CSS_MEDIA_OR_CONDITION => true,
+            k if AnyCssMediaInParens::can_cast(k) => true,
+            _ => false,
+        }
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_MEDIA_OR_CONDITION => {
+                AnyCssMediaOrCombinableCondition::CssMediaOrCondition(CssMediaOrCondition {
+                    syntax,
+                })
+            }
+            _ => {
+                if let Some(any_css_media_in_parens) = AnyCssMediaInParens::cast(syntax) {
+                    return Some(AnyCssMediaOrCombinableCondition::AnyCssMediaInParens(
+                        any_css_media_in_parens,
+                    ));
+                }
+                return None;
+            }
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            AnyCssMediaOrCombinableCondition::CssMediaOrCondition(it) => &it.syntax,
+            AnyCssMediaOrCombinableCondition::AnyCssMediaInParens(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            AnyCssMediaOrCombinableCondition::CssMediaOrCondition(it) => it.syntax,
+            AnyCssMediaOrCombinableCondition::AnyCssMediaInParens(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssMediaOrCombinableCondition {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            AnyCssMediaOrCombinableCondition::AnyCssMediaInParens(it) => {
+                std::fmt::Debug::fmt(it, f)
+            }
+            AnyCssMediaOrCombinableCondition::CssMediaOrCondition(it) => {
+                std::fmt::Debug::fmt(it, f)
+            }
+        }
+    }
+}
+impl From<AnyCssMediaOrCombinableCondition> for SyntaxNode {
+    fn from(n: AnyCssMediaOrCombinableCondition) -> SyntaxNode {
+        match n {
+            AnyCssMediaOrCombinableCondition::AnyCssMediaInParens(it) => it.into(),
+            AnyCssMediaOrCombinableCondition::CssMediaOrCondition(it) => it.into(),
+        }
+    }
+}
+impl From<AnyCssMediaOrCombinableCondition> for SyntaxElement {
+    fn from(n: AnyCssMediaOrCombinableCondition) -> SyntaxElement {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<CssBogusMediaQuery> for AnyCssMediaQuery {
+    fn from(node: CssBogusMediaQuery) -> AnyCssMediaQuery {
+        AnyCssMediaQuery::CssBogusMediaQuery(node)
+    }
+}
+impl From<CssMediaConditionQuery> for AnyCssMediaQuery {
+    fn from(node: CssMediaConditionQuery) -> AnyCssMediaQuery {
+        AnyCssMediaQuery::CssMediaConditionQuery(node)
+    }
+}
+impl AstNode for AnyCssMediaQuery {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = AnyCssMediaTypeQuery::KIND_SET
+        .union(CssBogusMediaQuery::KIND_SET)
+        .union(CssMediaConditionQuery::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        match kind {
+            CSS_BOGUS_MEDIA_QUERY | CSS_MEDIA_CONDITION_QUERY => true,
+            k if AnyCssMediaTypeQuery::can_cast(k) => true,
+            _ => false,
+        }
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_BOGUS_MEDIA_QUERY => {
+                AnyCssMediaQuery::CssBogusMediaQuery(CssBogusMediaQuery { syntax })
+            }
+            CSS_MEDIA_CONDITION_QUERY => {
+                AnyCssMediaQuery::CssMediaConditionQuery(CssMediaConditionQuery { syntax })
+            }
+            _ => {
+                if let Some(any_css_media_type_query) = AnyCssMediaTypeQuery::cast(syntax) {
+                    return Some(AnyCssMediaQuery::AnyCssMediaTypeQuery(
+                        any_css_media_type_query,
+                    ));
+                }
+                return None;
+            }
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            AnyCssMediaQuery::CssBogusMediaQuery(it) => &it.syntax,
+            AnyCssMediaQuery::CssMediaConditionQuery(it) => &it.syntax,
+            AnyCssMediaQuery::AnyCssMediaTypeQuery(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            AnyCssMediaQuery::CssBogusMediaQuery(it) => it.syntax,
+            AnyCssMediaQuery::CssMediaConditionQuery(it) => it.syntax,
+            AnyCssMediaQuery::AnyCssMediaTypeQuery(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssMediaQuery {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            AnyCssMediaQuery::AnyCssMediaTypeQuery(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssMediaQuery::CssBogusMediaQuery(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssMediaQuery::CssMediaConditionQuery(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssMediaQuery> for SyntaxNode {
+    fn from(n: AnyCssMediaQuery) -> SyntaxNode {
+        match n {
+            AnyCssMediaQuery::AnyCssMediaTypeQuery(it) => it.into(),
+            AnyCssMediaQuery::CssBogusMediaQuery(it) => it.into(),
+            AnyCssMediaQuery::CssMediaConditionQuery(it) => it.into(),
+        }
+    }
+}
+impl From<AnyCssMediaQuery> for SyntaxElement {
+    fn from(n: AnyCssMediaQuery) -> SyntaxElement {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<CssMediaAndCondition> for AnyCssMediaTypeCondition {
+    fn from(node: CssMediaAndCondition) -> AnyCssMediaTypeCondition {
+        AnyCssMediaTypeCondition::CssMediaAndCondition(node)
+    }
+}
+impl From<CssMediaNotCondition> for AnyCssMediaTypeCondition {
+    fn from(node: CssMediaNotCondition) -> AnyCssMediaTypeCondition {
+        AnyCssMediaTypeCondition::CssMediaNotCondition(node)
+    }
+}
+impl AstNode for AnyCssMediaTypeCondition {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = AnyCssMediaInParens::KIND_SET
+        .union(CssMediaAndCondition::KIND_SET)
+        .union(CssMediaNotCondition::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        match kind {
+            CSS_MEDIA_AND_CONDITION | CSS_MEDIA_NOT_CONDITION => true,
+            k if AnyCssMediaInParens::can_cast(k) => true,
+            _ => false,
+        }
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_MEDIA_AND_CONDITION => {
+                AnyCssMediaTypeCondition::CssMediaAndCondition(CssMediaAndCondition { syntax })
+            }
+            CSS_MEDIA_NOT_CONDITION => {
+                AnyCssMediaTypeCondition::CssMediaNotCondition(CssMediaNotCondition { syntax })
+            }
+            _ => {
+                if let Some(any_css_media_in_parens) = AnyCssMediaInParens::cast(syntax) {
+                    return Some(AnyCssMediaTypeCondition::AnyCssMediaInParens(
+                        any_css_media_in_parens,
+                    ));
+                }
+                return None;
+            }
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            AnyCssMediaTypeCondition::CssMediaAndCondition(it) => &it.syntax,
+            AnyCssMediaTypeCondition::CssMediaNotCondition(it) => &it.syntax,
+            AnyCssMediaTypeCondition::AnyCssMediaInParens(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            AnyCssMediaTypeCondition::CssMediaAndCondition(it) => it.syntax,
+            AnyCssMediaTypeCondition::CssMediaNotCondition(it) => it.syntax,
+            AnyCssMediaTypeCondition::AnyCssMediaInParens(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssMediaTypeCondition {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            AnyCssMediaTypeCondition::AnyCssMediaInParens(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssMediaTypeCondition::CssMediaAndCondition(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssMediaTypeCondition::CssMediaNotCondition(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssMediaTypeCondition> for SyntaxNode {
+    fn from(n: AnyCssMediaTypeCondition) -> SyntaxNode {
+        match n {
+            AnyCssMediaTypeCondition::AnyCssMediaInParens(it) => it.into(),
+            AnyCssMediaTypeCondition::CssMediaAndCondition(it) => it.into(),
+            AnyCssMediaTypeCondition::CssMediaNotCondition(it) => it.into(),
+        }
+    }
+}
+impl From<AnyCssMediaTypeCondition> for SyntaxElement {
+    fn from(n: AnyCssMediaTypeCondition) -> SyntaxElement {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<CssMediaAndTypeQuery> for AnyCssMediaTypeQuery {
+    fn from(node: CssMediaAndTypeQuery) -> AnyCssMediaTypeQuery {
+        AnyCssMediaTypeQuery::CssMediaAndTypeQuery(node)
+    }
+}
+impl From<CssMediaTypeQuery> for AnyCssMediaTypeQuery {
+    fn from(node: CssMediaTypeQuery) -> AnyCssMediaTypeQuery {
+        AnyCssMediaTypeQuery::CssMediaTypeQuery(node)
+    }
+}
+impl AstNode for AnyCssMediaTypeQuery {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        CssMediaAndTypeQuery::KIND_SET.union(CssMediaTypeQuery::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, CSS_MEDIA_AND_TYPE_QUERY | CSS_MEDIA_TYPE_QUERY)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_MEDIA_AND_TYPE_QUERY => {
+                AnyCssMediaTypeQuery::CssMediaAndTypeQuery(CssMediaAndTypeQuery { syntax })
+            }
+            CSS_MEDIA_TYPE_QUERY => {
+                AnyCssMediaTypeQuery::CssMediaTypeQuery(CssMediaTypeQuery { syntax })
+            }
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            AnyCssMediaTypeQuery::CssMediaAndTypeQuery(it) => &it.syntax,
+            AnyCssMediaTypeQuery::CssMediaTypeQuery(it) => &it.syntax,
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            AnyCssMediaTypeQuery::CssMediaAndTypeQuery(it) => it.syntax,
+            AnyCssMediaTypeQuery::CssMediaTypeQuery(it) => it.syntax,
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssMediaTypeQuery {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            AnyCssMediaTypeQuery::CssMediaAndTypeQuery(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssMediaTypeQuery::CssMediaTypeQuery(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssMediaTypeQuery> for SyntaxNode {
+    fn from(n: AnyCssMediaTypeQuery) -> SyntaxNode {
+        match n {
+            AnyCssMediaTypeQuery::CssMediaAndTypeQuery(it) => it.into(),
+            AnyCssMediaTypeQuery::CssMediaTypeQuery(it) => it.into(),
+        }
+    }
+}
+impl From<AnyCssMediaTypeQuery> for SyntaxElement {
+    fn from(n: AnyCssMediaTypeQuery) -> SyntaxElement {
         let node: SyntaxNode = n.into();
         node.into()
     }
@@ -10244,6 +10915,216 @@ impl From<AnyCssPseudoValue> for SyntaxElement {
         node.into()
     }
 }
+impl From<CssQueryFeatureBoolean> for AnyCssQueryFeature {
+    fn from(node: CssQueryFeatureBoolean) -> AnyCssQueryFeature {
+        AnyCssQueryFeature::CssQueryFeatureBoolean(node)
+    }
+}
+impl From<CssQueryFeaturePlain> for AnyCssQueryFeature {
+    fn from(node: CssQueryFeaturePlain) -> AnyCssQueryFeature {
+        AnyCssQueryFeature::CssQueryFeaturePlain(node)
+    }
+}
+impl From<CssQueryFeatureRange> for AnyCssQueryFeature {
+    fn from(node: CssQueryFeatureRange) -> AnyCssQueryFeature {
+        AnyCssQueryFeature::CssQueryFeatureRange(node)
+    }
+}
+impl From<CssQueryFeatureRangeInterval> for AnyCssQueryFeature {
+    fn from(node: CssQueryFeatureRangeInterval) -> AnyCssQueryFeature {
+        AnyCssQueryFeature::CssQueryFeatureRangeInterval(node)
+    }
+}
+impl From<CssQueryFeatureReverseRange> for AnyCssQueryFeature {
+    fn from(node: CssQueryFeatureReverseRange) -> AnyCssQueryFeature {
+        AnyCssQueryFeature::CssQueryFeatureReverseRange(node)
+    }
+}
+impl AstNode for AnyCssQueryFeature {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = CssQueryFeatureBoolean::KIND_SET
+        .union(CssQueryFeaturePlain::KIND_SET)
+        .union(CssQueryFeatureRange::KIND_SET)
+        .union(CssQueryFeatureRangeInterval::KIND_SET)
+        .union(CssQueryFeatureReverseRange::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(
+            kind,
+            CSS_QUERY_FEATURE_BOOLEAN
+                | CSS_QUERY_FEATURE_PLAIN
+                | CSS_QUERY_FEATURE_RANGE
+                | CSS_QUERY_FEATURE_RANGE_INTERVAL
+                | CSS_QUERY_FEATURE_REVERSE_RANGE
+        )
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_QUERY_FEATURE_BOOLEAN => {
+                AnyCssQueryFeature::CssQueryFeatureBoolean(CssQueryFeatureBoolean { syntax })
+            }
+            CSS_QUERY_FEATURE_PLAIN => {
+                AnyCssQueryFeature::CssQueryFeaturePlain(CssQueryFeaturePlain { syntax })
+            }
+            CSS_QUERY_FEATURE_RANGE => {
+                AnyCssQueryFeature::CssQueryFeatureRange(CssQueryFeatureRange { syntax })
+            }
+            CSS_QUERY_FEATURE_RANGE_INTERVAL => {
+                AnyCssQueryFeature::CssQueryFeatureRangeInterval(CssQueryFeatureRangeInterval {
+                    syntax,
+                })
+            }
+            CSS_QUERY_FEATURE_REVERSE_RANGE => {
+                AnyCssQueryFeature::CssQueryFeatureReverseRange(CssQueryFeatureReverseRange {
+                    syntax,
+                })
+            }
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            AnyCssQueryFeature::CssQueryFeatureBoolean(it) => &it.syntax,
+            AnyCssQueryFeature::CssQueryFeaturePlain(it) => &it.syntax,
+            AnyCssQueryFeature::CssQueryFeatureRange(it) => &it.syntax,
+            AnyCssQueryFeature::CssQueryFeatureRangeInterval(it) => &it.syntax,
+            AnyCssQueryFeature::CssQueryFeatureReverseRange(it) => &it.syntax,
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            AnyCssQueryFeature::CssQueryFeatureBoolean(it) => it.syntax,
+            AnyCssQueryFeature::CssQueryFeaturePlain(it) => it.syntax,
+            AnyCssQueryFeature::CssQueryFeatureRange(it) => it.syntax,
+            AnyCssQueryFeature::CssQueryFeatureRangeInterval(it) => it.syntax,
+            AnyCssQueryFeature::CssQueryFeatureReverseRange(it) => it.syntax,
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssQueryFeature {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            AnyCssQueryFeature::CssQueryFeatureBoolean(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssQueryFeature::CssQueryFeaturePlain(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssQueryFeature::CssQueryFeatureRange(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssQueryFeature::CssQueryFeatureRangeInterval(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssQueryFeature::CssQueryFeatureReverseRange(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssQueryFeature> for SyntaxNode {
+    fn from(n: AnyCssQueryFeature) -> SyntaxNode {
+        match n {
+            AnyCssQueryFeature::CssQueryFeatureBoolean(it) => it.into(),
+            AnyCssQueryFeature::CssQueryFeaturePlain(it) => it.into(),
+            AnyCssQueryFeature::CssQueryFeatureRange(it) => it.into(),
+            AnyCssQueryFeature::CssQueryFeatureRangeInterval(it) => it.into(),
+            AnyCssQueryFeature::CssQueryFeatureReverseRange(it) => it.into(),
+        }
+    }
+}
+impl From<AnyCssQueryFeature> for SyntaxElement {
+    fn from(n: AnyCssQueryFeature) -> SyntaxElement {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<CssAnyFunction> for AnyCssQueryFeatureValue {
+    fn from(node: CssAnyFunction) -> AnyCssQueryFeatureValue {
+        AnyCssQueryFeatureValue::CssAnyFunction(node)
+    }
+}
+impl From<CssIdentifier> for AnyCssQueryFeatureValue {
+    fn from(node: CssIdentifier) -> AnyCssQueryFeatureValue {
+        AnyCssQueryFeatureValue::CssIdentifier(node)
+    }
+}
+impl From<CssNumber> for AnyCssQueryFeatureValue {
+    fn from(node: CssNumber) -> AnyCssQueryFeatureValue {
+        AnyCssQueryFeatureValue::CssNumber(node)
+    }
+}
+impl From<CssRatio> for AnyCssQueryFeatureValue {
+    fn from(node: CssRatio) -> AnyCssQueryFeatureValue {
+        AnyCssQueryFeatureValue::CssRatio(node)
+    }
+}
+impl AstNode for AnyCssQueryFeatureValue {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = AnyCssDimension::KIND_SET
+        .union(CssAnyFunction::KIND_SET)
+        .union(CssIdentifier::KIND_SET)
+        .union(CssNumber::KIND_SET)
+        .union(CssRatio::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        match kind {
+            CSS_ANY_FUNCTION | CSS_IDENTIFIER | CSS_NUMBER | CSS_RATIO => true,
+            k if AnyCssDimension::can_cast(k) => true,
+            _ => false,
+        }
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_ANY_FUNCTION => AnyCssQueryFeatureValue::CssAnyFunction(CssAnyFunction { syntax }),
+            CSS_IDENTIFIER => AnyCssQueryFeatureValue::CssIdentifier(CssIdentifier { syntax }),
+            CSS_NUMBER => AnyCssQueryFeatureValue::CssNumber(CssNumber { syntax }),
+            CSS_RATIO => AnyCssQueryFeatureValue::CssRatio(CssRatio { syntax }),
+            _ => {
+                if let Some(any_css_dimension) = AnyCssDimension::cast(syntax) {
+                    return Some(AnyCssQueryFeatureValue::AnyCssDimension(any_css_dimension));
+                }
+                return None;
+            }
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            AnyCssQueryFeatureValue::CssAnyFunction(it) => &it.syntax,
+            AnyCssQueryFeatureValue::CssIdentifier(it) => &it.syntax,
+            AnyCssQueryFeatureValue::CssNumber(it) => &it.syntax,
+            AnyCssQueryFeatureValue::CssRatio(it) => &it.syntax,
+            AnyCssQueryFeatureValue::AnyCssDimension(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            AnyCssQueryFeatureValue::CssAnyFunction(it) => it.syntax,
+            AnyCssQueryFeatureValue::CssIdentifier(it) => it.syntax,
+            AnyCssQueryFeatureValue::CssNumber(it) => it.syntax,
+            AnyCssQueryFeatureValue::CssRatio(it) => it.syntax,
+            AnyCssQueryFeatureValue::AnyCssDimension(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssQueryFeatureValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            AnyCssQueryFeatureValue::AnyCssDimension(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssQueryFeatureValue::CssAnyFunction(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssQueryFeatureValue::CssIdentifier(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssQueryFeatureValue::CssNumber(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssQueryFeatureValue::CssRatio(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssQueryFeatureValue> for SyntaxNode {
+    fn from(n: AnyCssQueryFeatureValue) -> SyntaxNode {
+        match n {
+            AnyCssQueryFeatureValue::AnyCssDimension(it) => it.into(),
+            AnyCssQueryFeatureValue::CssAnyFunction(it) => it.into(),
+            AnyCssQueryFeatureValue::CssIdentifier(it) => it.into(),
+            AnyCssQueryFeatureValue::CssNumber(it) => it.into(),
+            AnyCssQueryFeatureValue::CssRatio(it) => it.into(),
+        }
+    }
+}
+impl From<AnyCssQueryFeatureValue> for SyntaxElement {
+    fn from(n: AnyCssQueryFeatureValue) -> SyntaxElement {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<CssBogusSelector> for AnyCssRelativeSelector {
     fn from(node: CssBogusSelector) -> AnyCssRelativeSelector {
         AnyCssRelativeSelector::CssBogusSelector(node)
@@ -10519,102 +11400,6 @@ impl From<AnyCssSimpleSelector> for SyntaxElement {
         node.into()
     }
 }
-impl From<CssAnyFunction> for AnyCssSizeFeatureValue {
-    fn from(node: CssAnyFunction) -> AnyCssSizeFeatureValue {
-        AnyCssSizeFeatureValue::CssAnyFunction(node)
-    }
-}
-impl From<CssIdentifier> for AnyCssSizeFeatureValue {
-    fn from(node: CssIdentifier) -> AnyCssSizeFeatureValue {
-        AnyCssSizeFeatureValue::CssIdentifier(node)
-    }
-}
-impl From<CssNumber> for AnyCssSizeFeatureValue {
-    fn from(node: CssNumber) -> AnyCssSizeFeatureValue {
-        AnyCssSizeFeatureValue::CssNumber(node)
-    }
-}
-impl From<CssRatio> for AnyCssSizeFeatureValue {
-    fn from(node: CssRatio) -> AnyCssSizeFeatureValue {
-        AnyCssSizeFeatureValue::CssRatio(node)
-    }
-}
-impl AstNode for AnyCssSizeFeatureValue {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = AnyCssDimension::KIND_SET
-        .union(CssAnyFunction::KIND_SET)
-        .union(CssIdentifier::KIND_SET)
-        .union(CssNumber::KIND_SET)
-        .union(CssRatio::KIND_SET);
-    fn can_cast(kind: SyntaxKind) -> bool {
-        match kind {
-            CSS_ANY_FUNCTION | CSS_IDENTIFIER | CSS_NUMBER | CSS_RATIO => true,
-            k if AnyCssDimension::can_cast(k) => true,
-            _ => false,
-        }
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        let res = match syntax.kind() {
-            CSS_ANY_FUNCTION => AnyCssSizeFeatureValue::CssAnyFunction(CssAnyFunction { syntax }),
-            CSS_IDENTIFIER => AnyCssSizeFeatureValue::CssIdentifier(CssIdentifier { syntax }),
-            CSS_NUMBER => AnyCssSizeFeatureValue::CssNumber(CssNumber { syntax }),
-            CSS_RATIO => AnyCssSizeFeatureValue::CssRatio(CssRatio { syntax }),
-            _ => {
-                if let Some(any_css_dimension) = AnyCssDimension::cast(syntax) {
-                    return Some(AnyCssSizeFeatureValue::AnyCssDimension(any_css_dimension));
-                }
-                return None;
-            }
-        };
-        Some(res)
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        match self {
-            AnyCssSizeFeatureValue::CssAnyFunction(it) => &it.syntax,
-            AnyCssSizeFeatureValue::CssIdentifier(it) => &it.syntax,
-            AnyCssSizeFeatureValue::CssNumber(it) => &it.syntax,
-            AnyCssSizeFeatureValue::CssRatio(it) => &it.syntax,
-            AnyCssSizeFeatureValue::AnyCssDimension(it) => it.syntax(),
-        }
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        match self {
-            AnyCssSizeFeatureValue::CssAnyFunction(it) => it.syntax,
-            AnyCssSizeFeatureValue::CssIdentifier(it) => it.syntax,
-            AnyCssSizeFeatureValue::CssNumber(it) => it.syntax,
-            AnyCssSizeFeatureValue::CssRatio(it) => it.syntax,
-            AnyCssSizeFeatureValue::AnyCssDimension(it) => it.into_syntax(),
-        }
-    }
-}
-impl std::fmt::Debug for AnyCssSizeFeatureValue {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            AnyCssSizeFeatureValue::AnyCssDimension(it) => std::fmt::Debug::fmt(it, f),
-            AnyCssSizeFeatureValue::CssAnyFunction(it) => std::fmt::Debug::fmt(it, f),
-            AnyCssSizeFeatureValue::CssIdentifier(it) => std::fmt::Debug::fmt(it, f),
-            AnyCssSizeFeatureValue::CssNumber(it) => std::fmt::Debug::fmt(it, f),
-            AnyCssSizeFeatureValue::CssRatio(it) => std::fmt::Debug::fmt(it, f),
-        }
-    }
-}
-impl From<AnyCssSizeFeatureValue> for SyntaxNode {
-    fn from(n: AnyCssSizeFeatureValue) -> SyntaxNode {
-        match n {
-            AnyCssSizeFeatureValue::AnyCssDimension(it) => it.into(),
-            AnyCssSizeFeatureValue::CssAnyFunction(it) => it.into(),
-            AnyCssSizeFeatureValue::CssIdentifier(it) => it.into(),
-            AnyCssSizeFeatureValue::CssNumber(it) => it.into(),
-            AnyCssSizeFeatureValue::CssRatio(it) => it.into(),
-        }
-    }
-}
-impl From<AnyCssSizeFeatureValue> for SyntaxElement {
-    fn from(n: AnyCssSizeFeatureValue) -> SyntaxElement {
-        let node: SyntaxNode = n.into();
-        node.into()
-    }
-}
 impl From<CssAttributeSelector> for AnyCssSubSelector {
     fn from(node: CssAttributeSelector) -> AnyCssSubSelector {
         AnyCssSubSelector::CssAttributeSelector(node)
@@ -10869,7 +11654,12 @@ impl std::fmt::Display for AnyCssCompoundSelector {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for AnyCssContainerCombinableQuery {
+impl std::fmt::Display for AnyCssContainerAndCombinableQuery {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyCssContainerOrCombinableQuery {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -10884,17 +11674,17 @@ impl std::fmt::Display for AnyCssContainerQueryInParens {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for AnyCssContainerSizeFeature {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
-impl std::fmt::Display for AnyCssContainerStyleCombinableQuery {
+impl std::fmt::Display for AnyCssContainerStyleAndCombinableQuery {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
 impl std::fmt::Display for AnyCssContainerStyleInParens {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyCssContainerStyleOrCombinableQuery {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -10914,12 +11704,37 @@ impl std::fmt::Display for AnyCssDimension {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for AnyCssMediaQueryFeatureType {
+impl std::fmt::Display for AnyCssMediaAndCombinableCondition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for AnyCssMediaQueryType {
+impl std::fmt::Display for AnyCssMediaCondition {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyCssMediaInParens {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyCssMediaOrCombinableCondition {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyCssMediaQuery {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyCssMediaTypeCondition {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyCssMediaTypeQuery {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -10954,6 +11769,16 @@ impl std::fmt::Display for AnyCssPseudoValue {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for AnyCssQueryFeature {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyCssQueryFeatureValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AnyCssRelativeSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -10970,11 +11795,6 @@ impl std::fmt::Display for AnyCssSelector {
     }
 }
 impl std::fmt::Display for AnyCssSimpleSelector {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
-impl std::fmt::Display for AnyCssSizeFeatureValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -11164,47 +11984,52 @@ impl std::fmt::Display for CssKeyframesSelector {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for CssMediaAndCondition {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssMediaAndTypeQuery {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for CssMediaAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for CssMediaQuery {
+impl std::fmt::Display for CssMediaConditionInParens {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for CssMediaQueryConsequent {
+impl std::fmt::Display for CssMediaConditionQuery {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for CssMediaQueryFeature {
+impl std::fmt::Display for CssMediaFeatureInParens {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for CssMediaQueryFeatureBoolean {
+impl std::fmt::Display for CssMediaNotCondition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for CssMediaQueryFeatureCompare {
+impl std::fmt::Display for CssMediaOrCondition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for CssMediaQueryFeaturePlain {
+impl std::fmt::Display for CssMediaType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for CssMediaQueryFeatureRange {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
-impl std::fmt::Display for CssMediaQueryRange {
+impl std::fmt::Display for CssMediaTypeQuery {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -11339,6 +12164,36 @@ impl std::fmt::Display for CssPseudoElementSelector {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for CssQueryFeatureBoolean {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssQueryFeaturePlain {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssQueryFeatureRange {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssQueryFeatureRangeComparison {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssQueryFeatureRangeInterval {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssQueryFeatureReverseRange {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for CssRatio {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -11365,31 +12220,6 @@ impl std::fmt::Display for CssRule {
     }
 }
 impl std::fmt::Display for CssSimpleFunction {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
-impl std::fmt::Display for CssSizeFeatureBoolean {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
-impl std::fmt::Display for CssSizeFeaturePlain {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
-impl std::fmt::Display for CssSizeFeatureRange {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
-impl std::fmt::Display for CssSizeFeatureRangeComparison {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
-impl std::fmt::Display for CssSizeFeatureRangeInterval {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -11592,6 +12422,234 @@ impl From<CssBogusBody> for SyntaxNode {
 }
 impl From<CssBogusBody> for SyntaxElement {
     fn from(n: CssBogusBody) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssBogusComponentValue {
+    syntax: SyntaxNode,
+}
+impl CssBogusComponentValue {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn items(&self) -> SyntaxElementChildren {
+        support::elements(&self.syntax)
+    }
+}
+impl AstNode for CssBogusComponentValue {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_BOGUS_COMPONENT_VALUE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_BOGUS_COMPONENT_VALUE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssBogusComponentValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssBogusComponentValue")
+            .field("items", &DebugSyntaxElementChildren(self.items()))
+            .finish()
+    }
+}
+impl From<CssBogusComponentValue> for SyntaxNode {
+    fn from(n: CssBogusComponentValue) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssBogusComponentValue> for SyntaxElement {
+    fn from(n: CssBogusComponentValue) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssBogusDeclarationItem {
+    syntax: SyntaxNode,
+}
+impl CssBogusDeclarationItem {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn items(&self) -> SyntaxElementChildren {
+        support::elements(&self.syntax)
+    }
+}
+impl AstNode for CssBogusDeclarationItem {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_BOGUS_DECLARATION_ITEM as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_BOGUS_DECLARATION_ITEM
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssBogusDeclarationItem {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssBogusDeclarationItem")
+            .field("items", &DebugSyntaxElementChildren(self.items()))
+            .finish()
+    }
+}
+impl From<CssBogusDeclarationItem> for SyntaxNode {
+    fn from(n: CssBogusDeclarationItem) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssBogusDeclarationItem> for SyntaxElement {
+    fn from(n: CssBogusDeclarationItem) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssBogusMediaQuery {
+    syntax: SyntaxNode,
+}
+impl CssBogusMediaQuery {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn items(&self) -> SyntaxElementChildren {
+        support::elements(&self.syntax)
+    }
+}
+impl AstNode for CssBogusMediaQuery {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_BOGUS_MEDIA_QUERY as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_BOGUS_MEDIA_QUERY
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssBogusMediaQuery {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssBogusMediaQuery")
+            .field("items", &DebugSyntaxElementChildren(self.items()))
+            .finish()
+    }
+}
+impl From<CssBogusMediaQuery> for SyntaxNode {
+    fn from(n: CssBogusMediaQuery) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssBogusMediaQuery> for SyntaxElement {
+    fn from(n: CssBogusMediaQuery) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssBogusParameter {
+    syntax: SyntaxNode,
+}
+impl CssBogusParameter {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn items(&self) -> SyntaxElementChildren {
+        support::elements(&self.syntax)
+    }
+}
+impl AstNode for CssBogusParameter {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_BOGUS_PARAMETER as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_BOGUS_PARAMETER
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssBogusParameter {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssBogusParameter")
+            .field("items", &DebugSyntaxElementChildren(self.items()))
+            .finish()
+    }
+}
+impl From<CssBogusParameter> for SyntaxNode {
+    fn from(n: CssBogusParameter) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssBogusParameter> for SyntaxElement {
+    fn from(n: CssBogusParameter) -> SyntaxElement {
         n.syntax.into()
     }
 }
@@ -12350,7 +13408,7 @@ impl Serialize for CssMediaQueryList {
 }
 impl AstSeparatedList for CssMediaQueryList {
     type Language = Language;
-    type Node = CssMediaQuery;
+    type Node = AnyCssMediaQuery;
     fn syntax_list(&self) -> &SyntaxList {
         &self.syntax_list
     }
@@ -12365,15 +13423,15 @@ impl Debug for CssMediaQueryList {
     }
 }
 impl IntoIterator for CssMediaQueryList {
-    type Item = SyntaxResult<CssMediaQuery>;
-    type IntoIter = AstSeparatedListNodesIterator<Language, CssMediaQuery>;
+    type Item = SyntaxResult<AnyCssMediaQuery>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, AnyCssMediaQuery>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }
 }
 impl IntoIterator for &CssMediaQueryList {
-    type Item = SyntaxResult<CssMediaQuery>;
-    type IntoIter = AstSeparatedListNodesIterator<Language, CssMediaQuery>;
+    type Item = SyntaxResult<AnyCssMediaQuery>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, AnyCssMediaQuery>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }

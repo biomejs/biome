@@ -2,6 +2,7 @@
 //!
 //! The configuration is divided by "tool", and then it's possible to further customise it
 //! by language. The language might further options divided by tool.
+pub mod css;
 pub mod diagnostics;
 pub mod formatter;
 mod generated;
@@ -14,6 +15,7 @@ mod overrides;
 mod parse;
 pub mod vcs;
 
+use crate::configuration::css::CssFormatter;
 use crate::configuration::diagnostics::CantLoadExtendFile;
 pub use crate::configuration::diagnostics::ConfigurationDiagnostic;
 pub(crate) use crate::configuration::generated::push_to_analyzer_rules;
@@ -34,6 +36,7 @@ use biome_js_analyze::metadata;
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_parser::{parse_json, JsonParserOptions};
 use bpaf::Bpaf;
+pub use css::{css_configuration, CssConfiguration};
 pub use formatter::{
     deserialize_line_width, formatter_configuration, serialize_line_width, FormatterConfiguration,
     PlainIndentStyle,
@@ -95,6 +98,11 @@ pub struct Configuration {
     #[bpaf(external(json_configuration), optional)]
     pub json: Option<JsonConfiguration>,
 
+    /// Specific configuration for the Css language
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[bpaf(external(css_configuration), optional, hide)]
+    pub css: Option<CssConfiguration>,
+
     /// A list of paths to other JSON files, used to extends the current configuration.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[bpaf(hide)]
@@ -116,11 +124,12 @@ impl Default for Configuration {
             }),
             organize_imports: Some(OrganizeImports::default()),
             formatter: None,
+            css: None,
             javascript: None,
+            json: None,
             schema: None,
             vcs: None,
             extends: None,
-            json: None,
             overrides: None,
         }
     }
@@ -375,16 +384,31 @@ impl MergeWith<Option<JavascriptFormatter>> for Configuration {
 
 impl MergeWith<Option<JsonFormatter>> for Configuration {
     fn merge_with(&mut self, other: Option<JsonFormatter>) {
-        let javascript_configuration = self.json.get_or_insert_with(JsonConfiguration::default);
-        javascript_configuration.merge_with(other);
+        let json_configuration = self.json.get_or_insert_with(JsonConfiguration::default);
+        json_configuration.merge_with(other);
     }
 
     fn merge_with_if_not_default(&mut self, other: Option<JsonFormatter>)
     where
         Option<JsonFormatter>: Default,
     {
-        let javascript_configuration = self.json.get_or_insert_with(JsonConfiguration::default);
-        javascript_configuration.merge_with_if_not_default(other);
+        let json_configuration = self.json.get_or_insert_with(JsonConfiguration::default);
+        json_configuration.merge_with_if_not_default(other);
+    }
+}
+
+impl MergeWith<Option<CssFormatter>> for Configuration {
+    fn merge_with(&mut self, other: Option<CssFormatter>) {
+        let css_configuration = self.css.get_or_insert_with(CssConfiguration::default);
+        css_configuration.merge_with(other);
+    }
+
+    fn merge_with_if_not_default(&mut self, other: Option<CssFormatter>)
+    where
+        Option<CssFormatter>: Default,
+    {
+        let css_configuration = self.css.get_or_insert_with(CssConfiguration::default);
+        css_configuration.merge_with_if_not_default(other);
     }
 }
 

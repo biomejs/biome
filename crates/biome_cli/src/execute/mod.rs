@@ -256,7 +256,6 @@ pub(crate) fn execute_mode(
     session: CliSession,
     cli_options: &CliOptions,
     paths: Vec<OsString>,
-    vcs_enabled: bool,
 ) -> Result<(), CliDiagnostic> {
     if cli_options.max_diagnostics > MAXIMUM_DISPLAYABLE_DIAGNOSTICS {
         return Err(CliDiagnostic::overflown_argument(
@@ -285,6 +284,6 @@ pub(crate) fn execute_mode(
             cli_options.verbose,
         )
     } else {
-        traverse(mode, session, cli_options, paths, vcs_enabled)
+        traverse(mode, session, cli_options, paths)
     }
 }

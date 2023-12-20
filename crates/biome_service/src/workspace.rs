@@ -56,6 +56,7 @@ use crate::{Configuration, Deserialize, Serialize, WorkspaceError};
 use biome_analyze::ActionCategory;
 pub use biome_analyze::RuleCategories;
 use biome_console::{markup, Markup, MarkupBuf};
+use biome_css_formatter::can_format_css_yet;
 use biome_diagnostics::CodeSuggestion;
 use biome_formatter::Printed;
 use biome_fs::RomePath;
@@ -95,7 +96,7 @@ pub struct FileFeaturesResult {
 
 impl FileFeaturesResult {
     /// Files that should not be processed no matter the cases
-    pub(crate) const FILES_TO_NOT_PROCESS: &'static [&'static str; 11] = &[
+    pub(crate) const FILES_TO_NOT_PROCESS: &'static [&'static str; 12] = &[
         "package.json",
         "package-lock.json",
         "npm-shrinkwrap.json",
@@ -107,6 +108,8 @@ impl FileFeaturesResult {
         "jsconfig.json",
         "deno.json",
         "deno.jsonc",
+        // TODO: remove this when are able to handle nested .gitignore files
+        ".gitignore",
     ];
 
     /// Checks whether this file can be processed
@@ -119,9 +122,9 @@ impl FileFeaturesResult {
 
     /// By default, all features are not supported by a file.
     const WORKSPACE_FEATURES: [(FeatureName, SupportKind); 3] = [
-        (FeatureName::Lint, SupportKind::Ignored),
-        (FeatureName::Format, SupportKind::Ignored),
-        (FeatureName::OrganizeImports, SupportKind::Ignored),
+        (FeatureName::Lint, SupportKind::FileNotSupported),
+        (FeatureName::Format, SupportKind::FileNotSupported),
+        (FeatureName::OrganizeImports, SupportKind::FileNotSupported),
     ];
 
     pub fn new() -> Self {
@@ -161,6 +164,10 @@ impl FileFeaturesResult {
                     !settings.formatter().enabled || settings.javascript_formatter_disabled()
                 } else if language.is_json_like() {
                     !settings.formatter().enabled || settings.json_formatter_disabled()
+                } else if language.is_css_like() {
+                    !can_format_css_yet()
+                        || !settings.formatter().enabled
+                        || settings.css_formatter_disabled()
                 } else {
                     !settings.formatter().enabled
                 };
@@ -199,6 +206,13 @@ impl FileFeaturesResult {
         );
 
         self
+    }
+
+    /// The file will be ignored for all features
+    pub fn set_ignored_for_all_features(&mut self) {
+        for support_kind in self.features_supported.values_mut() {
+            *support_kind = SupportKind::Ignored;
+        }
     }
 
     pub fn ignored(&mut self, feature: FeatureName) {

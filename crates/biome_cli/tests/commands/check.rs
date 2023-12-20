@@ -994,7 +994,6 @@ fn fs_error_unknown() {
 //     ├── symlink_testcase1_3 -> hidden_testcase1/test/test.js
 //     └── symlink_testcase2 -> hidden_testcase2
 #[test]
-#[ignore = "It regresses on linux since we added the ignore crate, to understand why"]
 fn fs_files_ignore_symlink() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
@@ -1073,7 +1072,6 @@ fn fs_files_ignore_symlink() {
         Args::from(
             [
                 ("check"),
-                "--log-level=info",
                 ("--config-path"),
                 (root_path.display().to_string().as_str()),
                 ("--apply-unsafe"),
