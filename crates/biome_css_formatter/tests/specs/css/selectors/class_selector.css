@@ -1,0 +1,18 @@
+.one {}
+.one.two {}
+
+.one .two {}
+.one.two .three.four {}
+
+
+div.one.two {}
+div#one.two {}
+div.one#two {}
+div .one {}
+div .one.two {}
+
+.one.two.three.four.five.six.seven.eight.nine.ten.eleven.twelve.thirteen.fourteen.fifteen.sixteen.seventeen.eighteen.nineteen.twenty {}
+
+.one, .two {}
+.one.two, .three.four {}
+.one .two.three, .four {}

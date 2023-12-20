@@ -13,6 +13,9 @@ info: css/declaration_list.css
 .newline {
     color: blue; background-color: red;
 }
+.no-trailing-semi {
+    color: blue
+}
 
 .empty-line {
     color: blue;
@@ -61,6 +64,9 @@ Line width: 80
 	color: blue;
 	background-color: red;
 }
+.no-trailing-semi {
+	color: blue;
+}
 
 .empty-line {
 	color: blue;
@@ -79,10 +85,4 @@ Line width: 80
 }
 ```
 
-
-
-## Unimplemented nodes/tokens
-
-" 12p" => 307..311
-" 70" => 328..331
 

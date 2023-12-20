@@ -5,6 +5,6 @@ pub(crate) struct FormatCssCompoundSelectorList;
 impl FormatRule<CssCompoundSelectorList> for FormatCssCompoundSelectorList {
     type Context = CssFormatContext;
     fn fmt(&self, node: &CssCompoundSelectorList, f: &mut CssFormatter) -> FormatResult<()> {
-        format_verbatim_node(node.syntax()).fmt(f)
+        f.join().entries(node.iter().formatted()).finish()
     }
 }
