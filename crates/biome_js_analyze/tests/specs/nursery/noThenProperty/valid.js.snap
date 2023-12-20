@@ -1,3 +1,9 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
 const then = {}
 const notThen = then
 const then = then.then
@@ -6,3 +12,7 @@ const foo = {notThen() {}}
 const foo = {[then]: 1}
 // const NOT_THEN = "no-then";const foo = {[NOT_THEN]: 1}
 function foo({then}) {}
+
+```
+
+

@@ -1,0 +1,225 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+const foo = {then: 1}
+const foo = {["then"]: 1}
+const foo = {[`then`]: 1}
+const foo = {["then"]() {}}
+const foo = {[`then`]() {}}
+// const THEN = "then";const foo = {[THEN]() {}}
+const foo = {get then() {}}
+const foo = {get ["then"]() {}}
+const foo = {get [`then`]() {}}
+// const THEN = "then";const foo = {get [THEN]() {}}
+class Foo {then}
+```
+
+# Diagnostics
+```
+invalid.js:1:14 lint/nursery/noThenProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not add `then` to an object.
+  
+  > 1 │ const foo = {then: 1}
+      │              ^^^^
+    2 │ const foo = {["then"]: 1}
+    3 │ const foo = {[`then`]: 1}
+  
+
+```
+
+```
+invalid.js:2:14 lint/nursery/noThenProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not add `then` to an object.
+  
+    1 │ const foo = {then: 1}
+  > 2 │ const foo = {["then"]: 1}
+      │              ^^^^^^^^
+    3 │ const foo = {[`then`]: 1}
+    4 │ const foo = {["then"]() {}}
+  
+
+```
+
+```
+invalid.js:2:14 lint/nursery/noThenProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not add `then` to an object.
+  
+    1 │ const foo = {then: 1}
+  > 2 │ const foo = {["then"]: 1}
+      │              ^^^^^^^^
+    3 │ const foo = {[`then`]: 1}
+    4 │ const foo = {["then"]() {}}
+  
+
+```
+
+```
+invalid.js:3:14 lint/nursery/noThenProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not add `then` to an object.
+  
+    1 │ const foo = {then: 1}
+    2 │ const foo = {["then"]: 1}
+  > 3 │ const foo = {[`then`]: 1}
+      │              ^^^^^^^^
+    4 │ const foo = {["then"]() {}}
+    5 │ const foo = {[`then`]() {}}
+  
+
+```
+
+```
+invalid.js:3:14 lint/nursery/noThenProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not add `then` to an object.
+  
+    1 │ const foo = {then: 1}
+    2 │ const foo = {["then"]: 1}
+  > 3 │ const foo = {[`then`]: 1}
+      │              ^^^^^^^^
+    4 │ const foo = {["then"]() {}}
+    5 │ const foo = {[`then`]() {}}
+  
+
+```
+
+```
+invalid.js:4:14 lint/nursery/noThenProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not add `then` to an object.
+  
+    2 │ const foo = {["then"]: 1}
+    3 │ const foo = {[`then`]: 1}
+  > 4 │ const foo = {["then"]() {}}
+      │              ^^^^^^^^
+    5 │ const foo = {[`then`]() {}}
+    6 │ // const THEN = "then";const foo = {[THEN]() {}}
+  
+
+```
+
+```
+invalid.js:5:14 lint/nursery/noThenProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not add `then` to an object.
+  
+    3 │ const foo = {[`then`]: 1}
+    4 │ const foo = {["then"]() {}}
+  > 5 │ const foo = {[`then`]() {}}
+      │              ^^^^^^^^^^^^^
+    6 │ // const THEN = "then";const foo = {[THEN]() {}}
+    7 │ const foo = {get then() {}}
+  
+
+```
+
+```
+invalid.js:5:14 lint/nursery/noThenProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not add `then` to an object.
+  
+    3 │ const foo = {[`then`]: 1}
+    4 │ const foo = {["then"]() {}}
+  > 5 │ const foo = {[`then`]() {}}
+      │              ^^^^^^^^
+    6 │ // const THEN = "then";const foo = {[THEN]() {}}
+    7 │ const foo = {get then() {}}
+  
+
+```
+
+```
+invalid.js:7:18 lint/nursery/noThenProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not add `then` to an object.
+  
+    5 │ const foo = {[`then`]() {}}
+    6 │ // const THEN = "then";const foo = {[THEN]() {}}
+  > 7 │ const foo = {get then() {}}
+      │                  ^^^^
+    8 │ const foo = {get ["then"]() {}}
+    9 │ const foo = {get [`then`]() {}}
+  
+
+```
+
+```
+invalid.js:8:18 lint/nursery/noThenProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not add `then` to an object.
+  
+     6 │ // const THEN = "then";const foo = {[THEN]() {}}
+     7 │ const foo = {get then() {}}
+   > 8 │ const foo = {get ["then"]() {}}
+       │                  ^^^^^^^^
+     9 │ const foo = {get [`then`]() {}}
+    10 │ // const THEN = "then";const foo = {get [THEN]() {}}
+  
+
+```
+
+```
+invalid.js:8:18 lint/nursery/noThenProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not add `then` to an object.
+  
+     6 │ // const THEN = "then";const foo = {[THEN]() {}}
+     7 │ const foo = {get then() {}}
+   > 8 │ const foo = {get ["then"]() {}}
+       │                  ^^^^^^^^
+     9 │ const foo = {get [`then`]() {}}
+    10 │ // const THEN = "then";const foo = {get [THEN]() {}}
+  
+
+```
+
+```
+invalid.js:9:18 lint/nursery/noThenProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not add `then` to an object.
+  
+     7 │ const foo = {get then() {}}
+     8 │ const foo = {get ["then"]() {}}
+   > 9 │ const foo = {get [`then`]() {}}
+       │                  ^^^^^^^^
+    10 │ // const THEN = "then";const foo = {get [THEN]() {}}
+    11 │ class Foo {then}
+  
+
+```
+
+```
+invalid.js:9:18 lint/nursery/noThenProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not add `then` to an object.
+  
+     7 │ const foo = {get then() {}}
+     8 │ const foo = {get ["then"]() {}}
+   > 9 │ const foo = {get [`then`]() {}}
+       │                  ^^^^^^^^
+    10 │ // const THEN = "then";const foo = {get [THEN]() {}}
+    11 │ class Foo {then}
+  
+
+```
+
+```
+invalid.js:11:12 lint/nursery/noThenProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not add `then` to a class.
+  
+     9 │ const foo = {get [`then`]() {}}
+    10 │ // const THEN = "then";const foo = {get [THEN]() {}}
+  > 11 │ class Foo {then}
+       │            ^^^^
+  
+
+```
+
+
