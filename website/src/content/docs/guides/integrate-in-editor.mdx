@@ -117,7 +117,12 @@ Operations via the daemon are significantly slower than the CLI itself, so it's 
 
 ### Daemon logs
 
-The Biome daemon saves logs in your file system. Logs are store in a folder called `biome-logs`. You can find this folder in the biome cache directory, residing at `~/.cache/biome` on Linux, `C:\Users\<UserName>\AppData\Local\biomejs\biome\cache` on Windows, `/Users/<UserName>/Library/Caches/dev.biomejs.biome` on macOS, and the system's temporary directory on other operating systems.
+The Biome daemon saves logs in your file system. Logs are stored in a folder called `biome-logs`. The path of  this folder changes based on your operative system:
+-  Linux: `~/.cache/biome`;
+-  Windows: `C:\Users\<UserName>\AppData\Local\biomejs\biome\cache`
+-  macOS: `/Users/<UserName>/Library/Caches/dev.biomejs.biome`
+
+For other operative systems, you can find the folder in the system's temporary directory.
 
 To obtain the precise path, execute the following command:
 ```shell
