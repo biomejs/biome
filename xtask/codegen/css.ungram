@@ -429,6 +429,7 @@ AnyCssAtRule =
 	| CssCounterStyleAtRule
 	| CssContainerAtRule
 	| CssFontFaceAtRule
+	| CssFontPaletteValuesAtRule
 	| CssKeyframesAtRule
 	| CssMediaAtRule
 	| CssBogusAtRule
@@ -462,7 +463,7 @@ CssFontFaceAtRule =
 
 
 // @font-palette-values {}
-// ^^^^^^^^^^^^^^^^^^^^^^^
+// ^^^^^^^^^^^^^^^^^^^^
 CssFontPaletteValuesAtRule =
 	'font-palette-values'
 	name: CssIdentifier

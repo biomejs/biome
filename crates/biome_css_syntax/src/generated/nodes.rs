@@ -3900,6 +3900,7 @@ pub enum AnyCssAtRule {
     CssContainerAtRule(CssContainerAtRule),
     CssCounterStyleAtRule(CssCounterStyleAtRule),
     CssFontFaceAtRule(CssFontFaceAtRule),
+    CssFontPaletteValuesAtRule(CssFontPaletteValuesAtRule),
     CssKeyframesAtRule(CssKeyframesAtRule),
     CssMediaAtRule(CssMediaAtRule),
 }
@@ -3937,6 +3938,12 @@ impl AnyCssAtRule {
     pub fn as_css_font_face_at_rule(&self) -> Option<&CssFontFaceAtRule> {
         match &self {
             AnyCssAtRule::CssFontFaceAtRule(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_font_palette_values_at_rule(&self) -> Option<&CssFontPaletteValuesAtRule> {
+        match &self {
+            AnyCssAtRule::CssFontPaletteValuesAtRule(item) => Some(item),
             _ => None,
         }
     }
@@ -8501,6 +8508,11 @@ impl From<CssFontFaceAtRule> for AnyCssAtRule {
         AnyCssAtRule::CssFontFaceAtRule(node)
     }
 }
+impl From<CssFontPaletteValuesAtRule> for AnyCssAtRule {
+    fn from(node: CssFontPaletteValuesAtRule) -> AnyCssAtRule {
+        AnyCssAtRule::CssFontPaletteValuesAtRule(node)
+    }
+}
 impl From<CssKeyframesAtRule> for AnyCssAtRule {
     fn from(node: CssKeyframesAtRule) -> AnyCssAtRule {
         AnyCssAtRule::CssKeyframesAtRule(node)
@@ -8519,6 +8531,7 @@ impl AstNode for AnyCssAtRule {
         .union(CssContainerAtRule::KIND_SET)
         .union(CssCounterStyleAtRule::KIND_SET)
         .union(CssFontFaceAtRule::KIND_SET)
+        .union(CssFontPaletteValuesAtRule::KIND_SET)
         .union(CssKeyframesAtRule::KIND_SET)
         .union(CssMediaAtRule::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
@@ -8530,6 +8543,7 @@ impl AstNode for AnyCssAtRule {
                 | CSS_CONTAINER_AT_RULE
                 | CSS_COUNTER_STYLE_AT_RULE
                 | CSS_FONT_FACE_AT_RULE
+                | CSS_FONT_PALETTE_VALUES_AT_RULE
                 | CSS_KEYFRAMES_AT_RULE
                 | CSS_MEDIA_AT_RULE
         )
@@ -8548,6 +8562,9 @@ impl AstNode for AnyCssAtRule {
                 AnyCssAtRule::CssCounterStyleAtRule(CssCounterStyleAtRule { syntax })
             }
             CSS_FONT_FACE_AT_RULE => AnyCssAtRule::CssFontFaceAtRule(CssFontFaceAtRule { syntax }),
+            CSS_FONT_PALETTE_VALUES_AT_RULE => {
+                AnyCssAtRule::CssFontPaletteValuesAtRule(CssFontPaletteValuesAtRule { syntax })
+            }
             CSS_KEYFRAMES_AT_RULE => {
                 AnyCssAtRule::CssKeyframesAtRule(CssKeyframesAtRule { syntax })
             }
@@ -8564,6 +8581,7 @@ impl AstNode for AnyCssAtRule {
             AnyCssAtRule::CssContainerAtRule(it) => &it.syntax,
             AnyCssAtRule::CssCounterStyleAtRule(it) => &it.syntax,
             AnyCssAtRule::CssFontFaceAtRule(it) => &it.syntax,
+            AnyCssAtRule::CssFontPaletteValuesAtRule(it) => &it.syntax,
             AnyCssAtRule::CssKeyframesAtRule(it) => &it.syntax,
             AnyCssAtRule::CssMediaAtRule(it) => &it.syntax,
         }
@@ -8576,6 +8594,7 @@ impl AstNode for AnyCssAtRule {
             AnyCssAtRule::CssContainerAtRule(it) => it.syntax,
             AnyCssAtRule::CssCounterStyleAtRule(it) => it.syntax,
             AnyCssAtRule::CssFontFaceAtRule(it) => it.syntax,
+            AnyCssAtRule::CssFontPaletteValuesAtRule(it) => it.syntax,
             AnyCssAtRule::CssKeyframesAtRule(it) => it.syntax,
             AnyCssAtRule::CssMediaAtRule(it) => it.syntax,
         }
@@ -8590,6 +8609,7 @@ impl std::fmt::Debug for AnyCssAtRule {
             AnyCssAtRule::CssContainerAtRule(it) => std::fmt::Debug::fmt(it, f),
             AnyCssAtRule::CssCounterStyleAtRule(it) => std::fmt::Debug::fmt(it, f),
             AnyCssAtRule::CssFontFaceAtRule(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssAtRule::CssFontPaletteValuesAtRule(it) => std::fmt::Debug::fmt(it, f),
             AnyCssAtRule::CssKeyframesAtRule(it) => std::fmt::Debug::fmt(it, f),
             AnyCssAtRule::CssMediaAtRule(it) => std::fmt::Debug::fmt(it, f),
         }
@@ -8604,6 +8624,7 @@ impl From<AnyCssAtRule> for SyntaxNode {
             AnyCssAtRule::CssContainerAtRule(it) => it.into(),
             AnyCssAtRule::CssCounterStyleAtRule(it) => it.into(),
             AnyCssAtRule::CssFontFaceAtRule(it) => it.into(),
+            AnyCssAtRule::CssFontPaletteValuesAtRule(it) => it.into(),
             AnyCssAtRule::CssKeyframesAtRule(it) => it.into(),
             AnyCssAtRule::CssMediaAtRule(it) => it.into(),
         }

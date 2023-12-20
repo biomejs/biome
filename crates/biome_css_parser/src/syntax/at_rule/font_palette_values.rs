@@ -25,9 +25,10 @@ pub(crate) fn parse_font_palette_values(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_font_palette_values(p) {
         return Absent;
     }
+
     let m = p.start();
 
-    p.bump(T![font_face]);
+    p.bump(T![font_palette_values]);
 
     let kind = if parse_regular_identifier(p)
         .or_recover(
