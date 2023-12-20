@@ -3,6 +3,7 @@ mod color_profile;
 mod container;
 mod counter_style;
 mod font_face;
+mod font_palette_values;
 
 use crate::parser::CssParser;
 use crate::syntax::at_rule::charset::{is_at_charset_at_rule, parse_charset_at_rule};
@@ -19,6 +20,8 @@ use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::T;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::prelude::*;
+
+use self::font_palette_values::{is_at_font_palette_values, parse_font_palette_values};
 
 #[inline]
 pub(crate) fn at_at_rule(p: &mut CssParser) -> bool {
@@ -59,6 +62,8 @@ pub(crate) fn parse_any_at_rule(p: &mut CssParser) -> ParsedSyntax {
         parse_container_at_rule(p)
     } else if is_at_font_face_at_rule(p) {
         parse_font_face_at_rule(p)
+    } else if is_at_font_palette_values(p) {
+        parse_font_palette_values(p)
     } else {
         Absent
     }
