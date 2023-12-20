@@ -7,17 +7,19 @@ mod language {
     include!("language.rs");
 }
 
-// #[ignore]
+#[ignore]
 #[test]
 // use this test check if your snippet prints as you wish, without using a snapshot
 fn quick_test() {
     let src = r#"
 
-    .complex  * | html {
+    div
+    
+    span, span p {
+        font-size: 12px;
     }
 "#;
     let parse = parse_css(src, CssParserOptions::default());
-    println!("{:#?}", parse);
 
     let options = CssFormatOptions::default();
     let doc = format_node(options.clone(), &parse.syntax()).unwrap();
