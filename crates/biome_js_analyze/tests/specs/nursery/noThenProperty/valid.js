@@ -6,3 +6,24 @@ const foo = {notThen() {}}
 const foo = {[then]: 1}
 // const NOT_THEN = "no-then";const foo = {[NOT_THEN]: 1}
 function foo({then}) {}
+
+class then {}
+class Foo {notThen}
+class Foo {notThen() {}}
+class Foo {[then]}
+class Foo {#then}
+class Foo {#then() {}}
+class Foo {[then]() {}}
+class Foo {get notThen() {}}
+class Foo {get #then() {}}
+class Foo {get [then]() {}}
+class Foo {static notThen}
+class Foo {static notThen() {}}
+class Foo {static #then}
+class Foo {static #then() {}}
+class Foo {static [then]}
+class Foo {static [then]() {}}
+class Foo {static get notThen() {}}
+class Foo {static get #then() {}}
+class Foo {static get [then]() {}}
+class Foo {notThen = then}

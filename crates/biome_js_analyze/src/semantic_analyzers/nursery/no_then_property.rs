@@ -1,12 +1,11 @@
 use crate::semantic_services::Semantic;
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
-use biome_js_semantic::{Reference, ReferencesExtensions};
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsObjectMemberName, AnyJsTemplateElement, JsIdentifierBinding,
+    AnyJsClassMemberName, AnyJsExpression, AnyJsObjectMemberName, AnyJsTemplateElement,
 };
 use biome_js_syntax::{
-    JsComputedMemberName, JsGetterObjectMember, JsLiteralMemberName, JsMethodObjectMember,
-    JsPropertyClassMember, JsPropertyObjectMember,
+    JsComputedMemberName, JsGetterClassMember, JsGetterObjectMember, JsMethodClassMember,
+    JsMethodObjectMember, JsPropertyClassMember, JsPropertyObjectMember, JsSetterClassMember,
 };
 use biome_rowan::{declare_node_union, AstNode};
 
@@ -45,7 +44,7 @@ declare_rule! {
 }
 
 declare_node_union! {
-    pub(crate) NoThenPropertyQuery = JsComputedMemberName | JsMethodObjectMember | JsPropertyObjectMember | JsGetterObjectMember | JsPropertyClassMember
+    pub(crate) NoThenPropertyQuery = JsComputedMemberName | JsMethodObjectMember | JsPropertyObjectMember | JsGetterObjectMember | JsPropertyClassMember | JsMethodClassMember | JsGetterClassMember | JsSetterClassMember
 }
 
 pub enum NoThenPropertyState {
@@ -84,6 +83,33 @@ impl Rule for NoThenProperty {
                 }
             }
             NoThenPropertyQuery::JsPropertyClassMember(node) => {
+                if let AnyJsClassMemberName::JsPrivateClassMemberName(_) = node.name().ok()? {
+                    return None;
+                }
+                if node.name().ok()?.name()? == "then" {
+                    return Some(NoThenPropertyState::Class);
+                }
+            }
+            NoThenPropertyQuery::JsMethodClassMember(node) => {
+                if let AnyJsClassMemberName::JsPrivateClassMemberName(_) = node.name().ok()? {
+                    return None;
+                }
+                if node.name().ok()?.name()? == "then" {
+                    return Some(NoThenPropertyState::Class);
+                }
+            }
+            NoThenPropertyQuery::JsGetterClassMember(node) => {
+                if let AnyJsClassMemberName::JsPrivateClassMemberName(_) = node.name().ok()? {
+                    return None;
+                }
+                if node.name().ok()?.name()? == "then" {
+                    return Some(NoThenPropertyState::Class);
+                }
+            }
+            NoThenPropertyQuery::JsSetterClassMember(node) => {
+                if let AnyJsClassMemberName::JsPrivateClassMemberName(_) = node.name().ok()? {
+                    return None;
+                }
                 if node.name().ok()?.name()? == "then" {
                     return Some(NoThenPropertyState::Class);
                 }
@@ -144,6 +170,9 @@ impl Rule for NoThenProperty {
             NoThenPropertyQuery::JsPropertyObjectMember(node) => node.name().ok()?.range(),
             NoThenPropertyQuery::JsGetterObjectMember(node) => node.name().ok()?.range(),
             NoThenPropertyQuery::JsPropertyClassMember(node) => node.name().ok()?.range(),
+            NoThenPropertyQuery::JsMethodClassMember(node) => node.name().ok()?.range(),
+            NoThenPropertyQuery::JsGetterClassMember(node) => node.name().ok()?.range(),
+            NoThenPropertyQuery::JsSetterClassMember(node) => node.name().ok()?.range(),
             NoThenPropertyQuery::JsComputedMemberName(node) => node.range(),
             NoThenPropertyQuery::JsMethodObjectMember(node) => node.range(),
         };
