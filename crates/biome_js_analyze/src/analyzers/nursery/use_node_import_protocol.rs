@@ -1,9 +1,15 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{
+    context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
+};
 use biome_console::markup;
-use biome_js_syntax::{JsCallExpression, JsImportCallExpression, JsModuleSource};
-use biome_rowan::{declare_node_union, AstNode, AstSeparatedList};
+use biome_diagnostics::Applicability;
+use biome_js_factory::make::{self, jsx_string_literal};
+use biome_js_syntax::{
+    AnyJsLiteralExpression, JsCallExpression, JsImportCallExpression, JsModuleSource,
+};
+use biome_rowan::{declare_node_union, AstNode, AstSeparatedList, BatchMutationExt};
 
-use crate::globals::node::NODE_BUILTINS;
+use crate::{globals::node::NODE_BUILTINS, JsRuleAction};
 
 declare_node_union! {
     pub(crate) AnyJsImportLike = JsModuleSource | JsCallExpression |  JsImportCallExpression
@@ -47,6 +53,7 @@ declare_rule! {
         version: "next",
         name: "useNodeImportProtocol",
         recommended: false,
+        fix_kind: FixKind::Unsafe,
     }
 }
 
@@ -119,10 +126,31 @@ impl Rule for UseNodeImportProtocol {
         )
         .note(markup!{
             "Using the "<Emphasis>"node:"</Emphasis>" protocol is more explicit and signals that the imported module belongs to Node.js."
-        })
-        .note(markup! {
-            "Change to \"node:"{state}"\"."
         }))
+    }
+
+    fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
+        let new_import_str = format!("node:{}", state);
+        let old_node = biome_js_syntax::AnyJsExpression::AnyJsLiteralExpression(
+            AnyJsLiteralExpression::JsStringLiteralExpression(make::js_string_literal_expression(
+                jsx_string_literal(state.as_str()),
+            )),
+        );
+        let new_node = biome_js_syntax::AnyJsExpression::AnyJsLiteralExpression(
+            AnyJsLiteralExpression::JsStringLiteralExpression(make::js_string_literal_expression(
+                jsx_string_literal(new_import_str.as_str()),
+            )),
+        );
+
+        let mut mutation = ctx.root().begin();
+        mutation.replace_node(old_node, new_node);
+
+        Some(JsRuleAction {
+            category: ActionCategory::QuickFix,
+            applicability: Applicability::MaybeIncorrect,
+            message: markup! { "Change to \"node:"{state}"\"." }.to_owned(),
+            mutation,
+        })
     }
 }
 
