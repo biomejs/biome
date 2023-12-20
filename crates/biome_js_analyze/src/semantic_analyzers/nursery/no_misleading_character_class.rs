@@ -6,12 +6,13 @@ use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_syntax::{
-    AnyJsCallArgument, AnyJsExpression, AnyJsLiteralExpression, AnyJsTemplateElement,
-    JsCallArguments, JsCallExpression, JsNewExpression, JsRegexLiteralExpression,
-    JsStringLiteralExpression, JsSyntaxKind, JsSyntaxToken, T,
+    global_identifier, AnyJsCallArgument, AnyJsExpression, AnyJsLiteralExpression,
+    AnyJsTemplateElement, JsCallArguments, JsCallExpression, JsNewExpression,
+    JsRegexLiteralExpression, JsStringLiteralExpression, JsSyntaxKind, JsSyntaxToken, T,
 };
 use biome_rowan::{
     declare_node_union, AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, TextRange,
+    TriviaPieceKind,
 };
 declare_rule! {
     /// Disallow characters made with multiple code points in character class syntax.
@@ -127,25 +128,7 @@ impl Rule for NoMisleadingCharacterClass {
             }
 
             AnyRegexExpression::JsNewExpression(expr) => {
-                let is_reg_exp = match expr.callee().ok()? {
-                    AnyJsExpression::JsIdentifierExpression(callee) => {
-                        callee.name().ok()?.has_name("RegExp")
-                    }
-                    AnyJsExpression::JsStaticMemberExpression(callee) => {
-                        let is_global_this = match callee.object().ok()? {
-                            AnyJsExpression::JsIdentifierExpression(e) => {
-                                e.name().ok()?.has_name("globalThis")
-                            }
-                            _ => false,
-                        };
-
-                        is_global_this
-                            && callee.member().ok()?.value_token().ok()?.text() == "RegExp"
-                    }
-                    _ => false,
-                };
-
-                if is_reg_exp {
+                if is_regex_expr(expr.callee().ok()?)? {
                     let mut args = expr.arguments()?.args().iter();
                     let raw_regex_pattern = args
                         .next()
@@ -171,11 +154,7 @@ impl Rule for NoMisleadingCharacterClass {
                 }
             }
             AnyRegexExpression::JsCallExpression(expr) => {
-                let callee = match expr.callee().ok()? {
-                    AnyJsExpression::JsIdentifierExpression(callee) => callee,
-                    _ => return None,
-                };
-                if callee.name().ok()?.has_name("RegExp") {
+                if is_regex_expr(expr.callee().ok()?)? {
                     let mut args = expr.arguments().ok()?.args().iter();
                     let raw_regex_pattern = args
                         .next()
@@ -290,6 +269,23 @@ impl Rule for NoMisleadingCharacterClass {
         } else {
             None
         }
+    }
+}
+
+fn is_regex_expr(expr: AnyJsExpression) -> Option<bool> {
+    match expr {
+        AnyJsExpression::JsIdentifierExpression(callee) => {
+            Some(callee.name().ok()?.has_name("RegExp"))
+        }
+        AnyJsExpression::JsStaticMemberExpression(callee) => {
+            let is_member_regexp = callee.member().ok()?.value_token().ok()?.text() == "RegExp";
+            let callee = callee.object().ok()?;
+            let (_, name) = global_identifier(&callee)?;
+            let is_global_obj =
+                name.text() == "globalThis" || name.text() == "global" || name.text() == "window";
+            Some(is_global_obj && is_member_regexp)
+        }
+        _ => Some(false),
     }
 }
 
@@ -421,7 +417,10 @@ fn make_suggestion(
     suggestion.map(|s| {
         make::js_call_arguments(
             make::token(T!['(']),
-            make::js_call_argument_list([literal, s], [make::token(T![,])]),
+            make::js_call_argument_list(
+                [literal, s],
+                Some(make::token(T![,]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")])),
+            ),
             make::token(T![')']),
         )
     })

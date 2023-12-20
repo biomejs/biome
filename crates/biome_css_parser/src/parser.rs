@@ -18,7 +18,7 @@ pub struct CssParserOptions {
 }
 
 impl CssParserOptions {
-    pub fn with_allow_wrong_line_comments(mut self) -> Self {
+    pub fn allow_wrong_line_comments(mut self) -> Self {
         self.allow_wrong_line_comments = true;
         self
     }

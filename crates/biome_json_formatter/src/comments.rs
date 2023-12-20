@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use biome_diagnostics::category;
 use biome_formatter::comments::{
-    is_doc_comment, CommentKind, CommentStyle, Comments, SourceComment,
+    is_alignable_comment, CommentKind, CommentStyle, Comments, SourceComment,
 };
 use biome_formatter::formatter::Formatter;
 use biome_formatter::{write, FormatResult, FormatRule};
@@ -22,12 +22,12 @@ impl FormatRule<SourceComment<JsonLanguage>> for FormatJsonLeadingComment {
         comment: &SourceComment<JsonLanguage>,
         f: &mut Formatter<Self::Context>,
     ) -> FormatResult<()> {
-        if is_doc_comment(comment.piece()) {
+        if is_alignable_comment(comment.piece()) {
             let mut source_offset = comment.piece().text_range().start();
 
             let mut lines = comment.piece().text().lines();
 
-            // SAFETY: Safe, `is_doc_comment` only returns `true` for multiline comments
+            // SAFETY: Safe, `is_alignable_comment` only returns `true` for multiline comments
             let first_line = lines.next().unwrap();
             write!(f, [dynamic_text(first_line.trim_end(), source_offset)])?;
 

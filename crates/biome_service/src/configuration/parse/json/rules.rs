@@ -937,12 +937,23 @@ impl Deserializable for Nursery {
                                 diagnostics,
                             );
                         }
+                        "noInvalidUseBeforeDeclaration" => {
+                            result.no_invalid_use_before_declaration = Deserializable::deserialize(
+                                &value,
+                                "noInvalidUseBeforeDeclaration",
+                                diagnostics,
+                            );
+                        }
                         "noMisleadingCharacterClass" => {
                             result.no_misleading_character_class = Deserializable::deserialize(
                                 &value,
                                 "noMisleadingCharacterClass",
                                 diagnostics,
                             );
+                        }
+                        "noNodejsModules" => {
+                            result.no_nodejs_modules =
+                                Deserializable::deserialize(&value, "noNodejsModules", diagnostics);
                         }
                         "noUnusedImports" => {
                             result.no_unused_imports =
@@ -959,6 +970,13 @@ impl Deserializable for Nursery {
                             result.no_useless_lone_block_statements = Deserializable::deserialize(
                                 &value,
                                 "noUselessLoneBlockStatements",
+                                diagnostics,
+                            );
+                        }
+                        "noUselessTernary" => {
+                            result.no_useless_ternary = Deserializable::deserialize(
+                                &value,
+                                "noUselessTernary",
                                 diagnostics,
                             );
                         }
@@ -985,6 +1003,13 @@ impl Deserializable for Nursery {
                             result.use_import_restrictions = Deserializable::deserialize(
                                 &value,
                                 "useImportRestrictions",
+                                diagnostics,
+                            );
+                        }
+                        "useNodeImportProtocol" => {
+                            result.use_node_import_protocol = Deserializable::deserialize(
+                                &value,
+                                "useNodeImportProtocol",
                                 diagnostics,
                             );
                         }
@@ -1021,15 +1046,19 @@ impl Deserializable for Nursery {
                                     "noDuplicateJsonKeys",
                                     "noEmptyBlockStatements",
                                     "noImplicitAnyLet",
+                                    "noInvalidUseBeforeDeclaration",
                                     "noMisleadingCharacterClass",
+                                    "noNodejsModules",
                                     "noUnusedImports",
                                     "noUnusedPrivateClassMembers",
                                     "noUselessLoneBlockStatements",
+                                    "noUselessTernary",
                                     "useAwait",
                                     "useExportType",
                                     "useForOf",
                                     "useGroupedTypeImport",
                                     "useImportRestrictions",
+                                    "useNodeImportProtocol",
                                     "useRegexLiterals",
                                     "useShorthandFunctionType",
                                     "useValidAriaRole",

@@ -6,7 +6,7 @@ mod selector;
 use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use crate::syntax::at_rule::{at_at_rule, parse_at_rule};
-use crate::syntax::css_dimension::{is_at_dimension, parse_dimension};
+use crate::syntax::css_dimension::{is_at_any_dimension, parse_any_dimension};
 use crate::syntax::parse_error::expected_block;
 use crate::syntax::parse_error::expected_identifier;
 use crate::syntax::selector::CssSelectorList;
@@ -84,14 +84,13 @@ pub(crate) fn parse_rule_block(p: &mut CssParser) -> ParsedSyntax {
     }
     let m = p.start();
     p.expect(T!['{']);
-    CssDeclarationList::default().parse_list(p);
+    CssDeclarationList.parse_list(p);
     p.expect(T!['}']);
 
     Present(m.complete(p, CSS_BLOCK))
 }
 
-#[derive(Default)]
-pub(crate) struct CssDeclarationList {}
+pub(crate) struct CssDeclarationList;
 
 impl ParseSeparatedList for CssDeclarationList {
     type Kind = CssSyntaxKind;
@@ -99,15 +98,11 @@ impl ParseSeparatedList for CssDeclarationList {
     const LIST_KIND: Self::Kind = CSS_DECLARATION_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        parse_declaration_item(p)
+        parse_declaration(p)
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
         p.at(T!['}'])
-    }
-
-    fn allow_trailing_separating_element(&self) -> bool {
-        true
     }
 
     fn recover(
@@ -125,21 +120,24 @@ impl ParseSeparatedList for CssDeclarationList {
     fn separating_element_kind(&mut self) -> Self::Kind {
         T![;]
     }
+
+    fn allow_trailing_separating_element(&self) -> bool {
+        true
+    }
 }
 
-#[derive(Default)]
-struct ListOfComponentValues {}
+struct ListOfComponentValues;
 impl ParseNodeList for ListOfComponentValues {
     type Kind = CssSyntaxKind;
     type Parser<'source> = CssParser<'source>;
-    const LIST_KIND: Self::Kind = CSS_LIST_OF_COMPONENT_VALUES;
+    const LIST_KIND: Self::Kind = CSS_COMPONENT_VALUE_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
         parse_any_value(p)
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        !is_any_value(p)
+        !is_at_any_value(p)
     }
 
     fn recover(
@@ -155,7 +153,7 @@ impl ParseNodeList for ListOfComponentValues {
     }
 }
 #[inline]
-pub(crate) fn parse_declaration_item(p: &mut CssParser) -> ParsedSyntax {
+pub(crate) fn parse_declaration(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_identifier(p) {
         return Absent;
     }
@@ -164,20 +162,20 @@ pub(crate) fn parse_declaration_item(p: &mut CssParser) -> ParsedSyntax {
 
     p.expect(T![:]);
 
-    ListOfComponentValues::default().parse_list(p);
+    ListOfComponentValues.parse_list(p);
 
     parse_declaration_important(p).ok();
     Present(m.complete(p, CSS_DECLARATION))
 }
 
 #[inline]
-fn at_declaration_important(p: &mut CssParser) -> bool {
+fn is_at_declaration_important(p: &mut CssParser) -> bool {
     p.at(T![!]) && p.nth_at(1, T![important])
 }
 
 #[inline]
 fn parse_declaration_important(p: &mut CssParser) -> ParsedSyntax {
-    if !at_declaration_important(p) {
+    if !is_at_declaration_important(p) {
         return Absent;
     }
     let m = p.start();
@@ -187,11 +185,11 @@ fn parse_declaration_important(p: &mut CssParser) -> ParsedSyntax {
 }
 
 #[inline]
-pub(crate) fn is_any_value(p: &mut CssParser) -> bool {
+pub(crate) fn is_at_any_value(p: &mut CssParser) -> bool {
     is_at_any_function(p)
         || is_at_identifier(p)
         || p.at(CSS_STRING_LITERAL)
-        || is_at_dimension(p)
+        || is_at_any_dimension(p)
         || p.at(CSS_NUMBER_LITERAL)
         || is_at_custom_property(p)
         || is_at_ratio(p)
@@ -207,8 +205,8 @@ pub(crate) fn parse_any_value(p: &mut CssParser) -> ParsedSyntax {
         parse_regular_identifier(p)
     } else if p.at(CSS_STRING_LITERAL) {
         parse_string(p)
-    } else if is_at_dimension(p) {
-        parse_dimension(p)
+    } else if is_at_any_dimension(p) {
+        parse_any_dimension(p)
     } else if is_at_ratio(p) {
         parse_ratio(p)
     } else if p.at(CSS_NUMBER_LITERAL) {
@@ -254,10 +252,6 @@ impl ParseSeparatedList for CssParameterList {
         p.at(T![')'])
     }
 
-    fn allow_trailing_separating_element(&self) -> bool {
-        true
-    }
-
     fn recover(
         &mut self,
         p: &mut Self::Parser<'_>,
@@ -273,16 +267,20 @@ impl ParseSeparatedList for CssParameterList {
     fn separating_element_kind(&mut self) -> Self::Kind {
         T![,]
     }
+
+    fn allow_trailing_separating_element(&self) -> bool {
+        true
+    }
 }
 
 #[inline]
 pub(crate) fn parse_parameter(p: &mut CssParser) -> ParsedSyntax {
-    if !is_any_value(p) {
+    if !is_at_any_value(p) {
         return Absent;
     }
     let param = p.start();
 
-    ListOfComponentValues::default().parse_list(p);
+    ListOfComponentValues.parse_list(p);
 
     Present(param.complete(p, CSS_PARAMETER))
 }

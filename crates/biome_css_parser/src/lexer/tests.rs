@@ -15,7 +15,7 @@ use crate::CssParserOptions;
 // and make sure the tokens yielded are fully lossless and the source can be reconstructed from only the tokens
 macro_rules! assert_lex {
     ($src:expr, $($kind:ident:$len:expr $(,)?)*) => {{
-        let config = CssParserOptions::default().with_allow_wrong_line_comments();
+        let config = CssParserOptions::default().allow_wrong_line_comments();
         let mut lexer = CssLexer::from_str($src).with_config(config);
         let mut idx = 0;
         let mut tok_idx = TextSize::default();

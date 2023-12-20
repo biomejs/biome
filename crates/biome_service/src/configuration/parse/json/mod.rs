@@ -2,6 +2,7 @@
 //!
 
 mod configuration;
+mod css;
 mod files;
 mod formatter;
 mod javascript;
