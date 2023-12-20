@@ -37,6 +37,7 @@ expression: snapshot
 @container(inline-size>=calc(200px)) { }
 
 @container ( WIDTH <= 150px ) {  }
+@container ( 150px <= WIDTH ) {  }
 
 ```
 
@@ -58,11 +59,11 @@ CssRoot {
                     not_token: NOT_KW@16..20 "not" [] [Whitespace(" ")],
                     query: CssContainerSizeFeatureInParens {
                         l_paren_token: L_PAREN@20..21 "(" [] [],
-                        query: CssSizeFeatureRange {
+                        feature: CssQueryFeatureRange {
                             left: CssIdentifier {
                                 value_token: IDENT@21..27 "width" [] [Whitespace(" ")],
                             },
-                            comparison: CssSizeFeatureRangeComparison {
+                            comparison: CssQueryFeatureRangeComparison {
                                 operator: LTEQ@27..30 "<=" [] [Whitespace(" ")],
                             },
                             right: CssRegularDimension {
@@ -93,11 +94,11 @@ CssRoot {
                 },
                 query: CssContainerSizeFeatureInParens {
                     l_paren_token: L_PAREN@64..65 "(" [] [],
-                    query: CssSizeFeatureRange {
+                    feature: CssQueryFeatureRange {
                         left: CssIdentifier {
                             value_token: IDENT@65..77 "inline-size" [] [Whitespace(" ")],
                         },
-                        comparison: CssSizeFeatureRangeComparison {
+                        comparison: CssQueryFeatureRangeComparison {
                             operator: R_ANGLE@77..79 ">" [] [Whitespace(" ")],
                         },
                         right: CssRegularDimension {
@@ -128,11 +129,11 @@ CssRoot {
                 query: CssContainerOrQuery {
                     left: CssContainerSizeFeatureInParens {
                         l_paren_token: L_PAREN@107..108 "(" [] [],
-                        query: CssSizeFeatureRange {
+                        feature: CssQueryFeatureRange {
                             left: CssIdentifier {
                                 value_token: IDENT@108..120 "inline-size" [] [Whitespace(" ")],
                             },
-                            comparison: CssSizeFeatureRangeComparison {
+                            comparison: CssQueryFeatureRangeComparison {
                                 operator: R_ANGLE@120..122 ">" [] [Whitespace(" ")],
                             },
                             right: CssRegularDimension {
@@ -179,11 +180,11 @@ CssRoot {
                 name: missing (optional),
                 query: CssContainerSizeFeatureInParens {
                     l_paren_token: L_PAREN@174..175 "(" [] [],
-                    query: CssSizeFeatureRange {
+                    feature: CssQueryFeatureRange {
                         left: CssIdentifier {
                             value_token: IDENT@175..187 "inline-size" [] [Whitespace(" ")],
                         },
-                        comparison: CssSizeFeatureRangeComparison {
+                        comparison: CssQueryFeatureRangeComparison {
                             operator: GTEQ@187..190 ">=" [] [Whitespace(" ")],
                         },
                         right: CssRegularDimension {
@@ -214,11 +215,11 @@ CssRoot {
                 query: CssContainerAndQuery {
                     left: CssContainerSizeFeatureInParens {
                         l_paren_token: L_PAREN@216..217 "(" [] [],
-                        query: CssSizeFeatureRange {
+                        feature: CssQueryFeatureRange {
                             left: CssIdentifier {
                                 value_token: IDENT@217..229 "inline-size" [] [Whitespace(" ")],
                             },
-                            comparison: CssSizeFeatureRangeComparison {
+                            comparison: CssQueryFeatureRangeComparison {
                                 operator: R_ANGLE@229..231 ">" [] [Whitespace(" ")],
                             },
                             right: CssRegularDimension {
@@ -235,11 +236,11 @@ CssRoot {
                     and_token: AND_KW@237..241 "and" [] [Whitespace(" ")],
                     right: CssContainerSizeFeatureInParens {
                         l_paren_token: L_PAREN@241..242 "(" [] [],
-                        query: CssSizeFeatureRange {
+                        feature: CssQueryFeatureRange {
                             left: CssIdentifier {
                                 value_token: IDENT@242..254 "inline-size" [] [Whitespace(" ")],
                             },
-                            comparison: CssSizeFeatureRangeComparison {
+                            comparison: CssQueryFeatureRangeComparison {
                                 operator: L_ANGLE@254..256 "<" [] [Whitespace(" ")],
                             },
                             right: CssRegularDimension {
@@ -268,7 +269,7 @@ CssRoot {
                 name: missing (optional),
                 query: CssContainerSizeFeatureInParens {
                     l_paren_token: L_PAREN@279..280 "(" [] [],
-                    query: CssSizeFeatureRangeInterval {
+                    feature: CssQueryFeatureRangeInterval {
                         left: CssRegularDimension {
                             value: CssNumber {
                                 value_token: CSS_NUMBER_LITERAL@280..283 "100" [] [],
@@ -277,13 +278,13 @@ CssRoot {
                                 value_token: IDENT@283..286 "px" [] [Whitespace(" ")],
                             },
                         },
-                        left_comparison: CssSizeFeatureRangeComparison {
+                        left_comparison: CssQueryFeatureRangeComparison {
                             operator: R_ANGLE@286..288 ">" [] [Whitespace(" ")],
                         },
                         name: CssIdentifier {
                             value_token: IDENT@288..294 "width" [] [Whitespace(" ")],
                         },
-                        right_comparison: CssSizeFeatureRangeComparison {
+                        right_comparison: CssQueryFeatureRangeComparison {
                             operator: R_ANGLE@294..296 ">" [] [Whitespace(" ")],
                         },
                         right: CssRegularDimension {
@@ -315,11 +316,11 @@ CssRoot {
                         not_token: NOT_KW@321..325 "not" [] [Whitespace(" ")],
                         query: CssContainerSizeFeatureInParens {
                             l_paren_token: L_PAREN@325..326 "(" [] [],
-                            query: CssSizeFeatureRange {
+                            feature: CssQueryFeatureRange {
                                 left: CssIdentifier {
                                     value_token: IDENT@326..332 "width" [] [Whitespace(" ")],
                                 },
-                                comparison: CssSizeFeatureRangeComparison {
+                                comparison: CssQueryFeatureRangeComparison {
                                     operator: LTEQ@332..335 "<=" [] [Whitespace(" ")],
                                 },
                                 right: CssRegularDimension {
@@ -352,11 +353,11 @@ CssRoot {
                     l_paren_token: L_PAREN@360..361 "(" [] [],
                     query: CssContainerSizeFeatureInParens {
                         l_paren_token: L_PAREN@361..362 "(" [] [],
-                        query: CssSizeFeatureRange {
+                        feature: CssQueryFeatureRange {
                             left: CssIdentifier {
                                 value_token: IDENT@362..368 "width" [] [Whitespace(" ")],
                             },
-                            comparison: CssSizeFeatureRangeComparison {
+                            comparison: CssQueryFeatureRangeComparison {
                                 operator: LTEQ@368..371 "<=" [] [Whitespace(" ")],
                             },
                             right: CssRegularDimension {
@@ -386,7 +387,7 @@ CssRoot {
                 name: missing (optional),
                 query: CssContainerSizeFeatureInParens {
                     l_paren_token: L_PAREN@396..397 "(" [] [],
-                    query: CssSizeFeaturePlain {
+                    feature: CssQueryFeaturePlain {
                         name: CssIdentifier {
                             value_token: IDENT@397..406 "min-width" [] [],
                         },
@@ -418,7 +419,7 @@ CssRoot {
                 },
                 query: CssContainerSizeFeatureInParens {
                     l_paren_token: L_PAREN@440..441 "(" [] [],
-                    query: CssSizeFeaturePlain {
+                    feature: CssQueryFeaturePlain {
                         name: CssIdentifier {
                             value_token: IDENT@441..450 "min-width" [] [],
                         },
@@ -481,7 +482,7 @@ CssRoot {
                 },
                 query: CssContainerSizeFeatureInParens {
                     l_paren_token: L_PAREN@529..530 "(" [] [],
-                    query: CssSizeFeaturePlain {
+                    feature: CssQueryFeaturePlain {
                         name: CssIdentifier {
                             value_token: IDENT@530..542 "--responsive" [] [],
                         },
@@ -508,11 +509,11 @@ CssRoot {
                 },
                 query: CssContainerSizeFeatureInParens {
                     l_paren_token: L_PAREN@572..573 "(" [] [],
-                    query: CssSizeFeatureRange {
+                    feature: CssQueryFeatureRange {
                         left: CssIdentifier {
                             value_token: IDENT@573..585 "inline-size" [] [Whitespace(" ")],
                         },
-                        comparison: CssSizeFeatureRangeComparison {
+                        comparison: CssQueryFeatureRangeComparison {
                             operator: R_ANGLE@585..587 ">" [] [Whitespace(" ")],
                         },
                         right: CssRegularDimension {
@@ -542,7 +543,7 @@ CssRoot {
                 },
                 query: CssContainerSizeFeatureInParens {
                     l_paren_token: L_PAREN@615..616 "(" [] [],
-                    query: CssSizeFeaturePlain {
+                    feature: CssQueryFeaturePlain {
                         name: CssIdentifier {
                             value_token: IDENT@616..628 "--responsive" [] [],
                         },
@@ -567,11 +568,11 @@ CssRoot {
                 name: missing (optional),
                 query: CssContainerSizeFeatureInParens {
                     l_paren_token: L_PAREN@652..653 "(" [] [],
-                    query: CssSizeFeatureRange {
+                    feature: CssQueryFeatureRange {
                         left: CssIdentifier {
                             value_token: IDENT@653..664 "inline-size" [] [],
                         },
-                        comparison: CssSizeFeatureRangeComparison {
+                        comparison: CssQueryFeatureRangeComparison {
                             operator: GTEQ@664..666 ">=" [] [],
                         },
                         right: CssAnyFunction {
@@ -614,11 +615,11 @@ CssRoot {
                 name: missing (optional),
                 query: CssContainerSizeFeatureInParens {
                     l_paren_token: L_PAREN@695..697 "(" [] [Whitespace(" ")],
-                    query: CssSizeFeatureRange {
+                    feature: CssQueryFeatureRange {
                         left: CssIdentifier {
                             value_token: IDENT@697..703 "WIDTH" [] [Whitespace(" ")],
                         },
-                        comparison: CssSizeFeatureRangeComparison {
+                        comparison: CssQueryFeatureRangeComparison {
                             operator: LTEQ@703..706 "<=" [] [Whitespace(" ")],
                         },
                         right: CssRegularDimension {
@@ -639,17 +640,49 @@ CssRoot {
                 },
             },
         },
+        CssAtRule {
+            at_token: AT@718..720 "@" [Newline("\n")] [],
+            rule: CssContainerAtRule {
+                container_token: CONTAINER_KW@720..730 "container" [] [Whitespace(" ")],
+                name: missing (optional),
+                query: CssContainerSizeFeatureInParens {
+                    l_paren_token: L_PAREN@730..732 "(" [] [Whitespace(" ")],
+                    feature: CssQueryFeatureReverseRange {
+                        left: CssRegularDimension {
+                            value: CssNumber {
+                                value_token: CSS_NUMBER_LITERAL@732..735 "150" [] [],
+                            },
+                            unit: CssIdentifier {
+                                value_token: IDENT@735..738 "px" [] [Whitespace(" ")],
+                            },
+                        },
+                        comparison: CssQueryFeatureRangeComparison {
+                            operator: LTEQ@738..741 "<=" [] [Whitespace(" ")],
+                        },
+                        right: CssIdentifier {
+                            value_token: IDENT@741..747 "WIDTH" [] [Whitespace(" ")],
+                        },
+                    },
+                    r_paren_token: R_PAREN@747..749 ")" [] [Whitespace(" ")],
+                },
+                block: CssBlock {
+                    l_curly_token: L_CURLY@749..752 "{" [] [Whitespace("  ")],
+                    declaration_list: CssDeclarationList [],
+                    r_curly_token: R_CURLY@752..753 "}" [] [],
+                },
+            },
+        },
     ],
-    eof_token: EOF@718..719 "" [Newline("\n")] [],
+    eof_token: EOF@753..754 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..719
+0: CSS_ROOT@0..754
   0: (empty)
-  1: CSS_RULE_LIST@0..718
+  1: CSS_RULE_LIST@0..753
     0: CSS_AT_RULE@0..41
       0: AT@0..1 "@" [] []
       1: CSS_CONTAINER_AT_RULE@1..41
@@ -660,10 +693,10 @@ CssRoot {
           0: NOT_KW@16..20 "not" [] [Whitespace(" ")]
           1: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@20..37
             0: L_PAREN@20..21 "(" [] []
-            1: CSS_SIZE_FEATURE_RANGE@21..35
+            1: CSS_QUERY_FEATURE_RANGE@21..35
               0: CSS_IDENTIFIER@21..27
                 0: IDENT@21..27 "width" [] [Whitespace(" ")]
-              1: CSS_SIZE_FEATURE_RANGE_COMPARISON@27..30
+              1: CSS_QUERY_FEATURE_RANGE_COMPARISON@27..30
                 0: LTEQ@27..30 "<=" [] [Whitespace(" ")]
               2: CSS_REGULAR_DIMENSION@30..35
                 0: CSS_NUMBER@30..33
@@ -683,10 +716,10 @@ CssRoot {
           0: IDENT@54..64 "my-layout" [] [Whitespace(" ")]
         2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@64..85
           0: L_PAREN@64..65 "(" [] []
-          1: CSS_SIZE_FEATURE_RANGE@65..83
+          1: CSS_QUERY_FEATURE_RANGE@65..83
             0: CSS_IDENTIFIER@65..77
               0: IDENT@65..77 "inline-size" [] [Whitespace(" ")]
-            1: CSS_SIZE_FEATURE_RANGE_COMPARISON@77..79
+            1: CSS_QUERY_FEATURE_RANGE_COMPARISON@77..79
               0: R_ANGLE@77..79 ">" [] [Whitespace(" ")]
             2: CSS_REGULAR_DIMENSION@79..83
               0: CSS_NUMBER@79..81
@@ -707,10 +740,10 @@ CssRoot {
         2: CSS_CONTAINER_OR_QUERY@107..157
           0: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@107..128
             0: L_PAREN@107..108 "(" [] []
-            1: CSS_SIZE_FEATURE_RANGE@108..126
+            1: CSS_QUERY_FEATURE_RANGE@108..126
               0: CSS_IDENTIFIER@108..120
                 0: IDENT@108..120 "inline-size" [] [Whitespace(" ")]
-              1: CSS_SIZE_FEATURE_RANGE_COMPARISON@120..122
+              1: CSS_QUERY_FEATURE_RANGE_COMPARISON@120..122
                 0: R_ANGLE@120..122 ">" [] [Whitespace(" ")]
               2: CSS_REGULAR_DIMENSION@122..126
                 0: CSS_NUMBER@122..124
@@ -742,10 +775,10 @@ CssRoot {
         1: (empty)
         2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@174..195
           0: L_PAREN@174..175 "(" [] []
-          1: CSS_SIZE_FEATURE_RANGE@175..193
+          1: CSS_QUERY_FEATURE_RANGE@175..193
             0: CSS_IDENTIFIER@175..187
               0: IDENT@175..187 "inline-size" [] [Whitespace(" ")]
-            1: CSS_SIZE_FEATURE_RANGE_COMPARISON@187..190
+            1: CSS_QUERY_FEATURE_RANGE_COMPARISON@187..190
               0: GTEQ@187..190 ">=" [] [Whitespace(" ")]
             2: CSS_REGULAR_DIMENSION@190..193
               0: CSS_NUMBER@190..191
@@ -766,10 +799,10 @@ CssRoot {
         2: CSS_CONTAINER_AND_QUERY@216..262
           0: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@216..237
             0: L_PAREN@216..217 "(" [] []
-            1: CSS_SIZE_FEATURE_RANGE@217..235
+            1: CSS_QUERY_FEATURE_RANGE@217..235
               0: CSS_IDENTIFIER@217..229
                 0: IDENT@217..229 "inline-size" [] [Whitespace(" ")]
-              1: CSS_SIZE_FEATURE_RANGE_COMPARISON@229..231
+              1: CSS_QUERY_FEATURE_RANGE_COMPARISON@229..231
                 0: R_ANGLE@229..231 ">" [] [Whitespace(" ")]
               2: CSS_REGULAR_DIMENSION@231..235
                 0: CSS_NUMBER@231..233
@@ -780,10 +813,10 @@ CssRoot {
           1: AND_KW@237..241 "and" [] [Whitespace(" ")]
           2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@241..262
             0: L_PAREN@241..242 "(" [] []
-            1: CSS_SIZE_FEATURE_RANGE@242..260
+            1: CSS_QUERY_FEATURE_RANGE@242..260
               0: CSS_IDENTIFIER@242..254
                 0: IDENT@242..254 "inline-size" [] [Whitespace(" ")]
-              1: CSS_SIZE_FEATURE_RANGE_COMPARISON@254..256
+              1: CSS_QUERY_FEATURE_RANGE_COMPARISON@254..256
                 0: L_ANGLE@254..256 "<" [] [Whitespace(" ")]
               2: CSS_REGULAR_DIMENSION@256..260
                 0: CSS_NUMBER@256..258
@@ -802,17 +835,17 @@ CssRoot {
         1: (empty)
         2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@279..303
           0: L_PAREN@279..280 "(" [] []
-          1: CSS_SIZE_FEATURE_RANGE_INTERVAL@280..301
+          1: CSS_QUERY_FEATURE_RANGE_INTERVAL@280..301
             0: CSS_REGULAR_DIMENSION@280..286
               0: CSS_NUMBER@280..283
                 0: CSS_NUMBER_LITERAL@280..283 "100" [] []
               1: CSS_IDENTIFIER@283..286
                 0: IDENT@283..286 "px" [] [Whitespace(" ")]
-            1: CSS_SIZE_FEATURE_RANGE_COMPARISON@286..288
+            1: CSS_QUERY_FEATURE_RANGE_COMPARISON@286..288
               0: R_ANGLE@286..288 ">" [] [Whitespace(" ")]
             2: CSS_IDENTIFIER@288..294
               0: IDENT@288..294 "width" [] [Whitespace(" ")]
-            3: CSS_SIZE_FEATURE_RANGE_COMPARISON@294..296
+            3: CSS_QUERY_FEATURE_RANGE_COMPARISON@294..296
               0: R_ANGLE@294..296 ">" [] [Whitespace(" ")]
             4: CSS_REGULAR_DIMENSION@296..301
               0: CSS_NUMBER@296..299
@@ -835,10 +868,10 @@ CssRoot {
             0: NOT_KW@321..325 "not" [] [Whitespace(" ")]
             1: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@325..341
               0: L_PAREN@325..326 "(" [] []
-              1: CSS_SIZE_FEATURE_RANGE@326..340
+              1: CSS_QUERY_FEATURE_RANGE@326..340
                 0: CSS_IDENTIFIER@326..332
                   0: IDENT@326..332 "width" [] [Whitespace(" ")]
-                1: CSS_SIZE_FEATURE_RANGE_COMPARISON@332..335
+                1: CSS_QUERY_FEATURE_RANGE_COMPARISON@332..335
                   0: LTEQ@332..335 "<=" [] [Whitespace(" ")]
                 2: CSS_REGULAR_DIMENSION@335..340
                   0: CSS_NUMBER@335..338
@@ -860,10 +893,10 @@ CssRoot {
           0: L_PAREN@360..361 "(" [] []
           1: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@361..377
             0: L_PAREN@361..362 "(" [] []
-            1: CSS_SIZE_FEATURE_RANGE@362..376
+            1: CSS_QUERY_FEATURE_RANGE@362..376
               0: CSS_IDENTIFIER@362..368
                 0: IDENT@362..368 "width" [] [Whitespace(" ")]
-              1: CSS_SIZE_FEATURE_RANGE_COMPARISON@368..371
+              1: CSS_QUERY_FEATURE_RANGE_COMPARISON@368..371
                 0: LTEQ@368..371 "<=" [] [Whitespace(" ")]
               2: CSS_REGULAR_DIMENSION@371..376
                 0: CSS_NUMBER@371..374
@@ -883,7 +916,7 @@ CssRoot {
         1: (empty)
         2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@396..415
           0: L_PAREN@396..397 "(" [] []
-          1: CSS_SIZE_FEATURE_PLAIN@397..413
+          1: CSS_QUERY_FEATURE_PLAIN@397..413
             0: CSS_IDENTIFIER@397..406
               0: IDENT@397..406 "min-width" [] []
             1: COLON@406..408 ":" [] [Whitespace(" ")]
@@ -905,7 +938,7 @@ CssRoot {
           0: IDENT@432..440 "sidebar" [] [Whitespace(" ")]
         2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@440..459
           0: L_PAREN@440..441 "(" [] []
-          1: CSS_SIZE_FEATURE_PLAIN@441..457
+          1: CSS_QUERY_FEATURE_PLAIN@441..457
             0: CSS_IDENTIFIER@441..450
               0: IDENT@441..450 "min-width" [] []
             1: COLON@450..452 ":" [] [Whitespace(" ")]
@@ -949,7 +982,7 @@ CssRoot {
           0: IDENT@524..529 "style" [] []
         2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@529..550
           0: L_PAREN@529..530 "(" [] []
-          1: CSS_SIZE_FEATURE_PLAIN@530..548
+          1: CSS_QUERY_FEATURE_PLAIN@530..548
             0: CSS_IDENTIFIER@530..542
               0: IDENT@530..542 "--responsive" [] []
             1: COLON@542..544 ":" [] [Whitespace(" ")]
@@ -968,10 +1001,10 @@ CssRoot {
           0: IDENT@567..572 "card" [] [Whitespace(" ")]
         2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@572..593
           0: L_PAREN@572..573 "(" [] []
-          1: CSS_SIZE_FEATURE_RANGE@573..591
+          1: CSS_QUERY_FEATURE_RANGE@573..591
             0: CSS_IDENTIFIER@573..585
               0: IDENT@573..585 "inline-size" [] [Whitespace(" ")]
-            1: CSS_SIZE_FEATURE_RANGE_COMPARISON@585..587
+            1: CSS_QUERY_FEATURE_RANGE_COMPARISON@585..587
               0: R_ANGLE@585..587 ">" [] [Whitespace(" ")]
             2: CSS_REGULAR_DIMENSION@587..591
               0: CSS_NUMBER@587..589
@@ -991,7 +1024,7 @@ CssRoot {
           0: IDENT@610..615 "style" [] []
         2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@615..636
           0: L_PAREN@615..616 "(" [] []
-          1: CSS_SIZE_FEATURE_PLAIN@616..634
+          1: CSS_QUERY_FEATURE_PLAIN@616..634
             0: CSS_IDENTIFIER@616..628
               0: IDENT@616..628 "--responsive" [] []
             1: COLON@628..630 ":" [] [Whitespace(" ")]
@@ -1009,10 +1042,10 @@ CssRoot {
         1: (empty)
         2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@652..679
           0: L_PAREN@652..653 "(" [] []
-          1: CSS_SIZE_FEATURE_RANGE@653..677
+          1: CSS_QUERY_FEATURE_RANGE@653..677
             0: CSS_IDENTIFIER@653..664
               0: IDENT@653..664 "inline-size" [] []
-            1: CSS_SIZE_FEATURE_RANGE_COMPARISON@664..666
+            1: CSS_QUERY_FEATURE_RANGE_COMPARISON@664..666
               0: GTEQ@664..666 ">=" [] []
             2: CSS_ANY_FUNCTION@666..677
               0: CSS_SIMPLE_FUNCTION@666..677
@@ -1040,10 +1073,10 @@ CssRoot {
         1: (empty)
         2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@695..714
           0: L_PAREN@695..697 "(" [] [Whitespace(" ")]
-          1: CSS_SIZE_FEATURE_RANGE@697..712
+          1: CSS_QUERY_FEATURE_RANGE@697..712
             0: CSS_IDENTIFIER@697..703
               0: IDENT@697..703 "WIDTH" [] [Whitespace(" ")]
-            1: CSS_SIZE_FEATURE_RANGE_COMPARISON@703..706
+            1: CSS_QUERY_FEATURE_RANGE_COMPARISON@703..706
               0: LTEQ@703..706 "<=" [] [Whitespace(" ")]
             2: CSS_REGULAR_DIMENSION@706..712
               0: CSS_NUMBER@706..709
@@ -1055,7 +1088,29 @@ CssRoot {
           0: L_CURLY@714..717 "{" [] [Whitespace("  ")]
           1: CSS_DECLARATION_LIST@717..717
           2: R_CURLY@717..718 "}" [] []
-  2: EOF@718..719 "" [Newline("\n")] []
+    16: CSS_AT_RULE@718..753
+      0: AT@718..720 "@" [Newline("\n")] []
+      1: CSS_CONTAINER_AT_RULE@720..753
+        0: CONTAINER_KW@720..730 "container" [] [Whitespace(" ")]
+        1: (empty)
+        2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@730..749
+          0: L_PAREN@730..732 "(" [] [Whitespace(" ")]
+          1: CSS_QUERY_FEATURE_REVERSE_RANGE@732..747
+            0: CSS_REGULAR_DIMENSION@732..738
+              0: CSS_NUMBER@732..735
+                0: CSS_NUMBER_LITERAL@732..735 "150" [] []
+              1: CSS_IDENTIFIER@735..738
+                0: IDENT@735..738 "px" [] [Whitespace(" ")]
+            1: CSS_QUERY_FEATURE_RANGE_COMPARISON@738..741
+              0: LTEQ@738..741 "<=" [] [Whitespace(" ")]
+            2: CSS_IDENTIFIER@741..747
+              0: IDENT@741..747 "WIDTH" [] [Whitespace(" ")]
+          2: R_PAREN@747..749 ")" [] [Whitespace(" ")]
+        3: CSS_BLOCK@749..753
+          0: L_CURLY@749..752 "{" [] [Whitespace("  ")]
+          1: CSS_DECLARATION_LIST@752..752
+          2: R_CURLY@752..753 "}" [] []
+  2: EOF@753..754 "" [Newline("\n")] []
 
 ```
 
