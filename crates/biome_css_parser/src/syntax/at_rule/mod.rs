@@ -15,13 +15,14 @@ use crate::syntax::at_rule::counter_style::{
     is_at_counter_style_at_rule, parse_counter_style_at_rule,
 };
 use crate::syntax::at_rule::font_face::{is_at_font_face_at_rule, parse_font_face_at_rule};
+use crate::syntax::at_rule::font_palette_values::{
+    is_at_font_palette_values, parse_font_palette_values_at_rule,
+};
 use crate::syntax::parse_error::expected_any_at_rule;
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::T;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::prelude::*;
-
-use self::font_palette_values::{is_at_font_palette_values, parse_font_palette_values_at_rule};
 
 #[inline]
 pub(crate) fn at_at_rule(p: &mut CssParser) -> bool {
