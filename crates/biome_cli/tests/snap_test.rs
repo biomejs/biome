@@ -401,7 +401,7 @@ pub fn assert_file_contents(fs: &MemoryFileSystem, path: &Path, expected_content
     assert_eq!(
         content,
         expected_content,
-        "file {} doesn't match the expected content",
+        "file {} doesn't match the expected content (right)",
         path.display()
     );
 }

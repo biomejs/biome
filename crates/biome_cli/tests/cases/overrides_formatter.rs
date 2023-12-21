@@ -358,3 +358,107 @@ fn does_include_file_with_different_languages_and_files() {
         result,
     ));
 }
+
+#[test]
+fn does_not_change_formatting_settings() {
+    let mut console = BufferConsole::default();
+    let mut fs = MemoryFileSystem::default();
+    let file_path = Path::new("biome.json");
+    fs.insert(
+        file_path.into(),
+        r#"{
+        "formatter": { "lineWidth": 20, "indentStyle": "space" },
+  "overrides": [
+    { "include": ["test.js"], "linter": { "enabled": false } }
+  ]
+}
+
+"#
+        .as_bytes(),
+    );
+
+    let test = Path::new("test.js");
+    fs.insert(test.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
+
+    let test2 = Path::new("test2.js");
+    fs.insert(test2.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("format"),
+                ("--write"),
+                test.as_os_str().to_str().unwrap(),
+                test2.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, test, FORMATTED_LINE_WITH_SPACES);
+    assert_file_contents(&fs, test2, FORMATTED_LINE_WITH_SPACES);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "does_not_change_formatting_settings",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn does_not_change_formatting_language_settings() {
+    let mut console = BufferConsole::default();
+    let mut fs = MemoryFileSystem::default();
+    let file_path = Path::new("biome.json");
+    fs.insert(
+        file_path.into(),
+        r#"{
+        "javascript": { "formatter": { "quoteStyle": "single" } },
+  "overrides": [
+    { "include": ["test.js"], "linter": { "enabled": false } }
+  ]
+}
+
+"#
+        .as_bytes(),
+    );
+
+    let test = Path::new("test.js");
+    fs.insert(test.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
+
+    let test2 = Path::new("test2.js");
+    fs.insert(test2.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("format"),
+                ("--write"),
+                test.as_os_str().to_str().unwrap(),
+                test2.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, test, FORMATTED_WITH_SINGLE_QUOTES);
+    assert_file_contents(&fs, test2, FORMATTED_WITH_SINGLE_QUOTES);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "does_not_change_formatting_language_settings",
+        fs,
+        console,
+        result,
+    ));
+}
