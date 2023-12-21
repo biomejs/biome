@@ -339,11 +339,11 @@ CssRoot {
                             name: CssAttributeName {
                                 namespace: missing (optional),
                                 name: CssIdentifier {
-                                    value_token: IDENT@144..149 "href$" [] [],
+                                    value_token: IDENT@144..148 "href" [] [],
                                 },
                             },
                             matcher: CssAttributeMatcher {
-                                operator: EQ@149..150 "=" [] [],
+                                operator: DOLLAR_EQ@148..150 "$=" [] [],
                                 value: CssAttributeMatcherValue {
                                     name: CssString {
                                         value_token: CSS_STRING_LITERAL@150..156 "\".org\"" [] [],
@@ -1870,12 +1870,12 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@142..158
             0: CSS_ATTRIBUTE_SELECTOR@142..158
               0: L_BRACK@142..144 "[" [Newline("\n")] []
-              1: CSS_ATTRIBUTE_NAME@144..149
+              1: CSS_ATTRIBUTE_NAME@144..148
                 0: (empty)
-                1: CSS_IDENTIFIER@144..149
-                  0: IDENT@144..149 "href$" [] []
-              2: CSS_ATTRIBUTE_MATCHER@149..156
-                0: EQ@149..150 "=" [] []
+                1: CSS_IDENTIFIER@144..148
+                  0: IDENT@144..148 "href" [] []
+              2: CSS_ATTRIBUTE_MATCHER@148..156
+                0: DOLLAR_EQ@148..150 "$=" [] []
                 1: CSS_ATTRIBUTE_MATCHER_VALUE@150..156
                   0: CSS_STRING@150..156
                     0: CSS_STRING_LITERAL@150..156 "\".org\"" [] []

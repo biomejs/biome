@@ -292,7 +292,7 @@ CssRoot {
                                                     CSS_NUMBER_LITERAL@245..250 "100" [Newline("\n"), Whitespace("\t")] [],
                                                     CssBogusSelector {
                                                         items: [
-                                                            IDENT@250..253 "vh" [] [Whitespace(" ")],
+                                                            VH_KW@250..253 "vh" [] [Whitespace(" ")],
                                                         ],
                                                     },
                                                 ],
@@ -837,7 +837,7 @@ CssRoot {
               0: CSS_BOGUS@245..253
                 0: CSS_NUMBER_LITERAL@245..250 "100" [Newline("\n"), Whitespace("\t")] []
                 1: CSS_BOGUS_SELECTOR@250..253
-                  0: IDENT@250..253 "vh" [] [Whitespace(" ")]
+                  0: VH_KW@250..253 "vh" [] [Whitespace(" ")]
               1: CSS_DECLARATION_LIST_BLOCK@253..286
                 0: L_CURLY@253..254 "{" [] []
                 1: CSS_DECLARATION_LIST@254..283
