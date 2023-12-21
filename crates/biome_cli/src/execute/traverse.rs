@@ -316,6 +316,7 @@ fn process_messages(options: ProcessMessagesOptions) {
     let mut is_msg_open = true;
     let mut is_report_open = true;
     let mut diagnostics_to_print = vec![];
+    dbg!(diagnostic_level);
     while is_msg_open || is_report_open {
         let msg = select! {
             recv(recv_msgs) -> msg => match msg {
@@ -347,8 +348,10 @@ fn process_messages(options: ProcessMessagesOptions) {
 
             Message::ApplyError(error) => {
                 *errors += 1;
-                let should_print =
-                    printed_diagnostics < max_diagnostics && error.severity() >= *diagnostic_level;
+                if error.severity() < *diagnostic_level {
+                    continue;
+                }
+                let should_print = printed_diagnostics < max_diagnostics;
                 if should_print {
                     printed_diagnostics += 1;
                     remaining_diagnostics.store(
@@ -365,6 +368,9 @@ fn process_messages(options: ProcessMessagesOptions) {
 
             Message::Error(mut err) => {
                 let location = err.location();
+                if err.severity() < *diagnostic_level {
+                    continue;
+                }
                 if err.severity() == Severity::Warning {
                     *warnings += 1;
                 }
@@ -394,8 +400,7 @@ fn process_messages(options: ProcessMessagesOptions) {
                     }
                 }
 
-                let should_print =
-                    printed_diagnostics < max_diagnostics && err.severity() >= *diagnostic_level;
+                let should_print = printed_diagnostics < max_diagnostics;
                 if should_print {
                     printed_diagnostics += 1;
                     remaining_diagnostics.store(
@@ -444,6 +449,10 @@ fn process_messages(options: ProcessMessagesOptions) {
                 if mode.is_ci() {
                     for diag in diagnostics {
                         let severity = diag.severity();
+                        if severity < *diagnostic_level {
+                            continue;
+                        }
+
                         if severity == Severity::Error {
                             *errors += 1;
                         }
@@ -457,6 +466,9 @@ fn process_messages(options: ProcessMessagesOptions) {
                 } else {
                     for diag in diagnostics {
                         let severity = diag.severity();
+                        if severity < *diagnostic_level {
+                            continue;
+                        }
                         if severity == Severity::Error {
                             *errors += 1;
                         }
@@ -464,8 +476,7 @@ fn process_messages(options: ProcessMessagesOptions) {
                             *warnings += 1;
                         }
 
-                        let should_print = printed_diagnostics < max_diagnostics
-                            && diag.severity() >= *diagnostic_level;
+                        let should_print = printed_diagnostics < max_diagnostics;
                         if should_print {
                             printed_diagnostics += 1;
                             remaining_diagnostics.store(
@@ -501,15 +512,24 @@ fn process_messages(options: ProcessMessagesOptions) {
                 new,
                 diff_kind,
             } => {
+                let is_error = mode.is_ci() || !mode.is_format_write();
                 // A diff is an error in CI mode and in format check mode
                 if mode.is_ci() || !mode.is_format_write() {
                     *errors += 1;
                 }
 
-                let severity: Severity = diff_kind.severity();
+                let severity: Severity = if is_error {
+                    Severity::Error
+                } else {
+                    // we set lowest
+                    Severity::Hint
+                };
 
-                let should_print =
-                    printed_diagnostics < max_diagnostics && severity >= *diagnostic_level;
+                if severity < *diagnostic_level {
+                    continue;
+                }
+
+                let should_print = printed_diagnostics < max_diagnostics;
                 if should_print {
                     printed_diagnostics += 1;
                     remaining_diagnostics.store(
@@ -609,6 +629,7 @@ fn process_messages(options: ProcessMessagesOptions) {
         })
     }
 
+    dbg!(not_printed_diagnostics);
     if !mode.is_ci() && not_printed_diagnostics > 0 {
         console.log(markup! {
             <Warn>"The number of diagnostics exceeds the number allowed by Biome.\n"</Warn>
