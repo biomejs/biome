@@ -94,12 +94,9 @@ is enabled to process only the files that were changed. Contributed by @simonxab
 
 #### Enhancements
 
-#### Bug fixes
+- Address [#959](https://github.com/biomejs/biome/issues/959) and [#1157](https://github.com/biomejs/biome/issues/1157). [noEmptyInterface](https://biomejs.dev/linter/rules/no-empty-interface) no longer reports empty interfaces that extend a type. Contributed by @Conaclos
 
-- Fix [#959](https://github.com/biomejs/biome/issues/959). [noEmptyInterface](https://biomejs.dev/linter/rules/no-empty-interface) no longer reports interface that extends a type and is in an external module or a global declaration. Contributed by @Conaclos
-
-  Empty interface that extends a type are sometimes used to extend an existing interface.
-  This is generally used to extend an interface of an external module.
+  This allows supporting interface augmentation in external modules as demonstrated in the following example:
 
   ```ts
   interface Extension {
@@ -107,9 +104,12 @@ is enabled to process only the files that were changed. Contributed by @simonxab
   }
 
   declare module "@external/module" {
+    // Empty interface that extends a type.
     export interface ExistingInterface extends Extension {}
   }
   ```
+
+#### Bug fixes
 
 - Fix [#1061](https://github.com/biomejs/biome/issues/1061). [noRedeclare](https://biomejs.dev/linter/rules/no-redeclare) no longer reports overloads of `export default function`. Contributed by @Conaclos
 

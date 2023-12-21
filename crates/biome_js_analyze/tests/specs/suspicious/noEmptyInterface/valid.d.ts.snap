@@ -7,6 +7,7 @@ expression: valid.d.ts
 declare global {
     export interface App extends Services {}
 }
+
 ```
 
 
