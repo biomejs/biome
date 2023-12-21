@@ -18,7 +18,7 @@
     position: relative;
 }
 
-.com-head {
+.community-head {
     font-size: 50px;
     font-weight: bold;
     text-align: center;
@@ -36,13 +36,13 @@
     visibility: hidden !important;
 }
 
-.com-con {
+.community-connect {
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
-.com-des {
+.community-description {
     font-size: 25px;
     text-align: center;
 }
@@ -55,22 +55,22 @@
 }
 
 .discord:hover {
-    background-color: rgb(114, 137, 218) !important;
-    color: var(--sl-community-link) !important;
+    background-color: var(--sl-discord);
+    color: var(--sl-community-link);
 }
 
 .x:hover,
 .github:hover {
     background-color: black;
-    color: var(--sl-community-link) !important;
+    color: var(--sl-community-link);
 }
 
 .mastodon:hover {
-    background-color: #6364ff;
-    color: var(--sl-community-link) !important;
+    background-color: var(--sl-mastodon);
+    color: var(--sl-community-link);
 }
 
-.comm-grid {
+.community-grid {
     z-index: -1;
     position: absolute;
     content: "";
