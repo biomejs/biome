@@ -12,30 +12,75 @@ use biome_js_syntax::{
 use biome_rowan::{declare_node_union, AstNode, AstSeparatedList, TextRange};
 
 declare_rule! {
-    /// Succinct description of the rule.
+    /// Disallow `then` property
     ///
-    /// Put context and details about the rule.
-    /// As a starting point, you can take the description of the corresponding _ESLint_ rule (if any).
+    /// When combining objects with a `then`` method (thenable objects) with await expressions or dynamic imports, caution is necessary.
+    /// These syntaxes interpret the object's then method as intended for the resolution or rejection of a promise, which can lead to unexpected behavior or errors.
     ///
-    /// Try to stay consistent with the descriptions of implemented rules.
-    ///
-    /// Add a link to the corresponding ESLint rule (if any):
-    ///
-    /// Source: https://eslint.org/docs/latest/rules/rule-name
+    /// Source: https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/no-thenable.md
     ///
     /// ## Examples
     ///
     /// ### Invalid
     ///
     /// ```js,expect_diagnostic
-    /// var a = 1;
-    /// a = 2;
+    /// export {then};
+    /// ```
+    ///
+    /// ```js,expect_diagnostic
+    /// const foo = {
+    ///     then() {}
+    /// };
+    /// ```
+    ///
+    /// ```js,expect_diagnostic
+    /// const foo = {
+    ///     get then() {}
+    /// };
+    /// ```
+    ///
+    /// ```js,expect_diagnostic
+    /// const foo = {
+    ///    get then() {}
+    /// };
+    /// ```
+    ///
+    /// ```js,expect_diagnostic
+    /// foo.then = function () {}
+    /// ```
+    ///
+    /// ```js,expect_diagnostic
+    /// class Foo {
+    ///     then() {}
+    /// }
+    /// ```
+    ///
+    /// ```js,expect_diagnostic
+    /// class Foo {
+    ///     static then() {}
+    /// }
     /// ```
     ///
     /// ## Valid
     ///
     /// ```js
-    /// var a = 1;
+    /// export {then as success};
+    /// ```
+    ///
+    /// ```js
+    /// const foo = {
+    ///     success() {}
+    /// };
+    /// ```
+    ///
+    /// ```js
+    /// class Foo {
+    ///     success() {}
+    /// }
+    /// ```
+    ///
+    /// ```js
+    /// const foo = bar.then;
     /// ```
     ///
     pub(crate) NoThenProperty {
@@ -256,21 +301,17 @@ impl Rule for NoThenProperty {
                                 if let AnyJsExpression::JsArrayExpression(array) = expr {
                                     for arr in array.elements().iter() {
                                         match arr.ok()? {
-                                            AnyJsArrayElement::AnyJsExpression(expr) => {
-                                                match expr {
-                                                    AnyJsExpression::JsArrayExpression(arg) => {
-                                                        let key = arg.elements().first()?.ok()?;
-                                                        if key.text() == "\"then\""
-                                                            || key.text() == "`then`"
-                                                        {
-                                                            return Some(RuleState {
-                                                                range: key.range(),
-                                                                message:
-                                                                    NoThenPropertyMessage::Object,
-                                                            });
-                                                        }
-                                                    }
-                                                    _ => continue,
+                                            AnyJsArrayElement::AnyJsExpression(
+                                                AnyJsExpression::JsArrayExpression(arg),
+                                            ) => {
+                                                let key = arg.elements().first()?.ok()?;
+                                                if key.text() == "\"then\""
+                                                    || key.text() == "`then`"
+                                                {
+                                                    return Some(RuleState {
+                                                        range: key.range(),
+                                                        message: NoThenPropertyMessage::Object,
+                                                    });
                                                 }
                                             }
                                             _ => continue,
@@ -331,21 +372,20 @@ impl Rule for NoThenProperty {
                             }
                         }
                     }
-                    AnyJsExportClause::AnyJsDeclarationClause(node) => match node {
-                        AnyJsDeclarationClause::JsVariableDeclarationClause(node) => {
-                            let decls = node.declaration().ok()?;
-                            for d in decls.declarators().iter() {
-                                let id = d.ok()?.id().ok()?;
-                                if id.text() == "then" {
-                                    return Some(RuleState {
-                                        range: id.range(),
-                                        message: NoThenPropertyMessage::Object,
-                                    });
-                                }
+                    AnyJsExportClause::AnyJsDeclarationClause(
+                        AnyJsDeclarationClause::JsVariableDeclarationClause(node),
+                    ) => {
+                        let decls = node.declaration().ok()?;
+                        for d in decls.declarators().iter() {
+                            let id = d.ok()?.id().ok()?;
+                            if id.text() == "then" {
+                                return Some(RuleState {
+                                    range: id.range(),
+                                    message: NoThenPropertyMessage::Object,
+                                });
                             }
                         }
-                        _ => return None,
-                    },
+                    }
                     _ => return None,
                 }
             }

@@ -2516,7 +2516,7 @@ pub struct Nursery {
     #[doc = "Forbid the use of Node.js builtin modules. Can be useful for client-side web projects that do not have access to those modules."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_nodejs_modules: Option<RuleConfiguration>,
-    #[doc = "Succinct description of the rule."]
+    #[doc = "Disallow then property"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_then_property: Option<RuleConfiguration>,
     #[doc = "Disallow unused imports."]

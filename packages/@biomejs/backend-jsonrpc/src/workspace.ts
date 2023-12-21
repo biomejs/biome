@@ -872,7 +872,7 @@ export interface Nursery {
 	 */
 	noNodejsModules?: RuleConfiguration;
 	/**
-	 * Succinct description of the rule.
+	 * Disallow then property
 	 */
 	noThenProperty?: RuleConfiguration;
 	/**

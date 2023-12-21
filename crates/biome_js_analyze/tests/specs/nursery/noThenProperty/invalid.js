@@ -1,3 +1,4 @@
+// `object`
 const foo = {then: 1}
 const foo = {["then"]: 1}
 const foo = {[`then`]: 1}
@@ -8,6 +9,8 @@ const foo = {get then() {}}
 const foo = {get ["then"]() {}}
 const foo = {get [`then`]() {}}
 // const THEN = "then";const foo = {get [THEN]() {}}
+
+// `class`
 class Foo {then}
 const Foo = class {then}
 class Foo {["then"]}
@@ -38,6 +41,7 @@ class Foo {static get ["then"]() {}}
 class Foo {static get [`then`]() {}}
 // const THEN = "then";class Foo {static get [THEN]() {}}
 
+// Assign
 foo.then = 1
 foo["then"] = 1
 foo[`then`] = 1
@@ -45,6 +49,7 @@ foo.then += 1
 foo.then ||= 1
 foo.then ??= 1
 
+// `{Object,Reflect}.defineProperty`
 Object.defineProperty(foo, "then", 1)
 Object.defineProperty(foo, `then`, 1)
 // const THEN = "then";Object.defineProperty(foo, THEN, 1)
@@ -52,13 +57,16 @@ Reflect.defineProperty(foo, "then", 1)
 Reflect.defineProperty(foo, `then`, 1)
 // const THEN = "then";Reflect.defineProperty(foo, THEN, 1)
 
+// `Object.fromEntries`
 Object.fromEntries([["then", 1]])
 Object.fromEntries([["then"]])
 Object.fromEntries([[`then`, 1]])
 // const THEN = "then";Object.fromEntries([[THEN, 1]])
 Object.fromEntries([foo, ["then", 1]])
 
+// `export`
 const then = 1; export {then}
 const notThen = 1; export {notThen as then}
 
+// `export variables`
 export const then = 1
