@@ -1,8 +1,8 @@
 use crate::semantic_services::Semantic;
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
 use biome_js_syntax::{
-    AnyJsAssignment, AnyJsAssignmentPattern, AnyJsCallArgument, AnyJsClassMemberName,
-    AnyJsExpression, AnyJsObjectMemberName, AnyJsTemplateElement, JsSpread,
+    AnyJsArrayElement, AnyJsAssignment, AnyJsAssignmentPattern, AnyJsCallArgument,
+    AnyJsClassMemberName, AnyJsExpression, AnyJsObjectMemberName, AnyJsTemplateElement,
 };
 use biome_js_syntax::{
     JsAssignmentExpression, JsCallExpression, JsComputedMemberName, JsGetterClassMember,
@@ -180,27 +180,76 @@ impl Rule for NoThenProperty {
                 },
                 _ => return None,
             },
-            NoThenPropertyQuery::JsCallExpression(node) => match node.callee().ok()? {
-                AnyJsExpression::JsStaticMemberExpression(m) => {
-                    if m.object().ok()?.text() == "Object"
-                        || m.object().ok()?.text() == "Reflect"
-                            && m.member().ok()?.text() == "defineProperty"
-                    {
-                        if node.arguments().ok()?.args().len() < 3 {
+            NoThenPropertyQuery::JsCallExpression(node) => {
+                if node.is_optional_chain() {
+                    return None;
+                }
+                match node.callee().ok()? {
+                    AnyJsExpression::JsStaticMemberExpression(m) => {
+                        if m.is_optional_chain() {
                             return None;
                         }
-                        let first = node.arguments().ok()?.args().iter().nth(0)?.ok()?;
-                        if matches!(first, AnyJsCallArgument::JsSpread(_)) {
-                            return None;
+
+                        let callee = m.object().ok()?.text();
+                        let member = m.member().ok()?.text();
+
+                        let args = node.arguments().ok()?.args();
+                        let first = args.iter().nth(0)?.ok()?;
+
+                        // Handle `Object.fromEntries()`
+                        // ex)
+                        //   Object.fromEntries([["then", 1]])
+                        //   Object.fromEntries([['foo', 'foo'], ['then', 32],['bar', 'bar']]);
+                        if callee == "Object" && member == "fromEntries" {
+                            if args.len() != 1 {
+                                return None;
+                            }
+                            if let AnyJsCallArgument::AnyJsExpression(expr) = &first {
+                                if let AnyJsExpression::JsArrayExpression(array) = expr {
+                                    for arr in array.elements().iter() {
+                                        match arr.ok()? {
+                                            AnyJsArrayElement::AnyJsExpression(expr) => {
+                                                match expr {
+                                                    AnyJsExpression::JsArrayExpression(arg) => {
+                                                        let key = arg.elements().first()?.ok()?;
+                                                        if key.text() == "\"then\""
+                                                            || key.text() == "`then`"
+                                                        {
+                                                            return Some(
+                                                                NoThenPropertyState::Object,
+                                                            );
+                                                        }
+                                                    }
+                                                    _ => continue,
+                                                }
+                                            }
+                                            _ => continue,
+                                        }
+                                    }
+                                } else {
+                                    return None;
+                                }
+                            }
                         }
-                        let args = node.arguments().ok()?.args().iter().nth(1)?.ok()?;
-                        if args.text() == "\"then\"" || args.text() == "`then`" {
-                            return Some(NoThenPropertyState::Object);
+
+                        // Handle `Object.defineProperty({}, "then", {})`
+                        if (callee == "Object" || callee == "Reflect") && member == "defineProperty"
+                        {
+                            if args.len() < 3 {
+                                return None;
+                            }
+                            if matches!(first, AnyJsCallArgument::JsSpread(_)) {
+                                return None;
+                            }
+                            let second = args.iter().nth(1)?.ok()?;
+                            if second.text() == "\"then\"" || second.text() == "`then`" {
+                                return Some(NoThenPropertyState::Object);
+                            }
                         }
                     }
+                    _ => return None,
                 }
-                _ => return None,
-            },
+            }
         }
         None
     }
@@ -217,9 +266,7 @@ impl Rule for NoThenProperty {
             NoThenPropertyQuery::JsComputedMemberName(node) => node.range(),
             NoThenPropertyQuery::JsMethodObjectMember(node) => node.range(),
             NoThenPropertyQuery::JsAssignmentExpression(node) => node.left().ok()?.range(),
-            NoThenPropertyQuery::JsCallExpression(node) => {
-                node.arguments().ok()?.args().iter().nth(1)?.ok()?.range()
-            }
+            NoThenPropertyQuery::JsCallExpression(node) => node.range(),
         };
         Some(RuleDiagnostic::new(
             rule_category!(),

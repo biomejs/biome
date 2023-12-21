@@ -57,6 +57,12 @@ Object.defineProperty(foo, `then`, 1)
 Reflect.defineProperty(foo, "then", 1)
 Reflect.defineProperty(foo, `then`, 1)
 // const THEN = "then";Reflect.defineProperty(foo, THEN, 1)
+
+Object.fromEntries([["then", 1]])
+Object.fromEntries([["then"]])
+Object.fromEntries([[`then`, 1]])
+// const THEN = "then";Object.fromEntries([[THEN, 1]])
+Object.fromEntries([foo, ["then", 1]])
 ```
 
 # Diagnostics
@@ -881,14 +887,14 @@ invalid.js:46:1 lint/nursery/noThenProperty ━━━━━━━━━━━━
 ```
 
 ```
-invalid.js:48:28 lint/nursery/noThenProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:48:1 lint/nursery/noThenProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Do not add `then` to an object.
   
     46 │ foo.then ??= 1
     47 │ 
   > 48 │ Object.defineProperty(foo, "then", 1)
-       │                            ^^^^^^
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     49 │ Object.defineProperty(foo, `then`, 1)
     50 │ // const THEN = "then";Object.defineProperty(foo, THEN, 1)
   
@@ -896,13 +902,13 @@ invalid.js:48:28 lint/nursery/noThenProperty ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:49:28 lint/nursery/noThenProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:49:1 lint/nursery/noThenProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Do not add `then` to an object.
   
     48 │ Object.defineProperty(foo, "then", 1)
   > 49 │ Object.defineProperty(foo, `then`, 1)
-       │                            ^^^^^^
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     50 │ // const THEN = "then";Object.defineProperty(foo, THEN, 1)
     51 │ Reflect.defineProperty(foo, "then", 1)
   
@@ -910,14 +916,14 @@ invalid.js:49:28 lint/nursery/noThenProperty ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:51:29 lint/nursery/noThenProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:51:1 lint/nursery/noThenProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Do not add `then` to an object.
   
     49 │ Object.defineProperty(foo, `then`, 1)
     50 │ // const THEN = "then";Object.defineProperty(foo, THEN, 1)
   > 51 │ Reflect.defineProperty(foo, "then", 1)
-       │                             ^^^^^^
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     52 │ Reflect.defineProperty(foo, `then`, 1)
     53 │ // const THEN = "then";Reflect.defineProperty(foo, THEN, 1)
   
@@ -925,15 +931,73 @@ invalid.js:51:29 lint/nursery/noThenProperty ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:52:29 lint/nursery/noThenProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:52:1 lint/nursery/noThenProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Do not add `then` to an object.
   
     50 │ // const THEN = "then";Object.defineProperty(foo, THEN, 1)
     51 │ Reflect.defineProperty(foo, "then", 1)
   > 52 │ Reflect.defineProperty(foo, `then`, 1)
-       │                             ^^^^^^
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     53 │ // const THEN = "then";Reflect.defineProperty(foo, THEN, 1)
+    54 │ 
+  
+
+```
+
+```
+invalid.js:55:1 lint/nursery/noThenProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not add `then` to an object.
+  
+    53 │ // const THEN = "then";Reflect.defineProperty(foo, THEN, 1)
+    54 │ 
+  > 55 │ Object.fromEntries([["then", 1]])
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    56 │ Object.fromEntries([["then"]])
+    57 │ Object.fromEntries([[`then`, 1]])
+  
+
+```
+
+```
+invalid.js:56:1 lint/nursery/noThenProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not add `then` to an object.
+  
+    55 │ Object.fromEntries([["then", 1]])
+  > 56 │ Object.fromEntries([["then"]])
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    57 │ Object.fromEntries([[`then`, 1]])
+    58 │ // const THEN = "then";Object.fromEntries([[THEN, 1]])
+  
+
+```
+
+```
+invalid.js:57:1 lint/nursery/noThenProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not add `then` to an object.
+  
+    55 │ Object.fromEntries([["then", 1]])
+    56 │ Object.fromEntries([["then"]])
+  > 57 │ Object.fromEntries([[`then`, 1]])
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    58 │ // const THEN = "then";Object.fromEntries([[THEN, 1]])
+    59 │ Object.fromEntries([foo, ["then", 1]])
+  
+
+```
+
+```
+invalid.js:59:1 lint/nursery/noThenProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not add `then` to an object.
+  
+    57 │ Object.fromEntries([[`then`, 1]])
+    58 │ // const THEN = "then";Object.fromEntries([[THEN, 1]])
+  > 59 │ Object.fromEntries([foo, ["then", 1]])
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
 
 ```

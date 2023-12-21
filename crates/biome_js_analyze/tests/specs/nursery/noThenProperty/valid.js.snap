@@ -53,6 +53,20 @@ Reflect.defineProperty(foo, "not-then", 1)
 Object.defineProperty(foo, "then", )
 Object.defineProperty(...foo, "then", 1)
 Object.defineProperty(foo, ...["then", 1])
+
+
+Object.fromEntries([then, 1])
+Object.fromEntries([,,])
+Object.fromEntries([[,,],[]])
+// const NOT_THEN = "not-then";Object.fromEntries([[NOT_THEN, 1]])
+Object.fromEntries([[["then", 1]]])
+NotObject.fromEntries([["then", 1]])
+Object.notFromEntries([["then", 1]])
+Object.fromEntries?.([["then", 1]])
+Object?.fromEntries([["then", 1]])
+Object.fromEntries([[..."then", 1]])
+Object.fromEntries([["then", 1]], extraArgument)
+Object.fromEntries(...[["then", 1]])
 ```
 
 
