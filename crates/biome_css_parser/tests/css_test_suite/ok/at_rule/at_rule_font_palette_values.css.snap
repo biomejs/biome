@@ -1,0 +1,59 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@font-palette-values ident {  }
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssFontPaletteValuesAtRule {
+                font_palette_values_token: FONT_PALETTE_VALUES_KW@1..21 "font-palette-values" [] [Whitespace(" ")],
+                name: CssIdentifier {
+                    value_token: IDENT@21..27 "ident" [] [Whitespace(" ")],
+                },
+                block: CssBlock {
+                    l_curly_token: L_CURLY@27..30 "{" [] [Whitespace("  ")],
+                    declaration_list: CssDeclarationList [],
+                    r_curly_token: R_CURLY@30..31 "}" [] [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@31..32 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..32
+  0: (empty)
+  1: CSS_RULE_LIST@0..31
+    0: CSS_AT_RULE@0..31
+      0: AT@0..1 "@" [] []
+      1: CSS_FONT_PALETTE_VALUES_AT_RULE@1..31
+        0: FONT_PALETTE_VALUES_KW@1..21 "font-palette-values" [] [Whitespace(" ")]
+        1: CSS_IDENTIFIER@21..27
+          0: IDENT@21..27 "ident" [] [Whitespace(" ")]
+        2: CSS_BLOCK@27..31
+          0: L_CURLY@27..30 "{" [] [Whitespace("  ")]
+          1: CSS_DECLARATION_LIST@30..30
+          2: R_CURLY@30..31 "}" [] []
+  2: EOF@31..32 "" [Newline("\n")] []
+
+```
+
+

@@ -233,6 +233,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "to",
         "var",
         "font-face",
+        "font-palette-values",
     ],
     literals: &[
         "CSS_STRING_LITERAL",
@@ -335,6 +336,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_CONTAINER_STYLE_OR_QUERY",
         "CSS_CONTAINER_STYLE_IN_PARENS",
         "CSS_FONT_FACE_AT_RULE",
+        "CSS_FONT_PALETTE_VALUES_AT_RULE",
         "CSS_KEYFRAMES_AT_RULE",
         "CSS_KEYFRAMES_BODY",
         "CSS_MEDIA_AT_RULE",

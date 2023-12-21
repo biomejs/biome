@@ -471,6 +471,20 @@ pub fn css_font_face_at_rule(font_face_token: SyntaxToken, block: CssBlock) -> C
         ],
     ))
 }
+pub fn css_font_palette_values_at_rule(
+    font_palette_values_token: SyntaxToken,
+    name: CssIdentifier,
+    block: CssBlock,
+) -> CssFontPaletteValuesAtRule {
+    CssFontPaletteValuesAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_FONT_PALETTE_VALUES_AT_RULE,
+        [
+            Some(SyntaxElement::Token(font_palette_values_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Node(block.into_syntax())),
+        ],
+    ))
+}
 pub fn css_id_selector(hash_token: SyntaxToken, name: CssIdentifier) -> CssIdSelector {
     CssIdSelector::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_ID_SELECTOR,

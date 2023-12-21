@@ -722,7 +722,7 @@ impl<'src> CssLexer<'src> {
 
         // Note to keep the buffer large enough to fit every possible keyword that
         // the lexer can return
-        let mut buf = [0u8; 20];
+        let mut buf = [0u8; 22];
         let count = self.consume_ident_sequence(&mut buf);
 
         match buf[..count].to_ascii_lowercase().as_slice() {
@@ -773,6 +773,7 @@ impl<'src> CssLexer<'src> {
             b"container" => CONTAINER_KW,
             b"style" => STYLE_KW,
             b"font-face" => FONT_FACE_KW,
+            b"font-palette-values" => FONT_PALETTE_VALUES_KW,
             _ => IDENT,
         }
     }

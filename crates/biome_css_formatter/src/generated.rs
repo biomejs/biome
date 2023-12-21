@@ -1693,6 +1693,40 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssFontFaceAtRule {
         )
     }
 }
+impl FormatRule<biome_css_syntax::CssFontPaletteValuesAtRule>
+    for crate::css::statements::font_palette_values_at_rule::FormatCssFontPaletteValuesAtRule
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssFontPaletteValuesAtRule,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::CssFontPaletteValuesAtRule>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssFontPaletteValuesAtRule {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssFontPaletteValuesAtRule,
+        crate::css::statements::font_palette_values_at_rule::FormatCssFontPaletteValuesAtRule,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule :: new (self , crate :: css :: statements :: font_palette_values_at_rule :: FormatCssFontPaletteValuesAtRule :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssFontPaletteValuesAtRule {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssFontPaletteValuesAtRule,
+        crate::css::statements::font_palette_values_at_rule::FormatCssFontPaletteValuesAtRule,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule :: new (self , crate :: css :: statements :: font_palette_values_at_rule :: FormatCssFontPaletteValuesAtRule :: default ())
+    }
+}
 impl FormatRule<biome_css_syntax::CssKeyframesAtRule>
     for crate::css::statements::keyframes_at_rule::FormatCssKeyframesAtRule
 {
