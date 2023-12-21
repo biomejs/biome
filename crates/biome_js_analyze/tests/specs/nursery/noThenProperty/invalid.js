@@ -57,3 +57,8 @@ Object.fromEntries([["then"]])
 Object.fromEntries([[`then`, 1]])
 // const THEN = "then";Object.fromEntries([[THEN, 1]])
 Object.fromEntries([foo, ["then", 1]])
+
+const then = 1; export {then}
+const notThen = 1; export {notThen as then}
+
+export const then = 1

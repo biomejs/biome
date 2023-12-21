@@ -2,12 +2,12 @@ use crate::semantic_services::Semantic;
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
 use biome_js_syntax::{
     AnyJsArrayElement, AnyJsAssignment, AnyJsAssignmentPattern, AnyJsCallArgument,
-    AnyJsClassMemberName, AnyJsExpression, AnyJsObjectMemberName, AnyJsTemplateElement,
+    AnyJsClassMemberName, AnyJsDeclarationClause, AnyJsExportClause, AnyJsExportNamedSpecifier,
+    AnyJsExpression, AnyJsObjectMemberName, AnyJsTemplateElement,
 };
 use biome_js_syntax::{
-    JsAssignmentExpression, JsCallExpression, JsComputedMemberName, JsGetterClassMember,
-    JsGetterObjectMember, JsMethodClassMember, JsMethodObjectMember, JsPropertyClassMember,
-    JsPropertyObjectMember, JsSetterClassMember,
+    AnyJsClassMember, AnyJsObjectMember, JsAssignmentExpression, JsCallExpression,
+    JsComputedMemberName, JsExport,
 };
 use biome_rowan::{declare_node_union, AstNode, AstSeparatedList, TextRange};
 
@@ -46,7 +46,13 @@ declare_rule! {
 }
 
 declare_node_union! {
-    pub(crate) NoThenPropertyQuery = JsComputedMemberName | JsMethodObjectMember | JsPropertyObjectMember | JsGetterObjectMember | JsPropertyClassMember | JsMethodClassMember | JsGetterClassMember | JsSetterClassMember | JsAssignmentExpression | JsCallExpression
+    pub(crate) NoThenPropertyQuery =
+        AnyJsObjectMember |
+        JsComputedMemberName |
+        AnyJsClassMember |
+        JsAssignmentExpression |
+        JsCallExpression  |
+        JsExport
 }
 
 pub enum NoThenPropertyMessage {
@@ -78,64 +84,101 @@ impl Rule for NoThenProperty {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let binding = ctx.query();
         match binding {
-            NoThenPropertyQuery::JsPropertyObjectMember(node) => {
-                if node.name().ok()?.name()? == "then" {
+            NoThenPropertyQuery::AnyJsObjectMember(node) => match node {
+                AnyJsObjectMember::JsGetterObjectMember(node) => {
                     return Some(RuleState {
                         range: node.name().ok()?.range(),
                         message: NoThenPropertyMessage::Object,
                     });
                 }
-            }
-            NoThenPropertyQuery::JsGetterObjectMember(node) => {
-                if node.name().ok()?.name()? == "then" {
-                    return Some(RuleState {
-                        range: node.name().ok()?.range(),
-                        message: NoThenPropertyMessage::Object,
-                    });
+                AnyJsObjectMember::JsMethodObjectMember(node) => {
+                    let member_name = node.name().ok()?;
+                    match member_name {
+                        AnyJsObjectMemberName::JsComputedMemberName(expr) => {
+                            match expr.expression().ok()? {
+                                AnyJsExpression::AnyJsLiteralExpression(lit) => {
+                                    if lit.value_token().ok()?.text() == "then" {
+                                        return Some(RuleState {
+                                            range: node.name().ok()?.range(),
+                                            message: NoThenPropertyMessage::Object,
+                                        });
+                                    }
+                                }
+                                AnyJsExpression::JsTemplateExpression(lit) => {
+                                    for l in lit.elements() {
+                                        if let AnyJsTemplateElement::JsTemplateChunkElement(chunk) =
+                                            l
+                                        {
+                                            if chunk.template_chunk_token().ok()?.text() == "then" {
+                                                return Some(RuleState {
+                                                    range: node.name().ok()?.range(),
+                                                    message: NoThenPropertyMessage::Object,
+                                                });
+                                            }
+                                        }
+                                    }
+                                }
+                                _ => return None,
+                            }
+                        }
+                        AnyJsObjectMemberName::JsLiteralMemberName(literal) => {
+                            if literal.name().ok()? == "then" {
+                                return Some(RuleState {
+                                    range: node.name().ok()?.range(),
+                                    message: NoThenPropertyMessage::Object,
+                                });
+                            }
+                        }
+                    }
                 }
-            }
-            NoThenPropertyQuery::JsPropertyClassMember(node) => {
-                if let AnyJsClassMemberName::JsPrivateClassMemberName(_) = node.name().ok()? {
+                AnyJsObjectMember::JsPropertyObjectMember(node) => {
+                    if node.name().ok()?.name()? == "then" {
+                        return Some(RuleState {
+                            range: node.name().ok()?.range(),
+                            message: NoThenPropertyMessage::Object,
+                        });
+                    }
+                }
+                _ => return None,
+            },
+            NoThenPropertyQuery::AnyJsClassMember(node) => {
+                if let Some(AnyJsClassMemberName::JsPrivateClassMemberName(_)) = node.name().ok()? {
                     return None;
                 }
-                if node.name().ok()?.name()? == "then" {
-                    return Some(RuleState {
-                        range: node.name().ok()?.range(),
-                        message: NoThenPropertyMessage::Class,
-                    });
-                }
-            }
-            NoThenPropertyQuery::JsMethodClassMember(node) => {
-                if let AnyJsClassMemberName::JsPrivateClassMemberName(_) = node.name().ok()? {
-                    return None;
-                }
-                if node.name().ok()?.name()? == "then" {
-                    return Some(RuleState {
-                        range: node.name().ok()?.range(),
-                        message: NoThenPropertyMessage::Class,
-                    });
-                }
-            }
-            NoThenPropertyQuery::JsGetterClassMember(node) => {
-                if let AnyJsClassMemberName::JsPrivateClassMemberName(_) = node.name().ok()? {
-                    return None;
-                }
-                if node.name().ok()?.name()? == "then" {
-                    return Some(RuleState {
-                        range: node.name().ok()?.range(),
-                        message: NoThenPropertyMessage::Class,
-                    });
-                }
-            }
-            NoThenPropertyQuery::JsSetterClassMember(node) => {
-                if let AnyJsClassMemberName::JsPrivateClassMemberName(_) = node.name().ok()? {
-                    return None;
-                }
-                if node.name().ok()?.name()? == "then" {
-                    return Some(RuleState {
-                        range: node.name().ok()?.range(),
-                        message: NoThenPropertyMessage::Class,
-                    });
+                match node {
+                    AnyJsClassMember::JsGetterClassMember(node) => {
+                        if node.name().ok()?.name()? == "then" {
+                            return Some(RuleState {
+                                range: node.name().ok()?.range(),
+                                message: NoThenPropertyMessage::Class,
+                            });
+                        }
+                    }
+                    AnyJsClassMember::JsMethodClassMember(node) => {
+                        if node.name().ok()?.name()? == "then" {
+                            return Some(RuleState {
+                                range: node.name().ok()?.range(),
+                                message: NoThenPropertyMessage::Class,
+                            });
+                        }
+                    }
+                    AnyJsClassMember::JsPropertyClassMember(node) => {
+                        if node.name().ok()?.name()? == "then" {
+                            return Some(RuleState {
+                                range: node.name().ok()?.range(),
+                                message: NoThenPropertyMessage::Class,
+                            });
+                        }
+                    }
+                    AnyJsClassMember::JsSetterClassMember(node) => {
+                        if node.name().ok()?.name()? == "then" {
+                            return Some(RuleState {
+                                range: node.name().ok()?.range(),
+                                message: NoThenPropertyMessage::Class,
+                            });
+                        }
+                    }
+                    _ => return None,
                 }
             }
             NoThenPropertyQuery::JsComputedMemberName(node) => match node.expression().ok()? {
@@ -161,44 +204,6 @@ impl Rule for NoThenProperty {
                 }
                 _ => return None,
             },
-            NoThenPropertyQuery::JsMethodObjectMember(node) => {
-                let member_name = node.name().ok()?;
-                match member_name {
-                    AnyJsObjectMemberName::JsComputedMemberName(expr) => {
-                        match expr.expression().ok()? {
-                            AnyJsExpression::AnyJsLiteralExpression(lit) => {
-                                if lit.value_token().ok()?.text() == "then" {
-                                    return Some(RuleState {
-                                        range: node.name().ok()?.range(),
-                                        message: NoThenPropertyMessage::Object,
-                                    });
-                                }
-                            }
-                            AnyJsExpression::JsTemplateExpression(lit) => {
-                                for l in lit.elements() {
-                                    if let AnyJsTemplateElement::JsTemplateChunkElement(chunk) = l {
-                                        if chunk.template_chunk_token().ok()?.text() == "then" {
-                                            return Some(RuleState {
-                                                range: node.name().ok()?.range(),
-                                                message: NoThenPropertyMessage::Object,
-                                            });
-                                        }
-                                    }
-                                }
-                            }
-                            _ => return None,
-                        }
-                    }
-                    AnyJsObjectMemberName::JsLiteralMemberName(literal) => {
-                        if literal.name().ok()? == "then" {
-                            return Some(RuleState {
-                                range: node.name().ok()?.range(),
-                                message: NoThenPropertyMessage::Object,
-                            });
-                        }
-                    }
-                }
-            }
             NoThenPropertyQuery::JsAssignmentExpression(node) => match node.left().ok()? {
                 AnyJsAssignmentPattern::AnyJsAssignment(assignment) => match assignment {
                     AnyJsAssignment::JsComputedMemberAssignment(c) => {
@@ -295,6 +300,52 @@ impl Rule for NoThenProperty {
                             }
                         }
                     }
+                    _ => return None,
+                }
+            }
+            NoThenPropertyQuery::JsExport(node) => {
+                let export_clause = node.export_clause().ok()?;
+                match export_clause {
+                    AnyJsExportClause::JsExportNamedClause(node) => {
+                        let specifiers = node.specifiers();
+                        for specifier in specifiers.iter() {
+                            match specifier.ok()? {
+                                AnyJsExportNamedSpecifier::JsExportNamedShorthandSpecifier(
+                                    name,
+                                ) => {
+                                    if name.name().ok()?.name().ok()? == "then" {
+                                        return Some(RuleState {
+                                            range: name.name().ok()?.range(),
+                                            message: NoThenPropertyMessage::Export,
+                                        });
+                                    }
+                                }
+                                AnyJsExportNamedSpecifier::JsExportNamedSpecifier(name) => {
+                                    if name.exported_name().ok()?.text() == "then" {
+                                        return Some(RuleState {
+                                            range: name.exported_name().ok()?.range(),
+                                            message: NoThenPropertyMessage::Export,
+                                        });
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    AnyJsExportClause::AnyJsDeclarationClause(node) => match node {
+                        AnyJsDeclarationClause::JsVariableDeclarationClause(node) => {
+                            let decls = node.declaration().ok()?;
+                            for d in decls.declarators().iter() {
+                                let id = d.ok()?.id().ok()?;
+                                if id.text() == "then" {
+                                    return Some(RuleState {
+                                        range: id.range(),
+                                        message: NoThenPropertyMessage::Object,
+                                    });
+                                }
+                            }
+                        }
+                        _ => return None,
+                    },
                     _ => return None,
                 }
             }

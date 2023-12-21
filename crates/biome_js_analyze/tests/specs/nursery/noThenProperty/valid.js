@@ -61,3 +61,17 @@ Object?.fromEntries([["then", 1]])
 Object.fromEntries([[..."then", 1]])
 Object.fromEntries([["then", 1]], extraArgument)
 Object.fromEntries(...[["then", 1]])
+
+export {default} from "then"
+const then = 1; export {then as notThen}
+export default then
+export function notThen(){}
+export class notThen {}
+export default function then (){}
+export default class then {}
+export default function (){}
+export default class {}
+
+export const notThen = 1
+export const {then: notThen} = 1
+export const {then: notThen = then} = 1
