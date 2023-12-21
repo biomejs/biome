@@ -66,7 +66,7 @@ import y from "y";
 
 ```jsx
 import z from "y";
-({ z } = 1); 
+({ z } = 1);
 ```
 
 <pre class="language-text"><code class="language-text">suspicious/noImportAssign.js:2:4 <a href="https://biomejs.dev/linter/rules/no-import-assign">lint/suspicious/noImportAssign</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -74,7 +74,7 @@ import z from "y";
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">The imported variable </span><span style="color: Tomato;"><strong>z</strong></span><span style="color: Tomato;"> is read-only</span>
   
     <strong>1 │ </strong>import z from &quot;y&quot;;
-<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>2 │ </strong>({ z } = 1);<span style="opacity: 0.8;">·</span>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>2 │ </strong>({ z } = 1);
    <strong>   │ </strong>   <strong><span style="color: Tomato;">^</span></strong>
     <strong>3 │ </strong>
   
@@ -82,7 +82,7 @@ import z from "y";
   
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>import z from &quot;y&quot;;
    <strong>   │ </strong>       <strong><span style="color: Tomato;">^</span></strong>
-    <strong>2 │ </strong>({ z } = 1);<span style="opacity: 0.8;">·</span>
+    <strong>2 │ </strong>({ z } = 1);
     <strong>3 │ </strong>
   
 <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Use a local variable instead of reassigning an import.</span>
