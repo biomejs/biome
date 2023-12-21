@@ -8,7 +8,7 @@ impl FormatRule<CssRuleList> for FormatCssRuleList {
         let mut join = f.join_nodes_with_hardline();
 
         for rule in node {
-            join.entry(rule.syntax(), &rule.format());
+            join.entry(rule.syntax(), &format_or_verbatim(rule.format()));
         }
 
         join.finish()
