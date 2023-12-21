@@ -26,14 +26,15 @@ pub(crate) fn parse_any_dimension(p: &mut CssParser) -> ParsedSyntax {
     }
 }
 
-fn is_at_percentage_dimension(p: &mut CssParser) -> bool {
-    p.at(CSS_NUMBER_LITERAL) && matches!(p.nth(1), T![%])
+pub(crate) fn is_at_percentage_dimension(p: &mut CssParser) -> bool {
+    p.at(CSS_NUMBER_LITERAL) && p.nth_at(1, T![%])
 }
 #[inline]
-fn parse_percentage_dimension(p: &mut CssParser) -> ParsedSyntax {
+pub(crate) fn parse_percentage_dimension(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_percentage_dimension(p) {
         return Absent;
     }
+
     let m = p.start();
     parse_regular_number(p).ok();
     p.expect(T![%]);

@@ -42,7 +42,8 @@ CssBogusSubSelector = SyntaxElement*
 CssBogusPseudoClass = SyntaxElement*
 CssBogusPseudoElement = SyntaxElement*
 CssBogusAtRule = SyntaxElement*
-CssBogusBody =  SyntaxElement*
+CssBogusBlock =  SyntaxElement*
+CssBogusKeyframesItem =  SyntaxElement*
 CssBogusRule =  SyntaxElement*
 CssBogusParameter = SyntaxElement*
 CssBogusDeclarationItem = SyntaxElement*
@@ -66,8 +67,7 @@ AnyCssRule =
 // ^^^^^^^^^^^^^^^^^^^^^
 CssRule =
 	prelude: CssSelectorList
-	block: CssBlock
-
+	block: AnyCssDeclarationListBlock
 
 /////////////
 /// SELECTORS
@@ -232,7 +232,7 @@ CssPseudoClassFunctionSelectorList =
 // :-webkit-any(i,p,:link,span:focus) {}
 //  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 CssPseudoClassFunctionCompoundSelectorList =
- 	name: ('-moz-any' | '-webkit-any' | 'past' | 'current' | 'future')
+ 	name: ('any' | 'past' | 'current' | 'future')
 	'('
 	compound_selector_list: CssCompoundSelectorList
 	')'
@@ -398,9 +398,22 @@ CssPseudoElementFunctionIdentifier =
 	ident: CssIdentifier
 	')'
 
-CssBlock =
+AnyCssDeclarationListBlock =
+	CssDeclarationListBlock
+	| CssBogusBlock
+
+CssDeclarationListBlock =
 	'{'
 	declaration_list: CssDeclarationList
+ 	'}'
+
+AnyCssRuleListBlock =
+	CssRuleListBlock
+	| CssBogusBlock
+
+CssRuleListBlock =
+	'{'
+	rules: CssRuleList
  	'}'
 
 CssDeclarationList = CssDeclaration (';' CssDeclaration)* ';'?
@@ -452,18 +465,18 @@ CssCharsetAtRule =
 CssColorProfileAtRule =
 	'color-profile'
 	name: CssIdentifier
-	block: CssBlock
+	block: AnyCssDeclarationListBlock
 
 CssCounterStyleAtRule =
 	'counter-style'
 	name: CssIdentifier
-	block: CssBlock
+	block: AnyCssDeclarationListBlock
 
 // @font-face {}
 // ^^^^^^^^^^^^^
 CssFontFaceAtRule =
 	'font-face'
-	block: CssBlock
+	block: AnyCssDeclarationListBlock
 
 
 // @font-palette-values --ident {}
@@ -471,7 +484,7 @@ CssFontFaceAtRule =
 CssFontPaletteValuesAtRule =
 	'font-palette-values'
 	name: CssIdentifier
-	block: CssBlock
+	block: AnyCssDeclarationListBlock
 
 
 // https://drafts.csswg.org/css-contain-3/#container-rule
@@ -502,7 +515,7 @@ CssContainerAtRule =
 	'container'
 	name: CssIdentifier?
 	query: AnyCssContainerQuery
-	block: CssBlock
+	block: AnyCssRuleListBlock
 
 // <container-query>
 AnyCssContainerQuery =
@@ -622,32 +635,62 @@ AnyCssContainerStyleInParens =
 	AnyCssContainerStyleQuery
 	| CssDeclaration
 
+// https://drafts.csswg.org/css-animations/#keyframes
+// @keyframes = @keyframes <keyframes-name> { <qualified-rule-list> }
+// <keyframes-name> = <custom-ident> | <string>
+// <keyframe-block> = <keyframe-selector># { <declaration-list> }
+// <keyframe-selector> = from | to | <percentage [0,100]>
+
 // @keyframes "something" { from {} to {} }
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 CssKeyframesAtRule =
 	'keyframes'
-	name: CssIdentifier | CssString
-	body: CssKeyframesBody
+	name: AnyCssKeyframeName
+	block: AnyCssKeyframesBlock
 
+AnyCssKeyframesBlock =
+	CssKeyframesBlock
+	| CssBogusBlock
 
-CssKeyframesBody =
+// @keyframes "something" { from {} to {} }
+//            ^^^^^^^^^^^
+AnyCssKeyframeName = CssIdentifier | CssString
+
+// @keyframes "something" { from {} to {} }
+//                        ^^^^^^^^^^^^^^^^^
+CssKeyframesBlock =
 	'{'
 	items: CssKeyframesItemList
 	'}'
 
-CssKeyframesItemList = CssKeyframesBlock*
+CssKeyframesItemList = AnyCssKeyframesItem*
+
+AnyCssKeyframesItem =
+	CssKeyframesItem
+	| CssBogusKeyframesItem
 
 // @keyframes "something" { 30%, 60% {} }
 //                          ^^^^^^^^^^^
-CssKeyframesBlock =
+CssKeyframesItem =
 	selectors: CssKeyframesSelectorList
-	'{'
-	declarations: CssDeclarationList
-	'}'
+	block: AnyCssDeclarationListBlock
 
-CssKeyframesSelectorList =  (CssKeyframesSelector (',' CssKeyframesSelector)*)
+CssKeyframesSelectorList =  (AnyCssKeyframesSelector (',' AnyCssKeyframesSelector)*)
 
-CssKeyframesSelector = 'from' | 'to' | CssPercentage
+AnyCssKeyframesSelector =
+	CssKeyframesIdentSelector
+	| CssKeyframesPercentageSelector
+	| CssBogusSelector
+
+// @keyframes "something" { from {} to {} }
+//                          ^^^^    ^^
+CssKeyframesIdentSelector =
+	selector: ('from' | 'to')
+
+// @keyframes "something" { 30%, 60% {} }
+//                          ^^^  ^^^
+CssKeyframesPercentageSelector =
+	selector: CssPercentage
 
 // https://drafts.csswg.org/mediaqueries-5/#media-query
 // <media-query> = <media-condition>
@@ -684,7 +727,7 @@ CssKeyframesSelector = 'from' | 'to' | CssPercentage
 CssMediaAtRule =
 	'media'
 	query_list: CssMediaQueryList
-	block: CssBlock
+	block: AnyCssRuleListBlock
 
 // @media screen, (width > 500px), print {}
 // 				^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

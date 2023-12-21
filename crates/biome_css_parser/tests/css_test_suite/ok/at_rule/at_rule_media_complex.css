@@ -11,3 +11,12 @@
 @media (width <= 500px) and ((width >= 600px) or (width >= 600px)), only print  {  }
 @media (width <= 500px) or ((width >= 600px) and (width >= 600px)) {  }
 @media (600px < height), not all and not (600px < height) {}
+
+@media not all and not (color)  {
+    #inner {
+				background-color: skyblue;
+		}
+		div {
+				background-color: skyblue;
+		}
+}
