@@ -10,6 +10,7 @@ use crate::{
     Report, ReportDiagnostic, ReportDiff, ReportErrorKind, ReportKind, TraversalMode,
 };
 use biome_console::{fmt, markup, Console, ConsoleExt};
+use biome_diagnostics::Diagnostic;
 use biome_diagnostics::PrintGitHubDiagnostic;
 use biome_diagnostics::{
     category, DiagnosticExt, Error, PrintDescription, PrintDiagnostic, Resource, Severity,
@@ -346,7 +347,8 @@ fn process_messages(options: ProcessMessagesOptions) {
 
             Message::ApplyError(error) => {
                 *errors += 1;
-                let should_print = printed_diagnostics < max_diagnostics;
+                let should_print =
+                    printed_diagnostics < max_diagnostics && error.severity() >= *diagnostic_level;
                 if should_print {
                     printed_diagnostics += 1;
                     remaining_diagnostics.store(
@@ -504,7 +506,10 @@ fn process_messages(options: ProcessMessagesOptions) {
                     *errors += 1;
                 }
 
-                let should_print = printed_diagnostics < max_diagnostics;
+                let severity: Severity = diff_kind.severity();
+
+                let should_print =
+                    printed_diagnostics < max_diagnostics && severity >= *diagnostic_level;
                 if should_print {
                     printed_diagnostics += 1;
                     remaining_diagnostics.store(
