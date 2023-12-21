@@ -9,7 +9,7 @@ use biome_js_syntax::{
     JsGetterObjectMember, JsMethodClassMember, JsMethodObjectMember, JsPropertyClassMember,
     JsPropertyObjectMember, JsSetterClassMember,
 };
-use biome_rowan::{declare_node_union, AstNode, AstSeparatedList};
+use biome_rowan::{declare_node_union, AstNode, AstSeparatedList, TextRange};
 
 declare_rule! {
     /// Succinct description of the rule.
@@ -49,25 +49,29 @@ declare_node_union! {
     pub(crate) NoThenPropertyQuery = JsComputedMemberName | JsMethodObjectMember | JsPropertyObjectMember | JsGetterObjectMember | JsPropertyClassMember | JsMethodClassMember | JsGetterClassMember | JsSetterClassMember | JsAssignmentExpression | JsCallExpression
 }
 
-pub enum NoThenPropertyState {
+pub enum NoThenPropertyMessage {
     Object,
     Export,
     Class,
 }
 
-impl NoThenPropertyState {
+pub struct RuleState {
+    range: TextRange,
+    message: NoThenPropertyMessage,
+}
+
+impl RuleState {
     fn diagnostic_message(&self) -> &str {
-        match self {
-            NoThenPropertyState::Object => "Do not add `then` to an object.",
-            NoThenPropertyState::Export => "Do not export `then`.",
-            NoThenPropertyState::Class => "Do not add `then` to a class.",
+        match self.message {
+            NoThenPropertyMessage::Object => "Do not add `then` to an object.",
+            NoThenPropertyMessage::Export => "Do not export `then`.",
+            NoThenPropertyMessage::Class => "Do not add `then` to a class.",
         }
     }
 }
-
 impl Rule for NoThenProperty {
     type Query = Semantic<NoThenPropertyQuery>;
-    type State = NoThenPropertyState;
+    type State = RuleState;
     type Signals = Option<Self::State>;
     type Options = ();
 
@@ -76,12 +80,18 @@ impl Rule for NoThenProperty {
         match binding {
             NoThenPropertyQuery::JsPropertyObjectMember(node) => {
                 if node.name().ok()?.name()? == "then" {
-                    return Some(NoThenPropertyState::Object);
+                    return Some(RuleState {
+                        range: node.name().ok()?.range(),
+                        message: NoThenPropertyMessage::Object,
+                    });
                 }
             }
             NoThenPropertyQuery::JsGetterObjectMember(node) => {
                 if node.name().ok()?.name()? == "then" {
-                    return Some(NoThenPropertyState::Object);
+                    return Some(RuleState {
+                        range: node.name().ok()?.range(),
+                        message: NoThenPropertyMessage::Object,
+                    });
                 }
             }
             NoThenPropertyQuery::JsPropertyClassMember(node) => {
@@ -89,7 +99,10 @@ impl Rule for NoThenProperty {
                     return None;
                 }
                 if node.name().ok()?.name()? == "then" {
-                    return Some(NoThenPropertyState::Class);
+                    return Some(RuleState {
+                        range: node.name().ok()?.range(),
+                        message: NoThenPropertyMessage::Class,
+                    });
                 }
             }
             NoThenPropertyQuery::JsMethodClassMember(node) => {
@@ -97,7 +110,10 @@ impl Rule for NoThenProperty {
                     return None;
                 }
                 if node.name().ok()?.name()? == "then" {
-                    return Some(NoThenPropertyState::Class);
+                    return Some(RuleState {
+                        range: node.name().ok()?.range(),
+                        message: NoThenPropertyMessage::Class,
+                    });
                 }
             }
             NoThenPropertyQuery::JsGetterClassMember(node) => {
@@ -105,7 +121,10 @@ impl Rule for NoThenProperty {
                     return None;
                 }
                 if node.name().ok()?.name()? == "then" {
-                    return Some(NoThenPropertyState::Class);
+                    return Some(RuleState {
+                        range: node.name().ok()?.range(),
+                        message: NoThenPropertyMessage::Class,
+                    });
                 }
             }
             NoThenPropertyQuery::JsSetterClassMember(node) => {
@@ -113,20 +132,29 @@ impl Rule for NoThenProperty {
                     return None;
                 }
                 if node.name().ok()?.name()? == "then" {
-                    return Some(NoThenPropertyState::Class);
+                    return Some(RuleState {
+                        range: node.name().ok()?.range(),
+                        message: NoThenPropertyMessage::Class,
+                    });
                 }
             }
             NoThenPropertyQuery::JsComputedMemberName(node) => match node.expression().ok()? {
                 AnyJsExpression::AnyJsLiteralExpression(lit) => {
                     if lit.value_token().ok()?.text() == "\"then\"" {
-                        return Some(NoThenPropertyState::Object);
+                        return Some(RuleState {
+                            range: lit.range(),
+                            message: NoThenPropertyMessage::Object,
+                        });
                     }
                 }
                 AnyJsExpression::JsTemplateExpression(lit) => {
                     for l in lit.elements() {
                         if let AnyJsTemplateElement::JsTemplateChunkElement(chunk) = l {
                             if chunk.template_chunk_token().ok()?.text() == "then" {
-                                return Some(NoThenPropertyState::Object);
+                                return Some(RuleState {
+                                    range: chunk.range(),
+                                    message: NoThenPropertyMessage::Object,
+                                });
                             }
                         }
                     }
@@ -140,14 +168,20 @@ impl Rule for NoThenProperty {
                         match expr.expression().ok()? {
                             AnyJsExpression::AnyJsLiteralExpression(lit) => {
                                 if lit.value_token().ok()?.text() == "then" {
-                                    return Some(NoThenPropertyState::Object);
+                                    return Some(RuleState {
+                                        range: node.name().ok()?.range(),
+                                        message: NoThenPropertyMessage::Object,
+                                    });
                                 }
                             }
                             AnyJsExpression::JsTemplateExpression(lit) => {
                                 for l in lit.elements() {
                                     if let AnyJsTemplateElement::JsTemplateChunkElement(chunk) = l {
                                         if chunk.template_chunk_token().ok()?.text() == "then" {
-                                            return Some(NoThenPropertyState::Object);
+                                            return Some(RuleState {
+                                                range: node.name().ok()?.range(),
+                                                message: NoThenPropertyMessage::Object,
+                                            });
                                         }
                                     }
                                 }
@@ -157,7 +191,10 @@ impl Rule for NoThenProperty {
                     }
                     AnyJsObjectMemberName::JsLiteralMemberName(literal) => {
                         if literal.name().ok()? == "then" {
-                            return Some(NoThenPropertyState::Object);
+                            return Some(RuleState {
+                                range: node.name().ok()?.range(),
+                                message: NoThenPropertyMessage::Object,
+                            });
                         }
                     }
                 }
@@ -168,12 +205,18 @@ impl Rule for NoThenProperty {
                         if c.member().ok()?.text() == "\"then\""
                             || c.member().ok()?.text() == "`then`"
                         {
-                            return Some(NoThenPropertyState::Object);
+                            return Some(RuleState {
+                                range: node.left().ok()?.range(),
+                                message: NoThenPropertyMessage::Object,
+                            });
                         }
                     }
                     AnyJsAssignment::JsStaticMemberAssignment(m) => {
                         if m.member().ok()?.text() == "then" {
-                            return Some(NoThenPropertyState::Object);
+                            return Some(RuleState {
+                                range: node.left().ok()?.range(),
+                                message: NoThenPropertyMessage::Object,
+                            });
                         }
                     }
                     _ => return None,
@@ -215,9 +258,11 @@ impl Rule for NoThenProperty {
                                                         if key.text() == "\"then\""
                                                             || key.text() == "`then`"
                                                         {
-                                                            return Some(
-                                                                NoThenPropertyState::Object,
-                                                            );
+                                                            return Some(RuleState {
+                                                                range: key.range(),
+                                                                message:
+                                                                    NoThenPropertyMessage::Object,
+                                                            });
                                                         }
                                                     }
                                                     _ => continue,
@@ -243,7 +288,10 @@ impl Rule for NoThenProperty {
                             }
                             let second = args.iter().nth(1)?.ok()?;
                             if second.text() == "\"then\"" || second.text() == "`then`" {
-                                return Some(NoThenPropertyState::Object);
+                                return Some(RuleState {
+                                    range: second.range(),
+                                    message: NoThenPropertyMessage::Object,
+                                });
                             }
                         }
                     }
@@ -254,23 +302,10 @@ impl Rule for NoThenProperty {
         None
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        let node = ctx.query();
-        let range = match node {
-            NoThenPropertyQuery::JsPropertyObjectMember(node) => node.name().ok()?.range(),
-            NoThenPropertyQuery::JsGetterObjectMember(node) => node.name().ok()?.range(),
-            NoThenPropertyQuery::JsPropertyClassMember(node) => node.name().ok()?.range(),
-            NoThenPropertyQuery::JsMethodClassMember(node) => node.name().ok()?.range(),
-            NoThenPropertyQuery::JsGetterClassMember(node) => node.name().ok()?.range(),
-            NoThenPropertyQuery::JsSetterClassMember(node) => node.name().ok()?.range(),
-            NoThenPropertyQuery::JsComputedMemberName(node) => node.range(),
-            NoThenPropertyQuery::JsMethodObjectMember(node) => node.range(),
-            NoThenPropertyQuery::JsAssignmentExpression(node) => node.left().ok()?.range(),
-            NoThenPropertyQuery::JsCallExpression(node) => node.range(),
-        };
+    fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         Some(RuleDiagnostic::new(
             rule_category!(),
-            range,
+            state.range,
             state.diagnostic_message(),
         ))
     }
