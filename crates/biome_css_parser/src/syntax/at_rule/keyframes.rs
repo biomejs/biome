@@ -178,8 +178,7 @@ impl ParseSeparatedList for CssKeyframesSelectorList {
     }
 }
 
-const KEYFRAMES_ITEM_SELECTOR_IDENT_SET: TokenSet<CssSyntaxKind> =
-    token_set!(T![from], T![to]);
+const KEYFRAMES_ITEM_SELECTOR_IDENT_SET: TokenSet<CssSyntaxKind> = token_set!(T![from], T![to]);
 const KEYFRAMES_ITEM_SELECTOR_SET: TokenSet<CssSyntaxKind> =
     KEYFRAMES_ITEM_SELECTOR_IDENT_SET.union(token_set!(CSS_NUMBER_LITERAL));
 
