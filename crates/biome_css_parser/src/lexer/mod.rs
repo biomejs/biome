@@ -722,7 +722,7 @@ impl<'src> CssLexer<'src> {
 
         // Note to keep the buffer large enough to fit every possible keyword that
         // the lexer can return
-        let mut buf = [0u8; 20];
+        let mut buf = [0u8; 22];
         let count = self.consume_ident_sequence(&mut buf);
 
         match buf[..count].to_ascii_lowercase().as_slice() {
