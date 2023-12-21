@@ -27,7 +27,7 @@
 
 **Biome** is a performant toolchain for web projects, it aims to provide developer tools to maintain the health of said projects.
 
-**Biome is a [fast formatter](./benchmark#formatting)** for _JavaScript_, _TypeScript_, _JSX_, and _JSON_ that scores **[96% compatibility with _Prettier_](https://console.algora.io/challenges/prettier)**.
+**Biome is a [fast formatter](./benchmark#formatting)** for _JavaScript_, _TypeScript_, _JSX_, and _JSON_ that scores **[97% compatibility with _Prettier_](https://console.algora.io/challenges/prettier)**.
 
 **Biome is a [performant linter](https://github.com/biomejs/biome/tree/main/benchmark#linting)** for _JavaScript_, _TypeScript_, and _JSX_ that features **[more than 170 rules](https://biomejs.dev/linter/rules/)** from ESLint, TypeSCript ESLint, and [other sources](https://github.com/biomejs/biome/discussions/3).
 It **outputs detailed and contextualized diagnostics** that help you to improve your code and become a better programmer!
