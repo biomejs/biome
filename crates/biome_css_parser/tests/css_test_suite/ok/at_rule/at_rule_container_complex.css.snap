@@ -20,6 +20,14 @@ expression: snapshot
 @container name style((not (--b: red)) or ((not (--c: green)) and (background: red))) {  }
 @container name style(not (not (--b: red))) {  }
 @container name (width <= 500px) and  style((not (--b: red)) or ((not (--c: green)) and (background: red))) {  }
+@container name  (width <= 500px)  {
+	#inner {
+		background-color: skyblue;
+	}
+	div {
+		background-color: skyblue;
+	}
+}
 
 ```
 
@@ -992,17 +1000,120 @@ CssRoot {
                 },
             },
         },
+        CssAtRule {
+            at_token: AT@998..1000 "@" [Newline("\n")] [],
+            rule: CssContainerAtRule {
+                container_token: CONTAINER_KW@1000..1010 "container" [] [Whitespace(" ")],
+                name: CssIdentifier {
+                    value_token: IDENT@1010..1016 "name" [] [Whitespace("  ")],
+                },
+                query: CssContainerSizeFeatureInParens {
+                    l_paren_token: L_PAREN@1016..1017 "(" [] [],
+                    feature: CssQueryFeatureRange {
+                        left: CssIdentifier {
+                            value_token: IDENT@1017..1023 "width" [] [Whitespace(" ")],
+                        },
+                        comparison: CssQueryFeatureRangeComparison {
+                            operator: LTEQ@1023..1026 "<=" [] [Whitespace(" ")],
+                        },
+                        right: CssRegularDimension {
+                            value: CssNumber {
+                                value_token: CSS_NUMBER_LITERAL@1026..1029 "500" [] [],
+                            },
+                            unit: CssIdentifier {
+                                value_token: IDENT@1029..1031 "px" [] [],
+                            },
+                        },
+                    },
+                    r_paren_token: R_PAREN@1031..1034 ")" [] [Whitespace("  ")],
+                },
+                block: CssRuleListBlock {
+                    l_curly_token: L_CURLY@1034..1035 "{" [] [],
+                    rules: CssRuleList [
+                        CssRule {
+                            prelude: CssSelectorList [
+                                CssCompoundSelector {
+                                    nesting_selector_token: missing (optional),
+                                    simple_selector: missing (optional),
+                                    sub_selectors: CssSubSelectorList [
+                                        CssIdSelector {
+                                            hash_token: HASH@1035..1038 "#" [Newline("\n"), Whitespace("\t")] [],
+                                            name: CssIdentifier {
+                                                value_token: IDENT@1038..1044 "inner" [] [Whitespace(" ")],
+                                            },
+                                        },
+                                    ],
+                                },
+                            ],
+                            block: CssDeclarationListBlock {
+                                l_curly_token: L_CURLY@1044..1045 "{" [] [],
+                                declaration_list: CssDeclarationList [
+                                    CssDeclaration {
+                                        name: CssIdentifier {
+                                            value_token: IDENT@1045..1064 "background-color" [Newline("\n"), Whitespace("\t\t")] [],
+                                        },
+                                        colon_token: COLON@1064..1066 ":" [] [Whitespace(" ")],
+                                        value: CssComponentValueList [
+                                            CssIdentifier {
+                                                value_token: IDENT@1066..1073 "skyblue" [] [],
+                                            },
+                                        ],
+                                        important: missing (optional),
+                                    },
+                                    SEMICOLON@1073..1074 ";" [] [],
+                                ],
+                                r_curly_token: R_CURLY@1074..1077 "}" [Newline("\n"), Whitespace("\t")] [],
+                            },
+                        },
+                        CssRule {
+                            prelude: CssSelectorList [
+                                CssCompoundSelector {
+                                    nesting_selector_token: missing (optional),
+                                    simple_selector: CssTypeSelector {
+                                        namespace: missing (optional),
+                                        ident: CssIdentifier {
+                                            value_token: IDENT@1077..1083 "div" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
+                                        },
+                                    },
+                                    sub_selectors: CssSubSelectorList [],
+                                },
+                            ],
+                            block: CssDeclarationListBlock {
+                                l_curly_token: L_CURLY@1083..1084 "{" [] [],
+                                declaration_list: CssDeclarationList [
+                                    CssDeclaration {
+                                        name: CssIdentifier {
+                                            value_token: IDENT@1084..1103 "background-color" [Newline("\n"), Whitespace("\t\t")] [],
+                                        },
+                                        colon_token: COLON@1103..1105 ":" [] [Whitespace(" ")],
+                                        value: CssComponentValueList [
+                                            CssIdentifier {
+                                                value_token: IDENT@1105..1112 "skyblue" [] [],
+                                            },
+                                        ],
+                                        important: missing (optional),
+                                    },
+                                    SEMICOLON@1112..1113 ";" [] [],
+                                ],
+                                r_curly_token: R_CURLY@1113..1116 "}" [Newline("\n"), Whitespace("\t")] [],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@1116..1118 "}" [Newline("\n")] [],
+                },
+            },
+        },
     ],
-    eof_token: EOF@998..999 "" [Newline("\n")] [],
+    eof_token: EOF@1118..1119 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..999
+0: CSS_ROOT@0..1119
   0: (empty)
-  1: CSS_RULE_LIST@0..998
+  1: CSS_RULE_LIST@0..1118
     0: CSS_AT_RULE@0..38
       0: AT@0..1 "@" [] []
       1: CSS_CONTAINER_AT_RULE@1..38
@@ -1666,7 +1777,75 @@ CssRoot {
           0: L_CURLY@994..997 "{" [] [Whitespace("  ")]
           1: CSS_RULE_LIST@997..997
           2: R_CURLY@997..998 "}" [] []
-  2: EOF@998..999 "" [Newline("\n")] []
+    14: CSS_AT_RULE@998..1118
+      0: AT@998..1000 "@" [Newline("\n")] []
+      1: CSS_CONTAINER_AT_RULE@1000..1118
+        0: CONTAINER_KW@1000..1010 "container" [] [Whitespace(" ")]
+        1: CSS_IDENTIFIER@1010..1016
+          0: IDENT@1010..1016 "name" [] [Whitespace("  ")]
+        2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@1016..1034
+          0: L_PAREN@1016..1017 "(" [] []
+          1: CSS_QUERY_FEATURE_RANGE@1017..1031
+            0: CSS_IDENTIFIER@1017..1023
+              0: IDENT@1017..1023 "width" [] [Whitespace(" ")]
+            1: CSS_QUERY_FEATURE_RANGE_COMPARISON@1023..1026
+              0: LTEQ@1023..1026 "<=" [] [Whitespace(" ")]
+            2: CSS_REGULAR_DIMENSION@1026..1031
+              0: CSS_NUMBER@1026..1029
+                0: CSS_NUMBER_LITERAL@1026..1029 "500" [] []
+              1: CSS_IDENTIFIER@1029..1031
+                0: IDENT@1029..1031 "px" [] []
+          2: R_PAREN@1031..1034 ")" [] [Whitespace("  ")]
+        3: CSS_RULE_LIST_BLOCK@1034..1118
+          0: L_CURLY@1034..1035 "{" [] []
+          1: CSS_RULE_LIST@1035..1116
+            0: CSS_RULE@1035..1077
+              0: CSS_SELECTOR_LIST@1035..1044
+                0: CSS_COMPOUND_SELECTOR@1035..1044
+                  0: (empty)
+                  1: (empty)
+                  2: CSS_SUB_SELECTOR_LIST@1035..1044
+                    0: CSS_ID_SELECTOR@1035..1044
+                      0: HASH@1035..1038 "#" [Newline("\n"), Whitespace("\t")] []
+                      1: CSS_IDENTIFIER@1038..1044
+                        0: IDENT@1038..1044 "inner" [] [Whitespace(" ")]
+              1: CSS_DECLARATION_LIST_BLOCK@1044..1077
+                0: L_CURLY@1044..1045 "{" [] []
+                1: CSS_DECLARATION_LIST@1045..1074
+                  0: CSS_DECLARATION@1045..1073
+                    0: CSS_IDENTIFIER@1045..1064
+                      0: IDENT@1045..1064 "background-color" [Newline("\n"), Whitespace("\t\t")] []
+                    1: COLON@1064..1066 ":" [] [Whitespace(" ")]
+                    2: CSS_COMPONENT_VALUE_LIST@1066..1073
+                      0: CSS_IDENTIFIER@1066..1073
+                        0: IDENT@1066..1073 "skyblue" [] []
+                    3: (empty)
+                  1: SEMICOLON@1073..1074 ";" [] []
+                2: R_CURLY@1074..1077 "}" [Newline("\n"), Whitespace("\t")] []
+            1: CSS_RULE@1077..1116
+              0: CSS_SELECTOR_LIST@1077..1083
+                0: CSS_COMPOUND_SELECTOR@1077..1083
+                  0: (empty)
+                  1: CSS_TYPE_SELECTOR@1077..1083
+                    0: (empty)
+                    1: CSS_IDENTIFIER@1077..1083
+                      0: IDENT@1077..1083 "div" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
+                  2: CSS_SUB_SELECTOR_LIST@1083..1083
+              1: CSS_DECLARATION_LIST_BLOCK@1083..1116
+                0: L_CURLY@1083..1084 "{" [] []
+                1: CSS_DECLARATION_LIST@1084..1113
+                  0: CSS_DECLARATION@1084..1112
+                    0: CSS_IDENTIFIER@1084..1103
+                      0: IDENT@1084..1103 "background-color" [Newline("\n"), Whitespace("\t\t")] []
+                    1: COLON@1103..1105 ":" [] [Whitespace(" ")]
+                    2: CSS_COMPONENT_VALUE_LIST@1105..1112
+                      0: CSS_IDENTIFIER@1105..1112
+                        0: IDENT@1105..1112 "skyblue" [] []
+                    3: (empty)
+                  1: SEMICOLON@1112..1113 ";" [] []
+                2: R_CURLY@1113..1116 "}" [Newline("\n"), Whitespace("\t")] []
+          2: R_CURLY@1116..1118 "}" [Newline("\n")] []
+  2: EOF@1118..1119 "" [Newline("\n")] []
 
 ```
 
