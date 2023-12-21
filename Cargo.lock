@@ -418,7 +418,6 @@ dependencies = [
  "biome_rowan",
  "biome_test_utils",
  "biome_text_edit",
- "bpaf",
  "countme",
  "insta",
  "lazy_static",

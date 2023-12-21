@@ -860,6 +860,10 @@ export interface Nursery {
 	 */
 	noImplicitAnyLet?: RuleConfiguration;
 	/**
+	 * Disallow the use of variables and function parameters before their declaration
+	 */
+	noInvalidUseBeforeDeclaration?: RuleConfiguration;
+	/**
 	 * Disallow characters made with multiple code points in character class syntax.
 	 */
 	noMisleadingCharacterClass?: RuleConfiguration;
@@ -1593,6 +1597,7 @@ export type Category =
 	| "lint/nursery/noDuplicateJsonKeys"
 	| "lint/nursery/noEmptyBlockStatements"
 	| "lint/nursery/noImplicitAnyLet"
+	| "lint/nursery/noInvalidUseBeforeDeclaration"
 	| "lint/nursery/noMisleadingCharacterClass"
 	| "lint/nursery/noNodejsModules"
 	| "lint/nursery/noTypeOnlyImportAttributes"
