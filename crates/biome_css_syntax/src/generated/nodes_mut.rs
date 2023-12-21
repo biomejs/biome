@@ -564,7 +564,7 @@ impl CssKeyframesAtRule {
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
         )
     }
-    pub fn with_block(self, element: CssKeyframesBlock) -> Self {
+    pub fn with_block(self, element: AnyCssKeyframesBlock) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),

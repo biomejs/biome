@@ -506,7 +506,7 @@ pub fn css_identifier(value_token: SyntaxToken) -> CssIdentifier {
 pub fn css_keyframes_at_rule(
     keyframes_token: SyntaxToken,
     name: AnyCssKeyframeName,
-    block: CssKeyframesBlock,
+    block: AnyCssKeyframesBlock,
 ) -> CssKeyframesAtRule {
     CssKeyframesAtRule::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_KEYFRAMES_AT_RULE,

@@ -4779,6 +4779,33 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssKeyframeName {
         )
     }
 }
+impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssKeyframesBlock {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::AnyCssKeyframesBlock,
+        crate::css::any::keyframes_block::FormatAnyCssKeyframesBlock,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::css::any::keyframes_block::FormatAnyCssKeyframesBlock::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssKeyframesBlock {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::AnyCssKeyframesBlock,
+        crate::css::any::keyframes_block::FormatAnyCssKeyframesBlock,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::any::keyframes_block::FormatAnyCssKeyframesBlock::default(),
+        )
+    }
+}
 impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssKeyframesItem {
     type Format<'a> = FormatRefWithRule<
         'a,

@@ -1410,7 +1410,7 @@ impl CssKeyframesAtRule {
     pub fn name(&self) -> SyntaxResult<AnyCssKeyframeName> {
         support::required_node(&self.syntax, 1usize)
     }
-    pub fn block(&self) -> SyntaxResult<CssKeyframesBlock> {
+    pub fn block(&self) -> SyntaxResult<AnyCssKeyframesBlock> {
         support::required_node(&self.syntax, 2usize)
     }
 }
@@ -1427,7 +1427,7 @@ impl Serialize for CssKeyframesAtRule {
 pub struct CssKeyframesAtRuleFields {
     pub keyframes_token: SyntaxResult<SyntaxToken>,
     pub name: SyntaxResult<AnyCssKeyframeName>,
-    pub block: SyntaxResult<CssKeyframesBlock>,
+    pub block: SyntaxResult<AnyCssKeyframesBlock>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssKeyframesBlock {
@@ -4376,6 +4376,26 @@ impl AnyCssKeyframeName {
     pub fn as_css_string(&self) -> Option<&CssString> {
         match &self {
             AnyCssKeyframeName::CssString(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub enum AnyCssKeyframesBlock {
+    CssBogusBlock(CssBogusBlock),
+    CssKeyframesBlock(CssKeyframesBlock),
+}
+impl AnyCssKeyframesBlock {
+    pub fn as_css_bogus_block(&self) -> Option<&CssBogusBlock> {
+        match &self {
+            AnyCssKeyframesBlock::CssBogusBlock(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_keyframes_block(&self) -> Option<&CssKeyframesBlock> {
+        match &self {
+            AnyCssKeyframesBlock::CssKeyframesBlock(item) => Some(item),
             _ => None,
         }
     }
@@ -10156,6 +10176,68 @@ impl From<AnyCssKeyframeName> for SyntaxElement {
         node.into()
     }
 }
+impl From<CssBogusBlock> for AnyCssKeyframesBlock {
+    fn from(node: CssBogusBlock) -> AnyCssKeyframesBlock {
+        AnyCssKeyframesBlock::CssBogusBlock(node)
+    }
+}
+impl From<CssKeyframesBlock> for AnyCssKeyframesBlock {
+    fn from(node: CssKeyframesBlock) -> AnyCssKeyframesBlock {
+        AnyCssKeyframesBlock::CssKeyframesBlock(node)
+    }
+}
+impl AstNode for AnyCssKeyframesBlock {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        CssBogusBlock::KIND_SET.union(CssKeyframesBlock::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, CSS_BOGUS_BLOCK | CSS_KEYFRAMES_BLOCK)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_BOGUS_BLOCK => AnyCssKeyframesBlock::CssBogusBlock(CssBogusBlock { syntax }),
+            CSS_KEYFRAMES_BLOCK => {
+                AnyCssKeyframesBlock::CssKeyframesBlock(CssKeyframesBlock { syntax })
+            }
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            AnyCssKeyframesBlock::CssBogusBlock(it) => &it.syntax,
+            AnyCssKeyframesBlock::CssKeyframesBlock(it) => &it.syntax,
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            AnyCssKeyframesBlock::CssBogusBlock(it) => it.syntax,
+            AnyCssKeyframesBlock::CssKeyframesBlock(it) => it.syntax,
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssKeyframesBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            AnyCssKeyframesBlock::CssBogusBlock(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssKeyframesBlock::CssKeyframesBlock(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssKeyframesBlock> for SyntaxNode {
+    fn from(n: AnyCssKeyframesBlock) -> SyntaxNode {
+        match n {
+            AnyCssKeyframesBlock::CssBogusBlock(it) => it.into(),
+            AnyCssKeyframesBlock::CssKeyframesBlock(it) => it.into(),
+        }
+    }
+}
+impl From<AnyCssKeyframesBlock> for SyntaxElement {
+    fn from(n: AnyCssKeyframesBlock) -> SyntaxElement {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<CssBogusKeyframesItem> for AnyCssKeyframesItem {
     fn from(node: CssBogusKeyframesItem) -> AnyCssKeyframesItem {
         AnyCssKeyframesItem::CssBogusKeyframesItem(node)
@@ -12279,6 +12361,11 @@ impl std::fmt::Display for AnyCssDimension {
     }
 }
 impl std::fmt::Display for AnyCssKeyframeName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyCssKeyframesBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

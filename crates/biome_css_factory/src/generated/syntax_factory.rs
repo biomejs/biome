@@ -991,7 +991,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if CssKeyframesBlock::can_cast(element.kind()) {
+                    if AnyCssKeyframesBlock::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }

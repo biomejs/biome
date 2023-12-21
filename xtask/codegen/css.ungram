@@ -646,7 +646,11 @@ AnyCssContainerStyleInParens =
 CssKeyframesAtRule =
 	'keyframes'
 	name: AnyCssKeyframeName
-	block: CssKeyframesBlock
+	block: AnyCssKeyframesBlock
+
+AnyCssKeyframesBlock =
+	CssKeyframesBlock
+	| CssBogusBlock
 
 // @keyframes "something" { from {} to {} }
 //            ^^^^^^^^^^^

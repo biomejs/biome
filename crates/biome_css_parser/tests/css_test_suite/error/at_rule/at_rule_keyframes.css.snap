@@ -74,7 +74,7 @@ expression: snapshot
 
 }
 
-
+@keyframes slidein
 
 
 
@@ -683,22 +683,29 @@ CssRoot {
                                 r_curly_token: R_CURLY@697..700 "}" [Newline("\n"), Newline("\n")] [],
                             },
                         },
+                        CssBogusKeyframesItem {
+                            items: [
+                                AT@700..703 "@" [Newline("\n"), Newline("\n")] [],
+                                KEYFRAMES_KW@703..713 "keyframes" [] [Whitespace(" ")],
+                                IDENT@713..720 "slidein" [] [],
+                            ],
+                        },
                     ],
                     r_curly_token: missing (required),
                 },
             },
         },
     ],
-    eof_token: EOF@700..705 "" [Newline("\n"), Newline("\n"), Newline("\n"), Newline("\n"), Newline("\n")] [],
+    eof_token: EOF@720..723 "" [Newline("\n"), Newline("\n"), Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..705
+0: CSS_ROOT@0..723
   0: (empty)
-  1: CSS_RULE_LIST@0..700
+  1: CSS_RULE_LIST@0..720
     0: CSS_AT_RULE@0..95
       0: AT@0..1 "@" [] []
       1: CSS_BOGUS_AT_RULE@1..95
@@ -968,15 +975,15 @@ CssRoot {
                   1: SEMICOLON@488..489 ";" [] []
                 2: R_CURLY@489..492 "}" [Newline("\n"), Whitespace("\t")] []
           2: R_CURLY@492..494 "}" [Newline("\n")] []
-    5: CSS_AT_RULE@494..700
+    5: CSS_AT_RULE@494..720
       0: AT@494..497 "@" [Newline("\n"), Newline("\n")] []
-      1: CSS_KEYFRAMES_AT_RULE@497..700
+      1: CSS_KEYFRAMES_AT_RULE@497..720
         0: KEYFRAMES_KW@497..507 "keyframes" [] [Whitespace(" ")]
         1: CSS_IDENTIFIER@507..515
           0: IDENT@507..515 "slidein" [] [Whitespace(" ")]
-        2: CSS_KEYFRAMES_BLOCK@515..700
+        2: CSS_KEYFRAMES_BLOCK@515..720
           0: L_CURLY@515..516 "{" [] []
-          1: CSS_KEYFRAMES_ITEM_LIST@516..700
+          1: CSS_KEYFRAMES_ITEM_LIST@516..720
             0: CSS_KEYFRAMES_ITEM@516..556
               0: CSS_KEYFRAMES_SELECTOR_LIST@516..523
                 0: CSS_KEYFRAMES_IDENT_SELECTOR@516..523
@@ -1078,8 +1085,12 @@ CssRoot {
                     3: (empty)
                   1: SEMICOLON@696..697 ";" [] []
                 2: R_CURLY@697..700 "}" [Newline("\n"), Newline("\n")] []
+            3: CSS_BOGUS_KEYFRAMES_ITEM@700..720
+              0: AT@700..703 "@" [Newline("\n"), Newline("\n")] []
+              1: KEYFRAMES_KW@703..713 "keyframes" [] [Whitespace(" ")]
+              2: IDENT@713..720 "slidein" [] []
           2: (empty)
-  2: EOF@700..705 "" [Newline("\n"), Newline("\n"), Newline("\n"), Newline("\n"), Newline("\n")] []
+  2: EOF@720..723 "" [Newline("\n"), Newline("\n"), Newline("\n")] []
 
 ```
 
@@ -1288,6 +1299,24 @@ at_rule_keyframes.css:60:7 parse ━━━━━━━━━━━━━━━�
     62 │ 	}
   
   i Remove {
+  
+at_rule_keyframes.css:69:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a keyframes item but instead found '@keyframes slidein'.
+  
+    67 │ }
+    68 │ 
+  > 69 │ @keyframes slidein
+       │ ^^^^^^^^^^^^^^^^^^
+    70 │ 
+  
+  i Expected a keyframes item here.
+  
+    67 │ }
+    68 │ 
+  > 69 │ @keyframes slidein
+       │ ^^^^^^^^^^^^^^^^^^
+    70 │ 
   
 at_rule_keyframes.css:72:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

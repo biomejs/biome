@@ -15,6 +15,7 @@ pub(crate) mod declaration_list_block;
 pub(crate) mod declaration_name;
 pub(crate) mod dimension;
 pub(crate) mod keyframe_name;
+pub(crate) mod keyframes_block;
 pub(crate) mod keyframes_item;
 pub(crate) mod keyframes_selector;
 pub(crate) mod media_and_combinable_condition;
