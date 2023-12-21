@@ -134,7 +134,7 @@ impl WorkspaceSettings {
         // NOTE: keep this last. Computing the overrides require reading the settings computed by the parent settings.
         if let Some(overrides) = configuration.overrides {
             self.override_settings =
-                to_override_settings(overrides, vcs_path, gitignore_matches, &self)?;
+                to_override_settings(overrides, vcs_path, gitignore_matches, self)?;
         }
 
         Ok(())
