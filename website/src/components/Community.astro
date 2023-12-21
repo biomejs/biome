@@ -1,0 +1,36 @@
+---
+import Contributors from "@src/components/Contributors.astro";
+import { Icon } from "@astrojs/starlight/components";
+---
+
+<div class="community">
+  <div class="comm-grid"></div>
+  <div class="com-head">Community</div>
+  <div class="com-con">
+    <div class="com-des">Powered by Astro and our open-source contributors</div>
+    <div class="com-links">
+      <a class="discord">
+        <Icon name="discord" /> Discord
+      </a>
+      <a class="github">
+        <Icon name="github" />
+         Github
+      </a>
+      <a class="x">
+        <Icon name="x.com" />
+         Twitter
+      </a>
+      <a class="mastodon">
+        <Icon name="mastodon" />
+         Mastodon
+      </a>
+    </div>
+  </div>
+  <div class="connect">
+    <Contributors class="contributors" />
+  </div>
+</div>
+
+<script>
+    import "../frontend-scripts/contributors.ts";
+</script>

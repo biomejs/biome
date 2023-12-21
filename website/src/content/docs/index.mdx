@@ -29,11 +29,12 @@ import { Card, CardGrid } from "@astrojs/starlight/components";
 import Inputf from "@src/components/formatter/input.md";
 import Outputf from "@src/components/formatter/output.md";
 import ProgressBar from "../../playground/components/Progress.tsx";
-import PackageManagerCommand from "@src/components/PackageManagerCommand.astro";
+import Community from "@src/components/Community.astro";
 import arrow from "../../assets/svg/arrow-right.svg";
 import { Image } from "astro:assets";
 import "../../styles/_performance.scss";
 import "../../styles/_installation.scss";
+import "../../styles/_community.scss";
 
 <body>
   <div class="gradient"></div>
@@ -126,6 +127,8 @@ import "../../styles/_installation.scss";
 
   </div>
 </div>
+
+<Community />
 
 ## Sponsors
 

@@ -1,0 +1,92 @@
+.community>div>div>a {
+    display: flex;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    width: fit-content;
+    border-radius: 100px;
+    padding: 8px 21px;
+    background-color: rgba(36, 173, 243, 0.1);
+    cursor: pointer;
+}
+
+.community {
+    margin-top: 150px !important;
+    height: 100vh;
+    position: relative;
+}
+
+.com-head {
+    font-size: 50px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.connect {
+    display: flex;
+    width: 500px;
+    position: absolute;
+    right: -160px !important;
+    top: 10px;
+}
+
+.connect>h3 {
+    visibility: hidden !important;
+}
+
+.com-con {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.com-des {
+    font-size: 25px;
+    text-align: center;
+}
+
+.github,
+.mastodon,
+.x,
+.discord {
+    width: 150px !important;
+}
+
+.discord:hover {
+    background-color: rgb(114, 137, 218) !important;
+    color: var(--sl-community-link) !important;
+}
+
+.x:hover,
+.github:hover {
+    background-color: black;
+    color: var(--sl-community-link) !important;
+}
+
+.mastodon:hover {
+    background-color: #6364ff;
+    color: var(--sl-community-link) !important;
+}
+
+.comm-grid {
+    z-index: -1;
+    position: absolute;
+    content: "";
+    inset: 0;
+    background-image: linear-gradient(to right,
+            var(--sl-color-gray-6) 1px,
+            transparent 1px),
+        linear-gradient(to bottom, var(--sl-color-gray-6) 1px, transparent 1px);
+    background-position: top center;
+    background-size: 20px 20px;
+    -webkit-mask-image: radial-gradient(circle at 100%, white, transparent 80%);
+    mask-image: radial-gradient(circle at 100%, white, transparent 80%);
+}
+
+@media only screen and (max-width: 1000px) {
+    .connect {
+        display: none;
+    }
+}
