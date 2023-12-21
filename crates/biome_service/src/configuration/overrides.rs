@@ -1,5 +1,5 @@
 use crate::configuration::formatter::{deserialize_line_width, serialize_line_width};
-use crate::configuration::linter::{rules, to_linter_settings};
+use crate::configuration::linter::rules;
 use crate::configuration::{
     css_configuration, javascript_configuration, json_configuration, CssConfiguration,
     JavascriptConfiguration, JsonConfiguration, PlainIndentStyle,

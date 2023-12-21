@@ -30,6 +30,7 @@ is enabled to process only the files that were changed. Contributed by @simonxab
 - Fix [#805](https://github.com/biomejs/biome/issues/805), by correctly parsing these kind of patterns. Contributed by @ematipico
 - Fix [#1117](https://github.com/biomejs/biome/issues/1117) by correctly respecting the matching. Contributed by @ematipico
 - Fix [#1247](https://github.com/biomejs/biome/issues/1247), Biome now prints a **warning** diagnostic if it encounters files that can't handle. Contributed by @ematipico
+- Fix [#691](https://github.com/biomejs/biome/issues/691) and [#1190](https://github.com/biomejs/biome/issues/1190), by correctly apply the configuration when computing the overrides. Contributed by @ematipico
 
 ### Configuration
 
