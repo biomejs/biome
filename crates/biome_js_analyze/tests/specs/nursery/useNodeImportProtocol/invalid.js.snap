@@ -67,7 +67,7 @@ import("fs");
 
 # Diagnostics
 ```
-invalid.js:1:20 lint/nursery/useNodeImportProtocol ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:1:20 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Import from Node.js builtin module "assert" should use the "node:" protocol.
   
@@ -78,13 +78,18 @@ invalid.js:1:20 lint/nursery/useNodeImportProtocol ━━━━━━━━━�
   
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
   
-  i Change to "node:assert".
+  i Unsafe fix: Change to "node:assert".
+  
+     1    │ - import·assert·from·"assert";
+        1 │ + import·assert·from·"node:assert";
+     2  2 │   import assert_strict from "assert/strict";
+     3  3 │   import async_hooks from "async_hooks";
   
 
 ```
 
 ```
-invalid.js:2:27 lint/nursery/useNodeImportProtocol ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:2:27 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Import from Node.js builtin module "assert/strict" should use the "node:" protocol.
   
@@ -96,13 +101,19 @@ invalid.js:2:27 lint/nursery/useNodeImportProtocol ━━━━━━━━━�
   
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
   
-  i Change to "node:assert/strict".
+  i Unsafe fix: Change to "node:assert/strict".
+  
+     1  1 │   import assert from "assert";
+     2    │ - import·assert_strict·from·"assert/strict";
+        2 │ + import·assert_strict·from·"node:assert/strict";
+     3  3 │   import async_hooks from "async_hooks";
+     4  4 │   import buffer from "buffer";
   
 
 ```
 
 ```
-invalid.js:3:25 lint/nursery/useNodeImportProtocol ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:3:25 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Import from Node.js builtin module "async_hooks" should use the "node:" protocol.
   
@@ -115,13 +126,20 @@ invalid.js:3:25 lint/nursery/useNodeImportProtocol ━━━━━━━━━�
   
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
   
-  i Change to "node:async_hooks".
+  i Unsafe fix: Change to "node:async_hooks".
+  
+     1  1 │   import assert from "assert";
+     2  2 │   import assert_strict from "assert/strict";
+     3    │ - import·async_hooks·from·"async_hooks";
+        3 │ + import·async_hooks·from·"node:async_hooks";
+     4  4 │   import buffer from "buffer";
+     5  5 │   import child_process from "child_process";
   
 
 ```
 
 ```
-invalid.js:4:20 lint/nursery/useNodeImportProtocol ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:4:20 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Import from Node.js builtin module "buffer" should use the "node:" protocol.
   
@@ -134,13 +152,20 @@ invalid.js:4:20 lint/nursery/useNodeImportProtocol ━━━━━━━━━�
   
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
   
-  i Change to "node:buffer".
+  i Unsafe fix: Change to "node:buffer".
+  
+     2  2 │   import assert_strict from "assert/strict";
+     3  3 │   import async_hooks from "async_hooks";
+     4    │ - import·buffer·from·"buffer";
+        4 │ + import·buffer·from·"node:buffer";
+     5  5 │   import child_process from "child_process";
+     6  6 │   import cluster from "cluster";
   
 
 ```
 
 ```
-invalid.js:5:27 lint/nursery/useNodeImportProtocol ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:5:27 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Import from Node.js builtin module "child_process" should use the "node:" protocol.
   
@@ -153,13 +178,20 @@ invalid.js:5:27 lint/nursery/useNodeImportProtocol ━━━━━━━━━�
   
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
   
-  i Change to "node:child_process".
+  i Unsafe fix: Change to "node:child_process".
+  
+     3  3 │   import async_hooks from "async_hooks";
+     4  4 │   import buffer from "buffer";
+     5    │ - import·child_process·from·"child_process";
+        5 │ + import·child_process·from·"node:child_process";
+     6  6 │   import cluster from "cluster";
+     7  7 │   import console from "console";
   
 
 ```
 
 ```
-invalid.js:6:21 lint/nursery/useNodeImportProtocol ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:6:21 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Import from Node.js builtin module "cluster" should use the "node:" protocol.
   
@@ -172,13 +204,20 @@ invalid.js:6:21 lint/nursery/useNodeImportProtocol ━━━━━━━━━�
   
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
   
-  i Change to "node:cluster".
+  i Unsafe fix: Change to "node:cluster".
+  
+     4  4 │   import buffer from "buffer";
+     5  5 │   import child_process from "child_process";
+     6    │ - import·cluster·from·"cluster";
+        6 │ + import·cluster·from·"node:cluster";
+     7  7 │   import console from "console";
+     8  8 │   import constants from "constants";
   
 
 ```
 
 ```
-invalid.js:7:21 lint/nursery/useNodeImportProtocol ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:7:21 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Import from Node.js builtin module "console" should use the "node:" protocol.
   
@@ -191,13 +230,20 @@ invalid.js:7:21 lint/nursery/useNodeImportProtocol ━━━━━━━━━�
   
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
   
-  i Change to "node:console".
+  i Unsafe fix: Change to "node:console".
+  
+     5  5 │   import child_process from "child_process";
+     6  6 │   import cluster from "cluster";
+     7    │ - import·console·from·"console";
+        7 │ + import·console·from·"node:console";
+     8  8 │   import constants from "constants";
+     9  9 │   import crypto from "crypto";
   
 
 ```
 
 ```
-invalid.js:8:23 lint/nursery/useNodeImportProtocol ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:8:23 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Import from Node.js builtin module "constants" should use the "node:" protocol.
   
@@ -210,13 +256,20 @@ invalid.js:8:23 lint/nursery/useNodeImportProtocol ━━━━━━━━━�
   
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
   
-  i Change to "node:constants".
+  i Unsafe fix: Change to "node:constants".
+  
+     6  6 │   import cluster from "cluster";
+     7  7 │   import console from "console";
+     8    │ - import·constants·from·"constants";
+        8 │ + import·constants·from·"node:constants";
+     9  9 │   import crypto from "crypto";
+    10 10 │   import dgram from "dgram";
   
 
 ```
 
 ```
-invalid.js:9:20 lint/nursery/useNodeImportProtocol ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:9:20 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Import from Node.js builtin module "crypto" should use the "node:" protocol.
   
@@ -229,13 +282,20 @@ invalid.js:9:20 lint/nursery/useNodeImportProtocol ━━━━━━━━━�
   
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
   
-  i Change to "node:crypto".
+  i Unsafe fix: Change to "node:crypto".
+  
+     7  7 │   import console from "console";
+     8  8 │   import constants from "constants";
+     9    │ - import·crypto·from·"crypto";
+        9 │ + import·crypto·from·"node:crypto";
+    10 10 │   import dgram from "dgram";
+    11 11 │   import diagnostics_channel from "diagnostics_channel";
   
 
 ```
 
 ```
-invalid.js:10:19 lint/nursery/useNodeImportProtocol ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:10:19 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Import from Node.js builtin module "dgram" should use the "node:" protocol.
   
@@ -248,13 +308,20 @@ invalid.js:10:19 lint/nursery/useNodeImportProtocol ━━━━━━━━━�
   
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
   
-  i Change to "node:dgram".
+  i Unsafe fix: Change to "node:dgram".
+  
+     8  8 │   import constants from "constants";
+     9  9 │   import crypto from "crypto";
+    10    │ - import·dgram·from·"dgram";
+       10 │ + import·dgram·from·"node:dgram";
+    11 11 │   import diagnostics_channel from "diagnostics_channel";
+    12 12 │   import dns from "dns";
   
 
 ```
 
 ```
-invalid.js:11:33 lint/nursery/useNodeImportProtocol ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:11:33 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Import from Node.js builtin module "diagnostics_channel" should use the "node:" protocol.
   
@@ -267,13 +334,20 @@ invalid.js:11:33 lint/nursery/useNodeImportProtocol ━━━━━━━━━�
   
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
   
-  i Change to "node:diagnostics_channel".
+  i Unsafe fix: Change to "node:diagnostics_channel".
+  
+     9  9 │   import crypto from "crypto";
+    10 10 │   import dgram from "dgram";
+    11    │ - import·diagnostics_channel·from·"diagnostics_channel";
+       11 │ + import·diagnostics_channel·from·"node:diagnostics_channel";
+    12 12 │   import dns from "dns";
+    13 13 │   import dns_promises from "dns/promises";
   
 
 ```
 
 ```
-invalid.js:12:17 lint/nursery/useNodeImportProtocol ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:12:17 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Import from Node.js builtin module "dns" should use the "node:" protocol.
   
@@ -286,13 +360,20 @@ invalid.js:12:17 lint/nursery/useNodeImportProtocol ━━━━━━━━━�
   
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
   
-  i Change to "node:dns".
+  i Unsafe fix: Change to "node:dns".
+  
+    10 10 │   import dgram from "dgram";
+    11 11 │   import diagnostics_channel from "diagnostics_channel";
+    12    │ - import·dns·from·"dns";
+       12 │ + import·dns·from·"node:dns";
+    13 13 │   import dns_promises from "dns/promises";
+    14 14 │   import domain from "domain";
   
 
 ```
 
 ```
-invalid.js:13:26 lint/nursery/useNodeImportProtocol ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:13:26 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Import from Node.js builtin module "dns/promises" should use the "node:" protocol.
   
@@ -305,13 +386,20 @@ invalid.js:13:26 lint/nursery/useNodeImportProtocol ━━━━━━━━━�
   
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
   
-  i Change to "node:dns/promises".
+  i Unsafe fix: Change to "node:dns/promises".
+  
+    11 11 │   import diagnostics_channel from "diagnostics_channel";
+    12 12 │   import dns from "dns";
+    13    │ - import·dns_promises·from·"dns/promises";
+       13 │ + import·dns_promises·from·"node:dns/promises";
+    14 14 │   import domain from "domain";
+    15 15 │   import events from "events";
   
 
 ```
 
 ```
-invalid.js:14:20 lint/nursery/useNodeImportProtocol ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:14:20 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Import from Node.js builtin module "domain" should use the "node:" protocol.
   
@@ -324,13 +412,20 @@ invalid.js:14:20 lint/nursery/useNodeImportProtocol ━━━━━━━━━�
   
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
   
-  i Change to "node:domain".
+  i Unsafe fix: Change to "node:domain".
+  
+    12 12 │   import dns from "dns";
+    13 13 │   import dns_promises from "dns/promises";
+    14    │ - import·domain·from·"domain";
+       14 │ + import·domain·from·"node:domain";
+    15 15 │   import events from "events";
+    16 16 │   import fs from "fs";
   
 
 ```
 
 ```
-invalid.js:15:20 lint/nursery/useNodeImportProtocol ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:15:20 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Import from Node.js builtin module "events" should use the "node:" protocol.
   
@@ -343,13 +438,20 @@ invalid.js:15:20 lint/nursery/useNodeImportProtocol ━━━━━━━━━�
   
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
   
-  i Change to "node:events".
+  i Unsafe fix: Change to "node:events".
+  
+    13 13 │   import dns_promises from "dns/promises";
+    14 14 │   import domain from "domain";
+    15    │ - import·events·from·"events";
+       15 │ + import·events·from·"node:events";
+    16 16 │   import fs from "fs";
+    17 17 │   import fs_promises from "fs/promises";
   
 
 ```
 
 ```
-invalid.js:16:16 lint/nursery/useNodeImportProtocol ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:16:16 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Import from Node.js builtin module "fs" should use the "node:" protocol.
   
@@ -362,13 +464,20 @@ invalid.js:16:16 lint/nursery/useNodeImportProtocol ━━━━━━━━━�
   
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
   
-  i Change to "node:fs".
+  i Unsafe fix: Change to "node:fs".
+  
+    14 14 │   import domain from "domain";
+    15 15 │   import events from "events";
+    16    │ - import·fs·from·"fs";
+       16 │ + import·fs·from·"node:fs";
+    17 17 │   import fs_promises from "fs/promises";
+    18 18 │   import http from "http";
   
 
 ```
 
 ```
-invalid.js:17:25 lint/nursery/useNodeImportProtocol ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:17:25 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Import from Node.js builtin module "fs/promises" should use the "node:" protocol.
   
@@ -381,13 +490,20 @@ invalid.js:17:25 lint/nursery/useNodeImportProtocol ━━━━━━━━━�
   
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
   
-  i Change to "node:fs/promises".
+  i Unsafe fix: Change to "node:fs/promises".
+  
+    15 15 │   import events from "events";
+    16 16 │   import fs from "fs";
+    17    │ - import·fs_promises·from·"fs/promises";
+       17 │ + import·fs_promises·from·"node:fs/promises";
+    18 18 │   import http from "http";
+    19 19 │   import http2 from "http2";
   
 
 ```
 
 ```
-invalid.js:18:18 lint/nursery/useNodeImportProtocol ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:18:18 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Import from Node.js builtin module "http" should use the "node:" protocol.
   
@@ -400,13 +516,20 @@ invalid.js:18:18 lint/nursery/useNodeImportProtocol ━━━━━━━━━�
   
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
   
-  i Change to "node:http".
+  i Unsafe fix: Change to "node:http".
+  
+    16 16 │   import fs from "fs";
+    17 17 │   import fs_promises from "fs/promises";
+    18    │ - import·http·from·"http";
+       18 │ + import·http·from·"node:http";
+    19 19 │   import http2 from "http2";
+    20 20 │   import https from "https";
   
 
 ```
 
 ```
-invalid.js:19:19 lint/nursery/useNodeImportProtocol ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:19:19 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Import from Node.js builtin module "http2" should use the "node:" protocol.
   
@@ -419,13 +542,20 @@ invalid.js:19:19 lint/nursery/useNodeImportProtocol ━━━━━━━━━�
   
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
   
-  i Change to "node:http2".
+  i Unsafe fix: Change to "node:http2".
+  
+    17 17 │   import fs_promises from "fs/promises";
+    18 18 │   import http from "http";
+    19    │ - import·http2·from·"http2";
+       19 │ + import·http2·from·"node:http2";
+    20 20 │   import https from "https";
+    21 21 │   import inspector from "inspector";
   
 
 ```
 
 ```
-invalid.js:20:19 lint/nursery/useNodeImportProtocol ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:20:19 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Import from Node.js builtin module "https" should use the "node:" protocol.
   
@@ -438,13 +568,20 @@ invalid.js:20:19 lint/nursery/useNodeImportProtocol ━━━━━━━━━�
   
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
   
-  i Change to "node:https".
+  i Unsafe fix: Change to "node:https".
+  
+    18 18 │   import http from "http";
+    19 19 │   import http2 from "http2";
+    20    │ - import·https·from·"https";
+       20 │ + import·https·from·"node:https";
+    21 21 │   import inspector from "inspector";
+    22 22 │   import inspector_promises from "inspector/promises";
   
 
 ```
 
 ```
-invalid.js:21:23 lint/nursery/useNodeImportProtocol ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:21:23 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Import from Node.js builtin module "inspector" should use the "node:" protocol.
   
@@ -457,13 +594,20 @@ invalid.js:21:23 lint/nursery/useNodeImportProtocol ━━━━━━━━━�
   
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
   
-  i Change to "node:inspector".
+  i Unsafe fix: Change to "node:inspector".
+  
+    19 19 │   import http2 from "http2";
+    20 20 │   import https from "https";
+    21    │ - import·inspector·from·"inspector";
+       21 │ + import·inspector·from·"node:inspector";
+    22 22 │   import inspector_promises from "inspector/promises";
+    23 23 │   import module from "module";
   
 
 ```
 
 ```
-invalid.js:22:32 lint/nursery/useNodeImportProtocol ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:22:32 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Import from Node.js builtin module "inspector/promises" should use the "node:" protocol.
   
@@ -476,13 +620,20 @@ invalid.js:22:32 lint/nursery/useNodeImportProtocol ━━━━━━━━━�
   
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
   
-  i Change to "node:inspector/promises".
+  i Unsafe fix: Change to "node:inspector/promises".
+  
+    20 20 │   import https from "https";
+    21 21 │   import inspector from "inspector";
+    22    │ - import·inspector_promises·from·"inspector/promises";
+       22 │ + import·inspector_promises·from·"node:inspector/promises";
+    23 23 │   import module from "module";
+    24 24 │   import net from "net";
   
 
 ```
 
 ```
-invalid.js:23:20 lint/nursery/useNodeImportProtocol ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:23:20 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Import from Node.js builtin module "module" should use the "node:" protocol.
   
@@ -495,13 +646,20 @@ invalid.js:23:20 lint/nursery/useNodeImportProtocol ━━━━━━━━━�
   
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
   
-  i Change to "node:module".
+  i Unsafe fix: Change to "node:module".
+  
+    21 21 │   import inspector from "inspector";
+    22 22 │   import inspector_promises from "inspector/promises";
+    23    │ - import·module·from·"module";
+       23 │ + import·module·from·"node:module";
+    24 24 │   import net from "net";
+    25 25 │   import os from "os";
   
 
 ```
 
 ```
-invalid.js:24:17 lint/nursery/useNodeImportProtocol ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:24:17 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Import from Node.js builtin module "net" should use the "node:" protocol.
   
@@ -514,13 +672,20 @@ invalid.js:24:17 lint/nursery/useNodeImportProtocol ━━━━━━━━━�
   
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
   
-  i Change to "node:net".
+  i Unsafe fix: Change to "node:net".
+  
+    22 22 │   import inspector_promises from "inspector/promises";
+    23 23 │   import module from "module";
+    24    │ - import·net·from·"net";
+       24 │ + import·net·from·"node:net";
+    25 25 │   import os from "os";
+    26 26 │   import path from "path";
   
 
 ```
 
 ```
-invalid.js:25:16 lint/nursery/useNodeImportProtocol ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:25:16 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Import from Node.js builtin module "os" should use the "node:" protocol.
   
@@ -533,13 +698,20 @@ invalid.js:25:16 lint/nursery/useNodeImportProtocol ━━━━━━━━━�
   
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
   
-  i Change to "node:os".
+  i Unsafe fix: Change to "node:os".
+  
+    23 23 │   import module from "module";
+    24 24 │   import net from "net";
+    25    │ - import·os·from·"os";
+       25 │ + import·os·from·"node:os";
+    26 26 │   import path from "path";
+    27 27 │   import path_posix from "path/posix";
   
 
 ```
 
 ```
-invalid.js:26:18 lint/nursery/useNodeImportProtocol ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:26:18 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Import from Node.js builtin module "path" should use the "node:" protocol.
   
@@ -552,13 +724,20 @@ invalid.js:26:18 lint/nursery/useNodeImportProtocol ━━━━━━━━━�
   
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
   
-  i Change to "node:path".
+  i Unsafe fix: Change to "node:path".
+  
+    24 24 │   import net from "net";
+    25 25 │   import os from "os";
+    26    │ - import·path·from·"path";
+       26 │ + import·path·from·"node:path";
+    27 27 │   import path_posix from "path/posix";
+    28 28 │   import path_win32 from "path/win32";
   
 
 ```
 
 ```
-invalid.js:27:24 lint/nursery/useNodeImportProtocol ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:27:24 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Import from Node.js builtin module "path/posix" should use the "node:" protocol.
   
@@ -571,13 +750,20 @@ invalid.js:27:24 lint/nursery/useNodeImportProtocol ━━━━━━━━━�
   
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
   
-  i Change to "node:path/posix".
+  i Unsafe fix: Change to "node:path/posix".
+  
+    25 25 │   import os from "os";
+    26 26 │   import path from "path";
+    27    │ - import·path_posix·from·"path/posix";
+       27 │ + import·path_posix·from·"node:path/posix";
+    28 28 │   import path_win32 from "path/win32";
+    29 29 │   import perf_hooks from "perf_hooks";
   
 
 ```
 
 ```
-invalid.js:28:24 lint/nursery/useNodeImportProtocol ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:28:24 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Import from Node.js builtin module "path/win32" should use the "node:" protocol.
   
@@ -590,13 +776,20 @@ invalid.js:28:24 lint/nursery/useNodeImportProtocol ━━━━━━━━━�
   
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
   
-  i Change to "node:path/win32".
+  i Unsafe fix: Change to "node:path/win32".
+  
+    26 26 │   import path from "path";
+    27 27 │   import path_posix from "path/posix";
+    28    │ - import·path_win32·from·"path/win32";
+       28 │ + import·path_win32·from·"node:path/win32";
+    29 29 │   import perf_hooks from "perf_hooks";
+    30 30 │   import process from "process";
   
 
 ```
 
 ```
-invalid.js:29:24 lint/nursery/useNodeImportProtocol ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:29:24 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Import from Node.js builtin module "perf_hooks" should use the "node:" protocol.
   
@@ -609,13 +802,20 @@ invalid.js:29:24 lint/nursery/useNodeImportProtocol ━━━━━━━━━�
   
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
   
-  i Change to "node:perf_hooks".
+  i Unsafe fix: Change to "node:perf_hooks".
+  
+    27 27 │   import path_posix from "path/posix";
+    28 28 │   import path_win32 from "path/win32";
+    29    │ - import·perf_hooks·from·"perf_hooks";
+       29 │ + import·perf_hooks·from·"node:perf_hooks";
+    30 30 │   import process from "process";
+    31 31 │   import punycode from "punycode";
   
 
 ```
 
 ```
-invalid.js:30:21 lint/nursery/useNodeImportProtocol ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:30:21 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Import from Node.js builtin module "process" should use the "node:" protocol.
   
@@ -628,13 +828,20 @@ invalid.js:30:21 lint/nursery/useNodeImportProtocol ━━━━━━━━━�
   
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
   
-  i Change to "node:process".
+  i Unsafe fix: Change to "node:process".
+  
+    28 28 │   import path_win32 from "path/win32";
+    29 29 │   import perf_hooks from "perf_hooks";
+    30    │ - import·process·from·"process";
+       30 │ + import·process·from·"node:process";
+    31 31 │   import punycode from "punycode";
+    32 32 │   import querystring from "querystring";
   
 
 ```
 
 ```
-invalid.js:31:22 lint/nursery/useNodeImportProtocol ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:31:22 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Import from Node.js builtin module "punycode" should use the "node:" protocol.
   
@@ -647,13 +854,20 @@ invalid.js:31:22 lint/nursery/useNodeImportProtocol ━━━━━━━━━�
   
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
   
-  i Change to "node:punycode".
+  i Unsafe fix: Change to "node:punycode".
+  
+    29 29 │   import perf_hooks from "perf_hooks";
+    30 30 │   import process from "process";
+    31    │ - import·punycode·from·"punycode";
+       31 │ + import·punycode·from·"node:punycode";
+    32 32 │   import querystring from "querystring";
+    33 33 │   import readline from "readline";
   
 
 ```
 
 ```
-invalid.js:32:25 lint/nursery/useNodeImportProtocol ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:32:25 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Import from Node.js builtin module "querystring" should use the "node:" protocol.
   
@@ -666,13 +880,20 @@ invalid.js:32:25 lint/nursery/useNodeImportProtocol ━━━━━━━━━�
   
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
   
-  i Change to "node:querystring".
+  i Unsafe fix: Change to "node:querystring".
+  
+    30 30 │   import process from "process";
+    31 31 │   import punycode from "punycode";
+    32    │ - import·querystring·from·"querystring";
+       32 │ + import·querystring·from·"node:querystring";
+    33 33 │   import readline from "readline";
+    34 34 │   import readline_promises from "readline/promises";
   
 
 ```
 
 ```
-invalid.js:33:22 lint/nursery/useNodeImportProtocol ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:33:22 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Import from Node.js builtin module "readline" should use the "node:" protocol.
   
@@ -685,13 +906,20 @@ invalid.js:33:22 lint/nursery/useNodeImportProtocol ━━━━━━━━━�
   
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
   
-  i Change to "node:readline".
+  i Unsafe fix: Change to "node:readline".
+  
+    31 31 │   import punycode from "punycode";
+    32 32 │   import querystring from "querystring";
+    33    │ - import·readline·from·"readline";
+       33 │ + import·readline·from·"node:readline";
+    34 34 │   import readline_promises from "readline/promises";
+    35 35 │   import repl from "repl";
   
 
 ```
 
 ```
-invalid.js:34:31 lint/nursery/useNodeImportProtocol ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:34:31 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Import from Node.js builtin module "readline/promises" should use the "node:" protocol.
   
@@ -704,13 +932,20 @@ invalid.js:34:31 lint/nursery/useNodeImportProtocol ━━━━━━━━━�
   
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
   
-  i Change to "node:readline/promises".
+  i Unsafe fix: Change to "node:readline/promises".
+  
+    32 32 │   import querystring from "querystring";
+    33 33 │   import readline from "readline";
+    34    │ - import·readline_promises·from·"readline/promises";
+       34 │ + import·readline_promises·from·"node:readline/promises";
+    35 35 │   import repl from "repl";
+    36 36 │   import stream from "stream";
   
 
 ```
 
 ```
-invalid.js:35:18 lint/nursery/useNodeImportProtocol ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:35:18 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Import from Node.js builtin module "repl" should use the "node:" protocol.
   
@@ -723,13 +958,20 @@ invalid.js:35:18 lint/nursery/useNodeImportProtocol ━━━━━━━━━�
   
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
   
-  i Change to "node:repl".
+  i Unsafe fix: Change to "node:repl".
+  
+    33 33 │   import readline from "readline";
+    34 34 │   import readline_promises from "readline/promises";
+    35    │ - import·repl·from·"repl";
+       35 │ + import·repl·from·"node:repl";
+    36 36 │   import stream from "stream";
+    37 37 │   import stream_consumers from "stream/consumers";
   
 
 ```
 
 ```
-invalid.js:36:20 lint/nursery/useNodeImportProtocol ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:36:20 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Import from Node.js builtin module "stream" should use the "node:" protocol.
   
@@ -742,13 +984,20 @@ invalid.js:36:20 lint/nursery/useNodeImportProtocol ━━━━━━━━━�
   
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
   
-  i Change to "node:stream".
+  i Unsafe fix: Change to "node:stream".
+  
+    34 34 │   import readline_promises from "readline/promises";
+    35 35 │   import repl from "repl";
+    36    │ - import·stream·from·"stream";
+       36 │ + import·stream·from·"node:stream";
+    37 37 │   import stream_consumers from "stream/consumers";
+    38 38 │   import stream_promises from "stream/promises";
   
 
 ```
 
 ```
-invalid.js:37:30 lint/nursery/useNodeImportProtocol ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:37:30 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Import from Node.js builtin module "stream/consumers" should use the "node:" protocol.
   
@@ -761,13 +1010,20 @@ invalid.js:37:30 lint/nursery/useNodeImportProtocol ━━━━━━━━━�
   
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
   
-  i Change to "node:stream/consumers".
+  i Unsafe fix: Change to "node:stream/consumers".
+  
+    35 35 │   import repl from "repl";
+    36 36 │   import stream from "stream";
+    37    │ - import·stream_consumers·from·"stream/consumers";
+       37 │ + import·stream_consumers·from·"node:stream/consumers";
+    38 38 │   import stream_promises from "stream/promises";
+    39 39 │   import stream_web from "stream/web";
   
 
 ```
 
 ```
-invalid.js:38:29 lint/nursery/useNodeImportProtocol ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:38:29 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Import from Node.js builtin module "stream/promises" should use the "node:" protocol.
   
@@ -780,13 +1036,20 @@ invalid.js:38:29 lint/nursery/useNodeImportProtocol ━━━━━━━━━�
   
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
   
-  i Change to "node:stream/promises".
+  i Unsafe fix: Change to "node:stream/promises".
+  
+    36 36 │   import stream from "stream";
+    37 37 │   import stream_consumers from "stream/consumers";
+    38    │ - import·stream_promises·from·"stream/promises";
+       38 │ + import·stream_promises·from·"node:stream/promises";
+    39 39 │   import stream_web from "stream/web";
+    40 40 │   import string_decoder from "string_decoder";
   
 
 ```
 
 ```
-invalid.js:39:24 lint/nursery/useNodeImportProtocol ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:39:24 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Import from Node.js builtin module "stream/web" should use the "node:" protocol.
   
@@ -799,13 +1062,20 @@ invalid.js:39:24 lint/nursery/useNodeImportProtocol ━━━━━━━━━�
   
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
   
-  i Change to "node:stream/web".
+  i Unsafe fix: Change to "node:stream/web".
+  
+    37 37 │   import stream_consumers from "stream/consumers";
+    38 38 │   import stream_promises from "stream/promises";
+    39    │ - import·stream_web·from·"stream/web";
+       39 │ + import·stream_web·from·"node:stream/web";
+    40 40 │   import string_decoder from "string_decoder";
+    41 41 │   import sys from "sys";
   
 
 ```
 
 ```
-invalid.js:40:28 lint/nursery/useNodeImportProtocol ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:40:28 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Import from Node.js builtin module "string_decoder" should use the "node:" protocol.
   
@@ -818,13 +1088,20 @@ invalid.js:40:28 lint/nursery/useNodeImportProtocol ━━━━━━━━━�
   
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
   
-  i Change to "node:string_decoder".
+  i Unsafe fix: Change to "node:string_decoder".
+  
+    38 38 │   import stream_promises from "stream/promises";
+    39 39 │   import stream_web from "stream/web";
+    40    │ - import·string_decoder·from·"string_decoder";
+       40 │ + import·string_decoder·from·"node:string_decoder";
+    41 41 │   import sys from "sys";
+    42 42 │   import timers from "timers";
   
 
 ```
 
 ```
-invalid.js:41:17 lint/nursery/useNodeImportProtocol ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:41:17 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Import from Node.js builtin module "sys" should use the "node:" protocol.
   
@@ -837,13 +1114,20 @@ invalid.js:41:17 lint/nursery/useNodeImportProtocol ━━━━━━━━━�
   
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
   
-  i Change to "node:sys".
+  i Unsafe fix: Change to "node:sys".
+  
+    39 39 │   import stream_web from "stream/web";
+    40 40 │   import string_decoder from "string_decoder";
+    41    │ - import·sys·from·"sys";
+       41 │ + import·sys·from·"node:sys";
+    42 42 │   import timers from "timers";
+    43 43 │   import timers_promises from "timers/promises";
   
 
 ```
 
 ```
-invalid.js:42:20 lint/nursery/useNodeImportProtocol ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:42:20 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Import from Node.js builtin module "timers" should use the "node:" protocol.
   
@@ -856,13 +1140,20 @@ invalid.js:42:20 lint/nursery/useNodeImportProtocol ━━━━━━━━━�
   
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
   
-  i Change to "node:timers".
+  i Unsafe fix: Change to "node:timers".
+  
+    40 40 │   import string_decoder from "string_decoder";
+    41 41 │   import sys from "sys";
+    42    │ - import·timers·from·"timers";
+       42 │ + import·timers·from·"node:timers";
+    43 43 │   import timers_promises from "timers/promises";
+    44 44 │   import tls from "tls";
   
 
 ```
 
 ```
-invalid.js:43:29 lint/nursery/useNodeImportProtocol ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:43:29 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Import from Node.js builtin module "timers/promises" should use the "node:" protocol.
   
@@ -875,13 +1166,20 @@ invalid.js:43:29 lint/nursery/useNodeImportProtocol ━━━━━━━━━�
   
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
   
-  i Change to "node:timers/promises".
+  i Unsafe fix: Change to "node:timers/promises".
+  
+    41 41 │   import sys from "sys";
+    42 42 │   import timers from "timers";
+    43    │ - import·timers_promises·from·"timers/promises";
+       43 │ + import·timers_promises·from·"node:timers/promises";
+    44 44 │   import tls from "tls";
+    45 45 │   import trace_events from "trace_events";
   
 
 ```
 
 ```
-invalid.js:44:17 lint/nursery/useNodeImportProtocol ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:44:17 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Import from Node.js builtin module "tls" should use the "node:" protocol.
   
@@ -894,13 +1192,20 @@ invalid.js:44:17 lint/nursery/useNodeImportProtocol ━━━━━━━━━�
   
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
   
-  i Change to "node:tls".
+  i Unsafe fix: Change to "node:tls".
+  
+    42 42 │   import timers from "timers";
+    43 43 │   import timers_promises from "timers/promises";
+    44    │ - import·tls·from·"tls";
+       44 │ + import·tls·from·"node:tls";
+    45 45 │   import trace_events from "trace_events";
+    46 46 │   import tty from "tty";
   
 
 ```
 
 ```
-invalid.js:45:26 lint/nursery/useNodeImportProtocol ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:45:26 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Import from Node.js builtin module "trace_events" should use the "node:" protocol.
   
@@ -913,13 +1218,20 @@ invalid.js:45:26 lint/nursery/useNodeImportProtocol ━━━━━━━━━�
   
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
   
-  i Change to "node:trace_events".
+  i Unsafe fix: Change to "node:trace_events".
+  
+    43 43 │   import timers_promises from "timers/promises";
+    44 44 │   import tls from "tls";
+    45    │ - import·trace_events·from·"trace_events";
+       45 │ + import·trace_events·from·"node:trace_events";
+    46 46 │   import tty from "tty";
+    47 47 │   import url from "url";
   
 
 ```
 
 ```
-invalid.js:46:17 lint/nursery/useNodeImportProtocol ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:46:17 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Import from Node.js builtin module "tty" should use the "node:" protocol.
   
@@ -932,13 +1244,20 @@ invalid.js:46:17 lint/nursery/useNodeImportProtocol ━━━━━━━━━�
   
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
   
-  i Change to "node:tty".
+  i Unsafe fix: Change to "node:tty".
+  
+    44 44 │   import tls from "tls";
+    45 45 │   import trace_events from "trace_events";
+    46    │ - import·tty·from·"tty";
+       46 │ + import·tty·from·"node:tty";
+    47 47 │   import url from "url";
+    48 48 │   import util from "util";
   
 
 ```
 
 ```
-invalid.js:47:17 lint/nursery/useNodeImportProtocol ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:47:17 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Import from Node.js builtin module "url" should use the "node:" protocol.
   
@@ -951,13 +1270,20 @@ invalid.js:47:17 lint/nursery/useNodeImportProtocol ━━━━━━━━━�
   
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
   
-  i Change to "node:url".
+  i Unsafe fix: Change to "node:url".
+  
+    45 45 │   import trace_events from "trace_events";
+    46 46 │   import tty from "tty";
+    47    │ - import·url·from·"url";
+       47 │ + import·url·from·"node:url";
+    48 48 │   import util from "util";
+    49 49 │   import util_types from "util/types";
   
 
 ```
 
 ```
-invalid.js:48:18 lint/nursery/useNodeImportProtocol ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:48:18 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Import from Node.js builtin module "util" should use the "node:" protocol.
   
@@ -970,13 +1296,20 @@ invalid.js:48:18 lint/nursery/useNodeImportProtocol ━━━━━━━━━�
   
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
   
-  i Change to "node:util".
+  i Unsafe fix: Change to "node:util".
+  
+    46 46 │   import tty from "tty";
+    47 47 │   import url from "url";
+    48    │ - import·util·from·"util";
+       48 │ + import·util·from·"node:util";
+    49 49 │   import util_types from "util/types";
+    50 50 │   import v8 from "v8";
   
 
 ```
 
 ```
-invalid.js:49:24 lint/nursery/useNodeImportProtocol ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:49:24 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Import from Node.js builtin module "util/types" should use the "node:" protocol.
   
@@ -989,13 +1322,20 @@ invalid.js:49:24 lint/nursery/useNodeImportProtocol ━━━━━━━━━�
   
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
   
-  i Change to "node:util/types".
+  i Unsafe fix: Change to "node:util/types".
+  
+    47 47 │   import url from "url";
+    48 48 │   import util from "util";
+    49    │ - import·util_types·from·"util/types";
+       49 │ + import·util_types·from·"node:util/types";
+    50 50 │   import v8 from "v8";
+    51 51 │   import vm from "vm";
   
 
 ```
 
 ```
-invalid.js:50:16 lint/nursery/useNodeImportProtocol ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:50:16 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Import from Node.js builtin module "v8" should use the "node:" protocol.
   
@@ -1008,13 +1348,20 @@ invalid.js:50:16 lint/nursery/useNodeImportProtocol ━━━━━━━━━�
   
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
   
-  i Change to "node:v8".
+  i Unsafe fix: Change to "node:v8".
+  
+    48 48 │   import util from "util";
+    49 49 │   import util_types from "util/types";
+    50    │ - import·v8·from·"v8";
+       50 │ + import·v8·from·"node:v8";
+    51 51 │   import vm from "vm";
+    52 52 │   import wasi from "wasi";
   
 
 ```
 
 ```
-invalid.js:51:16 lint/nursery/useNodeImportProtocol ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:51:16 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Import from Node.js builtin module "vm" should use the "node:" protocol.
   
@@ -1027,13 +1374,20 @@ invalid.js:51:16 lint/nursery/useNodeImportProtocol ━━━━━━━━━�
   
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
   
-  i Change to "node:vm".
+  i Unsafe fix: Change to "node:vm".
+  
+    49 49 │   import util_types from "util/types";
+    50 50 │   import v8 from "v8";
+    51    │ - import·vm·from·"vm";
+       51 │ + import·vm·from·"node:vm";
+    52 52 │   import wasi from "wasi";
+    53 53 │   import worker_threads from "worker_threads";
   
 
 ```
 
 ```
-invalid.js:52:18 lint/nursery/useNodeImportProtocol ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:52:18 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Import from Node.js builtin module "wasi" should use the "node:" protocol.
   
@@ -1046,13 +1400,20 @@ invalid.js:52:18 lint/nursery/useNodeImportProtocol ━━━━━━━━━�
   
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
   
-  i Change to "node:wasi".
+  i Unsafe fix: Change to "node:wasi".
+  
+    50 50 │   import v8 from "v8";
+    51 51 │   import vm from "vm";
+    52    │ - import·wasi·from·"wasi";
+       52 │ + import·wasi·from·"node:wasi";
+    53 53 │   import worker_threads from "worker_threads";
+    54 54 │   import zlib from "zlib";
   
 
 ```
 
 ```
-invalid.js:53:28 lint/nursery/useNodeImportProtocol ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:53:28 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Import from Node.js builtin module "worker_threads" should use the "node:" protocol.
   
@@ -1065,13 +1426,20 @@ invalid.js:53:28 lint/nursery/useNodeImportProtocol ━━━━━━━━━�
   
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
   
-  i Change to "node:worker_threads".
+  i Unsafe fix: Change to "node:worker_threads".
+  
+    51 51 │   import vm from "vm";
+    52 52 │   import wasi from "wasi";
+    53    │ - import·worker_threads·from·"worker_threads";
+       53 │ + import·worker_threads·from·"node:worker_threads";
+    54 54 │   import zlib from "zlib";
+    55 55 │   
   
 
 ```
 
 ```
-invalid.js:54:18 lint/nursery/useNodeImportProtocol ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:54:18 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Import from Node.js builtin module "zlib" should use the "node:" protocol.
   
@@ -1084,13 +1452,20 @@ invalid.js:54:18 lint/nursery/useNodeImportProtocol ━━━━━━━━━�
   
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
   
-  i Change to "node:zlib".
+  i Unsafe fix: Change to "node:zlib".
+  
+    52 52 │   import wasi from "wasi";
+    53 53 │   import worker_threads from "worker_threads";
+    54    │ - import·zlib·from·"zlib";
+       54 │ + import·zlib·from·"node:zlib";
+    55 55 │   
+    56 56 │   // check for require and import
   
 
 ```
 
 ```
-invalid.js:57:1 lint/nursery/useNodeImportProtocol ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:57:1 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Import from Node.js builtin module "fs" should use the "node:" protocol.
   
@@ -1102,13 +1477,20 @@ invalid.js:57:1 lint/nursery/useNodeImportProtocol ━━━━━━━━━�
   
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
   
-  i Change to "node:fs".
+  i Unsafe fix: Change to "node:fs".
+  
+    55 55 │   
+    56 56 │   // check for require and import
+    57    │ - require("fs");
+       57 │ + require("node:fs");
+    58 58 │   import("fs");
+    59 59 │   
   
 
 ```
 
 ```
-invalid.js:58:1 lint/nursery/useNodeImportProtocol ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:58:1 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Import from Node.js builtin module "fs" should use the "node:" protocol.
   
@@ -1120,7 +1502,13 @@ invalid.js:58:1 lint/nursery/useNodeImportProtocol ━━━━━━━━━�
   
   i Using the node: protocol is more explicit and signals that the imported module belongs to Node.js.
   
-  i Change to "node:fs".
+  i Unsafe fix: Change to "node:fs".
+  
+    56 56 │   // check for require and import
+    57 57 │   require("fs");
+    58    │ - import("fs");
+       58 │ + import("node:fs");
+    59 59 │   
   
 
 ```

@@ -3,11 +3,14 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
-use biome_js_factory::make::{self, jsx_string_literal};
-use biome_js_syntax::{
-    AnyJsLiteralExpression, JsCallExpression, JsImportCallExpression, JsModuleSource,
+use biome_js_factory::make::{
+    self, js_call_argument_list, js_string_literal, js_string_literal_expression,
 };
-use biome_rowan::{declare_node_union, AstNode, AstSeparatedList, BatchMutationExt};
+use biome_js_syntax::{
+    AnyJsCallArgument, AnyJsLiteralExpression, JsCallArgumentList, JsCallExpression,
+    JsImportCallExpression, JsLanguage, JsModuleSource,
+};
+use biome_rowan::{declare_node_union, AstNode, AstSeparatedList, BatchMutation, BatchMutationExt};
 
 use crate::{globals::node::NODE_BUILTINS, JsRuleAction};
 
@@ -130,20 +133,24 @@ impl Rule for UseNodeImportProtocol {
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
+        let binding = ctx.query();
         let new_import_str = format!("node:{}", state);
-        let old_node = biome_js_syntax::AnyJsExpression::AnyJsLiteralExpression(
-            AnyJsLiteralExpression::JsStringLiteralExpression(make::js_string_literal_expression(
-                jsx_string_literal(state.as_str()),
-            )),
-        );
-        let new_node = biome_js_syntax::AnyJsExpression::AnyJsLiteralExpression(
-            AnyJsLiteralExpression::JsStringLiteralExpression(make::js_string_literal_expression(
-                jsx_string_literal(new_import_str.as_str()),
-            )),
-        );
-
         let mut mutation = ctx.root().begin();
-        mutation.replace_node(old_node, new_node);
+
+        match binding {
+            AnyJsImportLike::JsModuleSource(source) => {
+                let new_source = make::js_module_source(make::js_string_literal(&new_import_str));
+                mutation.replace_node(source.clone(), new_source.clone());
+            }
+            AnyJsImportLike::JsImportCallExpression(import_call) => {
+                let arguments = import_call.arguments().ok()?.args();
+                mutate_call_expression(&arguments, &new_import_str, &mut mutation);
+            }
+            AnyJsImportLike::JsCallExpression(expression) => {
+                let arguments = expression.arguments().ok()?.args();
+                mutate_call_expression(&arguments, &new_import_str, &mut mutation);
+            }
+        };
 
         Some(JsRuleAction {
             category: ActionCategory::QuickFix,
@@ -156,4 +163,20 @@ impl Rule for UseNodeImportProtocol {
 
 fn is_node_module_without_protocol(module_name: &str) -> bool {
     !module_name.starts_with("node:") && NODE_BUILTINS.binary_search(&module_name).is_ok()
+}
+
+fn mutate_call_expression(
+    arguments: &JsCallArgumentList,
+    new_import_str: &str,
+    mutation: &mut BatchMutation<JsLanguage>,
+) {
+    let arg = AnyJsCallArgument::AnyJsExpression(
+        biome_js_syntax::AnyJsExpression::AnyJsLiteralExpression(
+            AnyJsLiteralExpression::JsStringLiteralExpression(js_string_literal_expression(
+                js_string_literal(new_import_str),
+            )),
+        ),
+    );
+    let list = js_call_argument_list([arg], []);
+    mutation.replace_node(arguments.clone(), list.clone());
 }
