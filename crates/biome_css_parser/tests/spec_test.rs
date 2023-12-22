@@ -134,11 +134,10 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 #[test]
 pub fn quick_test() {
     let code = r#"
-@keyframes slidein {
-	{
-		transform: translateX(0%);
-	}
-}
+    a{
+        color: var(--a,);
+    }
+
     "#;
     // let code: String = fs::read_to_string("./tests/bootstrap.css")
     //     .unwrap()

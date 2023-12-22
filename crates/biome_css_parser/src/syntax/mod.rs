@@ -324,6 +324,10 @@ impl ParseSeparatedList for CssParameterList {
     fn separating_element_kind(&mut self) -> Self::Kind {
         T![,]
     }
+    
+    fn allow_trailing_separating_element(&self) -> bool {
+        true
+    }
 }
 #[inline]
 pub(crate) fn is_parameter(p: &mut CssParser) -> bool {

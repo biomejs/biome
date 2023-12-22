@@ -43,7 +43,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [],
                 },
             ],
-            block: CssBlock {
+            block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@2..3 "{" [] [],
                 declaration_list: CssDeclarationList [
                     CssDeclaration {
@@ -51,7 +51,7 @@ CssRoot {
                             value_token: IDENT@3..18 "background" [Newline("\n"), Whitespace("    ")] [],
                         },
                         colon_token: COLON@18..20 ":" [] [Whitespace(" ")],
-                        value: CssListOfComponentValues [
+                        value: CssComponentValueList [
                             CssSimpleFunction {
                                 name: CssIdentifier {
                                     value_token: IDENT@20..35 "linear-gradient" [] [],
@@ -81,7 +81,7 @@ CssRoot {
                             value_token: IDENT@49..64 "background" [Newline("\n"), Whitespace("    ")] [],
                         },
                         colon_token: COLON@64..66 ":" [] [Whitespace(" ")],
-                        value: CssListOfComponentValues [
+                        value: CssComponentValueList [
                             CssSimpleFunction {
                                 name: CssIdentifier {
                                     value_token: IDENT@66..81 "linear-gradient" [] [],
@@ -111,7 +111,7 @@ CssRoot {
                             value_token: IDENT@96..111 "background" [Newline("\n"), Whitespace("    ")] [],
                         },
                         colon_token: COLON@111..113 ":" [] [Whitespace(" ")],
-                        value: CssListOfComponentValues [
+                        value: CssComponentValueList [
                             CssSimpleFunction {
                                 name: CssIdentifier {
                                     value_token: IDENT@113..128 "linear-gradient" [] [],
@@ -120,7 +120,7 @@ CssRoot {
                                 items: CssParameterList [
                                     CssParameter {
                                         any_css_parameter: CssListOfComponentValuesExpress {
-                                            css_list_of_component_values: CssListOfComponentValues [
+                                            css_component_value_list: CssComponentValueList [
                                                 CssIdentifier {
                                                     value_token: IDENT@129..132 "to" [] [Whitespace(" ")],
                                                 },
@@ -154,7 +154,7 @@ CssRoot {
                             value_token: IDENT@154..169 "background" [Newline("\n"), Whitespace("    ")] [],
                         },
                         colon_token: COLON@169..171 ":" [] [Whitespace(" ")],
-                        value: CssListOfComponentValues [
+                        value: CssComponentValueList [
                             CssSimpleFunction {
                                 name: CssIdentifier {
                                     value_token: IDENT@171..186 "linear-gradient" [] [],
@@ -195,7 +195,7 @@ CssRoot {
                             value_token: IDENT@209..224 "background" [Newline("\n"), Whitespace("    ")] [],
                         },
                         colon_token: COLON@224..226 ":" [] [Whitespace(" ")],
-                        value: CssListOfComponentValues [
+                        value: CssComponentValueList [
                             CssSimpleFunction {
                                 name: CssIdentifier {
                                     value_token: IDENT@226..241 "linear-gradient" [] [],
@@ -204,7 +204,7 @@ CssRoot {
                                 items: CssParameterList [
                                     CssParameter {
                                         any_css_parameter: CssListOfComponentValuesExpress {
-                                            css_list_of_component_values: CssListOfComponentValues [
+                                            css_component_value_list: CssComponentValueList [
                                                 CssIdentifier {
                                                     value_token: IDENT@242..245 "to" [] [Whitespace(" ")],
                                                 },
@@ -238,7 +238,7 @@ CssRoot {
                             value_token: IDENT@264..279 "background" [Newline("\n"), Whitespace("    ")] [],
                         },
                         colon_token: COLON@279..281 ":" [] [Whitespace(" ")],
-                        value: CssListOfComponentValues [
+                        value: CssComponentValueList [
                             CssSimpleFunction {
                                 name: CssIdentifier {
                                     value_token: IDENT@281..296 "linear-gradient" [] [],
@@ -247,7 +247,7 @@ CssRoot {
                                 items: CssParameterList [
                                     CssParameter {
                                         any_css_parameter: CssListOfComponentValuesExpress {
-                                            css_list_of_component_values: CssListOfComponentValues [
+                                            css_component_value_list: CssComponentValueList [
                                                 CssIdentifier {
                                                     value_token: IDENT@297..300 "to" [] [Whitespace(" ")],
                                                 },
@@ -260,7 +260,7 @@ CssRoot {
                                     COMMA@306..308 "," [] [Whitespace(" ")],
                                     CssParameter {
                                         any_css_parameter: CssListOfComponentValuesExpress {
-                                            css_list_of_component_values: CssListOfComponentValues [
+                                            css_component_value_list: CssComponentValueList [
                                                 CssIdentifier {
                                                     value_token: IDENT@308..315 "yellow" [] [Whitespace(" ")],
                                                 },
@@ -276,7 +276,7 @@ CssRoot {
                                     COMMA@317..319 "," [] [Whitespace(" ")],
                                     CssParameter {
                                         any_css_parameter: CssListOfComponentValuesExpress {
-                                            css_list_of_component_values: CssListOfComponentValues [
+                                            css_component_value_list: CssComponentValueList [
                                                 CssIdentifier {
                                                     value_token: IDENT@319..324 "blue" [] [Whitespace(" ")],
                                                 },
@@ -301,7 +301,7 @@ CssRoot {
                             value_token: IDENT@330..345 "background" [Newline("\n"), Whitespace("    ")] [],
                         },
                         colon_token: COLON@345..347 ":" [] [Whitespace(" ")],
-                        value: CssListOfComponentValues [
+                        value: CssComponentValueList [
                             CssSimpleFunction {
                                 name: CssIdentifier {
                                     value_token: IDENT@347..362 "linear-gradient" [] [],
@@ -342,7 +342,7 @@ CssRoot {
                             value_token: IDENT@385..400 "background" [Newline("\n"), Whitespace("    ")] [],
                         },
                         colon_token: COLON@400..402 ":" [] [Whitespace(" ")],
-                        value: CssListOfComponentValues [
+                        value: CssComponentValueList [
                             CssSimpleFunction {
                                 name: CssIdentifier {
                                     value_token: IDENT@402..417 "linear-gradient" [] [],
@@ -383,7 +383,7 @@ CssRoot {
                             value_token: IDENT@440..455 "background" [Newline("\n"), Whitespace("    ")] [],
                         },
                         colon_token: COLON@455..457 ":" [] [Whitespace(" ")],
-                        value: CssListOfComponentValues [
+                        value: CssComponentValueList [
                             CssSimpleFunction {
                                 name: CssIdentifier {
                                     value_token: IDENT@457..472 "linear-gradient" [] [],
@@ -398,7 +398,7 @@ CssRoot {
                                     COMMA@479..481 "," [] [Whitespace(" ")],
                                     CssParameter {
                                         any_css_parameter: CssListOfComponentValuesExpress {
-                                            css_list_of_component_values: CssListOfComponentValues [
+                                            css_component_value_list: CssComponentValueList [
                                                 CssIdentifier {
                                                     value_token: IDENT@481..486 "blue" [] [Whitespace(" ")],
                                                 },
@@ -430,7 +430,7 @@ CssRoot {
                             value_token: IDENT@497..512 "background" [Newline("\n"), Whitespace("    ")] [],
                         },
                         colon_token: COLON@512..514 ":" [] [Whitespace(" ")],
-                        value: CssListOfComponentValues [
+                        value: CssComponentValueList [
                             CssSimpleFunction {
                                 name: CssIdentifier {
                                     value_token: IDENT@514..529 "linear-gradient" [] [],
@@ -439,7 +439,7 @@ CssRoot {
                                 items: CssParameterList [
                                     CssParameter {
                                         any_css_parameter: CssListOfComponentValuesExpress {
-                                            css_list_of_component_values: CssListOfComponentValues [
+                                            css_component_value_list: CssComponentValueList [
                                                 CssIdentifier {
                                                     value_token: IDENT@530..533 "to" [] [Whitespace(" ")],
                                                 },
@@ -482,7 +482,7 @@ CssRoot {
                             value_token: IDENT@562..577 "background" [Newline("\n"), Whitespace("    ")] [],
                         },
                         colon_token: COLON@577..579 ":" [] [Whitespace(" ")],
-                        value: CssListOfComponentValues [
+                        value: CssComponentValueList [
                             CssSimpleFunction {
                                 name: CssIdentifier {
                                     value_token: IDENT@579..594 "linear-gradient" [] [],
@@ -508,7 +508,7 @@ CssRoot {
                                     COMMA@605..607 "," [] [Whitespace(" ")],
                                     CssParameter {
                                         any_css_parameter: CssListOfComponentValuesExpress {
-                                            css_list_of_component_values: CssListOfComponentValues [
+                                            css_component_value_list: CssComponentValueList [
                                                 CssIdentifier {
                                                     value_token: IDENT@607..613 "green" [] [Whitespace(" ")],
                                                 },
@@ -539,7 +539,7 @@ CssRoot {
                             value_token: IDENT@623..638 "background" [Newline("\n"), Whitespace("    ")] [],
                         },
                         colon_token: COLON@638..640 ":" [] [Whitespace(" ")],
-                        value: CssListOfComponentValues [
+                        value: CssComponentValueList [
                             CssSimpleFunction {
                                 name: CssIdentifier {
                                     value_token: IDENT@640..655 "linear-gradient" [] [],
@@ -559,7 +559,7 @@ CssRoot {
                                     COMMA@663..665 "," [] [Whitespace(" ")],
                                     CssParameter {
                                         any_css_parameter: CssListOfComponentValuesExpress {
-                                            css_list_of_component_values: CssListOfComponentValues [
+                                            css_component_value_list: CssComponentValueList [
                                                 CssIdentifier {
                                                     value_token: IDENT@665..669 "red" [] [Whitespace(" ")],
                                                 },
@@ -590,7 +590,7 @@ CssRoot {
                             value_token: IDENT@680..695 "background" [Newline("\n"), Whitespace("    ")] [],
                         },
                         colon_token: COLON@695..697 ":" [] [Whitespace(" ")],
-                        value: CssListOfComponentValues [
+                        value: CssComponentValueList [
                             CssSimpleFunction {
                                 name: CssIdentifier {
                                     value_token: IDENT@697..712 "linear-gradient" [] [],
@@ -610,7 +610,7 @@ CssRoot {
                                     COMMA@718..720 "," [] [Whitespace(" ")],
                                     CssParameter {
                                         any_css_parameter: CssListOfComponentValuesExpress {
-                                            css_list_of_component_values: CssListOfComponentValues [
+                                            css_component_value_list: CssComponentValueList [
                                                 CssIdentifier {
                                                     value_token: IDENT@720..724 "red" [] [Whitespace(" ")],
                                                 },
@@ -629,7 +629,7 @@ CssRoot {
                                     COMMA@729..731 "," [] [Whitespace(" ")],
                                     CssParameter {
                                         any_css_parameter: CssListOfComponentValuesExpress {
-                                            css_list_of_component_values: CssListOfComponentValues [
+                                            css_component_value_list: CssComponentValueList [
                                                 CssIdentifier {
                                                     value_token: IDENT@731..736 "blue" [] [Whitespace(" ")],
                                                 },
@@ -679,14 +679,14 @@ CssRoot {
             1: CSS_IDENTIFIER@0..2
               0: IDENT@0..2 "a" [] [Whitespace(" ")]
           2: CSS_SUB_SELECTOR_LIST@2..2
-      1: CSS_BLOCK@2..748
+      1: CSS_DECLARATION_LIST_BLOCK@2..748
         0: L_CURLY@2..3 "{" [] []
         1: CSS_DECLARATION_LIST@3..746
           0: CSS_DECLARATION@3..48
             0: CSS_IDENTIFIER@3..18
               0: IDENT@3..18 "background" [Newline("\n"), Whitespace("    ")] []
             1: COLON@18..20 ":" [] [Whitespace(" ")]
-            2: CSS_LIST_OF_COMPONENT_VALUES@20..48
+            2: CSS_COMPONENT_VALUE_LIST@20..48
               0: CSS_SIMPLE_FUNCTION@20..48
                 0: CSS_IDENTIFIER@20..35
                   0: IDENT@20..35 "linear-gradient" [] []
@@ -706,7 +706,7 @@ CssRoot {
             0: CSS_IDENTIFIER@49..64
               0: IDENT@49..64 "background" [Newline("\n"), Whitespace("    ")] []
             1: COLON@64..66 ":" [] [Whitespace(" ")]
-            2: CSS_LIST_OF_COMPONENT_VALUES@66..95
+            2: CSS_COMPONENT_VALUE_LIST@66..95
               0: CSS_SIMPLE_FUNCTION@66..95
                 0: CSS_IDENTIFIER@66..81
                   0: IDENT@66..81 "linear-gradient" [] []
@@ -726,7 +726,7 @@ CssRoot {
             0: CSS_IDENTIFIER@96..111
               0: IDENT@96..111 "background" [Newline("\n"), Whitespace("    ")] []
             1: COLON@111..113 ":" [] [Whitespace(" ")]
-            2: CSS_LIST_OF_COMPONENT_VALUES@113..153
+            2: CSS_COMPONENT_VALUE_LIST@113..153
               0: CSS_SIMPLE_FUNCTION@113..153
                 0: CSS_IDENTIFIER@113..128
                   0: IDENT@113..128 "linear-gradient" [] []
@@ -734,7 +734,7 @@ CssRoot {
                 2: CSS_PARAMETER_LIST@129..152
                   0: CSS_PARAMETER@129..138
                     0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESS@129..138
-                      0: CSS_LIST_OF_COMPONENT_VALUES@129..138
+                      0: CSS_COMPONENT_VALUE_LIST@129..138
                         0: CSS_IDENTIFIER@129..132
                           0: IDENT@129..132 "to" [] [Whitespace(" ")]
                         1: CSS_IDENTIFIER@132..138
@@ -754,7 +754,7 @@ CssRoot {
             0: CSS_IDENTIFIER@154..169
               0: IDENT@154..169 "background" [Newline("\n"), Whitespace("    ")] []
             1: COLON@169..171 ":" [] [Whitespace(" ")]
-            2: CSS_LIST_OF_COMPONENT_VALUES@171..208
+            2: CSS_COMPONENT_VALUE_LIST@171..208
               0: CSS_SIMPLE_FUNCTION@171..208
                 0: CSS_IDENTIFIER@171..186
                   0: IDENT@171..186 "linear-gradient" [] []
@@ -781,7 +781,7 @@ CssRoot {
             0: CSS_IDENTIFIER@209..224
               0: IDENT@209..224 "background" [Newline("\n"), Whitespace("    ")] []
             1: COLON@224..226 ":" [] [Whitespace(" ")]
-            2: CSS_LIST_OF_COMPONENT_VALUES@226..263
+            2: CSS_COMPONENT_VALUE_LIST@226..263
               0: CSS_SIMPLE_FUNCTION@226..263
                 0: CSS_IDENTIFIER@226..241
                   0: IDENT@226..241 "linear-gradient" [] []
@@ -789,7 +789,7 @@ CssRoot {
                 2: CSS_PARAMETER_LIST@242..262
                   0: CSS_PARAMETER@242..248
                     0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESS@242..248
-                      0: CSS_LIST_OF_COMPONENT_VALUES@242..248
+                      0: CSS_COMPONENT_VALUE_LIST@242..248
                         0: CSS_IDENTIFIER@242..245
                           0: IDENT@242..245 "to" [] [Whitespace(" ")]
                         1: CSS_IDENTIFIER@245..248
@@ -809,7 +809,7 @@ CssRoot {
             0: CSS_IDENTIFIER@264..279
               0: IDENT@264..279 "background" [Newline("\n"), Whitespace("    ")] []
             1: COLON@279..281 ":" [] [Whitespace(" ")]
-            2: CSS_LIST_OF_COMPONENT_VALUES@281..329
+            2: CSS_COMPONENT_VALUE_LIST@281..329
               0: CSS_SIMPLE_FUNCTION@281..329
                 0: CSS_IDENTIFIER@281..296
                   0: IDENT@281..296 "linear-gradient" [] []
@@ -817,7 +817,7 @@ CssRoot {
                 2: CSS_PARAMETER_LIST@297..328
                   0: CSS_PARAMETER@297..306
                     0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESS@297..306
-                      0: CSS_LIST_OF_COMPONENT_VALUES@297..306
+                      0: CSS_COMPONENT_VALUE_LIST@297..306
                         0: CSS_IDENTIFIER@297..300
                           0: IDENT@297..300 "to" [] [Whitespace(" ")]
                         1: CSS_IDENTIFIER@300..306
@@ -825,7 +825,7 @@ CssRoot {
                   1: COMMA@306..308 "," [] [Whitespace(" ")]
                   2: CSS_PARAMETER@308..317
                     0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESS@308..317
-                      0: CSS_LIST_OF_COMPONENT_VALUES@308..317
+                      0: CSS_COMPONENT_VALUE_LIST@308..317
                         0: CSS_IDENTIFIER@308..315
                           0: IDENT@308..315 "yellow" [] [Whitespace(" ")]
                         1: CSS_PERCENTAGE@315..317
@@ -835,7 +835,7 @@ CssRoot {
                   3: COMMA@317..319 "," [] [Whitespace(" ")]
                   4: CSS_PARAMETER@319..328
                     0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESS@319..328
-                      0: CSS_LIST_OF_COMPONENT_VALUES@319..328
+                      0: CSS_COMPONENT_VALUE_LIST@319..328
                         0: CSS_IDENTIFIER@319..324
                           0: IDENT@319..324 "blue" [] [Whitespace(" ")]
                         1: CSS_PERCENTAGE@324..328
@@ -849,7 +849,7 @@ CssRoot {
             0: CSS_IDENTIFIER@330..345
               0: IDENT@330..345 "background" [Newline("\n"), Whitespace("    ")] []
             1: COLON@345..347 ":" [] [Whitespace(" ")]
-            2: CSS_LIST_OF_COMPONENT_VALUES@347..384
+            2: CSS_COMPONENT_VALUE_LIST@347..384
               0: CSS_SIMPLE_FUNCTION@347..384
                 0: CSS_IDENTIFIER@347..362
                   0: IDENT@347..362 "linear-gradient" [] []
@@ -876,7 +876,7 @@ CssRoot {
             0: CSS_IDENTIFIER@385..400
               0: IDENT@385..400 "background" [Newline("\n"), Whitespace("    ")] []
             1: COLON@400..402 ":" [] [Whitespace(" ")]
-            2: CSS_LIST_OF_COMPONENT_VALUES@402..439
+            2: CSS_COMPONENT_VALUE_LIST@402..439
               0: CSS_SIMPLE_FUNCTION@402..439
                 0: CSS_IDENTIFIER@402..417
                   0: IDENT@402..417 "linear-gradient" [] []
@@ -903,7 +903,7 @@ CssRoot {
             0: CSS_IDENTIFIER@440..455
               0: IDENT@440..455 "background" [Newline("\n"), Whitespace("    ")] []
             1: COLON@455..457 ":" [] [Whitespace(" ")]
-            2: CSS_LIST_OF_COMPONENT_VALUES@457..496
+            2: CSS_COMPONENT_VALUE_LIST@457..496
               0: CSS_SIMPLE_FUNCTION@457..496
                 0: CSS_IDENTIFIER@457..472
                   0: IDENT@457..472 "linear-gradient" [] []
@@ -915,7 +915,7 @@ CssRoot {
                   1: COMMA@479..481 "," [] [Whitespace(" ")]
                   2: CSS_PARAMETER@481..489
                     0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESS@481..489
-                      0: CSS_LIST_OF_COMPONENT_VALUES@481..489
+                      0: CSS_COMPONENT_VALUE_LIST@481..489
                         0: CSS_IDENTIFIER@481..486
                           0: IDENT@481..486 "blue" [] [Whitespace(" ")]
                         1: CSS_PERCENTAGE@486..489
@@ -934,7 +934,7 @@ CssRoot {
             0: CSS_IDENTIFIER@497..512
               0: IDENT@497..512 "background" [Newline("\n"), Whitespace("    ")] []
             1: COLON@512..514 ":" [] [Whitespace(" ")]
-            2: CSS_LIST_OF_COMPONENT_VALUES@514..561
+            2: CSS_COMPONENT_VALUE_LIST@514..561
               0: CSS_SIMPLE_FUNCTION@514..561
                 0: CSS_IDENTIFIER@514..529
                   0: IDENT@514..529 "linear-gradient" [] []
@@ -942,7 +942,7 @@ CssRoot {
                 2: CSS_PARAMETER_LIST@530..560
                   0: CSS_PARAMETER@530..542
                     0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESS@530..542
-                      0: CSS_LIST_OF_COMPONENT_VALUES@530..542
+                      0: CSS_COMPONENT_VALUE_LIST@530..542
                         0: CSS_IDENTIFIER@530..533
                           0: IDENT@530..533 "to" [] [Whitespace(" ")]
                         1: CSS_IDENTIFIER@533..537
@@ -968,7 +968,7 @@ CssRoot {
             0: CSS_IDENTIFIER@562..577
               0: IDENT@562..577 "background" [Newline("\n"), Whitespace("    ")] []
             1: COLON@577..579 ":" [] [Whitespace(" ")]
-            2: CSS_LIST_OF_COMPONENT_VALUES@579..622
+            2: CSS_COMPONENT_VALUE_LIST@579..622
               0: CSS_SIMPLE_FUNCTION@579..622
                 0: CSS_IDENTIFIER@579..594
                   0: IDENT@579..594 "linear-gradient" [] []
@@ -987,7 +987,7 @@ CssRoot {
                   3: COMMA@605..607 "," [] [Whitespace(" ")]
                   4: CSS_PARAMETER@607..616
                     0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESS@607..616
-                      0: CSS_LIST_OF_COMPONENT_VALUES@607..616
+                      0: CSS_COMPONENT_VALUE_LIST@607..616
                         0: CSS_IDENTIFIER@607..613
                           0: IDENT@607..613 "green" [] [Whitespace(" ")]
                         1: CSS_PERCENTAGE@613..616
@@ -1005,7 +1005,7 @@ CssRoot {
             0: CSS_IDENTIFIER@623..638
               0: IDENT@623..638 "background" [Newline("\n"), Whitespace("    ")] []
             1: COLON@638..640 ":" [] [Whitespace(" ")]
-            2: CSS_LIST_OF_COMPONENT_VALUES@640..679
+            2: CSS_COMPONENT_VALUE_LIST@640..679
               0: CSS_SIMPLE_FUNCTION@640..679
                 0: CSS_IDENTIFIER@640..655
                   0: IDENT@640..655 "linear-gradient" [] []
@@ -1020,7 +1020,7 @@ CssRoot {
                   1: COMMA@663..665 "," [] [Whitespace(" ")]
                   2: CSS_PARAMETER@665..672
                     0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESS@665..672
-                      0: CSS_LIST_OF_COMPONENT_VALUES@665..672
+                      0: CSS_COMPONENT_VALUE_LIST@665..672
                         0: CSS_IDENTIFIER@665..669
                           0: IDENT@665..669 "red" [] [Whitespace(" ")]
                         1: CSS_PERCENTAGE@669..672
@@ -1038,7 +1038,7 @@ CssRoot {
             0: CSS_IDENTIFIER@680..695
               0: IDENT@680..695 "background" [Newline("\n"), Whitespace("    ")] []
             1: COLON@695..697 ":" [] [Whitespace(" ")]
-            2: CSS_LIST_OF_COMPONENT_VALUES@697..745
+            2: CSS_COMPONENT_VALUE_LIST@697..745
               0: CSS_SIMPLE_FUNCTION@697..745
                 0: CSS_IDENTIFIER@697..712
                   0: IDENT@697..712 "linear-gradient" [] []
@@ -1053,7 +1053,7 @@ CssRoot {
                   1: COMMA@718..720 "," [] [Whitespace(" ")]
                   2: CSS_PARAMETER@720..729
                     0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESS@720..729
-                      0: CSS_LIST_OF_COMPONENT_VALUES@720..729
+                      0: CSS_COMPONENT_VALUE_LIST@720..729
                         0: CSS_IDENTIFIER@720..724
                           0: IDENT@720..724 "red" [] [Whitespace(" ")]
                         1: CSS_NUMBER@724..726
@@ -1065,7 +1065,7 @@ CssRoot {
                   3: COMMA@729..731 "," [] [Whitespace(" ")]
                   4: CSS_PARAMETER@731..744
                     0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESS@731..744
-                      0: CSS_LIST_OF_COMPONENT_VALUES@731..744
+                      0: CSS_COMPONENT_VALUE_LIST@731..744
                         0: CSS_IDENTIFIER@731..736
                           0: IDENT@731..736 "blue" [] [Whitespace(" ")]
                         1: CSS_PERCENTAGE@736..740
