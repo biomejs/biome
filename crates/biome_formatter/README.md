@@ -1,5 +1,5 @@
 <p align="center">
-	<img alt="Biome - Toolchain of the web" width="400" src="https://raw.githubusercontent.com/biomejs/resources/main/biome-logo-slogan.svg"/>
+	<img alt="Biome - Toolchain of the web" width="400" src="https://raw.githubusercontent.com/biomejs/resources/main/svg/slogan-light-transparent.svg"/>
 </p>
 
 <div align="center">
