@@ -1,4 +1,4 @@
-use crate::{prelude::*, separated::FormatAstSeparatedListExtension};
+use crate::prelude::*;
 use biome_css_syntax::CssDeclarationList;
 use biome_formatter::separated::TrailingSeparator;
 #[derive(Debug, Clone, Default)]

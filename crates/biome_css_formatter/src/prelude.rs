@@ -8,3 +8,5 @@ pub(crate) use crate::{
 pub(crate) use biome_formatter::prelude::*;
 #[allow(unused_imports)]
 pub(crate) use biome_rowan::{AstNode as _, AstNodeList as _, AstSeparatedList as _};
+
+pub(crate) use crate::separated::FormatAstSeparatedListExtension;
