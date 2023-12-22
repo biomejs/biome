@@ -262,6 +262,8 @@ pub enum BiomeCommand {
     },
     #[bpaf(command("__print_socket"), hide)]
     PrintSocket,
+    #[bpaf(command("__print_cache_dir"), hide)]
+    PrintCacheDir,
 }
 
 impl BiomeCommand {
@@ -279,7 +281,8 @@ impl BiomeCommand {
             | BiomeCommand::Stop
             | BiomeCommand::Init
             | BiomeCommand::RunServer { .. }
-            | BiomeCommand::PrintSocket => None,
+            | BiomeCommand::PrintSocket
+            | BiomeCommand::PrintCacheDir => None,
         }
     }
 
@@ -297,7 +300,8 @@ impl BiomeCommand {
             | BiomeCommand::Stop
             | BiomeCommand::LspProxy(_)
             | BiomeCommand::RunServer { .. }
-            | BiomeCommand::PrintSocket => false,
+            | BiomeCommand::PrintSocket
+            | BiomeCommand::PrintCacheDir => false,
         }
     }
 
@@ -319,7 +323,8 @@ impl BiomeCommand {
             | BiomeCommand::Init
             | BiomeCommand::LspProxy(_)
             | BiomeCommand::RunServer { .. }
-            | BiomeCommand::PrintSocket => false,
+            | BiomeCommand::PrintSocket
+            | BiomeCommand::PrintCacheDir => false,
         }
     }
 
@@ -337,7 +342,8 @@ impl BiomeCommand {
             | BiomeCommand::Stop
             | BiomeCommand::Init
             | BiomeCommand::RunServer { .. }
-            | BiomeCommand::PrintSocket => LoggingLevel::default(),
+            | BiomeCommand::PrintSocket
+            | BiomeCommand::PrintCacheDir => LoggingLevel::default(),
         }
     }
     pub fn log_kind(&self) -> LoggingKind {
@@ -354,7 +360,8 @@ impl BiomeCommand {
             | BiomeCommand::Stop
             | BiomeCommand::Init
             | BiomeCommand::RunServer { .. }
-            | BiomeCommand::PrintSocket => LoggingKind::default(),
+            | BiomeCommand::PrintSocket
+            | BiomeCommand::PrintCacheDir => LoggingKind::default(),
         }
     }
 }

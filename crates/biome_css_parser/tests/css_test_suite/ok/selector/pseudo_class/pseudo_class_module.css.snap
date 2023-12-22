@@ -61,7 +61,7 @@ CssRoot {
                     ],
                 },
             ],
-            block: CssBlock {
+            block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@20..21 "{" [] [],
                 declaration_list: CssDeclarationList [],
                 r_curly_token: R_CURLY@21..22 "}" [] [],
@@ -124,7 +124,7 @@ CssRoot {
                     ],
                 },
             ],
-            block: CssBlock {
+            block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@48..49 "{" [] [],
                 declaration_list: CssDeclarationList [],
                 r_curly_token: R_CURLY@49..50 "}" [] [],
@@ -187,7 +187,7 @@ CssRoot {
                     },
                 },
             ],
-            block: CssBlock {
+            block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@76..77 "{" [] [],
                 declaration_list: CssDeclarationList [],
                 r_curly_token: R_CURLY@77..78 "}" [] [],
@@ -233,7 +233,7 @@ CssRoot {
                         0: IDENT@15..18 "div" [] []
                     2: CSS_SUB_SELECTOR_LIST@18..18
                 3: R_PAREN@18..20 ")" [] [Whitespace(" ")]
-      1: CSS_BLOCK@20..22
+      1: CSS_DECLARATION_LIST_BLOCK@20..22
         0: L_CURLY@20..21 "{" [] []
         1: CSS_DECLARATION_LIST@21..21
         2: R_CURLY@21..22 "}" [] []
@@ -276,7 +276,7 @@ CssRoot {
                         1: CSS_IDENTIFIER@44..46
                           0: IDENT@44..46 "id" [] []
                 3: R_PAREN@46..48 ")" [] [Whitespace(" ")]
-      1: CSS_BLOCK@48..50
+      1: CSS_DECLARATION_LIST_BLOCK@48..50
         0: L_CURLY@48..49 "{" [] []
         1: CSS_DECLARATION_LIST@49..49
         2: R_CURLY@49..50 "}" [] []
@@ -319,7 +319,7 @@ CssRoot {
                 0: DOT@71..72 "." [] []
                 1: CSS_IDENTIFIER@72..76
                   0: IDENT@72..76 "div" [] [Whitespace(" ")]
-      1: CSS_BLOCK@76..78
+      1: CSS_DECLARATION_LIST_BLOCK@76..78
         0: L_CURLY@76..77 "{" [] []
         1: CSS_DECLARATION_LIST@77..77
         2: R_CURLY@77..78 "}" [] []

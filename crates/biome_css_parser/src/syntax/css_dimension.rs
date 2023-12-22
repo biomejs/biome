@@ -1,9 +1,9 @@
 use crate::parser::CssParser;
 use biome_css_syntax::CssSyntaxKind::*;
-use biome_css_syntax::T;
+use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
-use biome_parser::Parser;
+use biome_parser::{token_set, Parser, TokenSet};
 
 use super::parse_error::expected_unit;
 use super::{parse_regular_identifier, parse_regular_number};
@@ -26,21 +26,22 @@ pub(crate) fn parse_any_dimension(p: &mut CssParser) -> ParsedSyntax {
     }
 }
 
-fn is_at_percentage_dimension(p: &mut CssParser) -> bool {
-    p.at(CSS_NUMBER_LITERAL) && matches!(p.nth(1), T![%])
+pub(crate) fn is_at_percentage_dimension(p: &mut CssParser) -> bool {
+    p.at(CSS_NUMBER_LITERAL) && p.nth_at(1, T![%])
 }
 #[inline]
-fn parse_percentage_dimension(p: &mut CssParser) -> ParsedSyntax {
+pub(crate) fn parse_percentage_dimension(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_percentage_dimension(p) {
         return Absent;
     }
+
     let m = p.start();
     parse_regular_number(p).ok();
     p.expect(T![%]);
     Present(m.complete(p, CSS_PERCENTAGE))
 }
 fn is_at_regular_dimension(p: &mut CssParser) -> bool {
-    p.at(CSS_NUMBER_LITERAL) && p.nth_at(1, T![ident])
+    p.at(CSS_NUMBER_LITERAL) && is_nth_at_unit(p, 1)
 }
 #[inline]
 fn parse_regular_dimension(p: &mut CssParser) -> ParsedSyntax {
@@ -55,58 +56,114 @@ fn parse_regular_dimension(p: &mut CssParser) -> ParsedSyntax {
 
 #[inline]
 fn parse_unit(p: &mut CssParser) -> ParsedSyntax {
-    if !(p.at(T![ident]) && is_unit_str(p.cur_text())) {
+    if !is_nth_at_unit(p, 0) {
         return Absent;
     }
     parse_regular_identifier(p)
 }
 
 #[inline]
-fn is_unit_str(unit: &str) -> bool {
-    is_length_unit(unit)
-        || is_container_lengths_unit(unit)
-        || is_angle_unit(unit)
-        || is_time_unit(unit)
-        || is_frequency_unit(unit)
-        || is_resolution_unit(unit)
-        || is_flex_unit(unit)
+fn is_nth_at_unit(p: &mut CssParser, n: usize) -> bool {
+    is_nth_at_length_unit(p, n)
+        || is_nth_at_container_lengths_unit(p, n)
+        || is_nth_at_angle_unit(p, n)
+        || is_nth_at_time_unit(p, n)
+        || is_nth_at_frequency_unit(p, n)
+        || is_nth_at_resolution_unit(p, n)
+        || is_nth_at_flex_unit(p, n)
 }
 
+const LENGTH_UNIT_SET: TokenSet<CssSyntaxKind> = token_set!(
+    T![em],
+    T![rem],
+    T![ex],
+    T![rex],
+    T![cap],
+    T![rcap],
+    T![ch],
+    T![rch],
+    T![ic],
+    T![ric],
+    T![lh],
+    T![rlh],
+    //  Viewport-percentage Lengths
+    T![vw],
+    T![svw],
+    T![lvw],
+    T![dvw],
+    T![vh],
+    T![svh],
+    T![lvh],
+    T![dvh],
+    T![vi],
+    T![svi],
+    T![lvi],
+    T![dvi],
+    T![vb],
+    T![svb],
+    T![lvb],
+    T![dvb],
+    T![vmin],
+    T![svmin],
+    T![lvmin],
+    T![dvmin],
+    T![vmax],
+    T![svmax],
+    T![lvmax],
+    T![dvmax],
+    // Absolute lengths
+    T![cm],
+    T![mm],
+    T![q],
+    T![in],
+    T![pc],
+    T![pt],
+    T![px],
+    T![mozmm],
+    // mini app
+    T![rpx],
+);
+
 #[inline]
-fn is_length_unit(unit: &str) -> bool {
-    matches!(
-        unit,
-        "em"| "rem"| "ex"| "rex"| "cap"| "rcap"| "ch"| "rch"| "ic"| "ric"| "lh"| "rlh"|
-        //  Viewport-percentage Lengths
-        "vw"| "svw"| "lvw"| "dvw"| "vh"| "svh"| "lvh"| "dvh"| "vi"| "svi"| "lvi"| "dvi"| "vb"|
-        "svb"| "lvb"| "dvb"| "vmin"| "svmin"| "lvmin"| "dvmin"| "vmax"| "svmax"| "lvmax"| "dvmax"|
-        // Absolute lengths
-        "cm"| "mm"| "q"| "in"| "pc"| "pt"| "px"| "mozmm" |
-        // mini app
-        "rpx"
-    )
+fn is_nth_at_length_unit(p: &mut CssParser, n: usize) -> bool {
+    p.nth_at_ts(n, LENGTH_UNIT_SET)
 }
+const CONTAINER_LENGTHS_UNIT_SET: TokenSet<CssSyntaxKind> =
+    token_set!(T![cqw], T![cqh], T![cqi], T![cqb], T![cqmin], T![cqmax],);
+
 #[inline]
-fn is_container_lengths_unit(unit: &str) -> bool {
-    matches!(unit, "cqw" | "cqh" | "cqi" | "cqb" | "cqmin" | "cqmax")
+fn is_nth_at_container_lengths_unit(p: &mut CssParser, n: usize) -> bool {
+    p.nth_at_ts(n, CONTAINER_LENGTHS_UNIT_SET)
 }
+
+const ANGLE_UNIT_SET: TokenSet<CssSyntaxKind> = token_set!(T![deg], T![grad], T![rad], T![turn],);
+
 #[inline]
-fn is_angle_unit(unit: &str) -> bool {
-    matches!(unit, "deg" | "grad" | "rad" | "turn")
+fn is_nth_at_angle_unit(p: &mut CssParser, n: usize) -> bool {
+    p.nth_at_ts(n, ANGLE_UNIT_SET)
 }
+const TIME_UNIT_SET: TokenSet<CssSyntaxKind> = token_set!(T![s], T![ms],);
+
 #[inline]
-fn is_time_unit(unit: &str) -> bool {
-    matches!(unit, "s" | "ms")
+fn is_nth_at_time_unit(p: &mut CssParser, n: usize) -> bool {
+    p.nth_at_ts(n, TIME_UNIT_SET)
 }
+const FREQUENCY_UNIT_SET: TokenSet<CssSyntaxKind> = token_set!(T![hz], T![khz],);
+
 #[inline]
-fn is_frequency_unit(unit: &str) -> bool {
-    matches!(unit, "hz" | "khz")
+fn is_nth_at_frequency_unit(p: &mut CssParser, n: usize) -> bool {
+    p.nth_at_ts(n, FREQUENCY_UNIT_SET)
 }
+const RESOLUTION_UNIT_SET: TokenSet<CssSyntaxKind> =
+    token_set!(T![dpi], T![dpcm], T![dppx], T![x],);
+
 #[inline]
-fn is_resolution_unit(unit: &str) -> bool {
-    matches!(unit, "dpi" | "dpcm" | "dppx" | "x")
+fn is_nth_at_resolution_unit(p: &mut CssParser, n: usize) -> bool {
+    p.nth_at_ts(n, RESOLUTION_UNIT_SET)
 }
+const FLEX_UNIT_SET: TokenSet<CssSyntaxKind> = token_set!(T![fr],);
+
 #[inline]
-fn is_flex_unit(unit: &str) -> bool {
-    matches!(unit, "fr")
+fn is_nth_at_flex_unit(p: &mut CssParser, n: usize) -> bool {
+    p.nth_at_ts(n, FLEX_UNIT_SET)
 }

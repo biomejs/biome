@@ -4,7 +4,9 @@ mod tests;
 
 use crate::CssParserOptions;
 use biome_css_syntax::{CssSyntaxKind, CssSyntaxKind::*, TextLen, TextRange, TextSize, T};
-use biome_js_unicode_table::{is_id_continue, is_id_start, lookup_byte, Dispatch::*};
+use biome_js_unicode_table::{
+    is_css_id_continue, is_css_id_start, lookup_byte, Dispatch, Dispatch::*,
+};
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{LexContext, Lexer, LexerCheckpoint, TokenFlags};
 use std::char::REPLACEMENT_CHARACTER;
@@ -475,9 +477,11 @@ impl<'src> CssLexer<'src> {
 
             LSS => self.consume_lss(),
 
+            IDT if self.peek_byte() == Some(b'=') => {
+                self.advance(1);
+                self.consume_byte(T!["$="])
+            }
             IDT | UNI | BSL if self.is_ident_start() => self.consume_identifier(),
-
-            IDT if self.next_byte() == Some(b'=') => self.consume_byte(T!["$="]),
 
             MUL => self.consume_mul(),
             CRT => self.consume_ctr(),
@@ -498,6 +502,7 @@ impl<'src> CssLexer<'src> {
             EQL => self.consume_byte(T![=]),
             EXL => self.consume_byte(T![!]),
             PRC => self.consume_byte(T![%]),
+            Dispatch::AMP => self.consume_byte(T![&]),
 
             UNI => {
                 // A BOM can only appear at the start of a file, so if we haven't advanced at all yet,
@@ -728,11 +733,14 @@ impl<'src> CssLexer<'src> {
         match buf[..count].to_ascii_lowercase().as_slice() {
             b"media" => MEDIA_KW,
             b"keyframes" => KEYFRAMES_KW,
+            b"-webkit-keyframes" => KEYFRAMES_KW,
+            b"-moz-keyframes" => KEYFRAMES_KW,
+            b"-o-keyframes" => KEYFRAMES_KW,
+            b"-ms-keyframes" => KEYFRAMES_KW,
             b"and" => AND_KW,
             b"only" => ONLY_KW,
             b"or" => OR_KW,
             b"i" => I_KW,
-            b"s" => S_KW,
             b"important" => IMPORTANT_KW,
             b"from" => FROM_KW,
             b"to" => TO_KW,
@@ -743,8 +751,8 @@ impl<'src> CssLexer<'src> {
             b"dir" => DIR_KW,
             b"global" => GLOBAL_KW,
             b"local" => LOCAL_KW,
-            b"-moz-any" => _MOZ_ANY_KW,
-            b"-webkit-any" => _WEBKIT_ANY_KW,
+            b"-moz-any" => ANY_KW,
+            b"-webkit-any" => ANY_KW,
             b"past" => PAST_KW,
             b"current" => CURRENT_KW,
             b"future" => FUTURE_KW,
@@ -774,6 +782,80 @@ impl<'src> CssLexer<'src> {
             b"style" => STYLE_KW,
             b"font-face" => FONT_FACE_KW,
             b"font-palette-values" => FONT_PALETTE_VALUES_KW,
+            // length units
+            b"em" => EM_KW,
+            b"rem" => REM_KW,
+            b"ex" => EX_KW,
+            b"rex" => REX_KW,
+            b"cap" => CAP_KW,
+            b"rcap" => RCAP_KW,
+            b"ch" => CH_KW,
+            b"rch" => RCH_KW,
+            b"ic" => IC_KW,
+            b"ric" => RIC_KW,
+            b"lh" => LH_KW,
+            b"rlh" => RLH_KW,
+            // Viewport-percentage Lengths
+            b"vw" => VW_KW,
+            b"svw" => SVW_KW,
+            b"lvw" => LVW_KW,
+            b"dvw" => DVW_KW,
+            b"vh" => VH_KW,
+            b"svh" => SVW_KW,
+            b"lvh" => LVH_KW,
+            b"dvh" => DVH_KW,
+            b"vi" => VI_KW,
+            b"svi" => SVI_KW,
+            b"lvi" => LVI_KW,
+            b"dvi" => DVI_KW,
+            b"vb" => VB_KW,
+            b"svb" => SVB_KW,
+            b"lvb" => LVB_KW,
+            b"dvb" => DVB_KW,
+            b"vmin" => VMIN_KW,
+            b"svmin" => SVMIN_KW,
+            b"lvmin" => LVMIN_KW,
+            b"dvmin" => DVMIN_KW,
+            b"vmax" => VMAX_KW,
+            b"svmax" => SVMAX_KW,
+            b"lvmax" => LVMAX_KW,
+            b"dvmax" => DVMAX_KW,
+            // Absolute lengths
+            b"cm" => CM_KW,
+            b"mm" => MM_KW,
+            b"q" => Q_KW,
+            b"in" => IN_KW,
+            b"pc" => PC_KW,
+            b"pt" => PT_KW,
+            b"px" => PX_KW,
+            b"mozmm" => MOZMM_KW,
+            // mini app
+            b"rpx" => RPX_KW,
+            // container lengths
+            b"cqw" => CQW_KW,
+            b"cqh" => CQH_KW,
+            b"cqi" => CQI_KW,
+            b"cqb" => CQB_KW,
+            b"cqmin" => CQMIN_KW,
+            b"cqmax" => CQMAX_KW,
+            // angle units
+            b"deg" => DEG_KW,
+            b"grad" => GRAD_KW,
+            b"rad" => RAD_KW,
+            b"turn" => TURN_KW,
+            // time units
+            b"s" => S_KW,
+            b"ms" => MS_KW,
+            // frequency units
+            b"hz" => HZ_KW,
+            b"khz" => KHZ_KW,
+            // resolution units
+            b"dpi" => DPI_KW,
+            b"dpcm" => DPCM_KW,
+            b"dppx" => DPPX_KW,
+            b"x" => X_KW,
+            // flex units
+            b"fr" => FR_KW,
             _ => IDENT,
         }
     }
@@ -827,9 +909,9 @@ impl<'src> CssLexer<'src> {
                 // SAFETY: We know that the current byte is a valid unicode code point
                 let chr = self.current_char_unchecked();
                 let is_id = if is_first {
-                    is_id_start(chr)
+                    is_css_id_start(chr)
                 } else {
-                    is_id_continue(chr)
+                    is_css_id_continue(chr)
                 };
 
                 if is_id {
@@ -1123,7 +1205,7 @@ impl<'src> CssLexer<'src> {
                         match lookup_byte(next) {
                             // If the third code point is a name-start code point
                             // return true.
-                            UNI | IDT if is_id_start(self.char_unchecked_at(2)) => true,
+                            UNI | IDT if is_css_id_start(self.char_unchecked_at(2)) => true,
                             // or the third and fourth code points are a valid escape
                             // return true.
                             BSL => self.is_valid_escape_at(3),
@@ -1132,14 +1214,14 @@ impl<'src> CssLexer<'src> {
                     }
                     // If the second code point is a name-start code point
                     // return true.
-                    UNI | IDT if is_id_start(self.peek_char_unchecked()) => true,
+                    UNI | IDT if is_css_id_start(self.peek_char_unchecked()) => true,
                     // or the second and third code points are a valid escape
                     // return true.
                     BSL => self.is_valid_escape_at(2),
                     _ => false,
                 }
             }
-            UNI | IDT if is_id_start(self.current_char_unchecked()) => true,
+            UNI | IDT if is_css_id_start(self.current_char_unchecked()) => true,
             // U+005C REVERSE SOLIDUS (\)
             // If the first and second code points are a valid escape, return true. Otherwise,
             // return false.

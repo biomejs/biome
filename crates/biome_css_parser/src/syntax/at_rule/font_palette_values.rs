@@ -1,7 +1,8 @@
 use crate::{
     parser::CssParser,
     syntax::{
-        parse_error::expected_identifier, parse_or_recover_rule_block, parse_regular_identifier,
+        parse_error::expected_identifier, parse_or_recover_declaration_list_block,
+        parse_regular_identifier,
     },
 };
 use biome_css_syntax::{
@@ -44,7 +45,7 @@ pub(crate) fn parse_font_palette_values_at_rule(p: &mut CssParser) -> ParsedSynt
         CSS_BOGUS_AT_RULE
     };
 
-    if parse_or_recover_rule_block(p).is_err() {
+    if parse_or_recover_declaration_list_block(p).is_err() {
         return Present(m.complete(p, CSS_BOGUS_AT_RULE));
     }
 

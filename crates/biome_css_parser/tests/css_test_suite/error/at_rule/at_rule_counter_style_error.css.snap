@@ -26,7 +26,7 @@ CssRoot {
             rule: CssBogusAtRule {
                 items: [
                     COUNTER_STYLE_KW@1..16 "counter-style" [] [Whitespace("  ")],
-                    CssBlock {
+                    CssDeclarationListBlock {
                         l_curly_token: L_CURLY@16..19 "{" [] [Whitespace("  ")],
                         declaration_list: CssDeclarationList [],
                         r_curly_token: R_CURLY@19..20 "}" [] [],
@@ -44,7 +44,7 @@ CssRoot {
                             CSS_NUMBER_LITERAL@36..41 "6788" [] [Whitespace(" ")],
                         ],
                     },
-                    CssBlock {
+                    CssDeclarationListBlock {
                         l_curly_token: L_CURLY@41..44 "{" [] [Whitespace("  ")],
                         declaration_list: CssDeclarationList [],
                         r_curly_token: R_CURLY@44..45 "}" [] [],
@@ -62,7 +62,7 @@ CssRoot {
                             CSS_STRING_LITERAL@61..70 "'string'" [] [Whitespace(" ")],
                         ],
                     },
-                    CssBlock {
+                    CssDeclarationListBlock {
                         l_curly_token: L_CURLY@70..73 "{" [] [Whitespace("  ")],
                         declaration_list: CssDeclarationList [],
                         r_curly_token: R_CURLY@73..74 "}" [] [],
@@ -107,7 +107,7 @@ CssRoot {
       0: AT@0..1 "@" [] []
       1: CSS_BOGUS_AT_RULE@1..20
         0: COUNTER_STYLE_KW@1..16 "counter-style" [] [Whitespace("  ")]
-        1: CSS_BLOCK@16..20
+        1: CSS_DECLARATION_LIST_BLOCK@16..20
           0: L_CURLY@16..19 "{" [] [Whitespace("  ")]
           1: CSS_DECLARATION_LIST@19..19
           2: R_CURLY@19..20 "}" [] []
@@ -117,7 +117,7 @@ CssRoot {
         0: COUNTER_STYLE_KW@22..36 "counter-style" [] [Whitespace(" ")]
         1: CSS_BOGUS@36..41
           0: CSS_NUMBER_LITERAL@36..41 "6788" [] [Whitespace(" ")]
-        2: CSS_BLOCK@41..45
+        2: CSS_DECLARATION_LIST_BLOCK@41..45
           0: L_CURLY@41..44 "{" [] [Whitespace("  ")]
           1: CSS_DECLARATION_LIST@44..44
           2: R_CURLY@44..45 "}" [] []
@@ -127,7 +127,7 @@ CssRoot {
         0: COUNTER_STYLE_KW@47..61 "counter-style" [] [Whitespace(" ")]
         1: CSS_BOGUS@61..70
           0: CSS_STRING_LITERAL@61..70 "'string'" [] [Whitespace(" ")]
-        2: CSS_BLOCK@70..74
+        2: CSS_DECLARATION_LIST_BLOCK@70..74
           0: L_CURLY@70..73 "{" [] [Whitespace("  ")]
           1: CSS_DECLARATION_LIST@73..73
           2: R_CURLY@73..74 "}" [] []

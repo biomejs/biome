@@ -3,7 +3,7 @@
 #[rustfmt::skip]
 mod tests;
 
-use biome_js_unicode_table::{is_id_continue, is_id_start, lookup_byte, Dispatch::*};
+use biome_js_unicode_table::{is_js_id_continue, is_js_id_start, lookup_byte, Dispatch::*};
 use biome_json_syntax::{JsonSyntaxKind, JsonSyntaxKind::*, TextLen, TextRange, TextSize, T};
 use biome_parser::diagnostic::ParseDiagnostic;
 use std::iter::FusedIterator;
@@ -321,7 +321,7 @@ impl<'src> Lexer<'src> {
             UNI => {
                 let chr = self.current_char_unchecked();
 
-                if is_id_start(chr) {
+                if is_js_id_start(chr) {
                     self.lex_identifier(current)
                 } else if self.position == 0 && self.consume_potential_bom().is_some() {
                     // A BOM can only appear at the start of a file, so if we haven't advanced at all yet,
@@ -699,7 +699,7 @@ impl<'src> Lexer<'src> {
                 UNI => {
                     let char = self.current_char_unchecked();
                     keyword = KeywordMatcher::None;
-                    if is_id_continue(char) {
+                    if is_js_id_continue(char) {
                         self.advance(char.len_utf8());
                     } else {
                         break;
