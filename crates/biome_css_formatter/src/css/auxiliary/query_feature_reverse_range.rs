@@ -1,6 +1,7 @@
 use crate::prelude::*;
-use biome_css_syntax::CssQueryFeatureReverseRange;
-use biome_rowan::AstNode;
+use biome_css_syntax::{CssQueryFeatureReverseRange, CssQueryFeatureReverseRangeFields};
+use biome_formatter::write;
+
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatCssQueryFeatureReverseRange;
 impl FormatNodeRule<CssQueryFeatureReverseRange> for FormatCssQueryFeatureReverseRange {
@@ -9,6 +10,21 @@ impl FormatNodeRule<CssQueryFeatureReverseRange> for FormatCssQueryFeatureRevers
         node: &CssQueryFeatureReverseRange,
         f: &mut CssFormatter,
     ) -> FormatResult<()> {
-        format_verbatim_node(node.syntax()).fmt(f)
+        let CssQueryFeatureReverseRangeFields {
+            left,
+            comparison,
+            right,
+        } = node.as_fields();
+
+        write!(
+            f,
+            [
+                left.format(),
+                space(),
+                comparison.format(),
+                space(),
+                right.format()
+            ]
+        )
     }
 }
