@@ -28,7 +28,7 @@ CssRoot {
                     COUNTER_STYLE_KW@1..16 "counter-style" [] [Whitespace("  ")],
                     CssDeclarationListBlock {
                         l_curly_token: L_CURLY@16..19 "{" [] [Whitespace("  ")],
-                        declaration_list: CssDeclarationList [],
+                        declarations: CssDeclarationList [],
                         r_curly_token: R_CURLY@19..20 "}" [] [],
                     },
                 ],
@@ -46,7 +46,7 @@ CssRoot {
                     },
                     CssDeclarationListBlock {
                         l_curly_token: L_CURLY@41..44 "{" [] [Whitespace("  ")],
-                        declaration_list: CssDeclarationList [],
+                        declarations: CssDeclarationList [],
                         r_curly_token: R_CURLY@44..45 "}" [] [],
                     },
                 ],
@@ -64,7 +64,7 @@ CssRoot {
                     },
                     CssDeclarationListBlock {
                         l_curly_token: L_CURLY@70..73 "{" [] [Whitespace("  ")],
-                        declaration_list: CssDeclarationList [],
+                        declarations: CssDeclarationList [],
                         r_curly_token: R_CURLY@73..74 "}" [] [],
                     },
                 ],
@@ -153,91 +153,91 @@ CssRoot {
 at_rule_counter_style_error.css:1:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an identifier but instead found '{'.
-  
+
   > 1 │ @counter-style  {  }
       │                 ^
     2 │ @counter-style 6788 {  }
     3 │ @counter-style 'string' {  }
-  
+
   i Expected an identifier here.
-  
+
   > 1 │ @counter-style  {  }
       │                 ^
     2 │ @counter-style 6788 {  }
     3 │ @counter-style 'string' {  }
-  
+
 at_rule_counter_style_error.css:2:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an identifier but instead found '6788'.
-  
+
     1 │ @counter-style  {  }
   > 2 │ @counter-style 6788 {  }
       │                ^^^^
     3 │ @counter-style 'string' {  }
     4 │ @counter-style ident
-  
+
   i Expected an identifier here.
-  
+
     1 │ @counter-style  {  }
   > 2 │ @counter-style 6788 {  }
       │                ^^^^
     3 │ @counter-style 'string' {  }
     4 │ @counter-style ident
-  
+
 at_rule_counter_style_error.css:3:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an identifier but instead found ''string''.
-  
+
     1 │ @counter-style  {  }
     2 │ @counter-style 6788 {  }
   > 3 │ @counter-style 'string' {  }
       │                ^^^^^^^^
     4 │ @counter-style ident
     5 │ @counter-style ident
-  
+
   i Expected an identifier here.
-  
+
     1 │ @counter-style  {  }
     2 │ @counter-style 6788 {  }
   > 3 │ @counter-style 'string' {  }
       │                ^^^^^^^^
     4 │ @counter-style ident
     5 │ @counter-style ident
-  
+
 at_rule_counter_style_error.css:5:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a body but instead found '@'.
-  
+
     3 │ @counter-style 'string' {  }
     4 │ @counter-style ident
   > 5 │ @counter-style ident
       │ ^
-    6 │ 
-  
+    6 │
+
   i Expected a body here.
-  
+
     3 │ @counter-style 'string' {  }
     4 │ @counter-style ident
   > 5 │ @counter-style ident
       │ ^
-    6 │ 
-  
+    6 │
+
 at_rule_counter_style_error.css:6:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a body but instead found the end of the file.
-  
+
     4 │ @counter-style ident
     5 │ @counter-style ident
-  > 6 │ 
-      │ 
-  
+  > 6 │
+      │
+
   i Expected a body here.
-  
+
     4 │ @counter-style ident
     5 │ @counter-style ident
-  > 6 │ 
-      │ 
-  
+  > 6 │
+      │
+
 ```
 
 

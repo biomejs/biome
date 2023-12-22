@@ -43,7 +43,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@8..9 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@9..10 "}" [] [],
             },
         },
@@ -70,7 +70,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@20..21 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@21..22 "}" [] [],
             },
         },
@@ -116,7 +116,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@44..45 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@45..46 "}" [] [],
             },
         },
@@ -161,7 +161,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@67..68 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@68..69 "}" [] [],
             },
         },
@@ -214,7 +214,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@89..90 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@90..91 "}" [] [],
             },
         },
@@ -363,102 +363,102 @@ CssRoot {
 pseudo_element_function_selector.css:1:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a selector but instead found '{'.
-  
+
   > 1 │ ::cure( {}
       │         ^
     2 │ ::cure() {}
     3 │ ::cure(.div, .class) {}
-  
+
   i Expected a selector here.
-  
+
   > 1 │ ::cure( {}
       │         ^
     2 │ ::cure() {}
     3 │ ::cure(.div, .class) {}
-  
+
 pseudo_element_function_selector.css:2:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a selector but instead found ')'.
-  
+
     1 │ ::cure( {}
   > 2 │ ::cure() {}
       │        ^
     3 │ ::cure(.div, .class) {}
     4 │ ::cure(.div, .class {}
-  
+
   i Expected a selector here.
-  
+
     1 │ ::cure( {}
   > 2 │ ::cure() {}
       │        ^
     3 │ ::cure(.div, .class) {}
     4 │ ::cure(.div, .class {}
-  
+
 pseudo_element_function_selector.css:3:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a selector but instead found '.div, .class'.
-  
+
     1 │ ::cure( {}
     2 │ ::cure() {}
   > 3 │ ::cure(.div, .class) {}
       │        ^^^^^^^^^^^^
     4 │ ::cure(.div, .class {}
     5 │ ::cure(.div .class {}
-  
+
   i Expected a selector here.
-  
+
     1 │ ::cure( {}
     2 │ ::cure() {}
   > 3 │ ::cure(.div, .class) {}
       │        ^^^^^^^^^^^^
     4 │ ::cure(.div, .class {}
     5 │ ::cure(.div .class {}
-  
+
 pseudo_element_function_selector.css:4:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a selector but instead found '.div, .class'.
-  
+
     2 │ ::cure() {}
     3 │ ::cure(.div, .class) {}
   > 4 │ ::cure(.div, .class {}
       │        ^^^^^^^^^^^^
     5 │ ::cure(.div .class {}
-    6 │ 
-  
+    6 │
+
   i Expected a selector here.
-  
+
     2 │ ::cure() {}
     3 │ ::cure(.div, .class) {}
   > 4 │ ::cure(.div, .class {}
       │        ^^^^^^^^^^^^
     5 │ ::cure(.div .class {}
-    6 │ 
-  
+    6 │
+
 pseudo_element_function_selector.css:4:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `)` but instead found `{`
-  
+
     2 │ ::cure() {}
     3 │ ::cure(.div, .class) {}
   > 4 │ ::cure(.div, .class {}
       │                     ^
     5 │ ::cure(.div .class {}
-    6 │ 
-  
+    6 │
+
   i Remove {
-  
+
 pseudo_element_function_selector.css:5:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `)` but instead found `{`
-  
+
     3 │ ::cure(.div, .class) {}
     4 │ ::cure(.div, .class {}
   > 5 │ ::cure(.div .class {}
       │                    ^
-    6 │ 
-  
+    6 │
+
   i Remove {
-  
+
 ```
 
 

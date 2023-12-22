@@ -49,7 +49,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@23..24 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@24..25 "}" [] [],
             },
         },
@@ -73,7 +73,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@39..40 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@40..41 "}" [] [],
             },
         },
@@ -166,53 +166,53 @@ CssRoot {
 pseudo_element_function_identifier.css:1:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an identifier but instead found 'div + div'.
-  
+
   > 1 │ ::highlight(div + div) {}
       │             ^^^^^^^^^
     2 │ ::highlight( {}
     3 │ ::highlight(
-  
+
   i Expected an identifier here.
-  
+
   > 1 │ ::highlight(div + div) {}
       │             ^^^^^^^^^
     2 │ ::highlight( {}
     3 │ ::highlight(
-  
+
 pseudo_element_function_identifier.css:2:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an identifier but instead found '{'.
-  
+
     1 │ ::highlight(div + div) {}
   > 2 │ ::highlight( {}
       │              ^
     3 │ ::highlight(
-    4 │ 
-  
+    4 │
+
   i Expected an identifier here.
-  
+
     1 │ ::highlight(div + div) {}
   > 2 │ ::highlight( {}
       │              ^
     3 │ ::highlight(
-    4 │ 
-  
+    4 │
+
 pseudo_element_function_identifier.css:4:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an identifier but instead found the end of the file.
-  
+
     2 │ ::highlight( {}
     3 │ ::highlight(
-  > 4 │ 
-      │ 
-  
+  > 4 │
+      │
+
   i Expected an identifier here.
-  
+
     2 │ ::highlight( {}
     3 │ ::highlight(
-  > 4 │ 
-      │ 
-  
+  > 4 │
+      │
+
 ```
 
 

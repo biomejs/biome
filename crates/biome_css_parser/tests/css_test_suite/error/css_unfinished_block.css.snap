@@ -34,7 +34,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@8..9 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: missing (required),
             },
         },
@@ -73,17 +73,17 @@ CssRoot {
 css_unfinished_block.css:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `}` but instead the file ends
-  
+
     1 │ .action {
-  > 2 │ 
-      │ 
-  
+  > 2 │
+      │
+
   i the file ends here
-  
+
     1 │ .action {
-  > 2 │ 
-      │ 
-  
+  > 2 │
+      │
+
 ```
 
 

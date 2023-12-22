@@ -38,7 +38,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@9..10 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@10..11 "}" [] [],
             },
         },
@@ -80,17 +80,17 @@ CssRoot {
 id_selector_err.css:1:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an identifier but instead found '.'.
-  
+
   > 1 │ # .class {}
       │   ^
-    2 │ 
-  
+    2 │
+
   i Expected an identifier here.
-  
+
   > 1 │ # .class {}
       │   ^
-    2 │ 
-  
+    2 │
+
 ```
 
 

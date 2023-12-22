@@ -33,7 +33,7 @@ CssRoot {
                     },
                     CssDeclarationListBlock {
                         l_curly_token: L_CURLY@22..25 "{" [] [Whitespace("  ")],
-                        declaration_list: CssDeclarationList [],
+                        declarations: CssDeclarationList [],
                         r_curly_token: R_CURLY@25..26 "}" [] [],
                     },
                 ],
@@ -51,7 +51,7 @@ CssRoot {
                     },
                     CssDeclarationListBlock {
                         l_curly_token: L_CURLY@51..54 "{" [] [Whitespace("  ")],
-                        declaration_list: CssDeclarationList [],
+                        declarations: CssDeclarationList [],
                         r_curly_token: R_CURLY@54..55 "}" [] [],
                     },
                 ],
@@ -64,7 +64,7 @@ CssRoot {
                     COLOR_PROFILE_KW@57..72 "color-profile" [] [Whitespace("  ")],
                     CssDeclarationListBlock {
                         l_curly_token: L_CURLY@72..75 "{" [] [Whitespace("  ")],
-                        declaration_list: CssDeclarationList [],
+                        declarations: CssDeclarationList [],
                         r_curly_token: R_CURLY@75..76 "}" [] [],
                     },
                 ],
@@ -148,91 +148,91 @@ CssRoot {
 at_rule_color_profile_error.css:1:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an identifier but instead found '112321'.
-  
+
   > 1 │ @color-profile 112321 {  }
       │                ^^^^^^
     2 │ @color-profile 'string' {  }
     3 │ @color-profile  {  }
-  
+
   i Expected an identifier here.
-  
+
   > 1 │ @color-profile 112321 {  }
       │                ^^^^^^
     2 │ @color-profile 'string' {  }
     3 │ @color-profile  {  }
-  
+
 at_rule_color_profile_error.css:2:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an identifier but instead found ''string''.
-  
+
     1 │ @color-profile 112321 {  }
   > 2 │ @color-profile 'string' {  }
       │                ^^^^^^^^
     3 │ @color-profile  {  }
     4 │ @color-profile DEVICE-CMYK
-  
+
   i Expected an identifier here.
-  
+
     1 │ @color-profile 112321 {  }
   > 2 │ @color-profile 'string' {  }
       │                ^^^^^^^^
     3 │ @color-profile  {  }
     4 │ @color-profile DEVICE-CMYK
-  
+
 at_rule_color_profile_error.css:3:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an identifier but instead found '{'.
-  
+
     1 │ @color-profile 112321 {  }
     2 │ @color-profile 'string' {  }
   > 3 │ @color-profile  {  }
       │                 ^
     4 │ @color-profile DEVICE-CMYK
     5 │ @color-profile
-  
+
   i Expected an identifier here.
-  
+
     1 │ @color-profile 112321 {  }
     2 │ @color-profile 'string' {  }
   > 3 │ @color-profile  {  }
       │                 ^
     4 │ @color-profile DEVICE-CMYK
     5 │ @color-profile
-  
+
 at_rule_color_profile_error.css:5:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a body but instead found '@'.
-  
+
     3 │ @color-profile  {  }
     4 │ @color-profile DEVICE-CMYK
   > 5 │ @color-profile
       │ ^
-    6 │ 
-  
+    6 │
+
   i Expected a body here.
-  
+
     3 │ @color-profile  {  }
     4 │ @color-profile DEVICE-CMYK
   > 5 │ @color-profile
       │ ^
-    6 │ 
-  
+    6 │
+
 at_rule_color_profile_error.css:6:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an identifier but instead found the end of the file.
-  
+
     4 │ @color-profile DEVICE-CMYK
     5 │ @color-profile
-  > 6 │ 
-      │ 
-  
+  > 6 │
+      │
+
   i Expected an identifier here.
-  
+
     4 │ @color-profile DEVICE-CMYK
     5 │ @color-profile
-  > 6 │ 
-      │ 
-  
+  > 6 │
+      │
+
 ```
 
 

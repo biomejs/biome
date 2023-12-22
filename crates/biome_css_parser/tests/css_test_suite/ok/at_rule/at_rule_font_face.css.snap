@@ -22,7 +22,7 @@ CssRoot {
                 font_face_token: FONT_FACE_KW@1..11 "font-face" [] [Whitespace(" ")],
                 block: CssDeclarationListBlock {
                     l_curly_token: L_CURLY@11..12 "{" [] [],
-                    declaration_list: CssDeclarationList [],
+                    declarations: CssDeclarationList [],
                     r_curly_token: R_CURLY@12..13 "}" [] [],
                 },
             },

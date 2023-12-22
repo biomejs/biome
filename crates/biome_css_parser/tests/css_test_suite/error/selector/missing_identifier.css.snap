@@ -43,7 +43,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@6..7 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@7..8 "}" [] [],
             },
         },
@@ -89,31 +89,31 @@ CssRoot {
 missing_identifier.css:1:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an identifier but instead found ','.
-  
+
   > 1 │ . , # {}
       │   ^
-    2 │ 
-  
+    2 │
+
   i Expected an identifier here.
-  
+
   > 1 │ . , # {}
       │   ^
-    2 │ 
-  
+    2 │
+
 missing_identifier.css:1:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an identifier but instead found '{'.
-  
+
   > 1 │ . , # {}
       │       ^
-    2 │ 
-  
+    2 │
+
   i Expected an identifier here.
-  
+
   > 1 │ . , # {}
       │       ^
-    2 │ 
-  
+    2 │
+
 ```
 
 

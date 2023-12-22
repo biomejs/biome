@@ -47,7 +47,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@6..7 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@7..8 "}" [] [],
             },
         },
@@ -72,7 +72,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@16..17 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@17..18 "}" [] [],
             },
         },
@@ -99,7 +99,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@28..29 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@29..30 "}" [] [],
             },
         },
@@ -128,7 +128,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@44..45 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@45..46 "}" [] [],
             },
         },
@@ -159,7 +159,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@62..63 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@63..64 "}" [] [],
             },
         },
@@ -189,7 +189,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@79..80 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@80..81 "}" [] [],
             },
         },
@@ -222,7 +222,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@98..99 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@99..100 "}" [] [],
             },
         },
@@ -256,7 +256,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@118..119 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@119..120 "}" [] [],
             },
         },
@@ -287,7 +287,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@141..142 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@142..143 "}" [] [],
             },
         },
@@ -319,7 +319,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@165..166 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@166..167 "}" [] [],
             },
         },
@@ -567,276 +567,276 @@ CssRoot {
 pseudo_class_function_identifier.css:1:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a ltr, or a rtl but instead found '{'.
-  
+
   > 1 │ :dir( {}
       │       ^
     2 │ :dir() {}
     3 │ :dir(ltr {}
-  
+
   i Expected a ltr, or a rtl here.
-  
+
   > 1 │ :dir( {}
       │       ^
     2 │ :dir() {}
     3 │ :dir(ltr {}
-  
+
 pseudo_class_function_identifier.css:2:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a ltr, or a rtl but instead found ')'.
-  
+
     1 │ :dir( {}
   > 2 │ :dir() {}
       │      ^
     3 │ :dir(ltr {}
     4 │ :dir(invalid {}
-  
+
   i Expected a ltr, or a rtl here.
-  
+
     1 │ :dir( {}
   > 2 │ :dir() {}
       │      ^
     3 │ :dir(ltr {}
     4 │ :dir(invalid {}
-  
+
 pseudo_class_function_identifier.css:3:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `)` but instead found `{`
-  
+
     1 │ :dir( {}
     2 │ :dir() {}
   > 3 │ :dir(ltr {}
       │          ^
     4 │ :dir(invalid {}
     5 │ :dir(.invalid) {}
-  
+
   i Remove {
-  
+
 pseudo_class_function_identifier.css:4:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a ltr, or a rtl but instead found 'invalid'.
-  
+
     2 │ :dir() {}
     3 │ :dir(ltr {}
   > 4 │ :dir(invalid {}
       │      ^^^^^^^
     5 │ :dir(.invalid) {}
     6 │ :dir(.invalid {}
-  
+
   i Expected a ltr, or a rtl here.
-  
+
     2 │ :dir() {}
     3 │ :dir(ltr {}
   > 4 │ :dir(invalid {}
       │      ^^^^^^^
     5 │ :dir(.invalid) {}
     6 │ :dir(.invalid {}
-  
+
 pseudo_class_function_identifier.css:4:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `)` but instead found `{`
-  
+
     2 │ :dir() {}
     3 │ :dir(ltr {}
   > 4 │ :dir(invalid {}
       │              ^
     5 │ :dir(.invalid) {}
     6 │ :dir(.invalid {}
-  
+
   i Remove {
-  
+
 pseudo_class_function_identifier.css:5:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a ltr, or a rtl but instead found '.invalid'.
-  
+
     3 │ :dir(ltr {}
     4 │ :dir(invalid {}
   > 5 │ :dir(.invalid) {}
       │      ^^^^^^^^
     6 │ :dir(.invalid {}
     7 │ :dir(ltr .class {}
-  
+
   i Expected a ltr, or a rtl here.
-  
+
     3 │ :dir(ltr {}
     4 │ :dir(invalid {}
   > 5 │ :dir(.invalid) {}
       │      ^^^^^^^^
     6 │ :dir(.invalid {}
     7 │ :dir(ltr .class {}
-  
+
 pseudo_class_function_identifier.css:6:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a ltr, or a rtl but instead found '.invalid'.
-  
+
     4 │ :dir(invalid {}
     5 │ :dir(.invalid) {}
   > 6 │ :dir(.invalid {}
       │      ^^^^^^^^
     7 │ :dir(ltr .class {}
     8 │ :dir(ltr .class) {}
-  
+
   i Expected a ltr, or a rtl here.
-  
+
     4 │ :dir(invalid {}
     5 │ :dir(.invalid) {}
   > 6 │ :dir(.invalid {}
       │      ^^^^^^^^
     7 │ :dir(ltr .class {}
     8 │ :dir(ltr .class) {}
-  
+
 pseudo_class_function_identifier.css:6:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `)` but instead found `{`
-  
+
     4 │ :dir(invalid {}
     5 │ :dir(.invalid) {}
   > 6 │ :dir(.invalid {}
       │               ^
     7 │ :dir(ltr .class {}
     8 │ :dir(ltr .class) {}
-  
+
   i Remove {
-  
+
 pseudo_class_function_identifier.css:7:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a ltr, or a rtl but instead found 'ltr .class'.
-  
+
     5 │ :dir(.invalid) {}
     6 │ :dir(.invalid {}
   > 7 │ :dir(ltr .class {}
       │      ^^^^^^^^^^
     8 │ :dir(ltr .class) {}
     9 │ :dir(invalid .class {}
-  
+
   i Expected a ltr, or a rtl here.
-  
+
     5 │ :dir(.invalid) {}
     6 │ :dir(.invalid {}
   > 7 │ :dir(ltr .class {}
       │      ^^^^^^^^^^
     8 │ :dir(ltr .class) {}
     9 │ :dir(invalid .class {}
-  
+
 pseudo_class_function_identifier.css:7:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `)` but instead found `{`
-  
+
     5 │ :dir(.invalid) {}
     6 │ :dir(.invalid {}
   > 7 │ :dir(ltr .class {}
       │                 ^
     8 │ :dir(ltr .class) {}
     9 │ :dir(invalid .class {}
-  
+
   i Remove {
-  
+
 pseudo_class_function_identifier.css:8:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a ltr, or a rtl but instead found 'ltr .class'.
-  
+
      6 │ :dir(.invalid {}
      7 │ :dir(ltr .class {}
    > 8 │ :dir(ltr .class) {}
        │      ^^^^^^^^^^
      9 │ :dir(invalid .class {}
     10 │ :dir(invalid .class) {}
-  
+
   i Expected a ltr, or a rtl here.
-  
+
      6 │ :dir(.invalid {}
      7 │ :dir(ltr .class {}
    > 8 │ :dir(ltr .class) {}
        │      ^^^^^^^^^^
      9 │ :dir(invalid .class {}
     10 │ :dir(invalid .class) {}
-  
+
 pseudo_class_function_identifier.css:9:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a ltr, or a rtl but instead found 'invalid .class'.
-  
+
      7 │ :dir(ltr .class {}
      8 │ :dir(ltr .class) {}
    > 9 │ :dir(invalid .class {}
        │      ^^^^^^^^^^^^^^
     10 │ :dir(invalid .class) {}
     11 │ :dir(.invalid
-  
+
   i Expected a ltr, or a rtl here.
-  
+
      7 │ :dir(ltr .class {}
      8 │ :dir(ltr .class) {}
    > 9 │ :dir(invalid .class {}
        │      ^^^^^^^^^^^^^^
     10 │ :dir(invalid .class) {}
     11 │ :dir(.invalid
-  
+
 pseudo_class_function_identifier.css:9:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `)` but instead found `{`
-  
+
      7 │ :dir(ltr .class {}
      8 │ :dir(ltr .class) {}
    > 9 │ :dir(invalid .class {}
        │                     ^
     10 │ :dir(invalid .class) {}
     11 │ :dir(.invalid
-  
+
   i Remove {
-  
+
 pseudo_class_function_identifier.css:10:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a ltr, or a rtl but instead found 'invalid .class'.
-  
+
      8 │ :dir(ltr .class) {}
      9 │ :dir(invalid .class {}
   > 10 │ :dir(invalid .class) {}
        │      ^^^^^^^^^^^^^^
     11 │ :dir(.invalid
-    12 │ 
-  
+    12 │
+
   i Expected a ltr, or a rtl here.
-  
+
      8 │ :dir(ltr .class) {}
      9 │ :dir(invalid .class {}
   > 10 │ :dir(invalid .class) {}
        │      ^^^^^^^^^^^^^^
     11 │ :dir(.invalid
-    12 │ 
-  
+    12 │
+
 pseudo_class_function_identifier.css:11:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a ltr, or a rtl but instead found '.invalid'.
-  
+
      9 │ :dir(invalid .class {}
     10 │ :dir(invalid .class) {}
   > 11 │ :dir(.invalid
        │      ^^^^^^^^
-    12 │ 
-  
+    12 │
+
   i Expected a ltr, or a rtl here.
-  
+
      9 │ :dir(invalid .class {}
     10 │ :dir(invalid .class) {}
   > 11 │ :dir(.invalid
        │      ^^^^^^^^
-    12 │ 
-  
+    12 │
+
 pseudo_class_function_identifier.css:12:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `)` but instead the file ends
-  
+
     10 │ :dir(invalid .class) {}
     11 │ :dir(.invalid
-  > 12 │ 
-       │ 
-  
+  > 12 │
+       │
+
   i the file ends here
-  
+
     10 │ :dir(invalid .class) {}
     11 │ :dir(.invalid
-  > 12 │ 
-       │ 
-  
+  > 12 │
+       │
+
 ```
 
 

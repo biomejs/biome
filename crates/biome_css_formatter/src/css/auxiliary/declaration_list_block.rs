@@ -7,13 +7,13 @@ impl FormatNodeRule<CssDeclarationListBlock> for FormatCssDeclarationListBlock {
     fn fmt_fields(&self, node: &CssDeclarationListBlock, f: &mut CssFormatter) -> FormatResult<()> {
         let CssDeclarationListBlockFields {
             l_curly_token,
-            declaration_list,
+            declarations,
             r_curly_token,
         } = node.as_fields();
 
         // When the list is empty, we still print a hard line to put the
         // closing curly on the next line.
-        if declaration_list.is_empty() {
+        if declarations.is_empty() {
             write!(
                 f,
                 [
@@ -27,7 +27,7 @@ impl FormatNodeRule<CssDeclarationListBlock> for FormatCssDeclarationListBlock {
                 f,
                 [
                     l_curly_token.format(),
-                    block_indent(&declaration_list.format()),
+                    block_indent(&declarations.format()),
                     r_curly_token.format()
                 ]
             )

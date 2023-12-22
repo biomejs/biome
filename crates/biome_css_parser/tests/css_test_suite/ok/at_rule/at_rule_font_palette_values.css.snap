@@ -26,7 +26,7 @@ CssRoot {
                 },
                 block: CssDeclarationListBlock {
                     l_curly_token: L_CURLY@27..30 "{" [] [Whitespace("  ")],
-                    declaration_list: CssDeclarationList [],
+                    declarations: CssDeclarationList [],
                     r_curly_token: R_CURLY@30..31 "}" [] [],
                 },
             },

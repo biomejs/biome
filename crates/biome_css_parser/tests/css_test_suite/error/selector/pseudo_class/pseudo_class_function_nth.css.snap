@@ -58,7 +58,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@20..21 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@21..22 "}" [] [],
             },
         },
@@ -99,7 +99,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@40..41 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@41..42 "}" [] [],
             },
         },
@@ -146,7 +146,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@66..67 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@67..68 "}" [] [],
             },
         },
@@ -192,7 +192,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@91..92 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@92..93 "}" [] [],
             },
         },
@@ -231,7 +231,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@114..115 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@115..116 "}" [] [],
             },
         },
@@ -273,7 +273,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@143..144 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@144..145 "}" [] [],
             },
         },
@@ -313,7 +313,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@165..166 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@166..167 "}" [] [],
             },
         },
@@ -357,7 +357,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@189..190 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@190..191 "}" [] [],
             },
         },
@@ -400,7 +400,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@212..213 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@213..214 "}" [] [],
             },
         },
@@ -437,7 +437,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@237..238 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@238..239 "}" [] [],
             },
         },
@@ -473,7 +473,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@261..262 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@262..263 "}" [] [],
             },
         },
@@ -494,7 +494,7 @@ CssRoot {
                                     },
                                     of_selector: CssPseudoClassOfNthSelector {
                                         of_token: OF_KW@280..283 "of" [] [Whitespace(" ")],
-                                        selector_list: CssSelectorList [
+                                        selectors: CssSelectorList [
                                             CssBogusSelector {
                                                 items: [
                                                     CARET@283..284 "^" [] [],
@@ -524,7 +524,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@290..291 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@291..292 "}" [] [],
             },
         },
@@ -546,7 +546,7 @@ CssRoot {
                                         },
                                         of_selector: CssPseudoClassOfNthSelector {
                                             of_token: OF_KW@309..312 "of" [] [Whitespace(" ")],
-                                            selector_list: CssSelectorList [
+                                            selectors: CssSelectorList [
                                                 CssBogusSelector {
                                                     items: [
                                                         CARET@312..313 "^" [] [],
@@ -576,7 +576,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@318..319 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@319..320 "}" [] [],
             },
         },
@@ -615,7 +615,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@345..346 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@346..347 "}" [] [],
             },
         },
@@ -653,7 +653,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@371..372 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@372..373 "}" [] [],
             },
         },
@@ -1134,417 +1134,417 @@ CssRoot {
 pseudo_class_function_nth.css:1:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an even, an odd, a n, a <An+B>, or a number but instead found 'invalid'.
-  
+
   > 1 │ :nth-child(invalid) {}
       │            ^^^^^^^
     2 │ :nth-child(2not) {}
     3 │ :nth-child(2n+1 + 100) {}
-  
+
   i Expected an even, an odd, a n, a <An+B>, or a number here.
-  
+
   > 1 │ :nth-child(invalid) {}
       │            ^^^^^^^
     2 │ :nth-child(2not) {}
     3 │ :nth-child(2n+1 + 100) {}
-  
+
 pseudo_class_function_nth.css:2:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an even, an odd, a n, a <An+B>, or a number but instead found '2not'.
-  
+
     1 │ :nth-child(invalid) {}
   > 2 │ :nth-child(2not) {}
       │            ^^^^
     3 │ :nth-child(2n+1 + 100) {}
     4 │ :nth-child(2n+1 + 100 {}
-  
+
   i Expected an even, an odd, a n, a <An+B>, or a number here.
-  
+
     1 │ :nth-child(invalid) {}
   > 2 │ :nth-child(2not) {}
       │            ^^^^
     3 │ :nth-child(2n+1 + 100) {}
     4 │ :nth-child(2n+1 + 100 {}
-  
+
 pseudo_class_function_nth.css:3:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an even, an odd, a n, a <An+B>, or a number but instead found '2n+1 + 100'.
-  
+
     1 │ :nth-child(invalid) {}
     2 │ :nth-child(2not) {}
   > 3 │ :nth-child(2n+1 + 100) {}
       │            ^^^^^^^^^^
     4 │ :nth-child(2n+1 + 100 {}
     5 │ :nth-child(2n + +1) {}
-  
+
   i Expected an even, an odd, a n, a <An+B>, or a number here.
-  
+
     1 │ :nth-child(invalid) {}
     2 │ :nth-child(2not) {}
   > 3 │ :nth-child(2n+1 + 100) {}
       │            ^^^^^^^^^^
     4 │ :nth-child(2n+1 + 100 {}
     5 │ :nth-child(2n + +1) {}
-  
+
 pseudo_class_function_nth.css:4:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an even, an odd, a n, a <An+B>, or a number but instead found '2n+1 + 100'.
-  
+
     2 │ :nth-child(2not) {}
     3 │ :nth-child(2n+1 + 100) {}
   > 4 │ :nth-child(2n+1 + 100 {}
       │            ^^^^^^^^^^
     5 │ :nth-child(2n + +1) {}
     6 │ :nth-child(2n invalid +1) {}
-  
+
   i Expected an even, an odd, a n, a <An+B>, or a number here.
-  
+
     2 │ :nth-child(2not) {}
     3 │ :nth-child(2n+1 + 100) {}
   > 4 │ :nth-child(2n+1 + 100 {}
       │            ^^^^^^^^^^
     5 │ :nth-child(2n + +1) {}
     6 │ :nth-child(2n invalid +1) {}
-  
+
 pseudo_class_function_nth.css:4:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `)` but instead found `{`
-  
+
     2 │ :nth-child(2not) {}
     3 │ :nth-child(2n+1 + 100) {}
   > 4 │ :nth-child(2n+1 + 100 {}
       │                       ^
     5 │ :nth-child(2n + +1) {}
     6 │ :nth-child(2n invalid +1) {}
-  
+
   i Remove {
-  
+
 pseudo_class_function_nth.css:6:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an even, an odd, a n, a <An+B>, or a number but instead found '2n invalid +1'.
-  
+
     4 │ :nth-child(2n+1 + 100 {}
     5 │ :nth-child(2n + +1) {}
   > 6 │ :nth-child(2n invalid +1) {}
       │            ^^^^^^^^^^^^^
     7 │ :nth-child(2n + +1 {}
     8 │ :nth-child(2n + not) {}
-  
+
   i Expected an even, an odd, a n, a <An+B>, or a number here.
-  
+
     4 │ :nth-child(2n+1 + 100 {}
     5 │ :nth-child(2n + +1) {}
   > 6 │ :nth-child(2n invalid +1) {}
       │            ^^^^^^^^^^^^^
     7 │ :nth-child(2n + +1 {}
     8 │ :nth-child(2n + not) {}
-  
+
 pseudo_class_function_nth.css:7:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `)` but instead found `{`
-  
+
     5 │ :nth-child(2n + +1) {}
     6 │ :nth-child(2n invalid +1) {}
   > 7 │ :nth-child(2n + +1 {}
       │                    ^
     8 │ :nth-child(2n + not) {}
     9 │ :nth-child(2n + not {}
-  
+
   i Remove {
-  
+
 pseudo_class_function_nth.css:8:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a number but instead found 'not'.
-  
+
      6 │ :nth-child(2n invalid +1) {}
      7 │ :nth-child(2n + +1 {}
    > 8 │ :nth-child(2n + not) {}
        │                 ^^^
      9 │ :nth-child(2n + not {}
     10 │ :nth-child(even .div) {}
-  
+
   i Expected a number here.
-  
+
      6 │ :nth-child(2n invalid +1) {}
      7 │ :nth-child(2n + +1 {}
    > 8 │ :nth-child(2n + not) {}
        │                 ^^^
      9 │ :nth-child(2n + not {}
     10 │ :nth-child(even .div) {}
-  
+
 pseudo_class_function_nth.css:8:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an even, an odd, a n, a <An+B>, or a number but instead found '2n + not'.
-  
+
      6 │ :nth-child(2n invalid +1) {}
      7 │ :nth-child(2n + +1 {}
    > 8 │ :nth-child(2n + not) {}
        │            ^^^^^^^^
      9 │ :nth-child(2n + not {}
     10 │ :nth-child(even .div) {}
-  
+
   i Expected an even, an odd, a n, a <An+B>, or a number here.
-  
+
      6 │ :nth-child(2n invalid +1) {}
      7 │ :nth-child(2n + +1 {}
    > 8 │ :nth-child(2n + not) {}
        │            ^^^^^^^^
      9 │ :nth-child(2n + not {}
     10 │ :nth-child(even .div) {}
-  
+
 pseudo_class_function_nth.css:9:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a number but instead found 'not'.
-  
+
      7 │ :nth-child(2n + +1 {}
      8 │ :nth-child(2n + not) {}
    > 9 │ :nth-child(2n + not {}
        │                 ^^^
     10 │ :nth-child(even .div) {}
     11 │ :nth-child(even .div {}
-  
+
   i Expected a number here.
-  
+
      7 │ :nth-child(2n + +1 {}
      8 │ :nth-child(2n + not) {}
    > 9 │ :nth-child(2n + not {}
        │                 ^^^
     10 │ :nth-child(even .div) {}
     11 │ :nth-child(even .div {}
-  
+
 pseudo_class_function_nth.css:9:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an even, an odd, a n, a <An+B>, or a number but instead found '2n + not'.
-  
+
      7 │ :nth-child(2n + +1 {}
      8 │ :nth-child(2n + not) {}
    > 9 │ :nth-child(2n + not {}
        │            ^^^^^^^^
     10 │ :nth-child(even .div) {}
     11 │ :nth-child(even .div {}
-  
+
   i Expected an even, an odd, a n, a <An+B>, or a number here.
-  
+
      7 │ :nth-child(2n + +1 {}
      8 │ :nth-child(2n + not) {}
    > 9 │ :nth-child(2n + not {}
        │            ^^^^^^^^
     10 │ :nth-child(even .div) {}
     11 │ :nth-child(even .div {}
-  
+
 pseudo_class_function_nth.css:9:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `)` but instead found `{`
-  
+
      7 │ :nth-child(2n + +1 {}
      8 │ :nth-child(2n + not) {}
    > 9 │ :nth-child(2n + not {}
        │                     ^
     10 │ :nth-child(even .div) {}
     11 │ :nth-child(even .div {}
-  
+
   i Remove {
-  
+
 pseudo_class_function_nth.css:10:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an even, an odd, a n, a <An+B>, or a number but instead found 'even .div'.
-  
+
      8 │ :nth-child(2n + not) {}
      9 │ :nth-child(2n + not {}
   > 10 │ :nth-child(even .div) {}
        │            ^^^^^^^^^
     11 │ :nth-child(even .div {}
     12 │ :nth-child(even of ^.div) {}
-  
+
   i Expected an even, an odd, a n, a <An+B>, or a number here.
-  
+
      8 │ :nth-child(2n + not) {}
      9 │ :nth-child(2n + not {}
   > 10 │ :nth-child(even .div) {}
        │            ^^^^^^^^^
     11 │ :nth-child(even .div {}
     12 │ :nth-child(even of ^.div) {}
-  
+
 pseudo_class_function_nth.css:11:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an even, an odd, a n, a <An+B>, or a number but instead found 'even .div'.
-  
+
      9 │ :nth-child(2n + not {}
     10 │ :nth-child(even .div) {}
   > 11 │ :nth-child(even .div {}
        │            ^^^^^^^^^
     12 │ :nth-child(even of ^.div) {}
     13 │ :nth-child(even of ^.div {}
-  
+
   i Expected an even, an odd, a n, a <An+B>, or a number here.
-  
+
      9 │ :nth-child(2n + not {}
     10 │ :nth-child(even .div) {}
   > 11 │ :nth-child(even .div {}
        │            ^^^^^^^^^
     12 │ :nth-child(even of ^.div) {}
     13 │ :nth-child(even of ^.div {}
-  
+
 pseudo_class_function_nth.css:11:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `)` but instead found `{`
-  
+
      9 │ :nth-child(2n + not {}
     10 │ :nth-child(even .div) {}
   > 11 │ :nth-child(even .div {}
        │                      ^
     12 │ :nth-child(even of ^.div) {}
     13 │ :nth-child(even of ^.div {}
-  
+
   i Remove {
-  
+
 pseudo_class_function_nth.css:12:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a selector but instead found '^'.
-  
+
     10 │ :nth-child(even .div) {}
     11 │ :nth-child(even .div {}
   > 12 │ :nth-child(even of ^.div) {}
        │                    ^
     13 │ :nth-child(even of ^.div {}
     14 │ :nth-child(even ^.div,) {}
-  
+
   i Expected a selector here.
-  
+
     10 │ :nth-child(even .div) {}
     11 │ :nth-child(even .div {}
   > 12 │ :nth-child(even of ^.div) {}
        │                    ^
     13 │ :nth-child(even of ^.div {}
     14 │ :nth-child(even ^.div,) {}
-  
+
 pseudo_class_function_nth.css:12:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `.`
-  
+
     10 │ :nth-child(even .div) {}
     11 │ :nth-child(even .div {}
   > 12 │ :nth-child(even of ^.div) {}
        │                     ^
     13 │ :nth-child(even of ^.div {}
     14 │ :nth-child(even ^.div,) {}
-  
+
   i Remove .
-  
+
 pseudo_class_function_nth.css:13:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a selector but instead found '^'.
-  
+
     11 │ :nth-child(even .div {}
     12 │ :nth-child(even of ^.div) {}
   > 13 │ :nth-child(even of ^.div {}
        │                    ^
     14 │ :nth-child(even ^.div,) {}
     15 │ :nth-child(even ^.div, {}
-  
+
   i Expected a selector here.
-  
+
     11 │ :nth-child(even .div {}
     12 │ :nth-child(even of ^.div) {}
   > 13 │ :nth-child(even of ^.div {}
        │                    ^
     14 │ :nth-child(even ^.div,) {}
     15 │ :nth-child(even ^.div, {}
-  
+
 pseudo_class_function_nth.css:13:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `.`
-  
+
     11 │ :nth-child(even .div {}
     12 │ :nth-child(even of ^.div) {}
   > 13 │ :nth-child(even of ^.div {}
        │                     ^
     14 │ :nth-child(even ^.div,) {}
     15 │ :nth-child(even ^.div, {}
-  
+
   i Remove .
-  
+
 pseudo_class_function_nth.css:13:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `{`
-  
+
     11 │ :nth-child(even .div {}
     12 │ :nth-child(even of ^.div) {}
   > 13 │ :nth-child(even of ^.div {}
        │                          ^
     14 │ :nth-child(even ^.div,) {}
     15 │ :nth-child(even ^.div, {}
-  
+
   i Remove {
-  
+
 pseudo_class_function_nth.css:14:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an even, an odd, a n, a <An+B>, or a number but instead found 'even ^.div,'.
-  
+
     12 │ :nth-child(even of ^.div) {}
     13 │ :nth-child(even of ^.div {}
   > 14 │ :nth-child(even ^.div,) {}
        │            ^^^^^^^^^^^
     15 │ :nth-child(even ^.div, {}
     16 │ :nth-child(2n + 1
-  
+
   i Expected an even, an odd, a n, a <An+B>, or a number here.
-  
+
     12 │ :nth-child(even of ^.div) {}
     13 │ :nth-child(even of ^.div {}
   > 14 │ :nth-child(even ^.div,) {}
        │            ^^^^^^^^^^^
     15 │ :nth-child(even ^.div, {}
     16 │ :nth-child(2n + 1
-  
+
 pseudo_class_function_nth.css:15:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an even, an odd, a n, a <An+B>, or a number but instead found 'even ^.div,'.
-  
+
     13 │ :nth-child(even of ^.div {}
     14 │ :nth-child(even ^.div,) {}
   > 15 │ :nth-child(even ^.div, {}
        │            ^^^^^^^^^^^
     16 │ :nth-child(2n + 1
-    17 │ 
-  
+    17 │
+
   i Expected an even, an odd, a n, a <An+B>, or a number here.
-  
+
     13 │ :nth-child(even of ^.div {}
     14 │ :nth-child(even ^.div,) {}
   > 15 │ :nth-child(even ^.div, {}
        │            ^^^^^^^^^^^
     16 │ :nth-child(2n + 1
-    17 │ 
-  
+    17 │
+
 pseudo_class_function_nth.css:15:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `)` but instead found `{`
-  
+
     13 │ :nth-child(even of ^.div {}
     14 │ :nth-child(even ^.div,) {}
   > 15 │ :nth-child(even ^.div, {}
        │                        ^
     16 │ :nth-child(2n + 1
-    17 │ 
-  
+    17 │
+
   i Remove {
-  
+
 pseudo_class_function_nth.css:17:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `)` but instead the file ends
-  
+
     15 │ :nth-child(even ^.div, {}
     16 │ :nth-child(2n + 1
-  > 17 │ 
-       │ 
-  
+  > 17 │
+       │
+
   i the file ends here
-  
+
     15 │ :nth-child(even ^.div, {}
     16 │ :nth-child(2n + 1
-  > 17 │ 
-       │ 
-  
+  > 17 │
+       │
+
 ```
 
 
