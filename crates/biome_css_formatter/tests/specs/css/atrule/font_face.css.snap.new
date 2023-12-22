@@ -1,0 +1,217 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 212
+info: css/atrule/font_face.css
+---
+
+# Input
+
+```css
+@font-face {
+    font-family: "Open Sans";
+    src: url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2"),
+        url("/fonts/OpenSans-Regular-webfont.woff") format("woff");
+}
+@font-face {
+font-family: "Open Sans";
+src: url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2"),
+url("/fonts/OpenSans-Regular-webfont.woff") format("woff");
+}
+@font-face{
+    font-family: "Open Sans";
+    src: url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2"),
+        url("/fonts/OpenSans-Regular-webfont.woff") format("woff");
+}
+@font-face  {
+    font-family: "Open Sans";
+    src: url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2"),
+        url("/fonts/OpenSans-Regular-webfont.woff") format("woff");
+}
+@font-face
+{
+font-family
+:
+"Open Sans"
+;
+src
+:
+url(
+"/fonts/OpenSans-Regular-webfont.woff2"
+)
+format(
+"woff2"
+)
+,
+url(
+"/fonts/OpenSans-Regular-webfont.woff"
+)
+format(
+"woff"
+)
+;
+}
+@font-face
+
+{
+
+font-family
+
+:
+
+"Open Sans"
+
+;
+
+src
+
+:
+
+url(
+
+"/fonts/OpenSans-Regular-webfont.woff2"
+
+)
+
+format(
+
+"woff2"
+
+)
+
+,
+
+url(
+
+"/fonts/OpenSans-Regular-webfont.woff"
+
+)
+
+format(
+
+
+"woff"
+
+)
+
+;
+
+}
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+-----
+
+```css
+@font-face {
+    font-family: "Open Sans";
+    src: url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2"),
+        url("/fonts/OpenSans-Regular-webfont.woff") format("woff");
+}
+@font-face {
+font-family: "Open Sans";
+src: url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2"),
+url("/fonts/OpenSans-Regular-webfont.woff") format("woff");
+}
+@font-face{
+    font-family: "Open Sans";
+    src: url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2"),
+        url("/fonts/OpenSans-Regular-webfont.woff") format("woff");
+}
+@font-face  {
+    font-family: "Open Sans";
+    src: url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2"),
+        url("/fonts/OpenSans-Regular-webfont.woff") format("woff");
+}
+@font-face
+{
+font-family
+:
+"Open Sans"
+;
+src
+:
+url(
+"/fonts/OpenSans-Regular-webfont.woff2"
+)
+format(
+"woff2"
+)
+,
+url(
+"/fonts/OpenSans-Regular-webfont.woff"
+)
+format(
+"woff"
+)
+;
+}
+@font-face
+
+{
+
+font-family
+
+:
+
+"Open Sans"
+
+;
+
+src
+
+:
+
+url(
+
+"/fonts/OpenSans-Regular-webfont.woff2"
+
+)
+
+format(
+
+"woff2"
+
+)
+
+,
+
+url(
+
+"/fonts/OpenSans-Regular-webfont.woff"
+
+)
+
+format(
+
+
+"woff"
+
+)
+
+;
+
+}
+```
+
+
+
+## Unimplemented nodes/tokens
+
+"@font-face {\n    font-family: \"Open Sans\";\n    src: url(\"/fonts/OpenSans-Regular-webfont.woff2\") format(\"woff2\"),\n        url(\"/fonts/OpenSans-Regular-webfont.woff\") format(\"woff\");\n}" => 0..183
+"@font-face {\nfont-family: \"Open Sans\";\nsrc: url(\"/fonts/OpenSans-Regular-webfont.woff2\") format(\"woff2\"),\nurl(\"/fonts/OpenSans-Regular-webfont.woff\") format(\"woff\");\n}\n" => 184..352
+"@font-face{\n    font-family: \"Open Sans\";\n    src: url(\"/fonts/OpenSans-Regular-webfont.woff2\") format(\"woff2\"),\n        url(\"/fonts/OpenSans-Regular-webfont.woff\") format(\"woff\");\n}\n" => 352..535
+"@font-face  {\n    font-family: \"Open Sans\";\n    src: url(\"/fonts/OpenSans-Regular-webfont.woff2\") format(\"woff2\"),\n        url(\"/fonts/OpenSans-Regular-webfont.woff\") format(\"woff\");\n}\n" => 535..720
+"@font-face\n{\nfont-family\n:\n\"Open Sans\"\n;\nsrc\n:\nurl(\n\"/fonts/OpenSans-Regular-webfont.woff2\"\n)\nformat(\n\"woff2\"\n)\n,\nurl(\n\"/fonts/OpenSans-Regular-webfont.woff\"\n)\nformat(\n\"woff\"\n)\n;\n}\n" => 720..901
+"@font-face\n\n{\n\nfont-family\n\n:\n\n\"Open Sans\"\n\n;\n\nsrc\n\n:\n\nurl(\n\n\"/fonts/OpenSans-Regular-webfont.woff2\"\n\n)\n\nformat(\n\n\"woff2\"\n\n)\n\n,\n\nurl(\n\n\"/fonts/OpenSans-Regular-webfont.woff\"\n\n)\n\nformat(\n\n\n\"woff\"\n\n)\n\n;\n\n}\n" => 901..1105
+

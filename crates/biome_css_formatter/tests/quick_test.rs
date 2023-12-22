@@ -13,8 +13,10 @@ mod language {
 // use this test check if your snippet prints as you wish, without using a snapshot
 fn quick_test() {
     let src = r#"
-    div {
-        a: 4px;
+    @font-face {
+        font-family: "Open Sans";
+        src: url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2"),
+            url("/fonts/OpenSans-Regular-webfont.woff") format("woff");
     }
 "#;
     let parse = parse_css(src, CssParserOptions::default());
