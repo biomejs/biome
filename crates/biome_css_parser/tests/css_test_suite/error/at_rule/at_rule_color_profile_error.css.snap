@@ -33,7 +33,7 @@ CssRoot {
                     },
                     CssDeclarationListBlock {
                         l_curly_token: L_CURLY@22..25 "{" [] [Whitespace("  ")],
-                        declaration_list: CssDeclarationList [],
+                        declarations: CssDeclarationList [],
                         r_curly_token: R_CURLY@25..26 "}" [] [],
                     },
                 ],
@@ -51,7 +51,7 @@ CssRoot {
                     },
                     CssDeclarationListBlock {
                         l_curly_token: L_CURLY@51..54 "{" [] [Whitespace("  ")],
-                        declaration_list: CssDeclarationList [],
+                        declarations: CssDeclarationList [],
                         r_curly_token: R_CURLY@54..55 "}" [] [],
                     },
                 ],
@@ -64,7 +64,7 @@ CssRoot {
                     COLOR_PROFILE_KW@57..72 "color-profile" [] [Whitespace("  ")],
                     CssDeclarationListBlock {
                         l_curly_token: L_CURLY@72..75 "{" [] [Whitespace("  ")],
-                        declaration_list: CssDeclarationList [],
+                        declarations: CssDeclarationList [],
                         r_curly_token: R_CURLY@75..76 "}" [] [],
                     },
                 ],

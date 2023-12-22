@@ -1047,7 +1047,7 @@ CssRoot {
                             ],
                             block: CssDeclarationListBlock {
                                 l_curly_token: L_CURLY@1044..1045 "{" [] [],
-                                declaration_list: CssDeclarationList [
+                                declarations: CssDeclarationList [
                                     CssDeclaration {
                                         name: CssIdentifier {
                                             value_token: IDENT@1045..1064 "background-color" [Newline("\n"), Whitespace("\t\t")] [],
@@ -1080,7 +1080,7 @@ CssRoot {
                             ],
                             block: CssDeclarationListBlock {
                                 l_curly_token: L_CURLY@1083..1084 "{" [] [],
-                                declaration_list: CssDeclarationList [
+                                declarations: CssDeclarationList [
                                     CssDeclaration {
                                         name: CssIdentifier {
                                             value_token: IDENT@1084..1103 "background-color" [Newline("\n"), Whitespace("\t\t")] [],
