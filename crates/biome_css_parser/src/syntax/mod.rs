@@ -324,7 +324,7 @@ impl ParseSeparatedList for CssParameterList {
     fn separating_element_kind(&mut self) -> Self::Kind {
         T![,]
     }
-    
+
     fn allow_trailing_separating_element(&self) -> bool {
         true
     }
