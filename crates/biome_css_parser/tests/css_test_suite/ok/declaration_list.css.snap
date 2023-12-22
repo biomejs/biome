@@ -62,7 +62,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [],
                 },
             ],
-            block: CssBlock {
+            block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@2..3 "{" [] [],
                 declaration_list: CssDeclarationList [
                     CssDeclaration {
@@ -108,7 +108,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [],
                 },
             ],
-            block: CssBlock {
+            block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@45..46 "{" [] [],
                 declaration_list: CssDeclarationList [
                     CssDeclaration {
@@ -146,7 +146,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [],
                 },
             ],
-            block: CssBlock {
+            block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@68..69 "{" [] [],
                 declaration_list: CssDeclarationList [
                     CssDeclaration {
@@ -186,7 +186,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [],
                 },
             ],
-            block: CssBlock {
+            block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@91..92 "{" [] [],
                 declaration_list: CssDeclarationList [
                     CssDeclaration {
@@ -234,7 +234,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [],
                 },
             ],
-            block: CssBlock {
+            block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@115..116 "{" [] [],
                 declaration_list: CssDeclarationList [
                     CssDeclaration {
@@ -290,7 +290,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [],
                 },
             ],
-            block: CssBlock {
+            block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@141..142 "{" [] [],
                 declaration_list: CssDeclarationList [
                     CssDeclaration {
@@ -349,7 +349,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [],
                 },
             ],
-            block: CssBlock {
+            block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@169..170 "{" [] [],
                 declaration_list: CssDeclarationList [
                     CssDeclaration {
@@ -388,7 +388,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [],
                 },
             ],
-            block: CssBlock {
+            block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@192..193 "{" [] [],
                 declaration_list: CssDeclarationList [
                     CssDeclaration {
@@ -430,7 +430,7 @@ CssRoot {
             1: CSS_IDENTIFIER@0..2
               0: IDENT@0..2 "a" [] [Whitespace(" ")]
           2: CSS_SUB_SELECTOR_LIST@2..2
-      1: CSS_BLOCK@2..41
+      1: CSS_DECLARATION_LIST_BLOCK@2..41
         0: L_CURLY@2..3 "{" [] []
         1: CSS_DECLARATION_LIST@3..39
           0: CSS_DECLARATION@3..20
@@ -461,7 +461,7 @@ CssRoot {
             1: CSS_IDENTIFIER@41..45
               0: IDENT@41..45 "a" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
           2: CSS_SUB_SELECTOR_LIST@45..45
-      1: CSS_BLOCK@45..64
+      1: CSS_DECLARATION_LIST_BLOCK@45..64
         0: L_CURLY@45..46 "{" [] []
         1: CSS_DECLARATION_LIST@46..62
           0: CSS_DECLARATION@46..61
@@ -486,7 +486,7 @@ CssRoot {
             1: CSS_IDENTIFIER@64..68
               0: IDENT@64..68 "a" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
           2: CSS_SUB_SELECTOR_LIST@68..68
-      1: CSS_BLOCK@68..87
+      1: CSS_DECLARATION_LIST_BLOCK@68..87
         0: L_CURLY@68..69 "{" [] []
         1: CSS_DECLARATION_LIST@69..85
           0: CSS_DECLARATION@69..84
@@ -513,7 +513,7 @@ CssRoot {
             1: CSS_IDENTIFIER@87..91
               0: IDENT@87..91 "a" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
           2: CSS_SUB_SELECTOR_LIST@91..91
-      1: CSS_BLOCK@91..111
+      1: CSS_DECLARATION_LIST_BLOCK@91..111
         0: L_CURLY@91..92 "{" [] []
         1: CSS_DECLARATION_LIST@92..109
           0: CSS_DECLARATION@92..108
@@ -544,7 +544,7 @@ CssRoot {
             1: CSS_IDENTIFIER@111..115
               0: IDENT@111..115 "a" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
           2: CSS_SUB_SELECTOR_LIST@115..115
-      1: CSS_BLOCK@115..137
+      1: CSS_DECLARATION_LIST_BLOCK@115..137
         0: L_CURLY@115..116 "{" [] []
         1: CSS_DECLARATION_LIST@116..135
           0: CSS_DECLARATION@116..134
@@ -580,7 +580,7 @@ CssRoot {
             1: CSS_IDENTIFIER@137..141
               0: IDENT@137..141 "a" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
           2: CSS_SUB_SELECTOR_LIST@141..141
-      1: CSS_BLOCK@141..165
+      1: CSS_DECLARATION_LIST_BLOCK@141..165
         0: L_CURLY@141..142 "{" [] []
         1: CSS_DECLARATION_LIST@142..163
           0: CSS_DECLARATION@142..162
@@ -618,7 +618,7 @@ CssRoot {
             1: CSS_IDENTIFIER@165..169
               0: IDENT@165..169 "a" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
           2: CSS_SUB_SELECTOR_LIST@169..169
-      1: CSS_BLOCK@169..188
+      1: CSS_DECLARATION_LIST_BLOCK@169..188
         0: L_CURLY@169..170 "{" [] []
         1: CSS_DECLARATION_LIST@170..186
           0: CSS_DECLARATION@170..185
@@ -644,7 +644,7 @@ CssRoot {
             1: CSS_IDENTIFIER@188..192
               0: IDENT@188..192 "a" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
           2: CSS_SUB_SELECTOR_LIST@192..192
-      1: CSS_BLOCK@192..216
+      1: CSS_DECLARATION_LIST_BLOCK@192..216
         0: L_CURLY@192..193 "{" [] []
         1: CSS_DECLARATION_LIST@193..214
           0: CSS_DECLARATION@193..213

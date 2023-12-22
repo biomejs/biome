@@ -40,10 +40,6 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssAttributeSelector::new_unchecked(node) };
                     $body
                 }
-                $crate::CssSyntaxKind::CSS_BLOCK => {
-                    let $pattern = unsafe { $crate::CssBlock::new_unchecked(node) };
-                    $body
-                }
                 $crate::CssSyntaxKind::CSS_CHARSET_AT_RULE => {
                     let $pattern = unsafe { $crate::CssCharsetAtRule::new_unchecked(node) };
                     $body
@@ -130,8 +126,17 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssDeclarationImportant::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_DECLARATION_LIST_BLOCK => {
+                    let $pattern = unsafe { $crate::CssDeclarationListBlock::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_FONT_FACE_AT_RULE => {
                     let $pattern = unsafe { $crate::CssFontFaceAtRule::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_FONT_PALETTE_VALUES_AT_RULE => {
+                    let $pattern =
+                        unsafe { $crate::CssFontPaletteValuesAtRule::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_ID_SELECTOR => {
@@ -150,12 +155,18 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssKeyframesBlock::new_unchecked(node) };
                     $body
                 }
-                $crate::CssSyntaxKind::CSS_KEYFRAMES_BODY => {
-                    let $pattern = unsafe { $crate::CssKeyframesBody::new_unchecked(node) };
+                $crate::CssSyntaxKind::CSS_KEYFRAMES_IDENT_SELECTOR => {
+                    let $pattern =
+                        unsafe { $crate::CssKeyframesIdentSelector::new_unchecked(node) };
                     $body
                 }
-                $crate::CssSyntaxKind::CSS_KEYFRAMES_SELECTOR => {
-                    let $pattern = unsafe { $crate::CssKeyframesSelector::new_unchecked(node) };
+                $crate::CssSyntaxKind::CSS_KEYFRAMES_ITEM => {
+                    let $pattern = unsafe { $crate::CssKeyframesItem::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_KEYFRAMES_PERCENTAGE_SELECTOR => {
+                    let $pattern =
+                        unsafe { $crate::CssKeyframesPercentageSelector::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_MEDIA_AND_CONDITION => {
@@ -367,6 +378,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssRule::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_RULE_LIST_BLOCK => {
+                    let $pattern = unsafe { $crate::CssRuleListBlock::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_SIMPLE_FUNCTION => {
                     let $pattern = unsafe { $crate::CssSimpleFunction::new_unchecked(node) };
                     $body
@@ -404,8 +419,8 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssBogusAtRule::new_unchecked(node) };
                     $body
                 }
-                $crate::CssSyntaxKind::CSS_BOGUS_BODY => {
-                    let $pattern = unsafe { $crate::CssBogusBody::new_unchecked(node) };
+                $crate::CssSyntaxKind::CSS_BOGUS_BLOCK => {
+                    let $pattern = unsafe { $crate::CssBogusBlock::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_BOGUS_COMPONENT_VALUE => {
@@ -414,6 +429,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::CssSyntaxKind::CSS_BOGUS_DECLARATION_ITEM => {
                     let $pattern = unsafe { $crate::CssBogusDeclarationItem::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_BOGUS_KEYFRAMES_ITEM => {
+                    let $pattern = unsafe { $crate::CssBogusKeyframesItem::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_BOGUS_MEDIA_QUERY => {

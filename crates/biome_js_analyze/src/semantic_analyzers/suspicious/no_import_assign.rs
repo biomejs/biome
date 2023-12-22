@@ -26,7 +26,8 @@ declare_rule! {
     /// ```
     /// ```js,expect_diagnostic
     /// import z from "y";
-    /// ({ z } = 1); /// ```
+    /// ({ z } = 1);
+    /// ```
     /// ```js,expect_diagnostic
     /// import a from "y";
     /// [...a] = 1;

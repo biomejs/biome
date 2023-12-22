@@ -4,7 +4,7 @@ mod tests;
 
 use crate::CssParserOptions;
 use biome_css_syntax::{CssSyntaxKind, CssSyntaxKind::*, TextLen, TextRange, TextSize, T};
-use biome_js_unicode_table::{is_id_continue, is_id_start, lookup_byte, Dispatch::*};
+use biome_js_unicode_table::{is_id_continue, is_id_start, lookup_byte, Dispatch, Dispatch::*};
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{LexContext, Lexer, LexerCheckpoint, TokenFlags};
 use std::char::REPLACEMENT_CHARACTER;
@@ -498,6 +498,7 @@ impl<'src> CssLexer<'src> {
             EQL => self.consume_byte(T![=]),
             EXL => self.consume_byte(T![!]),
             PRC => self.consume_byte(T![%]),
+            Dispatch::AMP => self.consume_byte(T![&]),
 
             UNI => {
                 // A BOM can only appear at the start of a file, so if we haven't advanced at all yet,
@@ -722,12 +723,16 @@ impl<'src> CssLexer<'src> {
 
         // Note to keep the buffer large enough to fit every possible keyword that
         // the lexer can return
-        let mut buf = [0u8; 20];
+        let mut buf = [0u8; 22];
         let count = self.consume_ident_sequence(&mut buf);
 
         match buf[..count].to_ascii_lowercase().as_slice() {
             b"media" => MEDIA_KW,
             b"keyframes" => KEYFRAMES_KW,
+            b"-webkit-keyframes" => KEYFRAMES_KW,
+            b"-moz-keyframes" => KEYFRAMES_KW,
+            b"-o-keyframes" => KEYFRAMES_KW,
+            b"-ms-keyframes" => KEYFRAMES_KW,
             b"and" => AND_KW,
             b"only" => ONLY_KW,
             b"or" => OR_KW,
@@ -743,8 +748,8 @@ impl<'src> CssLexer<'src> {
             b"dir" => DIR_KW,
             b"global" => GLOBAL_KW,
             b"local" => LOCAL_KW,
-            b"-moz-any" => _MOZ_ANY_KW,
-            b"-webkit-any" => _WEBKIT_ANY_KW,
+            b"-moz-any" => ANY_KW,
+            b"-webkit-any" => ANY_KW,
             b"past" => PAST_KW,
             b"current" => CURRENT_KW,
             b"future" => FUTURE_KW,
@@ -773,6 +778,7 @@ impl<'src> CssLexer<'src> {
             b"container" => CONTAINER_KW,
             b"style" => STYLE_KW,
             b"font-face" => FONT_FACE_KW,
+            b"font-palette-values" => FONT_PALETTE_VALUES_KW,
             _ => IDENT,
         }
     }
