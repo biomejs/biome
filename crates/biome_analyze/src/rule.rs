@@ -30,6 +30,10 @@ pub struct RuleMetadata {
     pub recommended: bool,
     /// The kind of fix
     pub fix_kind: Option<FixKind>,
+    /// The source url of the rule
+    pub source: Option<Source>,
+    /// The source kind of the rule
+    pub source_kind: Option<SourceKind>,
 }
 
 #[derive(Debug, Eq, PartialEq)]
@@ -42,6 +46,47 @@ pub enum FixKind {
     Unsafe,
 }
 
+#[derive(Debug, Eq, PartialEq)]
+pub enum Source {
+    Clippy(&'static str),
+    Eslint(&'static str),
+    EslintJest(&'static str),
+    EslintJsxA11y(&'static str),
+    EslintReact(&'static str),
+    EslintReactHooks(&'static str),
+    EslintTypeScript(&'static str),
+    EslintUnicorn(&'static str),
+    EslintMysticatea(&'static str),
+}
+
+impl std::fmt::Display for Source {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let (source_url, source_rule_name) = match self {
+            Self::Clippy(rule_name) => (format!("https://rust-lang.github.io/rust-clippy/master/#/{rule_name}"), rule_name),
+            Self::Eslint(rule_name) => (format!("https://eslint.org/docs/latest/rules/{rule_name}"), rule_name),
+            Self::EslintJest(rule_name) => (format!("https://github.com/jest-community/eslint-plugin-jest/blob/main/docs/rules/{rule_name}.md"), rule_name),
+            Self::EslintJsxA11y(rule_name) => (format!("https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/{rule_name}.md"), rule_name),
+            Self::EslintReact(rule_name) => (format!("https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/{rule_name}.md"), rule_name),
+            Self::EslintReactHooks(rule_name) => (format!("https://github.com/facebook/react/blob/main/packages/eslint-plugin-react-hooks/README.md"), rule_name),
+            Self::EslintTypeScript(rule_name) => (format!("https://typescript-eslint.io/rules/{rule_name}"), rule_name),
+            Self::EslintUnicorn(rule_name) => (format!("https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/{rule_name}"), rule_name),
+            Self::EslintMysticatea(rule_name) => (format!("https://github.com/mysticatea/eslint-plugin/blob/master/docs/rules/{rule_name}"), rule_name),
+        };
+
+        write!(
+            f,
+            "<a href=\"{source_url}\" target=\"_blank\"><code>{source_rule_name}</code></a>"
+        )
+    }
+}
+
+pub enum SourceKind {
+    /// The rule implements the same logic of the source
+    SameLogic,
+    /// The rule deviate of the logic of the source
+    Inspired,
+}
+
 impl RuleMetadata {
     pub const fn new(version: &'static str, name: &'static str, docs: &'static str) -> Self {
         Self {
@@ -51,6 +96,8 @@ impl RuleMetadata {
             docs,
             recommended: false,
             fix_kind: None,
+            source: None,
+            source_kind: None,
         }
     }
 
@@ -66,6 +113,16 @@ impl RuleMetadata {
 
     pub const fn fix_kind(mut self, kind: FixKind) -> Self {
         self.fix_kind = Some(kind);
+        self
+    }
+
+    pub const fn source(mut self, source: Source) -> Self {
+        self.source = Some(source);
+        self
+    }
+
+    pub const fn source_kind(mut self, source_kind: SourceKind) -> Self {
+        self.source_kind = Some(source_kind);
         self
     }
 }
