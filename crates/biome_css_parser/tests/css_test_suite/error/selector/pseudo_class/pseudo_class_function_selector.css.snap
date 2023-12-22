@@ -426,119 +426,119 @@ CssRoot {
 pseudo_class_function_selector.css:1:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a selector but instead found '{'.
-
+  
   > 1 │ :global( {}
       │          ^
     2 │ :global() {}
     3 │ :global(.div, .class) {}
-
+  
   i Expected a selector here.
-
+  
   > 1 │ :global( {}
       │          ^
     2 │ :global() {}
     3 │ :global(.div, .class) {}
-
+  
 pseudo_class_function_selector.css:2:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a selector but instead found ')'.
-
+  
     1 │ :global( {}
   > 2 │ :global() {}
       │         ^
     3 │ :global(.div, .class) {}
     4 │ :global(.div, .class {}
-
+  
   i Expected a selector here.
-
+  
     1 │ :global( {}
   > 2 │ :global() {}
       │         ^
     3 │ :global(.div, .class) {}
     4 │ :global(.div, .class {}
-
+  
 pseudo_class_function_selector.css:3:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a selector but instead found '.div, .class'.
-
+  
     1 │ :global( {}
     2 │ :global() {}
   > 3 │ :global(.div, .class) {}
       │         ^^^^^^^^^^^^
     4 │ :global(.div, .class {}
     5 │ :global(.div .class {}
-
+  
   i Expected a selector here.
-
+  
     1 │ :global( {}
     2 │ :global() {}
   > 3 │ :global(.div, .class) {}
       │         ^^^^^^^^^^^^
     4 │ :global(.div, .class {}
     5 │ :global(.div .class {}
-
+  
 pseudo_class_function_selector.css:4:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a selector but instead found '.div, .class'.
-
+  
     2 │ :global() {}
     3 │ :global(.div, .class) {}
   > 4 │ :global(.div, .class {}
       │         ^^^^^^^^^^^^
     5 │ :global(.div .class {}
     6 │ :global(.div .class
-
+  
   i Expected a selector here.
-
+  
     2 │ :global() {}
     3 │ :global(.div, .class) {}
   > 4 │ :global(.div, .class {}
       │         ^^^^^^^^^^^^
     5 │ :global(.div .class {}
     6 │ :global(.div .class
-
+  
 pseudo_class_function_selector.css:4:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `)` but instead found `{`
-
+  
     2 │ :global() {}
     3 │ :global(.div, .class) {}
   > 4 │ :global(.div, .class {}
       │                      ^
     5 │ :global(.div .class {}
     6 │ :global(.div .class
-
+  
   i Remove {
-
+  
 pseudo_class_function_selector.css:5:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `)` but instead found `{`
-
+  
     3 │ :global(.div, .class) {}
     4 │ :global(.div, .class {}
   > 5 │ :global(.div .class {}
       │                     ^
     6 │ :global(.div .class
-    7 │
-
+    7 │ 
+  
   i Remove {
-
+  
 pseudo_class_function_selector.css:7:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `)` but instead the file ends
-
+  
     5 │ :global(.div .class {}
     6 │ :global(.div .class
-  > 7 │
-      │
-
+  > 7 │ 
+      │ 
+  
   i the file ends here
-
+  
     5 │ :global(.div .class {}
     6 │ :global(.div .class
-  > 7 │
-      │
-
+  > 7 │ 
+      │ 
+  
 ```
 
 

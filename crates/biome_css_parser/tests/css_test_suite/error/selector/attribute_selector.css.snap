@@ -252,52 +252,52 @@ CssRoot {
 attribute_selector.css:3:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a s, a S, an i, or a I but instead found 'P'.
-
+  
     1 │ [ .class {}
-    2 │
+    2 │ 
   > 3 │ [title="foo" P] {}
       │              ^
-    4 │
+    4 │ 
     5 │ [title="foo" s {}
-
+  
   i Expected a s, a S, an i, or a I here.
-
+  
     1 │ [ .class {}
-    2 │
+    2 │ 
   > 3 │ [title="foo" P] {}
       │              ^
-    4 │
+    4 │ 
     5 │ [title="foo" s {}
-
+  
 attribute_selector.css:5:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `]` but instead found `{`
-
+  
     3 │ [title="foo" P] {}
-    4 │
+    4 │ 
   > 5 │ [title="foo" s {}
       │                ^
     6 │ [title="foo" s
-    7 │
-
+    7 │ 
+  
   i Remove {
-
+  
 attribute_selector.css:7:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `]` but instead the file ends
-
+  
     5 │ [title="foo" s {}
     6 │ [title="foo" s
-  > 7 │
-      │
-
+  > 7 │ 
+      │ 
+  
   i the file ends here
-
+  
     5 │ [title="foo" s {}
     6 │ [title="foo" s
-  > 7 │
-      │
-
+  > 7 │ 
+      │ 
+  
 ```
 
 

@@ -520,172 +520,172 @@ CssRoot {
 pseudo_class_function_compound_selector.css:1:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a compound selector but instead found '{'.
-
+  
   > 1 │ :host( {}
       │        ^
     2 │ :host() {}
     3 │ :host(.div, .class) {}
-
+  
   i Expected a compound selector here.
-
+  
   > 1 │ :host( {}
       │        ^
     2 │ :host() {}
     3 │ :host(.div, .class) {}
-
+  
 pseudo_class_function_compound_selector.css:2:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a compound selector but instead found ')'.
-
+  
     1 │ :host( {}
   > 2 │ :host() {}
       │       ^
     3 │ :host(.div, .class) {}
     4 │ :host(.div, .class {}
-
+  
   i Expected a compound selector here.
-
+  
     1 │ :host( {}
   > 2 │ :host() {}
       │       ^
     3 │ :host(.div, .class) {}
     4 │ :host(.div, .class {}
-
+  
 pseudo_class_function_compound_selector.css:3:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a compound selector but instead found '.div, .class'.
-
+  
     1 │ :host( {}
     2 │ :host() {}
   > 3 │ :host(.div, .class) {}
       │       ^^^^^^^^^^^^
     4 │ :host(.div, .class {}
     5 │ :host(.div .class) {}
-
+  
   i Expected a compound selector here.
-
+  
     1 │ :host( {}
     2 │ :host() {}
   > 3 │ :host(.div, .class) {}
       │       ^^^^^^^^^^^^
     4 │ :host(.div, .class {}
     5 │ :host(.div .class) {}
-
+  
 pseudo_class_function_compound_selector.css:4:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a compound selector but instead found '.div, .class'.
-
+  
     2 │ :host() {}
     3 │ :host(.div, .class) {}
   > 4 │ :host(.div, .class {}
       │       ^^^^^^^^^^^^
     5 │ :host(.div .class) {}
     6 │ :host(.div .class {}
-
+  
   i Expected a compound selector here.
-
+  
     2 │ :host() {}
     3 │ :host(.div, .class) {}
   > 4 │ :host(.div, .class {}
       │       ^^^^^^^^^^^^
     5 │ :host(.div .class) {}
     6 │ :host(.div .class {}
-
+  
 pseudo_class_function_compound_selector.css:4:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `)` but instead found `{`
-
+  
     2 │ :host() {}
     3 │ :host(.div, .class) {}
   > 4 │ :host(.div, .class {}
       │                    ^
     5 │ :host(.div .class) {}
     6 │ :host(.div .class {}
-
+  
   i Remove {
-
+  
 pseudo_class_function_compound_selector.css:5:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a compound selector but instead found '.div .class'.
-
+  
     3 │ :host(.div, .class) {}
     4 │ :host(.div, .class {}
   > 5 │ :host(.div .class) {}
       │       ^^^^^^^^^^^
     6 │ :host(.div .class {}
     7 │ :host(.div {}
-
+  
   i Expected a compound selector here.
-
+  
     3 │ :host(.div, .class) {}
     4 │ :host(.div, .class {}
   > 5 │ :host(.div .class) {}
       │       ^^^^^^^^^^^
     6 │ :host(.div .class {}
     7 │ :host(.div {}
-
+  
 pseudo_class_function_compound_selector.css:6:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a compound selector but instead found '.div .class'.
-
+  
     4 │ :host(.div, .class {}
     5 │ :host(.div .class) {}
   > 6 │ :host(.div .class {}
       │       ^^^^^^^^^^^
     7 │ :host(.div {}
     8 │ :host(.div
-
+  
   i Expected a compound selector here.
-
+  
     4 │ :host(.div, .class {}
     5 │ :host(.div .class) {}
   > 6 │ :host(.div .class {}
       │       ^^^^^^^^^^^
     7 │ :host(.div {}
     8 │ :host(.div
-
+  
 pseudo_class_function_compound_selector.css:6:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `)` but instead found `{`
-
+  
     4 │ :host(.div, .class {}
     5 │ :host(.div .class) {}
   > 6 │ :host(.div .class {}
       │                   ^
     7 │ :host(.div {}
     8 │ :host(.div
-
+  
   i Remove {
-
+  
 pseudo_class_function_compound_selector.css:7:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `)` but instead found `{`
-
+  
     5 │ :host(.div .class) {}
     6 │ :host(.div .class {}
   > 7 │ :host(.div {}
       │            ^
     8 │ :host(.div
-    9 │
-
+    9 │ 
+  
   i Remove {
-
+  
 pseudo_class_function_compound_selector.css:9:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `)` but instead the file ends
-
+  
     7 │ :host(.div {}
     8 │ :host(.div
-  > 9 │
-      │
-
+  > 9 │ 
+      │ 
+  
   i the file ends here
-
+  
     7 │ :host(.div {}
     8 │ :host(.div
-  > 9 │
-      │
-
+  > 9 │ 
+      │ 
+  
 ```
 
 

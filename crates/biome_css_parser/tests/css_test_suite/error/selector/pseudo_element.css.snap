@@ -285,14 +285,14 @@ CssRoot {
 pseudo_element.css:1:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unexpected value or character.
-
+  
   > 1 │ :: {}
       │    ^
-    2 │
+    2 │ 
     3 │ ::mark( {}
-
+  
   i Expected one of:
-
+  
   - after
   - backdrop
   - before
@@ -308,91 +308,91 @@ pseudo_element.css:1:4 parse ━━━━━━━━━━━━━━━━━
   - slotted
   - spelling-error
   - target-text
-
+  
 pseudo_element.css:3:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a selector but instead found '{'.
-
+  
     1 │ :: {}
-    2 │
+    2 │ 
   > 3 │ ::mark( {}
       │         ^
-    4 │
+    4 │ 
     5 │ ::mark( div {}
-
+  
   i Expected a selector here.
-
+  
     1 │ :: {}
-    2 │
+    2 │ 
   > 3 │ ::mark( {}
       │         ^
-    4 │
+    4 │ 
     5 │ ::mark( div {}
-
+  
 pseudo_element.css:5:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `)` but instead found `{`
-
+  
     3 │ ::mark( {}
-    4 │
+    4 │ 
   > 5 │ ::mark( div {}
       │             ^
-    6 │
+    6 │ 
     7 │ ::mark( + div {}
-
+  
   i Remove {
-
+  
 pseudo_element.css:7:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a selector but instead found '+ div'.
-
+  
     5 │ ::mark( div {}
-    6 │
+    6 │ 
   > 7 │ ::mark( + div {}
       │         ^^^^^
-    8 │
+    8 │ 
     9 │ ::highlight(div + div) {}
-
+  
   i Expected a selector here.
-
+  
     5 │ ::mark( div {}
-    6 │
+    6 │ 
   > 7 │ ::mark( + div {}
       │         ^^^^^
-    8 │
+    8 │ 
     9 │ ::highlight(div + div) {}
-
+  
 pseudo_element.css:7:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `)` but instead found `{`
-
+  
     5 │ ::mark( div {}
-    6 │
+    6 │ 
   > 7 │ ::mark( + div {}
       │               ^
-    8 │
+    8 │ 
     9 │ ::highlight(div + div) {}
-
+  
   i Remove {
-
+  
 pseudo_element.css:9:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an identifier but instead found 'div + div'.
-
+  
      7 │ ::mark( + div {}
-     8 │
+     8 │ 
    > 9 │ ::highlight(div + div) {}
        │             ^^^^^^^^^
-    10 │
-
+    10 │ 
+  
   i Expected an identifier here.
-
+  
      7 │ ::mark( + div {}
-     8 │
+     8 │ 
    > 9 │ ::highlight(div + div) {}
        │             ^^^^^^^^^
-    10 │
-
+    10 │ 
+  
 ```
 
 

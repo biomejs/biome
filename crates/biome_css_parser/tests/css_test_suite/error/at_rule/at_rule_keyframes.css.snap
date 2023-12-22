@@ -1100,24 +1100,24 @@ CssRoot {
 at_rule_keyframes.css:1:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an identifier but instead found '{'.
-
+  
   > 1 │ @keyframes {
       │            ^
     2 │ 	from {
     3 │ 		transform: translateX(0%);
-
+  
   i Expected an identifier here.
-
+  
   > 1 │ @keyframes {
       │            ^
     2 │ 	from {
     3 │ 		transform: translateX(0%);
-
+  
 at_rule_keyframes.css:12:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a keyframes item but instead found '{
     		transform: translateX('.
-
+  
     11 │ @keyframes slidein {
   > 12 │ 	{
        │ 	^
@@ -1125,9 +1125,9 @@ at_rule_keyframes.css:12:2 parse ━━━━━━━━━━━━━━━�
        │ 		^^^^^^^^^^^^^^^^^^^^^^
     14 │ 	}
     15 │ }
-
+  
   i Expected a keyframes item here.
-
+  
     11 │ @keyframes slidein {
   > 12 │ 	{
        │ 	^
@@ -1135,201 +1135,201 @@ at_rule_keyframes.css:12:2 parse ━━━━━━━━━━━━━━━�
        │ 		^^^^^^^^^^^^^^^^^^^^^^
     14 │ 	}
     15 │ }
-
+  
 at_rule_keyframes.css:13:27 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `)`
-
+  
     11 │ @keyframes slidein {
     12 │ 	{
   > 13 │ 		transform: translateX(0%);
        │ 		                        ^
     14 │ 	}
     15 │ }
-
+  
   i Remove )
-
+  
 at_rule_keyframes.css:18:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `:` but instead found `to`
-
+  
     17 │ @keyframes slidein {
   > 18 │ 	from to {
        │ 	     ^^
     19 │ 		transform: translateX(100%);
     20 │ 	}
-
+  
   i Remove to
-
+  
 at_rule_keyframes.css:18:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `;` but instead found `{`
-
+  
     17 │ @keyframes slidein {
   > 18 │ 	from to {
        │ 	        ^
     19 │ 		transform: translateX(100%);
     20 │ 	}
-
+  
   i Remove {
-
+  
 at_rule_keyframes.css:24:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unexpected value or character.
-
+  
     23 │ @keyframes slidein {
   > 24 │ 	100vh {
        │ 	   ^^
     25 │ 		transform: translateX(0%);
     26 │ 	}
-
+  
   i Expected one of:
-
+  
   - from
   - to
   - number
-
+  
 at_rule_keyframes.css:34:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `:` but instead found `{`
-
+  
   > 34 │ 	to {
        │ 	   ^
     35 │ 		transform: translateX(100%);
     36 │ 	}
-
+  
   i Remove {
-
+  
 at_rule_keyframes.css:41:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `transform`
-
+  
     39 │ @keyframes slidein {
     40 │ 	from
   > 41 │ 		transform: translateX(0%);
        │ 		^^^^^^^^^
     42 │ 	}
-    43 │
-
+    43 │ 
+  
   i Remove transform
-
+  
 at_rule_keyframes.css:41:25 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `0`
-
+  
     39 │ @keyframes slidein {
     40 │ 	from
   > 41 │ 		transform: translateX(0%);
        │ 		                      ^
     42 │ 	}
-    43 │
-
+    43 │ 
+  
   i Remove 0
-
+  
 at_rule_keyframes.css:41:27 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `)`
-
+  
     39 │ @keyframes slidein {
     40 │ 	from
   > 41 │ 		transform: translateX(0%);
        │ 		                        ^
     42 │ 	}
-    43 │
-
+    43 │ 
+  
   i Remove )
-
+  
 at_rule_keyframes.css:44:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `to`
-
+  
     42 │ 	}
-    43 │
+    43 │ 
   > 44 │ 	to {
        │ 	^^
     45 │ 		transform: translateX(100%);
     46 │ 	}
-
+  
   i Remove to
-
+  
 at_rule_keyframes.css:55:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `transform`
-
+  
     54 │ 	to
   > 55 │ 		transform: translateX(100%);
        │ 		^^^^^^^^^
     56 │ 	}
     57 │ }
-
+  
   i Remove transform
-
+  
 at_rule_keyframes.css:55:25 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `100`
-
+  
     54 │ 	to
   > 55 │ 		transform: translateX(100%);
        │ 		                      ^^^
     56 │ 	}
     57 │ }
-
+  
   i Remove 100
-
+  
 at_rule_keyframes.css:55:29 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `)`
-
+  
     54 │ 	to
   > 55 │ 		transform: translateX(100%);
        │ 		                          ^
     56 │ 	}
     57 │ }
-
+  
   i Remove )
-
+  
 at_rule_keyframes.css:60:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `:` but instead found `{`
-
+  
     59 │ @keyframes slidein {
   > 60 │ 	from {
        │ 	     ^
     61 │ 		transform: translateX(0%);
     62 │ 	}
-
+  
   i Remove {
-
+  
 at_rule_keyframes.css:69:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a keyframes item but instead found '@keyframes slidein'.
-
+  
     67 │ }
-    68 │
+    68 │ 
   > 69 │ @keyframes slidein
        │ ^^^^^^^^^^^^^^^^^^
-    70 │
-
+    70 │ 
+  
   i Expected a keyframes item here.
-
+  
     67 │ }
-    68 │
+    68 │ 
   > 69 │ @keyframes slidein
        │ ^^^^^^^^^^^^^^^^^^
-    70 │
-
+    70 │ 
+  
 at_rule_keyframes.css:72:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `}` but instead the file ends
-
-  > 72 │
-       │
-
+  
+  > 72 │ 
+       │ 
+  
   i the file ends here
-
-  > 72 │
-       │
-
+  
+  > 72 │ 
+       │ 
+  
 ```
 
 

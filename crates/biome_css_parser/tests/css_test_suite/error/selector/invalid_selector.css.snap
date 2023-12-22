@@ -84,30 +84,30 @@ CssRoot {
 invalid_selector.css:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a selector but instead found '!'.
-
+  
   > 1 │ !.selector {
       │ ^
-    2 │
+    2 │ 
     3 │ }
-
+  
   i Expected a selector here.
-
+  
   > 1 │ !.selector {
       │ ^
-    2 │
+    2 │ 
     3 │ }
-
+  
 invalid_selector.css:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `.`
-
+  
   > 1 │ !.selector {
       │  ^
-    2 │
+    2 │ 
     3 │ }
-
+  
   i Remove .
-
+  
 ```
 
 

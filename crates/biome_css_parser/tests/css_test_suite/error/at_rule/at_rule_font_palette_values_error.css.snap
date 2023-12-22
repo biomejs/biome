@@ -155,109 +155,109 @@ CssRoot {
 at_rule_font_palette_values_error.css:1:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an identifier but instead found '{'.
-
+  
   > 1 │ @font-palette-values  {  }
       │                       ^
     2 │ @font-palette-values 6788 {  }
     3 │ @font-palette-values 'string' {  }
-
+  
   i Expected an identifier here.
-
+  
   > 1 │ @font-palette-values  {  }
       │                       ^
     2 │ @font-palette-values 6788 {  }
     3 │ @font-palette-values 'string' {  }
-
+  
 at_rule_font_palette_values_error.css:2:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an identifier but instead found '6788'.
-
+  
     1 │ @font-palette-values  {  }
   > 2 │ @font-palette-values 6788 {  }
       │                      ^^^^
     3 │ @font-palette-values 'string' {  }
     4 │ @font-palette-values ident
-
+  
   i Expected an identifier here.
-
+  
     1 │ @font-palette-values  {  }
   > 2 │ @font-palette-values 6788 {  }
       │                      ^^^^
     3 │ @font-palette-values 'string' {  }
     4 │ @font-palette-values ident
-
+  
 at_rule_font_palette_values_error.css:3:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an identifier but instead found ''string''.
-
+  
     1 │ @font-palette-values  {  }
     2 │ @font-palette-values 6788 {  }
   > 3 │ @font-palette-values 'string' {  }
       │                      ^^^^^^^^
     4 │ @font-palette-values ident
     5 │ @font-palette-values ;
-
+  
   i Expected an identifier here.
-
+  
     1 │ @font-palette-values  {  }
     2 │ @font-palette-values 6788 {  }
   > 3 │ @font-palette-values 'string' {  }
       │                      ^^^^^^^^
     4 │ @font-palette-values ident
     5 │ @font-palette-values ;
-
+  
 at_rule_font_palette_values_error.css:5:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a body but instead found '@'.
-
+  
     3 │ @font-palette-values 'string' {  }
     4 │ @font-palette-values ident
   > 5 │ @font-palette-values ;
       │ ^
-    6 │
-
+    6 │ 
+  
   i Expected a body here.
-
+  
     3 │ @font-palette-values 'string' {  }
     4 │ @font-palette-values ident
   > 5 │ @font-palette-values ;
       │ ^
-    6 │
-
+    6 │ 
+  
 at_rule_font_palette_values_error.css:5:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected an identifier but instead found ';'.
-
+  
     3 │ @font-palette-values 'string' {  }
     4 │ @font-palette-values ident
   > 5 │ @font-palette-values ;
       │                      ^
-    6 │
-
+    6 │ 
+  
   i Expected an identifier here.
-
+  
     3 │ @font-palette-values 'string' {  }
     4 │ @font-palette-values ident
   > 5 │ @font-palette-values ;
       │                      ^
-    6 │
-
+    6 │ 
+  
 at_rule_font_palette_values_error.css:6:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a body but instead found the end of the file.
-
+  
     4 │ @font-palette-values ident
     5 │ @font-palette-values ;
-  > 6 │
-      │
-
+  > 6 │ 
+      │ 
+  
   i Expected a body here.
-
+  
     4 │ @font-palette-values ident
     5 │ @font-palette-values ;
-  > 6 │
-      │
-
+  > 6 │ 
+      │ 
+  
 ```
 
 

@@ -73,17 +73,17 @@ CssRoot {
 css_unfinished_block.css:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `}` but instead the file ends
-
+  
     1 │ .action {
-  > 2 │
-      │
-
+  > 2 │ 
+      │ 
+  
   i the file ends here
-
+  
     1 │ .action {
-  > 2 │
-      │
-
+  > 2 │ 
+      │ 
+  
 ```
 
 

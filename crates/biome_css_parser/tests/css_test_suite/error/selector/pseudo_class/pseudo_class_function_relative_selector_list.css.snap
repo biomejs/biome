@@ -614,192 +614,192 @@ CssRoot {
 pseudo_class_function_relative_selector_list.css:1:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a relative selector but instead found '{'.
-
+  
   > 1 │ :has( {}
       │       ^
     2 │ :has() {}
     3 │ :has(^invalid) {}
-
+  
   i Expected a relative selector here.
-
+  
   > 1 │ :has( {}
       │       ^
     2 │ :has() {}
     3 │ :has(^invalid) {}
-
+  
 pseudo_class_function_relative_selector_list.css:2:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a relative selector but instead found ''.
-
+  
     1 │ :has( {}
   > 2 │ :has() {}
-      │
+      │      
     3 │ :has(^invalid) {}
     4 │ :has(^invalid {}
-
+  
   i Expected a relative selector here.
-
+  
     1 │ :has( {}
   > 2 │ :has() {}
-      │
+      │      
     3 │ :has(^invalid) {}
     4 │ :has(^invalid {}
-
+  
 pseudo_class_function_relative_selector_list.css:3:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a relative selector but instead found '^'.
-
+  
     1 │ :has( {}
     2 │ :has() {}
   > 3 │ :has(^invalid) {}
       │      ^
     4 │ :has(^invalid {}
     5 │ :has(^invalid .class) {}
-
+  
   i Expected a relative selector here.
-
+  
     1 │ :has( {}
     2 │ :has() {}
   > 3 │ :has(^invalid) {}
       │      ^
     4 │ :has(^invalid {}
     5 │ :has(^invalid .class) {}
-
+  
 pseudo_class_function_relative_selector_list.css:4:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a relative selector but instead found '^'.
-
+  
     2 │ :has() {}
     3 │ :has(^invalid) {}
   > 4 │ :has(^invalid {}
       │      ^
     5 │ :has(^invalid .class) {}
     6 │ :has(.div .class,^invalid) {}
-
+  
   i Expected a relative selector here.
-
+  
     2 │ :has() {}
     3 │ :has(^invalid) {}
   > 4 │ :has(^invalid {}
       │      ^
     5 │ :has(^invalid .class) {}
     6 │ :has(.div .class,^invalid) {}
-
+  
 pseudo_class_function_relative_selector_list.css:4:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `)` but instead found `{`
-
+  
     2 │ :has() {}
     3 │ :has(^invalid) {}
   > 4 │ :has(^invalid {}
       │               ^
     5 │ :has(^invalid .class) {}
     6 │ :has(.div .class,^invalid) {}
-
+  
   i Remove {
-
+  
 pseudo_class_function_relative_selector_list.css:5:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a relative selector but instead found '^'.
-
+  
     3 │ :has(^invalid) {}
     4 │ :has(^invalid {}
   > 5 │ :has(^invalid .class) {}
       │      ^
     6 │ :has(.div .class,^invalid) {}
     7 │ :has(.div .class {}
-
+  
   i Expected a relative selector here.
-
+  
     3 │ :has(^invalid) {}
     4 │ :has(^invalid {}
   > 5 │ :has(^invalid .class) {}
       │      ^
     6 │ :has(.div .class,^invalid) {}
     7 │ :has(.div .class {}
-
+  
 pseudo_class_function_relative_selector_list.css:6:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a relative selector but instead found '^'.
-
+  
     4 │ :has(^invalid {}
     5 │ :has(^invalid .class) {}
   > 6 │ :has(.div .class,^invalid) {}
       │                  ^
     7 │ :has(.div .class {}
     8 │ :has(.div {}
-
+  
   i Expected a relative selector here.
-
+  
     4 │ :has(^invalid {}
     5 │ :has(^invalid .class) {}
   > 6 │ :has(.div .class,^invalid) {}
       │                  ^
     7 │ :has(.div .class {}
     8 │ :has(.div {}
-
+  
 pseudo_class_function_relative_selector_list.css:6:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a relative selector but instead found '.div .class,^invalid'.
-
+  
     4 │ :has(^invalid {}
     5 │ :has(^invalid .class) {}
   > 6 │ :has(.div .class,^invalid) {}
       │      ^^^^^^^^^^^^^^^^^^^^
     7 │ :has(.div .class {}
     8 │ :has(.div {}
-
+  
   i Expected a relative selector here.
-
+  
     4 │ :has(^invalid {}
     5 │ :has(^invalid .class) {}
   > 6 │ :has(.div .class,^invalid) {}
       │      ^^^^^^^^^^^^^^^^^^^^
     7 │ :has(.div .class {}
     8 │ :has(.div {}
-
+  
 pseudo_class_function_relative_selector_list.css:7:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `{`
-
+  
     5 │ :has(^invalid .class) {}
     6 │ :has(.div .class,^invalid) {}
   > 7 │ :has(.div .class {}
       │                  ^
     8 │ :has(.div {}
     9 │ :has(.div
-
+  
   i Remove {
-
+  
 pseudo_class_function_relative_selector_list.css:8:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `,` but instead found `{`
-
+  
      6 │ :has(.div .class,^invalid) {}
      7 │ :has(.div .class {}
    > 8 │ :has(.div {}
        │           ^
      9 │ :has(.div
-    10 │
-
+    10 │ 
+  
   i Remove {
-
+  
 pseudo_class_function_relative_selector_list.css:10:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `)` but instead the file ends
-
+  
      8 │ :has(.div {}
      9 │ :has(.div
-  > 10 │
-       │
-
+  > 10 │ 
+       │ 
+  
   i the file ends here
-
+  
      8 │ :has(.div {}
      9 │ :has(.div
-  > 10 │
-       │
-
+  > 10 │ 
+       │ 
+  
 ```
 
 
