@@ -84,7 +84,9 @@ const a = ["loreum", "ipsum"]
 ## `test4.css`
 
 ```css
-html {}
+html {
+}
+
 ```
 
 # Emitted Messages

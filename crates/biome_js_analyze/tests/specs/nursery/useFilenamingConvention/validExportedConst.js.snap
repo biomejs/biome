@@ -1,0 +1,11 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validExportedConst.js
+---
+# Input
+```js
+export const a = 0, { validExportedConst } = {};
+
+```
+
+

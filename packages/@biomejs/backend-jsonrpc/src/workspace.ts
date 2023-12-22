@@ -860,9 +860,17 @@ export interface Nursery {
 	 */
 	noImplicitAnyLet?: RuleConfiguration;
 	/**
+	 * Disallow the use of variables and function parameters before their declaration
+	 */
+	noInvalidUseBeforeDeclaration?: RuleConfiguration;
+	/**
 	 * Disallow characters made with multiple code points in character class syntax.
 	 */
 	noMisleadingCharacterClass?: RuleConfiguration;
+	/**
+	 * Forbid the use of Node.js builtin modules. Can be useful for client-side web projects that do not have access to those modules.
+	 */
+	noNodejsModules?: RuleConfiguration;
 	/**
 	 * Disallow unused imports.
 	 */
@@ -892,6 +900,10 @@ export interface Nursery {
 	 */
 	useExportType?: RuleConfiguration;
 	/**
+	 * Enforce naming conventions for JavaScript and TypeScript filenames.
+	 */
+	useFilenamingConvention?: RuleConfiguration;
+	/**
 	 * This rule recommends a for-of loop when in a for loop, the index used to extract an item from the iterated array.
 	 */
 	useForOf?: RuleConfiguration;
@@ -903,6 +915,10 @@ export interface Nursery {
 	 * Disallows package private imports.
 	 */
 	useImportRestrictions?: RuleConfiguration;
+	/**
+	 * Enforces using the node: protocol for Node.js builtin modules.
+	 */
+	useNodeImportProtocol?: RuleConfiguration;
 	/**
 	 * Enforce the use of the regular expression literals instead of the RegExp constructor if possible.
 	 */
@@ -1339,6 +1355,7 @@ export interface RuleWithOptions {
 }
 export type PossibleOptions =
 	| ComplexityOptions
+	| FilenamingConventionOptions
 	| HooksOptions
 	| NamingConventionOptions
 	| RestrictedGlobalsOptions
@@ -1351,6 +1368,19 @@ export interface ComplexityOptions {
 	 * The maximum complexity score that we allow. Anything higher is considered excessive.
 	 */
 	maxAllowedComplexity: number;
+}
+/**
+ * Rule's options.
+ */
+export interface FilenamingConventionOptions {
+	/**
+	 * Allowed cases for _TypeScript_ `enum` member names.
+	 */
+	filenameCases: FilenameCases;
+	/**
+	 * If `false`, then consecutive uppercase are allowed in _camel_ and _pascal_ cases. This does not affect other [Case].
+	 */
+	strictCase: boolean;
 }
 /**
  * Options for the rule `useExhaustiveDependencies` and `useHookAtTopLevel`
@@ -1387,6 +1417,7 @@ export interface ValidAriaRoleOptions {
 	allowedInvalidRoles: string[];
 	ignoreNonDom: boolean;
 }
+export type FilenameCases = FilenameCase[];
 export interface Hooks {
 	/**
 	* The "position" of the closure function, starting from zero.
@@ -1407,6 +1438,10 @@ export interface Hooks {
  * Supported cases for TypeScript `enum` member names.
  */
 export type EnumMemberCase = "PascalCase" | "CONSTANT_CASE" | "camelCase";
+/**
+ * Supported cases for TypeScript `enum` member names.
+ */
+export type FilenameCase = "camelCase" | "export" | "kebab-case" | "snake_case";
 export interface ProjectFeaturesParams {
 	manifest_path: RomePath;
 }
@@ -1585,7 +1620,9 @@ export type Category =
 	| "lint/nursery/noDuplicateJsonKeys"
 	| "lint/nursery/noEmptyBlockStatements"
 	| "lint/nursery/noImplicitAnyLet"
+	| "lint/nursery/noInvalidUseBeforeDeclaration"
 	| "lint/nursery/noMisleadingCharacterClass"
+	| "lint/nursery/noNodejsModules"
 	| "lint/nursery/noTypeOnlyImportAttributes"
 	| "lint/nursery/noUnusedImports"
 	| "lint/nursery/noUnusedPrivateClassMembers"
@@ -1594,9 +1631,11 @@ export type Category =
 	| "lint/nursery/useAwait"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useExportType"
+	| "lint/nursery/useFilenamingConvention"
 	| "lint/nursery/useForOf"
 	| "lint/nursery/useGroupedTypeImport"
 	| "lint/nursery/useImportRestrictions"
+	| "lint/nursery/useNodeImportProtocol"
 	| "lint/nursery/useRegexLiterals"
 	| "lint/nursery/useShorthandFunctionType"
 	| "lint/nursery/useValidAriaRole"

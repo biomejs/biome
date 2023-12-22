@@ -1,0 +1,114 @@
+[attr] {}
+
+[ attr   ] {}
+
+
+[  svg | a ] {}
+
+[ foo|att = val] {}
+
+[ *| att] {}
+
+[ |att] {}
+
+input[type="radio" i] {}
+img[alt~="person" i][src*="lorem" i] {}
+input[type="radio" s] {}
+img[alt~="person" s][src*="lorem" s] {}
+
+
+a[id = test] {}
+a[id= "test"] {}
+a[id = 'test'] {}
+a[id=  func("foo")] {}
+a[class=  "(╯°□°）╯︵ ┻━┻"  ]{}
+
+[lang] {}
+[ lang] {}
+[lang ] {}
+[ lang ] {}
+[  lang  ] {}
+[
+lang
+] {}
+span[lang] {}
+span[ lang] {}
+span[lang ] {}
+span[ lang ] {}
+span[  lang  ] {}
+span[lang='pt'] {}
+span[lang ='pt'] {}
+span[lang= 'pt'] {}
+span[lang = 'pt'] {}
+span[lang  =  'pt'] {}
+span[lang='pt' ] {}
+span[lang='pt'  ] {}
+span[
+lang
+=
+'pt'
+] {}
+span[ lang ~= 'en-us' ] {}
+span[  lang  ~=  'en-us'  ] {}
+span[ lang |='zh' ] {}
+span[
+lang
+~=
+'en-us'
+] {}
+a[ href ^= '#' ] {}
+a[ href *= 'example' ] {}
+a[
+href
+*=
+'example'
+] {}
+input[ type = 'radio' i ] {}
+input[  type  =  'radio'  i  ] {}
+input[ type ~= 'radio' i ] {}
+input[  type  ~=  'radio'  i  ] {}
+input[
+type
+~=
+'radio'
+i
+] {}
+img[ alt = 'person' ][ src = 'lorem' ] {}
+img[ alt  =  'person' ][ src  =  'lorem' ] {}
+img[ alt ~= 'person' ][ src *= 'lorem' ] {}
+img[  alt  ~=  'person'  ][  src  *=  'lorem'  ] {}
+img[
+alt
+~=
+'person'
+][
+src
+*=
+'lorem'
+] {}
+
+[foo|att=val] {}
+[ foo | att = val ] {}
+[  foo  |  att  =  val  ] {}
+[
+foo
+|
+att
+=
+val
+] {}
+[*|att] {}
+[ * | att ] {}
+[  *  |  att  ] {}
+[
+*
+|
+att
+] {}
+[|att] {}
+[ | att ] {}
+[  |  att  ] {}
+[
+|
+att
+] {}

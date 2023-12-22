@@ -12,9 +12,8 @@ use biome_js_syntax::{
     JsLogicalExpression, JsLogicalOperator,
 };
 use biome_rowan::{AstNode, Language, SyntaxNode, TextRange, WalkEvent};
-use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
-use std::{num::NonZeroU8, str::FromStr};
+use std::num::NonZeroU8;
 
 #[cfg(feature = "schemars")]
 use schemars::JsonSchema;
@@ -372,7 +371,7 @@ pub struct ComplexityScore {
 }
 
 /// Options for the rule `noExcessiveCognitiveComplexity`.
-#[derive(Deserialize, Serialize, Debug, Eq, PartialEq, Clone, Bpaf)]
+#[derive(Deserialize, Serialize, Debug, Eq, PartialEq, Clone)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct ComplexityOptions {
@@ -385,15 +384,6 @@ impl Default for ComplexityOptions {
         Self {
             max_allowed_complexity: NonZeroU8::new(15).unwrap(),
         }
-    }
-}
-
-// Required by [Bpaf].
-impl FromStr for ComplexityOptions {
-    type Err = ();
-
-    fn from_str(_s: &str) -> Result<Self, Self::Err> {
-        Ok(Self::default())
     }
 }
 

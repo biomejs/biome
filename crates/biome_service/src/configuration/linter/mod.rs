@@ -1,14 +1,14 @@
 #[rustfmt::skip]
 mod rules;
 
-pub use crate::configuration::linter::rules::{rules, Rules};
+pub use crate::configuration::linter::rules::Rules;
 use crate::configuration::merge::MergeWith;
 use crate::configuration::overrides::OverrideLinterConfiguration;
 use crate::settings::{to_matcher, LinterSettings};
 use crate::{Matcher, WorkspaceError};
 use biome_deserialize::StringSet;
 use biome_diagnostics::Severity;
-use biome_js_analyze::options::{possible_options, PossibleOptions};
+use biome_js_analyze::options::PossibleOptions;
 use bpaf::Bpaf;
 pub use rules::*;
 #[cfg(feature = "schema")]
@@ -28,7 +28,7 @@ pub struct LinterConfiguration {
 
     /// List of rules
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(external, optional, hide)]
+    #[bpaf(pure(Rules::default()), optional, hide)]
     pub rules: Option<Rules>,
 
     /// A list of Unix shell style patterns. The formatter will ignore files/folders that will
@@ -104,12 +104,12 @@ impl TryFrom<OverrideLinterConfiguration> for LinterSettings {
     }
 }
 
-#[derive(Deserialize, Serialize, Debug, Clone, Eq, PartialEq, Bpaf)]
+#[derive(Deserialize, Serialize, Debug, Clone, Eq, PartialEq)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, untagged)]
 pub enum RuleConfiguration {
     Plain(RulePlainConfiguration),
-    WithOptions(RuleWithOptions),
+    WithOptions(Box<RuleWithOptions>),
 }
 
 impl FromStr for RuleConfiguration {
@@ -170,7 +170,7 @@ impl From<&RulePlainConfiguration> for Severity {
     }
 }
 
-#[derive(Default, Deserialize, Serialize, Debug, Eq, PartialEq, Clone, Bpaf)]
+#[derive(Default, Deserialize, Serialize, Debug, Eq, PartialEq, Clone)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub enum RulePlainConfiguration {
@@ -193,13 +193,12 @@ impl FromStr for RulePlainConfiguration {
     }
 }
 
-#[derive(Default, Deserialize, Serialize, Debug, Eq, PartialEq, Clone, Bpaf)]
+#[derive(Default, Deserialize, Serialize, Debug, Eq, PartialEq, Clone)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct RuleWithOptions {
     pub level: RulePlainConfiguration,
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(external(possible_options), hide, optional)]
     pub options: Option<PossibleOptions>,
 }
 

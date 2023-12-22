@@ -14,13 +14,8 @@ use biome_parser::parsed_syntax::ParsedSyntax;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
 use biome_parser::{token_set, Parser, TokenSet};
 
-const PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR_LIST_SET: TokenSet<CssSyntaxKind> = token_set![
-    T![_moz_any],
-    T![_webkit_any],
-    T![past],
-    T![current],
-    T![future]
-];
+const PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR_LIST_SET: TokenSet<CssSyntaxKind> =
+    token_set![T![any], T![past], T![current], T![future]];
 
 #[inline]
 pub(crate) fn is_at_pseudo_class_function_compound_selector_list(p: &mut CssParser) -> bool {

@@ -36,6 +36,7 @@ is enabled to process only the files that were changed. Contributed by @simonxab
 - Fix [#805](https://github.com/biomejs/biome/issues/805), by correctly parsing these kind of patterns. Contributed by @ematipico
 - Fix [#1117](https://github.com/biomejs/biome/issues/1117) by correctly respecting the matching. Contributed by @ematipico
 - Fix [#1247](https://github.com/biomejs/biome/issues/1247), Biome now prints a **warning** diagnostic if it encounters files that can't handle. Contributed by @ematipico
+- Fix [#691](https://github.com/biomejs/biome/issues/691) and [#1190](https://github.com/biomejs/biome/issues/1190), by correctly apply the configuration when computing the overrides. Contributed by @ematipico
 
 ### Configuration
 
@@ -85,14 +86,29 @@ is enabled to process only the files that were changed. Contributed by @simonxab
   + export type { B }
   ```
 
+- Add [useFilenamingConvention](https://biomejs.dev/linter/rules/use-filenaming-convention), that enforces naming conventions for JavaScript and TypeScript filenames. Contributed by @Conaclos
+
+  By default, the rule requires that a filename be in `camelCase`, `kebab-case`, `snake_case`, or matches the name of an `export` in the file.
+  The rule provides options to restrict the allowed cases.
+
+- Add [noNodejsModules](https://biomejs.dev/linter/rules/no-nodejs-modules), that disallows the use of Node.js modules.
+
+- Add [useNodeImportProtocol](https://biomejs.dev/linter/rules/use-node-import-protocol) that forces the use of the `node:` protocol when importing Node.js modules. Contributed by @2-NOW
+
+- Add [noInvalidUseBeforeDeclaration](https://biomejs.dev/linter/rules/no-invalid-use-before-declaration) that reports variables and function parameters used before their declaration. Contributed by @Conaclos
+
+  ```js
+  function f() {
+    console.log(c); // Use of `c` before its declaration.
+    const c = 0;
+  }
+  ```
+
 #### Enhancements
 
-#### Bug fixes
+- Address [#959](https://github.com/biomejs/biome/issues/959) and [#1157](https://github.com/biomejs/biome/issues/1157). [noEmptyInterface](https://biomejs.dev/linter/rules/no-empty-interface) no longer reports empty interfaces that extend a type. Contributed by @Conaclos
 
-- Fix [#959](https://github.com/biomejs/biome/issues/959). [noEmptyInterface](https://biomejs.dev/linter/rules/no-empty-interface) no longer reports interface that extends a type and is in an external module or a global declaration. Contributed by @Conaclos
-
-  Empty interface that extends a type are sometimes used to extend an existing interface.
-  This is generally used to extend an interface of an external module.
+  This allows supporting interface augmentation in external modules as demonstrated in the following example:
 
   ```ts
   interface Extension {
@@ -100,9 +116,12 @@ is enabled to process only the files that were changed. Contributed by @simonxab
   }
 
   declare module "@external/module" {
+    // Empty interface that extends a type.
     export interface ExistingInterface extends Extension {}
   }
   ```
+
+#### Bug fixes
 
 - Fix [#1061](https://github.com/biomejs/biome/issues/1061). [noRedeclare](https://biomejs.dev/linter/rules/no-redeclare) no longer reports overloads of `export default function`. Contributed by @Conaclos
 

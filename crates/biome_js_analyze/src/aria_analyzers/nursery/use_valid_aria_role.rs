@@ -1,5 +1,3 @@
-use std::str::FromStr;
-
 use crate::{aria_services::Aria, JsRuleAction};
 use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
@@ -11,7 +9,6 @@ use biome_deserialize::{
 use biome_diagnostics::Applicability;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_rowan::{AstNode, BatchMutationExt};
-use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 
 declare_rule! {
@@ -79,22 +76,12 @@ declare_rule! {
     }
 }
 
-#[derive(Default, Deserialize, Serialize, Eq, PartialEq, Debug, Clone, Bpaf)]
+#[derive(Default, Deserialize, Serialize, Eq, PartialEq, Debug, Clone)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct ValidAriaRoleOptions {
-    #[bpaf(hide, argument::<String>("roles"), many)]
     allowed_invalid_roles: Vec<String>,
-    #[bpaf(hide)]
     ignore_non_dom: bool,
-}
-
-impl FromStr for ValidAriaRoleOptions {
-    type Err = ();
-
-    fn from_str(_s: &str) -> Result<Self, Self::Err> {
-        Ok(ValidAriaRoleOptions::default())
-    }
 }
 
 impl Deserializable for ValidAriaRoleOptions {

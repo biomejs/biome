@@ -1,0 +1,13 @@
+html {}
+
+div {}
+
+div span p {}
+
+div, span, p {}
+
+div span, span p {}
+
+nonstandard {}
+
+any-id {}

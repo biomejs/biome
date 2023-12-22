@@ -1,6 +1,6 @@
 ## Overall Metrics
 
-**Average compatibility**: 96.88
+**Average compatibility**: 97.03
 
 <details>
     <summary>Definition</summary>
@@ -8,7 +8,7 @@
     $$average = \frac\{\sum_{file}^\{files}compatibility_\{file}}\{files}$$
 </details>
 
-**Compatible lines**: 97.88
+**Compatible lines**: 98.01
 
 <details>
     <summary>Definition</summary>
@@ -349,80 +349,6 @@
 **Prettier Similarity**: 66.67%
 
 
-### js/comments/jsdoc-nestled-dangling.js
-```diff
- {
-   {
-     {
-       {
-         {
-           {
-             {
-               o = {
-                 /**
-                  * A
--                 *//**
-+                 */
-+                /**
-                  * B
-                  */
-               };
-             }
-           }
-         }
-       }
-     }
-   }
- }
-
-```
-
-**Prettier Similarity**: 90.91%
-
-
-### js/comments/jsdoc-nestled.js
-```diff
- const issues = {
-   see: "#7724 and #12653",
--  /** Trailing comment 1 (not nestled as both comments should be multiline for that) */ /**
-+  /** Trailing comment 1 (not nestled as both comments should be multiline for that) */
-+  /**
-    * Trailing comment 2
-    */
- };
- 
- /**
-  * @template T
-  * @param {Type} type
-  * @param {T} value
-  * @return {Value}
-- *//**
-+ */ /**
-  * @param {Type} type
-  * @return {Value}
-  */
- function value(type, value) {
-   if (arguments.length === 2) {
-     return new ConcreteValue(type, value);
-   } else {
-     return new Value(type);
-   }
- }
- 
- /** Trailing nestled comment 1
-- *//** Trailing nestled comment 2
-- *//** Trailing nestled comment 3
-  */
-+/** Trailing nestled comment 2
-+ */
-+/** Trailing nestled comment 3
-+ */
-
-```
-
-**Prettier Similarity**: 77.42%
-
-
 ### js/comments/multi-comments-on-same-line.js
 ```diff
  /*========= All on same line =========*/
@@ -733,45 +659,6 @@
 ```
 
 **Prettier Similarity**: 85.71%
-
-
-### js/comments/trailing-jsdocs.js
-```diff
- const CONNECTION_STATUS = (exports.CONNECTION_STATUS = {
-   CLOSED: Object.freeze({ kind: "CLOSED" }),
-   CONNECTED: Object.freeze({ kind: "CONNECTED" }),
-   CONNECTING: Object.freeze({ kind: "CONNECTING" }),
-   NOT_CONNECTED: Object.freeze({ kind: "NOT_CONNECTED" }),
- });
- 
--/* A comment */ /**
-+/* A comment */
-+/**
-  * A type that can be written to a buffer.
-- */ /**
-+ */
-+/**
-  * Describes the connection status of a ReactiveSocket/DuplexConnection.
-  * - NOT_CONNECTED: no connection established or pending.
-  * - CONNECTING: when `connect()` has been called but a connection is not yet
-  *   established.
-  * - CONNECTED: when a connection is established.
-  * - CLOSED: when the connection has been explicitly closed via `close()`.
-  * - ERROR: when the connection has been closed for any other reason.
-- */ /**
-+ */
-+/**
-  * A contract providing different interaction models per the [ReactiveSocket protocol]
-  * (https://github.com/ReactiveSocket/reactivesocket/blob/master/Protocol.md).
-- */ /**
-+ */
-+/**
-  * A single unit of data exchanged between the peers of a `ReactiveSocket`.
-  */
-
-```
-
-**Prettier Similarity**: 70.37%
 
 
 ### js/conditional/comments.js
@@ -1650,25 +1537,6 @@
 ```
 
 **Prettier Similarity**: 0.00%
-
-
-### js/strings/escaped.js
-```diff
-+// FIXME
-+// TODO: reformat issue
- export const MSG_GENERIC_OPERATION_FAILURE_BODY_1 =
-   goog.getMsg("That's all we know");
- 
--export const MSG_GENERIC_OPERATION_FAILURE_BODY_2 =
--  goog.getMsg("That's all we know");
-+// FIXME
-+// TODO: reformat issue
-+// export const MSG_GENERIC_OPERATION_FAILURE_BODY_2 =
-+//   goog.getMsg("That\'s all we know");
-
-```
-
-**Prettier Similarity**: 33.33%
 
 
 ### js/switch/comments2.js
@@ -3272,94 +3140,6 @@
 ```
 
 **Prettier Similarity**: 27.87%
-
-
-### typescript/mapped-type/break-mode/break-mode.ts
-```diff
- type A1 = { readonly [A in B]: T };
--type A2 = {
--  readonly [A in B]: T;
--};
-+type A2 = { readonly [A in B]: T };
- type A3 = {
-   readonly [A in B]: T;
- };
--type A4 = {
-+type A4 = { readonly [A in B]: T };
-+type A5 = { readonly [A in B]: T };
-+type A6 = { readonly [A in B]: T };
-+type A7 = {
-   readonly [A in B]: T;
- };
--type A5 = { readonly [A in B]: T };
--type A6 = { readonly [A in B]: T };
--type A7 = { readonly [A in B]: T };
-
-```
-
-**Prettier Similarity**: 46.15%
-
-
-### typescript/mapped-type/issue-11098.ts
-```diff
- type Type = {
-   // comment
-   readonly [T in number];
- };
- 
- type Type = {
-   // comment1
-   // comment2
-   readonly [T in number];
- };
- 
- type Type = {
-   // comment
-   +readonly [T in number];
- };
- 
- type Type = {
-   // comment
-   -readonly [T in number];
- };
- 
- type Type = {
-   // comment
-   +readonly [T in number];
- };
- 
- type Type = {
-   // comment
-   +readonly [T in number];
- };
- 
- type Type = {
-   // comment
-   readonly [T in number];
- };
- 
- type Type = {
-   // comment
-   [T in number];
- };
- 
- type Type = {
--  // comment
--  readonly [T in number];
-+  readonly // comment
-+  [T in number];
- };
- 
- type Type = {
--  // foo
--  /* bar */ readonly [T in number];
-+  readonly // foo
-+  /* bar */ [T in number];
- };
-
-```
-
-**Prettier Similarity**: 92.00%
 
 
 ### typescript/multiparser-css/issue-6259.ts

@@ -1,0 +1,24 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: InvalidPascalCase.js
+---
+# Input
+```js
+export const PascalCase = {};
+```
+
+# Diagnostics
+```
+InvalidPascalCase.js lint/nursery/useFilenamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The filename should be in camelCase or kebab-case or snake_case or equal to the name of an export.
+  
+  i The filename could be renamed to one of the following names:
+    invalid-pascal-case.js
+    invalid_pascal_case.js
+    invalidPascalCase.js
+  
+
+```
+
+
