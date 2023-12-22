@@ -15,7 +15,9 @@ expression: content
 ## `input.css`
 
 ```css
-html {}
+html {
+}
+
 ```
 
 ## `input.js`
