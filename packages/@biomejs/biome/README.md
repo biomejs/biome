@@ -25,6 +25,12 @@
 
 </div>
 
+<div align="center">
+
+English | [简体中文](./packages/%40biomejs/biome/README.zh-CN.md) | [日本語](./packages/%40biomejs/biome/README.ja.md) | [Português do Brasil](./packages/%40biomejs/biome/README.pt-br.md)
+
+</div>
+
 **Biome** is a performant toolchain for web projects, it aims to provide developer tools to maintain the health of said projects.
 
 **Biome is a [fast formatter](./benchmark#formatting)** for _JavaScript_, _TypeScript_, _JSX_, and _JSON_ that scores **[96% compatibility with _Prettier_](https://console.algora.io/challenges/prettier)**.
@@ -108,13 +114,6 @@ Read more about our [project philosophy][biome-philosophy].
     </tr>
   </tbody>
 </table>
-
-## Translations
-
-- English
-- [简体中文](./packages/%40biomejs/biome/README.zh-CN.md)
-- [日本語](./packages/%40biomejs/biome/README.ja.md)
-- [Português do Brasil](./packages/%40biomejs/biome/README.pt-br.md)
 
 [biomejs]: https://biomejs.dev/
 [biome-philosophy]: https://biomejs.dev/internals/philosophy/
