@@ -270,7 +270,7 @@ fn dimension() {
     assert_lex! {
         "100vh",
         CSS_NUMBER_LITERAL:3,
-        IDENT:2
+        VH_KW:2
     }
 }
 
@@ -285,6 +285,14 @@ fn keywords() {
         IMPORTANT_KW:9,
         WHITESPACE:1,
         FROM_KW:4
+    }
+}
+
+#[test]
+fn attribute() {
+    assert_lex! {
+        "$=",
+        DOLLAR_EQ:2
     }
 }
 

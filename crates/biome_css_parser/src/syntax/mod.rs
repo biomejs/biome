@@ -271,11 +271,10 @@ pub(crate) fn parse_custom_property(p: &mut CssParser) -> ParsedSyntax {
 
 #[inline]
 pub(crate) fn is_at_any_function(p: &mut CssParser) -> bool {
-    p.at(T![ident]) && p.nth_at(1, T!['('])
+    is_at_identifier(p) && p.nth_at(1, T!['('])
 }
 
-#[derive(Default)]
-pub(crate) struct CssParameterList {}
+pub(crate) struct CssParameterList;
 
 impl ParseSeparatedList for CssParameterList {
     type Kind = CssSyntaxKind;
@@ -325,18 +324,19 @@ pub(crate) fn parse_parameter(p: &mut CssParser) -> ParsedSyntax {
 
 #[inline]
 pub(crate) fn parse_any_function(p: &mut CssParser) -> ParsedSyntax {
-    if is_at_any_function(p) {
-        let m = p.start();
-        let simple_fn = p.start();
-        parse_regular_identifier(p).or_add_diagnostic(p, expected_identifier);
-        p.eat(T!['(']);
-        CssParameterList::default().parse_list(p);
-        p.expect(T![')']);
-        simple_fn.complete(p, CSS_SIMPLE_FUNCTION);
-
-        return Present(m.complete(p, CSS_ANY_FUNCTION));
+    if !is_at_any_function(p) {
+        return Absent;
     }
-    Absent
+
+    let m = p.start();
+    let simple_fn = p.start();
+    parse_regular_identifier(p).or_add_diagnostic(p, expected_identifier);
+    p.eat(T!['(']);
+    CssParameterList.parse_list(p);
+    p.expect(T![')']);
+    simple_fn.complete(p, CSS_SIMPLE_FUNCTION);
+
+    Present(m.complete(p, CSS_ANY_FUNCTION))
 }
 
 #[inline]

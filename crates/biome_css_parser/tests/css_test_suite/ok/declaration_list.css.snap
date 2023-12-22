@@ -39,6 +39,13 @@ a {
     prop1: --custom;
 }
 
+div {
+	flex: 1 1 auto !important;
+}
+
+div {
+	border-bottom-left-radius: var(--bs-border-radius-xxl) !important;
+}
 
 ```
 
@@ -410,17 +417,112 @@ CssRoot {
                 r_curly_token: R_CURLY@214..216 "}" [Newline("\n")] [],
             },
         },
+        CssRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selector_token: missing (optional),
+                    simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
+                        ident: CssIdentifier {
+                            value_token: IDENT@216..222 "div" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+                        },
+                    },
+                    sub_selectors: CssSubSelectorList [],
+                },
+            ],
+            block: CssDeclarationListBlock {
+                l_curly_token: L_CURLY@222..223 "{" [] [],
+                declaration_list: CssDeclarationList [
+                    CssDeclaration {
+                        name: CssIdentifier {
+                            value_token: IDENT@223..229 "flex" [Newline("\n"), Whitespace("\t")] [],
+                        },
+                        colon_token: COLON@229..231 ":" [] [Whitespace(" ")],
+                        value: CssComponentValueList [
+                            CssNumber {
+                                value_token: CSS_NUMBER_LITERAL@231..233 "1" [] [Whitespace(" ")],
+                            },
+                            CssNumber {
+                                value_token: CSS_NUMBER_LITERAL@233..235 "1" [] [Whitespace(" ")],
+                            },
+                            CssIdentifier {
+                                value_token: IDENT@235..240 "auto" [] [Whitespace(" ")],
+                            },
+                        ],
+                        important: CssDeclarationImportant {
+                            excl_token: BANG@240..241 "!" [] [],
+                            important_token: IMPORTANT_KW@241..250 "important" [] [],
+                        },
+                    },
+                    SEMICOLON@250..251 ";" [] [],
+                ],
+                r_curly_token: R_CURLY@251..253 "}" [Newline("\n")] [],
+            },
+        },
+        CssRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selector_token: missing (optional),
+                    simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
+                        ident: CssIdentifier {
+                            value_token: IDENT@253..259 "div" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+                        },
+                    },
+                    sub_selectors: CssSubSelectorList [],
+                },
+            ],
+            block: CssDeclarationListBlock {
+                l_curly_token: L_CURLY@259..260 "{" [] [],
+                declaration_list: CssDeclarationList [
+                    CssDeclaration {
+                        name: CssIdentifier {
+                            value_token: IDENT@260..287 "border-bottom-left-radius" [Newline("\n"), Whitespace("\t")] [],
+                        },
+                        colon_token: COLON@287..289 ":" [] [Whitespace(" ")],
+                        value: CssComponentValueList [
+                            CssAnyFunction {
+                                css_simple_function: CssSimpleFunction {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@289..292 "var" [] [],
+                                    },
+                                    l_paren_token: L_PAREN@292..293 "(" [] [],
+                                    items: CssParameterList [
+                                        CssParameter {
+                                            css_component_value_list: CssComponentValueList [
+                                                CssCustomProperty {
+                                                    value: CssIdentifier {
+                                                        value_token: IDENT@293..315 "--bs-border-radius-xxl" [] [],
+                                                    },
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                    r_paren_token: R_PAREN@315..317 ")" [] [Whitespace(" ")],
+                                },
+                            },
+                        ],
+                        important: CssDeclarationImportant {
+                            excl_token: BANG@317..318 "!" [] [],
+                            important_token: IMPORTANT_KW@318..327 "important" [] [],
+                        },
+                    },
+                    SEMICOLON@327..328 ";" [] [],
+                ],
+                r_curly_token: R_CURLY@328..330 "}" [Newline("\n")] [],
+            },
+        },
     ],
-    eof_token: EOF@216..218 "" [Newline("\n"), Newline("\n")] [],
+    eof_token: EOF@330..331 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..218
+0: CSS_ROOT@0..331
   0: (empty)
-  1: CSS_RULE_LIST@0..216
+  1: CSS_RULE_LIST@0..330
     0: CSS_RULE@0..41
       0: CSS_SELECTOR_LIST@0..2
         0: CSS_COMPOUND_SELECTOR@0..2
@@ -658,7 +760,69 @@ CssRoot {
             3: (empty)
           1: SEMICOLON@213..214 ";" [] []
         2: R_CURLY@214..216 "}" [Newline("\n")] []
-  2: EOF@216..218 "" [Newline("\n"), Newline("\n")] []
+    8: CSS_RULE@216..253
+      0: CSS_SELECTOR_LIST@216..222
+        0: CSS_COMPOUND_SELECTOR@216..222
+          0: (empty)
+          1: CSS_TYPE_SELECTOR@216..222
+            0: (empty)
+            1: CSS_IDENTIFIER@216..222
+              0: IDENT@216..222 "div" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+          2: CSS_SUB_SELECTOR_LIST@222..222
+      1: CSS_DECLARATION_LIST_BLOCK@222..253
+        0: L_CURLY@222..223 "{" [] []
+        1: CSS_DECLARATION_LIST@223..251
+          0: CSS_DECLARATION@223..250
+            0: CSS_IDENTIFIER@223..229
+              0: IDENT@223..229 "flex" [Newline("\n"), Whitespace("\t")] []
+            1: COLON@229..231 ":" [] [Whitespace(" ")]
+            2: CSS_COMPONENT_VALUE_LIST@231..240
+              0: CSS_NUMBER@231..233
+                0: CSS_NUMBER_LITERAL@231..233 "1" [] [Whitespace(" ")]
+              1: CSS_NUMBER@233..235
+                0: CSS_NUMBER_LITERAL@233..235 "1" [] [Whitespace(" ")]
+              2: CSS_IDENTIFIER@235..240
+                0: IDENT@235..240 "auto" [] [Whitespace(" ")]
+            3: CSS_DECLARATION_IMPORTANT@240..250
+              0: BANG@240..241 "!" [] []
+              1: IMPORTANT_KW@241..250 "important" [] []
+          1: SEMICOLON@250..251 ";" [] []
+        2: R_CURLY@251..253 "}" [Newline("\n")] []
+    9: CSS_RULE@253..330
+      0: CSS_SELECTOR_LIST@253..259
+        0: CSS_COMPOUND_SELECTOR@253..259
+          0: (empty)
+          1: CSS_TYPE_SELECTOR@253..259
+            0: (empty)
+            1: CSS_IDENTIFIER@253..259
+              0: IDENT@253..259 "div" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+          2: CSS_SUB_SELECTOR_LIST@259..259
+      1: CSS_DECLARATION_LIST_BLOCK@259..330
+        0: L_CURLY@259..260 "{" [] []
+        1: CSS_DECLARATION_LIST@260..328
+          0: CSS_DECLARATION@260..327
+            0: CSS_IDENTIFIER@260..287
+              0: IDENT@260..287 "border-bottom-left-radius" [Newline("\n"), Whitespace("\t")] []
+            1: COLON@287..289 ":" [] [Whitespace(" ")]
+            2: CSS_COMPONENT_VALUE_LIST@289..317
+              0: CSS_ANY_FUNCTION@289..317
+                0: CSS_SIMPLE_FUNCTION@289..317
+                  0: CSS_IDENTIFIER@289..292
+                    0: IDENT@289..292 "var" [] []
+                  1: L_PAREN@292..293 "(" [] []
+                  2: CSS_PARAMETER_LIST@293..315
+                    0: CSS_PARAMETER@293..315
+                      0: CSS_COMPONENT_VALUE_LIST@293..315
+                        0: CSS_CUSTOM_PROPERTY@293..315
+                          0: CSS_IDENTIFIER@293..315
+                            0: IDENT@293..315 "--bs-border-radius-xxl" [] []
+                  3: R_PAREN@315..317 ")" [] [Whitespace(" ")]
+            3: CSS_DECLARATION_IMPORTANT@317..327
+              0: BANG@317..318 "!" [] []
+              1: IMPORTANT_KW@318..327 "important" [] []
+          1: SEMICOLON@327..328 ";" [] []
+        2: R_CURLY@328..330 "}" [Newline("\n")] []
+  2: EOF@330..331 "" [Newline("\n")] []
 
 ```
 
