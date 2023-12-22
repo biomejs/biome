@@ -1,0 +1,68 @@
+@container name   not (width <= 500px) {  }
+
+@container my-layout  (   inline-size  >   45em) {  }
+
+@container card (inline-size > 30em)   or  style(--responsive: true) {  }
+@container card (inline-size > 30em)   
+
+and
+  style(--responsive: true) {  }
+  
+@container card 
+(
+    inline-size
+     > 
+     30em
+     )   
+
+  and
+
+    style(
+        --responsive:
+         true) {  }
+
+@container (
+    
+inline-size 
+
+>=   0px
+) { }
+
+@container card
+
+( 
+    inline-size > 
+30em  )  and (inline-size < 
+45em
+) {  }
+
+@container (
+    100px >
+     width   >
+      150px  ) {  }
+
+@container (not  (  width   <= 150px ) ) {  }
+
+@container (  ( 
+    width 
+    <= 150px)  ) {  }
+
+@container (
+    min-width: 700px) {  }
+
+@container sidebar (min-width: 400px) {  }
+
+@container test style(
+    --responsive: true
+    ) {  }
+
+@container style(--responsive: true) {  }
+
+@container card (inline-size > 30em) {  }
+
+@container style(--responsive: true) {  }
+
+@container(inline-size>=calc(200px)) { }
+
+@container ( WIDTH <= 150px ) {  }
+@container ( 150px <= WIDTH ) {  }

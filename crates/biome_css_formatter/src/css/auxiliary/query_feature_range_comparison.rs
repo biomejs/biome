@@ -1,6 +1,7 @@
 use crate::prelude::*;
-use biome_css_syntax::CssQueryFeatureRangeComparison;
-use biome_rowan::AstNode;
+use biome_css_syntax::{CssQueryFeatureRangeComparison, CssQueryFeatureRangeComparisonFields};
+use biome_formatter::write;
+
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatCssQueryFeatureRangeComparison;
 impl FormatNodeRule<CssQueryFeatureRangeComparison> for FormatCssQueryFeatureRangeComparison {
@@ -9,6 +10,8 @@ impl FormatNodeRule<CssQueryFeatureRangeComparison> for FormatCssQueryFeatureRan
         node: &CssQueryFeatureRangeComparison,
         f: &mut CssFormatter,
     ) -> FormatResult<()> {
-        format_verbatim_node(node.syntax()).fmt(f)
+        let CssQueryFeatureRangeComparisonFields { operator } = node.as_fields();
+
+        write!(f, [operator.format()])
     }
 }
