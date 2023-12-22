@@ -316,7 +316,7 @@ fn process_messages(options: ProcessMessagesOptions) {
     let mut is_msg_open = true;
     let mut is_report_open = true;
     let mut diagnostics_to_print = vec![];
-    dbg!(diagnostic_level);
+
     while is_msg_open || is_report_open {
         let msg = select! {
             recv(recv_msgs) -> msg => match msg {
@@ -629,7 +629,6 @@ fn process_messages(options: ProcessMessagesOptions) {
         })
     }
 
-    dbg!(not_printed_diagnostics);
     if !mode.is_ci() && not_printed_diagnostics > 0 {
         console.log(markup! {
             <Warn>"The number of diagnostics exceeds the number allowed by Biome.\n"</Warn>
