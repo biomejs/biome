@@ -12,16 +12,13 @@ use crate::syntax::parse_error::{expected_block, expected_express};
 use crate::syntax::selector::CssSelectorList;
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
-use biome_parser::lexer::LexContext;
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
 use biome_parser::parse_recovery::{ParseRecovery, RecoveryResult};
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::{token_set, CompletedMarker, Parser, ParserProgress, TokenSet};
 
-use self::parse_error::{
-    expected_component_value, expected_declaration_item, expected_number, expected_url_value,
-};
+use self::parse_error::{expected_component_value, expected_declaration_item, expected_number};
 
 const RULE_RECOVERY_SET: TokenSet<CssSyntaxKind> =
     token_set![T![#], T![.], T![*], T![ident], T![:], T![::], T!['{']];
@@ -310,7 +307,7 @@ pub(crate) fn parse_parameter(p: &mut CssParser) -> ParsedSyntax {
         return Absent;
     }
     let param = p.start();
-   
+
     parse_any_express(p).ok();
     Present(param.complete(p, CSS_PARAMETER))
 }
@@ -344,7 +341,7 @@ pub(crate) fn parse_any_express(p: &mut CssParser) -> ParsedSyntax {
             .precede(p);
         return Present(m.complete(p, CSS_LIST_OF_COMPONENT_VALUES_EXPRESS));
     }
-    return param;
+    param
 }
 
 #[inline]
@@ -377,7 +374,7 @@ pub(crate) fn parse_any_function(p: &mut CssParser) -> ParsedSyntax {
     if is_url_function(p) {
         return parse_url_function(p);
     }
-    return parse_simple_function(p);
+    parse_simple_function(p)
 }
 
 fn parse_simple_function(p: &mut CssParser<'_>) -> ParsedSyntax {
@@ -403,7 +400,7 @@ pub(crate) fn parse_url_function(p: &mut CssParser) -> ParsedSyntax {
     let url_fn = p.start();
     p.expect(T![url]);
     p.expect_with_context(T!['('], CssLexContext::UrlRawValue);
-    parse_url_value_raw(p);
+    parse_url_value_raw(p).ok();
     p.expect(T![')']);
     Present(url_fn.complete(p, CSS_URL_FUNCTION))
 }

@@ -10,9 +10,6 @@ pub(crate) fn expected_identifier(p: &CssParser, range: TextRange) -> ParseDiagn
 pub(crate) fn expected_express(p: &CssParser, range: TextRange) -> ParseDiagnostic {
     expected_node("express", range, p)
 }
-pub(crate) fn expected_url_value(p: &CssParser, range: TextRange) -> ParseDiagnostic {
-    expected_node("url", range, p)
-}
 
 pub(crate) fn expected_number(p: &CssParser, range: TextRange) -> ParseDiagnostic {
     expected_node("number", range, p)

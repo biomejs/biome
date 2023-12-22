@@ -28,7 +28,10 @@ impl CssSyntaxKind {
     pub fn is_trivia(self) -> bool {
         matches!(
             self,
-            CssSyntaxKind::NEWLINE | CssSyntaxKind::WHITESPACE | CssSyntaxKind::COMMENT | CssSyntaxKind::MULTILINE_COMMENT
+            CssSyntaxKind::NEWLINE
+                | CssSyntaxKind::WHITESPACE
+                | CssSyntaxKind::COMMENT
+                | CssSyntaxKind::MULTILINE_COMMENT
         )
     }
 

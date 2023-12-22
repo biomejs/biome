@@ -231,7 +231,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "to",
         "var",
         "font-face",
-        "url"
+        "url",
     ],
     literals: &[
         "CSS_STRING_LITERAL",
@@ -239,7 +239,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_CUSTOM_PROPERTY",
         "CSS_SPACE_LITERAL",
         "CSS_URL_VALUE_RAW_LITERAL",
-        "CSS_COLOR_LITERAL"
+        "CSS_COLOR_LITERAL",
     ],
     tokens: &[
         "ERROR_TOKEN",
