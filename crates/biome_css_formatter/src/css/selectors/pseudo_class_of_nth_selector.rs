@@ -12,9 +12,9 @@ impl FormatNodeRule<CssPseudoClassOfNthSelector> for FormatCssPseudoClassOfNthSe
     ) -> FormatResult<()> {
         let CssPseudoClassOfNthSelectorFields {
             of_token,
-            selector_list,
+            selectors,
         } = node.as_fields();
 
-        write!(f, [of_token.format(), space(), selector_list.format()])
+        write!(f, [of_token.format(), space(), selectors.format()])
     }
 }

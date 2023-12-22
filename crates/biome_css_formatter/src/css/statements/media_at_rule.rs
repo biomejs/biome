@@ -8,7 +8,7 @@ impl FormatNodeRule<CssMediaAtRule> for FormatCssMediaAtRule {
     fn fmt_fields(&self, node: &CssMediaAtRule, f: &mut CssFormatter) -> FormatResult<()> {
         let CssMediaAtRuleFields {
             media_token,
-            query_list,
+            queries,
             block,
         } = node.as_fields();
 
@@ -36,7 +36,7 @@ impl FormatNodeRule<CssMediaAtRule> for FormatCssMediaAtRule {
                 // 	     all and (min-device-pixel-ratio: 1.5)
                 //   {
                 //   }
-                group(&indent(&query_list.format())),
+                group(&indent(&queries.format())),
                 space(),
                 block.format()
             ]
