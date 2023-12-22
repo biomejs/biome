@@ -7,9 +7,9 @@ use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use crate::syntax::at_rule::{at_at_rule, parse_at_rule};
 use crate::syntax::css_dimension::{is_at_any_dimension, parse_any_dimension};
+use crate::syntax::parse_error::expected_any_at_rule;
 use crate::syntax::parse_error::expected_identifier;
 use crate::syntax::parse_error::{expected_block, expected_express};
-use crate::syntax::parse_error::expected_any_at_rule;
 use crate::syntax::selector::CssSelectorList;
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
@@ -333,7 +333,6 @@ pub(crate) fn is_parameter(p: &mut CssParser) -> bool {
 pub(crate) fn is_css_parenthesized(p: &mut CssParser) -> bool {
     p.at(T!['('])
 }
-
 
 #[inline]
 pub(crate) fn parse_parameter(p: &mut CssParser) -> ParsedSyntax {

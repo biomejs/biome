@@ -6,9 +6,7 @@ use biome_formatter::write;
 pub(crate) struct FormatCssParameter;
 impl FormatNodeRule<CssParameter> for FormatCssParameter {
     fn fmt_fields(&self, node: &CssParameter, f: &mut CssFormatter) -> FormatResult<()> {
-        let CssParameterFields {
-            any_css_parameter,
-        } = node.as_fields();
+        let CssParameterFields { any_css_parameter } = node.as_fields();
 
         write!(f, [any_css_parameter.format()])
     }

@@ -525,9 +525,7 @@ impl<'src> CssLexer<'src> {
     fn consume_color_token(&mut self, current: u8) -> CssSyntaxKind {
         match current {
             b'#' => self.consume_byte(T![#]),
-            b'0'..=b'9' | b'a'..=b'f' | b'A'..=b'F' => {
-                return self.consume_color();
-            }
+            b'0'..=b'9' | b'a'..=b'f' | b'A'..=b'F' => self.consume_color(),
             _ => self.consume_token(current),
         }
     }
