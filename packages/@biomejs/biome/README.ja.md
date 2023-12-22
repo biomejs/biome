@@ -25,6 +25,12 @@
 
 </div>
 
+<div align="center">
+
+[English](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.md) | [简体中文](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.zh-CN.md) | 日本語 | [Português do Brasil](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.pt-br.md)
+
+</div>
+
 **Biome** はWebプロジェクトのための高性能なツールチェーンであり、プロジェクトの健全性を維持するための開発者ツールの提供を目的としています。
 
 **Biome は _JavaScript_, _TypeScript_, _JSX_ そして _JSON_ 向けの[高速なFormatter](./benchmark#formatting)**であり、**[_Prettier_ との互換性は97%](https://console.algora.io/challenges/prettier)** を達成しています。
@@ -106,13 +112,6 @@ Biome についてもっと知るために[ホームページ][biomejs]をチェ
     </tr>
   </tbody>
 </table>
-
-## 翻訳
-
-- [English](./README.md)
-- [简体中文](./README.zh-CN.md)
-- 日本語
-- [Português do Brasil](./README.pt-br.md)
 
 [biomejs]: https://biomejs.dev/ja/
 [biome-philosophy]: https://biomejs.dev/ja/internals/philosophy/
