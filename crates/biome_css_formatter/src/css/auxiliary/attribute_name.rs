@@ -1,10 +1,13 @@
 use crate::prelude::*;
-use biome_css_syntax::CssAttributeName;
-use biome_rowan::AstNode;
+use biome_css_syntax::{CssAttributeName, CssAttributeNameFields};
+use biome_formatter::write;
+
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatCssAttributeName;
 impl FormatNodeRule<CssAttributeName> for FormatCssAttributeName {
     fn fmt_fields(&self, node: &CssAttributeName, f: &mut CssFormatter) -> FormatResult<()> {
-        format_verbatim_node(node.syntax()).fmt(f)
+        let CssAttributeNameFields { namespace, name } = node.as_fields();
+
+        write!(f, [namespace.format(), name.format()])
     }
 }

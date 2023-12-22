@@ -1,6 +1,7 @@
 use crate::prelude::*;
-use biome_css_syntax::CssAttributeMatcherValue;
-use biome_rowan::AstNode;
+use biome_css_syntax::{CssAttributeMatcherValue, CssAttributeMatcherValueFields};
+use biome_formatter::write;
+
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatCssAttributeMatcherValue;
 impl FormatNodeRule<CssAttributeMatcherValue> for FormatCssAttributeMatcherValue {
@@ -9,6 +10,8 @@ impl FormatNodeRule<CssAttributeMatcherValue> for FormatCssAttributeMatcherValue
         node: &CssAttributeMatcherValue,
         f: &mut CssFormatter,
     ) -> FormatResult<()> {
-        format_verbatim_node(node.syntax()).fmt(f)
+        let CssAttributeMatcherValueFields { name } = node.as_fields();
+
+        write!(f, [name.format()])
     }
 }
