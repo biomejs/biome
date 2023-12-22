@@ -1,0 +1,19 @@
+:global(.class div) {}
+
+:global() {}
+
+:global(.class) {}
+:global(div   p   a) {}
+:global(
+    
+.class1.class2   ) {}
+
+:local(.class div) {}
+
+:local() {}
+
+:local(.class) {}
+:local(div   p   a) {}
+:local(
+    
+.class1.class2   ) {}

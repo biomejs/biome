@@ -35,25 +35,25 @@ Line width: 80
 -----
 
 ```css
-.parent>.child {
+.parent > .child {
 }
-.parent>.child {
+.parent > .child {
 }
-.parent>.child {
-}
-
-.parent+.child {
-}
-.parent+.child {
-}
-.parent+.child {
+.parent > .child {
 }
 
-.parent~.child {
+.parent + .child {
 }
-.parent~.child {
+.parent + .child {
 }
-.parent~.child {
+.parent + .child {
+}
+
+.parent ~ .child {
+}
+.parent ~ .child {
+}
+.parent ~ .child {
 }
 ```
 
