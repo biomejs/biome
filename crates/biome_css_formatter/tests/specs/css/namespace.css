@@ -1,0 +1,34 @@
+hello|* {
+
+}
+
+spaced     | * {}
+
+
+newline
+
+
+|   * {
+
+}
+
+*|  * {}
+
+*    | hello {}
+
+long-ident
+
+|
+
+
+other-ident .html {
+
+}
+
+
+.complex  * | html {}
+
+.complex-ident   ident | hello {
+
+}
+

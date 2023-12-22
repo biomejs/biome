@@ -42,9 +42,13 @@ CssBogusSubSelector = SyntaxElement*
 CssBogusPseudoClass = SyntaxElement*
 CssBogusPseudoElement = SyntaxElement*
 CssBogusAtRule = SyntaxElement*
-CssBogusBody =  SyntaxElement*
+CssBogusBlock =  SyntaxElement*
+CssBogusKeyframesItem =  SyntaxElement*
 CssBogusRule =  SyntaxElement*
 CssBogusParameter = SyntaxElement*
+CssBogusDeclarationItem = SyntaxElement*
+CssBogusComponentValue = SyntaxElement*
+CssBogusMediaQuery =  SyntaxElement*
 
 CssRoot =
 	bom: 'UNICODE_BOM'?
@@ -63,8 +67,7 @@ AnyCssRule =
 // ^^^^^^^^^^^^^^^^^^^^^
 CssRule =
 	prelude: CssSelectorList
-	block: CssBlock
-
+	block: AnyCssDeclarationListBlock
 
 /////////////
 /// SELECTORS
@@ -229,7 +232,7 @@ CssPseudoClassFunctionSelectorList =
 // :-webkit-any(i,p,:link,span:focus) {}
 //  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 CssPseudoClassFunctionCompoundSelectorList =
- 	name: ('-moz-any' | '-webkit-any' | 'past' | 'current' | 'future')
+ 	name: ('any' | 'past' | 'current' | 'future')
 	'('
 	compound_selector_list: CssCompoundSelectorList
 	')'
@@ -395,9 +398,22 @@ CssPseudoElementFunctionIdentifier =
 	ident: CssIdentifier
 	')'
 
-CssBlock =
+AnyCssDeclarationListBlock =
+	CssDeclarationListBlock
+	| CssBogusBlock
+
+CssDeclarationListBlock =
 	'{'
 	declaration_list: CssDeclarationList
+ 	'}'
+
+AnyCssRuleListBlock =
+	CssRuleListBlock
+	| CssBogusBlock
+
+CssRuleListBlock =
+	'{'
+	rules: CssRuleList
  	'}'
 
 CssDeclarationList = CssDeclaration (';' CssDeclaration)* ';'?
@@ -405,10 +421,10 @@ CssDeclarationList = CssDeclaration (';' CssDeclaration)* ';'?
 CssDeclaration =
 	name: AnyCssDeclarationName
 	':'
-	value: CssListOfComponentValues
+	value: CssComponentValueList
 	important: CssDeclarationImportant?
 
-CssListOfComponentValues = AnyCssValue*
+CssComponentValueList = AnyCssValue*
 
 AnyCssDeclarationName = CssIdentifier | CssCustomProperty
 
@@ -428,7 +444,9 @@ AnyCssAtRule =
 	CssCharsetAtRule
 	| CssColorProfileAtRule
 	| CssCounterStyleAtRule
+	| CssContainerAtRule
 	| CssFontFaceAtRule
+	| CssFontPaletteValuesAtRule
 	| CssKeyframesAtRule
 	| CssMediaAtRule
 	| CssBogusAtRule
@@ -447,125 +465,422 @@ CssCharsetAtRule =
 CssColorProfileAtRule =
 	'color-profile'
 	name: CssIdentifier
-	block: CssBlock
+	block: AnyCssDeclarationListBlock
 
 CssCounterStyleAtRule =
 	'counter-style'
 	name: CssIdentifier
-	block: CssBlock
+	block: AnyCssDeclarationListBlock
 
 // @font-face {}
 // ^^^^^^^^^^^^^
 CssFontFaceAtRule =
 	'font-face'
-	block: CssBlock
+	block: AnyCssDeclarationListBlock
+
+
+// @font-palette-values --ident {}
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssFontPaletteValuesAtRule =
+	'font-palette-values'
+	name: CssIdentifier
+	block: AnyCssDeclarationListBlock
+
+
+// https://drafts.csswg.org/css-contain-3/#container-rule
+// <container-condition> = [ <container-name> ]? <container-query>
+// <container-name> = <custom-ident>
+// <container-query>     = not <query-in-parens>
+//                      | <query-in-parens> [ [ and <query-in-parens> ]* | [ or <query-in-parens> ]* ]
+//
+// <query-in-parens>     = ( <container-query> )
+//                       | ( <size-feature> )
+//                       | style( <style-query> )
+//                       | <general-enclosed>
+// <general-enclosed> exists to allow for future expansion of the grammar in a reasonably compatible way.
+//
+// <style-query>         = not <style-in-parens>
+//                       | <style-in-parens> [ [ and <style-in-parens> ]* | [ or <style-in-parens> ]* ]
+//                       | <style-feature>
+//
+// <style-in-parens>     = ( <style-query> )
+//                       | ( <style-feature> )
+//                       | <general-enclosed>
+// <general-enclosed> exists to allow for future expansion of the grammar in a reasonably compatible way.
+
+// <container-condition> = [ <container-name> ]? <container-query>
+// @container name (width <= 500px) {  }
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssContainerAtRule =
+	'container'
+	name: CssIdentifier?
+	query: AnyCssContainerQuery
+	block: AnyCssRuleListBlock
+
+// <container-query>
+AnyCssContainerQuery =
+	CssContainerNotQuery
+	| CssContainerOrQuery
+	| CssContainerAndQuery
+	| AnyCssContainerQueryInParens
+
+// @container name not (width <= 500px) {  }
+//                 ^^^^^^^^^^^^^^^^^^^^
+CssContainerNotQuery =
+	'not'
+	query: AnyCssContainerQueryInParens
+
+// @container name (width <= 500px) and (width <= 500px) {  }
+//                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssContainerAndQuery =
+	left: AnyCssContainerQueryInParens
+	'and'
+	right: AnyCssContainerAndCombinableQuery
+
+AnyCssContainerAndCombinableQuery =
+	CssContainerAndQuery
+	| AnyCssContainerQueryInParens
+
+// @container name (width <= 500px) or (width <= 500px) {  }
+//                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssContainerOrQuery =
+	left: AnyCssContainerQueryInParens
+	'or'
+	right: AnyCssContainerOrCombinableQuery
+
+AnyCssContainerOrCombinableQuery =
+	CssContainerOrQuery
+	| AnyCssContainerQueryInParens
+
+// <query-in-parens>
+AnyCssContainerQueryInParens =
+	CssContainerQueryInParens
+	| CssContainerSizeFeatureInParens
+	| CssContainerStyleQueryInParens
+
+// ( <container-query> )
+// @container name (width <= 500px) and ((width <= 500px) or (width <= 500px)) {  }
+//                 											^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssContainerQueryInParens =
+	'('
+	query: AnyCssContainerQuery
+	')'
+
+// ( <size-feature> )
+// @container name (width <= 500px) and ((width <= 500px) or (width <= 500px)) {  }
+//                 ^^^^^^^^^^^^^^^
+CssContainerSizeFeatureInParens =
+	'('
+	feature: AnyCssQueryFeature
+	')'
+
+// style( <style-query> )
+// @container style(--accent-color: blue) {}
+//						^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssContainerStyleQueryInParens =
+	'style'
+	'('
+	query: AnyCssContainerStyleQuery
+	')'
+
+// <style-query>
+AnyCssContainerStyleQuery =
+	CssContainerStyleNotQuery
+	| CssContainerStyleAndQuery
+	| CssContainerStyleOrQuery
+	| CssDeclaration
+	| CssContainerStyleInParens
+
+// @container name style(not (--b: red)) {  }
+// 								       ^^^^^^^^^^^^^^
+CssContainerStyleNotQuery =
+	'not'
+	query: CssContainerStyleInParens
+
+// @container name style((--a: blue) and (--b: red)) {  }
+// 								       ^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssContainerStyleAndQuery =
+	left: CssContainerStyleInParens
+	'and'
+	right: AnyCssContainerStyleAndCombinableQuery
+
+AnyCssContainerStyleAndCombinableQuery =
+	CssContainerStyleAndQuery
+	| CssContainerStyleInParens
+
+// @container name style((--a: blue) or (--b: red)) {  }
+// 								       ^^^^^^^^^^^^^^^^^^^^^^^^^
+CssContainerStyleOrQuery =
+	left: CssContainerStyleInParens
+	'or'
+	right: AnyCssContainerStyleOrCombinableQuery
+
+AnyCssContainerStyleOrCombinableQuery =
+	CssContainerStyleOrQuery
+	| CssContainerStyleInParens
+
+// <style-in-parens>
+// @container name style((--a: blue) and ((--a: blue) or (--b: red))) {  }
+// 								       								 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssContainerStyleInParens =
+	'('
+	query: AnyCssContainerStyleInParens
+	')'
+
+// ( <style-query> )
+// ( <style-feature> )
+// @container name style((--a: blue) or (--b: red)) {  }
+// 								        ^^^^^^^^^
+AnyCssContainerStyleInParens =
+	AnyCssContainerStyleQuery
+	| CssDeclaration
+
+// https://drafts.csswg.org/css-animations/#keyframes
+// @keyframes = @keyframes <keyframes-name> { <qualified-rule-list> }
+// <keyframes-name> = <custom-ident> | <string>
+// <keyframe-block> = <keyframe-selector># { <declaration-list> }
+// <keyframe-selector> = from | to | <percentage [0,100]>
 
 // @keyframes "something" { from {} to {} }
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 CssKeyframesAtRule =
 	'keyframes'
-	name: CssIdentifier | CssString
-	body: CssKeyframesBody
+	name: AnyCssKeyframeName
+	block: AnyCssKeyframesBlock
 
+AnyCssKeyframesBlock =
+	CssKeyframesBlock
+	| CssBogusBlock
 
-CssKeyframesBody =
+// @keyframes "something" { from {} to {} }
+//            ^^^^^^^^^^^
+AnyCssKeyframeName = CssIdentifier | CssString
+
+// @keyframes "something" { from {} to {} }
+//                        ^^^^^^^^^^^^^^^^^
+CssKeyframesBlock =
 	'{'
 	items: CssKeyframesItemList
 	'}'
 
-CssKeyframesItemList = CssKeyframesBlock*
+CssKeyframesItemList = AnyCssKeyframesItem*
+
+AnyCssKeyframesItem =
+	CssKeyframesItem
+	| CssBogusKeyframesItem
 
 // @keyframes "something" { 30%, 60% {} }
 //                          ^^^^^^^^^^^
-CssKeyframesBlock =
+CssKeyframesItem =
 	selectors: CssKeyframesSelectorList
-	'{'
-	declarations: CssDeclarationList
-	'}'
+	block: AnyCssDeclarationListBlock
 
-CssKeyframesSelectorList =  (CssKeyframesSelector (',' CssKeyframesSelector)*)
+CssKeyframesSelectorList =  (AnyCssKeyframesSelector (',' AnyCssKeyframesSelector)*)
 
-CssKeyframesSelector = 'from' | 'to' | CssPercentage
+AnyCssKeyframesSelector =
+	CssKeyframesIdentSelector
+	| CssKeyframesPercentageSelector
+	| CssBogusSelector
 
+// @keyframes "something" { from {} to {} }
+//                          ^^^^    ^^
+CssKeyframesIdentSelector =
+	selector: ('from' | 'to')
+
+// @keyframes "something" { 30%, 60% {} }
+//                          ^^^  ^^^
+CssKeyframesPercentageSelector =
+	selector: CssPercentage
+
+// https://drafts.csswg.org/mediaqueries-5/#media-query
+// <media-query> = <media-condition>
+//              | [ not | only ]? <media-type> [ and <media-condition-without-or> ]?
+// <media-type> = <ident>
+//
+// <media-condition> = <media-not> | <media-in-parens> [ <media-and>* | <media-or>* ]
+// <media-condition-without-or> = <media-not> | <media-in-parens> <media-and>*
+// <media-not> = not <media-in-parens>
+// <media-and> = and <media-in-parens>
+// <media-or> = or <media-in-parens>
+// <media-in-parens> = ( <media-condition> ) | <media-feature> | <general-enclosed>
+//
+// <media-feature> = ( [ <mf-plain> | <mf-boolean> | <mf-range> ] )
+// <mf-plain> = <mf-name> : <mf-value>
+// <mf-boolean> = <mf-name>
+// <mf-range> = <mf-name> <mf-comparison> <mf-value>
+//            | <mf-value> <mf-comparison> <mf-name>
+//            | <mf-value> <mf-lt> <mf-name> <mf-lt> <mf-value>
+//            | <mf-value> <mf-gt> <mf-name> <mf-gt> <mf-value>
+// <mf-name> = <ident>
+// <mf-value> = <number> | <dimension> | <ident> | <ratio>
+// <mf-lt> = '<' '='?
+// <mf-gt> = '>' '='?
+// <mf-eq> = '='
+// <mf-comparison> = <mf-lt> | <mf-gt> | <mf-eq>
+//
+// <general-enclosed> branch must only be chosen if the input does not match either of the preceding branches.
+// <general-enclosed> exists to allow for future expansion of the grammar in a reasonably compatible way.
+// <general-enclosed> = [ <function-token> <any-value>? ) ] | [ ( <any-value>? ) ]
 
 // @media screen, all, print {}
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 CssMediaAtRule =
 	'media'
 	query_list: CssMediaQueryList
-	'{'
-	body: AnyCssRule
-	'}'
+	block: AnyCssRuleListBlock
 
+// @media screen, (width > 500px), print {}
+// 				^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssMediaQueryList = (AnyCssMediaQuery (',' AnyCssMediaQuery)*)
 
-// NB: a query list can't start with `and` condition
-CssMediaQueryList = (CssMediaQuery (',' CssMediaQuery)*)
+AnyCssMediaQuery =
+	CssMediaConditionQuery
+	| AnyCssMediaTypeQuery
+	| CssBogusMediaQuery
 
-// @media or screen and print {}
-// 		  ^^^^^^^^^^^^^^^^^^^^
-CssMediaQuery =
-	condition: 'not' | 'or' | 'only'?
-	type: AnyCssMediaQueryType
-	consequent: CssMediaQueryConsequent?
+// @media screen, (width > 500px), print {}
+// 				        ^^^^^^^^^^^^^^^
+CssMediaConditionQuery =
+	condition: AnyCssMediaCondition
 
+AnyCssMediaTypeQuery =
+	CssMediaAndTypeQuery
+	| CssMediaTypeQuery
 
-// @media not screen and print {}
-// 		  ^^^^^^^^^
-CssMediaQueryConsequent =
+// [ not | only ]? <media-type> [ and <media-condition-without-or> ]?
+// @media not all and not (color)  { }
+//        ^^^^^^^^^^^^^^^^^^^^^^^
+// @media not all and (color) and (color)  { }
+//        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssMediaAndTypeQuery =
+	left: CssMediaTypeQuery
 	'and'
-	condition: 'not'?
-	type: AnyCssMediaQueryType
+	right: AnyCssMediaTypeCondition
 
+// @media not all and not (color)  { }
+//        ^^^^^^^
+CssMediaTypeQuery =
+	modifier: ('only' | 'not')?
+	type: CssMediaType
 
-AnyCssMediaQueryType =
-	CssIdentifier
-	| CssMediaQueryFeature
+// @media not all and not (color)  { }
+//            ^^^
+CssMediaType =
+	value: CssIdentifier
 
-// @media (width: 800px) {}
-// 				^^^^^^^^^^^^^^
-// @media (width) {}
-// 				^^^^^^^
-CssMediaQueryFeature =
+AnyCssMediaTypeCondition =
+	CssMediaNotCondition
+	| CssMediaAndCondition
+	| AnyCssMediaInParens
+
+// <media-condition> = <media-not> | <media-in-parens> [ <media-and>* | <media-or>* ]
+AnyCssMediaCondition =
+	CssMediaNotCondition
+	| CssMediaAndCondition
+	| CssMediaOrCondition
+	| AnyCssMediaInParens
+
+// @media not all and not (color)  { }
+//        						^^^^^^^^^^^
+CssMediaNotCondition =
+	'not'
+	condition: AnyCssMediaInParens
+
+// @media (width > 400px) or (color) or (inline-width >= 30em)  { }
+//        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssMediaOrCondition =
+	left: AnyCssMediaInParens
+	'or'
+	right: AnyCssMediaOrCombinableCondition
+
+AnyCssMediaOrCombinableCondition =
+	CssMediaOrCondition
+	| AnyCssMediaInParens
+
+// @media (width > 400px) and (color) and (inline-width >= 30em)  { }
+//        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssMediaAndCondition =
+	left: AnyCssMediaInParens
+	'and'
+	right: AnyCssMediaAndCombinableCondition
+
+AnyCssMediaAndCombinableCondition =
+	CssMediaAndCondition
+	| AnyCssMediaInParens
+
+AnyCssMediaInParens =
+	CssMediaConditionInParens
+	| CssMediaFeatureInParens
+
+// @media (width > 400px) or ((color) and (inline-width >= 30em))  { }
+//                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssMediaConditionInParens =
 	'('
-	feature: AnyCssMediaQueryFeatureType
+	condition: AnyCssMediaCondition
 	')'
 
-AnyCssMediaQueryFeatureType =
-	CssMediaQueryFeaturePlain
-	| CssMediaQueryFeatureBoolean
-	| CssMediaQueryFeatureCompare
-	| CssMediaQueryFeatureRange
+// @media (width > 400px) or ((color) and (inline-width >= 30em))  { }
+//        ^^^^^^^^^^^^^^^                 ^^^^^^^^^^^^^^^^^^^^^^
+CssMediaFeatureInParens =
+	'('
+	feature: AnyCssQueryFeature
+	')'
 
+AnyCssQueryFeature =
+	CssQueryFeaturePlain
+	| CssQueryFeatureBoolean
+	| CssQueryFeatureRange
+	| CssQueryFeatureReverseRange
+	| CssQueryFeatureRangeInterval
 
-// @media (width: 800px) {}
-// 				^^^^^^^^^^^^^^
-CssMediaQueryFeaturePlain =
+// @container (--responsive: true) {  }
+//             ^^^^^^^^^^^^^^^^^^
+CssQueryFeaturePlain =
 	name: CssIdentifier
 	':'
-	value: AnyCssValue
+	value: AnyCssQueryFeatureValue
 
-// @media (width) {}
-// 				^^^^^^^
-CssMediaQueryFeatureBoolean = CssIdentifier
-
-
-// @media (height > 600px) {}
-// 				^^^^^^^^^^^^^^^
-CssMediaQueryFeatureCompare =
+// @container (any-hover) {  }
+//             ^^^^^^^^^
+CssQueryFeatureBoolean =
 	name: CssIdentifier
-	range: CssMediaQueryRange
-	value: AnyCssValue
 
-// @media (400px <= width <= 700px) {}
-// 				^^^^^^^^^^^^^^^^^^^^^^^^
-CssMediaQueryFeatureRange =
-	first_value: AnyCssValue
-	first_range: CssMediaQueryRange
+// @media (width <= 500px) {  }
+//         ^^^^^^^^^^^^^^
+CssQueryFeatureRange =
+	left: CssIdentifier
+	comparison: CssQueryFeatureRangeComparison
+	right: AnyCssQueryFeatureValue
+
+// @media (500px <= width) {  }
+//         ^^^^^^^^^^^^^^
+CssQueryFeatureReverseRange =
+	left: AnyCssQueryFeatureValue
+	comparison: CssQueryFeatureRangeComparison
+	right: CssIdentifier
+
+// @media (500px <= width <= 500px) {  }
+//         ^^^^^^^^^^^^^^^^^^^^^^^
+CssQueryFeatureRangeInterval =
+	left: AnyCssQueryFeatureValue
+	left_comparison: CssQueryFeatureRangeComparison
 	name: CssIdentifier
-	second_value: AnyCssValue
-	second_range: CssMediaQueryRange
+	right_comparison: CssQueryFeatureRangeComparison
+	right: AnyCssQueryFeatureValue
 
-CssMediaQueryRange = '>' | '<' | '>=' | '<='
+// @media (500px <= width <= 500px) {  }
+//               ^^       ^^
+CssQueryFeatureRangeComparison =
+	operator: ('>' | '<' | '=' | '>=' | '<=')
 
+// @media (500px <= width <= 500px) {  }
+//         ^^^^^             ^^^^^
+AnyCssQueryFeatureValue =
+	CssNumber
+	| AnyCssDimension
+	| CssIdentifier
+	| CssRatio
+	| CssAnyFunction
 
 ///////////////
 // AUXILIARY

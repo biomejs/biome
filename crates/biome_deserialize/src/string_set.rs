@@ -20,6 +20,10 @@ impl StringSet {
     pub fn into_index_set(self) -> IndexSet<String> {
         self.0
     }
+
+    pub fn clear(&mut self) {
+        self.0.clear();
+    }
 }
 
 impl Deref for StringSet {

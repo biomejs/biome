@@ -20,7 +20,7 @@ CssRoot {
             at_token: AT@0..1 "@" [] [],
             rule: CssFontFaceAtRule {
                 font_face_token: FONT_FACE_KW@1..11 "font-face" [] [Whitespace(" ")],
-                block: CssBlock {
+                block: CssDeclarationListBlock {
                     l_curly_token: L_CURLY@11..12 "{" [] [],
                     declaration_list: CssDeclarationList [],
                     r_curly_token: R_CURLY@12..13 "}" [] [],
@@ -42,7 +42,7 @@ CssRoot {
       0: AT@0..1 "@" [] []
       1: CSS_FONT_FACE_AT_RULE@1..13
         0: FONT_FACE_KW@1..11 "font-face" [] [Whitespace(" ")]
-        1: CSS_BLOCK@11..13
+        1: CSS_DECLARATION_LIST_BLOCK@11..13
           0: L_CURLY@11..12 "{" [] []
           1: CSS_DECLARATION_LIST@12..12
           2: R_CURLY@12..13 "}" [] []

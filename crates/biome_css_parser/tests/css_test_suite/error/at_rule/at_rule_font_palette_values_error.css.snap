@@ -1,0 +1,263 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@font-palette-values  {  }
+@font-palette-values 6788 {  }
+@font-palette-values 'string' {  }
+@font-palette-values ident
+@font-palette-values ;
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssBogusAtRule {
+                items: [
+                    FONT_PALETTE_VALUES_KW@1..22 "font-palette-values" [] [Whitespace("  ")],
+                    CssDeclarationListBlock {
+                        l_curly_token: L_CURLY@22..25 "{" [] [Whitespace("  ")],
+                        declaration_list: CssDeclarationList [],
+                        r_curly_token: R_CURLY@25..26 "}" [] [],
+                    },
+                ],
+            },
+        },
+        CssAtRule {
+            at_token: AT@26..28 "@" [Newline("\n")] [],
+            rule: CssBogusAtRule {
+                items: [
+                    FONT_PALETTE_VALUES_KW@28..48 "font-palette-values" [] [Whitespace(" ")],
+                    CssBogus {
+                        items: [
+                            CSS_NUMBER_LITERAL@48..53 "6788" [] [Whitespace(" ")],
+                        ],
+                    },
+                    CssDeclarationListBlock {
+                        l_curly_token: L_CURLY@53..56 "{" [] [Whitespace("  ")],
+                        declaration_list: CssDeclarationList [],
+                        r_curly_token: R_CURLY@56..57 "}" [] [],
+                    },
+                ],
+            },
+        },
+        CssAtRule {
+            at_token: AT@57..59 "@" [Newline("\n")] [],
+            rule: CssBogusAtRule {
+                items: [
+                    FONT_PALETTE_VALUES_KW@59..79 "font-palette-values" [] [Whitespace(" ")],
+                    CssBogus {
+                        items: [
+                            CSS_STRING_LITERAL@79..88 "'string'" [] [Whitespace(" ")],
+                        ],
+                    },
+                    CssDeclarationListBlock {
+                        l_curly_token: L_CURLY@88..91 "{" [] [Whitespace("  ")],
+                        declaration_list: CssDeclarationList [],
+                        r_curly_token: R_CURLY@91..92 "}" [] [],
+                    },
+                ],
+            },
+        },
+        CssAtRule {
+            at_token: AT@92..94 "@" [Newline("\n")] [],
+            rule: CssBogusAtRule {
+                items: [
+                    FONT_PALETTE_VALUES_KW@94..114 "font-palette-values" [] [Whitespace(" ")],
+                    CssIdentifier {
+                        value_token: IDENT@114..119 "ident" [] [],
+                    },
+                ],
+            },
+        },
+        CssAtRule {
+            at_token: AT@119..121 "@" [Newline("\n")] [],
+            rule: CssBogusAtRule {
+                items: [
+                    FONT_PALETTE_VALUES_KW@121..141 "font-palette-values" [] [Whitespace(" ")],
+                    CssBogus {
+                        items: [
+                            SEMICOLON@141..142 ";" [] [],
+                        ],
+                    },
+                ],
+            },
+        },
+    ],
+    eof_token: EOF@142..143 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..143
+  0: (empty)
+  1: CSS_RULE_LIST@0..142
+    0: CSS_AT_RULE@0..26
+      0: AT@0..1 "@" [] []
+      1: CSS_BOGUS_AT_RULE@1..26
+        0: FONT_PALETTE_VALUES_KW@1..22 "font-palette-values" [] [Whitespace("  ")]
+        1: CSS_DECLARATION_LIST_BLOCK@22..26
+          0: L_CURLY@22..25 "{" [] [Whitespace("  ")]
+          1: CSS_DECLARATION_LIST@25..25
+          2: R_CURLY@25..26 "}" [] []
+    1: CSS_AT_RULE@26..57
+      0: AT@26..28 "@" [Newline("\n")] []
+      1: CSS_BOGUS_AT_RULE@28..57
+        0: FONT_PALETTE_VALUES_KW@28..48 "font-palette-values" [] [Whitespace(" ")]
+        1: CSS_BOGUS@48..53
+          0: CSS_NUMBER_LITERAL@48..53 "6788" [] [Whitespace(" ")]
+        2: CSS_DECLARATION_LIST_BLOCK@53..57
+          0: L_CURLY@53..56 "{" [] [Whitespace("  ")]
+          1: CSS_DECLARATION_LIST@56..56
+          2: R_CURLY@56..57 "}" [] []
+    2: CSS_AT_RULE@57..92
+      0: AT@57..59 "@" [Newline("\n")] []
+      1: CSS_BOGUS_AT_RULE@59..92
+        0: FONT_PALETTE_VALUES_KW@59..79 "font-palette-values" [] [Whitespace(" ")]
+        1: CSS_BOGUS@79..88
+          0: CSS_STRING_LITERAL@79..88 "'string'" [] [Whitespace(" ")]
+        2: CSS_DECLARATION_LIST_BLOCK@88..92
+          0: L_CURLY@88..91 "{" [] [Whitespace("  ")]
+          1: CSS_DECLARATION_LIST@91..91
+          2: R_CURLY@91..92 "}" [] []
+    3: CSS_AT_RULE@92..119
+      0: AT@92..94 "@" [Newline("\n")] []
+      1: CSS_BOGUS_AT_RULE@94..119
+        0: FONT_PALETTE_VALUES_KW@94..114 "font-palette-values" [] [Whitespace(" ")]
+        1: CSS_IDENTIFIER@114..119
+          0: IDENT@114..119 "ident" [] []
+    4: CSS_AT_RULE@119..142
+      0: AT@119..121 "@" [Newline("\n")] []
+      1: CSS_BOGUS_AT_RULE@121..142
+        0: FONT_PALETTE_VALUES_KW@121..141 "font-palette-values" [] [Whitespace(" ")]
+        1: CSS_BOGUS@141..142
+          0: SEMICOLON@141..142 ";" [] []
+  2: EOF@142..143 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+at_rule_font_palette_values_error.css:1:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found '{'.
+  
+  > 1 │ @font-palette-values  {  }
+      │                       ^
+    2 │ @font-palette-values 6788 {  }
+    3 │ @font-palette-values 'string' {  }
+  
+  i Expected an identifier here.
+  
+  > 1 │ @font-palette-values  {  }
+      │                       ^
+    2 │ @font-palette-values 6788 {  }
+    3 │ @font-palette-values 'string' {  }
+  
+at_rule_font_palette_values_error.css:2:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found '6788'.
+  
+    1 │ @font-palette-values  {  }
+  > 2 │ @font-palette-values 6788 {  }
+      │                      ^^^^
+    3 │ @font-palette-values 'string' {  }
+    4 │ @font-palette-values ident
+  
+  i Expected an identifier here.
+  
+    1 │ @font-palette-values  {  }
+  > 2 │ @font-palette-values 6788 {  }
+      │                      ^^^^
+    3 │ @font-palette-values 'string' {  }
+    4 │ @font-palette-values ident
+  
+at_rule_font_palette_values_error.css:3:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found ''string''.
+  
+    1 │ @font-palette-values  {  }
+    2 │ @font-palette-values 6788 {  }
+  > 3 │ @font-palette-values 'string' {  }
+      │                      ^^^^^^^^
+    4 │ @font-palette-values ident
+    5 │ @font-palette-values ;
+  
+  i Expected an identifier here.
+  
+    1 │ @font-palette-values  {  }
+    2 │ @font-palette-values 6788 {  }
+  > 3 │ @font-palette-values 'string' {  }
+      │                      ^^^^^^^^
+    4 │ @font-palette-values ident
+    5 │ @font-palette-values ;
+  
+at_rule_font_palette_values_error.css:5:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a body but instead found '@'.
+  
+    3 │ @font-palette-values 'string' {  }
+    4 │ @font-palette-values ident
+  > 5 │ @font-palette-values ;
+      │ ^
+    6 │ 
+  
+  i Expected a body here.
+  
+    3 │ @font-palette-values 'string' {  }
+    4 │ @font-palette-values ident
+  > 5 │ @font-palette-values ;
+      │ ^
+    6 │ 
+  
+at_rule_font_palette_values_error.css:5:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found ';'.
+  
+    3 │ @font-palette-values 'string' {  }
+    4 │ @font-palette-values ident
+  > 5 │ @font-palette-values ;
+      │                      ^
+    6 │ 
+  
+  i Expected an identifier here.
+  
+    3 │ @font-palette-values 'string' {  }
+    4 │ @font-palette-values ident
+  > 5 │ @font-palette-values ;
+      │                      ^
+    6 │ 
+  
+at_rule_font_palette_values_error.css:6:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a body but instead found the end of the file.
+  
+    4 │ @font-palette-values ident
+    5 │ @font-palette-values ;
+  > 6 │ 
+      │ 
+  
+  i Expected a body here.
+  
+    4 │ @font-palette-values ident
+    5 │ @font-palette-values ;
+  > 6 │ 
+      │ 
+  
+```
+
+

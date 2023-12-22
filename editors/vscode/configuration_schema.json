@@ -2081,6 +2081,10 @@
 						{ "type": "null" }
 					]
 				},
+				"defaultBranch": {
+					"description": "The main branch of the project",
+					"type": ["string", "null"]
+				},
 				"enabled": {
 					"description": "Whether Biome should integrate itself with the VCS client",
 					"type": ["boolean", "null"]

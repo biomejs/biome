@@ -1,6 +1,6 @@
 ## Overall Metrics
 
-**Average compatibility**: 96.78
+**Average compatibility**: 97.03
 
 <details>
     <summary>Definition</summary>
@@ -8,7 +8,7 @@
     $$average = \frac\{\sum_{file}^\{files}compatibility_\{file}}\{files}$$
 </details>
 
-**Compatible lines**: 97.79
+**Compatible lines**: 98.01
 
 <details>
     <summary>Definition</summary>
@@ -19,38 +19,6 @@
 [Metric definition discussion](https://github.com/rome/tools/issues/2555#issuecomment-1124787893)
 
 ## Test cases
-
-### js/arrays/numbers-negative.js
-```diff
- const numbers1 = [
-   -2017, -506252, -744011292, -7224, -70.4, -83353.6, -708.4, -174023963.52,
-   -40385,
-   // comment1
--  -380014, -253951682, -728, -15.84, -2058467564.56, -43, -33, -85134845,
--  -67092, -1, -78820379, -2371.6, -16, 7,
-+  -380014,
-+  -253951682, -728, -15.84, -2058467564.56, -43, -33, -85134845, -67092, -1,
-+  -78820379, -2371.6, -16, 7,
-   // comment2
--  -62454, -4282239912, -10816495.36, 0.88, -100622682, 8.8, -67087.68000000001,
-+  -62454,
-+  -4282239912, -10816495.36, 0.88, -100622682, 8.8, -67087.68000000001,
-   -3758276, -25.5211, -54, -1184265243, -46073628, -280423.44, -41833463,
-   -27961.12, -305.36, -199875.28,
- ];
- 
- const numbers2 = [
-   -234,
-   -342, // comment3
-   -223,
-   -333333.33,
-   12345,
- ];
-
-```
-
-**Prettier Similarity**: 76.19%
-
 
 ### js/arrays/numbers-with-holes.js
 ```diff
@@ -87,28 +55,6 @@
 ```
 
 **Prettier Similarity**: 96.43%
-
-
-### js/arrays/numbers-with-tricky-comments.js
-```diff
- const lazyCatererNumbers = [
-   1, 2, 4, 7, 11, 16, 22, 29, 37, 46, 56, 67, 79, 92, 106, 121, 137, 154, 172,
-   191, 211, 232, 254, 277, 301, 326, 352, 379, 407, 436, 466 /*block*/,
-   // line
--  497, 529, 562, 596, 631, 667, 704, 742, 781, 821, 862, 904, 947, 991, 1036,
--  1082, 1129, 1177, 1226,
-+  497,
-+  529, 562, 596, 631, 667, 704, 742, 781, 821, 862, 904, 947, 991, 1036, 1082,
-+  1129, 1177, 1226,
-   // line 2
--  1276, 1327, 1379,
-+  1276,
-+  1327, 1379,
- ];
-
-```
-
-**Prettier Similarity**: 54.55%
 
 
 ### js/arrows/currying-4.js
@@ -401,80 +347,6 @@
 ```
 
 **Prettier Similarity**: 66.67%
-
-
-### js/comments/jsdoc-nestled-dangling.js
-```diff
- {
-   {
-     {
-       {
-         {
-           {
-             {
-               o = {
-                 /**
-                  * A
--                 *//**
-+                 */
-+                /**
-                  * B
-                  */
-               };
-             }
-           }
-         }
-       }
-     }
-   }
- }
-
-```
-
-**Prettier Similarity**: 90.91%
-
-
-### js/comments/jsdoc-nestled.js
-```diff
- const issues = {
-   see: "#7724 and #12653",
--  /** Trailing comment 1 (not nestled as both comments should be multiline for that) */ /**
-+  /** Trailing comment 1 (not nestled as both comments should be multiline for that) */
-+  /**
-    * Trailing comment 2
-    */
- };
- 
- /**
-  * @template T
-  * @param {Type} type
-  * @param {T} value
-  * @return {Value}
-- *//**
-+ */ /**
-  * @param {Type} type
-  * @return {Value}
-  */
- function value(type, value) {
-   if (arguments.length === 2) {
-     return new ConcreteValue(type, value);
-   } else {
-     return new Value(type);
-   }
- }
- 
- /** Trailing nestled comment 1
-- *//** Trailing nestled comment 2
-- *//** Trailing nestled comment 3
-  */
-+/** Trailing nestled comment 2
-+ */
-+/** Trailing nestled comment 3
-+ */
-
-```
-
-**Prettier Similarity**: 77.42%
 
 
 ### js/comments/multi-comments-on-same-line.js
@@ -787,45 +659,6 @@
 ```
 
 **Prettier Similarity**: 85.71%
-
-
-### js/comments/trailing-jsdocs.js
-```diff
- const CONNECTION_STATUS = (exports.CONNECTION_STATUS = {
-   CLOSED: Object.freeze({ kind: "CLOSED" }),
-   CONNECTED: Object.freeze({ kind: "CONNECTED" }),
-   CONNECTING: Object.freeze({ kind: "CONNECTING" }),
-   NOT_CONNECTED: Object.freeze({ kind: "NOT_CONNECTED" }),
- });
- 
--/* A comment */ /**
-+/* A comment */
-+/**
-  * A type that can be written to a buffer.
-- */ /**
-+ */
-+/**
-  * Describes the connection status of a ReactiveSocket/DuplexConnection.
-  * - NOT_CONNECTED: no connection established or pending.
-  * - CONNECTING: when `connect()` has been called but a connection is not yet
-  *   established.
-  * - CONNECTED: when a connection is established.
-  * - CLOSED: when the connection has been explicitly closed via `close()`.
-  * - ERROR: when the connection has been closed for any other reason.
-- */ /**
-+ */
-+/**
-  * A contract providing different interaction models per the [ReactiveSocket protocol]
-  * (https://github.com/ReactiveSocket/reactivesocket/blob/master/Protocol.md).
-- */ /**
-+ */
-+/**
-  * A single unit of data exchanged between the peers of a `ReactiveSocket`.
-  */
-
-```
-
-**Prettier Similarity**: 70.37%
 
 
 ### js/conditional/comments.js
@@ -1706,25 +1539,6 @@
 **Prettier Similarity**: 0.00%
 
 
-### js/strings/escaped.js
-```diff
-+// FIXME
-+// TODO: reformat issue
- export const MSG_GENERIC_OPERATION_FAILURE_BODY_1 =
-   goog.getMsg("That's all we know");
- 
--export const MSG_GENERIC_OPERATION_FAILURE_BODY_2 =
--  goog.getMsg("That's all we know");
-+// FIXME
-+// TODO: reformat issue
-+// export const MSG_GENERIC_OPERATION_FAILURE_BODY_2 =
-+//   goog.getMsg("That\'s all we know");
-
-```
-
-**Prettier Similarity**: 33.33%
-
-
 ### js/switch/comments2.js
 ```diff
  switch (1) {
@@ -1765,24 +1579,6 @@
 ```
 
 **Prettier Similarity**: 74.07%
-
-
-### js/ternaries/func-call.js
-```diff
- fn(
-   bifornCringerMoshedPerplexSawder,
-   askTrovenaBeenaDependsRowans,
-   glimseGlyphsHazardNoopsTieTie === averredBathersBoxroomBuggyNurl &&
--    anodyneCondosMalateOverateRetinol
-+  anodyneCondosMalateOverateRetinol
-     ? annularCooeedSplicesWalksWayWay
-     : kochabCooieGameOnOboleUnweave,
- );
- // TODO(rattrayalex): try to indent consequent/alternate here.
-
-```
-
-**Prettier Similarity**: 88.89%
 
 
 ### js/test-declarations/angularjs_inject.js
@@ -3033,69 +2829,6 @@
 **Prettier Similarity**: 25.00%
 
 
-### typescript/function-type/consistent.ts
-```diff
- // TSFunctionType
- type A = (
-   tpl: TemplateStringsArray,
-   ...args: Array<unknown>
- ) => (replacements?: PublicReplacements) => T;
- 
- // TSConstructorType
- type B = new (
-   tpl: TemplateStringsArray,
-   ...args: Array<unknown>
- ) => (replacements?: PublicReplacements) => T;
- 
- type X = {
-   // TSCallSignatureDeclaration
--  (
--    tpl: TemplateStringsArray,
--    ...args: Array<unknown>
--  ): (replacements?: PublicReplacements) => T;
-+  (tpl: TemplateStringsArray, ...args: Array<unknown>): (
-+    replacements?: PublicReplacements,
-+  ) => T;
- 
-   // TSConstructSignatureDeclaration
--  new (
--    tpl: TemplateStringsArray,
--    ...args: Array<unknown>
--  ): (replacements?: PublicReplacements) => T;
-+  new (tpl: TemplateStringsArray, ...args: Array<unknown>): (
-+    replacements?: PublicReplacements,
-+  ) => T;
- };
-
-```
-
-**Prettier Similarity**: 68.00%
-
-
-### typescript/generic/ungrouped-parameters.ts
-```diff
--function filterTooltipWithFoo<F extends Field>(
--  oldEncoding: Encoding<F>,
--): {
-+function filterTooltipWithFoo<F extends Field>(oldEncoding: Encoding<F>): {
-   customTooltipWithoutAggregatedField?:
-     | StringFieldDefWithCondition<F>
-     | StringValueDefWithCondition<F>
-     | StringFieldDef<F>[];
-   filteredEncoding: Encoding<F>;
- } {
-   const { tooltip, ...filteredEncoding } = oldEncoding;
-   if (!tooltip) {
-     return { filteredEncoding };
-   }
-   // ...
- }
-
-```
-
-**Prettier Similarity**: 80.00%
-
-
 ### typescript/import-export/type-modifier.ts
 ```diff
  export type { SomeThing };
@@ -3407,94 +3140,6 @@
 ```
 
 **Prettier Similarity**: 27.87%
-
-
-### typescript/mapped-type/break-mode/break-mode.ts
-```diff
- type A1 = { readonly [A in B]: T };
--type A2 = {
--  readonly [A in B]: T;
--};
-+type A2 = { readonly [A in B]: T };
- type A3 = {
-   readonly [A in B]: T;
- };
--type A4 = {
-+type A4 = { readonly [A in B]: T };
-+type A5 = { readonly [A in B]: T };
-+type A6 = { readonly [A in B]: T };
-+type A7 = {
-   readonly [A in B]: T;
- };
--type A5 = { readonly [A in B]: T };
--type A6 = { readonly [A in B]: T };
--type A7 = { readonly [A in B]: T };
-
-```
-
-**Prettier Similarity**: 46.15%
-
-
-### typescript/mapped-type/issue-11098.ts
-```diff
- type Type = {
-   // comment
-   readonly [T in number];
- };
- 
- type Type = {
-   // comment1
-   // comment2
-   readonly [T in number];
- };
- 
- type Type = {
-   // comment
-   +readonly [T in number];
- };
- 
- type Type = {
-   // comment
-   -readonly [T in number];
- };
- 
- type Type = {
-   // comment
-   +readonly [T in number];
- };
- 
- type Type = {
-   // comment
-   +readonly [T in number];
- };
- 
- type Type = {
-   // comment
-   readonly [T in number];
- };
- 
- type Type = {
-   // comment
-   [T in number];
- };
- 
- type Type = {
--  // comment
--  readonly [T in number];
-+  readonly // comment
-+  [T in number];
- };
- 
- type Type = {
--  // foo
--  /* bar */ readonly [T in number];
-+  readonly // foo
-+  /* bar */ [T in number];
- };
-
-```
-
-**Prettier Similarity**: 92.00%
 
 
 ### typescript/multiparser-css/issue-6259.ts

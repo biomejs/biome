@@ -22,15 +22,19 @@ hooks_missing_name.json:6:5 deserialize ━━━━━━━━━━━━━�
   - noDuplicateJsonKeys
   - noEmptyBlockStatements
   - noImplicitAnyLet
+  - noInvalidUseBeforeDeclaration
   - noMisleadingCharacterClass
+  - noNodejsModules
   - noUnusedImports
   - noUnusedPrivateClassMembers
   - noUselessLoneBlockStatements
+  - noUselessTernary
   - useAwait
   - useExportType
   - useForOf
   - useGroupedTypeImport
   - useImportRestrictions
+  - useNodeImportProtocol
   - useRegexLiterals
   - useShorthandFunctionType
   - useValidAriaRole

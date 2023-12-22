@@ -9,29 +9,32 @@ use super::parse_error::expected_unit;
 use super::{parse_regular_identifier, parse_regular_number};
 
 #[inline]
-pub(crate) fn is_at_dimension(p: &mut CssParser) -> bool {
+pub(crate) fn is_at_any_dimension(p: &mut CssParser) -> bool {
     is_at_percentage_dimension(p) || is_at_regular_dimension(p)
 }
 
 #[inline]
-pub(crate) fn parse_dimension(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_dimension(p) {
+pub(crate) fn parse_any_dimension(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_any_dimension(p) {
         return Absent;
     }
+
     if is_at_percentage_dimension(p) {
-        return parse_percentage_dimension(p);
+        parse_percentage_dimension(p)
+    } else {
+        parse_regular_dimension(p)
     }
-    parse_regular_dimension(p)
 }
 
-fn is_at_percentage_dimension(p: &mut CssParser) -> bool {
-    p.at(CSS_NUMBER_LITERAL) && matches!(p.nth(1), T![%])
+pub(crate) fn is_at_percentage_dimension(p: &mut CssParser) -> bool {
+    p.at(CSS_NUMBER_LITERAL) && p.nth_at(1, T![%])
 }
 #[inline]
-fn parse_percentage_dimension(p: &mut CssParser) -> ParsedSyntax {
+pub(crate) fn parse_percentage_dimension(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_percentage_dimension(p) {
         return Absent;
     }
+
     let m = p.start();
     parse_regular_number(p).ok();
     p.expect(T![%]);

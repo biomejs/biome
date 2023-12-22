@@ -36,7 +36,7 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
     let content = fs::read_to_string(test_case_path)
         .expect("Expected test path to be a readable file in UTF8 encoding");
 
-    let parse_config = CssParserOptions::default().with_allow_wrong_line_comments();
+    let parse_config = CssParserOptions::default().allow_wrong_line_comments();
     let parsed = parse_css(&content, parse_config);
     let formatted_ast = format!("{:#?}", parsed.tree());
 
@@ -103,7 +103,7 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
                     .descendants()
                     .any(|node| node.kind().is_bogus())
             {
-                panic!("Parsed tree of a 'OK' test case should not contain any missing required children or bogus nodes");
+                panic!("Parsed tree of a 'OK' test case should not contain any missing required children or bogus nodes: \n {formatted_ast:#?} \n\n {}", formatted_ast);
             }
 
             let syntax = parsed.syntax();
@@ -134,14 +134,20 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 #[test]
 pub fn quick_test() {
     let code = r#"
-    .a{
-         background: url(image.png\10FFFF);
-    }
-  
+@keyframes slidein {
+	{
+		transform: translateX(0%);
+	}
+}
     "#;
+    // let code: String = fs::read_to_string("./tests/bootstrap.css")
+    //     .unwrap()
+    //     .parse()
+    //     .unwrap();
+
     let root = parse_css(
         code,
-        CssParserOptions::default().with_allow_wrong_line_comments(),
+        CssParserOptions::default().allow_wrong_line_comments(),
     );
     let syntax = root.syntax();
     dbg!(&syntax, root.diagnostics(), root.has_errors());

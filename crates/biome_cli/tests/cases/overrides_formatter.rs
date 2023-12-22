@@ -10,6 +10,8 @@ const UNFORMATTED: &str = "  statement(  )  ";
 const UNFORMATTED_JSON: &str = r#"{ "asta": ["lorem", "ipsum", "first", "second"] }"#;
 const FORMATTED_JSON: &str =
     "{\n    \"asta\": [\n        \"lorem\",\n        \"ipsum\",\n        \"first\",\n        \"second\"\n    ]\n}\n";
+const UNFORMATTED_CSS: &str = "html {}";
+const FORMATTED_CSS: &str = "html {\n}\n";
 
 const UNFORMATTED_LINE_WIDTH: &str = r#"const a = ["loreum", "ipsum"]"#;
 const FORMATTED: &str = "statement();\n";
@@ -293,12 +295,14 @@ fn does_include_file_with_different_languages_and_files() {
         "include": ["test2.js"],
         "formatter": { "lineWidth": 120, "indentStyle": "space" },
         "javascript": { "formatter": { "semicolons": "asNeeded" } },
-        "json": { "formatter": { "indentStyle": "space", "lineWidth": 20, "indentWidth": 4 } }
+        "json": { "formatter": { "indentStyle": "space", "lineWidth": 20, "indentWidth": 4 } },
+        "css": { "formatter": { "indentStyle": "space", "lineWidth": 30, "indentWidth": 3 } }
     },
     {
         "include": ["test3.json"],
         "formatter": { "lineWidth": 120, "indentStyle": "space" },
-        "json": { "formatter": { "indentStyle": "space", "lineWidth": 20, "indentWidth": 4 } }
+        "json": { "formatter": { "indentStyle": "space", "lineWidth": 20, "indentWidth": 4 } },
+        "css": { "formatter": { "indentStyle": "space", "lineWidth": 30, "indentWidth": 3 } }
     }
   ]
 }
@@ -316,6 +320,9 @@ fn does_include_file_with_different_languages_and_files() {
     let json_file = Path::new("test3.json");
     fs.insert(json_file.into(), UNFORMATTED_JSON.as_bytes());
 
+    let css_file = Path::new("test4.css");
+    fs.insert(css_file.into(), UNFORMATTED_CSS.as_bytes());
+
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
         &mut console,
@@ -326,6 +333,7 @@ fn does_include_file_with_different_languages_and_files() {
                 test.as_os_str().to_str().unwrap(),
                 test2.as_os_str().to_str().unwrap(),
                 json_file.as_os_str().to_str().unwrap(),
+                css_file.as_os_str().to_str().unwrap(),
             ]
             .as_slice(),
         ),
@@ -336,6 +344,7 @@ fn does_include_file_with_different_languages_and_files() {
     assert_file_contents(&fs, test, FORMATTED_WITH_SINGLE_QUOTES);
     assert_file_contents(&fs, test2, FORMATTED_WITH_NO_SEMICOLONS);
     assert_file_contents(&fs, json_file, FORMATTED_JSON);
+    assert_file_contents(&fs, css_file, FORMATTED_CSS);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),

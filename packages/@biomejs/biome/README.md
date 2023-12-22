@@ -23,18 +23,11 @@
 [open-vsx-badge]: https://badgen.net/open-vsx/version/biomejs/biome?label=open-vsx&color=green
 [open-vsx-url]: https://open-vsx.org/extension/biomejs/biome
 
-
-</div>
-
-<div align="center">
-
-English | [简体中文](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.zh-CN.md)
-
 </div>
 
 **Biome** is a performant toolchain for web projects, it aims to provide developer tools to maintain the health of said projects.
 
-**Biome is a [fast formatter](./benchmark#formatting)** for _JavaScript_, _TypeScript_, _JSX_, and _JSON_ that scores **[96% compatibility with _Prettier_](https://console.algora.io/challenges/prettier)**.
+**Biome is a [fast formatter](./benchmark#formatting)** for _JavaScript_, _TypeScript_, _JSX_, and _JSON_ that scores **[97% compatibility with _Prettier_](https://console.algora.io/challenges/prettier)**.
 
 **Biome is a [performant linter](https://github.com/biomejs/biome/tree/main/benchmark#linting)** for _JavaScript_, _TypeScript_, and _JSX_ that features **[more than 170 rules](https://biomejs.dev/linter/rules/)** from ESLint, TypeSCript ESLint, and [other sources](https://github.com/biomejs/biome/discussions/3).
 It **outputs detailed and contextualized diagnostics** that help you to improve your code and become a better programmer!
@@ -116,7 +109,13 @@ Read more about our [project philosophy][biome-philosophy].
   </tbody>
 </table>
 
-[bench]: https://github.com/biomejs/biome/blob/main/benchmark/README.md
+## Translations
+
+- English
+- [简体中文](./packages/%40biomejs/biome/README.zh-CN.md)
+- [日本語](./packages/%40biomejs/biome/README.ja.md)
+- [Português do Brasil](./packages/%40biomejs/biome/README.pt-br.md)
+
 [biomejs]: https://biomejs.dev/
 [biome-philosophy]: https://biomejs.dev/internals/philosophy/
 [language-support]: https://biomejs.dev/internals/language-support/

@@ -11,9 +11,7 @@ impl FormatNodeRule<JsImportNamespaceClause> for FormatJsImportNamespaceClause {
     fn fmt_fields(&self, node: &JsImportNamespaceClause, f: &mut JsFormatter) -> FormatResult<()> {
         let JsImportNamespaceClauseFields {
             type_token,
-            star_token,
-            as_token,
-            local_name,
+            namespace_specifier,
             from_token,
             source,
             assertion,
@@ -26,11 +24,7 @@ impl FormatNodeRule<JsImportNamespaceClause> for FormatJsImportNamespaceClause {
         write![
             f,
             [
-                star_token.format(),
-                space(),
-                as_token.format(),
-                space(),
-                local_name.format(),
+                namespace_specifier.format(),
                 space(),
                 from_token.format(),
                 space(),
