@@ -27,7 +27,7 @@
 
 <div align="center">
 
-[English](./packages/%40biomejs/biome/README.md) | [简体中文](./packages/%40biomejs/biome/README.zh-CN.md) | [日本語](./packages/%40biomejs/biome/README.ja.md) | Português do Brasil
+[English](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.md) | [简体中文](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.zh-CN.md) | [日本語](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.ja.md) | Português do Brasil
 
 </div>
 
