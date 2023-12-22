@@ -1,6 +1,7 @@
 use crate::prelude::*;
-use biome_css_syntax::CssPseudoClassOfNthSelector;
-use biome_rowan::AstNode;
+use biome_css_syntax::{CssPseudoClassOfNthSelector, CssPseudoClassOfNthSelectorFields};
+use biome_formatter::write;
+
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatCssPseudoClassOfNthSelector;
 impl FormatNodeRule<CssPseudoClassOfNthSelector> for FormatCssPseudoClassOfNthSelector {
@@ -9,6 +10,11 @@ impl FormatNodeRule<CssPseudoClassOfNthSelector> for FormatCssPseudoClassOfNthSe
         node: &CssPseudoClassOfNthSelector,
         f: &mut CssFormatter,
     ) -> FormatResult<()> {
-        format_verbatim_node(node.syntax()).fmt(f)
+        let CssPseudoClassOfNthSelectorFields {
+            of_token,
+            selector_list,
+        } = node.as_fields();
+
+        write!(f, [of_token.format(), space(), selector_list.format()])
     }
 }
