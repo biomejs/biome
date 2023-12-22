@@ -231,12 +231,15 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "to",
         "var",
         "font-face",
+        "url"
     ],
     literals: &[
         "CSS_STRING_LITERAL",
         "CSS_NUMBER_LITERAL",
         "CSS_CUSTOM_PROPERTY",
         "CSS_SPACE_LITERAL",
+        "CSS_URL_VALUE_RAW_LITERAL",
+        "CSS_COLOR_LITERAL"
     ],
     tokens: &[
         "ERROR_TOKEN",
@@ -316,6 +319,12 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_ATTRIBUTE_NAME",
         "CSS_ATTRIBUTE_MATCHER",
         "CSS_ATTRIBUTE_MATCHER_VALUE",
+        "CSS_PARENTHESIZED_EXPRESSION",
+        "CSS_LIST_OF_COMPONENT_VALUES_EXPRESS",
+        "CSS_BINARY_EXPRESS",
+        "CSS_URL_VALUE_RAW",
+        "CSS_URL_FUNCTION",
+        "CSS_COLOR",
         // At rule nodes
         "CSS_AT_RULE",
         "CSS_CHARSET_AT_RULE",

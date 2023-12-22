@@ -16,10 +16,6 @@ macro_rules! map_syntax_node {
     ($ node : expr , $ pattern : pat => $ body : expr) => {
         match $node {
             node => match $crate::CssSyntaxNode::kind(&node) {
-                $crate::CssSyntaxKind::CSS_ANY_FUNCTION => {
-                    let $pattern = unsafe { $crate::CssAnyFunction::new_unchecked(node) };
-                    $body
-                }
                 $crate::CssSyntaxKind::CSS_AT_RULE => {
                     let $pattern = unsafe { $crate::CssAtRule::new_unchecked(node) };
                     $body
@@ -40,6 +36,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssAttributeSelector::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_BINARY_EXPRESS => {
+                    let $pattern = unsafe { $crate::CssBinaryExpress::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_BLOCK => {
                     let $pattern = unsafe { $crate::CssBlock::new_unchecked(node) };
                     $body
@@ -50,6 +50,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::CssSyntaxKind::CSS_CLASS_SELECTOR => {
                     let $pattern = unsafe { $crate::CssClassSelector::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_COLOR => {
+                    let $pattern = unsafe { $crate::CssColor::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_COLOR_PROFILE_AT_RULE => {
@@ -106,6 +110,11 @@ macro_rules! map_syntax_node {
                 }
                 $crate::CssSyntaxKind::CSS_KEYFRAMES_SELECTOR => {
                     let $pattern = unsafe { $crate::CssKeyframesSelector::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_LIST_OF_COMPONENT_VALUES_EXPRESS => {
+                    let $pattern =
+                        unsafe { $crate::CssListOfComponentValuesExpress::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_MEDIA_AT_RULE => {
@@ -166,6 +175,11 @@ macro_rules! map_syntax_node {
                 }
                 $crate::CssSyntaxKind::CSS_PARAMETER => {
                     let $pattern = unsafe { $crate::CssParameter::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_PARENTHESIZED_EXPRESSION => {
+                    let $pattern =
+                        unsafe { $crate::CssParenthesizedExpression::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_PERCENT_DIMENSION => {
@@ -310,6 +324,14 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssUniversalSelector::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_URL_FUNCTION => {
+                    let $pattern = unsafe { $crate::CssUrlFunction::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_URL_VALUE_RAW => {
+                    let $pattern = unsafe { $crate::CssUrlValueRaw::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_VAR_FUNCTION => {
                     let $pattern = unsafe { $crate::CssVarFunction::new_unchecked(node) };
                     $body
@@ -328,6 +350,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::CssSyntaxKind::CSS_BOGUS_BODY => {
                     let $pattern = unsafe { $crate::CssBogusBody::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_BOGUS_PARAMETER => {
+                    let $pattern = unsafe { $crate::CssBogusParameter::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_BOGUS_PSEUDO_CLASS => {

@@ -44,6 +44,7 @@ CssBogusPseudoElement = SyntaxElement*
 CssBogusAtRule = SyntaxElement*
 CssBogusBody =  SyntaxElement*
 CssBogusRule =  SyntaxElement*
+CssBogusParameter = SyntaxElement*
 
 CssRoot =
 	bom: 'UNICODE_BOM'?
@@ -576,8 +577,9 @@ AnyCssValue =
 	| CssNumber
 	| AnyCssDimension
 	| CssRatio
-	| CssAnyFunction
+	| AnyCssFunction
 	| CssCustomProperty
+	| CssColor
 
 
 // 10px
@@ -601,8 +603,9 @@ CssRatio =
 	denominator: CssNumber
 
 
-CssAnyFunction =
-	CssSimpleFunction
+AnyCssFunction =
+	CssSimpleFunction | 
+	CssUrlFunction
 
 // content: counter(section);
 // 					^^^^^^^^^^^^^^^^
@@ -611,6 +614,13 @@ CssSimpleFunction =
 	'('
 	items: CssParameterList
 	')'
+
+CssUrlFunction = 'url' '(' AnyCssUrlValue? ')'
+
+AnyCssUrlValue =
+	CssUrlValueRaw
+	| CssString
+
 
 CssVarFunction =
 	'var'
@@ -637,8 +647,31 @@ CssParameterList = CssParameter (',' CssParameter)* ','?
 //			    ^^^
 // repeating-radial-gradient(red, yellow 10%, green 15%);
 //                                ^^^^^^^^^^
-CssParameter = CssListOfComponentValues
+CssParameter = AnyCssParameter
+AnyCssParameter = AnyCssExpression | CssListOfComponentValuesExpress
+
+AnyCssExpression = CssBinaryExpress | CssParenthesizedExpression |  AnyCssValue
+
+CssListOfComponentValuesExpress = CssListOfComponentValues
+
+CssBinaryExpress = 
+	left: AnyCssExpression
+	operator_token: (
+		'+' | '-' | '*' | '/' 
+	)
+	right: AnyCssExpression
+
+
+CssParenthesizedExpression =
+	'(' expression: AnyCssExpression? ')'
+
+// #app {}
+// ^^^^
+CssColor =
+	'#'
+	name:'css_color_literal' 
 
 CssIdentifier = value: 'ident'
 CssString = value: 'css_string_literal'
 CssNumber = value: 'css_number_literal'
+CssUrlValueRaw = value: 'css_url_value_raw_literal'

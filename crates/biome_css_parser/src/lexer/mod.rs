@@ -21,6 +21,12 @@ pub enum CssLexContext {
     /// Applied when lexing CSS pseudo nth selectors.
     /// Distinct '-' from identifiers and '+' from numbers.
     PseudoNthSelector,
+
+    /// Applied when lexing CSS url function.
+    /// Doesn't skip whitespace trivia for a combinator.
+    UrlRawValue,
+
+    Color,
 }
 
 impl LexContext for CssLexContext {
@@ -102,6 +108,8 @@ impl<'src> Lexer<'src> for CssLexer<'src> {
                 CssLexContext::Regular => self.consume_token(current),
                 CssLexContext::Selector => self.consume_selector_token(current),
                 CssLexContext::PseudoNthSelector => self.consume_pseudo_nth_selector_token(current),
+                CssLexContext::UrlRawValue => self.consume_url_raw_value_token(current),
+                CssLexContext::Color => self.consume_color_token(current),
             },
             None => EOF,
         };
@@ -513,11 +521,62 @@ impl<'src> CssLexer<'src> {
         }
     }
 
+    fn consume_color_token(&mut self, current: u8) -> CssSyntaxKind {
+        match current {
+            b'#' => self.consume_byte(T![#]),
+            b'0'..=b'9' | b'a'..=b'f' | b'A'..=b'Z' => {
+                return self.consume_color();
+            }
+            _ => self.consume_token(current),
+        }
+    }
+
+    fn consume_color(&mut self) -> CssSyntaxKind {
+        let start = self.text_position();
+        let mut length = 0;
+        while matches!(
+            self.current_byte(),
+            Some(b'0'..=b'9') | Some(b'a'..=b'f') | Some(b'A'..=b'Z')
+        ) {
+            self.advance(1);
+            length += 1;
+        }
+        if !matches!(length, 3 | 4 | 6 | 8) {
+            let diagnostic = ParseDiagnostic::new("Invalid color", start..self.text_position());
+            self.diagnostics.push(diagnostic);
+        }
+
+        CSS_COLOR_LITERAL
+    }
+
     fn consume_selector_token(&mut self, current: u8) -> CssSyntaxKind {
         match current {
             b' ' => self.consume_byte(CSS_SPACE_LITERAL),
             _ => self.consume_token(current),
         }
+    }
+    fn consume_url_raw_value_token(&mut self, current: u8) -> CssSyntaxKind {
+        if let Some(chr) = self.current_byte() {
+            let dispatch = lookup_byte(chr);
+            return match dispatch {
+                IDT | UNI | PRD | SLH | ZER | DIG => self.consume_url_raw_value(),
+                _ => self.consume_token(current),
+            };
+        }
+        self.consume_token(current)
+    }
+    fn consume_url_raw_value(&mut self) -> CssSyntaxKind {
+        let start = self.text_position();
+        while let Some(chr) = self.current_byte() {
+            let dispatch = lookup_byte(chr);
+            if matches!(dispatch, PNC) {
+                return CSS_URL_VALUE_RAW_LITERAL;
+            }
+            self.advance(1);
+        }
+        let diagnostic = ParseDiagnostic::new("Invalid url raw value", start..self.text_position());
+        self.diagnostics.push(diagnostic);
+        CSS_URL_VALUE_RAW_LITERAL
     }
 
     fn consume_pseudo_nth_selector_token(&mut self, current: u8) -> CssSyntaxKind {
@@ -771,6 +830,7 @@ impl<'src> CssLexer<'src> {
             b"color-profile" => COLOR_PROFILE_KW,
             b"counter-style" => COUNTER_STYLE_KW,
             b"font-face" => FONT_FACE_KW,
+            b"url" => URL_KW,
             _ => IDENT,
         }
     }
