@@ -980,7 +980,7 @@ CssBinaryExpress =
 CssParenthesizedExpression =
 	'(' expression: AnyCssExpression? ')'
 
-// #app {}
+// #fff
 // ^^^^
 CssColor =
 	'#'
