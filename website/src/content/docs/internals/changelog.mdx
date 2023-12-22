@@ -86,6 +86,11 @@ is enabled to process only the files that were changed. Contributed by @simonxab
   + export type { B }
   ```
 
+- Add [useFilenamingConvention](https://biomejs.dev/linter/rules/use-filenaming-convention), that enforces naming conventions for JavaScript and TypeScript filenames. Contributed by @Conaclos
+
+  By default, the rule requires that a filename be in `camelCase`, `kebab-case`, `snake_case`, or matches the name of an `export` in the file.
+  The rule provides options to restrict the allowed cases.
+
 - Add [noNodejsModules](https://biomejs.dev/linter/rules/no-nodejs-modules), that disallows the use of Node.js modules.
 
 - Add [useNodeImportProtocol](https://biomejs.dev/linter/rules/use-node-import-protocol) that forces the use of the `node:` protocol when importing Node.js modules. Contributed by @2-NOW

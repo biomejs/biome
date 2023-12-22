@@ -1,0 +1,22 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-kebab-case.js
+---
+# Input
+```js
+
+```
+
+# Diagnostics
+```
+invalid-kebab-case.js lint/nursery/useFilenamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The filename should be in snake_case.
+  
+  i The filename could be renamed to one of the following names:
+    invalid_kebab_case.js
+  
+
+```
+
+

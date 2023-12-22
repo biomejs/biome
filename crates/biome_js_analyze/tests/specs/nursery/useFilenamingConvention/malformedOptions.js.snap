@@ -1,0 +1,26 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: malformedOptions.js
+---
+# Input
+```js
+
+```
+
+# Diagnostics
+```
+malformedOptions.options:9:24 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × filenameCases has an incorrect type, expected an array, but received a string.
+  
+     7 │ 					"level": "error",
+     8 │ 					"options": {
+   > 9 │ 						"filenameCases": "camelCase"
+       │ 						                 ^^^^^^^^^^^
+    10 │ 					}
+    11 │ 				}
+  
+
+```
+
+
