@@ -28,11 +28,6 @@ debugger;
 # Emitted Messages
 
 ```block
-The number of diagnostics exceeds the number allowed by Biome.
-Diagnostics not shown: 1.
-```
-
-```block
 Checked 1 file(s) in <TIME>
 ```
 

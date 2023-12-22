@@ -11,7 +11,6 @@ use crate::execute::process_file::lint::lint;
 use crate::execute::traverse::TraversalOptions;
 use crate::execute::TraversalMode;
 use crate::CliDiagnostic;
-use biome_diagnostics::Severity;
 use biome_diagnostics::{category, DiagnosticExt, Error};
 use biome_fs::RomePath;
 use biome_service::workspace::{FeatureName, FeaturesBuilder, SupportKind, SupportsFeatureParams};
@@ -59,15 +58,6 @@ impl Message {
 pub(crate) enum DiffKind {
     Format,
     OrganizeImports,
-}
-
-impl DiffKind {
-    pub fn severity(&self) -> Severity {
-        match self {
-            DiffKind::Format => Severity::Information,
-            DiffKind::OrganizeImports => Severity::Warning,
-        }
-    }
 }
 
 impl<D> From<D> for Message
