@@ -114,7 +114,7 @@ impl DeserializationVisitor for RuleConfigurationVisitor {
                 )),
             }
         }
-        Some(RuleConfiguration::WithOptions(result))
+        Some(RuleConfiguration::WithOptions(Box::new(result)))
     }
 }
 
