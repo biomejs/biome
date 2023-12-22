@@ -575,28 +575,24 @@ CssRoot {
                         comparison: CssQueryFeatureRangeComparison {
                             operator: GTEQ@664..666 ">=" [] [],
                         },
-                        right: CssAnyFunction {
-                            css_simple_function: CssSimpleFunction {
-                                name: CssIdentifier {
-                                    value_token: IDENT@666..670 "calc" [] [],
-                                },
-                                l_paren_token: L_PAREN@670..671 "(" [] [],
-                                items: CssParameterList [
-                                    CssParameter {
-                                        css_component_value_list: CssComponentValueList [
-                                            CssRegularDimension {
-                                                value: CssNumber {
-                                                    value_token: CSS_NUMBER_LITERAL@671..674 "200" [] [],
-                                                },
-                                                unit: CssIdentifier {
-                                                    value_token: IDENT@674..676 "px" [] [],
-                                                },
-                                            },
-                                        ],
-                                    },
-                                ],
-                                r_paren_token: R_PAREN@676..677 ")" [] [],
+                        right: CssSimpleFunction {
+                            name: CssIdentifier {
+                                value_token: IDENT@666..670 "calc" [] [],
                             },
+                            l_paren_token: L_PAREN@670..671 "(" [] [],
+                            items: CssParameterList [
+                                CssParameter {
+                                    any_css_parameter: CssRegularDimension {
+                                        value: CssNumber {
+                                            value_token: CSS_NUMBER_LITERAL@671..674 "200" [] [],
+                                        },
+                                        unit: CssIdentifier {
+                                            value_token: IDENT@674..676 "px" [] [],
+                                        },
+                                    },
+                                },
+                            ],
+                            r_paren_token: R_PAREN@676..677 ")" [] [],
                         },
                     },
                     r_paren_token: R_PAREN@677..679 ")" [] [Whitespace(" ")],
@@ -1047,20 +1043,18 @@ CssRoot {
               0: IDENT@653..664 "inline-size" [] []
             1: CSS_QUERY_FEATURE_RANGE_COMPARISON@664..666
               0: GTEQ@664..666 ">=" [] []
-            2: CSS_ANY_FUNCTION@666..677
-              0: CSS_SIMPLE_FUNCTION@666..677
-                0: CSS_IDENTIFIER@666..670
-                  0: IDENT@666..670 "calc" [] []
-                1: L_PAREN@670..671 "(" [] []
-                2: CSS_PARAMETER_LIST@671..676
-                  0: CSS_PARAMETER@671..676
-                    0: CSS_COMPONENT_VALUE_LIST@671..676
-                      0: CSS_REGULAR_DIMENSION@671..676
-                        0: CSS_NUMBER@671..674
-                          0: CSS_NUMBER_LITERAL@671..674 "200" [] []
-                        1: CSS_IDENTIFIER@674..676
-                          0: IDENT@674..676 "px" [] []
-                3: R_PAREN@676..677 ")" [] []
+            2: CSS_SIMPLE_FUNCTION@666..677
+              0: CSS_IDENTIFIER@666..670
+                0: IDENT@666..670 "calc" [] []
+              1: L_PAREN@670..671 "(" [] []
+              2: CSS_PARAMETER_LIST@671..676
+                0: CSS_PARAMETER@671..676
+                  0: CSS_REGULAR_DIMENSION@671..676
+                    0: CSS_NUMBER@671..674
+                      0: CSS_NUMBER_LITERAL@671..674 "200" [] []
+                    1: CSS_IDENTIFIER@674..676
+                      0: IDENT@674..676 "px" [] []
+              3: R_PAREN@676..677 ")" [] []
           2: R_PAREN@677..679 ")" [] [Whitespace(" ")]
         3: CSS_RULE_LIST_BLOCK@679..682
           0: L_CURLY@679..681 "{" [] [Whitespace(" ")]

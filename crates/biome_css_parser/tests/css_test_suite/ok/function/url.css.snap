@@ -77,7 +77,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [],
                 },
             ],
-            block: CssBlock {
+            block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@2..3 "{" [] [],
                 declaration_list: CssDeclarationList [
                     CssDeclaration {
@@ -85,7 +85,7 @@ CssRoot {
                             value_token: IDENT@3..24 "background-image" [Newline("\n"), Whitespace("    ")] [],
                         },
                         colon_token: COLON@24..26 ":" [] [Whitespace(" ")],
-                        value: CssListOfComponentValues [
+                        value: CssComponentValueList [
                             CssUrlFunction {
                                 url_token: URL_KW@26..29 "url" [] [],
                                 l_paren_token: L_PAREN@29..30 "(" [] [],
@@ -103,7 +103,7 @@ CssRoot {
                             value_token: IDENT@110..131 "background-image" [Newline("\n"), Whitespace("    ")] [],
                         },
                         colon_token: COLON@131..133 ":" [] [Whitespace(" ")],
-                        value: CssListOfComponentValues [
+                        value: CssComponentValueList [
                             CssUrlFunction {
                                 url_token: URL_KW@133..136 "url" [] [],
                                 l_paren_token: L_PAREN@136..137 "(" [] [],
@@ -121,7 +121,7 @@ CssRoot {
                             value_token: IDENT@156..177 "background-image" [Newline("\n"), Whitespace("    ")] [],
                         },
                         colon_token: COLON@177..179 ":" [] [Whitespace(" ")],
-                        value: CssListOfComponentValues [
+                        value: CssComponentValueList [
                             CssUrlFunction {
                                 url_token: URL_KW@179..182 "url" [] [],
                                 l_paren_token: L_PAREN@182..183 "(" [] [],
@@ -139,7 +139,7 @@ CssRoot {
                             value_token: IDENT@202..223 "background-image" [Newline("\n"), Whitespace("    ")] [],
                         },
                         colon_token: COLON@223..225 ":" [] [Whitespace(" ")],
-                        value: CssListOfComponentValues [
+                        value: CssComponentValueList [
                             CssUrlFunction {
                                 url_token: URL_KW@225..228 "URL" [] [],
                                 l_paren_token: L_PAREN@228..229 "(" [] [],
@@ -157,7 +157,7 @@ CssRoot {
                             value_token: IDENT@248..269 "background-image" [Newline("\n"), Whitespace("    ")] [],
                         },
                         colon_token: COLON@269..271 ":" [] [Whitespace(" ")],
-                        value: CssListOfComponentValues [
+                        value: CssComponentValueList [
                             CssUrlFunction {
                                 url_token: URL_KW@271..274 "url" [] [],
                                 l_paren_token: L_PAREN@274..278 "(" [] [Whitespace("   ")],
@@ -175,7 +175,7 @@ CssRoot {
                             value_token: IDENT@297..318 "background-image" [Newline("\n"), Whitespace("    ")] [],
                         },
                         colon_token: COLON@318..320 ":" [] [Whitespace(" ")],
-                        value: CssListOfComponentValues [
+                        value: CssComponentValueList [
                             CssUrlFunction {
                                 url_token: URL_KW@320..323 "url" [] [],
                                 l_paren_token: L_PAREN@323..324 "(" [] [],
@@ -193,7 +193,7 @@ CssRoot {
                             value_token: IDENT@346..367 "background-image" [Newline("\n"), Whitespace("    ")] [],
                         },
                         colon_token: COLON@367..369 ":" [] [Whitespace(" ")],
-                        value: CssListOfComponentValues [
+                        value: CssComponentValueList [
                             CssUrlFunction {
                                 url_token: URL_KW@369..372 "url" [] [],
                                 l_paren_token: L_PAREN@372..376 "(" [] [Whitespace("   ")],
@@ -211,7 +211,7 @@ CssRoot {
                             value_token: IDENT@398..419 "background-image" [Newline("\n"), Whitespace("    ")] [],
                         },
                         colon_token: COLON@419..421 ":" [] [Whitespace(" ")],
-                        value: CssListOfComponentValues [
+                        value: CssComponentValueList [
                             CssUrlFunction {
                                 url_token: URL_KW@421..424 "url" [] [],
                                 l_paren_token: L_PAREN@424..428 "(" [] [Whitespace("   ")],
@@ -229,7 +229,7 @@ CssRoot {
                             value_token: IDENT@460..481 "background-image" [Newline("\n"), Whitespace("    ")] [],
                         },
                         colon_token: COLON@481..483 ":" [] [Whitespace(" ")],
-                        value: CssListOfComponentValues [
+                        value: CssComponentValueList [
                             CssUrlFunction {
                                 url_token: URL_KW@483..486 "url" [] [],
                                 l_paren_token: L_PAREN@486..487 "(" [] [],
@@ -245,7 +245,7 @@ CssRoot {
                             value_token: IDENT@489..510 "background-image" [Newline("\n"), Whitespace("    ")] [],
                         },
                         colon_token: COLON@510..512 ":" [] [Whitespace(" ")],
-                        value: CssListOfComponentValues [
+                        value: CssComponentValueList [
                             CssUrlFunction {
                                 url_token: URL_KW@512..515 "url" [] [],
                                 l_paren_token: L_PAREN@515..519 "(" [] [Whitespace("   ")],
@@ -261,7 +261,7 @@ CssRoot {
                             value_token: IDENT@521..542 "background-image" [Newline("\n"), Whitespace("    ")] [],
                         },
                         colon_token: COLON@542..544 ":" [] [Whitespace(" ")],
-                        value: CssListOfComponentValues [
+                        value: CssComponentValueList [
                             CssUrlFunction {
                                 url_token: URL_KW@544..547 "url" [] [],
                                 l_paren_token: L_PAREN@547..548 "(" [] [],
@@ -279,7 +279,7 @@ CssRoot {
                             value_token: IDENT@552..573 "background-image" [Newline("\n"), Whitespace("    ")] [],
                         },
                         colon_token: COLON@573..575 ":" [] [Whitespace(" ")],
-                        value: CssListOfComponentValues [
+                        value: CssComponentValueList [
                             CssUrlFunction {
                                 url_token: URL_KW@575..578 "url" [] [],
                                 l_paren_token: L_PAREN@578..582 "(" [] [Whitespace("   ")],
@@ -297,7 +297,7 @@ CssRoot {
                             value_token: IDENT@589..610 "background-image" [Newline("\n"), Whitespace("    ")] [],
                         },
                         colon_token: COLON@610..612 ":" [] [Whitespace(" ")],
-                        value: CssListOfComponentValues [
+                        value: CssComponentValueList [
                             CssUrlFunction {
                                 url_token: URL_KW@612..615 "url" [] [],
                                 l_paren_token: L_PAREN@615..616 "(" [] [],
@@ -315,7 +315,7 @@ CssRoot {
                             value_token: IDENT@620..641 "background-image" [Newline("\n"), Whitespace("    ")] [],
                         },
                         colon_token: COLON@641..643 ":" [] [Whitespace(" ")],
-                        value: CssListOfComponentValues [
+                        value: CssComponentValueList [
                             CssUrlFunction {
                                 url_token: URL_KW@643..646 "url" [] [],
                                 l_paren_token: L_PAREN@646..650 "(" [] [Whitespace("   ")],
@@ -333,7 +333,7 @@ CssRoot {
                             value_token: IDENT@657..678 "background-image" [Newline("\n"), Whitespace("    ")] [],
                         },
                         colon_token: COLON@678..680 ":" [] [Whitespace(" ")],
-                        value: CssListOfComponentValues [
+                        value: CssComponentValueList [
                             CssUrlFunction {
                                 url_token: URL_KW@680..683 "url" [] [],
                                 l_paren_token: L_PAREN@683..687 "(" [] [Whitespace("   ")],
@@ -351,7 +351,7 @@ CssRoot {
                             value_token: IDENT@695..716 "background-image" [Newline("\n"), Whitespace("    ")] [],
                         },
                         colon_token: COLON@716..718 ":" [] [Whitespace(" ")],
-                        value: CssListOfComponentValues [
+                        value: CssComponentValueList [
                             CssUrlFunction {
                                 url_token: URL_KW@718..721 "url" [] [],
                                 l_paren_token: L_PAREN@721..722 "(" [] [],
@@ -369,7 +369,7 @@ CssRoot {
                             value_token: IDENT@735..756 "background-image" [Newline("\n"), Whitespace("    ")] [],
                         },
                         colon_token: COLON@756..758 ":" [] [Whitespace(" ")],
-                        value: CssListOfComponentValues [
+                        value: CssComponentValueList [
                             CssUrlFunction {
                                 url_token: URL_KW@758..761 "url" [] [],
                                 l_paren_token: L_PAREN@761..765 "(" [] [Whitespace("   ")],
@@ -387,7 +387,7 @@ CssRoot {
                             value_token: IDENT@781..802 "background-image" [Newline("\n"), Whitespace("    ")] [],
                         },
                         colon_token: COLON@802..804 ":" [] [Whitespace(" ")],
-                        value: CssListOfComponentValues [
+                        value: CssComponentValueList [
                             CssUrlFunction {
                                 url_token: URL_KW@804..807 "url" [] [],
                                 l_paren_token: L_PAREN@807..811 "(" [] [Whitespace("   ")],
@@ -405,7 +405,7 @@ CssRoot {
                             value_token: IDENT@830..851 "background-image" [Newline("\n"), Whitespace("    ")] [],
                         },
                         colon_token: COLON@851..853 ":" [] [Whitespace(" ")],
-                        value: CssListOfComponentValues [
+                        value: CssComponentValueList [
                             CssUrlFunction {
                                 url_token: URL_KW@853..856 "url" [] [],
                                 l_paren_token: L_PAREN@856..860 "(" [] [Whitespace("   ")],
@@ -423,7 +423,7 @@ CssRoot {
                             value_token: IDENT@889..910 "background-image" [Newline("\n"), Whitespace("    ")] [],
                         },
                         colon_token: COLON@910..912 ":" [] [Whitespace(" ")],
-                        value: CssListOfComponentValues [
+                        value: CssComponentValueList [
                             CssUrlFunction {
                                 url_token: URL_KW@912..915 "url" [] [],
                                 l_paren_token: L_PAREN@915..916 "(" [] [],
@@ -441,7 +441,7 @@ CssRoot {
                             value_token: IDENT@975..996 "background-image" [Newline("\n"), Whitespace("    ")] [],
                         },
                         colon_token: COLON@996..998 ":" [] [Whitespace(" ")],
-                        value: CssListOfComponentValues [
+                        value: CssComponentValueList [
                             CssUrlFunction {
                                 url_token: URL_KW@998..1001 "url" [] [],
                                 l_paren_token: L_PAREN@1001..1005 "(" [] [Whitespace("   ")],
@@ -459,7 +459,7 @@ CssRoot {
                             value_token: IDENT@1040..1055 "background" [Newline("\n"), Whitespace("    ")] [],
                         },
                         colon_token: COLON@1055..1057 ":" [] [Whitespace(" ")],
-                        value: CssListOfComponentValues [
+                        value: CssComponentValueList [
                             CssUrlFunction {
                                 url_token: URL_KW@1057..1060 "url" [] [],
                                 l_paren_token: L_PAREN@1060..1061 "(" [] [],
@@ -477,7 +477,7 @@ CssRoot {
                             value_token: IDENT@1077..1092 "background" [Newline("\n"), Whitespace("    ")] [],
                         },
                         colon_token: COLON@1092..1094 ":" [] [Whitespace(" ")],
-                        value: CssListOfComponentValues [
+                        value: CssComponentValueList [
                             CssUrlFunction {
                                 url_token: URL_KW@1094..1097 "url" [] [],
                                 l_paren_token: L_PAREN@1097..1098 "(" [] [],
@@ -495,7 +495,7 @@ CssRoot {
                             value_token: IDENT@1111..1126 "background" [Newline("\n"), Whitespace("    ")] [],
                         },
                         colon_token: COLON@1126..1128 ":" [] [Whitespace(" ")],
-                        value: CssListOfComponentValues [
+                        value: CssComponentValueList [
                             CssUrlFunction {
                                 url_token: URL_KW@1128..1131 "url" [] [],
                                 l_paren_token: L_PAREN@1131..1132 "(" [] [],
@@ -513,7 +513,7 @@ CssRoot {
                             value_token: IDENT@1148..1163 "background" [Newline("\n"), Whitespace("    ")] [],
                         },
                         colon_token: COLON@1163..1165 ":" [] [Whitespace(" ")],
-                        value: CssListOfComponentValues [
+                        value: CssComponentValueList [
                             CssUrlFunction {
                                 url_token: URL_KW@1165..1168 "url" [] [],
                                 l_paren_token: L_PAREN@1168..1169 "(" [] [],
@@ -531,7 +531,7 @@ CssRoot {
                             value_token: IDENT@1185..1200 "background" [Newline("\n"), Whitespace("    ")] [],
                         },
                         colon_token: COLON@1200..1202 ":" [] [Whitespace(" ")],
-                        value: CssListOfComponentValues [
+                        value: CssComponentValueList [
                             CssUrlFunction {
                                 url_token: URL_KW@1202..1205 "url" [] [],
                                 l_paren_token: L_PAREN@1205..1206 "(" [] [],
@@ -549,7 +549,7 @@ CssRoot {
                             value_token: IDENT@1224..1239 "background" [Newline("\n"), Whitespace("    ")] [],
                         },
                         colon_token: COLON@1239..1241 ":" [] [Whitespace(" ")],
-                        value: CssListOfComponentValues [
+                        value: CssComponentValueList [
                             CssUrlFunction {
                                 url_token: URL_KW@1241..1244 "url" [] [],
                                 l_paren_token: L_PAREN@1244..1245 "(" [] [],
@@ -586,14 +586,14 @@ CssRoot {
             1: CSS_IDENTIFIER@0..2
               0: IDENT@0..2 "a" [] [Whitespace(" ")]
           2: CSS_SUB_SELECTOR_LIST@2..2
-      1: CSS_BLOCK@2..1251
+      1: CSS_DECLARATION_LIST_BLOCK@2..1251
         0: L_CURLY@2..3 "{" [] []
         1: CSS_DECLARATION_LIST@3..1249
           0: CSS_DECLARATION@3..109
             0: CSS_IDENTIFIER@3..24
               0: IDENT@3..24 "background-image" [Newline("\n"), Whitespace("    ")] []
             1: COLON@24..26 ":" [] [Whitespace(" ")]
-            2: CSS_LIST_OF_COMPONENT_VALUES@26..109
+            2: CSS_COMPONENT_VALUE_LIST@26..109
               0: CSS_URL_FUNCTION@26..109
                 0: URL_KW@26..29 "url" [] []
                 1: L_PAREN@29..30 "(" [] []
@@ -606,7 +606,7 @@ CssRoot {
             0: CSS_IDENTIFIER@110..131
               0: IDENT@110..131 "background-image" [Newline("\n"), Whitespace("    ")] []
             1: COLON@131..133 ":" [] [Whitespace(" ")]
-            2: CSS_LIST_OF_COMPONENT_VALUES@133..155
+            2: CSS_COMPONENT_VALUE_LIST@133..155
               0: CSS_URL_FUNCTION@133..155
                 0: URL_KW@133..136 "url" [] []
                 1: L_PAREN@136..137 "(" [] []
@@ -619,7 +619,7 @@ CssRoot {
             0: CSS_IDENTIFIER@156..177
               0: IDENT@156..177 "background-image" [Newline("\n"), Whitespace("    ")] []
             1: COLON@177..179 ":" [] [Whitespace(" ")]
-            2: CSS_LIST_OF_COMPONENT_VALUES@179..201
+            2: CSS_COMPONENT_VALUE_LIST@179..201
               0: CSS_URL_FUNCTION@179..201
                 0: URL_KW@179..182 "url" [] []
                 1: L_PAREN@182..183 "(" [] []
@@ -632,7 +632,7 @@ CssRoot {
             0: CSS_IDENTIFIER@202..223
               0: IDENT@202..223 "background-image" [Newline("\n"), Whitespace("    ")] []
             1: COLON@223..225 ":" [] [Whitespace(" ")]
-            2: CSS_LIST_OF_COMPONENT_VALUES@225..247
+            2: CSS_COMPONENT_VALUE_LIST@225..247
               0: CSS_URL_FUNCTION@225..247
                 0: URL_KW@225..228 "URL" [] []
                 1: L_PAREN@228..229 "(" [] []
@@ -645,7 +645,7 @@ CssRoot {
             0: CSS_IDENTIFIER@248..269
               0: IDENT@248..269 "background-image" [Newline("\n"), Whitespace("    ")] []
             1: COLON@269..271 ":" [] [Whitespace(" ")]
-            2: CSS_LIST_OF_COMPONENT_VALUES@271..296
+            2: CSS_COMPONENT_VALUE_LIST@271..296
               0: CSS_URL_FUNCTION@271..296
                 0: URL_KW@271..274 "url" [] []
                 1: L_PAREN@274..278 "(" [] [Whitespace("   ")]
@@ -658,7 +658,7 @@ CssRoot {
             0: CSS_IDENTIFIER@297..318
               0: IDENT@297..318 "background-image" [Newline("\n"), Whitespace("    ")] []
             1: COLON@318..320 ":" [] [Whitespace(" ")]
-            2: CSS_LIST_OF_COMPONENT_VALUES@320..345
+            2: CSS_COMPONENT_VALUE_LIST@320..345
               0: CSS_URL_FUNCTION@320..345
                 0: URL_KW@320..323 "url" [] []
                 1: L_PAREN@323..324 "(" [] []
@@ -671,7 +671,7 @@ CssRoot {
             0: CSS_IDENTIFIER@346..367
               0: IDENT@346..367 "background-image" [Newline("\n"), Whitespace("    ")] []
             1: COLON@367..369 ":" [] [Whitespace(" ")]
-            2: CSS_LIST_OF_COMPONENT_VALUES@369..397
+            2: CSS_COMPONENT_VALUE_LIST@369..397
               0: CSS_URL_FUNCTION@369..397
                 0: URL_KW@369..372 "url" [] []
                 1: L_PAREN@372..376 "(" [] [Whitespace("   ")]
@@ -684,7 +684,7 @@ CssRoot {
             0: CSS_IDENTIFIER@398..419
               0: IDENT@398..419 "background-image" [Newline("\n"), Whitespace("    ")] []
             1: COLON@419..421 ":" [] [Whitespace(" ")]
-            2: CSS_LIST_OF_COMPONENT_VALUES@421..459
+            2: CSS_COMPONENT_VALUE_LIST@421..459
               0: CSS_URL_FUNCTION@421..459
                 0: URL_KW@421..424 "url" [] []
                 1: L_PAREN@424..428 "(" [] [Whitespace("   ")]
@@ -697,7 +697,7 @@ CssRoot {
             0: CSS_IDENTIFIER@460..481
               0: IDENT@460..481 "background-image" [Newline("\n"), Whitespace("    ")] []
             1: COLON@481..483 ":" [] [Whitespace(" ")]
-            2: CSS_LIST_OF_COMPONENT_VALUES@483..488
+            2: CSS_COMPONENT_VALUE_LIST@483..488
               0: CSS_URL_FUNCTION@483..488
                 0: URL_KW@483..486 "url" [] []
                 1: L_PAREN@486..487 "(" [] []
@@ -709,7 +709,7 @@ CssRoot {
             0: CSS_IDENTIFIER@489..510
               0: IDENT@489..510 "background-image" [Newline("\n"), Whitespace("    ")] []
             1: COLON@510..512 ":" [] [Whitespace(" ")]
-            2: CSS_LIST_OF_COMPONENT_VALUES@512..520
+            2: CSS_COMPONENT_VALUE_LIST@512..520
               0: CSS_URL_FUNCTION@512..520
                 0: URL_KW@512..515 "url" [] []
                 1: L_PAREN@515..519 "(" [] [Whitespace("   ")]
@@ -721,7 +721,7 @@ CssRoot {
             0: CSS_IDENTIFIER@521..542
               0: IDENT@521..542 "background-image" [Newline("\n"), Whitespace("    ")] []
             1: COLON@542..544 ":" [] [Whitespace(" ")]
-            2: CSS_LIST_OF_COMPONENT_VALUES@544..551
+            2: CSS_COMPONENT_VALUE_LIST@544..551
               0: CSS_URL_FUNCTION@544..551
                 0: URL_KW@544..547 "url" [] []
                 1: L_PAREN@547..548 "(" [] []
@@ -734,7 +734,7 @@ CssRoot {
             0: CSS_IDENTIFIER@552..573
               0: IDENT@552..573 "background-image" [Newline("\n"), Whitespace("    ")] []
             1: COLON@573..575 ":" [] [Whitespace(" ")]
-            2: CSS_LIST_OF_COMPONENT_VALUES@575..588
+            2: CSS_COMPONENT_VALUE_LIST@575..588
               0: CSS_URL_FUNCTION@575..588
                 0: URL_KW@575..578 "url" [] []
                 1: L_PAREN@578..582 "(" [] [Whitespace("   ")]
@@ -747,7 +747,7 @@ CssRoot {
             0: CSS_IDENTIFIER@589..610
               0: IDENT@589..610 "background-image" [Newline("\n"), Whitespace("    ")] []
             1: COLON@610..612 ":" [] [Whitespace(" ")]
-            2: CSS_LIST_OF_COMPONENT_VALUES@612..619
+            2: CSS_COMPONENT_VALUE_LIST@612..619
               0: CSS_URL_FUNCTION@612..619
                 0: URL_KW@612..615 "url" [] []
                 1: L_PAREN@615..616 "(" [] []
@@ -760,7 +760,7 @@ CssRoot {
             0: CSS_IDENTIFIER@620..641
               0: IDENT@620..641 "background-image" [Newline("\n"), Whitespace("    ")] []
             1: COLON@641..643 ":" [] [Whitespace(" ")]
-            2: CSS_LIST_OF_COMPONENT_VALUES@643..656
+            2: CSS_COMPONENT_VALUE_LIST@643..656
               0: CSS_URL_FUNCTION@643..656
                 0: URL_KW@643..646 "url" [] []
                 1: L_PAREN@646..650 "(" [] [Whitespace("   ")]
@@ -773,7 +773,7 @@ CssRoot {
             0: CSS_IDENTIFIER@657..678
               0: IDENT@657..678 "background-image" [Newline("\n"), Whitespace("    ")] []
             1: COLON@678..680 ":" [] [Whitespace(" ")]
-            2: CSS_LIST_OF_COMPONENT_VALUES@680..694
+            2: CSS_COMPONENT_VALUE_LIST@680..694
               0: CSS_URL_FUNCTION@680..694
                 0: URL_KW@680..683 "url" [] []
                 1: L_PAREN@683..687 "(" [] [Whitespace("   ")]
@@ -786,7 +786,7 @@ CssRoot {
             0: CSS_IDENTIFIER@695..716
               0: IDENT@695..716 "background-image" [Newline("\n"), Whitespace("    ")] []
             1: COLON@716..718 ":" [] [Whitespace(" ")]
-            2: CSS_LIST_OF_COMPONENT_VALUES@718..734
+            2: CSS_COMPONENT_VALUE_LIST@718..734
               0: CSS_URL_FUNCTION@718..734
                 0: URL_KW@718..721 "url" [] []
                 1: L_PAREN@721..722 "(" [] []
@@ -799,7 +799,7 @@ CssRoot {
             0: CSS_IDENTIFIER@735..756
               0: IDENT@735..756 "background-image" [Newline("\n"), Whitespace("    ")] []
             1: COLON@756..758 ":" [] [Whitespace(" ")]
-            2: CSS_LIST_OF_COMPONENT_VALUES@758..780
+            2: CSS_COMPONENT_VALUE_LIST@758..780
               0: CSS_URL_FUNCTION@758..780
                 0: URL_KW@758..761 "url" [] []
                 1: L_PAREN@761..765 "(" [] [Whitespace("   ")]
@@ -812,7 +812,7 @@ CssRoot {
             0: CSS_IDENTIFIER@781..802
               0: IDENT@781..802 "background-image" [Newline("\n"), Whitespace("    ")] []
             1: COLON@802..804 ":" [] [Whitespace(" ")]
-            2: CSS_LIST_OF_COMPONENT_VALUES@804..829
+            2: CSS_COMPONENT_VALUE_LIST@804..829
               0: CSS_URL_FUNCTION@804..829
                 0: URL_KW@804..807 "url" [] []
                 1: L_PAREN@807..811 "(" [] [Whitespace("   ")]
@@ -825,7 +825,7 @@ CssRoot {
             0: CSS_IDENTIFIER@830..851
               0: IDENT@830..851 "background-image" [Newline("\n"), Whitespace("    ")] []
             1: COLON@851..853 ":" [] [Whitespace(" ")]
-            2: CSS_LIST_OF_COMPONENT_VALUES@853..888
+            2: CSS_COMPONENT_VALUE_LIST@853..888
               0: CSS_URL_FUNCTION@853..888
                 0: URL_KW@853..856 "url" [] []
                 1: L_PAREN@856..860 "(" [] [Whitespace("   ")]
@@ -838,7 +838,7 @@ CssRoot {
             0: CSS_IDENTIFIER@889..910
               0: IDENT@889..910 "background-image" [Newline("\n"), Whitespace("    ")] []
             1: COLON@910..912 ":" [] [Whitespace(" ")]
-            2: CSS_LIST_OF_COMPONENT_VALUES@912..974
+            2: CSS_COMPONENT_VALUE_LIST@912..974
               0: CSS_URL_FUNCTION@912..974
                 0: URL_KW@912..915 "url" [] []
                 1: L_PAREN@915..916 "(" [] []
@@ -851,7 +851,7 @@ CssRoot {
             0: CSS_IDENTIFIER@975..996
               0: IDENT@975..996 "background-image" [Newline("\n"), Whitespace("    ")] []
             1: COLON@996..998 ":" [] [Whitespace(" ")]
-            2: CSS_LIST_OF_COMPONENT_VALUES@998..1039
+            2: CSS_COMPONENT_VALUE_LIST@998..1039
               0: CSS_URL_FUNCTION@998..1039
                 0: URL_KW@998..1001 "url" [] []
                 1: L_PAREN@1001..1005 "(" [] [Whitespace("   ")]
@@ -864,7 +864,7 @@ CssRoot {
             0: CSS_IDENTIFIER@1040..1055
               0: IDENT@1040..1055 "background" [Newline("\n"), Whitespace("    ")] []
             1: COLON@1055..1057 ":" [] [Whitespace(" ")]
-            2: CSS_LIST_OF_COMPONENT_VALUES@1057..1076
+            2: CSS_COMPONENT_VALUE_LIST@1057..1076
               0: CSS_URL_FUNCTION@1057..1076
                 0: URL_KW@1057..1060 "url" [] []
                 1: L_PAREN@1060..1061 "(" [] []
@@ -877,7 +877,7 @@ CssRoot {
             0: CSS_IDENTIFIER@1077..1092
               0: IDENT@1077..1092 "background" [Newline("\n"), Whitespace("    ")] []
             1: COLON@1092..1094 ":" [] [Whitespace(" ")]
-            2: CSS_LIST_OF_COMPONENT_VALUES@1094..1110
+            2: CSS_COMPONENT_VALUE_LIST@1094..1110
               0: CSS_URL_FUNCTION@1094..1110
                 0: URL_KW@1094..1097 "url" [] []
                 1: L_PAREN@1097..1098 "(" [] []
@@ -890,7 +890,7 @@ CssRoot {
             0: CSS_IDENTIFIER@1111..1126
               0: IDENT@1111..1126 "background" [Newline("\n"), Whitespace("    ")] []
             1: COLON@1126..1128 ":" [] [Whitespace(" ")]
-            2: CSS_LIST_OF_COMPONENT_VALUES@1128..1147
+            2: CSS_COMPONENT_VALUE_LIST@1128..1147
               0: CSS_URL_FUNCTION@1128..1147
                 0: URL_KW@1128..1131 "url" [] []
                 1: L_PAREN@1131..1132 "(" [] []
@@ -903,7 +903,7 @@ CssRoot {
             0: CSS_IDENTIFIER@1148..1163
               0: IDENT@1148..1163 "background" [Newline("\n"), Whitespace("    ")] []
             1: COLON@1163..1165 ":" [] [Whitespace(" ")]
-            2: CSS_LIST_OF_COMPONENT_VALUES@1165..1184
+            2: CSS_COMPONENT_VALUE_LIST@1165..1184
               0: CSS_URL_FUNCTION@1165..1184
                 0: URL_KW@1165..1168 "url" [] []
                 1: L_PAREN@1168..1169 "(" [] []
@@ -916,7 +916,7 @@ CssRoot {
             0: CSS_IDENTIFIER@1185..1200
               0: IDENT@1185..1200 "background" [Newline("\n"), Whitespace("    ")] []
             1: COLON@1200..1202 ":" [] [Whitespace(" ")]
-            2: CSS_LIST_OF_COMPONENT_VALUES@1202..1223
+            2: CSS_COMPONENT_VALUE_LIST@1202..1223
               0: CSS_URL_FUNCTION@1202..1223
                 0: URL_KW@1202..1205 "url" [] []
                 1: L_PAREN@1205..1206 "(" [] []
@@ -929,7 +929,7 @@ CssRoot {
             0: CSS_IDENTIFIER@1224..1239
               0: IDENT@1224..1239 "background" [Newline("\n"), Whitespace("    ")] []
             1: COLON@1239..1241 ":" [] [Whitespace(" ")]
-            2: CSS_LIST_OF_COMPONENT_VALUES@1241..1248
+            2: CSS_COMPONENT_VALUE_LIST@1241..1248
               0: CSS_URL_FUNCTION@1241..1248
                 0: URL_KW@1241..1244 "url" [] []
                 1: L_PAREN@1244..1245 "(" [] []

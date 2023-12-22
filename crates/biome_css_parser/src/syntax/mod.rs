@@ -9,7 +9,7 @@ use crate::syntax::at_rule::{at_at_rule, parse_at_rule};
 use crate::syntax::css_dimension::{is_at_any_dimension, parse_any_dimension};
 use crate::syntax::parse_error::expected_identifier;
 use crate::syntax::parse_error::{expected_block, expected_express};
-use crate::syntax::parse_error::{expected_any_at_rule, expected_block};
+use crate::syntax::parse_error::expected_any_at_rule;
 use crate::syntax::selector::CssSelectorList;
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
@@ -327,20 +327,13 @@ impl ParseSeparatedList for CssParameterList {
 }
 #[inline]
 pub(crate) fn is_parameter(p: &mut CssParser) -> bool {
-    is_css_parenthesized(p) || is_any_value(p)
+    is_css_parenthesized(p) || is_at_any_value(p)
 }
 #[inline]
 pub(crate) fn is_css_parenthesized(p: &mut CssParser) -> bool {
     p.at(T!['('])
 }
-#[inline]
-pub(crate) fn is_parameter(p: &mut CssParser) -> bool {
-    is_css_parenthesized(p) || is_any_value(p)
-}
-#[inline]
-pub(crate) fn is_css_parenthesized(p: &mut CssParser) -> bool {
-    p.at(T!['('])
-}
+
 
 #[inline]
 pub(crate) fn parse_parameter(p: &mut CssParser) -> ParsedSyntax {
@@ -354,7 +347,7 @@ pub(crate) fn parse_parameter(p: &mut CssParser) -> ParsedSyntax {
 }
 #[inline]
 pub(crate) fn is_any_express(p: &mut CssParser) -> bool {
-    is_css_parenthesized(p) || is_any_value(p)
+    is_css_parenthesized(p) || is_at_any_value(p)
 }
 #[inline]
 pub(crate) fn parse_any_express(p: &mut CssParser) -> ParsedSyntax {
@@ -372,13 +365,13 @@ pub(crate) fn parse_any_express(p: &mut CssParser) -> ParsedSyntax {
         parse_any_express(p).or_add_diagnostic(p, expected_express);
         return Present(css_binary_express.complete(p, CSS_BINARY_EXPRESS));
     }
-    if is_any_value(p) {
+    if is_at_any_value(p) {
         let component_value_list = param.precede(p);
-        while is_any_value(p) {
+        while is_at_any_value(p) {
             parse_any_value(p).ok();
         }
         let m = component_value_list
-            .complete(p, CSS_LIST_OF_COMPONENT_VALUES)
+            .complete(p, CSS_COMPONENT_VALUE_LIST)
             .precede(p);
         return Present(m.complete(p, CSS_LIST_OF_COMPONENT_VALUES_EXPRESS));
     }

@@ -85,7 +85,6 @@ impl CssAttributeSelector {
         )
     }
 }
-<<<<<<< HEAD
 impl CssBinaryExpress {
     pub fn with_left(self, element: AnyCssExpression) -> Self {
         Self::unwrap_cast(
@@ -106,28 +105,6 @@ impl CssBinaryExpress {
         )
     }
 }
-impl CssBlock {
-    pub fn with_l_curly_token(self, element: SyntaxToken) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(0usize..=0usize, once(Some(element.into()))),
-        )
-    }
-    pub fn with_declaration_list(self, element: CssDeclarationList) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
-        )
-    }
-    pub fn with_r_curly_token(self, element: SyntaxToken) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(2usize..=2usize, once(Some(element.into()))),
-        )
-    }
-}
-=======
->>>>>>> origin/main
 impl CssCharsetAtRule {
     pub fn with_charset_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
@@ -670,6 +647,14 @@ impl CssKeyframesPercentageSelector {
         )
     }
 }
+impl CssListOfComponentValuesExpress {
+    pub fn with_css_component_value_list(self, element: CssComponentValueList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
 impl CssMediaAndCondition {
     pub fn with_left(self, element: AnyCssMediaInParens) -> Self {
         Self::unwrap_cast(
@@ -707,14 +692,6 @@ impl CssMediaAndTypeQuery {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
-        )
-    }
-}
-impl CssListOfComponentValuesExpress {
-    pub fn with_css_list_of_component_values(self, element: CssListOfComponentValues) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
         )
     }
 }
@@ -887,11 +864,7 @@ impl CssNumber {
     }
 }
 impl CssParameter {
-<<<<<<< HEAD
     pub fn with_any_css_parameter(self, element: AnyCssParameter) -> Self {
-=======
-    pub fn with_css_component_value_list(self, element: CssComponentValueList) -> Self {
->>>>>>> origin/main
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),

@@ -7,9 +7,9 @@ pub(crate) struct FormatCssParameter;
 impl FormatNodeRule<CssParameter> for FormatCssParameter {
     fn fmt_fields(&self, node: &CssParameter, f: &mut CssFormatter) -> FormatResult<()> {
         let CssParameterFields {
-            css_component_value_list,
+            any_css_parameter,
         } = node.as_fields();
 
-        write!(f, [css_component_value_list.format()])
+        write!(f, [any_css_parameter.format()])
     }
 }

@@ -92,6 +92,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "var",
         "font-palette-values",
         "font-face",
+        "url",
         // Don't add to the end of this list, add to the end of the list in
         // because we have a range check in is_contextual_keyword function.
     ],

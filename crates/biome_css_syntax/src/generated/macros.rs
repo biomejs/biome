@@ -36,17 +36,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssAttributeSelector::new_unchecked(node) };
                     $body
                 }
-<<<<<<< HEAD
                 $crate::CssSyntaxKind::CSS_BINARY_EXPRESS => {
                     let $pattern = unsafe { $crate::CssBinaryExpress::new_unchecked(node) };
                     $body
                 }
-                $crate::CssSyntaxKind::CSS_BLOCK => {
-                    let $pattern = unsafe { $crate::CssBlock::new_unchecked(node) };
-                    $body
-                }
-=======
->>>>>>> origin/main
                 $crate::CssSyntaxKind::CSS_CHARSET_AT_RULE => {
                     let $pattern = unsafe { $crate::CssCharsetAtRule::new_unchecked(node) };
                     $body
@@ -180,17 +173,17 @@ macro_rules! map_syntax_node {
                         unsafe { $crate::CssKeyframesPercentageSelector::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_LIST_OF_COMPONENT_VALUES_EXPRESS => {
+                    let $pattern =
+                        unsafe { $crate::CssListOfComponentValuesExpress::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_MEDIA_AND_CONDITION => {
                     let $pattern = unsafe { $crate::CssMediaAndCondition::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_MEDIA_AND_TYPE_QUERY => {
                     let $pattern = unsafe { $crate::CssMediaAndTypeQuery::new_unchecked(node) };
-                    $body
-                }
-                $crate::CssSyntaxKind::CSS_LIST_OF_COMPONENT_VALUES_EXPRESS => {
-                    let $pattern =
-                        unsafe { $crate::CssListOfComponentValuesExpress::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_MEDIA_AT_RULE => {
@@ -466,10 +459,6 @@ macro_rules! map_syntax_node {
                 }
                 $crate::CssSyntaxKind::CSS_BOGUS_MEDIA_QUERY => {
                     let $pattern = unsafe { $crate::CssBogusMediaQuery::new_unchecked(node) };
-                    $body
-                }
-                $crate::CssSyntaxKind::CSS_BOGUS_PARAMETER => {
-                    let $pattern = unsafe { $crate::CssBogusParameter::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_BOGUS_PARAMETER => {

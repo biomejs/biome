@@ -880,7 +880,7 @@ AnyCssQueryFeatureValue =
 	| AnyCssDimension
 	| CssIdentifier
 	| CssRatio
-	| CssAnyFunction
+	| AnyCssFunction
 
 ///////////////
 // AUXILIARY
@@ -967,7 +967,7 @@ AnyCssParameter = AnyCssExpression | CssListOfComponentValuesExpress
 
 AnyCssExpression = CssBinaryExpress | CssParenthesizedExpression |  AnyCssValue
 
-CssListOfComponentValuesExpress = CssListOfComponentValues
+CssListOfComponentValuesExpress = CssComponentValueList
 
 CssBinaryExpress = 
 	left: AnyCssExpression

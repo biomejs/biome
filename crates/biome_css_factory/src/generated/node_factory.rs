@@ -115,6 +115,20 @@ impl CssAttributeSelectorBuilder {
         ))
     }
 }
+pub fn css_binary_express(
+    left: AnyCssExpression,
+    operator_token_token: SyntaxToken,
+    right: AnyCssExpression,
+) -> CssBinaryExpress {
+    CssBinaryExpress::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_BINARY_EXPRESS,
+        [
+            Some(SyntaxElement::Node(left.into_syntax())),
+            Some(SyntaxElement::Token(operator_token_token)),
+            Some(SyntaxElement::Node(right.into_syntax())),
+        ],
+    ))
+}
 pub fn css_charset_at_rule(
     charset_token: SyntaxToken,
     encoding: CssString,
@@ -560,6 +574,16 @@ pub fn css_keyframes_percentage_selector(
         [Some(SyntaxElement::Node(selector.into_syntax()))],
     ))
 }
+pub fn css_list_of_component_values_express(
+    css_component_value_list: CssComponentValueList,
+) -> CssListOfComponentValuesExpress {
+    CssListOfComponentValuesExpress::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_LIST_OF_COMPONENT_VALUES_EXPRESS,
+        [Some(SyntaxElement::Node(
+            css_component_value_list.into_syntax(),
+        ))],
+    ))
+}
 pub fn css_media_and_condition(
     left: AnyCssMediaInParens,
     and_token: SyntaxToken,
@@ -586,16 +610,6 @@ pub fn css_media_and_type_query(
             Some(SyntaxElement::Token(and_token)),
             Some(SyntaxElement::Node(right.into_syntax())),
         ],
-    ))
-}
-pub fn css_list_of_component_values_express(
-    css_list_of_component_values: CssListOfComponentValues,
-) -> CssListOfComponentValuesExpress {
-    CssListOfComponentValuesExpress::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_LIST_OF_COMPONENT_VALUES_EXPRESS,
-        [Some(SyntaxElement::Node(
-            css_list_of_component_values.into_syntax(),
-        ))],
     ))
 }
 pub fn css_media_at_rule(
@@ -750,12 +764,10 @@ pub fn css_number(value_token: SyntaxToken) -> CssNumber {
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
-pub fn css_parameter(css_component_value_list: CssComponentValueList) -> CssParameter {
+pub fn css_parameter(any_css_parameter: AnyCssParameter) -> CssParameter {
     CssParameter::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_PARAMETER,
-        [Some(SyntaxElement::Node(
-            css_component_value_list.into_syntax(),
-        ))],
+        [Some(SyntaxElement::Node(any_css_parameter.into_syntax()))],
     ))
 }
 pub fn css_parenthesized_expression(
@@ -1744,16 +1756,6 @@ where
 {
     CssBogusMediaQuery::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_BOGUS_MEDIA_QUERY,
-        slots,
-    ))
-}
-pub fn css_bogus_parameter<I>(slots: I) -> CssBogusParameter
-where
-    I: IntoIterator<Item = Option<SyntaxElement>>,
-    I::IntoIter: ExactSizeIterator,
-{
-    CssBogusParameter::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_BOGUS_PARAMETER,
         slots,
     ))
 }
