@@ -17,7 +17,7 @@ impl FormatNodeRule<CssPseudoClassFunctionCompoundSelectorList>
         let CssPseudoClassFunctionCompoundSelectorListFields {
             name,
             l_paren_token,
-            compound_selector_list,
+            compound_selectors,
             r_paren_token,
         } = node.as_fields();
 
@@ -27,7 +27,7 @@ impl FormatNodeRule<CssPseudoClassFunctionCompoundSelectorList>
                 name.format(),
                 group(&format_args![
                     l_paren_token.format(),
-                    soft_block_indent(&compound_selector_list.format()),
+                    soft_block_indent(&compound_selectors.format()),
                     r_paren_token.format()
                 ])
             ]

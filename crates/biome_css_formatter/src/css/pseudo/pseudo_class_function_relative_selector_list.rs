@@ -17,7 +17,7 @@ impl FormatNodeRule<CssPseudoClassFunctionRelativeSelectorList>
         let CssPseudoClassFunctionRelativeSelectorListFields {
             name_token,
             l_paren_token,
-            relative_selector_list,
+            relative_selectors,
             r_paren_token,
         } = node.as_fields();
 
@@ -27,7 +27,7 @@ impl FormatNodeRule<CssPseudoClassFunctionRelativeSelectorList>
                 name_token.format(),
                 group(&format_args![
                     l_paren_token.format(),
-                    soft_block_indent(&relative_selector_list.format()),
+                    soft_block_indent(&relative_selectors.format()),
                     r_paren_token.format()
                 ])
             ]

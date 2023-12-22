@@ -13,7 +13,7 @@ impl FormatNodeRule<CssPseudoClassFunctionValueList> for FormatCssPseudoClassFun
         let CssPseudoClassFunctionValueListFields {
             name_token,
             l_paren_token,
-            value_list,
+            values,
             r_paren_token,
         } = node.as_fields();
 
@@ -23,7 +23,7 @@ impl FormatNodeRule<CssPseudoClassFunctionValueList> for FormatCssPseudoClassFun
                 name_token.format(),
                 group(&format_args![
                     l_paren_token.format(),
-                    soft_block_indent(&value_list.format()),
+                    soft_block_indent(&values.format()),
                     r_paren_token.format()
                 ])
             ]
