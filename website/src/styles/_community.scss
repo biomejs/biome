@@ -1,39 +1,56 @@
 .community>div>div>a {
     display: flex;
-    margin-top: 20px;
-    margin-bottom: 20px;
+    margin-top: 1.2rem;
+    margin-bottom: 1.2rem;
     align-items: center;
-    gap: 10px;
+    gap: 0.6rem;
     text-decoration: none;
     width: fit-content;
-    border-radius: 100px;
-    padding: 8px 21px;
+    border-radius: 6.2rem;
+    padding: 0.5rem 1.3rem;
     background-color: rgba(36, 173, 243, 0.1);
     cursor: pointer;
 }
 
+div>img.contributor-avatar {
+    margin: 0rem;
+    width: 4.4rem;
+    height: 4.4rem;
+    border-radius: 50rem;
+    object-fit: cover;
+}
+
+.contributor-avatar:nth-child(1),
+.contributor-avatar:nth-child(11),
+.contributor-avatar:nth-child(21),
+.contributor-avatar:nth-child(22),
+.contributor-avatar:nth-child(26) {
+    visibility: hidden;
+}
+
+.community>div>div>a>p {
+    margin: 0;
+}
+
 .community {
-    margin-top: 150px !important;
+    margin-top: 9.4rem !important;
     height: 100vh;
     position: relative;
 }
 
-.community-head {
-    font-size: 50px;
-    font-weight: bold;
+h2.community-head {
+    font-size: 3.7rem;
     text-align: center;
 }
 
 .connect {
+    flex-wrap: wrap;
+    gap: 1.2rem;
     display: flex;
-    width: 500px;
+    width: 31rem;
     position: absolute;
-    right: -160px !important;
-    top: 10px;
-}
-
-.connect>h3 {
-    visibility: hidden !important;
+    right: -14rem;
+    top: 2rem;
 }
 
 .community-connect {
@@ -43,29 +60,29 @@
 }
 
 .community-description {
-    font-size: 25px;
+    font-size: 1.5rem;
     text-align: center;
 }
 
-.github,
-.mastodon,
-.x,
-.discord {
-    width: 150px !important;
+a.github,
+a.mastodon,
+a.x,
+a.discord {
+    width: 9.3rem !important;
 }
 
-.discord:hover {
+a.discord:hover {
     background-color: var(--sl-discord);
     color: var(--sl-community-link);
 }
 
-.x:hover,
-.github:hover {
+a.x:hover,
+a.github:hover {
     background-color: black;
     color: var(--sl-community-link);
 }
 
-.mastodon:hover {
+a.mastodon:hover {
     background-color: var(--sl-mastodon);
     color: var(--sl-community-link);
 }
@@ -86,7 +103,14 @@
 }
 
 @media only screen and (max-width: 1000px) {
-    .connect {
-        display: none;
+    div.community {
+        height: 130vh;
+        overflow: hidden;
+    }
+
+    div.connect {
+        top: 27rem;
+        right: 5rem;
+        rotate: 90deg;
     }
 }

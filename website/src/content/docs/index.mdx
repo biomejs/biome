@@ -30,6 +30,7 @@ import Inputf from "@src/components/formatter/input.md";
 import Outputf from "@src/components/formatter/output.md";
 import ProgressBar from "../../playground/components/Progress.tsx";
 import Community from "@src/components/Community.astro";
+import { Icon } from "@astrojs/starlight/components";
 import arrow from "../../assets/svg/arrow-right.svg";
 import { Image } from "astro:assets";
 import "../../styles/_performance.scss";
@@ -128,10 +129,38 @@ import "../../styles/_community.scss";
   </div>
 </div>
 
-<Community />
+<div class="community">
+  <div class="community-grid"></div>
+  <h2 class="community-head">Community</h2>
+  <div class="community-connect">
+    <div class="community-description">
+      Powered by our open-source contributors
+    </div>
+    <div class="community-links">
+      <a href="https://discord.gg/BypW39g6Yc" class="discord">
+        <Icon name="discord" />
+        Discord
+      </a>
+      <a href="https://github.com/biomejs/biome" class="github">
+        <Icon name="github" />
+        Github
+      </a>
+      <a href="https://twitter.com/biomejs" class="x">
+        <Icon name="x.com" />
+        Twitter
+      </a>
+      <a href="https://fosstodon.org/@biomejs" class="mastodon">
+        <Icon name="mastodon" />
+        Mastodon
+      </a>
+    </div>
+  </div>
+  <div class="connect">
+    <Community />
+  </div>
+</div>
 
-## Sponsors
-
+<h2 class="sponsor-head">Sponsors</h2>
 <div class="sponsors">
   <a class="sponsors-row" href="https://shiguredo.jp/" rel="nofollow">
     <img

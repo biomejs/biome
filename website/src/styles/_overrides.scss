@@ -15,7 +15,6 @@
   --sl-hue-blue: 210;
   --sl-community-link: #ffffff;
   --sl-hue-blue: 210;
-  --sl-community-link: #ffffff;
   --sl-perf-progress: #60a5fa;
   --sl-discord: #7289da;
   --sl-mastodon: #6364ff;
@@ -109,4 +108,8 @@
     overflow: scroll;
     font-size: 0.7rem;
   }
+}
+
+.content-panel {
+  overflow: hidden;
 }

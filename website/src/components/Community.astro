@@ -1,36 +1,13 @@
 ---
-import Contributors from "@src/components/Contributors.astro";
-import { Icon } from "@astrojs/starlight/components";
+const apiUrl =
+  "https://api.github.com/repos/biomejs/biome/contributors?per_page=35";
+
+let contributors = await fetch(apiUrl);
+contributors = await contributors.json();
 ---
 
-<div class="community">
-  <div class="community-grid"></div>
-  <div class="community-head">Community</div>
-  <div class="community-connect">
-    <div class="community-description">Powered by Astro and our open-source contributors</div>
-    <div class="community-links">
-      <a class="discord">
-        <Icon name="discord" /> Discord
-      </a>
-      <a class="github">
-        <Icon name="github" />
-         Github
-      </a>
-      <a class="x">
-        <Icon name="x.com" />
-         Twitter
-      </a>
-      <a class="mastodon">
-        <Icon name="mastodon" />
-         Mastodon
-      </a>
-    </div>
-  </div>
-  <div class="connect">
-    <Contributors class="contributors" />
-  </div>
-</div>
-
-<script>
-    import "../frontend-scripts/contributors.ts";
-</script>
+{
+  contributors.map((person: any) => {
+    return <img class="contributor-avatar" src={person.avatar_url} />;
+  })
+}
