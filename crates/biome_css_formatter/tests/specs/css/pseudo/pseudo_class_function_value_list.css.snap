@@ -38,11 +38,7 @@ Line width: 80
 ```css
 :lang(de, fr) {
 }
-:lang(
-		de,
-
-		fr
-	) {
+:lang(de, fr) {
 }
 
 :lang(de) {
