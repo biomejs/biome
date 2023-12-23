@@ -345,7 +345,7 @@ pub(crate) fn parse_parameter(p: &mut CssParser) -> ParsedSyntax {
     }
     let param = p.start();
 
-    parse_any_express(p).ok();
+    parse_any_expression(p).ok();
     Present(param.complete(p, CSS_PARAMETER))
 }
 #[inline]
@@ -353,7 +353,7 @@ pub(crate) fn is_at_any_expression(p: &mut CssParser) -> bool {
     is_at_parenthesized(p) || is_at_any_value(p)
 }
 #[inline]
-pub(crate) fn parse_any_express(p: &mut CssParser) -> ParsedSyntax {
+pub(crate) fn parse_any_expression(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_any_expression(p) {
         return Absent;
     }
@@ -365,7 +365,7 @@ pub(crate) fn parse_any_express(p: &mut CssParser) -> ParsedSyntax {
     if is_at_binary_operator(p) {
         let css_binary_express = param.precede(p);
         bump_operator_token(p);
-        parse_any_express(p).or_add_diagnostic(p, expected_expression);
+        parse_any_expression(p).or_add_diagnostic(p, expected_expression);
         return Present(css_binary_express.complete(p, CSS_BINARY_EXPRESSION));
     }
     if is_at_any_value(p) {
@@ -398,7 +398,7 @@ pub(crate) fn parse_parenthesized_express(p: &mut CssParser) -> ParsedSyntax {
     }
     let m = p.start();
     p.expect(T!['(']);
-    parse_any_express(p).ok();
+    parse_any_expression(p).ok();
     p.expect(T![')']);
     Present(m.complete(p, CSS_PARENTHESIZED_EXPRESSION))
 }
