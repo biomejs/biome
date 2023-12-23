@@ -167,7 +167,6 @@ where
 {
     fn fmt(&self, node: &N, f: &mut CssFormatter) -> FormatResult<()> {
         if self.is_suppressed(node, f) {
-            println!("Printing suppressed for some reason");
             return write!(f, [format_suppressed_node(node.syntax())]);
         }
 
