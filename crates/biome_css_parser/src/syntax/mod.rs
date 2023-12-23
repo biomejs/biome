@@ -35,7 +35,7 @@ const RULE_RECOVERY_SET: TokenSet<CssSyntaxKind> = token_set![
 const SELECTOR_LIST_RECOVERY_SET: TokenSet<CssSyntaxKind> = token_set![T!['{'], T!['}'],];
 const BODY_RECOVERY_SET: TokenSet<CssSyntaxKind> =
     SELECTOR_LIST_RECOVERY_SET.union(RULE_RECOVERY_SET);
-const BINARY_OPERATION_TOKEN:TokenSet<CssSyntaxKind> = token_set![T![+], T![-], T![*], T![/]];
+const BINARY_OPERATION_TOKEN: TokenSet<CssSyntaxKind> = token_set![T![+], T![-], T![*], T![/]];
 
 pub(crate) fn parse_root(p: &mut CssParser) {
     let m = p.start();
@@ -293,7 +293,6 @@ pub(crate) fn parse_custom_property(p: &mut CssParser) -> ParsedSyntax {
 pub(crate) fn is_at_any_function(p: &mut CssParser) -> bool {
     is_at_identifier(p) && p.nth_at(1, T!['('])
 }
-
 
 pub(crate) struct CssParameterList;
 

@@ -29,7 +29,7 @@ pub enum CssLexContext {
     UrlRawValue,
 
     /// Applied when lexing CSS color literals.
-    /// Starting from # 
+    /// Starting from #
     /// support #000 #000f #ffffff #ffffffff
     /// https://drafts.csswg.org/css-color/#typedef-hex-color
     Color,
