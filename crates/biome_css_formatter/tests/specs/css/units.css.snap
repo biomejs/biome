@@ -90,7 +90,7 @@ Line width: 80
 	a: 5deg;
 	a: 5grad;
 	a: 5rad;
-	a: 5 s;
+	a: 5s;
 	a: 5ms;
 	a: 5hz;
 	a: 5khz;

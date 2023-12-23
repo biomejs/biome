@@ -1,16 +1,16 @@
 use crate::configuration::formatter::{deserialize_line_width, serialize_line_width};
-use crate::configuration::linter::rules;
 use crate::configuration::{
     css_configuration, javascript_configuration, json_configuration, CssConfiguration,
     JavascriptConfiguration, JsonConfiguration, PlainIndentStyle,
 };
 use crate::settings::{
-    to_matcher, LanguageListSettings, OverrideFormatSettings, OverrideLinterSettings,
-    OverrideOrganizeImportsSettings, OverrideSettingPattern, OverrideSettings,
+    to_matcher, FormatSettings, LanguageListSettings, LinterSettings, OrganizeImportsSettings,
+    OverrideFormatSettings, OverrideLinterSettings, OverrideOrganizeImportsSettings,
+    OverrideSettingPattern, OverrideSettings, WorkspaceSettings,
 };
 use crate::{MergeWith, Rules, WorkspaceError};
 use biome_deserialize::StringSet;
-use biome_formatter::{IndentStyle, LineEnding, LineWidth};
+use biome_formatter::{LineEnding, LineWidth};
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
@@ -280,7 +280,7 @@ pub struct OverrideLinterConfiguration {
 
     /// List of rules
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(external, optional, hide)]
+    #[bpaf(pure(Rules::default()), optional, hide)]
     pub rules: Option<Rules>,
 }
 
@@ -335,17 +335,19 @@ pub fn to_override_settings(
     overrides: Overrides,
     vcs_base_path: Option<PathBuf>,
     gitignore_matches: &[String],
+    current_settings: &WorkspaceSettings,
 ) -> Result<OverrideSettings, WorkspaceError> {
     let mut override_settings = OverrideSettings::default();
     for mut pattern in overrides.0 {
         let formatter = pattern.formatter.take().unwrap_or_default();
-        let formatter = OverrideFormatSettings::try_from(formatter)?;
+        let formatter = to_format_settings(formatter, &current_settings.formatter);
 
         let linter = pattern.linter.take().unwrap_or_default();
-        let linter = OverrideLinterSettings::try_from(linter)?;
+        let linter = to_override_linter_settings(linter, &current_settings.linter);
 
         let organize_imports = pattern.organize_imports.take().unwrap_or_default();
-        let organize_imports = OverrideOrganizeImportsSettings::try_from(organize_imports)?;
+        let organize_imports =
+            to_organize_imports_settings(organize_imports, &current_settings.organize_imports);
 
         let mut languages = LanguageListSettings::default();
         if let Some(javascript) = pattern.javascript {
@@ -370,6 +372,7 @@ pub fn to_override_settings(
             formatter,
             linter,
             organize_imports,
+
             languages,
         };
 
@@ -379,49 +382,50 @@ pub fn to_override_settings(
     Ok(override_settings)
 }
 
-impl TryFrom<OverrideFormatterConfiguration> for OverrideFormatSettings {
-    type Error = WorkspaceError;
+pub(crate) fn to_format_settings(
+    conf: OverrideFormatterConfiguration,
+    format_settings: &FormatSettings,
+) -> OverrideFormatSettings {
+    let indent_style = conf
+        .indent_style
+        .map(Into::into)
+        .or(format_settings.indent_style);
+    let indent_width = conf
+        .indent_width
+        .map(Into::into)
+        .or(conf.indent_size.map(Into::into))
+        .or(format_settings.indent_width);
 
-    fn try_from(conf: OverrideFormatterConfiguration) -> Result<Self, Self::Error> {
-        let indent_style = match conf.indent_style {
-            Some(PlainIndentStyle::Tab) => IndentStyle::Tab,
-            Some(PlainIndentStyle::Space) => IndentStyle::Space,
-            None => IndentStyle::default(),
-        };
-        let indent_width = conf
-            .indent_width
-            .map(Into::into)
-            .or(conf.indent_size.map(Into::into))
-            .unwrap_or_default();
-
-        Ok(Self {
-            enabled: conf.enabled,
-            indent_style: Some(indent_style),
-            indent_width: Some(indent_width),
-            line_ending: conf.line_ending,
-            line_width: conf.line_width,
-            format_with_errors: conf.format_with_errors.unwrap_or_default(),
-        })
+    let line_ending = conf.line_ending.or(format_settings.line_ending);
+    let line_width = conf.line_width.or(format_settings.line_width);
+    let format_with_errors = conf
+        .format_with_errors
+        .unwrap_or(format_settings.format_with_errors);
+    OverrideFormatSettings {
+        enabled: conf.enabled.or(Some(format_settings.enabled)),
+        indent_style,
+        indent_width,
+        line_ending,
+        line_width,
+        format_with_errors,
     }
 }
 
-impl TryFrom<OverrideLinterConfiguration> for OverrideLinterSettings {
-    type Error = WorkspaceError;
-
-    fn try_from(conf: OverrideLinterConfiguration) -> Result<Self, Self::Error> {
-        Ok(Self {
-            enabled: conf.enabled,
-            rules: conf.rules,
-        })
+fn to_override_linter_settings(
+    conf: OverrideLinterConfiguration,
+    lint_settings: &LinterSettings,
+) -> OverrideLinterSettings {
+    OverrideLinterSettings {
+        enabled: conf.enabled.or(Some(lint_settings.enabled)),
+        rules: conf.rules.or(lint_settings.rules.clone()),
     }
 }
 
-impl TryFrom<OverrideOrganizeImportsConfiguration> for OverrideOrganizeImportsSettings {
-    type Error = WorkspaceError;
-
-    fn try_from(conf: OverrideOrganizeImportsConfiguration) -> Result<Self, Self::Error> {
-        Ok(Self {
-            enabled: conf.enabled,
-        })
+fn to_organize_imports_settings(
+    conf: OverrideOrganizeImportsConfiguration,
+    settings: &OrganizeImportsSettings,
+) -> OverrideOrganizeImportsSettings {
+    OverrideOrganizeImportsSettings {
+        enabled: conf.enabled.or(Some(settings.enabled)),
     }
 }

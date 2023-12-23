@@ -139,10 +139,6 @@ pub fn quick_test() {
     }
 
     "#;
-    // let code: String = fs::read_to_string("./tests/bootstrap.css")
-    //     .unwrap()
-    //     .parse()
-    //     .unwrap();
 
     let root = parse_css(
         code,

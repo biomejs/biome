@@ -1,0 +1,12 @@
+:host(span:focus) {}
+
+:host(
+    span:focus
+    
+    ) {}
+
+    :host(
+
+        span#id.class:focus
+        
+        ) {}

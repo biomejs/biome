@@ -291,11 +291,10 @@ pub(crate) fn parse_custom_property(p: &mut CssParser) -> ParsedSyntax {
 
 #[inline]
 pub(crate) fn is_at_any_function(p: &mut CssParser) -> bool {
-    (p.at(T![ident]) || p.cur().is_keyword()) && p.nth_at(1, T!['('])
+    is_at_identifier(p) && p.nth_at(1, T!['('])
 }
 
-#[derive(Default)]
-pub(crate) struct CssParameterList {}
+pub(crate) struct CssParameterList;
 
 impl ParseSeparatedList for CssParameterList {
     type Kind = CssSyntaxKind;

@@ -42,7 +42,7 @@ CssRoot {
             at_token: AT@0..1 "@" [] [],
             rule: CssMediaAtRule {
                 media_token: MEDIA_KW@1..7 "media" [] [Whitespace(" ")],
-                query_list: CssMediaQueryList [],
+                queries: CssMediaQueryList [],
                 block: CssRuleListBlock {
                     l_curly_token: L_CURLY@7..8 "{" [] [],
                     rules: CssRuleList [],
@@ -54,7 +54,7 @@ CssRoot {
             at_token: AT@9..12 "@" [Newline("\n"), Newline("\n")] [],
             rule: CssMediaAtRule {
                 media_token: MEDIA_KW@12..18 "media" [] [Whitespace(" ")],
-                query_list: CssMediaQueryList [
+                queries: CssMediaQueryList [
                     CssMediaAndTypeQuery {
                         left: CssMediaTypeQuery {
                             modifier: NOT_KW@18..22 "not" [] [Whitespace(" ")],
@@ -90,7 +90,7 @@ CssRoot {
             at_token: AT@47..50 "@" [Newline("\n"), Newline("\n")] [],
             rule: CssMediaAtRule {
                 media_token: MEDIA_KW@50..56 "media" [] [Whitespace(" ")],
-                query_list: CssMediaQueryList [
+                queries: CssMediaQueryList [
                     CssMediaAndTypeQuery {
                         left: CssMediaTypeQuery {
                             modifier: NOT_KW@56..60 "not" [] [Whitespace(" ")],
@@ -135,7 +135,7 @@ CssRoot {
             at_token: AT@93..96 "@" [Newline("\n"), Newline("\n")] [],
             rule: CssMediaAtRule {
                 media_token: MEDIA_KW@96..102 "media" [] [Whitespace(" ")],
-                query_list: CssMediaQueryList [
+                queries: CssMediaQueryList [
                     CssMediaAndTypeQuery {
                         left: CssMediaTypeQuery {
                             modifier: NOT_KW@102..106 "not" [] [Whitespace(" ")],
@@ -180,7 +180,7 @@ CssRoot {
             at_token: AT@139..142 "@" [Newline("\n"), Newline("\n")] [],
             rule: CssMediaAtRule {
                 media_token: MEDIA_KW@142..148 "media" [] [Whitespace(" ")],
-                query_list: CssMediaQueryList [
+                queries: CssMediaQueryList [
                     CssMediaConditionQuery {
                         condition: CssMediaAndCondition {
                             left: CssMediaFeatureInParens {
@@ -270,7 +270,7 @@ CssRoot {
             at_token: AT@220..222 "@" [Newline("\n")] [],
             rule: CssMediaAtRule {
                 media_token: MEDIA_KW@222..228 "media" [] [Whitespace(" ")],
-                query_list: CssMediaQueryList [
+                queries: CssMediaQueryList [
                     CssMediaConditionQuery {
                         condition: CssMediaOrCondition {
                             left: CssMediaFeatureInParens {
@@ -379,7 +379,7 @@ CssRoot {
             at_token: AT@316..318 "@" [Newline("\n")] [],
             rule: CssMediaAtRule {
                 media_token: MEDIA_KW@318..324 "media" [] [Whitespace(" ")],
-                query_list: CssMediaQueryList [
+                queries: CssMediaQueryList [
                     CssMediaConditionQuery {
                         condition: CssMediaAndCondition {
                             left: CssMediaFeatureInParens {
@@ -473,7 +473,7 @@ CssRoot {
             at_token: AT@401..403 "@" [Newline("\n")] [],
             rule: CssMediaAtRule {
                 media_token: MEDIA_KW@403..409 "media" [] [Whitespace(" ")],
-                query_list: CssMediaQueryList [
+                queries: CssMediaQueryList [
                     CssMediaConditionQuery {
                         condition: CssMediaOrCondition {
                             left: CssMediaFeatureInParens {
@@ -558,7 +558,7 @@ CssRoot {
             at_token: AT@473..475 "@" [Newline("\n")] [],
             rule: CssMediaAtRule {
                 media_token: MEDIA_KW@475..481 "media" [] [Whitespace(" ")],
-                query_list: CssMediaQueryList [
+                queries: CssMediaQueryList [
                     CssMediaConditionQuery {
                         condition: CssMediaFeatureInParens {
                             l_paren_token: L_PAREN@481..482 "(" [] [],
@@ -628,7 +628,7 @@ CssRoot {
             at_token: AT@534..537 "@" [Newline("\n"), Newline("\n")] [],
             rule: CssMediaAtRule {
                 media_token: MEDIA_KW@537..543 "media" [] [Whitespace(" ")],
-                query_list: CssMediaQueryList [
+                queries: CssMediaQueryList [
                     CssMediaAndTypeQuery {
                         left: CssMediaTypeQuery {
                             modifier: NOT_KW@543..547 "not" [] [Whitespace(" ")],
@@ -673,7 +673,7 @@ CssRoot {
                             ],
                             block: CssDeclarationListBlock {
                                 l_curly_token: L_CURLY@581..582 "{" [] [],
-                                declaration_list: CssDeclarationList [
+                                declarations: CssDeclarationList [
                                     CssDeclaration {
                                         name: CssIdentifier {
                                             value_token: IDENT@582..603 "background-color" [Newline("\n"), Whitespace("\t\t\t\t")] [],
@@ -706,7 +706,7 @@ CssRoot {
                             ],
                             block: CssDeclarationListBlock {
                                 l_curly_token: L_CURLY@624..625 "{" [] [],
-                                declaration_list: CssDeclarationList [
+                                declarations: CssDeclarationList [
                                     CssDeclaration {
                                         name: CssIdentifier {
                                             value_token: IDENT@625..646 "background-color" [Newline("\n"), Whitespace("\t\t\t\t")] [],

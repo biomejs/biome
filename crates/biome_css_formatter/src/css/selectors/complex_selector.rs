@@ -18,12 +18,21 @@ impl FormatNodeRule<CssComplexSelector> for FormatCssComplexSelector {
         // to allow the complete selector to break onto multiple lines if needed.
         let formatted_combinator = format_with(|f| {
             if matches!(combinator.kind(), CssSyntaxKind::CSS_SPACE_LITERAL) {
-                write!(f, [soft_line_break_or_space(), format_removed(&combinator)])
+                write!(f, [format_removed(&combinator)])
             } else {
                 write!(f, [combinator.format()])
             }
         });
 
-        write!(f, [left.format(), formatted_combinator, right.format()])
+        write!(
+            f,
+            [
+                left.format(),
+                soft_line_break_or_space(),
+                formatted_combinator,
+                space(),
+                right.format()
+            ]
+        )
     }
 }

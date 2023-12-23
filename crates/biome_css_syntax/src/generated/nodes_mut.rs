@@ -508,7 +508,7 @@ impl CssDeclarationListBlock {
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
-    pub fn with_declaration_list(self, element: CssDeclarationList) -> Self {
+    pub fn with_declarations(self, element: CssDeclarationList) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
@@ -702,7 +702,7 @@ impl CssMediaAtRule {
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
-    pub fn with_query_list(self, element: CssMediaQueryList) -> Self {
+    pub fn with_queries(self, element: CssMediaQueryList) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
@@ -958,7 +958,7 @@ impl CssPseudoClassFunctionCompoundSelectorList {
                 .splice_slots(1usize..=1usize, once(Some(element.into()))),
         )
     }
-    pub fn with_compound_selector_list(self, element: CssCompoundSelectorList) -> Self {
+    pub fn with_compound_selectors(self, element: CssCompoundSelectorList) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
@@ -1036,7 +1036,7 @@ impl CssPseudoClassFunctionRelativeSelectorList {
                 .splice_slots(1usize..=1usize, once(Some(element.into()))),
         )
     }
-    pub fn with_relative_selector_list(self, element: CssRelativeSelectorList) -> Self {
+    pub fn with_relative_selectors(self, element: CssRelativeSelectorList) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
@@ -1088,7 +1088,7 @@ impl CssPseudoClassFunctionSelectorList {
                 .splice_slots(1usize..=1usize, once(Some(element.into()))),
         )
     }
-    pub fn with_selector_list(self, element: CssSelectorList) -> Self {
+    pub fn with_selectors(self, element: CssSelectorList) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
@@ -1114,7 +1114,7 @@ impl CssPseudoClassFunctionValueList {
                 .splice_slots(1usize..=1usize, once(Some(element.into()))),
         )
     }
-    pub fn with_value_list(self, element: CssPseudoValueList) -> Self {
+    pub fn with_values(self, element: CssPseudoValueList) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
@@ -1204,7 +1204,7 @@ impl CssPseudoClassOfNthSelector {
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
-    pub fn with_selector_list(self, element: CssSelectorList) -> Self {
+    pub fn with_selectors(self, element: CssSelectorList) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),

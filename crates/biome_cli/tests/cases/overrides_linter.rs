@@ -327,3 +327,61 @@ fn does_override_the_rules() {
         result,
     ));
 }
+
+#[test]
+fn does_not_change_linting_settings() {
+    let mut console = BufferConsole::default();
+    let mut fs = MemoryFileSystem::default();
+    let file_path = Path::new("biome.json");
+    fs.insert(
+        file_path.into(),
+        r#"{
+        "linter": {
+                "rules": {
+                    "suspicious": {
+                        "noDebugger": "off"
+                    }
+                }
+            },
+  "overrides": [
+    { "include": ["test.js"], "formatter": { "enabled": false } }
+  ]
+}
+
+"#
+        .as_bytes(),
+    );
+
+    let test = Path::new("test.js");
+    fs.insert(test.into(), DEBUGGER_BEFORE.as_bytes());
+
+    let test2 = Path::new("test2.js");
+    fs.insert(test2.into(), DEBUGGER_BEFORE.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("lint"),
+                ("--apply-unsafe"),
+                test.as_os_str().to_str().unwrap(),
+                test2.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, test, DEBUGGER_BEFORE);
+    assert_file_contents(&fs, test2, DEBUGGER_BEFORE);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "does_not_change_linting_settings",
+        fs,
+        console,
+        result,
+    ));
+}

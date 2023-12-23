@@ -8,7 +8,7 @@ mod language {
     include!("language.rs");
 }
 
-// #[ignore]
+#[ignore]
 #[test]
 // use this test check if your snippet prints as you wish, without using a snapshot
 fn quick_test() {
@@ -30,7 +30,7 @@ fn quick_test() {
     println!("{:#?}", parse.syntax());
 
     let options = CssFormatOptions::default()
-        .with_line_width(LineWidth::try_from(40).unwrap())
+        .with_line_width(LineWidth::try_from(80).unwrap())
         .with_indent_style(IndentStyle::Space);
     let doc = format_node(options.clone(), &parse.syntax()).unwrap();
     let result = doc.print().unwrap();

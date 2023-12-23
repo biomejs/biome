@@ -1,0 +1,13 @@
+:has(> img, +dt) {}
+:has(
+    
+> img, 
+        +dt
+        ) {}
+
+:has(> img) {}
+:has(
+    > img, +   dt, >p, ~ 
+
+div 
+> p) {}

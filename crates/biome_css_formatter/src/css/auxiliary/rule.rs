@@ -7,6 +7,15 @@ impl FormatNodeRule<CssRule> for FormatCssRule {
     fn fmt_fields(&self, node: &CssRule, f: &mut CssFormatter) -> FormatResult<()> {
         let CssRuleFields { prelude, block } = node.as_fields();
 
-        write!(f, [group(&prelude.format()), space(), &block?.format()])
+        write!(
+            f,
+            [
+                // The selector list gets expanded so that every selector
+                // appears on its own line, no matter how long they are.
+                group(&prelude.format()).should_expand(true),
+                space(),
+                &block?.format()
+            ]
+        )
     }
 }

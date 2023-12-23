@@ -806,6 +806,47 @@
 				{ "description": "camelCase", "type": "string", "enum": ["camelCase"] }
 			]
 		},
+		"FilenameCase": {
+			"description": "Supported cases for TypeScript `enum` member names.",
+			"oneOf": [
+				{ "description": "camelCase", "type": "string", "enum": ["camelCase"] },
+				{
+					"description": "Match an export name",
+					"type": "string",
+					"enum": ["export"]
+				},
+				{
+					"description": "kebab-case",
+					"type": "string",
+					"enum": ["kebab-case"]
+				},
+				{
+					"description": "PascalCase",
+					"type": "string",
+					"enum": ["snake_case"]
+				}
+			]
+		},
+		"FilenameCases": {
+			"type": "array",
+			"items": { "$ref": "#/definitions/FilenameCase" },
+			"uniqueItems": true
+		},
+		"FilenamingConventionOptions": {
+			"description": "Rule's options.",
+			"type": "object",
+			"properties": {
+				"filenameCases": {
+					"description": "Allowed cases for _TypeScript_ `enum` member names.",
+					"allOf": [{ "$ref": "#/definitions/FilenameCases" }]
+				},
+				"strictCase": {
+					"description": "If `false`, then consecutive uppercase are allowed in _camel_ and _pascal_ cases. This does not affect other [Case].",
+					"type": "boolean"
+				}
+			},
+			"additionalProperties": false
+		},
 		"FilesConfiguration": {
 			"description": "The configuration of the filesystem",
 			"type": "object",
@@ -1287,6 +1328,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useFilenamingConvention": {
+					"description": "Enforce naming conventions for JavaScript and TypeScript filenames.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useForOf": {
 					"description": "This rule recommends a for-of loop when in a for loop, the index used to extract an item from the iterated array.",
 					"anyOf": [
@@ -1520,6 +1568,10 @@
 				{
 					"description": "Options for `noExcessiveComplexity` rule",
 					"allOf": [{ "$ref": "#/definitions/ComplexityOptions" }]
+				},
+				{
+					"description": "Options for `useFilenamingConvention` rule",
+					"allOf": [{ "$ref": "#/definitions/FilenamingConventionOptions" }]
 				},
 				{
 					"description": "Options for `useExhaustiveDependencies` and `useHookAtTopLevel` rule",

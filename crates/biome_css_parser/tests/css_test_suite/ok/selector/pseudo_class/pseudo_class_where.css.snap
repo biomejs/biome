@@ -39,7 +39,7 @@ CssRoot {
                                 class: CssPseudoClassFunctionSelectorList {
                                     name: WHERE_KW@1..6 "where" [] [],
                                     l_paren_token: L_PAREN@6..7 "(" [] [],
-                                    selector_list: CssSelectorList [
+                                    selectors: CssSelectorList [
                                         CssCompoundSelector {
                                             nesting_selector_token: missing (optional),
                                             simple_selector: CssTypeSelector {
@@ -71,7 +71,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@14..15 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@15..16 "}" [] [],
             },
         },
@@ -87,7 +87,7 @@ CssRoot {
                                 class: CssPseudoClassFunctionSelectorList {
                                     name: WHERE_KW@18..23 "where" [] [],
                                     l_paren_token: L_PAREN@23..24 "(" [] [],
-                                    selector_list: CssSelectorList [
+                                    selectors: CssSelectorList [
                                         CssCompoundSelector {
                                             nesting_selector_token: missing (optional),
                                             simple_selector: CssTypeSelector {
@@ -130,7 +130,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@35..36 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@36..37 "}" [] [],
             },
         },
@@ -146,7 +146,7 @@ CssRoot {
                                 class: CssPseudoClassFunctionSelectorList {
                                     name: WHERE_KW@39..44 "where" [] [],
                                     l_paren_token: L_PAREN@44..45 "(" [] [],
-                                    selector_list: CssSelectorList [
+                                    selectors: CssSelectorList [
                                         CssCompoundSelector {
                                             nesting_selector_token: missing (optional),
                                             simple_selector: CssTypeSelector {
@@ -209,7 +209,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@75..76 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@76..77 "}" [] [],
             },
         },
@@ -229,7 +229,7 @@ CssRoot {
                             class: CssPseudoClassFunctionSelectorList {
                                 name: WHERE_KW@82..87 "where" [] [],
                                 l_paren_token: L_PAREN@87..88 "(" [] [],
-                                selector_list: CssSelectorList [
+                                selectors: CssSelectorList [
                                     CssCompoundSelector {
                                         nesting_selector_token: missing (optional),
                                         simple_selector: missing (optional),
@@ -264,7 +264,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@101..102 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@102..103 "}" [] [],
             },
         },
@@ -281,7 +281,7 @@ CssRoot {
                                     class: CssPseudoClassFunctionSelectorList {
                                         name: WHERE_KW@105..110 "where" [] [],
                                         l_paren_token: L_PAREN@110..111 "(" [] [],
-                                        selector_list: CssSelectorList [
+                                        selectors: CssSelectorList [
                                             CssCompoundSelector {
                                                 nesting_selector_token: missing (optional),
                                                 simple_selector: CssTypeSelector {
@@ -341,7 +341,7 @@ CssRoot {
                                     class: CssPseudoClassFunctionSelectorList {
                                         name: WHERE_KW@131..136 "where" [] [],
                                         l_paren_token: L_PAREN@136..137 "(" [] [],
-                                        selector_list: CssSelectorList [
+                                        selectors: CssSelectorList [
                                             CssCompoundSelector {
                                                 nesting_selector_token: missing (optional),
                                                 simple_selector: CssTypeSelector {
@@ -402,7 +402,7 @@ CssRoot {
                                 class: CssPseudoClassFunctionSelectorList {
                                     name: WHERE_KW@157..162 "where" [] [],
                                     l_paren_token: L_PAREN@162..163 "(" [] [],
-                                    selector_list: CssSelectorList [
+                                    selectors: CssSelectorList [
                                         CssCompoundSelector {
                                             nesting_selector_token: missing (optional),
                                             simple_selector: CssTypeSelector {
@@ -445,7 +445,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@178..179 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@179..180 "}" [] [],
             },
         },
@@ -463,7 +463,7 @@ CssRoot {
                             class: CssPseudoClassFunctionSelectorList {
                                 name: WHERE_KW@183..188 "where" [] [],
                                 l_paren_token: L_PAREN@188..189 "(" [] [],
-                                selector_list: CssSelectorList [
+                                selectors: CssSelectorList [
                                     CssCompoundSelector {
                                         nesting_selector_token: missing (optional),
                                         simple_selector: missing (optional),
@@ -502,7 +502,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@205..206 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@206..207 "}" [] [],
             },
         },
@@ -520,7 +520,7 @@ CssRoot {
                             class: CssPseudoClassFunctionSelectorList {
                                 name: WHERE_KW@210..215 "where" [] [],
                                 l_paren_token: L_PAREN@215..216 "(" [] [],
-                                selector_list: CssSelectorList [
+                                selectors: CssSelectorList [
                                     CssCompoundSelector {
                                         nesting_selector_token: missing (optional),
                                         simple_selector: CssUniversalSelector {
@@ -565,7 +565,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@234..235 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@235..236 "}" [] [],
             },
         },
@@ -581,7 +581,7 @@ CssRoot {
                                 class: CssPseudoClassFunctionSelectorList {
                                     name: WHERE_KW@238..243 "where" [] [],
                                     l_paren_token: L_PAREN@243..244 "(" [] [],
-                                    selector_list: CssSelectorList [
+                                    selectors: CssSelectorList [
                                         CssCompoundSelector {
                                             nesting_selector_token: missing (optional),
                                             simple_selector: CssTypeSelector {
@@ -644,7 +644,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@273..274 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@274..275 "}" [] [],
             },
         },
@@ -659,7 +659,7 @@ CssRoot {
                             class: CssPseudoClassFunctionSelectorList {
                                 name: WHERE_KW@277..282 "where" [] [],
                                 l_paren_token: L_PAREN@282..283 "(" [] [],
-                                selector_list: CssSelectorList [
+                                selectors: CssSelectorList [
                                     CssCompoundSelector {
                                         nesting_selector_token: missing (optional),
                                         simple_selector: CssTypeSelector {
@@ -699,7 +699,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@301..302 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@302..303 "}" [] [],
             },
         },
@@ -714,7 +714,7 @@ CssRoot {
                             class: CssPseudoClassFunctionSelectorList {
                                 name: WHERE_KW@305..310 "where" [] [],
                                 l_paren_token: L_PAREN@310..311 "(" [] [],
-                                selector_list: CssSelectorList [
+                                selectors: CssSelectorList [
                                     CssCompoundSelector {
                                         nesting_selector_token: missing (optional),
                                         simple_selector: missing (optional),
@@ -753,7 +753,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@333..334 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@334..335 "}" [] [],
             },
         },
@@ -773,7 +773,7 @@ CssRoot {
                             class: CssPseudoClassFunctionSelectorList {
                                 name: WHERE_KW@338..343 "where" [] [],
                                 l_paren_token: L_PAREN@343..344 "(" [] [],
-                                selector_list: CssSelectorList [
+                                selectors: CssSelectorList [
                                     CssCompoundSelector {
                                         nesting_selector_token: missing (optional),
                                         simple_selector: missing (optional),
@@ -783,7 +783,7 @@ CssRoot {
                                                 class: CssPseudoClassFunctionSelectorList {
                                                     name: NOT_KW@345..348 "not" [] [],
                                                     l_paren_token: L_PAREN@348..349 "(" [] [],
-                                                    selector_list: CssSelectorList [
+                                                    selectors: CssSelectorList [
                                                         CssCompoundSelector {
                                                             nesting_selector_token: missing (optional),
                                                             simple_selector: missing (optional),
@@ -813,7 +813,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@358..359 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@359..360 "}" [] [],
             },
         },

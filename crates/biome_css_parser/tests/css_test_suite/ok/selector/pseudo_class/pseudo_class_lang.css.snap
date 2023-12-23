@@ -35,7 +35,7 @@ CssRoot {
                             class: CssPseudoClassFunctionValueList {
                                 name_token: LANG_KW@1..5 "lang" [] [],
                                 l_paren_token: L_PAREN@5..6 "(" [] [],
-                                value_list: CssPseudoValueList [
+                                values: CssPseudoValueList [
                                     CssIdentifier {
                                         value_token: IDENT@6..13 "\\*-Latn" [] [],
                                     },
@@ -48,7 +48,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@15..16 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@16..17 "}" [] [],
             },
         },
@@ -63,7 +63,7 @@ CssRoot {
                             class: CssPseudoClassFunctionValueList {
                                 name_token: LANG_KW@19..23 "lang" [] [],
                                 l_paren_token: L_PAREN@23..24 "(" [] [],
-                                value_list: CssPseudoValueList [
+                                values: CssPseudoValueList [
                                     CssString {
                                         value_token: CSS_STRING_LITERAL@24..32 "\"*-Latn\"" [] [],
                                     },
@@ -76,7 +76,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@34..35 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@35..36 "}" [] [],
             },
         },
@@ -96,7 +96,7 @@ CssRoot {
                             class: CssPseudoClassFunctionValueList {
                                 name_token: LANG_KW@42..46 "lang" [] [],
                                 l_paren_token: L_PAREN@46..47 "(" [] [],
-                                value_list: CssPseudoValueList [
+                                values: CssPseudoValueList [
                                     CssIdentifier {
                                         value_token: IDENT@47..52 "fr-be" [] [],
                                     },
@@ -109,7 +109,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@54..55 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@55..56 "}" [] [],
             },
         },
@@ -129,7 +129,7 @@ CssRoot {
                             class: CssPseudoClassFunctionValueList {
                                 name_token: LANG_KW@62..66 "lang" [] [],
                                 l_paren_token: L_PAREN@66..67 "(" [] [],
-                                value_list: CssPseudoValueList [
+                                values: CssPseudoValueList [
                                     CssIdentifier {
                                         value_token: IDENT@67..69 "de" [] [],
                                     },
@@ -142,7 +142,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@71..72 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@72..73 "}" [] [],
             },
         },
@@ -162,7 +162,7 @@ CssRoot {
                             class: CssPseudoClassFunctionValueList {
                                 name_token: LANG_KW@79..83 "lang" [] [],
                                 l_paren_token: L_PAREN@83..84 "(" [] [],
-                                value_list: CssPseudoValueList [
+                                values: CssPseudoValueList [
                                     CssIdentifier {
                                         value_token: IDENT@84..86 "de" [] [],
                                     },
@@ -179,7 +179,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@92..93 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@93..94 "}" [] [],
             },
         },
@@ -195,7 +195,7 @@ CssRoot {
                                 class: CssPseudoClassFunctionValueList {
                                     name_token: LANG_KW@96..100 "lang" [] [],
                                     l_paren_token: L_PAREN@100..101 "(" [] [],
-                                    value_list: CssPseudoValueList [
+                                    values: CssPseudoValueList [
                                         CssIdentifier {
                                             value_token: IDENT@101..106 "fr-be" [] [],
                                         },
@@ -220,7 +220,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@112..113 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@113..114 "}" [] [],
             },
         },
@@ -236,7 +236,7 @@ CssRoot {
                                 class: CssPseudoClassFunctionValueList {
                                     name_token: LANG_KW@116..120 "lang" [] [],
                                     l_paren_token: L_PAREN@120..121 "(" [] [],
-                                    value_list: CssPseudoValueList [
+                                    values: CssPseudoValueList [
                                         CssIdentifier {
                                             value_token: IDENT@121..123 "de" [] [],
                                         },
@@ -261,7 +261,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@129..130 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@130..131 "}" [] [],
             },
         },
@@ -277,7 +277,7 @@ CssRoot {
                                 class: CssPseudoClassFunctionValueList {
                                     name_token: LANG_KW@133..137 "lang" [] [],
                                     l_paren_token: L_PAREN@137..138 "(" [] [],
-                                    value_list: CssPseudoValueList [
+                                    values: CssPseudoValueList [
                                         CssIdentifier {
                                             value_token: IDENT@138..143 "fr-be" [] [],
                                         },
@@ -304,7 +304,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@152..153 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@153..154 "}" [] [],
             },
         },
