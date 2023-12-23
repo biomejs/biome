@@ -5,7 +5,6 @@ const then = then.then
 const foo = {notThen: 1}
 const foo = {notThen() {}}
 const foo = {[then]: 1}
-// const NOT_THEN = "no-then";const foo = {[NOT_THEN]: 1}
 function foo({then}) {}
 
 // `class`
@@ -44,10 +43,8 @@ foo.then != 1
 // `{Object,Reflect}.defineProperty`
 Object.defineProperty(foo, then, 1)
 Object.defineProperty(foo, "not-then", 1)
-// const then = "no-then";Object.defineProperty(foo, then, 1)
 Reflect.defineProperty(foo, then, 1)
 Reflect.defineProperty(foo, "not-then", 1)
-// const then = "no-then";Reflect.defineProperty(foo, then, 1)
 Object.defineProperty(foo, "then", )
 Object.defineProperty(...foo, "then", 1)
 Object.defineProperty(foo, ...["then", 1])
@@ -56,7 +53,6 @@ Object.defineProperty(foo, ...["then", 1])
 Object.fromEntries([then, 1])
 Object.fromEntries([,,])
 Object.fromEntries([[,,],[]])
-// const NOT_THEN = "not-then";Object.fromEntries([[NOT_THEN, 1]])
 Object.fromEntries([[["then", 1]]])
 NotObject.fromEntries([["then", 1]])
 Object.notFromEntries([["then", 1]])
