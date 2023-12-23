@@ -8,7 +8,7 @@ impl FormatRule<AnyCssExpression> for FormatAnyCssExpression {
     type Context = CssFormatContext;
     fn fmt(&self, node: &AnyCssExpression, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
-            AnyCssExpression::CssBinaryExpress(node) => node.format().fmt(f),
+            AnyCssExpression::CssBinaryExpression(node) => node.format().fmt(f),
             AnyCssExpression::CssParenthesizedExpression(node) => node.format().fmt(f),
             AnyCssExpression::AnyCssValue(node) => node.format().fmt(f),
         }

@@ -963,13 +963,13 @@ CssParameterList = CssParameter (',' CssParameter)* ','?
 // repeating-radial-gradient(red, yellow 10%, green 15%);
 //                                ^^^^^^^^^^
 CssParameter = AnyCssParameter
-AnyCssParameter = AnyCssExpression | CssListOfComponentValuesExpress
+AnyCssParameter = AnyCssExpression | CssListOfComponentValuesExpression
 
-AnyCssExpression = CssBinaryExpress | CssParenthesizedExpression |  AnyCssValue
+AnyCssExpression = CssBinaryExpression | CssParenthesizedExpression |  AnyCssValue
 
-CssListOfComponentValuesExpress = CssComponentValueList
+CssListOfComponentValuesExpression = CssComponentValueList
 
-CssBinaryExpress = 
+CssBinaryExpression = 
 	left: AnyCssExpression
 	operator_token: (
 		'+' | '-' | '*' | '/' 
@@ -984,7 +984,7 @@ CssParenthesizedExpression =
 // ^^^^
 CssColor =
 	'#'
-	name:'css_color_literal' 
+	value:'css_color_literal' 
 
 CssIdentifier = value: 'ident'
 CssString = value: 'css_string_literal'

@@ -7,8 +7,8 @@ pub(crate) fn expected_identifier(p: &CssParser, range: TextRange) -> ParseDiagn
     expected_node("identifier", range, p)
 }
 
-pub(crate) fn expected_express(p: &CssParser, range: TextRange) -> ParseDiagnostic {
-    expected_node("express", range, p)
+pub(crate) fn expected_expression(p: &CssParser, range: TextRange) -> ParseDiagnostic {
+    expected_node("expression", range, p)
 }
 
 pub(crate) fn expected_number(p: &CssParser, range: TextRange) -> ParseDiagnostic {

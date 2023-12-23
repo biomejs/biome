@@ -85,7 +85,7 @@ impl CssAttributeSelector {
         )
     }
 }
-impl CssBinaryExpress {
+impl CssBinaryExpression {
     pub fn with_left(self, element: AnyCssExpression) -> Self {
         Self::unwrap_cast(
             self.syntax
@@ -146,7 +146,7 @@ impl CssColor {
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
-    pub fn with_name_token(self, element: SyntaxToken) -> Self {
+    pub fn with_value_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into()))),
@@ -647,7 +647,7 @@ impl CssKeyframesPercentageSelector {
         )
     }
 }
-impl CssListOfComponentValuesExpress {
+impl CssListOfComponentValuesExpression {
     pub fn with_css_component_value_list(self, element: CssComponentValueList) -> Self {
         Self::unwrap_cast(
             self.syntax

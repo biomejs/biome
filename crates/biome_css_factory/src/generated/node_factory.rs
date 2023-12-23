@@ -115,13 +115,13 @@ impl CssAttributeSelectorBuilder {
         ))
     }
 }
-pub fn css_binary_express(
+pub fn css_binary_expression(
     left: AnyCssExpression,
     operator_token_token: SyntaxToken,
     right: AnyCssExpression,
-) -> CssBinaryExpress {
-    CssBinaryExpress::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_BINARY_EXPRESS,
+) -> CssBinaryExpression {
+    CssBinaryExpression::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_BINARY_EXPRESSION,
         [
             Some(SyntaxElement::Node(left.into_syntax())),
             Some(SyntaxElement::Token(operator_token_token)),
@@ -152,12 +152,12 @@ pub fn css_class_selector(dot_token: SyntaxToken, name: CssIdentifier) -> CssCla
         ],
     ))
 }
-pub fn css_color(hash_token: SyntaxToken, name_token: SyntaxToken) -> CssColor {
+pub fn css_color(hash_token: SyntaxToken, value_token: SyntaxToken) -> CssColor {
     CssColor::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_COLOR,
         [
             Some(SyntaxElement::Token(hash_token)),
-            Some(SyntaxElement::Token(name_token)),
+            Some(SyntaxElement::Token(value_token)),
         ],
     ))
 }
@@ -574,11 +574,11 @@ pub fn css_keyframes_percentage_selector(
         [Some(SyntaxElement::Node(selector.into_syntax()))],
     ))
 }
-pub fn css_list_of_component_values_express(
+pub fn css_list_of_component_values_expression(
     css_component_value_list: CssComponentValueList,
-) -> CssListOfComponentValuesExpress {
-    CssListOfComponentValuesExpress::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_LIST_OF_COMPONENT_VALUES_EXPRESS,
+) -> CssListOfComponentValuesExpression {
+    CssListOfComponentValuesExpression::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION,
         [Some(SyntaxElement::Node(
             css_component_value_list.into_syntax(),
         ))],

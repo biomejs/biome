@@ -36,8 +36,8 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssAttributeSelector::new_unchecked(node) };
                     $body
                 }
-                $crate::CssSyntaxKind::CSS_BINARY_EXPRESS => {
-                    let $pattern = unsafe { $crate::CssBinaryExpress::new_unchecked(node) };
+                $crate::CssSyntaxKind::CSS_BINARY_EXPRESSION => {
+                    let $pattern = unsafe { $crate::CssBinaryExpression::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_CHARSET_AT_RULE => {
@@ -173,9 +173,9 @@ macro_rules! map_syntax_node {
                         unsafe { $crate::CssKeyframesPercentageSelector::new_unchecked(node) };
                     $body
                 }
-                $crate::CssSyntaxKind::CSS_LIST_OF_COMPONENT_VALUES_EXPRESS => {
+                $crate::CssSyntaxKind::CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION => {
                     let $pattern =
-                        unsafe { $crate::CssListOfComponentValuesExpress::new_unchecked(node) };
+                        unsafe { $crate::CssListOfComponentValuesExpression::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_MEDIA_AND_CONDITION => {

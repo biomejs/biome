@@ -3335,43 +3335,43 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssListOfComponentValues
         FormatOwnedWithRule :: new (self , crate :: css :: auxiliary :: list_of_component_values_express :: FormatCssListOfComponentValuesExpress :: default ())
     }
 }
-impl FormatRule<biome_css_syntax::CssBinaryExpress>
-    for crate::css::auxiliary::binary_express::FormatCssBinaryExpress
+impl FormatRule<biome_css_syntax::CssBinaryExpression>
+    for crate::css::auxiliary::binary_expression::FormatCssBinaryExpression
 {
     type Context = CssFormatContext;
     #[inline(always)]
     fn fmt(
         &self,
-        node: &biome_css_syntax::CssBinaryExpress,
+        node: &biome_css_syntax::CssBinaryExpression,
         f: &mut CssFormatter,
     ) -> FormatResult<()> {
-        FormatNodeRule::<biome_css_syntax::CssBinaryExpress>::fmt(self, node, f)
+        FormatNodeRule::<biome_css_syntax::CssBinaryExpression>::fmt(self, node, f)
     }
 }
-impl AsFormat<CssFormatContext> for biome_css_syntax::CssBinaryExpress {
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssBinaryExpression {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_css_syntax::CssBinaryExpress,
-        crate::css::auxiliary::binary_express::FormatCssBinaryExpress,
+        biome_css_syntax::CssBinaryExpression,
+        crate::css::auxiliary::binary_expression::FormatCssBinaryExpression,
     >;
     fn format(&self) -> Self::Format<'_> {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::css::auxiliary::binary_express::FormatCssBinaryExpress::default(),
+            crate::css::auxiliary::binary_expression::FormatCssBinaryExpression::default(),
         )
     }
 }
-impl IntoFormat<CssFormatContext> for biome_css_syntax::CssBinaryExpress {
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssBinaryExpression {
     type Format = FormatOwnedWithRule<
-        biome_css_syntax::CssBinaryExpress,
-        crate::css::auxiliary::binary_express::FormatCssBinaryExpress,
+        biome_css_syntax::CssBinaryExpression,
+        crate::css::auxiliary::binary_expression::FormatCssBinaryExpression,
     >;
     fn into_format(self) -> Self::Format {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::css::auxiliary::binary_express::FormatCssBinaryExpress::default(),
+            crate::css::auxiliary::binary_expression::FormatCssBinaryExpression::default(),
         )
     }
 }

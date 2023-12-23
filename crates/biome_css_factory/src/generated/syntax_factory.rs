@@ -174,7 +174,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.into_node(CSS_ATTRIBUTE_SELECTOR, children)
             }
-            CSS_BINARY_EXPRESS => {
+            CSS_BINARY_EXPRESSION => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
@@ -201,11 +201,11 @@ impl SyntaxFactory for CssSyntaxFactory {
                 slots.next_slot();
                 if current_element.is_some() {
                     return RawSyntaxNode::new(
-                        CSS_BINARY_EXPRESS.to_bogus(),
+                        CSS_BINARY_EXPRESSION.to_bogus(),
                         children.into_iter().map(Some),
                     );
                 }
-                slots.into_node(CSS_BINARY_EXPRESS, children)
+                slots.into_node(CSS_BINARY_EXPRESSION, children)
             }
             CSS_CHARSET_AT_RULE => {
                 let mut elements = (&children).into_iter();
@@ -1142,7 +1142,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.into_node(CSS_KEYFRAMES_PERCENTAGE_SELECTOR, children)
             }
-            CSS_LIST_OF_COMPONENT_VALUES_EXPRESS => {
+            CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
@@ -1155,11 +1155,11 @@ impl SyntaxFactory for CssSyntaxFactory {
                 slots.next_slot();
                 if current_element.is_some() {
                     return RawSyntaxNode::new(
-                        CSS_LIST_OF_COMPONENT_VALUES_EXPRESS.to_bogus(),
+                        CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION.to_bogus(),
                         children.into_iter().map(Some),
                     );
                 }
-                slots.into_node(CSS_LIST_OF_COMPONENT_VALUES_EXPRESS, children)
+                slots.into_node(CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION, children)
             }
             CSS_MEDIA_AND_CONDITION => {
                 let mut elements = (&children).into_iter();

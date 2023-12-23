@@ -233,10 +233,10 @@ pub struct CssAttributeSelectorFields {
     pub r_brack_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub struct CssBinaryExpress {
+pub struct CssBinaryExpression {
     pub(crate) syntax: SyntaxNode,
 }
-impl CssBinaryExpress {
+impl CssBinaryExpression {
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -246,8 +246,8 @@ impl CssBinaryExpress {
     pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
         Self { syntax }
     }
-    pub fn as_fields(&self) -> CssBinaryExpressFields {
-        CssBinaryExpressFields {
+    pub fn as_fields(&self) -> CssBinaryExpressionFields {
+        CssBinaryExpressionFields {
             left: self.left(),
             operator_token: self.operator_token(),
             right: self.right(),
@@ -264,7 +264,7 @@ impl CssBinaryExpress {
     }
 }
 #[cfg(feature = "serde")]
-impl Serialize for CssBinaryExpress {
+impl Serialize for CssBinaryExpression {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
@@ -273,7 +273,7 @@ impl Serialize for CssBinaryExpress {
     }
 }
 #[cfg_attr(feature = "serde", derive(Serialize))]
-pub struct CssBinaryExpressFields {
+pub struct CssBinaryExpressionFields {
     pub left: SyntaxResult<AnyCssExpression>,
     pub operator_token: SyntaxResult<SyntaxToken>,
     pub right: SyntaxResult<AnyCssExpression>,
@@ -382,13 +382,13 @@ impl CssColor {
     pub fn as_fields(&self) -> CssColorFields {
         CssColorFields {
             hash_token: self.hash_token(),
-            name_token: self.name_token(),
+            value_token: self.value_token(),
         }
     }
     pub fn hash_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn name_token(&self) -> SyntaxResult<SyntaxToken> {
+    pub fn value_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 1usize)
     }
 }
@@ -404,7 +404,7 @@ impl Serialize for CssColor {
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct CssColorFields {
     pub hash_token: SyntaxResult<SyntaxToken>,
-    pub name_token: SyntaxResult<SyntaxToken>,
+    pub value_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssColorProfileAtRule {
@@ -1640,10 +1640,10 @@ pub struct CssKeyframesPercentageSelectorFields {
     pub selector: SyntaxResult<CssPercentage>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub struct CssListOfComponentValuesExpress {
+pub struct CssListOfComponentValuesExpression {
     pub(crate) syntax: SyntaxNode,
 }
-impl CssListOfComponentValuesExpress {
+impl CssListOfComponentValuesExpression {
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -1653,8 +1653,8 @@ impl CssListOfComponentValuesExpress {
     pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
         Self { syntax }
     }
-    pub fn as_fields(&self) -> CssListOfComponentValuesExpressFields {
-        CssListOfComponentValuesExpressFields {
+    pub fn as_fields(&self) -> CssListOfComponentValuesExpressionFields {
+        CssListOfComponentValuesExpressionFields {
             css_component_value_list: self.css_component_value_list(),
         }
     }
@@ -1663,7 +1663,7 @@ impl CssListOfComponentValuesExpress {
     }
 }
 #[cfg(feature = "serde")]
-impl Serialize for CssListOfComponentValuesExpress {
+impl Serialize for CssListOfComponentValuesExpression {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
@@ -1672,7 +1672,7 @@ impl Serialize for CssListOfComponentValuesExpress {
     }
 }
 #[cfg_attr(feature = "serde", derive(Serialize))]
-pub struct CssListOfComponentValuesExpressFields {
+pub struct CssListOfComponentValuesExpressionFields {
     pub css_component_value_list: CssComponentValueList,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -4584,7 +4584,7 @@ impl AnyCssDimension {
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum AnyCssExpression {
     AnyCssValue(AnyCssValue),
-    CssBinaryExpress(CssBinaryExpress),
+    CssBinaryExpression(CssBinaryExpression),
     CssParenthesizedExpression(CssParenthesizedExpression),
 }
 impl AnyCssExpression {
@@ -4594,9 +4594,9 @@ impl AnyCssExpression {
             _ => None,
         }
     }
-    pub fn as_css_binary_express(&self) -> Option<&CssBinaryExpress> {
+    pub fn as_css_binary_expression(&self) -> Option<&CssBinaryExpression> {
         match &self {
-            AnyCssExpression::CssBinaryExpress(item) => Some(item),
+            AnyCssExpression::CssBinaryExpression(item) => Some(item),
             _ => None,
         }
     }
@@ -4906,7 +4906,7 @@ impl AnyCssNamespacePrefix {
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum AnyCssParameter {
     AnyCssExpression(AnyCssExpression),
-    CssListOfComponentValuesExpress(CssListOfComponentValuesExpress),
+    CssListOfComponentValuesExpression(CssListOfComponentValuesExpression),
 }
 impl AnyCssParameter {
     pub fn as_any_css_expression(&self) -> Option<&AnyCssExpression> {
@@ -4915,11 +4915,11 @@ impl AnyCssParameter {
             _ => None,
         }
     }
-    pub fn as_css_list_of_component_values_express(
+    pub fn as_css_list_of_component_values_expression(
         &self,
-    ) -> Option<&CssListOfComponentValuesExpress> {
+    ) -> Option<&CssListOfComponentValuesExpression> {
         match &self {
-            AnyCssParameter::CssListOfComponentValuesExpress(item) => Some(item),
+            AnyCssParameter::CssListOfComponentValuesExpression(item) => Some(item),
             _ => None,
         }
     }
@@ -5649,12 +5649,12 @@ impl From<CssAttributeSelector> for SyntaxElement {
         n.syntax.into()
     }
 }
-impl AstNode for CssBinaryExpress {
+impl AstNode for CssBinaryExpression {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_BINARY_EXPRESS as u16));
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_BINARY_EXPRESSION as u16));
     fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_BINARY_EXPRESS
+        kind == CSS_BINARY_EXPRESSION
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
@@ -5670,9 +5670,9 @@ impl AstNode for CssBinaryExpress {
         self.syntax
     }
 }
-impl std::fmt::Debug for CssBinaryExpress {
+impl std::fmt::Debug for CssBinaryExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssBinaryExpress")
+        f.debug_struct("CssBinaryExpression")
             .field("left", &support::DebugSyntaxResult(self.left()))
             .field(
                 "operator_token",
@@ -5682,13 +5682,13 @@ impl std::fmt::Debug for CssBinaryExpress {
             .finish()
     }
 }
-impl From<CssBinaryExpress> for SyntaxNode {
-    fn from(n: CssBinaryExpress) -> SyntaxNode {
+impl From<CssBinaryExpression> for SyntaxNode {
+    fn from(n: CssBinaryExpression) -> SyntaxNode {
         n.syntax
     }
 }
-impl From<CssBinaryExpress> for SyntaxElement {
-    fn from(n: CssBinaryExpress) -> SyntaxElement {
+impl From<CssBinaryExpression> for SyntaxElement {
+    fn from(n: CssBinaryExpression) -> SyntaxElement {
         n.syntax.into()
     }
 }
@@ -5802,7 +5802,10 @@ impl std::fmt::Debug for CssColor {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("CssColor")
             .field("hash_token", &support::DebugSyntaxResult(self.hash_token()))
-            .field("name_token", &support::DebugSyntaxResult(self.name_token()))
+            .field(
+                "value_token",
+                &support::DebugSyntaxResult(self.value_token()),
+            )
             .finish()
     }
 }
@@ -7000,12 +7003,13 @@ impl From<CssKeyframesPercentageSelector> for SyntaxElement {
         n.syntax.into()
     }
 }
-impl AstNode for CssListOfComponentValuesExpress {
+impl AstNode for CssListOfComponentValuesExpression {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_LIST_OF_COMPONENT_VALUES_EXPRESS as u16));
+    const KIND_SET: SyntaxKindSet<Language> = SyntaxKindSet::from_raw(RawSyntaxKind(
+        CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION as u16,
+    ));
     fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_LIST_OF_COMPONENT_VALUES_EXPRESS
+        kind == CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
@@ -7021,20 +7025,20 @@ impl AstNode for CssListOfComponentValuesExpress {
         self.syntax
     }
 }
-impl std::fmt::Debug for CssListOfComponentValuesExpress {
+impl std::fmt::Debug for CssListOfComponentValuesExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssListOfComponentValuesExpress")
+        f.debug_struct("CssListOfComponentValuesExpression")
             .field("css_component_value_list", &self.css_component_value_list())
             .finish()
     }
 }
-impl From<CssListOfComponentValuesExpress> for SyntaxNode {
-    fn from(n: CssListOfComponentValuesExpress) -> SyntaxNode {
+impl From<CssListOfComponentValuesExpression> for SyntaxNode {
+    fn from(n: CssListOfComponentValuesExpression) -> SyntaxNode {
         n.syntax
     }
 }
-impl From<CssListOfComponentValuesExpress> for SyntaxElement {
-    fn from(n: CssListOfComponentValuesExpress) -> SyntaxElement {
+impl From<CssListOfComponentValuesExpression> for SyntaxElement {
+    fn from(n: CssListOfComponentValuesExpression) -> SyntaxElement {
         n.syntax.into()
     }
 }
@@ -10655,9 +10659,9 @@ impl From<AnyCssDimension> for SyntaxElement {
         node.into()
     }
 }
-impl From<CssBinaryExpress> for AnyCssExpression {
-    fn from(node: CssBinaryExpress) -> AnyCssExpression {
-        AnyCssExpression::CssBinaryExpress(node)
+impl From<CssBinaryExpression> for AnyCssExpression {
+    fn from(node: CssBinaryExpression) -> AnyCssExpression {
+        AnyCssExpression::CssBinaryExpression(node)
     }
 }
 impl From<CssParenthesizedExpression> for AnyCssExpression {
@@ -10668,18 +10672,20 @@ impl From<CssParenthesizedExpression> for AnyCssExpression {
 impl AstNode for AnyCssExpression {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = AnyCssValue::KIND_SET
-        .union(CssBinaryExpress::KIND_SET)
+        .union(CssBinaryExpression::KIND_SET)
         .union(CssParenthesizedExpression::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
-            CSS_BINARY_EXPRESS | CSS_PARENTHESIZED_EXPRESSION => true,
+            CSS_BINARY_EXPRESSION | CSS_PARENTHESIZED_EXPRESSION => true,
             k if AnyCssValue::can_cast(k) => true,
             _ => false,
         }
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            CSS_BINARY_EXPRESS => AnyCssExpression::CssBinaryExpress(CssBinaryExpress { syntax }),
+            CSS_BINARY_EXPRESSION => {
+                AnyCssExpression::CssBinaryExpression(CssBinaryExpression { syntax })
+            }
             CSS_PARENTHESIZED_EXPRESSION => {
                 AnyCssExpression::CssParenthesizedExpression(CssParenthesizedExpression { syntax })
             }
@@ -10694,14 +10700,14 @@ impl AstNode for AnyCssExpression {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyCssExpression::CssBinaryExpress(it) => &it.syntax,
+            AnyCssExpression::CssBinaryExpression(it) => &it.syntax,
             AnyCssExpression::CssParenthesizedExpression(it) => &it.syntax,
             AnyCssExpression::AnyCssValue(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyCssExpression::CssBinaryExpress(it) => it.syntax,
+            AnyCssExpression::CssBinaryExpression(it) => it.syntax,
             AnyCssExpression::CssParenthesizedExpression(it) => it.syntax,
             AnyCssExpression::AnyCssValue(it) => it.into_syntax(),
         }
@@ -10711,7 +10717,7 @@ impl std::fmt::Debug for AnyCssExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             AnyCssExpression::AnyCssValue(it) => std::fmt::Debug::fmt(it, f),
-            AnyCssExpression::CssBinaryExpress(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssExpression::CssBinaryExpression(it) => std::fmt::Debug::fmt(it, f),
             AnyCssExpression::CssParenthesizedExpression(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -10720,7 +10726,7 @@ impl From<AnyCssExpression> for SyntaxNode {
     fn from(n: AnyCssExpression) -> SyntaxNode {
         match n {
             AnyCssExpression::AnyCssValue(it) => it.into(),
-            AnyCssExpression::CssBinaryExpress(it) => it.into(),
+            AnyCssExpression::CssBinaryExpression(it) => it.into(),
             AnyCssExpression::CssParenthesizedExpression(it) => it.into(),
         }
     }
@@ -11661,28 +11667,28 @@ impl From<AnyCssNamespacePrefix> for SyntaxElement {
         node.into()
     }
 }
-impl From<CssListOfComponentValuesExpress> for AnyCssParameter {
-    fn from(node: CssListOfComponentValuesExpress) -> AnyCssParameter {
-        AnyCssParameter::CssListOfComponentValuesExpress(node)
+impl From<CssListOfComponentValuesExpression> for AnyCssParameter {
+    fn from(node: CssListOfComponentValuesExpression) -> AnyCssParameter {
+        AnyCssParameter::CssListOfComponentValuesExpression(node)
     }
 }
 impl AstNode for AnyCssParameter {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
-        AnyCssExpression::KIND_SET.union(CssListOfComponentValuesExpress::KIND_SET);
+        AnyCssExpression::KIND_SET.union(CssListOfComponentValuesExpression::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
-            CSS_LIST_OF_COMPONENT_VALUES_EXPRESS => true,
+            CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION => true,
             k if AnyCssExpression::can_cast(k) => true,
             _ => false,
         }
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            CSS_LIST_OF_COMPONENT_VALUES_EXPRESS => {
-                AnyCssParameter::CssListOfComponentValuesExpress(CssListOfComponentValuesExpress {
-                    syntax,
-                })
+            CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION => {
+                AnyCssParameter::CssListOfComponentValuesExpression(
+                    CssListOfComponentValuesExpression { syntax },
+                )
             }
             _ => {
                 if let Some(any_css_expression) = AnyCssExpression::cast(syntax) {
@@ -11695,13 +11701,13 @@ impl AstNode for AnyCssParameter {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyCssParameter::CssListOfComponentValuesExpress(it) => &it.syntax,
+            AnyCssParameter::CssListOfComponentValuesExpression(it) => &it.syntax,
             AnyCssParameter::AnyCssExpression(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyCssParameter::CssListOfComponentValuesExpress(it) => it.syntax,
+            AnyCssParameter::CssListOfComponentValuesExpression(it) => it.syntax,
             AnyCssParameter::AnyCssExpression(it) => it.into_syntax(),
         }
     }
@@ -11710,7 +11716,7 @@ impl std::fmt::Debug for AnyCssParameter {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             AnyCssParameter::AnyCssExpression(it) => std::fmt::Debug::fmt(it, f),
-            AnyCssParameter::CssListOfComponentValuesExpress(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssParameter::CssListOfComponentValuesExpression(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -11718,7 +11724,7 @@ impl From<AnyCssParameter> for SyntaxNode {
     fn from(n: AnyCssParameter) -> SyntaxNode {
         match n {
             AnyCssParameter::AnyCssExpression(it) => it.into(),
-            AnyCssParameter::CssListOfComponentValuesExpress(it) => it.into(),
+            AnyCssParameter::CssListOfComponentValuesExpression(it) => it.into(),
         }
     }
 }
@@ -13342,7 +13348,7 @@ impl std::fmt::Display for CssAttributeSelector {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for CssBinaryExpress {
+impl std::fmt::Display for CssBinaryExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -13502,7 +13508,7 @@ impl std::fmt::Display for CssKeyframesPercentageSelector {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for CssListOfComponentValuesExpress {
+impl std::fmt::Display for CssListOfComponentValuesExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
