@@ -1,0 +1,41 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 83
+expression: invalid_properties_value_shorthand.js
+---
+# Input
+```js
+const options = {
+	normalize: parseFloat,
+	parseInt,
+};
+run(foo, options);
+
+```
+
+# Diagnostics
+```
+invalid_properties_value_shorthand.js:2:13 lint/nursery/useNumberProperties  FIXABLE  ━━━━━━━━━━━━━━
+
+  ! Use the Number properties instead of the global ones.
+  
+    1 │ const options = {
+  > 2 │ 	normalize: parseFloat,
+      │ 	           ^^^^^^^^^^
+    3 │ 	parseInt,
+    4 │ };
+  
+  i ECMAScript 2015 moved globals onto the Number constructor for consistency and to slightly improve them.
+  
+  i Safe fix: Use Number instead.
+  
+    1 1 │   const options = {
+    2   │ - → normalize:·parseFloat,
+      2 │ + → normalize:·Number.parseFloat,
+    3 3 │   	parseInt,
+    4 4 │   };
+  
+
+```
+
+
