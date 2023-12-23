@@ -300,7 +300,7 @@ CssRoot {
                                     },
                                     COMMA@157..158 "," [] [],
                                     CssParameter {
-                                        any_css_parameter: CssListOfComponentValuesExpress {
+                                        any_css_parameter: CssListOfComponentValuesExpression {
                                             css_component_value_list: CssComponentValueList [
                                                 CssNumber {
                                                     value_token: CSS_NUMBER_LITERAL@158..160 "1" [] [Whitespace(" ")],
@@ -578,7 +578,7 @@ CssRoot {
                       0: CSS_NUMBER_LITERAL@156..157 "1" [] []
                   1: COMMA@157..158 "," [] []
                   2: CSS_PARAMETER@158..161
-                    0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESS@158..161
+                    0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@158..161
                       0: CSS_COMPONENT_VALUE_LIST@158..161
                         0: CSS_NUMBER@158..160
                           0: CSS_NUMBER_LITERAL@158..160 "1" [] [Whitespace(" ")]

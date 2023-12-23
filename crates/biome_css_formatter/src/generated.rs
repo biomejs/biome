@@ -3320,19 +3320,19 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssParameter {
         )
     }
 }
-impl FormatRule < biome_css_syntax :: CssListOfComponentValuesExpress > for crate :: css :: auxiliary :: list_of_component_values_express :: FormatCssListOfComponentValuesExpress { type Context = CssFormatContext ; # [inline (always)] fn fmt (& self , node : & biome_css_syntax :: CssListOfComponentValuesExpress , f : & mut CssFormatter) -> FormatResult < () > { FormatNodeRule :: < biome_css_syntax :: CssListOfComponentValuesExpress > :: fmt (self , node , f) } }
-impl AsFormat<CssFormatContext> for biome_css_syntax::CssListOfComponentValuesExpress {
-    type Format < 'a > = FormatRefWithRule < 'a , biome_css_syntax :: CssListOfComponentValuesExpress , crate :: css :: auxiliary :: list_of_component_values_express :: FormatCssListOfComponentValuesExpress > ;
+impl FormatRule < biome_css_syntax :: CssListOfComponentValuesExpression > for crate :: css :: auxiliary :: list_of_component_values_expression :: FormatCssListOfComponentValuesExpression { type Context = CssFormatContext ; # [inline (always)] fn fmt (& self , node : & biome_css_syntax :: CssListOfComponentValuesExpression , f : & mut CssFormatter) -> FormatResult < () > { FormatNodeRule :: < biome_css_syntax :: CssListOfComponentValuesExpression > :: fmt (self , node , f) } }
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssListOfComponentValuesExpression {
+    type Format < 'a > = FormatRefWithRule < 'a , biome_css_syntax :: CssListOfComponentValuesExpression , crate :: css :: auxiliary :: list_of_component_values_expression :: FormatCssListOfComponentValuesExpression > ;
     fn format(&self) -> Self::Format<'_> {
         #![allow(clippy::default_constructed_unit_structs)]
-        FormatRefWithRule :: new (self , crate :: css :: auxiliary :: list_of_component_values_express :: FormatCssListOfComponentValuesExpress :: default ())
+        FormatRefWithRule :: new (self , crate :: css :: auxiliary :: list_of_component_values_expression :: FormatCssListOfComponentValuesExpression :: default ())
     }
 }
-impl IntoFormat<CssFormatContext> for biome_css_syntax::CssListOfComponentValuesExpress {
-    type Format = FormatOwnedWithRule < biome_css_syntax :: CssListOfComponentValuesExpress , crate :: css :: auxiliary :: list_of_component_values_express :: FormatCssListOfComponentValuesExpress > ;
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssListOfComponentValuesExpression {
+    type Format = FormatOwnedWithRule < biome_css_syntax :: CssListOfComponentValuesExpression , crate :: css :: auxiliary :: list_of_component_values_expression :: FormatCssListOfComponentValuesExpression > ;
     fn into_format(self) -> Self::Format {
         #![allow(clippy::default_constructed_unit_structs)]
-        FormatOwnedWithRule :: new (self , crate :: css :: auxiliary :: list_of_component_values_express :: FormatCssListOfComponentValuesExpress :: default ())
+        FormatOwnedWithRule :: new (self , crate :: css :: auxiliary :: list_of_component_values_expression :: FormatCssListOfComponentValuesExpression :: default ())
     }
 }
 impl FormatRule<biome_css_syntax::CssBinaryExpression>

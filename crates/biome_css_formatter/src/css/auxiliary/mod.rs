@@ -22,7 +22,7 @@ pub(crate) mod declaration_list_block;
 pub(crate) mod identifier;
 pub(crate) mod keyframes_block;
 pub(crate) mod keyframes_item;
-pub(crate) mod list_of_component_values_express;
+pub(crate) mod list_of_component_values_expression;
 pub(crate) mod media_and_condition;
 pub(crate) mod media_and_type_query;
 pub(crate) mod media_condition_in_parens;

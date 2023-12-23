@@ -9,7 +9,7 @@ impl FormatRule<AnyCssParameter> for FormatAnyCssParameter {
     fn fmt(&self, node: &AnyCssParameter, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
             AnyCssParameter::AnyCssExpression(node) => node.format().fmt(f),
-            AnyCssParameter::CssListOfComponentValuesExpress(node) => node.format().fmt(f),
+            AnyCssParameter::CssListOfComponentValuesExpression(node) => node.format().fmt(f),
         }
     }
 }
