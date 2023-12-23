@@ -30,7 +30,7 @@ pub struct RuleMetadata {
     pub recommended: bool,
     /// The kind of fix
     pub fix_kind: Option<FixKind>,
-    /// The source url of the rule
+    /// The source URL of the rule
     pub source: Option<Source>,
     /// The source kind of the rule
     pub source_kind: Option<SourceKind>,
@@ -48,35 +48,57 @@ pub enum FixKind {
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum Source {
+    /// Rules from [Rust Clippy](https://rust-lang.github.io/rust-clippy/master/index.html)
     Clippy(&'static str),
+    /// Rules from [Eslint](https://eslint.org/)
     Eslint(&'static str),
+    /// Rules from [Eslint Plugin Jest](https://github.com/jest-community/eslint-plugin-jest)
     EslintJest(&'static str),
+    /// Rules from [Eslint Plugin JSX A11y](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y)
     EslintJsxA11y(&'static str),
+    /// Rules from [Eslint Plugin React](https://github.com/jsx-eslint/eslint-plugin-react)
     EslintReact(&'static str),
+    /// Rules from [Eslint Plugin React Hooks](https://github.com/facebook/react/blob/main/packages/eslint-plugin-react-hooks/README.md)
     EslintReactHooks(&'static str),
+    /// Rules from [Typescript Eslint Plugin](https://typescript-eslint.io)
     EslintTypeScript(&'static str),
+    /// Rules from [Eslint Plugin Unicorn](https://github.com/sindresorhus/eslint-plugin-unicorn)
     EslintUnicorn(&'static str),
+    /// Rules from [Eslint Plugin Mysticatea](https://github.com/mysticatea/eslint-plugin)
     EslintMysticatea(&'static str),
 }
 
-impl std::fmt::Display for Source {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let (source_url, source_rule_name) = match self {
-            Self::Clippy(rule_name) => (format!("https://rust-lang.github.io/rust-clippy/master/#/{rule_name}"), rule_name),
-            Self::Eslint(rule_name) => (format!("https://eslint.org/docs/latest/rules/{rule_name}"), rule_name),
-            Self::EslintJest(rule_name) => (format!("https://github.com/jest-community/eslint-plugin-jest/blob/main/docs/rules/{rule_name}.md"), rule_name),
-            Self::EslintJsxA11y(rule_name) => (format!("https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/{rule_name}.md"), rule_name),
-            Self::EslintReact(rule_name) => (format!("https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/{rule_name}.md"), rule_name),
-            Self::EslintReactHooks(rule_name) => (format!("https://github.com/facebook/react/blob/main/packages/eslint-plugin-react-hooks/README.md"), rule_name),
-            Self::EslintTypeScript(rule_name) => (format!("https://typescript-eslint.io/rules/{rule_name}"), rule_name),
-            Self::EslintUnicorn(rule_name) => (format!("https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/{rule_name}"), rule_name),
-            Self::EslintMysticatea(rule_name) => (format!("https://github.com/mysticatea/eslint-plugin/blob/master/docs/rules/{rule_name}"), rule_name),
-        };
+impl Source {
+    pub fn as_rule_name(&self) -> &'static str {
+        match self {
+            Self::Clippy(rule_name) => rule_name,
+            Self::Eslint(rule_name) => rule_name,
+            Self::EslintJest(rule_name) => rule_name,
+            Self::EslintJsxA11y(rule_name) => rule_name,
+            Self::EslintReact(rule_name) => rule_name,
+            Self::EslintReactHooks(rule_name) => rule_name,
+            Self::EslintTypeScript(rule_name) => rule_name,
+            Self::EslintUnicorn(rule_name) => rule_name,
+            Self::EslintMysticatea(rule_name) => rule_name,
+        }
+    }
 
-        write!(
-            f,
-            "<a href=\"{source_url}\" target=\"_blank\"><code>{source_rule_name}</code></a>"
-        )
+    pub fn as_rule_url(&self) -> String {
+        match self {
+            Self::Clippy(rule_name) => format!("https://rust-lang.github.io/rust-clippy/master/#/{rule_name}"),
+            Self::Eslint(rule_name) => format!( "https://eslint.org/docs/latest/rules/{rule_name}"),
+            Self::EslintJest(rule_name) => format!("https://github.com/jest-community/eslint-plugin-jest/blob/main/docs/rules/{rule_name}.md"),
+            Self::EslintJsxA11y(rule_name) => format!("https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/{rule_name}.md"),
+            Self::EslintReact(rule_name) => format!("https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/{rule_name}.md"),
+            Self::EslintReactHooks(_) =>  "https://github.com/facebook/react/blob/main/packages/eslint-plugin-react-hooks/README.md".to_string(),
+            Self::EslintTypeScript(rule_name) => format!("https://typescript-eslint.io/rules/{rule_name}"),
+            Self::EslintUnicorn(rule_name) => format!("https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/{rule_name}.md"),
+            Self::EslintMysticatea(rule_name) => format!("https://github.com/mysticatea/eslint-plugin/blob/master/docs/rules/{rule_name}.md"),
+        }
+    }
+
+    pub fn as_url_and_rule_name(&self) -> (String, &'static str) {
+        (self.as_rule_url(), self.as_rule_name())
     }
 }
 
