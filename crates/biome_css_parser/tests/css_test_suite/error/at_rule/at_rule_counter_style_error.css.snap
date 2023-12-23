@@ -28,7 +28,7 @@ CssRoot {
                     COUNTER_STYLE_KW@1..16 "counter-style" [] [Whitespace("  ")],
                     CssDeclarationListBlock {
                         l_curly_token: L_CURLY@16..19 "{" [] [Whitespace("  ")],
-                        declaration_list: CssDeclarationList [],
+                        declarations: CssDeclarationList [],
                         r_curly_token: R_CURLY@19..20 "}" [] [],
                     },
                 ],
@@ -46,7 +46,7 @@ CssRoot {
                     },
                     CssDeclarationListBlock {
                         l_curly_token: L_CURLY@41..44 "{" [] [Whitespace("  ")],
-                        declaration_list: CssDeclarationList [],
+                        declarations: CssDeclarationList [],
                         r_curly_token: R_CURLY@44..45 "}" [] [],
                     },
                 ],
@@ -64,7 +64,7 @@ CssRoot {
                     },
                     CssDeclarationListBlock {
                         l_curly_token: L_CURLY@70..73 "{" [] [Whitespace("  ")],
-                        declaration_list: CssDeclarationList [],
+                        declarations: CssDeclarationList [],
                         r_curly_token: R_CURLY@73..74 "}" [] [],
                     },
                 ],

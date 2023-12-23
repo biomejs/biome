@@ -44,7 +44,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@7..8 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@8..9 "}" [] [],
             },
         },
@@ -69,7 +69,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@18..19 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@19..20 "}" [] [],
             },
         },
@@ -113,7 +113,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@41..42 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@42..43 "}" [] [],
             },
         },
@@ -156,7 +156,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@63..64 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@64..65 "}" [] [],
             },
         },
@@ -200,7 +200,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@85..86 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@86..87 "}" [] [],
             },
         },
@@ -243,7 +243,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@106..107 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@107..108 "}" [] [],
             },
         },
@@ -279,7 +279,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@120..121 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@121..122 "}" [] [],
             },
         },

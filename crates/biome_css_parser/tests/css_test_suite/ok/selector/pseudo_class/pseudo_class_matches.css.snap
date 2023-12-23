@@ -30,7 +30,7 @@ CssRoot {
                                 class: CssPseudoClassFunctionSelectorList {
                                     name: MATCHES_KW@1..8 "matches" [] [],
                                     l_paren_token: L_PAREN@8..9 "(" [] [],
-                                    selector_list: CssSelectorList [
+                                    selectors: CssSelectorList [
                                         CssCompoundSelector {
                                             nesting_selector_token: missing (optional),
                                             simple_selector: CssTypeSelector {
@@ -62,7 +62,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@16..17 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@17..18 "}" [] [],
             },
         },
@@ -78,7 +78,7 @@ CssRoot {
                                 class: CssPseudoClassFunctionSelectorList {
                                     name: MATCHES_KW@20..27 "matches" [] [],
                                     l_paren_token: L_PAREN@27..28 "(" [] [],
-                                    selector_list: CssSelectorList [
+                                    selectors: CssSelectorList [
                                         CssCompoundSelector {
                                             nesting_selector_token: missing (optional),
                                             simple_selector: CssTypeSelector {
@@ -121,7 +121,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@39..40 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@40..41 "}" [] [],
             },
         },

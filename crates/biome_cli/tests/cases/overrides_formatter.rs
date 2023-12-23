@@ -10,9 +10,8 @@ const UNFORMATTED: &str = "  statement(  )  ";
 const UNFORMATTED_JSON: &str = r#"{ "asta": ["lorem", "ipsum", "first", "second"] }"#;
 const FORMATTED_JSON: &str =
     "{\n    \"asta\": [\n        \"lorem\",\n        \"ipsum\",\n        \"first\",\n        \"second\"\n    ]\n}\n";
-// TODO(faulty): re-add when the CSS formatter is available from the CLI.
-// const UNFORMATTED_CSS: &str = "html {}";
-// const FORMATTED_CSS: &str = "html {\n}\n";
+const UNFORMATTED_CSS: &str = "html {}";
+const FORMATTED_CSS: &str = "html {\n}\n";
 
 const UNFORMATTED_LINE_WIDTH: &str = r#"const a = ["loreum", "ipsum"]"#;
 const FORMATTED: &str = "statement();\n";
@@ -321,9 +320,8 @@ fn does_include_file_with_different_languages_and_files() {
     let json_file = Path::new("test3.json");
     fs.insert(json_file.into(), UNFORMATTED_JSON.as_bytes());
 
-    // TODO(faulty): re-add when the CSS formatter is available from the CLI.
-    // let css_file = Path::new("test4.css");
-    // fs.insert(css_file.into(), UNFORMATTED_CSS.as_bytes());
+    let css_file = Path::new("test4.css");
+    fs.insert(css_file.into(), UNFORMATTED_CSS.as_bytes());
 
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
@@ -335,8 +333,7 @@ fn does_include_file_with_different_languages_and_files() {
                 test.as_os_str().to_str().unwrap(),
                 test2.as_os_str().to_str().unwrap(),
                 json_file.as_os_str().to_str().unwrap(),
-                // TODO(faulty): re-add when the CSS formatter is available from the CLI.
-                // css_file.as_os_str().to_str().unwrap(),
+                css_file.as_os_str().to_str().unwrap(),
             ]
             .as_slice(),
         ),
@@ -347,12 +344,115 @@ fn does_include_file_with_different_languages_and_files() {
     assert_file_contents(&fs, test, FORMATTED_WITH_SINGLE_QUOTES);
     assert_file_contents(&fs, test2, FORMATTED_WITH_NO_SEMICOLONS);
     assert_file_contents(&fs, json_file, FORMATTED_JSON);
-    // TODO(faulty): re-add when the CSS formatter is available from the CLI.
-    // assert_file_contents(&fs, css_file, FORMATTED_CSS);
+    assert_file_contents(&fs, css_file, FORMATTED_CSS);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "does_include_file_with_different_languages_and_files",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn does_not_change_formatting_settings() {
+    let mut console = BufferConsole::default();
+    let mut fs = MemoryFileSystem::default();
+    let file_path = Path::new("biome.json");
+    fs.insert(
+        file_path.into(),
+        r#"{
+        "formatter": { "lineWidth": 20, "indentStyle": "space" },
+  "overrides": [
+    { "include": ["test.js"], "linter": { "enabled": false } }
+  ]
+}
+
+"#
+        .as_bytes(),
+    );
+
+    let test = Path::new("test.js");
+    fs.insert(test.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
+
+    let test2 = Path::new("test2.js");
+    fs.insert(test2.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("format"),
+                ("--write"),
+                test.as_os_str().to_str().unwrap(),
+                test2.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, test, FORMATTED_LINE_WITH_SPACES);
+    assert_file_contents(&fs, test2, FORMATTED_LINE_WITH_SPACES);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "does_not_change_formatting_settings",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn does_not_change_formatting_language_settings() {
+    let mut console = BufferConsole::default();
+    let mut fs = MemoryFileSystem::default();
+    let file_path = Path::new("biome.json");
+    fs.insert(
+        file_path.into(),
+        r#"{
+        "javascript": { "formatter": { "quoteStyle": "single" } },
+  "overrides": [
+    { "include": ["test.js"], "linter": { "enabled": false } }
+  ]
+}
+
+"#
+        .as_bytes(),
+    );
+
+    let test = Path::new("test.js");
+    fs.insert(test.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
+
+    let test2 = Path::new("test2.js");
+    fs.insert(test2.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("format"),
+                ("--write"),
+                test.as_os_str().to_str().unwrap(),
+                test2.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, test, FORMATTED_WITH_SINGLE_QUOTES);
+    assert_file_contents(&fs, test2, FORMATTED_WITH_SINGLE_QUOTES);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "does_not_change_formatting_language_settings",
         fs,
         console,
         result,

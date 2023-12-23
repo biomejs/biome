@@ -1,7 +1,9 @@
 <p align="center">
-    <img alt="Biome - Toolchain of the web"
-         src="https://raw.githubusercontent.com/biomejs/resources/main/biome-logo-slogan.svg"
-         width="400">
+    <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/biomejs/resources/main/svg/slogan-dark-transparent.svg">
+        <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/biomejs/resources/main/svg/slogan-light-transparent.svg">
+        <img alt="Biome - Toolchain of the web" src="https://raw.githubusercontent.com/biomejs/resources/main/svg/slogan-light-transparent.svg" width="700">
+    </picture>
 </p>
 
 <div align="center">
@@ -22,6 +24,12 @@
 [vscode-url]: https://marketplace.visualstudio.com/items?itemName=biomejs.biome
 [open-vsx-badge]: https://badgen.net/open-vsx/version/biomejs/biome?label=open-vsx&color=green
 [open-vsx-url]: https://open-vsx.org/extension/biomejs/biome
+
+</div>
+
+<div align="center">
+
+[English](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.md) | [简体中文](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.zh-CN.md) | 日本語 | [Português do Brasil](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.pt-br.md)
 
 </div>
 
@@ -106,13 +114,6 @@ Biome についてもっと知るために[ホームページ][biomejs]をチェ
     </tr>
   </tbody>
 </table>
-
-## 翻訳
-
-- [English](./README.md)
-- [简体中文](./README.zh-CN.md)
-- 日本語
-- [Português do Brasil](./README.pt-br.md)
 
 [biomejs]: https://biomejs.dev/ja/
 [biome-philosophy]: https://biomejs.dev/ja/internals/philosophy/

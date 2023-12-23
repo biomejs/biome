@@ -29,7 +29,7 @@ CssRoot {
                             class: CssPseudoClassFunctionCompoundSelectorList {
                                 name: FUTURE_KW@1..7 "future" [] [],
                                 l_paren_token: L_PAREN@7..8 "(" [] [],
-                                compound_selector_list: CssCompoundSelectorList [
+                                compound_selectors: CssCompoundSelectorList [
                                     CssCompoundSelector {
                                         nesting_selector_token: missing (optional),
                                         simple_selector: CssTypeSelector {
@@ -82,7 +82,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@23..24 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@24..25 "}" [] [],
             },
         },
@@ -98,7 +98,7 @@ CssRoot {
                                 class: CssPseudoClassFunctionCompoundSelectorList {
                                     name: FUTURE_KW@27..33 "future" [] [],
                                     l_paren_token: L_PAREN@33..34 "(" [] [],
-                                    compound_selector_list: CssCompoundSelectorList [
+                                    compound_selectors: CssCompoundSelectorList [
                                         CssCompoundSelector {
                                             nesting_selector_token: missing (optional),
                                             simple_selector: CssTypeSelector {
@@ -165,7 +165,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@54..55 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@55..56 "}" [] [],
             },
         },

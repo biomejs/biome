@@ -130,7 +130,7 @@ CssRoot {
                             ],
                             block: CssDeclarationListBlock {
                                 l_curly_token: L_CURLY@123..124 "{" [] [],
-                                declaration_list: CssDeclarationList [
+                                declarations: CssDeclarationList [
                                     CssDeclaration {
                                         name: CssIdentifier {
                                             value_token: IDENT@124..136 "transform" [Newline("\n"), Whitespace("\t\t")] [],
@@ -174,7 +174,7 @@ CssRoot {
                             ],
                             block: CssDeclarationListBlock {
                                 l_curly_token: L_CURLY@162..163 "{" [] [],
-                                declaration_list: CssDeclarationList [
+                                declarations: CssDeclarationList [
                                     CssDeclaration {
                                         name: CssIdentifier {
                                             value_token: IDENT@163..175 "transform" [Newline("\n"), Whitespace("\t\t")] [],
@@ -238,7 +238,7 @@ CssRoot {
                             ],
                             block: CssDeclarationListBlock {
                                 l_curly_token: L_CURLY@233..235 "{" [] [Whitespace(" ")],
-                                declaration_list: CssDeclarationList [
+                                declarations: CssDeclarationList [
                                     CssDeclaration {
                                         name: CssIdentifier {
                                             value_token: IDENT@235..238 "top" [] [],
@@ -282,7 +282,7 @@ CssRoot {
                             ],
                             block: CssDeclarationListBlock {
                                 l_curly_token: L_CURLY@259..261 "{" [] [Whitespace(" ")],
-                                declaration_list: CssDeclarationList [
+                                declarations: CssDeclarationList [
                                     CssDeclaration {
                                         name: CssIdentifier {
                                             value_token: IDENT@261..264 "top" [] [],
@@ -327,7 +327,7 @@ CssRoot {
                             ],
                             block: CssDeclarationListBlock {
                                 l_curly_token: L_CURLY@284..286 "{" [] [Whitespace(" ")],
-                                declaration_list: CssDeclarationList [
+                                declarations: CssDeclarationList [
                                     CssDeclaration {
                                         name: CssIdentifier {
                                             value_token: IDENT@286..290 "left" [] [],
@@ -363,7 +363,7 @@ CssRoot {
                             ],
                             block: CssDeclarationListBlock {
                                 l_curly_token: L_CURLY@306..308 "{" [] [Whitespace(" ")],
-                                declaration_list: CssDeclarationList [
+                                declarations: CssDeclarationList [
                                     CssDeclaration {
                                         name: CssIdentifier {
                                             value_token: IDENT@308..311 "top" [] [],
@@ -467,7 +467,7 @@ CssRoot {
                             ],
                             block: CssDeclarationListBlock {
                                 l_curly_token: L_CURLY@443..444 "{" [] [],
-                                declaration_list: CssDeclarationList [
+                                declarations: CssDeclarationList [
                                     CssDeclaration {
                                         name: CssIdentifier {
                                             value_token: IDENT@444..458 "margin-left" [Newline("\n"), Whitespace("\t\t")] [],
@@ -503,7 +503,7 @@ CssRoot {
                             ],
                             block: CssDeclarationListBlock {
                                 l_curly_token: L_CURLY@474..475 "{" [] [],
-                                declaration_list: CssDeclarationList [
+                                declarations: CssDeclarationList [
                                     CssDeclaration {
                                         name: CssIdentifier {
                                             value_token: IDENT@475..489 "margin-left" [Newline("\n"), Whitespace("\t\t")] [],
@@ -552,7 +552,7 @@ CssRoot {
                             ],
                             block: CssDeclarationListBlock {
                                 l_curly_token: L_CURLY@521..522 "{" [] [],
-                                declaration_list: CssDeclarationList [
+                                declarations: CssDeclarationList [
                                     CssDeclaration {
                                         name: CssIdentifier {
                                             value_token: IDENT@522..532 "opacity" [Newline("\n"), Whitespace("\t\t")] [],
@@ -578,7 +578,7 @@ CssRoot {
                             ],
                             block: CssDeclarationListBlock {
                                 l_curly_token: L_CURLY@547..548 "{" [] [],
-                                declaration_list: CssDeclarationList [
+                                declarations: CssDeclarationList [
                                     CssDeclaration {
                                         name: CssIdentifier {
                                             value_token: IDENT@548..562 "margin-left" [Newline("\n"), Whitespace("\t\t")] [],
@@ -624,7 +624,7 @@ CssRoot {
                             ],
                             block: CssDeclarationListBlock {
                                 l_curly_token: L_CURLY@613..614 "{" [] [],
-                                declaration_list: CssDeclarationList [
+                                declarations: CssDeclarationList [
                                     CssDeclaration {
                                         name: CssIdentifier {
                                             value_token: IDENT@614..626 "transform" [Newline("\n"), Whitespace("\t\t")] [],
@@ -668,7 +668,7 @@ CssRoot {
                             ],
                             block: CssDeclarationListBlock {
                                 l_curly_token: L_CURLY@652..653 "{" [] [],
-                                declaration_list: CssDeclarationList [
+                                declarations: CssDeclarationList [
                                     CssDeclaration {
                                         name: CssIdentifier {
                                             value_token: IDENT@653..665 "transform" [Newline("\n"), Whitespace("\t\t")] [],

@@ -44,10 +44,10 @@ pub(crate) trait FormatAstSeparatedListExtension:
 {
     /// Prints a separated list of nodes
     ///
-    /// Trailing separators will be reused from the original list or
-    /// created by calling the `separator_factory` function.
-    /// The last trailing separator in the list will only be printed
-    /// if the outer group breaks.
+    /// Trailing separators will be reused from the original list or created by
+    /// calling the `separator_factory` function. The last trailing separator
+    /// will not be printed by default. Use `with_trailing_separator` to add it
+    /// in where necessary.
     fn format_separated(&self, separator: &'static str) -> CssFormatSeparatedIter<Self::Node> {
         CssFormatSeparatedIter::new(
             self.elements(),

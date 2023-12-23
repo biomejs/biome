@@ -134,16 +134,9 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 #[test]
 pub fn quick_test() {
     let code = r#"
-@keyframes slidein {
-	{
-		transform: translateX(0%);
-	}
+[href$='#'] {} {
 }
     "#;
-    // let code: String = fs::read_to_string("./tests/bootstrap.css")
-    //     .unwrap()
-    //     .parse()
-    //     .unwrap();
 
     let root = parse_css(
         code,

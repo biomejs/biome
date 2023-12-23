@@ -1,5 +1,6 @@
 use crate::prelude::*;
-use biome_css_syntax::CssFontPaletteValuesAtRule;
+use biome_css_syntax::{CssFontPaletteValuesAtRule, CssFontPaletteValuesAtRuleFields};
+use biome_formatter::write;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatCssFontPaletteValuesAtRule;
@@ -10,6 +11,21 @@ impl FormatNodeRule<CssFontPaletteValuesAtRule> for FormatCssFontPaletteValuesAt
         node: &CssFontPaletteValuesAtRule,
         f: &mut CssFormatter,
     ) -> FormatResult<()> {
-        format_verbatim_node(node.syntax()).fmt(f)
+        let CssFontPaletteValuesAtRuleFields {
+            font_palette_values_token,
+            name,
+            block,
+        } = node.as_fields();
+
+        write!(
+            f,
+            [
+                font_palette_values_token.format(),
+                space(),
+                name.format(),
+                space(),
+                block.format()
+            ]
+        )
     }
 }

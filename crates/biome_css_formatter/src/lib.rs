@@ -167,6 +167,7 @@ where
 {
     fn fmt(&self, node: &N, f: &mut CssFormatter) -> FormatResult<()> {
         if self.is_suppressed(node, f) {
+            println!("Printing suppressed for some reason");
             return write!(f, [format_suppressed_node(node.syntax())]);
         }
 
@@ -341,6 +342,6 @@ mod tests {
         let parse = parse_css(src, CssParserOptions::default());
         let options = CssFormatOptions::default();
         let formatted = format_node(options, &parse.syntax()).unwrap();
-        assert_eq!(formatted.print().unwrap().as_code(), "html {}");
+        assert_eq!(formatted.print().unwrap().as_code(), "html {\n}\n");
     }
 }

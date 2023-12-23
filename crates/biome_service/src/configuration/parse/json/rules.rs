@@ -988,6 +988,13 @@ impl Deserializable for Nursery {
                             result.use_export_type =
                                 Deserializable::deserialize(&value, "useExportType", diagnostics);
                         }
+                        "useFilenamingConvention" => {
+                            result.use_filenaming_convention = Deserializable::deserialize(
+                                &value,
+                                "useFilenamingConvention",
+                                diagnostics,
+                            );
+                        }
                         "useForOf" => {
                             result.use_for_of =
                                 Deserializable::deserialize(&value, "useForOf", diagnostics);
@@ -1055,6 +1062,7 @@ impl Deserializable for Nursery {
                                     "noUselessTernary",
                                     "useAwait",
                                     "useExportType",
+                                    "useFilenamingConvention",
                                     "useForOf",
                                     "useGroupedTypeImport",
                                     "useImportRestrictions",

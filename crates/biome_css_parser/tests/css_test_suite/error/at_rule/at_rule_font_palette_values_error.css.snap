@@ -28,7 +28,7 @@ CssRoot {
                     FONT_PALETTE_VALUES_KW@1..22 "font-palette-values" [] [Whitespace("  ")],
                     CssDeclarationListBlock {
                         l_curly_token: L_CURLY@22..25 "{" [] [Whitespace("  ")],
-                        declaration_list: CssDeclarationList [],
+                        declarations: CssDeclarationList [],
                         r_curly_token: R_CURLY@25..26 "}" [] [],
                     },
                 ],
@@ -46,7 +46,7 @@ CssRoot {
                     },
                     CssDeclarationListBlock {
                         l_curly_token: L_CURLY@53..56 "{" [] [Whitespace("  ")],
-                        declaration_list: CssDeclarationList [],
+                        declarations: CssDeclarationList [],
                         r_curly_token: R_CURLY@56..57 "}" [] [],
                     },
                 ],
@@ -64,7 +64,7 @@ CssRoot {
                     },
                     CssDeclarationListBlock {
                         l_curly_token: L_CURLY@88..91 "{" [] [Whitespace("  ")],
-                        declaration_list: CssDeclarationList [],
+                        declarations: CssDeclarationList [],
                         r_curly_token: R_CURLY@91..92 "}" [] [],
                     },
                 ],
