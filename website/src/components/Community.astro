@@ -2,8 +2,10 @@
 const apiUrl =
   "https://api.github.com/repos/biomejs/biome/contributors?per_page=35";
 
-let contributors = await fetch(apiUrl);
-contributors = await contributors.json();
+let contributors = [];
+contributors = await fetch(apiUrl)
+  .then((res) => res.json())
+  .catch((error) => console.error("Error:", error));
 ---
 
 {
