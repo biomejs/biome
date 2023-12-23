@@ -8,7 +8,16 @@ pub(crate) fn expected_identifier(p: &CssParser, range: TextRange) -> ParseDiagn
 }
 
 pub(crate) fn expected_expression(p: &CssParser, range: TextRange) -> ParseDiagnostic {
-    expected_node("expression", range, p)
+    expected_any(
+        &[
+            "component value",
+            "binary expression",
+            "parenthesized expression",
+            "any function expression",
+        ],
+        range,
+        p,
+    )
 }
 
 pub(crate) fn expected_number(p: &CssParser, range: TextRange) -> ParseDiagnostic {

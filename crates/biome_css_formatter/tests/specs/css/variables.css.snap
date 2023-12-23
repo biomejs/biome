@@ -1,6 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-info: css/variables.css
+info: "css\\variables.css"
 ---
 
 # Input
@@ -66,10 +66,10 @@ Line width: 80
 
 ```css
 .foo {
-    --prop: 10px;
-    prop1: var(--prop);
-    prop2: var(--my-var, --my-background, pink);
-    prop3: calc(var(--prop) * 1px);
+	--prop: 10px;
+	prop1: var(--prop);
+	prop2: var(--my-var, --my-background, pink);
+	prop3: calc(var(--prop) * 1px);
 }
 
 .bar {
@@ -91,8 +91,21 @@ Line width: 80
 	prop: var(--prop1) var(prop2);
 	prop: var(--prop1) var(prop2);
 
-	prop: hsl(var(--hue, 0) var(--sat, 100) var(--light, 1));
+	prop: hsl(
+			var(--hue, 
+        0) 
+        var(
+            --sat, 100
+            
+            ) var(--light  ,  1)
+		);
 }
 ```
 
+
+
+## Unimplemented nodes/tokens
+
+"var(--prop) * 1px" => 102..119
+"\t\t\tvar(--hue, \n        0) \n        var(\n            --sat, 100\n            \n            ) var(--light  ,  1)\n\t\t);\n" => 428..542
 
