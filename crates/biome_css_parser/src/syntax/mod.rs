@@ -294,6 +294,7 @@ pub(crate) fn is_at_any_function(p: &mut CssParser) -> bool {
     is_at_identifier(p) && p.nth_at(1, T!['('])
 }
 
+
 pub(crate) struct CssParameterList;
 
 impl ParseSeparatedList for CssParameterList {
@@ -421,7 +422,7 @@ fn parse_simple_function(p: &mut CssParser<'_>) -> ParsedSyntax {
     let simple_fn = p.start();
     parse_regular_identifier(p).or_add_diagnostic(p, expected_identifier);
     p.expect(T!['(']);
-    CssParameterList::default().parse_list(p);
+    CssParameterList.parse_list(p);
     p.expect(T![')']);
     Present(simple_fn.complete(p, CSS_SIMPLE_FUNCTION))
 }

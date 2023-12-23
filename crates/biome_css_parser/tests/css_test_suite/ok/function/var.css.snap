@@ -35,7 +35,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@4..5 "{" [] [],
-                declaration_list: CssDeclarationList [
+                declarations: CssDeclarationList [
                     CssDeclaration {
                         name: CssIdentifier {
                             value_token: IDENT@5..15 "color" [Newline("\n"), Whitespace("    ")] [],

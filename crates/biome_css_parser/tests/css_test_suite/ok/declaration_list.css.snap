@@ -467,25 +467,21 @@ CssRoot {
                         },
                         colon_token: COLON@287..289 ":" [] [Whitespace(" ")],
                         value: CssComponentValueList [
-                            CssAnyFunction {
-                                css_simple_function: CssSimpleFunction {
-                                    name: CssIdentifier {
-                                        value_token: IDENT@289..292 "var" [] [],
-                                    },
-                                    l_paren_token: L_PAREN@292..293 "(" [] [],
-                                    items: CssParameterList [
-                                        CssParameter {
-                                            css_component_value_list: CssComponentValueList [
-                                                CssCustomProperty {
-                                                    value: CssIdentifier {
-                                                        value_token: IDENT@293..315 "--bs-border-radius-xxl" [] [],
-                                                    },
-                                                },
-                                            ],
-                                        },
-                                    ],
-                                    r_paren_token: R_PAREN@315..317 ")" [] [Whitespace(" ")],
+                            CssSimpleFunction {
+                                name: CssIdentifier {
+                                    value_token: IDENT@289..292 "var" [] [],
                                 },
+                                l_paren_token: L_PAREN@292..293 "(" [] [],
+                                items: CssParameterList [
+                                    CssParameter {
+                                        any_css_parameter: CssCustomProperty {
+                                            value: CssIdentifier {
+                                                value_token: IDENT@293..315 "--bs-border-radius-xxl" [] [],
+                                            },
+                                        },
+                                    },
+                                ],
+                                r_paren_token: R_PAREN@315..317 ")" [] [Whitespace(" ")],
                             },
                         ],
                         important: CssDeclarationImportant {
@@ -784,18 +780,16 @@ CssRoot {
               0: IDENT@260..287 "border-bottom-left-radius" [Newline("\n"), Whitespace("\t")] []
             1: COLON@287..289 ":" [] [Whitespace(" ")]
             2: CSS_COMPONENT_VALUE_LIST@289..317
-              0: CSS_ANY_FUNCTION@289..317
-                0: CSS_SIMPLE_FUNCTION@289..317
-                  0: CSS_IDENTIFIER@289..292
-                    0: IDENT@289..292 "var" [] []
-                  1: L_PAREN@292..293 "(" [] []
-                  2: CSS_PARAMETER_LIST@293..315
-                    0: CSS_PARAMETER@293..315
-                      0: CSS_COMPONENT_VALUE_LIST@293..315
-                        0: CSS_CUSTOM_PROPERTY@293..315
-                          0: CSS_IDENTIFIER@293..315
-                            0: IDENT@293..315 "--bs-border-radius-xxl" [] []
-                  3: R_PAREN@315..317 ")" [] [Whitespace(" ")]
+              0: CSS_SIMPLE_FUNCTION@289..317
+                0: CSS_IDENTIFIER@289..292
+                  0: IDENT@289..292 "var" [] []
+                1: L_PAREN@292..293 "(" [] []
+                2: CSS_PARAMETER_LIST@293..315
+                  0: CSS_PARAMETER@293..315
+                    0: CSS_CUSTOM_PROPERTY@293..315
+                      0: CSS_IDENTIFIER@293..315
+                        0: IDENT@293..315 "--bs-border-radius-xxl" [] []
+                3: R_PAREN@315..317 ")" [] [Whitespace(" ")]
             3: CSS_DECLARATION_IMPORTANT@317..327
               0: BANG@317..318 "!" [] []
               1: IMPORTANT_KW@318..327 "important" [] []

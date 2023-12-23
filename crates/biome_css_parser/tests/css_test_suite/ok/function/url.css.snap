@@ -79,7 +79,7 @@ CssRoot {
             ],
             block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@2..3 "{" [] [],
-                declaration_list: CssDeclarationList [
+                declarations: CssDeclarationList [
                     CssDeclaration {
                         name: CssIdentifier {
                             value_token: IDENT@3..24 "background-image" [Newline("\n"), Whitespace("    ")] [],
