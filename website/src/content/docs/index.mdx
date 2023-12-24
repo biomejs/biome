@@ -131,11 +131,10 @@ import Netlify from "@src/components/Netlify.astro";
     </Card>
   </CardGrid>
 </div>
-
 <div class="installation-body">
   <div class="installation">
     <div class="installation-left">
-      <div class="installation-head">Try Biome</div>
+      <h2 class="installation-head">Try Biome</h2>
       <div class="installation-description">
         Install Biome using your preferred package manager AND integrate it in your editor.
       </div>
@@ -147,13 +146,14 @@ import Netlify from "@src/components/Netlify.astro";
         href="/guides/integrate-in-editor/"
         class="installation-extension"
       >
-         Integrate Biome in your editor
+        Integrate Biome in your editor
         <Image src={arrow} alt="arrow" />
       </a>
     </div>
 
-</div>
+    <div class="extension-img"></div>
 
+  </div>
 </div>
 
 <div class="community">
@@ -189,11 +189,13 @@ import Netlify from "@src/components/Netlify.astro";
 
 <h2 class="sponsors-head">Sponsors</h2>
 <div class="sponsors">
-  <a class="sponsors-row" href="https://shiguredo.jp/" rel="nofollow">
-    <img
-      title="Shiguredō"
+  <a class="sponsors-row" href="https://shiguredo.jp/" rel="nofollow" title="Shiguredō">
+    <Image
+      alt="Shiguredō"
       src="https://camo.githubusercontent.com/58b1dd652b0e2bfb67b97b59c2785bd5694dc0e9e8f6ce2a4182eacc35ed1fec/68747470733a2f2f73686967757265646f2e6a702f6f6666696369616c5f73686967757265646f5f6c6f676f2e737667"
       data-canonical-src="https://shiguredo.jp/official_shiguredo_logo.svg"
+      width="400"
+      height="100"
     />
   </a>
 </div>
