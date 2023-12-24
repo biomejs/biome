@@ -1,14 +1,23 @@
+use std::str::FromStr;
+
 use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
 };
 use biome_console::{markup, Markup, MarkupBuf};
 use biome_diagnostics::Applicability;
+use biome_deserialize::{
+    Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor, Text,
+    VisitableType,
+};
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyTsName, AnyTsType, JsSyntaxKind, JsSyntaxToken, TriviaPieceKind, TsReferenceType,
-    TsTypeAnnotation, TsTypeArguments, T,
+    TsTypeArguments, T,
 };
-use biome_rowan::{declare_node_union, AstNode, AstSeparatedList, BatchMutationExt, TriviaPiece};
+use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TriviaPiece, SyntaxNodeOptionExt};
+use bpaf::Bpaf;
+#[cfg(feature = "schemars")]
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 use crate::JsRuleAction;
@@ -16,7 +25,12 @@ use crate::JsRuleAction;
 declare_rule! {
     /// Require consistently using either `T[]` or `Array<T>`
     ///
-    /// ESLint (typescript-eslint) equivalent: [array-type](https://typescript-eslint.io/rules/array-type)
+    /// _TypeScript_ provides two equivalent ways to define an array type: `T[]` and `Array<T>`.
+    /// The two styles are functionally equivalent.
+    /// Using the same style consistently across your codebase makes it easier for developers to read and understand array types.
+    ///
+    /// Source: https://typescript-eslint.io/rules/array-type
+    ///
     /// ## Example
     ///
     /// ### Invalid
@@ -29,6 +43,7 @@ declare_rule! {
     /// ```
     ///
     /// ```ts,expect_diagnostic
+    /// let invalid3: Array<Foo<Bar>>;
     /// ```
     ///
     /// ### Valid
@@ -44,30 +59,26 @@ declare_rule! {
     /// ## Options
     /// The rule provides two options that help to specify what type of array declarations to use.
     ///
-    /// Default: "simple"
+    /// Default: "shorthand"
     ///
     /// ```json
     /// {
     ///     "//": "...",
     ///     "options": {
-    ///         "consistentArrayType": "simple" | "generic"
+    ///         "syntax": "shorthand" | "generic"
     ///     },
     /// }
     /// ```
     ///
-    /// By default, all array declarations will be converted to `T[]` or `readonly T[]`, which it means `simple`,
+    /// By default, all array declarations will be converted to `T[]` or `readonly T[]`, which it means `shorthand`,
     /// or if the options is set to the "generic", that all will converted to `Array<T>` or `ReadonlyArray<T>`.
     ///
     pub(crate) UseConsistentArrayType {
-        version: "1.4.2",
+        version: "next",
         name: "useConsistentArrayType",
         recommended: false,
         fix_kind: FixKind::Unsafe,
     }
-}
-
-declare_node_union! {
-    pub(crate) Query = TsTypeAnnotation | TsReferenceType
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -83,29 +94,28 @@ enum TsArrayKind {
 }
 
 impl Rule for UseConsistentArrayType {
-    type Query = Ast<Query>;
+    type Query = Ast<AnyTsType>;
     type State = AnyTsType;
     type Signals = Option<Self::State>;
-    type Options = ConsistentArrayType;
+    type Options = ConsistentArrayTypeOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let query = ctx.query();
         let options = ctx.options();
 
         match query {
-            Query::TsTypeAnnotation(ty) => {
-                if options.consistent_array_type == "simple" {
+            AnyTsType::TsTypeOperatorType(_)
+            | AnyTsType::TsArrayType(_) if query.syntax().parent().kind() != Some(JsSyntaxKind::TS_TYPE_OPERATOR_TYPE) => {
+                if options.syntax == ConsistentArrayType::Shorthand {
                     return None;
                 }
-
-                let ty: AnyTsType = ty.ty().ok()?;
-                match get_array_kind_by_any_type(&ty) {
-                    Some(array_kind) => transform_array_type(ty, array_kind),
+                match get_array_kind_by_any_type(query) {
+                    Some(array_kind) => transform_array_type(query.to_owned(), array_kind),
                     _ => None,
                 }
             }
-            Query::TsReferenceType(ty) => {
-                if options.consistent_array_type == "generic" {
+            AnyTsType::TsReferenceType(ty) => {
+                if options.syntax == ConsistentArrayType::Generic {
                     return None;
                 }
 
@@ -117,6 +127,7 @@ impl Rule for UseConsistentArrayType {
                     _ => None,
                 }
             }
+            _ => None
         }
     }
 
@@ -125,31 +136,27 @@ impl Rule for UseConsistentArrayType {
         let options = ctx.options();
 
         match query {
-            Query::TsTypeAnnotation(ty) => {
-                if options.consistent_array_type == "simple" {
+            AnyTsType::TsTypeOperatorType(_)
+            | AnyTsType::TsArrayType(_) if query.syntax().parent().kind() != Some(JsSyntaxKind::TS_TYPE_OPERATOR_TYPE) => {
+                if options.syntax == ConsistentArrayType::Shorthand {
                     return None;
                 }
 
-                let ty = ty.ty().ok()?;
+                let is_readonly = matches!(query, AnyTsType::TsTypeOperatorType(_));
+                let title = if is_readonly {
+                    get_diagnostic_title(TsArrayKind::Readonly)
+                } else {
+                    get_diagnostic_title(TsArrayKind::Simple)
+                };
 
-                if let AnyTsType::TsArrayType(_) = ty {
-                    return Some(RuleDiagnostic::new(
-                        rule_category!(),
-                        ty.range(),
-                        get_diagnostic_title(TsArrayKind::Simple),
-                    ));
-                } else if let AnyTsType::TsTypeOperatorType(opt_ty) = ty {
-                    if let AnyTsType::TsArrayType(_) = opt_ty.ty().ok()? {
-                        return Some(RuleDiagnostic::new(
-                            rule_category!(),
-                            opt_ty.range(),
-                            get_diagnostic_title(TsArrayKind::Readonly),
-                        ));
-                    }
-                }
+                return Some(RuleDiagnostic::new(
+                    rule_category!(),
+                    query.range(),
+                    title,
+                ));
             }
-            Query::TsReferenceType(ty) => {
-                if options.consistent_array_type == "generic" {
+            AnyTsType::TsReferenceType(ty) => {
+                if options.syntax == ConsistentArrayType::Generic {
                     return None;
                 }
 
@@ -160,10 +167,11 @@ impl Rule for UseConsistentArrayType {
                         get_diagnostic_title(kind),
                     ));
                 }
-            }
-        }
 
-        None
+                None
+            }
+            _ => None
+        }
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
@@ -171,7 +179,7 @@ impl Rule for UseConsistentArrayType {
         let mut mutation = ctx.root().begin();
 
         match query {
-            Query::TsReferenceType(ty) => {
+            AnyTsType::TsReferenceType(ty) => {
                 mutation.replace_node(AnyTsType::TsReferenceType(ty.clone()), state.clone());
                 if let Some(kind) = get_array_kind_by_reference(ty) {
                     return Some(JsRuleAction {
@@ -181,36 +189,38 @@ impl Rule for UseConsistentArrayType {
                         mutation,
                     });
                 }
-            }
-            Query::TsTypeAnnotation(ty) => {
-                let ty = ty.ty().ok()?;
-                if let AnyTsType::TsTypeOperatorType(opt_ty) = &ty {
-                    mutation
-                        .replace_node(AnyTsType::TsTypeOperatorType(opt_ty.clone()), state.clone());
-                    if let Some(kind) = get_array_kind_by_any_type(&ty) {
-                        return Some(JsRuleAction {
-                            category: ActionCategory::QuickFix,
-                            applicability: Applicability::MaybeIncorrect,
-                            message: get_action_message(kind),
-                            mutation,
-                        });
-                    }
-                } else if let AnyTsType::TsArrayType(array_type) = &ty {
-                    mutation
-                        .replace_node(AnyTsType::TsArrayType(array_type.clone()), state.clone());
-                    if let Some(kind) = get_array_kind_by_any_type(&ty) {
-                        return Some(JsRuleAction {
-                            category: ActionCategory::QuickFix,
-                            applicability: Applicability::MaybeIncorrect,
-                            message: get_action_message(kind),
-                            mutation,
-                        });
-                    }
-                }
-            }
-        }
 
-        None
+                None
+            }
+            AnyTsType::TsTypeOperatorType(ty) => {
+                dbg!(ty);
+                mutation.replace_node(AnyTsType::TsTypeOperatorType(ty.clone()), state.clone());
+                let ty = ty.ty().ok()?;
+
+                if let Some(kind) = get_array_kind_by_any_type(&ty) {
+                    dbg!(kind);
+                    return Some(JsRuleAction {
+                        category: ActionCategory::QuickFix,
+                        applicability: Applicability::MaybeIncorrect,
+                        message: get_action_message(kind),
+                        mutation,
+                    });
+                }
+
+                None
+            }
+            AnyTsType::TsArrayType(ty)
+            if query.syntax().parent().kind() != Some(JsSyntaxKind::TS_TYPE_OPERATOR_TYPE) => {
+                mutation.replace_node(AnyTsType::TsArrayType(ty.clone()), state.clone());
+                    Some(JsRuleAction {
+                        category: ActionCategory::QuickFix,
+                        applicability: Applicability::MaybeIncorrect,
+                        message: get_action_message(TsArrayKind::Simple),
+                        mutation,
+                    })
+            }
+            _ => None
+        }
     }
 }
 
@@ -231,11 +241,7 @@ fn get_array_kind_by_any_type(ty: &AnyTsType) -> Option<TsArrayKind> {
         let operator_token = ty.operator_token().ok()?;
         let is_readonly = operator_token.text_trimmed() == "readonly";
 
-        if let AnyTsType::TsArrayType(_) = ty.ty().ok()? {
-            if is_readonly {
-                return Some(TsArrayKind::Readonly);
-            }
-        }
+        return (matches!(ty.ty(), Ok(AnyTsType::TsArrayType(_))) && is_readonly).then_some(TsArrayKind::Readonly);
     } else if let AnyTsType::TsArrayType(_) = ty {
         return Some(TsArrayKind::Simple);
     }
@@ -470,16 +476,61 @@ where
     )
 }
 
-#[derive(Deserialize, Serialize, Debug, Clone)]
-pub struct ConsistentArrayType {
-    /// "simple" | "generic"
-    pub consistent_array_type: &'static str,
+#[derive(Deserialize, Serialize, Default, Debug, Clone, Eq, PartialEq, Bpaf)]
+#[cfg_attr(feature = "schemars", derive(JsonSchema))]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct ConsistentArrayTypeOptions {
+    #[bpaf(hide)]
+    syntax: ConsistentArrayType,
 }
 
-impl Default for ConsistentArrayType {
-    fn default() -> Self {
-        Self {
-            consistent_array_type: "simple",
+impl Deserializable for ConsistentArrayTypeOptions {
+    fn deserialize(
+        value: &impl DeserializableValue,
+        name: &str,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> Option<Self> {
+        value.deserialize(ConsistentArrayTypeOptionsVisitor, name, diagnostics)
+    }
+}
+
+struct ConsistentArrayTypeOptionsVisitor;
+
+impl DeserializationVisitor for ConsistentArrayTypeOptionsVisitor {
+    type Output = ConsistentArrayTypeOptions;
+
+    const EXPECTED_TYPE: VisitableType = VisitableType::MAP;
+
+    fn visit_map(
+        self,
+        _members: impl Iterator<Item = Option<(impl DeserializableValue, impl DeserializableValue)>>,
+        range: biome_rowan::TextRange,
+        name: &str,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> Option<Self::Output> {
+        None
+    }
+}
+
+#[derive(Deserialize, Serialize, Debug, Default, Clone, Copy, Eq, PartialEq)]
+#[cfg_attr(feature = "schemars", derive(JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub enum ConsistentArrayType {
+    /// `ItemType[]`
+    #[default]
+    Shorthand,
+    /// `Array<ItemType>`
+    Generic,
+}
+
+impl FromStr for ConsistentArrayType {
+    type Err = &'static str;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "Shorthand" => Ok(Self::Shorthand),
+            "Generic" => Ok(Self::Generic),
+            _ => Err("Value not supported for enum member case"),
         }
     }
 }
