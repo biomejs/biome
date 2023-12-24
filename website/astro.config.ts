@@ -52,9 +52,6 @@ export default defineConfig({
 		react(),
 		starlight({
 			title: "Biome",
-			components: {
-				Hero: "./src/components/starlight/Hero.astro",
-			},
 			defaultLocale: "root",
 			locales: {
 				root: {
