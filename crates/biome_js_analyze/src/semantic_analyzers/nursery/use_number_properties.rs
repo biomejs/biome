@@ -6,13 +6,14 @@ use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_syntax::{global_identifier, AnyJsExpression, JsSyntaxKind, T};
-use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rowan::{AstNode, BatchMutationExt, NodeOrToken};
 
 declare_rule! {
     /// Use `Number` properties instead of global ones.
     ///
-    /// ECMAScript 2015 moved globals onto the `Number` constructor for consistency and to slightly improve them.
+    /// _ES2015_ moved some globals into the `Number` properties for consistency.
     ///
+    /// Source: https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/prefer-number-properties.md
     ///
     /// ## Examples
     ///
@@ -68,6 +69,8 @@ declare_rule! {
     }
 }
 
+const GLOBAL_NUMBER_IDENTS: [&str; 4] = ["parseInt", "parseFloat", "NaN", "Infinity"];
+
 impl Rule for UseNumberProperties {
     type Query = Semantic<AnyJsExpression>;
     type State = ();
@@ -77,9 +80,8 @@ impl Rule for UseNumberProperties {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let model = ctx.model();
-        let (reference, name) = global_identifier(node)?;
-        let names = ["parseInt", "parseFloat", "NaN", "Infinity"];
-        if !names.contains(&name.text()) {
+        let (reference, global_ident_name) = global_identifier(node)?;
+        if !GLOBAL_NUMBER_IDENTS.contains(&global_ident_name.text()) {
             return None;
         }
         model.binding(&reference).is_none().then_some(())
@@ -96,7 +98,7 @@ impl Rule for UseNumberProperties {
                 },
             )
             .note(markup! {
-                "ECMAScript 2015 moved globals onto the "<Emphasis>"Number"</Emphasis>" constructor for consistency and to slightly improve them."
+                "ES2015 moved some globals into the "<Emphasis>"Number"</Emphasis>" properties for consistency."
             }),
         )
     }
@@ -104,27 +106,27 @@ impl Rule for UseNumberProperties {
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
         let node = ctx.query();
         let mut mutation = ctx.root().begin();
-        let (old, new) = match node {
+        let (old_node, new_node) = match node {
             AnyJsExpression::JsIdentifierExpression(expression) => {
                 let name = expression.name().ok()?.text();
+                if !GLOBAL_NUMBER_IDENTS.contains(&name.as_str()) {
+                    return None;
+                }
                 let replacement = match name.as_str() {
-                    "parseInt" => "parseInt",
-                    "parseFloat" => "parseFloat",
-                    "NaN" => "NaN",
                     "Infinity" => {
                         let is_negative = expression
                             .syntax()
                             .parent()
                             .and_then(|parent| {
                                 parent.children_with_tokens().find_map(|child| match child {
-                                    biome_rowan::NodeOrToken::Token(token) => {
+                                    NodeOrToken::Token(token) => {
                                         if token.kind() == JsSyntaxKind::MINUS {
                                             Some(true)
                                         } else {
                                             None
                                         }
                                     }
-                                    biome_rowan::NodeOrToken::Node(_) => None,
+                                    NodeOrToken::Node(_) => None,
                                 })
                             })
                             .unwrap_or(false);
@@ -134,10 +136,11 @@ impl Rule for UseNumberProperties {
                             "POSITIVE_INFINITY"
                         }
                     }
-                    _ => return None,
+                    _ => name.as_str(),
                 };
                 (
                     if replacement == "NEGATIVE_INFINITY" {
+                        // When replacing JsIdentifierExpression with JsUnaryExpression, the parent node must be replaced.
                         node.parent::<AnyJsExpression>()?.clone()
                     } else {
                         node.clone()
@@ -178,12 +181,12 @@ impl Rule for UseNumberProperties {
             }
             _ => return None,
         };
-        mutation.replace_node(old, new.into());
+        mutation.replace_node(old_node, new_node.into());
         Some(JsRuleAction {
             category: ActionCategory::QuickFix,
             applicability: Applicability::Always,
             message: markup! {
-                "Use "<Emphasis>"Number"</Emphasis>" instead."
+                "Use "<Emphasis>"Number"</Emphasis>" properties instead."
             }
             .to_owned(),
             mutation,
