@@ -878,6 +878,7 @@ impl<'src> CssLexer<'src> {
             b"right-top" => RIGHT_TOP_KW,
             b"right-middle" => RIGHT_MIDDLE_KW,
             b"right-bottom" => RIGHT_BOTTOM_KW,
+            b"layer" => LAYER_KW,
             _ => IDENT,
         }
     }

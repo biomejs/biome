@@ -6,6 +6,8 @@ pub(crate) mod declaration_list;
 pub(crate) mod declaration_or_at_rule_list;
 pub(crate) mod keyframes_item_list;
 pub(crate) mod keyframes_selector_list;
+pub(crate) mod layer_name_list;
+pub(crate) mod layer_reference_list;
 pub(crate) mod media_query_list;
 pub(crate) mod page_at_rule_item_list;
 pub(crate) mod page_selector_list;

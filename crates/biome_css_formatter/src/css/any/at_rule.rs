@@ -17,6 +17,7 @@ impl FormatRule<AnyCssAtRule> for FormatAnyCssAtRule {
             AnyCssAtRule::CssKeyframesAtRule(node) => node.format().fmt(f),
             AnyCssAtRule::CssMediaAtRule(node) => node.format().fmt(f),
             AnyCssAtRule::CssPageAtRule(node) => node.format().fmt(f),
+            AnyCssAtRule::CssLayerAtRule(node) => node.format().fmt(f),
             AnyCssAtRule::CssBogusAtRule(node) => node.format().fmt(f),
         }
     }

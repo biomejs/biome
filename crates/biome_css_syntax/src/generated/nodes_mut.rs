@@ -655,6 +655,48 @@ impl CssKeyframesPercentageSelector {
         )
     }
 }
+impl CssLayerAtRule {
+    pub fn with_layer_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_layer(self, element: AnyCssLayer) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
+impl CssLayerDeclaration {
+    pub fn with_references(self, element: CssLayerReferenceList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_block(self, element: AnyCssRuleListBlock) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
+impl CssLayerReference {
+    pub fn with_references(self, element: CssLayerReferenceList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_semicolon_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into()))),
+        )
+    }
+}
 impl CssMarginAtRule {
     pub fn with_at_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(

@@ -19,6 +19,7 @@ pub(crate) mod keyframe_name;
 pub(crate) mod keyframes_block;
 pub(crate) mod keyframes_item;
 pub(crate) mod keyframes_selector;
+pub(crate) mod layer;
 pub(crate) mod media_and_combinable_condition;
 pub(crate) mod media_condition;
 pub(crate) mod media_in_parens;

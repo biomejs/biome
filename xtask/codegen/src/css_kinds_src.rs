@@ -186,6 +186,9 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "right-top",
         "right-middle",
         "right-bottom",
+        // layer at rule
+        "layer",
+        //
         "font-face",
         // Don't add to the end of this list, add to the end of the list in
         // because we have a range check in is_contextual_keyword function.
@@ -327,6 +330,11 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_PAGE_AT_RULE_BLOCK",
         "CSS_PAGE_AT_RULE_ITEM_LIST",
         "CSS_MARGIN_AT_RULE",
+        "CSS_LAYER_AT_RULE",
+        "CSS_LAYER_REFERENCE",
+        "CSS_LAYER_REFERENCE_LIST",
+        "CSS_LAYER_NAME_LIST",
+        "CSS_LAYER_DECLARATION",
         // Bogus nodes
         "CSS_BOGUS",
         "CSS_BOGUS_BLOCK",
@@ -337,6 +345,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_BOGUS_PSEUDO_CLASS",
         "CSS_BOGUS_PSEUDO_ELEMENT",
         "CSS_BOGUS_AT_RULE",
+        "CSS_BOGUS_LAYER",
         "CSS_BOGUS_PAGE_SELECTOR_PSEUDO",
         "CSS_BOGUS_DECLARATION_ITEM",
         "CSS_BOGUS_COMPONENT_VALUE",

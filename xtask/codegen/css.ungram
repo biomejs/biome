@@ -43,6 +43,7 @@ CssBogusPseudoClass = SyntaxElement*
 CssBogusPageSelectorPseudo = SyntaxElement*
 CssBogusPseudoElement = SyntaxElement*
 CssBogusAtRule = SyntaxElement*
+CssBogusLayer = SyntaxElement*
 CssBogusBlock =  SyntaxElement*
 CssBogusKeyframesItem =  SyntaxElement*
 CssBogusRule =  SyntaxElement*
@@ -474,6 +475,7 @@ AnyCssAtRule =
 	| CssKeyframesAtRule
 	| CssMediaAtRule
 	| CssPageAtRule
+	| CssLayerAtRule
 	| CssBogusAtRule
 
 // @charset "UTF-8";
@@ -987,6 +989,47 @@ CssMarginAtRule =
 		| 'right-bottom'
 	)
 	block: CssDeclarationOrAtRuleBlock
+
+// https://drafts.csswg.org/css-cascade-5/#layering
+// @layer =
+//  @layer <layer-name>? { <rule-list> }  |
+//  @layer <layer-name># ;
+//
+// <layer-name> =
+//   <ident> [ '.' <ident> ]*
+
+// @layer override { }
+//  ^^^^^^^^^^^^^^^^^^
+// @layer framework, bar.baz;
+//  ^^^^^^^^^^^^^^^^^^^^^^^^^
+CssLayerAtRule =
+	'layer'
+	layer: AnyCssLayer
+
+AnyCssLayer =
+	CssLayerDeclaration
+	| CssLayerReference
+	| CssBogusLayer
+
+// @layer override.bar { }
+//        ^^^^^^^^^^^^^^^^
+CssLayerDeclaration =
+	references: CssLayerReferenceList
+	block: AnyCssRuleListBlock
+
+// @layer framework, bar.baz;
+//        ^^^^^^^^^^^^^^^^^^^
+CssLayerReference =
+	references: CssLayerReferenceList
+	';'
+
+// @layer framework, bar.baz;
+//        ^^^^^^^^^^^^^^^^^^
+CssLayerReferenceList = (CssLayerNameList (',' CssLayerNameList)*)
+
+// @layer framework, bar.baz;
+//                   ^^^^^^^
+CssLayerNameList = (CssIdentifier ('.' CssIdentifier)*)
 
 ///////////////
 // AUXILIARY

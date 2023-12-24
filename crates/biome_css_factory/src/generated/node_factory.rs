@@ -583,6 +583,39 @@ pub fn css_keyframes_percentage_selector(
         [Some(SyntaxElement::Node(selector.into_syntax()))],
     ))
 }
+pub fn css_layer_at_rule(layer_token: SyntaxToken, layer: AnyCssLayer) -> CssLayerAtRule {
+    CssLayerAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_LAYER_AT_RULE,
+        [
+            Some(SyntaxElement::Token(layer_token)),
+            Some(SyntaxElement::Node(layer.into_syntax())),
+        ],
+    ))
+}
+pub fn css_layer_declaration(
+    references: CssLayerReferenceList,
+    block: AnyCssRuleListBlock,
+) -> CssLayerDeclaration {
+    CssLayerDeclaration::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_LAYER_DECLARATION,
+        [
+            Some(SyntaxElement::Node(references.into_syntax())),
+            Some(SyntaxElement::Node(block.into_syntax())),
+        ],
+    ))
+}
+pub fn css_layer_reference(
+    references: CssLayerReferenceList,
+    semicolon_token: SyntaxToken,
+) -> CssLayerReference {
+    CssLayerReference::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_LAYER_REFERENCE,
+        [
+            Some(SyntaxElement::Node(references.into_syntax())),
+            Some(SyntaxElement::Token(semicolon_token)),
+        ],
+    ))
+}
 pub fn css_margin_at_rule(
     at_token: SyntaxToken,
     name_token: SyntaxToken,
@@ -1579,6 +1612,48 @@ where
         }),
     ))
 }
+pub fn css_layer_name_list<I, S>(items: I, separators: S) -> CssLayerNameList
+where
+    I: IntoIterator<Item = CssIdentifier>,
+    I::IntoIter: ExactSizeIterator,
+    S: IntoIterator<Item = CssSyntaxToken>,
+    S::IntoIter: ExactSizeIterator,
+{
+    let mut items = items.into_iter();
+    let mut separators = separators.into_iter();
+    let length = items.len() + separators.len();
+    CssLayerNameList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_LAYER_NAME_LIST,
+        (0..length).map(|index| {
+            if index % 2 == 0 {
+                Some(items.next()?.into_syntax().into())
+            } else {
+                Some(separators.next()?.into())
+            }
+        }),
+    ))
+}
+pub fn css_layer_reference_list<I, S>(items: I, separators: S) -> CssLayerReferenceList
+where
+    I: IntoIterator<Item = CssLayerNameList>,
+    I::IntoIter: ExactSizeIterator,
+    S: IntoIterator<Item = CssSyntaxToken>,
+    S::IntoIter: ExactSizeIterator,
+{
+    let mut items = items.into_iter();
+    let mut separators = separators.into_iter();
+    let length = items.len() + separators.len();
+    CssLayerReferenceList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_LAYER_REFERENCE_LIST,
+        (0..length).map(|index| {
+            if index % 2 == 0 {
+                Some(items.next()?.into_syntax().into())
+            } else {
+                Some(separators.next()?.into())
+            }
+        }),
+    ))
+}
 pub fn css_media_query_list<I, S>(items: I, separators: S) -> CssMediaQueryList
 where
     I: IntoIterator<Item = AnyCssMediaQuery>,
@@ -1807,6 +1882,16 @@ where
 {
     CssBogusKeyframesItem::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_BOGUS_KEYFRAMES_ITEM,
+        slots,
+    ))
+}
+pub fn css_bogus_layer<I>(slots: I) -> CssBogusLayer
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssBogusLayer::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_BOGUS_LAYER,
         slots,
     ))
 }

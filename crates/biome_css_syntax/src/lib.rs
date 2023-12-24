@@ -81,6 +81,7 @@ impl biome_rowan::SyntaxKind for CssSyntaxKind {
                 | CSS_BOGUS_MEDIA_QUERY
                 | CSS_BOGUS_KEYFRAMES_ITEM
                 | CSS_BOGUS_PAGE_SELECTOR_PSEUDO
+                | CSS_BOGUS_LAYER
         )
     }
 
@@ -97,6 +98,7 @@ impl biome_rowan::SyntaxKind for CssSyntaxKind {
             kind if AnyCssRuleListBlock::can_cast(*kind) => CSS_BOGUS_BLOCK,
             kind if AnyCssKeyframesSelector::can_cast(*kind) => CSS_BOGUS_SELECTOR,
             kind if AnyCssPageSelectorPseudo::can_cast(*kind) => CSS_BOGUS_PAGE_SELECTOR_PSEUDO,
+            kind if AnyCssLayer::can_cast(*kind) => CSS_BOGUS_LAYER,
 
             _ => CSS_BOGUS,
         }
