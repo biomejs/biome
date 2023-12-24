@@ -358,15 +358,15 @@ pub(crate) fn parse_any_expression(p: &mut CssParser) -> ParsedSyntax {
         return Absent;
     }
     let param = if is_at_parenthesized(p) {
-        parse_parenthesized_express(p)
+        parse_parenthesized_expression(p)
     } else {
         parse_any_value(p)
     };
     if is_at_binary_operator(p) {
-        let css_binary_express = param.precede(p);
+        let css_binary_expression = param.precede(p);
         bump_operator_token(p);
         parse_any_expression(p).or_add_diagnostic(p, expected_expression);
-        return Present(css_binary_express.complete(p, CSS_BINARY_EXPRESSION));
+        return Present(css_binary_expression.complete(p, CSS_BINARY_EXPRESSION));
     }
     if is_at_any_value(p) {
         let component_value_list = param.precede(p);
@@ -392,7 +392,7 @@ pub(crate) fn bump_operator_token(p: &mut CssParser) {
 }
 
 #[inline]
-pub(crate) fn parse_parenthesized_express(p: &mut CssParser) -> ParsedSyntax {
+pub(crate) fn parse_parenthesized_expression(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_parenthesized(p) {
         return Absent;
     }
@@ -473,13 +473,13 @@ pub(crate) fn parse_regular_identifier(p: &mut CssParser) -> ParsedSyntax {
     parse_identifier(p, CssLexContext::Regular)
 }
 
-pub(crate) fn is_at_url_value_raw(p: &mut CssParser) -> bool {
+pub(crate) fn is_at_url_value(p: &mut CssParser) -> bool {
     p.at(CSS_URL_VALUE_RAW_LITERAL) || is_at_string(p)
 }
 
 #[inline]
 pub(crate) fn parse_url_value(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_url_value_raw(p) {
+    if !is_at_url_value(p) {
         return Absent;
     }
 
