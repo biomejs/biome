@@ -4549,6 +4549,328 @@ pub struct CssStringFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssSupportsAndCondition {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssSupportsAndCondition {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssSupportsAndConditionFields {
+        CssSupportsAndConditionFields {
+            left: self.left(),
+            and_token: self.and_token(),
+            right: self.right(),
+        }
+    }
+    pub fn left(&self) -> SyntaxResult<AnyCssSupportsInParens> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn and_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn right(&self) -> SyntaxResult<AnyCssSupportsAndCombinableCondition> {
+        support::required_node(&self.syntax, 2usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssSupportsAndCondition {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssSupportsAndConditionFields {
+    pub left: SyntaxResult<AnyCssSupportsInParens>,
+    pub and_token: SyntaxResult<SyntaxToken>,
+    pub right: SyntaxResult<AnyCssSupportsAndCombinableCondition>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssSupportsAtRule {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssSupportsAtRule {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssSupportsAtRuleFields {
+        CssSupportsAtRuleFields {
+            supports_token: self.supports_token(),
+            condition: self.condition(),
+            block: self.block(),
+        }
+    }
+    pub fn supports_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn condition(&self) -> SyntaxResult<AnyCssSupportsCondition> {
+        support::required_node(&self.syntax, 1usize)
+    }
+    pub fn block(&self) -> SyntaxResult<AnyCssRuleListBlock> {
+        support::required_node(&self.syntax, 2usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssSupportsAtRule {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssSupportsAtRuleFields {
+    pub supports_token: SyntaxResult<SyntaxToken>,
+    pub condition: SyntaxResult<AnyCssSupportsCondition>,
+    pub block: SyntaxResult<AnyCssRuleListBlock>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssSupportsConditionInParens {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssSupportsConditionInParens {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssSupportsConditionInParensFields {
+        CssSupportsConditionInParensFields {
+            l_paren_token: self.l_paren_token(),
+            condition: self.condition(),
+            r_paren_token: self.r_paren_token(),
+        }
+    }
+    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn condition(&self) -> SyntaxResult<AnyCssSupportsCondition> {
+        support::required_node(&self.syntax, 1usize)
+    }
+    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssSupportsConditionInParens {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssSupportsConditionInParensFields {
+    pub l_paren_token: SyntaxResult<SyntaxToken>,
+    pub condition: SyntaxResult<AnyCssSupportsCondition>,
+    pub r_paren_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssSupportsFeatureDeclaration {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssSupportsFeatureDeclaration {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssSupportsFeatureDeclarationFields {
+        CssSupportsFeatureDeclarationFields {
+            l_paren_token: self.l_paren_token(),
+            declaration: self.declaration(),
+            r_paren_token: self.r_paren_token(),
+        }
+    }
+    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn declaration(&self) -> SyntaxResult<CssDeclaration> {
+        support::required_node(&self.syntax, 1usize)
+    }
+    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssSupportsFeatureDeclaration {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssSupportsFeatureDeclarationFields {
+    pub l_paren_token: SyntaxResult<SyntaxToken>,
+    pub declaration: SyntaxResult<CssDeclaration>,
+    pub r_paren_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssSupportsFeatureSelector {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssSupportsFeatureSelector {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssSupportsFeatureSelectorFields {
+        CssSupportsFeatureSelectorFields {
+            selector_token: self.selector_token(),
+            l_paren_token: self.l_paren_token(),
+            selector: self.selector(),
+            r_paren_token: self.r_paren_token(),
+        }
+    }
+    pub fn selector_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn selector(&self) -> SyntaxResult<AnyCssSelector> {
+        support::required_node(&self.syntax, 2usize)
+    }
+    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 3usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssSupportsFeatureSelector {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssSupportsFeatureSelectorFields {
+    pub selector_token: SyntaxResult<SyntaxToken>,
+    pub l_paren_token: SyntaxResult<SyntaxToken>,
+    pub selector: SyntaxResult<AnyCssSelector>,
+    pub r_paren_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssSupportsNotCondition {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssSupportsNotCondition {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssSupportsNotConditionFields {
+        CssSupportsNotConditionFields {
+            not_token: self.not_token(),
+            query: self.query(),
+        }
+    }
+    pub fn not_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn query(&self) -> SyntaxResult<AnyCssSupportsInParens> {
+        support::required_node(&self.syntax, 1usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssSupportsNotCondition {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssSupportsNotConditionFields {
+    pub not_token: SyntaxResult<SyntaxToken>,
+    pub query: SyntaxResult<AnyCssSupportsInParens>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssSupportsOrCondition {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssSupportsOrCondition {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssSupportsOrConditionFields {
+        CssSupportsOrConditionFields {
+            left: self.left(),
+            or_token: self.or_token(),
+            right: self.right(),
+        }
+    }
+    pub fn left(&self) -> SyntaxResult<AnyCssSupportsInParens> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn or_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn right(&self) -> SyntaxResult<AnyCssSupportsOrCombinableCondition> {
+        support::required_node(&self.syntax, 2usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssSupportsOrCondition {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssSupportsOrConditionFields {
+    pub left: SyntaxResult<AnyCssSupportsInParens>,
+    pub or_token: SyntaxResult<SyntaxToken>,
+    pub right: SyntaxResult<AnyCssSupportsOrCombinableCondition>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssTypeSelector {
     pub(crate) syntax: SyntaxNode,
 }
@@ -4864,6 +5186,7 @@ pub enum AnyCssAtRule {
     CssLayerAtRule(CssLayerAtRule),
     CssMediaAtRule(CssMediaAtRule),
     CssPageAtRule(CssPageAtRule),
+    CssSupportsAtRule(CssSupportsAtRule),
     CssScopeAtRule(CssScopeAtRule),
 }
 impl AnyCssAtRule {
@@ -4936,6 +5259,12 @@ impl AnyCssAtRule {
     pub fn as_css_scope_at_rule(&self) -> Option<&CssScopeAtRule> {
         match &self {
             AnyCssAtRule::CssScopeAtRule(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_supports_at_rule(&self) -> Option<&CssSupportsAtRule> {
+        match &self {
+            AnyCssAtRule::CssSupportsAtRule(item) => Some(item),
             _ => None,
         }
     }
@@ -6191,6 +6520,114 @@ impl AnyCssUrlValue {
     pub fn as_css_url_value_raw(&self) -> Option<&CssUrlValueRaw> {
         match &self {
             AnyCssUrlValue::CssUrlValueRaw(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub enum AnyCssSupportsAndCombinableCondition {
+    AnyCssSupportsInParens(AnyCssSupportsInParens),
+    CssSupportsAndCondition(CssSupportsAndCondition),
+}
+impl AnyCssSupportsAndCombinableCondition {
+    pub fn as_any_css_supports_in_parens(&self) -> Option<&AnyCssSupportsInParens> {
+        match &self {
+            AnyCssSupportsAndCombinableCondition::AnyCssSupportsInParens(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_supports_and_condition(&self) -> Option<&CssSupportsAndCondition> {
+        match &self {
+            AnyCssSupportsAndCombinableCondition::CssSupportsAndCondition(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub enum AnyCssSupportsCondition {
+    AnyCssSupportsInParens(AnyCssSupportsInParens),
+    CssSupportsAndCondition(CssSupportsAndCondition),
+    CssSupportsNotCondition(CssSupportsNotCondition),
+    CssSupportsOrCondition(CssSupportsOrCondition),
+}
+impl AnyCssSupportsCondition {
+    pub fn as_any_css_supports_in_parens(&self) -> Option<&AnyCssSupportsInParens> {
+        match &self {
+            AnyCssSupportsCondition::AnyCssSupportsInParens(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_supports_and_condition(&self) -> Option<&CssSupportsAndCondition> {
+        match &self {
+            AnyCssSupportsCondition::CssSupportsAndCondition(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_supports_not_condition(&self) -> Option<&CssSupportsNotCondition> {
+        match &self {
+            AnyCssSupportsCondition::CssSupportsNotCondition(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_supports_or_condition(&self) -> Option<&CssSupportsOrCondition> {
+        match &self {
+            AnyCssSupportsCondition::CssSupportsOrCondition(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub enum AnyCssSupportsInParens {
+    CssAnyFunction(CssAnyFunction),
+    CssSupportsConditionInParens(CssSupportsConditionInParens),
+    CssSupportsFeatureDeclaration(CssSupportsFeatureDeclaration),
+    CssSupportsFeatureSelector(CssSupportsFeatureSelector),
+}
+impl AnyCssSupportsInParens {
+    pub fn as_css_any_function(&self) -> Option<&CssAnyFunction> {
+        match &self {
+            AnyCssSupportsInParens::CssAnyFunction(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_supports_condition_in_parens(&self) -> Option<&CssSupportsConditionInParens> {
+        match &self {
+            AnyCssSupportsInParens::CssSupportsConditionInParens(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_supports_feature_declaration(&self) -> Option<&CssSupportsFeatureDeclaration> {
+        match &self {
+            AnyCssSupportsInParens::CssSupportsFeatureDeclaration(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_supports_feature_selector(&self) -> Option<&CssSupportsFeatureSelector> {
+        match &self {
+            AnyCssSupportsInParens::CssSupportsFeatureSelector(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub enum AnyCssSupportsOrCombinableCondition {
+    AnyCssSupportsInParens(AnyCssSupportsInParens),
+    CssSupportsOrCondition(CssSupportsOrCondition),
+}
+impl AnyCssSupportsOrCombinableCondition {
+    pub fn as_any_css_supports_in_parens(&self) -> Option<&AnyCssSupportsInParens> {
+        match &self {
+            AnyCssSupportsOrCombinableCondition::AnyCssSupportsInParens(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_supports_or_condition(&self) -> Option<&CssSupportsOrCondition> {
+        match &self {
+            AnyCssSupportsOrCombinableCondition::CssSupportsOrCondition(item) => Some(item),
             _ => None,
         }
     }
@@ -10649,6 +11086,313 @@ impl From<CssString> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for CssSupportsAndCondition {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_SUPPORTS_AND_CONDITION as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_SUPPORTS_AND_CONDITION
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssSupportsAndCondition {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssSupportsAndCondition")
+            .field("left", &support::DebugSyntaxResult(self.left()))
+            .field("and_token", &support::DebugSyntaxResult(self.and_token()))
+            .field("right", &support::DebugSyntaxResult(self.right()))
+            .finish()
+    }
+}
+impl From<CssSupportsAndCondition> for SyntaxNode {
+    fn from(n: CssSupportsAndCondition) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssSupportsAndCondition> for SyntaxElement {
+    fn from(n: CssSupportsAndCondition) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssSupportsAtRule {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_SUPPORTS_AT_RULE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_SUPPORTS_AT_RULE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssSupportsAtRule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssSupportsAtRule")
+            .field(
+                "supports_token",
+                &support::DebugSyntaxResult(self.supports_token()),
+            )
+            .field("condition", &support::DebugSyntaxResult(self.condition()))
+            .field("block", &support::DebugSyntaxResult(self.block()))
+            .finish()
+    }
+}
+impl From<CssSupportsAtRule> for SyntaxNode {
+    fn from(n: CssSupportsAtRule) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssSupportsAtRule> for SyntaxElement {
+    fn from(n: CssSupportsAtRule) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssSupportsConditionInParens {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_SUPPORTS_CONDITION_IN_PARENS as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_SUPPORTS_CONDITION_IN_PARENS
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssSupportsConditionInParens {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssSupportsConditionInParens")
+            .field(
+                "l_paren_token",
+                &support::DebugSyntaxResult(self.l_paren_token()),
+            )
+            .field("condition", &support::DebugSyntaxResult(self.condition()))
+            .field(
+                "r_paren_token",
+                &support::DebugSyntaxResult(self.r_paren_token()),
+            )
+            .finish()
+    }
+}
+impl From<CssSupportsConditionInParens> for SyntaxNode {
+    fn from(n: CssSupportsConditionInParens) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssSupportsConditionInParens> for SyntaxElement {
+    fn from(n: CssSupportsConditionInParens) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssSupportsFeatureDeclaration {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_SUPPORTS_FEATURE_DECLARATION as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_SUPPORTS_FEATURE_DECLARATION
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssSupportsFeatureDeclaration {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssSupportsFeatureDeclaration")
+            .field(
+                "l_paren_token",
+                &support::DebugSyntaxResult(self.l_paren_token()),
+            )
+            .field(
+                "declaration",
+                &support::DebugSyntaxResult(self.declaration()),
+            )
+            .field(
+                "r_paren_token",
+                &support::DebugSyntaxResult(self.r_paren_token()),
+            )
+            .finish()
+    }
+}
+impl From<CssSupportsFeatureDeclaration> for SyntaxNode {
+    fn from(n: CssSupportsFeatureDeclaration) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssSupportsFeatureDeclaration> for SyntaxElement {
+    fn from(n: CssSupportsFeatureDeclaration) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssSupportsFeatureSelector {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_SUPPORTS_FEATURE_SELECTOR as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_SUPPORTS_FEATURE_SELECTOR
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssSupportsFeatureSelector {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssSupportsFeatureSelector")
+            .field(
+                "selector_token",
+                &support::DebugSyntaxResult(self.selector_token()),
+            )
+            .field(
+                "l_paren_token",
+                &support::DebugSyntaxResult(self.l_paren_token()),
+            )
+            .field("selector", &support::DebugSyntaxResult(self.selector()))
+            .field(
+                "r_paren_token",
+                &support::DebugSyntaxResult(self.r_paren_token()),
+            )
+            .finish()
+    }
+}
+impl From<CssSupportsFeatureSelector> for SyntaxNode {
+    fn from(n: CssSupportsFeatureSelector) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssSupportsFeatureSelector> for SyntaxElement {
+    fn from(n: CssSupportsFeatureSelector) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssSupportsNotCondition {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_SUPPORTS_NOT_CONDITION as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_SUPPORTS_NOT_CONDITION
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssSupportsNotCondition {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssSupportsNotCondition")
+            .field("not_token", &support::DebugSyntaxResult(self.not_token()))
+            .field("query", &support::DebugSyntaxResult(self.query()))
+            .finish()
+    }
+}
+impl From<CssSupportsNotCondition> for SyntaxNode {
+    fn from(n: CssSupportsNotCondition) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssSupportsNotCondition> for SyntaxElement {
+    fn from(n: CssSupportsNotCondition) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssSupportsOrCondition {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_SUPPORTS_OR_CONDITION as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_SUPPORTS_OR_CONDITION
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssSupportsOrCondition {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssSupportsOrCondition")
+            .field("left", &support::DebugSyntaxResult(self.left()))
+            .field("or_token", &support::DebugSyntaxResult(self.or_token()))
+            .field("right", &support::DebugSyntaxResult(self.right()))
+            .finish()
+    }
+}
+impl From<CssSupportsOrCondition> for SyntaxNode {
+    fn from(n: CssSupportsOrCondition) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssSupportsOrCondition> for SyntaxElement {
+    fn from(n: CssSupportsOrCondition) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
 impl AstNode for CssTypeSelector {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -11007,11 +11751,6 @@ impl From<CssPageAtRule> for AnyCssAtRule {
         AnyCssAtRule::CssPageAtRule(node)
     }
 }
-impl From<CssScopeAtRule> for AnyCssAtRule {
-    fn from(node: CssScopeAtRule) -> AnyCssAtRule {
-        AnyCssAtRule::CssScopeAtRule(node)
-    }
-}
 impl AstNode for AnyCssAtRule {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = CssBogusAtRule::KIND_SET
@@ -11024,8 +11763,7 @@ impl AstNode for AnyCssAtRule {
         .union(CssKeyframesAtRule::KIND_SET)
         .union(CssLayerAtRule::KIND_SET)
         .union(CssMediaAtRule::KIND_SET)
-        .union(CssPageAtRule::KIND_SET)
-        .union(CssScopeAtRule::KIND_SET);
+        .union(CssPageAtRule::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
@@ -11041,6 +11779,7 @@ impl AstNode for AnyCssAtRule {
                 | CSS_MEDIA_AT_RULE
                 | CSS_PAGE_AT_RULE
                 | CSS_SCOPE_AT_RULE
+                | CSS_SUPPORTS_AT_RULE
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
@@ -11067,6 +11806,7 @@ impl AstNode for AnyCssAtRule {
             CSS_MEDIA_AT_RULE => AnyCssAtRule::CssMediaAtRule(CssMediaAtRule { syntax }),
             CSS_PAGE_AT_RULE => AnyCssAtRule::CssPageAtRule(CssPageAtRule { syntax }),
             CSS_SCOPE_AT_RULE => AnyCssAtRule::CssScopeAtRule(CssScopeAtRule { syntax }),
+            CSS_SUPPORTS_AT_RULE => AnyCssAtRule::CssSupportsAtRule(CssSupportsAtRule { syntax }),
             _ => return None,
         };
         Some(res)
@@ -11084,7 +11824,6 @@ impl AstNode for AnyCssAtRule {
             AnyCssAtRule::CssLayerAtRule(it) => &it.syntax,
             AnyCssAtRule::CssMediaAtRule(it) => &it.syntax,
             AnyCssAtRule::CssPageAtRule(it) => &it.syntax,
-            AnyCssAtRule::CssScopeAtRule(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
@@ -11100,7 +11839,6 @@ impl AstNode for AnyCssAtRule {
             AnyCssAtRule::CssLayerAtRule(it) => it.syntax,
             AnyCssAtRule::CssMediaAtRule(it) => it.syntax,
             AnyCssAtRule::CssPageAtRule(it) => it.syntax,
-            AnyCssAtRule::CssScopeAtRule(it) => it.syntax,
         }
     }
 }
@@ -11118,7 +11856,6 @@ impl std::fmt::Debug for AnyCssAtRule {
             AnyCssAtRule::CssLayerAtRule(it) => std::fmt::Debug::fmt(it, f),
             AnyCssAtRule::CssMediaAtRule(it) => std::fmt::Debug::fmt(it, f),
             AnyCssAtRule::CssPageAtRule(it) => std::fmt::Debug::fmt(it, f),
-            AnyCssAtRule::CssScopeAtRule(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -11136,7 +11873,6 @@ impl From<AnyCssAtRule> for SyntaxNode {
             AnyCssAtRule::CssLayerAtRule(it) => it.into(),
             AnyCssAtRule::CssMediaAtRule(it) => it.into(),
             AnyCssAtRule::CssPageAtRule(it) => it.into(),
-            AnyCssAtRule::CssScopeAtRule(it) => it.into(),
         }
     }
 }
@@ -14837,6 +15573,351 @@ impl From<AnyCssSubSelector> for SyntaxElement {
         node.into()
     }
 }
+impl From<CssSupportsAndCondition> for AnyCssSupportsAndCombinableCondition {
+    fn from(node: CssSupportsAndCondition) -> AnyCssSupportsAndCombinableCondition {
+        AnyCssSupportsAndCombinableCondition::CssSupportsAndCondition(node)
+    }
+}
+impl AstNode for AnyCssSupportsAndCombinableCondition {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        AnyCssSupportsInParens::KIND_SET.union(CssSupportsAndCondition::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        match kind {
+            CSS_SUPPORTS_AND_CONDITION => true,
+            k if AnyCssSupportsInParens::can_cast(k) => true,
+            _ => false,
+        }
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_SUPPORTS_AND_CONDITION => {
+                AnyCssSupportsAndCombinableCondition::CssSupportsAndCondition(
+                    CssSupportsAndCondition { syntax },
+                )
+            }
+            _ => {
+                if let Some(any_css_supports_in_parens) = AnyCssSupportsInParens::cast(syntax) {
+                    return Some(
+                        AnyCssSupportsAndCombinableCondition::AnyCssSupportsInParens(
+                            any_css_supports_in_parens,
+                        ),
+                    );
+                }
+                return None;
+            }
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            AnyCssSupportsAndCombinableCondition::CssSupportsAndCondition(it) => &it.syntax,
+            AnyCssSupportsAndCombinableCondition::AnyCssSupportsInParens(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            AnyCssSupportsAndCombinableCondition::CssSupportsAndCondition(it) => it.syntax,
+            AnyCssSupportsAndCombinableCondition::AnyCssSupportsInParens(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssSupportsAndCombinableCondition {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            AnyCssSupportsAndCombinableCondition::AnyCssSupportsInParens(it) => {
+                std::fmt::Debug::fmt(it, f)
+            }
+            AnyCssSupportsAndCombinableCondition::CssSupportsAndCondition(it) => {
+                std::fmt::Debug::fmt(it, f)
+            }
+        }
+    }
+}
+impl From<AnyCssSupportsAndCombinableCondition> for SyntaxNode {
+    fn from(n: AnyCssSupportsAndCombinableCondition) -> SyntaxNode {
+        match n {
+            AnyCssSupportsAndCombinableCondition::AnyCssSupportsInParens(it) => it.into(),
+            AnyCssSupportsAndCombinableCondition::CssSupportsAndCondition(it) => it.into(),
+        }
+    }
+}
+impl From<AnyCssSupportsAndCombinableCondition> for SyntaxElement {
+    fn from(n: AnyCssSupportsAndCombinableCondition) -> SyntaxElement {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<CssSupportsAndCondition> for AnyCssSupportsCondition {
+    fn from(node: CssSupportsAndCondition) -> AnyCssSupportsCondition {
+        AnyCssSupportsCondition::CssSupportsAndCondition(node)
+    }
+}
+impl From<CssSupportsNotCondition> for AnyCssSupportsCondition {
+    fn from(node: CssSupportsNotCondition) -> AnyCssSupportsCondition {
+        AnyCssSupportsCondition::CssSupportsNotCondition(node)
+    }
+}
+impl From<CssSupportsOrCondition> for AnyCssSupportsCondition {
+    fn from(node: CssSupportsOrCondition) -> AnyCssSupportsCondition {
+        AnyCssSupportsCondition::CssSupportsOrCondition(node)
+    }
+}
+impl AstNode for AnyCssSupportsCondition {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = AnyCssSupportsInParens::KIND_SET
+        .union(CssSupportsAndCondition::KIND_SET)
+        .union(CssSupportsNotCondition::KIND_SET)
+        .union(CssSupportsOrCondition::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        match kind {
+            CSS_SUPPORTS_AND_CONDITION | CSS_SUPPORTS_NOT_CONDITION | CSS_SUPPORTS_OR_CONDITION => {
+                true
+            }
+            k if AnyCssSupportsInParens::can_cast(k) => true,
+            _ => false,
+        }
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_SUPPORTS_AND_CONDITION => {
+                AnyCssSupportsCondition::CssSupportsAndCondition(CssSupportsAndCondition { syntax })
+            }
+            CSS_SUPPORTS_NOT_CONDITION => {
+                AnyCssSupportsCondition::CssSupportsNotCondition(CssSupportsNotCondition { syntax })
+            }
+            CSS_SUPPORTS_OR_CONDITION => {
+                AnyCssSupportsCondition::CssSupportsOrCondition(CssSupportsOrCondition { syntax })
+            }
+            _ => {
+                if let Some(any_css_supports_in_parens) = AnyCssSupportsInParens::cast(syntax) {
+                    return Some(AnyCssSupportsCondition::AnyCssSupportsInParens(
+                        any_css_supports_in_parens,
+                    ));
+                }
+                return None;
+            }
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            AnyCssSupportsCondition::CssSupportsAndCondition(it) => &it.syntax,
+            AnyCssSupportsCondition::CssSupportsNotCondition(it) => &it.syntax,
+            AnyCssSupportsCondition::CssSupportsOrCondition(it) => &it.syntax,
+            AnyCssSupportsCondition::AnyCssSupportsInParens(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            AnyCssSupportsCondition::CssSupportsAndCondition(it) => it.syntax,
+            AnyCssSupportsCondition::CssSupportsNotCondition(it) => it.syntax,
+            AnyCssSupportsCondition::CssSupportsOrCondition(it) => it.syntax,
+            AnyCssSupportsCondition::AnyCssSupportsInParens(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssSupportsCondition {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            AnyCssSupportsCondition::AnyCssSupportsInParens(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssSupportsCondition::CssSupportsAndCondition(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssSupportsCondition::CssSupportsNotCondition(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssSupportsCondition::CssSupportsOrCondition(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssSupportsCondition> for SyntaxNode {
+    fn from(n: AnyCssSupportsCondition) -> SyntaxNode {
+        match n {
+            AnyCssSupportsCondition::AnyCssSupportsInParens(it) => it.into(),
+            AnyCssSupportsCondition::CssSupportsAndCondition(it) => it.into(),
+            AnyCssSupportsCondition::CssSupportsNotCondition(it) => it.into(),
+            AnyCssSupportsCondition::CssSupportsOrCondition(it) => it.into(),
+        }
+    }
+}
+impl From<AnyCssSupportsCondition> for SyntaxElement {
+    fn from(n: AnyCssSupportsCondition) -> SyntaxElement {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<CssAnyFunction> for AnyCssSupportsInParens {
+    fn from(node: CssAnyFunction) -> AnyCssSupportsInParens {
+        AnyCssSupportsInParens::CssAnyFunction(node)
+    }
+}
+impl From<CssSupportsConditionInParens> for AnyCssSupportsInParens {
+    fn from(node: CssSupportsConditionInParens) -> AnyCssSupportsInParens {
+        AnyCssSupportsInParens::CssSupportsConditionInParens(node)
+    }
+}
+impl From<CssSupportsFeatureDeclaration> for AnyCssSupportsInParens {
+    fn from(node: CssSupportsFeatureDeclaration) -> AnyCssSupportsInParens {
+        AnyCssSupportsInParens::CssSupportsFeatureDeclaration(node)
+    }
+}
+impl From<CssSupportsFeatureSelector> for AnyCssSupportsInParens {
+    fn from(node: CssSupportsFeatureSelector) -> AnyCssSupportsInParens {
+        AnyCssSupportsInParens::CssSupportsFeatureSelector(node)
+    }
+}
+impl AstNode for AnyCssSupportsInParens {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = CssAnyFunction::KIND_SET
+        .union(CssSupportsConditionInParens::KIND_SET)
+        .union(CssSupportsFeatureDeclaration::KIND_SET)
+        .union(CssSupportsFeatureSelector::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(
+            kind,
+            CSS_ANY_FUNCTION
+                | CSS_SUPPORTS_CONDITION_IN_PARENS
+                | CSS_SUPPORTS_FEATURE_DECLARATION
+                | CSS_SUPPORTS_FEATURE_SELECTOR
+        )
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_ANY_FUNCTION => AnyCssSupportsInParens::CssAnyFunction(CssAnyFunction { syntax }),
+            CSS_SUPPORTS_CONDITION_IN_PARENS => {
+                AnyCssSupportsInParens::CssSupportsConditionInParens(CssSupportsConditionInParens {
+                    syntax,
+                })
+            }
+            CSS_SUPPORTS_FEATURE_DECLARATION => {
+                AnyCssSupportsInParens::CssSupportsFeatureDeclaration(
+                    CssSupportsFeatureDeclaration { syntax },
+                )
+            }
+            CSS_SUPPORTS_FEATURE_SELECTOR => {
+                AnyCssSupportsInParens::CssSupportsFeatureSelector(CssSupportsFeatureSelector {
+                    syntax,
+                })
+            }
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            AnyCssSupportsInParens::CssAnyFunction(it) => &it.syntax,
+            AnyCssSupportsInParens::CssSupportsConditionInParens(it) => &it.syntax,
+            AnyCssSupportsInParens::CssSupportsFeatureDeclaration(it) => &it.syntax,
+            AnyCssSupportsInParens::CssSupportsFeatureSelector(it) => &it.syntax,
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            AnyCssSupportsInParens::CssAnyFunction(it) => it.syntax,
+            AnyCssSupportsInParens::CssSupportsConditionInParens(it) => it.syntax,
+            AnyCssSupportsInParens::CssSupportsFeatureDeclaration(it) => it.syntax,
+            AnyCssSupportsInParens::CssSupportsFeatureSelector(it) => it.syntax,
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssSupportsInParens {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            AnyCssSupportsInParens::CssAnyFunction(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssSupportsInParens::CssSupportsConditionInParens(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssSupportsInParens::CssSupportsFeatureDeclaration(it) => {
+                std::fmt::Debug::fmt(it, f)
+            }
+            AnyCssSupportsInParens::CssSupportsFeatureSelector(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssSupportsInParens> for SyntaxNode {
+    fn from(n: AnyCssSupportsInParens) -> SyntaxNode {
+        match n {
+            AnyCssSupportsInParens::CssAnyFunction(it) => it.into(),
+            AnyCssSupportsInParens::CssSupportsConditionInParens(it) => it.into(),
+            AnyCssSupportsInParens::CssSupportsFeatureDeclaration(it) => it.into(),
+            AnyCssSupportsInParens::CssSupportsFeatureSelector(it) => it.into(),
+        }
+    }
+}
+impl From<AnyCssSupportsInParens> for SyntaxElement {
+    fn from(n: AnyCssSupportsInParens) -> SyntaxElement {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<CssSupportsOrCondition> for AnyCssSupportsOrCombinableCondition {
+    fn from(node: CssSupportsOrCondition) -> AnyCssSupportsOrCombinableCondition {
+        AnyCssSupportsOrCombinableCondition::CssSupportsOrCondition(node)
+    }
+}
+impl AstNode for AnyCssSupportsOrCombinableCondition {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        AnyCssSupportsInParens::KIND_SET.union(CssSupportsOrCondition::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        match kind {
+            CSS_SUPPORTS_OR_CONDITION => true,
+            k if AnyCssSupportsInParens::can_cast(k) => true,
+            _ => false,
+        }
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_SUPPORTS_OR_CONDITION => {
+                AnyCssSupportsOrCombinableCondition::CssSupportsOrCondition(
+                    CssSupportsOrCondition { syntax },
+                )
+            }
+            _ => {
+                if let Some(any_css_supports_in_parens) = AnyCssSupportsInParens::cast(syntax) {
+                    return Some(AnyCssSupportsOrCombinableCondition::AnyCssSupportsInParens(
+                        any_css_supports_in_parens,
+                    ));
+                }
+                return None;
+            }
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            AnyCssSupportsOrCombinableCondition::CssSupportsOrCondition(it) => &it.syntax,
+            AnyCssSupportsOrCombinableCondition::AnyCssSupportsInParens(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            AnyCssSupportsOrCombinableCondition::CssSupportsOrCondition(it) => it.syntax,
+            AnyCssSupportsOrCombinableCondition::AnyCssSupportsInParens(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssSupportsOrCombinableCondition {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            AnyCssSupportsOrCombinableCondition::AnyCssSupportsInParens(it) => {
+                std::fmt::Debug::fmt(it, f)
+            }
+            AnyCssSupportsOrCombinableCondition::CssSupportsOrCondition(it) => {
+                std::fmt::Debug::fmt(it, f)
+            }
+        }
+    }
+}
+impl From<AnyCssSupportsOrCombinableCondition> for SyntaxNode {
+    fn from(n: AnyCssSupportsOrCombinableCondition) -> SyntaxNode {
+        match n {
+            AnyCssSupportsOrCombinableCondition::AnyCssSupportsInParens(it) => it.into(),
+            AnyCssSupportsOrCombinableCondition::CssSupportsOrCondition(it) => it.into(),
+        }
+    }
+}
+impl From<AnyCssSupportsOrCombinableCondition> for SyntaxElement {
+    fn from(n: AnyCssSupportsOrCombinableCondition) -> SyntaxElement {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<CssString> for AnyCssUrlValue {
     fn from(node: CssString) -> AnyCssUrlValue {
         AnyCssUrlValue::CssString(node)
@@ -15260,6 +16341,26 @@ impl std::fmt::Display for AnyCssSimpleSelector {
     }
 }
 impl std::fmt::Display for AnyCssSubSelector {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyCssSupportsAndCombinableCondition {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyCssSupportsCondition {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyCssSupportsInParens {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyCssSupportsOrCombinableCondition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -15790,6 +16891,41 @@ impl std::fmt::Display for CssSimpleFunction {
     }
 }
 impl std::fmt::Display for CssString {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssSupportsAndCondition {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssSupportsAtRule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssSupportsConditionInParens {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssSupportsFeatureDeclaration {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssSupportsFeatureSelector {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssSupportsNotCondition {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssSupportsOrCondition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

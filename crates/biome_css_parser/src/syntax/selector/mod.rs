@@ -108,7 +108,7 @@ pub(crate) fn is_at_selector(p: &mut CssParser) -> bool {
 }
 
 #[inline]
-fn parse_selector(p: &mut CssParser) -> ParsedSyntax {
+pub(crate) fn parse_selector(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_selector(p) {
         return Absent;
     }

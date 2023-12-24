@@ -1535,6 +1535,104 @@ pub fn css_string(value_token: SyntaxToken) -> CssString {
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
+pub fn css_supports_and_condition(
+    left: AnyCssSupportsInParens,
+    and_token: SyntaxToken,
+    right: AnyCssSupportsAndCombinableCondition,
+) -> CssSupportsAndCondition {
+    CssSupportsAndCondition::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_SUPPORTS_AND_CONDITION,
+        [
+            Some(SyntaxElement::Node(left.into_syntax())),
+            Some(SyntaxElement::Token(and_token)),
+            Some(SyntaxElement::Node(right.into_syntax())),
+        ],
+    ))
+}
+pub fn css_supports_at_rule(
+    supports_token: SyntaxToken,
+    condition: AnyCssSupportsCondition,
+    block: AnyCssRuleListBlock,
+) -> CssSupportsAtRule {
+    CssSupportsAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_SUPPORTS_AT_RULE,
+        [
+            Some(SyntaxElement::Token(supports_token)),
+            Some(SyntaxElement::Node(condition.into_syntax())),
+            Some(SyntaxElement::Node(block.into_syntax())),
+        ],
+    ))
+}
+pub fn css_supports_condition_in_parens(
+    l_paren_token: SyntaxToken,
+    condition: AnyCssSupportsCondition,
+    r_paren_token: SyntaxToken,
+) -> CssSupportsConditionInParens {
+    CssSupportsConditionInParens::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_SUPPORTS_CONDITION_IN_PARENS,
+        [
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(condition.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
+pub fn css_supports_feature_declaration(
+    l_paren_token: SyntaxToken,
+    declaration: CssDeclaration,
+    r_paren_token: SyntaxToken,
+) -> CssSupportsFeatureDeclaration {
+    CssSupportsFeatureDeclaration::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_SUPPORTS_FEATURE_DECLARATION,
+        [
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(declaration.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
+pub fn css_supports_feature_selector(
+    selector_token: SyntaxToken,
+    l_paren_token: SyntaxToken,
+    selector: AnyCssSelector,
+    r_paren_token: SyntaxToken,
+) -> CssSupportsFeatureSelector {
+    CssSupportsFeatureSelector::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_SUPPORTS_FEATURE_SELECTOR,
+        [
+            Some(SyntaxElement::Token(selector_token)),
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(selector.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
+pub fn css_supports_not_condition(
+    not_token: SyntaxToken,
+    query: AnyCssSupportsInParens,
+) -> CssSupportsNotCondition {
+    CssSupportsNotCondition::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_SUPPORTS_NOT_CONDITION,
+        [
+            Some(SyntaxElement::Token(not_token)),
+            Some(SyntaxElement::Node(query.into_syntax())),
+        ],
+    ))
+}
+pub fn css_supports_or_condition(
+    left: AnyCssSupportsInParens,
+    or_token: SyntaxToken,
+    right: AnyCssSupportsOrCombinableCondition,
+) -> CssSupportsOrCondition {
+    CssSupportsOrCondition::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_SUPPORTS_OR_CONDITION,
+        [
+            Some(SyntaxElement::Node(left.into_syntax())),
+            Some(SyntaxElement::Token(or_token)),
+            Some(SyntaxElement::Node(right.into_syntax())),
+        ],
+    ))
+}
 pub fn css_type_selector(ident: CssIdentifier) -> CssTypeSelectorBuilder {
     CssTypeSelectorBuilder {
         ident,

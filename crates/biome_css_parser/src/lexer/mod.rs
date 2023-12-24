@@ -939,6 +939,8 @@ impl<'src> CssLexer<'src> {
             b"right-middle" => RIGHT_MIDDLE_KW,
             b"right-bottom" => RIGHT_BOTTOM_KW,
             b"layer" => LAYER_KW,
+            b"supports" => SUPPORTS_KW,
+            b"selector" => SELECTOR_KW,
             b"url" => URL_KW,
             b"scope" => SCOPE_KW,
             _ => IDENT,

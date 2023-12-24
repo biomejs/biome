@@ -10,6 +10,7 @@ mod layer;
 mod media;
 mod page;
 mod parse_error;
+mod supports;
 mod scope;
 
 use crate::parser::CssParser;
@@ -30,6 +31,7 @@ use crate::syntax::at_rule::layer::{is_at_layer_at_rule, parse_layer_at_rule};
 use crate::syntax::at_rule::media::{is_at_media_at_rule, parse_media_at_rule};
 use crate::syntax::at_rule::page::{is_at_page_at_rule, parse_page_at_rule};
 use crate::syntax::at_rule::scope::{is_at_scope_at_rule, parse_scope_at_rule};
+use crate::syntax::at_rule::supports::{is_at_supports_at_rule, parse_supports_at_rule};
 use crate::syntax::parse_error::expected_any_at_rule;
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::T;
@@ -87,7 +89,9 @@ pub(crate) fn parse_any_at_rule(p: &mut CssParser) -> ParsedSyntax {
         parse_layer_at_rule(p)
     } else if is_at_scope_at_rule(p) {
         parse_scope_at_rule(p)
-    } else {
+    } else if is_at_supports_at_rule(p) {
+        parse_supports_at_rule(p)
+    }  else {
         Absent
     }
 }
