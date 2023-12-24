@@ -598,7 +598,7 @@ invalid.js:40:14 lint/nursery/useNumberProperties  FIXABLE  ━━━━━━�
     38 38 │   const foo = (-Infinity).toString();
     39 39 │   
     40    │ - const·foo·=·+Infinity;
-       40 │ + const·foo·=·+Number.POSITIVE_INFINITY;
+       40 │ + const·foo·=·Number.POSITIVE_INFINITY;
     41 41 │   
     42 42 │   const foo = +-Infinity;
   
@@ -702,7 +702,7 @@ invalid.js:48:17 lint/nursery/useNumberProperties  FIXABLE  ━━━━━━�
     46 46 │   const foo = -(-Infinity);
     47 47 │   
     48    │ - const·foo·=·1·-·Infinity;
-       48 │ + const·foo·=·Number.NEGATIVE_INFINITY;
+       48 │ + const·foo·=·1·-·Number.POSITIVE_INFINITY;
     49 49 │   
     50 50 │   const foo = 1 - -Infinity;
   

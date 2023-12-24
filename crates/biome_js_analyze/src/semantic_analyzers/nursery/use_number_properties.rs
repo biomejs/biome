@@ -5,13 +5,16 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make;
-use biome_js_syntax::{global_identifier, AnyJsExpression, JsSyntaxKind, T};
-use biome_rowan::{AstNode, BatchMutationExt, NodeOrToken};
+use biome_js_syntax::{global_identifier, AnyJsExpression, JsUnaryExpression, JsUnaryOperator, T};
+use biome_rowan::{AstNode, BatchMutationExt};
 
 declare_rule! {
     /// Use `Number` properties instead of global ones.
     ///
     /// _ES2015_ moved some globals into the `Number` properties for consistency.
+    ///
+    /// The rule doesn't report the globals `isFinite` and `isNan` because they have a slightly different behabior to their corresponding `Number`'s properties `Number.isFinite` and `Number.isNan`.
+    /// You can use the dedicated rules [noGlobalIsFinite](https://biomejs.dev/linter/rules/no-global-is-finite/) and  [noGlobalIsNan](https://biomejs.dev/linter/rules/no-global-is-nan/) to enforce the use of `Number.isFinite` and `Number.isNan`.
     ///
     /// Source: https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/prefer-number-properties.md
     ///
@@ -115,9 +118,16 @@ impl Rule for UseNumberProperties {
                 let (old_node, replacement) = match name.as_str() {
                     "Infinity" => {
                         if let Some(parent) = node.parent::<JsUnaryExpression>() {
-                            match parent.operator.ok()? {
-                                JsUnaryOperator::Minus => (AnyJsExpression::JsUnaryExpression(parent), "NEGATIVE_INFINITY"),
-                                JsUnaryOperator::Plus => (AnyJsExpression::JsUnaryExpression(parent), "POSITIVE_INFINITY"),
+                            match parent.operator().ok()? {
+                                JsUnaryOperator::Minus => (
+                                    AnyJsExpression::JsUnaryExpression(parent),
+                                    "NEGATIVE_INFINITY",
+                                ),
+                                JsUnaryOperator::Plus => (
+                                    AnyJsExpression::JsUnaryExpression(parent),
+                                    "POSITIVE_INFINITY",
+                                ),
+                                _ => return None,
                             }
                         } else {
                             (node.clone(), "POSITIVE_INFINITY")
@@ -126,12 +136,7 @@ impl Rule for UseNumberProperties {
                     _ => (node.clone(), name.as_str()),
                 };
                 (
-                    if replacement == "NEGATIVE_INFINITY" {
-                        // When replacing JsIdentifierExpression with JsUnaryExpression, the parent node must be replaced.
-                        node.parent::<AnyJsExpression>()?.clone()
-                    } else {
-                        node.clone()
-                    },
+                    old_node,
                     make::js_static_member_expression(
                         make::js_identifier_expression(make::js_reference_identifier(make::ident(
                             "Number",
