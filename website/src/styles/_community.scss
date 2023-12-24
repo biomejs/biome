@@ -20,14 +20,6 @@ div>img.contributor-avatar {
     object-fit: cover;
 }
 
-.contributor-avatar:nth-child(1),
-.contributor-avatar:nth-child(11),
-.contributor-avatar:nth-child(21),
-.contributor-avatar:nth-child(22),
-.contributor-avatar:nth-child(26) {
-    visibility: hidden;
-}
-
 .community>div>div>a>p {
     margin: 0;
 }
