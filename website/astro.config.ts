@@ -352,7 +352,8 @@ export default defineConfig({
 				baseUrl: "https://github.com/biomejs/biome/edit/main/website/",
 			},
 			components: {
-				SiteTitle: "./src/components/SiteTitle.astro",
+				SiteTitle: "./src/components/starlight/SiteTitle.astro",
+				Sidebar: "./src/components/starlight/Sidebar.astro",
 			},
 		}),
 	],

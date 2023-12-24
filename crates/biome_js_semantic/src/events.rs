@@ -2,7 +2,7 @@
 
 use biome_js_syntax::binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding};
 use biome_js_syntax::{
-    AnyJsExportNamedSpecifier, AnyJsNamedImportSpecifier, AnyTsType, JsImportNamedClause,
+    AnyJsExportNamedSpecifier, AnyJsImportClause, AnyJsNamedImportSpecifier, AnyTsType,
 };
 use biome_js_syntax::{
     AnyJsIdentifierUsage, JsLanguage, JsSyntaxKind, JsSyntaxNode, TextRange, TsTypeParameterName,
@@ -442,20 +442,6 @@ impl SemanticEventExtractor {
                     | AnyJsBindingDeclaration::TsTypeParameter(_) => {
                         self.push_binding(None, BindingName::Type(name), info);
                     }
-                    AnyJsBindingDeclaration::JsImportDefaultClause(clause) => {
-                        let info = info.into_imported();
-                        if clause.type_token().is_none() {
-                            self.push_binding(None, BindingName::Value(name.clone()), info.clone());
-                        }
-                        self.push_binding(None, BindingName::Type(name), info);
-                    }
-                    AnyJsBindingDeclaration::JsImportNamespaceClause(clause) => {
-                        let info = info.into_imported();
-                        if clause.type_token().is_none() {
-                            self.push_binding(None, BindingName::Value(name.clone()), info.clone());
-                        }
-                        self.push_binding(None, BindingName::Type(name), info);
-                    }
                     AnyJsBindingDeclaration::TsImportEqualsDeclaration(declaration) => {
                         let info = info.into_imported();
                         if declaration.type_token().is_none() {
@@ -465,12 +451,11 @@ impl SemanticEventExtractor {
                     }
                     AnyJsBindingDeclaration::JsDefaultImportSpecifier(_)
                     | AnyJsBindingDeclaration::JsNamespaceImportSpecifier(_) => {
-                        let is_import_type = declaration
-                            .parent::<JsImportNamedClause>()
-                            .map(|clause| clause.type_token().is_none())
-                            .unwrap_or(false);
+                        let type_token = declaration
+                            .parent::<AnyJsImportClause>()
+                            .and_then(|clause| clause.type_token());
                         let info = info.into_imported();
-                        if is_import_type {
+                        if type_token.is_none() {
                             self.push_binding(None, BindingName::Value(name.clone()), info.clone());
                         }
                         self.push_binding(None, BindingName::Type(name), info);

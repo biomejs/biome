@@ -5,6 +5,7 @@ use crate::utils::FormatOptionalSemicolon;
 use biome_formatter::trivia::FormatLeadingComments;
 use biome_formatter::{format_args, write};
 use biome_js_syntax::{JsSyntaxNode, TsMappedType, TsMappedTypeFields};
+use biome_rowan::Direction;
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsMappedType;
@@ -27,31 +28,22 @@ impl FormatNodeRule<TsMappedType> for FormatTsMappedType {
         } = node.as_fields();
 
         let property_name = property_name?;
-
-        // Check if the user introduced a new line inside the node.
-        let should_expand = node
-            .syntax()
-            .tokens()
-            // Skip the first token to avoid formatter instability. See #4165.
-            // This also makes sense since leading trivia of the first token
-            // are not part of the interior of the node.
-            .skip(1)
-            .flat_map(|token| {
-                token
-                    .leading_trivia()
-                    .pieces()
-                    .chain(token.trailing_trivia().pieces())
-            })
-            .any(|piece| piece.is_newline());
+        let should_expand = has_line_break_before_property_name(node)?;
 
         let comments = f.comments().clone();
-        let dangling_comments = comments.dangling_comments(node.syntax());
         let type_annotation_has_leading_comment =
             mapped_type.as_ref().map_or(false, |annotation| {
                 comments.has_leading_comments(annotation.syntax())
             });
 
         let format_inner = format_with(|f| {
+            write!(
+                f,
+                [FormatLeadingComments::Comments(
+                    comments.dangling_comments(node.syntax())
+                )]
+            )?;
+
             if let Some(readonly_modifier) = &readonly_modifier {
                 write!(f, [readonly_modifier.format(), space()])?;
             }
@@ -59,7 +51,6 @@ impl FormatNodeRule<TsMappedType> for FormatTsMappedType {
             write!(
                 f,
                 [
-                    FormatLeadingComments::Comments(dangling_comments),
                     group(&format_args![
                         l_brack_token.format(),
                         property_name.format(),
@@ -108,4 +99,46 @@ impl NeedsParentheses for TsMappedType {
     fn needs_parentheses_with_parent(&self, _parent: &JsSyntaxNode) -> bool {
         false
     }
+}
+
+/// Check if the user introduced a new line inside the node, but only if
+/// that new line occurs at or before the property name. For example,
+/// this would break:
+///   { [
+///     A in B]: T}
+/// Because the line break occurs before `A`, the property name. But this
+/// would _not_ break:
+///   { [A
+///     in B]: T}
+/// Because the break is _after_ the `A`.
+fn has_line_break_before_property_name(node: &TsMappedType) -> FormatResult<bool> {
+    let property_name = node.property_name()?;
+    let first_property_name_token = match property_name.syntax().first_token() {
+        Some(first_token) => first_token,
+        None => return Err(FormatError::SyntaxError),
+    };
+
+    let result = node
+        .syntax()
+        .descendants_tokens(Direction::Next)
+        // Skip the first token to avoid formatter instability. See #4165.
+        // This also makes sense since leading trivia of the first token
+        // are not part of the interior of the node.
+        .skip(1)
+        // Only process up until the first token of the property name
+        .take_while(|token| first_property_name_token != *token)
+        .flat_map(|token| {
+            token
+                .leading_trivia()
+                .pieces()
+                .chain(token.trailing_trivia().pieces())
+        })
+        // Add only the leading trivia of the first property name token to
+        // ensure that any newline in front of it is included. Otherwise
+        // the `take_while` stops at the previous token, and the trailing
+        // trivia won't include the newline.
+        .chain(first_property_name_token.leading_trivia().pieces())
+        .any(|piece| piece.is_newline());
+
+    Ok(result)
 }

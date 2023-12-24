@@ -7,7 +7,10 @@ use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_syntax::{AnyJsStatement, JsIfStatement, JsStatementList, JsSyntaxKind};
-use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, SyntaxNodeOptionExt};
+use biome_rowan::{
+    chain_trivia_pieces, trim_leading_trivia_pieces, AstNode, AstNodeList, BatchMutationExt,
+    SyntaxNodeOptionExt,
+};
 
 use crate::JsRuleAction;
 
@@ -127,21 +130,13 @@ impl Rule for NoUselessElse {
 
     fn diagnostic(_ctx: &RuleContext<Self>, if_stmt: &Self::State) -> Option<RuleDiagnostic> {
         let else_clause = if_stmt.else_clause()?;
-        Some(
-            RuleDiagnostic::new(
-                rule_category!(),
-                else_clause.range(),
-                markup! {
-                    "This "<Emphasis>"else"</Emphasis>" clause can be omitted."
-                },
-            )
-            .detail(
-                if_stmt.range(),
-                markup! {
-                    "This "<Emphasis>"if"</Emphasis>" statement uses an early breaking statement."
-                },
-            ),
-        )
+        Some(RuleDiagnostic::new(
+            rule_category!(),
+            else_clause.range(),
+            markup! {
+                "This "<Emphasis>"else"</Emphasis>" clause can be omitted because previous branches break early."
+            },
+        ))
     }
 
     fn action(ctx: &RuleContext<Self>, if_stmt: &Self::State) -> Option<JsRuleAction> {
@@ -151,8 +146,12 @@ impl Rule for NoUselessElse {
             let if_pos = stmts_list
                 .iter()
                 .position(|x| x.syntax() == if_stmt.syntax())?;
+            let else_token = else_clause.else_token().ok()?;
             let new_if_stmt = AnyJsStatement::from(if_stmt.clone().with_else_clause(None))
-                .with_trailing_trivia_pieces([])?;
+                .with_trailing_trivia_pieces(chain_trivia_pieces(
+                    else_token.leading_trivia().pieces(),
+                    trim_leading_trivia_pieces(else_token.trailing_trivia().pieces()),
+                ))?;
             let prev_stmts = stmts_list.iter().take(if_pos).chain([new_if_stmt]);
             let next_stmts = stmts_list.iter().skip(if_pos + 1);
             // We collect the statements because `chain` is not able to produce an `ExactSizeIterator`.

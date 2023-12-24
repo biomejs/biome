@@ -27,7 +27,6 @@ use biome_js_unicode_table::is_js_ident;
 use biome_rowan::{
     declare_node_union, AstNode, AstNodeList, BatchMutationExt, SyntaxResult, TextRange, TokenText,
 };
-use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 use smallvec::SmallVec;
 
@@ -457,13 +456,12 @@ pub(crate) struct State {
 }
 
 /// Rule's options.
-#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize, Bpaf)]
+#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct NamingConventionOptions {
     /// If `false`, then consecutive uppercase are allowed in _camel_ and _pascal_ cases.
     /// This does not affect other [Case].
-    #[bpaf(hide)]
     #[serde(
         default = "default_strict_case",
         skip_serializing_if = "is_default_strict_case"
@@ -471,7 +469,6 @@ pub struct NamingConventionOptions {
     pub strict_case: bool,
 
     /// Allowed cases for _TypeScript_ `enum` member names.
-    #[bpaf(hide)]
     #[serde(default, skip_serializing_if = "is_default")]
     pub enum_member_case: EnumMemberCase,
 }
@@ -494,16 +491,6 @@ impl Default for NamingConventionOptions {
             strict_case: default_strict_case(),
             enum_member_case: EnumMemberCase::default(),
         }
-    }
-}
-
-// Required by [Bpaf].
-impl FromStr for NamingConventionOptions {
-    type Err = &'static str;
-
-    fn from_str(_s: &str) -> Result<Self, Self::Err> {
-        // WARNING: should not be used.
-        Ok(Self::default())
     }
 }
 
@@ -840,8 +827,7 @@ impl Named {
             AnyJsBindingDeclaration::JsCatchDeclaration(_) => Some(Named::CatchParameter),
             AnyJsBindingDeclaration::TsPropertyParameter(_) => Some(Named::ParameterProperty),
             AnyJsBindingDeclaration::TsIndexSignatureParameter(_) => Some(Named::IndexParameter),
-            AnyJsBindingDeclaration::JsNamespaceImportSpecifier(_)
-            | AnyJsBindingDeclaration::JsImportNamespaceClause(_) => Some(Named::ImportNamespace),
+            AnyJsBindingDeclaration::JsNamespaceImportSpecifier(_) => Some(Named::ImportNamespace),
             AnyJsBindingDeclaration::JsFunctionDeclaration(_)
             | AnyJsBindingDeclaration::JsFunctionExpression(_)
             | AnyJsBindingDeclaration::JsFunctionExportDefaultDeclaration(_)
@@ -849,8 +835,7 @@ impl Named {
             | AnyJsBindingDeclaration::TsDeclareFunctionExportDefaultDeclaration(_) => {
                 Some(Named::Function)
             }
-            AnyJsBindingDeclaration::JsImportDefaultClause(_)
-            | AnyJsBindingDeclaration::TsImportEqualsDeclaration(_)
+            AnyJsBindingDeclaration::TsImportEqualsDeclaration(_)
             | AnyJsBindingDeclaration::JsDefaultImportSpecifier(_)
             | AnyJsBindingDeclaration::JsNamedImportSpecifier(_) => Some(Named::ImportAlias),
             AnyJsBindingDeclaration::TsModuleDeclaration(_) => Some(Named::Namespace),

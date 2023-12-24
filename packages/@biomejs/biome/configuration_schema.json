@@ -8,6 +8,13 @@
 			"description": "A field for the [JSON schema](https://json-schema.org/) specification",
 			"type": ["string", "null"]
 		},
+		"css": {
+			"description": "Specific configuration for the Css language",
+			"anyOf": [
+				{ "$ref": "#/definitions/CssConfiguration" },
+				{ "type": "null" }
+			]
+		},
 		"extends": {
 			"description": "A list of paths to other JSON files, used to extends the current configuration.",
 			"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
@@ -717,6 +724,72 @@
 				}
 			}
 		},
+		"CssConfiguration": {
+			"description": "Options applied to CSS files",
+			"type": "object",
+			"properties": {
+				"formatter": {
+					"description": "Formatting options",
+					"anyOf": [
+						{ "$ref": "#/definitions/CssFormatter" },
+						{ "type": "null" }
+					]
+				},
+				"parser": {
+					"description": "Parsing options",
+					"anyOf": [{ "$ref": "#/definitions/CssParser" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"CssFormatter": {
+			"type": "object",
+			"properties": {
+				"enabled": {
+					"description": "Control the formatter for CSS (and its super languages) files.",
+					"type": ["boolean", "null"]
+				},
+				"indentSize": {
+					"description": "The size of the indentation applied to CSS (and its super languages) files. Default to 2.",
+					"type": ["integer", "null"],
+					"format": "uint8",
+					"minimum": 0.0
+				},
+				"indentStyle": {
+					"description": "The indent style applied to CSS (and its super languages) files.",
+					"anyOf": [
+						{ "$ref": "#/definitions/PlainIndentStyle" },
+						{ "type": "null" }
+					]
+				},
+				"indentWidth": {
+					"description": "The size of the indentation applied to CSS (and its super languages) files. Default to 2.",
+					"type": ["integer", "null"],
+					"format": "uint8",
+					"minimum": 0.0
+				},
+				"lineEnding": {
+					"description": "The type of line ending applied to CSS (and its super languages) files.",
+					"anyOf": [{ "$ref": "#/definitions/LineEnding" }, { "type": "null" }]
+				},
+				"lineWidth": {
+					"description": "What's the max width of a line applied to CSS (and its super languages) files. Defaults to 80.",
+					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"CssParser": {
+			"description": "Options that changes how the CSS parser behaves",
+			"type": "object",
+			"properties": {
+				"allowWrongLineComments": {
+					"description": "Allow comments to appear on incorrect lines in `.css` files",
+					"type": ["boolean", "null"]
+				}
+			},
+			"additionalProperties": false
+		},
 		"EnumMemberCase": {
 			"description": "Supported cases for TypeScript `enum` member names.",
 			"oneOf": [
@@ -732,6 +805,47 @@
 				},
 				{ "description": "camelCase", "type": "string", "enum": ["camelCase"] }
 			]
+		},
+		"FilenameCase": {
+			"description": "Supported cases for TypeScript `enum` member names.",
+			"oneOf": [
+				{ "description": "camelCase", "type": "string", "enum": ["camelCase"] },
+				{
+					"description": "Match an export name",
+					"type": "string",
+					"enum": ["export"]
+				},
+				{
+					"description": "kebab-case",
+					"type": "string",
+					"enum": ["kebab-case"]
+				},
+				{
+					"description": "PascalCase",
+					"type": "string",
+					"enum": ["snake_case"]
+				}
+			]
+		},
+		"FilenameCases": {
+			"type": "array",
+			"items": { "$ref": "#/definitions/FilenameCase" },
+			"uniqueItems": true
+		},
+		"FilenamingConventionOptions": {
+			"description": "Rule's options.",
+			"type": "object",
+			"properties": {
+				"filenameCases": {
+					"description": "Allowed cases for _TypeScript_ `enum` member names.",
+					"allOf": [{ "$ref": "#/definitions/FilenameCases" }]
+				},
+				"strictCase": {
+					"description": "If `false`, then consecutive uppercase are allowed in _camel_ and _pascal_ cases. This does not affect other [Case].",
+					"type": "boolean"
+				}
+			},
+			"additionalProperties": false
 		},
 		"FilesConfiguration": {
 			"description": "The configuration of the filesystem",
@@ -1147,8 +1261,22 @@
 						{ "type": "null" }
 					]
 				},
+				"noInvalidUseBeforeDeclaration": {
+					"description": "Disallow the use of variables and function parameters before their declaration",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noMisleadingCharacterClass": {
 					"description": "Disallow characters made with multiple code points in character class syntax.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noNodejsModules": {
+					"description": "Forbid the use of Node.js builtin modules. Can be useful for client-side web projects that do not have access to those modules.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -1175,6 +1303,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUselessTernary": {
+					"description": "Disallow ternary operators when simpler alternatives exist.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"recommended": {
 					"description": "It enables the recommended rules for this group",
 					"type": ["boolean", "null"]
@@ -1188,6 +1323,13 @@
 				},
 				"useExportType": {
 					"description": "Promotes the use of export type for types.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useFilenamingConvention": {
+					"description": "Enforce naming conventions for JavaScript and TypeScript filenames.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -1209,6 +1351,13 @@
 				},
 				"useImportRestrictions": {
 					"description": "Disallows package private imports.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useNodeImportProtocol": {
+					"description": "Enforces using the node: protocol for Node.js builtin modules.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -1323,6 +1472,13 @@
 		"OverridePattern": {
 			"type": "object",
 			"properties": {
+				"css": {
+					"description": "Specific configuration for the Css language",
+					"anyOf": [
+						{ "$ref": "#/definitions/CssConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"formatter": {
 					"description": "Specific configuration for the Json language",
 					"anyOf": [
@@ -1412,6 +1568,10 @@
 				{
 					"description": "Options for `noExcessiveComplexity` rule",
 					"allOf": [{ "$ref": "#/definitions/ComplexityOptions" }]
+				},
+				{
+					"description": "Options for `useFilenamingConvention` rule",
+					"allOf": [{ "$ref": "#/definitions/FilenamingConventionOptions" }]
 				},
 				{
 					"description": "Options for `useExhaustiveDependencies` and `useHookAtTopLevel` rule",
@@ -2152,6 +2312,10 @@
 						{ "$ref": "#/definitions/VcsClientKind" },
 						{ "type": "null" }
 					]
+				},
+				"defaultBranch": {
+					"description": "The main branch of the project",
+					"type": ["string", "null"]
 				},
 				"enabled": {
 					"description": "Whether Biome should integrate itself with the VCS client",

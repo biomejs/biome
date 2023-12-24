@@ -7,8 +7,7 @@ JsModule {
             import_token: IMPORT_KW@0..7 "import" [] [Whitespace(" ")],
             import_clause: JsImportNamedClause {
                 type_token: missing (optional),
-                default_specifier: missing (optional),
-                named_import: JsNamedImportSpecifiers {
+                named_specifiers: JsNamedImportSpecifiers {
                     l_curly_token: L_CURLY@7..9 "{" [] [Whitespace(" ")],
                     specifiers: JsNamedImportSpecifierList [
                         JsNamedImportSpecifier {
@@ -43,8 +42,7 @@ JsModule {
       0: IMPORT_KW@0..7 "import" [] [Whitespace(" ")]
       1: JS_IMPORT_NAMED_CLAUSE@7..27
         0: (empty)
-        1: (empty)
-        2: JS_NAMED_IMPORT_SPECIFIERS@7..16
+        1: JS_NAMED_IMPORT_SPECIFIERS@7..16
           0: L_CURLY@7..9 "{" [] [Whitespace(" ")]
           1: JS_NAMED_IMPORT_SPECIFIER_LIST@9..14
             0: JS_NAMED_IMPORT_SPECIFIER@9..14
@@ -54,10 +52,10 @@ JsModule {
               3: JS_IDENTIFIER_BINDING@12..14
                 0: IDENT@12..14 "c" [] [Whitespace(" ")]
           2: R_CURLY@14..16 "}" [] [Whitespace(" ")]
-        3: FROM_KW@16..21 "from" [] [Whitespace(" ")]
-        4: JS_MODULE_SOURCE@21..27
+        2: FROM_KW@16..21 "from" [] [Whitespace(" ")]
+        3: JS_MODULE_SOURCE@21..27
           0: JS_STRING_LITERAL@21..27 "\"test\"" [] []
-        5: (empty)
+        4: (empty)
       2: SEMICOLON@27..28 ";" [] []
   4: EOF@28..29 "" [Newline("\n")] []
 --

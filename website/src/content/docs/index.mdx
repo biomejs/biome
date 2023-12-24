@@ -2,11 +2,7 @@
 title: Biome
 template: splash
 description: Format, lint, and more in a fraction of a second.
-banner:
-  content: |
-    Biome claims the bounty of the <a href="/blog/biome-wins-prettier-challenge">Prettier challenge</a>!
 editUrl: false
-next: false
 hero:
   title: One toolchain for your web project
   tagline: Format, lint, and more in a fraction of a second.
@@ -36,6 +32,9 @@ import { Image } from "astro:assets";
 import "../../styles/_performance.scss";
 import "../../styles/_installation.scss";
 import "../../styles/_community.scss";
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+import Netlify from "@src/components/Netlify.astro";
 
 <body>
   <div class="gradient"></div>
@@ -170,3 +169,6 @@ import "../../styles/_community.scss";
     />
   </a>
 </div>
+
+
+<Netlify />

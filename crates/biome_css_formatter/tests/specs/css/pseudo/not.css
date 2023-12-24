@@ -1,0 +1,12 @@
+div:not(
+    :last-child
+    ) {
+}
+
+:not(
+    div 
+    
+    +
+     #id:hover
+     
+     ) {}

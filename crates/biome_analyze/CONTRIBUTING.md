@@ -474,19 +474,17 @@ let options = ctx.options();
 ```
 
 The compiler should warn you that `MyRuleOptions` does not implement some required types.
-We currently require implementing _serde_'s traits `Deserialize`/`Serialize` and _Bpaf_'s parser trait.
+We currently require implementing _serde_'s traits `Deserialize`/`Serialize`.
 You can simply use a derive macros:
 
 ```rust,ignore
-#[derive(Debug, Default, Clone, Serialize, Deserialize, Bpaf)]
+#[derive(Debug, Default, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct MyRuleOptions {
-    #[bpaf(hide)]
     #[serde(default, skip_serializing_if = "is_default")]
     main_behavior: Behavior,
 
-    #[bpaf(hide)]
     #[serde(default, skip_serializing_if = "is_default")]
     extra_behaviors: Vec<Behavior>,
 }

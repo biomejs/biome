@@ -49,6 +49,10 @@ impl DeserializationVisitor for VcsConfigurationVisitor {
                 "root" => {
                     result.root = Deserializable::deserialize(&value, &key_text, diagnostics);
                 }
+                "defaultBranch" => {
+                    result.default_branch =
+                        Deserializable::deserialize(&value, &key_text, diagnostics);
+                }
                 _ => {
                     diagnostics.push(DeserializationDiagnostic::new_unknown_key(
                         &key_text,

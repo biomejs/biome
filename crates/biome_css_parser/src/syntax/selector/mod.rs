@@ -130,8 +130,8 @@ fn parse_complex_selector(p: &mut CssParser, mut left: CompletedMarker) -> Parse
 
         if is_at_complex_selector_combinator(p) {
             let complex_selector = left.precede(p);
-            // bump combinator
-            p.bump(p.cur());
+
+            p.bump_ts(COMPLEX_SELECTOR_COMBINATOR_SET);
             parse_compound_selector(p).or_add_diagnostic(p, expected_compound_selector);
             left = complex_selector.complete(p, CSS_COMPLEX_SELECTOR)
         } else {

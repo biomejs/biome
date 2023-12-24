@@ -33,6 +33,11 @@ pub struct VcsConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[bpaf(long("vcs-root"), argument("PATH"), optional)]
     pub root: Option<String>,
+
+    /// The main branch of the project
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[bpaf(long("vcs-default-branch"), argument("BRANCH"), optional)]
+    pub default_branch: Option<String>,
 }
 
 impl VcsConfiguration {
@@ -60,6 +65,9 @@ impl MergeWith<VcsConfiguration> for VcsConfiguration {
         }
         if let Some(root) = other.root {
             self.root = Some(root);
+        }
+        if let Some(default_branch) = other.default_branch {
+            self.root = Some(default_branch);
         }
     }
 

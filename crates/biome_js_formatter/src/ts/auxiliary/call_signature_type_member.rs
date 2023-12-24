@@ -23,8 +23,11 @@ impl FormatNodeRule<TsCallSignatureTypeMember> for FormatTsCallSignatureTypeMemb
         write!(
             f,
             [
-                group(&format_args![type_parameters.format(), parameters.format()]),
-                return_type_annotation.format(),
+                group(&format_args![
+                    type_parameters.format(),
+                    parameters.format(),
+                    return_type_annotation.format(),
+                ]),
                 FormatTypeMemberSeparator::new(separator_token.as_ref())
             ]
         )

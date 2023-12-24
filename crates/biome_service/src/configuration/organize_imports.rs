@@ -1,10 +1,11 @@
 use crate::configuration::merge::MergeWith;
 use crate::configuration::overrides::OverrideOrganizeImportsConfiguration;
 use crate::settings::{to_matcher, OrganizeImportsSettings};
-use crate::WorkspaceError;
+use crate::{Matcher, WorkspaceError};
 use biome_deserialize::StringSet;
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
+use std::path::PathBuf;
 
 #[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Clone, Bpaf)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -71,16 +72,24 @@ impl MergeWith<OrganizeImports> for OrganizeImports {
     }
 }
 
-impl TryFrom<OrganizeImports> for OrganizeImportsSettings {
-    type Error = WorkspaceError;
-
-    fn try_from(organize_imports: OrganizeImports) -> Result<Self, Self::Error> {
-        Ok(Self {
-            enabled: organize_imports.enabled.unwrap_or_default(),
-            ignored_files: to_matcher(organize_imports.ignore.as_ref())?,
-            included_files: to_matcher(organize_imports.include.as_ref())?,
-        })
-    }
+pub fn to_organize_imports_settings(
+    organize_imports: OrganizeImports,
+    vcs_base_path: Option<PathBuf>,
+    gitignore_matches: &[String],
+) -> Result<OrganizeImportsSettings, WorkspaceError> {
+    Ok(OrganizeImportsSettings {
+        enabled: organize_imports.enabled.unwrap_or_default(),
+        ignored_files: to_matcher(
+            organize_imports.ignore.as_ref(),
+            vcs_base_path.clone(),
+            gitignore_matches,
+        )?,
+        included_files: to_matcher(
+            organize_imports.include.as_ref(),
+            vcs_base_path,
+            gitignore_matches,
+        )?,
+    })
 }
 
 impl TryFrom<OverrideOrganizeImportsConfiguration> for OrganizeImportsSettings {
@@ -91,8 +100,8 @@ impl TryFrom<OverrideOrganizeImportsConfiguration> for OrganizeImportsSettings {
     ) -> Result<Self, Self::Error> {
         Ok(Self {
             enabled: organize_imports.enabled.unwrap_or_default(),
-            ignored_files: None,
-            included_files: None,
+            ignored_files: Matcher::empty(),
+            included_files: Matcher::empty(),
         })
     }
 }

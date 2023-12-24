@@ -22,15 +22,20 @@ hooks_incorrect_options.json:6:5 deserialize ━━━━━━━━━━━�
   - noDuplicateJsonKeys
   - noEmptyBlockStatements
   - noImplicitAnyLet
+  - noInvalidUseBeforeDeclaration
   - noMisleadingCharacterClass
+  - noNodejsModules
   - noUnusedImports
   - noUnusedPrivateClassMembers
   - noUselessLoneBlockStatements
+  - noUselessTernary
   - useAwait
   - useExportType
+  - useFilenamingConvention
   - useForOf
   - useGroupedTypeImport
   - useImportRestrictions
+  - useNodeImportProtocol
   - useRegexLiterals
   - useShorthandFunctionType
   - useValidAriaRole
