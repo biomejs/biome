@@ -82,7 +82,7 @@ declare_rule! {
 #[derive(Debug, Copy, Clone)]
 enum TsArrayKind {
     /// `T[]`
-    Simple,
+    Shorthand,
     /// `Array<T>`
     GenericArray,
     /// `readonly T[]`
@@ -144,7 +144,7 @@ impl Rule for UseConsistentArrayType {
                 let title = if is_readonly {
                     get_diagnostic_title(TsArrayKind::Readonly)
                 } else {
-                    get_diagnostic_title(TsArrayKind::Simple)
+                    get_diagnostic_title(TsArrayKind::Shorthand)
                 };
 
                 Some(RuleDiagnostic::new(
@@ -211,7 +211,7 @@ impl Rule for UseConsistentArrayType {
                     Some(JsRuleAction {
                         category: ActionCategory::QuickFix,
                         applicability: Applicability::MaybeIncorrect,
-                        message: get_action_message(TsArrayKind::Simple),
+                        message: get_action_message(TsArrayKind::Shorthand),
                         mutation,
                     })
             }
@@ -239,7 +239,7 @@ fn get_array_kind_by_any_type(ty: &AnyTsType) -> Option<TsArrayKind> {
 
         return (matches!(ty.ty(), Ok(AnyTsType::TsArrayType(_))) && is_readonly).then_some(TsArrayKind::Readonly);
     } else if let AnyTsType::TsArrayType(_) = ty {
-        return Some(TsArrayKind::Simple);
+        return Some(TsArrayKind::Shorthand);
     }
 
     None
@@ -373,7 +373,7 @@ fn transform_array_element_type(param: AnyTsType, array_kind: TsArrayKind) -> Op
             ))
         }
 
-        TsArrayKind::Simple => {
+        TsArrayKind::Shorthand => {
             let element_type = if let AnyTsType::TsArrayType(array_type) = element_type {
                 array_type.element_type().ok()
             } else {
@@ -421,7 +421,7 @@ fn get_diagnostic_title<'a>(array_kind: TsArrayKind) -> Markup<'a> {
         TsArrayKind::ReadonlyGenericArray => {
             markup! {"Use "<Emphasis>"shorthand readonly T[] syntax"</Emphasis>" instead of "<Emphasis>"ReadonlyArray<T> syntax."</Emphasis>}
         }
-        TsArrayKind::Simple => {
+        TsArrayKind::Shorthand => {
             markup! {"Use "<Emphasis>"Array<T> syntax"</Emphasis>" instead of "<Emphasis>"shorthand T[] syntax."</Emphasis>}
         }
         TsArrayKind::Readonly => {
@@ -439,7 +439,7 @@ fn get_action_message(array_kind: TsArrayKind) -> MarkupBuf {
             markup! { "Use "<Emphasis>"shorthand readonly T[] syntax"</Emphasis>" to replace" }
                 .to_owned()
         }
-        TsArrayKind::Simple => {
+        TsArrayKind::Shorthand => {
             markup! { "Use "<Emphasis>"Array<T> syntax"</Emphasis>" to replace"}.to_owned()
         }
         TsArrayKind::Readonly => {
