@@ -6,8 +6,7 @@ use biome_analyze::{
 use biome_console::{markup, Markup, MarkupBuf};
 use biome_diagnostics::Applicability;
 use biome_deserialize::{
-    Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor, Text,
-    VisitableType,
+    Deserializable, DeserializableValue, DeserializationDiagnostic, Text,
 };
 use biome_js_factory::make;
 use biome_js_syntax::{
@@ -15,7 +14,6 @@ use biome_js_syntax::{
     TsTypeArguments, T,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TriviaPiece, SyntaxNodeOptionExt};
-use bpaf::Bpaf;
 #[cfg(feature = "schemars")]
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -149,11 +147,11 @@ impl Rule for UseConsistentArrayType {
                     get_diagnostic_title(TsArrayKind::Simple)
                 };
 
-                return Some(RuleDiagnostic::new(
+                Some(RuleDiagnostic::new(
                     rule_category!(),
                     query.range(),
                     title,
-                ));
+                ))
             }
             AnyTsType::TsReferenceType(ty) => {
                 if options.syntax == ConsistentArrayType::Generic {
@@ -193,12 +191,10 @@ impl Rule for UseConsistentArrayType {
                 None
             }
             AnyTsType::TsTypeOperatorType(ty) => {
-                dbg!(ty);
                 mutation.replace_node(AnyTsType::TsTypeOperatorType(ty.clone()), state.clone());
                 let ty = ty.ty().ok()?;
 
                 if let Some(kind) = get_array_kind_by_any_type(&ty) {
-                    dbg!(kind);
                     return Some(JsRuleAction {
                         category: ActionCategory::QuickFix,
                         applicability: Applicability::MaybeIncorrect,
@@ -476,40 +472,11 @@ where
     )
 }
 
-#[derive(Deserialize, Serialize, Default, Debug, Clone, Eq, PartialEq, Bpaf)]
+#[derive(Deserialize, Serialize, Default, Debug, Clone, Eq, PartialEq)]
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct ConsistentArrayTypeOptions {
-    #[bpaf(hide)]
     syntax: ConsistentArrayType,
-}
-
-impl Deserializable for ConsistentArrayTypeOptions {
-    fn deserialize(
-        value: &impl DeserializableValue,
-        name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<Self> {
-        value.deserialize(ConsistentArrayTypeOptionsVisitor, name, diagnostics)
-    }
-}
-
-struct ConsistentArrayTypeOptionsVisitor;
-
-impl DeserializationVisitor for ConsistentArrayTypeOptionsVisitor {
-    type Output = ConsistentArrayTypeOptions;
-
-    const EXPECTED_TYPE: VisitableType = VisitableType::MAP;
-
-    fn visit_map(
-        self,
-        _members: impl Iterator<Item = Option<(impl DeserializableValue, impl DeserializableValue)>>,
-        range: biome_rowan::TextRange,
-        name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<Self::Output> {
-        None
-    }
 }
 
 #[derive(Deserialize, Serialize, Debug, Default, Clone, Copy, Eq, PartialEq)]
@@ -531,6 +498,27 @@ impl FromStr for ConsistentArrayType {
             "Shorthand" => Ok(Self::Shorthand),
             "Generic" => Ok(Self::Generic),
             _ => Err("Value not supported for enum member case"),
+        }
+    }
+}
+
+impl Deserializable for ConsistentArrayType {
+    fn deserialize(
+        value: &impl DeserializableValue,
+        name: &str,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> Option<Self> {
+        const ALLOWED_VARIANTS: &[&str] = &["shorthand", "generic"];
+        let value_text = Text::deserialize(value, name, diagnostics)?;
+        if let Ok(value) = value_text.parse::<Self>() {
+            Some(value)
+        } else {
+            diagnostics.push(DeserializationDiagnostic::new_unknown_key(
+                value_text.text(),
+                value.range(),
+                ALLOWED_VARIANTS
+            ));
+            None
         }
     }
 }

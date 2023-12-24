@@ -49,7 +49,7 @@ pub(crate) async fn handle_lsp_error<T>(
             | WorkspaceError::FileIgnored(_)
             | WorkspaceError::FileTooLarge(_) => {
                 let message = format!("{}", err);
-                client.show_message(MessageType::WARNING, message).await;
+                client.log_message(MessageType::WARNING, message).await;
                 Ok(None)
             }
 

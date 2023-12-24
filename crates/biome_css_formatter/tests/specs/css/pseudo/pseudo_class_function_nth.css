@@ -1,0 +1,37 @@
+:nth-child(2n+1) {}
+:nth-child(2n + 1) {}
+:nth-child(-2n   - 3) {}
+:nth-child(+2n   - 3) {}
+:nth-child(2n
+ +
+ 
+   1) {}
+:nth-child(
+    2n+ 1) {}
+:nth-child(
+    2n) {}
+
+:nth-child(
+odd) {}
+:nth-child(
+    even) {}
+:nth-child(
+    102) {}
+:nth-child(
+    -102) {}
+
+
+:nth-child(2n+1 of li, .test) {}
+:nth-child(
+    
+    2n+1 of 
+    li,
+    
+    .test) {}
+
+:nth-child(2n+1
+    of
+    li, .test) {}
+:nth-child(2n+1
+        of
+        li, .test, .anotherLongClassName, #aSelectorLongEnoughToBreak, .OverMultipleLinesWithIndentation) {}

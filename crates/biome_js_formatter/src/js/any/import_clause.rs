@@ -12,6 +12,7 @@ impl FormatRule<AnyJsImportClause> for FormatAnyJsImportClause {
             AnyJsImportClause::JsImportNamedClause(node) => node.format().fmt(f),
             AnyJsImportClause::JsImportDefaultClause(node) => node.format().fmt(f),
             AnyJsImportClause::JsImportNamespaceClause(node) => node.format().fmt(f),
+            AnyJsImportClause::JsImportCombinedClause(node) => node.format().fmt(f),
         }
     }
 }

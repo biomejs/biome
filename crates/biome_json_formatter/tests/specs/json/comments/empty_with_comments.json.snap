@@ -1,0 +1,66 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: json/comments/empty_with_comments.json
+---
+
+# Input
+
+```json
+{
+    "object-block": { /* here's a block comment */},
+    "object-line": { // here's a line comment
+    },
+    "object-ownline": {
+        /* here's a block comment */
+        // and a line comment
+    },
+    "array-block": [ /* here's a block comment */],
+    "array-line": [ // here's a line comment
+    ],
+    "array-ownline": [
+        /* here's a block comment */
+        // and a line comment
+    ]
+}
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+-----
+
+```json
+{
+	"object-block": {
+		/* here's a block comment */
+	},
+	"object-line": {
+		// here's a line comment
+	},
+	"object-ownline": {
+		/* here's a block comment */
+		// and a line comment
+	},
+	"array-block": [
+		/* here's a block comment */
+	],
+	"array-line": [
+		// here's a line comment
+	],
+	"array-ownline": [
+		/* here's a block comment */
+		// and a line comment
+	]
+}
+```
+
+

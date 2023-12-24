@@ -1,7 +1,9 @@
 <p align="center">
-    <img alt="Biome - Toolchain of the web"
-         src="https://raw.githubusercontent.com/biomejs/resources/main/biome-logo-slogan.svg"
-         width="400">
+    <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/biomejs/resources/main/svg/slogan-dark-transparent.svg">
+        <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/biomejs/resources/main/svg/slogan-light-transparent.svg">
+        <img alt="Shows the banner of Biome, with its logo and the phrase 'Biome - Toolchain of the web'." src="https://raw.githubusercontent.com/biomejs/resources/main/svg/slogan-light-transparent.svg" width="700">
+    </picture>
 </p>
 
 <div align="center">
@@ -23,20 +25,19 @@
 [open-vsx-badge]: https://badgen.net/open-vsx/version/biomejs/biome?label=open-vsx&color=green
 [open-vsx-url]: https://open-vsx.org/extension/biomejs/biome
 
-
 </div>
 
 <div align="center">
 
-English | [简体中文](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.zh-CN.md)
+English | [简体中文](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.zh-CN.md) | [日本語](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.ja.md) | [Português do Brasil](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.pt-br.md)
 
 </div>
 
 **Biome** is a performant toolchain for web projects, it aims to provide developer tools to maintain the health of said projects.
 
-**Biome is a [fast formatter](./benchmark#formatting)** for _JavaScript_, _TypeScript_, _JSX_, and _JSON_ that scores **[96% compatibility with _Prettier_](https://console.algora.io/challenges/prettier)**.
+**Biome is a [fast formatter](./benchmark#formatting)** for _JavaScript_, _TypeScript_, _JSX_, and _JSON_ that scores **[97% compatibility with _Prettier_](https://console.algora.io/challenges/prettier)**.
 
-**Biome is a [performant linter](https://github.com/biomejs/biome/tree/main/benchmark#linting)** for _JavaScript_, _TypeScript_, and _JSX_ that features **[more than 170 rules](https://biomejs.dev/linter/rules/)** from ESLint, TypeSCript ESLint, and [other sources](https://github.com/biomejs/biome/discussions/3).
+**Biome is a [performant linter](https://github.com/biomejs/biome/tree/main/benchmark#linting)** for _JavaScript_, _TypeScript_, and _JSX_ that features **[more than 170 rules](https://biomejs.dev/linter/rules/)** from ESLint, TypeScript ESLint, and [other sources](https://github.com/biomejs/biome/discussions/3).
 It **outputs detailed and contextualized diagnostics** that help you to improve your code and become a better programmer!
 
 **Biome** is designed from the start to be used [interactively within an editor](https://biomejs.dev/guides/integrate-in-editor/).
@@ -116,7 +117,6 @@ Read more about our [project philosophy][biome-philosophy].
   </tbody>
 </table>
 
-[bench]: https://github.com/biomejs/biome/blob/main/benchmark/README.md
 [biomejs]: https://biomejs.dev/
 [biome-philosophy]: https://biomejs.dev/internals/philosophy/
 [language-support]: https://biomejs.dev/internals/language-support/

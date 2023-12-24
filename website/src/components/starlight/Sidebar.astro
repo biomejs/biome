@@ -1,0 +1,14 @@
+---
+import type { Props } from "@astrojs/starlight/props";
+
+import MobileMenuFooter from "@astrojs/starlight/components/MobileMenuFooter.astro";
+import SidebarSublist from "@astrojs/starlight/components/SidebarSublist.astro";
+import Netlify from "../Netlify.astro";
+
+const { sidebar } = Astro.props;
+---
+
+<SidebarSublist sublist={sidebar} />
+<div class="md:sl-hidden">
+  <MobileMenuFooter {...Astro.props} />
+</div>

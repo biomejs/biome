@@ -27,8 +27,11 @@ impl FormatNodeRule<TsConstructSignatureTypeMember> for FormatTsConstructSignatu
             [
                 new_token.format(),
                 space(),
-                group(&format_args![type_parameters.format(), parameters.format()]),
-                type_annotation.format(),
+                group(&format_args![
+                    type_parameters.format(),
+                    parameters.format(),
+                    type_annotation.format()
+                ]),
                 FormatTypeMemberSeparator::new(separator_token.as_ref()),
             ]
         ]

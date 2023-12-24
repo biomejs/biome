@@ -1,6 +1,5 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
-assertion_line: 129
 expression: snapshot
 ---
 
@@ -40,6 +39,13 @@ a {
     prop1: --custom;
 }
 
+div {
+	flex: 1 1 auto !important;
+}
+
+div {
+	border-bottom-left-radius: var(--bs-border-radius-xxl) !important;
+}
 
 ```
 
@@ -63,15 +69,15 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [],
                 },
             ],
-            block: CssBlock {
+            block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@2..3 "{" [] [],
-                declaration_list: CssDeclarationList [
+                declarations: CssDeclarationList [
                     CssDeclaration {
                         name: CssIdentifier {
                             value_token: IDENT@3..13 "prop1" [Newline("\n"), Whitespace("    ")] [],
                         },
                         colon_token: COLON@13..15 ":" [] [Whitespace(" ")],
-                        value: CssListOfComponentValues [
+                        value: CssComponentValueList [
                             CssIdentifier {
                                 value_token: IDENT@15..20 "value" [] [],
                             },
@@ -84,7 +90,7 @@ CssRoot {
                             value_token: IDENT@21..31 "prop2" [Newline("\n"), Whitespace("    ")] [],
                         },
                         colon_token: COLON@31..33 ":" [] [Whitespace(" ")],
-                        value: CssListOfComponentValues [
+                        value: CssComponentValueList [
                             CssIdentifier {
                                 value_token: IDENT@33..38 "value" [] [],
                             },
@@ -109,15 +115,15 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [],
                 },
             ],
-            block: CssBlock {
+            block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@45..46 "{" [] [],
-                declaration_list: CssDeclarationList [
+                declarations: CssDeclarationList [
                     CssDeclaration {
                         name: CssIdentifier {
                             value_token: IDENT@46..56 "prop1" [Newline("\n"), Whitespace("    ")] [],
                         },
                         colon_token: COLON@56..58 ":" [] [Whitespace(" ")],
-                        value: CssListOfComponentValues [
+                        value: CssComponentValueList [
                             CssRegularDimension {
                                 value: CssNumber {
                                     value_token: CSS_NUMBER_LITERAL@58..59 "1" [] [],
@@ -147,15 +153,15 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [],
                 },
             ],
-            block: CssBlock {
+            block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@68..69 "{" [] [],
-                declaration_list: CssDeclarationList [
+                declarations: CssDeclarationList [
                     CssDeclaration {
                         name: CssIdentifier {
                             value_token: IDENT@69..79 "prop1" [Newline("\n"), Whitespace("    ")] [],
                         },
                         colon_token: COLON@79..81 ":" [] [Whitespace(" ")],
-                        value: CssListOfComponentValues [
+                        value: CssComponentValueList [
                             CssAnyFunction {
                                 css_simple_function: CssSimpleFunction {
                                     name: CssIdentifier {
@@ -187,15 +193,15 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [],
                 },
             ],
-            block: CssBlock {
+            block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@91..92 "{" [] [],
-                declaration_list: CssDeclarationList [
+                declarations: CssDeclarationList [
                     CssDeclaration {
                         name: CssIdentifier {
                             value_token: IDENT@92..102 "prop1" [Newline("\n"), Whitespace("    ")] [],
                         },
                         colon_token: COLON@102..104 ":" [] [Whitespace(" ")],
-                        value: CssListOfComponentValues [
+                        value: CssComponentValueList [
                             CssAnyFunction {
                                 css_simple_function: CssSimpleFunction {
                                     name: CssIdentifier {
@@ -204,7 +210,7 @@ CssRoot {
                                     l_paren_token: L_PAREN@105..106 "(" [] [],
                                     items: CssParameterList [
                                         CssParameter {
-                                            css_list_of_component_values: CssListOfComponentValues [
+                                            css_component_value_list: CssComponentValueList [
                                                 CssNumber {
                                                     value_token: CSS_NUMBER_LITERAL@106..107 "1" [] [],
                                                 },
@@ -235,15 +241,15 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [],
                 },
             ],
-            block: CssBlock {
+            block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@115..116 "{" [] [],
-                declaration_list: CssDeclarationList [
+                declarations: CssDeclarationList [
                     CssDeclaration {
                         name: CssIdentifier {
                             value_token: IDENT@116..126 "prop1" [Newline("\n"), Whitespace("    ")] [],
                         },
                         colon_token: COLON@126..128 ":" [] [Whitespace(" ")],
-                        value: CssListOfComponentValues [
+                        value: CssComponentValueList [
                             CssAnyFunction {
                                 css_simple_function: CssSimpleFunction {
                                     name: CssIdentifier {
@@ -252,7 +258,7 @@ CssRoot {
                                     l_paren_token: L_PAREN@129..130 "(" [] [],
                                     items: CssParameterList [
                                         CssParameter {
-                                            css_list_of_component_values: CssListOfComponentValues [
+                                            css_component_value_list: CssComponentValueList [
                                                 CssNumber {
                                                     value_token: CSS_NUMBER_LITERAL@130..131 "1" [] [],
                                                 },
@@ -260,7 +266,7 @@ CssRoot {
                                         },
                                         COMMA@131..132 "," [] [],
                                         CssParameter {
-                                            css_list_of_component_values: CssListOfComponentValues [
+                                            css_component_value_list: CssComponentValueList [
                                                 CssNumber {
                                                     value_token: CSS_NUMBER_LITERAL@132..133 "1" [] [],
                                                 },
@@ -291,15 +297,15 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [],
                 },
             ],
-            block: CssBlock {
+            block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@141..142 "{" [] [],
-                declaration_list: CssDeclarationList [
+                declarations: CssDeclarationList [
                     CssDeclaration {
                         name: CssIdentifier {
                             value_token: IDENT@142..152 "prop1" [Newline("\n"), Whitespace("    ")] [],
                         },
                         colon_token: COLON@152..154 ":" [] [Whitespace(" ")],
-                        value: CssListOfComponentValues [
+                        value: CssComponentValueList [
                             CssAnyFunction {
                                 css_simple_function: CssSimpleFunction {
                                     name: CssIdentifier {
@@ -308,7 +314,7 @@ CssRoot {
                                     l_paren_token: L_PAREN@155..156 "(" [] [],
                                     items: CssParameterList [
                                         CssParameter {
-                                            css_list_of_component_values: CssListOfComponentValues [
+                                            css_component_value_list: CssComponentValueList [
                                                 CssNumber {
                                                     value_token: CSS_NUMBER_LITERAL@156..157 "1" [] [],
                                                 },
@@ -316,7 +322,7 @@ CssRoot {
                                         },
                                         COMMA@157..158 "," [] [],
                                         CssParameter {
-                                            css_list_of_component_values: CssListOfComponentValues [
+                                            css_component_value_list: CssComponentValueList [
                                                 CssNumber {
                                                     value_token: CSS_NUMBER_LITERAL@158..160 "1" [] [Whitespace(" ")],
                                                 },
@@ -350,15 +356,15 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [],
                 },
             ],
-            block: CssBlock {
+            block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@169..170 "{" [] [],
-                declaration_list: CssDeclarationList [
+                declarations: CssDeclarationList [
                     CssDeclaration {
                         name: CssIdentifier {
                             value_token: IDENT@170..180 "prop1" [Newline("\n"), Whitespace("    ")] [],
                         },
                         colon_token: COLON@180..182 ":" [] [Whitespace(" ")],
-                        value: CssListOfComponentValues [
+                        value: CssComponentValueList [
                             CssRatio {
                                 numerator: CssNumber {
                                     value_token: CSS_NUMBER_LITERAL@182..183 "2" [] [],
@@ -389,15 +395,15 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [],
                 },
             ],
-            block: CssBlock {
+            block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@192..193 "{" [] [],
-                declaration_list: CssDeclarationList [
+                declarations: CssDeclarationList [
                     CssDeclaration {
                         name: CssIdentifier {
                             value_token: IDENT@193..203 "prop1" [Newline("\n"), Whitespace("    ")] [],
                         },
                         colon_token: COLON@203..205 ":" [] [Whitespace(" ")],
-                        value: CssListOfComponentValues [
+                        value: CssComponentValueList [
                             CssCustomProperty {
                                 value: CssIdentifier {
                                     value_token: IDENT@205..213 "--custom" [] [],
@@ -411,17 +417,112 @@ CssRoot {
                 r_curly_token: R_CURLY@214..216 "}" [Newline("\n")] [],
             },
         },
+        CssRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selector_token: missing (optional),
+                    simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
+                        ident: CssIdentifier {
+                            value_token: IDENT@216..222 "div" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+                        },
+                    },
+                    sub_selectors: CssSubSelectorList [],
+                },
+            ],
+            block: CssDeclarationListBlock {
+                l_curly_token: L_CURLY@222..223 "{" [] [],
+                declarations: CssDeclarationList [
+                    CssDeclaration {
+                        name: CssIdentifier {
+                            value_token: IDENT@223..229 "flex" [Newline("\n"), Whitespace("\t")] [],
+                        },
+                        colon_token: COLON@229..231 ":" [] [Whitespace(" ")],
+                        value: CssComponentValueList [
+                            CssNumber {
+                                value_token: CSS_NUMBER_LITERAL@231..233 "1" [] [Whitespace(" ")],
+                            },
+                            CssNumber {
+                                value_token: CSS_NUMBER_LITERAL@233..235 "1" [] [Whitespace(" ")],
+                            },
+                            CssIdentifier {
+                                value_token: IDENT@235..240 "auto" [] [Whitespace(" ")],
+                            },
+                        ],
+                        important: CssDeclarationImportant {
+                            excl_token: BANG@240..241 "!" [] [],
+                            important_token: IMPORTANT_KW@241..250 "important" [] [],
+                        },
+                    },
+                    SEMICOLON@250..251 ";" [] [],
+                ],
+                r_curly_token: R_CURLY@251..253 "}" [Newline("\n")] [],
+            },
+        },
+        CssRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selector_token: missing (optional),
+                    simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
+                        ident: CssIdentifier {
+                            value_token: IDENT@253..259 "div" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+                        },
+                    },
+                    sub_selectors: CssSubSelectorList [],
+                },
+            ],
+            block: CssDeclarationListBlock {
+                l_curly_token: L_CURLY@259..260 "{" [] [],
+                declarations: CssDeclarationList [
+                    CssDeclaration {
+                        name: CssIdentifier {
+                            value_token: IDENT@260..287 "border-bottom-left-radius" [Newline("\n"), Whitespace("\t")] [],
+                        },
+                        colon_token: COLON@287..289 ":" [] [Whitespace(" ")],
+                        value: CssComponentValueList [
+                            CssAnyFunction {
+                                css_simple_function: CssSimpleFunction {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@289..292 "var" [] [],
+                                    },
+                                    l_paren_token: L_PAREN@292..293 "(" [] [],
+                                    items: CssParameterList [
+                                        CssParameter {
+                                            css_component_value_list: CssComponentValueList [
+                                                CssCustomProperty {
+                                                    value: CssIdentifier {
+                                                        value_token: IDENT@293..315 "--bs-border-radius-xxl" [] [],
+                                                    },
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                    r_paren_token: R_PAREN@315..317 ")" [] [Whitespace(" ")],
+                                },
+                            },
+                        ],
+                        important: CssDeclarationImportant {
+                            excl_token: BANG@317..318 "!" [] [],
+                            important_token: IMPORTANT_KW@318..327 "important" [] [],
+                        },
+                    },
+                    SEMICOLON@327..328 ";" [] [],
+                ],
+                r_curly_token: R_CURLY@328..330 "}" [Newline("\n")] [],
+            },
+        },
     ],
-    eof_token: EOF@216..218 "" [Newline("\n"), Newline("\n")] [],
+    eof_token: EOF@330..331 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..218
+0: CSS_ROOT@0..331
   0: (empty)
-  1: CSS_RULE_LIST@0..216
+  1: CSS_RULE_LIST@0..330
     0: CSS_RULE@0..41
       0: CSS_SELECTOR_LIST@0..2
         0: CSS_COMPOUND_SELECTOR@0..2
@@ -431,14 +532,14 @@ CssRoot {
             1: CSS_IDENTIFIER@0..2
               0: IDENT@0..2 "a" [] [Whitespace(" ")]
           2: CSS_SUB_SELECTOR_LIST@2..2
-      1: CSS_BLOCK@2..41
+      1: CSS_DECLARATION_LIST_BLOCK@2..41
         0: L_CURLY@2..3 "{" [] []
         1: CSS_DECLARATION_LIST@3..39
           0: CSS_DECLARATION@3..20
             0: CSS_IDENTIFIER@3..13
               0: IDENT@3..13 "prop1" [Newline("\n"), Whitespace("    ")] []
             1: COLON@13..15 ":" [] [Whitespace(" ")]
-            2: CSS_LIST_OF_COMPONENT_VALUES@15..20
+            2: CSS_COMPONENT_VALUE_LIST@15..20
               0: CSS_IDENTIFIER@15..20
                 0: IDENT@15..20 "value" [] []
             3: (empty)
@@ -447,7 +548,7 @@ CssRoot {
             0: CSS_IDENTIFIER@21..31
               0: IDENT@21..31 "prop2" [Newline("\n"), Whitespace("    ")] []
             1: COLON@31..33 ":" [] [Whitespace(" ")]
-            2: CSS_LIST_OF_COMPONENT_VALUES@33..38
+            2: CSS_COMPONENT_VALUE_LIST@33..38
               0: CSS_IDENTIFIER@33..38
                 0: IDENT@33..38 "value" [] []
             3: (empty)
@@ -462,14 +563,14 @@ CssRoot {
             1: CSS_IDENTIFIER@41..45
               0: IDENT@41..45 "a" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
           2: CSS_SUB_SELECTOR_LIST@45..45
-      1: CSS_BLOCK@45..64
+      1: CSS_DECLARATION_LIST_BLOCK@45..64
         0: L_CURLY@45..46 "{" [] []
         1: CSS_DECLARATION_LIST@46..62
           0: CSS_DECLARATION@46..61
             0: CSS_IDENTIFIER@46..56
               0: IDENT@46..56 "prop1" [Newline("\n"), Whitespace("    ")] []
             1: COLON@56..58 ":" [] [Whitespace(" ")]
-            2: CSS_LIST_OF_COMPONENT_VALUES@58..61
+            2: CSS_COMPONENT_VALUE_LIST@58..61
               0: CSS_REGULAR_DIMENSION@58..61
                 0: CSS_NUMBER@58..59
                   0: CSS_NUMBER_LITERAL@58..59 "1" [] []
@@ -487,14 +588,14 @@ CssRoot {
             1: CSS_IDENTIFIER@64..68
               0: IDENT@64..68 "a" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
           2: CSS_SUB_SELECTOR_LIST@68..68
-      1: CSS_BLOCK@68..87
+      1: CSS_DECLARATION_LIST_BLOCK@68..87
         0: L_CURLY@68..69 "{" [] []
         1: CSS_DECLARATION_LIST@69..85
           0: CSS_DECLARATION@69..84
             0: CSS_IDENTIFIER@69..79
               0: IDENT@69..79 "prop1" [Newline("\n"), Whitespace("    ")] []
             1: COLON@79..81 ":" [] [Whitespace(" ")]
-            2: CSS_LIST_OF_COMPONENT_VALUES@81..84
+            2: CSS_COMPONENT_VALUE_LIST@81..84
               0: CSS_ANY_FUNCTION@81..84
                 0: CSS_SIMPLE_FUNCTION@81..84
                   0: CSS_IDENTIFIER@81..82
@@ -514,14 +615,14 @@ CssRoot {
             1: CSS_IDENTIFIER@87..91
               0: IDENT@87..91 "a" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
           2: CSS_SUB_SELECTOR_LIST@91..91
-      1: CSS_BLOCK@91..111
+      1: CSS_DECLARATION_LIST_BLOCK@91..111
         0: L_CURLY@91..92 "{" [] []
         1: CSS_DECLARATION_LIST@92..109
           0: CSS_DECLARATION@92..108
             0: CSS_IDENTIFIER@92..102
               0: IDENT@92..102 "prop1" [Newline("\n"), Whitespace("    ")] []
             1: COLON@102..104 ":" [] [Whitespace(" ")]
-            2: CSS_LIST_OF_COMPONENT_VALUES@104..108
+            2: CSS_COMPONENT_VALUE_LIST@104..108
               0: CSS_ANY_FUNCTION@104..108
                 0: CSS_SIMPLE_FUNCTION@104..108
                   0: CSS_IDENTIFIER@104..105
@@ -529,7 +630,7 @@ CssRoot {
                   1: L_PAREN@105..106 "(" [] []
                   2: CSS_PARAMETER_LIST@106..107
                     0: CSS_PARAMETER@106..107
-                      0: CSS_LIST_OF_COMPONENT_VALUES@106..107
+                      0: CSS_COMPONENT_VALUE_LIST@106..107
                         0: CSS_NUMBER@106..107
                           0: CSS_NUMBER_LITERAL@106..107 "1" [] []
                   3: R_PAREN@107..108 ")" [] []
@@ -545,14 +646,14 @@ CssRoot {
             1: CSS_IDENTIFIER@111..115
               0: IDENT@111..115 "a" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
           2: CSS_SUB_SELECTOR_LIST@115..115
-      1: CSS_BLOCK@115..137
+      1: CSS_DECLARATION_LIST_BLOCK@115..137
         0: L_CURLY@115..116 "{" [] []
         1: CSS_DECLARATION_LIST@116..135
           0: CSS_DECLARATION@116..134
             0: CSS_IDENTIFIER@116..126
               0: IDENT@116..126 "prop1" [Newline("\n"), Whitespace("    ")] []
             1: COLON@126..128 ":" [] [Whitespace(" ")]
-            2: CSS_LIST_OF_COMPONENT_VALUES@128..134
+            2: CSS_COMPONENT_VALUE_LIST@128..134
               0: CSS_ANY_FUNCTION@128..134
                 0: CSS_SIMPLE_FUNCTION@128..134
                   0: CSS_IDENTIFIER@128..129
@@ -560,12 +661,12 @@ CssRoot {
                   1: L_PAREN@129..130 "(" [] []
                   2: CSS_PARAMETER_LIST@130..133
                     0: CSS_PARAMETER@130..131
-                      0: CSS_LIST_OF_COMPONENT_VALUES@130..131
+                      0: CSS_COMPONENT_VALUE_LIST@130..131
                         0: CSS_NUMBER@130..131
                           0: CSS_NUMBER_LITERAL@130..131 "1" [] []
                     1: COMMA@131..132 "," [] []
                     2: CSS_PARAMETER@132..133
-                      0: CSS_LIST_OF_COMPONENT_VALUES@132..133
+                      0: CSS_COMPONENT_VALUE_LIST@132..133
                         0: CSS_NUMBER@132..133
                           0: CSS_NUMBER_LITERAL@132..133 "1" [] []
                   3: R_PAREN@133..134 ")" [] []
@@ -581,14 +682,14 @@ CssRoot {
             1: CSS_IDENTIFIER@137..141
               0: IDENT@137..141 "a" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
           2: CSS_SUB_SELECTOR_LIST@141..141
-      1: CSS_BLOCK@141..165
+      1: CSS_DECLARATION_LIST_BLOCK@141..165
         0: L_CURLY@141..142 "{" [] []
         1: CSS_DECLARATION_LIST@142..163
           0: CSS_DECLARATION@142..162
             0: CSS_IDENTIFIER@142..152
               0: IDENT@142..152 "prop1" [Newline("\n"), Whitespace("    ")] []
             1: COLON@152..154 ":" [] [Whitespace(" ")]
-            2: CSS_LIST_OF_COMPONENT_VALUES@154..162
+            2: CSS_COMPONENT_VALUE_LIST@154..162
               0: CSS_ANY_FUNCTION@154..162
                 0: CSS_SIMPLE_FUNCTION@154..162
                   0: CSS_IDENTIFIER@154..155
@@ -596,12 +697,12 @@ CssRoot {
                   1: L_PAREN@155..156 "(" [] []
                   2: CSS_PARAMETER_LIST@156..161
                     0: CSS_PARAMETER@156..157
-                      0: CSS_LIST_OF_COMPONENT_VALUES@156..157
+                      0: CSS_COMPONENT_VALUE_LIST@156..157
                         0: CSS_NUMBER@156..157
                           0: CSS_NUMBER_LITERAL@156..157 "1" [] []
                     1: COMMA@157..158 "," [] []
                     2: CSS_PARAMETER@158..161
-                      0: CSS_LIST_OF_COMPONENT_VALUES@158..161
+                      0: CSS_COMPONENT_VALUE_LIST@158..161
                         0: CSS_NUMBER@158..160
                           0: CSS_NUMBER_LITERAL@158..160 "1" [] [Whitespace(" ")]
                         1: CSS_NUMBER@160..161
@@ -619,14 +720,14 @@ CssRoot {
             1: CSS_IDENTIFIER@165..169
               0: IDENT@165..169 "a" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
           2: CSS_SUB_SELECTOR_LIST@169..169
-      1: CSS_BLOCK@169..188
+      1: CSS_DECLARATION_LIST_BLOCK@169..188
         0: L_CURLY@169..170 "{" [] []
         1: CSS_DECLARATION_LIST@170..186
           0: CSS_DECLARATION@170..185
             0: CSS_IDENTIFIER@170..180
               0: IDENT@170..180 "prop1" [Newline("\n"), Whitespace("    ")] []
             1: COLON@180..182 ":" [] [Whitespace(" ")]
-            2: CSS_LIST_OF_COMPONENT_VALUES@182..185
+            2: CSS_COMPONENT_VALUE_LIST@182..185
               0: CSS_RATIO@182..185
                 0: CSS_NUMBER@182..183
                   0: CSS_NUMBER_LITERAL@182..183 "2" [] []
@@ -645,21 +746,83 @@ CssRoot {
             1: CSS_IDENTIFIER@188..192
               0: IDENT@188..192 "a" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
           2: CSS_SUB_SELECTOR_LIST@192..192
-      1: CSS_BLOCK@192..216
+      1: CSS_DECLARATION_LIST_BLOCK@192..216
         0: L_CURLY@192..193 "{" [] []
         1: CSS_DECLARATION_LIST@193..214
           0: CSS_DECLARATION@193..213
             0: CSS_IDENTIFIER@193..203
               0: IDENT@193..203 "prop1" [Newline("\n"), Whitespace("    ")] []
             1: COLON@203..205 ":" [] [Whitespace(" ")]
-            2: CSS_LIST_OF_COMPONENT_VALUES@205..213
+            2: CSS_COMPONENT_VALUE_LIST@205..213
               0: CSS_CUSTOM_PROPERTY@205..213
                 0: CSS_IDENTIFIER@205..213
                   0: IDENT@205..213 "--custom" [] []
             3: (empty)
           1: SEMICOLON@213..214 ";" [] []
         2: R_CURLY@214..216 "}" [Newline("\n")] []
-  2: EOF@216..218 "" [Newline("\n"), Newline("\n")] []
+    8: CSS_RULE@216..253
+      0: CSS_SELECTOR_LIST@216..222
+        0: CSS_COMPOUND_SELECTOR@216..222
+          0: (empty)
+          1: CSS_TYPE_SELECTOR@216..222
+            0: (empty)
+            1: CSS_IDENTIFIER@216..222
+              0: IDENT@216..222 "div" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+          2: CSS_SUB_SELECTOR_LIST@222..222
+      1: CSS_DECLARATION_LIST_BLOCK@222..253
+        0: L_CURLY@222..223 "{" [] []
+        1: CSS_DECLARATION_LIST@223..251
+          0: CSS_DECLARATION@223..250
+            0: CSS_IDENTIFIER@223..229
+              0: IDENT@223..229 "flex" [Newline("\n"), Whitespace("\t")] []
+            1: COLON@229..231 ":" [] [Whitespace(" ")]
+            2: CSS_COMPONENT_VALUE_LIST@231..240
+              0: CSS_NUMBER@231..233
+                0: CSS_NUMBER_LITERAL@231..233 "1" [] [Whitespace(" ")]
+              1: CSS_NUMBER@233..235
+                0: CSS_NUMBER_LITERAL@233..235 "1" [] [Whitespace(" ")]
+              2: CSS_IDENTIFIER@235..240
+                0: IDENT@235..240 "auto" [] [Whitespace(" ")]
+            3: CSS_DECLARATION_IMPORTANT@240..250
+              0: BANG@240..241 "!" [] []
+              1: IMPORTANT_KW@241..250 "important" [] []
+          1: SEMICOLON@250..251 ";" [] []
+        2: R_CURLY@251..253 "}" [Newline("\n")] []
+    9: CSS_RULE@253..330
+      0: CSS_SELECTOR_LIST@253..259
+        0: CSS_COMPOUND_SELECTOR@253..259
+          0: (empty)
+          1: CSS_TYPE_SELECTOR@253..259
+            0: (empty)
+            1: CSS_IDENTIFIER@253..259
+              0: IDENT@253..259 "div" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+          2: CSS_SUB_SELECTOR_LIST@259..259
+      1: CSS_DECLARATION_LIST_BLOCK@259..330
+        0: L_CURLY@259..260 "{" [] []
+        1: CSS_DECLARATION_LIST@260..328
+          0: CSS_DECLARATION@260..327
+            0: CSS_IDENTIFIER@260..287
+              0: IDENT@260..287 "border-bottom-left-radius" [Newline("\n"), Whitespace("\t")] []
+            1: COLON@287..289 ":" [] [Whitespace(" ")]
+            2: CSS_COMPONENT_VALUE_LIST@289..317
+              0: CSS_ANY_FUNCTION@289..317
+                0: CSS_SIMPLE_FUNCTION@289..317
+                  0: CSS_IDENTIFIER@289..292
+                    0: IDENT@289..292 "var" [] []
+                  1: L_PAREN@292..293 "(" [] []
+                  2: CSS_PARAMETER_LIST@293..315
+                    0: CSS_PARAMETER@293..315
+                      0: CSS_COMPONENT_VALUE_LIST@293..315
+                        0: CSS_CUSTOM_PROPERTY@293..315
+                          0: CSS_IDENTIFIER@293..315
+                            0: IDENT@293..315 "--bs-border-radius-xxl" [] []
+                  3: R_PAREN@315..317 ")" [] [Whitespace(" ")]
+            3: CSS_DECLARATION_IMPORTANT@317..327
+              0: BANG@317..318 "!" [] []
+              1: IMPORTANT_KW@318..327 "important" [] []
+          1: SEMICOLON@327..328 ";" [] []
+        2: R_CURLY@328..330 "}" [Newline("\n")] []
+  2: EOF@330..331 "" [Newline("\n")] []
 
 ```
 

@@ -66,24 +66,51 @@ import y from "y";
 
 ```jsx
 import z from "y";
-({ z } = 1); /// ```
-```js,expect_diagnostic
+({ z } = 1);
+```
+
+<pre class="language-text"><code class="language-text">suspicious/noImportAssign.js:2:4 <a href="https://biomejs.dev/linter/rules/no-import-assign">lint/suspicious/noImportAssign</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">The imported variable </span><span style="color: Tomato;"><strong>z</strong></span><span style="color: Tomato;"> is read-only</span>
+  
+    <strong>1 │ </strong>import z from &quot;y&quot;;
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>2 │ </strong>({ z } = 1);
+   <strong>   │ </strong>   <strong><span style="color: Tomato;">^</span></strong>
+    <strong>3 │ </strong>
+  
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">The variable is imported here</span>
+  
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>import z from &quot;y&quot;;
+   <strong>   │ </strong>       <strong><span style="color: Tomato;">^</span></strong>
+    <strong>2 │ </strong>({ z } = 1);
+    <strong>3 │ </strong>
+  
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Use a local variable instead of reassigning an import.</span>
+  
+</code></pre>
+
+```jsx
 import a from "y";
 [...a] = 1;
 ```
 
-<pre class="language-text"><code class="language-text">suspicious/noImportAssign.js:3:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noImportAssign.js:2:5 <a href="https://biomejs.dev/linter/rules/no-import-assign">lint/suspicious/noImportAssign</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">unterminated template literal</span>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">The imported variable </span><span style="color: Tomato;"><strong>a</strong></span><span style="color: Tomato;"> is read-only</span>
   
-    <strong>1 │ </strong>import z from &quot;y&quot;;
-    <strong>2 │ </strong>({ z } = 1); /// ```
-<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>3 │ </strong>```js,expect_diagnostic
-   <strong>   │ </strong>   <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
-<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>4 │ </strong>import a from &quot;y&quot;;
-<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>5 │ </strong>[...a] = 1;
-<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>6 │ </strong>
-   <strong>   │ </strong>
+    <strong>1 │ </strong>import a from &quot;y&quot;;
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>2 │ </strong>[...a] = 1;
+   <strong>   │ </strong>    <strong><span style="color: Tomato;">^</span></strong>
+    <strong>3 │ </strong>
+  
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">The variable is imported here</span>
+  
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>import a from &quot;y&quot;;
+   <strong>   │ </strong>       <strong><span style="color: Tomato;">^</span></strong>
+    <strong>2 │ </strong>[...a] = 1;
+    <strong>3 │ </strong>
+  
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Use a local variable instead of reassigning an import.</span>
   
 </code></pre>
 

@@ -3,9 +3,8 @@ use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_js_semantic::ReferencesExtensions;
 use biome_js_syntax::{
-    JsDefaultImportSpecifier, JsIdentifierAssignment, JsIdentifierBinding, JsImportDefaultClause,
-    JsImportNamespaceClause, JsNamedImportSpecifier, JsNamespaceImportSpecifier,
-    JsShorthandNamedImportSpecifier,
+    JsDefaultImportSpecifier, JsIdentifierAssignment, JsIdentifierBinding, JsNamedImportSpecifier,
+    JsNamespaceImportSpecifier, JsShorthandNamedImportSpecifier,
 };
 
 use biome_rowan::{declare_node_union, AstNode};
@@ -27,7 +26,8 @@ declare_rule! {
     /// ```
     /// ```js,expect_diagnostic
     /// import z from "y";
-    /// ({ z } = 1); /// ```
+    /// ({ z } = 1);
+    /// ```
     /// ```js,expect_diagnostic
     /// import a from "y";
     /// [...a] = 1;
@@ -67,10 +67,6 @@ impl Rule for NoImportAssign {
         let label_statement = ctx.query();
         let mut invalid_assign_list = vec![];
         let local_name_binding = match label_statement {
-            // `import xx from 'y'`
-            AnyJsImportLike::JsImportDefaultClause(clause) => clause.local_name().ok(),
-            // `import * as xxx from 'y'`
-            AnyJsImportLike::JsImportNamespaceClause(clause) => clause.local_name().ok(),
             // `import {x as xx} from 'y'`
             //          ^^^^^^^
             AnyJsImportLike::JsNamedImportSpecifier(specifier) => specifier.local_name().ok(),
@@ -79,9 +75,13 @@ impl Rule for NoImportAssign {
             AnyJsImportLike::JsShorthandNamedImportSpecifier(specifier) => {
                 specifier.local_name().ok()
             }
+            // `import * as xxx from 'y'`
+            //         ^^^^^^^^
             // `import a, * as b from 'y'`
             //            ^^^^^^
             AnyJsImportLike::JsNamespaceImportSpecifier(specifier) => specifier.local_name().ok(),
+            // `import xx from 'y'`
+            //         ^^
             // `import a, * as b from 'y'`
             //         ^
             AnyJsImportLike::JsDefaultImportSpecifier(specifier) => specifier.local_name().ok(),
@@ -125,5 +125,5 @@ impl Rule for NoImportAssign {
 }
 
 declare_node_union! {
-    pub(crate) AnyJsImportLike = JsImportDefaultClause | JsImportNamespaceClause | JsNamedImportSpecifier | JsShorthandNamedImportSpecifier | JsNamespaceImportSpecifier | JsDefaultImportSpecifier
+    pub(crate) AnyJsImportLike = JsNamedImportSpecifier | JsShorthandNamedImportSpecifier | JsNamespaceImportSpecifier | JsDefaultImportSpecifier
 }

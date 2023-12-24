@@ -78,8 +78,6 @@ The following files are currently ignored by Biome. This means that no diagnosti
 - `deno.json`
 - `deno.jsonc`
 
-
-
 The following files are parsed as **`JSON` files** with  the options `json.parser.allowComments` and `json.parser.allowTrailingCommas` set to `true`. This is because editor tools like VSCode treat them like this.
 
 - `tslint.json`
@@ -94,3 +92,27 @@ The following files are parsed as **`JSON` files** with  the options `json.parse
 - `.swcrc`
 - `.hintrc`
 - `.babelrc`
+
+### `ignore` and `include` syntax rules
+
+The syntax and meaning of these two options loosely follow the [globset rules](https://docs.rs/globset/latest/globset/#syntax) but without the ability to set options.
+
+
+> - `?` matches any single character.
+> - `*` matches zero or more characters.
+> - `**` recursively matches directories but are only legal in three situations.
+> First, if the glob starts with <code>\*\*&#x2F;</code>, then it matches
+> all directories. For example, <code>\*\*&#x2F;foo</code> matches `foo`
+> and `bar/foo` but not `foo/bar`. Secondly, if the glob ends with
+> <code>&#x2F;\*\*</code>, then it matches all sub-entries. For example,
+  > <code>foo&#x2F;\*\*</code> matches `foo/a` and `foo/a/b`, but not `foo`.
+  > Thirdly, if the glob contains <code>&#x2F;\*\*&#x2F;</code> anywhere within
+  > the pattern, then it matches zero or more directories. Using `**` anywhere
+  > else is illegal (N.B. the glob `**` is allowed and means "match everything").
+>
+> - `{a,b}` matches `a` or `b` where `a` and `b` are arbitrary glob patterns.
+> (N.B. Nesting `{...}` is not currently allowed.)
+> - `[ab]` matches `a` or `b` where `a` and `b` are characters. Use
+> `[!ab]` to match any character except for `a` and `b`.
+> - Metacharacters such as `*` and `?` can be escaped with character class
+> notation. e.g., `[*]` matches `*`.

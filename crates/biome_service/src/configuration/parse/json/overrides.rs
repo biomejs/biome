@@ -52,6 +52,7 @@ impl DeserializationVisitor for OverridePatternVisitor {
             "organizeImports",
             "javascript",
             "json",
+            "css",
         ];
         let mut result = Self::Output::default();
         for (key, value) in members.flatten() {
@@ -80,6 +81,9 @@ impl DeserializationVisitor for OverridePatternVisitor {
                 }
                 "json" => {
                     result.json = Deserializable::deserialize(&value, &key_text, diagnostics);
+                }
+                "css" => {
+                    result.css = Deserializable::deserialize(&value, &key_text, diagnostics);
                 }
                 unknown_key => diagnostics.push(DeserializationDiagnostic::new_unknown_key(
                     unknown_key,

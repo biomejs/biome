@@ -1,0 +1,42 @@
+.foo {
+    --prop: 10px;
+    prop1: var(--prop);
+    prop2: var(--my-var, --my-background, pink);
+    prop3: calc(var(--prop) * 1px);
+}
+
+.bar {
+    --prop   : 15px;
+
+    prop2: var(    --prop);
+
+    prop3: var(
+
+    --prop
+    );
+
+    prop4: var(
+        --prop   , pink
+    );
+
+    prop5: 
+        var  (  --one-var-thats-super-long-on-its-own , --super-long-just-enough-to-make-it-break-over-lines
+        
+        );
+}
+
+
+.multiple {
+    prop: var(--prop1)    var(prop2);
+    prop: 
+    var(--prop1)   
+    var(prop2);
+
+    prop: hsl(
+        var(--hue, 
+        0) 
+        var(
+            --sat, 100
+            
+            ) var(--light  ,  1));
+}

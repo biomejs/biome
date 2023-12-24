@@ -5,3 +5,4 @@ var a = <div abcARIAdef="true"></div>;
 var a = <div fooaria-foobar="true"></div>;
 var a = <div fooaria-hidden="true"></div>;
 var a = <input type="text" aria-errormessage="foobar" />;
+var a = <div type="text" aria-atomic="true" />;

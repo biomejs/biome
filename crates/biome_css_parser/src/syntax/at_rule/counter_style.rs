@@ -1,6 +1,6 @@
 use crate::parser::CssParser;
 use crate::syntax::parse_error::expected_identifier;
-use crate::syntax::{parse_or_recover_rule_block, parse_regular_identifier};
+use crate::syntax::{parse_or_recover_declaration_list_block, parse_regular_identifier};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_recovery::ParseRecovery;
@@ -37,7 +37,7 @@ pub(crate) fn parse_counter_style_at_rule(p: &mut CssParser) -> ParsedSyntax {
         CSS_BOGUS_AT_RULE
     };
 
-    if parse_or_recover_rule_block(p).is_err() {
+    if parse_or_recover_declaration_list_block(p).is_err() {
         return Present(m.complete(p, CSS_BOGUS_AT_RULE));
     }
 

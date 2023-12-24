@@ -1,19 +1,20 @@
 #[rustfmt::skip]
 mod rules;
 
-pub use crate::configuration::linter::rules::{rules, Rules};
+pub use crate::configuration::linter::rules::Rules;
 use crate::configuration::merge::MergeWith;
 use crate::configuration::overrides::OverrideLinterConfiguration;
 use crate::settings::{to_matcher, LinterSettings};
-use crate::WorkspaceError;
+use crate::{Matcher, WorkspaceError};
 use biome_deserialize::StringSet;
 use biome_diagnostics::Severity;
-use biome_js_analyze::options::{possible_options, PossibleOptions};
+use biome_js_analyze::options::PossibleOptions;
 use bpaf::Bpaf;
 pub use rules::*;
 #[cfg(feature = "schema")]
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
+use std::path::PathBuf;
 use std::str::FromStr;
 
 #[derive(Deserialize, Serialize, Debug, Clone, Bpaf, Eq, PartialEq)]
@@ -27,7 +28,7 @@ pub struct LinterConfiguration {
 
     /// List of rules
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(external, optional, hide)]
+    #[bpaf(pure(Rules::default()), optional, hide)]
     pub rules: Option<Rules>,
 
     /// A list of Unix shell style patterns. The formatter will ignore files/folders that will
@@ -77,17 +78,17 @@ impl Default for LinterConfiguration {
     }
 }
 
-impl TryFrom<LinterConfiguration> for LinterSettings {
-    type Error = WorkspaceError;
-
-    fn try_from(conf: LinterConfiguration) -> Result<Self, Self::Error> {
-        Ok(Self {
-            enabled: conf.enabled.unwrap_or_default(),
-            rules: conf.rules,
-            ignored_files: to_matcher(conf.ignore.as_ref())?,
-            included_files: to_matcher(conf.include.as_ref())?,
-        })
-    }
+pub fn to_linter_settings(
+    conf: LinterConfiguration,
+    vcs_path: Option<PathBuf>,
+    gitignore_matches: &[String],
+) -> Result<LinterSettings, WorkspaceError> {
+    Ok(LinterSettings {
+        enabled: conf.enabled.unwrap_or_default(),
+        rules: conf.rules,
+        ignored_files: to_matcher(conf.ignore.as_ref(), vcs_path.clone(), gitignore_matches)?,
+        included_files: to_matcher(conf.include.as_ref(), vcs_path, gitignore_matches)?,
+    })
 }
 
 impl TryFrom<OverrideLinterConfiguration> for LinterSettings {
@@ -97,18 +98,18 @@ impl TryFrom<OverrideLinterConfiguration> for LinterSettings {
         Ok(Self {
             enabled: conf.enabled.unwrap_or_default(),
             rules: conf.rules,
-            ignored_files: None,
-            included_files: None,
+            ignored_files: Matcher::empty(),
+            included_files: Matcher::empty(),
         })
     }
 }
 
-#[derive(Deserialize, Serialize, Debug, Clone, Eq, PartialEq, Bpaf)]
+#[derive(Deserialize, Serialize, Debug, Clone, Eq, PartialEq)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, untagged)]
 pub enum RuleConfiguration {
     Plain(RulePlainConfiguration),
-    WithOptions(RuleWithOptions),
+    WithOptions(Box<RuleWithOptions>),
 }
 
 impl FromStr for RuleConfiguration {
@@ -169,7 +170,7 @@ impl From<&RulePlainConfiguration> for Severity {
     }
 }
 
-#[derive(Default, Deserialize, Serialize, Debug, Eq, PartialEq, Clone, Bpaf)]
+#[derive(Default, Deserialize, Serialize, Debug, Eq, PartialEq, Clone)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub enum RulePlainConfiguration {
@@ -192,13 +193,12 @@ impl FromStr for RulePlainConfiguration {
     }
 }
 
-#[derive(Default, Deserialize, Serialize, Debug, Eq, PartialEq, Clone, Bpaf)]
+#[derive(Default, Deserialize, Serialize, Debug, Eq, PartialEq, Clone)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct RuleWithOptions {
     pub level: RulePlainConfiguration,
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(external(possible_options), hide, optional)]
     pub options: Option<PossibleOptions>,
 }
 

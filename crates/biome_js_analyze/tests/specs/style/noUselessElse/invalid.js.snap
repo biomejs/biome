@@ -99,13 +99,23 @@ function f (x) { // 0
     // 2
 } // 3
 
+function f (x) {
+    if (x > 0 && x < 5) {
+        return 0;
+    }
+    // Some explanations
+    else {
+        return x;
+    }
+}
+
 ```
 
 # Diagnostics
 ```
 invalid.js:4:7 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This else clause can be omitted.
+  ! This else clause can be omitted because previous branches break early.
   
     2 │     if (x < 0) {
     3 │         throw new RangeError();
@@ -117,29 +127,16 @@ invalid.js:4:7 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━━
     7 │ }
     8 │ 
   
-  i This if statement uses an early breaking statement.
-  
-    1 │ function f (x) {
-  > 2 │     if (x < 0) {
-      │     ^^^^^^^^^^^^
-  > 3 │         throw new RangeError();
-  > 4 │     } else {
-  > 5 │         return x;
-  > 6 │     }
-      │     ^
-    7 │ }
-    8 │ 
-  
   i Unsafe fix: Omit the else clause.
   
-     2  2 │       if (x < 0) {
-     3  3 │           throw new RangeError();
-     4    │ - ····}·else·{
-        4 │ + ····}
-     5  5 │           return x;
-     6    │ - ····}
-     7  6 │   }
-     8  7 │   
+      2   2 │       if (x < 0) {
+      3   3 │           throw new RangeError();
+      4     │ - ····}·else·{
+          4 │ + ····}
+      5   5 │           return x;
+      6     │ - ····}
+      7   6 │   }
+      8   7 │   
   
 
 ```
@@ -147,7 +144,7 @@ invalid.js:4:7 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━━
 ```
 invalid.js:13:7 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This else clause can be omitted.
+  ! This else clause can be omitted because previous branches break early.
   
     11 │     if (x < 0) {
     12 │         throw new RangeError();
@@ -159,30 +156,16 @@ invalid.js:13:7 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━�
     16 │     h();
     17 │ }
   
-  i This if statement uses an early breaking statement.
-  
-     9 │ function f (x) {
-    10 │     f();
-  > 11 │     if (x < 0) {
-       │     ^^^^^^^^^^^^
-  > 12 │         throw new RangeError();
-  > 13 │     } else {
-  > 14 │         g();
-  > 15 │     }
-       │     ^
-    16 │     h();
-    17 │ }
-  
   i Unsafe fix: Omit the else clause.
   
-    11 11 │       if (x < 0) {
-    12 12 │           throw new RangeError();
-    13    │ - ····}·else·{
-       13 │ + ····}
-    14 14 │           g();
-    15    │ - ····}
-    16 15 │       h();
-    17 16 │   }
+     11  11 │       if (x < 0) {
+     12  12 │           throw new RangeError();
+     13     │ - ····}·else·{
+         13 │ + ····}
+     14  14 │           g();
+     15     │ - ····}
+     16  15 │       h();
+     17  16 │   }
   
 
 ```
@@ -190,23 +173,12 @@ invalid.js:13:7 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━�
 ```
 invalid.js:22:7 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This else clause can be omitted.
+  ! This else clause can be omitted because previous branches break early.
   
     20 │     if (x < 0) {
     21 │         throw new RangeError();
   > 22 │     } else return x;
        │       ^^^^^^^^^^^^^^
-    23 │ }
-    24 │ 
-  
-  i This if statement uses an early breaking statement.
-  
-    19 │ function f (x) {
-  > 20 │     if (x < 0) {
-       │     ^^^^^^^^^^^^
-  > 21 │         throw new RangeError();
-  > 22 │     } else return x;
-       │     ^^^^^^^^^^^^^^^^
     23 │ }
     24 │ 
   
@@ -220,7 +192,7 @@ invalid.js:22:7 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━�
 ```
 invalid.js:28:5 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This else clause can be omitted.
+  ! This else clause can be omitted because previous branches break early.
   
     26 │     if (x < 0)
     27 │         throw new RangeError();
@@ -231,33 +203,17 @@ invalid.js:28:5 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━�
     30 │ }
     31 │ 
   
-  i This if statement uses an early breaking statement.
-  
-    25 │ function f (x) {
-  > 26 │     if (x < 0)
-       │     ^^^^^^^^^^
-  > 27 │         throw new RangeError();
-  > 28 │     else
-  > 29 │         return x;
-       │         ^^^^^^^^^
-    30 │ }
-    31 │ 
-  
   i Unsafe fix: Omit the else clause.
   
-    26 26 │       if (x < 0)
-    27 27 │           throw new RangeError();
-    28    │ - ····else
-    29 28 │           return x;
-    30 29 │   }
-  
+    28 │ ····else
+       │     ----
 
 ```
 
 ```
 invalid.js:35:7 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This else clause can be omitted.
+  ! This else clause can be omitted because previous branches break early.
   
     33 │     if (x < 0) {
     34 │         throw new RangeError();
@@ -265,19 +221,6 @@ invalid.js:35:7 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━�
        │       ^^^^^^^^^^^^^^^^^^^
   > 36 │         return 1;
   > 37 │     } else {
-  > 38 │         return x;
-  > 39 │     }
-       │     ^
-    40 │ }
-    41 │ 
-  
-  i This if statement uses an early breaking statement.
-  
-    32 │ function f (x) {
-  > 33 │     if (x < 0) {
-       │     ^^^^^^^^^^^^
-  > 34 │         throw new RangeError();
-        ...
   > 38 │         return x;
   > 39 │     }
        │     ^
@@ -294,26 +237,12 @@ invalid.js:35:7 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━�
 ```
 invalid.js:37:7 lint/style/noUselessElse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This else clause can be omitted.
+  ! This else clause can be omitted because previous branches break early.
   
     35 │     } else if (x === 0) {
     36 │         return 1;
   > 37 │     } else {
        │       ^^^^^^
-  > 38 │         return x;
-  > 39 │     }
-       │     ^
-    40 │ }
-    41 │ 
-  
-  i This if statement uses an early breaking statement.
-  
-    33 │     if (x < 0) {
-    34 │         throw new RangeError();
-  > 35 │     } else if (x === 0) {
-       │            ^^^^^^^^^^^^^^
-  > 36 │         return 1;
-  > 37 │     } else {
   > 38 │         return x;
   > 39 │     }
        │     ^
@@ -326,7 +255,7 @@ invalid.js:37:7 lint/style/noUselessElse ━━━━━━━━━━━━━
 ```
 invalid.js:46:11 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This else clause can be omitted.
+  ! This else clause can be omitted because previous branches break early.
   
     44 │         if (x < 0) {
     45 │             break;
@@ -338,30 +267,16 @@ invalid.js:46:11 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━�
     49 │     }
     50 │     return x;
   
-  i This if statement uses an early breaking statement.
-  
-    42 │ function f (x) {
-    43 │     while (true) {
-  > 44 │         if (x < 0) {
-       │         ^^^^^^^^^^^^
-  > 45 │             break;
-  > 46 │         } else {
-  > 47 │             x -= g(x)
-  > 48 │         }
-       │         ^
-    49 │     }
-    50 │     return x;
-  
   i Unsafe fix: Omit the else clause.
   
-    44 44 │           if (x < 0) {
-    45 45 │               break;
-    46    │ - ········}·else·{
-       46 │ + ········}
-    47 47 │               x -= g(x)
-    48    │ - ········}
-    49 48 │       }
-    50 49 │       return x;
+     44  44 │           if (x < 0) {
+     45  45 │               break;
+     46     │ - ········}·else·{
+         46 │ + ········}
+     47  47 │               x -= g(x)
+     48     │ - ········}
+     49  48 │       }
+     50  49 │       return x;
   
 
 ```
@@ -369,7 +284,7 @@ invalid.js:46:11 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━�
 ```
 invalid.js:57:11 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This else clause can be omitted.
+  ! This else clause can be omitted because previous branches break early.
   
     55 │         if (x < 0) {
     56 │             break;
@@ -381,30 +296,16 @@ invalid.js:57:11 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━�
     60 │     }
     61 │     return x;
   
-  i This if statement uses an early breaking statement.
-  
-    53 │ function f (x) {
-    54 │     while (true) {
-  > 55 │         if (x < 0) {
-       │         ^^^^^^^^^^^^
-  > 56 │             break;
-  > 57 │         } else {
-  > 58 │             x -= g(x)
-  > 59 │         }
-       │         ^
-    60 │     }
-    61 │     return x;
-  
   i Unsafe fix: Omit the else clause.
   
-    55 55 │           if (x < 0) {
-    56 56 │               break;
-    57    │ - ········}·else·{
-       57 │ + ········}
-    58 58 │               x -= g(x)
-    59    │ - ········}
-    60 59 │       }
-    61 60 │       return x;
+     55  55 │           if (x < 0) {
+     56  56 │               break;
+     57     │ - ········}·else·{
+         57 │ + ········}
+     58  58 │               x -= g(x)
+     59     │ - ········}
+     60  59 │       }
+     61  60 │       return x;
   
 
 ```
@@ -412,7 +313,7 @@ invalid.js:57:11 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━�
 ```
 invalid.js:73:7 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This else clause can be omitted.
+  ! This else clause can be omitted because previous branches break early.
   
     71 │                 return x;
     72 │         }
@@ -424,29 +325,16 @@ invalid.js:73:7 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━�
     76 │ }
     77 │ 
   
-  i This if statement uses an early breaking statement.
-  
-    64 │ function f (x) {
-  > 65 │     if (x > 0 && x < 5) {
-       │     ^^^^^^^^^^^^^^^^^^^^^
-  > 66 │         switch (x) {
-        ...
-  > 74 │         return x;
-  > 75 │     }
-       │     ^
-    76 │ }
-    77 │ 
-  
   i Unsafe fix: Omit the else clause.
   
-    71 71 │                   return x;
-    72 72 │           }
-    73    │ - ····}·else·{
-       73 │ + ····}
-    74 74 │           return x;
-    75    │ - ····}
-    76 75 │   }
-    77 76 │   
+     71  71 │                   return x;
+     72  72 │           }
+     73     │ - ····}·else·{
+         73 │ + ····}
+     74  74 │           return x;
+     75     │ - ····}
+     76  75 │   }
+     77  76 │   
   
 
 ```
@@ -454,7 +342,7 @@ invalid.js:73:7 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━�
 ```
 invalid.js:88:13 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This else clause can be omitted.
+  ! This else clause can be omitted because previous branches break early.
   
     86 │                 return x;
     87 │         }
@@ -468,32 +356,47 @@ invalid.js:88:13 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━�
     93 │     // 2
     94 │ } // 3
   
-  i This if statement uses an early breaking statement.
+  i Unsafe fix: Omit the else clause.
   
-    78 │ function f (x) { // 0
-    79 │     // 1
-  > 80 │     if (x > 0 && x < 5) {
-       │     ^^^^^^^^^^^^^^^^^^^^^
-  > 81 │         switch (x) {
-        ...
-  > 91 │         // f
-  > 92 │     } // g
-       │     ^
-    93 │     // 2
-    94 │ } // 3
+     86  86 │                   return x;
+     87  87 │           }
+     88     │ - ····}·/*a*/·else·/*b*/·{·//·c
+         88 │ + ····}/*b*/·
+     89  89 │           // d
+     90  90 │           return x; // e
+     91     │ - ········//·f
+     92     │ - ····}·//·g
+     93  91 │       // 2
+     94  92 │   } // 3
+  
+
+```
+
+```
+invalid.js:101:5 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This else clause can be omitted because previous branches break early.
+  
+     99 │     }
+    100 │     // Some explanations
+  > 101 │     else {
+        │     ^^^^^^
+  > 102 │         return x;
+  > 103 │     }
+        │     ^
+    104 │ }
+    105 │ 
   
   i Unsafe fix: Omit the else clause.
   
-    86 86 │                   return x;
-    87 87 │           }
-    88    │ - ····}·/*a*/·else·/*b*/·{·//·c
-       88 │ + ····}
-    89 89 │           // d
-    90 90 │           return x; // e
-    91    │ - ········//·f
-    92    │ - ····}·//·g
-    93 91 │       // 2
-    94 92 │   } // 3
+     99  99 │       }
+    100 100 │       // Some explanations
+    101     │ - ····else·{
+        101 │ + ····
+    102 102 │           return x;
+    103     │ - ····}
+    104 103 │   }
+    105 104 │   
   
 
 ```

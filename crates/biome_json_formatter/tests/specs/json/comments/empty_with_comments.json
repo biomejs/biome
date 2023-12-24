@@ -1,0 +1,16 @@
+{
+    "object-block": { /* here's a block comment */},
+    "object-line": { // here's a line comment
+    },
+    "object-ownline": {
+        /* here's a block comment */
+        // and a line comment
+    },
+    "array-block": [ /* here's a block comment */],
+    "array-line": [ // here's a line comment
+    ],
+    "array-ownline": [
+        /* here's a block comment */
+        // and a line comment
+    ]
+}

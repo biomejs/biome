@@ -1,0 +1,22 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidCamelCase.js
+---
+# Input
+```js
+
+```
+
+# Diagnostics
+```
+invalidCamelCase.js lint/nursery/useFilenamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The filename should be in snake_case.
+  
+  i The filename could be renamed to one of the following names:
+    invalid_camel_case.js
+  
+
+```
+
+

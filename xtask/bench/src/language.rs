@@ -1,6 +1,8 @@
 use crate::test_case::TestCase;
 use biome_analyze::{AnalysisFilter, AnalyzerOptions, ControlFlow, Never, RuleCategories};
+use biome_css_formatter::context::{CssFormatContext, CssFormatOptions};
 use biome_css_parser::CssParserOptions;
+use biome_css_syntax::CssSyntaxNode;
 use biome_formatter::{FormatResult, Formatted, PrintResult, Printed};
 use biome_js_analyze::analyze;
 use biome_js_formatter::context::{JsFormatContext, JsFormatOptions};
@@ -43,7 +45,7 @@ impl<'a> Parse<'a> {
             )),
             Parse::Css(code) => Parsed::Css(biome_css_parser::parse_css(
                 code,
-                CssParserOptions::default().with_allow_wrong_line_comments(),
+                CssParserOptions::default().allow_wrong_line_comments(),
             )),
         }
     }
@@ -67,7 +69,7 @@ impl<'a> Parse<'a> {
             Parse::Css(code) => Parsed::Css(biome_css_parser::parse_css_with_cache(
                 code,
                 cache,
-                CssParserOptions::default().with_allow_wrong_line_comments(),
+                CssParserOptions::default().allow_wrong_line_comments(),
             )),
         }
     }
@@ -110,6 +112,7 @@ impl Parsed {
 pub enum FormatNode {
     JavaScript(JsSyntaxNode, JsFileSource),
     Json(JsonSyntaxNode),
+    Css(CssSyntaxNode),
 }
 
 impl FormatNode {
@@ -119,10 +122,12 @@ impl FormatNode {
                 biome_js_formatter::format_node(JsFormatOptions::new(*source_type), root)
                     .map(FormattedNode::JavaScript)
             }
-            FormatNode::Json(root) => {
+            Self::Json(root) => {
                 biome_json_formatter::format_node(JsonFormatOptions::default(), root)
                     .map(FormattedNode::Json)
             }
+            Self::Css(root) => biome_css_formatter::format_node(CssFormatOptions::default(), root)
+                .map(FormattedNode::Css),
         }
     }
 }
@@ -130,6 +135,7 @@ impl FormatNode {
 pub enum FormattedNode {
     JavaScript(Formatted<JsFormatContext>),
     Json(Formatted<JsonFormatContext>),
+    Css(Formatted<CssFormatContext>),
 }
 
 impl FormattedNode {
@@ -137,6 +143,7 @@ impl FormattedNode {
         match self {
             FormattedNode::JavaScript(formatted) => formatted.print(),
             FormattedNode::Json(formatted) => formatted.print(),
+            FormattedNode::Css(formatted) => formatted.print(),
         }
     }
 }
