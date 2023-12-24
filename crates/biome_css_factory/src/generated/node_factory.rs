@@ -462,6 +462,32 @@ pub fn css_declaration_list_block(
         ],
     ))
 }
+pub fn css_declaration_or_at_rule_block(
+    l_curly_token: SyntaxToken,
+    items: CssDeclarationOrAtRuleList,
+    r_curly_token: SyntaxToken,
+) -> CssDeclarationOrAtRuleBlock {
+    CssDeclarationOrAtRuleBlock::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_DECLARATION_OR_AT_RULE_BLOCK,
+        [
+            Some(SyntaxElement::Token(l_curly_token)),
+            Some(SyntaxElement::Node(items.into_syntax())),
+            Some(SyntaxElement::Token(r_curly_token)),
+        ],
+    ))
+}
+pub fn css_declaration_with_semicolon(
+    declaration: CssDeclaration,
+    semicolon_token: SyntaxToken,
+) -> CssDeclarationWithSemicolon {
+    CssDeclarationWithSemicolon::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_DECLARATION_WITH_SEMICOLON,
+        [
+            Some(SyntaxElement::Node(declaration.into_syntax())),
+            Some(SyntaxElement::Token(semicolon_token)),
+        ],
+    ))
+}
 pub fn css_font_face_at_rule(
     font_face_token: SyntaxToken,
     block: AnyCssDeclarationListBlock,
@@ -555,6 +581,20 @@ pub fn css_keyframes_percentage_selector(
     CssKeyframesPercentageSelector::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_KEYFRAMES_PERCENTAGE_SELECTOR,
         [Some(SyntaxElement::Node(selector.into_syntax()))],
+    ))
+}
+pub fn css_margin_at_rule(
+    at_token: SyntaxToken,
+    name_token: SyntaxToken,
+    block: CssDeclarationOrAtRuleBlock,
+) -> CssMarginAtRule {
+    CssMarginAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_MARGIN_AT_RULE,
+        [
+            Some(SyntaxElement::Token(at_token)),
+            Some(SyntaxElement::Token(name_token)),
+            Some(SyntaxElement::Node(block.into_syntax())),
+        ],
     ))
 }
 pub fn css_media_and_condition(
@@ -735,6 +775,69 @@ pub fn css_number(value_token: SyntaxToken) -> CssNumber {
     CssNumber::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_NUMBER,
         [Some(SyntaxElement::Token(value_token))],
+    ))
+}
+pub fn css_page_at_rule(
+    page_token: SyntaxToken,
+    selectors: CssPageSelectorList,
+    block: AnyCssPageAtRuleBlock,
+) -> CssPageAtRule {
+    CssPageAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_PAGE_AT_RULE,
+        [
+            Some(SyntaxElement::Token(page_token)),
+            Some(SyntaxElement::Node(selectors.into_syntax())),
+            Some(SyntaxElement::Node(block.into_syntax())),
+        ],
+    ))
+}
+pub fn css_page_at_rule_block(
+    l_curly_token: SyntaxToken,
+    items: CssPageAtRuleItemList,
+    r_curly_token: SyntaxToken,
+) -> CssPageAtRuleBlock {
+    CssPageAtRuleBlock::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_PAGE_AT_RULE_BLOCK,
+        [
+            Some(SyntaxElement::Token(l_curly_token)),
+            Some(SyntaxElement::Node(items.into_syntax())),
+            Some(SyntaxElement::Token(r_curly_token)),
+        ],
+    ))
+}
+pub fn css_page_selector(pseudos: CssPageSelectorPseudoList) -> CssPageSelectorBuilder {
+    CssPageSelectorBuilder { pseudos, ty: None }
+}
+pub struct CssPageSelectorBuilder {
+    pseudos: CssPageSelectorPseudoList,
+    ty: Option<CssIdentifier>,
+}
+impl CssPageSelectorBuilder {
+    pub fn with_ty(mut self, ty: CssIdentifier) -> Self {
+        self.ty = Some(ty);
+        self
+    }
+    pub fn build(self) -> CssPageSelector {
+        CssPageSelector::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::CSS_PAGE_SELECTOR,
+            [
+                self.ty
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Node(self.pseudos.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn css_page_selector_pseudo(
+    colon_token: SyntaxToken,
+    selector_token: SyntaxToken,
+) -> CssPageSelectorPseudo {
+    CssPageSelectorPseudo::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_PAGE_SELECTOR_PSEUDO,
+        [
+            Some(SyntaxElement::Token(colon_token)),
+            Some(SyntaxElement::Token(selector_token)),
+        ],
     ))
 }
 pub fn css_parameter(css_component_value_list: CssComponentValueList) -> CssParameter {
@@ -1431,6 +1534,18 @@ where
         }),
     ))
 }
+pub fn css_declaration_or_at_rule_list<I>(items: I) -> CssDeclarationOrAtRuleList
+where
+    I: IntoIterator<Item = AnyCssDeclarationOrAtRule>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssDeclarationOrAtRuleList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_DECLARATION_OR_AT_RULE_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
+    ))
+}
 pub fn css_keyframes_item_list<I>(items: I) -> CssKeyframesItemList
 where
     I: IntoIterator<Item = AnyCssKeyframesItem>,
@@ -1483,6 +1598,51 @@ where
                 Some(separators.next()?.into())
             }
         }),
+    ))
+}
+pub fn css_page_at_rule_item_list<I>(items: I) -> CssPageAtRuleItemList
+where
+    I: IntoIterator<Item = AnyCssPageAtRuleItem>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssPageAtRuleItemList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_PAGE_AT_RULE_ITEM_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
+    ))
+}
+pub fn css_page_selector_list<I, S>(items: I, separators: S) -> CssPageSelectorList
+where
+    I: IntoIterator<Item = AnyCssPageSelector>,
+    I::IntoIter: ExactSizeIterator,
+    S: IntoIterator<Item = CssSyntaxToken>,
+    S::IntoIter: ExactSizeIterator,
+{
+    let mut items = items.into_iter();
+    let mut separators = separators.into_iter();
+    let length = items.len() + separators.len();
+    CssPageSelectorList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_PAGE_SELECTOR_LIST,
+        (0..length).map(|index| {
+            if index % 2 == 0 {
+                Some(items.next()?.into_syntax().into())
+            } else {
+                Some(separators.next()?.into())
+            }
+        }),
+    ))
+}
+pub fn css_page_selector_pseudo_list<I>(items: I) -> CssPageSelectorPseudoList
+where
+    I: IntoIterator<Item = AnyCssPageSelectorPseudo>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssPageSelectorPseudoList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_PAGE_SELECTOR_PSEUDO_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
     ))
 }
 pub fn css_parameter_list<I, S>(items: I, separators: S) -> CssParameterList
@@ -1657,6 +1817,16 @@ where
 {
     CssBogusMediaQuery::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_BOGUS_MEDIA_QUERY,
+        slots,
+    ))
+}
+pub fn css_bogus_page_selector_pseudo<I>(slots: I) -> CssBogusPageSelectorPseudo
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssBogusPageSelectorPseudo::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_BOGUS_PAGE_SELECTOR_PSEUDO,
         slots,
     ))
 }

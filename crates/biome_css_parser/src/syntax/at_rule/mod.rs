@@ -7,6 +7,7 @@ mod font_face;
 mod font_palette_values;
 mod keyframes;
 mod media;
+mod page;
 mod parse_error;
 
 use crate::parser::CssParser;
@@ -24,6 +25,8 @@ use crate::syntax::at_rule::font_palette_values::{
 };
 use crate::syntax::at_rule::keyframes::{is_at_keyframes_at_rule, parse_keyframes_at_rule};
 use crate::syntax::at_rule::media::{is_at_media_at_rule, parse_media_at_rule};
+use crate::syntax::at_rule::page::{is_at_page_at_rule, parse_page_at_rule};
+use crate::syntax::parse_error::expected_any_at_rule;
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::T;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
@@ -44,7 +47,10 @@ pub(crate) fn parse_at_rule(p: &mut CssParser) -> ParsedSyntax {
 
     p.bump(T![@]);
 
-    let kind = if parse_any_at_rule(p).is_present() {
+    let kind = if parse_any_at_rule(p)
+        .or_add_diagnostic(p, expected_any_at_rule)
+        .is_some()
+    {
         CSS_AT_RULE
     } else {
         CSS_BOGUS_RULE
@@ -71,6 +77,8 @@ pub(crate) fn parse_any_at_rule(p: &mut CssParser) -> ParsedSyntax {
         parse_media_at_rule(p)
     } else if is_at_keyframes_at_rule(p) {
         parse_keyframes_at_rule(p)
+    } else if is_at_page_at_rule(p) {
+        parse_page_at_rule(p)
     } else {
         Absent
     }
