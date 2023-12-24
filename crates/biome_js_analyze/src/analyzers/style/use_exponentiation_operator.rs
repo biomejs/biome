@@ -11,7 +11,8 @@ use biome_js_syntax::{
     OperatorPrecedence,
 };
 use biome_rowan::{
-    trim_leading_trivia_pieces, AstNode, AstSeparatedList, BatchMutationExt, SyntaxResult,
+    chain_trivia_pieces, trim_leading_trivia_pieces, AstNode, AstSeparatedList, BatchMutationExt,
+    SyntaxResult,
 };
 
 declare_rule! {
@@ -110,17 +111,35 @@ impl Rule for UseExponentiationOperator {
         } else {
             exponent
         };
-        let comma_separator = args.args().separators().next()?.ok()?;
+        let l_paren = args.l_paren_token().ok()?;
+        let mut separators = args.args().separators();
+        let separator = separators.next()?.ok()?;
+        let trailing_separator = separators.next();
+        let r_paren = args.r_paren_token().ok()?;
         // Transfer comments before and after `base` and `exponent`
         // which are associated with the comma or a paren.
         let base = base
-            .prepend_trivia_pieces(args.l_paren_token().ok()?.trailing_trivia().pieces())?
-            .append_trivia_pieces(comma_separator.leading_trivia().pieces())?;
+            .prepend_trivia_pieces(chain_trivia_pieces(
+                l_paren.leading_trivia().pieces(),
+                l_paren.trailing_trivia().pieces(),
+            ))?
+            .append_trivia_pieces(chain_trivia_pieces(
+                separator.leading_trivia().pieces(),
+                separator.leading_trivia().pieces(),
+            ))?;
+        let exponent = if let Some(Ok(trailing_separator)) = trailing_separator {
+            exponent.append_trivia_pieces(chain_trivia_pieces(
+                trailing_separator.leading_trivia().pieces(),
+                trailing_separator.trailing_trivia().pieces(),
+            ))?
+        } else {
+            exponent
+        };
         let exponent = exponent
             .prepend_trivia_pieces(trim_leading_trivia_pieces(
-                comma_separator.trailing_trivia().pieces(),
+                separator.trailing_trivia().pieces(),
             ))?
-            .append_trivia_pieces(args.r_paren_token().ok()?.leading_trivia().pieces())?;
+            .append_trivia_pieces(r_paren.leading_trivia().pieces())?;
         let mut mutation = ctx.root().begin();
         let new_node = AnyJsExpression::from(make::js_binary_expression(
             base,
