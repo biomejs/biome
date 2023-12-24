@@ -36,13 +36,17 @@ h2.community-head {
 }
 
 .connect {
-    flex-wrap: wrap;
     gap: 1.2rem;
-    display: flex;
     width: 31rem;
     position: absolute;
-    right: -14rem;
+    right: -10rem;
     top: 2rem;
+}
+
+.contributor-row {
+    display: flex;
+    justify-content: end;
+    gap: 1.2rem;
 }
 
 .community-connect {
@@ -97,12 +101,40 @@ a.mastodon:hover {
 @media only screen and (max-width: 1000px) {
     div.community {
         height: 130vh;
-        overflow: hidden;
     }
 
     div.connect {
+        width: 130vh;
+        z-index: -1;
+        opacity: 0.7;
         top: 27rem;
-        right: 5rem;
+        right: 0;
+        top: 0;
+        bottom: 0;
         rotate: 90deg;
+    }
+}
+
+@media only screen and (max-width: 700px) {
+    div>img.contributor-avatar {
+        width: 3.4rem;
+        height: 3.4rem;
+    }
+}
+
+@media only screen and (max-width: 600px) {
+    div>img.contributor-avatar {
+        width: 3rem;
+        height: 3rem;
+    }
+}
+
+@media only screen and (max-width: 550px) {
+    div.community {
+        height: 100vh;
+    }
+
+    .connect {
+        display: none;
     }
 }
