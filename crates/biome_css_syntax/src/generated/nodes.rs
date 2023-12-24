@@ -1676,6 +1676,129 @@ pub struct CssKeyframesPercentageSelectorFields {
     pub selector: SyntaxResult<CssPercentage>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssLayerAtRule {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssLayerAtRule {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssLayerAtRuleFields {
+        CssLayerAtRuleFields {
+            layer_token: self.layer_token(),
+            layer: self.layer(),
+        }
+    }
+    pub fn layer_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn layer(&self) -> SyntaxResult<AnyCssLayer> {
+        support::required_node(&self.syntax, 1usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssLayerAtRule {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssLayerAtRuleFields {
+    pub layer_token: SyntaxResult<SyntaxToken>,
+    pub layer: SyntaxResult<AnyCssLayer>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssLayerDeclaration {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssLayerDeclaration {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssLayerDeclarationFields {
+        CssLayerDeclarationFields {
+            references: self.references(),
+            block: self.block(),
+        }
+    }
+    pub fn references(&self) -> CssLayerReferenceList {
+        support::list(&self.syntax, 0usize)
+    }
+    pub fn block(&self) -> SyntaxResult<AnyCssRuleListBlock> {
+        support::required_node(&self.syntax, 1usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssLayerDeclaration {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssLayerDeclarationFields {
+    pub references: CssLayerReferenceList,
+    pub block: SyntaxResult<AnyCssRuleListBlock>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssLayerReference {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssLayerReference {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssLayerReferenceFields {
+        CssLayerReferenceFields {
+            references: self.references(),
+            semicolon_token: self.semicolon_token(),
+        }
+    }
+    pub fn references(&self) -> CssLayerReferenceList {
+        support::list(&self.syntax, 0usize)
+    }
+    pub fn semicolon_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssLayerReference {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssLayerReferenceFields {
+    pub references: CssLayerReferenceList,
+    pub semicolon_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssMarginAtRule {
     pub(crate) syntax: SyntaxNode,
 }
@@ -4303,6 +4426,7 @@ pub enum AnyCssAtRule {
     CssFontFaceAtRule(CssFontFaceAtRule),
     CssFontPaletteValuesAtRule(CssFontPaletteValuesAtRule),
     CssKeyframesAtRule(CssKeyframesAtRule),
+    CssLayerAtRule(CssLayerAtRule),
     CssMediaAtRule(CssMediaAtRule),
     CssPageAtRule(CssPageAtRule),
 }
@@ -4352,6 +4476,12 @@ impl AnyCssAtRule {
     pub fn as_css_keyframes_at_rule(&self) -> Option<&CssKeyframesAtRule> {
         match &self {
             AnyCssAtRule::CssKeyframesAtRule(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_layer_at_rule(&self) -> Option<&CssLayerAtRule> {
+        match &self {
+            AnyCssAtRule::CssLayerAtRule(item) => Some(item),
             _ => None,
         }
     }
@@ -4777,6 +4907,33 @@ impl AnyCssKeyframesSelector {
     pub fn as_css_keyframes_percentage_selector(&self) -> Option<&CssKeyframesPercentageSelector> {
         match &self {
             AnyCssKeyframesSelector::CssKeyframesPercentageSelector(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub enum AnyCssLayer {
+    CssBogusLayer(CssBogusLayer),
+    CssLayerDeclaration(CssLayerDeclaration),
+    CssLayerReference(CssLayerReference),
+}
+impl AnyCssLayer {
+    pub fn as_css_bogus_layer(&self) -> Option<&CssBogusLayer> {
+        match &self {
+            AnyCssLayer::CssBogusLayer(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_layer_declaration(&self) -> Option<&CssLayerDeclaration> {
+        match &self {
+            AnyCssLayer::CssLayerDeclaration(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_layer_reference(&self) -> Option<&CssLayerReference> {
+        match &self {
+            AnyCssLayer::CssLayerReference(item) => Some(item),
             _ => None,
         }
     }
@@ -7152,6 +7309,129 @@ impl From<CssKeyframesPercentageSelector> for SyntaxNode {
 }
 impl From<CssKeyframesPercentageSelector> for SyntaxElement {
     fn from(n: CssKeyframesPercentageSelector) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssLayerAtRule {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_LAYER_AT_RULE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_LAYER_AT_RULE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssLayerAtRule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssLayerAtRule")
+            .field(
+                "layer_token",
+                &support::DebugSyntaxResult(self.layer_token()),
+            )
+            .field("layer", &support::DebugSyntaxResult(self.layer()))
+            .finish()
+    }
+}
+impl From<CssLayerAtRule> for SyntaxNode {
+    fn from(n: CssLayerAtRule) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssLayerAtRule> for SyntaxElement {
+    fn from(n: CssLayerAtRule) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssLayerDeclaration {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_LAYER_DECLARATION as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_LAYER_DECLARATION
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssLayerDeclaration {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssLayerDeclaration")
+            .field("references", &self.references())
+            .field("block", &support::DebugSyntaxResult(self.block()))
+            .finish()
+    }
+}
+impl From<CssLayerDeclaration> for SyntaxNode {
+    fn from(n: CssLayerDeclaration) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssLayerDeclaration> for SyntaxElement {
+    fn from(n: CssLayerDeclaration) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssLayerReference {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_LAYER_REFERENCE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_LAYER_REFERENCE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssLayerReference {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssLayerReference")
+            .field("references", &self.references())
+            .field(
+                "semicolon_token",
+                &support::DebugSyntaxResult(self.semicolon_token()),
+            )
+            .finish()
+    }
+}
+impl From<CssLayerReference> for SyntaxNode {
+    fn from(n: CssLayerReference) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssLayerReference> for SyntaxElement {
+    fn from(n: CssLayerReference) -> SyntaxElement {
         n.syntax.into()
     }
 }
@@ -9728,6 +10008,11 @@ impl From<CssKeyframesAtRule> for AnyCssAtRule {
         AnyCssAtRule::CssKeyframesAtRule(node)
     }
 }
+impl From<CssLayerAtRule> for AnyCssAtRule {
+    fn from(node: CssLayerAtRule) -> AnyCssAtRule {
+        AnyCssAtRule::CssLayerAtRule(node)
+    }
+}
 impl From<CssMediaAtRule> for AnyCssAtRule {
     fn from(node: CssMediaAtRule) -> AnyCssAtRule {
         AnyCssAtRule::CssMediaAtRule(node)
@@ -9748,6 +10033,7 @@ impl AstNode for AnyCssAtRule {
         .union(CssFontFaceAtRule::KIND_SET)
         .union(CssFontPaletteValuesAtRule::KIND_SET)
         .union(CssKeyframesAtRule::KIND_SET)
+        .union(CssLayerAtRule::KIND_SET)
         .union(CssMediaAtRule::KIND_SET)
         .union(CssPageAtRule::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
@@ -9761,6 +10047,7 @@ impl AstNode for AnyCssAtRule {
                 | CSS_FONT_FACE_AT_RULE
                 | CSS_FONT_PALETTE_VALUES_AT_RULE
                 | CSS_KEYFRAMES_AT_RULE
+                | CSS_LAYER_AT_RULE
                 | CSS_MEDIA_AT_RULE
                 | CSS_PAGE_AT_RULE
         )
@@ -9785,6 +10072,7 @@ impl AstNode for AnyCssAtRule {
             CSS_KEYFRAMES_AT_RULE => {
                 AnyCssAtRule::CssKeyframesAtRule(CssKeyframesAtRule { syntax })
             }
+            CSS_LAYER_AT_RULE => AnyCssAtRule::CssLayerAtRule(CssLayerAtRule { syntax }),
             CSS_MEDIA_AT_RULE => AnyCssAtRule::CssMediaAtRule(CssMediaAtRule { syntax }),
             CSS_PAGE_AT_RULE => AnyCssAtRule::CssPageAtRule(CssPageAtRule { syntax }),
             _ => return None,
@@ -9801,6 +10089,7 @@ impl AstNode for AnyCssAtRule {
             AnyCssAtRule::CssFontFaceAtRule(it) => &it.syntax,
             AnyCssAtRule::CssFontPaletteValuesAtRule(it) => &it.syntax,
             AnyCssAtRule::CssKeyframesAtRule(it) => &it.syntax,
+            AnyCssAtRule::CssLayerAtRule(it) => &it.syntax,
             AnyCssAtRule::CssMediaAtRule(it) => &it.syntax,
             AnyCssAtRule::CssPageAtRule(it) => &it.syntax,
         }
@@ -9815,6 +10104,7 @@ impl AstNode for AnyCssAtRule {
             AnyCssAtRule::CssFontFaceAtRule(it) => it.syntax,
             AnyCssAtRule::CssFontPaletteValuesAtRule(it) => it.syntax,
             AnyCssAtRule::CssKeyframesAtRule(it) => it.syntax,
+            AnyCssAtRule::CssLayerAtRule(it) => it.syntax,
             AnyCssAtRule::CssMediaAtRule(it) => it.syntax,
             AnyCssAtRule::CssPageAtRule(it) => it.syntax,
         }
@@ -9831,6 +10121,7 @@ impl std::fmt::Debug for AnyCssAtRule {
             AnyCssAtRule::CssFontFaceAtRule(it) => std::fmt::Debug::fmt(it, f),
             AnyCssAtRule::CssFontPaletteValuesAtRule(it) => std::fmt::Debug::fmt(it, f),
             AnyCssAtRule::CssKeyframesAtRule(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssAtRule::CssLayerAtRule(it) => std::fmt::Debug::fmt(it, f),
             AnyCssAtRule::CssMediaAtRule(it) => std::fmt::Debug::fmt(it, f),
             AnyCssAtRule::CssPageAtRule(it) => std::fmt::Debug::fmt(it, f),
         }
@@ -9847,6 +10138,7 @@ impl From<AnyCssAtRule> for SyntaxNode {
             AnyCssAtRule::CssFontFaceAtRule(it) => it.into(),
             AnyCssAtRule::CssFontPaletteValuesAtRule(it) => it.into(),
             AnyCssAtRule::CssKeyframesAtRule(it) => it.into(),
+            AnyCssAtRule::CssLayerAtRule(it) => it.into(),
             AnyCssAtRule::CssMediaAtRule(it) => it.into(),
             AnyCssAtRule::CssPageAtRule(it) => it.into(),
         }
@@ -11181,6 +11473,82 @@ impl From<AnyCssKeyframesSelector> for SyntaxNode {
 }
 impl From<AnyCssKeyframesSelector> for SyntaxElement {
     fn from(n: AnyCssKeyframesSelector) -> SyntaxElement {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<CssBogusLayer> for AnyCssLayer {
+    fn from(node: CssBogusLayer) -> AnyCssLayer {
+        AnyCssLayer::CssBogusLayer(node)
+    }
+}
+impl From<CssLayerDeclaration> for AnyCssLayer {
+    fn from(node: CssLayerDeclaration) -> AnyCssLayer {
+        AnyCssLayer::CssLayerDeclaration(node)
+    }
+}
+impl From<CssLayerReference> for AnyCssLayer {
+    fn from(node: CssLayerReference) -> AnyCssLayer {
+        AnyCssLayer::CssLayerReference(node)
+    }
+}
+impl AstNode for AnyCssLayer {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = CssBogusLayer::KIND_SET
+        .union(CssLayerDeclaration::KIND_SET)
+        .union(CssLayerReference::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(
+            kind,
+            CSS_BOGUS_LAYER | CSS_LAYER_DECLARATION | CSS_LAYER_REFERENCE
+        )
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_BOGUS_LAYER => AnyCssLayer::CssBogusLayer(CssBogusLayer { syntax }),
+            CSS_LAYER_DECLARATION => {
+                AnyCssLayer::CssLayerDeclaration(CssLayerDeclaration { syntax })
+            }
+            CSS_LAYER_REFERENCE => AnyCssLayer::CssLayerReference(CssLayerReference { syntax }),
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            AnyCssLayer::CssBogusLayer(it) => &it.syntax,
+            AnyCssLayer::CssLayerDeclaration(it) => &it.syntax,
+            AnyCssLayer::CssLayerReference(it) => &it.syntax,
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            AnyCssLayer::CssBogusLayer(it) => it.syntax,
+            AnyCssLayer::CssLayerDeclaration(it) => it.syntax,
+            AnyCssLayer::CssLayerReference(it) => it.syntax,
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssLayer {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            AnyCssLayer::CssBogusLayer(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssLayer::CssLayerDeclaration(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssLayer::CssLayerReference(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssLayer> for SyntaxNode {
+    fn from(n: AnyCssLayer) -> SyntaxNode {
+        match n {
+            AnyCssLayer::CssBogusLayer(it) => it.into(),
+            AnyCssLayer::CssLayerDeclaration(it) => it.into(),
+            AnyCssLayer::CssLayerReference(it) => it.into(),
+        }
+    }
+}
+impl From<AnyCssLayer> for SyntaxElement {
+    fn from(n: AnyCssLayer) -> SyntaxElement {
         let node: SyntaxNode = n.into();
         node.into()
     }
@@ -13451,6 +13819,11 @@ impl std::fmt::Display for AnyCssKeyframesSelector {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for AnyCssLayer {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AnyCssMediaAndCombinableCondition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -13767,6 +14140,21 @@ impl std::fmt::Display for CssKeyframesItem {
     }
 }
 impl std::fmt::Display for CssKeyframesPercentageSelector {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssLayerAtRule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssLayerDeclaration {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssLayerReference {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -14410,6 +14798,63 @@ impl From<CssBogusKeyframesItem> for SyntaxNode {
 }
 impl From<CssBogusKeyframesItem> for SyntaxElement {
     fn from(n: CssBogusKeyframesItem) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssBogusLayer {
+    syntax: SyntaxNode,
+}
+impl CssBogusLayer {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn items(&self) -> SyntaxElementChildren {
+        support::elements(&self.syntax)
+    }
+}
+impl AstNode for CssBogusLayer {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_BOGUS_LAYER as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_BOGUS_LAYER
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssBogusLayer {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssBogusLayer")
+            .field("items", &DebugSyntaxElementChildren(self.items()))
+            .finish()
+    }
+}
+impl From<CssBogusLayer> for SyntaxNode {
+    fn from(n: CssBogusLayer) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssBogusLayer> for SyntaxElement {
+    fn from(n: CssBogusLayer) -> SyntaxElement {
         n.syntax.into()
     }
 }
@@ -15363,6 +15808,172 @@ impl IntoIterator for CssKeyframesSelectorList {
 impl IntoIterator for &CssKeyframesSelectorList {
     type Item = SyntaxResult<AnyCssKeyframesSelector>;
     type IntoIter = AstSeparatedListNodesIterator<Language, AnyCssKeyframesSelector>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+#[derive(Clone, Eq, PartialEq, Hash)]
+pub struct CssLayerNameList {
+    syntax_list: SyntaxList,
+}
+impl CssLayerNameList {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self {
+            syntax_list: syntax.into_list(),
+        }
+    }
+}
+impl AstNode for CssLayerNameList {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_LAYER_NAME_LIST as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_LAYER_NAME_LIST
+    }
+    fn cast(syntax: SyntaxNode) -> Option<CssLayerNameList> {
+        if Self::can_cast(syntax.kind()) {
+            Some(CssLayerNameList {
+                syntax_list: syntax.into_list(),
+            })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        self.syntax_list.node()
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax_list.into_node()
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssLayerNameList {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(self.len()))?;
+        for e in self.iter() {
+            seq.serialize_element(&e)?;
+        }
+        seq.end()
+    }
+}
+impl AstSeparatedList for CssLayerNameList {
+    type Language = Language;
+    type Node = CssIdentifier;
+    fn syntax_list(&self) -> &SyntaxList {
+        &self.syntax_list
+    }
+    fn into_syntax_list(self) -> SyntaxList {
+        self.syntax_list
+    }
+}
+impl Debug for CssLayerNameList {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str("CssLayerNameList ")?;
+        f.debug_list().entries(self.elements()).finish()
+    }
+}
+impl IntoIterator for CssLayerNameList {
+    type Item = SyntaxResult<CssIdentifier>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, CssIdentifier>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+impl IntoIterator for &CssLayerNameList {
+    type Item = SyntaxResult<CssIdentifier>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, CssIdentifier>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+#[derive(Clone, Eq, PartialEq, Hash)]
+pub struct CssLayerReferenceList {
+    syntax_list: SyntaxList,
+}
+impl CssLayerReferenceList {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self {
+            syntax_list: syntax.into_list(),
+        }
+    }
+}
+impl AstNode for CssLayerReferenceList {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_LAYER_REFERENCE_LIST as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_LAYER_REFERENCE_LIST
+    }
+    fn cast(syntax: SyntaxNode) -> Option<CssLayerReferenceList> {
+        if Self::can_cast(syntax.kind()) {
+            Some(CssLayerReferenceList {
+                syntax_list: syntax.into_list(),
+            })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        self.syntax_list.node()
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax_list.into_node()
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssLayerReferenceList {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(self.len()))?;
+        for e in self.iter() {
+            seq.serialize_element(&e)?;
+        }
+        seq.end()
+    }
+}
+impl AstSeparatedList for CssLayerReferenceList {
+    type Language = Language;
+    type Node = CssLayerNameList;
+    fn syntax_list(&self) -> &SyntaxList {
+        &self.syntax_list
+    }
+    fn into_syntax_list(self) -> SyntaxList {
+        self.syntax_list
+    }
+}
+impl Debug for CssLayerReferenceList {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str("CssLayerReferenceList ")?;
+        f.debug_list().entries(self.elements()).finish()
+    }
+}
+impl IntoIterator for CssLayerReferenceList {
+    type Item = SyntaxResult<CssLayerNameList>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, CssLayerNameList>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+impl IntoIterator for &CssLayerReferenceList {
+    type Item = SyntaxResult<CssLayerNameList>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, CssLayerNameList>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }

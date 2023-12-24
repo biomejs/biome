@@ -179,6 +179,18 @@ macro_rules! map_syntax_node {
                         unsafe { $crate::CssKeyframesPercentageSelector::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_LAYER_AT_RULE => {
+                    let $pattern = unsafe { $crate::CssLayerAtRule::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_LAYER_DECLARATION => {
+                    let $pattern = unsafe { $crate::CssLayerDeclaration::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_LAYER_REFERENCE => {
+                    let $pattern = unsafe { $crate::CssLayerReference::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_MARGIN_AT_RULE => {
                     let $pattern = unsafe { $crate::CssMarginAtRule::new_unchecked(node) };
                     $body
@@ -465,6 +477,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssBogusKeyframesItem::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_BOGUS_LAYER => {
+                    let $pattern = unsafe { $crate::CssBogusLayer::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_BOGUS_MEDIA_QUERY => {
                     let $pattern = unsafe { $crate::CssBogusMediaQuery::new_unchecked(node) };
                     $body
@@ -521,6 +537,14 @@ macro_rules! map_syntax_node {
                 }
                 $crate::CssSyntaxKind::CSS_KEYFRAMES_SELECTOR_LIST => {
                     let $pattern = unsafe { $crate::CssKeyframesSelectorList::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_LAYER_NAME_LIST => {
+                    let $pattern = unsafe { $crate::CssLayerNameList::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_LAYER_REFERENCE_LIST => {
+                    let $pattern = unsafe { $crate::CssLayerReferenceList::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_MEDIA_QUERY_LIST => {

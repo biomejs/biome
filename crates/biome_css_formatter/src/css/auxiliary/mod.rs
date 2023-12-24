@@ -23,6 +23,8 @@ pub(crate) mod declaration_with_semicolon;
 pub(crate) mod identifier;
 pub(crate) mod keyframes_block;
 pub(crate) mod keyframes_item;
+pub(crate) mod layer_declaration;
+pub(crate) mod layer_reference;
 pub(crate) mod media_and_condition;
 pub(crate) mod media_and_type_query;
 pub(crate) mod media_condition_in_parens;

@@ -20,6 +20,7 @@ impl SyntaxFactory for CssSyntaxFactory {
             | CSS_BOGUS_COMPONENT_VALUE
             | CSS_BOGUS_DECLARATION_ITEM
             | CSS_BOGUS_KEYFRAMES_ITEM
+            | CSS_BOGUS_LAYER
             | CSS_BOGUS_MEDIA_QUERY
             | CSS_BOGUS_PAGE_SELECTOR_PSEUDO
             | CSS_BOGUS_PARAMETER
@@ -1161,6 +1162,84 @@ impl SyntaxFactory for CssSyntaxFactory {
                     );
                 }
                 slots.into_node(CSS_KEYFRAMES_PERCENTAGE_SELECTOR, children)
+            }
+            CSS_LAYER_AT_RULE => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element {
+                    if element.kind() == T![layer] {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if AnyCssLayer::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_LAYER_AT_RULE.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_LAYER_AT_RULE, children)
+            }
+            CSS_LAYER_DECLARATION => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element {
+                    if CssLayerReferenceList::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if AnyCssRuleListBlock::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_LAYER_DECLARATION.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_LAYER_DECLARATION, children)
+            }
+            CSS_LAYER_REFERENCE => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element {
+                    if CssLayerReferenceList::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if element.kind() == T ! [;] {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_LAYER_REFERENCE.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_LAYER_REFERENCE, children)
             }
             CSS_MARGIN_AT_RULE => {
                 let mut elements = (&children).into_iter();
@@ -3006,6 +3085,20 @@ impl SyntaxFactory for CssSyntaxFactory {
                 kind,
                 children,
                 AnyCssKeyframesSelector::can_cast,
+                T ! [,],
+                false,
+            ),
+            CSS_LAYER_NAME_LIST => Self::make_separated_list_syntax(
+                kind,
+                children,
+                CssIdentifier::can_cast,
+                T ! [.],
+                false,
+            ),
+            CSS_LAYER_REFERENCE_LIST => Self::make_separated_list_syntax(
+                kind,
+                children,
+                CssLayerNameList::can_cast,
                 T ! [,],
                 false,
             ),

@@ -7,6 +7,7 @@ pub(crate) mod bogus_block;
 pub(crate) mod bogus_component_value;
 pub(crate) mod bogus_declaration_item;
 pub(crate) mod bogus_keyframes_item;
+pub(crate) mod bogus_layer;
 pub(crate) mod bogus_media_query;
 pub(crate) mod bogus_page_selector_pseudo;
 pub(crate) mod bogus_parameter;
