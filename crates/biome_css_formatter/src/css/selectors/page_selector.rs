@@ -1,10 +1,13 @@
 use crate::prelude::*;
-use biome_css_syntax::CssPageSelector;
-use biome_rowan::AstNode;
+use biome_css_syntax::{CssPageSelector, CssPageSelectorFields};
+use biome_formatter::{format_args, write};
+
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatCssPageSelector;
 impl FormatNodeRule<CssPageSelector> for FormatCssPageSelector {
     fn fmt_fields(&self, node: &CssPageSelector, f: &mut CssFormatter) -> FormatResult<()> {
-        format_verbatim_node(node.syntax()).fmt(f)
+        let CssPageSelectorFields { ty, pseudos } = node.as_fields();
+
+        write!(f, [group(&format_args![ty.format(), pseudos.format()])])
     }
 }
