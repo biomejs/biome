@@ -112,31 +112,18 @@ impl Rule for UseNumberProperties {
                 if !GLOBAL_NUMBER_IDENTS.contains(&name.as_str()) {
                     return None;
                 }
-                let replacement = match name.as_str() {
+                let (old_node, replacement) = match name.as_str() {
                     "Infinity" => {
-                        let is_negative = expression
-                            .syntax()
-                            .parent()
-                            .and_then(|parent| {
-                                parent.children_with_tokens().find_map(|child| match child {
-                                    NodeOrToken::Token(token) => {
-                                        if token.kind() == JsSyntaxKind::MINUS {
-                                            Some(true)
-                                        } else {
-                                            None
-                                        }
-                                    }
-                                    NodeOrToken::Node(_) => None,
-                                })
-                            })
-                            .unwrap_or(false);
-                        if is_negative {
-                            "NEGATIVE_INFINITY"
+                        if let Some(parent) = node.parent::<JsUnaryExpression>() {
+                            match parent.operator.ok()? {
+                                JsUnaryOperator::Minus => (AnyJsExpression::JsUnaryExpression(parent), "NEGATIVE_INFINITY"),
+                                JsUnaryOperator::Plus => (AnyJsExpression::JsUnaryExpression(parent), "POSITIVE_INFINITY"),
+                            }
                         } else {
-                            "POSITIVE_INFINITY"
+                            (node.clone(), "POSITIVE_INFINITY")
                         }
                     }
-                    _ => name.as_str(),
+                    _ => (node.clone(), name.as_str()),
                 };
                 (
                     if replacement == "NEGATIVE_INFINITY" {
