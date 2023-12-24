@@ -354,6 +354,7 @@ export default defineConfig({
 			components: {
 				SiteTitle: "./src/components/starlight/SiteTitle.astro",
 				Sidebar: "./src/components/starlight/Sidebar.astro",
+				Hero: "./src/components/starlight/Hero.astro",
 			},
 		}),
 	],

@@ -3,6 +3,7 @@ title: Biome
 template: splash
 description: Format, lint, and more in a fraction of a second.
 editUrl: false
+next: false
 hero:
   title: One toolchain for your web project
   tagline: Format, lint, and more in a fraction of a second.
@@ -35,8 +36,83 @@ import "../../styles/_community.scss";
 
 import { Card, CardGrid } from '@astrojs/starlight/components';
 import Netlify from "@src/components/Netlify.astro";
+import Inputf from "@src/components/formatter/input.md";
+import Outputf from "@src/components/formatter/output.md";
+import ProgressBar from "../../playground/components/Progress.tsx";
+import arrow from "../../assets/svg/arrow-right.svg";
+import { Image } from "astro:assets";
+import "../../styles/_performance.scss";
+import "../../styles/_installation.scss";
 
 <body>
+  <div class="gradient"></div>
+  <div class="grid"></div>
+</body>
+
+
+<Card>
+  <h2 align="center">
+    What's Biome
+  </h2>
+  <p>
+    Biome is a performant toolchain for web projects, it aims to provide developer tools to maintain the health of said projects.
+
+    ```shell
+    npm install --save-dev --save-exact @biomejs/biome
+    ```
+  </p>
+
+  **Biome is a [fast formatter](./benchmark#formatting)** for _JavaScript_, _TypeScript_, _JSX_, and _JSON_ that scores **[96% compatibility with _Prettier_](https://console.algora.io/challenges/prettier)**.
+
+  ```shell
+  npx @biomejs/biome format ./src
+  ```
+
+  **Biome is a [performant linter](https://github.com/biomejs/biome/tree/main/benchmark#linting)** for _JavaScript_, _TypeScript_, and _JSX_ that features **[more than 170 rules](https://biomejs.dev/linter/rules/)** from ESLint, TypeSCript ESLint, and [other sources](https://github.com/biomejs/biome/discussions/3).
+  It **outputs detailed and contextualized diagnostics** that help you to improve your code and become a better programmer!
+
+  ```shell
+  npx @biomejs/biome lint ./src
+  ```
+</Card>
+
+
+<div class="hero-code">
+  <div class="formatter">
+    <h2 class="head">Biome is fast</h2>
+    <div class="linter format">
+      <div class="inp">
+        <span>CODE</span>
+        <Inputf />
+      </div>
+      <div class="out">
+        <span>OUTPUT</span>
+        <Outputf />
+      </div>
+      <div class="perf-out">
+        <span>PERFORMANCE</span>
+        <div class="bench-comp">
+          <div class="bench">
+            <div>
+              <ProgressBar client:visible duration={5} label="Biome" />
+              <ProgressBar client:visible duration={10} label="Dprint" />
+              <ProgressBar client:visible duration={20} label="Prettier" />
+            </div>
+          </div>
+          <div class="perf-comp">
+            <div class="comp">~25x</div>
+            <div class="comp-des">
+              Faster than Prettier when formatting 85,000 lines of code.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card-cnt">
+  <body>
   <div class="gradient"></div>
   <div class="grid"></div>
 </body>
@@ -123,7 +199,33 @@ import Netlify from "@src/components/Netlify.astro";
       </a>
     </div>
 
+</div>
+
+
+<div class="installation-body">
+  <div class="installation">
+    <div class="installation-left">
+      <div class="installation-head">Try Biome</div>
+      <div class="installation-description">
+        Install Biome using your preferred package manager AND integrate it in your editor.
+      </div>
+      <a class="installation-biome" href="/guides/getting-started/#installation">
+        Install with package manager
+        <Image src={arrow} alt="arrow" />
+      </a>
+      <a
+        href="/guides/integrate-in-editor/"
+        class="installation-extension"
+      >
+         Integrate Biome in your editor
+        <Image src={arrow} alt="arrow" />
+      </a>
+    </div>
+
     <div class="extension-img"></div>
+
+  </div>
+</div>
 
   </div>
 </div>
