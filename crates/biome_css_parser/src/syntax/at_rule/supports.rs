@@ -1,7 +1,9 @@
 use crate::parser::CssParser;
 use crate::syntax::blocks::parse_or_recover_rule_list_block;
 use crate::syntax::selector::parse_selector;
-use crate::syntax::{is_at_any_function, is_nth_at_identifier, parse_any_function, parse_declaration};
+use crate::syntax::{
+    is_at_any_function, is_nth_at_identifier, parse_any_function, parse_declaration,
+};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::T;
 use biome_parser::parsed_syntax::ParsedSyntax::Present;
