@@ -125,7 +125,6 @@ impl Rule for UseConsistentArrayType {
                     _ => None,
                 }
             }
-            _ => None
             _ => None,
         }
     }
