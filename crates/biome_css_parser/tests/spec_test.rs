@@ -134,10 +134,9 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 #[test]
 pub fn quick_test() {
     let code = r#"
-    a{
-        color: var(--a,);
-    }
-
+    .sign {
+        background-position: sign(10% * 2);
+         }
     "#;
 
     let root = parse_css(

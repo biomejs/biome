@@ -962,11 +962,9 @@ CssParameterList = CssParameter (',' CssParameter)* ','?
 //			    ^^^
 // repeating-radial-gradient(red, yellow 10%, green 15%);
 //                                ^^^^^^^^^^
-CssParameter = AnyCssParameter
-AnyCssParameter = AnyCssExpression | CssListOfComponentValuesExpression
+CssParameter = AnyCssExpression 
 
-AnyCssExpression = CssBinaryExpression | CssParenthesizedExpression |  AnyCssValue
-
+AnyCssExpression = CssBinaryExpression | CssParenthesizedExpression |  CssListOfComponentValuesExpression 
 CssListOfComponentValuesExpression = CssComponentValueList
 
 CssBinaryExpression = 

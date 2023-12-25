@@ -10,7 +10,7 @@ impl FormatRule<AnyCssExpression> for FormatAnyCssExpression {
         match node {
             AnyCssExpression::CssBinaryExpression(node) => node.format().fmt(f),
             AnyCssExpression::CssParenthesizedExpression(node) => node.format().fmt(f),
-            AnyCssExpression::AnyCssValue(node) => node.format().fmt(f),
+            AnyCssExpression::CssListOfComponentValuesExpression(node) => node.format().fmt(f),
         }
     }
 }

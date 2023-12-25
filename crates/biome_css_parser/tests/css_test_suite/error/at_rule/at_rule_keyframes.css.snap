@@ -117,11 +117,15 @@ CssRoot {
                                                     l_paren_token: L_PAREN@44..45 "(" [] [],
                                                     items: CssParameterList [
                                                         CssParameter {
-                                                            any_css_parameter: CssPercentage {
-                                                                value: CssNumber {
-                                                                    value_token: CSS_NUMBER_LITERAL@45..46 "0" [] [],
-                                                                },
-                                                                reminder_token: PERCENT@46..47 "%" [] [],
+                                                            any_css_expression: CssListOfComponentValuesExpression {
+                                                                css_component_value_list: CssComponentValueList [
+                                                                    CssPercentage {
+                                                                        value: CssNumber {
+                                                                            value_token: CSS_NUMBER_LITERAL@45..46 "0" [] [],
+                                                                        },
+                                                                        reminder_token: PERCENT@46..47 "%" [] [],
+                                                                    },
+                                                                ],
                                                             },
                                                         },
                                                     ],
@@ -157,11 +161,15 @@ CssRoot {
                                                     l_paren_token: L_PAREN@83..84 "(" [] [],
                                                     items: CssParameterList [
                                                         CssParameter {
-                                                            any_css_parameter: CssPercentage {
-                                                                value: CssNumber {
-                                                                    value_token: CSS_NUMBER_LITERAL@84..87 "100" [] [],
-                                                                },
-                                                                reminder_token: PERCENT@87..88 "%" [] [],
+                                                            any_css_expression: CssListOfComponentValuesExpression {
+                                                                css_component_value_list: CssComponentValueList [
+                                                                    CssPercentage {
+                                                                        value: CssNumber {
+                                                                            value_token: CSS_NUMBER_LITERAL@84..87 "100" [] [],
+                                                                        },
+                                                                        reminder_token: PERCENT@87..88 "%" [] [],
+                                                                    },
+                                                                ],
                                                             },
                                                         },
                                                     ],
@@ -305,11 +313,15 @@ CssRoot {
                                                                 l_paren_token: L_PAREN@278..279 "(" [] [],
                                                                 items: CssParameterList [
                                                                     CssParameter {
-                                                                        any_css_parameter: CssPercentage {
-                                                                            value: CssNumber {
-                                                                                value_token: CSS_NUMBER_LITERAL@279..280 "0" [] [],
-                                                                            },
-                                                                            reminder_token: PERCENT@280..281 "%" [] [],
+                                                                        any_css_expression: CssListOfComponentValuesExpression {
+                                                                            css_component_value_list: CssComponentValueList [
+                                                                                CssPercentage {
+                                                                                    value: CssNumber {
+                                                                                        value_token: CSS_NUMBER_LITERAL@279..280 "0" [] [],
+                                                                                    },
+                                                                                    reminder_token: PERCENT@280..281 "%" [] [],
+                                                                                },
+                                                                            ],
                                                                         },
                                                                     },
                                                                 ],
@@ -366,11 +378,15 @@ CssRoot {
                                                         l_paren_token: L_PAREN@342..343 "(" [] [],
                                                         items: CssParameterList [
                                                             CssParameter {
-                                                                any_css_parameter: CssPercentage {
-                                                                    value: CssNumber {
-                                                                        value_token: CSS_NUMBER_LITERAL@343..344 "0" [] [],
-                                                                    },
-                                                                    reminder_token: PERCENT@344..345 "%" [] [],
+                                                                any_css_expression: CssListOfComponentValuesExpression {
+                                                                    css_component_value_list: CssComponentValueList [
+                                                                        CssPercentage {
+                                                                            value: CssNumber {
+                                                                                value_token: CSS_NUMBER_LITERAL@343..344 "0" [] [],
+                                                                            },
+                                                                            reminder_token: PERCENT@344..345 "%" [] [],
+                                                                        },
+                                                                    ],
                                                                 },
                                                             },
                                                         ],
@@ -474,11 +490,15 @@ CssRoot {
                                                 l_paren_token: L_PAREN@482..483 "(" [] [],
                                                 items: CssParameterList [
                                                     CssParameter {
-                                                        any_css_parameter: CssPercentage {
-                                                            value: CssNumber {
-                                                                value_token: CSS_NUMBER_LITERAL@483..486 "100" [] [],
-                                                            },
-                                                            reminder_token: PERCENT@486..487 "%" [] [],
+                                                        any_css_expression: CssListOfComponentValuesExpression {
+                                                            css_component_value_list: CssComponentValueList [
+                                                                CssPercentage {
+                                                                    value: CssNumber {
+                                                                        value_token: CSS_NUMBER_LITERAL@483..486 "100" [] [],
+                                                                    },
+                                                                    reminder_token: PERCENT@486..487 "%" [] [],
+                                                                },
+                                                            ],
                                                         },
                                                     },
                                                 ],
@@ -529,11 +549,15 @@ CssRoot {
                                                 l_paren_token: L_PAREN@548..549 "(" [] [],
                                                 items: CssParameterList [
                                                     CssParameter {
-                                                        any_css_parameter: CssPercentage {
-                                                            value: CssNumber {
-                                                                value_token: CSS_NUMBER_LITERAL@549..550 "0" [] [],
-                                                            },
-                                                            reminder_token: PERCENT@550..551 "%" [] [],
+                                                        any_css_expression: CssListOfComponentValuesExpression {
+                                                            css_component_value_list: CssComponentValueList [
+                                                                CssPercentage {
+                                                                    value: CssNumber {
+                                                                        value_token: CSS_NUMBER_LITERAL@549..550 "0" [] [],
+                                                                    },
+                                                                    reminder_token: PERCENT@550..551 "%" [] [],
+                                                                },
+                                                            ],
                                                         },
                                                     },
                                                 ],
@@ -637,11 +661,15 @@ CssRoot {
                                                 l_paren_token: L_PAREN@690..691 "(" [] [],
                                                 items: CssParameterList [
                                                     CssParameter {
-                                                        any_css_parameter: CssPercentage {
-                                                            value: CssNumber {
-                                                                value_token: CSS_NUMBER_LITERAL@691..694 "100" [] [],
-                                                            },
-                                                            reminder_token: PERCENT@694..695 "%" [] [],
+                                                        any_css_expression: CssListOfComponentValuesExpression {
+                                                            css_component_value_list: CssComponentValueList [
+                                                                CssPercentage {
+                                                                    value: CssNumber {
+                                                                        value_token: CSS_NUMBER_LITERAL@691..694 "100" [] [],
+                                                                    },
+                                                                    reminder_token: PERCENT@694..695 "%" [] [],
+                                                                },
+                                                            ],
                                                         },
                                                     },
                                                 ],
@@ -703,10 +731,12 @@ CssRoot {
                         1: L_PAREN@44..45 "(" [] []
                         2: CSS_PARAMETER_LIST@45..47
                           0: CSS_PARAMETER@45..47
-                            0: CSS_PERCENTAGE@45..47
-                              0: CSS_NUMBER@45..46
-                                0: CSS_NUMBER_LITERAL@45..46 "0" [] []
-                              1: PERCENT@46..47 "%" [] []
+                            0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@45..47
+                              0: CSS_COMPONENT_VALUE_LIST@45..47
+                                0: CSS_PERCENTAGE@45..47
+                                  0: CSS_NUMBER@45..46
+                                    0: CSS_NUMBER_LITERAL@45..46 "0" [] []
+                                  1: PERCENT@46..47 "%" [] []
                         3: R_PAREN@47..48 ")" [] []
                     3: (empty)
                   1: SEMICOLON@48..49 ";" [] []
@@ -729,10 +759,12 @@ CssRoot {
                         1: L_PAREN@83..84 "(" [] []
                         2: CSS_PARAMETER_LIST@84..88
                           0: CSS_PARAMETER@84..88
-                            0: CSS_PERCENTAGE@84..88
-                              0: CSS_NUMBER@84..87
-                                0: CSS_NUMBER_LITERAL@84..87 "100" [] []
-                              1: PERCENT@87..88 "%" [] []
+                            0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@84..88
+                              0: CSS_COMPONENT_VALUE_LIST@84..88
+                                0: CSS_PERCENTAGE@84..88
+                                  0: CSS_NUMBER@84..87
+                                    0: CSS_NUMBER_LITERAL@84..87 "100" [] []
+                                  1: PERCENT@87..88 "%" [] []
                         3: R_PAREN@88..89 ")" [] []
                     3: (empty)
                   1: SEMICOLON@89..90 ";" [] []
@@ -820,10 +852,12 @@ CssRoot {
                         1: L_PAREN@278..279 "(" [] []
                         2: CSS_PARAMETER_LIST@279..281
                           0: CSS_PARAMETER@279..281
-                            0: CSS_PERCENTAGE@279..281
-                              0: CSS_NUMBER@279..280
-                                0: CSS_NUMBER_LITERAL@279..280 "0" [] []
-                              1: PERCENT@280..281 "%" [] []
+                            0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@279..281
+                              0: CSS_COMPONENT_VALUE_LIST@279..281
+                                0: CSS_PERCENTAGE@279..281
+                                  0: CSS_NUMBER@279..280
+                                    0: CSS_NUMBER_LITERAL@279..280 "0" [] []
+                                  1: PERCENT@280..281 "%" [] []
                         3: R_PAREN@281..282 ")" [] []
                     3: (empty)
                   1: SEMICOLON@282..283 ";" [] []
@@ -856,10 +890,12 @@ CssRoot {
                         1: L_PAREN@342..343 "(" [] []
                         2: CSS_PARAMETER_LIST@343..345
                           0: CSS_PARAMETER@343..345
-                            0: CSS_PERCENTAGE@343..345
-                              0: CSS_NUMBER@343..344
-                                0: CSS_NUMBER_LITERAL@343..344 "0" [] []
-                              1: PERCENT@344..345 "%" [] []
+                            0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@343..345
+                              0: CSS_COMPONENT_VALUE_LIST@343..345
+                                0: CSS_PERCENTAGE@343..345
+                                  0: CSS_NUMBER@343..344
+                                    0: CSS_NUMBER_LITERAL@343..344 "0" [] []
+                                  1: PERCENT@344..345 "%" [] []
                         3: R_PAREN@345..346 ")" [] []
                     3: (empty)
                   1: SEMICOLON@346..347 ";" [] []
@@ -928,10 +964,12 @@ CssRoot {
                         1: L_PAREN@482..483 "(" [] []
                         2: CSS_PARAMETER_LIST@483..487
                           0: CSS_PARAMETER@483..487
-                            0: CSS_PERCENTAGE@483..487
-                              0: CSS_NUMBER@483..486
-                                0: CSS_NUMBER_LITERAL@483..486 "100" [] []
-                              1: PERCENT@486..487 "%" [] []
+                            0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@483..487
+                              0: CSS_COMPONENT_VALUE_LIST@483..487
+                                0: CSS_PERCENTAGE@483..487
+                                  0: CSS_NUMBER@483..486
+                                    0: CSS_NUMBER_LITERAL@483..486 "100" [] []
+                                  1: PERCENT@486..487 "%" [] []
                         3: R_PAREN@487..488 ")" [] []
                     3: (empty)
                   1: SEMICOLON@488..489 ";" [] []
@@ -964,10 +1002,12 @@ CssRoot {
                         1: L_PAREN@548..549 "(" [] []
                         2: CSS_PARAMETER_LIST@549..551
                           0: CSS_PARAMETER@549..551
-                            0: CSS_PERCENTAGE@549..551
-                              0: CSS_NUMBER@549..550
-                                0: CSS_NUMBER_LITERAL@549..550 "0" [] []
-                              1: PERCENT@550..551 "%" [] []
+                            0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@549..551
+                              0: CSS_COMPONENT_VALUE_LIST@549..551
+                                0: CSS_PERCENTAGE@549..551
+                                  0: CSS_NUMBER@549..550
+                                    0: CSS_NUMBER_LITERAL@549..550 "0" [] []
+                                  1: PERCENT@550..551 "%" [] []
                         3: R_PAREN@551..552 ")" [] []
                     3: (empty)
                   1: SEMICOLON@552..553 ";" [] []
@@ -1035,10 +1075,12 @@ CssRoot {
                         1: L_PAREN@690..691 "(" [] []
                         2: CSS_PARAMETER_LIST@691..695
                           0: CSS_PARAMETER@691..695
-                            0: CSS_PERCENTAGE@691..695
-                              0: CSS_NUMBER@691..694
-                                0: CSS_NUMBER_LITERAL@691..694 "100" [] []
-                              1: PERCENT@694..695 "%" [] []
+                            0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@691..695
+                              0: CSS_COMPONENT_VALUE_LIST@691..695
+                                0: CSS_PERCENTAGE@691..695
+                                  0: CSS_NUMBER@691..694
+                                    0: CSS_NUMBER_LITERAL@691..694 "100" [] []
+                                  1: PERCENT@694..695 "%" [] []
                         3: R_PAREN@695..696 ")" [] []
                     3: (empty)
                   1: SEMICOLON@696..697 ";" [] []

@@ -49,10 +49,14 @@ CssRoot {
                                 l_paren_token: L_PAREN@20..21 "(" [] [],
                                 items: CssParameterList [
                                     CssParameter {
-                                        any_css_parameter: CssCustomProperty {
-                                            value: CssIdentifier {
-                                                value_token: IDENT@21..24 "--a" [] [],
-                                            },
+                                        any_css_expression: CssListOfComponentValuesExpression {
+                                            css_component_value_list: CssComponentValueList [
+                                                CssCustomProperty {
+                                                    value: CssIdentifier {
+                                                        value_token: IDENT@21..24 "--a" [] [],
+                                                    },
+                                                },
+                                            ],
                                         },
                                     },
                                 ],
@@ -75,10 +79,14 @@ CssRoot {
                                 l_paren_token: L_PAREN@41..42 "(" [] [],
                                 items: CssParameterList [
                                     CssParameter {
-                                        any_css_parameter: CssCustomProperty {
-                                            value: CssIdentifier {
-                                                value_token: IDENT@42..45 "--a" [] [],
-                                            },
+                                        any_css_expression: CssListOfComponentValuesExpression {
+                                            css_component_value_list: CssComponentValueList [
+                                                CssCustomProperty {
+                                                    value: CssIdentifier {
+                                                        value_token: IDENT@42..45 "--a" [] [],
+                                                    },
+                                                },
+                                            ],
                                         },
                                     },
                                     COMMA@45..46 "," [] [],
@@ -102,16 +110,24 @@ CssRoot {
                                 l_paren_token: L_PAREN@63..64 "(" [] [],
                                 items: CssParameterList [
                                     CssParameter {
-                                        any_css_parameter: CssCustomProperty {
-                                            value: CssIdentifier {
-                                                value_token: IDENT@64..67 "--a" [] [],
-                                            },
+                                        any_css_expression: CssListOfComponentValuesExpression {
+                                            css_component_value_list: CssComponentValueList [
+                                                CssCustomProperty {
+                                                    value: CssIdentifier {
+                                                        value_token: IDENT@64..67 "--a" [] [],
+                                                    },
+                                                },
+                                            ],
                                         },
                                     },
                                     COMMA@67..69 "," [] [Whitespace(" ")],
                                     CssParameter {
-                                        any_css_parameter: CssIdentifier {
-                                            value_token: IDENT@69..73 "blue" [] [],
+                                        any_css_expression: CssListOfComponentValuesExpression {
+                                            css_component_value_list: CssComponentValueList [
+                                                CssIdentifier {
+                                                    value_token: IDENT@69..73 "blue" [] [],
+                                                },
+                                            ],
                                         },
                                     },
                                 ],
@@ -159,9 +175,11 @@ CssRoot {
                 1: L_PAREN@20..21 "(" [] []
                 2: CSS_PARAMETER_LIST@21..24
                   0: CSS_PARAMETER@21..24
-                    0: CSS_CUSTOM_PROPERTY@21..24
-                      0: CSS_IDENTIFIER@21..24
-                        0: IDENT@21..24 "--a" [] []
+                    0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@21..24
+                      0: CSS_COMPONENT_VALUE_LIST@21..24
+                        0: CSS_CUSTOM_PROPERTY@21..24
+                          0: CSS_IDENTIFIER@21..24
+                            0: IDENT@21..24 "--a" [] []
                 3: R_PAREN@24..25 ")" [] []
             3: (empty)
           1: SEMICOLON@25..26 ";" [] []
@@ -176,9 +194,11 @@ CssRoot {
                 1: L_PAREN@41..42 "(" [] []
                 2: CSS_PARAMETER_LIST@42..46
                   0: CSS_PARAMETER@42..45
-                    0: CSS_CUSTOM_PROPERTY@42..45
-                      0: CSS_IDENTIFIER@42..45
-                        0: IDENT@42..45 "--a" [] []
+                    0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@42..45
+                      0: CSS_COMPONENT_VALUE_LIST@42..45
+                        0: CSS_CUSTOM_PROPERTY@42..45
+                          0: CSS_IDENTIFIER@42..45
+                            0: IDENT@42..45 "--a" [] []
                   1: COMMA@45..46 "," [] []
                 3: R_PAREN@46..47 ")" [] []
             3: (empty)
@@ -194,13 +214,17 @@ CssRoot {
                 1: L_PAREN@63..64 "(" [] []
                 2: CSS_PARAMETER_LIST@64..73
                   0: CSS_PARAMETER@64..67
-                    0: CSS_CUSTOM_PROPERTY@64..67
-                      0: CSS_IDENTIFIER@64..67
-                        0: IDENT@64..67 "--a" [] []
+                    0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@64..67
+                      0: CSS_COMPONENT_VALUE_LIST@64..67
+                        0: CSS_CUSTOM_PROPERTY@64..67
+                          0: CSS_IDENTIFIER@64..67
+                            0: IDENT@64..67 "--a" [] []
                   1: COMMA@67..69 "," [] [Whitespace(" ")]
                   2: CSS_PARAMETER@69..73
-                    0: CSS_IDENTIFIER@69..73
-                      0: IDENT@69..73 "blue" [] []
+                    0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@69..73
+                      0: CSS_COMPONENT_VALUE_LIST@69..73
+                        0: CSS_IDENTIFIER@69..73
+                          0: IDENT@69..73 "blue" [] []
                 3: R_PAREN@73..74 ")" [] []
             3: (empty)
           5: SEMICOLON@74..75 ";" [] []

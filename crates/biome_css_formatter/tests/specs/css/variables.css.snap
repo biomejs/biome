@@ -106,6 +106,20 @@ Line width: 80
 
 ## Unimplemented nodes/tokens
 
+"--prop" => 34..40
+"--my-var" => 55..63
+" --my-backgroun" => 64..79
+" pin" => 81..85
 "var(--prop) * 1px" => 102..119
+"--prop" => 160..166
+"--prop);\n\n\tp" => 182..194
+"--prop, pink);\n\n\tp" => 204..222
+" pin" => 211..215
+"\t\t\t--one-var-thats-super-long-on-its-o" => 233..271
+"\t\t\t--super-long-just-enough-to-make-it-break-over-li" => 275..327
+"--prop1" => 362..369
+"prop2" => 375..380
+"--prop1" => 394..401
+"prop2" => 407..412
 "\t\t\tvar(--hue, \n        0) \n        var(\n            --sat, 100\n            \n            ) var(--light  ,  1)\n\t\t);\n" => 428..542
 

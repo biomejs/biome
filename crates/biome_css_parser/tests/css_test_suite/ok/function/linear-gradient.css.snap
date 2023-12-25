@@ -59,14 +59,22 @@ CssRoot {
                                 l_paren_token: L_PAREN@35..36 "(" [] [],
                                 items: CssParameterList [
                                     CssParameter {
-                                        any_css_parameter: CssIdentifier {
-                                            value_token: IDENT@36..41 "white" [] [],
+                                        any_css_expression: CssListOfComponentValuesExpression {
+                                            css_component_value_list: CssComponentValueList [
+                                                CssIdentifier {
+                                                    value_token: IDENT@36..41 "white" [] [],
+                                                },
+                                            ],
                                         },
                                     },
                                     COMMA@41..43 "," [] [Whitespace(" ")],
                                     CssParameter {
-                                        any_css_parameter: CssIdentifier {
-                                            value_token: IDENT@43..47 "gray" [] [],
+                                        any_css_expression: CssListOfComponentValuesExpression {
+                                            css_component_value_list: CssComponentValueList [
+                                                CssIdentifier {
+                                                    value_token: IDENT@43..47 "gray" [] [],
+                                                },
+                                            ],
                                         },
                                     },
                                 ],
@@ -89,14 +97,22 @@ CssRoot {
                                 l_paren_token: L_PAREN@81..82 "(" [] [],
                                 items: CssParameterList [
                                     CssParameter {
-                                        any_css_parameter: CssIdentifier {
-                                            value_token: IDENT@82..88 "yellow" [] [],
+                                        any_css_expression: CssListOfComponentValuesExpression {
+                                            css_component_value_list: CssComponentValueList [
+                                                CssIdentifier {
+                                                    value_token: IDENT@82..88 "yellow" [] [],
+                                                },
+                                            ],
                                         },
                                     },
                                     COMMA@88..90 "," [] [Whitespace(" ")],
                                     CssParameter {
-                                        any_css_parameter: CssIdentifier {
-                                            value_token: IDENT@90..94 "blue" [] [],
+                                        any_css_expression: CssListOfComponentValuesExpression {
+                                            css_component_value_list: CssComponentValueList [
+                                                CssIdentifier {
+                                                    value_token: IDENT@90..94 "blue" [] [],
+                                                },
+                                            ],
                                         },
                                     },
                                 ],
@@ -119,7 +135,7 @@ CssRoot {
                                 l_paren_token: L_PAREN@128..129 "(" [] [],
                                 items: CssParameterList [
                                     CssParameter {
-                                        any_css_parameter: CssListOfComponentValuesExpression {
+                                        any_css_expression: CssListOfComponentValuesExpression {
                                             css_component_value_list: CssComponentValueList [
                                                 CssIdentifier {
                                                     value_token: IDENT@129..132 "to" [] [Whitespace(" ")],
@@ -132,14 +148,22 @@ CssRoot {
                                     },
                                     COMMA@138..140 "," [] [Whitespace(" ")],
                                     CssParameter {
-                                        any_css_parameter: CssIdentifier {
-                                            value_token: IDENT@140..146 "yellow" [] [],
+                                        any_css_expression: CssListOfComponentValuesExpression {
+                                            css_component_value_list: CssComponentValueList [
+                                                CssIdentifier {
+                                                    value_token: IDENT@140..146 "yellow" [] [],
+                                                },
+                                            ],
                                         },
                                     },
                                     COMMA@146..148 "," [] [Whitespace(" ")],
                                     CssParameter {
-                                        any_css_parameter: CssIdentifier {
-                                            value_token: IDENT@148..152 "blue" [] [],
+                                        any_css_expression: CssListOfComponentValuesExpression {
+                                            css_component_value_list: CssComponentValueList [
+                                                CssIdentifier {
+                                                    value_token: IDENT@148..152 "blue" [] [],
+                                                },
+                                            ],
                                         },
                                     },
                                 ],
@@ -162,25 +186,37 @@ CssRoot {
                                 l_paren_token: L_PAREN@186..187 "(" [] [],
                                 items: CssParameterList [
                                     CssParameter {
-                                        any_css_parameter: CssRegularDimension {
-                                            value: CssNumber {
-                                                value_token: CSS_NUMBER_LITERAL@187..190 "180" [] [],
-                                            },
-                                            unit: CssIdentifier {
-                                                value_token: IDENT@190..193 "deg" [] [],
-                                            },
+                                        any_css_expression: CssListOfComponentValuesExpression {
+                                            css_component_value_list: CssComponentValueList [
+                                                CssRegularDimension {
+                                                    value: CssNumber {
+                                                        value_token: CSS_NUMBER_LITERAL@187..190 "180" [] [],
+                                                    },
+                                                    unit: CssIdentifier {
+                                                        value_token: IDENT@190..193 "deg" [] [],
+                                                    },
+                                                },
+                                            ],
                                         },
                                     },
                                     COMMA@193..195 "," [] [Whitespace(" ")],
                                     CssParameter {
-                                        any_css_parameter: CssIdentifier {
-                                            value_token: IDENT@195..201 "yellow" [] [],
+                                        any_css_expression: CssListOfComponentValuesExpression {
+                                            css_component_value_list: CssComponentValueList [
+                                                CssIdentifier {
+                                                    value_token: IDENT@195..201 "yellow" [] [],
+                                                },
+                                            ],
                                         },
                                     },
                                     COMMA@201..203 "," [] [Whitespace(" ")],
                                     CssParameter {
-                                        any_css_parameter: CssIdentifier {
-                                            value_token: IDENT@203..207 "blue" [] [],
+                                        any_css_expression: CssListOfComponentValuesExpression {
+                                            css_component_value_list: CssComponentValueList [
+                                                CssIdentifier {
+                                                    value_token: IDENT@203..207 "blue" [] [],
+                                                },
+                                            ],
                                         },
                                     },
                                 ],
@@ -203,7 +239,7 @@ CssRoot {
                                 l_paren_token: L_PAREN@241..242 "(" [] [],
                                 items: CssParameterList [
                                     CssParameter {
-                                        any_css_parameter: CssListOfComponentValuesExpression {
+                                        any_css_expression: CssListOfComponentValuesExpression {
                                             css_component_value_list: CssComponentValueList [
                                                 CssIdentifier {
                                                     value_token: IDENT@242..245 "to" [] [Whitespace(" ")],
@@ -216,14 +252,22 @@ CssRoot {
                                     },
                                     COMMA@248..250 "," [] [Whitespace(" ")],
                                     CssParameter {
-                                        any_css_parameter: CssIdentifier {
-                                            value_token: IDENT@250..254 "blue" [] [],
+                                        any_css_expression: CssListOfComponentValuesExpression {
+                                            css_component_value_list: CssComponentValueList [
+                                                CssIdentifier {
+                                                    value_token: IDENT@250..254 "blue" [] [],
+                                                },
+                                            ],
                                         },
                                     },
                                     COMMA@254..256 "," [] [Whitespace(" ")],
                                     CssParameter {
-                                        any_css_parameter: CssIdentifier {
-                                            value_token: IDENT@256..262 "yellow" [] [],
+                                        any_css_expression: CssListOfComponentValuesExpression {
+                                            css_component_value_list: CssComponentValueList [
+                                                CssIdentifier {
+                                                    value_token: IDENT@256..262 "yellow" [] [],
+                                                },
+                                            ],
                                         },
                                     },
                                 ],
@@ -246,7 +290,7 @@ CssRoot {
                                 l_paren_token: L_PAREN@296..297 "(" [] [],
                                 items: CssParameterList [
                                     CssParameter {
-                                        any_css_parameter: CssListOfComponentValuesExpression {
+                                        any_css_expression: CssListOfComponentValuesExpression {
                                             css_component_value_list: CssComponentValueList [
                                                 CssIdentifier {
                                                     value_token: IDENT@297..300 "to" [] [Whitespace(" ")],
@@ -259,7 +303,7 @@ CssRoot {
                                     },
                                     COMMA@306..308 "," [] [Whitespace(" ")],
                                     CssParameter {
-                                        any_css_parameter: CssListOfComponentValuesExpression {
+                                        any_css_expression: CssListOfComponentValuesExpression {
                                             css_component_value_list: CssComponentValueList [
                                                 CssIdentifier {
                                                     value_token: IDENT@308..315 "yellow" [] [Whitespace(" ")],
@@ -275,7 +319,7 @@ CssRoot {
                                     },
                                     COMMA@317..319 "," [] [Whitespace(" ")],
                                     CssParameter {
-                                        any_css_parameter: CssListOfComponentValuesExpression {
+                                        any_css_expression: CssListOfComponentValuesExpression {
                                             css_component_value_list: CssComponentValueList [
                                                 CssIdentifier {
                                                     value_token: IDENT@319..324 "blue" [] [Whitespace(" ")],
@@ -309,25 +353,37 @@ CssRoot {
                                 l_paren_token: L_PAREN@362..363 "(" [] [],
                                 items: CssParameterList [
                                     CssParameter {
-                                        any_css_parameter: CssRegularDimension {
-                                            value: CssNumber {
-                                                value_token: CSS_NUMBER_LITERAL@363..366 "135" [] [],
-                                            },
-                                            unit: CssIdentifier {
-                                                value_token: IDENT@366..369 "deg" [] [],
-                                            },
+                                        any_css_expression: CssListOfComponentValuesExpression {
+                                            css_component_value_list: CssComponentValueList [
+                                                CssRegularDimension {
+                                                    value: CssNumber {
+                                                        value_token: CSS_NUMBER_LITERAL@363..366 "135" [] [],
+                                                    },
+                                                    unit: CssIdentifier {
+                                                        value_token: IDENT@366..369 "deg" [] [],
+                                                    },
+                                                },
+                                            ],
                                         },
                                     },
                                     COMMA@369..371 "," [] [Whitespace(" ")],
                                     CssParameter {
-                                        any_css_parameter: CssIdentifier {
-                                            value_token: IDENT@371..377 "yellow" [] [],
+                                        any_css_expression: CssListOfComponentValuesExpression {
+                                            css_component_value_list: CssComponentValueList [
+                                                CssIdentifier {
+                                                    value_token: IDENT@371..377 "yellow" [] [],
+                                                },
+                                            ],
                                         },
                                     },
                                     COMMA@377..379 "," [] [Whitespace(" ")],
                                     CssParameter {
-                                        any_css_parameter: CssIdentifier {
-                                            value_token: IDENT@379..383 "blue" [] [],
+                                        any_css_expression: CssListOfComponentValuesExpression {
+                                            css_component_value_list: CssComponentValueList [
+                                                CssIdentifier {
+                                                    value_token: IDENT@379..383 "blue" [] [],
+                                                },
+                                            ],
                                         },
                                     },
                                 ],
@@ -350,25 +406,37 @@ CssRoot {
                                 l_paren_token: L_PAREN@417..418 "(" [] [],
                                 items: CssParameterList [
                                     CssParameter {
-                                        any_css_parameter: CssRegularDimension {
-                                            value: CssNumber {
-                                                value_token: CSS_NUMBER_LITERAL@418..421 "-45" [] [],
-                                            },
-                                            unit: CssIdentifier {
-                                                value_token: IDENT@421..424 "deg" [] [],
-                                            },
+                                        any_css_expression: CssListOfComponentValuesExpression {
+                                            css_component_value_list: CssComponentValueList [
+                                                CssRegularDimension {
+                                                    value: CssNumber {
+                                                        value_token: CSS_NUMBER_LITERAL@418..421 "-45" [] [],
+                                                    },
+                                                    unit: CssIdentifier {
+                                                        value_token: IDENT@421..424 "deg" [] [],
+                                                    },
+                                                },
+                                            ],
                                         },
                                     },
                                     COMMA@424..426 "," [] [Whitespace(" ")],
                                     CssParameter {
-                                        any_css_parameter: CssIdentifier {
-                                            value_token: IDENT@426..430 "blue" [] [],
+                                        any_css_expression: CssListOfComponentValuesExpression {
+                                            css_component_value_list: CssComponentValueList [
+                                                CssIdentifier {
+                                                    value_token: IDENT@426..430 "blue" [] [],
+                                                },
+                                            ],
                                         },
                                     },
                                     COMMA@430..432 "," [] [Whitespace(" ")],
                                     CssParameter {
-                                        any_css_parameter: CssIdentifier {
-                                            value_token: IDENT@432..438 "yellow" [] [],
+                                        any_css_expression: CssListOfComponentValuesExpression {
+                                            css_component_value_list: CssComponentValueList [
+                                                CssIdentifier {
+                                                    value_token: IDENT@432..438 "yellow" [] [],
+                                                },
+                                            ],
                                         },
                                     },
                                 ],
@@ -391,13 +459,17 @@ CssRoot {
                                 l_paren_token: L_PAREN@472..473 "(" [] [],
                                 items: CssParameterList [
                                     CssParameter {
-                                        any_css_parameter: CssIdentifier {
-                                            value_token: IDENT@473..479 "yellow" [] [],
+                                        any_css_expression: CssListOfComponentValuesExpression {
+                                            css_component_value_list: CssComponentValueList [
+                                                CssIdentifier {
+                                                    value_token: IDENT@473..479 "yellow" [] [],
+                                                },
+                                            ],
                                         },
                                     },
                                     COMMA@479..481 "," [] [Whitespace(" ")],
                                     CssParameter {
-                                        any_css_parameter: CssListOfComponentValuesExpression {
+                                        any_css_expression: CssListOfComponentValuesExpression {
                                             css_component_value_list: CssComponentValueList [
                                                 CssIdentifier {
                                                     value_token: IDENT@481..486 "blue" [] [Whitespace(" ")],
@@ -413,9 +485,13 @@ CssRoot {
                                     },
                                     COMMA@489..491 "," [] [Whitespace(" ")],
                                     CssParameter {
-                                        any_css_parameter: CssColor {
-                                            hash_token: HASH@491..492 "#" [] [],
-                                            value_token: CSS_COLOR_LITERAL@492..495 "0f0" [] [],
+                                        any_css_expression: CssListOfComponentValuesExpression {
+                                            css_component_value_list: CssComponentValueList [
+                                                CssColor {
+                                                    hash_token: HASH@491..492 "#" [] [],
+                                                    value_token: CSS_COLOR_LITERAL@492..495 "0f0" [] [],
+                                                },
+                                            ],
                                         },
                                     },
                                 ],
@@ -438,7 +514,7 @@ CssRoot {
                                 l_paren_token: L_PAREN@529..530 "(" [] [],
                                 items: CssParameterList [
                                     CssParameter {
-                                        any_css_parameter: CssListOfComponentValuesExpression {
+                                        any_css_expression: CssListOfComponentValuesExpression {
                                             css_component_value_list: CssComponentValueList [
                                                 CssIdentifier {
                                                     value_token: IDENT@530..533 "to" [] [Whitespace(" ")],
@@ -454,20 +530,32 @@ CssRoot {
                                     },
                                     COMMA@542..544 "," [] [Whitespace(" ")],
                                     CssParameter {
-                                        any_css_parameter: CssIdentifier {
-                                            value_token: IDENT@544..547 "red" [] [],
+                                        any_css_expression: CssListOfComponentValuesExpression {
+                                            css_component_value_list: CssComponentValueList [
+                                                CssIdentifier {
+                                                    value_token: IDENT@544..547 "red" [] [],
+                                                },
+                                            ],
                                         },
                                     },
                                     COMMA@547..549 "," [] [Whitespace(" ")],
                                     CssParameter {
-                                        any_css_parameter: CssIdentifier {
-                                            value_token: IDENT@549..554 "white" [] [],
+                                        any_css_expression: CssListOfComponentValuesExpression {
+                                            css_component_value_list: CssComponentValueList [
+                                                CssIdentifier {
+                                                    value_token: IDENT@549..554 "white" [] [],
+                                                },
+                                            ],
                                         },
                                     },
                                     COMMA@554..556 "," [] [Whitespace(" ")],
                                     CssParameter {
-                                        any_css_parameter: CssIdentifier {
-                                            value_token: IDENT@556..560 "blue" [] [],
+                                        any_css_expression: CssListOfComponentValuesExpression {
+                                            css_component_value_list: CssComponentValueList [
+                                                CssIdentifier {
+                                                    value_token: IDENT@556..560 "blue" [] [],
+                                                },
+                                            ],
                                         },
                                     },
                                 ],
@@ -490,24 +578,32 @@ CssRoot {
                                 l_paren_token: L_PAREN@594..595 "(" [] [],
                                 items: CssParameterList [
                                     CssParameter {
-                                        any_css_parameter: CssRegularDimension {
-                                            value: CssNumber {
-                                                value_token: CSS_NUMBER_LITERAL@595..596 "0" [] [],
-                                            },
-                                            unit: CssIdentifier {
-                                                value_token: IDENT@596..599 "deg" [] [],
-                                            },
+                                        any_css_expression: CssListOfComponentValuesExpression {
+                                            css_component_value_list: CssComponentValueList [
+                                                CssRegularDimension {
+                                                    value: CssNumber {
+                                                        value_token: CSS_NUMBER_LITERAL@595..596 "0" [] [],
+                                                    },
+                                                    unit: CssIdentifier {
+                                                        value_token: IDENT@596..599 "deg" [] [],
+                                                    },
+                                                },
+                                            ],
                                         },
                                     },
                                     COMMA@599..601 "," [] [Whitespace(" ")],
                                     CssParameter {
-                                        any_css_parameter: CssIdentifier {
-                                            value_token: IDENT@601..605 "blue" [] [],
+                                        any_css_expression: CssListOfComponentValuesExpression {
+                                            css_component_value_list: CssComponentValueList [
+                                                CssIdentifier {
+                                                    value_token: IDENT@601..605 "blue" [] [],
+                                                },
+                                            ],
                                         },
                                     },
                                     COMMA@605..607 "," [] [Whitespace(" ")],
                                     CssParameter {
-                                        any_css_parameter: CssListOfComponentValuesExpression {
+                                        any_css_expression: CssListOfComponentValuesExpression {
                                             css_component_value_list: CssComponentValueList [
                                                 CssIdentifier {
                                                     value_token: IDENT@607..613 "green" [] [Whitespace(" ")],
@@ -523,8 +619,12 @@ CssRoot {
                                     },
                                     COMMA@616..618 "," [] [Whitespace(" ")],
                                     CssParameter {
-                                        any_css_parameter: CssIdentifier {
-                                            value_token: IDENT@618..621 "red" [] [],
+                                        any_css_expression: CssListOfComponentValuesExpression {
+                                            css_component_value_list: CssComponentValueList [
+                                                CssIdentifier {
+                                                    value_token: IDENT@618..621 "red" [] [],
+                                                },
+                                            ],
                                         },
                                     },
                                 ],
@@ -547,18 +647,22 @@ CssRoot {
                                 l_paren_token: L_PAREN@655..656 "(" [] [],
                                 items: CssParameterList [
                                     CssParameter {
-                                        any_css_parameter: CssRegularDimension {
-                                            value: CssNumber {
-                                                value_token: CSS_NUMBER_LITERAL@656..659 ".25" [] [],
-                                            },
-                                            unit: CssIdentifier {
-                                                value_token: IDENT@659..663 "turn" [] [],
-                                            },
+                                        any_css_expression: CssListOfComponentValuesExpression {
+                                            css_component_value_list: CssComponentValueList [
+                                                CssRegularDimension {
+                                                    value: CssNumber {
+                                                        value_token: CSS_NUMBER_LITERAL@656..659 ".25" [] [],
+                                                    },
+                                                    unit: CssIdentifier {
+                                                        value_token: IDENT@659..663 "turn" [] [],
+                                                    },
+                                                },
+                                            ],
                                         },
                                     },
                                     COMMA@663..665 "," [] [Whitespace(" ")],
                                     CssParameter {
-                                        any_css_parameter: CssListOfComponentValuesExpression {
+                                        any_css_expression: CssListOfComponentValuesExpression {
                                             css_component_value_list: CssComponentValueList [
                                                 CssIdentifier {
                                                     value_token: IDENT@665..669 "red" [] [Whitespace(" ")],
@@ -574,8 +678,12 @@ CssRoot {
                                     },
                                     COMMA@672..674 "," [] [Whitespace(" ")],
                                     CssParameter {
-                                        any_css_parameter: CssIdentifier {
-                                            value_token: IDENT@674..678 "blue" [] [],
+                                        any_css_expression: CssListOfComponentValuesExpression {
+                                            css_component_value_list: CssComponentValueList [
+                                                CssIdentifier {
+                                                    value_token: IDENT@674..678 "blue" [] [],
+                                                },
+                                            ],
                                         },
                                     },
                                 ],
@@ -598,18 +706,22 @@ CssRoot {
                                 l_paren_token: L_PAREN@712..713 "(" [] [],
                                 items: CssParameterList [
                                     CssParameter {
-                                        any_css_parameter: CssRegularDimension {
-                                            value: CssNumber {
-                                                value_token: CSS_NUMBER_LITERAL@713..715 "45" [] [],
-                                            },
-                                            unit: CssIdentifier {
-                                                value_token: IDENT@715..718 "deg" [] [],
-                                            },
+                                        any_css_expression: CssListOfComponentValuesExpression {
+                                            css_component_value_list: CssComponentValueList [
+                                                CssRegularDimension {
+                                                    value: CssNumber {
+                                                        value_token: CSS_NUMBER_LITERAL@713..715 "45" [] [],
+                                                    },
+                                                    unit: CssIdentifier {
+                                                        value_token: IDENT@715..718 "deg" [] [],
+                                                    },
+                                                },
+                                            ],
                                         },
                                     },
                                     COMMA@718..720 "," [] [Whitespace(" ")],
                                     CssParameter {
-                                        any_css_parameter: CssListOfComponentValuesExpression {
+                                        any_css_expression: CssListOfComponentValuesExpression {
                                             css_component_value_list: CssComponentValueList [
                                                 CssIdentifier {
                                                     value_token: IDENT@720..724 "red" [] [Whitespace(" ")],
@@ -628,7 +740,7 @@ CssRoot {
                                     },
                                     COMMA@729..731 "," [] [Whitespace(" ")],
                                     CssParameter {
-                                        any_css_parameter: CssListOfComponentValuesExpression {
+                                        any_css_expression: CssListOfComponentValuesExpression {
                                             css_component_value_list: CssComponentValueList [
                                                 CssIdentifier {
                                                     value_token: IDENT@731..736 "blue" [] [Whitespace(" ")],
@@ -693,12 +805,16 @@ CssRoot {
                 1: L_PAREN@35..36 "(" [] []
                 2: CSS_PARAMETER_LIST@36..47
                   0: CSS_PARAMETER@36..41
-                    0: CSS_IDENTIFIER@36..41
-                      0: IDENT@36..41 "white" [] []
+                    0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@36..41
+                      0: CSS_COMPONENT_VALUE_LIST@36..41
+                        0: CSS_IDENTIFIER@36..41
+                          0: IDENT@36..41 "white" [] []
                   1: COMMA@41..43 "," [] [Whitespace(" ")]
                   2: CSS_PARAMETER@43..47
-                    0: CSS_IDENTIFIER@43..47
-                      0: IDENT@43..47 "gray" [] []
+                    0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@43..47
+                      0: CSS_COMPONENT_VALUE_LIST@43..47
+                        0: CSS_IDENTIFIER@43..47
+                          0: IDENT@43..47 "gray" [] []
                 3: R_PAREN@47..48 ")" [] []
             3: (empty)
           1: SEMICOLON@48..49 ";" [] []
@@ -713,12 +829,16 @@ CssRoot {
                 1: L_PAREN@81..82 "(" [] []
                 2: CSS_PARAMETER_LIST@82..94
                   0: CSS_PARAMETER@82..88
-                    0: CSS_IDENTIFIER@82..88
-                      0: IDENT@82..88 "yellow" [] []
+                    0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@82..88
+                      0: CSS_COMPONENT_VALUE_LIST@82..88
+                        0: CSS_IDENTIFIER@82..88
+                          0: IDENT@82..88 "yellow" [] []
                   1: COMMA@88..90 "," [] [Whitespace(" ")]
                   2: CSS_PARAMETER@90..94
-                    0: CSS_IDENTIFIER@90..94
-                      0: IDENT@90..94 "blue" [] []
+                    0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@90..94
+                      0: CSS_COMPONENT_VALUE_LIST@90..94
+                        0: CSS_IDENTIFIER@90..94
+                          0: IDENT@90..94 "blue" [] []
                 3: R_PAREN@94..95 ")" [] []
             3: (empty)
           3: SEMICOLON@95..96 ";" [] []
@@ -741,12 +861,16 @@ CssRoot {
                           0: IDENT@132..138 "bottom" [] []
                   1: COMMA@138..140 "," [] [Whitespace(" ")]
                   2: CSS_PARAMETER@140..146
-                    0: CSS_IDENTIFIER@140..146
-                      0: IDENT@140..146 "yellow" [] []
+                    0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@140..146
+                      0: CSS_COMPONENT_VALUE_LIST@140..146
+                        0: CSS_IDENTIFIER@140..146
+                          0: IDENT@140..146 "yellow" [] []
                   3: COMMA@146..148 "," [] [Whitespace(" ")]
                   4: CSS_PARAMETER@148..152
-                    0: CSS_IDENTIFIER@148..152
-                      0: IDENT@148..152 "blue" [] []
+                    0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@148..152
+                      0: CSS_COMPONENT_VALUE_LIST@148..152
+                        0: CSS_IDENTIFIER@148..152
+                          0: IDENT@148..152 "blue" [] []
                 3: R_PAREN@152..153 ")" [] []
             3: (empty)
           5: SEMICOLON@153..154 ";" [] []
@@ -761,19 +885,25 @@ CssRoot {
                 1: L_PAREN@186..187 "(" [] []
                 2: CSS_PARAMETER_LIST@187..207
                   0: CSS_PARAMETER@187..193
-                    0: CSS_REGULAR_DIMENSION@187..193
-                      0: CSS_NUMBER@187..190
-                        0: CSS_NUMBER_LITERAL@187..190 "180" [] []
-                      1: CSS_IDENTIFIER@190..193
-                        0: IDENT@190..193 "deg" [] []
+                    0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@187..193
+                      0: CSS_COMPONENT_VALUE_LIST@187..193
+                        0: CSS_REGULAR_DIMENSION@187..193
+                          0: CSS_NUMBER@187..190
+                            0: CSS_NUMBER_LITERAL@187..190 "180" [] []
+                          1: CSS_IDENTIFIER@190..193
+                            0: IDENT@190..193 "deg" [] []
                   1: COMMA@193..195 "," [] [Whitespace(" ")]
                   2: CSS_PARAMETER@195..201
-                    0: CSS_IDENTIFIER@195..201
-                      0: IDENT@195..201 "yellow" [] []
+                    0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@195..201
+                      0: CSS_COMPONENT_VALUE_LIST@195..201
+                        0: CSS_IDENTIFIER@195..201
+                          0: IDENT@195..201 "yellow" [] []
                   3: COMMA@201..203 "," [] [Whitespace(" ")]
                   4: CSS_PARAMETER@203..207
-                    0: CSS_IDENTIFIER@203..207
-                      0: IDENT@203..207 "blue" [] []
+                    0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@203..207
+                      0: CSS_COMPONENT_VALUE_LIST@203..207
+                        0: CSS_IDENTIFIER@203..207
+                          0: IDENT@203..207 "blue" [] []
                 3: R_PAREN@207..208 ")" [] []
             3: (empty)
           7: SEMICOLON@208..209 ";" [] []
@@ -796,12 +926,16 @@ CssRoot {
                           0: IDENT@245..248 "top" [] []
                   1: COMMA@248..250 "," [] [Whitespace(" ")]
                   2: CSS_PARAMETER@250..254
-                    0: CSS_IDENTIFIER@250..254
-                      0: IDENT@250..254 "blue" [] []
+                    0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@250..254
+                      0: CSS_COMPONENT_VALUE_LIST@250..254
+                        0: CSS_IDENTIFIER@250..254
+                          0: IDENT@250..254 "blue" [] []
                   3: COMMA@254..256 "," [] [Whitespace(" ")]
                   4: CSS_PARAMETER@256..262
-                    0: CSS_IDENTIFIER@256..262
-                      0: IDENT@256..262 "yellow" [] []
+                    0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@256..262
+                      0: CSS_COMPONENT_VALUE_LIST@256..262
+                        0: CSS_IDENTIFIER@256..262
+                          0: IDENT@256..262 "yellow" [] []
                 3: R_PAREN@262..263 ")" [] []
             3: (empty)
           9: SEMICOLON@263..264 ";" [] []
@@ -856,19 +990,25 @@ CssRoot {
                 1: L_PAREN@362..363 "(" [] []
                 2: CSS_PARAMETER_LIST@363..383
                   0: CSS_PARAMETER@363..369
-                    0: CSS_REGULAR_DIMENSION@363..369
-                      0: CSS_NUMBER@363..366
-                        0: CSS_NUMBER_LITERAL@363..366 "135" [] []
-                      1: CSS_IDENTIFIER@366..369
-                        0: IDENT@366..369 "deg" [] []
+                    0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@363..369
+                      0: CSS_COMPONENT_VALUE_LIST@363..369
+                        0: CSS_REGULAR_DIMENSION@363..369
+                          0: CSS_NUMBER@363..366
+                            0: CSS_NUMBER_LITERAL@363..366 "135" [] []
+                          1: CSS_IDENTIFIER@366..369
+                            0: IDENT@366..369 "deg" [] []
                   1: COMMA@369..371 "," [] [Whitespace(" ")]
                   2: CSS_PARAMETER@371..377
-                    0: CSS_IDENTIFIER@371..377
-                      0: IDENT@371..377 "yellow" [] []
+                    0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@371..377
+                      0: CSS_COMPONENT_VALUE_LIST@371..377
+                        0: CSS_IDENTIFIER@371..377
+                          0: IDENT@371..377 "yellow" [] []
                   3: COMMA@377..379 "," [] [Whitespace(" ")]
                   4: CSS_PARAMETER@379..383
-                    0: CSS_IDENTIFIER@379..383
-                      0: IDENT@379..383 "blue" [] []
+                    0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@379..383
+                      0: CSS_COMPONENT_VALUE_LIST@379..383
+                        0: CSS_IDENTIFIER@379..383
+                          0: IDENT@379..383 "blue" [] []
                 3: R_PAREN@383..384 ")" [] []
             3: (empty)
           13: SEMICOLON@384..385 ";" [] []
@@ -883,19 +1023,25 @@ CssRoot {
                 1: L_PAREN@417..418 "(" [] []
                 2: CSS_PARAMETER_LIST@418..438
                   0: CSS_PARAMETER@418..424
-                    0: CSS_REGULAR_DIMENSION@418..424
-                      0: CSS_NUMBER@418..421
-                        0: CSS_NUMBER_LITERAL@418..421 "-45" [] []
-                      1: CSS_IDENTIFIER@421..424
-                        0: IDENT@421..424 "deg" [] []
+                    0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@418..424
+                      0: CSS_COMPONENT_VALUE_LIST@418..424
+                        0: CSS_REGULAR_DIMENSION@418..424
+                          0: CSS_NUMBER@418..421
+                            0: CSS_NUMBER_LITERAL@418..421 "-45" [] []
+                          1: CSS_IDENTIFIER@421..424
+                            0: IDENT@421..424 "deg" [] []
                   1: COMMA@424..426 "," [] [Whitespace(" ")]
                   2: CSS_PARAMETER@426..430
-                    0: CSS_IDENTIFIER@426..430
-                      0: IDENT@426..430 "blue" [] []
+                    0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@426..430
+                      0: CSS_COMPONENT_VALUE_LIST@426..430
+                        0: CSS_IDENTIFIER@426..430
+                          0: IDENT@426..430 "blue" [] []
                   3: COMMA@430..432 "," [] [Whitespace(" ")]
                   4: CSS_PARAMETER@432..438
-                    0: CSS_IDENTIFIER@432..438
-                      0: IDENT@432..438 "yellow" [] []
+                    0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@432..438
+                      0: CSS_COMPONENT_VALUE_LIST@432..438
+                        0: CSS_IDENTIFIER@432..438
+                          0: IDENT@432..438 "yellow" [] []
                 3: R_PAREN@438..439 ")" [] []
             3: (empty)
           15: SEMICOLON@439..440 ";" [] []
@@ -910,8 +1056,10 @@ CssRoot {
                 1: L_PAREN@472..473 "(" [] []
                 2: CSS_PARAMETER_LIST@473..495
                   0: CSS_PARAMETER@473..479
-                    0: CSS_IDENTIFIER@473..479
-                      0: IDENT@473..479 "yellow" [] []
+                    0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@473..479
+                      0: CSS_COMPONENT_VALUE_LIST@473..479
+                        0: CSS_IDENTIFIER@473..479
+                          0: IDENT@473..479 "yellow" [] []
                   1: COMMA@479..481 "," [] [Whitespace(" ")]
                   2: CSS_PARAMETER@481..489
                     0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@481..489
@@ -924,9 +1072,11 @@ CssRoot {
                           1: PERCENT@488..489 "%" [] []
                   3: COMMA@489..491 "," [] [Whitespace(" ")]
                   4: CSS_PARAMETER@491..495
-                    0: CSS_COLOR@491..495
-                      0: HASH@491..492 "#" [] []
-                      1: CSS_COLOR_LITERAL@492..495 "0f0" [] []
+                    0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@491..495
+                      0: CSS_COMPONENT_VALUE_LIST@491..495
+                        0: CSS_COLOR@491..495
+                          0: HASH@491..492 "#" [] []
+                          1: CSS_COLOR_LITERAL@492..495 "0f0" [] []
                 3: R_PAREN@495..496 ")" [] []
             3: (empty)
           17: SEMICOLON@496..497 ";" [] []
@@ -951,16 +1101,22 @@ CssRoot {
                           0: IDENT@537..542 "right" [] []
                   1: COMMA@542..544 "," [] [Whitespace(" ")]
                   2: CSS_PARAMETER@544..547
-                    0: CSS_IDENTIFIER@544..547
-                      0: IDENT@544..547 "red" [] []
+                    0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@544..547
+                      0: CSS_COMPONENT_VALUE_LIST@544..547
+                        0: CSS_IDENTIFIER@544..547
+                          0: IDENT@544..547 "red" [] []
                   3: COMMA@547..549 "," [] [Whitespace(" ")]
                   4: CSS_PARAMETER@549..554
-                    0: CSS_IDENTIFIER@549..554
-                      0: IDENT@549..554 "white" [] []
+                    0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@549..554
+                      0: CSS_COMPONENT_VALUE_LIST@549..554
+                        0: CSS_IDENTIFIER@549..554
+                          0: IDENT@549..554 "white" [] []
                   5: COMMA@554..556 "," [] [Whitespace(" ")]
                   6: CSS_PARAMETER@556..560
-                    0: CSS_IDENTIFIER@556..560
-                      0: IDENT@556..560 "blue" [] []
+                    0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@556..560
+                      0: CSS_COMPONENT_VALUE_LIST@556..560
+                        0: CSS_IDENTIFIER@556..560
+                          0: IDENT@556..560 "blue" [] []
                 3: R_PAREN@560..561 ")" [] []
             3: (empty)
           19: SEMICOLON@561..562 ";" [] []
@@ -975,15 +1131,19 @@ CssRoot {
                 1: L_PAREN@594..595 "(" [] []
                 2: CSS_PARAMETER_LIST@595..621
                   0: CSS_PARAMETER@595..599
-                    0: CSS_REGULAR_DIMENSION@595..599
-                      0: CSS_NUMBER@595..596
-                        0: CSS_NUMBER_LITERAL@595..596 "0" [] []
-                      1: CSS_IDENTIFIER@596..599
-                        0: IDENT@596..599 "deg" [] []
+                    0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@595..599
+                      0: CSS_COMPONENT_VALUE_LIST@595..599
+                        0: CSS_REGULAR_DIMENSION@595..599
+                          0: CSS_NUMBER@595..596
+                            0: CSS_NUMBER_LITERAL@595..596 "0" [] []
+                          1: CSS_IDENTIFIER@596..599
+                            0: IDENT@596..599 "deg" [] []
                   1: COMMA@599..601 "," [] [Whitespace(" ")]
                   2: CSS_PARAMETER@601..605
-                    0: CSS_IDENTIFIER@601..605
-                      0: IDENT@601..605 "blue" [] []
+                    0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@601..605
+                      0: CSS_COMPONENT_VALUE_LIST@601..605
+                        0: CSS_IDENTIFIER@601..605
+                          0: IDENT@601..605 "blue" [] []
                   3: COMMA@605..607 "," [] [Whitespace(" ")]
                   4: CSS_PARAMETER@607..616
                     0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@607..616
@@ -996,8 +1156,10 @@ CssRoot {
                           1: PERCENT@615..616 "%" [] []
                   5: COMMA@616..618 "," [] [Whitespace(" ")]
                   6: CSS_PARAMETER@618..621
-                    0: CSS_IDENTIFIER@618..621
-                      0: IDENT@618..621 "red" [] []
+                    0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@618..621
+                      0: CSS_COMPONENT_VALUE_LIST@618..621
+                        0: CSS_IDENTIFIER@618..621
+                          0: IDENT@618..621 "red" [] []
                 3: R_PAREN@621..622 ")" [] []
             3: (empty)
           21: SEMICOLON@622..623 ";" [] []
@@ -1012,11 +1174,13 @@ CssRoot {
                 1: L_PAREN@655..656 "(" [] []
                 2: CSS_PARAMETER_LIST@656..678
                   0: CSS_PARAMETER@656..663
-                    0: CSS_REGULAR_DIMENSION@656..663
-                      0: CSS_NUMBER@656..659
-                        0: CSS_NUMBER_LITERAL@656..659 ".25" [] []
-                      1: CSS_IDENTIFIER@659..663
-                        0: IDENT@659..663 "turn" [] []
+                    0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@656..663
+                      0: CSS_COMPONENT_VALUE_LIST@656..663
+                        0: CSS_REGULAR_DIMENSION@656..663
+                          0: CSS_NUMBER@656..659
+                            0: CSS_NUMBER_LITERAL@656..659 ".25" [] []
+                          1: CSS_IDENTIFIER@659..663
+                            0: IDENT@659..663 "turn" [] []
                   1: COMMA@663..665 "," [] [Whitespace(" ")]
                   2: CSS_PARAMETER@665..672
                     0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@665..672
@@ -1029,8 +1193,10 @@ CssRoot {
                           1: PERCENT@671..672 "%" [] []
                   3: COMMA@672..674 "," [] [Whitespace(" ")]
                   4: CSS_PARAMETER@674..678
-                    0: CSS_IDENTIFIER@674..678
-                      0: IDENT@674..678 "blue" [] []
+                    0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@674..678
+                      0: CSS_COMPONENT_VALUE_LIST@674..678
+                        0: CSS_IDENTIFIER@674..678
+                          0: IDENT@674..678 "blue" [] []
                 3: R_PAREN@678..679 ")" [] []
             3: (empty)
           23: SEMICOLON@679..680 ";" [] []
@@ -1045,11 +1211,13 @@ CssRoot {
                 1: L_PAREN@712..713 "(" [] []
                 2: CSS_PARAMETER_LIST@713..744
                   0: CSS_PARAMETER@713..718
-                    0: CSS_REGULAR_DIMENSION@713..718
-                      0: CSS_NUMBER@713..715
-                        0: CSS_NUMBER_LITERAL@713..715 "45" [] []
-                      1: CSS_IDENTIFIER@715..718
-                        0: IDENT@715..718 "deg" [] []
+                    0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@713..718
+                      0: CSS_COMPONENT_VALUE_LIST@713..718
+                        0: CSS_REGULAR_DIMENSION@713..718
+                          0: CSS_NUMBER@713..715
+                            0: CSS_NUMBER_LITERAL@713..715 "45" [] []
+                          1: CSS_IDENTIFIER@715..718
+                            0: IDENT@715..718 "deg" [] []
                   1: COMMA@718..720 "," [] [Whitespace(" ")]
                   2: CSS_PARAMETER@720..729
                     0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@720..729

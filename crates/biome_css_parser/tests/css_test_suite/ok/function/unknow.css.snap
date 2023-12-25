@@ -49,13 +49,17 @@ CssRoot {
                                 l_paren_token: L_PAREN@18..19 "(" [] [],
                                 items: CssParameterList [
                                     CssParameter {
-                                        any_css_parameter: CssRegularDimension {
-                                            value: CssNumber {
-                                                value_token: CSS_NUMBER_LITERAL@19..22 "100" [] [],
-                                            },
-                                            unit: CssIdentifier {
-                                                value_token: IDENT@22..24 "px" [] [],
-                                            },
+                                        any_css_expression: CssListOfComponentValuesExpression {
+                                            css_component_value_list: CssComponentValueList [
+                                                CssRegularDimension {
+                                                    value: CssNumber {
+                                                        value_token: CSS_NUMBER_LITERAL@19..22 "100" [] [],
+                                                    },
+                                                    unit: CssIdentifier {
+                                                        value_token: IDENT@22..24 "px" [] [],
+                                                    },
+                                                },
+                                            ],
                                         },
                                     },
                                 ],
@@ -78,13 +82,17 @@ CssRoot {
                                 l_paren_token: L_PAREN@41..42 "(" [] [],
                                 items: CssParameterList [
                                     CssParameter {
-                                        any_css_parameter: CssRegularDimension {
-                                            value: CssNumber {
-                                                value_token: CSS_NUMBER_LITERAL@42..45 "100" [] [],
-                                            },
-                                            unit: CssIdentifier {
-                                                value_token: IDENT@45..47 "px" [] [],
-                                            },
+                                        any_css_expression: CssListOfComponentValuesExpression {
+                                            css_component_value_list: CssComponentValueList [
+                                                CssRegularDimension {
+                                                    value: CssNumber {
+                                                        value_token: CSS_NUMBER_LITERAL@42..45 "100" [] [],
+                                                    },
+                                                    unit: CssIdentifier {
+                                                        value_token: IDENT@45..47 "px" [] [],
+                                                    },
+                                                },
+                                            ],
                                         },
                                     },
                                 ],
@@ -107,13 +115,17 @@ CssRoot {
                                 l_paren_token: L_PAREN@68..69 "(" [] [],
                                 items: CssParameterList [
                                     CssParameter {
-                                        any_css_parameter: CssRegularDimension {
-                                            value: CssNumber {
-                                                value_token: CSS_NUMBER_LITERAL@69..72 "100" [] [],
-                                            },
-                                            unit: CssIdentifier {
-                                                value_token: IDENT@72..74 "px" [] [],
-                                            },
+                                        any_css_expression: CssListOfComponentValuesExpression {
+                                            css_component_value_list: CssComponentValueList [
+                                                CssRegularDimension {
+                                                    value: CssNumber {
+                                                        value_token: CSS_NUMBER_LITERAL@69..72 "100" [] [],
+                                                    },
+                                                    unit: CssIdentifier {
+                                                        value_token: IDENT@72..74 "px" [] [],
+                                                    },
+                                                },
+                                            ],
                                         },
                                     },
                                 ],
@@ -161,11 +173,13 @@ CssRoot {
                 1: L_PAREN@18..19 "(" [] []
                 2: CSS_PARAMETER_LIST@19..24
                   0: CSS_PARAMETER@19..24
-                    0: CSS_REGULAR_DIMENSION@19..24
-                      0: CSS_NUMBER@19..22
-                        0: CSS_NUMBER_LITERAL@19..22 "100" [] []
-                      1: CSS_IDENTIFIER@22..24
-                        0: IDENT@22..24 "px" [] []
+                    0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@19..24
+                      0: CSS_COMPONENT_VALUE_LIST@19..24
+                        0: CSS_REGULAR_DIMENSION@19..24
+                          0: CSS_NUMBER@19..22
+                            0: CSS_NUMBER_LITERAL@19..22 "100" [] []
+                          1: CSS_IDENTIFIER@22..24
+                            0: IDENT@22..24 "px" [] []
                 3: R_PAREN@24..25 ")" [] []
             3: (empty)
           1: SEMICOLON@25..26 ";" [] []
@@ -180,11 +194,13 @@ CssRoot {
                 1: L_PAREN@41..42 "(" [] []
                 2: CSS_PARAMETER_LIST@42..47
                   0: CSS_PARAMETER@42..47
-                    0: CSS_REGULAR_DIMENSION@42..47
-                      0: CSS_NUMBER@42..45
-                        0: CSS_NUMBER_LITERAL@42..45 "100" [] []
-                      1: CSS_IDENTIFIER@45..47
-                        0: IDENT@45..47 "px" [] []
+                    0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@42..47
+                      0: CSS_COMPONENT_VALUE_LIST@42..47
+                        0: CSS_REGULAR_DIMENSION@42..47
+                          0: CSS_NUMBER@42..45
+                            0: CSS_NUMBER_LITERAL@42..45 "100" [] []
+                          1: CSS_IDENTIFIER@45..47
+                            0: IDENT@45..47 "px" [] []
                 3: R_PAREN@47..48 ")" [] []
             3: (empty)
           3: SEMICOLON@48..49 ";" [] []
@@ -199,11 +215,13 @@ CssRoot {
                 1: L_PAREN@68..69 "(" [] []
                 2: CSS_PARAMETER_LIST@69..74
                   0: CSS_PARAMETER@69..74
-                    0: CSS_REGULAR_DIMENSION@69..74
-                      0: CSS_NUMBER@69..72
-                        0: CSS_NUMBER_LITERAL@69..72 "100" [] []
-                      1: CSS_IDENTIFIER@72..74
-                        0: IDENT@72..74 "px" [] []
+                    0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@69..74
+                      0: CSS_COMPONENT_VALUE_LIST@69..74
+                        0: CSS_REGULAR_DIMENSION@69..74
+                          0: CSS_NUMBER@69..72
+                            0: CSS_NUMBER_LITERAL@69..72 "100" [] []
+                          1: CSS_IDENTIFIER@72..74
+                            0: IDENT@72..74 "px" [] []
                 3: R_PAREN@74..75 ")" [] []
             3: (empty)
           5: SEMICOLON@75..76 ";" [] []

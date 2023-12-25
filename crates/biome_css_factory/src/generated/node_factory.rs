@@ -764,10 +764,10 @@ pub fn css_number(value_token: SyntaxToken) -> CssNumber {
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
-pub fn css_parameter(any_css_parameter: AnyCssParameter) -> CssParameter {
+pub fn css_parameter(any_css_expression: AnyCssExpression) -> CssParameter {
     CssParameter::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_PARAMETER,
-        [Some(SyntaxElement::Node(any_css_parameter.into_syntax()))],
+        [Some(SyntaxElement::Node(any_css_expression.into_syntax()))],
     ))
 }
 pub fn css_parenthesized_expression(

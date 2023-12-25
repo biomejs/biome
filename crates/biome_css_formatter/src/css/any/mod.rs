@@ -28,7 +28,6 @@ pub(crate) mod media_query;
 pub(crate) mod media_type_condition;
 pub(crate) mod media_type_query;
 pub(crate) mod namespace_prefix;
-pub(crate) mod parameter;
 pub(crate) mod pseudo_class;
 pub(crate) mod pseudo_class_nth;
 pub(crate) mod pseudo_class_nth_selector;
