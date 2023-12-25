@@ -907,7 +907,7 @@ AnyCssQueryFeatureValue =
 	| AnyCssDimension
 	| CssIdentifier
 	| CssRatio
-	| CssAnyFunction
+	| AnyCssFunction
 
 // https://drafts.csswg.org/css-page/#at-ruledef-page
 // @page = @page <page-selector-list>? { <declaration-rule-list> }
@@ -1041,8 +1041,9 @@ AnyCssValue =
 	| CssNumber
 	| AnyCssDimension
 	| CssRatio
-	| CssAnyFunction
+	| AnyCssFunction
 	| CssCustomProperty
+	| CssColor
 
 
 // 10px
@@ -1066,8 +1067,9 @@ CssRatio =
 	denominator: CssNumber
 
 
-CssAnyFunction =
-	CssSimpleFunction
+AnyCssFunction =
+	CssSimpleFunction | 
+	CssUrlFunction
 
 // content: counter(section);
 // 					^^^^^^^^^^^^^^^^
@@ -1076,6 +1078,13 @@ CssSimpleFunction =
 	'('
 	items: CssParameterList
 	')'
+
+CssUrlFunction = 'url' '(' AnyCssUrlValue? ')'
+
+AnyCssUrlValue =
+	CssUrlValueRaw
+	| CssString
+
 
 CssVarFunction =
 	'var'
@@ -1102,8 +1111,29 @@ CssParameterList = CssParameter (',' CssParameter)* ','?
 //			    ^^^
 // repeating-radial-gradient(red, yellow 10%, green 15%);
 //                                ^^^^^^^^^^
-CssParameter = CssComponentValueList
+CssParameter = AnyCssExpression 
+
+AnyCssExpression = CssBinaryExpression | CssParenthesizedExpression |  CssListOfComponentValuesExpression 
+CssListOfComponentValuesExpression = CssComponentValueList
+
+CssBinaryExpression = 
+	left: AnyCssExpression
+	operator_token: (
+		'+' | '-' | '*' | '/' 
+	)
+	right: AnyCssExpression
+
+
+CssParenthesizedExpression =
+	'(' expression: AnyCssExpression? ')'
+
+// #fff
+// ^^^^
+CssColor =
+	'#'
+	value:'css_color_literal' 
 
 CssIdentifier = value: 'ident'
 CssString = value: 'css_string_literal'
 CssNumber = value: 'css_number_literal'
+CssUrlValueRaw = value: 'css_url_value_raw_literal'

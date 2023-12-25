@@ -134,7 +134,9 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 #[test]
 pub fn quick_test() {
     let code = r#"
-@page{margin: 1cm;}
+    .sign {
+        background-position: sign(10% * 2);
+         }
     "#;
 
     let root = parse_css(

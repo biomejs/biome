@@ -13,12 +13,18 @@ mod language {
 // use this test check if your snippet prints as you wish, without using a snapshot
 fn quick_test() {
     let src = r#"
-    @charset "UTF-8";
-@charset "iso-8859-15";
-@charset     "UTF-8";
-@charset "UTF-8";
-
-@charset "any-string-is-okay";
+    div {
+        color: rgba(255, 255, 255, 1);
+        color:   rgba   (
+            0,
+            1,
+            255,
+            1
+        );
+        color: arbitrary(really long list, of complex parameter values, each one on its own line);
+        color: more-arbitrary(just, has, lots, of, individual, parameters, breaking, over, lines);
+        color: arbitrary(one really long parameter value that itself will break over multiple lines and fill together);
+    }
 "#;
     let parse = parse_css(src, CssParserOptions::default());
     println!("{:#?}", parse.syntax());

@@ -1,6 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-info: css/functions.css
+info: "css\\functions.css"
 ---
 
 # Input
@@ -55,10 +55,39 @@ div {
 			lines
 		);
 	color: arbitrary(
-			one really long parameter value that itself will break over multiple lines
-				and fill together
+			one really long parameter value that itself will break over multiple lines and fill together
 		);
 }
+```
+
+
+
+## Unimplemented nodes/tokens
+
+"255" => 19..22
+" 25" => 23..26
+" 25" => 28..31
+" " => 33..34
+"0, 1, 255," => 51..61
+" 1, 255, 1" => 53..63
+" 255, 1);\n\tc" => 56..68
+" 1);\n\tcolo" => 61..71
+"\t\t\treally long l" => 85..101
+"\t\t\tof complex parameter val" => 106..133
+"\t\t\teach one on its own l" => 138..162
+"\t\t\tj" => 195..199
+"\t\t\t" => 204..207
+"\t\t\tl" => 212..216
+"\t\t" => 221..223
+"\t\t\tindivid" => 228..238
+"\t\t\tparamet" => 243..253
+"\t\t\tbreak" => 258..266
+"\t\t\to" => 271..275
+"\t\t\tli" => 280..285
+"\t\t\tone really long parameter value that itself will break over multiple lines and fill toget" => 313..405
+# Lines exceeding max width of 80 characters
+```
+   21: 			one really long parameter value that itself will break over multiple lines and fill together
 ```
 
 
