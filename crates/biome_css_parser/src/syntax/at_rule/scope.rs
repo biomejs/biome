@@ -131,4 +131,4 @@ pub(crate) fn parse_scope_edge(p: &mut CssParser) -> ParsedSyntax {
 }
 
 const SCOPE_EDGE_SELECTOR_LIST_END_SET: TokenSet<CssSyntaxKind> =
-    token_set![T![')'], T!['('], T![to], T!['{']];
+    token_set![T![')'], T!['{']];
