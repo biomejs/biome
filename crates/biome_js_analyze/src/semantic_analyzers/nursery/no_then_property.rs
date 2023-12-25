@@ -1,5 +1,6 @@
 use crate::semantic_services::Semantic;
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
+use biome_console::{markup, MarkupBuf};
 use biome_js_syntax::{
     AnyJsArrayElement, AnyJsAssignment, AnyJsAssignmentPattern, AnyJsCallArgument,
     AnyJsClassMemberName, AnyJsDeclarationClause, AnyJsExportClause, AnyJsExportNamedSpecifier,
@@ -12,9 +13,9 @@ use biome_js_syntax::{
 use biome_rowan::{declare_node_union, AstNode, AstSeparatedList, TextRange};
 
 declare_rule! {
-    /// Disallow `then` property
+    /// Disallow `then` property.
     ///
-    /// When combining objects with a `then`` method (thenable objects) with await expressions or dynamic imports, caution is necessary.
+    /// When combining objects with a `then` method (thenable objects) with await expressions or dynamic imports, caution is necessary.
     /// These syntaxes interpret the object's then method as intended for the resolution or rejection of a promise, which can lead to unexpected behavior or errors.
     ///
     /// Source: https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/no-thenable.md
@@ -86,7 +87,7 @@ declare_rule! {
     pub(crate) NoThenProperty {
         version: "next",
         name: "noThenProperty",
-        recommended: false,
+        recommended: true,
     }
 }
 
@@ -112,11 +113,17 @@ pub struct RuleState {
 }
 
 impl RuleState {
-    fn diagnostic_message(&self) -> &str {
+    fn diagnostic_message(&self) -> MarkupBuf {
         match self.message {
-            NoThenPropertyMessage::Object => "Do not add `then` to an object.",
-            NoThenPropertyMessage::Export => "Do not export `then`.",
-            NoThenPropertyMessage::Class => "Do not add `then` to a class.",
+            NoThenPropertyMessage::Object => {
+                markup! { "Do not add "<Emphasis>"then"</Emphasis>" to an object." }.to_owned()
+            }
+            NoThenPropertyMessage::Export => {
+                markup! { "Do not export "<Emphasis>"then"</Emphasis>"."}.to_owned()
+            }
+            NoThenPropertyMessage::Class => {
+                markup! {"Do not add  "<Emphasis>"then"</Emphasis>" to a class." }.to_owned()
+            }
         }
     }
 }
