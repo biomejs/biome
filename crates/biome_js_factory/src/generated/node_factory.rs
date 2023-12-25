@@ -5216,6 +5216,7 @@ pub fn ts_interface_declaration(
         members,
         r_curly_token,
         type_parameters: None,
+        ts_type_empty_parameters: None,
         extends_clause: None,
     }
 }
@@ -5226,11 +5227,19 @@ pub struct TsInterfaceDeclarationBuilder {
     members: TsTypeMemberList,
     r_curly_token: SyntaxToken,
     type_parameters: Option<TsTypeParameters>,
+    ts_type_empty_parameters: Option<TsTypeEmptyParameters>,
     extends_clause: Option<TsExtendsClause>,
 }
 impl TsInterfaceDeclarationBuilder {
     pub fn with_type_parameters(mut self, type_parameters: TsTypeParameters) -> Self {
         self.type_parameters = Some(type_parameters);
+        self
+    }
+    pub fn with_ts_type_empty_parameters(
+        mut self,
+        ts_type_empty_parameters: TsTypeEmptyParameters,
+    ) -> Self {
+        self.ts_type_empty_parameters = Some(ts_type_empty_parameters);
         self
     }
     pub fn with_extends_clause(mut self, extends_clause: TsExtendsClause) -> Self {
@@ -5244,6 +5253,8 @@ impl TsInterfaceDeclarationBuilder {
                 Some(SyntaxElement::Token(self.interface_token)),
                 Some(SyntaxElement::Node(self.id.into_syntax())),
                 self.type_parameters
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                self.ts_type_empty_parameters
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
                 self.extends_clause
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
@@ -6249,6 +6260,7 @@ pub fn ts_type_alias_declaration(
         eq_token,
         ty,
         type_parameters: None,
+        ts_type_empty_parameters: None,
         semicolon_token: None,
     }
 }
@@ -6258,11 +6270,19 @@ pub struct TsTypeAliasDeclarationBuilder {
     eq_token: SyntaxToken,
     ty: AnyTsType,
     type_parameters: Option<TsTypeParameters>,
+    ts_type_empty_parameters: Option<TsTypeEmptyParameters>,
     semicolon_token: Option<SyntaxToken>,
 }
 impl TsTypeAliasDeclarationBuilder {
     pub fn with_type_parameters(mut self, type_parameters: TsTypeParameters) -> Self {
         self.type_parameters = Some(type_parameters);
+        self
+    }
+    pub fn with_ts_type_empty_parameters(
+        mut self,
+        ts_type_empty_parameters: TsTypeEmptyParameters,
+    ) -> Self {
+        self.ts_type_empty_parameters = Some(ts_type_empty_parameters);
         self
     }
     pub fn with_semicolon_token(mut self, semicolon_token: SyntaxToken) -> Self {
@@ -6276,6 +6296,8 @@ impl TsTypeAliasDeclarationBuilder {
                 Some(SyntaxElement::Token(self.type_token)),
                 Some(SyntaxElement::Node(self.binding_identifier.into_syntax())),
                 self.type_parameters
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                self.ts_type_empty_parameters
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
                 Some(SyntaxElement::Token(self.eq_token)),
                 Some(SyntaxElement::Node(self.ty.into_syntax())),
@@ -6349,6 +6371,18 @@ pub fn ts_type_constraint_clause(
         [
             Some(SyntaxElement::Token(extends_token)),
             Some(SyntaxElement::Node(ty.into_syntax())),
+        ],
+    ))
+}
+pub fn ts_type_empty_parameters(
+    l_angle_token: SyntaxToken,
+    r_angle_token: SyntaxToken,
+) -> TsTypeEmptyParameters {
+    TsTypeEmptyParameters::unwrap_cast(SyntaxNode::new_detached(
+        JsSyntaxKind::TS_TYPE_EMPTY_PARAMETERS,
+        [
+            Some(SyntaxElement::Token(l_angle_token)),
+            Some(SyntaxElement::Token(r_angle_token)),
         ],
     ))
 }
