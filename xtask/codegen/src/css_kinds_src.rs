@@ -189,6 +189,8 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "right-bottom",
         // layer at rule
         "layer",
+        // scope at rule
+        "scope",
         //
         "font-face",
         // Don't add to the end of this list, add to the end of the list in
@@ -344,6 +346,11 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_LAYER_REFERENCE_LIST",
         "CSS_LAYER_NAME_LIST",
         "CSS_LAYER_DECLARATION",
+        "CSS_SCOPE_AT_RULE",
+        "CSS_SCOPE_RANGE_START",
+        "CSS_SCOPE_RANGE_END",
+        "CSS_SCOPE_RANGE_INTERVAL",
+        "CSS_SCOPE_EDGE",
         // Bogus nodes
         "CSS_BOGUS",
         "CSS_BOGUS_BLOCK",
@@ -360,5 +367,6 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_BOGUS_COMPONENT_VALUE",
         "CSS_BOGUS_PARAMETER",
         "CSS_BOGUS_MEDIA_QUERY",
+        "CSS_BOGUS_SCOPE_RANGE",
     ],
 };

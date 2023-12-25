@@ -26,3 +26,15 @@ pub(crate) fn expected_page_selector_pseudo(p: &CssParser, range: TextRange) -> 
 pub(crate) fn expected_any_page_at_rule_item(p: &CssParser, range: TextRange) -> ParseDiagnostic {
     expected_any(&["declaration", "at rule", "margin at rule"], range, p)
 }
+
+pub(crate) fn expected_any_scope_range(p: &CssParser, range: TextRange) -> ParseDiagnostic {
+    expected_any(
+        &[
+            "(<scope-start>)",
+            "to (<scope-end>)",
+            "(scope-start) to (<scope-end>)",
+        ],
+        range,
+        p,
+    )
+}

@@ -438,6 +438,26 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssRuleListBlock::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_SCOPE_AT_RULE => {
+                    let $pattern = unsafe { $crate::CssScopeAtRule::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_SCOPE_EDGE => {
+                    let $pattern = unsafe { $crate::CssScopeEdge::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_SCOPE_RANGE_END => {
+                    let $pattern = unsafe { $crate::CssScopeRangeEnd::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_SCOPE_RANGE_INTERVAL => {
+                    let $pattern = unsafe { $crate::CssScopeRangeInterval::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_SCOPE_RANGE_START => {
+                    let $pattern = unsafe { $crate::CssScopeRangeStart::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_SIMPLE_FUNCTION => {
                     let $pattern = unsafe { $crate::CssSimpleFunction::new_unchecked(node) };
                     $body
@@ -526,6 +546,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::CssSyntaxKind::CSS_BOGUS_RULE => {
                     let $pattern = unsafe { $crate::CssBogusRule::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_BOGUS_SCOPE_RANGE => {
+                    let $pattern = unsafe { $crate::CssBogusScopeRange::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_BOGUS_SELECTOR => {

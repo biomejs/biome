@@ -282,12 +282,13 @@ pub(crate) fn is_at_custom_property(p: &mut CssParser) -> bool {
 
 #[inline]
 pub(crate) fn parse_custom_property(p: &mut CssParser) -> ParsedSyntax {
-    if is_at_custom_property(p) {
-        let m = p.start();
-        parse_regular_identifier(p).or_add_diagnostic(p, expected_identifier);
-        return Present(m.complete(p, CSS_CUSTOM_PROPERTY));
+    if !is_at_custom_property(p) {
+        return Absent;
     }
-    Absent
+
+    let m = p.start();
+    parse_regular_identifier(p).or_add_diagnostic(p, expected_identifier);
+    Present(m.complete(p, CSS_CUSTOM_PROPERTY))
 }
 
 #[inline]

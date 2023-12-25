@@ -4247,6 +4247,221 @@ pub struct CssRuleListBlockFields {
     pub r_curly_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssScopeAtRule {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssScopeAtRule {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssScopeAtRuleFields {
+        CssScopeAtRuleFields {
+            scope_token: self.scope_token(),
+            range: self.range(),
+            block: self.block(),
+        }
+    }
+    pub fn scope_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn range(&self) -> Option<AnyCssScopeRange> {
+        support::node(&self.syntax, 1usize)
+    }
+    pub fn block(&self) -> SyntaxResult<AnyCssRuleListBlock> {
+        support::required_node(&self.syntax, 2usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssScopeAtRule {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssScopeAtRuleFields {
+    pub scope_token: SyntaxResult<SyntaxToken>,
+    pub range: Option<AnyCssScopeRange>,
+    pub block: SyntaxResult<AnyCssRuleListBlock>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssScopeEdge {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssScopeEdge {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssScopeEdgeFields {
+        CssScopeEdgeFields {
+            l_paren_token: self.l_paren_token(),
+            selectors: self.selectors(),
+            r_paren_token: self.r_paren_token(),
+        }
+    }
+    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn selectors(&self) -> CssSelectorList {
+        support::list(&self.syntax, 1usize)
+    }
+    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssScopeEdge {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssScopeEdgeFields {
+    pub l_paren_token: SyntaxResult<SyntaxToken>,
+    pub selectors: CssSelectorList,
+    pub r_paren_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssScopeRangeEnd {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssScopeRangeEnd {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssScopeRangeEndFields {
+        CssScopeRangeEndFields {
+            to_token: self.to_token(),
+            end: self.end(),
+        }
+    }
+    pub fn to_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn end(&self) -> SyntaxResult<CssScopeEdge> {
+        support::required_node(&self.syntax, 1usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssScopeRangeEnd {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssScopeRangeEndFields {
+    pub to_token: SyntaxResult<SyntaxToken>,
+    pub end: SyntaxResult<CssScopeEdge>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssScopeRangeInterval {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssScopeRangeInterval {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssScopeRangeIntervalFields {
+        CssScopeRangeIntervalFields {
+            start: self.start(),
+            to_token: self.to_token(),
+            end: self.end(),
+        }
+    }
+    pub fn start(&self) -> SyntaxResult<CssScopeEdge> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn to_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn end(&self) -> SyntaxResult<CssScopeEdge> {
+        support::required_node(&self.syntax, 2usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssScopeRangeInterval {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssScopeRangeIntervalFields {
+    pub start: SyntaxResult<CssScopeEdge>,
+    pub to_token: SyntaxResult<SyntaxToken>,
+    pub end: SyntaxResult<CssScopeEdge>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssScopeRangeStart {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssScopeRangeStart {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssScopeRangeStartFields {
+        CssScopeRangeStartFields {
+            start: self.start(),
+        }
+    }
+    pub fn start(&self) -> SyntaxResult<CssScopeEdge> {
+        support::required_node(&self.syntax, 0usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssScopeRangeStart {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssScopeRangeStartFields {
+    pub start: SyntaxResult<CssScopeEdge>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssSimpleFunction {
     pub(crate) syntax: SyntaxNode,
 }
@@ -4649,6 +4864,7 @@ pub enum AnyCssAtRule {
     CssLayerAtRule(CssLayerAtRule),
     CssMediaAtRule(CssMediaAtRule),
     CssPageAtRule(CssPageAtRule),
+    CssScopeAtRule(CssScopeAtRule),
 }
 impl AnyCssAtRule {
     pub fn as_css_bogus_at_rule(&self) -> Option<&CssBogusAtRule> {
@@ -4714,6 +4930,12 @@ impl AnyCssAtRule {
     pub fn as_css_page_at_rule(&self) -> Option<&CssPageAtRule> {
         match &self {
             AnyCssAtRule::CssPageAtRule(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_scope_at_rule(&self) -> Option<&CssScopeAtRule> {
+        match &self {
+            AnyCssAtRule::CssScopeAtRule(item) => Some(item),
             _ => None,
         }
     }
@@ -5820,6 +6042,40 @@ impl AnyCssRuleListBlock {
     pub fn as_css_rule_list_block(&self) -> Option<&CssRuleListBlock> {
         match &self {
             AnyCssRuleListBlock::CssRuleListBlock(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub enum AnyCssScopeRange {
+    CssBogusScopeRange(CssBogusScopeRange),
+    CssScopeRangeEnd(CssScopeRangeEnd),
+    CssScopeRangeInterval(CssScopeRangeInterval),
+    CssScopeRangeStart(CssScopeRangeStart),
+}
+impl AnyCssScopeRange {
+    pub fn as_css_bogus_scope_range(&self) -> Option<&CssBogusScopeRange> {
+        match &self {
+            AnyCssScopeRange::CssBogusScopeRange(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_scope_range_end(&self) -> Option<&CssScopeRangeEnd> {
+        match &self {
+            AnyCssScopeRange::CssScopeRangeEnd(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_scope_range_interval(&self) -> Option<&CssScopeRangeInterval> {
+        match &self {
+            AnyCssScopeRange::CssScopeRangeInterval(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_scope_range_start(&self) -> Option<&CssScopeRangeStart> {
+        match &self {
+            AnyCssScopeRange::CssScopeRangeStart(item) => Some(item),
             _ => None,
         }
     }
@@ -10099,6 +10355,212 @@ impl From<CssRuleListBlock> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for CssScopeAtRule {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_SCOPE_AT_RULE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_SCOPE_AT_RULE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssScopeAtRule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssScopeAtRule")
+            .field(
+                "scope_token",
+                &support::DebugSyntaxResult(self.scope_token()),
+            )
+            .field("range", &support::DebugOptionalElement(self.range()))
+            .field("block", &support::DebugSyntaxResult(self.block()))
+            .finish()
+    }
+}
+impl From<CssScopeAtRule> for SyntaxNode {
+    fn from(n: CssScopeAtRule) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssScopeAtRule> for SyntaxElement {
+    fn from(n: CssScopeAtRule) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssScopeEdge {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_SCOPE_EDGE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_SCOPE_EDGE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssScopeEdge {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssScopeEdge")
+            .field(
+                "l_paren_token",
+                &support::DebugSyntaxResult(self.l_paren_token()),
+            )
+            .field("selectors", &self.selectors())
+            .field(
+                "r_paren_token",
+                &support::DebugSyntaxResult(self.r_paren_token()),
+            )
+            .finish()
+    }
+}
+impl From<CssScopeEdge> for SyntaxNode {
+    fn from(n: CssScopeEdge) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssScopeEdge> for SyntaxElement {
+    fn from(n: CssScopeEdge) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssScopeRangeEnd {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_SCOPE_RANGE_END as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_SCOPE_RANGE_END
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssScopeRangeEnd {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssScopeRangeEnd")
+            .field("to_token", &support::DebugSyntaxResult(self.to_token()))
+            .field("end", &support::DebugSyntaxResult(self.end()))
+            .finish()
+    }
+}
+impl From<CssScopeRangeEnd> for SyntaxNode {
+    fn from(n: CssScopeRangeEnd) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssScopeRangeEnd> for SyntaxElement {
+    fn from(n: CssScopeRangeEnd) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssScopeRangeInterval {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_SCOPE_RANGE_INTERVAL as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_SCOPE_RANGE_INTERVAL
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssScopeRangeInterval {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssScopeRangeInterval")
+            .field("start", &support::DebugSyntaxResult(self.start()))
+            .field("to_token", &support::DebugSyntaxResult(self.to_token()))
+            .field("end", &support::DebugSyntaxResult(self.end()))
+            .finish()
+    }
+}
+impl From<CssScopeRangeInterval> for SyntaxNode {
+    fn from(n: CssScopeRangeInterval) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssScopeRangeInterval> for SyntaxElement {
+    fn from(n: CssScopeRangeInterval) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssScopeRangeStart {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_SCOPE_RANGE_START as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_SCOPE_RANGE_START
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssScopeRangeStart {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssScopeRangeStart")
+            .field("start", &support::DebugSyntaxResult(self.start()))
+            .finish()
+    }
+}
+impl From<CssScopeRangeStart> for SyntaxNode {
+    fn from(n: CssScopeRangeStart) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssScopeRangeStart> for SyntaxElement {
+    fn from(n: CssScopeRangeStart) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
 impl AstNode for CssSimpleFunction {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -10545,6 +11007,11 @@ impl From<CssPageAtRule> for AnyCssAtRule {
         AnyCssAtRule::CssPageAtRule(node)
     }
 }
+impl From<CssScopeAtRule> for AnyCssAtRule {
+    fn from(node: CssScopeAtRule) -> AnyCssAtRule {
+        AnyCssAtRule::CssScopeAtRule(node)
+    }
+}
 impl AstNode for AnyCssAtRule {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = CssBogusAtRule::KIND_SET
@@ -10557,7 +11024,8 @@ impl AstNode for AnyCssAtRule {
         .union(CssKeyframesAtRule::KIND_SET)
         .union(CssLayerAtRule::KIND_SET)
         .union(CssMediaAtRule::KIND_SET)
-        .union(CssPageAtRule::KIND_SET);
+        .union(CssPageAtRule::KIND_SET)
+        .union(CssScopeAtRule::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
@@ -10572,6 +11040,7 @@ impl AstNode for AnyCssAtRule {
                 | CSS_LAYER_AT_RULE
                 | CSS_MEDIA_AT_RULE
                 | CSS_PAGE_AT_RULE
+                | CSS_SCOPE_AT_RULE
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
@@ -10597,6 +11066,7 @@ impl AstNode for AnyCssAtRule {
             CSS_LAYER_AT_RULE => AnyCssAtRule::CssLayerAtRule(CssLayerAtRule { syntax }),
             CSS_MEDIA_AT_RULE => AnyCssAtRule::CssMediaAtRule(CssMediaAtRule { syntax }),
             CSS_PAGE_AT_RULE => AnyCssAtRule::CssPageAtRule(CssPageAtRule { syntax }),
+            CSS_SCOPE_AT_RULE => AnyCssAtRule::CssScopeAtRule(CssScopeAtRule { syntax }),
             _ => return None,
         };
         Some(res)
@@ -10614,6 +11084,7 @@ impl AstNode for AnyCssAtRule {
             AnyCssAtRule::CssLayerAtRule(it) => &it.syntax,
             AnyCssAtRule::CssMediaAtRule(it) => &it.syntax,
             AnyCssAtRule::CssPageAtRule(it) => &it.syntax,
+            AnyCssAtRule::CssScopeAtRule(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
@@ -10629,6 +11100,7 @@ impl AstNode for AnyCssAtRule {
             AnyCssAtRule::CssLayerAtRule(it) => it.syntax,
             AnyCssAtRule::CssMediaAtRule(it) => it.syntax,
             AnyCssAtRule::CssPageAtRule(it) => it.syntax,
+            AnyCssAtRule::CssScopeAtRule(it) => it.syntax,
         }
     }
 }
@@ -10646,6 +11118,7 @@ impl std::fmt::Debug for AnyCssAtRule {
             AnyCssAtRule::CssLayerAtRule(it) => std::fmt::Debug::fmt(it, f),
             AnyCssAtRule::CssMediaAtRule(it) => std::fmt::Debug::fmt(it, f),
             AnyCssAtRule::CssPageAtRule(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssAtRule::CssScopeAtRule(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -10663,6 +11136,7 @@ impl From<AnyCssAtRule> for SyntaxNode {
             AnyCssAtRule::CssLayerAtRule(it) => it.into(),
             AnyCssAtRule::CssMediaAtRule(it) => it.into(),
             AnyCssAtRule::CssPageAtRule(it) => it.into(),
+            AnyCssAtRule::CssScopeAtRule(it) => it.into(),
         }
     }
 }
@@ -14009,6 +14483,100 @@ impl From<AnyCssRuleListBlock> for SyntaxElement {
         node.into()
     }
 }
+impl From<CssBogusScopeRange> for AnyCssScopeRange {
+    fn from(node: CssBogusScopeRange) -> AnyCssScopeRange {
+        AnyCssScopeRange::CssBogusScopeRange(node)
+    }
+}
+impl From<CssScopeRangeEnd> for AnyCssScopeRange {
+    fn from(node: CssScopeRangeEnd) -> AnyCssScopeRange {
+        AnyCssScopeRange::CssScopeRangeEnd(node)
+    }
+}
+impl From<CssScopeRangeInterval> for AnyCssScopeRange {
+    fn from(node: CssScopeRangeInterval) -> AnyCssScopeRange {
+        AnyCssScopeRange::CssScopeRangeInterval(node)
+    }
+}
+impl From<CssScopeRangeStart> for AnyCssScopeRange {
+    fn from(node: CssScopeRangeStart) -> AnyCssScopeRange {
+        AnyCssScopeRange::CssScopeRangeStart(node)
+    }
+}
+impl AstNode for AnyCssScopeRange {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = CssBogusScopeRange::KIND_SET
+        .union(CssScopeRangeEnd::KIND_SET)
+        .union(CssScopeRangeInterval::KIND_SET)
+        .union(CssScopeRangeStart::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(
+            kind,
+            CSS_BOGUS_SCOPE_RANGE
+                | CSS_SCOPE_RANGE_END
+                | CSS_SCOPE_RANGE_INTERVAL
+                | CSS_SCOPE_RANGE_START
+        )
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_BOGUS_SCOPE_RANGE => {
+                AnyCssScopeRange::CssBogusScopeRange(CssBogusScopeRange { syntax })
+            }
+            CSS_SCOPE_RANGE_END => AnyCssScopeRange::CssScopeRangeEnd(CssScopeRangeEnd { syntax }),
+            CSS_SCOPE_RANGE_INTERVAL => {
+                AnyCssScopeRange::CssScopeRangeInterval(CssScopeRangeInterval { syntax })
+            }
+            CSS_SCOPE_RANGE_START => {
+                AnyCssScopeRange::CssScopeRangeStart(CssScopeRangeStart { syntax })
+            }
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            AnyCssScopeRange::CssBogusScopeRange(it) => &it.syntax,
+            AnyCssScopeRange::CssScopeRangeEnd(it) => &it.syntax,
+            AnyCssScopeRange::CssScopeRangeInterval(it) => &it.syntax,
+            AnyCssScopeRange::CssScopeRangeStart(it) => &it.syntax,
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            AnyCssScopeRange::CssBogusScopeRange(it) => it.syntax,
+            AnyCssScopeRange::CssScopeRangeEnd(it) => it.syntax,
+            AnyCssScopeRange::CssScopeRangeInterval(it) => it.syntax,
+            AnyCssScopeRange::CssScopeRangeStart(it) => it.syntax,
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssScopeRange {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            AnyCssScopeRange::CssBogusScopeRange(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssScopeRange::CssScopeRangeEnd(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssScopeRange::CssScopeRangeInterval(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssScopeRange::CssScopeRangeStart(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssScopeRange> for SyntaxNode {
+    fn from(n: AnyCssScopeRange) -> SyntaxNode {
+        match n {
+            AnyCssScopeRange::CssBogusScopeRange(it) => it.into(),
+            AnyCssScopeRange::CssScopeRangeEnd(it) => it.into(),
+            AnyCssScopeRange::CssScopeRangeInterval(it) => it.into(),
+            AnyCssScopeRange::CssScopeRangeStart(it) => it.into(),
+        }
+    }
+}
+impl From<AnyCssScopeRange> for SyntaxElement {
+    fn from(n: AnyCssScopeRange) -> SyntaxElement {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<CssBogusSelector> for AnyCssSelector {
     fn from(node: CssBogusSelector) -> AnyCssSelector {
         AnyCssSelector::CssBogusSelector(node)
@@ -14676,6 +15244,11 @@ impl std::fmt::Display for AnyCssRuleListBlock {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for AnyCssScopeRange {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AnyCssSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -15182,6 +15755,31 @@ impl std::fmt::Display for CssRule {
     }
 }
 impl std::fmt::Display for CssRuleListBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssScopeAtRule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssScopeEdge {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssScopeRangeEnd {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssScopeRangeInterval {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssScopeRangeStart {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -15969,6 +16567,63 @@ impl From<CssBogusRule> for SyntaxNode {
 }
 impl From<CssBogusRule> for SyntaxElement {
     fn from(n: CssBogusRule) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssBogusScopeRange {
+    syntax: SyntaxNode,
+}
+impl CssBogusScopeRange {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn items(&self) -> SyntaxElementChildren {
+        support::elements(&self.syntax)
+    }
+}
+impl AstNode for CssBogusScopeRange {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_BOGUS_SCOPE_RANGE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_BOGUS_SCOPE_RANGE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssBogusScopeRange {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssBogusScopeRange")
+            .field("items", &DebugSyntaxElementChildren(self.items()))
+            .finish()
+    }
+}
+impl From<CssBogusScopeRange> for SyntaxNode {
+    fn from(n: CssBogusScopeRange) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssBogusScopeRange> for SyntaxElement {
+    fn from(n: CssBogusScopeRange) -> SyntaxElement {
         n.syntax.into()
     }
 }

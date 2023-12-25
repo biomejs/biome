@@ -44,6 +44,7 @@ pub(crate) mod query_feature_value;
 pub(crate) mod relative_selector;
 pub(crate) mod rule;
 pub(crate) mod rule_list_block;
+pub(crate) mod scope_range;
 pub(crate) mod selector;
 pub(crate) mod simple_selector;
 pub(crate) mod sub_selector;

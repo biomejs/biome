@@ -37,22 +37,27 @@ fn selector_lex_context(p: &mut CssParser) -> CssLexContext {
 }
 
 pub(crate) struct CssSelectorList {
-    end_kind: CssSyntaxKind,
+    end_kind_ts: TokenSet<CssSyntaxKind>,
     is_recovery_disabled: bool,
 }
 
 impl Default for CssSelectorList {
     fn default() -> Self {
         CssSelectorList {
-            end_kind: T!['{'],
+            end_kind_ts: token_set!(T!['{']),
             is_recovery_disabled: false,
         }
     }
 }
 
 impl CssSelectorList {
+    pub(crate) fn with_end_kind_ts(mut self, end_kind_ts: TokenSet<CssSyntaxKind>) -> Self {
+        self.end_kind_ts = end_kind_ts;
+        self
+    }
+
     pub(crate) fn with_end_kind(mut self, end_kind: CssSyntaxKind) -> Self {
-        self.end_kind = end_kind;
+        self.end_kind_ts = token_set!(end_kind);
         self
     }
 
@@ -72,7 +77,7 @@ impl ParseSeparatedList for CssSelectorList {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(self.end_kind)
+        p.at_ts(self.end_kind_ts)
     }
 
     fn recover(
