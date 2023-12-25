@@ -1,6 +1,7 @@
 use crate::prelude::*;
-use biome_css_syntax::CssDeclarationWithSemicolon;
-use biome_rowan::AstNode;
+use biome_css_syntax::{CssDeclarationWithSemicolon, CssDeclarationWithSemicolonFields};
+use biome_formatter::write;
+
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatCssDeclarationWithSemicolon;
 impl FormatNodeRule<CssDeclarationWithSemicolon> for FormatCssDeclarationWithSemicolon {
@@ -9,6 +10,11 @@ impl FormatNodeRule<CssDeclarationWithSemicolon> for FormatCssDeclarationWithSem
         node: &CssDeclarationWithSemicolon,
         f: &mut CssFormatter,
     ) -> FormatResult<()> {
-        format_verbatim_node(node.syntax()).fmt(f)
+        let CssDeclarationWithSemicolonFields {
+            declaration,
+            semicolon_token,
+        } = node.as_fields();
+
+        write!(f, [declaration.format(), semicolon_token.format()])
     }
 }
