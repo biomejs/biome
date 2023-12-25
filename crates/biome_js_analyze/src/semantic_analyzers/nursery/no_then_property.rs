@@ -116,13 +116,13 @@ impl RuleState {
     fn diagnostic_message(&self) -> MarkupBuf {
         match self.message {
             NoThenPropertyMessage::Object => {
-                markup! { "Do not add "<Emphasis>"then"</Emphasis>" to an object." }.to_owned()
+                markup! { "Do not add "<Emphasis>"`then`"</Emphasis>" to an object." }.to_owned()
             }
             NoThenPropertyMessage::Export => {
-                markup! { "Do not export "<Emphasis>"then"</Emphasis>"."}.to_owned()
+                markup! { "Do not export "<Emphasis>"`then`"</Emphasis>"."}.to_owned()
             }
             NoThenPropertyMessage::Class => {
-                markup! {"Do not add  "<Emphasis>"then"</Emphasis>" to a class." }.to_owned()
+                markup! {"Do not add "<Emphasis>"`then`"</Emphasis>" to a class." }.to_owned()
             }
         }
     }

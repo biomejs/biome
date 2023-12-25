@@ -1283,7 +1283,7 @@
 					]
 				},
 				"noThenProperty": {
-					"description": "Disallow then property",
+					"description": "Disallow then property.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
