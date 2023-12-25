@@ -288,7 +288,7 @@ pub(crate) fn parse_custom_property(p: &mut CssParser) -> ParsedSyntax {
 
     let m = p.start();
     parse_regular_identifier(p).or_add_diagnostic(p, expected_identifier);
-    return Present(m.complete(p, CSS_CUSTOM_PROPERTY));
+    Present(m.complete(p, CSS_CUSTOM_PROPERTY))
 }
 
 #[inline]
