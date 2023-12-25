@@ -22,6 +22,7 @@ JsModule {
                 ],
                 r_angle_token: missing (required),
             },
+            ts_type_empty_parameters: missing (optional),
             eq_token: missing (required),
             ty: missing (required),
             semicolon_token: missing (optional),
@@ -52,6 +53,7 @@ JsModule {
       3: (empty)
       4: (empty)
       5: (empty)
+      6: (empty)
   4: EOF@8..9 "" [Newline("\n")] []
 --
 ts_type_parameters_incomplete.ts:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

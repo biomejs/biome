@@ -9,6 +9,7 @@ JsModule {
                 name_token: IDENT@5..7 "A" [] [Whitespace(" ")],
             },
             type_parameters: missing (optional),
+            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@7..9 "=" [] [Whitespace(" ")],
             ty: TsArrayType {
                 element_type: TsStringType {
@@ -25,6 +26,7 @@ JsModule {
                 name_token: IDENT@24..26 "B" [] [Whitespace(" ")],
             },
             type_parameters: missing (optional),
+            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@26..28 "=" [] [Whitespace(" ")],
             ty: TsArrayType {
                 element_type: TsObjectType {
@@ -66,20 +68,22 @@ JsModule {
       1: TS_IDENTIFIER_BINDING@5..7
         0: IDENT@5..7 "A" [] [Whitespace(" ")]
       2: (empty)
-      3: EQ@7..9 "=" [] [Whitespace(" ")]
-      4: TS_ARRAY_TYPE@9..17
+      3: (empty)
+      4: EQ@7..9 "=" [] [Whitespace(" ")]
+      5: TS_ARRAY_TYPE@9..17
         0: TS_STRING_TYPE@9..15
           0: STRING_KW@9..15 "string" [] []
         1: L_BRACK@15..16 "[" [] []
         2: R_BRACK@16..17 "]" [] []
-      5: SEMICOLON@17..18 ";" [] []
+      6: SEMICOLON@17..18 ";" [] []
     1: TS_TYPE_ALIAS_DECLARATION@18..45
       0: TYPE_KW@18..24 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@24..26
         0: IDENT@24..26 "B" [] [Whitespace(" ")]
       2: (empty)
-      3: EQ@26..28 "=" [] [Whitespace(" ")]
-      4: TS_ARRAY_TYPE@28..44
+      3: (empty)
+      4: EQ@26..28 "=" [] [Whitespace(" ")]
+      5: TS_ARRAY_TYPE@28..44
         0: TS_OBJECT_TYPE@28..42
           0: L_CURLY@28..30 "{" [] [Whitespace(" ")]
           1: TS_TYPE_MEMBER_LIST@30..40
@@ -96,5 +100,5 @@ JsModule {
           2: R_CURLY@40..42 "}" [] [Whitespace(" ")]
         1: L_BRACK@42..43 "[" [] []
         2: R_BRACK@43..44 "]" [] []
-      5: SEMICOLON@44..45 ";" [] []
+      6: SEMICOLON@44..45 ";" [] []
   4: EOF@45..46 "" [Newline("\n")] []

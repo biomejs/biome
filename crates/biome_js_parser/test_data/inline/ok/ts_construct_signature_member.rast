@@ -9,6 +9,7 @@ JsModule {
                 name_token: IDENT@5..7 "A" [] [Whitespace(" ")],
             },
             type_parameters: missing (optional),
+            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@7..9 "=" [] [Whitespace(" ")],
             ty: TsObjectType {
                 l_curly_token: L_CURLY@9..11 "{" [] [Whitespace(" ")],
@@ -40,6 +41,7 @@ JsModule {
                 name_token: IDENT@34..36 "B" [] [Whitespace(" ")],
             },
             type_parameters: missing (optional),
+            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@36..38 "=" [] [Whitespace(" ")],
             ty: TsObjectType {
                 l_curly_token: L_CURLY@38..40 "{" [] [Whitespace(" ")],
@@ -96,6 +98,7 @@ JsModule {
                 name_token: IDENT@74..76 "C" [] [Whitespace(" ")],
             },
             type_parameters: missing (optional),
+            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@76..78 "=" [] [Whitespace(" ")],
             ty: TsObjectType {
                 l_curly_token: L_CURLY@78..80 "{" [] [Whitespace(" ")],
@@ -193,8 +196,9 @@ JsModule {
       1: TS_IDENTIFIER_BINDING@5..7
         0: IDENT@5..7 "A" [] [Whitespace(" ")]
       2: (empty)
-      3: EQ@7..9 "=" [] [Whitespace(" ")]
-      4: TS_OBJECT_TYPE@9..28
+      3: (empty)
+      4: EQ@7..9 "=" [] [Whitespace(" ")]
+      5: TS_OBJECT_TYPE@9..28
         0: L_CURLY@9..11 "{" [] [Whitespace(" ")]
         1: TS_TYPE_MEMBER_LIST@11..27
           0: TS_CONSTRUCT_SIGNATURE_TYPE_MEMBER@11..27
@@ -210,14 +214,15 @@ JsModule {
                 0: STRING_KW@19..25 "string" [] []
             4: SEMICOLON@25..27 ";" [] [Whitespace(" ")]
         2: R_CURLY@27..28 "}" [] []
-      5: (empty)
+      6: (empty)
     1: TS_TYPE_ALIAS_DECLARATION@28..68
       0: TYPE_KW@28..34 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@34..36
         0: IDENT@34..36 "B" [] [Whitespace(" ")]
       2: (empty)
-      3: EQ@36..38 "=" [] [Whitespace(" ")]
-      4: TS_OBJECT_TYPE@38..68
+      3: (empty)
+      4: EQ@36..38 "=" [] [Whitespace(" ")]
+      5: TS_OBJECT_TYPE@38..68
         0: L_CURLY@38..40 "{" [] [Whitespace(" ")]
         1: TS_TYPE_MEMBER_LIST@40..67
           0: TS_CONSTRUCT_SIGNATURE_TYPE_MEMBER@40..67
@@ -251,14 +256,15 @@ JsModule {
             3: (empty)
             4: (empty)
         2: R_CURLY@67..68 "}" [] []
-      5: (empty)
+      6: (empty)
     2: TS_TYPE_ALIAS_DECLARATION@68..112
       0: TYPE_KW@68..74 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@74..76
         0: IDENT@74..76 "C" [] [Whitespace(" ")]
       2: (empty)
-      3: EQ@76..78 "=" [] [Whitespace(" ")]
-      4: TS_OBJECT_TYPE@78..112
+      3: (empty)
+      4: EQ@76..78 "=" [] [Whitespace(" ")]
+      5: TS_OBJECT_TYPE@78..112
         0: L_CURLY@78..80 "{" [] [Whitespace(" ")]
         1: TS_TYPE_MEMBER_LIST@80..111
           0: TS_CONSTRUCT_SIGNATURE_TYPE_MEMBER@80..111
@@ -315,5 +321,5 @@ JsModule {
                 0: STRING_KW@104..111 "string" [] [Whitespace(" ")]
             4: (empty)
         2: R_CURLY@111..112 "}" [] []
-      5: (empty)
+      6: (empty)
   4: EOF@112..113 "" [Newline("\n")] []

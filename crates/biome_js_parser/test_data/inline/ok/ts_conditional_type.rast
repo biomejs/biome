@@ -9,6 +9,7 @@ JsModule {
                 name_token: IDENT@5..7 "A" [] [Whitespace(" ")],
             },
             type_parameters: missing (optional),
+            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@7..9 "=" [] [Whitespace(" ")],
             ty: TsNumberType {
                 number_token: NUMBER_KW@9..15 "number" [] [],
@@ -21,6 +22,7 @@ JsModule {
                 name_token: IDENT@22..24 "B" [] [Whitespace(" ")],
             },
             type_parameters: missing (optional),
+            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@24..26 "=" [] [Whitespace(" ")],
             ty: TsConditionalType {
                 check_type: TsStringType {
@@ -47,6 +49,7 @@ JsModule {
                 name_token: IDENT@72..74 "C" [] [Whitespace(" ")],
             },
             type_parameters: missing (optional),
+            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@74..76 "=" [] [Whitespace(" ")],
             ty: TsConditionalType {
                 check_type: TsReferenceType {
@@ -113,6 +116,7 @@ JsModule {
                 ],
                 r_angle_token: R_ANGLE@143..145 ">" [] [Whitespace(" ")],
             },
+            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@145..147 "=" [] [Whitespace(" ")],
             ty: TsConditionalType {
                 check_type: TsReferenceType {
@@ -193,6 +197,7 @@ JsModule {
                 ],
                 r_angle_token: R_ANGLE@220..222 ">" [] [Whitespace(" ")],
             },
+            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@222..224 "=" [] [Whitespace(" ")],
             ty: TsConditionalType {
                 check_type: TsReferenceType {
@@ -269,6 +274,7 @@ JsModule {
                 ],
                 r_angle_token: R_ANGLE@284..286 ">" [] [Whitespace(" ")],
             },
+            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@286..288 "=" [] [Whitespace(" ")],
             ty: TsConditionalType {
                 check_type: TsReferenceType {
@@ -360,6 +366,7 @@ JsModule {
                 ],
                 r_angle_token: R_ANGLE@362..364 ">" [] [Whitespace(" ")],
             },
+            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@364..366 "=" [] [Whitespace(" ")],
             ty: TsConditionalType {
                 check_type: TsReferenceType {
@@ -411,6 +418,7 @@ JsModule {
                 name_token: IDENT@428..430 "H" [] [Whitespace(" ")],
             },
             type_parameters: missing (optional),
+            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@430..432 "=" [] [Whitespace(" ")],
             ty: TsConditionalType {
                 check_type: TsReferenceType {
@@ -494,6 +502,7 @@ JsModule {
                 ],
                 r_angle_token: R_ANGLE@485..487 ">" [] [Whitespace(" ")],
             },
+            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@487..489 "=" [] [Whitespace(" ")],
             ty: TsConditionalType {
                 check_type: TsReferenceType {
@@ -566,6 +575,7 @@ JsModule {
                 name_token: IDENT@559..566 "Equals" [] [Whitespace(" ")],
             },
             type_parameters: missing (optional),
+            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@566..568 "=" [] [Whitespace(" ")],
             ty: TsConditionalType {
                 check_type: TsReferenceType {
@@ -697,6 +707,7 @@ JsModule {
                 ],
                 r_angle_token: R_ANGLE@661..663 ">" [] [Whitespace(" ")],
             },
+            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@663..664 "=" [] [],
             ty: TsFunctionType {
                 type_parameters: TsTypeParameters {
@@ -1121,6 +1132,7 @@ JsModule {
                 ],
                 r_angle_token: R_ANGLE@1058..1060 ">" [] [Whitespace(" ")],
             },
+            ts_type_empty_parameters: missing (optional),
             extends_clause: missing (optional),
             l_curly_token: L_CURLY@1060..1061 "{" [] [],
             members: TsTypeMemberList [
@@ -1413,17 +1425,19 @@ JsModule {
       1: TS_IDENTIFIER_BINDING@5..7
         0: IDENT@5..7 "A" [] [Whitespace(" ")]
       2: (empty)
-      3: EQ@7..9 "=" [] [Whitespace(" ")]
-      4: TS_NUMBER_TYPE@9..15
+      3: (empty)
+      4: EQ@7..9 "=" [] [Whitespace(" ")]
+      5: TS_NUMBER_TYPE@9..15
         0: NUMBER_KW@9..15 "number" [] []
-      5: SEMICOLON@15..16 ";" [] []
+      6: SEMICOLON@15..16 ";" [] []
     1: TS_TYPE_ALIAS_DECLARATION@16..66
       0: TYPE_KW@16..22 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@22..24
         0: IDENT@22..24 "B" [] [Whitespace(" ")]
       2: (empty)
-      3: EQ@24..26 "=" [] [Whitespace(" ")]
-      4: TS_CONDITIONAL_TYPE@26..65
+      3: (empty)
+      4: EQ@24..26 "=" [] [Whitespace(" ")]
+      5: TS_CONDITIONAL_TYPE@26..65
         0: TS_STRING_TYPE@26..33
           0: STRING_KW@26..33 "string" [] [Whitespace(" ")]
         1: EXTENDS_KW@33..41 "extends" [] [Whitespace(" ")]
@@ -1435,14 +1449,15 @@ JsModule {
         5: COLON@57..59 ":" [] [Whitespace(" ")]
         6: TS_NUMBER_TYPE@59..65
           0: NUMBER_KW@59..65 "number" [] []
-      5: SEMICOLON@65..66 ";" [] []
+      6: SEMICOLON@65..66 ";" [] []
     2: TS_TYPE_ALIAS_DECLARATION@66..134
       0: TYPE_KW@66..72 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@72..74
         0: IDENT@72..74 "C" [] [Whitespace(" ")]
       2: (empty)
-      3: EQ@74..76 "=" [] [Whitespace(" ")]
-      4: TS_CONDITIONAL_TYPE@76..133
+      3: (empty)
+      4: EQ@74..76 "=" [] [Whitespace(" ")]
+      5: TS_CONDITIONAL_TYPE@76..133
         0: TS_REFERENCE_TYPE@76..78
           0: JS_REFERENCE_IDENTIFIER@76..78
             0: IDENT@76..78 "A" [] [Whitespace(" ")]
@@ -1473,7 +1488,7 @@ JsModule {
         5: COLON@125..127 ":" [] [Whitespace(" ")]
         6: TS_NUMBER_TYPE@127..133
           0: NUMBER_KW@127..133 "number" [] []
-      5: SEMICOLON@133..134 ";" [] []
+      6: SEMICOLON@133..134 ";" [] []
     3: TS_TYPE_ALIAS_DECLARATION@134..208
       0: TYPE_KW@134..140 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@140..141
@@ -1488,8 +1503,9 @@ JsModule {
             2: (empty)
             3: (empty)
         2: R_ANGLE@143..145 ">" [] [Whitespace(" ")]
-      3: EQ@145..147 "=" [] [Whitespace(" ")]
-      4: TS_CONDITIONAL_TYPE@147..207
+      3: (empty)
+      4: EQ@145..147 "=" [] [Whitespace(" ")]
+      5: TS_CONDITIONAL_TYPE@147..207
         0: TS_REFERENCE_TYPE@147..149
           0: JS_REFERENCE_IDENTIFIER@147..149
             0: IDENT@147..149 "T" [] [Whitespace(" ")]
@@ -1523,7 +1539,7 @@ JsModule {
         5: COLON@200..202 ":" [] [Whitespace(" ")]
         6: TS_NEVER_TYPE@202..207
           0: NEVER_KW@202..207 "never" [] []
-      5: SEMICOLON@207..208 ";" [] []
+      6: SEMICOLON@207..208 ";" [] []
     4: TS_TYPE_ALIAS_DECLARATION@208..275
       0: TYPE_KW@208..214 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@214..215
@@ -1545,8 +1561,9 @@ JsModule {
             2: (empty)
             3: (empty)
         2: R_ANGLE@220..222 ">" [] [Whitespace(" ")]
-      3: EQ@222..224 "=" [] [Whitespace(" ")]
-      4: TS_CONDITIONAL_TYPE@224..275
+      3: (empty)
+      4: EQ@222..224 "=" [] [Whitespace(" ")]
+      5: TS_CONDITIONAL_TYPE@224..275
         0: TS_REFERENCE_TYPE@224..226
           0: JS_REFERENCE_IDENTIFIER@224..226
             0: IDENT@224..226 "T" [] [Whitespace(" ")]
@@ -1584,7 +1601,7 @@ JsModule {
           0: JS_REFERENCE_IDENTIFIER@274..275
             0: IDENT@274..275 "T" [] []
           1: (empty)
-      5: (empty)
+      6: (empty)
     5: TS_TYPE_ALIAS_DECLARATION@275..353
       0: TYPE_KW@275..281 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@281..282
@@ -1599,8 +1616,9 @@ JsModule {
             2: (empty)
             3: (empty)
         2: R_ANGLE@284..286 ">" [] [Whitespace(" ")]
-      3: EQ@286..288 "=" [] [Whitespace(" ")]
-      4: TS_CONDITIONAL_TYPE@288..352
+      3: (empty)
+      4: EQ@286..288 "=" [] [Whitespace(" ")]
+      5: TS_CONDITIONAL_TYPE@288..352
         0: TS_REFERENCE_TYPE@288..290
           0: JS_REFERENCE_IDENTIFIER@288..290
             0: IDENT@288..290 "T" [] [Whitespace(" ")]
@@ -1652,7 +1670,7 @@ JsModule {
         6: TS_NUMBER_LITERAL_TYPE@351..352
           0: (empty)
           1: JS_NUMBER_LITERAL@351..352 "0" [] []
-      5: SEMICOLON@352..353 ";" [] []
+      6: SEMICOLON@352..353 ";" [] []
     6: TS_TYPE_ALIAS_DECLARATION@353..422
       0: TYPE_KW@353..359 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@359..360
@@ -1667,8 +1685,9 @@ JsModule {
             2: (empty)
             3: (empty)
         2: R_ANGLE@362..364 ">" [] [Whitespace(" ")]
-      3: EQ@364..366 "=" [] [Whitespace(" ")]
-      4: TS_CONDITIONAL_TYPE@366..421
+      3: (empty)
+      4: EQ@364..366 "=" [] [Whitespace(" ")]
+      5: TS_CONDITIONAL_TYPE@366..421
         0: TS_REFERENCE_TYPE@366..368
           0: JS_REFERENCE_IDENTIFIER@366..368
             0: IDENT@366..368 "T" [] [Whitespace(" ")]
@@ -1697,14 +1716,15 @@ JsModule {
         5: COLON@414..416 ":" [] [Whitespace(" ")]
         6: TS_NEVER_TYPE@416..421
           0: NEVER_KW@416..421 "never" [] []
-      5: SEMICOLON@421..422 ";" [] []
+      6: SEMICOLON@421..422 ";" [] []
     7: TS_TYPE_ALIAS_DECLARATION@422..476
       0: TYPE_KW@422..428 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@428..430
         0: IDENT@428..430 "H" [] [Whitespace(" ")]
       2: (empty)
-      3: EQ@430..432 "=" [] [Whitespace(" ")]
-      4: TS_CONDITIONAL_TYPE@432..475
+      3: (empty)
+      4: EQ@430..432 "=" [] [Whitespace(" ")]
+      5: TS_CONDITIONAL_TYPE@432..475
         0: TS_REFERENCE_TYPE@432..434
           0: JS_REFERENCE_IDENTIFIER@432..434
             0: IDENT@432..434 "A" [] [Whitespace(" ")]
@@ -1747,7 +1767,7 @@ JsModule {
           0: JS_REFERENCE_IDENTIFIER@474..475
             0: IDENT@474..475 "G" [] []
           1: (empty)
-      5: SEMICOLON@475..476 ";" [] []
+      6: SEMICOLON@475..476 ";" [] []
     8: TS_TYPE_ALIAS_DECLARATION@476..553
       0: TYPE_KW@476..482 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@482..483
@@ -1762,8 +1782,9 @@ JsModule {
             2: (empty)
             3: (empty)
         2: R_ANGLE@485..487 ">" [] [Whitespace(" ")]
-      3: EQ@487..489 "=" [] [Whitespace(" ")]
-      4: TS_CONDITIONAL_TYPE@489..552
+      3: (empty)
+      4: EQ@487..489 "=" [] [Whitespace(" ")]
+      5: TS_CONDITIONAL_TYPE@489..552
         0: TS_REFERENCE_TYPE@489..491
           0: JS_REFERENCE_IDENTIFIER@489..491
             0: IDENT@489..491 "T" [] [Whitespace(" ")]
@@ -1807,14 +1828,15 @@ JsModule {
         5: COLON@545..547 ":" [] [Whitespace(" ")]
         6: TS_NEVER_TYPE@547..552
           0: NEVER_KW@547..552 "never" [] []
-      5: SEMICOLON@552..553 ";" [] []
+      6: SEMICOLON@552..553 ";" [] []
     9: TS_TYPE_ALIAS_DECLARATION@553..616
       0: TYPE_KW@553..559 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@559..566
         0: IDENT@559..566 "Equals" [] [Whitespace(" ")]
       2: (empty)
-      3: EQ@566..568 "=" [] [Whitespace(" ")]
-      4: TS_CONDITIONAL_TYPE@568..615
+      3: (empty)
+      4: EQ@566..568 "=" [] [Whitespace(" ")]
+      5: TS_CONDITIONAL_TYPE@568..615
         0: TS_REFERENCE_TYPE@568..570
           0: JS_REFERENCE_IDENTIFIER@568..570
             0: IDENT@568..570 "A" [] [Whitespace(" ")]
@@ -1868,7 +1890,7 @@ JsModule {
           0: JS_REFERENCE_IDENTIFIER@614..615
             0: IDENT@614..615 "G" [] []
           1: (empty)
-      5: SEMICOLON@615..616 ";" [] []
+      6: SEMICOLON@615..616 ";" [] []
     10: TS_TYPE_ALIAS_DECLARATION@616..955
       0: TYPE_KW@616..622 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@622..627
@@ -1905,8 +1927,9 @@ JsModule {
                 2: R_PAREN@660..661 ")" [] []
             3: (empty)
         2: R_ANGLE@661..663 ">" [] [Whitespace(" ")]
-      3: EQ@663..664 "=" [] []
-      4: TS_FUNCTION_TYPE@664..954
+      3: (empty)
+      4: EQ@663..664 "=" [] []
+      5: TS_FUNCTION_TYPE@664..954
         0: TS_TYPE_PARAMETERS@664..686
           0: L_ANGLE@664..670 "<" [Newline("\n"), Whitespace("    ")] []
           1: TS_TYPE_PARAMETER_LIST@670..685
@@ -2125,7 +2148,7 @@ JsModule {
                     0: IDENT@952..953 "F" [] []
                   1: (empty)
               2: R_ANGLE@953..954 ">" [] []
-      5: SEMICOLON@954..955 ";" [] []
+      6: SEMICOLON@954..955 ";" [] []
     11: TS_INTERFACE_DECLARATION@955..1272
       0: INTERFACE_KW@955..966 "interface" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@966..978
@@ -2196,8 +2219,9 @@ JsModule {
                 2: R_BRACK@1057..1058 "]" [] []
         2: R_ANGLE@1058..1060 ">" [] [Whitespace(" ")]
       3: (empty)
-      4: L_CURLY@1060..1061 "{" [] []
-      5: TS_TYPE_MEMBER_LIST@1061..1270
+      4: (empty)
+      5: L_CURLY@1060..1061 "{" [] []
+      6: TS_TYPE_MEMBER_LIST@1061..1270
         0: TS_PROPERTY_SIGNATURE_TYPE_MEMBER@1061..1168
           0: (empty)
           1: JS_LITERAL_MEMBER_NAME@1061..1067
@@ -2384,5 +2408,5 @@ JsModule {
                       0: NEVER_KW@1263..1268 "never" [] []
                 2: R_ANGLE@1268..1269 ">" [] []
           4: SEMICOLON@1269..1270 ";" [] []
-      6: R_CURLY@1270..1272 "}" [Newline("\n")] []
+      7: R_CURLY@1270..1272 "}" [Newline("\n")] []
   4: EOF@1272..1273 "" [Newline("\n")] []

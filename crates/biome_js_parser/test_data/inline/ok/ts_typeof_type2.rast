@@ -9,6 +9,7 @@ JsModule {
                 name_token: IDENT@5..7 "X" [] [Whitespace(" ")],
             },
             type_parameters: missing (optional),
+            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@7..9 "=" [] [Whitespace(" ")],
             ty: TsTypeofType {
                 typeof_token: TYPEOF_KW@9..16 "typeof" [] [Whitespace(" ")],
@@ -62,13 +63,14 @@ JsModule {
       1: TS_IDENTIFIER_BINDING@5..7
         0: IDENT@5..7 "X" [] [Whitespace(" ")]
       2: (empty)
-      3: EQ@7..9 "=" [] [Whitespace(" ")]
-      4: TS_TYPEOF_TYPE@9..21
+      3: (empty)
+      4: EQ@7..9 "=" [] [Whitespace(" ")]
+      5: TS_TYPEOF_TYPE@9..21
         0: TYPEOF_KW@9..16 "typeof" [] [Whitespace(" ")]
         1: JS_REFERENCE_IDENTIFIER@16..21
           0: IDENT@16..21 "Array" [] []
         2: (empty)
-      5: (empty)
+      6: (empty)
     1: JS_EXPRESSION_STATEMENT@21..35
       0: JSX_TAG_EXPRESSION@21..34
         0: JSX_ELEMENT@21..34

@@ -22,6 +22,7 @@ JsModule {
                 ],
                 r_angle_token: R_ANGLE@16..18 ">" [] [Whitespace(" ")],
             },
+            ts_type_empty_parameters: missing (optional),
             extends_clause: missing (optional),
             l_curly_token: L_CURLY@18..20 "{" [] [Whitespace(" ")],
             members: TsTypeMemberList [
@@ -51,6 +52,7 @@ JsModule {
                 name_token: IDENT@43..45 "B" [] [Whitespace(" ")],
             },
             type_parameters: missing (optional),
+            ts_type_empty_parameters: missing (optional),
             extends_clause: TsExtendsClause {
                 extends_token: EXTENDS_KW@45..53 "extends" [] [Whitespace(" ")],
                 types: TsTypeList [
@@ -80,6 +82,7 @@ JsModule {
                 name_token: IDENT@76..78 "C" [] [Whitespace(" ")],
             },
             type_parameters: missing (optional),
+            ts_type_empty_parameters: missing (optional),
             extends_clause: TsExtendsClause {
                 extends_token: EXTENDS_KW@78..86 "extends" [] [Whitespace(" ")],
                 types: TsTypeList [
@@ -134,8 +137,9 @@ JsModule {
             3: (empty)
         2: R_ANGLE@16..18 ">" [] [Whitespace(" ")]
       3: (empty)
-      4: L_CURLY@18..20 "{" [] [Whitespace(" ")]
-      5: TS_TYPE_MEMBER_LIST@20..31
+      4: (empty)
+      5: L_CURLY@18..20 "{" [] [Whitespace(" ")]
+      6: TS_TYPE_MEMBER_LIST@20..31
         0: TS_PROPERTY_SIGNATURE_TYPE_MEMBER@20..31
           0: (empty)
           1: JS_LITERAL_MEMBER_NAME@20..24
@@ -148,13 +152,14 @@ JsModule {
                 0: IDENT@26..31 "Prop" [] [Whitespace(" ")]
               1: (empty)
           4: (empty)
-      6: R_CURLY@31..32 "}" [] []
+      7: R_CURLY@31..32 "}" [] []
     1: TS_INTERFACE_DECLARATION@32..65
       0: INTERFACE_KW@32..43 "interface" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@43..45
         0: IDENT@43..45 "B" [] [Whitespace(" ")]
       2: (empty)
-      3: TS_EXTENDS_CLAUSE@45..63
+      3: (empty)
+      4: TS_EXTENDS_CLAUSE@45..63
         0: EXTENDS_KW@45..53 "extends" [] [Whitespace(" ")]
         1: TS_TYPE_LIST@53..63
           0: TS_NAME_WITH_TYPE_ARGUMENTS@53..63
@@ -166,15 +171,16 @@ JsModule {
                 0: TS_STRING_TYPE@55..61
                   0: STRING_KW@55..61 "string" [] []
               2: R_ANGLE@61..63 ">" [] [Whitespace(" ")]
-      4: L_CURLY@63..64 "{" [] []
-      5: TS_TYPE_MEMBER_LIST@64..64
-      6: R_CURLY@64..65 "}" [] []
+      5: L_CURLY@63..64 "{" [] []
+      6: TS_TYPE_MEMBER_LIST@64..64
+      7: R_CURLY@64..65 "}" [] []
     2: TS_INTERFACE_DECLARATION@65..101
       0: INTERFACE_KW@65..76 "interface" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@76..78
         0: IDENT@76..78 "C" [] [Whitespace(" ")]
       2: (empty)
-      3: TS_EXTENDS_CLAUSE@78..99
+      3: (empty)
+      4: TS_EXTENDS_CLAUSE@78..99
         0: EXTENDS_KW@78..86 "extends" [] [Whitespace(" ")]
         1: TS_TYPE_LIST@86..99
           0: TS_NAME_WITH_TYPE_ARGUMENTS@86..95
@@ -191,7 +197,7 @@ JsModule {
             0: JS_REFERENCE_IDENTIFIER@97..99
               0: IDENT@97..99 "B" [] [Whitespace(" ")]
             1: (empty)
-      4: L_CURLY@99..100 "{" [] []
-      5: TS_TYPE_MEMBER_LIST@100..100
-      6: R_CURLY@100..101 "}" [] []
+      5: L_CURLY@99..100 "{" [] []
+      6: TS_TYPE_MEMBER_LIST@100..100
+      7: R_CURLY@100..101 "}" [] []
   4: EOF@101..102 "" [Newline("\n")] []

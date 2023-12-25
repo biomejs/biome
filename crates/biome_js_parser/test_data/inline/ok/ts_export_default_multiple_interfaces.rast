@@ -14,6 +14,7 @@ JsModule {
                         name_token: IDENT@25..27 "A" [] [Whitespace(" ")],
                     },
                     type_parameters: missing (optional),
+                    ts_type_empty_parameters: missing (optional),
                     extends_clause: missing (optional),
                     l_curly_token: L_CURLY@27..29 "{" [] [Whitespace(" ")],
                     members: TsTypeMemberList [
@@ -48,6 +49,7 @@ JsModule {
                         name_token: IDENT@67..69 "B" [] [Whitespace(" ")],
                     },
                     type_parameters: missing (optional),
+                    ts_type_empty_parameters: missing (optional),
                     extends_clause: missing (optional),
                     l_curly_token: L_CURLY@69..71 "{" [] [Whitespace(" ")],
                     members: TsTypeMemberList [
@@ -120,8 +122,9 @@ JsModule {
             0: IDENT@25..27 "A" [] [Whitespace(" ")]
           2: (empty)
           3: (empty)
-          4: L_CURLY@27..29 "{" [] [Whitespace(" ")]
-          5: TS_TYPE_MEMBER_LIST@29..40
+          4: (empty)
+          5: L_CURLY@27..29 "{" [] [Whitespace(" ")]
+          6: TS_TYPE_MEMBER_LIST@29..40
             0: TS_PROPERTY_SIGNATURE_TYPE_MEMBER@29..40
               0: (empty)
               1: JS_LITERAL_MEMBER_NAME@29..30
@@ -132,7 +135,7 @@ JsModule {
                 1: TS_STRING_TYPE@32..38
                   0: STRING_KW@32..38 "string" [] []
               4: SEMICOLON@38..40 ";" [] [Whitespace(" ")]
-          6: R_CURLY@40..41 "}" [] []
+          7: R_CURLY@40..41 "}" [] []
         2: (empty)
     1: JS_EXPORT@41..82
       0: JS_DECORATOR_LIST@41..41
@@ -145,8 +148,9 @@ JsModule {
             0: IDENT@67..69 "B" [] [Whitespace(" ")]
           2: (empty)
           3: (empty)
-          4: L_CURLY@69..71 "{" [] [Whitespace(" ")]
-          5: TS_TYPE_MEMBER_LIST@71..81
+          4: (empty)
+          5: L_CURLY@69..71 "{" [] [Whitespace(" ")]
+          6: TS_TYPE_MEMBER_LIST@71..81
             0: TS_PROPERTY_SIGNATURE_TYPE_MEMBER@71..81
               0: (empty)
               1: JS_LITERAL_MEMBER_NAME@71..72
@@ -157,7 +161,7 @@ JsModule {
                 1: TS_STRING_TYPE@74..81
                   0: STRING_KW@74..81 "string" [] [Whitespace(" ")]
               4: (empty)
-          6: R_CURLY@81..82 "}" [] []
+          7: R_CURLY@81..82 "}" [] []
         2: (empty)
     2: JS_EXPORT@82..116
       0: JS_DECORATOR_LIST@82..82

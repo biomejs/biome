@@ -27,6 +27,7 @@ JsModule {
                 ],
                 r_angle_token: R_ANGLE@15..17 ">" [] [Whitespace(" ")],
             },
+            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@17..19 "=" [] [Whitespace(" ")],
             ty: TsReferenceType {
                 name: JsReferenceIdentifier {
@@ -74,6 +75,7 @@ JsModule {
                 ],
                 r_angle_token: R_ANGLE@63..65 ">" [] [Whitespace(" ")],
             },
+            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@65..67 "=" [] [Whitespace(" ")],
             ty: TsObjectType {
                 l_curly_token: L_CURLY@67..69 "{" [] [Whitespace(" ")],
@@ -126,12 +128,13 @@ JsModule {
               1: TS_STRING_TYPE@9..15
                 0: STRING_KW@9..15 "string" [] []
         2: R_ANGLE@15..17 ">" [] [Whitespace(" ")]
-      3: EQ@17..19 "=" [] [Whitespace(" ")]
-      4: TS_REFERENCE_TYPE@19..20
+      3: (empty)
+      4: EQ@17..19 "=" [] [Whitespace(" ")]
+      5: TS_REFERENCE_TYPE@19..20
         0: JS_REFERENCE_IDENTIFIER@19..20
           0: IDENT@19..20 "X" [] []
         1: (empty)
-      5: SEMICOLON@20..21 ";" [] []
+      6: SEMICOLON@20..21 ";" [] []
     1: TS_TYPE_ALIAS_DECLARATION@21..75
       0: TYPE_KW@21..27 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@27..28
@@ -158,8 +161,9 @@ JsModule {
               1: TS_STRING_TYPE@57..63
                 0: STRING_KW@57..63 "string" [] []
         2: R_ANGLE@63..65 ">" [] [Whitespace(" ")]
-      3: EQ@65..67 "=" [] [Whitespace(" ")]
-      4: TS_OBJECT_TYPE@67..75
+      3: (empty)
+      4: EQ@65..67 "=" [] [Whitespace(" ")]
+      5: TS_OBJECT_TYPE@67..75
         0: L_CURLY@67..69 "{" [] [Whitespace(" ")]
         1: TS_TYPE_MEMBER_LIST@69..74
           0: TS_PROPERTY_SIGNATURE_TYPE_MEMBER@69..74
@@ -175,5 +179,5 @@ JsModule {
                 1: (empty)
             4: (empty)
         2: R_CURLY@74..75 "}" [] []
-      5: (empty)
+      6: (empty)
   4: EOF@75..76 "" [Newline("\n")] []

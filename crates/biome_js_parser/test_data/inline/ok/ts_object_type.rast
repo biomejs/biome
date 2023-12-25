@@ -9,6 +9,7 @@ JsModule {
                 name_token: IDENT@5..7 "A" [] [Whitespace(" ")],
             },
             type_parameters: missing (optional),
+            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@7..9 "=" [] [Whitespace(" ")],
             ty: TsObjectType {
                 l_curly_token: L_CURLY@9..11 "{" [] [Whitespace(" ")],
@@ -52,6 +53,7 @@ JsModule {
                 name_token: IDENT@40..42 "B" [] [Whitespace(" ")],
             },
             type_parameters: missing (optional),
+            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@42..44 "=" [] [Whitespace(" ")],
             ty: TsObjectType {
                 l_curly_token: L_CURLY@44..46 "{" [] [Whitespace(" ")],
@@ -95,6 +97,7 @@ JsModule {
                 name_token: IDENT@75..77 "C" [] [Whitespace(" ")],
             },
             type_parameters: missing (optional),
+            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@77..79 "=" [] [Whitespace(" ")],
             ty: TsObjectType {
                 l_curly_token: L_CURLY@79..81 "{" [] [Whitespace(" ")],
@@ -152,6 +155,7 @@ JsModule {
                 name_token: IDENT@121..123 "D" [] [Whitespace(" ")],
             },
             type_parameters: missing (optional),
+            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@123..125 "=" [] [Whitespace(" ")],
             ty: TsObjectType {
                 l_curly_token: L_CURLY@125..126 "{" [] [],
@@ -203,8 +207,9 @@ JsModule {
       1: TS_IDENTIFIER_BINDING@5..7
         0: IDENT@5..7 "A" [] [Whitespace(" ")]
       2: (empty)
-      3: EQ@7..9 "=" [] [Whitespace(" ")]
-      4: TS_OBJECT_TYPE@9..33
+      3: (empty)
+      4: EQ@7..9 "=" [] [Whitespace(" ")]
+      5: TS_OBJECT_TYPE@9..33
         0: L_CURLY@9..11 "{" [] [Whitespace(" ")]
         1: TS_TYPE_MEMBER_LIST@11..32
           0: TS_PROPERTY_SIGNATURE_TYPE_MEMBER@11..22
@@ -228,14 +233,15 @@ JsModule {
                 0: NUMBER_KW@25..32 "number" [] [Whitespace(" ")]
             4: (empty)
         2: R_CURLY@32..33 "}" [] []
-      5: SEMICOLON@33..34 ";" [] []
+      6: SEMICOLON@33..34 ";" [] []
     1: TS_TYPE_ALIAS_DECLARATION@34..69
       0: TYPE_KW@34..40 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@40..42
         0: IDENT@40..42 "B" [] [Whitespace(" ")]
       2: (empty)
-      3: EQ@42..44 "=" [] [Whitespace(" ")]
-      4: TS_OBJECT_TYPE@44..68
+      3: (empty)
+      4: EQ@42..44 "=" [] [Whitespace(" ")]
+      5: TS_OBJECT_TYPE@44..68
         0: L_CURLY@44..46 "{" [] [Whitespace(" ")]
         1: TS_TYPE_MEMBER_LIST@46..67
           0: TS_PROPERTY_SIGNATURE_TYPE_MEMBER@46..57
@@ -259,14 +265,15 @@ JsModule {
                 0: NUMBER_KW@60..67 "number" [] [Whitespace(" ")]
             4: (empty)
         2: R_CURLY@67..68 "}" [] []
-      5: SEMICOLON@68..69 ";" [] []
+      6: SEMICOLON@68..69 ";" [] []
     2: TS_TYPE_ALIAS_DECLARATION@69..115
       0: TYPE_KW@69..75 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@75..77
         0: IDENT@75..77 "C" [] [Whitespace(" ")]
       2: (empty)
-      3: EQ@77..79 "=" [] [Whitespace(" ")]
-      4: TS_OBJECT_TYPE@79..114
+      3: (empty)
+      4: EQ@77..79 "=" [] [Whitespace(" ")]
+      5: TS_OBJECT_TYPE@79..114
         0: L_CURLY@79..81 "{" [] [Whitespace(" ")]
         1: TS_TYPE_MEMBER_LIST@81..113
           0: TS_PROPERTY_SIGNATURE_TYPE_MEMBER@81..92
@@ -300,14 +307,15 @@ JsModule {
                 0: STRING_KW@106..113 "string" [] [Whitespace(" ")]
             4: (empty)
         2: R_CURLY@113..114 "}" [] []
-      5: SEMICOLON@114..115 ";" [] []
+      6: SEMICOLON@114..115 ";" [] []
     3: TS_TYPE_ALIAS_DECLARATION@115..150
       0: TYPE_KW@115..121 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@121..123
         0: IDENT@121..123 "D" [] [Whitespace(" ")]
       2: (empty)
-      3: EQ@123..125 "=" [] [Whitespace(" ")]
-      4: TS_OBJECT_TYPE@125..150
+      3: (empty)
+      4: EQ@123..125 "=" [] [Whitespace(" ")]
+      5: TS_OBJECT_TYPE@125..150
         0: L_CURLY@125..126 "{" [] []
         1: TS_TYPE_MEMBER_LIST@126..148
           0: TS_PROPERTY_SIGNATURE_TYPE_MEMBER@126..137
@@ -331,5 +339,5 @@ JsModule {
                 0: NUMBER_KW@142..148 "number" [] []
             4: (empty)
         2: R_CURLY@148..150 "}" [Newline("\n")] []
-      5: (empty)
+      6: (empty)
   4: EOF@150..151 "" [Newline("\n")] []

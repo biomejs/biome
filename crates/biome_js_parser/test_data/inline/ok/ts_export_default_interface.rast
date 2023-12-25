@@ -14,6 +14,7 @@ JsModule {
                         name_token: IDENT@25..27 "A" [] [Whitespace(" ")],
                     },
                     type_parameters: missing (optional),
+                    ts_type_empty_parameters: missing (optional),
                     extends_clause: missing (optional),
                     l_curly_token: L_CURLY@27..29 "{" [] [Whitespace(" ")],
                     members: TsTypeMemberList [],
@@ -42,8 +43,9 @@ JsModule {
             0: IDENT@25..27 "A" [] [Whitespace(" ")]
           2: (empty)
           3: (empty)
-          4: L_CURLY@27..29 "{" [] [Whitespace(" ")]
-          5: TS_TYPE_MEMBER_LIST@29..29
-          6: R_CURLY@29..30 "}" [] []
+          4: (empty)
+          5: L_CURLY@27..29 "{" [] [Whitespace(" ")]
+          6: TS_TYPE_MEMBER_LIST@29..29
+          7: R_CURLY@29..30 "}" [] []
         2: (empty)
   4: EOF@30..31 "" [Newline("\n")] []

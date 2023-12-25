@@ -42,6 +42,7 @@ JsModule {
                         name_token: IDENT@57..59 "A" [] [Whitespace(" ")],
                     },
                     type_parameters: missing (optional),
+                    ts_type_empty_parameters: missing (optional),
                     extends_clause: missing (optional),
                     l_curly_token: L_CURLY@59..60 "{" [] [],
                     members: TsTypeMemberList [],
@@ -77,6 +78,7 @@ JsModule {
                         name_token: IDENT@107..109 "C" [] [Whitespace(" ")],
                     },
                     type_parameters: missing (optional),
+                    ts_type_empty_parameters: missing (optional),
                     eq_token: EQ@109..111 "=" [] [Whitespace(" ")],
                     ty: TsStringType {
                         string_token: STRING_KW@111..117 "string" [] [],
@@ -167,9 +169,10 @@ JsModule {
             0: IDENT@57..59 "A" [] [Whitespace(" ")]
           2: (empty)
           3: (empty)
-          4: L_CURLY@59..60 "{" [] []
-          5: TS_TYPE_MEMBER_LIST@60..60
-          6: R_CURLY@60..61 "}" [] []
+          4: (empty)
+          5: L_CURLY@59..60 "{" [] []
+          6: TS_TYPE_MEMBER_LIST@60..60
+          7: R_CURLY@60..61 "}" [] []
     2: JS_EXPORT@61..86
       0: JS_DECORATOR_LIST@61..61
       1: EXPORT_KW@61..69 "export" [Newline("\n")] [Whitespace(" ")]
@@ -193,10 +196,11 @@ JsModule {
           1: TS_IDENTIFIER_BINDING@107..109
             0: IDENT@107..109 "C" [] [Whitespace(" ")]
           2: (empty)
-          3: EQ@109..111 "=" [] [Whitespace(" ")]
-          4: TS_STRING_TYPE@111..117
+          3: (empty)
+          4: EQ@109..111 "=" [] [Whitespace(" ")]
+          5: TS_STRING_TYPE@111..117
             0: STRING_KW@111..117 "string" [] []
-          5: SEMICOLON@117..118 ";" [] []
+          6: SEMICOLON@117..118 ";" [] []
     4: JS_EXPORT@118..144
       0: JS_DECORATOR_LIST@118..118
       1: EXPORT_KW@118..126 "export" [Newline("\n")] [Whitespace(" ")]

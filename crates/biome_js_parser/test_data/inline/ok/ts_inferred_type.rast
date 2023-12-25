@@ -9,6 +9,7 @@ JsModule {
                 name_token: IDENT@5..7 "A" [] [Whitespace(" ")],
             },
             type_parameters: missing (optional),
+            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@7..9 "=" [] [Whitespace(" ")],
             ty: TsConditionalType {
                 check_type: TsReferenceType {
@@ -45,6 +46,7 @@ JsModule {
                 name_token: IDENT@45..47 "B" [] [Whitespace(" ")],
             },
             type_parameters: missing (optional),
+            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@47..49 "=" [] [Whitespace(" ")],
             ty: TsConditionalType {
                 check_type: TsReferenceType {
@@ -124,8 +126,9 @@ JsModule {
       1: TS_IDENTIFIER_BINDING@5..7
         0: IDENT@5..7 "A" [] [Whitespace(" ")]
       2: (empty)
-      3: EQ@7..9 "=" [] [Whitespace(" ")]
-      4: TS_CONDITIONAL_TYPE@9..38
+      3: (empty)
+      4: EQ@7..9 "=" [] [Whitespace(" ")]
+      5: TS_CONDITIONAL_TYPE@9..38
         0: TS_REFERENCE_TYPE@9..11
           0: JS_REFERENCE_IDENTIFIER@9..11
             0: IDENT@9..11 "A" [] [Whitespace(" ")]
@@ -144,14 +147,15 @@ JsModule {
         5: COLON@31..33 ":" [] [Whitespace(" ")]
         6: TS_NEVER_TYPE@33..38
           0: NEVER_KW@33..38 "never" [] []
-      5: SEMICOLON@38..39 ";" [] []
+      6: SEMICOLON@38..39 ";" [] []
     1: TS_TYPE_ALIAS_DECLARATION@39..97
       0: TYPE_KW@39..45 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@45..47
         0: IDENT@45..47 "B" [] [Whitespace(" ")]
       2: (empty)
-      3: EQ@47..49 "=" [] [Whitespace(" ")]
-      4: TS_CONDITIONAL_TYPE@49..96
+      3: (empty)
+      4: EQ@47..49 "=" [] [Whitespace(" ")]
+      5: TS_CONDITIONAL_TYPE@49..96
         0: TS_REFERENCE_TYPE@49..51
           0: JS_REFERENCE_IDENTIFIER@49..51
             0: IDENT@49..51 "A" [] [Whitespace(" ")]
@@ -195,5 +199,5 @@ JsModule {
         5: COLON@89..91 ":" [] [Whitespace(" ")]
         6: TS_NEVER_TYPE@91..96
           0: NEVER_KW@91..96 "never" [] []
-      5: SEMICOLON@96..97 ";" [] []
+      6: SEMICOLON@96..97 ";" [] []
   4: EOF@97..98 "" [Newline("\n")] []

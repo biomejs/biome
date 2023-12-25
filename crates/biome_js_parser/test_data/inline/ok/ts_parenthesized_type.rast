@@ -9,6 +9,7 @@ JsModule {
                 name_token: IDENT@5..7 "A" [] [Whitespace(" ")],
             },
             type_parameters: missing (optional),
+            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@7..9 "=" [] [Whitespace(" ")],
             ty: TsParenthesizedType {
                 l_paren_token: L_PAREN@9..10 "(" [] [],
@@ -33,11 +34,12 @@ JsModule {
       1: TS_IDENTIFIER_BINDING@5..7
         0: IDENT@5..7 "A" [] [Whitespace(" ")]
       2: (empty)
-      3: EQ@7..9 "=" [] [Whitespace(" ")]
-      4: TS_PARENTHESIZED_TYPE@9..17
+      3: (empty)
+      4: EQ@7..9 "=" [] [Whitespace(" ")]
+      5: TS_PARENTHESIZED_TYPE@9..17
         0: L_PAREN@9..10 "(" [] []
         1: TS_STRING_TYPE@10..16
           0: STRING_KW@10..16 "string" [] []
         2: R_PAREN@16..17 ")" [] []
-      5: (empty)
+      6: (empty)
   4: EOF@17..18 "" [Newline("\n")] []

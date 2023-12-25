@@ -9,6 +9,7 @@ JsModule {
                 name_token: IDENT@5..7 "A" [] [Whitespace(" ")],
             },
             type_parameters: missing (optional),
+            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@7..9 "=" [] [Whitespace(" ")],
             ty: TsBogusType {
                 items: [
@@ -53,8 +54,9 @@ JsModule {
       1: TS_IDENTIFIER_BINDING@5..7
         0: IDENT@5..7 "A" [] [Whitespace(" ")]
       2: (empty)
-      3: EQ@7..9 "=" [] [Whitespace(" ")]
-      4: TS_BOGUS_TYPE@9..31
+      3: (empty)
+      4: EQ@7..9 "=" [] [Whitespace(" ")]
+      5: TS_BOGUS_TYPE@9..31
         0: L_BRACK@9..11 "[" [] [Whitespace(" ")]
         1: JS_BOGUS@11..30
           0: JS_BOGUS@11..30
@@ -69,7 +71,7 @@ JsModule {
               1: L_BRACK@27..28 "[" [] []
               2: R_BRACK@28..30 "]" [] [Whitespace(" ")]
         2: R_BRACK@30..31 "]" [] []
-      5: (empty)
+      6: (empty)
   4: EOF@31..32 "" [Newline("\n")] []
 --
 ts_tuple_type_cannot_be_optional_and_rest.ts:1:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
