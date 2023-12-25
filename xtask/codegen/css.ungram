@@ -1087,6 +1087,7 @@ AnyCssSupportsInParens =
 	| CssSupportsFeatureDeclaration
 	| CssSupportsFeatureSelector
 	| CssAnyFunction
+	| AnyCssValue // general-enclosed
 
 CssSupportsConditionInParens =
 	'('

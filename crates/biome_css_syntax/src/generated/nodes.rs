@@ -6581,12 +6581,19 @@ impl AnyCssSupportsCondition {
 #[derive(Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum AnyCssSupportsInParens {
+    AnyCssValue(AnyCssValue),
     CssAnyFunction(CssAnyFunction),
     CssSupportsConditionInParens(CssSupportsConditionInParens),
     CssSupportsFeatureDeclaration(CssSupportsFeatureDeclaration),
     CssSupportsFeatureSelector(CssSupportsFeatureSelector),
 }
 impl AnyCssSupportsInParens {
+    pub fn as_any_css_value(&self) -> Option<&AnyCssValue> {
+        match &self {
+            AnyCssSupportsInParens::AnyCssValue(item) => Some(item),
+            _ => None,
+        }
+    }
     pub fn as_css_any_function(&self) -> Option<&CssAnyFunction> {
         match &self {
             AnyCssSupportsInParens::CssAnyFunction(item) => Some(item),
@@ -15765,18 +15772,20 @@ impl From<CssSupportsFeatureSelector> for AnyCssSupportsInParens {
 }
 impl AstNode for AnyCssSupportsInParens {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = CssAnyFunction::KIND_SET
+    const KIND_SET: SyntaxKindSet<Language> = AnyCssValue::KIND_SET
+        .union(CssAnyFunction::KIND_SET)
         .union(CssSupportsConditionInParens::KIND_SET)
         .union(CssSupportsFeatureDeclaration::KIND_SET)
         .union(CssSupportsFeatureSelector::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(
-            kind,
+        match kind {
             CSS_ANY_FUNCTION
-                | CSS_SUPPORTS_CONDITION_IN_PARENS
-                | CSS_SUPPORTS_FEATURE_DECLARATION
-                | CSS_SUPPORTS_FEATURE_SELECTOR
-        )
+            | CSS_SUPPORTS_CONDITION_IN_PARENS
+            | CSS_SUPPORTS_FEATURE_DECLARATION
+            | CSS_SUPPORTS_FEATURE_SELECTOR => true,
+            k if AnyCssValue::can_cast(k) => true,
+            _ => false,
+        }
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
@@ -15796,7 +15805,12 @@ impl AstNode for AnyCssSupportsInParens {
                     syntax,
                 })
             }
-            _ => return None,
+            _ => {
+                if let Some(any_css_value) = AnyCssValue::cast(syntax) {
+                    return Some(AnyCssSupportsInParens::AnyCssValue(any_css_value));
+                }
+                return None;
+            }
         };
         Some(res)
     }
@@ -15806,6 +15820,7 @@ impl AstNode for AnyCssSupportsInParens {
             AnyCssSupportsInParens::CssSupportsConditionInParens(it) => &it.syntax,
             AnyCssSupportsInParens::CssSupportsFeatureDeclaration(it) => &it.syntax,
             AnyCssSupportsInParens::CssSupportsFeatureSelector(it) => &it.syntax,
+            AnyCssSupportsInParens::AnyCssValue(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
@@ -15814,12 +15829,14 @@ impl AstNode for AnyCssSupportsInParens {
             AnyCssSupportsInParens::CssSupportsConditionInParens(it) => it.syntax,
             AnyCssSupportsInParens::CssSupportsFeatureDeclaration(it) => it.syntax,
             AnyCssSupportsInParens::CssSupportsFeatureSelector(it) => it.syntax,
+            AnyCssSupportsInParens::AnyCssValue(it) => it.into_syntax(),
         }
     }
 }
 impl std::fmt::Debug for AnyCssSupportsInParens {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            AnyCssSupportsInParens::AnyCssValue(it) => std::fmt::Debug::fmt(it, f),
             AnyCssSupportsInParens::CssAnyFunction(it) => std::fmt::Debug::fmt(it, f),
             AnyCssSupportsInParens::CssSupportsConditionInParens(it) => std::fmt::Debug::fmt(it, f),
             AnyCssSupportsInParens::CssSupportsFeatureDeclaration(it) => {
@@ -15832,6 +15849,7 @@ impl std::fmt::Debug for AnyCssSupportsInParens {
 impl From<AnyCssSupportsInParens> for SyntaxNode {
     fn from(n: AnyCssSupportsInParens) -> SyntaxNode {
         match n {
+            AnyCssSupportsInParens::AnyCssValue(it) => it.into(),
             AnyCssSupportsInParens::CssAnyFunction(it) => it.into(),
             AnyCssSupportsInParens::CssSupportsConditionInParens(it) => it.into(),
             AnyCssSupportsInParens::CssSupportsFeatureDeclaration(it) => it.into(),

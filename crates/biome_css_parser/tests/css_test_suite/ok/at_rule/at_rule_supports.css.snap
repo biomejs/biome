@@ -162,6 +162,16 @@ expression: snapshot
 	* { background: red; }
 }
 
+@supports (--var) {
+	* { background: red; }
+}
+
+@supports (--element(".minwidth")) {
+	[--self] {
+		background: greenyellow;
+	}
+}
+
 ```
 
 
@@ -3126,17 +3136,143 @@ CssRoot {
                 },
             },
         },
+        CssAtRule {
+            at_token: AT@2990..2993 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssSupportsAtRule {
+                supports_token: SUPPORTS_KW@2993..3002 "supports" [] [Whitespace(" ")],
+                condition: CssSupportsConditionInParens {
+                    l_paren_token: L_PAREN@3002..3003 "(" [] [],
+                    condition: CssCustomProperty {
+                        value: CssIdentifier {
+                            value_token: IDENT@3003..3008 "--var" [] [],
+                        },
+                    },
+                    r_paren_token: R_PAREN@3008..3010 ")" [] [Whitespace(" ")],
+                },
+                block: CssRuleListBlock {
+                    l_curly_token: L_CURLY@3010..3011 "{" [] [],
+                    rules: CssRuleList [
+                        CssRule {
+                            prelude: CssSelectorList [
+                                CssCompoundSelector {
+                                    nesting_selector_token: missing (optional),
+                                    simple_selector: CssUniversalSelector {
+                                        namespace: missing (optional),
+                                        star_token: STAR@3011..3015 "*" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
+                                    },
+                                    sub_selectors: CssSubSelectorList [],
+                                },
+                            ],
+                            block: CssDeclarationListBlock {
+                                l_curly_token: L_CURLY@3015..3017 "{" [] [Whitespace(" ")],
+                                declarations: CssDeclarationList [
+                                    CssDeclaration {
+                                        name: CssIdentifier {
+                                            value_token: IDENT@3017..3027 "background" [] [],
+                                        },
+                                        colon_token: COLON@3027..3029 ":" [] [Whitespace(" ")],
+                                        value: CssComponentValueList [
+                                            CssIdentifier {
+                                                value_token: IDENT@3029..3032 "red" [] [],
+                                            },
+                                        ],
+                                        important: missing (optional),
+                                    },
+                                    SEMICOLON@3032..3034 ";" [] [Whitespace(" ")],
+                                ],
+                                r_curly_token: R_CURLY@3034..3035 "}" [] [],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@3035..3037 "}" [Newline("\n")] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@3037..3040 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssSupportsAtRule {
+                supports_token: SUPPORTS_KW@3040..3049 "supports" [] [Whitespace(" ")],
+                condition: CssSupportsConditionInParens {
+                    l_paren_token: L_PAREN@3049..3050 "(" [] [],
+                    condition: CssAnyFunction {
+                        css_simple_function: CssSimpleFunction {
+                            name: CssIdentifier {
+                                value_token: IDENT@3050..3059 "--element" [] [],
+                            },
+                            l_paren_token: L_PAREN@3059..3060 "(" [] [],
+                            items: CssParameterList [
+                                CssParameter {
+                                    css_component_value_list: CssComponentValueList [
+                                        CssString {
+                                            value_token: CSS_STRING_LITERAL@3060..3071 "\".minwidth\"" [] [],
+                                        },
+                                    ],
+                                },
+                            ],
+                            r_paren_token: R_PAREN@3071..3072 ")" [] [],
+                        },
+                    },
+                    r_paren_token: R_PAREN@3072..3074 ")" [] [Whitespace(" ")],
+                },
+                block: CssRuleListBlock {
+                    l_curly_token: L_CURLY@3074..3075 "{" [] [],
+                    rules: CssRuleList [
+                        CssRule {
+                            prelude: CssSelectorList [
+                                CssCompoundSelector {
+                                    nesting_selector_token: missing (optional),
+                                    simple_selector: missing (optional),
+                                    sub_selectors: CssSubSelectorList [
+                                        CssAttributeSelector {
+                                            l_brack_token: L_BRACK@3075..3078 "[" [Newline("\n"), Whitespace("\t")] [],
+                                            name: CssAttributeName {
+                                                namespace: missing (optional),
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@3078..3084 "--self" [] [],
+                                                },
+                                            },
+                                            matcher: missing (optional),
+                                            r_brack_token: R_BRACK@3084..3086 "]" [] [Whitespace(" ")],
+                                        },
+                                    ],
+                                },
+                            ],
+                            block: CssDeclarationListBlock {
+                                l_curly_token: L_CURLY@3086..3087 "{" [] [],
+                                declarations: CssDeclarationList [
+                                    CssDeclaration {
+                                        name: CssIdentifier {
+                                            value_token: IDENT@3087..3100 "background" [Newline("\n"), Whitespace("\t\t")] [],
+                                        },
+                                        colon_token: COLON@3100..3102 ":" [] [Whitespace(" ")],
+                                        value: CssComponentValueList [
+                                            CssIdentifier {
+                                                value_token: IDENT@3102..3113 "greenyellow" [] [],
+                                            },
+                                        ],
+                                        important: missing (optional),
+                                    },
+                                    SEMICOLON@3113..3114 ";" [] [],
+                                ],
+                                r_curly_token: R_CURLY@3114..3117 "}" [Newline("\n"), Whitespace("\t")] [],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@3117..3119 "}" [Newline("\n")] [],
+                },
+            },
+        },
     ],
-    eof_token: EOF@2990..2991 "" [Newline("\n")] [],
+    eof_token: EOF@3119..3120 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..2991
+0: CSS_ROOT@0..3120
   0: (empty)
-  1: CSS_RULE_LIST@0..2990
+  1: CSS_RULE_LIST@0..3119
     0: CSS_AT_RULE@0..56
       0: AT@0..1 "@" [] []
       1: CSS_SUPPORTS_AT_RULE@1..56
@@ -5126,7 +5262,91 @@ CssRoot {
                   1: SEMICOLON@2985..2987 ";" [] [Whitespace(" ")]
                 2: R_CURLY@2987..2988 "}" [] []
           2: R_CURLY@2988..2990 "}" [Newline("\n")] []
-  2: EOF@2990..2991 "" [Newline("\n")] []
+    38: CSS_AT_RULE@2990..3037
+      0: AT@2990..2993 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_SUPPORTS_AT_RULE@2993..3037
+        0: SUPPORTS_KW@2993..3002 "supports" [] [Whitespace(" ")]
+        1: CSS_SUPPORTS_CONDITION_IN_PARENS@3002..3010
+          0: L_PAREN@3002..3003 "(" [] []
+          1: CSS_CUSTOM_PROPERTY@3003..3008
+            0: CSS_IDENTIFIER@3003..3008
+              0: IDENT@3003..3008 "--var" [] []
+          2: R_PAREN@3008..3010 ")" [] [Whitespace(" ")]
+        2: CSS_RULE_LIST_BLOCK@3010..3037
+          0: L_CURLY@3010..3011 "{" [] []
+          1: CSS_RULE_LIST@3011..3035
+            0: CSS_RULE@3011..3035
+              0: CSS_SELECTOR_LIST@3011..3015
+                0: CSS_COMPOUND_SELECTOR@3011..3015
+                  0: (empty)
+                  1: CSS_UNIVERSAL_SELECTOR@3011..3015
+                    0: (empty)
+                    1: STAR@3011..3015 "*" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
+                  2: CSS_SUB_SELECTOR_LIST@3015..3015
+              1: CSS_DECLARATION_LIST_BLOCK@3015..3035
+                0: L_CURLY@3015..3017 "{" [] [Whitespace(" ")]
+                1: CSS_DECLARATION_LIST@3017..3034
+                  0: CSS_DECLARATION@3017..3032
+                    0: CSS_IDENTIFIER@3017..3027
+                      0: IDENT@3017..3027 "background" [] []
+                    1: COLON@3027..3029 ":" [] [Whitespace(" ")]
+                    2: CSS_COMPONENT_VALUE_LIST@3029..3032
+                      0: CSS_IDENTIFIER@3029..3032
+                        0: IDENT@3029..3032 "red" [] []
+                    3: (empty)
+                  1: SEMICOLON@3032..3034 ";" [] [Whitespace(" ")]
+                2: R_CURLY@3034..3035 "}" [] []
+          2: R_CURLY@3035..3037 "}" [Newline("\n")] []
+    39: CSS_AT_RULE@3037..3119
+      0: AT@3037..3040 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_SUPPORTS_AT_RULE@3040..3119
+        0: SUPPORTS_KW@3040..3049 "supports" [] [Whitespace(" ")]
+        1: CSS_SUPPORTS_CONDITION_IN_PARENS@3049..3074
+          0: L_PAREN@3049..3050 "(" [] []
+          1: CSS_ANY_FUNCTION@3050..3072
+            0: CSS_SIMPLE_FUNCTION@3050..3072
+              0: CSS_IDENTIFIER@3050..3059
+                0: IDENT@3050..3059 "--element" [] []
+              1: L_PAREN@3059..3060 "(" [] []
+              2: CSS_PARAMETER_LIST@3060..3071
+                0: CSS_PARAMETER@3060..3071
+                  0: CSS_COMPONENT_VALUE_LIST@3060..3071
+                    0: CSS_STRING@3060..3071
+                      0: CSS_STRING_LITERAL@3060..3071 "\".minwidth\"" [] []
+              3: R_PAREN@3071..3072 ")" [] []
+          2: R_PAREN@3072..3074 ")" [] [Whitespace(" ")]
+        2: CSS_RULE_LIST_BLOCK@3074..3119
+          0: L_CURLY@3074..3075 "{" [] []
+          1: CSS_RULE_LIST@3075..3117
+            0: CSS_RULE@3075..3117
+              0: CSS_SELECTOR_LIST@3075..3086
+                0: CSS_COMPOUND_SELECTOR@3075..3086
+                  0: (empty)
+                  1: (empty)
+                  2: CSS_SUB_SELECTOR_LIST@3075..3086
+                    0: CSS_ATTRIBUTE_SELECTOR@3075..3086
+                      0: L_BRACK@3075..3078 "[" [Newline("\n"), Whitespace("\t")] []
+                      1: CSS_ATTRIBUTE_NAME@3078..3084
+                        0: (empty)
+                        1: CSS_IDENTIFIER@3078..3084
+                          0: IDENT@3078..3084 "--self" [] []
+                      2: (empty)
+                      3: R_BRACK@3084..3086 "]" [] [Whitespace(" ")]
+              1: CSS_DECLARATION_LIST_BLOCK@3086..3117
+                0: L_CURLY@3086..3087 "{" [] []
+                1: CSS_DECLARATION_LIST@3087..3114
+                  0: CSS_DECLARATION@3087..3113
+                    0: CSS_IDENTIFIER@3087..3100
+                      0: IDENT@3087..3100 "background" [Newline("\n"), Whitespace("\t\t")] []
+                    1: COLON@3100..3102 ":" [] [Whitespace(" ")]
+                    2: CSS_COMPONENT_VALUE_LIST@3102..3113
+                      0: CSS_IDENTIFIER@3102..3113
+                        0: IDENT@3102..3113 "greenyellow" [] []
+                    3: (empty)
+                  1: SEMICOLON@3113..3114 ";" [] []
+                2: R_CURLY@3114..3117 "}" [Newline("\n"), Whitespace("\t")] []
+          2: R_CURLY@3117..3119 "}" [Newline("\n")] []
+  2: EOF@3119..3120 "" [Newline("\n")] []
 
 ```
 

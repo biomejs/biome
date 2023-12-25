@@ -12,6 +12,7 @@ impl FormatRule<AnyCssSupportsInParens> for FormatAnyCssSupportsInParens {
             AnyCssSupportsInParens::CssSupportsFeatureDeclaration(node) => node.format().fmt(f),
             AnyCssSupportsInParens::CssSupportsFeatureSelector(node) => node.format().fmt(f),
             AnyCssSupportsInParens::CssAnyFunction(node) => node.format().fmt(f),
+            AnyCssSupportsInParens::AnyCssValue(node) => node.format().fmt(f),
         }
     }
 }

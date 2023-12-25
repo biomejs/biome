@@ -2,7 +2,8 @@ use crate::parser::CssParser;
 use crate::syntax::blocks::parse_or_recover_rule_list_block;
 use crate::syntax::selector::parse_selector;
 use crate::syntax::{
-    is_at_any_function, is_nth_at_identifier, parse_any_function, parse_declaration,
+    is_at_any_function, is_nth_at_identifier, parse_any_function, parse_any_value,
+    parse_declaration,
 };
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::T;
@@ -112,8 +113,10 @@ fn parse_any_supports_condition_in_parens(p: &mut CssParser) -> ParsedSyntax {
         parse_supports_feature_declaration(p)
     } else if is_at_any_function(p) {
         parse_any_function(p) // TODO replace with parse_simple_function
-    } else {
+    } else if is_at_supports_condition_in_parens(p) {
         parse_supports_condition_in_parens(p) // TODO handle error
+    } else {
+        parse_any_value(p)
     }
 }
 

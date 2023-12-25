@@ -153,3 +153,13 @@
 @supports (   --var:   "test"   ) {
 	* { background: red; }
 }
+
+@supports (--var) {
+	* { background: red; }
+}
+
+@supports (--element(".minwidth")) {
+	[--self] {
+		background: greenyellow;
+	}
+}
