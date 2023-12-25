@@ -61,6 +61,9 @@ bitflags! {
 
         /// Whether the parser is inside a conditional extends
         const IN_CONDITIONAL_EXTENDS = 1 << 3;
+
+        /// Whether the current context is within a type or interface declaration
+        const TYPE_OR_INTERFACE_DECLARATION = 1 << 4;
     }
 }
 
@@ -81,6 +84,10 @@ impl TypeContext {
         self.and(TypeContext::IN_CONDITIONAL_EXTENDS, allow)
     }
 
+    pub(crate) fn and_type_or_interface_declaration(self, allow: bool) -> Self {
+        self.and(TypeContext::TYPE_OR_INTERFACE_DECLARATION, allow)
+    }
+
     pub(crate) const fn is_conditional_type_allowed(&self) -> bool {
         !self.contains(TypeContext::DISALLOW_CONDITIONAL_TYPES)
     }
@@ -95,6 +102,10 @@ impl TypeContext {
 
     pub(crate) const fn in_conditional_extends(&self) -> bool {
         self.contains(TypeContext::IN_CONDITIONAL_EXTENDS)
+    }
+
+    pub(crate) const fn is_in_type_or_interface_declaration(&self) -> bool {
+        self.contains(TypeContext::TYPE_OR_INTERFACE_DECLARATION)
     }
 
     /// Adds the `flag` if `set` is `true`, otherwise removes the `flag`
@@ -179,7 +190,9 @@ fn parse_ts_type_parameter_name(p: &mut JsParser) -> ParsedSyntax {
 
 // test ts ts_type_parameters
 // type A<X extends string, Y = number, Z extends string | number = number> = { x: X, y: Y, z: Z }
-//
+// type A<> = {}
+// interface A<> {}
+
 // test_err ts ts_type_parameters_incomplete
 // type A<T
 pub(crate) fn parse_ts_type_parameters(p: &mut JsParser, context: TypeContext) -> ParsedSyntax {
@@ -189,9 +202,16 @@ pub(crate) fn parse_ts_type_parameters(p: &mut JsParser, context: TypeContext) -
 
     let m = p.start();
     p.bump(T![<]);
+
     if p.at(T![>]) {
-        p.error(expected_ts_type_parameter(p, p.cur_range()));
+        if context.is_in_type_or_interface_declaration() {
+            p.bump(T![>]);
+            return Present(m.complete(p, TS_TYPE_EMPTY_PARAMETERS));
+        } else {
+            p.error(expected_ts_type_parameter(p, p.cur_range()));
+        }
     }
+
     TsTypeParameterList(context).parse_list(p);
     p.expect(T![>]);
 
