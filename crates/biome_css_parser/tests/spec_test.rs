@@ -134,8 +134,7 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 #[test]
 pub fn quick_test() {
     let code = r#"
-[href$='#'] {} {
-}
+@page{margin: 1cm;}
     "#;
 
     let root = parse_css(

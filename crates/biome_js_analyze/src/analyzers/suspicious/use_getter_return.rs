@@ -150,7 +150,7 @@ impl Rule for UseGetterReturn {
                 rule_category!(),
                 return_stmt_range,
                 markup! {
-                    "This "<Emphasis>"return"</Emphasis>" should return a value because it is located in a "<Emphasis>"return"</Emphasis>"."
+                    "This "<Emphasis>"return"</Emphasis>" should return a value because it is located in a "<Emphasis>"getter"</Emphasis>"."
                 },
             ),
         };

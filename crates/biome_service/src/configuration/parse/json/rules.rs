@@ -1020,6 +1020,13 @@ impl Deserializable for Nursery {
                                 diagnostics,
                             );
                         }
+                        "useNumberProperties" => {
+                            result.use_number_properties = Deserializable::deserialize(
+                                &value,
+                                "useNumberProperties",
+                                diagnostics,
+                            );
+                        }
                         "useRegexLiterals" => {
                             result.use_regex_literals = Deserializable::deserialize(
                                 &value,
@@ -1067,6 +1074,7 @@ impl Deserializable for Nursery {
                                     "useGroupedTypeImport",
                                     "useImportRestrictions",
                                     "useNodeImportProtocol",
+                                    "useNumberProperties",
                                     "useRegexLiterals",
                                     "useShorthandFunctionType",
                                     "useValidAriaRole",

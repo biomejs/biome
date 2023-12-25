@@ -130,6 +130,16 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssDeclarationListBlock::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_DECLARATION_OR_AT_RULE_BLOCK => {
+                    let $pattern =
+                        unsafe { $crate::CssDeclarationOrAtRuleBlock::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_DECLARATION_WITH_SEMICOLON => {
+                    let $pattern =
+                        unsafe { $crate::CssDeclarationWithSemicolon::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_FONT_FACE_AT_RULE => {
                     let $pattern = unsafe { $crate::CssFontFaceAtRule::new_unchecked(node) };
                     $body
@@ -167,6 +177,22 @@ macro_rules! map_syntax_node {
                 $crate::CssSyntaxKind::CSS_KEYFRAMES_PERCENTAGE_SELECTOR => {
                     let $pattern =
                         unsafe { $crate::CssKeyframesPercentageSelector::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_LAYER_AT_RULE => {
+                    let $pattern = unsafe { $crate::CssLayerAtRule::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_LAYER_DECLARATION => {
+                    let $pattern = unsafe { $crate::CssLayerDeclaration::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_LAYER_REFERENCE => {
+                    let $pattern = unsafe { $crate::CssLayerReference::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_MARGIN_AT_RULE => {
+                    let $pattern = unsafe { $crate::CssMarginAtRule::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_MEDIA_AND_CONDITION => {
@@ -224,6 +250,22 @@ macro_rules! map_syntax_node {
                 }
                 $crate::CssSyntaxKind::CSS_NUMBER => {
                     let $pattern = unsafe { $crate::CssNumber::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_PAGE_AT_RULE => {
+                    let $pattern = unsafe { $crate::CssPageAtRule::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_PAGE_AT_RULE_BLOCK => {
+                    let $pattern = unsafe { $crate::CssPageAtRuleBlock::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_PAGE_SELECTOR => {
+                    let $pattern = unsafe { $crate::CssPageSelector::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_PAGE_SELECTOR_PSEUDO => {
+                    let $pattern = unsafe { $crate::CssPageSelectorPseudo::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_PARAMETER => {
@@ -435,8 +477,17 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssBogusKeyframesItem::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_BOGUS_LAYER => {
+                    let $pattern = unsafe { $crate::CssBogusLayer::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_BOGUS_MEDIA_QUERY => {
                     let $pattern = unsafe { $crate::CssBogusMediaQuery::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_BOGUS_PAGE_SELECTOR_PSEUDO => {
+                    let $pattern =
+                        unsafe { $crate::CssBogusPageSelectorPseudo::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_BOGUS_PARAMETER => {
@@ -475,6 +526,11 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssDeclarationList::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_DECLARATION_OR_AT_RULE_LIST => {
+                    let $pattern =
+                        unsafe { $crate::CssDeclarationOrAtRuleList::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_KEYFRAMES_ITEM_LIST => {
                     let $pattern = unsafe { $crate::CssKeyframesItemList::new_unchecked(node) };
                     $body
@@ -483,8 +539,29 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssKeyframesSelectorList::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_LAYER_NAME_LIST => {
+                    let $pattern = unsafe { $crate::CssLayerNameList::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_LAYER_REFERENCE_LIST => {
+                    let $pattern = unsafe { $crate::CssLayerReferenceList::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_MEDIA_QUERY_LIST => {
                     let $pattern = unsafe { $crate::CssMediaQueryList::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_PAGE_AT_RULE_ITEM_LIST => {
+                    let $pattern = unsafe { $crate::CssPageAtRuleItemList::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_PAGE_SELECTOR_LIST => {
+                    let $pattern = unsafe { $crate::CssPageSelectorList::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_PAGE_SELECTOR_PSEUDO_LIST => {
+                    let $pattern =
+                        unsafe { $crate::CssPageSelectorPseudoList::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_PARAMETER_LIST => {

@@ -153,7 +153,24 @@ Biome now scores 97% compatibility with Prettier and features more than 180 lint
   }
   ```
 
-- The code action (fix) of [noMultipleSpacesInRegularExpressionLiterals](https://biomejs.dev/linter/rules/no-multiple-spaces-in-regular-expression-literals/) is now marked as safe.
+- Preserve more comments in the fix of [useExponentiationOperator](https://biomejs.dev/linter/rules/use-exponentiation-operator). Contributed by @Conaclos
+
+  The rule now preserves comments that follow the (optional) trailing comma.
+
+  For example, the rule now suggests the following code fix:
+
+  ```diff
+  - Math.pow(
+  -    a, // a
+  -    2, // 2
+  -  );
+  +
+  +    a ** // a
+  +    2 // 2
+  +
+  ```
+
+- The code action (fix) of [noMultipleSpacesInRegularExpressionLiterals](https://biomejs.dev/linter/rules/no-multiple-spaces-in-regular-expression-literals/) is now marked as safe. Contributed by @Conaclos
 
 #### Bug fixes
 

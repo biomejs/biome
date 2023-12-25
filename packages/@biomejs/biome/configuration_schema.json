@@ -1363,6 +1363,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useNumberProperties": {
+					"description": "Use Number properties instead of global ones.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useRegexLiterals": {
 					"description": "Enforce the use of the regular expression literals instead of the RegExp constructor if possible.",
 					"anyOf": [

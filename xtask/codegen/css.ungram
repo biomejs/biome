@@ -40,8 +40,10 @@ CssBogus = SyntaxElement*
 CssBogusSelector = SyntaxElement*
 CssBogusSubSelector = SyntaxElement*
 CssBogusPseudoClass = SyntaxElement*
+CssBogusPageSelectorPseudo = SyntaxElement*
 CssBogusPseudoElement = SyntaxElement*
 CssBogusAtRule = SyntaxElement*
+CssBogusLayer = SyntaxElement*
 CssBogusBlock =  SyntaxElement*
 CssBogusKeyframesItem =  SyntaxElement*
 CssBogusRule =  SyntaxElement*
@@ -398,6 +400,29 @@ CssPseudoElementFunctionIdentifier =
 	ident: CssIdentifier
 	')'
 
+/////////////
+// COMMON BLOCKS
+////////////
+
+// @page :left { background: red; @media (500px <= width <= 500px) {  } }
+// 						 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssDeclarationOrAtRuleBlock =
+	'{'
+	items: CssDeclarationOrAtRuleList
+ 	'}'
+
+CssDeclarationOrAtRuleList = AnyCssDeclarationOrAtRule*
+
+AnyCssDeclarationOrAtRule =
+    CssDeclarationWithSemicolon
+    | CssAtRule
+
+// @page :left { background: red; @media (500px <= width <= 500px) {  } }
+// 						   ^^^^^^^^^^^^^^^^
+CssDeclarationWithSemicolon =
+    declaration: CssDeclaration
+    ';'
+
 AnyCssDeclarationListBlock =
 	CssDeclarationListBlock
 	| CssBogusBlock
@@ -449,6 +474,8 @@ AnyCssAtRule =
 	| CssFontPaletteValuesAtRule
 	| CssKeyframesAtRule
 	| CssMediaAtRule
+	| CssPageAtRule
+	| CssLayerAtRule
 	| CssBogusAtRule
 
 // @charset "UTF-8";
@@ -881,6 +908,128 @@ AnyCssQueryFeatureValue =
 	| CssIdentifier
 	| CssRatio
 	| CssAnyFunction
+
+// https://drafts.csswg.org/css-page/#at-ruledef-page
+// @page = @page <page-selector-list>? { <declaration-rule-list> }
+// <page-selector-list> = <page-selector>#
+// <page-selector> = [ <ident-token>? <pseudo-page>* ]!
+// <pseudo-page> = ':' [ left | right | first | blank ]
+
+// @page :first {  }
+// ^^^^^^^^^^^^^^^^^
+CssPageAtRule =
+	'page'
+	selectors: CssPageSelectorList
+	block: AnyCssPageAtRuleBlock
+
+// @page name:first,:blank:first {  }
+// 			 ^^^^^^^^^^^^^^^^^^^^^^^
+CssPageSelectorList = (AnyCssPageSelector (',' AnyCssPageSelector)*)
+
+AnyCssPageSelector =
+	CssPageSelector
+	| CssBogusSelector
+
+// @page name:first,:blank:first {  }
+// 			 ^^^^^^^^^^ ^^^^^^^^^^^^
+CssPageSelector =
+	type: CssIdentifier?
+	pseudos: CssPageSelectorPseudoList
+
+CssPageSelectorPseudoList = AnyCssPageSelectorPseudo*
+
+AnyCssPageSelectorPseudo =
+	CssPageSelectorPseudo
+	| CssBogusPageSelectorPseudo
+
+// @page name:first,:blank:first {  }
+// 			     ^^^^^^ ^^^^^^^^^^^^
+CssPageSelectorPseudo =
+	':'
+	selector: ('left' | 'right' | 'first' | 'blank')
+
+AnyCssPageAtRuleBlock =
+	CssPageAtRuleBlock
+	| CssBogusBlock
+
+// @page :left { @left-middle {} background: red; @media (500px <= width <= 500px) {  } }
+// 						 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssPageAtRuleBlock =
+	'{'
+	items: CssPageAtRuleItemList
+ 	'}'
+
+CssPageAtRuleItemList = AnyCssPageAtRuleItem*
+
+AnyCssPageAtRuleItem =
+	CssDeclarationWithSemicolon
+	| CssAtRule
+	| CssMarginAtRule
+
+// @page :left { @left-middle {} background: red; }
+// 						   ^^^^^^^^^^^^^^^
+CssMarginAtRule =
+	'@'
+	name: (
+		'top-left-corner'
+		| 'top-left'
+		| 'top-center'
+		| 'top-right'
+		| 'top-right-corner'
+		| 'bottom-left-corner'
+		| 'bottom-left'
+		| 'bottom-center'
+		| 'bottom-right'
+		| 'bottom-right-corner'
+		| 'left-top'
+		| 'left-middle'
+		| 'left-bottom'
+		| 'right-top'
+		| 'right-middle'
+		| 'right-bottom'
+	)
+	block: CssDeclarationOrAtRuleBlock
+
+// https://drafts.csswg.org/css-cascade-5/#layering
+// @layer =
+//  @layer <layer-name>? { <rule-list> }  |
+//  @layer <layer-name># ;
+//
+// <layer-name> =
+//   <ident> [ '.' <ident> ]*
+
+// @layer override { }
+//  ^^^^^^^^^^^^^^^^^^
+// @layer framework, bar.baz;
+//  ^^^^^^^^^^^^^^^^^^^^^^^^^
+CssLayerAtRule =
+	'layer'
+	layer: AnyCssLayer
+
+AnyCssLayer =
+	CssLayerDeclaration
+	| CssLayerReference
+	| CssBogusLayer
+
+// @layer override.bar { }
+//        ^^^^^^^^^^^^^^^^
+CssLayerDeclaration =
+	references: CssLayerReferenceList
+	block: AnyCssRuleListBlock
+
+// @layer framework, bar.baz;
+//        ^^^^^^^^^^^^^^^^^^^
+CssLayerReference =
+	references: CssLayerReferenceList
+	';'
+
+// @layer framework, bar.baz;
+//        ^^^^^^^^^^^^^^^^^^
+CssLayerReferenceList = (CssLayerNameList (',' CssLayerNameList)*)
+
+// @layer framework, bar.baz;
+//                   ^^^^^^^
+CssLayerNameList = (CssIdentifier ('.' CssIdentifier)*)
 
 ///////////////
 // AUXILIARY
