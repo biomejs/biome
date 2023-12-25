@@ -1,6 +1,7 @@
 //! This module contains the rules that have options
 
 use crate::analyzers::complexity::no_excessive_cognitive_complexity::ComplexityOptions;
+use crate::analyzers::nursery::use_filenaming_convention::FilenamingConventionOptions;
 use crate::aria_analyzers::nursery::use_valid_aria_role::ValidAriaRoleOptions;
 use crate::semantic_analyzers::correctness::use_exhaustive_dependencies::HooksOptions;
 use crate::semantic_analyzers::style::no_restricted_globals::RestrictedGlobalsOptions;
@@ -19,6 +20,8 @@ use serde::{Deserialize, Serialize};
 pub enum PossibleOptions {
     /// Options for `noExcessiveComplexity` rule
     Complexity(ComplexityOptions),
+    /// Options for `useFilenamingConvention` rule
+    FilenamingConvention(FilenamingConventionOptions),
     /// Options for `useExhaustiveDependencies` and `useHookAtTopLevel` rule
     Hooks(HooksOptions),
     /// Options for `useNamingConvention` rule
@@ -49,6 +52,13 @@ impl PossibleOptions {
                 let options = match self {
                     PossibleOptions::Hooks(options) => options.clone(),
                     _ => HooksOptions::default(),
+                };
+                RuleOptions::new(options)
+            }
+            "useFilenamingConvention" => {
+                let options = match self {
+                    PossibleOptions::FilenamingConvention(options) => options.clone(),
+                    _ => FilenamingConventionOptions::default(),
                 };
                 RuleOptions::new(options)
             }
@@ -94,6 +104,8 @@ impl Deserializable for PossibleOptions {
             "useExhaustiveDependencies" | "useHookAtTopLevel" => {
                 Deserializable::deserialize(value, "options", diagnostics).map(Self::Hooks)
             }
+            "useFilenamingConvention" => Deserializable::deserialize(value, "options", diagnostics)
+                .map(Self::FilenamingConvention),
             "useNamingConvention" => Deserializable::deserialize(value, "options", diagnostics)
                 .map(Self::NamingConvention),
             "useValidAriaRole" => {

@@ -341,6 +341,6 @@ mod tests {
         let parse = parse_css(src, CssParserOptions::default());
         let options = CssFormatOptions::default();
         let formatted = format_node(options, &parse.syntax()).unwrap();
-        assert_eq!(formatted.print().unwrap().as_code(), "html {}");
+        assert_eq!(formatted.print().unwrap().as_code(), "html {\n}\n");
     }
 }

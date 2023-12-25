@@ -24,9 +24,9 @@ CssRoot {
                 name: CssIdentifier {
                     value_token: IDENT@21..27 "ident" [] [Whitespace(" ")],
                 },
-                block: CssBlock {
+                block: CssDeclarationListBlock {
                     l_curly_token: L_CURLY@27..30 "{" [] [Whitespace("  ")],
-                    declaration_list: CssDeclarationList [],
+                    declarations: CssDeclarationList [],
                     r_curly_token: R_CURLY@30..31 "}" [] [],
                 },
             },
@@ -48,7 +48,7 @@ CssRoot {
         0: FONT_PALETTE_VALUES_KW@1..21 "font-palette-values" [] [Whitespace(" ")]
         1: CSS_IDENTIFIER@21..27
           0: IDENT@21..27 "ident" [] [Whitespace(" ")]
-        2: CSS_BLOCK@27..31
+        2: CSS_DECLARATION_LIST_BLOCK@27..31
           0: L_CURLY@27..30 "{" [] [Whitespace("  ")]
           1: CSS_DECLARATION_LIST@30..30
           2: R_CURLY@30..31 "}" [] []

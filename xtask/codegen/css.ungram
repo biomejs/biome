@@ -40,9 +40,12 @@ CssBogus = SyntaxElement*
 CssBogusSelector = SyntaxElement*
 CssBogusSubSelector = SyntaxElement*
 CssBogusPseudoClass = SyntaxElement*
+CssBogusPageSelectorPseudo = SyntaxElement*
 CssBogusPseudoElement = SyntaxElement*
 CssBogusAtRule = SyntaxElement*
-CssBogusBody =  SyntaxElement*
+CssBogusLayer = SyntaxElement*
+CssBogusBlock =  SyntaxElement*
+CssBogusKeyframesItem =  SyntaxElement*
 CssBogusRule =  SyntaxElement*
 CssBogusParameter = SyntaxElement*
 CssBogusDeclarationItem = SyntaxElement*
@@ -66,8 +69,7 @@ AnyCssRule =
 // ^^^^^^^^^^^^^^^^^^^^^
 CssRule =
 	prelude: CssSelectorList
-	block: CssBlock
-
+	block: AnyCssDeclarationListBlock
 
 /////////////
 /// SELECTORS
@@ -226,15 +228,15 @@ CssPseudoClassFunctionSelector =
 CssPseudoClassFunctionSelectorList =
  	name: ('matches' | 'not' | 'is' | 'where')
 	'('
-	selector_list: CssSelectorList
+	selectors: CssSelectorList
 	')'
 
 // :-webkit-any(i,p,:link,span:focus) {}
 //  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 CssPseudoClassFunctionCompoundSelectorList =
- 	name: ('-moz-any' | '-webkit-any' | 'past' | 'current' | 'future')
+ 	name: ('any' | 'past' | 'current' | 'future')
 	'('
-	compound_selector_list: CssCompoundSelectorList
+	compound_selectors: CssCompoundSelectorList
 	')'
 
 // :-webkit-any(i,p,:link,span:focus) {}
@@ -258,7 +260,7 @@ AnyCssCompoundSelector =
 CssPseudoClassFunctionRelativeSelectorList =
  	name: 'has'
 	'('
-	relative_selector_list: CssRelativeSelectorList
+	relative_selectors: CssRelativeSelectorList
 	')'
 
 // :has(> img, +dt) {}
@@ -280,7 +282,7 @@ CssRelativeSelector =
 CssPseudoClassFunctionValueList =
  	name: 'lang'
 	'('
-	value_list: CssPseudoValueList
+	values: CssPseudoValueList
 	')'
 
 // :lang(de, fr) {}
@@ -357,7 +359,7 @@ CssNthOffset =
 //             		 ^^^^^^^^^^^^
 CssPseudoClassOfNthSelector =
 	'of'
-	selector_list: CssSelectorList
+	selectors: CssSelectorList
 
 // a::after {}
 //  ^^^^^^^^
@@ -398,9 +400,45 @@ CssPseudoElementFunctionIdentifier =
 	ident: CssIdentifier
 	')'
 
-CssBlock =
+/////////////
+// COMMON BLOCKS
+////////////
+
+// @page :left { background: red; @media (500px <= width <= 500px) {  } }
+// 						 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssDeclarationOrAtRuleBlock =
 	'{'
-	declaration_list: CssDeclarationList
+	items: CssDeclarationOrAtRuleList
+ 	'}'
+
+CssDeclarationOrAtRuleList = AnyCssDeclarationOrAtRule*
+
+AnyCssDeclarationOrAtRule =
+    CssDeclarationWithSemicolon
+    | CssAtRule
+
+// @page :left { background: red; @media (500px <= width <= 500px) {  } }
+// 						   ^^^^^^^^^^^^^^^^
+CssDeclarationWithSemicolon =
+    declaration: CssDeclaration
+    ';'
+
+AnyCssDeclarationListBlock =
+	CssDeclarationListBlock
+	| CssBogusBlock
+
+CssDeclarationListBlock =
+	'{'
+	declarations: CssDeclarationList
+ 	'}'
+
+AnyCssRuleListBlock =
+	CssRuleListBlock
+	| CssBogusBlock
+
+CssRuleListBlock =
+	'{'
+	rules: CssRuleList
  	'}'
 
 CssDeclarationList = CssDeclaration (';' CssDeclaration)* ';'?
@@ -436,6 +474,8 @@ AnyCssAtRule =
 	| CssFontPaletteValuesAtRule
 	| CssKeyframesAtRule
 	| CssMediaAtRule
+	| CssPageAtRule
+	| CssLayerAtRule
 	| CssBogusAtRule
 
 // @charset "UTF-8";
@@ -452,18 +492,18 @@ CssCharsetAtRule =
 CssColorProfileAtRule =
 	'color-profile'
 	name: CssIdentifier
-	block: CssBlock
+	block: AnyCssDeclarationListBlock
 
 CssCounterStyleAtRule =
 	'counter-style'
 	name: CssIdentifier
-	block: CssBlock
+	block: AnyCssDeclarationListBlock
 
 // @font-face {}
 // ^^^^^^^^^^^^^
 CssFontFaceAtRule =
 	'font-face'
-	block: CssBlock
+	block: AnyCssDeclarationListBlock
 
 
 // @font-palette-values --ident {}
@@ -471,7 +511,7 @@ CssFontFaceAtRule =
 CssFontPaletteValuesAtRule =
 	'font-palette-values'
 	name: CssIdentifier
-	block: CssBlock
+	block: AnyCssDeclarationListBlock
 
 
 // https://drafts.csswg.org/css-contain-3/#container-rule
@@ -502,7 +542,7 @@ CssContainerAtRule =
 	'container'
 	name: CssIdentifier?
 	query: AnyCssContainerQuery
-	block: CssBlock
+	block: AnyCssRuleListBlock
 
 // <container-query>
 AnyCssContainerQuery =
@@ -622,32 +662,62 @@ AnyCssContainerStyleInParens =
 	AnyCssContainerStyleQuery
 	| CssDeclaration
 
+// https://drafts.csswg.org/css-animations/#keyframes
+// @keyframes = @keyframes <keyframes-name> { <qualified-rule-list> }
+// <keyframes-name> = <custom-ident> | <string>
+// <keyframe-block> = <keyframe-selector># { <declaration-list> }
+// <keyframe-selector> = from | to | <percentage [0,100]>
+
 // @keyframes "something" { from {} to {} }
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 CssKeyframesAtRule =
 	'keyframes'
-	name: CssIdentifier | CssString
-	body: CssKeyframesBody
+	name: AnyCssKeyframeName
+	block: AnyCssKeyframesBlock
 
+AnyCssKeyframesBlock =
+	CssKeyframesBlock
+	| CssBogusBlock
 
-CssKeyframesBody =
+// @keyframes "something" { from {} to {} }
+//            ^^^^^^^^^^^
+AnyCssKeyframeName = CssIdentifier | CssString
+
+// @keyframes "something" { from {} to {} }
+//                        ^^^^^^^^^^^^^^^^^
+CssKeyframesBlock =
 	'{'
 	items: CssKeyframesItemList
 	'}'
 
-CssKeyframesItemList = CssKeyframesBlock*
+CssKeyframesItemList = AnyCssKeyframesItem*
+
+AnyCssKeyframesItem =
+	CssKeyframesItem
+	| CssBogusKeyframesItem
 
 // @keyframes "something" { 30%, 60% {} }
 //                          ^^^^^^^^^^^
-CssKeyframesBlock =
+CssKeyframesItem =
 	selectors: CssKeyframesSelectorList
-	'{'
-	declarations: CssDeclarationList
-	'}'
+	block: AnyCssDeclarationListBlock
 
-CssKeyframesSelectorList =  (CssKeyframesSelector (',' CssKeyframesSelector)*)
+CssKeyframesSelectorList =  (AnyCssKeyframesSelector (',' AnyCssKeyframesSelector)*)
 
-CssKeyframesSelector = 'from' | 'to' | CssPercentage
+AnyCssKeyframesSelector =
+	CssKeyframesIdentSelector
+	| CssKeyframesPercentageSelector
+	| CssBogusSelector
+
+// @keyframes "something" { from {} to {} }
+//                          ^^^^    ^^
+CssKeyframesIdentSelector =
+	selector: ('from' | 'to')
+
+// @keyframes "something" { 30%, 60% {} }
+//                          ^^^  ^^^
+CssKeyframesPercentageSelector =
+	selector: CssPercentage
 
 // https://drafts.csswg.org/mediaqueries-5/#media-query
 // <media-query> = <media-condition>
@@ -683,8 +753,8 @@ CssKeyframesSelector = 'from' | 'to' | CssPercentage
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 CssMediaAtRule =
 	'media'
-	query_list: CssMediaQueryList
-	block: CssBlock
+	queries: CssMediaQueryList
+	block: AnyCssRuleListBlock
 
 // @media screen, (width > 500px), print {}
 // 				^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -838,6 +908,128 @@ AnyCssQueryFeatureValue =
 	| CssIdentifier
 	| CssRatio
 	| CssAnyFunction
+
+// https://drafts.csswg.org/css-page/#at-ruledef-page
+// @page = @page <page-selector-list>? { <declaration-rule-list> }
+// <page-selector-list> = <page-selector>#
+// <page-selector> = [ <ident-token>? <pseudo-page>* ]!
+// <pseudo-page> = ':' [ left | right | first | blank ]
+
+// @page :first {  }
+// ^^^^^^^^^^^^^^^^^
+CssPageAtRule =
+	'page'
+	selectors: CssPageSelectorList
+	block: AnyCssPageAtRuleBlock
+
+// @page name:first,:blank:first {  }
+// 			 ^^^^^^^^^^^^^^^^^^^^^^^
+CssPageSelectorList = (AnyCssPageSelector (',' AnyCssPageSelector)*)
+
+AnyCssPageSelector =
+	CssPageSelector
+	| CssBogusSelector
+
+// @page name:first,:blank:first {  }
+// 			 ^^^^^^^^^^ ^^^^^^^^^^^^
+CssPageSelector =
+	type: CssIdentifier?
+	pseudos: CssPageSelectorPseudoList
+
+CssPageSelectorPseudoList = AnyCssPageSelectorPseudo*
+
+AnyCssPageSelectorPseudo =
+	CssPageSelectorPseudo
+	| CssBogusPageSelectorPseudo
+
+// @page name:first,:blank:first {  }
+// 			     ^^^^^^ ^^^^^^^^^^^^
+CssPageSelectorPseudo =
+	':'
+	selector: ('left' | 'right' | 'first' | 'blank')
+
+AnyCssPageAtRuleBlock =
+	CssPageAtRuleBlock
+	| CssBogusBlock
+
+// @page :left { @left-middle {} background: red; @media (500px <= width <= 500px) {  } }
+// 						 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssPageAtRuleBlock =
+	'{'
+	items: CssPageAtRuleItemList
+ 	'}'
+
+CssPageAtRuleItemList = AnyCssPageAtRuleItem*
+
+AnyCssPageAtRuleItem =
+	CssDeclarationWithSemicolon
+	| CssAtRule
+	| CssMarginAtRule
+
+// @page :left { @left-middle {} background: red; }
+// 						   ^^^^^^^^^^^^^^^
+CssMarginAtRule =
+	'@'
+	name: (
+		'top-left-corner'
+		| 'top-left'
+		| 'top-center'
+		| 'top-right'
+		| 'top-right-corner'
+		| 'bottom-left-corner'
+		| 'bottom-left'
+		| 'bottom-center'
+		| 'bottom-right'
+		| 'bottom-right-corner'
+		| 'left-top'
+		| 'left-middle'
+		| 'left-bottom'
+		| 'right-top'
+		| 'right-middle'
+		| 'right-bottom'
+	)
+	block: CssDeclarationOrAtRuleBlock
+
+// https://drafts.csswg.org/css-cascade-5/#layering
+// @layer =
+//  @layer <layer-name>? { <rule-list> }  |
+//  @layer <layer-name># ;
+//
+// <layer-name> =
+//   <ident> [ '.' <ident> ]*
+
+// @layer override { }
+//  ^^^^^^^^^^^^^^^^^^
+// @layer framework, bar.baz;
+//  ^^^^^^^^^^^^^^^^^^^^^^^^^
+CssLayerAtRule =
+	'layer'
+	layer: AnyCssLayer
+
+AnyCssLayer =
+	CssLayerDeclaration
+	| CssLayerReference
+	| CssBogusLayer
+
+// @layer override.bar { }
+//        ^^^^^^^^^^^^^^^^
+CssLayerDeclaration =
+	references: CssLayerReferenceList
+	block: AnyCssRuleListBlock
+
+// @layer framework, bar.baz;
+//        ^^^^^^^^^^^^^^^^^^^
+CssLayerReference =
+	references: CssLayerReferenceList
+	';'
+
+// @layer framework, bar.baz;
+//        ^^^^^^^^^^^^^^^^^^
+CssLayerReferenceList = (CssLayerNameList (',' CssLayerNameList)*)
+
+// @layer framework, bar.baz;
+//                   ^^^^^^^
+CssLayerNameList = (CssIdentifier ('.' CssIdentifier)*)
 
 ///////////////
 // AUXILIARY

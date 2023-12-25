@@ -29,7 +29,7 @@ pub use highlight::*;
 use biome_js_syntax::JsSyntaxKind::*;
 pub use biome_js_syntax::*;
 use biome_js_unicode_table::{
-    is_id_continue, is_id_start, lookup_byte,
+    is_js_id_continue, is_js_id_start, lookup_byte,
     Dispatch::{self, *},
 };
 use biome_parser::diagnostic::ParseDiagnostic;
@@ -912,7 +912,7 @@ impl<'src> JsLexer<'src> {
             // FIXME: This should use ID_Continue, not XID_Continue
             UNI => {
                 let chr = self.current_char_unchecked();
-                let res = is_id_continue(chr);
+                let res = is_js_id_continue(chr);
                 if res {
                     self.advance(chr.len_utf8() - 1);
                     Some((chr, false))
@@ -931,7 +931,7 @@ impl<'src> JsLexer<'src> {
                 };
 
                 if let Ok(c) = res {
-                    if is_id_continue(c) {
+                    if is_js_id_continue(c) {
                         Some((c, true))
                     } else {
                         self.position = start;
@@ -959,7 +959,7 @@ impl<'src> JsLexer<'src> {
             BSL if self.peek_byte() == Some(b'u') => {
                 self.next_byte();
                 if let Ok(chr) = self.read_unicode_escape(false) {
-                    if is_id_start(chr) {
+                    if is_js_id_start(chr) {
                         self.advance(5);
                         return true;
                     }
@@ -969,7 +969,7 @@ impl<'src> JsLexer<'src> {
             }
             UNI => {
                 let chr = self.current_char_unchecked();
-                if is_id_start(chr) {
+                if is_js_id_start(chr) {
                     self.advance(chr.len_utf8() - 1);
                     true
                 } else {
@@ -1897,7 +1897,7 @@ impl<'src> JsLexer<'src> {
 
                     match res {
                         Ok(chr) => {
-                            if is_id_start(chr) {
+                            if is_js_id_start(chr) {
                                 self.current_flags |= TokenFlags::UNICODE_ESCAPE;
                                 self.resolve_identifier(chr)
                             } else {
@@ -1958,7 +1958,7 @@ impl<'src> JsLexer<'src> {
                     self.consume_newline_or_whitespaces()
                 } else {
                     self.advance(chr.len_utf8() - 1);
-                    if is_id_start(chr) {
+                    if is_js_id_start(chr) {
                         self.resolve_identifier(chr)
                     } else {
                         let err = ParseDiagnostic::new(

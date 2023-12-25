@@ -988,6 +988,13 @@ impl Deserializable for Nursery {
                             result.use_export_type =
                                 Deserializable::deserialize(&value, "useExportType", diagnostics);
                         }
+                        "useFilenamingConvention" => {
+                            result.use_filenaming_convention = Deserializable::deserialize(
+                                &value,
+                                "useFilenamingConvention",
+                                diagnostics,
+                            );
+                        }
                         "useForOf" => {
                             result.use_for_of =
                                 Deserializable::deserialize(&value, "useForOf", diagnostics);
@@ -1010,6 +1017,13 @@ impl Deserializable for Nursery {
                             result.use_node_import_protocol = Deserializable::deserialize(
                                 &value,
                                 "useNodeImportProtocol",
+                                diagnostics,
+                            );
+                        }
+                        "useNumberProperties" => {
+                            result.use_number_properties = Deserializable::deserialize(
+                                &value,
+                                "useNumberProperties",
                                 diagnostics,
                             );
                         }
@@ -1055,10 +1069,12 @@ impl Deserializable for Nursery {
                                     "noUselessTernary",
                                     "useAwait",
                                     "useExportType",
+                                    "useFilenamingConvention",
                                     "useForOf",
                                     "useGroupedTypeImport",
                                     "useImportRestrictions",
                                     "useNodeImportProtocol",
+                                    "useNumberProperties",
                                     "useRegexLiterals",
                                     "useShorthandFunctionType",
                                     "useValidAriaRole",

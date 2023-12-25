@@ -1,8 +1,7 @@
 use crate::parser::CssParser;
 use crate::syntax::at_rule::feature::parse_any_query_feature;
-use crate::syntax::{
-    is_at_identifier, parse_declaration, parse_or_recover_rule_block, parse_regular_identifier,
-};
+use crate::syntax::blocks::parse_or_recover_rule_list_block;
+use crate::syntax::{is_at_identifier, parse_declaration, parse_regular_identifier};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::T;
 use biome_parser::parsed_syntax::ParsedSyntax::Present;
@@ -28,7 +27,7 @@ pub(crate) fn parse_container_at_rule(p: &mut CssParser) -> ParsedSyntax {
 
     parse_any_container_query(p).ok(); // TODO handle error
 
-    if parse_or_recover_rule_block(p).is_err() {
+    if parse_or_recover_rule_list_block(p).is_err() {
         return Present(m.complete(p, CSS_BOGUS_AT_RULE));
     }
 

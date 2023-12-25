@@ -15,11 +15,9 @@ mod overrides;
 mod parse;
 pub mod vcs;
 
-use crate::configuration::css::CssFormatter;
 use crate::configuration::diagnostics::CantLoadExtendFile;
 pub use crate::configuration::diagnostics::ConfigurationDiagnostic;
 pub(crate) use crate::configuration::generated::push_to_analyzer_rules;
-use crate::configuration::json::JsonFormatter;
 pub use crate::configuration::merge::MergeWith;
 use crate::configuration::organize_imports::{organize_imports, OrganizeImports};
 use crate::configuration::overrides::Overrides;
@@ -36,13 +34,13 @@ use biome_js_analyze::metadata;
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_parser::{parse_json, JsonParserOptions};
 use bpaf::Bpaf;
-pub use css::{css_configuration, CssConfiguration};
+pub use css::{css_configuration, CssConfiguration, CssFormatter};
 pub use formatter::{
     deserialize_line_width, formatter_configuration, serialize_line_width, FormatterConfiguration,
     PlainIndentStyle,
 };
 pub use javascript::{javascript_configuration, JavascriptConfiguration, JavascriptFormatter};
-pub use json::{json_configuration, JsonConfiguration};
+pub use json::{json_configuration, JsonConfiguration, JsonFormatter};
 pub use linter::{linter_configuration, LinterConfiguration, RuleConfiguration, Rules};
 pub use overrides::to_override_settings;
 use serde::{Deserialize, Serialize};
@@ -143,6 +141,10 @@ impl MergeWith<Configuration> for Configuration {
         self.merge_with(other_configuration.formatter);
         // javascript
         self.merge_with(other_configuration.javascript);
+        // json
+        self.merge_with(other_configuration.json);
+        // css
+        self.merge_with(other_configuration.css);
         // linter
         self.merge_with(other_configuration.linter);
         // organize imports
@@ -163,6 +165,10 @@ impl MergeWith<Configuration> for Configuration {
         self.merge_with_if_not_default(other_configuration.formatter);
         // javascript
         self.merge_with_if_not_default(other_configuration.javascript);
+        // json
+        self.merge_with_if_not_default(other_configuration.json);
+        // css
+        self.merge_with_if_not_default(other_configuration.css);
         // linter
         self.merge_with_if_not_default(other_configuration.linter);
         // organize imports
@@ -337,6 +343,42 @@ impl MergeWith<Option<JavascriptConfiguration>> for Configuration {
                 .javascript
                 .get_or_insert_with(JavascriptConfiguration::default);
             js_configuration.merge_with_if_not_default(other);
+        }
+    }
+}
+impl MergeWith<Option<JsonConfiguration>> for Configuration {
+    fn merge_with(&mut self, other: Option<JsonConfiguration>) {
+        if let Some(other) = other {
+            let json_configuration = self.json.get_or_insert_with(JsonConfiguration::default);
+            json_configuration.merge_with(other);
+        }
+    }
+
+    fn merge_with_if_not_default(&mut self, other: Option<JsonConfiguration>)
+    where
+        Option<JsonConfiguration>: Default,
+    {
+        if let Some(other) = other {
+            let json_configuration = self.json.get_or_insert_with(JsonConfiguration::default);
+            json_configuration.merge_with_if_not_default(other);
+        }
+    }
+}
+impl MergeWith<Option<CssConfiguration>> for Configuration {
+    fn merge_with(&mut self, other: Option<CssConfiguration>) {
+        if let Some(other) = other {
+            let css_configuration = self.css.get_or_insert_with(CssConfiguration::default);
+            css_configuration.merge_with(other);
+        }
+    }
+
+    fn merge_with_if_not_default(&mut self, other: Option<CssConfiguration>)
+    where
+        Option<CssConfiguration>: Default,
+    {
+        if let Some(other) = other {
+            let css_configuration = self.css.get_or_insert_with(CssConfiguration::default);
+            css_configuration.merge_with_if_not_default(other);
         }
     }
 }

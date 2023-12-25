@@ -26,9 +26,9 @@ CssRoot {
             rule: CssBogusAtRule {
                 items: [
                     FONT_PALETTE_VALUES_KW@1..22 "font-palette-values" [] [Whitespace("  ")],
-                    CssBlock {
+                    CssDeclarationListBlock {
                         l_curly_token: L_CURLY@22..25 "{" [] [Whitespace("  ")],
-                        declaration_list: CssDeclarationList [],
+                        declarations: CssDeclarationList [],
                         r_curly_token: R_CURLY@25..26 "}" [] [],
                     },
                 ],
@@ -44,9 +44,9 @@ CssRoot {
                             CSS_NUMBER_LITERAL@48..53 "6788" [] [Whitespace(" ")],
                         ],
                     },
-                    CssBlock {
+                    CssDeclarationListBlock {
                         l_curly_token: L_CURLY@53..56 "{" [] [Whitespace("  ")],
-                        declaration_list: CssDeclarationList [],
+                        declarations: CssDeclarationList [],
                         r_curly_token: R_CURLY@56..57 "}" [] [],
                     },
                 ],
@@ -62,9 +62,9 @@ CssRoot {
                             CSS_STRING_LITERAL@79..88 "'string'" [] [Whitespace(" ")],
                         ],
                     },
-                    CssBlock {
+                    CssDeclarationListBlock {
                         l_curly_token: L_CURLY@88..91 "{" [] [Whitespace("  ")],
-                        declaration_list: CssDeclarationList [],
+                        declarations: CssDeclarationList [],
                         r_curly_token: R_CURLY@91..92 "}" [] [],
                     },
                 ],
@@ -109,7 +109,7 @@ CssRoot {
       0: AT@0..1 "@" [] []
       1: CSS_BOGUS_AT_RULE@1..26
         0: FONT_PALETTE_VALUES_KW@1..22 "font-palette-values" [] [Whitespace("  ")]
-        1: CSS_BLOCK@22..26
+        1: CSS_DECLARATION_LIST_BLOCK@22..26
           0: L_CURLY@22..25 "{" [] [Whitespace("  ")]
           1: CSS_DECLARATION_LIST@25..25
           2: R_CURLY@25..26 "}" [] []
@@ -119,7 +119,7 @@ CssRoot {
         0: FONT_PALETTE_VALUES_KW@28..48 "font-palette-values" [] [Whitespace(" ")]
         1: CSS_BOGUS@48..53
           0: CSS_NUMBER_LITERAL@48..53 "6788" [] [Whitespace(" ")]
-        2: CSS_BLOCK@53..57
+        2: CSS_DECLARATION_LIST_BLOCK@53..57
           0: L_CURLY@53..56 "{" [] [Whitespace("  ")]
           1: CSS_DECLARATION_LIST@56..56
           2: R_CURLY@56..57 "}" [] []
@@ -129,7 +129,7 @@ CssRoot {
         0: FONT_PALETTE_VALUES_KW@59..79 "font-palette-values" [] [Whitespace(" ")]
         1: CSS_BOGUS@79..88
           0: CSS_STRING_LITERAL@79..88 "'string'" [] [Whitespace(" ")]
-        2: CSS_BLOCK@88..92
+        2: CSS_DECLARATION_LIST_BLOCK@88..92
           0: L_CURLY@88..91 "{" [] [Whitespace("  ")]
           1: CSS_DECLARATION_LIST@91..91
           2: R_CURLY@91..92 "}" [] []

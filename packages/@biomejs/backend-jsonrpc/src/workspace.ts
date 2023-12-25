@@ -900,6 +900,10 @@ export interface Nursery {
 	 */
 	useExportType?: RuleConfiguration;
 	/**
+	 * Enforce naming conventions for JavaScript and TypeScript filenames.
+	 */
+	useFilenamingConvention?: RuleConfiguration;
+	/**
 	 * This rule recommends a for-of loop when in a for loop, the index used to extract an item from the iterated array.
 	 */
 	useForOf?: RuleConfiguration;
@@ -915,6 +919,10 @@ export interface Nursery {
 	 * Enforces using the node: protocol for Node.js builtin modules.
 	 */
 	useNodeImportProtocol?: RuleConfiguration;
+	/**
+	 * Use Number properties instead of global ones.
+	 */
+	useNumberProperties?: RuleConfiguration;
 	/**
 	 * Enforce the use of the regular expression literals instead of the RegExp constructor if possible.
 	 */
@@ -1351,6 +1359,7 @@ export interface RuleWithOptions {
 }
 export type PossibleOptions =
 	| ComplexityOptions
+	| FilenamingConventionOptions
 	| HooksOptions
 	| NamingConventionOptions
 	| RestrictedGlobalsOptions
@@ -1363,6 +1372,19 @@ export interface ComplexityOptions {
 	 * The maximum complexity score that we allow. Anything higher is considered excessive.
 	 */
 	maxAllowedComplexity: number;
+}
+/**
+ * Rule's options.
+ */
+export interface FilenamingConventionOptions {
+	/**
+	 * Allowed cases for _TypeScript_ `enum` member names.
+	 */
+	filenameCases: FilenameCases;
+	/**
+	 * If `false`, then consecutive uppercase are allowed in _camel_ and _pascal_ cases. This does not affect other [Case].
+	 */
+	strictCase: boolean;
 }
 /**
  * Options for the rule `useExhaustiveDependencies` and `useHookAtTopLevel`
@@ -1399,6 +1421,7 @@ export interface ValidAriaRoleOptions {
 	allowedInvalidRoles: string[];
 	ignoreNonDom: boolean;
 }
+export type FilenameCases = FilenameCase[];
 export interface Hooks {
 	/**
 	* The "position" of the closure function, starting from zero.
@@ -1419,6 +1442,10 @@ export interface Hooks {
  * Supported cases for TypeScript `enum` member names.
  */
 export type EnumMemberCase = "PascalCase" | "CONSTANT_CASE" | "camelCase";
+/**
+ * Supported cases for TypeScript `enum` member names.
+ */
+export type FilenameCase = "camelCase" | "export" | "kebab-case" | "snake_case";
 export interface ProjectFeaturesParams {
 	manifest_path: RomePath;
 }
@@ -1608,10 +1635,12 @@ export type Category =
 	| "lint/nursery/useAwait"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useExportType"
+	| "lint/nursery/useFilenamingConvention"
 	| "lint/nursery/useForOf"
 	| "lint/nursery/useGroupedTypeImport"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useNodeImportProtocol"
+	| "lint/nursery/useNumberProperties"
 	| "lint/nursery/useRegexLiterals"
 	| "lint/nursery/useShorthandFunctionType"
 	| "lint/nursery/useValidAriaRole"

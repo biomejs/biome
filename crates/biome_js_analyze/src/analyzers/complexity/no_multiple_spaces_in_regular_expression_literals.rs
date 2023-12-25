@@ -51,7 +51,7 @@ declare_rule! {
         version: "1.0.0",
         name: "noMultipleSpacesInRegularExpressionLiterals",
         recommended: true,
-        fix_kind: FixKind::Unsafe,
+        fix_kind: FixKind::Safe,
     }
 }
 
@@ -177,7 +177,7 @@ impl Rule for NoMultipleSpacesInRegularExpressionLiterals {
         mutation.replace_token(token, next_trimmed_token);
         Some(JsRuleAction {
             category: ActionCategory::QuickFix,
-            applicability: Applicability::MaybeIncorrect,
+            applicability: Applicability::Always,
             message: markup! { "Use a quantifier instead." }.to_owned(),
             mutation,
         })

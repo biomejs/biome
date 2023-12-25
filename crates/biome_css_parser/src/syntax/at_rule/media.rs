@@ -1,9 +1,8 @@
 use super::parse_error::expected_media_query;
 use crate::parser::CssParser;
 use crate::syntax::at_rule::feature::parse_any_query_feature;
-use crate::syntax::{
-    is_at_identifier, is_nth_at_identifier, parse_or_recover_rule_block, parse_regular_identifier,
-};
+use crate::syntax::blocks::parse_or_recover_rule_list_block;
+use crate::syntax::{is_at_identifier, is_nth_at_identifier, parse_regular_identifier};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::ParseSeparatedList;
@@ -29,7 +28,7 @@ pub(crate) fn parse_media_at_rule(p: &mut CssParser) -> ParsedSyntax {
 
     CssMediaQueryList.parse_list(p);
 
-    if parse_or_recover_rule_block(p).is_err() {
+    if parse_or_recover_rule_list_block(p).is_err() {
         return Present(m.complete(p, CSS_BOGUS_AT_RULE));
     }
 

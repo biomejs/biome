@@ -1,6 +1,9 @@
 use crate::prelude::*;
-use biome_css_syntax::CssPseudoClassFunctionSelectorList;
-use biome_rowan::AstNode;
+use biome_css_syntax::{
+    CssPseudoClassFunctionSelectorList, CssPseudoClassFunctionSelectorListFields,
+};
+use biome_formatter::{format_args, write};
+
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatCssPseudoClassFunctionSelectorList;
 impl FormatNodeRule<CssPseudoClassFunctionSelectorList>
@@ -11,6 +14,23 @@ impl FormatNodeRule<CssPseudoClassFunctionSelectorList>
         node: &CssPseudoClassFunctionSelectorList,
         f: &mut CssFormatter,
     ) -> FormatResult<()> {
-        format_verbatim_node(node.syntax()).fmt(f)
+        let CssPseudoClassFunctionSelectorListFields {
+            name,
+            l_paren_token,
+            selectors,
+            r_paren_token,
+        } = node.as_fields();
+
+        write!(
+            f,
+            [
+                name.format(),
+                group(&format_args![
+                    l_paren_token.format(),
+                    soft_block_indent(&selectors.format()),
+                    r_paren_token.format()
+                ])
+            ]
+        )
     }
 }

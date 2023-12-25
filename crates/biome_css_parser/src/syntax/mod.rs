@@ -1,4 +1,5 @@
 mod at_rule;
+mod blocks;
 mod css_dimension;
 mod parse_error;
 mod selector;
@@ -6,22 +7,30 @@ mod selector;
 use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use crate::syntax::at_rule::{at_at_rule, parse_at_rule};
+use crate::syntax::blocks::parse_or_recover_declaration_list_block;
 use crate::syntax::css_dimension::{is_at_any_dimension, parse_any_dimension};
-use crate::syntax::parse_error::expected_block;
-use crate::syntax::parse_error::expected_identifier;
-use crate::syntax::selector::CssSelectorList;
+use crate::syntax::parse_error::{expected_any_rule, expected_identifier};
+use crate::syntax::selector::{is_at_selector, CssSelectorList, CssSubSelectorList};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
 use biome_parser::parse_recovery::{ParseRecovery, RecoveryResult};
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
-use biome_parser::{token_set, CompletedMarker, Parser, ParserProgress, TokenSet};
+use biome_parser::{token_set, Parser, TokenSet};
 
 use self::parse_error::{expected_component_value, expected_declaration_item, expected_number};
 
-const RULE_RECOVERY_SET: TokenSet<CssSyntaxKind> =
-    token_set![T![#], T![.], T![*], T![ident], T![:], T![::], T!['{']];
+const RULE_RECOVERY_SET: TokenSet<CssSyntaxKind> = token_set![
+    T![#],
+    T![.],
+    T![*],
+    T![ident],
+    T![:],
+    T![::],
+    T!['{'],
+    T![@]
+];
 const SELECTOR_LIST_RECOVERY_SET: TokenSet<CssSyntaxKind> = token_set![T!['{'], T!['}'],];
 const BODY_RECOVERY_SET: TokenSet<CssSyntaxKind> =
     SELECTOR_LIST_RECOVERY_SET.union(RULE_RECOVERY_SET);
@@ -30,64 +39,78 @@ pub(crate) fn parse_root(p: &mut CssParser) {
     let m = p.start();
     p.eat(UNICODE_BOM);
 
-    parse_rule_list(p);
+    CssRuleList::new(EOF).parse_list(p);
 
     m.complete(p, CSS_ROOT);
 }
 
-#[inline]
-pub(crate) fn parse_rule_list(p: &mut CssParser) {
-    let mut progress = ParserProgress::default();
+struct CssRuleList {
+    end_kind: CssSyntaxKind,
+}
 
-    let rules = p.start();
-    while !p.at(EOF) {
-        progress.assert_progressing(p);
+impl CssRuleList {
+    fn new(end_kind: CssSyntaxKind) -> Self {
+        Self { end_kind }
+    }
+}
 
+// TODO: better recovery set. may be we need to pass function instead of token set
+const CSS_RULE_LIST_RECOVERY_SET: TokenSet<CssSyntaxKind> =
+    token_set!(T![@], T![&], T![|], T![*], T![ident]).union(CssSubSelectorList::START_SET);
+impl ParseNodeList for CssRuleList {
+    type Kind = CssSyntaxKind;
+    type Parser<'source> = CssParser<'source>;
+    const LIST_KIND: Self::Kind = CSS_RULE_LIST;
+
+    fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
         if at_at_rule(p) {
-            parse_at_rule(p).ok();
+            parse_at_rule(p)
+        } else if is_at_rule(p) {
+            parse_rule(p)
         } else {
-            parse_rule(p);
+            Absent
         }
     }
 
-    rules.complete(p, CSS_RULE_LIST);
+    fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
+        p.at(self.end_kind)
+    }
+
+    fn recover(
+        &mut self,
+        p: &mut Self::Parser<'_>,
+        parsed_element: ParsedSyntax,
+    ) -> RecoveryResult {
+        parsed_element.or_recover(
+            p,
+            &ParseRecovery::new(CSS_BOGUS_RULE, CSS_RULE_LIST_RECOVERY_SET),
+            expected_any_rule,
+        )
+    }
 }
 
 #[inline]
-pub(crate) fn parse_rule(p: &mut CssParser) -> CompletedMarker {
+pub(crate) fn is_at_rule(p: &mut CssParser) -> bool {
+    is_at_selector(p)
+}
+
+#[inline]
+pub(crate) fn parse_rule(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_rule(p) {
+        return Absent;
+    }
+
     let m = p.start();
 
     CssSelectorList::default().parse_list(p);
 
-    let kind = if parse_or_recover_rule_block(p).is_ok() {
+    let kind = if parse_or_recover_declaration_list_block(p).is_ok() {
         CSS_RULE
     } else {
         CSS_BOGUS_RULE
     };
 
-    m.complete(p, kind)
-}
-
-#[inline]
-pub(crate) fn parse_or_recover_rule_block(p: &mut CssParser) -> RecoveryResult {
-    parse_rule_block(p).or_recover(
-        p,
-        &ParseRecovery::new(CSS_BOGUS_BODY, BODY_RECOVERY_SET).enable_recovery_on_line_break(),
-        expected_block,
-    )
-}
-
-#[inline]
-pub(crate) fn parse_rule_block(p: &mut CssParser) -> ParsedSyntax {
-    if !p.at(T!['{']) {
-        return Absent;
-    }
-    let m = p.start();
-    p.expect(T!['{']);
-    CssDeclarationList.parse_list(p);
-    p.expect(T!['}']);
-
-    Present(m.complete(p, CSS_BLOCK))
+    Present(m.complete(p, kind))
 }
 
 pub(crate) struct CssDeclarationList;
@@ -169,6 +192,20 @@ pub(crate) fn parse_declaration(p: &mut CssParser) -> ParsedSyntax {
 }
 
 #[inline]
+pub(crate) fn parse_declaration_with_semicolon(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_identifier(p) {
+        return Absent;
+    }
+
+    let m = p.start();
+
+    parse_declaration(p).ok();
+    p.expect(T![;]);
+
+    Present(m.complete(p, CSS_DECLARATION_WITH_SEMICOLON))
+}
+
+#[inline]
 fn is_at_declaration_important(p: &mut CssParser) -> bool {
     p.at(T![!]) && p.nth_at(1, T![important])
 }
@@ -233,11 +270,10 @@ pub(crate) fn parse_custom_property(p: &mut CssParser) -> ParsedSyntax {
 
 #[inline]
 pub(crate) fn is_at_any_function(p: &mut CssParser) -> bool {
-    p.at(T![ident]) && p.nth_at(1, T!['('])
+    is_at_identifier(p) && p.nth_at(1, T!['('])
 }
 
-#[derive(Default)]
-pub(crate) struct CssParameterList {}
+pub(crate) struct CssParameterList;
 
 impl ParseSeparatedList for CssParameterList {
     type Kind = CssSyntaxKind;
@@ -287,18 +323,19 @@ pub(crate) fn parse_parameter(p: &mut CssParser) -> ParsedSyntax {
 
 #[inline]
 pub(crate) fn parse_any_function(p: &mut CssParser) -> ParsedSyntax {
-    if is_at_any_function(p) {
-        let m = p.start();
-        let simple_fn = p.start();
-        parse_regular_identifier(p).or_add_diagnostic(p, expected_identifier);
-        p.eat(T!['(']);
-        CssParameterList::default().parse_list(p);
-        p.expect(T![')']);
-        simple_fn.complete(p, CSS_SIMPLE_FUNCTION);
-
-        return Present(m.complete(p, CSS_ANY_FUNCTION));
+    if !is_at_any_function(p) {
+        return Absent;
     }
-    Absent
+
+    let m = p.start();
+    let simple_fn = p.start();
+    parse_regular_identifier(p).or_add_diagnostic(p, expected_identifier);
+    p.eat(T!['(']);
+    CssParameterList.parse_list(p);
+    p.expect(T![')']);
+    simple_fn.complete(p, CSS_SIMPLE_FUNCTION);
+
+    Present(m.complete(p, CSS_ANY_FUNCTION))
 }
 
 #[inline]
