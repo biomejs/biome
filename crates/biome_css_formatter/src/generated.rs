@@ -3816,6 +3816,46 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssSupportsFeatureSelect
         FormatOwnedWithRule :: new (self , crate :: css :: selectors :: supports_feature_selector :: FormatCssSupportsFeatureSelector :: default ())
     }
 }
+impl FormatRule<biome_css_syntax::CssSimpleFunction>
+    for crate::css::auxiliary::simple_function::FormatCssSimpleFunction
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssSimpleFunction,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::CssSimpleFunction>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssSimpleFunction {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssSimpleFunction,
+        crate::css::auxiliary::simple_function::FormatCssSimpleFunction,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::css::auxiliary::simple_function::FormatCssSimpleFunction::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssSimpleFunction {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssSimpleFunction,
+        crate::css::auxiliary::simple_function::FormatCssSimpleFunction,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::auxiliary::simple_function::FormatCssSimpleFunction::default(),
+        )
+    }
+}
 impl FormatRule<biome_css_syntax::CssColor> for crate::css::auxiliary::color::FormatCssColor {
     type Context = CssFormatContext;
     #[inline(always)]
@@ -3927,46 +3967,6 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssPercentDimension {
         FormatOwnedWithRule::new(
             self,
             crate::css::value::percent_dimension::FormatCssPercentDimension::default(),
-        )
-    }
-}
-impl FormatRule<biome_css_syntax::CssSimpleFunction>
-    for crate::css::auxiliary::simple_function::FormatCssSimpleFunction
-{
-    type Context = CssFormatContext;
-    #[inline(always)]
-    fn fmt(
-        &self,
-        node: &biome_css_syntax::CssSimpleFunction,
-        f: &mut CssFormatter,
-    ) -> FormatResult<()> {
-        FormatNodeRule::<biome_css_syntax::CssSimpleFunction>::fmt(self, node, f)
-    }
-}
-impl AsFormat<CssFormatContext> for biome_css_syntax::CssSimpleFunction {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        biome_css_syntax::CssSimpleFunction,
-        crate::css::auxiliary::simple_function::FormatCssSimpleFunction,
-    >;
-    fn format(&self) -> Self::Format<'_> {
-        #![allow(clippy::default_constructed_unit_structs)]
-        FormatRefWithRule::new(
-            self,
-            crate::css::auxiliary::simple_function::FormatCssSimpleFunction::default(),
-        )
-    }
-}
-impl IntoFormat<CssFormatContext> for biome_css_syntax::CssSimpleFunction {
-    type Format = FormatOwnedWithRule<
-        biome_css_syntax::CssSimpleFunction,
-        crate::css::auxiliary::simple_function::FormatCssSimpleFunction,
-    >;
-    fn into_format(self) -> Self::Format {
-        #![allow(clippy::default_constructed_unit_structs)]
-        FormatOwnedWithRule::new(
-            self,
-            crate::css::auxiliary::simple_function::FormatCssSimpleFunction::default(),
         )
     }
 }

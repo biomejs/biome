@@ -361,19 +361,19 @@ pub(crate) fn parse_any_expression(p: &mut CssParser) -> ParsedSyntax {
     let param = if is_at_parenthesized(p) {
         parse_parenthesized_expression(p)
     } else {
-        parse_css_list_of_component_values_expression(p)
+        parse_list_of_component_values_expression(p)
     };
     if is_at_binary_operator(p) {
-        let css_binary_expression = param.precede(p);
+        let binary_expression = param.precede(p);
         bump_operator_token(p);
         parse_any_expression(p).or_add_diagnostic(p, expected_expression);
-        return Present(css_binary_expression.complete(p, CSS_BINARY_EXPRESSION));
+        return Present(binary_expression.complete(p, CSS_BINARY_EXPRESSION));
     }
     param
 }
 
 #[inline]
-pub(crate) fn parse_css_list_of_component_values_expression(p: &mut CssParser) -> ParsedSyntax {
+pub(crate) fn parse_list_of_component_values_expression(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_any_value(p) {
         return Absent;
     }
@@ -415,7 +415,7 @@ pub(crate) fn parse_any_function(p: &mut CssParser) -> ParsedSyntax {
     parse_simple_function(p)
 }
 
-fn parse_simple_function(p: &mut CssParser<'_>) -> ParsedSyntax {
+fn parse_simple_function(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_any_function(p) {
         return Absent;
     }
