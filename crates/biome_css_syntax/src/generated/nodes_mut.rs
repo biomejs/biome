@@ -723,6 +723,14 @@ impl CssLayerReference {
         )
     }
 }
+impl CssListOfComponentValuesExpression {
+    pub fn with_css_component_value_list(self, element: CssComponentValueList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
 impl CssMarginAtRule {
     pub fn with_at_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(

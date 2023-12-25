@@ -1850,6 +1850,42 @@ pub struct CssLayerReferenceFields {
     pub semicolon_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssListOfComponentValuesExpression {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssListOfComponentValuesExpression {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssListOfComponentValuesExpressionFields {
+        CssListOfComponentValuesExpressionFields {
+            css_component_value_list: self.css_component_value_list(),
+        }
+    }
+    pub fn css_component_value_list(&self) -> CssComponentValueList {
+        support::list(&self.syntax, 0usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssListOfComponentValuesExpression {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssListOfComponentValuesExpressionFields {
+    pub css_component_value_list: CssComponentValueList,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssMarginAtRule {
     pub(crate) syntax: SyntaxNode,
 }
@@ -7736,6 +7772,45 @@ impl From<CssLayerReference> for SyntaxNode {
 }
 impl From<CssLayerReference> for SyntaxElement {
     fn from(n: CssLayerReference) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssListOfComponentValuesExpression {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = SyntaxKindSet::from_raw(RawSyntaxKind(
+        CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION as u16,
+    ));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssListOfComponentValuesExpression {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssListOfComponentValuesExpression")
+            .field("css_component_value_list", &self.css_component_value_list())
+            .finish()
+    }
+}
+impl From<CssListOfComponentValuesExpression> for SyntaxNode {
+    fn from(n: CssListOfComponentValuesExpression) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssListOfComponentValuesExpression> for SyntaxElement {
+    fn from(n: CssListOfComponentValuesExpression) -> SyntaxElement {
         n.syntax.into()
     }
 }
@@ -14832,6 +14907,11 @@ impl std::fmt::Display for CssLayerDeclaration {
     }
 }
 impl std::fmt::Display for CssLayerReference {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssListOfComponentValuesExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

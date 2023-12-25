@@ -633,6 +633,16 @@ pub fn css_layer_reference(
         ],
     ))
 }
+pub fn css_list_of_component_values_expression(
+    css_component_value_list: CssComponentValueList,
+) -> CssListOfComponentValuesExpression {
+    CssListOfComponentValuesExpression::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION,
+        [Some(SyntaxElement::Node(
+            css_component_value_list.into_syntax(),
+        ))],
+    ))
+}
 pub fn css_margin_at_rule(
     at_token: SyntaxToken,
     name_token: SyntaxToken,
@@ -890,7 +900,7 @@ pub fn css_page_selector_pseudo(
         ],
     ))
 }
-pub fn css_parameter(css_component_value_list: CssComponentValueList) -> CssParameter {
+pub fn css_parameter(any_css_expression: AnyCssExpression) -> CssParameter {
     CssParameter::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_PARAMETER,
         [Some(SyntaxElement::Node(any_css_expression.into_syntax()))],

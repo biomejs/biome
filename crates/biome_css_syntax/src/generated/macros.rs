@@ -195,6 +195,11 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssLayerReference::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION => {
+                    let $pattern =
+                        unsafe { $crate::CssListOfComponentValuesExpression::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_MARGIN_AT_RULE => {
                     let $pattern = unsafe { $crate::CssMarginAtRule::new_unchecked(node) };
                     $body
