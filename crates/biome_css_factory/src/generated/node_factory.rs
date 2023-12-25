@@ -1438,6 +1438,81 @@ pub fn css_rule_list_block(
         ],
     ))
 }
+pub fn css_scope_at_rule(
+    scope_token: SyntaxToken,
+    block: AnyCssRuleListBlock,
+) -> CssScopeAtRuleBuilder {
+    CssScopeAtRuleBuilder {
+        scope_token,
+        block,
+        range: None,
+    }
+}
+pub struct CssScopeAtRuleBuilder {
+    scope_token: SyntaxToken,
+    block: AnyCssRuleListBlock,
+    range: Option<AnyCssScopeRange>,
+}
+impl CssScopeAtRuleBuilder {
+    pub fn with_range(mut self, range: AnyCssScopeRange) -> Self {
+        self.range = Some(range);
+        self
+    }
+    pub fn build(self) -> CssScopeAtRule {
+        CssScopeAtRule::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::CSS_SCOPE_AT_RULE,
+            [
+                Some(SyntaxElement::Token(self.scope_token)),
+                self.range
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Node(self.block.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn css_scope_edge(
+    l_paren_token: SyntaxToken,
+    selectors: CssSelectorList,
+    r_paren_token: SyntaxToken,
+) -> CssScopeEdge {
+    CssScopeEdge::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_SCOPE_EDGE,
+        [
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(selectors.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
+pub fn css_scope_range_end(to_token: SyntaxToken, end: CssScopeEdge) -> CssScopeRangeEnd {
+    CssScopeRangeEnd::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_SCOPE_RANGE_END,
+        [
+            Some(SyntaxElement::Token(to_token)),
+            Some(SyntaxElement::Node(end.into_syntax())),
+        ],
+    ))
+}
+pub fn css_scope_range_interval(
+    start: CssScopeEdge,
+    to_token: SyntaxToken,
+    end: CssScopeEdge,
+) -> CssScopeRangeInterval {
+    CssScopeRangeInterval::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_SCOPE_RANGE_INTERVAL,
+        [
+            Some(SyntaxElement::Node(start.into_syntax())),
+            Some(SyntaxElement::Token(to_token)),
+            Some(SyntaxElement::Node(end.into_syntax())),
+        ],
+    ))
+}
+pub fn css_scope_range_start(start: CssScopeEdge) -> CssScopeRangeStart {
+    CssScopeRangeStart::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_SCOPE_RANGE_START,
+        [Some(SyntaxElement::Node(start.into_syntax()))],
+    ))
+}
 pub fn css_simple_function(
     name: CssIdentifier,
     l_paren_token: SyntaxToken,
@@ -2051,6 +2126,16 @@ where
 {
     CssBogusRule::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_BOGUS_RULE,
+        slots,
+    ))
+}
+pub fn css_bogus_scope_range<I>(slots: I) -> CssBogusScopeRange
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssBogusScopeRange::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_BOGUS_SCOPE_RANGE,
         slots,
     ))
 }

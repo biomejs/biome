@@ -45,6 +45,7 @@ CssBogusPseudoElement = SyntaxElement*
 CssBogusAtRule = SyntaxElement*
 CssBogusLayer = SyntaxElement*
 CssBogusBlock =  SyntaxElement*
+CssBogusScopeRange =  SyntaxElement*
 CssBogusKeyframesItem =  SyntaxElement*
 CssBogusRule =  SyntaxElement*
 CssBogusParameter = SyntaxElement*
@@ -476,6 +477,7 @@ AnyCssAtRule =
 	| CssMediaAtRule
 	| CssPageAtRule
 	| CssLayerAtRule
+	| CssScopeAtRule
 	| CssBogusAtRule
 
 // @charset "UTF-8";
@@ -1031,6 +1033,39 @@ CssLayerReferenceList = (CssLayerNameList (',' CssLayerNameList)*)
 //                   ^^^^^^^
 CssLayerNameList = (CssIdentifier ('.' CssIdentifier)*)
 
+// https://drafts.csswg.org/css-cascade-6/#at-ruledef-scope
+// @scope [(<scope-start>)]? [to (<scope-end>)]? {
+//     <rule-list>
+//   }
+
+CssScopeAtRule =
+	'scope'
+	range: AnyCssScopeRange?
+	block: AnyCssRuleListBlock
+
+AnyCssScopeRange =
+	CssScopeRangeStart
+	| CssScopeRangeEnd
+	| CssScopeRangeInterval
+	| CssBogusScopeRange
+
+CssScopeRangeStart =
+	start: CssScopeEdge
+
+CssScopeRangeEnd =
+	'to'
+	end: CssScopeEdge
+
+CssScopeRangeInterval =
+	start: CssScopeEdge
+	'to'
+	end: CssScopeEdge
+
+CssScopeEdge =
+	'('
+	selectors: CssSelectorList
+	')'
+
 ///////////////
 // AUXILIARY
 ///////////////
@@ -1068,7 +1103,7 @@ CssRatio =
 
 
 AnyCssFunction =
-	CssSimpleFunction | 
+	CssSimpleFunction |
 	CssUrlFunction
 
 // content: counter(section);
@@ -1111,15 +1146,19 @@ CssParameterList = CssParameter (',' CssParameter)* ','?
 //			    ^^^
 // repeating-radial-gradient(red, yellow 10%, green 15%);
 //                                ^^^^^^^^^^
-CssParameter = AnyCssExpression 
+CssParameter = AnyCssExpression
 
-AnyCssExpression = CssBinaryExpression | CssParenthesizedExpression |  CssListOfComponentValuesExpression 
+AnyCssExpression =
+	CssBinaryExpression
+	| CssParenthesizedExpression
+	| CssListOfComponentValuesExpression
+
 CssListOfComponentValuesExpression = CssComponentValueList
 
-CssBinaryExpression = 
+CssBinaryExpression =
 	left: AnyCssExpression
 	operator_token: (
-		'+' | '-' | '*' | '/' 
+		'+' | '-' | '*' | '/'
 	)
 	right: AnyCssExpression
 
@@ -1131,7 +1170,7 @@ CssParenthesizedExpression =
 // ^^^^
 CssColor =
 	'#'
-	value:'css_color_literal' 
+	value:'css_color_literal'
 
 CssIdentifier = value: 'ident'
 CssString = value: 'css_string_literal'
