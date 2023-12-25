@@ -25,8 +25,8 @@ div>img.contributor-avatar {
 }
 
 .community {
+    height: 44rem;
     margin-top: 9.4rem !important;
-    height: 100vh;
     position: relative;
 }
 
@@ -100,17 +100,14 @@ a.mastodon:hover {
 
 @media only screen and (max-width: 1000px) {
     div.community {
-        height: 130vh;
+        height: 60rem;
     }
 
     div.connect {
-        width: 130vh;
         z-index: -1;
         opacity: 0.7;
-        top: 27rem;
-        right: 0;
-        top: 0;
-        bottom: 0;
+        right: 4rem;
+        top: 20rem;
         rotate: 90deg;
     }
 }
@@ -120,6 +117,14 @@ a.mastodon:hover {
         width: 3.4rem;
         height: 3.4rem;
     }
+
+    div.community {
+        height: 56rem;
+    }
+
+    div.connect {
+        right: 1rem;
+    }
 }
 
 @media only screen and (max-width: 600px) {
@@ -127,11 +132,15 @@ a.mastodon:hover {
         width: 3rem;
         height: 3rem;
     }
+
+    div.connect {
+        right: 0rem;
+    }
 }
 
 @media only screen and (max-width: 550px) {
     div.community {
-        height: 100vh;
+        height: 40rem;
     }
 
     .connect {
