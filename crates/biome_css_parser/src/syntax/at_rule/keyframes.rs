@@ -2,12 +2,10 @@ use crate::parser::CssParser;
 use crate::syntax::at_rule::parse_error::{
     expected_keyframes_item, expected_keyframes_item_selector,
 };
+use crate::syntax::blocks::parse_declaration_list_block;
 use crate::syntax::css_dimension::{is_at_percentage_dimension, parse_percentage_dimension};
 use crate::syntax::parse_error::{expected_block, expected_identifier};
-use crate::syntax::{
-    is_at_identifier, parse_declaration_list_block, parse_regular_identifier, parse_string,
-    BODY_RECOVERY_SET,
-};
+use crate::syntax::{is_at_identifier, parse_regular_identifier, parse_string, BODY_RECOVERY_SET};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};

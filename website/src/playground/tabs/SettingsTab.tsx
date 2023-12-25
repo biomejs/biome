@@ -652,7 +652,7 @@ function FormatterSettings({
 						id="indentWidth"
 						value={indentWidth}
 						onChange={(e) => {
-							setIndentWidth(parseInt(e.target.value));
+							setIndentWidth(Number.parseInt(e.target.value));
 						}}
 					/>
 				</div>
@@ -902,7 +902,7 @@ function LineWidthInput({
 							id="lineWidth"
 							value={lineWidth}
 							onChange={(e) => {
-								setLineWidth(parseInt(e.target.value));
+								setLineWidth(Number.parseInt(e.target.value));
 							}}
 						/>
 					)}

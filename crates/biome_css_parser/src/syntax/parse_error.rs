@@ -36,6 +36,17 @@ pub(crate) fn expected_selector(p: &CssParser, range: TextRange) -> ParseDiagnos
     expected_node("selector", range, p)
 }
 
+pub(crate) fn expected_any_rule(p: &CssParser, range: TextRange) -> ParseDiagnostic {
+    expected_any(&["rule", "at rule"], range, p)
+}
+
+pub(crate) fn expected_any_declaration_or_at_rule(
+    p: &CssParser,
+    range: TextRange,
+) -> ParseDiagnostic {
+    expected_any(&["declaration", "at rule"], range, p)
+}
+
 pub(crate) fn expected_relative_selector(p: &CssParser, range: TextRange) -> ParseDiagnostic {
     expected_node("relative selector", range, p)
 }

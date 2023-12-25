@@ -30,5 +30,8 @@ odd) {}
     .test) {}
 
 :nth-child(2n+1
-     of
-     li, .test) {}
+    of
+    li, .test) {}
+:nth-child(2n+1
+        of
+        li, .test, .anotherLongClassName, #aSelectorLongEnoughToBreak, .OverMultipleLinesWithIndentation) {}

@@ -146,7 +146,7 @@ Line width: 80
 [svg|a] {
 }
 
-[foo|att=val] {
+[foo|att="val"] {
 }
 
 [*|att] {
@@ -164,7 +164,7 @@ input[type="radio" s] {
 img[alt~="person" s][src*="lorem" s] {
 }
 
-a[id=test] {
+a[id="test"] {
 }
 a[id="test"] {
 }
@@ -247,13 +247,13 @@ img[alt~='person'][src*='lorem'] {
 img[alt~='person'][src*='lorem'] {
 }
 
-[foo|att=val] {
+[foo|att="val"] {
 }
-[foo|att=val] {
+[foo|att="val"] {
 }
-[foo|att=val] {
+[foo|att="val"] {
 }
-[foo|att=val] {
+[foo|att="val"] {
 }
 [*|att] {
 }

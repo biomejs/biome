@@ -12,7 +12,7 @@ impl FormatNodeRule<CssPseudoClassNthSelector> for FormatCssPseudoClassNthSelect
     ) -> FormatResult<()> {
         let CssPseudoClassNthSelectorFields { nth, of_selector } = node.as_fields();
 
-        write!(f, [nth.format()])?;
+        write!(f, [group(&nth.format())])?;
 
         if of_selector.is_some() {
             write!(f, [space(), of_selector.format()])?;

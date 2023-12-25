@@ -163,7 +163,28 @@ pub enum CssSyntaxKind {
     DPPX_KW,
     X_KW,
     FR_KW,
-    URL_KW,
+    PAGE_KW,
+    LEFT_KW,
+    RIGHT_KW,
+    FIRST_KW,
+    BLANK_KW,
+    TOP_LEFT_CORNER_KW,
+    TOP_LEFT_KW,
+    TOP_CENTER_KW,
+    TOP_RIGHT_KW,
+    TOP_RIGHT_CORNER_KW,
+    BOTTOM_LEFT_CORNER_KW,
+    BOTTOM_LEFT_KW,
+    BOTTOM_CENTER_KW,
+    BOTTOM_RIGHT_KW,
+    BOTTOM_RIGHT_CORNER_KW,
+    LEFT_TOP_KW,
+    LEFT_MIDDLE_KW,
+    LEFT_BOTTOM_KW,
+    RIGHT_TOP_KW,
+    RIGHT_MIDDLE_KW,
+    RIGHT_BOTTOM_KW,
+    LAYER_KW,
     FONT_FACE_KW,
     CSS_STRING_LITERAL,
     CSS_NUMBER_LITERAL,
@@ -184,6 +205,9 @@ pub enum CssSyntaxKind {
     CSS_ANY_FUNCTION,
     CSS_DECLARATION_LIST_BLOCK,
     CSS_RULE_LIST_BLOCK,
+    CSS_DECLARATION_OR_AT_RULE_BLOCK,
+    CSS_DECLARATION_OR_AT_RULE_LIST,
+    CSS_DECLARATION_WITH_SEMICOLON,
     CSS_DECLARATION,
     CSS_IDENTIFIER,
     CSS_NUMBER,
@@ -292,6 +316,19 @@ pub enum CssSyntaxKind {
     CSS_KEYFRAMES_IDENT_SELECTOR,
     CSS_KEYFRAMES_PERCENTAGE_SELECTOR,
     CSS_KEYFRAMES_SELECTOR_LIST,
+    CSS_PAGE_AT_RULE,
+    CSS_PAGE_SELECTOR_LIST,
+    CSS_PAGE_SELECTOR,
+    CSS_PAGE_SELECTOR_PSEUDO_LIST,
+    CSS_PAGE_SELECTOR_PSEUDO,
+    CSS_PAGE_AT_RULE_BLOCK,
+    CSS_PAGE_AT_RULE_ITEM_LIST,
+    CSS_MARGIN_AT_RULE,
+    CSS_LAYER_AT_RULE,
+    CSS_LAYER_REFERENCE,
+    CSS_LAYER_REFERENCE_LIST,
+    CSS_LAYER_NAME_LIST,
+    CSS_LAYER_DECLARATION,
     CSS_BOGUS,
     CSS_BOGUS_BLOCK,
     CSS_BOGUS_KEYFRAMES_ITEM,
@@ -301,6 +338,8 @@ pub enum CssSyntaxKind {
     CSS_BOGUS_PSEUDO_CLASS,
     CSS_BOGUS_PSEUDO_ELEMENT,
     CSS_BOGUS_AT_RULE,
+    CSS_BOGUS_LAYER,
+    CSS_BOGUS_PAGE_SELECTOR_PSEUDO,
     CSS_BOGUS_DECLARATION_ITEM,
     CSS_BOGUS_COMPONENT_VALUE,
     CSS_BOGUS_PARAMETER,
@@ -335,6 +374,7 @@ impl CssSyntaxKind {
         match self {
             CSS_RULE_LIST
             | CSS_SELECTOR_LIST
+            | CSS_DECLARATION_OR_AT_RULE_LIST
             | CSS_ATTRIBUTE_LIST
             | CSS_DECLARATION_LIST
             | CSS_COMPONENT_VALUE_LIST
@@ -350,7 +390,12 @@ impl CssSyntaxKind {
             | CSS_PSEUDO_VALUE_LIST
             | CSS_MEDIA_QUERY_LIST
             | CSS_KEYFRAMES_ITEM_LIST
-            | CSS_KEYFRAMES_SELECTOR_LIST => true,
+            | CSS_KEYFRAMES_SELECTOR_LIST
+            | CSS_PAGE_SELECTOR_LIST
+            | CSS_PAGE_SELECTOR_PSEUDO_LIST
+            | CSS_PAGE_AT_RULE_ITEM_LIST
+            | CSS_LAYER_REFERENCE_LIST
+            | CSS_LAYER_NAME_LIST => true,
             _ => false,
         }
     }
@@ -465,7 +510,28 @@ impl CssSyntaxKind {
             "dppx" => DPPX_KW,
             "x" => X_KW,
             "fr" => FR_KW,
-            "url" => URL_KW,
+            "page" => PAGE_KW,
+            "left" => LEFT_KW,
+            "right" => RIGHT_KW,
+            "first" => FIRST_KW,
+            "blank" => BLANK_KW,
+            "top_left_corner" => TOP_LEFT_CORNER_KW,
+            "top_left" => TOP_LEFT_KW,
+            "top_center" => TOP_CENTER_KW,
+            "top_right" => TOP_RIGHT_KW,
+            "top_right_corner" => TOP_RIGHT_CORNER_KW,
+            "bottom_left_corner" => BOTTOM_LEFT_CORNER_KW,
+            "bottom_left" => BOTTOM_LEFT_KW,
+            "bottom_center" => BOTTOM_CENTER_KW,
+            "bottom_right" => BOTTOM_RIGHT_KW,
+            "bottom_right_corner" => BOTTOM_RIGHT_CORNER_KW,
+            "left_top" => LEFT_TOP_KW,
+            "left_middle" => LEFT_MIDDLE_KW,
+            "left_bottom" => LEFT_BOTTOM_KW,
+            "right_top" => RIGHT_TOP_KW,
+            "right_middle" => RIGHT_MIDDLE_KW,
+            "right_bottom" => RIGHT_BOTTOM_KW,
+            "layer" => LAYER_KW,
             "font_face" => FONT_FACE_KW,
             _ => return None,
         };
@@ -623,7 +689,28 @@ impl CssSyntaxKind {
             DPPX_KW => "dppx",
             X_KW => "x",
             FR_KW => "fr",
-            URL_KW => "url",
+            PAGE_KW => "page",
+            LEFT_KW => "left",
+            RIGHT_KW => "right",
+            FIRST_KW => "first",
+            BLANK_KW => "blank",
+            TOP_LEFT_CORNER_KW => "top_left_corner",
+            TOP_LEFT_KW => "top_left",
+            TOP_CENTER_KW => "top_center",
+            TOP_RIGHT_KW => "top_right",
+            TOP_RIGHT_CORNER_KW => "top_right_corner",
+            BOTTOM_LEFT_CORNER_KW => "bottom_left_corner",
+            BOTTOM_LEFT_KW => "bottom_left",
+            BOTTOM_CENTER_KW => "bottom_center",
+            BOTTOM_RIGHT_KW => "bottom_right",
+            BOTTOM_RIGHT_CORNER_KW => "bottom_right_corner",
+            LEFT_TOP_KW => "left_top",
+            LEFT_MIDDLE_KW => "left_middle",
+            LEFT_BOTTOM_KW => "left_bottom",
+            RIGHT_TOP_KW => "right_top",
+            RIGHT_MIDDLE_KW => "right_middle",
+            RIGHT_BOTTOM_KW => "right_bottom",
+            LAYER_KW => "layer",
             FONT_FACE_KW => "font_face",
             CSS_STRING_LITERAL => "string literal",
             _ => return None,
@@ -633,4 +720,4 @@ impl CssSyntaxKind {
 }
 #[doc = r" Utility macro for creating a SyntaxKind through simple macro syntax"]
 #[macro_export]
-macro_rules ! T { [;] => { $ crate :: CssSyntaxKind :: SEMICOLON } ; [,] => { $ crate :: CssSyntaxKind :: COMMA } ; ['('] => { $ crate :: CssSyntaxKind :: L_PAREN } ; [')'] => { $ crate :: CssSyntaxKind :: R_PAREN } ; ['{'] => { $ crate :: CssSyntaxKind :: L_CURLY } ; ['}'] => { $ crate :: CssSyntaxKind :: R_CURLY } ; ['['] => { $ crate :: CssSyntaxKind :: L_BRACK } ; [']'] => { $ crate :: CssSyntaxKind :: R_BRACK } ; [<] => { $ crate :: CssSyntaxKind :: L_ANGLE } ; [>] => { $ crate :: CssSyntaxKind :: R_ANGLE } ; [~] => { $ crate :: CssSyntaxKind :: TILDE } ; [#] => { $ crate :: CssSyntaxKind :: HASH } ; [&] => { $ crate :: CssSyntaxKind :: AMP } ; [|] => { $ crate :: CssSyntaxKind :: PIPE } ; [||] => { $ crate :: CssSyntaxKind :: PIPE2 } ; [+] => { $ crate :: CssSyntaxKind :: PLUS } ; [*] => { $ crate :: CssSyntaxKind :: STAR } ; [/] => { $ crate :: CssSyntaxKind :: SLASH } ; [^] => { $ crate :: CssSyntaxKind :: CARET } ; [%] => { $ crate :: CssSyntaxKind :: PERCENT } ; [.] => { $ crate :: CssSyntaxKind :: DOT } ; [:] => { $ crate :: CssSyntaxKind :: COLON } ; [::] => { $ crate :: CssSyntaxKind :: COLON2 } ; [=] => { $ crate :: CssSyntaxKind :: EQ } ; [!] => { $ crate :: CssSyntaxKind :: BANG } ; [!=] => { $ crate :: CssSyntaxKind :: NEQ } ; [-] => { $ crate :: CssSyntaxKind :: MINUS } ; [<=] => { $ crate :: CssSyntaxKind :: LTEQ } ; [>=] => { $ crate :: CssSyntaxKind :: GTEQ } ; [+=] => { $ crate :: CssSyntaxKind :: PLUSEQ } ; [|=] => { $ crate :: CssSyntaxKind :: PIPEEQ } ; [&=] => { $ crate :: CssSyntaxKind :: AMPEQ } ; [^=] => { $ crate :: CssSyntaxKind :: CARETEQ } ; [/=] => { $ crate :: CssSyntaxKind :: SLASHEQ } ; [*=] => { $ crate :: CssSyntaxKind :: STAREQ } ; [%=] => { $ crate :: CssSyntaxKind :: PERCENTEQ } ; [@] => { $ crate :: CssSyntaxKind :: AT } ; ["$="] => { $ crate :: CssSyntaxKind :: DOLLAR_EQ } ; [~=] => { $ crate :: CssSyntaxKind :: TILDE_EQ } ; [-->] => { $ crate :: CssSyntaxKind :: CDC } ; [<!--] => { $ crate :: CssSyntaxKind :: CDO } ; [media] => { $ crate :: CssSyntaxKind :: MEDIA_KW } ; [keyframes] => { $ crate :: CssSyntaxKind :: KEYFRAMES_KW } ; [not] => { $ crate :: CssSyntaxKind :: NOT_KW } ; [and] => { $ crate :: CssSyntaxKind :: AND_KW } ; [only] => { $ crate :: CssSyntaxKind :: ONLY_KW } ; [or] => { $ crate :: CssSyntaxKind :: OR_KW } ; [i] => { $ crate :: CssSyntaxKind :: I_KW } ; [important] => { $ crate :: CssSyntaxKind :: IMPORTANT_KW } ; [highlight] => { $ crate :: CssSyntaxKind :: HIGHLIGHT_KW } ; [part] => { $ crate :: CssSyntaxKind :: PART_KW } ; [dir] => { $ crate :: CssSyntaxKind :: DIR_KW } ; [local] => { $ crate :: CssSyntaxKind :: LOCAL_KW } ; [global] => { $ crate :: CssSyntaxKind :: GLOBAL_KW } ; [any] => { $ crate :: CssSyntaxKind :: ANY_KW } ; [current] => { $ crate :: CssSyntaxKind :: CURRENT_KW } ; [past] => { $ crate :: CssSyntaxKind :: PAST_KW } ; [future] => { $ crate :: CssSyntaxKind :: FUTURE_KW } ; [host] => { $ crate :: CssSyntaxKind :: HOST_KW } ; [host_context] => { $ crate :: CssSyntaxKind :: HOST_CONTEXT_KW } ; [matches] => { $ crate :: CssSyntaxKind :: MATCHES_KW } ; [is] => { $ crate :: CssSyntaxKind :: IS_KW } ; [where] => { $ crate :: CssSyntaxKind :: WHERE_KW } ; [has] => { $ crate :: CssSyntaxKind :: HAS_KW } ; [lang] => { $ crate :: CssSyntaxKind :: LANG_KW } ; [nth_child] => { $ crate :: CssSyntaxKind :: NTH_CHILD_KW } ; [nth_last_child] => { $ crate :: CssSyntaxKind :: NTH_LAST_CHILD_KW } ; [nth_of_type] => { $ crate :: CssSyntaxKind :: NTH_OF_TYPE_KW } ; [nth_last_of_type] => { $ crate :: CssSyntaxKind :: NTH_LAST_OF_TYPE_KW } ; [nth_col] => { $ crate :: CssSyntaxKind :: NTH_COL_KW } ; [nth_last_col] => { $ crate :: CssSyntaxKind :: NTH_LAST_COL_KW } ; [charset] => { $ crate :: CssSyntaxKind :: CHARSET_KW } ; [color_profile] => { $ crate :: CssSyntaxKind :: COLOR_PROFILE_KW } ; [counter_style] => { $ crate :: CssSyntaxKind :: COUNTER_STYLE_KW } ; [container] => { $ crate :: CssSyntaxKind :: CONTAINER_KW } ; [style] => { $ crate :: CssSyntaxKind :: STYLE_KW } ; [ltr] => { $ crate :: CssSyntaxKind :: LTR_KW } ; [rtl] => { $ crate :: CssSyntaxKind :: RTL_KW } ; [n] => { $ crate :: CssSyntaxKind :: N_KW } ; [even] => { $ crate :: CssSyntaxKind :: EVEN_KW } ; [odd] => { $ crate :: CssSyntaxKind :: ODD_KW } ; [of] => { $ crate :: CssSyntaxKind :: OF_KW } ; [from] => { $ crate :: CssSyntaxKind :: FROM_KW } ; [to] => { $ crate :: CssSyntaxKind :: TO_KW } ; [var] => { $ crate :: CssSyntaxKind :: VAR_KW } ; [font_palette_values] => { $ crate :: CssSyntaxKind :: FONT_PALETTE_VALUES_KW } ; [em] => { $ crate :: CssSyntaxKind :: EM_KW } ; [rem] => { $ crate :: CssSyntaxKind :: REM_KW } ; [ex] => { $ crate :: CssSyntaxKind :: EX_KW } ; [rex] => { $ crate :: CssSyntaxKind :: REX_KW } ; [cap] => { $ crate :: CssSyntaxKind :: CAP_KW } ; [rcap] => { $ crate :: CssSyntaxKind :: RCAP_KW } ; [ch] => { $ crate :: CssSyntaxKind :: CH_KW } ; [rch] => { $ crate :: CssSyntaxKind :: RCH_KW } ; [ic] => { $ crate :: CssSyntaxKind :: IC_KW } ; [ric] => { $ crate :: CssSyntaxKind :: RIC_KW } ; [lh] => { $ crate :: CssSyntaxKind :: LH_KW } ; [rlh] => { $ crate :: CssSyntaxKind :: RLH_KW } ; [vw] => { $ crate :: CssSyntaxKind :: VW_KW } ; [svw] => { $ crate :: CssSyntaxKind :: SVW_KW } ; [lvw] => { $ crate :: CssSyntaxKind :: LVW_KW } ; [dvw] => { $ crate :: CssSyntaxKind :: DVW_KW } ; [vh] => { $ crate :: CssSyntaxKind :: VH_KW } ; [svh] => { $ crate :: CssSyntaxKind :: SVH_KW } ; [lvh] => { $ crate :: CssSyntaxKind :: LVH_KW } ; [dvh] => { $ crate :: CssSyntaxKind :: DVH_KW } ; [vi] => { $ crate :: CssSyntaxKind :: VI_KW } ; [svi] => { $ crate :: CssSyntaxKind :: SVI_KW } ; [lvi] => { $ crate :: CssSyntaxKind :: LVI_KW } ; [dvi] => { $ crate :: CssSyntaxKind :: DVI_KW } ; [vb] => { $ crate :: CssSyntaxKind :: VB_KW } ; [svb] => { $ crate :: CssSyntaxKind :: SVB_KW } ; [lvb] => { $ crate :: CssSyntaxKind :: LVB_KW } ; [dvb] => { $ crate :: CssSyntaxKind :: DVB_KW } ; [vmin] => { $ crate :: CssSyntaxKind :: VMIN_KW } ; [svmin] => { $ crate :: CssSyntaxKind :: SVMIN_KW } ; [lvmin] => { $ crate :: CssSyntaxKind :: LVMIN_KW } ; [dvmin] => { $ crate :: CssSyntaxKind :: DVMIN_KW } ; [vmax] => { $ crate :: CssSyntaxKind :: VMAX_KW } ; [svmax] => { $ crate :: CssSyntaxKind :: SVMAX_KW } ; [lvmax] => { $ crate :: CssSyntaxKind :: LVMAX_KW } ; [dvmax] => { $ crate :: CssSyntaxKind :: DVMAX_KW } ; [cm] => { $ crate :: CssSyntaxKind :: CM_KW } ; [mm] => { $ crate :: CssSyntaxKind :: MM_KW } ; [q] => { $ crate :: CssSyntaxKind :: Q_KW } ; [in] => { $ crate :: CssSyntaxKind :: IN_KW } ; [pc] => { $ crate :: CssSyntaxKind :: PC_KW } ; [pt] => { $ crate :: CssSyntaxKind :: PT_KW } ; [px] => { $ crate :: CssSyntaxKind :: PX_KW } ; [mozmm] => { $ crate :: CssSyntaxKind :: MOZMM_KW } ; [rpx] => { $ crate :: CssSyntaxKind :: RPX_KW } ; [cqw] => { $ crate :: CssSyntaxKind :: CQW_KW } ; [cqh] => { $ crate :: CssSyntaxKind :: CQH_KW } ; [cqi] => { $ crate :: CssSyntaxKind :: CQI_KW } ; [cqb] => { $ crate :: CssSyntaxKind :: CQB_KW } ; [cqmin] => { $ crate :: CssSyntaxKind :: CQMIN_KW } ; [cqmax] => { $ crate :: CssSyntaxKind :: CQMAX_KW } ; [deg] => { $ crate :: CssSyntaxKind :: DEG_KW } ; [grad] => { $ crate :: CssSyntaxKind :: GRAD_KW } ; [rad] => { $ crate :: CssSyntaxKind :: RAD_KW } ; [turn] => { $ crate :: CssSyntaxKind :: TURN_KW } ; [s] => { $ crate :: CssSyntaxKind :: S_KW } ; [ms] => { $ crate :: CssSyntaxKind :: MS_KW } ; [hz] => { $ crate :: CssSyntaxKind :: HZ_KW } ; [khz] => { $ crate :: CssSyntaxKind :: KHZ_KW } ; [dpi] => { $ crate :: CssSyntaxKind :: DPI_KW } ; [dpcm] => { $ crate :: CssSyntaxKind :: DPCM_KW } ; [dppx] => { $ crate :: CssSyntaxKind :: DPPX_KW } ; [x] => { $ crate :: CssSyntaxKind :: X_KW } ; [fr] => { $ crate :: CssSyntaxKind :: FR_KW } ; [url] => { $ crate :: CssSyntaxKind :: URL_KW } ; [font_face] => { $ crate :: CssSyntaxKind :: FONT_FACE_KW } ; [ident] => { $ crate :: CssSyntaxKind :: IDENT } ; [EOF] => { $ crate :: CssSyntaxKind :: EOF } ; [UNICODE_BOM] => { $ crate :: CssSyntaxKind :: UNICODE_BOM } ; [#] => { $ crate :: CssSyntaxKind :: HASH } ; }
+macro_rules ! T { [;] => { $ crate :: CssSyntaxKind :: SEMICOLON } ; [,] => { $ crate :: CssSyntaxKind :: COMMA } ; ['('] => { $ crate :: CssSyntaxKind :: L_PAREN } ; [')'] => { $ crate :: CssSyntaxKind :: R_PAREN } ; ['{'] => { $ crate :: CssSyntaxKind :: L_CURLY } ; ['}'] => { $ crate :: CssSyntaxKind :: R_CURLY } ; ['['] => { $ crate :: CssSyntaxKind :: L_BRACK } ; [']'] => { $ crate :: CssSyntaxKind :: R_BRACK } ; [<] => { $ crate :: CssSyntaxKind :: L_ANGLE } ; [>] => { $ crate :: CssSyntaxKind :: R_ANGLE } ; [~] => { $ crate :: CssSyntaxKind :: TILDE } ; [#] => { $ crate :: CssSyntaxKind :: HASH } ; [&] => { $ crate :: CssSyntaxKind :: AMP } ; [|] => { $ crate :: CssSyntaxKind :: PIPE } ; [||] => { $ crate :: CssSyntaxKind :: PIPE2 } ; [+] => { $ crate :: CssSyntaxKind :: PLUS } ; [*] => { $ crate :: CssSyntaxKind :: STAR } ; [/] => { $ crate :: CssSyntaxKind :: SLASH } ; [^] => { $ crate :: CssSyntaxKind :: CARET } ; [%] => { $ crate :: CssSyntaxKind :: PERCENT } ; [.] => { $ crate :: CssSyntaxKind :: DOT } ; [:] => { $ crate :: CssSyntaxKind :: COLON } ; [::] => { $ crate :: CssSyntaxKind :: COLON2 } ; [=] => { $ crate :: CssSyntaxKind :: EQ } ; [!] => { $ crate :: CssSyntaxKind :: BANG } ; [!=] => { $ crate :: CssSyntaxKind :: NEQ } ; [-] => { $ crate :: CssSyntaxKind :: MINUS } ; [<=] => { $ crate :: CssSyntaxKind :: LTEQ } ; [>=] => { $ crate :: CssSyntaxKind :: GTEQ } ; [+=] => { $ crate :: CssSyntaxKind :: PLUSEQ } ; [|=] => { $ crate :: CssSyntaxKind :: PIPEEQ } ; [&=] => { $ crate :: CssSyntaxKind :: AMPEQ } ; [^=] => { $ crate :: CssSyntaxKind :: CARETEQ } ; [/=] => { $ crate :: CssSyntaxKind :: SLASHEQ } ; [*=] => { $ crate :: CssSyntaxKind :: STAREQ } ; [%=] => { $ crate :: CssSyntaxKind :: PERCENTEQ } ; [@] => { $ crate :: CssSyntaxKind :: AT } ; ["$="] => { $ crate :: CssSyntaxKind :: DOLLAR_EQ } ; [~=] => { $ crate :: CssSyntaxKind :: TILDE_EQ } ; [-->] => { $ crate :: CssSyntaxKind :: CDC } ; [<!--] => { $ crate :: CssSyntaxKind :: CDO } ; [media] => { $ crate :: CssSyntaxKind :: MEDIA_KW } ; [keyframes] => { $ crate :: CssSyntaxKind :: KEYFRAMES_KW } ; [not] => { $ crate :: CssSyntaxKind :: NOT_KW } ; [and] => { $ crate :: CssSyntaxKind :: AND_KW } ; [only] => { $ crate :: CssSyntaxKind :: ONLY_KW } ; [or] => { $ crate :: CssSyntaxKind :: OR_KW } ; [i] => { $ crate :: CssSyntaxKind :: I_KW } ; [important] => { $ crate :: CssSyntaxKind :: IMPORTANT_KW } ; [highlight] => { $ crate :: CssSyntaxKind :: HIGHLIGHT_KW } ; [part] => { $ crate :: CssSyntaxKind :: PART_KW } ; [dir] => { $ crate :: CssSyntaxKind :: DIR_KW } ; [local] => { $ crate :: CssSyntaxKind :: LOCAL_KW } ; [global] => { $ crate :: CssSyntaxKind :: GLOBAL_KW } ; [any] => { $ crate :: CssSyntaxKind :: ANY_KW } ; [current] => { $ crate :: CssSyntaxKind :: CURRENT_KW } ; [past] => { $ crate :: CssSyntaxKind :: PAST_KW } ; [future] => { $ crate :: CssSyntaxKind :: FUTURE_KW } ; [host] => { $ crate :: CssSyntaxKind :: HOST_KW } ; [host_context] => { $ crate :: CssSyntaxKind :: HOST_CONTEXT_KW } ; [matches] => { $ crate :: CssSyntaxKind :: MATCHES_KW } ; [is] => { $ crate :: CssSyntaxKind :: IS_KW } ; [where] => { $ crate :: CssSyntaxKind :: WHERE_KW } ; [has] => { $ crate :: CssSyntaxKind :: HAS_KW } ; [lang] => { $ crate :: CssSyntaxKind :: LANG_KW } ; [nth_child] => { $ crate :: CssSyntaxKind :: NTH_CHILD_KW } ; [nth_last_child] => { $ crate :: CssSyntaxKind :: NTH_LAST_CHILD_KW } ; [nth_of_type] => { $ crate :: CssSyntaxKind :: NTH_OF_TYPE_KW } ; [nth_last_of_type] => { $ crate :: CssSyntaxKind :: NTH_LAST_OF_TYPE_KW } ; [nth_col] => { $ crate :: CssSyntaxKind :: NTH_COL_KW } ; [nth_last_col] => { $ crate :: CssSyntaxKind :: NTH_LAST_COL_KW } ; [charset] => { $ crate :: CssSyntaxKind :: CHARSET_KW } ; [color_profile] => { $ crate :: CssSyntaxKind :: COLOR_PROFILE_KW } ; [counter_style] => { $ crate :: CssSyntaxKind :: COUNTER_STYLE_KW } ; [container] => { $ crate :: CssSyntaxKind :: CONTAINER_KW } ; [style] => { $ crate :: CssSyntaxKind :: STYLE_KW } ; [ltr] => { $ crate :: CssSyntaxKind :: LTR_KW } ; [rtl] => { $ crate :: CssSyntaxKind :: RTL_KW } ; [n] => { $ crate :: CssSyntaxKind :: N_KW } ; [even] => { $ crate :: CssSyntaxKind :: EVEN_KW } ; [odd] => { $ crate :: CssSyntaxKind :: ODD_KW } ; [of] => { $ crate :: CssSyntaxKind :: OF_KW } ; [from] => { $ crate :: CssSyntaxKind :: FROM_KW } ; [to] => { $ crate :: CssSyntaxKind :: TO_KW } ; [var] => { $ crate :: CssSyntaxKind :: VAR_KW } ; [font_palette_values] => { $ crate :: CssSyntaxKind :: FONT_PALETTE_VALUES_KW } ; [em] => { $ crate :: CssSyntaxKind :: EM_KW } ; [rem] => { $ crate :: CssSyntaxKind :: REM_KW } ; [ex] => { $ crate :: CssSyntaxKind :: EX_KW } ; [rex] => { $ crate :: CssSyntaxKind :: REX_KW } ; [cap] => { $ crate :: CssSyntaxKind :: CAP_KW } ; [rcap] => { $ crate :: CssSyntaxKind :: RCAP_KW } ; [ch] => { $ crate :: CssSyntaxKind :: CH_KW } ; [rch] => { $ crate :: CssSyntaxKind :: RCH_KW } ; [ic] => { $ crate :: CssSyntaxKind :: IC_KW } ; [ric] => { $ crate :: CssSyntaxKind :: RIC_KW } ; [lh] => { $ crate :: CssSyntaxKind :: LH_KW } ; [rlh] => { $ crate :: CssSyntaxKind :: RLH_KW } ; [vw] => { $ crate :: CssSyntaxKind :: VW_KW } ; [svw] => { $ crate :: CssSyntaxKind :: SVW_KW } ; [lvw] => { $ crate :: CssSyntaxKind :: LVW_KW } ; [dvw] => { $ crate :: CssSyntaxKind :: DVW_KW } ; [vh] => { $ crate :: CssSyntaxKind :: VH_KW } ; [svh] => { $ crate :: CssSyntaxKind :: SVH_KW } ; [lvh] => { $ crate :: CssSyntaxKind :: LVH_KW } ; [dvh] => { $ crate :: CssSyntaxKind :: DVH_KW } ; [vi] => { $ crate :: CssSyntaxKind :: VI_KW } ; [svi] => { $ crate :: CssSyntaxKind :: SVI_KW } ; [lvi] => { $ crate :: CssSyntaxKind :: LVI_KW } ; [dvi] => { $ crate :: CssSyntaxKind :: DVI_KW } ; [vb] => { $ crate :: CssSyntaxKind :: VB_KW } ; [svb] => { $ crate :: CssSyntaxKind :: SVB_KW } ; [lvb] => { $ crate :: CssSyntaxKind :: LVB_KW } ; [dvb] => { $ crate :: CssSyntaxKind :: DVB_KW } ; [vmin] => { $ crate :: CssSyntaxKind :: VMIN_KW } ; [svmin] => { $ crate :: CssSyntaxKind :: SVMIN_KW } ; [lvmin] => { $ crate :: CssSyntaxKind :: LVMIN_KW } ; [dvmin] => { $ crate :: CssSyntaxKind :: DVMIN_KW } ; [vmax] => { $ crate :: CssSyntaxKind :: VMAX_KW } ; [svmax] => { $ crate :: CssSyntaxKind :: SVMAX_KW } ; [lvmax] => { $ crate :: CssSyntaxKind :: LVMAX_KW } ; [dvmax] => { $ crate :: CssSyntaxKind :: DVMAX_KW } ; [cm] => { $ crate :: CssSyntaxKind :: CM_KW } ; [mm] => { $ crate :: CssSyntaxKind :: MM_KW } ; [q] => { $ crate :: CssSyntaxKind :: Q_KW } ; [in] => { $ crate :: CssSyntaxKind :: IN_KW } ; [pc] => { $ crate :: CssSyntaxKind :: PC_KW } ; [pt] => { $ crate :: CssSyntaxKind :: PT_KW } ; [px] => { $ crate :: CssSyntaxKind :: PX_KW } ; [mozmm] => { $ crate :: CssSyntaxKind :: MOZMM_KW } ; [rpx] => { $ crate :: CssSyntaxKind :: RPX_KW } ; [cqw] => { $ crate :: CssSyntaxKind :: CQW_KW } ; [cqh] => { $ crate :: CssSyntaxKind :: CQH_KW } ; [cqi] => { $ crate :: CssSyntaxKind :: CQI_KW } ; [cqb] => { $ crate :: CssSyntaxKind :: CQB_KW } ; [cqmin] => { $ crate :: CssSyntaxKind :: CQMIN_KW } ; [cqmax] => { $ crate :: CssSyntaxKind :: CQMAX_KW } ; [deg] => { $ crate :: CssSyntaxKind :: DEG_KW } ; [grad] => { $ crate :: CssSyntaxKind :: GRAD_KW } ; [rad] => { $ crate :: CssSyntaxKind :: RAD_KW } ; [turn] => { $ crate :: CssSyntaxKind :: TURN_KW } ; [s] => { $ crate :: CssSyntaxKind :: S_KW } ; [ms] => { $ crate :: CssSyntaxKind :: MS_KW } ; [hz] => { $ crate :: CssSyntaxKind :: HZ_KW } ; [khz] => { $ crate :: CssSyntaxKind :: KHZ_KW } ; [dpi] => { $ crate :: CssSyntaxKind :: DPI_KW } ; [dpcm] => { $ crate :: CssSyntaxKind :: DPCM_KW } ; [dppx] => { $ crate :: CssSyntaxKind :: DPPX_KW } ; [x] => { $ crate :: CssSyntaxKind :: X_KW } ; [fr] => { $ crate :: CssSyntaxKind :: FR_KW } ; [page] => { $ crate :: CssSyntaxKind :: PAGE_KW } ; [left] => { $ crate :: CssSyntaxKind :: LEFT_KW } ; [right] => { $ crate :: CssSyntaxKind :: RIGHT_KW } ; [first] => { $ crate :: CssSyntaxKind :: FIRST_KW } ; [blank] => { $ crate :: CssSyntaxKind :: BLANK_KW } ; [top_left_corner] => { $ crate :: CssSyntaxKind :: TOP_LEFT_CORNER_KW } ; [top_left] => { $ crate :: CssSyntaxKind :: TOP_LEFT_KW } ; [top_center] => { $ crate :: CssSyntaxKind :: TOP_CENTER_KW } ; [top_right] => { $ crate :: CssSyntaxKind :: TOP_RIGHT_KW } ; [top_right_corner] => { $ crate :: CssSyntaxKind :: TOP_RIGHT_CORNER_KW } ; [bottom_left_corner] => { $ crate :: CssSyntaxKind :: BOTTOM_LEFT_CORNER_KW } ; [bottom_left] => { $ crate :: CssSyntaxKind :: BOTTOM_LEFT_KW } ; [bottom_center] => { $ crate :: CssSyntaxKind :: BOTTOM_CENTER_KW } ; [bottom_right] => { $ crate :: CssSyntaxKind :: BOTTOM_RIGHT_KW } ; [bottom_right_corner] => { $ crate :: CssSyntaxKind :: BOTTOM_RIGHT_CORNER_KW } ; [left_top] => { $ crate :: CssSyntaxKind :: LEFT_TOP_KW } ; [left_middle] => { $ crate :: CssSyntaxKind :: LEFT_MIDDLE_KW } ; [left_bottom] => { $ crate :: CssSyntaxKind :: LEFT_BOTTOM_KW } ; [right_top] => { $ crate :: CssSyntaxKind :: RIGHT_TOP_KW } ; [right_middle] => { $ crate :: CssSyntaxKind :: RIGHT_MIDDLE_KW } ; [right_bottom] => { $ crate :: CssSyntaxKind :: RIGHT_BOTTOM_KW } ; [layer] => { $ crate :: CssSyntaxKind :: LAYER_KW } ; [font_face] => { $ crate :: CssSyntaxKind :: FONT_FACE_KW } ; [ident] => { $ crate :: CssSyntaxKind :: IDENT } ; [EOF] => { $ crate :: CssSyntaxKind :: EOF } ; [UNICODE_BOM] => { $ crate :: CssSyntaxKind :: UNICODE_BOM } ; [#] => { $ crate :: CssSyntaxKind :: HASH } ; }

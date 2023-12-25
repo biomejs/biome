@@ -38,8 +38,11 @@ odd) {}
     .test) {}
 
 :nth-child(2n+1
-     of
-     li, .test) {}
+    of
+    li, .test) {}
+:nth-child(2n+1
+        of
+        li, .test, .anotherLongClassName, #aSelectorLongEnoughToBreak, .OverMultipleLinesWithIndentation) {}
 ```
 
 
@@ -83,15 +86,18 @@ Line width: 80
 
 :nth-child(2n + 1 of li, .test) {
 }
-:nth-child(
-		2n
-		+ 1 of li,
-
-		.test
-	) {
+:nth-child(2n + 1 of li, .test) {
 }
 
 :nth-child(2n + 1 of li, .test) {
+}
+:nth-child(
+		2n + 1 of li,
+		.test,
+		.anotherLongClassName,
+		#aSelectorLongEnoughToBreak,
+		.OverMultipleLinesWithIndentation
+	) {
 }
 ```
 

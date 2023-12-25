@@ -920,6 +920,10 @@ export interface Nursery {
 	 */
 	useNodeImportProtocol?: RuleConfiguration;
 	/**
+	 * Use Number properties instead of global ones.
+	 */
+	useNumberProperties?: RuleConfiguration;
+	/**
 	 * Enforce the use of the regular expression literals instead of the RegExp constructor if possible.
 	 */
 	useRegexLiterals?: RuleConfiguration;
@@ -1636,6 +1640,7 @@ export type Category =
 	| "lint/nursery/useGroupedTypeImport"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useNodeImportProtocol"
+	| "lint/nursery/useNumberProperties"
 	| "lint/nursery/useRegexLiterals"
 	| "lint/nursery/useShorthandFunctionType"
 	| "lint/nursery/useValidAriaRole"

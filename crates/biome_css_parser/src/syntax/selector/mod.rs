@@ -98,7 +98,7 @@ impl ParseSeparatedList for CssSelectorList {
 }
 
 #[inline]
-fn is_at_selector(p: &mut CssParser) -> bool {
+pub(crate) fn is_at_selector(p: &mut CssParser) -> bool {
     is_at_compound_selector(p)
 }
 
@@ -223,9 +223,10 @@ fn parse_namespace_prefix(p: &mut CssParser) -> ParsedSyntax {
     Present(m.complete(p, kind))
 }
 
-struct CssSubSelectorList;
+pub(crate) struct CssSubSelectorList;
 impl CssSubSelectorList {
-    const START_SET: TokenSet<CssSyntaxKind> = token_set![T![#], T![.], T![:], T![::], T!['[']];
+    pub(crate) const START_SET: TokenSet<CssSyntaxKind> =
+        token_set![T![#], T![.], T![:], T![::], T!['[']];
 }
 impl ParseNodeList for CssSubSelectorList {
     type Kind = CssSyntaxKind;
