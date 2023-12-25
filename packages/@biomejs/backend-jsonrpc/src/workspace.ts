@@ -872,6 +872,10 @@ export interface Nursery {
 	 */
 	noNodejsModules?: RuleConfiguration;
 	/**
+	 * Succinct description of the rule.
+	 */
+	noThenProperty?: RuleConfiguration;
+	/**
 	 * Disallow unused imports.
 	 */
 	noUnusedImports?: RuleConfiguration;
@@ -1627,6 +1631,7 @@ export type Category =
 	| "lint/nursery/noInvalidUseBeforeDeclaration"
 	| "lint/nursery/noMisleadingCharacterClass"
 	| "lint/nursery/noNodejsModules"
+	| "lint/nursery/noThenProperty"
 	| "lint/nursery/noTypeOnlyImportAttributes"
 	| "lint/nursery/noUnusedImports"
 	| "lint/nursery/noUnusedPrivateClassMembers"

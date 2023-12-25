@@ -1282,6 +1282,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noThenProperty": {
+					"description": "Succinct description of the rule.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUnusedImports": {
 					"description": "Disallow unused imports.",
 					"anyOf": [
