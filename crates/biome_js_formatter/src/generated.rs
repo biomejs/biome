@@ -8654,6 +8654,46 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsIdentifierBinding {
         )
     }
 }
+impl FormatRule<biome_js_syntax::TsTypeEmptyParameters>
+    for crate::ts::bindings::type_empty_parameters::FormatTsTypeEmptyParameters
+{
+    type Context = JsFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_js_syntax::TsTypeEmptyParameters,
+        f: &mut JsFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_js_syntax::TsTypeEmptyParameters>::fmt(self, node, f)
+    }
+}
+impl AsFormat<JsFormatContext> for biome_js_syntax::TsTypeEmptyParameters {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_js_syntax::TsTypeEmptyParameters,
+        crate::ts::bindings::type_empty_parameters::FormatTsTypeEmptyParameters,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::ts::bindings::type_empty_parameters::FormatTsTypeEmptyParameters::default(),
+        )
+    }
+}
+impl IntoFormat<JsFormatContext> for biome_js_syntax::TsTypeEmptyParameters {
+    type Format = FormatOwnedWithRule<
+        biome_js_syntax::TsTypeEmptyParameters,
+        crate::ts::bindings::type_empty_parameters::FormatTsTypeEmptyParameters,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::ts::bindings::type_empty_parameters::FormatTsTypeEmptyParameters::default(),
+        )
+    }
+}
 impl FormatRule<biome_js_syntax::TsEnumMember>
     for crate::ts::auxiliary::enum_member::FormatTsEnumMember
 {

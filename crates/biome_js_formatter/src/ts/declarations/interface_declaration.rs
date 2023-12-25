@@ -16,6 +16,7 @@ impl FormatNodeRule<TsInterfaceDeclaration> for FormatTsInterfaceDeclaration {
             members,
             l_curly_token,
             r_curly_token,
+            ts_type_empty_parameters: _,
         } = node.as_fields();
 
         let l_curly_token = l_curly_token?;
