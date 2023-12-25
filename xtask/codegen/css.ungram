@@ -1049,6 +1049,8 @@ CssLayerNameList = (CssIdentifier ('.' CssIdentifier)*)
 // <general-enclosed> branch must only be chosen if the input does not match either of the preceding branches.
 // <general-enclosed> exists to allow for future expansion of the grammar in a reasonably compatible way.
 
+// @supports (display: grid) {}
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 CssSupportsAtRule =
 	'supports'
 	condition: AnyCssSupportsCondition
@@ -1060,24 +1062,34 @@ AnyCssSupportsCondition =
 	| CssSupportsAndCondition
 	| AnyCssSupportsInParens
 
+// @supports not (display: grid) {}
+//           ^^^^^^^^^^^^^^^^^^^
 CssSupportsNotCondition =
 	'not'
 	query: AnyCssSupportsInParens
 
+// @supports (transition-property: color) and (animation-name: foo) {}
+//           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 CssSupportsAndCondition =
 	left: AnyCssSupportsInParens
 	'and'
 	right: AnyCssSupportsAndCombinableCondition
 
+// @supports (transition-property: color) and ((animation-name: foo) or (display: flex)) {}
+//           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 AnyCssSupportsAndCombinableCondition =
 	CssSupportsAndCondition
 	| AnyCssSupportsInParens
 
+// @supports (transition-property: color) or (animation-name: foo) {}
+//           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 CssSupportsOrCondition =
 	left: AnyCssSupportsInParens
 	'or'
 	right: AnyCssSupportsOrCombinableCondition
 
+// @supports (transition-property: color) or ((animation-name: foo) and (display: flex)) {}
+//           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 AnyCssSupportsOrCombinableCondition =
 	CssSupportsOrCondition
 	| AnyCssSupportsInParens
@@ -1089,16 +1101,22 @@ AnyCssSupportsInParens =
 	| CssAnyFunction
 	| AnyCssValue // general-enclosed
 
+// @supports (transition-property: color) or (not (animation-name: foo)) {}
+//                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 CssSupportsConditionInParens =
 	'('
 	condition: AnyCssSupportsCondition
 	')'
 
+// @supports not (display: flex) {}
+// 				       ^^^^^^^^^^^^^^^
 CssSupportsFeatureDeclaration =
 	'('
 	declaration: CssDeclaration
 	')'
 
+// @supports selector(:focus-visible) { }
+// 				   ^^^^^^^^^^^^^^^^^^^^^^^^
 CssSupportsFeatureSelector =
 	'selector'
 	'('
