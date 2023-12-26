@@ -860,7 +860,16 @@ impl<'src> CssLexer<'src> {
             b"container" => CONTAINER_KW,
             b"style" => STYLE_KW,
             b"font-face" => FONT_FACE_KW,
+            b"font-feature-values" => FONT_FEATURE_VALUES_KW,
             b"font-palette-values" => FONT_PALETTE_VALUES_KW,
+            //
+            b"stylistic" => STYLISTIC_KW,
+            b"historical-forms" => HISTORICAL_FORMS_KW,
+            b"styleset" => STYLESET_KW,
+            b"character-variant" => CHARACTER_VARIANT_KW,
+            b"swash" => SWASH_KW,
+            b"ornaments" => ORNAMENTS_KW,
+            b"annotation" => ANNOTATION_KW,
             // CSS-Wide keywords
             b"initial" => INITIAL_KW,
             b"inherit" => INHERIT_KW,

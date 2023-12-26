@@ -1,0 +1,214 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@font-feature-values  {  }
+@font-feature-values 6788 {  }
+@font-feature-values ident
+@font-palette-values ;
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssBogusAtRule {
+                items: [
+                    FONT_FEATURE_VALUES_KW@1..22 "font-feature-values" [] [Whitespace("  ")],
+                    CssFontFeatureValuesBlock {
+                        l_curly_token: L_CURLY@22..25 "{" [] [Whitespace("  ")],
+                        items: CssFontFeatureValuesItemList [],
+                        r_curly_token: R_CURLY@25..26 "}" [] [],
+                    },
+                ],
+            },
+        },
+        CssAtRule {
+            at_token: AT@26..28 "@" [Newline("\n")] [],
+            rule: CssBogusAtRule {
+                items: [
+                    FONT_FEATURE_VALUES_KW@28..48 "font-feature-values" [] [Whitespace(" ")],
+                    CssBogus {
+                        items: [
+                            CSS_NUMBER_LITERAL@48..53 "6788" [] [Whitespace(" ")],
+                        ],
+                    },
+                    CssFontFeatureValuesBlock {
+                        l_curly_token: L_CURLY@53..56 "{" [] [Whitespace("  ")],
+                        items: CssFontFeatureValuesItemList [],
+                        r_curly_token: R_CURLY@56..57 "}" [] [],
+                    },
+                ],
+            },
+        },
+        CssAtRule {
+            at_token: AT@57..59 "@" [Newline("\n")] [],
+            rule: CssBogusAtRule {
+                items: [
+                    FONT_FEATURE_VALUES_KW@59..79 "font-feature-values" [] [Whitespace(" ")],
+                    CssCustomIdentifier {
+                        value_token: IDENT@79..84 "ident" [] [],
+                    },
+                ],
+            },
+        },
+        CssAtRule {
+            at_token: AT@84..86 "@" [Newline("\n")] [],
+            rule: CssBogusAtRule {
+                items: [
+                    FONT_PALETTE_VALUES_KW@86..106 "font-palette-values" [] [Whitespace(" ")],
+                    CssBogus {
+                        items: [
+                            SEMICOLON@106..107 ";" [] [],
+                        ],
+                    },
+                ],
+            },
+        },
+    ],
+    eof_token: EOF@107..108 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..108
+  0: (empty)
+  1: CSS_RULE_LIST@0..107
+    0: CSS_AT_RULE@0..26
+      0: AT@0..1 "@" [] []
+      1: CSS_BOGUS_AT_RULE@1..26
+        0: FONT_FEATURE_VALUES_KW@1..22 "font-feature-values" [] [Whitespace("  ")]
+        1: CSS_FONT_FEATURE_VALUES_BLOCK@22..26
+          0: L_CURLY@22..25 "{" [] [Whitespace("  ")]
+          1: CSS_FONT_FEATURE_VALUES_ITEM_LIST@25..25
+          2: R_CURLY@25..26 "}" [] []
+    1: CSS_AT_RULE@26..57
+      0: AT@26..28 "@" [Newline("\n")] []
+      1: CSS_BOGUS_AT_RULE@28..57
+        0: FONT_FEATURE_VALUES_KW@28..48 "font-feature-values" [] [Whitespace(" ")]
+        1: CSS_BOGUS@48..53
+          0: CSS_NUMBER_LITERAL@48..53 "6788" [] [Whitespace(" ")]
+        2: CSS_FONT_FEATURE_VALUES_BLOCK@53..57
+          0: L_CURLY@53..56 "{" [] [Whitespace("  ")]
+          1: CSS_FONT_FEATURE_VALUES_ITEM_LIST@56..56
+          2: R_CURLY@56..57 "}" [] []
+    2: CSS_AT_RULE@57..84
+      0: AT@57..59 "@" [Newline("\n")] []
+      1: CSS_BOGUS_AT_RULE@59..84
+        0: FONT_FEATURE_VALUES_KW@59..79 "font-feature-values" [] [Whitespace(" ")]
+        1: CSS_CUSTOM_IDENTIFIER@79..84
+          0: IDENT@79..84 "ident" [] []
+    3: CSS_AT_RULE@84..107
+      0: AT@84..86 "@" [Newline("\n")] []
+      1: CSS_BOGUS_AT_RULE@86..107
+        0: FONT_PALETTE_VALUES_KW@86..106 "font-palette-values" [] [Whitespace(" ")]
+        1: CSS_BOGUS@106..107
+          0: SEMICOLON@106..107 ";" [] []
+  2: EOF@107..108 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+at_rule_font_feature_values_error.css:1:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found '{'.
+  
+  > 1 │ @font-feature-values  {  }
+      │                       ^
+    2 │ @font-feature-values 6788 {  }
+    3 │ @font-feature-values ident
+  
+  i Expected an identifier here.
+  
+  > 1 │ @font-feature-values  {  }
+      │                       ^
+    2 │ @font-feature-values 6788 {  }
+    3 │ @font-feature-values ident
+  
+at_rule_font_feature_values_error.css:2:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found '6788'.
+  
+    1 │ @font-feature-values  {  }
+  > 2 │ @font-feature-values 6788 {  }
+      │                      ^^^^
+    3 │ @font-feature-values ident
+    4 │ @font-palette-values ;
+  
+  i Expected an identifier here.
+  
+    1 │ @font-feature-values  {  }
+  > 2 │ @font-feature-values 6788 {  }
+      │                      ^^^^
+    3 │ @font-feature-values ident
+    4 │ @font-palette-values ;
+  
+at_rule_font_feature_values_error.css:4:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a body but instead found '@'.
+  
+    2 │ @font-feature-values 6788 {  }
+    3 │ @font-feature-values ident
+  > 4 │ @font-palette-values ;
+      │ ^
+    5 │ 
+  
+  i Expected a body here.
+  
+    2 │ @font-feature-values 6788 {  }
+    3 │ @font-feature-values ident
+  > 4 │ @font-palette-values ;
+      │ ^
+    5 │ 
+  
+at_rule_font_feature_values_error.css:4:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a dashed identifier but instead found ';'.
+  
+    2 │ @font-feature-values 6788 {  }
+    3 │ @font-feature-values ident
+  > 4 │ @font-palette-values ;
+      │                      ^
+    5 │ 
+  
+  i Expected a dashed identifier here.
+  
+    2 │ @font-feature-values 6788 {  }
+    3 │ @font-feature-values ident
+  > 4 │ @font-palette-values ;
+      │                      ^
+    5 │ 
+  
+at_rule_font_feature_values_error.css:5:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a body but instead found the end of the file.
+  
+    3 │ @font-feature-values ident
+    4 │ @font-palette-values ;
+  > 5 │ 
+      │ 
+  
+  i Expected a body here.
+  
+    3 │ @font-feature-values ident
+    4 │ @font-palette-values ;
+  > 5 │ 
+      │ 
+  
+```
+
+

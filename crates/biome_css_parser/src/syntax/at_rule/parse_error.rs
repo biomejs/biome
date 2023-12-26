@@ -38,3 +38,29 @@ pub(crate) fn expected_any_scope_range(p: &CssParser, range: TextRange) -> Parse
         p,
     )
 }
+
+pub(crate) fn expected_font_feature_values_item(
+    p: &CssParser,
+    range: TextRange,
+) -> ParseDiagnostic {
+    expected_node("font-feature-values item", range, p)
+}
+
+pub(crate) fn expected_any_font_feature_value_item(
+    p: &CssParser,
+    range: TextRange,
+) -> ParseDiagnostic {
+    expected_any(
+        &[
+            "stylistic",
+            "historical_forms",
+            "styleset",
+            "character_variant",
+            "swash",
+            "ornaments",
+            "annotation",
+        ],
+        range,
+        p,
+    )
+}

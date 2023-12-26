@@ -4,6 +4,7 @@ mod container;
 mod counter_style;
 mod feature;
 mod font_face;
+mod font_feature_values;
 mod font_palette_values;
 mod keyframes;
 mod layer;
@@ -23,6 +24,9 @@ use crate::syntax::at_rule::counter_style::{
     is_at_counter_style_at_rule, parse_counter_style_at_rule,
 };
 use crate::syntax::at_rule::font_face::{is_at_font_face_at_rule, parse_font_face_at_rule};
+use crate::syntax::at_rule::font_feature_values::{
+    is_at_font_feature_values_at_rule, parse_font_feature_values_at_rule,
+};
 use crate::syntax::at_rule::font_palette_values::{
     is_at_font_palette_values_at_rule, parse_font_palette_values_at_rule,
 };
@@ -77,6 +81,8 @@ pub(crate) fn parse_any_at_rule(p: &mut CssParser) -> ParsedSyntax {
         parse_container_at_rule(p)
     } else if is_at_font_face_at_rule(p) {
         parse_font_face_at_rule(p)
+    } else if is_at_font_feature_values_at_rule(p) {
+        parse_font_feature_values_at_rule(p)
     } else if is_at_font_palette_values_at_rule(p) {
         parse_font_palette_values_at_rule(p)
     } else if is_at_media_at_rule(p) {
