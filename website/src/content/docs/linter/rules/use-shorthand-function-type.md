@@ -31,7 +31,7 @@ interface Example {
 }
 ```
 
-<pre class="language-text"><code class="language-text">nursery/useShorthandFunctionType.js:2:3 <a href="https://biomejs.dev/lint/rules/use-shorthand-function-type">lint/nursery/useShorthandFunctionType</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/useShorthandFunctionType.js:2:3 <a href="https://biomejs.dev/linter/rules/use-shorthand-function-type">lint/nursery/useShorthandFunctionType</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Use a function type instead of a call signature.</span>
   
@@ -59,7 +59,7 @@ function foo(example: { (): number }): number {
 }
 ```
 
-<pre class="language-text"><code class="language-text">nursery/useShorthandFunctionType.js:1:25 <a href="https://biomejs.dev/lint/rules/use-shorthand-function-type">lint/nursery/useShorthandFunctionType</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/useShorthandFunctionType.js:1:25 <a href="https://biomejs.dev/linter/rules/use-shorthand-function-type">lint/nursery/useShorthandFunctionType</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Use a function type instead of a call signature.</span>
   
