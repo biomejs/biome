@@ -2340,6 +2340,40 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssFontFaceAtRule {
         )
     }
 }
+impl FormatRule<biome_css_syntax::CssFontFeatureValuesAtRule>
+    for crate::css::statements::font_feature_values_at_rule::FormatCssFontFeatureValuesAtRule
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssFontFeatureValuesAtRule,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::CssFontFeatureValuesAtRule>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssFontFeatureValuesAtRule {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssFontFeatureValuesAtRule,
+        crate::css::statements::font_feature_values_at_rule::FormatCssFontFeatureValuesAtRule,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule :: new (self , crate :: css :: statements :: font_feature_values_at_rule :: FormatCssFontFeatureValuesAtRule :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssFontFeatureValuesAtRule {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssFontFeatureValuesAtRule,
+        crate::css::statements::font_feature_values_at_rule::FormatCssFontFeatureValuesAtRule,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule :: new (self , crate :: css :: statements :: font_feature_values_at_rule :: FormatCssFontFeatureValuesAtRule :: default ())
+    }
+}
 impl FormatRule<biome_css_syntax::CssFontPaletteValuesAtRule>
     for crate::css::statements::font_palette_values_at_rule::FormatCssFontPaletteValuesAtRule
 {
@@ -2772,6 +2806,74 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssDocumentAtRule {
             self,
             crate::css::statements::document_at_rule::FormatCssDocumentAtRule::default(),
         )
+    }
+}
+impl FormatRule<biome_css_syntax::CssFontFeatureValuesBlock>
+    for crate::css::auxiliary::font_feature_values_block::FormatCssFontFeatureValuesBlock
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssFontFeatureValuesBlock,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::CssFontFeatureValuesBlock>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssFontFeatureValuesBlock {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssFontFeatureValuesBlock,
+        crate::css::auxiliary::font_feature_values_block::FormatCssFontFeatureValuesBlock,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule :: new (self , crate :: css :: auxiliary :: font_feature_values_block :: FormatCssFontFeatureValuesBlock :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssFontFeatureValuesBlock {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssFontFeatureValuesBlock,
+        crate::css::auxiliary::font_feature_values_block::FormatCssFontFeatureValuesBlock,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule :: new (self , crate :: css :: auxiliary :: font_feature_values_block :: FormatCssFontFeatureValuesBlock :: default ())
+    }
+}
+impl FormatRule<biome_css_syntax::CssFontFeatureValuesItem>
+    for crate::css::auxiliary::font_feature_values_item::FormatCssFontFeatureValuesItem
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssFontFeatureValuesItem,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::CssFontFeatureValuesItem>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssFontFeatureValuesItem {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssFontFeatureValuesItem,
+        crate::css::auxiliary::font_feature_values_item::FormatCssFontFeatureValuesItem,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule :: new (self , crate :: css :: auxiliary :: font_feature_values_item :: FormatCssFontFeatureValuesItem :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssFontFeatureValuesItem {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssFontFeatureValuesItem,
+        crate::css::auxiliary::font_feature_values_item::FormatCssFontFeatureValuesItem,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule :: new (self , crate :: css :: auxiliary :: font_feature_values_item :: FormatCssFontFeatureValuesItem :: default ())
     }
 }
 impl FormatRule<biome_css_syntax::CssContainerNotQuery>
@@ -5081,6 +5183,27 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssDocumentMatcherList {
         )
     }
 }
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssFontFeatureValuesItemList {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssFontFeatureValuesItemList,
+        crate::css::lists::font_feature_values_item_list::FormatCssFontFeatureValuesItemList,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule :: new (self , crate :: css :: lists :: font_feature_values_item_list :: FormatCssFontFeatureValuesItemList :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssFontFeatureValuesItemList {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssFontFeatureValuesItemList,
+        crate::css::lists::font_feature_values_item_list::FormatCssFontFeatureValuesItemList,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule :: new (self , crate :: css :: lists :: font_feature_values_item_list :: FormatCssFontFeatureValuesItemList :: default ())
+    }
+}
 impl AsFormat<CssFormatContext> for biome_css_syntax::CssGenericComponentValueList {
     type Format<'a> = FormatRefWithRule<
         'a,
@@ -5884,6 +6007,40 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssBogusScopeRange {
             self,
             crate::css::bogus::bogus_scope_range::FormatCssBogusScopeRange::default(),
         )
+    }
+}
+impl FormatRule<biome_css_syntax::CssBogusFontFeatureValuesItem>
+    for crate::css::bogus::bogus_font_feature_values_item::FormatCssBogusFontFeatureValuesItem
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssBogusFontFeatureValuesItem,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatBogusNodeRule::<biome_css_syntax::CssBogusFontFeatureValuesItem>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssBogusFontFeatureValuesItem {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssBogusFontFeatureValuesItem,
+        crate::css::bogus::bogus_font_feature_values_item::FormatCssBogusFontFeatureValuesItem,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule :: new (self , crate :: css :: bogus :: bogus_font_feature_values_item :: FormatCssBogusFontFeatureValuesItem :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssBogusFontFeatureValuesItem {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssBogusFontFeatureValuesItem,
+        crate::css::bogus::bogus_font_feature_values_item::FormatCssBogusFontFeatureValuesItem,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule :: new (self , crate :: css :: bogus :: bogus_font_feature_values_item :: FormatCssBogusFontFeatureValuesItem :: default ())
     }
 }
 impl FormatRule<biome_css_syntax::CssBogusKeyframesItem>
@@ -6902,6 +7059,89 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssAtRule {
         FormatOwnedWithRule::new(
             self,
             crate::css::any::at_rule::FormatAnyCssAtRule::default(),
+        )
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssFontFamilyName {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::AnyCssFontFamilyName,
+        crate::css::any::font_family_name::FormatAnyCssFontFamilyName,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::css::any::font_family_name::FormatAnyCssFontFamilyName::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssFontFamilyName {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::AnyCssFontFamilyName,
+        crate::css::any::font_family_name::FormatAnyCssFontFamilyName,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::any::font_family_name::FormatAnyCssFontFamilyName::default(),
+        )
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssFontFeatureValuesBlock {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::AnyCssFontFeatureValuesBlock,
+        crate::css::any::font_feature_values_block::FormatAnyCssFontFeatureValuesBlock,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::css::any::font_feature_values_block::FormatAnyCssFontFeatureValuesBlock::default(
+            ),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssFontFeatureValuesBlock {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::AnyCssFontFeatureValuesBlock,
+        crate::css::any::font_feature_values_block::FormatAnyCssFontFeatureValuesBlock,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::any::font_feature_values_block::FormatAnyCssFontFeatureValuesBlock::default(
+            ),
+        )
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssFontFeatureValuesItem {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::AnyCssFontFeatureValuesItem,
+        crate::css::any::font_feature_values_item::FormatAnyCssFontFeatureValuesItem,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::css::any::font_feature_values_item::FormatAnyCssFontFeatureValuesItem::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssFontFeatureValuesItem {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::AnyCssFontFeatureValuesItem,
+        crate::css::any::font_feature_values_item::FormatAnyCssFontFeatureValuesItem,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::any::font_feature_values_item::FormatAnyCssFontFeatureValuesItem::default(),
         )
     }
 }

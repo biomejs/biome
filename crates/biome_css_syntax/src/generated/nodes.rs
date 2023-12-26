@@ -1732,6 +1732,144 @@ pub struct CssFontFaceAtRuleFields {
     pub block: SyntaxResult<AnyCssDeclarationListBlock>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssFontFeatureValuesAtRule {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssFontFeatureValuesAtRule {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssFontFeatureValuesAtRuleFields {
+        CssFontFeatureValuesAtRuleFields {
+            font_feature_values_token: self.font_feature_values_token(),
+            name: self.name(),
+            block: self.block(),
+        }
+    }
+    pub fn font_feature_values_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn name(&self) -> SyntaxResult<AnyCssFontFamilyName> {
+        support::required_node(&self.syntax, 1usize)
+    }
+    pub fn block(&self) -> SyntaxResult<AnyCssFontFeatureValuesBlock> {
+        support::required_node(&self.syntax, 2usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssFontFeatureValuesAtRule {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssFontFeatureValuesAtRuleFields {
+    pub font_feature_values_token: SyntaxResult<SyntaxToken>,
+    pub name: SyntaxResult<AnyCssFontFamilyName>,
+    pub block: SyntaxResult<AnyCssFontFeatureValuesBlock>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssFontFeatureValuesBlock {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssFontFeatureValuesBlock {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssFontFeatureValuesBlockFields {
+        CssFontFeatureValuesBlockFields {
+            l_curly_token: self.l_curly_token(),
+            items: self.items(),
+            r_curly_token: self.r_curly_token(),
+        }
+    }
+    pub fn l_curly_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn items(&self) -> CssFontFeatureValuesItemList {
+        support::list(&self.syntax, 1usize)
+    }
+    pub fn r_curly_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssFontFeatureValuesBlock {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssFontFeatureValuesBlockFields {
+    pub l_curly_token: SyntaxResult<SyntaxToken>,
+    pub items: CssFontFeatureValuesItemList,
+    pub r_curly_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssFontFeatureValuesItem {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssFontFeatureValuesItem {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssFontFeatureValuesItemFields {
+        CssFontFeatureValuesItemFields {
+            at_token: self.at_token(),
+            name: self.name(),
+            block: self.block(),
+        }
+    }
+    pub fn at_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn name(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn block(&self) -> SyntaxResult<AnyCssDeclarationListBlock> {
+        support::required_node(&self.syntax, 2usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssFontFeatureValuesItem {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssFontFeatureValuesItemFields {
+    pub at_token: SyntaxResult<SyntaxToken>,
+    pub name: SyntaxResult<SyntaxToken>,
+    pub block: SyntaxResult<AnyCssDeclarationListBlock>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssFontPaletteValuesAtRule {
     pub(crate) syntax: SyntaxNode,
 }
@@ -6013,6 +6151,7 @@ pub enum AnyCssAtRule {
     CssCounterStyleAtRule(CssCounterStyleAtRule),
     CssDocumentAtRule(CssDocumentAtRule),
     CssFontFaceAtRule(CssFontFaceAtRule),
+    CssFontFeatureValuesAtRule(CssFontFeatureValuesAtRule),
     CssFontPaletteValuesAtRule(CssFontPaletteValuesAtRule),
     CssImportAtRule(CssImportAtRule),
     CssKeyframesAtRule(CssKeyframesAtRule),
@@ -6064,6 +6203,12 @@ impl AnyCssAtRule {
     pub fn as_css_font_face_at_rule(&self) -> Option<&CssFontFaceAtRule> {
         match &self {
             AnyCssAtRule::CssFontFaceAtRule(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_font_feature_values_at_rule(&self) -> Option<&CssFontFeatureValuesAtRule> {
+        match &self {
+            AnyCssAtRule::CssFontFeatureValuesAtRule(item) => Some(item),
             _ => None,
         }
     }
@@ -6547,6 +6692,66 @@ impl AnyCssExpression {
     pub fn as_css_parenthesized_expression(&self) -> Option<&CssParenthesizedExpression> {
         match &self {
             AnyCssExpression::CssParenthesizedExpression(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub enum AnyCssFontFamilyName {
+    CssCustomIdentifier(CssCustomIdentifier),
+    CssString(CssString),
+}
+impl AnyCssFontFamilyName {
+    pub fn as_css_custom_identifier(&self) -> Option<&CssCustomIdentifier> {
+        match &self {
+            AnyCssFontFamilyName::CssCustomIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_string(&self) -> Option<&CssString> {
+        match &self {
+            AnyCssFontFamilyName::CssString(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub enum AnyCssFontFeatureValuesBlock {
+    CssBogusBlock(CssBogusBlock),
+    CssFontFeatureValuesBlock(CssFontFeatureValuesBlock),
+}
+impl AnyCssFontFeatureValuesBlock {
+    pub fn as_css_bogus_block(&self) -> Option<&CssBogusBlock> {
+        match &self {
+            AnyCssFontFeatureValuesBlock::CssBogusBlock(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_font_feature_values_block(&self) -> Option<&CssFontFeatureValuesBlock> {
+        match &self {
+            AnyCssFontFeatureValuesBlock::CssFontFeatureValuesBlock(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub enum AnyCssFontFeatureValuesItem {
+    CssBogusFontFeatureValuesItem(CssBogusFontFeatureValuesItem),
+    CssFontFeatureValuesItem(CssFontFeatureValuesItem),
+}
+impl AnyCssFontFeatureValuesItem {
+    pub fn as_css_bogus_font_feature_values_item(&self) -> Option<&CssBogusFontFeatureValuesItem> {
+        match &self {
+            AnyCssFontFeatureValuesItem::CssBogusFontFeatureValuesItem(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_font_feature_values_item(&self) -> Option<&CssFontFeatureValuesItem> {
+        match &self {
+            AnyCssFontFeatureValuesItem::CssFontFeatureValuesItem(item) => Some(item),
             _ => None,
         }
     }
@@ -9520,6 +9725,135 @@ impl From<CssFontFaceAtRule> for SyntaxNode {
 }
 impl From<CssFontFaceAtRule> for SyntaxElement {
     fn from(n: CssFontFaceAtRule) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssFontFeatureValuesAtRule {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_FONT_FEATURE_VALUES_AT_RULE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_FONT_FEATURE_VALUES_AT_RULE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssFontFeatureValuesAtRule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssFontFeatureValuesAtRule")
+            .field(
+                "font_feature_values_token",
+                &support::DebugSyntaxResult(self.font_feature_values_token()),
+            )
+            .field("name", &support::DebugSyntaxResult(self.name()))
+            .field("block", &support::DebugSyntaxResult(self.block()))
+            .finish()
+    }
+}
+impl From<CssFontFeatureValuesAtRule> for SyntaxNode {
+    fn from(n: CssFontFeatureValuesAtRule) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssFontFeatureValuesAtRule> for SyntaxElement {
+    fn from(n: CssFontFeatureValuesAtRule) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssFontFeatureValuesBlock {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_FONT_FEATURE_VALUES_BLOCK as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_FONT_FEATURE_VALUES_BLOCK
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssFontFeatureValuesBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssFontFeatureValuesBlock")
+            .field(
+                "l_curly_token",
+                &support::DebugSyntaxResult(self.l_curly_token()),
+            )
+            .field("items", &self.items())
+            .field(
+                "r_curly_token",
+                &support::DebugSyntaxResult(self.r_curly_token()),
+            )
+            .finish()
+    }
+}
+impl From<CssFontFeatureValuesBlock> for SyntaxNode {
+    fn from(n: CssFontFeatureValuesBlock) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssFontFeatureValuesBlock> for SyntaxElement {
+    fn from(n: CssFontFeatureValuesBlock) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssFontFeatureValuesItem {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_FONT_FEATURE_VALUES_ITEM as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_FONT_FEATURE_VALUES_ITEM
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssFontFeatureValuesItem {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssFontFeatureValuesItem")
+            .field("at_token", &support::DebugSyntaxResult(self.at_token()))
+            .field("name", &support::DebugSyntaxResult(self.name()))
+            .field("block", &support::DebugSyntaxResult(self.block()))
+            .finish()
+    }
+}
+impl From<CssFontFeatureValuesItem> for SyntaxNode {
+    fn from(n: CssFontFeatureValuesItem) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssFontFeatureValuesItem> for SyntaxElement {
+    fn from(n: CssFontFeatureValuesItem) -> SyntaxElement {
         n.syntax.into()
     }
 }
@@ -13789,6 +14123,11 @@ impl From<CssFontFaceAtRule> for AnyCssAtRule {
         AnyCssAtRule::CssFontFaceAtRule(node)
     }
 }
+impl From<CssFontFeatureValuesAtRule> for AnyCssAtRule {
+    fn from(node: CssFontFeatureValuesAtRule) -> AnyCssAtRule {
+        AnyCssAtRule::CssFontFeatureValuesAtRule(node)
+    }
+}
 impl From<CssFontPaletteValuesAtRule> for AnyCssAtRule {
     fn from(node: CssFontPaletteValuesAtRule) -> AnyCssAtRule {
         AnyCssAtRule::CssFontPaletteValuesAtRule(node)
@@ -13848,6 +14187,7 @@ impl AstNode for AnyCssAtRule {
         .union(CssCounterStyleAtRule::KIND_SET)
         .union(CssDocumentAtRule::KIND_SET)
         .union(CssFontFaceAtRule::KIND_SET)
+        .union(CssFontFeatureValuesAtRule::KIND_SET)
         .union(CssFontPaletteValuesAtRule::KIND_SET)
         .union(CssImportAtRule::KIND_SET)
         .union(CssKeyframesAtRule::KIND_SET)
@@ -13868,6 +14208,7 @@ impl AstNode for AnyCssAtRule {
                 | CSS_COUNTER_STYLE_AT_RULE
                 | CSS_DOCUMENT_AT_RULE
                 | CSS_FONT_FACE_AT_RULE
+                | CSS_FONT_FEATURE_VALUES_AT_RULE
                 | CSS_FONT_PALETTE_VALUES_AT_RULE
                 | CSS_IMPORT_AT_RULE
                 | CSS_KEYFRAMES_AT_RULE
@@ -13895,6 +14236,9 @@ impl AstNode for AnyCssAtRule {
             }
             CSS_DOCUMENT_AT_RULE => AnyCssAtRule::CssDocumentAtRule(CssDocumentAtRule { syntax }),
             CSS_FONT_FACE_AT_RULE => AnyCssAtRule::CssFontFaceAtRule(CssFontFaceAtRule { syntax }),
+            CSS_FONT_FEATURE_VALUES_AT_RULE => {
+                AnyCssAtRule::CssFontFeatureValuesAtRule(CssFontFeatureValuesAtRule { syntax })
+            }
             CSS_FONT_PALETTE_VALUES_AT_RULE => {
                 AnyCssAtRule::CssFontPaletteValuesAtRule(CssFontPaletteValuesAtRule { syntax })
             }
@@ -13926,6 +14270,7 @@ impl AstNode for AnyCssAtRule {
             AnyCssAtRule::CssCounterStyleAtRule(it) => &it.syntax,
             AnyCssAtRule::CssDocumentAtRule(it) => &it.syntax,
             AnyCssAtRule::CssFontFaceAtRule(it) => &it.syntax,
+            AnyCssAtRule::CssFontFeatureValuesAtRule(it) => &it.syntax,
             AnyCssAtRule::CssFontPaletteValuesAtRule(it) => &it.syntax,
             AnyCssAtRule::CssImportAtRule(it) => &it.syntax,
             AnyCssAtRule::CssKeyframesAtRule(it) => &it.syntax,
@@ -13947,6 +14292,7 @@ impl AstNode for AnyCssAtRule {
             AnyCssAtRule::CssCounterStyleAtRule(it) => it.syntax,
             AnyCssAtRule::CssDocumentAtRule(it) => it.syntax,
             AnyCssAtRule::CssFontFaceAtRule(it) => it.syntax,
+            AnyCssAtRule::CssFontFeatureValuesAtRule(it) => it.syntax,
             AnyCssAtRule::CssFontPaletteValuesAtRule(it) => it.syntax,
             AnyCssAtRule::CssImportAtRule(it) => it.syntax,
             AnyCssAtRule::CssKeyframesAtRule(it) => it.syntax,
@@ -13970,6 +14316,7 @@ impl std::fmt::Debug for AnyCssAtRule {
             AnyCssAtRule::CssCounterStyleAtRule(it) => std::fmt::Debug::fmt(it, f),
             AnyCssAtRule::CssDocumentAtRule(it) => std::fmt::Debug::fmt(it, f),
             AnyCssAtRule::CssFontFaceAtRule(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssAtRule::CssFontFeatureValuesAtRule(it) => std::fmt::Debug::fmt(it, f),
             AnyCssAtRule::CssFontPaletteValuesAtRule(it) => std::fmt::Debug::fmt(it, f),
             AnyCssAtRule::CssImportAtRule(it) => std::fmt::Debug::fmt(it, f),
             AnyCssAtRule::CssKeyframesAtRule(it) => std::fmt::Debug::fmt(it, f),
@@ -13993,6 +14340,7 @@ impl From<AnyCssAtRule> for SyntaxNode {
             AnyCssAtRule::CssCounterStyleAtRule(it) => it.into(),
             AnyCssAtRule::CssDocumentAtRule(it) => it.into(),
             AnyCssAtRule::CssFontFaceAtRule(it) => it.into(),
+            AnyCssAtRule::CssFontFeatureValuesAtRule(it) => it.into(),
             AnyCssAtRule::CssFontPaletteValuesAtRule(it) => it.into(),
             AnyCssAtRule::CssImportAtRule(it) => it.into(),
             AnyCssAtRule::CssKeyframesAtRule(it) => it.into(),
@@ -19293,6 +19641,21 @@ impl std::fmt::Display for AnyCssExpression {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for AnyCssFontFamilyName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyCssFontFeatureValuesBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyCssFontFeatureValuesItem {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AnyCssFunction {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -19719,6 +20082,21 @@ impl std::fmt::Display for CssDocumentCustomMatcher {
     }
 }
 impl std::fmt::Display for CssFontFaceAtRule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssFontFeatureValuesAtRule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssFontFeatureValuesBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssFontFeatureValuesItem {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

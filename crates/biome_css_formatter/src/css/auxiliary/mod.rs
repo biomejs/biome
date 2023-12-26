@@ -22,6 +22,8 @@ pub(crate) mod declaration_list_block;
 pub(crate) mod declaration_or_at_rule_block;
 pub(crate) mod declaration_with_semicolon;
 pub(crate) mod document_custom_matcher;
+pub(crate) mod font_feature_values_block;
+pub(crate) mod font_feature_values_item;
 pub(crate) mod function;
 pub(crate) mod generic_delimiter;
 pub(crate) mod import_anonymous_layer;

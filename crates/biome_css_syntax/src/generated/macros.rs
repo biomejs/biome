@@ -176,6 +176,20 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssFontFaceAtRule::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_FONT_FEATURE_VALUES_AT_RULE => {
+                    let $pattern =
+                        unsafe { $crate::CssFontFeatureValuesAtRule::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_FONT_FEATURE_VALUES_BLOCK => {
+                    let $pattern =
+                        unsafe { $crate::CssFontFeatureValuesBlock::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_FONT_FEATURE_VALUES_ITEM => {
+                    let $pattern = unsafe { $crate::CssFontFeatureValuesItem::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_FONT_PALETTE_VALUES_AT_RULE => {
                     let $pattern =
                         unsafe { $crate::CssFontPaletteValuesAtRule::new_unchecked(node) };

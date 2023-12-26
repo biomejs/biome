@@ -616,6 +616,48 @@ pub fn css_font_face_at_rule(
         ],
     ))
 }
+pub fn css_font_feature_values_at_rule(
+    font_feature_values_token: SyntaxToken,
+    name: AnyCssFontFamilyName,
+    block: AnyCssFontFeatureValuesBlock,
+) -> CssFontFeatureValuesAtRule {
+    CssFontFeatureValuesAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_FONT_FEATURE_VALUES_AT_RULE,
+        [
+            Some(SyntaxElement::Token(font_feature_values_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Node(block.into_syntax())),
+        ],
+    ))
+}
+pub fn css_font_feature_values_block(
+    l_curly_token: SyntaxToken,
+    items: CssFontFeatureValuesItemList,
+    r_curly_token: SyntaxToken,
+) -> CssFontFeatureValuesBlock {
+    CssFontFeatureValuesBlock::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_FONT_FEATURE_VALUES_BLOCK,
+        [
+            Some(SyntaxElement::Token(l_curly_token)),
+            Some(SyntaxElement::Node(items.into_syntax())),
+            Some(SyntaxElement::Token(r_curly_token)),
+        ],
+    ))
+}
+pub fn css_font_feature_values_item(
+    at_token: SyntaxToken,
+    name_token: SyntaxToken,
+    block: AnyCssDeclarationListBlock,
+) -> CssFontFeatureValuesItem {
+    CssFontFeatureValuesItem::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_FONT_FEATURE_VALUES_ITEM,
+        [
+            Some(SyntaxElement::Token(at_token)),
+            Some(SyntaxElement::Token(name_token)),
+            Some(SyntaxElement::Node(block.into_syntax())),
+        ],
+    ))
+}
 pub fn css_font_palette_values_at_rule(
     font_palette_values_token: SyntaxToken,
     name: CssDashedIdentifier,

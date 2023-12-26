@@ -101,6 +101,14 @@ pub enum CssSyntaxKind {
     URL_KW,
     SRC_KW,
     FONT_PALETTE_VALUES_KW,
+    FONT_FEATURE_VALUES_KW,
+    STYLISTIC_KW,
+    HISTORICAL_FORMS_KW,
+    STYLESET_KW,
+    CHARACTER_VARIANT_KW,
+    SWASH_KW,
+    ORNAMENTS_KW,
+    ANNOTATION_KW,
     AUTO_KW,
     THIN_KW,
     MEDIUM_KW,
@@ -337,6 +345,17 @@ pub enum CssSyntaxKind {
     CSS_CONTAINER_STYLE_OR_QUERY,
     CSS_CONTAINER_STYLE_IN_PARENS,
     CSS_FONT_FACE_AT_RULE,
+    CSS_FONT_FEATURE_VALUES_AT_RULE,
+    CSS_FONT_FEATURE_VALUES_BLOCK,
+    CSS_FONT_FEATURE_VALUES_ITEM,
+    CSS_FONT_FEATURE_VALUES_ITEM_LIST,
+    CSS_FONT_FEATURE_VALUES_STYLISTIC,
+    CSS_FONT_FEATURE_VALUES_HISTORICAL_FORMS,
+    CSS_FONT_FEATURE_VALUES_STYLESET,
+    CSS_FONT_FEATURE_VALUES_CHARACTER_VARIANT,
+    CSS_FONT_FEATURE_VALUES_SWASH,
+    CSS_FONT_FEATURE_VALUES_ORNAMENTS,
+    CSS_FONT_FEATURE_VALUES_ANNOTATION,
     CSS_FONT_PALETTE_VALUES_AT_RULE,
     CSS_KEYFRAMES_AT_RULE,
     CSS_KEYFRAMES_BODY,
@@ -418,6 +437,7 @@ pub enum CssSyntaxKind {
     CSS_BOGUS_SCOPE_RANGE,
     CSS_BOGUS_URL_MODIFIER,
     CSS_BOGUS_DOCUMENT_MATCHER,
+    CSS_BOGUS_FONT_FEATURE_VALUES_ITEM,
     #[doc(hidden)]
     __LAST,
 }
@@ -467,6 +487,7 @@ impl CssSyntaxKind {
             | CSS_PSEUDO_CLASS_FUNCTION_VALUE_LIST
             | CSS_PSEUDO_VALUE_LIST
             | CSS_URL_MODIFIER_LIST
+            | CSS_FONT_FEATURE_VALUES_ITEM_LIST
             | CSS_MEDIA_QUERY_LIST
             | CSS_KEYFRAMES_ITEM_LIST
             | CSS_KEYFRAMES_SELECTOR_LIST
@@ -528,6 +549,14 @@ impl CssSyntaxKind {
             "url" => URL_KW,
             "src" => SRC_KW,
             "font-palette-values" => FONT_PALETTE_VALUES_KW,
+            "font-feature-values" => FONT_FEATURE_VALUES_KW,
+            "stylistic" => STYLISTIC_KW,
+            "historical-forms" => HISTORICAL_FORMS_KW,
+            "styleset" => STYLESET_KW,
+            "character-variant" => CHARACTER_VARIANT_KW,
+            "swash" => SWASH_KW,
+            "ornaments" => ORNAMENTS_KW,
+            "annotation" => ANNOTATION_KW,
             "auto" => AUTO_KW,
             "thin" => THIN_KW,
             "medium" => MEDIUM_KW,
@@ -740,6 +769,14 @@ impl CssSyntaxKind {
             URL_KW => "url",
             SRC_KW => "src",
             FONT_PALETTE_VALUES_KW => "font-palette-values",
+            FONT_FEATURE_VALUES_KW => "font-feature-values",
+            STYLISTIC_KW => "stylistic",
+            HISTORICAL_FORMS_KW => "historical-forms",
+            STYLESET_KW => "styleset",
+            CHARACTER_VARIANT_KW => "character-variant",
+            SWASH_KW => "swash",
+            ORNAMENTS_KW => "ornaments",
+            ANNOTATION_KW => "annotation",
             AUTO_KW => "auto",
             THIN_KW => "thin",
             MEDIUM_KW => "medium",

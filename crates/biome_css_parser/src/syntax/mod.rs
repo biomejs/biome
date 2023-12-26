@@ -363,7 +363,7 @@ pub(crate) fn parse_custom_identifier(p: &mut CssParser, context: CssLexContext)
 ///
 /// This function should only be needed in cases where the CSS specification
 /// defines a token as `<ident>` _and also_ case-sensitive. Otherwise, either
-/// `parse_identifer` or `parse_custom_identifier` should be sufficient.
+/// `parse_identifier` or `parse_custom_identifier` should be sufficient.
 #[inline]
 pub(crate) fn parse_custom_identifier_with_keywords(
     p: &mut CssParser,
