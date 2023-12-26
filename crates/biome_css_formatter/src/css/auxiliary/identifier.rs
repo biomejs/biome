@@ -1,8 +1,6 @@
-use std::borrow::Cow;
-
-use crate::prelude::*;
+use crate::{prelude::*, utils::string_utils::FormatTokenAsLowercase};
 use biome_css_syntax::{CssIdentifier, CssIdentifierFields};
-use biome_formatter::{token::string::ToAsciiLowercaseCow, write, FormatRuleWithOptions};
+use biome_formatter::{write, FormatRuleWithOptions};
 
 #[derive(Default, Debug)]
 pub(crate) struct FormatCssIdentifierOptions {
@@ -34,21 +32,7 @@ impl FormatNodeRule<CssIdentifier> for FormatCssIdentifier {
         // we always want to write units in lowercase, but all of the others
         // we want to preserve their casing.
         if self.forced_lowercase {
-            let value_token = value_token?;
-
-            let original = value_token.text_trimmed();
-            match original.to_ascii_lowercase_cow() {
-                Cow::Borrowed(_) => write![f, [value_token.format()]],
-                Cow::Owned(lowercase) => {
-                    write!(
-                        f,
-                        [format_replaced(
-                            &value_token,
-                            &dynamic_text(&lowercase, value_token.text_trimmed_range().start())
-                        )]
-                    )
-                }
-            }
+            write!(f, [FormatTokenAsLowercase::from(value_token?)])
         } else {
             write!(f, [value_token.format()])
         }

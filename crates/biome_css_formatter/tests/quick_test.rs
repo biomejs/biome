@@ -8,14 +8,15 @@ mod language {
     include!("language.rs");
 }
 
-// #[ignore]
+#[ignore]
 #[test]
 // use this test check if your snippet prints as you wish, without using a snapshot
 fn quick_test() {
     let src = r#"
-    @layer framework, override   ,    foo   , bar.baz  ;
-@layer bar.baz  ;
-
+a {
+    content: url(https://example.com/a.jpg);
+    content: url(   https://example.com/f.jpg   );
+  }
 "#;
     let parse = parse_css(src, CssParserOptions::default());
     println!("{:#?}", parse.syntax());
