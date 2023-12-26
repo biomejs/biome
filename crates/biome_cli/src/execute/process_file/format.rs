@@ -74,12 +74,12 @@ pub(crate) fn format_with_guard<'ctx>(
                     workspace_file.update_file(output)?;
                 } else {
                     if !ctx.execution.should_report_to_terminal() {
-                        ctx.push_format_stat(
-                            workspace_file.path.display().to_string(),
-                            FormatterReportFileDetail {
-                                formatted_content: Some(output.clone()),
-                            },
-                        )
+                        // ctx.push_format_stat(
+                        //     workspace_file.path.display().to_string(),
+                        //     FormatterReportFileDetail {
+                        //         formatted_content: Some(output.clone()),
+                        //     },
+                        // )
                     }
 
                     return Ok(FileStatus::Message(Message::Diff {
