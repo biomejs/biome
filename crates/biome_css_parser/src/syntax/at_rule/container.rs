@@ -80,7 +80,7 @@ fn parse_container_or_query(p: &mut CssParser) -> ParsedSyntax {
     if p.at(T![or]) {
         let m = query_in_parens.precede(p);
         p.bump(T![or]);
-        parse_container_and_query(p).ok(); // TODO handle error
+        parse_container_or_query(p).ok(); // TODO handle error
         Present(m.complete(p, CSS_CONTAINER_OR_QUERY))
     } else {
         query_in_parens

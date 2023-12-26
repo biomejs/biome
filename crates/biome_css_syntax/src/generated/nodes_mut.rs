@@ -1789,6 +1789,146 @@ impl CssString {
         )
     }
 }
+impl CssSupportsAndCondition {
+    pub fn with_left(self, element: AnyCssSupportsInParens) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_and_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_right(self, element: AnyCssSupportsAndCombinableCondition) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
+impl CssSupportsAtRule {
+    pub fn with_supports_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_condition(self, element: AnyCssSupportsCondition) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_block(self, element: AnyCssRuleListBlock) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
+impl CssSupportsConditionInParens {
+    pub fn with_l_paren_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_condition(self, element: AnyCssSupportsCondition) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_r_paren_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(Some(element.into()))),
+        )
+    }
+}
+impl CssSupportsFeatureDeclaration {
+    pub fn with_l_paren_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_declaration(self, element: CssDeclaration) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_r_paren_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(Some(element.into()))),
+        )
+    }
+}
+impl CssSupportsFeatureSelector {
+    pub fn with_selector_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_l_paren_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_selector(self, element: AnyCssSelector) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_r_paren_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(3usize..=3usize, once(Some(element.into()))),
+        )
+    }
+}
+impl CssSupportsNotCondition {
+    pub fn with_not_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_query(self, element: AnyCssSupportsInParens) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
+impl CssSupportsOrCondition {
+    pub fn with_left(self, element: AnyCssSupportsInParens) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_or_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_right(self, element: AnyCssSupportsOrCombinableCondition) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
 impl CssTypeSelector {
     pub fn with_namespace(self, element: Option<CssNamespace>) -> Self {
         Self::unwrap_cast(self.syntax.splice_slots(

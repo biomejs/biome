@@ -466,6 +466,37 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssString::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_SUPPORTS_AND_CONDITION => {
+                    let $pattern = unsafe { $crate::CssSupportsAndCondition::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_SUPPORTS_AT_RULE => {
+                    let $pattern = unsafe { $crate::CssSupportsAtRule::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_SUPPORTS_CONDITION_IN_PARENS => {
+                    let $pattern =
+                        unsafe { $crate::CssSupportsConditionInParens::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_SUPPORTS_FEATURE_DECLARATION => {
+                    let $pattern =
+                        unsafe { $crate::CssSupportsFeatureDeclaration::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_SUPPORTS_FEATURE_SELECTOR => {
+                    let $pattern =
+                        unsafe { $crate::CssSupportsFeatureSelector::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_SUPPORTS_NOT_CONDITION => {
+                    let $pattern = unsafe { $crate::CssSupportsNotCondition::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_SUPPORTS_OR_CONDITION => {
+                    let $pattern = unsafe { $crate::CssSupportsOrCondition::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_TYPE_SELECTOR => {
                     let $pattern = unsafe { $crate::CssTypeSelector::new_unchecked(node) };
                     $body

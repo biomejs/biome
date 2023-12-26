@@ -13,3 +13,4 @@ pub(crate) mod margin_at_rule;
 pub(crate) mod media_at_rule;
 pub(crate) mod page_at_rule;
 pub(crate) mod scope_at_rule;
+pub(crate) mod supports_at_rule;
