@@ -5186,8 +5186,8 @@ pub enum AnyCssAtRule {
     CssLayerAtRule(CssLayerAtRule),
     CssMediaAtRule(CssMediaAtRule),
     CssPageAtRule(CssPageAtRule),
-    CssSupportsAtRule(CssSupportsAtRule),
     CssScopeAtRule(CssScopeAtRule),
+    CssSupportsAtRule(CssSupportsAtRule),
 }
 impl AnyCssAtRule {
     pub fn as_css_bogus_at_rule(&self) -> Option<&CssBogusAtRule> {
@@ -11758,6 +11758,16 @@ impl From<CssPageAtRule> for AnyCssAtRule {
         AnyCssAtRule::CssPageAtRule(node)
     }
 }
+impl From<CssScopeAtRule> for AnyCssAtRule {
+    fn from(node: CssScopeAtRule) -> AnyCssAtRule {
+        AnyCssAtRule::CssScopeAtRule(node)
+    }
+}
+impl From<CssSupportsAtRule> for AnyCssAtRule {
+    fn from(node: CssSupportsAtRule) -> AnyCssAtRule {
+        AnyCssAtRule::CssSupportsAtRule(node)
+    }
+}
 impl AstNode for AnyCssAtRule {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = CssBogusAtRule::KIND_SET
@@ -11770,7 +11780,9 @@ impl AstNode for AnyCssAtRule {
         .union(CssKeyframesAtRule::KIND_SET)
         .union(CssLayerAtRule::KIND_SET)
         .union(CssMediaAtRule::KIND_SET)
-        .union(CssPageAtRule::KIND_SET);
+        .union(CssPageAtRule::KIND_SET)
+        .union(CssScopeAtRule::KIND_SET)
+        .union(CssSupportsAtRule::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
@@ -11831,6 +11843,8 @@ impl AstNode for AnyCssAtRule {
             AnyCssAtRule::CssLayerAtRule(it) => &it.syntax,
             AnyCssAtRule::CssMediaAtRule(it) => &it.syntax,
             AnyCssAtRule::CssPageAtRule(it) => &it.syntax,
+            AnyCssAtRule::CssScopeAtRule(it) => &it.syntax,
+            AnyCssAtRule::CssSupportsAtRule(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
@@ -11846,6 +11860,8 @@ impl AstNode for AnyCssAtRule {
             AnyCssAtRule::CssLayerAtRule(it) => it.syntax,
             AnyCssAtRule::CssMediaAtRule(it) => it.syntax,
             AnyCssAtRule::CssPageAtRule(it) => it.syntax,
+            AnyCssAtRule::CssScopeAtRule(it) => it.syntax,
+            AnyCssAtRule::CssSupportsAtRule(it) => it.syntax,
         }
     }
 }
@@ -11863,6 +11879,8 @@ impl std::fmt::Debug for AnyCssAtRule {
             AnyCssAtRule::CssLayerAtRule(it) => std::fmt::Debug::fmt(it, f),
             AnyCssAtRule::CssMediaAtRule(it) => std::fmt::Debug::fmt(it, f),
             AnyCssAtRule::CssPageAtRule(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssAtRule::CssScopeAtRule(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssAtRule::CssSupportsAtRule(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -11880,6 +11898,8 @@ impl From<AnyCssAtRule> for SyntaxNode {
             AnyCssAtRule::CssLayerAtRule(it) => it.into(),
             AnyCssAtRule::CssMediaAtRule(it) => it.into(),
             AnyCssAtRule::CssPageAtRule(it) => it.into(),
+            AnyCssAtRule::CssScopeAtRule(it) => it.into(),
+            AnyCssAtRule::CssSupportsAtRule(it) => it.into(),
         }
     }
 }
