@@ -4,7 +4,6 @@ use crate::execute::process_file::{
     DiffKind, FileResult, FileStatus, Message, SharedTraversalOptions,
 };
 use crate::execute::TraversalMode;
-use crate::FormatterReportFileDetail;
 use biome_diagnostics::{category, DiagnosticExt};
 use biome_service::workspace::RuleCategories;
 use std::path::Path;
