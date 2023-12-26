@@ -10,8 +10,8 @@ mod layer;
 mod media;
 mod page;
 mod parse_error;
-mod supports;
 mod scope;
+mod supports;
 
 use crate::parser::CssParser;
 use crate::syntax::at_rule::charset::{is_at_charset_at_rule, parse_charset_at_rule};
@@ -91,7 +91,7 @@ pub(crate) fn parse_any_at_rule(p: &mut CssParser) -> ParsedSyntax {
         parse_scope_at_rule(p)
     } else if is_at_supports_at_rule(p) {
         parse_supports_at_rule(p)
-    }  else {
+    } else {
         Absent
     }
 }
