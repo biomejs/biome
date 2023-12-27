@@ -1067,8 +1067,11 @@ fn can_group_expression_argument(
                     .map_or(true, |any_type| match any_type {
                         AnyTsReturnType::AnyTsType(AnyTsType::TsReferenceType(_)) => match &body {
                             AnyJsFunctionBody::JsFunctionBody(body) => {
-                                body.statements().iter().any(|statement| {
-                                    !matches!(statement, AnyJsStatement::JsEmptyStatement(_))
+                                body.statements().iter().any(|statement| match statement {
+                                    AnyJsStatement::JsEmptyStatement(s) => {
+                                        comments.has_comments(s.syntax())
+                                    }
+                                    _ => true,
                                 }) || comments.has_dangling_comments(body.syntax())
                             }
                             _ => false,
