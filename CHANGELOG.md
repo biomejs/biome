@@ -87,6 +87,8 @@ Biome now scores 97% compatibility with Prettier and features more than 180 lint
 
 - Fix [#1220](https://github.com/biomejs/biome/issues/1220). Avoid duplicating comments in type unions for mapped, empty object, and empty tuple types. [#1240](https://github.com/biomejs/biome/pull/1240) Contributed by @faultyserver
 
+- Fix [#1171](https://github.com/biomejs/biome/issues/1171). Correctly format empty statement with comment inside arrow body when used as single argument in call expression. Contributed by @kalleep
+
 ### JavaScript APIs
 
 ### Linter
