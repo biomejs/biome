@@ -1,4 +1,6 @@
 @container name  (width <= 500px) {  }
+@container name  (width <= 500px) or (width <= 500px) or (width <= 500px) or (width <= 500px)  {  }
+@container name  (width <= 500px) and (width <= 500px) and (width <= 500px) and (width <= 500px)  {  }
 @container name  (width <= 500px) and ((width >= 600px) or (inline-width >= 300em)) {  }
 @container name  (width <= 500px) and ((width >= 600px) or (not (inline-width >= 300em))) {  }
 @container name  (width <= 500px) and ((width >= 600px) or (not (inline-width >= 300em))) and (width <= 500px) {  }

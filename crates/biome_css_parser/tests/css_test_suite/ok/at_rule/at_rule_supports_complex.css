@@ -1,0 +1,6 @@
+@supports (display: flex) {  }
+@supports (display: flex) or (display: flex) or (display: flex) or (display: flex)  {  }
+@supports (display: flex) and (display: flex) and (display: flex) and (display: flex)  {  }
+@supports (display: flex) and (selector(:focus-visible) or ((animation-name: test))) {  }
+@supports (display: flex) and (selector(:focus-visible) or (not ((animation-name: test)))) {  }
+@supports (display: flex) and (selector(:focus-visible) or (not ((animation-name: test)))) and (display: flex) {  }

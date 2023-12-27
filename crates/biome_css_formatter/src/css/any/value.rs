@@ -13,8 +13,9 @@ impl FormatRule<AnyCssValue> for FormatAnyCssValue {
             AnyCssValue::CssNumber(node) => node.format().fmt(f),
             AnyCssValue::AnyCssDimension(node) => node.format().fmt(f),
             AnyCssValue::CssRatio(node) => node.format().fmt(f),
-            AnyCssValue::CssAnyFunction(node) => node.format().fmt(f),
+            AnyCssValue::AnyCssFunction(node) => node.format().fmt(f),
             AnyCssValue::CssCustomProperty(node) => node.format().fmt(f),
+            AnyCssValue::CssColor(node) => node.format().fmt(f),
         }
     }
 }

@@ -45,6 +45,7 @@ CssBogusPseudoElement = SyntaxElement*
 CssBogusAtRule = SyntaxElement*
 CssBogusLayer = SyntaxElement*
 CssBogusBlock =  SyntaxElement*
+CssBogusScopeRange =  SyntaxElement*
 CssBogusKeyframesItem =  SyntaxElement*
 CssBogusRule =  SyntaxElement*
 CssBogusParameter = SyntaxElement*
@@ -476,6 +477,8 @@ AnyCssAtRule =
 	| CssMediaAtRule
 	| CssPageAtRule
 	| CssLayerAtRule
+	| CssSupportsAtRule
+	| CssScopeAtRule
 	| CssBogusAtRule
 
 // @charset "UTF-8";
@@ -907,7 +910,7 @@ AnyCssQueryFeatureValue =
 	| AnyCssDimension
 	| CssIdentifier
 	| CssRatio
-	| CssAnyFunction
+	| AnyCssFunction
 
 // https://drafts.csswg.org/css-page/#at-ruledef-page
 // @page = @page <page-selector-list>? { <declaration-rule-list> }
@@ -1031,6 +1034,128 @@ CssLayerReferenceList = (CssLayerNameList (',' CssLayerNameList)*)
 //                   ^^^^^^^
 CssLayerNameList = (CssIdentifier ('.' CssIdentifier)*)
 
+// https://drafts.csswg.org/css-conditional-3/#at-supports
+// https://drafts.csswg.org/css-conditional-4/#at-supports-ext
+// @supports <supports-condition> {
+//  <rule-list>
+// }
+// <supports-condition> = not <supports-in-parens>
+//                     | <supports-in-parens> [ and <supports-in-parens> ]*
+//                     | <supports-in-parens> [ or <supports-in-parens> ]*
+// <supports-in-parens> = ( <supports-condition> ) | <supports-feature> | <general-enclosed>
+// <supports-feature> = <supports-selector-fn> | <supports-decl>
+// <supports-selector-fn> = selector( <complex-selector> )
+// <supports-decl> = ( <declaration> )
+// <general-enclosed> branch must only be chosen if the input does not match either of the preceding branches.
+// <general-enclosed> exists to allow for future expansion of the grammar in a reasonably compatible way.
+
+// @supports (display: grid) {}
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssSupportsAtRule =
+	'supports'
+	condition: AnyCssSupportsCondition
+	block: AnyCssRuleListBlock
+
+AnyCssSupportsCondition =
+	CssSupportsNotCondition
+	| CssSupportsOrCondition
+	| CssSupportsAndCondition
+	| AnyCssSupportsInParens
+
+// @supports not (display: grid) {}
+//           ^^^^^^^^^^^^^^^^^^^
+CssSupportsNotCondition =
+	'not'
+	query: AnyCssSupportsInParens
+
+// @supports (transition-property: color) and (animation-name: foo) {}
+//           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssSupportsAndCondition =
+	left: AnyCssSupportsInParens
+	'and'
+	right: AnyCssSupportsAndCombinableCondition
+
+// @supports (transition-property: color) and ((animation-name: foo) or (display: flex)) {}
+//           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AnyCssSupportsAndCombinableCondition =
+	CssSupportsAndCondition
+	| AnyCssSupportsInParens
+
+// @supports (transition-property: color) or (animation-name: foo) {}
+//           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssSupportsOrCondition =
+	left: AnyCssSupportsInParens
+	'or'
+	right: AnyCssSupportsOrCombinableCondition
+
+// @supports (transition-property: color) or ((animation-name: foo) and (display: flex)) {}
+//           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AnyCssSupportsOrCombinableCondition =
+	CssSupportsOrCondition
+	| AnyCssSupportsInParens
+
+AnyCssSupportsInParens =
+	CssSupportsConditionInParens
+	| CssSupportsFeatureDeclaration
+	| CssSupportsFeatureSelector
+	| CssSimpleFunction
+	| AnyCssValue // general-enclosed
+
+// @supports (transition-property: color) or (not (animation-name: foo)) {}
+//                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssSupportsConditionInParens =
+	'('
+	condition: AnyCssSupportsCondition
+	')'
+
+// @supports not (display: flex) {}
+// 				       ^^^^^^^^^^^^^^^
+CssSupportsFeatureDeclaration =
+	'('
+	declaration: CssDeclaration
+	')'
+
+// @supports selector(:focus-visible) { }
+// 				   ^^^^^^^^^^^^^^^^^^^^^^^^
+CssSupportsFeatureSelector =
+	'selector'
+	'('
+	selector: AnyCssSelector
+	')'
+
+// https://drafts.csswg.org/css-cascade-6/#at-ruledef-scope
+// @scope [(<scope-start>)]? [to (<scope-end>)]? {
+//     <rule-list>
+//   }
+
+CssScopeAtRule =
+	'scope'
+	range: AnyCssScopeRange?
+	block: AnyCssRuleListBlock
+
+AnyCssScopeRange =
+	CssScopeRangeStart
+	| CssScopeRangeEnd
+	| CssScopeRangeInterval
+	| CssBogusScopeRange
+
+CssScopeRangeStart =
+	start: CssScopeEdge
+
+CssScopeRangeEnd =
+	'to'
+	end: CssScopeEdge
+
+CssScopeRangeInterval =
+	start: CssScopeEdge
+	'to'
+	end: CssScopeEdge
+
+CssScopeEdge =
+	'('
+	selectors: CssSelectorList
+	')'
+
 ///////////////
 // AUXILIARY
 ///////////////
@@ -1041,8 +1166,9 @@ AnyCssValue =
 	| CssNumber
 	| AnyCssDimension
 	| CssRatio
-	| CssAnyFunction
+	| AnyCssFunction
 	| CssCustomProperty
+	| CssColor
 
 
 // 10px
@@ -1066,8 +1192,9 @@ CssRatio =
 	denominator: CssNumber
 
 
-CssAnyFunction =
+AnyCssFunction =
 	CssSimpleFunction
+	| CssUrlFunction
 
 // content: counter(section);
 // 					^^^^^^^^^^^^^^^^
@@ -1076,6 +1203,13 @@ CssSimpleFunction =
 	'('
 	items: CssParameterList
 	')'
+
+CssUrlFunction = 'url' '(' AnyCssUrlValue? ')'
+
+AnyCssUrlValue =
+	CssUrlValueRaw
+	| CssString
+
 
 CssVarFunction =
 	'var'
@@ -1102,8 +1236,33 @@ CssParameterList = CssParameter (',' CssParameter)* ','?
 //			    ^^^
 // repeating-radial-gradient(red, yellow 10%, green 15%);
 //                                ^^^^^^^^^^
-CssParameter = CssComponentValueList
+CssParameter = AnyCssExpression
+
+AnyCssExpression =
+	CssBinaryExpression
+	| CssParenthesizedExpression
+	| CssListOfComponentValuesExpression
+
+CssListOfComponentValuesExpression = CssComponentValueList
+
+CssBinaryExpression =
+	left: AnyCssExpression
+	operator_token: (
+		'+' | '-' | '*' | '/'
+	)
+	right: AnyCssExpression
+
+
+CssParenthesizedExpression =
+	'(' expression: AnyCssExpression? ')'
+
+// #fff
+// ^^^^
+CssColor =
+	'#'
+	value:'css_color_literal'
 
 CssIdentifier = value: 'ident'
 CssString = value: 'css_string_literal'
 CssNumber = value: 'css_number_literal'
+CssUrlValueRaw = value: 'css_url_value_raw_literal'

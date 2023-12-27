@@ -5,6 +5,6 @@ pub(crate) struct FormatCssLayerNameList;
 impl FormatRule<CssLayerNameList> for FormatCssLayerNameList {
     type Context = CssFormatContext;
     fn fmt(&self, node: &CssLayerNameList, f: &mut CssFormatter) -> FormatResult<()> {
-        format_verbatim_node(node.syntax()).fmt(f)
+        f.join().entries(node.format_separated(".")).finish()
     }
 }

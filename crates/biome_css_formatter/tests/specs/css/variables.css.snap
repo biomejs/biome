@@ -66,10 +66,10 @@ Line width: 80
 
 ```css
 .foo {
-    --prop: 10px;
-    prop1: var(--prop);
-    prop2: var(--my-var, --my-background, pink);
-    prop3: calc(var(--prop) * 1px);
+	--prop: 10px;
+	prop1: var(--prop);
+	prop2: var(--my-var, --my-background, pink);
+	prop3: calc(var(--prop) * 1px);
 }
 
 .bar {

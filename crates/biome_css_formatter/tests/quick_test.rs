@@ -13,12 +13,10 @@ mod language {
 // use this test check if your snippet prints as you wish, without using a snapshot
 fn quick_test() {
     let src = r#"
-    @charset "UTF-8";
-@charset "iso-8859-15";
-@charset     "UTF-8";
-@charset "UTF-8";
-
-@charset "any-string-is-okay";
+a {
+    content: url(https://example.com/a.jpg);
+    content: url(   https://example.com/f.jpg   );
+  }
 "#;
     let parse = parse_css(src, CssParserOptions::default());
     println!("{:#?}", parse.syntax());

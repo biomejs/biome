@@ -164,6 +164,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "x",
         // flex units
         "fr",
+        "url",
         // page at rule
         "page",
         "left",
@@ -188,6 +189,11 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "right-bottom",
         // layer at rule
         "layer",
+        // scope at rule
+        "scope",
+        //
+        "supports",
+        "selector",
         //
         "font-face",
         // Don't add to the end of this list, add to the end of the list in
@@ -198,6 +204,8 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_NUMBER_LITERAL",
         "CSS_CUSTOM_PROPERTY",
         "CSS_SPACE_LITERAL",
+        "CSS_URL_VALUE_RAW_LITERAL",
+        "CSS_COLOR_LITERAL",
     ],
     tokens: &[
         "ERROR_TOKEN",
@@ -278,6 +286,12 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_ATTRIBUTE_NAME",
         "CSS_ATTRIBUTE_MATCHER",
         "CSS_ATTRIBUTE_MATCHER_VALUE",
+        "CSS_PARENTHESIZED_EXPRESSION",
+        "CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION",
+        "CSS_BINARY_EXPRESSION",
+        "CSS_URL_VALUE_RAW",
+        "CSS_URL_FUNCTION",
+        "CSS_COLOR",
         // At rule nodes
         "CSS_AT_RULE",
         "CSS_CHARSET_AT_RULE",
@@ -335,6 +349,18 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_LAYER_REFERENCE_LIST",
         "CSS_LAYER_NAME_LIST",
         "CSS_LAYER_DECLARATION",
+        "CSS_SUPPORTS_AT_RULE",
+        "CSS_SUPPORTS_NOT_CONDITION",
+        "CSS_SUPPORTS_AND_CONDITION",
+        "CSS_SUPPORTS_OR_CONDITION",
+        "CSS_SUPPORTS_CONDITION_IN_PARENS",
+        "CSS_SUPPORTS_FEATURE_DECLARATION",
+        "CSS_SUPPORTS_FEATURE_SELECTOR",
+        "CSS_SCOPE_AT_RULE",
+        "CSS_SCOPE_RANGE_START",
+        "CSS_SCOPE_RANGE_END",
+        "CSS_SCOPE_RANGE_INTERVAL",
+        "CSS_SCOPE_EDGE",
         // Bogus nodes
         "CSS_BOGUS",
         "CSS_BOGUS_BLOCK",
@@ -351,5 +377,6 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_BOGUS_COMPONENT_VALUE",
         "CSS_BOGUS_PARAMETER",
         "CSS_BOGUS_MEDIA_QUERY",
+        "CSS_BOGUS_SCOPE_RANGE",
     ],
 };

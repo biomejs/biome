@@ -14,5 +14,6 @@ pub(crate) mod bogus_parameter;
 pub(crate) mod bogus_pseudo_class;
 pub(crate) mod bogus_pseudo_element;
 pub(crate) mod bogus_rule;
+pub(crate) mod bogus_scope_range;
 pub(crate) mod bogus_selector;
 pub(crate) mod bogus_sub_selector;
