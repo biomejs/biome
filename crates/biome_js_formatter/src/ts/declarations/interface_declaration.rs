@@ -16,7 +16,6 @@ impl FormatNodeRule<TsInterfaceDeclaration> for FormatTsInterfaceDeclaration {
             members,
             l_curly_token,
             r_curly_token,
-            ts_type_empty_parameters,
         } = node.as_fields();
 
         let l_curly_token = l_curly_token?;
@@ -41,10 +40,6 @@ impl FormatNodeRule<TsInterfaceDeclaration> for FormatTsInterfaceDeclaration {
                     f,
                     [type_parameters.format().with_options(type_parameter_group)]
                 )?;
-            }
-
-            if let Some(empty_type_params) = &ts_type_empty_parameters {
-                write!(f, [empty_type_params.format()])?;
             }
 
             Ok(())

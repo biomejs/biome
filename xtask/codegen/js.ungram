@@ -1736,7 +1736,7 @@ TsReferenceType =
 TsTypeAliasDeclaration =
 	'type'
 	binding_identifier: TsIdentifierBinding
-	type_parameters: TsTypeParameters? | TsTypeEmptyParameters?
+	type_parameters: TsTypeParameters?
 	'='
 	ty: AnyTsType
 	';'?
@@ -1951,12 +1951,6 @@ TsTypeParameters =
 
 TsTypeParameterList = (TsTypeParameter (',' TsTypeParameter)* ','?)
 
-// interface Foo<> {}
-//              ^^
-TsTypeEmptyParameters =
-	'<'
-	'>'
-
 // type A<B extends string = "1"> = { b: B }
 //        ^^^^^^^^^^^^^^^^^^^^^^
 TsTypeParameter =
@@ -1988,7 +1982,7 @@ TsObjectType = '{' members: TsTypeMemberList '}'
 TsInterfaceDeclaration =
 	'interface'
 	id: TsIdentifierBinding
-	type_parameters: TsTypeParameters? | TsTypeEmptyParameters?
+	type_parameters: TsTypeParameters?
 	extends_clause: TsExtendsClause?
 	'{'
 	members: TsTypeMemberList

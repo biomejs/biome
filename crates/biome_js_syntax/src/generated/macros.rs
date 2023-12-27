@@ -1195,10 +1195,6 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::TsTypeConstraintClause::new_unchecked(node) };
                     $body
                 }
-                $crate::JsSyntaxKind::TS_TYPE_EMPTY_PARAMETERS => {
-                    let $pattern = unsafe { $crate::TsTypeEmptyParameters::new_unchecked(node) };
-                    $body
-                }
                 $crate::JsSyntaxKind::TS_TYPE_OPERATOR_TYPE => {
                     let $pattern = unsafe { $crate::TsTypeOperatorType::new_unchecked(node) };
                     $body

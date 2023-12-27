@@ -1,0 +1,142 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 212
+info: ts/declaration/interface.ts
+---
+
+# Input
+
+```ts
+interface A {}
+interface B extends A /** comment **/ {
+    something: string
+}
+
+
+interface C<Foo, Bar, Loreum, Ipsum, ItShouldBeLongEnoughToCoverSomeEdgeCases, But, Maybe, Not> extends B {
+    something: string
+}
+
+// @ts-ignore
+interface D extends B<string, symbol>, F<string, symbol>, G<string, number, symbol>, H<string, number, symbol> {
+    something1: string,
+    something2: string,
+    something3: string,
+    something4: string,
+    something5: string,
+}
+// @ts-ignore
+interface D extends B<string, symbol>, F<string, symbol> {
+
+}
+
+interface Wrong {
+	aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa;
+	ppppppp: ppppppp
+}
+
+f(() => {
+	interface Wrong {
+		aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa;
+		ppppppp: ppppppp
+	}
+});
+
+x.y(() => {
+	interface Wrong {
+		a: {
+			b: string;
+		};
+		p: {
+			q: string;
+		};
+	}
+});
+
+interface A<             >{}
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing comma: All
+Semicolons: Always
+Arrow parentheses: Always
+Bracket spacing: true
+Bracket same line: false
+-----
+
+```ts
+interface A {}
+interface B extends A /** comment **/ {
+	something: string;
+}
+
+interface C<
+	Foo,
+	Bar,
+	Loreum,
+	Ipsum,
+	ItShouldBeLongEnoughToCoverSomeEdgeCases,
+	But,
+	Maybe,
+	Not,
+> extends B {
+	something: string;
+}
+
+// @ts-ignore
+interface D
+	extends B<string, symbol>,
+		F<string, symbol>,
+		G<string, number, symbol>,
+		H<string, number, symbol> {
+	something1: string;
+	something2: string;
+	something3: string;
+	something4: string;
+	something5: string;
+}
+// @ts-ignore
+interface D extends B<string, symbol>, F<string, symbol> {}
+
+interface Wrong {
+	aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa;
+	ppppppp: ppppppp;
+}
+
+f(() => {
+	interface Wrong {
+		aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa;
+		ppppppp: ppppppp;
+	}
+});
+
+x.y(() => {
+	interface Wrong {
+		a: {
+			b: string;
+		};
+		p: {
+			q: string;
+		};
+	}
+});
+
+interface A<             >{}
+```
+
+

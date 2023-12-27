@@ -10623,7 +10623,6 @@ impl TsInterfaceDeclaration {
             interface_token: self.interface_token(),
             id: self.id(),
             type_parameters: self.type_parameters(),
-            ts_type_empty_parameters: self.ts_type_empty_parameters(),
             extends_clause: self.extends_clause(),
             l_curly_token: self.l_curly_token(),
             members: self.members(),
@@ -10639,20 +10638,17 @@ impl TsInterfaceDeclaration {
     pub fn type_parameters(&self) -> Option<TsTypeParameters> {
         support::node(&self.syntax, 2usize)
     }
-    pub fn ts_type_empty_parameters(&self) -> Option<TsTypeEmptyParameters> {
+    pub fn extends_clause(&self) -> Option<TsExtendsClause> {
         support::node(&self.syntax, 3usize)
     }
-    pub fn extends_clause(&self) -> Option<TsExtendsClause> {
-        support::node(&self.syntax, 4usize)
-    }
     pub fn l_curly_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 5usize)
+        support::required_token(&self.syntax, 4usize)
     }
     pub fn members(&self) -> TsTypeMemberList {
-        support::list(&self.syntax, 6usize)
+        support::list(&self.syntax, 5usize)
     }
     pub fn r_curly_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 7usize)
+        support::required_token(&self.syntax, 6usize)
     }
 }
 #[cfg(feature = "serde")]
@@ -10669,7 +10665,6 @@ pub struct TsInterfaceDeclarationFields {
     pub interface_token: SyntaxResult<SyntaxToken>,
     pub id: SyntaxResult<TsIdentifierBinding>,
     pub type_parameters: Option<TsTypeParameters>,
-    pub ts_type_empty_parameters: Option<TsTypeEmptyParameters>,
     pub extends_clause: Option<TsExtendsClause>,
     pub l_curly_token: SyntaxResult<SyntaxToken>,
     pub members: TsTypeMemberList,
@@ -12811,7 +12806,6 @@ impl TsTypeAliasDeclaration {
             type_token: self.type_token(),
             binding_identifier: self.binding_identifier(),
             type_parameters: self.type_parameters(),
-            ts_type_empty_parameters: self.ts_type_empty_parameters(),
             eq_token: self.eq_token(),
             ty: self.ty(),
             semicolon_token: self.semicolon_token(),
@@ -12826,17 +12820,14 @@ impl TsTypeAliasDeclaration {
     pub fn type_parameters(&self) -> Option<TsTypeParameters> {
         support::node(&self.syntax, 2usize)
     }
-    pub fn ts_type_empty_parameters(&self) -> Option<TsTypeEmptyParameters> {
-        support::node(&self.syntax, 3usize)
-    }
     pub fn eq_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 4usize)
+        support::required_token(&self.syntax, 3usize)
     }
     pub fn ty(&self) -> SyntaxResult<AnyTsType> {
-        support::required_node(&self.syntax, 5usize)
+        support::required_node(&self.syntax, 4usize)
     }
     pub fn semicolon_token(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, 6usize)
+        support::token(&self.syntax, 5usize)
     }
 }
 #[cfg(feature = "serde")]
@@ -12853,7 +12844,6 @@ pub struct TsTypeAliasDeclarationFields {
     pub type_token: SyntaxResult<SyntaxToken>,
     pub binding_identifier: SyntaxResult<TsIdentifierBinding>,
     pub type_parameters: Option<TsTypeParameters>,
-    pub ts_type_empty_parameters: Option<TsTypeEmptyParameters>,
     pub eq_token: SyntaxResult<SyntaxToken>,
     pub ty: SyntaxResult<AnyTsType>,
     pub semicolon_token: Option<SyntaxToken>,
@@ -13087,47 +13077,6 @@ impl Serialize for TsTypeConstraintClause {
 pub struct TsTypeConstraintClauseFields {
     pub extends_token: SyntaxResult<SyntaxToken>,
     pub ty: SyntaxResult<AnyTsType>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
-pub struct TsTypeEmptyParameters {
-    pub(crate) syntax: SyntaxNode,
-}
-impl TsTypeEmptyParameters {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> TsTypeEmptyParametersFields {
-        TsTypeEmptyParametersFields {
-            l_angle_token: self.l_angle_token(),
-            r_angle_token: self.r_angle_token(),
-        }
-    }
-    pub fn l_angle_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
-    }
-    pub fn r_angle_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 1usize)
-    }
-}
-#[cfg(feature = "serde")]
-impl Serialize for TsTypeEmptyParameters {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[cfg_attr(feature = "serde", derive(Serialize))]
-pub struct TsTypeEmptyParametersFields {
-    pub l_angle_token: SyntaxResult<SyntaxToken>,
-    pub r_angle_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct TsTypeOperatorType {
@@ -26720,10 +26669,6 @@ impl std::fmt::Debug for TsInterfaceDeclaration {
                 &support::DebugOptionalElement(self.type_parameters()),
             )
             .field(
-                "ts_type_empty_parameters",
-                &support::DebugOptionalElement(self.ts_type_empty_parameters()),
-            )
-            .field(
                 "extends_clause",
                 &support::DebugOptionalElement(self.extends_clause()),
             )
@@ -28886,10 +28831,6 @@ impl std::fmt::Debug for TsTypeAliasDeclaration {
                 "type_parameters",
                 &support::DebugOptionalElement(self.type_parameters()),
             )
-            .field(
-                "ts_type_empty_parameters",
-                &support::DebugOptionalElement(self.ts_type_empty_parameters()),
-            )
             .field("eq_token", &support::DebugSyntaxResult(self.eq_token()))
             .field("ty", &support::DebugSyntaxResult(self.ty()))
             .field(
@@ -29130,51 +29071,6 @@ impl From<TsTypeConstraintClause> for SyntaxNode {
 }
 impl From<TsTypeConstraintClause> for SyntaxElement {
     fn from(n: TsTypeConstraintClause) -> SyntaxElement {
-        n.syntax.into()
-    }
-}
-impl AstNode for TsTypeEmptyParameters {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(TS_TYPE_EMPTY_PARAMETERS as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == TS_TYPE_EMPTY_PARAMETERS
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for TsTypeEmptyParameters {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TsTypeEmptyParameters")
-            .field(
-                "l_angle_token",
-                &support::DebugSyntaxResult(self.l_angle_token()),
-            )
-            .field(
-                "r_angle_token",
-                &support::DebugSyntaxResult(self.r_angle_token()),
-            )
-            .finish()
-    }
-}
-impl From<TsTypeEmptyParameters> for SyntaxNode {
-    fn from(n: TsTypeEmptyParameters) -> SyntaxNode {
-        n.syntax
-    }
-}
-impl From<TsTypeEmptyParameters> for SyntaxElement {
-    fn from(n: TsTypeEmptyParameters) -> SyntaxElement {
         n.syntax.into()
     }
 }
@@ -38917,11 +38813,6 @@ impl std::fmt::Display for TsTypeAssertionExpression {
     }
 }
 impl std::fmt::Display for TsTypeConstraintClause {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
-impl std::fmt::Display for TsTypeEmptyParameters {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

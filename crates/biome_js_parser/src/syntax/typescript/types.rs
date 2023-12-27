@@ -203,13 +203,8 @@ pub(crate) fn parse_ts_type_parameters(p: &mut JsParser, context: TypeContext) -
     let m = p.start();
     p.bump(T![<]);
 
-    if p.at(T![>]) {
-        if context.is_in_type_or_interface_declaration() {
-            p.bump(T![>]);
-            return Present(m.complete(p, TS_TYPE_EMPTY_PARAMETERS));
-        } else {
-            p.error(expected_ts_type_parameter(p, p.cur_range()));
-        }
+    if p.at(T![>]) && !context.is_in_type_or_interface_declaration() {
+        p.error(expected_ts_type_parameter(p, p.cur_range()));
     }
 
     TsTypeParameterList(context).parse_list(p);

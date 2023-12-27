@@ -4883,34 +4883,28 @@ impl TsInterfaceDeclaration {
             once(element.map(|element| element.into_syntax().into())),
         ))
     }
-    pub fn with_ts_type_empty_parameters(self, element: Option<TsTypeEmptyParameters>) -> Self {
-        Self::unwrap_cast(self.syntax.splice_slots(
-            3usize..=3usize,
-            once(element.map(|element| element.into_syntax().into())),
-        ))
-    }
     pub fn with_extends_clause(self, element: Option<TsExtendsClause>) -> Self {
         Self::unwrap_cast(self.syntax.splice_slots(
-            4usize..=4usize,
+            3usize..=3usize,
             once(element.map(|element| element.into_syntax().into())),
         ))
     }
     pub fn with_l_curly_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(5usize..=5usize, once(Some(element.into()))),
+                .splice_slots(4usize..=4usize, once(Some(element.into()))),
         )
     }
     pub fn with_members(self, element: TsTypeMemberList) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(6usize..=6usize, once(Some(element.into_syntax().into()))),
+                .splice_slots(5usize..=5usize, once(Some(element.into_syntax().into()))),
         )
     }
     pub fn with_r_curly_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(7usize..=7usize, once(Some(element.into()))),
+                .splice_slots(6usize..=6usize, once(Some(element.into()))),
         )
     }
 }
@@ -5828,28 +5822,22 @@ impl TsTypeAliasDeclaration {
             once(element.map(|element| element.into_syntax().into())),
         ))
     }
-    pub fn with_ts_type_empty_parameters(self, element: Option<TsTypeEmptyParameters>) -> Self {
-        Self::unwrap_cast(self.syntax.splice_slots(
-            3usize..=3usize,
-            once(element.map(|element| element.into_syntax().into())),
-        ))
-    }
     pub fn with_eq_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(4usize..=4usize, once(Some(element.into()))),
+                .splice_slots(3usize..=3usize, once(Some(element.into()))),
         )
     }
     pub fn with_ty(self, element: AnyTsType) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(5usize..=5usize, once(Some(element.into_syntax().into()))),
+                .splice_slots(4usize..=4usize, once(Some(element.into_syntax().into()))),
         )
     }
     pub fn with_semicolon_token(self, element: Option<SyntaxToken>) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(6usize..=6usize, once(element.map(|element| element.into()))),
+                .splice_slots(5usize..=5usize, once(element.map(|element| element.into()))),
         )
     }
 }
@@ -5950,20 +5938,6 @@ impl TsTypeConstraintClause {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
-        )
-    }
-}
-impl TsTypeEmptyParameters {
-    pub fn with_l_angle_token(self, element: SyntaxToken) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(0usize..=0usize, once(Some(element.into()))),
-        )
-    }
-    pub fn with_r_angle_token(self, element: SyntaxToken) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(1usize..=1usize, once(Some(element.into()))),
         )
     }
 }
