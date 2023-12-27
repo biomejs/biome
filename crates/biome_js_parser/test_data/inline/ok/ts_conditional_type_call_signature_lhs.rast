@@ -22,7 +22,6 @@ JsModule {
                 ],
                 r_angle_token: R_ANGLE@8..10 ">" [] [Whitespace(" ")],
             },
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@10..12 "=" [] [Whitespace(" ")],
             ty: TsConditionalType {
                 check_type: TsReferenceType {
@@ -136,9 +135,8 @@ JsModule {
             2: (empty)
             3: (empty)
         2: R_ANGLE@8..10 ">" [] [Whitespace(" ")]
-      3: (empty)
-      4: EQ@10..12 "=" [] [Whitespace(" ")]
-      5: TS_CONDITIONAL_TYPE@12..91
+      3: EQ@10..12 "=" [] [Whitespace(" ")]
+      4: TS_CONDITIONAL_TYPE@12..91
         0: TS_REFERENCE_TYPE@12..14
           0: JS_REFERENCE_IDENTIFIER@12..14
             0: IDENT@12..14 "V" [] [Whitespace(" ")]
@@ -198,5 +196,5 @@ JsModule {
           0: JS_REFERENCE_IDENTIFIER@83..91
             0: IDENT@83..91 "Function" [] []
           1: (empty)
-      6: SEMICOLON@91..92 ";" [] []
+      5: SEMICOLON@91..92 ";" [] []
   4: EOF@92..93 "" [Newline("\n")] []

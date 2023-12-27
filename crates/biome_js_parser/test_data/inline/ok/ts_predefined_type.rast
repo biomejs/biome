@@ -9,7 +9,6 @@ JsModule {
                 name_token: IDENT@5..7 "A" [] [Whitespace(" ")],
             },
             type_parameters: missing (optional),
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@7..9 "=" [] [Whitespace(" ")],
             ty: TsAnyType {
                 any_token: ANY_KW@9..12 "any" [] [],
@@ -22,7 +21,6 @@ JsModule {
                 name_token: IDENT@18..20 "B" [] [Whitespace(" ")],
             },
             type_parameters: missing (optional),
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@20..22 "=" [] [Whitespace(" ")],
             ty: TsNumberType {
                 number_token: NUMBER_KW@22..28 "number" [] [],
@@ -35,7 +33,6 @@ JsModule {
                 name_token: IDENT@35..37 "C" [] [Whitespace(" ")],
             },
             type_parameters: missing (optional),
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@37..39 "=" [] [Whitespace(" ")],
             ty: TsNonPrimitiveType {
                 object_token: OBJECT_KW@39..45 "object" [] [],
@@ -48,7 +45,6 @@ JsModule {
                 name_token: IDENT@52..54 "D" [] [Whitespace(" ")],
             },
             type_parameters: missing (optional),
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@54..56 "=" [] [Whitespace(" ")],
             ty: TsBooleanType {
                 boolean_token: BOOLEAN_KW@56..63 "boolean" [] [],
@@ -61,7 +57,6 @@ JsModule {
                 name_token: IDENT@70..72 "E" [] [Whitespace(" ")],
             },
             type_parameters: missing (optional),
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@72..74 "=" [] [Whitespace(" ")],
             ty: TsBigintType {
                 bigint_token: BIGINT_KW@74..80 "bigint" [] [],
@@ -74,7 +69,6 @@ JsModule {
                 name_token: IDENT@87..89 "F" [] [Whitespace(" ")],
             },
             type_parameters: missing (optional),
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@89..91 "=" [] [Whitespace(" ")],
             ty: TsStringType {
                 string_token: STRING_KW@91..97 "string" [] [],
@@ -87,7 +81,6 @@ JsModule {
                 name_token: IDENT@104..106 "G" [] [Whitespace(" ")],
             },
             type_parameters: missing (optional),
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@106..108 "=" [] [Whitespace(" ")],
             ty: TsSymbolType {
                 symbol_token: SYMBOL_KW@108..114 "symbol" [] [],
@@ -100,7 +93,6 @@ JsModule {
                 name_token: IDENT@121..123 "H" [] [Whitespace(" ")],
             },
             type_parameters: missing (optional),
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@123..125 "=" [] [Whitespace(" ")],
             ty: TsVoidType {
                 void_token: VOID_KW@125..129 "void" [] [],
@@ -113,7 +105,6 @@ JsModule {
                 name_token: IDENT@136..138 "I" [] [Whitespace(" ")],
             },
             type_parameters: missing (optional),
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@138..140 "=" [] [Whitespace(" ")],
             ty: TsUndefinedType {
                 undefined_token: UNDEFINED_KW@140..149 "undefined" [] [],
@@ -126,7 +117,6 @@ JsModule {
                 name_token: IDENT@156..158 "J" [] [Whitespace(" ")],
             },
             type_parameters: missing (optional),
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@158..160 "=" [] [Whitespace(" ")],
             ty: TsNullLiteralType {
                 literal_token: NULL_KW@160..164 "null" [] [],
@@ -139,7 +129,6 @@ JsModule {
                 name_token: IDENT@171..173 "K" [] [Whitespace(" ")],
             },
             type_parameters: missing (optional),
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@173..175 "=" [] [Whitespace(" ")],
             ty: TsNeverType {
                 never_token: NEVER_KW@175..180 "never" [] [],
@@ -160,109 +149,98 @@ JsModule {
       1: TS_IDENTIFIER_BINDING@5..7
         0: IDENT@5..7 "A" [] [Whitespace(" ")]
       2: (empty)
-      3: (empty)
-      4: EQ@7..9 "=" [] [Whitespace(" ")]
-      5: TS_ANY_TYPE@9..12
+      3: EQ@7..9 "=" [] [Whitespace(" ")]
+      4: TS_ANY_TYPE@9..12
         0: ANY_KW@9..12 "any" [] []
-      6: (empty)
+      5: (empty)
     1: TS_TYPE_ALIAS_DECLARATION@12..29
       0: TYPE_KW@12..18 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@18..20
         0: IDENT@18..20 "B" [] [Whitespace(" ")]
       2: (empty)
-      3: (empty)
-      4: EQ@20..22 "=" [] [Whitespace(" ")]
-      5: TS_NUMBER_TYPE@22..28
+      3: EQ@20..22 "=" [] [Whitespace(" ")]
+      4: TS_NUMBER_TYPE@22..28
         0: NUMBER_KW@22..28 "number" [] []
-      6: SEMICOLON@28..29 ";" [] []
+      5: SEMICOLON@28..29 ";" [] []
     2: TS_TYPE_ALIAS_DECLARATION@29..46
       0: TYPE_KW@29..35 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@35..37
         0: IDENT@35..37 "C" [] [Whitespace(" ")]
       2: (empty)
-      3: (empty)
-      4: EQ@37..39 "=" [] [Whitespace(" ")]
-      5: TS_NON_PRIMITIVE_TYPE@39..45
+      3: EQ@37..39 "=" [] [Whitespace(" ")]
+      4: TS_NON_PRIMITIVE_TYPE@39..45
         0: OBJECT_KW@39..45 "object" [] []
-      6: SEMICOLON@45..46 ";" [] []
+      5: SEMICOLON@45..46 ";" [] []
     3: TS_TYPE_ALIAS_DECLARATION@46..64
       0: TYPE_KW@46..52 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@52..54
         0: IDENT@52..54 "D" [] [Whitespace(" ")]
       2: (empty)
-      3: (empty)
-      4: EQ@54..56 "=" [] [Whitespace(" ")]
-      5: TS_BOOLEAN_TYPE@56..63
+      3: EQ@54..56 "=" [] [Whitespace(" ")]
+      4: TS_BOOLEAN_TYPE@56..63
         0: BOOLEAN_KW@56..63 "boolean" [] []
-      6: SEMICOLON@63..64 ";" [] []
+      5: SEMICOLON@63..64 ";" [] []
     4: TS_TYPE_ALIAS_DECLARATION@64..81
       0: TYPE_KW@64..70 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@70..72
         0: IDENT@70..72 "E" [] [Whitespace(" ")]
       2: (empty)
-      3: (empty)
-      4: EQ@72..74 "=" [] [Whitespace(" ")]
-      5: TS_BIGINT_TYPE@74..80
+      3: EQ@72..74 "=" [] [Whitespace(" ")]
+      4: TS_BIGINT_TYPE@74..80
         0: BIGINT_KW@74..80 "bigint" [] []
-      6: SEMICOLON@80..81 ";" [] []
+      5: SEMICOLON@80..81 ";" [] []
     5: TS_TYPE_ALIAS_DECLARATION@81..98
       0: TYPE_KW@81..87 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@87..89
         0: IDENT@87..89 "F" [] [Whitespace(" ")]
       2: (empty)
-      3: (empty)
-      4: EQ@89..91 "=" [] [Whitespace(" ")]
-      5: TS_STRING_TYPE@91..97
+      3: EQ@89..91 "=" [] [Whitespace(" ")]
+      4: TS_STRING_TYPE@91..97
         0: STRING_KW@91..97 "string" [] []
-      6: SEMICOLON@97..98 ";" [] []
+      5: SEMICOLON@97..98 ";" [] []
     6: TS_TYPE_ALIAS_DECLARATION@98..115
       0: TYPE_KW@98..104 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@104..106
         0: IDENT@104..106 "G" [] [Whitespace(" ")]
       2: (empty)
-      3: (empty)
-      4: EQ@106..108 "=" [] [Whitespace(" ")]
-      5: TS_SYMBOL_TYPE@108..114
+      3: EQ@106..108 "=" [] [Whitespace(" ")]
+      4: TS_SYMBOL_TYPE@108..114
         0: SYMBOL_KW@108..114 "symbol" [] []
-      6: SEMICOLON@114..115 ";" [] []
+      5: SEMICOLON@114..115 ";" [] []
     7: TS_TYPE_ALIAS_DECLARATION@115..130
       0: TYPE_KW@115..121 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@121..123
         0: IDENT@121..123 "H" [] [Whitespace(" ")]
       2: (empty)
-      3: (empty)
-      4: EQ@123..125 "=" [] [Whitespace(" ")]
-      5: TS_VOID_TYPE@125..129
+      3: EQ@123..125 "=" [] [Whitespace(" ")]
+      4: TS_VOID_TYPE@125..129
         0: VOID_KW@125..129 "void" [] []
-      6: SEMICOLON@129..130 ";" [] []
+      5: SEMICOLON@129..130 ";" [] []
     8: TS_TYPE_ALIAS_DECLARATION@130..150
       0: TYPE_KW@130..136 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@136..138
         0: IDENT@136..138 "I" [] [Whitespace(" ")]
       2: (empty)
-      3: (empty)
-      4: EQ@138..140 "=" [] [Whitespace(" ")]
-      5: TS_UNDEFINED_TYPE@140..149
+      3: EQ@138..140 "=" [] [Whitespace(" ")]
+      4: TS_UNDEFINED_TYPE@140..149
         0: UNDEFINED_KW@140..149 "undefined" [] []
-      6: SEMICOLON@149..150 ";" [] []
+      5: SEMICOLON@149..150 ";" [] []
     9: TS_TYPE_ALIAS_DECLARATION@150..165
       0: TYPE_KW@150..156 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@156..158
         0: IDENT@156..158 "J" [] [Whitespace(" ")]
       2: (empty)
-      3: (empty)
-      4: EQ@158..160 "=" [] [Whitespace(" ")]
-      5: TS_NULL_LITERAL_TYPE@160..164
+      3: EQ@158..160 "=" [] [Whitespace(" ")]
+      4: TS_NULL_LITERAL_TYPE@160..164
         0: NULL_KW@160..164 "null" [] []
-      6: SEMICOLON@164..165 ";" [] []
+      5: SEMICOLON@164..165 ";" [] []
     10: TS_TYPE_ALIAS_DECLARATION@165..180
       0: TYPE_KW@165..171 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@171..173
         0: IDENT@171..173 "K" [] [Whitespace(" ")]
       2: (empty)
-      3: (empty)
-      4: EQ@173..175 "=" [] [Whitespace(" ")]
-      5: TS_NEVER_TYPE@175..180
+      3: EQ@173..175 "=" [] [Whitespace(" ")]
+      4: TS_NEVER_TYPE@175..180
         0: NEVER_KW@175..180 "never" [] []
-      6: (empty)
+      5: (empty)
   4: EOF@180..181 "" [Newline("\n")] []

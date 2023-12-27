@@ -9,7 +9,6 @@ JsModule {
                 name_token: IDENT@10..12 "A" [] [Whitespace(" ")],
             },
             type_parameters: missing (optional),
-            ts_type_empty_parameters: missing (optional),
             extends_clause: missing (optional),
             l_curly_token: L_CURLY@12..13 "{" [] [],
             members: TsTypeMemberList [],
@@ -21,7 +20,6 @@ JsModule {
                 name_token: IDENT@25..27 "B" [] [Whitespace(" ")],
             },
             type_parameters: missing (optional),
-            ts_type_empty_parameters: missing (optional),
             extends_clause: missing (optional),
             l_curly_token: L_CURLY@27..29 "{" [] [Whitespace(" ")],
             members: TsTypeMemberList [
@@ -118,19 +116,17 @@ JsModule {
         0: IDENT@10..12 "A" [] [Whitespace(" ")]
       2: (empty)
       3: (empty)
-      4: (empty)
-      5: L_CURLY@12..13 "{" [] []
-      6: TS_TYPE_MEMBER_LIST@13..13
-      7: R_CURLY@13..14 "}" [] []
+      4: L_CURLY@12..13 "{" [] []
+      5: TS_TYPE_MEMBER_LIST@13..13
+      6: R_CURLY@13..14 "}" [] []
     1: TS_INTERFACE_DECLARATION@14..96
       0: INTERFACE_KW@14..25 "interface" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@25..27
         0: IDENT@25..27 "B" [] [Whitespace(" ")]
       2: (empty)
       3: (empty)
-      4: (empty)
-      5: L_CURLY@27..29 "{" [] [Whitespace(" ")]
-      6: TS_TYPE_MEMBER_LIST@29..95
+      4: L_CURLY@27..29 "{" [] [Whitespace(" ")]
+      5: TS_TYPE_MEMBER_LIST@29..95
         0: TS_PROPERTY_SIGNATURE_TYPE_MEMBER@29..43
           0: (empty)
           1: JS_LITERAL_MEMBER_NAME@29..33
@@ -185,5 +181,5 @@ JsModule {
                 0: IDENT@93..95 "B" [] [Whitespace(" ")]
               1: (empty)
           4: (empty)
-      7: R_CURLY@95..96 "}" [] []
+      6: R_CURLY@95..96 "}" [] []
   4: EOF@96..97 "" [Newline("\n")] []

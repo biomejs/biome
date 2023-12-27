@@ -9,7 +9,6 @@ JsModule {
                 name_token: IDENT@5..7 "A" [] [Whitespace(" ")],
             },
             type_parameters: missing (optional),
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@7..9 "=" [] [Whitespace(" ")],
             ty: TsNonPrimitiveType {
                 object_token: OBJECT_KW@9..15 "object" [] [],
@@ -22,7 +21,6 @@ JsModule {
                 name_token: IDENT@22..24 "B" [] [Whitespace(" ")],
             },
             type_parameters: missing (optional),
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@24..26 "=" [] [Whitespace(" ")],
             ty: TsStringType {
                 string_token: STRING_KW@26..32 "string" [] [],
@@ -35,7 +33,6 @@ JsModule {
                 name_token: IDENT@39..41 "C" [] [Whitespace(" ")],
             },
             type_parameters: missing (optional),
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@41..43 "=" [] [Whitespace(" ")],
             ty: TsReferenceType {
                 name: JsReferenceIdentifier {
@@ -51,7 +48,6 @@ JsModule {
                 name_token: IDENT@51..53 "D" [] [Whitespace(" ")],
             },
             type_parameters: missing (optional),
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@53..55 "=" [] [Whitespace(" ")],
             ty: TsReferenceType {
                 name: TsQualifiedName {
@@ -73,7 +69,6 @@ JsModule {
                 name_token: IDENT@65..67 "E" [] [Whitespace(" ")],
             },
             type_parameters: missing (optional),
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@67..69 "=" [] [Whitespace(" ")],
             ty: TsReferenceType {
                 name: TsQualifiedName {
@@ -115,41 +110,37 @@ JsModule {
       1: TS_IDENTIFIER_BINDING@5..7
         0: IDENT@5..7 "A" [] [Whitespace(" ")]
       2: (empty)
-      3: (empty)
-      4: EQ@7..9 "=" [] [Whitespace(" ")]
-      5: TS_NON_PRIMITIVE_TYPE@9..15
+      3: EQ@7..9 "=" [] [Whitespace(" ")]
+      4: TS_NON_PRIMITIVE_TYPE@9..15
         0: OBJECT_KW@9..15 "object" [] []
-      6: SEMICOLON@15..16 ";" [] []
+      5: SEMICOLON@15..16 ";" [] []
     1: TS_TYPE_ALIAS_DECLARATION@16..33
       0: TYPE_KW@16..22 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@22..24
         0: IDENT@22..24 "B" [] [Whitespace(" ")]
       2: (empty)
-      3: (empty)
-      4: EQ@24..26 "=" [] [Whitespace(" ")]
-      5: TS_STRING_TYPE@26..32
+      3: EQ@24..26 "=" [] [Whitespace(" ")]
+      4: TS_STRING_TYPE@26..32
         0: STRING_KW@26..32 "string" [] []
-      6: SEMICOLON@32..33 ";" [] []
+      5: SEMICOLON@32..33 ";" [] []
     2: TS_TYPE_ALIAS_DECLARATION@33..45
       0: TYPE_KW@33..39 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@39..41
         0: IDENT@39..41 "C" [] [Whitespace(" ")]
       2: (empty)
-      3: (empty)
-      4: EQ@41..43 "=" [] [Whitespace(" ")]
-      5: TS_REFERENCE_TYPE@43..44
+      3: EQ@41..43 "=" [] [Whitespace(" ")]
+      4: TS_REFERENCE_TYPE@43..44
         0: JS_REFERENCE_IDENTIFIER@43..44
           0: IDENT@43..44 "A" [] []
         1: (empty)
-      6: SEMICOLON@44..45 ";" [] []
+      5: SEMICOLON@44..45 ";" [] []
     3: TS_TYPE_ALIAS_DECLARATION@45..59
       0: TYPE_KW@45..51 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@51..53
         0: IDENT@51..53 "D" [] [Whitespace(" ")]
       2: (empty)
-      3: (empty)
-      4: EQ@53..55 "=" [] [Whitespace(" ")]
-      5: TS_REFERENCE_TYPE@55..58
+      3: EQ@53..55 "=" [] [Whitespace(" ")]
+      4: TS_REFERENCE_TYPE@55..58
         0: TS_QUALIFIED_NAME@55..58
           0: JS_REFERENCE_IDENTIFIER@55..56
             0: IDENT@55..56 "B" [] []
@@ -157,15 +148,14 @@ JsModule {
           2: JS_NAME@57..58
             0: IDENT@57..58 "a" [] []
         1: (empty)
-      6: SEMICOLON@58..59 ";" [] []
+      5: SEMICOLON@58..59 ";" [] []
     4: TS_TYPE_ALIAS_DECLARATION@59..77
       0: TYPE_KW@59..65 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@65..67
         0: IDENT@65..67 "E" [] [Whitespace(" ")]
       2: (empty)
-      3: (empty)
-      4: EQ@67..69 "=" [] [Whitespace(" ")]
-      5: TS_REFERENCE_TYPE@69..76
+      3: EQ@67..69 "=" [] [Whitespace(" ")]
+      4: TS_REFERENCE_TYPE@69..76
         0: TS_QUALIFIED_NAME@69..76
           0: TS_QUALIFIED_NAME@69..74
             0: TS_QUALIFIED_NAME@69..72
@@ -181,5 +171,5 @@ JsModule {
           2: JS_NAME@75..76
             0: IDENT@75..76 "a" [] []
         1: (empty)
-      6: SEMICOLON@76..77 ";" [] []
+      5: SEMICOLON@76..77 ";" [] []
   4: EOF@77..78 "" [Newline("\n")] []

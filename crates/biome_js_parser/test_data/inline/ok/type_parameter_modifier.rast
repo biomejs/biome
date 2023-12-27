@@ -26,7 +26,6 @@ JsModule {
                 ],
                 r_angle_token: R_ANGLE@13..15 ">" [] [Whitespace(" ")],
             },
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@15..17 "=" [] [Whitespace(" ")],
             ty: TsObjectType {
                 l_curly_token: L_CURLY@17..18 "{" [] [],
@@ -54,7 +53,6 @@ JsModule {
                 ],
                 r_angle_token: R_ANGLE@32..34 ">" [] [Whitespace(" ")],
             },
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@34..36 "=" [] [Whitespace(" ")],
             ty: TsObjectType {
                 l_curly_token: L_CURLY@36..37 "{" [] [],
@@ -86,7 +84,6 @@ JsModule {
                 ],
                 r_angle_token: R_ANGLE@53..55 ">" [] [Whitespace(" ")],
             },
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@55..57 "=" [] [Whitespace(" ")],
             ty: TsObjectType {
                 l_curly_token: L_CURLY@57..58 "{" [] [],
@@ -118,7 +115,6 @@ JsModule {
                 ],
                 r_angle_token: R_ANGLE@75..77 ">" [] [Whitespace(" ")],
             },
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@77..79 "=" [] [Whitespace(" ")],
             ty: TsObjectType {
                 l_curly_token: L_CURLY@79..80 "{" [] [],
@@ -150,7 +146,6 @@ JsModule {
                 ],
                 r_angle_token: R_ANGLE@98..100 ">" [] [Whitespace(" ")],
             },
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@100..102 "=" [] [Whitespace(" ")],
             ty: TsObjectType {
                 l_curly_token: L_CURLY@102..103 "{" [] [],
@@ -185,7 +180,6 @@ JsModule {
                 ],
                 r_angle_token: R_ANGLE@124..126 ">" [] [Whitespace(" ")],
             },
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@126..128 "=" [] [Whitespace(" ")],
             ty: TsObjectType {
                 l_curly_token: L_CURLY@128..129 "{" [] [],
@@ -230,7 +224,6 @@ JsModule {
                 ],
                 r_angle_token: R_ANGLE@151..153 ">" [] [Whitespace(" ")],
             },
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@153..155 "=" [] [Whitespace(" ")],
             ty: TsObjectType {
                 l_curly_token: L_CURLY@155..156 "{" [] [],
@@ -275,7 +268,6 @@ JsModule {
                 ],
                 r_angle_token: R_ANGLE@178..180 ">" [] [Whitespace(" ")],
             },
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@180..182 "=" [] [Whitespace(" ")],
             ty: TsObjectType {
                 l_curly_token: L_CURLY@182..183 "{" [] [],
@@ -331,7 +323,6 @@ JsModule {
                 ],
                 r_angle_token: R_ANGLE@222..224 ">" [] [Whitespace(" ")],
             },
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@224..226 "=" [] [Whitespace(" ")],
             ty: TsObjectType {
                 l_curly_token: L_CURLY@226..227 "{" [] [],
@@ -495,7 +486,6 @@ JsModule {
                 ],
                 r_angle_token: R_ANGLE@340..342 ">" [] [Whitespace(" ")],
             },
-            ts_type_empty_parameters: missing (optional),
             extends_clause: missing (optional),
             l_curly_token: L_CURLY@342..343 "{" [] [],
             members: TsTypeMemberList [],
@@ -524,7 +514,6 @@ JsModule {
                 ],
                 r_angle_token: R_ANGLE@364..366 ">" [] [Whitespace(" ")],
             },
-            ts_type_empty_parameters: missing (optional),
             extends_clause: missing (optional),
             l_curly_token: L_CURLY@366..367 "{" [] [],
             members: TsTypeMemberList [],
@@ -623,7 +612,6 @@ JsModule {
                     ],
                     r_angle_token: R_ANGLE@450..452 ">" [] [Whitespace(" ")],
                 },
-                ts_type_empty_parameters: missing (optional),
                 extends_clause: missing (optional),
                 l_curly_token: L_CURLY@452..453 "{" [] [],
                 members: TsTypeMemberList [],
@@ -655,7 +643,6 @@ JsModule {
                     ],
                     r_angle_token: R_ANGLE@482..484 ">" [] [Whitespace(" ")],
                 },
-                ts_type_empty_parameters: missing (optional),
                 extends_clause: missing (optional),
                 l_curly_token: L_CURLY@484..485 "{" [] [],
                 members: TsTypeMemberList [],
@@ -1784,13 +1771,12 @@ JsModule {
             2: (empty)
             3: (empty)
         2: R_ANGLE@13..15 ">" [] [Whitespace(" ")]
-      3: (empty)
-      4: EQ@15..17 "=" [] [Whitespace(" ")]
-      5: TS_OBJECT_TYPE@17..19
+      3: EQ@15..17 "=" [] [Whitespace(" ")]
+      4: TS_OBJECT_TYPE@17..19
         0: L_CURLY@17..18 "{" [] []
         1: TS_TYPE_MEMBER_LIST@18..18
         2: R_CURLY@18..19 "}" [] []
-      6: (empty)
+      5: (empty)
     1: TS_TYPE_ALIAS_DECLARATION@19..38
       0: TYPE_KW@19..25 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@25..28
@@ -1805,13 +1791,12 @@ JsModule {
             2: (empty)
             3: (empty)
         2: R_ANGLE@32..34 ">" [] [Whitespace(" ")]
-      3: (empty)
-      4: EQ@34..36 "=" [] [Whitespace(" ")]
-      5: TS_OBJECT_TYPE@36..38
+      3: EQ@34..36 "=" [] [Whitespace(" ")]
+      4: TS_OBJECT_TYPE@36..38
         0: L_CURLY@36..37 "{" [] []
         1: TS_TYPE_MEMBER_LIST@37..37
         2: R_CURLY@37..38 "}" [] []
-      6: (empty)
+      5: (empty)
     2: TS_TYPE_ALIAS_DECLARATION@38..59
       0: TYPE_KW@38..44 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@44..47
@@ -1828,13 +1813,12 @@ JsModule {
             2: (empty)
             3: (empty)
         2: R_ANGLE@53..55 ">" [] [Whitespace(" ")]
-      3: (empty)
-      4: EQ@55..57 "=" [] [Whitespace(" ")]
-      5: TS_OBJECT_TYPE@57..59
+      3: EQ@55..57 "=" [] [Whitespace(" ")]
+      4: TS_OBJECT_TYPE@57..59
         0: L_CURLY@57..58 "{" [] []
         1: TS_TYPE_MEMBER_LIST@58..58
         2: R_CURLY@58..59 "}" [] []
-      6: (empty)
+      5: (empty)
     3: TS_TYPE_ALIAS_DECLARATION@59..81
       0: TYPE_KW@59..65 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@65..68
@@ -1851,13 +1835,12 @@ JsModule {
             2: (empty)
             3: (empty)
         2: R_ANGLE@75..77 ">" [] [Whitespace(" ")]
-      3: (empty)
-      4: EQ@77..79 "=" [] [Whitespace(" ")]
-      5: TS_OBJECT_TYPE@79..81
+      3: EQ@77..79 "=" [] [Whitespace(" ")]
+      4: TS_OBJECT_TYPE@79..81
         0: L_CURLY@79..80 "{" [] []
         1: TS_TYPE_MEMBER_LIST@80..80
         2: R_CURLY@80..81 "}" [] []
-      6: (empty)
+      5: (empty)
     4: TS_TYPE_ALIAS_DECLARATION@81..104
       0: TYPE_KW@81..87 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@87..90
@@ -1874,13 +1857,12 @@ JsModule {
             2: (empty)
             3: (empty)
         2: R_ANGLE@98..100 ">" [] [Whitespace(" ")]
-      3: (empty)
-      4: EQ@100..102 "=" [] [Whitespace(" ")]
-      5: TS_OBJECT_TYPE@102..104
+      3: EQ@100..102 "=" [] [Whitespace(" ")]
+      4: TS_OBJECT_TYPE@102..104
         0: L_CURLY@102..103 "{" [] []
         1: TS_TYPE_MEMBER_LIST@103..103
         2: R_CURLY@103..104 "}" [] []
-      6: (empty)
+      5: (empty)
     5: TS_TYPE_ALIAS_DECLARATION@104..130
       0: TYPE_KW@104..110 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@110..113
@@ -1899,13 +1881,12 @@ JsModule {
             2: (empty)
             3: (empty)
         2: R_ANGLE@124..126 ">" [] [Whitespace(" ")]
-      3: (empty)
-      4: EQ@126..128 "=" [] [Whitespace(" ")]
-      5: TS_OBJECT_TYPE@128..130
+      3: EQ@126..128 "=" [] [Whitespace(" ")]
+      4: TS_OBJECT_TYPE@128..130
         0: L_CURLY@128..129 "{" [] []
         1: TS_TYPE_MEMBER_LIST@129..129
         2: R_CURLY@129..130 "}" [] []
-      6: (empty)
+      5: (empty)
     6: TS_TYPE_ALIAS_DECLARATION@130..157
       0: TYPE_KW@130..136 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@136..139
@@ -1931,13 +1912,12 @@ JsModule {
             2: (empty)
             3: (empty)
         2: R_ANGLE@151..153 ">" [] [Whitespace(" ")]
-      3: (empty)
-      4: EQ@153..155 "=" [] [Whitespace(" ")]
-      5: TS_OBJECT_TYPE@155..157
+      3: EQ@153..155 "=" [] [Whitespace(" ")]
+      4: TS_OBJECT_TYPE@155..157
         0: L_CURLY@155..156 "{" [] []
         1: TS_TYPE_MEMBER_LIST@156..156
         2: R_CURLY@156..157 "}" [] []
-      6: (empty)
+      5: (empty)
     7: TS_TYPE_ALIAS_DECLARATION@157..184
       0: TYPE_KW@157..163 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@163..166
@@ -1963,13 +1943,12 @@ JsModule {
             2: (empty)
             3: (empty)
         2: R_ANGLE@178..180 ">" [] [Whitespace(" ")]
-      3: (empty)
-      4: EQ@180..182 "=" [] [Whitespace(" ")]
-      5: TS_OBJECT_TYPE@182..184
+      3: EQ@180..182 "=" [] [Whitespace(" ")]
+      4: TS_OBJECT_TYPE@182..184
         0: L_CURLY@182..183 "{" [] []
         1: TS_TYPE_MEMBER_LIST@183..183
         2: R_CURLY@183..184 "}" [] []
-      6: (empty)
+      5: (empty)
     8: TS_TYPE_ALIAS_DECLARATION@184..228
       0: TYPE_KW@184..190 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@190..193
@@ -2002,13 +1981,12 @@ JsModule {
                   1: (empty)
             3: (empty)
         2: R_ANGLE@222..224 ">" [] [Whitespace(" ")]
-      3: (empty)
-      4: EQ@224..226 "=" [] [Whitespace(" ")]
-      5: TS_OBJECT_TYPE@226..228
+      3: EQ@224..226 "=" [] [Whitespace(" ")]
+      4: TS_OBJECT_TYPE@226..228
         0: L_CURLY@226..227 "{" [] []
         1: TS_TYPE_MEMBER_LIST@227..227
         2: R_CURLY@227..228 "}" [] []
-      6: (empty)
+      5: (empty)
     9: JS_CLASS_DECLARATION@228..247
       0: JS_DECORATOR_LIST@228..228
       1: (empty)
@@ -2124,10 +2102,9 @@ JsModule {
             3: (empty)
         2: R_ANGLE@340..342 ">" [] [Whitespace(" ")]
       3: (empty)
-      4: (empty)
-      5: L_CURLY@342..343 "{" [] []
-      6: TS_TYPE_MEMBER_LIST@343..343
-      7: R_CURLY@343..344 "}" [] []
+      4: L_CURLY@342..343 "{" [] []
+      5: TS_TYPE_MEMBER_LIST@343..343
+      6: R_CURLY@343..344 "}" [] []
     14: TS_INTERFACE_DECLARATION@344..368
       0: INTERFACE_KW@344..355 "interface" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@355..358
@@ -2145,10 +2122,9 @@ JsModule {
             3: (empty)
         2: R_ANGLE@364..366 ">" [] [Whitespace(" ")]
       3: (empty)
-      4: (empty)
-      5: L_CURLY@366..367 "{" [] []
-      6: TS_TYPE_MEMBER_LIST@367..367
-      7: R_CURLY@367..368 "}" [] []
+      4: L_CURLY@366..367 "{" [] []
+      5: TS_TYPE_MEMBER_LIST@367..367
+      6: R_CURLY@367..368 "}" [] []
     15: TS_DECLARE_STATEMENT@368..395
       0: DECLARE_KW@368..377 "declare" [Newline("\n")] [Whitespace(" ")]
       1: JS_CLASS_DECLARATION@377..395
@@ -2218,10 +2194,9 @@ JsModule {
               3: (empty)
           2: R_ANGLE@450..452 ">" [] [Whitespace(" ")]
         3: (empty)
-        4: (empty)
-        5: L_CURLY@452..453 "{" [] []
-        6: TS_TYPE_MEMBER_LIST@453..453
-        7: R_CURLY@453..454 "}" [] []
+        4: L_CURLY@452..453 "{" [] []
+        5: TS_TYPE_MEMBER_LIST@453..453
+        6: R_CURLY@453..454 "}" [] []
     18: TS_DECLARE_STATEMENT@454..486
       0: DECLARE_KW@454..463 "declare" [Newline("\n")] [Whitespace(" ")]
       1: TS_INTERFACE_DECLARATION@463..486
@@ -2241,10 +2216,9 @@ JsModule {
               3: (empty)
           2: R_ANGLE@482..484 ">" [] [Whitespace(" ")]
         3: (empty)
-        4: (empty)
-        5: L_CURLY@484..485 "{" [] []
-        6: TS_TYPE_MEMBER_LIST@485..485
-        7: R_CURLY@485..486 "}" [] []
+        4: L_CURLY@484..485 "{" [] []
+        5: TS_TYPE_MEMBER_LIST@485..485
+        6: R_CURLY@485..486 "}" [] []
     19: JS_FUNCTION_DECLARATION@486..511
       0: (empty)
       1: FUNCTION_KW@486..496 "function" [Newline("\n")] [Whitespace(" ")]

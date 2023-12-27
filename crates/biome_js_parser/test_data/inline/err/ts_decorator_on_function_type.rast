@@ -9,7 +9,6 @@ JsModule {
                 name_token: IDENT@5..7 "I" [] [Whitespace(" ")],
             },
             type_parameters: missing (optional),
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@7..9 "=" [] [Whitespace(" ")],
             ty: TsParenthesizedType {
                 l_paren_token: L_PAREN@9..10 "(" [] [],
@@ -88,7 +87,6 @@ JsModule {
                 name_token: IDENT@66..68 "I" [] [Whitespace(" ")],
             },
             type_parameters: missing (optional),
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@68..70 "=" [] [Whitespace(" ")],
             ty: TsParenthesizedType {
                 l_paren_token: L_PAREN@70..71 "(" [] [],
@@ -197,7 +195,6 @@ JsModule {
                 name_token: IDENT@137..139 "I" [] [Whitespace(" ")],
             },
             type_parameters: missing (optional),
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@139..141 "=" [] [Whitespace(" ")],
             ty: TsParenthesizedType {
                 l_paren_token: L_PAREN@141..142 "(" [] [],
@@ -302,13 +299,12 @@ JsModule {
       1: TS_IDENTIFIER_BINDING@5..7
         0: IDENT@5..7 "I" [] [Whitespace(" ")]
       2: (empty)
-      3: (empty)
-      4: EQ@7..9 "=" [] [Whitespace(" ")]
-      5: TS_PARENTHESIZED_TYPE@9..10
+      3: EQ@7..9 "=" [] [Whitespace(" ")]
+      4: TS_PARENTHESIZED_TYPE@9..10
         0: L_PAREN@9..10 "(" [] []
         1: (empty)
         2: (empty)
-      6: (empty)
+      5: (empty)
     1: JS_BOGUS_STATEMENT@10..15
       0: JS_DECORATOR@10..15
         0: AT@10..11 "@" [] []
@@ -350,13 +346,12 @@ JsModule {
       1: TS_IDENTIFIER_BINDING@66..68
         0: IDENT@66..68 "I" [] [Whitespace(" ")]
       2: (empty)
-      3: (empty)
-      4: EQ@68..70 "=" [] [Whitespace(" ")]
-      5: TS_PARENTHESIZED_TYPE@70..71
+      3: EQ@68..70 "=" [] [Whitespace(" ")]
+      4: TS_PARENTHESIZED_TYPE@70..71
         0: L_PAREN@70..71 "(" [] []
         1: (empty)
         2: (empty)
-      6: (empty)
+      5: (empty)
     6: JS_BOGUS_STATEMENT@71..81
       0: JS_DECORATOR@71..81
         0: AT@71..72 "@" [] []
@@ -420,13 +415,12 @@ JsModule {
       1: TS_IDENTIFIER_BINDING@137..139
         0: IDENT@137..139 "I" [] [Whitespace(" ")]
       2: (empty)
-      3: (empty)
-      4: EQ@139..141 "=" [] [Whitespace(" ")]
-      5: TS_PARENTHESIZED_TYPE@141..142
+      3: EQ@139..141 "=" [] [Whitespace(" ")]
+      4: TS_PARENTHESIZED_TYPE@141..142
         0: L_PAREN@141..142 "(" [] []
         1: (empty)
         2: (empty)
-      6: (empty)
+      5: (empty)
     11: JS_BOGUS_STATEMENT@142..149
       0: JS_DECORATOR@142..149
         0: AT@142..143 "@" [] []

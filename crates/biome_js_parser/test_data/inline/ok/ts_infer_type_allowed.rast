@@ -22,7 +22,6 @@ JsModule {
                 ],
                 r_angle_token: R_ANGLE@11..13 ">" [] [Whitespace(" ")],
             },
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@13..15 "=" [] [Whitespace(" ")],
             ty: TsConditionalType {
                 check_type: TsReferenceType {
@@ -82,7 +81,6 @@ JsModule {
                 name_token: IDENT@70..72 "A" [] [Whitespace(" ")],
             },
             type_parameters: missing (optional),
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@72..74 "=" [] [Whitespace(" ")],
             ty: TsConditionalType {
                 check_type: TsReferenceType {
@@ -138,7 +136,6 @@ JsModule {
                 name_token: IDENT@127..129 "A" [] [Whitespace(" ")],
             },
             type_parameters: missing (optional),
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@129..131 "=" [] [Whitespace(" ")],
             ty: TsConditionalType {
                 check_type: TsReferenceType {
@@ -187,7 +184,6 @@ JsModule {
                 name_token: IDENT@180..182 "A" [] [Whitespace(" ")],
             },
             type_parameters: missing (optional),
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@182..184 "=" [] [Whitespace(" ")],
             ty: TsConditionalType {
                 check_type: TsReferenceType {
@@ -261,7 +257,6 @@ JsModule {
                 name_token: IDENT@239..241 "A" [] [Whitespace(" ")],
             },
             type_parameters: missing (optional),
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@241..243 "=" [] [Whitespace(" ")],
             ty: TsConditionalType {
                 check_type: TsReferenceType {
@@ -320,7 +315,6 @@ JsModule {
                 name_token: IDENT@289..291 "A" [] [Whitespace(" ")],
             },
             type_parameters: missing (optional),
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@291..293 "=" [] [Whitespace(" ")],
             ty: TsConditionalType {
                 check_type: TsReferenceType {
@@ -402,7 +396,6 @@ JsModule {
                 ],
                 r_angle_token: R_ANGLE@362..364 ">" [] [Whitespace(" ")],
             },
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@364..366 "=" [] [Whitespace(" ")],
             ty: TsConditionalType {
                 check_type: TsReferenceType {
@@ -463,7 +456,6 @@ JsModule {
                 ],
                 r_angle_token: R_ANGLE@431..433 ">" [] [Whitespace(" ")],
             },
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@433..435 "=" [] [Whitespace(" ")],
             ty: TsConditionalType {
                 check_type: TsReferenceType {
@@ -529,7 +521,6 @@ JsModule {
                 ],
                 r_angle_token: R_ANGLE@493..495 ">" [] [Whitespace(" ")],
             },
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@495..497 "=" [] [Whitespace(" ")],
             ty: TsConditionalType {
                 check_type: TsReferenceType {
@@ -666,7 +657,6 @@ JsModule {
                 name_token: IDENT@603..605 "A" [] [Whitespace(" ")],
             },
             type_parameters: missing (optional),
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@605..607 "=" [] [Whitespace(" ")],
             ty: TsConditionalType {
                 check_type: TsReferenceType {
@@ -770,7 +760,6 @@ JsModule {
                 ],
                 r_angle_token: R_ANGLE@745..747 ">" [] [Whitespace(" ")],
             },
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@747..748 "=" [] [],
             ty: TsConditionalType {
                 check_type: TsReferenceType {
@@ -991,7 +980,6 @@ JsModule {
                 ],
                 r_angle_token: R_ANGLE@979..981 ">" [] [Whitespace(" ")],
             },
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@981..983 "=" [] [Whitespace(" ")],
             ty: TsConditionalType {
                 check_type: TsReferenceType {
@@ -1089,7 +1077,6 @@ JsModule {
                 ],
                 r_angle_token: R_ANGLE@1076..1078 ">" [] [Whitespace(" ")],
             },
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@1078..1080 "=" [] [Whitespace(" ")],
             ty: TsConditionalType {
                 check_type: TsReferenceType {
@@ -1209,7 +1196,6 @@ JsModule {
                 ],
                 r_angle_token: R_ANGLE@1178..1180 ">" [] [Whitespace(" ")],
             },
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@1180..1181 "=" [] [],
             ty: TsConditionalType {
                 check_type: TsReferenceType {
@@ -1286,7 +1272,6 @@ JsModule {
                 ],
                 r_angle_token: R_ANGLE@1241..1243 ">" [] [Whitespace(" ")],
             },
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@1243..1245 "=" [] [Whitespace(" ")],
             ty: TsConditionalType {
                 check_type: TsReferenceType {
@@ -1352,7 +1337,6 @@ JsModule {
                 ],
                 r_angle_token: R_ANGLE@1298..1300 ">" [] [Whitespace(" ")],
             },
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@1300..1302 "=" [] [Whitespace(" ")],
             ty: TsConditionalType {
                 check_type: TsReferenceType {
@@ -1528,7 +1512,6 @@ JsModule {
                 ],
                 r_angle_token: R_ANGLE@1465..1467 ">" [] [Whitespace(" ")],
             },
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@1467..1469 "=" [] [Whitespace(" ")],
             ty: TsConditionalType {
                 check_type: TsReferenceType {
@@ -1602,7 +1585,6 @@ JsModule {
                 ],
                 r_angle_token: R_ANGLE@1519..1521 ">" [] [Whitespace(" ")],
             },
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@1521..1523 "=" [] [Whitespace(" ")],
             ty: TsConditionalType {
                 check_type: TsReferenceType {
@@ -1771,7 +1753,6 @@ JsModule {
                 ],
                 r_angle_token: R_ANGLE@1635..1637 ">" [] [Whitespace(" ")],
             },
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@1637..1639 "=" [] [Whitespace(" ")],
             ty: TsConditionalType {
                 check_type: TsReferenceType {
@@ -1869,7 +1850,6 @@ JsModule {
                 ],
                 r_angle_token: R_ANGLE@1702..1704 ">" [] [Whitespace(" ")],
             },
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@1704..1706 "=" [] [Whitespace(" ")],
             ty: TsConditionalType {
                 check_type: TsReferenceType {
@@ -1930,7 +1910,6 @@ JsModule {
                 ],
                 r_angle_token: R_ANGLE@1747..1749 ">" [] [Whitespace(" ")],
             },
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@1749..1751 "=" [] [Whitespace(" ")],
             ty: TsConditionalType {
                 check_type: TsReferenceType {
@@ -2011,7 +1990,6 @@ JsModule {
                 ],
                 r_angle_token: R_ANGLE@1838..1840 ">" [] [Whitespace(" ")],
             },
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@1840..1842 "=" [] [Whitespace(" ")],
             ty: TsConditionalType {
                 check_type: TsReferenceType {
@@ -2139,7 +2117,6 @@ JsModule {
                 ],
                 r_angle_token: R_ANGLE@1929..1931 ">" [] [Whitespace(" ")],
             },
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@1931..1933 "=" [] [Whitespace(" ")],
             ty: TsConditionalType {
                 check_type: TsReferenceType {
@@ -2295,7 +2272,6 @@ JsModule {
                 name_token: IDENT@2134..2137 "T1" [] [Whitespace(" ")],
             },
             type_parameters: missing (optional),
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@2137..2139 "=" [] [Whitespace(" ")],
             ty: TsConditionalType {
                 check_type: TsReferenceType {
@@ -2359,7 +2335,6 @@ JsModule {
                 name_token: IDENT@2197..2200 "T2" [] [Whitespace(" ")],
             },
             type_parameters: missing (optional),
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@2200..2202 "=" [] [Whitespace(" ")],
             ty: TsConditionalType {
                 check_type: TsReferenceType {
@@ -2446,7 +2421,6 @@ JsModule {
                 ],
                 r_angle_token: R_ANGLE@2266..2268 ">" [] [Whitespace(" ")],
             },
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@2268..2270 "=" [] [Whitespace(" ")],
             ty: TsConditionalType {
                 check_type: TsReferenceType {
@@ -2495,7 +2469,6 @@ JsModule {
                 name_token: IDENT@2321..2324 "T4" [] [Whitespace(" ")],
             },
             type_parameters: missing (optional),
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@2324..2326 "=" [] [Whitespace(" ")],
             ty: TsConditionalType {
                 check_type: TsReferenceType {
@@ -2563,7 +2536,6 @@ JsModule {
                 name_token: IDENT@2386..2389 "T5" [] [Whitespace(" ")],
             },
             type_parameters: missing (optional),
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@2389..2391 "=" [] [Whitespace(" ")],
             ty: TsConditionalType {
                 check_type: TsReferenceType {
@@ -2654,7 +2626,6 @@ JsModule {
                 ],
                 r_angle_token: R_ANGLE@2457..2459 ">" [] [Whitespace(" ")],
             },
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@2459..2461 "=" [] [Whitespace(" ")],
             ty: TsConditionalType {
                 check_type: TsReferenceType {
@@ -2707,7 +2678,6 @@ JsModule {
                 name_token: IDENT@2514..2517 "T7" [] [Whitespace(" ")],
             },
             type_parameters: missing (optional),
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@2517..2519 "=" [] [Whitespace(" ")],
             ty: TsConditionalType {
                 check_type: TsReferenceType {
@@ -2783,7 +2753,6 @@ JsModule {
                 name_token: IDENT@2583..2586 "T8" [] [Whitespace(" ")],
             },
             type_parameters: missing (optional),
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@2586..2588 "=" [] [Whitespace(" ")],
             ty: TsConditionalType {
                 check_type: TsReferenceType {
@@ -2882,7 +2851,6 @@ JsModule {
                 ],
                 r_angle_token: R_ANGLE@2658..2660 ">" [] [Whitespace(" ")],
             },
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@2660..2662 "=" [] [Whitespace(" ")],
             ty: TsConditionalType {
                 check_type: TsReferenceType {
@@ -2974,7 +2942,6 @@ JsModule {
                 ],
                 r_angle_token: R_ANGLE@2745..2747 ">" [] [Whitespace(" ")],
             },
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@2747..2748 "=" [] [],
             ty: TsConditionalType {
                 check_type: TsParenthesizedType {
@@ -3103,9 +3070,8 @@ JsModule {
             2: (empty)
             3: (empty)
         2: R_ANGLE@11..13 ">" [] [Whitespace(" ")]
-      3: (empty)
-      4: EQ@13..15 "=" [] [Whitespace(" ")]
-      5: TS_CONDITIONAL_TYPE@15..63
+      3: EQ@13..15 "=" [] [Whitespace(" ")]
+      4: TS_CONDITIONAL_TYPE@15..63
         0: TS_REFERENCE_TYPE@15..17
           0: JS_REFERENCE_IDENTIFIER@15..17
             0: IDENT@15..17 "F" [] [Whitespace(" ")]
@@ -3140,15 +3106,14 @@ JsModule {
         5: COLON@56..58 ":" [] [Whitespace(" ")]
         6: TS_NEVER_TYPE@58..63
           0: NEVER_KW@58..63 "never" [] []
-      6: SEMICOLON@63..64 ";" [] []
+      5: SEMICOLON@63..64 ";" [] []
     1: TS_TYPE_ALIAS_DECLARATION@64..121
       0: TYPE_KW@64..70 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@70..72
         0: IDENT@70..72 "A" [] [Whitespace(" ")]
       2: (empty)
-      3: (empty)
-      4: EQ@72..74 "=" [] [Whitespace(" ")]
-      5: TS_CONDITIONAL_TYPE@74..121
+      3: EQ@72..74 "=" [] [Whitespace(" ")]
+      4: TS_CONDITIONAL_TYPE@74..121
         0: TS_REFERENCE_TYPE@74..76
           0: JS_REFERENCE_IDENTIFIER@74..76
             0: IDENT@74..76 "T" [] [Whitespace(" ")]
@@ -3181,15 +3146,14 @@ JsModule {
         5: COLON@114..116 ":" [] [Whitespace(" ")]
         6: TS_NEVER_TYPE@116..121
           0: NEVER_KW@116..121 "never" [] []
-      6: (empty)
+      5: (empty)
     2: TS_TYPE_ALIAS_DECLARATION@121..174
       0: TYPE_KW@121..127 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@127..129
         0: IDENT@127..129 "A" [] [Whitespace(" ")]
       2: (empty)
-      3: (empty)
-      4: EQ@129..131 "=" [] [Whitespace(" ")]
-      5: TS_CONDITIONAL_TYPE@131..174
+      3: EQ@129..131 "=" [] [Whitespace(" ")]
+      4: TS_CONDITIONAL_TYPE@131..174
         0: TS_REFERENCE_TYPE@131..133
           0: JS_REFERENCE_IDENTIFIER@131..133
             0: IDENT@131..133 "T" [] [Whitespace(" ")]
@@ -3216,15 +3180,14 @@ JsModule {
         5: COLON@167..169 ":" [] [Whitespace(" ")]
         6: TS_NEVER_TYPE@169..174
           0: NEVER_KW@169..174 "never" [] []
-      6: (empty)
+      5: (empty)
     3: TS_TYPE_ALIAS_DECLARATION@174..233
       0: TYPE_KW@174..180 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@180..182
         0: IDENT@180..182 "A" [] [Whitespace(" ")]
       2: (empty)
-      3: (empty)
-      4: EQ@182..184 "=" [] [Whitespace(" ")]
-      5: TS_CONDITIONAL_TYPE@184..233
+      3: EQ@182..184 "=" [] [Whitespace(" ")]
+      4: TS_CONDITIONAL_TYPE@184..233
         0: TS_REFERENCE_TYPE@184..186
           0: JS_REFERENCE_IDENTIFIER@184..186
             0: IDENT@184..186 "T" [] [Whitespace(" ")]
@@ -3269,15 +3232,14 @@ JsModule {
         5: COLON@226..228 ":" [] [Whitespace(" ")]
         6: TS_NEVER_TYPE@228..233
           0: NEVER_KW@228..233 "never" [] []
-      6: (empty)
+      5: (empty)
     4: TS_TYPE_ALIAS_DECLARATION@233..283
       0: TYPE_KW@233..239 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@239..241
         0: IDENT@239..241 "A" [] [Whitespace(" ")]
       2: (empty)
-      3: (empty)
-      4: EQ@241..243 "=" [] [Whitespace(" ")]
-      5: TS_CONDITIONAL_TYPE@243..283
+      3: EQ@241..243 "=" [] [Whitespace(" ")]
+      4: TS_CONDITIONAL_TYPE@243..283
         0: TS_REFERENCE_TYPE@243..245
           0: JS_REFERENCE_IDENTIFIER@243..245
             0: IDENT@243..245 "T" [] [Whitespace(" ")]
@@ -3312,15 +3274,14 @@ JsModule {
         5: COLON@276..278 ":" [] [Whitespace(" ")]
         6: TS_NEVER_TYPE@278..283
           0: NEVER_KW@278..283 "never" [] []
-      6: (empty)
+      5: (empty)
     5: TS_TYPE_ALIAS_DECLARATION@283..348
       0: TYPE_KW@283..289 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@289..291
         0: IDENT@289..291 "A" [] [Whitespace(" ")]
       2: (empty)
-      3: (empty)
-      4: EQ@291..293 "=" [] [Whitespace(" ")]
-      5: TS_CONDITIONAL_TYPE@293..348
+      3: EQ@291..293 "=" [] [Whitespace(" ")]
+      4: TS_CONDITIONAL_TYPE@293..348
         0: TS_REFERENCE_TYPE@293..295
           0: JS_REFERENCE_IDENTIFIER@293..295
             0: IDENT@293..295 "T" [] [Whitespace(" ")]
@@ -3361,7 +3322,7 @@ JsModule {
         5: COLON@341..343 ":" [] [Whitespace(" ")]
         6: TS_NEVER_TYPE@343..348
           0: NEVER_KW@343..348 "never" [] []
-      6: (empty)
+      5: (empty)
     6: TS_TYPE_ALIAS_DECLARATION@348..401
       0: TYPE_KW@348..354 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@354..360
@@ -3376,9 +3337,8 @@ JsModule {
             2: (empty)
             3: (empty)
         2: R_ANGLE@362..364 ">" [] [Whitespace(" ")]
-      3: (empty)
-      4: EQ@364..366 "=" [] [Whitespace(" ")]
-      5: TS_CONDITIONAL_TYPE@366..400
+      3: EQ@364..366 "=" [] [Whitespace(" ")]
+      4: TS_CONDITIONAL_TYPE@366..400
         0: TS_REFERENCE_TYPE@366..368
           0: JS_REFERENCE_IDENTIFIER@366..368
             0: IDENT@366..368 "T" [] [Whitespace(" ")]
@@ -3404,7 +3364,7 @@ JsModule {
         5: COLON@395..397 ":" [] [Whitespace(" ")]
         6: TS_ANY_TYPE@397..400
           0: ANY_KW@397..400 "any" [] []
-      6: SEMICOLON@400..401 ";" [] []
+      5: SEMICOLON@400..401 ";" [] []
     7: TS_TYPE_ALIAS_DECLARATION@401..472
       0: TYPE_KW@401..407 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@407..429
@@ -3419,9 +3379,8 @@ JsModule {
             2: (empty)
             3: (empty)
         2: R_ANGLE@431..433 ">" [] [Whitespace(" ")]
-      3: (empty)
-      4: EQ@433..435 "=" [] [Whitespace(" ")]
-      5: TS_CONDITIONAL_TYPE@435..471
+      3: EQ@433..435 "=" [] [Whitespace(" ")]
+      4: TS_CONDITIONAL_TYPE@435..471
         0: TS_REFERENCE_TYPE@435..437
           0: JS_REFERENCE_IDENTIFIER@435..437
             0: IDENT@435..437 "S" [] [Whitespace(" ")]
@@ -3451,7 +3410,7 @@ JsModule {
         5: COLON@464..466 ":" [] [Whitespace(" ")]
         6: TS_NEVER_TYPE@466..471
           0: NEVER_KW@466..471 "never" [] []
-      6: SEMICOLON@471..472 ";" [] []
+      5: SEMICOLON@471..472 ";" [] []
     8: TS_TYPE_ALIAS_DECLARATION@472..597
       0: TYPE_KW@472..478 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@478..491
@@ -3466,9 +3425,8 @@ JsModule {
             2: (empty)
             3: (empty)
         2: R_ANGLE@493..495 ">" [] [Whitespace(" ")]
-      3: (empty)
-      4: EQ@495..497 "=" [] [Whitespace(" ")]
-      5: TS_CONDITIONAL_TYPE@497..596
+      3: EQ@495..497 "=" [] [Whitespace(" ")]
+      4: TS_CONDITIONAL_TYPE@497..596
         0: TS_REFERENCE_TYPE@497..499
           0: JS_REFERENCE_IDENTIFIER@497..499
             0: IDENT@497..499 "S" [] [Whitespace(" ")]
@@ -3560,15 +3518,14 @@ JsModule {
         5: COLON@584..591 ":" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
         6: TS_NEVER_TYPE@591..596
           0: NEVER_KW@591..596 "never" [] []
-      6: SEMICOLON@596..597 ";" [] []
+      5: SEMICOLON@596..597 ";" [] []
     9: TS_TYPE_ALIAS_DECLARATION@597..697
       0: TYPE_KW@597..603 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@603..605
         0: IDENT@603..605 "A" [] [Whitespace(" ")]
       2: (empty)
-      3: (empty)
-      4: EQ@605..607 "=" [] [Whitespace(" ")]
-      5: TS_CONDITIONAL_TYPE@607..697
+      3: EQ@605..607 "=" [] [Whitespace(" ")]
+      4: TS_CONDITIONAL_TYPE@607..697
         0: TS_REFERENCE_TYPE@607..614
           0: JS_REFERENCE_IDENTIFIER@607..614
             0: IDENT@607..614 "MyType" [] [Whitespace(" ")]
@@ -3609,7 +3566,7 @@ JsModule {
           0: JS_REFERENCE_IDENTIFIER@687..697
             0: IDENT@687..697 "OuterFalse" [] []
           1: (empty)
-      6: (empty)
+      5: (empty)
     10: TS_TYPE_ALIAS_DECLARATION@697..947
       0: TYPE_KW@697..703 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@703..707
@@ -3640,9 +3597,8 @@ JsModule {
                 0: STRING_KW@739..745 "string" [] []
             3: (empty)
         2: R_ANGLE@745..747 ">" [] [Whitespace(" ")]
-      3: (empty)
-      4: EQ@747..748 "=" [] []
-      5: TS_CONDITIONAL_TYPE@748..946
+      3: EQ@747..748 "=" [] []
+      4: TS_CONDITIONAL_TYPE@748..946
         0: TS_REFERENCE_TYPE@748..756
           0: JS_REFERENCE_IDENTIFIER@748..756
             0: IDENT@748..756 "T" [Newline("\n"), Whitespace("     ")] [Whitespace(" ")]
@@ -3778,7 +3734,7 @@ JsModule {
             5: COLON@933..934 ":" [] []
             6: TS_STRING_TYPE@934..946
               0: STRING_KW@934..946 "string" [Newline("\n"), Whitespace("     ")] []
-      6: SEMICOLON@946..947 ";" [] []
+      5: SEMICOLON@946..947 ";" [] []
     11: TS_TYPE_ALIAS_DECLARATION@947..1038
       0: TYPE_KW@947..953 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@953..962
@@ -3796,9 +3752,8 @@ JsModule {
                 0: STRING_KW@973..979 "string" [] []
             3: (empty)
         2: R_ANGLE@979..981 ">" [] [Whitespace(" ")]
-      3: (empty)
-      4: EQ@981..983 "=" [] [Whitespace(" ")]
-      5: TS_CONDITIONAL_TYPE@983..1037
+      3: EQ@981..983 "=" [] [Whitespace(" ")]
+      4: TS_CONDITIONAL_TYPE@983..1037
         0: TS_REFERENCE_TYPE@983..985
           0: JS_REFERENCE_IDENTIFIER@983..985
             0: IDENT@983..985 "S" [] [Whitespace(" ")]
@@ -3847,7 +3802,7 @@ JsModule {
         5: COLON@1028..1030 ":" [] [Whitespace(" ")]
         6: TS_UNKNOWN_TYPE@1030..1037
           0: UNKNOWN_KW@1030..1037 "unknown" [] []
-      6: SEMICOLON@1037..1038 ";" [] []
+      5: SEMICOLON@1037..1038 ";" [] []
     12: TS_TYPE_ALIAS_DECLARATION@1038..1151
       0: TYPE_KW@1038..1044 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@1044..1059
@@ -3865,9 +3820,8 @@ JsModule {
                 0: STRING_KW@1070..1076 "string" [] []
             3: (empty)
         2: R_ANGLE@1076..1078 ">" [] [Whitespace(" ")]
-      3: (empty)
-      4: EQ@1078..1080 "=" [] [Whitespace(" ")]
-      5: TS_CONDITIONAL_TYPE@1080..1150
+      3: EQ@1078..1080 "=" [] [Whitespace(" ")]
+      4: TS_CONDITIONAL_TYPE@1080..1150
         0: TS_REFERENCE_TYPE@1080..1082
           0: JS_REFERENCE_IDENTIFIER@1080..1082
             0: IDENT@1080..1082 "S" [] [Whitespace(" ")]
@@ -3932,7 +3886,7 @@ JsModule {
         5: COLON@1141..1143 ":" [] [Whitespace(" ")]
         6: TS_UNKNOWN_TYPE@1143..1150
           0: UNKNOWN_KW@1143..1150 "unknown" [] []
-      6: SEMICOLON@1150..1151 ";" [] []
+      5: SEMICOLON@1150..1151 ";" [] []
     13: TS_TYPE_ALIAS_DECLARATION@1151..1230
       0: TYPE_KW@1151..1157 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@1157..1161
@@ -3950,9 +3904,8 @@ JsModule {
                 0: STRING_KW@1172..1178 "string" [] []
             3: (empty)
         2: R_ANGLE@1178..1180 ">" [] [Whitespace(" ")]
-      3: (empty)
-      4: EQ@1180..1181 "=" [] []
-      5: TS_CONDITIONAL_TYPE@1181..1229
+      3: EQ@1180..1181 "=" [] []
+      4: TS_CONDITIONAL_TYPE@1181..1229
         0: TS_REFERENCE_TYPE@1181..1189
           0: JS_REFERENCE_IDENTIFIER@1181..1189
             0: IDENT@1181..1189 "S" [Newline("\n"), Whitespace("     ")] [Whitespace(" ")]
@@ -3989,7 +3942,7 @@ JsModule {
           0: JS_REFERENCE_IDENTIFIER@1222..1229
             0: IDENT@1222..1229 "S" [Newline("\n"), Whitespace("     ")] []
           1: (empty)
-      6: SEMICOLON@1229..1230 ";" [] []
+      5: SEMICOLON@1229..1230 ";" [] []
     14: TS_TYPE_ALIAS_DECLARATION@1230..1282
       0: TYPE_KW@1230..1236 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@1236..1239
@@ -4004,9 +3957,8 @@ JsModule {
             2: (empty)
             3: (empty)
         2: R_ANGLE@1241..1243 ">" [] [Whitespace(" ")]
-      3: (empty)
-      4: EQ@1243..1245 "=" [] [Whitespace(" ")]
-      5: TS_CONDITIONAL_TYPE@1245..1281
+      3: EQ@1243..1245 "=" [] [Whitespace(" ")]
+      4: TS_CONDITIONAL_TYPE@1245..1281
         0: TS_REFERENCE_TYPE@1245..1247
           0: JS_REFERENCE_IDENTIFIER@1245..1247
             0: IDENT@1245..1247 "T" [] [Whitespace(" ")]
@@ -4036,7 +3988,7 @@ JsModule {
         5: COLON@1274..1276 ":" [] [Whitespace(" ")]
         6: TS_NEVER_TYPE@1276..1281
           0: NEVER_KW@1276..1281 "never" [] []
-      6: SEMICOLON@1281..1282 ";" [] []
+      5: SEMICOLON@1281..1282 ";" [] []
     15: TS_TYPE_ALIAS_DECLARATION@1282..1421
       0: TYPE_KW@1282..1288 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@1288..1296
@@ -4051,9 +4003,8 @@ JsModule {
             2: (empty)
             3: (empty)
         2: R_ANGLE@1298..1300 ">" [] [Whitespace(" ")]
-      3: (empty)
-      4: EQ@1300..1302 "=" [] [Whitespace(" ")]
-      5: TS_CONDITIONAL_TYPE@1302..1420
+      3: EQ@1300..1302 "=" [] [Whitespace(" ")]
+      4: TS_CONDITIONAL_TYPE@1302..1420
         0: TS_REFERENCE_TYPE@1302..1304
           0: JS_REFERENCE_IDENTIFIER@1302..1304
             0: IDENT@1302..1304 "T" [] [Whitespace(" ")]
@@ -4140,7 +4091,7 @@ JsModule {
               0: JS_REFERENCE_IDENTIFIER@1414..1420
                 0: IDENT@1414..1420 "T" [Newline("\n"), Whitespace("    ")] []
               1: (empty)
-      6: SEMICOLON@1420..1421 ";" [] []
+      5: SEMICOLON@1420..1421 ";" [] []
     16: TS_TYPE_ALIAS_DECLARATION@1421..1509
       0: TYPE_KW@1421..1427 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@1427..1439
@@ -4175,9 +4126,8 @@ JsModule {
                   0: ANY_KW@1462..1465 "any" [] []
             3: (empty)
         2: R_ANGLE@1465..1467 ">" [] [Whitespace(" ")]
-      3: (empty)
-      4: EQ@1467..1469 "=" [] [Whitespace(" ")]
-      5: TS_CONDITIONAL_TYPE@1469..1508
+      3: EQ@1467..1469 "=" [] [Whitespace(" ")]
+      4: TS_CONDITIONAL_TYPE@1469..1508
         0: TS_REFERENCE_TYPE@1469..1471
           0: JS_REFERENCE_IDENTIFIER@1469..1471
             0: IDENT@1469..1471 "T" [] [Whitespace(" ")]
@@ -4213,7 +4163,7 @@ JsModule {
         5: COLON@1503..1505 ":" [] [Whitespace(" ")]
         6: TS_ANY_TYPE@1505..1508
           0: ANY_KW@1505..1508 "any" [] []
-      6: SEMICOLON@1508..1509 ";" [] []
+      5: SEMICOLON@1508..1509 ";" [] []
     17: TS_TYPE_ALIAS_DECLARATION@1509..1598
       0: TYPE_KW@1509..1515 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@1515..1517
@@ -4228,9 +4178,8 @@ JsModule {
             2: (empty)
             3: (empty)
         2: R_ANGLE@1519..1521 ">" [] [Whitespace(" ")]
-      3: (empty)
-      4: EQ@1521..1523 "=" [] [Whitespace(" ")]
-      5: TS_CONDITIONAL_TYPE@1523..1597
+      3: EQ@1521..1523 "=" [] [Whitespace(" ")]
+      4: TS_CONDITIONAL_TYPE@1523..1597
         0: TS_REFERENCE_TYPE@1523..1525
           0: JS_REFERENCE_IDENTIFIER@1523..1525
             0: IDENT@1523..1525 "T" [] [Whitespace(" ")]
@@ -4308,7 +4257,7 @@ JsModule {
         5: COLON@1590..1592 ":" [] [Whitespace(" ")]
         6: TS_NEVER_TYPE@1592..1597
           0: NEVER_KW@1592..1597 "never" [] []
-      6: SEMICOLON@1597..1598 ";" [] []
+      5: SEMICOLON@1597..1598 ";" [] []
     18: TS_TYPE_ALIAS_DECLARATION@1598..1691
       0: TYPE_KW@1598..1604 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@1604..1606
@@ -4348,9 +4297,8 @@ JsModule {
                 2: R_CURLY@1634..1635 "}" [] []
             3: (empty)
         2: R_ANGLE@1635..1637 ">" [] [Whitespace(" ")]
-      3: (empty)
-      4: EQ@1637..1639 "=" [] [Whitespace(" ")]
-      5: TS_CONDITIONAL_TYPE@1639..1690
+      3: EQ@1637..1639 "=" [] [Whitespace(" ")]
+      4: TS_CONDITIONAL_TYPE@1639..1690
         0: TS_REFERENCE_TYPE@1639..1641
           0: JS_REFERENCE_IDENTIFIER@1639..1641
             0: IDENT@1639..1641 "T" [] [Whitespace(" ")]
@@ -4403,7 +4351,7 @@ JsModule {
         5: COLON@1685..1687 ":" [] [Whitespace(" ")]
         6: TS_ANY_TYPE@1687..1690
           0: ANY_KW@1687..1690 "any" [] []
-      6: SEMICOLON@1690..1691 ";" [] []
+      5: SEMICOLON@1690..1691 ";" [] []
     19: TS_TYPE_ALIAS_DECLARATION@1691..1736
       0: TYPE_KW@1691..1697 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@1697..1700
@@ -4418,9 +4366,8 @@ JsModule {
             2: (empty)
             3: (empty)
         2: R_ANGLE@1702..1704 ">" [] [Whitespace(" ")]
-      3: (empty)
-      4: EQ@1704..1706 "=" [] [Whitespace(" ")]
-      5: TS_CONDITIONAL_TYPE@1706..1735
+      3: EQ@1704..1706 "=" [] [Whitespace(" ")]
+      4: TS_CONDITIONAL_TYPE@1706..1735
         0: TS_REFERENCE_TYPE@1706..1708
           0: JS_REFERENCE_IDENTIFIER@1706..1708
             0: IDENT@1706..1708 "U" [] [Whitespace(" ")]
@@ -4447,7 +4394,7 @@ JsModule {
           0: JS_REFERENCE_IDENTIFIER@1734..1735
             0: IDENT@1734..1735 "U" [] []
           1: (empty)
-      6: SEMICOLON@1735..1736 ";" [] []
+      5: SEMICOLON@1735..1736 ";" [] []
     20: TS_TYPE_ALIAS_DECLARATION@1736..1827
       0: TYPE_KW@1736..1742 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@1742..1745
@@ -4462,9 +4409,8 @@ JsModule {
             2: (empty)
             3: (empty)
         2: R_ANGLE@1747..1749 ">" [] [Whitespace(" ")]
-      3: (empty)
-      4: EQ@1749..1751 "=" [] [Whitespace(" ")]
-      5: TS_CONDITIONAL_TYPE@1751..1826
+      3: EQ@1749..1751 "=" [] [Whitespace(" ")]
+      4: TS_CONDITIONAL_TYPE@1751..1826
         0: TS_REFERENCE_TYPE@1751..1753
           0: JS_REFERENCE_IDENTIFIER@1751..1753
             0: IDENT@1751..1753 "T" [] [Whitespace(" ")]
@@ -4506,7 +4452,7 @@ JsModule {
         5: COLON@1818..1820 ":" [] [Whitespace(" ")]
         6: TS_NUMBER_TYPE@1820..1826
           0: NUMBER_KW@1820..1826 "number" [] []
-      6: SEMICOLON@1826..1827 ";" [] []
+      5: SEMICOLON@1826..1827 ";" [] []
     21: TS_TYPE_ALIAS_DECLARATION@1827..1912
       0: TYPE_KW@1827..1833 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@1833..1836
@@ -4521,9 +4467,8 @@ JsModule {
             2: (empty)
             3: (empty)
         2: R_ANGLE@1838..1840 ">" [] [Whitespace(" ")]
-      3: (empty)
-      4: EQ@1840..1842 "=" [] [Whitespace(" ")]
-      5: TS_CONDITIONAL_TYPE@1842..1911
+      3: EQ@1840..1842 "=" [] [Whitespace(" ")]
+      4: TS_CONDITIONAL_TYPE@1842..1911
         0: TS_REFERENCE_TYPE@1842..1844
           0: JS_REFERENCE_IDENTIFIER@1842..1844
             0: IDENT@1842..1844 "T" [] [Whitespace(" ")]
@@ -4594,7 +4539,7 @@ JsModule {
         5: COLON@1904..1906 ":" [] [Whitespace(" ")]
         6: TS_NEVER_TYPE@1906..1911
           0: NEVER_KW@1906..1911 "never" [] []
-      6: SEMICOLON@1911..1912 ";" [] []
+      5: SEMICOLON@1911..1912 ";" [] []
     22: TS_TYPE_ALIAS_DECLARATION@1912..2128
       0: TYPE_KW@1912..1918 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@1918..1927
@@ -4609,9 +4554,8 @@ JsModule {
             2: (empty)
             3: (empty)
         2: R_ANGLE@1929..1931 ">" [] [Whitespace(" ")]
-      3: (empty)
-      4: EQ@1931..1933 "=" [] [Whitespace(" ")]
-      5: TS_CONDITIONAL_TYPE@1933..2127
+      3: EQ@1931..1933 "=" [] [Whitespace(" ")]
+      4: TS_CONDITIONAL_TYPE@1933..2127
         0: TS_REFERENCE_TYPE@1933..1935
           0: JS_REFERENCE_IDENTIFIER@1933..1935
             0: IDENT@1933..1935 "T" [] [Whitespace(" ")]
@@ -4713,15 +4657,14 @@ JsModule {
               5: COLON@2110..2113 ":" [Newline("\n")] [Whitespace(" ")]
               6: TS_STRING_LITERAL_TYPE@2113..2127
                 0: JS_STRING_LITERAL@2113..2127 "\"what is this\"" [] []
-      6: SEMICOLON@2127..2128 ";" [] []
+      5: SEMICOLON@2127..2128 ";" [] []
     23: TS_TYPE_ALIAS_DECLARATION@2128..2191
       0: TYPE_KW@2128..2134 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@2134..2137
         0: IDENT@2134..2137 "T1" [] [Whitespace(" ")]
       2: (empty)
-      3: (empty)
-      4: EQ@2137..2139 "=" [] [Whitespace(" ")]
-      5: TS_CONDITIONAL_TYPE@2139..2190
+      3: EQ@2137..2139 "=" [] [Whitespace(" ")]
+      4: TS_CONDITIONAL_TYPE@2139..2190
         0: TS_REFERENCE_TYPE@2139..2142
           0: JS_REFERENCE_IDENTIFIER@2139..2142
             0: IDENT@2139..2142 "F1" [] [Whitespace(" ")]
@@ -4759,15 +4702,14 @@ JsModule {
         5: COLON@2183..2185 ":" [] [Whitespace(" ")]
         6: TS_NEVER_TYPE@2185..2190
           0: NEVER_KW@2185..2190 "never" [] []
-      6: SEMICOLON@2190..2191 ";" [] []
+      5: SEMICOLON@2190..2191 ";" [] []
     24: TS_TYPE_ALIAS_DECLARATION@2191..2256
       0: TYPE_KW@2191..2197 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@2197..2200
         0: IDENT@2197..2200 "T2" [] [Whitespace(" ")]
       2: (empty)
-      3: (empty)
-      4: EQ@2200..2202 "=" [] [Whitespace(" ")]
-      5: TS_CONDITIONAL_TYPE@2202..2255
+      3: EQ@2200..2202 "=" [] [Whitespace(" ")]
+      4: TS_CONDITIONAL_TYPE@2202..2255
         0: TS_REFERENCE_TYPE@2202..2205
           0: JS_REFERENCE_IDENTIFIER@2202..2205
             0: IDENT@2202..2205 "F1" [] [Whitespace(" ")]
@@ -4812,7 +4754,7 @@ JsModule {
         5: COLON@2248..2250 ":" [] [Whitespace(" ")]
         6: TS_NEVER_TYPE@2250..2255
           0: NEVER_KW@2250..2255 "never" [] []
-      6: SEMICOLON@2255..2256 ";" [] []
+      5: SEMICOLON@2255..2256 ";" [] []
     25: TS_TYPE_ALIAS_DECLARATION@2256..2315
       0: TYPE_KW@2256..2262 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@2262..2264
@@ -4827,9 +4769,8 @@ JsModule {
             2: (empty)
             3: (empty)
         2: R_ANGLE@2266..2268 ">" [] [Whitespace(" ")]
-      3: (empty)
-      4: EQ@2268..2270 "=" [] [Whitespace(" ")]
-      5: TS_CONDITIONAL_TYPE@2270..2314
+      3: EQ@2268..2270 "=" [] [Whitespace(" ")]
+      4: TS_CONDITIONAL_TYPE@2270..2314
         0: TS_REFERENCE_TYPE@2270..2272
           0: JS_REFERENCE_IDENTIFIER@2270..2272
             0: IDENT@2270..2272 "T" [] [Whitespace(" ")]
@@ -4856,15 +4797,14 @@ JsModule {
         5: COLON@2307..2309 ":" [] [Whitespace(" ")]
         6: TS_BOOLEAN_LITERAL_TYPE@2309..2314
           0: FALSE_KW@2309..2314 "false" [] []
-      6: SEMICOLON@2314..2315 ";" [] []
+      5: SEMICOLON@2314..2315 ";" [] []
     26: TS_TYPE_ALIAS_DECLARATION@2315..2380
       0: TYPE_KW@2315..2321 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@2321..2324
         0: IDENT@2321..2324 "T4" [] [Whitespace(" ")]
       2: (empty)
-      3: (empty)
-      4: EQ@2324..2326 "=" [] [Whitespace(" ")]
-      5: TS_CONDITIONAL_TYPE@2326..2379
+      3: EQ@2324..2326 "=" [] [Whitespace(" ")]
+      4: TS_CONDITIONAL_TYPE@2326..2379
         0: TS_REFERENCE_TYPE@2326..2329
           0: JS_REFERENCE_IDENTIFIER@2326..2329
             0: IDENT@2326..2329 "F1" [] [Whitespace(" ")]
@@ -4905,15 +4845,14 @@ JsModule {
         5: COLON@2372..2374 ":" [] [Whitespace(" ")]
         6: TS_NEVER_TYPE@2374..2379
           0: NEVER_KW@2374..2379 "never" [] []
-      6: SEMICOLON@2379..2380 ";" [] []
+      5: SEMICOLON@2379..2380 ";" [] []
     27: TS_TYPE_ALIAS_DECLARATION@2380..2447
       0: TYPE_KW@2380..2386 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@2386..2389
         0: IDENT@2386..2389 "T5" [] [Whitespace(" ")]
       2: (empty)
-      3: (empty)
-      4: EQ@2389..2391 "=" [] [Whitespace(" ")]
-      5: TS_CONDITIONAL_TYPE@2391..2446
+      3: EQ@2389..2391 "=" [] [Whitespace(" ")]
+      4: TS_CONDITIONAL_TYPE@2391..2446
         0: TS_REFERENCE_TYPE@2391..2394
           0: JS_REFERENCE_IDENTIFIER@2391..2394
             0: IDENT@2391..2394 "F1" [] [Whitespace(" ")]
@@ -4961,7 +4900,7 @@ JsModule {
         5: COLON@2439..2441 ":" [] [Whitespace(" ")]
         6: TS_NEVER_TYPE@2441..2446
           0: NEVER_KW@2441..2446 "never" [] []
-      6: SEMICOLON@2446..2447 ";" [] []
+      5: SEMICOLON@2446..2447 ";" [] []
     28: TS_TYPE_ALIAS_DECLARATION@2447..2508
       0: TYPE_KW@2447..2453 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@2453..2455
@@ -4976,9 +4915,8 @@ JsModule {
             2: (empty)
             3: (empty)
         2: R_ANGLE@2457..2459 ">" [] [Whitespace(" ")]
-      3: (empty)
-      4: EQ@2459..2461 "=" [] [Whitespace(" ")]
-      5: TS_CONDITIONAL_TYPE@2461..2507
+      3: EQ@2459..2461 "=" [] [Whitespace(" ")]
+      4: TS_CONDITIONAL_TYPE@2461..2507
         0: TS_REFERENCE_TYPE@2461..2463
           0: JS_REFERENCE_IDENTIFIER@2461..2463
             0: IDENT@2461..2463 "T" [] [Whitespace(" ")]
@@ -5008,15 +4946,14 @@ JsModule {
         5: COLON@2500..2502 ":" [] [Whitespace(" ")]
         6: TS_BOOLEAN_LITERAL_TYPE@2502..2507
           0: FALSE_KW@2502..2507 "false" [] []
-      6: SEMICOLON@2507..2508 ";" [] []
+      5: SEMICOLON@2507..2508 ";" [] []
     29: TS_TYPE_ALIAS_DECLARATION@2508..2577
       0: TYPE_KW@2508..2514 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@2514..2517
         0: IDENT@2514..2517 "T7" [] [Whitespace(" ")]
       2: (empty)
-      3: (empty)
-      4: EQ@2517..2519 "=" [] [Whitespace(" ")]
-      5: TS_CONDITIONAL_TYPE@2519..2576
+      3: EQ@2517..2519 "=" [] [Whitespace(" ")]
+      4: TS_CONDITIONAL_TYPE@2519..2576
         0: TS_REFERENCE_TYPE@2519..2522
           0: JS_REFERENCE_IDENTIFIER@2519..2522
             0: IDENT@2519..2522 "F1" [] [Whitespace(" ")]
@@ -5063,15 +5000,14 @@ JsModule {
         5: COLON@2569..2571 ":" [] [Whitespace(" ")]
         6: TS_NEVER_TYPE@2571..2576
           0: NEVER_KW@2571..2576 "never" [] []
-      6: SEMICOLON@2576..2577 ";" [] []
+      5: SEMICOLON@2576..2577 ";" [] []
     30: TS_TYPE_ALIAS_DECLARATION@2577..2648
       0: TYPE_KW@2577..2583 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@2583..2586
         0: IDENT@2583..2586 "T8" [] [Whitespace(" ")]
       2: (empty)
-      3: (empty)
-      4: EQ@2586..2588 "=" [] [Whitespace(" ")]
-      5: TS_CONDITIONAL_TYPE@2588..2647
+      3: EQ@2586..2588 "=" [] [Whitespace(" ")]
+      4: TS_CONDITIONAL_TYPE@2588..2647
         0: TS_REFERENCE_TYPE@2588..2591
           0: JS_REFERENCE_IDENTIFIER@2588..2591
             0: IDENT@2588..2591 "F1" [] [Whitespace(" ")]
@@ -5125,7 +5061,7 @@ JsModule {
         5: COLON@2640..2642 ":" [] [Whitespace(" ")]
         6: TS_NEVER_TYPE@2642..2647
           0: NEVER_KW@2642..2647 "never" [] []
-      6: SEMICOLON@2647..2648 ";" [] []
+      5: SEMICOLON@2647..2648 ";" [] []
     31: TS_TYPE_ALIAS_DECLARATION@2648..2713
       0: TYPE_KW@2648..2654 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@2654..2656
@@ -5140,9 +5076,8 @@ JsModule {
             2: (empty)
             3: (empty)
         2: R_ANGLE@2658..2660 ">" [] [Whitespace(" ")]
-      3: (empty)
-      4: EQ@2660..2662 "=" [] [Whitespace(" ")]
-      5: TS_CONDITIONAL_TYPE@2662..2712
+      3: EQ@2660..2662 "=" [] [Whitespace(" ")]
+      4: TS_CONDITIONAL_TYPE@2662..2712
         0: TS_REFERENCE_TYPE@2662..2664
           0: JS_REFERENCE_IDENTIFIER@2662..2664
             0: IDENT@2662..2664 "T" [] [Whitespace(" ")]
@@ -5178,7 +5113,7 @@ JsModule {
         5: COLON@2705..2707 ":" [] [Whitespace(" ")]
         6: TS_BOOLEAN_LITERAL_TYPE@2707..2712
           0: FALSE_KW@2707..2712 "false" [] []
-      6: SEMICOLON@2712..2713 ";" [] []
+      5: SEMICOLON@2712..2713 ";" [] []
     32: TS_TYPE_ALIAS_DECLARATION@2713..2836
       0: TYPE_KW@2713..2719 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@2719..2726
@@ -5206,9 +5141,8 @@ JsModule {
                 2: R_BRACK@2744..2745 "]" [] []
             3: (empty)
         2: R_ANGLE@2745..2747 ">" [] [Whitespace(" ")]
-      3: (empty)
-      4: EQ@2747..2748 "=" [] []
-      5: TS_CONDITIONAL_TYPE@2748..2835
+      3: EQ@2747..2748 "=" [] []
+      4: TS_CONDITIONAL_TYPE@2748..2835
         0: TS_PARENTHESIZED_TYPE@2748..2784
           0: L_PAREN@2748..2754 "(" [Newline("\n"), Whitespace("    ")] []
           1: TS_FUNCTION_TYPE@2754..2782
@@ -5280,5 +5214,5 @@ JsModule {
           0: JS_REFERENCE_IDENTIFIER@2834..2835
             0: IDENT@2834..2835 "T" [] []
           1: (empty)
-      6: SEMICOLON@2835..2836 ";" [] []
+      5: SEMICOLON@2835..2836 ";" [] []
   4: EOF@2836..2837 "" [Newline("\n")] []

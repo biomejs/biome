@@ -9,7 +9,6 @@ JsModule {
                 name_token: IDENT@5..28 "IHasVisualizationModel" [] [Whitespace(" ")],
             },
             type_parameters: missing (optional),
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@28..30 "=" [] [Whitespace(" ")],
             ty: TsStringType {
                 string_token: STRING_KW@30..36 "string" [] [],
@@ -78,11 +77,10 @@ JsModule {
       1: TS_IDENTIFIER_BINDING@5..28
         0: IDENT@5..28 "IHasVisualizationModel" [] [Whitespace(" ")]
       2: (empty)
-      3: (empty)
-      4: EQ@28..30 "=" [] [Whitespace(" ")]
-      5: TS_STRING_TYPE@30..36
+      3: EQ@28..30 "=" [] [Whitespace(" ")]
+      4: TS_STRING_TYPE@30..36
         0: STRING_KW@30..36 "string" [] []
-      6: SEMICOLON@36..37 ";" [] []
+      5: SEMICOLON@36..37 ";" [] []
     1: JS_CLASS_DECLARATION@37..101
       0: JS_DECORATOR_LIST@37..37
       1: (empty)

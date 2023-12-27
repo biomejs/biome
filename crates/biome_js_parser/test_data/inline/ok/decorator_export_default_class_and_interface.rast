@@ -14,7 +14,6 @@ JsModule {
                         name_token: IDENT@25..26 "A" [] [],
                     },
                     type_parameters: missing (optional),
-                    ts_type_empty_parameters: missing (optional),
                     extends_clause: missing (optional),
                     l_curly_token: L_CURLY@26..27 "{" [] [],
                     members: TsTypeMemberList [],
@@ -37,7 +36,6 @@ JsModule {
                         name_token: IDENT@55..56 "A" [] [],
                     },
                     type_parameters: missing (optional),
-                    ts_type_empty_parameters: missing (optional),
                     extends_clause: missing (optional),
                     l_curly_token: L_CURLY@56..57 "{" [] [],
                     members: TsTypeMemberList [],
@@ -85,7 +83,6 @@ JsModule {
                         name_token: IDENT@111..112 "A" [] [],
                     },
                     type_parameters: missing (optional),
-                    ts_type_empty_parameters: missing (optional),
                     extends_clause: missing (optional),
                     l_curly_token: L_CURLY@112..113 "{" [] [],
                     members: TsTypeMemberList [],
@@ -108,7 +105,6 @@ JsModule {
                         name_token: IDENT@141..142 "A" [] [],
                     },
                     type_parameters: missing (optional),
-                    ts_type_empty_parameters: missing (optional),
                     extends_clause: missing (optional),
                     l_curly_token: L_CURLY@142..143 "{" [] [],
                     members: TsTypeMemberList [],
@@ -140,10 +136,9 @@ JsModule {
             0: IDENT@25..26 "A" [] []
           2: (empty)
           3: (empty)
-          4: (empty)
-          5: L_CURLY@26..27 "{" [] []
-          6: TS_TYPE_MEMBER_LIST@27..27
-          7: R_CURLY@27..28 "}" [] []
+          4: L_CURLY@26..27 "{" [] []
+          5: TS_TYPE_MEMBER_LIST@27..27
+          6: R_CURLY@27..28 "}" [] []
         2: (empty)
     1: JS_EMPTY_STATEMENT@28..29
       0: SEMICOLON@28..29 ";" [] []
@@ -158,10 +153,9 @@ JsModule {
             0: IDENT@55..56 "A" [] []
           2: (empty)
           3: (empty)
-          4: (empty)
-          5: L_CURLY@56..57 "{" [] []
-          6: TS_TYPE_MEMBER_LIST@57..57
-          7: R_CURLY@57..58 "}" [] []
+          4: L_CURLY@56..57 "{" [] []
+          5: TS_TYPE_MEMBER_LIST@57..57
+          6: R_CURLY@57..58 "}" [] []
         2: (empty)
     3: JS_EMPTY_STATEMENT@58..59
       0: SEMICOLON@58..59 ";" [] []
@@ -196,10 +190,9 @@ JsModule {
             0: IDENT@111..112 "A" [] []
           2: (empty)
           3: (empty)
-          4: (empty)
-          5: L_CURLY@112..113 "{" [] []
-          6: TS_TYPE_MEMBER_LIST@113..113
-          7: R_CURLY@113..114 "}" [] []
+          4: L_CURLY@112..113 "{" [] []
+          5: TS_TYPE_MEMBER_LIST@113..113
+          6: R_CURLY@113..114 "}" [] []
         2: (empty)
     7: JS_EMPTY_STATEMENT@114..115
       0: SEMICOLON@114..115 ";" [] []
@@ -214,10 +207,9 @@ JsModule {
             0: IDENT@141..142 "A" [] []
           2: (empty)
           3: (empty)
-          4: (empty)
-          5: L_CURLY@142..143 "{" [] []
-          6: TS_TYPE_MEMBER_LIST@143..143
-          7: R_CURLY@143..144 "}" [] []
+          4: L_CURLY@142..143 "{" [] []
+          5: TS_TYPE_MEMBER_LIST@143..143
+          6: R_CURLY@143..144 "}" [] []
         2: (empty)
     9: JS_EMPTY_STATEMENT@144..145
       0: SEMICOLON@144..145 ";" [] []

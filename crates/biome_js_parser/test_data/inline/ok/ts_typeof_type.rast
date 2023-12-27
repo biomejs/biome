@@ -30,7 +30,6 @@ JsModule {
                 name_token: IDENT@21..23 "B" [] [Whitespace(" ")],
             },
             type_parameters: missing (optional),
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@23..25 "=" [] [Whitespace(" ")],
             ty: TsTypeofType {
                 typeof_token: TYPEOF_KW@25..32 "typeof" [] [Whitespace(" ")],
@@ -47,7 +46,6 @@ JsModule {
                 name_token: IDENT@40..44 "T21" [] [Whitespace(" ")],
             },
             type_parameters: missing (optional),
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@44..46 "=" [] [Whitespace(" ")],
             ty: TsTypeofType {
                 typeof_token: TYPEOF_KW@46..53 "typeof" [] [Whitespace(" ")],
@@ -85,7 +83,6 @@ JsModule {
                 ],
                 r_angle_token: R_ANGLE@76..78 ">" [] [Whitespace(" ")],
             },
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@78..80 "=" [] [Whitespace(" ")],
             ty: TsReferenceType {
                 name: JsReferenceIdentifier {
@@ -146,22 +143,20 @@ JsModule {
       1: TS_IDENTIFIER_BINDING@21..23
         0: IDENT@21..23 "B" [] [Whitespace(" ")]
       2: (empty)
-      3: (empty)
-      4: EQ@23..25 "=" [] [Whitespace(" ")]
-      5: TS_TYPEOF_TYPE@25..33
+      3: EQ@23..25 "=" [] [Whitespace(" ")]
+      4: TS_TYPEOF_TYPE@25..33
         0: TYPEOF_KW@25..32 "typeof" [] [Whitespace(" ")]
         1: JS_REFERENCE_IDENTIFIER@32..33
           0: IDENT@32..33 "a" [] []
         2: (empty)
-      6: SEMICOLON@33..34 ";" [] []
+      5: SEMICOLON@33..34 ";" [] []
     2: TS_TYPE_ALIAS_DECLARATION@34..67
       0: TYPE_KW@34..40 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@40..44
         0: IDENT@40..44 "T21" [] [Whitespace(" ")]
       2: (empty)
-      3: (empty)
-      4: EQ@44..46 "=" [] [Whitespace(" ")]
-      5: TS_TYPEOF_TYPE@46..66
+      3: EQ@44..46 "=" [] [Whitespace(" ")]
+      4: TS_TYPEOF_TYPE@46..66
         0: TYPEOF_KW@46..53 "typeof" [] [Whitespace(" ")]
         1: JS_REFERENCE_IDENTIFIER@53..58
           0: IDENT@53..58 "Array" [] []
@@ -171,7 +166,7 @@ JsModule {
             0: TS_STRING_TYPE@59..65
               0: STRING_KW@59..65 "string" [] []
           2: R_ANGLE@65..66 ">" [] []
-      6: SEMICOLON@66..67 ";" [] []
+      5: SEMICOLON@66..67 ";" [] []
     3: TS_TYPE_ALIAS_DECLARATION@67..110
       0: TYPE_KW@67..73 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@73..74
@@ -186,9 +181,8 @@ JsModule {
             2: (empty)
             3: (empty)
         2: R_ANGLE@76..78 ">" [] [Whitespace(" ")]
-      3: (empty)
-      4: EQ@78..80 "=" [] [Whitespace(" ")]
-      5: TS_REFERENCE_TYPE@80..109
+      3: EQ@78..80 "=" [] [Whitespace(" ")]
+      4: TS_REFERENCE_TYPE@80..109
         0: JS_REFERENCE_IDENTIFIER@80..92
           0: IDENT@80..92 "InstanceType" [] []
         1: TS_TYPE_ARGUMENTS@92..109
@@ -207,5 +201,5 @@ JsModule {
                     1: (empty)
                 2: R_ANGLE@107..108 ">" [] []
           2: R_ANGLE@108..109 ">" [] []
-      6: SEMICOLON@109..110 ";" [] []
+      5: SEMICOLON@109..110 ";" [] []
   4: EOF@110..111 "" [Newline("\n")] []

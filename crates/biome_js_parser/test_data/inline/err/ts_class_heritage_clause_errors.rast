@@ -23,7 +23,6 @@ JsModule {
                 name_token: IDENT@21..25 "Int" [] [Whitespace(" ")],
             },
             type_parameters: missing (optional),
-            ts_type_empty_parameters: missing (optional),
             extends_clause: missing (optional),
             l_curly_token: L_CURLY@25..26 "{" [] [],
             members: TsTypeMemberList [],
@@ -180,10 +179,9 @@ JsModule {
         0: IDENT@21..25 "Int" [] [Whitespace(" ")]
       2: (empty)
       3: (empty)
-      4: (empty)
-      5: L_CURLY@25..26 "{" [] []
-      6: TS_TYPE_MEMBER_LIST@26..26
-      7: R_CURLY@26..27 "}" [] []
+      4: L_CURLY@25..26 "{" [] []
+      5: TS_TYPE_MEMBER_LIST@26..26
+      6: R_CURLY@26..27 "}" [] []
     2: JS_BOGUS_STATEMENT@27..63
       0: JS_DECORATOR_LIST@27..27
       1: CLASS_KW@27..34 "class" [Newline("\n")] [Whitespace(" ")]

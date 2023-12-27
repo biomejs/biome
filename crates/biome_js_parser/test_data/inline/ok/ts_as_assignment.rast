@@ -43,7 +43,6 @@ JsModule {
                 ],
                 r_angle_token: R_ANGLE@20..22 ">" [] [Whitespace(" ")],
             },
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@22..24 "=" [] [Whitespace(" ")],
             ty: TsObjectType {
                 l_curly_token: L_CURLY@24..26 "{" [] [Whitespace(" ")],
@@ -335,9 +334,8 @@ JsModule {
             2: (empty)
             3: (empty)
         2: R_ANGLE@20..22 ">" [] [Whitespace(" ")]
-      3: (empty)
-      4: EQ@22..24 "=" [] [Whitespace(" ")]
-      5: TS_OBJECT_TYPE@24..32
+      3: EQ@22..24 "=" [] [Whitespace(" ")]
+      4: TS_OBJECT_TYPE@24..32
         0: L_CURLY@24..26 "{" [] [Whitespace(" ")]
         1: TS_TYPE_MEMBER_LIST@26..31
           0: TS_PROPERTY_SIGNATURE_TYPE_MEMBER@26..31
@@ -353,7 +351,7 @@ JsModule {
                 1: (empty)
             4: (empty)
         2: R_CURLY@31..32 "}" [] []
-      6: SEMICOLON@32..33 ";" [] []
+      5: SEMICOLON@32..33 ";" [] []
     2: JS_EXPRESSION_STATEMENT@33..59
       0: JS_ASSIGNMENT_EXPRESSION@33..58
         0: JS_PARENTHESIZED_ASSIGNMENT@33..48

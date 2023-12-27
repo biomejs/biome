@@ -40,7 +40,6 @@ JsModule {
                                     name_token: IDENT@38..40 "A" [] [Whitespace(" ")],
                                 },
                                 type_parameters: missing (optional),
-                                ts_type_empty_parameters: missing (optional),
                                 eq_token: EQ@40..42 "=" [] [Whitespace(" ")],
                                 ty: TsThisType {
                                     this_token: THIS_KW@42..46 "this" [] [],
@@ -146,11 +145,10 @@ JsModule {
                 1: TS_IDENTIFIER_BINDING@38..40
                   0: IDENT@38..40 "A" [] [Whitespace(" ")]
                 2: (empty)
-                3: (empty)
-                4: EQ@40..42 "=" [] [Whitespace(" ")]
-                5: TS_THIS_TYPE@42..46
+                3: EQ@40..42 "=" [] [Whitespace(" ")]
+                4: TS_THIS_TYPE@42..46
                   0: THIS_KW@42..46 "this" [] []
-                6: SEMICOLON@46..47 ";" [] []
+                5: SEMICOLON@46..47 ";" [] []
             3: R_CURLY@47..53 "}" [Newline("\n"), Whitespace("    ")] []
         1: JS_METHOD_CLASS_MEMBER@53..133
           0: JS_METHOD_MODIFIER_LIST@53..53

@@ -103,5 +103,3 @@ function test2(a: string):
 type Type01 = 0 extends
     (1 extends 2 ? 3 : 4) ? 5 : 6
     ;
-
-type A<                > = {}

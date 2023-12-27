@@ -1799,7 +1799,6 @@ JsModule {
                 ],
                 r_angle_token: R_ANGLE@938..940 ">" [] [Whitespace(" ")],
             },
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@940..942 "=" [] [Whitespace(" ")],
             ty: TsObjectType {
                 l_curly_token: L_CURLY@942..943 "{" [] [],
@@ -3037,13 +3036,12 @@ JsModule {
             2: (empty)
             3: (empty)
         2: R_ANGLE@938..940 ">" [] [Whitespace(" ")]
-      3: (empty)
-      4: EQ@940..942 "=" [] [Whitespace(" ")]
-      5: TS_OBJECT_TYPE@942..944
+      3: EQ@940..942 "=" [] [Whitespace(" ")]
+      4: TS_OBJECT_TYPE@942..944
         0: L_CURLY@942..943 "{" [] []
         1: TS_TYPE_MEMBER_LIST@943..943
         2: R_CURLY@943..944 "}" [] []
-      6: (empty)
+      5: (empty)
     35: JS_BOGUS_STATEMENT@944..971
       0: TYPE_KW@944..950 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@950..953

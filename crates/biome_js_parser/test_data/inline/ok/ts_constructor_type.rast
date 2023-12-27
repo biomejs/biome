@@ -9,7 +9,6 @@ JsModule {
                 name_token: IDENT@5..7 "A" [] [Whitespace(" ")],
             },
             type_parameters: missing (optional),
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@7..9 "=" [] [Whitespace(" ")],
             ty: TsConstructorType {
                 abstract_token: missing (optional),
@@ -63,7 +62,6 @@ JsModule {
                 name_token: IDENT@51..53 "B" [] [Whitespace(" ")],
             },
             type_parameters: missing (optional),
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@53..55 "=" [] [Whitespace(" ")],
             ty: TsConstructorType {
                 abstract_token: ABSTRACT_KW@55..64 "abstract" [] [Whitespace(" ")],
@@ -117,7 +115,6 @@ JsModule {
                 name_token: IDENT@106..108 "C" [] [Whitespace(" ")],
             },
             type_parameters: missing (optional),
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@108..110 "=" [] [Whitespace(" ")],
             ty: TsConstructorType {
                 abstract_token: missing (optional),
@@ -199,7 +196,6 @@ JsModule {
                 name_token: IDENT@148..150 "D" [] [Whitespace(" ")],
             },
             type_parameters: missing (optional),
-            ts_type_empty_parameters: missing (optional),
             eq_token: EQ@150..152 "=" [] [Whitespace(" ")],
             ty: TsConstructorType {
                 abstract_token: ABSTRACT_KW@152..161 "abstract" [] [Whitespace(" ")],
@@ -289,9 +285,8 @@ JsModule {
       1: TS_IDENTIFIER_BINDING@5..7
         0: IDENT@5..7 "A" [] [Whitespace(" ")]
       2: (empty)
-      3: (empty)
-      4: EQ@7..9 "=" [] [Whitespace(" ")]
-      5: TS_CONSTRUCTOR_TYPE@9..44
+      3: EQ@7..9 "=" [] [Whitespace(" ")]
+      4: TS_CONSTRUCTOR_TYPE@9..44
         0: (empty)
         1: NEW_KW@9..12 "new" [] []
         2: (empty)
@@ -323,15 +318,14 @@ JsModule {
         4: FAT_ARROW@35..38 "=>" [] [Whitespace(" ")]
         5: TS_STRING_TYPE@38..44
           0: STRING_KW@38..44 "string" [] []
-      6: SEMICOLON@44..45 ";" [] []
+      5: SEMICOLON@44..45 ";" [] []
     1: TS_TYPE_ALIAS_DECLARATION@45..100
       0: TYPE_KW@45..51 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@51..53
         0: IDENT@51..53 "B" [] [Whitespace(" ")]
       2: (empty)
-      3: (empty)
-      4: EQ@53..55 "=" [] [Whitespace(" ")]
-      5: TS_CONSTRUCTOR_TYPE@55..99
+      3: EQ@53..55 "=" [] [Whitespace(" ")]
+      4: TS_CONSTRUCTOR_TYPE@55..99
         0: ABSTRACT_KW@55..64 "abstract" [] [Whitespace(" ")]
         1: NEW_KW@64..67 "new" [] []
         2: (empty)
@@ -363,15 +357,14 @@ JsModule {
         4: FAT_ARROW@90..93 "=>" [] [Whitespace(" ")]
         5: TS_STRING_TYPE@93..99
           0: STRING_KW@93..99 "string" [] []
-      6: SEMICOLON@99..100 ";" [] []
+      5: SEMICOLON@99..100 ";" [] []
     2: TS_TYPE_ALIAS_DECLARATION@100..142
       0: TYPE_KW@100..106 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@106..108
         0: IDENT@106..108 "C" [] [Whitespace(" ")]
       2: (empty)
-      3: (empty)
-      4: EQ@108..110 "=" [] [Whitespace(" ")]
-      5: TS_CONSTRUCTOR_TYPE@110..141
+      3: EQ@108..110 "=" [] [Whitespace(" ")]
+      4: TS_CONSTRUCTOR_TYPE@110..141
         0: (empty)
         1: NEW_KW@110..113 "new" [] []
         2: TS_TYPE_PARAMETERS@113..119
@@ -423,15 +416,14 @@ JsModule {
         4: FAT_ARROW@132..135 "=>" [] [Whitespace(" ")]
         5: TS_STRING_TYPE@135..141
           0: STRING_KW@135..141 "string" [] []
-      6: SEMICOLON@141..142 ";" [] []
+      5: SEMICOLON@141..142 ";" [] []
     3: TS_TYPE_ALIAS_DECLARATION@142..193
       0: TYPE_KW@142..148 "type" [Newline("\n")] [Whitespace(" ")]
       1: TS_IDENTIFIER_BINDING@148..150
         0: IDENT@148..150 "D" [] [Whitespace(" ")]
       2: (empty)
-      3: (empty)
-      4: EQ@150..152 "=" [] [Whitespace(" ")]
-      5: TS_CONSTRUCTOR_TYPE@152..192
+      3: EQ@150..152 "=" [] [Whitespace(" ")]
+      4: TS_CONSTRUCTOR_TYPE@152..192
         0: ABSTRACT_KW@152..161 "abstract" [] [Whitespace(" ")]
         1: NEW_KW@161..164 "new" [] []
         2: TS_TYPE_PARAMETERS@164..170
@@ -483,5 +475,5 @@ JsModule {
         4: FAT_ARROW@183..186 "=>" [] [Whitespace(" ")]
         5: TS_STRING_TYPE@186..192
           0: STRING_KW@186..192 "string" [] []
-      6: SEMICOLON@192..193 ";" [] []
+      5: SEMICOLON@192..193 ";" [] []
   4: EOF@193..194 "" [Newline("\n")] []
