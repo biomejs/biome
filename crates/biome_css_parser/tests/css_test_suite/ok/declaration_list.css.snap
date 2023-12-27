@@ -406,10 +406,8 @@ CssRoot {
                         },
                         colon_token: COLON@203..205 ":" [] [Whitespace(" ")],
                         value: CssComponentValueList [
-                            CssCustomProperty {
-                                value: CssIdentifier {
-                                    value_token: IDENT@205..213 "--custom" [] [],
-                                },
+                            CssDashedIdentifier {
+                                value_token: IDENT@205..213 "--custom" [] [],
                             },
                         ],
                         important: missing (optional),
@@ -492,10 +490,8 @@ CssRoot {
                                     CssParameter {
                                         any_css_expression: CssListOfComponentValuesExpression {
                                             css_component_value_list: CssComponentValueList [
-                                                CssCustomProperty {
-                                                    value: CssIdentifier {
-                                                        value_token: IDENT@293..315 "--bs-border-radius-xxl" [] [],
-                                                    },
+                                                CssDashedIdentifier {
+                                                    value_token: IDENT@293..315 "--bs-border-radius-xxl" [] [],
                                                 },
                                             ],
                                         },
@@ -757,9 +753,8 @@ CssRoot {
               0: IDENT@193..203 "prop1" [Newline("\n"), Whitespace("    ")] []
             1: COLON@203..205 ":" [] [Whitespace(" ")]
             2: CSS_COMPONENT_VALUE_LIST@205..213
-              0: CSS_CUSTOM_PROPERTY@205..213
-                0: CSS_IDENTIFIER@205..213
-                  0: IDENT@205..213 "--custom" [] []
+              0: CSS_DASHED_IDENTIFIER@205..213
+                0: IDENT@205..213 "--custom" [] []
             3: (empty)
           1: SEMICOLON@213..214 ";" [] []
         2: R_CURLY@214..216 "}" [Newline("\n")] []
@@ -816,9 +811,8 @@ CssRoot {
                   0: CSS_PARAMETER@293..315
                     0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@293..315
                       0: CSS_COMPONENT_VALUE_LIST@293..315
-                        0: CSS_CUSTOM_PROPERTY@293..315
-                          0: CSS_IDENTIFIER@293..315
-                            0: IDENT@293..315 "--bs-border-radius-xxl" [] []
+                        0: CSS_DASHED_IDENTIFIER@293..315
+                          0: IDENT@293..315 "--bs-border-radius-xxl" [] []
                 3: R_PAREN@315..317 ")" [] [Whitespace(" ")]
             3: CSS_DECLARATION_IMPORTANT@317..327
               0: BANG@317..318 "!" [] []

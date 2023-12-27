@@ -8,7 +8,7 @@ impl FormatRule<AnyCssKeyframeName> for FormatAnyCssKeyframeName {
     type Context = CssFormatContext;
     fn fmt(&self, node: &AnyCssKeyframeName, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
-            AnyCssKeyframeName::CssIdentifier(node) => node.format().fmt(f),
+            AnyCssKeyframeName::CssCustomIdentifier(node) => node.format().fmt(f),
             AnyCssKeyframeName::CssString(node) => node.format().fmt(f),
         }
     }

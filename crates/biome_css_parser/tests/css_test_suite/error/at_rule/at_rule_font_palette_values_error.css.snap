@@ -9,6 +9,7 @@ expression: snapshot
 @font-palette-values  {  }
 @font-palette-values 6788 {  }
 @font-palette-values 'string' {  }
+@font-palette-values undashed-ident { }
 @font-palette-values ident
 @font-palette-values ;
 
@@ -75,36 +76,56 @@ CssRoot {
             rule: CssBogusAtRule {
                 items: [
                     FONT_PALETTE_VALUES_KW@94..114 "font-palette-values" [] [Whitespace(" ")],
-                    CssIdentifier {
-                        value_token: IDENT@114..119 "ident" [] [],
+                    CssBogus {
+                        items: [
+                            IDENT@114..129 "undashed-ident" [] [Whitespace(" ")],
+                        ],
+                    },
+                    CssDeclarationListBlock {
+                        l_curly_token: L_CURLY@129..131 "{" [] [Whitespace(" ")],
+                        declarations: CssDeclarationList [],
+                        r_curly_token: R_CURLY@131..132 "}" [] [],
                     },
                 ],
             },
         },
         CssAtRule {
-            at_token: AT@119..121 "@" [Newline("\n")] [],
+            at_token: AT@132..134 "@" [Newline("\n")] [],
             rule: CssBogusAtRule {
                 items: [
-                    FONT_PALETTE_VALUES_KW@121..141 "font-palette-values" [] [Whitespace(" ")],
+                    FONT_PALETTE_VALUES_KW@134..154 "font-palette-values" [] [Whitespace(" ")],
                     CssBogus {
                         items: [
-                            SEMICOLON@141..142 ";" [] [],
+                            IDENT@154..159 "ident" [] [],
+                        ],
+                    },
+                ],
+            },
+        },
+        CssAtRule {
+            at_token: AT@159..161 "@" [Newline("\n")] [],
+            rule: CssBogusAtRule {
+                items: [
+                    FONT_PALETTE_VALUES_KW@161..181 "font-palette-values" [] [Whitespace(" ")],
+                    CssBogus {
+                        items: [
+                            SEMICOLON@181..182 ";" [] [],
                         ],
                     },
                 ],
             },
         },
     ],
-    eof_token: EOF@142..143 "" [Newline("\n")] [],
+    eof_token: EOF@182..183 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..143
+0: CSS_ROOT@0..183
   0: (empty)
-  1: CSS_RULE_LIST@0..142
+  1: CSS_RULE_LIST@0..182
     0: CSS_AT_RULE@0..26
       0: AT@0..1 "@" [] []
       1: CSS_BOGUS_AT_RULE@1..26
@@ -133,19 +154,29 @@ CssRoot {
           0: L_CURLY@88..91 "{" [] [Whitespace("  ")]
           1: CSS_DECLARATION_LIST@91..91
           2: R_CURLY@91..92 "}" [] []
-    3: CSS_AT_RULE@92..119
+    3: CSS_AT_RULE@92..132
       0: AT@92..94 "@" [Newline("\n")] []
-      1: CSS_BOGUS_AT_RULE@94..119
+      1: CSS_BOGUS_AT_RULE@94..132
         0: FONT_PALETTE_VALUES_KW@94..114 "font-palette-values" [] [Whitespace(" ")]
-        1: CSS_IDENTIFIER@114..119
-          0: IDENT@114..119 "ident" [] []
-    4: CSS_AT_RULE@119..142
-      0: AT@119..121 "@" [Newline("\n")] []
-      1: CSS_BOGUS_AT_RULE@121..142
-        0: FONT_PALETTE_VALUES_KW@121..141 "font-palette-values" [] [Whitespace(" ")]
-        1: CSS_BOGUS@141..142
-          0: SEMICOLON@141..142 ";" [] []
-  2: EOF@142..143 "" [Newline("\n")] []
+        1: CSS_BOGUS@114..129
+          0: IDENT@114..129 "undashed-ident" [] [Whitespace(" ")]
+        2: CSS_DECLARATION_LIST_BLOCK@129..132
+          0: L_CURLY@129..131 "{" [] [Whitespace(" ")]
+          1: CSS_DECLARATION_LIST@131..131
+          2: R_CURLY@131..132 "}" [] []
+    4: CSS_AT_RULE@132..159
+      0: AT@132..134 "@" [Newline("\n")] []
+      1: CSS_BOGUS_AT_RULE@134..159
+        0: FONT_PALETTE_VALUES_KW@134..154 "font-palette-values" [] [Whitespace(" ")]
+        1: CSS_BOGUS@154..159
+          0: IDENT@154..159 "ident" [] []
+    5: CSS_AT_RULE@159..182
+      0: AT@159..161 "@" [Newline("\n")] []
+      1: CSS_BOGUS_AT_RULE@161..182
+        0: FONT_PALETTE_VALUES_KW@161..181 "font-palette-values" [] [Whitespace(" ")]
+        1: CSS_BOGUS@181..182
+          0: SEMICOLON@181..182 ";" [] []
+  2: EOF@182..183 "" [Newline("\n")] []
 
 ```
 
@@ -176,7 +207,7 @@ at_rule_font_palette_values_error.css:2:22 parse ━━━━━━━━━━�
   > 2 │ @font-palette-values 6788 {  }
       │                      ^^^^
     3 │ @font-palette-values 'string' {  }
-    4 │ @font-palette-values ident
+    4 │ @font-palette-values undashed-ident { }
   
   i Expected an identifier here.
   
@@ -184,7 +215,7 @@ at_rule_font_palette_values_error.css:2:22 parse ━━━━━━━━━━�
   > 2 │ @font-palette-values 6788 {  }
       │                      ^^^^
     3 │ @font-palette-values 'string' {  }
-    4 │ @font-palette-values ident
+    4 │ @font-palette-values undashed-ident { }
   
 at_rule_font_palette_values_error.css:3:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -194,8 +225,8 @@ at_rule_font_palette_values_error.css:3:22 parse ━━━━━━━━━━�
     2 │ @font-palette-values 6788 {  }
   > 3 │ @font-palette-values 'string' {  }
       │                      ^^^^^^^^
-    4 │ @font-palette-values ident
-    5 │ @font-palette-values ;
+    4 │ @font-palette-values undashed-ident { }
+    5 │ @font-palette-values ident
   
   i Expected an identifier here.
   
@@ -203,59 +234,99 @@ at_rule_font_palette_values_error.css:3:22 parse ━━━━━━━━━━�
     2 │ @font-palette-values 6788 {  }
   > 3 │ @font-palette-values 'string' {  }
       │                      ^^^^^^^^
-    4 │ @font-palette-values ident
-    5 │ @font-palette-values ;
+    4 │ @font-palette-values undashed-ident { }
+    5 │ @font-palette-values ident
   
-at_rule_font_palette_values_error.css:5:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+at_rule_font_palette_values_error.css:4:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a body but instead found '@'.
+  × Expected an identifier but instead found 'undashed-ident'.
   
+    2 │ @font-palette-values 6788 {  }
     3 │ @font-palette-values 'string' {  }
-    4 │ @font-palette-values ident
-  > 5 │ @font-palette-values ;
-      │ ^
-    6 │ 
+  > 4 │ @font-palette-values undashed-ident { }
+      │                      ^^^^^^^^^^^^^^
+    5 │ @font-palette-values ident
+    6 │ @font-palette-values ;
   
-  i Expected a body here.
+  i Expected an identifier here.
   
+    2 │ @font-palette-values 6788 {  }
     3 │ @font-palette-values 'string' {  }
-    4 │ @font-palette-values ident
-  > 5 │ @font-palette-values ;
-      │ ^
-    6 │ 
+  > 4 │ @font-palette-values undashed-ident { }
+      │                      ^^^^^^^^^^^^^^
+    5 │ @font-palette-values ident
+    6 │ @font-palette-values ;
   
 at_rule_font_palette_values_error.css:5:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected an identifier but instead found ';'.
+  × Expected an identifier but instead found 'ident'.
   
     3 │ @font-palette-values 'string' {  }
-    4 │ @font-palette-values ident
-  > 5 │ @font-palette-values ;
-      │                      ^
-    6 │ 
+    4 │ @font-palette-values undashed-ident { }
+  > 5 │ @font-palette-values ident
+      │                      ^^^^^
+    6 │ @font-palette-values ;
+    7 │ 
   
   i Expected an identifier here.
   
     3 │ @font-palette-values 'string' {  }
-    4 │ @font-palette-values ident
-  > 5 │ @font-palette-values ;
-      │                      ^
-    6 │ 
+    4 │ @font-palette-values undashed-ident { }
+  > 5 │ @font-palette-values ident
+      │                      ^^^^^
+    6 │ @font-palette-values ;
+    7 │ 
   
 at_rule_font_palette_values_error.css:6:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+  × Expected a body but instead found '@'.
+  
+    4 │ @font-palette-values undashed-ident { }
+    5 │ @font-palette-values ident
+  > 6 │ @font-palette-values ;
+      │ ^
+    7 │ 
+  
+  i Expected a body here.
+  
+    4 │ @font-palette-values undashed-ident { }
+    5 │ @font-palette-values ident
+  > 6 │ @font-palette-values ;
+      │ ^
+    7 │ 
+  
+at_rule_font_palette_values_error.css:6:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found ';'.
+  
+    4 │ @font-palette-values undashed-ident { }
+    5 │ @font-palette-values ident
+  > 6 │ @font-palette-values ;
+      │                      ^
+    7 │ 
+  
+  i Expected an identifier here.
+  
+    4 │ @font-palette-values undashed-ident { }
+    5 │ @font-palette-values ident
+  > 6 │ @font-palette-values ;
+      │                      ^
+    7 │ 
+  
+at_rule_font_palette_values_error.css:7:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
   × Expected a body but instead found the end of the file.
   
-    4 │ @font-palette-values ident
-    5 │ @font-palette-values ;
-  > 6 │ 
+    5 │ @font-palette-values ident
+    6 │ @font-palette-values ;
+  > 7 │ 
       │ 
   
   i Expected a body here.
   
-    4 │ @font-palette-values ident
-    5 │ @font-palette-values ;
-  > 6 │ 
+    5 │ @font-palette-values ident
+    6 │ @font-palette-values ;
+  > 7 │ 
       │ 
   
 ```

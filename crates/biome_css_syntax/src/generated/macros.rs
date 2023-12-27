@@ -118,8 +118,12 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssCounterStyleAtRule::new_unchecked(node) };
                     $body
                 }
-                $crate::CssSyntaxKind::CSS_CUSTOM_PROPERTY => {
-                    let $pattern = unsafe { $crate::CssCustomProperty::new_unchecked(node) };
+                $crate::CssSyntaxKind::CSS_CUSTOM_IDENTIFIER => {
+                    let $pattern = unsafe { $crate::CssCustomIdentifier::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_DASHED_IDENTIFIER => {
+                    let $pattern = unsafe { $crate::CssDashedIdentifier::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_DECLARATION => {

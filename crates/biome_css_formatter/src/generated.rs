@@ -602,6 +602,46 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssUniversalNamespacePre
         FormatOwnedWithRule :: new (self , crate :: css :: auxiliary :: universal_namespace_prefix :: FormatCssUniversalNamespacePrefix :: default ())
     }
 }
+impl FormatRule<biome_css_syntax::CssCustomIdentifier>
+    for crate::css::auxiliary::custom_identifier::FormatCssCustomIdentifier
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssCustomIdentifier,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::CssCustomIdentifier>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssCustomIdentifier {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssCustomIdentifier,
+        crate::css::auxiliary::custom_identifier::FormatCssCustomIdentifier,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::css::auxiliary::custom_identifier::FormatCssCustomIdentifier::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssCustomIdentifier {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssCustomIdentifier,
+        crate::css::auxiliary::custom_identifier::FormatCssCustomIdentifier,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::auxiliary::custom_identifier::FormatCssCustomIdentifier::default(),
+        )
+    }
+}
 impl FormatRule<biome_css_syntax::CssAttributeName>
     for crate::css::auxiliary::attribute_name::FormatCssAttributeName
 {
@@ -1567,43 +1607,43 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssDeclarationImportant 
         )
     }
 }
-impl FormatRule<biome_css_syntax::CssCustomProperty>
-    for crate::css::auxiliary::custom_property::FormatCssCustomProperty
+impl FormatRule<biome_css_syntax::CssDashedIdentifier>
+    for crate::css::auxiliary::dashed_identifier::FormatCssDashedIdentifier
 {
     type Context = CssFormatContext;
     #[inline(always)]
     fn fmt(
         &self,
-        node: &biome_css_syntax::CssCustomProperty,
+        node: &biome_css_syntax::CssDashedIdentifier,
         f: &mut CssFormatter,
     ) -> FormatResult<()> {
-        FormatNodeRule::<biome_css_syntax::CssCustomProperty>::fmt(self, node, f)
+        FormatNodeRule::<biome_css_syntax::CssDashedIdentifier>::fmt(self, node, f)
     }
 }
-impl AsFormat<CssFormatContext> for biome_css_syntax::CssCustomProperty {
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssDashedIdentifier {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_css_syntax::CssCustomProperty,
-        crate::css::auxiliary::custom_property::FormatCssCustomProperty,
+        biome_css_syntax::CssDashedIdentifier,
+        crate::css::auxiliary::dashed_identifier::FormatCssDashedIdentifier,
     >;
     fn format(&self) -> Self::Format<'_> {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::css::auxiliary::custom_property::FormatCssCustomProperty::default(),
+            crate::css::auxiliary::dashed_identifier::FormatCssDashedIdentifier::default(),
         )
     }
 }
-impl IntoFormat<CssFormatContext> for biome_css_syntax::CssCustomProperty {
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssDashedIdentifier {
     type Format = FormatOwnedWithRule<
-        biome_css_syntax::CssCustomProperty,
-        crate::css::auxiliary::custom_property::FormatCssCustomProperty,
+        biome_css_syntax::CssDashedIdentifier,
+        crate::css::auxiliary::dashed_identifier::FormatCssDashedIdentifier,
     >;
     fn into_format(self) -> Self::Format {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::css::auxiliary::custom_property::FormatCssCustomProperty::default(),
+            crate::css::auxiliary::dashed_identifier::FormatCssDashedIdentifier::default(),
         )
     }
 }

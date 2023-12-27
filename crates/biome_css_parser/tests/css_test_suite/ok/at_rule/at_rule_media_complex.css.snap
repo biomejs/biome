@@ -892,7 +892,7 @@ CssRoot {
                                     sub_selectors: CssSubSelectorList [
                                         CssIdSelector {
                                             hash_token: HASH@768..774 "#" [Newline("\n"), Whitespace("    ")] [],
-                                            name: CssIdentifier {
+                                            name: CssCustomIdentifier {
                                                 value_token: IDENT@774..780 "inner" [] [Whitespace(" ")],
                                             },
                                         },
@@ -1535,7 +1535,7 @@ CssRoot {
                   2: CSS_SUB_SELECTOR_LIST@768..780
                     0: CSS_ID_SELECTOR@768..780
                       0: HASH@768..774 "#" [Newline("\n"), Whitespace("    ")] []
-                      1: CSS_IDENTIFIER@774..780
+                      1: CSS_CUSTOM_IDENTIFIER@774..780
                         0: IDENT@774..780 "inner" [] [Whitespace(" ")]
               1: CSS_DECLARATION_LIST_BLOCK@780..816
                 0: L_CURLY@780..781 "{" [] []

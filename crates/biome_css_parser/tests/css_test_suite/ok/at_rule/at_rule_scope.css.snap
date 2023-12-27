@@ -131,7 +131,7 @@ CssRoot {
                                 sub_selectors: CssSubSelectorList [
                                     CssClassSelector {
                                         dot_token: DOT@97..98 "." [] [],
-                                        name: CssIdentifier {
+                                        name: CssCustomIdentifier {
                                             value_token: IDENT@98..110 "light-scheme" [] [],
                                         },
                                     },
@@ -198,7 +198,7 @@ CssRoot {
                                     sub_selectors: CssSubSelectorList [
                                         CssClassSelector {
                                             dot_token: DOT@201..202 "." [] [],
-                                            name: CssIdentifier {
+                                            name: CssCustomIdentifier {
                                                 value_token: IDENT@202..210 "content" [] [Whitespace(" ")],
                                             },
                                         },
@@ -265,7 +265,7 @@ CssRoot {
                                     sub_selectors: CssSubSelectorList [
                                         CssClassSelector {
                                             dot_token: DOT@245..248 "." [Newline("\n"), Newline("\n")] [],
-                                            name: CssIdentifier {
+                                            name: CssCustomIdentifier {
                                                 value_token: IDENT@248..256 "content" [] [Whitespace(" ")],
                                             },
                                         },
@@ -316,7 +316,7 @@ CssRoot {
                                 sub_selectors: CssSubSelectorList [
                                     CssClassSelector {
                                         dot_token: DOT@286..287 "." [] [],
-                                        name: CssIdentifier {
+                                        name: CssCustomIdentifier {
                                             value_token: IDENT@287..299 "media-object" [] [],
                                         },
                                     },
@@ -336,7 +336,7 @@ CssRoot {
                                     sub_selectors: CssSubSelectorList [
                                         CssClassSelector {
                                             dot_token: DOT@305..306 "." [] [],
-                                            name: CssIdentifier {
+                                            name: CssCustomIdentifier {
                                                 value_token: IDENT@306..314 "content" [] [Whitespace(" ")],
                                             },
                                         },
@@ -403,7 +403,7 @@ CssRoot {
                                     sub_selectors: CssSubSelectorList [
                                         CssClassSelector {
                                             dot_token: DOT@349..352 "." [Newline("\n"), Newline("\n")] [],
-                                            name: CssIdentifier {
+                                            name: CssCustomIdentifier {
                                                 value_token: IDENT@352..360 "content" [] [Whitespace(" ")],
                                             },
                                         },
@@ -456,7 +456,7 @@ CssRoot {
                                     sub_selectors: CssSubSelectorList [
                                         CssClassSelector {
                                             dot_token: DOT@393..394 "." [] [],
-                                            name: CssIdentifier {
+                                            name: CssCustomIdentifier {
                                                 value_token: IDENT@394..402 "content" [] [Whitespace(" ")],
                                             },
                                         },
@@ -523,7 +523,7 @@ CssRoot {
                                     sub_selectors: CssSubSelectorList [
                                         CssClassSelector {
                                             dot_token: DOT@437..440 "." [Newline("\n"), Newline("\n")] [],
-                                            name: CssIdentifier {
+                                            name: CssCustomIdentifier {
                                                 value_token: IDENT@440..448 "content" [] [Whitespace(" ")],
                                             },
                                         },
@@ -574,7 +574,7 @@ CssRoot {
                                 sub_selectors: CssSubSelectorList [
                                     CssIdSelector {
                                         hash_token: HASH@478..479 "#" [] [],
-                                        name: CssIdentifier {
+                                        name: CssCustomIdentifier {
                                             value_token: IDENT@479..484 "inner" [] [],
                                         },
                                     },
@@ -591,7 +591,7 @@ CssRoot {
                             at_token: AT@487..489 "@" [Newline("\n")] [],
                             rule: CssKeyframesAtRule {
                                 keyframes_token: KEYFRAMES_KW@489..499 "keyframes" [] [Whitespace(" ")],
-                                name: CssIdentifier {
+                                name: CssCustomIdentifier {
                                     value_token: IDENT@499..509 "--my-anim" [] [Whitespace(" ")],
                                 },
                                 block: CssKeyframesBlock {
@@ -682,7 +682,7 @@ CssRoot {
                                 sub_selectors: CssSubSelectorList [
                                     CssClassSelector {
                                         dot_token: DOT@569..570 "." [] [],
-                                        name: CssIdentifier {
+                                        name: CssCustomIdentifier {
                                             value_token: IDENT@570..582 "media-object" [] [],
                                         },
                                     },
@@ -722,7 +722,7 @@ CssRoot {
                                     sub_selectors: CssSubSelectorList [
                                         CssClassSelector {
                                             dot_token: DOT@600..601 "." [] [],
-                                            name: CssIdentifier {
+                                            name: CssCustomIdentifier {
                                                 value_token: IDENT@601..609 "content" [] [Whitespace(" ")],
                                             },
                                         },
@@ -820,7 +820,7 @@ CssRoot {
                 2: CSS_SUB_SELECTOR_LIST@97..110
                   0: CSS_CLASS_SELECTOR@97..110
                     0: DOT@97..98 "." [] []
-                    1: CSS_IDENTIFIER@98..110
+                    1: CSS_CUSTOM_IDENTIFIER@98..110
                       0: IDENT@98..110 "light-scheme" [] []
             2: R_PAREN@110..112 ")" [] [Whitespace(" ")]
         2: CSS_RULE_LIST_BLOCK@112..188
@@ -865,7 +865,7 @@ CssRoot {
                   2: CSS_SUB_SELECTOR_LIST@201..210
                     0: CSS_CLASS_SELECTOR@201..210
                       0: DOT@201..202 "." [] []
-                      1: CSS_IDENTIFIER@202..210
+                      1: CSS_CUSTOM_IDENTIFIER@202..210
                         0: IDENT@202..210 "content" [] [Whitespace(" ")]
                 1: R_ANGLE@210..212 ">" [] [Whitespace(" ")]
                 2: CSS_COMPOUND_SELECTOR@212..213
@@ -910,7 +910,7 @@ CssRoot {
                   2: CSS_SUB_SELECTOR_LIST@245..256
                     0: CSS_CLASS_SELECTOR@245..256
                       0: DOT@245..248 "." [Newline("\n"), Newline("\n")] []
-                      1: CSS_IDENTIFIER@248..256
+                      1: CSS_CUSTOM_IDENTIFIER@248..256
                         0: IDENT@248..256 "content" [] [Whitespace(" ")]
               1: CSS_DECLARATION_LIST_BLOCK@256..274
                 0: L_CURLY@256..257 "{" [] []
@@ -943,7 +943,7 @@ CssRoot {
                 2: CSS_SUB_SELECTOR_LIST@286..299
                   0: CSS_CLASS_SELECTOR@286..299
                     0: DOT@286..287 "." [] []
-                    1: CSS_IDENTIFIER@287..299
+                    1: CSS_CUSTOM_IDENTIFIER@287..299
                       0: IDENT@287..299 "media-object" [] []
             2: R_PAREN@299..301 ")" [] [Whitespace(" ")]
           1: TO_KW@301..304 "to" [] [Whitespace(" ")]
@@ -957,7 +957,7 @@ CssRoot {
                   2: CSS_SUB_SELECTOR_LIST@305..314
                     0: CSS_CLASS_SELECTOR@305..314
                       0: DOT@305..306 "." [] []
-                      1: CSS_IDENTIFIER@306..314
+                      1: CSS_CUSTOM_IDENTIFIER@306..314
                         0: IDENT@306..314 "content" [] [Whitespace(" ")]
                 1: R_ANGLE@314..316 ">" [] [Whitespace(" ")]
                 2: CSS_COMPOUND_SELECTOR@316..317
@@ -1002,7 +1002,7 @@ CssRoot {
                   2: CSS_SUB_SELECTOR_LIST@349..360
                     0: CSS_CLASS_SELECTOR@349..360
                       0: DOT@349..352 "." [Newline("\n"), Newline("\n")] []
-                      1: CSS_IDENTIFIER@352..360
+                      1: CSS_CUSTOM_IDENTIFIER@352..360
                         0: IDENT@352..360 "content" [] [Whitespace(" ")]
               1: CSS_DECLARATION_LIST_BLOCK@360..378
                 0: L_CURLY@360..361 "{" [] []
@@ -1037,7 +1037,7 @@ CssRoot {
                   2: CSS_SUB_SELECTOR_LIST@393..402
                     0: CSS_CLASS_SELECTOR@393..402
                       0: DOT@393..394 "." [] []
-                      1: CSS_IDENTIFIER@394..402
+                      1: CSS_CUSTOM_IDENTIFIER@394..402
                         0: IDENT@394..402 "content" [] [Whitespace(" ")]
                 1: R_ANGLE@402..404 ">" [] [Whitespace(" ")]
                 2: CSS_COMPOUND_SELECTOR@404..405
@@ -1082,7 +1082,7 @@ CssRoot {
                   2: CSS_SUB_SELECTOR_LIST@437..448
                     0: CSS_CLASS_SELECTOR@437..448
                       0: DOT@437..440 "." [Newline("\n"), Newline("\n")] []
-                      1: CSS_IDENTIFIER@440..448
+                      1: CSS_CUSTOM_IDENTIFIER@440..448
                         0: IDENT@440..448 "content" [] [Whitespace(" ")]
               1: CSS_DECLARATION_LIST_BLOCK@448..466
                 0: L_CURLY@448..449 "{" [] []
@@ -1115,7 +1115,7 @@ CssRoot {
                 2: CSS_SUB_SELECTOR_LIST@478..484
                   0: CSS_ID_SELECTOR@478..484
                     0: HASH@478..479 "#" [] []
-                    1: CSS_IDENTIFIER@479..484
+                    1: CSS_CUSTOM_IDENTIFIER@479..484
                       0: IDENT@479..484 "inner" [] []
             2: R_PAREN@484..486 ")" [] [Whitespace(" ")]
         2: CSS_RULE_LIST_BLOCK@486..559
@@ -1125,7 +1125,7 @@ CssRoot {
               0: AT@487..489 "@" [Newline("\n")] []
               1: CSS_KEYFRAMES_AT_RULE@489..557
                 0: KEYFRAMES_KW@489..499 "keyframes" [] [Whitespace(" ")]
-                1: CSS_IDENTIFIER@499..509
+                1: CSS_CUSTOM_IDENTIFIER@499..509
                   0: IDENT@499..509 "--my-anim" [] [Whitespace(" ")]
                 2: CSS_KEYFRAMES_BLOCK@509..557
                   0: L_CURLY@509..510 "{" [] []
@@ -1184,7 +1184,7 @@ CssRoot {
                 2: CSS_SUB_SELECTOR_LIST@569..582
                   0: CSS_CLASS_SELECTOR@569..582
                     0: DOT@569..570 "." [] []
-                    1: CSS_IDENTIFIER@570..582
+                    1: CSS_CUSTOM_IDENTIFIER@570..582
                       0: IDENT@570..582 "media-object" [] []
               1: COMMA@582..584 "," [] [Whitespace(" ")]
               2: CSS_COMPOUND_SELECTOR@584..594
@@ -1211,7 +1211,7 @@ CssRoot {
                   2: CSS_SUB_SELECTOR_LIST@600..609
                     0: CSS_CLASS_SELECTOR@600..609
                       0: DOT@600..601 "." [] []
-                      1: CSS_IDENTIFIER@601..609
+                      1: CSS_CUSTOM_IDENTIFIER@601..609
                         0: IDENT@601..609 "content" [] [Whitespace(" ")]
                 1: R_ANGLE@609..611 ">" [] [Whitespace(" ")]
                 2: CSS_COMPOUND_SELECTOR@611..612

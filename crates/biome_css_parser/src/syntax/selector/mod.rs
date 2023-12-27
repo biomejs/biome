@@ -11,7 +11,8 @@ use crate::syntax::selector::attribute::parse_attribute_selector;
 use crate::syntax::selector::pseudo_class::parse_pseudo_class_selector;
 use crate::syntax::selector::pseudo_element::parse_pseudo_element_selector;
 use crate::syntax::{
-    is_at_identifier, parse_identifier, parse_regular_identifier, RULE_RECOVERY_SET,
+    is_at_identifier, parse_custom_identifier, parse_identifier, parse_regular_identifier,
+    RULE_RECOVERY_SET,
 };
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, TextRange, T};
@@ -277,7 +278,7 @@ pub(crate) fn parse_class_selector(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
 
     p.bump(T![.]);
-    parse_selector_identifier(p).or_add_diagnostic(p, expected_identifier);
+    parse_selector_custom_identifier(p).or_add_diagnostic(p, expected_identifier);
 
     Present(m.complete(p, CSS_CLASS_SELECTOR))
 }
@@ -291,7 +292,7 @@ pub(crate) fn parse_id_selector(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
 
     p.bump(T![#]);
-    parse_selector_identifier(p).or_add_diagnostic(p, expected_identifier);
+    parse_selector_custom_identifier(p).or_add_diagnostic(p, expected_identifier);
 
     Present(m.complete(p, CSS_ID_SELECTOR))
 }
@@ -327,6 +328,15 @@ fn parse_type_selector(p: &mut CssParser, namespace: ParsedSyntax) -> ParsedSynt
 fn parse_selector_identifier(p: &mut CssParser) -> ParsedSyntax {
     let context = selector_lex_context(p);
     parse_identifier(p, context)
+}
+
+/// Custom identifiers are used for class names and ids in selectors and are
+/// case-sensitive. These are distinguished from regular identifiers in
+/// selectors that are case-insensitive for safety in preserving the casing.
+#[inline]
+fn parse_selector_custom_identifier(p: &mut CssParser) -> ParsedSyntax {
+    let context = selector_lex_context(p);
+    parse_custom_identifier(p, context)
 }
 
 #[inline]

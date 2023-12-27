@@ -193,7 +193,7 @@ CssRoot {
             at_token: AT@95..98 "@" [Newline("\n"), Newline("\n")] [],
             rule: CssKeyframesAtRule {
                 keyframes_token: KEYFRAMES_KW@98..108 "keyframes" [] [Whitespace(" ")],
-                name: CssIdentifier {
+                name: CssCustomIdentifier {
                     value_token: IDENT@108..116 "slidein" [] [Whitespace(" ")],
                 },
                 block: CssKeyframesBlock {
@@ -277,7 +277,7 @@ CssRoot {
             rule: CssBogusAtRule {
                 items: [
                     KEYFRAMES_KW@226..236 "keyframes" [] [Whitespace(" ")],
-                    CssIdentifier {
+                    CssCustomIdentifier {
                         value_token: IDENT@236..244 "slidein" [] [Whitespace(" ")],
                     },
                     CssBogus {
@@ -348,7 +348,7 @@ CssRoot {
             at_token: AT@288..291 "@" [Newline("\n"), Newline("\n")] [],
             rule: CssKeyframesAtRule {
                 keyframes_token: KEYFRAMES_KW@291..301 "keyframes" [] [Whitespace(" ")],
-                name: CssIdentifier {
+                name: CssCustomIdentifier {
                     value_token: IDENT@301..309 "slidein" [] [Whitespace(" ")],
                 },
                 block: CssKeyframesBlock {
@@ -432,7 +432,7 @@ CssRoot {
             at_token: AT@391..394 "@" [Newline("\n"), Newline("\n")] [],
             rule: CssKeyframesAtRule {
                 keyframes_token: KEYFRAMES_KW@394..404 "keyframes" [] [Whitespace(" ")],
-                name: CssIdentifier {
+                name: CssCustomIdentifier {
                     value_token: IDENT@404..412 "slidein" [] [Whitespace(" ")],
                 },
                 block: CssKeyframesBlock {
@@ -521,7 +521,7 @@ CssRoot {
             at_token: AT@494..497 "@" [Newline("\n"), Newline("\n")] [],
             rule: CssKeyframesAtRule {
                 keyframes_token: KEYFRAMES_KW@497..507 "keyframes" [] [Whitespace(" ")],
-                name: CssIdentifier {
+                name: CssCustomIdentifier {
                     value_token: IDENT@507..515 "slidein" [] [Whitespace(" ")],
                 },
                 block: CssKeyframesBlock {
@@ -774,7 +774,7 @@ CssRoot {
       0: AT@95..98 "@" [Newline("\n"), Newline("\n")] []
       1: CSS_KEYFRAMES_AT_RULE@98..223
         0: KEYFRAMES_KW@98..108 "keyframes" [] [Whitespace(" ")]
-        1: CSS_IDENTIFIER@108..116
+        1: CSS_CUSTOM_IDENTIFIER@108..116
           0: IDENT@108..116 "slidein" [] [Whitespace(" ")]
         2: CSS_KEYFRAMES_BLOCK@116..223
           0: L_CURLY@116..117 "{" [] []
@@ -828,7 +828,7 @@ CssRoot {
       0: AT@223..226 "@" [Newline("\n"), Newline("\n")] []
       1: CSS_BOGUS_AT_RULE@226..288
         0: KEYFRAMES_KW@226..236 "keyframes" [] [Whitespace(" ")]
-        1: CSS_IDENTIFIER@236..244
+        1: CSS_CUSTOM_IDENTIFIER@236..244
           0: IDENT@236..244 "slidein" [] [Whitespace(" ")]
         2: CSS_BOGUS@244..288
           0: L_CURLY@244..245 "{" [] []
@@ -867,7 +867,7 @@ CssRoot {
       0: AT@288..291 "@" [Newline("\n"), Newline("\n")] []
       1: CSS_KEYFRAMES_AT_RULE@291..391
         0: KEYFRAMES_KW@291..301 "keyframes" [] [Whitespace(" ")]
-        1: CSS_IDENTIFIER@301..309
+        1: CSS_CUSTOM_IDENTIFIER@301..309
           0: IDENT@301..309 "slidein" [] [Whitespace(" ")]
         2: CSS_KEYFRAMES_BLOCK@309..391
           0: L_CURLY@309..310 "{" [] []
@@ -921,7 +921,7 @@ CssRoot {
       0: AT@391..394 "@" [Newline("\n"), Newline("\n")] []
       1: CSS_KEYFRAMES_AT_RULE@394..494
         0: KEYFRAMES_KW@394..404 "keyframes" [] [Whitespace(" ")]
-        1: CSS_IDENTIFIER@404..412
+        1: CSS_CUSTOM_IDENTIFIER@404..412
           0: IDENT@404..412 "slidein" [] [Whitespace(" ")]
         2: CSS_KEYFRAMES_BLOCK@412..494
           0: L_CURLY@412..413 "{" [] []
@@ -979,7 +979,7 @@ CssRoot {
       0: AT@494..497 "@" [Newline("\n"), Newline("\n")] []
       1: CSS_KEYFRAMES_AT_RULE@497..720
         0: KEYFRAMES_KW@497..507 "keyframes" [] [Whitespace(" ")]
-        1: CSS_IDENTIFIER@507..515
+        1: CSS_CUSTOM_IDENTIFIER@507..515
           0: IDENT@507..515 "slidein" [] [Whitespace(" ")]
         2: CSS_KEYFRAMES_BLOCK@515..720
           0: L_CURLY@515..516 "{" [] []

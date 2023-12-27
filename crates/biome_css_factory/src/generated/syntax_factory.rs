@@ -255,7 +255,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if CssIdentifier::can_cast(element.kind()) {
+                    if CssCustomIdentifier::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -307,7 +307,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if CssIdentifier::can_cast(element.kind()) {
+                    if CssCustomIdentifier::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -442,7 +442,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if CssIdentifier::can_cast(element.kind()) {
+                    if CssCustomIdentifier::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -772,7 +772,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if CssIdentifier::can_cast(element.kind()) {
+                    if CssCustomIdentifier::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -793,12 +793,12 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.into_node(CSS_COUNTER_STYLE_AT_RULE, children)
             }
-            CSS_CUSTOM_PROPERTY => {
+            CSS_CUSTOM_IDENTIFIER => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element {
-                    if CssIdentifier::can_cast(element.kind()) {
+                    if element.kind() == IDENT {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -806,11 +806,30 @@ impl SyntaxFactory for CssSyntaxFactory {
                 slots.next_slot();
                 if current_element.is_some() {
                     return RawSyntaxNode::new(
-                        CSS_CUSTOM_PROPERTY.to_bogus(),
+                        CSS_CUSTOM_IDENTIFIER.to_bogus(),
                         children.into_iter().map(Some),
                     );
                 }
-                slots.into_node(CSS_CUSTOM_PROPERTY, children)
+                slots.into_node(CSS_CUSTOM_IDENTIFIER, children)
+            }
+            CSS_DASHED_IDENTIFIER => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element {
+                    if element.kind() == IDENT {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_DASHED_IDENTIFIER.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_DASHED_IDENTIFIER, children)
             }
             CSS_DECLARATION => {
                 let mut elements = (&children).into_iter();
@@ -1008,7 +1027,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if CssIdentifier::can_cast(element.kind()) {
+                    if CssDashedIdentifier::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -1041,7 +1060,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if CssIdentifier::can_cast(element.kind()) {
+                    if CssCustomIdentifier::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -3531,7 +3550,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if CssCustomProperty::can_cast(element.kind()) {
+                    if CssDashedIdentifier::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }

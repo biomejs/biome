@@ -44,7 +44,7 @@ CssRoot {
             at_token: AT@0..1 "@" [] [],
             rule: CssContainerAtRule {
                 container_token: CONTAINER_KW@1..11 "container" [] [Whitespace(" ")],
-                name: CssIdentifier {
+                name: CssCustomIdentifier {
                     value_token: IDENT@11..17 "name" [] [Whitespace("  ")],
                 },
                 query: CssContainerSizeFeatureInParens {
@@ -78,7 +78,7 @@ CssRoot {
             at_token: AT@38..40 "@" [Newline("\n")] [],
             rule: CssContainerAtRule {
                 container_token: CONTAINER_KW@40..50 "container" [] [Whitespace(" ")],
-                name: CssIdentifier {
+                name: CssCustomIdentifier {
                     value_token: IDENT@50..56 "name" [] [Whitespace("  ")],
                 },
                 query: CssContainerOrQuery {
@@ -181,7 +181,7 @@ CssRoot {
             at_token: AT@138..140 "@" [Newline("\n")] [],
             rule: CssContainerAtRule {
                 container_token: CONTAINER_KW@140..150 "container" [] [Whitespace(" ")],
-                name: CssIdentifier {
+                name: CssCustomIdentifier {
                     value_token: IDENT@150..156 "name" [] [Whitespace("  ")],
                 },
                 query: CssContainerAndQuery {
@@ -284,7 +284,7 @@ CssRoot {
             at_token: AT@241..243 "@" [Newline("\n")] [],
             rule: CssContainerAtRule {
                 container_token: CONTAINER_KW@243..253 "container" [] [Whitespace(" ")],
-                name: CssIdentifier {
+                name: CssCustomIdentifier {
                     value_token: IDENT@253..259 "name" [] [Whitespace("  ")],
                 },
                 query: CssContainerAndQuery {
@@ -368,7 +368,7 @@ CssRoot {
             at_token: AT@330..332 "@" [Newline("\n")] [],
             rule: CssContainerAtRule {
                 container_token: CONTAINER_KW@332..342 "container" [] [Whitespace(" ")],
-                name: CssIdentifier {
+                name: CssCustomIdentifier {
                     value_token: IDENT@342..348 "name" [] [Whitespace("  ")],
                 },
                 query: CssContainerAndQuery {
@@ -459,7 +459,7 @@ CssRoot {
             at_token: AT@425..427 "@" [Newline("\n")] [],
             rule: CssContainerAtRule {
                 container_token: CONTAINER_KW@427..437 "container" [] [Whitespace(" ")],
-                name: CssIdentifier {
+                name: CssCustomIdentifier {
                     value_token: IDENT@437..443 "name" [] [Whitespace("  ")],
                 },
                 query: CssContainerAndQuery {
@@ -573,7 +573,7 @@ CssRoot {
             at_token: AT@541..543 "@" [Newline("\n")] [],
             rule: CssContainerAtRule {
                 container_token: CONTAINER_KW@543..553 "container" [] [Whitespace(" ")],
-                name: CssIdentifier {
+                name: CssCustomIdentifier {
                     value_token: IDENT@553..558 "name" [] [Whitespace(" ")],
                 },
                 query: CssContainerNotQuery {
@@ -637,7 +637,7 @@ CssRoot {
             at_token: AT@606..608 "@" [Newline("\n")] [],
             rule: CssContainerAtRule {
                 container_token: CONTAINER_KW@608..618 "container" [] [Whitespace(" ")],
-                name: CssIdentifier {
+                name: CssCustomIdentifier {
                     value_token: IDENT@618..623 "name" [] [Whitespace(" ")],
                 },
                 query: CssContainerStyleQueryInParens {
@@ -675,7 +675,7 @@ CssRoot {
             at_token: AT@650..652 "@" [Newline("\n")] [],
             rule: CssContainerAtRule {
                 container_token: CONTAINER_KW@652..662 "container" [] [Whitespace(" ")],
-                name: CssIdentifier {
+                name: CssCustomIdentifier {
                     value_token: IDENT@662..667 "style" [] [],
                 },
                 query: CssContainerSizeFeatureInParens {
@@ -702,7 +702,7 @@ CssRoot {
             at_token: AT@692..694 "@" [Newline("\n")] [],
             rule: CssContainerAtRule {
                 container_token: CONTAINER_KW@694..704 "container" [] [Whitespace(" ")],
-                name: CssIdentifier {
+                name: CssCustomIdentifier {
                     value_token: IDENT@704..709 "name" [] [Whitespace(" ")],
                 },
                 query: CssContainerStyleQueryInParens {
@@ -756,7 +756,7 @@ CssRoot {
             at_token: AT@747..749 "@" [Newline("\n")] [],
             rule: CssContainerAtRule {
                 container_token: CONTAINER_KW@749..759 "container" [] [Whitespace(" ")],
-                name: CssIdentifier {
+                name: CssCustomIdentifier {
                     value_token: IDENT@759..764 "name" [] [Whitespace(" ")],
                 },
                 query: CssContainerStyleQueryInParens {
@@ -833,7 +833,7 @@ CssRoot {
             at_token: AT@820..822 "@" [Newline("\n")] [],
             rule: CssContainerAtRule {
                 container_token: CONTAINER_KW@822..832 "container" [] [Whitespace(" ")],
-                name: CssIdentifier {
+                name: CssCustomIdentifier {
                     value_token: IDENT@832..837 "name" [] [Whitespace(" ")],
                 },
                 query: CssContainerStyleQueryInParens {
@@ -894,7 +894,7 @@ CssRoot {
             at_token: AT@881..883 "@" [Newline("\n")] [],
             rule: CssContainerAtRule {
                 container_token: CONTAINER_KW@883..893 "container" [] [Whitespace(" ")],
-                name: CssIdentifier {
+                name: CssCustomIdentifier {
                     value_token: IDENT@893..898 "name" [] [Whitespace(" ")],
                 },
                 query: CssContainerStyleQueryInParens {
@@ -962,7 +962,7 @@ CssRoot {
             at_token: AT@948..950 "@" [Newline("\n")] [],
             rule: CssContainerAtRule {
                 container_token: CONTAINER_KW@950..960 "container" [] [Whitespace(" ")],
-                name: CssIdentifier {
+                name: CssCustomIdentifier {
                     value_token: IDENT@960..965 "name" [] [Whitespace(" ")],
                 },
                 query: CssContainerStyleQueryInParens {
@@ -1053,7 +1053,7 @@ CssRoot {
             at_token: AT@1039..1041 "@" [Newline("\n")] [],
             rule: CssContainerAtRule {
                 container_token: CONTAINER_KW@1041..1051 "container" [] [Whitespace(" ")],
-                name: CssIdentifier {
+                name: CssCustomIdentifier {
                     value_token: IDENT@1051..1056 "name" [] [Whitespace(" ")],
                 },
                 query: CssContainerStyleQueryInParens {
@@ -1098,7 +1098,7 @@ CssRoot {
             at_token: AT@1088..1090 "@" [Newline("\n")] [],
             rule: CssContainerAtRule {
                 container_token: CONTAINER_KW@1090..1100 "container" [] [Whitespace(" ")],
-                name: CssIdentifier {
+                name: CssCustomIdentifier {
                     value_token: IDENT@1100..1105 "name" [] [Whitespace(" ")],
                 },
                 query: CssContainerAndQuery {
@@ -1212,7 +1212,7 @@ CssRoot {
             at_token: AT@1201..1203 "@" [Newline("\n")] [],
             rule: CssContainerAtRule {
                 container_token: CONTAINER_KW@1203..1213 "container" [] [Whitespace(" ")],
-                name: CssIdentifier {
+                name: CssCustomIdentifier {
                     value_token: IDENT@1213..1219 "name" [] [Whitespace("  ")],
                 },
                 query: CssContainerSizeFeatureInParens {
@@ -1246,7 +1246,7 @@ CssRoot {
                                     sub_selectors: CssSubSelectorList [
                                         CssIdSelector {
                                             hash_token: HASH@1238..1241 "#" [Newline("\n"), Whitespace("\t")] [],
-                                            name: CssIdentifier {
+                                            name: CssCustomIdentifier {
                                                 value_token: IDENT@1241..1247 "inner" [] [Whitespace(" ")],
                                             },
                                         },
@@ -1326,7 +1326,7 @@ CssRoot {
       0: AT@0..1 "@" [] []
       1: CSS_CONTAINER_AT_RULE@1..38
         0: CONTAINER_KW@1..11 "container" [] [Whitespace(" ")]
-        1: CSS_IDENTIFIER@11..17
+        1: CSS_CUSTOM_IDENTIFIER@11..17
           0: IDENT@11..17 "name" [] [Whitespace("  ")]
         2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@17..34
           0: L_PAREN@17..18 "(" [] []
@@ -1349,7 +1349,7 @@ CssRoot {
       0: AT@38..40 "@" [Newline("\n")] []
       1: CSS_CONTAINER_AT_RULE@40..138
         0: CONTAINER_KW@40..50 "container" [] [Whitespace(" ")]
-        1: CSS_IDENTIFIER@50..56
+        1: CSS_CUSTOM_IDENTIFIER@50..56
           0: IDENT@50..56 "name" [] [Whitespace("  ")]
         2: CSS_CONTAINER_OR_QUERY@56..134
           0: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@56..73
@@ -1417,7 +1417,7 @@ CssRoot {
       0: AT@138..140 "@" [Newline("\n")] []
       1: CSS_CONTAINER_AT_RULE@140..241
         0: CONTAINER_KW@140..150 "container" [] [Whitespace(" ")]
-        1: CSS_IDENTIFIER@150..156
+        1: CSS_CUSTOM_IDENTIFIER@150..156
           0: IDENT@150..156 "name" [] [Whitespace("  ")]
         2: CSS_CONTAINER_AND_QUERY@156..237
           0: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@156..173
@@ -1485,7 +1485,7 @@ CssRoot {
       0: AT@241..243 "@" [Newline("\n")] []
       1: CSS_CONTAINER_AT_RULE@243..330
         0: CONTAINER_KW@243..253 "container" [] [Whitespace(" ")]
-        1: CSS_IDENTIFIER@253..259
+        1: CSS_CUSTOM_IDENTIFIER@253..259
           0: IDENT@253..259 "name" [] [Whitespace("  ")]
         2: CSS_CONTAINER_AND_QUERY@259..326
           0: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@259..276
@@ -1541,7 +1541,7 @@ CssRoot {
       0: AT@330..332 "@" [Newline("\n")] []
       1: CSS_CONTAINER_AT_RULE@332..425
         0: CONTAINER_KW@332..342 "container" [] [Whitespace(" ")]
-        1: CSS_IDENTIFIER@342..348
+        1: CSS_CUSTOM_IDENTIFIER@342..348
           0: IDENT@342..348 "name" [] [Whitespace("  ")]
         2: CSS_CONTAINER_AND_QUERY@348..421
           0: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@348..365
@@ -1602,7 +1602,7 @@ CssRoot {
       0: AT@425..427 "@" [Newline("\n")] []
       1: CSS_CONTAINER_AT_RULE@427..541
         0: CONTAINER_KW@427..437 "container" [] [Whitespace(" ")]
-        1: CSS_IDENTIFIER@437..443
+        1: CSS_CUSTOM_IDENTIFIER@437..443
           0: IDENT@437..443 "name" [] [Whitespace("  ")]
         2: CSS_CONTAINER_AND_QUERY@443..537
           0: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@443..460
@@ -1678,7 +1678,7 @@ CssRoot {
       0: AT@541..543 "@" [Newline("\n")] []
       1: CSS_CONTAINER_AT_RULE@543..606
         0: CONTAINER_KW@543..553 "container" [] [Whitespace(" ")]
-        1: CSS_IDENTIFIER@553..558
+        1: CSS_CUSTOM_IDENTIFIER@553..558
           0: IDENT@553..558 "name" [] [Whitespace(" ")]
         2: CSS_CONTAINER_NOT_QUERY@558..602
           0: NOT_KW@558..562 "not" [] [Whitespace(" ")]
@@ -1721,7 +1721,7 @@ CssRoot {
       0: AT@606..608 "@" [Newline("\n")] []
       1: CSS_CONTAINER_AT_RULE@608..650
         0: CONTAINER_KW@608..618 "container" [] [Whitespace(" ")]
-        1: CSS_IDENTIFIER@618..623
+        1: CSS_CUSTOM_IDENTIFIER@618..623
           0: IDENT@618..623 "name" [] [Whitespace(" ")]
         2: CSS_CONTAINER_STYLE_QUERY_IN_PARENS@623..646
           0: STYLE_KW@623..628 "style" [] []
@@ -1748,7 +1748,7 @@ CssRoot {
       0: AT@650..652 "@" [Newline("\n")] []
       1: CSS_CONTAINER_AT_RULE@652..692
         0: CONTAINER_KW@652..662 "container" [] [Whitespace(" ")]
-        1: CSS_IDENTIFIER@662..667
+        1: CSS_CUSTOM_IDENTIFIER@662..667
           0: IDENT@662..667 "style" [] []
         2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@667..690
           0: L_PAREN@667..668 "(" [] []
@@ -1767,7 +1767,7 @@ CssRoot {
       0: AT@692..694 "@" [Newline("\n")] []
       1: CSS_CONTAINER_AT_RULE@694..747
         0: CONTAINER_KW@694..704 "container" [] [Whitespace(" ")]
-        1: CSS_IDENTIFIER@704..709
+        1: CSS_CUSTOM_IDENTIFIER@704..709
           0: IDENT@704..709 "name" [] [Whitespace(" ")]
         2: CSS_CONTAINER_STYLE_QUERY_IN_PARENS@709..743
           0: STYLE_KW@709..714 "style" [] []
@@ -1805,7 +1805,7 @@ CssRoot {
       0: AT@747..749 "@" [Newline("\n")] []
       1: CSS_CONTAINER_AT_RULE@749..820
         0: CONTAINER_KW@749..759 "container" [] [Whitespace(" ")]
-        1: CSS_IDENTIFIER@759..764
+        1: CSS_CUSTOM_IDENTIFIER@759..764
           0: IDENT@759..764 "name" [] [Whitespace(" ")]
         2: CSS_CONTAINER_STYLE_QUERY_IN_PARENS@764..816
           0: STYLE_KW@764..769 "style" [] []
@@ -1859,7 +1859,7 @@ CssRoot {
       0: AT@820..822 "@" [Newline("\n")] []
       1: CSS_CONTAINER_AT_RULE@822..881
         0: CONTAINER_KW@822..832 "container" [] [Whitespace(" ")]
-        1: CSS_IDENTIFIER@832..837
+        1: CSS_CUSTOM_IDENTIFIER@832..837
           0: IDENT@832..837 "name" [] [Whitespace(" ")]
         2: CSS_CONTAINER_STYLE_QUERY_IN_PARENS@837..877
           0: STYLE_KW@837..842 "style" [] []
@@ -1902,7 +1902,7 @@ CssRoot {
       0: AT@881..883 "@" [Newline("\n")] []
       1: CSS_CONTAINER_AT_RULE@883..948
         0: CONTAINER_KW@883..893 "container" [] [Whitespace(" ")]
-        1: CSS_IDENTIFIER@893..898
+        1: CSS_CUSTOM_IDENTIFIER@893..898
           0: IDENT@893..898 "name" [] [Whitespace(" ")]
         2: CSS_CONTAINER_STYLE_QUERY_IN_PARENS@898..944
           0: STYLE_KW@898..903 "style" [] []
@@ -1950,7 +1950,7 @@ CssRoot {
       0: AT@948..950 "@" [Newline("\n")] []
       1: CSS_CONTAINER_AT_RULE@950..1039
         0: CONTAINER_KW@950..960 "container" [] [Whitespace(" ")]
-        1: CSS_IDENTIFIER@960..965
+        1: CSS_CUSTOM_IDENTIFIER@960..965
           0: IDENT@960..965 "name" [] [Whitespace(" ")]
         2: CSS_CONTAINER_STYLE_QUERY_IN_PARENS@965..1035
           0: STYLE_KW@965..970 "style" [] []
@@ -2014,7 +2014,7 @@ CssRoot {
       0: AT@1039..1041 "@" [Newline("\n")] []
       1: CSS_CONTAINER_AT_RULE@1041..1088
         0: CONTAINER_KW@1041..1051 "container" [] [Whitespace(" ")]
-        1: CSS_IDENTIFIER@1051..1056
+        1: CSS_CUSTOM_IDENTIFIER@1051..1056
           0: IDENT@1051..1056 "name" [] [Whitespace(" ")]
         2: CSS_CONTAINER_STYLE_QUERY_IN_PARENS@1056..1084
           0: STYLE_KW@1056..1061 "style" [] []
@@ -2046,7 +2046,7 @@ CssRoot {
       0: AT@1088..1090 "@" [Newline("\n")] []
       1: CSS_CONTAINER_AT_RULE@1090..1201
         0: CONTAINER_KW@1090..1100 "container" [] [Whitespace(" ")]
-        1: CSS_IDENTIFIER@1100..1105
+        1: CSS_CUSTOM_IDENTIFIER@1100..1105
           0: IDENT@1100..1105 "name" [] [Whitespace(" ")]
         2: CSS_CONTAINER_AND_QUERY@1105..1197
           0: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@1105..1122
@@ -2125,7 +2125,7 @@ CssRoot {
       0: AT@1201..1203 "@" [Newline("\n")] []
       1: CSS_CONTAINER_AT_RULE@1203..1321
         0: CONTAINER_KW@1203..1213 "container" [] [Whitespace(" ")]
-        1: CSS_IDENTIFIER@1213..1219
+        1: CSS_CUSTOM_IDENTIFIER@1213..1219
           0: IDENT@1213..1219 "name" [] [Whitespace("  ")]
         2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@1219..1237
           0: L_PAREN@1219..1220 "(" [] []
@@ -2151,7 +2151,7 @@ CssRoot {
                   2: CSS_SUB_SELECTOR_LIST@1238..1247
                     0: CSS_ID_SELECTOR@1238..1247
                       0: HASH@1238..1241 "#" [Newline("\n"), Whitespace("\t")] []
-                      1: CSS_IDENTIFIER@1241..1247
+                      1: CSS_CUSTOM_IDENTIFIER@1241..1247
                         0: IDENT@1241..1247 "inner" [] [Whitespace(" ")]
               1: CSS_DECLARATION_LIST_BLOCK@1247..1280
                 0: L_CURLY@1247..1248 "{" [] []

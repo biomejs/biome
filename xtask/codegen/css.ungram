@@ -155,13 +155,13 @@ CssUniversalNamespacePrefix =
 // ^^^^
 CssIdSelector =
 	'#'
-	name: CssIdentifier
+	name: CssCustomIdentifier
 
 // .app {}
 // ^^^^
 CssClassSelector =
 	'.'
-	name: CssIdentifier
+	name: CssCustomIdentifier
 
 // [title = "title" i] {}
 // ^^^^^^^^^^^^^^^^^^^
@@ -452,7 +452,7 @@ CssDeclaration =
 
 CssComponentValueList = AnyCssValue*
 
-AnyCssDeclarationName = CssIdentifier | CssCustomProperty
+AnyCssDeclarationName = CssIdentifier | CssDashedIdentifier
 
 CssDeclarationImportant =
 	'!'
@@ -492,14 +492,15 @@ CssCharsetAtRule =
 // ^^^^^^^^^^^^^^^^^^^^^^^^
 // @color-profile device-cmyk {}
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+// TODO: `name` should be `<dashed-ident> | device-cmyk` instead
 CssColorProfileAtRule =
 	'color-profile'
-	name: CssIdentifier
+	name: CssCustomIdentifier
 	block: AnyCssDeclarationListBlock
 
 CssCounterStyleAtRule =
 	'counter-style'
-	name: CssIdentifier
+	name: CssCustomIdentifier
 	block: AnyCssDeclarationListBlock
 
 // @font-face {}
@@ -513,7 +514,7 @@ CssFontFaceAtRule =
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 CssFontPaletteValuesAtRule =
 	'font-palette-values'
-	name: CssIdentifier
+	name: CssDashedIdentifier
 	block: AnyCssDeclarationListBlock
 
 
@@ -543,7 +544,7 @@ CssFontPaletteValuesAtRule =
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 CssContainerAtRule =
 	'container'
-	name: CssIdentifier?
+	name: CssCustomIdentifier?
 	query: AnyCssContainerQuery
 	block: AnyCssRuleListBlock
 
@@ -684,7 +685,7 @@ AnyCssKeyframesBlock =
 
 // @keyframes "something" { from {} to {} }
 //            ^^^^^^^^^^^
-AnyCssKeyframeName = CssIdentifier | CssString
+AnyCssKeyframeName = CssCustomIdentifier | CssString
 
 // @keyframes "something" { from {} to {} }
 //                        ^^^^^^^^^^^^^^^^^
@@ -1162,12 +1163,13 @@ CssScopeEdge =
 
 AnyCssValue =
 	CssIdentifier
+	| CssCustomIdentifier
+	| CssDashedIdentifier
 	| CssString
 	| CssNumber
 	| AnyCssDimension
 	| CssRatio
 	| AnyCssFunction
-	| CssCustomProperty
 	| CssColor
 
 
@@ -1210,25 +1212,9 @@ AnyCssUrlValue =
 	CssUrlValueRaw
 	| CssString
 
-
-CssVarFunction =
-	'var'
-	'('
-		property: CssCustomProperty
-		value: CssVarFunctionValue?
-	')'
-
-CssVarFunctionValue =
-	','
-	value: CssIdentifier
-
 CssPercentage =
 	value: CssNumber
 	'%'
-
-
-// parsed with --ident
-CssCustomProperty = value: CssIdentifier
 
 CssParameterList = CssParameter (',' CssParameter)* ','?
 
@@ -1262,7 +1248,14 @@ CssColor =
 	'#'
 	value:'css_color_literal'
 
+// Any identifier. Case insensitve, used for standard property names, values, type selectors, etc.
 CssIdentifier = value: 'ident'
+// Any non-standard identifier. Case sensitive, used for class names, ids, etc. Custom identifiers
+// _may_ overlap with standard identifiers defined by CSS (e.g., `color`).
+CssCustomIdentifier = value: 'ident'
+// An identifier starting with two dashes, `--`. Case sensitive, used for custom property names.
+// Dashed identifiers are guaranteed to never overlap with an identifier defined by CSS.
+CssDashedIdentifier = value: 'ident'
 CssString = value: 'css_string_literal'
 CssNumber = value: 'css_number_literal'
 CssUrlValueRaw = value: 'css_url_value_raw_literal'

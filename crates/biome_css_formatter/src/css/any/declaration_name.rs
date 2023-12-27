@@ -9,7 +9,7 @@ impl FormatRule<AnyCssDeclarationName> for FormatAnyCssDeclarationName {
     fn fmt(&self, node: &AnyCssDeclarationName, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
             AnyCssDeclarationName::CssIdentifier(node) => node.format().fmt(f),
-            AnyCssDeclarationName::CssCustomProperty(node) => node.format().fmt(f),
+            AnyCssDeclarationName::CssDashedIdentifier(node) => node.format().fmt(f),
         }
     }
 }

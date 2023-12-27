@@ -1071,10 +1071,8 @@ CssRoot {
                                                             CssParameter {
                                                                 any_css_expression: CssListOfComponentValuesExpression {
                                                                     css_component_value_list: CssComponentValueList [
-                                                                        CssCustomProperty {
-                                                                            value: CssIdentifier {
-                                                                                value_token: IDENT@612..619 "--width" [] [],
-                                                                            },
+                                                                        CssDashedIdentifier {
+                                                                            value_token: IDENT@612..619 "--width" [] [],
                                                                         },
                                                                     ],
                                                                 },
@@ -1474,7 +1472,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssClassSelector {
                             dot_token: DOT@848..851 "." [Newline("\n"), Newline("\n")] [],
-                            name: CssIdentifier {
+                            name: CssCustomIdentifier {
                                 value_token: IDENT@851..855 "bar" [] [Whitespace(" ")],
                             },
                         },
@@ -1904,7 +1902,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssClassSelector {
                             dot_token: DOT@1105..1108 "." [Newline("\n"), Newline("\n")] [],
-                            name: CssIdentifier {
+                            name: CssCustomIdentifier {
                                 value_token: IDENT@1108..1113 "fade" [] [Whitespace(" ")],
                             },
                         },
@@ -2268,7 +2266,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssClassSelector {
                             dot_token: DOT@1436..1439 "." [Newline("\n"), Newline("\n")] [],
-                            name: CssIdentifier {
+                            name: CssCustomIdentifier {
                                 value_token: IDENT@1439..1444 "fade" [] [Whitespace(" ")],
                             },
                         },
@@ -2404,7 +2402,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssClassSelector {
                             dot_token: DOT@1551..1554 "." [Newline("\n"), Newline("\n")] [],
-                            name: CssIdentifier {
+                            name: CssCustomIdentifier {
                                 value_token: IDENT@1554..1559 "type" [] [Whitespace(" ")],
                             },
                         },
@@ -2513,7 +2511,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssClassSelector {
                             dot_token: DOT@1708..1711 "." [Newline("\n"), Newline("\n")] [],
-                            name: CssIdentifier {
+                            name: CssCustomIdentifier {
                                 value_token: IDENT@1711..1716 "type" [] [Whitespace(" ")],
                             },
                         },
@@ -2637,7 +2635,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssClassSelector {
                             dot_token: DOT@1837..1840 "." [Newline("\n"), Newline("\n")] [],
-                            name: CssIdentifier {
+                            name: CssCustomIdentifier {
                                 value_token: IDENT@1840..1845 "more" [] [Whitespace(" ")],
                             },
                         },
@@ -3268,10 +3266,8 @@ CssRoot {
                                                         CssParameter {
                                                             any_css_expression: CssListOfComponentValuesExpression {
                                                                 css_component_value_list: CssComponentValueList [
-                                                                    CssCustomProperty {
-                                                                        value: CssIdentifier {
-                                                                            value_token: IDENT@2279..2286 "--width" [] [],
-                                                                        },
+                                                                    CssDashedIdentifier {
+                                                                        value_token: IDENT@2279..2286 "--width" [] [],
                                                                     },
                                                                 ],
                                                             },
@@ -3338,10 +3334,8 @@ CssRoot {
                                                         CssParameter {
                                                             any_css_expression: CssListOfComponentValuesExpression {
                                                                 css_component_value_list: CssComponentValueList [
-                                                                    CssCustomProperty {
-                                                                        value: CssIdentifier {
-                                                                            value_token: IDENT@2326..2333 "--width" [] [],
-                                                                        },
+                                                                    CssDashedIdentifier {
+                                                                        value_token: IDENT@2326..2333 "--width" [] [],
                                                                     },
                                                                 ],
                                                             },
@@ -3408,10 +3402,8 @@ CssRoot {
                                                         CssParameter {
                                                             any_css_expression: CssListOfComponentValuesExpression {
                                                                 css_component_value_list: CssComponentValueList [
-                                                                    CssCustomProperty {
-                                                                        value: CssIdentifier {
-                                                                            value_token: IDENT@2368..2375 "--width" [] [],
-                                                                        },
+                                                                    CssDashedIdentifier {
+                                                                        value_token: IDENT@2368..2375 "--width" [] [],
                                                                     },
                                                                 ],
                                                             },
@@ -3478,10 +3470,8 @@ CssRoot {
                                                         CssParameter {
                                                             any_css_expression: CssListOfComponentValuesExpression {
                                                                 css_component_value_list: CssComponentValueList [
-                                                                    CssCustomProperty {
-                                                                        value: CssIdentifier {
-                                                                            value_token: IDENT@2412..2419 "--width" [] [],
-                                                                        },
+                                                                    CssDashedIdentifier {
+                                                                        value_token: IDENT@2412..2419 "--width" [] [],
                                                                     },
                                                                 ],
                                                             },
@@ -3548,10 +3538,8 @@ CssRoot {
                                                         CssParameter {
                                                             any_css_expression: CssListOfComponentValuesExpression {
                                                                 css_component_value_list: CssComponentValueList [
-                                                                    CssCustomProperty {
-                                                                        value: CssIdentifier {
-                                                                            value_token: IDENT@2459..2466 "--width" [] [],
-                                                                        },
+                                                                    CssDashedIdentifier {
+                                                                        value_token: IDENT@2459..2466 "--width" [] [],
                                                                     },
                                                                 ],
                                                             },
@@ -3596,7 +3584,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssClassSelector {
                             dot_token: DOT@2477..2480 "." [Newline("\n"), Newline("\n")] [],
-                            name: CssIdentifier {
+                            name: CssCustomIdentifier {
                                 value_token: IDENT@2480..2488 "min-max" [] [Whitespace(" ")],
                             },
                         },
@@ -3852,7 +3840,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssClassSelector {
                             dot_token: DOT@2635..2638 "." [Newline("\n"), Newline("\n")] [],
-                            name: CssIdentifier {
+                            name: CssCustomIdentifier {
                                 value_token: IDENT@2638..2642 "rem" [] [Whitespace(" ")],
                             },
                         },
@@ -3922,7 +3910,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssClassSelector {
                             dot_token: DOT@2673..2676 "." [Newline("\n"), Newline("\n")] [],
-                            name: CssIdentifier {
+                            name: CssCustomIdentifier {
                                 value_token: IDENT@2676..2680 "sin" [] [Whitespace(" ")],
                             },
                         },
@@ -4041,7 +4029,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssClassSelector {
                             dot_token: DOT@2759..2762 "." [Newline("\n"), Newline("\n")] [],
-                            name: CssIdentifier {
+                            name: CssCustomIdentifier {
                                 value_token: IDENT@2762..2766 "cos" [] [Whitespace(" ")],
                             },
                         },
@@ -4160,7 +4148,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssClassSelector {
                             dot_token: DOT@2845..2848 "." [Newline("\n"), Newline("\n")] [],
-                            name: CssIdentifier {
+                            name: CssCustomIdentifier {
                                 value_token: IDENT@2848..2853 "asin" [] [Whitespace(" ")],
                             },
                         },
@@ -4283,7 +4271,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssClassSelector {
                             dot_token: DOT@2929..2932 "." [Newline("\n"), Newline("\n")] [],
-                            name: CssIdentifier {
+                            name: CssCustomIdentifier {
                                 value_token: IDENT@2932..2937 "acos" [] [Whitespace(" ")],
                             },
                         },
@@ -4406,7 +4394,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssClassSelector {
                             dot_token: DOT@3013..3016 "." [Newline("\n"), Newline("\n")] [],
-                            name: CssIdentifier {
+                            name: CssCustomIdentifier {
                                 value_token: IDENT@3016..3021 "atan" [] [Whitespace(" ")],
                             },
                         },
@@ -4477,7 +4465,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssClassSelector {
                             dot_token: DOT@3061..3064 "." [Newline("\n"), Newline("\n")] [],
-                            name: CssIdentifier {
+                            name: CssCustomIdentifier {
                                 value_token: IDENT@3064..3070 "atan2" [] [Whitespace(" ")],
                             },
                         },
@@ -4552,7 +4540,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssClassSelector {
                             dot_token: DOT@3110..3113 "." [Newline("\n"), Newline("\n")] [],
-                            name: CssIdentifier {
+                            name: CssCustomIdentifier {
                                 value_token: IDENT@3113..3118 "sqrt" [] [Whitespace(" ")],
                             },
                         },
@@ -4602,7 +4590,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssClassSelector {
                             dot_token: DOT@3142..3145 "." [Newline("\n"), Newline("\n")] [],
-                            name: CssIdentifier {
+                            name: CssCustomIdentifier {
                                 value_token: IDENT@3145..3149 "exp" [] [Whitespace(" ")],
                             },
                         },
@@ -4662,7 +4650,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssClassSelector {
                             dot_token: DOT@3176..3179 "." [Newline("\n"), Newline("\n")] [],
-                            name: CssIdentifier {
+                            name: CssCustomIdentifier {
                                 value_token: IDENT@3179..3183 "abs" [] [Whitespace(" ")],
                             },
                         },
@@ -4743,7 +4731,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssClassSelector {
                             dot_token: DOT@3234..3237 "." [Newline("\n"), Newline("\n")] [],
-                            name: CssIdentifier {
+                            name: CssCustomIdentifier {
                                 value_token: IDENT@3237..3242 "sign" [] [Whitespace(" ")],
                             },
                         },
@@ -5631,9 +5619,8 @@ CssRoot {
                               0: CSS_PARAMETER@612..619
                                 0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@612..619
                                   0: CSS_COMPONENT_VALUE_LIST@612..619
-                                    0: CSS_CUSTOM_PROPERTY@612..619
-                                      0: CSS_IDENTIFIER@612..619
-                                        0: IDENT@612..619 "--width" [] []
+                                    0: CSS_DASHED_IDENTIFIER@612..619
+                                      0: IDENT@612..619 "--width" [] []
                             3: R_PAREN@619..620 ")" [] []
                 3: R_PAREN@620..621 ")" [] []
             3: (empty)
@@ -5878,7 +5865,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@848..855
             0: CSS_CLASS_SELECTOR@848..855
               0: DOT@848..851 "." [Newline("\n"), Newline("\n")] []
-              1: CSS_IDENTIFIER@851..855
+              1: CSS_CUSTOM_IDENTIFIER@851..855
                 0: IDENT@851..855 "bar" [] [Whitespace(" ")]
       1: CSS_DECLARATION_LIST_BLOCK@855..1105
         0: L_CURLY@855..856 "{" [] []
@@ -6144,7 +6131,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@1105..1113
             0: CSS_CLASS_SELECTOR@1105..1113
               0: DOT@1105..1108 "." [Newline("\n"), Newline("\n")] []
-              1: CSS_IDENTIFIER@1108..1113
+              1: CSS_CUSTOM_IDENTIFIER@1108..1113
                 0: IDENT@1108..1113 "fade" [] [Whitespace(" ")]
       1: CSS_DECLARATION_LIST_BLOCK@1113..1216
         0: L_CURLY@1113..1114 "{" [] []
@@ -6376,7 +6363,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@1436..1444
             0: CSS_CLASS_SELECTOR@1436..1444
               0: DOT@1436..1439 "." [Newline("\n"), Newline("\n")] []
-              1: CSS_IDENTIFIER@1439..1444
+              1: CSS_CUSTOM_IDENTIFIER@1439..1444
                 0: IDENT@1439..1444 "fade" [] [Whitespace(" ")]
       1: CSS_DECLARATION_LIST_BLOCK@1444..1551
         0: L_CURLY@1444..1445 "{" [] []
@@ -6461,7 +6448,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@1551..1559
             0: CSS_CLASS_SELECTOR@1551..1559
               0: DOT@1551..1554 "." [Newline("\n"), Newline("\n")] []
-              1: CSS_IDENTIFIER@1554..1559
+              1: CSS_CUSTOM_IDENTIFIER@1554..1559
                 0: IDENT@1554..1559 "type" [] [Whitespace(" ")]
       1: CSS_DECLARATION_LIST_BLOCK@1559..1708
         0: L_CURLY@1559..1560 "{" [] []
@@ -6529,7 +6516,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@1708..1716
             0: CSS_CLASS_SELECTOR@1708..1716
               0: DOT@1708..1711 "." [Newline("\n"), Newline("\n")] []
-              1: CSS_IDENTIFIER@1711..1716
+              1: CSS_CUSTOM_IDENTIFIER@1711..1716
                 0: IDENT@1711..1716 "type" [] [Whitespace(" ")]
       1: CSS_DECLARATION_LIST_BLOCK@1716..1837
         0: L_CURLY@1716..1717 "{" [] []
@@ -6606,7 +6593,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@1837..1845
             0: CSS_CLASS_SELECTOR@1837..1845
               0: DOT@1837..1840 "." [Newline("\n"), Newline("\n")] []
-              1: CSS_IDENTIFIER@1840..1845
+              1: CSS_CUSTOM_IDENTIFIER@1840..1845
                 0: IDENT@1840..1845 "more" [] [Whitespace(" ")]
       1: CSS_DECLARATION_LIST_BLOCK@1845..2477
         0: L_CURLY@1845..1846 "{" [] []
@@ -7006,9 +6993,8 @@ CssRoot {
                             0: CSS_PARAMETER@2279..2286
                               0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@2279..2286
                                 0: CSS_COMPONENT_VALUE_LIST@2279..2286
-                                  0: CSS_CUSTOM_PROPERTY@2279..2286
-                                    0: CSS_IDENTIFIER@2279..2286
-                                      0: IDENT@2279..2286 "--width" [] []
+                                  0: CSS_DASHED_IDENTIFIER@2279..2286
+                                    0: IDENT@2279..2286 "--width" [] []
                           3: R_PAREN@2286..2287 ")" [] []
                   1: COMMA@2287..2289 "," [] [Whitespace(" ")]
                   2: CSS_PARAMETER@2289..2293
@@ -7049,9 +7035,8 @@ CssRoot {
                             0: CSS_PARAMETER@2326..2333
                               0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@2326..2333
                                 0: CSS_COMPONENT_VALUE_LIST@2326..2333
-                                  0: CSS_CUSTOM_PROPERTY@2326..2333
-                                    0: CSS_IDENTIFIER@2326..2333
-                                      0: IDENT@2326..2333 "--width" [] []
+                                  0: CSS_DASHED_IDENTIFIER@2326..2333
+                                    0: IDENT@2326..2333 "--width" [] []
                           3: R_PAREN@2333..2334 ")" [] []
                   3: COMMA@2334..2336 "," [] [Whitespace(" ")]
                   4: CSS_PARAMETER@2336..2340
@@ -7092,9 +7077,8 @@ CssRoot {
                             0: CSS_PARAMETER@2368..2375
                               0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@2368..2375
                                 0: CSS_COMPONENT_VALUE_LIST@2368..2375
-                                  0: CSS_CUSTOM_PROPERTY@2368..2375
-                                    0: CSS_IDENTIFIER@2368..2375
-                                      0: IDENT@2368..2375 "--width" [] []
+                                  0: CSS_DASHED_IDENTIFIER@2368..2375
+                                    0: IDENT@2368..2375 "--width" [] []
                           3: R_PAREN@2375..2376 ")" [] []
                   3: COMMA@2376..2378 "," [] [Whitespace(" ")]
                   4: CSS_PARAMETER@2378..2382
@@ -7135,9 +7119,8 @@ CssRoot {
                             0: CSS_PARAMETER@2412..2419
                               0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@2412..2419
                                 0: CSS_COMPONENT_VALUE_LIST@2412..2419
-                                  0: CSS_CUSTOM_PROPERTY@2412..2419
-                                    0: CSS_IDENTIFIER@2412..2419
-                                      0: IDENT@2412..2419 "--width" [] []
+                                  0: CSS_DASHED_IDENTIFIER@2412..2419
+                                    0: IDENT@2412..2419 "--width" [] []
                           3: R_PAREN@2419..2420 ")" [] []
                   3: COMMA@2420..2422 "," [] [Whitespace(" ")]
                   4: CSS_PARAMETER@2422..2426
@@ -7178,9 +7161,8 @@ CssRoot {
                             0: CSS_PARAMETER@2459..2466
                               0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@2459..2466
                                 0: CSS_COMPONENT_VALUE_LIST@2459..2466
-                                  0: CSS_CUSTOM_PROPERTY@2459..2466
-                                    0: CSS_IDENTIFIER@2459..2466
-                                      0: IDENT@2459..2466 "--width" [] []
+                                  0: CSS_DASHED_IDENTIFIER@2459..2466
+                                    0: IDENT@2459..2466 "--width" [] []
                           3: R_PAREN@2466..2467 ")" [] []
                   3: COMMA@2467..2469 "," [] [Whitespace(" ")]
                   4: CSS_PARAMETER@2469..2473
@@ -7203,7 +7185,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@2477..2488
             0: CSS_CLASS_SELECTOR@2477..2488
               0: DOT@2477..2480 "." [Newline("\n"), Newline("\n")] []
-              1: CSS_IDENTIFIER@2480..2488
+              1: CSS_CUSTOM_IDENTIFIER@2480..2488
                 0: IDENT@2480..2488 "min-max" [] [Whitespace(" ")]
       1: CSS_DECLARATION_LIST_BLOCK@2488..2635
         0: L_CURLY@2488..2489 "{" [] []
@@ -7361,7 +7343,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@2635..2642
             0: CSS_CLASS_SELECTOR@2635..2642
               0: DOT@2635..2638 "." [Newline("\n"), Newline("\n")] []
-              1: CSS_IDENTIFIER@2638..2642
+              1: CSS_CUSTOM_IDENTIFIER@2638..2642
                 0: IDENT@2638..2642 "rem" [] [Whitespace(" ")]
       1: CSS_DECLARATION_LIST_BLOCK@2642..2673
         0: L_CURLY@2642..2643 "{" [] []
@@ -7405,7 +7387,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@2673..2680
             0: CSS_CLASS_SELECTOR@2673..2680
               0: DOT@2673..2676 "." [Newline("\n"), Newline("\n")] []
-              1: CSS_IDENTIFIER@2676..2680
+              1: CSS_CUSTOM_IDENTIFIER@2676..2680
                 0: IDENT@2676..2680 "sin" [] [Whitespace(" ")]
       1: CSS_DECLARATION_LIST_BLOCK@2680..2759
         0: L_CURLY@2680..2681 "{" [] []
@@ -7480,7 +7462,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@2759..2766
             0: CSS_CLASS_SELECTOR@2759..2766
               0: DOT@2759..2762 "." [Newline("\n"), Newline("\n")] []
-              1: CSS_IDENTIFIER@2762..2766
+              1: CSS_CUSTOM_IDENTIFIER@2762..2766
                 0: IDENT@2762..2766 "cos" [] [Whitespace(" ")]
       1: CSS_DECLARATION_LIST_BLOCK@2766..2845
         0: L_CURLY@2766..2767 "{" [] []
@@ -7555,7 +7537,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@2845..2853
             0: CSS_CLASS_SELECTOR@2845..2853
               0: DOT@2845..2848 "." [Newline("\n"), Newline("\n")] []
-              1: CSS_IDENTIFIER@2848..2853
+              1: CSS_CUSTOM_IDENTIFIER@2848..2853
                 0: IDENT@2848..2853 "asin" [] [Whitespace(" ")]
       1: CSS_DECLARATION_LIST_BLOCK@2853..2929
         0: L_CURLY@2853..2854 "{" [] []
@@ -7632,7 +7614,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@2929..2937
             0: CSS_CLASS_SELECTOR@2929..2937
               0: DOT@2929..2932 "." [Newline("\n"), Newline("\n")] []
-              1: CSS_IDENTIFIER@2932..2937
+              1: CSS_CUSTOM_IDENTIFIER@2932..2937
                 0: IDENT@2932..2937 "acos" [] [Whitespace(" ")]
       1: CSS_DECLARATION_LIST_BLOCK@2937..3013
         0: L_CURLY@2937..2938 "{" [] []
@@ -7709,7 +7691,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@3013..3021
             0: CSS_CLASS_SELECTOR@3013..3021
               0: DOT@3013..3016 "." [Newline("\n"), Newline("\n")] []
-              1: CSS_IDENTIFIER@3016..3021
+              1: CSS_CUSTOM_IDENTIFIER@3016..3021
                 0: IDENT@3016..3021 "atan" [] [Whitespace(" ")]
       1: CSS_DECLARATION_LIST_BLOCK@3021..3061
         0: L_CURLY@3021..3022 "{" [] []
@@ -7754,7 +7736,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@3061..3070
             0: CSS_CLASS_SELECTOR@3061..3070
               0: DOT@3061..3064 "." [Newline("\n"), Newline("\n")] []
-              1: CSS_IDENTIFIER@3064..3070
+              1: CSS_CUSTOM_IDENTIFIER@3064..3070
                 0: IDENT@3064..3070 "atan2" [] [Whitespace(" ")]
       1: CSS_DECLARATION_LIST_BLOCK@3070..3110
         0: L_CURLY@3070..3071 "{" [] []
@@ -7801,7 +7783,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@3110..3118
             0: CSS_CLASS_SELECTOR@3110..3118
               0: DOT@3110..3113 "." [Newline("\n"), Newline("\n")] []
-              1: CSS_IDENTIFIER@3113..3118
+              1: CSS_CUSTOM_IDENTIFIER@3113..3118
                 0: IDENT@3113..3118 "sqrt" [] [Whitespace(" ")]
       1: CSS_DECLARATION_LIST_BLOCK@3118..3142
         0: L_CURLY@3118..3119 "{" [] []
@@ -7833,7 +7815,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@3142..3149
             0: CSS_CLASS_SELECTOR@3142..3149
               0: DOT@3142..3145 "." [Newline("\n"), Newline("\n")] []
-              1: CSS_IDENTIFIER@3145..3149
+              1: CSS_CUSTOM_IDENTIFIER@3145..3149
                 0: IDENT@3145..3149 "exp" [] [Whitespace(" ")]
       1: CSS_DECLARATION_LIST_BLOCK@3149..3176
         0: L_CURLY@3149..3150 "{" [] []
@@ -7871,7 +7853,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@3176..3183
             0: CSS_CLASS_SELECTOR@3176..3183
               0: DOT@3176..3179 "." [Newline("\n"), Newline("\n")] []
-              1: CSS_IDENTIFIER@3179..3183
+              1: CSS_CUSTOM_IDENTIFIER@3179..3183
                 0: IDENT@3179..3183 "abs" [] [Whitespace(" ")]
       1: CSS_DECLARATION_LIST_BLOCK@3183..3234
         0: L_CURLY@3183..3184 "{" [] []
@@ -7922,7 +7904,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@3234..3242
             0: CSS_CLASS_SELECTOR@3234..3242
               0: DOT@3234..3237 "." [Newline("\n"), Newline("\n")] []
-              1: CSS_IDENTIFIER@3237..3242
+              1: CSS_CUSTOM_IDENTIFIER@3237..3242
                 0: IDENT@3237..3242 "sign" [] [Whitespace(" ")]
       1: CSS_DECLARATION_LIST_BLOCK@3242..3559
         0: L_CURLY@3242..3243 "{" [] []
