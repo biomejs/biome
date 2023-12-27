@@ -168,7 +168,7 @@ Line width: 80
 }
 
 @layer framework {
-	@media ONLY screen AND (color) {
+	@media only screen and (color) {
 		article {
 			padding: 1rem 3rem;
 		}

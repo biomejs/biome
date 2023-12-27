@@ -223,7 +223,7 @@ Line width: 80
 }
 @supports not (display: flex) {
 }
-@SUPPORTS not (display: flex) {
+@supports not (display: flex) {
 }
 @supports (box-shadow: 0 0 2px black inset) or
 	(-moz-box-shadow: 0 0 2px black inset) or
@@ -245,15 +245,15 @@ Line width: 80
 }
 @supports (display: flex !important) {
 }
-@supports NOT (display: flex) {
+@supports not (display: flex) {
 }
-@supports ((transition-property: color) OR (animation-name: foo)) AND
+@supports ((transition-property: color) or (animation-name: foo)) and
 	(transform: rotate(10deg)) {
 }
-@supports (transition-property: color) OR
-	((animation-name: foo) AND (transform: rotate(10deg))) {
+@supports (transition-property: color) or
+	((animation-name: foo) and (transform: rotate(10deg))) {
 }
-@supports (NOT (display: flex)) {
+@supports (not (display: flex)) {
 }
 
 @supports selector(col || td) {
