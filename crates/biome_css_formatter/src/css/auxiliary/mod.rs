@@ -66,5 +66,3 @@ pub(crate) mod supports_or_condition;
 pub(crate) mod universal_namespace_prefix;
 pub(crate) mod url_function;
 pub(crate) mod url_value_raw;
-pub(crate) mod var_function;
-pub(crate) mod var_function_value;

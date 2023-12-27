@@ -1739,58 +1739,6 @@ pub fn css_url_value_raw(value_token: SyntaxToken) -> CssUrlValueRaw {
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
-pub fn css_var_function(
-    var_token: SyntaxToken,
-    l_paren_token: SyntaxToken,
-    property: CssDashedIdentifier,
-    r_paren_token: SyntaxToken,
-) -> CssVarFunctionBuilder {
-    CssVarFunctionBuilder {
-        var_token,
-        l_paren_token,
-        property,
-        r_paren_token,
-        value: None,
-    }
-}
-pub struct CssVarFunctionBuilder {
-    var_token: SyntaxToken,
-    l_paren_token: SyntaxToken,
-    property: CssDashedIdentifier,
-    r_paren_token: SyntaxToken,
-    value: Option<CssVarFunctionValue>,
-}
-impl CssVarFunctionBuilder {
-    pub fn with_value(mut self, value: CssVarFunctionValue) -> Self {
-        self.value = Some(value);
-        self
-    }
-    pub fn build(self) -> CssVarFunction {
-        CssVarFunction::unwrap_cast(SyntaxNode::new_detached(
-            CssSyntaxKind::CSS_VAR_FUNCTION,
-            [
-                Some(SyntaxElement::Token(self.var_token)),
-                Some(SyntaxElement::Token(self.l_paren_token)),
-                Some(SyntaxElement::Node(self.property.into_syntax())),
-                self.value
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-                Some(SyntaxElement::Token(self.r_paren_token)),
-            ],
-        ))
-    }
-}
-pub fn css_var_function_value(
-    comma_token: SyntaxToken,
-    value: CssIdentifier,
-) -> CssVarFunctionValue {
-    CssVarFunctionValue::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_VAR_FUNCTION_VALUE,
-        [
-            Some(SyntaxElement::Token(comma_token)),
-            Some(SyntaxElement::Node(value.into_syntax())),
-        ],
-    ))
-}
 pub fn css_component_value_list<I>(items: I) -> CssComponentValueList
 where
     I: IntoIterator<Item = AnyCssValue>,

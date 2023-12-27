@@ -522,14 +522,6 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssUrlValueRaw::new_unchecked(node) };
                     $body
                 }
-                $crate::CssSyntaxKind::CSS_VAR_FUNCTION => {
-                    let $pattern = unsafe { $crate::CssVarFunction::new_unchecked(node) };
-                    $body
-                }
-                $crate::CssSyntaxKind::CSS_VAR_FUNCTION_VALUE => {
-                    let $pattern = unsafe { $crate::CssVarFunctionValue::new_unchecked(node) };
-                    $body
-                }
                 $crate::CssSyntaxKind::CSS_BOGUS => {
                     let $pattern = unsafe { $crate::CssBogus::new_unchecked(node) };
                     $body
