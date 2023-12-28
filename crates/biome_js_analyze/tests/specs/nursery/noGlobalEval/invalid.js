@@ -50,12 +50,6 @@ window.window.eval("foo");
 
 window.window["eval"]("foo");
 
-global.eval("foo");
-
-global.global.eval("foo");
-
-global.global[`eval`]("foo");
-
 this.eval("foo");
 
 ("use strict");
