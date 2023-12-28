@@ -35,7 +35,7 @@
     padding: 0 !important;
     gap: 1px;
     display: grid;
-    grid-template-columns: repeat(3, 375px);
+    grid-template-columns: repeat(3, 22.4rem);
     width: fit-content;
     border-top-left-radius: 1rem;
     border-top-right-radius: 1rem;
@@ -124,7 +124,7 @@
         display: flex;
         flex-direction: column;
         overflow: hidden;
-        width: calc(100vw - 4.5rem);
+        width: calc(100vw - 2.4rem);
     }
 
     .perf-out {
@@ -173,7 +173,7 @@
     top: 0;
     left: 0;
     z-index: -1;
-    height: 100vh;
+    height: 100vmx;
     width: 100vw;
     background:
         radial-gradient(var(--sl-color-accent-low), transparent 50%) no-repeat -60vw -50vh / 105vw 200vh,
