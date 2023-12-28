@@ -1,0 +1,8 @@
+{
+    "cases": [
+        {
+            "semicolon": "AsNeeded",
+            "line_width": 40
+        }
+    ]
+}
