@@ -1,39 +1,97 @@
-.community>div>div>a {
-    display: flex;
-    margin-top: 1.2rem;
-    margin-bottom: 1.2rem;
-    align-items: center;
-    gap: 0.6rem;
-    text-decoration: none;
-    width: fit-content;
-    border-radius: 6.2rem;
-    padding: 0.5rem 1.3rem;
-    background-color: rgba(36, 173, 243, 0.1);
-    cursor: pointer;
-}
+@import "_mixins";
 
-div>img.contributor-avatar {
-    margin: 0rem;
-    width: 4.4rem;
-    height: 4.4rem;
-    border-radius: 50rem;
-    object-fit: cover;
-}
+.community-links {
+		> a {
+			display: flex;
+			margin-top: 1.2rem;
+			margin-bottom: 1.2rem;
+			align-items: center;
+			gap: 0.6rem;
+			text-decoration: none;
+			width: fit-content;
+			border-radius: 6.2rem;
+			padding: 0.5rem 1.3rem;
+			background-color: rgba(36, 173, 243, 0.1);
+			cursor: pointer;
 
-.community>div>div>a>p {
-    margin: 0;
+			&.github,
+			&.mastodon,
+			&.x,
+			&.discord {
+				width: 9.3rem;
+			}
+
+			@include small-screen-only {
+				&.discord {
+					background-color: var(--sl-discord);
+					color: var(--sl-community-link);
+				}
+			}
+
+
+			&.discord:hover {
+				background-color: var(--sl-discord);
+				color: var(--sl-community-link);
+			}
+
+			@include small-screen-only {
+				&.x,
+				&.github {
+					background-color: black;
+					color: var(--sl-community-link);
+				}
+			}
+			&.x:hover,
+			&.github:hover {
+				background-color: black;
+				color: var(--sl-community-link);
+			}
+
+
+			@include small-screen-only {
+				&.mastodon {
+					background-color: var(--sl-mastodon);
+					color: var(--sl-community-link);
+				}
+			}
+			&.mastodon:hover {
+				background-color: var(--sl-mastodon);
+				color: var(--sl-community-link);
+			}
+
+			 > p {
+				 margin: 0;
+			 }
+		}
 }
 
 .community {
     height: 44rem;
     margin-top: 9.4rem !important;
     position: relative;
-}
 
-h2.community-head {
+	.community-head {
     font-size: 3.7rem;
     text-align: center;
+	}
+
+
+	.community-grid {
+		z-index: -1;
+		position: absolute;
+		content: "";
+		inset: 0;
+		background-image: linear-gradient(to right,
+			var(--sl-color-gray-6) 1px,
+			transparent 1px),
+		linear-gradient(to bottom, var(--sl-color-gray-6) 1px, transparent 1px);
+		background-position: top center;
+		background-size: 20px 20px;
+		-webkit-mask-image: radial-gradient(circle at 100%, white, transparent 80%);
+		mask-image: radial-gradient(circle at 100%, white, transparent 80%);
+	}
 }
+
 
 .connect {
     gap: 1.2rem;
@@ -47,69 +105,41 @@ h2.community-head {
     display: flex;
     justify-content: end;
     gap: 1.2rem;
+
+		.contributor-avatar {
+			margin: 0rem;
+			width: 4.4rem;
+			height: 4.4rem;
+			border-radius: 50rem;
+			object-fit: cover;
+		}
 }
 
 .community-connect {
     display: flex;
     flex-direction: column;
     align-items: center;
+
+	.community-description {
+		font-size: 1.5rem;
+		text-align: center;
+	}
 }
 
-.community-description {
-    font-size: 1.5rem;
-    text-align: center;
-}
 
-a.github,
-a.mastodon,
-a.x,
-a.discord {
-    width: 9.3rem !important;
-}
 
-a.discord:hover {
-    background-color: var(--sl-discord);
-    color: var(--sl-community-link);
-}
 
-a.x:hover,
-a.github:hover {
-    background-color: black;
-    color: var(--sl-community-link);
-}
 
-a.mastodon:hover {
-    background-color: var(--sl-mastodon);
-    color: var(--sl-community-link);
-}
+@include small-screen-only {
+	.community {
+		height: 60rem;
+	}
 
-.community-grid {
-    z-index: -1;
-    position: absolute;
-    content: "";
-    inset: 0;
-    background-image: linear-gradient(to right,
-            var(--sl-color-gray-6) 1px,
-            transparent 1px),
-        linear-gradient(to bottom, var(--sl-color-gray-6) 1px, transparent 1px);
-    background-position: top center;
-    background-size: 20px 20px;
-    -webkit-mask-image: radial-gradient(circle at 100%, white, transparent 80%);
-    mask-image: radial-gradient(circle at 100%, white, transparent 80%);
-}
-
-@media only screen and (max-width: 1000px) {
-    div.community {
-        height: 60rem;
-    }
-
-    div.connect {
-        z-index: -1;
-        opacity: 0.7;
-        right: 4rem;
-        top: 20rem;
-        rotate: 90deg;
-    }
+	.connect {
+		z-index: -1;
+		opacity: 0.2;
+		right: 0;
+	}
 }
 
 @media only screen and (max-width: 700px) {
