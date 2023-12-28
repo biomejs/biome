@@ -156,7 +156,7 @@ CssRoot {
                                 at_token: AT@89..92 "@" [Newline("\n"), Whitespace("\t")] [],
                                 rule: CssKeyframesAtRule {
                                     keyframes_token: KEYFRAMES_KW@92..102 "keyframes" [] [Whitespace(" ")],
-                                    name: CssIdentifier {
+                                    name: CssCustomIdentifier {
                                         value_token: IDENT@102..113 "slide-left" [] [Whitespace(" ")],
                                     },
                                     block: CssKeyframesBlock {
@@ -250,7 +250,7 @@ CssRoot {
                                 at_token: AT@193..196 "@" [Newline("\n"), Whitespace("\t")] [],
                                 rule: CssKeyframesAtRule {
                                     keyframes_token: KEYFRAMES_KW@196..206 "keyframes" [] [Whitespace(" ")],
-                                    name: CssIdentifier {
+                                    name: CssCustomIdentifier {
                                         value_token: IDENT@206..217 "slide-left" [] [Whitespace(" ")],
                                     },
                                     block: CssKeyframesBlock {
@@ -431,7 +431,7 @@ CssRoot {
                                         sub_selectors: CssSubSelectorList [
                                             CssClassSelector {
                                                 dot_token: DOT@404..407 "." [Newline("\n"), Whitespace("\t")] [],
-                                                name: CssIdentifier {
+                                                name: CssCustomIdentifier {
                                                     value_token: IDENT@407..413 "title" [] [Whitespace(" ")],
                                                 },
                                             },
@@ -885,7 +885,7 @@ CssRoot {
                                         sub_selectors: CssSubSelectorList [
                                             CssClassSelector {
                                                 dot_token: DOT@887..890 "." [Newline("\n"), Whitespace("\t")] [],
-                                                name: CssIdentifier {
+                                                name: CssCustomIdentifier {
                                                     value_token: IDENT@890..896 "title" [] [Whitespace(" ")],
                                                 },
                                             },
@@ -1048,7 +1048,7 @@ CssRoot {
                 0: AT@89..92 "@" [Newline("\n"), Whitespace("\t")] []
                 1: CSS_KEYFRAMES_AT_RULE@92..171
                   0: KEYFRAMES_KW@92..102 "keyframes" [] [Whitespace(" ")]
-                  1: CSS_IDENTIFIER@102..113
+                  1: CSS_CUSTOM_IDENTIFIER@102..113
                     0: IDENT@102..113 "slide-left" [] [Whitespace(" ")]
                   2: CSS_KEYFRAMES_BLOCK@113..171
                     0: L_CURLY@113..114 "{" [] []
@@ -1109,7 +1109,7 @@ CssRoot {
                 0: AT@193..196 "@" [Newline("\n"), Whitespace("\t")] []
                 1: CSS_KEYFRAMES_AT_RULE@196..277
                   0: KEYFRAMES_KW@196..206 "keyframes" [] [Whitespace(" ")]
-                  1: CSS_IDENTIFIER@206..217
+                  1: CSS_CUSTOM_IDENTIFIER@206..217
                     0: IDENT@206..217 "slide-left" [] [Whitespace(" ")]
                   2: CSS_KEYFRAMES_BLOCK@217..277
                     0: L_CURLY@217..218 "{" [] []
@@ -1230,7 +1230,7 @@ CssRoot {
                     2: CSS_SUB_SELECTOR_LIST@404..413
                       0: CSS_CLASS_SELECTOR@404..413
                         0: DOT@404..407 "." [Newline("\n"), Whitespace("\t")] []
-                        1: CSS_IDENTIFIER@407..413
+                        1: CSS_CUSTOM_IDENTIFIER@407..413
                           0: IDENT@407..413 "title" [] [Whitespace(" ")]
                 1: CSS_DECLARATION_LIST_BLOCK@413..434
                   0: L_CURLY@413..415 "{" [] [Whitespace(" ")]
@@ -1525,7 +1525,7 @@ CssRoot {
                     2: CSS_SUB_SELECTOR_LIST@887..896
                       0: CSS_CLASS_SELECTOR@887..896
                         0: DOT@887..890 "." [Newline("\n"), Whitespace("\t")] []
-                        1: CSS_IDENTIFIER@890..896
+                        1: CSS_CUSTOM_IDENTIFIER@890..896
                           0: IDENT@890..896 "title" [] [Whitespace(" ")]
                 1: CSS_DECLARATION_LIST_BLOCK@896..917
                   0: L_CURLY@896..898 "{" [] [Whitespace(" ")]

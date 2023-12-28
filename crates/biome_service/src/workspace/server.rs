@@ -255,7 +255,7 @@ impl Workspace for WorkspaceServer {
 
                 if let Some(file_name) = file_name {
                     if FileFeaturesResult::FILES_TO_NOT_PROCESS.contains(&file_name) {
-                        file_features.set_ignored_for_all_features();
+                        file_features.set_protected_for_all_features();
                         return Ok(entry.insert(file_features).clone());
                     }
                 }

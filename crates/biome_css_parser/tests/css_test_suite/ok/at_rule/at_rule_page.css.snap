@@ -315,7 +315,7 @@ CssRoot {
                 page_token: PAGE_KW@154..159 "page" [] [Whitespace(" ")],
                 selectors: CssPageSelectorList [
                     CssPageSelector {
-                        ty: CssIdentifier {
+                        ty: CssCustomIdentifier {
                             value_token: IDENT@159..174 "LandscapeTable" [] [Whitespace(" ")],
                         },
                         pseudos: CssPageSelectorPseudoList [],
@@ -334,7 +334,7 @@ CssRoot {
                 page_token: PAGE_KW@178..183 "page" [] [Whitespace(" ")],
                 selectors: CssPageSelectorList [
                     CssPageSelector {
-                        ty: CssIdentifier {
+                        ty: CssCustomIdentifier {
                             value_token: IDENT@183..200 "CompanyLetterHead" [] [],
                         },
                         pseudos: CssPageSelectorPseudoList [
@@ -380,14 +380,14 @@ CssRoot {
                 page_token: PAGE_KW@261..266 "page" [] [Whitespace(" ")],
                 selectors: CssPageSelectorList [
                     CssPageSelector {
-                        ty: CssIdentifier {
+                        ty: CssCustomIdentifier {
                             value_token: IDENT@266..269 "toc" [] [],
                         },
                         pseudos: CssPageSelectorPseudoList [],
                     },
                     COMMA@269..271 "," [] [Whitespace(" ")],
                     CssPageSelector {
-                        ty: CssIdentifier {
+                        ty: CssCustomIdentifier {
                             value_token: IDENT@271..277 "index" [] [Whitespace(" ")],
                         },
                         pseudos: CssPageSelectorPseudoList [],
@@ -714,7 +714,7 @@ CssRoot {
                 page_token: PAGE_KW@616..621 "page" [] [Whitespace(" ")],
                 selectors: CssPageSelectorList [
                     CssPageSelector {
-                        ty: CssIdentifier {
+                        ty: CssCustomIdentifier {
                             value_token: IDENT@621..627 "artsy" [] [Whitespace(" ")],
                         },
                         pseudos: CssPageSelectorPseudoList [],
@@ -733,7 +733,7 @@ CssRoot {
                 page_token: PAGE_KW@631..636 "page" [] [Whitespace(" ")],
                 selectors: CssPageSelectorList [
                     CssPageSelector {
-                        ty: CssIdentifier {
+                        ty: CssCustomIdentifier {
                             value_token: IDENT@636..641 "artsy" [] [],
                         },
                         pseudos: CssPageSelectorPseudoList [
@@ -757,7 +757,7 @@ CssRoot {
                 page_token: PAGE_KW@651..656 "page" [] [Whitespace(" ")],
                 selectors: CssPageSelectorList [
                     CssPageSelector {
-                        ty: CssIdentifier {
+                        ty: CssCustomIdentifier {
                             value_token: IDENT@656..661 "artsy" [] [],
                         },
                         pseudos: CssPageSelectorPseudoList [
@@ -1219,7 +1219,7 @@ CssRoot {
         0: PAGE_KW@154..159 "page" [] [Whitespace(" ")]
         1: CSS_PAGE_SELECTOR_LIST@159..174
           0: CSS_PAGE_SELECTOR@159..174
-            0: CSS_IDENTIFIER@159..174
+            0: CSS_CUSTOM_IDENTIFIER@159..174
               0: IDENT@159..174 "LandscapeTable" [] [Whitespace(" ")]
             1: CSS_PAGE_SELECTOR_PSEUDO_LIST@174..174
         2: CSS_PAGE_AT_RULE_BLOCK@174..176
@@ -1232,7 +1232,7 @@ CssRoot {
         0: PAGE_KW@178..183 "page" [] [Whitespace(" ")]
         1: CSS_PAGE_SELECTOR_LIST@183..207
           0: CSS_PAGE_SELECTOR@183..207
-            0: CSS_IDENTIFIER@183..200
+            0: CSS_CUSTOM_IDENTIFIER@183..200
               0: IDENT@183..200 "CompanyLetterHead" [] []
             1: CSS_PAGE_SELECTOR_PSEUDO_LIST@200..207
               0: CSS_PAGE_SELECTOR_PSEUDO@200..207
@@ -1263,12 +1263,12 @@ CssRoot {
         0: PAGE_KW@261..266 "page" [] [Whitespace(" ")]
         1: CSS_PAGE_SELECTOR_LIST@266..277
           0: CSS_PAGE_SELECTOR@266..269
-            0: CSS_IDENTIFIER@266..269
+            0: CSS_CUSTOM_IDENTIFIER@266..269
               0: IDENT@266..269 "toc" [] []
             1: CSS_PAGE_SELECTOR_PSEUDO_LIST@269..269
           1: COMMA@269..271 "," [] [Whitespace(" ")]
           2: CSS_PAGE_SELECTOR@271..277
-            0: CSS_IDENTIFIER@271..277
+            0: CSS_CUSTOM_IDENTIFIER@271..277
               0: IDENT@271..277 "index" [] [Whitespace(" ")]
             1: CSS_PAGE_SELECTOR_PSEUDO_LIST@277..277
         2: CSS_PAGE_AT_RULE_BLOCK@277..279
@@ -1496,7 +1496,7 @@ CssRoot {
         0: PAGE_KW@616..621 "page" [] [Whitespace(" ")]
         1: CSS_PAGE_SELECTOR_LIST@621..627
           0: CSS_PAGE_SELECTOR@621..627
-            0: CSS_IDENTIFIER@621..627
+            0: CSS_CUSTOM_IDENTIFIER@621..627
               0: IDENT@621..627 "artsy" [] [Whitespace(" ")]
             1: CSS_PAGE_SELECTOR_PSEUDO_LIST@627..627
         2: CSS_PAGE_AT_RULE_BLOCK@627..629
@@ -1509,7 +1509,7 @@ CssRoot {
         0: PAGE_KW@631..636 "page" [] [Whitespace(" ")]
         1: CSS_PAGE_SELECTOR_LIST@636..647
           0: CSS_PAGE_SELECTOR@636..647
-            0: CSS_IDENTIFIER@636..641
+            0: CSS_CUSTOM_IDENTIFIER@636..641
               0: IDENT@636..641 "artsy" [] []
             1: CSS_PAGE_SELECTOR_PSEUDO_LIST@641..647
               0: CSS_PAGE_SELECTOR_PSEUDO@641..647
@@ -1525,7 +1525,7 @@ CssRoot {
         0: PAGE_KW@651..656 "page" [] [Whitespace(" ")]
         1: CSS_PAGE_SELECTOR_LIST@656..668
           0: CSS_PAGE_SELECTOR@656..668
-            0: CSS_IDENTIFIER@656..661
+            0: CSS_CUSTOM_IDENTIFIER@656..661
               0: IDENT@656..661 "artsy" [] []
             1: CSS_PAGE_SELECTOR_PSEUDO_LIST@661..668
               0: CSS_PAGE_SELECTOR_PSEUDO@661..668

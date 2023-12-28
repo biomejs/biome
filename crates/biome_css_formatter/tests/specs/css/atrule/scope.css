@@ -1,0 +1,67 @@
+@scope
+{
+/* Only match links inside a light-scheme */
+a { color: darkmagenta; }
+}
+
+@scope (
+    .light-scheme
+    
+)
+{
+/* Only match links inside a light-scheme */
+a {
+	color: darkmagenta;
+}
+}
+
+@scope 
+to 
+(
+.content
+>
+*
+)
+{
+img {
+	border-radius: 50%;
+}
+
+.content {
+	padding: 1em;
+}
+}
+
+@scope (
+    .media-object   )   to  (   .content >   *){
+img {
+	border-radius: 50%;
+}
+
+.content {
+	padding: 1em;
+}
+}
+
+@scope  TO   (.content > *  ) {
+img {
+	border-radius: 50%;
+}
+
+.content {
+	padding: 1em;
+}
+}
+
+@scope (  #inner  ) {
+@keyframes --my-anim {
+	to {
+		background-color: rgb(0, 0, 255);
+	}
+}
+}
+
+@scope (.media-object,
+div:active
+) 
+to ( .content > *  , :hover  ) {}

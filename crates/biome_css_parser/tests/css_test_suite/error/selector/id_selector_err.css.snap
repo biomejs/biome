@@ -29,7 +29,7 @@ CssRoot {
                         },
                         CssClassSelector {
                             dot_token: DOT@2..3 "." [] [],
-                            name: CssIdentifier {
+                            name: CssCustomIdentifier {
                                 value_token: IDENT@3..9 "class" [] [Whitespace(" ")],
                             },
                         },
@@ -64,7 +64,7 @@ CssRoot {
               1: (empty)
             1: CSS_CLASS_SELECTOR@2..9
               0: DOT@2..3 "." [] []
-              1: CSS_IDENTIFIER@3..9
+              1: CSS_CUSTOM_IDENTIFIER@3..9
                 0: IDENT@3..9 "class" [] [Whitespace(" ")]
       1: CSS_DECLARATION_LIST_BLOCK@9..11
         0: L_CURLY@9..10 "{" [] []

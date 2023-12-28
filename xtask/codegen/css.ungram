@@ -45,6 +45,7 @@ CssBogusPseudoElement = SyntaxElement*
 CssBogusAtRule = SyntaxElement*
 CssBogusLayer = SyntaxElement*
 CssBogusBlock =  SyntaxElement*
+CssBogusScopeRange =  SyntaxElement*
 CssBogusKeyframesItem =  SyntaxElement*
 CssBogusRule =  SyntaxElement*
 CssBogusParameter = SyntaxElement*
@@ -154,13 +155,13 @@ CssUniversalNamespacePrefix =
 // ^^^^
 CssIdSelector =
 	'#'
-	name: CssIdentifier
+	name: CssCustomIdentifier
 
 // .app {}
 // ^^^^
 CssClassSelector =
 	'.'
-	name: CssIdentifier
+	name: CssCustomIdentifier
 
 // [title = "title" i] {}
 // ^^^^^^^^^^^^^^^^^^^
@@ -451,7 +452,7 @@ CssDeclaration =
 
 CssComponentValueList = AnyCssValue*
 
-AnyCssDeclarationName = CssIdentifier | CssCustomProperty
+AnyCssDeclarationName = CssIdentifier | CssDashedIdentifier
 
 CssDeclarationImportant =
 	'!'
@@ -476,6 +477,8 @@ AnyCssAtRule =
 	| CssMediaAtRule
 	| CssPageAtRule
 	| CssLayerAtRule
+	| CssSupportsAtRule
+	| CssScopeAtRule
 	| CssBogusAtRule
 
 // @charset "UTF-8";
@@ -489,14 +492,15 @@ CssCharsetAtRule =
 // ^^^^^^^^^^^^^^^^^^^^^^^^
 // @color-profile device-cmyk {}
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+// TODO: `name` should be `<dashed-ident> | device-cmyk` instead
 CssColorProfileAtRule =
 	'color-profile'
-	name: CssIdentifier
+	name: CssCustomIdentifier
 	block: AnyCssDeclarationListBlock
 
 CssCounterStyleAtRule =
 	'counter-style'
-	name: CssIdentifier
+	name: CssCustomIdentifier
 	block: AnyCssDeclarationListBlock
 
 // @font-face {}
@@ -510,7 +514,7 @@ CssFontFaceAtRule =
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 CssFontPaletteValuesAtRule =
 	'font-palette-values'
-	name: CssIdentifier
+	name: CssDashedIdentifier
 	block: AnyCssDeclarationListBlock
 
 
@@ -540,7 +544,7 @@ CssFontPaletteValuesAtRule =
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 CssContainerAtRule =
 	'container'
-	name: CssIdentifier?
+	name: CssCustomIdentifier?
 	query: AnyCssContainerQuery
 	block: AnyCssRuleListBlock
 
@@ -681,7 +685,7 @@ AnyCssKeyframesBlock =
 
 // @keyframes "something" { from {} to {} }
 //            ^^^^^^^^^^^
-AnyCssKeyframeName = CssIdentifier | CssString
+AnyCssKeyframeName = CssCustomIdentifier | CssString
 
 // @keyframes "something" { from {} to {} }
 //                        ^^^^^^^^^^^^^^^^^
@@ -907,7 +911,7 @@ AnyCssQueryFeatureValue =
 	| AnyCssDimension
 	| CssIdentifier
 	| CssRatio
-	| CssAnyFunction
+	| AnyCssFunction
 
 // https://drafts.csswg.org/css-page/#at-ruledef-page
 // @page = @page <page-selector-list>? { <declaration-rule-list> }
@@ -931,9 +935,12 @@ AnyCssPageSelector =
 	| CssBogusSelector
 
 // @page name:first,:blank:first {  }
-// 			 ^^^^^^^^^^ ^^^^^^^^^^^^
+//       ^^^^^^^^^^ ^^^^^^^^^^^^
+// NOTE: The CSS Spec uses `<ident>` for the name, but also explicitly states
+// that the name is case sensitive. For simplicity, `<custom-ident>` gets the
+// exact same behavior.
 CssPageSelector =
-	type: CssIdentifier?
+	type: CssCustomIdentifier?
 	pseudos: CssPageSelectorPseudoList
 
 CssPageSelectorPseudoList = AnyCssPageSelectorPseudo*
@@ -1031,18 +1038,142 @@ CssLayerReferenceList = (CssLayerNameList (',' CssLayerNameList)*)
 //                   ^^^^^^^
 CssLayerNameList = (CssIdentifier ('.' CssIdentifier)*)
 
+// https://drafts.csswg.org/css-conditional-3/#at-supports
+// https://drafts.csswg.org/css-conditional-4/#at-supports-ext
+// @supports <supports-condition> {
+//  <rule-list>
+// }
+// <supports-condition> = not <supports-in-parens>
+//                     | <supports-in-parens> [ and <supports-in-parens> ]*
+//                     | <supports-in-parens> [ or <supports-in-parens> ]*
+// <supports-in-parens> = ( <supports-condition> ) | <supports-feature> | <general-enclosed>
+// <supports-feature> = <supports-selector-fn> | <supports-decl>
+// <supports-selector-fn> = selector( <complex-selector> )
+// <supports-decl> = ( <declaration> )
+// <general-enclosed> branch must only be chosen if the input does not match either of the preceding branches.
+// <general-enclosed> exists to allow for future expansion of the grammar in a reasonably compatible way.
+
+// @supports (display: grid) {}
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssSupportsAtRule =
+	'supports'
+	condition: AnyCssSupportsCondition
+	block: AnyCssRuleListBlock
+
+AnyCssSupportsCondition =
+	CssSupportsNotCondition
+	| CssSupportsOrCondition
+	| CssSupportsAndCondition
+	| AnyCssSupportsInParens
+
+// @supports not (display: grid) {}
+//           ^^^^^^^^^^^^^^^^^^^
+CssSupportsNotCondition =
+	'not'
+	query: AnyCssSupportsInParens
+
+// @supports (transition-property: color) and (animation-name: foo) {}
+//           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssSupportsAndCondition =
+	left: AnyCssSupportsInParens
+	'and'
+	right: AnyCssSupportsAndCombinableCondition
+
+// @supports (transition-property: color) and ((animation-name: foo) or (display: flex)) {}
+//           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AnyCssSupportsAndCombinableCondition =
+	CssSupportsAndCondition
+	| AnyCssSupportsInParens
+
+// @supports (transition-property: color) or (animation-name: foo) {}
+//           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssSupportsOrCondition =
+	left: AnyCssSupportsInParens
+	'or'
+	right: AnyCssSupportsOrCombinableCondition
+
+// @supports (transition-property: color) or ((animation-name: foo) and (display: flex)) {}
+//           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AnyCssSupportsOrCombinableCondition =
+	CssSupportsOrCondition
+	| AnyCssSupportsInParens
+
+AnyCssSupportsInParens =
+	CssSupportsConditionInParens
+	| CssSupportsFeatureDeclaration
+	| CssSupportsFeatureSelector
+	| CssSimpleFunction
+	| AnyCssValue // general-enclosed
+
+// @supports (transition-property: color) or (not (animation-name: foo)) {}
+//                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssSupportsConditionInParens =
+	'('
+	condition: AnyCssSupportsCondition
+	')'
+
+// @supports not (display: flex) {}
+// 				       ^^^^^^^^^^^^^^^
+CssSupportsFeatureDeclaration =
+	'('
+	declaration: CssDeclaration
+	')'
+
+// @supports selector(:focus-visible) { }
+// 				   ^^^^^^^^^^^^^^^^^^^^^^^^
+CssSupportsFeatureSelector =
+	'selector'
+	'('
+	selector: AnyCssSelector
+	')'
+
+// https://drafts.csswg.org/css-cascade-6/#at-ruledef-scope
+// @scope [(<scope-start>)]? [to (<scope-end>)]? {
+//     <rule-list>
+//   }
+
+CssScopeAtRule =
+	'scope'
+	range: AnyCssScopeRange?
+	block: AnyCssRuleListBlock
+
+AnyCssScopeRange =
+	CssScopeRangeStart
+	| CssScopeRangeEnd
+	| CssScopeRangeInterval
+	| CssBogusScopeRange
+
+CssScopeRangeStart =
+	start: CssScopeEdge
+
+CssScopeRangeEnd =
+	'to'
+	end: CssScopeEdge
+
+CssScopeRangeInterval =
+	start: CssScopeEdge
+	'to'
+	end: CssScopeEdge
+
+CssScopeEdge =
+	'('
+	selectors: CssSelectorList
+	')'
+
 ///////////////
 // AUXILIARY
 ///////////////
 
 AnyCssValue =
 	CssIdentifier
+	| CssCustomIdentifier
+	| CssDashedIdentifier
 	| CssString
 	| CssNumber
 	| AnyCssDimension
 	| CssRatio
-	| CssAnyFunction
-	| CssCustomProperty
+	| AnyCssFunction
+	| CssColor
 
 
 // 10px
@@ -1066,8 +1197,9 @@ CssRatio =
 	denominator: CssNumber
 
 
-CssAnyFunction =
+AnyCssFunction =
 	CssSimpleFunction
+	| CssUrlFunction
 
 // content: counter(section);
 // 					^^^^^^^^^^^^^^^^
@@ -1077,24 +1209,15 @@ CssSimpleFunction =
 	items: CssParameterList
 	')'
 
-CssVarFunction =
-	'var'
-	'('
-		property: CssCustomProperty
-		value: CssVarFunctionValue?
-	')'
+CssUrlFunction = 'url' '(' AnyCssUrlValue? ')'
 
-CssVarFunctionValue =
-	','
-	value: CssIdentifier
+AnyCssUrlValue =
+	CssUrlValueRaw
+	| CssString
 
 CssPercentage =
 	value: CssNumber
 	'%'
-
-
-// parsed with --ident
-CssCustomProperty = value: CssIdentifier
 
 CssParameterList = CssParameter (',' CssParameter)* ','?
 
@@ -1102,8 +1225,40 @@ CssParameterList = CssParameter (',' CssParameter)* ','?
 //			    ^^^
 // repeating-radial-gradient(red, yellow 10%, green 15%);
 //                                ^^^^^^^^^^
-CssParameter = CssComponentValueList
+CssParameter = AnyCssExpression
 
+AnyCssExpression =
+	CssBinaryExpression
+	| CssParenthesizedExpression
+	| CssListOfComponentValuesExpression
+
+CssListOfComponentValuesExpression = CssComponentValueList
+
+CssBinaryExpression =
+	left: AnyCssExpression
+	operator_token: (
+		'+' | '-' | '*' | '/'
+	)
+	right: AnyCssExpression
+
+
+CssParenthesizedExpression =
+	'(' expression: AnyCssExpression? ')'
+
+// #fff
+// ^^^^
+CssColor =
+	'#'
+	value:'css_color_literal'
+
+// Any identifier. Case insensitve, used for standard property names, values, type selectors, etc.
 CssIdentifier = value: 'ident'
+// Any non-standard identifier. Case sensitive, used for class names, ids, etc. Custom identifiers
+// _may_ overlap with standard identifiers defined by CSS (e.g., `color`).
+CssCustomIdentifier = value: 'ident'
+// An identifier starting with two dashes, `--`. Case sensitive, used for custom property names.
+// Dashed identifiers are guaranteed to never overlap with an identifier defined by CSS.
+CssDashedIdentifier = value: 'ident'
 CssString = value: 'css_string_literal'
 CssNumber = value: 'css_number_literal'
+CssUrlValueRaw = value: 'css_url_value_raw_literal'

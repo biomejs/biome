@@ -5,6 +5,7 @@ mod cst;
 mod generated;
 mod prelude;
 mod separated;
+mod utils;
 
 use crate::comments::CssCommentStyle;
 pub(crate) use crate::context::CssFormatContext;

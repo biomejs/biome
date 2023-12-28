@@ -9,8 +9,11 @@ use crate::parser::CssParser;
 use crate::syntax::at_rule::{at_at_rule, parse_at_rule};
 use crate::syntax::blocks::parse_or_recover_declaration_list_block;
 use crate::syntax::css_dimension::{is_at_any_dimension, parse_any_dimension};
-use crate::syntax::parse_error::{expected_any_rule, expected_identifier};
-use crate::syntax::selector::{is_at_selector, CssSelectorList, CssSubSelectorList};
+use crate::syntax::parse_error::expected_any_rule;
+use crate::syntax::parse_error::expected_expression;
+use crate::syntax::parse_error::expected_identifier;
+use crate::syntax::selector::CssSelectorList;
+use crate::syntax::selector::{is_at_selector, CssSubSelectorList};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
@@ -34,6 +37,7 @@ const RULE_RECOVERY_SET: TokenSet<CssSyntaxKind> = token_set![
 const SELECTOR_LIST_RECOVERY_SET: TokenSet<CssSyntaxKind> = token_set![T!['{'], T!['}'],];
 const BODY_RECOVERY_SET: TokenSet<CssSyntaxKind> =
     SELECTOR_LIST_RECOVERY_SET.union(RULE_RECOVERY_SET);
+const BINARY_OPERATION_TOKEN: TokenSet<CssSyntaxKind> = token_set![T![+], T![-], T![*], T![/]];
 
 pub(crate) fn parse_root(p: &mut CssParser) {
     let m = p.start();
@@ -135,7 +139,7 @@ impl ParseSeparatedList for CssDeclarationList {
     ) -> RecoveryResult {
         parsed_element.or_recover(
             p,
-            &ParseRecovery::new(CSS_BOGUS_DECLARATION_ITEM, token_set!(T!['}'])),
+            &ParseRecovery::new(CSS_BOGUS, token_set!(T!['}'])),
             expected_declaration_item,
         )
     }
@@ -228,16 +232,17 @@ pub(crate) fn is_at_any_value(p: &mut CssParser) -> bool {
         || p.at(CSS_STRING_LITERAL)
         || is_at_any_dimension(p)
         || p.at(CSS_NUMBER_LITERAL)
-        || is_at_custom_property(p)
+        || is_at_dashed_identifier(p)
         || is_at_ratio(p)
+        || is_at_color(p)
 }
 
 #[inline]
 pub(crate) fn parse_any_value(p: &mut CssParser) -> ParsedSyntax {
     if is_at_any_function(p) {
         parse_any_function(p)
-    } else if is_at_custom_property(p) {
-        parse_custom_property(p)
+    } else if is_at_dashed_identifier(p) {
+        parse_dashed_identifier(p)
     } else if is_at_identifier(p) {
         parse_regular_identifier(p)
     } else if p.at(CSS_STRING_LITERAL) {
@@ -248,24 +253,26 @@ pub(crate) fn parse_any_value(p: &mut CssParser) -> ParsedSyntax {
         parse_ratio(p)
     } else if p.at(CSS_NUMBER_LITERAL) {
         parse_regular_number(p)
+    } else if is_at_color(p) {
+        parse_color(p)
     } else {
         Absent
     }
 }
 
 #[inline]
-pub(crate) fn is_at_custom_property(p: &mut CssParser) -> bool {
-    is_at_identifier(p) && p.cur_text().starts_with("--")
+pub(crate) fn is_at_color(p: &mut CssParser) -> bool {
+    p.at(T![#])
 }
-
 #[inline]
-pub(crate) fn parse_custom_property(p: &mut CssParser) -> ParsedSyntax {
-    if is_at_custom_property(p) {
-        let m = p.start();
-        parse_regular_identifier(p).or_add_diagnostic(p, expected_identifier);
-        return Present(m.complete(p, CSS_CUSTOM_PROPERTY));
+pub(crate) fn parse_color(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_color(p) {
+        return Absent;
     }
-    Absent
+    let m = p.start();
+    p.bump_with_context(T![#], CssLexContext::Color);
+    p.expect(CSS_COLOR_LITERAL);
+    Present(m.complete(p, CSS_COLOR))
 }
 
 #[inline]
@@ -308,17 +315,77 @@ impl ParseSeparatedList for CssParameterList {
         true
     }
 }
+#[inline]
+pub(crate) fn is_at_parameter(p: &mut CssParser) -> bool {
+    is_at_parenthesized(p) || is_at_any_value(p)
+}
+#[inline]
+pub(crate) fn is_at_parenthesized(p: &mut CssParser) -> bool {
+    p.at(T!['('])
+}
 
 #[inline]
 pub(crate) fn parse_parameter(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_any_value(p) {
+    if !is_at_parameter(p) {
         return Absent;
     }
     let param = p.start();
-
-    ListOfComponentValues.parse_list(p);
-
+    parse_any_expression(p).ok();
     Present(param.complete(p, CSS_PARAMETER))
+}
+#[inline]
+pub(crate) fn is_at_any_expression(p: &mut CssParser) -> bool {
+    is_at_parenthesized(p) || is_at_any_value(p)
+}
+#[inline]
+pub(crate) fn parse_any_expression(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_any_expression(p) {
+        return Absent;
+    }
+    let param = if is_at_parenthesized(p) {
+        parse_parenthesized_expression(p)
+    } else {
+        parse_list_of_component_values_expression(p)
+    };
+    if is_at_binary_operator(p) {
+        let binary_expression = param.precede(p);
+        bump_operator_token(p);
+        parse_any_expression(p).or_add_diagnostic(p, expected_expression);
+        return Present(binary_expression.complete(p, CSS_BINARY_EXPRESSION));
+    }
+    param
+}
+
+#[inline]
+pub(crate) fn parse_list_of_component_values_expression(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_any_value(p) {
+        return Absent;
+    }
+    let m = p.start();
+    ListOfComponentValues.parse_list(p);
+    Present(m.complete(p, CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION))
+}
+
+#[inline]
+pub(crate) fn is_at_binary_operator(p: &mut CssParser) -> bool {
+    p.at_ts(BINARY_OPERATION_TOKEN)
+}
+
+#[inline]
+pub(crate) fn bump_operator_token(p: &mut CssParser) {
+    p.bump_ts(BINARY_OPERATION_TOKEN);
+}
+
+#[inline]
+pub(crate) fn parse_parenthesized_expression(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_parenthesized(p) {
+        return Absent;
+    }
+    let m = p.start();
+    p.expect(T!['(']);
+    parse_any_expression(p).ok();
+    p.expect(T![')']);
+    Present(m.complete(p, CSS_PARENTHESIZED_EXPRESSION))
 }
 
 #[inline]
@@ -326,16 +393,38 @@ pub(crate) fn parse_any_function(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_any_function(p) {
         return Absent;
     }
+    if is_at_url_function(p) {
+        return parse_url_function(p);
+    }
+    parse_simple_function(p)
+}
 
-    let m = p.start();
+fn parse_simple_function(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_any_function(p) {
+        return Absent;
+    }
     let simple_fn = p.start();
     parse_regular_identifier(p).or_add_diagnostic(p, expected_identifier);
-    p.eat(T!['(']);
+    p.expect(T!['(']);
     CssParameterList.parse_list(p);
     p.expect(T![')']);
-    simple_fn.complete(p, CSS_SIMPLE_FUNCTION);
+    Present(simple_fn.complete(p, CSS_SIMPLE_FUNCTION))
+}
 
-    Present(m.complete(p, CSS_ANY_FUNCTION))
+pub(crate) fn is_at_url_function(p: &mut CssParser) -> bool {
+    p.at(T![url]) && p.nth_at(1, T!['('])
+}
+
+pub(crate) fn parse_url_function(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_url_function(p) {
+        return Absent;
+    }
+    let url_fn = p.start();
+    p.expect(T![url]);
+    p.expect_with_context(T!['('], CssLexContext::UrlRawValue);
+    parse_url_value(p).ok();
+    p.expect(T![')']);
+    Present(url_fn.complete(p, CSS_URL_FUNCTION))
 }
 
 #[inline]
@@ -355,6 +444,24 @@ pub(crate) fn parse_ratio(p: &mut CssParser) -> ParsedSyntax {
     Present(m.complete(p, CSS_RATIO))
 }
 
+pub(crate) fn is_at_url_value(p: &mut CssParser) -> bool {
+    p.at(CSS_URL_VALUE_RAW_LITERAL) || is_at_string(p)
+}
+
+#[inline]
+pub(crate) fn parse_url_value(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_url_value(p) {
+        return Absent;
+    }
+
+    if is_at_string(p) {
+        return parse_string(p);
+    }
+    let m = p.start();
+    p.expect(CSS_URL_VALUE_RAW_LITERAL);
+    Present(m.complete(p, CSS_URL_VALUE_RAW))
+}
+
 #[inline]
 pub(crate) fn is_at_identifier(p: &mut CssParser) -> bool {
     is_nth_at_identifier(p, 0)
@@ -364,6 +471,8 @@ pub(crate) fn is_at_identifier(p: &mut CssParser) -> bool {
 pub(crate) fn is_nth_at_identifier(p: &mut CssParser, n: usize) -> bool {
     p.nth_at(n, T![ident]) || p.nth(n).is_contextual_keyword()
 }
+/// Parse any identifier as a general CssIdentifier. Regular identifiers are
+/// case-insensitive, often used for property names, values, etc.
 #[inline]
 pub(crate) fn parse_regular_identifier(p: &mut CssParser) -> ParsedSyntax {
     parse_identifier(p, CssLexContext::Regular)
@@ -380,6 +489,45 @@ pub(crate) fn parse_identifier(p: &mut CssParser, context: CssLexContext) -> Par
     let identifier = m.complete(p, CSS_IDENTIFIER);
 
     Present(identifier)
+}
+
+/// Custom identifiers are identifiers not defined by CSS itself. These _are_
+/// case-sensitive, used for class names, ids, etc. Custom identifiers _may_
+/// have the same value as an identifier defined by CSS (e.g, `color`, used as
+/// a class name).
+///
+/// Custom identifiers have the same syntax as general identifiers, so the
+/// [is_at_identifier] function can be used to check for both while parsing.
+#[inline]
+pub(crate) fn parse_custom_identifier(p: &mut CssParser, context: CssLexContext) -> ParsedSyntax {
+    if !is_at_identifier(p) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.bump_remap_with_context(T![ident], context);
+    let identifier = m.complete(p, CSS_CUSTOM_IDENTIFIER);
+
+    Present(identifier)
+}
+
+#[inline]
+pub(crate) fn is_at_dashed_identifier(p: &mut CssParser) -> bool {
+    is_at_identifier(p) && p.cur_text().starts_with("--")
+}
+
+/// Dashed identifiers are regular identifiers that start with two dashes (`--`).
+/// Case sensitive, these are guaranteed to never overlap with an identifier
+/// defined by CSS.
+#[inline]
+pub(crate) fn parse_dashed_identifier(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_dashed_identifier(p) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.bump(T![ident]);
+    Present(m.complete(p, CSS_DASHED_IDENTIFIER))
 }
 
 #[inline]
@@ -401,7 +549,7 @@ pub(crate) fn parse_number(p: &mut CssParser, context: CssLexContext) -> ParsedS
 
 #[inline]
 pub(crate) fn parse_string(p: &mut CssParser) -> ParsedSyntax {
-    if !p.at(CSS_STRING_LITERAL) {
+    if !is_at_string(p) {
         return Absent;
     }
 
@@ -410,4 +558,8 @@ pub(crate) fn parse_string(p: &mut CssParser) -> ParsedSyntax {
     p.bump(CSS_STRING_LITERAL);
 
     Present(m.complete(p, CSS_STRING))
+}
+
+fn is_at_string(p: &mut CssParser) -> bool {
+    p.at(CSS_STRING_LITERAL)
 }

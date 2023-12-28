@@ -1,7 +1,8 @@
+use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use crate::syntax::at_rule::feature::parse_any_query_feature;
 use crate::syntax::blocks::parse_or_recover_rule_list_block;
-use crate::syntax::{is_at_identifier, parse_declaration, parse_regular_identifier};
+use crate::syntax::{is_at_identifier, parse_custom_identifier, parse_declaration};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::T;
 use biome_parser::parsed_syntax::ParsedSyntax::Present;
@@ -23,7 +24,7 @@ pub(crate) fn parse_container_at_rule(p: &mut CssParser) -> ParsedSyntax {
 
     p.bump(T![container]);
 
-    parse_regular_identifier(p).ok();
+    parse_custom_identifier(p, CssLexContext::Regular).ok();
 
     parse_any_container_query(p).ok(); // TODO handle error
 
@@ -80,7 +81,7 @@ fn parse_container_or_query(p: &mut CssParser) -> ParsedSyntax {
     if p.at(T![or]) {
         let m = query_in_parens.precede(p);
         p.bump(T![or]);
-        parse_container_and_query(p).ok(); // TODO handle error
+        parse_container_or_query(p).ok(); // TODO handle error
         Present(m.complete(p, CSS_CONTAINER_OR_QUERY))
     } else {
         query_in_parens

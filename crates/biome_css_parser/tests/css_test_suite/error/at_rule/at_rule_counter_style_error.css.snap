@@ -75,7 +75,7 @@ CssRoot {
             rule: CssBogusAtRule {
                 items: [
                     COUNTER_STYLE_KW@76..90 "counter-style" [] [Whitespace(" ")],
-                    CssIdentifier {
+                    CssCustomIdentifier {
                         value_token: IDENT@90..95 "ident" [] [],
                     },
                 ],
@@ -86,7 +86,7 @@ CssRoot {
             rule: CssBogusAtRule {
                 items: [
                     COUNTER_STYLE_KW@97..111 "counter-style" [] [Whitespace(" ")],
-                    CssIdentifier {
+                    CssCustomIdentifier {
                         value_token: IDENT@111..116 "ident" [] [],
                     },
                 ],
@@ -135,13 +135,13 @@ CssRoot {
       0: AT@74..76 "@" [Newline("\n")] []
       1: CSS_BOGUS_AT_RULE@76..95
         0: COUNTER_STYLE_KW@76..90 "counter-style" [] [Whitespace(" ")]
-        1: CSS_IDENTIFIER@90..95
+        1: CSS_CUSTOM_IDENTIFIER@90..95
           0: IDENT@90..95 "ident" [] []
     4: CSS_AT_RULE@95..116
       0: AT@95..97 "@" [Newline("\n")] []
       1: CSS_BOGUS_AT_RULE@97..116
         0: COUNTER_STYLE_KW@97..111 "counter-style" [] [Whitespace(" ")]
-        1: CSS_IDENTIFIER@111..116
+        1: CSS_CUSTOM_IDENTIFIER@111..116
           0: IDENT@111..116 "ident" [] []
   2: EOF@116..117 "" [Newline("\n")] []
 

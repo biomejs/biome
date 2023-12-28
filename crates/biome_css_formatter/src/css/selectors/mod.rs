@@ -16,5 +16,6 @@ pub(crate) mod pseudo_class_selector;
 pub(crate) mod pseudo_element_function_selector;
 pub(crate) mod pseudo_element_selector;
 pub(crate) mod relative_selector;
+pub(crate) mod supports_feature_selector;
 pub(crate) mod type_selector;
 pub(crate) mod universal_selector;

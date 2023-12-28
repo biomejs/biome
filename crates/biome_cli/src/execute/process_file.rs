@@ -23,6 +23,8 @@ pub(crate) enum FileStatus {
     Success,
     Message(Message),
     Ignored,
+    /// Files that belong to other tools and shouldn't be touched
+    Protected(String),
 }
 
 /// Wrapper type for messages that can be printed during the traversal process
@@ -215,6 +217,9 @@ pub(crate) fn process_file(ctx: &TraversalOptions, path: &Path) -> FileResult {
                 }
                 SupportKind::FeatureNotEnabled | SupportKind::Ignored => {
                     return Ok(FileStatus::Ignored)
+                }
+                SupportKind::Protected => {
+                    return Ok(FileStatus::Protected(path.display().to_string()))
                 }
                 SupportKind::Supported => {}
             };

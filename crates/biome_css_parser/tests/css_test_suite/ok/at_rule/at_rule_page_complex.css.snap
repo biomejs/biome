@@ -167,7 +167,7 @@ CssRoot {
                     },
                     COMMA@29..31 "," [] [Whitespace(" ")],
                     CssPageSelector {
-                        ty: CssIdentifier {
+                        ty: CssCustomIdentifier {
                             value_token: IDENT@31..35 "name" [] [],
                         },
                         pseudos: CssPageSelectorPseudoList [
@@ -1718,7 +1718,7 @@ CssRoot {
                 1: BLANK_KW@24..29 "blank" [] []
           1: COMMA@29..31 "," [] [Whitespace(" ")]
           2: CSS_PAGE_SELECTOR@31..59
-            0: CSS_IDENTIFIER@31..35
+            0: CSS_CUSTOM_IDENTIFIER@31..35
               0: IDENT@31..35 "name" [] []
             1: CSS_PAGE_SELECTOR_PSEUDO_LIST@35..59
               0: CSS_PAGE_SELECTOR_PSEUDO@35..41

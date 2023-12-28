@@ -13,6 +13,7 @@ use biome_service::configuration::{
     vcs::vcs_configuration, FilesConfiguration, FormatterConfiguration, JavascriptFormatter,
     LinterConfiguration, LoadedConfiguration,
 };
+use biome_service::documentation::Doc;
 use biome_service::{Configuration, ConfigurationDiagnostic, WorkspaceError};
 use bpaf::Bpaf;
 use std::ffi::OsString;
@@ -21,6 +22,7 @@ use std::path::PathBuf;
 pub(crate) mod check;
 pub(crate) mod ci;
 pub(crate) mod daemon;
+pub(crate) mod explain;
 pub(crate) mod format;
 pub(crate) mod init;
 pub(crate) mod lint;
@@ -252,6 +254,14 @@ pub enum BiomeCommand {
         bool,
     ),
 
+    /// A command to retrieve the documentation of various aspects of the CLI.
+    #[bpaf(command)]
+    Explain {
+        /// Single name to display documentation for.
+        #[bpaf(positional("NAME"))]
+        doc: Doc,
+    },
+
     #[bpaf(command("__run_server"), hide)]
     RunServer {
         #[bpaf(long("stop-on-disconnect"), hide_usage)]
@@ -280,6 +290,7 @@ impl BiomeCommand {
             | BiomeCommand::Start(_)
             | BiomeCommand::Stop
             | BiomeCommand::Init
+            | BiomeCommand::Explain { .. }
             | BiomeCommand::RunServer { .. }
             | BiomeCommand::PrintSocket
             | BiomeCommand::PrintCacheDir => None,
@@ -298,6 +309,7 @@ impl BiomeCommand {
             BiomeCommand::Init
             | BiomeCommand::Start(_)
             | BiomeCommand::Stop
+            | BiomeCommand::Explain { .. }
             | BiomeCommand::LspProxy(_)
             | BiomeCommand::RunServer { .. }
             | BiomeCommand::PrintSocket
@@ -321,6 +333,7 @@ impl BiomeCommand {
             | BiomeCommand::Start(_)
             | BiomeCommand::Stop
             | BiomeCommand::Init
+            | BiomeCommand::Explain { .. }
             | BiomeCommand::LspProxy(_)
             | BiomeCommand::RunServer { .. }
             | BiomeCommand::PrintSocket
@@ -341,6 +354,7 @@ impl BiomeCommand {
             | BiomeCommand::Start(_)
             | BiomeCommand::Stop
             | BiomeCommand::Init
+            | BiomeCommand::Explain { .. }
             | BiomeCommand::RunServer { .. }
             | BiomeCommand::PrintSocket
             | BiomeCommand::PrintCacheDir => LoggingLevel::default(),
@@ -359,6 +373,7 @@ impl BiomeCommand {
             | BiomeCommand::Start(_)
             | BiomeCommand::Stop
             | BiomeCommand::Init
+            | BiomeCommand::Explain { .. }
             | BiomeCommand::RunServer { .. }
             | BiomeCommand::PrintSocket
             | BiomeCommand::PrintCacheDir => LoggingKind::default(),

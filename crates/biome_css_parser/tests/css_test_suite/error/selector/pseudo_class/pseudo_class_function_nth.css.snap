@@ -507,7 +507,7 @@ CssRoot {
                                                 sub_selectors: CssSubSelectorList [
                                                     CssClassSelector {
                                                         dot_token: DOT@284..285 "." [] [],
-                                                        name: CssIdentifier {
+                                                        name: CssCustomIdentifier {
                                                             value_token: IDENT@285..288 "div" [] [],
                                                         },
                                                     },
@@ -559,7 +559,7 @@ CssRoot {
                                                     sub_selectors: CssSubSelectorList [
                                                         CssClassSelector {
                                                             dot_token: DOT@313..314 "." [] [],
-                                                            name: CssIdentifier {
+                                                            name: CssCustomIdentifier {
                                                                 value_token: IDENT@314..318 "div" [] [Whitespace(" ")],
                                                             },
                                                         },
@@ -1014,7 +1014,7 @@ CssRoot {
                         2: CSS_SUB_SELECTOR_LIST@284..288
                           0: CSS_CLASS_SELECTOR@284..288
                             0: DOT@284..285 "." [] []
-                            1: CSS_IDENTIFIER@285..288
+                            1: CSS_CUSTOM_IDENTIFIER@285..288
                               0: IDENT@285..288 "div" [] []
                 3: R_PAREN@288..290 ")" [] [Whitespace(" ")]
       1: CSS_DECLARATION_LIST_BLOCK@290..292
@@ -1047,7 +1047,7 @@ CssRoot {
                         2: CSS_SUB_SELECTOR_LIST@313..318
                           0: CSS_CLASS_SELECTOR@313..318
                             0: DOT@313..314 "." [] []
-                            1: CSS_IDENTIFIER@314..318
+                            1: CSS_CUSTOM_IDENTIFIER@314..318
                               0: IDENT@314..318 "div" [] [Whitespace(" ")]
       1: CSS_DECLARATION_LIST_BLOCK@318..320
         0: L_CURLY@318..319 "{" [] []
