@@ -463,6 +463,11 @@ pub(crate) fn parse_url_value(p: &mut CssParser) -> ParsedSyntax {
 }
 
 #[inline]
+pub(crate) fn is_at_css_wide_keyword(p: &mut CssParser) -> bool {
+    p.cur().is_css_wide_keyword()
+}
+
+#[inline]
 pub(crate) fn is_at_identifier(p: &mut CssParser) -> bool {
     is_nth_at_identifier(p, 0)
 }
@@ -471,13 +476,15 @@ pub(crate) fn is_at_identifier(p: &mut CssParser) -> bool {
 pub(crate) fn is_nth_at_identifier(p: &mut CssParser, n: usize) -> bool {
     p.nth_at(n, T![ident]) || p.nth(n).is_contextual_keyword()
 }
-/// Parse any identifier as a general CssIdentifier. Regular identifiers are
-/// case-insensitive, often used for property names, values, etc.
+
+/// Parse any identifier using the Regular lexing context.
 #[inline]
 pub(crate) fn parse_regular_identifier(p: &mut CssParser) -> ParsedSyntax {
     parse_identifier(p, CssLexContext::Regular)
 }
 
+/// Parse any identifier as a general CssIdentifier. Regular identifiers are
+/// case-insensitive, often used for property names, values, etc.
 #[inline]
 pub(crate) fn parse_identifier(p: &mut CssParser, context: CssLexContext) -> ParsedSyntax {
     if !is_at_identifier(p) {
@@ -494,13 +501,39 @@ pub(crate) fn parse_identifier(p: &mut CssParser, context: CssLexContext) -> Par
 /// Custom identifiers are identifiers not defined by CSS itself. These _are_
 /// case-sensitive, used for class names, ids, etc. Custom identifiers _may_
 /// have the same value as an identifier defined by CSS (e.g, `color`, used as
-/// a class name).
+/// a class name), however they _must not_ be any of the CSS-wide keywords.
 ///
 /// Custom identifiers have the same syntax as general identifiers, so the
 /// [is_at_identifier] function can be used to check for both while parsing.
+///
+/// Custom identifiers can also be used in places where the CSS grammar
+/// specifies `<ident>` but also includes case-sensitivity, such as in
+/// class and id selectors. In these cases, CSS wide keywords _are_ accepted,
+/// and can be handled by calling `parse_custom_identifier_with_keywords` with
+/// `allow_css_wide_keywords` as `true` to cast them as identifiers.
+///
+/// When recovering from a parse error here, use
+/// [parse_error::expected_non_css_wide_keyword_identifier] to provide the user
+/// with additional information about how the CSS-wide keywords are not allowed
+/// as custom identifiers.
 #[inline]
 pub(crate) fn parse_custom_identifier(p: &mut CssParser, context: CssLexContext) -> ParsedSyntax {
-    if !is_at_identifier(p) {
+    parse_custom_identifier_with_keywords(p, context, false)
+}
+
+/// See [parse_custom_identifier]. This function allows for overriding the
+/// handling of CSS-wide keywords using the `allow_css_wide_keywords` parameter.
+///
+/// This function should only be needed in cases where the CSS specification
+/// defines a token as `<ident>` _and also_ case-sensitive. Otherwise, either
+/// `parse_identifer` or `parse_custom_identifier` should be sufficient.
+#[inline]
+pub(crate) fn parse_custom_identifier_with_keywords(
+    p: &mut CssParser,
+    context: CssLexContext,
+    allow_css_wide_keywords: bool,
+) -> ParsedSyntax {
+    if !is_at_identifier(p) || (!allow_css_wide_keywords && is_at_css_wide_keyword(p)) {
         return Absent;
     }
 
@@ -516,7 +549,7 @@ pub(crate) fn is_at_dashed_identifier(p: &mut CssParser) -> bool {
     is_at_identifier(p) && p.cur_text().starts_with("--")
 }
 
-/// Dashed identifiers are regular identifiers that start with two dashes (`--`).
+/// Dashed identifiers are any identifiers that start with two dashes (`--`).
 /// Case sensitive, these are guaranteed to never overlap with an identifier
 /// defined by CSS.
 #[inline]

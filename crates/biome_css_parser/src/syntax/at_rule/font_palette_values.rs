@@ -1,6 +1,6 @@
 use crate::syntax::blocks::parse_or_recover_declaration_list_block;
 use crate::syntax::parse_dashed_identifier;
-use crate::{parser::CssParser, syntax::parse_error::expected_identifier};
+use crate::{parser::CssParser, syntax::parse_error::expected_dashed_identifier};
 use biome_css_syntax::{
     CssSyntaxKind::{self, *},
     T,
@@ -32,7 +32,7 @@ pub(crate) fn parse_font_palette_values_at_rule(p: &mut CssParser) -> ParsedSynt
             p,
             &ParseRecovery::new(CSS_BOGUS, FONT_PALETTE_VALUES_RECOVERY_SET)
                 .enable_recovery_on_line_break(),
-            expected_identifier,
+            expected_dashed_identifier,
         )
         .is_ok()
     {

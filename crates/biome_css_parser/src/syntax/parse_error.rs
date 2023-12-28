@@ -1,10 +1,46 @@
 use crate::parser::CssParser;
+use crate::prelude::*;
+use biome_css_syntax::CssSyntaxKind;
 use biome_parser::diagnostic::{expect_one_of, expected_any, expected_node};
 use biome_parser::prelude::{ParseDiagnostic, ToDiagnostic};
 use biome_rowan::TextRange;
 
 pub(crate) fn expected_identifier(p: &CssParser, range: TextRange) -> ParseDiagnostic {
     expected_node("identifier", range, p)
+}
+
+pub(crate) fn expected_dashed_identifier(p: &CssParser, range: TextRange) -> ParseDiagnostic {
+    expected_node("dashed identifier", range, p)
+}
+
+/// If we know the token that wasn't parsed is a CSS-wide keyword that isn't
+/// allowed here, we can give a more helpful error message since they _are_
+/// valid identifiers, just not allowed in specific contexts.
+pub(crate) fn expected_non_css_wide_keyword_identifier(
+    p: &CssParser,
+    range: TextRange,
+) -> ParseDiagnostic {
+    let text = p.text(range);
+
+    // It's possible that the parser recovered over more than one token and
+    // isn't just on the keyword anymore, so we want to try to cast _all_ of
+    // the skipped text to a keyword to see if it matches. For example:
+    //     @container revert-layer-and
+    if CssSyntaxKind::from_keyword(text).is_some_and(|keyword| keyword.is_css_wide_keyword()) {
+        // Trying to use `expected_node` here with the additional hint results in
+        // two details being added, but since we're adding the hint as well, we
+        // only want to show one code frame.
+        ParseDiagnostic::new(
+            format!("Expected an identifier but instead found '{}'", text),
+            range,
+        )
+        .with_hint(format!(
+            "'{}' is a CSS-wide keyword that cannot be used here",
+            text
+        ))
+    } else {
+        expected_identifier(p, range)
+    }
 }
 
 pub(crate) fn expected_expression(p: &CssParser, range: TextRange) -> ParseDiagnostic {
