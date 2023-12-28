@@ -81,7 +81,7 @@ pub(crate) fn traverse(
 
     let printer = DiagnosticsPrinter::new(&execution)
         .with_verbose(cli_options.verbose)
-        .with_diagnostic_level(cli_options.diagnostic_level.clone())
+        .with_diagnostic_level(cli_options.diagnostic_level)
         .with_max_diagnostics(max_diagnostics);
 
     let duration = thread::scope(|s| {
@@ -387,10 +387,8 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                         not_printed_diagnostics += 1;
                     }
 
-                    if self.execution.should_report_to_terminal() {
-                        if should_print {
-                            diagnostics_to_print.push(err);
-                        }
+                    if self.execution.should_report_to_terminal() && should_print {
+                        diagnostics_to_print.push(err);
                     }
                 }
 
@@ -447,12 +445,10 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                                 not_printed_diagnostics += 1;
                             }
 
-                            if self.execution.should_report_to_terminal() {
-                                if should_print {
-                                    let diag =
-                                        diag.with_file_path(&name).with_file_source_code(&content);
-                                    diagnostics_to_print.push(diag)
-                                }
+                            if self.execution.should_report_to_terminal() && should_print {
+                                let diag =
+                                    diag.with_file_path(&name).with_file_source_code(&content);
+                                diagnostics_to_print.push(diag)
                             }
                         }
                     }
@@ -491,55 +487,53 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                         not_printed_diagnostics += 1;
                     }
 
-                    if self.execution.should_report_to_terminal() {
-                        if should_print {
-                            if self.execution.is_ci() {
-                                match diff_kind {
-                                    DiffKind::Format => {
-                                        let diag = CIFormatDiffDiagnostic {
-                                            file_name: file_name.clone(),
-                                            diff: ContentDiffAdvice {
-                                                old: old.clone(),
-                                                new: new.clone(),
-                                            },
-                                        };
-                                        diagnostics_to_print.push(Error::from(diag))
-                                    }
-                                    DiffKind::OrganizeImports => {
-                                        let diag = CIOrganizeImportsDiffDiagnostic {
-                                            file_name: file_name.clone(),
-                                            diff: ContentDiffAdvice {
-                                                old: old.clone(),
-                                                new: new.clone(),
-                                            },
-                                        };
-                                        diagnostics_to_print.push(Error::from(diag))
-                                    }
-                                };
-                            } else {
-                                match diff_kind {
-                                    DiffKind::Format => {
-                                        let diag = FormatDiffDiagnostic {
-                                            file_name: file_name.clone(),
-                                            diff: ContentDiffAdvice {
-                                                old: old.clone(),
-                                                new: new.clone(),
-                                            },
-                                        };
-                                        diagnostics_to_print.push(Error::from(diag))
-                                    }
-                                    DiffKind::OrganizeImports => {
-                                        let diag = OrganizeImportsDiffDiagnostic {
-                                            file_name: file_name.clone(),
-                                            diff: ContentDiffAdvice {
-                                                old: old.clone(),
-                                                new: new.clone(),
-                                            },
-                                        };
-                                        diagnostics_to_print.push(Error::from(diag))
-                                    }
-                                };
-                            }
+                    if self.execution.should_report_to_terminal() && should_print {
+                        if self.execution.is_ci() {
+                            match diff_kind {
+                                DiffKind::Format => {
+                                    let diag = CIFormatDiffDiagnostic {
+                                        file_name: file_name.clone(),
+                                        diff: ContentDiffAdvice {
+                                            old: old.clone(),
+                                            new: new.clone(),
+                                        },
+                                    };
+                                    diagnostics_to_print.push(Error::from(diag))
+                                }
+                                DiffKind::OrganizeImports => {
+                                    let diag = CIOrganizeImportsDiffDiagnostic {
+                                        file_name: file_name.clone(),
+                                        diff: ContentDiffAdvice {
+                                            old: old.clone(),
+                                            new: new.clone(),
+                                        },
+                                    };
+                                    diagnostics_to_print.push(Error::from(diag))
+                                }
+                            };
+                        } else {
+                            match diff_kind {
+                                DiffKind::Format => {
+                                    let diag = FormatDiffDiagnostic {
+                                        file_name: file_name.clone(),
+                                        diff: ContentDiffAdvice {
+                                            old: old.clone(),
+                                            new: new.clone(),
+                                        },
+                                    };
+                                    diagnostics_to_print.push(Error::from(diag))
+                                }
+                                DiffKind::OrganizeImports => {
+                                    let diag = OrganizeImportsDiffDiagnostic {
+                                        file_name: file_name.clone(),
+                                        diff: ContentDiffAdvice {
+                                            old: old.clone(),
+                                            new: new.clone(),
+                                        },
+                                    };
+                                    diagnostics_to_print.push(Error::from(diag))
+                                }
+                            };
                         }
                     }
                 }

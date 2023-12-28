@@ -7,13 +7,11 @@ mod snap_test;
 #[cfg(test)]
 use snap_test::assert_cli_snapshot;
 
-use bpaf::ParseFailure;
-use std::path::Path;
-
 use biome_cli::{biome_command, CliDiagnostic, CliSession};
 use biome_console::{markup, BufferConsole, Console, ConsoleExt};
 use biome_fs::{FileSystem, MemoryFileSystem};
 use biome_service::{App, DynRef};
+use bpaf::ParseFailure;
 
 const UNFORMATTED: &str = "  statement(  )  ";
 const FORMATTED: &str = "statement();\n";
