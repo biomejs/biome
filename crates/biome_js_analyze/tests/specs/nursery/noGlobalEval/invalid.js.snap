@@ -1,0 +1,328 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+var foo = "foo";
+eval(foo);
+
+eval("foo");
+
+(0, eval)("foo");
+
+(0, window.eval)("foo");
+
+(0, window["eval"])("foo");
+
+var EVAL = eval;
+EVAL("foo");
+
+var EVAL = this.eval;
+EVAL("foo");
+
+("use strict");
+var EVAL = this.eval;
+EVAL("foo");
+
+() => {
+	this.eval("foo");
+};
+
+() => {
+	"use strict";
+	this.eval("foo");
+};
+
+("use strict");
+() => {
+	this.eval("foo");
+};
+
+() => {
+	"use strict";
+	() => {
+		this.eval("foo");
+	};
+};
+
+(function (exe) {
+	exe("foo");
+})(eval);
+
+window.eval("foo");
+
+window.window.eval("foo");
+
+window.window["eval"]("foo");
+
+global.eval("foo");
+
+global.global.eval("foo");
+
+global.global[`eval`]("foo");
+
+this.eval("foo");
+
+("use strict");
+this.eval("foo");
+
+function foo() {
+	this.eval("foo");
+}
+
+var EVAL = globalThis.eval;
+EVAL("foo");
+
+globalThis.eval("foo");
+
+globalThis.globalThis.eval("foo");
+
+globalThis.globalThis["eval"]("foo");
+
+(0, globalThis.eval)("foo");
+
+(0, globalThis["eval"])("foo");
+
+```
+
+# Diagnostics
+```
+invalid.js:2:1 lint/nursery/noGlobalEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! eval() can be harmful.
+  
+    1 │ var foo = "foo";
+  > 2 │ eval(foo);
+      │ ^^^^
+    3 │ 
+    4 │ eval("foo");
+  
+
+```
+
+```
+invalid.js:4:1 lint/nursery/noGlobalEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! eval() can be harmful.
+  
+    2 │ eval(foo);
+    3 │ 
+  > 4 │ eval("foo");
+      │ ^^^^
+    5 │ 
+    6 │ (0, eval)("foo");
+  
+
+```
+
+```
+invalid.js:6:5 lint/nursery/noGlobalEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! eval() can be harmful.
+  
+    4 │ eval("foo");
+    5 │ 
+  > 6 │ (0, eval)("foo");
+      │     ^^^^
+    7 │ 
+    8 │ (0, window.eval)("foo");
+  
+
+```
+
+```
+invalid.js:8:5 lint/nursery/noGlobalEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! eval() can be harmful.
+  
+     6 │ (0, eval)("foo");
+     7 │ 
+   > 8 │ (0, window.eval)("foo");
+       │     ^^^^^^^^^^^
+     9 │ 
+    10 │ (0, window["eval"])("foo");
+  
+
+```
+
+```
+invalid.js:10:5 lint/nursery/noGlobalEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! eval() can be harmful.
+  
+     8 │ (0, window.eval)("foo");
+     9 │ 
+  > 10 │ (0, window["eval"])("foo");
+       │     ^^^^^^^^^^^^^^
+    11 │ 
+    12 │ var EVAL = eval;
+  
+
+```
+
+```
+invalid.js:12:12 lint/nursery/noGlobalEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! eval() can be harmful.
+  
+    10 │ (0, window["eval"])("foo");
+    11 │ 
+  > 12 │ var EVAL = eval;
+       │            ^^^^
+    13 │ EVAL("foo");
+    14 │ 
+  
+
+```
+
+```
+invalid.js:45:4 lint/nursery/noGlobalEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! eval() can be harmful.
+  
+    43 │ (function (exe) {
+    44 │ 	exe("foo");
+  > 45 │ })(eval);
+       │    ^^^^
+    46 │ 
+    47 │ window.eval("foo");
+  
+
+```
+
+```
+invalid.js:47:1 lint/nursery/noGlobalEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! eval() can be harmful.
+  
+    45 │ })(eval);
+    46 │ 
+  > 47 │ window.eval("foo");
+       │ ^^^^^^^^^^^
+    48 │ 
+    49 │ window.window.eval("foo");
+  
+
+```
+
+```
+invalid.js:49:1 lint/nursery/noGlobalEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! eval() can be harmful.
+  
+    47 │ window.eval("foo");
+    48 │ 
+  > 49 │ window.window.eval("foo");
+       │ ^^^^^^^^^^^^^^^^^^
+    50 │ 
+    51 │ window.window["eval"]("foo");
+  
+
+```
+
+```
+invalid.js:51:1 lint/nursery/noGlobalEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! eval() can be harmful.
+  
+    49 │ window.window.eval("foo");
+    50 │ 
+  > 51 │ window.window["eval"]("foo");
+       │ ^^^^^^^^^^^^^^^^^^^^^
+    52 │ 
+    53 │ global.eval("foo");
+  
+
+```
+
+```
+invalid.js:68:12 lint/nursery/noGlobalEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! eval() can be harmful.
+  
+    66 │ }
+    67 │ 
+  > 68 │ var EVAL = globalThis.eval;
+       │            ^^^^^^^^^^^^^^^
+    69 │ EVAL("foo");
+    70 │ 
+  
+
+```
+
+```
+invalid.js:71:1 lint/nursery/noGlobalEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! eval() can be harmful.
+  
+    69 │ EVAL("foo");
+    70 │ 
+  > 71 │ globalThis.eval("foo");
+       │ ^^^^^^^^^^^^^^^
+    72 │ 
+    73 │ globalThis.globalThis.eval("foo");
+  
+
+```
+
+```
+invalid.js:73:1 lint/nursery/noGlobalEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! eval() can be harmful.
+  
+    71 │ globalThis.eval("foo");
+    72 │ 
+  > 73 │ globalThis.globalThis.eval("foo");
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    74 │ 
+    75 │ globalThis.globalThis["eval"]("foo");
+  
+
+```
+
+```
+invalid.js:75:1 lint/nursery/noGlobalEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! eval() can be harmful.
+  
+    73 │ globalThis.globalThis.eval("foo");
+    74 │ 
+  > 75 │ globalThis.globalThis["eval"]("foo");
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    76 │ 
+    77 │ (0, globalThis.eval)("foo");
+  
+
+```
+
+```
+invalid.js:77:5 lint/nursery/noGlobalEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! eval() can be harmful.
+  
+    75 │ globalThis.globalThis["eval"]("foo");
+    76 │ 
+  > 77 │ (0, globalThis.eval)("foo");
+       │     ^^^^^^^^^^^^^^^
+    78 │ 
+    79 │ (0, globalThis["eval"])("foo");
+  
+
+```
+
+```
+invalid.js:79:5 lint/nursery/noGlobalEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! eval() can be harmful.
+  
+    77 │ (0, globalThis.eval)("foo");
+    78 │ 
+  > 79 │ (0, globalThis["eval"])("foo");
+       │     ^^^^^^^^^^^^^^^^^^
+    80 │ 
+  
+
+```
+
+

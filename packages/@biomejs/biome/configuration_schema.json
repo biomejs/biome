@@ -1267,6 +1267,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noGlobalEval": {
+					"description": "Succinct description of the rule.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noImplicitAnyLet": {
 					"description": "Disallow use of implicit any type on variable declarations.",
 					"anyOf": [
