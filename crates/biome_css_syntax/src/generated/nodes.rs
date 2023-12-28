@@ -2661,7 +2661,7 @@ impl CssPageSelector {
             pseudos: self.pseudos(),
         }
     }
-    pub fn ty(&self) -> Option<CssIdentifier> {
+    pub fn ty(&self) -> Option<CssCustomIdentifier> {
         support::node(&self.syntax, 0usize)
     }
     pub fn pseudos(&self) -> CssPageSelectorPseudoList {
@@ -2679,7 +2679,7 @@ impl Serialize for CssPageSelector {
 }
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct CssPageSelectorFields {
-    pub ty: Option<CssIdentifier>,
+    pub ty: Option<CssCustomIdentifier>,
     pub pseudos: CssPageSelectorPseudoList,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]

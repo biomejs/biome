@@ -1008,7 +1008,7 @@ impl CssPageAtRuleBlock {
     }
 }
 impl CssPageSelector {
-    pub fn with_ty(self, element: Option<CssIdentifier>) -> Self {
+    pub fn with_ty(self, element: Option<CssCustomIdentifier>) -> Self {
         Self::unwrap_cast(self.syntax.splice_slots(
             0usize..=0usize,
             once(element.map(|element| element.into_syntax().into())),

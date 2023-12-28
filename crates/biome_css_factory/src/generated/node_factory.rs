@@ -876,10 +876,10 @@ pub fn css_page_selector(pseudos: CssPageSelectorPseudoList) -> CssPageSelectorB
 }
 pub struct CssPageSelectorBuilder {
     pseudos: CssPageSelectorPseudoList,
-    ty: Option<CssIdentifier>,
+    ty: Option<CssCustomIdentifier>,
 }
 impl CssPageSelectorBuilder {
-    pub fn with_ty(mut self, ty: CssIdentifier) -> Self {
+    pub fn with_ty(mut self, ty: CssCustomIdentifier) -> Self {
         self.ty = Some(ty);
         self
     }

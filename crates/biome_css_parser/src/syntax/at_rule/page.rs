@@ -1,3 +1,4 @@
+use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use crate::syntax::at_rule::parse_error::{
     expected_any_page_at_rule_item, expected_page_selector, expected_page_selector_pseudo,
@@ -6,7 +7,7 @@ use crate::syntax::at_rule::{at_at_rule, parse_at_rule};
 use crate::syntax::blocks::parse_or_recover_declaration_or_rule_list_block;
 use crate::syntax::parse_error::expected_block;
 use crate::syntax::{
-    is_at_identifier, parse_declaration_with_semicolon, parse_regular_identifier, BODY_RECOVERY_SET,
+    is_at_identifier, parse_custom_identifier, parse_declaration_with_semicolon, BODY_RECOVERY_SET,
 };
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
@@ -96,7 +97,7 @@ pub(crate) fn parse_page_selector(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
 
     // it's optional
-    parse_regular_identifier(p).ok();
+    parse_custom_identifier(p, CssLexContext::Regular).ok();
     CssPageSelectorPseudoList.parse_list(p);
 
     Present(m.complete(p, CSS_PAGE_SELECTOR))

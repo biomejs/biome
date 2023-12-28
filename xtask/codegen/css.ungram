@@ -935,9 +935,12 @@ AnyCssPageSelector =
 	| CssBogusSelector
 
 // @page name:first,:blank:first {  }
-// 			 ^^^^^^^^^^ ^^^^^^^^^^^^
+//       ^^^^^^^^^^ ^^^^^^^^^^^^
+// NOTE: The CSS Spec uses `<ident>` for the name, but also explicitly states
+// that the name is case sensitive. For simplicity, `<custom-ident>` gets the
+// exact same behavior.
 CssPageSelector =
-	type: CssIdentifier?
+	type: CssCustomIdentifier?
 	pseudos: CssPageSelectorPseudoList
 
 CssPageSelectorPseudoList = AnyCssPageSelectorPseudo*
