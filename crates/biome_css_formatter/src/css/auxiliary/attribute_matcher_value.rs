@@ -24,12 +24,16 @@ impl FormatNodeRule<CssAttributeMatcherValue> for FormatCssAttributeMatcherValue
                 write!(f, [string.format()])
             }
             AnyCssAttributeMatcherValue::CssIdentifier(ident) => {
-                let value = ident.value_token()?;
-
                 if f.comments().is_suppressed(ident.syntax()) {
                     return write!(f, [ident.format()]);
                 }
 
+                // Unlike almost all other usages of regular identifiers,
+                // attribute values are case-sensitive, so the identifier here
+                // does not get converted to lowercase. Once it's quoted, it
+                // will be parsed as a CssString on the next pass, at which
+                // point casing is preserved no matter what.
+                let value = ident.value_token()?;
                 let quoted = std::format!("\"{}\"", value.text_trimmed());
 
                 write!(

@@ -142,9 +142,9 @@ Line width: 80
 @container (inline-size >= calc(200px)) {
 }
 
-@container (WIDTH <= 150px) {
+@container (width <= 150px) {
 }
-@container (150px <= WIDTH) {
+@container (150px <= width) {
 }
 ```
 
