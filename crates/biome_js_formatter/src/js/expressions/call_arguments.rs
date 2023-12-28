@@ -1069,6 +1069,12 @@ fn can_group_expression_argument(
                             AnyJsFunctionBody::JsFunctionBody(body) => {
                                 body.statements().iter().any(|statement| match statement {
                                     AnyJsStatement::JsEmptyStatement(s) => {
+                                        // When the body contains an empty statement, comments in
+                                        // the body will get attached to that statement rather than
+                                        // the body itself, so they need to be checked for comments
+                                        // as well to ensure that the body is still considered
+                                        // groupable when those empty statements are removed by the
+                                        // printer.
                                         comments.has_comments(s.syntax())
                                     }
                                     _ => true,
