@@ -1282,6 +1282,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noThenProperty": {
+					"description": "Disallow then property.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUnusedImports": {
 					"description": "Disallow unused imports.",
 					"anyOf": [

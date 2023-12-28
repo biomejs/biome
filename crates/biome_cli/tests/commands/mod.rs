@@ -1,5 +1,6 @@
 mod check;
 mod ci;
+mod explain;
 mod format;
 mod init;
 mod lint;
