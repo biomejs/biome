@@ -14,6 +14,7 @@ export interface SupportsFeatureResult {
 export type SupportKind =
 	| "Supported"
 	| "Ignored"
+	| "Protected"
 	| "FeatureNotEnabled"
 	| "FileNotSupported";
 export interface UpdateSettingsParams {

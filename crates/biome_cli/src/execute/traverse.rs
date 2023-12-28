@@ -612,6 +612,10 @@ impl<'ctx, 'app> TraversalOptions<'ctx, 'app> {
                 .with_file_path(rome_path.display().to_string()),
         );
     }
+
+    pub(crate) fn protected_file(&self, rome_path: &RomePath) {
+        self.push_diagnostic(WorkspaceError::protected_file(rome_path.display().to_string()).into())
+    }
 }
 
 impl<'ctx, 'app> TraversalContext for TraversalOptions<'ctx, 'app> {
@@ -649,6 +653,11 @@ impl<'ctx, 'app> TraversalContext for TraversalOptions<'ctx, 'app> {
 
         let file_features = match file_features {
             Ok(file_features) => {
+                if file_features.is_protected() {
+                    self.protected_file(rome_path);
+                    return false;
+                }
+
                 if file_features.is_not_supported() && !file_features.is_ignored() {
                     // we should throw a diagnostic if we can't handle a file that isn't ignored
                     self.miss_handler_err(extension_error(rome_path), rome_path);
@@ -694,6 +703,9 @@ fn handle_file(ctx: &TraversalOptions, path: &Path) {
         Ok(Ok(FileStatus::Success)) => {}
         Ok(Ok(FileStatus::Message(msg))) => {
             ctx.push_message(msg);
+        }
+        Ok(Ok(FileStatus::Protected(file_path))) => {
+            ctx.push_diagnostic(WorkspaceError::protected_file(file_path).into());
         }
         Ok(Ok(FileStatus::Ignored)) => {}
         Ok(Err(err)) => {
