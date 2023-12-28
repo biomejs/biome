@@ -168,7 +168,6 @@ impl<'scope> TraversalScope<'scope> for OsTraversalScope<'scope> {
 /// detecting and parsing .ignore files
 const DEFAULT_IGNORE: &[&str; 5] = &[".git", ".svn", ".hg", ".yarn", "node_modules"];
 
-
 /// Traverse a single directory
 fn handle_dir<'scope>(
     scope: &Scope<'scope>,

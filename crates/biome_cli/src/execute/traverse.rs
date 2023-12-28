@@ -654,7 +654,7 @@ impl<'ctx, 'app> TraversalContext for TraversalOptions<'ctx, 'app> {
         let file_features = match file_features {
             Ok(file_features) => {
                 if file_features.is_protected() {
-                    self.protected_file(&rome_path);
+                    self.protected_file(rome_path);
                     return false;
                 }
 
