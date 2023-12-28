@@ -1478,7 +1478,7 @@ CssRoot {
                                         sub_selectors: CssSubSelectorList [
                                             CssClassSelector {
                                                 dot_token: DOT@1491..1492 "." [] [],
-                                                name: CssIdentifier {
+                                                name: CssCustomIdentifier {
                                                     value_token: IDENT@1492..1501 "selected" [] [Whitespace(" ")],
                                                 },
                                             },
@@ -2150,7 +2150,7 @@ CssRoot {
                             at_token: AT@2098..2101 "@" [Newline("\n"), Whitespace("\t")] [],
                             rule: CssKeyframesAtRule {
                                 keyframes_token: KEYFRAMES_KW@2101..2111 "keyframes" [] [Whitespace(" ")],
-                                name: CssIdentifier {
+                                name: CssCustomIdentifier {
                                     value_token: IDENT@2111..2116 "anim" [] [Whitespace(" ")],
                                 },
                                 block: CssKeyframesBlock {
@@ -2271,10 +2271,8 @@ CssRoot {
                                                     CssParameter {
                                                         any_css_expression: CssListOfComponentValuesExpression {
                                                             css_component_value_list: CssComponentValueList [
-                                                                CssCustomProperty {
-                                                                    value: CssIdentifier {
-                                                                        value_token: IDENT@2229..2238 "--varName" [] [],
-                                                                    },
+                                                                CssDashedIdentifier {
+                                                                    value_token: IDENT@2229..2238 "--varName" [] [],
                                                                 },
                                                             ],
                                                         },
@@ -2641,7 +2639,7 @@ CssRoot {
                             at_token: AT@2492..2495 "@" [Newline("\n"), Whitespace("\t")] [],
                             rule: CssKeyframesAtRule {
                                 keyframes_token: KEYFRAMES_KW@2495..2505 "keyframes" [] [Whitespace(" ")],
-                                name: CssIdentifier {
+                                name: CssCustomIdentifier {
                                     value_token: IDENT@2505..2510 "anim" [] [Whitespace(" ")],
                                 },
                                 block: CssKeyframesBlock {
@@ -2980,7 +2978,7 @@ CssRoot {
                                         sub_selectors: CssSubSelectorList [
                                             CssClassSelector {
                                                 dot_token: DOT@2823..2824 "." [] [],
-                                                name: CssIdentifier {
+                                                name: CssCustomIdentifier {
                                                     value_token: IDENT@2824..2833 "selected" [] [Whitespace(" ")],
                                                 },
                                             },
@@ -3154,10 +3152,8 @@ CssRoot {
                 supports_token: SUPPORTS_KW@2993..3002 "supports" [] [Whitespace(" ")],
                 condition: CssSupportsConditionInParens {
                     l_paren_token: L_PAREN@3002..3003 "(" [] [],
-                    condition: CssCustomProperty {
-                        value: CssIdentifier {
-                            value_token: IDENT@3003..3008 "--var" [] [],
-                        },
+                    condition: CssDashedIdentifier {
+                        value_token: IDENT@3003..3008 "--var" [] [],
                     },
                     r_paren_token: R_PAREN@3008..3010 ")" [] [Whitespace(" ")],
                 },
@@ -4169,7 +4165,7 @@ CssRoot {
                     2: CSS_SUB_SELECTOR_LIST@1491..1501
                       0: CSS_CLASS_SELECTOR@1491..1501
                         0: DOT@1491..1492 "." [] []
-                        1: CSS_IDENTIFIER@1492..1501
+                        1: CSS_CUSTOM_IDENTIFIER@1492..1501
                           0: IDENT@1492..1501 "selected" [] [Whitespace(" ")]
                   1: PIPE2@1501..1504 "||" [] [Whitespace(" ")]
                   2: CSS_COMPOUND_SELECTOR@1504..1507
@@ -4613,7 +4609,7 @@ CssRoot {
               0: AT@2098..2101 "@" [Newline("\n"), Whitespace("\t")] []
               1: CSS_KEYFRAMES_AT_RULE@2101..2177
                 0: KEYFRAMES_KW@2101..2111 "keyframes" [] [Whitespace(" ")]
-                1: CSS_IDENTIFIER@2111..2116
+                1: CSS_CUSTOM_IDENTIFIER@2111..2116
                   0: IDENT@2111..2116 "anim" [] [Whitespace(" ")]
                 2: CSS_KEYFRAMES_BLOCK@2116..2177
                   0: L_CURLY@2116..2117 "{" [] []
@@ -4696,9 +4692,8 @@ CssRoot {
                           0: CSS_PARAMETER@2229..2238
                             0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@2229..2238
                               0: CSS_COMPONENT_VALUE_LIST@2229..2238
-                                0: CSS_CUSTOM_PROPERTY@2229..2238
-                                  0: CSS_IDENTIFIER@2229..2238
-                                    0: IDENT@2229..2238 "--varName" [] []
+                                0: CSS_DASHED_IDENTIFIER@2229..2238
+                                  0: IDENT@2229..2238 "--varName" [] []
                         3: R_PAREN@2238..2239 ")" [] []
                     3: (empty)
                   1: SEMICOLON@2239..2240 ";" [] []
@@ -4947,7 +4942,7 @@ CssRoot {
               0: AT@2492..2495 "@" [Newline("\n"), Whitespace("\t")] []
               1: CSS_KEYFRAMES_AT_RULE@2495..2571
                 0: KEYFRAMES_KW@2495..2505 "keyframes" [] [Whitespace(" ")]
-                1: CSS_IDENTIFIER@2505..2510
+                1: CSS_CUSTOM_IDENTIFIER@2505..2510
                   0: IDENT@2505..2510 "anim" [] [Whitespace(" ")]
                 2: CSS_KEYFRAMES_BLOCK@2510..2571
                   0: L_CURLY@2510..2511 "{" [] []
@@ -5173,7 +5168,7 @@ CssRoot {
                     2: CSS_SUB_SELECTOR_LIST@2823..2833
                       0: CSS_CLASS_SELECTOR@2823..2833
                         0: DOT@2823..2824 "." [] []
-                        1: CSS_IDENTIFIER@2824..2833
+                        1: CSS_CUSTOM_IDENTIFIER@2824..2833
                           0: IDENT@2824..2833 "selected" [] [Whitespace(" ")]
                   1: PIPE2@2833..2836 "||" [] [Whitespace(" ")]
                   2: CSS_COMPOUND_SELECTOR@2836..2839
@@ -5286,9 +5281,8 @@ CssRoot {
         0: SUPPORTS_KW@2993..3002 "supports" [] [Whitespace(" ")]
         1: CSS_SUPPORTS_CONDITION_IN_PARENS@3002..3010
           0: L_PAREN@3002..3003 "(" [] []
-          1: CSS_CUSTOM_PROPERTY@3003..3008
-            0: CSS_IDENTIFIER@3003..3008
-              0: IDENT@3003..3008 "--var" [] []
+          1: CSS_DASHED_IDENTIFIER@3003..3008
+            0: IDENT@3003..3008 "--var" [] []
           2: R_PAREN@3008..3010 ")" [] [Whitespace(" ")]
         2: CSS_RULE_LIST_BLOCK@3010..3037
           0: L_CURLY@3010..3011 "{" [] []

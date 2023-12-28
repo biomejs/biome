@@ -1,8 +1,6 @@
 use crate::syntax::blocks::parse_or_recover_declaration_list_block;
-use crate::{
-    parser::CssParser,
-    syntax::{parse_error::expected_identifier, parse_regular_identifier},
-};
+use crate::syntax::parse_dashed_identifier;
+use crate::{parser::CssParser, syntax::parse_error::expected_identifier};
 use biome_css_syntax::{
     CssSyntaxKind::{self, *},
     T,
@@ -29,7 +27,7 @@ pub(crate) fn parse_font_palette_values_at_rule(p: &mut CssParser) -> ParsedSynt
 
     p.bump(T![font_palette_values]);
 
-    let kind = if parse_regular_identifier(p)
+    let kind = if parse_dashed_identifier(p)
         .or_recover(
             p,
             &ParseRecovery::new(CSS_BOGUS, FONT_PALETTE_VALUES_RECOVERY_SET)

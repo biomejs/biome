@@ -143,7 +143,7 @@ pub fn css_charset_at_rule(
         ],
     ))
 }
-pub fn css_class_selector(dot_token: SyntaxToken, name: CssIdentifier) -> CssClassSelector {
+pub fn css_class_selector(dot_token: SyntaxToken, name: CssCustomIdentifier) -> CssClassSelector {
     CssClassSelector::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_CLASS_SELECTOR,
         [
@@ -163,7 +163,7 @@ pub fn css_color(hash_token: SyntaxToken, value_token: SyntaxToken) -> CssColor 
 }
 pub fn css_color_profile_at_rule(
     color_profile_token: SyntaxToken,
-    name: CssIdentifier,
+    name: CssCustomIdentifier,
     block: AnyCssDeclarationListBlock,
 ) -> CssColorProfileAtRule {
     CssColorProfileAtRule::unwrap_cast(SyntaxNode::new_detached(
@@ -253,10 +253,10 @@ pub struct CssContainerAtRuleBuilder {
     container_token: SyntaxToken,
     query: AnyCssContainerQuery,
     block: AnyCssRuleListBlock,
-    name: Option<CssIdentifier>,
+    name: Option<CssCustomIdentifier>,
 }
 impl CssContainerAtRuleBuilder {
-    pub fn with_name(mut self, name: CssIdentifier) -> Self {
+    pub fn with_name(mut self, name: CssCustomIdentifier) -> Self {
         self.name = Some(name);
         self
     }
@@ -399,7 +399,7 @@ pub fn css_container_style_query_in_parens(
 }
 pub fn css_counter_style_at_rule(
     counter_style_token: SyntaxToken,
-    name: CssIdentifier,
+    name: CssCustomIdentifier,
     block: AnyCssDeclarationListBlock,
 ) -> CssCounterStyleAtRule {
     CssCounterStyleAtRule::unwrap_cast(SyntaxNode::new_detached(
@@ -411,10 +411,16 @@ pub fn css_counter_style_at_rule(
         ],
     ))
 }
-pub fn css_custom_property(value: CssIdentifier) -> CssCustomProperty {
-    CssCustomProperty::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_CUSTOM_PROPERTY,
-        [Some(SyntaxElement::Node(value.into_syntax()))],
+pub fn css_custom_identifier(value_token: SyntaxToken) -> CssCustomIdentifier {
+    CssCustomIdentifier::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_CUSTOM_IDENTIFIER,
+        [Some(SyntaxElement::Token(value_token))],
+    ))
+}
+pub fn css_dashed_identifier(value_token: SyntaxToken) -> CssDashedIdentifier {
+    CssDashedIdentifier::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_DASHED_IDENTIFIER,
+        [Some(SyntaxElement::Token(value_token))],
     ))
 }
 pub fn css_declaration(
@@ -519,7 +525,7 @@ pub fn css_font_face_at_rule(
 }
 pub fn css_font_palette_values_at_rule(
     font_palette_values_token: SyntaxToken,
-    name: CssIdentifier,
+    name: CssDashedIdentifier,
     block: AnyCssDeclarationListBlock,
 ) -> CssFontPaletteValuesAtRule {
     CssFontPaletteValuesAtRule::unwrap_cast(SyntaxNode::new_detached(
@@ -531,7 +537,7 @@ pub fn css_font_palette_values_at_rule(
         ],
     ))
 }
-pub fn css_id_selector(hash_token: SyntaxToken, name: CssIdentifier) -> CssIdSelector {
+pub fn css_id_selector(hash_token: SyntaxToken, name: CssCustomIdentifier) -> CssIdSelector {
     CssIdSelector::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_ID_SELECTOR,
         [
@@ -870,10 +876,10 @@ pub fn css_page_selector(pseudos: CssPageSelectorPseudoList) -> CssPageSelectorB
 }
 pub struct CssPageSelectorBuilder {
     pseudos: CssPageSelectorPseudoList,
-    ty: Option<CssIdentifier>,
+    ty: Option<CssCustomIdentifier>,
 }
 impl CssPageSelectorBuilder {
-    pub fn with_ty(mut self, ty: CssIdentifier) -> Self {
+    pub fn with_ty(mut self, ty: CssCustomIdentifier) -> Self {
         self.ty = Some(ty);
         self
     }
@@ -1731,58 +1737,6 @@ pub fn css_url_value_raw(value_token: SyntaxToken) -> CssUrlValueRaw {
     CssUrlValueRaw::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_URL_VALUE_RAW,
         [Some(SyntaxElement::Token(value_token))],
-    ))
-}
-pub fn css_var_function(
-    var_token: SyntaxToken,
-    l_paren_token: SyntaxToken,
-    property: CssCustomProperty,
-    r_paren_token: SyntaxToken,
-) -> CssVarFunctionBuilder {
-    CssVarFunctionBuilder {
-        var_token,
-        l_paren_token,
-        property,
-        r_paren_token,
-        value: None,
-    }
-}
-pub struct CssVarFunctionBuilder {
-    var_token: SyntaxToken,
-    l_paren_token: SyntaxToken,
-    property: CssCustomProperty,
-    r_paren_token: SyntaxToken,
-    value: Option<CssVarFunctionValue>,
-}
-impl CssVarFunctionBuilder {
-    pub fn with_value(mut self, value: CssVarFunctionValue) -> Self {
-        self.value = Some(value);
-        self
-    }
-    pub fn build(self) -> CssVarFunction {
-        CssVarFunction::unwrap_cast(SyntaxNode::new_detached(
-            CssSyntaxKind::CSS_VAR_FUNCTION,
-            [
-                Some(SyntaxElement::Token(self.var_token)),
-                Some(SyntaxElement::Token(self.l_paren_token)),
-                Some(SyntaxElement::Node(self.property.into_syntax())),
-                self.value
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-                Some(SyntaxElement::Token(self.r_paren_token)),
-            ],
-        ))
-    }
-}
-pub fn css_var_function_value(
-    comma_token: SyntaxToken,
-    value: CssIdentifier,
-) -> CssVarFunctionValue {
-    CssVarFunctionValue::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_VAR_FUNCTION_VALUE,
-        [
-            Some(SyntaxElement::Token(comma_token)),
-            Some(SyntaxElement::Node(value.into_syntax())),
-        ],
     ))
 }
 pub fn css_component_value_list<I>(items: I) -> CssComponentValueList

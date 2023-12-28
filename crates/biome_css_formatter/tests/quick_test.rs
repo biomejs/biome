@@ -13,13 +13,12 @@ mod language {
 // use this test check if your snippet prints as you wish, without using a snapshot
 fn quick_test() {
     let src = r#"
-a {
-    content: url(https://example.com/a.jpg);
-    content: url(   https://example.com/f.jpg   );
-  }
+
+    @container style(--responsive: true) {  }
+
 "#;
     let parse = parse_css(src, CssParserOptions::default());
-    println!("{:#?}", parse.syntax());
+    println!("{:#?}", parse);
 
     let options = CssFormatOptions::default()
         .with_line_width(LineWidth::try_from(80).unwrap())

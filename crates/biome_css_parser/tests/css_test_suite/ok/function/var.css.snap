@@ -51,10 +51,8 @@ CssRoot {
                                     CssParameter {
                                         any_css_expression: CssListOfComponentValuesExpression {
                                             css_component_value_list: CssComponentValueList [
-                                                CssCustomProperty {
-                                                    value: CssIdentifier {
-                                                        value_token: IDENT@21..24 "--a" [] [],
-                                                    },
+                                                CssDashedIdentifier {
+                                                    value_token: IDENT@21..24 "--a" [] [],
                                                 },
                                             ],
                                         },
@@ -81,10 +79,8 @@ CssRoot {
                                     CssParameter {
                                         any_css_expression: CssListOfComponentValuesExpression {
                                             css_component_value_list: CssComponentValueList [
-                                                CssCustomProperty {
-                                                    value: CssIdentifier {
-                                                        value_token: IDENT@42..45 "--a" [] [],
-                                                    },
+                                                CssDashedIdentifier {
+                                                    value_token: IDENT@42..45 "--a" [] [],
                                                 },
                                             ],
                                         },
@@ -112,10 +108,8 @@ CssRoot {
                                     CssParameter {
                                         any_css_expression: CssListOfComponentValuesExpression {
                                             css_component_value_list: CssComponentValueList [
-                                                CssCustomProperty {
-                                                    value: CssIdentifier {
-                                                        value_token: IDENT@64..67 "--a" [] [],
-                                                    },
+                                                CssDashedIdentifier {
+                                                    value_token: IDENT@64..67 "--a" [] [],
                                                 },
                                             ],
                                         },
@@ -177,9 +171,8 @@ CssRoot {
                   0: CSS_PARAMETER@21..24
                     0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@21..24
                       0: CSS_COMPONENT_VALUE_LIST@21..24
-                        0: CSS_CUSTOM_PROPERTY@21..24
-                          0: CSS_IDENTIFIER@21..24
-                            0: IDENT@21..24 "--a" [] []
+                        0: CSS_DASHED_IDENTIFIER@21..24
+                          0: IDENT@21..24 "--a" [] []
                 3: R_PAREN@24..25 ")" [] []
             3: (empty)
           1: SEMICOLON@25..26 ";" [] []
@@ -196,9 +189,8 @@ CssRoot {
                   0: CSS_PARAMETER@42..45
                     0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@42..45
                       0: CSS_COMPONENT_VALUE_LIST@42..45
-                        0: CSS_CUSTOM_PROPERTY@42..45
-                          0: CSS_IDENTIFIER@42..45
-                            0: IDENT@42..45 "--a" [] []
+                        0: CSS_DASHED_IDENTIFIER@42..45
+                          0: IDENT@42..45 "--a" [] []
                   1: COMMA@45..46 "," [] []
                 3: R_PAREN@46..47 ")" [] []
             3: (empty)
@@ -216,9 +208,8 @@ CssRoot {
                   0: CSS_PARAMETER@64..67
                     0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@64..67
                       0: CSS_COMPONENT_VALUE_LIST@64..67
-                        0: CSS_CUSTOM_PROPERTY@64..67
-                          0: CSS_IDENTIFIER@64..67
-                            0: IDENT@64..67 "--a" [] []
+                        0: CSS_DASHED_IDENTIFIER@64..67
+                          0: IDENT@64..67 "--a" [] []
                   1: COMMA@67..69 "," [] [Whitespace(" ")]
                   2: CSS_PARAMETER@69..73
                     0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@69..73

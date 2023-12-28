@@ -192,7 +192,8 @@ pub enum CssSyntaxKind {
     FONT_FACE_KW,
     CSS_STRING_LITERAL,
     CSS_NUMBER_LITERAL,
-    CSS_CUSTOM_PROPERTY,
+    CSS_DASHED_IDENTIFIER,
+    CSS_CUSTOM_IDENTIFIER,
     CSS_SPACE_LITERAL,
     CSS_URL_VALUE_RAW_LITERAL,
     CSS_COLOR_LITERAL,
@@ -380,7 +381,8 @@ impl CssSyntaxKind {
         match self {
             CSS_STRING_LITERAL
             | CSS_NUMBER_LITERAL
-            | CSS_CUSTOM_PROPERTY
+            | CSS_DASHED_IDENTIFIER
+            | CSS_CUSTOM_IDENTIFIER
             | CSS_SPACE_LITERAL
             | CSS_URL_VALUE_RAW_LITERAL
             | CSS_COLOR_LITERAL => true,

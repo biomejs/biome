@@ -232,7 +232,7 @@ pub(crate) fn is_at_any_value(p: &mut CssParser) -> bool {
         || p.at(CSS_STRING_LITERAL)
         || is_at_any_dimension(p)
         || p.at(CSS_NUMBER_LITERAL)
-        || is_at_custom_property(p)
+        || is_at_dashed_identifier(p)
         || is_at_ratio(p)
         || is_at_color(p)
 }
@@ -241,8 +241,8 @@ pub(crate) fn is_at_any_value(p: &mut CssParser) -> bool {
 pub(crate) fn parse_any_value(p: &mut CssParser) -> ParsedSyntax {
     if is_at_any_function(p) {
         parse_any_function(p)
-    } else if is_at_custom_property(p) {
-        parse_custom_property(p)
+    } else if is_at_dashed_identifier(p) {
+        parse_dashed_identifier(p)
     } else if is_at_identifier(p) {
         parse_regular_identifier(p)
     } else if p.at(CSS_STRING_LITERAL) {
@@ -273,22 +273,6 @@ pub(crate) fn parse_color(p: &mut CssParser) -> ParsedSyntax {
     p.bump_with_context(T![#], CssLexContext::Color);
     p.expect(CSS_COLOR_LITERAL);
     Present(m.complete(p, CSS_COLOR))
-}
-
-#[inline]
-pub(crate) fn is_at_custom_property(p: &mut CssParser) -> bool {
-    is_at_identifier(p) && p.cur_text().starts_with("--")
-}
-
-#[inline]
-pub(crate) fn parse_custom_property(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_custom_property(p) {
-        return Absent;
-    }
-
-    let m = p.start();
-    parse_regular_identifier(p).or_add_diagnostic(p, expected_identifier);
-    Present(m.complete(p, CSS_CUSTOM_PROPERTY))
 }
 
 #[inline]
@@ -460,20 +444,6 @@ pub(crate) fn parse_ratio(p: &mut CssParser) -> ParsedSyntax {
     Present(m.complete(p, CSS_RATIO))
 }
 
-#[inline]
-pub(crate) fn is_at_identifier(p: &mut CssParser) -> bool {
-    is_nth_at_identifier(p, 0)
-}
-
-#[inline]
-pub(crate) fn is_nth_at_identifier(p: &mut CssParser, n: usize) -> bool {
-    p.nth_at(n, T![ident]) || p.nth(n).is_contextual_keyword()
-}
-#[inline]
-pub(crate) fn parse_regular_identifier(p: &mut CssParser) -> ParsedSyntax {
-    parse_identifier(p, CssLexContext::Regular)
-}
-
 pub(crate) fn is_at_url_value(p: &mut CssParser) -> bool {
     p.at(CSS_URL_VALUE_RAW_LITERAL) || is_at_string(p)
 }
@@ -491,6 +461,23 @@ pub(crate) fn parse_url_value(p: &mut CssParser) -> ParsedSyntax {
     p.expect(CSS_URL_VALUE_RAW_LITERAL);
     Present(m.complete(p, CSS_URL_VALUE_RAW))
 }
+
+#[inline]
+pub(crate) fn is_at_identifier(p: &mut CssParser) -> bool {
+    is_nth_at_identifier(p, 0)
+}
+
+#[inline]
+pub(crate) fn is_nth_at_identifier(p: &mut CssParser, n: usize) -> bool {
+    p.nth_at(n, T![ident]) || p.nth(n).is_contextual_keyword()
+}
+/// Parse any identifier as a general CssIdentifier. Regular identifiers are
+/// case-insensitive, often used for property names, values, etc.
+#[inline]
+pub(crate) fn parse_regular_identifier(p: &mut CssParser) -> ParsedSyntax {
+    parse_identifier(p, CssLexContext::Regular)
+}
+
 #[inline]
 pub(crate) fn parse_identifier(p: &mut CssParser, context: CssLexContext) -> ParsedSyntax {
     if !is_at_identifier(p) {
@@ -502,6 +489,45 @@ pub(crate) fn parse_identifier(p: &mut CssParser, context: CssLexContext) -> Par
     let identifier = m.complete(p, CSS_IDENTIFIER);
 
     Present(identifier)
+}
+
+/// Custom identifiers are identifiers not defined by CSS itself. These _are_
+/// case-sensitive, used for class names, ids, etc. Custom identifiers _may_
+/// have the same value as an identifier defined by CSS (e.g, `color`, used as
+/// a class name).
+///
+/// Custom identifiers have the same syntax as general identifiers, so the
+/// [is_at_identifier] function can be used to check for both while parsing.
+#[inline]
+pub(crate) fn parse_custom_identifier(p: &mut CssParser, context: CssLexContext) -> ParsedSyntax {
+    if !is_at_identifier(p) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.bump_remap_with_context(T![ident], context);
+    let identifier = m.complete(p, CSS_CUSTOM_IDENTIFIER);
+
+    Present(identifier)
+}
+
+#[inline]
+pub(crate) fn is_at_dashed_identifier(p: &mut CssParser) -> bool {
+    is_at_identifier(p) && p.cur_text().starts_with("--")
+}
+
+/// Dashed identifiers are regular identifiers that start with two dashes (`--`).
+/// Case sensitive, these are guaranteed to never overlap with an identifier
+/// defined by CSS.
+#[inline]
+pub(crate) fn parse_dashed_identifier(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_dashed_identifier(p) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.bump(T![ident]);
+    Present(m.complete(p, CSS_DASHED_IDENTIFIER))
 }
 
 #[inline]

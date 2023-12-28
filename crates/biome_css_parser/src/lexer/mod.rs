@@ -1219,7 +1219,7 @@ impl<'src> CssLexer<'src> {
                 return CDC;
             }
 
-            // --custom-property
+            // --dashed-identifier
             if self.is_ident_start() {
                 return self.consume_identifier();
             }

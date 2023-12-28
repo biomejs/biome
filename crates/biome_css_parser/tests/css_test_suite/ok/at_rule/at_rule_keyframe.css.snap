@@ -74,7 +74,7 @@ CssRoot {
             at_token: AT@0..1 "@" [] [],
             rule: CssKeyframesAtRule {
                 keyframes_token: KEYFRAMES_KW@1..11 "keyframes" [] [Whitespace(" ")],
-                name: CssIdentifier {
+                name: CssCustomIdentifier {
                     value_token: IDENT@11..15 "foo" [] [Whitespace(" ")],
                 },
                 block: CssKeyframesBlock {
@@ -102,7 +102,7 @@ CssRoot {
             at_token: AT@59..61 "@" [Newline("\n")] [],
             rule: CssKeyframesAtRule {
                 keyframes_token: KEYFRAMES_KW@61..74 "keyframes" [] [Whitespace("    ")],
-                name: CssIdentifier {
+                name: CssCustomIdentifier {
                     value_token: IDENT@74..81 "foo" [] [Whitespace("    ")],
                 },
                 block: CssKeyframesBlock {
@@ -116,7 +116,7 @@ CssRoot {
             at_token: AT@94..97 "@" [Newline("\n"), Newline("\n")] [],
             rule: CssKeyframesAtRule {
                 keyframes_token: KEYFRAMES_KW@97..107 "keyframes" [] [Whitespace(" ")],
-                name: CssIdentifier {
+                name: CssCustomIdentifier {
                     value_token: IDENT@107..115 "slidein" [] [Whitespace(" ")],
                 },
                 block: CssKeyframesBlock {
@@ -219,7 +219,7 @@ CssRoot {
             at_token: AT@199..202 "@" [Newline("\n"), Newline("\n")] [],
             rule: CssKeyframesAtRule {
                 keyframes_token: KEYFRAMES_KW@202..216 "-ms-keyframes" [] [Whitespace(" ")],
-                name: CssIdentifier {
+                name: CssCustomIdentifier {
                     value_token: IDENT@216..227 "identifier" [] [Whitespace(" ")],
                 },
                 block: CssKeyframesBlock {
@@ -411,7 +411,7 @@ CssRoot {
             at_token: AT@335..338 "@" [Newline("\n"), Newline("\n")] [],
             rule: CssKeyframesAtRule {
                 keyframes_token: KEYFRAMES_KW@338..348 "keyframes" [] [Whitespace(" ")],
-                name: CssIdentifier {
+                name: CssCustomIdentifier {
                     value_token: IDENT@348..352 "FOO" [] [Whitespace(" ")],
                 },
                 block: CssKeyframesBlock {
@@ -453,7 +453,7 @@ CssRoot {
             at_token: AT@402..404 "@" [Newline("\n")] [],
             rule: CssKeyframesAtRule {
                 keyframes_token: KEYFRAMES_KW@404..422 "-webkit-keyframes" [] [Whitespace(" ")],
-                name: CssIdentifier {
+                name: CssCustomIdentifier {
                     value_token: IDENT@422..434 "slide-right" [] [Whitespace(" ")],
                 },
                 block: CssKeyframesBlock {
@@ -610,7 +610,7 @@ CssRoot {
             at_token: AT@576..579 "@" [Newline("\n"), Newline("\n")] [],
             rule: CssKeyframesAtRule {
                 keyframes_token: KEYFRAMES_KW@579..594 "-moz-keyframes" [] [Whitespace(" ")],
-                name: CssIdentifier {
+                name: CssCustomIdentifier {
                     value_token: IDENT@594..605 "slidein-up" [] [Whitespace(" ")],
                 },
                 block: CssKeyframesBlock {
@@ -724,7 +724,7 @@ CssRoot {
       0: AT@0..1 "@" [] []
       1: CSS_KEYFRAMES_AT_RULE@1..28
         0: KEYFRAMES_KW@1..11 "keyframes" [] [Whitespace(" ")]
-        1: CSS_IDENTIFIER@11..15
+        1: CSS_CUSTOM_IDENTIFIER@11..15
           0: IDENT@11..15 "foo" [] [Whitespace(" ")]
         2: CSS_KEYFRAMES_BLOCK@15..28
           0: L_CURLY@15..27 "{" [] [Whitespace(" "), Comments("/* ... */"), Whitespace(" ")]
@@ -744,7 +744,7 @@ CssRoot {
       0: AT@59..61 "@" [Newline("\n")] []
       1: CSS_KEYFRAMES_AT_RULE@61..94
         0: KEYFRAMES_KW@61..74 "keyframes" [] [Whitespace("    ")]
-        1: CSS_IDENTIFIER@74..81
+        1: CSS_CUSTOM_IDENTIFIER@74..81
           0: IDENT@74..81 "foo" [] [Whitespace("    ")]
         2: CSS_KEYFRAMES_BLOCK@81..94
           0: L_CURLY@81..93 "{" [] [Whitespace(" "), Comments("/* ... */"), Whitespace(" ")]
@@ -754,7 +754,7 @@ CssRoot {
       0: AT@94..97 "@" [Newline("\n"), Newline("\n")] []
       1: CSS_KEYFRAMES_AT_RULE@97..199
         0: KEYFRAMES_KW@97..107 "keyframes" [] [Whitespace(" ")]
-        1: CSS_IDENTIFIER@107..115
+        1: CSS_CUSTOM_IDENTIFIER@107..115
           0: IDENT@107..115 "slidein" [] [Whitespace(" ")]
         2: CSS_KEYFRAMES_BLOCK@115..199
           0: L_CURLY@115..116 "{" [] []
@@ -820,7 +820,7 @@ CssRoot {
       0: AT@199..202 "@" [Newline("\n"), Newline("\n")] []
       1: CSS_KEYFRAMES_AT_RULE@202..335
         0: KEYFRAMES_KW@202..216 "-ms-keyframes" [] [Whitespace(" ")]
-        1: CSS_IDENTIFIER@216..227
+        1: CSS_CUSTOM_IDENTIFIER@216..227
           0: IDENT@216..227 "identifier" [] [Whitespace(" ")]
         2: CSS_KEYFRAMES_BLOCK@227..335
           0: L_CURLY@227..228 "{" [] []
@@ -945,7 +945,7 @@ CssRoot {
       0: AT@335..338 "@" [Newline("\n"), Newline("\n")] []
       1: CSS_KEYFRAMES_AT_RULE@338..354
         0: KEYFRAMES_KW@338..348 "keyframes" [] [Whitespace(" ")]
-        1: CSS_IDENTIFIER@348..352
+        1: CSS_CUSTOM_IDENTIFIER@348..352
           0: IDENT@348..352 "FOO" [] [Whitespace(" ")]
         2: CSS_KEYFRAMES_BLOCK@352..354
           0: L_CURLY@352..353 "{" [] []
@@ -975,7 +975,7 @@ CssRoot {
       0: AT@402..404 "@" [Newline("\n")] []
       1: CSS_KEYFRAMES_AT_RULE@404..576
         0: KEYFRAMES_KW@404..422 "-webkit-keyframes" [] [Whitespace(" ")]
-        1: CSS_IDENTIFIER@422..434
+        1: CSS_CUSTOM_IDENTIFIER@422..434
           0: IDENT@422..434 "slide-right" [] [Whitespace(" ")]
         2: CSS_KEYFRAMES_BLOCK@434..576
           0: L_CURLY@434..435 "{" [] []
@@ -1077,7 +1077,7 @@ CssRoot {
       0: AT@576..579 "@" [Newline("\n"), Newline("\n")] []
       1: CSS_KEYFRAMES_AT_RULE@579..689
         0: KEYFRAMES_KW@579..594 "-moz-keyframes" [] [Whitespace(" ")]
-        1: CSS_IDENTIFIER@594..605
+        1: CSS_CUSTOM_IDENTIFIER@594..605
           0: IDENT@594..605 "slidein-up" [] [Whitespace(" ")]
         2: CSS_KEYFRAMES_BLOCK@605..689
           0: L_CURLY@605..606 "{" [] []

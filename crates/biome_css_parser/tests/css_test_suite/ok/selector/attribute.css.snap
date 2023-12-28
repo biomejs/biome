@@ -858,13 +858,13 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssIdSelector {
                             hash_token: HASH@505..507 "#" [Newline("\n")] [],
-                            name: CssIdentifier {
+                            name: CssCustomIdentifier {
                                 value_token: IDENT@507..509 "id" [] [],
                             },
                         },
                         CssClassSelector {
                             dot_token: DOT@509..510 "." [] [],
-                            name: CssIdentifier {
+                            name: CssCustomIdentifier {
                                 value_token: IDENT@510..515 "class" [] [],
                             },
                         },
@@ -896,7 +896,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssIdSelector {
                             hash_token: HASH@526..528 "#" [Newline("\n")] [],
-                            name: CssIdentifier {
+                            name: CssCustomIdentifier {
                                 value_token: IDENT@528..530 "id" [] [],
                             },
                         },
@@ -939,7 +939,7 @@ CssRoot {
                         },
                         CssClassSelector {
                             dot_token: DOT@550..551 "." [] [],
-                            name: CssIdentifier {
+                            name: CssCustomIdentifier {
                                 value_token: IDENT@551..557 "class" [] [Whitespace(" ")],
                             },
                         },
@@ -2224,11 +2224,11 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@505..524
             0: CSS_ID_SELECTOR@505..509
               0: HASH@505..507 "#" [Newline("\n")] []
-              1: CSS_IDENTIFIER@507..509
+              1: CSS_CUSTOM_IDENTIFIER@507..509
                 0: IDENT@507..509 "id" [] []
             1: CSS_CLASS_SELECTOR@509..515
               0: DOT@509..510 "." [] []
-              1: CSS_IDENTIFIER@510..515
+              1: CSS_CUSTOM_IDENTIFIER@510..515
                 0: IDENT@510..515 "class" [] []
             2: CSS_ATTRIBUTE_SELECTOR@515..524
               0: L_BRACK@515..516 "[" [] []
@@ -2250,7 +2250,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@526..539
             0: CSS_ID_SELECTOR@526..530
               0: HASH@526..528 "#" [Newline("\n")] []
-              1: CSS_IDENTIFIER@528..530
+              1: CSS_CUSTOM_IDENTIFIER@528..530
                 0: IDENT@528..530 "id" [] []
             1: CSS_ATTRIBUTE_SELECTOR@530..539
               0: L_BRACK@530..531 "[" [] []
@@ -2280,7 +2280,7 @@ CssRoot {
               3: R_BRACK@549..550 "]" [] []
             1: CSS_CLASS_SELECTOR@550..557
               0: DOT@550..551 "." [] []
-              1: CSS_IDENTIFIER@551..557
+              1: CSS_CUSTOM_IDENTIFIER@551..557
                 0: IDENT@551..557 "class" [] [Whitespace(" ")]
       1: CSS_DECLARATION_LIST_BLOCK@557..559
         0: L_CURLY@557..558 "{" [] []

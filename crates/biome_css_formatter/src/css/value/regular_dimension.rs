@@ -1,4 +1,4 @@
-use crate::{css::auxiliary::identifier::FormatCssIdentifierOptions, prelude::*};
+use crate::prelude::*;
 use biome_css_syntax::{CssRegularDimension, CssRegularDimensionFields};
 use biome_formatter::write;
 
@@ -11,12 +11,7 @@ impl FormatNodeRule<CssRegularDimension> for FormatCssRegularDimension {
         write!(f, [value.format()])?;
 
         if let Ok(unit) = unit {
-            write!(
-                f,
-                [unit.format().with_options(FormatCssIdentifierOptions {
-                    forced_lowercase: true
-                })]
-            )?;
+            write!(f, [unit.format()])?;
         }
 
         Ok(())

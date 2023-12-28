@@ -324,7 +324,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssClassSelector {
                             dot_token: DOT@156..157 "." [] [],
-                            name: CssIdentifier {
+                            name: CssCustomIdentifier {
                                 value_token: IDENT@157..164 "sidebar" [] [],
                             },
                         },
@@ -509,7 +509,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssClassSelector {
                             dot_token: DOT@309..311 "." [Newline("\n")] [],
-                            name: CssIdentifier {
+                            name: CssCustomIdentifier {
                                 value_token: IDENT@311..315 "test" [] [],
                             },
                         },
@@ -986,7 +986,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@156..211
             0: CSS_CLASS_SELECTOR@156..164
               0: DOT@156..157 "." [] []
-              1: CSS_IDENTIFIER@157..164
+              1: CSS_CUSTOM_IDENTIFIER@157..164
                 0: IDENT@157..164 "sidebar" [] []
             1: CSS_PSEUDO_CLASS_SELECTOR@164..184
               0: COLON@164..165 ":" [] []
@@ -1110,7 +1110,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@309..363
             0: CSS_CLASS_SELECTOR@309..315
               0: DOT@309..311 "." [Newline("\n")] []
-              1: CSS_IDENTIFIER@311..315
+              1: CSS_CUSTOM_IDENTIFIER@311..315
                 0: IDENT@311..315 "test" [] []
             1: CSS_PSEUDO_ELEMENT_SELECTOR@315..341
               0: COLON2@315..317 "::" [] []

@@ -27,7 +27,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssClassSelector {
                             dot_token: DOT@0..1 "." [] [],
-                            name: CssIdentifier {
+                            name: CssCustomIdentifier {
                                 value_token: IDENT@1..9 "selector" [] [],
                             },
                         },
@@ -40,7 +40,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssClassSelector {
                             dot_token: DOT@11..12 "." [] [],
-                            name: CssIdentifier {
+                            name: CssCustomIdentifier {
                                 value_token: IDENT@12..21 "important" [] [],
                             },
                         },
@@ -53,7 +53,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssClassSelector {
                             dot_token: DOT@23..24 "." [] [],
-                            name: CssIdentifier {
+                            name: CssCustomIdentifier {
                                 value_token: IDENT@24..29 "from" [] [Whitespace(" ")],
                             },
                         },
@@ -85,7 +85,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@0..9
             0: CSS_CLASS_SELECTOR@0..9
               0: DOT@0..1 "." [] []
-              1: CSS_IDENTIFIER@1..9
+              1: CSS_CUSTOM_IDENTIFIER@1..9
                 0: IDENT@1..9 "selector" [] []
         1: COMMA@9..11 "," [] [Whitespace(" ")]
         2: CSS_COMPOUND_SELECTOR@11..21
@@ -94,7 +94,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@11..21
             0: CSS_CLASS_SELECTOR@11..21
               0: DOT@11..12 "." [] []
-              1: CSS_IDENTIFIER@12..21
+              1: CSS_CUSTOM_IDENTIFIER@12..21
                 0: IDENT@12..21 "important" [] []
         3: COMMA@21..23 "," [] [Whitespace(" ")]
         4: CSS_COMPOUND_SELECTOR@23..29
@@ -103,7 +103,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@23..29
             0: CSS_CLASS_SELECTOR@23..29
               0: DOT@23..24 "." [] []
-              1: CSS_IDENTIFIER@24..29
+              1: CSS_CUSTOM_IDENTIFIER@24..29
                 0: IDENT@24..29 "from" [] [Whitespace(" ")]
       1: CSS_DECLARATION_LIST_BLOCK@29..33
         0: L_CURLY@29..30 "{" [] []

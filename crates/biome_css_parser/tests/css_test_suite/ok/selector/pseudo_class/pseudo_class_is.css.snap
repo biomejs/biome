@@ -241,7 +241,7 @@ CssRoot {
                                         sub_selectors: CssSubSelectorList [
                                             CssClassSelector {
                                                 dot_token: DOT@76..77 "." [] [],
-                                                name: CssIdentifier {
+                                                name: CssCustomIdentifier {
                                                     value_token: IDENT@77..81 "cool" [] [],
                                                 },
                                             },
@@ -254,7 +254,7 @@ CssRoot {
                                         sub_selectors: CssSubSelectorList [
                                             CssClassSelector {
                                                 dot_token: DOT@83..84 "." [] [],
-                                                name: CssIdentifier {
+                                                name: CssCustomIdentifier {
                                                     value_token: IDENT@84..87 "fun" [] [],
                                                 },
                                             },
@@ -615,7 +615,7 @@ CssRoot {
                                             sub_selectors: CssSubSelectorList [
                                                 CssClassSelector {
                                                     dot_token: DOT@222..223 "." [] [],
-                                                    name: CssIdentifier {
+                                                    name: CssCustomIdentifier {
                                                         value_token: IDENT@223..227 "list" [] [],
                                                     },
                                                 },
@@ -1450,7 +1450,7 @@ CssRoot {
                     2: CSS_SUB_SELECTOR_LIST@76..81
                       0: CSS_CLASS_SELECTOR@76..81
                         0: DOT@76..77 "." [] []
-                        1: CSS_IDENTIFIER@77..81
+                        1: CSS_CUSTOM_IDENTIFIER@77..81
                           0: IDENT@77..81 "cool" [] []
                   1: COMMA@81..83 "," [] [Whitespace(" ")]
                   2: CSS_COMPOUND_SELECTOR@83..87
@@ -1459,7 +1459,7 @@ CssRoot {
                     2: CSS_SUB_SELECTOR_LIST@83..87
                       0: CSS_CLASS_SELECTOR@83..87
                         0: DOT@83..84 "." [] []
-                        1: CSS_IDENTIFIER@84..87
+                        1: CSS_CUSTOM_IDENTIFIER@84..87
                           0: IDENT@84..87 "fun" [] []
                 3: R_PAREN@87..89 ")" [] [Whitespace(" ")]
       1: CSS_DECLARATION_LIST_BLOCK@89..91
@@ -1709,7 +1709,7 @@ CssRoot {
                       2: CSS_SUB_SELECTOR_LIST@222..227
                         0: CSS_CLASS_SELECTOR@222..227
                           0: DOT@222..223 "." [] []
-                          1: CSS_IDENTIFIER@223..227
+                          1: CSS_CUSTOM_IDENTIFIER@223..227
                             0: IDENT@223..227 "list" [] []
                   3: R_PAREN@227..229 ")" [] [Whitespace(" ")]
           1: R_ANGLE@229..231 ">" [] [Whitespace(" ")]
