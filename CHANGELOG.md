@@ -18,6 +18,8 @@ Biome now scores 97% compatibility with Prettier and features more than 180 lint
 
 #### New features
 
+- Biome now shows a diagnostic when it encounters a protected file. Contributed by @ematipico
+
 - The command `biome migrate` now updates the `$schema` if there's an outdated version.
 
 - The commands `format`, `lint`, `check` and `ci` now accepts two new arguments: `--changed` and `--since`.
