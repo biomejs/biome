@@ -22,3 +22,12 @@ export class Task {
         this.args = args;
     }
 }
+
+// Issue https://github.com/biomejs/biome/issues/1171
+users.map((user: User): User => {
+  ; // comment
+})
+
+users.map((user: User): User => {
+  // comment
+})

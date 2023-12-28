@@ -1,0 +1,57 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+# Emitted Messages
+
+```block
+# noBlankTarget
+
+```
+
+```block
+Fix is Safe.
+
+```
+
+```block
+This rule is recommended.
+
+# Description
+Disallow `target="_blank"` attribute without `rel="noreferrer"`
+
+When creating anchor `a` element, there are times when its link has to be opened in a new browser tab
+via `target="_blank"` attribute. This attribute has to paired with `rel="noreferrer"` or you're incur
+in a security issue.
+
+Refer to [the noreferrer documentation](https://html.spec.whatwg.org/multipage/links.html#link-type-noreferrer)
+and the [the noopener documentation](https://html.spec.whatwg.org/multipage/links.html#link-type-noopener)
+
+## Examples
+
+### Invalid
+
+```jsx,expect_diagnostic
+<a href='http://external.link' target='_blank'>child</a>
+```
+
+```jsx,expect_diagnostic
+<a href='http://external.link' target='_blank' rel="noopener">child</a>
+```
+
+```jsx,expect_diagnostic
+<a {...props} href='http://external.link' target='_blank' rel="noopener">child</a>
+```
+
+### Valid
+
+```jsx
+<a href='http://external.link' rel='noreferrer' target='_blank'>child</a>
+```
+
+```jsx
+<a href='http://external.link' target='_blank' rel="noopener" {...props}>child</a>
+```
+```
+
+

@@ -19,6 +19,7 @@ path = "src/main.rs"
 
 [dependencies]
 anyhow               = "1.0.52"
+biome_analyze        = { workspace = true }
 biome_console        = { workspace = true }
 biome_deserialize    = { workspace = true }
 biome_diagnostics    = { workspace = true }
