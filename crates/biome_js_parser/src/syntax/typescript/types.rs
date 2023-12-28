@@ -1292,6 +1292,9 @@ fn parse_ts_call_signature_type_member(p: &mut JsParser, context: TypeContext) -
 // type A = { new (): string; }
 // type B = { new (a: string, b: number) }
 // type C = { new <A, B>(a: A, b: B): string }
+
+// test_err ts ts_construct_signature_member_err
+// type C = { new <>(a: A, b: B): string }
 fn parse_ts_construct_signature_type_member(
     p: &mut JsParser,
     context: TypeContext,
@@ -1587,6 +1590,10 @@ fn is_at_ts_construct_signature_type_member(p: &mut JsParser) -> bool {
 // type B = abstract new(a: string, b: number) => string;
 // type C = new<A, B>(a: A, b: B) => string;
 // type D = abstract new<A, B>(a: A, b: B) => string;
+
+// test_err ts ts_constructor_type_err
+// type C = new<>(a: A, b: B) => string;
+// type D = abstract new<>(a: A, b: B) => string;
 fn parse_ts_constructor_type(p: &mut JsParser, context: TypeContext) -> ParsedSyntax {
     if !is_at_constructor_type(p) {
         return Absent;
@@ -1658,6 +1665,9 @@ fn is_at_function_type(p: &mut JsParser) -> bool {
 // type G = <A, B>(a: A, b: B) => string
 // type H = (a: any) => a is string;
 // type I = ({ a, b }?) => string;
+
+// test_err ts ts_function_type_err
+// type G = <>(a: A, b: B) => string
 fn parse_ts_function_type(p: &mut JsParser, context: TypeContext) -> ParsedSyntax {
     if !p.at(T![<]) && !p.at(T!['(']) {
         return Absent;

@@ -261,6 +261,7 @@ fn parse_getter_object_member(p: &mut JsParser) -> ParsedSyntax {
 
     // test_err ts ts_object_getter_type_parameters
     // ({ get a<A>(): A {} });
+    // ({ get a<>(): A {} });
     if let Present(type_parameters) = parse_ts_type_parameters(p, TypeContext::default()) {
         p.error(ts_accessor_type_parameters_error(p, &type_parameters))
     }
@@ -295,6 +296,7 @@ fn parse_setter_object_member(p: &mut JsParser) -> ParsedSyntax {
 
     // test_err ts ts_object_setter_type_parameters
     // ({ set a<A>(value: A) {} });
+    // ({ set a<>(value: A) {} });
     if let Present(type_parameters) = parse_ts_type_parameters(p, TypeContext::default()) {
         p.error(ts_accessor_type_parameters_error(p, &type_parameters))
     }
@@ -453,6 +455,12 @@ fn parse_method_object_member(p: &mut JsParser) -> ParsedSyntax {
 //     x<A>(maybeA: any): maybeA is A { return true },
 //     y(a: string): string { return "string"; },
 //     async *id<R>(param: Promise<R>): AsyncIterableIterator<R> { yield await param },
+// })
+
+// test_err ts ts_method_object_member_body_error
+// ({
+//     x<>(maybeA: any): maybeA is A { return true },
+//     async *id<>(param: Promise<R>): AsyncIterableIterator<R> { yield await param },
 // })
 
 /// Parses the body of a method object member starting right after the member name.
