@@ -1,4 +1,4 @@
-name: JavaScript Formatter Benchmark
+name: CSS Parser Benchmark
 
 on:
   workflow_dispatch:
@@ -7,14 +7,14 @@ on:
     branches:
       - main
     paths:
-      - 'crates/biome_js_formatter/**'
-      - 'crates/biome_formatter/**'
+      - 'crates/biome_css_parser/**'
+      - 'crates/biome_parser/**'
   push:
     branches:
       - main
     paths:
-      - 'crates/biome_js_formatter/**'
-      - 'crates/biome_formatter/**'
+      - 'crates/biome_css_parser/**'
+      - 'crates/biome_parser/**'
 
 env:
   RUST_LOG: info
@@ -47,5 +47,5 @@ jobs:
         uses: CodSpeedHQ/action@v2
         timeout-minutes: 30
         with:
-          run: cargo codspeed run js_formatter
+          run: cargo codspeed run css_parser
           token: ${{ secrets.CODSPEED_TOKEN }}

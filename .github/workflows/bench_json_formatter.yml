@@ -1,4 +1,4 @@
-name: JavaScript Formatter Benchmark
+name: JSON Formatter Benchmark
 
 on:
   workflow_dispatch:
@@ -7,13 +7,13 @@ on:
     branches:
       - main
     paths:
-      - 'crates/biome_js_formatter/**'
+      - 'crates/biome_json_formatter/**'
       - 'crates/biome_formatter/**'
   push:
     branches:
       - main
     paths:
-      - 'crates/biome_js_formatter/**'
+      - 'crates/biome_json_formatter/**'
       - 'crates/biome_formatter/**'
 
 env:
@@ -47,5 +47,5 @@ jobs:
         uses: CodSpeedHQ/action@v2
         timeout-minutes: 30
         with:
-          run: cargo codspeed run js_formatter
+          run: cargo codspeed run json_formatter
           token: ${{ secrets.CODSPEED_TOKEN }}

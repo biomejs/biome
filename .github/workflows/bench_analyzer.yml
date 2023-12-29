@@ -1,12 +1,12 @@
-# Analyzer benchmark, compares main and PR branch with Criterion.
-# Comment with text containing `!bench_analyzer`, a new result will be commented at the bottom of this PR.
-
 name: Analyzer Benchmark
 
 on:
   workflow_dispatch:
-  issue_comment:
-    types: [ created ]
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'crates/**_analyze/**'
 
 env:
   RUST_LOG: info
@@ -16,7 +16,6 @@ jobs:
     permissions:
       pull-requests: write
     name: Bench
-    if: github.event.issue.pull_request && contains(github.event.comment.body, '!bench_analyzer')
     runs-on: ubuntu-latest
 
     steps:

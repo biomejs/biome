@@ -1,19 +1,19 @@
-name: JavaScript Formatter Benchmark
+name: CSS Formatter Benchmark
 
 on:
   workflow_dispatch:
   pull_request:
-    types: [ opened, synchronize ]
+    types: [opened, synchronize]
     branches:
       - main
     paths:
-      - 'crates/biome_js_formatter/**'
+      - 'crates/biome_css_formatter/**'
       - 'crates/biome_formatter/**'
   push:
     branches:
       - main
     paths:
-      - 'crates/biome_js_formatter/**'
+      - 'crates/biome_css_formatter/**'
       - 'crates/biome_formatter/**'
 
 env:
@@ -47,5 +47,5 @@ jobs:
         uses: CodSpeedHQ/action@v2
         timeout-minutes: 30
         with:
-          run: cargo codspeed run js_formatter
+          run: cargo codspeed run css_formatter
           token: ${{ secrets.CODSPEED_TOKEN }}

@@ -353,12 +353,6 @@ If in doubt, take a look to existing changelog lines.
 If your PR requires some update on the website (new features, breaking changes, etc.), you should create a new PR once the previous PR is successfully merged.
 When adding new features, the documentation should be part of a new PR, which will be merged right before the release.
 
-### Magic comments
-
-- `!bench_parser` benchmarks the parser's runtime performance and writes a comment with the results;
-- `!bench_formatter` benchmarks the formatter runtime performance and writes a comment with the results;
-- `!bench_analyzer` benchmarks the analyzer runtime performance and writes a comment with the results;
-
 ### Versioning
 
 We follow the specs suggested by [the official documentation](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#prerelease-extensions):

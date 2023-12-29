@@ -1,12 +1,20 @@
-# Analyzer benchmark, compares main and PR branch with Criterion.
-# Comment with text containing `!bench_js_parser`, a new result will be commented at the bottom of this PR.
-
 name: JavaScript Parser Benchmark
 
 on:
   workflow_dispatch:
-  issue_comment:
-    types: [ created ]
+  pull_request:
+    types: [ opened, synchronize ]
+    branches:
+      - main
+    paths:
+      - 'crates/biome_js_parser/**'
+      - 'crates/biome_parser/**'
+  push:
+    branches:
+      - main
+    paths:
+      - 'crates/biome_js_parser/**'
+      - 'crates/biome_parser/**'
 
 env:
   RUST_LOG: info
@@ -16,7 +24,6 @@ jobs:
     permissions:
       pull-requests: write
     name: Bench
-    if: github.event.issue.pull_request && contains(github.event.comment.body, '!bench_js_parser')
     runs-on: ubuntu-latest
 
     steps:
