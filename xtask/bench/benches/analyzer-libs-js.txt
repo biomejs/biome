@@ -1,0 +1,2 @@
+https://raw.githubusercontent.com/prettier/prettier/main/src/language-js/utils/index.js
+https://raw.githubusercontent.com/jquery/jquery/main/src/css.js
