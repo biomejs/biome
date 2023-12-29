@@ -36,7 +36,7 @@ pub(crate) fn parse_pseudo_class_function_relative_selector_list(
     p.bump_ts(PSEUDO_CLASS_FUNCTION_RELATIVE_SELECTOR_LIST_SET);
     p.bump(T!['(']);
 
-    let list = CssRelativeSelectorList.parse_list(p);
+    let list = RelativeSelectorList.parse_list(p);
     let list_range = list.range(p);
 
     if list_range.is_empty() && p.at(T![')']) {
@@ -55,9 +55,9 @@ pub(crate) fn parse_pseudo_class_function_relative_selector_list(
     Present(m.complete(p, kind))
 }
 
-struct CssRelativeSelectorList;
+struct RelativeSelectorList;
 
-impl ParseSeparatedList for CssRelativeSelectorList {
+impl ParseSeparatedList for RelativeSelectorList {
     type Kind = CssSyntaxKind;
     type Parser<'source> = CssParser<'source>;
 

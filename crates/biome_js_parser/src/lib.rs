@@ -138,7 +138,7 @@ pub use crate::{
 use biome_js_factory::JsSyntaxFactory;
 use biome_js_syntax::{JsLanguage, JsSyntaxKind, LanguageVariant};
 use biome_parser::tree_sink::LosslessTreeSink;
-pub(crate) use parser::{JsParser, ParseRecovery};
+pub(crate) use parser::{JsParser, ParseRecoveryTokenSet};
 pub(crate) use state::{ParserState, StrictMode};
 use std::fmt::Debug;
 

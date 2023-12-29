@@ -13,7 +13,7 @@ use crate::syntax::{
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
-use biome_parser::parse_recovery::{ParseRecovery, RecoveryResult};
+use biome_parser::parse_recovery::{ParseRecoveryTokenSet, RecoveryResult};
 use biome_parser::parsed_syntax::ParsedSyntax::Present;
 use biome_parser::prelude::ParsedSyntax::Absent;
 use biome_parser::prelude::*;
@@ -33,12 +33,13 @@ pub(crate) fn parse_page_at_rule(p: &mut CssParser) -> ParsedSyntax {
 
     p.bump(T![page]);
 
-    CssPageSelectorList.parse_list(p);
+    PageSelectorList.parse_list(p);
 
     if parse_page_block(p)
-        .or_recover(
+        .or_recover_with_token_set(
             p,
-            &ParseRecovery::new(CSS_BOGUS_BLOCK, BODY_RECOVERY_SET).enable_recovery_on_line_break(),
+            &ParseRecoveryTokenSet::new(CSS_BOGUS_BLOCK, BODY_RECOVERY_SET)
+                .enable_recovery_on_line_break(),
             expected_block,
         )
         .is_err()
@@ -52,9 +53,9 @@ pub(crate) fn parse_page_at_rule(p: &mut CssParser) -> ParsedSyntax {
 const PAGE_SELECTOR_SET: TokenSet<CssSyntaxKind> = token_set!(T![ident], T![:]);
 const PAGE_SELECTOR_LIST_RECOVERY_SET: TokenSet<CssSyntaxKind> =
     PAGE_SELECTOR_SET.union(token_set!(T!['{']));
-struct CssPageSelectorList;
+struct PageSelectorList;
 
-impl ParseSeparatedList for CssPageSelectorList {
+impl ParseSeparatedList for PageSelectorList {
     type Kind = CssSyntaxKind;
     type Parser<'source> = CssParser<'source>;
     const LIST_KIND: Self::Kind = CSS_PAGE_SELECTOR_LIST;
@@ -72,9 +73,9 @@ impl ParseSeparatedList for CssPageSelectorList {
         p: &mut Self::Parser<'_>,
         parsed_element: ParsedSyntax,
     ) -> RecoveryResult {
-        parsed_element.or_recover(
+        parsed_element.or_recover_with_token_set(
             p,
-            &ParseRecovery::new(CSS_BOGUS_SELECTOR, PAGE_SELECTOR_LIST_RECOVERY_SET),
+            &ParseRecoveryTokenSet::new(CSS_BOGUS_SELECTOR, PAGE_SELECTOR_LIST_RECOVERY_SET),
             expected_page_selector,
         )
     }
@@ -103,7 +104,7 @@ pub(crate) fn parse_page_selector(p: &mut CssParser) -> ParsedSyntax {
     // sensitive, we use a `<custom-ident>` instead to preserve the casing, but
     // need to allow the CSS-wide keywords that would otherwise be disallowed.
     parse_custom_identifier_with_keywords(p, CssLexContext::Regular, true).ok();
-    CssPageSelectorPseudoList.parse_list(p);
+    PageSelectorPseudoList.parse_list(p);
 
     Present(m.complete(p, CSS_PAGE_SELECTOR))
 }
@@ -112,9 +113,9 @@ const PAGE_SELECTOR_PSEUDO_LIST_END_SET: TokenSet<CssSyntaxKind> = token_set!(T!
 const PAGE_SELECTOR_PSEUDO_LIST_RECOVERY_SET: TokenSet<CssSyntaxKind> =
     PAGE_SELECTOR_PSEUDO_LIST_END_SET.union(token_set!(T![:]));
 
-struct CssPageSelectorPseudoList;
+struct PageSelectorPseudoList;
 
-impl ParseNodeList for CssPageSelectorPseudoList {
+impl ParseNodeList for PageSelectorPseudoList {
     type Kind = CssSyntaxKind;
     type Parser<'source> = CssParser<'source>;
     const LIST_KIND: Self::Kind = CSS_PAGE_SELECTOR_PSEUDO_LIST;
@@ -132,9 +133,9 @@ impl ParseNodeList for CssPageSelectorPseudoList {
         p: &mut Self::Parser<'_>,
         parsed_element: ParsedSyntax,
     ) -> RecoveryResult {
-        parsed_element.or_recover(
+        parsed_element.or_recover_with_token_set(
             p,
-            &ParseRecovery::new(
+            &ParseRecoveryTokenSet::new(
                 CSS_BOGUS_PSEUDO_CLASS,
                 PAGE_SELECTOR_PSEUDO_LIST_RECOVERY_SET,
             ),
@@ -178,7 +179,7 @@ pub(crate) fn parse_page_block(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
 
     p.expect(T!['{']);
-    CssPageAtRuleItemList.parse_list(p);
+    PageAtRuleItemList.parse_list(p);
     p.expect(T!['}']);
 
     Present(m.complete(p, CSS_PAGE_AT_RULE_BLOCK))
@@ -186,8 +187,8 @@ pub(crate) fn parse_page_block(p: &mut CssParser) -> ParsedSyntax {
 
 const CSS_PAGE_AT_RULE_ITEM_LIST_RECOVERY_SET: TokenSet<CssSyntaxKind> =
     token_set!(T![@], T![ident]);
-struct CssPageAtRuleItemList;
-impl ParseNodeList for CssPageAtRuleItemList {
+struct PageAtRuleItemList;
+impl ParseNodeList for PageAtRuleItemList {
     type Kind = CssSyntaxKind;
     type Parser<'source> = CssParser<'source>;
     const LIST_KIND: Self::Kind = CSS_PAGE_AT_RULE_ITEM_LIST;
@@ -211,9 +212,9 @@ impl ParseNodeList for CssPageAtRuleItemList {
         p: &mut Self::Parser<'_>,
         parsed_element: ParsedSyntax,
     ) -> RecoveryResult {
-        parsed_element.or_recover(
+        parsed_element.or_recover_with_token_set(
             p,
-            &ParseRecovery::new(CSS_BOGUS, CSS_PAGE_AT_RULE_ITEM_LIST_RECOVERY_SET),
+            &ParseRecoveryTokenSet::new(CSS_BOGUS, CSS_PAGE_AT_RULE_ITEM_LIST_RECOVERY_SET),
             expected_any_page_at_rule_item,
         )
     }

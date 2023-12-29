@@ -50,13 +50,13 @@ pub type RecoveryResult = Result<CompletedMarker, RecoveryError>;
 /// Recovers the parser by finding a token/point (depending on the configuration) from where
 /// the caller knows how to proceed parsing. The recovery wraps all the skipped tokens inside a `Bogus` node.
 /// A safe recovery point for an array element could by finding the next `,` or `]`.
-pub struct ParseRecovery<K: SyntaxKind> {
+pub struct ParseRecoveryTokenSet<K: SyntaxKind> {
     node_kind: K,
     recovery_set: TokenSet<K>,
     line_break: bool,
 }
 
-impl<K: SyntaxKind> ParseRecovery<K> {
+impl<K: SyntaxKind> ParseRecoveryTokenSet<K> {
     /// Creates a new parse recovery that eats all tokens until it finds any token in the passed recovery set.
     pub fn new(node_kind: K, recovery_set: TokenSet<K>) -> Self {
         Self {
@@ -87,7 +87,7 @@ impl<K: SyntaxKind> ParseRecovery<K> {
             return Err(RecoveryError::Eof);
         }
 
-        if self.recovered(p) {
+        if self.is_at_recovered(p) {
             return Err(RecoveryError::AlreadyRecovered);
         }
 
@@ -97,7 +97,7 @@ impl<K: SyntaxKind> ParseRecovery<K> {
 
         let m = p.start();
 
-        while !self.recovered(p) {
+        while !(self.is_at_recovered(p) || p.at(P::Kind::EOF)) {
             p.bump_any();
         }
 
@@ -105,12 +105,49 @@ impl<K: SyntaxKind> ParseRecovery<K> {
     }
 
     #[inline]
-    fn recovered<P>(&self, p: &P) -> bool
+    fn is_at_recovered<P>(&self, p: &P) -> bool
     where
         P: Parser<Kind = K>,
     {
-        p.at_ts(self.recovery_set)
-            || p.at(P::Kind::EOF)
-            || (self.line_break && p.has_preceding_line_break())
+        p.at_ts(self.recovery_set) || (self.line_break && p.has_preceding_line_break())
+    }
+}
+
+/// Recovers the parser by finding a token/point (depending on the configuration) from where
+/// the caller knows how to proceed parsing. The recovery wraps all the skipped tokens inside a `Bogus` node.
+pub trait ParseRecovery {
+    type Kind: SyntaxKind;
+    type Parser<'source>: Parser<Kind = Self::Kind>;
+
+    /// The kind of the recovered node
+    const RECOVERED_KIND: Self::Kind;
+
+    /// Checks if the parser is in a recovered state.
+    fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool;
+
+    /// Tries to recover by parsing all tokens into an `Bogus*` node until the parser finds any token
+    /// specified in the recovery set, the EOF, or a line break (depending on configuration).
+    /// Returns `Ok(bogus_node)` if recovery was successful, and `Err(RecoveryError::Eof)` if the parser
+    /// is at the end of the file (before starting recovery).
+    fn recover(&self, p: &mut Self::Parser<'_>) -> RecoveryResult {
+        if p.at(Self::Kind::EOF) {
+            return Err(RecoveryError::Eof);
+        }
+
+        if self.is_at_recovered(p) {
+            return Err(RecoveryError::AlreadyRecovered);
+        }
+
+        if p.is_speculative_parsing() {
+            return Err(RecoveryError::RecoveryDisabled);
+        }
+
+        let m = p.start();
+
+        while !(self.is_at_recovered(p) || p.at(Self::Kind::EOF)) {
+            p.bump_any();
+        }
+
+        Ok(m.complete(p, Self::RECOVERED_KIND))
     }
 }
