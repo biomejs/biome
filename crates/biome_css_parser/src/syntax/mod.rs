@@ -12,12 +12,12 @@ use crate::syntax::css_dimension::{is_at_any_dimension, parse_any_dimension};
 use crate::syntax::parse_error::expected_any_rule;
 use crate::syntax::parse_error::expected_expression;
 use crate::syntax::parse_error::expected_identifier;
-use crate::syntax::selector::SelectorList;
 use crate::syntax::selector::is_at_selector;
+use crate::syntax::selector::SelectorList;
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
-use biome_parser::parse_recovery::{ParseRecoveryTokenSet, ParseRecovery, RecoveryResult};
+use biome_parser::parse_recovery::{ParseRecovery, ParseRecoveryTokenSet, RecoveryResult};
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::{token_set, Parser, TokenSet};
@@ -96,11 +96,7 @@ impl ParseNodeList for RuleList {
         p: &mut Self::Parser<'_>,
         parsed_element: ParsedSyntax,
     ) -> RecoveryResult {
-        parsed_element.or_recover(
-            p,
-            &RuleListParseRecovery,
-            expected_any_rule,
-        )
+        parsed_element.or_recover(p, &RuleListParseRecovery, expected_any_rule)
     }
 }
 
