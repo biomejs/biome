@@ -53,6 +53,7 @@ dhat-heap = ["dhat", "humansize"]
 harness = false
 name    = "analyzer"
 
+# JavaScript benches
 [[bench]]
 harness = false
 name    = "js_parser"
@@ -60,3 +61,21 @@ name    = "js_parser"
 [[bench]]
 harness = false
 name    = "js_formatter"
+
+# JSON benches
+[[bench]]
+harness = false
+name    = "json_parser"
+
+[[bench]]
+harness = false
+name    = "json_formatter"
+
+# CSS benches
+[[bench]]
+harness = false
+name    = "css_parser"
+
+[[bench]]
+harness = false
+name    = "css_formatter"
