@@ -1,6 +1,3 @@
-# Analyzer benchmark, compares main and PR branch with Criterion.
-# Comment with text containing `!bench_analyzer`, a new result will be commented at the bottom of this PR.
-
 name: Analyzer Benchmark
 
 on:

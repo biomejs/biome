@@ -1,5 +1,3 @@
-# Analyzer benchmark, compares main and PR branch with Criterion.
-# Comment with text containing `!bench_json_parser`, a new result will be commented at the bottom of this PR.
 
 name: JSON Parser Benchmark
 

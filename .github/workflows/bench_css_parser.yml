@@ -1,6 +1,3 @@
-# Analyzer benchmark, compares main and PR branch with Criterion.
-# Comment with text containing `!bench_css_parser`, a new result will be commented at the bottom of this PR.
-
 name: CSS Parser Benchmark
 
 on:
