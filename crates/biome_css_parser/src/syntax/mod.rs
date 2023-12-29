@@ -6,7 +6,7 @@ mod selector;
 
 use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
-use crate::syntax::at_rule::{at_at_rule, parse_at_rule};
+use crate::syntax::at_rule::{is_at_at_rule, parse_at_rule};
 use crate::syntax::blocks::parse_or_recover_declaration_list_block;
 use crate::syntax::css_dimension::{is_at_any_dimension, parse_any_dimension};
 use crate::syntax::parse_error::expected_any_rule;
@@ -68,7 +68,7 @@ impl ParseRecovery for RuleListParseRecovery {
     const RECOVERED_KIND: Self::Kind = CSS_BOGUS_RULE;
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
-        at_at_rule(p) || is_at_rule(p)
+        is_at_at_rule(p) || is_at_rule(p)
     }
 }
 
@@ -78,7 +78,7 @@ impl ParseNodeList for RuleList {
     const LIST_KIND: Self::Kind = CSS_RULE_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        if at_at_rule(p) {
+        if is_at_at_rule(p) {
             parse_at_rule(p)
         } else if is_at_rule(p) {
             parse_rule(p)

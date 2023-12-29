@@ -1,5 +1,5 @@
 use crate::parser::CssParser;
-use crate::syntax::at_rule::{at_at_rule, parse_at_rule};
+use crate::syntax::at_rule::{is_at_at_rule, parse_at_rule};
 use crate::syntax::parse_error::{expected_any_declaration_or_at_rule, expected_block};
 use crate::syntax::{
     parse_declaration_with_semicolon, DeclarationList, RuleList, BODY_RECOVERY_SET,
@@ -96,7 +96,7 @@ impl ParseNodeList for DeclarationOrAtRuleList {
     const LIST_KIND: Self::Kind = CSS_DECLARATION_OR_AT_RULE_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        if at_at_rule(p) {
+        if is_at_at_rule(p) {
             parse_at_rule(p)
         } else {
             parse_declaration_with_semicolon(p)

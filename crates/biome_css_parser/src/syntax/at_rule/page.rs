@@ -3,7 +3,7 @@ use crate::parser::CssParser;
 use crate::syntax::at_rule::parse_error::{
     expected_any_page_at_rule_item, expected_page_selector, expected_page_selector_pseudo,
 };
-use crate::syntax::at_rule::{at_at_rule, parse_at_rule};
+use crate::syntax::at_rule::{is_at_at_rule, parse_at_rule};
 use crate::syntax::blocks::parse_or_recover_declaration_or_rule_list_block;
 use crate::syntax::parse_error::expected_block;
 use crate::syntax::{
@@ -196,7 +196,7 @@ impl ParseNodeList for PageAtRuleItemList {
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
         if at_margin_rule(p) {
             parse_margin_at_rule(p)
-        } else if at_at_rule(p) {
+        } else if is_at_at_rule(p) {
             parse_at_rule(p)
         } else {
             parse_declaration_with_semicolon(p)
