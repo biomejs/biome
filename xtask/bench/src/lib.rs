@@ -13,7 +13,7 @@ use criterion::{BatchSize, BenchmarkId};
 pub use crate::features::analyzer::benchmark_analyze_lib;
 use crate::features::analyzer::AnalyzerMeasurement;
 pub use crate::features::formatter::benchmark_format_lib;
-use crate::features::formatter::{run_format, FormatterMeasurement};
+pub use crate::features::formatter::{run_format, FormatterMeasurement};
 pub use crate::features::parser::benchmark_parse_lib;
 use crate::features::parser::ParseMeasurement;
 pub use crate::language::Parse;

@@ -1,7 +1,7 @@
 # Analyzer benchmark, compares main and PR branch with Criterion.
-# Comment with text containing `!bench_analyzer`, a new result will be commented at the bottom of this PR.
+# Comment with text containing `!bench_js_formatter`, a new result will be commented at the bottom of this PR.
 
-name: Analyzer Benchmark
+name: JavaScript Formatter Benchmark
 
 on:
   workflow_dispatch:
@@ -16,7 +16,7 @@ jobs:
     permissions:
       pull-requests: write
     name: Bench
-    if: github.event.issue.pull_request && contains(github.event.comment.body, '!bench_analyzer')
+    if: github.event.issue.pull_request && contains(github.event.comment.body, '!bench_js_formatter')
     runs-on: ubuntu-latest
 
     steps:
@@ -40,5 +40,5 @@ jobs:
         uses: CodSpeedHQ/action@v2
         timeout-minutes: 30
         with:
-          run: cargo codspeed run analyzer
+          run: cargo codspeed run js_formatter
           token: ${{ secrets.CODSPEED_TOKEN }}

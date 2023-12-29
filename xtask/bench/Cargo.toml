@@ -56,3 +56,7 @@ name    = "analyzer"
 [[bench]]
 harness = false
 name    = "js_parser"
+
+[[bench]]
+harness = false
+name    = "js_formatter"
