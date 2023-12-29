@@ -932,6 +932,10 @@ export interface Nursery {
 	 */
 	useShorthandFunctionType?: RuleConfiguration;
 	/**
+	 * Enforce the sorting of CSS classes.
+	 */
+	useSortedClasses?: RuleConfiguration;
+	/**
 	 * Elements with ARIA roles must use a valid, non-abstract ARIA role.
 	 */
 	useValidAriaRole?: RuleConfiguration;
@@ -1643,6 +1647,7 @@ export type Category =
 	| "lint/nursery/useNumberProperties"
 	| "lint/nursery/useRegexLiterals"
 	| "lint/nursery/useShorthandFunctionType"
+	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useValidAriaRole"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noDelete"

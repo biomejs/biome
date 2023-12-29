@@ -1041,6 +1041,13 @@ impl Deserializable for Nursery {
                                 diagnostics,
                             );
                         }
+                        "useSortedClasses" => {
+                            result.use_sorted_classes = Deserializable::deserialize(
+                                &value,
+                                "useSortedClasses",
+                                diagnostics,
+                            );
+                        }
                         "useValidAriaRole" => {
                             result.use_valid_aria_role = Deserializable::deserialize(
                                 &value,
@@ -1077,6 +1084,7 @@ impl Deserializable for Nursery {
                                     "useNumberProperties",
                                     "useRegexLiterals",
                                     "useShorthandFunctionType",
+                                    "useSortedClasses",
                                     "useValidAriaRole",
                                 ],
                             ));

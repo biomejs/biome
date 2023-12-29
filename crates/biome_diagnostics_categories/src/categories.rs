@@ -123,6 +123,7 @@ define_categories! {
     "lint/nursery/useNumberProperties": "https://biomejs.dev/linter/rules/use-number-properties",
     "lint/nursery/useRegexLiterals": "https://biomejs.dev/linter/rules/use-regex-literals",
     "lint/nursery/useShorthandFunctionType": "https://biomejs.dev/lint/rules/use-shorthand-function-type",
+    "lint/nursery/useSortedClasses": "https://biomejs.dev/linter/rules/use-sorted-classes",
     "lint/nursery/useValidAriaRole": "https://biomejs.dev/lint/rules/use-valid-aria-role",
     "lint/performance/noAccumulatingSpread": "https://biomejs.dev/linter/rules/no-accumulating-spread",
     "lint/performance/noDelete": "https://biomejs.dev/linter/rules/no-delete",

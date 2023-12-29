@@ -1384,6 +1384,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useSortedClasses": {
+					"description": "Enforce the sorting of CSS classes.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useValidAriaRole": {
 					"description": "Elements with ARIA roles must use a valid, non-abstract ARIA role.",
 					"anyOf": [
