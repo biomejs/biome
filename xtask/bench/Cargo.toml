@@ -48,3 +48,7 @@ tikv-jemallocator = "0.5.0"
 [features]
 count     = ["countme/print_at_exit"]
 dhat-heap = ["dhat", "humansize"]
+
+[[bench]]
+harness = false
+name    = "analyzer"

@@ -16,8 +16,8 @@ pub use crate::features::formatter::benchmark_format_lib;
 use crate::features::formatter::{run_format, FormatterMeasurement};
 pub use crate::features::parser::benchmark_parse_lib;
 use crate::features::parser::ParseMeasurement;
-use crate::language::Parse;
-use crate::test_case::TestCase;
+pub use crate::language::Parse;
+pub use crate::test_case::TestCase;
 
 /// What feature to benchmark
 #[derive(Eq, PartialEq)]
