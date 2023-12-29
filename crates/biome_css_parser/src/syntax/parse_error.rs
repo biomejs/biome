@@ -1,8 +1,8 @@
 use crate::parser::CssParser;
-use crate::prelude::*;
 use biome_css_syntax::CssSyntaxKind;
 use biome_parser::diagnostic::{expect_one_of, expected_any, expected_node};
 use biome_parser::prelude::{ParseDiagnostic, ToDiagnostic};
+use biome_parser::Parser;
 use biome_rowan::TextRange;
 
 pub(crate) fn expected_identifier(p: &CssParser, range: TextRange) -> ParseDiagnostic {
