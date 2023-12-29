@@ -225,8 +225,8 @@ impl SemanticModel {
         let first = self
             .data
             .globals
-            .get(0)
-            .and_then(|global| global.references.get(0))
+            .first()
+            .and_then(|global| global.references.first())
             .map(|_| GlobalReference {
                 data: self.data.clone(),
                 global_id: 0,
@@ -271,7 +271,7 @@ impl SemanticModel {
         let first = self
             .data
             .unresolved_references
-            .get(0)
+            .first()
             .map(|_| UnresolvedReference {
                 data: self.data.clone(),
                 id: 0,
