@@ -1472,22 +1472,22 @@ fn parse_variable_declarator(
             )
         {
             let err = p
-                .err_builder("Object and Array patterns require initializers", id_range)
+                .err_builder("Object and Array patterns require initializers.", id_range)
                 .with_hint(
-                    "this pattern is declared, but it is not given an initialized value",
+                    "This pattern is declared, but it is not given an initialized value.",
                 );
 
             p.error(err);
         } else if initializer.is_none() && context.is_const() && !p.state().in_ambient_context() {
             let err = p
-                .err_builder("Const declarations must have an initialized value", id_range)
-                .with_hint( "this variable needs to be initialized");
+                .err_builder("Const declarations must have an initialized value.", id_range)
+                .with_hint( "This variable needs to be initialized.");
 
             p.error(err);
         } else if initializer.is_none() && context.is_using() {
             let err = p
-                .err_builder("Using declarations must have an initialized value", id_range)
-                .with_hint( "this variable needs to be initialized");
+                .err_builder("Using declarations must have an initialized value.", id_range)
+                .with_hint( "This variable needs to be initialized.");
 
             p.error(err);
         }

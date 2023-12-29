@@ -75,7 +75,7 @@ Biome now scores 97% compatibility with Prettier and features more than 180 lint
     "files": {
       "ignore": [
         "node_modules/**",
-        "!**/dist/**" // this is now accepted and allow list files inside the `dist` folder
+        "!**/dist/**" // this is now accepted and allow files inside the `dist` folder
       ]
     }
   }

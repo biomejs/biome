@@ -344,7 +344,7 @@ array_binding_err.js:4:15 parse ━━━━━━━━━━━━━━━━
 --
 array_binding_err.js:4:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Object and Array patterns require initializers
+  × Object and Array patterns require initializers.
   
     2 │ let [="default"] = [1, 2];
     3 │ let ["default"] = [1, 2];
@@ -352,7 +352,7 @@ array_binding_err.js:4:5 parse ━━━━━━━━━━━━━━━━�
       │     ^^^^^^^^^^
     5 │ 
   
-  i this pattern is declared, but it is not given an initialized value
+  i This pattern is declared, but it is not given an initialized value.
   
 --
 let [a b] = [1, 2];

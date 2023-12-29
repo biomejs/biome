@@ -50,6 +50,10 @@ importers:
         specifier: ^0.22.0
         version: 0.22.0
 
+  packages/@biomejs/wasm-nodejs: {}
+
+  packages/@biomejs/wasm-web: {}
+
   website:
     dependencies:
       astro:

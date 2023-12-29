@@ -154,7 +154,7 @@ export_variable_clause_error.js:1:16 parse ━━━━━━━━━━━━�
 --
 export_variable_clause_error.js:2:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Const declarations must have an initialized value
+  × Const declarations must have an initialized value.
   
     1 │ export let a = ;
   > 2 │ export const b;
@@ -162,7 +162,7 @@ export_variable_clause_error.js:2:14 parse ━━━━━━━━━━━━�
     3 │ export let d, c;
     4 │ 
   
-  i this variable needs to be initialized
+  i This variable needs to be initialized.
   
 --
 export let a = ;
