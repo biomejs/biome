@@ -1,0 +1,40 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/range/single_declaration.css
+---
+
+# Input
+
+```css
+div{color  :  blue  
+    
+    ;
+        border   :  1px   solid;
+}
+div{color:green;}
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+-----
+
+```css
+div {
+	color: blue;
+	border: 1px solid;
+}
+div{color:green;}
+```
+
+
