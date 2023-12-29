@@ -79,9 +79,9 @@ fn get_attribute_name(attribute: &JsxAttribute) -> Option<String> {
 
 fn is_call_expression_of_valid_function(
     call_expression: &JsCallExpression,
-    functions: &Vec<String>,
+    functions: &[String],
 ) -> bool {
-    match get_callee_name(&call_expression) {
+    match get_callee_name(call_expression) {
         Some(name) => functions.contains(&name.to_string()),
         None => false,
     }
@@ -89,8 +89,8 @@ fn is_call_expression_of_valid_function(
 
 const CLASS_ATTRIBUTE_NAMES: [&str; 2] = ["class", "className"];
 
-fn is_valid_attribute(attribute: &JsxAttribute, attributes: &Vec<String>) -> bool {
-    match get_attribute_name(&attribute) {
+fn is_valid_attribute(attribute: &JsxAttribute, attributes: &[String]) -> bool {
+    match get_attribute_name(attribute) {
         Some(name) => {
             attributes.contains(&name.to_string()) || CLASS_ATTRIBUTE_NAMES.contains(&name.as_str())
         }
@@ -182,19 +182,19 @@ impl Visitor for StringLiteralInCallExpressionVisitor {
             WalkEvent::Enter(node) => {
                 // When entering a call expression node, track if we are in a valid function and reset
                 // in_arguments.
-                if let Some(call_expression) = JsCallExpression::cast_ref(&node) {
+                if let Some(call_expression) = JsCallExpression::cast_ref(node) {
                     self.in_valid_function =
                         is_call_expression_of_valid_function(&call_expression, &options.functions);
                     self.in_arguments = false;
                 }
 
                 // When entering a call arguments node, set in_arguments.
-                if JsCallArguments::cast_ref(&node).is_some() {
+                if JsCallArguments::cast_ref(node).is_some() {
                     self.in_arguments = true;
                 }
 
                 // When entering a string literal node, and we are in a valid function and in arguments, emit.
-                if let Some(string_literal) = JsStringLiteralExpression::cast_ref(&node) {
+                if let Some(string_literal) = JsStringLiteralExpression::cast_ref(node) {
                     if self.in_valid_function && self.in_arguments {
                         ctx.match_query(ClassStringLike::StringLiteral(string_literal));
                     }
@@ -202,7 +202,7 @@ impl Visitor for StringLiteralInCallExpressionVisitor {
             }
             WalkEvent::Leave(node) => {
                 // When leaving a call arguments node, reset in_arguments.
-                if JsCallArguments::cast_ref(&node).is_some() {
+                if JsCallArguments::cast_ref(node).is_some() {
                     self.in_arguments = false;
                 }
             }
@@ -280,7 +280,7 @@ impl Queryable for ClassStringLike {
 // -------------
 
 fn get_class_order_match(spec: &String, class_name: &str) -> Option<bool> {
-    if spec.ends_with("$") && class_name == &spec[..spec.len() - 1] {
+    if spec.ends_with('$') && class_name == &spec[..spec.len() - 1] {
         return Some(true);
     }
     if class_name.starts_with(spec) && class_name != spec.as_str() {
@@ -289,7 +289,7 @@ fn get_class_order_match(spec: &String, class_name: &str) -> Option<bool> {
     None
 }
 
-fn find_class_order_index(class_order: &Vec<String>, class_name: &str) -> Option<usize> {
+fn find_class_order_index(class_order: &[String], class_name: &str) -> Option<usize> {
     let mut matched = false;
     let mut match_index: usize = 0;
     let mut last_size: usize = 0;
@@ -322,10 +322,7 @@ fn sort_class_name(class_name: &str, class_order: &Vec<String>) -> String {
     for class in classes {
         match find_class_order_index(class_order, class) {
             Some(index) => {
-                class_order_map
-                    .entry(index)
-                    .or_insert_with(Vec::new)
-                    .push(class);
+                class_order_map.entry(index).or_default().push(class);
             }
             None => {
                 unordered_classes.push(class);
@@ -340,7 +337,7 @@ fn sort_class_name(class_name: &str, class_order: &Vec<String>) -> String {
             sorted_classes.extend(abc_classes);
         }
     }
-    return sorted_classes.join(" ");
+    sorted_classes.join(" ")
 }
 
 // rule
@@ -378,7 +375,7 @@ impl Rule for UseSortedClasses {
         let mut mutation = ctx.root().begin();
         match ctx.query() {
             ClassStringLike::StringLiteral(string_literal) => {
-                let replacement = js_string_literal_expression(js_string_literal(&state));
+                let replacement = js_string_literal_expression(js_string_literal(state));
                 mutation.replace_node(string_literal.clone(), replacement);
                 Some(JsRuleAction {
                     category: ActionCategory::QuickFix,
@@ -391,7 +388,7 @@ impl Rule for UseSortedClasses {
                 })
             }
             ClassStringLike::JsxString(jsx_string_node) => {
-                let replacement = jsx_string(js_string_literal(&state));
+                let replacement = jsx_string(js_string_literal(state));
                 mutation.replace_node(jsx_string_node.clone(), replacement);
                 Some(JsRuleAction {
                     category: ActionCategory::QuickFix,
