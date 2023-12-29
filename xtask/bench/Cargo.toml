@@ -21,7 +21,6 @@ biome_json_parser    = { workspace = true }
 biome_json_syntax    = { workspace = true }
 biome_parser         = { workspace = true }
 biome_rowan          = { workspace = true }
-xtask                = { path = '../', version = "0.0" }
 
 
 ansi_rgb  = "0.2.0"

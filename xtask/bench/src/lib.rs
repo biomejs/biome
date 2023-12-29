@@ -6,7 +6,7 @@ pub use crate::language::Parse;
 pub use crate::test_case::TestCase;
 use biome_formatter::Printed;
 
-#[cfg(all(target_os = "windows"))]
+#[cfg(target_os = "windows")]
 #[global_allocator]
 static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
 

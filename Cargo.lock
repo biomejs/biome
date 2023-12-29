@@ -3807,7 +3807,6 @@ dependencies = [
  "tikv-jemallocator",
  "ureq",
  "url",
- "xtask",
 ]
 
 [[package]]
