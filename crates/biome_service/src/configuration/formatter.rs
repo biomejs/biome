@@ -3,7 +3,7 @@ use crate::configuration::overrides::OverrideFormatterConfiguration;
 use crate::settings::{to_matcher, FormatSettings};
 use crate::{Matcher, WorkspaceError};
 use biome_deserialize::StringSet;
-use biome_formatter::{IndentStyle, LineEnding, LineWidth};
+use biome_formatter::{IndentStyle, LineEnding, LineWidth, QuoteStyle};
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
@@ -51,6 +51,11 @@ pub struct FormatterConfiguration {
     #[bpaf(long("line-width"), argument("NUMBER"), optional)]
     pub line_width: Option<LineWidth>,
 
+    /// The type of quotes used in languages that support alternate quoting styles. Defaults to double.
+    #[bpaf(long("quote-style"), argument("double|single"), optional)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub quote_style: Option<QuoteStyle>,
+
     /// A list of Unix shell style patterns. The formatter will ignore files/folders that will
     /// match these patterns.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -80,6 +85,7 @@ impl Default for FormatterConfiguration {
             indent_style: Some(PlainIndentStyle::default()),
             line_ending: Some(LineEnding::default()),
             line_width: Some(LineWidth::default()),
+            quote_style: Some(QuoteStyle::default()),
             ignore: None,
             include: None,
         }
@@ -114,6 +120,9 @@ impl MergeWith<FormatterConfiguration> for FormatterConfiguration {
         }
         if let Some(line_width) = other.line_width {
             self.line_width = Some(line_width);
+        }
+        if let Some(quote_style) = other.quote_style {
+            self.quote_style = Some(quote_style);
         }
 
         if let Some(format_with_errors) = other.format_with_errors {
@@ -160,6 +169,7 @@ pub fn to_format_settings(
         indent_width: Some(indent_width),
         line_ending: conf.line_ending,
         line_width: conf.line_width,
+        quote_style: conf.quote_style,
         format_with_errors: conf.format_with_errors.unwrap_or_default(),
         ignored_files: to_matcher(conf.ignore.as_ref(), vcs_path.clone(), gitignore_matches)?,
         included_files: to_matcher(conf.include.as_ref(), vcs_path, gitignore_matches)?,
@@ -187,6 +197,7 @@ impl TryFrom<OverrideFormatterConfiguration> for FormatSettings {
             indent_width: Some(indent_width),
             line_ending: conf.line_ending,
             line_width: conf.line_width,
+            quote_style: conf.quote_style,
             format_with_errors: conf.format_with_errors.unwrap_or_default(),
             ignored_files: Matcher::empty(),
             included_files: Matcher::empty(),

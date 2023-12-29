@@ -1,6 +1,6 @@
 use crate::configuration::merge::MergeWith;
 use crate::configuration::{deserialize_line_width, serialize_line_width, PlainIndentStyle};
-use biome_formatter::{LineEnding, LineWidth};
+use biome_formatter::{LineEnding, LineWidth, QuoteStyle};
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 
@@ -107,6 +107,11 @@ pub struct CssFormatter {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[bpaf(long("css-formatter-line-width"), argument("NUMBER"), optional)]
     pub line_width: Option<LineWidth>,
+
+    /// The type of quotes used in CSS code. Defaults to double.
+    #[bpaf(long("css-formatter-quote-style"), argument("double|single"), optional)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub quote_style: Option<QuoteStyle>,
 }
 
 impl MergeWith<CssFormatter> for CssFormatter {
@@ -122,6 +127,9 @@ impl MergeWith<CssFormatter> for CssFormatter {
         }
         if let Some(line_width) = other.line_width {
             self.line_width = Some(line_width);
+        }
+        if let Some(quote_style) = other.quote_style {
+            self.quote_style = Some(quote_style);
         }
     }
 

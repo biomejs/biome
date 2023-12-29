@@ -36,6 +36,7 @@ impl DeserializationVisitor for FormatterConfigurationVisitor {
             "indentWidth",
             "lineEnding",
             "lineWidth",
+            "quoteStyle",
             "ignore",
             "include",
         ];
@@ -77,6 +78,10 @@ impl DeserializationVisitor for FormatterConfigurationVisitor {
                 }
                 "lineWidth" => {
                     result.line_width = Deserializable::deserialize(&value, &key_text, diagnostics);
+                }
+                "quoteStyle" => {
+                    result.quote_style =
+                        Deserializable::deserialize(&value, &key_text, diagnostics);
                 }
                 "formatWithErrors" => {
                     result.format_with_errors =

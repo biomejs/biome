@@ -16,7 +16,7 @@ use biome_css_parser::CssParserOptions;
 use biome_css_syntax::CssLanguage;
 use biome_deserialize::StringSet;
 use biome_diagnostics::Category;
-use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth};
+use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth, QuoteStyle};
 use biome_fs::RomePath;
 use biome_js_analyze::metadata;
 use biome_js_formatter::context::JsFormatOptions;
@@ -179,6 +179,7 @@ pub struct FormatSettings {
     pub indent_width: Option<IndentWidth>,
     pub line_ending: Option<LineEnding>,
     pub line_width: Option<LineWidth>,
+    pub quote_style: Option<QuoteStyle>,
     /// List of ignore paths/files
     pub ignored_files: Matcher,
     /// List of included paths/files
@@ -194,6 +195,7 @@ impl Default for FormatSettings {
             indent_width: Some(IndentWidth::default()),
             line_ending: Some(LineEnding::default()),
             line_width: Some(LineWidth::default()),
+            quote_style: Some(QuoteStyle::default()),
             ignored_files: Matcher::empty(),
             included_files: Matcher::empty(),
         }
@@ -212,6 +214,7 @@ pub struct OverrideFormatSettings {
     pub indent_width: Option<IndentWidth>,
     pub line_ending: Option<LineEnding>,
     pub line_width: Option<LineWidth>,
+    pub quote_style: Option<QuoteStyle>,
 }
 
 /// Linter settings for the entire workspace
@@ -359,6 +362,7 @@ impl From<CssConfiguration> for LanguageSettings<CssLanguage> {
                 .map(Into::into)
                 .or(formatter.indent_size.map(Into::into));
             language_setting.formatter.indent_style = formatter.indent_style.map(Into::into);
+            language_setting.formatter.quote_style = formatter.quote_style;
         }
         language_setting
     }
@@ -563,7 +567,7 @@ impl OverrideSettings {
                 if let Some(line_width) = js_formatter.line_width.or(formatter.line_width) {
                     options.set_line_width(line_width);
                 }
-                if let Some(quote_style) = js_formatter.quote_style {
+                if let Some(quote_style) = js_formatter.quote_style.or(formatter.quote_style) {
                     options.set_quote_style(quote_style);
                 }
                 if let Some(trailing_comma) = js_formatter.trailing_comma {
@@ -645,23 +649,19 @@ impl OverrideSettings {
             }
             if included {
                 let css_formatter = &pattern.languages.css.formatter;
+                let formatter = &pattern.formatter;
 
-                if let Some(indent_style) = css_formatter
-                    .indent_style
-                    .or(pattern.formatter.indent_style)
-                {
+                if let Some(indent_style) = css_formatter.indent_style.or(formatter.indent_style) {
                     options.set_indent_style(indent_style);
                 }
-
-                if let Some(indent_width) = css_formatter
-                    .indent_width
-                    .or(pattern.formatter.indent_width)
-                {
+                if let Some(indent_width) = css_formatter.indent_width.or(formatter.indent_width) {
                     options.set_indent_width(indent_width)
                 }
-                if let Some(line_width) = css_formatter.line_width.or(pattern.formatter.line_width)
-                {
+                if let Some(line_width) = css_formatter.line_width.or(formatter.line_width) {
                     options.set_line_width(line_width);
+                }
+                if let Some(quote_style) = css_formatter.quote_style.or(formatter.quote_style) {
+                    options.set_quote_style(quote_style);
                 }
             }
 

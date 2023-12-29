@@ -127,6 +127,7 @@ impl DeserializationVisitor for OverrideFormatterConfigurationVisitor {
             "indentWidth",
             "lineEnding",
             "lineWidth",
+            "quoteStyle",
         ];
         let mut result = Self::Output::default();
         for (key, value) in members.flatten() {
@@ -160,6 +161,10 @@ impl DeserializationVisitor for OverrideFormatterConfigurationVisitor {
                 }
                 "lineWidth" => {
                     result.line_width = Deserializable::deserialize(&value, &key_text, diagnostics);
+                }
+                "quoteStyle" => {
+                    result.quote_style =
+                        Deserializable::deserialize(&value, &key_text, diagnostics);
                 }
                 "formatWithErrors" => {
                     result.format_with_errors =

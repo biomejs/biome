@@ -20,7 +20,9 @@ use biome_analyze::{
     QueryMatch, RegistryVisitor, RuleCategories, RuleCategory, RuleFilter, RuleGroup,
 };
 use biome_diagnostics::{category, Applicability, Diagnostic, DiagnosticExt, Severity};
-use biome_formatter::{FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed};
+use biome_formatter::{
+    FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, QuoteStyle,
+};
 use biome_fs::RomePath;
 use biome_js_analyze::utils::rename::{RenameError, RenameSymbolExtensions};
 use biome_js_analyze::{
@@ -28,8 +30,7 @@ use biome_js_analyze::{
 };
 use biome_js_formatter::context::trailing_comma::TrailingComma;
 use biome_js_formatter::context::{
-    ArrowParentheses, BracketSameLine, BracketSpacing, JsFormatOptions, QuoteProperties,
-    QuoteStyle, Semicolons,
+    ArrowParentheses, BracketSameLine, BracketSpacing, JsFormatOptions, QuoteProperties, Semicolons,
 };
 use biome_js_formatter::format_node;
 use biome_js_parser::JsParserOptions;
@@ -110,11 +111,16 @@ impl Language for JsLanguage {
         } else {
             global.indent_width.unwrap_or_default()
         };
+        let quote_style = if let Some(quote_style) = language.quote_style {
+            quote_style
+        } else {
+            global.quote_style.unwrap_or_default()
+        };
         let options = JsFormatOptions::new(path.as_path().try_into().unwrap_or_default())
             .with_indent_style(indent_style)
             .with_indent_width(indent_width)
             .with_line_width(line_width)
-            .with_quote_style(language.quote_style.unwrap_or_default())
+            .with_quote_style(quote_style)
             .with_jsx_quote_style(language.jsx_quote_style.unwrap_or_default())
             .with_quote_properties(language.quote_properties.unwrap_or_default())
             .with_trailing_comma(language.trailing_comma.unwrap_or_default())

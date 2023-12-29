@@ -1,5 +1,5 @@
 use crate::CssCommentStyle;
-use biome_formatter::{prelude::*, IndentWidth};
+use biome_formatter::{prelude::*, IndentWidth, QuoteStyle};
 use biome_formatter::{
     CstFormatContext, FormatContext, FormatOptions, IndentStyle, LineEnding, LineWidth,
     TransformSourceMap,
@@ -61,6 +61,7 @@ pub struct CssFormatOptions {
     indent_width: IndentWidth,
     line_ending: LineEnding,
     line_width: LineWidth,
+    quote_style: QuoteStyle,
     _file_source: CssFileSource,
 }
 
@@ -72,6 +73,7 @@ impl CssFormatOptions {
             indent_width: IndentWidth::default(),
             line_ending: LineEnding::default(),
             line_width: LineWidth::default(),
+            quote_style: QuoteStyle::default(),
         }
     }
 
@@ -95,6 +97,11 @@ impl CssFormatOptions {
         self
     }
 
+    pub fn with_quote_style(mut self, quote_style: QuoteStyle) -> Self {
+        self.quote_style = quote_style;
+        self
+    }
+
     pub fn set_indent_style(&mut self, indent_style: IndentStyle) {
         self.indent_style = indent_style;
     }
@@ -109,6 +116,10 @@ impl CssFormatOptions {
 
     pub fn set_line_width(&mut self, line_width: LineWidth) {
         self.line_width = line_width;
+    }
+
+    pub fn set_quote_style(&mut self, quote_style: QuoteStyle) {
+        self.quote_style = quote_style;
     }
 }
 
@@ -139,6 +150,7 @@ impl fmt::Display for CssFormatOptions {
         writeln!(f, "Indent style: {}", self.indent_style)?;
         writeln!(f, "Indent width: {}", self.indent_width.value())?;
         writeln!(f, "Line ending: {}", self.line_ending)?;
-        writeln!(f, "Line width: {}", self.line_width.get())
+        writeln!(f, "Line width: {}", self.line_width.get())?;
+        writeln!(f, "Quote style: {}", self.quote_style)
     }
 }

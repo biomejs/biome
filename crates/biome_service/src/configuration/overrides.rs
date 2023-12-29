@@ -9,8 +9,9 @@ use crate::settings::{
     OverrideOrganizeImportsSettings, OverrideSettingPattern, OverrideSettings, WorkspaceSettings,
 };
 use crate::{MergeWith, Rules, WorkspaceError};
+use biome_css_syntax::CssLanguage;
 use biome_deserialize::StringSet;
-use biome_formatter::{LineEnding, LineWidth};
+use biome_formatter::{LineEnding, LineWidth, QuoteStyle};
 use biome_js_syntax::JsLanguage;
 use biome_json_syntax::JsonLanguage;
 use bpaf::Bpaf;
@@ -235,6 +236,11 @@ pub struct OverrideFormatterConfiguration {
     )]
     #[bpaf(long("line-width"), argument("NUMBER"), optional)]
     pub line_width: Option<LineWidth>,
+
+    /// The type of quotes used in languages that support alternate quoting styles. Defaults to double.
+    #[bpaf(long("quote-style"), argument("double|single"), optional)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub quote_style: Option<QuoteStyle>,
 }
 
 impl MergeWith<OverrideFormatterConfiguration> for OverrideFormatterConfiguration {
@@ -251,9 +257,11 @@ impl MergeWith<OverrideFormatterConfiguration> for OverrideFormatterConfiguratio
         if let Some(indent_style) = other.indent_style {
             self.indent_style = Some(indent_style);
         }
-
         if let Some(line_width) = other.line_width {
             self.line_width = Some(line_width);
+        }
+        if let Some(quote_style) = other.quote_style {
+            self.quote_style = Some(quote_style);
         }
 
         if let Some(format_with_errors) = other.format_with_errors {
@@ -354,14 +362,12 @@ pub fn to_override_settings(
         let mut languages = LanguageListSettings::default();
         let javascript = pattern.javascript.take().unwrap_or_default();
         let json = pattern.json.take().unwrap_or_default();
+        let css = pattern.css.take().unwrap_or_default();
         languages.javascript =
             to_javascript_language_settings(javascript, &current_settings.languages.javascript);
 
         languages.json = to_json_language_settings(json, &current_settings.languages.json);
-
-        if let Some(json) = pattern.json {
-            languages.json = json.into();
-        }
+        languages.css = to_css_language_settings(css, &current_settings.languages.css);
 
         let pattern_setting = OverrideSettingPattern {
             include: to_matcher(
@@ -403,15 +409,18 @@ pub(crate) fn to_format_settings(
 
     let line_ending = conf.line_ending.or(format_settings.line_ending);
     let line_width = conf.line_width.or(format_settings.line_width);
+    let quote_style = conf.quote_style.or(format_settings.quote_style);
     let format_with_errors = conf
         .format_with_errors
         .unwrap_or(format_settings.format_with_errors);
+
     OverrideFormatSettings {
         enabled: conf.enabled.or(Some(format_settings.enabled)),
         indent_style,
         indent_width,
         line_ending,
         line_width,
+        quote_style,
         format_with_errors,
     }
 }
@@ -502,6 +511,35 @@ fn to_json_language_settings(
     language_setting.parser.allow_trailing_commas = parser
         .allow_trailing_commas
         .unwrap_or(parent_parser.allow_trailing_commas);
+
+    language_setting
+}
+
+fn to_css_language_settings(
+    mut conf: CssConfiguration,
+    parent_settings: &LanguageSettings<CssLanguage>,
+) -> LanguageSettings<CssLanguage> {
+    let mut language_setting: LanguageSettings<CssLanguage> = LanguageSettings::default();
+    let formatter = conf.formatter.take().unwrap_or_default();
+    let parent_formatter = &parent_settings.formatter;
+
+    language_setting.formatter.enabled = formatter.enabled.or(parent_formatter.enabled);
+    language_setting.formatter.line_width = formatter.line_width.or(parent_formatter.line_width);
+    language_setting.formatter.indent_width = formatter
+        .indent_width
+        .map(Into::into)
+        .or(formatter.indent_size.map(Into::into))
+        .or(parent_formatter.indent_width);
+    language_setting.formatter.indent_style = formatter
+        .indent_style
+        .map(Into::into)
+        .or(parent_formatter.indent_style);
+
+    let parser = conf.parser.take().unwrap_or_default();
+    let parent_parser = &parent_settings.parser;
+    language_setting.parser.allow_wrong_line_comments = parser
+        .allow_wrong_line_comments
+        .unwrap_or(parent_parser.allow_wrong_line_comments);
 
     language_setting
 }
