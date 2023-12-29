@@ -5,8 +5,12 @@ name: JSON Parser Benchmark
 
 on:
   workflow_dispatch:
-  issue_comment:
-    types: [ created ]
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'crates/biome_json_parser/**'
+      - 'crates/biome_parser/**'
 
 env:
   RUST_LOG: info
@@ -16,7 +20,6 @@ jobs:
     permissions:
       pull-requests: write
     name: Bench
-    if: github.event.issue.pull_request && contains(github.event.comment.body, '!bench_json_parser')
     runs-on: ubuntu-latest
 
     steps:

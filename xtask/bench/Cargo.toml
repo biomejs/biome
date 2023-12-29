@@ -79,3 +79,6 @@ name    = "css_parser"
 [[bench]]
 harness = false
 name    = "css_formatter"
+
+[lints]
+workspace = true
