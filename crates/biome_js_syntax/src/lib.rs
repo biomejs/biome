@@ -30,7 +30,6 @@ pub use biome_rowan::{
     SyntaxNodeText, TextLen, TextRange, TextSize, TokenAtOffset, TokenText, TriviaPieceKind,
     WalkEvent,
 };
-pub use export_ext::*;
 pub use expr_ext::*;
 pub use file_source::*;
 pub use function_ext::*;
@@ -38,7 +37,6 @@ pub use identifier_ext::*;
 pub use modifier_ext::*;
 pub use stmt_ext::*;
 pub use syntax_node::*;
-pub use type_ext::*;
 
 use crate::JsSyntaxKind::*;
 use biome_rowan::{AstNode, RawSyntaxKind};

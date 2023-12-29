@@ -162,6 +162,24 @@ impl TsModuleDeclaration {
     }
 }
 
+impl JsLabeledStatement {
+    pub fn label_token(&self) -> SyntaxResult<SyntaxToken> {
+        self.label()?.value_token()
+    }
+}
+
+impl JsBreakStatement {
+    pub fn label_token(&self) -> Option<SyntaxToken> {
+        self.label()?.value_token().ok()
+    }
+}
+
+impl JsContinueStatement {
+    pub fn label_token(&self) -> Option<SyntaxToken> {
+        self.label()?.value_token().ok()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use biome_js_factory::syntax::{JsSyntaxKind::*, JsVariableDeclaration};
@@ -189,23 +207,5 @@ mod tests {
         let var_decl = JsVariableDeclaration::cast(root).unwrap();
 
         assert!(var_decl.is_var());
-    }
-}
-
-impl JsLabeledStatement {
-    pub fn label_token(&self) -> SyntaxResult<SyntaxToken> {
-        self.label()?.value_token()
-    }
-}
-
-impl JsBreakStatement {
-    pub fn label_token(&self) -> Option<SyntaxToken> {
-        self.label()?.value_token().ok()
-    }
-}
-
-impl JsContinueStatement {
-    pub fn label_token(&self) -> Option<SyntaxToken> {
-        self.label()?.value_token().ok()
     }
 }
