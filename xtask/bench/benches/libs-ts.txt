@@ -1,0 +1,4 @@
+https://github.com/PanayotCankov/nativescript-big-dts/raw/master/ios.d.ts
+https://raw.githubusercontent.com/microsoft/TypeScript/2a7eb58589c62529c9045c50cae31ddcca23a6ae/src/compiler/checker.ts
+https://raw.githubusercontent.com/angular/angular/master/packages/compiler/src/expression_parser/parser.ts
+https://raw.githubusercontent.com/angular/angular/master/packages/router/src/router.ts

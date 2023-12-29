@@ -1,0 +1,5 @@
+https://raw.githubusercontent.com/pys5205/docker-pys/d1d026f3f3789f31f753661af0a0235776294287/package-lock.json
+https://raw.githubusercontent.com/miloyip/nativejson-benchmark/master/data/canada.json
+https://raw.githubusercontent.com/jshttp/mime-db/master/db.json
+https://raw.githubusercontent.com/ashtuchkin/iconv-lite/master/encodings/tables/big5-added.json
+https://raw.githubusercontent.com/ashtuchkin/iconv-lite/master/encodings/tables/eucjp.json
