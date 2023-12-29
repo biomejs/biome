@@ -15,7 +15,7 @@ jobs:
     permissions:
       pull-requests: write
     name: Bench
-    if: github.event.issue.pull_request && contains(github.event.comment.body, '!bench_analyzer')
+    if: github.event.issue.pull_request && contains(github.event.comment.body, '!bench_js_parser')
     runs-on: ubuntu-latest
 
     steps:
@@ -39,5 +39,5 @@ jobs:
         uses: CodSpeedHQ/action@v2
         timeout-minutes: 30
         with:
-          run: cargo codspeed run analyzer
+          run: cargo codspeed run js_parser
           token: ${{ secrets.CODSPEED_TOKEN }}
