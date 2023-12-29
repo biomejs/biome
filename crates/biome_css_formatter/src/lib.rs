@@ -13,7 +13,10 @@ use crate::comments::CssCommentStyle;
 pub(crate) use crate::context::CssFormatContext;
 use crate::context::CssFormatOptions;
 use crate::cst::FormatCssSyntaxNode;
-use biome_css_syntax::{AnyCssValue, CssLanguage, CssSyntaxNode, CssSyntaxToken};
+use biome_css_syntax::{
+    AnyCssDeclarationListBlock, AnyCssRule, AnyCssRuleListBlock, AnyCssValue, CssLanguage,
+    CssSyntaxKind, CssSyntaxNode, CssSyntaxToken,
+};
 use biome_formatter::comments::Comments;
 use biome_formatter::prelude::*;
 use biome_formatter::token::string::ToAsciiLowercaseCow;
@@ -244,8 +247,22 @@ impl FormatLanguage for CssFormatLanguage {
     type Context = CssFormatContext;
     type FormatRule = FormatCssSyntaxNode;
 
+    // For CSS, range formatting allows:
+    // - any block of rules or declarations
+    // - any individual rule or declaration
+    // - any individual value
+    // - a complete value definition for a declaration
     fn is_range_formatting_node(&self, node: &SyntaxNode<Self::SyntaxLanguage>) -> bool {
-        AnyCssValue::can_cast(node.kind())
+        AnyCssDeclarationListBlock::can_cast(node.kind())
+            || AnyCssRuleListBlock::can_cast(node.kind())
+            || AnyCssValue::can_cast(node.kind())
+            || AnyCssRule::can_cast(node.kind())
+            || matches!(
+                node.kind(),
+                CssSyntaxKind::CSS_DECLARATION
+                    | CssSyntaxKind::CSS_COMPONENT_VALUE_LIST
+                    | CssSyntaxKind::CSS_SELECTOR_LIST
+            )
     }
 
     fn options(&self) -> &<Self::Context as FormatContext>::Options {
