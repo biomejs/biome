@@ -2,6 +2,7 @@ use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use crate::syntax::at_rule::feature::parse_any_query_feature;
 use crate::syntax::blocks::parse_or_recover_rule_list_block;
+use crate::syntax::parse_error::expected_non_css_wide_keyword_identifier;
 use crate::syntax::{is_at_identifier, parse_custom_identifier, parse_declaration};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::T;
@@ -24,7 +25,20 @@ pub(crate) fn parse_container_at_rule(p: &mut CssParser) -> ParsedSyntax {
 
     p.bump(T![container]);
 
-    parse_custom_identifier(p, CssLexContext::Regular).ok();
+    if parse_custom_identifier(p, CssLexContext::Regular)
+        .ok()
+        .is_none()
+    {
+        // Because the name is optional, we have to indirectly check if it's
+        // a CSS-wide keyword that can't be used. If it was required, we could
+        // use `.or_recover` or `.or_add_diagnostic` here instead.
+        if p.cur().is_css_wide_keyword() {
+            p.err_and_bump(
+                expected_non_css_wide_keyword_identifier(p, p.cur_range()),
+                CSS_BOGUS,
+            )
+        }
+    };
 
     parse_any_container_query(p).ok(); // TODO handle error
 

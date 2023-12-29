@@ -105,6 +105,16 @@ impl ParseSeparatedList for CssLayerNameList {
     const LIST_KIND: Self::Kind = CSS_LAYER_NAME_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
+        // The Spec for `<layer-name>` technically adds that "The CSS-wide
+        // keywords are reserved for future use, and cause the rule to be
+        // invalid at parse time"...but it's unclear if that means it's a
+        // _parse error_, or just not a valid layer. The examples in the
+        // document use `default`, which was an _old_ keyword (renamed to
+        // `revert` in Level 4), and all of the validators I've found allow
+        // keywords as identifiers here, so for now we will continue to
+        // allow them as well.
+        //
+        // https://drafts.csswg.org/css-cascade-5/#typedef-layer-name
         parse_regular_identifier(p)
     }
 

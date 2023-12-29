@@ -2,7 +2,7 @@ use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use crate::syntax::blocks::parse_or_recover_declaration_list_block;
 use crate::syntax::parse_custom_identifier;
-use crate::syntax::parse_error::expected_identifier;
+use crate::syntax::parse_error::expected_non_css_wide_keyword_identifier;
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_recovery::ParseRecovery;
@@ -30,7 +30,7 @@ pub(crate) fn parse_counter_style_at_rule(p: &mut CssParser) -> ParsedSyntax {
             p,
             &ParseRecovery::new(CSS_BOGUS, COUNTER_STYLE_RECOVERY_SET)
                 .enable_recovery_on_line_break(),
-            expected_identifier,
+            expected_non_css_wide_keyword_identifier,
         )
         .is_ok()
     {

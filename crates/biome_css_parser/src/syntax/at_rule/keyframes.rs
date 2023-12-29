@@ -5,7 +5,7 @@ use crate::syntax::at_rule::parse_error::{
 };
 use crate::syntax::blocks::parse_declaration_list_block;
 use crate::syntax::css_dimension::{is_at_percentage_dimension, parse_percentage_dimension};
-use crate::syntax::parse_error::{expected_block, expected_identifier};
+use crate::syntax::parse_error::{expected_block, expected_non_css_wide_keyword_identifier};
 use crate::syntax::{is_at_identifier, parse_custom_identifier, parse_string, BODY_RECOVERY_SET};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
@@ -41,7 +41,7 @@ pub(crate) fn parse_keyframes_at_rule(p: &mut CssParser) -> ParsedSyntax {
             p,
             &ParseRecovery::new(CSS_BOGUS, KEYFRAMES_NAME_RECOVERY_SET)
                 .enable_recovery_on_line_break(),
-            expected_identifier,
+            expected_non_css_wide_keyword_identifier,
         )
         .is_ok()
     {

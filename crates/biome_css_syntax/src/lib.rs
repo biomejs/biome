@@ -49,6 +49,12 @@ impl CssSyntaxKind {
         (self as u16) >= (MEDIA_KW as u16) && (self as u16) <= (FONT_FACE_KW as u16)
     }
 
+    /// Returns `true` for css-wide keywords
+    #[inline]
+    pub const fn is_css_wide_keyword(self) -> bool {
+        (self as u16) >= (INITIAL_KW as u16) && (self as u16) <= (DEFAULT_KW as u16)
+    }
+
     /// Returns `true` for contextual attribute modifier keywords
     #[inline]
     pub const fn is_attribute_modifier_keyword(self) -> bool {

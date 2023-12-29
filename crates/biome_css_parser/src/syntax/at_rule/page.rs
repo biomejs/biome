@@ -7,7 +7,8 @@ use crate::syntax::at_rule::{at_at_rule, parse_at_rule};
 use crate::syntax::blocks::parse_or_recover_declaration_or_rule_list_block;
 use crate::syntax::parse_error::expected_block;
 use crate::syntax::{
-    is_at_identifier, parse_custom_identifier, parse_declaration_with_semicolon, BODY_RECOVERY_SET,
+    is_at_identifier, parse_custom_identifier_with_keywords, parse_declaration_with_semicolon,
+    BODY_RECOVERY_SET,
 };
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
@@ -97,7 +98,11 @@ pub(crate) fn parse_page_selector(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
 
     // it's optional
-    parse_custom_identifier(p, CssLexContext::Regular).ok();
+    //
+    // Because the selector is formally defined as `<ident>` _and_ also case-
+    // sensitive, we use a `<custom-ident>` instead to preserve the casing, but
+    // need to allow the CSS-wide keywords that would otherwise be disallowed.
+    parse_custom_identifier_with_keywords(p, CssLexContext::Regular, true).ok();
     CssPageSelectorPseudoList.parse_list(p);
 
     Present(m.complete(p, CSS_PAGE_SELECTOR))

@@ -74,9 +74,14 @@ expression: snapshot
 
 }
 
+
+@keyframes inherit { }
+@keyframes initial { }
+@keyframes unset { }
+@keyframes revert { }
+@keyframes revert-layer { }
+
 @keyframes slidein
-
-
 
 ```
 
@@ -685,27 +690,111 @@ CssRoot {
                         },
                         CssBogusKeyframesItem {
                             items: [
-                                AT@700..703 "@" [Newline("\n"), Newline("\n")] [],
-                                KEYFRAMES_KW@703..713 "keyframes" [] [Whitespace(" ")],
-                                IDENT@713..720 "slidein" [] [],
+                                AT@700..704 "@" [Newline("\n"), Newline("\n"), Newline("\n")] [],
+                                KEYFRAMES_KW@704..714 "keyframes" [] [Whitespace(" ")],
+                                INHERIT_KW@714..722 "inherit" [] [Whitespace(" ")],
+                                L_CURLY@722..724 "{" [] [Whitespace(" ")],
                             ],
                         },
                     ],
-                    r_curly_token: missing (required),
+                    r_curly_token: R_CURLY@724..725 "}" [] [],
                 },
             },
         },
+        CssAtRule {
+            at_token: AT@725..727 "@" [Newline("\n")] [],
+            rule: CssBogusAtRule {
+                items: [
+                    KEYFRAMES_KW@727..737 "keyframes" [] [Whitespace(" ")],
+                    CssBogus {
+                        items: [
+                            INITIAL_KW@737..745 "initial" [] [Whitespace(" ")],
+                        ],
+                    },
+                    CssKeyframesBlock {
+                        l_curly_token: L_CURLY@745..747 "{" [] [Whitespace(" ")],
+                        items: CssKeyframesItemList [],
+                        r_curly_token: R_CURLY@747..748 "}" [] [],
+                    },
+                ],
+            },
+        },
+        CssAtRule {
+            at_token: AT@748..750 "@" [Newline("\n")] [],
+            rule: CssBogusAtRule {
+                items: [
+                    KEYFRAMES_KW@750..760 "keyframes" [] [Whitespace(" ")],
+                    CssBogus {
+                        items: [
+                            UNSET_KW@760..766 "unset" [] [Whitespace(" ")],
+                        ],
+                    },
+                    CssKeyframesBlock {
+                        l_curly_token: L_CURLY@766..768 "{" [] [Whitespace(" ")],
+                        items: CssKeyframesItemList [],
+                        r_curly_token: R_CURLY@768..769 "}" [] [],
+                    },
+                ],
+            },
+        },
+        CssAtRule {
+            at_token: AT@769..771 "@" [Newline("\n")] [],
+            rule: CssBogusAtRule {
+                items: [
+                    KEYFRAMES_KW@771..781 "keyframes" [] [Whitespace(" ")],
+                    CssBogus {
+                        items: [
+                            REVERT_KW@781..788 "revert" [] [Whitespace(" ")],
+                        ],
+                    },
+                    CssKeyframesBlock {
+                        l_curly_token: L_CURLY@788..790 "{" [] [Whitespace(" ")],
+                        items: CssKeyframesItemList [],
+                        r_curly_token: R_CURLY@790..791 "}" [] [],
+                    },
+                ],
+            },
+        },
+        CssAtRule {
+            at_token: AT@791..793 "@" [Newline("\n")] [],
+            rule: CssBogusAtRule {
+                items: [
+                    KEYFRAMES_KW@793..803 "keyframes" [] [Whitespace(" ")],
+                    CssBogus {
+                        items: [
+                            REVERT_LAYER_KW@803..816 "revert-layer" [] [Whitespace(" ")],
+                        ],
+                    },
+                    CssKeyframesBlock {
+                        l_curly_token: L_CURLY@816..818 "{" [] [Whitespace(" ")],
+                        items: CssKeyframesItemList [],
+                        r_curly_token: R_CURLY@818..819 "}" [] [],
+                    },
+                ],
+            },
+        },
+        CssAtRule {
+            at_token: AT@819..822 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssBogusAtRule {
+                items: [
+                    KEYFRAMES_KW@822..832 "keyframes" [] [Whitespace(" ")],
+                    CssCustomIdentifier {
+                        value_token: IDENT@832..839 "slidein" [] [],
+                    },
+                ],
+            },
+        },
     ],
-    eof_token: EOF@720..723 "" [Newline("\n"), Newline("\n"), Newline("\n")] [],
+    eof_token: EOF@839..840 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..723
+0: CSS_ROOT@0..840
   0: (empty)
-  1: CSS_RULE_LIST@0..720
+  1: CSS_RULE_LIST@0..839
     0: CSS_AT_RULE@0..95
       0: AT@0..1 "@" [] []
       1: CSS_BOGUS_AT_RULE@1..95
@@ -975,15 +1064,15 @@ CssRoot {
                   1: SEMICOLON@488..489 ";" [] []
                 2: R_CURLY@489..492 "}" [Newline("\n"), Whitespace("\t")] []
           2: R_CURLY@492..494 "}" [Newline("\n")] []
-    5: CSS_AT_RULE@494..720
+    5: CSS_AT_RULE@494..725
       0: AT@494..497 "@" [Newline("\n"), Newline("\n")] []
-      1: CSS_KEYFRAMES_AT_RULE@497..720
+      1: CSS_KEYFRAMES_AT_RULE@497..725
         0: KEYFRAMES_KW@497..507 "keyframes" [] [Whitespace(" ")]
         1: CSS_CUSTOM_IDENTIFIER@507..515
           0: IDENT@507..515 "slidein" [] [Whitespace(" ")]
-        2: CSS_KEYFRAMES_BLOCK@515..720
+        2: CSS_KEYFRAMES_BLOCK@515..725
           0: L_CURLY@515..516 "{" [] []
-          1: CSS_KEYFRAMES_ITEM_LIST@516..720
+          1: CSS_KEYFRAMES_ITEM_LIST@516..724
             0: CSS_KEYFRAMES_ITEM@516..556
               0: CSS_KEYFRAMES_SELECTOR_LIST@516..523
                 0: CSS_KEYFRAMES_IDENT_SELECTOR@516..523
@@ -1085,12 +1174,59 @@ CssRoot {
                     3: (empty)
                   1: SEMICOLON@696..697 ";" [] []
                 2: R_CURLY@697..700 "}" [Newline("\n"), Newline("\n")] []
-            3: CSS_BOGUS_KEYFRAMES_ITEM@700..720
-              0: AT@700..703 "@" [Newline("\n"), Newline("\n")] []
-              1: KEYFRAMES_KW@703..713 "keyframes" [] [Whitespace(" ")]
-              2: IDENT@713..720 "slidein" [] []
-          2: (empty)
-  2: EOF@720..723 "" [Newline("\n"), Newline("\n"), Newline("\n")] []
+            3: CSS_BOGUS_KEYFRAMES_ITEM@700..724
+              0: AT@700..704 "@" [Newline("\n"), Newline("\n"), Newline("\n")] []
+              1: KEYFRAMES_KW@704..714 "keyframes" [] [Whitespace(" ")]
+              2: INHERIT_KW@714..722 "inherit" [] [Whitespace(" ")]
+              3: L_CURLY@722..724 "{" [] [Whitespace(" ")]
+          2: R_CURLY@724..725 "}" [] []
+    6: CSS_AT_RULE@725..748
+      0: AT@725..727 "@" [Newline("\n")] []
+      1: CSS_BOGUS_AT_RULE@727..748
+        0: KEYFRAMES_KW@727..737 "keyframes" [] [Whitespace(" ")]
+        1: CSS_BOGUS@737..745
+          0: INITIAL_KW@737..745 "initial" [] [Whitespace(" ")]
+        2: CSS_KEYFRAMES_BLOCK@745..748
+          0: L_CURLY@745..747 "{" [] [Whitespace(" ")]
+          1: CSS_KEYFRAMES_ITEM_LIST@747..747
+          2: R_CURLY@747..748 "}" [] []
+    7: CSS_AT_RULE@748..769
+      0: AT@748..750 "@" [Newline("\n")] []
+      1: CSS_BOGUS_AT_RULE@750..769
+        0: KEYFRAMES_KW@750..760 "keyframes" [] [Whitespace(" ")]
+        1: CSS_BOGUS@760..766
+          0: UNSET_KW@760..766 "unset" [] [Whitespace(" ")]
+        2: CSS_KEYFRAMES_BLOCK@766..769
+          0: L_CURLY@766..768 "{" [] [Whitespace(" ")]
+          1: CSS_KEYFRAMES_ITEM_LIST@768..768
+          2: R_CURLY@768..769 "}" [] []
+    8: CSS_AT_RULE@769..791
+      0: AT@769..771 "@" [Newline("\n")] []
+      1: CSS_BOGUS_AT_RULE@771..791
+        0: KEYFRAMES_KW@771..781 "keyframes" [] [Whitespace(" ")]
+        1: CSS_BOGUS@781..788
+          0: REVERT_KW@781..788 "revert" [] [Whitespace(" ")]
+        2: CSS_KEYFRAMES_BLOCK@788..791
+          0: L_CURLY@788..790 "{" [] [Whitespace(" ")]
+          1: CSS_KEYFRAMES_ITEM_LIST@790..790
+          2: R_CURLY@790..791 "}" [] []
+    9: CSS_AT_RULE@791..819
+      0: AT@791..793 "@" [Newline("\n")] []
+      1: CSS_BOGUS_AT_RULE@793..819
+        0: KEYFRAMES_KW@793..803 "keyframes" [] [Whitespace(" ")]
+        1: CSS_BOGUS@803..816
+          0: REVERT_LAYER_KW@803..816 "revert-layer" [] [Whitespace(" ")]
+        2: CSS_KEYFRAMES_BLOCK@816..819
+          0: L_CURLY@816..818 "{" [] [Whitespace(" ")]
+          1: CSS_KEYFRAMES_ITEM_LIST@818..818
+          2: R_CURLY@818..819 "}" [] []
+    10: CSS_AT_RULE@819..839
+      0: AT@819..822 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_BOGUS_AT_RULE@822..839
+        0: KEYFRAMES_KW@822..832 "keyframes" [] [Whitespace(" ")]
+        1: CSS_CUSTOM_IDENTIFIER@832..839
+          0: IDENT@832..839 "slidein" [] []
+  2: EOF@839..840 "" [Newline("\n")] []
 
 ```
 
@@ -1300,34 +1436,85 @@ at_rule_keyframes.css:60:7 parse ━━━━━━━━━━━━━━━�
   
   i Remove {
   
-at_rule_keyframes.css:69:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+at_rule_keyframes.css:70:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a keyframes item but instead found '@keyframes slidein'.
+  × Expected a keyframes item but instead found '@keyframes inherit {'.
   
-    67 │ }
-    68 │ 
-  > 69 │ @keyframes slidein
-       │ ^^^^^^^^^^^^^^^^^^
-    70 │ 
+  > 70 │ @keyframes inherit { }
+       │ ^^^^^^^^^^^^^^^^^^^^
+    71 │ @keyframes initial { }
+    72 │ @keyframes unset { }
   
   i Expected a keyframes item here.
   
-    67 │ }
-    68 │ 
-  > 69 │ @keyframes slidein
-       │ ^^^^^^^^^^^^^^^^^^
-    70 │ 
+  > 70 │ @keyframes inherit { }
+       │ ^^^^^^^^^^^^^^^^^^^^
+    71 │ @keyframes initial { }
+    72 │ @keyframes unset { }
   
-at_rule_keyframes.css:72:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+at_rule_keyframes.css:71:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `}` but instead the file ends
+  × Expected an identifier but instead found 'initial'
   
-  > 72 │ 
+    70 │ @keyframes inherit { }
+  > 71 │ @keyframes initial { }
+       │            ^^^^^^^
+    72 │ @keyframes unset { }
+    73 │ @keyframes revert { }
+  
+  i 'initial' is a CSS-wide keyword that cannot be used here
+  
+at_rule_keyframes.css:72:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found 'unset'
+  
+    70 │ @keyframes inherit { }
+    71 │ @keyframes initial { }
+  > 72 │ @keyframes unset { }
+       │            ^^^^^
+    73 │ @keyframes revert { }
+    74 │ @keyframes revert-layer { }
+  
+  i 'unset' is a CSS-wide keyword that cannot be used here
+  
+at_rule_keyframes.css:73:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found 'revert'
+  
+    71 │ @keyframes initial { }
+    72 │ @keyframes unset { }
+  > 73 │ @keyframes revert { }
+       │            ^^^^^^
+    74 │ @keyframes revert-layer { }
+    75 │ 
+  
+  i 'revert' is a CSS-wide keyword that cannot be used here
+  
+at_rule_keyframes.css:74:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found 'revert-layer'
+  
+    72 │ @keyframes unset { }
+    73 │ @keyframes revert { }
+  > 74 │ @keyframes revert-layer { }
+       │            ^^^^^^^^^^^^
+    75 │ 
+    76 │ @keyframes slidein
+  
+  i 'revert-layer' is a CSS-wide keyword that cannot be used here
+  
+at_rule_keyframes.css:77:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a body but instead found the end of the file.
+  
+    76 │ @keyframes slidein
+  > 77 │ 
        │ 
   
-  i the file ends here
+  i Expected a body here.
   
-  > 72 │ 
+    76 │ @keyframes slidein
+  > 77 │ 
        │ 
   
 ```

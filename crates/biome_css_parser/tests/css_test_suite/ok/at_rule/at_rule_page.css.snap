@@ -68,6 +68,12 @@ expression: snapshot
 @page :FIRST {}
 @page :LEFT {}
 
+@page inherit {} /* page allows the CSS-wide keywords as names */
+@page initial {}
+@page INITIAL {}
+@page unset {}
+@page revert {}
+@page revert-layer {}
 ```
 
 
@@ -1045,17 +1051,131 @@ CssRoot {
                 },
             },
         },
+        CssAtRule {
+            at_token: AT@952..955 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssPageAtRule {
+                page_token: PAGE_KW@955..960 "page" [] [Whitespace(" ")],
+                selectors: CssPageSelectorList [
+                    CssPageSelector {
+                        ty: CssCustomIdentifier {
+                            value_token: IDENT@960..968 "inherit" [] [Whitespace(" ")],
+                        },
+                        pseudos: CssPageSelectorPseudoList [],
+                    },
+                ],
+                block: CssPageAtRuleBlock {
+                    l_curly_token: L_CURLY@968..969 "{" [] [],
+                    items: CssPageAtRuleItemList [],
+                    r_curly_token: R_CURLY@969..1019 "}" [] [Whitespace(" "), Comments("/* page allows the CS ...")],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@1019..1021 "@" [Newline("\n")] [],
+            rule: CssPageAtRule {
+                page_token: PAGE_KW@1021..1026 "page" [] [Whitespace(" ")],
+                selectors: CssPageSelectorList [
+                    CssPageSelector {
+                        ty: CssCustomIdentifier {
+                            value_token: IDENT@1026..1034 "initial" [] [Whitespace(" ")],
+                        },
+                        pseudos: CssPageSelectorPseudoList [],
+                    },
+                ],
+                block: CssPageAtRuleBlock {
+                    l_curly_token: L_CURLY@1034..1035 "{" [] [],
+                    items: CssPageAtRuleItemList [],
+                    r_curly_token: R_CURLY@1035..1036 "}" [] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@1036..1038 "@" [Newline("\n")] [],
+            rule: CssPageAtRule {
+                page_token: PAGE_KW@1038..1043 "page" [] [Whitespace(" ")],
+                selectors: CssPageSelectorList [
+                    CssPageSelector {
+                        ty: CssCustomIdentifier {
+                            value_token: IDENT@1043..1051 "INITIAL" [] [Whitespace(" ")],
+                        },
+                        pseudos: CssPageSelectorPseudoList [],
+                    },
+                ],
+                block: CssPageAtRuleBlock {
+                    l_curly_token: L_CURLY@1051..1052 "{" [] [],
+                    items: CssPageAtRuleItemList [],
+                    r_curly_token: R_CURLY@1052..1053 "}" [] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@1053..1055 "@" [Newline("\n")] [],
+            rule: CssPageAtRule {
+                page_token: PAGE_KW@1055..1060 "page" [] [Whitespace(" ")],
+                selectors: CssPageSelectorList [
+                    CssPageSelector {
+                        ty: CssCustomIdentifier {
+                            value_token: IDENT@1060..1066 "unset" [] [Whitespace(" ")],
+                        },
+                        pseudos: CssPageSelectorPseudoList [],
+                    },
+                ],
+                block: CssPageAtRuleBlock {
+                    l_curly_token: L_CURLY@1066..1067 "{" [] [],
+                    items: CssPageAtRuleItemList [],
+                    r_curly_token: R_CURLY@1067..1068 "}" [] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@1068..1070 "@" [Newline("\n")] [],
+            rule: CssPageAtRule {
+                page_token: PAGE_KW@1070..1075 "page" [] [Whitespace(" ")],
+                selectors: CssPageSelectorList [
+                    CssPageSelector {
+                        ty: CssCustomIdentifier {
+                            value_token: IDENT@1075..1082 "revert" [] [Whitespace(" ")],
+                        },
+                        pseudos: CssPageSelectorPseudoList [],
+                    },
+                ],
+                block: CssPageAtRuleBlock {
+                    l_curly_token: L_CURLY@1082..1083 "{" [] [],
+                    items: CssPageAtRuleItemList [],
+                    r_curly_token: R_CURLY@1083..1084 "}" [] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@1084..1086 "@" [Newline("\n")] [],
+            rule: CssPageAtRule {
+                page_token: PAGE_KW@1086..1091 "page" [] [Whitespace(" ")],
+                selectors: CssPageSelectorList [
+                    CssPageSelector {
+                        ty: CssCustomIdentifier {
+                            value_token: IDENT@1091..1104 "revert-layer" [] [Whitespace(" ")],
+                        },
+                        pseudos: CssPageSelectorPseudoList [],
+                    },
+                ],
+                block: CssPageAtRuleBlock {
+                    l_curly_token: L_CURLY@1104..1105 "{" [] [],
+                    items: CssPageAtRuleItemList [],
+                    r_curly_token: R_CURLY@1105..1106 "}" [] [],
+                },
+            },
+        },
     ],
-    eof_token: EOF@952..953 "" [Newline("\n")] [],
+    eof_token: EOF@1106..1106 "" [] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..953
+0: CSS_ROOT@0..1106
   0: (empty)
-  1: CSS_RULE_LIST@0..952
+  1: CSS_RULE_LIST@0..1106
     0: CSS_AT_RULE@0..8
       0: AT@0..1 "@" [] []
       1: CSS_PAGE_AT_RULE@1..8
@@ -1716,7 +1836,85 @@ CssRoot {
           0: L_CURLY@950..951 "{" [] []
           1: CSS_PAGE_AT_RULE_ITEM_LIST@951..951
           2: R_CURLY@951..952 "}" [] []
-  2: EOF@952..953 "" [Newline("\n")] []
+    31: CSS_AT_RULE@952..1019
+      0: AT@952..955 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_PAGE_AT_RULE@955..1019
+        0: PAGE_KW@955..960 "page" [] [Whitespace(" ")]
+        1: CSS_PAGE_SELECTOR_LIST@960..968
+          0: CSS_PAGE_SELECTOR@960..968
+            0: CSS_CUSTOM_IDENTIFIER@960..968
+              0: IDENT@960..968 "inherit" [] [Whitespace(" ")]
+            1: CSS_PAGE_SELECTOR_PSEUDO_LIST@968..968
+        2: CSS_PAGE_AT_RULE_BLOCK@968..1019
+          0: L_CURLY@968..969 "{" [] []
+          1: CSS_PAGE_AT_RULE_ITEM_LIST@969..969
+          2: R_CURLY@969..1019 "}" [] [Whitespace(" "), Comments("/* page allows the CS ...")]
+    32: CSS_AT_RULE@1019..1036
+      0: AT@1019..1021 "@" [Newline("\n")] []
+      1: CSS_PAGE_AT_RULE@1021..1036
+        0: PAGE_KW@1021..1026 "page" [] [Whitespace(" ")]
+        1: CSS_PAGE_SELECTOR_LIST@1026..1034
+          0: CSS_PAGE_SELECTOR@1026..1034
+            0: CSS_CUSTOM_IDENTIFIER@1026..1034
+              0: IDENT@1026..1034 "initial" [] [Whitespace(" ")]
+            1: CSS_PAGE_SELECTOR_PSEUDO_LIST@1034..1034
+        2: CSS_PAGE_AT_RULE_BLOCK@1034..1036
+          0: L_CURLY@1034..1035 "{" [] []
+          1: CSS_PAGE_AT_RULE_ITEM_LIST@1035..1035
+          2: R_CURLY@1035..1036 "}" [] []
+    33: CSS_AT_RULE@1036..1053
+      0: AT@1036..1038 "@" [Newline("\n")] []
+      1: CSS_PAGE_AT_RULE@1038..1053
+        0: PAGE_KW@1038..1043 "page" [] [Whitespace(" ")]
+        1: CSS_PAGE_SELECTOR_LIST@1043..1051
+          0: CSS_PAGE_SELECTOR@1043..1051
+            0: CSS_CUSTOM_IDENTIFIER@1043..1051
+              0: IDENT@1043..1051 "INITIAL" [] [Whitespace(" ")]
+            1: CSS_PAGE_SELECTOR_PSEUDO_LIST@1051..1051
+        2: CSS_PAGE_AT_RULE_BLOCK@1051..1053
+          0: L_CURLY@1051..1052 "{" [] []
+          1: CSS_PAGE_AT_RULE_ITEM_LIST@1052..1052
+          2: R_CURLY@1052..1053 "}" [] []
+    34: CSS_AT_RULE@1053..1068
+      0: AT@1053..1055 "@" [Newline("\n")] []
+      1: CSS_PAGE_AT_RULE@1055..1068
+        0: PAGE_KW@1055..1060 "page" [] [Whitespace(" ")]
+        1: CSS_PAGE_SELECTOR_LIST@1060..1066
+          0: CSS_PAGE_SELECTOR@1060..1066
+            0: CSS_CUSTOM_IDENTIFIER@1060..1066
+              0: IDENT@1060..1066 "unset" [] [Whitespace(" ")]
+            1: CSS_PAGE_SELECTOR_PSEUDO_LIST@1066..1066
+        2: CSS_PAGE_AT_RULE_BLOCK@1066..1068
+          0: L_CURLY@1066..1067 "{" [] []
+          1: CSS_PAGE_AT_RULE_ITEM_LIST@1067..1067
+          2: R_CURLY@1067..1068 "}" [] []
+    35: CSS_AT_RULE@1068..1084
+      0: AT@1068..1070 "@" [Newline("\n")] []
+      1: CSS_PAGE_AT_RULE@1070..1084
+        0: PAGE_KW@1070..1075 "page" [] [Whitespace(" ")]
+        1: CSS_PAGE_SELECTOR_LIST@1075..1082
+          0: CSS_PAGE_SELECTOR@1075..1082
+            0: CSS_CUSTOM_IDENTIFIER@1075..1082
+              0: IDENT@1075..1082 "revert" [] [Whitespace(" ")]
+            1: CSS_PAGE_SELECTOR_PSEUDO_LIST@1082..1082
+        2: CSS_PAGE_AT_RULE_BLOCK@1082..1084
+          0: L_CURLY@1082..1083 "{" [] []
+          1: CSS_PAGE_AT_RULE_ITEM_LIST@1083..1083
+          2: R_CURLY@1083..1084 "}" [] []
+    36: CSS_AT_RULE@1084..1106
+      0: AT@1084..1086 "@" [Newline("\n")] []
+      1: CSS_PAGE_AT_RULE@1086..1106
+        0: PAGE_KW@1086..1091 "page" [] [Whitespace(" ")]
+        1: CSS_PAGE_SELECTOR_LIST@1091..1104
+          0: CSS_PAGE_SELECTOR@1091..1104
+            0: CSS_CUSTOM_IDENTIFIER@1091..1104
+              0: IDENT@1091..1104 "revert-layer" [] [Whitespace(" ")]
+            1: CSS_PAGE_SELECTOR_PSEUDO_LIST@1104..1104
+        2: CSS_PAGE_AT_RULE_BLOCK@1104..1106
+          0: L_CURLY@1104..1105 "{" [] []
+          1: CSS_PAGE_AT_RULE_ITEM_LIST@1105..1105
+          2: R_CURLY@1105..1106 "}" [] []
+  2: EOF@1106..1106 "" [] []
 
 ```
 

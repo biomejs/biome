@@ -11,8 +11,8 @@ use crate::syntax::selector::attribute::parse_attribute_selector;
 use crate::syntax::selector::pseudo_class::parse_pseudo_class_selector;
 use crate::syntax::selector::pseudo_element::parse_pseudo_element_selector;
 use crate::syntax::{
-    is_at_identifier, parse_custom_identifier, parse_identifier, parse_regular_identifier,
-    RULE_RECOVERY_SET,
+    is_at_identifier, parse_custom_identifier_with_keywords, parse_identifier,
+    parse_regular_identifier, RULE_RECOVERY_SET,
 };
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, TextRange, T};
@@ -336,7 +336,11 @@ fn parse_selector_identifier(p: &mut CssParser) -> ParsedSyntax {
 #[inline]
 fn parse_selector_custom_identifier(p: &mut CssParser) -> ParsedSyntax {
     let context = selector_lex_context(p);
-    parse_custom_identifier(p, context)
+    // Class and ID selectors are technically `<ident>` _and_ case-sensitive.
+    // To handle this, we use `<custom-ident>` instead, but also have to allow
+    // the CSS-wide keywords to include selectors like `.inherit`, which is
+    // valid as a regular ident.
+    parse_custom_identifier_with_keywords(p, context, true)
 }
 
 #[inline]
