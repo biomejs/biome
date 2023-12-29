@@ -95,6 +95,10 @@ impl Rule for UseShorthandFunctionType {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let query = ctx.query();
+        // If there are comments, it's not a single call signature.
+        if query.syntax().has_comments_direct() {
+            return None;
+        }
 
         if let Some(ts_type_member_list) = query.parent::<TsTypeMemberList>() {
             // If there is more than one member, it's not a single call signature.
