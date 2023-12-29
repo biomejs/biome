@@ -12,3 +12,7 @@ pub fn run_format(format_node: &FormatNode) -> Printed {
     drop(formatted);
     printed.expect("Document to be valid")
 }
+
+pub fn err_to_string<E: std::fmt::Debug>(e: E) -> String {
+    format!("{:?}", e)
+}
