@@ -113,12 +113,15 @@ impl ParseNodeList for KeyframesItemList {
 
 #[inline]
 fn parse_keyframes_item(p: &mut CssParser) -> ParsedSyntax {
-    if !p.at_ts(KEYFRAMES_ITEM_SELECTOR_SET) {
-        return Absent;
-    }
-
     let m = p.start();
     KeyframesSelectorList.parse_list(p);
+    // `parse_list` will take care of recovering invalid selectors, but if
+    // _none_ are present, we still want to add a diagnostic to explain the
+    // error while continuing the rest of the parse, since we know that the
+    // following content should still be a declaration list block.
+    if p.cur_range().start() == m.start() {
+        p.error(expected_keyframes_item_selector(p, p.cur_range()))
+    }
 
     if parse_declaration_list_block(p)
         .or_recover_with_token_set(
