@@ -125,7 +125,7 @@ Line width: 80
 	}
 }
 
-@scope TO (.content > *) {
+@scope to (.content > *) {
 	img {
 		border-radius: 50%;
 	}

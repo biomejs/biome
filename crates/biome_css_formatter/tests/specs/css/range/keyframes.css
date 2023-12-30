@@ -1,0 +1,10 @@
+@keyframes   animation-name   {
+    10%   <<<ROME_RANGE_START>>>,  20%   {
+        opacity:   0
+           ;
+        <<<ROME_RANGE_END>>>
+    }
+
+    100%    {
+        opacity  : 1 }
+}

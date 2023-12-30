@@ -2,4 +2,9 @@
 @counter-style 6788 {  }
 @counter-style 'string' {  }
 @counter-style ident
-@counter-style ident
+
+@counter-style inherit { }
+@counter-style initial { }
+@counter-style unset { }
+@counter-style revert { }
+@counter-style revert-layer { }

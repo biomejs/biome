@@ -1,0 +1,96 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: ts/parameters/issue-1356/parameter_type_annotation_semicolon.ts
+---
+
+# Input
+
+```ts
+// Ensure that the type annotation preserves the semicolon in the type
+// annotation, even though the parent group breaks. This was only an issue when
+// `semicolon: AsNeeded` was set, since the semicolon became conditional on
+// whether the group was printed inline.
+//
+// https://github.com/biomejs/biome/issues/1356.
+
+foo((args: {a: string; b: string}) => {
+    return a;
+  })
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing comma: All
+Semicolons: Always
+Arrow parentheses: Always
+Bracket spacing: true
+Bracket same line: false
+-----
+
+```ts
+// Ensure that the type annotation preserves the semicolon in the type
+// annotation, even though the parent group breaks. This was only an issue when
+// `semicolon: AsNeeded` was set, since the semicolon became conditional on
+// whether the group was printed inline.
+//
+// https://github.com/biomejs/biome/issues/1356.
+
+foo((args: { a: string; b: string }) => {
+	return a;
+});
+```
+
+## Output 2
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 40
+Quote style: Double Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing comma: All
+Semicolons: Always
+Arrow parentheses: Always
+Bracket spacing: true
+Bracket same line: false
+-----
+
+```ts
+// Ensure that the type annotation preserves the semicolon in the type
+// annotation, even though the parent group breaks. This was only an issue when
+// `semicolon: AsNeeded` was set, since the semicolon became conditional on
+// whether the group was printed inline.
+//
+// https://github.com/biomejs/biome/issues/1356.
+
+foo(
+	(args: { a: string; b: string }) => {
+		return a;
+	},
+);
+```
+
+# Lines exceeding max width of 40 characters
+```
+    1: // Ensure that the type annotation preserves the semicolon in the type
+    2: // annotation, even though the parent group breaks. This was only an issue when
+    3: // `semicolon: AsNeeded` was set, since the semicolon became conditional on
+    6: // https://github.com/biomejs/biome/issues/1356.
+```
+
+

@@ -29,7 +29,7 @@ use crate::syntax::stmt::{is_semi, STMT_RECOVERY_SET};
 use crate::syntax::typescript::ts_parse_error::{expected_ts_type, ts_only_syntax_error};
 use crate::JsSyntaxFeature::{Jsx, StrictMode, TypeScript};
 use crate::ParsedSyntax::{Absent, Present};
-use crate::{syntax, JsParser, ParseRecovery, ParsedSyntax};
+use crate::{syntax, JsParser, ParseRecoveryTokenSet, ParsedSyntax};
 use biome_js_syntax::{JsSyntaxKind::*, *};
 use biome_parser::diagnostic::expected_token;
 use biome_parser::parse_lists::ParseSeparatedList;
@@ -129,9 +129,9 @@ pub(crate) fn parse_expression_or_recover_to_next_statement(
         syntax::expr::parse_expression
     };
 
-    func(p, context).or_recover(
+    func(p, context).or_recover_with_token_set(
         p,
-        &ParseRecovery::new(
+        &ParseRecoveryTokenSet::new(
             JsSyntaxKind::JS_BOGUS_EXPRESSION,
             STMT_RECOVERY_SET.union(token_set![T!['}']]),
         )
@@ -1139,9 +1139,9 @@ fn parse_call_arguments(p: &mut JsParser) -> ParsedSyntax {
         }
 
         if argument
-            .or_recover(
+            .or_recover_with_token_set(
                 p,
-                &ParseRecovery::new(
+                &ParseRecoveryTokenSet::new(
                     JS_BOGUS_EXPRESSION,
                     EXPR_RECOVERY_SET.union(token_set!(T![')'], T![;], T![...])),
                 )
@@ -1695,7 +1695,7 @@ pub(crate) fn parse_template_elements<P>(
                 if !p.at(T!['}']) {
                     p.error(expected_token(T!['}']));
                     // Seems there's more. For example a `${a a}`. We must eat all tokens away to avoid a panic because of an unexpected token
-                    let _ =  ParseRecovery::new(JS_BOGUS, token_set![T!['}'], TEMPLATE_CHUNK, DOLLAR_CURLY, ERROR_TOKEN, BACKTICK]).recover(p);
+                    let _ =  ParseRecoveryTokenSet::new(JS_BOGUS, token_set![T!['}'], TEMPLATE_CHUNK, DOLLAR_CURLY, ERROR_TOKEN, BACKTICK]).recover(p);
                     if !p.at(T!['}']) {
                         e.complete(p, element_kind);
                         // Failed to fully recover, unclear where we are now, exit
@@ -1736,9 +1736,9 @@ impl ParseSeparatedList for ArrayElementsList {
     }
 
     fn recover(&mut self, p: &mut JsParser, parsed_element: ParsedSyntax) -> RecoveryResult {
-        parsed_element.or_recover(
+        parsed_element.or_recover_with_token_set(
             p,
-            &ParseRecovery::new(
+            &ParseRecoveryTokenSet::new(
                 JS_BOGUS_EXPRESSION,
                 EXPR_RECOVERY_SET.union(token_set!(T![']'])),
             ),

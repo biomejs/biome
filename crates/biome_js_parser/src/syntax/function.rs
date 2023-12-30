@@ -23,7 +23,7 @@ use crate::syntax::typescript::{
 
 use crate::JsSyntaxFeature::TypeScript;
 use crate::ParsedSyntax::{Absent, Present};
-use crate::{JsParser, JsSyntaxFeature, ParseRecovery};
+use crate::{JsParser, JsSyntaxFeature, ParseRecoveryTokenSet};
 use biome_js_syntax::JsSyntaxKind::*;
 use biome_js_syntax::{JsSyntaxKind, TextRange, T};
 use biome_parser::ParserProgress;
@@ -1384,9 +1384,9 @@ pub(super) fn parse_parameters_list(
 
             // test_err js formal_params_invalid
             // function (a++, c) {}
-            let recovered_result = parameter.or_recover(
+            let recovered_result = parameter.or_recover_with_token_set(
                 p,
-                &ParseRecovery::new(
+                &ParseRecoveryTokenSet::new(
                     JS_BOGUS_PARAMETER,
                     token_set![
                         T![ident],

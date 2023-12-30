@@ -1,12 +1,12 @@
 use crate::syntax::blocks::parse_or_recover_declaration_list_block;
 use crate::syntax::parse_dashed_identifier;
-use crate::{parser::CssParser, syntax::parse_error::expected_identifier};
+use crate::{parser::CssParser, syntax::parse_error::expected_dashed_identifier};
 use biome_css_syntax::{
     CssSyntaxKind::{self, *},
     T,
 };
 use biome_parser::{
-    parse_recovery::ParseRecovery,
+    parse_recovery::ParseRecoveryTokenSet,
     parsed_syntax::ParsedSyntax::{self, Present},
     prelude::ParsedSyntax::Absent,
     token_set, Parser, TokenSet,
@@ -28,11 +28,11 @@ pub(crate) fn parse_font_palette_values_at_rule(p: &mut CssParser) -> ParsedSynt
     p.bump(T![font_palette_values]);
 
     let kind = if parse_dashed_identifier(p)
-        .or_recover(
+        .or_recover_with_token_set(
             p,
-            &ParseRecovery::new(CSS_BOGUS, FONT_PALETTE_VALUES_RECOVERY_SET)
+            &ParseRecoveryTokenSet::new(CSS_BOGUS, FONT_PALETTE_VALUES_RECOVERY_SET)
                 .enable_recovery_on_line_break(),
-            expected_identifier,
+            expected_dashed_identifier,
         )
         .is_ok()
     {

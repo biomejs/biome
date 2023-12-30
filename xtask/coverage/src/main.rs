@@ -23,7 +23,7 @@ fn main() -> Result<()> {
         // cargo coverage compare ./base_results.json ./new_results.json --markdown
         let markdown = args.contains("--markdown");
         let free = args.finish();
-        let base_result_path = free.get(0).and_then(|arg| arg.to_str());
+        let base_result_path = free.first().and_then(|arg| arg.to_str());
         let new_result_path = free.get(1).and_then(|arg| arg.to_str());
         coverage_compare(base_result_path, new_result_path, markdown);
         return Ok(());

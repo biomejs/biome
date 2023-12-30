@@ -182,9 +182,9 @@ Line width: 80
 	margin: 20px;
 }
 
-@page :FIRST {
+@page :first {
 }
-@page :LEFT {
+@page :left {
 }
 ```
 

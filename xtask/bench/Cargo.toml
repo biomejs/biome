@@ -21,15 +21,11 @@ biome_json_parser    = { workspace = true }
 biome_json_syntax    = { workspace = true }
 biome_parser         = { workspace = true }
 biome_rowan          = { workspace = true }
-xtask                = { path = '../', version = "0.0" }
 
 
 ansi_rgb  = "0.2.0"
 criterion = "0.5.1"
-itertools = "0.11.0"
-pico-args = { version = "0.5.0", features = ["eq-separator"] }
 regex     = "1.5.5"
-timing    = "0.2.3"
 ureq      = "2.7.1"
 url       = "2.2.2"
 
@@ -45,6 +41,36 @@ mimalloc = "0.1.29"
 [target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dependencies]
 tikv-jemallocator = "0.5.0"
 
-[features]
-count     = ["countme/print_at_exit"]
-dhat-heap = ["dhat", "humansize"]
+[[bench]]
+harness = false
+name    = "analyzer"
+
+# JavaScript benches
+[[bench]]
+harness = false
+name    = "js_parser"
+
+[[bench]]
+harness = false
+name    = "js_formatter"
+
+# JSON benches
+[[bench]]
+harness = false
+name    = "json_parser"
+
+[[bench]]
+harness = false
+name    = "json_formatter"
+
+# CSS benches
+[[bench]]
+harness = false
+name    = "css_parser"
+
+[[bench]]
+harness = false
+name    = "css_formatter"
+
+[lints]
+workspace = true

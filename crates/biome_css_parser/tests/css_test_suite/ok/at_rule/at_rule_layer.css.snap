@@ -70,6 +70,17 @@ expression: snapshot
 	}
 }
 
+/* See https://drafts.csswg.org/css-cascade-5/#typedef-layer-name. These may
+ * become invalid in the future, or remain valid. The draft spec says that the
+ * CSS-wide keywords are "cause the rule to be invalid at parse time", but all
+ * parsers I've found so far allow these as names.
+ */
+@layer inherit { }
+@layer initial { }
+@layer initial.unset.default { }
+@layer unset { }
+@layer revert { }
+@layer revert-layer { }
 ```
 
 
@@ -983,17 +994,145 @@ CssRoot {
                 },
             },
         },
+        CssAtRule {
+            at_token: AT@967..1260 "@" [Newline("\n"), Newline("\n"), Comments("/* See https://drafts ..."), Newline("\n")] [],
+            rule: CssLayerAtRule {
+                layer_token: LAYER_KW@1260..1266 "layer" [] [Whitespace(" ")],
+                layer: CssLayerDeclaration {
+                    references: CssLayerReferenceList [
+                        CssLayerNameList [
+                            CssIdentifier {
+                                value_token: IDENT@1266..1274 "inherit" [] [Whitespace(" ")],
+                            },
+                        ],
+                    ],
+                    block: CssRuleListBlock {
+                        l_curly_token: L_CURLY@1274..1276 "{" [] [Whitespace(" ")],
+                        rules: CssRuleList [],
+                        r_curly_token: R_CURLY@1276..1277 "}" [] [],
+                    },
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@1277..1279 "@" [Newline("\n")] [],
+            rule: CssLayerAtRule {
+                layer_token: LAYER_KW@1279..1285 "layer" [] [Whitespace(" ")],
+                layer: CssLayerDeclaration {
+                    references: CssLayerReferenceList [
+                        CssLayerNameList [
+                            CssIdentifier {
+                                value_token: IDENT@1285..1293 "initial" [] [Whitespace(" ")],
+                            },
+                        ],
+                    ],
+                    block: CssRuleListBlock {
+                        l_curly_token: L_CURLY@1293..1295 "{" [] [Whitespace(" ")],
+                        rules: CssRuleList [],
+                        r_curly_token: R_CURLY@1295..1296 "}" [] [],
+                    },
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@1296..1298 "@" [Newline("\n")] [],
+            rule: CssLayerAtRule {
+                layer_token: LAYER_KW@1298..1304 "layer" [] [Whitespace(" ")],
+                layer: CssLayerDeclaration {
+                    references: CssLayerReferenceList [
+                        CssLayerNameList [
+                            CssIdentifier {
+                                value_token: IDENT@1304..1311 "initial" [] [],
+                            },
+                            DOT@1311..1312 "." [] [],
+                            CssIdentifier {
+                                value_token: IDENT@1312..1317 "unset" [] [],
+                            },
+                            DOT@1317..1318 "." [] [],
+                            CssIdentifier {
+                                value_token: IDENT@1318..1326 "default" [] [Whitespace(" ")],
+                            },
+                        ],
+                    ],
+                    block: CssRuleListBlock {
+                        l_curly_token: L_CURLY@1326..1328 "{" [] [Whitespace(" ")],
+                        rules: CssRuleList [],
+                        r_curly_token: R_CURLY@1328..1329 "}" [] [],
+                    },
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@1329..1331 "@" [Newline("\n")] [],
+            rule: CssLayerAtRule {
+                layer_token: LAYER_KW@1331..1337 "layer" [] [Whitespace(" ")],
+                layer: CssLayerDeclaration {
+                    references: CssLayerReferenceList [
+                        CssLayerNameList [
+                            CssIdentifier {
+                                value_token: IDENT@1337..1343 "unset" [] [Whitespace(" ")],
+                            },
+                        ],
+                    ],
+                    block: CssRuleListBlock {
+                        l_curly_token: L_CURLY@1343..1345 "{" [] [Whitespace(" ")],
+                        rules: CssRuleList [],
+                        r_curly_token: R_CURLY@1345..1346 "}" [] [],
+                    },
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@1346..1348 "@" [Newline("\n")] [],
+            rule: CssLayerAtRule {
+                layer_token: LAYER_KW@1348..1354 "layer" [] [Whitespace(" ")],
+                layer: CssLayerDeclaration {
+                    references: CssLayerReferenceList [
+                        CssLayerNameList [
+                            CssIdentifier {
+                                value_token: IDENT@1354..1361 "revert" [] [Whitespace(" ")],
+                            },
+                        ],
+                    ],
+                    block: CssRuleListBlock {
+                        l_curly_token: L_CURLY@1361..1363 "{" [] [Whitespace(" ")],
+                        rules: CssRuleList [],
+                        r_curly_token: R_CURLY@1363..1364 "}" [] [],
+                    },
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@1364..1366 "@" [Newline("\n")] [],
+            rule: CssLayerAtRule {
+                layer_token: LAYER_KW@1366..1372 "layer" [] [Whitespace(" ")],
+                layer: CssLayerDeclaration {
+                    references: CssLayerReferenceList [
+                        CssLayerNameList [
+                            CssIdentifier {
+                                value_token: IDENT@1372..1385 "revert-layer" [] [Whitespace(" ")],
+                            },
+                        ],
+                    ],
+                    block: CssRuleListBlock {
+                        l_curly_token: L_CURLY@1385..1387 "{" [] [Whitespace(" ")],
+                        rules: CssRuleList [],
+                        r_curly_token: R_CURLY@1387..1388 "}" [] [],
+                    },
+                },
+            },
+        },
     ],
-    eof_token: EOF@967..968 "" [Newline("\n")] [],
+    eof_token: EOF@1388..1388 "" [] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..968
+0: CSS_ROOT@0..1388
   0: (empty)
-  1: CSS_RULE_LIST@0..967
+  1: CSS_RULE_LIST@0..1388
     0: CSS_AT_RULE@0..52
       0: AT@0..1 "@" [] []
       1: CSS_LAYER_AT_RULE@1..52
@@ -1584,7 +1723,91 @@ CssRoot {
                             2: R_CURLY@961..962 "}" [] []
                       2: R_CURLY@962..965 "}" [Newline("\n"), Whitespace("\t")] []
             2: R_CURLY@965..967 "}" [Newline("\n")] []
-  2: EOF@967..968 "" [Newline("\n")] []
+    12: CSS_AT_RULE@967..1277
+      0: AT@967..1260 "@" [Newline("\n"), Newline("\n"), Comments("/* See https://drafts ..."), Newline("\n")] []
+      1: CSS_LAYER_AT_RULE@1260..1277
+        0: LAYER_KW@1260..1266 "layer" [] [Whitespace(" ")]
+        1: CSS_LAYER_DECLARATION@1266..1277
+          0: CSS_LAYER_REFERENCE_LIST@1266..1274
+            0: CSS_LAYER_NAME_LIST@1266..1274
+              0: CSS_IDENTIFIER@1266..1274
+                0: IDENT@1266..1274 "inherit" [] [Whitespace(" ")]
+          1: CSS_RULE_LIST_BLOCK@1274..1277
+            0: L_CURLY@1274..1276 "{" [] [Whitespace(" ")]
+            1: CSS_RULE_LIST@1276..1276
+            2: R_CURLY@1276..1277 "}" [] []
+    13: CSS_AT_RULE@1277..1296
+      0: AT@1277..1279 "@" [Newline("\n")] []
+      1: CSS_LAYER_AT_RULE@1279..1296
+        0: LAYER_KW@1279..1285 "layer" [] [Whitespace(" ")]
+        1: CSS_LAYER_DECLARATION@1285..1296
+          0: CSS_LAYER_REFERENCE_LIST@1285..1293
+            0: CSS_LAYER_NAME_LIST@1285..1293
+              0: CSS_IDENTIFIER@1285..1293
+                0: IDENT@1285..1293 "initial" [] [Whitespace(" ")]
+          1: CSS_RULE_LIST_BLOCK@1293..1296
+            0: L_CURLY@1293..1295 "{" [] [Whitespace(" ")]
+            1: CSS_RULE_LIST@1295..1295
+            2: R_CURLY@1295..1296 "}" [] []
+    14: CSS_AT_RULE@1296..1329
+      0: AT@1296..1298 "@" [Newline("\n")] []
+      1: CSS_LAYER_AT_RULE@1298..1329
+        0: LAYER_KW@1298..1304 "layer" [] [Whitespace(" ")]
+        1: CSS_LAYER_DECLARATION@1304..1329
+          0: CSS_LAYER_REFERENCE_LIST@1304..1326
+            0: CSS_LAYER_NAME_LIST@1304..1326
+              0: CSS_IDENTIFIER@1304..1311
+                0: IDENT@1304..1311 "initial" [] []
+              1: DOT@1311..1312 "." [] []
+              2: CSS_IDENTIFIER@1312..1317
+                0: IDENT@1312..1317 "unset" [] []
+              3: DOT@1317..1318 "." [] []
+              4: CSS_IDENTIFIER@1318..1326
+                0: IDENT@1318..1326 "default" [] [Whitespace(" ")]
+          1: CSS_RULE_LIST_BLOCK@1326..1329
+            0: L_CURLY@1326..1328 "{" [] [Whitespace(" ")]
+            1: CSS_RULE_LIST@1328..1328
+            2: R_CURLY@1328..1329 "}" [] []
+    15: CSS_AT_RULE@1329..1346
+      0: AT@1329..1331 "@" [Newline("\n")] []
+      1: CSS_LAYER_AT_RULE@1331..1346
+        0: LAYER_KW@1331..1337 "layer" [] [Whitespace(" ")]
+        1: CSS_LAYER_DECLARATION@1337..1346
+          0: CSS_LAYER_REFERENCE_LIST@1337..1343
+            0: CSS_LAYER_NAME_LIST@1337..1343
+              0: CSS_IDENTIFIER@1337..1343
+                0: IDENT@1337..1343 "unset" [] [Whitespace(" ")]
+          1: CSS_RULE_LIST_BLOCK@1343..1346
+            0: L_CURLY@1343..1345 "{" [] [Whitespace(" ")]
+            1: CSS_RULE_LIST@1345..1345
+            2: R_CURLY@1345..1346 "}" [] []
+    16: CSS_AT_RULE@1346..1364
+      0: AT@1346..1348 "@" [Newline("\n")] []
+      1: CSS_LAYER_AT_RULE@1348..1364
+        0: LAYER_KW@1348..1354 "layer" [] [Whitespace(" ")]
+        1: CSS_LAYER_DECLARATION@1354..1364
+          0: CSS_LAYER_REFERENCE_LIST@1354..1361
+            0: CSS_LAYER_NAME_LIST@1354..1361
+              0: CSS_IDENTIFIER@1354..1361
+                0: IDENT@1354..1361 "revert" [] [Whitespace(" ")]
+          1: CSS_RULE_LIST_BLOCK@1361..1364
+            0: L_CURLY@1361..1363 "{" [] [Whitespace(" ")]
+            1: CSS_RULE_LIST@1363..1363
+            2: R_CURLY@1363..1364 "}" [] []
+    17: CSS_AT_RULE@1364..1388
+      0: AT@1364..1366 "@" [Newline("\n")] []
+      1: CSS_LAYER_AT_RULE@1366..1388
+        0: LAYER_KW@1366..1372 "layer" [] [Whitespace(" ")]
+        1: CSS_LAYER_DECLARATION@1372..1388
+          0: CSS_LAYER_REFERENCE_LIST@1372..1385
+            0: CSS_LAYER_NAME_LIST@1372..1385
+              0: CSS_IDENTIFIER@1372..1385
+                0: IDENT@1372..1385 "revert-layer" [] [Whitespace(" ")]
+          1: CSS_RULE_LIST_BLOCK@1385..1388
+            0: L_CURLY@1385..1387 "{" [] [Whitespace(" ")]
+            1: CSS_RULE_LIST@1387..1387
+            2: R_CURLY@1387..1388 "}" [] []
+  2: EOF@1388..1388 "" [] []
 
 ```
 
