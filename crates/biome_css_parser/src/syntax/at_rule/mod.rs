@@ -39,13 +39,13 @@ use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::prelude::*;
 
 #[inline]
-pub(crate) fn at_at_rule(p: &mut CssParser) -> bool {
+pub(crate) fn is_at_at_rule(p: &mut CssParser) -> bool {
     p.at(T![@])
 }
 
 #[inline]
 pub(crate) fn parse_at_rule(p: &mut CssParser) -> ParsedSyntax {
-    if !at_at_rule(p) {
+    if !is_at_at_rule(p) {
         return Absent;
     }
 
