@@ -5,6 +5,9 @@ use crate::language::FormatNode;
 pub use crate::language::Parse;
 pub use crate::test_case::TestCase;
 use biome_formatter::Printed;
+use biome_rowan::NodeCache;
+use criterion::measurement::WallTime;
+use criterion::{BatchSize, BenchmarkGroup, BenchmarkId};
 
 #[cfg(target_os = "windows")]
 #[global_allocator]
@@ -31,4 +34,61 @@ pub fn run_format(format_node: &FormatNode) -> Printed {
 
 pub fn err_to_string<E: std::fmt::Debug>(e: E) -> String {
     format!("{:?}", e)
+}
+
+pub fn bench_parser_group(group: &mut BenchmarkGroup<WallTime>, test_case: TestCase) {
+    let parse = Parse::try_from_case(&test_case).expect("Supported language");
+
+    let code = test_case.code();
+
+    group.throughput(criterion::Throughput::Bytes(code.len() as u64));
+
+    group.bench_with_input(
+        BenchmarkId::new(test_case.filename(), "uncached"),
+        &code,
+        |b, _| {
+            b.iter(|| {
+                criterion::black_box(parse.parse());
+            })
+        },
+    );
+    group.bench_with_input(
+        BenchmarkId::new(test_case.filename(), "cached"),
+        &code,
+        |b, _| {
+            b.iter_batched(
+                || {
+                    let mut cache = NodeCache::default();
+                    parse.parse_with_cache(&mut cache);
+                    cache
+                },
+                |mut cache| {
+                    criterion::black_box(parse.parse_with_cache(&mut cache));
+                },
+                BatchSize::SmallInput,
+            )
+        },
+    );
+}
+
+pub fn bench_formatter_group(group: &mut BenchmarkGroup<WallTime>, test_case: TestCase) {
+    let parse = Parse::try_from_case(&test_case).expect("Supported language");
+
+    let code = test_case.code();
+
+    group.throughput(criterion::Throughput::Bytes(code.len() as u64));
+    group.bench_with_input(
+        BenchmarkId::from_parameter(test_case.filename()),
+        code,
+        |b, _| {
+            let parsed = parse.parse();
+
+            match parsed.format_node() {
+                None => {}
+                Some(format_node) => b.iter(|| {
+                    criterion::black_box(run_format(&format_node));
+                }),
+            }
+        },
+    );
 }
