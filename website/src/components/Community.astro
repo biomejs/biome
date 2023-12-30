@@ -1,0 +1,44 @@
+---
+import { Image } from "astro:assets";
+
+// for people that could/should not appear in the list
+const denyList = [853712];
+
+const apiUrl =
+  "https://api.github.com/repos/biomejs/biome/contributors?per_page=35";
+
+let contributors: any[] = [];
+contributors = await fetch(apiUrl)
+  .then((res) => res.json())
+  .catch((error) => console.error("Error:", error));
+
+contributors = contributors.filter((contributor) => {
+  return !denyList.includes(contributor.id);
+});
+
+const organizedContributors: any[] = []; // Organize contributors into rows and columns
+const contributorsPerRow = [5, 4, 6, 5, 3, 5, 4];
+
+let startIndex = 0;
+contributorsPerRow.forEach((contributorsInRow) => {
+  const row = contributors.slice(startIndex, startIndex + contributorsInRow);
+  organizedContributors.push([...row]);
+  startIndex += contributorsInRow;
+});
+---
+
+{
+  organizedContributors.map((row) => (
+    <div class="contributor-row">
+      {row.map((person: any) => (
+        <Image
+          class="contributor-avatar"
+          src={person.avatar_url}
+          alt={"User " + person.login}
+          width="84"
+          height="84"
+        />
+      ))}
+    </div>
+  ))
+}

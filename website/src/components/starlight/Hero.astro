@@ -1,0 +1,44 @@
+---
+import type { Props } from "@astrojs/starlight/props";
+import Default from "@astrojs/starlight/components/Hero.astro";
+---
+
+<Default {...Astro.props}>
+  <slot />
+</Default>
+<div aria-hidden="true" class="grid"></div>
+
+<script>
+  import "../../frontend-scripts/hover.ts";
+</script>
+
+<style>
+  .grid {
+    z-index: -1;
+    position: absolute;
+    content: "";
+    inset: 0;
+    background-image: linear-gradient(
+        to right,
+        var(--sl-color-gray-6) 0.06rem,
+        transparent 0.06rem
+      ),
+      linear-gradient(
+        to bottom,
+        var(--sl-color-gray-6) 0.06rem,
+        transparent 0.06rem
+      );
+    background-position: top center;
+    background-size: 1.3rem 1.3rem;
+    -webkit-mask-image: radial-gradient(circle at 100%, white, transparent 80%);
+    mask-image: radial-gradient(circle at 100%, white, transparent 80%);
+  }
+
+  :global([data-has-hero] .page) {
+    background:
+      radial-gradient(var(--sl-color-accent-low), transparent 50%) no-repeat -60vw -50vh /
+        105vw 200vh,
+      radial-gradient(var(--sl-color-accent-low), transparent 50%) no-repeat
+        30vw -100vh / 105vw 200vh;
+  }
+</style>

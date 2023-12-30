@@ -1,4 +1,5 @@
 .sponsors {
+	margin-top: 9.5rem;
 	display: flex;
 	flex-wrap: wrap;
 	.sponsors-row {
@@ -8,4 +9,9 @@
 			height: 120px;
 		}
 	}
+}
+
+h2.sponsors-head {
+    font-size: 3.7rem;
+    text-align: center;
 }
