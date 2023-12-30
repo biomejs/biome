@@ -113,12 +113,15 @@ impl ParseNodeList for KeyframesItemList {
 
 #[inline]
 fn parse_keyframes_item(p: &mut CssParser) -> ParsedSyntax {
-    if !p.at_ts(KEYFRAMES_ITEM_SELECTOR_SET) {
-        return Absent;
-    }
-
     let m = p.start();
     KeyframesSelectorList.parse_list(p);
+    // `parse_list` will take care of recovering invalid selectors, but if
+    // _none_ are present, we still want to add a diagnostic to explain the
+    // error while continuing the rest of the parse, since we know that the
+    // following content should still be a declaration list block.
+    if p.cur_range().start() == m.start() {
+        p.error(expected_keyframes_item_selector(p, p.cur_range()))
+    }
 
     if parse_declaration_list_block(p)
         .or_recover_with_token_set(
@@ -181,7 +184,7 @@ impl ParseSeparatedList for KeyframesSelectorList {
 
 const KEYFRAMES_ITEM_SELECTOR_IDENT_SET: TokenSet<CssSyntaxKind> = token_set!(T![from], T![to]);
 const KEYFRAMES_ITEM_SELECTOR_SET: TokenSet<CssSyntaxKind> =
-    KEYFRAMES_ITEM_SELECTOR_IDENT_SET.union(token_set!(CSS_NUMBER_LITERAL));
+    KEYFRAMES_ITEM_SELECTOR_IDENT_SET.union(token_set!(CSS_PERCENTAGE_VALUE));
 
 fn is_at_keyframes_item_selector(p: &mut CssParser) -> bool {
     p.at_ts(KEYFRAMES_ITEM_SELECTOR_IDENT_SET) || is_at_percentage_dimension(p)

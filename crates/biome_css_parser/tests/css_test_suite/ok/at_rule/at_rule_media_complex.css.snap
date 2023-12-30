@@ -195,12 +195,8 @@ CssRoot {
                                         operator: LTEQ@155..158 "<=" [] [Whitespace(" ")],
                                     },
                                     right: CssRegularDimension {
-                                        value: CssNumber {
-                                            value_token: CSS_NUMBER_LITERAL@158..161 "500" [] [],
-                                        },
-                                        unit: CssIdentifier {
-                                            value_token: IDENT@161..163 "px" [] [],
-                                        },
+                                        value_token: CSS_NUMBER_LITERAL@158..161 "500" [] [],
+                                        unit_token: IDENT@161..163 "px" [] [],
                                     },
                                 },
                                 r_paren_token: R_PAREN@163..165 ")" [] [Whitespace(" ")],
@@ -217,12 +213,8 @@ CssRoot {
                                             operator: GTEQ@176..179 ">=" [] [Whitespace(" ")],
                                         },
                                         right: CssRegularDimension {
-                                            value: CssNumber {
-                                                value_token: CSS_NUMBER_LITERAL@179..182 "600" [] [],
-                                            },
-                                            unit: CssIdentifier {
-                                                value_token: IDENT@182..184 "px" [] [],
-                                            },
+                                            value_token: CSS_NUMBER_LITERAL@179..182 "600" [] [],
+                                            unit_token: IDENT@182..184 "px" [] [],
                                         },
                                     },
                                     r_paren_token: R_PAREN@184..186 ")" [] [Whitespace(" ")],
@@ -238,12 +230,8 @@ CssRoot {
                                             operator: GTEQ@197..200 ">=" [] [Whitespace(" ")],
                                         },
                                         right: CssRegularDimension {
-                                            value: CssNumber {
-                                                value_token: CSS_NUMBER_LITERAL@200..203 "600" [] [],
-                                            },
-                                            unit: CssIdentifier {
-                                                value_token: IDENT@203..205 "px" [] [],
-                                            },
+                                            value_token: CSS_NUMBER_LITERAL@200..203 "600" [] [],
+                                            unit_token: IDENT@203..205 "px" [] [],
                                         },
                                     },
                                     r_paren_token: R_PAREN@205..206 ")" [] [],
@@ -285,12 +273,8 @@ CssRoot {
                                         operator: LTEQ@235..238 "<=" [] [Whitespace(" ")],
                                     },
                                     right: CssRegularDimension {
-                                        value: CssNumber {
-                                            value_token: CSS_NUMBER_LITERAL@238..241 "500" [] [],
-                                        },
-                                        unit: CssIdentifier {
-                                            value_token: IDENT@241..243 "px" [] [],
-                                        },
+                                        value_token: CSS_NUMBER_LITERAL@238..241 "500" [] [],
+                                        unit_token: IDENT@241..243 "px" [] [],
                                     },
                                 },
                                 r_paren_token: R_PAREN@243..245 ")" [] [Whitespace(" ")],
@@ -307,12 +291,8 @@ CssRoot {
                                             operator: GTEQ@256..259 ">=" [] [Whitespace(" ")],
                                         },
                                         right: CssRegularDimension {
-                                            value: CssNumber {
-                                                value_token: CSS_NUMBER_LITERAL@259..262 "600" [] [],
-                                            },
-                                            unit: CssIdentifier {
-                                                value_token: IDENT@262..264 "px" [] [],
-                                            },
+                                            value_token: CSS_NUMBER_LITERAL@259..262 "600" [] [],
+                                            unit_token: IDENT@262..264 "px" [] [],
                                         },
                                     },
                                     r_paren_token: R_PAREN@264..266 ")" [] [Whitespace(" ")],
@@ -329,12 +309,8 @@ CssRoot {
                                                 operator: GTEQ@277..280 ">=" [] [Whitespace(" ")],
                                             },
                                             right: CssRegularDimension {
-                                                value: CssNumber {
-                                                    value_token: CSS_NUMBER_LITERAL@280..283 "600" [] [],
-                                                },
-                                                unit: CssIdentifier {
-                                                    value_token: IDENT@283..285 "px" [] [],
-                                                },
+                                                value_token: CSS_NUMBER_LITERAL@280..283 "600" [] [],
+                                                unit_token: IDENT@283..285 "px" [] [],
                                             },
                                         },
                                         r_paren_token: R_PAREN@285..287 ")" [] [Whitespace(" ")],
@@ -350,12 +326,8 @@ CssRoot {
                                                 operator: GTEQ@298..301 ">=" [] [Whitespace(" ")],
                                             },
                                             right: CssRegularDimension {
-                                                value: CssNumber {
-                                                    value_token: CSS_NUMBER_LITERAL@301..304 "600" [] [],
-                                                },
-                                                unit: CssIdentifier {
-                                                    value_token: IDENT@304..306 "px" [] [],
-                                                },
+                                                value_token: CSS_NUMBER_LITERAL@301..304 "600" [] [],
+                                                unit_token: IDENT@304..306 "px" [] [],
                                             },
                                         },
                                         r_paren_token: R_PAREN@306..307 ")" [] [],
@@ -398,12 +370,8 @@ CssRoot {
                                         operator: LTEQ@336..339 "<=" [] [Whitespace(" ")],
                                     },
                                     right: CssRegularDimension {
-                                        value: CssNumber {
-                                            value_token: CSS_NUMBER_LITERAL@339..342 "500" [] [],
-                                        },
-                                        unit: CssIdentifier {
-                                            value_token: IDENT@342..344 "px" [] [],
-                                        },
+                                        value_token: CSS_NUMBER_LITERAL@339..342 "500" [] [],
+                                        unit_token: IDENT@342..344 "px" [] [],
                                     },
                                 },
                                 r_paren_token: R_PAREN@344..346 ")" [] [Whitespace(" ")],
@@ -420,12 +388,8 @@ CssRoot {
                                             operator: GTEQ@356..359 ">=" [] [Whitespace(" ")],
                                         },
                                         right: CssRegularDimension {
-                                            value: CssNumber {
-                                                value_token: CSS_NUMBER_LITERAL@359..362 "600" [] [],
-                                            },
-                                            unit: CssIdentifier {
-                                                value_token: IDENT@362..364 "px" [] [],
-                                            },
+                                            value_token: CSS_NUMBER_LITERAL@359..362 "600" [] [],
+                                            unit_token: IDENT@362..364 "px" [] [],
                                         },
                                     },
                                     r_paren_token: R_PAREN@364..366 ")" [] [Whitespace(" ")],
@@ -442,12 +406,8 @@ CssRoot {
                                                 operator: GTEQ@376..379 ">=" [] [Whitespace(" ")],
                                             },
                                             right: CssRegularDimension {
-                                                value: CssNumber {
-                                                    value_token: CSS_NUMBER_LITERAL@379..382 "600" [] [],
-                                                },
-                                                unit: CssIdentifier {
-                                                    value_token: IDENT@382..384 "px" [] [],
-                                                },
+                                                value_token: CSS_NUMBER_LITERAL@379..382 "600" [] [],
+                                                unit_token: IDENT@382..384 "px" [] [],
                                             },
                                         },
                                         r_paren_token: R_PAREN@384..386 ")" [] [Whitespace(" ")],
@@ -463,12 +423,8 @@ CssRoot {
                                                 operator: GTEQ@396..399 ">=" [] [Whitespace(" ")],
                                             },
                                             right: CssRegularDimension {
-                                                value: CssNumber {
-                                                    value_token: CSS_NUMBER_LITERAL@399..402 "600" [] [],
-                                                },
-                                                unit: CssIdentifier {
-                                                    value_token: IDENT@402..404 "px" [] [],
-                                                },
+                                                value_token: CSS_NUMBER_LITERAL@399..402 "600" [] [],
+                                                unit_token: IDENT@402..404 "px" [] [],
                                             },
                                         },
                                         r_paren_token: R_PAREN@404..405 ")" [] [],
@@ -511,12 +467,8 @@ CssRoot {
                                         operator: LTEQ@434..437 "<=" [] [Whitespace(" ")],
                                     },
                                     right: CssRegularDimension {
-                                        value: CssNumber {
-                                            value_token: CSS_NUMBER_LITERAL@437..440 "500" [] [],
-                                        },
-                                        unit: CssIdentifier {
-                                            value_token: IDENT@440..442 "px" [] [],
-                                        },
+                                        value_token: CSS_NUMBER_LITERAL@437..440 "500" [] [],
+                                        unit_token: IDENT@440..442 "px" [] [],
                                     },
                                 },
                                 r_paren_token: R_PAREN@442..444 ")" [] [Whitespace(" ")],
@@ -533,12 +485,8 @@ CssRoot {
                                             operator: GTEQ@454..457 ">=" [] [Whitespace(" ")],
                                         },
                                         right: CssRegularDimension {
-                                            value: CssNumber {
-                                                value_token: CSS_NUMBER_LITERAL@457..460 "600" [] [],
-                                            },
-                                            unit: CssIdentifier {
-                                                value_token: IDENT@460..462 "px" [] [],
-                                            },
+                                            value_token: CSS_NUMBER_LITERAL@457..460 "600" [] [],
+                                            unit_token: IDENT@460..462 "px" [] [],
                                         },
                                     },
                                     r_paren_token: R_PAREN@462..464 ")" [] [Whitespace(" ")],
@@ -554,12 +502,8 @@ CssRoot {
                                             operator: GTEQ@474..477 ">=" [] [Whitespace(" ")],
                                         },
                                         right: CssRegularDimension {
-                                            value: CssNumber {
-                                                value_token: CSS_NUMBER_LITERAL@477..480 "600" [] [],
-                                            },
-                                            unit: CssIdentifier {
-                                                value_token: IDENT@480..482 "px" [] [],
-                                            },
+                                            value_token: CSS_NUMBER_LITERAL@477..480 "600" [] [],
+                                            unit_token: IDENT@480..482 "px" [] [],
                                         },
                                     },
                                     r_paren_token: R_PAREN@482..483 ")" [] [],
@@ -620,12 +564,8 @@ CssRoot {
                                         operator: LTEQ@530..533 "<=" [] [Whitespace(" ")],
                                     },
                                     right: CssRegularDimension {
-                                        value: CssNumber {
-                                            value_token: CSS_NUMBER_LITERAL@533..536 "500" [] [],
-                                        },
-                                        unit: CssIdentifier {
-                                            value_token: IDENT@536..538 "px" [] [],
-                                        },
+                                        value_token: CSS_NUMBER_LITERAL@533..536 "500" [] [],
+                                        unit_token: IDENT@536..538 "px" [] [],
                                     },
                                 },
                                 r_paren_token: R_PAREN@538..540 ")" [] [Whitespace(" ")],
@@ -644,12 +584,8 @@ CssRoot {
                                                 operator: GTEQ@552..555 ">=" [] [Whitespace(" ")],
                                             },
                                             right: CssRegularDimension {
-                                                value: CssNumber {
-                                                    value_token: CSS_NUMBER_LITERAL@555..558 "600" [] [],
-                                                },
-                                                unit: CssIdentifier {
-                                                    value_token: IDENT@558..560 "px" [] [],
-                                                },
+                                                value_token: CSS_NUMBER_LITERAL@555..558 "600" [] [],
+                                                unit_token: IDENT@558..560 "px" [] [],
                                             },
                                         },
                                         r_paren_token: R_PAREN@560..562 ")" [] [Whitespace(" ")],
@@ -665,12 +601,8 @@ CssRoot {
                                                 operator: GTEQ@572..575 ">=" [] [Whitespace(" ")],
                                             },
                                             right: CssRegularDimension {
-                                                value: CssNumber {
-                                                    value_token: CSS_NUMBER_LITERAL@575..578 "600" [] [],
-                                                },
-                                                unit: CssIdentifier {
-                                                    value_token: IDENT@578..580 "px" [] [],
-                                                },
+                                                value_token: CSS_NUMBER_LITERAL@575..578 "600" [] [],
+                                                unit_token: IDENT@578..580 "px" [] [],
                                             },
                                         },
                                         r_paren_token: R_PAREN@580..581 ")" [] [],
@@ -714,12 +646,8 @@ CssRoot {
                                         operator: LTEQ@615..618 "<=" [] [Whitespace(" ")],
                                     },
                                     right: CssRegularDimension {
-                                        value: CssNumber {
-                                            value_token: CSS_NUMBER_LITERAL@618..621 "500" [] [],
-                                        },
-                                        unit: CssIdentifier {
-                                            value_token: IDENT@621..623 "px" [] [],
-                                        },
+                                        value_token: CSS_NUMBER_LITERAL@618..621 "500" [] [],
+                                        unit_token: IDENT@621..623 "px" [] [],
                                     },
                                 },
                                 r_paren_token: R_PAREN@623..625 ")" [] [Whitespace(" ")],
@@ -738,12 +666,8 @@ CssRoot {
                                                 operator: GTEQ@636..639 ">=" [] [Whitespace(" ")],
                                             },
                                             right: CssRegularDimension {
-                                                value: CssNumber {
-                                                    value_token: CSS_NUMBER_LITERAL@639..642 "600" [] [],
-                                                },
-                                                unit: CssIdentifier {
-                                                    value_token: IDENT@642..644 "px" [] [],
-                                                },
+                                                value_token: CSS_NUMBER_LITERAL@639..642 "600" [] [],
+                                                unit_token: IDENT@642..644 "px" [] [],
                                             },
                                         },
                                         r_paren_token: R_PAREN@644..646 ")" [] [Whitespace(" ")],
@@ -759,12 +683,8 @@ CssRoot {
                                                 operator: GTEQ@657..660 ">=" [] [Whitespace(" ")],
                                             },
                                             right: CssRegularDimension {
-                                                value: CssNumber {
-                                                    value_token: CSS_NUMBER_LITERAL@660..663 "600" [] [],
-                                                },
-                                                unit: CssIdentifier {
-                                                    value_token: IDENT@663..665 "px" [] [],
-                                                },
+                                                value_token: CSS_NUMBER_LITERAL@660..663 "600" [] [],
+                                                unit_token: IDENT@663..665 "px" [] [],
                                             },
                                         },
                                         r_paren_token: R_PAREN@665..666 ")" [] [],
@@ -792,12 +712,8 @@ CssRoot {
                             l_paren_token: L_PAREN@680..681 "(" [] [],
                             feature: CssQueryFeatureReverseRange {
                                 left: CssRegularDimension {
-                                    value: CssNumber {
-                                        value_token: CSS_NUMBER_LITERAL@681..684 "600" [] [],
-                                    },
-                                    unit: CssIdentifier {
-                                        value_token: IDENT@684..687 "px" [] [Whitespace(" ")],
-                                    },
+                                    value_token: CSS_NUMBER_LITERAL@681..684 "600" [] [],
+                                    unit_token: IDENT@684..687 "px" [] [Whitespace(" ")],
                                 },
                                 comparison: CssQueryFeatureRangeComparison {
                                     operator: L_ANGLE@687..689 "<" [] [Whitespace(" ")],
@@ -826,12 +742,8 @@ CssRoot {
                                 l_paren_token: L_PAREN@714..715 "(" [] [],
                                 feature: CssQueryFeatureReverseRange {
                                     left: CssRegularDimension {
-                                        value: CssNumber {
-                                            value_token: CSS_NUMBER_LITERAL@715..718 "600" [] [],
-                                        },
-                                        unit: CssIdentifier {
-                                            value_token: IDENT@718..721 "px" [] [Whitespace(" ")],
-                                        },
+                                        value_token: CSS_NUMBER_LITERAL@715..718 "600" [] [],
+                                        unit_token: IDENT@718..721 "px" [] [Whitespace(" ")],
                                     },
                                     comparison: CssQueryFeatureRangeComparison {
                                         operator: L_ANGLE@721..723 "<" [] [Whitespace(" ")],
@@ -1076,10 +988,8 @@ CssRoot {
                   1: CSS_QUERY_FEATURE_RANGE_COMPARISON@155..158
                     0: LTEQ@155..158 "<=" [] [Whitespace(" ")]
                   2: CSS_REGULAR_DIMENSION@158..163
-                    0: CSS_NUMBER@158..161
-                      0: CSS_NUMBER_LITERAL@158..161 "500" [] []
-                    1: CSS_IDENTIFIER@161..163
-                      0: IDENT@161..163 "px" [] []
+                    0: CSS_NUMBER_LITERAL@158..161 "500" [] []
+                    1: IDENT@161..163 "px" [] []
                 2: R_PAREN@163..165 ")" [] [Whitespace(" ")]
               1: AND_KW@165..169 "and" [] [Whitespace(" ")]
               2: CSS_MEDIA_AND_CONDITION@169..206
@@ -1091,10 +1001,8 @@ CssRoot {
                     1: CSS_QUERY_FEATURE_RANGE_COMPARISON@176..179
                       0: GTEQ@176..179 ">=" [] [Whitespace(" ")]
                     2: CSS_REGULAR_DIMENSION@179..184
-                      0: CSS_NUMBER@179..182
-                        0: CSS_NUMBER_LITERAL@179..182 "600" [] []
-                      1: CSS_IDENTIFIER@182..184
-                        0: IDENT@182..184 "px" [] []
+                      0: CSS_NUMBER_LITERAL@179..182 "600" [] []
+                      1: IDENT@182..184 "px" [] []
                   2: R_PAREN@184..186 ")" [] [Whitespace(" ")]
                 1: AND_KW@186..190 "and" [] [Whitespace(" ")]
                 2: CSS_MEDIA_FEATURE_IN_PARENS@190..206
@@ -1105,10 +1013,8 @@ CssRoot {
                     1: CSS_QUERY_FEATURE_RANGE_COMPARISON@197..200
                       0: GTEQ@197..200 ">=" [] [Whitespace(" ")]
                     2: CSS_REGULAR_DIMENSION@200..205
-                      0: CSS_NUMBER@200..203
-                        0: CSS_NUMBER_LITERAL@200..203 "600" [] []
-                      1: CSS_IDENTIFIER@203..205
-                        0: IDENT@203..205 "px" [] []
+                      0: CSS_NUMBER_LITERAL@200..203 "600" [] []
+                      1: IDENT@203..205 "px" [] []
                   2: R_PAREN@205..206 ")" [] []
           1: COMMA@206..208 "," [] [Whitespace(" ")]
           2: CSS_MEDIA_TYPE_QUERY@208..216
@@ -1135,10 +1041,8 @@ CssRoot {
                   1: CSS_QUERY_FEATURE_RANGE_COMPARISON@235..238
                     0: LTEQ@235..238 "<=" [] [Whitespace(" ")]
                   2: CSS_REGULAR_DIMENSION@238..243
-                    0: CSS_NUMBER@238..241
-                      0: CSS_NUMBER_LITERAL@238..241 "500" [] []
-                    1: CSS_IDENTIFIER@241..243
-                      0: IDENT@241..243 "px" [] []
+                    0: CSS_NUMBER_LITERAL@238..241 "500" [] []
+                    1: IDENT@241..243 "px" [] []
                 2: R_PAREN@243..245 ")" [] [Whitespace(" ")]
               1: AND_KW@245..249 "and" [] [Whitespace(" ")]
               2: CSS_MEDIA_AND_CONDITION@249..307
@@ -1150,10 +1054,8 @@ CssRoot {
                     1: CSS_QUERY_FEATURE_RANGE_COMPARISON@256..259
                       0: GTEQ@256..259 ">=" [] [Whitespace(" ")]
                     2: CSS_REGULAR_DIMENSION@259..264
-                      0: CSS_NUMBER@259..262
-                        0: CSS_NUMBER_LITERAL@259..262 "600" [] []
-                      1: CSS_IDENTIFIER@262..264
-                        0: IDENT@262..264 "px" [] []
+                      0: CSS_NUMBER_LITERAL@259..262 "600" [] []
+                      1: IDENT@262..264 "px" [] []
                   2: R_PAREN@264..266 ")" [] [Whitespace(" ")]
                 1: AND_KW@266..270 "and" [] [Whitespace(" ")]
                 2: CSS_MEDIA_AND_CONDITION@270..307
@@ -1165,10 +1067,8 @@ CssRoot {
                       1: CSS_QUERY_FEATURE_RANGE_COMPARISON@277..280
                         0: GTEQ@277..280 ">=" [] [Whitespace(" ")]
                       2: CSS_REGULAR_DIMENSION@280..285
-                        0: CSS_NUMBER@280..283
-                          0: CSS_NUMBER_LITERAL@280..283 "600" [] []
-                        1: CSS_IDENTIFIER@283..285
-                          0: IDENT@283..285 "px" [] []
+                        0: CSS_NUMBER_LITERAL@280..283 "600" [] []
+                        1: IDENT@283..285 "px" [] []
                     2: R_PAREN@285..287 ")" [] [Whitespace(" ")]
                   1: AND_KW@287..291 "and" [] [Whitespace(" ")]
                   2: CSS_MEDIA_FEATURE_IN_PARENS@291..307
@@ -1179,10 +1079,8 @@ CssRoot {
                       1: CSS_QUERY_FEATURE_RANGE_COMPARISON@298..301
                         0: GTEQ@298..301 ">=" [] [Whitespace(" ")]
                       2: CSS_REGULAR_DIMENSION@301..306
-                        0: CSS_NUMBER@301..304
-                          0: CSS_NUMBER_LITERAL@301..304 "600" [] []
-                        1: CSS_IDENTIFIER@304..306
-                          0: IDENT@304..306 "px" [] []
+                        0: CSS_NUMBER_LITERAL@301..304 "600" [] []
+                        1: IDENT@304..306 "px" [] []
                     2: R_PAREN@306..307 ")" [] []
           1: COMMA@307..309 "," [] [Whitespace(" ")]
           2: CSS_MEDIA_TYPE_QUERY@309..317
@@ -1209,10 +1107,8 @@ CssRoot {
                   1: CSS_QUERY_FEATURE_RANGE_COMPARISON@336..339
                     0: LTEQ@336..339 "<=" [] [Whitespace(" ")]
                   2: CSS_REGULAR_DIMENSION@339..344
-                    0: CSS_NUMBER@339..342
-                      0: CSS_NUMBER_LITERAL@339..342 "500" [] []
-                    1: CSS_IDENTIFIER@342..344
-                      0: IDENT@342..344 "px" [] []
+                    0: CSS_NUMBER_LITERAL@339..342 "500" [] []
+                    1: IDENT@342..344 "px" [] []
                 2: R_PAREN@344..346 ")" [] [Whitespace(" ")]
               1: OR_KW@346..349 "or" [] [Whitespace(" ")]
               2: CSS_MEDIA_OR_CONDITION@349..405
@@ -1224,10 +1120,8 @@ CssRoot {
                     1: CSS_QUERY_FEATURE_RANGE_COMPARISON@356..359
                       0: GTEQ@356..359 ">=" [] [Whitespace(" ")]
                     2: CSS_REGULAR_DIMENSION@359..364
-                      0: CSS_NUMBER@359..362
-                        0: CSS_NUMBER_LITERAL@359..362 "600" [] []
-                      1: CSS_IDENTIFIER@362..364
-                        0: IDENT@362..364 "px" [] []
+                      0: CSS_NUMBER_LITERAL@359..362 "600" [] []
+                      1: IDENT@362..364 "px" [] []
                   2: R_PAREN@364..366 ")" [] [Whitespace(" ")]
                 1: OR_KW@366..369 "or" [] [Whitespace(" ")]
                 2: CSS_MEDIA_OR_CONDITION@369..405
@@ -1239,10 +1133,8 @@ CssRoot {
                       1: CSS_QUERY_FEATURE_RANGE_COMPARISON@376..379
                         0: GTEQ@376..379 ">=" [] [Whitespace(" ")]
                       2: CSS_REGULAR_DIMENSION@379..384
-                        0: CSS_NUMBER@379..382
-                          0: CSS_NUMBER_LITERAL@379..382 "600" [] []
-                        1: CSS_IDENTIFIER@382..384
-                          0: IDENT@382..384 "px" [] []
+                        0: CSS_NUMBER_LITERAL@379..382 "600" [] []
+                        1: IDENT@382..384 "px" [] []
                     2: R_PAREN@384..386 ")" [] [Whitespace(" ")]
                   1: OR_KW@386..389 "or" [] [Whitespace(" ")]
                   2: CSS_MEDIA_FEATURE_IN_PARENS@389..405
@@ -1253,10 +1145,8 @@ CssRoot {
                       1: CSS_QUERY_FEATURE_RANGE_COMPARISON@396..399
                         0: GTEQ@396..399 ">=" [] [Whitespace(" ")]
                       2: CSS_REGULAR_DIMENSION@399..404
-                        0: CSS_NUMBER@399..402
-                          0: CSS_NUMBER_LITERAL@399..402 "600" [] []
-                        1: CSS_IDENTIFIER@402..404
-                          0: IDENT@402..404 "px" [] []
+                        0: CSS_NUMBER_LITERAL@399..402 "600" [] []
+                        1: IDENT@402..404 "px" [] []
                     2: R_PAREN@404..405 ")" [] []
           1: COMMA@405..407 "," [] [Whitespace(" ")]
           2: CSS_MEDIA_TYPE_QUERY@407..415
@@ -1283,10 +1173,8 @@ CssRoot {
                   1: CSS_QUERY_FEATURE_RANGE_COMPARISON@434..437
                     0: LTEQ@434..437 "<=" [] [Whitespace(" ")]
                   2: CSS_REGULAR_DIMENSION@437..442
-                    0: CSS_NUMBER@437..440
-                      0: CSS_NUMBER_LITERAL@437..440 "500" [] []
-                    1: CSS_IDENTIFIER@440..442
-                      0: IDENT@440..442 "px" [] []
+                    0: CSS_NUMBER_LITERAL@437..440 "500" [] []
+                    1: IDENT@440..442 "px" [] []
                 2: R_PAREN@442..444 ")" [] [Whitespace(" ")]
               1: OR_KW@444..447 "or" [] [Whitespace(" ")]
               2: CSS_MEDIA_OR_CONDITION@447..483
@@ -1298,10 +1186,8 @@ CssRoot {
                     1: CSS_QUERY_FEATURE_RANGE_COMPARISON@454..457
                       0: GTEQ@454..457 ">=" [] [Whitespace(" ")]
                     2: CSS_REGULAR_DIMENSION@457..462
-                      0: CSS_NUMBER@457..460
-                        0: CSS_NUMBER_LITERAL@457..460 "600" [] []
-                      1: CSS_IDENTIFIER@460..462
-                        0: IDENT@460..462 "px" [] []
+                      0: CSS_NUMBER_LITERAL@457..460 "600" [] []
+                      1: IDENT@460..462 "px" [] []
                   2: R_PAREN@462..464 ")" [] [Whitespace(" ")]
                 1: OR_KW@464..467 "or" [] [Whitespace(" ")]
                 2: CSS_MEDIA_FEATURE_IN_PARENS@467..483
@@ -1312,10 +1198,8 @@ CssRoot {
                     1: CSS_QUERY_FEATURE_RANGE_COMPARISON@474..477
                       0: GTEQ@474..477 ">=" [] [Whitespace(" ")]
                     2: CSS_REGULAR_DIMENSION@477..482
-                      0: CSS_NUMBER@477..480
-                        0: CSS_NUMBER_LITERAL@477..480 "600" [] []
-                      1: CSS_IDENTIFIER@480..482
-                        0: IDENT@480..482 "px" [] []
+                      0: CSS_NUMBER_LITERAL@477..480 "600" [] []
+                      1: IDENT@480..482 "px" [] []
                   2: R_PAREN@482..483 ")" [] []
           1: COMMA@483..485 "," [] [Whitespace(" ")]
           2: CSS_MEDIA_CONDITION_QUERY@485..511
@@ -1355,10 +1239,8 @@ CssRoot {
                   1: CSS_QUERY_FEATURE_RANGE_COMPARISON@530..533
                     0: LTEQ@530..533 "<=" [] [Whitespace(" ")]
                   2: CSS_REGULAR_DIMENSION@533..538
-                    0: CSS_NUMBER@533..536
-                      0: CSS_NUMBER_LITERAL@533..536 "500" [] []
-                    1: CSS_IDENTIFIER@536..538
-                      0: IDENT@536..538 "px" [] []
+                    0: CSS_NUMBER_LITERAL@533..536 "500" [] []
+                    1: IDENT@536..538 "px" [] []
                 2: R_PAREN@538..540 ")" [] [Whitespace(" ")]
               1: AND_KW@540..544 "and" [] [Whitespace(" ")]
               2: CSS_MEDIA_CONDITION_IN_PARENS@544..582
@@ -1372,10 +1254,8 @@ CssRoot {
                       1: CSS_QUERY_FEATURE_RANGE_COMPARISON@552..555
                         0: GTEQ@552..555 ">=" [] [Whitespace(" ")]
                       2: CSS_REGULAR_DIMENSION@555..560
-                        0: CSS_NUMBER@555..558
-                          0: CSS_NUMBER_LITERAL@555..558 "600" [] []
-                        1: CSS_IDENTIFIER@558..560
-                          0: IDENT@558..560 "px" [] []
+                        0: CSS_NUMBER_LITERAL@555..558 "600" [] []
+                        1: IDENT@558..560 "px" [] []
                     2: R_PAREN@560..562 ")" [] [Whitespace(" ")]
                   1: OR_KW@562..565 "or" [] [Whitespace(" ")]
                   2: CSS_MEDIA_FEATURE_IN_PARENS@565..581
@@ -1386,10 +1266,8 @@ CssRoot {
                       1: CSS_QUERY_FEATURE_RANGE_COMPARISON@572..575
                         0: GTEQ@572..575 ">=" [] [Whitespace(" ")]
                       2: CSS_REGULAR_DIMENSION@575..580
-                        0: CSS_NUMBER@575..578
-                          0: CSS_NUMBER_LITERAL@575..578 "600" [] []
-                        1: CSS_IDENTIFIER@578..580
-                          0: IDENT@578..580 "px" [] []
+                        0: CSS_NUMBER_LITERAL@575..578 "600" [] []
+                        1: IDENT@578..580 "px" [] []
                     2: R_PAREN@580..581 ")" [] []
                 2: R_PAREN@581..582 ")" [] []
           1: COMMA@582..584 "," [] [Whitespace(" ")]
@@ -1417,10 +1295,8 @@ CssRoot {
                   1: CSS_QUERY_FEATURE_RANGE_COMPARISON@615..618
                     0: LTEQ@615..618 "<=" [] [Whitespace(" ")]
                   2: CSS_REGULAR_DIMENSION@618..623
-                    0: CSS_NUMBER@618..621
-                      0: CSS_NUMBER_LITERAL@618..621 "500" [] []
-                    1: CSS_IDENTIFIER@621..623
-                      0: IDENT@621..623 "px" [] []
+                    0: CSS_NUMBER_LITERAL@618..621 "500" [] []
+                    1: IDENT@621..623 "px" [] []
                 2: R_PAREN@623..625 ")" [] [Whitespace(" ")]
               1: OR_KW@625..628 "or" [] [Whitespace(" ")]
               2: CSS_MEDIA_CONDITION_IN_PARENS@628..668
@@ -1434,10 +1310,8 @@ CssRoot {
                       1: CSS_QUERY_FEATURE_RANGE_COMPARISON@636..639
                         0: GTEQ@636..639 ">=" [] [Whitespace(" ")]
                       2: CSS_REGULAR_DIMENSION@639..644
-                        0: CSS_NUMBER@639..642
-                          0: CSS_NUMBER_LITERAL@639..642 "600" [] []
-                        1: CSS_IDENTIFIER@642..644
-                          0: IDENT@642..644 "px" [] []
+                        0: CSS_NUMBER_LITERAL@639..642 "600" [] []
+                        1: IDENT@642..644 "px" [] []
                     2: R_PAREN@644..646 ")" [] [Whitespace(" ")]
                   1: AND_KW@646..650 "and" [] [Whitespace(" ")]
                   2: CSS_MEDIA_FEATURE_IN_PARENS@650..666
@@ -1448,10 +1322,8 @@ CssRoot {
                       1: CSS_QUERY_FEATURE_RANGE_COMPARISON@657..660
                         0: GTEQ@657..660 ">=" [] [Whitespace(" ")]
                       2: CSS_REGULAR_DIMENSION@660..665
-                        0: CSS_NUMBER@660..663
-                          0: CSS_NUMBER_LITERAL@660..663 "600" [] []
-                        1: CSS_IDENTIFIER@663..665
-                          0: IDENT@663..665 "px" [] []
+                        0: CSS_NUMBER_LITERAL@660..663 "600" [] []
+                        1: IDENT@663..665 "px" [] []
                     2: R_PAREN@665..666 ")" [] []
                 2: R_PAREN@666..668 ")" [] [Whitespace(" ")]
         2: CSS_RULE_LIST_BLOCK@668..672
@@ -1468,10 +1340,8 @@ CssRoot {
               0: L_PAREN@680..681 "(" [] []
               1: CSS_QUERY_FEATURE_REVERSE_RANGE@681..695
                 0: CSS_REGULAR_DIMENSION@681..687
-                  0: CSS_NUMBER@681..684
-                    0: CSS_NUMBER_LITERAL@681..684 "600" [] []
-                  1: CSS_IDENTIFIER@684..687
-                    0: IDENT@684..687 "px" [] [Whitespace(" ")]
+                  0: CSS_NUMBER_LITERAL@681..684 "600" [] []
+                  1: IDENT@684..687 "px" [] [Whitespace(" ")]
                 1: CSS_QUERY_FEATURE_RANGE_COMPARISON@687..689
                   0: L_ANGLE@687..689 "<" [] [Whitespace(" ")]
                 2: CSS_IDENTIFIER@689..695
@@ -1491,10 +1361,8 @@ CssRoot {
                 0: L_PAREN@714..715 "(" [] []
                 1: CSS_QUERY_FEATURE_REVERSE_RANGE@715..729
                   0: CSS_REGULAR_DIMENSION@715..721
-                    0: CSS_NUMBER@715..718
-                      0: CSS_NUMBER_LITERAL@715..718 "600" [] []
-                    1: CSS_IDENTIFIER@718..721
-                      0: IDENT@718..721 "px" [] [Whitespace(" ")]
+                    0: CSS_NUMBER_LITERAL@715..718 "600" [] []
+                    1: IDENT@718..721 "px" [] [Whitespace(" ")]
                   1: CSS_QUERY_FEATURE_RANGE_COMPARISON@721..723
                     0: L_ANGLE@721..723 "<" [] [Whitespace(" ")]
                   2: CSS_IDENTIFIER@723..729

@@ -12,7 +12,7 @@ pub(crate) fn expected_keyframes_item(p: &CssParser, range: TextRange) -> ParseD
 }
 
 pub(crate) fn expected_keyframes_item_selector(p: &CssParser, range: TextRange) -> ParseDiagnostic {
-    expect_one_of(&["from", "to", "number"], range).into_diagnostic(p)
+    expect_one_of(&["from", "to", "a percentage"], range).into_diagnostic(p)
 }
 
 pub(crate) fn expected_page_selector(p: &CssParser, range: TextRange) -> ParseDiagnostic {
