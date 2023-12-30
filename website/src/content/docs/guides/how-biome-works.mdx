@@ -1,9 +1,10 @@
 ---
 title: How Biome works
-description: Learn how to set up a new project with Biome.
+description: Learn how Biome works, like assumptions, configuration and more.
 ---
 import DefaultConfiguration from "@src/components/generated/DefaultConfiguration.mdx";
 
+This is a guide that explains how the tool works, assumptions, and internal information useful when setting up the project and the configuration file.
 
 ## Configuration
 
@@ -93,7 +94,7 @@ The following files are parsed as **`JSON` files** with  the options `json.parse
 - `.hintrc`
 - `.babelrc`
 
-### `ignore` and `include` syntax rules
+## Syntax rules for `ignore` and `include`
 
 The syntax and meaning of these two options loosely follow the [globset rules](https://docs.rs/globset/latest/globset/#syntax) but without the ability to set options.
 
@@ -116,3 +117,8 @@ The syntax and meaning of these two options loosely follow the [globset rules](h
 > `[!ab]` to match any character except for `a` and `b`.
 > - Metacharacters such as `*` and `?` can be escaped with character class
 > notation. e.g., `[*]` matches `*`.
+
+### Ignore folders and ignore files
+
+
+

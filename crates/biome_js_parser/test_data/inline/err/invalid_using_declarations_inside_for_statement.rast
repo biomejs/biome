@@ -132,14 +132,14 @@ JsModule {
 --
 invalid_using_declarations_inside_for_statement.js:1:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Using declarations must have an initialized value
+  × Using declarations must have an initialized value.
   
   > 1 │ for (await using of x) {};
       │                  ^^
     2 │ for await (await using of x) {};
     3 │ 
   
-  i this variable needs to be initialized
+  i This variable needs to be initialized.
   
 --
 invalid_using_declarations_inside_for_statement.js:1:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -168,14 +168,14 @@ invalid_using_declarations_inside_for_statement.js:1:22 parse ━━━━━━
 --
 invalid_using_declarations_inside_for_statement.js:2:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Using declarations must have an initialized value
+  × Using declarations must have an initialized value.
   
     1 │ for (await using of x) {};
   > 2 │ for await (await using of x) {};
       │                        ^^
     3 │ 
   
-  i this variable needs to be initialized
+  i This variable needs to be initialized.
   
 --
 invalid_using_declarations_inside_for_statement.js:2:27 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

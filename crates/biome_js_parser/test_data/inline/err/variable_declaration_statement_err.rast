@@ -298,7 +298,7 @@ JsModule {
 --
 variable_declaration_statement_err.js:3:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Const declarations must have an initialized value
+  × Const declarations must have an initialized value.
   
     1 │ let a, { b } = { a: 10 }
     2 │ const c = 1, { d } = { a: 10 }
@@ -307,12 +307,12 @@ variable_declaration_statement_err.js:3:7 parse ━━━━━━━━━━�
     4 │ let [f];
     5 │ const { g };
   
-  i this variable needs to be initialized
+  i This variable needs to be initialized.
   
 --
 variable_declaration_statement_err.js:4:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Object and Array patterns require initializers
+  × Object and Array patterns require initializers.
   
     2 │ const c = 1, { d } = { a: 10 }
     3 │ const e;
@@ -321,12 +321,12 @@ variable_declaration_statement_err.js:4:5 parse ━━━━━━━━━━�
     5 │ const { g };
     6 │ 
   
-  i this pattern is declared, but it is not given an initialized value
+  i This pattern is declared, but it is not given an initialized value.
   
 --
 variable_declaration_statement_err.js:5:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Object and Array patterns require initializers
+  × Object and Array patterns require initializers.
   
     3 │ const e;
     4 │ let [f];
@@ -334,7 +334,7 @@ variable_declaration_statement_err.js:5:7 parse ━━━━━━━━━━�
       │       ^^^^^
     6 │ 
   
-  i this pattern is declared, but it is not given an initialized value
+  i This pattern is declared, but it is not given an initialized value.
   
 --
 let a, { b } = { a: 10 }
