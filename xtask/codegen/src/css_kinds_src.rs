@@ -89,7 +89,10 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "from",
         "to",
         "var",
+        "url",
         "font-palette-values",
+        // HERE: Add new regular keywords _above_ here. Be sure to also add them
+        // to `consume_identifier` in `biome_css_parser/src/lexer/mod.rs` as well.
         // CSS-wide keywords
         "initial",
         "inherit",
@@ -97,6 +100,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "revert",
         "revert-layer",
         "default",
+        // START: Only add dimension units after `em` and before `fr` below.
         // length units
         "em",
         "rem",
@@ -171,7 +175,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "x",
         // flex units
         "fr",
-        "url",
+        // END: Add new units _above_ `fr` to preserve range checks.
         // page at rule
         "page",
         "left",
@@ -203,8 +207,8 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "selector",
         //
         "font-face",
-        // Don't add to the end of this list, add to the end of the list in
-        // because we have a range check in is_contextual_keyword function.
+        // Don't add to the end of this list, add new keywords above the "HERE"
+        // marker above, because we have a range check in is_contextual_keyword function.
     ],
     literals: &[
         "CSS_STRING_LITERAL",
@@ -214,6 +218,13 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_SPACE_LITERAL",
         "CSS_URL_VALUE_RAW_LITERAL",
         "CSS_COLOR_LITERAL",
+        // Special literal token to represent a number that is _immediately_
+        // followed by an identifier, which means it is a `<dimension>` token
+        // according to the spec: https://www.w3.org/TR/css-values-4/#dimensions.
+        "CSS_DIMENSION_VALUE",
+        // Similarly, `<percentage>` also disallows spaces, so this token
+        // represents a number immediately preceding a `%`.
+        "CSS_PERCENTAGE_VALUE",
     ],
     tokens: &[
         "ERROR_TOKEN",
@@ -252,6 +263,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_UNIT",
         "CSS_PERCENT_DIMENSION",
         "CSS_REGULAR_DIMENSION",
+        "CSS_UNKNOWN_DIMENSION",
         // Selectors nodes
         "CSS_NAMESPACE",
         "CSS_NAMED_NAMESPACE_PREFIX",

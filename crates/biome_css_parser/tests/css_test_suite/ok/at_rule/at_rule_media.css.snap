@@ -125,6 +125,9 @@ expression: snapshot
 
 @media (NOT (color)) OR (hover) {}
 
+/* http://browserbu.gs/css-hacks/media-min-width-0-backslash-0/ */
+@media screen and (min-width: 0\0) {
+}
 ```
 
 
@@ -4259,17 +4262,59 @@ CssRoot {
                 },
             },
         },
+        CssAtRule {
+            at_token: AT@4004..4074 "@" [Newline("\n"), Newline("\n"), Comments("/* http://browserbu.g ..."), Newline("\n")] [],
+            rule: CssMediaAtRule {
+                media_token: MEDIA_KW@4074..4080 "media" [] [Whitespace(" ")],
+                queries: CssMediaQueryList [
+                    CssMediaAndTypeQuery {
+                        left: CssMediaTypeQuery {
+                            modifier: missing (optional),
+                            ty: CssMediaType {
+                                value: CssIdentifier {
+                                    value_token: IDENT@4080..4087 "screen" [] [Whitespace(" ")],
+                                },
+                            },
+                        },
+                        and_token: AND_KW@4087..4091 "and" [] [Whitespace(" ")],
+                        right: CssMediaFeatureInParens {
+                            l_paren_token: L_PAREN@4091..4092 "(" [] [],
+                            feature: CssQueryFeaturePlain {
+                                name: CssIdentifier {
+                                    value_token: IDENT@4092..4101 "min-width" [] [],
+                                },
+                                colon_token: COLON@4101..4103 ":" [] [Whitespace(" ")],
+                                value: CssUnknownDimension {
+                                    value: CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@4103..4104 "0" [] [],
+                                    },
+                                    unit: CssIdentifier {
+                                        value_token: IDENT@4104..4106 "\\0" [] [],
+                                    },
+                                },
+                            },
+                            r_paren_token: R_PAREN@4106..4108 ")" [] [Whitespace(" ")],
+                        },
+                    },
+                ],
+                block: CssRuleListBlock {
+                    l_curly_token: L_CURLY@4108..4109 "{" [] [],
+                    rules: CssRuleList [],
+                    r_curly_token: R_CURLY@4109..4111 "}" [Newline("\n")] [],
+                },
+            },
+        },
     ],
-    eof_token: EOF@4004..4005 "" [Newline("\n")] [],
+    eof_token: EOF@4111..4111 "" [] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..4005
+0: CSS_ROOT@0..4111
   0: (empty)
-  1: CSS_RULE_LIST@0..4004
+  1: CSS_RULE_LIST@0..4111
     0: CSS_AT_RULE@0..17
       0: AT@0..1 "@" [] []
       1: CSS_MEDIA_AT_RULE@1..17
@@ -7005,7 +7050,35 @@ CssRoot {
           0: L_CURLY@4002..4003 "{" [] []
           1: CSS_RULE_LIST@4003..4003
           2: R_CURLY@4003..4004 "}" [] []
-  2: EOF@4004..4005 "" [Newline("\n")] []
+    99: CSS_AT_RULE@4004..4111
+      0: AT@4004..4074 "@" [Newline("\n"), Newline("\n"), Comments("/* http://browserbu.g ..."), Newline("\n")] []
+      1: CSS_MEDIA_AT_RULE@4074..4111
+        0: MEDIA_KW@4074..4080 "media" [] [Whitespace(" ")]
+        1: CSS_MEDIA_QUERY_LIST@4080..4108
+          0: CSS_MEDIA_AND_TYPE_QUERY@4080..4108
+            0: CSS_MEDIA_TYPE_QUERY@4080..4087
+              0: (empty)
+              1: CSS_MEDIA_TYPE@4080..4087
+                0: CSS_IDENTIFIER@4080..4087
+                  0: IDENT@4080..4087 "screen" [] [Whitespace(" ")]
+            1: AND_KW@4087..4091 "and" [] [Whitespace(" ")]
+            2: CSS_MEDIA_FEATURE_IN_PARENS@4091..4108
+              0: L_PAREN@4091..4092 "(" [] []
+              1: CSS_QUERY_FEATURE_PLAIN@4092..4106
+                0: CSS_IDENTIFIER@4092..4101
+                  0: IDENT@4092..4101 "min-width" [] []
+                1: COLON@4101..4103 ":" [] [Whitespace(" ")]
+                2: CSS_UNKNOWN_DIMENSION@4103..4106
+                  0: CSS_NUMBER@4103..4104
+                    0: CSS_NUMBER_LITERAL@4103..4104 "0" [] []
+                  1: CSS_IDENTIFIER@4104..4106
+                    0: IDENT@4104..4106 "\\0" [] []
+              2: R_PAREN@4106..4108 ")" [] [Whitespace(" ")]
+        2: CSS_RULE_LIST_BLOCK@4108..4111
+          0: L_CURLY@4108..4109 "{" [] []
+          1: CSS_RULE_LIST@4109..4109
+          2: R_CURLY@4109..4111 "}" [Newline("\n")] []
+  2: EOF@4111..4111 "" [] []
 
 ```
 

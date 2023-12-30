@@ -260,7 +260,7 @@ CssRoot {
                 CssBogusSelector {
                     items: [
                         LTEQ@227..230 "<=" [] [Whitespace(" ")],
-                        CSS_NUMBER_LITERAL@230..233 "500" [] [],
+                        CSS_DIMENSION_VALUE@230..233 "500" [] [],
                         PX_KW@233..235 "px" [] [],
                         R_PAREN@235..237 ")" [] [Whitespace(" ")],
                     ],
@@ -303,7 +303,7 @@ CssRoot {
                 CssBogusSelector {
                     items: [
                         LTEQ@263..266 "<=" [] [Whitespace(" ")],
-                        CSS_NUMBER_LITERAL@266..269 "500" [] [],
+                        CSS_DIMENSION_VALUE@266..269 "500" [] [],
                         PX_KW@269..271 "px" [] [],
                         R_PAREN@271..273 ")" [] [Whitespace(" ")],
                     ],
@@ -673,7 +673,7 @@ CssRoot {
         1: (empty)
         2: CSS_BOGUS_SELECTOR@227..237
           0: LTEQ@227..230 "<=" [] [Whitespace(" ")]
-          1: CSS_NUMBER_LITERAL@230..233 "500" [] []
+          1: CSS_DIMENSION_VALUE@230..233 "500" [] []
           2: PX_KW@233..235 "px" [] []
           3: R_PAREN@235..237 ")" [] [Whitespace(" ")]
       1: CSS_DECLARATION_LIST_BLOCK@237..240
@@ -701,7 +701,7 @@ CssRoot {
         1: (empty)
         2: CSS_BOGUS_SELECTOR@263..273
           0: LTEQ@263..266 "<=" [] [Whitespace(" ")]
-          1: CSS_NUMBER_LITERAL@266..269 "500" [] []
+          1: CSS_DIMENSION_VALUE@266..269 "500" [] []
           2: PX_KW@269..271 "px" [] []
           3: R_PAREN@271..273 ")" [] [Whitespace(" ")]
       1: CSS_DECLARATION_LIST_BLOCK@273..277

@@ -116,3 +116,7 @@
 
 
 @media (NOT (color)) OR (hover) {}
+
+/* http://browserbu.gs/css-hacks/media-min-width-0-backslash-0/ */
+@media screen and (min-width: 0\0) {
+}

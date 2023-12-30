@@ -13,4 +13,6 @@
 :nth-child(even of ^.div {}
 :nth-child(even ^.div,) {}
 :nth-child(even ^.div, {}
+:nth-child(2 n) {}
+:nth-child(2 n + 1) {}
 :nth-child(2n + 1

@@ -1973,6 +1973,20 @@ impl CssUniversalSelector {
         )
     }
 }
+impl CssUnknownDimension {
+    pub fn with_value(self, element: CssNumber) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_unit(self, element: CssIdentifier) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
 impl CssUrlFunction {
     pub fn with_url_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(

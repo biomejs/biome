@@ -5025,6 +5025,47 @@ pub struct CssUniversalSelectorFields {
     pub star_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssUnknownDimension {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssUnknownDimension {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssUnknownDimensionFields {
+        CssUnknownDimensionFields {
+            value: self.value(),
+            unit: self.unit(),
+        }
+    }
+    pub fn value(&self) -> SyntaxResult<CssNumber> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn unit(&self) -> SyntaxResult<CssIdentifier> {
+        support::required_node(&self.syntax, 1usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssUnknownDimension {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssUnknownDimensionFields {
+    pub value: SyntaxResult<CssNumber>,
+    pub unit: SyntaxResult<CssIdentifier>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssUrlFunction {
     pub(crate) syntax: SyntaxNode,
 }
@@ -5519,6 +5560,7 @@ impl AnyCssDeclarationOrAtRule {
 pub enum AnyCssDimension {
     CssPercentage(CssPercentage),
     CssRegularDimension(CssRegularDimension),
+    CssUnknownDimension(CssUnknownDimension),
 }
 impl AnyCssDimension {
     pub fn as_css_percentage(&self) -> Option<&CssPercentage> {
@@ -5530,6 +5572,12 @@ impl AnyCssDimension {
     pub fn as_css_regular_dimension(&self) -> Option<&CssRegularDimension> {
         match &self {
             AnyCssDimension::CssRegularDimension(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_unknown_dimension(&self) -> Option<&CssUnknownDimension> {
+        match &self {
+            AnyCssDimension::CssUnknownDimension(item) => Some(item),
             _ => None,
         }
     }
@@ -11512,6 +11560,45 @@ impl From<CssUniversalSelector> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for CssUnknownDimension {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_UNKNOWN_DIMENSION as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_UNKNOWN_DIMENSION
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssUnknownDimension {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssUnknownDimension")
+            .field("value", &support::DebugSyntaxResult(self.value()))
+            .field("unit", &support::DebugSyntaxResult(self.unit()))
+            .finish()
+    }
+}
+impl From<CssUnknownDimension> for SyntaxNode {
+    fn from(n: CssUnknownDimension) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssUnknownDimension> for SyntaxElement {
+    fn from(n: CssUnknownDimension) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
 impl AstNode for CssUrlFunction {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -12813,18 +12900,30 @@ impl From<CssRegularDimension> for AnyCssDimension {
         AnyCssDimension::CssRegularDimension(node)
     }
 }
+impl From<CssUnknownDimension> for AnyCssDimension {
+    fn from(node: CssUnknownDimension) -> AnyCssDimension {
+        AnyCssDimension::CssUnknownDimension(node)
+    }
+}
 impl AstNode for AnyCssDimension {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        CssPercentage::KIND_SET.union(CssRegularDimension::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> = CssPercentage::KIND_SET
+        .union(CssRegularDimension::KIND_SET)
+        .union(CssUnknownDimension::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, CSS_PERCENTAGE | CSS_REGULAR_DIMENSION)
+        matches!(
+            kind,
+            CSS_PERCENTAGE | CSS_REGULAR_DIMENSION | CSS_UNKNOWN_DIMENSION
+        )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             CSS_PERCENTAGE => AnyCssDimension::CssPercentage(CssPercentage { syntax }),
             CSS_REGULAR_DIMENSION => {
                 AnyCssDimension::CssRegularDimension(CssRegularDimension { syntax })
+            }
+            CSS_UNKNOWN_DIMENSION => {
+                AnyCssDimension::CssUnknownDimension(CssUnknownDimension { syntax })
             }
             _ => return None,
         };
@@ -12834,12 +12933,14 @@ impl AstNode for AnyCssDimension {
         match self {
             AnyCssDimension::CssPercentage(it) => &it.syntax,
             AnyCssDimension::CssRegularDimension(it) => &it.syntax,
+            AnyCssDimension::CssUnknownDimension(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
             AnyCssDimension::CssPercentage(it) => it.syntax,
             AnyCssDimension::CssRegularDimension(it) => it.syntax,
+            AnyCssDimension::CssUnknownDimension(it) => it.syntax,
         }
     }
 }
@@ -12848,6 +12949,7 @@ impl std::fmt::Debug for AnyCssDimension {
         match self {
             AnyCssDimension::CssPercentage(it) => std::fmt::Debug::fmt(it, f),
             AnyCssDimension::CssRegularDimension(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssDimension::CssUnknownDimension(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -12856,6 +12958,7 @@ impl From<AnyCssDimension> for SyntaxNode {
         match n {
             AnyCssDimension::CssPercentage(it) => it.into(),
             AnyCssDimension::CssRegularDimension(it) => it.into(),
+            AnyCssDimension::CssUnknownDimension(it) => it.into(),
         }
     }
 }
@@ -16909,6 +17012,11 @@ impl std::fmt::Display for CssUniversalNamespacePrefix {
     }
 }
 impl std::fmt::Display for CssUniversalSelector {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssUnknownDimension {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

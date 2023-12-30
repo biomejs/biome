@@ -1697,6 +1697,15 @@ impl CssUniversalSelectorBuilder {
         ))
     }
 }
+pub fn css_unknown_dimension(value: CssNumber, unit: CssIdentifier) -> CssUnknownDimension {
+    CssUnknownDimension::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_UNKNOWN_DIMENSION,
+        [
+            Some(SyntaxElement::Node(value.into_syntax())),
+            Some(SyntaxElement::Node(unit.into_syntax())),
+        ],
+    ))
+}
 pub fn css_url_function(
     url_token: SyntaxToken,
     l_paren_token: SyntaxToken,

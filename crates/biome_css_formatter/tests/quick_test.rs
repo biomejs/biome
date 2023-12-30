@@ -14,7 +14,9 @@ mod language {
 fn quick_test() {
     let src = r#"
 
-    @container style(--responsive: true) {  }
+    
+@media screen and (min-width: 0 px ) {
+  }
 
 "#;
     let parse = parse_css(src, CssParserOptions::default());
