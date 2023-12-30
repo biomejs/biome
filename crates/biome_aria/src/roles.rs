@@ -1128,6 +1128,17 @@ impl<'a> AriaRoles {
             return false;
         }
 
+        // SVG elements, by default, do not have interactive semantics.
+        // They are primarily used for graphics and visual rendering. While they can be made interactive with additional
+        // attributes and JavaScript, inherently they don't provide user interaction capabilities.
+        // Hence, we classify them as non-interactive elements similar to other non-interactive
+        // elements like <img> or <progress>.
+        //
+        // Check: https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/img_role#svg_and_roleimg
+        if element_name == "svg" {
+            return true;
+        }
+
         let elements_no_concept_info = [
             "body", "br", "details", "dir", "frame", "iframe", "label", "mark", "marquee", "menu",
             "meter", "optgroup", "pre", "progress", "ruby",
