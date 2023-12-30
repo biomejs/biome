@@ -1,6 +1,6 @@
 use crate::parser::CssParser;
 use crate::syntax::parse_error::expected_selector;
-use crate::syntax::selector::{eat_or_recover_selector_function_close_token, CssSelectorList};
+use crate::syntax::selector::{eat_or_recover_selector_function_close_token, SelectorList};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::ParseSeparatedList;
@@ -27,7 +27,7 @@ pub(crate) fn parse_pseudo_class_function_selector_list(p: &mut CssParser) -> Pa
     p.bump_ts(PSEUDO_CLASS_FUNCTION_SELECTOR_LIST_SET);
     p.bump(T!['(']);
 
-    let list = CssSelectorList::default()
+    let list = SelectorList::default()
         .with_end_kind(T![')'])
         // we don't need to recover here, because we have a better diagnostic message in a close token
         .disable_recovery()

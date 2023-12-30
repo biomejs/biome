@@ -14,10 +14,13 @@ export interface SupportsFeatureResult {
 export type SupportKind =
 	| "Supported"
 	| "Ignored"
+	| "Protected"
 	| "FeatureNotEnabled"
 	| "FileNotSupported";
 export interface UpdateSettingsParams {
 	configuration: Configuration;
+	gitignore_matches: string[];
+	vcs_base_path?: string;
 }
 /**
  * The configuration that is contained inside the file `biome.json`
@@ -27,6 +30,10 @@ export interface Configuration {
 	 * A field for the [JSON schema](https://json-schema.org/) specification
 	 */
 	$schema?: string;
+	/**
+	 * Specific configuration for the Css language
+	 */
+	css?: CssConfiguration;
 	/**
 	 * A list of paths to other JSON files, used to extends the current configuration.
 	 */
@@ -63,6 +70,19 @@ export interface Configuration {
 	 * The configuration of the VCS integration
 	 */
 	vcs?: VcsConfiguration;
+}
+/**
+ * Options applied to CSS files
+ */
+export interface CssConfiguration {
+	/**
+	 * Formatting options
+	 */
+	formatter?: CssFormatter;
+	/**
+	 * Parsing options
+	 */
+	parser?: CssParser;
 }
 export type StringSet = string[];
 /**
@@ -199,6 +219,10 @@ export interface VcsConfiguration {
 	 */
 	clientKind?: VcsClientKind;
 	/**
+	 * The main branch of the project
+	 */
+	defaultBranch?: string;
+	/**
 	 * Whether Biome should integrate itself with the VCS client
 	 */
 	enabled?: boolean;
@@ -212,6 +236,41 @@ If Biome can't find the configuration, it will attempt to use the current workin
 	 * Whether Biome should use the VCS ignore file. When [true], Biome will ignore the files specified in the ignore file.
 	 */
 	useIgnoreFile?: boolean;
+}
+export interface CssFormatter {
+	/**
+	 * Control the formatter for CSS (and its super languages) files.
+	 */
+	enabled?: boolean;
+	/**
+	 * The size of the indentation applied to CSS (and its super languages) files. Default to 2.
+	 */
+	indentSize?: number;
+	/**
+	 * The indent style applied to CSS (and its super languages) files.
+	 */
+	indentStyle?: PlainIndentStyle;
+	/**
+	 * The size of the indentation applied to CSS (and its super languages) files. Default to 2.
+	 */
+	indentWidth?: number;
+	/**
+	 * The type of line ending applied to CSS (and its super languages) files.
+	 */
+	lineEnding?: LineEnding;
+	/**
+	 * What's the max width of a line applied to CSS (and its super languages) files. Defaults to 80.
+	 */
+	lineWidth?: LineWidth;
+}
+/**
+ * Options that changes how the CSS parser behaves
+ */
+export interface CssParser {
+	/**
+	 * Allow comments to appear on incorrect lines in `.css` files
+	 */
+	allowWrongLineComments?: boolean;
 }
 export type PlainIndentStyle = "tab" | "space";
 export type LineEnding = "lf" | "crlf" | "cr";
@@ -352,6 +411,10 @@ export interface Rules {
 	suspicious?: Suspicious;
 }
 export interface OverridePattern {
+	/**
+	 * Specific configuration for the Css language
+	 */
+	css?: CssConfiguration;
 	/**
 	 * Specific configuration for the Json language
 	 */
@@ -798,9 +861,21 @@ export interface Nursery {
 	 */
 	noImplicitAnyLet?: RuleConfiguration;
 	/**
+	 * Disallow the use of variables and function parameters before their declaration
+	 */
+	noInvalidUseBeforeDeclaration?: RuleConfiguration;
+	/**
 	 * Disallow characters made with multiple code points in character class syntax.
 	 */
 	noMisleadingCharacterClass?: RuleConfiguration;
+	/**
+	 * Forbid the use of Node.js builtin modules. Can be useful for client-side web projects that do not have access to those modules.
+	 */
+	noNodejsModules?: RuleConfiguration;
+	/**
+	 * Disallow then property.
+	 */
+	noThenProperty?: RuleConfiguration;
 	/**
 	 * Disallow unused imports.
 	 */
@@ -830,6 +905,10 @@ export interface Nursery {
 	 */
 	useExportType?: RuleConfiguration;
 	/**
+	 * Enforce naming conventions for JavaScript and TypeScript filenames.
+	 */
+	useFilenamingConvention?: RuleConfiguration;
+	/**
 	 * This rule recommends a for-of loop when in a for loop, the index used to extract an item from the iterated array.
 	 */
 	useForOf?: RuleConfiguration;
@@ -841,6 +920,14 @@ export interface Nursery {
 	 * Disallows package private imports.
 	 */
 	useImportRestrictions?: RuleConfiguration;
+	/**
+	 * Enforces using the node: protocol for Node.js builtin modules.
+	 */
+	useNodeImportProtocol?: RuleConfiguration;
+	/**
+	 * Use Number properties instead of global ones.
+	 */
+	useNumberProperties?: RuleConfiguration;
 	/**
 	 * Enforce the use of the regular expression literals instead of the RegExp constructor if possible.
 	 */
@@ -1277,6 +1364,7 @@ export interface RuleWithOptions {
 }
 export type PossibleOptions =
 	| ComplexityOptions
+	| FilenamingConventionOptions
 	| HooksOptions
 	| NamingConventionOptions
 	| RestrictedGlobalsOptions
@@ -1289,6 +1377,19 @@ export interface ComplexityOptions {
 	 * The maximum complexity score that we allow. Anything higher is considered excessive.
 	 */
 	maxAllowedComplexity: number;
+}
+/**
+ * Rule's options.
+ */
+export interface FilenamingConventionOptions {
+	/**
+	 * Allowed cases for _TypeScript_ `enum` member names.
+	 */
+	filenameCases: FilenameCases;
+	/**
+	 * If `false`, then consecutive uppercase are allowed in _camel_ and _pascal_ cases. This does not affect other [Case].
+	 */
+	strictCase: boolean;
 }
 /**
  * Options for the rule `useExhaustiveDependencies` and `useHookAtTopLevel`
@@ -1325,6 +1426,7 @@ export interface ValidAriaRoleOptions {
 	allowedInvalidRoles: string[];
 	ignoreNonDom: boolean;
 }
+export type FilenameCases = FilenameCase[];
 export interface Hooks {
 	/**
 	* The "position" of the closure function, starting from zero.
@@ -1345,6 +1447,10 @@ export interface Hooks {
  * Supported cases for TypeScript `enum` member names.
  */
 export type EnumMemberCase = "PascalCase" | "CONSTANT_CASE" | "camelCase";
+/**
+ * Supported cases for TypeScript `enum` member names.
+ */
+export type FilenameCase = "camelCase" | "export" | "kebab-case" | "snake_case";
 export interface ProjectFeaturesParams {
 	manifest_path: RomePath;
 }
@@ -1365,6 +1471,7 @@ export type Language =
 	| "TypeScriptReact"
 	| "Json"
 	| "Jsonc"
+	| "Css"
 	| "Unknown";
 export interface ChangeFileParams {
 	content: string;
@@ -1522,7 +1629,11 @@ export type Category =
 	| "lint/nursery/noDuplicateJsonKeys"
 	| "lint/nursery/noEmptyBlockStatements"
 	| "lint/nursery/noImplicitAnyLet"
+	| "lint/nursery/noInvalidUseBeforeDeclaration"
 	| "lint/nursery/noMisleadingCharacterClass"
+	| "lint/nursery/noNodejsModules"
+	| "lint/nursery/noThenProperty"
+	| "lint/nursery/noTypeOnlyImportAttributes"
 	| "lint/nursery/noUnusedImports"
 	| "lint/nursery/noUnusedPrivateClassMembers"
 	| "lint/nursery/noUselessLoneBlockStatements"
@@ -1530,9 +1641,12 @@ export type Category =
 	| "lint/nursery/useAwait"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useExportType"
+	| "lint/nursery/useFilenamingConvention"
 	| "lint/nursery/useForOf"
 	| "lint/nursery/useGroupedTypeImport"
 	| "lint/nursery/useImportRestrictions"
+	| "lint/nursery/useNodeImportProtocol"
+	| "lint/nursery/useNumberProperties"
 	| "lint/nursery/useRegexLiterals"
 	| "lint/nursery/useShorthandFunctionType"
 	| "lint/nursery/useValidAriaRole"

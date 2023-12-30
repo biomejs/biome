@@ -103,7 +103,7 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
                     .descendants()
                     .any(|node| node.kind().is_bogus())
             {
-                panic!("Parsed tree of a 'OK' test case should not contain any missing required children or bogus nodes");
+                panic!("Parsed tree of a 'OK' test case should not contain any missing required children or bogus nodes: \n {formatted_ast:#?} \n\n {}", formatted_ast);
             }
 
             let syntax = parsed.syntax();
@@ -134,8 +134,9 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 #[test]
 pub fn quick_test() {
     let code = r#"
-    @container name style(not (not (--b: red))) {  }
+@scope (.media-object) to (.content > *) {}
     "#;
+
     let root = parse_css(
         code,
         CssParserOptions::default().allow_wrong_line_comments(),

@@ -1,14 +1,20 @@
 use crate::cli_options::{cli_options, CliOptions, ColorsArg};
+use crate::diagnostics::DeprecatedConfigurationFile;
 use crate::logging::LoggingKind;
-use crate::{LoggingLevel, VERSION};
+use crate::{CliDiagnostic, LoggingLevel, VERSION};
+use biome_console::{markup, Console, ConsoleExt};
+use biome_diagnostics::PrintDiagnostic;
+use biome_service::configuration::css::CssFormatter;
 use biome_service::configuration::json::JsonFormatter;
 use biome_service::configuration::vcs::VcsConfiguration;
 use biome_service::configuration::{
-    configuration, files_configuration, formatter_configuration, javascript::javascript_formatter,
-    json::json_formatter, linter_configuration, vcs::vcs_configuration, FilesConfiguration,
-    FormatterConfiguration, JavascriptFormatter, LinterConfiguration,
+    configuration, css::css_formatter, files_configuration, formatter_configuration,
+    javascript::javascript_formatter, json::json_formatter, linter_configuration,
+    vcs::vcs_configuration, FilesConfiguration, FormatterConfiguration, JavascriptFormatter,
+    LinterConfiguration, LoadedConfiguration,
 };
-use biome_service::Configuration;
+use biome_service::documentation::Doc;
+use biome_service::{Configuration, ConfigurationDiagnostic, WorkspaceError};
 use bpaf::Bpaf;
 use std::ffi::OsString;
 use std::path::PathBuf;
@@ -16,6 +22,7 @@ use std::path::PathBuf;
 pub(crate) mod check;
 pub(crate) mod ci;
 pub(crate) mod daemon;
+pub(crate) mod explain;
 pub(crate) mod format;
 pub(crate) mod init;
 pub(crate) mod lint;
@@ -90,6 +97,17 @@ pub enum BiomeCommand {
         /// Example: `echo 'let a;' | biome check --stdin-file-path=file.js`
         #[bpaf(long("stdin-file-path"), argument("PATH"), hide_usage)]
         stdin_file_path: Option<String>,
+
+        /// When set to true, only the files that have been changed compared to your `defaultBranch`
+        /// configuration will be linted.
+        #[bpaf(long("changed"), switch)]
+        changed: bool,
+
+        /// Use this to specify the base branch to compare against when you're using the --changed
+        /// flag and the `defaultBranch` is not set in your biome.json
+        #[bpaf(long("since"), argument("REF"))]
+        since: Option<String>,
+
         /// Single file, single path or list of paths
         #[bpaf(positional("PATH"), many)]
         paths: Vec<OsString>,
@@ -121,6 +139,14 @@ pub enum BiomeCommand {
         /// Example: `echo 'let a;' | biome lint --stdin-file-path=file.js`
         #[bpaf(long("stdin-file-path"), argument("PATH"), hide_usage)]
         stdin_file_path: Option<String>,
+        /// When set to true, only the files that have been changed compared to your `defaultBranch`
+        /// configuration will be linted.
+        #[bpaf(long("changed"), switch)]
+        changed: bool,
+        /// Use this to specify the base branch to compare against when you're using the --changed
+        /// flag and the `defaultBranch` is not set in your biome.json
+        #[bpaf(long("since"), argument("REF"))]
+        since: Option<String>,
         /// Single file, single path or list of paths
         #[bpaf(positional("PATH"), many)]
         paths: Vec<OsString>,
@@ -136,6 +162,9 @@ pub enum BiomeCommand {
 
         #[bpaf(external, optional, hide_usage)]
         json_formatter: Option<JsonFormatter>,
+
+        #[bpaf(external, optional, hide_usage, hide)]
+        css_formatter: Option<CssFormatter>,
 
         #[bpaf(external, optional, hide_usage)]
         vcs_configuration: Option<VcsConfiguration>,
@@ -156,6 +185,16 @@ pub enum BiomeCommand {
         /// Writes formatted files to file system.
         #[bpaf(switch)]
         write: bool,
+
+        /// When set to true, only the files that have been changed compared to your `defaultBranch`
+        /// configuration will be linted.
+        #[bpaf(long("changed"), switch)]
+        changed: bool,
+
+        /// Use this to specify the base branch to compare against when you're using the --changed
+        /// flag and the `defaultBranch` is not set in your biome.json
+        #[bpaf(long("since"), argument("REF"))]
+        since: Option<String>,
 
         /// Single file, single path or list of paths.
         #[bpaf(positional("PATH"), many)]
@@ -181,6 +220,16 @@ pub enum BiomeCommand {
         #[bpaf(external, hide_usage)]
         cli_options: CliOptions,
 
+        /// When set to true, only the files that have been changed compared to your `defaultBranch`
+        /// configuration will be linted.
+        #[bpaf(long("changed"), switch)]
+        changed: bool,
+
+        /// Use this to specify the base branch to compare against when you're using the --changed
+        /// flag and the `defaultBranch` is not set in your biome.json
+        #[bpaf(long("since"), argument("REF"))]
+        since: Option<String>,
+
         /// Single file, single path or list of paths
         #[bpaf(positional("PATH"), many)]
         paths: Vec<OsString>,
@@ -205,6 +254,14 @@ pub enum BiomeCommand {
         bool,
     ),
 
+    /// A command to retrieve the documentation of various aspects of the CLI.
+    #[bpaf(command)]
+    Explain {
+        /// Single name to display documentation for.
+        #[bpaf(positional("NAME"))]
+        doc: Doc,
+    },
+
     #[bpaf(command("__run_server"), hide)]
     RunServer {
         #[bpaf(long("stop-on-disconnect"), hide_usage)]
@@ -215,6 +272,8 @@ pub enum BiomeCommand {
     },
     #[bpaf(command("__print_socket"), hide)]
     PrintSocket,
+    #[bpaf(command("__print_cache_dir"), hide)]
+    PrintCacheDir,
 }
 
 impl BiomeCommand {
@@ -231,8 +290,10 @@ impl BiomeCommand {
             | BiomeCommand::Start(_)
             | BiomeCommand::Stop
             | BiomeCommand::Init
+            | BiomeCommand::Explain { .. }
             | BiomeCommand::RunServer { .. }
-            | BiomeCommand::PrintSocket => None,
+            | BiomeCommand::PrintSocket
+            | BiomeCommand::PrintCacheDir => None,
         }
     }
 
@@ -248,9 +309,11 @@ impl BiomeCommand {
             BiomeCommand::Init
             | BiomeCommand::Start(_)
             | BiomeCommand::Stop
+            | BiomeCommand::Explain { .. }
             | BiomeCommand::LspProxy(_)
             | BiomeCommand::RunServer { .. }
-            | BiomeCommand::PrintSocket => false,
+            | BiomeCommand::PrintSocket
+            | BiomeCommand::PrintCacheDir => false,
         }
     }
 
@@ -270,9 +333,11 @@ impl BiomeCommand {
             | BiomeCommand::Start(_)
             | BiomeCommand::Stop
             | BiomeCommand::Init
+            | BiomeCommand::Explain { .. }
             | BiomeCommand::LspProxy(_)
             | BiomeCommand::RunServer { .. }
-            | BiomeCommand::PrintSocket => false,
+            | BiomeCommand::PrintSocket
+            | BiomeCommand::PrintCacheDir => false,
         }
     }
 
@@ -289,8 +354,10 @@ impl BiomeCommand {
             | BiomeCommand::Start(_)
             | BiomeCommand::Stop
             | BiomeCommand::Init
+            | BiomeCommand::Explain { .. }
             | BiomeCommand::RunServer { .. }
-            | BiomeCommand::PrintSocket => LoggingLevel::default(),
+            | BiomeCommand::PrintSocket
+            | BiomeCommand::PrintCacheDir => LoggingLevel::default(),
         }
     }
     pub fn log_kind(&self) -> LoggingKind {
@@ -306,8 +373,48 @@ impl BiomeCommand {
             | BiomeCommand::Start(_)
             | BiomeCommand::Stop
             | BiomeCommand::Init
+            | BiomeCommand::Explain { .. }
             | BiomeCommand::RunServer { .. }
-            | BiomeCommand::PrintSocket => LoggingKind::default(),
+            | BiomeCommand::PrintSocket
+            | BiomeCommand::PrintCacheDir => LoggingKind::default(),
         }
     }
+}
+
+/// It accepts a [LoadedConfiguration] and it prints the diagnostics emitted during parsing and deserialization.
+///
+/// If it contains errors, it return an error.
+pub(crate) fn validate_configuration_diagnostics(
+    loaded_configuration: &LoadedConfiguration,
+    console: &mut dyn Console,
+    verbose: bool,
+) -> Result<(), CliDiagnostic> {
+    if let Some(file_path) = loaded_configuration
+        .file_path
+        .as_ref()
+        .and_then(|f| f.file_name())
+        .and_then(|f| f.to_str())
+    {
+        if file_path == "rome.json" {
+            let diagnostic = DeprecatedConfigurationFile::new(file_path);
+            console.error(markup!{
+                {if verbose { PrintDiagnostic::verbose(&diagnostic) } else { PrintDiagnostic::simple(&diagnostic) }}
+            });
+        }
+    }
+    let diagnostics = loaded_configuration.as_diagnostics_iter();
+    for diagnostic in diagnostics {
+        console.error(markup!{
+            {if verbose { PrintDiagnostic::verbose(diagnostic) } else { PrintDiagnostic::simple(diagnostic) }}
+        });
+    }
+    if loaded_configuration.has_errors() {
+        return Err(CliDiagnostic::workspace_error(
+            WorkspaceError::Configuration(ConfigurationDiagnostic::invalid_configuration(
+                "Biome exited because the configuration resulted in errors. Please fix them.",
+            )),
+        ));
+    }
+
+    Ok(())
 }

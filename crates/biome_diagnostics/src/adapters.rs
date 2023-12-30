@@ -66,8 +66,7 @@ impl Diagnostic for IoError {
     }
 
     fn message(&self, fmt: &mut fmt::Formatter<'_>) -> io::Result<()> {
-        let error = self.error.to_string();
-        fmt.write_str(&error)
+        fmt.write_markup(markup!({ AsConsoleDisplay(&self.error) }))
     }
 }
 

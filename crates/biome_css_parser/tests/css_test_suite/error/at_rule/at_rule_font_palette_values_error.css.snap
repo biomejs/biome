@@ -1,0 +1,579 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@font-palette-values  {  }
+@font-palette-values 6788 {  }
+@font-palette-values 'string' {  }
+@font-palette-values undashed-ident { }
+@font-palette-values inherit { }
+@font-palette-values initial { }
+@font-palette-values unset { }
+@font-palette-values revert { }
+@font-palette-values revert-layer { }
+@font-palette-values ident
+@font-palette-values ;
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssBogusAtRule {
+                items: [
+                    FONT_PALETTE_VALUES_KW@1..22 "font-palette-values" [] [Whitespace("  ")],
+                    CssDeclarationListBlock {
+                        l_curly_token: L_CURLY@22..25 "{" [] [Whitespace("  ")],
+                        declarations: CssDeclarationList [],
+                        r_curly_token: R_CURLY@25..26 "}" [] [],
+                    },
+                ],
+            },
+        },
+        CssAtRule {
+            at_token: AT@26..28 "@" [Newline("\n")] [],
+            rule: CssBogusAtRule {
+                items: [
+                    FONT_PALETTE_VALUES_KW@28..48 "font-palette-values" [] [Whitespace(" ")],
+                    CssBogus {
+                        items: [
+                            CSS_NUMBER_LITERAL@48..53 "6788" [] [Whitespace(" ")],
+                        ],
+                    },
+                    CssDeclarationListBlock {
+                        l_curly_token: L_CURLY@53..56 "{" [] [Whitespace("  ")],
+                        declarations: CssDeclarationList [],
+                        r_curly_token: R_CURLY@56..57 "}" [] [],
+                    },
+                ],
+            },
+        },
+        CssAtRule {
+            at_token: AT@57..59 "@" [Newline("\n")] [],
+            rule: CssBogusAtRule {
+                items: [
+                    FONT_PALETTE_VALUES_KW@59..79 "font-palette-values" [] [Whitespace(" ")],
+                    CssBogus {
+                        items: [
+                            CSS_STRING_LITERAL@79..88 "'string'" [] [Whitespace(" ")],
+                        ],
+                    },
+                    CssDeclarationListBlock {
+                        l_curly_token: L_CURLY@88..91 "{" [] [Whitespace("  ")],
+                        declarations: CssDeclarationList [],
+                        r_curly_token: R_CURLY@91..92 "}" [] [],
+                    },
+                ],
+            },
+        },
+        CssAtRule {
+            at_token: AT@92..94 "@" [Newline("\n")] [],
+            rule: CssBogusAtRule {
+                items: [
+                    FONT_PALETTE_VALUES_KW@94..114 "font-palette-values" [] [Whitespace(" ")],
+                    CssBogus {
+                        items: [
+                            IDENT@114..129 "undashed-ident" [] [Whitespace(" ")],
+                        ],
+                    },
+                    CssDeclarationListBlock {
+                        l_curly_token: L_CURLY@129..131 "{" [] [Whitespace(" ")],
+                        declarations: CssDeclarationList [],
+                        r_curly_token: R_CURLY@131..132 "}" [] [],
+                    },
+                ],
+            },
+        },
+        CssAtRule {
+            at_token: AT@132..134 "@" [Newline("\n")] [],
+            rule: CssBogusAtRule {
+                items: [
+                    FONT_PALETTE_VALUES_KW@134..154 "font-palette-values" [] [Whitespace(" ")],
+                    CssBogus {
+                        items: [
+                            INHERIT_KW@154..162 "inherit" [] [Whitespace(" ")],
+                        ],
+                    },
+                    CssDeclarationListBlock {
+                        l_curly_token: L_CURLY@162..164 "{" [] [Whitespace(" ")],
+                        declarations: CssDeclarationList [],
+                        r_curly_token: R_CURLY@164..165 "}" [] [],
+                    },
+                ],
+            },
+        },
+        CssAtRule {
+            at_token: AT@165..167 "@" [Newline("\n")] [],
+            rule: CssBogusAtRule {
+                items: [
+                    FONT_PALETTE_VALUES_KW@167..187 "font-palette-values" [] [Whitespace(" ")],
+                    CssBogus {
+                        items: [
+                            INITIAL_KW@187..195 "initial" [] [Whitespace(" ")],
+                        ],
+                    },
+                    CssDeclarationListBlock {
+                        l_curly_token: L_CURLY@195..197 "{" [] [Whitespace(" ")],
+                        declarations: CssDeclarationList [],
+                        r_curly_token: R_CURLY@197..198 "}" [] [],
+                    },
+                ],
+            },
+        },
+        CssAtRule {
+            at_token: AT@198..200 "@" [Newline("\n")] [],
+            rule: CssBogusAtRule {
+                items: [
+                    FONT_PALETTE_VALUES_KW@200..220 "font-palette-values" [] [Whitespace(" ")],
+                    CssBogus {
+                        items: [
+                            UNSET_KW@220..226 "unset" [] [Whitespace(" ")],
+                        ],
+                    },
+                    CssDeclarationListBlock {
+                        l_curly_token: L_CURLY@226..228 "{" [] [Whitespace(" ")],
+                        declarations: CssDeclarationList [],
+                        r_curly_token: R_CURLY@228..229 "}" [] [],
+                    },
+                ],
+            },
+        },
+        CssAtRule {
+            at_token: AT@229..231 "@" [Newline("\n")] [],
+            rule: CssBogusAtRule {
+                items: [
+                    FONT_PALETTE_VALUES_KW@231..251 "font-palette-values" [] [Whitespace(" ")],
+                    CssBogus {
+                        items: [
+                            REVERT_KW@251..258 "revert" [] [Whitespace(" ")],
+                        ],
+                    },
+                    CssDeclarationListBlock {
+                        l_curly_token: L_CURLY@258..260 "{" [] [Whitespace(" ")],
+                        declarations: CssDeclarationList [],
+                        r_curly_token: R_CURLY@260..261 "}" [] [],
+                    },
+                ],
+            },
+        },
+        CssAtRule {
+            at_token: AT@261..263 "@" [Newline("\n")] [],
+            rule: CssBogusAtRule {
+                items: [
+                    FONT_PALETTE_VALUES_KW@263..283 "font-palette-values" [] [Whitespace(" ")],
+                    CssBogus {
+                        items: [
+                            REVERT_LAYER_KW@283..296 "revert-layer" [] [Whitespace(" ")],
+                        ],
+                    },
+                    CssDeclarationListBlock {
+                        l_curly_token: L_CURLY@296..298 "{" [] [Whitespace(" ")],
+                        declarations: CssDeclarationList [],
+                        r_curly_token: R_CURLY@298..299 "}" [] [],
+                    },
+                ],
+            },
+        },
+        CssAtRule {
+            at_token: AT@299..301 "@" [Newline("\n")] [],
+            rule: CssBogusAtRule {
+                items: [
+                    FONT_PALETTE_VALUES_KW@301..321 "font-palette-values" [] [Whitespace(" ")],
+                    CssBogus {
+                        items: [
+                            IDENT@321..326 "ident" [] [],
+                        ],
+                    },
+                ],
+            },
+        },
+        CssAtRule {
+            at_token: AT@326..328 "@" [Newline("\n")] [],
+            rule: CssBogusAtRule {
+                items: [
+                    FONT_PALETTE_VALUES_KW@328..348 "font-palette-values" [] [Whitespace(" ")],
+                    CssBogus {
+                        items: [
+                            SEMICOLON@348..349 ";" [] [],
+                        ],
+                    },
+                ],
+            },
+        },
+    ],
+    eof_token: EOF@349..350 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..350
+  0: (empty)
+  1: CSS_RULE_LIST@0..349
+    0: CSS_AT_RULE@0..26
+      0: AT@0..1 "@" [] []
+      1: CSS_BOGUS_AT_RULE@1..26
+        0: FONT_PALETTE_VALUES_KW@1..22 "font-palette-values" [] [Whitespace("  ")]
+        1: CSS_DECLARATION_LIST_BLOCK@22..26
+          0: L_CURLY@22..25 "{" [] [Whitespace("  ")]
+          1: CSS_DECLARATION_LIST@25..25
+          2: R_CURLY@25..26 "}" [] []
+    1: CSS_AT_RULE@26..57
+      0: AT@26..28 "@" [Newline("\n")] []
+      1: CSS_BOGUS_AT_RULE@28..57
+        0: FONT_PALETTE_VALUES_KW@28..48 "font-palette-values" [] [Whitespace(" ")]
+        1: CSS_BOGUS@48..53
+          0: CSS_NUMBER_LITERAL@48..53 "6788" [] [Whitespace(" ")]
+        2: CSS_DECLARATION_LIST_BLOCK@53..57
+          0: L_CURLY@53..56 "{" [] [Whitespace("  ")]
+          1: CSS_DECLARATION_LIST@56..56
+          2: R_CURLY@56..57 "}" [] []
+    2: CSS_AT_RULE@57..92
+      0: AT@57..59 "@" [Newline("\n")] []
+      1: CSS_BOGUS_AT_RULE@59..92
+        0: FONT_PALETTE_VALUES_KW@59..79 "font-palette-values" [] [Whitespace(" ")]
+        1: CSS_BOGUS@79..88
+          0: CSS_STRING_LITERAL@79..88 "'string'" [] [Whitespace(" ")]
+        2: CSS_DECLARATION_LIST_BLOCK@88..92
+          0: L_CURLY@88..91 "{" [] [Whitespace("  ")]
+          1: CSS_DECLARATION_LIST@91..91
+          2: R_CURLY@91..92 "}" [] []
+    3: CSS_AT_RULE@92..132
+      0: AT@92..94 "@" [Newline("\n")] []
+      1: CSS_BOGUS_AT_RULE@94..132
+        0: FONT_PALETTE_VALUES_KW@94..114 "font-palette-values" [] [Whitespace(" ")]
+        1: CSS_BOGUS@114..129
+          0: IDENT@114..129 "undashed-ident" [] [Whitespace(" ")]
+        2: CSS_DECLARATION_LIST_BLOCK@129..132
+          0: L_CURLY@129..131 "{" [] [Whitespace(" ")]
+          1: CSS_DECLARATION_LIST@131..131
+          2: R_CURLY@131..132 "}" [] []
+    4: CSS_AT_RULE@132..165
+      0: AT@132..134 "@" [Newline("\n")] []
+      1: CSS_BOGUS_AT_RULE@134..165
+        0: FONT_PALETTE_VALUES_KW@134..154 "font-palette-values" [] [Whitespace(" ")]
+        1: CSS_BOGUS@154..162
+          0: INHERIT_KW@154..162 "inherit" [] [Whitespace(" ")]
+        2: CSS_DECLARATION_LIST_BLOCK@162..165
+          0: L_CURLY@162..164 "{" [] [Whitespace(" ")]
+          1: CSS_DECLARATION_LIST@164..164
+          2: R_CURLY@164..165 "}" [] []
+    5: CSS_AT_RULE@165..198
+      0: AT@165..167 "@" [Newline("\n")] []
+      1: CSS_BOGUS_AT_RULE@167..198
+        0: FONT_PALETTE_VALUES_KW@167..187 "font-palette-values" [] [Whitespace(" ")]
+        1: CSS_BOGUS@187..195
+          0: INITIAL_KW@187..195 "initial" [] [Whitespace(" ")]
+        2: CSS_DECLARATION_LIST_BLOCK@195..198
+          0: L_CURLY@195..197 "{" [] [Whitespace(" ")]
+          1: CSS_DECLARATION_LIST@197..197
+          2: R_CURLY@197..198 "}" [] []
+    6: CSS_AT_RULE@198..229
+      0: AT@198..200 "@" [Newline("\n")] []
+      1: CSS_BOGUS_AT_RULE@200..229
+        0: FONT_PALETTE_VALUES_KW@200..220 "font-palette-values" [] [Whitespace(" ")]
+        1: CSS_BOGUS@220..226
+          0: UNSET_KW@220..226 "unset" [] [Whitespace(" ")]
+        2: CSS_DECLARATION_LIST_BLOCK@226..229
+          0: L_CURLY@226..228 "{" [] [Whitespace(" ")]
+          1: CSS_DECLARATION_LIST@228..228
+          2: R_CURLY@228..229 "}" [] []
+    7: CSS_AT_RULE@229..261
+      0: AT@229..231 "@" [Newline("\n")] []
+      1: CSS_BOGUS_AT_RULE@231..261
+        0: FONT_PALETTE_VALUES_KW@231..251 "font-palette-values" [] [Whitespace(" ")]
+        1: CSS_BOGUS@251..258
+          0: REVERT_KW@251..258 "revert" [] [Whitespace(" ")]
+        2: CSS_DECLARATION_LIST_BLOCK@258..261
+          0: L_CURLY@258..260 "{" [] [Whitespace(" ")]
+          1: CSS_DECLARATION_LIST@260..260
+          2: R_CURLY@260..261 "}" [] []
+    8: CSS_AT_RULE@261..299
+      0: AT@261..263 "@" [Newline("\n")] []
+      1: CSS_BOGUS_AT_RULE@263..299
+        0: FONT_PALETTE_VALUES_KW@263..283 "font-palette-values" [] [Whitespace(" ")]
+        1: CSS_BOGUS@283..296
+          0: REVERT_LAYER_KW@283..296 "revert-layer" [] [Whitespace(" ")]
+        2: CSS_DECLARATION_LIST_BLOCK@296..299
+          0: L_CURLY@296..298 "{" [] [Whitespace(" ")]
+          1: CSS_DECLARATION_LIST@298..298
+          2: R_CURLY@298..299 "}" [] []
+    9: CSS_AT_RULE@299..326
+      0: AT@299..301 "@" [Newline("\n")] []
+      1: CSS_BOGUS_AT_RULE@301..326
+        0: FONT_PALETTE_VALUES_KW@301..321 "font-palette-values" [] [Whitespace(" ")]
+        1: CSS_BOGUS@321..326
+          0: IDENT@321..326 "ident" [] []
+    10: CSS_AT_RULE@326..349
+      0: AT@326..328 "@" [Newline("\n")] []
+      1: CSS_BOGUS_AT_RULE@328..349
+        0: FONT_PALETTE_VALUES_KW@328..348 "font-palette-values" [] [Whitespace(" ")]
+        1: CSS_BOGUS@348..349
+          0: SEMICOLON@348..349 ";" [] []
+  2: EOF@349..350 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+at_rule_font_palette_values_error.css:1:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a dashed identifier but instead found '{'.
+  
+  > 1 │ @font-palette-values  {  }
+      │                       ^
+    2 │ @font-palette-values 6788 {  }
+    3 │ @font-palette-values 'string' {  }
+  
+  i Expected a dashed identifier here.
+  
+  > 1 │ @font-palette-values  {  }
+      │                       ^
+    2 │ @font-palette-values 6788 {  }
+    3 │ @font-palette-values 'string' {  }
+  
+at_rule_font_palette_values_error.css:2:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a dashed identifier but instead found '6788'.
+  
+    1 │ @font-palette-values  {  }
+  > 2 │ @font-palette-values 6788 {  }
+      │                      ^^^^
+    3 │ @font-palette-values 'string' {  }
+    4 │ @font-palette-values undashed-ident { }
+  
+  i Expected a dashed identifier here.
+  
+    1 │ @font-palette-values  {  }
+  > 2 │ @font-palette-values 6788 {  }
+      │                      ^^^^
+    3 │ @font-palette-values 'string' {  }
+    4 │ @font-palette-values undashed-ident { }
+  
+at_rule_font_palette_values_error.css:3:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a dashed identifier but instead found ''string''.
+  
+    1 │ @font-palette-values  {  }
+    2 │ @font-palette-values 6788 {  }
+  > 3 │ @font-palette-values 'string' {  }
+      │                      ^^^^^^^^
+    4 │ @font-palette-values undashed-ident { }
+    5 │ @font-palette-values inherit { }
+  
+  i Expected a dashed identifier here.
+  
+    1 │ @font-palette-values  {  }
+    2 │ @font-palette-values 6788 {  }
+  > 3 │ @font-palette-values 'string' {  }
+      │                      ^^^^^^^^
+    4 │ @font-palette-values undashed-ident { }
+    5 │ @font-palette-values inherit { }
+  
+at_rule_font_palette_values_error.css:4:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a dashed identifier but instead found 'undashed-ident'.
+  
+    2 │ @font-palette-values 6788 {  }
+    3 │ @font-palette-values 'string' {  }
+  > 4 │ @font-palette-values undashed-ident { }
+      │                      ^^^^^^^^^^^^^^
+    5 │ @font-palette-values inherit { }
+    6 │ @font-palette-values initial { }
+  
+  i Expected a dashed identifier here.
+  
+    2 │ @font-palette-values 6788 {  }
+    3 │ @font-palette-values 'string' {  }
+  > 4 │ @font-palette-values undashed-ident { }
+      │                      ^^^^^^^^^^^^^^
+    5 │ @font-palette-values inherit { }
+    6 │ @font-palette-values initial { }
+  
+at_rule_font_palette_values_error.css:5:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a dashed identifier but instead found 'inherit'.
+  
+    3 │ @font-palette-values 'string' {  }
+    4 │ @font-palette-values undashed-ident { }
+  > 5 │ @font-palette-values inherit { }
+      │                      ^^^^^^^
+    6 │ @font-palette-values initial { }
+    7 │ @font-palette-values unset { }
+  
+  i Expected a dashed identifier here.
+  
+    3 │ @font-palette-values 'string' {  }
+    4 │ @font-palette-values undashed-ident { }
+  > 5 │ @font-palette-values inherit { }
+      │                      ^^^^^^^
+    6 │ @font-palette-values initial { }
+    7 │ @font-palette-values unset { }
+  
+at_rule_font_palette_values_error.css:6:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a dashed identifier but instead found 'initial'.
+  
+    4 │ @font-palette-values undashed-ident { }
+    5 │ @font-palette-values inherit { }
+  > 6 │ @font-palette-values initial { }
+      │                      ^^^^^^^
+    7 │ @font-palette-values unset { }
+    8 │ @font-palette-values revert { }
+  
+  i Expected a dashed identifier here.
+  
+    4 │ @font-palette-values undashed-ident { }
+    5 │ @font-palette-values inherit { }
+  > 6 │ @font-palette-values initial { }
+      │                      ^^^^^^^
+    7 │ @font-palette-values unset { }
+    8 │ @font-palette-values revert { }
+  
+at_rule_font_palette_values_error.css:7:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a dashed identifier but instead found 'unset'.
+  
+    5 │ @font-palette-values inherit { }
+    6 │ @font-palette-values initial { }
+  > 7 │ @font-palette-values unset { }
+      │                      ^^^^^
+    8 │ @font-palette-values revert { }
+    9 │ @font-palette-values revert-layer { }
+  
+  i Expected a dashed identifier here.
+  
+    5 │ @font-palette-values inherit { }
+    6 │ @font-palette-values initial { }
+  > 7 │ @font-palette-values unset { }
+      │                      ^^^^^
+    8 │ @font-palette-values revert { }
+    9 │ @font-palette-values revert-layer { }
+  
+at_rule_font_palette_values_error.css:8:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a dashed identifier but instead found 'revert'.
+  
+     6 │ @font-palette-values initial { }
+     7 │ @font-palette-values unset { }
+   > 8 │ @font-palette-values revert { }
+       │                      ^^^^^^
+     9 │ @font-palette-values revert-layer { }
+    10 │ @font-palette-values ident
+  
+  i Expected a dashed identifier here.
+  
+     6 │ @font-palette-values initial { }
+     7 │ @font-palette-values unset { }
+   > 8 │ @font-palette-values revert { }
+       │                      ^^^^^^
+     9 │ @font-palette-values revert-layer { }
+    10 │ @font-palette-values ident
+  
+at_rule_font_palette_values_error.css:9:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a dashed identifier but instead found 'revert-layer'.
+  
+     7 │ @font-palette-values unset { }
+     8 │ @font-palette-values revert { }
+   > 9 │ @font-palette-values revert-layer { }
+       │                      ^^^^^^^^^^^^
+    10 │ @font-palette-values ident
+    11 │ @font-palette-values ;
+  
+  i Expected a dashed identifier here.
+  
+     7 │ @font-palette-values unset { }
+     8 │ @font-palette-values revert { }
+   > 9 │ @font-palette-values revert-layer { }
+       │                      ^^^^^^^^^^^^
+    10 │ @font-palette-values ident
+    11 │ @font-palette-values ;
+  
+at_rule_font_palette_values_error.css:10:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a dashed identifier but instead found 'ident'.
+  
+     8 │ @font-palette-values revert { }
+     9 │ @font-palette-values revert-layer { }
+  > 10 │ @font-palette-values ident
+       │                      ^^^^^
+    11 │ @font-palette-values ;
+    12 │ 
+  
+  i Expected a dashed identifier here.
+  
+     8 │ @font-palette-values revert { }
+     9 │ @font-palette-values revert-layer { }
+  > 10 │ @font-palette-values ident
+       │                      ^^^^^
+    11 │ @font-palette-values ;
+    12 │ 
+  
+at_rule_font_palette_values_error.css:11:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a body but instead found '@'.
+  
+     9 │ @font-palette-values revert-layer { }
+    10 │ @font-palette-values ident
+  > 11 │ @font-palette-values ;
+       │ ^
+    12 │ 
+  
+  i Expected a body here.
+  
+     9 │ @font-palette-values revert-layer { }
+    10 │ @font-palette-values ident
+  > 11 │ @font-palette-values ;
+       │ ^
+    12 │ 
+  
+at_rule_font_palette_values_error.css:11:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a dashed identifier but instead found ';'.
+  
+     9 │ @font-palette-values revert-layer { }
+    10 │ @font-palette-values ident
+  > 11 │ @font-palette-values ;
+       │                      ^
+    12 │ 
+  
+  i Expected a dashed identifier here.
+  
+     9 │ @font-palette-values revert-layer { }
+    10 │ @font-palette-values ident
+  > 11 │ @font-palette-values ;
+       │                      ^
+    12 │ 
+  
+at_rule_font_palette_values_error.css:12:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a body but instead found the end of the file.
+  
+    10 │ @font-palette-values ident
+    11 │ @font-palette-values ;
+  > 12 │ 
+       │ 
+  
+  i Expected a body here.
+  
+    10 │ @font-palette-values ident
+    11 │ @font-palette-values ;
+  > 12 │ 
+       │ 
+  
+```
+
+

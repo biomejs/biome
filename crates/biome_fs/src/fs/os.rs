@@ -7,11 +7,11 @@ use crate::{
 };
 use biome_diagnostics::{adapters::IoError, DiagnosticExt, Error, Severity};
 use rayon::{scope, Scope};
+use std::ffi::OsStr;
 use std::fs::{DirEntry, FileType};
+use std::process::Command;
 use std::{
-    env,
-    ffi::OsStr,
-    fs,
+    env, fs,
     io::{self, ErrorKind as IoErrorKind, Read, Seek, Write},
     mem,
     path::{Path, PathBuf},
@@ -46,6 +46,19 @@ impl FileSystem for OsFileSystem {
 
     fn path_exists(&self, path: &Path) -> bool {
         path.exists()
+    }
+
+    fn get_changed_files(&self, base: &str) -> io::Result<Vec<String>> {
+        let output = Command::new("git")
+            .arg("diff")
+            .arg("--name-only")
+            .arg(format!("{}...HEAD", base))
+            .output()?;
+
+        Ok(String::from_utf8_lossy(&output.stdout)
+            .lines()
+            .map(|l| l.to_string())
+            .collect())
     }
 }
 
@@ -128,16 +141,16 @@ impl<'scope> TraversalScope<'scope> for OsTraversalScope<'scope> {
 
         let _ = ctx.interner().intern_path(path.clone());
 
-        if file_type.is_file() {
-            self.scope.spawn(move |_| {
-                ctx.handle_file(&path);
+        if file_type.is_dir() {
+            self.scope.spawn(move |scope| {
+                handle_dir(scope, ctx, &path, None);
             });
             return;
         }
 
-        if file_type.is_dir() {
-            self.scope.spawn(move |scope| {
-                handle_dir(scope, ctx, &path, None);
+        if file_type.is_file() {
+            self.scope.spawn(move |_| {
+                ctx.handle_file(&path);
             });
             return;
         }
@@ -150,6 +163,7 @@ impl<'scope> TraversalScope<'scope> for OsTraversalScope<'scope> {
     }
 }
 
+// TODO: remove in Biome 2.0, and directly use `.gitignore`
 /// Default list of ignored directories, in the future will be supplanted by
 /// detecting and parsing .ignore files
 const DEFAULT_IGNORE: &[&str; 5] = &[".git", ".svn", ".hg", ".yarn", "node_modules"];
@@ -167,7 +181,6 @@ fn handle_dir<'scope>(
             return;
         }
     }
-
     let iter = match fs::read_dir(path) {
         Ok(iter) => iter,
         Err(err) => {
@@ -262,21 +275,12 @@ fn handle_dir_entry<'scope>(
         // doing a directory traversal, but printing an error message if the
         // user explicitly requests an unsupported file to be handled.
         // This check also works for symbolic links.
-        if !ctx.can_handle(&rome_path) {
-            return;
+        if ctx.can_handle(&rome_path) {
+            scope.spawn(move |_| {
+                ctx.handle_file(&path);
+            });
         }
-
-        scope.spawn(move |_| {
-            ctx.handle_file(&path);
-        });
-        return;
     }
-
-    ctx.push_diagnostic(Error::from(FileSystemDiagnostic {
-        path: path.to_string_lossy().to_string(),
-        error_kind: ErrorKind::from(file_type),
-        severity: Severity::Warning,
-    }));
 }
 
 /// Indicates a symbolic link could not be expanded.

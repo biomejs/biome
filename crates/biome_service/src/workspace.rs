@@ -56,6 +56,7 @@ use crate::{Configuration, Deserialize, Serialize, WorkspaceError};
 use biome_analyze::ActionCategory;
 pub use biome_analyze::RuleCategories;
 use biome_console::{markup, Markup, MarkupBuf};
+use biome_css_formatter::can_format_css_yet;
 use biome_diagnostics::CodeSuggestion;
 use biome_formatter::Printed;
 use biome_fs::RomePath;
@@ -63,7 +64,7 @@ use biome_js_syntax::{TextRange, TextSize};
 use biome_text_edit::TextEdit;
 use std::collections::HashMap;
 use std::ffi::OsStr;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::{borrow::Cow, panic::RefUnwindSafe, sync::Arc};
 use tracing::debug;
 
@@ -95,7 +96,7 @@ pub struct FileFeaturesResult {
 
 impl FileFeaturesResult {
     /// Files that should not be processed no matter the cases
-    pub(crate) const FILES_TO_NOT_PROCESS: &'static [&'static str; 11] = &[
+    pub(crate) const FILES_TO_NOT_PROCESS: &'static [&'static str; 12] = &[
         "package.json",
         "package-lock.json",
         "npm-shrinkwrap.json",
@@ -107,6 +108,8 @@ impl FileFeaturesResult {
         "jsconfig.json",
         "deno.json",
         "deno.jsonc",
+        // TODO: remove this when are able to handle nested .gitignore files
+        ".gitignore",
     ];
 
     /// Checks whether this file can be processed
@@ -147,7 +150,7 @@ impl FileFeaturesResult {
         self
     }
 
-    pub fn with_settings_and_language(
+    pub(crate) fn with_settings_and_language(
         mut self,
         settings: &WorkspaceSettings,
         language: &Language,
@@ -161,6 +164,10 @@ impl FileFeaturesResult {
                     !settings.formatter().enabled || settings.javascript_formatter_disabled()
                 } else if language.is_json_like() {
                     !settings.formatter().enabled || settings.json_formatter_disabled()
+                } else if language.is_css_like() {
+                    !can_format_css_yet()
+                        || !settings.formatter().enabled
+                        || settings.css_formatter_disabled()
                 } else {
                     !settings.formatter().enabled
                 };
@@ -201,6 +208,20 @@ impl FileFeaturesResult {
         self
     }
 
+    /// The file will be ignored for all features
+    pub fn set_ignored_for_all_features(&mut self) {
+        for support_kind in self.features_supported.values_mut() {
+            *support_kind = SupportKind::Ignored;
+        }
+    }
+
+    /// The file will be protected for all features
+    pub fn set_protected_for_all_features(&mut self) {
+        for support_kind in self.features_supported.values_mut() {
+            *support_kind = SupportKind::Protected;
+        }
+    }
+
     pub fn ignored(&mut self, feature: FeatureName) {
         self.features_supported
             .insert(feature, SupportKind::Ignored);
@@ -226,6 +247,41 @@ impl FileFeaturesResult {
 
     pub fn support_kind_for(&self, feature: &FeatureName) -> Option<&SupportKind> {
         self.features_supported.get(feature)
+    }
+
+    /// If at least one feature is supported, the file is supported
+    pub fn is_supported(&self) -> bool {
+        self.features_supported
+            .values()
+            .any(|support_kind| support_kind.is_supported())
+    }
+
+    /// The file is ignored only if all the features marked it as ignored
+    pub fn is_ignored(&self) -> bool {
+        self.features_supported
+            .values()
+            .all(|support_kind| support_kind.is_ignored())
+    }
+
+    /// The file is protected only if all the features marked it as protected
+    pub fn is_protected(&self) -> bool {
+        self.features_supported
+            .values()
+            .all(|support_kind| support_kind.is_protected())
+    }
+
+    /// The file is not supported if all the featured marked it as not supported
+    pub fn is_not_supported(&self) -> bool {
+        self.features_supported
+            .values()
+            .all(|support_kind| support_kind.is_not_supported())
+    }
+
+    /// The file is not enabled if all the features marked it as not enabled
+    pub fn is_not_enabled(&self) -> bool {
+        self.features_supported
+            .values()
+            .all(|support_kind| support_kind.is_not_enabled())
     }
 }
 
@@ -253,6 +309,8 @@ pub enum SupportKind {
     Supported,
     /// The file is ignored (configuration)
     Ignored,
+    /// The file is protected, meaning that it can't be processed because other tools manage it
+    Protected,
     /// The feature is not enabled (configuration or the file doesn't need it)
     FeatureNotEnabled,
     /// The file is not capable of having this feature
@@ -265,6 +323,16 @@ impl SupportKind {
     }
     pub const fn is_not_enabled(&self) -> bool {
         matches!(self, SupportKind::FeatureNotEnabled)
+    }
+
+    pub const fn is_not_supported(&self) -> bool {
+        matches!(self, SupportKind::FileNotSupported)
+    }
+    pub const fn is_ignored(&self) -> bool {
+        matches!(self, SupportKind::Ignored)
+    }
+    pub const fn is_protected(&self) -> bool {
+        matches!(self, SupportKind::Protected)
     }
 }
 
@@ -306,6 +374,10 @@ impl FeaturesBuilder {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct UpdateSettingsParams {
     pub configuration: Configuration,
+    // @ematipico TODO: have a better data structure for this
+    pub vcs_base_path: Option<PathBuf>,
+    // @ematipico TODO: have a better data structure for this
+    pub gitignore_matches: Vec<String>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]

@@ -1,0 +1,3 @@
+@scope (.media-object) to (.content > * {}
+@scope (.media-object {}
+@scope (.media-object to (.content > *) {}

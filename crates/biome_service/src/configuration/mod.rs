@@ -2,6 +2,7 @@
 //!
 //! The configuration is divided by "tool", and then it's possible to further customise it
 //! by language. The language might further options divided by tool.
+pub mod css;
 pub mod diagnostics;
 pub mod formatter;
 mod generated;
@@ -14,9 +15,9 @@ mod overrides;
 mod parse;
 pub mod vcs;
 
+use crate::configuration::diagnostics::CantLoadExtendFile;
 pub use crate::configuration::diagnostics::ConfigurationDiagnostic;
 pub(crate) use crate::configuration::generated::push_to_analyzer_rules;
-use crate::configuration::json::JsonFormatter;
 pub use crate::configuration::merge::MergeWith;
 use crate::configuration::organize_imports::{organize_imports, OrganizeImports};
 use crate::configuration::overrides::Overrides;
@@ -24,23 +25,28 @@ use crate::configuration::vcs::{vcs_configuration, VcsConfiguration};
 use crate::settings::WorkspaceSettings;
 use crate::{DynRef, WorkspaceError, VERSION};
 use biome_analyze::AnalyzerRules;
+use biome_console::markup;
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize::{Deserialized, StringSet};
+use biome_diagnostics::{DiagnosticExt, Error, Severity};
 use biome_fs::{AutoSearchResult, FileSystem, OpenOptions};
 use biome_js_analyze::metadata;
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_parser::{parse_json, JsonParserOptions};
 use bpaf::Bpaf;
+pub use css::{css_configuration, CssConfiguration, CssFormatter};
 pub use formatter::{
     deserialize_line_width, formatter_configuration, serialize_line_width, FormatterConfiguration,
     PlainIndentStyle,
 };
 pub use javascript::{javascript_configuration, JavascriptConfiguration, JavascriptFormatter};
-pub use json::{json_configuration, JsonConfiguration};
+pub use json::{json_configuration, JsonConfiguration, JsonFormatter};
 pub use linter::{linter_configuration, LinterConfiguration, RuleConfiguration, Rules};
+pub use overrides::to_override_settings;
 use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
 use std::io::ErrorKind;
+use std::iter::FusedIterator;
 use std::num::NonZeroU64;
 use std::path::{Path, PathBuf};
 
@@ -90,6 +96,11 @@ pub struct Configuration {
     #[bpaf(external(json_configuration), optional)]
     pub json: Option<JsonConfiguration>,
 
+    /// Specific configuration for the Css language
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[bpaf(external(css_configuration), optional, hide)]
+    pub css: Option<CssConfiguration>,
+
     /// A list of paths to other JSON files, used to extends the current configuration.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[bpaf(hide)]
@@ -111,13 +122,61 @@ impl Default for Configuration {
             }),
             organize_imports: Some(OrganizeImports::default()),
             formatter: None,
+            css: None,
             javascript: None,
+            json: None,
             schema: None,
             vcs: None,
             extends: None,
-            json: None,
             overrides: None,
         }
+    }
+}
+
+impl MergeWith<Configuration> for Configuration {
+    fn merge_with(&mut self, other_configuration: Configuration) {
+        // files
+        self.merge_with(other_configuration.files);
+        // formatter
+        self.merge_with(other_configuration.formatter);
+        // javascript
+        self.merge_with(other_configuration.javascript);
+        // json
+        self.merge_with(other_configuration.json);
+        // css
+        self.merge_with(other_configuration.css);
+        // linter
+        self.merge_with(other_configuration.linter);
+        // organize imports
+        self.merge_with(other_configuration.organize_imports);
+        // VCS
+        self.merge_with(other_configuration.vcs);
+        // overrides
+        self.merge_with(other_configuration.overrides);
+    }
+
+    fn merge_with_if_not_default(&mut self, other_configuration: Configuration)
+    where
+        Configuration: Default,
+    {
+        // files
+        self.merge_with_if_not_default(other_configuration.files);
+        // formatter
+        self.merge_with_if_not_default(other_configuration.formatter);
+        // javascript
+        self.merge_with_if_not_default(other_configuration.javascript);
+        // json
+        self.merge_with_if_not_default(other_configuration.json);
+        // css
+        self.merge_with_if_not_default(other_configuration.css);
+        // linter
+        self.merge_with_if_not_default(other_configuration.linter);
+        // organize imports
+        self.merge_with_if_not_default(other_configuration.organize_imports);
+        // VCS
+        self.merge_with_if_not_default(other_configuration.vcs);
+        // overrides
+        self.merge_with_if_not_default(other_configuration.overrides);
     }
 }
 
@@ -146,44 +205,52 @@ impl Configuration {
     pub fn is_vcs_disabled(&self) -> bool {
         self.vcs.as_ref().map(|f| f.is_disabled()).unwrap_or(true)
     }
-}
 
-impl MergeWith<Configuration> for Configuration {
-    fn merge_with(&mut self, other_configuration: Configuration) {
-        // files
-        self.merge_with(other_configuration.files);
-        // formatter
-        self.merge_with(other_configuration.formatter);
-        // javascript
-        self.merge_with(other_configuration.javascript);
-        // linter
-        self.merge_with(other_configuration.linter);
-        // organize imports
-        self.merge_with(other_configuration.organize_imports);
-        // VCS
-        self.merge_with(other_configuration.vcs);
-        // overrides
-        self.merge_with(other_configuration.overrides);
+    pub fn is_vcs_enabled(&self) -> bool {
+        !self.is_vcs_disabled()
     }
 
-    fn merge_with_if_not_default(&mut self, other_configuration: Configuration)
-    where
-        Configuration: Default,
-    {
-        // files
-        self.merge_with_if_not_default(other_configuration.files);
-        // formatter
-        self.merge_with_if_not_default(other_configuration.formatter);
-        // javascript
-        self.merge_with_if_not_default(other_configuration.javascript);
-        // linter
-        self.merge_with_if_not_default(other_configuration.linter);
-        // organize imports
-        self.merge_with_if_not_default(other_configuration.organize_imports);
-        // VCS
-        self.merge_with_if_not_default(other_configuration.vcs);
-        // overrides
-        self.merge_with_if_not_default(other_configuration.overrides);
+    /// This function checks if the VCS integration is enabled, and if so, it will attempts to resolve the
+    /// VCS root directory and the `.gitignore` file.
+    ///
+    /// ## Returns
+    ///
+    /// A tuple with VCS root folder and the contents of the `.gitignore` file
+    pub fn retrieve_gitignore_matches(
+        &self,
+        file_system: &DynRef<'_, dyn FileSystem>,
+        vcs_base_path: Option<&Path>,
+    ) -> Result<(Option<PathBuf>, Vec<String>), WorkspaceError> {
+        let Some(vcs) = &self.vcs else {
+            return Ok((None, vec![]));
+        };
+        if vcs.is_enabled() {
+            let vcs_base_path = match (vcs_base_path, &vcs.root) {
+                (Some(vcs_base_path), Some(root)) => vcs_base_path.join(root),
+                (None, Some(root)) => PathBuf::from(root),
+                (Some(vcs_base_path), None) => PathBuf::from(vcs_base_path),
+                (None, None) => return Err(WorkspaceError::vcs_disabled()),
+            };
+            if let Some(client_kind) = &vcs.client_kind {
+                if !vcs.ignore_file_disabled() {
+                    let result = file_system
+                        .auto_search(vcs_base_path, client_kind.ignore_file(), false)
+                        .map_err(WorkspaceError::from)?;
+
+                    if let Some(result) = result {
+                        return Ok((
+                            Some(result.directory_path),
+                            result
+                                .content
+                                .lines()
+                                .map(String::from)
+                                .collect::<Vec<String>>(),
+                        ));
+                    }
+                }
+            }
+        }
+        Ok((None, vec![]))
     }
 }
 
@@ -279,6 +346,42 @@ impl MergeWith<Option<JavascriptConfiguration>> for Configuration {
         }
     }
 }
+impl MergeWith<Option<JsonConfiguration>> for Configuration {
+    fn merge_with(&mut self, other: Option<JsonConfiguration>) {
+        if let Some(other) = other {
+            let json_configuration = self.json.get_or_insert_with(JsonConfiguration::default);
+            json_configuration.merge_with(other);
+        }
+    }
+
+    fn merge_with_if_not_default(&mut self, other: Option<JsonConfiguration>)
+    where
+        Option<JsonConfiguration>: Default,
+    {
+        if let Some(other) = other {
+            let json_configuration = self.json.get_or_insert_with(JsonConfiguration::default);
+            json_configuration.merge_with_if_not_default(other);
+        }
+    }
+}
+impl MergeWith<Option<CssConfiguration>> for Configuration {
+    fn merge_with(&mut self, other: Option<CssConfiguration>) {
+        if let Some(other) = other {
+            let css_configuration = self.css.get_or_insert_with(CssConfiguration::default);
+            css_configuration.merge_with(other);
+        }
+    }
+
+    fn merge_with_if_not_default(&mut self, other: Option<CssConfiguration>)
+    where
+        Option<CssConfiguration>: Default,
+    {
+        if let Some(other) = other {
+            let css_configuration = self.css.get_or_insert_with(CssConfiguration::default);
+            css_configuration.merge_with_if_not_default(other);
+        }
+    }
+}
 impl MergeWith<Option<FormatterConfiguration>> for Configuration {
     fn merge_with(&mut self, other: Option<FormatterConfiguration>) {
         if let Some(other_formatter) = other {
@@ -323,16 +426,31 @@ impl MergeWith<Option<JavascriptFormatter>> for Configuration {
 
 impl MergeWith<Option<JsonFormatter>> for Configuration {
     fn merge_with(&mut self, other: Option<JsonFormatter>) {
-        let javascript_configuration = self.json.get_or_insert_with(JsonConfiguration::default);
-        javascript_configuration.merge_with(other);
+        let json_configuration = self.json.get_or_insert_with(JsonConfiguration::default);
+        json_configuration.merge_with(other);
     }
 
     fn merge_with_if_not_default(&mut self, other: Option<JsonFormatter>)
     where
         Option<JsonFormatter>: Default,
     {
-        let javascript_configuration = self.json.get_or_insert_with(JsonConfiguration::default);
-        javascript_configuration.merge_with_if_not_default(other);
+        let json_configuration = self.json.get_or_insert_with(JsonConfiguration::default);
+        json_configuration.merge_with_if_not_default(other);
+    }
+}
+
+impl MergeWith<Option<CssFormatter>> for Configuration {
+    fn merge_with(&mut self, other: Option<CssFormatter>) {
+        let css_configuration = self.css.get_or_insert_with(CssConfiguration::default);
+        css_configuration.merge_with(other);
+    }
+
+    fn merge_with_if_not_default(&mut self, other: Option<CssFormatter>)
+    where
+        Option<CssFormatter>: Default,
+    {
+        let css_configuration = self.css.get_or_insert_with(CssConfiguration::default);
+        css_configuration.merge_with_if_not_default(other);
     }
 }
 
@@ -439,6 +557,17 @@ impl ConfigurationBasePath {
     }
 }
 
+/// Load the configuration for this session of the CLI, merging the content of
+/// the `biome.json` file if it exists on disk with common command line options
+pub fn load_configuration(
+    fs: &DynRef<'_, dyn FileSystem>,
+    config_path: ConfigurationBasePath,
+) -> Result<LoadedConfiguration, WorkspaceError> {
+    let config = load_config(fs, config_path)?;
+    let loaded_configuration = LoadedConfiguration::from(config);
+    loaded_configuration.apply_extends(fs)
+}
+
 /// Load the configuration from the file system.
 ///
 /// The configuration file will be read from the `file_system`. A [base path](ConfigurationBasePath) should be provided.
@@ -448,8 +577,8 @@ impl ConfigurationBasePath {
 ///
 /// If a the configuration base path was provided by the user, the function will error. If not, Biome will use
 /// its defaults.
-pub fn load_config(
-    file_system: &DynRef<dyn FileSystem>,
+fn load_config(
+    file_system: &DynRef<'_, dyn FileSystem>,
     base_path: ConfigurationBasePath,
 ) -> LoadConfig {
     let config_name = file_system.config_name();
@@ -569,4 +698,194 @@ pub fn to_analyzer_rules(settings: &WorkspaceSettings, path: &Path) -> AnalyzerR
     }
 
     overrides.override_analyzer_rules(path, analyzer_rules)
+}
+
+/// Yield information regarding the configuration that was found
+#[derive(Default, Debug)]
+pub struct LoadedConfiguration {
+    /// If present, the path of the directory where it was found
+    pub directory_path: Option<PathBuf>,
+    /// If present, the path of the file where it was found
+    pub file_path: Option<PathBuf>,
+    /// The Deserialized configuration
+    pub configuration: Configuration,
+    /// All diagnostics that were emitted during parsing and deserialization
+    pub diagnostics: Vec<Error>,
+}
+
+impl LoadedConfiguration {
+    /// Consumes itself to generate a new [LoadedConfiguration] where the new `configuration`
+    /// is the result of its `extends` fields applied from left to right, and the last one element
+    /// applied is itself.
+    ///
+    /// If a configuration can't be resolved from the file system, the operation will fail.
+    pub fn apply_extends(
+        mut self,
+        fs: &DynRef<'_, dyn FileSystem>,
+    ) -> Result<Self, WorkspaceError> {
+        let deserialized = self.deserialize_extends(fs)?;
+        let (configurations, errors): (Vec<_>, Vec<_>) = deserialized
+            .into_iter()
+            .map(|d| d.consume())
+            .map(|(config, diagnostics)| (config.unwrap_or_default(), diagnostics))
+            .unzip();
+
+        let extended_configuration = configurations.into_iter().reduce(
+            |mut previous_configuration, current_configuration| {
+                previous_configuration.merge_with(current_configuration);
+                previous_configuration
+            },
+        );
+        let configuration = if let Some(mut extended_configuration) = extended_configuration {
+            // Here we want to keep only the values that aren't a default
+            extended_configuration.merge_with_if_not_default(self.configuration);
+            extended_configuration
+        } else {
+            self.configuration
+        };
+        self.diagnostics.extend(
+            errors
+                .into_iter()
+                .flatten()
+                .map(|diagnostic| {
+                    diagnostic.with_file_path(
+                        self.file_path
+                            .as_ref()
+                            .map(|path| path.display().to_string()),
+                    )
+                })
+                .collect::<Vec<_>>(),
+        );
+
+        Ok(Self {
+            configuration,
+            diagnostics: self.diagnostics,
+            file_path: self.file_path,
+            directory_path: self.directory_path,
+        })
+    }
+
+    /// It attempts to deserialize all the configuration files that were specified in the `extends` property
+    fn deserialize_extends(
+        &mut self,
+        fs: &DynRef<'_, dyn FileSystem>,
+    ) -> Result<Vec<Deserialized<Configuration>>, WorkspaceError> {
+        let Some(extends) = &self.configuration.extends else {
+            return Ok(vec![]);
+        };
+
+        let directory_path = self
+            .directory_path
+            .as_ref()
+            .cloned()
+            .unwrap_or(fs.working_directory().unwrap_or(PathBuf::from("./")));
+        let mut deserialized_configurations = vec![];
+        for path in extends.iter() {
+            let config_path = directory_path.join(path);
+            let mut file = fs
+                .open_with_options(config_path.as_path(), OpenOptions::default().read(true))
+                .map_err(|err| {
+                    CantLoadExtendFile::new(config_path.display().to_string(), err.to_string()).with_verbose_advice(
+                        markup!{
+								"Biome tried to load the configuration file "<Emphasis>{directory_path.display().to_string()}</Emphasis>" using "<Emphasis>{config_path.display().to_string()}</Emphasis>" as base path."
+							}
+                    )
+                })?;
+            let mut content = String::new();
+            file.read_to_string(&mut content).map_err(|err| {
+                CantLoadExtendFile::new(config_path.display().to_string(), err.to_string()).with_verbose_advice(
+                    markup!{
+							"It's possible that the file was created with a different user/group. Make sure you have the rights to read the file."
+						}
+                )
+
+            })?;
+            let deserialized = deserialize_from_json_str::<Configuration>(
+                content.as_str(),
+                JsonParserOptions::default(),
+            );
+            deserialized_configurations.push(deserialized)
+        }
+        Ok(deserialized_configurations)
+    }
+
+    /// Return the path of the **directory** where the configuration is
+    pub fn directory_path(&self) -> Option<&Path> {
+        self.directory_path.as_deref()
+    }
+
+    /// Return the path of the **file** where the configuration is
+    pub fn file_path(&self) -> Option<&Path> {
+        self.file_path.as_deref()
+    }
+
+    /// Whether the are errors emitted. Error are [Severity::Error] or greater.
+    pub fn has_errors(&self) -> bool {
+        self.diagnostics
+            .iter()
+            .any(|diagnostic| diagnostic.severity() >= Severity::Error)
+    }
+
+    /// It return an iterator over the diagnostics emitted during the resolution of the configuration file
+    pub fn as_diagnostics_iter(&self) -> ConfigurationDiagnosticsIter {
+        ConfigurationDiagnosticsIter::new(self.diagnostics.as_slice())
+    }
+}
+
+pub struct ConfigurationDiagnosticsIter<'a> {
+    errors: &'a [Error],
+    len: usize,
+    index: usize,
+}
+
+impl<'a> ConfigurationDiagnosticsIter<'a> {
+    fn new(errors: &'a [Error]) -> Self {
+        Self {
+            len: errors.len(),
+            index: 0,
+            errors,
+        }
+    }
+}
+
+impl<'a> Iterator for ConfigurationDiagnosticsIter<'a> {
+    type Item = &'a Error;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.len == self.index {
+            return None;
+        }
+
+        let item = self.errors.get(self.index);
+        self.index += 1;
+        item
+    }
+}
+
+impl FusedIterator for ConfigurationDiagnosticsIter<'_> {}
+
+impl From<Option<ConfigurationPayload>> for LoadedConfiguration {
+    fn from(value: Option<ConfigurationPayload>) -> Self {
+        if let Some(value) = value {
+            let ConfigurationPayload {
+                configuration_directory_path,
+                configuration_file_path,
+                deserialized,
+            } = value;
+            let (configuration, diagnostics) = deserialized.consume();
+            LoadedConfiguration {
+                configuration: configuration.unwrap_or_default(),
+                diagnostics: diagnostics
+                    .into_iter()
+                    .map(|diagnostic| {
+                        diagnostic.with_file_path(configuration_file_path.display().to_string())
+                    })
+                    .collect(),
+                directory_path: Some(configuration_directory_path),
+                file_path: Some(configuration_file_path),
+            }
+        } else {
+            LoadedConfiguration::default()
+        }
+    }
 }

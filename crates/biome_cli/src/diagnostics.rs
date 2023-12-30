@@ -55,8 +55,6 @@ pub enum CliDiagnostic {
     NoFilesWereProcessed(NoFilesWereProcessed),
     /// Errors thrown when running the `biome migrate` command
     MigrateError(MigrationDiagnostic),
-    /// When the VCS folder couldn't be found
-    NoVcsFolderFound(NoVcsFolderFound),
 }
 
 #[derive(Debug, Diagnostic)]
@@ -249,43 +247,6 @@ pub struct MigrationDiagnostic {
 #[derive(Debug, Diagnostic)]
 #[diagnostic(
     category = "internalError/fs",
-    severity = Error,
-    message(
-		description = "Biome couldn't find the VCS folder at the following path: {path}",
-		message("Biome couldn't find the VCS folder at the following path: "<Emphasis>{self.path}</Emphasis>),
-	)
-)]
-pub struct NoVcsFolderFound {
-    #[location(resource)]
-    pub path: String,
-
-    #[source]
-    pub source: Option<Error>,
-}
-
-#[derive(Debug, Diagnostic)]
-#[diagnostic(
-    category = "internalError/fs",
-    severity = Warning,
-    message(
-        description = "The configuration file {path} is deprecated. Use biome.json instead.",
-        message("The configuration file "<Emphasis>{self.path}</Emphasis>" is deprecated. Use "<Emphasis>"biome.json"</Emphasis>" instead."),
-    )
-)]
-pub struct DeprecatedConfigurationFile {
-    #[location(resource)]
-    pub path: String,
-}
-
-impl DeprecatedConfigurationFile {
-    pub fn new(path: impl Into<String>) -> Self {
-        Self { path: path.into() }
-    }
-}
-
-#[derive(Debug, Diagnostic)]
-#[diagnostic(
-    category = "internalError/fs",
     severity = Warning,
     tags(DEPRECATED_CODE)
 )]
@@ -301,14 +262,6 @@ impl DeprecatedArgument {
         }
     }
 }
-
-#[derive(Debug, Diagnostic)]
-#[diagnostic(
-	category = "internalError/fs",
-	severity = Warning,
-	message = "Biome couldn't determine a directory for the VCS integration. VCS integration will be disabled."
-)]
-pub struct DisabledVcs {}
 
 /// Advices for the [CliDiagnostic]
 #[derive(Debug, Default)]
@@ -536,7 +489,6 @@ impl Diagnostic for CliDiagnostic {
             CliDiagnostic::NoFilesWereProcessed(diagnostic) => diagnostic.category(),
             CliDiagnostic::FileCheck(diagnostic) => diagnostic.category(),
             CliDiagnostic::MigrateError(diagnostic) => diagnostic.category(),
-            CliDiagnostic::NoVcsFolderFound(diagnostic) => diagnostic.category(),
         }
     }
 
@@ -558,7 +510,6 @@ impl Diagnostic for CliDiagnostic {
             CliDiagnostic::NoFilesWereProcessed(diagnostic) => diagnostic.tags(),
             CliDiagnostic::FileCheck(diagnostic) => diagnostic.tags(),
             CliDiagnostic::MigrateError(diagnostic) => diagnostic.tags(),
-            CliDiagnostic::NoVcsFolderFound(diagnostic) => diagnostic.tags(),
         }
     }
 
@@ -580,7 +531,6 @@ impl Diagnostic for CliDiagnostic {
             CliDiagnostic::NoFilesWereProcessed(diagnostic) => diagnostic.severity(),
             CliDiagnostic::FileCheck(diagnostic) => diagnostic.severity(),
             CliDiagnostic::MigrateError(diagnostic) => diagnostic.severity(),
-            CliDiagnostic::NoVcsFolderFound(diagnostic) => diagnostic.severity(),
         }
     }
 
@@ -602,7 +552,6 @@ impl Diagnostic for CliDiagnostic {
             CliDiagnostic::NoFilesWereProcessed(diagnostic) => diagnostic.location(),
             CliDiagnostic::FileCheck(diagnostic) => diagnostic.location(),
             CliDiagnostic::MigrateError(diagnostic) => diagnostic.location(),
-            CliDiagnostic::NoVcsFolderFound(diagnostic) => diagnostic.location(),
         }
     }
 
@@ -624,7 +573,6 @@ impl Diagnostic for CliDiagnostic {
             CliDiagnostic::NoFilesWereProcessed(diagnostic) => diagnostic.message(fmt),
             CliDiagnostic::FileCheck(diagnostic) => diagnostic.message(fmt),
             CliDiagnostic::MigrateError(diagnostic) => diagnostic.message(fmt),
-            CliDiagnostic::NoVcsFolderFound(diagnostic) => diagnostic.message(fmt),
         }
     }
 
@@ -646,7 +594,6 @@ impl Diagnostic for CliDiagnostic {
             CliDiagnostic::NoFilesWereProcessed(diagnostic) => diagnostic.description(fmt),
             CliDiagnostic::FileCheck(diagnostic) => diagnostic.description(fmt),
             CliDiagnostic::MigrateError(diagnostic) => diagnostic.description(fmt),
-            CliDiagnostic::NoVcsFolderFound(diagnostic) => diagnostic.description(fmt),
         }
     }
 
@@ -668,7 +615,6 @@ impl Diagnostic for CliDiagnostic {
             CliDiagnostic::NoFilesWereProcessed(diagnostic) => diagnostic.advices(visitor),
             CliDiagnostic::FileCheck(diagnostic) => diagnostic.advices(visitor),
             CliDiagnostic::MigrateError(diagnostic) => diagnostic.advices(visitor),
-            CliDiagnostic::NoVcsFolderFound(diagnostic) => diagnostic.advices(visitor),
         }
     }
 
@@ -694,7 +640,6 @@ impl Diagnostic for CliDiagnostic {
             CliDiagnostic::NoFilesWereProcessed(diagnostic) => diagnostic.verbose_advices(visitor),
             CliDiagnostic::FileCheck(diagnostic) => diagnostic.verbose_advices(visitor),
             CliDiagnostic::MigrateError(diagnostic) => diagnostic.verbose_advices(visitor),
-            CliDiagnostic::NoVcsFolderFound(diagnostic) => diagnostic.verbose_advices(visitor),
         }
     }
 
@@ -716,7 +661,6 @@ impl Diagnostic for CliDiagnostic {
             CliDiagnostic::NoFilesWereProcessed(diagnostic) => diagnostic.source(),
             CliDiagnostic::FileCheck(diagnostic) => diagnostic.source(),
             CliDiagnostic::MigrateError(diagnostic) => diagnostic.source(),
-            CliDiagnostic::NoVcsFolderFound(diagnostic) => diagnostic.source(),
         }
     }
 }
@@ -741,6 +685,26 @@ impl Termination for CliDiagnostic {
         } else {
             ExitCode::SUCCESS
         }
+    }
+}
+
+#[derive(Debug, Diagnostic)]
+#[diagnostic(
+category = "internalError/fs",
+    severity = Warning,
+    message(
+        description = "The configuration file {path} is deprecated. Use biome.json instead.",
+        message("The configuration file "<Emphasis>{self.path}</Emphasis>" is deprecated. Use "<Emphasis>"biome.json"</Emphasis>" instead."),
+    )
+)]
+pub struct DeprecatedConfigurationFile {
+    #[location(resource)]
+    pub path: String,
+}
+
+impl DeprecatedConfigurationFile {
+    pub fn new(path: impl Into<String>) -> Self {
+        Self { path: path.into() }
     }
 }
 

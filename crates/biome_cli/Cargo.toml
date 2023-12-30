@@ -19,6 +19,7 @@ path = "src/main.rs"
 
 [dependencies]
 anyhow               = "1.0.52"
+biome_analyze        = { workspace = true }
 biome_console        = { workspace = true }
 biome_deserialize    = { workspace = true }
 biome_diagnostics    = { workspace = true }
@@ -61,6 +62,7 @@ mimalloc = "0.1.29"
 tikv-jemallocator = "0.5.0"
 
 [dev-dependencies]
+biome_css_formatter  = { workspace = true }
 biome_js_formatter   = { workspace = true }
 biome_json_formatter = { workspace = true }
 biome_json_parser    = { workspace = true }

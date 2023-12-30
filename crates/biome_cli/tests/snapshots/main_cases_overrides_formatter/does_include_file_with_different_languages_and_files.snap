@@ -22,6 +22,13 @@ expression: content
           "lineWidth": 20,
           "indentWidth": 4
         }
+      },
+      "css": {
+        "formatter": {
+          "indentStyle": "space",
+          "lineWidth": 30,
+          "indentWidth": 3
+        }
       }
     },
     {
@@ -32,6 +39,13 @@ expression: content
           "indentStyle": "space",
           "lineWidth": 20,
           "indentWidth": 4
+        }
+      },
+      "css": {
+        "formatter": {
+          "indentStyle": "space",
+          "lineWidth": 30,
+          "indentWidth": 3
         }
       }
     }
@@ -67,10 +81,18 @@ const a = ["loreum", "ipsum"]
 
 ```
 
+## `test4.css`
+
+```css
+html {
+}
+
+```
+
 # Emitted Messages
 
 ```block
-Formatted 3 file(s) in <TIME>
+Formatted 4 file(s) in <TIME>
 ```
 
 

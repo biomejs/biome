@@ -11,13 +11,14 @@ use crate::syntax::selector::attribute::parse_attribute_selector;
 use crate::syntax::selector::pseudo_class::parse_pseudo_class_selector;
 use crate::syntax::selector::pseudo_element::parse_pseudo_element_selector;
 use crate::syntax::{
-    is_at_identifier, parse_identifier, parse_regular_identifier, RULE_RECOVERY_SET,
+    is_at_identifier, parse_custom_identifier_with_keywords, parse_identifier,
+    parse_regular_identifier, RULE_RECOVERY_SET,
 };
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, TextRange, T};
 use biome_parser::diagnostic::ToDiagnostic;
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
-use biome_parser::parse_recovery::{ParseRecovery, RecoveryError, RecoveryResult};
+use biome_parser::parse_recovery::{ParseRecoveryTokenSet, RecoveryError, RecoveryResult};
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::{token_set, CompletedMarker, Parser, ParserProgress, TokenSet};
@@ -36,23 +37,28 @@ fn selector_lex_context(p: &mut CssParser) -> CssLexContext {
     }
 }
 
-pub(crate) struct CssSelectorList {
-    end_kind: CssSyntaxKind,
+pub(crate) struct SelectorList {
+    end_kind_ts: TokenSet<CssSyntaxKind>,
     is_recovery_disabled: bool,
 }
 
-impl Default for CssSelectorList {
+impl Default for SelectorList {
     fn default() -> Self {
-        CssSelectorList {
-            end_kind: T!['{'],
+        SelectorList {
+            end_kind_ts: token_set!(T!['{']),
             is_recovery_disabled: false,
         }
     }
 }
 
-impl CssSelectorList {
+impl SelectorList {
+    pub(crate) fn with_end_kind_ts(mut self, end_kind_ts: TokenSet<CssSyntaxKind>) -> Self {
+        self.end_kind_ts = end_kind_ts;
+        self
+    }
+
     pub(crate) fn with_end_kind(mut self, end_kind: CssSyntaxKind) -> Self {
-        self.end_kind = end_kind;
+        self.end_kind_ts = token_set!(end_kind);
         self
     }
 
@@ -62,7 +68,7 @@ impl CssSelectorList {
     }
 }
 
-impl ParseSeparatedList for CssSelectorList {
+impl ParseSeparatedList for SelectorList {
     type Kind = CssSyntaxKind;
     type Parser<'source> = CssParser<'source>;
     const LIST_KIND: Self::Kind = CSS_SELECTOR_LIST;
@@ -72,7 +78,7 @@ impl ParseSeparatedList for CssSelectorList {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(self.end_kind)
+        p.at_ts(self.end_kind_ts)
     }
 
     fn recover(
@@ -84,9 +90,9 @@ impl ParseSeparatedList for CssSelectorList {
             p.error(expected_selector(p, p.cur_range()));
             Err(RecoveryError::RecoveryDisabled)
         } else {
-            parsed_element.or_recover(
+            parsed_element.or_recover_with_token_set(
                 p,
-                &ParseRecovery::new(CSS_BOGUS_SELECTOR, SELECTOR_RECOVERY_SET)
+                &ParseRecoveryTokenSet::new(CSS_BOGUS_SELECTOR, SELECTOR_RECOVERY_SET)
                     .enable_recovery_on_line_break(),
                 expected_selector,
             )
@@ -98,12 +104,12 @@ impl ParseSeparatedList for CssSelectorList {
 }
 
 #[inline]
-fn is_at_selector(p: &mut CssParser) -> bool {
+pub(crate) fn is_at_selector(p: &mut CssParser) -> bool {
     is_at_compound_selector(p)
 }
 
 #[inline]
-fn parse_selector(p: &mut CssParser) -> ParsedSyntax {
+pub(crate) fn parse_selector(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_selector(p) {
         return Absent;
     }
@@ -142,7 +148,7 @@ fn parse_complex_selector(p: &mut CssParser, mut left: CompletedMarker) -> Parse
 
 #[inline]
 fn is_at_compound_selector(p: &mut CssParser) -> bool {
-    p.at(T![&]) || is_at_simple_selector(p) || p.at_ts(CssSubSelectorList::START_SET)
+    p.at(T![&]) || is_at_simple_selector(p) || p.at_ts(SubSelectorList::START_SET)
 }
 #[inline]
 fn parse_compound_selector(p: &mut CssParser) -> ParsedSyntax {
@@ -154,7 +160,7 @@ fn parse_compound_selector(p: &mut CssParser) -> ParsedSyntax {
 
     p.eat(T![&]);
     parse_simple_selector(p).ok();
-    CssSubSelectorList.parse_list(p);
+    SubSelectorList.parse_list(p);
 
     Present(m.complete(p, CSS_COMPOUND_SELECTOR))
 }
@@ -223,11 +229,12 @@ fn parse_namespace_prefix(p: &mut CssParser) -> ParsedSyntax {
     Present(m.complete(p, kind))
 }
 
-struct CssSubSelectorList;
-impl CssSubSelectorList {
-    const START_SET: TokenSet<CssSyntaxKind> = token_set![T![#], T![.], T![:], T![::], T!['[']];
+pub(crate) struct SubSelectorList;
+impl SubSelectorList {
+    pub(crate) const START_SET: TokenSet<CssSyntaxKind> =
+        token_set![T![#], T![.], T![:], T![::], T!['[']];
 }
-impl ParseNodeList for CssSubSelectorList {
+impl ParseNodeList for SubSelectorList {
     type Kind = CssSyntaxKind;
     type Parser<'source> = CssParser<'source>;
 
@@ -242,9 +249,9 @@ impl ParseNodeList for CssSubSelectorList {
     }
 
     fn recover(&mut self, p: &mut CssParser, parsed_element: ParsedSyntax) -> RecoveryResult {
-        parsed_element.or_recover(
+        parsed_element.or_recover_with_token_set(
             p,
-            &ParseRecovery::new(CSS_BOGUS_SUB_SELECTOR, Self::START_SET),
+            &ParseRecoveryTokenSet::new(CSS_BOGUS_SUB_SELECTOR, Self::START_SET),
             expected_any_sub_selector,
         )
     }
@@ -271,7 +278,7 @@ pub(crate) fn parse_class_selector(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
 
     p.bump(T![.]);
-    parse_selector_identifier(p).or_add_diagnostic(p, expected_identifier);
+    parse_selector_custom_identifier(p).or_add_diagnostic(p, expected_identifier);
 
     Present(m.complete(p, CSS_CLASS_SELECTOR))
 }
@@ -285,7 +292,7 @@ pub(crate) fn parse_id_selector(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
 
     p.bump(T![#]);
-    parse_selector_identifier(p).or_add_diagnostic(p, expected_identifier);
+    parse_selector_custom_identifier(p).or_add_diagnostic(p, expected_identifier);
 
     Present(m.complete(p, CSS_ID_SELECTOR))
 }
@@ -323,6 +330,19 @@ fn parse_selector_identifier(p: &mut CssParser) -> ParsedSyntax {
     parse_identifier(p, context)
 }
 
+/// Custom identifiers are used for class names and ids in selectors and are
+/// case-sensitive. These are distinguished from regular identifiers in
+/// selectors that are case-insensitive for safety in preserving the casing.
+#[inline]
+fn parse_selector_custom_identifier(p: &mut CssParser) -> ParsedSyntax {
+    let context = selector_lex_context(p);
+    // Class and ID selectors are technically `<ident>` _and_ case-sensitive.
+    // To handle this, we use `<custom-ident>` instead, but also have to allow
+    // the CSS-wide keywords to include selectors like `.inherit`, which is
+    // valid as a regular ident.
+    parse_custom_identifier_with_keywords(p, context, true)
+}
+
 #[inline]
 pub(crate) fn eat_or_recover_selector_function_close_token<'a, E, D>(
     p: &mut CssParser<'a>,
@@ -338,7 +358,7 @@ where
     if p.eat_with_context(T![')'], context) {
         true
     } else {
-        if let Ok(m) = ParseRecovery::new(CSS_BOGUS, SELECTOR_FUNCTION_RECOVERY_SET)
+        if let Ok(m) = ParseRecoveryTokenSet::new(CSS_BOGUS, SELECTOR_FUNCTION_RECOVERY_SET)
             .enable_recovery_on_line_break()
             .recover(p)
         {
@@ -364,7 +384,7 @@ where
 {
     let start = p.cur_range().start();
 
-    let range = ParseRecovery::new(CSS_BOGUS, SELECTOR_FUNCTION_RECOVERY_SET)
+    let range = ParseRecoveryTokenSet::new(CSS_BOGUS, SELECTOR_FUNCTION_RECOVERY_SET)
         .enable_recovery_on_line_break()
         .recover(p)
         .map(|m| m.range(p))

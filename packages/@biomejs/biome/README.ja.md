@@ -1,7 +1,9 @@
 <p align="center">
-    <img alt="Biome - Toolchain of the web"
-         src="https://raw.githubusercontent.com/biomejs/resources/main/biome-logo-slogan.svg"
-         width="400">
+    <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/biomejs/resources/main/svg/slogan-dark-transparent.svg">
+        <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/biomejs/resources/main/svg/slogan-light-transparent.svg">
+        <img alt="Biome - Toolchain of the web" src="https://raw.githubusercontent.com/biomejs/resources/main/svg/slogan-light-transparent.svg" width="700">
+    </picture>
 </p>
 
 <div align="center">
@@ -25,9 +27,15 @@
 
 </div>
 
+<div align="center">
+
+[English](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.md) | [简体中文](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.zh-CN.md) | 日本語 | [Português do Brasil](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.pt-br.md)
+
+</div>
+
 **Biome** はWebプロジェクトのための高性能なツールチェーンであり、プロジェクトの健全性を維持するための開発者ツールの提供を目的としています。
 
-**Biome は _JavaScript_, _TypeScript_, _JSX_ そして _JSON_ 向けの[高速なFormatter](./benchmark#formatting)**であり、**[_Prettier_ との互換性は96%](https://console.algora.io/challenges/prettier)** を達成しています。
+**Biome は _JavaScript_, _TypeScript_, _JSX_ そして _JSON_ 向けの[高速なFormatter](./benchmark#formatting)**であり、**[_Prettier_ との互換性は97%](https://console.algora.io/challenges/prettier)** を達成しています。
 
 **Biome は _JavaScript_, _TypeScript_, _JSX_ のための[高性能なLinter](https://github.com/biomejs/biome/tree/main/benchmark#linting)** であり、ESLint, TypeScript ESLint, [その他のソース](https://github.com/biomejs/biome/discussions/3)から **[170以上のルール](https://biomejs.dev/linter/rules/)**を提供しています。Biome は**詳細で文脈に沿った結果を出力**するため、コードを改善し、より良いプログラマになるための手助けをします！
 
@@ -60,7 +68,7 @@ Biome をインストールせずに試したい場合は、WebAssembly にコ�
 
 ## ドキュメント
 
-Biome についてもっと知るために[ホームページ][biomejs]をチェックするか、Biome を使い始めるために[はじめる](getting-started)に進んでください。
+Biome についてもっと知るために[ホームページ][biomejs]をチェックするか、Biome を使い始めるために[はじめる][getting-started]に進んでください。
 
 ## Biome をもっと詳しく
 
@@ -107,13 +115,6 @@ Biome についてもっと知るために[ホームページ][biomejs]をチェ
   </tbody>
 </table>
 
-## 翻訳
-
-- [English](./README.md)
-- [简体中文](./README.zh-CN.md)
-- 日本語
-
-[bench]: https://github.com/biomejs/biome/blob/main/benchmark/README.md
 [biomejs]: https://biomejs.dev/ja/
 [biome-philosophy]: https://biomejs.dev/ja/internals/philosophy/
 [language-support]: https://biomejs.dev/ja/internals/language-support/

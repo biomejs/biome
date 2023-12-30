@@ -2,6 +2,13 @@
 source: crates/biome_service/src/diagnostics.rs
 expression: content
 ---
-not_supported.toml internalError/io ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+not_supported.toml files/missingHandler ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Biome could not determine the language for the file extension toml
+  ! Biome could not determine the language for the file extension toml
+  
+  Verbose advice
+  
+    i If you want to turn off this diagnostic, consider using --files-ignore-unknownfrom the CLI, or files.ignoreUnknown from the configuration file.
+    
+
+

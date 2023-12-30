@@ -1,4 +1,4 @@
-use crate::parse_recovery::{ParseRecovery, RecoveryResult};
+use crate::parse_recovery::{ParseRecovery, ParseRecoveryTokenSet, RecoveryResult};
 use crate::parsed_syntax::ParsedSyntax::{Absent, Present};
 use crate::prelude::*;
 use biome_rowan::TextRange;
@@ -242,19 +242,57 @@ impl ParsedSyntax {
     /// parser if the syntax is absent. The recovery...
     ///
     /// * eats all unexpected tokens into a `Bogus*` node until the parser reaches one
+    ///   of the "safe tokens" configured in the [ParseRecoveryTokenSet].
+    /// * creates an error using the passed in error builder and adds it to the parsing diagnostics.
+    ///
+    /// The error recovery can fail if the parser is located at the EOF token or if the parser
+    /// is already at a valid position according to the [ParseRecoveryTokenSet].
+    pub fn or_recover_with_token_set<P, E>(
+        self,
+        p: &mut P,
+        recovery: &ParseRecoveryTokenSet<P::Kind>,
+        error_builder: E,
+    ) -> RecoveryResult
+    where
+        P: Parser,
+        E: FnOnce(&P, TextRange) -> ParseDiagnostic,
+    {
+        match self {
+            Present(syntax) => Ok(syntax),
+            Absent => match recovery.recover(p) {
+                Ok(recovered) => {
+                    let diagnostic = error_builder(p, recovered.range(p));
+                    p.error(diagnostic);
+                    Ok(recovered)
+                }
+
+                Err(recovery_error) => {
+                    let diagnostic = error_builder(p, p.cur_range());
+                    p.error(diagnostic);
+                    Err(recovery_error)
+                }
+            },
+        }
+    }
+
+    /// Returns this Syntax if it is present in the source text or tries to recover the
+    /// parser if the syntax is absent. The recovery...
+    ///
+    /// * eats all unexpected tokens into a `Bogus*` node until the parser reaches one
     ///   of the "safe tokens" configured in the [ParseRecovery].
     /// * creates an error using the passed in error builder and adds it to the parsing diagnostics.
     ///
     /// The error recovery can fail if the parser is located at the EOF token or if the parser
     /// is already at a valid position according to the [ParseRecovery].
-    pub fn or_recover<P, E>(
+    pub fn or_recover<'source, P, E, R>(
         self,
         p: &mut P,
-        recovery: &ParseRecovery<P::Kind>,
+        recovery: &R,
         error_builder: E,
     ) -> RecoveryResult
     where
         P: Parser,
+        R: ParseRecovery<Parser<'source> = P>,
         E: FnOnce(&P, TextRange) -> ParseDiagnostic,
     {
         match self {

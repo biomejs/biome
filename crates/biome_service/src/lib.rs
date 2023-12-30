@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 use std::ops::{Deref, DerefMut};
 
 pub mod configuration;
+pub mod documentation;
 pub mod file_handlers;
 pub mod project_handlers;
 
@@ -11,21 +12,22 @@ pub mod matcher;
 pub mod settings;
 pub mod workspace;
 
-mod diagnostics;
+pub mod diagnostics;
 #[cfg(feature = "schema")]
 pub mod workspace_types;
 
 pub use crate::configuration::{
-    create_config, load_config, Configuration, ConfigurationBasePath, ConfigurationDiagnostic,
+    create_config, Configuration, ConfigurationBasePath, ConfigurationDiagnostic,
     JavascriptFormatter, MergeWith, RuleConfiguration, Rules,
 };
-pub use crate::matcher::{MatchOptions, Matcher, Pattern};
+pub use crate::matcher::Matcher;
 
 pub use crate::diagnostics::{TransportError, WorkspaceError};
 /// Exports only for this crate
 pub use crate::file_handlers::JsFormatterSettings;
 pub use crate::project_handlers::Manifests;
 pub use crate::workspace::Workspace;
+pub use diagnostics::extension_error;
 pub const VERSION: &str = match option_env!("BIOME_VERSION") {
     Some(version) => version,
     None => "0.0.0",

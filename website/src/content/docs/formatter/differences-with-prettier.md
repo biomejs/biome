@@ -211,7 +211,7 @@ class Read {
   readonly x: number;
   readonly readonly   x: number;
 }
-
+```
 
 #### Assignment to an optional chain
 

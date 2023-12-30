@@ -29,3 +29,6 @@
 @container(inline-size>=calc(200px)) { }
 
 @container ( WIDTH <= 150px ) {  }
+@container ( 150px <= WIDTH ) {  }
+
+@container --dashed-name not (width <= 500px) {  }

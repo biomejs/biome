@@ -29,7 +29,10 @@ pub fn create_analyzer_options(
     input_file: &Path,
     diagnostics: &mut Vec<String>,
 ) -> AnalyzerOptions {
-    let mut options = AnalyzerOptions::default();
+    let mut options = AnalyzerOptions {
+        configuration: Default::default(),
+        file_path: input_file.to_path_buf(),
+    };
     // We allow a test file to configure its rule using a special
     // file with the same name as the test but with extension ".options.json"
     // that configures that specific rule.
@@ -57,14 +60,16 @@ pub fn create_analyzer_options(
         } else {
             let configuration = deserialized.into_deserialized().unwrap_or_default();
             let mut settings = WorkspaceSettings::default();
-            settings.merge_with_configuration(configuration).unwrap();
+            settings
+                .merge_with_configuration(configuration, None, &[])
+                .unwrap();
             let configuration = AnalyzerConfiguration {
                 rules: to_analyzer_rules(&settings, input_file),
                 globals: vec![],
             };
             options = AnalyzerOptions {
                 configuration,
-                ..AnalyzerOptions::default()
+                ..options
             };
 
             Some(json)

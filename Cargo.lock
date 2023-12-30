@@ -19,9 +19,9 @@ checksum = "f26201604c87b1e01bd3d98f8d5d9a8fcbb815e8cedb41ffccbeb4bf593a35fe"
 
 [[package]]
 name = "aho-corasick"
-version = "0.7.20"
+version = "1.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cc936419f96fa211c1b9166887b38e5e40b19958e5b895be7c1f93adec7071ac"
+checksum = "b2969dcb958b36655471fc61f7e416fa76033bdd4bfed0678d8fee1e2d07a1f0"
 dependencies = [
  "memchr",
 ]
@@ -165,7 +165,9 @@ name = "biome_cli"
 version = "0.0.0"
 dependencies = [
  "anyhow",
+ "biome_analyze",
  "biome_console",
+ "biome_css_formatter",
  "biome_deserialize",
  "biome_diagnostics",
  "biome_flags",
@@ -230,6 +232,27 @@ version = "0.3.1"
 dependencies = [
  "biome_css_syntax",
  "biome_rowan",
+]
+
+[[package]]
+name = "biome_css_formatter"
+version = "0.3.1"
+dependencies = [
+ "biome_css_factory",
+ "biome_css_parser",
+ "biome_css_syntax",
+ "biome_diagnostics",
+ "biome_formatter",
+ "biome_formatter_test",
+ "biome_fs",
+ "biome_parser",
+ "biome_rowan",
+ "biome_suppression",
+ "countme",
+ "insta",
+ "serde",
+ "serde_json",
+ "tests_macros",
 ]
 
 [[package]]
@@ -367,6 +390,7 @@ dependencies = [
  "biome_console",
  "biome_diagnostics",
  "crossbeam",
+ "directories",
  "indexmap",
  "parking_lot",
  "rayon",
@@ -396,7 +420,6 @@ dependencies = [
  "biome_rowan",
  "biome_test_utils",
  "biome_text_edit",
- "bpaf",
  "countme",
  "insta",
  "lazy_static",
@@ -711,6 +734,9 @@ version = "0.0.0"
 dependencies = [
  "biome_analyze",
  "biome_console",
+ "biome_css_formatter",
+ "biome_css_parser",
+ "biome_css_syntax",
  "biome_deserialize",
  "biome_diagnostics",
  "biome_flags",
@@ -732,6 +758,8 @@ dependencies = [
  "biome_text_edit",
  "bpaf",
  "dashmap",
+ "globset",
+ "ignore",
  "indexmap",
  "insta",
  "lazy_static",
@@ -870,14 +898,14 @@ checksum = "ba3569f383e8f1598449f1a423e72e99569137b47740b1da11ef19af3d5c3223"
 dependencies = [
  "lazy_static",
  "memchr",
- "regex-automata",
+ "regex-automata 0.1.10",
 ]
 
 [[package]]
 name = "bstr"
-version = "1.3.0"
+version = "1.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5ffdb39cb703212f3c11973452c2861b972f757b021158f3516ba10f2fa8b2c1"
+checksum = "542f33a8835a0884b006a0c3df3dadd99c0c3f296ed26c2fdc8028e01ad6230c"
 dependencies = [
  "memchr",
  "serde",
@@ -1088,7 +1116,7 @@ dependencies = [
  "ciborium",
  "clap 3.2.25",
  "criterion-plot",
- "itertools 0.10.5",
+ "itertools",
  "lazy_static",
  "num-traits",
  "oorandom",
@@ -1114,7 +1142,7 @@ dependencies = [
  "clap 4.4.0",
  "criterion-plot",
  "is-terminal",
- "itertools 0.10.5",
+ "itertools",
  "num-traits",
  "once_cell",
  "oorandom",
@@ -1135,7 +1163,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6b50826342786a51a89e2da3a28f1c32b06e387201bc2d19791f622c673706b1"
 dependencies = [
  "cast",
- "itertools 0.10.5",
+ "itertools",
 ]
 
 [[package]]
@@ -1249,6 +1277,27 @@ dependencies = [
  "serde",
  "serde_json",
  "thousands",
+]
+
+[[package]]
+name = "directories"
+version = "5.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9a49173b84e034382284f27f1af4dcbbd231ffa358c0fe316541a7337f376a35"
+dependencies = [
+ "dirs-sys",
+]
+
+[[package]]
+name = "dirs-sys"
+version = "0.4.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "520f05a5cbd335fae5a99ff7a6ab8627577660ee5cfd6a94a6a929b52ff0321c"
+dependencies = [
+ "libc",
+ "option-ext",
+ "redox_users",
+ "windows-sys 0.48.0",
 ]
 
 [[package]]
@@ -1367,7 +1416,7 @@ checksum = "8a3de6e8d11b22ff9edc6d916f890800597d60f8b2da1caf2955c274638d6412"
 dependencies = [
  "cfg-if",
  "libc",
- "redox_syscall",
+ "redox_syscall 0.2.16",
  "windows-sys 0.45.0",
 ]
 
@@ -1555,15 +1604,15 @@ checksum = "d2fabcfbdc87f4758337ca535fb41a6d701b65693ce38287d856d1674551ec9b"
 
 [[package]]
 name = "globset"
-version = "0.4.10"
+version = "0.4.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "029d74589adefde59de1a0c4f4732695c32805624aec7b68d91503d4dba79afc"
+checksum = "57da3b9b5b85bd66f31093f8c408b90a74431672542466497dcbdfdc02034be1"
 dependencies = [
  "aho-corasick",
- "bstr 1.3.0",
- "fnv",
+ "bstr 1.8.0",
  "log",
- "regex",
+ "regex-automata 0.4.3",
+ "regex-syntax 0.8.2",
 ]
 
 [[package]]
@@ -1665,17 +1714,16 @@ dependencies = [
 
 [[package]]
 name = "ignore"
-version = "0.4.20"
+version = "0.4.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dbe7873dab538a9a44ad79ede1faf5f30d49f9a5c883ddbab48bce81b64b7492"
+checksum = "747ad1b4ae841a78e8aba0d63adbfbeaea26b517b63705d47856b73015d27060"
 dependencies = [
+ "crossbeam-deque",
  "globset",
- "lazy_static",
  "log",
  "memchr",
- "regex",
+ "regex-automata 0.4.3",
  "same-file",
- "thread_local",
  "walkdir",
  "winapi-util",
 ]
@@ -1766,15 +1814,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "itertools"
-version = "0.11.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b1c173a5686ce8bfa551b3563d0c2170bf24ca44da99c7ca4bfdab5418c3fe57"
-dependencies = [
- "either",
-]
-
-[[package]]
 name = "itoa"
 version = "1.0.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1845,6 +1884,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "libredox"
+version = "0.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "85c833ca1e66078851dba29046874e38f08b2c883700aa29a03ddd3b23814ee8"
+dependencies = [
+ "bitflags 2.3.1",
+ "libc",
+ "redox_syscall 0.4.1",
+]
+
+[[package]]
 name = "libz-sys"
 version = "1.1.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1909,14 +1959,14 @@ version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8263075bb86c5a1b1427b5ae862e8889656f126e9f77c484496e8b47cf5c5558"
 dependencies = [
- "regex-automata",
+ "regex-automata 0.1.10",
 ]
 
 [[package]]
 name = "memchr"
-version = "2.5.0"
+version = "2.6.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2dffe52ecf27772e601905b7522cb4ef790d2cc203488bbd0e2fe85fcb74566d"
+checksum = "f665ee40bc4a3c5590afb1e9677db74a508659dfd71e126420da8274909a0167"
 
 [[package]]
 name = "memoffset"
@@ -2089,6 +2139,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0ab1bc2a289d34bd04a330323ac98a1b4bc82c9d9fcb1e66b63caa84da26b575"
 
 [[package]]
+name = "option-ext"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "04744f49eae99ab78e0d5c0b603ab218f515ea8cfe5a456d7629ad883a3b6e7d"
+
+[[package]]
 name = "os_str_bytes"
 version = "6.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2124,7 +2180,7 @@ checksum = "9069cbb9f99e3a5083476ccb29ceb1de18b9118cafa53e90c9551235de2b9521"
 dependencies = [
  "cfg-if",
  "libc",
- "redox_syscall",
+ "redox_syscall 0.2.16",
  "smallvec",
  "windows-sys 0.45.0",
 ]
@@ -2267,7 +2323,7 @@ dependencies = [
  "rand 0.8.5",
  "rand_chacha 0.3.1",
  "rand_xorshift",
- "regex-syntax",
+ "regex-syntax 0.6.28",
  "rusty-fork",
  "tempfile",
  "unarray",
@@ -2449,14 +2505,35 @@ dependencies = [
 ]
 
 [[package]]
-name = "regex"
-version = "1.7.1"
+name = "redox_syscall"
+version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "48aaa5748ba571fb95cd2c85c09f629215d3a6ece942baa100950af03a34f733"
+checksum = "4722d768eff46b75989dd134e5c353f0d6296e5aaa3132e776cbdb56be7731aa"
+dependencies = [
+ "bitflags 1.3.2",
+]
+
+[[package]]
+name = "redox_users"
+version = "0.4.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a18479200779601e498ada4e8c1e1f50e3ee19deb0259c25825a98b5603b2cb4"
+dependencies = [
+ "getrandom 0.2.8",
+ "libredox",
+ "thiserror",
+]
+
+[[package]]
+name = "regex"
+version = "1.10.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "380b951a9c5e80ddfd6136919eef32310721aa4aacd4889a8d39124b026ab343"
 dependencies = [
  "aho-corasick",
  "memchr",
- "regex-syntax",
+ "regex-automata 0.4.3",
+ "regex-syntax 0.8.2",
 ]
 
 [[package]]
@@ -2465,7 +2542,18 @@ version = "0.1.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6c230d73fb8d8c1b9c0b3135c5142a8acee3a0558fb8db5cf1cb65f8d7862132"
 dependencies = [
- "regex-syntax",
+ "regex-syntax 0.6.28",
+]
+
+[[package]]
+name = "regex-automata"
+version = "0.4.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5f804c7828047e88b2d32e2d7fe5a105da8ee3264f01902f796c8e067dc2483f"
+dependencies = [
+ "aho-corasick",
+ "memchr",
+ "regex-syntax 0.8.2",
 ]
 
 [[package]]
@@ -2473,6 +2561,12 @@ name = "regex-syntax"
 version = "0.6.28"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "456c603be3e8d448b072f410900c09faf164fbce2d480456f50eea6e25f9c848"
+
+[[package]]
+name = "regex-syntax"
+version = "0.8.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c08c74e62047bb2de4ff487b251e4a92e24f48745648451635cec7d591162d9f"
 
 [[package]]
 name = "retain_mut"
@@ -2884,7 +2978,7 @@ checksum = "af18f7ae1acd354b992402e9ec5864359d693cd8a79dcbef59f76891701c1e95"
 dependencies = [
  "cfg-if",
  "fastrand",
- "redox_syscall",
+ "redox_syscall 0.2.16",
  "rustix 0.36.9",
  "windows-sys 0.42.0",
 ]
@@ -2999,12 +3093,6 @@ checksum = "4ad70d68dba9e1f8aceda7aa6711965dfec1cac869f311a51bd08b3a2ccbce20"
 dependencies = [
  "time-core",
 ]
-
-[[package]]
-name = "timing"
-version = "0.2.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0ef973380ab2960e2b4e49d552291930c217b947ee831f73000ebc5439074bf0"
 
 [[package]]
 name = "tinytemplate"
@@ -3403,12 +3491,11 @@ dependencies = [
 
 [[package]]
 name = "walkdir"
-version = "2.3.2"
+version = "2.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "808cf2735cd4b6866113f648b791c6adc5714537bc222d9347bb203386ffda56"
+checksum = "d71d857dc86794ca4c280d616f7da00d2dbfd8cd788846559a6813e6aa4b54ee"
 dependencies = [
  "same-file",
- "winapi",
  "winapi-util",
 ]
 
@@ -3697,6 +3784,7 @@ dependencies = [
  "ansi_rgb",
  "biome_analyze",
  "biome_console",
+ "biome_css_formatter",
  "biome_css_parser",
  "biome_css_syntax",
  "biome_diagnostics",
@@ -3714,15 +3802,11 @@ dependencies = [
  "criterion 0.5.1",
  "dhat",
  "humansize",
- "itertools 0.11.0",
  "mimalloc",
- "pico-args",
  "regex",
  "tikv-jemallocator",
- "timing",
  "ureq",
  "url",
- "xtask",
 ]
 
 [[package]]

@@ -28,7 +28,7 @@ pub(crate) fn parse_pseudo_class_function_value_list(p: &mut CssParser) -> Parse
     p.bump_ts(PSEUDO_CLASS_FUNCTION_VALUE_LIST_SET);
     p.bump(T!['(']);
 
-    let list = CssPseudoValueList.parse_list(p);
+    let list = PseudoValueList.parse_list(p);
     let list_range = list.range(p);
 
     if list_range.is_empty() {
@@ -47,9 +47,9 @@ pub(crate) fn parse_pseudo_class_function_value_list(p: &mut CssParser) -> Parse
     Present(m.complete(p, kind))
 }
 
-struct CssPseudoValueList;
+struct PseudoValueList;
 
-impl ParseSeparatedList for CssPseudoValueList {
+impl ParseSeparatedList for PseudoValueList {
     type Kind = CssSyntaxKind;
     type Parser<'source> = CssParser<'source>;
 

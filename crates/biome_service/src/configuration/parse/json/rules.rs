@@ -937,12 +937,27 @@ impl Deserializable for Nursery {
                                 diagnostics,
                             );
                         }
+                        "noInvalidUseBeforeDeclaration" => {
+                            result.no_invalid_use_before_declaration = Deserializable::deserialize(
+                                &value,
+                                "noInvalidUseBeforeDeclaration",
+                                diagnostics,
+                            );
+                        }
                         "noMisleadingCharacterClass" => {
                             result.no_misleading_character_class = Deserializable::deserialize(
                                 &value,
                                 "noMisleadingCharacterClass",
                                 diagnostics,
                             );
+                        }
+                        "noNodejsModules" => {
+                            result.no_nodejs_modules =
+                                Deserializable::deserialize(&value, "noNodejsModules", diagnostics);
+                        }
+                        "noThenProperty" => {
+                            result.no_then_property =
+                                Deserializable::deserialize(&value, "noThenProperty", diagnostics);
                         }
                         "noUnusedImports" => {
                             result.no_unused_imports =
@@ -977,6 +992,13 @@ impl Deserializable for Nursery {
                             result.use_export_type =
                                 Deserializable::deserialize(&value, "useExportType", diagnostics);
                         }
+                        "useFilenamingConvention" => {
+                            result.use_filenaming_convention = Deserializable::deserialize(
+                                &value,
+                                "useFilenamingConvention",
+                                diagnostics,
+                            );
+                        }
                         "useForOf" => {
                             result.use_for_of =
                                 Deserializable::deserialize(&value, "useForOf", diagnostics);
@@ -992,6 +1014,20 @@ impl Deserializable for Nursery {
                             result.use_import_restrictions = Deserializable::deserialize(
                                 &value,
                                 "useImportRestrictions",
+                                diagnostics,
+                            );
+                        }
+                        "useNodeImportProtocol" => {
+                            result.use_node_import_protocol = Deserializable::deserialize(
+                                &value,
+                                "useNodeImportProtocol",
+                                diagnostics,
+                            );
+                        }
+                        "useNumberProperties" => {
+                            result.use_number_properties = Deserializable::deserialize(
+                                &value,
+                                "useNumberProperties",
                                 diagnostics,
                             );
                         }
@@ -1028,16 +1064,22 @@ impl Deserializable for Nursery {
                                     "noDuplicateJsonKeys",
                                     "noEmptyBlockStatements",
                                     "noImplicitAnyLet",
+                                    "noInvalidUseBeforeDeclaration",
                                     "noMisleadingCharacterClass",
+                                    "noNodejsModules",
+                                    "noThenProperty",
                                     "noUnusedImports",
                                     "noUnusedPrivateClassMembers",
                                     "noUselessLoneBlockStatements",
                                     "noUselessTernary",
                                     "useAwait",
                                     "useExportType",
+                                    "useFilenamingConvention",
                                     "useForOf",
                                     "useGroupedTypeImport",
                                     "useImportRestrictions",
+                                    "useNodeImportProtocol",
+                                    "useNumberProperties",
                                     "useRegexLiterals",
                                     "useShorthandFunctionType",
                                     "useValidAriaRole",

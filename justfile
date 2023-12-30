@@ -94,17 +94,17 @@ test-doc:
 test-lintrule name:
   just _touch crates/biome_js_analyze/tests/spec_tests.rs
   just _touch crates/biome_json_analyze/tests/spec_tests.rs
-  cargo test -p biome_js_analyze -- {{snakecase(name)}}
-  cargo test -p biome_json_analyze -- {{snakecase(name)}}
+  cargo test -p biome_js_analyze -- {{snakecase(name)}} --show-output
+  cargo test -p biome_json_analyze -- {{snakecase(name)}} --show-output
 
 # Tests a lint rule. The name of the rule needs to be camel case
 test-transformation name:
   just _touch crates/biome_js_transform/tests/spec_tests.rs
-  cargo test -p biome_js_transform -- {{snakecase(name)}}
+  cargo test -p biome_js_transform -- {{snakecase(name)}} --show-output
 
 # Run the quick_test for the given package.
 test-quick package:
-  cargo test -p {{package}} --test quick_test -- quick_test --nocapture
+  cargo test -p {{package}} --test quick_test -- quick_test --nocapture --ignored
 
 
 # Alias for `cargo lint`, it runs clippy on the whole codebase

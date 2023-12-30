@@ -243,7 +243,7 @@ mod tests {
             String::from_utf8(buffer).unwrap()
         }
 
-        const SOURCE: &str = r#" this.arr[0] = p[0];
+        const SOURCE: &str = r#"require("fs")
         "#;
         // const SOURCE: &str = r#"document.querySelector("foo").value = document.querySelector("foo").value
         //
@@ -258,7 +258,7 @@ mod tests {
             closure_index: Some(0),
             dependencies_index: Some(1),
         };
-        let rule_filter = RuleFilter::Rule("correctness", "noSelfAssign");
+        let rule_filter = RuleFilter::Rule("nursery", "useNodeImportProtocol");
         options.configuration.rules.push_rule(
             RuleKey::new("nursery", "useHookAtTopLevel"),
             RuleOptions::new(HooksOptions { hooks: vec![hook] }),

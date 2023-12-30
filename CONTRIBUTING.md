@@ -2,9 +2,10 @@
 
 We can use help in a bunch of areas and any help is greatly appreciated!
 
-# Table of Contents
+## Table of Contents
+
 - [🚀 Contributing](#-contributing)
-- [Table of Contents](#table-of-contents)
+  - [Table of Contents](#table-of-contents)
   - [Asking questions, making proposals](#asking-questions-making-proposals)
   - [Reporting bugs](#reporting-bugs)
   - [Getting Started](#getting-started)
@@ -26,6 +27,7 @@ We can use help in a bunch of areas and any help is greatly appreciated!
     - [UI Testing intellij plugin](#ui-testing-intellij-plugin)
   - [Node.js development](#nodejs-development)
   - [Website development](#website-development)
+    - [Translations](#translations)
   - [Commit messages](#commit-messages)
   - [Creating pull requests](#creating-pull-requests)
     - [Changelog](#changelog)
@@ -176,7 +178,6 @@ These tests are generated from inline comments found inside the source code.
 
 On the other hand, we are moving away from this approach and have a straightforward process in other parser implementation like CSS.
 
-
 ##### `cargo codegen analyzer`
 
 This command will detect linter rules declared in the `analyzers`, `assists` and `syntax` directories in the analyzer crates, e.g. `biome_js_analyze`, `biome_json_analyze`, etc., and regenerate the `registry.rs` file and its dependents to include all the rules.
@@ -197,11 +198,13 @@ Build and run the plugin requires:
 - IntelliJ IDEA Ultimate edition
 
 ### Running the plugin on IDEA
+
 ```bash
 ./gradlew runIde
 ```
 
 ### Build the plugin
+
 ```bash
 ./gradlew buildPlugin
 ```
@@ -245,6 +248,10 @@ pnpm install
 pnpm start
 ```
 
+### Translations
+
+For more information on how to help with translation, please see the [translation contribution guidelines for our docs](./website/TRANSLATIONS.md).
+
 ## Commit messages
 
 Internally, the Biome team adheres as closely as possible to the [conventional commit specification](https://www.conventionalcommits.org/en/v1.0.0-beta.2/).
@@ -262,7 +269,7 @@ The following commit prefixes are supported:
 
 Below are examples of well-formatted commits:
 
-```
+```txt
 feat(compiler): implement parsing for new type of files
 fix: fix nasty unhandled error
 docs: fix link to website page
@@ -272,7 +279,7 @@ test(lint): add more cases to handle invalid rules
 ## Creating pull requests
 
 When creating a new pull request, it's preferable to use a conventional commit-formatted title, as this title will be used as the default commit message on the squashed commit after merging.
-See the [dedicated section](#Commit-messages) about conventional commit format.
+See the [dedicated section](#commit-messages) about conventional commit format.
 
 Please use the template provided.
 
@@ -346,12 +353,6 @@ If in doubt, take a look to existing changelog lines.
 If your PR requires some update on the website (new features, breaking changes, etc.), you should create a new PR once the previous PR is successfully merged.
 When adding new features, the documentation should be part of a new PR, which will be merged right before the release.
 
-### Magic comments
-
-- `!bench_parser` benchmarks the parser's runtime performance and writes a comment with the results;
-- `!bench_formatter` benchmarks the formatter runtime performance and writes a comment with the results;
-- `!bench_analyzer` benchmarks the analyzer runtime performance and writes a comment with the results;
-
 ### Versioning
 
 We follow the specs suggested by [the official documentation](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#prerelease-extensions):
@@ -390,6 +391,7 @@ We have several resources explaining about Biome. They will help you understand 
 
 - [Rust Dublin October 2023 - Biome - YouTube](https://youtu.be/stxiUYmHn0s?si=C9cMsc93nNrZa-r1)
 - [Rome, a Modern Toolchain! by Emanuele Stoppa - GitNation](https://portal.gitnation.org/contents/rome-a-modern-toolchain)
+- [How to create a lint rule in Biome](https://www.youtube.com/watch?v=zfzMO3nW_Wo&t=343s)
 
 ## Current Members
 
@@ -405,12 +407,11 @@ Members are listed in alphabetical order. Members are free to use the full name,
 - [Daiki Nishikawa @nissy-dev](https://github.com/nissy-dev)
 - [Denis Bezrukov @denbezrukov](https://github.com/denbezrukov)
 - [Hiroki Ihoriya @unvalley](https://github.com/unvalley)
+- [Jon Egeland @faultyserver](https://github.com/faultyserver)
 
 ### Maintainers team
 
-- [Jon Egeland @faultyserver](https://github.com/faultyserver)
 - [Madeline Gurriarán @SuperchupuDev](https://github.com/SuperchupuDev)
 - [Nicolas Hedger @nhedger](https://github.com/nhedger)
 - [Victor Teles @victor-teles](https://github.com/victor-teles)
 - [Takayuki Maeda @TaKO8Ki](https://github.com/TaKO8Ki)
-- [Jon Egeland @faultyserver](https://github.com/faultyserver)
