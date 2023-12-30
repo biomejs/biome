@@ -24,12 +24,12 @@ Biome now scores 97% compatibility with Prettier and features more than 180 lint
 
 - The CLI now takes in consideration the `.gitignore` in the home directory of the user, if it exists. Contributed by @ematipico
 - The `biome ci` command is now able to print [GitHub Workflow Commands](https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions) when there are diagnostics in our code. Contributed by @nikeee
-  This will **might** require setting the proper permissions on your GitHub action:
+  This **might** require setting the proper permissions on your GitHub action:
   ```yaml
   permissions:
     pull-requests: write
   ```
-- The commands `format`, `lint`, `check` and `ci` now accepts two new arguments: `--changed` and `--since`. Use these options when the VCS integration
+- The commands `format`, `lint`, `check` and `ci` now accept two new arguments: `--changed` and `--since`. Use these options with the VCS integration
   is enabled to process only the files that were changed. Contributed by @simonxabris
 
   ```shell

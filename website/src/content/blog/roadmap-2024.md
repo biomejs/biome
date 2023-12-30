@@ -16,7 +16,7 @@ socialImage: ../../assets/social-logo.png
 
 We are thrilled to share what the Core Contributors and Maintainers would like to focus on in 2024.
 
-We want to remind the community that Biome is a project driven by the community, so we can't promise that all the ideas outlined below are going to be shipped.
+We want to remind that Biome is a community-driven project, so we can't promise that all the ideas outlined below are going to be shipped.
 
 However, if you're excited about some aspects of the project, and you want to see some of them developed faster than others, you can help us in many ways:
 - [**Be involved in the project and the community**](https://github.com/biomejs). Help us to build those features.
@@ -26,16 +26,16 @@ However, if you're excited about some aspects of the project, and you want to se
 
 ### Preface
 
-The project is young and still can't compete against other giants such as Prettier, eslint, webpack, vite, esbuild, etc., although the recent events (sponsors, bounty challenge, Biome being a fork of Rome) showed that the users **have** interest in the project, and we showed those users that we have the tools for fulfilling a need.
+The project is young and still can't compete against other giants such as Prettier, ESLint, Webpack, Vite, ESBuild, etc., although the recent events (sponsors, bounty challenge, Biome being a fork of Rome) showed that the users **have** interest in the project, and we showed those users that we have the tools for fulfilling a need.
 
-Moving small projects from ESLint/Prettier is easy, but moving **big** code bases is challenging and time-consuming. This is a big friction to Biome.
+Moving small projects from ESLint/Prettier is easy, but moving **big** code bases is challenging and time-consuming. This is a big point of friction in Biome.
 
-Users have different needs though, so it will be impossible to satisfy all of them, so we want to make sure that they contribute to our project and embrace our philosophy.
+Users have different needs though, so it will be impossible to satisfy all of them. We want to make sure that all features and contributions to our project [embrace our philosophy](/internals/philosophy/) and provide the best experience by default.
 
 ### Main area of focus
 
 1. Help users to move to Biome
-2. Increase Biome's languages, so Biome tools can span
+2. Expand Biome's language support, so Biome tools can span more of the web ecosystem
 3. Deepen Biome's existing capabilities to offer more functionalities
 4. Plugins
 5. Transformations
@@ -51,9 +51,9 @@ Users have different needs though, so it will be impossible to satisfy all of th
   - A command called `biome migrate eslint` that will read the JSON configuration of Eslint and the ignore file. There will be expectations and limitations.
 
 
-### Increase Biome's languages, so Biome tools can span
+### Expand Biome's language support
 
-CSS is going to be our next language of focus. HTML and Markdown will follow. Follow our [up-to-date page](/internals/language-support) to know the progress of our works.
+CSS is our next language of focus and is making good progress. HTML and Markdown will follow. Follow our [up-to-date page](/internals/language-support) to keep up with the progress of our work.
 
 The CSS language will enable a lot of work and experimentation: CSS formatting and linting, and we will port some of the lint rules from `styelelint`. A new area of experimentation is cross-linting.
 
@@ -77,7 +77,7 @@ With project resolution, we will be able to provide more lint rules, some of whi
 
 With dependency resolution, we will be able to provide to - for example - detect dependencies that aren't used inside a project.
 
-With this infrastructure, our LSP is going to be more powerful and we will able to provide more features, for example:
+With this infrastructure, our LSP is going to be more powerful and provide more features, for example:
 - rename variables across a project;
 - auto-complete for imports;
 - in-line types
@@ -121,7 +121,7 @@ We will provide the ability to transform TypeScript and JSX files into JavaScrip
 
 Biome has a growing ecosystem, with an official VSCode extension, an official IntelliJ extension, and a Discord bot. We want to grow the features provided by these tools and welcome any user who wants to help us.
 
-Our community is slowly growing, and we want to reward any person who sticks around a contributions to Biome. At Biome, **we value any type of contribution**, so you don't need to be proficient in Rust in order to help us. Even participating to discussions and help us to shape our features, or helping other people are considered *contributions*. If you think you contributed to our ecosystem, we encourage you to [candidate yourself as a maintainer of the project](https://github.com/biomejs/biome/blob/main/GOVERNANCE.md#maintainer-nomination).
+Our community is slowly growing, and we want to reward any person who sticks around and contributes to Biome. At Biome, **we value any type of contribution**, so you don't need to be proficient in Rust in order to help us. Even participating to discussions and help us to shape our features, or helping other people are considered *contributions*. If you'd like to continue contributing to our ecosystem, we also encourage you to [nominate yourself as a maintainer of the project](https://github.com/biomejs/biome/blob/main/GOVERNANCE.md#maintainer-nomination).
 
 Recently Biome started its own [YouTube Channel](https://www.youtube.com/channel/UC6ssscaFgCSlbv1Pb6krGVw). We will use this channel to share learning content with the community.
 
