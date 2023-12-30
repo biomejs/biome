@@ -233,7 +233,7 @@ pub(crate) fn run_test_suite(
 
         // Skip frames inside the backtrace lib
         for frame in backtrace.frames().iter().skip(6) {
-            if let Some(s) = frame.symbols().get(0) {
+            if let Some(s) = frame.symbols().first() {
                 if let Some(file) = s.filename() {
                     // We don't care about std or cargo registry libs
                     let file_path = file.as_os_str().to_str().unwrap();

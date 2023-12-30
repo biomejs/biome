@@ -39,6 +39,7 @@ expression: snapshot
 @container ( WIDTH <= 150px ) {  }
 @container ( 150px <= WIDTH ) {  }
 
+@container --dashed-name not (width <= 500px) {  }
 ```
 
 
@@ -672,17 +673,54 @@ CssRoot {
                 },
             },
         },
+        CssAtRule {
+            at_token: AT@753..756 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssContainerAtRule {
+                container_token: CONTAINER_KW@756..766 "container" [] [Whitespace(" ")],
+                name: CssCustomIdentifier {
+                    value_token: IDENT@766..780 "--dashed-name" [] [Whitespace(" ")],
+                },
+                query: CssContainerNotQuery {
+                    not_token: NOT_KW@780..784 "not" [] [Whitespace(" ")],
+                    query: CssContainerSizeFeatureInParens {
+                        l_paren_token: L_PAREN@784..785 "(" [] [],
+                        feature: CssQueryFeatureRange {
+                            left: CssIdentifier {
+                                value_token: IDENT@785..791 "width" [] [Whitespace(" ")],
+                            },
+                            comparison: CssQueryFeatureRangeComparison {
+                                operator: LTEQ@791..794 "<=" [] [Whitespace(" ")],
+                            },
+                            right: CssRegularDimension {
+                                value: CssNumber {
+                                    value_token: CSS_NUMBER_LITERAL@794..797 "500" [] [],
+                                },
+                                unit: CssIdentifier {
+                                    value_token: IDENT@797..799 "px" [] [],
+                                },
+                            },
+                        },
+                        r_paren_token: R_PAREN@799..801 ")" [] [Whitespace(" ")],
+                    },
+                },
+                block: CssRuleListBlock {
+                    l_curly_token: L_CURLY@801..804 "{" [] [Whitespace("  ")],
+                    rules: CssRuleList [],
+                    r_curly_token: R_CURLY@804..805 "}" [] [],
+                },
+            },
+        },
     ],
-    eof_token: EOF@753..754 "" [Newline("\n")] [],
+    eof_token: EOF@805..805 "" [] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..754
+0: CSS_ROOT@0..805
   0: (empty)
-  1: CSS_RULE_LIST@0..753
+  1: CSS_RULE_LIST@0..805
     0: CSS_AT_RULE@0..41
       0: AT@0..1 "@" [] []
       1: CSS_CONTAINER_AT_RULE@1..41
@@ -1110,7 +1148,32 @@ CssRoot {
           0: L_CURLY@749..752 "{" [] [Whitespace("  ")]
           1: CSS_RULE_LIST@752..752
           2: R_CURLY@752..753 "}" [] []
-  2: EOF@753..754 "" [Newline("\n")] []
+    17: CSS_AT_RULE@753..805
+      0: AT@753..756 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_CONTAINER_AT_RULE@756..805
+        0: CONTAINER_KW@756..766 "container" [] [Whitespace(" ")]
+        1: CSS_CUSTOM_IDENTIFIER@766..780
+          0: IDENT@766..780 "--dashed-name" [] [Whitespace(" ")]
+        2: CSS_CONTAINER_NOT_QUERY@780..801
+          0: NOT_KW@780..784 "not" [] [Whitespace(" ")]
+          1: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@784..801
+            0: L_PAREN@784..785 "(" [] []
+            1: CSS_QUERY_FEATURE_RANGE@785..799
+              0: CSS_IDENTIFIER@785..791
+                0: IDENT@785..791 "width" [] [Whitespace(" ")]
+              1: CSS_QUERY_FEATURE_RANGE_COMPARISON@791..794
+                0: LTEQ@791..794 "<=" [] [Whitespace(" ")]
+              2: CSS_REGULAR_DIMENSION@794..799
+                0: CSS_NUMBER@794..797
+                  0: CSS_NUMBER_LITERAL@794..797 "500" [] []
+                1: CSS_IDENTIFIER@797..799
+                  0: IDENT@797..799 "px" [] []
+            2: R_PAREN@799..801 ")" [] [Whitespace(" ")]
+        3: CSS_RULE_LIST_BLOCK@801..805
+          0: L_CURLY@801..804 "{" [] [Whitespace("  ")]
+          1: CSS_RULE_LIST@804..804
+          2: R_CURLY@804..805 "}" [] []
+  2: EOF@805..805 "" [] []
 
 ```
 

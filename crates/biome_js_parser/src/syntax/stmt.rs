@@ -29,7 +29,7 @@ use crate::syntax::typescript::ts_parse_error::{expected_ts_type, ts_only_syntax
 use crate::span::Span;
 use crate::JsSyntaxFeature::{StrictMode, TypeScript};
 use crate::ParsedSyntax::{Absent, Present};
-use crate::{parser, JsParser, JsSyntaxFeature, ParseRecovery};
+use crate::{parser, JsParser, JsSyntaxFeature, ParseRecoveryTokenSet};
 use biome_js_syntax::{JsSyntaxKind::*, *};
 use biome_parser::diagnostic::expected_token;
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
@@ -903,9 +903,9 @@ pub(crate) fn parse_statements(p: &mut JsParser, stop_on_r_curly: bool, statemen
         }
 
         if parse_statement(p, StatementContext::StatementList)
-            .or_recover(
+            .or_recover_with_token_set(
                 p,
-                &ParseRecovery::new(JS_BOGUS_STATEMENT, recovery_set),
+                &ParseRecoveryTokenSet::new(JS_BOGUS_STATEMENT, recovery_set),
                 expected_statement,
             )
             .is_err()
@@ -1270,9 +1270,9 @@ impl ParseSeparatedList for VariableDeclaratorList {
     }
 
     fn recover(&mut self, p: &mut JsParser, parsed_element: ParsedSyntax) -> RecoveryResult {
-        parsed_element.or_recover(
+        parsed_element.or_recover_with_token_set(
             p,
-            &ParseRecovery::new(JS_BOGUS, STMT_RECOVERY_SET.union(token_set!(T![,])))
+            &ParseRecoveryTokenSet::new(JS_BOGUS, STMT_RECOVERY_SET.union(token_set!(T![,])))
                 .enable_recovery_on_line_break(),
             expected_binding,
         )
@@ -1804,9 +1804,9 @@ impl ParseNodeList for SwitchCaseStatementList {
         p: &mut JsParser,
         parsed_element: ParsedSyntax,
     ) -> parser::RecoveryResult {
-        parsed_element.or_recover(
+        parsed_element.or_recover_with_token_set(
             p,
-            &ParseRecovery::new(JS_BOGUS_STATEMENT, STMT_RECOVERY_SET),
+            &ParseRecoveryTokenSet::new(JS_BOGUS_STATEMENT, STMT_RECOVERY_SET),
             js_parse_error::expected_case,
         )
     }
@@ -1898,9 +1898,9 @@ impl ParseNodeList for SwitchCasesList {
             let m = p.start();
             let statements = p.start();
 
-            let recovered_element = parsed_element.or_recover(
+            let recovered_element = parsed_element.or_recover_with_token_set(
                 p,
-                &ParseRecovery::new(
+                &ParseRecoveryTokenSet::new(
                     JS_BOGUS_STATEMENT,
                     token_set![T![default], T![case], T!['}']],
                 )

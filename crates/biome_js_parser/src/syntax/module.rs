@@ -29,7 +29,7 @@ use crate::syntax::typescript::{
     parse_ts_interface_declaration,
 };
 use crate::JsSyntaxFeature::TypeScript;
-use crate::{Absent, JsParser, ParseRecovery, ParsedSyntax, Present};
+use crate::{Absent, JsParser, ParseRecoveryTokenSet, ParsedSyntax, Present};
 use biome_js_syntax::JsSyntaxKind::*;
 use biome_js_syntax::{JsSyntaxKind, TextRange, T};
 use biome_parser::diagnostic::{expected_any, expected_node};
@@ -99,9 +99,9 @@ pub(crate) fn parse_module_item_list(
 
         let module_item = parse_module_item(p);
 
-        let recovered = module_item.or_recover(
+        let recovered = module_item.or_recover_with_token_set(
             p,
-            &ParseRecovery::new(JS_BOGUS_STATEMENT, recovery_set),
+            &ParseRecoveryTokenSet::new(JS_BOGUS_STATEMENT, recovery_set),
             expected_statement,
         );
 
@@ -435,9 +435,9 @@ impl ParseSeparatedList for NamedImportSpecifierList {
     }
 
     fn recover(&mut self, p: &mut JsParser, parsed_element: ParsedSyntax) -> RecoveryResult {
-        parsed_element.or_recover(
+        parsed_element.or_recover_with_token_set(
             p,
-            &ParseRecovery::new(
+            &ParseRecoveryTokenSet::new(
                 JS_BOGUS_NAMED_IMPORT_SPECIFIER,
                 STMT_RECOVERY_SET.union(token_set![T![,], T!['}'], T![;]]),
             )
@@ -609,9 +609,9 @@ impl ParseSeparatedList for ImportAssertionList {
     }
 
     fn recover(&mut self, p: &mut JsParser, parsed_element: ParsedSyntax) -> RecoveryResult {
-        parsed_element.or_recover(
+        parsed_element.or_recover_with_token_set(
             p,
-            &ParseRecovery::new(
+            &ParseRecoveryTokenSet::new(
                 JS_BOGUS_IMPORT_ASSERTION_ENTRY,
                 STMT_RECOVERY_SET.union(token_set![T![,], T!['}']]),
             )
@@ -841,9 +841,9 @@ impl ParseSeparatedList for ExportNamedSpecifierList {
     }
 
     fn recover(&mut self, p: &mut JsParser, parsed_element: ParsedSyntax) -> RecoveryResult {
-        parsed_element.or_recover(
+        parsed_element.or_recover_with_token_set(
             p,
-            &ParseRecovery::new(
+            &ParseRecoveryTokenSet::new(
                 JS_BOGUS,
                 STMT_RECOVERY_SET.union(token_set![T![,], T!['}'], T![;]]),
             )
@@ -1132,9 +1132,9 @@ impl ParseSeparatedList for ExportNamedFromSpecifierList {
     }
 
     fn recover(&mut self, p: &mut JsParser, parsed_element: ParsedSyntax) -> RecoveryResult {
-        parsed_element.or_recover(
+        parsed_element.or_recover_with_token_set(
             p,
-            &ParseRecovery::new(
+            &ParseRecoveryTokenSet::new(
                 JS_BOGUS,
                 STMT_RECOVERY_SET.union(token_set![T![,], T!['}'], T![;]]),
             )

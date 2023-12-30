@@ -20,6 +20,7 @@ pub enum CssLexContext {
     /// Applied when lexing CSS selectors.
     /// Doesn't skip whitespace trivia for a combinator.
     Selector,
+
     /// Applied when lexing CSS pseudo nth selectors.
     /// Distinct '-' from identifiers and '+' from numbers.
     PseudoNthSelector,
@@ -842,6 +843,13 @@ impl<'src> CssLexer<'src> {
             b"style" => STYLE_KW,
             b"font-face" => FONT_FACE_KW,
             b"font-palette-values" => FONT_PALETTE_VALUES_KW,
+            // CSS-Wide keywords
+            b"initial" => INITIAL_KW,
+            b"inherit" => INHERIT_KW,
+            b"unset" => UNSET_KW,
+            b"revert" => REVERT_KW,
+            b"revert-layer" => REVERT_LAYER_KW,
+            b"default" => DEFAULT_KW,
             // length units
             b"em" => EM_KW,
             b"rem" => REM_KW,

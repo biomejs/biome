@@ -1,0 +1,21 @@
+@container inherit (width <= 500px) { }
+@container initial (width <= 500px) { }
+@container unset (width <= 500px) { }
+@container revert (width <= 500px) { }
+@container revert-layer (width <= 500px) { }
+@container inherit width <= 500px) { }
+
+@container not width <= 500px) {  }
+
+@container not (width <= 500px {  }
+@container not (width <=) {  }
+@container not {  }
+
+@container my-layout (inline-size > 45em) {  }
+
+@container card (inline-size > 30em) or {  }
+
+@container (inline-size >= 0px)  }
+
+@container { }
+@container () { }

@@ -90,6 +90,13 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "to",
         "var",
         "font-palette-values",
+        // CSS-wide keywords
+        "initial",
+        "inherit",
+        "unset",
+        "revert",
+        "revert-layer",
+        "default",
         // length units
         "em",
         "rem",

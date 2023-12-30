@@ -8,7 +8,9 @@ pub(crate) mod rewrite_parser;
 pub(crate) mod single_token_parse_recovery;
 
 use crate::lexer::JsReLexContext;
-pub(crate) use crate::parser::parse_recovery::{ParseRecovery, RecoveryError, RecoveryResult};
+pub(crate) use crate::parser::parse_recovery::{
+    ParseRecoveryTokenSet, RecoveryError, RecoveryResult,
+};
 use crate::prelude::*;
 use crate::state::{ChangeParserState, ParserStateGuard};
 use crate::*;

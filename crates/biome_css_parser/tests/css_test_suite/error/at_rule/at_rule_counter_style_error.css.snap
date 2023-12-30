@@ -10,8 +10,12 @@ expression: snapshot
 @counter-style 6788 {  }
 @counter-style 'string' {  }
 @counter-style ident
-@counter-style ident
 
+@counter-style inherit { }
+@counter-style initial { }
+@counter-style unset { }
+@counter-style revert { }
+@counter-style revert-layer { }
 ```
 
 
@@ -82,27 +86,106 @@ CssRoot {
             },
         },
         CssAtRule {
-            at_token: AT@95..97 "@" [Newline("\n")] [],
+            at_token: AT@95..98 "@" [Newline("\n"), Newline("\n")] [],
             rule: CssBogusAtRule {
                 items: [
-                    COUNTER_STYLE_KW@97..111 "counter-style" [] [Whitespace(" ")],
-                    CssCustomIdentifier {
-                        value_token: IDENT@111..116 "ident" [] [],
+                    COUNTER_STYLE_KW@98..112 "counter-style" [] [Whitespace(" ")],
+                    CssBogus {
+                        items: [
+                            INHERIT_KW@112..120 "inherit" [] [Whitespace(" ")],
+                        ],
+                    },
+                    CssDeclarationListBlock {
+                        l_curly_token: L_CURLY@120..122 "{" [] [Whitespace(" ")],
+                        declarations: CssDeclarationList [],
+                        r_curly_token: R_CURLY@122..123 "}" [] [],
+                    },
+                ],
+            },
+        },
+        CssAtRule {
+            at_token: AT@123..125 "@" [Newline("\n")] [],
+            rule: CssBogusAtRule {
+                items: [
+                    COUNTER_STYLE_KW@125..139 "counter-style" [] [Whitespace(" ")],
+                    CssBogus {
+                        items: [
+                            INITIAL_KW@139..147 "initial" [] [Whitespace(" ")],
+                        ],
+                    },
+                    CssDeclarationListBlock {
+                        l_curly_token: L_CURLY@147..149 "{" [] [Whitespace(" ")],
+                        declarations: CssDeclarationList [],
+                        r_curly_token: R_CURLY@149..150 "}" [] [],
+                    },
+                ],
+            },
+        },
+        CssAtRule {
+            at_token: AT@150..152 "@" [Newline("\n")] [],
+            rule: CssBogusAtRule {
+                items: [
+                    COUNTER_STYLE_KW@152..166 "counter-style" [] [Whitespace(" ")],
+                    CssBogus {
+                        items: [
+                            UNSET_KW@166..172 "unset" [] [Whitespace(" ")],
+                        ],
+                    },
+                    CssDeclarationListBlock {
+                        l_curly_token: L_CURLY@172..174 "{" [] [Whitespace(" ")],
+                        declarations: CssDeclarationList [],
+                        r_curly_token: R_CURLY@174..175 "}" [] [],
+                    },
+                ],
+            },
+        },
+        CssAtRule {
+            at_token: AT@175..177 "@" [Newline("\n")] [],
+            rule: CssBogusAtRule {
+                items: [
+                    COUNTER_STYLE_KW@177..191 "counter-style" [] [Whitespace(" ")],
+                    CssBogus {
+                        items: [
+                            REVERT_KW@191..198 "revert" [] [Whitespace(" ")],
+                        ],
+                    },
+                    CssDeclarationListBlock {
+                        l_curly_token: L_CURLY@198..200 "{" [] [Whitespace(" ")],
+                        declarations: CssDeclarationList [],
+                        r_curly_token: R_CURLY@200..201 "}" [] [],
+                    },
+                ],
+            },
+        },
+        CssAtRule {
+            at_token: AT@201..203 "@" [Newline("\n")] [],
+            rule: CssBogusAtRule {
+                items: [
+                    COUNTER_STYLE_KW@203..217 "counter-style" [] [Whitespace(" ")],
+                    CssBogus {
+                        items: [
+                            REVERT_LAYER_KW@217..230 "revert-layer" [] [Whitespace(" ")],
+                        ],
+                    },
+                    CssDeclarationListBlock {
+                        l_curly_token: L_CURLY@230..232 "{" [] [Whitespace(" ")],
+                        declarations: CssDeclarationList [],
+                        r_curly_token: R_CURLY@232..233 "}" [] [],
                     },
                 ],
             },
         },
     ],
-    eof_token: EOF@116..117 "" [Newline("\n")] [],
+    eof_token: EOF@233..233 "" [] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..117
+0: CSS_ROOT@0..233
   0: (empty)
-  1: CSS_RULE_LIST@0..116
+  1: CSS_RULE_LIST@0..233
     0: CSS_AT_RULE@0..20
       0: AT@0..1 "@" [] []
       1: CSS_BOGUS_AT_RULE@1..20
@@ -137,13 +220,57 @@ CssRoot {
         0: COUNTER_STYLE_KW@76..90 "counter-style" [] [Whitespace(" ")]
         1: CSS_CUSTOM_IDENTIFIER@90..95
           0: IDENT@90..95 "ident" [] []
-    4: CSS_AT_RULE@95..116
-      0: AT@95..97 "@" [Newline("\n")] []
-      1: CSS_BOGUS_AT_RULE@97..116
-        0: COUNTER_STYLE_KW@97..111 "counter-style" [] [Whitespace(" ")]
-        1: CSS_CUSTOM_IDENTIFIER@111..116
-          0: IDENT@111..116 "ident" [] []
-  2: EOF@116..117 "" [Newline("\n")] []
+    4: CSS_AT_RULE@95..123
+      0: AT@95..98 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_BOGUS_AT_RULE@98..123
+        0: COUNTER_STYLE_KW@98..112 "counter-style" [] [Whitespace(" ")]
+        1: CSS_BOGUS@112..120
+          0: INHERIT_KW@112..120 "inherit" [] [Whitespace(" ")]
+        2: CSS_DECLARATION_LIST_BLOCK@120..123
+          0: L_CURLY@120..122 "{" [] [Whitespace(" ")]
+          1: CSS_DECLARATION_LIST@122..122
+          2: R_CURLY@122..123 "}" [] []
+    5: CSS_AT_RULE@123..150
+      0: AT@123..125 "@" [Newline("\n")] []
+      1: CSS_BOGUS_AT_RULE@125..150
+        0: COUNTER_STYLE_KW@125..139 "counter-style" [] [Whitespace(" ")]
+        1: CSS_BOGUS@139..147
+          0: INITIAL_KW@139..147 "initial" [] [Whitespace(" ")]
+        2: CSS_DECLARATION_LIST_BLOCK@147..150
+          0: L_CURLY@147..149 "{" [] [Whitespace(" ")]
+          1: CSS_DECLARATION_LIST@149..149
+          2: R_CURLY@149..150 "}" [] []
+    6: CSS_AT_RULE@150..175
+      0: AT@150..152 "@" [Newline("\n")] []
+      1: CSS_BOGUS_AT_RULE@152..175
+        0: COUNTER_STYLE_KW@152..166 "counter-style" [] [Whitespace(" ")]
+        1: CSS_BOGUS@166..172
+          0: UNSET_KW@166..172 "unset" [] [Whitespace(" ")]
+        2: CSS_DECLARATION_LIST_BLOCK@172..175
+          0: L_CURLY@172..174 "{" [] [Whitespace(" ")]
+          1: CSS_DECLARATION_LIST@174..174
+          2: R_CURLY@174..175 "}" [] []
+    7: CSS_AT_RULE@175..201
+      0: AT@175..177 "@" [Newline("\n")] []
+      1: CSS_BOGUS_AT_RULE@177..201
+        0: COUNTER_STYLE_KW@177..191 "counter-style" [] [Whitespace(" ")]
+        1: CSS_BOGUS@191..198
+          0: REVERT_KW@191..198 "revert" [] [Whitespace(" ")]
+        2: CSS_DECLARATION_LIST_BLOCK@198..201
+          0: L_CURLY@198..200 "{" [] [Whitespace(" ")]
+          1: CSS_DECLARATION_LIST@200..200
+          2: R_CURLY@200..201 "}" [] []
+    8: CSS_AT_RULE@201..233
+      0: AT@201..203 "@" [Newline("\n")] []
+      1: CSS_BOGUS_AT_RULE@203..233
+        0: COUNTER_STYLE_KW@203..217 "counter-style" [] [Whitespace(" ")]
+        1: CSS_BOGUS@217..230
+          0: REVERT_LAYER_KW@217..230 "revert-layer" [] [Whitespace(" ")]
+        2: CSS_DECLARATION_LIST_BLOCK@230..233
+          0: L_CURLY@230..232 "{" [] [Whitespace(" ")]
+          1: CSS_DECLARATION_LIST@232..232
+          2: R_CURLY@232..233 "}" [] []
+  2: EOF@233..233 "" [] []
 
 ```
 
@@ -193,7 +320,7 @@ at_rule_counter_style_error.css:3:16 parse ━━━━━━━━━━━━�
   > 3 │ @counter-style 'string' {  }
       │                ^^^^^^^^
     4 │ @counter-style ident
-    5 │ @counter-style ident
+    5 │ 
   
   i Expected an identifier here.
   
@@ -202,41 +329,88 @@ at_rule_counter_style_error.css:3:16 parse ━━━━━━━━━━━━�
   > 3 │ @counter-style 'string' {  }
       │                ^^^^^^^^
     4 │ @counter-style ident
-    5 │ @counter-style ident
-  
-at_rule_counter_style_error.css:5:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a body but instead found '@'.
-  
-    3 │ @counter-style 'string' {  }
-    4 │ @counter-style ident
-  > 5 │ @counter-style ident
-      │ ^
-    6 │ 
-  
-  i Expected a body here.
-  
-    3 │ @counter-style 'string' {  }
-    4 │ @counter-style ident
-  > 5 │ @counter-style ident
-      │ ^
-    6 │ 
+    5 │ 
   
 at_rule_counter_style_error.css:6:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a body but instead found the end of the file.
+  × Expected a body but instead found '@'.
   
     4 │ @counter-style ident
-    5 │ @counter-style ident
-  > 6 │ 
-      │ 
+    5 │ 
+  > 6 │ @counter-style inherit { }
+      │ ^
+    7 │ @counter-style initial { }
+    8 │ @counter-style unset { }
   
   i Expected a body here.
   
     4 │ @counter-style ident
-    5 │ @counter-style ident
-  > 6 │ 
-      │ 
+    5 │ 
+  > 6 │ @counter-style inherit { }
+      │ ^
+    7 │ @counter-style initial { }
+    8 │ @counter-style unset { }
+  
+at_rule_counter_style_error.css:6:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found 'inherit'
+  
+    4 │ @counter-style ident
+    5 │ 
+  > 6 │ @counter-style inherit { }
+      │                ^^^^^^^
+    7 │ @counter-style initial { }
+    8 │ @counter-style unset { }
+  
+  i 'inherit' is a CSS-wide keyword that cannot be used here
+  
+at_rule_counter_style_error.css:7:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found 'initial'
+  
+    6 │ @counter-style inherit { }
+  > 7 │ @counter-style initial { }
+      │                ^^^^^^^
+    8 │ @counter-style unset { }
+    9 │ @counter-style revert { }
+  
+  i 'initial' is a CSS-wide keyword that cannot be used here
+  
+at_rule_counter_style_error.css:8:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found 'unset'
+  
+     6 │ @counter-style inherit { }
+     7 │ @counter-style initial { }
+   > 8 │ @counter-style unset { }
+       │                ^^^^^
+     9 │ @counter-style revert { }
+    10 │ @counter-style revert-layer { }
+  
+  i 'unset' is a CSS-wide keyword that cannot be used here
+  
+at_rule_counter_style_error.css:9:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found 'revert'
+  
+     7 │ @counter-style initial { }
+     8 │ @counter-style unset { }
+   > 9 │ @counter-style revert { }
+       │                ^^^^^^
+    10 │ @counter-style revert-layer { }
+  
+  i 'revert' is a CSS-wide keyword that cannot be used here
+  
+at_rule_counter_style_error.css:10:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found 'revert-layer'
+  
+     8 │ @counter-style unset { }
+     9 │ @counter-style revert { }
+  > 10 │ @counter-style revert-layer { }
+       │                ^^^^^^^^^^^^
+  
+  i 'revert-layer' is a CSS-wide keyword that cannot be used here
   
 ```
 

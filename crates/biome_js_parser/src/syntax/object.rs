@@ -22,7 +22,7 @@ use crate::syntax::typescript::{
     TypeContext,
 };
 use crate::JsSyntaxFeature::TypeScript;
-use crate::{JsParser, ParseRecovery};
+use crate::{JsParser, ParseRecoveryTokenSet};
 use biome_js_syntax::JsSyntaxKind::*;
 use biome_js_syntax::{JsSyntaxKind, T};
 use biome_parser::parse_lists::ParseSeparatedList;
@@ -53,9 +53,9 @@ impl ParseSeparatedList for ObjectMembersList {
     }
 
     fn recover(&mut self, p: &mut JsParser, parsed_element: ParsedSyntax) -> RecoveryResult {
-        parsed_element.or_recover(
+        parsed_element.or_recover_with_token_set(
             p,
-            &ParseRecovery::new(JS_BOGUS_MEMBER, token_set![T![,], T!['}'], T![;], T![:]])
+            &ParseRecoveryTokenSet::new(JS_BOGUS_MEMBER, token_set![T![,], T!['}'], T![;], T![:]])
                 .enable_recovery_on_line_break(),
             js_parse_error::expected_object_member,
         )
