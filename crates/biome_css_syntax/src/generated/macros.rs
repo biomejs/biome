@@ -290,10 +290,6 @@ macro_rules! map_syntax_node {
                         unsafe { $crate::CssParenthesizedExpression::new_unchecked(node) };
                     $body
                 }
-                $crate::CssSyntaxKind::CSS_PERCENT_DIMENSION => {
-                    let $pattern = unsafe { $crate::CssPercentDimension::new_unchecked(node) };
-                    $body
-                }
                 $crate::CssSyntaxKind::CSS_PERCENTAGE => {
                     let $pattern = unsafe { $crate::CssPercentage::new_unchecked(node) };
                     $body

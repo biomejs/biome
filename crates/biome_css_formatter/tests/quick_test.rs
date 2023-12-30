@@ -13,10 +13,11 @@ mod language {
 // use this test check if your snippet prints as you wish, without using a snapshot
 fn quick_test() {
     let src = r#"
-
-    
-@media screen and (min-width: 0 px ) {
-  }
+    div {
+        prod: fn(100px);
+        prod: --fn(100px);
+        prod: --fn--fn(100px);
+    }
 
 "#;
     let parse = parse_css(src, CssParserOptions::default());

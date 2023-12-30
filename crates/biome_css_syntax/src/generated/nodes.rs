@@ -2806,47 +2806,6 @@ pub struct CssParenthesizedExpressionFields {
     pub r_paren_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub struct CssPercentDimension {
-    pub(crate) syntax: SyntaxNode,
-}
-impl CssPercentDimension {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> CssPercentDimensionFields {
-        CssPercentDimensionFields {
-            value: self.value(),
-            unit_token: self.unit_token(),
-        }
-    }
-    pub fn value(&self) -> SyntaxResult<CssNumber> {
-        support::required_node(&self.syntax, 0usize)
-    }
-    pub fn unit_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 1usize)
-    }
-}
-#[cfg(feature = "serde")]
-impl Serialize for CssPercentDimension {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[cfg_attr(feature = "serde", derive(Serialize))]
-pub struct CssPercentDimensionFields {
-    pub value: SyntaxResult<CssNumber>,
-    pub unit_token: SyntaxResult<SyntaxToken>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssPercentage {
     pub(crate) syntax: SyntaxNode,
 }
@@ -2862,12 +2821,12 @@ impl CssPercentage {
     }
     pub fn as_fields(&self) -> CssPercentageFields {
         CssPercentageFields {
-            value: self.value(),
+            value_token: self.value_token(),
             reminder_token: self.reminder_token(),
         }
     }
-    pub fn value(&self) -> SyntaxResult<CssNumber> {
-        support::required_node(&self.syntax, 0usize)
+    pub fn value_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
     }
     pub fn reminder_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 1usize)
@@ -2884,7 +2843,7 @@ impl Serialize for CssPercentage {
 }
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct CssPercentageFields {
-    pub value: SyntaxResult<CssNumber>,
+    pub value_token: SyntaxResult<SyntaxToken>,
     pub reminder_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -4083,15 +4042,15 @@ impl CssRegularDimension {
     }
     pub fn as_fields(&self) -> CssRegularDimensionFields {
         CssRegularDimensionFields {
-            value: self.value(),
-            unit: self.unit(),
+            value_token: self.value_token(),
+            unit_token: self.unit_token(),
         }
     }
-    pub fn value(&self) -> SyntaxResult<CssNumber> {
-        support::required_node(&self.syntax, 0usize)
+    pub fn value_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
     }
-    pub fn unit(&self) -> SyntaxResult<CssIdentifier> {
-        support::required_node(&self.syntax, 1usize)
+    pub fn unit_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
     }
 }
 #[cfg(feature = "serde")]
@@ -4105,8 +4064,8 @@ impl Serialize for CssRegularDimension {
 }
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct CssRegularDimensionFields {
-    pub value: SyntaxResult<CssNumber>,
-    pub unit: SyntaxResult<CssIdentifier>,
+    pub value_token: SyntaxResult<SyntaxToken>,
+    pub unit_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssRelativeSelector {
@@ -5040,15 +4999,15 @@ impl CssUnknownDimension {
     }
     pub fn as_fields(&self) -> CssUnknownDimensionFields {
         CssUnknownDimensionFields {
-            value: self.value(),
-            unit: self.unit(),
+            value_token: self.value_token(),
+            unit_token: self.unit_token(),
         }
     }
-    pub fn value(&self) -> SyntaxResult<CssNumber> {
-        support::required_node(&self.syntax, 0usize)
+    pub fn value_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
     }
-    pub fn unit(&self) -> SyntaxResult<CssIdentifier> {
-        support::required_node(&self.syntax, 1usize)
+    pub fn unit_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
     }
 }
 #[cfg(feature = "serde")]
@@ -5062,8 +5021,8 @@ impl Serialize for CssUnknownDimension {
 }
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct CssUnknownDimensionFields {
-    pub value: SyntaxResult<CssNumber>,
-    pub unit: SyntaxResult<CssIdentifier>,
+    pub value_token: SyntaxResult<SyntaxToken>,
+    pub unit_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssUrlFunction {
@@ -9418,45 +9377,6 @@ impl From<CssParenthesizedExpression> for SyntaxElement {
         n.syntax.into()
     }
 }
-impl AstNode for CssPercentDimension {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_PERCENT_DIMENSION as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_PERCENT_DIMENSION
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for CssPercentDimension {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssPercentDimension")
-            .field("value", &support::DebugSyntaxResult(self.value()))
-            .field("unit_token", &support::DebugSyntaxResult(self.unit_token()))
-            .finish()
-    }
-}
-impl From<CssPercentDimension> for SyntaxNode {
-    fn from(n: CssPercentDimension) -> SyntaxNode {
-        n.syntax
-    }
-}
-impl From<CssPercentDimension> for SyntaxElement {
-    fn from(n: CssPercentDimension) -> SyntaxElement {
-        n.syntax.into()
-    }
-}
 impl AstNode for CssPercentage {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -9481,7 +9401,10 @@ impl AstNode for CssPercentage {
 impl std::fmt::Debug for CssPercentage {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("CssPercentage")
-            .field("value", &support::DebugSyntaxResult(self.value()))
+            .field(
+                "value_token",
+                &support::DebugSyntaxResult(self.value_token()),
+            )
             .field(
                 "reminder_token",
                 &support::DebugSyntaxResult(self.reminder_token()),
@@ -10652,8 +10575,11 @@ impl AstNode for CssRegularDimension {
 impl std::fmt::Debug for CssRegularDimension {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("CssRegularDimension")
-            .field("value", &support::DebugSyntaxResult(self.value()))
-            .field("unit", &support::DebugSyntaxResult(self.unit()))
+            .field(
+                "value_token",
+                &support::DebugSyntaxResult(self.value_token()),
+            )
+            .field("unit_token", &support::DebugSyntaxResult(self.unit_token()))
             .finish()
     }
 }
@@ -11584,8 +11510,11 @@ impl AstNode for CssUnknownDimension {
 impl std::fmt::Debug for CssUnknownDimension {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("CssUnknownDimension")
-            .field("value", &support::DebugSyntaxResult(self.value()))
-            .field("unit", &support::DebugSyntaxResult(self.unit()))
+            .field(
+                "value_token",
+                &support::DebugSyntaxResult(self.value_token()),
+            )
+            .field("unit_token", &support::DebugSyntaxResult(self.unit_token()))
             .finish()
     }
 }
@@ -16762,11 +16691,6 @@ impl std::fmt::Display for CssParameter {
     }
 }
 impl std::fmt::Display for CssParenthesizedExpression {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
-impl std::fmt::Display for CssPercentDimension {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

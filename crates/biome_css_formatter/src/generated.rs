@@ -4010,46 +4010,6 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssUnknownDimension {
         )
     }
 }
-impl FormatRule<biome_css_syntax::CssPercentDimension>
-    for crate::css::value::percent_dimension::FormatCssPercentDimension
-{
-    type Context = CssFormatContext;
-    #[inline(always)]
-    fn fmt(
-        &self,
-        node: &biome_css_syntax::CssPercentDimension,
-        f: &mut CssFormatter,
-    ) -> FormatResult<()> {
-        FormatNodeRule::<biome_css_syntax::CssPercentDimension>::fmt(self, node, f)
-    }
-}
-impl AsFormat<CssFormatContext> for biome_css_syntax::CssPercentDimension {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        biome_css_syntax::CssPercentDimension,
-        crate::css::value::percent_dimension::FormatCssPercentDimension,
-    >;
-    fn format(&self) -> Self::Format<'_> {
-        #![allow(clippy::default_constructed_unit_structs)]
-        FormatRefWithRule::new(
-            self,
-            crate::css::value::percent_dimension::FormatCssPercentDimension::default(),
-        )
-    }
-}
-impl IntoFormat<CssFormatContext> for biome_css_syntax::CssPercentDimension {
-    type Format = FormatOwnedWithRule<
-        biome_css_syntax::CssPercentDimension,
-        crate::css::value::percent_dimension::FormatCssPercentDimension,
-    >;
-    fn into_format(self) -> Self::Format {
-        #![allow(clippy::default_constructed_unit_structs)]
-        FormatOwnedWithRule::new(
-            self,
-            crate::css::value::percent_dimension::FormatCssPercentDimension::default(),
-        )
-    }
-}
 impl FormatRule<biome_css_syntax::CssUrlFunction>
     for crate::css::auxiliary::url_function::FormatCssUrlFunction
 {

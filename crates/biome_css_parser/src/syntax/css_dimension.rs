@@ -1,12 +1,9 @@
-use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::{token_set, Parser, TokenSet};
-
-use super::{parse_dimension_value_as_number, parse_regular_identifier};
 
 #[inline]
 pub(crate) fn is_at_any_dimension(p: &mut CssParser) -> bool {
@@ -34,7 +31,10 @@ pub(crate) fn parse_percentage_dimension(p: &mut CssParser) -> ParsedSyntax {
     }
 
     let m = p.start();
-    parse_dimension_value_as_number(p, CssLexContext::Regular).ok();
+    // Re-cast the value portion of the dimension as a number literal.
+    p.bump_remap(CSS_NUMBER_LITERAL);
+    // CSS_PERCENTAGE_VALUE guarantees the `%` will be the next token,
+    // but we can use expect just to be safe.
     p.expect(T![%]);
     Present(m.complete(p, CSS_PERCENTAGE))
 }
@@ -51,7 +51,8 @@ fn parse_regular_dimension(p: &mut CssParser) -> ParsedSyntax {
     }
 
     let m = p.start();
-    parse_dimension_value_as_number(p, CssLexContext::Regular).ok();
+    // Re-cast the value portion of the dimension as a number literal.
+    p.bump_remap(CSS_NUMBER_LITERAL);
 
     // Any identifier is valid as a dimension unit, but for known units we
     // use `CssRegularDimension` as a convenience elsewhere to know that the
@@ -63,9 +64,10 @@ fn parse_regular_dimension(p: &mut CssParser) -> ParsedSyntax {
     };
 
     // CSS_DIMENSION_VALUE guarantees that an identifier will follow the
-    // number parsed previously, so this can just be parsed with no
-    // diagnostic necessary.
-    parse_regular_identifier(p).ok();
+    // number parsed previously, but the lexer will most likely treat it
+    // as a keyword (like `px` as PX_KW), so it needs to be re-cast to just
+    // an ident.
+    p.bump_remap(T![ident]);
 
     Present(m.complete(p, kind))
 }

@@ -4,7 +4,7 @@ use crate::syntax::parse_error::{expected_any_pseudo_class_nth, expected_number}
 use crate::syntax::selector::{
     eat_or_recover_selector_function_close_token, recover_selector_function_parameter, SelectorList,
 };
-use crate::syntax::{parse_dimension_value_as_number, parse_number, parse_regular_number};
+use crate::syntax::{parse_number, parse_regular_number};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::CssSyntaxKind::{
     CSS_NTH_OFFSET, CSS_PSEUDO_CLASS_FUNCTION_NTH, CSS_PSEUDO_CLASS_NTH,
@@ -116,7 +116,12 @@ fn parse_pseudo_class_nth(p: &mut CssParser) -> ParsedSyntax {
         match p.cur() {
             // Matches `2n` or `2n + 1`
             CSS_DIMENSION_VALUE => {
-                parse_dimension_value_as_number(p, CssLexContext::PseudoNthSelector).ok();
+                // Re-cast the value as a number literal and into a CssNumber
+                // to fit the Pseudo node.
+                let m = p.start();
+                p.bump_remap_with_context(CSS_NUMBER_LITERAL, CssLexContext::PseudoNthSelector);
+                m.complete(p, CSS_NUMBER);
+
                 if p.eat_with_context(T![n], CssLexContext::PseudoNthSelector) {
                     parse_nth_offset(p).ok();
                     CSS_PSEUDO_CLASS_NTH

@@ -586,21 +586,6 @@ pub(crate) fn parse_number(p: &mut CssParser, context: CssLexContext) -> ParsedS
 
     Present(m.complete(p, CSS_NUMBER))
 }
-/// Re-cast CSS_DIMENSION_VALUE or CSS_PERCENTAGE_VALUE as a CSS_NUMBER_LITERAL
-/// and capture it in a CssNumber node, as if it were a number literal originally.
-#[inline]
-pub(crate) fn parse_dimension_value_as_number(
-    p: &mut CssParser,
-    context: CssLexContext,
-) -> ParsedSyntax {
-    if !p.at(CSS_DIMENSION_VALUE) && !p.at(CSS_PERCENTAGE_VALUE) {
-        return Absent;
-    }
-
-    let m = p.start();
-    p.bump_remap_with_context(CSS_NUMBER_LITERAL, context);
-    Present(m.complete(p, CSS_NUMBER))
-}
 
 #[inline]
 pub(crate) fn parse_string(p: &mut CssParser) -> ParsedSyntax {

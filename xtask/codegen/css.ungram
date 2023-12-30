@@ -1181,6 +1181,15 @@ AnyCssValue =
 // Known, valid units like `px` or `vh` will be parsed as `CssRegularDimension`,
 // but the spec considers any identifier after the number to be the "unit".
 // These cases will instead be parsed into `CssUnknownDimension`.
+//
+// Dimensions and percentages are considered unique tokens in CSS, and so these
+// nodes just represent the tokens directly, rather than wrapping them in
+// `CssNumber` and `CssIdentifier`. This helps users easily distinguish between
+// things like `100`, `100px`, and `100%`, where they are all distinct, non-
+// overlapping types. If these instead used the number and identifier nodes, a
+// visitor would incidentally visit them even though they cannot be safely
+// operated on individually (i.e., the whole dimension must be treated as a
+// whole and not two individual pieces).
 
 // 10px
 // 100vh
@@ -1189,17 +1198,17 @@ AnyCssValue =
 // 0\0
 // 0Unknown
 AnyCssDimension =
-	CssRegularDimension | CssPercentage | CssUnknownDimension
+	CssRegularDimension | CssUnknownDimension | CssPercentage
 
 CssRegularDimension =
-	value: CssNumber
-	unit: CssIdentifier
-CssPercentDimension =
-	value: CssNumber
-	unit: '%'
+	value: 'css_number_literal'
+	unit: 'ident'
 CssUnknownDimension =
-	value: CssNumber
-	unit: CssIdentifier
+	value: 'css_number_literal'
+	unit: 'ident'
+CssPercentage =
+	value: 'css_number_literal'
+	'%'
 
 // 3 / 2
 CssRatio =
@@ -1225,10 +1234,6 @@ CssUrlFunction = 'url' '(' AnyCssUrlValue? ')'
 AnyCssUrlValue =
 	CssUrlValueRaw
 	| CssString
-
-CssPercentage =
-	value: CssNumber
-	'%'
 
 CssParameterList = CssParameter (',' CssParameter)* ','?
 

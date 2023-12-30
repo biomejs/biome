@@ -261,7 +261,6 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_PARAMETER_LIST",
         "CSS_DECLARATION_IMPORTANT",
         "CSS_UNIT",
-        "CSS_PERCENT_DIMENSION",
         "CSS_REGULAR_DIMENSION",
         "CSS_UNKNOWN_DIMENSION",
         // Selectors nodes

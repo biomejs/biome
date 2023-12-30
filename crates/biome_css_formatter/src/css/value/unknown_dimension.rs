@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use crate::{prelude::*, utils::string_utils::FormatTokenAsLowercase};
 use biome_css_syntax::{CssUnknownDimension, CssUnknownDimensionFields};
 use biome_formatter::write;
 
@@ -6,8 +6,18 @@ use biome_formatter::write;
 pub(crate) struct FormatCssUnknownDimension;
 impl FormatNodeRule<CssUnknownDimension> for FormatCssUnknownDimension {
     fn fmt_fields(&self, node: &CssUnknownDimension, f: &mut CssFormatter) -> FormatResult<()> {
-        let CssUnknownDimensionFields { value, unit } = node.as_fields();
+        let CssUnknownDimensionFields {
+            value_token,
+            unit_token,
+        } = node.as_fields();
 
-        write!(f, [value.format(), unit.format()])
+        let var_name = write!(
+            f,
+            [
+                FormatTokenAsLowercase::from(value_token?),
+                FormatTokenAsLowercase::from(unit_token?),
+            ]
+        );
+        var_name
     }
 }
