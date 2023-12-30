@@ -104,7 +104,7 @@ test-transformation name:
 
 # Run the quick_test for the given package.
 test-quick package:
-  cargo test -p {{package}} --test quick_test -- quick_test --nocapture
+  cargo test -p {{package}} --test quick_test -- quick_test --nocapture --ignored
 
 
 # Alias for `cargo lint`, it runs clippy on the whole codebase

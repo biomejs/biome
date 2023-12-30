@@ -1,17 +1,16 @@
+use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use crate::syntax::at_rule::parse_error::{
     expected_keyframes_item, expected_keyframes_item_selector,
 };
+use crate::syntax::blocks::parse_declaration_list_block;
 use crate::syntax::css_dimension::{is_at_percentage_dimension, parse_percentage_dimension};
-use crate::syntax::parse_error::{expected_block, expected_identifier};
-use crate::syntax::{
-    is_at_identifier, parse_declaration_list_block, parse_regular_identifier, parse_string,
-    BODY_RECOVERY_SET,
-};
+use crate::syntax::parse_error::{expected_block, expected_non_css_wide_keyword_identifier};
+use crate::syntax::{is_at_identifier, parse_custom_identifier, parse_string, BODY_RECOVERY_SET};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
-use biome_parser::parse_recovery::{ParseRecovery, RecoveryResult};
+use biome_parser::parse_recovery::{ParseRecovery, ParseRecoveryTokenSet, RecoveryResult};
 use biome_parser::parsed_syntax::ParsedSyntax::Present;
 use biome_parser::prelude::ParsedSyntax::Absent;
 use biome_parser::prelude::*;
@@ -32,17 +31,17 @@ pub(crate) fn parse_keyframes_at_rule(p: &mut CssParser) -> ParsedSyntax {
     p.bump(T![keyframes]);
 
     let name = if is_at_identifier(p) {
-        parse_regular_identifier(p)
+        parse_custom_identifier(p, CssLexContext::Regular)
     } else {
         parse_string(p)
     };
 
     let kind = if name
-        .or_recover(
+        .or_recover_with_token_set(
             p,
-            &ParseRecovery::new(CSS_BOGUS, KEYFRAMES_NAME_RECOVERY_SET)
+            &ParseRecoveryTokenSet::new(CSS_BOGUS, KEYFRAMES_NAME_RECOVERY_SET)
                 .enable_recovery_on_line_break(),
-            expected_identifier,
+            expected_non_css_wide_keyword_identifier,
         )
         .is_ok()
     {
@@ -52,9 +51,10 @@ pub(crate) fn parse_keyframes_at_rule(p: &mut CssParser) -> ParsedSyntax {
     };
 
     if parse_keyframes_block(p)
-        .or_recover(
+        .or_recover_with_token_set(
             p,
-            &ParseRecovery::new(CSS_BOGUS_BLOCK, BODY_RECOVERY_SET).enable_recovery_on_line_break(),
+            &ParseRecoveryTokenSet::new(CSS_BOGUS_BLOCK, BODY_RECOVERY_SET)
+                .enable_recovery_on_line_break(),
             expected_block,
         )
         .is_err()
@@ -74,7 +74,7 @@ fn parse_keyframes_block(p: &mut CssParser) -> ParsedSyntax {
 
     let m = p.start();
     p.expect(T!['{']);
-    CssKeyframesItemList.parse_list(p);
+    KeyframesItemList.parse_list(p);
     p.expect(T!['}']);
 
     Present(m.complete(p, CSS_KEYFRAMES_BLOCK))
@@ -83,9 +83,9 @@ fn parse_keyframes_block(p: &mut CssParser) -> ParsedSyntax {
 const KEYFRAMES_ITEM_LIST_RECOVERY_SET: TokenSet<CssSyntaxKind> =
     KEYFRAMES_ITEM_SELECTOR_SET.union(token_set!(T!['}']));
 
-struct CssKeyframesItemList;
+struct KeyframesItemList;
 
-impl ParseNodeList for CssKeyframesItemList {
+impl ParseNodeList for KeyframesItemList {
     type Kind = CssSyntaxKind;
     type Parser<'source> = CssParser<'source>;
     const LIST_KIND: Self::Kind = CSS_KEYFRAMES_ITEM_LIST;
@@ -103,9 +103,9 @@ impl ParseNodeList for CssKeyframesItemList {
         p: &mut Self::Parser<'_>,
         parsed_element: ParsedSyntax,
     ) -> RecoveryResult {
-        parsed_element.or_recover(
+        parsed_element.or_recover_with_token_set(
             p,
-            &ParseRecovery::new(CSS_BOGUS_KEYFRAMES_ITEM, KEYFRAMES_ITEM_LIST_RECOVERY_SET),
+            &ParseRecoveryTokenSet::new(CSS_BOGUS_KEYFRAMES_ITEM, KEYFRAMES_ITEM_LIST_RECOVERY_SET),
             expected_keyframes_item,
         )
     }
@@ -118,12 +118,13 @@ fn parse_keyframes_item(p: &mut CssParser) -> ParsedSyntax {
     }
 
     let m = p.start();
-    CssKeyframesSelectorList.parse_list(p);
+    KeyframesSelectorList.parse_list(p);
 
     if parse_declaration_list_block(p)
-        .or_recover(
+        .or_recover_with_token_set(
             p,
-            &ParseRecovery::new(CSS_BOGUS_BLOCK, BODY_RECOVERY_SET).enable_recovery_on_line_break(),
+            &ParseRecoveryTokenSet::new(CSS_BOGUS_BLOCK, BODY_RECOVERY_SET)
+                .enable_recovery_on_line_break(),
             expected_block,
         )
         .is_err()
@@ -134,24 +135,27 @@ fn parse_keyframes_item(p: &mut CssParser) -> ParsedSyntax {
     Present(m.complete(p, CSS_KEYFRAMES_ITEM))
 }
 
-const KEYFRAMES_ITEM_SELECTOR_LIST_RECOVERY_SET: TokenSet<CssSyntaxKind> =
-    KEYFRAMES_ITEM_SELECTOR_SET.union(token_set!(T!['{']));
+struct KeyframesSelectorListParseRecovery;
 
-struct CssKeyframesSelectorList;
+impl ParseRecovery for KeyframesSelectorListParseRecovery {
+    type Kind = CssSyntaxKind;
+    type Parser<'source> = CssParser<'source>;
+    const RECOVERED_KIND: Self::Kind = CSS_BOGUS_SELECTOR;
 
-impl ParseSeparatedList for CssKeyframesSelectorList {
+    fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
+        p.at(T!['{']) || is_at_keyframes_item_selector(p)
+    }
+}
+
+struct KeyframesSelectorList;
+
+impl ParseSeparatedList for KeyframesSelectorList {
     type Kind = CssSyntaxKind;
     type Parser<'source> = CssParser<'source>;
     const LIST_KIND: Self::Kind = CSS_KEYFRAMES_SELECTOR_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        //TODO better error recovery? we need to extend ParseRecovery to support nth_at token
-        if p.at(CSS_NUMBER_LITERAL) && !p.nth_at(1, T![%]) {
-            p.bump(CSS_NUMBER_LITERAL);
-            Absent
-        } else {
-            parse_keyframes_item_selector(p)
-        }
+        parse_keyframes_item_selector(p)
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
@@ -165,10 +169,7 @@ impl ParseSeparatedList for CssKeyframesSelectorList {
     ) -> RecoveryResult {
         parsed_element.or_recover(
             p,
-            &ParseRecovery::new(
-                CSS_BOGUS_SELECTOR,
-                KEYFRAMES_ITEM_SELECTOR_LIST_RECOVERY_SET,
-            ),
+            &KeyframesSelectorListParseRecovery,
             expected_keyframes_item_selector,
         )
     }

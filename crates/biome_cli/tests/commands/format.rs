@@ -1073,7 +1073,7 @@ fn format_stdin_successfully() {
 
     let message = console
         .out_buffer
-        .get(0)
+        .first()
         .expect("Console should have written a message");
 
     let content = markup_to_string(markup! {
@@ -1135,7 +1135,7 @@ fn does_not_format_if_disabled() {
 
     let message = console
         .out_buffer
-        .get(0)
+        .first()
         .expect("Console should have written a message");
 
     let content = markup_to_string(markup! {

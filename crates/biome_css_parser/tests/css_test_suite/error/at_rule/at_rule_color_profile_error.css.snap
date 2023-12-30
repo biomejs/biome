@@ -75,7 +75,7 @@ CssRoot {
             rule: CssBogusAtRule {
                 items: [
                     COLOR_PROFILE_KW@78..92 "color-profile" [] [Whitespace(" ")],
-                    CssIdentifier {
+                    CssCustomIdentifier {
                         value_token: IDENT@92..103 "DEVICE-CMYK" [] [],
                     },
                 ],
@@ -132,7 +132,7 @@ CssRoot {
       0: AT@76..78 "@" [Newline("\n")] []
       1: CSS_BOGUS_AT_RULE@78..103
         0: COLOR_PROFILE_KW@78..92 "color-profile" [] [Whitespace(" ")]
-        1: CSS_IDENTIFIER@92..103
+        1: CSS_CUSTOM_IDENTIFIER@92..103
           0: IDENT@92..103 "DEVICE-CMYK" [] []
     4: CSS_AT_RULE@103..118
       0: AT@103..105 "@" [Newline("\n")] []

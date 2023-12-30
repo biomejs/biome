@@ -30,3 +30,6 @@ bench = false
 name  = "contains_iai"
 path  = "bins/contains_iai.rs"
 test  = false
+
+[lints]
+workspace = true

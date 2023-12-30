@@ -7,13 +7,11 @@ mod snap_test;
 #[cfg(test)]
 use snap_test::assert_cli_snapshot;
 
-use bpaf::ParseFailure;
-use std::path::Path;
-
 use biome_cli::{biome_command, CliDiagnostic, CliSession};
 use biome_console::{markup, BufferConsole, Console, ConsoleExt};
 use biome_fs::{FileSystem, MemoryFileSystem};
 use biome_service::{App, DynRef};
+use bpaf::ParseFailure;
 
 const UNFORMATTED: &str = "  statement(  )  ";
 const FORMATTED: &str = "statement();\n";
@@ -286,86 +284,6 @@ mod configuration {
         );
 
         assert!(result.is_err(), "run_cli returned {result:?}");
-    }
-}
-
-mod reporter_json {
-    use super::*;
-    use crate::snap_test::{assert_file_contents, SnapshotPayload};
-    use crate::UNFORMATTED;
-    use bpaf::Args;
-
-    #[test]
-    fn reports_formatter_check_mode() {
-        let mut fs = MemoryFileSystem::default();
-        let mut console = BufferConsole::default();
-
-        let file_path = Path::new("format.js");
-        fs.insert(file_path.into(), UNFORMATTED.as_bytes());
-
-        let result = run_cli(
-            DynRef::Borrowed(&mut fs),
-            &mut console,
-            Args::from(
-                [
-                    ("format"),
-                    ("--json"),
-                    file_path.as_os_str().to_str().unwrap(),
-                ]
-                .as_slice(),
-            ),
-        );
-
-        eprintln!("{:?}", console.out_buffer);
-
-        assert!(result.is_ok(), "run_cli returned {result:?}");
-
-        assert_file_contents(&fs, file_path, UNFORMATTED);
-
-        assert_cli_snapshot(SnapshotPayload::new(
-            module_path!(),
-            "reports_formatter_check_mode",
-            fs,
-            console,
-            result,
-        ));
-    }
-
-    #[test]
-    fn reports_formatter_write() {
-        let mut fs = MemoryFileSystem::default();
-        let mut console = BufferConsole::default();
-
-        let file_path = Path::new("format.js");
-        fs.insert(file_path.into(), UNFORMATTED.as_bytes());
-
-        let result = run_cli(
-            DynRef::Borrowed(&mut fs),
-            &mut console,
-            Args::from(
-                [
-                    "format",
-                    "--write",
-                    "--json",
-                    file_path.as_os_str().to_str().unwrap(),
-                ]
-                .as_slice(),
-            ),
-        );
-
-        assert!(result.is_ok(), "run_cli returned {result:?}");
-
-        assert_file_contents(&fs, file_path, FORMATTED);
-
-        assert_eq!(console.out_buffer.len(), 1);
-
-        assert_cli_snapshot(SnapshotPayload::new(
-            module_path!(),
-            "reports_formatter_write",
-            fs,
-            console,
-            result,
-        ));
     }
 }
 

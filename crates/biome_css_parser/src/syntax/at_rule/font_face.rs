@@ -1,5 +1,5 @@
 use crate::parser::CssParser;
-use crate::syntax::parse_or_recover_declaration_list_block;
+use crate::syntax::blocks::parse_or_recover_declaration_list_block;
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::T;
 use biome_parser::parsed_syntax::ParsedSyntax::Present;

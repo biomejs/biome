@@ -306,7 +306,7 @@ function initState(
 		currentFile: Object.keys(files)[0] ?? "main.js",
 		files,
 		settings: {
-			lineWidth: parseInt(
+			lineWidth: Number.parseInt(
 				searchParams.get("lineWidth") ??
 					String(defaultPlaygroundState.settings.lineWidth),
 			),
@@ -325,7 +325,7 @@ function initState(
 			trailingComma:
 				(searchParams.get("trailingComma") as TrailingComma) ??
 				defaultPlaygroundState.settings.trailingComma,
-			indentWidth: parseInt(
+			indentWidth: Number.parseInt(
 				searchParams.get("indentWidth") ??
 					String(defaultPlaygroundState.settings.indentWidth),
 			),

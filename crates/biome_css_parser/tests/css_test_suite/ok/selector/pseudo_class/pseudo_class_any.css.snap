@@ -280,7 +280,7 @@ CssRoot {
                                         sub_selectors: CssSubSelectorList [
                                             CssClassSelector {
                                                 dot_token: DOT@151..152 "." [] [],
-                                                name: CssIdentifier {
+                                                name: CssCustomIdentifier {
                                                     value_token: IDENT@152..157 "class" [] [],
                                                 },
                                             },
@@ -328,7 +328,7 @@ CssRoot {
                                         sub_selectors: CssSubSelectorList [
                                             CssClassSelector {
                                                 dot_token: DOT@178..179 "." [] [],
-                                                name: CssIdentifier {
+                                                name: CssCustomIdentifier {
                                                     value_token: IDENT@179..184 "class" [] [],
                                                 },
                                             },
@@ -376,7 +376,7 @@ CssRoot {
                                         sub_selectors: CssSubSelectorList [
                                             CssClassSelector {
                                                 dot_token: DOT@208..209 "." [] [],
-                                                name: CssIdentifier {
+                                                name: CssCustomIdentifier {
                                                     value_token: IDENT@209..214 "class" [] [],
                                                 },
                                             },
@@ -400,7 +400,7 @@ CssRoot {
                                         sub_selectors: CssSubSelectorList [
                                             CssClassSelector {
                                                 dot_token: DOT@222..223 "." [] [],
-                                                name: CssIdentifier {
+                                                name: CssCustomIdentifier {
                                                     value_token: IDENT@223..228 "class" [] [],
                                                 },
                                             },
@@ -437,7 +437,7 @@ CssRoot {
                                         sub_selectors: CssSubSelectorList [
                                             CssClassSelector {
                                                 dot_token: DOT@243..244 "." [] [],
-                                                name: CssIdentifier {
+                                                name: CssCustomIdentifier {
                                                     value_token: IDENT@244..249 "class" [] [],
                                                 },
                                             },
@@ -461,7 +461,7 @@ CssRoot {
                                         sub_selectors: CssSubSelectorList [
                                             CssClassSelector {
                                                 dot_token: DOT@257..258 "." [] [],
-                                                name: CssIdentifier {
+                                                name: CssCustomIdentifier {
                                                     value_token: IDENT@258..263 "class" [] [],
                                                 },
                                             },
@@ -525,7 +525,7 @@ CssRoot {
                                         sub_selectors: CssSubSelectorList [
                                             CssIdSelector {
                                                 hash_token: HASH@300..301 "#" [] [],
-                                                name: CssIdentifier {
+                                                name: CssCustomIdentifier {
                                                     value_token: IDENT@301..305 "div1" [] [],
                                                 },
                                             },
@@ -565,7 +565,7 @@ CssRoot {
                                         sub_selectors: CssSubSelectorList [
                                             CssClassSelector {
                                                 dot_token: DOT@325..326 "." [] [],
-                                                name: CssIdentifier {
+                                                name: CssCustomIdentifier {
                                                     value_token: IDENT@326..329 "foo" [] [],
                                                 },
                                             },
@@ -578,7 +578,7 @@ CssRoot {
                                         sub_selectors: CssSubSelectorList [
                                             CssIdSelector {
                                                 hash_token: HASH@331..332 "#" [] [],
-                                                name: CssIdentifier {
+                                                name: CssCustomIdentifier {
                                                     value_token: IDENT@332..335 "bar" [] [],
                                                 },
                                             },
@@ -679,7 +679,7 @@ CssRoot {
                         sub_selectors: CssSubSelectorList [
                             CssIdSelector {
                                 hash_token: HASH@375..378 "#" [Newline("\n"), Newline("\n")] [],
-                                name: CssIdentifier {
+                                name: CssCustomIdentifier {
                                     value_token: IDENT@378..393 "test-last-child" [] [],
                                 },
                             },
@@ -764,7 +764,7 @@ CssRoot {
                         sub_selectors: CssSubSelectorList [
                             CssIdSelector {
                                 hash_token: HASH@447..449 "#" [Newline("\n")] [],
-                                name: CssIdentifier {
+                                name: CssCustomIdentifier {
                                     value_token: IDENT@449..462 "container-div" [] [],
                                 },
                             },
@@ -839,7 +839,7 @@ CssRoot {
                                         sub_selectors: CssSubSelectorList [
                                             CssClassSelector {
                                                 dot_token: DOT@507..508 "." [] [],
-                                                name: CssIdentifier {
+                                                name: CssCustomIdentifier {
                                                     value_token: IDENT@508..515 "h1class" [] [],
                                                 },
                                             },
@@ -852,7 +852,7 @@ CssRoot {
                                         sub_selectors: CssSubSelectorList [
                                             CssIdSelector {
                                                 hash_token: HASH@517..518 "#" [] [],
-                                                name: CssIdentifier {
+                                                name: CssCustomIdentifier {
                                                     value_token: IDENT@518..521 "bar" [] [],
                                                 },
                                             },
@@ -907,7 +907,7 @@ CssRoot {
                         sub_selectors: CssSubSelectorList [
                             CssClassSelector {
                                 dot_token: DOT@546..547 "." [] [],
-                                name: CssIdentifier {
+                                name: CssCustomIdentifier {
                                     value_token: IDENT@547..551 "div" [] [Whitespace(" ")],
                                 },
                             },
@@ -1106,7 +1106,7 @@ CssRoot {
                     2: CSS_SUB_SELECTOR_LIST@151..163
                       0: CSS_CLASS_SELECTOR@151..157
                         0: DOT@151..152 "." [] []
-                        1: CSS_IDENTIFIER@152..157
+                        1: CSS_CUSTOM_IDENTIFIER@152..157
                           0: IDENT@152..157 "class" [] []
                       1: CSS_ATTRIBUTE_SELECTOR@157..163
                         0: L_BRACK@157..158 "[" [] []
@@ -1139,7 +1139,7 @@ CssRoot {
                     2: CSS_SUB_SELECTOR_LIST@178..190
                       0: CSS_CLASS_SELECTOR@178..184
                         0: DOT@178..179 "." [] []
-                        1: CSS_IDENTIFIER@179..184
+                        1: CSS_CUSTOM_IDENTIFIER@179..184
                           0: IDENT@179..184 "class" [] []
                       1: CSS_ATTRIBUTE_SELECTOR@184..190
                         0: L_BRACK@184..185 "[" [] []
@@ -1172,7 +1172,7 @@ CssRoot {
                     2: CSS_SUB_SELECTOR_LIST@208..220
                       0: CSS_CLASS_SELECTOR@208..214
                         0: DOT@208..209 "." [] []
-                        1: CSS_IDENTIFIER@209..214
+                        1: CSS_CUSTOM_IDENTIFIER@209..214
                           0: IDENT@209..214 "class" [] []
                       1: CSS_ATTRIBUTE_SELECTOR@214..220
                         0: L_BRACK@214..215 "[" [] []
@@ -1189,7 +1189,7 @@ CssRoot {
                     2: CSS_SUB_SELECTOR_LIST@222..228
                       0: CSS_CLASS_SELECTOR@222..228
                         0: DOT@222..223 "." [] []
-                        1: CSS_IDENTIFIER@223..228
+                        1: CSS_CUSTOM_IDENTIFIER@223..228
                           0: IDENT@223..228 "class" [] []
                 3: R_PAREN@228..230 ")" [] [Whitespace(" ")]
       1: CSS_DECLARATION_LIST_BLOCK@230..232
@@ -1214,7 +1214,7 @@ CssRoot {
                     2: CSS_SUB_SELECTOR_LIST@243..255
                       0: CSS_CLASS_SELECTOR@243..249
                         0: DOT@243..244 "." [] []
-                        1: CSS_IDENTIFIER@244..249
+                        1: CSS_CUSTOM_IDENTIFIER@244..249
                           0: IDENT@244..249 "class" [] []
                       1: CSS_ATTRIBUTE_SELECTOR@249..255
                         0: L_BRACK@249..250 "[" [] []
@@ -1231,7 +1231,7 @@ CssRoot {
                     2: CSS_SUB_SELECTOR_LIST@257..263
                       0: CSS_CLASS_SELECTOR@257..263
                         0: DOT@257..258 "." [] []
-                        1: CSS_IDENTIFIER@258..263
+                        1: CSS_CUSTOM_IDENTIFIER@258..263
                           0: IDENT@258..263 "class" [] []
                 3: R_PAREN@263..265 ")" [] [Whitespace(" ")]
       1: CSS_DECLARATION_LIST_BLOCK@265..267
@@ -1275,7 +1275,7 @@ CssRoot {
                     2: CSS_SUB_SELECTOR_LIST@300..305
                       0: CSS_ID_SELECTOR@300..305
                         0: HASH@300..301 "#" [] []
-                        1: CSS_IDENTIFIER@301..305
+                        1: CSS_CUSTOM_IDENTIFIER@301..305
                           0: IDENT@301..305 "div1" [] []
                   1: COMMA@305..307 "," [] [Whitespace(" ")]
                   2: CSS_COMPOUND_SELECTOR@307..309
@@ -1303,7 +1303,7 @@ CssRoot {
                     2: CSS_SUB_SELECTOR_LIST@325..329
                       0: CSS_CLASS_SELECTOR@325..329
                         0: DOT@325..326 "." [] []
-                        1: CSS_IDENTIFIER@326..329
+                        1: CSS_CUSTOM_IDENTIFIER@326..329
                           0: IDENT@326..329 "foo" [] []
                   1: COMMA@329..331 "," [] [Whitespace(" ")]
                   2: CSS_COMPOUND_SELECTOR@331..335
@@ -1312,7 +1312,7 @@ CssRoot {
                     2: CSS_SUB_SELECTOR_LIST@331..335
                       0: CSS_ID_SELECTOR@331..335
                         0: HASH@331..332 "#" [] []
-                        1: CSS_IDENTIFIER@332..335
+                        1: CSS_CUSTOM_IDENTIFIER@332..335
                           0: IDENT@332..335 "bar" [] []
                 3: R_PAREN@335..336 ")" [] []
         5: COMMA@336..337 "," [] []
@@ -1378,7 +1378,7 @@ CssRoot {
             2: CSS_SUB_SELECTOR_LIST@375..393
               0: CSS_ID_SELECTOR@375..393
                 0: HASH@375..378 "#" [Newline("\n"), Newline("\n")] []
-                1: CSS_IDENTIFIER@378..393
+                1: CSS_CUSTOM_IDENTIFIER@378..393
                   0: IDENT@378..393 "test-last-child" [] []
           1: CSS_SPACE_LITERAL@393..394 " " [] []
           2: CSS_COMPOUND_SELECTOR@394..419
@@ -1435,7 +1435,7 @@ CssRoot {
             2: CSS_SUB_SELECTOR_LIST@447..462
               0: CSS_ID_SELECTOR@447..462
                 0: HASH@447..449 "#" [Newline("\n")] []
-                1: CSS_IDENTIFIER@449..462
+                1: CSS_CUSTOM_IDENTIFIER@449..462
                   0: IDENT@449..462 "container-div" [] []
           1: CSS_SPACE_LITERAL@462..463 " " [] []
           2: CSS_COMPOUND_SELECTOR@463..490
@@ -1488,7 +1488,7 @@ CssRoot {
                     2: CSS_SUB_SELECTOR_LIST@507..515
                       0: CSS_CLASS_SELECTOR@507..515
                         0: DOT@507..508 "." [] []
-                        1: CSS_IDENTIFIER@508..515
+                        1: CSS_CUSTOM_IDENTIFIER@508..515
                           0: IDENT@508..515 "h1class" [] []
                   1: COMMA@515..517 "," [] [Whitespace(" ")]
                   2: CSS_COMPOUND_SELECTOR@517..521
@@ -1497,7 +1497,7 @@ CssRoot {
                     2: CSS_SUB_SELECTOR_LIST@517..521
                       0: CSS_ID_SELECTOR@517..521
                         0: HASH@517..518 "#" [] []
-                        1: CSS_IDENTIFIER@518..521
+                        1: CSS_CUSTOM_IDENTIFIER@518..521
                           0: IDENT@518..521 "bar" [] []
                 3: R_PAREN@521..523 ")" [] [Whitespace(" ")]
       1: CSS_DECLARATION_LIST_BLOCK@523..525
@@ -1532,7 +1532,7 @@ CssRoot {
             2: CSS_SUB_SELECTOR_LIST@546..551
               0: CSS_CLASS_SELECTOR@546..551
                 0: DOT@546..547 "." [] []
-                1: CSS_IDENTIFIER@547..551
+                1: CSS_CUSTOM_IDENTIFIER@547..551
                   0: IDENT@547..551 "div" [] [Whitespace(" ")]
       1: CSS_DECLARATION_LIST_BLOCK@551..553
         0: L_CURLY@551..552 "{" [] []

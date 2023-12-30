@@ -955,6 +955,10 @@ impl Deserializable for Nursery {
                             result.no_nodejs_modules =
                                 Deserializable::deserialize(&value, "noNodejsModules", diagnostics);
                         }
+                        "noThenProperty" => {
+                            result.no_then_property =
+                                Deserializable::deserialize(&value, "noThenProperty", diagnostics);
+                        }
                         "noUnusedImports" => {
                             result.no_unused_imports =
                                 Deserializable::deserialize(&value, "noUnusedImports", diagnostics);
@@ -1020,6 +1024,13 @@ impl Deserializable for Nursery {
                                 diagnostics,
                             );
                         }
+                        "useNumberProperties" => {
+                            result.use_number_properties = Deserializable::deserialize(
+                                &value,
+                                "useNumberProperties",
+                                diagnostics,
+                            );
+                        }
                         "useRegexLiterals" => {
                             result.use_regex_literals = Deserializable::deserialize(
                                 &value,
@@ -1056,6 +1067,7 @@ impl Deserializable for Nursery {
                                     "noInvalidUseBeforeDeclaration",
                                     "noMisleadingCharacterClass",
                                     "noNodejsModules",
+                                    "noThenProperty",
                                     "noUnusedImports",
                                     "noUnusedPrivateClassMembers",
                                     "noUselessLoneBlockStatements",
@@ -1067,6 +1079,7 @@ impl Deserializable for Nursery {
                                     "useGroupedTypeImport",
                                     "useImportRestrictions",
                                     "useNodeImportProtocol",
+                                    "useNumberProperties",
                                     "useRegexLiterals",
                                     "useShorthandFunctionType",
                                     "useValidAriaRole",

@@ -247,7 +247,7 @@ CssRoot {
                                     sub_selectors: CssSubSelectorList [
                                         CssIdSelector {
                                             hash_token: HASH@109..110 "#" [] [],
-                                            name: CssIdentifier {
+                                            name: CssCustomIdentifier {
                                                 value_token: IDENT@110..114 "cue1" [] [],
                                             },
                                         },
@@ -431,7 +431,7 @@ CssRoot {
                   2: CSS_SUB_SELECTOR_LIST@109..114
                     0: CSS_ID_SELECTOR@109..114
                       0: HASH@109..110 "#" [] []
-                      1: CSS_IDENTIFIER@110..114
+                      1: CSS_CUSTOM_IDENTIFIER@110..114
                         0: IDENT@110..114 "cue1" [] []
                 3: R_PAREN@114..116 ")" [] [Whitespace(" ")]
       1: CSS_DECLARATION_LIST_BLOCK@116..118

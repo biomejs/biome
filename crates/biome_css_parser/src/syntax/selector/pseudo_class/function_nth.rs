@@ -2,8 +2,7 @@ use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use crate::syntax::parse_error::{expected_any_pseudo_class_nth, expected_number};
 use crate::syntax::selector::{
-    eat_or_recover_selector_function_close_token, recover_selector_function_parameter,
-    CssSelectorList,
+    eat_or_recover_selector_function_close_token, recover_selector_function_parameter, SelectorList,
 };
 use crate::syntax::{parse_number, parse_regular_number};
 use biome_css_syntax::CssSyntaxKind::*;
@@ -145,9 +144,7 @@ fn parse_pseudo_class_of_nth_selector(p: &mut CssParser) -> ParsedSyntax {
 
     p.bump(OF_KW);
 
-    CssSelectorList::default()
-        .with_end_kind(T![')'])
-        .parse_list(p);
+    SelectorList::default().with_end_kind(T![')']).parse_list(p);
 
     Present(m.complete(p, CSS_PSEUDO_CLASS_OF_NTH_SELECTOR))
 }

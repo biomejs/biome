@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use crate::{prelude::*, ts::bindings::type_parameters::FormatTsTypeParametersOptions};
 
 use biome_formatter::{format_args, write};
 use biome_js_syntax::{TsInterfaceDeclaration, TsInterfaceDeclarationFields};
@@ -38,7 +38,12 @@ impl FormatNodeRule<TsInterfaceDeclaration> for FormatTsInterfaceDeclaration {
             if let Some(type_parameters) = &type_parameters {
                 write!(
                     f,
-                    [type_parameters.format().with_options(type_parameter_group)]
+                    [type_parameters
+                        .format()
+                        .with_options(FormatTsTypeParametersOptions {
+                            group_id: type_parameter_group,
+                            is_type_or_interface_decl: true
+                        })]
                 )?;
             }
 

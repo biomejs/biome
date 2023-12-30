@@ -606,16 +606,30 @@ impl<Context> Buffer for RemoveSoftLinesBuffer<'_, Context> {
 
     fn write_element(&mut self, element: FormatElement) -> FormatResult<()> {
         let element = match element {
-            FormatElement::Tag(Tag::StartConditionalContent(condition))
-                if condition.mode == PrintMode::Expanded =>
-            {
-                self.is_in_expanded_conditional_content = true;
-                return Ok(());
+            FormatElement::Tag(Tag::StartConditionalContent(condition)) => {
+                match condition.mode {
+                    PrintMode::Expanded => {
+                        // Mark that we're within expanded content so that it
+                        // can be dropped in all future writes until the ending
+                        // tag.
+                        self.is_in_expanded_conditional_content = true;
+                        return Ok(());
+                    }
+                    PrintMode::Flat => {
+                        // Flat groups have the conditional tag dropped as
+                        // well, since the content within it will _always_ be
+                        // printed by this buffer.
+                        return Ok(());
+                    }
+                }
             }
-            FormatElement::Tag(Tag::EndConditionalContent)
-                if self.is_in_expanded_conditional_content =>
-            {
+            FormatElement::Tag(Tag::EndConditionalContent) => {
+                // NOTE: This assumes that conditional content cannot be nested.
+                // This is true for all practical cases, but it's _possible_ to
+                // write IR that breaks this.
                 self.is_in_expanded_conditional_content = false;
+                // No matter if this was flat or expanded content, the ending
+                // tag gets dropped, since the starting tag was also dropped.
                 return Ok(());
             }
             // All content within an expanded conditional gets dropped. If there's a

@@ -165,6 +165,7 @@ name = "biome_cli"
 version = "0.0.0"
 dependencies = [
  "anyhow",
+ "biome_analyze",
  "biome_console",
  "biome_css_formatter",
  "biome_deserialize",
@@ -1115,7 +1116,7 @@ dependencies = [
  "ciborium",
  "clap 3.2.25",
  "criterion-plot",
- "itertools 0.10.5",
+ "itertools",
  "lazy_static",
  "num-traits",
  "oorandom",
@@ -1141,7 +1142,7 @@ dependencies = [
  "clap 4.4.0",
  "criterion-plot",
  "is-terminal",
- "itertools 0.10.5",
+ "itertools",
  "num-traits",
  "once_cell",
  "oorandom",
@@ -1162,7 +1163,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6b50826342786a51a89e2da3a28f1c32b06e387201bc2d19791f622c673706b1"
 dependencies = [
  "cast",
- "itertools 0.10.5",
+ "itertools",
 ]
 
 [[package]]
@@ -1808,15 +1809,6 @@ name = "itertools"
 version = "0.10.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b0fd2260e829bddf4cb6ea802289de2f86d6a7a690192fbe91b3f46e0f2c8473"
-dependencies = [
- "either",
-]
-
-[[package]]
-name = "itertools"
-version = "0.11.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b1c173a5686ce8bfa551b3563d0c2170bf24ca44da99c7ca4bfdab5418c3fe57"
 dependencies = [
  "either",
 ]
@@ -3103,12 +3095,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "timing"
-version = "0.2.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0ef973380ab2960e2b4e49d552291930c217b947ee831f73000ebc5439074bf0"
-
-[[package]]
 name = "tinytemplate"
 version = "1.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3816,15 +3802,11 @@ dependencies = [
  "criterion 0.5.1",
  "dhat",
  "humansize",
- "itertools 0.11.0",
  "mimalloc",
- "pico-args",
  "regex",
  "tikv-jemallocator",
- "timing",
  "ureq",
  "url",
- "xtask",
 ]
 
 [[package]]

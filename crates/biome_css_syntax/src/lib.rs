@@ -49,6 +49,12 @@ impl CssSyntaxKind {
         (self as u16) >= (MEDIA_KW as u16) && (self as u16) <= (FONT_FACE_KW as u16)
     }
 
+    /// Returns `true` for css-wide keywords
+    #[inline]
+    pub const fn is_css_wide_keyword(self) -> bool {
+        (self as u16) >= (INITIAL_KW as u16) && (self as u16) <= (DEFAULT_KW as u16)
+    }
+
     /// Returns `true` for contextual attribute modifier keywords
     #[inline]
     pub const fn is_attribute_modifier_keyword(self) -> bool {
@@ -80,6 +86,9 @@ impl biome_rowan::SyntaxKind for CssSyntaxKind {
                 | CSS_BOGUS_AT_RULE
                 | CSS_BOGUS_MEDIA_QUERY
                 | CSS_BOGUS_KEYFRAMES_ITEM
+                | CSS_BOGUS_PAGE_SELECTOR_PSEUDO
+                | CSS_BOGUS_LAYER
+                | CSS_BOGUS_SCOPE_RANGE
         )
     }
 
@@ -95,6 +104,9 @@ impl biome_rowan::SyntaxKind for CssSyntaxKind {
             kind if AnyCssDeclarationListBlock::can_cast(*kind) => CSS_BOGUS_BLOCK,
             kind if AnyCssRuleListBlock::can_cast(*kind) => CSS_BOGUS_BLOCK,
             kind if AnyCssKeyframesSelector::can_cast(*kind) => CSS_BOGUS_SELECTOR,
+            kind if AnyCssPageSelectorPseudo::can_cast(*kind) => CSS_BOGUS_PAGE_SELECTOR_PSEUDO,
+            kind if AnyCssLayer::can_cast(*kind) => CSS_BOGUS_LAYER,
+            kind if AnyCssScopeRange::can_cast(*kind) => CSS_BOGUS_SCOPE_RANGE,
 
             _ => CSS_BOGUS,
         }
