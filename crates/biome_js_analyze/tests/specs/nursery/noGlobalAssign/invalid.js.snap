@@ -1,0 +1,103 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+window = 10
+Object = null
+undefined = 1
+length = 1
+top = 1
+
+```
+
+# Diagnostics
+```
+invalid.js:1:1 lint/nursery/noGlobalAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A global variable should not be reassigned
+  
+  > 1 │ window = 10
+      │ ^^^^^^^
+    2 │ Object = null
+    3 │ undefined = 1
+  
+  i Assigning to a global variable can override essential functionality.
+  
+
+```
+
+```
+invalid.js:1:12 lint/nursery/noGlobalAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A global variable should not be reassigned
+  
+  > 1 │ window = 10
+      │            
+  > 2 │ Object = null
+      │ ^^^^^^^
+    3 │ undefined = 1
+    4 │ length = 1
+  
+  i Assigning to a global variable can override essential functionality.
+  
+
+```
+
+```
+invalid.js:2:14 lint/nursery/noGlobalAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A global variable should not be reassigned
+  
+    1 │ window = 10
+  > 2 │ Object = null
+      │              
+  > 3 │ undefined = 1
+      │ ^^^^^^^^^^
+    4 │ length = 1
+    5 │ top = 1
+  
+  i Assigning to a global variable can override essential functionality.
+  
+
+```
+
+```
+invalid.js:3:14 lint/nursery/noGlobalAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A global variable should not be reassigned
+  
+    1 │ window = 10
+    2 │ Object = null
+  > 3 │ undefined = 1
+      │              
+  > 4 │ length = 1
+      │ ^^^^^^^
+    5 │ top = 1
+    6 │ 
+  
+  i Assigning to a global variable can override essential functionality.
+  
+
+```
+
+```
+invalid.js:4:11 lint/nursery/noGlobalAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A global variable should not be reassigned
+  
+    2 │ Object = null
+    3 │ undefined = 1
+  > 4 │ length = 1
+      │           
+  > 5 │ top = 1
+      │ ^^^^
+    6 │ 
+  
+  i Assigning to a global variable can override essential functionality.
+  
+
+```
+
+

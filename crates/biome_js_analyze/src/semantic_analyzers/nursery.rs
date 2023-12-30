@@ -2,6 +2,7 @@
 
 use biome_analyze::declare_group;
 
+pub(crate) mod no_global_assign;
 pub(crate) mod no_global_eval;
 pub(crate) mod no_invalid_use_before_declaration;
 pub(crate) mod no_misleading_character_class;
@@ -16,6 +17,7 @@ declare_group! {
     pub (crate) Nursery {
         name : "nursery" ,
         rules : [
+            self :: no_global_assign :: NoGlobalAssign ,
             self :: no_global_eval :: NoGlobalEval ,
             self :: no_invalid_use_before_declaration :: NoInvalidUseBeforeDeclaration ,
             self :: no_misleading_character_class :: NoMisleadingCharacterClass ,

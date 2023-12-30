@@ -858,6 +858,10 @@ export interface Nursery {
 	 */
 	noEmptyBlockStatements?: RuleConfiguration;
 	/**
+	 * Disallow assignments to native objects and read-only global variables.
+	 */
+	noGlobalAssign?: RuleConfiguration;
+	/**
 	 * Disallow the use of global eval().
 	 */
 	noGlobalEval?: RuleConfiguration;
@@ -1652,6 +1656,7 @@ export type Category =
 	| "lint/nursery/noDuplicateJsonKeys"
 	| "lint/nursery/noEmptyBlockStatements"
 	| "lint/nursery/noGlobalEval"
+	| "lint/nursery/noGlobalAssign"
 	| "lint/nursery/noImplicitAnyLet"
 	| "lint/nursery/noInvalidUseBeforeDeclaration"
 	| "lint/nursery/noMisleadingCharacterClass"
