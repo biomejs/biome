@@ -212,6 +212,7 @@
 <li role="presentation" />;
 <nav role="button" />;
 <ol role="button" />;
+<svg role="img" />;
 <table role="button" />;
 <tbody role="button" />;
 <td role="button" />;
@@ -262,3 +263,4 @@
 <Link href="http://x.y.z" role="img" />;
 <Link href="http://x.y.z" />;
 <Button onClick={doFoo} />;
+
