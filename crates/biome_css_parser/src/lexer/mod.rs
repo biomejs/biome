@@ -4,11 +4,11 @@ mod tests;
 
 use crate::CssParserOptions;
 use biome_css_syntax::{CssSyntaxKind, CssSyntaxKind::*, TextLen, TextRange, TextSize, T};
-use biome_js_unicode_table::{
-    is_css_id_continue, is_css_id_start, lookup_byte, Dispatch, Dispatch::*,
-};
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{LexContext, Lexer, LexerCheckpoint, TokenFlags};
+use biome_unicode_table::{
+    is_css_id_continue, is_css_id_start, lookup_byte, Dispatch, Dispatch::*,
+};
 use std::char::REPLACEMENT_CHARACTER;
 use unicode_bom::Bom;
 

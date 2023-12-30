@@ -13,8 +13,8 @@ use biome_js_syntax::{
     AnyJsMemberExpression, AnyJsName, AnyJsObjectMemberName, JsComputedMemberName,
     JsLiteralMemberName, JsSyntaxKind, T,
 };
-use biome_js_unicode_table::is_js_ident;
 use biome_rowan::{declare_node_union, AstNode, BatchMutationExt, TextRange};
+use biome_unicode_table::is_js_ident;
 
 declare_rule! {
     /// Enforce the usage of a literal access to properties over computed property access.

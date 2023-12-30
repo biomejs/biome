@@ -3,9 +3,9 @@
 #[rustfmt::skip]
 mod tests;
 
-use biome_js_unicode_table::{is_js_id_continue, is_js_id_start, lookup_byte, Dispatch::*};
 use biome_json_syntax::{JsonSyntaxKind, JsonSyntaxKind::*, TextLen, TextRange, TextSize, T};
 use biome_parser::diagnostic::ParseDiagnostic;
+use biome_unicode_table::{is_js_id_continue, is_js_id_start, lookup_byte, Dispatch::*};
 use std::iter::FusedIterator;
 use std::ops::Add;
 use unicode_bom::Bom;
