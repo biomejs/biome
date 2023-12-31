@@ -108,8 +108,9 @@ pub struct CssFormatter {
     #[bpaf(long("css-formatter-line-width"), argument("NUMBER"), optional)]
     pub line_width: Option<LineWidth>,
 
-    /// The type of quotes used in CSS code. Defaults to double.
-    #[bpaf(long("css-formatter-quote-style"), argument("double|single"), optional)]
+    // TODO: Rename this to `css-formatter-quote-style` once it's also a
+    // top-level option. Right now this acts for both JS and CSS.
+    #[bpaf(long("quote-style"), argument("double|single"), optional, hide)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub quote_style: Option<QuoteStyle>,
 }

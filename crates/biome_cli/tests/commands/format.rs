@@ -41,7 +41,7 @@ const APPLY_CSS_QUOTE_STYLE_BEFORE: &str =
     r#"[class='foo'] { background-image: url("/path/to/file.jpg")}"#;
 
 const APPLY_CSS_QUOTE_STYLE_AFTER: &str =
-    "[class='foo'] {\n\tbackground-image: url('/path/to/file.jpg');\n}";
+    "[class='foo'] {\n\tbackground-image: url('/path/to/file.jpg');\n}\n";
 
 const APPLY_TRAILING_COMMA_BEFORE: &str = r#"
 const a = [

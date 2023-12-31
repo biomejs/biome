@@ -87,12 +87,10 @@ pub struct JavascriptFormatter {
     #[bpaf(long("javascript-formatter-line-width"), argument("NUMBER"), optional)]
     pub line_width: Option<LineWidth>,
 
+    // TODO: Rename the argument to `javascript-formatter-quote-style` once
+    // it's also a top-level configurable property.
     /// The type of quotes used in JavaScript code. Defaults to double.
-    #[bpaf(
-        long("javascript-formatter-quote-style"),
-        argument("double|single"),
-        optional
-    )]
+    #[bpaf(long("quote-style"), argument("double|single"), optional)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub quote_style: Option<QuoteStyle>,
 }

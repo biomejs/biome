@@ -26,8 +26,8 @@ const FORMATTED_WITH_NO_SEMICOLONS: &str = "const a = [\"loreum\", \"ipsum\"]\n"
 
 const CSS_UNFORMATTED_QUOTES: &str =
     r#"[class='foo'] { background-image: url("/path/to/file.jpg")}"#;
-const CSS_FORMATTED_SINGLE_QUOTES: &str =
-    "[class='foo'] {\n\tbackground-image: url('/path/to/file.jpg');\n}\n";
+const CSS_FORMATTED_SINGLE_QUOTES_AND_SPACES: &str =
+    "[class='foo'] {\n  background-image: url('/path/to/file.jpg');\n}\n";
 
 #[test]
 fn does_handle_included_file_and_disable_formatter() {
@@ -279,7 +279,7 @@ fn does_include_file_with_different_languages() {
 
     assert_file_contents(&fs, test, FORMATTED_WITH_SINGLE_QUOTES);
     assert_file_contents(&fs, test2, FORMATTED_WITH_NO_SEMICOLONS);
-    assert_file_contents(&fs, test_css, CSS_FORMATTED_SINGLE_QUOTES);
+    assert_file_contents(&fs, test_css, CSS_FORMATTED_SINGLE_QUOTES_AND_SPACES);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),

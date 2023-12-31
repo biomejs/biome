@@ -69,11 +69,6 @@ impl Language for CssLanguage {
         } else {
             global.indent_width.unwrap_or_default()
         };
-        let quote_style = if let Some(quote_style) = language.quote_style {
-            quote_style
-        } else {
-            global.quote_style.unwrap_or_default()
-        };
 
         overrides.override_css_format_options(
             path,
@@ -81,7 +76,7 @@ impl Language for CssLanguage {
                 .with_indent_style(indent_style)
                 .with_indent_width(indent_width)
                 .with_line_width(line_width)
-                .with_quote_style(quote_style),
+                .with_quote_style(language.quote_style.unwrap_or_default()),
         )
     }
 }
