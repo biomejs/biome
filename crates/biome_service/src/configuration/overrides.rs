@@ -445,6 +445,7 @@ fn to_javascript_language_settings(
         .or(parent_formatter.bracket_same_line);
     language_setting.formatter.enabled = formatter.enabled.or(parent_formatter.enabled);
     language_setting.formatter.line_width = formatter.line_width.or(parent_formatter.line_width);
+    language_setting.formatter.line_ending = formatter.line_ending.or(parent_formatter.line_ending);
     language_setting.formatter.indent_width = formatter
         .indent_width
         .map(Into::into)
@@ -482,6 +483,7 @@ fn to_json_language_settings(
 
     language_setting.formatter.enabled = formatter.enabled.or(parent_formatter.enabled);
     language_setting.formatter.line_width = formatter.line_width.or(parent_formatter.line_width);
+    language_setting.formatter.line_ending = formatter.line_ending.or(parent_formatter.line_ending);
     language_setting.formatter.indent_width = formatter
         .indent_width
         .map(Into::into)
@@ -515,6 +517,7 @@ fn to_css_language_settings(
 
     language_setting.formatter.enabled = formatter.enabled.or(parent_formatter.enabled);
     language_setting.formatter.line_width = formatter.line_width.or(parent_formatter.line_width);
+    language_setting.formatter.line_ending = formatter.line_ending.or(parent_formatter.line_ending);
     language_setting.formatter.indent_width = formatter
         .indent_width
         .map(Into::into)
@@ -524,6 +527,7 @@ fn to_css_language_settings(
         .indent_style
         .map(Into::into)
         .or(parent_formatter.indent_style);
+    language_setting.formatter.quote_style = formatter.quote_style.or(parent_formatter.quote_style);
 
     let parser = conf.parser.take().unwrap_or_default();
     let parent_parser = &parent_settings.parser;
