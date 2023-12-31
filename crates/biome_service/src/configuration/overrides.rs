@@ -4,13 +4,15 @@ use crate::configuration::{
     JavascriptConfiguration, JsonConfiguration, PlainIndentStyle,
 };
 use crate::settings::{
-    to_matcher, FormatSettings, LanguageListSettings, LinterSettings, OrganizeImportsSettings,
-    OverrideFormatSettings, OverrideLinterSettings, OverrideOrganizeImportsSettings,
-    OverrideSettingPattern, OverrideSettings, WorkspaceSettings,
+    to_matcher, FormatSettings, LanguageListSettings, LanguageSettings, LinterSettings,
+    OrganizeImportsSettings, OverrideFormatSettings, OverrideLinterSettings,
+    OverrideOrganizeImportsSettings, OverrideSettingPattern, OverrideSettings, WorkspaceSettings,
 };
 use crate::{MergeWith, Rules, WorkspaceError};
 use biome_deserialize::StringSet;
 use biome_formatter::{LineEnding, LineWidth};
+use biome_js_syntax::JsLanguage;
+use biome_json_syntax::JsonLanguage;
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
@@ -350,9 +352,12 @@ pub fn to_override_settings(
             to_organize_imports_settings(organize_imports, &current_settings.organize_imports);
 
         let mut languages = LanguageListSettings::default();
-        if let Some(javascript) = pattern.javascript {
-            languages.javascript = javascript.into();
-        }
+        let javascript = pattern.javascript.take().unwrap_or_default();
+        let json = pattern.json.take().unwrap_or_default();
+        languages.javascript =
+            to_javascript_language_settings(javascript, &current_settings.languages.javascript);
+
+        languages.json = to_json_language_settings(json, &current_settings.languages.json);
 
         if let Some(json) = pattern.json {
             languages.json = json.into();
@@ -409,6 +414,96 @@ pub(crate) fn to_format_settings(
         line_width,
         format_with_errors,
     }
+}
+
+fn to_javascript_language_settings(
+    mut conf: JavascriptConfiguration,
+    parent_settings: &LanguageSettings<JsLanguage>,
+) -> LanguageSettings<JsLanguage> {
+    let mut language_setting: LanguageSettings<JsLanguage> = LanguageSettings::default();
+    let formatter = conf.formatter.take().unwrap_or_default();
+    let parent_formatter = &parent_settings.formatter;
+    language_setting.formatter.quote_style = formatter.quote_style.or(parent_formatter.quote_style);
+    language_setting.formatter.jsx_quote_style = formatter
+        .jsx_quote_style
+        .or(parent_formatter.jsx_quote_style);
+    language_setting.formatter.quote_properties = formatter
+        .quote_properties
+        .or(parent_formatter.quote_properties);
+    language_setting.formatter.trailing_comma =
+        formatter.trailing_comma.or(parent_formatter.trailing_comma);
+    language_setting.formatter.semicolons = formatter.semicolons.or(parent_formatter.semicolons);
+    language_setting.formatter.arrow_parentheses = formatter
+        .arrow_parentheses
+        .or(parent_formatter.arrow_parentheses);
+    language_setting.formatter.bracket_spacing = formatter
+        .bracket_spacing
+        .map(Into::into)
+        .or(parent_formatter.bracket_spacing);
+    language_setting.formatter.bracket_same_line = formatter
+        .bracket_same_line
+        .map(Into::into)
+        .or(parent_formatter.bracket_same_line);
+    language_setting.formatter.enabled = formatter.enabled.or(parent_formatter.enabled);
+    language_setting.formatter.line_width = formatter.line_width.or(parent_formatter.line_width);
+    language_setting.formatter.indent_width = formatter
+        .indent_width
+        .map(Into::into)
+        .or(formatter.indent_size.map(Into::into))
+        .or(parent_formatter.indent_width);
+    language_setting.formatter.indent_style = formatter
+        .indent_style
+        .map(Into::into)
+        .or(parent_formatter.indent_style);
+
+    let parser = conf.parser.take().unwrap_or_default();
+    let parent_parser = &parent_settings.parser;
+    language_setting.parser.parse_class_parameter_decorators = parser
+        .unsafe_parameter_decorators_enabled
+        .unwrap_or(parent_parser.parse_class_parameter_decorators);
+
+    let organize_imports = conf.organize_imports;
+    if let Some(_organize_imports) = organize_imports {}
+
+    language_setting.globals = conf
+        .globals
+        .map(|global| global.into_index_set())
+        .or(parent_settings.globals.clone());
+
+    language_setting
+}
+
+fn to_json_language_settings(
+    mut conf: JsonConfiguration,
+    parent_settings: &LanguageSettings<JsonLanguage>,
+) -> LanguageSettings<JsonLanguage> {
+    let mut language_setting: LanguageSettings<JsonLanguage> = LanguageSettings::default();
+    let formatter = conf.formatter.take().unwrap_or_default();
+    let parent_formatter = &parent_settings.formatter;
+
+    language_setting.formatter.enabled = formatter.enabled.or(parent_formatter.enabled);
+    language_setting.formatter.line_width = formatter.line_width.or(parent_formatter.line_width);
+    language_setting.formatter.indent_width = formatter
+        .indent_width
+        .map(Into::into)
+        .or(formatter.indent_size.map(Into::into))
+        .or(parent_formatter.indent_width);
+    language_setting.formatter.indent_style = formatter
+        .indent_style
+        .map(Into::into)
+        .or(parent_formatter.indent_style);
+
+    let parser = conf.parser.take().unwrap_or_default();
+    let parent_parser = &parent_settings.parser;
+    language_setting.parser.allow_comments = parser
+        .allow_comments
+        .unwrap_or(parent_parser.allow_comments);
+
+    language_setting.parser.allow_trailing_commas = parser
+        .allow_trailing_commas
+        .unwrap_or(parent_parser.allow_trailing_commas);
+
+    language_setting
 }
 
 fn to_override_linter_settings(
