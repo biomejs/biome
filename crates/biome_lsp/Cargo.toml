@@ -34,7 +34,6 @@ tower-lsp          = { version = "0.19.0" }
 tracing            = { workspace = true, features = ["attributes"] }
 
 [dev-dependencies]
-proptest = "1.0.0"
 tokio    = { workspace = true, features = ["rt", "rt-multi-thread", "macros"] }
 tower    = { version = "0.4.12", features = ["timeout"] }
 
