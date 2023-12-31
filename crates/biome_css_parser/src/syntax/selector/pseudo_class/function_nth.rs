@@ -69,7 +69,7 @@ const PSEUDO_CLASS_FUNCTION_NTH_CLASS_SIGN_SET: TokenSet<CssSyntaxKind> = token_
 const PSEUDO_CLASS_FUNCTION_NTH_CLASS_SET: TokenSet<CssSyntaxKind> =
     PSEUDO_CLASS_FUNCTION_NTH_CLASS_IDENTIFIER_SET
         .union(PSEUDO_CLASS_FUNCTION_NTH_CLASS_SIGN_SET)
-        .union(token_set![T![n], CSS_NUMBER_LITERAL,]);
+        .union(token_set![T![n], CSS_DIMENSION_VALUE, CSS_NUMBER_LITERAL]);
 
 #[inline]
 fn is_at_pseudo_class_nth_selector(p: &mut CssParser) -> bool {
@@ -106,14 +106,46 @@ fn parse_pseudo_class_nth(p: &mut CssParser) -> ParsedSyntax {
             CssLexContext::PseudoNthSelector,
         );
 
-        parse_number(p, CssLexContext::PseudoNthSelector).ok();
+        // `2n` will get lexed as a CSS_DIMENSION_VALUE first, and needs to be
+        // re-cast to a CssNumber instead, like `2` would, then followed by the
+        // `n` token for the symbol.
+        //
+        // Whitespace between `2` and `n` is invalid, so if it's not currently
+        // at a CSS_DIMENSION_VALUE, then it must be treated as just a number
+        // and the `n` would be an error.
+        match p.cur() {
+            // Matches `2n` or `2n + 1`
+            CSS_DIMENSION_VALUE => {
+                // Re-cast the value as a number literal and into a CssNumber
+                // to fit the Pseudo node.
+                let m = p.start();
+                p.bump_remap_with_context(CSS_NUMBER_LITERAL, CssLexContext::PseudoNthSelector);
+                m.complete(p, CSS_NUMBER);
 
-        if p.eat_with_context(T![n], CssLexContext::PseudoNthSelector) {
-            parse_nth_offset(p).ok();
-
-            CSS_PSEUDO_CLASS_NTH
-        } else {
-            CSS_PSEUDO_CLASS_NTH_NUMBER
+                if p.eat_with_context(T![n], CssLexContext::PseudoNthSelector) {
+                    parse_nth_offset(p).ok();
+                    CSS_PSEUDO_CLASS_NTH
+                } else {
+                    // This branch means the selector was invalid, like `2px`
+                    // instead of `2n`.
+                    CSS_PSEUDO_CLASS_NTH_NUMBER
+                }
+            }
+            // Matches `2` or `5`
+            CSS_NUMBER_LITERAL => {
+                parse_number(p, CssLexContext::PseudoNthSelector).ok();
+                CSS_PSEUDO_CLASS_NTH_NUMBER
+            }
+            // Tests for just `n` or `n + 1`
+            _ => {
+                if p.eat_with_context(T![n], CssLexContext::PseudoNthSelector) {
+                    parse_nth_offset(p).ok();
+                    CSS_PSEUDO_CLASS_NTH
+                } else {
+                    // This branch is an error and should be handled as bogus
+                    CSS_BOGUS
+                }
+            }
         }
     };
 

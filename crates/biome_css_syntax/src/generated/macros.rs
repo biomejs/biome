@@ -290,10 +290,6 @@ macro_rules! map_syntax_node {
                         unsafe { $crate::CssParenthesizedExpression::new_unchecked(node) };
                     $body
                 }
-                $crate::CssSyntaxKind::CSS_PERCENT_DIMENSION => {
-                    let $pattern = unsafe { $crate::CssPercentDimension::new_unchecked(node) };
-                    $body
-                }
                 $crate::CssSyntaxKind::CSS_PERCENTAGE => {
                     let $pattern = unsafe { $crate::CssPercentage::new_unchecked(node) };
                     $body
@@ -512,6 +508,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::CssSyntaxKind::CSS_UNIVERSAL_SELECTOR => {
                     let $pattern = unsafe { $crate::CssUniversalSelector::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_UNKNOWN_DIMENSION => {
+                    let $pattern = unsafe { $crate::CssUnknownDimension::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_URL_FUNCTION => {

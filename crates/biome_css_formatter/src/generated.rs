@@ -3970,43 +3970,43 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssRegularDimension {
         )
     }
 }
-impl FormatRule<biome_css_syntax::CssPercentDimension>
-    for crate::css::value::percent_dimension::FormatCssPercentDimension
+impl FormatRule<biome_css_syntax::CssUnknownDimension>
+    for crate::css::value::unknown_dimension::FormatCssUnknownDimension
 {
     type Context = CssFormatContext;
     #[inline(always)]
     fn fmt(
         &self,
-        node: &biome_css_syntax::CssPercentDimension,
+        node: &biome_css_syntax::CssUnknownDimension,
         f: &mut CssFormatter,
     ) -> FormatResult<()> {
-        FormatNodeRule::<biome_css_syntax::CssPercentDimension>::fmt(self, node, f)
+        FormatNodeRule::<biome_css_syntax::CssUnknownDimension>::fmt(self, node, f)
     }
 }
-impl AsFormat<CssFormatContext> for biome_css_syntax::CssPercentDimension {
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssUnknownDimension {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_css_syntax::CssPercentDimension,
-        crate::css::value::percent_dimension::FormatCssPercentDimension,
+        biome_css_syntax::CssUnknownDimension,
+        crate::css::value::unknown_dimension::FormatCssUnknownDimension,
     >;
     fn format(&self) -> Self::Format<'_> {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::css::value::percent_dimension::FormatCssPercentDimension::default(),
+            crate::css::value::unknown_dimension::FormatCssUnknownDimension::default(),
         )
     }
 }
-impl IntoFormat<CssFormatContext> for biome_css_syntax::CssPercentDimension {
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssUnknownDimension {
     type Format = FormatOwnedWithRule<
-        biome_css_syntax::CssPercentDimension,
-        crate::css::value::percent_dimension::FormatCssPercentDimension,
+        biome_css_syntax::CssUnknownDimension,
+        crate::css::value::unknown_dimension::FormatCssUnknownDimension,
     >;
     fn into_format(self) -> Self::Format {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::css::value::percent_dimension::FormatCssPercentDimension::default(),
+            crate::css::value::unknown_dimension::FormatCssUnknownDimension::default(),
         )
     }
 }

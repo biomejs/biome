@@ -189,12 +189,8 @@ CssRoot {
                                         any_css_expression: CssListOfComponentValuesExpression {
                                             css_component_value_list: CssComponentValueList [
                                                 CssRegularDimension {
-                                                    value: CssNumber {
-                                                        value_token: CSS_NUMBER_LITERAL@187..190 "180" [] [],
-                                                    },
-                                                    unit: CssIdentifier {
-                                                        value_token: IDENT@190..193 "deg" [] [],
-                                                    },
+                                                    value_token: CSS_NUMBER_LITERAL@187..190 "180" [] [],
+                                                    unit_token: IDENT@190..193 "deg" [] [],
                                                 },
                                             ],
                                         },
@@ -309,9 +305,7 @@ CssRoot {
                                                     value_token: IDENT@308..315 "yellow" [] [Whitespace(" ")],
                                                 },
                                                 CssPercentage {
-                                                    value: CssNumber {
-                                                        value_token: CSS_NUMBER_LITERAL@315..316 "0" [] [],
-                                                    },
+                                                    value_token: CSS_NUMBER_LITERAL@315..316 "0" [] [],
                                                     reminder_token: PERCENT@316..317 "%" [] [],
                                                 },
                                             ],
@@ -325,9 +319,7 @@ CssRoot {
                                                     value_token: IDENT@319..324 "blue" [] [Whitespace(" ")],
                                                 },
                                                 CssPercentage {
-                                                    value: CssNumber {
-                                                        value_token: CSS_NUMBER_LITERAL@324..327 "100" [] [],
-                                                    },
+                                                    value_token: CSS_NUMBER_LITERAL@324..327 "100" [] [],
                                                     reminder_token: PERCENT@327..328 "%" [] [],
                                                 },
                                             ],
@@ -356,12 +348,8 @@ CssRoot {
                                         any_css_expression: CssListOfComponentValuesExpression {
                                             css_component_value_list: CssComponentValueList [
                                                 CssRegularDimension {
-                                                    value: CssNumber {
-                                                        value_token: CSS_NUMBER_LITERAL@363..366 "135" [] [],
-                                                    },
-                                                    unit: CssIdentifier {
-                                                        value_token: IDENT@366..369 "deg" [] [],
-                                                    },
+                                                    value_token: CSS_NUMBER_LITERAL@363..366 "135" [] [],
+                                                    unit_token: IDENT@366..369 "deg" [] [],
                                                 },
                                             ],
                                         },
@@ -409,12 +397,8 @@ CssRoot {
                                         any_css_expression: CssListOfComponentValuesExpression {
                                             css_component_value_list: CssComponentValueList [
                                                 CssRegularDimension {
-                                                    value: CssNumber {
-                                                        value_token: CSS_NUMBER_LITERAL@418..421 "-45" [] [],
-                                                    },
-                                                    unit: CssIdentifier {
-                                                        value_token: IDENT@421..424 "deg" [] [],
-                                                    },
+                                                    value_token: CSS_NUMBER_LITERAL@418..421 "-45" [] [],
+                                                    unit_token: IDENT@421..424 "deg" [] [],
                                                 },
                                             ],
                                         },
@@ -475,9 +459,7 @@ CssRoot {
                                                     value_token: IDENT@481..486 "blue" [] [Whitespace(" ")],
                                                 },
                                                 CssPercentage {
-                                                    value: CssNumber {
-                                                        value_token: CSS_NUMBER_LITERAL@486..488 "20" [] [],
-                                                    },
+                                                    value_token: CSS_NUMBER_LITERAL@486..488 "20" [] [],
                                                     reminder_token: PERCENT@488..489 "%" [] [],
                                                 },
                                             ],
@@ -581,12 +563,8 @@ CssRoot {
                                         any_css_expression: CssListOfComponentValuesExpression {
                                             css_component_value_list: CssComponentValueList [
                                                 CssRegularDimension {
-                                                    value: CssNumber {
-                                                        value_token: CSS_NUMBER_LITERAL@595..596 "0" [] [],
-                                                    },
-                                                    unit: CssIdentifier {
-                                                        value_token: IDENT@596..599 "deg" [] [],
-                                                    },
+                                                    value_token: CSS_NUMBER_LITERAL@595..596 "0" [] [],
+                                                    unit_token: IDENT@596..599 "deg" [] [],
                                                 },
                                             ],
                                         },
@@ -609,9 +587,7 @@ CssRoot {
                                                     value_token: IDENT@607..613 "green" [] [Whitespace(" ")],
                                                 },
                                                 CssPercentage {
-                                                    value: CssNumber {
-                                                        value_token: CSS_NUMBER_LITERAL@613..615 "40" [] [],
-                                                    },
+                                                    value_token: CSS_NUMBER_LITERAL@613..615 "40" [] [],
                                                     reminder_token: PERCENT@615..616 "%" [] [],
                                                 },
                                             ],
@@ -650,12 +626,8 @@ CssRoot {
                                         any_css_expression: CssListOfComponentValuesExpression {
                                             css_component_value_list: CssComponentValueList [
                                                 CssRegularDimension {
-                                                    value: CssNumber {
-                                                        value_token: CSS_NUMBER_LITERAL@656..659 ".25" [] [],
-                                                    },
-                                                    unit: CssIdentifier {
-                                                        value_token: IDENT@659..663 "turn" [] [],
-                                                    },
+                                                    value_token: CSS_NUMBER_LITERAL@656..659 ".25" [] [],
+                                                    unit_token: IDENT@659..663 "turn" [] [],
                                                 },
                                             ],
                                         },
@@ -668,9 +640,7 @@ CssRoot {
                                                     value_token: IDENT@665..669 "red" [] [Whitespace(" ")],
                                                 },
                                                 CssPercentage {
-                                                    value: CssNumber {
-                                                        value_token: CSS_NUMBER_LITERAL@669..671 "10" [] [],
-                                                    },
+                                                    value_token: CSS_NUMBER_LITERAL@669..671 "10" [] [],
                                                     reminder_token: PERCENT@671..672 "%" [] [],
                                                 },
                                             ],
@@ -709,12 +679,8 @@ CssRoot {
                                         any_css_expression: CssListOfComponentValuesExpression {
                                             css_component_value_list: CssComponentValueList [
                                                 CssRegularDimension {
-                                                    value: CssNumber {
-                                                        value_token: CSS_NUMBER_LITERAL@713..715 "45" [] [],
-                                                    },
-                                                    unit: CssIdentifier {
-                                                        value_token: IDENT@715..718 "deg" [] [],
-                                                    },
+                                                    value_token: CSS_NUMBER_LITERAL@713..715 "45" [] [],
+                                                    unit_token: IDENT@715..718 "deg" [] [],
                                                 },
                                             ],
                                         },
@@ -730,9 +696,7 @@ CssRoot {
                                                     value_token: CSS_NUMBER_LITERAL@724..726 "0" [] [Whitespace(" ")],
                                                 },
                                                 CssPercentage {
-                                                    value: CssNumber {
-                                                        value_token: CSS_NUMBER_LITERAL@726..728 "50" [] [],
-                                                    },
+                                                    value_token: CSS_NUMBER_LITERAL@726..728 "50" [] [],
                                                     reminder_token: PERCENT@728..729 "%" [] [],
                                                 },
                                             ],
@@ -746,15 +710,11 @@ CssRoot {
                                                     value_token: IDENT@731..736 "blue" [] [Whitespace(" ")],
                                                 },
                                                 CssPercentage {
-                                                    value: CssNumber {
-                                                        value_token: CSS_NUMBER_LITERAL@736..738 "50" [] [],
-                                                    },
+                                                    value_token: CSS_NUMBER_LITERAL@736..738 "50" [] [],
                                                     reminder_token: PERCENT@738..740 "%" [] [Whitespace(" ")],
                                                 },
                                                 CssPercentage {
-                                                    value: CssNumber {
-                                                        value_token: CSS_NUMBER_LITERAL@740..743 "100" [] [],
-                                                    },
+                                                    value_token: CSS_NUMBER_LITERAL@740..743 "100" [] [],
                                                     reminder_token: PERCENT@743..744 "%" [] [],
                                                 },
                                             ],
@@ -888,10 +848,8 @@ CssRoot {
                     0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@187..193
                       0: CSS_COMPONENT_VALUE_LIST@187..193
                         0: CSS_REGULAR_DIMENSION@187..193
-                          0: CSS_NUMBER@187..190
-                            0: CSS_NUMBER_LITERAL@187..190 "180" [] []
-                          1: CSS_IDENTIFIER@190..193
-                            0: IDENT@190..193 "deg" [] []
+                          0: CSS_NUMBER_LITERAL@187..190 "180" [] []
+                          1: IDENT@190..193 "deg" [] []
                   1: COMMA@193..195 "," [] [Whitespace(" ")]
                   2: CSS_PARAMETER@195..201
                     0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@195..201
@@ -963,8 +921,7 @@ CssRoot {
                         0: CSS_IDENTIFIER@308..315
                           0: IDENT@308..315 "yellow" [] [Whitespace(" ")]
                         1: CSS_PERCENTAGE@315..317
-                          0: CSS_NUMBER@315..316
-                            0: CSS_NUMBER_LITERAL@315..316 "0" [] []
+                          0: CSS_NUMBER_LITERAL@315..316 "0" [] []
                           1: PERCENT@316..317 "%" [] []
                   3: COMMA@317..319 "," [] [Whitespace(" ")]
                   4: CSS_PARAMETER@319..328
@@ -973,8 +930,7 @@ CssRoot {
                         0: CSS_IDENTIFIER@319..324
                           0: IDENT@319..324 "blue" [] [Whitespace(" ")]
                         1: CSS_PERCENTAGE@324..328
-                          0: CSS_NUMBER@324..327
-                            0: CSS_NUMBER_LITERAL@324..327 "100" [] []
+                          0: CSS_NUMBER_LITERAL@324..327 "100" [] []
                           1: PERCENT@327..328 "%" [] []
                 3: R_PAREN@328..329 ")" [] []
             3: (empty)
@@ -993,10 +949,8 @@ CssRoot {
                     0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@363..369
                       0: CSS_COMPONENT_VALUE_LIST@363..369
                         0: CSS_REGULAR_DIMENSION@363..369
-                          0: CSS_NUMBER@363..366
-                            0: CSS_NUMBER_LITERAL@363..366 "135" [] []
-                          1: CSS_IDENTIFIER@366..369
-                            0: IDENT@366..369 "deg" [] []
+                          0: CSS_NUMBER_LITERAL@363..366 "135" [] []
+                          1: IDENT@366..369 "deg" [] []
                   1: COMMA@369..371 "," [] [Whitespace(" ")]
                   2: CSS_PARAMETER@371..377
                     0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@371..377
@@ -1026,10 +980,8 @@ CssRoot {
                     0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@418..424
                       0: CSS_COMPONENT_VALUE_LIST@418..424
                         0: CSS_REGULAR_DIMENSION@418..424
-                          0: CSS_NUMBER@418..421
-                            0: CSS_NUMBER_LITERAL@418..421 "-45" [] []
-                          1: CSS_IDENTIFIER@421..424
-                            0: IDENT@421..424 "deg" [] []
+                          0: CSS_NUMBER_LITERAL@418..421 "-45" [] []
+                          1: IDENT@421..424 "deg" [] []
                   1: COMMA@424..426 "," [] [Whitespace(" ")]
                   2: CSS_PARAMETER@426..430
                     0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@426..430
@@ -1067,8 +1019,7 @@ CssRoot {
                         0: CSS_IDENTIFIER@481..486
                           0: IDENT@481..486 "blue" [] [Whitespace(" ")]
                         1: CSS_PERCENTAGE@486..489
-                          0: CSS_NUMBER@486..488
-                            0: CSS_NUMBER_LITERAL@486..488 "20" [] []
+                          0: CSS_NUMBER_LITERAL@486..488 "20" [] []
                           1: PERCENT@488..489 "%" [] []
                   3: COMMA@489..491 "," [] [Whitespace(" ")]
                   4: CSS_PARAMETER@491..495
@@ -1134,10 +1085,8 @@ CssRoot {
                     0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@595..599
                       0: CSS_COMPONENT_VALUE_LIST@595..599
                         0: CSS_REGULAR_DIMENSION@595..599
-                          0: CSS_NUMBER@595..596
-                            0: CSS_NUMBER_LITERAL@595..596 "0" [] []
-                          1: CSS_IDENTIFIER@596..599
-                            0: IDENT@596..599 "deg" [] []
+                          0: CSS_NUMBER_LITERAL@595..596 "0" [] []
+                          1: IDENT@596..599 "deg" [] []
                   1: COMMA@599..601 "," [] [Whitespace(" ")]
                   2: CSS_PARAMETER@601..605
                     0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@601..605
@@ -1151,8 +1100,7 @@ CssRoot {
                         0: CSS_IDENTIFIER@607..613
                           0: IDENT@607..613 "green" [] [Whitespace(" ")]
                         1: CSS_PERCENTAGE@613..616
-                          0: CSS_NUMBER@613..615
-                            0: CSS_NUMBER_LITERAL@613..615 "40" [] []
+                          0: CSS_NUMBER_LITERAL@613..615 "40" [] []
                           1: PERCENT@615..616 "%" [] []
                   5: COMMA@616..618 "," [] [Whitespace(" ")]
                   6: CSS_PARAMETER@618..621
@@ -1177,10 +1125,8 @@ CssRoot {
                     0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@656..663
                       0: CSS_COMPONENT_VALUE_LIST@656..663
                         0: CSS_REGULAR_DIMENSION@656..663
-                          0: CSS_NUMBER@656..659
-                            0: CSS_NUMBER_LITERAL@656..659 ".25" [] []
-                          1: CSS_IDENTIFIER@659..663
-                            0: IDENT@659..663 "turn" [] []
+                          0: CSS_NUMBER_LITERAL@656..659 ".25" [] []
+                          1: IDENT@659..663 "turn" [] []
                   1: COMMA@663..665 "," [] [Whitespace(" ")]
                   2: CSS_PARAMETER@665..672
                     0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@665..672
@@ -1188,8 +1134,7 @@ CssRoot {
                         0: CSS_IDENTIFIER@665..669
                           0: IDENT@665..669 "red" [] [Whitespace(" ")]
                         1: CSS_PERCENTAGE@669..672
-                          0: CSS_NUMBER@669..671
-                            0: CSS_NUMBER_LITERAL@669..671 "10" [] []
+                          0: CSS_NUMBER_LITERAL@669..671 "10" [] []
                           1: PERCENT@671..672 "%" [] []
                   3: COMMA@672..674 "," [] [Whitespace(" ")]
                   4: CSS_PARAMETER@674..678
@@ -1214,10 +1159,8 @@ CssRoot {
                     0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@713..718
                       0: CSS_COMPONENT_VALUE_LIST@713..718
                         0: CSS_REGULAR_DIMENSION@713..718
-                          0: CSS_NUMBER@713..715
-                            0: CSS_NUMBER_LITERAL@713..715 "45" [] []
-                          1: CSS_IDENTIFIER@715..718
-                            0: IDENT@715..718 "deg" [] []
+                          0: CSS_NUMBER_LITERAL@713..715 "45" [] []
+                          1: IDENT@715..718 "deg" [] []
                   1: COMMA@718..720 "," [] [Whitespace(" ")]
                   2: CSS_PARAMETER@720..729
                     0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@720..729
@@ -1227,8 +1170,7 @@ CssRoot {
                         1: CSS_NUMBER@724..726
                           0: CSS_NUMBER_LITERAL@724..726 "0" [] [Whitespace(" ")]
                         2: CSS_PERCENTAGE@726..729
-                          0: CSS_NUMBER@726..728
-                            0: CSS_NUMBER_LITERAL@726..728 "50" [] []
+                          0: CSS_NUMBER_LITERAL@726..728 "50" [] []
                           1: PERCENT@728..729 "%" [] []
                   3: COMMA@729..731 "," [] [Whitespace(" ")]
                   4: CSS_PARAMETER@731..744
@@ -1237,12 +1179,10 @@ CssRoot {
                         0: CSS_IDENTIFIER@731..736
                           0: IDENT@731..736 "blue" [] [Whitespace(" ")]
                         1: CSS_PERCENTAGE@736..740
-                          0: CSS_NUMBER@736..738
-                            0: CSS_NUMBER_LITERAL@736..738 "50" [] []
+                          0: CSS_NUMBER_LITERAL@736..738 "50" [] []
                           1: PERCENT@738..740 "%" [] [Whitespace(" ")]
                         2: CSS_PERCENTAGE@740..744
-                          0: CSS_NUMBER@740..743
-                            0: CSS_NUMBER_LITERAL@740..743 "100" [] []
+                          0: CSS_NUMBER_LITERAL@740..743 "100" [] []
                           1: PERCENT@743..744 "%" [] []
                 3: R_PAREN@744..745 ")" [] []
             3: (empty)

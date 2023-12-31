@@ -5,29 +5,24 @@ use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::{token_set, Parser, TokenSet};
 
-use super::parse_error::expected_unit;
-use super::{parse_regular_identifier, parse_regular_number};
-
 #[inline]
 pub(crate) fn is_at_any_dimension(p: &mut CssParser) -> bool {
-    is_at_percentage_dimension(p) || is_at_regular_dimension(p)
+    is_at_regular_dimension(p) || is_at_percentage_dimension(p)
 }
 
 #[inline]
 pub(crate) fn parse_any_dimension(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_any_dimension(p) {
-        return Absent;
-    }
-
     if is_at_percentage_dimension(p) {
         parse_percentage_dimension(p)
-    } else {
+    } else if is_at_regular_dimension(p) {
         parse_regular_dimension(p)
+    } else {
+        Absent
     }
 }
 
 pub(crate) fn is_at_percentage_dimension(p: &mut CssParser) -> bool {
-    p.at(CSS_NUMBER_LITERAL) && p.nth_at(1, T![%])
+    p.at(CSS_PERCENTAGE_VALUE)
 }
 #[inline]
 pub(crate) fn parse_percentage_dimension(p: &mut CssParser) -> ParsedSyntax {
@@ -36,30 +31,45 @@ pub(crate) fn parse_percentage_dimension(p: &mut CssParser) -> ParsedSyntax {
     }
 
     let m = p.start();
-    parse_regular_number(p).ok();
+    // Re-cast the value portion of the dimension as a number literal.
+    p.bump_remap(CSS_NUMBER_LITERAL);
+    // CSS_PERCENTAGE_VALUE guarantees the `%` will be the next token,
+    // but we can use expect just to be safe.
     p.expect(T![%]);
     Present(m.complete(p, CSS_PERCENTAGE))
 }
+
+#[inline]
 fn is_at_regular_dimension(p: &mut CssParser) -> bool {
-    p.at(CSS_NUMBER_LITERAL) && is_nth_at_unit(p, 1)
+    p.at(CSS_DIMENSION_VALUE)
 }
+
 #[inline]
 fn parse_regular_dimension(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_regular_dimension(p) {
         return Absent;
     }
-    let m = p.start();
-    parse_regular_number(p).ok();
-    parse_unit(p).or_add_diagnostic(p, expected_unit);
-    Present(m.complete(p, CSS_REGULAR_DIMENSION))
-}
 
-#[inline]
-fn parse_unit(p: &mut CssParser) -> ParsedSyntax {
-    if !is_nth_at_unit(p, 0) {
-        return Absent;
-    }
-    parse_regular_identifier(p)
+    let m = p.start();
+    // Re-cast the value portion of the dimension as a number literal.
+    p.bump_remap(CSS_NUMBER_LITERAL);
+
+    // Any identifier is valid as a dimension unit, but for known units we
+    // use `CssRegularDimension` as a convenience elsewhere to know that the
+    // unit is valid. All other identifiers become `CssUnknownDimension`.
+    let kind = if is_nth_at_unit(p, 0) {
+        CSS_REGULAR_DIMENSION
+    } else {
+        CSS_UNKNOWN_DIMENSION
+    };
+
+    // CSS_DIMENSION_VALUE guarantees that an identifier will follow the
+    // number parsed previously, but the lexer will most likely treat it
+    // as a keyword (like `px` as PX_KW), so it needs to be re-cast to just
+    // an ident.
+    p.bump_remap(T![ident]);
+
+    Present(m.complete(p, kind))
 }
 
 #[inline]
