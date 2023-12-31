@@ -1,7 +1,5 @@
-use crate::react::hooks::react_hook_configuration;
-use crate::semantic_analyzers::correctness::use_exhaustive_dependencies::{
-    HooksOptions, ReactExtensiveDependenciesOptions,
-};
+use crate::react::hooks::is_react_hook_call;
+use crate::semantic_analyzers::correctness::use_exhaustive_dependencies::HooksOptions;
 use crate::semantic_services::{SemanticModelBuilderVisitor, SemanticServices};
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
 use biome_analyze::{
@@ -90,13 +88,14 @@ pub enum Suggestion {
         hook_name_range: TextRange,
         path: Vec<TextRange>,
         early_return: Option<TextRange>,
+        is_nested: bool,
     },
 }
 
 // Verify if the call expression is at the top level
 // of the component
-fn enclosing_function_if_at_top_level(node: &SyntaxNode<JsLanguage>) -> Option<AnyJsFunction> {
-    let next = node.ancestors().find(|x| {
+fn enclosing_function_if_call_is_at_top_level(call: &JsCallExpression) -> Option<AnyJsFunction> {
+    let next = call.syntax().ancestors().find(|x| {
         !matches!(
             x.kind(),
             JsSyntaxKind::JS_STATEMENT_LIST
@@ -129,7 +128,9 @@ fn is_nested_function(function: &AnyJsFunction) -> bool {
         return false;
     };
 
-    enclosing_function_if_at_top_level(&parent).is_some()
+    parent
+        .ancestors()
+        .any(|node| AnyJsFunction::can_cast(node.kind()))
 }
 
 /// Model for tracking which function calls are preceeded by an early return.
@@ -306,17 +307,16 @@ impl Rule for UseHookAtTopLevel {
     type Options = HooksOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let options = ctx.options();
-        let options = ReactExtensiveDependenciesOptions::new(options.clone());
-
         let FunctionCall(call) = ctx.query();
         let get_hook_name_range = || match call.callee() {
             Ok(callee) => Some(AnyJsExpression::syntax(&callee).text_trimmed_range()),
             Err(_) => None,
         };
 
-        // Early return for any function call that's not a React hook:
-        react_hook_configuration(call, &options.hooks_config)?;
+        // Early return for any function call that's not a hook call:
+        if !is_react_hook_call(call) {
+            return None;
+        }
 
         let model = ctx.semantic_model();
         let early_returns = ctx.early_returns_model();
@@ -333,12 +333,24 @@ impl Rule for UseHookAtTopLevel {
             let mut path = path.clone();
             path.push(range);
 
-            if let Some(enclosing_function) = enclosing_function_if_at_top_level(call.syntax()) {
+            if let Some(enclosing_function) = enclosing_function_if_call_is_at_top_level(&call) {
+                if is_nested_function(&enclosing_function) {
+                    // We cannot allow nested functions, since it would break
+                    // the requirement for hooks to be called from the top-level.
+                    return Some(Suggestion::None {
+                        hook_name_range: get_hook_name_range()?,
+                        path,
+                        early_return: None,
+                        is_nested: true,
+                    });
+                }
+
                 if let Some(early_return) = early_returns.get(&call) {
                     return Some(Suggestion::None {
                         hook_name_range: get_hook_name_range()?,
                         path,
                         early_return: Some(*early_return),
+                        is_nested: false,
                     });
                 }
 
@@ -349,25 +361,13 @@ impl Rule for UseHookAtTopLevel {
                             path: path.clone(),
                         });
                     }
-                } else if is_nested_function(&enclosing_function) {
-                    // If `all_calls()` didn't return an iterator, it means the
-                    // enclosing function is an anonymous function. This is fine
-                    // if the top-level component itself is an anonymous
-                    // function (for instance, for passing them to React's
-                    // `forwardRef()`). But we cannot allow them to be nested
-                    // inside another function, since it would break the
-                    // requirement for hooks to be called from the top-level.
-                    return Some(Suggestion::None {
-                        hook_name_range: get_hook_name_range()?,
-                        path,
-                        early_return: None,
-                    });
                 }
             } else {
                 return Some(Suggestion::None {
                     hook_name_range: get_hook_name_range()?,
                     path,
                     early_return: None,
+                    is_nested: false,
                 });
             }
         }
@@ -381,10 +381,19 @@ impl Rule for UseHookAtTopLevel {
                 hook_name_range,
                 path,
                 early_return,
+                is_nested,
             } => {
-                let call_deep = path.len() - 1;
+                let call_depth = path.len() - 1;
 
-                let mut diag = if call_deep == 0 {
+                let mut diag = if *is_nested {
+                    RuleDiagnostic::new(
+                        rule_category!(),
+                        hook_name_range,
+                        markup! {
+                            "This hook is being called from a nested function, but all hooks must be called unconditionally from the top-level component."
+                        },
+                    )
+                } else if call_depth == 0 {
                     RuleDiagnostic::new(
                         rule_category!(),
                         hook_name_range,
