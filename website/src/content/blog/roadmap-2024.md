@@ -10,7 +10,7 @@ coverImage:
   lightSrc: ../../assets/blog/roadmap-2024/banner-light.png
   darkSrc: ../../assets/blog/roadmap-2024/banner-dark.png
   alt: The Prettier challenge banner, with the Biome logo over it
-socialImage: ../../assets/social-logo.png
+socialImage: ../../assets/old-social-logo.png
 ---
 ## Roadmap 2024
 
