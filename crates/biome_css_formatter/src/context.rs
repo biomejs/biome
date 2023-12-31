@@ -121,6 +121,10 @@ impl CssFormatOptions {
     pub fn set_quote_style(&mut self, quote_style: QuoteStyle) {
         self.quote_style = quote_style;
     }
+
+    pub fn quote_style(&self) -> QuoteStyle {
+        self.quote_style
+    }
 }
 
 impl FormatOptions for CssFormatOptions {
