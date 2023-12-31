@@ -28,7 +28,7 @@ criterion = "0.5.1"
 regex     = "1.5.5"
 ureq      = "2.7.1"
 url       = "2.2.2"
-codspeed_criterion_compat = { version = "2.3.3", optional = true}
+codspeed-criterion-compat = { version = "2.3.3", optional = true}
 
 countme = { workspace = true }
 
