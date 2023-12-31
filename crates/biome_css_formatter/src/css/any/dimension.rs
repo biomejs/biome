@@ -9,8 +9,8 @@ impl FormatRule<AnyCssDimension> for FormatAnyCssDimension {
     fn fmt(&self, node: &AnyCssDimension, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
             AnyCssDimension::CssRegularDimension(node) => node.format().fmt(f),
-            AnyCssDimension::CssPercentage(node) => node.format().fmt(f),
             AnyCssDimension::CssUnknownDimension(node) => node.format().fmt(f),
+            AnyCssDimension::CssPercentage(node) => node.format().fmt(f),
         }
     }
 }

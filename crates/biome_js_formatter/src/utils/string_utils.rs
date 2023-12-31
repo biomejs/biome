@@ -1,6 +1,7 @@
-use crate::context::{JsFormatOptions, QuoteProperties, QuoteStyle};
+use crate::context::{JsFormatOptions, QuoteProperties};
 use crate::prelude::*;
 use biome_formatter::token::string::normalize_string;
+use biome_formatter::QuoteStyle;
 use biome_js_syntax::JsSyntaxKind::{JSX_STRING_LITERAL, JS_STRING_LITERAL};
 use biome_js_syntax::{JsFileSource, JsSyntaxToken};
 use biome_js_unicode_table::is_js_ident;
@@ -355,10 +356,10 @@ impl<'token> LiteralStringNormaliser<'token> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::context::QuoteStyle;
     use crate::utils::quickcheck_utils::*;
     use crate::utils::FormatLiteralStringToken;
     use biome_formatter::token::string::ToAsciiLowercaseCow;
+    use biome_formatter::QuoteStyle;
     use biome_js_factory::JsSyntaxTreeBuilder;
     use biome_js_syntax::JsSyntaxKind::{JS_STRING_LITERAL, JS_STRING_LITERAL_EXPRESSION};
     use biome_js_syntax::{JsStringLiteralExpression, JsSyntaxToken};

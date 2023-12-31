@@ -17,7 +17,6 @@ Generic options applied to all files
         --line-width=NUMBER   What's the max width of a line. Defaults to 80.
 
 Formatting options specific to the JavaScript files
-        --quote-style=<double|single>  The type of quotes used in JavaScript code. Defaults to double.
         --jsx-quote-style=<double|single>  The type of quotes used in JSX. Defaults to double.
         --quote-properties=<preserve|as-needed>  When properties in objects are quoted. Defaults to asNeeded.
         --trailing-comma=<all|es5|none>  Print trailing commas wherever possible in multi-line comma-separated
@@ -43,6 +42,7 @@ Formatting options specific to the JavaScript files
                               (and its super languages) files.
         --javascript-formatter-line-width=NUMBER  What's the max width of a line applied to JavaScript
                               (and its super languages) files. Defaults to 80.
+        --quote-style=<double|single>  The type of quotes used in JavaScript code. Defaults to double.
 
 Set of properties to integrate Biome with a VCS software.
         --vcs-client-kind=<git>  The kind of client.

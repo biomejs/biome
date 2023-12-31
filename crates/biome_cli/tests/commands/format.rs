@@ -37,6 +37,12 @@ let b = {
 const APPLY_QUOTE_STYLE_AFTER: &str = "let a = 'something';
 let b = {\n\t'hey': 'hello',\n};\n";
 
+const APPLY_CSS_QUOTE_STYLE_BEFORE: &str =
+    r#"[class='foo'] { background-image: url("/path/to/file.jpg")}"#;
+
+const APPLY_CSS_QUOTE_STYLE_AFTER: &str =
+    "[class='foo'] {\n\tbackground-image: url('/path/to/file.jpg');\n}\n";
+
 const APPLY_TRAILING_COMMA_BEFORE: &str = r#"
 const a = [
 	longlonglonglongItem1longlonglonglongItem1,
@@ -610,6 +616,45 @@ fn applies_custom_quote_style() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "applies_custom_quote_style",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn applies_custom_css_quote_style() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let css_file_path = Path::new("file.css");
+    fs.insert(
+        css_file_path.into(),
+        APPLY_CSS_QUOTE_STYLE_BEFORE.as_bytes(),
+    );
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("format"),
+                ("--css-formatter-quote-style"),
+                ("single"),
+                ("--write"),
+                css_file_path.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, css_file_path, APPLY_CSS_QUOTE_STYLE_AFTER);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "applies_custom_css_quote_style",
         fs,
         console,
         result,
