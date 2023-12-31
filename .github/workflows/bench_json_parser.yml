@@ -42,7 +42,7 @@ jobs:
           bins: cargo-codspeed
 
       - name: Compile
-        run: cargo codspeed build --feature codspeed json_parser -p xtask_bench
+        run: cargo codspeed build --features codspeed json_parser -p xtask_bench
 
       - name: Run the benchmarks
         uses: CodSpeedHQ/action@v2
