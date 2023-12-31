@@ -11,7 +11,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_js_semantic::{CallsExtensions, SemanticModel};
 use biome_js_syntax::{
-    AnyFunctionLike, AnyJsFunction, JsCallExpression, JsFunctionBody, JsLanguage,
+    AnyFunctionLike, AnyJsExpression, AnyJsFunction, JsCallExpression, JsFunctionBody, JsLanguage,
     JsReturnStatement, JsSyntaxKind, TextRange,
 };
 use biome_rowan::{AstNode, Language, SyntaxNode, WalkEvent};
@@ -95,8 +95,8 @@ pub enum Suggestion {
 
 // Verify if the call expression is at the top level
 // of the component
-fn enclosing_function_if_call_is_at_top_level(call: &JsCallExpression) -> Option<AnyJsFunction> {
-    let next = call.syntax().ancestors().find(|x| {
+fn enclosing_function_if_at_top_level(node: &SyntaxNode<JsLanguage>) -> Option<AnyJsFunction> {
+    let next = node.ancestors().find(|x| {
         !matches!(
             x.kind(),
             JsSyntaxKind::JS_STATEMENT_LIST
@@ -117,8 +117,19 @@ fn enclosing_function_if_call_is_at_top_level(call: &JsCallExpression) -> Option
         )
     });
 
-    next.and_then(JsFunctionBody::cast)
-        .and_then(|body| body.parent::<AnyJsFunction>())
+    match next {
+        Some(next) if AnyJsFunction::can_cast(next.kind()) => AnyJsFunction::cast(next),
+        Some(next) => JsFunctionBody::cast(next).and_then(|body| body.parent::<AnyJsFunction>()),
+        None => None,
+    }
+}
+
+fn is_nested_function(function: &AnyJsFunction) -> bool {
+    let Some(parent) = function.syntax().parent() else {
+        return false;
+    };
+
+    enclosing_function_if_at_top_level(&parent).is_some()
 }
 
 /// Model for tracking which function calls are preceeded by an early return.
@@ -299,48 +310,65 @@ impl Rule for UseHookAtTopLevel {
         let options = ReactExtensiveDependenciesOptions::new(options.clone());
 
         let FunctionCall(call) = ctx.query();
-        let hook_name_range = call.callee().ok()?.syntax().text_trimmed_range();
-        if react_hook_configuration(call, &options.hooks_config).is_some() {
-            let model = ctx.semantic_model();
-            let early_returns = ctx.early_returns_model();
+        let get_hook_name_range = || match call.callee() {
+            Ok(callee) => Some(AnyJsExpression::syntax(&callee).text_trimmed_range()),
+            Err(_) => None,
+        };
 
-            let root = CallPath {
-                call: call.clone(),
-                path: vec![],
-            };
-            let mut calls = vec![root];
+        // Early return for any function call that's not a React hook:
+        react_hook_configuration(call, &options.hooks_config)?;
 
-            while let Some(CallPath { call, path }) = calls.pop() {
-                let range = call.syntax().text_range();
+        let model = ctx.semantic_model();
+        let early_returns = ctx.early_returns_model();
 
-                let mut path = path.clone();
-                path.push(range);
+        let root = CallPath {
+            call: call.clone(),
+            path: vec![],
+        };
+        let mut calls = vec![root];
 
-                if let Some(enclosing_function) = enclosing_function_if_call_is_at_top_level(&call)
-                {
-                    if let Some(early_return) = early_returns.get(&call) {
-                        return Some(Suggestion::None {
-                            hook_name_range,
-                            path,
-                            early_return: Some(*early_return),
+        while let Some(CallPath { call, path }) = calls.pop() {
+            let range = call.syntax().text_range();
+
+            let mut path = path.clone();
+            path.push(range);
+
+            if let Some(enclosing_function) = enclosing_function_if_at_top_level(call.syntax()) {
+                if let Some(early_return) = early_returns.get(&call) {
+                    return Some(Suggestion::None {
+                        hook_name_range: get_hook_name_range()?,
+                        path,
+                        early_return: Some(*early_return),
+                    });
+                }
+
+                if let Some(calls_iter) = enclosing_function.all_calls(model) {
+                    for call in calls_iter {
+                        calls.push(CallPath {
+                            call: call.tree(),
+                            path: path.clone(),
                         });
                     }
-
-                    if let Some(calls_iter) = enclosing_function.all_calls(model) {
-                        for call in calls_iter {
-                            calls.push(CallPath {
-                                call: call.tree(),
-                                path: path.clone(),
-                            });
-                        }
-                    }
-                } else {
+                } else if is_nested_function(&enclosing_function) {
+                    // If `all_calls()` didn't return an iterator, it means the
+                    // enclosing function is an anonymous function. This is fine
+                    // if the top-level component itself is an anonymous
+                    // function (for instance, for passing them to React's
+                    // `forwardRef()`). But we cannot allow them to be nested
+                    // inside another function, since it would break the
+                    // requirement for hooks to be called from the top-level.
                     return Some(Suggestion::None {
-                        hook_name_range,
+                        hook_name_range: get_hook_name_range()?,
                         path,
                         early_return: None,
                     });
                 }
+            } else {
+                return Some(Suggestion::None {
+                    hook_name_range: get_hook_name_range()?,
+                    path,
+                    early_return: None,
+                });
             }
         }
 
