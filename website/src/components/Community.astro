@@ -7,24 +7,34 @@ const denyList = [853712];
 const apiUrl =
   "https://api.github.com/repos/biomejs/biome/contributors?per_page=35";
 
-let contributors: any[] = [];
+let contributors: any[] | undefined = [];
 contributors = await fetch(apiUrl)
-  .then((res) => res.json())
+  .then((res) => {
+		if (res.status < 400) {
+			return undefined;
+		} else {
+			return res.json();
+		}
+	})
   .catch((error) => console.error("Error:", error));
 
-contributors = contributors.filter((contributor) => {
-  return !denyList.includes(contributor.id);
-});
+if (contributors && Array.isArray(contributors)) {
+	contributors = contributors.filter((contributor) => {
+  	return !denyList.includes(contributor.id);
+	});
+}
 
 const organizedContributors: any[] = []; // Organize contributors into rows and columns
 const contributorsPerRow = [5, 4, 6, 5, 3, 5, 4];
 
 let startIndex = 0;
-contributorsPerRow.forEach((contributorsInRow) => {
-  const row = contributors.slice(startIndex, startIndex + contributorsInRow);
-  organizedContributors.push([...row]);
-  startIndex += contributorsInRow;
-});
+if (Array.isArray(contributors)) {
+	contributorsPerRow.forEach((contributorsInRow) => {
+		const row = contributors.slice(startIndex, startIndex + contributorsInRow);
+		organizedContributors.push([...row]);
+		startIndex += contributorsInRow;
+	});
+}
 ---
 
 {

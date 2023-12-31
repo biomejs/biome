@@ -29,6 +29,7 @@ hero:
 import { Card, CardGrid } from "@astrojs/starlight/components";
 import Netlify from "@src/components/Netlify.astro";
 import Sponsors from "@src/components/Sponsors.astro";
+
 <div class="card-cnt">
   <CardGrid>
     <Card title="高速" icon="rocket">
@@ -52,8 +53,6 @@ import Sponsors from "@src/components/Sponsors.astro";
   </CardGrid>
 </div>
 
-## スポンサー
+<Sponsors title={"スポンサー"} />
 
-<Sponsors />
-
-  <Netlify />
+<Netlify />
