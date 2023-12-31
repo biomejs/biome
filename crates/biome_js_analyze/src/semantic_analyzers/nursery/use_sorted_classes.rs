@@ -7,18 +7,18 @@ mod sort;
 mod sort_config;
 
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
+    context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make::{js_string_literal, js_string_literal_expression, jsx_string};
-use biome_rowan::BatchMutationExt;
+use biome_rowan::{AstNode, BatchMutationExt};
 
 use crate::JsRuleAction;
 
 pub use self::options::UseSortedClassesOptions;
 use self::{
-    class_like_visitor::ClassStringLike,
+    class_like_visitor::AnyClassStringLike,
     presets::{get_utilities_preset, UseSortedClassesPreset},
     sort::sort_class_name,
     sort_config::SortConfig,
@@ -58,7 +58,7 @@ declare_rule! {
 // ----
 
 impl Rule for UseSortedClasses {
-    type Query = ClassStringLike;
+    type Query = Ast<AnyClassStringLike>;
     type State = String;
     type Signals = Option<Self::State>;
     type Options = UseSortedClassesOptions;
@@ -95,7 +95,7 @@ impl Rule for UseSortedClasses {
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
         let mut mutation = ctx.root().begin();
         match ctx.query() {
-            ClassStringLike::StringLiteral(string_literal) => {
+            AnyClassStringLike::JsStringLiteralExpression(string_literal) => {
                 let replacement = js_string_literal_expression(js_string_literal(state));
                 mutation.replace_node(string_literal.clone(), replacement);
                 Some(JsRuleAction {
@@ -108,7 +108,7 @@ impl Rule for UseSortedClasses {
                     mutation,
                 })
             }
-            ClassStringLike::JsxString(jsx_string_node) => {
+            AnyClassStringLike::JsxString(jsx_string_node) => {
                 let replacement = jsx_string(js_string_literal(state));
                 mutation.replace_node(jsx_string_node.clone(), replacement);
                 Some(JsRuleAction {

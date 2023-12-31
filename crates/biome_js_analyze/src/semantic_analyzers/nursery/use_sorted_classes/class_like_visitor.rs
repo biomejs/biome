@@ -6,9 +6,12 @@ use biome_js_syntax::{
     JsCallArguments, JsCallExpression, JsLanguage, JsStringLiteralExpression,
     JsTemplateChunkElement, JsxAttribute, JsxString,
 };
-use biome_rowan::{AstNode, Language, SyntaxNode, TextRange, WalkEvent};
+use biome_rowan::{declare_node_union, AstNode, Language, SyntaxNode, TextRange, WalkEvent};
 
 use super::UseSortedClassesOptions;
+
+// utils
+// -----
 
 fn get_options_from_analyzer(analyzer_options: &AnalyzerOptions) -> UseSortedClassesOptions {
     match analyzer_options
@@ -83,14 +86,16 @@ impl Visitor for StringLiteralInAttributeVisitor {
                 // When entering a JSX string node, and we are in a valid attribute, emit.
                 if let Some(jsx_string) = JsxString::cast_ref(node) {
                     if self.in_valid_attribute {
-                        ctx.match_query(ClassStringLike::JsxString(jsx_string));
+                        ctx.match_query(AnyClassStringLike::JsxString(jsx_string));
                     }
                 }
 
                 // When entering a string literal node, and we are in a valid attribute, emit.
                 if let Some(string_literal) = JsStringLiteralExpression::cast_ref(node) {
                     if self.in_valid_attribute {
-                        ctx.match_query(ClassStringLike::StringLiteral(string_literal));
+                        ctx.match_query(AnyClassStringLike::JsStringLiteralExpression(
+                            string_literal,
+                        ));
                     }
                 }
             }
@@ -143,7 +148,9 @@ impl Visitor for StringLiteralInCallExpressionVisitor {
                 // When entering a string literal node, and we are in a valid function and in arguments, emit.
                 if let Some(string_literal) = JsStringLiteralExpression::cast_ref(node) {
                     if self.in_valid_function && self.in_arguments {
-                        ctx.match_query(ClassStringLike::StringLiteral(string_literal));
+                        ctx.match_query(AnyClassStringLike::JsStringLiteralExpression(
+                            string_literal,
+                        ));
                     }
                 }
             }
@@ -165,45 +172,36 @@ impl Visitor for StringLiteralInCallExpressionVisitor {
 // query
 // -----
 
-#[derive(Clone)]
-pub(crate) enum ClassStringLike {
-    StringLiteral(JsStringLiteralExpression),
-    JsxString(JsxString),
-    TemplateChunk(JsTemplateChunkElement),
+declare_node_union! {
+    pub AnyClassStringLike = JsStringLiteralExpression | JsxString | JsTemplateChunkElement
 }
 
-impl ClassStringLike {
-    pub fn range(&self) -> TextRange {
-        match self {
-            ClassStringLike::StringLiteral(string_literal) => string_literal.range(),
-            ClassStringLike::JsxString(jsx_string) => jsx_string.range(),
-            ClassStringLike::TemplateChunk(template_chunk) => template_chunk.range(),
-        }
-    }
-
+impl AnyClassStringLike {
     pub fn value(&self) -> Option<String> {
         match self {
-            ClassStringLike::StringLiteral(string_literal) => {
+            AnyClassStringLike::JsStringLiteralExpression(string_literal) => {
                 Some(string_literal.inner_string_text().ok()?.to_string())
             }
-            ClassStringLike::JsxString(jsx_string) => {
+            AnyClassStringLike::JsxString(jsx_string) => {
                 Some(jsx_string.inner_string_text().ok()?.to_string())
             }
-            ClassStringLike::TemplateChunk(template_chunk) => Some(template_chunk.to_string()),
+            AnyClassStringLike::JsTemplateChunkElement(template_chunk) => {
+                Some(template_chunk.to_string())
+            }
         }
     }
 }
 
-impl QueryMatch for ClassStringLike {
+impl QueryMatch for AnyClassStringLike {
     fn text_range(&self) -> TextRange {
         self.range()
     }
 }
 
-impl Queryable for ClassStringLike {
+impl Queryable for AnyClassStringLike {
     type Input = Self;
     type Language = JsLanguage;
-    type Output = ClassStringLike;
+    type Output = AnyClassStringLike;
     type Services = ();
 
     fn build_visitor(
