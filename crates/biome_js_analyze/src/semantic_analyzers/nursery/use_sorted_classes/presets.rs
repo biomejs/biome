@@ -1,13 +1,15 @@
-use super::options::UtilityLayer;
+// Presets contain pre-defined sort configurations, notably from Tailwind CSS.
 
-#[derive(Debug, Default, Clone)]
+use super::sort_config::{UtilitiesConfig, UtilityLayer};
+
+#[derive(Default)]
 pub enum UseSortedClassesPreset {
     None,
     #[default]
     TailwindCSS,
 }
 
-pub fn get_utilities_preset(preset: &UseSortedClassesPreset) -> Vec<UtilityLayer> {
+pub fn get_utilities_preset(preset: &UseSortedClassesPreset) -> UtilitiesConfig {
     match preset {
         UseSortedClassesPreset::None => {
             vec![]
@@ -16,11 +18,11 @@ pub fn get_utilities_preset(preset: &UseSortedClassesPreset) -> Vec<UtilityLayer
             // TAILWIND-PRESET-START
             vec![
                 UtilityLayer {
-                    layer: String::from("components"),
+                    name: String::from("components"),
                     classes: vec![String::from("container$")],
                 },
                 UtilityLayer {
-                    layer: String::from("utilities"),
+                    name: String::from("utilities"),
                     classes: vec![
                         String::from("sr-only$"),
                         String::from("not-sr-only$"),

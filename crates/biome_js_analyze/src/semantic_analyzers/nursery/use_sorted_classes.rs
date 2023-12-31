@@ -1,8 +1,10 @@
+mod class_info;
 mod class_like_visitor;
 mod class_parser;
 mod options;
 mod presets;
 mod sort;
+mod sort_config;
 
 use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
@@ -14,8 +16,12 @@ use biome_rowan::BatchMutationExt;
 
 use crate::JsRuleAction;
 
+pub use self::options::UseSortedClassesOptions;
 use self::{
-    class_like_visitor::ClassStringLike, options::UseSortedClassesOptions, sort::sort_class_name,
+    class_like_visitor::ClassStringLike,
+    presets::{get_utilities_preset, UseSortedClassesPreset},
+    sort::sort_class_name,
+    sort_config::SortConfig,
 };
 
 // rule metadata
@@ -59,8 +65,16 @@ impl Rule for UseSortedClasses {
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let value = ctx.query().value()?;
-        let options = &ctx.options();
-        let sorted_value = sort_class_name(value.as_str(), &options.utilities);
+        // TODO: unsure if options are needed here. The sort config should ideally be created once
+        // from the options and then reused for all queries.
+        // let options = &ctx.options();
+        // TODO: the sort config should already exist at this point, and be generated from the options,
+        // including the preset and extended options as well.
+        let sort_config = SortConfig::new(
+            get_utilities_preset(&UseSortedClassesPreset::default()),
+            Vec::new(),
+        );
+        let sorted_value = sort_class_name(value.as_str(), &sort_config);
         if value != sorted_value {
             Some(sorted_value)
         } else {

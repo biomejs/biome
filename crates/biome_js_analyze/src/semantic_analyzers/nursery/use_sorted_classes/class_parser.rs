@@ -48,23 +48,23 @@ enum CharKind {
     Backslash,
 }
 
-/// Information about a segment of a CSS class (variant or utility).
+/// Information about the structure of a segment of a CSS class (variant or utility).
 #[derive(Debug)]
-pub struct UtilitySegmentData {
-    arbitrary: bool,
-    text: String,
+pub struct ClassSegmentStructure {
+    pub arbitrary: bool,
+    pub text: String,
 }
 
-/// Information about a CSS class.
+/// Information about the structure of a CSS class.
 #[derive(Debug)]
-pub struct UtilityData {
-    variants: Vec<UtilitySegmentData>,
-    utility: UtilitySegmentData,
+pub struct ClassStructure {
+    pub variants: Vec<ClassSegmentStructure>,
+    pub utility: ClassSegmentStructure,
 }
 
-/// Parses a CSS class into a utility data structure, containing a list of variants and the
+/// Parses a CSS class into a class structure, containing a list of variants and the
 /// utility itself.
-pub fn parse_class(class_name: &str) -> UtilityData {
+pub fn parse_class(class_name: &str) -> ClassStructure {
     // state
     let mut arbitrary_block_depth = 0;
     let mut at_arbitrary_block_start = false;
@@ -145,9 +145,9 @@ pub fn parse_class(class_name: &str) -> UtilityData {
         };
         last_char = next_last_char;
     }
-    let mut variants: Vec<UtilitySegmentData> = split_at_indexes(class_name, &delimiter_indexes)
+    let mut variants: Vec<ClassSegmentStructure> = split_at_indexes(class_name, &delimiter_indexes)
         .iter()
-        .map(|&s| UtilitySegmentData {
+        .map(|&s| ClassSegmentStructure {
             arbitrary: s.starts_with('['),
             text: s.to_string(),
         })
@@ -156,5 +156,5 @@ pub fn parse_class(class_name: &str) -> UtilityData {
         .pop()
         .expect("TODO: error message (this should never happen)");
 
-    UtilityData { variants, utility }
+    ClassStructure { variants, utility }
 }
