@@ -775,6 +775,9 @@
 				"lineWidth": {
 					"description": "What's the max width of a line applied to CSS (and its super languages) files. Defaults to 80.",
 					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
+				},
+				"quoteStyle": {
+					"anyOf": [{ "$ref": "#/definitions/QuoteStyle" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
