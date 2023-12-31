@@ -321,12 +321,8 @@ CssRoot {
                                                 },
                                                 colon_token: COLON@142..144 ":" [] [Whitespace(" ")],
                                                 value: CssRegularDimension {
-                                                    value: CssNumber {
-                                                        value_token: CSS_NUMBER_LITERAL@144..147 "900" [] [],
-                                                    },
-                                                    unit: CssIdentifier {
-                                                        value_token: IDENT@147..149 "px" [] [],
-                                                    },
+                                                    value_token: CSS_NUMBER_LITERAL@144..147 "900" [] [],
+                                                    unit_token: IDENT@147..149 "px" [] [],
                                                 },
                                             },
                                             r_paren_token: R_PAREN@149..151 ")" [] [Whitespace(" ")],
@@ -486,12 +482,8 @@ CssRoot {
                                     value_token: CSS_NUMBER_LITERAL@327..329 "0" [] [Whitespace(" ")],
                                 },
                                 CssRegularDimension {
-                                    value: CssNumber {
-                                        value_token: CSS_NUMBER_LITERAL@329..330 "2" [] [],
-                                    },
-                                    unit: CssIdentifier {
-                                        value_token: IDENT@330..333 "px" [] [Whitespace(" ")],
-                                    },
+                                    value_token: CSS_NUMBER_LITERAL@329..330 "2" [] [],
+                                    unit_token: IDENT@330..333 "px" [] [Whitespace(" ")],
                                 },
                                 CssIdentifier {
                                     value_token: IDENT@333..339 "black" [] [Whitespace(" ")],
@@ -521,12 +513,8 @@ CssRoot {
                                         value_token: CSS_NUMBER_LITERAL@370..372 "0" [] [Whitespace(" ")],
                                     },
                                     CssRegularDimension {
-                                        value: CssNumber {
-                                            value_token: CSS_NUMBER_LITERAL@372..373 "2" [] [],
-                                        },
-                                        unit: CssIdentifier {
-                                            value_token: IDENT@373..376 "px" [] [Whitespace(" ")],
-                                        },
+                                        value_token: CSS_NUMBER_LITERAL@372..373 "2" [] [],
+                                        unit_token: IDENT@373..376 "px" [] [Whitespace(" ")],
                                     },
                                     CssIdentifier {
                                         value_token: IDENT@376..382 "black" [] [Whitespace(" ")],
@@ -556,12 +544,8 @@ CssRoot {
                                             value_token: CSS_NUMBER_LITERAL@416..418 "0" [] [Whitespace(" ")],
                                         },
                                         CssRegularDimension {
-                                            value: CssNumber {
-                                                value_token: CSS_NUMBER_LITERAL@418..419 "2" [] [],
-                                            },
-                                            unit: CssIdentifier {
-                                                value_token: IDENT@419..422 "px" [] [Whitespace(" ")],
-                                            },
+                                            value_token: CSS_NUMBER_LITERAL@418..419 "2" [] [],
+                                            unit_token: IDENT@419..422 "px" [] [Whitespace(" ")],
                                         },
                                         CssIdentifier {
                                             value_token: IDENT@422..428 "black" [] [Whitespace(" ")],
@@ -590,12 +574,8 @@ CssRoot {
                                             value_token: CSS_NUMBER_LITERAL@457..459 "0" [] [Whitespace(" ")],
                                         },
                                         CssRegularDimension {
-                                            value: CssNumber {
-                                                value_token: CSS_NUMBER_LITERAL@459..460 "2" [] [],
-                                            },
-                                            unit: CssIdentifier {
-                                                value_token: IDENT@460..463 "px" [] [Whitespace(" ")],
-                                            },
+                                            value_token: CSS_NUMBER_LITERAL@459..460 "2" [] [],
+                                            unit_token: IDENT@460..463 "px" [] [Whitespace(" ")],
                                         },
                                         CssIdentifier {
                                             value_token: IDENT@463..469 "black" [] [Whitespace(" ")],
@@ -638,12 +618,8 @@ CssRoot {
                                     value_token: CSS_NUMBER_LITERAL@506..508 "0" [] [Whitespace(" ")],
                                 },
                                 CssRegularDimension {
-                                    value: CssNumber {
-                                        value_token: CSS_NUMBER_LITERAL@508..509 "2" [] [],
-                                    },
-                                    unit: CssIdentifier {
-                                        value_token: IDENT@509..512 "px" [] [Whitespace(" ")],
-                                    },
+                                    value_token: CSS_NUMBER_LITERAL@508..509 "2" [] [],
+                                    unit_token: IDENT@509..512 "px" [] [Whitespace(" ")],
                                 },
                                 CssIdentifier {
                                     value_token: IDENT@512..518 "black" [] [Whitespace(" ")],
@@ -673,12 +649,8 @@ CssRoot {
                                         value_token: CSS_NUMBER_LITERAL@552..554 "0" [] [Whitespace(" ")],
                                     },
                                     CssRegularDimension {
-                                        value: CssNumber {
-                                            value_token: CSS_NUMBER_LITERAL@554..555 "2" [] [],
-                                        },
-                                        unit: CssIdentifier {
-                                            value_token: IDENT@555..558 "px" [] [Whitespace(" ")],
-                                        },
+                                        value_token: CSS_NUMBER_LITERAL@554..555 "2" [] [],
+                                        unit_token: IDENT@555..558 "px" [] [Whitespace(" ")],
                                     },
                                     CssIdentifier {
                                         value_token: IDENT@558..564 "black" [] [Whitespace(" ")],
@@ -708,12 +680,8 @@ CssRoot {
                                             value_token: CSS_NUMBER_LITERAL@601..603 "0" [] [Whitespace(" ")],
                                         },
                                         CssRegularDimension {
-                                            value: CssNumber {
-                                                value_token: CSS_NUMBER_LITERAL@603..604 "2" [] [],
-                                            },
-                                            unit: CssIdentifier {
-                                                value_token: IDENT@604..607 "px" [] [Whitespace(" ")],
-                                            },
+                                            value_token: CSS_NUMBER_LITERAL@603..604 "2" [] [],
+                                            unit_token: IDENT@604..607 "px" [] [Whitespace(" ")],
                                         },
                                         CssIdentifier {
                                             value_token: IDENT@607..613 "black" [] [Whitespace(" ")],
@@ -742,12 +710,8 @@ CssRoot {
                                             value_token: CSS_NUMBER_LITERAL@645..647 "0" [] [Whitespace(" ")],
                                         },
                                         CssRegularDimension {
-                                            value: CssNumber {
-                                                value_token: CSS_NUMBER_LITERAL@647..648 "2" [] [],
-                                            },
-                                            unit: CssIdentifier {
-                                                value_token: IDENT@648..651 "px" [] [Whitespace(" ")],
-                                            },
+                                            value_token: CSS_NUMBER_LITERAL@647..648 "2" [] [],
+                                            unit_token: IDENT@648..651 "px" [] [Whitespace(" ")],
                                         },
                                         CssIdentifier {
                                             value_token: IDENT@651..657 "black" [] [Whitespace(" ")],
@@ -833,12 +797,8 @@ CssRoot {
                                             any_css_expression: CssListOfComponentValuesExpression {
                                                 css_component_value_list: CssComponentValueList [
                                                     CssRegularDimension {
-                                                        value: CssNumber {
-                                                            value_token: CSS_NUMBER_LITERAL@759..761 "10" [] [],
-                                                        },
-                                                        unit: CssIdentifier {
-                                                            value_token: IDENT@761..764 "deg" [] [],
-                                                        },
+                                                        value_token: CSS_NUMBER_LITERAL@759..761 "10" [] [],
+                                                        unit_token: IDENT@761..764 "deg" [] [],
                                                     },
                                                 ],
                                             },
@@ -919,12 +879,8 @@ CssRoot {
                                                     any_css_expression: CssListOfComponentValuesExpression {
                                                         css_component_value_list: CssComponentValueList [
                                                             CssRegularDimension {
-                                                                value: CssNumber {
-                                                                    value_token: CSS_NUMBER_LITERAL@858..860 "10" [] [],
-                                                                },
-                                                                unit: CssIdentifier {
-                                                                    value_token: IDENT@860..863 "deg" [] [],
-                                                                },
+                                                                value_token: CSS_NUMBER_LITERAL@858..860 "10" [] [],
+                                                                unit_token: IDENT@860..863 "deg" [] [],
                                                             },
                                                         ],
                                                     },
@@ -1008,12 +964,8 @@ CssRoot {
                                                     any_css_expression: CssListOfComponentValuesExpression {
                                                         css_component_value_list: CssComponentValueList [
                                                             CssRegularDimension {
-                                                                value: CssNumber {
-                                                                    value_token: CSS_NUMBER_LITERAL@1002..1004 "10" [] [],
-                                                                },
-                                                                unit: CssIdentifier {
-                                                                    value_token: IDENT@1004..1007 "deg" [] [],
-                                                                },
+                                                                value_token: CSS_NUMBER_LITERAL@1002..1004 "10" [] [],
+                                                                unit_token: IDENT@1004..1007 "deg" [] [],
                                                             },
                                                         ],
                                                     },
@@ -1097,12 +1049,8 @@ CssRoot {
                                                     any_css_expression: CssListOfComponentValuesExpression {
                                                         css_component_value_list: CssComponentValueList [
                                                             CssRegularDimension {
-                                                                value: CssNumber {
-                                                                    value_token: CSS_NUMBER_LITERAL@1104..1106 "10" [] [],
-                                                                },
-                                                                unit: CssIdentifier {
-                                                                    value_token: IDENT@1106..1109 "deg" [] [],
-                                                                },
+                                                                value_token: CSS_NUMBER_LITERAL@1104..1106 "10" [] [],
+                                                                unit_token: IDENT@1106..1109 "deg" [] [],
                                                             },
                                                         ],
                                                     },
@@ -1280,12 +1228,8 @@ CssRoot {
                                             any_css_expression: CssListOfComponentValuesExpression {
                                                 css_component_value_list: CssComponentValueList [
                                                     CssRegularDimension {
-                                                        value: CssNumber {
-                                                            value_token: CSS_NUMBER_LITERAL@1308..1310 "10" [] [],
-                                                        },
-                                                        unit: CssIdentifier {
-                                                            value_token: IDENT@1310..1313 "deg" [] [],
-                                                        },
+                                                        value_token: CSS_NUMBER_LITERAL@1308..1310 "10" [] [],
+                                                        unit_token: IDENT@1310..1313 "deg" [] [],
                                                     },
                                                 ],
                                             },
@@ -1366,12 +1310,8 @@ CssRoot {
                                                     any_css_expression: CssListOfComponentValuesExpression {
                                                         css_component_value_list: CssComponentValueList [
                                                             CssRegularDimension {
-                                                                value: CssNumber {
-                                                                    value_token: CSS_NUMBER_LITERAL@1407..1409 "10" [] [],
-                                                                },
-                                                                unit: CssIdentifier {
-                                                                    value_token: IDENT@1409..1412 "deg" [] [],
-                                                                },
+                                                                value_token: CSS_NUMBER_LITERAL@1407..1409 "10" [] [],
+                                                                unit_token: IDENT@1409..1412 "deg" [] [],
                                                             },
                                                         ],
                                                     },
@@ -2801,12 +2741,8 @@ CssRoot {
                                         any_css_expression: CssListOfComponentValuesExpression {
                                             css_component_value_list: CssComponentValueList [
                                                 CssRegularDimension {
-                                                    value: CssNumber {
-                                                        value_token: CSS_NUMBER_LITERAL@2682..2685 "100" [] [],
-                                                    },
-                                                    unit: CssIdentifier {
-                                                        value_token: IDENT@2685..2687 "px" [] [],
-                                                    },
+                                                    value_token: CSS_NUMBER_LITERAL@2682..2685 "100" [] [],
+                                                    unit_token: IDENT@2685..2687 "px" [] [],
                                                 },
                                             ],
                                         },
@@ -3381,10 +3317,8 @@ CssRoot {
                           0: IDENT@133..142 "min-width" [] []
                         1: COLON@142..144 ":" [] [Whitespace(" ")]
                         2: CSS_REGULAR_DIMENSION@144..149
-                          0: CSS_NUMBER@144..147
-                            0: CSS_NUMBER_LITERAL@144..147 "900" [] []
-                          1: CSS_IDENTIFIER@147..149
-                            0: IDENT@147..149 "px" [] []
+                          0: CSS_NUMBER_LITERAL@144..147 "900" [] []
+                          1: IDENT@147..149 "px" [] []
                       2: R_PAREN@149..151 ")" [] [Whitespace(" ")]
                 2: CSS_RULE_LIST_BLOCK@151..189
                   0: L_CURLY@151..152 "{" [] []
@@ -3491,10 +3425,8 @@ CssRoot {
                 1: CSS_NUMBER@327..329
                   0: CSS_NUMBER_LITERAL@327..329 "0" [] [Whitespace(" ")]
                 2: CSS_REGULAR_DIMENSION@329..333
-                  0: CSS_NUMBER@329..330
-                    0: CSS_NUMBER_LITERAL@329..330 "2" [] []
-                  1: CSS_IDENTIFIER@330..333
-                    0: IDENT@330..333 "px" [] [Whitespace(" ")]
+                  0: CSS_NUMBER_LITERAL@329..330 "2" [] []
+                  1: IDENT@330..333 "px" [] [Whitespace(" ")]
                 3: CSS_IDENTIFIER@333..339
                   0: IDENT@333..339 "black" [] [Whitespace(" ")]
                 4: CSS_IDENTIFIER@339..345
@@ -3515,10 +3447,8 @@ CssRoot {
                   1: CSS_NUMBER@370..372
                     0: CSS_NUMBER_LITERAL@370..372 "0" [] [Whitespace(" ")]
                   2: CSS_REGULAR_DIMENSION@372..376
-                    0: CSS_NUMBER@372..373
-                      0: CSS_NUMBER_LITERAL@372..373 "2" [] []
-                    1: CSS_IDENTIFIER@373..376
-                      0: IDENT@373..376 "px" [] [Whitespace(" ")]
+                    0: CSS_NUMBER_LITERAL@372..373 "2" [] []
+                    1: IDENT@373..376 "px" [] [Whitespace(" ")]
                   3: CSS_IDENTIFIER@376..382
                     0: IDENT@376..382 "black" [] [Whitespace(" ")]
                   4: CSS_IDENTIFIER@382..388
@@ -3539,10 +3469,8 @@ CssRoot {
                     1: CSS_NUMBER@416..418
                       0: CSS_NUMBER_LITERAL@416..418 "0" [] [Whitespace(" ")]
                     2: CSS_REGULAR_DIMENSION@418..422
-                      0: CSS_NUMBER@418..419
-                        0: CSS_NUMBER_LITERAL@418..419 "2" [] []
-                      1: CSS_IDENTIFIER@419..422
-                        0: IDENT@419..422 "px" [] [Whitespace(" ")]
+                      0: CSS_NUMBER_LITERAL@418..419 "2" [] []
+                      1: IDENT@419..422 "px" [] [Whitespace(" ")]
                     3: CSS_IDENTIFIER@422..428
                       0: IDENT@422..428 "black" [] [Whitespace(" ")]
                     4: CSS_IDENTIFIER@428..434
@@ -3562,10 +3490,8 @@ CssRoot {
                     1: CSS_NUMBER@457..459
                       0: CSS_NUMBER_LITERAL@457..459 "0" [] [Whitespace(" ")]
                     2: CSS_REGULAR_DIMENSION@459..463
-                      0: CSS_NUMBER@459..460
-                        0: CSS_NUMBER_LITERAL@459..460 "2" [] []
-                      1: CSS_IDENTIFIER@460..463
-                        0: IDENT@460..463 "px" [] [Whitespace(" ")]
+                      0: CSS_NUMBER_LITERAL@459..460 "2" [] []
+                      1: IDENT@460..463 "px" [] [Whitespace(" ")]
                     3: CSS_IDENTIFIER@463..469
                       0: IDENT@463..469 "black" [] [Whitespace(" ")]
                     4: CSS_IDENTIFIER@469..475
@@ -3593,10 +3519,8 @@ CssRoot {
                 1: CSS_NUMBER@506..508
                   0: CSS_NUMBER_LITERAL@506..508 "0" [] [Whitespace(" ")]
                 2: CSS_REGULAR_DIMENSION@508..512
-                  0: CSS_NUMBER@508..509
-                    0: CSS_NUMBER_LITERAL@508..509 "2" [] []
-                  1: CSS_IDENTIFIER@509..512
-                    0: IDENT@509..512 "px" [] [Whitespace(" ")]
+                  0: CSS_NUMBER_LITERAL@508..509 "2" [] []
+                  1: IDENT@509..512 "px" [] [Whitespace(" ")]
                 3: CSS_IDENTIFIER@512..518
                   0: IDENT@512..518 "black" [] [Whitespace(" ")]
                 4: CSS_IDENTIFIER@518..524
@@ -3617,10 +3541,8 @@ CssRoot {
                   1: CSS_NUMBER@552..554
                     0: CSS_NUMBER_LITERAL@552..554 "0" [] [Whitespace(" ")]
                   2: CSS_REGULAR_DIMENSION@554..558
-                    0: CSS_NUMBER@554..555
-                      0: CSS_NUMBER_LITERAL@554..555 "2" [] []
-                    1: CSS_IDENTIFIER@555..558
-                      0: IDENT@555..558 "px" [] [Whitespace(" ")]
+                    0: CSS_NUMBER_LITERAL@554..555 "2" [] []
+                    1: IDENT@555..558 "px" [] [Whitespace(" ")]
                   3: CSS_IDENTIFIER@558..564
                     0: IDENT@558..564 "black" [] [Whitespace(" ")]
                   4: CSS_IDENTIFIER@564..570
@@ -3641,10 +3563,8 @@ CssRoot {
                     1: CSS_NUMBER@601..603
                       0: CSS_NUMBER_LITERAL@601..603 "0" [] [Whitespace(" ")]
                     2: CSS_REGULAR_DIMENSION@603..607
-                      0: CSS_NUMBER@603..604
-                        0: CSS_NUMBER_LITERAL@603..604 "2" [] []
-                      1: CSS_IDENTIFIER@604..607
-                        0: IDENT@604..607 "px" [] [Whitespace(" ")]
+                      0: CSS_NUMBER_LITERAL@603..604 "2" [] []
+                      1: IDENT@604..607 "px" [] [Whitespace(" ")]
                     3: CSS_IDENTIFIER@607..613
                       0: IDENT@607..613 "black" [] [Whitespace(" ")]
                     4: CSS_IDENTIFIER@613..619
@@ -3664,10 +3584,8 @@ CssRoot {
                     1: CSS_NUMBER@645..647
                       0: CSS_NUMBER_LITERAL@645..647 "0" [] [Whitespace(" ")]
                     2: CSS_REGULAR_DIMENSION@647..651
-                      0: CSS_NUMBER@647..648
-                        0: CSS_NUMBER_LITERAL@647..648 "2" [] []
-                      1: CSS_IDENTIFIER@648..651
-                        0: IDENT@648..651 "px" [] [Whitespace(" ")]
+                      0: CSS_NUMBER_LITERAL@647..648 "2" [] []
+                      1: IDENT@648..651 "px" [] [Whitespace(" ")]
                     3: CSS_IDENTIFIER@651..657
                       0: IDENT@651..657 "black" [] [Whitespace(" ")]
                     4: CSS_IDENTIFIER@657..663
@@ -3727,10 +3645,8 @@ CssRoot {
                       0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@759..764
                         0: CSS_COMPONENT_VALUE_LIST@759..764
                           0: CSS_REGULAR_DIMENSION@759..764
-                            0: CSS_NUMBER@759..761
-                              0: CSS_NUMBER_LITERAL@759..761 "10" [] []
-                            1: CSS_IDENTIFIER@761..764
-                              0: IDENT@761..764 "deg" [] []
+                            0: CSS_NUMBER_LITERAL@759..761 "10" [] []
+                            1: IDENT@761..764 "deg" [] []
                   3: R_PAREN@764..765 ")" [] []
               3: (empty)
             2: R_PAREN@765..767 ")" [] [Whitespace(" ")]
@@ -3786,10 +3702,8 @@ CssRoot {
                           0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@858..863
                             0: CSS_COMPONENT_VALUE_LIST@858..863
                               0: CSS_REGULAR_DIMENSION@858..863
-                                0: CSS_NUMBER@858..860
-                                  0: CSS_NUMBER_LITERAL@858..860 "10" [] []
-                                1: CSS_IDENTIFIER@860..863
-                                  0: IDENT@860..863 "deg" [] []
+                                0: CSS_NUMBER_LITERAL@858..860 "10" [] []
+                                1: IDENT@860..863 "deg" [] []
                       3: R_PAREN@863..864 ")" [] []
                   3: (empty)
                 2: R_PAREN@864..865 ")" [] []
@@ -3846,10 +3760,8 @@ CssRoot {
                           0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1002..1007
                             0: CSS_COMPONENT_VALUE_LIST@1002..1007
                               0: CSS_REGULAR_DIMENSION@1002..1007
-                                0: CSS_NUMBER@1002..1004
-                                  0: CSS_NUMBER_LITERAL@1002..1004 "10" [] []
-                                1: CSS_IDENTIFIER@1004..1007
-                                  0: IDENT@1004..1007 "deg" [] []
+                                0: CSS_NUMBER_LITERAL@1002..1004 "10" [] []
+                                1: IDENT@1004..1007 "deg" [] []
                       3: R_PAREN@1007..1011 ")" [] [Whitespace("   ")]
                   3: (empty)
                 2: R_PAREN@1011..1015 ")" [] [Whitespace("   ")]
@@ -3906,10 +3818,8 @@ CssRoot {
                           0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1104..1109
                             0: CSS_COMPONENT_VALUE_LIST@1104..1109
                               0: CSS_REGULAR_DIMENSION@1104..1109
-                                0: CSS_NUMBER@1104..1106
-                                  0: CSS_NUMBER_LITERAL@1104..1106 "10" [] []
-                                1: CSS_IDENTIFIER@1106..1109
-                                  0: IDENT@1106..1109 "deg" [] []
+                                0: CSS_NUMBER_LITERAL@1104..1106 "10" [] []
+                                1: IDENT@1106..1109 "deg" [] []
                       3: R_PAREN@1109..1110 ")" [] []
                   3: (empty)
                 2: R_PAREN@1110..1111 ")" [] []
@@ -4031,10 +3941,8 @@ CssRoot {
                       0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1308..1313
                         0: CSS_COMPONENT_VALUE_LIST@1308..1313
                           0: CSS_REGULAR_DIMENSION@1308..1313
-                            0: CSS_NUMBER@1308..1310
-                              0: CSS_NUMBER_LITERAL@1308..1310 "10" [] []
-                            1: CSS_IDENTIFIER@1310..1313
-                              0: IDENT@1310..1313 "deg" [] []
+                            0: CSS_NUMBER_LITERAL@1308..1310 "10" [] []
+                            1: IDENT@1310..1313 "deg" [] []
                   3: R_PAREN@1313..1314 ")" [] []
               3: (empty)
             2: R_PAREN@1314..1316 ")" [] [Whitespace(" ")]
@@ -4090,10 +3998,8 @@ CssRoot {
                           0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1407..1412
                             0: CSS_COMPONENT_VALUE_LIST@1407..1412
                               0: CSS_REGULAR_DIMENSION@1407..1412
-                                0: CSS_NUMBER@1407..1409
-                                  0: CSS_NUMBER_LITERAL@1407..1409 "10" [] []
-                                1: CSS_IDENTIFIER@1409..1412
-                                  0: IDENT@1409..1412 "deg" [] []
+                                0: CSS_NUMBER_LITERAL@1407..1409 "10" [] []
+                                1: IDENT@1409..1412 "deg" [] []
                       3: R_PAREN@1412..1413 ")" [] []
                   3: (empty)
                 2: R_PAREN@1413..1414 ")" [] []
@@ -5050,10 +4956,8 @@ CssRoot {
                     0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@2682..2687
                       0: CSS_COMPONENT_VALUE_LIST@2682..2687
                         0: CSS_REGULAR_DIMENSION@2682..2687
-                          0: CSS_NUMBER@2682..2685
-                            0: CSS_NUMBER_LITERAL@2682..2685 "100" [] []
-                          1: CSS_IDENTIFIER@2685..2687
-                            0: IDENT@2685..2687 "px" [] []
+                          0: CSS_NUMBER_LITERAL@2682..2685 "100" [] []
+                          1: IDENT@2685..2687 "px" [] []
                 3: R_PAREN@2687..2688 ")" [] []
             3: (empty)
           2: R_PAREN@2688..2690 ")" [] [Whitespace(" ")]

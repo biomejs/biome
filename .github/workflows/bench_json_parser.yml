@@ -8,14 +8,14 @@ on:
     branches:
       - main
     paths:
-      - 'crates/biome_json_parser/**'
-      - 'crates/biome_parser/**'
+      - 'crates/biome_json_parser/**/*.rs'
+      - 'crates/biome_parser/**/*.rs'
   push:
     branches:
       - main
     paths:
-      - 'crates/biome_json_parser/**'
-      - 'crates/biome_parser/**'
+      - 'crates/biome_json_parser/**/*.rs'
+      - 'crates/biome_parser/**/*.rs'
 
 env:
   RUST_LOG: info
@@ -42,7 +42,7 @@ jobs:
           bins: cargo-codspeed
 
       - name: Compile
-        run: cargo codspeed build -p xtask_bench
+        run: cargo codspeed build --features codspeed json_parser -p xtask_bench
 
       - name: Run the benchmarks
         uses: CodSpeedHQ/action@v2

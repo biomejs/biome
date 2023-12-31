@@ -21,8 +21,9 @@ expression: snapshot
 :nth-child(even of ^.div {}
 :nth-child(even ^.div,) {}
 :nth-child(even ^.div, {}
+:nth-child(2 n) {}
+:nth-child(2 n + 1) {}
 :nth-child(2n + 1
-
 ```
 
 
@@ -657,6 +658,86 @@ CssRoot {
                 r_curly_token: R_CURLY@372..373 "}" [] [],
             },
         },
+        CssRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selector_token: missing (optional),
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssPseudoClassSelector {
+                            colon_token: COLON@373..375 ":" [Newline("\n")] [],
+                            class: CssBogusPseudoClass {
+                                items: [
+                                    NTH_CHILD_KW@375..384 "nth-child" [] [],
+                                    L_PAREN@384..385 "(" [] [],
+                                    CssPseudoClassNthSelector {
+                                        nth: CssPseudoClassNthNumber {
+                                            sign: missing (optional),
+                                            value: CssNumber {
+                                                value_token: CSS_NUMBER_LITERAL@385..387 "2" [] [Whitespace(" ")],
+                                            },
+                                        },
+                                        of_selector: missing (optional),
+                                    },
+                                    CssBogus {
+                                        items: [
+                                            N_KW@387..388 "n" [] [],
+                                        ],
+                                    },
+                                    R_PAREN@388..390 ")" [] [Whitespace(" ")],
+                                ],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationListBlock {
+                l_curly_token: L_CURLY@390..391 "{" [] [],
+                declarations: CssDeclarationList [],
+                r_curly_token: R_CURLY@391..392 "}" [] [],
+            },
+        },
+        CssRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selector_token: missing (optional),
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssPseudoClassSelector {
+                            colon_token: COLON@392..394 ":" [Newline("\n")] [],
+                            class: CssBogusPseudoClass {
+                                items: [
+                                    NTH_CHILD_KW@394..403 "nth-child" [] [],
+                                    L_PAREN@403..404 "(" [] [],
+                                    CssPseudoClassNthSelector {
+                                        nth: CssPseudoClassNthNumber {
+                                            sign: missing (optional),
+                                            value: CssNumber {
+                                                value_token: CSS_NUMBER_LITERAL@404..406 "2" [] [Whitespace(" ")],
+                                            },
+                                        },
+                                        of_selector: missing (optional),
+                                    },
+                                    CssBogus {
+                                        items: [
+                                            N_KW@406..408 "n" [] [Whitespace(" ")],
+                                            PLUS@408..410 "+" [] [Whitespace(" ")],
+                                            CSS_NUMBER_LITERAL@410..411 "1" [] [],
+                                        ],
+                                    },
+                                    R_PAREN@411..413 ")" [] [Whitespace(" ")],
+                                ],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationListBlock {
+                l_curly_token: L_CURLY@413..414 "{" [] [],
+                declarations: CssDeclarationList [],
+                r_curly_token: R_CURLY@414..415 "}" [] [],
+            },
+        },
         CssBogusRule {
             items: [
                 CssSelectorList [
@@ -665,22 +746,22 @@ CssRoot {
                         simple_selector: missing (optional),
                         sub_selectors: CssSubSelectorList [
                             CssPseudoClassSelector {
-                                colon_token: COLON@373..375 ":" [Newline("\n")] [],
+                                colon_token: COLON@415..417 ":" [Newline("\n")] [],
                                 class: CssBogusPseudoClass {
                                     items: [
-                                        NTH_CHILD_KW@375..384 "nth-child" [] [],
-                                        L_PAREN@384..385 "(" [] [],
+                                        NTH_CHILD_KW@417..426 "nth-child" [] [],
+                                        L_PAREN@426..427 "(" [] [],
                                         CssPseudoClassNthSelector {
                                             nth: CssPseudoClassNth {
                                                 sign: missing (optional),
                                                 value: CssNumber {
-                                                    value_token: CSS_NUMBER_LITERAL@385..386 "2" [] [],
+                                                    value_token: CSS_NUMBER_LITERAL@427..428 "2" [] [],
                                                 },
-                                                symbol_token: N_KW@386..388 "n" [] [Whitespace(" ")],
+                                                symbol_token: N_KW@428..430 "n" [] [Whitespace(" ")],
                                                 offset: CssNthOffset {
-                                                    sign: PLUS@388..390 "+" [] [Whitespace(" ")],
+                                                    sign: PLUS@430..432 "+" [] [Whitespace(" ")],
                                                     value: CssNumber {
-                                                        value_token: CSS_NUMBER_LITERAL@390..391 "1" [] [],
+                                                        value_token: CSS_NUMBER_LITERAL@432..433 "1" [] [],
                                                     },
                                                 },
                                             },
@@ -695,16 +776,16 @@ CssRoot {
             ],
         },
     ],
-    eof_token: EOF@391..392 "" [Newline("\n")] [],
+    eof_token: EOF@433..433 "" [] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..392
+0: CSS_ROOT@0..433
   0: (empty)
-  1: CSS_RULE_LIST@0..391
+  1: CSS_RULE_LIST@0..433
     0: CSS_RULE@0..22
       0: CSS_SELECTOR_LIST@0..20
         0: CSS_COMPOUND_SELECTOR@0..20
@@ -1102,29 +1183,79 @@ CssRoot {
         0: L_CURLY@371..372 "{" [] []
         1: CSS_DECLARATION_LIST@372..372
         2: R_CURLY@372..373 "}" [] []
-    15: CSS_BOGUS_RULE@373..391
-      0: CSS_SELECTOR_LIST@373..391
-        0: CSS_COMPOUND_SELECTOR@373..391
+    15: CSS_RULE@373..392
+      0: CSS_SELECTOR_LIST@373..390
+        0: CSS_COMPOUND_SELECTOR@373..390
           0: (empty)
           1: (empty)
-          2: CSS_SUB_SELECTOR_LIST@373..391
-            0: CSS_PSEUDO_CLASS_SELECTOR@373..391
+          2: CSS_SUB_SELECTOR_LIST@373..390
+            0: CSS_PSEUDO_CLASS_SELECTOR@373..390
               0: COLON@373..375 ":" [Newline("\n")] []
-              1: CSS_BOGUS_PSEUDO_CLASS@375..391
+              1: CSS_BOGUS_PSEUDO_CLASS@375..390
                 0: NTH_CHILD_KW@375..384 "nth-child" [] []
                 1: L_PAREN@384..385 "(" [] []
-                2: CSS_PSEUDO_CLASS_NTH_SELECTOR@385..391
-                  0: CSS_PSEUDO_CLASS_NTH@385..391
+                2: CSS_PSEUDO_CLASS_NTH_SELECTOR@385..387
+                  0: CSS_PSEUDO_CLASS_NTH_NUMBER@385..387
                     0: (empty)
-                    1: CSS_NUMBER@385..386
-                      0: CSS_NUMBER_LITERAL@385..386 "2" [] []
-                    2: N_KW@386..388 "n" [] [Whitespace(" ")]
-                    3: CSS_NTH_OFFSET@388..391
-                      0: PLUS@388..390 "+" [] [Whitespace(" ")]
-                      1: CSS_NUMBER@390..391
-                        0: CSS_NUMBER_LITERAL@390..391 "1" [] []
+                    1: CSS_NUMBER@385..387
+                      0: CSS_NUMBER_LITERAL@385..387 "2" [] [Whitespace(" ")]
                   1: (empty)
-  2: EOF@391..392 "" [Newline("\n")] []
+                3: CSS_BOGUS@387..388
+                  0: N_KW@387..388 "n" [] []
+                4: R_PAREN@388..390 ")" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_LIST_BLOCK@390..392
+        0: L_CURLY@390..391 "{" [] []
+        1: CSS_DECLARATION_LIST@391..391
+        2: R_CURLY@391..392 "}" [] []
+    16: CSS_RULE@392..415
+      0: CSS_SELECTOR_LIST@392..413
+        0: CSS_COMPOUND_SELECTOR@392..413
+          0: (empty)
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@392..413
+            0: CSS_PSEUDO_CLASS_SELECTOR@392..413
+              0: COLON@392..394 ":" [Newline("\n")] []
+              1: CSS_BOGUS_PSEUDO_CLASS@394..413
+                0: NTH_CHILD_KW@394..403 "nth-child" [] []
+                1: L_PAREN@403..404 "(" [] []
+                2: CSS_PSEUDO_CLASS_NTH_SELECTOR@404..406
+                  0: CSS_PSEUDO_CLASS_NTH_NUMBER@404..406
+                    0: (empty)
+                    1: CSS_NUMBER@404..406
+                      0: CSS_NUMBER_LITERAL@404..406 "2" [] [Whitespace(" ")]
+                  1: (empty)
+                3: CSS_BOGUS@406..411
+                  0: N_KW@406..408 "n" [] [Whitespace(" ")]
+                  1: PLUS@408..410 "+" [] [Whitespace(" ")]
+                  2: CSS_NUMBER_LITERAL@410..411 "1" [] []
+                4: R_PAREN@411..413 ")" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_LIST_BLOCK@413..415
+        0: L_CURLY@413..414 "{" [] []
+        1: CSS_DECLARATION_LIST@414..414
+        2: R_CURLY@414..415 "}" [] []
+    17: CSS_BOGUS_RULE@415..433
+      0: CSS_SELECTOR_LIST@415..433
+        0: CSS_COMPOUND_SELECTOR@415..433
+          0: (empty)
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@415..433
+            0: CSS_PSEUDO_CLASS_SELECTOR@415..433
+              0: COLON@415..417 ":" [Newline("\n")] []
+              1: CSS_BOGUS_PSEUDO_CLASS@417..433
+                0: NTH_CHILD_KW@417..426 "nth-child" [] []
+                1: L_PAREN@426..427 "(" [] []
+                2: CSS_PSEUDO_CLASS_NTH_SELECTOR@427..433
+                  0: CSS_PSEUDO_CLASS_NTH@427..433
+                    0: (empty)
+                    1: CSS_NUMBER@427..428
+                      0: CSS_NUMBER_LITERAL@427..428 "2" [] []
+                    2: N_KW@428..430 "n" [] [Whitespace(" ")]
+                    3: CSS_NTH_OFFSET@430..433
+                      0: PLUS@430..432 "+" [] [Whitespace(" ")]
+                      1: CSS_NUMBER@432..433
+                        0: CSS_NUMBER_LITERAL@432..433 "1" [] []
+                  1: (empty)
+  2: EOF@433..433 "" [] []
 
 ```
 
@@ -1485,7 +1616,7 @@ pseudo_class_function_nth.css:14:12 parse ━━━━━━━━━━━━�
   > 14 │ :nth-child(even ^.div,) {}
        │            ^^^^^^^^^^^
     15 │ :nth-child(even ^.div, {}
-    16 │ :nth-child(2n + 1
+    16 │ :nth-child(2 n) {}
   
   i Expected an even, an odd, a n, a <An+B>, or a number here.
   
@@ -1494,7 +1625,7 @@ pseudo_class_function_nth.css:14:12 parse ━━━━━━━━━━━━�
   > 14 │ :nth-child(even ^.div,) {}
        │            ^^^^^^^^^^^
     15 │ :nth-child(even ^.div, {}
-    16 │ :nth-child(2n + 1
+    16 │ :nth-child(2 n) {}
   
 pseudo_class_function_nth.css:15:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -1504,8 +1635,8 @@ pseudo_class_function_nth.css:15:12 parse ━━━━━━━━━━━━�
     14 │ :nth-child(even ^.div,) {}
   > 15 │ :nth-child(even ^.div, {}
        │            ^^^^^^^^^^^
-    16 │ :nth-child(2n + 1
-    17 │ 
+    16 │ :nth-child(2 n) {}
+    17 │ :nth-child(2 n + 1) {}
   
   i Expected an even, an odd, a n, a <An+B>, or a number here.
   
@@ -1513,8 +1644,8 @@ pseudo_class_function_nth.css:15:12 parse ━━━━━━━━━━━━�
     14 │ :nth-child(even ^.div,) {}
   > 15 │ :nth-child(even ^.div, {}
        │            ^^^^^^^^^^^
-    16 │ :nth-child(2n + 1
-    17 │ 
+    16 │ :nth-child(2 n) {}
+    17 │ :nth-child(2 n + 1) {}
   
 pseudo_class_function_nth.css:15:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -1524,26 +1655,64 @@ pseudo_class_function_nth.css:15:24 parse ━━━━━━━━━━━━�
     14 │ :nth-child(even ^.div,) {}
   > 15 │ :nth-child(even ^.div, {}
        │                        ^
-    16 │ :nth-child(2n + 1
-    17 │ 
+    16 │ :nth-child(2 n) {}
+    17 │ :nth-child(2 n + 1) {}
   
   i Remove {
   
-pseudo_class_function_nth.css:17:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+pseudo_class_function_nth.css:16:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an even, an odd, a n, a <An+B>, or a number but instead found '2 n'.
+  
+    14 │ :nth-child(even ^.div,) {}
+    15 │ :nth-child(even ^.div, {}
+  > 16 │ :nth-child(2 n) {}
+       │            ^^^
+    17 │ :nth-child(2 n + 1) {}
+    18 │ :nth-child(2n + 1
+  
+  i Expected an even, an odd, a n, a <An+B>, or a number here.
+  
+    14 │ :nth-child(even ^.div,) {}
+    15 │ :nth-child(even ^.div, {}
+  > 16 │ :nth-child(2 n) {}
+       │            ^^^
+    17 │ :nth-child(2 n + 1) {}
+    18 │ :nth-child(2n + 1
+  
+pseudo_class_function_nth.css:17:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an even, an odd, a n, a <An+B>, or a number but instead found '2 n + 1'.
+  
+    15 │ :nth-child(even ^.div, {}
+    16 │ :nth-child(2 n) {}
+  > 17 │ :nth-child(2 n + 1) {}
+       │            ^^^^^^^
+    18 │ :nth-child(2n + 1
+  
+  i Expected an even, an odd, a n, a <An+B>, or a number here.
+  
+    15 │ :nth-child(even ^.div, {}
+    16 │ :nth-child(2 n) {}
+  > 17 │ :nth-child(2 n + 1) {}
+       │            ^^^^^^^
+    18 │ :nth-child(2n + 1
+  
+pseudo_class_function_nth.css:18:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `)` but instead the file ends
   
-    15 │ :nth-child(even ^.div, {}
-    16 │ :nth-child(2n + 1
-  > 17 │ 
-       │ 
+    16 │ :nth-child(2 n) {}
+    17 │ :nth-child(2 n + 1) {}
+  > 18 │ :nth-child(2n + 1
+       │                  
   
   i the file ends here
   
-    15 │ :nth-child(even ^.div, {}
-    16 │ :nth-child(2n + 1
-  > 17 │ 
-       │ 
+    16 │ :nth-child(2 n) {}
+    17 │ :nth-child(2 n + 1) {}
+  > 18 │ :nth-child(2n + 1
+       │                  
   
 ```
 

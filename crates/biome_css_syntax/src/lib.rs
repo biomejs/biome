@@ -67,6 +67,16 @@ impl CssSyntaxKind {
     pub const fn is_non_contextual_keyword(self) -> bool {
         self.is_keyword() && !self.is_contextual_keyword()
     }
+
+    /// Returns true for all _known_ dimension units.
+    ///
+    /// Note that dimensions allow any identifier as the unit value, but only
+    /// these known units will be parsed as a `CssRegularDimension`. All others
+    /// will be parsed as `CssUnknownDimension` instead.
+    #[inline]
+    pub const fn is_known_dimension_unit(self) -> bool {
+        (self as u16) >= (EM_KW as u16) && (self as u16) <= (FR_KW as u16)
+    }
 }
 
 impl biome_rowan::SyntaxKind for CssSyntaxKind {

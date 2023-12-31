@@ -129,6 +129,11 @@ impl Rule for UseShorthandFunctionType {
         let node = ctx.query();
         let mut mutation = ctx.root().begin();
 
+        // If there are comments, it's not a single call signature.
+        if node.syntax().has_comments_direct() {
+            return None;
+        }
+
         let ts_type_member_list = node.parent::<TsTypeMemberList>()?;
 
         if let Some(interface_decl) = ts_type_member_list.parent::<TsInterfaceDeclaration>() {

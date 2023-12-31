@@ -125,12 +125,8 @@ CssRoot {
                         colon_token: COLON@56..58 ":" [] [Whitespace(" ")],
                         value: CssComponentValueList [
                             CssRegularDimension {
-                                value: CssNumber {
-                                    value_token: CSS_NUMBER_LITERAL@58..59 "1" [] [],
-                                },
-                                unit: CssIdentifier {
-                                    value_token: IDENT@59..61 "px" [] [],
-                                },
+                                value_token: CSS_NUMBER_LITERAL@58..59 "1" [] [],
+                                unit_token: IDENT@59..61 "px" [] [],
                             },
                         ],
                         important: missing (optional),
@@ -570,10 +566,8 @@ CssRoot {
             1: COLON@56..58 ":" [] [Whitespace(" ")]
             2: CSS_COMPONENT_VALUE_LIST@58..61
               0: CSS_REGULAR_DIMENSION@58..61
-                0: CSS_NUMBER@58..59
-                  0: CSS_NUMBER_LITERAL@58..59 "1" [] []
-                1: CSS_IDENTIFIER@59..61
-                  0: IDENT@59..61 "px" [] []
+                0: CSS_NUMBER_LITERAL@58..59 "1" [] []
+                1: IDENT@59..61 "px" [] []
             3: (empty)
           1: SEMICOLON@61..62 ";" [] []
         2: R_CURLY@62..64 "}" [Newline("\n")] []

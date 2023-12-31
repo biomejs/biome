@@ -944,20 +944,11 @@ impl CssParenthesizedExpressionBuilder {
         ))
     }
 }
-pub fn css_percent_dimension(value: CssNumber, unit_token: SyntaxToken) -> CssPercentDimension {
-    CssPercentDimension::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_PERCENT_DIMENSION,
-        [
-            Some(SyntaxElement::Node(value.into_syntax())),
-            Some(SyntaxElement::Token(unit_token)),
-        ],
-    ))
-}
-pub fn css_percentage(value: CssNumber, reminder_token: SyntaxToken) -> CssPercentage {
+pub fn css_percentage(value_token: SyntaxToken, reminder_token: SyntaxToken) -> CssPercentage {
     CssPercentage::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_PERCENTAGE,
         [
-            Some(SyntaxElement::Node(value.into_syntax())),
+            Some(SyntaxElement::Token(value_token)),
             Some(SyntaxElement::Token(reminder_token)),
         ],
     ))
@@ -1358,12 +1349,15 @@ pub fn css_ratio(
         ],
     ))
 }
-pub fn css_regular_dimension(value: CssNumber, unit: CssIdentifier) -> CssRegularDimension {
+pub fn css_regular_dimension(
+    value_token: SyntaxToken,
+    unit_token: SyntaxToken,
+) -> CssRegularDimension {
     CssRegularDimension::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_REGULAR_DIMENSION,
         [
-            Some(SyntaxElement::Node(value.into_syntax())),
-            Some(SyntaxElement::Node(unit.into_syntax())),
+            Some(SyntaxElement::Token(value_token)),
+            Some(SyntaxElement::Token(unit_token)),
         ],
     ))
 }
@@ -1696,6 +1690,18 @@ impl CssUniversalSelectorBuilder {
             ],
         ))
     }
+}
+pub fn css_unknown_dimension(
+    value_token: SyntaxToken,
+    unit_token: SyntaxToken,
+) -> CssUnknownDimension {
+    CssUnknownDimension::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_UNKNOWN_DIMENSION,
+        [
+            Some(SyntaxElement::Token(value_token)),
+            Some(SyntaxElement::Token(unit_token)),
+        ],
+    ))
 }
 pub fn css_url_function(
     url_token: SyntaxToken,
