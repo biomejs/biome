@@ -1042,6 +1042,28 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cd7cc57abe963c6d3b9d8be5b06ba7c8957a930305ca90304f24ef040aa6f961"
 
 [[package]]
+name = "codspeed"
+version = "2.3.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0eb4ab4dcb6554eb4f590fb16f99d3b102ab76f5f56554c9a5340518b32c499b"
+dependencies = [
+ "colored",
+ "libc",
+ "serde_json",
+]
+
+[[package]]
+name = "codspeed-criterion-compat"
+version = "2.3.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cc07a3d3f7e0c8961d0ffdee149d39b231bafdcdc3d978dc5ad790c615f55f3f"
+dependencies = [
+ "codspeed",
+ "colored",
+ "criterion 0.5.1",
+]
+
+[[package]]
 name = "colored"
 version = "2.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1262,22 +1284,6 @@ name = "deranged"
 version = "0.3.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f2696e8a945f658fd14dc3b87242e6b80cd0f36ff04ea560fa39082368847946"
-
-[[package]]
-name = "dhat"
-version = "0.3.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4f2aaf837aaf456f6706cb46386ba8dffd4013a757e36f4ea05c20dd46b209a3"
-dependencies = [
- "backtrace",
- "lazy_static",
- "mintex",
- "parking_lot",
- "rustc-hash",
- "serde",
- "serde_json",
- "thousands",
-]
 
 [[package]]
 name = "directories"
@@ -1688,15 +1694,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d897f394bad6a705d5f4104762e116a75639e470d80901eed05a860a95cb1904"
 
 [[package]]
-name = "humansize"
-version = "2.1.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6cb51c9a029ddc91b07a787f1d86b53ccfa49b0e86688c946ebe8d3555685dd7"
-dependencies = [
- "libm",
-]
-
-[[package]]
 name = "iai"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2022,16 +2019,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b275950c28b37e794e8c55d88aeb5e139d0ce23fdbbeda68f8d7174abdf9e8fa"
 dependencies = [
  "adler",
-]
-
-[[package]]
-name = "mintex"
-version = "0.1.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fd7c5ba1c3b5a23418d7bbf98c71c3d4946a0125002129231da8d6b723d559cb"
-dependencies = [
- "once_cell",
- "sys-info",
 ]
 
 [[package]]
@@ -2802,9 +2789,9 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.99"
+version = "1.0.108"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "46266871c240a00b8f503b877622fe33430b3c7d963bdc0f2adc511e54a1eae3"
+checksum = "3d1c7e3eac408d115102c4c24ad393e0821bb3a5df4d506a80f85f7a742a526b"
 dependencies = [
  "itoa",
  "ryu",
@@ -2961,16 +2948,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "sys-info"
-version = "0.9.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0b3a0d0aba8bf96a0e1ddfdc352fc53b3df7f39318c71854910c3c4b024ae52c"
-dependencies = [
- "cc",
- "libc",
-]
-
-[[package]]
 name = "tempfile"
 version = "3.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3029,12 +3006,6 @@ dependencies = [
  "quote",
  "syn 2.0.38",
 ]
-
-[[package]]
-name = "thousands"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3bf63baf9f5039dadc247375c29eb13706706cfde997d0330d05aa63a77d8820"
 
 [[package]]
 name = "thread_local"
@@ -3798,10 +3769,9 @@ dependencies = [
  "biome_json_syntax",
  "biome_parser",
  "biome_rowan",
+ "codspeed-criterion-compat",
  "countme",
  "criterion 0.5.1",
- "dhat",
- "humansize",
  "mimalloc",
  "regex",
  "tikv-jemallocator",
