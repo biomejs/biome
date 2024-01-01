@@ -258,7 +258,7 @@ mod tests {
             closure_index: Some(0),
             dependencies_index: Some(1),
         };
-        let rule_filter = RuleFilter::Rule("nursery", "useNodeImportProtocol");
+        let rule_filter = RuleFilter::Rule("nursery", "useNodejsImportProtocol");
         options.configuration.rules.push_rule(
             RuleKey::new("nursery", "useHookAtTopLevel"),
             RuleOptions::new(HooksOptions { hooks: vec![hook] }),

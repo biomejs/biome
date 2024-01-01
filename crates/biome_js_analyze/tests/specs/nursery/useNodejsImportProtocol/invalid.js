@@ -56,3 +56,10 @@ import zlib from "zlib";
 // check for require and import
 require("fs");
 import("fs");
+
+// Use same quote style
+import assert from "assert";
+import assert from 'assert';
+
+// Keep comments
+import assert from /*0*/ "assert" /*b*/;

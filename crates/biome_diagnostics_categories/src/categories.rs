@@ -120,7 +120,7 @@ define_categories! {
     "lint/nursery/useForOf": "https://biomejs.dev/linter/rules/use-for-of",
     "lint/nursery/useGroupedTypeImport": "https://biomejs.dev/linter/rules/use-grouped-type-import",
     "lint/nursery/useImportRestrictions": "https://biomejs.dev/linter/rules/use-import-restrictions",
-    "lint/nursery/useNodeImportProtocol": "https://biomejs.dev/linter/rules/use-node-import-protocol",
+    "lint/nursery/useNodejsImportProtocol": "https://biomejs.dev/linter/rules/use-nodejs-import-protocol",
     "lint/nursery/useNumberProperties": "https://biomejs.dev/linter/rules/use-number-properties",
     "lint/nursery/useRegexLiterals": "https://biomejs.dev/linter/rules/use-regex-literals",
     "lint/nursery/useShorthandFunctionType": "https://biomejs.dev/linter/rules/use-shorthand-function-type",
