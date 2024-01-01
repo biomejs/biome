@@ -4,11 +4,14 @@ use biome_deserialize::{
 };
 use biome_rowan::TextRange;
 
+/// Attributes that are always targets.
 const CLASS_ATTRIBUTES: [&str; 2] = ["class", "className"];
 
 #[derive(Debug, Clone)]
 pub struct UseSortedClassesOptions {
+    /// Additional attribute targets specified by the user.
     pub attributes: Vec<String>,
+    /// Function targets specified by the user.
     pub functions: Vec<String>,
 }
 

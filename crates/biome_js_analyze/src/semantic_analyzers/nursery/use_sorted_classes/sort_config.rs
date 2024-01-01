@@ -1,5 +1,9 @@
-// The following structures define the data required to compute the information about
-// CSS classes that is later used to compare them and sort them.
+// The following structures define the config required to compute sort-related information about
+// CSS classes (`ClassInfo`) that is later used to compare and sort them. A sort config includes:
+// - The list of layers, in order.
+// - The list of utilities, in order, for each layer.
+// - The list of variants, in order of importance (which is used to compute the variants weight).
+// - Other options, such as prefix and separator.
 
 use std::collections::HashMap;
 

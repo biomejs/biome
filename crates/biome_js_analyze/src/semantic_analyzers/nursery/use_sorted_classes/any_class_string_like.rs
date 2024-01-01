@@ -38,12 +38,12 @@ fn get_callee_name(call_expression: &JsCallExpression) -> Option<String> {
     )
 }
 
-fn is_call_expression_of_valid_function(
+fn is_call_expression_of_target_function(
     call_expression: &JsCallExpression,
-    functions: &[String],
+    target_functions: &[String],
 ) -> bool {
     match get_callee_name(call_expression) {
-        Some(name) => functions.contains(&name.to_string()),
+        Some(name) => target_functions.contains(&name.to_string()),
         None => false,
     }
 }
@@ -52,9 +52,9 @@ fn get_attribute_name(attribute: &JsxAttribute) -> Option<String> {
     Some(attribute.name().ok()?.as_jsx_name()?.to_string())
 }
 
-fn is_valid_attribute(attribute: &JsxAttribute, attributes: &[String]) -> bool {
+fn is_target_attribute(attribute: &JsxAttribute, target_attributes: &[String]) -> bool {
     match get_attribute_name(attribute) {
-        Some(name) => attributes.contains(&name.to_string()),
+        Some(name) => target_attributes.contains(&name.to_string()),
         None => false,
     }
 }
@@ -64,12 +64,12 @@ fn is_valid_attribute(attribute: &JsxAttribute, attributes: &[String]) -> bool {
 
 #[derive(Default)]
 struct StringLiteralInAttributeVisitor {
-    in_valid_attribute: bool,
+    in_target_attribute: bool,
 }
 
+// Finds class-like strings in JSX attributes, including class, className, and others defined in the options.
 impl Visitor for StringLiteralInAttributeVisitor {
     type Language = JsLanguage;
-
     fn visit(
         &mut self,
         event: &WalkEvent<SyntaxNode<Self::Language>>,
@@ -78,21 +78,21 @@ impl Visitor for StringLiteralInAttributeVisitor {
         let options = get_options_from_analyzer(ctx.options);
         match event {
             WalkEvent::Enter(node) => {
-                // When entering an attribute node, track if we are in a valid attribute.
+                // When entering an attribute node, track if we are in a target attribute.
                 if let Some(attribute) = JsxAttribute::cast_ref(node) {
-                    self.in_valid_attribute = is_valid_attribute(&attribute, &options.attributes);
+                    self.in_target_attribute = is_target_attribute(&attribute, &options.attributes);
                 }
 
-                // When entering a JSX string node, and we are in a valid attribute, emit.
+                // When entering a JSX string node, and we are in a target attribute, emit.
                 if let Some(jsx_string) = JsxString::cast_ref(node) {
-                    if self.in_valid_attribute {
+                    if self.in_target_attribute {
                         ctx.match_query(AnyClassStringLike::JsxString(jsx_string));
                     }
                 }
 
-                // When entering a string literal node, and we are in a valid attribute, emit.
+                // When entering a string literal node, and we are in a target attribute, emit.
                 if let Some(string_literal) = JsStringLiteralExpression::cast_ref(node) {
-                    if self.in_valid_attribute {
+                    if self.in_target_attribute {
                         ctx.match_query(AnyClassStringLike::JsStringLiteralExpression(
                             string_literal,
                         ));
@@ -100,9 +100,9 @@ impl Visitor for StringLiteralInAttributeVisitor {
                 }
             }
             WalkEvent::Leave(node) => {
-                // When leaving an attribute node, reset in_valid_attribute.
+                // When leaving an attribute node, reset in_target_attribute.
                 if JsxAttribute::cast_ref(node).is_some() {
-                    self.in_valid_attribute = false;
+                    self.in_target_attribute = false;
                 }
             }
         }
@@ -114,10 +114,11 @@ impl Visitor for StringLiteralInAttributeVisitor {
 
 #[derive(Default)]
 struct StringLiteralInCallExpressionVisitor {
-    in_valid_function: bool,
+    in_target_function: bool,
     in_arguments: bool,
 }
 
+// Finds class-like strings inside function calls defined in the options, e.g. clsx(classes).
 impl Visitor for StringLiteralInCallExpressionVisitor {
     type Language = JsLanguage;
 
@@ -132,11 +133,11 @@ impl Visitor for StringLiteralInCallExpressionVisitor {
         }
         match event {
             WalkEvent::Enter(node) => {
-                // When entering a call expression node, track if we are in a valid function and reset
+                // When entering a call expression node, track if we are in a target function and reset
                 // in_arguments.
                 if let Some(call_expression) = JsCallExpression::cast_ref(node) {
-                    self.in_valid_function =
-                        is_call_expression_of_valid_function(&call_expression, &options.functions);
+                    self.in_target_function =
+                        is_call_expression_of_target_function(&call_expression, &options.functions);
                     self.in_arguments = false;
                 }
 
@@ -145,9 +146,9 @@ impl Visitor for StringLiteralInCallExpressionVisitor {
                     self.in_arguments = true;
                 }
 
-                // When entering a string literal node, and we are in a valid function and in arguments, emit.
+                // When entering a string literal node, and we are in a target function and in arguments, emit.
                 if let Some(string_literal) = JsStringLiteralExpression::cast_ref(node) {
-                    if self.in_valid_function && self.in_arguments {
+                    if self.in_target_function && self.in_arguments {
                         ctx.match_query(AnyClassStringLike::JsStringLiteralExpression(
                             string_literal,
                         ));
@@ -167,16 +168,19 @@ impl Visitor for StringLiteralInCallExpressionVisitor {
 // functions (template chunk) visitor
 // ----------------------------------
 
+// Finds class-like template chunks in tagged template calls defined in the options, e.g. tw`classes`.
 // TODO: template chunk visitor
 
 // query
 // -----
 
 declare_node_union! {
+    /// A string literal, JSX string, or template chunk representing a CSS class string.
     pub AnyClassStringLike = JsStringLiteralExpression | JsxString | JsTemplateChunkElement
 }
 
 impl AnyClassStringLike {
+    /// Returns the value of the string literal, JSX string, or template chunk.
     pub fn value(&self) -> Option<String> {
         match self {
             AnyClassStringLike::JsStringLiteralExpression(string_literal) => {

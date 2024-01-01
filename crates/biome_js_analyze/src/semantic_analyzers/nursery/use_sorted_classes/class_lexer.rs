@@ -1,3 +1,13 @@
+// CSS utility classes need to be lexed into segments, which represent the variants and the utility,
+// and whether they are arbitrary or not. Some examples:
+// - `px-2`: utility `px-2`.
+// - `hover:px-2`: variant `hover`, utility `px-2`.
+// - `sm:hover:px-2`: variant `sm`, variant `hover`, utility `px-2`.
+// - `hover:[mask:circle]`: variant `hover`, utility `[mask:circle]` (arbitrary).
+// - `[&:nth-child(3)]:px-2`: variant `[&:nth-child(3)]` (arbitrary), utility `px-2`.
+// The results of the lexer are then used to process classes into `ClassInfo` structs, which are, in
+// turn, used to sort the classes.
+
 /// Splits a string into segments based on a list of indexes. The characters at the indexes are not
 /// included in the segments, as they are considered delimiters.
 fn split_at_indexes<'a>(s: &'a str, indexes: &[usize]) -> Vec<&'a str> {
@@ -22,6 +32,8 @@ fn split_at_indexes<'a>(s: &'a str, indexes: &[usize]) -> Vec<&'a str> {
 
     segments
 }
+
+// TODO: unit tests.
 
 #[derive(Debug, Clone, PartialEq)]
 enum Quote {
@@ -62,18 +74,17 @@ pub struct ClassStructure {
     pub utility: ClassSegmentStructure,
 }
 
-/// Parses a CSS class into a class structure, containing a list of variants and the
+/// Processes a CSS class into a class structure, containing a list of variants and the
 /// utility itself.
-pub fn parse_class(class_name: &str) -> ClassStructure {
-    // state
+pub fn tokenize_class(class_name: &str) -> ClassStructure {
+    // TODO: add custom separator argument (currently hardcoded to `:`).
     let mut arbitrary_block_depth = 0;
     let mut at_arbitrary_block_start = false;
     let mut quoted_arbitrary_block_type: Option<Quote> = None;
     let mut last_char = CharKind::Other;
     let mut delimiter_indexes: Vec<usize> = Vec::new();
 
-    // loop
-    for (index, c) in class_name.chars().enumerate() {
+    for (index, c) in class_name.char_indices() {
         let mut next_last_char = CharKind::Other;
         let mut is_start_of_arbitrary_block = false;
         match c {
@@ -89,10 +100,6 @@ pub fn parse_class(class_name: &str) -> ClassStructure {
             '\'' | '"' | '`' => {
                 if at_arbitrary_block_start {
                     quoted_arbitrary_block_type = Quote::from_char(c);
-                    if quoted_arbitrary_block_type.is_none() {
-                        // Sanity check.
-                        panic!("TODO: error message (this should never happen)");
-                    }
                 } else if let CharKind::Backslash = last_char {
                     // Escaped, ignore.
                 } else {
@@ -158,3 +165,5 @@ pub fn parse_class(class_name: &str) -> ClassStructure {
 
     ClassStructure { variants, utility }
 }
+
+// TODO: unit tests.

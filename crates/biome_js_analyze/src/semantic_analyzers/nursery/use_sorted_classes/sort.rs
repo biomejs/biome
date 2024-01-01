@@ -5,9 +5,6 @@ use super::{
     sort_config::SortConfig,
 };
 
-// sort
-// ----
-
 impl ClassInfo {
     /// Compare based on the existence of variants. Classes with variants go last.
     /// Returns `None` if both or none of the classes has variants.
@@ -53,7 +50,7 @@ impl ClassInfo {
 }
 
 // See: https://github.com/tailwindlabs/tailwindcss/blob/970f2ca704dda95cf328addfe67b81d6679c8755/src/lib/offsets.js#L206
-// This comparison function follows a similar logic to the one in Tailwind CSS, with some
+// This comparison function follows a very similar logic to the one in Tailwind CSS, with some
 // simplifications and necessary differences.
 fn compare_classes(a: &ClassInfo, b: &ClassInfo) -> Ordering {
     // Classes with variants go last.
@@ -118,3 +115,5 @@ pub fn sort_class_name(class_name: &str, sort_config: &SortConfig) -> String {
     // Join the classes back into a string.
     sorted_classes.join(" ")
 }
+
+// TODO: unit tests.

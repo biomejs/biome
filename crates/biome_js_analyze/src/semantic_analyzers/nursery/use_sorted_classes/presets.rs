@@ -1,4 +1,5 @@
-// Presets contain pre-defined sort configurations, notably from Tailwind CSS.
+// Presets contain pre-defined sort configurations, notably from Tailwind CSS. They are a
+// starting point that can be extended (e.g. by adding custom utilities or variants).
 
 use super::sort_config::{UtilitiesConfig, UtilityLayer};
 
@@ -6,7 +7,7 @@ use super::sort_config::{UtilitiesConfig, UtilityLayer};
 pub enum UseSortedClassesPreset {
     None,
     #[default]
-    TailwindCSS,
+    TailwindCSS, // TODO: should this be the default?
 }
 
 pub fn get_utilities_preset(preset: &UseSortedClassesPreset) -> UtilitiesConfig {
@@ -15,7 +16,7 @@ pub fn get_utilities_preset(preset: &UseSortedClassesPreset) -> UtilitiesConfig 
             vec![]
         }
         UseSortedClassesPreset::TailwindCSS => {
-            // TAILWIND-PRESET-START
+            // TAILWIND-UTILITIES-PRESET-START
             vec![
                 UtilityLayer {
                     name: String::from("components"),
@@ -594,7 +595,7 @@ pub fn get_utilities_preset(preset: &UseSortedClassesPreset) -> UtilitiesConfig 
                     ],
                 },
             ]
-            // TAILWIND-PRESET-END
+            // TAILWIND-UTILITIES-PRESET-END
         }
     }
 }

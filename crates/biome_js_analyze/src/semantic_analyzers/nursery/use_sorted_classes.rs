@@ -1,6 +1,6 @@
+mod any_class_string_like;
 mod class_info;
-mod class_like_visitor;
-mod class_parser;
+mod class_lexer;
 mod options;
 mod presets;
 mod sort;
@@ -18,14 +18,11 @@ use crate::JsRuleAction;
 
 pub use self::options::UseSortedClassesOptions;
 use self::{
-    class_like_visitor::AnyClassStringLike,
+    any_class_string_like::AnyClassStringLike,
     presets::{get_utilities_preset, UseSortedClassesPreset},
     sort::sort_class_name,
     sort_config::SortConfig,
 };
-
-// rule metadata
-// -------------
 
 declare_rule! {
     /// Enforce the sorting of CSS classes.
@@ -54,9 +51,6 @@ declare_rule! {
     }
 }
 
-// rule
-// ----
-
 impl Rule for UseSortedClasses {
     type Query = Ast<AnyClassStringLike>;
     type State = String;
@@ -64,7 +58,6 @@ impl Rule for UseSortedClasses {
     type Options = UseSortedClassesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
-        let value = ctx.query().value()?;
         // TODO: unsure if options are needed here. The sort config should ideally be created once
         // from the options and then reused for all queries.
         // let options = &ctx.options();
@@ -74,6 +67,8 @@ impl Rule for UseSortedClasses {
             get_utilities_preset(&UseSortedClassesPreset::default()),
             Vec::new(),
         );
+
+        let value = ctx.query().value()?;
         let sorted_value = sort_class_name(value.as_str(), &sort_config);
         if value != sorted_value {
             Some(sorted_value)
