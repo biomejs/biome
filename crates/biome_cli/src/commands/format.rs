@@ -1,24 +1,28 @@
+use crate::changed::get_changed_files;
 use crate::cli_options::CliOptions;
-use crate::configuration::{load_configuration, LoadedConfiguration};
+use crate::commands::validate_configuration_diagnostics;
 use crate::diagnostics::DeprecatedArgument;
 use crate::execute::ReportMode;
-use crate::vcs::store_path_to_ignore_from_vcs;
 use crate::{
     execute_mode, setup_cli_subscriber, CliDiagnostic, CliSession, Execution, TraversalMode,
 };
 use biome_console::{markup, ConsoleExt};
 use biome_diagnostics::PrintDiagnostic;
+use biome_service::configuration::css::CssFormatter;
 use biome_service::configuration::json::JsonFormatter;
 use biome_service::configuration::vcs::VcsConfiguration;
-use biome_service::configuration::{FilesConfiguration, FormatterConfiguration};
+use biome_service::configuration::{
+    load_configuration, FilesConfiguration, FormatterConfiguration, LoadedConfiguration,
+};
 use biome_service::workspace::UpdateSettingsParams;
-use biome_service::{JavascriptFormatter, MergeWith};
+use biome_service::{ConfigurationBasePath, JavascriptFormatter, MergeWith};
 use std::ffi::OsString;
 use std::path::PathBuf;
 
 pub(crate) struct FormatCommandPayload {
     pub(crate) javascript_formatter: Option<JavascriptFormatter>,
     pub(crate) json_formatter: Option<JsonFormatter>,
+    pub(crate) css_formatter: Option<CssFormatter>,
     pub(crate) formatter_configuration: Option<FormatterConfiguration>,
     pub(crate) vcs_configuration: Option<VcsConfiguration>,
     pub(crate) files_configuration: Option<FilesConfiguration>,
@@ -26,6 +30,8 @@ pub(crate) struct FormatCommandPayload {
     pub(crate) write: bool,
     pub(crate) cli_options: CliOptions,
     pub(crate) paths: Vec<OsString>,
+    pub(crate) changed: bool,
+    pub(crate) since: Option<String>,
 }
 
 /// Handler for the "format" command of the Biome CLI
@@ -37,19 +43,29 @@ pub(crate) fn format(
         javascript_formatter,
         formatter_configuration,
         vcs_configuration,
-        paths,
+        mut paths,
         cli_options,
         stdin_file_path,
         files_configuration,
         write,
         json_formatter,
+        css_formatter,
+        since,
+        changed,
     } = payload;
     setup_cli_subscriber(cli_options.log_level.clone(), cli_options.log_kind.clone());
 
-    let loaded_configuration = load_configuration(&mut session, &cli_options)?.with_file_path();
+    let base_path = match cli_options.config_path.as_ref() {
+        None => ConfigurationBasePath::default(),
+        Some(path) => ConfigurationBasePath::FromUser(PathBuf::from(path)),
+    };
 
-    loaded_configuration.check_for_errors(session.app.console, cli_options.verbose)?;
-
+    let loaded_configuration = load_configuration(&session.app.fs, base_path)?;
+    validate_configuration_diagnostics(
+        &loaded_configuration,
+        session.app.console,
+        cli_options.verbose,
+    )?;
     let LoadedConfiguration {
         mut configuration,
         directory_path: configuration_path,
@@ -94,25 +110,48 @@ pub(crate) fn format(
             {PrintDiagnostic::simple(&diagnostic)}
         })
     }
+    // TODO: remove in biome 2.0
+    if css_formatter
+        .as_ref()
+        .is_some_and(|f| f.indent_size.is_some())
+    {
+        let console = &mut session.app.console;
+        let diagnostic = DeprecatedArgument::new(markup! {
+            "The argument "<Emphasis>"--css-formatter-indent-size"</Emphasis>" is deprecated, it will be removed in the next major release. Use "<Emphasis>"--css-formatter-indent-width"</Emphasis>" instead."
+        });
+        console.error(markup! {
+            {PrintDiagnostic::simple(&diagnostic)}
+        })
+    }
 
     configuration.merge_with(javascript_formatter);
     configuration.merge_with(json_formatter);
+    configuration.merge_with(css_formatter);
     configuration.merge_with(formatter_configuration);
     configuration.merge_with(vcs_configuration);
     configuration.merge_with(files_configuration);
 
     // check if support of git ignore files is enabled
     let vcs_base_path = configuration_path.or(session.app.fs.working_directory());
-    store_path_to_ignore_from_vcs(
-        &mut session,
-        &mut configuration,
-        vcs_base_path,
-        &cli_options,
-    )?;
+    let (vcs_base_path, gitignore_matches) =
+        configuration.retrieve_gitignore_matches(&session.app.fs, vcs_base_path.as_deref())?;
+
+    if since.is_some() && !changed {
+        return Err(CliDiagnostic::incompatible_arguments("since", "changed"));
+    }
+
+    if changed {
+        paths = get_changed_files(&session.app.fs, &configuration, since)?;
+    }
+
     session
         .app
         .workspace
-        .update_settings(UpdateSettingsParams { configuration })?;
+        .update_settings(UpdateSettingsParams {
+            configuration,
+            vcs_base_path,
+            gitignore_matches,
+        })?;
 
     let stdin = if let Some(stdin_file_path) = stdin_file_path {
         let console = &mut session.app.console;

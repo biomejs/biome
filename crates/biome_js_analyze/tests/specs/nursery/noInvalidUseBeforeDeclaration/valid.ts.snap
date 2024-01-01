@@ -1,0 +1,24 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.ts
+---
+# Input
+```js
+
+let i: I;
+interface I {}
+
+let t: T;
+type T = T[] | null;
+
+let e: E;
+enum E {}
+
+let n = N.X;
+namespace N {
+    export const X = 0;
+}
+
+```
+
+

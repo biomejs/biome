@@ -146,7 +146,46 @@ impl Format<JsFormatContext> for FormatTypeVariant<'_> {
             write!(f, [align(2, &format_node)])?;
         }
 
-        if !is_suppressed {
+        // There are a few special cases for nodes which handle their own
+        // dangling comments:
+        // - Mapped types place the dangling comments as _leading_ comments for
+        // the type:
+        //     {
+        //       // This is a dangling comment, formatted as a leading comment
+        //       [foo in keyof Foo]: T
+        //     }
+        // - Other object like types format their own comments _only when there
+        // are no members in the type_:
+        //     {
+        //       // This is a dangling comment, formatted inside JsObjectLike
+        //     }
+        // - Empty tuple types also format their own dangling comments
+        //     [
+        //       // This is a dangling comment, formatted inside TsTupleType
+        //     ]
+        // Attempting to format any of these dangling comments again results
+        // in double printing, and often invalid syntax, such as:
+        //     const t: {
+        //       // Hello
+        //       [foo in keyof Foo]: T
+        //     } = 1;
+        // Would get formatted to:
+        //     const t: {
+        //       // Hello
+        //       [foo in keyof Foo]: T
+        //     }// Hello = 1;
+        // This check prevents that double printing from happening. There may
+        // be a better place for it in the long term (maybe just always ensure
+        // that a comment hasn't already been formatted before writing it?),
+        // but this covers the majority of these cases already.
+        let has_already_formatted_dangling_comments = match node {
+            AnyTsType::TsMappedType(_) => true,
+            AnyTsType::TsObjectType(object) => object.members().is_empty(),
+            AnyTsType::TsTupleType(tuple) => tuple.elements().is_empty(),
+            _ => false,
+        };
+
+        if !is_suppressed && has_already_formatted_dangling_comments {
             write!(f, [format_dangling_comments(node.syntax())])?;
         }
 

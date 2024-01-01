@@ -23,7 +23,9 @@ In contrast, using a for loop or a `for...of` loop can make the code more explic
 
 - Debugging: `forEach` can make debugging more difficult, because it hides the iteration process.
 
+## Caveat
 
+We consider all objects with a method named `forEach` to be iterable. This way, this rule applies to all objects with a method called `forEach`, not just `Array`.
 
 ## Examples
 

@@ -4,14 +4,13 @@ use crate::{
     JsClassExportDefaultDeclaration, JsClassExpression, JsConstructorClassMember,
     JsConstructorParameterList, JsConstructorParameters, JsDefaultImportSpecifier, JsExport,
     JsFormalParameter, JsFunctionDeclaration, JsFunctionExportDefaultDeclaration,
-    JsFunctionExpression, JsIdentifierBinding, JsImportDefaultClause, JsImportNamespaceClause,
-    JsMethodClassMember, JsMethodObjectMember, JsNamedImportSpecifier, JsNamespaceImportSpecifier,
-    JsParameterList, JsParameters, JsRestParameter, JsSetterClassMember, JsSetterObjectMember,
-    JsShorthandNamedImportSpecifier, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken,
-    JsVariableDeclarator, TsCallSignatureTypeMember, TsConstructSignatureTypeMember,
-    TsConstructorSignatureClassMember, TsConstructorType, TsDeclareFunctionDeclaration,
-    TsDeclareFunctionExportDefaultDeclaration, TsEnumDeclaration, TsFunctionType,
-    TsIdentifierBinding, TsImportEqualsDeclaration, TsIndexSignatureClassMember,
+    JsFunctionExpression, JsIdentifierBinding, JsMethodClassMember, JsMethodObjectMember,
+    JsNamedImportSpecifier, JsNamespaceImportSpecifier, JsParameterList, JsParameters,
+    JsRestParameter, JsSetterClassMember, JsSetterObjectMember, JsShorthandNamedImportSpecifier,
+    JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, JsVariableDeclarator, TsCallSignatureTypeMember,
+    TsConstructSignatureTypeMember, TsConstructorSignatureClassMember, TsConstructorType,
+    TsDeclareFunctionDeclaration, TsDeclareFunctionExportDefaultDeclaration, TsEnumDeclaration,
+    TsFunctionType, TsIdentifierBinding, TsImportEqualsDeclaration, TsIndexSignatureClassMember,
     TsIndexSignatureParameter, TsInferType, TsInterfaceDeclaration, TsMappedType,
     TsMethodSignatureClassMember, TsMethodSignatureTypeMember, TsModuleDeclaration,
     TsPropertyParameter, TsSetterSignatureClassMember, TsSetterSignatureTypeMember,
@@ -35,7 +34,7 @@ declare_node_union! {
             | JsClassDeclaration | JsClassExpression
             | TsInterfaceDeclaration | TsTypeAliasDeclaration | TsEnumDeclaration | TsModuleDeclaration
         // import
-            | JsImportDefaultClause | JsImportNamespaceClause | JsShorthandNamedImportSpecifier
+            | JsShorthandNamedImportSpecifier
                 | JsNamedImportSpecifier | JsBogusNamedImportSpecifier | JsDefaultImportSpecifier
                 | JsNamespaceImportSpecifier
             | TsImportEqualsDeclaration
@@ -298,7 +297,11 @@ impl AnyJsIdentifierBinding {
                 if let Some(specifier) = binding.parent::<AnyJsNamedImportSpecifier>() {
                     return specifier.imports_only_types();
                 }
-                if let Some(clause) = binding.parent::<AnyJsImportClause>() {
+                if let Some(clause) = binding
+                    .syntax()
+                    .grand_parent()
+                    .and_then(AnyJsImportClause::cast)
+                {
                     return clause.type_token().is_some();
                 }
             }

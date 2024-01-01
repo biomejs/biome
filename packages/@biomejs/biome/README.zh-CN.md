@@ -25,15 +25,19 @@
 
 </div>
 
-**Biome** 是一个用于网络项目的高性能工具链，旨在为开发者提供维护这些项目的工具。
+<div align="center">
 
-**Biome 是一个[快速的格式化器](./benchmark#formatting)**，适用于 _JavaScript_、_TypeScript_、_JSX_ 和 _JSON_，与 _Prettier_ 的兼容性达到了 **[96%](https://console.algora.io/challenges/prettier)**。
+[English](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.md) | 简体中文 | [日本語](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.ja.md) | [Português do Brasil](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.pt-br.md)
 
-**Biome 是一个[高性能的 linter](https://github.com/biomejs/biome/tree/main/benchmark#linting)**，适用于 _JavaScript_、_TypeScript_ 和 _JSX_，包含了来自 ESLint、TypeSCript ESLint 和 [其他来源](https://github.com/biomejs/biome/discussions/3)的 **[超过 170 条规则](https://biomejs.dev/zh-cn/linter/rules/)**。
-它**输出详细且有上下文的诊断信息**，帮助你改进代码，成为一个更好的程序员！
+</div>
 
-**Biome** 从一开始就设计为[在编辑器中交互式使用](https://biomejs.dev/zh-cn/guides/integrate-in-editor/)。
-你在编写代码时，它可以格式化和 lint 不规范的代码。
+**Biome** 是一个用于 Web 项目的高性能工具链，旨在为开发者提供维护项目的工具。
+
+**Biome 是一个[快速的格式化工具](./benchmark#formatting)**，适用于 _JavaScript_、_TypeScript_、_JSX_、_JSON_ 等，与 _Prettier_ 的兼容性达到了 **[97%](https://console.algora.io/challenges/prettier)**。
+
+**Biome 是一个[高性能的 Linter](https://github.com/biomejs/biome/tree/main/benchmark#linting)**，适用于 _JavaScript_、_TypeScript_、_JSX_ 等，包含了来自 ESLint、TypeScript ESLint 和[其他来源](https://github.com/biomejs/biome/discussions/3)的 **[170 余项规则](https://biomejs.dev/zh-cn/linter/rules/)**。它**输出详细且有上下文诊断信息**，能帮助你优化代码，成为一名更好的程序员！
+
+**Biome** 从一开始就设计为[在编辑器中交互式使用](https://biomejs.dev/zh-cn/guides/integrate-in-editor/)。它可以在你编写代码时格式化并检查出不规范的代码。
 
 ### 安装
 
@@ -47,13 +51,13 @@ npm install --save-dev --save-exact @biomejs/biome
 # 格式化文件
 npx @biomejs/biome format --write ./src
 
-# lint 文件
+# Lint 文件
 npx @biomejs/biome lint ./src
 
-# 运行格式化，lint 等，并应用安全的建议
+# 运行格式化，Lint 等，并应用安全的建议
 npx @biomejs/biome check --apply ./src
 
-# 在 CI 环境中检查所有文件是否符合格式，lint 等
+# 在 CI 环境中检查所有文件是否符合格式，Lint 等
 npx @biomejs/biome ci ./src
 ```
 
@@ -61,16 +65,15 @@ npx @biomejs/biome ci ./src
 
 ## 文档
 
-查看我们的[主页][biomejs]以了解更多关于 Biome 的信息，
-或者直接前往[入门指南][getting-started]开始使用 Biome。
+查看我们的[主页][biomejs]以了解更多关于 Biome 的信息，或者直接前往[入门指南][getting-started]开始使用 Biome。
 
-## 更多关于 Biome
+## 更多信息
 
 **Biome** 有合理的默认设置，不需要配置。
 
 **Biome** 旨在支持[所有主要的现代网络开发语言][language-support]。
 
-**Biome** [不需要 Node.js](https://biomejs.dev/zh-cn/guides/manual-installation/)就可以运行。
+**Biome** [不需要 Node.js](https://biomejs.dev/zh-cn/guides/manual-installation/) 就可以运行。
 
 **Biome** 有一流的 LSP 支持，具有精密的解析器，可以完全保真地表示源文本，并具有顶级的错误恢复能力。
 
@@ -105,11 +108,6 @@ npx @biomejs/biome ci ./src
     </tr>
   </tbody>
 </table>
-
-## 翻译
-
-- [English](./README.md)
-- 简体中文
 
 [biomejs]: https://biomejs.dev/zh-cn/
 [biome-philosophy]: https://biomejs.dev/zh-cn/internals/philosophy/

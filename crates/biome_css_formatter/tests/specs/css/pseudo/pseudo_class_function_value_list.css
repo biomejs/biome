@@ -1,0 +1,13 @@
+:lang(de, fr) {}
+:lang(
+    de,
+    
+    fr
+    ) {}
+
+:lang(
+    de
+    ) {}
+:lang(
+    de, fr, en, es, hi, pt
+) {}

@@ -1,0 +1,44 @@
+name: 📚 Documentation issue
+description: Report a possible issue in the documentation
+title: "📚 <TITLE>"
+labels: ["S-To triage", "A-Documentation"]
+body:
+  - type: markdown
+    attributes:
+      value: Thank you for submitting this issue! We'll try to triage it ASAP!
+  - type: markdown
+    attributes:
+      value: |
+        Documentation issue reports that don't follow this template will be closed.
+        Please provide a clear and concise description of what the issue is.
+  - type: input
+    id: url
+    attributes:
+      label: Documentation URL
+      description: Provide the URL of the documentation page where you found the issue.
+      placeholder: https://biomejs.dev/guides/getting-started/
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: |
+        Provide a detailed description of the issue.
+    validations:
+      required: true
+  - type: textarea
+    id: expectations
+    attributes:
+      label: Expectations
+      description: Describe what you expected to see.
+    validations:
+      required: true
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Code of Conduct
+      description: By submitting this issue, you agree to follow our [Code of Conduct](https://github.com/biomejs/biome/blob/main/CODE_OF_CONDUCT.md)
+      options:
+        - label: I agree to follow Biome's Code of Conduct
+          required: true

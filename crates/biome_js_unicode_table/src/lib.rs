@@ -6,15 +6,27 @@ mod tables;
 
 pub use crate::bytes::Dispatch;
 
-/// Tests if `c` is a valid start of an identifier
+/// Tests if `c` is a valid start of a CSS identifier
 #[inline]
-pub fn is_id_start(c: char) -> bool {
+pub fn is_css_id_start(c: char) -> bool {
     c == '_' || c == '$' || ID_Start(c)
 }
 
-/// Tests if `c` is a valid continuation of an identifier.
+/// Tests if `c` is a valid continuation of a CSS identifier.
 #[inline]
-pub fn is_id_continue(c: char) -> bool {
+pub fn is_css_id_continue(c: char) -> bool {
+    c == '\u{200d}' || c == '\u{200c}' || ID_Continue(c)
+}
+
+/// Tests if `c` is a valid start of a js identifier
+#[inline]
+pub fn is_js_id_start(c: char) -> bool {
+    c == '_' || c == '$' || ID_Start(c)
+}
+
+/// Tests if `c` is a valid continuation of a js identifier.
+#[inline]
+pub fn is_js_id_continue(c: char) -> bool {
     c == '$' || c == '\u{200d}' || c == '\u{200c}' || ID_Continue(c)
 }
 
@@ -40,9 +52,9 @@ pub fn is_js_ident(s: &str) -> bool {
     }
     s.chars().enumerate().all(|(index, c)| {
         if index == 0 {
-            is_id_start(c)
+            is_js_id_start(c)
         } else {
-            is_id_continue(c)
+            is_js_id_continue(c)
         }
     })
 }

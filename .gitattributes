@@ -20,3 +20,5 @@ crates/biome_js_formatter/tests/**/*.ts.snap linguist-language=Markdown
 crates/biome_js_formatter/tests/**/*.js.snap linguist-language=Markdown
 crates/biome_cli/tests/**/*.snap linguist-language=Markdown
 crates/biome_js_analyze/tests/specs/**/*.snap linguist-language=Markdown
+crates/biome_css_formatter/tests/**/*.css.prettier-snap linguist-language=CSS
+crates/biome_css_formatter/tests/**/*.css.snap linguist-language=Markdown

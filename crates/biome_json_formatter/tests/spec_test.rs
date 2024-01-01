@@ -9,7 +9,7 @@ mod language {
 /// [insta.rs](https://insta.rs/docs) snapshot testing
 ///
 /// For better development workflow, run
-/// `cargo watch -i '*.new' -x 'test -p biome_js_formatter formatter'`
+/// `cargo watch -i '*.new' -x 'test -p biome_json_formatter formatter'`
 ///
 /// To review and commit the snapshots, `cargo install cargo-insta`, and run
 /// `cargo insta review` or `cargo insta accept`

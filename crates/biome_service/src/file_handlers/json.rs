@@ -1,6 +1,5 @@
 use super::{ExtensionHandler, Mime};
 use crate::configuration::to_analyzer_rules;
-use crate::file_handlers::javascript::JsonParserSettings;
 use crate::file_handlers::{
     AnalyzerCapabilities, Capabilities, FixAllParams, FormatterCapabilities, LintParams,
     LintResults, ParserCapabilities,
@@ -37,6 +36,13 @@ pub struct JsonFormatterSettings {
     pub indent_width: Option<IndentWidth>,
     pub indent_style: Option<IndentStyle>,
     pub enabled: Option<bool>,
+}
+
+#[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct JsonParserSettings {
+    pub allow_comments: bool,
+    pub allow_trailing_commas: bool,
 }
 
 impl Language for JsonLanguage {
