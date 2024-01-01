@@ -136,11 +136,9 @@ CssRoot {
                             colon_token: COLON@56..58 ":" [] [Whitespace(" ")],
                             value: CssGenericComponentValueList [
                                 CssRegularDimension {
-
-                                        value_token: CSS_NUMBER_LITERAL@58..59 "1" [] [],
+                                    value_token: CSS_NUMBER_LITERAL@58..59 "1" [] [],
                                     unit_token: IDENT@59..61 "px" [] [],
-                                    },
-
+                                },
                             ],
                         },
                         important: missing (optional),
@@ -614,12 +612,8 @@ CssRoot {
                                     value: SLASH@432..433 "/" [] [],
                                 },
                                 CssRegularDimension {
-                                    value: CssNumber {
-                                        value_token: CSS_NUMBER_LITERAL@433..434 "1" [] [],
-                                    },
-                                    unit: CssIdentifier {
-                                        value_token: IDENT@434..437 "em" [] [Whitespace(" ")],
-                                    },
+                                    value_token: CSS_NUMBER_LITERAL@433..434 "1" [] [],
+                                    unit_token: IDENT@434..437 "em" [] [Whitespace(" ")],
                                 },
                                 CssIdentifier {
                                     value_token: IDENT@437..442 "auto" [] [Whitespace(" ")],
@@ -699,7 +693,7 @@ CssRoot {
               1: COLON@56..58 ":" [] [Whitespace(" ")]
               2: CSS_GENERIC_COMPONENT_VALUE_LIST@58..61
                 0: CSS_REGULAR_DIMENSION@58..61
-                  0:  CSS_NUMBER_LITERAL@58..59 "1" [] []
+                  0: CSS_NUMBER_LITERAL@58..59 "1" [] []
                   1: IDENT@59..61 "px" [] []
             1: (empty)
           1: SEMICOLON@61..62 ";" [] []
@@ -1008,10 +1002,8 @@ CssRoot {
                 3: CSS_GENERIC_DELIMITER@432..433
                   0: SLASH@432..433 "/" [] []
                 4: CSS_REGULAR_DIMENSION@433..437
-                  0: CSS_NUMBER@433..434
-                    0: CSS_NUMBER_LITERAL@433..434 "1" [] []
-                  1: CSS_IDENTIFIER@434..437
-                    0: IDENT@434..437 "em" [] [Whitespace(" ")]
+                  0: CSS_NUMBER_LITERAL@433..434 "1" [] []
+                  1: IDENT@434..437 "em" [] [Whitespace(" ")]
                 5: CSS_IDENTIFIER@437..442
                   0: IDENT@437..442 "auto" [] [Whitespace(" ")]
                 6: CSS_IDENTIFIER@442..451

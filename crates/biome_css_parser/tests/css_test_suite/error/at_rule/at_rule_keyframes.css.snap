@@ -110,31 +110,33 @@ CssRoot {
                                     l_curly_token: L_CURLY@19..20 "{" [] [],
                                     declarations: CssDeclarationList [
                                         CssDeclaration {
-                                            name: CssIdentifier {
-                                                value_token: IDENT@20..32 "transform" [Newline("\n"), Whitespace("\t\t")] [],
-                                            },
-                                            colon_token: COLON@32..34 ":" [] [Whitespace(" ")],
-                                            value: CssComponentValueList [
-                                                CssSimpleFunction {
-                                                    name: CssIdentifier {
-                                                        value_token: IDENT@34..44 "translateX" [] [],
-                                                    },
-                                                    l_paren_token: L_PAREN@44..45 "(" [] [],
-                                                    items: CssParameterList [
-                                                        CssParameter {
-                                                            any_css_expression: CssListOfComponentValuesExpression {
-                                                                css_component_value_list: CssComponentValueList [
-                                                                    CssPercentage {
-                                                                        value_token: CSS_NUMBER_LITERAL@45..46 "0" [] [],
-                                                                        percent_token: PERCENT@46..47 "%" [] [],
-                                                                    },
-                                                                ],
-                                                            },
-                                                        },
-                                                    ],
-                                                    r_paren_token: R_PAREN@47..48 ")" [] [],
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@20..32 "transform" [Newline("\n"), Whitespace("\t\t")] [],
                                                 },
-                                            ],
+                                                colon_token: COLON@32..34 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssSimpleFunction {
+                                                        name: CssIdentifier {
+                                                            value_token: IDENT@34..44 "translateX" [] [],
+                                                        },
+                                                        l_paren_token: L_PAREN@44..45 "(" [] [],
+                                                        items: CssParameterList [
+                                                            CssParameter {
+                                                                any_css_expression: CssListOfComponentValuesExpression {
+                                                                    css_component_value_list: CssComponentValueList [
+                                                                        CssPercentage {
+                                                                            value_token: CSS_NUMBER_LITERAL@45..46 "0" [] [],
+                                                                            percent_token: PERCENT@46..47 "%" [] [],
+                                                                        },
+                                                                    ],
+                                                                },
+                                                            },
+                                                        ],
+                                                        r_paren_token: R_PAREN@47..48 ")" [] [],
+                                                    },
+                                                ],
+                                            },
                                             important: missing (optional),
                                         },
                                         SEMICOLON@48..49 ";" [] [],
@@ -152,31 +154,33 @@ CssRoot {
                                     l_curly_token: L_CURLY@58..59 "{" [] [],
                                     declarations: CssDeclarationList [
                                         CssDeclaration {
-                                            name: CssIdentifier {
-                                                value_token: IDENT@59..71 "transform" [Newline("\n"), Whitespace("\t\t")] [],
-                                            },
-                                            colon_token: COLON@71..73 ":" [] [Whitespace(" ")],
-                                            value: CssComponentValueList [
-                                                CssSimpleFunction {
-                                                    name: CssIdentifier {
-                                                        value_token: IDENT@73..83 "translateX" [] [],
-                                                    },
-                                                    l_paren_token: L_PAREN@83..84 "(" [] [],
-                                                    items: CssParameterList [
-                                                        CssParameter {
-                                                            any_css_expression: CssListOfComponentValuesExpression {
-                                                                css_component_value_list: CssComponentValueList [
-                                                                    CssPercentage {
-                                                                        value_token: CSS_NUMBER_LITERAL@84..87 "100" [] [],
-                                                                        percent_token: PERCENT@87..88 "%" [] [],
-                                                                    },
-                                                                ],
-                                                            },
-                                                        },
-                                                    ],
-                                                    r_paren_token: R_PAREN@88..89 ")" [] [],
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@59..71 "transform" [Newline("\n"), Whitespace("\t\t")] [],
                                                 },
-                                            ],
+                                                colon_token: COLON@71..73 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssSimpleFunction {
+                                                        name: CssIdentifier {
+                                                            value_token: IDENT@73..83 "translateX" [] [],
+                                                        },
+                                                        l_paren_token: L_PAREN@83..84 "(" [] [],
+                                                        items: CssParameterList [
+                                                            CssParameter {
+                                                                any_css_expression: CssListOfComponentValuesExpression {
+                                                                    css_component_value_list: CssComponentValueList [
+                                                                        CssPercentage {
+                                                                            value_token: CSS_NUMBER_LITERAL@84..87 "100" [] [],
+                                                                            percent_token: PERCENT@87..88 "%" [] [],
+                                                                        },
+                                                                    ],
+                                                                },
+                                                            },
+                                                        ],
+                                                        r_paren_token: R_PAREN@88..89 ")" [] [],
+                                                    },
+                                                ],
+                                            },
                                             important: missing (optional),
                                         },
                                         SEMICOLON@89..90 ";" [] [],
@@ -206,31 +210,33 @@ CssRoot {
                                 l_curly_token: L_CURLY@117..120 "{" [Newline("\n"), Whitespace("\t")] [],
                                 declarations: CssDeclarationList [
                                     CssDeclaration {
-                                        name: CssIdentifier {
-                                            value_token: IDENT@120..132 "transform" [Newline("\n"), Whitespace("\t\t")] [],
-                                        },
-                                        colon_token: COLON@132..134 ":" [] [Whitespace(" ")],
-                                        value: CssComponentValueList [
-                                            CssSimpleFunction {
-                                                name: CssIdentifier {
-                                                    value_token: IDENT@134..144 "translateX" [] [],
-                                                },
-                                                l_paren_token: L_PAREN@144..145 "(" [] [],
-                                                items: CssParameterList [
-                                                    CssParameter {
-                                                        any_css_expression: CssListOfComponentValuesExpression {
-                                                            css_component_value_list: CssComponentValueList [
-                                                                CssPercentage {
-                                                                    value_token: CSS_NUMBER_LITERAL@145..146 "0" [] [],
-                                                                    percent_token: PERCENT@146..147 "%" [] [],
-                                                                },
-                                                            ],
-                                                        },
-                                                    },
-                                                ],
-                                                r_paren_token: R_PAREN@147..148 ")" [] [],
+                                        property: CssGenericProperty {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@120..132 "transform" [Newline("\n"), Whitespace("\t\t")] [],
                                             },
-                                        ],
+                                            colon_token: COLON@132..134 ":" [] [Whitespace(" ")],
+                                            value: CssGenericComponentValueList [
+                                                CssSimpleFunction {
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@134..144 "translateX" [] [],
+                                                    },
+                                                    l_paren_token: L_PAREN@144..145 "(" [] [],
+                                                    items: CssParameterList [
+                                                        CssParameter {
+                                                            any_css_expression: CssListOfComponentValuesExpression {
+                                                                css_component_value_list: CssComponentValueList [
+                                                                    CssPercentage {
+                                                                        value_token: CSS_NUMBER_LITERAL@145..146 "0" [] [],
+                                                                        percent_token: PERCENT@146..147 "%" [] [],
+                                                                    },
+                                                                ],
+                                                            },
+                                                        },
+                                                    ],
+                                                    r_paren_token: R_PAREN@147..148 ")" [] [],
+                                                },
+                                            ],
+                                        },
                                         important: missing (optional),
                                     },
                                     SEMICOLON@148..149 ";" [] [],
@@ -267,31 +273,33 @@ CssRoot {
                                 l_curly_token: L_CURLY@186..187 "{" [] [],
                                 declarations: CssDeclarationList [
                                     CssDeclaration {
-                                        name: CssIdentifier {
-                                            value_token: IDENT@187..199 "transform" [Newline("\n"), Whitespace("\t\t")] [],
-                                        },
-                                        colon_token: COLON@199..201 ":" [] [Whitespace(" ")],
-                                        value: CssComponentValueList [
-                                            CssSimpleFunction {
-                                                name: CssIdentifier {
-                                                    value_token: IDENT@201..211 "translateX" [] [],
-                                                },
-                                                l_paren_token: L_PAREN@211..212 "(" [] [],
-                                                items: CssParameterList [
-                                                    CssParameter {
-                                                        any_css_expression: CssListOfComponentValuesExpression {
-                                                            css_component_value_list: CssComponentValueList [
-                                                                CssPercentage {
-                                                                    value_token: CSS_NUMBER_LITERAL@212..215 "100" [] [],
-                                                                    percent_token: PERCENT@215..216 "%" [] [],
-                                                                },
-                                                            ],
-                                                        },
-                                                    },
-                                                ],
-                                                r_paren_token: R_PAREN@216..217 ")" [] [],
+                                        property: CssGenericProperty {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@187..199 "transform" [Newline("\n"), Whitespace("\t\t")] [],
                                             },
-                                        ],
+                                            colon_token: COLON@199..201 ":" [] [Whitespace(" ")],
+                                            value: CssGenericComponentValueList [
+                                                CssSimpleFunction {
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@201..211 "translateX" [] [],
+                                                    },
+                                                    l_paren_token: L_PAREN@211..212 "(" [] [],
+                                                    items: CssParameterList [
+                                                        CssParameter {
+                                                            any_css_expression: CssListOfComponentValuesExpression {
+                                                                css_component_value_list: CssComponentValueList [
+                                                                    CssPercentage {
+                                                                        value_token: CSS_NUMBER_LITERAL@212..215 "100" [] [],
+                                                                        percent_token: PERCENT@215..216 "%" [] [],
+                                                                    },
+                                                                ],
+                                                            },
+                                                        },
+                                                    ],
+                                                    r_paren_token: R_PAREN@216..217 ")" [] [],
+                                                },
+                                            ],
+                                        },
                                         important: missing (optional),
                                     },
                                     SEMICOLON@217..218 ";" [] [],
@@ -327,31 +335,33 @@ CssRoot {
                                 l_curly_token: L_CURLY@253..254 "{" [] [],
                                 declarations: CssDeclarationList [
                                     CssDeclaration {
-                                        name: CssIdentifier {
-                                            value_token: IDENT@254..266 "transform" [Newline("\n"), Whitespace("\t\t")] [],
-                                        },
-                                        colon_token: COLON@266..268 ":" [] [Whitespace(" ")],
-                                        value: CssComponentValueList [
-                                            CssSimpleFunction {
-                                                name: CssIdentifier {
-                                                    value_token: IDENT@268..278 "translateX" [] [],
-                                                },
-                                                l_paren_token: L_PAREN@278..279 "(" [] [],
-                                                items: CssParameterList [
-                                                    CssParameter {
-                                                        any_css_expression: CssListOfComponentValuesExpression {
-                                                            css_component_value_list: CssComponentValueList [
-                                                                CssPercentage {
-                                                                    value_token: CSS_NUMBER_LITERAL@279..280 "0" [] [],
-                                                                    percent_token: PERCENT@280..281 "%" [] [],
-                                                                },
-                                                            ],
-                                                        },
-                                                    },
-                                                ],
-                                                r_paren_token: R_PAREN@281..282 ")" [] [],
+                                        property: CssGenericProperty {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@254..266 "transform" [Newline("\n"), Whitespace("\t\t")] [],
                                             },
-                                        ],
+                                            colon_token: COLON@266..268 ":" [] [Whitespace(" ")],
+                                            value: CssGenericComponentValueList [
+                                                CssSimpleFunction {
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@268..278 "translateX" [] [],
+                                                    },
+                                                    l_paren_token: L_PAREN@278..279 "(" [] [],
+                                                    items: CssParameterList [
+                                                        CssParameter {
+                                                            any_css_expression: CssListOfComponentValuesExpression {
+                                                                css_component_value_list: CssComponentValueList [
+                                                                    CssPercentage {
+                                                                        value_token: CSS_NUMBER_LITERAL@279..280 "0" [] [],
+                                                                        percent_token: PERCENT@280..281 "%" [] [],
+                                                                    },
+                                                                ],
+                                                            },
+                                                        },
+                                                    ],
+                                                    r_paren_token: R_PAREN@281..282 ")" [] [],
+                                                },
+                                            ],
+                                        },
                                         important: missing (optional),
                                     },
                                     SEMICOLON@282..283 ";" [] [],
@@ -386,40 +396,44 @@ CssRoot {
                                     CssBogus {
                                         items: [
                                             CssDeclaration {
-                                                name: CssIdentifier {
-                                                    value_token: IDENT@318..330 "transform" [Newline("\n"), Whitespace("\t\t")] [],
-                                                },
-                                                colon_token: COLON@330..332 ":" [] [Whitespace(" ")],
-                                                value: CssComponentValueList [
-                                                    CssSimpleFunction {
-                                                        name: CssIdentifier {
-                                                            value_token: IDENT@332..342 "translateX" [] [],
-                                                        },
-                                                        l_paren_token: L_PAREN@342..343 "(" [] [],
-                                                        items: CssParameterList [
-                                                            CssParameter {
-                                                                any_css_expression: CssListOfComponentValuesExpression {
-                                                                    css_component_value_list: CssComponentValueList [
-                                                                        CssPercentage {
-                                                                            value_token: CSS_NUMBER_LITERAL@343..344 "0" [] [],
-                                                                            percent_token: PERCENT@344..345 "%" [] [],
-                                                                        },
-                                                                    ],
-                                                                },
-                                                            },
-                                                        ],
-                                                        r_paren_token: R_PAREN@345..346 ")" [] [],
+                                                property: CssGenericProperty {
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@318..330 "transform" [Newline("\n"), Whitespace("\t\t")] [],
                                                     },
-                                                ],
+                                                    colon_token: COLON@330..332 ":" [] [Whitespace(" ")],
+                                                    value: CssGenericComponentValueList [
+                                                        CssSimpleFunction {
+                                                            name: CssIdentifier {
+                                                                value_token: IDENT@332..342 "translateX" [] [],
+                                                            },
+                                                            l_paren_token: L_PAREN@342..343 "(" [] [],
+                                                            items: CssParameterList [
+                                                                CssParameter {
+                                                                    any_css_expression: CssListOfComponentValuesExpression {
+                                                                        css_component_value_list: CssComponentValueList [
+                                                                            CssPercentage {
+                                                                                value_token: CSS_NUMBER_LITERAL@343..344 "0" [] [],
+                                                                                percent_token: PERCENT@344..345 "%" [] [],
+                                                                            },
+                                                                        ],
+                                                                    },
+                                                                },
+                                                            ],
+                                                            r_paren_token: R_PAREN@345..346 ")" [] [],
+                                                        },
+                                                    ],
+                                                },
                                                 important: missing (optional),
                                             },
                                             SEMICOLON@346..347 ";" [] [],
                                             CssDeclaration {
-                                                name: CssIdentifier {
-                                                    value_token: IDENT@347..354 "to" [Newline("\n"), Newline("\n"), Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
+                                                property: CssGenericProperty {
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@347..354 "to" [Newline("\n"), Newline("\n"), Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
+                                                    },
+                                                    colon_token: missing (required),
+                                                    value: CssGenericComponentValueList [],
                                                 },
-                                                colon_token: missing (required),
-                                                value: CssComponentValueList [],
                                                 important: missing (optional),
                                             },
                                             CssBogus {
@@ -494,31 +508,33 @@ CssRoot {
                                 l_curly_token: L_CURLY@457..458 "{" [] [],
                                 declarations: CssDeclarationList [
                                     CssDeclaration {
-                                        name: CssIdentifier {
-                                            value_token: IDENT@458..470 "transform" [Newline("\n"), Whitespace("\t\t")] [],
-                                        },
-                                        colon_token: COLON@470..472 ":" [] [Whitespace(" ")],
-                                        value: CssComponentValueList [
-                                            CssSimpleFunction {
-                                                name: CssIdentifier {
-                                                    value_token: IDENT@472..482 "translateX" [] [],
-                                                },
-                                                l_paren_token: L_PAREN@482..483 "(" [] [],
-                                                items: CssParameterList [
-                                                    CssParameter {
-                                                        any_css_expression: CssListOfComponentValuesExpression {
-                                                            css_component_value_list: CssComponentValueList [
-                                                                CssPercentage {
-                                                                    value_token: CSS_NUMBER_LITERAL@483..486 "100" [] [],
-                                                                    percent_token: PERCENT@486..487 "%" [] [],
-                                                                },
-                                                            ],
-                                                        },
-                                                    },
-                                                ],
-                                                r_paren_token: R_PAREN@487..488 ")" [] [],
+                                        property: CssGenericProperty {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@458..470 "transform" [Newline("\n"), Whitespace("\t\t")] [],
                                             },
-                                        ],
+                                            colon_token: COLON@470..472 ":" [] [Whitespace(" ")],
+                                            value: CssGenericComponentValueList [
+                                                CssSimpleFunction {
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@472..482 "translateX" [] [],
+                                                    },
+                                                    l_paren_token: L_PAREN@482..483 "(" [] [],
+                                                    items: CssParameterList [
+                                                        CssParameter {
+                                                            any_css_expression: CssListOfComponentValuesExpression {
+                                                                css_component_value_list: CssComponentValueList [
+                                                                    CssPercentage {
+                                                                        value_token: CSS_NUMBER_LITERAL@483..486 "100" [] [],
+                                                                        percent_token: PERCENT@486..487 "%" [] [],
+                                                                    },
+                                                                ],
+                                                            },
+                                                        },
+                                                    ],
+                                                    r_paren_token: R_PAREN@487..488 ")" [] [],
+                                                },
+                                            ],
+                                        },
                                         important: missing (optional),
                                     },
                                     SEMICOLON@488..489 ";" [] [],
@@ -554,31 +570,33 @@ CssRoot {
                                             l_curly_token: L_CURLY@523..524 "{" [] [],
                                             declarations: CssDeclarationList [
                                                 CssDeclaration {
-                                                    name: CssIdentifier {
-                                                        value_token: IDENT@524..536 "transform" [Newline("\n"), Whitespace("\t\t")] [],
-                                                    },
-                                                    colon_token: COLON@536..538 ":" [] [Whitespace(" ")],
-                                                    value: CssComponentValueList [
-                                                        CssSimpleFunction {
-                                                            name: CssIdentifier {
-                                                                value_token: IDENT@538..548 "translateX" [] [],
-                                                            },
-                                                            l_paren_token: L_PAREN@548..549 "(" [] [],
-                                                            items: CssParameterList [
-                                                                CssParameter {
-                                                                    any_css_expression: CssListOfComponentValuesExpression {
-                                                                        css_component_value_list: CssComponentValueList [
-                                                                            CssPercentage {
-                                                                                value_token: CSS_NUMBER_LITERAL@549..550 "0" [] [],
-                                                                                percent_token: PERCENT@550..551 "%" [] [],
-                                                                            },
-                                                                        ],
-                                                                    },
-                                                                },
-                                                            ],
-                                                            r_paren_token: R_PAREN@551..552 ")" [] [],
+                                                    property: CssGenericProperty {
+                                                        name: CssIdentifier {
+                                                            value_token: IDENT@524..536 "transform" [Newline("\n"), Whitespace("\t\t")] [],
                                                         },
-                                                    ],
+                                                        colon_token: COLON@536..538 ":" [] [Whitespace(" ")],
+                                                        value: CssGenericComponentValueList [
+                                                            CssSimpleFunction {
+                                                                name: CssIdentifier {
+                                                                    value_token: IDENT@538..548 "translateX" [] [],
+                                                                },
+                                                                l_paren_token: L_PAREN@548..549 "(" [] [],
+                                                                items: CssParameterList [
+                                                                    CssParameter {
+                                                                        any_css_expression: CssListOfComponentValuesExpression {
+                                                                            css_component_value_list: CssComponentValueList [
+                                                                                CssPercentage {
+                                                                                    value_token: CSS_NUMBER_LITERAL@549..550 "0" [] [],
+                                                                                    percent_token: PERCENT@550..551 "%" [] [],
+                                                                                },
+                                                                            ],
+                                                                        },
+                                                                    },
+                                                                ],
+                                                                r_paren_token: R_PAREN@551..552 ")" [] [],
+                                                            },
+                                                        ],
+                                                    },
                                                     important: missing (optional),
                                                 },
                                                 SEMICOLON@552..553 ";" [] [],
@@ -626,11 +644,13 @@ CssRoot {
                                                 CssBogus {
                                                     items: [
                                                         CssDeclaration {
-                                                            name: CssIdentifier {
-                                                                value_token: IDENT@619..626 "from" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
+                                                            property: CssGenericProperty {
+                                                                name: CssIdentifier {
+                                                                    value_token: IDENT@619..626 "from" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
+                                                                },
+                                                                colon_token: missing (required),
+                                                                value: CssGenericComponentValueList [],
                                                             },
-                                                            colon_token: missing (required),
-                                                            value: CssComponentValueList [],
                                                             important: missing (optional),
                                                         },
                                                         CssBogus {
@@ -662,31 +682,33 @@ CssRoot {
                                             l_curly_token: L_CURLY@665..666 "{" [] [],
                                             declarations: CssDeclarationList [
                                                 CssDeclaration {
-                                                    name: CssIdentifier {
-                                                        value_token: IDENT@666..678 "transform" [Newline("\n"), Whitespace("\t\t")] [],
-                                                    },
-                                                    colon_token: COLON@678..680 ":" [] [Whitespace(" ")],
-                                                    value: CssComponentValueList [
-                                                        CssSimpleFunction {
-                                                            name: CssIdentifier {
-                                                                value_token: IDENT@680..690 "translateX" [] [],
-                                                            },
-                                                            l_paren_token: L_PAREN@690..691 "(" [] [],
-                                                            items: CssParameterList [
-                                                                CssParameter {
-                                                                    any_css_expression: CssListOfComponentValuesExpression {
-                                                                        css_component_value_list: CssComponentValueList [
-                                                                            CssPercentage {
-                                                                                value_token: CSS_NUMBER_LITERAL@691..694 "100" [] [],
-                                                                                percent_token: PERCENT@694..695 "%" [] [],
-                                                                            },
-                                                                        ],
-                                                                    },
-                                                                },
-                                                            ],
-                                                            r_paren_token: R_PAREN@695..696 ")" [] [],
+                                                    property: CssGenericProperty {
+                                                        name: CssIdentifier {
+                                                            value_token: IDENT@666..678 "transform" [Newline("\n"), Whitespace("\t\t")] [],
                                                         },
-                                                    ],
+                                                        colon_token: COLON@678..680 ":" [] [Whitespace(" ")],
+                                                        value: CssGenericComponentValueList [
+                                                            CssSimpleFunction {
+                                                                name: CssIdentifier {
+                                                                    value_token: IDENT@680..690 "translateX" [] [],
+                                                                },
+                                                                l_paren_token: L_PAREN@690..691 "(" [] [],
+                                                                items: CssParameterList [
+                                                                    CssParameter {
+                                                                        any_css_expression: CssListOfComponentValuesExpression {
+                                                                            css_component_value_list: CssComponentValueList [
+                                                                                CssPercentage {
+                                                                                    value_token: CSS_NUMBER_LITERAL@691..694 "100" [] [],
+                                                                                    percent_token: PERCENT@694..695 "%" [] [],
+                                                                                },
+                                                                            ],
+                                                                        },
+                                                                    },
+                                                                ],
+                                                                r_paren_token: R_PAREN@695..696 ")" [] [],
+                                                            },
+                                                        ],
+                                                    },
                                                     important: missing (optional),
                                                 },
                                                 SEMICOLON@696..697 ";" [] [],
@@ -820,23 +842,24 @@ CssRoot {
                 0: L_CURLY@19..20 "{" [] []
                 1: CSS_DECLARATION_LIST@20..49
                   0: CSS_DECLARATION@20..48
-                    0: CSS_IDENTIFIER@20..32
-                      0: IDENT@20..32 "transform" [Newline("\n"), Whitespace("\t\t")] []
-                    1: COLON@32..34 ":" [] [Whitespace(" ")]
-                    2: CSS_COMPONENT_VALUE_LIST@34..48
-                      0: CSS_SIMPLE_FUNCTION@34..48
-                        0: CSS_IDENTIFIER@34..44
-                          0: IDENT@34..44 "translateX" [] []
-                        1: L_PAREN@44..45 "(" [] []
-                        2: CSS_PARAMETER_LIST@45..47
-                          0: CSS_PARAMETER@45..47
-                            0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@45..47
-                              0: CSS_COMPONENT_VALUE_LIST@45..47
-                                0: CSS_PERCENTAGE@45..47
-                                  0: CSS_NUMBER_LITERAL@45..46 "0" [] []
-                                  1: PERCENT@46..47 "%" [] []
-                        3: R_PAREN@47..48 ")" [] []
-                    3: (empty)
+                    0: CSS_GENERIC_PROPERTY@20..48
+                      0: CSS_IDENTIFIER@20..32
+                        0: IDENT@20..32 "transform" [Newline("\n"), Whitespace("\t\t")] []
+                      1: COLON@32..34 ":" [] [Whitespace(" ")]
+                      2: CSS_GENERIC_COMPONENT_VALUE_LIST@34..48
+                        0: CSS_SIMPLE_FUNCTION@34..48
+                          0: CSS_IDENTIFIER@34..44
+                            0: IDENT@34..44 "translateX" [] []
+                          1: L_PAREN@44..45 "(" [] []
+                          2: CSS_PARAMETER_LIST@45..47
+                            0: CSS_PARAMETER@45..47
+                              0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@45..47
+                                0: CSS_COMPONENT_VALUE_LIST@45..47
+                                  0: CSS_PERCENTAGE@45..47
+                                    0: CSS_NUMBER_LITERAL@45..46 "0" [] []
+                                    1: PERCENT@46..47 "%" [] []
+                          3: R_PAREN@47..48 ")" [] []
+                    1: (empty)
                   1: SEMICOLON@48..49 ";" [] []
                 2: R_CURLY@49..52 "}" [Newline("\n"), Whitespace("\t")] []
             1: CSS_KEYFRAMES_ITEM@52..93
@@ -847,23 +870,24 @@ CssRoot {
                 0: L_CURLY@58..59 "{" [] []
                 1: CSS_DECLARATION_LIST@59..90
                   0: CSS_DECLARATION@59..89
-                    0: CSS_IDENTIFIER@59..71
-                      0: IDENT@59..71 "transform" [Newline("\n"), Whitespace("\t\t")] []
-                    1: COLON@71..73 ":" [] [Whitespace(" ")]
-                    2: CSS_COMPONENT_VALUE_LIST@73..89
-                      0: CSS_SIMPLE_FUNCTION@73..89
-                        0: CSS_IDENTIFIER@73..83
-                          0: IDENT@73..83 "translateX" [] []
-                        1: L_PAREN@83..84 "(" [] []
-                        2: CSS_PARAMETER_LIST@84..88
-                          0: CSS_PARAMETER@84..88
-                            0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@84..88
-                              0: CSS_COMPONENT_VALUE_LIST@84..88
-                                0: CSS_PERCENTAGE@84..88
-                                  0: CSS_NUMBER_LITERAL@84..87 "100" [] []
-                                  1: PERCENT@87..88 "%" [] []
-                        3: R_PAREN@88..89 ")" [] []
-                    3: (empty)
+                    0: CSS_GENERIC_PROPERTY@59..89
+                      0: CSS_IDENTIFIER@59..71
+                        0: IDENT@59..71 "transform" [Newline("\n"), Whitespace("\t\t")] []
+                      1: COLON@71..73 ":" [] [Whitespace(" ")]
+                      2: CSS_GENERIC_COMPONENT_VALUE_LIST@73..89
+                        0: CSS_SIMPLE_FUNCTION@73..89
+                          0: CSS_IDENTIFIER@73..83
+                            0: IDENT@73..83 "translateX" [] []
+                          1: L_PAREN@83..84 "(" [] []
+                          2: CSS_PARAMETER_LIST@84..88
+                            0: CSS_PARAMETER@84..88
+                              0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@84..88
+                                0: CSS_COMPONENT_VALUE_LIST@84..88
+                                  0: CSS_PERCENTAGE@84..88
+                                    0: CSS_NUMBER_LITERAL@84..87 "100" [] []
+                                    1: PERCENT@87..88 "%" [] []
+                          3: R_PAREN@88..89 ")" [] []
+                    1: (empty)
                   1: SEMICOLON@89..90 ";" [] []
                 2: R_CURLY@90..93 "}" [Newline("\n"), Whitespace("\t")] []
           2: R_CURLY@93..95 "}" [Newline("\n")] []
@@ -882,23 +906,24 @@ CssRoot {
                 0: L_CURLY@117..120 "{" [Newline("\n"), Whitespace("\t")] []
                 1: CSS_DECLARATION_LIST@120..149
                   0: CSS_DECLARATION@120..148
-                    0: CSS_IDENTIFIER@120..132
-                      0: IDENT@120..132 "transform" [Newline("\n"), Whitespace("\t\t")] []
-                    1: COLON@132..134 ":" [] [Whitespace(" ")]
-                    2: CSS_COMPONENT_VALUE_LIST@134..148
-                      0: CSS_SIMPLE_FUNCTION@134..148
-                        0: CSS_IDENTIFIER@134..144
-                          0: IDENT@134..144 "translateX" [] []
-                        1: L_PAREN@144..145 "(" [] []
-                        2: CSS_PARAMETER_LIST@145..147
-                          0: CSS_PARAMETER@145..147
-                            0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@145..147
-                              0: CSS_COMPONENT_VALUE_LIST@145..147
-                                0: CSS_PERCENTAGE@145..147
-                                  0: CSS_NUMBER_LITERAL@145..146 "0" [] []
-                                  1: PERCENT@146..147 "%" [] []
-                        3: R_PAREN@147..148 ")" [] []
-                    3: (empty)
+                    0: CSS_GENERIC_PROPERTY@120..148
+                      0: CSS_IDENTIFIER@120..132
+                        0: IDENT@120..132 "transform" [Newline("\n"), Whitespace("\t\t")] []
+                      1: COLON@132..134 ":" [] [Whitespace(" ")]
+                      2: CSS_GENERIC_COMPONENT_VALUE_LIST@134..148
+                        0: CSS_SIMPLE_FUNCTION@134..148
+                          0: CSS_IDENTIFIER@134..144
+                            0: IDENT@134..144 "translateX" [] []
+                          1: L_PAREN@144..145 "(" [] []
+                          2: CSS_PARAMETER_LIST@145..147
+                            0: CSS_PARAMETER@145..147
+                              0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@145..147
+                                0: CSS_COMPONENT_VALUE_LIST@145..147
+                                  0: CSS_PERCENTAGE@145..147
+                                    0: CSS_NUMBER_LITERAL@145..146 "0" [] []
+                                    1: PERCENT@146..147 "%" [] []
+                          3: R_PAREN@147..148 ")" [] []
+                    1: (empty)
                   1: SEMICOLON@148..149 ";" [] []
                 2: R_CURLY@149..152 "}" [Newline("\n"), Whitespace("\t")] []
           2: R_CURLY@152..154 "}" [Newline("\n")] []
@@ -922,23 +947,24 @@ CssRoot {
                 0: L_CURLY@186..187 "{" [] []
                 1: CSS_DECLARATION_LIST@187..218
                   0: CSS_DECLARATION@187..217
-                    0: CSS_IDENTIFIER@187..199
-                      0: IDENT@187..199 "transform" [Newline("\n"), Whitespace("\t\t")] []
-                    1: COLON@199..201 ":" [] [Whitespace(" ")]
-                    2: CSS_COMPONENT_VALUE_LIST@201..217
-                      0: CSS_SIMPLE_FUNCTION@201..217
-                        0: CSS_IDENTIFIER@201..211
-                          0: IDENT@201..211 "translateX" [] []
-                        1: L_PAREN@211..212 "(" [] []
-                        2: CSS_PARAMETER_LIST@212..216
-                          0: CSS_PARAMETER@212..216
-                            0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@212..216
-                              0: CSS_COMPONENT_VALUE_LIST@212..216
-                                0: CSS_PERCENTAGE@212..216
-                                  0: CSS_NUMBER_LITERAL@212..215 "100" [] []
-                                  1: PERCENT@215..216 "%" [] []
-                        3: R_PAREN@216..217 ")" [] []
-                    3: (empty)
+                    0: CSS_GENERIC_PROPERTY@187..217
+                      0: CSS_IDENTIFIER@187..199
+                        0: IDENT@187..199 "transform" [Newline("\n"), Whitespace("\t\t")] []
+                      1: COLON@199..201 ":" [] [Whitespace(" ")]
+                      2: CSS_GENERIC_COMPONENT_VALUE_LIST@201..217
+                        0: CSS_SIMPLE_FUNCTION@201..217
+                          0: CSS_IDENTIFIER@201..211
+                            0: IDENT@201..211 "translateX" [] []
+                          1: L_PAREN@211..212 "(" [] []
+                          2: CSS_PARAMETER_LIST@212..216
+                            0: CSS_PARAMETER@212..216
+                              0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@212..216
+                                0: CSS_COMPONENT_VALUE_LIST@212..216
+                                  0: CSS_PERCENTAGE@212..216
+                                    0: CSS_NUMBER_LITERAL@212..215 "100" [] []
+                                    1: PERCENT@215..216 "%" [] []
+                          3: R_PAREN@216..217 ")" [] []
+                    1: (empty)
                   1: SEMICOLON@217..218 ";" [] []
                 2: R_CURLY@218..221 "}" [Newline("\n"), Whitespace("\t")] []
           2: R_CURLY@221..223 "}" [Newline("\n")] []
@@ -960,23 +986,24 @@ CssRoot {
                 0: L_CURLY@253..254 "{" [] []
                 1: CSS_DECLARATION_LIST@254..283
                   0: CSS_DECLARATION@254..282
-                    0: CSS_IDENTIFIER@254..266
-                      0: IDENT@254..266 "transform" [Newline("\n"), Whitespace("\t\t")] []
-                    1: COLON@266..268 ":" [] [Whitespace(" ")]
-                    2: CSS_COMPONENT_VALUE_LIST@268..282
-                      0: CSS_SIMPLE_FUNCTION@268..282
-                        0: CSS_IDENTIFIER@268..278
-                          0: IDENT@268..278 "translateX" [] []
-                        1: L_PAREN@278..279 "(" [] []
-                        2: CSS_PARAMETER_LIST@279..281
-                          0: CSS_PARAMETER@279..281
-                            0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@279..281
-                              0: CSS_COMPONENT_VALUE_LIST@279..281
-                                0: CSS_PERCENTAGE@279..281
-                                  0: CSS_NUMBER_LITERAL@279..280 "0" [] []
-                                  1: PERCENT@280..281 "%" [] []
-                        3: R_PAREN@281..282 ")" [] []
-                    3: (empty)
+                    0: CSS_GENERIC_PROPERTY@254..282
+                      0: CSS_IDENTIFIER@254..266
+                        0: IDENT@254..266 "transform" [Newline("\n"), Whitespace("\t\t")] []
+                      1: COLON@266..268 ":" [] [Whitespace(" ")]
+                      2: CSS_GENERIC_COMPONENT_VALUE_LIST@268..282
+                        0: CSS_SIMPLE_FUNCTION@268..282
+                          0: CSS_IDENTIFIER@268..278
+                            0: IDENT@268..278 "translateX" [] []
+                          1: L_PAREN@278..279 "(" [] []
+                          2: CSS_PARAMETER_LIST@279..281
+                            0: CSS_PARAMETER@279..281
+                              0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@279..281
+                                0: CSS_COMPONENT_VALUE_LIST@279..281
+                                  0: CSS_PERCENTAGE@279..281
+                                    0: CSS_NUMBER_LITERAL@279..280 "0" [] []
+                                    1: PERCENT@280..281 "%" [] []
+                          3: R_PAREN@281..282 ")" [] []
+                    1: (empty)
                   1: SEMICOLON@282..283 ";" [] []
                 2: R_CURLY@283..286 "}" [Newline("\n"), Whitespace("\t")] []
           2: R_CURLY@286..288 "}" [Newline("\n")] []
@@ -997,30 +1024,32 @@ CssRoot {
                 0: L_CURLY@317..318 "{" [] []
                 1: CSS_BOGUS@318..386
                   0: CSS_DECLARATION@318..346
-                    0: CSS_IDENTIFIER@318..330
-                      0: IDENT@318..330 "transform" [Newline("\n"), Whitespace("\t\t")] []
-                    1: COLON@330..332 ":" [] [Whitespace(" ")]
-                    2: CSS_COMPONENT_VALUE_LIST@332..346
-                      0: CSS_SIMPLE_FUNCTION@332..346
-                        0: CSS_IDENTIFIER@332..342
-                          0: IDENT@332..342 "translateX" [] []
-                        1: L_PAREN@342..343 "(" [] []
-                        2: CSS_PARAMETER_LIST@343..345
-                          0: CSS_PARAMETER@343..345
-                            0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@343..345
-                              0: CSS_COMPONENT_VALUE_LIST@343..345
-                                0: CSS_PERCENTAGE@343..345
-                                  0: CSS_NUMBER_LITERAL@343..344 "0" [] []
-                                  1: PERCENT@344..345 "%" [] []
-                        3: R_PAREN@345..346 ")" [] []
-                    3: (empty)
+                    0: CSS_GENERIC_PROPERTY@318..346
+                      0: CSS_IDENTIFIER@318..330
+                        0: IDENT@318..330 "transform" [Newline("\n"), Whitespace("\t\t")] []
+                      1: COLON@330..332 ":" [] [Whitespace(" ")]
+                      2: CSS_GENERIC_COMPONENT_VALUE_LIST@332..346
+                        0: CSS_SIMPLE_FUNCTION@332..346
+                          0: CSS_IDENTIFIER@332..342
+                            0: IDENT@332..342 "translateX" [] []
+                          1: L_PAREN@342..343 "(" [] []
+                          2: CSS_PARAMETER_LIST@343..345
+                            0: CSS_PARAMETER@343..345
+                              0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@343..345
+                                0: CSS_COMPONENT_VALUE_LIST@343..345
+                                  0: CSS_PERCENTAGE@343..345
+                                    0: CSS_NUMBER_LITERAL@343..344 "0" [] []
+                                    1: PERCENT@344..345 "%" [] []
+                          3: R_PAREN@345..346 ")" [] []
+                    1: (empty)
                   1: SEMICOLON@346..347 ";" [] []
                   2: CSS_DECLARATION@347..354
-                    0: CSS_IDENTIFIER@347..354
-                      0: IDENT@347..354 "to" [Newline("\n"), Newline("\n"), Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
+                    0: CSS_GENERIC_PROPERTY@347..354
+                      0: CSS_IDENTIFIER@347..354
+                        0: IDENT@347..354 "to" [Newline("\n"), Newline("\n"), Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
+                      1: (empty)
+                      2: CSS_GENERIC_COMPONENT_VALUE_LIST@354..354
                     1: (empty)
-                    2: CSS_COMPONENT_VALUE_LIST@354..354
-                    3: (empty)
                   3: CSS_BOGUS@354..386
                     0: L_CURLY@354..355 "{" [] []
                     1: IDENT@355..367 "transform" [Newline("\n"), Whitespace("\t\t")] []
@@ -1069,23 +1098,24 @@ CssRoot {
                 0: L_CURLY@457..458 "{" [] []
                 1: CSS_DECLARATION_LIST@458..489
                   0: CSS_DECLARATION@458..488
-                    0: CSS_IDENTIFIER@458..470
-                      0: IDENT@458..470 "transform" [Newline("\n"), Whitespace("\t\t")] []
-                    1: COLON@470..472 ":" [] [Whitespace(" ")]
-                    2: CSS_COMPONENT_VALUE_LIST@472..488
-                      0: CSS_SIMPLE_FUNCTION@472..488
-                        0: CSS_IDENTIFIER@472..482
-                          0: IDENT@472..482 "translateX" [] []
-                        1: L_PAREN@482..483 "(" [] []
-                        2: CSS_PARAMETER_LIST@483..487
-                          0: CSS_PARAMETER@483..487
-                            0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@483..487
-                              0: CSS_COMPONENT_VALUE_LIST@483..487
-                                0: CSS_PERCENTAGE@483..487
-                                  0: CSS_NUMBER_LITERAL@483..486 "100" [] []
-                                  1: PERCENT@486..487 "%" [] []
-                        3: R_PAREN@487..488 ")" [] []
-                    3: (empty)
+                    0: CSS_GENERIC_PROPERTY@458..488
+                      0: CSS_IDENTIFIER@458..470
+                        0: IDENT@458..470 "transform" [Newline("\n"), Whitespace("\t\t")] []
+                      1: COLON@470..472 ":" [] [Whitespace(" ")]
+                      2: CSS_GENERIC_COMPONENT_VALUE_LIST@472..488
+                        0: CSS_SIMPLE_FUNCTION@472..488
+                          0: CSS_IDENTIFIER@472..482
+                            0: IDENT@472..482 "translateX" [] []
+                          1: L_PAREN@482..483 "(" [] []
+                          2: CSS_PARAMETER_LIST@483..487
+                            0: CSS_PARAMETER@483..487
+                              0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@483..487
+                                0: CSS_COMPONENT_VALUE_LIST@483..487
+                                  0: CSS_PERCENTAGE@483..487
+                                    0: CSS_NUMBER_LITERAL@483..486 "100" [] []
+                                    1: PERCENT@486..487 "%" [] []
+                          3: R_PAREN@487..488 ")" [] []
+                    1: (empty)
                   1: SEMICOLON@488..489 ";" [] []
                 2: R_CURLY@489..492 "}" [Newline("\n"), Whitespace("\t")] []
           2: R_CURLY@492..494 "}" [Newline("\n")] []
@@ -1106,23 +1136,24 @@ CssRoot {
                 0: L_CURLY@523..524 "{" [] []
                 1: CSS_DECLARATION_LIST@524..553
                   0: CSS_DECLARATION@524..552
-                    0: CSS_IDENTIFIER@524..536
-                      0: IDENT@524..536 "transform" [Newline("\n"), Whitespace("\t\t")] []
-                    1: COLON@536..538 ":" [] [Whitespace(" ")]
-                    2: CSS_COMPONENT_VALUE_LIST@538..552
-                      0: CSS_SIMPLE_FUNCTION@538..552
-                        0: CSS_IDENTIFIER@538..548
-                          0: IDENT@538..548 "translateX" [] []
-                        1: L_PAREN@548..549 "(" [] []
-                        2: CSS_PARAMETER_LIST@549..551
-                          0: CSS_PARAMETER@549..551
-                            0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@549..551
-                              0: CSS_COMPONENT_VALUE_LIST@549..551
-                                0: CSS_PERCENTAGE@549..551
-                                  0: CSS_NUMBER_LITERAL@549..550 "0" [] []
-                                  1: PERCENT@550..551 "%" [] []
-                        3: R_PAREN@551..552 ")" [] []
-                    3: (empty)
+                    0: CSS_GENERIC_PROPERTY@524..552
+                      0: CSS_IDENTIFIER@524..536
+                        0: IDENT@524..536 "transform" [Newline("\n"), Whitespace("\t\t")] []
+                      1: COLON@536..538 ":" [] [Whitespace(" ")]
+                      2: CSS_GENERIC_COMPONENT_VALUE_LIST@538..552
+                        0: CSS_SIMPLE_FUNCTION@538..552
+                          0: CSS_IDENTIFIER@538..548
+                            0: IDENT@538..548 "translateX" [] []
+                          1: L_PAREN@548..549 "(" [] []
+                          2: CSS_PARAMETER_LIST@549..551
+                            0: CSS_PARAMETER@549..551
+                              0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@549..551
+                                0: CSS_COMPONENT_VALUE_LIST@549..551
+                                  0: CSS_PERCENTAGE@549..551
+                                    0: CSS_NUMBER_LITERAL@549..550 "0" [] []
+                                    1: PERCENT@550..551 "%" [] []
+                          3: R_PAREN@551..552 ")" [] []
+                    1: (empty)
                   1: SEMICOLON@552..553 ";" [] []
                 2: R_CURLY@553..556 "}" [Newline("\n"), Whitespace("\t")] []
             1: CSS_KEYFRAMES_ITEM@556..659
@@ -1153,11 +1184,12 @@ CssRoot {
                 0: L_CURLY@618..619 "{" [] []
                 1: CSS_BOGUS@619..656
                   0: CSS_DECLARATION@619..626
-                    0: CSS_IDENTIFIER@619..626
-                      0: IDENT@619..626 "from" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
+                    0: CSS_GENERIC_PROPERTY@619..626
+                      0: CSS_IDENTIFIER@619..626
+                        0: IDENT@619..626 "from" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
+                      1: (empty)
+                      2: CSS_GENERIC_COMPONENT_VALUE_LIST@626..626
                     1: (empty)
-                    2: CSS_COMPONENT_VALUE_LIST@626..626
-                    3: (empty)
                   1: CSS_BOGUS@626..656
                     0: L_CURLY@626..627 "{" [] []
                     1: IDENT@627..639 "transform" [Newline("\n"), Whitespace("\t\t")] []
@@ -1177,23 +1209,24 @@ CssRoot {
                 0: L_CURLY@665..666 "{" [] []
                 1: CSS_DECLARATION_LIST@666..697
                   0: CSS_DECLARATION@666..696
-                    0: CSS_IDENTIFIER@666..678
-                      0: IDENT@666..678 "transform" [Newline("\n"), Whitespace("\t\t")] []
-                    1: COLON@678..680 ":" [] [Whitespace(" ")]
-                    2: CSS_COMPONENT_VALUE_LIST@680..696
-                      0: CSS_SIMPLE_FUNCTION@680..696
-                        0: CSS_IDENTIFIER@680..690
-                          0: IDENT@680..690 "translateX" [] []
-                        1: L_PAREN@690..691 "(" [] []
-                        2: CSS_PARAMETER_LIST@691..695
-                          0: CSS_PARAMETER@691..695
-                            0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@691..695
-                              0: CSS_COMPONENT_VALUE_LIST@691..695
-                                0: CSS_PERCENTAGE@691..695
-                                  0: CSS_NUMBER_LITERAL@691..694 "100" [] []
-                                  1: PERCENT@694..695 "%" [] []
-                        3: R_PAREN@695..696 ")" [] []
-                    3: (empty)
+                    0: CSS_GENERIC_PROPERTY@666..696
+                      0: CSS_IDENTIFIER@666..678
+                        0: IDENT@666..678 "transform" [Newline("\n"), Whitespace("\t\t")] []
+                      1: COLON@678..680 ":" [] [Whitespace(" ")]
+                      2: CSS_GENERIC_COMPONENT_VALUE_LIST@680..696
+                        0: CSS_SIMPLE_FUNCTION@680..696
+                          0: CSS_IDENTIFIER@680..690
+                            0: IDENT@680..690 "translateX" [] []
+                          1: L_PAREN@690..691 "(" [] []
+                          2: CSS_PARAMETER_LIST@691..695
+                            0: CSS_PARAMETER@691..695
+                              0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@691..695
+                                0: CSS_COMPONENT_VALUE_LIST@691..695
+                                  0: CSS_PERCENTAGE@691..695
+                                    0: CSS_NUMBER_LITERAL@691..694 "100" [] []
+                                    1: PERCENT@694..695 "%" [] []
+                          3: R_PAREN@695..696 ")" [] []
+                    1: (empty)
                   1: SEMICOLON@696..697 ";" [] []
                 2: R_CURLY@697..700 "}" [Newline("\n"), Newline("\n")] []
             3: CSS_KEYFRAMES_ITEM@700..725

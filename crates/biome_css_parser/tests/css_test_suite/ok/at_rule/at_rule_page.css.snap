@@ -124,11 +124,9 @@ CssRoot {
                                     colon_token: COLON@29..31 ":" [] [Whitespace(" ")],
                                     value: CssGenericComponentValueList [
                                         CssRegularDimension {
-
-                                                value_token: CSS_NUMBER_LITERAL@31..32 "1" [] [],
+                                            value_token: CSS_NUMBER_LITERAL@31..32 "1" [] [],
                                             unit_token: IDENT@32..34 "cm" [] [],
-                                            },
-
+                                        },
                                     ],
                                 },
                                 important: missing (optional),
@@ -157,11 +155,9 @@ CssRoot {
                                     colon_token: COLON@50..52 ":" [] [Whitespace(" ")],
                                     value: CssGenericComponentValueList [
                                         CssRegularDimension {
-
-                                                value_token: CSS_NUMBER_LITERAL@52..53 "1" [] [],
+                                            value_token: CSS_NUMBER_LITERAL@52..53 "1" [] [],
                                             unit_token: IDENT@53..55 "cm" [] [],
-                                            },
-
+                                        },
                                     ],
                                 },
                                 important: missing (optional),
@@ -200,11 +196,9 @@ CssRoot {
                                     colon_token: COLON@78..80 ":" [] [Whitespace(" ")],
                                     value: CssGenericComponentValueList [
                                         CssRegularDimension {
-
-                                                value_token: CSS_NUMBER_LITERAL@80..81 "2" [] [],
+                                            value_token: CSS_NUMBER_LITERAL@80..81 "2" [] [],
                                             unit_token: IDENT@81..83 "cm" [] [],
-                                            },
-
+                                        },
                                     ],
                                 },
                                 important: missing (optional),
@@ -243,11 +237,9 @@ CssRoot {
                                     colon_token: COLON@105..107 ":" [] [Whitespace(" ")],
                                     value: CssGenericComponentValueList [
                                         CssRegularDimension {
-
-                                                value_token: CSS_NUMBER_LITERAL@107..108 "2" [] [],
+                                            value_token: CSS_NUMBER_LITERAL@107..108 "2" [] [],
                                             unit_token: IDENT@108..110 "cm" [] [],
-                                            },
-
+                                        },
                                     ],
                                 },
                                 important: missing (optional),
@@ -1007,11 +999,9 @@ CssRoot {
                                     colon_token: COLON@911..913 ":" [] [Whitespace(" ")],
                                     value: CssGenericComponentValueList [
                                         CssRegularDimension {
-
-                                                value_token: CSS_NUMBER_LITERAL@913..915 "20" [] [],
+                                            value_token: CSS_NUMBER_LITERAL@913..915 "20" [] [],
                                             unit_token: IDENT@915..917 "px" [] [],
-                                            },
-
+                                        },
                                     ],
                                 },
                                 important: missing (optional),
@@ -1226,7 +1216,7 @@ CssRoot {
                   1: COLON@29..31 ":" [] [Whitespace(" ")]
                   2: CSS_GENERIC_COMPONENT_VALUE_LIST@31..34
                     0: CSS_REGULAR_DIMENSION@31..34
-                      0:  CSS_NUMBER_LITERAL@31..32 "1" [] []
+                      0: CSS_NUMBER_LITERAL@31..32 "1" [] []
                       1: IDENT@32..34 "cm" [] []
                 1: (empty)
               1: SEMICOLON@34..35 ";" [] []
@@ -1247,7 +1237,7 @@ CssRoot {
                   1: COLON@50..52 ":" [] [Whitespace(" ")]
                   2: CSS_GENERIC_COMPONENT_VALUE_LIST@52..55
                     0: CSS_REGULAR_DIMENSION@52..55
-                      0:  CSS_NUMBER_LITERAL@52..53 "1" [] []
+                      0: CSS_NUMBER_LITERAL@52..53 "1" [] []
                       1: IDENT@53..55 "cm" [] []
                 1: (empty)
               1: SEMICOLON@55..56 ";" [] []
@@ -1274,7 +1264,7 @@ CssRoot {
                   1: COLON@78..80 ":" [] [Whitespace(" ")]
                   2: CSS_GENERIC_COMPONENT_VALUE_LIST@80..83
                     0: CSS_REGULAR_DIMENSION@80..83
-                      0:  CSS_NUMBER_LITERAL@80..81 "2" [] []
+                      0: CSS_NUMBER_LITERAL@80..81 "2" [] []
                       1: IDENT@81..83 "cm" [] []
                 1: (empty)
               1: SEMICOLON@83..84 ";" [] []
@@ -1301,7 +1291,7 @@ CssRoot {
                   1: COLON@105..107 ":" [] [Whitespace(" ")]
                   2: CSS_GENERIC_COMPONENT_VALUE_LIST@107..110
                     0: CSS_REGULAR_DIMENSION@107..110
-                      0:  CSS_NUMBER_LITERAL@107..108 "2" [] []
+                      0: CSS_NUMBER_LITERAL@107..108 "2" [] []
                       1: IDENT@108..110 "cm" [] []
                 1: (empty)
               1: SEMICOLON@110..111 ";" [] []
@@ -1820,7 +1810,7 @@ CssRoot {
                   1: COLON@911..913 ":" [] [Whitespace(" ")]
                   2: CSS_GENERIC_COMPONENT_VALUE_LIST@913..917
                     0: CSS_REGULAR_DIMENSION@913..917
-                      0:  CSS_NUMBER_LITERAL@913..915 "20" [] []
+                      0: CSS_NUMBER_LITERAL@913..915 "20" [] []
                       1: IDENT@915..917 "px" [] []
                 1: (empty)
               1: SEMICOLON@917..918 ";" [] []

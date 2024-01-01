@@ -53,10 +53,8 @@ CssRoot {
                                             any_css_expression: CssListOfComponentValuesExpression {
                                                 css_component_value_list: CssComponentValueList [
                                                     CssRegularDimension {
-
-                                                            value_token: CSS_NUMBER_LITERAL@19..22 "100" [] [],
+                                                        value_token: CSS_NUMBER_LITERAL@19..22 "100" [] [],
                                                         unit_token: IDENT@22..24 "px" [] [],
-
                                                     },
                                                 ],
                                             },
@@ -86,10 +84,8 @@ CssRoot {
                                             any_css_expression: CssListOfComponentValuesExpression {
                                                 css_component_value_list: CssComponentValueList [
                                                     CssRegularDimension {
-
-                                                            value_token: CSS_NUMBER_LITERAL@42..45 "100" [] [],
+                                                        value_token: CSS_NUMBER_LITERAL@42..45 "100" [] [],
                                                         unit_token: IDENT@45..47 "px" [] [],
-
                                                     },
                                                 ],
                                             },
@@ -119,10 +115,8 @@ CssRoot {
                                             any_css_expression: CssListOfComponentValuesExpression {
                                                 css_component_value_list: CssComponentValueList [
                                                     CssRegularDimension {
-
-                                                            value_token: CSS_NUMBER_LITERAL@69..72 "100" [] [],
+                                                        value_token: CSS_NUMBER_LITERAL@69..72 "100" [] [],
                                                         unit_token: IDENT@72..74 "px" [] [],
-
                                                     },
                                                 ],
                                             },
@@ -177,8 +171,8 @@ CssRoot {
                       0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@19..24
                         0: CSS_COMPONENT_VALUE_LIST@19..24
                           0: CSS_REGULAR_DIMENSION@19..24
-                            0:  CSS_NUMBER_LITERAL@19..22 "100" [] []
-                            1:  IDENT@22..24 "px" [] []
+                            0: CSS_NUMBER_LITERAL@19..22 "100" [] []
+                            1: IDENT@22..24 "px" [] []
                   3: R_PAREN@24..25 ")" [] []
             1: (empty)
           1: SEMICOLON@25..26 ";" [] []
@@ -197,8 +191,8 @@ CssRoot {
                       0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@42..47
                         0: CSS_COMPONENT_VALUE_LIST@42..47
                           0: CSS_REGULAR_DIMENSION@42..47
-                            0:  CSS_NUMBER_LITERAL@42..45 "100" [] []
-                            1:  IDENT@45..47 "px" [] []
+                            0: CSS_NUMBER_LITERAL@42..45 "100" [] []
+                            1: IDENT@45..47 "px" [] []
                   3: R_PAREN@47..48 ")" [] []
             1: (empty)
           3: SEMICOLON@48..49 ";" [] []
@@ -217,8 +211,8 @@ CssRoot {
                       0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@69..74
                         0: CSS_COMPONENT_VALUE_LIST@69..74
                           0: CSS_REGULAR_DIMENSION@69..74
-                            0:  CSS_NUMBER_LITERAL@69..72 "100" [] []
-                            1:  IDENT@72..74 "px" [] []
+                            0: CSS_NUMBER_LITERAL@69..72 "100" [] []
+                            1: IDENT@72..74 "px" [] []
                   3: R_PAREN@74..75 ")" [] []
             1: (empty)
           5: SEMICOLON@75..76 ";" [] []
