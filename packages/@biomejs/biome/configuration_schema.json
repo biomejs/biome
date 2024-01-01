@@ -1373,8 +1373,8 @@
 						{ "type": "null" }
 					]
 				},
-				"useNumberProperties": {
-					"description": "Use Number properties instead of global ones.",
+				"useNumberNamespace": {
+					"description": "Use the Number properties instead of global ones.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

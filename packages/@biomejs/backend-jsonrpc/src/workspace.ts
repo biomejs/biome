@@ -926,9 +926,9 @@ export interface Nursery {
 	 */
 	useNodejsImportProtocol?: RuleConfiguration;
 	/**
-	 * Use Number properties instead of global ones.
+	 * Use the Number properties instead of global ones.
 	 */
-	useNumberProperties?: RuleConfiguration;
+	useNumberNamespace?: RuleConfiguration;
 	/**
 	 * Enforce the use of the regular expression literals instead of the RegExp constructor if possible.
 	 */
@@ -1647,7 +1647,7 @@ export type Category =
 	| "lint/nursery/useGroupedTypeImport"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useNodejsImportProtocol"
-	| "lint/nursery/useNumberProperties"
+	| "lint/nursery/useNumberNamespace"
 	| "lint/nursery/useRegexLiterals"
 	| "lint/nursery/useShorthandFunctionType"
 	| "lint/nursery/useValidAriaRole"

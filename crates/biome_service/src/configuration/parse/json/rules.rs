@@ -1024,10 +1024,10 @@ impl Deserializable for Nursery {
                                 diagnostics,
                             );
                         }
-                        "useNumberProperties" => {
-                            result.use_number_properties = Deserializable::deserialize(
+                        "useNumberNamespace" => {
+                            result.use_number_namespace = Deserializable::deserialize(
                                 &value,
-                                "useNumberProperties",
+                                "useNumberNamespace",
                                 diagnostics,
                             );
                         }
@@ -1079,7 +1079,7 @@ impl Deserializable for Nursery {
                                     "useGroupedTypeImport",
                                     "useImportRestrictions",
                                     "useNodejsImportProtocol",
-                                    "useNumberProperties",
+                                    "useNumberNamespace",
                                     "useRegexLiterals",
                                     "useShorthandFunctionType",
                                     "useValidAriaRole",
