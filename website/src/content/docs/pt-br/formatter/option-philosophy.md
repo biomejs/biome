@@ -25,7 +25,7 @@ Tomando por base [a filosofia de opções do Prettier](https://prettier.io/docs/
 
 > …[essas] não são opções que gostamos de oferecer. Elas causam muitas discussões inúteis nas equipes, e lamentamos por isso. Difíceis de remover agora, essas opções existem como um artefato histórico e não devem motivar a adição de mais opções ("Se *essas* opções existem, por que esta não pode existir também?").
 
-No entanto, quando o [Prettier Challenge foi anunciado](https://twitter.com/Vjeux/status/1722733472522142022), o Biome decidiu aceitar o desafio, o que exigia a implementação de todas as opções de configuração que o Prettier já oferecia para obter compatibilidade total.
+No entanto, quando o [Desafio do Prettier foi anunciado](https://twitter.com/Vjeux/status/1722733472522142022), o Biome decidiu aceitar o desafio, o que exigia a implementação de todas as opções de configuração que o Prettier já oferecia para obter compatibilidade total.
 
 O Biome ainda compartilha a filosofia do Prettier sobre essas opções e as considera um recurso legado para compatibilidade, em vez de um conjunto de recursos de primeira classe. Sua existência não indica que mais opções serão adicionadas, nem devem ser usadas como justificativa para apoiar a existência de outras opções no futuro.
 
