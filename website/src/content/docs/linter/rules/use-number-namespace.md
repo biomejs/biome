@@ -1,5 +1,5 @@
 ---
-title: useNumberNamespace (since vnext)
+title: useNumberNamespace (since v1.5.0)
 ---
 
 **Diagnostic Category: `lint/nursery/useNumberNamespace`**

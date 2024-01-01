@@ -1,5 +1,5 @@
 ---
-title: noInvalidUseBeforeDeclaration (since vnext)
+title: noInvalidUseBeforeDeclaration (since v1.5.0)
 ---
 
 **Diagnostic Category: `lint/nursery/noInvalidUseBeforeDeclaration`**

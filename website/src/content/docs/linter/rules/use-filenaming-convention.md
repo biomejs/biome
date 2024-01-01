@@ -1,5 +1,5 @@
 ---
-title: useFilenamingConvention (since vnext)
+title: useFilenamingConvention (since v1.5.0)
 ---
 
 **Diagnostic Category: `lint/nursery/useFilenamingConvention`**

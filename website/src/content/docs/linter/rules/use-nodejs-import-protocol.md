@@ -1,5 +1,5 @@
 ---
-title: useNodejsImportProtocol (since vnext)
+title: useNodejsImportProtocol (since v1.5.0)
 ---
 
 **Diagnostic Category: `lint/nursery/useNodejsImportProtocol`**

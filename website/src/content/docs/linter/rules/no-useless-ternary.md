@@ -1,5 +1,5 @@
 ---
-title: noUselessTernary (since vnext)
+title: noUselessTernary (since v1.5.0)
 ---
 
 **Diagnostic Category: `lint/nursery/noUselessTernary`**

@@ -1,5 +1,5 @@
 ---
-title: noThenProperty (since vnext)
+title: noThenProperty (since v1.5.0)
 ---
 
 **Diagnostic Category: `lint/nursery/noThenProperty`**

@@ -1,5 +1,5 @@
 ---
-title: useShorthandFunctionType (since vnext)
+title: useShorthandFunctionType (since v1.5.0)
 ---
 
 **Diagnostic Category: `lint/nursery/useShorthandFunctionType`**

@@ -65,7 +65,7 @@ declare_rule! {
     /// [`kebab-case`]: https://en.wikipedia.org/wiki/Letter_case#Kebab_case
     /// [`snake_case`]: https://en.wikipedia.org/wiki/Snake_case
     pub(crate) UseFilenamingConvention {
-        version: "next",
+        version: "1.5.0",
         name: "useFilenamingConvention",
         recommended: false,
     }

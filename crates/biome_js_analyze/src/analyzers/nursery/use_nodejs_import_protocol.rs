@@ -46,7 +46,7 @@ declare_rule! {
     /// ```
     ///
     pub(crate) UseNodejsImportProtocol {
-        version: "next",
+        version: "1.5.0",
         name: "useNodejsImportProtocol",
         recommended: false,
         fix_kind: FixKind::Unsafe,

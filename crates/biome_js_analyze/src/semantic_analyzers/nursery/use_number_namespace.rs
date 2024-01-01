@@ -68,7 +68,7 @@ declare_rule! {
     /// ```
     ///
     pub(crate) UseNumberNamespace {
-        version: "next",
+        version: "1.5.0",
         name: "useNumberNamespace",
         recommended: true,
         fix_kind: FixKind::Unsafe,
