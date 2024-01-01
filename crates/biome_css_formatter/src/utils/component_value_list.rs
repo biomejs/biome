@@ -1,7 +1,7 @@
 use crate::comments::CssComments;
-use biome_css_syntax::{CssLanguage};
-use biome_formatter::{CstFormatContext, write};
+use biome_css_syntax::CssLanguage;
 use biome_formatter::FormatResult;
+use biome_formatter::{write, CstFormatContext};
 
 use crate::prelude::*;
 use crate::CssFormatter;
@@ -60,13 +60,10 @@ pub(crate) enum ValueListLayout {
 /// Until the parser supports comma-separated lists, this will always return
 /// [ValueListLayout::Fill], since all space-separated lists are intentionally
 /// printed compactly.
-pub(crate) fn get_value_list_layout<N, I>(
-    _list: &N,
-    _: &CssComments,
-) -> ValueListLayout
-    where
-        N: AstNodeList<Language = CssLanguage, Node = I> + AstNode<Language = CssLanguage>,
-        I: AstNode<Language = CssLanguage> + IntoFormat<CssFormatContext>,
+pub(crate) fn get_value_list_layout<N, I>(_list: &N, _: &CssComments) -> ValueListLayout
+where
+    N: AstNodeList<Language = CssLanguage, Node = I> + AstNode<Language = CssLanguage>,
+    I: AstNode<Language = CssLanguage> + IntoFormat<CssFormatContext>,
 {
     // TODO: Check for comments, check for the types of elements in the list, etc.
     ValueListLayout::Fill
