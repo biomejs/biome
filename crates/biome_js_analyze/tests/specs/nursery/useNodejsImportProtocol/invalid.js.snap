@@ -74,7 +74,7 @@ import assert from /*0*/ "assert" /*b*/;
 
 # Diagnostics
 ```
-invalid.js:1:20 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:1:20 lint/nursery/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
   
@@ -96,7 +96,7 @@ invalid.js:1:20 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.js:2:27 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:2:27 lint/nursery/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
   
@@ -120,7 +120,7 @@ invalid.js:2:27 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.js:3:25 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:3:25 lint/nursery/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
   
@@ -146,7 +146,7 @@ invalid.js:3:25 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.js:4:20 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:4:20 lint/nursery/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
   
@@ -172,7 +172,7 @@ invalid.js:4:20 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.js:5:27 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:5:27 lint/nursery/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
   
@@ -198,7 +198,7 @@ invalid.js:5:27 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.js:6:21 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:6:21 lint/nursery/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
   
@@ -224,7 +224,7 @@ invalid.js:6:21 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.js:7:21 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:7:21 lint/nursery/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
   
@@ -250,7 +250,7 @@ invalid.js:7:21 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.js:8:23 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:8:23 lint/nursery/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
   
@@ -276,7 +276,7 @@ invalid.js:8:23 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.js:9:20 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:9:20 lint/nursery/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
   
@@ -302,7 +302,7 @@ invalid.js:9:20 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.js:10:19 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:10:19 lint/nursery/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
   
@@ -328,7 +328,7 @@ invalid.js:10:19 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:11:33 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:11:33 lint/nursery/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
   
@@ -354,7 +354,7 @@ invalid.js:11:33 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:12:17 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:12:17 lint/nursery/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
   
@@ -380,7 +380,7 @@ invalid.js:12:17 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:13:26 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:13:26 lint/nursery/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
   
@@ -406,7 +406,7 @@ invalid.js:13:26 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:14:20 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:14:20 lint/nursery/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
   
@@ -432,7 +432,7 @@ invalid.js:14:20 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:15:20 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:15:20 lint/nursery/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
   
@@ -458,7 +458,7 @@ invalid.js:15:20 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:16:16 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:16:16 lint/nursery/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
   
@@ -484,7 +484,7 @@ invalid.js:16:16 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:17:25 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:17:25 lint/nursery/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
   
@@ -510,7 +510,7 @@ invalid.js:17:25 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:18:18 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:18:18 lint/nursery/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
   
@@ -536,7 +536,7 @@ invalid.js:18:18 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:19:19 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:19:19 lint/nursery/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
   
@@ -562,7 +562,7 @@ invalid.js:19:19 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:20:19 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:20:19 lint/nursery/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
   
@@ -588,7 +588,7 @@ invalid.js:20:19 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:21:23 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:21:23 lint/nursery/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
   
@@ -614,7 +614,7 @@ invalid.js:21:23 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:22:32 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:22:32 lint/nursery/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
   
@@ -640,7 +640,7 @@ invalid.js:22:32 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:23:20 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:23:20 lint/nursery/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
   
@@ -666,7 +666,7 @@ invalid.js:23:20 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:24:17 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:24:17 lint/nursery/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
   
@@ -692,7 +692,7 @@ invalid.js:24:17 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:25:16 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:25:16 lint/nursery/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
   
@@ -718,7 +718,7 @@ invalid.js:25:16 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:26:18 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:26:18 lint/nursery/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
   
@@ -744,7 +744,7 @@ invalid.js:26:18 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:27:24 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:27:24 lint/nursery/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
   
@@ -770,7 +770,7 @@ invalid.js:27:24 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:28:24 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:28:24 lint/nursery/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
   
@@ -796,7 +796,7 @@ invalid.js:28:24 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:29:24 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:29:24 lint/nursery/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
   
@@ -822,7 +822,7 @@ invalid.js:29:24 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:30:21 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:30:21 lint/nursery/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
   
@@ -848,7 +848,7 @@ invalid.js:30:21 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:31:22 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:31:22 lint/nursery/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
   
@@ -874,7 +874,7 @@ invalid.js:31:22 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:32:25 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:32:25 lint/nursery/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
   
@@ -900,7 +900,7 @@ invalid.js:32:25 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:33:22 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:33:22 lint/nursery/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
   
@@ -926,7 +926,7 @@ invalid.js:33:22 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:34:31 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:34:31 lint/nursery/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
   
@@ -952,7 +952,7 @@ invalid.js:34:31 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:35:18 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:35:18 lint/nursery/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
   
@@ -978,7 +978,7 @@ invalid.js:35:18 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:36:20 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:36:20 lint/nursery/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
   
@@ -1004,7 +1004,7 @@ invalid.js:36:20 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:37:30 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:37:30 lint/nursery/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
   
@@ -1030,7 +1030,7 @@ invalid.js:37:30 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:38:29 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:38:29 lint/nursery/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
   
@@ -1056,7 +1056,7 @@ invalid.js:38:29 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:39:24 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:39:24 lint/nursery/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
   
@@ -1082,7 +1082,7 @@ invalid.js:39:24 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:40:28 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:40:28 lint/nursery/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
   
@@ -1108,7 +1108,7 @@ invalid.js:40:28 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:41:17 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:41:17 lint/nursery/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
   
@@ -1134,7 +1134,7 @@ invalid.js:41:17 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:42:20 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:42:20 lint/nursery/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
   
@@ -1160,7 +1160,7 @@ invalid.js:42:20 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:43:29 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:43:29 lint/nursery/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
   
@@ -1186,7 +1186,7 @@ invalid.js:43:29 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:44:17 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:44:17 lint/nursery/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
   
@@ -1212,7 +1212,7 @@ invalid.js:44:17 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:45:26 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:45:26 lint/nursery/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
   
@@ -1238,7 +1238,7 @@ invalid.js:45:26 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:46:17 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:46:17 lint/nursery/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
   
@@ -1264,7 +1264,7 @@ invalid.js:46:17 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:47:17 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:47:17 lint/nursery/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
   
@@ -1290,7 +1290,7 @@ invalid.js:47:17 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:48:18 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:48:18 lint/nursery/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
   
@@ -1316,7 +1316,7 @@ invalid.js:48:18 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:49:24 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:49:24 lint/nursery/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
   
@@ -1342,7 +1342,7 @@ invalid.js:49:24 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:50:16 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:50:16 lint/nursery/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
   
@@ -1368,7 +1368,7 @@ invalid.js:50:16 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:51:16 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:51:16 lint/nursery/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
   
@@ -1394,7 +1394,7 @@ invalid.js:51:16 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:52:18 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:52:18 lint/nursery/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
   
@@ -1420,7 +1420,7 @@ invalid.js:52:18 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:53:28 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:53:28 lint/nursery/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
   
@@ -1446,7 +1446,7 @@ invalid.js:53:28 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:54:18 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:54:18 lint/nursery/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
   
@@ -1472,7 +1472,7 @@ invalid.js:54:18 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:57:9 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:57:9 lint/nursery/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
   
@@ -1497,7 +1497,7 @@ invalid.js:57:9 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.js:58:8 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:58:8 lint/nursery/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
   
@@ -1523,7 +1523,7 @@ invalid.js:58:8 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.js:61:20 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:61:20 lint/nursery/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
   
@@ -1548,7 +1548,7 @@ invalid.js:61:20 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:62:20 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:62:20 lint/nursery/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
   
@@ -1574,7 +1574,7 @@ invalid.js:62:20 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:65:26 lint/nursery/useNodeImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:65:26 lint/nursery/useNodejsImportProtocol  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! A Node.js builtin module should be imported with the node: protocol.
   

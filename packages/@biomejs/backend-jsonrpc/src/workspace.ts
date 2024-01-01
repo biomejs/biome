@@ -872,7 +872,7 @@ export interface Nursery {
 	/**
 	 * Forbid the use of Node.js builtin modules.
 	 */
-	noNodeModules?: RuleConfiguration;
+	noNodejsModules?: RuleConfiguration;
 	/**
 	 * Disallow then property.
 	 */
@@ -924,7 +924,7 @@ export interface Nursery {
 	/**
 	 * Enforces using the node: protocol for Node.js builtin modules.
 	 */
-	useNodeImportProtocol?: RuleConfiguration;
+	useNodejsImportProtocol?: RuleConfiguration;
 	/**
 	 * Use Number properties instead of global ones.
 	 */
@@ -1632,7 +1632,7 @@ export type Category =
 	| "lint/nursery/noImplicitAnyLet"
 	| "lint/nursery/noInvalidUseBeforeDeclaration"
 	| "lint/nursery/noMisleadingCharacterClass"
-	| "lint/nursery/noNodeModules"
+	| "lint/nursery/noNodejsModules"
 	| "lint/nursery/noThenProperty"
 	| "lint/nursery/noTypeOnlyImportAttributes"
 	| "lint/nursery/noUnusedImports"
@@ -1646,7 +1646,7 @@ export type Category =
 	| "lint/nursery/useForOf"
 	| "lint/nursery/useGroupedTypeImport"
 	| "lint/nursery/useImportRestrictions"
-	| "lint/nursery/useNodeImportProtocol"
+	| "lint/nursery/useNodejsImportProtocol"
 	| "lint/nursery/useNumberProperties"
 	| "lint/nursery/useRegexLiterals"
 	| "lint/nursery/useShorthandFunctionType"

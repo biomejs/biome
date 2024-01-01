@@ -1278,7 +1278,7 @@
 						{ "type": "null" }
 					]
 				},
-				"noNodeModules": {
+				"noNodejsModules": {
 					"description": "Forbid the use of Node.js builtin modules.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
@@ -1366,7 +1366,7 @@
 						{ "type": "null" }
 					]
 				},
-				"useNodeImportProtocol": {
+				"useNodejsImportProtocol": {
 					"description": "Enforces using the node: protocol for Node.js builtin modules.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },

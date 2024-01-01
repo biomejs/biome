@@ -11,7 +11,7 @@ const path = require('node:path');
 
 # Diagnostics
 ```
-invalid-cjs.cjs:1:20 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-cjs.cjs:1:20 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -28,7 +28,7 @@ invalid-cjs.cjs:1:20 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-cjs.cjs:2:22 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-cjs.cjs:2:22 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   

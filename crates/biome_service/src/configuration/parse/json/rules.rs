@@ -951,9 +951,9 @@ impl Deserializable for Nursery {
                                 diagnostics,
                             );
                         }
-                        "noNodeModules" => {
-                            result.no_node_modules =
-                                Deserializable::deserialize(&value, "noNodeModules", diagnostics);
+                        "noNodejsModules" => {
+                            result.no_nodejs_modules =
+                                Deserializable::deserialize(&value, "noNodejsModules", diagnostics);
                         }
                         "noThenProperty" => {
                             result.no_then_property =
@@ -1017,10 +1017,10 @@ impl Deserializable for Nursery {
                                 diagnostics,
                             );
                         }
-                        "useNodeImportProtocol" => {
-                            result.use_node_import_protocol = Deserializable::deserialize(
+                        "useNodejsImportProtocol" => {
+                            result.use_nodejs_import_protocol = Deserializable::deserialize(
                                 &value,
-                                "useNodeImportProtocol",
+                                "useNodejsImportProtocol",
                                 diagnostics,
                             );
                         }
@@ -1066,7 +1066,7 @@ impl Deserializable for Nursery {
                                     "noImplicitAnyLet",
                                     "noInvalidUseBeforeDeclaration",
                                     "noMisleadingCharacterClass",
-                                    "noNodeModules",
+                                    "noNodejsModules",
                                     "noThenProperty",
                                     "noUnusedImports",
                                     "noUnusedPrivateClassMembers",
@@ -1078,7 +1078,7 @@ impl Deserializable for Nursery {
                                     "useForOf",
                                     "useGroupedTypeImport",
                                     "useImportRestrictions",
-                                    "useNodeImportProtocol",
+                                    "useNodejsImportProtocol",
                                     "useNumberProperties",
                                     "useRegexLiterals",
                                     "useShorthandFunctionType",

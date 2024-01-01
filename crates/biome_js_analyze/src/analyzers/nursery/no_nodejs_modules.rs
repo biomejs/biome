@@ -4,7 +4,7 @@ use biome_console::markup;
 use biome_js_syntax::inner_string_text;
 use biome_rowan::TextRange;
 
-use super::use_node_import_protocol::AnyJsImportLike;
+use super::use_nodejs_import_protocol::AnyJsImportLike;
 
 declare_rule! {
     /// Forbid the use of Node.js builtin modules.
@@ -30,14 +30,14 @@ declare_rule! {
     /// ```js
     /// import fs from "fs-custom";
     /// ```
-    pub(crate) NoNodeModules {
+    pub(crate) NoNodejsModules {
         version: "next",
-        name: "noNodeModules",
+        name: "noNodejsModules",
         recommended: false,
     }
 }
 
-impl Rule for NoNodeModules {
+impl Rule for NoNodejsModules {
     type Query = Ast<AnyJsImportLike>;
     type State = TextRange;
     type Signals = Option<Self::State>;

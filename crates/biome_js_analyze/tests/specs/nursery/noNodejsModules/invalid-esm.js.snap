@@ -231,7 +231,7 @@ import("node:zlib");
 
 # Diagnostics
 ```
-invalid-esm.js:1:20 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:1:20 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -248,7 +248,7 @@ invalid-esm.js:1:20 lint/nursery/noNodeModules ━━━━━━━━━━━
 ```
 
 ```
-invalid-esm.js:2:27 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:2:27 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -266,7 +266,7 @@ invalid-esm.js:2:27 lint/nursery/noNodeModules ━━━━━━━━━━━
 ```
 
 ```
-invalid-esm.js:3:25 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:3:25 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -285,7 +285,7 @@ invalid-esm.js:3:25 lint/nursery/noNodeModules ━━━━━━━━━━━
 ```
 
 ```
-invalid-esm.js:4:20 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:4:20 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -304,7 +304,7 @@ invalid-esm.js:4:20 lint/nursery/noNodeModules ━━━━━━━━━━━
 ```
 
 ```
-invalid-esm.js:5:27 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:5:27 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -323,7 +323,7 @@ invalid-esm.js:5:27 lint/nursery/noNodeModules ━━━━━━━━━━━
 ```
 
 ```
-invalid-esm.js:6:21 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:6:21 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -342,7 +342,7 @@ invalid-esm.js:6:21 lint/nursery/noNodeModules ━━━━━━━━━━━
 ```
 
 ```
-invalid-esm.js:7:21 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:7:21 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -361,7 +361,7 @@ invalid-esm.js:7:21 lint/nursery/noNodeModules ━━━━━━━━━━━
 ```
 
 ```
-invalid-esm.js:8:23 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:8:23 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -380,7 +380,7 @@ invalid-esm.js:8:23 lint/nursery/noNodeModules ━━━━━━━━━━━
 ```
 
 ```
-invalid-esm.js:9:20 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:9:20 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -399,7 +399,7 @@ invalid-esm.js:9:20 lint/nursery/noNodeModules ━━━━━━━━━━━
 ```
 
 ```
-invalid-esm.js:10:19 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:10:19 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -418,7 +418,7 @@ invalid-esm.js:10:19 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:11:33 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:11:33 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -437,7 +437,7 @@ invalid-esm.js:11:33 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:12:17 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:12:17 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -456,7 +456,7 @@ invalid-esm.js:12:17 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:13:26 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:13:26 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -475,7 +475,7 @@ invalid-esm.js:13:26 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:14:20 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:14:20 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -494,7 +494,7 @@ invalid-esm.js:14:20 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:15:20 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:15:20 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -513,7 +513,7 @@ invalid-esm.js:15:20 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:16:16 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:16:16 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -532,7 +532,7 @@ invalid-esm.js:16:16 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:17:25 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:17:25 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -551,7 +551,7 @@ invalid-esm.js:17:25 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:18:18 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:18:18 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -570,7 +570,7 @@ invalid-esm.js:18:18 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:19:19 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:19:19 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -589,7 +589,7 @@ invalid-esm.js:19:19 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:20:19 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:20:19 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -608,7 +608,7 @@ invalid-esm.js:20:19 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:21:23 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:21:23 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -627,7 +627,7 @@ invalid-esm.js:21:23 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:22:32 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:22:32 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -646,7 +646,7 @@ invalid-esm.js:22:32 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:23:20 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:23:20 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -665,7 +665,7 @@ invalid-esm.js:23:20 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:24:17 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:24:17 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -684,7 +684,7 @@ invalid-esm.js:24:17 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:25:16 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:25:16 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -703,7 +703,7 @@ invalid-esm.js:25:16 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:26:18 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:26:18 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -722,7 +722,7 @@ invalid-esm.js:26:18 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:27:24 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:27:24 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -741,7 +741,7 @@ invalid-esm.js:27:24 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:28:24 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:28:24 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -760,7 +760,7 @@ invalid-esm.js:28:24 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:29:24 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:29:24 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -779,7 +779,7 @@ invalid-esm.js:29:24 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:30:21 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:30:21 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -798,7 +798,7 @@ invalid-esm.js:30:21 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:31:22 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:31:22 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -817,7 +817,7 @@ invalid-esm.js:31:22 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:32:25 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:32:25 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -836,7 +836,7 @@ invalid-esm.js:32:25 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:33:22 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:33:22 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -855,7 +855,7 @@ invalid-esm.js:33:22 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:34:31 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:34:31 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -874,7 +874,7 @@ invalid-esm.js:34:31 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:35:18 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:35:18 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -893,7 +893,7 @@ invalid-esm.js:35:18 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:36:20 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:36:20 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -912,7 +912,7 @@ invalid-esm.js:36:20 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:37:30 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:37:30 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -931,7 +931,7 @@ invalid-esm.js:37:30 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:38:29 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:38:29 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -950,7 +950,7 @@ invalid-esm.js:38:29 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:39:24 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:39:24 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -969,7 +969,7 @@ invalid-esm.js:39:24 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:40:28 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:40:28 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -988,7 +988,7 @@ invalid-esm.js:40:28 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:41:17 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:41:17 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -1007,7 +1007,7 @@ invalid-esm.js:41:17 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:42:20 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:42:20 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -1026,7 +1026,7 @@ invalid-esm.js:42:20 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:43:29 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:43:29 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -1045,7 +1045,7 @@ invalid-esm.js:43:29 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:44:17 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:44:17 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -1064,7 +1064,7 @@ invalid-esm.js:44:17 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:45:26 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:45:26 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -1083,7 +1083,7 @@ invalid-esm.js:45:26 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:46:17 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:46:17 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -1102,7 +1102,7 @@ invalid-esm.js:46:17 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:47:17 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:47:17 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -1121,7 +1121,7 @@ invalid-esm.js:47:17 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:48:18 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:48:18 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -1140,7 +1140,7 @@ invalid-esm.js:48:18 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:49:24 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:49:24 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -1159,7 +1159,7 @@ invalid-esm.js:49:24 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:50:16 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:50:16 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -1178,7 +1178,7 @@ invalid-esm.js:50:16 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:51:16 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:51:16 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -1197,7 +1197,7 @@ invalid-esm.js:51:16 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:52:18 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:52:18 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -1216,7 +1216,7 @@ invalid-esm.js:52:18 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:53:28 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:53:28 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -1235,7 +1235,7 @@ invalid-esm.js:53:28 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:54:18 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:54:18 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -1254,7 +1254,7 @@ invalid-esm.js:54:18 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:57:20 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:57:20 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -1272,7 +1272,7 @@ invalid-esm.js:57:20 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:58:27 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:58:27 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -1291,7 +1291,7 @@ invalid-esm.js:58:27 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:59:25 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:59:25 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -1310,7 +1310,7 @@ invalid-esm.js:59:25 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:60:20 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:60:20 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -1329,7 +1329,7 @@ invalid-esm.js:60:20 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:61:27 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:61:27 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -1348,7 +1348,7 @@ invalid-esm.js:61:27 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:62:21 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:62:21 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -1367,7 +1367,7 @@ invalid-esm.js:62:21 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:63:21 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:63:21 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -1386,7 +1386,7 @@ invalid-esm.js:63:21 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:64:23 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:64:23 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -1405,7 +1405,7 @@ invalid-esm.js:64:23 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:65:20 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:65:20 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -1424,7 +1424,7 @@ invalid-esm.js:65:20 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:66:19 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:66:19 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -1443,7 +1443,7 @@ invalid-esm.js:66:19 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:67:33 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:67:33 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -1462,7 +1462,7 @@ invalid-esm.js:67:33 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:68:17 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:68:17 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -1481,7 +1481,7 @@ invalid-esm.js:68:17 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:69:26 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:69:26 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -1500,7 +1500,7 @@ invalid-esm.js:69:26 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:70:20 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:70:20 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -1519,7 +1519,7 @@ invalid-esm.js:70:20 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:71:20 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:71:20 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -1538,7 +1538,7 @@ invalid-esm.js:71:20 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:72:16 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:72:16 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -1557,7 +1557,7 @@ invalid-esm.js:72:16 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:73:25 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:73:25 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -1576,7 +1576,7 @@ invalid-esm.js:73:25 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:74:18 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:74:18 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -1595,7 +1595,7 @@ invalid-esm.js:74:18 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:75:19 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:75:19 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -1614,7 +1614,7 @@ invalid-esm.js:75:19 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:76:19 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:76:19 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -1633,7 +1633,7 @@ invalid-esm.js:76:19 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:77:23 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:77:23 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -1652,7 +1652,7 @@ invalid-esm.js:77:23 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:78:32 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:78:32 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -1671,7 +1671,7 @@ invalid-esm.js:78:32 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:79:20 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:79:20 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -1690,7 +1690,7 @@ invalid-esm.js:79:20 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:80:17 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:80:17 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -1709,7 +1709,7 @@ invalid-esm.js:80:17 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:81:16 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:81:16 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -1728,7 +1728,7 @@ invalid-esm.js:81:16 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:82:18 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:82:18 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -1747,7 +1747,7 @@ invalid-esm.js:82:18 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:83:24 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:83:24 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -1766,7 +1766,7 @@ invalid-esm.js:83:24 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:84:24 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:84:24 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -1785,7 +1785,7 @@ invalid-esm.js:84:24 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:85:24 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:85:24 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -1804,7 +1804,7 @@ invalid-esm.js:85:24 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:86:21 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:86:21 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -1823,7 +1823,7 @@ invalid-esm.js:86:21 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:87:22 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:87:22 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -1842,7 +1842,7 @@ invalid-esm.js:87:22 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:88:25 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:88:25 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -1861,7 +1861,7 @@ invalid-esm.js:88:25 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:89:22 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:89:22 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -1880,7 +1880,7 @@ invalid-esm.js:89:22 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:90:31 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:90:31 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -1899,7 +1899,7 @@ invalid-esm.js:90:31 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:91:18 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:91:18 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -1918,7 +1918,7 @@ invalid-esm.js:91:18 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:92:20 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:92:20 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -1937,7 +1937,7 @@ invalid-esm.js:92:20 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:93:30 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:93:30 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -1956,7 +1956,7 @@ invalid-esm.js:93:30 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:94:29 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:94:29 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -1975,7 +1975,7 @@ invalid-esm.js:94:29 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:95:24 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:95:24 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -1994,7 +1994,7 @@ invalid-esm.js:95:24 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:96:28 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:96:28 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -2013,7 +2013,7 @@ invalid-esm.js:96:28 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:97:17 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:97:17 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -2032,7 +2032,7 @@ invalid-esm.js:97:17 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:98:20 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:98:20 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -2051,7 +2051,7 @@ invalid-esm.js:98:20 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:99:29 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:99:29 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -2070,7 +2070,7 @@ invalid-esm.js:99:29 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:100:17 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:100:17 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -2089,7 +2089,7 @@ invalid-esm.js:100:17 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:101:26 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:101:26 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -2108,7 +2108,7 @@ invalid-esm.js:101:26 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:102:17 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:102:17 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -2127,7 +2127,7 @@ invalid-esm.js:102:17 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:103:17 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:103:17 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -2146,7 +2146,7 @@ invalid-esm.js:103:17 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:104:18 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:104:18 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -2165,7 +2165,7 @@ invalid-esm.js:104:18 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:105:24 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:105:24 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -2184,7 +2184,7 @@ invalid-esm.js:105:24 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:106:16 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:106:16 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -2203,7 +2203,7 @@ invalid-esm.js:106:16 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:107:16 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:107:16 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -2222,7 +2222,7 @@ invalid-esm.js:107:16 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:108:18 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:108:18 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -2241,7 +2241,7 @@ invalid-esm.js:108:18 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:109:28 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:109:28 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -2260,7 +2260,7 @@ invalid-esm.js:109:28 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:110:18 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:110:18 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -2279,7 +2279,7 @@ invalid-esm.js:110:18 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:113:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:113:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -2297,7 +2297,7 @@ invalid-esm.js:113:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:114:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:114:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -2316,7 +2316,7 @@ invalid-esm.js:114:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:115:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:115:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -2335,7 +2335,7 @@ invalid-esm.js:115:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:116:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:116:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -2354,7 +2354,7 @@ invalid-esm.js:116:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:117:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:117:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -2373,7 +2373,7 @@ invalid-esm.js:117:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:118:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:118:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -2392,7 +2392,7 @@ invalid-esm.js:118:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:119:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:119:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -2411,7 +2411,7 @@ invalid-esm.js:119:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:120:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:120:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -2430,7 +2430,7 @@ invalid-esm.js:120:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:121:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:121:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -2449,7 +2449,7 @@ invalid-esm.js:121:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:122:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:122:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -2468,7 +2468,7 @@ invalid-esm.js:122:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:123:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:123:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -2487,7 +2487,7 @@ invalid-esm.js:123:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:124:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:124:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -2506,7 +2506,7 @@ invalid-esm.js:124:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:125:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:125:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -2525,7 +2525,7 @@ invalid-esm.js:125:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:126:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:126:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -2544,7 +2544,7 @@ invalid-esm.js:126:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:127:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:127:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -2563,7 +2563,7 @@ invalid-esm.js:127:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:128:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:128:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -2582,7 +2582,7 @@ invalid-esm.js:128:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:129:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:129:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -2601,7 +2601,7 @@ invalid-esm.js:129:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:130:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:130:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -2620,7 +2620,7 @@ invalid-esm.js:130:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:131:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:131:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -2639,7 +2639,7 @@ invalid-esm.js:131:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:132:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:132:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -2658,7 +2658,7 @@ invalid-esm.js:132:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:133:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:133:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -2677,7 +2677,7 @@ invalid-esm.js:133:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:134:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:134:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -2696,7 +2696,7 @@ invalid-esm.js:134:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:135:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:135:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -2715,7 +2715,7 @@ invalid-esm.js:135:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:136:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:136:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -2734,7 +2734,7 @@ invalid-esm.js:136:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:137:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:137:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -2753,7 +2753,7 @@ invalid-esm.js:137:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:138:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:138:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -2772,7 +2772,7 @@ invalid-esm.js:138:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:139:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:139:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -2791,7 +2791,7 @@ invalid-esm.js:139:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:140:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:140:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -2810,7 +2810,7 @@ invalid-esm.js:140:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:141:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:141:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -2829,7 +2829,7 @@ invalid-esm.js:141:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:142:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:142:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -2848,7 +2848,7 @@ invalid-esm.js:142:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:143:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:143:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -2867,7 +2867,7 @@ invalid-esm.js:143:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:144:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:144:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -2886,7 +2886,7 @@ invalid-esm.js:144:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:145:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:145:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -2905,7 +2905,7 @@ invalid-esm.js:145:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:146:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:146:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -2924,7 +2924,7 @@ invalid-esm.js:146:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:147:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:147:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -2943,7 +2943,7 @@ invalid-esm.js:147:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:148:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:148:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -2962,7 +2962,7 @@ invalid-esm.js:148:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:149:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:149:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -2981,7 +2981,7 @@ invalid-esm.js:149:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:150:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:150:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -3000,7 +3000,7 @@ invalid-esm.js:150:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:151:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:151:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -3019,7 +3019,7 @@ invalid-esm.js:151:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:152:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:152:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -3038,7 +3038,7 @@ invalid-esm.js:152:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:153:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:153:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -3057,7 +3057,7 @@ invalid-esm.js:153:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:154:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:154:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -3076,7 +3076,7 @@ invalid-esm.js:154:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:155:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:155:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -3095,7 +3095,7 @@ invalid-esm.js:155:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:156:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:156:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -3114,7 +3114,7 @@ invalid-esm.js:156:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:157:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:157:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -3133,7 +3133,7 @@ invalid-esm.js:157:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:158:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:158:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -3152,7 +3152,7 @@ invalid-esm.js:158:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:159:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:159:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -3171,7 +3171,7 @@ invalid-esm.js:159:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:160:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:160:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -3190,7 +3190,7 @@ invalid-esm.js:160:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:161:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:161:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -3209,7 +3209,7 @@ invalid-esm.js:161:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:162:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:162:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -3228,7 +3228,7 @@ invalid-esm.js:162:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:163:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:163:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -3247,7 +3247,7 @@ invalid-esm.js:163:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:164:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:164:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -3266,7 +3266,7 @@ invalid-esm.js:164:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:165:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:165:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -3285,7 +3285,7 @@ invalid-esm.js:165:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:166:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:166:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -3304,7 +3304,7 @@ invalid-esm.js:166:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:169:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:169:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -3322,7 +3322,7 @@ invalid-esm.js:169:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:170:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:170:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -3341,7 +3341,7 @@ invalid-esm.js:170:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:171:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:171:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -3360,7 +3360,7 @@ invalid-esm.js:171:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:172:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:172:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -3379,7 +3379,7 @@ invalid-esm.js:172:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:173:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:173:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -3398,7 +3398,7 @@ invalid-esm.js:173:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:174:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:174:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -3417,7 +3417,7 @@ invalid-esm.js:174:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:175:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:175:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -3436,7 +3436,7 @@ invalid-esm.js:175:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:176:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:176:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -3455,7 +3455,7 @@ invalid-esm.js:176:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:177:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:177:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -3474,7 +3474,7 @@ invalid-esm.js:177:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:178:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:178:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -3493,7 +3493,7 @@ invalid-esm.js:178:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:179:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:179:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -3512,7 +3512,7 @@ invalid-esm.js:179:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:180:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:180:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -3531,7 +3531,7 @@ invalid-esm.js:180:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:181:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:181:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -3550,7 +3550,7 @@ invalid-esm.js:181:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:182:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:182:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -3569,7 +3569,7 @@ invalid-esm.js:182:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:183:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:183:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -3588,7 +3588,7 @@ invalid-esm.js:183:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:184:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:184:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -3607,7 +3607,7 @@ invalid-esm.js:184:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:185:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:185:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -3626,7 +3626,7 @@ invalid-esm.js:185:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:186:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:186:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -3645,7 +3645,7 @@ invalid-esm.js:186:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:187:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:187:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -3664,7 +3664,7 @@ invalid-esm.js:187:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:188:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:188:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -3683,7 +3683,7 @@ invalid-esm.js:188:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:189:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:189:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -3702,7 +3702,7 @@ invalid-esm.js:189:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:190:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:190:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -3721,7 +3721,7 @@ invalid-esm.js:190:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:191:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:191:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -3740,7 +3740,7 @@ invalid-esm.js:191:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:192:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:192:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -3759,7 +3759,7 @@ invalid-esm.js:192:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:193:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:193:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -3778,7 +3778,7 @@ invalid-esm.js:193:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:194:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:194:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -3797,7 +3797,7 @@ invalid-esm.js:194:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:195:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:195:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -3816,7 +3816,7 @@ invalid-esm.js:195:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:196:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:196:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -3835,7 +3835,7 @@ invalid-esm.js:196:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:197:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:197:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -3854,7 +3854,7 @@ invalid-esm.js:197:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:198:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:198:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -3873,7 +3873,7 @@ invalid-esm.js:198:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:199:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:199:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -3892,7 +3892,7 @@ invalid-esm.js:199:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:200:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:200:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -3911,7 +3911,7 @@ invalid-esm.js:200:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:201:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:201:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -3930,7 +3930,7 @@ invalid-esm.js:201:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:202:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:202:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -3949,7 +3949,7 @@ invalid-esm.js:202:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:203:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:203:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -3968,7 +3968,7 @@ invalid-esm.js:203:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:204:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:204:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -3987,7 +3987,7 @@ invalid-esm.js:204:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:205:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:205:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -4006,7 +4006,7 @@ invalid-esm.js:205:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:206:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:206:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -4025,7 +4025,7 @@ invalid-esm.js:206:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:207:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:207:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -4044,7 +4044,7 @@ invalid-esm.js:207:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:208:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:208:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -4063,7 +4063,7 @@ invalid-esm.js:208:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:209:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:209:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -4082,7 +4082,7 @@ invalid-esm.js:209:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:210:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:210:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -4101,7 +4101,7 @@ invalid-esm.js:210:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:211:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:211:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -4120,7 +4120,7 @@ invalid-esm.js:211:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:212:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:212:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -4139,7 +4139,7 @@ invalid-esm.js:212:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:213:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:213:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -4158,7 +4158,7 @@ invalid-esm.js:213:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:214:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:214:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -4177,7 +4177,7 @@ invalid-esm.js:214:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:215:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:215:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -4196,7 +4196,7 @@ invalid-esm.js:215:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:216:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:216:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -4215,7 +4215,7 @@ invalid-esm.js:216:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:217:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:217:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -4234,7 +4234,7 @@ invalid-esm.js:217:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:218:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:218:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -4253,7 +4253,7 @@ invalid-esm.js:218:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:219:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:219:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -4272,7 +4272,7 @@ invalid-esm.js:219:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:220:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:220:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -4291,7 +4291,7 @@ invalid-esm.js:220:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:221:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:221:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   
@@ -4310,7 +4310,7 @@ invalid-esm.js:221:8 lint/nursery/noNodeModules ━━━━━━━━━━�
 ```
 
 ```
-invalid-esm.js:222:8 lint/nursery/noNodeModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-esm.js:222:8 lint/nursery/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using Node.js modules are forbidden.
   

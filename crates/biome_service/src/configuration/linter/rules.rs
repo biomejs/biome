@@ -2515,7 +2515,7 @@ pub struct Nursery {
     pub no_misleading_character_class: Option<RuleConfiguration>,
     #[doc = "Forbid the use of Node.js builtin modules."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_node_modules: Option<RuleConfiguration>,
+    pub no_nodejs_modules: Option<RuleConfiguration>,
     #[doc = "Disallow then property."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_then_property: Option<RuleConfiguration>,
@@ -2551,7 +2551,7 @@ pub struct Nursery {
     pub use_import_restrictions: Option<RuleConfiguration>,
     #[doc = "Enforces using the node: protocol for Node.js builtin modules."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_node_import_protocol: Option<RuleConfiguration>,
+    pub use_nodejs_import_protocol: Option<RuleConfiguration>,
     #[doc = "Use Number properties instead of global ones."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_number_properties: Option<RuleConfiguration>,
@@ -2588,8 +2588,8 @@ impl MergeWith<Nursery> for Nursery {
         if let Some(no_misleading_character_class) = other.no_misleading_character_class {
             self.no_misleading_character_class = Some(no_misleading_character_class);
         }
-        if let Some(no_node_modules) = other.no_node_modules {
-            self.no_node_modules = Some(no_node_modules);
+        if let Some(no_nodejs_modules) = other.no_nodejs_modules {
+            self.no_nodejs_modules = Some(no_nodejs_modules);
         }
         if let Some(no_then_property) = other.no_then_property {
             self.no_then_property = Some(no_then_property);
@@ -2624,8 +2624,8 @@ impl MergeWith<Nursery> for Nursery {
         if let Some(use_import_restrictions) = other.use_import_restrictions {
             self.use_import_restrictions = Some(use_import_restrictions);
         }
-        if let Some(use_node_import_protocol) = other.use_node_import_protocol {
-            self.use_node_import_protocol = Some(use_node_import_protocol);
+        if let Some(use_nodejs_import_protocol) = other.use_nodejs_import_protocol {
+            self.use_nodejs_import_protocol = Some(use_nodejs_import_protocol);
         }
         if let Some(use_number_properties) = other.use_number_properties {
             self.use_number_properties = Some(use_number_properties);
@@ -2659,7 +2659,7 @@ impl Nursery {
         "noImplicitAnyLet",
         "noInvalidUseBeforeDeclaration",
         "noMisleadingCharacterClass",
-        "noNodeModules",
+        "noNodejsModules",
         "noThenProperty",
         "noUnusedImports",
         "noUnusedPrivateClassMembers",
@@ -2671,7 +2671,7 @@ impl Nursery {
         "useForOf",
         "useGroupedTypeImport",
         "useImportRestrictions",
-        "useNodeImportProtocol",
+        "useNodejsImportProtocol",
         "useNumberProperties",
         "useRegexLiterals",
         "useShorthandFunctionType",
@@ -2777,7 +2777,7 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[6]));
             }
         }
-        if let Some(rule) = self.no_node_modules.as_ref() {
+        if let Some(rule) = self.no_nodejs_modules.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]));
             }
@@ -2837,7 +2837,7 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]));
             }
         }
-        if let Some(rule) = self.use_node_import_protocol.as_ref() {
+        if let Some(rule) = self.use_nodejs_import_protocol.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]));
             }
@@ -2901,7 +2901,7 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[6]));
             }
         }
-        if let Some(rule) = self.no_node_modules.as_ref() {
+        if let Some(rule) = self.no_nodejs_modules.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]));
             }
@@ -2961,7 +2961,7 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]));
             }
         }
-        if let Some(rule) = self.use_node_import_protocol.as_ref() {
+        if let Some(rule) = self.use_nodejs_import_protocol.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]));
             }
@@ -3029,7 +3029,7 @@ impl Nursery {
             "noImplicitAnyLet" => self.no_implicit_any_let.as_ref(),
             "noInvalidUseBeforeDeclaration" => self.no_invalid_use_before_declaration.as_ref(),
             "noMisleadingCharacterClass" => self.no_misleading_character_class.as_ref(),
-            "noNodeModules" => self.no_node_modules.as_ref(),
+            "noNodejsModules" => self.no_nodejs_modules.as_ref(),
             "noThenProperty" => self.no_then_property.as_ref(),
             "noUnusedImports" => self.no_unused_imports.as_ref(),
             "noUnusedPrivateClassMembers" => self.no_unused_private_class_members.as_ref(),
@@ -3041,7 +3041,7 @@ impl Nursery {
             "useForOf" => self.use_for_of.as_ref(),
             "useGroupedTypeImport" => self.use_grouped_type_import.as_ref(),
             "useImportRestrictions" => self.use_import_restrictions.as_ref(),
-            "useNodeImportProtocol" => self.use_node_import_protocol.as_ref(),
+            "useNodejsImportProtocol" => self.use_nodejs_import_protocol.as_ref(),
             "useNumberProperties" => self.use_number_properties.as_ref(),
             "useRegexLiterals" => self.use_regex_literals.as_ref(),
             "useShorthandFunctionType" => self.use_shorthand_function_type.as_ref(),

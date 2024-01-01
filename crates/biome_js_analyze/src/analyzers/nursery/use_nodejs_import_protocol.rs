@@ -45,15 +45,15 @@ declare_rule! {
     /// import path from 'node:path';
     /// ```
     ///
-    pub(crate) UseNodeImportProtocol {
+    pub(crate) UseNodejsImportProtocol {
         version: "next",
-        name: "useNodeImportProtocol",
+        name: "useNodejsImportProtocol",
         recommended: false,
         fix_kind: FixKind::Unsafe,
     }
 }
 
-impl Rule for UseNodeImportProtocol {
+impl Rule for UseNodejsImportProtocol {
     type Query = Ast<AnyJsImportLike>;
     type State = JsSyntaxToken;
     type Signals = Option<Self::State>;
@@ -78,7 +78,10 @@ impl Rule for UseNodeImportProtocol {
     }
 
     fn action(ctx: &RuleContext<Self>, module_name: &Self::State) -> Option<JsRuleAction> {
-        debug_assert!(module_name.kind() == JsSyntaxKind::JS_STRING_LITERAL);
+        debug_assert!(
+            module_name.kind() == JsSyntaxKind::JS_STRING_LITERAL,
+            "The module name token should be a string literal."
+        );
         let delimiter = module_name.text_trimmed().chars().nth(0)?;
         let module_inner_name = inner_string_text(module_name);
         let new_module_name = JsSyntaxToken::new_detached(
