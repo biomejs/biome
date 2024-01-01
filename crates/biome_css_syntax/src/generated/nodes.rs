@@ -2822,13 +2822,13 @@ impl CssPercentage {
     pub fn as_fields(&self) -> CssPercentageFields {
         CssPercentageFields {
             value_token: self.value_token(),
-            reminder_token: self.reminder_token(),
+            percent_token: self.percent_token(),
         }
     }
     pub fn value_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn reminder_token(&self) -> SyntaxResult<SyntaxToken> {
+    pub fn percent_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 1usize)
     }
 }
@@ -2844,7 +2844,7 @@ impl Serialize for CssPercentage {
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct CssPercentageFields {
     pub value_token: SyntaxResult<SyntaxToken>,
-    pub reminder_token: SyntaxResult<SyntaxToken>,
+    pub percent_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssPseudoClassFunctionCompoundSelector {
@@ -9406,8 +9406,8 @@ impl std::fmt::Debug for CssPercentage {
                 &support::DebugSyntaxResult(self.value_token()),
             )
             .field(
-                "reminder_token",
-                &support::DebugSyntaxResult(self.reminder_token()),
+                "percent_token",
+                &support::DebugSyntaxResult(self.percent_token()),
             )
             .finish()
     }
