@@ -7,9 +7,9 @@ impl FormatNodeRule<CssPercentage> for FormatCssPercentage {
     fn fmt_fields(&self, node: &CssPercentage, f: &mut CssFormatter) -> FormatResult<()> {
         let CssPercentageFields {
             value_token,
-            reminder_token,
+            percent_token,
         } = node.as_fields();
 
-        write!(f, [value_token.format(), reminder_token.format()])
+        write!(f, [value_token.format(), percent_token.format()])
     }
 }

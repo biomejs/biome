@@ -126,7 +126,7 @@ CssRoot {
                                                                 css_component_value_list: CssComponentValueList [
                                                                     CssPercentage {
                                                                         value_token: CSS_NUMBER_LITERAL@45..46 "0" [] [],
-                                                                        reminder_token: PERCENT@46..47 "%" [] [],
+                                                                        percent_token: PERCENT@46..47 "%" [] [],
                                                                     },
                                                                 ],
                                                             },
@@ -168,7 +168,7 @@ CssRoot {
                                                                 css_component_value_list: CssComponentValueList [
                                                                     CssPercentage {
                                                                         value_token: CSS_NUMBER_LITERAL@84..87 "100" [] [],
-                                                                        reminder_token: PERCENT@87..88 "%" [] [],
+                                                                        percent_token: PERCENT@87..88 "%" [] [],
                                                                     },
                                                                 ],
                                                             },
@@ -222,7 +222,7 @@ CssRoot {
                                                             css_component_value_list: CssComponentValueList [
                                                                 CssPercentage {
                                                                     value_token: CSS_NUMBER_LITERAL@145..146 "0" [] [],
-                                                                    reminder_token: PERCENT@146..147 "%" [] [],
+                                                                    percent_token: PERCENT@146..147 "%" [] [],
                                                                 },
                                                             ],
                                                         },
@@ -283,7 +283,7 @@ CssRoot {
                                                             css_component_value_list: CssComponentValueList [
                                                                 CssPercentage {
                                                                     value_token: CSS_NUMBER_LITERAL@212..215 "100" [] [],
-                                                                    reminder_token: PERCENT@215..216 "%" [] [],
+                                                                    percent_token: PERCENT@215..216 "%" [] [],
                                                                 },
                                                             ],
                                                         },
@@ -343,7 +343,7 @@ CssRoot {
                                                             css_component_value_list: CssComponentValueList [
                                                                 CssPercentage {
                                                                     value_token: CSS_NUMBER_LITERAL@279..280 "0" [] [],
-                                                                    reminder_token: PERCENT@280..281 "%" [] [],
+                                                                    percent_token: PERCENT@280..281 "%" [] [],
                                                                 },
                                                             ],
                                                         },
@@ -402,7 +402,7 @@ CssRoot {
                                                                     css_component_value_list: CssComponentValueList [
                                                                         CssPercentage {
                                                                             value_token: CSS_NUMBER_LITERAL@343..344 "0" [] [],
-                                                                            reminder_token: PERCENT@344..345 "%" [] [],
+                                                                            percent_token: PERCENT@344..345 "%" [] [],
                                                                         },
                                                                     ],
                                                                 },
@@ -474,7 +474,7 @@ CssRoot {
                                 CssKeyframesPercentageSelector {
                                     selector: CssPercentage {
                                         value_token: CSS_NUMBER_LITERAL@444..445 "0" [] [],
-                                        reminder_token: PERCENT@445..446 "%" [] [],
+                                        percent_token: PERCENT@445..446 "%" [] [],
                                     },
                                 },
                                 missing separator,
@@ -510,7 +510,7 @@ CssRoot {
                                                             css_component_value_list: CssComponentValueList [
                                                                 CssPercentage {
                                                                     value_token: CSS_NUMBER_LITERAL@483..486 "100" [] [],
-                                                                    reminder_token: PERCENT@486..487 "%" [] [],
+                                                                    percent_token: PERCENT@486..487 "%" [] [],
                                                                 },
                                                             ],
                                                         },
@@ -570,7 +570,7 @@ CssRoot {
                                                                         css_component_value_list: CssComponentValueList [
                                                                             CssPercentage {
                                                                                 value_token: CSS_NUMBER_LITERAL@549..550 "0" [] [],
-                                                                                reminder_token: PERCENT@550..551 "%" [] [],
+                                                                                percent_token: PERCENT@550..551 "%" [] [],
                                                                             },
                                                                         ],
                                                                     },
@@ -604,7 +604,7 @@ CssRoot {
                                             CssKeyframesPercentageSelector {
                                                 selector: CssPercentage {
                                                     value_token: CSS_NUMBER_LITERAL@586..589 "100" [] [],
-                                                    reminder_token: PERCENT@589..590 "%" [] [],
+                                                    percent_token: PERCENT@589..590 "%" [] [],
                                                 },
                                             },
                                             missing separator,
@@ -678,7 +678,7 @@ CssRoot {
                                                                         css_component_value_list: CssComponentValueList [
                                                                             CssPercentage {
                                                                                 value_token: CSS_NUMBER_LITERAL@691..694 "100" [] [],
-                                                                                reminder_token: PERCENT@694..695 "%" [] [],
+                                                                                percent_token: PERCENT@694..695 "%" [] [],
                                                                             },
                                                                         ],
                                                                     },
