@@ -130,6 +130,7 @@ impl DeserializationVisitor for CssFormatterVisitor {
             "indentWidth",
             "lineEnding",
             "lineWidth",
+            "quoteStyle",
         ];
         let mut result = Self::Output::default();
         for (key, value) in members.flatten() {
@@ -163,6 +164,10 @@ impl DeserializationVisitor for CssFormatterVisitor {
                 }
                 "lineWidth" => {
                     result.line_width = Deserializable::deserialize(&value, &key_text, diagnostics);
+                }
+                "quoteStyle" => {
+                    result.quote_style =
+                        Deserializable::deserialize(&value, &key_text, diagnostics);
                 }
                 unknown_key => {
                     diagnostics.push(DeserializationDiagnostic::new_unknown_key(

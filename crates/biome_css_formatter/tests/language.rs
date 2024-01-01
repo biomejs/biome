@@ -3,7 +3,7 @@ use biome_css_formatter::{format_node, format_range, CssFormatLanguage};
 use biome_css_parser::{parse_css, CssParserOptions};
 use biome_css_syntax::{CssFileSource, CssLanguage};
 use biome_formatter::{
-    FormatContext, FormatResult, Formatted, IndentStyle, LineEnding, LineWidth, Printed,
+    FormatContext, FormatResult, Formatted, IndentStyle, LineEnding, LineWidth, Printed, QuoteStyle,
 };
 use biome_formatter_test::TestFormatLanguage;
 use biome_parser::AnyParse;
@@ -63,24 +63,39 @@ impl TestFormatLanguage for CssTestFormatLanguage {
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Copy, Deserialize, Serialize)]
-pub enum JsonSerializableIndentStyle {
+pub enum CssSerializableIndentStyle {
     /// Tab
     Tab,
     /// Space
     Space,
 }
 
-impl From<JsonSerializableIndentStyle> for IndentStyle {
-    fn from(test: JsonSerializableIndentStyle) -> Self {
+impl From<CssSerializableIndentStyle> for IndentStyle {
+    fn from(test: CssSerializableIndentStyle) -> Self {
         match test {
-            JsonSerializableIndentStyle::Tab => IndentStyle::Tab,
-            JsonSerializableIndentStyle::Space => IndentStyle::Space,
+            CssSerializableIndentStyle::Tab => IndentStyle::Tab,
+            CssSerializableIndentStyle::Space => IndentStyle::Space,
         }
     }
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Copy, Deserialize, Serialize)]
-pub enum JsonSerializableLineEnding {
+pub enum CssSerializableQuoteStyle {
+    Double,
+    Single,
+}
+
+impl From<CssSerializableQuoteStyle> for QuoteStyle {
+    fn from(test: CssSerializableQuoteStyle) -> Self {
+        match test {
+            CssSerializableQuoteStyle::Double => QuoteStyle::Double,
+            CssSerializableQuoteStyle::Single => QuoteStyle::Single,
+        }
+    }
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Copy, Deserialize, Serialize)]
+pub enum CssSerializableLineEnding {
     ///  Line Feed only (\n), common on Linux and macOS as well as inside git repos
     Lf,
 
@@ -91,33 +106,36 @@ pub enum JsonSerializableLineEnding {
     Cr,
 }
 
-impl From<JsonSerializableLineEnding> for LineEnding {
-    fn from(test: JsonSerializableLineEnding) -> Self {
+impl From<CssSerializableLineEnding> for LineEnding {
+    fn from(test: CssSerializableLineEnding) -> Self {
         match test {
-            JsonSerializableLineEnding::Lf => LineEnding::Lf,
-            JsonSerializableLineEnding::Crlf => LineEnding::Crlf,
-            JsonSerializableLineEnding::Cr => LineEnding::Cr,
+            CssSerializableLineEnding::Lf => LineEnding::Lf,
+            CssSerializableLineEnding::Crlf => LineEnding::Crlf,
+            CssSerializableLineEnding::Cr => LineEnding::Cr,
         }
     }
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone, Copy)]
-pub struct JsonSerializableFormatOptions {
+pub struct CssSerializableFormatOptions {
     /// The indent style.
-    pub indent_style: Option<JsonSerializableIndentStyle>,
+    pub indent_style: Option<CssSerializableIndentStyle>,
 
     /// The indent width.
     pub indent_width: Option<u8>,
 
     /// The type of line ending.
-    pub line_ending: Option<JsonSerializableLineEnding>,
+    pub line_ending: Option<CssSerializableLineEnding>,
 
     /// What's the max width of a line. Defaults to 80.
     pub line_width: Option<u16>,
+
+    /// The style for quotes. Defaults to double.
+    pub quote_style: Option<CssSerializableQuoteStyle>,
 }
 
-impl From<JsonSerializableFormatOptions> for CssFormatOptions {
-    fn from(test: JsonSerializableFormatOptions) -> Self {
+impl From<CssSerializableFormatOptions> for CssFormatOptions {
+    fn from(test: CssSerializableFormatOptions) -> Self {
         CssFormatOptions::default()
             .with_indent_style(test.indent_style.map(Into::into).unwrap_or_default())
             .with_indent_width(test.indent_width.map(Into::into).unwrap_or_default())
@@ -126,10 +144,14 @@ impl From<JsonSerializableFormatOptions> for CssFormatOptions {
                     .and_then(|width| LineWidth::try_from(width).ok())
                     .unwrap_or_default(),
             )
+            .with_quote_style(
+                test.quote_style
+                    .map_or_else(|| QuoteStyle::Double, |value| value.into()),
+            )
     }
 }
 
 #[derive(Debug, Deserialize, Serialize)]
 struct TestOptions {
-    cases: Vec<JsonSerializableFormatOptions>,
+    cases: Vec<CssSerializableFormatOptions>,
 }

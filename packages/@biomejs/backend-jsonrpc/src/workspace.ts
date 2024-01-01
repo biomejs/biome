@@ -262,6 +262,7 @@ export interface CssFormatter {
 	 * What's the max width of a line applied to CSS (and its super languages) files. Defaults to 80.
 	 */
 	lineWidth?: LineWidth;
+	quoteStyle?: QuoteStyle;
 }
 /**
  * Options that changes how the CSS parser behaves
@@ -445,8 +446,8 @@ export interface OverridePattern {
 	organizeImports?: OverrideOrganizeImportsConfiguration;
 }
 export type VcsClientKind = "git";
-export type ArrowParentheses = "always" | "asNeeded";
 export type QuoteStyle = "double" | "single";
+export type ArrowParentheses = "always" | "asNeeded";
 export type QuoteProperties = "asNeeded" | "preserve";
 export type Semicolons = "always" | "asNeeded";
 /**

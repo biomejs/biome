@@ -1,6 +1,6 @@
-use biome_formatter::{IndentStyle, LineWidth};
+use biome_formatter::{IndentStyle, LineWidth, QuoteStyle};
 use biome_formatter_test::check_reformat::CheckReformat;
-use biome_js_formatter::context::{ArrowParentheses, JsFormatOptions, QuoteStyle, Semicolons};
+use biome_js_formatter::context::{ArrowParentheses, JsFormatOptions, Semicolons};
 use biome_js_formatter::format_node;
 use biome_js_parser::{parse, JsParserOptions};
 use biome_js_syntax::JsFileSource;
