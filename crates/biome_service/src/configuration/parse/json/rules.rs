@@ -1369,11 +1369,11 @@ impl Deserializable for Style {
                                 diagnostics,
                             );
                         }
-                         "useConsistentArrayType" => {
+                        "useConsistentArrayType" => {
                             result.use_consistent_array_type = Deserializable::deserialize(
                                 &value,
                                 "useConsistentArrayType",
-                                diagnostics
+                                diagnostics,
                             );
                         }
                         "useConst" => {

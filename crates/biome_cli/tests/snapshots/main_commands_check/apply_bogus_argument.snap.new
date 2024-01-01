@@ -1,0 +1,64 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 388
+expression: content
+---
+## `fix.js`
+
+```js
+function _1313Fun(arguments) { }
+```
+
+# Termination Message
+
+```block
+check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+fix.js:1:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Illegal use of `arguments` as an identifier in strict mode
+  
+  > 1 │ function _1313Fun(arguments) { }
+      │                   ^^^^^^^^^
+  
+
+```
+
+```block
+fix.js lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Fixes applied to the file, but there are still diagnostics to address.
+  
+
+```
+
+```block
+fix.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Format with errors is disabled.
+  
+
+```
+
+```block
+fix.js check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Fixes applied to the file, but there are still diagnostics to address.
+  
+
+```
+
+```block
+Fixed 1 file(s) in <TIME>
+```
+
+

@@ -1833,7 +1833,7 @@
 					]
 				},
 				"useConsistentArrayType": {
-					"description": "Require consistently using either `T[]` or `Array<T>`",
+					"description": "Require consistently using either `T[]` or `Array<T>`.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
