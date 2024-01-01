@@ -870,7 +870,7 @@ export interface Nursery {
 	 */
 	noMisleadingCharacterClass?: RuleConfiguration;
 	/**
-	 * Forbid the use of Node.js builtin modules. Can be useful for client-side web projects that do not have access to those modules.
+	 * Forbid the use of Node.js builtin modules.
 	 */
 	noNodejsModules?: RuleConfiguration;
 	/**
@@ -924,11 +924,11 @@ export interface Nursery {
 	/**
 	 * Enforces using the node: protocol for Node.js builtin modules.
 	 */
-	useNodeImportProtocol?: RuleConfiguration;
+	useNodejsImportProtocol?: RuleConfiguration;
 	/**
-	 * Use Number properties instead of global ones.
+	 * Use the Number properties instead of global ones.
 	 */
-	useNumberProperties?: RuleConfiguration;
+	useNumberNamespace?: RuleConfiguration;
 	/**
 	 * Enforce the use of the regular expression literals instead of the RegExp constructor if possible.
 	 */
@@ -1646,8 +1646,8 @@ export type Category =
 	| "lint/nursery/useForOf"
 	| "lint/nursery/useGroupedTypeImport"
 	| "lint/nursery/useImportRestrictions"
-	| "lint/nursery/useNodeImportProtocol"
-	| "lint/nursery/useNumberProperties"
+	| "lint/nursery/useNodejsImportProtocol"
+	| "lint/nursery/useNumberNamespace"
 	| "lint/nursery/useRegexLiterals"
 	| "lint/nursery/useShorthandFunctionType"
 	| "lint/nursery/useValidAriaRole"

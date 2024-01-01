@@ -306,7 +306,7 @@ CssRoot {
                                                 },
                                                 CssPercentage {
                                                     value_token: CSS_NUMBER_LITERAL@315..316 "0" [] [],
-                                                    reminder_token: PERCENT@316..317 "%" [] [],
+                                                    percent_token: PERCENT@316..317 "%" [] [],
                                                 },
                                             ],
                                         },
@@ -320,7 +320,7 @@ CssRoot {
                                                 },
                                                 CssPercentage {
                                                     value_token: CSS_NUMBER_LITERAL@324..327 "100" [] [],
-                                                    reminder_token: PERCENT@327..328 "%" [] [],
+                                                    percent_token: PERCENT@327..328 "%" [] [],
                                                 },
                                             ],
                                         },
@@ -460,7 +460,7 @@ CssRoot {
                                                 },
                                                 CssPercentage {
                                                     value_token: CSS_NUMBER_LITERAL@486..488 "20" [] [],
-                                                    reminder_token: PERCENT@488..489 "%" [] [],
+                                                    percent_token: PERCENT@488..489 "%" [] [],
                                                 },
                                             ],
                                         },
@@ -588,7 +588,7 @@ CssRoot {
                                                 },
                                                 CssPercentage {
                                                     value_token: CSS_NUMBER_LITERAL@613..615 "40" [] [],
-                                                    reminder_token: PERCENT@615..616 "%" [] [],
+                                                    percent_token: PERCENT@615..616 "%" [] [],
                                                 },
                                             ],
                                         },
@@ -641,7 +641,7 @@ CssRoot {
                                                 },
                                                 CssPercentage {
                                                     value_token: CSS_NUMBER_LITERAL@669..671 "10" [] [],
-                                                    reminder_token: PERCENT@671..672 "%" [] [],
+                                                    percent_token: PERCENT@671..672 "%" [] [],
                                                 },
                                             ],
                                         },
@@ -697,7 +697,7 @@ CssRoot {
                                                 },
                                                 CssPercentage {
                                                     value_token: CSS_NUMBER_LITERAL@726..728 "50" [] [],
-                                                    reminder_token: PERCENT@728..729 "%" [] [],
+                                                    percent_token: PERCENT@728..729 "%" [] [],
                                                 },
                                             ],
                                         },
@@ -711,11 +711,11 @@ CssRoot {
                                                 },
                                                 CssPercentage {
                                                     value_token: CSS_NUMBER_LITERAL@736..738 "50" [] [],
-                                                    reminder_token: PERCENT@738..740 "%" [] [Whitespace(" ")],
+                                                    percent_token: PERCENT@738..740 "%" [] [Whitespace(" ")],
                                                 },
                                                 CssPercentage {
                                                     value_token: CSS_NUMBER_LITERAL@740..743 "100" [] [],
-                                                    reminder_token: PERCENT@743..744 "%" [] [],
+                                                    percent_token: PERCENT@743..744 "%" [] [],
                                                 },
                                             ],
                                         },

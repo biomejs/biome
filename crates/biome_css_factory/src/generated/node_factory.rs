@@ -944,12 +944,12 @@ impl CssParenthesizedExpressionBuilder {
         ))
     }
 }
-pub fn css_percentage(value_token: SyntaxToken, reminder_token: SyntaxToken) -> CssPercentage {
+pub fn css_percentage(value_token: SyntaxToken, percent_token: SyntaxToken) -> CssPercentage {
     CssPercentage::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_PERCENTAGE,
         [
             Some(SyntaxElement::Token(value_token)),
-            Some(SyntaxElement::Token(reminder_token)),
+            Some(SyntaxElement::Token(percent_token)),
         ],
     ))
 }

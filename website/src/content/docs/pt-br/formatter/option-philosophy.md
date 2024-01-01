@@ -1,38 +1,38 @@
 ---
-title: Formatter Option Philosophy
-description: Configuring an opinionated formatter.
+title: Filosofia das Opções de Formatação
+description: Configuração de um formatador com convicções fortes.
 ---
 
->💡 Biome follows the same [Option Philosophy as Prettier](https://prettier.io/docs/en/option-philosophy). The existing set of options for formatting is considered stable, and new options are not likely to be considered.
+>💡 O Biome segue a mesma [filosofia de opções do Prettier](https://prettier.io/docs/en/option-philosophy). O conjunto existente de opções para formatação é considerado estável, e não é provável que novas opções sejam consideradas.
 >
->This document explains some history about how and why Biome got to where it is today, and an outlook for the future.
+>Este documento explica um pouco da história sobre como e por que o Biome chegou onde está hoje e uma perspectiva para o futuro.
 
-Biome is an *opinionated formatter*. In an ideal world, that means Biome assumes there is only one correct way to format things and will enforce that style at all times. No matter the project, no matter the setup, code formatted by Biome will always look the same. From another perspective, Biome is its own *automatic style guide*, not a tool for implementing other style guides.
+O Biome é um *formatador com convicções fortes*. Em um mundo ideal, isso significa que o Biome assume que existe apenas uma maneira correta de formatar as coisas e aplicará esse estilo em todos os momentos. Não importa o projeto, não importa a configuração, o código formatado pelo Biome sempre terá a mesma aparência. Falando de outra forma, o Biome é o seu próprio *guia de estilo automático*, não uma ferramenta para implementar outros guias de estilo.
 
-Having such a strong opinion on formatting may seem heavy-handed, but the benefits quickly become clear after adoption. All of the discussions about where spaces should go, whether a line should be broken out, whether a line should be indented, and so many more simply *vanish*. [Trivial, bike-shedding discussions](https://en.wikipedia.org/wiki/Law_of_triviality) no longer distract from focusing on what matters. Code reviews become free of re-formatting requests and cyclical debates. All it takes is trust that Biome does its best to format code cleanly, legibly, and consistently.
+Ter uma opinião tão forte sobre a formatação pode parecer severo demais, mas os benefícios rapidamente se tornam claros após a adoção. Todas as discussões sobre onde os espaços devem ir, se uma linha deve ser quebrada, se uma linha deve ser recuada e muitas outras simplesmente *desaparecem*. [Discussões triviais e desgastantes](https://pt.wikipedia.org/wiki/Lei_da_trivialidade) não tiram mais o foco do que realmente importa. As revisões de código ficam livres de solicitações de reformatação e debates cíclicos. Basta confiar que o Biome faz o melhor possível para formatar o código de forma limpa, legível e consistente.
 
-Beyond the benefits within individual teams and organizations, the adoption of consistent formatters across the whole web ecosystem benefits everyone, making it easier to retain familiarity when moving between projects and helping newcomers learn and recognize patterns more intuitively without distractions.
+Além dos benefícios dentro de organizações e equipes individuais, a adoção de formatadores consistentes em todo o ecossistema web beneficia a todos, preservando a familiaridade ao alternar entre projetos e ajudando os recém-chegados a aprender e reconhecer padrões de forma mais intuitiva, sem distrações.
 
-In the web ecosystem today, Prettier is by far the most popular code formatter, and it is also strongly opinionated, with a [strict philosophy on adding options](https://prettier.io/docs/en/option-philosophy). Biome aims to be [largely compatible with Prettier](https://biomejs.dev/blog/biome-wins-prettier-challenge), and as such, has adopted many of the opinions that Prettier implements, and configuration is no exception to that.
+Atualmente, no ecossistema web, o Prettier é, de longe, o formatador de código mais popular, além de também ter convicções fortes, com uma [filosofia rígida sobre adicionar novas opções](https://prettier.io/docs/en/option-philosophy). O Biome tem a intenção de ser [amplamente compatível com o Prettier](https://biomejs.dev/blog/biome-wins-prettier-challenge) e, como tal, adotou muitas das convicções que o Prettier implementa, e a configuração não é exceção a isso.
 
-Biome is proud to have reached such high compatibility with Prettier and make the migration path for users as painless as possible, but this also comes with similar caveats.
+O Biome se orgulha de ter alcançado uma compatibilidade tão alta com o Prettier, e de fazer com que a migração seja o mais simples possível, mas isso também vem com ressalvas semelhantes.
 
-## Existing Options
+## Opções Existentes
 
-Biome started out with a strict subset of configuration options, targeting the most common and contentious style guidelines in the JavaScript ecosystem: indent styles (tabs vs spaces), indent widths (2 spaces to equal a tab, or 4?), and enforced semicolons. Adding options for these points was considered sufficient enough to address most people’s needs, and there was no strong consideration for adding any others.
+O Biome começou com um subconjunto restrito de opções de configuração, visando às diretrizes de estilo mais comuns e controversas no ecossistema JavaScript: tipo de identação (tabulações vs. espaços), larguras da identação (2 espaços para igualar uma tabulação ou 4?) e pontos-e-vírgulas obrigatórios.  Adicionar opções para esses pontos foi considerado suficiente para atender às necessidades da maioria das pessoas, e não houve nenhuma consideração forte para adicionar mais outros.
 
-Leaning on the [Prettier Option Philosophy](https://prettier.io/docs/en/option-philosophy), Biome had the chance to start fresh and avoid the pitfalls that Prettier had fallen into with its other existing options, like `--bracket-same-line` and `--arrow-parens`:
+Tomando por base [a filosofia de opções do Prettier](https://prettier.io/docs/en/option-philosophy), Biome tinha a oportunidade de começar do zero e evitar as armadilhas nas quais o Prettier havia caído com algumas de suas opções existentes, como `--bracket-same-line` e `--arrow-parens`:
 
-> …[these] are not the type of options we’re happy to have. They cause a lot of bike-shedding in teams, and we’re sorry for that. Difficult to remove now, these options exist as a historical artifact and should not motivate adding more options (“If *those* options exist, why can’t this one?”).
+> …[essas] não são opções que gostamos de oferecer. Elas causam muitas discussões inúteis nas equipes, e lamentamos por isso. Difíceis de remover agora, essas opções existem como um artefato histórico e não devem motivar a adição de mais opções ("Se *essas* opções existem, por que esta não pode existir também?").
 
-However, when the [Prettier Challenge was announced](https://twitter.com/Vjeux/status/1722733472522142022), Biome decided to accept the challenge, which required implementing all of the configuration options that Prettier had to achieve full compatibility.
+No entanto, quando o [Desafio do Prettier foi anunciado](https://twitter.com/Vjeux/status/1722733472522142022), o Biome decidiu aceitar o desafio, o que exigia a implementação de todas as opções de configuração que o Prettier já oferecia para obter compatibilidade total.
 
-Biome still shares Prettier's philosophy about these options and considers them a legacy feature for compatibility rather than a baseline feature set. Their existence does not indicate that more options will be added, nor should they be used as a rationale to support the existence of other options in the future.
+O Biome ainda compartilha a filosofia do Prettier sobre essas opções e as considera um recurso legado para compatibilidade, em vez de um conjunto de recursos de primeira classe. Sua existência não indica que mais opções serão adicionadas, nem devem ser usadas como justificativa para apoiar a existência de outras opções no futuro.
 
-## New Options
+## Novas Opções
 
-Much like Prettier, Biome believes the current set of options is stable, sufficient, and not open for additions or other changes. Requests for additional configuration options are not likely to be considered and may be closed without discussion.
+Assim como o Prettier, o Biome acredita que o conjunto atual de opções é estável, suficiente e não está aberto a adições ou outras alterações. Solicitações por opções de configuração adicionais provavelmente não serão consideradas e poderão ser fechadas sem discussão.
 
-That said, even as Biome has established itself as a capable and robust formatting tool, it is also still relatively new, meaning there is plenty of opportunity to pave the way for new advancements and ideas that may not seem feasible otherwise.
+Dito isso, mesmo que o Biome tenha se estabelecido como uma ferramenta de formatação capaz e robusta, ele ainda é relativamente novo, o que significa que há muitas oportunidades para abrir caminho para novos avanços e ideias que podem não parecer viáveis de outra forma.
 
-The formatting style of Biome is also considered relatively stable, continuing to match Prettier as much as possible, with [few intentional deviations](https://github.com/biomejs/biome/issues/739). Changes to the style of Biome may be considered and implemented. Still, these are also unlikely to become configurable options and would instead be applied universally for all future versions of Biome.
+O estilo de formatação do Biome também é considerado relativamente estável, continuando a corresponder ao Prettier tanto quanto possível, com [poucos desvios intencionais](https://github.com/biomejs/biome/issues/739). Alterações no estilo do Biome podem ser consideradas e implementadas. Ainda assim, também é improvável que elas se tornem opções configuráveis e, em vez disso, seriam aplicadas universalmente a todas as versões futuras do Biome.

@@ -1017,17 +1017,17 @@ impl Deserializable for Nursery {
                                 diagnostics,
                             );
                         }
-                        "useNodeImportProtocol" => {
-                            result.use_node_import_protocol = Deserializable::deserialize(
+                        "useNodejsImportProtocol" => {
+                            result.use_nodejs_import_protocol = Deserializable::deserialize(
                                 &value,
-                                "useNodeImportProtocol",
+                                "useNodejsImportProtocol",
                                 diagnostics,
                             );
                         }
-                        "useNumberProperties" => {
-                            result.use_number_properties = Deserializable::deserialize(
+                        "useNumberNamespace" => {
+                            result.use_number_namespace = Deserializable::deserialize(
                                 &value,
-                                "useNumberProperties",
+                                "useNumberNamespace",
                                 diagnostics,
                             );
                         }
@@ -1078,8 +1078,8 @@ impl Deserializable for Nursery {
                                     "useForOf",
                                     "useGroupedTypeImport",
                                     "useImportRestrictions",
-                                    "useNodeImportProtocol",
-                                    "useNumberProperties",
+                                    "useNodejsImportProtocol",
+                                    "useNumberNamespace",
                                     "useRegexLiterals",
                                     "useShorthandFunctionType",
                                     "useValidAriaRole",
