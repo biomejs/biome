@@ -255,7 +255,7 @@ CssRoot {
                                         sub_selectors: CssSubSelectorList [
                                             CssIdSelector {
                                                 hash_token: HASH@119..120 "#" [] [],
-                                                name: CssIdentifier {
+                                                name: CssCustomIdentifier {
                                                     value_token: IDENT@120..127 "scroll" [] [Whitespace(" ")],
                                                 },
                                             },
@@ -268,7 +268,7 @@ CssRoot {
                                         sub_selectors: CssSubSelectorList [
                                             CssClassSelector {
                                                 dot_token: DOT@129..130 "." [] [],
-                                                name: CssIdentifier {
+                                                name: CssCustomIdentifier {
                                                     value_token: IDENT@130..133 "div" [] [],
                                                 },
                                             },
@@ -532,7 +532,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssClassSelector {
                             dot_token: DOT@316..319 "." [Newline("\n"), Newline("\n")] [],
-                            name: CssIdentifier {
+                            name: CssCustomIdentifier {
                                 value_token: IDENT@319..329 "form-range" [] [],
                             },
                         },
@@ -612,7 +612,7 @@ CssRoot {
                         sub_selectors: CssSubSelectorList [
                             CssClassSelector {
                                 dot_token: DOT@377..378 "." [] [],
-                                name: CssIdentifier {
+                                name: CssCustomIdentifier {
                                     value_token: IDENT@378..381 "foo" [] [],
                                 },
                             },
@@ -784,7 +784,7 @@ CssRoot {
                     2: CSS_SUB_SELECTOR_LIST@119..127
                       0: CSS_ID_SELECTOR@119..127
                         0: HASH@119..120 "#" [] []
-                        1: CSS_IDENTIFIER@120..127
+                        1: CSS_CUSTOM_IDENTIFIER@120..127
                           0: IDENT@120..127 "scroll" [] [Whitespace(" ")]
                   1: R_ANGLE@127..129 ">" [] [Whitespace(" ")]
                   2: CSS_COMPOUND_SELECTOR@129..133
@@ -793,7 +793,7 @@ CssRoot {
                     2: CSS_SUB_SELECTOR_LIST@129..133
                       0: CSS_CLASS_SELECTOR@129..133
                         0: DOT@129..130 "." [] []
-                        1: CSS_IDENTIFIER@130..133
+                        1: CSS_CUSTOM_IDENTIFIER@130..133
                           0: IDENT@130..133 "div" [] []
                 3: R_PAREN@133..135 ")" [] [Whitespace(" ")]
       1: CSS_DECLARATION_LIST_BLOCK@135..137
@@ -966,7 +966,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@316..352
             0: CSS_CLASS_SELECTOR@316..329
               0: DOT@316..319 "." [Newline("\n"), Newline("\n")] []
-              1: CSS_IDENTIFIER@319..329
+              1: CSS_CUSTOM_IDENTIFIER@319..329
                 0: IDENT@319..329 "form-range" [] []
             1: CSS_PSEUDO_ELEMENT_SELECTOR@329..352
               0: COLON2@329..331 "::" [] []
@@ -1020,7 +1020,7 @@ CssRoot {
             2: CSS_SUB_SELECTOR_LIST@377..390
               0: CSS_CLASS_SELECTOR@377..381
                 0: DOT@377..378 "." [] []
-                1: CSS_IDENTIFIER@378..381
+                1: CSS_CUSTOM_IDENTIFIER@378..381
                   0: IDENT@378..381 "foo" [] []
               1: CSS_PSEUDO_ELEMENT_SELECTOR@381..390
                 0: COLON2@381..383 "::" [] []

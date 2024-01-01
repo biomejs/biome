@@ -775,6 +775,9 @@
 				"lineWidth": {
 					"description": "What's the max width of a line applied to CSS (and its super languages) files. Defaults to 80.",
 					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
+				},
+				"quoteStyle": {
+					"anyOf": [{ "$ref": "#/definitions/QuoteStyle" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
@@ -1282,6 +1285,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noThenProperty": {
+					"description": "Disallow then property.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUnusedImports": {
 					"description": "Disallow unused imports.",
 					"anyOf": [
@@ -1358,6 +1368,13 @@
 				},
 				"useNodeImportProtocol": {
 					"description": "Enforces using the node: protocol for Node.js builtin modules.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useNumberProperties": {
+					"description": "Use Number properties instead of global ones.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

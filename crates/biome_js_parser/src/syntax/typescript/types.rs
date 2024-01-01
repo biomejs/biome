@@ -33,7 +33,7 @@ use crate::lexer::{JsLexContext, JsReLexContext};
 use crate::span::Span;
 use crate::syntax::class::parse_decorators;
 use crate::JsSyntaxFeature::TypeScript;
-use crate::{Absent, JsParser, ParseRecovery, ParsedSyntax, Present};
+use crate::{Absent, JsParser, ParseRecoveryTokenSet, ParsedSyntax, Present};
 use biome_js_syntax::JsSyntaxKind::TS_TYPE_ANNOTATION;
 use biome_js_syntax::T;
 use biome_js_syntax::{JsSyntaxKind::*, *};
@@ -61,6 +61,9 @@ bitflags! {
 
         /// Whether the parser is inside a conditional extends
         const IN_CONDITIONAL_EXTENDS = 1 << 3;
+
+        /// Whether the current context is within a type or interface declaration
+        const TYPE_OR_INTERFACE_DECLARATION = 1 << 4;
     }
 }
 
@@ -81,6 +84,10 @@ impl TypeContext {
         self.and(TypeContext::IN_CONDITIONAL_EXTENDS, allow)
     }
 
+    pub(crate) fn and_type_or_interface_declaration(self, allow: bool) -> Self {
+        self.and(TypeContext::TYPE_OR_INTERFACE_DECLARATION, allow)
+    }
+
     pub(crate) const fn is_conditional_type_allowed(&self) -> bool {
         !self.contains(TypeContext::DISALLOW_CONDITIONAL_TYPES)
     }
@@ -95,6 +102,10 @@ impl TypeContext {
 
     pub(crate) const fn in_conditional_extends(&self) -> bool {
         self.contains(TypeContext::IN_CONDITIONAL_EXTENDS)
+    }
+
+    pub(crate) const fn is_in_type_or_interface_declaration(&self) -> bool {
+        self.contains(TypeContext::TYPE_OR_INTERFACE_DECLARATION)
     }
 
     /// Adds the `flag` if `set` is `true`, otherwise removes the `flag`
@@ -179,7 +190,9 @@ fn parse_ts_type_parameter_name(p: &mut JsParser) -> ParsedSyntax {
 
 // test ts ts_type_parameters
 // type A<X extends string, Y = number, Z extends string | number = number> = { x: X, y: Y, z: Z }
-//
+// type A<> = {}
+// interface A<> {}
+
 // test_err ts ts_type_parameters_incomplete
 // type A<T
 pub(crate) fn parse_ts_type_parameters(p: &mut JsParser, context: TypeContext) -> ParsedSyntax {
@@ -189,9 +202,11 @@ pub(crate) fn parse_ts_type_parameters(p: &mut JsParser, context: TypeContext) -
 
     let m = p.start();
     p.bump(T![<]);
-    if p.at(T![>]) {
+
+    if p.at(T![>]) && !context.is_in_type_or_interface_declaration() {
         p.error(expected_ts_type_parameter(p, p.cur_range()));
     }
+
     TsTypeParameterList(context).parse_list(p);
     p.expect(T![>]);
 
@@ -215,9 +230,9 @@ impl ParseSeparatedList for TsTypeParameterList {
     }
 
     fn recover(&mut self, p: &mut JsParser, parsed_element: ParsedSyntax) -> RecoveryResult {
-        parsed_element.or_recover(
+        parsed_element.or_recover_with_token_set(
             p,
-            &ParseRecovery::new(
+            &ParseRecoveryTokenSet::new(
                 TS_BOGUS_TYPE,
                 token_set![T![>], T![,], T![ident], T![yield], T![await]],
             )
@@ -1170,9 +1185,9 @@ impl ParseNodeList for TypeMembers {
     }
 
     fn recover(&mut self, p: &mut JsParser, member: ParsedSyntax) -> RecoveryResult {
-        member.or_recover(
+        member.or_recover_with_token_set(
             p,
-            &ParseRecovery::new(JS_BOGUS, token_set![T!['}'], T![,], T![;]])
+            &ParseRecoveryTokenSet::new(JS_BOGUS, token_set![T!['}'], T![,], T![;]])
                 .enable_recovery_on_line_break(),
             expected_property_or_signature,
         )
@@ -1277,6 +1292,9 @@ fn parse_ts_call_signature_type_member(p: &mut JsParser, context: TypeContext) -
 // type A = { new (): string; }
 // type B = { new (a: string, b: number) }
 // type C = { new <A, B>(a: A, b: B): string }
+
+// test_err ts ts_construct_signature_member_err
+// type C = { new <>(a: A, b: B): string }
 fn parse_ts_construct_signature_type_member(
     p: &mut JsParser,
     context: TypeContext,
@@ -1445,9 +1463,9 @@ impl ParseSeparatedList for TsTupleTypeElementList {
     }
 
     fn recover(&mut self, p: &mut JsParser, parsed_element: ParsedSyntax) -> RecoveryResult {
-        parsed_element.or_recover(
+        parsed_element.or_recover_with_token_set(
             p,
-            &ParseRecovery::new(
+            &ParseRecoveryTokenSet::new(
                 TS_BOGUS_TYPE,
                 token_set![
                     T![']'],
@@ -1572,6 +1590,10 @@ fn is_at_ts_construct_signature_type_member(p: &mut JsParser) -> bool {
 // type B = abstract new(a: string, b: number) => string;
 // type C = new<A, B>(a: A, b: B) => string;
 // type D = abstract new<A, B>(a: A, b: B) => string;
+
+// test_err ts ts_constructor_type_err
+// type C = new<>(a: A, b: B) => string;
+// type D = abstract new<>(a: A, b: B) => string;
 fn parse_ts_constructor_type(p: &mut JsParser, context: TypeContext) -> ParsedSyntax {
     if !is_at_constructor_type(p) {
         return Absent;
@@ -1643,6 +1665,9 @@ fn is_at_function_type(p: &mut JsParser) -> bool {
 // type G = <A, B>(a: A, b: B) => string
 // type H = (a: any) => a is string;
 // type I = ({ a, b }?) => string;
+
+// test_err ts ts_function_type_err
+// type G = <>(a: A, b: B) => string
 fn parse_ts_function_type(p: &mut JsParser, context: TypeContext) -> ParsedSyntax {
     if !p.at(T![<]) && !p.at(T!['(']) {
         return Absent;
@@ -2084,9 +2109,9 @@ impl ParseSeparatedList for TypeArgumentsList {
             // The parser shouldn't perform error recovery in that case and simply bail out of parsing
             RecoveryResult::Err(RecoveryError::AlreadyRecovered)
         } else {
-            parsed_element.or_recover(
+            parsed_element.or_recover_with_token_set(
                 p,
-                &ParseRecovery::new(
+                &ParseRecoveryTokenSet::new(
                     TS_BOGUS_TYPE,
                     token_set![T![>], T![,], T![ident], T![yield], T![await]],
                 )

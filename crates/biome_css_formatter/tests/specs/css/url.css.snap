@@ -1,0 +1,75 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/url.css
+---
+
+# Input
+
+```css
+div {
+  background: url(/images/bg.png);
+}
+
+a {
+  content: url(https://example.com/a.jpg);
+  content: url(   https://example.com/f.jpg   );
+
+  background:
+    no-repeat url(RobotoFlex-VariableFont_GRAD,XTRA,YOPQ,YTAS,YTDE,YTFI,YTLC,YTUC,opsz,slnt,wdth,wght.ttf);
+}
+
+.quoted {
+  content: url("https://example.com/\)\).jpg");
+  content: url(  "https://example.com/\(\(.jpg" );
+  content: url(
+    "https://example.com/\ \ .jpg"
+    );
+
+  background:
+    no-repeat url("https://example.com/\)\).jpg");
+}
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+-----
+
+```css
+div {
+	background: url(/images/bg.png);
+}
+
+a {
+	content: url(https://example.com/a.jpg);
+	content: url(https://example.com/f.jpg   );
+
+	background: no-repeat
+		url(RobotoFlex-VariableFont_GRAD,XTRA,YOPQ,YTAS,YTDE,YTFI,YTLC,YTUC,opsz,slnt,wdth,wght.ttf);
+}
+
+.quoted {
+	content: url("https://example.com/\)\).jpg");
+	content: url("https://example.com/\(\(.jpg");
+	content: url("https://example.com/\ \ .jpg");
+
+	background: no-repeat url("https://example.com/\)\).jpg");
+}
+```
+
+# Lines exceeding max width of 80 characters
+```
+   10: 		url(RobotoFlex-VariableFont_GRAD,XTRA,YOPQ,YTAS,YTDE,YTFI,YTLC,YTUC,opsz,slnt,wdth,wght.ttf);
+```
+
+

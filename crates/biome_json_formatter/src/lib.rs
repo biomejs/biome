@@ -258,7 +258,7 @@ impl FormatLanguage for JsonFormatLanguage {
     }
 }
 
-/// Format implementation specific to JavaScript tokens.
+/// Format implementation specific to JSON tokens.
 pub(crate) type FormatJsonSyntaxToken = FormatToken<JsonFormatContext>;
 
 impl AsFormat<JsonFormatContext> for JsonSyntaxToken {

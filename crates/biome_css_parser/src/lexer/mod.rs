@@ -20,9 +20,20 @@ pub enum CssLexContext {
     /// Applied when lexing CSS selectors.
     /// Doesn't skip whitespace trivia for a combinator.
     Selector,
+
     /// Applied when lexing CSS pseudo nth selectors.
     /// Distinct '-' from identifiers and '+' from numbers.
     PseudoNthSelector,
+
+    /// Applied when lexing CSS url function.
+    /// Greedily consume tokens in the URL function until encountering ")"
+    UrlRawValue,
+
+    /// Applied when lexing CSS color literals.
+    /// Starting from #
+    /// support #000 #000f #ffffff #ffffffff
+    /// https://drafts.csswg.org/css-color/#typedef-hex-color
+    Color,
 }
 
 impl LexContext for CssLexContext {
@@ -104,6 +115,8 @@ impl<'src> Lexer<'src> for CssLexer<'src> {
                 CssLexContext::Regular => self.consume_token(current),
                 CssLexContext::Selector => self.consume_selector_token(current),
                 CssLexContext::PseudoNthSelector => self.consume_pseudo_nth_selector_token(current),
+                CssLexContext::UrlRawValue => self.consume_url_raw_value_token(current),
+                CssLexContext::Color => self.consume_color_token(current),
             },
             None => EOF,
         };
@@ -518,11 +531,59 @@ impl<'src> CssLexer<'src> {
         }
     }
 
+    fn consume_color_token(&mut self, current: u8) -> CssSyntaxKind {
+        match current {
+            b'0'..=b'9' | b'a'..=b'f' | b'A'..=b'F' => self.consume_color(),
+            _ => self.consume_token(current),
+        }
+    }
+
+    fn consume_color(&mut self) -> CssSyntaxKind {
+        let start = self.text_position();
+        let mut length = 0;
+        while matches!(
+            self.current_byte(),
+            Some(b'0'..=b'9' | b'a'..=b'f' | b'A'..=b'F')
+        ) {
+            self.advance(1);
+            length += 1;
+        }
+        if !matches!(length, 3 | 4 | 6 | 8) {
+            let diagnostic = ParseDiagnostic::new("Invalid color", start..self.text_position());
+            self.diagnostics.push(diagnostic);
+        }
+
+        CSS_COLOR_LITERAL
+    }
+
     fn consume_selector_token(&mut self, current: u8) -> CssSyntaxKind {
         match current {
             b' ' => self.consume_byte(CSS_SPACE_LITERAL),
             _ => self.consume_token(current),
         }
+    }
+    fn consume_url_raw_value_token(&mut self, current: u8) -> CssSyntaxKind {
+        if let Some(chr) = self.current_byte() {
+            let dispatch = lookup_byte(chr);
+            return match dispatch {
+                IDT | UNI | PRD | SLH | ZER | DIG => self.consume_url_raw_value(),
+                _ => self.consume_token(current),
+            };
+        }
+        self.consume_token(current)
+    }
+    fn consume_url_raw_value(&mut self) -> CssSyntaxKind {
+        let start = self.text_position();
+        while let Some(chr) = self.current_byte() {
+            let dispatch = lookup_byte(chr);
+            if matches!(dispatch, PNC) {
+                return CSS_URL_VALUE_RAW_LITERAL;
+            }
+            self.advance(1);
+        }
+        let diagnostic = ParseDiagnostic::new("Invalid url raw value", start..self.text_position());
+        self.diagnostics.push(diagnostic);
+        CSS_URL_VALUE_RAW_LITERAL
     }
 
     fn consume_pseudo_nth_selector_token(&mut self, current: u8) -> CssSyntaxKind {
@@ -712,7 +773,25 @@ impl<'src> CssLexer<'src> {
             }
         }
 
-        CSS_NUMBER_LITERAL
+        // A Number immediately followed by an identifier is considered a single
+        // <dimension> token according to the spec: https://www.w3.org/TR/css-values-4/#dimensions.
+        // Spaces are not allowed, but by default this lexer will skip over
+        // whitespace tokens, making it difficult to determine on the next token
+        // if it is actually a dimension unit or a separated identifier. So, if
+        // the next characters constitute an identifier after parsing a number,
+        // this special CSS_DIMENSION_VALUE token will indicate to the parser
+        // that it is part of a dimension and the next token can safely be
+        // consumed as the unit.
+        //
+        // The parser will re-cast these tokens as CSS_NUMBER_LITERALs when
+        // creating the Dimension node to hide this internal detail.
+        if matches!(self.current_byte(), Some(b'%')) {
+            CSS_PERCENTAGE_VALUE
+        } else if self.is_ident_start() {
+            CSS_DIMENSION_VALUE
+        } else {
+            CSS_NUMBER_LITERAL
+        }
     }
 
     fn consume_number_sequence(&mut self) {
@@ -782,6 +861,13 @@ impl<'src> CssLexer<'src> {
             b"style" => STYLE_KW,
             b"font-face" => FONT_FACE_KW,
             b"font-palette-values" => FONT_PALETTE_VALUES_KW,
+            // CSS-Wide keywords
+            b"initial" => INITIAL_KW,
+            b"inherit" => INHERIT_KW,
+            b"unset" => UNSET_KW,
+            b"revert" => REVERT_KW,
+            b"revert-layer" => REVERT_LAYER_KW,
+            b"default" => DEFAULT_KW,
             // length units
             b"em" => EM_KW,
             b"rem" => REM_KW,
@@ -856,6 +942,33 @@ impl<'src> CssLexer<'src> {
             b"x" => X_KW,
             // flex units
             b"fr" => FR_KW,
+            // page at rule
+            b"left" => LEFT_KW,
+            b"right" => RIGHT_KW,
+            b"first" => FIRST_KW,
+            b"blank" => BLANK_KW,
+            b"page" => PAGE_KW,
+            b"top-left-corner" => TOP_LEFT_CORNER_KW,
+            b"top-left" => TOP_LEFT_KW,
+            b"top-center" => TOP_CENTER_KW,
+            b"top-right" => TOP_RIGHT_KW,
+            b"top-right-corner" => TOP_RIGHT_CORNER_KW,
+            b"bottom-left-corner" => BOTTOM_LEFT_CORNER_KW,
+            b"bottom-left" => BOTTOM_LEFT_KW,
+            b"bottom-center" => BOTTOM_CENTER_KW,
+            b"bottom-right" => BOTTOM_RIGHT_KW,
+            b"bottom-right-corner" => BOTTOM_RIGHT_CORNER_KW,
+            b"left-top" => LEFT_TOP_KW,
+            b"left-middle" => LEFT_MIDDLE_KW,
+            b"left-bottom" => LEFT_BOTTOM_KW,
+            b"right-top" => RIGHT_TOP_KW,
+            b"right-middle" => RIGHT_MIDDLE_KW,
+            b"right-bottom" => RIGHT_BOTTOM_KW,
+            b"layer" => LAYER_KW,
+            b"supports" => SUPPORTS_KW,
+            b"selector" => SELECTOR_KW,
+            b"url" => URL_KW,
+            b"scope" => SCOPE_KW,
             _ => IDENT,
         }
     }
@@ -935,19 +1048,11 @@ impl<'src> CssLexer<'src> {
                 self.advance(1);
 
                 match self.current_byte() {
-                    Some(c) if c.is_ascii_hexdigit() => {
-                        let hex = self.consume_escape_sequence(c);
-
-                        if hex == REPLACEMENT_CHARACTER {
-                            let diagnostic = ParseDiagnostic::new(
-                                "Invalid escape sequence",
-                                escape_start..self.text_position(),
-                            );
-                            self.diagnostics.push(diagnostic);
-                        }
-
-                        hex
-                    }
+                    // Any valid escape sequence can be used as an identifier,
+                    // even if it becomes the REPLACEMENT CHARACTER (like `\0`).
+                    // This is important to handle for cases like the "media
+                    // min-width hack": http://browserbu.gs/css-hacks/media-min-width-0-backslash-0/.
+                    Some(c) if c.is_ascii_hexdigit() => self.consume_escape_sequence(c),
 
                     Some(_) => {
                         let chr = self.current_char_unchecked();
@@ -1132,7 +1237,7 @@ impl<'src> CssLexer<'src> {
                 return CDC;
             }
 
-            // --custom-property
+            // --dashed-identifier
             if self.is_ident_start() {
                 return self.consume_identifier();
             }

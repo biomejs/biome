@@ -8,14 +8,12 @@ version = "0.0.0"
 regex = { version = "1.6.0" }
 
 [dev-dependencies]
-biome_js_analyze = { workspace = true }
-case             = "1.0.0"
-criterion        = "0.4.0"
-fastbloom-rs     = "0.3.0"
-fst              = "0.4.7"
-iai              = "0.1.1"
-memchr           = "2.5.0"
-qp-trie          = "0.8.0"
+criterion    = "0.4.0"
+fastbloom-rs = "0.3.0"
+fst          = "0.4.7"
+iai          = "0.1.1"
+memchr       = "2.5.0"
+qp-trie      = "0.8.0"
 
 [[bench]]
 harness = false
@@ -30,3 +28,6 @@ bench = false
 name  = "contains_iai"
 path  = "bins/contains_iai.rs"
 test  = false
+
+[lints]
+workspace = true

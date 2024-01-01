@@ -134,6 +134,7 @@ Indent style: Tab
 Indent width: 2
 Line ending: LF
 Line width: 80
+Quote style: Double Quotes
 -----
 
 ```css
@@ -146,7 +147,7 @@ Line width: 80
 [svg|a] {
 }
 
-[foo|att=val] {
+[foo|att="val"] {
 }
 
 [*|att] {
@@ -164,11 +165,11 @@ input[type="radio" s] {
 img[alt~="person" s][src*="lorem" s] {
 }
 
-a[id=test] {
+a[id="test"] {
 }
 a[id="test"] {
 }
-a[id='test'] {
+a[id="test"] {
 }
 a[id=  func("foo")] {}
 a[class="(╯°□°）╯︵ ┻━┻"] {
@@ -196,64 +197,64 @@ span[lang] {
 }
 span[lang] {
 }
-span[lang='pt'] {
+span[lang="pt"] {
 }
-span[lang='pt'] {
+span[lang="pt"] {
 }
-span[lang='pt'] {
+span[lang="pt"] {
 }
-span[lang='pt'] {
+span[lang="pt"] {
 }
-span[lang='pt'] {
+span[lang="pt"] {
 }
-span[lang='pt'] {
+span[lang="pt"] {
 }
-span[lang='pt'] {
+span[lang="pt"] {
 }
-span[lang='pt'] {
+span[lang="pt"] {
 }
-span[lang~='en-us'] {
+span[lang~="en-us"] {
 }
-span[lang~='en-us'] {
+span[lang~="en-us"] {
 }
-span[lang|='zh'] {
+span[lang|="zh"] {
 }
-span[lang~='en-us'] {
+span[lang~="en-us"] {
 }
-a[href^='#'] {
+a[href^="#"] {
 }
-a[href*='example'] {
+a[href*="example"] {
 }
-a[href*='example'] {
+a[href*="example"] {
 }
-input[type='radio' i] {
+input[type="radio" i] {
 }
-input[type='radio' i] {
+input[type="radio" i] {
 }
-input[type~='radio' i] {
+input[type~="radio" i] {
 }
-input[type~='radio' i] {
+input[type~="radio" i] {
 }
-input[type~='radio' i] {
+input[type~="radio" i] {
 }
-img[alt='person'][src='lorem'] {
+img[alt="person"][src="lorem"] {
 }
-img[alt='person'][src='lorem'] {
+img[alt="person"][src="lorem"] {
 }
-img[alt~='person'][src*='lorem'] {
+img[alt~="person"][src*="lorem"] {
 }
-img[alt~='person'][src*='lorem'] {
+img[alt~="person"][src*="lorem"] {
 }
-img[alt~='person'][src*='lorem'] {
+img[alt~="person"][src*="lorem"] {
 }
 
-[foo|att=val] {
+[foo|att="val"] {
 }
-[foo|att=val] {
+[foo|att="val"] {
 }
-[foo|att=val] {
+[foo|att="val"] {
 }
-[foo|att=val] {
+[foo|att="val"] {
 }
 [*|att] {
 }

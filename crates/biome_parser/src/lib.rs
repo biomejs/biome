@@ -145,7 +145,7 @@
 //!     ) -> parser::RecoveryResult {
 //!         parsed_element.or_recover(
 //!             p,
-//!             &ParseRecovery::new(JS_BOGUS_STATEMENT, STMT_RECOVERY_SET),
+//!             &ParseRecoveryTokenSet::new(JS_BOGUS_STATEMENT, STMT_RECOVERY_SET),
 //!             js_parse_error::expected_case,
 //!         )
 //!     }
@@ -157,7 +157,7 @@
 //! ```rust, ignore
 //! parsed_element.or_recover(
 //!     p,
-//!     &ParseRecovery::new(JS_BOGUS_STATEMENT, STMT_RECOVERY_SET),
+//!     &ParseRecoveryTokenSet::new(JS_BOGUS_STATEMENT, STMT_RECOVERY_SET),
 //!     js_parse_error::expected_case,
 //! )
 //! ```

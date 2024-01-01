@@ -1,0 +1,98 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/atrule/supports_complex.css
+---
+
+# Input
+
+```css
+@supports (
+    display: flex
+    ) {  }
+@supports (
+    display:     flex
+    
+    ) 
+    or
+     (
+display  : 
+flex  ) or   (display: flex
+) or (display: flex)  {  }
+@supports (display: flex) 
+and (display: flex) 
+and (display: flex) 
+and (display: flex)  {  }
+
+@supports (display: flex) and 
+(selector(
+    :focus-visible
+) or ((
+    animation-name:
+    test))) {  }
+
+@supports (display: flex
+) and (selector(:focus-visible
+
+) or (
+not 
+(
+(animation-name: test)
+))
+
+) {  }
+
+@supports (display: flex) 
+
+and (selector(:focus-visible  )  or (
+    
+not ((animation-name: test))  ) 
+
+) and (display: flex
+) {  }
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+-----
+
+```css
+@supports (display: flex) {
+}
+@supports (display: flex) or
+	(display: flex) or
+	(display: flex) or
+	(display: flex) {
+}
+@supports (display: flex) and
+	(display: flex) and
+	(display: flex) and
+	(display: flex) {
+}
+
+@supports (display: flex) and
+	(selector(:focus-visible) or ((animation-name: test))) {
+}
+
+@supports (display: flex) and
+	(selector(:focus-visible) or (not ((animation-name: test)))) {
+}
+
+@supports (display: flex) and
+	(selector(:focus-visible) or (not ((animation-name: test)))) and
+	(display: flex) {
+}
+```
+
+

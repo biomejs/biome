@@ -1,7 +1,4 @@
 [alias]
-bench_analyzer = "run -p xtask_bench --release -- --feature analyzer"
-bench_formatter = "run -p xtask_bench --release -- --feature formatter"
-bench_parser = "run -p xtask_bench --release -- --feature parser"
 biome-cli = "run -p biome_cli --release --"
 biome-cli-dev = "run -p biome_cli --"
 codegen = "run -p xtask_codegen --"
@@ -33,7 +30,7 @@ documentation = """
     --no-deps
 """
 format = "fmt --all --verbose"
-lint = "clippy --workspace --all-targets --verbose -- --deny warnings"
+lint = "clippy --workspace --all-targets -- --deny warnings"
 lintdoc = "run -p xtask_lintdoc --"
 
 [profile.release]

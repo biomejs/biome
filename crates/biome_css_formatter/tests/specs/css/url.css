@@ -1,0 +1,22 @@
+div {
+  background: url(/images/bg.png);
+}
+
+a {
+  content: url(https://example.com/a.jpg);
+  content: url(   https://example.com/f.jpg   );
+
+  background:
+    no-repeat url(RobotoFlex-VariableFont_GRAD,XTRA,YOPQ,YTAS,YTDE,YTFI,YTLC,YTUC,opsz,slnt,wdth,wght.ttf);
+}
+
+.quoted {
+  content: url("https://example.com/\)\).jpg");
+  content: url(  "https://example.com/\(\(.jpg" );
+  content: url(
+    "https://example.com/\ \ .jpg"
+    );
+
+  background:
+    no-repeat url("https://example.com/\)\).jpg");
+}

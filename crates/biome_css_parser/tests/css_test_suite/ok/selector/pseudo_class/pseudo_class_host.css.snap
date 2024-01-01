@@ -38,7 +38,7 @@ CssRoot {
                                     sub_selectors: CssSubSelectorList [
                                         CssClassSelector {
                                             dot_token: DOT@6..7 "." [] [],
-                                            name: CssIdentifier {
+                                            name: CssCustomIdentifier {
                                                 value_token: IDENT@7..29 "special-custom-element" [] [],
                                             },
                                         },
@@ -73,7 +73,7 @@ CssRoot {
                                     sub_selectors: CssSubSelectorList [
                                         CssClassSelector {
                                             dot_token: DOT@43..44 "." [] [],
-                                            name: CssIdentifier {
+                                            name: CssCustomIdentifier {
                                                 value_token: IDENT@44..69 "special-custom-element" [] [Whitespace("   ")],
                                             },
                                         },
@@ -108,7 +108,7 @@ CssRoot {
                                     sub_selectors: CssSubSelectorList [
                                         CssClassSelector {
                                             dot_token: DOT@80..81 "." [] [],
-                                            name: CssIdentifier {
+                                            name: CssCustomIdentifier {
                                                 value_token: IDENT@81..87 "footer" [] [],
                                             },
                                         },
@@ -167,7 +167,7 @@ CssRoot {
                                         sub_selectors: CssSubSelectorList [
                                             CssClassSelector {
                                                 dot_token: DOT@107..108 "." [] [],
-                                                name: CssIdentifier {
+                                                name: CssCustomIdentifier {
                                                     value_token: IDENT@108..114 "footer" [] [],
                                                 },
                                             },
@@ -185,7 +185,7 @@ CssRoot {
                         sub_selectors: CssSubSelectorList [
                             CssClassSelector {
                                 dot_token: DOT@116..117 "." [] [],
-                                name: CssIdentifier {
+                                name: CssCustomIdentifier {
                                     value_token: IDENT@117..121 "div" [] [Whitespace(" ")],
                                 },
                             },
@@ -227,7 +227,7 @@ CssRoot {
                   2: CSS_SUB_SELECTOR_LIST@6..29
                     0: CSS_CLASS_SELECTOR@6..29
                       0: DOT@6..7 "." [] []
-                      1: CSS_IDENTIFIER@7..29
+                      1: CSS_CUSTOM_IDENTIFIER@7..29
                         0: IDENT@7..29 "special-custom-element" [] []
                 3: R_PAREN@29..31 ")" [] [Whitespace(" ")]
       1: CSS_DECLARATION_LIST_BLOCK@31..33
@@ -251,7 +251,7 @@ CssRoot {
                   2: CSS_SUB_SELECTOR_LIST@43..69
                     0: CSS_CLASS_SELECTOR@43..69
                       0: DOT@43..44 "." [] []
-                      1: CSS_IDENTIFIER@44..69
+                      1: CSS_CUSTOM_IDENTIFIER@44..69
                         0: IDENT@44..69 "special-custom-element" [] [Whitespace("   ")]
                 3: R_PAREN@69..71 ")" [] [Whitespace(" ")]
       1: CSS_DECLARATION_LIST_BLOCK@71..73
@@ -275,7 +275,7 @@ CssRoot {
                   2: CSS_SUB_SELECTOR_LIST@80..87
                     0: CSS_CLASS_SELECTOR@80..87
                       0: DOT@80..81 "." [] []
-                      1: CSS_IDENTIFIER@81..87
+                      1: CSS_CUSTOM_IDENTIFIER@81..87
                         0: IDENT@81..87 "footer" [] []
                 3: R_PAREN@87..89 ")" [] [Whitespace(" ")]
       1: CSS_DECLARATION_LIST_BLOCK@89..91
@@ -315,7 +315,7 @@ CssRoot {
                     2: CSS_SUB_SELECTOR_LIST@107..114
                       0: CSS_CLASS_SELECTOR@107..114
                         0: DOT@107..108 "." [] []
-                        1: CSS_IDENTIFIER@108..114
+                        1: CSS_CUSTOM_IDENTIFIER@108..114
                           0: IDENT@108..114 "footer" [] []
                   3: R_PAREN@114..115 ")" [] []
           1: CSS_SPACE_LITERAL@115..116 " " [] []
@@ -325,7 +325,7 @@ CssRoot {
             2: CSS_SUB_SELECTOR_LIST@116..121
               0: CSS_CLASS_SELECTOR@116..121
                 0: DOT@116..117 "." [] []
-                1: CSS_IDENTIFIER@117..121
+                1: CSS_CUSTOM_IDENTIFIER@117..121
                   0: IDENT@117..121 "div" [] [Whitespace(" ")]
       1: CSS_DECLARATION_LIST_BLOCK@121..123
         0: L_CURLY@121..122 "{" [] []

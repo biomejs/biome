@@ -218,6 +218,7 @@ expression: valid.jsx
 <li role="presentation" />;
 <nav role="button" />;
 <ol role="button" />;
+<svg role="img" />;
 <table role="button" />;
 <tbody role="button" />;
 <td role="button" />;
@@ -268,6 +269,7 @@ expression: valid.jsx
 <Link href="http://x.y.z" role="img" />;
 <Link href="http://x.y.z" />;
 <Button onClick={doFoo} />;
+
 
 ```
 
