@@ -8,7 +8,7 @@ pub(crate) mod no_then_property;
 pub(crate) mod no_unused_imports;
 pub(crate) mod use_export_type;
 pub(crate) mod use_for_of;
-pub(crate) mod use_number_properties;
+pub(crate) mod use_number_namespace;
 
 declare_group! {
     pub (crate) Nursery {
@@ -20,7 +20,7 @@ declare_group! {
             self :: no_unused_imports :: NoUnusedImports ,
             self :: use_export_type :: UseExportType ,
             self :: use_for_of :: UseForOf ,
-            self :: use_number_properties :: UseNumberProperties ,
+            self :: use_number_namespace :: UseNumberNamespace ,
         ]
      }
 }
