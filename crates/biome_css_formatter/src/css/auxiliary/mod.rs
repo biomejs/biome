@@ -22,6 +22,8 @@ pub(crate) mod declaration_important;
 pub(crate) mod declaration_list_block;
 pub(crate) mod declaration_or_at_rule_block;
 pub(crate) mod declaration_with_semicolon;
+pub(crate) mod generic_delimiter;
+pub(crate) mod generic_property;
 pub(crate) mod identifier;
 pub(crate) mod keyframes_block;
 pub(crate) mod keyframes_item;

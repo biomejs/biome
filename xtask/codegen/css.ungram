@@ -50,8 +50,8 @@ CssBogusKeyframesItem =  SyntaxElement*
 CssBogusRule =  SyntaxElement*
 CssBogusParameter = SyntaxElement*
 CssBogusDeclarationItem = SyntaxElement*
-CssBogusComponentValue = SyntaxElement*
 CssBogusMediaQuery =  SyntaxElement*
+CssBogusProperty =  SyntaxElement*
 
 CssRoot =
 	bom: 'UNICODE_BOM'?
@@ -445,10 +445,38 @@ CssRuleListBlock =
 CssDeclarationList = CssDeclaration (';' CssDeclaration)* ';'?
 
 CssDeclaration =
+	property: AnyCssProperty
+	important: CssDeclarationImportant?
+
+AnyCssProperty =
+	CssGenericProperty
+	| CssBogusProperty
+
+CssGenericProperty =
 	name: AnyCssDeclarationName
 	':'
-	value: CssComponentValueList
-	important: CssDeclarationImportant?
+	value: CssGenericComponentValueList
+
+// div {
+//	--bs-btn-focus-shadow-rgb: 33, 37, 41;
+//	                           ^^^^^^^^^^
+//  background: transparent center/1em auto no-repeat;
+//              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+// }
+CssGenericComponentValueList = AnyCssGenericComponentValue*
+
+AnyCssGenericComponentValue =
+	AnyCssValue
+	| CssGenericDelimiter
+
+// div {
+//	--bs-btn-focus-shadow-rgb: 33, 37, 41;
+//	                             ^   ^
+//  background: transparent center/1em auto no-repeat;
+//                                ^
+// }
+CssGenericDelimiter =
+	value: (',' | '/')
 
 CssComponentValueList = AnyCssValue*
 
