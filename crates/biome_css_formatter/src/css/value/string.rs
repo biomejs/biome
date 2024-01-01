@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use crate::{prelude::*, utils::string_utils::FormatLiteralStringToken};
 use biome_css_syntax::{CssString, CssStringFields};
 use biome_formatter::write;
 
@@ -8,6 +8,6 @@ impl FormatNodeRule<CssString> for FormatCssString {
     fn fmt_fields(&self, node: &CssString, f: &mut CssFormatter) -> FormatResult<()> {
         let CssStringFields { value_token } = node.as_fields();
 
-        write!(f, [value_token.format()])
+        write!(f, [FormatLiteralStringToken::new(&value_token?)])
     }
 }

@@ -1,6 +1,4 @@
-use std::borrow::Cow;
-
-use crate::prelude::*;
+use crate::{prelude::*, utils::string_utils::FormatLiteralStringToken};
 use biome_css_syntax::{
     AnyCssAttributeMatcherValue, CssAttributeMatcherValue, CssAttributeMatcherValueFields,
 };
@@ -28,26 +26,16 @@ impl FormatNodeRule<CssAttributeMatcherValue> for FormatCssAttributeMatcherValue
                     return write!(f, [ident.format()]);
                 }
 
-                // Unlike almost all other usages of regular identifiers,
-                // attribute values are case-sensitive, so the identifier here
-                // does not get converted to lowercase. Once it's quoted, it
-                // will be parsed as a CssString on the next pass, at which
-                // point casing is preserved no matter what.
-                let value = ident.value_token()?;
-                let quoted = std::format!("\"{}\"", value.text_trimmed());
-
                 write!(
                     f,
                     [
                         format_leading_comments(ident.syntax()),
-                        format_replaced(
-                            &value,
-                            &syntax_token_cow_slice(
-                                Cow::Owned(quoted),
-                                &value,
-                                value.text_trimmed_range().start()
-                            )
-                        ),
+                        // Unlike almost all other usages of regular identifiers,
+                        // attribute values are case-sensitive, so the identifier here
+                        // does not get converted to lowercase. Once it's quoted, it
+                        // will be parsed as a CssString on the next pass, at which
+                        // point casing is preserved no matter what.
+                        FormatLiteralStringToken::new(&ident.value_token()?),
                         format_trailing_comments(ident.syntax()),
                         format_dangling_comments(ident.syntax())
                     ]

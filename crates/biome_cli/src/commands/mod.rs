@@ -408,7 +408,9 @@ pub(crate) fn validate_configuration_diagnostics(
             {if verbose { PrintDiagnostic::verbose(diagnostic) } else { PrintDiagnostic::simple(diagnostic) }}
         });
     }
+
     if loaded_configuration.has_errors() {
+        println!("{:#?}", loaded_configuration);
         return Err(CliDiagnostic::workspace_error(
             WorkspaceError::Configuration(ConfigurationDiagnostic::invalid_configuration(
                 "Biome exited because the configuration resulted in errors. Please fix them.",

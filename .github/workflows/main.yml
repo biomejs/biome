@@ -63,7 +63,7 @@ jobs:
       - name: Install udeps
         run: cargo install cargo-udeps --locked
       - name: Run udeps
-        run: cargo +nightly udeps
+        run: cargo +nightly udeps --all-targets
 
   test:
     name: Test
