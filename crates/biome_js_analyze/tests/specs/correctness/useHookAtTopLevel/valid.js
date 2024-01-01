@@ -25,6 +25,14 @@ function useStuff2() {
     return [useCallback(() => null, [])];
 }
 
+const obj = {
+    Component() {
+        const [count, setCount] = useState(0);
+
+        return count;
+    }
+}
+
 // Hook called indirectly
 function helper() {
     useEffect();

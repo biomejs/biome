@@ -10,7 +10,7 @@ use biome_console::markup;
 use biome_js_semantic::{CallsExtensions, SemanticModel};
 use biome_js_syntax::{
     AnyFunctionLike, AnyJsExpression, AnyJsFunction, JsCallExpression, JsFunctionBody, JsLanguage,
-    JsReturnStatement, JsSyntaxKind, TextRange,
+    JsMethodObjectMember, JsReturnStatement, JsSyntaxKind, TextRange,
 };
 use biome_rowan::{AstNode, Language, SyntaxNode, WalkEvent};
 use rustc_hash::FxHashMap;
@@ -83,6 +83,50 @@ declare_rule! {
     }
 }
 
+#[derive(Clone)]
+enum AnyJsFunctionOrMethod {
+    Function(AnyJsFunction),
+    ObjectMethod(JsMethodObjectMember),
+}
+
+impl AstNode for AnyJsFunctionOrMethod {
+    type Language = JsLanguage;
+
+    const KIND_SET: biome_rowan::SyntaxKindSet<Self::Language> =
+        AnyJsFunction::KIND_SET.union(JsMethodObjectMember::KIND_SET);
+
+    fn can_cast(kind: <Self::Language as Language>::Kind) -> bool {
+        Self::KIND_SET.matches(kind)
+    }
+
+    fn cast(syntax: SyntaxNode<Self::Language>) -> Option<Self>
+    where
+        Self: Sized,
+    {
+        if AnyJsFunction::can_cast(syntax.kind()) {
+            AnyJsFunction::cast(syntax).map(Self::Function)
+        } else if JsMethodObjectMember::can_cast(syntax.kind()) {
+            JsMethodObjectMember::cast(syntax).map(Self::ObjectMethod)
+        } else {
+            None
+        }
+    }
+
+    fn syntax(&self) -> &SyntaxNode<Self::Language> {
+        match self {
+            Self::Function(function) => function.syntax(),
+            Self::ObjectMethod(method) => method.syntax(),
+        }
+    }
+
+    fn into_syntax(self) -> SyntaxNode<Self::Language> {
+        match self {
+            Self::Function(function) => function.into_syntax(),
+            Self::ObjectMethod(method) => method.into_syntax(),
+        }
+    }
+}
+
 pub enum Suggestion {
     None {
         hook_name_range: TextRange,
@@ -94,7 +138,9 @@ pub enum Suggestion {
 
 // Verify if the call expression is at the top level
 // of the component
-fn enclosing_function_if_call_is_at_top_level(call: &JsCallExpression) -> Option<AnyJsFunction> {
+fn enclosing_function_if_call_is_at_top_level(
+    call: &JsCallExpression,
+) -> Option<AnyJsFunctionOrMethod> {
     let next = call.syntax().ancestors().find(|x| {
         !matches!(
             x.kind(),
@@ -121,20 +167,24 @@ fn enclosing_function_if_call_is_at_top_level(call: &JsCallExpression) -> Option
     });
 
     match next {
-        Some(next) if AnyJsFunction::can_cast(next.kind()) => AnyJsFunction::cast(next),
-        Some(next) => JsFunctionBody::cast(next).and_then(|body| body.parent::<AnyJsFunction>()),
+        Some(next) if AnyJsFunctionOrMethod::can_cast(next.kind()) => {
+            AnyJsFunctionOrMethod::cast(next)
+        }
+        Some(next) => {
+            JsFunctionBody::cast(next).and_then(|body| body.parent::<AnyJsFunctionOrMethod>())
+        }
         None => None,
     }
 }
 
-fn is_nested_function(function: &AnyJsFunction) -> bool {
+fn is_nested_function(function: &AnyJsFunctionOrMethod) -> bool {
     let Some(parent) = function.syntax().parent() else {
         return false;
     };
 
     parent
         .ancestors()
-        .any(|node| AnyJsFunction::can_cast(node.kind()))
+        .any(|node| AnyJsFunctionOrMethod::can_cast(node.kind()))
 }
 
 /// Model for tracking which function calls are preceeded by an early return.
@@ -358,12 +408,14 @@ impl Rule for UseHookAtTopLevel {
                     });
                 }
 
-                if let Some(calls_iter) = enclosing_function.all_calls(model) {
-                    for call in calls_iter {
-                        calls.push(CallPath {
-                            call: call.tree(),
-                            path: path.clone(),
-                        });
+                if let AnyJsFunctionOrMethod::Function(function) = enclosing_function {
+                    if let Some(calls_iter) = function.all_calls(model) {
+                        for call in calls_iter {
+                            calls.push(CallPath {
+                                call: call.tree(),
+                                path: path.clone(),
+                            });
+                        }
                     }
                 }
             } else {
