@@ -2513,9 +2513,9 @@ pub struct Nursery {
     #[doc = "Disallow characters made with multiple code points in character class syntax."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_misleading_character_class: Option<RuleConfiguration>,
-    #[doc = "Forbid the use of Node.js builtin modules. Can be useful for client-side web projects that do not have access to those modules."]
+    #[doc = "Forbid the use of Node.js builtin modules."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_nodejs_modules: Option<RuleConfiguration>,
+    pub no_node_modules: Option<RuleConfiguration>,
     #[doc = "Disallow then property."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_then_property: Option<RuleConfiguration>,
@@ -2588,8 +2588,8 @@ impl MergeWith<Nursery> for Nursery {
         if let Some(no_misleading_character_class) = other.no_misleading_character_class {
             self.no_misleading_character_class = Some(no_misleading_character_class);
         }
-        if let Some(no_nodejs_modules) = other.no_nodejs_modules {
-            self.no_nodejs_modules = Some(no_nodejs_modules);
+        if let Some(no_node_modules) = other.no_node_modules {
+            self.no_node_modules = Some(no_node_modules);
         }
         if let Some(no_then_property) = other.no_then_property {
             self.no_then_property = Some(no_then_property);
@@ -2659,7 +2659,7 @@ impl Nursery {
         "noImplicitAnyLet",
         "noInvalidUseBeforeDeclaration",
         "noMisleadingCharacterClass",
-        "noNodejsModules",
+        "noNodeModules",
         "noThenProperty",
         "noUnusedImports",
         "noUnusedPrivateClassMembers",
@@ -2777,7 +2777,7 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[6]));
             }
         }
-        if let Some(rule) = self.no_nodejs_modules.as_ref() {
+        if let Some(rule) = self.no_node_modules.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]));
             }
@@ -2901,7 +2901,7 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[6]));
             }
         }
-        if let Some(rule) = self.no_nodejs_modules.as_ref() {
+        if let Some(rule) = self.no_node_modules.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]));
             }
@@ -3029,7 +3029,7 @@ impl Nursery {
             "noImplicitAnyLet" => self.no_implicit_any_let.as_ref(),
             "noInvalidUseBeforeDeclaration" => self.no_invalid_use_before_declaration.as_ref(),
             "noMisleadingCharacterClass" => self.no_misleading_character_class.as_ref(),
-            "noNodejsModules" => self.no_nodejs_modules.as_ref(),
+            "noNodeModules" => self.no_node_modules.as_ref(),
             "noThenProperty" => self.no_then_property.as_ref(),
             "noUnusedImports" => self.no_unused_imports.as_ref(),
             "noUnusedPrivateClassMembers" => self.no_unused_private_class_members.as_ref(),

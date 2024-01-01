@@ -870,9 +870,9 @@ export interface Nursery {
 	 */
 	noMisleadingCharacterClass?: RuleConfiguration;
 	/**
-	 * Forbid the use of Node.js builtin modules. Can be useful for client-side web projects that do not have access to those modules.
+	 * Forbid the use of Node.js builtin modules.
 	 */
-	noNodejsModules?: RuleConfiguration;
+	noNodeModules?: RuleConfiguration;
 	/**
 	 * Disallow then property.
 	 */
@@ -1632,7 +1632,7 @@ export type Category =
 	| "lint/nursery/noImplicitAnyLet"
 	| "lint/nursery/noInvalidUseBeforeDeclaration"
 	| "lint/nursery/noMisleadingCharacterClass"
-	| "lint/nursery/noNodejsModules"
+	| "lint/nursery/noNodeModules"
 	| "lint/nursery/noThenProperty"
 	| "lint/nursery/noTypeOnlyImportAttributes"
 	| "lint/nursery/noUnusedImports"

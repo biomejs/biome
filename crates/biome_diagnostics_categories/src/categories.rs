@@ -106,7 +106,7 @@ define_categories! {
     "lint/nursery/noImplicitAnyLet": "https://biomejs.dev/linter/rules/no-implicit-any-let",
     "lint/nursery/noInvalidUseBeforeDeclaration": "https://biomejs.dev/linter/rules/no-invalid-use-before-declaration",
     "lint/nursery/noMisleadingCharacterClass": "https://biomejs.dev/linter/rules/no-misleading-character-class",
-    "lint/nursery/noNodejsModules": "https://biomejs.dev/linter/rules/no-nodejs-modules",
+    "lint/nursery/noNodeModules": "https://biomejs.dev/linter/rules/no-node-modules",
     "lint/nursery/noThenProperty": "https://biomejs.dev/linter/rules/no-then-property",
     "lint/nursery/noTypeOnlyImportAttributes": "https://biomejs.dev/linter/rules/no-type-only-import-attributes",
     "lint/nursery/noUnusedImports": "https://biomejs.dev/linter/rules/no-unused-imports",

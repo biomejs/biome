@@ -951,9 +951,9 @@ impl Deserializable for Nursery {
                                 diagnostics,
                             );
                         }
-                        "noNodejsModules" => {
-                            result.no_nodejs_modules =
-                                Deserializable::deserialize(&value, "noNodejsModules", diagnostics);
+                        "noNodeModules" => {
+                            result.no_node_modules =
+                                Deserializable::deserialize(&value, "noNodeModules", diagnostics);
                         }
                         "noThenProperty" => {
                             result.no_then_property =
@@ -1066,7 +1066,7 @@ impl Deserializable for Nursery {
                                     "noImplicitAnyLet",
                                     "noInvalidUseBeforeDeclaration",
                                     "noMisleadingCharacterClass",
-                                    "noNodejsModules",
+                                    "noNodeModules",
                                     "noThenProperty",
                                     "noUnusedImports",
                                     "noUnusedPrivateClassMembers",
