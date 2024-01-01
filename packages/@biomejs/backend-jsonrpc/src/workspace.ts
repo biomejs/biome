@@ -467,6 +467,10 @@ export interface A11y {
 	 */
 	noAccessKey?: RuleConfiguration;
 	/**
+	 * Enforce that aria-hidden="true" is not set on focusable elements.
+	 */
+	noAriaHiddenOnFocusable?: RuleConfiguration;
+	/**
 	 * Enforce that elements that do not support ARIA roles, states, and properties do not have those attributes.
 	 */
 	noAriaUnsupportedElements?: RuleConfiguration;
@@ -570,6 +574,10 @@ export interface A11y {
 	 * Ensures that ARIA properties aria-* are all valid.
 	 */
 	useValidAriaProps?: RuleConfiguration;
+	/**
+	 * Elements with ARIA roles must use a valid, non-abstract ARIA role.
+	 */
+	useValidAriaRole?: RuleConfiguration;
 	/**
 	 * Enforce that ARIA state and property values are valid.
 	 */
@@ -679,6 +687,10 @@ export interface Complexity {
 	 * Enforce using concise optional chain instead of chained logical expressions.
 	 */
 	useOptionalChain?: RuleConfiguration;
+	/**
+	 * Enforce the use of the regular expression literals instead of the RegExp constructor if possible.
+	 */
+	useRegexLiterals?: RuleConfiguration;
 	/**
 	 * Disallow number literal object member names which are not base10 or uses underscore as separator
 	 */
@@ -842,14 +854,6 @@ export interface Nursery {
 	 */
 	all?: boolean;
 	/**
-	 * Enforce that aria-hidden="true" is not set on focusable elements.
-	 */
-	noAriaHiddenOnFocusable?: RuleConfiguration;
-	/**
-	 * Disallow default exports.
-	 */
-	noDefaultExport?: RuleConfiguration;
-	/**
 	 * Disallow two keys with the same name inside a JSON object.
 	 */
 	noDuplicateJsonKeys?: RuleConfiguration;
@@ -857,10 +861,6 @@ export interface Nursery {
 	 * Disallow empty block statements and static blocks.
 	 */
 	noEmptyBlockStatements?: RuleConfiguration;
-	/**
-	 * Disallow use of implicit any type on variable declarations.
-	 */
-	noImplicitAnyLet?: RuleConfiguration;
 	/**
 	 * Disallow the use of variables and function parameters before their declaration
 	 */
@@ -930,17 +930,9 @@ export interface Nursery {
 	 */
 	useNumberNamespace?: RuleConfiguration;
 	/**
-	 * Enforce the use of the regular expression literals instead of the RegExp constructor if possible.
-	 */
-	useRegexLiterals?: RuleConfiguration;
-	/**
 	 * Enforce using function types instead of object type with call signatures.
 	 */
 	useShorthandFunctionType?: RuleConfiguration;
-	/**
-	 * Elements with ARIA roles must use a valid, non-abstract ARIA role.
-	 */
-	useValidAriaRole?: RuleConfiguration;
 }
 /**
  * A list of rules that belong to this group
@@ -1000,6 +992,10 @@ export interface Style {
 	 * Disallow comma operator.
 	 */
 	noCommaOperator?: RuleConfiguration;
+	/**
+	 * Disallow default exports.
+	 */
+	noDefaultExport?: RuleConfiguration;
 	/**
 	 * Disallow implicit true values on JSX boolean attributes
 	 */
@@ -1241,6 +1237,10 @@ export interface Suspicious {
 	 * Use Number.isNaN instead of global isNaN.
 	 */
 	noGlobalIsNan?: RuleConfiguration;
+	/**
+	 * Disallow use of implicit any type on variable declarations.
+	 */
+	noImplicitAnyLet?: RuleConfiguration;
 	/**
 	 * Disallow assigning to imported bindings
 	 */
@@ -1540,6 +1540,7 @@ export interface Advices {
 }
 export type Category =
 	| "lint/a11y/noAccessKey"
+	| "lint/a11y/noAriaHiddenOnFocusable"
 	| "lint/a11y/noAriaUnsupportedElements"
 	| "lint/a11y/noAutofocus"
 	| "lint/a11y/noBlankTarget"
@@ -1565,6 +1566,7 @@ export type Category =
 	| "lint/a11y/useMediaCaption"
 	| "lint/a11y/useValidAnchor"
 	| "lint/a11y/useValidAriaProps"
+	| "lint/a11y/useValidAriaRole"
 	| "lint/a11y/useValidAriaValues"
 	| "lint/a11y/useValidLang"
 	| "lint/complexity/noBannedTypes"
@@ -1589,6 +1591,7 @@ export type Category =
 	| "lint/complexity/useFlatMap"
 	| "lint/complexity/useLiteralKeys"
 	| "lint/complexity/useOptionalChain"
+	| "lint/complexity/useRegexLiterals"
 	| "lint/complexity/useSimpleNumberKeys"
 	| "lint/complexity/useSimplifiedLogicExpression"
 	| "lint/correctness/noChildrenProp"
@@ -1625,11 +1628,8 @@ export type Category =
 	| "lint/correctness/useValidForDirection"
 	| "lint/correctness/useYield"
 	| "lint/nursery/noApproximativeNumericConstant"
-	| "lint/nursery/noAriaHiddenOnFocusable"
-	| "lint/nursery/noDefaultExport"
 	| "lint/nursery/noDuplicateJsonKeys"
 	| "lint/nursery/noEmptyBlockStatements"
-	| "lint/nursery/noImplicitAnyLet"
 	| "lint/nursery/noInvalidUseBeforeDeclaration"
 	| "lint/nursery/noMisleadingCharacterClass"
 	| "lint/nursery/noNodejsModules"
@@ -1648,15 +1648,14 @@ export type Category =
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useNodejsImportProtocol"
 	| "lint/nursery/useNumberNamespace"
-	| "lint/nursery/useRegexLiterals"
 	| "lint/nursery/useShorthandFunctionType"
-	| "lint/nursery/useValidAriaRole"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noDelete"
 	| "lint/security/noDangerouslySetInnerHtml"
 	| "lint/security/noDangerouslySetInnerHtmlWithChildren"
 	| "lint/style/noArguments"
 	| "lint/style/noCommaOperator"
+	| "lint/style/noDefaultExport"
 	| "lint/style/noImplicitBoolean"
 	| "lint/style/noInferrableTypes"
 	| "lint/style/noNamespace"
@@ -1714,6 +1713,7 @@ export type Category =
 	| "lint/suspicious/noFunctionAssign"
 	| "lint/suspicious/noGlobalIsFinite"
 	| "lint/suspicious/noGlobalIsNan"
+	| "lint/suspicious/noImplicitAnyLet"
 	| "lint/suspicious/noImportAssign"
 	| "lint/suspicious/noLabelVar"
 	| "lint/suspicious/noMisleadingInstantiator"

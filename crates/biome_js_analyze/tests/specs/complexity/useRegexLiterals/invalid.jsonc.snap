@@ -9,7 +9,7 @@ new RegExp('');
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -33,7 +33,7 @@ RegExp('', '');
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -57,7 +57,7 @@ new RegExp(String.raw``);
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -81,7 +81,7 @@ new RegExp('abc');
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -105,7 +105,7 @@ new RegExp((('abc')), ('g'));
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -129,7 +129,7 @@ RegExp('abc');
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -153,7 +153,7 @@ new RegExp('abc', 'g');
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -177,7 +177,7 @@ RegExp('abc', 'g');
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -201,7 +201,7 @@ new RegExp(`abc`);
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -225,7 +225,7 @@ RegExp(`abc`);
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -249,7 +249,7 @@ new RegExp(`abc`, `g`);
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -273,7 +273,7 @@ RegExp(`abc`, `g`);
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -297,7 +297,7 @@ new RegExp(String.raw`abc`);
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -322,7 +322,7 @@ abc`);
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -350,7 +350,7 @@ abc`);
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -377,7 +377,7 @@ RegExp(String.raw`abc`);
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -401,7 +401,7 @@ new RegExp(String.raw`abc`, String.raw`g`);
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -425,7 +425,7 @@ RegExp(String.raw`abc`, String.raw`g`);
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -449,7 +449,7 @@ new RegExp(String['raw']`a`);
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -473,7 +473,7 @@ new RegExp('a', `g`);
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -497,7 +497,7 @@ RegExp(`a`, 'g');
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -521,7 +521,7 @@ RegExp(String.raw`a`, 'g');
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -545,7 +545,7 @@ new RegExp(String.raw`\d`, `g`);
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -569,7 +569,7 @@ new RegExp(String.raw`\\d`, `g`);
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -593,7 +593,7 @@ new RegExp(String['raw']`\\d`, `g`);
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -617,7 +617,7 @@ new RegExp(String["raw"]`\\d`, `g`);
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -641,7 +641,7 @@ RegExp('a', String.raw`g`);
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -665,7 +665,7 @@ new globalThis.RegExp('a');
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -689,7 +689,7 @@ globalThis.RegExp('a');
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -713,7 +713,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -737,7 +737,7 @@ new RegExp((String?.raw)`a`);
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -761,7 +761,7 @@ RegExp('abc', 'u');
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -785,7 +785,7 @@ new RegExp('abc', 'd');
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -809,7 +809,7 @@ RegExp('abc', 'd');
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -833,7 +833,7 @@ RegExp('\\\\', '');
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -857,7 +857,7 @@ RegExp('\n', '');
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -881,7 +881,7 @@ RegExp('\n\n', '');
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -905,7 +905,7 @@ RegExp('\t', '');
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -929,7 +929,7 @@ RegExp('\t\t', '');
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -953,7 +953,7 @@ RegExp('\r\n', '');
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -977,7 +977,7 @@ RegExp('\u1234', 'g')
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -1001,7 +1001,7 @@ RegExp('\u{1234}', 'g')
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -1025,7 +1025,7 @@ RegExp('\u{11111}', 'g')
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -1049,7 +1049,7 @@ RegExp('\v', '');
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -1073,7 +1073,7 @@ RegExp('\v\v', '');
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -1097,7 +1097,7 @@ RegExp('\f', '');
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -1121,7 +1121,7 @@ RegExp('\f\f', '');
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -1145,7 +1145,7 @@ RegExp('\\b', '');
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -1169,7 +1169,7 @@ RegExp('\\b\\b', '');
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -1193,7 +1193,7 @@ new RegExp('\\B\\b', '');
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -1217,7 +1217,7 @@ RegExp('\\w', '');
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -1241,7 +1241,7 @@ new globalThis.RegExp('\\W', '');
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -1265,7 +1265,7 @@ RegExp('\\s', '');
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -1289,7 +1289,7 @@ new RegExp('\\S', '')
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -1313,7 +1313,7 @@ globalThis.RegExp('\\d', '');
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -1337,7 +1337,7 @@ globalThis.RegExp('\\D', '')
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -1361,7 +1361,7 @@ globalThis.RegExp('\\\\\\D', '')
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -1385,7 +1385,7 @@ new RegExp('\\D\\D', '')
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -1409,7 +1409,7 @@ new globalThis.RegExp('\\0\\0', '');
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -1433,7 +1433,7 @@ new RegExp('\\0\\0', '');
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -1457,7 +1457,7 @@ new RegExp('\0\0', 'g');
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -1481,7 +1481,7 @@ RegExp('\\0\\0\\0', '')
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -1505,7 +1505,7 @@ RegExp('\\78\\126\\5934', '')
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -1529,7 +1529,7 @@ new window['RegExp']('\\x56\\x78\\x45', '');
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -1553,7 +1553,7 @@ new (window['RegExp'])('\\x56\\x78\\x45', '');
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -1577,7 +1577,7 @@ a in(RegExp('abc'))
 
 # Diagnostics
 ```
-invalid.jsonc:1:6 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:6 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -1601,7 +1601,7 @@ func(new RegExp(String.raw`\w{1, 2`, 'u'),new RegExp(String.raw`\w{1, 2`, 'u'))
 
 # Diagnostics
 ```
-invalid.jsonc:1:6 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:6 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -1619,7 +1619,7 @@ invalid.jsonc:1:6 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 ```
-invalid.jsonc:1:43 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:43 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -1644,7 +1644,7 @@ x = y;
 
 # Diagnostics
 ```
-invalid.jsonc:2:13 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:2:13 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -1670,7 +1670,7 @@ typeof RegExp("foo")
 
 # Diagnostics
 ```
-invalid.jsonc:1:8 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:8 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -1694,7 +1694,7 @@ RegExp("foo") instanceof RegExp(String.raw`blahblah`, 'g') ? typeof new RegExp('
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -1712,7 +1712,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 ```
-invalid.jsonc:1:26 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:26 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -1730,7 +1730,7 @@ invalid.jsonc:1:26 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 ```
 
 ```
-invalid.jsonc:1:69 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:69 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -1754,7 +1754,7 @@ invalid.jsonc:1:69 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 
 # Diagnostics
 ```
-invalid.jsonc:1:5 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:5 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -1781,7 +1781,7 @@ const totallyValidatesEmails = new RegExp("\\S+@(\\S+\\.)+\\S+")
 
 # Diagnostics
 ```
-invalid.jsonc:1:32 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:32 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -1809,7 +1809,7 @@ invalid.jsonc:1:32 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 
 # Diagnostics
 ```
-invalid.jsonc:1:2 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:2 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -1827,7 +1827,7 @@ invalid.jsonc:1:2 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 ```
-invalid.jsonc:1:31 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:31 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -1845,7 +1845,7 @@ invalid.jsonc:1:31 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 ```
 
 ```
-invalid.jsonc:1:53 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:53 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -1863,7 +1863,7 @@ invalid.jsonc:1:53 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 ```
 
 ```
-invalid.jsonc:1:77 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:77 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -1881,7 +1881,7 @@ invalid.jsonc:1:77 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 ```
 
 ```
-invalid.jsonc:1:96 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:96 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -1899,7 +1899,7 @@ invalid.jsonc:1:96 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 ```
 
 ```
-invalid.jsonc:1:122 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:122 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -1917,7 +1917,7 @@ invalid.jsonc:1:122 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.jsonc:1:151 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:151 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -1942,7 +1942,7 @@ invalid.jsonc:1:151 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━�
 
 # Diagnostics
 ```
-invalid.jsonc:2:13 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:2:13 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -1968,7 +1968,7 @@ async function abc(){await new RegExp("foo")}
 
 # Diagnostics
 ```
-invalid.jsonc:1:28 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:28 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -1992,7 +1992,7 @@ function* abc(){yield new RegExp("foo")}
 
 # Diagnostics
 ```
-invalid.jsonc:1:23 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:23 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -2016,7 +2016,7 @@ function* abc(){yield* new RegExp("foo")}
 
 # Diagnostics
 ```
-invalid.jsonc:1:24 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:24 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -2040,7 +2040,7 @@ console.log({ ...new RegExp('a') })
 
 # Diagnostics
 ```
-invalid.jsonc:1:18 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:18 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -2064,7 +2064,7 @@ delete RegExp('a');
 
 # Diagnostics
 ```
-invalid.jsonc:1:8 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:8 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -2088,7 +2088,7 @@ void RegExp('a');
 
 # Diagnostics
 ```
-invalid.jsonc:1:6 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:6 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -2112,7 +2112,7 @@ new RegExp("\\S+@(\\S+\\.)+\\S+")**RegExp('a')
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -2130,7 +2130,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 ```
-invalid.jsonc:1:36 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:36 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -2154,7 +2154,7 @@ new RegExp("\\S+@(\\S+\\.)+\\S+")%RegExp('a')
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -2172,7 +2172,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 ```
-invalid.jsonc:1:35 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:35 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -2196,7 +2196,7 @@ a in RegExp('abc')
 
 # Diagnostics
 ```
-invalid.jsonc:1:6 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:6 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -2222,7 +2222,7 @@ invalid.jsonc:1:6 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 
 # Diagnostics
 ```
-invalid.jsonc:2:22 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:2:22 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -2251,7 +2251,7 @@ invalid.jsonc:2:22 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 
 # Diagnostics
 ```
-invalid.jsonc:2:23 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:2:23 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -2280,7 +2280,7 @@ invalid.jsonc:2:23 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 
 # Diagnostics
 ```
-invalid.jsonc:2:22 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:2:22 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -2309,7 +2309,7 @@ invalid.jsonc:2:22 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 
 # Diagnostics
 ```
-invalid.jsonc:2:23 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:2:23 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -2338,7 +2338,7 @@ invalid.jsonc:2:23 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 
 # Diagnostics
 ```
-invalid.jsonc:2:21 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:2:21 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -2367,7 +2367,7 @@ invalid.jsonc:2:21 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 
 # Diagnostics
 ```
-invalid.jsonc:2:21 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:2:21 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -2396,7 +2396,7 @@ invalid.jsonc:2:21 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 
 # Diagnostics
 ```
-invalid.jsonc:2:22 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:2:22 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -2425,7 +2425,7 @@ invalid.jsonc:2:22 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 
 # Diagnostics
 ```
-invalid.jsonc:2:22 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:2:22 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -2454,7 +2454,7 @@ invalid.jsonc:2:22 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 
 # Diagnostics
 ```
-invalid.jsonc:2:22 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:2:22 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -2483,7 +2483,7 @@ invalid.jsonc:2:22 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 
 # Diagnostics
 ```
-invalid.jsonc:2:22 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:2:22 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -2512,7 +2512,7 @@ invalid.jsonc:2:22 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 
 # Diagnostics
 ```
-invalid.jsonc:2:23 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:2:23 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -2541,7 +2541,7 @@ invalid.jsonc:2:23 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 
 # Diagnostics
 ```
-invalid.jsonc:2:21 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:2:21 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -2570,7 +2570,7 @@ invalid.jsonc:2:21 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 
 # Diagnostics
 ```
-invalid.jsonc:2:21 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:2:21 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -2599,7 +2599,7 @@ invalid.jsonc:2:21 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 
 # Diagnostics
 ```
-invalid.jsonc:2:21 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:2:21 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -2628,7 +2628,7 @@ invalid.jsonc:2:21 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 
 # Diagnostics
 ```
-invalid.jsonc:2:21 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:2:21 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -2657,7 +2657,7 @@ invalid.jsonc:2:21 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 
 # Diagnostics
 ```
-invalid.jsonc:2:20 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:2:20 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -2686,7 +2686,7 @@ invalid.jsonc:2:20 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 
 # Diagnostics
 ```
-invalid.jsonc:2:29 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:2:29 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -2715,7 +2715,7 @@ invalid.jsonc:2:29 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 
 # Diagnostics
 ```
-invalid.jsonc:2:32 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:2:32 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -2744,7 +2744,7 @@ invalid.jsonc:2:32 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 
 # Diagnostics
 ```
-invalid.jsonc:2:29 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:2:29 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -2773,7 +2773,7 @@ invalid.jsonc:2:29 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 
 # Diagnostics
 ```
-invalid.jsonc:2:36 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:2:36 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -2802,7 +2802,7 @@ invalid.jsonc:2:36 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 
 # Diagnostics
 ```
-invalid.jsonc:2:21 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:2:21 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -2831,7 +2831,7 @@ invalid.jsonc:2:21 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 
 # Diagnostics
 ```
-invalid.jsonc:2:21 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:2:21 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -2860,7 +2860,7 @@ invalid.jsonc:2:21 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 
 # Diagnostics
 ```
-invalid.jsonc:2:22 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:2:22 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -2889,7 +2889,7 @@ invalid.jsonc:2:22 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 
 # Diagnostics
 ```
-invalid.jsonc:2:20 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:2:20 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -2918,7 +2918,7 @@ invalid.jsonc:2:20 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 
 # Diagnostics
 ```
-invalid.jsonc:2:20 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:2:20 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -2947,7 +2947,7 @@ invalid.jsonc:2:20 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 
 # Diagnostics
 ```
-invalid.jsonc:2:20 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:2:20 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -2976,7 +2976,7 @@ invalid.jsonc:2:20 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 
 # Diagnostics
 ```
-invalid.jsonc:2:21 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:2:21 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -3005,7 +3005,7 @@ invalid.jsonc:2:21 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 
 # Diagnostics
 ```
-invalid.jsonc:2:21 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:2:21 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -3034,7 +3034,7 @@ invalid.jsonc:2:21 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 
 # Diagnostics
 ```
-invalid.jsonc:2:21 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:2:21 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -3063,7 +3063,7 @@ invalid.jsonc:2:21 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 
 # Diagnostics
 ```
-invalid.jsonc:2:21 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:2:21 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -3092,7 +3092,7 @@ invalid.jsonc:2:21 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 
 # Diagnostics
 ```
-invalid.jsonc:2:20 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:2:20 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -3121,7 +3121,7 @@ invalid.jsonc:2:20 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 
 # Diagnostics
 ```
-invalid.jsonc:2:20 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:2:20 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -3150,7 +3150,7 @@ invalid.jsonc:2:20 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 
 # Diagnostics
 ```
-invalid.jsonc:2:20 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:2:20 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -3179,7 +3179,7 @@ invalid.jsonc:2:20 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 
 # Diagnostics
 ```
-invalid.jsonc:2:20 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:2:20 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -3208,7 +3208,7 @@ invalid.jsonc:2:20 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 
 # Diagnostics
 ```
-invalid.jsonc:2:19 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:2:19 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -3235,7 +3235,7 @@ a/RegExp("foo")in b
 
 # Diagnostics
 ```
-invalid.jsonc:1:3 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:3 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -3259,7 +3259,7 @@ a/RegExp("foo")instanceof b
 
 # Diagnostics
 ```
-invalid.jsonc:1:3 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:3 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -3284,7 +3284,7 @@ while (true);
 
 # Diagnostics
 ```
-invalid.jsonc:1:4 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:4 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -3311,7 +3311,7 @@ new RegExp('search')}
 
 # Diagnostics
 ```
-invalid.jsonc:2:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:2:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -3338,7 +3338,7 @@ new RegExp('search')}
 
 # Diagnostics
 ```
-invalid.jsonc:2:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:2:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -3372,7 +3372,7 @@ invalid.jsonc:2:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 
 # Diagnostics
 ```
-invalid.jsonc:5:22 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:5:22 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -3404,7 +3404,7 @@ throw new RegExp('abcdefg') // fail with a regular expression
 
 # Diagnostics
 ```
-invalid.jsonc:1:7 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:7 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -3428,7 +3428,7 @@ for (value of new RegExp('something being searched')) { console.log(value) }
 
 # Diagnostics
 ```
-invalid.jsonc:1:15 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:15 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -3452,7 +3452,7 @@ invalid.jsonc:1:15 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 
 # Diagnostics
 ```
-invalid.jsonc:1:39 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:39 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -3476,7 +3476,7 @@ for (value in new RegExp('something being searched')) { console.log(value) }
 
 # Diagnostics
 ```
-invalid.jsonc:1:15 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:15 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -3500,7 +3500,7 @@ if (condition1 && condition2) new RegExp('avalue').test(str);
 
 # Diagnostics
 ```
-invalid.jsonc:1:31 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:31 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -3525,7 +3525,7 @@ new RegExp('myReg')
 
 # Diagnostics
 ```
-invalid.jsonc:2:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:2:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -3551,7 +3551,7 @@ RegExp("\\\n")
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -3575,7 +3575,7 @@ RegExp("\\\t")
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -3599,7 +3599,7 @@ RegExp("\\\f")
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -3623,7 +3623,7 @@ RegExp("\\\v")
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -3647,7 +3647,7 @@ RegExp("\\\r")
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -3671,7 +3671,7 @@ new RegExp("	")
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -3695,7 +3695,7 @@ new RegExp("/")
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -3719,7 +3719,7 @@ new RegExp("\.")
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -3743,7 +3743,7 @@ new RegExp("\\.")
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -3767,7 +3767,7 @@ new RegExp("\\\n\\\n")
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -3791,7 +3791,7 @@ new RegExp("\\\n\\\f\\\n")
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -3815,7 +3815,7 @@ new RegExp("\u000A\u000A");
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -3839,7 +3839,7 @@ new RegExp('mysafereg' /* comment explaining its safety */)
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -3863,7 +3863,7 @@ new RegExp('[[A--B]]', 'v')
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -3887,7 +3887,7 @@ new RegExp('[[A--B]]', 'v')
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   
@@ -3911,7 +3911,7 @@ new RegExp('[[A&&&]]', 'v')
 
 # Diagnostics
 ```
-invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsonc:1:1 lint/complexity/useRegexLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a regular expression literal instead of the RegExp constructor.
   

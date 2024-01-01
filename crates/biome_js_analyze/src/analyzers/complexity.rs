@@ -20,6 +20,7 @@ pub(crate) mod use_arrow_function;
 pub(crate) mod use_flat_map;
 pub(crate) mod use_literal_keys;
 pub(crate) mod use_optional_chain;
+pub(crate) mod use_regex_literals;
 pub(crate) mod use_simple_number_keys;
 pub(crate) mod use_simplified_logic_expression;
 
@@ -45,6 +46,7 @@ declare_group! {
             self :: use_flat_map :: UseFlatMap ,
             self :: use_literal_keys :: UseLiteralKeys ,
             self :: use_optional_chain :: UseOptionalChain ,
+            self :: use_regex_literals :: UseRegexLiterals ,
             self :: use_simple_number_keys :: UseSimpleNumberKeys ,
             self :: use_simplified_logic_expression :: UseSimplifiedLogicExpression ,
         ]

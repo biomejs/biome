@@ -87,6 +87,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noAriaHiddenOnFocusable": {
+					"description": "Enforce that aria-hidden=\"true\" is not set on focusable elements.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noAriaUnsupportedElements": {
 					"description": "Enforce that elements that do not support ARIA roles, states, and properties do not have those attributes.",
 					"anyOf": [
@@ -261,6 +268,13 @@
 				},
 				"useValidAriaProps": {
 					"description": "Ensures that ARIA properties aria-* are all valid.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useValidAriaRole": {
+					"description": "Elements with ARIA roles must use a valid, non-abstract ARIA role.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -444,6 +458,13 @@
 				},
 				"useOptionalChain": {
 					"description": "Enforce using concise optional chain instead of chained logical expressions.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useRegexLiterals": {
+					"description": "Enforce the use of the regular expression literals instead of the RegExp constructor if possible.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -1229,20 +1250,6 @@
 					"description": "It enables ALL rules for this group.",
 					"type": ["boolean", "null"]
 				},
-				"noAriaHiddenOnFocusable": {
-					"description": "Enforce that aria-hidden=\"true\" is not set on focusable elements.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noDefaultExport": {
-					"description": "Disallow default exports.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noDuplicateJsonKeys": {
 					"description": "Disallow two keys with the same name inside a JSON object.",
 					"anyOf": [
@@ -1252,13 +1259,6 @@
 				},
 				"noEmptyBlockStatements": {
 					"description": "Disallow empty block statements and static blocks.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noImplicitAnyLet": {
-					"description": "Disallow use of implicit any type on variable declarations.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -1380,22 +1380,8 @@
 						{ "type": "null" }
 					]
 				},
-				"useRegexLiterals": {
-					"description": "Enforce the use of the regular expression literals instead of the RegExp constructor if possible.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"useShorthandFunctionType": {
 					"description": "Enforce using function types instead of object type with call signatures.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useValidAriaRole": {
-					"description": "Elements with ARIA roles must use a valid, non-abstract ARIA role.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -1735,6 +1721,13 @@
 				},
 				"noCommaOperator": {
 					"description": "Disallow comma operator.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noDefaultExport": {
+					"description": "Disallow default exports.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -2148,6 +2141,13 @@
 				},
 				"noGlobalIsNan": {
 					"description": "Use Number.isNaN instead of global isNaN.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noImplicitAnyLet": {
+					"description": "Disallow use of implicit any type on variable declarations.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

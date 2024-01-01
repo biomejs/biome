@@ -17,11 +17,8 @@ hooks_missing_name.json:6:5 deserialize ━━━━━━━━━━━━━�
   
   - recommended
   - all
-  - noAriaHiddenOnFocusable
-  - noDefaultExport
   - noDuplicateJsonKeys
   - noEmptyBlockStatements
-  - noImplicitAnyLet
   - noInvalidUseBeforeDeclaration
   - noMisleadingCharacterClass
   - noNodejsModules
@@ -38,9 +35,7 @@ hooks_missing_name.json:6:5 deserialize ━━━━━━━━━━━━━�
   - useImportRestrictions
   - useNodejsImportProtocol
   - useNumberNamespace
-  - useRegexLiterals
   - useShorthandFunctionType
-  - useValidAriaRole
   
 
 

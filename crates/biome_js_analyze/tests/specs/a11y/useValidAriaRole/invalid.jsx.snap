@@ -21,7 +21,7 @@ expression: invalid.jsx
 
 # Diagnostics
 ```
-invalid.jsx:2:3 lint/nursery/useValidAriaRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:2:3 lint/a11y/useValidAriaRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Enforce that elements with ARIA roles must use a valid, non-abstract ARIA role.
   
@@ -42,7 +42,7 @@ invalid.jsx:2:3 lint/nursery/useValidAriaRole  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.jsx:3:3 lint/nursery/useValidAriaRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:3:3 lint/a11y/useValidAriaRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Enforce that elements with ARIA roles must use a valid, non-abstract ARIA role.
   
@@ -64,7 +64,7 @@ invalid.jsx:3:3 lint/nursery/useValidAriaRole  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.jsx:4:3 lint/nursery/useValidAriaRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:4:3 lint/a11y/useValidAriaRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Enforce that elements with ARIA roles must use a valid, non-abstract ARIA role.
   
@@ -86,7 +86,7 @@ invalid.jsx:4:3 lint/nursery/useValidAriaRole  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.jsx:5:3 lint/nursery/useValidAriaRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:5:3 lint/a11y/useValidAriaRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Enforce that elements with ARIA roles must use a valid, non-abstract ARIA role.
   
@@ -108,7 +108,7 @@ invalid.jsx:5:3 lint/nursery/useValidAriaRole  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.jsx:6:3 lint/nursery/useValidAriaRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:6:3 lint/a11y/useValidAriaRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Enforce that elements with ARIA roles must use a valid, non-abstract ARIA role.
   
@@ -130,7 +130,7 @@ invalid.jsx:6:3 lint/nursery/useValidAriaRole  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.jsx:7:3 lint/nursery/useValidAriaRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:7:3 lint/a11y/useValidAriaRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Enforce that elements with ARIA roles must use a valid, non-abstract ARIA role.
   
@@ -152,7 +152,7 @@ invalid.jsx:7:3 lint/nursery/useValidAriaRole  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.jsx:8:3 lint/nursery/useValidAriaRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:8:3 lint/a11y/useValidAriaRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Enforce that elements with ARIA roles must use a valid, non-abstract ARIA role.
   
@@ -174,7 +174,7 @@ invalid.jsx:8:3 lint/nursery/useValidAriaRole  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.jsx:9:3 lint/nursery/useValidAriaRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:9:3 lint/a11y/useValidAriaRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Enforce that elements with ARIA roles must use a valid, non-abstract ARIA role.
   
@@ -196,7 +196,7 @@ invalid.jsx:9:3 lint/nursery/useValidAriaRole  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.jsx:10:3 lint/nursery/useValidAriaRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:10:3 lint/a11y/useValidAriaRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Enforce that elements with ARIA roles must use a valid, non-abstract ARIA role.
   
@@ -218,7 +218,7 @@ invalid.jsx:10:3 lint/nursery/useValidAriaRole  FIXABLE  ━━━━━━━�
 ```
 
 ```
-invalid.jsx:11:3 lint/nursery/useValidAriaRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:11:3 lint/a11y/useValidAriaRole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Enforce that elements with ARIA roles must use a valid, non-abstract ARIA role.
   

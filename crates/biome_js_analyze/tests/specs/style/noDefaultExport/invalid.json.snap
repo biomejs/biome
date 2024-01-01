@@ -9,7 +9,7 @@ export default function f() {};
 
 # Diagnostics
 ```
-invalid.json:1:8 lint/nursery/noDefaultExport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.json:1:8 lint/style/noDefaultExport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Avoid default exports.
   
@@ -30,7 +30,7 @@ export default class C {};
 
 # Diagnostics
 ```
-invalid.json:1:8 lint/nursery/noDefaultExport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.json:1:8 lint/style/noDefaultExport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Avoid default exports.
   
@@ -51,7 +51,7 @@ export default function () {};
 
 # Diagnostics
 ```
-invalid.json:1:8 lint/nursery/noDefaultExport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.json:1:8 lint/style/noDefaultExport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Avoid default exports.
   
@@ -72,7 +72,7 @@ export default class {};
 
 # Diagnostics
 ```
-invalid.json:1:8 lint/nursery/noDefaultExport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.json:1:8 lint/style/noDefaultExport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Avoid default exports.
   
@@ -93,7 +93,7 @@ export default X;
 
 # Diagnostics
 ```
-invalid.json:1:8 lint/nursery/noDefaultExport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.json:1:8 lint/style/noDefaultExport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Avoid default exports.
   
@@ -114,7 +114,7 @@ export default { f() {} };
 
 # Diagnostics
 ```
-invalid.json:1:8 lint/nursery/noDefaultExport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.json:1:8 lint/style/noDefaultExport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Avoid default exports.
   
@@ -135,7 +135,7 @@ export { X as default };
 
 # Diagnostics
 ```
-invalid.json:1:15 lint/nursery/noDefaultExport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.json:1:15 lint/style/noDefaultExport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Avoid default exports.
   
@@ -156,7 +156,7 @@ export { X as 'default' };
 
 # Diagnostics
 ```
-invalid.json:1:15 lint/nursery/noDefaultExport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.json:1:15 lint/style/noDefaultExport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Avoid default exports.
   
@@ -182,7 +182,7 @@ export { X as default } from './module';
 
 # Diagnostics
 ```
-invalid.json:1:15 lint/nursery/noDefaultExport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.json:1:15 lint/style/noDefaultExport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Avoid default exports.
   
@@ -203,7 +203,7 @@ export { X as 'default' } from './module';
 
 # Diagnostics
 ```
-invalid.json:1:15 lint/nursery/noDefaultExport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.json:1:15 lint/style/noDefaultExport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Avoid default exports.
   

@@ -24,7 +24,7 @@ function ex() {
 
 # Diagnostics
 ```
-invalid.ts:1:5 lint/nursery/noImplicitAnyLet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:1:5 lint/suspicious/noImplicitAnyLet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This variable has implicitly the any type.
   
@@ -39,7 +39,7 @@ invalid.ts:1:5 lint/nursery/noImplicitAnyLet ━━━━━━━━━━━�
 ```
 
 ```
-invalid.ts:5:5 lint/nursery/noImplicitAnyLet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:5:5 lint/suspicious/noImplicitAnyLet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This variable has implicitly the any type.
   
@@ -56,7 +56,7 @@ invalid.ts:5:5 lint/nursery/noImplicitAnyLet ━━━━━━━━━━━�
 ```
 
 ```
-invalid.ts:9:12 lint/nursery/noImplicitAnyLet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:9:12 lint/suspicious/noImplicitAnyLet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This variable has implicitly the any type.
   
@@ -73,7 +73,7 @@ invalid.ts:9:12 lint/nursery/noImplicitAnyLet ━━━━━━━━━━━�
 ```
 
 ```
-invalid.ts:10:12 lint/nursery/noImplicitAnyLet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:10:12 lint/suspicious/noImplicitAnyLet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This variable has implicitly the any type.
   
@@ -89,7 +89,7 @@ invalid.ts:10:12 lint/nursery/noImplicitAnyLet ━━━━━━━━━━━
 ```
 
 ```
-invalid.ts:11:16 lint/nursery/noImplicitAnyLet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:11:16 lint/suspicious/noImplicitAnyLet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This variable has implicitly the any type.
   
@@ -106,7 +106,7 @@ invalid.ts:11:16 lint/nursery/noImplicitAnyLet ━━━━━━━━━━━
 ```
 
 ```
-invalid.ts:14:9 lint/nursery/noImplicitAnyLet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:14:9 lint/suspicious/noImplicitAnyLet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This variable has implicitly the any type.
   

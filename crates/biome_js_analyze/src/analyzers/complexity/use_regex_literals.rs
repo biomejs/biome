@@ -50,7 +50,7 @@ declare_rule! {
     pub(crate) UseRegexLiterals {
         version: "1.3.0",
         name: "useRegexLiterals",
-        recommended: false,
+        recommended: true,
         fix_kind: FixKind::Unsafe,
     }
 }

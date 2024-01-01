@@ -16,7 +16,7 @@ expression: invalid.jsx
 
 # Diagnostics
 ```
-invalid.jsx:2:3 lint/nursery/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:2:3 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Disallow aria-hidden="true" from being set on focusable elements.
   
@@ -36,7 +36,7 @@ invalid.jsx:2:3 lint/nursery/noAriaHiddenOnFocusable  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.jsx:3:3 lint/nursery/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:3:3 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Disallow aria-hidden="true" from being set on focusable elements.
   
@@ -57,7 +57,7 @@ invalid.jsx:3:3 lint/nursery/noAriaHiddenOnFocusable  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.jsx:4:3 lint/nursery/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:4:3 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Disallow aria-hidden="true" from being set on focusable elements.
   
@@ -78,7 +78,7 @@ invalid.jsx:4:3 lint/nursery/noAriaHiddenOnFocusable  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.jsx:5:3 lint/nursery/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:5:3 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Disallow aria-hidden="true" from being set on focusable elements.
   
@@ -99,7 +99,7 @@ invalid.jsx:5:3 lint/nursery/noAriaHiddenOnFocusable  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.jsx:6:3 lint/nursery/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:6:3 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Disallow aria-hidden="true" from being set on focusable elements.
   
@@ -120,7 +120,7 @@ invalid.jsx:6:3 lint/nursery/noAriaHiddenOnFocusable  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.jsx:7:3 lint/nursery/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:7:3 lint/a11y/noAriaHiddenOnFocusable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Disallow aria-hidden="true" from being set on focusable elements.
   

@@ -121,6 +121,18 @@ Biome now scores 97% compatibility with Prettier and features more than 180 lint
 
 ### Linter
 
+#### Promoted rules
+
+New rules are incubated in the nursery group.
+Once stable, we promote them to a stable group.
+The following rules are promoted:
+
+- [a11y/noAriaHiddenOnFocusable](https://www.biomejs.dev/linter/rules/no-aria-hidden-on-focusable)
+- [a11y/useValidAriaRole](https://www.biomejs.dev/linter/rules/use-valid-aria-role)
+- [complexity/useRegexLiterals](https://www.biomejs.dev/linter/rules/use-regex-literals)
+- [suspicious/noImplicitAnyLet](https://www.biomejs.dev/linter/rules/no-implicit-any-let)
+- [style/noDefaultExport](https://www.biomejs.dev/linter/rules/no-default-export)
+
 #### New features
 
 - Add [useExportType](https://biomejs.dev/linter/rules/use-export-type) that enforces the use of type-only exports for names that are only types. Contributed by @Conaclos
@@ -147,6 +159,15 @@ Biome now scores 97% compatibility with Prettier and features more than 180 lint
   ```diff
   - import fs from "fs";
   + import fs from "node:fs";
+  ```
+
+- Add [useNumberNamespace](https://biomejs.dev/linter/rules/use-number-namespace) that enforces the use of the `Number` properties instead of the global ones.
+
+  ```diff
+  - parseInt;
+  + Number.parseInt;
+  - - Infinity;
+  + Number.NEGATIVE_INFINITY;
   ```
 
 - Add [noNodejsModules](https://biomejs.dev/linter/rules/no-nodejs-modules), that disallows the use of _Node.js_ modules. Contributed by @anonrig, @ematipico, and @Conaclos

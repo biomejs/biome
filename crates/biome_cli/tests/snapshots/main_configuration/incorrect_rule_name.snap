@@ -104,6 +104,7 @@ biome.json:9:13 deserialize ━━━━━━━━━━━━━━━━━�
   - all
   - noArguments
   - noCommaOperator
+  - noDefaultExport
   - noImplicitBoolean
   - noInferrableTypes
   - noNamespace

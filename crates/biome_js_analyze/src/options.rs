@@ -1,11 +1,13 @@
 //! This module contains the rules that have options
 
-use crate::analyzers::complexity::no_excessive_cognitive_complexity::ComplexityOptions;
 use crate::analyzers::nursery::use_filenaming_convention::FilenamingConventionOptions;
-use crate::aria_analyzers::nursery::use_valid_aria_role::ValidAriaRoleOptions;
 use crate::semantic_analyzers::correctness::use_exhaustive_dependencies::HooksOptions;
 use crate::semantic_analyzers::style::no_restricted_globals::RestrictedGlobalsOptions;
 use crate::semantic_analyzers::style::use_naming_convention::NamingConventionOptions;
+use crate::{
+    analyzers::complexity::no_excessive_cognitive_complexity::ComplexityOptions,
+    aria_analyzers::a11y::use_valid_aria_role::ValidAriaRoleOptions,
+};
 use biome_analyze::options::RuleOptions;
 use biome_analyze::RuleKey;
 use biome_console::markup;
