@@ -15,12 +15,22 @@ const implicitReturn = (x) => useMemo(() => x, [x]);
 
 const implicitReturnInsideWrappedComponent = forwardRef((x) => useMemo(() => x, [x]));
 
+function useStuff() {
+    return {
+        abc: useCallback(() => null, [])
+    };
+}
+
+function useStuff2() {
+    return [useCallback(() => null, [])];
+}
+
 // Hook called indirectly
 function helper() {
     useEffect();
 }
 
-function Component2({a}) {
+function Component2({ a }) {
     helper();
 }
 

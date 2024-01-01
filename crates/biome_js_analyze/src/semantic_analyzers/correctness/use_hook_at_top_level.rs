@@ -98,19 +98,23 @@ fn enclosing_function_if_call_is_at_top_level(call: &JsCallExpression) -> Option
     let next = call.syntax().ancestors().find(|x| {
         !matches!(
             x.kind(),
-            JsSyntaxKind::JS_STATEMENT_LIST
+            |JsSyntaxKind::JS_ARRAY_ELEMENT_LIST| JsSyntaxKind::JS_ARRAY_EXPRESSION
                 | JsSyntaxKind::JS_BLOCK_STATEMENT
-                | JsSyntaxKind::JS_VARIABLE_STATEMENT
-                | JsSyntaxKind::JS_EXPRESSION_STATEMENT
-                | JsSyntaxKind::JS_RETURN_STATEMENT
-                | JsSyntaxKind::JS_CALL_EXPRESSION
                 | JsSyntaxKind::JS_CALL_ARGUMENT_LIST
                 | JsSyntaxKind::JS_CALL_ARGUMENTS
-                | JsSyntaxKind::JS_STATIC_MEMBER_EXPRESSION
+                | JsSyntaxKind::JS_CALL_EXPRESSION
+                | JsSyntaxKind::JS_EXPRESSION_STATEMENT
                 | JsSyntaxKind::JS_INITIALIZER_CLAUSE
+                | JsSyntaxKind::JS_OBJECT_EXPRESSION
+                | JsSyntaxKind::JS_OBJECT_MEMBER_LIST
+                | JsSyntaxKind::JS_PROPERTY_OBJECT_MEMBER
+                | JsSyntaxKind::JS_RETURN_STATEMENT
+                | JsSyntaxKind::JS_STATEMENT_LIST
+                | JsSyntaxKind::JS_STATIC_MEMBER_EXPRESSION
                 | JsSyntaxKind::JS_VARIABLE_DECLARATOR
                 | JsSyntaxKind::JS_VARIABLE_DECLARATOR_LIST
                 | JsSyntaxKind::JS_VARIABLE_DECLARATION
+                | JsSyntaxKind::JS_VARIABLE_STATEMENT
                 | JsSyntaxKind::TS_AS_EXPRESSION
                 | JsSyntaxKind::TS_SATISFIES_EXPRESSION
         )
