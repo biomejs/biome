@@ -288,14 +288,14 @@ export { I };
 
 Enforces naming conventions for JavaScript and TypeScript filenames.
 
-##### [useNodeImportProtocol](https://biomejs.dev/linter/rules/use-node-import-protocol)
+##### [useNodejsImportProtocol](https://biomejs.dev/linter/rules/use-nodejs-import-protocol)
 
 ```jsx
 import fs from 'fs';
 ```
 
 
-<pre class="language-text"><code class="language-text">nursery/useNodeImportProtocol.js:1:16 <a href="https://biomejs.dev/linter/rules/use-node-import-protocol">lint/nursery/useNodeImportProtocol</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">nursery/useNodejsImportProtocol.js:1:16 <a href="https://biomejs.dev/linter/rules/use-node-import-protocol">lint/nursery/useNodejsImportProtocol</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Import from Node.js builtin module &quot;</span><span style="color: Orange;"><strong>fs</strong></span><span style="color: Orange;">&quot; should use the &quot;</span><span style="color: Orange;"><strong>node:</strong></span><span style="color: Orange;">&quot; protocol.</span>
 
