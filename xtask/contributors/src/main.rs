@@ -16,6 +16,8 @@ fn main() -> Result<()> {
 
     let mut content = String::new();
 
+    content.push_str("---\n import { Image } from \"astro:assets\"\n---\n");
+
     let command = "Use the command `cargo contributors`".to_string();
     write!(
         content,
@@ -23,7 +25,7 @@ fn main() -> Result<()> {
         prepend_generated_preamble(command)
     )?;
     content.push('\n');
-    content.push_str("<h3>Code contributors</h3>");
+    content.push_str("<h2>Code contributors</h2>");
     content.push('\n');
     content.push_str("<ul class=\"credits-people-list contributors\">");
     content.push('\n');
@@ -38,7 +40,7 @@ fn main() -> Result<()> {
             &mut contributor_html,
         );
         contributor_html.push_str("\">");
-        contributor_html.push_str("<img src=\"");
+        contributor_html.push_str("<Image width=\"150\" height=\"150\" src=\"");
         html_escape::encode_double_quoted_attribute_to_string(
             format!("{}", escaped_avatar),
             &mut contributor_html,
