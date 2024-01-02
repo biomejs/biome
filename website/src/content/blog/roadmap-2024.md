@@ -14,7 +14,7 @@ socialImage: ../../assets/old-social-logo.png
 ---
 ## Roadmap 2024
 
-We are thrilled to share what the Core Contributors and Maintainers would like to focus on in 2024.
+We are thrilled to share what the Core Contributors and Maintainers would like to focus in 2024.
 
 We want to remind that Biome is a community-driven project, so we can't promise that all the ideas outlined below are going to be shipped.
 
@@ -71,7 +71,7 @@ HTML and Markdown will be our next languages of focus. HTML will enable us to pa
 
 #### Project analysis and dependency resolution
 
-We will provide lint rules that can read the manifest and do operations over it, such as invalid licenses.
+We will provide lint rules that can read the manifest, detect errors such as invalid licenses.
 
 With project resolution, we will be able to provide more lint rules, some of which will be able to detect unused modules.
 
@@ -88,7 +88,7 @@ Building a full-fledged type system such as TypeScript is a massive effort, that
 
 This will come with a downside: relying on a stricter code, and minimal type inference from the compiler.
 
-Once we have something we can rely on, we can slowly widen the type-checking functionality.
+Once we have something we can rely on, we can slowly widen the capabilities of our type system.
 
 #### CLI
 
@@ -141,7 +141,7 @@ With the Roadmap 2024, we also publish a new version. This version has few featu
 Update Biome using the following commands:
 
 ```shell
-npm i @biomejs/biome@latest --exact
+npm i @biomejs/biome@latest --exact --save-dev
 npx @biomejs/biome migrate
 ```
 
@@ -155,7 +155,7 @@ npx @biomejs/biome migrate
 
 #### Process only the files that were changed
 
-If you enable the integration with VCS, you can tell Biome to process only the files that were changed. As for now, this feature computes the files that were changed by using a VCS, so Biome doesn't know what's changed.
+If you enable the integration with VCS, you can tell Biome to process only the files that were changed. As for now, this feature computes the files that were changed by using a VCS, so Biome doesn't know exactly which lines changed.
 
 This feature practically makes some utilities such as `lint-staged` obsolete.
 
