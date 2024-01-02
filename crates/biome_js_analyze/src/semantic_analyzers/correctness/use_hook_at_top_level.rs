@@ -9,7 +9,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_js_semantic::{CallsExtensions, SemanticModel};
 use biome_js_syntax::{
-    AnyFunctionLike, AnyJsExpression, AnyJsFunction, JsCallExpression, JsFunctionBody, JsLanguage,
+    AnyFunctionLike, AnyJsExpression, AnyJsFunction, JsCallExpression, JsLanguage,
     JsMethodObjectMember, JsReturnStatement, JsSyntaxKind, TextRange,
 };
 use biome_rowan::{AstNode, Language, SyntaxNode, WalkEvent};
@@ -136,20 +136,22 @@ pub enum Suggestion {
     },
 }
 
-// Verify if the call expression is at the top level
-// of the component
+/// Verifies whether the call expression is at the top level of the component,
+/// and returns the function node if so.
 fn enclosing_function_if_call_is_at_top_level(
     call: &JsCallExpression,
 ) -> Option<AnyJsFunctionOrMethod> {
     let next = call.syntax().ancestors().find(|x| {
         !matches!(
             x.kind(),
-            |JsSyntaxKind::JS_ARRAY_ELEMENT_LIST| JsSyntaxKind::JS_ARRAY_EXPRESSION
+            JsSyntaxKind::JS_ARRAY_ELEMENT_LIST
+                | JsSyntaxKind::JS_ARRAY_EXPRESSION
                 | JsSyntaxKind::JS_BLOCK_STATEMENT
                 | JsSyntaxKind::JS_CALL_ARGUMENT_LIST
                 | JsSyntaxKind::JS_CALL_ARGUMENTS
                 | JsSyntaxKind::JS_CALL_EXPRESSION
                 | JsSyntaxKind::JS_EXPRESSION_STATEMENT
+                | JsSyntaxKind::JS_FUNCTION_BODY
                 | JsSyntaxKind::JS_INITIALIZER_CLAUSE
                 | JsSyntaxKind::JS_OBJECT_EXPRESSION
                 | JsSyntaxKind::JS_OBJECT_MEMBER_LIST
@@ -166,15 +168,7 @@ fn enclosing_function_if_call_is_at_top_level(
         )
     });
 
-    match next {
-        Some(next) if AnyJsFunctionOrMethod::can_cast(next.kind()) => {
-            AnyJsFunctionOrMethod::cast(next)
-        }
-        Some(next) => {
-            JsFunctionBody::cast(next).and_then(|body| body.parent::<AnyJsFunctionOrMethod>())
-        }
-        None => None,
-    }
+    next.and_then(AnyJsFunctionOrMethod::cast)
 }
 
 fn is_nested_function(function: &AnyJsFunctionOrMethod) -> bool {

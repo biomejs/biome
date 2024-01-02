@@ -119,14 +119,7 @@ pub(crate) fn is_react_hook_call(call: &JsCallExpression) -> bool {
     };
 
     let name = name.text_trimmed();
-    name.starts_with("use")
-        && name
-            .chars()
-            .skip(3)
-            .take(1)
-            .next()
-            .map(char::is_uppercase)
-            .unwrap_or_default()
+    name.starts_with("use") && name.chars().nth(3).is_some_and(char::is_uppercase)
 }
 
 const HOOKS_WITH_DEPS_API: [&str; 6] = [
