@@ -1,0 +1,60 @@
+---
+title: Git Hooks
+description: Using Biome in Git Hooks
+---
+
+You can use Biome with a pre-commit tool.
+This can automatically format, lint, or check your staged files when running `git commit`.
+
+## lint-staged
+
+## pre-commit
+
+Biome provides four [pre-commit](https://pre-commit.com/) hooks via the [biomejs/pre-commit](https://github.com/biomejs/pre-commit) repository.
+
+| hook `id`       | description                                                                 |
+| --------------- | --------------------------------------------------------------------------- |
+| `biome-ci`      | Check formatting, check if imports are organized, and lints                 |
+| `biome-check`   | Format, organize imports, lint, and apply safe fixes to the committed files |
+| `biome-format`  | Format the committed files                                                  |
+| `biome-lint`    | Lint and apply safe fixes to the committed files                            |
+
+In the following example, we assume that you [installed pre-commit](https://pre-commit.com/index.html#install) and run `pre-commit install` in your repository.
+if you want to use the `biome-check` hook, add the following pre-commit configuration to the root of your project in a file named `.pre-commit-config.yaml`:
+
+```yaml
+repos:
+-   repo: https://github.com/biomejs/pre-commit
+    rev: "0.1.0"  # Use the sha / tag you want to point at
+    hooks:
+    -   id: biome-check
+        additional_dependencies: ["@biomejs/biome@1.4.1"]
+```
+
+This will run `biome check --apply` when you run `git commit`.
+
+Note that you must specify which version of Biome to use thanks to the `additional_dependencies` option.
+[pre-commit](https://pre-commit.com/) separately installs tools and need to know which one to install.
+
+If Biome is already installed as a `npm` package in your local repository,
+then it can be a burden to update both `package.json` and `.pre-commit-config.yaml` when you update Biome.
+Instead of using the provided Biome hooks, you can specify your own [local hook](https://pre-commit.com/index.html#repository-local-hooks).
+
+For example, if you use `npm`, you can write the following hook in `.pre-commit-config.yaml`:
+
+```yaml
+repos:
+  - repo: local
+    hooks:
+      - id: local-biome-check
+        name: biome check
+        entry: npx biome check --apply --files-ignore-unknown=true --no-errors-on-unmatched
+        language: system
+        types: [text]
+        files: "\\.(jsx?|tsx?|c(js|ts)|m(js|ts)|d\\.(ts|cts|mts)|jsonc?)$"
+```
+
+The pre-commit option `files` is optional,
+because Biome is able to ignore unknown files (using the option `--files-ignore-unknown=true`).
+
+## Shell script
