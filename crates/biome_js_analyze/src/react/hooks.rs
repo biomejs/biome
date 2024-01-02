@@ -109,7 +109,7 @@ fn get_untrimmed_callee_name(call: &JsCallExpression) -> Option<SyntaxToken<JsLa
 }
 
 /// Checks whether the given call expression calls a React hook, based on the
-/// official guideline for React hook naming: Hook names must start with `use`
+/// official convention for React hook naming: Hook names must start with `use`
 /// followed by a capital letter.
 ///
 /// Source: https://react.dev/learn/reusing-logic-with-custom-hooks#hook-names-always-start-with-use

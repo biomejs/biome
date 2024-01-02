@@ -793,6 +793,11 @@
 			},
 			"additionalProperties": false
 		},
+		"DeprecatedHooksOptions": {
+			"description": "Options for the `useHookAtTopLevel` rule have been deprecated, since we now use the React hook naming convention to determine whether a function is a hook.",
+			"type": "object",
+			"additionalProperties": false
+		},
 		"EnumMemberCase": {
 			"description": "Supported cases for TypeScript `enum` member names.",
 			"oneOf": [
@@ -1591,8 +1596,12 @@
 					"allOf": [{ "$ref": "#/definitions/FilenamingConventionOptions" }]
 				},
 				{
-					"description": "Options for `useExhaustiveDependencies` and `useHookAtTopLevel` rule",
+					"description": "Options for `useExhaustiveDependencies` rule",
 					"allOf": [{ "$ref": "#/definitions/HooksOptions" }]
+				},
+				{
+					"description": "Deprecated options for `useHookAtTopLevel` rule",
+					"allOf": [{ "$ref": "#/definitions/DeprecatedHooksOptions" }]
 				},
 				{
 					"description": "Options for `useNamingConvention` rule",

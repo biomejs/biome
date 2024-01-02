@@ -1,11 +1,15 @@
 use crate::react::hooks::is_react_hook_call;
 use crate::semantic_services::{SemanticModelBuilderVisitor, SemanticServices};
-use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
 use biome_analyze::{
-    AddVisitor, FromServices, MissingServicesDiagnostic, Phase, Phases, QueryMatch, Queryable,
-    RuleKey, ServiceBag, Visitor, VisitorContext, VisitorFinishContext,
+    context::RuleContext, declare_rule, AddVisitor, FromServices, MissingServicesDiagnostic, Phase,
+    Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, RuleKey, ServiceBag, Visitor,
+    VisitorContext, VisitorFinishContext,
 };
 use biome_console::markup;
+use biome_deserialize::{
+    Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor, Text,
+    VisitableType,
+};
 use biome_js_semantic::{CallsExtensions, SemanticModel};
 use biome_js_syntax::{
     AnyFunctionLike, AnyJsExpression, AnyJsFunction, JsCallExpression, JsLanguage,
@@ -13,7 +17,12 @@ use biome_js_syntax::{
 };
 use biome_rowan::{AstNode, Language, SyntaxNode, WalkEvent};
 use rustc_hash::FxHashMap;
+use serde::{Deserialize, Serialize};
 use std::ops::{Deref, DerefMut};
+
+use biome_diagnostics::Severity;
+#[cfg(feature = "schemars")]
+use schemars::JsonSchema;
 
 declare_rule! {
     /// Enforce that all React hooks are being called from the Top Level component functions.
@@ -326,7 +335,7 @@ impl Rule for UseHookAtTopLevel {
     type Query = FunctionCall;
     type State = Suggestion;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = DeprecatedHooksOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let FunctionCall(call) = ctx.query();
@@ -466,5 +475,62 @@ impl Rule for UseHookAtTopLevel {
                 Some(diag)
             }
         }
+    }
+}
+
+/// Options for the `useHookAtTopLevel` rule have been deprecated, since we now
+/// use the React hook naming convention to determine whether a function is a
+/// hook.
+#[derive(Default, Deserialize, Serialize, Eq, PartialEq, Debug, Clone)]
+#[cfg_attr(feature = "schemars", derive(JsonSchema))]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct DeprecatedHooksOptions {}
+
+impl Deserializable for DeprecatedHooksOptions {
+    fn deserialize(
+        value: &impl DeserializableValue,
+        name: &str,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> Option<Self> {
+        value.deserialize(DeprecatedHooksOptionsVisitor, name, diagnostics)
+    }
+}
+
+struct DeprecatedHooksOptionsVisitor;
+impl DeserializationVisitor for DeprecatedHooksOptionsVisitor {
+    type Output = DeprecatedHooksOptions;
+
+    const EXPECTED_TYPE: VisitableType = VisitableType::MAP;
+
+    fn visit_map(
+        self,
+        members: impl Iterator<Item = Option<(impl DeserializableValue, impl DeserializableValue)>>,
+        _range: TextRange,
+        _name: &str,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> Option<Self::Output> {
+        const ALLOWED_KEYS: &[&str] = &["hooks"];
+        for (key, value) in members.flatten() {
+            let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
+                continue;
+            };
+            match key_text.text() {
+                "hooks" => {
+                    diagnostics.push(
+                        DeserializationDiagnostic::new(
+                            "Hook configuration for this rule is deprecated",
+                        )
+                        .with_custom_severity(Severity::Warning)
+                        .with_range(value.range()),
+                    );
+                }
+                text => diagnostics.push(DeserializationDiagnostic::new_unknown_key(
+                    text,
+                    key.range(),
+                    ALLOWED_KEYS,
+                )),
+            }
+        }
+        Some(Self::Output::default())
     }
 }

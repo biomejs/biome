@@ -1371,6 +1371,7 @@ export type PossibleOptions =
 	| ComplexityOptions
 	| FilenamingConventionOptions
 	| HooksOptions
+	| DeprecatedHooksOptions
 	| NamingConventionOptions
 	| RestrictedGlobalsOptions
 	| ValidAriaRoleOptions;
@@ -1405,6 +1406,10 @@ export interface HooksOptions {
 	 */
 	hooks: Hooks[];
 }
+/**
+ * Options for the `useHookAtTopLevel` rule have been deprecated, since we now use the React hook naming convention to determine whether a function is a hook.
+ */
+export interface DeprecatedHooksOptions {}
 /**
  * Rule's options.
  */
