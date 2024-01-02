@@ -20,7 +20,7 @@ use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
 use std::ops::{Deref, DerefMut};
 
-use biome_diagnostics::Severity;
+use biome_diagnostics::{DiagnosticTags, Severity};
 #[cfg(feature = "schemars")]
 use schemars::JsonSchema;
 
@@ -517,10 +517,11 @@ impl DeserializationVisitor for DeprecatedHooksOptionsVisitor {
             match key_text.text() {
                 "hooks" => {
                     diagnostics.push(
-                        DeserializationDiagnostic::new(
-                            "Hook configuration for this rule is deprecated",
-                        )
+                        DeserializationDiagnostic::new(markup! {
+                            "The property "<Emphasis>"hooks"</Emphasis>" is deprecated. "<Emphasis>"useHookAtTopLevel"</Emphasis>" now uses the React hook naming convention to determine hook calls."
+                        })
                         .with_custom_severity(Severity::Warning)
+                        .with_tags(DiagnosticTags::DEPRECATED_CODE)
                         .with_range(value.range()),
                     );
                 }
