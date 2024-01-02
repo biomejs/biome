@@ -1,5 +1,5 @@
 ---
-title: useConsistentArrayType (since vnext)
+title: useConsistentArrayType (since v1.5.0)
 ---
 
 **Diagnostic Category: `lint/style/useConsistentArrayType`**

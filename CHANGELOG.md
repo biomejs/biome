@@ -181,6 +181,11 @@ The following rules are promoted:
   }
   ```
 
+- Add [useConsistentArrayType](https://biomejs.dev/linter/rules/use-consistent-array-type) that enforces the use of a consistent syntax for array types. Contributed by @eryue0220
+
+  This rule will replace [useShorthandArrayType](https://biomejs.dev/linter/rules/use-shorthand-array-type).
+  It provides an option to choose between the shorthand or the generic syntax.
+
 #### Enhancements
 
 - Address [#959](https://github.com/biomejs/biome/issues/959) and [#1157](https://github.com/biomejs/biome/issues/1157). [noEmptyInterface](https://biomejs.dev/linter/rules/no-empty-interface) no longer reports empty interfaces that extend a type. Contributed by @Conaclos
