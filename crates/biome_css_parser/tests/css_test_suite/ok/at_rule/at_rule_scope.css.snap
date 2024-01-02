@@ -245,7 +245,7 @@ CssRoot {
                                         value: CssComponentValueList [
                                             CssPercentage {
                                                 value_token: CSS_NUMBER_LITERAL@239..241 "50" [] [],
-                                                reminder_token: PERCENT@241..242 "%" [] [],
+                                                percent_token: PERCENT@241..242 "%" [] [],
                                             },
                                         ],
                                         important: missing (optional),
@@ -377,7 +377,7 @@ CssRoot {
                                         value: CssComponentValueList [
                                             CssPercentage {
                                                 value_token: CSS_NUMBER_LITERAL@343..345 "50" [] [],
-                                                reminder_token: PERCENT@345..346 "%" [] [],
+                                                percent_token: PERCENT@345..346 "%" [] [],
                                             },
                                         ],
                                         important: missing (optional),
@@ -491,7 +491,7 @@ CssRoot {
                                         value: CssComponentValueList [
                                             CssPercentage {
                                                 value_token: CSS_NUMBER_LITERAL@431..433 "50" [] [],
-                                                reminder_token: PERCENT@433..434 "%" [] [],
+                                                percent_token: PERCENT@433..434 "%" [] [],
                                             },
                                         ],
                                         important: missing (optional),

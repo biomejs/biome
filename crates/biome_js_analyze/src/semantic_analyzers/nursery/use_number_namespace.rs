@@ -5,11 +5,14 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make;
-use biome_js_syntax::{global_identifier, AnyJsExpression, JsUnaryExpression, JsUnaryOperator, T};
+use biome_js_syntax::{
+    global_identifier, static_value::StaticValue, AnyJsExpression, JsUnaryExpression,
+    JsUnaryOperator, T,
+};
 use biome_rowan::{AstNode, BatchMutationExt};
 
 declare_rule! {
-    /// Use `Number` properties instead of global ones.
+    /// Use the `Number` properties instead of global ones.
     ///
     /// _ES2015_ moved some globals into the `Number` properties for consistency.
     ///
@@ -64,55 +67,56 @@ declare_rule! {
     /// Number.NEGATIVE_INFINITY; // false
     /// ```
     ///
-    pub(crate) UseNumberProperties {
+    pub(crate) UseNumberNamespace {
         version: "next",
-        name: "useNumberProperties",
+        name: "useNumberNamespace",
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }
 }
 
-const GLOBAL_NUMBER_IDENTS: [&str; 4] = ["parseInt", "parseFloat", "NaN", "Infinity"];
+const GLOBAL_NUMBER_PROPERTIES: [&str; 4] = ["parseInt", "parseFloat", "NaN", "Infinity"];
 
-impl Rule for UseNumberProperties {
+impl Rule for UseNumberNamespace {
     type Query = Semantic<AnyJsExpression>;
-    type State = ();
+    type State = StaticValue;
     type Signals = Option<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let model = ctx.model();
-        let (reference, global_ident_name) = global_identifier(node)?;
-        if !GLOBAL_NUMBER_IDENTS.contains(&global_ident_name.text()) {
+        let (reference, global_ident) = global_identifier(node)?;
+        if !GLOBAL_NUMBER_PROPERTIES.contains(&global_ident.text()) {
             return None;
         }
-        model.binding(&reference).is_none().then_some(())
+        ctx.model()
+            .binding(&reference)
+            .is_none()
+            .then_some(global_ident)
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(ctx: &RuleContext<Self>, global_ident: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
                 node.range(),
                 markup! {
-                    "Use the "<Emphasis>"Number"</Emphasis>" properties instead of the global ones."
+                    "Use "<Emphasis>"Number."{global_ident.text()}</Emphasis>" instead of the equivalent global."
                 },
             )
             .note(markup! {
-                "ES2015 moved some globals into the "<Emphasis>"Number"</Emphasis>" properties for consistency."
+                "ES2015 moved some globals into the "<Emphasis>"Number"</Emphasis>" namespace for consistency."
             }),
         )
     }
 
-    fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
+    fn action(ctx: &RuleContext<Self>, global_ident: &Self::State) -> Option<JsRuleAction> {
         let node = ctx.query();
-        let mut mutation = ctx.root().begin();
         let (old_node, new_node) = match node {
             AnyJsExpression::JsIdentifierExpression(expression) => {
                 let name = expression.name().ok()?.text();
-                if !GLOBAL_NUMBER_IDENTS.contains(&name.as_str()) {
+                if !GLOBAL_NUMBER_PROPERTIES.contains(&name.as_str()) {
                     return None;
                 }
                 let (old_node, replacement) = match name.as_str() {
@@ -173,12 +177,13 @@ impl Rule for UseNumberProperties {
             }
             _ => return None,
         };
+        let mut mutation = ctx.root().begin();
         mutation.replace_node(old_node, new_node.into());
         Some(JsRuleAction {
             category: ActionCategory::QuickFix,
             applicability: Applicability::Always,
             message: markup! {
-                "Use "<Emphasis>"Number"</Emphasis>" properties instead."
+                "Use "<Emphasis>"Number."{global_ident.text()}</Emphasis>" instead."
             }
             .to_owned(),
             mutation,

@@ -16,9 +16,23 @@ expression: content
       "include": ["test2.js"],
       "formatter": { "lineWidth": 120, "indentStyle": "space" },
       "javascript": { "formatter": { "semicolons": "asNeeded" } }
+    },
+    {
+      "include": ["test.css"],
+      "formatter": { "lineWidth": 120, "indentStyle": "space" },
+      "css": { "formatter": { "quoteStyle": "single" } }
     }
   ]
 }
+```
+
+## `test.css`
+
+```css
+[class='foo'] {
+  background-image: url('/path/to/file.jpg');
+}
+
 ```
 
 ## `test.js`
@@ -38,7 +52,7 @@ const a = ["loreum", "ipsum"]
 # Emitted Messages
 
 ```block
-Formatted 2 file(s) in <TIME>
+Formatted 3 file(s) in <TIME>
 ```
 
 

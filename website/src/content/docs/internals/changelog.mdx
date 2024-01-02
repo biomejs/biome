@@ -126,14 +126,14 @@ Biome now scores 97% compatibility with Prettier and features more than 180 lint
   By default, the rule requires that a filename be in `camelCase`, `kebab-case`, `snake_case`, or matches the name of an `export` in the file.
   The rule provides options to restrict the allowed cases.
 
-- Add [useNodeImportProtocol](https://biomejs.dev/linter/rules/use-node-import-protocol) that enforces the use of the `node:` protocol when importing _Node.js_ modules. Contributed by @2-NOW
+- Add [useNodejsImportProtocol](https://biomejs.dev/linter/rules/use-nodejs-import-protocol) that enforces the use of the `node:` protocol when importing _Node.js_ modules. Contributed by @2-NOW and @Conaclos
 
   ```diff
   - import fs from "fs";
   + import fs from "node:fs";
   ```
 
-- Add [noNodejsModules](https://biomejs.dev/linter/rules/no-nodejs-modules), that disallows the use of _Node.js_ modules. Contributed by @anonrig and @ematipico
+- Add [noNodejsModules](https://biomejs.dev/linter/rules/no-nodejs-modules), that disallows the use of _Node.js_ modules. Contributed by @anonrig, @ematipico, and @Conaclos
 
 - Add [noInvalidUseBeforeDeclaration](https://biomejs.dev/linter/rules/no-invalid-use-before-declaration) that reports variables and function parameters used before their declaration. Contributed by @Conaclos
 

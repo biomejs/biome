@@ -1,11 +1,11 @@
 use biome_formatter::{
-    FormatContext, FormatResult, Formatted, IndentStyle, LineEnding, LineWidth, Printed,
+    FormatContext, FormatResult, Formatted, IndentStyle, LineEnding, LineWidth, Printed, QuoteStyle,
 };
 use biome_formatter_test::TestFormatLanguage;
 use biome_js_formatter::context::trailing_comma::TrailingComma;
 use biome_js_formatter::context::{
     ArrowParentheses, BracketSameLine, BracketSpacing, JsFormatContext, JsFormatOptions,
-    QuoteProperties, QuoteStyle, Semicolons,
+    QuoteProperties, Semicolons,
 };
 use biome_js_formatter::{format_node, format_range, JsFormatLanguage};
 use biome_js_parser::{parse, JsParserOptions};

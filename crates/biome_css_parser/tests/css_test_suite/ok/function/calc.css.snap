@@ -261,7 +261,7 @@ CssRoot {
                                                 css_component_value_list: CssComponentValueList [
                                                     CssPercentage {
                                                         value_token: CSS_NUMBER_LITERAL@68..70 "10" [] [],
-                                                        reminder_token: PERCENT@70..72 "%" [] [Whitespace(" ")],
+                                                        percent_token: PERCENT@70..72 "%" [] [Whitespace(" ")],
                                                     },
                                                 ],
                                             },
@@ -633,7 +633,7 @@ CssRoot {
                                                 css_component_value_list: CssComponentValueList [
                                                     CssPercentage {
                                                         value_token: CSS_NUMBER_LITERAL@382..384 "50" [] [],
-                                                        reminder_token: PERCENT@384..385 "%" [] [],
+                                                        percent_token: PERCENT@384..385 "%" [] [],
                                                     },
                                                 ],
                                             },
@@ -664,7 +664,7 @@ CssRoot {
                                                 css_component_value_list: CssComponentValueList [
                                                     CssPercentage {
                                                         value_token: CSS_NUMBER_LITERAL@404..406 "10" [] [],
-                                                        reminder_token: PERCENT@406..408 "%" [] [Whitespace(" ")],
+                                                        percent_token: PERCENT@406..408 "%" [] [Whitespace(" ")],
                                                     },
                                                 ],
                                             },
@@ -673,7 +673,7 @@ CssRoot {
                                                 css_component_value_list: CssComponentValueList [
                                                     CssPercentage {
                                                         value_token: CSS_NUMBER_LITERAL@410..412 "20" [] [],
-                                                        reminder_token: PERCENT@412..413 "%" [] [],
+                                                        percent_token: PERCENT@412..413 "%" [] [],
                                                     },
                                                 ],
                                             },
@@ -744,7 +744,7 @@ CssRoot {
                                                 css_component_value_list: CssComponentValueList [
                                                     CssPercentage {
                                                         value_token: CSS_NUMBER_LITERAL@460..463 "100" [] [],
-                                                        reminder_token: PERCENT@463..465 "%" [] [Whitespace(" ")],
+                                                        percent_token: PERCENT@463..465 "%" [] [Whitespace(" ")],
                                                     },
                                                 ],
                                             },
@@ -878,7 +878,7 @@ CssRoot {
                                                                     css_component_value_list: CssComponentValueList [
                                                                         CssPercentage {
                                                                             value_token: CSS_NUMBER_LITERAL@542..544 "60" [] [],
-                                                                            reminder_token: PERCENT@544..545 "%" [] [],
+                                                                            percent_token: PERCENT@544..545 "%" [] [],
                                                                         },
                                                                     ],
                                                                 },
@@ -941,7 +941,7 @@ CssRoot {
                                                                     css_component_value_list: CssComponentValueList [
                                                                         CssPercentage {
                                                                             value_token: CSS_NUMBER_LITERAL@581..583 "25" [] [],
-                                                                            reminder_token: PERCENT@583..584 "%" [] [],
+                                                                            percent_token: PERCENT@583..584 "%" [] [],
                                                                         },
                                                                     ],
                                                                 },
@@ -1308,7 +1308,7 @@ CssRoot {
                                                         css_component_value_list: CssComponentValueList [
                                                             CssPercentage {
                                                                 value_token: CSS_NUMBER_LITERAL@825..827 "80" [] [],
-                                                                reminder_token: PERCENT@827..829 "%" [] [Whitespace(" ")],
+                                                                percent_token: PERCENT@827..829 "%" [] [Whitespace(" ")],
                                                             },
                                                         ],
                                                     },
@@ -1804,7 +1804,7 @@ CssRoot {
                                                 },
                                                 CssPercentage {
                                                     value_token: CSS_NUMBER_LITERAL@1160..1161 "0" [] [],
-                                                    reminder_token: PERCENT@1161..1162 "%" [] [],
+                                                    percent_token: PERCENT@1161..1162 "%" [] [],
                                                 },
                                             ],
                                         },
@@ -1842,7 +1842,7 @@ CssRoot {
                                                                     css_component_value_list: CssComponentValueList [
                                                                         CssPercentage {
                                                                             value_token: CSS_NUMBER_LITERAL@1187..1190 "100" [] [],
-                                                                            reminder_token: PERCENT@1190..1192 "%" [] [Whitespace(" ")],
+                                                                            percent_token: PERCENT@1190..1192 "%" [] [Whitespace(" ")],
                                                                         },
                                                                     ],
                                                                 },
@@ -1872,7 +1872,7 @@ CssRoot {
                                                 },
                                                 CssPercentage {
                                                     value_token: CSS_NUMBER_LITERAL@1208..1211 "100" [] [],
-                                                    reminder_token: PERCENT@1211..1212 "%" [] [],
+                                                    percent_token: PERCENT@1211..1212 "%" [] [],
                                                 },
                                             ],
                                         },
@@ -1941,7 +1941,7 @@ CssRoot {
                                                 css_component_value_list: CssComponentValueList [
                                                     CssPercentage {
                                                         value_token: CSS_NUMBER_LITERAL@1339..1342 "100" [] [],
-                                                        reminder_token: PERCENT@1342..1344 "%" [] [Whitespace(" ")],
+                                                        percent_token: PERCENT@1342..1344 "%" [] [Whitespace(" ")],
                                                     },
                                                 ],
                                             },
@@ -2000,7 +2000,7 @@ CssRoot {
                                                 css_component_value_list: CssComponentValueList [
                                                     CssPercentage {
                                                         value_token: CSS_NUMBER_LITERAL@1375..1379 "-120" [] [],
-                                                        reminder_token: PERCENT@1379..1381 "%" [] [Whitespace(" ")],
+                                                        percent_token: PERCENT@1379..1381 "%" [] [Whitespace(" ")],
                                                     },
                                                 ],
                                             },
@@ -2060,7 +2060,7 @@ CssRoot {
                                                 css_component_value_list: CssComponentValueList [
                                                     CssPercentage {
                                                         value_token: CSS_NUMBER_LITERAL@1409..1411 "50" [] [],
-                                                        reminder_token: PERCENT@1411..1413 "%" [] [Whitespace(" ")],
+                                                        percent_token: PERCENT@1411..1413 "%" [] [Whitespace(" ")],
                                                     },
                                                 ],
                                             },
@@ -2074,7 +2074,7 @@ CssRoot {
                                                             css_component_value_list: CssComponentValueList [
                                                                 CssPercentage {
                                                                     value_token: CSS_NUMBER_LITERAL@1419..1420 "4" [] [],
-                                                                    reminder_token: PERCENT@1420..1422 "%" [] [Whitespace(" ")],
+                                                                    percent_token: PERCENT@1420..1422 "%" [] [Whitespace(" ")],
                                                                 },
                                                             ],
                                                         },
@@ -2142,7 +2142,7 @@ CssRoot {
                                                 },
                                                 CssPercentage {
                                                     value_token: CSS_NUMBER_LITERAL@1491..1492 "0" [] [],
-                                                    reminder_token: PERCENT@1492..1493 "%" [] [],
+                                                    percent_token: PERCENT@1492..1493 "%" [] [],
                                                 },
                                             ],
                                         },
@@ -2180,7 +2180,7 @@ CssRoot {
                                                                     css_component_value_list: CssComponentValueList [
                                                                         CssPercentage {
                                                                             value_token: CSS_NUMBER_LITERAL@1522..1525 "100" [] [],
-                                                                            reminder_token: PERCENT@1525..1527 "%" [] [Whitespace(" ")],
+                                                                            percent_token: PERCENT@1525..1527 "%" [] [Whitespace(" ")],
                                                                         },
                                                                     ],
                                                                 },
@@ -2210,7 +2210,7 @@ CssRoot {
                                                 },
                                                 CssPercentage {
                                                     value_token: CSS_NUMBER_LITERAL@1543..1546 "100" [] [],
-                                                    reminder_token: PERCENT@1546..1547 "%" [] [],
+                                                    percent_token: PERCENT@1546..1547 "%" [] [],
                                                 },
                                             ],
                                         },
@@ -2815,7 +2815,7 @@ CssRoot {
                                             css_component_value_list: CssComponentValueList [
                                                 CssPercentage {
                                                     value_token: CSS_NUMBER_LITERAL@2151..2153 "10" [] [],
-                                                    reminder_token: PERCENT@2153..2154 "%" [] [],
+                                                    percent_token: PERCENT@2153..2154 "%" [] [],
                                                 },
                                             ],
                                         },
@@ -4348,7 +4348,7 @@ CssRoot {
                                                 css_component_value_list: CssComponentValueList [
                                                     CssPercentage {
                                                         value_token: CSS_NUMBER_LITERAL@3215..3217 "10" [] [],
-                                                        reminder_token: PERCENT@3217..3219 "%" [] [Whitespace(" ")],
+                                                        percent_token: PERCENT@3217..3219 "%" [] [Whitespace(" ")],
                                                     },
                                                 ],
                                             },
@@ -4366,7 +4366,7 @@ CssRoot {
                                                                     css_component_value_list: CssComponentValueList [
                                                                         CssPercentage {
                                                                             value_token: CSS_NUMBER_LITERAL@3225..3228 "-10" [] [],
-                                                                            reminder_token: PERCENT@3228..3229 "%" [] [],
+                                                                            percent_token: PERCENT@3228..3229 "%" [] [],
                                                                         },
                                                                     ],
                                                                 },
@@ -4424,7 +4424,7 @@ CssRoot {
                                             css_component_value_list: CssComponentValueList [
                                                 CssPercentage {
                                                     value_token: CSS_NUMBER_LITERAL@3274..3276 "10" [] [],
-                                                    reminder_token: PERCENT@3276..3277 "%" [] [],
+                                                    percent_token: PERCENT@3276..3277 "%" [] [],
                                                 },
                                             ],
                                         },
@@ -4454,7 +4454,7 @@ CssRoot {
                                                 css_component_value_list: CssComponentValueList [
                                                     CssPercentage {
                                                         value_token: CSS_NUMBER_LITERAL@3310..3312 "10" [] [],
-                                                        reminder_token: PERCENT@3312..3314 "%" [] [Whitespace(" ")],
+                                                        percent_token: PERCENT@3312..3314 "%" [] [Whitespace(" ")],
                                                     },
                                                 ],
                                             },
@@ -4493,7 +4493,7 @@ CssRoot {
                                                 css_component_value_list: CssComponentValueList [
                                                     CssPercentage {
                                                         value_token: CSS_NUMBER_LITERAL@3353..3355 "10" [] [],
-                                                        reminder_token: PERCENT@3355..3359 "%" [] [Whitespace("   ")],
+                                                        percent_token: PERCENT@3355..3359 "%" [] [Whitespace("   ")],
                                                     },
                                                 ],
                                             },
@@ -4532,7 +4532,7 @@ CssRoot {
                                                 css_component_value_list: CssComponentValueList [
                                                     CssPercentage {
                                                         value_token: CSS_NUMBER_LITERAL@3400..3402 "10" [] [],
-                                                        reminder_token: PERCENT@3402..3403 "%" [] [],
+                                                        percent_token: PERCENT@3402..3403 "%" [] [],
                                                     },
                                                 ],
                                             },
@@ -4608,7 +4608,7 @@ CssRoot {
                                             css_component_value_list: CssComponentValueList [
                                                 CssPercentage {
                                                     value_token: CSS_NUMBER_LITERAL@3491..3493 "10" [] [],
-                                                    reminder_token: PERCENT@3493..3497 "%" [] [Whitespace("   ")],
+                                                    percent_token: PERCENT@3493..3497 "%" [] [Whitespace("   ")],
                                                 },
                                             ],
                                         },

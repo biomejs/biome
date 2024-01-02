@@ -2513,7 +2513,7 @@ pub struct Nursery {
     #[doc = "Disallow characters made with multiple code points in character class syntax."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_misleading_character_class: Option<RuleConfiguration>,
-    #[doc = "Forbid the use of Node.js builtin modules. Can be useful for client-side web projects that do not have access to those modules."]
+    #[doc = "Forbid the use of Node.js builtin modules."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_nodejs_modules: Option<RuleConfiguration>,
     #[doc = "Disallow then property."]
@@ -2551,10 +2551,10 @@ pub struct Nursery {
     pub use_import_restrictions: Option<RuleConfiguration>,
     #[doc = "Enforces using the node: protocol for Node.js builtin modules."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_node_import_protocol: Option<RuleConfiguration>,
-    #[doc = "Use Number properties instead of global ones."]
+    pub use_nodejs_import_protocol: Option<RuleConfiguration>,
+    #[doc = "Use the Number properties instead of global ones."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_number_properties: Option<RuleConfiguration>,
+    pub use_number_namespace: Option<RuleConfiguration>,
     #[doc = "Enforce the use of the regular expression literals instead of the RegExp constructor if possible."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_regex_literals: Option<RuleConfiguration>,
@@ -2624,11 +2624,11 @@ impl MergeWith<Nursery> for Nursery {
         if let Some(use_import_restrictions) = other.use_import_restrictions {
             self.use_import_restrictions = Some(use_import_restrictions);
         }
-        if let Some(use_node_import_protocol) = other.use_node_import_protocol {
-            self.use_node_import_protocol = Some(use_node_import_protocol);
+        if let Some(use_nodejs_import_protocol) = other.use_nodejs_import_protocol {
+            self.use_nodejs_import_protocol = Some(use_nodejs_import_protocol);
         }
-        if let Some(use_number_properties) = other.use_number_properties {
-            self.use_number_properties = Some(use_number_properties);
+        if let Some(use_number_namespace) = other.use_number_namespace {
+            self.use_number_namespace = Some(use_number_namespace);
         }
         if let Some(use_regex_literals) = other.use_regex_literals {
             self.use_regex_literals = Some(use_regex_literals);
@@ -2671,8 +2671,8 @@ impl Nursery {
         "useForOf",
         "useGroupedTypeImport",
         "useImportRestrictions",
-        "useNodeImportProtocol",
-        "useNumberProperties",
+        "useNodejsImportProtocol",
+        "useNumberNamespace",
         "useRegexLiterals",
         "useShorthandFunctionType",
         "useValidAriaRole",
@@ -2686,7 +2686,7 @@ impl Nursery {
         "useAwait",
         "useExportType",
         "useGroupedTypeImport",
-        "useNumberProperties",
+        "useNumberNamespace",
         "useValidAriaRole",
     ];
     const RECOMMENDED_RULES_AS_FILTERS: [RuleFilter<'static>; 10] = [
@@ -2837,12 +2837,12 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]));
             }
         }
-        if let Some(rule) = self.use_node_import_protocol.as_ref() {
+        if let Some(rule) = self.use_nodejs_import_protocol.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]));
             }
         }
-        if let Some(rule) = self.use_number_properties.as_ref() {
+        if let Some(rule) = self.use_number_namespace.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]));
             }
@@ -2961,12 +2961,12 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]));
             }
         }
-        if let Some(rule) = self.use_node_import_protocol.as_ref() {
+        if let Some(rule) = self.use_nodejs_import_protocol.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]));
             }
         }
-        if let Some(rule) = self.use_number_properties.as_ref() {
+        if let Some(rule) = self.use_number_namespace.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]));
             }
@@ -3041,8 +3041,8 @@ impl Nursery {
             "useForOf" => self.use_for_of.as_ref(),
             "useGroupedTypeImport" => self.use_grouped_type_import.as_ref(),
             "useImportRestrictions" => self.use_import_restrictions.as_ref(),
-            "useNodeImportProtocol" => self.use_node_import_protocol.as_ref(),
-            "useNumberProperties" => self.use_number_properties.as_ref(),
+            "useNodejsImportProtocol" => self.use_nodejs_import_protocol.as_ref(),
+            "useNumberNamespace" => self.use_number_namespace.as_ref(),
             "useRegexLiterals" => self.use_regex_literals.as_ref(),
             "useShorthandFunctionType" => self.use_shorthand_function_type.as_ref(),
             "useValidAriaRole" => self.use_valid_aria_role.as_ref(),

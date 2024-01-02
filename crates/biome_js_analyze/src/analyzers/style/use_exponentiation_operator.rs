@@ -97,7 +97,7 @@ impl Rule for UseExponentiationOperator {
         let node = ctx.query();
         let args = node.arguments().ok()?;
         let [Some(AnyJsCallArgument::AnyJsExpression(base)), Some(AnyJsCallArgument::AnyJsExpression(exponent)), None] =
-            node.get_arguments_by_index([0, 1, 2])
+            node.arguments().ok()?.get_arguments_by_index([0, 1, 2])
         else {
             return None;
         };

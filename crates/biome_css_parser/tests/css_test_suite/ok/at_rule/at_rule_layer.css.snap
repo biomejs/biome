@@ -216,7 +216,7 @@ CssRoot {
                                                             value: CssComponentValueList [
                                                                 CssPercentage {
                                                                     value_token: CSS_NUMBER_LITERAL@158..162 "-100" [] [],
-                                                                    reminder_token: PERCENT@162..164 "%" [] [Whitespace(" ")],
+                                                                    percent_token: PERCENT@162..164 "%" [] [Whitespace(" ")],
                                                                 },
                                                                 CssNumber {
                                                                     value_token: CSS_NUMBER_LITERAL@164..165 "0" [] [],
@@ -308,7 +308,7 @@ CssRoot {
                                                             value: CssComponentValueList [
                                                                 CssPercentage {
                                                                     value_token: CSS_NUMBER_LITERAL@266..270 "-100" [] [],
-                                                                    reminder_token: PERCENT@270..271 "%" [] [],
+                                                                    percent_token: PERCENT@270..271 "%" [] [],
                                                                 },
                                                             ],
                                                             important: missing (optional),
