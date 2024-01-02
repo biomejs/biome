@@ -99,6 +99,7 @@ impl biome_rowan::SyntaxKind for CssSyntaxKind {
                 | CSS_BOGUS_PAGE_SELECTOR_PSEUDO
                 | CSS_BOGUS_LAYER
                 | CSS_BOGUS_SCOPE_RANGE
+                | CSS_BOGUS_PROPERTY
         )
     }
 
@@ -117,6 +118,8 @@ impl biome_rowan::SyntaxKind for CssSyntaxKind {
             kind if AnyCssPageSelectorPseudo::can_cast(*kind) => CSS_BOGUS_PAGE_SELECTOR_PSEUDO,
             kind if AnyCssLayer::can_cast(*kind) => CSS_BOGUS_LAYER,
             kind if AnyCssScopeRange::can_cast(*kind) => CSS_BOGUS_SCOPE_RANGE,
+            kind if AnyCssKeyframesItem::can_cast(*kind) => CSS_BOGUS_KEYFRAMES_ITEM,
+            kind if AnyCssProperty::can_cast(*kind) => CSS_BOGUS_PROPERTY,
 
             _ => CSS_BOGUS,
         }

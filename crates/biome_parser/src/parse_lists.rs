@@ -43,8 +43,8 @@ pub trait ParseNodeList {
         -> RecoveryResult;
 
     /// It creates a [ParsedSyntax] that will contain the list
-    fn finish_list(&mut self, p: &mut Self::Parser<'_>, m: Marker) {
-        m.complete(p, Self::LIST_KIND);
+    fn finish_list(&mut self, p: &mut Self::Parser<'_>, m: Marker) -> CompletedMarker {
+        m.complete(p, Self::LIST_KIND)
     }
 
     /// Parses a simple list
@@ -52,7 +52,7 @@ pub trait ParseNodeList {
     /// # Panics
     ///
     /// It panics if the parser doesn't advance at each cycle of the loop
-    fn parse_list(&mut self, p: &mut Self::Parser<'_>) {
+    fn parse_list(&mut self, p: &mut Self::Parser<'_>) -> CompletedMarker {
         let elements = self.start_list(p);
         let mut progress = ParserProgress::default();
 
@@ -68,7 +68,7 @@ pub trait ParseNodeList {
             }
         }
 
-        self.finish_list(p, elements);
+        self.finish_list(p, elements)
     }
 }
 

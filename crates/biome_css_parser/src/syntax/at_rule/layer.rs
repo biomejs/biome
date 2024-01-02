@@ -68,7 +68,7 @@ impl ParseSeparatedList for LayerReferenceList {
     const LIST_KIND: Self::Kind = CSS_LAYER_REFERENCE_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        Present(LayerNameList.parse_list(p))
+        LayerNameList.parse_list(p).into()
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {

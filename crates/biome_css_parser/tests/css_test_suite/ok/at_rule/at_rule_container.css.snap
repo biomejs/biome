@@ -141,15 +141,17 @@ CssRoot {
                         style_token: STYLE_KW@131..136 "style" [] [],
                         l_paren_token: L_PAREN@136..137 "(" [] [],
                         query: CssDeclaration {
-                            name: CssIdentifier {
-                                value_token: IDENT@137..149 "--responsive" [] [],
-                            },
-                            colon_token: COLON@149..151 ":" [] [Whitespace(" ")],
-                            value: CssComponentValueList [
-                                CssIdentifier {
-                                    value_token: IDENT@151..155 "true" [] [],
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@137..149 "--responsive" [] [],
                                 },
-                            ],
+                                colon_token: COLON@149..151 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@151..155 "true" [] [],
+                                    },
+                                ],
+                            },
                             important: missing (optional),
                         },
                         r_paren_token: R_PAREN@155..157 ")" [] [Whitespace(" ")],
@@ -406,15 +408,17 @@ CssRoot {
                     style_token: STYLE_KW@481..486 "style" [] [],
                     l_paren_token: L_PAREN@486..487 "(" [] [],
                     query: CssDeclaration {
-                        name: CssIdentifier {
-                            value_token: IDENT@487..499 "--responsive" [] [],
-                        },
-                        colon_token: COLON@499..501 ":" [] [Whitespace(" ")],
-                        value: CssComponentValueList [
-                            CssIdentifier {
-                                value_token: IDENT@501..505 "true" [] [],
+                        property: CssGenericProperty {
+                            name: CssIdentifier {
+                                value_token: IDENT@487..499 "--responsive" [] [],
                             },
-                        ],
+                            colon_token: COLON@499..501 ":" [] [Whitespace(" ")],
+                            value: CssGenericComponentValueList [
+                                CssIdentifier {
+                                    value_token: IDENT@501..505 "true" [] [],
+                                },
+                            ],
+                        },
                         important: missing (optional),
                     },
                     r_paren_token: R_PAREN@505..507 ")" [] [Whitespace(" ")],
@@ -720,13 +724,14 @@ CssRoot {
             0: STYLE_KW@131..136 "style" [] []
             1: L_PAREN@136..137 "(" [] []
             2: CSS_DECLARATION@137..155
-              0: CSS_IDENTIFIER@137..149
-                0: IDENT@137..149 "--responsive" [] []
-              1: COLON@149..151 ":" [] [Whitespace(" ")]
-              2: CSS_COMPONENT_VALUE_LIST@151..155
-                0: CSS_IDENTIFIER@151..155
-                  0: IDENT@151..155 "true" [] []
-              3: (empty)
+              0: CSS_GENERIC_PROPERTY@137..155
+                0: CSS_IDENTIFIER@137..149
+                  0: IDENT@137..149 "--responsive" [] []
+                1: COLON@149..151 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@151..155
+                  0: CSS_IDENTIFIER@151..155
+                    0: IDENT@151..155 "true" [] []
+              1: (empty)
             3: R_PAREN@155..157 ")" [] [Whitespace(" ")]
         3: CSS_RULE_LIST_BLOCK@157..161
           0: L_CURLY@157..160 "{" [] [Whitespace("  ")]
@@ -908,13 +913,14 @@ CssRoot {
           0: STYLE_KW@481..486 "style" [] []
           1: L_PAREN@486..487 "(" [] []
           2: CSS_DECLARATION@487..505
-            0: CSS_IDENTIFIER@487..499
-              0: IDENT@487..499 "--responsive" [] []
-            1: COLON@499..501 ":" [] [Whitespace(" ")]
-            2: CSS_COMPONENT_VALUE_LIST@501..505
-              0: CSS_IDENTIFIER@501..505
-                0: IDENT@501..505 "true" [] []
-            3: (empty)
+            0: CSS_GENERIC_PROPERTY@487..505
+              0: CSS_IDENTIFIER@487..499
+                0: IDENT@487..499 "--responsive" [] []
+              1: COLON@499..501 ":" [] [Whitespace(" ")]
+              2: CSS_GENERIC_COMPONENT_VALUE_LIST@501..505
+                0: CSS_IDENTIFIER@501..505
+                  0: IDENT@501..505 "true" [] []
+            1: (empty)
           3: R_PAREN@505..507 ")" [] [Whitespace(" ")]
         3: CSS_RULE_LIST_BLOCK@507..511
           0: L_CURLY@507..510 "{" [] [Whitespace("  ")]

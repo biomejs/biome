@@ -2,6 +2,7 @@ mod at_rule;
 mod blocks;
 mod css_dimension;
 mod parse_error;
+mod property;
 mod selector;
 
 use crate::lexer::CssLexContext;
@@ -12,6 +13,7 @@ use crate::syntax::css_dimension::{is_at_any_dimension, parse_any_dimension};
 use crate::syntax::parse_error::expected_any_rule;
 use crate::syntax::parse_error::expected_expression;
 use crate::syntax::parse_error::expected_identifier;
+use crate::syntax::property::parse_any_property;
 use crate::syntax::selector::is_at_selector;
 use crate::syntax::selector::SelectorList;
 use biome_css_syntax::CssSyntaxKind::*;
@@ -57,8 +59,6 @@ impl RuleList {
         Self { end_kind }
     }
 }
-
-// TODO: better recovery set. may be we need to pass function instead of token set
 
 struct RuleListParseRecovery;
 
@@ -160,45 +160,16 @@ impl ParseSeparatedList for DeclarationList {
     }
 }
 
-struct ListOfComponentValues;
-impl ParseNodeList for ListOfComponentValues {
-    type Kind = CssSyntaxKind;
-    type Parser<'source> = CssParser<'source>;
-    const LIST_KIND: Self::Kind = CSS_COMPONENT_VALUE_LIST;
-
-    fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        parse_any_value(p)
-    }
-
-    fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        !is_at_any_value(p)
-    }
-
-    fn recover(
-        &mut self,
-        p: &mut Self::Parser<'_>,
-        parsed_element: ParsedSyntax,
-    ) -> RecoveryResult {
-        parsed_element.or_recover_with_token_set(
-            p,
-            &ParseRecoveryTokenSet::new(CSS_BOGUS_COMPONENT_VALUE, token_set!(T!['}'], T![;])),
-            expected_component_value,
-        )
-    }
-}
 #[inline]
 pub(crate) fn parse_declaration(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_identifier(p) {
         return Absent;
     }
     let m = p.start();
-    parse_regular_identifier(p).ok();
 
-    p.expect(T![:]);
-
-    ListOfComponentValues.parse_list(p);
-
+    parse_any_property(p).ok();
     parse_declaration_important(p).ok();
+
     Present(m.complete(p, CSS_DECLARATION))
 }
 
@@ -363,13 +334,40 @@ pub(crate) fn parse_any_expression(p: &mut CssParser) -> ParsedSyntax {
     param
 }
 
+struct CssComponentValueList;
+impl ParseNodeList for CssComponentValueList {
+    type Kind = CssSyntaxKind;
+    type Parser<'source> = CssParser<'source>;
+    const LIST_KIND: Self::Kind = CSS_COMPONENT_VALUE_LIST;
+
+    fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
+        parse_any_value(p)
+    }
+
+    fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
+        !is_at_any_value(p)
+    }
+
+    fn recover(
+        &mut self,
+        p: &mut Self::Parser<'_>,
+        parsed_element: ParsedSyntax,
+    ) -> RecoveryResult {
+        parsed_element.or_recover_with_token_set(
+            p,
+            &ParseRecoveryTokenSet::new(CSS_BOGUS, token_set!(T!['}'], T![;])),
+            expected_component_value,
+        )
+    }
+}
+
 #[inline]
 pub(crate) fn parse_list_of_component_values_expression(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_any_value(p) {
         return Absent;
     }
     let m = p.start();
-    ListOfComponentValues.parse_list(p);
+    CssComponentValueList.parse_list(p);
     Present(m.complete(p, CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION))
 }
 

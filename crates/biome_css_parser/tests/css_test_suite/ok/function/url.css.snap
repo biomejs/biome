@@ -81,484 +81,538 @@ CssRoot {
                 l_curly_token: L_CURLY@2..3 "{" [] [],
                 declarations: CssDeclarationList [
                     CssDeclaration {
-                        name: CssIdentifier {
-                            value_token: IDENT@3..24 "background-image" [Newline("\n"), Whitespace("    ")] [],
-                        },
-                        colon_token: COLON@24..26 ":" [] [Whitespace(" ")],
-                        value: CssComponentValueList [
-                            CssUrlFunction {
-                                url_token: URL_KW@26..29 "url" [] [],
-                                l_paren_token: L_PAREN@29..30 "(" [] [],
-                                any_css_url_value: CssUrlValueRaw {
-                                    value_token: CSS_URL_VALUE_RAW_LITERAL@30..108 "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" [] [],
-                                },
-                                r_paren_token: R_PAREN@108..109 ")" [] [],
+                        property: CssGenericProperty {
+                            name: CssIdentifier {
+                                value_token: IDENT@3..24 "background-image" [Newline("\n"), Whitespace("    ")] [],
                             },
-                        ],
+                            colon_token: COLON@24..26 ":" [] [Whitespace(" ")],
+                            value: CssGenericComponentValueList [
+                                CssUrlFunction {
+                                    url_token: URL_KW@26..29 "url" [] [],
+                                    l_paren_token: L_PAREN@29..30 "(" [] [],
+                                    any_css_url_value: CssUrlValueRaw {
+                                        value_token: CSS_URL_VALUE_RAW_LITERAL@30..108 "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" [] [],
+                                    },
+                                    r_paren_token: R_PAREN@108..109 ")" [] [],
+                                },
+                            ],
+                        },
                         important: missing (optional),
                     },
                     SEMICOLON@109..110 ";" [] [],
                     CssDeclaration {
-                        name: CssIdentifier {
-                            value_token: IDENT@110..131 "background-image" [Newline("\n"), Whitespace("    ")] [],
-                        },
-                        colon_token: COLON@131..133 ":" [] [Whitespace(" ")],
-                        value: CssComponentValueList [
-                            CssUrlFunction {
-                                url_token: URL_KW@133..136 "url" [] [],
-                                l_paren_token: L_PAREN@136..137 "(" [] [],
-                                any_css_url_value: CssString {
-                                    value_token: CSS_STRING_LITERAL@137..154 "\"./image (1).jpg\"" [] [],
-                                },
-                                r_paren_token: R_PAREN@154..155 ")" [] [],
+                        property: CssGenericProperty {
+                            name: CssIdentifier {
+                                value_token: IDENT@110..131 "background-image" [Newline("\n"), Whitespace("    ")] [],
                             },
-                        ],
+                            colon_token: COLON@131..133 ":" [] [Whitespace(" ")],
+                            value: CssGenericComponentValueList [
+                                CssUrlFunction {
+                                    url_token: URL_KW@133..136 "url" [] [],
+                                    l_paren_token: L_PAREN@136..137 "(" [] [],
+                                    any_css_url_value: CssString {
+                                        value_token: CSS_STRING_LITERAL@137..154 "\"./image (1).jpg\"" [] [],
+                                    },
+                                    r_paren_token: R_PAREN@154..155 ")" [] [],
+                                },
+                            ],
+                        },
                         important: missing (optional),
                     },
                     SEMICOLON@155..156 ";" [] [],
                     CssDeclaration {
-                        name: CssIdentifier {
-                            value_token: IDENT@156..177 "background-image" [Newline("\n"), Whitespace("    ")] [],
-                        },
-                        colon_token: COLON@177..179 ":" [] [Whitespace(" ")],
-                        value: CssComponentValueList [
-                            CssUrlFunction {
-                                url_token: URL_KW@179..182 "url" [] [],
-                                l_paren_token: L_PAREN@182..183 "(" [] [],
-                                any_css_url_value: CssString {
-                                    value_token: CSS_STRING_LITERAL@183..200 "'./image (1).jpg'" [] [],
-                                },
-                                r_paren_token: R_PAREN@200..201 ")" [] [],
+                        property: CssGenericProperty {
+                            name: CssIdentifier {
+                                value_token: IDENT@156..177 "background-image" [Newline("\n"), Whitespace("    ")] [],
                             },
-                        ],
+                            colon_token: COLON@177..179 ":" [] [Whitespace(" ")],
+                            value: CssGenericComponentValueList [
+                                CssUrlFunction {
+                                    url_token: URL_KW@179..182 "url" [] [],
+                                    l_paren_token: L_PAREN@182..183 "(" [] [],
+                                    any_css_url_value: CssString {
+                                        value_token: CSS_STRING_LITERAL@183..200 "'./image (1).jpg'" [] [],
+                                    },
+                                    r_paren_token: R_PAREN@200..201 ")" [] [],
+                                },
+                            ],
+                        },
                         important: missing (optional),
                     },
                     SEMICOLON@201..202 ";" [] [],
                     CssDeclaration {
-                        name: CssIdentifier {
-                            value_token: IDENT@202..223 "background-image" [Newline("\n"), Whitespace("    ")] [],
-                        },
-                        colon_token: COLON@223..225 ":" [] [Whitespace(" ")],
-                        value: CssComponentValueList [
-                            CssUrlFunction {
-                                url_token: URL_KW@225..228 "URL" [] [],
-                                l_paren_token: L_PAREN@228..229 "(" [] [],
-                                any_css_url_value: CssString {
-                                    value_token: CSS_STRING_LITERAL@229..246 "'./image (1).jpg'" [] [],
-                                },
-                                r_paren_token: R_PAREN@246..247 ")" [] [],
+                        property: CssGenericProperty {
+                            name: CssIdentifier {
+                                value_token: IDENT@202..223 "background-image" [Newline("\n"), Whitespace("    ")] [],
                             },
-                        ],
+                            colon_token: COLON@223..225 ":" [] [Whitespace(" ")],
+                            value: CssGenericComponentValueList [
+                                CssUrlFunction {
+                                    url_token: URL_KW@225..228 "URL" [] [],
+                                    l_paren_token: L_PAREN@228..229 "(" [] [],
+                                    any_css_url_value: CssString {
+                                        value_token: CSS_STRING_LITERAL@229..246 "'./image (1).jpg'" [] [],
+                                    },
+                                    r_paren_token: R_PAREN@246..247 ")" [] [],
+                                },
+                            ],
+                        },
                         important: missing (optional),
                     },
                     SEMICOLON@247..248 ";" [] [],
                     CssDeclaration {
-                        name: CssIdentifier {
-                            value_token: IDENT@248..269 "background-image" [Newline("\n"), Whitespace("    ")] [],
-                        },
-                        colon_token: COLON@269..271 ":" [] [Whitespace(" ")],
-                        value: CssComponentValueList [
-                            CssUrlFunction {
-                                url_token: URL_KW@271..274 "url" [] [],
-                                l_paren_token: L_PAREN@274..278 "(" [] [Whitespace("   ")],
-                                any_css_url_value: CssString {
-                                    value_token: CSS_STRING_LITERAL@278..295 "'./image (1).jpg'" [] [],
-                                },
-                                r_paren_token: R_PAREN@295..296 ")" [] [],
+                        property: CssGenericProperty {
+                            name: CssIdentifier {
+                                value_token: IDENT@248..269 "background-image" [Newline("\n"), Whitespace("    ")] [],
                             },
-                        ],
+                            colon_token: COLON@269..271 ":" [] [Whitespace(" ")],
+                            value: CssGenericComponentValueList [
+                                CssUrlFunction {
+                                    url_token: URL_KW@271..274 "url" [] [],
+                                    l_paren_token: L_PAREN@274..278 "(" [] [Whitespace("   ")],
+                                    any_css_url_value: CssString {
+                                        value_token: CSS_STRING_LITERAL@278..295 "'./image (1).jpg'" [] [],
+                                    },
+                                    r_paren_token: R_PAREN@295..296 ")" [] [],
+                                },
+                            ],
+                        },
                         important: missing (optional),
                     },
                     SEMICOLON@296..297 ";" [] [],
                     CssDeclaration {
-                        name: CssIdentifier {
-                            value_token: IDENT@297..318 "background-image" [Newline("\n"), Whitespace("    ")] [],
-                        },
-                        colon_token: COLON@318..320 ":" [] [Whitespace(" ")],
-                        value: CssComponentValueList [
-                            CssUrlFunction {
-                                url_token: URL_KW@320..323 "url" [] [],
-                                l_paren_token: L_PAREN@323..324 "(" [] [],
-                                any_css_url_value: CssString {
-                                    value_token: CSS_STRING_LITERAL@324..344 "'./image (1).jpg'" [] [Whitespace("   ")],
-                                },
-                                r_paren_token: R_PAREN@344..345 ")" [] [],
+                        property: CssGenericProperty {
+                            name: CssIdentifier {
+                                value_token: IDENT@297..318 "background-image" [Newline("\n"), Whitespace("    ")] [],
                             },
-                        ],
+                            colon_token: COLON@318..320 ":" [] [Whitespace(" ")],
+                            value: CssGenericComponentValueList [
+                                CssUrlFunction {
+                                    url_token: URL_KW@320..323 "url" [] [],
+                                    l_paren_token: L_PAREN@323..324 "(" [] [],
+                                    any_css_url_value: CssString {
+                                        value_token: CSS_STRING_LITERAL@324..344 "'./image (1).jpg'" [] [Whitespace("   ")],
+                                    },
+                                    r_paren_token: R_PAREN@344..345 ")" [] [],
+                                },
+                            ],
+                        },
                         important: missing (optional),
                     },
                     SEMICOLON@345..346 ";" [] [],
                     CssDeclaration {
-                        name: CssIdentifier {
-                            value_token: IDENT@346..367 "background-image" [Newline("\n"), Whitespace("    ")] [],
-                        },
-                        colon_token: COLON@367..369 ":" [] [Whitespace(" ")],
-                        value: CssComponentValueList [
-                            CssUrlFunction {
-                                url_token: URL_KW@369..372 "url" [] [],
-                                l_paren_token: L_PAREN@372..376 "(" [] [Whitespace("   ")],
-                                any_css_url_value: CssString {
-                                    value_token: CSS_STRING_LITERAL@376..396 "'./image (1).jpg'" [] [Whitespace("   ")],
-                                },
-                                r_paren_token: R_PAREN@396..397 ")" [] [],
+                        property: CssGenericProperty {
+                            name: CssIdentifier {
+                                value_token: IDENT@346..367 "background-image" [Newline("\n"), Whitespace("    ")] [],
                             },
-                        ],
+                            colon_token: COLON@367..369 ":" [] [Whitespace(" ")],
+                            value: CssGenericComponentValueList [
+                                CssUrlFunction {
+                                    url_token: URL_KW@369..372 "url" [] [],
+                                    l_paren_token: L_PAREN@372..376 "(" [] [Whitespace("   ")],
+                                    any_css_url_value: CssString {
+                                        value_token: CSS_STRING_LITERAL@376..396 "'./image (1).jpg'" [] [Whitespace("   ")],
+                                    },
+                                    r_paren_token: R_PAREN@396..397 ")" [] [],
+                                },
+                            ],
+                        },
                         important: missing (optional),
                     },
                     SEMICOLON@397..398 ";" [] [],
                     CssDeclaration {
-                        name: CssIdentifier {
-                            value_token: IDENT@398..419 "background-image" [Newline("\n"), Whitespace("    ")] [],
-                        },
-                        colon_token: COLON@419..421 ":" [] [Whitespace(" ")],
-                        value: CssComponentValueList [
-                            CssUrlFunction {
-                                url_token: URL_KW@421..424 "url" [] [],
-                                l_paren_token: L_PAREN@424..428 "(" [] [Whitespace("   ")],
-                                any_css_url_value: CssString {
-                                    value_token: CSS_STRING_LITERAL@428..453 "'./image (1).jpg'" [Newline("\n"), Whitespace("    ")] [Whitespace("   ")],
-                                },
-                                r_paren_token: R_PAREN@453..459 ")" [Newline("\n"), Whitespace("    ")] [],
+                        property: CssGenericProperty {
+                            name: CssIdentifier {
+                                value_token: IDENT@398..419 "background-image" [Newline("\n"), Whitespace("    ")] [],
                             },
-                        ],
+                            colon_token: COLON@419..421 ":" [] [Whitespace(" ")],
+                            value: CssGenericComponentValueList [
+                                CssUrlFunction {
+                                    url_token: URL_KW@421..424 "url" [] [],
+                                    l_paren_token: L_PAREN@424..428 "(" [] [Whitespace("   ")],
+                                    any_css_url_value: CssString {
+                                        value_token: CSS_STRING_LITERAL@428..453 "'./image (1).jpg'" [Newline("\n"), Whitespace("    ")] [Whitespace("   ")],
+                                    },
+                                    r_paren_token: R_PAREN@453..459 ")" [Newline("\n"), Whitespace("    ")] [],
+                                },
+                            ],
+                        },
                         important: missing (optional),
                     },
                     SEMICOLON@459..460 ";" [] [],
                     CssDeclaration {
-                        name: CssIdentifier {
-                            value_token: IDENT@460..481 "background-image" [Newline("\n"), Whitespace("    ")] [],
-                        },
-                        colon_token: COLON@481..483 ":" [] [Whitespace(" ")],
-                        value: CssComponentValueList [
-                            CssUrlFunction {
-                                url_token: URL_KW@483..486 "url" [] [],
-                                l_paren_token: L_PAREN@486..487 "(" [] [],
-                                any_css_url_value: missing (optional),
-                                r_paren_token: R_PAREN@487..488 ")" [] [],
+                        property: CssGenericProperty {
+                            name: CssIdentifier {
+                                value_token: IDENT@460..481 "background-image" [Newline("\n"), Whitespace("    ")] [],
                             },
-                        ],
+                            colon_token: COLON@481..483 ":" [] [Whitespace(" ")],
+                            value: CssGenericComponentValueList [
+                                CssUrlFunction {
+                                    url_token: URL_KW@483..486 "url" [] [],
+                                    l_paren_token: L_PAREN@486..487 "(" [] [],
+                                    any_css_url_value: missing (optional),
+                                    r_paren_token: R_PAREN@487..488 ")" [] [],
+                                },
+                            ],
+                        },
                         important: missing (optional),
                     },
                     SEMICOLON@488..489 ";" [] [],
                     CssDeclaration {
-                        name: CssIdentifier {
-                            value_token: IDENT@489..510 "background-image" [Newline("\n"), Whitespace("    ")] [],
-                        },
-                        colon_token: COLON@510..512 ":" [] [Whitespace(" ")],
-                        value: CssComponentValueList [
-                            CssUrlFunction {
-                                url_token: URL_KW@512..515 "url" [] [],
-                                l_paren_token: L_PAREN@515..519 "(" [] [Whitespace("   ")],
-                                any_css_url_value: missing (optional),
-                                r_paren_token: R_PAREN@519..520 ")" [] [],
+                        property: CssGenericProperty {
+                            name: CssIdentifier {
+                                value_token: IDENT@489..510 "background-image" [Newline("\n"), Whitespace("    ")] [],
                             },
-                        ],
+                            colon_token: COLON@510..512 ":" [] [Whitespace(" ")],
+                            value: CssGenericComponentValueList [
+                                CssUrlFunction {
+                                    url_token: URL_KW@512..515 "url" [] [],
+                                    l_paren_token: L_PAREN@515..519 "(" [] [Whitespace("   ")],
+                                    any_css_url_value: missing (optional),
+                                    r_paren_token: R_PAREN@519..520 ")" [] [],
+                                },
+                            ],
+                        },
                         important: missing (optional),
                     },
                     SEMICOLON@520..521 ";" [] [],
                     CssDeclaration {
-                        name: CssIdentifier {
-                            value_token: IDENT@521..542 "background-image" [Newline("\n"), Whitespace("    ")] [],
-                        },
-                        colon_token: COLON@542..544 ":" [] [Whitespace(" ")],
-                        value: CssComponentValueList [
-                            CssUrlFunction {
-                                url_token: URL_KW@544..547 "url" [] [],
-                                l_paren_token: L_PAREN@547..548 "(" [] [],
-                                any_css_url_value: CssString {
-                                    value_token: CSS_STRING_LITERAL@548..550 "\"\"" [] [],
-                                },
-                                r_paren_token: R_PAREN@550..551 ")" [] [],
+                        property: CssGenericProperty {
+                            name: CssIdentifier {
+                                value_token: IDENT@521..542 "background-image" [Newline("\n"), Whitespace("    ")] [],
                             },
-                        ],
+                            colon_token: COLON@542..544 ":" [] [Whitespace(" ")],
+                            value: CssGenericComponentValueList [
+                                CssUrlFunction {
+                                    url_token: URL_KW@544..547 "url" [] [],
+                                    l_paren_token: L_PAREN@547..548 "(" [] [],
+                                    any_css_url_value: CssString {
+                                        value_token: CSS_STRING_LITERAL@548..550 "\"\"" [] [],
+                                    },
+                                    r_paren_token: R_PAREN@550..551 ")" [] [],
+                                },
+                            ],
+                        },
                         important: missing (optional),
                     },
                     SEMICOLON@551..552 ";" [] [],
                     CssDeclaration {
-                        name: CssIdentifier {
-                            value_token: IDENT@552..573 "background-image" [Newline("\n"), Whitespace("    ")] [],
-                        },
-                        colon_token: COLON@573..575 ":" [] [Whitespace(" ")],
-                        value: CssComponentValueList [
-                            CssUrlFunction {
-                                url_token: URL_KW@575..578 "url" [] [],
-                                l_paren_token: L_PAREN@578..582 "(" [] [Whitespace("   ")],
-                                any_css_url_value: CssString {
-                                    value_token: CSS_STRING_LITERAL@582..587 "\"\"" [] [Whitespace("   ")],
-                                },
-                                r_paren_token: R_PAREN@587..588 ")" [] [],
+                        property: CssGenericProperty {
+                            name: CssIdentifier {
+                                value_token: IDENT@552..573 "background-image" [Newline("\n"), Whitespace("    ")] [],
                             },
-                        ],
+                            colon_token: COLON@573..575 ":" [] [Whitespace(" ")],
+                            value: CssGenericComponentValueList [
+                                CssUrlFunction {
+                                    url_token: URL_KW@575..578 "url" [] [],
+                                    l_paren_token: L_PAREN@578..582 "(" [] [Whitespace("   ")],
+                                    any_css_url_value: CssString {
+                                        value_token: CSS_STRING_LITERAL@582..587 "\"\"" [] [Whitespace("   ")],
+                                    },
+                                    r_paren_token: R_PAREN@587..588 ")" [] [],
+                                },
+                            ],
+                        },
                         important: missing (optional),
                     },
                     SEMICOLON@588..589 ";" [] [],
                     CssDeclaration {
-                        name: CssIdentifier {
-                            value_token: IDENT@589..610 "background-image" [Newline("\n"), Whitespace("    ")] [],
-                        },
-                        colon_token: COLON@610..612 ":" [] [Whitespace(" ")],
-                        value: CssComponentValueList [
-                            CssUrlFunction {
-                                url_token: URL_KW@612..615 "url" [] [],
-                                l_paren_token: L_PAREN@615..616 "(" [] [],
-                                any_css_url_value: CssString {
-                                    value_token: CSS_STRING_LITERAL@616..618 "''" [] [],
-                                },
-                                r_paren_token: R_PAREN@618..619 ")" [] [],
+                        property: CssGenericProperty {
+                            name: CssIdentifier {
+                                value_token: IDENT@589..610 "background-image" [Newline("\n"), Whitespace("    ")] [],
                             },
-                        ],
+                            colon_token: COLON@610..612 ":" [] [Whitespace(" ")],
+                            value: CssGenericComponentValueList [
+                                CssUrlFunction {
+                                    url_token: URL_KW@612..615 "url" [] [],
+                                    l_paren_token: L_PAREN@615..616 "(" [] [],
+                                    any_css_url_value: CssString {
+                                        value_token: CSS_STRING_LITERAL@616..618 "''" [] [],
+                                    },
+                                    r_paren_token: R_PAREN@618..619 ")" [] [],
+                                },
+                            ],
+                        },
                         important: missing (optional),
                     },
                     SEMICOLON@619..620 ";" [] [],
                     CssDeclaration {
-                        name: CssIdentifier {
-                            value_token: IDENT@620..641 "background-image" [Newline("\n"), Whitespace("    ")] [],
-                        },
-                        colon_token: COLON@641..643 ":" [] [Whitespace(" ")],
-                        value: CssComponentValueList [
-                            CssUrlFunction {
-                                url_token: URL_KW@643..646 "url" [] [],
-                                l_paren_token: L_PAREN@646..650 "(" [] [Whitespace("   ")],
-                                any_css_url_value: CssString {
-                                    value_token: CSS_STRING_LITERAL@650..655 "''" [] [Whitespace("   ")],
-                                },
-                                r_paren_token: R_PAREN@655..656 ")" [] [],
+                        property: CssGenericProperty {
+                            name: CssIdentifier {
+                                value_token: IDENT@620..641 "background-image" [Newline("\n"), Whitespace("    ")] [],
                             },
-                        ],
+                            colon_token: COLON@641..643 ":" [] [Whitespace(" ")],
+                            value: CssGenericComponentValueList [
+                                CssUrlFunction {
+                                    url_token: URL_KW@643..646 "url" [] [],
+                                    l_paren_token: L_PAREN@646..650 "(" [] [Whitespace("   ")],
+                                    any_css_url_value: CssString {
+                                        value_token: CSS_STRING_LITERAL@650..655 "''" [] [Whitespace("   ")],
+                                    },
+                                    r_paren_token: R_PAREN@655..656 ")" [] [],
+                                },
+                            ],
+                        },
                         important: missing (optional),
                     },
                     SEMICOLON@656..657 ";" [] [],
                     CssDeclaration {
-                        name: CssIdentifier {
-                            value_token: IDENT@657..678 "background-image" [Newline("\n"), Whitespace("    ")] [],
-                        },
-                        colon_token: COLON@678..680 ":" [] [Whitespace(" ")],
-                        value: CssComponentValueList [
-                            CssUrlFunction {
-                                url_token: URL_KW@680..683 "url" [] [],
-                                l_paren_token: L_PAREN@683..687 "(" [] [Whitespace("   ")],
-                                any_css_url_value: CssString {
-                                    value_token: CSS_STRING_LITERAL@687..693 "' '" [] [Whitespace("   ")],
-                                },
-                                r_paren_token: R_PAREN@693..694 ")" [] [],
+                        property: CssGenericProperty {
+                            name: CssIdentifier {
+                                value_token: IDENT@657..678 "background-image" [Newline("\n"), Whitespace("    ")] [],
                             },
-                        ],
+                            colon_token: COLON@678..680 ":" [] [Whitespace(" ")],
+                            value: CssGenericComponentValueList [
+                                CssUrlFunction {
+                                    url_token: URL_KW@680..683 "url" [] [],
+                                    l_paren_token: L_PAREN@683..687 "(" [] [Whitespace("   ")],
+                                    any_css_url_value: CssString {
+                                        value_token: CSS_STRING_LITERAL@687..693 "' '" [] [Whitespace("   ")],
+                                    },
+                                    r_paren_token: R_PAREN@693..694 ")" [] [],
+                                },
+                            ],
+                        },
                         important: missing (optional),
                     },
                     SEMICOLON@694..695 ";" [] [],
                     CssDeclaration {
-                        name: CssIdentifier {
-                            value_token: IDENT@695..716 "background-image" [Newline("\n"), Whitespace("    ")] [],
-                        },
-                        colon_token: COLON@716..718 ":" [] [Whitespace(" ")],
-                        value: CssComponentValueList [
-                            CssUrlFunction {
-                                url_token: URL_KW@718..721 "url" [] [],
-                                l_paren_token: L_PAREN@721..722 "(" [] [],
-                                any_css_url_value: CssUrlValueRaw {
-                                    value_token: CSS_URL_VALUE_RAW_LITERAL@722..733 "./image.png" [] [],
-                                },
-                                r_paren_token: R_PAREN@733..734 ")" [] [],
+                        property: CssGenericProperty {
+                            name: CssIdentifier {
+                                value_token: IDENT@695..716 "background-image" [Newline("\n"), Whitespace("    ")] [],
                             },
-                        ],
+                            colon_token: COLON@716..718 ":" [] [Whitespace(" ")],
+                            value: CssGenericComponentValueList [
+                                CssUrlFunction {
+                                    url_token: URL_KW@718..721 "url" [] [],
+                                    l_paren_token: L_PAREN@721..722 "(" [] [],
+                                    any_css_url_value: CssUrlValueRaw {
+                                        value_token: CSS_URL_VALUE_RAW_LITERAL@722..733 "./image.png" [] [],
+                                    },
+                                    r_paren_token: R_PAREN@733..734 ")" [] [],
+                                },
+                            ],
+                        },
                         important: missing (optional),
                     },
                     SEMICOLON@734..735 ";" [] [],
                     CssDeclaration {
-                        name: CssIdentifier {
-                            value_token: IDENT@735..756 "background-image" [Newline("\n"), Whitespace("    ")] [],
-                        },
-                        colon_token: COLON@756..758 ":" [] [Whitespace(" ")],
-                        value: CssComponentValueList [
-                            CssUrlFunction {
-                                url_token: URL_KW@758..761 "url" [] [],
-                                l_paren_token: L_PAREN@761..765 "(" [] [Whitespace("   ")],
-                                any_css_url_value: CssUrlValueRaw {
-                                    value_token: CSS_URL_VALUE_RAW_LITERAL@765..779 "./image.png   " [] [],
-                                },
-                                r_paren_token: R_PAREN@779..780 ")" [] [],
+                        property: CssGenericProperty {
+                            name: CssIdentifier {
+                                value_token: IDENT@735..756 "background-image" [Newline("\n"), Whitespace("    ")] [],
                             },
-                        ],
+                            colon_token: COLON@756..758 ":" [] [Whitespace(" ")],
+                            value: CssGenericComponentValueList [
+                                CssUrlFunction {
+                                    url_token: URL_KW@758..761 "url" [] [],
+                                    l_paren_token: L_PAREN@761..765 "(" [] [Whitespace("   ")],
+                                    any_css_url_value: CssUrlValueRaw {
+                                        value_token: CSS_URL_VALUE_RAW_LITERAL@765..779 "./image.png   " [] [],
+                                    },
+                                    r_paren_token: R_PAREN@779..780 ")" [] [],
+                                },
+                            ],
+                        },
                         important: missing (optional),
                     },
                     SEMICOLON@780..781 ";" [] [],
                     CssDeclaration {
-                        name: CssIdentifier {
-                            value_token: IDENT@781..802 "background-image" [Newline("\n"), Whitespace("    ")] [],
-                        },
-                        colon_token: COLON@802..804 ":" [] [Whitespace(" ")],
-                        value: CssComponentValueList [
-                            CssUrlFunction {
-                                url_token: URL_KW@804..807 "url" [] [],
-                                l_paren_token: L_PAREN@807..811 "(" [] [Whitespace("   ")],
-                                any_css_url_value: CssUrlValueRaw {
-                                    value_token: CSS_URL_VALUE_RAW_LITERAL@811..828 "./image\\32.png   " [] [],
-                                },
-                                r_paren_token: R_PAREN@828..829 ")" [] [],
+                        property: CssGenericProperty {
+                            name: CssIdentifier {
+                                value_token: IDENT@781..802 "background-image" [Newline("\n"), Whitespace("    ")] [],
                             },
-                        ],
+                            colon_token: COLON@802..804 ":" [] [Whitespace(" ")],
+                            value: CssGenericComponentValueList [
+                                CssUrlFunction {
+                                    url_token: URL_KW@804..807 "url" [] [],
+                                    l_paren_token: L_PAREN@807..811 "(" [] [Whitespace("   ")],
+                                    any_css_url_value: CssUrlValueRaw {
+                                        value_token: CSS_URL_VALUE_RAW_LITERAL@811..828 "./image\\32.png   " [] [],
+                                    },
+                                    r_paren_token: R_PAREN@828..829 ")" [] [],
+                                },
+                            ],
+                        },
                         important: missing (optional),
                     },
                     SEMICOLON@829..830 ";" [] [],
                     CssDeclaration {
-                        name: CssIdentifier {
-                            value_token: IDENT@830..851 "background-image" [Newline("\n"), Whitespace("    ")] [],
-                        },
-                        colon_token: COLON@851..853 ":" [] [Whitespace(" ")],
-                        value: CssComponentValueList [
-                            CssUrlFunction {
-                                url_token: URL_KW@853..856 "url" [] [],
-                                l_paren_token: L_PAREN@856..860 "(" [] [Whitespace("   ")],
-                                any_css_url_value: CssUrlValueRaw {
-                                    value_token: CSS_URL_VALUE_RAW_LITERAL@860..887 "./image\\32.png   \n    " [Newline("\n"), Whitespace("    ")] [],
-                                },
-                                r_paren_token: R_PAREN@887..888 ")" [] [],
+                        property: CssGenericProperty {
+                            name: CssIdentifier {
+                                value_token: IDENT@830..851 "background-image" [Newline("\n"), Whitespace("    ")] [],
                             },
-                        ],
+                            colon_token: COLON@851..853 ":" [] [Whitespace(" ")],
+                            value: CssGenericComponentValueList [
+                                CssUrlFunction {
+                                    url_token: URL_KW@853..856 "url" [] [],
+                                    l_paren_token: L_PAREN@856..860 "(" [] [Whitespace("   ")],
+                                    any_css_url_value: CssUrlValueRaw {
+                                        value_token: CSS_URL_VALUE_RAW_LITERAL@860..887 "./image\\32.png   \n    " [Newline("\n"), Whitespace("    ")] [],
+                                    },
+                                    r_paren_token: R_PAREN@887..888 ")" [] [],
+                                },
+                            ],
+                        },
                         important: missing (optional),
                     },
                     SEMICOLON@888..889 ";" [] [],
                     CssDeclaration {
-                        name: CssIdentifier {
-                            value_token: IDENT@889..910 "background-image" [Newline("\n"), Whitespace("    ")] [],
-                        },
-                        colon_token: COLON@910..912 ":" [] [Whitespace(" ")],
-                        value: CssComponentValueList [
-                            CssUrlFunction {
-                                url_token: URL_KW@912..915 "url" [] [],
-                                l_paren_token: L_PAREN@915..916 "(" [] [],
-                                any_css_url_value: CssUrlValueRaw {
-                                    value_token: CSS_URL_VALUE_RAW_LITERAL@916..973 "./image\\32.png\n    \n    \n    \n    " [Newline("\n"), Whitespace("    "), Newline("\n"), Whitespace("    "), Newline("\n"), Whitespace("    "), Newline("\n"), Whitespace("       ")] [],
-                                },
-                                r_paren_token: R_PAREN@973..974 ")" [] [],
+                        property: CssGenericProperty {
+                            name: CssIdentifier {
+                                value_token: IDENT@889..910 "background-image" [Newline("\n"), Whitespace("    ")] [],
                             },
-                        ],
+                            colon_token: COLON@910..912 ":" [] [Whitespace(" ")],
+                            value: CssGenericComponentValueList [
+                                CssUrlFunction {
+                                    url_token: URL_KW@912..915 "url" [] [],
+                                    l_paren_token: L_PAREN@915..916 "(" [] [],
+                                    any_css_url_value: CssUrlValueRaw {
+                                        value_token: CSS_URL_VALUE_RAW_LITERAL@916..973 "./image\\32.png\n    \n    \n    \n    " [Newline("\n"), Whitespace("    "), Newline("\n"), Whitespace("    "), Newline("\n"), Whitespace("    "), Newline("\n"), Whitespace("       ")] [],
+                                    },
+                                    r_paren_token: R_PAREN@973..974 ")" [] [],
+                                },
+                            ],
+                        },
                         important: missing (optional),
                     },
                     SEMICOLON@974..975 ";" [] [],
                     CssDeclaration {
-                        name: CssIdentifier {
-                            value_token: IDENT@975..996 "background-image" [Newline("\n"), Whitespace("    ")] [],
-                        },
-                        colon_token: COLON@996..998 ":" [] [Whitespace(" ")],
-                        value: CssComponentValueList [
-                            CssUrlFunction {
-                                url_token: URL_KW@998..1001 "url" [] [],
-                                l_paren_token: L_PAREN@1001..1005 "(" [] [Whitespace("   ")],
-                                any_css_url_value: CssUrlValueRaw {
-                                    value_token: CSS_URL_VALUE_RAW_LITERAL@1005..1038 "./image\\32.png\n\n\n\n       " [Newline("\n"), Newline("\n"), Newline("\n"), Newline("\n"), Whitespace("    ")] [],
-                                },
-                                r_paren_token: R_PAREN@1038..1039 ")" [] [],
+                        property: CssGenericProperty {
+                            name: CssIdentifier {
+                                value_token: IDENT@975..996 "background-image" [Newline("\n"), Whitespace("    ")] [],
                             },
-                        ],
+                            colon_token: COLON@996..998 ":" [] [Whitespace(" ")],
+                            value: CssGenericComponentValueList [
+                                CssUrlFunction {
+                                    url_token: URL_KW@998..1001 "url" [] [],
+                                    l_paren_token: L_PAREN@1001..1005 "(" [] [Whitespace("   ")],
+                                    any_css_url_value: CssUrlValueRaw {
+                                        value_token: CSS_URL_VALUE_RAW_LITERAL@1005..1038 "./image\\32.png\n\n\n\n       " [Newline("\n"), Newline("\n"), Newline("\n"), Newline("\n"), Whitespace("    ")] [],
+                                    },
+                                    r_paren_token: R_PAREN@1038..1039 ")" [] [],
+                                },
+                            ],
+                        },
                         important: missing (optional),
                     },
                     SEMICOLON@1039..1040 ";" [] [],
                     CssDeclaration {
-                        name: CssIdentifier {
-                            value_token: IDENT@1040..1055 "background" [Newline("\n"), Whitespace("    ")] [],
-                        },
-                        colon_token: COLON@1055..1057 ":" [] [Whitespace(" ")],
-                        value: CssComponentValueList [
-                            CssUrlFunction {
-                                url_token: URL_KW@1057..1060 "url" [] [],
-                                l_paren_token: L_PAREN@1060..1061 "(" [] [],
-                                any_css_url_value: CssUrlValueRaw {
-                                    value_token: CSS_URL_VALUE_RAW_LITERAL@1061..1075 "image.png\\0001" [] [],
-                                },
-                                r_paren_token: R_PAREN@1075..1076 ")" [] [],
+                        property: CssGenericProperty {
+                            name: CssIdentifier {
+                                value_token: IDENT@1040..1055 "background" [Newline("\n"), Whitespace("    ")] [],
                             },
-                        ],
+                            colon_token: COLON@1055..1057 ":" [] [Whitespace(" ")],
+                            value: CssGenericComponentValueList [
+                                CssUrlFunction {
+                                    url_token: URL_KW@1057..1060 "url" [] [],
+                                    l_paren_token: L_PAREN@1060..1061 "(" [] [],
+                                    any_css_url_value: CssUrlValueRaw {
+                                        value_token: CSS_URL_VALUE_RAW_LITERAL@1061..1075 "image.png\\0001" [] [],
+                                    },
+                                    r_paren_token: R_PAREN@1075..1076 ")" [] [],
+                                },
+                            ],
+                        },
                         important: missing (optional),
                     },
                     SEMICOLON@1076..1077 ";" [] [],
                     CssDeclaration {
-                        name: CssIdentifier {
-                            value_token: IDENT@1077..1092 "background" [Newline("\n"), Whitespace("    ")] [],
-                        },
-                        colon_token: COLON@1092..1094 ":" [] [Whitespace(" ")],
-                        value: CssComponentValueList [
-                            CssUrlFunction {
-                                url_token: URL_KW@1094..1097 "url" [] [],
-                                l_paren_token: L_PAREN@1097..1098 "(" [] [],
-                                any_css_url_value: CssUrlValueRaw {
-                                    value_token: CSS_URL_VALUE_RAW_LITERAL@1098..1109 "image.png\\1" [] [],
-                                },
-                                r_paren_token: R_PAREN@1109..1110 ")" [] [],
+                        property: CssGenericProperty {
+                            name: CssIdentifier {
+                                value_token: IDENT@1077..1092 "background" [Newline("\n"), Whitespace("    ")] [],
                             },
-                        ],
+                            colon_token: COLON@1092..1094 ":" [] [Whitespace(" ")],
+                            value: CssGenericComponentValueList [
+                                CssUrlFunction {
+                                    url_token: URL_KW@1094..1097 "url" [] [],
+                                    l_paren_token: L_PAREN@1097..1098 "(" [] [],
+                                    any_css_url_value: CssUrlValueRaw {
+                                        value_token: CSS_URL_VALUE_RAW_LITERAL@1098..1109 "image.png\\1" [] [],
+                                    },
+                                    r_paren_token: R_PAREN@1109..1110 ")" [] [],
+                                },
+                            ],
+                        },
                         important: missing (optional),
                     },
                     SEMICOLON@1110..1111 ";" [] [],
                     CssDeclaration {
-                        name: CssIdentifier {
-                            value_token: IDENT@1111..1126 "background" [Newline("\n"), Whitespace("    ")] [],
-                        },
-                        colon_token: COLON@1126..1128 ":" [] [Whitespace(" ")],
-                        value: CssComponentValueList [
-                            CssUrlFunction {
-                                url_token: URL_KW@1128..1131 "url" [] [],
-                                l_paren_token: L_PAREN@1131..1132 "(" [] [],
-                                any_css_url_value: CssUrlValueRaw {
-                                    value_token: CSS_URL_VALUE_RAW_LITERAL@1132..1146 "image.png\\D799" [] [],
-                                },
-                                r_paren_token: R_PAREN@1146..1147 ")" [] [],
+                        property: CssGenericProperty {
+                            name: CssIdentifier {
+                                value_token: IDENT@1111..1126 "background" [Newline("\n"), Whitespace("    ")] [],
                             },
-                        ],
+                            colon_token: COLON@1126..1128 ":" [] [Whitespace(" ")],
+                            value: CssGenericComponentValueList [
+                                CssUrlFunction {
+                                    url_token: URL_KW@1128..1131 "url" [] [],
+                                    l_paren_token: L_PAREN@1131..1132 "(" [] [],
+                                    any_css_url_value: CssUrlValueRaw {
+                                        value_token: CSS_URL_VALUE_RAW_LITERAL@1132..1146 "image.png\\D799" [] [],
+                                    },
+                                    r_paren_token: R_PAREN@1146..1147 ")" [] [],
+                                },
+                            ],
+                        },
                         important: missing (optional),
                     },
                     SEMICOLON@1147..1148 ";" [] [],
                     CssDeclaration {
-                        name: CssIdentifier {
-                            value_token: IDENT@1148..1163 "background" [Newline("\n"), Whitespace("    ")] [],
-                        },
-                        colon_token: COLON@1163..1165 ":" [] [Whitespace(" ")],
-                        value: CssComponentValueList [
-                            CssUrlFunction {
-                                url_token: URL_KW@1165..1168 "url" [] [],
-                                l_paren_token: L_PAREN@1168..1169 "(" [] [],
-                                any_css_url_value: CssUrlValueRaw {
-                                    value_token: CSS_URL_VALUE_RAW_LITERAL@1169..1183 "image.png\\E000" [] [],
-                                },
-                                r_paren_token: R_PAREN@1183..1184 ")" [] [],
+                        property: CssGenericProperty {
+                            name: CssIdentifier {
+                                value_token: IDENT@1148..1163 "background" [Newline("\n"), Whitespace("    ")] [],
                             },
-                        ],
+                            colon_token: COLON@1163..1165 ":" [] [Whitespace(" ")],
+                            value: CssGenericComponentValueList [
+                                CssUrlFunction {
+                                    url_token: URL_KW@1165..1168 "url" [] [],
+                                    l_paren_token: L_PAREN@1168..1169 "(" [] [],
+                                    any_css_url_value: CssUrlValueRaw {
+                                        value_token: CSS_URL_VALUE_RAW_LITERAL@1169..1183 "image.png\\E000" [] [],
+                                    },
+                                    r_paren_token: R_PAREN@1183..1184 ")" [] [],
+                                },
+                            ],
+                        },
                         important: missing (optional),
                     },
                     SEMICOLON@1184..1185 ";" [] [],
                     CssDeclaration {
-                        name: CssIdentifier {
-                            value_token: IDENT@1185..1200 "background" [Newline("\n"), Whitespace("    ")] [],
-                        },
-                        colon_token: COLON@1200..1202 ":" [] [Whitespace(" ")],
-                        value: CssComponentValueList [
-                            CssUrlFunction {
-                                url_token: URL_KW@1202..1205 "url" [] [],
-                                l_paren_token: L_PAREN@1205..1206 "(" [] [],
-                                any_css_url_value: CssUrlValueRaw {
-                                    value_token: CSS_URL_VALUE_RAW_LITERAL@1206..1222 "image.png\\10FFFF" [] [],
-                                },
-                                r_paren_token: R_PAREN@1222..1223 ")" [] [],
+                        property: CssGenericProperty {
+                            name: CssIdentifier {
+                                value_token: IDENT@1185..1200 "background" [Newline("\n"), Whitespace("    ")] [],
                             },
-                        ],
+                            colon_token: COLON@1200..1202 ":" [] [Whitespace(" ")],
+                            value: CssGenericComponentValueList [
+                                CssUrlFunction {
+                                    url_token: URL_KW@1202..1205 "url" [] [],
+                                    l_paren_token: L_PAREN@1205..1206 "(" [] [],
+                                    any_css_url_value: CssUrlValueRaw {
+                                        value_token: CSS_URL_VALUE_RAW_LITERAL@1206..1222 "image.png\\10FFFF" [] [],
+                                    },
+                                    r_paren_token: R_PAREN@1222..1223 ")" [] [],
+                                },
+                            ],
+                        },
                         important: missing (optional),
                     },
                     SEMICOLON@1223..1224 ";" [] [],
                     CssDeclaration {
-                        name: CssIdentifier {
-                            value_token: IDENT@1224..1239 "background" [Newline("\n"), Whitespace("    ")] [],
-                        },
-                        colon_token: COLON@1239..1241 ":" [] [Whitespace(" ")],
-                        value: CssComponentValueList [
-                            CssUrlFunction {
-                                url_token: URL_KW@1241..1244 "url" [] [],
-                                l_paren_token: L_PAREN@1244..1245 "(" [] [],
-                                any_css_url_value: CssUrlValueRaw {
-                                    value_token: CSS_URL_VALUE_RAW_LITERAL@1245..1247 "18" [] [],
-                                },
-                                r_paren_token: R_PAREN@1247..1248 ")" [] [],
+                        property: CssGenericProperty {
+                            name: CssIdentifier {
+                                value_token: IDENT@1224..1239 "background" [Newline("\n"), Whitespace("    ")] [],
                             },
-                        ],
+                            colon_token: COLON@1239..1241 ":" [] [Whitespace(" ")],
+                            value: CssGenericComponentValueList [
+                                CssUrlFunction {
+                                    url_token: URL_KW@1241..1244 "url" [] [],
+                                    l_paren_token: L_PAREN@1244..1245 "(" [] [],
+                                    any_css_url_value: CssUrlValueRaw {
+                                        value_token: CSS_URL_VALUE_RAW_LITERAL@1245..1247 "18" [] [],
+                                    },
+                                    r_paren_token: R_PAREN@1247..1248 ")" [] [],
+                                },
+                            ],
+                        },
                         important: missing (optional),
                     },
                     SEMICOLON@1248..1249 ";" [] [],
@@ -590,353 +644,380 @@ CssRoot {
         0: L_CURLY@2..3 "{" [] []
         1: CSS_DECLARATION_LIST@3..1249
           0: CSS_DECLARATION@3..109
-            0: CSS_IDENTIFIER@3..24
-              0: IDENT@3..24 "background-image" [Newline("\n"), Whitespace("    ")] []
-            1: COLON@24..26 ":" [] [Whitespace(" ")]
-            2: CSS_COMPONENT_VALUE_LIST@26..109
-              0: CSS_URL_FUNCTION@26..109
-                0: URL_KW@26..29 "url" [] []
-                1: L_PAREN@29..30 "(" [] []
-                2: CSS_URL_VALUE_RAW@30..108
-                  0: CSS_URL_VALUE_RAW_LITERAL@30..108 "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" [] []
-                3: R_PAREN@108..109 ")" [] []
-            3: (empty)
+            0: CSS_GENERIC_PROPERTY@3..109
+              0: CSS_IDENTIFIER@3..24
+                0: IDENT@3..24 "background-image" [Newline("\n"), Whitespace("    ")] []
+              1: COLON@24..26 ":" [] [Whitespace(" ")]
+              2: CSS_GENERIC_COMPONENT_VALUE_LIST@26..109
+                0: CSS_URL_FUNCTION@26..109
+                  0: URL_KW@26..29 "url" [] []
+                  1: L_PAREN@29..30 "(" [] []
+                  2: CSS_URL_VALUE_RAW@30..108
+                    0: CSS_URL_VALUE_RAW_LITERAL@30..108 "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" [] []
+                  3: R_PAREN@108..109 ")" [] []
+            1: (empty)
           1: SEMICOLON@109..110 ";" [] []
           2: CSS_DECLARATION@110..155
-            0: CSS_IDENTIFIER@110..131
-              0: IDENT@110..131 "background-image" [Newline("\n"), Whitespace("    ")] []
-            1: COLON@131..133 ":" [] [Whitespace(" ")]
-            2: CSS_COMPONENT_VALUE_LIST@133..155
-              0: CSS_URL_FUNCTION@133..155
-                0: URL_KW@133..136 "url" [] []
-                1: L_PAREN@136..137 "(" [] []
-                2: CSS_STRING@137..154
-                  0: CSS_STRING_LITERAL@137..154 "\"./image (1).jpg\"" [] []
-                3: R_PAREN@154..155 ")" [] []
-            3: (empty)
+            0: CSS_GENERIC_PROPERTY@110..155
+              0: CSS_IDENTIFIER@110..131
+                0: IDENT@110..131 "background-image" [Newline("\n"), Whitespace("    ")] []
+              1: COLON@131..133 ":" [] [Whitespace(" ")]
+              2: CSS_GENERIC_COMPONENT_VALUE_LIST@133..155
+                0: CSS_URL_FUNCTION@133..155
+                  0: URL_KW@133..136 "url" [] []
+                  1: L_PAREN@136..137 "(" [] []
+                  2: CSS_STRING@137..154
+                    0: CSS_STRING_LITERAL@137..154 "\"./image (1).jpg\"" [] []
+                  3: R_PAREN@154..155 ")" [] []
+            1: (empty)
           3: SEMICOLON@155..156 ";" [] []
           4: CSS_DECLARATION@156..201
-            0: CSS_IDENTIFIER@156..177
-              0: IDENT@156..177 "background-image" [Newline("\n"), Whitespace("    ")] []
-            1: COLON@177..179 ":" [] [Whitespace(" ")]
-            2: CSS_COMPONENT_VALUE_LIST@179..201
-              0: CSS_URL_FUNCTION@179..201
-                0: URL_KW@179..182 "url" [] []
-                1: L_PAREN@182..183 "(" [] []
-                2: CSS_STRING@183..200
-                  0: CSS_STRING_LITERAL@183..200 "'./image (1).jpg'" [] []
-                3: R_PAREN@200..201 ")" [] []
-            3: (empty)
+            0: CSS_GENERIC_PROPERTY@156..201
+              0: CSS_IDENTIFIER@156..177
+                0: IDENT@156..177 "background-image" [Newline("\n"), Whitespace("    ")] []
+              1: COLON@177..179 ":" [] [Whitespace(" ")]
+              2: CSS_GENERIC_COMPONENT_VALUE_LIST@179..201
+                0: CSS_URL_FUNCTION@179..201
+                  0: URL_KW@179..182 "url" [] []
+                  1: L_PAREN@182..183 "(" [] []
+                  2: CSS_STRING@183..200
+                    0: CSS_STRING_LITERAL@183..200 "'./image (1).jpg'" [] []
+                  3: R_PAREN@200..201 ")" [] []
+            1: (empty)
           5: SEMICOLON@201..202 ";" [] []
           6: CSS_DECLARATION@202..247
-            0: CSS_IDENTIFIER@202..223
-              0: IDENT@202..223 "background-image" [Newline("\n"), Whitespace("    ")] []
-            1: COLON@223..225 ":" [] [Whitespace(" ")]
-            2: CSS_COMPONENT_VALUE_LIST@225..247
-              0: CSS_URL_FUNCTION@225..247
-                0: URL_KW@225..228 "URL" [] []
-                1: L_PAREN@228..229 "(" [] []
-                2: CSS_STRING@229..246
-                  0: CSS_STRING_LITERAL@229..246 "'./image (1).jpg'" [] []
-                3: R_PAREN@246..247 ")" [] []
-            3: (empty)
+            0: CSS_GENERIC_PROPERTY@202..247
+              0: CSS_IDENTIFIER@202..223
+                0: IDENT@202..223 "background-image" [Newline("\n"), Whitespace("    ")] []
+              1: COLON@223..225 ":" [] [Whitespace(" ")]
+              2: CSS_GENERIC_COMPONENT_VALUE_LIST@225..247
+                0: CSS_URL_FUNCTION@225..247
+                  0: URL_KW@225..228 "URL" [] []
+                  1: L_PAREN@228..229 "(" [] []
+                  2: CSS_STRING@229..246
+                    0: CSS_STRING_LITERAL@229..246 "'./image (1).jpg'" [] []
+                  3: R_PAREN@246..247 ")" [] []
+            1: (empty)
           7: SEMICOLON@247..248 ";" [] []
           8: CSS_DECLARATION@248..296
-            0: CSS_IDENTIFIER@248..269
-              0: IDENT@248..269 "background-image" [Newline("\n"), Whitespace("    ")] []
-            1: COLON@269..271 ":" [] [Whitespace(" ")]
-            2: CSS_COMPONENT_VALUE_LIST@271..296
-              0: CSS_URL_FUNCTION@271..296
-                0: URL_KW@271..274 "url" [] []
-                1: L_PAREN@274..278 "(" [] [Whitespace("   ")]
-                2: CSS_STRING@278..295
-                  0: CSS_STRING_LITERAL@278..295 "'./image (1).jpg'" [] []
-                3: R_PAREN@295..296 ")" [] []
-            3: (empty)
+            0: CSS_GENERIC_PROPERTY@248..296
+              0: CSS_IDENTIFIER@248..269
+                0: IDENT@248..269 "background-image" [Newline("\n"), Whitespace("    ")] []
+              1: COLON@269..271 ":" [] [Whitespace(" ")]
+              2: CSS_GENERIC_COMPONENT_VALUE_LIST@271..296
+                0: CSS_URL_FUNCTION@271..296
+                  0: URL_KW@271..274 "url" [] []
+                  1: L_PAREN@274..278 "(" [] [Whitespace("   ")]
+                  2: CSS_STRING@278..295
+                    0: CSS_STRING_LITERAL@278..295 "'./image (1).jpg'" [] []
+                  3: R_PAREN@295..296 ")" [] []
+            1: (empty)
           9: SEMICOLON@296..297 ";" [] []
           10: CSS_DECLARATION@297..345
-            0: CSS_IDENTIFIER@297..318
-              0: IDENT@297..318 "background-image" [Newline("\n"), Whitespace("    ")] []
-            1: COLON@318..320 ":" [] [Whitespace(" ")]
-            2: CSS_COMPONENT_VALUE_LIST@320..345
-              0: CSS_URL_FUNCTION@320..345
-                0: URL_KW@320..323 "url" [] []
-                1: L_PAREN@323..324 "(" [] []
-                2: CSS_STRING@324..344
-                  0: CSS_STRING_LITERAL@324..344 "'./image (1).jpg'" [] [Whitespace("   ")]
-                3: R_PAREN@344..345 ")" [] []
-            3: (empty)
+            0: CSS_GENERIC_PROPERTY@297..345
+              0: CSS_IDENTIFIER@297..318
+                0: IDENT@297..318 "background-image" [Newline("\n"), Whitespace("    ")] []
+              1: COLON@318..320 ":" [] [Whitespace(" ")]
+              2: CSS_GENERIC_COMPONENT_VALUE_LIST@320..345
+                0: CSS_URL_FUNCTION@320..345
+                  0: URL_KW@320..323 "url" [] []
+                  1: L_PAREN@323..324 "(" [] []
+                  2: CSS_STRING@324..344
+                    0: CSS_STRING_LITERAL@324..344 "'./image (1).jpg'" [] [Whitespace("   ")]
+                  3: R_PAREN@344..345 ")" [] []
+            1: (empty)
           11: SEMICOLON@345..346 ";" [] []
           12: CSS_DECLARATION@346..397
-            0: CSS_IDENTIFIER@346..367
-              0: IDENT@346..367 "background-image" [Newline("\n"), Whitespace("    ")] []
-            1: COLON@367..369 ":" [] [Whitespace(" ")]
-            2: CSS_COMPONENT_VALUE_LIST@369..397
-              0: CSS_URL_FUNCTION@369..397
-                0: URL_KW@369..372 "url" [] []
-                1: L_PAREN@372..376 "(" [] [Whitespace("   ")]
-                2: CSS_STRING@376..396
-                  0: CSS_STRING_LITERAL@376..396 "'./image (1).jpg'" [] [Whitespace("   ")]
-                3: R_PAREN@396..397 ")" [] []
-            3: (empty)
+            0: CSS_GENERIC_PROPERTY@346..397
+              0: CSS_IDENTIFIER@346..367
+                0: IDENT@346..367 "background-image" [Newline("\n"), Whitespace("    ")] []
+              1: COLON@367..369 ":" [] [Whitespace(" ")]
+              2: CSS_GENERIC_COMPONENT_VALUE_LIST@369..397
+                0: CSS_URL_FUNCTION@369..397
+                  0: URL_KW@369..372 "url" [] []
+                  1: L_PAREN@372..376 "(" [] [Whitespace("   ")]
+                  2: CSS_STRING@376..396
+                    0: CSS_STRING_LITERAL@376..396 "'./image (1).jpg'" [] [Whitespace("   ")]
+                  3: R_PAREN@396..397 ")" [] []
+            1: (empty)
           13: SEMICOLON@397..398 ";" [] []
           14: CSS_DECLARATION@398..459
-            0: CSS_IDENTIFIER@398..419
-              0: IDENT@398..419 "background-image" [Newline("\n"), Whitespace("    ")] []
-            1: COLON@419..421 ":" [] [Whitespace(" ")]
-            2: CSS_COMPONENT_VALUE_LIST@421..459
-              0: CSS_URL_FUNCTION@421..459
-                0: URL_KW@421..424 "url" [] []
-                1: L_PAREN@424..428 "(" [] [Whitespace("   ")]
-                2: CSS_STRING@428..453
-                  0: CSS_STRING_LITERAL@428..453 "'./image (1).jpg'" [Newline("\n"), Whitespace("    ")] [Whitespace("   ")]
-                3: R_PAREN@453..459 ")" [Newline("\n"), Whitespace("    ")] []
-            3: (empty)
+            0: CSS_GENERIC_PROPERTY@398..459
+              0: CSS_IDENTIFIER@398..419
+                0: IDENT@398..419 "background-image" [Newline("\n"), Whitespace("    ")] []
+              1: COLON@419..421 ":" [] [Whitespace(" ")]
+              2: CSS_GENERIC_COMPONENT_VALUE_LIST@421..459
+                0: CSS_URL_FUNCTION@421..459
+                  0: URL_KW@421..424 "url" [] []
+                  1: L_PAREN@424..428 "(" [] [Whitespace("   ")]
+                  2: CSS_STRING@428..453
+                    0: CSS_STRING_LITERAL@428..453 "'./image (1).jpg'" [Newline("\n"), Whitespace("    ")] [Whitespace("   ")]
+                  3: R_PAREN@453..459 ")" [Newline("\n"), Whitespace("    ")] []
+            1: (empty)
           15: SEMICOLON@459..460 ";" [] []
           16: CSS_DECLARATION@460..488
-            0: CSS_IDENTIFIER@460..481
-              0: IDENT@460..481 "background-image" [Newline("\n"), Whitespace("    ")] []
-            1: COLON@481..483 ":" [] [Whitespace(" ")]
-            2: CSS_COMPONENT_VALUE_LIST@483..488
-              0: CSS_URL_FUNCTION@483..488
-                0: URL_KW@483..486 "url" [] []
-                1: L_PAREN@486..487 "(" [] []
-                2: (empty)
-                3: R_PAREN@487..488 ")" [] []
-            3: (empty)
+            0: CSS_GENERIC_PROPERTY@460..488
+              0: CSS_IDENTIFIER@460..481
+                0: IDENT@460..481 "background-image" [Newline("\n"), Whitespace("    ")] []
+              1: COLON@481..483 ":" [] [Whitespace(" ")]
+              2: CSS_GENERIC_COMPONENT_VALUE_LIST@483..488
+                0: CSS_URL_FUNCTION@483..488
+                  0: URL_KW@483..486 "url" [] []
+                  1: L_PAREN@486..487 "(" [] []
+                  2: (empty)
+                  3: R_PAREN@487..488 ")" [] []
+            1: (empty)
           17: SEMICOLON@488..489 ";" [] []
           18: CSS_DECLARATION@489..520
-            0: CSS_IDENTIFIER@489..510
-              0: IDENT@489..510 "background-image" [Newline("\n"), Whitespace("    ")] []
-            1: COLON@510..512 ":" [] [Whitespace(" ")]
-            2: CSS_COMPONENT_VALUE_LIST@512..520
-              0: CSS_URL_FUNCTION@512..520
-                0: URL_KW@512..515 "url" [] []
-                1: L_PAREN@515..519 "(" [] [Whitespace("   ")]
-                2: (empty)
-                3: R_PAREN@519..520 ")" [] []
-            3: (empty)
+            0: CSS_GENERIC_PROPERTY@489..520
+              0: CSS_IDENTIFIER@489..510
+                0: IDENT@489..510 "background-image" [Newline("\n"), Whitespace("    ")] []
+              1: COLON@510..512 ":" [] [Whitespace(" ")]
+              2: CSS_GENERIC_COMPONENT_VALUE_LIST@512..520
+                0: CSS_URL_FUNCTION@512..520
+                  0: URL_KW@512..515 "url" [] []
+                  1: L_PAREN@515..519 "(" [] [Whitespace("   ")]
+                  2: (empty)
+                  3: R_PAREN@519..520 ")" [] []
+            1: (empty)
           19: SEMICOLON@520..521 ";" [] []
           20: CSS_DECLARATION@521..551
-            0: CSS_IDENTIFIER@521..542
-              0: IDENT@521..542 "background-image" [Newline("\n"), Whitespace("    ")] []
-            1: COLON@542..544 ":" [] [Whitespace(" ")]
-            2: CSS_COMPONENT_VALUE_LIST@544..551
-              0: CSS_URL_FUNCTION@544..551
-                0: URL_KW@544..547 "url" [] []
-                1: L_PAREN@547..548 "(" [] []
-                2: CSS_STRING@548..550
-                  0: CSS_STRING_LITERAL@548..550 "\"\"" [] []
-                3: R_PAREN@550..551 ")" [] []
-            3: (empty)
+            0: CSS_GENERIC_PROPERTY@521..551
+              0: CSS_IDENTIFIER@521..542
+                0: IDENT@521..542 "background-image" [Newline("\n"), Whitespace("    ")] []
+              1: COLON@542..544 ":" [] [Whitespace(" ")]
+              2: CSS_GENERIC_COMPONENT_VALUE_LIST@544..551
+                0: CSS_URL_FUNCTION@544..551
+                  0: URL_KW@544..547 "url" [] []
+                  1: L_PAREN@547..548 "(" [] []
+                  2: CSS_STRING@548..550
+                    0: CSS_STRING_LITERAL@548..550 "\"\"" [] []
+                  3: R_PAREN@550..551 ")" [] []
+            1: (empty)
           21: SEMICOLON@551..552 ";" [] []
           22: CSS_DECLARATION@552..588
-            0: CSS_IDENTIFIER@552..573
-              0: IDENT@552..573 "background-image" [Newline("\n"), Whitespace("    ")] []
-            1: COLON@573..575 ":" [] [Whitespace(" ")]
-            2: CSS_COMPONENT_VALUE_LIST@575..588
-              0: CSS_URL_FUNCTION@575..588
-                0: URL_KW@575..578 "url" [] []
-                1: L_PAREN@578..582 "(" [] [Whitespace("   ")]
-                2: CSS_STRING@582..587
-                  0: CSS_STRING_LITERAL@582..587 "\"\"" [] [Whitespace("   ")]
-                3: R_PAREN@587..588 ")" [] []
-            3: (empty)
+            0: CSS_GENERIC_PROPERTY@552..588
+              0: CSS_IDENTIFIER@552..573
+                0: IDENT@552..573 "background-image" [Newline("\n"), Whitespace("    ")] []
+              1: COLON@573..575 ":" [] [Whitespace(" ")]
+              2: CSS_GENERIC_COMPONENT_VALUE_LIST@575..588
+                0: CSS_URL_FUNCTION@575..588
+                  0: URL_KW@575..578 "url" [] []
+                  1: L_PAREN@578..582 "(" [] [Whitespace("   ")]
+                  2: CSS_STRING@582..587
+                    0: CSS_STRING_LITERAL@582..587 "\"\"" [] [Whitespace("   ")]
+                  3: R_PAREN@587..588 ")" [] []
+            1: (empty)
           23: SEMICOLON@588..589 ";" [] []
           24: CSS_DECLARATION@589..619
-            0: CSS_IDENTIFIER@589..610
-              0: IDENT@589..610 "background-image" [Newline("\n"), Whitespace("    ")] []
-            1: COLON@610..612 ":" [] [Whitespace(" ")]
-            2: CSS_COMPONENT_VALUE_LIST@612..619
-              0: CSS_URL_FUNCTION@612..619
-                0: URL_KW@612..615 "url" [] []
-                1: L_PAREN@615..616 "(" [] []
-                2: CSS_STRING@616..618
-                  0: CSS_STRING_LITERAL@616..618 "''" [] []
-                3: R_PAREN@618..619 ")" [] []
-            3: (empty)
+            0: CSS_GENERIC_PROPERTY@589..619
+              0: CSS_IDENTIFIER@589..610
+                0: IDENT@589..610 "background-image" [Newline("\n"), Whitespace("    ")] []
+              1: COLON@610..612 ":" [] [Whitespace(" ")]
+              2: CSS_GENERIC_COMPONENT_VALUE_LIST@612..619
+                0: CSS_URL_FUNCTION@612..619
+                  0: URL_KW@612..615 "url" [] []
+                  1: L_PAREN@615..616 "(" [] []
+                  2: CSS_STRING@616..618
+                    0: CSS_STRING_LITERAL@616..618 "''" [] []
+                  3: R_PAREN@618..619 ")" [] []
+            1: (empty)
           25: SEMICOLON@619..620 ";" [] []
           26: CSS_DECLARATION@620..656
-            0: CSS_IDENTIFIER@620..641
-              0: IDENT@620..641 "background-image" [Newline("\n"), Whitespace("    ")] []
-            1: COLON@641..643 ":" [] [Whitespace(" ")]
-            2: CSS_COMPONENT_VALUE_LIST@643..656
-              0: CSS_URL_FUNCTION@643..656
-                0: URL_KW@643..646 "url" [] []
-                1: L_PAREN@646..650 "(" [] [Whitespace("   ")]
-                2: CSS_STRING@650..655
-                  0: CSS_STRING_LITERAL@650..655 "''" [] [Whitespace("   ")]
-                3: R_PAREN@655..656 ")" [] []
-            3: (empty)
+            0: CSS_GENERIC_PROPERTY@620..656
+              0: CSS_IDENTIFIER@620..641
+                0: IDENT@620..641 "background-image" [Newline("\n"), Whitespace("    ")] []
+              1: COLON@641..643 ":" [] [Whitespace(" ")]
+              2: CSS_GENERIC_COMPONENT_VALUE_LIST@643..656
+                0: CSS_URL_FUNCTION@643..656
+                  0: URL_KW@643..646 "url" [] []
+                  1: L_PAREN@646..650 "(" [] [Whitespace("   ")]
+                  2: CSS_STRING@650..655
+                    0: CSS_STRING_LITERAL@650..655 "''" [] [Whitespace("   ")]
+                  3: R_PAREN@655..656 ")" [] []
+            1: (empty)
           27: SEMICOLON@656..657 ";" [] []
           28: CSS_DECLARATION@657..694
-            0: CSS_IDENTIFIER@657..678
-              0: IDENT@657..678 "background-image" [Newline("\n"), Whitespace("    ")] []
-            1: COLON@678..680 ":" [] [Whitespace(" ")]
-            2: CSS_COMPONENT_VALUE_LIST@680..694
-              0: CSS_URL_FUNCTION@680..694
-                0: URL_KW@680..683 "url" [] []
-                1: L_PAREN@683..687 "(" [] [Whitespace("   ")]
-                2: CSS_STRING@687..693
-                  0: CSS_STRING_LITERAL@687..693 "' '" [] [Whitespace("   ")]
-                3: R_PAREN@693..694 ")" [] []
-            3: (empty)
+            0: CSS_GENERIC_PROPERTY@657..694
+              0: CSS_IDENTIFIER@657..678
+                0: IDENT@657..678 "background-image" [Newline("\n"), Whitespace("    ")] []
+              1: COLON@678..680 ":" [] [Whitespace(" ")]
+              2: CSS_GENERIC_COMPONENT_VALUE_LIST@680..694
+                0: CSS_URL_FUNCTION@680..694
+                  0: URL_KW@680..683 "url" [] []
+                  1: L_PAREN@683..687 "(" [] [Whitespace("   ")]
+                  2: CSS_STRING@687..693
+                    0: CSS_STRING_LITERAL@687..693 "' '" [] [Whitespace("   ")]
+                  3: R_PAREN@693..694 ")" [] []
+            1: (empty)
           29: SEMICOLON@694..695 ";" [] []
           30: CSS_DECLARATION@695..734
-            0: CSS_IDENTIFIER@695..716
-              0: IDENT@695..716 "background-image" [Newline("\n"), Whitespace("    ")] []
-            1: COLON@716..718 ":" [] [Whitespace(" ")]
-            2: CSS_COMPONENT_VALUE_LIST@718..734
-              0: CSS_URL_FUNCTION@718..734
-                0: URL_KW@718..721 "url" [] []
-                1: L_PAREN@721..722 "(" [] []
-                2: CSS_URL_VALUE_RAW@722..733
-                  0: CSS_URL_VALUE_RAW_LITERAL@722..733 "./image.png" [] []
-                3: R_PAREN@733..734 ")" [] []
-            3: (empty)
+            0: CSS_GENERIC_PROPERTY@695..734
+              0: CSS_IDENTIFIER@695..716
+                0: IDENT@695..716 "background-image" [Newline("\n"), Whitespace("    ")] []
+              1: COLON@716..718 ":" [] [Whitespace(" ")]
+              2: CSS_GENERIC_COMPONENT_VALUE_LIST@718..734
+                0: CSS_URL_FUNCTION@718..734
+                  0: URL_KW@718..721 "url" [] []
+                  1: L_PAREN@721..722 "(" [] []
+                  2: CSS_URL_VALUE_RAW@722..733
+                    0: CSS_URL_VALUE_RAW_LITERAL@722..733 "./image.png" [] []
+                  3: R_PAREN@733..734 ")" [] []
+            1: (empty)
           31: SEMICOLON@734..735 ";" [] []
           32: CSS_DECLARATION@735..780
-            0: CSS_IDENTIFIER@735..756
-              0: IDENT@735..756 "background-image" [Newline("\n"), Whitespace("    ")] []
-            1: COLON@756..758 ":" [] [Whitespace(" ")]
-            2: CSS_COMPONENT_VALUE_LIST@758..780
-              0: CSS_URL_FUNCTION@758..780
-                0: URL_KW@758..761 "url" [] []
-                1: L_PAREN@761..765 "(" [] [Whitespace("   ")]
-                2: CSS_URL_VALUE_RAW@765..779
-                  0: CSS_URL_VALUE_RAW_LITERAL@765..779 "./image.png   " [] []
-                3: R_PAREN@779..780 ")" [] []
-            3: (empty)
+            0: CSS_GENERIC_PROPERTY@735..780
+              0: CSS_IDENTIFIER@735..756
+                0: IDENT@735..756 "background-image" [Newline("\n"), Whitespace("    ")] []
+              1: COLON@756..758 ":" [] [Whitespace(" ")]
+              2: CSS_GENERIC_COMPONENT_VALUE_LIST@758..780
+                0: CSS_URL_FUNCTION@758..780
+                  0: URL_KW@758..761 "url" [] []
+                  1: L_PAREN@761..765 "(" [] [Whitespace("   ")]
+                  2: CSS_URL_VALUE_RAW@765..779
+                    0: CSS_URL_VALUE_RAW_LITERAL@765..779 "./image.png   " [] []
+                  3: R_PAREN@779..780 ")" [] []
+            1: (empty)
           33: SEMICOLON@780..781 ";" [] []
           34: CSS_DECLARATION@781..829
-            0: CSS_IDENTIFIER@781..802
-              0: IDENT@781..802 "background-image" [Newline("\n"), Whitespace("    ")] []
-            1: COLON@802..804 ":" [] [Whitespace(" ")]
-            2: CSS_COMPONENT_VALUE_LIST@804..829
-              0: CSS_URL_FUNCTION@804..829
-                0: URL_KW@804..807 "url" [] []
-                1: L_PAREN@807..811 "(" [] [Whitespace("   ")]
-                2: CSS_URL_VALUE_RAW@811..828
-                  0: CSS_URL_VALUE_RAW_LITERAL@811..828 "./image\\32.png   " [] []
-                3: R_PAREN@828..829 ")" [] []
-            3: (empty)
+            0: CSS_GENERIC_PROPERTY@781..829
+              0: CSS_IDENTIFIER@781..802
+                0: IDENT@781..802 "background-image" [Newline("\n"), Whitespace("    ")] []
+              1: COLON@802..804 ":" [] [Whitespace(" ")]
+              2: CSS_GENERIC_COMPONENT_VALUE_LIST@804..829
+                0: CSS_URL_FUNCTION@804..829
+                  0: URL_KW@804..807 "url" [] []
+                  1: L_PAREN@807..811 "(" [] [Whitespace("   ")]
+                  2: CSS_URL_VALUE_RAW@811..828
+                    0: CSS_URL_VALUE_RAW_LITERAL@811..828 "./image\\32.png   " [] []
+                  3: R_PAREN@828..829 ")" [] []
+            1: (empty)
           35: SEMICOLON@829..830 ";" [] []
           36: CSS_DECLARATION@830..888
-            0: CSS_IDENTIFIER@830..851
-              0: IDENT@830..851 "background-image" [Newline("\n"), Whitespace("    ")] []
-            1: COLON@851..853 ":" [] [Whitespace(" ")]
-            2: CSS_COMPONENT_VALUE_LIST@853..888
-              0: CSS_URL_FUNCTION@853..888
-                0: URL_KW@853..856 "url" [] []
-                1: L_PAREN@856..860 "(" [] [Whitespace("   ")]
-                2: CSS_URL_VALUE_RAW@860..887
-                  0: CSS_URL_VALUE_RAW_LITERAL@860..887 "./image\\32.png   \n    " [Newline("\n"), Whitespace("    ")] []
-                3: R_PAREN@887..888 ")" [] []
-            3: (empty)
+            0: CSS_GENERIC_PROPERTY@830..888
+              0: CSS_IDENTIFIER@830..851
+                0: IDENT@830..851 "background-image" [Newline("\n"), Whitespace("    ")] []
+              1: COLON@851..853 ":" [] [Whitespace(" ")]
+              2: CSS_GENERIC_COMPONENT_VALUE_LIST@853..888
+                0: CSS_URL_FUNCTION@853..888
+                  0: URL_KW@853..856 "url" [] []
+                  1: L_PAREN@856..860 "(" [] [Whitespace("   ")]
+                  2: CSS_URL_VALUE_RAW@860..887
+                    0: CSS_URL_VALUE_RAW_LITERAL@860..887 "./image\\32.png   \n    " [Newline("\n"), Whitespace("    ")] []
+                  3: R_PAREN@887..888 ")" [] []
+            1: (empty)
           37: SEMICOLON@888..889 ";" [] []
           38: CSS_DECLARATION@889..974
-            0: CSS_IDENTIFIER@889..910
-              0: IDENT@889..910 "background-image" [Newline("\n"), Whitespace("    ")] []
-            1: COLON@910..912 ":" [] [Whitespace(" ")]
-            2: CSS_COMPONENT_VALUE_LIST@912..974
-              0: CSS_URL_FUNCTION@912..974
-                0: URL_KW@912..915 "url" [] []
-                1: L_PAREN@915..916 "(" [] []
-                2: CSS_URL_VALUE_RAW@916..973
-                  0: CSS_URL_VALUE_RAW_LITERAL@916..973 "./image\\32.png\n    \n    \n    \n    " [Newline("\n"), Whitespace("    "), Newline("\n"), Whitespace("    "), Newline("\n"), Whitespace("    "), Newline("\n"), Whitespace("       ")] []
-                3: R_PAREN@973..974 ")" [] []
-            3: (empty)
+            0: CSS_GENERIC_PROPERTY@889..974
+              0: CSS_IDENTIFIER@889..910
+                0: IDENT@889..910 "background-image" [Newline("\n"), Whitespace("    ")] []
+              1: COLON@910..912 ":" [] [Whitespace(" ")]
+              2: CSS_GENERIC_COMPONENT_VALUE_LIST@912..974
+                0: CSS_URL_FUNCTION@912..974
+                  0: URL_KW@912..915 "url" [] []
+                  1: L_PAREN@915..916 "(" [] []
+                  2: CSS_URL_VALUE_RAW@916..973
+                    0: CSS_URL_VALUE_RAW_LITERAL@916..973 "./image\\32.png\n    \n    \n    \n    " [Newline("\n"), Whitespace("    "), Newline("\n"), Whitespace("    "), Newline("\n"), Whitespace("    "), Newline("\n"), Whitespace("       ")] []
+                  3: R_PAREN@973..974 ")" [] []
+            1: (empty)
           39: SEMICOLON@974..975 ";" [] []
           40: CSS_DECLARATION@975..1039
-            0: CSS_IDENTIFIER@975..996
-              0: IDENT@975..996 "background-image" [Newline("\n"), Whitespace("    ")] []
-            1: COLON@996..998 ":" [] [Whitespace(" ")]
-            2: CSS_COMPONENT_VALUE_LIST@998..1039
-              0: CSS_URL_FUNCTION@998..1039
-                0: URL_KW@998..1001 "url" [] []
-                1: L_PAREN@1001..1005 "(" [] [Whitespace("   ")]
-                2: CSS_URL_VALUE_RAW@1005..1038
-                  0: CSS_URL_VALUE_RAW_LITERAL@1005..1038 "./image\\32.png\n\n\n\n       " [Newline("\n"), Newline("\n"), Newline("\n"), Newline("\n"), Whitespace("    ")] []
-                3: R_PAREN@1038..1039 ")" [] []
-            3: (empty)
+            0: CSS_GENERIC_PROPERTY@975..1039
+              0: CSS_IDENTIFIER@975..996
+                0: IDENT@975..996 "background-image" [Newline("\n"), Whitespace("    ")] []
+              1: COLON@996..998 ":" [] [Whitespace(" ")]
+              2: CSS_GENERIC_COMPONENT_VALUE_LIST@998..1039
+                0: CSS_URL_FUNCTION@998..1039
+                  0: URL_KW@998..1001 "url" [] []
+                  1: L_PAREN@1001..1005 "(" [] [Whitespace("   ")]
+                  2: CSS_URL_VALUE_RAW@1005..1038
+                    0: CSS_URL_VALUE_RAW_LITERAL@1005..1038 "./image\\32.png\n\n\n\n       " [Newline("\n"), Newline("\n"), Newline("\n"), Newline("\n"), Whitespace("    ")] []
+                  3: R_PAREN@1038..1039 ")" [] []
+            1: (empty)
           41: SEMICOLON@1039..1040 ";" [] []
           42: CSS_DECLARATION@1040..1076
-            0: CSS_IDENTIFIER@1040..1055
-              0: IDENT@1040..1055 "background" [Newline("\n"), Whitespace("    ")] []
-            1: COLON@1055..1057 ":" [] [Whitespace(" ")]
-            2: CSS_COMPONENT_VALUE_LIST@1057..1076
-              0: CSS_URL_FUNCTION@1057..1076
-                0: URL_KW@1057..1060 "url" [] []
-                1: L_PAREN@1060..1061 "(" [] []
-                2: CSS_URL_VALUE_RAW@1061..1075
-                  0: CSS_URL_VALUE_RAW_LITERAL@1061..1075 "image.png\\0001" [] []
-                3: R_PAREN@1075..1076 ")" [] []
-            3: (empty)
+            0: CSS_GENERIC_PROPERTY@1040..1076
+              0: CSS_IDENTIFIER@1040..1055
+                0: IDENT@1040..1055 "background" [Newline("\n"), Whitespace("    ")] []
+              1: COLON@1055..1057 ":" [] [Whitespace(" ")]
+              2: CSS_GENERIC_COMPONENT_VALUE_LIST@1057..1076
+                0: CSS_URL_FUNCTION@1057..1076
+                  0: URL_KW@1057..1060 "url" [] []
+                  1: L_PAREN@1060..1061 "(" [] []
+                  2: CSS_URL_VALUE_RAW@1061..1075
+                    0: CSS_URL_VALUE_RAW_LITERAL@1061..1075 "image.png\\0001" [] []
+                  3: R_PAREN@1075..1076 ")" [] []
+            1: (empty)
           43: SEMICOLON@1076..1077 ";" [] []
           44: CSS_DECLARATION@1077..1110
-            0: CSS_IDENTIFIER@1077..1092
-              0: IDENT@1077..1092 "background" [Newline("\n"), Whitespace("    ")] []
-            1: COLON@1092..1094 ":" [] [Whitespace(" ")]
-            2: CSS_COMPONENT_VALUE_LIST@1094..1110
-              0: CSS_URL_FUNCTION@1094..1110
-                0: URL_KW@1094..1097 "url" [] []
-                1: L_PAREN@1097..1098 "(" [] []
-                2: CSS_URL_VALUE_RAW@1098..1109
-                  0: CSS_URL_VALUE_RAW_LITERAL@1098..1109 "image.png\\1" [] []
-                3: R_PAREN@1109..1110 ")" [] []
-            3: (empty)
+            0: CSS_GENERIC_PROPERTY@1077..1110
+              0: CSS_IDENTIFIER@1077..1092
+                0: IDENT@1077..1092 "background" [Newline("\n"), Whitespace("    ")] []
+              1: COLON@1092..1094 ":" [] [Whitespace(" ")]
+              2: CSS_GENERIC_COMPONENT_VALUE_LIST@1094..1110
+                0: CSS_URL_FUNCTION@1094..1110
+                  0: URL_KW@1094..1097 "url" [] []
+                  1: L_PAREN@1097..1098 "(" [] []
+                  2: CSS_URL_VALUE_RAW@1098..1109
+                    0: CSS_URL_VALUE_RAW_LITERAL@1098..1109 "image.png\\1" [] []
+                  3: R_PAREN@1109..1110 ")" [] []
+            1: (empty)
           45: SEMICOLON@1110..1111 ";" [] []
           46: CSS_DECLARATION@1111..1147
-            0: CSS_IDENTIFIER@1111..1126
-              0: IDENT@1111..1126 "background" [Newline("\n"), Whitespace("    ")] []
-            1: COLON@1126..1128 ":" [] [Whitespace(" ")]
-            2: CSS_COMPONENT_VALUE_LIST@1128..1147
-              0: CSS_URL_FUNCTION@1128..1147
-                0: URL_KW@1128..1131 "url" [] []
-                1: L_PAREN@1131..1132 "(" [] []
-                2: CSS_URL_VALUE_RAW@1132..1146
-                  0: CSS_URL_VALUE_RAW_LITERAL@1132..1146 "image.png\\D799" [] []
-                3: R_PAREN@1146..1147 ")" [] []
-            3: (empty)
+            0: CSS_GENERIC_PROPERTY@1111..1147
+              0: CSS_IDENTIFIER@1111..1126
+                0: IDENT@1111..1126 "background" [Newline("\n"), Whitespace("    ")] []
+              1: COLON@1126..1128 ":" [] [Whitespace(" ")]
+              2: CSS_GENERIC_COMPONENT_VALUE_LIST@1128..1147
+                0: CSS_URL_FUNCTION@1128..1147
+                  0: URL_KW@1128..1131 "url" [] []
+                  1: L_PAREN@1131..1132 "(" [] []
+                  2: CSS_URL_VALUE_RAW@1132..1146
+                    0: CSS_URL_VALUE_RAW_LITERAL@1132..1146 "image.png\\D799" [] []
+                  3: R_PAREN@1146..1147 ")" [] []
+            1: (empty)
           47: SEMICOLON@1147..1148 ";" [] []
           48: CSS_DECLARATION@1148..1184
-            0: CSS_IDENTIFIER@1148..1163
-              0: IDENT@1148..1163 "background" [Newline("\n"), Whitespace("    ")] []
-            1: COLON@1163..1165 ":" [] [Whitespace(" ")]
-            2: CSS_COMPONENT_VALUE_LIST@1165..1184
-              0: CSS_URL_FUNCTION@1165..1184
-                0: URL_KW@1165..1168 "url" [] []
-                1: L_PAREN@1168..1169 "(" [] []
-                2: CSS_URL_VALUE_RAW@1169..1183
-                  0: CSS_URL_VALUE_RAW_LITERAL@1169..1183 "image.png\\E000" [] []
-                3: R_PAREN@1183..1184 ")" [] []
-            3: (empty)
+            0: CSS_GENERIC_PROPERTY@1148..1184
+              0: CSS_IDENTIFIER@1148..1163
+                0: IDENT@1148..1163 "background" [Newline("\n"), Whitespace("    ")] []
+              1: COLON@1163..1165 ":" [] [Whitespace(" ")]
+              2: CSS_GENERIC_COMPONENT_VALUE_LIST@1165..1184
+                0: CSS_URL_FUNCTION@1165..1184
+                  0: URL_KW@1165..1168 "url" [] []
+                  1: L_PAREN@1168..1169 "(" [] []
+                  2: CSS_URL_VALUE_RAW@1169..1183
+                    0: CSS_URL_VALUE_RAW_LITERAL@1169..1183 "image.png\\E000" [] []
+                  3: R_PAREN@1183..1184 ")" [] []
+            1: (empty)
           49: SEMICOLON@1184..1185 ";" [] []
           50: CSS_DECLARATION@1185..1223
-            0: CSS_IDENTIFIER@1185..1200
-              0: IDENT@1185..1200 "background" [Newline("\n"), Whitespace("    ")] []
-            1: COLON@1200..1202 ":" [] [Whitespace(" ")]
-            2: CSS_COMPONENT_VALUE_LIST@1202..1223
-              0: CSS_URL_FUNCTION@1202..1223
-                0: URL_KW@1202..1205 "url" [] []
-                1: L_PAREN@1205..1206 "(" [] []
-                2: CSS_URL_VALUE_RAW@1206..1222
-                  0: CSS_URL_VALUE_RAW_LITERAL@1206..1222 "image.png\\10FFFF" [] []
-                3: R_PAREN@1222..1223 ")" [] []
-            3: (empty)
+            0: CSS_GENERIC_PROPERTY@1185..1223
+              0: CSS_IDENTIFIER@1185..1200
+                0: IDENT@1185..1200 "background" [Newline("\n"), Whitespace("    ")] []
+              1: COLON@1200..1202 ":" [] [Whitespace(" ")]
+              2: CSS_GENERIC_COMPONENT_VALUE_LIST@1202..1223
+                0: CSS_URL_FUNCTION@1202..1223
+                  0: URL_KW@1202..1205 "url" [] []
+                  1: L_PAREN@1205..1206 "(" [] []
+                  2: CSS_URL_VALUE_RAW@1206..1222
+                    0: CSS_URL_VALUE_RAW_LITERAL@1206..1222 "image.png\\10FFFF" [] []
+                  3: R_PAREN@1222..1223 ")" [] []
+            1: (empty)
           51: SEMICOLON@1223..1224 ";" [] []
           52: CSS_DECLARATION@1224..1248
-            0: CSS_IDENTIFIER@1224..1239
-              0: IDENT@1224..1239 "background" [Newline("\n"), Whitespace("    ")] []
-            1: COLON@1239..1241 ":" [] [Whitespace(" ")]
-            2: CSS_COMPONENT_VALUE_LIST@1241..1248
-              0: CSS_URL_FUNCTION@1241..1248
-                0: URL_KW@1241..1244 "url" [] []
-                1: L_PAREN@1244..1245 "(" [] []
-                2: CSS_URL_VALUE_RAW@1245..1247
-                  0: CSS_URL_VALUE_RAW_LITERAL@1245..1247 "18" [] []
-                3: R_PAREN@1247..1248 ")" [] []
-            3: (empty)
+            0: CSS_GENERIC_PROPERTY@1224..1248
+              0: CSS_IDENTIFIER@1224..1239
+                0: IDENT@1224..1239 "background" [Newline("\n"), Whitespace("    ")] []
+              1: COLON@1239..1241 ":" [] [Whitespace(" ")]
+              2: CSS_GENERIC_COMPONENT_VALUE_LIST@1241..1248
+                0: CSS_URL_FUNCTION@1241..1248
+                  0: URL_KW@1241..1244 "url" [] []
+                  1: L_PAREN@1244..1245 "(" [] []
+                  2: CSS_URL_VALUE_RAW@1245..1247
+                    0: CSS_URL_VALUE_RAW_LITERAL@1245..1247 "18" [] []
+                  3: R_PAREN@1247..1248 ")" [] []
+            1: (empty)
           53: SEMICOLON@1248..1249 ";" [] []
         2: R_CURLY@1249..1251 "}" [Newline("\n")] []
   2: EOF@1251..1251 "" [] []
