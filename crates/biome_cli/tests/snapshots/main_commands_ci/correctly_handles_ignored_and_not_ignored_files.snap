@@ -1,0 +1,105 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `biome.json`
+
+```json
+{
+  "linter": {
+    "ignore": ["/linter-ignored/**"]
+  },
+  "formatter": {
+    "ignore": ["/formatter-ignored/**"]
+  },
+  "files": {
+    "ignore": ["/globally-ignored/**"]
+  }
+}
+```
+
+## `/formatter-ignored/test.js`
+
+```js
+statement(    ) ; let a = !b || !c;
+```
+
+## `/globally-ignored/test.js`
+
+```js
+statement(    ) ; let a = !b || !c;
+```
+
+## `/linter-ignored/test.js`
+
+```js
+let a = !b || !c
+```
+
+# Termination Message
+
+```block
+ci ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+/formatter-ignored/test.js:1:19 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This let declares a variable which is never re-assigned.
+  
+  > 1 │ statement(    ) ; let a = !b || !c;
+      │                   ^^^
+  
+  i 'a' is never re-assigned.
+  
+  > 1 │ statement(    ) ; let a = !b || !c;
+      │                       ^
+  
+  i Safe fix: Use const instead.
+  
+  - statement(····)·;·let·a·=·!b·||·!c;
+  + statement(····)·;·const·a·=·!b·||·!c;
+  
+
+```
+
+```block
+/formatter-ignored/test.js lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The file contains diagnostics that needs to be addressed.
+  
+
+```
+
+```block
+/linter-ignored/test.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × File content differs from formatting output
+  
+    1   │ - let·a·=·!b·||·!c
+      1 │ + let·a·=·!b·||·!c;
+      2 │ + 
+  
+
+```
+
+```block
+/linter-ignored/test.js ci ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The file contains diagnostics that needs to be addressed.
+  
+
+```
+
+```block
+Checked 2 file(s) in <TIME>
+```
+
+
