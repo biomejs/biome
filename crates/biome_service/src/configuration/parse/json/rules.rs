@@ -1456,6 +1456,13 @@ impl Deserializable for Style {
                                 diagnostics,
                             );
                         }
+                        "useShorthandAssign" => {
+                            result.use_shorthand_assign = Deserializable::deserialize(
+                                &value,
+                                "useShorthandAssign",
+                                diagnostics,
+                            );
+                        }
                         "useSingleCaseStatement" => {
                             result.use_single_case_statement = Deserializable::deserialize(
                                 &value,

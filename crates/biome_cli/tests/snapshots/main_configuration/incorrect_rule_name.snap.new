@@ -1,0 +1,143 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 388
+expression: content
+---
+## `biome.json`
+
+```json
+{
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "correctness": {
+        "foo_rule": "off"
+      },
+      "style": {
+        "what_the_hell": "off"
+      }
+    }
+  }
+}
+```
+
+# Termination Message
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Biome exited because the configuration resulted in errors. Please fix them.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+biome.json:6:13 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Found an unknown key `foo_rule`.
+  
+    4 │     "rules": {
+    5 │         "correctness": {
+  > 6 │             "foo_rule": "off"
+      │             ^^^^^^^^^^
+    7 │         },
+    8 │         "style": {
+  
+  i Accepted keys
+  
+  - recommended
+  - all
+  - noChildrenProp
+  - noConstAssign
+  - noConstantCondition
+  - noConstructorReturn
+  - noEmptyCharacterClassInRegex
+  - noEmptyPattern
+  - noGlobalObjectCalls
+  - noInnerDeclarations
+  - noInvalidConstructorSuper
+  - noInvalidNewBuiltin
+  - noNewSymbol
+  - noNonoctalDecimalEscape
+  - noPrecisionLoss
+  - noRenderReturnValue
+  - noSelfAssign
+  - noSetterReturn
+  - noStringCaseMismatch
+  - noSwitchDeclarations
+  - noUndeclaredVariables
+  - noUnnecessaryContinue
+  - noUnreachable
+  - noUnreachableSuper
+  - noUnsafeFinally
+  - noUnsafeOptionalChaining
+  - noUnusedLabels
+  - noUnusedVariables
+  - noVoidElementsWithChildren
+  - noVoidTypeReturn
+  - useExhaustiveDependencies
+  - useHookAtTopLevel
+  - useIsNan
+  - useValidForDirection
+  - useYield
+  
+
+```
+
+```block
+biome.json:9:13 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Found an unknown key `what_the_hell`.
+  
+     7 │         },
+     8 │         "style": {
+   > 9 │             "what_the_hell": "off"
+       │             ^^^^^^^^^^^^^^^
+    10 │         }
+    11 │     }
+  
+  i Accepted keys
+  
+  - recommended
+  - all
+  - noArguments
+  - noCommaOperator
+  - noImplicitBoolean
+  - noInferrableTypes
+  - noNamespace
+  - noNegationElse
+  - noNonNullAssertion
+  - noParameterAssign
+  - noParameterProperties
+  - noRestrictedGlobals
+  - noShoutyConstants
+  - noUnusedTemplateLiteral
+  - noUselessElse
+  - noVar
+  - useAsConstAssertion
+  - useBlockStatements
+  - useCollapsedElseIf
+  - useConsistentArrayType
+  - useConst
+  - useDefaultParameterLast
+  - useEnumInitializers
+  - useExponentiationOperator
+  - useFragmentSyntax
+  - useLiteralEnumMembers
+  - useNamingConvention
+  - useNumericLiterals
+  - useSelfClosingElements
+  - useShorthandArrayType
+  - useShorthandAssign
+  - useSingleCaseStatement
+  - useSingleVarDeclarator
+  - useTemplate
+  - useWhile
+  
+
+```
+
+
