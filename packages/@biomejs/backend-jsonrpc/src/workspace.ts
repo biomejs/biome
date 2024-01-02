@@ -1393,7 +1393,7 @@ export interface FilenamingConventionOptions {
 	strictCase: boolean;
 }
 /**
- * Options for the rule `useExhaustiveDependencies` and `useHookAtTopLevel`
+ * Options for the rule `useExhaustiveDependencies`
  */
 export interface HooksOptions {
 	/**

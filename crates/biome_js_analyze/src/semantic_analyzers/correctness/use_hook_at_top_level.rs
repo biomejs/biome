@@ -1,5 +1,4 @@
 use crate::react::hooks::is_react_hook_call;
-use crate::semantic_analyzers::correctness::use_exhaustive_dependencies::HooksOptions;
 use crate::semantic_services::{SemanticModelBuilderVisitor, SemanticServices};
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
 use biome_analyze::{
@@ -48,31 +47,6 @@ declare_rule! {
     /// ```js
     /// function Component1() {
     ///     useEffect();
-    /// }
-    /// ```
-    ///
-    /// ## Options
-    ///
-    /// Allows to specify custom hooks - from libraries or internal projects - that can be considered stable.
-    ///
-    /// ```json
-    /// {
-    ///     "//": "...",
-    ///     "options": {
-    ///         "hooks": [
-    ///             { "name": "useLocation", "closureIndex": 0, "dependenciesIndex": 1},
-    ///             { "name": "useQuery", "closureIndex": 1, "dependenciesIndex": 0}
-    ///         ]
-    ///     }
-    /// }
-    /// ```
-    ///
-    /// Given the previous example, your hooks be used like this:
-    ///
-    /// ```js
-    /// function Foo() {
-    ///     const location = useLocation(() => {}, []);
-    ///     const query = useQuery([], () => {});
     /// }
     /// ```
     ///
@@ -352,7 +326,7 @@ impl Rule for UseHookAtTopLevel {
     type Query = FunctionCall;
     type State = Suggestion;
     type Signals = Option<Self::State>;
-    type Options = HooksOptions;
+    type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let FunctionCall(call) = ctx.query();
