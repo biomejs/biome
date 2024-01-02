@@ -1,0 +1,190 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/atrule/layer.css
+---
+
+# Input
+
+```css
+@layer framework, override   ,    foo   , bar.baz  ;
+@layer bar.baz  ;
+
+@layer override{
+	@keyframes slide-left {
+		from { translate: 0; }
+		to { translate: -100% 0; }
+	}
+}
+
+@layer
+framework
+{
+	@keyframes slide-left {
+		from { margin-left: 0; }
+		to { margin-left: -100%; }
+	}
+}
+
+@layer   {}
+@layer { 
+    }
+
+@layer
+
+reset.type
+
+{
+	strong { font-weight: bold; }
+}
+
+@layer   framework {
+	.title { font-weight: 100; }
+
+	@layer
+     theme {
+		h1, h2 { color: maroon; }
+	}
+}
+
+@layer reset {
+	[hidden] { display: none; }
+}
+
+@layer framework {
+	@layer default { p { margin-block: 0.75em; } }
+	@layer theme { p { color: red; } }
+}
+
+@layer framework.theme {
+	/* These styles will be added to the theme layer inside the framework layer */
+	blockquote { color: rebeccapurple; }
+}
+
+@layer framework
+
+{
+	@media ONLY screen AND (color)  {
+		article {
+			padding: 1rem 3rem;
+		}
+	}
+	.title { font-weight: 100; }
+
+	@layer theme {
+		h1, h2 { color: maroon; }
+	}
+}
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+-----
+
+```css
+@layer framework, override, foo, bar.baz;
+@layer bar.baz;
+
+@layer override {
+	@keyframes slide-left {
+		from {
+			translate: 0;
+		}
+		to {
+			translate: -100% 0;
+		}
+	}
+}
+
+@layer framework {
+	@keyframes slide-left {
+		from {
+			margin-left: 0;
+		}
+		to {
+			margin-left: -100%;
+		}
+	}
+}
+
+@layer {
+}
+@layer {
+}
+
+@layer reset.type {
+	strong {
+		font-weight: bold;
+	}
+}
+
+@layer framework {
+	.title {
+		font-weight: 100;
+	}
+
+	@layer theme {
+		h1,
+		h2 {
+			color: maroon;
+		}
+	}
+}
+
+@layer reset {
+	[hidden] {
+		display: none;
+	}
+}
+
+@layer framework {
+	@layer default {
+		p {
+			margin-block: 0.75em;
+		}
+	}
+	@layer theme {
+		p {
+			color: red;
+		}
+	}
+}
+
+@layer framework.theme {
+	/* These styles will be added to the theme layer inside the framework layer */
+	blockquote {
+		color: rebeccapurple;
+	}
+}
+
+@layer framework {
+	@media only screen and (color) {
+		article {
+			padding: 1rem 3rem;
+		}
+	}
+	.title {
+		font-weight: 100;
+	}
+
+	@layer theme {
+		h1,
+		h2 {
+			color: maroon;
+		}
+	}
+}
+```
+
+

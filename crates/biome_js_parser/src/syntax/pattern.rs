@@ -3,7 +3,7 @@ use crate::prelude::*;
 use crate::syntax::expr::{parse_assignment_expression_or_higher, ExpressionContext};
 use crate::syntax::js_parse_error;
 use crate::ParsedSyntax::{Absent, Present};
-use crate::{JsParser, ParseRecovery, ParsedSyntax};
+use crate::{JsParser, ParseRecoveryTokenSet, ParsedSyntax};
 use biome_js_syntax::JsSyntaxKind::{EOF, JS_ARRAY_HOLE};
 use biome_js_syntax::{JsSyntaxKind, TextRange, T};
 use biome_parser::ParserProgress;
@@ -73,7 +73,7 @@ pub(crate) trait ParseArrayPattern<P: ParseWithDefaultPattern> {
             while !p.at(EOF) && !p.at(T![']']) {
                 progress.assert_progressing(p);
 
-                let recovery = ParseRecovery::new(
+                let recovery = ParseRecoveryTokenSet::new(
                     Self::bogus_pattern_kind(),
                     token_set!(EOF, T![,], T![']'], T![=], T![;], T![...], T![')']),
                 )
@@ -82,7 +82,7 @@ pub(crate) trait ParseArrayPattern<P: ParseWithDefaultPattern> {
                 let element = self.parse_any_array_element(p, &recovery);
 
                 if element
-                    .or_recover(p, &recovery, Self::expected_element_error)
+                    .or_recover_with_token_set(p, &recovery, Self::expected_element_error)
                     .is_err()
                 {
                     // Failed to recover
@@ -105,7 +105,7 @@ pub(crate) trait ParseArrayPattern<P: ParseWithDefaultPattern> {
     fn parse_any_array_element(
         &self,
         p: &mut JsParser,
-        recovery: &ParseRecovery<JsSyntaxKind>,
+        recovery: &ParseRecoveryTokenSet<JsSyntaxKind>,
     ) -> ParsedSyntax {
         match p.cur() {
             T![,] => Present(p.start().complete(p, JS_ARRAY_HOLE)),
@@ -170,7 +170,7 @@ pub(crate) trait ParseObjectPattern {
                 p.bump_any(); // bump ,
                 continue;
             }
-            let recovery_set = ParseRecovery::new(
+            let recovery_set = ParseRecoveryTokenSet::new(
                 Self::bogus_pattern_kind(),
                 token_set!(EOF, T![,], T!['}'], T![...], T![;], T![')'], T![=]),
             )
@@ -179,7 +179,7 @@ pub(crate) trait ParseObjectPattern {
             let pattern = self.parse_any_property_pattern(p, &recovery_set);
 
             if pattern
-                .or_recover(p, &recovery_set, Self::expected_property_pattern_error)
+                .or_recover_with_token_set(p, &recovery_set, Self::expected_property_pattern_error)
                 .is_err()
             {
                 break;
@@ -200,7 +200,7 @@ pub(crate) trait ParseObjectPattern {
     fn parse_any_property_pattern(
         &self,
         p: &mut JsParser,
-        recovery: &ParseRecovery<JsSyntaxKind>,
+        recovery: &ParseRecoveryTokenSet<JsSyntaxKind>,
     ) -> ParsedSyntax {
         if p.at(T![...]) {
             self.parse_rest_property_pattern(p)
@@ -228,7 +228,7 @@ fn validate_rest_pattern(
     p: &mut JsParser,
     mut rest: CompletedMarker,
     end_token: JsSyntaxKind,
-    recovery: &ParseRecovery<JsSyntaxKind>,
+    recovery: &ParseRecoveryTokenSet<JsSyntaxKind>,
 ) -> CompletedMarker {
     if p.at(end_token) {
         return rest;

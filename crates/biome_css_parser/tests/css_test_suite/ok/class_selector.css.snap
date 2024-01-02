@@ -25,7 +25,7 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssClassSelector {
                             dot_token: DOT@0..1 "." [] [],
-                            name: CssIdentifier {
+                            name: CssCustomIdentifier {
                                 value_token: IDENT@1..8 "action" [] [Whitespace(" ")],
                             },
                         },
@@ -57,7 +57,7 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@0..8
             0: CSS_CLASS_SELECTOR@0..8
               0: DOT@0..1 "." [] []
-              1: CSS_IDENTIFIER@1..8
+              1: CSS_CUSTOM_IDENTIFIER@1..8
                 0: IDENT@1..8 "action" [] [Whitespace(" ")]
       1: CSS_DECLARATION_LIST_BLOCK@8..10
         0: L_CURLY@8..9 "{" [] []

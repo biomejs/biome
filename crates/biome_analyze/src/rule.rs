@@ -16,6 +16,7 @@ use biome_diagnostics::{
 use biome_rowan::{AstNode, BatchMutation, BatchMutationExt, Language, TextRange};
 use std::fmt::Debug;
 
+#[derive(Debug, Clone)]
 /// Static metadata containing information about a rule
 pub struct RuleMetadata {
     /// It marks if a rule is deprecated, and if so a reason has to be provided.
@@ -36,7 +37,7 @@ pub struct RuleMetadata {
     pub source_kind: Option<SourceKind>,
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 /// Used to identify the kind of code action emitted by a rule
 pub enum FixKind {
     /// The rule emits a code action that is safe to apply. Usually these fixes don't change the semantic of the program.
@@ -44,6 +45,15 @@ pub enum FixKind {
     /// The rule emits a code action that is _unsafe_ to apply. Usually these fixes remove comments, or change
     /// the semantic of the program.
     Unsafe,
+}
+
+impl Display for FixKind {
+    fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
+        match self {
+            FixKind::Safe => fmt.write_str("Safe"),
+            FixKind::Unsafe => fmt.write_str("Unsafe"),
+        }
+    }
 }
 
 #[derive(Debug, Eq, PartialEq)]

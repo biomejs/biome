@@ -25,6 +25,7 @@ hooks_missing_name.json:6:5 deserialize ━━━━━━━━━━━━━�
   - noInvalidUseBeforeDeclaration
   - noMisleadingCharacterClass
   - noNodejsModules
+  - noThenProperty
   - noUnusedImports
   - noUnusedPrivateClassMembers
   - noUselessLoneBlockStatements
@@ -35,7 +36,8 @@ hooks_missing_name.json:6:5 deserialize ━━━━━━━━━━━━━�
   - useForOf
   - useGroupedTypeImport
   - useImportRestrictions
-  - useNodeImportProtocol
+  - useNodejsImportProtocol
+  - useNumberNamespace
   - useRegexLiterals
   - useShorthandFunctionType
   - useValidAriaRole

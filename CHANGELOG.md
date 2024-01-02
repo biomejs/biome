@@ -18,6 +18,8 @@ Biome now scores 97% compatibility with Prettier and features more than 180 lint
 
 #### New features
 
+- Biome now shows a diagnostic when it encounters a protected file. Contributed by @ematipico
+
 - The command `biome migrate` now updates the `$schema` if there's an outdated version.
 
 - The commands `format`, `lint`, `check` and `ci` now accepts two new arguments: `--changed` and `--since`.
@@ -27,6 +29,8 @@ Biome now scores 97% compatibility with Prettier and features more than 180 lint
   ```shell
   biome format --write --changed
   ```
+
+- Introduced a new command called `biome explain`, which has the capability to display documentation for lint rules. Contributed by @kalleep
 
 #### Bug fixes
 
@@ -87,6 +91,10 @@ Biome now scores 97% compatibility with Prettier and features more than 180 lint
 
 - Fix [#1220](https://github.com/biomejs/biome/issues/1220). Avoid duplicating comments in type unions for mapped, empty object, and empty tuple types. [#1240](https://github.com/biomejs/biome/pull/1240) Contributed by @faultyserver
 
+- Fix [#1356](https://github.com/biomejs/biome/issues/1356). Ensure `if_group_fits_on_line` content is always written in `RemoveSoftLinesBuffer`s. [#1357](https://github.com/biomejs/biome/pull/1357) Contributed by @faultyserver
+
+- Fix [#1171](https://github.com/biomejs/biome/issues/1171). Correctly format empty statement with comment inside arrow body when used as single argument in call expression. Contributed by @kalleep
+
 ### JavaScript APIs
 
 ### Linter
@@ -112,14 +120,14 @@ Biome now scores 97% compatibility with Prettier and features more than 180 lint
   By default, the rule requires that a filename be in `camelCase`, `kebab-case`, `snake_case`, or matches the name of an `export` in the file.
   The rule provides options to restrict the allowed cases.
 
-- Add [useNodeImportProtocol](https://biomejs.dev/linter/rules/use-node-import-protocol) that enforces the use of the `node:` protocol when importing _Node.js_ modules. Contributed by @2-NOW
+- Add [useNodejsImportProtocol](https://biomejs.dev/linter/rules/use-nodejs-import-protocol) that enforces the use of the `node:` protocol when importing _Node.js_ modules. Contributed by @2-NOW and @Conaclos
 
   ```diff
   - import fs from "fs";
   + import fs from "node:fs";
   ```
 
-- Add [noNodejsModules](https://biomejs.dev/linter/rules/no-nodejs-modules), that disallows the use of _Node.js_ modules. Contributed by @anonrig and @ematipico
+- Add [noNodejsModules](https://biomejs.dev/linter/rules/no-nodejs-modules), that disallows the use of _Node.js_ modules. Contributed by @anonrig, @ematipico, and @Conaclos
 
 - Add [noInvalidUseBeforeDeclaration](https://biomejs.dev/linter/rules/no-invalid-use-before-declaration) that reports variables and function parameters used before their declaration. Contributed by @Conaclos
 
@@ -147,7 +155,24 @@ Biome now scores 97% compatibility with Prettier and features more than 180 lint
   }
   ```
 
-- The code action (fix) of [noMultipleSpacesInRegularExpressionLiterals](https://biomejs.dev/linter/rules/no-multiple-spaces-in-regular-expression-literals/) is now marked as safe.
+- Preserve more comments in the fix of [useExponentiationOperator](https://biomejs.dev/linter/rules/use-exponentiation-operator). Contributed by @Conaclos
+
+  The rule now preserves comments that follow the (optional) trailing comma.
+
+  For example, the rule now suggests the following code fix:
+
+  ```diff
+  - Math.pow(
+  -    a, // a
+  -    2, // 2
+  -  );
+  +
+  +    a ** // a
+  +    2 // 2
+  +
+  ```
+
+- The code action (fix) of [noMultipleSpacesInRegularExpressionLiterals](https://biomejs.dev/linter/rules/no-multiple-spaces-in-regular-expression-literals/) is now marked as safe. Contributed by @Conaclos
 
 #### Bug fixes
 

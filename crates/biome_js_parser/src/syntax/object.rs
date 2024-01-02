@@ -22,7 +22,7 @@ use crate::syntax::typescript::{
     TypeContext,
 };
 use crate::JsSyntaxFeature::TypeScript;
-use crate::{JsParser, ParseRecovery};
+use crate::{JsParser, ParseRecoveryTokenSet};
 use biome_js_syntax::JsSyntaxKind::*;
 use biome_js_syntax::{JsSyntaxKind, T};
 use biome_parser::parse_lists::ParseSeparatedList;
@@ -53,9 +53,9 @@ impl ParseSeparatedList for ObjectMembersList {
     }
 
     fn recover(&mut self, p: &mut JsParser, parsed_element: ParsedSyntax) -> RecoveryResult {
-        parsed_element.or_recover(
+        parsed_element.or_recover_with_token_set(
             p,
-            &ParseRecovery::new(JS_BOGUS_MEMBER, token_set![T![,], T!['}'], T![;], T![:]])
+            &ParseRecoveryTokenSet::new(JS_BOGUS_MEMBER, token_set![T![,], T!['}'], T![;], T![:]])
                 .enable_recovery_on_line_break(),
             js_parse_error::expected_object_member,
         )
@@ -261,6 +261,7 @@ fn parse_getter_object_member(p: &mut JsParser) -> ParsedSyntax {
 
     // test_err ts ts_object_getter_type_parameters
     // ({ get a<A>(): A {} });
+    // ({ get a<>(): A {} });
     if let Present(type_parameters) = parse_ts_type_parameters(p, TypeContext::default()) {
         p.error(ts_accessor_type_parameters_error(p, &type_parameters))
     }
@@ -295,6 +296,7 @@ fn parse_setter_object_member(p: &mut JsParser) -> ParsedSyntax {
 
     // test_err ts ts_object_setter_type_parameters
     // ({ set a<A>(value: A) {} });
+    // ({ set a<>(value: A) {} });
     if let Present(type_parameters) = parse_ts_type_parameters(p, TypeContext::default()) {
         p.error(ts_accessor_type_parameters_error(p, &type_parameters))
     }
@@ -453,6 +455,12 @@ fn parse_method_object_member(p: &mut JsParser) -> ParsedSyntax {
 //     x<A>(maybeA: any): maybeA is A { return true },
 //     y(a: string): string { return "string"; },
 //     async *id<R>(param: Promise<R>): AsyncIterableIterator<R> { yield await param },
+// })
+
+// test_err ts ts_method_object_member_body_error
+// ({
+//     x<>(maybeA: any): maybeA is A { return true },
+//     async *id<>(param: Promise<R>): AsyncIterableIterator<R> { yield await param },
 // })
 
 /// Parses the body of a method object member starting right after the member name.

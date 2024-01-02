@@ -27,3 +27,6 @@ tracing-subscriber = { version = "0.3.11", features = ["env-filter", "std"] }
 walkdir            = "2.3.2"
 xtask              = { path = '../', version = "0.0" }
 yastl              = "0.1.2"
+
+[lints]
+workspace = true

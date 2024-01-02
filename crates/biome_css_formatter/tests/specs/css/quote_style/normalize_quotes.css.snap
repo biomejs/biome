@@ -1,0 +1,105 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/quote_style/normalize_quotes.css
+---
+
+# Input
+
+```css
+[attr="double"] {
+    background: url("/double/quoted/path");
+}
+
+[attr='single'] {
+    background: url('/single/quoted/path');
+}
+
+[attr=no-quotes] {
+    /* this url-token should stay unquoted */
+    background: url(/unquoted/path);
+}
+
+[attr=\eescaped] {
+}
+
+div {
+    width: 0\eestays-unquoted;
+    --\eeunquoted: green;
+    color: var(--\eeunquoted);
+}
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+-----
+
+```css
+[attr="double"] {
+	background: url("/double/quoted/path");
+}
+
+[attr="single"] {
+	background: url("/single/quoted/path");
+}
+
+[attr="no-quotes"] {
+	/* this url-token should stay unquoted */
+	background: url(/unquoted/path);
+}
+
+[attr="\eescaped"] {
+}
+
+div {
+	width: 0\eestays-unquoted;
+	--\eeunquoted: green;
+	color: var(--\eeunquoted);
+}
+```
+
+## Output 2
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Single Quotes
+-----
+
+```css
+[attr='double'] {
+	background: url('/double/quoted/path');
+}
+
+[attr='single'] {
+	background: url('/single/quoted/path');
+}
+
+[attr='no-quotes'] {
+	/* this url-token should stay unquoted */
+	background: url(/unquoted/path);
+}
+
+[attr='\eescaped'] {
+}
+
+div {
+	width: 0\eestays-unquoted;
+	--\eeunquoted: green;
+	color: var(--\eeunquoted);
+}
+```
+
+

@@ -1090,7 +1090,7 @@ pub(crate) mod tests {
                         core::any::type_name::<T>(),
                     )
                 }
-                1 => matching_nodes.get(0).unwrap(),
+                1 => matching_nodes.first().unwrap(),
                 _ => {
                     panic!("Expected to find a single node matching '{}' in '{input}' but found multiple ones:\n {matching_nodes:#?}", core::any::type_name::<T>());
                 }
@@ -1131,7 +1131,7 @@ pub(crate) mod tests {
                         core::any::type_name::<T>(),
                     )
                 }
-                1 => matching_nodes.get(0).unwrap(),
+                1 => matching_nodes.first().unwrap(),
                 _ => {
                     panic!("Expected to find a single node matching '{}' in '{input}' but found multiple ones:\n {matching_nodes:#?}", core::any::type_name::<T>());
                 }

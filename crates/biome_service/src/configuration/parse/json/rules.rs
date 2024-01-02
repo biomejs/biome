@@ -955,6 +955,10 @@ impl Deserializable for Nursery {
                             result.no_nodejs_modules =
                                 Deserializable::deserialize(&value, "noNodejsModules", diagnostics);
                         }
+                        "noThenProperty" => {
+                            result.no_then_property =
+                                Deserializable::deserialize(&value, "noThenProperty", diagnostics);
+                        }
                         "noUnusedImports" => {
                             result.no_unused_imports =
                                 Deserializable::deserialize(&value, "noUnusedImports", diagnostics);
@@ -1013,10 +1017,17 @@ impl Deserializable for Nursery {
                                 diagnostics,
                             );
                         }
-                        "useNodeImportProtocol" => {
-                            result.use_node_import_protocol = Deserializable::deserialize(
+                        "useNodejsImportProtocol" => {
+                            result.use_nodejs_import_protocol = Deserializable::deserialize(
                                 &value,
-                                "useNodeImportProtocol",
+                                "useNodejsImportProtocol",
+                                diagnostics,
+                            );
+                        }
+                        "useNumberNamespace" => {
+                            result.use_number_namespace = Deserializable::deserialize(
+                                &value,
+                                "useNumberNamespace",
                                 diagnostics,
                             );
                         }
@@ -1056,6 +1067,7 @@ impl Deserializable for Nursery {
                                     "noInvalidUseBeforeDeclaration",
                                     "noMisleadingCharacterClass",
                                     "noNodejsModules",
+                                    "noThenProperty",
                                     "noUnusedImports",
                                     "noUnusedPrivateClassMembers",
                                     "noUselessLoneBlockStatements",
@@ -1066,7 +1078,8 @@ impl Deserializable for Nursery {
                                     "useForOf",
                                     "useGroupedTypeImport",
                                     "useImportRestrictions",
-                                    "useNodeImportProtocol",
+                                    "useNodejsImportProtocol",
+                                    "useNumberNamespace",
                                     "useRegexLiterals",
                                     "useShorthandFunctionType",
                                     "useValidAriaRole",

@@ -11,3 +11,6 @@ serde       = { version = "1.0.133", features = ["derive"] }
 serde_json  = { version = "1.0.74" }
 ureq        = { version = "2.4.0", features = ["json"] }
 xtask       = { path = '../', version = "0.0" }
+
+[lints]
+workspace = true

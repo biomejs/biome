@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 use std::ops::{Deref, DerefMut};
 
 pub mod configuration;
+pub mod documentation;
 pub mod file_handlers;
 pub mod project_handlers;
 

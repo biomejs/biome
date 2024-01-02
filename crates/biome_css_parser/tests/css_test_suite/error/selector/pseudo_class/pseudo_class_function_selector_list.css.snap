@@ -193,7 +193,7 @@ CssRoot {
                                                 sub_selectors: CssSubSelectorList [
                                                     CssClassSelector {
                                                         dot_token: DOT@96..97 "." [] [],
-                                                        name: CssIdentifier {
+                                                        name: CssCustomIdentifier {
                                                             value_token: IDENT@97..100 "div" [] [],
                                                         },
                                                     },
@@ -206,7 +206,7 @@ CssRoot {
                                                 sub_selectors: CssSubSelectorList [
                                                     CssClassSelector {
                                                         dot_token: DOT@101..102 "." [] [],
-                                                        name: CssIdentifier {
+                                                        name: CssCustomIdentifier {
                                                             value_token: IDENT@102..107 "class" [] [],
                                                         },
                                                     },
@@ -255,7 +255,7 @@ CssRoot {
                                                 sub_selectors: CssSubSelectorList [
                                                     CssClassSelector {
                                                         dot_token: DOT@128..129 "." [] [],
-                                                        name: CssIdentifier {
+                                                        name: CssCustomIdentifier {
                                                             value_token: IDENT@129..132 "div" [] [],
                                                         },
                                                     },
@@ -268,7 +268,7 @@ CssRoot {
                                                 sub_selectors: CssSubSelectorList [
                                                     CssClassSelector {
                                                         dot_token: DOT@133..134 "." [] [],
-                                                        name: CssIdentifier {
+                                                        name: CssCustomIdentifier {
                                                             value_token: IDENT@134..140 "class" [] [Whitespace(" ")],
                                                         },
                                                     },
@@ -307,7 +307,7 @@ CssRoot {
                                             sub_selectors: CssSubSelectorList [
                                                 CssClassSelector {
                                                     dot_token: DOT@150..151 "." [] [],
-                                                    name: CssIdentifier {
+                                                    name: CssCustomIdentifier {
                                                         value_token: IDENT@151..155 "div" [] [Whitespace(" ")],
                                                     },
                                                 },
@@ -346,7 +346,7 @@ CssRoot {
                                                 sub_selectors: CssSubSelectorList [
                                                     CssClassSelector {
                                                         dot_token: DOT@165..166 "." [] [],
-                                                        name: CssIdentifier {
+                                                        name: CssCustomIdentifier {
                                                             value_token: IDENT@166..169 "div" [] [],
                                                         },
                                                     },
@@ -485,7 +485,7 @@ CssRoot {
                       2: CSS_SUB_SELECTOR_LIST@96..100
                         0: CSS_CLASS_SELECTOR@96..100
                           0: DOT@96..97 "." [] []
-                          1: CSS_IDENTIFIER@97..100
+                          1: CSS_CUSTOM_IDENTIFIER@97..100
                             0: IDENT@97..100 "div" [] []
                     1: CSS_SPACE_LITERAL@100..101 " " [] []
                     2: CSS_COMPOUND_SELECTOR@101..107
@@ -494,7 +494,7 @@ CssRoot {
                       2: CSS_SUB_SELECTOR_LIST@101..107
                         0: CSS_CLASS_SELECTOR@101..107
                           0: DOT@101..102 "." [] []
-                          1: CSS_IDENTIFIER@102..107
+                          1: CSS_CUSTOM_IDENTIFIER@102..107
                             0: IDENT@102..107 "class" [] []
                   1: COMMA@107..108 "," [] []
                   2: (empty)
@@ -525,7 +525,7 @@ CssRoot {
                       2: CSS_SUB_SELECTOR_LIST@128..132
                         0: CSS_CLASS_SELECTOR@128..132
                           0: DOT@128..129 "." [] []
-                          1: CSS_IDENTIFIER@129..132
+                          1: CSS_CUSTOM_IDENTIFIER@129..132
                             0: IDENT@129..132 "div" [] []
                     1: CSS_SPACE_LITERAL@132..133 " " [] []
                     2: CSS_COMPOUND_SELECTOR@133..140
@@ -534,7 +534,7 @@ CssRoot {
                       2: CSS_SUB_SELECTOR_LIST@133..140
                         0: CSS_CLASS_SELECTOR@133..140
                           0: DOT@133..134 "." [] []
-                          1: CSS_IDENTIFIER@134..140
+                          1: CSS_CUSTOM_IDENTIFIER@134..140
                             0: IDENT@134..140 "class" [] [Whitespace(" ")]
       1: CSS_DECLARATION_LIST_BLOCK@140..142
         0: L_CURLY@140..141 "{" [] []
@@ -558,7 +558,7 @@ CssRoot {
                     2: CSS_SUB_SELECTOR_LIST@150..155
                       0: CSS_CLASS_SELECTOR@150..155
                         0: DOT@150..151 "." [] []
-                        1: CSS_IDENTIFIER@151..155
+                        1: CSS_CUSTOM_IDENTIFIER@151..155
                           0: IDENT@151..155 "div" [] [Whitespace(" ")]
       1: CSS_DECLARATION_LIST_BLOCK@155..157
         0: L_CURLY@155..156 "{" [] []
@@ -582,7 +582,7 @@ CssRoot {
                     2: CSS_SUB_SELECTOR_LIST@165..169
                       0: CSS_CLASS_SELECTOR@165..169
                         0: DOT@165..166 "." [] []
-                        1: CSS_IDENTIFIER@166..169
+                        1: CSS_CUSTOM_IDENTIFIER@166..169
                           0: IDENT@166..169 "div" [] []
   2: EOF@169..170 "" [Newline("\n")] []
 

@@ -359,6 +359,7 @@ impl From<CssConfiguration> for LanguageSettings<CssLanguage> {
                 .map(Into::into)
                 .or(formatter.indent_size.map(Into::into));
             language_setting.formatter.indent_style = formatter.indent_style.map(Into::into);
+            language_setting.formatter.quote_style = formatter.quote_style;
         }
         language_setting
     }
@@ -645,23 +646,19 @@ impl OverrideSettings {
             }
             if included {
                 let css_formatter = &pattern.languages.css.formatter;
+                let formatter = &pattern.formatter;
 
-                if let Some(indent_style) = css_formatter
-                    .indent_style
-                    .or(pattern.formatter.indent_style)
-                {
+                if let Some(indent_style) = css_formatter.indent_style.or(formatter.indent_style) {
                     options.set_indent_style(indent_style);
                 }
-
-                if let Some(indent_width) = css_formatter
-                    .indent_width
-                    .or(pattern.formatter.indent_width)
-                {
+                if let Some(indent_width) = css_formatter.indent_width.or(formatter.indent_width) {
                     options.set_indent_width(indent_width)
                 }
-                if let Some(line_width) = css_formatter.line_width.or(pattern.formatter.line_width)
-                {
+                if let Some(line_width) = css_formatter.line_width.or(formatter.line_width) {
                     options.set_line_width(line_width);
+                }
+                if let Some(quote_style) = css_formatter.quote_style {
+                    options.set_quote_style(quote_style);
                 }
             }
 
