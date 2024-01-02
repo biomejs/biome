@@ -1,5 +1,4 @@
-
-name: JSON Parser Benchmark
+name: Benchmarks
 
 on:
   workflow_dispatch:
@@ -8,14 +7,18 @@ on:
     branches:
       - main
     paths:
-      - 'crates/biome_json_parser/**/*.rs'
-      - 'crates/biome_parser/**/*.rs'
+      - 'Cargo.lock'
+      - 'crates/**_parser/**/*.rs'
+      - 'crates/**_formatter/**/*.rs'
+      - 'crates/**_analyze/**/*.rs'
   push:
     branches:
       - main
     paths:
-      - 'crates/biome_json_parser/**/*.rs'
-      - 'crates/biome_parser/**/*.rs'
+      - 'Cargo.lock'
+      - 'crates/**_parser/**/*.rs'
+      - 'crates/**_formatter/**/*.rs'
+      - 'crates/**_analyze/**/*.rs'
 
 env:
   RUST_LOG: info
@@ -42,11 +45,11 @@ jobs:
           bins: cargo-codspeed
 
       - name: Compile
-        run: cargo codspeed build --features codspeed json_parser -p xtask_bench
+        run: cargo codspeed build --features codspeed -p xtask_bench
 
       - name: Run the benchmarks
         uses: CodSpeedHQ/action@v2
         timeout-minutes: 30
         with:
-          run: cargo codspeed run json_parser
+          run: cargo codspeed run
           token: ${{ secrets.CODSPEED_TOKEN }}
