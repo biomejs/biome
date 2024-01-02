@@ -4,6 +4,7 @@ pub(crate) mod component_value_list;
 pub(crate) mod compound_selector_list;
 pub(crate) mod declaration_list;
 pub(crate) mod declaration_or_at_rule_list;
+pub(crate) mod generic_component_value_list;
 pub(crate) mod keyframes_item_list;
 pub(crate) mod keyframes_selector_list;
 pub(crate) mod layer_name_list;

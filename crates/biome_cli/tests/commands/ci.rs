@@ -859,6 +859,59 @@ fn ignores_unknown_file() {
 }
 
 #[test]
+fn correctly_handles_ignored_and_not_ignored_files() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let configuration = Path::new("biome.json");
+    fs.insert(
+        configuration.into(),
+        r#"{
+        "linter": {
+                "ignore": ["/linter-ignored/**"]
+        },
+        "formatter": {
+                "ignore": ["/formatter-ignored/**"]
+        },
+        "files": {
+                "ignore": ["/globally-ignored/**"]
+        }
+    }"#,
+    );
+
+    let file_path1 = Path::new("/formatter-ignored/test.js");
+    fs.insert(file_path1.into(), UNFORMATTED_AND_INCORRECT.as_bytes());
+
+    let file_path2 = Path::new("/linter-ignored/test.js");
+    fs.insert(file_path2.into(), INCORRECT_CODE.as_bytes());
+
+    let file_path3 = Path::new("/globally-ignored/test.js");
+    fs.insert(file_path3.into(), UNFORMATTED_AND_INCORRECT.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("ci"),
+                file_path1.as_os_str().to_str().unwrap(),
+                file_path2.as_os_str().to_str().unwrap(),
+                file_path3.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "correctly_handles_ignored_and_not_ignored_files",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn doesnt_error_if_no_files_were_processed() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();

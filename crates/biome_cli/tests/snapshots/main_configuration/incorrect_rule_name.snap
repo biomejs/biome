@@ -1,5 +1,6 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 388
 expression: content
 ---
 ## `biome.json`
@@ -120,6 +121,7 @@ biome.json:9:13 deserialize ━━━━━━━━━━━━━━━━━�
   - useAsConstAssertion
   - useBlockStatements
   - useCollapsedElseIf
+  - useConsistentArrayType
   - useConst
   - useDefaultParameterLast
   - useEnumInitializers

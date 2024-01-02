@@ -36,7 +36,7 @@ pub use crate::registry::{
 };
 pub use crate::rule::{
     CategoryLanguage, FixKind, GroupCategory, GroupLanguage, Rule, RuleAction, RuleDiagnostic,
-    RuleGroup, RuleMeta, RuleMetadata, SuppressAction,
+    RuleGroup, RuleMeta, RuleMetadata, Source, SourceKind, SuppressAction,
 };
 pub use crate::services::{FromServices, MissingServicesDiagnostic, ServiceBag};
 pub use crate::signals::{

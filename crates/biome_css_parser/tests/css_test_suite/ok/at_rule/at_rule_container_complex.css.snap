@@ -564,15 +564,17 @@ CssRoot {
                         query: CssContainerStyleInParens {
                             l_paren_token: L_PAREN@633..634 "(" [] [],
                             query: CssDeclaration {
-                                name: CssIdentifier {
-                                    value_token: IDENT@634..637 "--a" [] [],
-                                },
-                                colon_token: COLON@637..639 ":" [] [Whitespace(" ")],
-                                value: CssComponentValueList [
-                                    CssIdentifier {
-                                        value_token: IDENT@639..643 "blue" [] [],
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@634..637 "--a" [] [],
                                     },
-                                ],
+                                    colon_token: COLON@637..639 ":" [] [Whitespace(" ")],
+                                    value: CssGenericComponentValueList [
+                                        CssIdentifier {
+                                            value_token: IDENT@639..643 "blue" [] [],
+                                        },
+                                    ],
+                                },
                                 important: missing (optional),
                             },
                             r_paren_token: R_PAREN@643..644 ")" [] [],
@@ -628,15 +630,17 @@ CssRoot {
                         left: CssContainerStyleInParens {
                             l_paren_token: L_PAREN@715..716 "(" [] [],
                             query: CssDeclaration {
-                                name: CssIdentifier {
-                                    value_token: IDENT@716..719 "--a" [] [],
-                                },
-                                colon_token: COLON@719..721 ":" [] [Whitespace(" ")],
-                                value: CssComponentValueList [
-                                    CssIdentifier {
-                                        value_token: IDENT@721..725 "blue" [] [],
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@716..719 "--a" [] [],
                                     },
-                                ],
+                                    colon_token: COLON@719..721 ":" [] [Whitespace(" ")],
+                                    value: CssGenericComponentValueList [
+                                        CssIdentifier {
+                                            value_token: IDENT@721..725 "blue" [] [],
+                                        },
+                                    ],
+                                },
                                 important: missing (optional),
                             },
                             r_paren_token: R_PAREN@725..727 ")" [] [Whitespace(" ")],
@@ -645,15 +649,17 @@ CssRoot {
                         right: CssContainerStyleInParens {
                             l_paren_token: L_PAREN@731..732 "(" [] [],
                             query: CssDeclaration {
-                                name: CssIdentifier {
-                                    value_token: IDENT@732..735 "--b" [] [],
-                                },
-                                colon_token: COLON@735..737 ":" [] [Whitespace(" ")],
-                                value: CssComponentValueList [
-                                    CssIdentifier {
-                                        value_token: IDENT@737..740 "red" [] [],
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@732..735 "--b" [] [],
                                     },
-                                ],
+                                    colon_token: COLON@735..737 ":" [] [Whitespace(" ")],
+                                    value: CssGenericComponentValueList [
+                                        CssIdentifier {
+                                            value_token: IDENT@737..740 "red" [] [],
+                                        },
+                                    ],
+                                },
                                 important: missing (optional),
                             },
                             r_paren_token: R_PAREN@740..741 ")" [] [],
@@ -682,15 +688,17 @@ CssRoot {
                         left: CssContainerStyleInParens {
                             l_paren_token: L_PAREN@770..771 "(" [] [],
                             query: CssDeclaration {
-                                name: CssIdentifier {
-                                    value_token: IDENT@771..774 "--a" [] [],
-                                },
-                                colon_token: COLON@774..776 ":" [] [Whitespace(" ")],
-                                value: CssComponentValueList [
-                                    CssIdentifier {
-                                        value_token: IDENT@776..780 "blue" [] [],
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@771..774 "--a" [] [],
                                     },
-                                ],
+                                    colon_token: COLON@774..776 ":" [] [Whitespace(" ")],
+                                    value: CssGenericComponentValueList [
+                                        CssIdentifier {
+                                            value_token: IDENT@776..780 "blue" [] [],
+                                        },
+                                    ],
+                                },
                                 important: missing (optional),
                             },
                             r_paren_token: R_PAREN@780..782 ")" [] [Whitespace(" ")],
@@ -702,15 +710,17 @@ CssRoot {
                                 left: CssContainerStyleInParens {
                                     l_paren_token: L_PAREN@787..788 "(" [] [],
                                     query: CssDeclaration {
-                                        name: CssIdentifier {
-                                            value_token: IDENT@788..791 "--b" [] [],
-                                        },
-                                        colon_token: COLON@791..793 ":" [] [Whitespace(" ")],
-                                        value: CssComponentValueList [
-                                            CssIdentifier {
-                                                value_token: IDENT@793..796 "red" [] [],
+                                        property: CssGenericProperty {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@788..791 "--b" [] [],
                                             },
-                                        ],
+                                            colon_token: COLON@791..793 ":" [] [Whitespace(" ")],
+                                            value: CssGenericComponentValueList [
+                                                CssIdentifier {
+                                                    value_token: IDENT@793..796 "red" [] [],
+                                                },
+                                            ],
+                                        },
                                         important: missing (optional),
                                     },
                                     r_paren_token: R_PAREN@796..798 ")" [] [Whitespace(" ")],
@@ -719,15 +729,17 @@ CssRoot {
                                 right: CssContainerStyleInParens {
                                     l_paren_token: L_PAREN@801..802 "(" [] [],
                                     query: CssDeclaration {
-                                        name: CssIdentifier {
-                                            value_token: IDENT@802..805 "--c" [] [],
-                                        },
-                                        colon_token: COLON@805..807 ":" [] [Whitespace(" ")],
-                                        value: CssComponentValueList [
-                                            CssIdentifier {
-                                                value_token: IDENT@807..812 "green" [] [],
+                                        property: CssGenericProperty {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@802..805 "--c" [] [],
                                             },
-                                        ],
+                                            colon_token: COLON@805..807 ":" [] [Whitespace(" ")],
+                                            value: CssGenericComponentValueList [
+                                                CssIdentifier {
+                                                    value_token: IDENT@807..812 "green" [] [],
+                                                },
+                                            ],
+                                        },
                                         important: missing (optional),
                                     },
                                     r_paren_token: R_PAREN@812..813 ")" [] [],
@@ -763,15 +775,17 @@ CssRoot {
                                 query: CssContainerStyleInParens {
                                     l_paren_token: L_PAREN@848..849 "(" [] [],
                                     query: CssDeclaration {
-                                        name: CssIdentifier {
-                                            value_token: IDENT@849..852 "--b" [] [],
-                                        },
-                                        colon_token: COLON@852..854 ":" [] [Whitespace(" ")],
-                                        value: CssComponentValueList [
-                                            CssIdentifier {
-                                                value_token: IDENT@854..857 "red" [] [],
+                                        property: CssGenericProperty {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@849..852 "--b" [] [],
                                             },
-                                        ],
+                                            colon_token: COLON@852..854 ":" [] [Whitespace(" ")],
+                                            value: CssGenericComponentValueList [
+                                                CssIdentifier {
+                                                    value_token: IDENT@854..857 "red" [] [],
+                                                },
+                                            ],
+                                        },
                                         important: missing (optional),
                                     },
                                     r_paren_token: R_PAREN@857..858 ")" [] [],
@@ -783,15 +797,17 @@ CssRoot {
                         right: CssContainerStyleInParens {
                             l_paren_token: L_PAREN@863..864 "(" [] [],
                             query: CssDeclaration {
-                                name: CssIdentifier {
-                                    value_token: IDENT@864..867 "--c" [] [],
-                                },
-                                colon_token: COLON@867..869 ":" [] [Whitespace(" ")],
-                                value: CssComponentValueList [
-                                    CssIdentifier {
-                                        value_token: IDENT@869..874 "green" [] [],
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@864..867 "--c" [] [],
                                     },
-                                ],
+                                    colon_token: COLON@867..869 ":" [] [Whitespace(" ")],
+                                    value: CssGenericComponentValueList [
+                                        CssIdentifier {
+                                            value_token: IDENT@869..874 "green" [] [],
+                                        },
+                                    ],
+                                },
                                 important: missing (optional),
                             },
                             r_paren_token: R_PAREN@874..875 ")" [] [],
@@ -824,15 +840,17 @@ CssRoot {
                                 query: CssContainerStyleInParens {
                                     l_paren_token: L_PAREN@909..910 "(" [] [],
                                     query: CssDeclaration {
-                                        name: CssIdentifier {
-                                            value_token: IDENT@910..913 "--b" [] [],
-                                        },
-                                        colon_token: COLON@913..915 ":" [] [Whitespace(" ")],
-                                        value: CssComponentValueList [
-                                            CssIdentifier {
-                                                value_token: IDENT@915..918 "red" [] [],
+                                        property: CssGenericProperty {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@910..913 "--b" [] [],
                                             },
-                                        ],
+                                            colon_token: COLON@913..915 ":" [] [Whitespace(" ")],
+                                            value: CssGenericComponentValueList [
+                                                CssIdentifier {
+                                                    value_token: IDENT@915..918 "red" [] [],
+                                                },
+                                            ],
+                                        },
                                         important: missing (optional),
                                     },
                                     r_paren_token: R_PAREN@918..919 ")" [] [],
@@ -848,15 +866,17 @@ CssRoot {
                                 query: CssContainerStyleInParens {
                                     l_paren_token: L_PAREN@929..930 "(" [] [],
                                     query: CssDeclaration {
-                                        name: CssIdentifier {
-                                            value_token: IDENT@930..933 "--c" [] [],
-                                        },
-                                        colon_token: COLON@933..935 ":" [] [Whitespace(" ")],
-                                        value: CssComponentValueList [
-                                            CssIdentifier {
-                                                value_token: IDENT@935..940 "green" [] [],
+                                        property: CssGenericProperty {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@930..933 "--c" [] [],
                                             },
-                                        ],
+                                            colon_token: COLON@933..935 ":" [] [Whitespace(" ")],
+                                            value: CssGenericComponentValueList [
+                                                CssIdentifier {
+                                                    value_token: IDENT@935..940 "green" [] [],
+                                                },
+                                            ],
+                                        },
                                         important: missing (optional),
                                     },
                                     r_paren_token: R_PAREN@940..941 ")" [] [],
@@ -892,15 +912,17 @@ CssRoot {
                                 query: CssContainerStyleInParens {
                                     l_paren_token: L_PAREN@976..977 "(" [] [],
                                     query: CssDeclaration {
-                                        name: CssIdentifier {
-                                            value_token: IDENT@977..980 "--b" [] [],
-                                        },
-                                        colon_token: COLON@980..982 ":" [] [Whitespace(" ")],
-                                        value: CssComponentValueList [
-                                            CssIdentifier {
-                                                value_token: IDENT@982..985 "red" [] [],
+                                        property: CssGenericProperty {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@977..980 "--b" [] [],
                                             },
-                                        ],
+                                            colon_token: COLON@980..982 ":" [] [Whitespace(" ")],
+                                            value: CssGenericComponentValueList [
+                                                CssIdentifier {
+                                                    value_token: IDENT@982..985 "red" [] [],
+                                                },
+                                            ],
+                                        },
                                         important: missing (optional),
                                     },
                                     r_paren_token: R_PAREN@985..986 ")" [] [],
@@ -919,15 +941,17 @@ CssRoot {
                                         query: CssContainerStyleInParens {
                                             l_paren_token: L_PAREN@997..998 "(" [] [],
                                             query: CssDeclaration {
-                                                name: CssIdentifier {
-                                                    value_token: IDENT@998..1001 "--c" [] [],
-                                                },
-                                                colon_token: COLON@1001..1003 ":" [] [Whitespace(" ")],
-                                                value: CssComponentValueList [
-                                                    CssIdentifier {
-                                                        value_token: IDENT@1003..1008 "green" [] [],
+                                                property: CssGenericProperty {
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@998..1001 "--c" [] [],
                                                     },
-                                                ],
+                                                    colon_token: COLON@1001..1003 ":" [] [Whitespace(" ")],
+                                                    value: CssGenericComponentValueList [
+                                                        CssIdentifier {
+                                                            value_token: IDENT@1003..1008 "green" [] [],
+                                                        },
+                                                    ],
+                                                },
                                                 important: missing (optional),
                                             },
                                             r_paren_token: R_PAREN@1008..1009 ")" [] [],
@@ -939,15 +963,17 @@ CssRoot {
                                 right: CssContainerStyleInParens {
                                     l_paren_token: L_PAREN@1015..1016 "(" [] [],
                                     query: CssDeclaration {
-                                        name: CssIdentifier {
-                                            value_token: IDENT@1016..1026 "background" [] [],
-                                        },
-                                        colon_token: COLON@1026..1028 ":" [] [Whitespace(" ")],
-                                        value: CssComponentValueList [
-                                            CssIdentifier {
-                                                value_token: IDENT@1028..1031 "red" [] [],
+                                        property: CssGenericProperty {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@1016..1026 "background" [] [],
                                             },
-                                        ],
+                                            colon_token: COLON@1026..1028 ":" [] [Whitespace(" ")],
+                                            value: CssGenericComponentValueList [
+                                                CssIdentifier {
+                                                    value_token: IDENT@1028..1031 "red" [] [],
+                                                },
+                                            ],
+                                        },
                                         important: missing (optional),
                                     },
                                     r_paren_token: R_PAREN@1031..1032 ")" [] [],
@@ -984,15 +1010,17 @@ CssRoot {
                                 query: CssContainerStyleInParens {
                                     l_paren_token: L_PAREN@1071..1072 "(" [] [],
                                     query: CssDeclaration {
-                                        name: CssIdentifier {
-                                            value_token: IDENT@1072..1075 "--b" [] [],
-                                        },
-                                        colon_token: COLON@1075..1077 ":" [] [Whitespace(" ")],
-                                        value: CssComponentValueList [
-                                            CssIdentifier {
-                                                value_token: IDENT@1077..1080 "red" [] [],
+                                        property: CssGenericProperty {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@1072..1075 "--b" [] [],
                                             },
-                                        ],
+                                            colon_token: COLON@1075..1077 ":" [] [Whitespace(" ")],
+                                            value: CssGenericComponentValueList [
+                                                CssIdentifier {
+                                                    value_token: IDENT@1077..1080 "red" [] [],
+                                                },
+                                            ],
+                                        },
                                         important: missing (optional),
                                     },
                                     r_paren_token: R_PAREN@1080..1081 ")" [] [],
@@ -1046,15 +1074,17 @@ CssRoot {
                                     query: CssContainerStyleInParens {
                                         l_paren_token: L_PAREN@1138..1139 "(" [] [],
                                         query: CssDeclaration {
-                                            name: CssIdentifier {
-                                                value_token: IDENT@1139..1142 "--b" [] [],
-                                            },
-                                            colon_token: COLON@1142..1144 ":" [] [Whitespace(" ")],
-                                            value: CssComponentValueList [
-                                                CssIdentifier {
-                                                    value_token: IDENT@1144..1147 "red" [] [],
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@1139..1142 "--b" [] [],
                                                 },
-                                            ],
+                                                colon_token: COLON@1142..1144 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@1144..1147 "red" [] [],
+                                                    },
+                                                ],
+                                            },
                                             important: missing (optional),
                                         },
                                         r_paren_token: R_PAREN@1147..1148 ")" [] [],
@@ -1073,15 +1103,17 @@ CssRoot {
                                             query: CssContainerStyleInParens {
                                                 l_paren_token: L_PAREN@1159..1160 "(" [] [],
                                                 query: CssDeclaration {
-                                                    name: CssIdentifier {
-                                                        value_token: IDENT@1160..1163 "--c" [] [],
-                                                    },
-                                                    colon_token: COLON@1163..1165 ":" [] [Whitespace(" ")],
-                                                    value: CssComponentValueList [
-                                                        CssIdentifier {
-                                                            value_token: IDENT@1165..1170 "green" [] [],
+                                                    property: CssGenericProperty {
+                                                        name: CssIdentifier {
+                                                            value_token: IDENT@1160..1163 "--c" [] [],
                                                         },
-                                                    ],
+                                                        colon_token: COLON@1163..1165 ":" [] [Whitespace(" ")],
+                                                        value: CssGenericComponentValueList [
+                                                            CssIdentifier {
+                                                                value_token: IDENT@1165..1170 "green" [] [],
+                                                            },
+                                                        ],
+                                                    },
                                                     important: missing (optional),
                                                 },
                                                 r_paren_token: R_PAREN@1170..1171 ")" [] [],
@@ -1093,15 +1125,17 @@ CssRoot {
                                     right: CssContainerStyleInParens {
                                         l_paren_token: L_PAREN@1177..1178 "(" [] [],
                                         query: CssDeclaration {
-                                            name: CssIdentifier {
-                                                value_token: IDENT@1178..1188 "background" [] [],
-                                            },
-                                            colon_token: COLON@1188..1190 ":" [] [Whitespace(" ")],
-                                            value: CssComponentValueList [
-                                                CssIdentifier {
-                                                    value_token: IDENT@1190..1193 "red" [] [],
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@1178..1188 "background" [] [],
                                                 },
-                                            ],
+                                                colon_token: COLON@1188..1190 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@1190..1193 "red" [] [],
+                                                    },
+                                                ],
+                                            },
                                             important: missing (optional),
                                         },
                                         r_paren_token: R_PAREN@1193..1194 ")" [] [],
@@ -1165,15 +1199,17 @@ CssRoot {
                                 l_curly_token: L_CURLY@1247..1248 "{" [] [],
                                 declarations: CssDeclarationList [
                                     CssDeclaration {
-                                        name: CssIdentifier {
-                                            value_token: IDENT@1248..1267 "background-color" [Newline("\n"), Whitespace("\t\t")] [],
-                                        },
-                                        colon_token: COLON@1267..1269 ":" [] [Whitespace(" ")],
-                                        value: CssComponentValueList [
-                                            CssIdentifier {
-                                                value_token: IDENT@1269..1276 "skyblue" [] [],
+                                        property: CssGenericProperty {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@1248..1267 "background-color" [Newline("\n"), Whitespace("\t\t")] [],
                                             },
-                                        ],
+                                            colon_token: COLON@1267..1269 ":" [] [Whitespace(" ")],
+                                            value: CssGenericComponentValueList [
+                                                CssIdentifier {
+                                                    value_token: IDENT@1269..1276 "skyblue" [] [],
+                                                },
+                                            ],
+                                        },
                                         important: missing (optional),
                                     },
                                     SEMICOLON@1276..1277 ";" [] [],
@@ -1198,15 +1234,17 @@ CssRoot {
                                 l_curly_token: L_CURLY@1286..1287 "{" [] [],
                                 declarations: CssDeclarationList [
                                     CssDeclaration {
-                                        name: CssIdentifier {
-                                            value_token: IDENT@1287..1306 "background-color" [Newline("\n"), Whitespace("\t\t")] [],
-                                        },
-                                        colon_token: COLON@1306..1308 ":" [] [Whitespace(" ")],
-                                        value: CssComponentValueList [
-                                            CssIdentifier {
-                                                value_token: IDENT@1308..1315 "skyblue" [] [],
+                                        property: CssGenericProperty {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@1287..1306 "background-color" [Newline("\n"), Whitespace("\t\t")] [],
                                             },
-                                        ],
+                                            colon_token: COLON@1306..1308 ":" [] [Whitespace(" ")],
+                                            value: CssGenericComponentValueList [
+                                                CssIdentifier {
+                                                    value_token: IDENT@1308..1315 "skyblue" [] [],
+                                                },
+                                            ],
+                                        },
                                         important: missing (optional),
                                     },
                                     SEMICOLON@1315..1316 ";" [] [],
@@ -1597,13 +1635,14 @@ CssRoot {
             1: CSS_CONTAINER_STYLE_IN_PARENS@633..644
               0: L_PAREN@633..634 "(" [] []
               1: CSS_DECLARATION@634..643
-                0: CSS_IDENTIFIER@634..637
-                  0: IDENT@634..637 "--a" [] []
-                1: COLON@637..639 ":" [] [Whitespace(" ")]
-                2: CSS_COMPONENT_VALUE_LIST@639..643
-                  0: CSS_IDENTIFIER@639..643
-                    0: IDENT@639..643 "blue" [] []
-                3: (empty)
+                0: CSS_GENERIC_PROPERTY@634..643
+                  0: CSS_IDENTIFIER@634..637
+                    0: IDENT@634..637 "--a" [] []
+                  1: COLON@637..639 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@639..643
+                    0: CSS_IDENTIFIER@639..643
+                      0: IDENT@639..643 "blue" [] []
+                1: (empty)
               2: R_PAREN@643..644 ")" [] []
           3: R_PAREN@644..646 ")" [] [Whitespace(" ")]
         3: CSS_RULE_LIST_BLOCK@646..650
@@ -1642,25 +1681,27 @@ CssRoot {
             0: CSS_CONTAINER_STYLE_IN_PARENS@715..727
               0: L_PAREN@715..716 "(" [] []
               1: CSS_DECLARATION@716..725
-                0: CSS_IDENTIFIER@716..719
-                  0: IDENT@716..719 "--a" [] []
-                1: COLON@719..721 ":" [] [Whitespace(" ")]
-                2: CSS_COMPONENT_VALUE_LIST@721..725
-                  0: CSS_IDENTIFIER@721..725
-                    0: IDENT@721..725 "blue" [] []
-                3: (empty)
+                0: CSS_GENERIC_PROPERTY@716..725
+                  0: CSS_IDENTIFIER@716..719
+                    0: IDENT@716..719 "--a" [] []
+                  1: COLON@719..721 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@721..725
+                    0: CSS_IDENTIFIER@721..725
+                      0: IDENT@721..725 "blue" [] []
+                1: (empty)
               2: R_PAREN@725..727 ")" [] [Whitespace(" ")]
             1: AND_KW@727..731 "and" [] [Whitespace(" ")]
             2: CSS_CONTAINER_STYLE_IN_PARENS@731..741
               0: L_PAREN@731..732 "(" [] []
               1: CSS_DECLARATION@732..740
-                0: CSS_IDENTIFIER@732..735
-                  0: IDENT@732..735 "--b" [] []
-                1: COLON@735..737 ":" [] [Whitespace(" ")]
-                2: CSS_COMPONENT_VALUE_LIST@737..740
-                  0: CSS_IDENTIFIER@737..740
-                    0: IDENT@737..740 "red" [] []
-                3: (empty)
+                0: CSS_GENERIC_PROPERTY@732..740
+                  0: CSS_IDENTIFIER@732..735
+                    0: IDENT@732..735 "--b" [] []
+                  1: COLON@735..737 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@737..740
+                    0: CSS_IDENTIFIER@737..740
+                      0: IDENT@737..740 "red" [] []
+                1: (empty)
               2: R_PAREN@740..741 ")" [] []
           3: R_PAREN@741..743 ")" [] [Whitespace(" ")]
         3: CSS_RULE_LIST_BLOCK@743..747
@@ -1680,13 +1721,14 @@ CssRoot {
             0: CSS_CONTAINER_STYLE_IN_PARENS@770..782
               0: L_PAREN@770..771 "(" [] []
               1: CSS_DECLARATION@771..780
-                0: CSS_IDENTIFIER@771..774
-                  0: IDENT@771..774 "--a" [] []
-                1: COLON@774..776 ":" [] [Whitespace(" ")]
-                2: CSS_COMPONENT_VALUE_LIST@776..780
-                  0: CSS_IDENTIFIER@776..780
-                    0: IDENT@776..780 "blue" [] []
-                3: (empty)
+                0: CSS_GENERIC_PROPERTY@771..780
+                  0: CSS_IDENTIFIER@771..774
+                    0: IDENT@771..774 "--a" [] []
+                  1: COLON@774..776 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@776..780
+                    0: CSS_IDENTIFIER@776..780
+                      0: IDENT@776..780 "blue" [] []
+                1: (empty)
               2: R_PAREN@780..782 ")" [] [Whitespace(" ")]
             1: AND_KW@782..786 "and" [] [Whitespace(" ")]
             2: CSS_CONTAINER_STYLE_IN_PARENS@786..814
@@ -1695,25 +1737,27 @@ CssRoot {
                 0: CSS_CONTAINER_STYLE_IN_PARENS@787..798
                   0: L_PAREN@787..788 "(" [] []
                   1: CSS_DECLARATION@788..796
-                    0: CSS_IDENTIFIER@788..791
-                      0: IDENT@788..791 "--b" [] []
-                    1: COLON@791..793 ":" [] [Whitespace(" ")]
-                    2: CSS_COMPONENT_VALUE_LIST@793..796
-                      0: CSS_IDENTIFIER@793..796
-                        0: IDENT@793..796 "red" [] []
-                    3: (empty)
+                    0: CSS_GENERIC_PROPERTY@788..796
+                      0: CSS_IDENTIFIER@788..791
+                        0: IDENT@788..791 "--b" [] []
+                      1: COLON@791..793 ":" [] [Whitespace(" ")]
+                      2: CSS_GENERIC_COMPONENT_VALUE_LIST@793..796
+                        0: CSS_IDENTIFIER@793..796
+                          0: IDENT@793..796 "red" [] []
+                    1: (empty)
                   2: R_PAREN@796..798 ")" [] [Whitespace(" ")]
                 1: OR_KW@798..801 "or" [] [Whitespace(" ")]
                 2: CSS_CONTAINER_STYLE_IN_PARENS@801..813
                   0: L_PAREN@801..802 "(" [] []
                   1: CSS_DECLARATION@802..812
-                    0: CSS_IDENTIFIER@802..805
-                      0: IDENT@802..805 "--c" [] []
-                    1: COLON@805..807 ":" [] [Whitespace(" ")]
-                    2: CSS_COMPONENT_VALUE_LIST@807..812
-                      0: CSS_IDENTIFIER@807..812
-                        0: IDENT@807..812 "green" [] []
-                    3: (empty)
+                    0: CSS_GENERIC_PROPERTY@802..812
+                      0: CSS_IDENTIFIER@802..805
+                        0: IDENT@802..805 "--c" [] []
+                      1: COLON@805..807 ":" [] [Whitespace(" ")]
+                      2: CSS_GENERIC_COMPONENT_VALUE_LIST@807..812
+                        0: CSS_IDENTIFIER@807..812
+                          0: IDENT@807..812 "green" [] []
+                    1: (empty)
                   2: R_PAREN@812..813 ")" [] []
               2: R_PAREN@813..814 ")" [] []
           3: R_PAREN@814..816 ")" [] [Whitespace(" ")]
@@ -1738,26 +1782,28 @@ CssRoot {
                 1: CSS_CONTAINER_STYLE_IN_PARENS@848..858
                   0: L_PAREN@848..849 "(" [] []
                   1: CSS_DECLARATION@849..857
-                    0: CSS_IDENTIFIER@849..852
-                      0: IDENT@849..852 "--b" [] []
-                    1: COLON@852..854 ":" [] [Whitespace(" ")]
-                    2: CSS_COMPONENT_VALUE_LIST@854..857
-                      0: CSS_IDENTIFIER@854..857
-                        0: IDENT@854..857 "red" [] []
-                    3: (empty)
+                    0: CSS_GENERIC_PROPERTY@849..857
+                      0: CSS_IDENTIFIER@849..852
+                        0: IDENT@849..852 "--b" [] []
+                      1: COLON@852..854 ":" [] [Whitespace(" ")]
+                      2: CSS_GENERIC_COMPONENT_VALUE_LIST@854..857
+                        0: CSS_IDENTIFIER@854..857
+                          0: IDENT@854..857 "red" [] []
+                    1: (empty)
                   2: R_PAREN@857..858 ")" [] []
               2: R_PAREN@858..860 ")" [] [Whitespace(" ")]
             1: OR_KW@860..863 "or" [] [Whitespace(" ")]
             2: CSS_CONTAINER_STYLE_IN_PARENS@863..875
               0: L_PAREN@863..864 "(" [] []
               1: CSS_DECLARATION@864..874
-                0: CSS_IDENTIFIER@864..867
-                  0: IDENT@864..867 "--c" [] []
-                1: COLON@867..869 ":" [] [Whitespace(" ")]
-                2: CSS_COMPONENT_VALUE_LIST@869..874
-                  0: CSS_IDENTIFIER@869..874
-                    0: IDENT@869..874 "green" [] []
-                3: (empty)
+                0: CSS_GENERIC_PROPERTY@864..874
+                  0: CSS_IDENTIFIER@864..867
+                    0: IDENT@864..867 "--c" [] []
+                  1: COLON@867..869 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@869..874
+                    0: CSS_IDENTIFIER@869..874
+                      0: IDENT@869..874 "green" [] []
+                1: (empty)
               2: R_PAREN@874..875 ")" [] []
           3: R_PAREN@875..877 ")" [] [Whitespace(" ")]
         3: CSS_RULE_LIST_BLOCK@877..881
@@ -1781,13 +1827,14 @@ CssRoot {
                 1: CSS_CONTAINER_STYLE_IN_PARENS@909..919
                   0: L_PAREN@909..910 "(" [] []
                   1: CSS_DECLARATION@910..918
-                    0: CSS_IDENTIFIER@910..913
-                      0: IDENT@910..913 "--b" [] []
-                    1: COLON@913..915 ":" [] [Whitespace(" ")]
-                    2: CSS_COMPONENT_VALUE_LIST@915..918
-                      0: CSS_IDENTIFIER@915..918
-                        0: IDENT@915..918 "red" [] []
-                    3: (empty)
+                    0: CSS_GENERIC_PROPERTY@910..918
+                      0: CSS_IDENTIFIER@910..913
+                        0: IDENT@910..913 "--b" [] []
+                      1: COLON@913..915 ":" [] [Whitespace(" ")]
+                      2: CSS_GENERIC_COMPONENT_VALUE_LIST@915..918
+                        0: CSS_IDENTIFIER@915..918
+                          0: IDENT@915..918 "red" [] []
+                    1: (empty)
                   2: R_PAREN@918..919 ")" [] []
               2: R_PAREN@919..921 ")" [] [Whitespace(" ")]
             1: OR_KW@921..924 "or" [] [Whitespace(" ")]
@@ -1798,13 +1845,14 @@ CssRoot {
                 1: CSS_CONTAINER_STYLE_IN_PARENS@929..941
                   0: L_PAREN@929..930 "(" [] []
                   1: CSS_DECLARATION@930..940
-                    0: CSS_IDENTIFIER@930..933
-                      0: IDENT@930..933 "--c" [] []
-                    1: COLON@933..935 ":" [] [Whitespace(" ")]
-                    2: CSS_COMPONENT_VALUE_LIST@935..940
-                      0: CSS_IDENTIFIER@935..940
-                        0: IDENT@935..940 "green" [] []
-                    3: (empty)
+                    0: CSS_GENERIC_PROPERTY@930..940
+                      0: CSS_IDENTIFIER@930..933
+                        0: IDENT@930..933 "--c" [] []
+                      1: COLON@933..935 ":" [] [Whitespace(" ")]
+                      2: CSS_GENERIC_COMPONENT_VALUE_LIST@935..940
+                        0: CSS_IDENTIFIER@935..940
+                          0: IDENT@935..940 "green" [] []
+                    1: (empty)
                   2: R_PAREN@940..941 ")" [] []
               2: R_PAREN@941..942 ")" [] []
           3: R_PAREN@942..944 ")" [] [Whitespace(" ")]
@@ -1829,13 +1877,14 @@ CssRoot {
                 1: CSS_CONTAINER_STYLE_IN_PARENS@976..986
                   0: L_PAREN@976..977 "(" [] []
                   1: CSS_DECLARATION@977..985
-                    0: CSS_IDENTIFIER@977..980
-                      0: IDENT@977..980 "--b" [] []
-                    1: COLON@980..982 ":" [] [Whitespace(" ")]
-                    2: CSS_COMPONENT_VALUE_LIST@982..985
-                      0: CSS_IDENTIFIER@982..985
-                        0: IDENT@982..985 "red" [] []
-                    3: (empty)
+                    0: CSS_GENERIC_PROPERTY@977..985
+                      0: CSS_IDENTIFIER@977..980
+                        0: IDENT@977..980 "--b" [] []
+                      1: COLON@980..982 ":" [] [Whitespace(" ")]
+                      2: CSS_GENERIC_COMPONENT_VALUE_LIST@982..985
+                        0: CSS_IDENTIFIER@982..985
+                          0: IDENT@982..985 "red" [] []
+                    1: (empty)
                   2: R_PAREN@985..986 ")" [] []
               2: R_PAREN@986..988 ")" [] [Whitespace(" ")]
             1: OR_KW@988..991 "or" [] [Whitespace(" ")]
@@ -1849,26 +1898,28 @@ CssRoot {
                     1: CSS_CONTAINER_STYLE_IN_PARENS@997..1009
                       0: L_PAREN@997..998 "(" [] []
                       1: CSS_DECLARATION@998..1008
-                        0: CSS_IDENTIFIER@998..1001
-                          0: IDENT@998..1001 "--c" [] []
-                        1: COLON@1001..1003 ":" [] [Whitespace(" ")]
-                        2: CSS_COMPONENT_VALUE_LIST@1003..1008
-                          0: CSS_IDENTIFIER@1003..1008
-                            0: IDENT@1003..1008 "green" [] []
-                        3: (empty)
+                        0: CSS_GENERIC_PROPERTY@998..1008
+                          0: CSS_IDENTIFIER@998..1001
+                            0: IDENT@998..1001 "--c" [] []
+                          1: COLON@1001..1003 ":" [] [Whitespace(" ")]
+                          2: CSS_GENERIC_COMPONENT_VALUE_LIST@1003..1008
+                            0: CSS_IDENTIFIER@1003..1008
+                              0: IDENT@1003..1008 "green" [] []
+                        1: (empty)
                       2: R_PAREN@1008..1009 ")" [] []
                   2: R_PAREN@1009..1011 ")" [] [Whitespace(" ")]
                 1: AND_KW@1011..1015 "and" [] [Whitespace(" ")]
                 2: CSS_CONTAINER_STYLE_IN_PARENS@1015..1032
                   0: L_PAREN@1015..1016 "(" [] []
                   1: CSS_DECLARATION@1016..1031
-                    0: CSS_IDENTIFIER@1016..1026
-                      0: IDENT@1016..1026 "background" [] []
-                    1: COLON@1026..1028 ":" [] [Whitespace(" ")]
-                    2: CSS_COMPONENT_VALUE_LIST@1028..1031
-                      0: CSS_IDENTIFIER@1028..1031
-                        0: IDENT@1028..1031 "red" [] []
-                    3: (empty)
+                    0: CSS_GENERIC_PROPERTY@1016..1031
+                      0: CSS_IDENTIFIER@1016..1026
+                        0: IDENT@1016..1026 "background" [] []
+                      1: COLON@1026..1028 ":" [] [Whitespace(" ")]
+                      2: CSS_GENERIC_COMPONENT_VALUE_LIST@1028..1031
+                        0: CSS_IDENTIFIER@1028..1031
+                          0: IDENT@1028..1031 "red" [] []
+                    1: (empty)
                   2: R_PAREN@1031..1032 ")" [] []
               2: R_PAREN@1032..1033 ")" [] []
           3: R_PAREN@1033..1035 ")" [] [Whitespace(" ")]
@@ -1894,13 +1945,14 @@ CssRoot {
                 1: CSS_CONTAINER_STYLE_IN_PARENS@1071..1081
                   0: L_PAREN@1071..1072 "(" [] []
                   1: CSS_DECLARATION@1072..1080
-                    0: CSS_IDENTIFIER@1072..1075
-                      0: IDENT@1072..1075 "--b" [] []
-                    1: COLON@1075..1077 ":" [] [Whitespace(" ")]
-                    2: CSS_COMPONENT_VALUE_LIST@1077..1080
-                      0: CSS_IDENTIFIER@1077..1080
-                        0: IDENT@1077..1080 "red" [] []
-                    3: (empty)
+                    0: CSS_GENERIC_PROPERTY@1072..1080
+                      0: CSS_IDENTIFIER@1072..1075
+                        0: IDENT@1072..1075 "--b" [] []
+                      1: COLON@1075..1077 ":" [] [Whitespace(" ")]
+                      2: CSS_GENERIC_COMPONENT_VALUE_LIST@1077..1080
+                        0: CSS_IDENTIFIER@1077..1080
+                          0: IDENT@1077..1080 "red" [] []
+                    1: (empty)
                   2: R_PAREN@1080..1081 ")" [] []
               2: R_PAREN@1081..1082 ")" [] []
           3: R_PAREN@1082..1084 ")" [] [Whitespace(" ")]
@@ -1938,13 +1990,14 @@ CssRoot {
                   1: CSS_CONTAINER_STYLE_IN_PARENS@1138..1148
                     0: L_PAREN@1138..1139 "(" [] []
                     1: CSS_DECLARATION@1139..1147
-                      0: CSS_IDENTIFIER@1139..1142
-                        0: IDENT@1139..1142 "--b" [] []
-                      1: COLON@1142..1144 ":" [] [Whitespace(" ")]
-                      2: CSS_COMPONENT_VALUE_LIST@1144..1147
-                        0: CSS_IDENTIFIER@1144..1147
-                          0: IDENT@1144..1147 "red" [] []
-                      3: (empty)
+                      0: CSS_GENERIC_PROPERTY@1139..1147
+                        0: CSS_IDENTIFIER@1139..1142
+                          0: IDENT@1139..1142 "--b" [] []
+                        1: COLON@1142..1144 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@1144..1147
+                          0: CSS_IDENTIFIER@1144..1147
+                            0: IDENT@1144..1147 "red" [] []
+                      1: (empty)
                     2: R_PAREN@1147..1148 ")" [] []
                 2: R_PAREN@1148..1150 ")" [] [Whitespace(" ")]
               1: OR_KW@1150..1153 "or" [] [Whitespace(" ")]
@@ -1958,26 +2011,28 @@ CssRoot {
                       1: CSS_CONTAINER_STYLE_IN_PARENS@1159..1171
                         0: L_PAREN@1159..1160 "(" [] []
                         1: CSS_DECLARATION@1160..1170
-                          0: CSS_IDENTIFIER@1160..1163
-                            0: IDENT@1160..1163 "--c" [] []
-                          1: COLON@1163..1165 ":" [] [Whitespace(" ")]
-                          2: CSS_COMPONENT_VALUE_LIST@1165..1170
-                            0: CSS_IDENTIFIER@1165..1170
-                              0: IDENT@1165..1170 "green" [] []
-                          3: (empty)
+                          0: CSS_GENERIC_PROPERTY@1160..1170
+                            0: CSS_IDENTIFIER@1160..1163
+                              0: IDENT@1160..1163 "--c" [] []
+                            1: COLON@1163..1165 ":" [] [Whitespace(" ")]
+                            2: CSS_GENERIC_COMPONENT_VALUE_LIST@1165..1170
+                              0: CSS_IDENTIFIER@1165..1170
+                                0: IDENT@1165..1170 "green" [] []
+                          1: (empty)
                         2: R_PAREN@1170..1171 ")" [] []
                     2: R_PAREN@1171..1173 ")" [] [Whitespace(" ")]
                   1: AND_KW@1173..1177 "and" [] [Whitespace(" ")]
                   2: CSS_CONTAINER_STYLE_IN_PARENS@1177..1194
                     0: L_PAREN@1177..1178 "(" [] []
                     1: CSS_DECLARATION@1178..1193
-                      0: CSS_IDENTIFIER@1178..1188
-                        0: IDENT@1178..1188 "background" [] []
-                      1: COLON@1188..1190 ":" [] [Whitespace(" ")]
-                      2: CSS_COMPONENT_VALUE_LIST@1190..1193
-                        0: CSS_IDENTIFIER@1190..1193
-                          0: IDENT@1190..1193 "red" [] []
-                      3: (empty)
+                      0: CSS_GENERIC_PROPERTY@1178..1193
+                        0: CSS_IDENTIFIER@1178..1188
+                          0: IDENT@1178..1188 "background" [] []
+                        1: COLON@1188..1190 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@1190..1193
+                          0: CSS_IDENTIFIER@1190..1193
+                            0: IDENT@1190..1193 "red" [] []
+                      1: (empty)
                     2: R_PAREN@1193..1194 ")" [] []
                 2: R_PAREN@1194..1195 ")" [] []
             3: R_PAREN@1195..1197 ")" [] [Whitespace(" ")]
@@ -2019,13 +2074,14 @@ CssRoot {
                 0: L_CURLY@1247..1248 "{" [] []
                 1: CSS_DECLARATION_LIST@1248..1277
                   0: CSS_DECLARATION@1248..1276
-                    0: CSS_IDENTIFIER@1248..1267
-                      0: IDENT@1248..1267 "background-color" [Newline("\n"), Whitespace("\t\t")] []
-                    1: COLON@1267..1269 ":" [] [Whitespace(" ")]
-                    2: CSS_COMPONENT_VALUE_LIST@1269..1276
-                      0: CSS_IDENTIFIER@1269..1276
-                        0: IDENT@1269..1276 "skyblue" [] []
-                    3: (empty)
+                    0: CSS_GENERIC_PROPERTY@1248..1276
+                      0: CSS_IDENTIFIER@1248..1267
+                        0: IDENT@1248..1267 "background-color" [Newline("\n"), Whitespace("\t\t")] []
+                      1: COLON@1267..1269 ":" [] [Whitespace(" ")]
+                      2: CSS_GENERIC_COMPONENT_VALUE_LIST@1269..1276
+                        0: CSS_IDENTIFIER@1269..1276
+                          0: IDENT@1269..1276 "skyblue" [] []
+                    1: (empty)
                   1: SEMICOLON@1276..1277 ";" [] []
                 2: R_CURLY@1277..1280 "}" [Newline("\n"), Whitespace("\t")] []
             1: CSS_RULE@1280..1319
@@ -2041,13 +2097,14 @@ CssRoot {
                 0: L_CURLY@1286..1287 "{" [] []
                 1: CSS_DECLARATION_LIST@1287..1316
                   0: CSS_DECLARATION@1287..1315
-                    0: CSS_IDENTIFIER@1287..1306
-                      0: IDENT@1287..1306 "background-color" [Newline("\n"), Whitespace("\t\t")] []
-                    1: COLON@1306..1308 ":" [] [Whitespace(" ")]
-                    2: CSS_COMPONENT_VALUE_LIST@1308..1315
-                      0: CSS_IDENTIFIER@1308..1315
-                        0: IDENT@1308..1315 "skyblue" [] []
-                    3: (empty)
+                    0: CSS_GENERIC_PROPERTY@1287..1315
+                      0: CSS_IDENTIFIER@1287..1306
+                        0: IDENT@1287..1306 "background-color" [Newline("\n"), Whitespace("\t\t")] []
+                      1: COLON@1306..1308 ":" [] [Whitespace(" ")]
+                      2: CSS_GENERIC_COMPONENT_VALUE_LIST@1308..1315
+                        0: CSS_IDENTIFIER@1308..1315
+                          0: IDENT@1308..1315 "skyblue" [] []
+                    1: (empty)
                   1: SEMICOLON@1315..1316 ";" [] []
                 2: R_CURLY@1316..1319 "}" [Newline("\n"), Whitespace("\t")] []
           2: R_CURLY@1319..1321 "}" [Newline("\n")] []
