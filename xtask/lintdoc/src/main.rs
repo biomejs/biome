@@ -268,6 +268,7 @@ fn generate_group(
     Ok(())
 }
 
+#[allow(clippy::too_many_arguments)]
 /// Generates the documentation page for a single lint rule
 fn generate_rule(
     root: &Path,
