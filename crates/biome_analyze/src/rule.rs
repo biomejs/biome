@@ -56,7 +56,7 @@ impl Display for FixKind {
     }
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Source {
     /// Rules from [Rust Clippy](https://rust-lang.github.io/rust-clippy/master/index.html)
     Clippy(&'static str),
@@ -112,6 +112,7 @@ impl Source {
     }
 }
 
+#[derive(Debug, Clone)]
 pub enum SourceKind {
     /// The rule implements the same logic of the source
     SameLogic,
