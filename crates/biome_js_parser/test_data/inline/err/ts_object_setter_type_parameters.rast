@@ -63,15 +63,66 @@ JsModule {
             },
             semicolon_token: SEMICOLON@27..28 ";" [] [],
         },
+        JsExpressionStatement {
+            expression: JsParenthesizedExpression {
+                l_paren_token: L_PAREN@28..30 "(" [Newline("\n")] [],
+                expression: JsObjectExpression {
+                    l_curly_token: L_CURLY@30..32 "{" [] [Whitespace(" ")],
+                    members: JsObjectMemberList [
+                        JsBogusMember {
+                            items: [
+                                SET_KW@32..36 "set" [] [Whitespace(" ")],
+                                JsLiteralMemberName {
+                                    value: IDENT@36..37 "a" [] [],
+                                },
+                                TsTypeParameters {
+                                    l_angle_token: L_ANGLE@37..38 "<" [] [],
+                                    items: TsTypeParameterList [],
+                                    r_angle_token: R_ANGLE@38..39 ">" [] [],
+                                },
+                                L_PAREN@39..40 "(" [] [],
+                                JsFormalParameter {
+                                    decorators: JsDecoratorList [],
+                                    binding: JsIdentifierBinding {
+                                        name_token: IDENT@40..45 "value" [] [],
+                                    },
+                                    question_mark_token: missing (optional),
+                                    type_annotation: TsTypeAnnotation {
+                                        colon_token: COLON@45..47 ":" [] [Whitespace(" ")],
+                                        ty: TsReferenceType {
+                                            name: JsReferenceIdentifier {
+                                                value_token: IDENT@47..48 "A" [] [],
+                                            },
+                                            type_arguments: missing (optional),
+                                        },
+                                    },
+                                    initializer: missing (optional),
+                                },
+                                R_PAREN@48..50 ")" [] [Whitespace(" ")],
+                                JsFunctionBody {
+                                    l_curly_token: L_CURLY@50..51 "{" [] [],
+                                    directives: JsDirectiveList [],
+                                    statements: JsStatementList [],
+                                    r_curly_token: R_CURLY@51..53 "}" [] [Whitespace(" ")],
+                                },
+                            ],
+                        },
+                    ],
+                    r_curly_token: R_CURLY@53..54 "}" [] [],
+                },
+                r_paren_token: R_PAREN@54..55 ")" [] [],
+            },
+            semicolon_token: SEMICOLON@55..56 ";" [] [],
+        },
     ],
-    eof_token: EOF@28..29 "" [Newline("\n")] [],
+    eof_token: EOF@56..57 "" [Newline("\n")] [],
 }
 
-0: JS_MODULE@0..29
+0: JS_MODULE@0..57
   0: (empty)
   1: (empty)
   2: JS_DIRECTIVE_LIST@0..0
-  3: JS_MODULE_ITEM_LIST@0..28
+  3: JS_MODULE_ITEM_LIST@0..56
     0: JS_EXPRESSION_STATEMENT@0..28
       0: JS_PARENTHESIZED_EXPRESSION@0..27
         0: L_PAREN@0..1 "(" [] []
@@ -114,7 +165,43 @@ JsModule {
           2: R_CURLY@25..26 "}" [] []
         2: R_PAREN@26..27 ")" [] []
       1: SEMICOLON@27..28 ";" [] []
-  4: EOF@28..29 "" [Newline("\n")] []
+    1: JS_EXPRESSION_STATEMENT@28..56
+      0: JS_PARENTHESIZED_EXPRESSION@28..55
+        0: L_PAREN@28..30 "(" [Newline("\n")] []
+        1: JS_OBJECT_EXPRESSION@30..54
+          0: L_CURLY@30..32 "{" [] [Whitespace(" ")]
+          1: JS_OBJECT_MEMBER_LIST@32..53
+            0: JS_BOGUS_MEMBER@32..53
+              0: SET_KW@32..36 "set" [] [Whitespace(" ")]
+              1: JS_LITERAL_MEMBER_NAME@36..37
+                0: IDENT@36..37 "a" [] []
+              2: TS_TYPE_PARAMETERS@37..39
+                0: L_ANGLE@37..38 "<" [] []
+                1: TS_TYPE_PARAMETER_LIST@38..38
+                2: R_ANGLE@38..39 ">" [] []
+              3: L_PAREN@39..40 "(" [] []
+              4: JS_FORMAL_PARAMETER@40..48
+                0: JS_DECORATOR_LIST@40..40
+                1: JS_IDENTIFIER_BINDING@40..45
+                  0: IDENT@40..45 "value" [] []
+                2: (empty)
+                3: TS_TYPE_ANNOTATION@45..48
+                  0: COLON@45..47 ":" [] [Whitespace(" ")]
+                  1: TS_REFERENCE_TYPE@47..48
+                    0: JS_REFERENCE_IDENTIFIER@47..48
+                      0: IDENT@47..48 "A" [] []
+                    1: (empty)
+                4: (empty)
+              5: R_PAREN@48..50 ")" [] [Whitespace(" ")]
+              6: JS_FUNCTION_BODY@50..53
+                0: L_CURLY@50..51 "{" [] []
+                1: JS_DIRECTIVE_LIST@51..51
+                2: JS_STATEMENT_LIST@51..51
+                3: R_CURLY@51..53 "}" [] [Whitespace(" ")]
+          2: R_CURLY@53..54 "}" [] []
+        2: R_PAREN@54..55 ")" [] []
+      1: SEMICOLON@55..56 ";" [] []
+  4: EOF@56..57 "" [Newline("\n")] []
 --
 ts_object_setter_type_parameters.ts:1:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -122,7 +209,36 @@ ts_object_setter_type_parameters.ts:1:9 parse ━━━━━━━━━━━�
   
   > 1 │ ({ set a<A>(value: A) {} });
       │         ^^^
-    2 │ 
+    2 │ ({ set a<>(value: A) {} });
+    3 │ 
+  
+--
+ts_object_setter_type_parameters.ts:2:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a type parameter but instead found '>'.
+  
+    1 │ ({ set a<A>(value: A) {} });
+  > 2 │ ({ set a<>(value: A) {} });
+      │          ^
+    3 │ 
+  
+  i Expected a type parameter here.
+  
+    1 │ ({ set a<A>(value: A) {} });
+  > 2 │ ({ set a<>(value: A) {} });
+      │          ^
+    3 │ 
+  
+--
+ts_object_setter_type_parameters.ts:2:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × An accessor cannot have type parameters.
+  
+    1 │ ({ set a<A>(value: A) {} });
+  > 2 │ ({ set a<>(value: A) {} });
+      │         ^^
+    3 │ 
   
 --
 ({ set a<A>(value: A) {} });
+({ set a<>(value: A) {} });

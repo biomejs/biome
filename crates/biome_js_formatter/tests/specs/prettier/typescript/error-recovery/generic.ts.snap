@@ -182,26 +182,6 @@ generic.ts:11:21 parse ━━━━━━━━━━━━━━━━━━━
     12 │ 
     13 │ interface f6<> {
   
-generic.ts:13:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a type parameter but instead found '>'.
-  
-    11 │ const f5 = function<>() {}
-    12 │ 
-  > 13 │ interface f6<> {
-       │              ^
-    14 │     test<>();
-    15 │ }
-  
-  i Expected a type parameter here.
-  
-    11 │ const f5 = function<>() {}
-    12 │ 
-  > 13 │ interface f6<> {
-       │              ^
-    14 │     test<>();
-    15 │ }
-  
 generic.ts:14:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a type parameter but instead found '>'.

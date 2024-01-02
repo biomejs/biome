@@ -9,7 +9,8 @@
 			"indentStyle": "space",
 			"indentSize": 2,
 			"lineEnding": "lf",
-			"lineWidth": 200
+			"lineWidth": 200,
+			"quoteStyle": "single"
 		}
 	}
 }

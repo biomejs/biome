@@ -185,19 +185,19 @@ pub fn test_trivia_attached_to_tokens() {
 
     // first let leading trivia asserts
     let pieces: Vec<_> = first_let.leading_trivia().pieces().collect();
-    assert!(matches!(pieces.get(0).map(|x| x.text()), Some("/**/")));
+    assert!(matches!(pieces.first().map(|x| x.text()), Some("/**/")));
     assert!(pieces.get(1).is_none());
 
     // first let trailing trivia asserts
     let pieces: Vec<_> = first_let.trailing_trivia().pieces().collect();
-    assert!(matches!(pieces.get(0).map(|x| x.text()), Some(" ")));
+    assert!(matches!(pieces.first().map(|x| x.text()), Some(" ")));
     assert!(pieces.get(1).is_none());
 
     // second let leading trivia asserts
     let second_let = tokens.find(is_let).unwrap();
     let pieces: Vec<_> = second_let.leading_trivia().pieces().collect();
     assert_eq!(4, pieces.len());
-    assert!(matches!(pieces.get(0).map(|x| x.text()), Some("\n")));
+    assert!(matches!(pieces.first().map(|x| x.text()), Some("\n")));
     assert!(matches!(pieces.get(1).map(|x| x.text()), Some(" ")));
     assert!(matches!(pieces.get(2).map(|x| x.text()), Some("/*hey*/")));
     assert!(matches!(pieces.get(3).map(|x| x.text()), Some(" ")));
@@ -205,7 +205,7 @@ pub fn test_trivia_attached_to_tokens() {
     // second let trailing trivia asserts
     let pieces: Vec<_> = second_let.trailing_trivia().pieces().collect();
     assert_eq!(1, pieces.len());
-    assert!(matches!(pieces.get(0).map(|x| x.text()), Some(" \t ")));
+    assert!(matches!(pieces.first().map(|x| x.text()), Some(" \t ")));
 }
 
 #[test]

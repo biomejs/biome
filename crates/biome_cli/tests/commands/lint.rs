@@ -1868,7 +1868,7 @@ fn check_stdin_apply_successfully() {
 
     let message = console
         .out_buffer
-        .get(0)
+        .first()
         .expect("Console should have written a message");
 
     let content = markup_to_string(markup! {
@@ -1916,7 +1916,7 @@ fn check_stdin_apply_unsafe_successfully() {
 
     let message = console
         .out_buffer
-        .get(0)
+        .first()
         .expect("Console should have written a message");
 
     let content = markup_to_string(markup! {

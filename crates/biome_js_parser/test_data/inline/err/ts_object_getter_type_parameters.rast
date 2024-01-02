@@ -55,15 +55,58 @@ JsModule {
             },
             semicolon_token: SEMICOLON@22..23 ";" [] [],
         },
+        JsExpressionStatement {
+            expression: JsParenthesizedExpression {
+                l_paren_token: L_PAREN@23..25 "(" [Newline("\n")] [],
+                expression: JsObjectExpression {
+                    l_curly_token: L_CURLY@25..27 "{" [] [Whitespace(" ")],
+                    members: JsObjectMemberList [
+                        JsBogusMember {
+                            items: [
+                                GET_KW@27..31 "get" [] [Whitespace(" ")],
+                                JsLiteralMemberName {
+                                    value: IDENT@31..32 "a" [] [],
+                                },
+                                TsTypeParameters {
+                                    l_angle_token: L_ANGLE@32..33 "<" [] [],
+                                    items: TsTypeParameterList [],
+                                    r_angle_token: R_ANGLE@33..34 ">" [] [],
+                                },
+                                L_PAREN@34..35 "(" [] [],
+                                R_PAREN@35..36 ")" [] [],
+                                TsTypeAnnotation {
+                                    colon_token: COLON@36..38 ":" [] [Whitespace(" ")],
+                                    ty: TsReferenceType {
+                                        name: JsReferenceIdentifier {
+                                            value_token: IDENT@38..40 "A" [] [Whitespace(" ")],
+                                        },
+                                        type_arguments: missing (optional),
+                                    },
+                                },
+                                JsFunctionBody {
+                                    l_curly_token: L_CURLY@40..41 "{" [] [],
+                                    directives: JsDirectiveList [],
+                                    statements: JsStatementList [],
+                                    r_curly_token: R_CURLY@41..43 "}" [] [Whitespace(" ")],
+                                },
+                            ],
+                        },
+                    ],
+                    r_curly_token: R_CURLY@43..44 "}" [] [],
+                },
+                r_paren_token: R_PAREN@44..45 ")" [] [],
+            },
+            semicolon_token: SEMICOLON@45..46 ";" [] [],
+        },
     ],
-    eof_token: EOF@23..24 "" [Newline("\n")] [],
+    eof_token: EOF@46..47 "" [Newline("\n")] [],
 }
 
-0: JS_MODULE@0..24
+0: JS_MODULE@0..47
   0: (empty)
   1: (empty)
   2: JS_DIRECTIVE_LIST@0..0
-  3: JS_MODULE_ITEM_LIST@0..23
+  3: JS_MODULE_ITEM_LIST@0..46
     0: JS_EXPRESSION_STATEMENT@0..23
       0: JS_PARENTHESIZED_EXPRESSION@0..22
         0: L_PAREN@0..1 "(" [] []
@@ -100,7 +143,37 @@ JsModule {
           2: R_CURLY@20..21 "}" [] []
         2: R_PAREN@21..22 ")" [] []
       1: SEMICOLON@22..23 ";" [] []
-  4: EOF@23..24 "" [Newline("\n")] []
+    1: JS_EXPRESSION_STATEMENT@23..46
+      0: JS_PARENTHESIZED_EXPRESSION@23..45
+        0: L_PAREN@23..25 "(" [Newline("\n")] []
+        1: JS_OBJECT_EXPRESSION@25..44
+          0: L_CURLY@25..27 "{" [] [Whitespace(" ")]
+          1: JS_OBJECT_MEMBER_LIST@27..43
+            0: JS_BOGUS_MEMBER@27..43
+              0: GET_KW@27..31 "get" [] [Whitespace(" ")]
+              1: JS_LITERAL_MEMBER_NAME@31..32
+                0: IDENT@31..32 "a" [] []
+              2: TS_TYPE_PARAMETERS@32..34
+                0: L_ANGLE@32..33 "<" [] []
+                1: TS_TYPE_PARAMETER_LIST@33..33
+                2: R_ANGLE@33..34 ">" [] []
+              3: L_PAREN@34..35 "(" [] []
+              4: R_PAREN@35..36 ")" [] []
+              5: TS_TYPE_ANNOTATION@36..40
+                0: COLON@36..38 ":" [] [Whitespace(" ")]
+                1: TS_REFERENCE_TYPE@38..40
+                  0: JS_REFERENCE_IDENTIFIER@38..40
+                    0: IDENT@38..40 "A" [] [Whitespace(" ")]
+                  1: (empty)
+              6: JS_FUNCTION_BODY@40..43
+                0: L_CURLY@40..41 "{" [] []
+                1: JS_DIRECTIVE_LIST@41..41
+                2: JS_STATEMENT_LIST@41..41
+                3: R_CURLY@41..43 "}" [] [Whitespace(" ")]
+          2: R_CURLY@43..44 "}" [] []
+        2: R_PAREN@44..45 ")" [] []
+      1: SEMICOLON@45..46 ";" [] []
+  4: EOF@46..47 "" [Newline("\n")] []
 --
 ts_object_getter_type_parameters.ts:1:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -108,7 +181,36 @@ ts_object_getter_type_parameters.ts:1:9 parse ━━━━━━━━━━━�
   
   > 1 │ ({ get a<A>(): A {} });
       │         ^^^
-    2 │ 
+    2 │ ({ get a<>(): A {} });
+    3 │ 
+  
+--
+ts_object_getter_type_parameters.ts:2:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a type parameter but instead found '>'.
+  
+    1 │ ({ get a<A>(): A {} });
+  > 2 │ ({ get a<>(): A {} });
+      │          ^
+    3 │ 
+  
+  i Expected a type parameter here.
+  
+    1 │ ({ get a<A>(): A {} });
+  > 2 │ ({ get a<>(): A {} });
+      │          ^
+    3 │ 
+  
+--
+ts_object_getter_type_parameters.ts:2:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × An accessor cannot have type parameters.
+  
+    1 │ ({ get a<A>(): A {} });
+  > 2 │ ({ get a<>(): A {} });
+      │         ^^
+    3 │ 
   
 --
 ({ get a<A>(): A {} });
+({ get a<>(): A {} });

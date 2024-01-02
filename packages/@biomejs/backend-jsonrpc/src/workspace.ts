@@ -14,6 +14,7 @@ export interface SupportsFeatureResult {
 export type SupportKind =
 	| "Supported"
 	| "Ignored"
+	| "Protected"
 	| "FeatureNotEnabled"
 	| "FileNotSupported";
 export interface UpdateSettingsParams {
@@ -261,6 +262,7 @@ export interface CssFormatter {
 	 * What's the max width of a line applied to CSS (and its super languages) files. Defaults to 80.
 	 */
 	lineWidth?: LineWidth;
+	quoteStyle?: QuoteStyle;
 }
 /**
  * Options that changes how the CSS parser behaves
@@ -444,8 +446,8 @@ export interface OverridePattern {
 	organizeImports?: OverrideOrganizeImportsConfiguration;
 }
 export type VcsClientKind = "git";
-export type ArrowParentheses = "always" | "asNeeded";
 export type QuoteStyle = "double" | "single";
+export type ArrowParentheses = "always" | "asNeeded";
 export type QuoteProperties = "asNeeded" | "preserve";
 export type Semicolons = "always" | "asNeeded";
 /**
@@ -872,6 +874,10 @@ export interface Nursery {
 	 */
 	noNodejsModules?: RuleConfiguration;
 	/**
+	 * Disallow then property.
+	 */
+	noThenProperty?: RuleConfiguration;
+	/**
 	 * Disallow unused imports.
 	 */
 	noUnusedImports?: RuleConfiguration;
@@ -919,6 +925,10 @@ export interface Nursery {
 	 * Enforces using the node: protocol for Node.js builtin modules.
 	 */
 	useNodeImportProtocol?: RuleConfiguration;
+	/**
+	 * Use Number properties instead of global ones.
+	 */
+	useNumberProperties?: RuleConfiguration;
 	/**
 	 * Enforce the use of the regular expression literals instead of the RegExp constructor if possible.
 	 */
@@ -1623,6 +1633,7 @@ export type Category =
 	| "lint/nursery/noInvalidUseBeforeDeclaration"
 	| "lint/nursery/noMisleadingCharacterClass"
 	| "lint/nursery/noNodejsModules"
+	| "lint/nursery/noThenProperty"
 	| "lint/nursery/noTypeOnlyImportAttributes"
 	| "lint/nursery/noUnusedImports"
 	| "lint/nursery/noUnusedPrivateClassMembers"
@@ -1636,6 +1647,7 @@ export type Category =
 	| "lint/nursery/useGroupedTypeImport"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useNodeImportProtocol"
+	| "lint/nursery/useNumberProperties"
 	| "lint/nursery/useRegexLiterals"
 	| "lint/nursery/useShorthandFunctionType"
 	| "lint/nursery/useValidAriaRole"

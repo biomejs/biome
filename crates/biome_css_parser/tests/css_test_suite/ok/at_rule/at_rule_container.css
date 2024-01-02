@@ -30,3 +30,5 @@
 
 @container ( WIDTH <= 150px ) {  }
 @container ( 150px <= WIDTH ) {  }
+
+@container --dashed-name not (width <= 500px) {  }

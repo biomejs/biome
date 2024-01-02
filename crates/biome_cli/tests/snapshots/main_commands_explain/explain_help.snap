@@ -1,0 +1,20 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+# Emitted Messages
+
+```block
+A command to retrieve the documentation of various aspects of the CLI.
+
+Usage: explain NAME
+
+Available positional items:
+    NAME        Single name to display documentation for.
+
+Available options:
+    -h, --help  Prints help information
+
+```
+
+

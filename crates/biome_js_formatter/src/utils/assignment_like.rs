@@ -1,6 +1,7 @@
 use crate::js::auxiliary::initializer_clause::FormatJsInitializerClauseOptions;
 use crate::js::expressions::arrow_function_expression::FormatJsArrowFunctionExpressionOptions;
 use crate::prelude::*;
+use crate::ts::bindings::type_parameters::FormatTsTypeParametersOptions;
 use crate::utils::member_chain::is_member_call_chain;
 use crate::utils::object::write_member_name;
 use crate::utils::AnyJsBinaryLikeExpression;
@@ -435,7 +436,15 @@ impl AnyJsAssignmentLike {
 
                 write!(f, [binding_identifier.format()])?;
                 if let Some(type_parameters) = type_parameters {
-                    write!(f, [type_parameters.format(),])?;
+                    write!(
+                        f,
+                        [type_parameters
+                            .format()
+                            .with_options(FormatTsTypeParametersOptions {
+                                group_id: None,
+                                is_type_or_interface_decl: true
+                            }),]
+                    )?;
                 }
                 Ok(false)
             }

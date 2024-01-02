@@ -13,15 +13,15 @@ mod language {
 // use this test check if your snippet prints as you wish, without using a snapshot
 fn quick_test() {
     let src = r#"
-    @charset "UTF-8";
-@charset "iso-8859-15";
-@charset     "UTF-8";
-@charset "UTF-8";
+    div {
+        prod: fn(100px);
+        prod: --fn(100px);
+        prod: --fn--fn(100px);
+    }
 
-@charset "any-string-is-okay";
 "#;
     let parse = parse_css(src, CssParserOptions::default());
-    println!("{:#?}", parse.syntax());
+    println!("{:#?}", parse);
 
     let options = CssFormatOptions::default()
         .with_line_width(LineWidth::try_from(80).unwrap())

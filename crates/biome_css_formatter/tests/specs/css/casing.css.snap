@@ -1,0 +1,92 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/casing.css
+---
+
+# Input
+
+```css
+/*
+ * All values in CSS are case-insensitive except for Custom and Dashed
+ * identifiers. Everything else can and will be re-written in lowercase.
+ */
+
+DIV { COLOR: BLUE; }
+
+DIV.classNames#AND_Ids.ArePreserved {}
+
+[attr=IdentifierValuesPreserveWhenStringified] {}
+
+@MEDiA NoT SCReEN AND (  CoLOR  ), PRINT AND (COLOR) { }
+
+DIV {
+    --Preserved-Casing: BLUE;
+    ColOR: VAR(--Preserved-Casing);
+}
+
+@font-PALETTE-values --AnyCASInG-works {  }
+
+/*
+ * The only exception (at least that I've found so far in the spec), is @page
+ * using a _regular_ identifier for the page name, but where that identifier is
+ * considered case-sensitive. Biome uses a CssCustomIdentifier here instead to
+ * automatically preserve casing rather than creating a special exception.
+ */
+@PAGE ThisIsPreserved:FIRST {
+
+}
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+-----
+
+```css
+/*
+ * All values in CSS are case-insensitive except for Custom and Dashed
+ * identifiers. Everything else can and will be re-written in lowercase.
+ */
+
+div {
+	color: blue;
+}
+
+div.classNames#AND_Ids.ArePreserved {
+}
+
+[attr="IdentifierValuesPreserveWhenStringified"] {
+}
+
+@media not screen and (color), print and (color) {
+}
+
+div {
+	--preserved-casing: blue;
+	color: var(--Preserved-Casing);
+}
+
+@font-palette-values --AnyCASInG-works {
+}
+
+/*
+ * The only exception (at least that I've found so far in the spec), is @page
+ * using a _regular_ identifier for the page name, but where that identifier is
+ * considered case-sensitive. Biome uses a CssCustomIdentifier here instead to
+ * automatically preserve casing rather than creating a special exception.
+ */
+@page ThisIsPreserved:first {
+}
+```
+
+

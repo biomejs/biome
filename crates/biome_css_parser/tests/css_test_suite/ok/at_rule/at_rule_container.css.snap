@@ -39,6 +39,7 @@ expression: snapshot
 @container ( WIDTH <= 150px ) {  }
 @container ( 150px <= WIDTH ) {  }
 
+@container --dashed-name not (width <= 500px) {  }
 ```
 
 
@@ -52,7 +53,7 @@ CssRoot {
             at_token: AT@0..1 "@" [] [],
             rule: CssContainerAtRule {
                 container_token: CONTAINER_KW@1..11 "container" [] [Whitespace(" ")],
-                name: CssIdentifier {
+                name: CssCustomIdentifier {
                     value_token: IDENT@11..16 "name" [] [Whitespace(" ")],
                 },
                 query: CssContainerNotQuery {
@@ -67,12 +68,8 @@ CssRoot {
                                 operator: LTEQ@27..30 "<=" [] [Whitespace(" ")],
                             },
                             right: CssRegularDimension {
-                                value: CssNumber {
-                                    value_token: CSS_NUMBER_LITERAL@30..33 "500" [] [],
-                                },
-                                unit: CssIdentifier {
-                                    value_token: IDENT@33..35 "px" [] [],
-                                },
+                                value_token: CSS_NUMBER_LITERAL@30..33 "500" [] [],
+                                unit_token: IDENT@33..35 "px" [] [],
                             },
                         },
                         r_paren_token: R_PAREN@35..37 ")" [] [Whitespace(" ")],
@@ -89,7 +86,7 @@ CssRoot {
             at_token: AT@41..44 "@" [Newline("\n"), Newline("\n")] [],
             rule: CssContainerAtRule {
                 container_token: CONTAINER_KW@44..54 "container" [] [Whitespace(" ")],
-                name: CssIdentifier {
+                name: CssCustomIdentifier {
                     value_token: IDENT@54..64 "my-layout" [] [Whitespace(" ")],
                 },
                 query: CssContainerSizeFeatureInParens {
@@ -102,12 +99,8 @@ CssRoot {
                             operator: R_ANGLE@77..79 ">" [] [Whitespace(" ")],
                         },
                         right: CssRegularDimension {
-                            value: CssNumber {
-                                value_token: CSS_NUMBER_LITERAL@79..81 "45" [] [],
-                            },
-                            unit: CssIdentifier {
-                                value_token: IDENT@81..83 "em" [] [],
-                            },
+                            value_token: CSS_NUMBER_LITERAL@79..81 "45" [] [],
+                            unit_token: IDENT@81..83 "em" [] [],
                         },
                     },
                     r_paren_token: R_PAREN@83..85 ")" [] [Whitespace(" ")],
@@ -123,7 +116,7 @@ CssRoot {
             at_token: AT@89..92 "@" [Newline("\n"), Newline("\n")] [],
             rule: CssContainerAtRule {
                 container_token: CONTAINER_KW@92..102 "container" [] [Whitespace(" ")],
-                name: CssIdentifier {
+                name: CssCustomIdentifier {
                     value_token: IDENT@102..107 "card" [] [Whitespace(" ")],
                 },
                 query: CssContainerOrQuery {
@@ -137,12 +130,8 @@ CssRoot {
                                 operator: R_ANGLE@120..122 ">" [] [Whitespace(" ")],
                             },
                             right: CssRegularDimension {
-                                value: CssNumber {
-                                    value_token: CSS_NUMBER_LITERAL@122..124 "30" [] [],
-                                },
-                                unit: CssIdentifier {
-                                    value_token: IDENT@124..126 "em" [] [],
-                                },
+                                value_token: CSS_NUMBER_LITERAL@122..124 "30" [] [],
+                                unit_token: IDENT@124..126 "em" [] [],
                             },
                         },
                         r_paren_token: R_PAREN@126..128 ")" [] [Whitespace(" ")],
@@ -188,12 +177,8 @@ CssRoot {
                             operator: GTEQ@187..190 ">=" [] [Whitespace(" ")],
                         },
                         right: CssRegularDimension {
-                            value: CssNumber {
-                                value_token: CSS_NUMBER_LITERAL@190..191 "0" [] [],
-                            },
-                            unit: CssIdentifier {
-                                value_token: IDENT@191..193 "px" [] [],
-                            },
+                            value_token: CSS_NUMBER_LITERAL@190..191 "0" [] [],
+                            unit_token: IDENT@191..193 "px" [] [],
                         },
                     },
                     r_paren_token: R_PAREN@193..195 ")" [] [Whitespace(" ")],
@@ -209,7 +194,7 @@ CssRoot {
             at_token: AT@198..201 "@" [Newline("\n"), Newline("\n")] [],
             rule: CssContainerAtRule {
                 container_token: CONTAINER_KW@201..211 "container" [] [Whitespace(" ")],
-                name: CssIdentifier {
+                name: CssCustomIdentifier {
                     value_token: IDENT@211..216 "card" [] [Whitespace(" ")],
                 },
                 query: CssContainerAndQuery {
@@ -223,12 +208,8 @@ CssRoot {
                                 operator: R_ANGLE@229..231 ">" [] [Whitespace(" ")],
                             },
                             right: CssRegularDimension {
-                                value: CssNumber {
-                                    value_token: CSS_NUMBER_LITERAL@231..233 "30" [] [],
-                                },
-                                unit: CssIdentifier {
-                                    value_token: IDENT@233..235 "em" [] [],
-                                },
+                                value_token: CSS_NUMBER_LITERAL@231..233 "30" [] [],
+                                unit_token: IDENT@233..235 "em" [] [],
                             },
                         },
                         r_paren_token: R_PAREN@235..237 ")" [] [Whitespace(" ")],
@@ -244,12 +225,8 @@ CssRoot {
                                 operator: L_ANGLE@254..256 "<" [] [Whitespace(" ")],
                             },
                             right: CssRegularDimension {
-                                value: CssNumber {
-                                    value_token: CSS_NUMBER_LITERAL@256..258 "45" [] [],
-                                },
-                                unit: CssIdentifier {
-                                    value_token: IDENT@258..260 "em" [] [],
-                                },
+                                value_token: CSS_NUMBER_LITERAL@256..258 "45" [] [],
+                                unit_token: IDENT@258..260 "em" [] [],
                             },
                         },
                         r_paren_token: R_PAREN@260..262 ")" [] [Whitespace(" ")],
@@ -271,12 +248,8 @@ CssRoot {
                     l_paren_token: L_PAREN@279..280 "(" [] [],
                     feature: CssQueryFeatureRangeInterval {
                         left: CssRegularDimension {
-                            value: CssNumber {
-                                value_token: CSS_NUMBER_LITERAL@280..283 "100" [] [],
-                            },
-                            unit: CssIdentifier {
-                                value_token: IDENT@283..286 "px" [] [Whitespace(" ")],
-                            },
+                            value_token: CSS_NUMBER_LITERAL@280..283 "100" [] [],
+                            unit_token: IDENT@283..286 "px" [] [Whitespace(" ")],
                         },
                         left_comparison: CssQueryFeatureRangeComparison {
                             operator: R_ANGLE@286..288 ">" [] [Whitespace(" ")],
@@ -288,12 +261,8 @@ CssRoot {
                             operator: R_ANGLE@294..296 ">" [] [Whitespace(" ")],
                         },
                         right: CssRegularDimension {
-                            value: CssNumber {
-                                value_token: CSS_NUMBER_LITERAL@296..299 "150" [] [],
-                            },
-                            unit: CssIdentifier {
-                                value_token: IDENT@299..301 "px" [] [],
-                            },
+                            value_token: CSS_NUMBER_LITERAL@296..299 "150" [] [],
+                            unit_token: IDENT@299..301 "px" [] [],
                         },
                     },
                     r_paren_token: R_PAREN@301..303 ")" [] [Whitespace(" ")],
@@ -324,12 +293,8 @@ CssRoot {
                                     operator: LTEQ@332..335 "<=" [] [Whitespace(" ")],
                                 },
                                 right: CssRegularDimension {
-                                    value: CssNumber {
-                                        value_token: CSS_NUMBER_LITERAL@335..338 "150" [] [],
-                                    },
-                                    unit: CssIdentifier {
-                                        value_token: IDENT@338..340 "px" [] [],
-                                    },
+                                    value_token: CSS_NUMBER_LITERAL@335..338 "150" [] [],
+                                    unit_token: IDENT@338..340 "px" [] [],
                                 },
                             },
                             r_paren_token: R_PAREN@340..341 ")" [] [],
@@ -361,12 +326,8 @@ CssRoot {
                                 operator: LTEQ@368..371 "<=" [] [Whitespace(" ")],
                             },
                             right: CssRegularDimension {
-                                value: CssNumber {
-                                    value_token: CSS_NUMBER_LITERAL@371..374 "150" [] [],
-                                },
-                                unit: CssIdentifier {
-                                    value_token: IDENT@374..376 "px" [] [],
-                                },
+                                value_token: CSS_NUMBER_LITERAL@371..374 "150" [] [],
+                                unit_token: IDENT@374..376 "px" [] [],
                             },
                         },
                         r_paren_token: R_PAREN@376..377 ")" [] [],
@@ -393,12 +354,8 @@ CssRoot {
                         },
                         colon_token: COLON@406..408 ":" [] [Whitespace(" ")],
                         value: CssRegularDimension {
-                            value: CssNumber {
-                                value_token: CSS_NUMBER_LITERAL@408..411 "700" [] [],
-                            },
-                            unit: CssIdentifier {
-                                value_token: IDENT@411..413 "px" [] [],
-                            },
+                            value_token: CSS_NUMBER_LITERAL@408..411 "700" [] [],
+                            unit_token: IDENT@411..413 "px" [] [],
                         },
                     },
                     r_paren_token: R_PAREN@413..415 ")" [] [Whitespace(" ")],
@@ -414,7 +371,7 @@ CssRoot {
             at_token: AT@419..422 "@" [Newline("\n"), Newline("\n")] [],
             rule: CssContainerAtRule {
                 container_token: CONTAINER_KW@422..432 "container" [] [Whitespace(" ")],
-                name: CssIdentifier {
+                name: CssCustomIdentifier {
                     value_token: IDENT@432..440 "sidebar" [] [Whitespace(" ")],
                 },
                 query: CssContainerSizeFeatureInParens {
@@ -425,12 +382,8 @@ CssRoot {
                         },
                         colon_token: COLON@450..452 ":" [] [Whitespace(" ")],
                         value: CssRegularDimension {
-                            value: CssNumber {
-                                value_token: CSS_NUMBER_LITERAL@452..455 "400" [] [],
-                            },
-                            unit: CssIdentifier {
-                                value_token: IDENT@455..457 "px" [] [],
-                            },
+                            value_token: CSS_NUMBER_LITERAL@452..455 "400" [] [],
+                            unit_token: IDENT@455..457 "px" [] [],
                         },
                     },
                     r_paren_token: R_PAREN@457..459 ")" [] [Whitespace(" ")],
@@ -446,7 +399,7 @@ CssRoot {
             at_token: AT@463..466 "@" [Newline("\n"), Newline("\n")] [],
             rule: CssContainerAtRule {
                 container_token: CONTAINER_KW@466..476 "container" [] [Whitespace(" ")],
-                name: CssIdentifier {
+                name: CssCustomIdentifier {
                     value_token: IDENT@476..481 "test" [] [Whitespace(" ")],
                 },
                 query: CssContainerStyleQueryInParens {
@@ -477,7 +430,7 @@ CssRoot {
             at_token: AT@511..514 "@" [Newline("\n"), Newline("\n")] [],
             rule: CssContainerAtRule {
                 container_token: CONTAINER_KW@514..524 "container" [] [Whitespace(" ")],
-                name: CssIdentifier {
+                name: CssCustomIdentifier {
                     value_token: IDENT@524..529 "style" [] [],
                 },
                 query: CssContainerSizeFeatureInParens {
@@ -504,7 +457,7 @@ CssRoot {
             at_token: AT@554..557 "@" [Newline("\n"), Newline("\n")] [],
             rule: CssContainerAtRule {
                 container_token: CONTAINER_KW@557..567 "container" [] [Whitespace(" ")],
-                name: CssIdentifier {
+                name: CssCustomIdentifier {
                     value_token: IDENT@567..572 "card" [] [Whitespace(" ")],
                 },
                 query: CssContainerSizeFeatureInParens {
@@ -517,12 +470,8 @@ CssRoot {
                             operator: R_ANGLE@585..587 ">" [] [Whitespace(" ")],
                         },
                         right: CssRegularDimension {
-                            value: CssNumber {
-                                value_token: CSS_NUMBER_LITERAL@587..589 "30" [] [],
-                            },
-                            unit: CssIdentifier {
-                                value_token: IDENT@589..591 "em" [] [],
-                            },
+                            value_token: CSS_NUMBER_LITERAL@587..589 "30" [] [],
+                            unit_token: IDENT@589..591 "em" [] [],
                         },
                     },
                     r_paren_token: R_PAREN@591..593 ")" [] [Whitespace(" ")],
@@ -538,7 +487,7 @@ CssRoot {
             at_token: AT@597..600 "@" [Newline("\n"), Newline("\n")] [],
             rule: CssContainerAtRule {
                 container_token: CONTAINER_KW@600..610 "container" [] [Whitespace(" ")],
-                name: CssIdentifier {
+                name: CssCustomIdentifier {
                     value_token: IDENT@610..615 "style" [] [],
                 },
                 query: CssContainerSizeFeatureInParens {
@@ -575,28 +524,24 @@ CssRoot {
                         comparison: CssQueryFeatureRangeComparison {
                             operator: GTEQ@664..666 ">=" [] [],
                         },
-                        right: CssAnyFunction {
-                            css_simple_function: CssSimpleFunction {
-                                name: CssIdentifier {
-                                    value_token: IDENT@666..670 "calc" [] [],
-                                },
-                                l_paren_token: L_PAREN@670..671 "(" [] [],
-                                items: CssParameterList [
-                                    CssParameter {
+                        right: CssSimpleFunction {
+                            name: CssIdentifier {
+                                value_token: IDENT@666..670 "calc" [] [],
+                            },
+                            l_paren_token: L_PAREN@670..671 "(" [] [],
+                            items: CssParameterList [
+                                CssParameter {
+                                    any_css_expression: CssListOfComponentValuesExpression {
                                         css_component_value_list: CssComponentValueList [
                                             CssRegularDimension {
-                                                value: CssNumber {
-                                                    value_token: CSS_NUMBER_LITERAL@671..674 "200" [] [],
-                                                },
-                                                unit: CssIdentifier {
-                                                    value_token: IDENT@674..676 "px" [] [],
-                                                },
+                                                value_token: CSS_NUMBER_LITERAL@671..674 "200" [] [],
+                                                unit_token: IDENT@674..676 "px" [] [],
                                             },
                                         ],
                                     },
-                                ],
-                                r_paren_token: R_PAREN@676..677 ")" [] [],
-                            },
+                                },
+                            ],
+                            r_paren_token: R_PAREN@676..677 ")" [] [],
                         },
                     },
                     r_paren_token: R_PAREN@677..679 ")" [] [Whitespace(" ")],
@@ -623,12 +568,8 @@ CssRoot {
                             operator: LTEQ@703..706 "<=" [] [Whitespace(" ")],
                         },
                         right: CssRegularDimension {
-                            value: CssNumber {
-                                value_token: CSS_NUMBER_LITERAL@706..709 "150" [] [],
-                            },
-                            unit: CssIdentifier {
-                                value_token: IDENT@709..712 "px" [] [Whitespace(" ")],
-                            },
+                            value_token: CSS_NUMBER_LITERAL@706..709 "150" [] [],
+                            unit_token: IDENT@709..712 "px" [] [Whitespace(" ")],
                         },
                     },
                     r_paren_token: R_PAREN@712..714 ")" [] [Whitespace(" ")],
@@ -649,12 +590,8 @@ CssRoot {
                     l_paren_token: L_PAREN@730..732 "(" [] [Whitespace(" ")],
                     feature: CssQueryFeatureReverseRange {
                         left: CssRegularDimension {
-                            value: CssNumber {
-                                value_token: CSS_NUMBER_LITERAL@732..735 "150" [] [],
-                            },
-                            unit: CssIdentifier {
-                                value_token: IDENT@735..738 "px" [] [Whitespace(" ")],
-                            },
+                            value_token: CSS_NUMBER_LITERAL@732..735 "150" [] [],
+                            unit_token: IDENT@735..738 "px" [] [Whitespace(" ")],
                         },
                         comparison: CssQueryFeatureRangeComparison {
                             operator: LTEQ@738..741 "<=" [] [Whitespace(" ")],
@@ -672,22 +609,55 @@ CssRoot {
                 },
             },
         },
+        CssAtRule {
+            at_token: AT@753..756 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssContainerAtRule {
+                container_token: CONTAINER_KW@756..766 "container" [] [Whitespace(" ")],
+                name: CssCustomIdentifier {
+                    value_token: IDENT@766..780 "--dashed-name" [] [Whitespace(" ")],
+                },
+                query: CssContainerNotQuery {
+                    not_token: NOT_KW@780..784 "not" [] [Whitespace(" ")],
+                    query: CssContainerSizeFeatureInParens {
+                        l_paren_token: L_PAREN@784..785 "(" [] [],
+                        feature: CssQueryFeatureRange {
+                            left: CssIdentifier {
+                                value_token: IDENT@785..791 "width" [] [Whitespace(" ")],
+                            },
+                            comparison: CssQueryFeatureRangeComparison {
+                                operator: LTEQ@791..794 "<=" [] [Whitespace(" ")],
+                            },
+                            right: CssRegularDimension {
+                                value_token: CSS_NUMBER_LITERAL@794..797 "500" [] [],
+                                unit_token: IDENT@797..799 "px" [] [],
+                            },
+                        },
+                        r_paren_token: R_PAREN@799..801 ")" [] [Whitespace(" ")],
+                    },
+                },
+                block: CssRuleListBlock {
+                    l_curly_token: L_CURLY@801..804 "{" [] [Whitespace("  ")],
+                    rules: CssRuleList [],
+                    r_curly_token: R_CURLY@804..805 "}" [] [],
+                },
+            },
+        },
     ],
-    eof_token: EOF@753..754 "" [Newline("\n")] [],
+    eof_token: EOF@805..805 "" [] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..754
+0: CSS_ROOT@0..805
   0: (empty)
-  1: CSS_RULE_LIST@0..753
+  1: CSS_RULE_LIST@0..805
     0: CSS_AT_RULE@0..41
       0: AT@0..1 "@" [] []
       1: CSS_CONTAINER_AT_RULE@1..41
         0: CONTAINER_KW@1..11 "container" [] [Whitespace(" ")]
-        1: CSS_IDENTIFIER@11..16
+        1: CSS_CUSTOM_IDENTIFIER@11..16
           0: IDENT@11..16 "name" [] [Whitespace(" ")]
         2: CSS_CONTAINER_NOT_QUERY@16..37
           0: NOT_KW@16..20 "not" [] [Whitespace(" ")]
@@ -699,10 +669,8 @@ CssRoot {
               1: CSS_QUERY_FEATURE_RANGE_COMPARISON@27..30
                 0: LTEQ@27..30 "<=" [] [Whitespace(" ")]
               2: CSS_REGULAR_DIMENSION@30..35
-                0: CSS_NUMBER@30..33
-                  0: CSS_NUMBER_LITERAL@30..33 "500" [] []
-                1: CSS_IDENTIFIER@33..35
-                  0: IDENT@33..35 "px" [] []
+                0: CSS_NUMBER_LITERAL@30..33 "500" [] []
+                1: IDENT@33..35 "px" [] []
             2: R_PAREN@35..37 ")" [] [Whitespace(" ")]
         3: CSS_RULE_LIST_BLOCK@37..41
           0: L_CURLY@37..40 "{" [] [Whitespace("  ")]
@@ -712,7 +680,7 @@ CssRoot {
       0: AT@41..44 "@" [Newline("\n"), Newline("\n")] []
       1: CSS_CONTAINER_AT_RULE@44..89
         0: CONTAINER_KW@44..54 "container" [] [Whitespace(" ")]
-        1: CSS_IDENTIFIER@54..64
+        1: CSS_CUSTOM_IDENTIFIER@54..64
           0: IDENT@54..64 "my-layout" [] [Whitespace(" ")]
         2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@64..85
           0: L_PAREN@64..65 "(" [] []
@@ -722,10 +690,8 @@ CssRoot {
             1: CSS_QUERY_FEATURE_RANGE_COMPARISON@77..79
               0: R_ANGLE@77..79 ">" [] [Whitespace(" ")]
             2: CSS_REGULAR_DIMENSION@79..83
-              0: CSS_NUMBER@79..81
-                0: CSS_NUMBER_LITERAL@79..81 "45" [] []
-              1: CSS_IDENTIFIER@81..83
-                0: IDENT@81..83 "em" [] []
+              0: CSS_NUMBER_LITERAL@79..81 "45" [] []
+              1: IDENT@81..83 "em" [] []
           2: R_PAREN@83..85 ")" [] [Whitespace(" ")]
         3: CSS_RULE_LIST_BLOCK@85..89
           0: L_CURLY@85..88 "{" [] [Whitespace("  ")]
@@ -735,7 +701,7 @@ CssRoot {
       0: AT@89..92 "@" [Newline("\n"), Newline("\n")] []
       1: CSS_CONTAINER_AT_RULE@92..161
         0: CONTAINER_KW@92..102 "container" [] [Whitespace(" ")]
-        1: CSS_IDENTIFIER@102..107
+        1: CSS_CUSTOM_IDENTIFIER@102..107
           0: IDENT@102..107 "card" [] [Whitespace(" ")]
         2: CSS_CONTAINER_OR_QUERY@107..157
           0: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@107..128
@@ -746,10 +712,8 @@ CssRoot {
               1: CSS_QUERY_FEATURE_RANGE_COMPARISON@120..122
                 0: R_ANGLE@120..122 ">" [] [Whitespace(" ")]
               2: CSS_REGULAR_DIMENSION@122..126
-                0: CSS_NUMBER@122..124
-                  0: CSS_NUMBER_LITERAL@122..124 "30" [] []
-                1: CSS_IDENTIFIER@124..126
-                  0: IDENT@124..126 "em" [] []
+                0: CSS_NUMBER_LITERAL@122..124 "30" [] []
+                1: IDENT@124..126 "em" [] []
             2: R_PAREN@126..128 ")" [] [Whitespace(" ")]
           1: OR_KW@128..131 "or" [] [Whitespace(" ")]
           2: CSS_CONTAINER_STYLE_QUERY_IN_PARENS@131..157
@@ -781,10 +745,8 @@ CssRoot {
             1: CSS_QUERY_FEATURE_RANGE_COMPARISON@187..190
               0: GTEQ@187..190 ">=" [] [Whitespace(" ")]
             2: CSS_REGULAR_DIMENSION@190..193
-              0: CSS_NUMBER@190..191
-                0: CSS_NUMBER_LITERAL@190..191 "0" [] []
-              1: CSS_IDENTIFIER@191..193
-                0: IDENT@191..193 "px" [] []
+              0: CSS_NUMBER_LITERAL@190..191 "0" [] []
+              1: IDENT@191..193 "px" [] []
           2: R_PAREN@193..195 ")" [] [Whitespace(" ")]
         3: CSS_RULE_LIST_BLOCK@195..198
           0: L_CURLY@195..197 "{" [] [Whitespace(" ")]
@@ -794,7 +756,7 @@ CssRoot {
       0: AT@198..201 "@" [Newline("\n"), Newline("\n")] []
       1: CSS_CONTAINER_AT_RULE@201..266
         0: CONTAINER_KW@201..211 "container" [] [Whitespace(" ")]
-        1: CSS_IDENTIFIER@211..216
+        1: CSS_CUSTOM_IDENTIFIER@211..216
           0: IDENT@211..216 "card" [] [Whitespace(" ")]
         2: CSS_CONTAINER_AND_QUERY@216..262
           0: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@216..237
@@ -805,10 +767,8 @@ CssRoot {
               1: CSS_QUERY_FEATURE_RANGE_COMPARISON@229..231
                 0: R_ANGLE@229..231 ">" [] [Whitespace(" ")]
               2: CSS_REGULAR_DIMENSION@231..235
-                0: CSS_NUMBER@231..233
-                  0: CSS_NUMBER_LITERAL@231..233 "30" [] []
-                1: CSS_IDENTIFIER@233..235
-                  0: IDENT@233..235 "em" [] []
+                0: CSS_NUMBER_LITERAL@231..233 "30" [] []
+                1: IDENT@233..235 "em" [] []
             2: R_PAREN@235..237 ")" [] [Whitespace(" ")]
           1: AND_KW@237..241 "and" [] [Whitespace(" ")]
           2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@241..262
@@ -819,10 +779,8 @@ CssRoot {
               1: CSS_QUERY_FEATURE_RANGE_COMPARISON@254..256
                 0: L_ANGLE@254..256 "<" [] [Whitespace(" ")]
               2: CSS_REGULAR_DIMENSION@256..260
-                0: CSS_NUMBER@256..258
-                  0: CSS_NUMBER_LITERAL@256..258 "45" [] []
-                1: CSS_IDENTIFIER@258..260
-                  0: IDENT@258..260 "em" [] []
+                0: CSS_NUMBER_LITERAL@256..258 "45" [] []
+                1: IDENT@258..260 "em" [] []
             2: R_PAREN@260..262 ")" [] [Whitespace(" ")]
         3: CSS_RULE_LIST_BLOCK@262..266
           0: L_CURLY@262..265 "{" [] [Whitespace("  ")]
@@ -837,10 +795,8 @@ CssRoot {
           0: L_PAREN@279..280 "(" [] []
           1: CSS_QUERY_FEATURE_RANGE_INTERVAL@280..301
             0: CSS_REGULAR_DIMENSION@280..286
-              0: CSS_NUMBER@280..283
-                0: CSS_NUMBER_LITERAL@280..283 "100" [] []
-              1: CSS_IDENTIFIER@283..286
-                0: IDENT@283..286 "px" [] [Whitespace(" ")]
+              0: CSS_NUMBER_LITERAL@280..283 "100" [] []
+              1: IDENT@283..286 "px" [] [Whitespace(" ")]
             1: CSS_QUERY_FEATURE_RANGE_COMPARISON@286..288
               0: R_ANGLE@286..288 ">" [] [Whitespace(" ")]
             2: CSS_IDENTIFIER@288..294
@@ -848,10 +804,8 @@ CssRoot {
             3: CSS_QUERY_FEATURE_RANGE_COMPARISON@294..296
               0: R_ANGLE@294..296 ">" [] [Whitespace(" ")]
             4: CSS_REGULAR_DIMENSION@296..301
-              0: CSS_NUMBER@296..299
-                0: CSS_NUMBER_LITERAL@296..299 "150" [] []
-              1: CSS_IDENTIFIER@299..301
-                0: IDENT@299..301 "px" [] []
+              0: CSS_NUMBER_LITERAL@296..299 "150" [] []
+              1: IDENT@299..301 "px" [] []
           2: R_PAREN@301..303 ")" [] [Whitespace(" ")]
         3: CSS_RULE_LIST_BLOCK@303..307
           0: L_CURLY@303..306 "{" [] [Whitespace("  ")]
@@ -874,10 +828,8 @@ CssRoot {
                 1: CSS_QUERY_FEATURE_RANGE_COMPARISON@332..335
                   0: LTEQ@332..335 "<=" [] [Whitespace(" ")]
                 2: CSS_REGULAR_DIMENSION@335..340
-                  0: CSS_NUMBER@335..338
-                    0: CSS_NUMBER_LITERAL@335..338 "150" [] []
-                  1: CSS_IDENTIFIER@338..340
-                    0: IDENT@338..340 "px" [] []
+                  0: CSS_NUMBER_LITERAL@335..338 "150" [] []
+                  1: IDENT@338..340 "px" [] []
               2: R_PAREN@340..341 ")" [] []
           2: R_PAREN@341..343 ")" [] [Whitespace(" ")]
         3: CSS_RULE_LIST_BLOCK@343..347
@@ -899,10 +851,8 @@ CssRoot {
               1: CSS_QUERY_FEATURE_RANGE_COMPARISON@368..371
                 0: LTEQ@368..371 "<=" [] [Whitespace(" ")]
               2: CSS_REGULAR_DIMENSION@371..376
-                0: CSS_NUMBER@371..374
-                  0: CSS_NUMBER_LITERAL@371..374 "150" [] []
-                1: CSS_IDENTIFIER@374..376
-                  0: IDENT@374..376 "px" [] []
+                0: CSS_NUMBER_LITERAL@371..374 "150" [] []
+                1: IDENT@374..376 "px" [] []
             2: R_PAREN@376..377 ")" [] []
           2: R_PAREN@377..379 ")" [] [Whitespace(" ")]
         3: CSS_RULE_LIST_BLOCK@379..383
@@ -921,10 +871,8 @@ CssRoot {
               0: IDENT@397..406 "min-width" [] []
             1: COLON@406..408 ":" [] [Whitespace(" ")]
             2: CSS_REGULAR_DIMENSION@408..413
-              0: CSS_NUMBER@408..411
-                0: CSS_NUMBER_LITERAL@408..411 "700" [] []
-              1: CSS_IDENTIFIER@411..413
-                0: IDENT@411..413 "px" [] []
+              0: CSS_NUMBER_LITERAL@408..411 "700" [] []
+              1: IDENT@411..413 "px" [] []
           2: R_PAREN@413..415 ")" [] [Whitespace(" ")]
         3: CSS_RULE_LIST_BLOCK@415..419
           0: L_CURLY@415..418 "{" [] [Whitespace("  ")]
@@ -934,7 +882,7 @@ CssRoot {
       0: AT@419..422 "@" [Newline("\n"), Newline("\n")] []
       1: CSS_CONTAINER_AT_RULE@422..463
         0: CONTAINER_KW@422..432 "container" [] [Whitespace(" ")]
-        1: CSS_IDENTIFIER@432..440
+        1: CSS_CUSTOM_IDENTIFIER@432..440
           0: IDENT@432..440 "sidebar" [] [Whitespace(" ")]
         2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@440..459
           0: L_PAREN@440..441 "(" [] []
@@ -943,10 +891,8 @@ CssRoot {
               0: IDENT@441..450 "min-width" [] []
             1: COLON@450..452 ":" [] [Whitespace(" ")]
             2: CSS_REGULAR_DIMENSION@452..457
-              0: CSS_NUMBER@452..455
-                0: CSS_NUMBER_LITERAL@452..455 "400" [] []
-              1: CSS_IDENTIFIER@455..457
-                0: IDENT@455..457 "px" [] []
+              0: CSS_NUMBER_LITERAL@452..455 "400" [] []
+              1: IDENT@455..457 "px" [] []
           2: R_PAREN@457..459 ")" [] [Whitespace(" ")]
         3: CSS_RULE_LIST_BLOCK@459..463
           0: L_CURLY@459..462 "{" [] [Whitespace("  ")]
@@ -956,7 +902,7 @@ CssRoot {
       0: AT@463..466 "@" [Newline("\n"), Newline("\n")] []
       1: CSS_CONTAINER_AT_RULE@466..511
         0: CONTAINER_KW@466..476 "container" [] [Whitespace(" ")]
-        1: CSS_IDENTIFIER@476..481
+        1: CSS_CUSTOM_IDENTIFIER@476..481
           0: IDENT@476..481 "test" [] [Whitespace(" ")]
         2: CSS_CONTAINER_STYLE_QUERY_IN_PARENS@481..507
           0: STYLE_KW@481..486 "style" [] []
@@ -978,7 +924,7 @@ CssRoot {
       0: AT@511..514 "@" [Newline("\n"), Newline("\n")] []
       1: CSS_CONTAINER_AT_RULE@514..554
         0: CONTAINER_KW@514..524 "container" [] [Whitespace(" ")]
-        1: CSS_IDENTIFIER@524..529
+        1: CSS_CUSTOM_IDENTIFIER@524..529
           0: IDENT@524..529 "style" [] []
         2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@529..550
           0: L_PAREN@529..530 "(" [] []
@@ -997,7 +943,7 @@ CssRoot {
       0: AT@554..557 "@" [Newline("\n"), Newline("\n")] []
       1: CSS_CONTAINER_AT_RULE@557..597
         0: CONTAINER_KW@557..567 "container" [] [Whitespace(" ")]
-        1: CSS_IDENTIFIER@567..572
+        1: CSS_CUSTOM_IDENTIFIER@567..572
           0: IDENT@567..572 "card" [] [Whitespace(" ")]
         2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@572..593
           0: L_PAREN@572..573 "(" [] []
@@ -1007,10 +953,8 @@ CssRoot {
             1: CSS_QUERY_FEATURE_RANGE_COMPARISON@585..587
               0: R_ANGLE@585..587 ">" [] [Whitespace(" ")]
             2: CSS_REGULAR_DIMENSION@587..591
-              0: CSS_NUMBER@587..589
-                0: CSS_NUMBER_LITERAL@587..589 "30" [] []
-              1: CSS_IDENTIFIER@589..591
-                0: IDENT@589..591 "em" [] []
+              0: CSS_NUMBER_LITERAL@587..589 "30" [] []
+              1: IDENT@589..591 "em" [] []
           2: R_PAREN@591..593 ")" [] [Whitespace(" ")]
         3: CSS_RULE_LIST_BLOCK@593..597
           0: L_CURLY@593..596 "{" [] [Whitespace("  ")]
@@ -1020,7 +964,7 @@ CssRoot {
       0: AT@597..600 "@" [Newline("\n"), Newline("\n")] []
       1: CSS_CONTAINER_AT_RULE@600..640
         0: CONTAINER_KW@600..610 "container" [] [Whitespace(" ")]
-        1: CSS_IDENTIFIER@610..615
+        1: CSS_CUSTOM_IDENTIFIER@610..615
           0: IDENT@610..615 "style" [] []
         2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@615..636
           0: L_PAREN@615..616 "(" [] []
@@ -1047,20 +991,18 @@ CssRoot {
               0: IDENT@653..664 "inline-size" [] []
             1: CSS_QUERY_FEATURE_RANGE_COMPARISON@664..666
               0: GTEQ@664..666 ">=" [] []
-            2: CSS_ANY_FUNCTION@666..677
-              0: CSS_SIMPLE_FUNCTION@666..677
-                0: CSS_IDENTIFIER@666..670
-                  0: IDENT@666..670 "calc" [] []
-                1: L_PAREN@670..671 "(" [] []
-                2: CSS_PARAMETER_LIST@671..676
-                  0: CSS_PARAMETER@671..676
+            2: CSS_SIMPLE_FUNCTION@666..677
+              0: CSS_IDENTIFIER@666..670
+                0: IDENT@666..670 "calc" [] []
+              1: L_PAREN@670..671 "(" [] []
+              2: CSS_PARAMETER_LIST@671..676
+                0: CSS_PARAMETER@671..676
+                  0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@671..676
                     0: CSS_COMPONENT_VALUE_LIST@671..676
                       0: CSS_REGULAR_DIMENSION@671..676
-                        0: CSS_NUMBER@671..674
-                          0: CSS_NUMBER_LITERAL@671..674 "200" [] []
-                        1: CSS_IDENTIFIER@674..676
-                          0: IDENT@674..676 "px" [] []
-                3: R_PAREN@676..677 ")" [] []
+                        0: CSS_NUMBER_LITERAL@671..674 "200" [] []
+                        1: IDENT@674..676 "px" [] []
+              3: R_PAREN@676..677 ")" [] []
           2: R_PAREN@677..679 ")" [] [Whitespace(" ")]
         3: CSS_RULE_LIST_BLOCK@679..682
           0: L_CURLY@679..681 "{" [] [Whitespace(" ")]
@@ -1079,10 +1021,8 @@ CssRoot {
             1: CSS_QUERY_FEATURE_RANGE_COMPARISON@703..706
               0: LTEQ@703..706 "<=" [] [Whitespace(" ")]
             2: CSS_REGULAR_DIMENSION@706..712
-              0: CSS_NUMBER@706..709
-                0: CSS_NUMBER_LITERAL@706..709 "150" [] []
-              1: CSS_IDENTIFIER@709..712
-                0: IDENT@709..712 "px" [] [Whitespace(" ")]
+              0: CSS_NUMBER_LITERAL@706..709 "150" [] []
+              1: IDENT@709..712 "px" [] [Whitespace(" ")]
           2: R_PAREN@712..714 ")" [] [Whitespace(" ")]
         3: CSS_RULE_LIST_BLOCK@714..718
           0: L_CURLY@714..717 "{" [] [Whitespace("  ")]
@@ -1097,10 +1037,8 @@ CssRoot {
           0: L_PAREN@730..732 "(" [] [Whitespace(" ")]
           1: CSS_QUERY_FEATURE_REVERSE_RANGE@732..747
             0: CSS_REGULAR_DIMENSION@732..738
-              0: CSS_NUMBER@732..735
-                0: CSS_NUMBER_LITERAL@732..735 "150" [] []
-              1: CSS_IDENTIFIER@735..738
-                0: IDENT@735..738 "px" [] [Whitespace(" ")]
+              0: CSS_NUMBER_LITERAL@732..735 "150" [] []
+              1: IDENT@735..738 "px" [] [Whitespace(" ")]
             1: CSS_QUERY_FEATURE_RANGE_COMPARISON@738..741
               0: LTEQ@738..741 "<=" [] [Whitespace(" ")]
             2: CSS_IDENTIFIER@741..747
@@ -1110,7 +1048,30 @@ CssRoot {
           0: L_CURLY@749..752 "{" [] [Whitespace("  ")]
           1: CSS_RULE_LIST@752..752
           2: R_CURLY@752..753 "}" [] []
-  2: EOF@753..754 "" [Newline("\n")] []
+    17: CSS_AT_RULE@753..805
+      0: AT@753..756 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_CONTAINER_AT_RULE@756..805
+        0: CONTAINER_KW@756..766 "container" [] [Whitespace(" ")]
+        1: CSS_CUSTOM_IDENTIFIER@766..780
+          0: IDENT@766..780 "--dashed-name" [] [Whitespace(" ")]
+        2: CSS_CONTAINER_NOT_QUERY@780..801
+          0: NOT_KW@780..784 "not" [] [Whitespace(" ")]
+          1: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@784..801
+            0: L_PAREN@784..785 "(" [] []
+            1: CSS_QUERY_FEATURE_RANGE@785..799
+              0: CSS_IDENTIFIER@785..791
+                0: IDENT@785..791 "width" [] [Whitespace(" ")]
+              1: CSS_QUERY_FEATURE_RANGE_COMPARISON@791..794
+                0: LTEQ@791..794 "<=" [] [Whitespace(" ")]
+              2: CSS_REGULAR_DIMENSION@794..799
+                0: CSS_NUMBER_LITERAL@794..797 "500" [] []
+                1: IDENT@797..799 "px" [] []
+            2: R_PAREN@799..801 ")" [] [Whitespace(" ")]
+        3: CSS_RULE_LIST_BLOCK@801..805
+          0: L_CURLY@801..804 "{" [] [Whitespace("  ")]
+          1: CSS_RULE_LIST@804..804
+          2: R_CURLY@804..805 "}" [] []
+  2: EOF@805..805 "" [] []
 
 ```
 

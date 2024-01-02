@@ -1,0 +1,43 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/color/hex_colors.css
+---
+
+# Input
+
+```css
+div {
+    color: #FFF;
+    color: #aBcDEf;
+    color: #00112233;
+    color: #0a3FE1;
+    color: #FFF9;
+}
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+-----
+
+```css
+div {
+	color: #fff;
+	color: #abcdef;
+	color: #00112233;
+	color: #0a3fe1;
+	color: #fff9;
+}
+```
+
+

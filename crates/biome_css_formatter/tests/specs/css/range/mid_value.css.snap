@@ -1,0 +1,36 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/range/mid_value.css
+---
+
+# Input
+
+```css
+div {
+    border  :   1px   solid  green   ;
+}
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+-----
+
+```css
+div {
+    border: 1px solid green   ;
+}
+```
+
+

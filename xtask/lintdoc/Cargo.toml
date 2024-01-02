@@ -19,3 +19,6 @@ biome_service      = { workspace = true }
 convert_case       = "0.6.0"
 pulldown-cmark     = { version = "0.9", default-features = false }
 xtask              = { path = '../', version = "0.0" }
+
+[lints]
+workspace = true
