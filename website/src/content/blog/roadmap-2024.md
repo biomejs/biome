@@ -138,6 +138,13 @@ The triangle of the logo represents the mountains - **soil** -, and the curly sh
 
 With the Roadmap 2024, we also publish a new version. This version has few features around the CLI and **many** fixes in our formatter. Our TypeScript, JSX and JavaScript formatting has surpassed the **97% compatibility rate** with Prettier.
 
+Update Biome using the following commands:
+
+```shell
+npm i @biomejs/biome@latest --exact
+npx @biomejs/biome migrate
+```
+
 ### New features
 
 - Process only the files that were changed.
