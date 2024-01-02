@@ -815,15 +815,17 @@ CssRoot {
                                 l_curly_token: L_CURLY@780..781 "{" [] [],
                                 declarations: CssDeclarationList [
                                     CssDeclaration {
-                                        name: CssIdentifier {
-                                            value_token: IDENT@781..802 "background-color" [Newline("\n"), Whitespace("\t\t\t\t")] [],
-                                        },
-                                        colon_token: COLON@802..804 ":" [] [Whitespace(" ")],
-                                        value: CssComponentValueList [
-                                            CssIdentifier {
-                                                value_token: IDENT@804..811 "skyblue" [] [],
+                                        property: CssGenericProperty {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@781..802 "background-color" [Newline("\n"), Whitespace("\t\t\t\t")] [],
                                             },
-                                        ],
+                                            colon_token: COLON@802..804 ":" [] [Whitespace(" ")],
+                                            value: CssGenericComponentValueList [
+                                                CssIdentifier {
+                                                    value_token: IDENT@804..811 "skyblue" [] [],
+                                                },
+                                            ],
+                                        },
                                         important: missing (optional),
                                     },
                                     SEMICOLON@811..812 ";" [] [],
@@ -848,15 +850,17 @@ CssRoot {
                                 l_curly_token: L_CURLY@823..824 "{" [] [],
                                 declarations: CssDeclarationList [
                                     CssDeclaration {
-                                        name: CssIdentifier {
-                                            value_token: IDENT@824..845 "background-color" [Newline("\n"), Whitespace("\t\t\t\t")] [],
-                                        },
-                                        colon_token: COLON@845..847 ":" [] [Whitespace(" ")],
-                                        value: CssComponentValueList [
-                                            CssIdentifier {
-                                                value_token: IDENT@847..854 "skyblue" [] [],
+                                        property: CssGenericProperty {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@824..845 "background-color" [Newline("\n"), Whitespace("\t\t\t\t")] [],
                                             },
-                                        ],
+                                            colon_token: COLON@845..847 ":" [] [Whitespace(" ")],
+                                            value: CssGenericComponentValueList [
+                                                CssIdentifier {
+                                                    value_token: IDENT@847..854 "skyblue" [] [],
+                                                },
+                                            ],
+                                        },
                                         important: missing (optional),
                                     },
                                     SEMICOLON@854..855 ";" [] [],
@@ -1409,13 +1413,14 @@ CssRoot {
                 0: L_CURLY@780..781 "{" [] []
                 1: CSS_DECLARATION_LIST@781..812
                   0: CSS_DECLARATION@781..811
-                    0: CSS_IDENTIFIER@781..802
-                      0: IDENT@781..802 "background-color" [Newline("\n"), Whitespace("\t\t\t\t")] []
-                    1: COLON@802..804 ":" [] [Whitespace(" ")]
-                    2: CSS_COMPONENT_VALUE_LIST@804..811
-                      0: CSS_IDENTIFIER@804..811
-                        0: IDENT@804..811 "skyblue" [] []
-                    3: (empty)
+                    0: CSS_GENERIC_PROPERTY@781..811
+                      0: CSS_IDENTIFIER@781..802
+                        0: IDENT@781..802 "background-color" [Newline("\n"), Whitespace("\t\t\t\t")] []
+                      1: COLON@802..804 ":" [] [Whitespace(" ")]
+                      2: CSS_GENERIC_COMPONENT_VALUE_LIST@804..811
+                        0: CSS_IDENTIFIER@804..811
+                          0: IDENT@804..811 "skyblue" [] []
+                    1: (empty)
                   1: SEMICOLON@811..812 ";" [] []
                 2: R_CURLY@812..816 "}" [Newline("\n"), Whitespace("\t\t")] []
             1: CSS_RULE@816..859
@@ -1431,13 +1436,14 @@ CssRoot {
                 0: L_CURLY@823..824 "{" [] []
                 1: CSS_DECLARATION_LIST@824..855
                   0: CSS_DECLARATION@824..854
-                    0: CSS_IDENTIFIER@824..845
-                      0: IDENT@824..845 "background-color" [Newline("\n"), Whitespace("\t\t\t\t")] []
-                    1: COLON@845..847 ":" [] [Whitespace(" ")]
-                    2: CSS_COMPONENT_VALUE_LIST@847..854
-                      0: CSS_IDENTIFIER@847..854
-                        0: IDENT@847..854 "skyblue" [] []
-                    3: (empty)
+                    0: CSS_GENERIC_PROPERTY@824..854
+                      0: CSS_IDENTIFIER@824..845
+                        0: IDENT@824..845 "background-color" [Newline("\n"), Whitespace("\t\t\t\t")] []
+                      1: COLON@845..847 ":" [] [Whitespace(" ")]
+                      2: CSS_GENERIC_COMPONENT_VALUE_LIST@847..854
+                        0: CSS_IDENTIFIER@847..854
+                          0: IDENT@847..854 "skyblue" [] []
+                    1: (empty)
                   1: SEMICOLON@854..855 ";" [] []
                 2: R_CURLY@855..859 "}" [Newline("\n"), Whitespace("\t\t")] []
           2: R_CURLY@859..861 "}" [Newline("\n")] []
