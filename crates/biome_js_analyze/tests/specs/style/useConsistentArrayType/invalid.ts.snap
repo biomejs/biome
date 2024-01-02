@@ -22,7 +22,7 @@ let readonlyInvalid6: ReadonlyArray<ReadonlyArray<ReadonlyArray<number>>>;
 
 # Diagnostics
 ```
-invalid.ts:1:12 lint/style/useShorthandArrayType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:1:12 lint/style/useConsistentArrayType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use shorthand T[] syntax instead of Array<T> syntax.
   
@@ -42,7 +42,7 @@ invalid.ts:1:12 lint/style/useShorthandArrayType  FIXABLE  ━━━━━━━
 ```
 
 ```
-invalid.ts:2:15 lint/style/useShorthandArrayType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:2:15 lint/style/useConsistentArrayType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use shorthand T[] syntax instead of Array<T> syntax.
   
@@ -64,7 +64,7 @@ invalid.ts:2:15 lint/style/useShorthandArrayType  FIXABLE  ━━━━━━━
 ```
 
 ```
-invalid.ts:2:26 lint/style/useShorthandArrayType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:2:26 lint/style/useConsistentArrayType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use shorthand T[] syntax instead of Array<T> syntax.
   
@@ -86,7 +86,7 @@ invalid.ts:2:26 lint/style/useShorthandArrayType  FIXABLE  ━━━━━━━
 ```
 
 ```
-invalid.ts:3:23 lint/style/useShorthandArrayType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:3:23 lint/style/useConsistentArrayType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use shorthand T[] syntax instead of Array<T> syntax.
   
@@ -110,7 +110,7 @@ invalid.ts:3:23 lint/style/useShorthandArrayType  FIXABLE  ━━━━━━━
 ```
 
 ```
-invalid.ts:4:15 lint/style/useShorthandArrayType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:4:15 lint/style/useConsistentArrayType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use shorthand T[] syntax instead of Array<T> syntax.
   
@@ -134,7 +134,7 @@ invalid.ts:4:15 lint/style/useShorthandArrayType  FIXABLE  ━━━━━━━
 ```
 
 ```
-invalid.ts:5:15 lint/style/useShorthandArrayType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:5:15 lint/style/useConsistentArrayType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use shorthand T[] syntax instead of Array<T> syntax.
   
@@ -158,7 +158,7 @@ invalid.ts:5:15 lint/style/useShorthandArrayType  FIXABLE  ━━━━━━━
 ```
 
 ```
-invalid.ts:7:23 lint/style/useShorthandArrayType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:7:23 lint/style/useConsistentArrayType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use shorthand readonly T[] syntax instead of ReadonlyArray<T> syntax.
   
@@ -182,7 +182,7 @@ invalid.ts:7:23 lint/style/useShorthandArrayType  FIXABLE  ━━━━━━━
 ```
 
 ```
-invalid.ts:8:31 lint/style/useShorthandArrayType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:8:31 lint/style/useConsistentArrayType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use shorthand readonly T[] syntax instead of ReadonlyArray<T> syntax.
   
@@ -205,7 +205,7 @@ invalid.ts:8:31 lint/style/useShorthandArrayType  FIXABLE  ━━━━━━━
 ```
 
 ```
-invalid.ts:9:23 lint/style/useShorthandArrayType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:9:23 lint/style/useConsistentArrayType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use shorthand readonly T[] syntax instead of ReadonlyArray<T> syntax.
   
@@ -229,7 +229,7 @@ invalid.ts:9:23 lint/style/useShorthandArrayType  FIXABLE  ━━━━━━━
 ```
 
 ```
-invalid.ts:10:23 lint/style/useShorthandArrayType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:10:23 lint/style/useConsistentArrayType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use shorthand readonly T[] syntax instead of ReadonlyArray<T> syntax.
   
@@ -253,7 +253,7 @@ invalid.ts:10:23 lint/style/useShorthandArrayType  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.ts:11:23 lint/style/useShorthandArrayType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:11:23 lint/style/useConsistentArrayType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use shorthand readonly T[] syntax instead of ReadonlyArray<T> syntax.
   
@@ -277,7 +277,7 @@ invalid.ts:11:23 lint/style/useShorthandArrayType  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.ts:11:37 lint/style/useShorthandArrayType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:11:37 lint/style/useConsistentArrayType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use shorthand readonly T[] syntax instead of ReadonlyArray<T> syntax.
   
@@ -301,7 +301,7 @@ invalid.ts:11:37 lint/style/useShorthandArrayType  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.ts:12:23 lint/style/useShorthandArrayType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:12:23 lint/style/useConsistentArrayType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use shorthand readonly T[] syntax instead of ReadonlyArray<T> syntax.
   
@@ -323,7 +323,7 @@ invalid.ts:12:23 lint/style/useShorthandArrayType  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.ts:12:37 lint/style/useShorthandArrayType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:12:37 lint/style/useConsistentArrayType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use shorthand readonly T[] syntax instead of ReadonlyArray<T> syntax.
   
@@ -345,7 +345,7 @@ invalid.ts:12:37 lint/style/useShorthandArrayType  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.ts:12:51 lint/style/useShorthandArrayType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:12:51 lint/style/useConsistentArrayType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use shorthand readonly T[] syntax instead of ReadonlyArray<T> syntax.
   

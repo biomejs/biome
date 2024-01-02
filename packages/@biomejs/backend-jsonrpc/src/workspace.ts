@@ -1065,6 +1065,10 @@ export interface Style {
 	 */
 	useCollapsedElseIf?: RuleConfiguration;
 	/**
+	 * Require consistently using either T[] or Array<T>
+	 */
+	useConsistentArrayType?: RuleConfiguration;
+	/**
 	 * Require const declarations for variables that are never reassigned after declared.
 	 */
 	useConst?: RuleConfiguration;
@@ -1673,6 +1677,7 @@ export type Category =
 	| "lint/style/useBlockStatements"
 	| "lint/style/useCollapsedElseIf"
 	| "lint/style/useConst"
+	| "lint/style/useConsistentArrayType"
 	| "lint/style/useDefaultParameterLast"
 	| "lint/style/useEnumInitializers"
 	| "lint/style/useExponentiationOperator"
