@@ -9,13 +9,13 @@ Several tools exist to simplify the management of Git Hooks.
 In the following sections we introduce some of them and how they can be used with Biome.
 
 
-## lefthook
+## Lefthook
 
-[lefthook](https://github.com/evilmartians/lefthook) provides a fast, cross-platform, and dependency-free hook manager.
+[Lefthook](https://github.com/evilmartians/lefthook) provides a fast, cross-platform, and dependency-free hook manager.
 It can be [installed via NPM](https://github.com/evilmartians/lefthook#install).
 
 Add a file named `lefthook.yml` at the root of your Git repository.
-Some examples of _lefthook_ configurations:
+Some examples of _Lefthook_ configurations:
 
 - Check formatting and lint before committing
 
@@ -58,7 +58,7 @@ If you wish more control over which files are handled, you should use `glob`.
 Once configured, run `lefthook install` to set up the hooks.
 
 If your project contains a `package.json`,
-you can automatically set up _lefthook_ hooks upon package installation using `scripts.postinstall`:
+you can automatically set up _Lefthook_ hooks upon package installation using `scripts.postinstall`:
 
 ```json title="package.json"
 {
