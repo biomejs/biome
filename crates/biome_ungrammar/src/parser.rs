@@ -109,7 +109,11 @@ fn node(p: &mut Parser) -> Result<()> {
 }
 
 fn rule(p: &mut Parser) -> Result<Rule> {
-    if let Some(lexer::Token { kind: TokenKind::Pipe, loc }) = p.peek() {
+    if let Some(lexer::Token {
+        kind: TokenKind::Pipe,
+        loc,
+    }) = p.peek()
+    {
         bail!(
             *loc,
             "The first element in a sequence of productions or alternatives \
