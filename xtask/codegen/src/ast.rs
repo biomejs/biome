@@ -24,8 +24,8 @@ use crate::{
     kinds_src::{AstEnumSrc, AstNodeSrc, JS_KINDS_SRC},
     update, LanguageKind,
 };
+use biome_ungrammar::{Grammar, Rule, Token};
 use std::fmt::Write;
-use ungrammar::{Grammar, Rule, Token};
 use xtask::{project_root, Result};
 // these node won't generate any code
 pub const SYNTAX_ELEMENT_TYPE: &str = "SyntaxElement";
