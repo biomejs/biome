@@ -51,11 +51,6 @@ impl<'source> CssParser<'source> {
         &mut self.state
     }
 
-    #[inline]
-    fn is_speculative_parsing(&self) -> bool {
-        self.state.speculative_parsing
-    }
-
     pub fn checkpoint(&self) -> CssParserCheckpoint {
         CssParserCheckpoint {
             context: self.context.checkpoint(),
