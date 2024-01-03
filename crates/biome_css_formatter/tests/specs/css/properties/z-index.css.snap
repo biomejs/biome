@@ -1,0 +1,51 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/properties/z-index.css
+---
+
+# Input
+
+```css
+div {
+    z-index : INherit
+    
+    ;
+
+    z-index
+    :
+    Auto  ;
+
+    z-index  : -44;
+    z-index:   0  ;
+    z-index:   1  ;
+}
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+-----
+
+```css
+div {
+	z-index: inherit;
+
+	z-index: auto;
+
+	z-index: -44;
+	z-index: 0;
+	z-index: 1;
+}
+```
+
+

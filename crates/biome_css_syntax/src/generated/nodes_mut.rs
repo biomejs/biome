@@ -3,6 +3,26 @@
 use crate::{generated::nodes::*, CssSyntaxToken as SyntaxToken};
 use biome_rowan::AstNode;
 use std::iter::once;
+impl CssAllProperty {
+    pub fn with_name(self, element: CssIdentifier) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_colon_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_value(self, element: AnyCssAllPropertyValue) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
 impl CssAtRule {
     pub fn with_at_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
@@ -82,6 +102,14 @@ impl CssAttributeSelector {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(3usize..=3usize, once(Some(element.into()))),
+        )
+    }
+}
+impl CssAuto {
+    pub fn with_value_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
 }
@@ -2087,6 +2115,17 @@ impl CssUnknownDimension {
         )
     }
 }
+impl CssUnknownPropertyValue {
+    pub fn with_css_generic_component_value_list(
+        self,
+        element: CssGenericComponentValueList,
+    ) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
 impl CssUrlFunction {
     pub fn with_url_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
@@ -2118,6 +2157,34 @@ impl CssUrlValueRaw {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+}
+impl CssWideKeyword {
+    pub fn with_value_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+}
+impl CssZIndexProperty {
+    pub fn with_name(self, element: CssIdentifier) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_colon_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_value(self, element: AnyCssZIndexPropertyValue) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
         )
     }
 }

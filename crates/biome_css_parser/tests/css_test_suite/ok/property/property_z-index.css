@@ -1,0 +1,27 @@
+div {
+    /* Global values */
+    z-index: inherit;
+    z-index: initial;
+    z-index: unset;
+    z-index: revert;
+    z-index: revert-layer;
+
+    /* auto */
+    z-index: auto;
+
+    /* <integer> */
+    z-index: 1;
+    z-index: 0;
+    z-index: -1;
+    z-index: -123456;
+    z-index: 444567;
+
+
+    /* Incorrect values become generic */
+    z-index: 10s;
+    z-index: one-value;
+    z-index: multiple values;
+    z-index: delimited, values;
+    z-index: delimited / slash / values;
+    z-index: mixed, delimiters / can be, used;
+}

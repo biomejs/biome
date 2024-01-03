@@ -862,6 +862,7 @@ impl<'src> CssLexer<'src> {
             b"style" => STYLE_KW,
             b"font-face" => FONT_FACE_KW,
             b"font-palette-values" => FONT_PALETTE_VALUES_KW,
+            b"auto" => AUTO_KW,
             // CSS-Wide keywords
             b"initial" => INITIAL_KW,
             b"inherit" => INHERIT_KW,

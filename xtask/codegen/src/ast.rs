@@ -182,6 +182,20 @@ pub(crate) fn load_json_ast() -> AstSrc {
     make_ast(&grammar)
 }
 
+pub(crate) fn append_css_property_value_implied_alternatives(variants: Vec<String>) -> Vec<String> {
+    let mut cloned = variants.clone();
+    if !cloned.iter().any(|v| v == "CssWideKeyword") {
+        cloned.push(String::from("CssWideKeyword"));
+    }
+    if !cloned.iter().any(|v| v == "CssUnknownPropertyValue") {
+        cloned.push(String::from("CssUnknownPropertyValue"));
+    }
+    if !cloned.iter().any(|v| v == "CssBogusPropertyValue") {
+        cloned.push(String::from("CssBogusPropertyValue"));
+    }
+    cloned
+}
+
 fn make_ast(grammar: &Grammar) -> AstSrc {
     let mut ast = AstSrc::default();
 
@@ -193,12 +207,24 @@ fn make_ast(grammar: &Grammar) -> AstSrc {
 
         let rule = &grammar[node].rule;
 
-        match classify_node_rule(grammar, rule) {
-            NodeRuleClassification::Union(variants) => ast.unions.push(AstEnumSrc {
-                documentation: vec![],
-                name,
-                variants,
-            }),
+        match classify_node_rule(grammar, rule, &name) {
+            NodeRuleClassification::Union(variants) => {
+                // TODO: This is CSS-specific and would be better handled with a per-language
+                // method for classifying or modifying rules before generation.
+                let variants = if name.trim().starts_with("AnyCss")
+                    && name.trim().ends_with("PropertyValue")
+                {
+                    append_css_property_value_implied_alternatives(variants)
+                } else {
+                    variants
+                };
+
+                ast.unions.push(AstEnumSrc {
+                    documentation: vec![],
+                    name,
+                    variants,
+                })
+            }
             NodeRuleClassification::Node => {
                 let mut fields = vec![];
                 handle_rule(&mut fields, grammar, rule, None, false, false);
@@ -266,7 +292,7 @@ enum NodeRuleClassification {
     },
 }
 
-fn classify_node_rule(grammar: &Grammar, rule: &Rule) -> NodeRuleClassification {
+fn classify_node_rule(grammar: &Grammar, rule: &Rule, name: &str) -> NodeRuleClassification {
     match rule {
         // this is for enums
         Rule::Alt(alternatives) => {
@@ -314,6 +340,15 @@ fn classify_node_rule(grammar: &Grammar, rule: &Rule) -> NodeRuleClassification 
             }
         }
         Rule::UnorderedAll(_) | Rule::UnorderedSome(_) => NodeRuleClassification::DynamicNode,
+        Rule::Node(node) if name.starts_with("AnyCss") && name.ends_with("PropertyValue") => {
+            // TODO: This is CSS-specific and would be better handled with a per-language
+            // method for classifying or modifying rules before generation.
+            //
+            // We use the convention `AnyCss*PropertyValue` to automatically inject
+            // additional implicit variants. If there is only one normal production for
+            // the node, then it won't be a `Rule::Alt`, and needs to be handled
+            NodeRuleClassification::Union(vec![grammar[*node].name.clone()])
+        }
         _ => NodeRuleClassification::Node,
     }
 }

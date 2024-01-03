@@ -1,0 +1,53 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/properties/generic.css
+---
+
+# Input
+
+```css
+div {
+    /* Custom property, always generic */
+    unknown-property
+    :
+     one-value ;
+    unknown-property:    multiple   
+     values;
+    unknown-property: delimited
+    , values
+    ;
+        unknown-property   :
+         delimited / slash / values;
+    unknown-property: mixed, delimiters/can   be  ,
+     used
+     ;
+}
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+-----
+
+```css
+div {
+	/* Custom property, always generic */
+	unknown-property: one-value;
+	unknown-property: multiple values;
+	unknown-property: delimited , values;
+	unknown-property: delimited / slash / values;
+	unknown-property: mixed , delimiters / can be , used;
+}
+```
+
+

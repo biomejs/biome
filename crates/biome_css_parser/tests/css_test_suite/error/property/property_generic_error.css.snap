@@ -1,0 +1,185 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+div {
+    unknown: calc(;
+    width: calc(;
+    --custom: calc(;
+}
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selector_token: missing (optional),
+                    simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
+                        ident: CssIdentifier {
+                            value_token: IDENT@0..4 "div" [] [Whitespace(" ")],
+                        },
+                    },
+                    sub_selectors: CssSubSelectorList [],
+                },
+            ],
+            block: CssDeclarationListBlock {
+                l_curly_token: L_CURLY@4..5 "{" [] [],
+                declarations: CssDeclarationList [
+                    CssDeclaration {
+                        property: CssBogusProperty {
+                            items: [
+                                CssIdentifier {
+                                    value_token: IDENT@5..17 "unknown" [Newline("\n"), Whitespace("    ")] [],
+                                },
+                                COLON@17..19 ":" [] [Whitespace(" ")],
+                                CssBogus {
+                                    items: [
+                                        CssBogus {
+                                            items: [
+                                                CssIdentifier {
+                                                    value_token: IDENT@19..23 "calc" [] [],
+                                                },
+                                                L_PAREN@23..24 "(" [] [],
+                                                CssBogus {
+                                                    items: [
+                                                        CssBogusParameter {
+                                                            items: [
+                                                                SEMICOLON@24..25 ";" [] [],
+                                                                IDENT@25..35 "width" [Newline("\n"), Whitespace("    ")] [],
+                                                                COLON@35..37 ":" [] [Whitespace(" ")],
+                                                                IDENT@37..41 "calc" [] [],
+                                                                L_PAREN@41..42 "(" [] [],
+                                                                SEMICOLON@42..43 ";" [] [],
+                                                                IDENT@43..56 "--custom" [Newline("\n"), Whitespace("    ")] [],
+                                                                COLON@56..58 ":" [] [Whitespace(" ")],
+                                                                IDENT@58..62 "calc" [] [],
+                                                                L_PAREN@62..63 "(" [] [],
+                                                                SEMICOLON@63..64 ";" [] [],
+                                                                R_CURLY@64..66 "}" [Newline("\n")] [],
+                                                            ],
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                        important: missing (optional),
+                    },
+                ],
+                r_curly_token: missing (required),
+            },
+        },
+    ],
+    eof_token: EOF@66..66 "" [] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..66
+  0: (empty)
+  1: CSS_RULE_LIST@0..66
+    0: CSS_RULE@0..66
+      0: CSS_SELECTOR_LIST@0..4
+        0: CSS_COMPOUND_SELECTOR@0..4
+          0: (empty)
+          1: CSS_TYPE_SELECTOR@0..4
+            0: (empty)
+            1: CSS_IDENTIFIER@0..4
+              0: IDENT@0..4 "div" [] [Whitespace(" ")]
+          2: CSS_SUB_SELECTOR_LIST@4..4
+      1: CSS_DECLARATION_LIST_BLOCK@4..66
+        0: L_CURLY@4..5 "{" [] []
+        1: CSS_DECLARATION_LIST@5..66
+          0: CSS_DECLARATION@5..66
+            0: CSS_BOGUS_PROPERTY@5..66
+              0: CSS_IDENTIFIER@5..17
+                0: IDENT@5..17 "unknown" [Newline("\n"), Whitespace("    ")] []
+              1: COLON@17..19 ":" [] [Whitespace(" ")]
+              2: CSS_BOGUS@19..66
+                0: CSS_BOGUS@19..66
+                  0: CSS_IDENTIFIER@19..23
+                    0: IDENT@19..23 "calc" [] []
+                  1: L_PAREN@23..24 "(" [] []
+                  2: CSS_BOGUS@24..66
+                    0: CSS_BOGUS_PARAMETER@24..66
+                      0: SEMICOLON@24..25 ";" [] []
+                      1: IDENT@25..35 "width" [Newline("\n"), Whitespace("    ")] []
+                      2: COLON@35..37 ":" [] [Whitespace(" ")]
+                      3: IDENT@37..41 "calc" [] []
+                      4: L_PAREN@41..42 "(" [] []
+                      5: SEMICOLON@42..43 ";" [] []
+                      6: IDENT@43..56 "--custom" [Newline("\n"), Whitespace("    ")] []
+                      7: COLON@56..58 ":" [] [Whitespace(" ")]
+                      8: IDENT@58..62 "calc" [] []
+                      9: L_PAREN@62..63 "(" [] []
+                      10: SEMICOLON@63..64 ";" [] []
+                      11: R_CURLY@64..66 "}" [Newline("\n")] []
+            1: (empty)
+        2: (empty)
+  2: EOF@66..66 "" [] []
+
+```
+
+## Diagnostics
+
+```
+property_generic_error.css:2:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a declaration item but instead found ';
+        width: calc(;
+        --custom: calc(;
+    }'.
+  
+    1 │ div {
+  > 2 │     unknown: calc(;
+      │                   ^
+  > 3 │     width: calc(;
+  > 4 │     --custom: calc(;
+  > 5 │ }
+      │ ^
+  
+  i Expected a declaration item here.
+  
+    1 │ div {
+  > 2 │     unknown: calc(;
+      │                   ^
+  > 3 │     width: calc(;
+  > 4 │     --custom: calc(;
+  > 5 │ }
+      │ ^
+  
+property_generic_error.css:5:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `)` but instead the file ends
+  
+    3 │     width: calc(;
+    4 │     --custom: calc(;
+  > 5 │ }
+      │  
+  
+  i the file ends here
+  
+    3 │     width: calc(;
+    4 │     --custom: calc(;
+  > 5 │ }
+      │  
+  
+```
+
+
