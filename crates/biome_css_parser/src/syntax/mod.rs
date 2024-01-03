@@ -612,7 +612,10 @@ pub(crate) fn try_parse<T, E>(
     func: impl FnOnce(&mut CssParser) -> Result<T, E>,
 ) -> Result<T, E> {
     let checkpoint = p.checkpoint();
+    let old_speculative_parsing = std::mem::replace(&mut p.state_mut().speculative_parsing, true);
+
     let res = func(p);
+    p.state_mut().speculative_parsing = old_speculative_parsing;
 
     if res.is_err() {
         p.rewind(checkpoint);

@@ -13,6 +13,7 @@ pub use parser::CssParserOptions;
 mod lexer;
 mod parser;
 mod prelude;
+mod state;
 mod syntax;
 mod token_source;
 
