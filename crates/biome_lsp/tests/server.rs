@@ -204,6 +204,21 @@ impl Server {
         .await
     }
 
+    async fn open_untitled_document(&mut self, text: impl Display) -> Result<()> {
+        self.notify(
+            "textDocument/didOpen",
+            DidOpenTextDocumentParams {
+                text_document: TextDocumentItem {
+                    uri: url!("untitled-1"),
+                    language_id: String::from("javascript"),
+                    version: 0,
+                    text: text.to_string(),
+                },
+            },
+        )
+        .await
+    }
+
     /// Opens a document with given contents and given name. The name must contain the extension too
     async fn open_named_document(
         &mut self,
@@ -596,6 +611,88 @@ async fn pull_diagnostics() -> Result<()> {
                     related_information: Some(vec![lsp::DiagnosticRelatedInformation {
                         location: lsp::Location {
                             uri: url!("document.js"),
+                            range: lsp::Range {
+                                start: lsp::Position {
+                                    line: 0,
+                                    character: 5,
+                                },
+                                end: lsp::Position {
+                                    line: 0,
+                                    character: 7,
+                                },
+                            },
+                        },
+                        message: String::new(),
+                    }]),
+                    tags: None,
+                    data: None,
+                }],
+            }
+        ))
+    );
+
+    server.close_document().await?;
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn pull_diagnostics_from_new_file() -> Result<()> {
+    let factory = ServerFactory::default();
+    let (service, client) = factory.create(None).into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, mut receiver) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    server.open_untitled_document("if(a == b) {}").await?;
+
+    let notification = tokio::select! {
+        msg = receiver.next() => msg,
+        _ = sleep(Duration::from_secs(1)) => {
+            panic!("timed out waiting for the server to send diagnostics")
+        }
+    };
+
+    assert_eq!(
+        notification,
+        Some(ServerNotification::PublishDiagnostics(
+            PublishDiagnosticsParams {
+                uri: url!("untitled-1"),
+                version: Some(0),
+                diagnostics: vec![lsp::Diagnostic {
+                    range: lsp::Range {
+                        start: lsp::Position {
+                            line: 0,
+                            character: 5,
+                        },
+                        end: lsp::Position {
+                            line: 0,
+                            character: 7,
+                        },
+                    },
+                    severity: Some(lsp::DiagnosticSeverity::ERROR),
+                    code: Some(lsp::NumberOrString::String(String::from(
+                        "lint/suspicious/noDoubleEquals",
+                    ))),
+                    code_description: Some(CodeDescription {
+                        href: Url::parse("https://biomejs.dev/linter/rules/no-double-equals")
+                            .unwrap()
+                    }),
+                    source: Some(String::from("biome")),
+                    message: String::from(
+                        "Use === instead of ==.\n== is only allowed when comparing against `null`",
+                    ),
+                    related_information: Some(vec![lsp::DiagnosticRelatedInformation {
+                        location: lsp::Location {
+                            uri: url!("untitled-1"),
                             range: lsp::Range {
                                 start: lsp::Position {
                                     line: 0,

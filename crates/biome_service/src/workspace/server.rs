@@ -29,7 +29,7 @@ use dashmap::{mapref::entry::Entry, DashMap};
 use std::ffi::OsStr;
 use std::path::Path;
 use std::{panic::RefUnwindSafe, sync::RwLock};
-use tracing::{info_span, trace};
+use tracing::{debug, info, info_span, trace};
 
 pub(super) struct WorkspaceServer {
     /// features available throughout the application
@@ -87,6 +87,7 @@ impl WorkspaceServer {
     fn get_file_capabilities(&self, path: &RomePath) -> Capabilities {
         let language = self.get_language(path);
 
+        debug!("File capabilities: {:?} {:?}", &language, &path);
         self.features.get_capabilities(path, language)
     }
 
@@ -455,6 +456,7 @@ impl Workspace for WorkspaceServer {
     }
 
     /// Retrieves the list of diagnostics associated with a file
+    #[tracing::instrument(level = "debug", skip(self))]
     fn pull_diagnostics(
         &self,
         params: PullDiagnosticsParams,
@@ -491,6 +493,7 @@ impl Workspace for WorkspaceServer {
                     settings: self.settings(),
                     max_diagnostics: params.max_diagnostics,
                     path: &params.path,
+                    language: self.get_language(&params.path),
                 });
 
                 (
@@ -509,6 +512,7 @@ impl Workspace for WorkspaceServer {
             (parse_diagnostics, errors, 0)
         };
 
+        info!("Pulled {:?} diagnostic(s)", diagnostics.len());
         Ok(PullDiagnosticsResult {
             diagnostics: diagnostics
                 .into_iter()
@@ -524,6 +528,7 @@ impl Workspace for WorkspaceServer {
 
     /// Retrieves the list of code actions available for a given cursor
     /// position within a file
+    #[tracing::instrument(level = "debug", skip(self))]
     fn pull_actions(&self, params: PullActionsParams) -> Result<PullActionsResult, WorkspaceError> {
         let capabilities = self.get_file_capabilities(&params.path);
         let code_actions = capabilities
