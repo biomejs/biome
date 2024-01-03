@@ -19,16 +19,16 @@ upgrade-tools:
 	cargo binstall cargo-insta cargo-nextest taplo-cli wasm-pack wasm-tools cargo-workspaces --force
 
 # Generate all files across crates and tools. You rarely want to use it locally.
-codegen:
+gen:
   cargo codegen all
   cargo codegen-configuration
   cargo lintdoc
-  just codegen-bindings
-  cargo codegen-website
+  just gen-bindings
+  jest gen-web
   cargo format
 
 # Generates TypeScript types and JSON schema of the configuration
-codegen-bindings:
+gen-bindings:
   cargo codegen-schema
   cargo codegen-bindings
 
@@ -36,7 +36,7 @@ codegen-bindings:
 gen-lint:
   cargo codegen analyzer
   cargo codegen-configuration
-  just codegen-bindings
+  just gen-bindings
   cargo lintdoc
 
 # Generates code generated files for the website

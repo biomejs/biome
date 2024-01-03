@@ -14,7 +14,7 @@ use biome_console::markup;
 use biome_diagnostics::{Diagnostic, Severity};
 use biome_formatter::Printed;
 use biome_fs::RomePath;
-use biome_js_syntax::{TextRange, TextSize};
+use biome_js_syntax::{JsFileSource, TextRange, TextSize};
 use biome_parser::AnyParse;
 use biome_rowan::NodeCache;
 pub use javascript::JsFormatterSettings;
@@ -162,6 +162,16 @@ impl Language {
     pub const fn is_css_like(&self) -> bool {
         matches!(self, Language::Css)
     }
+
+    pub fn as_js_file_source(&self) -> Option<JsFileSource> {
+        match self {
+            Language::JavaScript => Some(JsFileSource::js_module()),
+            Language::JavaScriptReact => Some(JsFileSource::jsx()),
+            Language::TypeScript => Some(JsFileSource::tsx()),
+            Language::TypeScriptReact => Some(JsFileSource::tsx()),
+            Language::Json | Language::Jsonc | Language::Css | Language::Unknown => None,
+        }
+    }
 }
 
 impl biome_console::fmt::Display for Language {
@@ -252,6 +262,7 @@ pub(crate) struct LintParams<'a> {
     pub(crate) filter: AnalysisFilter<'a>,
     pub(crate) rules: Option<&'a Rules>,
     pub(crate) settings: SettingsHandle<'a>,
+    pub(crate) language: Language,
     pub(crate) max_diagnostics: u64,
     pub(crate) path: &'a RomePath,
 }

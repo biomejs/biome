@@ -43,7 +43,7 @@ use biome_rowan::{AstNode, BatchMutationExt, Direction, FileSource, NodeCache};
 use std::borrow::Cow;
 use std::fmt::Debug;
 use std::path::PathBuf;
-use tracing::{debug, error, info, trace};
+use tracing::{debug, debug_span, error, info, trace};
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -267,89 +267,101 @@ fn debug_formatter_ir(
 }
 
 fn lint(params: LintParams) -> LintResults {
-    let Ok(file_source) = params.parse.file_source(params.path) else {
-        return LintResults {
-            errors: 0,
-            diagnostics: vec![],
-            skipped_diagnostics: 0,
-        };
-    };
-    let tree = params.parse.tree();
-    let mut diagnostics = params.parse.into_diagnostics();
-
-    let analyzer_options =
-        compute_analyzer_options(&params.settings, PathBuf::from(params.path.as_path()));
-
-    let mut diagnostic_count = diagnostics.len() as u64;
-    let mut errors = diagnostics
-        .iter()
-        .filter(|diag| diag.severity() <= Severity::Error)
-        .count();
-
-    let has_lint = params.filter.categories.contains(RuleCategories::LINT);
-
-    info!("Analyze file {}", params.path.display());
-    let (_, analyze_diagnostics) = analyze(
-        &tree,
-        params.filter,
-        &analyzer_options,
-        file_source,
-        |signal| {
-            if let Some(mut diagnostic) = signal.diagnostic() {
-                // Do not report unused suppression comment diagnostics if this is a syntax-only analyzer pass
-                if !has_lint && diagnostic.category() == Some(category!("suppressions/unused")) {
-                    return ControlFlow::<Never>::Continue(());
+    debug_span!("Linting JavaScript file", path =? params.path, language =? params.language)
+        .in_scope(move || {
+            let file_source = match params.parse.file_source(params.path) {
+                Ok(file_source) => file_source,
+                Err(_) => {
+                    if let Some(file_source) = params.language.as_js_file_source() {
+                        file_source
+                    } else {
+                        return LintResults {
+                            errors: 0,
+                            diagnostics: vec![],
+                            skipped_diagnostics: 0,
+                        };
+                    }
                 }
+            };
+            let tree = params.parse.tree();
+            let mut diagnostics = params.parse.into_diagnostics();
 
-                diagnostic_count += 1;
+            let analyzer_options =
+                compute_analyzer_options(&params.settings, PathBuf::from(params.path.as_path()));
 
-                // We do now check if the severity of the diagnostics should be changed.
-                // The configuration allows to change the severity of the diagnostics emitted by rules.
-                let severity = diagnostic
-                    .category()
-                    .filter(|category| category.name().starts_with("lint/"))
-                    .map(|category| {
-                        params
-                            .rules
-                            .and_then(|rules| rules.get_severity_from_code(category))
-                            .unwrap_or(Severity::Warning)
-                    })
-                    .unwrap_or_else(|| diagnostic.severity());
+            let mut diagnostic_count = diagnostics.len() as u64;
+            let mut errors = diagnostics
+                .iter()
+                .filter(|diag| diag.severity() <= Severity::Error)
+                .count();
 
-                if severity >= Severity::Error {
-                    errors += 1;
-                }
+            let has_lint = params.filter.categories.contains(RuleCategories::LINT);
 
-                if diagnostic_count <= params.max_diagnostics {
-                    for action in signal.actions() {
-                        if !action.is_suppression() {
-                            diagnostic = diagnostic.add_code_suggestion(action.into());
+            info!("Analyze file {}", params.path.display());
+            let (_, analyze_diagnostics) = analyze(
+                &tree,
+                params.filter,
+                &analyzer_options,
+                file_source,
+                |signal| {
+                    if let Some(mut diagnostic) = signal.diagnostic() {
+                        // Do not report unused suppression comment diagnostics if this is a syntax-only analyzer pass
+                        if !has_lint
+                            && diagnostic.category() == Some(category!("suppressions/unused"))
+                        {
+                            return ControlFlow::<Never>::Continue(());
+                        }
+
+                        diagnostic_count += 1;
+
+                        // We do now check if the severity of the diagnostics should be changed.
+                        // The configuration allows to change the severity of the diagnostics emitted by rules.
+                        let severity = diagnostic
+                            .category()
+                            .filter(|category| category.name().starts_with("lint/"))
+                            .map(|category| {
+                                params
+                                    .rules
+                                    .and_then(|rules| rules.get_severity_from_code(category))
+                                    .unwrap_or(Severity::Warning)
+                            })
+                            .unwrap_or_else(|| diagnostic.severity());
+
+                        if severity >= Severity::Error {
+                            errors += 1;
+                        }
+
+                        if diagnostic_count <= params.max_diagnostics {
+                            for action in signal.actions() {
+                                if !action.is_suppression() {
+                                    diagnostic = diagnostic.add_code_suggestion(action.into());
+                                }
+                            }
+
+                            let error = diagnostic.with_severity(severity);
+
+                            diagnostics.push(biome_diagnostics::serde::Diagnostic::new(error));
                         }
                     }
 
-                    let error = diagnostic.with_severity(severity);
+                    ControlFlow::<Never>::Continue(())
+                },
+            );
 
-                    diagnostics.push(biome_diagnostics::serde::Diagnostic::new(error));
-                }
+            diagnostics.extend(
+                analyze_diagnostics
+                    .into_iter()
+                    .map(biome_diagnostics::serde::Diagnostic::new)
+                    .collect::<Vec<_>>(),
+            );
+            let skipped_diagnostics = diagnostic_count.saturating_sub(diagnostics.len() as u64);
+
+            LintResults {
+                diagnostics,
+                errors,
+                skipped_diagnostics,
             }
-
-            ControlFlow::<Never>::Continue(())
-        },
-    );
-
-    diagnostics.extend(
-        analyze_diagnostics
-            .into_iter()
-            .map(biome_diagnostics::serde::Diagnostic::new)
-            .collect::<Vec<_>>(),
-    );
-    let skipped_diagnostics = diagnostic_count.saturating_sub(diagnostics.len() as u64);
-
-    LintResults {
-        diagnostics,
-        errors,
-        skipped_diagnostics,
-    }
+        })
 }
 
 struct ActionsVisitor<'a> {
@@ -380,7 +392,7 @@ impl RegistryVisitor<JsLanguage> for ActionsVisitor<'_> {
     }
 }
 
-#[tracing::instrument(level = "trace", skip(parse))]
+#[tracing::instrument(level = "debug", skip(parse, settings))]
 fn code_actions(
     parse: AnyParse,
     range: TextRange,
@@ -555,7 +567,7 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
     }
 }
 
-#[tracing::instrument(level = "trace", skip(parse))]
+#[tracing::instrument(level = "trace", skip(parse, settings))]
 fn format(
     rome_path: &RomePath,
     parse: AnyParse,
@@ -576,7 +588,7 @@ fn format(
         }
     }
 }
-#[tracing::instrument(level = "trace", skip(parse))]
+#[tracing::instrument(level = "trace", skip(parse, settings))]
 fn format_range(
     rome_path: &RomePath,
     parse: AnyParse,
@@ -590,7 +602,7 @@ fn format_range(
     Ok(printed)
 }
 
-#[tracing::instrument(level = "trace", skip(parse))]
+#[tracing::instrument(level = "trace", skip(parse, settings))]
 fn format_on_type(
     rome_path: &RomePath,
     parse: AnyParse,
