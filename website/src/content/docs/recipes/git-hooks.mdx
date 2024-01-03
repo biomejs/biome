@@ -3,60 +3,150 @@ title: Git Hooks
 description: Using Biome in Git Hooks
 ---
 
-You can use Biome with a pre-commit tool.
-This can automatically format, lint, or check your staged files when running `git commit`.
+Git allows executing scripts during the run of a git command using [Git Hooks](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks).
+For example, you can format and lint the staged files before committing or pushing.
+Several tools exist to simplify the management of Git Hooks.
+In the following sections we introduce some of them and how they can be used with Biome.
 
-## Lefthook
 
-Install [`lefthook`](https://github.com/evilmartians/lefthook/blob/master/docs/install.md#-nodejs), and use of the following examples.
+## lefthook
 
-### Format and lint all files
+[lefthook](https://github.com/evilmartians/lefthook) provides a fast, cross-platform, and dependency-free hook manager.
+It can be [installed via NPM](https://github.com/evilmartians/lefthook#install).
 
-This snippet will format and lint all supported files in the repository, and add them to the commit.
+Add a file named `lefthook.yml` at the root of your Git repository.
+Some examples of _lefthook_ configurations:
 
-```yaml
-pre-commit:
-  commands:
-    check:
-      glob: "*.{js,ts,jsx,tsx,json}"
-      run: biome check --apply . && git add .
+- Check formatting and lint before committing
+
+  ```yaml title="lefthook.yml"
+  pre-commit:
+    commands:
+      check:
+        glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc}"
+        run: npx biome check --no-errors-on-unmatched --files-ignore-unknown=true {staged_files}
+  ```
+
+- Format, lint, and apply safe code fixes before committing
+
+  ```yaml title="lefthook.yml"
+  pre-commit:
+    commands:
+      check:
+        glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc}"
+        run: npx biome check --apply --no-errors-on-unmatched --files-ignore-unknown=true {staged_files} && git update-index --again
+  ```
+
+  `git update-index --again` adds again the staged files.
+
+- Check formatting and lint before pushing
+
+  ```yaml title="lefthook.yml"
+  pre-push:
+    commands:
+      check:
+        glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc}"
+        run: npx biome check --no-errors-on-unmatched --files-ignore-unknown=true {pushed_files}
+  ```
+
+Note that you don't need to use both `glob` and `--files-ignore-unknown=true`.
+Using only `--files-ignore-unknown=true` allows handling files supported in the present and in the future by Biome.
+If you wish more control over which files are handled, you should use `glob`.
+
+`--no-errors-on-unmatched` silents possible errors in case *no files are processed*.
+
+Once configured, run `lefthook install` to set up the hooks.
+
+If your project contains a `package.json`,
+you can automatically set up _lefthook_ hooks upon package installation using `scripts.postinstall`:
+
+```json title="package.json"
+{
+  "scripts": {
+    "postinstall": "lefthook install"
+  }
+}
 ```
 
-### Format and lint staged files only
 
-This snippet will format and lint only the staged files, and add them to the commit.
+## husky
 
-```yaml
-pre-commit:
-  commands:
-    check:
-      glob: "*.{js,ts,jsx,tsx,json}"
-      run: biome check --apply {staged_files} && git add {staged_files}
+[husky](https://github.com/typicode/husky) is a widely-used hook manager in the JavaScript ecosystem.
+[husky] doesn't hide unstaged changes and is not able to provides the list of staged files.
+This is why it is often used in tandem with another tool such as _lint-staged_ or _git-format-staged_.
+
+If your project contains a `package.json`,
+you can automatically set up _husky_ hooks upon package installation using `scripts.postinstall`:
+
+```json title="package.json"
+{
+  "scripts": {
+    "postinstall": "husky install"
+  }
+}
 ```
 
-## `lint-staged`
+### lint-staged
 
-Install [`lint-staged`](https://www.npmjs.com/package/lint-staged#installation-and-setup) and open its configuration file/section and update it with the needs you require. Remember to use the CLI option `--no-errors-on-unmatched` in your command, to silent possible errors in case *no files are processed*.
+[lint-staged](https://github.com/lint-staged/lint-staged) is one of the most used tool in the JavaScript ecosystem.
 
-Here's some example of commands that you could find useful when running the git hooks:
+Add the following husky configuration:
 
-```json5
+```shell title=".husky/pre-commit"
+lint-staged
+```
+
+The configuration of lint-staged is directly embedded in `package.json`.
+Here's some example of commands that you could find useful when running the Git hooks:
+
+```jsonc title="package.json"
 {
   "lint-staged": {
-    // Run Biome to files that have the following extensions: js, ts, jsx, tsx, json and jsonc
-    "**.{js|ts|jsx|tsx|json|jsonc}": [
-      "biome format --write --no-errors-on-unmatched", // format and write files
-      "biome lint --apply --no-errors-on-unmatched", // apply safe fixes when linting files
-      "biome check --apply --no-errors-on-unmatched", // format, sort imports and apply safe fixes when checking files
-      "biome check --apply --organize-imports-enabled=false --no-errors-on-unmatched", // format and apply safe fixes when checking files
-      "biome check --apply-unsafe --no-errors-on-unmatched", // format, sort imports, apply safe fixes and apply unsafe fixes when checking files
+    // Run Biome on staged files that have the following extensions: js, ts, jsx, tsx, json and jsonc
+    "**.{js|ts|cjs|mjs|d.cts|d.mts|jsx|tsx|json|jsonc}": [
+      "biome check --files-ignore-unknown=true", // Check formatting and lint
+      "biome check --apply --no-errors-on-unmatched", // Format, sort imports, lint, and apply safe fixes
+      "biome check --apply --organize-imports-enabled=false --no-errors-on-unmatched", // format and apply safe fixes
+      "biome check --apply-unsafe --no-errors-on-unmatched", // Format, sort imports, lints, apply safe/unsafe fixes
+      "biome format --write --no-errors-on-unmatched", // Format
+      "biome lint --apply --no-errors-on-unmatched", // Lint and apply safe fixes
+    ],
+    // Alternatively you can pass every files and ignore unknown extensions
+    "*": [
+      "biome check --no-errors-on-unmatched --files-ignore-unknown=true", // Check formatting and lint
     ]
   }
 }
 ```
 
+Remember to use the CLI option `--no-errors-on-unmatched` in your command, to silent possible errors in case *no files are processed*.
+
+
+### git-format-staged
+
+In contrast to other tools such as _lefthook_, _pre-commit_, and _lint-staged_,
+[git-format-staged](https://github.com/hallettj/git-format-staged) doesn't use `git stash` internally.
+This avoids manual intervention when conflicts arise between unstaged changes and updated staged changes.
+See the [comparison of _git-format-staged_ with other tools](https://github.com/hallettj/git-format-staged#comparisons-to-similar-utilities).
+
+Some examples of configuration:
+
+- Check formatting and lint before committing
+
+  ```shell title=".husky/pre-commit"
+  git-format-staged --formatter 'biome check --files-ignore-unknown=true --no-errors-on-unmatched \"{}\"' .
+  ```
+
+- Format, lint, and apply safe code fixes before committing
+
+  ```shell title=".husky/pre-commit"
+  git-format-staged --formatter 'biome check --apply --files-ignore-unknown=true --no-errors-on-unmatched \"{}\"' .
+  ```
+
+
 ## pre-commit
 
+[pre-commit](https://pre-commit.com/) provides a multi-language hook manager.
 Biome provides four [pre-commit](https://pre-commit.com/) hooks via the [biomejs/pre-commit](https://github.com/biomejs/pre-commit) repository.
 
 | hook `id`       | description                                                                 |
@@ -69,7 +159,7 @@ Biome provides four [pre-commit](https://pre-commit.com/) hooks via the [biomejs
 In the following example, we assume that you [installed pre-commit](https://pre-commit.com/index.html#install) and run `pre-commit install` in your repository.
 if you want to use the `biome-check` hook, add the following pre-commit configuration to the root of your project in a file named `.pre-commit-config.yaml`:
 
-```yaml
+```yaml title=".pre-commit-config.yaml"
 repos:
 -   repo: https://github.com/biomejs/pre-commit
     rev: "0.1.0"  # Use the sha / tag you want to point at
@@ -89,7 +179,7 @@ Instead of using the provided Biome hooks, you can specify your own [local hook]
 
 For example, if you use `npm`, you can write the following hook in `.pre-commit-config.yaml`:
 
-```yaml
+```yaml title=".pre-commit-config.yaml"
 repos:
   - repo: local
     hooks:
@@ -104,4 +194,40 @@ repos:
 The pre-commit option `files` is optional,
 because Biome is able to ignore unknown files (using the option `--files-ignore-unknown=true`).
 
+
 ## Shell script
+
+You can also use a custom shell script.
+Note that you can encounter cross-platform incompatibilities.
+We recommend the use of a dedicated tool as the one presented in the previous sections.
+
+Some examples of shells scripts:
+
+- Check formatting and lint before committing
+
+  ```shell title=".git/hooks/pre-commit"
+  #!/bin/sh
+  set -eu
+
+  git diff -z --staged --name-only --diff-filter=ACMR | \
+      xargs -0 npx biome check --files-ignore-unknown=true --no-errors-on-unmatched $STAGED_FILES
+  ```
+
+- Format, lint, and apply safe code fixes before committing
+
+  ```shell title=".git/hooks/pre-commit"
+  #!/bin/sh
+  set -eu
+
+  if ! git status --short | grep --quiet '^MM'; then
+    printf '%s\n' "ERROR: Some staged files have unstaged changes" >&2
+    exit 1;
+  fi
+
+  git diff -z --staged --name-only --diff-filter=ACMR | \
+      xargs -0 npx biome check --files-ignore-unknown=true --no-errors-on-unmatched
+
+  git update-index --again
+  ```
+
+  Note that we make the hook fail if staged files have unstaged changes.
