@@ -6,7 +6,26 @@ description: Using Biome in Git Hooks
 You can use Biome with a pre-commit tool.
 This can automatically format, lint, or check your staged files when running `git commit`.
 
-## lint-staged
+## `lint-staged`
+
+Install [`lint-staged`](https://www.npmjs.com/package/lint-staged#installation-and-setup) and open its configuration file/section and update it with the needs you require. Remember to use the CLI option `--no-errors-on-unmatched` in your command, to silent possible errors in case *no files are processed*.
+
+Here's some example of commands that you could find useful when running the git hooks:
+
+```json5
+{
+  "lint-staged": {
+    // Run Biome to files that have the following extensions: js, ts, jsx, tsx, json and jsonc
+    "**.{js|ts|jsx|tsx|json|jsonc}": [
+      "biome format --write --no-errors-on-unmatched", // format and write files
+      "biome lint --apply --no-errors-on-unmatched", // apply safe fixes when linting files
+      "biome check --apply --no-errors-on-unmatched", // format, sort imports and apply safe fixes when checking files
+      "biome check --apply --organize-imports-enabled=false --no-errors-on-unmatched", // format and apply safe fixes when checking files
+      "biome check --apply-unsafe --no-errors-on-unmatched", // format, sort imports, apply safe fixes and apply unsafe fixes when checking files
+    ]
+  }
+}
+```
 
 ## pre-commit
 
