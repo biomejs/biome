@@ -601,3 +601,83 @@ pub(crate) fn parse_string(p: &mut CssParser) -> ParsedSyntax {
 fn is_at_string(p: &mut CssParser) -> bool {
     p.at(CSS_STRING_LITERAL)
 }
+
+/// Attempt to parse some input with the given parsing function. If parsing
+/// succeeds, `Ok` is returned with the result of the parse and the state is
+/// preserved. If parsing fails, this function rewinds the parser back to
+/// where it was before attempting the parse and the `Err` value is returned.
+#[allow(dead_code)] // TODO: Remove this allow once it's actually used
+pub(crate) fn try_parse<T, E>(
+    p: &mut CssParser,
+    func: impl FnOnce(&mut CssParser) -> Result<T, E>,
+) -> Result<T, E> {
+    let checkpoint = p.checkpoint();
+    let res = func(p);
+
+    if res.is_err() {
+        p.rewind(checkpoint);
+    }
+
+    res
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::{parser::CssParser, CssParserOptions};
+    use biome_css_syntax::{CssSyntaxKind, T};
+    use biome_parser::prelude::ParsedSyntax::{Absent, Present};
+    use biome_parser::Parser;
+
+    use super::{parse_regular_identifier, parse_regular_number, try_parse};
+
+    #[test]
+    fn try_parse_rewinds_to_checkpoint() {
+        let mut p = CssParser::new("width: blue;", CssParserOptions::default());
+
+        let pre_try_range = p.cur_range();
+        let result = try_parse(&mut p, |p| {
+            // advance the parser within the attempt
+            // parse `width`
+            parse_regular_identifier(p).ok();
+            // parse `:`
+            p.expect(T![:]);
+
+            // attempt to parse a number, but fail because the input has `blue`.
+            match parse_regular_number(p) {
+                Present(marker) => Ok(Present(marker)),
+                Absent => Err(()),
+            }
+        });
+
+        assert!(result.is_err());
+        // The parser should've rewound back to the start.
+        assert_eq!(p.cur_range(), pre_try_range);
+        assert_eq!(p.cur_text(), "width");
+    }
+
+    #[test]
+    fn try_parse_preserves_position_on_success() {
+        let mut p = CssParser::new("width: 100;", CssParserOptions::default());
+
+        let pre_try_range = p.cur_range();
+        let result = try_parse(&mut p, |p| {
+            // advance the parser within the attempt
+            // parse `width`
+            parse_regular_identifier(p).ok();
+            // parse `:`
+            p.expect(T![:]);
+
+            // attempt to parse a number, and succeed because the input has `100`.
+            match parse_regular_number(p) {
+                Present(marker) => Ok(Present(marker)),
+                Absent => Err(()),
+            }
+        });
+
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap().kind(&p), Some(CssSyntaxKind::CSS_NUMBER));
+        // The parser should not have rewound and is now at the semicolon
+        assert_ne!(p.cur_range(), pre_try_range);
+        assert_eq!(p.cur_text(), ";");
+    }
+}

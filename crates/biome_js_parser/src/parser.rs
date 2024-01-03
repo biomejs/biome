@@ -13,11 +13,9 @@ pub(crate) use crate::parser::parse_recovery::{
 };
 use crate::prelude::*;
 use crate::state::{ChangeParserState, ParserStateGuard};
+use crate::token_source::JsTokenSourceCheckpoint;
 use crate::*;
-use crate::{
-    state::ParserStateCheckpoint,
-    token_source::{JsTokenSource, TokenSourceCheckpoint},
-};
+use crate::{state::ParserStateCheckpoint, token_source::JsTokenSource};
 use biome_js_syntax::{
     JsFileSource,
     JsSyntaxKind::{self},
@@ -213,7 +211,7 @@ impl<'source> Parser for JsParser<'source> {
 
 pub struct JsParserCheckpoint {
     pub(super) context: ParserContextCheckpoint,
-    pub(super) source: TokenSourceCheckpoint,
+    pub(super) source: JsTokenSourceCheckpoint,
     state: ParserStateCheckpoint,
 }
 

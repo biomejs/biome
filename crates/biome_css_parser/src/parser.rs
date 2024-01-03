@@ -1,11 +1,11 @@
 use crate::lexer::CssReLexContext;
-use crate::token_source::CssTokenSource;
+use crate::token_source::{CssTokenSource, CssTokenSourceCheckpoint};
 use biome_css_syntax::CssSyntaxKind;
 use biome_parser::diagnostic::merge_diagnostics;
 use biome_parser::event::Event;
-use biome_parser::prelude::*;
 use biome_parser::token_source::Trivia;
 use biome_parser::ParserContext;
+use biome_parser::{prelude::*, ParserContextCheckpoint};
 
 pub(crate) struct CssParser<'source> {
     context: ParserContext<CssSyntaxKind>,
@@ -39,6 +39,20 @@ impl<'source> CssParser<'source> {
         self.source_mut().re_lex(context)
     }
 
+    pub fn checkpoint(&self) -> CssParserCheckpoint {
+        CssParserCheckpoint {
+            context: self.context.checkpoint(),
+            source: self.source.checkpoint(),
+        }
+    }
+
+    pub fn rewind(&mut self, checkpoint: CssParserCheckpoint) {
+        let CssParserCheckpoint { context, source } = checkpoint;
+
+        self.context.rewind(context);
+        self.source.rewind(source);
+    }
+
     pub fn finish(self) -> (Vec<Event<CssSyntaxKind>>, Vec<ParseDiagnostic>, Vec<Trivia>) {
         let (trivia, lexer_diagnostics) = self.source.finish();
         let (events, parse_diagnostics) = self.context.finish();
@@ -68,4 +82,9 @@ impl<'source> Parser for CssParser<'source> {
     fn source_mut(&mut self) -> &mut Self::Source {
         &mut self.source
     }
+}
+
+pub struct CssParserCheckpoint {
+    pub(super) context: ParserContextCheckpoint,
+    pub(super) source: CssTokenSourceCheckpoint,
 }
