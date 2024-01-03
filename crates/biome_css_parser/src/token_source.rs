@@ -5,7 +5,7 @@ use biome_css_syntax::{CssSyntaxKind, TextRange};
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{BufferedLexer, LexContext};
 use biome_parser::prelude::{BumpWithContext, NthToken, TokenSource};
-use biome_parser::token_source::Trivia;
+use biome_parser::token_source::{TokenSourceCheckpoint, Trivia};
 use biome_rowan::TriviaPieceKind;
 use std::collections::VecDeque;
 
@@ -33,6 +33,8 @@ struct Lookahead {
     kind: CssSyntaxKind,
     after_newline: bool,
 }
+
+pub(crate) type CssTokenSourceCheckpoint = TokenSourceCheckpoint<CssSyntaxKind>;
 
 impl<'src> CssTokenSource<'src> {
     /// Creates a new token source.
@@ -138,6 +140,23 @@ impl<'src> CssTokenSource<'src> {
         }
 
         None
+    }
+
+    /// Creates a checkpoint to which it can later return using [Self::rewind].
+    pub fn checkpoint(&self) -> CssTokenSourceCheckpoint {
+        CssTokenSourceCheckpoint {
+            trivia_len: self.trivia_list.len() as u32,
+            lexer_checkpoint: self.lexer.checkpoint(),
+        }
+    }
+
+    /// Restores the token source to a previous state
+    pub fn rewind(&mut self, checkpoint: CssTokenSourceCheckpoint) {
+        assert!(self.trivia_list.len() >= checkpoint.trivia_len as usize);
+        self.trivia_list.truncate(checkpoint.trivia_len as usize);
+        self.lexer.rewind(checkpoint.lexer_checkpoint);
+        self.non_trivia_lookahead.clear();
+        self.lookahead_offset = 0;
     }
 }
 

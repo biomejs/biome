@@ -13,11 +13,9 @@ pub(crate) use crate::parser::parse_recovery::{
 };
 use crate::prelude::*;
 use crate::state::{ChangeParserState, ParserStateGuard};
+use crate::token_source::JsTokenSourceCheckpoint;
 use crate::*;
-use crate::{
-    state::ParserStateCheckpoint,
-    token_source::{JsTokenSource, TokenSourceCheckpoint},
-};
+use crate::{state::JsParserStateCheckpoint, token_source::JsTokenSource};
 use biome_js_syntax::{
     JsFileSource,
     JsSyntaxKind::{self},
@@ -33,7 +31,7 @@ pub(crate) use parsed_syntax::ParsedSyntax;
 /// The Parser yields lower level events instead of nodes.
 /// These events are then processed into a syntax tree through a [`TreeSink`] implementation.
 pub struct JsParser<'source> {
-    pub(super) state: ParserState,
+    pub(super) state: JsParserState,
     pub source_type: JsFileSource,
     context: ParserContext<JsSyntaxKind>,
     source: JsTokenSource<'source>,
@@ -46,7 +44,7 @@ impl<'source> JsParser<'source> {
         let source = JsTokenSource::from_str(source);
 
         JsParser {
-            state: ParserState::new(&source_type),
+            state: JsParserState::new(&source_type),
             source_type,
             context: ParserContext::default(),
             source,
@@ -54,7 +52,7 @@ impl<'source> JsParser<'source> {
         }
     }
 
-    pub(crate) fn state(&self) -> &ParserState {
+    pub(crate) fn state(&self) -> &JsParserState {
         &self.state
     }
 
@@ -62,7 +60,7 @@ impl<'source> JsParser<'source> {
         &self.options
     }
 
-    pub(crate) fn state_mut(&mut self) -> &mut ParserState {
+    pub(crate) fn state_mut(&mut self) -> &mut JsParserState {
         &mut self.state
     }
 
@@ -213,8 +211,8 @@ impl<'source> Parser for JsParser<'source> {
 
 pub struct JsParserCheckpoint {
     pub(super) context: ParserContextCheckpoint,
-    pub(super) source: TokenSourceCheckpoint,
-    state: ParserStateCheckpoint,
+    pub(super) source: JsTokenSourceCheckpoint,
+    state: JsParserStateCheckpoint,
 }
 
 #[cfg(test)]

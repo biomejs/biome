@@ -1,4 +1,4 @@
-use crate::diagnostic::ParseDiagnostic;
+use crate::{diagnostic::ParseDiagnostic, lexer::LexerCheckpoint};
 use biome_rowan::{SyntaxKind, TextRange, TextSize, TriviaPieceKind};
 
 /// A comment or a whitespace trivia in the source code.
@@ -92,4 +92,30 @@ pub trait NthToken: TokenSource {
 
     /// Returns true if the nth non-trivia token is preceded by a line break
     fn has_nth_preceding_line_break(&mut self, n: usize) -> bool;
+}
+
+#[derive(Debug)]
+pub struct TokenSourceCheckpoint<K>
+where
+    K: SyntaxKind,
+{
+    pub lexer_checkpoint: LexerCheckpoint<K>,
+    /// A `u32` should be enough because `TextSize` is also limited to `u32`.
+    /// The worst case is a document where every character is its own token. This would
+    /// result in `u32::MAX` tokens
+    pub trivia_len: u32,
+}
+
+impl<K> TokenSourceCheckpoint<K>
+where
+    K: SyntaxKind,
+{
+    /// byte offset in the source text
+    pub fn current_start(&self) -> TextSize {
+        self.lexer_checkpoint.current_start()
+    }
+
+    pub fn trivia_position(&self) -> usize {
+        self.trivia_len as usize
+    }
 }

@@ -1,5 +1,4 @@
-use crate::parser::JsParser;
-use crate::token_source::TokenSourceCheckpoint;
+use crate::{parser::JsParser, token_source::JsTokenSourceCheckpoint};
 
 use crate::prelude::*;
 use biome_console::fmt::Display;
@@ -34,7 +33,7 @@ pub(crate) struct RewriteParser<'parser, 'source> {
 }
 
 impl<'parser, 'source> RewriteParser<'parser, 'source> {
-    pub fn new(p: &'parser mut JsParser<'source>, checkpoint: TokenSourceCheckpoint) -> Self {
+    pub fn new(p: &'parser mut JsParser<'source>, checkpoint: JsTokenSourceCheckpoint) -> Self {
         Self {
             inner: p,
             offset: checkpoint.current_start(),
