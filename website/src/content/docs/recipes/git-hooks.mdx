@@ -6,6 +6,34 @@ description: Using Biome in Git Hooks
 You can use Biome with a pre-commit tool.
 This can automatically format, lint, or check your staged files when running `git commit`.
 
+## Lefthook
+
+Install [`lefthook`](https://github.com/evilmartians/lefthook/blob/master/docs/install.md#-nodejs), and use of the following examples.
+
+### Format and lint all files
+
+This snippet will format and lint all supported files in the repository, and add them to the commit.
+
+```yaml
+pre-commit:
+  commands:
+    check:
+      glob: "*.{js,ts,jsx,tsx,json}"
+      run: biome check --apply . && git add .
+```
+
+### Format and lint staged files only
+
+This snippet will format and lint only the staged files, and add them to the commit.
+
+```yaml
+pre-commit:
+  commands:
+    check:
+      glob: "*.{js,ts,jsx,tsx,json}"
+      run: biome check --apply {staged_files} && git add {staged_files}
+```
+
 ## `lint-staged`
 
 Install [`lint-staged`](https://www.npmjs.com/package/lint-staged#installation-and-setup) and open its configuration file/section and update it with the needs you require. Remember to use the CLI option `--no-errors-on-unmatched` in your command, to silent possible errors in case *no files are processed*.
