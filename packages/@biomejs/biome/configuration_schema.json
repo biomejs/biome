@@ -1267,6 +1267,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noGlobalEval": {
+					"description": "Disallow the use of global eval().",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noImplicitAnyLet": {
 					"description": "Disallow use of implicit any type on variable declarations.",
 					"anyOf": [

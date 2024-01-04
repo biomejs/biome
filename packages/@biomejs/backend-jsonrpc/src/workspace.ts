@@ -858,6 +858,10 @@ export interface Nursery {
 	 */
 	noEmptyBlockStatements?: RuleConfiguration;
 	/**
+	 * Disallow the use of global eval().
+	 */
+	noGlobalEval?: RuleConfiguration;
+	/**
 	 * Disallow use of implicit any type on variable declarations.
 	 */
 	noImplicitAnyLet?: RuleConfiguration;
@@ -1643,6 +1647,7 @@ export type Category =
 	| "lint/nursery/noDefaultExport"
 	| "lint/nursery/noDuplicateJsonKeys"
 	| "lint/nursery/noEmptyBlockStatements"
+	| "lint/nursery/noGlobalEval"
 	| "lint/nursery/noImplicitAnyLet"
 	| "lint/nursery/noInvalidUseBeforeDeclaration"
 	| "lint/nursery/noMisleadingCharacterClass"

@@ -930,6 +930,10 @@ impl Deserializable for Nursery {
                                 diagnostics,
                             );
                         }
+                        "noGlobalEval" => {
+                            result.no_global_eval =
+                                Deserializable::deserialize(&value, "noGlobalEval", diagnostics);
+                        }
                         "noImplicitAnyLet" => {
                             result.no_implicit_any_let = Deserializable::deserialize(
                                 &value,
@@ -1063,6 +1067,7 @@ impl Deserializable for Nursery {
                                     "noDefaultExport",
                                     "noDuplicateJsonKeys",
                                     "noEmptyBlockStatements",
+                                    "noGlobalEval",
                                     "noImplicitAnyLet",
                                     "noInvalidUseBeforeDeclaration",
                                     "noMisleadingCharacterClass",

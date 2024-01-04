@@ -21,6 +21,7 @@ hooks_missing_name.json:6:5 deserialize ━━━━━━━━━━━━━�
   - noDefaultExport
   - noDuplicateJsonKeys
   - noEmptyBlockStatements
+  - noGlobalEval
   - noImplicitAnyLet
   - noInvalidUseBeforeDeclaration
   - noMisleadingCharacterClass
