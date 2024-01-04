@@ -91,7 +91,7 @@ impl DeserializationVisitor for JavascriptFormatterVisitor {
                 "indentSize" => {
                     result.indent_width =
                         Deserializable::deserialize(&value, &key_text, diagnostics);
-                    diagnostics.push(DeserializationDiagnostic::new_deprecated(
+                    diagnostics.push(DeserializationDiagnostic::new_deprecated_use_instead(
                         &key_text,
                         key.range(),
                         "javascript.formatter.indentWidth",
