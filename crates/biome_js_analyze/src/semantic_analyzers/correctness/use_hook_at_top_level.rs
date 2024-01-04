@@ -15,7 +15,7 @@ use biome_js_syntax::{
     AnyFunctionLike, AnyJsExpression, AnyJsFunction, JsCallExpression, JsLanguage,
     JsMethodObjectMember, JsReturnStatement, JsSyntaxKind, TextRange,
 };
-use biome_rowan::{AstNode, Language, SyntaxNode, WalkEvent};
+use biome_rowan::{declare_node_union, AstNode, Language, SyntaxNode, WalkEvent};
 use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
 use std::ops::{Deref, DerefMut};
@@ -65,48 +65,8 @@ declare_rule! {
     }
 }
 
-#[derive(Clone)]
-enum AnyJsFunctionOrMethod {
-    Function(AnyJsFunction),
-    ObjectMethod(JsMethodObjectMember),
-}
-
-impl AstNode for AnyJsFunctionOrMethod {
-    type Language = JsLanguage;
-
-    const KIND_SET: biome_rowan::SyntaxKindSet<Self::Language> =
-        AnyJsFunction::KIND_SET.union(JsMethodObjectMember::KIND_SET);
-
-    fn can_cast(kind: <Self::Language as Language>::Kind) -> bool {
-        Self::KIND_SET.matches(kind)
-    }
-
-    fn cast(syntax: SyntaxNode<Self::Language>) -> Option<Self>
-    where
-        Self: Sized,
-    {
-        if AnyJsFunction::can_cast(syntax.kind()) {
-            AnyJsFunction::cast(syntax).map(Self::Function)
-        } else if JsMethodObjectMember::can_cast(syntax.kind()) {
-            JsMethodObjectMember::cast(syntax).map(Self::ObjectMethod)
-        } else {
-            None
-        }
-    }
-
-    fn syntax(&self) -> &SyntaxNode<Self::Language> {
-        match self {
-            Self::Function(function) => function.syntax(),
-            Self::ObjectMethod(method) => method.syntax(),
-        }
-    }
-
-    fn into_syntax(self) -> SyntaxNode<Self::Language> {
-        match self {
-            Self::Function(function) => function.into_syntax(),
-            Self::ObjectMethod(method) => method.into_syntax(),
-        }
-    }
+declare_node_union! {
+    pub AnyJsFunctionOrMethod = AnyJsFunction | JsMethodObjectMember
 }
 
 pub enum Suggestion {
@@ -384,7 +344,7 @@ impl Rule for UseHookAtTopLevel {
                     });
                 }
 
-                if let AnyJsFunctionOrMethod::Function(function) = enclosing_function {
+                if let AnyJsFunctionOrMethod::AnyJsFunction(function) = enclosing_function {
                     if let Some(calls_iter) = function.all_calls(model) {
                         for call in calls_iter {
                             calls.push(CallPath {
