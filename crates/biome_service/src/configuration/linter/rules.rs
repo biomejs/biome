@@ -2552,6 +2552,9 @@ pub struct Nursery {
     #[doc = "Disallows package private imports."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_import_restrictions: Option<RuleConfiguration>,
+    #[doc = "Promotes the use of import type for types."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_import_type: Option<RuleConfiguration>,
     #[doc = "Enforces using the node: protocol for Node.js builtin modules."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_nodejs_import_protocol: Option<RuleConfiguration>,
@@ -2630,6 +2633,9 @@ impl MergeWith<Nursery> for Nursery {
         if let Some(use_import_restrictions) = other.use_import_restrictions {
             self.use_import_restrictions = Some(use_import_restrictions);
         }
+        if let Some(use_import_type) = other.use_import_type {
+            self.use_import_type = Some(use_import_type);
+        }
         if let Some(use_nodejs_import_protocol) = other.use_nodejs_import_protocol {
             self.use_nodejs_import_protocol = Some(use_nodejs_import_protocol);
         }
@@ -2657,7 +2663,7 @@ impl MergeWith<Nursery> for Nursery {
 }
 impl Nursery {
     const GROUP_NAME: &'static str = "nursery";
-    pub(crate) const GROUP_RULES: [&'static str; 25] = [
+    pub(crate) const GROUP_RULES: [&'static str; 26] = [
         "noAriaHiddenOnFocusable",
         "noDefaultExport",
         "noDuplicateJsonKeys",
@@ -2678,13 +2684,14 @@ impl Nursery {
         "useForOf",
         "useGroupedTypeImport",
         "useImportRestrictions",
+        "useImportType",
         "useNodejsImportProtocol",
         "useNumberNamespace",
         "useRegexLiterals",
         "useShorthandFunctionType",
         "useValidAriaRole",
     ];
-    const RECOMMENDED_RULES: [&'static str; 11] = [
+    const RECOMMENDED_RULES: [&'static str; 12] = [
         "noAriaHiddenOnFocusable",
         "noDuplicateJsonKeys",
         "noGlobalEval",
@@ -2694,10 +2701,11 @@ impl Nursery {
         "useAwait",
         "useExportType",
         "useGroupedTypeImport",
+        "useImportType",
         "useNumberNamespace",
         "useValidAriaRole",
     ];
-    const RECOMMENDED_RULES_AS_FILTERS: [RuleFilter<'static>; 11] = [
+    const RECOMMENDED_RULES_AS_FILTERS: [RuleFilter<'static>; 12] = [
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]),
@@ -2707,10 +2715,11 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[18]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[24]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]),
     ];
-    const ALL_RULES_AS_FILTERS: [RuleFilter<'static>; 25] = [
+    const ALL_RULES_AS_FILTERS: [RuleFilter<'static>; 26] = [
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
@@ -2736,6 +2745,7 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[23]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[24]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]),
     ];
     #[doc = r" Retrieves the recommended rules"]
     pub(crate) fn is_recommended(&self) -> bool {
@@ -2852,29 +2862,34 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]));
             }
         }
-        if let Some(rule) = self.use_nodejs_import_protocol.as_ref() {
+        if let Some(rule) = self.use_import_type.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]));
             }
         }
-        if let Some(rule) = self.use_number_namespace.as_ref() {
+        if let Some(rule) = self.use_nodejs_import_protocol.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]));
             }
         }
-        if let Some(rule) = self.use_regex_literals.as_ref() {
+        if let Some(rule) = self.use_number_namespace.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]));
             }
         }
-        if let Some(rule) = self.use_shorthand_function_type.as_ref() {
+        if let Some(rule) = self.use_regex_literals.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[23]));
             }
         }
-        if let Some(rule) = self.use_valid_aria_role.as_ref() {
+        if let Some(rule) = self.use_shorthand_function_type.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[24]));
+            }
+        }
+        if let Some(rule) = self.use_valid_aria_role.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]));
             }
         }
         index_set
@@ -2981,29 +2996,34 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[19]));
             }
         }
-        if let Some(rule) = self.use_nodejs_import_protocol.as_ref() {
+        if let Some(rule) = self.use_import_type.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]));
             }
         }
-        if let Some(rule) = self.use_number_namespace.as_ref() {
+        if let Some(rule) = self.use_nodejs_import_protocol.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]));
             }
         }
-        if let Some(rule) = self.use_regex_literals.as_ref() {
+        if let Some(rule) = self.use_number_namespace.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]));
             }
         }
-        if let Some(rule) = self.use_shorthand_function_type.as_ref() {
+        if let Some(rule) = self.use_regex_literals.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[23]));
             }
         }
-        if let Some(rule) = self.use_valid_aria_role.as_ref() {
+        if let Some(rule) = self.use_shorthand_function_type.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[24]));
+            }
+        }
+        if let Some(rule) = self.use_valid_aria_role.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]));
             }
         }
         index_set
@@ -3016,10 +3036,10 @@ impl Nursery {
     pub(crate) fn is_recommended_rule(rule_name: &str) -> bool {
         Self::RECOMMENDED_RULES.contains(&rule_name)
     }
-    pub(crate) fn recommended_rules_as_filters() -> [RuleFilter<'static>; 11] {
+    pub(crate) fn recommended_rules_as_filters() -> [RuleFilter<'static>; 12] {
         Self::RECOMMENDED_RULES_AS_FILTERS
     }
-    pub(crate) fn all_rules_as_filters() -> [RuleFilter<'static>; 25] {
+    pub(crate) fn all_rules_as_filters() -> [RuleFilter<'static>; 26] {
         Self::ALL_RULES_AS_FILTERS
     }
     #[doc = r" Select preset rules"]
@@ -3062,6 +3082,7 @@ impl Nursery {
             "useForOf" => self.use_for_of.as_ref(),
             "useGroupedTypeImport" => self.use_grouped_type_import.as_ref(),
             "useImportRestrictions" => self.use_import_restrictions.as_ref(),
+            "useImportType" => self.use_import_type.as_ref(),
             "useNodejsImportProtocol" => self.use_nodejs_import_protocol.as_ref(),
             "useNumberNamespace" => self.use_number_namespace.as_ref(),
             "useRegexLiterals" => self.use_regex_literals.as_ref(),

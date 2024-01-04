@@ -111,7 +111,7 @@ Biome now scores 97% compatibility with Prettier and features more than 180 lint
 
 #### New features
 
-- Add [useExportType](https://biomejs.dev/linter/rules/use-export-type) that enforces the use of type-only exports for names that are only types. Contributed by @Conaclos
+- Add [useExportType](https://biomejs.dev/linter/rules/use-export-type) that enforces the use of type-only exports for types. Contributed by @Conaclos
 
   ```diff
     interface A {}
@@ -123,6 +123,22 @@ Biome now scores 97% compatibility with Prettier and features more than 180 lint
 
   - export { type B }
   + export type { B }
+  ```
+
+- Add [useImportType](https://biomejs.dev/linter/rules/use-import-type) that enforces the use of type-only imports for types. Contributed by @Conaclos
+
+  ```diff
+  - import { A, B } from "./mod.js";
+  + import { type A, B } from "mod";
+    let a: A;
+    const b: B = new B();
+  ```
+
+  Also, the rule groups type-only imports:
+
+  ```diff
+  - import { type A, type B } from "./mod.js";
+  + import type { A, B } from "./mod.js";
   ```
 
 - Add [useFilenamingConvention](https://biomejs.dev/linter/rules/use-filenaming-convention), that enforces naming conventions for JavaScript and TypeScript filenames. Contributed by @Conaclos

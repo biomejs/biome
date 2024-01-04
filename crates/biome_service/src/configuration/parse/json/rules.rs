@@ -1021,6 +1021,10 @@ impl Deserializable for Nursery {
                                 diagnostics,
                             );
                         }
+                        "useImportType" => {
+                            result.use_import_type =
+                                Deserializable::deserialize(&value, "useImportType", diagnostics);
+                        }
                         "useNodejsImportProtocol" => {
                             result.use_nodejs_import_protocol = Deserializable::deserialize(
                                 &value,
@@ -1083,6 +1087,7 @@ impl Deserializable for Nursery {
                                     "useForOf",
                                     "useGroupedTypeImport",
                                     "useImportRestrictions",
+                                    "useImportType",
                                     "useNodejsImportProtocol",
                                     "useNumberNamespace",
                                     "useRegexLiterals",
