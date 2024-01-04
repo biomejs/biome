@@ -495,9 +495,7 @@ The following rules are now deprecated:
 
 #### New features
 
-- Add [noUnusedPrivateClassMembers](https://biomejs.dev/linter/rules/no-unused-private-class-members) rule.
-  The rule disallow unused private class members.
-  Contributed by @victor-teles
+- Add [noUnusedPrivateClassMembers](https://biomejs.dev/linter/rules/no-unused-private-class-members) rule. The rule disallow unused private class members. Contributed by @victor-teles
 
 #### Bug fixes
 
@@ -518,6 +516,35 @@ The following rules are now deprecated:
 - Fix [#609](https://github.com/biomejs/biome/issues/609) `useExhaustiveDependencies`, by removing `useContext`, `useId` and `useSyncExternalStore` from the known hooks. Contributed by @msdlisper
 
 - Fix `useExhaustiveDependencies`, by removing `useContext`, `useId` and `useSyncExternalStore` from the known hooks. Contributed by @msdlisper
+
+- Fix [#871](https://github.com/biomejs/biome/issues/871) and [#610](https://github.com/biomejs/biome/issues/610). Now `useHookAtTopLevel` correctly handles nested functions.  Contributed by @arendjr
+
+- The options of the rule `useHookAtTopLevel` are deprecated and will be removed in Biome 2.0. The rule now determines the hooks using the naming convention set by React.
+
+  ```diff
+  {
+    "linter": {
+      "rules": {
+        "correctness": {
+  +        "useHookAtTopLevel": "error",
+  -        "useHookAtTopLevel": {
+  -          "level": "error",
+  -          "options": {
+  -            "hooks": [
+  -              {
+  -                "name": "useLocation",
+  -                "closureIndex": 0,
+  -                "dependenciesIndex": 1
+  -              },
+  -              { "name": "useQuery", "closureIndex": 1, "dependenciesIndex": 0 }
+  -            ]
+  -          }
+  -        }
+        }
+      }
+    }
+  }
+  ```
 
 ### Parser
 

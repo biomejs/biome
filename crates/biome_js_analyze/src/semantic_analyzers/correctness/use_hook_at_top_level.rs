@@ -495,6 +495,7 @@ impl Deserializable for DeprecatedHooksOptions {
     }
 }
 
+// TODO: remove in Biome 2.0
 struct DeprecatedHooksOptionsVisitor;
 impl DeserializationVisitor for DeprecatedHooksOptionsVisitor {
     type Output = DeprecatedHooksOptions;
