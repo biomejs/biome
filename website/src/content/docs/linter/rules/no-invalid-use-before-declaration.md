@@ -1,8 +1,12 @@
 ---
-title: noInvalidUseBeforeDeclaration (since vnext)
+title: noInvalidUseBeforeDeclaration (not released)
 ---
 
 **Diagnostic Category: `lint/nursery/noInvalidUseBeforeDeclaration`**
+
+:::danger
+This rule hasn't been released yet.
+:::
 
 :::caution
 This rule is part of the [nursery](/linter/rules/#nursery) group.

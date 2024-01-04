@@ -1,8 +1,12 @@
 ---
-title: noUselessTernary (since vnext)
+title: noUselessTernary (not released)
 ---
 
 **Diagnostic Category: `lint/nursery/noUselessTernary`**
+
+:::danger
+This rule hasn't been released yet.
+:::
 
 :::caution
 This rule is part of the [nursery](/linter/rules/#nursery) group.

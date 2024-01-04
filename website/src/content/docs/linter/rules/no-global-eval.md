@@ -1,8 +1,12 @@
 ---
-title: noGlobalEval (since vnext)
+title: noGlobalEval (not released)
 ---
 
 **Diagnostic Category: `lint/nursery/noGlobalEval`**
+
+:::danger
+This rule hasn't been released yet.
+:::
 
 :::caution
 This rule is part of the [nursery](/linter/rules/#nursery) group.
