@@ -1,8 +1,12 @@
 ---
-title: noNodejsModules (since vnext)
+title: noNodejsModules (not released)
 ---
 
 **Diagnostic Category: `lint/nursery/noNodejsModules`**
+
+:::danger
+This rule hasn't been released yet.
+:::
 
 :::caution
 This rule is part of the [nursery](/linter/rules/#nursery) group.
