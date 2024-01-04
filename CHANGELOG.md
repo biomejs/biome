@@ -251,6 +251,14 @@ Biome now scores 97% compatibility with Prettier and features more than 180 lint
     }
   ```
 
+- Fix [#1383](https://github.com/biomejs/biome/issues/1383). [noConfusingVoidType](https://biomejs.dev/linter/rules/no-confusing-void-type) now accepts the `void` type in type parameter lists.
+
+  The rule no longer reports the following code:
+
+  ```ts
+  f<void>();
+  ```
+
 - Fix [#728](https://github.com/biomejs/biome/issues/728). [useSingleVarDeclarator](https://biomejs.dev/linter/rules/use-single-var-declarator) no longer outputs invalid code. Contributed by @Conaclos
 
 - Fix [#1167](https://github.com/biomejs/biome/issues/1167). [useValidAriaProps](https://biomejs.dev/linter/rules/use-valid-aria-props) no longer reports `aria-atomic` as invalid. Contributed by @unvalley
