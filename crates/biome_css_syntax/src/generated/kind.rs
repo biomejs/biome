@@ -374,6 +374,7 @@ pub enum CssSyntaxKind {
     CSS_BOGUS_PROPERTY,
     CSS_BOGUS_MEDIA_QUERY,
     CSS_BOGUS_SCOPE_RANGE,
+    CSS_UNORDERED_TESTING,
     #[doc(hidden)]
     __LAST,
 }

@@ -1989,6 +1989,56 @@ impl CssUnknownDimension {
         )
     }
 }
+impl CssUnorderedTesting {
+    pub fn with_style(self, element: Option<CssDashedIdentifier>) -> Self {
+        Self::unwrap_cast(self.syntax.splice_slots(
+            0usize..=0usize,
+            once(element.map(|element| element.into_syntax().into())),
+        ))
+    }
+    pub fn with_variant(self, element: Option<CssCustomIdentifier>) -> Self {
+        Self::unwrap_cast(self.syntax.splice_slots(
+            1usize..=1usize,
+            once(element.map(|element| element.into_syntax().into())),
+        ))
+    }
+    pub fn with_weight(self, element: Option<CssNumber>) -> Self {
+        Self::unwrap_cast(self.syntax.splice_slots(
+            2usize..=2usize,
+            once(element.map(|element| element.into_syntax().into())),
+        ))
+    }
+    pub fn with_stretch(self, element: Option<CssString>) -> Self {
+        Self::unwrap_cast(self.syntax.splice_slots(
+            3usize..=3usize,
+            once(element.map(|element| element.into_syntax().into())),
+        ))
+    }
+    pub fn with_size(self, element: CssRegularDimension) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(4usize..=4usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_slash_token(self, element: Option<SyntaxToken>) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(5usize..=5usize, once(element.map(|element| element.into()))),
+        )
+    }
+    pub fn with_line_height(self, element: Option<CssBinaryExpression>) -> Self {
+        Self::unwrap_cast(self.syntax.splice_slots(
+            6usize..=6usize,
+            once(element.map(|element| element.into_syntax().into())),
+        ))
+    }
+    pub fn with_family(self, element: CssColor) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(7usize..=7usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
 impl CssUrlFunction {
     pub fn with_url_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(

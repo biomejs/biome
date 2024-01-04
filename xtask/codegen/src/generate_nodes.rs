@@ -1,8 +1,8 @@
 use crate::css_kinds_src::CSS_KINDS_SRC;
 use crate::json_kinds_src::JSON_KINDS_SRC;
-use crate::kinds_src::{AstSrc, Field, TokenKind, JS_KINDS_SRC};
+use crate::kinds_src::{AstNodeSrc, AstSrc, Field, TokenKind, JS_KINDS_SRC};
 use crate::{to_lower_snake_case, to_upper_snake_case, LanguageKind};
-use proc_macro2::Literal;
+use proc_macro2::{Literal, TokenStream};
 use quote::{format_ident, quote};
 use std::collections::HashMap;
 use xtask::Result;
@@ -14,6 +14,7 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
         .map(|node| {
             let name = format_ident!("{}", node.name);
             let node_kind = format_ident!("{}", to_upper_snake_case(node.name.as_str()));
+            let needs_dynamic_slots = node.dynamic;
 
             let methods = node
                 .fields
@@ -31,16 +32,22 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
 
                         let is_optional = field.is_optional();
 
+                        let slot_index_access = if needs_dynamic_slots {
+                            quote! { self.slot_map[#slot_index] as usize }
+                        } else {
+                            quote! { #slot_index }
+                        };
+
                         if is_optional {
                             quote! {
                                 pub fn #method_name(&self) -> Option<SyntaxToken> {
-                                    support::token(&self.syntax, #slot_index)
+                                    support::token(&self.syntax, #slot_index_access)
                                 }
                             }
                         } else {
                             quote! {
                                 pub fn #method_name(&self) -> SyntaxResult<SyntaxToken> {
-                                    support::required_token(&self.syntax, #slot_index)
+                                    support::required_token(&self.syntax, #slot_index_access)
                                 }
                             }
                         }
@@ -49,23 +56,29 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
                         let is_list = ast.is_list(ty);
                         let ty = format_ident!("{}", &ty);
 
+                        let slot_index_access = if needs_dynamic_slots {
+                            quote! { self.slot_map[#slot_index] as usize }
+                        } else {
+                            quote! { #slot_index }
+                        };
+
                         let method_name = field.method_name(language_kind);
                         if is_list {
                             quote! {
                                 pub fn #method_name(&self) -> #ty {
-                                    support::list(&self.syntax, #slot_index)
+                                    support::list(&self.syntax, #slot_index_access)
                                 }
                             }
                         } else if *optional {
                             quote! {
                                 pub fn #method_name(&self) -> Option<#ty> {
-                                    support::node(&self.syntax, #slot_index)
+                                    support::node(&self.syntax, #slot_index_access)
                                 }
                             }
                         } else {
                             quote! {
                                 pub fn #method_name(&self) -> SyntaxResult<#ty> {
-                                    support::required_node(&self.syntax, #slot_index)
+                                    support::required_node(&self.syntax, #slot_index_access)
                                 }
                             }
                         }
@@ -149,6 +162,59 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
                 })
                 .unzip();
 
+            let slot_count = node.fields.len();
+            let slot_map_type = quote! { [u8; #slot_count] };
+            let maybe_dynamic_slot_map_member = if needs_dynamic_slots {
+                quote! { pub(crate) slot_map: #slot_map_type, }
+            } else {
+                Default::default()
+            };
+
+            let new_unchecked_constructor = if needs_dynamic_slots {
+                let slot_map_builder_impl = get_slot_map_builder_impl(node, language_kind);
+                quote! {
+                    /// Create an AstNode from a SyntaxNode without checking its kind
+                    ///
+                    /// # Safety
+                    /// This function must be guarded with a call to [AstNode::can_cast]
+                    /// or a match on [SyntaxNode::kind]
+                    #[inline]
+                    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+                        let slot_map = #name::build_slot_map(&syntax);
+                        Self { syntax, slot_map }
+                    }
+
+                    /// Construct the `slot_map` for this node by checking the `kind` of
+                    /// each child of `syntax` against the defined grammar for the node.
+                    pub fn build_slot_map(syntax: &SyntaxNode) -> #slot_map_type {
+                        #slot_map_builder_impl
+                    }
+                }
+            } else {
+                quote! {
+                    /// Create an AstNode from a SyntaxNode without checking its kind
+                    ///
+                    /// # Safety
+                    /// This function must be guarded with a call to [AstNode::can_cast]
+                    /// or a match on [SyntaxNode::kind]
+                    #[inline]
+                    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+                        Self { syntax }
+                    }
+                }
+            };
+
+            let cast_impl = if needs_dynamic_slots {
+                quote! { 
+                    if Self::can_cast(syntax.kind()) { 
+                        let slot_map = #name::build_slot_map(&syntax);
+                        Some(Self { syntax, slot_map })
+                    } else { None }
+                }
+            } else {
+                quote! { if Self::can_cast(syntax.kind()) { Some(Self { syntax }) } else { None } }
+            };
+
             (
                 quote! {
                     // TODO: review documentation
@@ -156,18 +222,11 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
                     #[derive(Clone, PartialEq, Eq, Hash)]
                     pub struct #name {
                         pub(crate) syntax: SyntaxNode,
+                        #maybe_dynamic_slot_map_member
                     }
 
                     impl #name {
-                        /// Create an AstNode from a SyntaxNode without checking its kind
-                        ///
-                        /// # Safety
-                        /// This function must be guarded with a call to [AstNode::can_cast]
-                        /// or a match on [SyntaxNode::kind]
-                        #[inline]
-                        pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-                            Self { syntax }
-                        }
+                        #new_unchecked_constructor
 
                         pub fn as_fields(&self) -> #slots_name {
                             #slots_name {
@@ -204,7 +263,7 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
                             kind == #node_kind
                         }
                         fn cast(syntax: SyntaxNode) -> Option<Self> {
-                            if Self::can_cast(syntax.kind()) { Some(Self { syntax }) } else { None }
+                            #cast_impl
                         }
                         fn syntax(&self) -> &SyntaxNode { &self.syntax }
                         fn into_syntax(self) -> SyntaxNode { self.syntax }
@@ -804,6 +863,7 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
         #![allow(clippy::match_like_matches_macro)]
         use crate::{
             macros::map_syntax_node,
+            T,
             #language as Language, #syntax_element as SyntaxElement, #syntax_element_children as SyntaxElementChildren,
             #syntax_kind::{self as SyntaxKind, *},
             #syntax_list as SyntaxList, #syntax_node as SyntaxNode, #syntax_token as SyntaxToken,
@@ -815,6 +875,10 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
         use biome_rowan::{support, AstNode, SyntaxKindSet, RawSyntaxKind, SyntaxResult};
         use std::fmt::{Debug, Formatter};
         #serde_import
+
+        /// Sentinel value indicating a missing element in a dynamic node, where
+        /// the slots are not statically known.
+        const SLOT_MAP_EMPTY_VALUE: u8 = u8::MAX;
 
         #(#node_defs)*
         #(#union_defs)*
@@ -890,5 +954,140 @@ pub(crate) fn token_kind_to_code(
             let token: proc_macro2::TokenStream = name.parse().unwrap();
             quote! { T![#token] }
         }
+    }
+}
+
+/// Return a function body that iterates over a SyntaxNode's children, comparing
+/// each against the allowed kinds for that slot from the grammar, tracking each
+/// filled slot in a `slot_map` and returning that value once all of the children
+/// have been consumed.
+///
+/// To do this:
+///   - Ordered fields simply check if the current slot is filled with the
+///     expected syntax kind.
+///   - Unordered fields are grouped with other consecutive unordered fields,
+///     and each child is checked to find the first matching, unfilled slot
+///     from the grammar, until either all of the fields are filled or the
+///     current child does not match any of the fields.
+///   - The `slot_map` entry for the defined grammar node is filled with the
+///     index of the current child.
+fn get_slot_map_builder_impl(node: &AstNodeSrc, language_kind: LanguageKind) -> TokenStream {
+    let mut fields_copy = node.fields.iter().collect::<Vec<&Field>>();
+    let slot_count = fields_copy.len();
+
+    let last_field = node.fields.last();
+
+    // Chunk the fields of the node into groups of unordered nodes that need
+    // to be checked in parallel and ordered nodes that get checked one by one.
+    let field_groups = fields_copy.split_inclusive_mut(|field| !field.is_unordered());
+    let mut field_index = 0;
+
+    let field_mappers = field_groups
+        .map(|group| {
+            match group.len() {
+                0 => unreachable!("Somehow encountered a group of fields with no entries"),
+                // Single-field groups are assumed to act like ordered fields, so
+                // they can just check the kind and move on if there's no match.
+                1 => {
+                    let field = group[0];
+                    let this_field_index: usize = field_index;
+                    field_index += 1;
+                    let field_predicate = get_field_predicate(field, language_kind);
+
+                    let is_last = last_field.is_some_and(|last| field == last);
+
+                    // Don't increment current_element and current_slot if this is the
+                    // last element, otherwise Rust warns about the value being unused.
+                    if is_last {
+                        quote! {
+                            if let Some(element) = &current_element {
+                                if #field_predicate {
+                                    slot_map[#this_field_index] = current_slot;
+                                }
+                            }
+                        }
+                    } else {
+                        quote! {
+                            if let Some(element) = &current_element {
+                                if #field_predicate {
+                                    slot_map[#this_field_index] = current_slot;
+                                }
+                                current_element = children.next();
+                            }
+                            current_slot += 1;
+                        }
+                    }
+                }
+                _ => {
+                    let variants = group.iter().map(|field| {
+                        let this_field_index = field_index;
+                        field_index += 1;
+                        let field_predicate = get_field_predicate(field, language_kind);
+                        
+                        quote! {
+                            if slot_map[#this_field_index] == SLOT_MAP_EMPTY_VALUE && #field_predicate {
+                                slot_map[#this_field_index] = current_slot;
+                                current_slot += 1;
+                                current_element = children.next();
+                                continue;
+                            }
+                        }
+                    });
+
+                    let group_length = group.len();
+
+                    quote! {
+                        for _ in 0usize..#group_length {
+                            let Some(element) = &current_element else {
+                                break;
+                            };
+
+                            #(#variants)*
+
+                            // If the element didn't match any of the variants, then no more
+                            // are allowed to match, so move on to the next group.
+                            break;
+                        }
+                    }
+                }
+            }
+        })
+        .collect::<Vec<TokenStream>>();
+
+    quote! {
+        let mut children = syntax.children().into_iter();
+        let mut slot_map = [SLOT_MAP_EMPTY_VALUE; #slot_count];
+        let mut current_slot = 0;
+        let mut current_element = children.next();
+
+        #(#field_mappers)*
+
+        slot_map
+    }
+}
+
+fn get_field_predicate(field: &Field, language_kind: LanguageKind) -> TokenStream {
+    match field {
+        Field::Node { ty, .. } => {
+            let ast_type_name = format_ident!("{}", ty);
+
+            quote! {
+                #ast_type_name::can_cast(element.kind())
+            }
+        }
+        Field::Token { kind, .. } => match kind {
+            TokenKind::Single(expected) => {
+                let expected_kind = token_kind_to_code(expected, language_kind);
+                quote! { element.kind() == #expected_kind}
+            }
+            TokenKind::Many(expected) => {
+                let expected_kinds = expected
+                    .iter()
+                    .map(|kind| token_kind_to_code(kind, language_kind));
+                quote! {
+                    matches!(element.kind(), #(#expected_kinds)|*)
+                }
+            }
+        },
     }
 }

@@ -537,7 +537,6 @@ pub const JS_KINDS_SRC: KindsSrc = KindsSrc {
 #[derive(Default, Debug)]
 pub struct AstSrc {
     pub nodes: Vec<AstNodeSrc>,
-    pub dynamic_nodes: Vec<AstNodeSrc>,
     pub unions: Vec<AstEnumSrc>,
     pub lists: BTreeMap<String, AstListSrc>,
     pub bogus: Vec<String>,
@@ -589,6 +588,9 @@ pub struct AstNodeSrc {
     pub name: String,
     // pub traits: Vec<String>,
     pub fields: Vec<Field>,
+    /// Whether the fields of the node should be ordered dynamically using a
+    /// slot map for accesses.
+    pub dynamic: bool,
 }
 
 #[derive(Debug, Eq, PartialEq)]

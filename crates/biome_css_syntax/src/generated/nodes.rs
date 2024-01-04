@@ -7,7 +7,7 @@ use crate::{
     CssLanguage as Language, CssSyntaxElement as SyntaxElement,
     CssSyntaxElementChildren as SyntaxElementChildren,
     CssSyntaxKind::{self as SyntaxKind, *},
-    CssSyntaxList as SyntaxList, CssSyntaxNode as SyntaxNode, CssSyntaxToken as SyntaxToken,
+    CssSyntaxList as SyntaxList, CssSyntaxNode as SyntaxNode, CssSyntaxToken as SyntaxToken, T,
 };
 use biome_rowan::{support, AstNode, RawSyntaxKind, SyntaxKindSet, SyntaxResult};
 #[allow(unused)]
@@ -19,6 +19,9 @@ use serde::ser::SerializeSeq;
 #[cfg(feature = "serde")]
 use serde::{Serialize, Serializer};
 use std::fmt::{Debug, Formatter};
+#[doc = r" Sentinel value indicating a missing element in a dynamic node, where"]
+#[doc = r" the slots are not statically known."]
+const SLOT_MAP_EMPTY_VALUE: u8 = u8::MAX;
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssAtRule {
     pub(crate) syntax: SyntaxNode,
@@ -5095,6 +5098,149 @@ impl Serialize for CssUnknownDimension {
 pub struct CssUnknownDimensionFields {
     pub value_token: SyntaxResult<SyntaxToken>,
     pub unit_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssUnorderedTesting {
+    pub(crate) syntax: SyntaxNode,
+    pub(crate) slot_map: [u8; 8usize],
+}
+impl CssUnorderedTesting {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        let slot_map = CssUnorderedTesting::build_slot_map(&syntax);
+        Self { syntax, slot_map }
+    }
+    #[doc = r" Construct the `slot_map` for this node by checking the `kind` of"]
+    #[doc = r" each child of `syntax` against the defined grammar for the node."]
+    pub fn build_slot_map(syntax: &SyntaxNode) -> [u8; 8usize] {
+        let mut children = syntax.children().into_iter();
+        let mut slot_map = [SLOT_MAP_EMPTY_VALUE; 8usize];
+        let mut current_slot = 0;
+        let mut current_element = children.next();
+        for _ in 0usize..5usize {
+            let Some(element) = &current_element else {
+                break;
+            };
+            if slot_map[0usize] == SLOT_MAP_EMPTY_VALUE
+                && CssDashedIdentifier::can_cast(element.kind())
+            {
+                slot_map[0usize] = current_slot;
+                current_slot += 1;
+                current_element = children.next();
+                continue;
+            }
+            if slot_map[1usize] == SLOT_MAP_EMPTY_VALUE
+                && CssCustomIdentifier::can_cast(element.kind())
+            {
+                slot_map[1usize] = current_slot;
+                current_slot += 1;
+                current_element = children.next();
+                continue;
+            }
+            if slot_map[2usize] == SLOT_MAP_EMPTY_VALUE && CssNumber::can_cast(element.kind()) {
+                slot_map[2usize] = current_slot;
+                current_slot += 1;
+                current_element = children.next();
+                continue;
+            }
+            if slot_map[3usize] == SLOT_MAP_EMPTY_VALUE && CssString::can_cast(element.kind()) {
+                slot_map[3usize] = current_slot;
+                current_slot += 1;
+                current_element = children.next();
+                continue;
+            }
+            if slot_map[4usize] == SLOT_MAP_EMPTY_VALUE
+                && CssRegularDimension::can_cast(element.kind())
+            {
+                slot_map[4usize] = current_slot;
+                current_slot += 1;
+                current_element = children.next();
+                continue;
+            }
+            break;
+        }
+        if let Some(element) = &current_element {
+            if element.kind() == T ! [/] {
+                slot_map[5usize] = current_slot;
+            }
+            current_element = children.next();
+        }
+        current_slot += 1;
+        if let Some(element) = &current_element {
+            if CssBinaryExpression::can_cast(element.kind()) {
+                slot_map[6usize] = current_slot;
+            }
+            current_element = children.next();
+        }
+        current_slot += 1;
+        if let Some(element) = &current_element {
+            if CssColor::can_cast(element.kind()) {
+                slot_map[7usize] = current_slot;
+            }
+        }
+        slot_map
+    }
+    pub fn as_fields(&self) -> CssUnorderedTestingFields {
+        CssUnorderedTestingFields {
+            style: self.style(),
+            variant: self.variant(),
+            weight: self.weight(),
+            stretch: self.stretch(),
+            size: self.size(),
+            slash_token: self.slash_token(),
+            line_height: self.line_height(),
+            family: self.family(),
+        }
+    }
+    pub fn style(&self) -> Option<CssDashedIdentifier> {
+        support::node(&self.syntax, self.slot_map[0usize] as usize)
+    }
+    pub fn variant(&self) -> Option<CssCustomIdentifier> {
+        support::node(&self.syntax, self.slot_map[1usize] as usize)
+    }
+    pub fn weight(&self) -> Option<CssNumber> {
+        support::node(&self.syntax, self.slot_map[2usize] as usize)
+    }
+    pub fn stretch(&self) -> Option<CssString> {
+        support::node(&self.syntax, self.slot_map[3usize] as usize)
+    }
+    pub fn size(&self) -> SyntaxResult<CssRegularDimension> {
+        support::required_node(&self.syntax, self.slot_map[4usize] as usize)
+    }
+    pub fn slash_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, self.slot_map[5usize] as usize)
+    }
+    pub fn line_height(&self) -> Option<CssBinaryExpression> {
+        support::node(&self.syntax, self.slot_map[6usize] as usize)
+    }
+    pub fn family(&self) -> SyntaxResult<CssColor> {
+        support::required_node(&self.syntax, self.slot_map[7usize] as usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssUnorderedTesting {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssUnorderedTestingFields {
+    pub style: Option<CssDashedIdentifier>,
+    pub variant: Option<CssCustomIdentifier>,
+    pub weight: Option<CssNumber>,
+    pub stretch: Option<CssString>,
+    pub size: SyntaxResult<CssRegularDimension>,
+    pub slash_token: Option<SyntaxToken>,
+    pub line_height: Option<CssBinaryExpression>,
+    pub family: SyntaxResult<CssColor>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssUrlFunction {
@@ -11716,6 +11862,58 @@ impl From<CssUnknownDimension> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for CssUnorderedTesting {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_UNORDERED_TESTING as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_UNORDERED_TESTING
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            let slot_map = CssUnorderedTesting::build_slot_map(&syntax);
+            Some(Self { syntax, slot_map })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssUnorderedTesting {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssUnorderedTesting")
+            .field("style", &support::DebugOptionalElement(self.style()))
+            .field("variant", &support::DebugOptionalElement(self.variant()))
+            .field("weight", &support::DebugOptionalElement(self.weight()))
+            .field("stretch", &support::DebugOptionalElement(self.stretch()))
+            .field("size", &support::DebugSyntaxResult(self.size()))
+            .field(
+                "slash_token",
+                &support::DebugOptionalElement(self.slash_token()),
+            )
+            .field(
+                "line_height",
+                &support::DebugOptionalElement(self.line_height()),
+            )
+            .field("family", &support::DebugSyntaxResult(self.family()))
+            .finish()
+    }
+}
+impl From<CssUnorderedTesting> for SyntaxNode {
+    fn from(n: CssUnorderedTesting) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssUnorderedTesting> for SyntaxElement {
+    fn from(n: CssUnorderedTesting) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
 impl AstNode for CssUrlFunction {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -17276,6 +17474,11 @@ impl std::fmt::Display for CssUniversalSelector {
     }
 }
 impl std::fmt::Display for CssUnknownDimension {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssUnorderedTesting {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

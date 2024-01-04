@@ -202,27 +202,22 @@ fn make_ast(grammar: &Grammar) -> AstSrc {
             NodeRuleClassification::Node => {
                 let mut fields = vec![];
                 handle_rule(&mut fields, grammar, rule, None, false, false);
-                if fields.iter().any(|field| field.is_unordered()) {
-                    ast.dynamic_nodes.push(AstNodeSrc {
-                        documentation: vec![],
-                        name,
-                        fields,
-                    })
-                } else {
-                    ast.nodes.push(AstNodeSrc {
-                        documentation: vec![],
-                        name,
-                        fields,
-                    })
-                };
+                let is_dynamic = fields.iter().any(|field| field.is_unordered());
+                ast.nodes.push(AstNodeSrc {
+                    documentation: vec![],
+                    name,
+                    fields,
+                    dynamic: is_dynamic,
+                })
             }
             NodeRuleClassification::DynamicNode => {
                 let mut fields = vec![];
                 handle_rule(&mut fields, grammar, rule, None, false, true);
-                ast.dynamic_nodes.push(AstNodeSrc {
+                ast.nodes.push(AstNodeSrc {
                     documentation: vec![],
                     name,
                     fields,
+                    dynamic: true,
                 })
             }
             NodeRuleClassification::Bogus => ast.bogus.push(name),
