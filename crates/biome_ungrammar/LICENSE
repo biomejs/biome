@@ -4,7 +4,7 @@ biome_ungrammar is a fork of Ungrammar (https://github.com/rust-analyzer/ungramm
 Ungrammar is licensed under the MIT or Apache-2.0 License.
 The copyright holder of Ungrammar is Aleksey Kladov.
 
-Copyright (c) 2023 Biome Developers and Contributors.
+Copyright (c) 2024 Biome Developers and Contributors.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
