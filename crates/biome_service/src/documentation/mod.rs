@@ -7,6 +7,7 @@ use std::{collections::BTreeMap, str::FromStr};
 #[derive(Debug, Clone)]
 pub enum Doc {
     Rule(RuleMetadata),
+    DaemonLogs,
     Unknown(String),
 }
 
@@ -14,11 +15,16 @@ impl FromStr for Doc {
     type Err = String;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        if let Some(metadata) = LintRulesVisitor::new().get_metadata(s) {
-            return Ok(Doc::Rule(metadata));
-        };
+        match s {
+            "daemon-logs" => Ok(Doc::DaemonLogs),
+            _ => {
+                if let Some(metadata) = LintRulesVisitor::new().get_metadata(s) {
+                    return Ok(Doc::Rule(metadata));
+                };
 
-        Ok(Doc::Unknown(s.to_string()))
+                Ok(Doc::Unknown(s.to_string()))
+            }
+        }
     }
 }
 

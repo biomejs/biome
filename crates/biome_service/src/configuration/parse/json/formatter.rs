@@ -61,7 +61,7 @@ impl DeserializationVisitor for FormatterConfigurationVisitor {
                 "indentSize" => {
                     result.indent_width =
                         Deserializable::deserialize(&value, &key_text, diagnostics);
-                    diagnostics.push(DeserializationDiagnostic::new_deprecated(
+                    diagnostics.push(DeserializationDiagnostic::new_deprecated_use_instead(
                         &key_text,
                         key.range(),
                         "formatter.indentWidth",

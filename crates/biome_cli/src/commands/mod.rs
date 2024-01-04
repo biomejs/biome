@@ -255,6 +255,16 @@ pub enum BiomeCommand {
     ),
 
     /// A command to retrieve the documentation of various aspects of the CLI.
+    ///
+    /// ## Examples
+    ///
+    /// ```shell
+    /// biome explain noDebugger
+    /// ```
+    ///
+    /// ```shell
+    /// biome explain daemon-logs
+    /// ```
     #[bpaf(command)]
     Explain {
         /// Single name to display documentation for.
@@ -272,8 +282,6 @@ pub enum BiomeCommand {
     },
     #[bpaf(command("__print_socket"), hide)]
     PrintSocket,
-    #[bpaf(command("__print_cache_dir"), hide)]
-    PrintCacheDir,
 }
 
 impl BiomeCommand {
@@ -292,8 +300,7 @@ impl BiomeCommand {
             | BiomeCommand::Init
             | BiomeCommand::Explain { .. }
             | BiomeCommand::RunServer { .. }
-            | BiomeCommand::PrintSocket
-            | BiomeCommand::PrintCacheDir => None,
+            | BiomeCommand::PrintSocket => None,
         }
     }
 
@@ -312,8 +319,7 @@ impl BiomeCommand {
             | BiomeCommand::Explain { .. }
             | BiomeCommand::LspProxy(_)
             | BiomeCommand::RunServer { .. }
-            | BiomeCommand::PrintSocket
-            | BiomeCommand::PrintCacheDir => false,
+            | BiomeCommand::PrintSocket => false,
         }
     }
 
@@ -336,8 +342,7 @@ impl BiomeCommand {
             | BiomeCommand::Explain { .. }
             | BiomeCommand::LspProxy(_)
             | BiomeCommand::RunServer { .. }
-            | BiomeCommand::PrintSocket
-            | BiomeCommand::PrintCacheDir => false,
+            | BiomeCommand::PrintSocket => false,
         }
     }
 
@@ -356,8 +361,7 @@ impl BiomeCommand {
             | BiomeCommand::Init
             | BiomeCommand::Explain { .. }
             | BiomeCommand::RunServer { .. }
-            | BiomeCommand::PrintSocket
-            | BiomeCommand::PrintCacheDir => LoggingLevel::default(),
+            | BiomeCommand::PrintSocket => LoggingLevel::default(),
         }
     }
     pub fn log_kind(&self) -> LoggingKind {
@@ -375,8 +379,7 @@ impl BiomeCommand {
             | BiomeCommand::Init
             | BiomeCommand::Explain { .. }
             | BiomeCommand::RunServer { .. }
-            | BiomeCommand::PrintSocket
-            | BiomeCommand::PrintCacheDir => LoggingKind::default(),
+            | BiomeCommand::PrintSocket => LoggingKind::default(),
         }
     }
 }

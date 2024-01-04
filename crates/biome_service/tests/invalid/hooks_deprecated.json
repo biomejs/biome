@@ -1,0 +1,23 @@
+{
+	"$schema": "../../../../packages/@biomejs/biome/configuration_schema.json",
+	"linter": {
+		"rules": {
+			"correctness": {
+				"useHookAtTopLevel": {
+					"level": "error",
+					"options": {
+						"hooks": [
+							{
+								"name": "useLocation",
+								"closureIndex": 0,
+								"dependenciesIndex": 1
+							},
+							{ "name": "useQuery", "closureIndex": 1, "dependenciesIndex": 0 }
+						]
+					}
+				}
+			}
+		}
+	}
+}
+

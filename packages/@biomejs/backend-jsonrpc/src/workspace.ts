@@ -862,6 +862,10 @@ export interface Nursery {
 	 */
 	noEmptyBlockStatements?: RuleConfiguration;
 	/**
+	 * Disallow the use of global eval().
+	 */
+	noGlobalEval?: RuleConfiguration;
+	/**
 	 * Disallow the use of variables and function parameters before their declaration
 	 */
 	noInvalidUseBeforeDeclaration?: RuleConfiguration;
@@ -1371,6 +1375,7 @@ export type PossibleOptions =
 	| ComplexityOptions
 	| FilenamingConventionOptions
 	| HooksOptions
+	| DeprecatedHooksOptions
 	| NamingConventionOptions
 	| RestrictedGlobalsOptions
 	| ValidAriaRoleOptions;
@@ -1397,7 +1402,7 @@ export interface FilenamingConventionOptions {
 	strictCase: boolean;
 }
 /**
- * Options for the rule `useExhaustiveDependencies` and `useHookAtTopLevel`
+ * Options for the rule `useExhaustiveDependencies`
  */
 export interface HooksOptions {
 	/**
@@ -1405,6 +1410,10 @@ export interface HooksOptions {
 	 */
 	hooks: Hooks[];
 }
+/**
+ * Options for the `useHookAtTopLevel` rule have been deprecated, since we now use the React hook naming convention to determine whether a function is a hook.
+ */
+export interface DeprecatedHooksOptions {}
 /**
  * Rule's options.
  */
@@ -1455,7 +1464,12 @@ export type EnumMemberCase = "PascalCase" | "CONSTANT_CASE" | "camelCase";
 /**
  * Supported cases for TypeScript `enum` member names.
  */
-export type FilenameCase = "camelCase" | "export" | "kebab-case" | "snake_case";
+export type FilenameCase =
+	| "camelCase"
+	| "export"
+	| "kebab-case"
+	| "PascalCase"
+	| "snake_case";
 export interface ProjectFeaturesParams {
 	manifest_path: RomePath;
 }
@@ -1634,6 +1648,7 @@ export type Category =
 	| "lint/nursery/noApproximativeNumericConstant"
 	| "lint/nursery/noDuplicateJsonKeys"
 	| "lint/nursery/noEmptyBlockStatements"
+	| "lint/nursery/noGlobalEval"
 	| "lint/nursery/noInvalidUseBeforeDeclaration"
 	| "lint/nursery/noMisleadingCharacterClass"
 	| "lint/nursery/noNodejsModules"

@@ -1,0 +1,16 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+# Emitted Messages
+
+```block
+The daemon logs are available in the directory: 
+
+```
+
+```block
+<BIOME_DIR>/biome-logs
+```
+
+

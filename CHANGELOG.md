@@ -37,6 +37,15 @@ Biome now scores 97% compatibility with Prettier and features more than 180 lint
   ```
 
 - Introduced a new command called `biome explain`, which has the capability to display documentation for lint rules. Contributed by @kalleep
+- You can use the command `biome explain` to print the documentation of lint rules. Contributed by @kalleep
+  ```shell
+  biome explain noDebugger
+  biome explain useAltText
+  ```
+- You can use the command `biome explain` to print the directory where daemon logs are stored. Contributed by @ematipico
+  ```shell
+  biome explain daemon-logs
+  ```
 
 #### Bug fixes
 
@@ -181,11 +190,18 @@ The following rules are promoted:
   }
   ```
 
+<<<<<<< HEAD
 - Add [useConsistentArrayType](https://biomejs.dev/linter/rules/use-consistent-array-type) that enforces the use of a consistent syntax for array types. Contributed by @eryue0220
 
   This rule will replace [useShorthandArrayType](https://biomejs.dev/linter/rules/use-shorthand-array-type).
   It provides an option to choose between the shorthand or the generic syntax.
 
+||||||| 3c24e4c449
+=======
+- Add [noGlobalEval](https://biomejs.dev/linter/rules/no-global-eval) that reports any use of the global `eval`.
+  Contributed by @you-5805
+
+>>>>>>> main
 #### Enhancements
 
 - Address [#959](https://github.com/biomejs/biome/issues/959) and [#1157](https://github.com/biomejs/biome/issues/1157). [noEmptyInterface](https://biomejs.dev/linter/rules/no-empty-interface) no longer reports empty interfaces that extend a type. Contributed by @Conaclos
@@ -219,6 +235,14 @@ The following rules are promoted:
   +    2 // 2
   +
   ```
+
+- [useFilenamingConvention](https://biomejs.dev/linter/rules/use-filenaming-convention) accepts `PascalCase` in its configuration.
+
+  By default, the rule enforces that the filename is either in [`camelCase`], [`kebab-case`], [`snake_case`], or equal to the name of one export in the file.
+  The rule now accepts `PascalCase`.
+
+  Contributed by @Conaclos
+  Address [#1409](https://github.com/biomejs/biome/discussions/1409).
 
 - The code action (fix) of [noMultipleSpacesInRegularExpressionLiterals](https://biomejs.dev/linter/rules/no-multiple-spaces-in-regular-expression-literals/) is now marked as safe. Contributed by @Conaclos
 
@@ -327,6 +351,7 @@ The following rules are promoted:
 #### Bug fixes
 
 - Fix [#933](https://github.com/biomejs/biome/issues/933). Some files are properly ignored in the LSP too. E.g. `package.json`, `tsconfig.json`, etc.
+- Fix [#1394](https://github.com/biomejs/biome/issues/1394), by inferring the language extension from the internal saved files. Now newly created files JavaScript correctly show diagnostics.
 
 ### Formatter
 
@@ -534,9 +559,7 @@ The following rules are now deprecated:
 
 #### New features
 
-- Add [noUnusedPrivateClassMembers](https://biomejs.dev/linter/rules/no-unused-private-class-members) rule.
-  The rule disallow unused private class members.
-  Contributed by @victor-teles
+- Add [noUnusedPrivateClassMembers](https://biomejs.dev/linter/rules/no-unused-private-class-members) rule. The rule disallow unused private class members. Contributed by @victor-teles
 
 #### Bug fixes
 
@@ -557,6 +580,35 @@ The following rules are now deprecated:
 - Fix [#609](https://github.com/biomejs/biome/issues/609) `useExhaustiveDependencies`, by removing `useContext`, `useId` and `useSyncExternalStore` from the known hooks. Contributed by @msdlisper
 
 - Fix `useExhaustiveDependencies`, by removing `useContext`, `useId` and `useSyncExternalStore` from the known hooks. Contributed by @msdlisper
+
+- Fix [#871](https://github.com/biomejs/biome/issues/871) and [#610](https://github.com/biomejs/biome/issues/610). Now `useHookAtTopLevel` correctly handles nested functions.  Contributed by @arendjr
+
+- The options of the rule `useHookAtTopLevel` are deprecated and will be removed in Biome 2.0. The rule now determines the hooks using the naming convention set by React.
+
+  ```diff
+  {
+    "linter": {
+      "rules": {
+        "correctness": {
+  +        "useHookAtTopLevel": "error",
+  -        "useHookAtTopLevel": {
+  -          "level": "error",
+  -          "options": {
+  -            "hooks": [
+  -              {
+  -                "name": "useLocation",
+  -                "closureIndex": 0,
+  -                "dependenciesIndex": 1
+  -              },
+  -              { "name": "useQuery", "closureIndex": 1, "dependenciesIndex": 0 }
+  -            ]
+  -          }
+  -        }
+        }
+      }
+    }
+  }
+  ```
 
 ### Parser
 

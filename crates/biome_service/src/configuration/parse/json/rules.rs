@@ -943,6 +943,10 @@ impl Deserializable for Nursery {
                                 diagnostics,
                             );
                         }
+                        "noGlobalEval" => {
+                            result.no_global_eval =
+                                Deserializable::deserialize(&value, "noGlobalEval", diagnostics);
+                        }
                         "noInvalidUseBeforeDeclaration" => {
                             result.no_invalid_use_before_declaration = Deserializable::deserialize(
                                 &value,
@@ -1053,6 +1057,7 @@ impl Deserializable for Nursery {
                                     "all",
                                     "noDuplicateJsonKeys",
                                     "noEmptyBlockStatements",
+                                    "noGlobalEval",
                                     "noInvalidUseBeforeDeclaration",
                                     "noMisleadingCharacterClass",
                                     "noNodejsModules",
