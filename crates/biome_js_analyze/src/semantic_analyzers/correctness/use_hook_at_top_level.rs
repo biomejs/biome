@@ -491,8 +491,6 @@ impl Deserializable for DeprecatedHooksOptions {
         name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        dbg!("here");
-
         value.deserialize(DeprecatedHooksOptionsVisitor, name, diagnostics)
     }
 }
