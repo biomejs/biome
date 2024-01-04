@@ -5,7 +5,7 @@ expression: content
 # Emitted Messages
 
 ```block
-The logs directory is available at: 
+The daemon logs are available in the directory: 
 
 ```
 

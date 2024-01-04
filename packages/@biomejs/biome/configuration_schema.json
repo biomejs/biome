@@ -1268,7 +1268,7 @@
 					]
 				},
 				"noGlobalEval": {
-					"description": "Succinct description of the rule.",
+					"description": "Disallow the use of global eval().",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

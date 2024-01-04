@@ -858,7 +858,7 @@ export interface Nursery {
 	 */
 	noEmptyBlockStatements?: RuleConfiguration;
 	/**
-	 * Succinct description of the rule.
+	 * Disallow the use of global eval().
 	 */
 	noGlobalEval?: RuleConfiguration;
 	/**

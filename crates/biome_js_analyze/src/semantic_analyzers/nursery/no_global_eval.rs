@@ -7,7 +7,13 @@ use biome_rowan::AstNode;
 declare_rule! {
     /// Disallow the use of global `eval()`.
     ///
-    /// JavaScript’s `eval()` function is potentially dangerous and is often misused. Using `eval()` on untrusted code can open a program up to several different injection attacks. The use of `eval()` in most contexts can be substituted for a better, alternative approach to a problem.
+    /// The `eval()` function evaluates the passed string as a _JavaScript_ code.
+    /// The executed code can access and mutate variables in the scope where the function is called.
+    ///
+    /// The use of `eval()` exposes to [security risks and performance issues](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/eval#never_use_eval!).
+    /// If the executed code is somehow affected by a malicious party,
+    /// then you may end up executing malicious code with the privileges of the caller.
+    /// Moreover, changing variables in the caller's scope is expensive in modern _JavaScript_ interpreters.
     ///
     /// Source: https://eslint.org/docs/latest/rules/no-eval
     ///
@@ -20,22 +26,35 @@ declare_rule! {
     /// ```
     ///
     /// ```js,expect_diagnostic
+    /// (0, globalThis.eval)("var a = 0")
+    /// ```
+    ///
+    /// ```js,expect_diagnostic
     /// f(eval);
     /// ```
     ///
     /// ```js,expect_diagnostic
-    /// var evalAlias = eval;
+    /// const aliasedEval = eval;
     /// ```
     ///
     /// ### Valid
-    /// ```js
-    /// var a = 0;
+    ///
+    /// ```cjs
+    /// function f(eval) {
+    ///     eval("let a = 0;");
+    /// }
     /// ```
     ///
+    /// The rule is not able to detect cases where the global object is aliased:
+    ///
+    /// ```js
+    /// let foo = globalThis;
+    /// foo.eval("let a = 0;");
+    /// ```
     pub(crate) NoGlobalEval {
         version: "next",
         name: "noGlobalEval",
-        recommended: false,
+        recommended: true,
     }
 }
 
@@ -57,13 +76,18 @@ impl Rule for NoGlobalEval {
 
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
-
         Some(RuleDiagnostic::new(
             rule_category!(),
             node.range(),
             markup! {
-                <Emphasis>"eval()"</Emphasis>" can be harmful."
+                <Emphasis>"eval()"</Emphasis>" exposes to security risks and performance issues."
             },
-        ))
+        ).note(markup! {
+            "See the "<Hyperlink href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/eval#never_use_eval!">"MDN web docs"</Hyperlink>" for more details."
+        })
+        .note(
+            markup! {
+            "Refactor the code so that it doesn't need to call "<Emphasis>"eval()"</Emphasis>"."
+        }))
     }
 }

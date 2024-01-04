@@ -147,6 +147,9 @@ Biome now scores 97% compatibility with Prettier and features more than 180 lint
   }
   ```
 
+- Add [noGlobalEval](https://biomejs.dev/linter/rules/no-global-eval) that reports any use of the global `eval`.
+  Contributed by @you-5805
+
 #### Enhancements
 
 - Address [#959](https://github.com/biomejs/biome/issues/959) and [#1157](https://github.com/biomejs/biome/issues/1157). [noEmptyInterface](https://biomejs.dev/linter/rules/no-empty-interface) no longer reports empty interfaces that extend a type. Contributed by @Conaclos
