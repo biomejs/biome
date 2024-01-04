@@ -1308,3 +1308,15 @@ CssDashedIdentifier = value: 'ident'
 CssString = value: 'css_string_literal'
 CssNumber = value: 'css_number_literal'
 CssUrlValueRaw = value: 'css_url_value_raw_literal'
+
+
+CssUnorderedTesting =
+  (
+    style: CssDashedIdentifier
+     || variant: CssCustomIdentifier
+     || weight: CssNumber
+     || stretch: CssString
+  )?
+  size: CssRegularDimension
+  ( '/' line_height: CssBinaryExpression) ?
+  family: CssColor

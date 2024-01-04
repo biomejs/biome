@@ -537,6 +537,7 @@ pub const JS_KINDS_SRC: KindsSrc = KindsSrc {
 #[derive(Default, Debug)]
 pub struct AstSrc {
     pub nodes: Vec<AstNodeSrc>,
+    pub dynamic_nodes: Vec<AstNodeSrc>,
     pub unions: Vec<AstEnumSrc>,
     pub lists: BTreeMap<String, AstListSrc>,
     pub bogus: Vec<String>,
@@ -602,11 +603,13 @@ pub enum Field {
         name: String,
         kind: TokenKind,
         optional: bool,
+        unordered: bool,
     },
     Node {
         name: String,
         ty: String,
         optional: bool,
+        unordered: bool,
     },
 }
 
@@ -734,6 +737,13 @@ impl Field {
         match self {
             Field::Node { optional, .. } => *optional,
             Field::Token { optional, .. } => *optional,
+        }
+    }
+
+    pub fn is_unordered(&self) -> bool {
+        match self {
+            Field::Node { unordered, .. } => *unordered,
+            Field::Token { unordered, .. } => *unordered,
         }
     }
 }

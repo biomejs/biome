@@ -12,6 +12,29 @@ pub(crate) enum TokenKind {
     Colon,
     LParen,
     RParen,
+    DoublePipe,
+    DoubleAmpersand,
+}
+
+/// Utility type for quickly comparing simple tokens without having to
+/// worry about clone/equality/instantiation from Node and Token types.
+#[derive(Debug, Eq, PartialEq, Clone, Copy)]
+pub(crate) enum CombinatorKind {
+    Pipe,
+    DoublePipe,
+    DoubleAmpersand,
+    NonCombinator,
+}
+
+impl CombinatorKind {
+    pub fn new(value: &TokenKind) -> Self {
+        match value {
+            TokenKind::Pipe => CombinatorKind::Pipe,
+            TokenKind::DoublePipe => CombinatorKind::DoublePipe,
+            TokenKind::DoubleAmpersand => CombinatorKind::DoubleAmpersand,
+            _ => CombinatorKind::NonCombinator,
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -79,7 +102,20 @@ fn advance(input: &mut &str) -> Result<TokenKind> {
         '?' => TokenKind::QMark,
         '(' => TokenKind::LParen,
         ')' => TokenKind::RParen,
-        '|' => TokenKind::Pipe,
+        '|' => match chars.clone().next() {
+            Some('|') => {
+                chars.next();
+                TokenKind::DoublePipe
+            }
+            _ => TokenKind::Pipe,
+        },
+        '&' => match chars.clone().next() {
+            Some('&') => {
+                chars.next();
+                TokenKind::DoubleAmpersand
+            }
+            _ => bail!("unexpected `&`, did you mean to write `&&`?"),
+        },
         ':' => TokenKind::Colon,
         '\'' => {
             let mut buf = String::new();

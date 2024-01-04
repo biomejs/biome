@@ -112,6 +112,12 @@ pub enum Rule {
     Seq(Vec<Rule>),
     /// An alternative between many rules, like `'+' | '-' | '*' | '/'`.
     Alt(Vec<Rule>),
+    /// An unordered, alternative rule, like `A || B || C`, meaning A, B, and C
+    /// can all appear 0 or 1 times, in any order.
+    UnorderedSome(Vec<Rule>),
+    /// An unordered, required rule, like `A && B && C`, meaning A, B, and C
+    /// _must_ all appear exactly 1 time, but can be in any order.
+    UnorderedAll(Vec<Rule>),
     /// An optional rule, like `A?`.
     Opt(Box<Rule>),
     /// A repeated rule, like `A*`.
