@@ -1460,7 +1460,12 @@ export type EnumMemberCase = "PascalCase" | "CONSTANT_CASE" | "camelCase";
 /**
  * Supported cases for TypeScript `enum` member names.
  */
-export type FilenameCase = "camelCase" | "export" | "kebab-case" | "snake_case";
+export type FilenameCase =
+	| "camelCase"
+	| "export"
+	| "kebab-case"
+	| "PascalCase"
+	| "snake_case";
 export interface ProjectFeaturesParams {
 	manifest_path: RomePath;
 }

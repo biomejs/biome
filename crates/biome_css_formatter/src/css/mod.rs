@@ -4,6 +4,7 @@ pub(crate) mod any;
 pub(crate) mod auxiliary;
 pub(crate) mod bogus;
 pub(crate) mod lists;
+pub(crate) mod properties;
 pub(crate) mod pseudo;
 pub(crate) mod selectors;
 pub(crate) mod statements;

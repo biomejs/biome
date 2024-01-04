@@ -1192,6 +1192,8 @@ CssScopeEdge =
 // AUXILIARY
 ///////////////
 
+// When adding values here, add them as `NodeConcept::Value` in the
+// `name_to_module` function in `src/formatter.rs`.
 AnyCssValue =
 	CssIdentifier
 	| CssCustomIdentifier

@@ -85,7 +85,7 @@ pub(crate) struct ExportDefaultItem {
 /// State kept by the parser while parsing.
 /// It is required for things such as strict mode or async functions
 #[derive(Debug)]
-pub(crate) struct ParserState {
+pub(crate) struct JsParserState {
     parsing_context: ParsingContextFlags,
     /// A list of labels for labelled statements used to report undefined label errors
     /// for break and continue, as well as duplicate labels.
@@ -126,9 +126,9 @@ pub(crate) enum StrictMode {
     Class(TextRange),
 }
 
-impl ParserState {
+impl JsParserState {
     pub fn new(source_type: &JsFileSource) -> Self {
-        let mut state = ParserState {
+        let mut state = JsParserState {
             parsing_context: ParsingContextFlags::TOP_LEVEL,
             label_set: IndexMap::new(),
             strict: source_type
@@ -201,58 +201,58 @@ impl ParserState {
         self.label_set.get(label)
     }
 
-    pub(super) fn checkpoint(&self) -> ParserStateCheckpoint {
-        ParserStateCheckpoint::snapshot(self)
+    pub(super) fn checkpoint(&self) -> JsParserStateCheckpoint {
+        JsParserStateCheckpoint::snapshot(self)
     }
 
-    pub(super) fn restore(&mut self, checkpoint: ParserStateCheckpoint) {
+    pub(super) fn restore(&mut self, checkpoint: JsParserStateCheckpoint) {
         checkpoint.rewind(self);
     }
 }
 
-/// Stores a checkpoint of the [ParserState].
+/// Stores a checkpoint of the [JsParserState].
 /// Allows rewinding the state to its previous state.
 ///
 /// It's important that creating and rewinding a snapshot is cheap. Consider the performance implications
 /// before adding new unscoped state.
 #[derive(Debug)]
-pub(super) struct ParserStateCheckpoint {
+pub(super) struct JsParserStateCheckpoint {
     /// Additional data that we only want to store in debug mode
     #[cfg(debug_assertions)]
-    debug_checkpoint: DebugParserStateCheckpoint,
+    debug_checkpoint: JsDebugParserStateCheckpoint,
 }
 
-impl ParserStateCheckpoint {
+impl JsParserStateCheckpoint {
     /// Creates a snapshot of the passed in state.
     #[cfg(debug_assertions)]
-    fn snapshot(state: &ParserState) -> Self {
+    fn snapshot(state: &JsParserState) -> Self {
         Self {
-            debug_checkpoint: DebugParserStateCheckpoint::snapshot(state),
+            debug_checkpoint: JsDebugParserStateCheckpoint::snapshot(state),
         }
     }
 
     #[cfg(not(debug_assertions))]
-    fn snapshot(_: &ParserState) -> Self {
+    fn snapshot(_: &JsParserState) -> Self {
         Self {}
     }
 
     /// Restores the `state values` to the time when this snapshot was created.
     #[cfg(debug_assertions)]
-    fn rewind(self, state: &mut ParserState) {
+    fn rewind(self, state: &mut JsParserState) {
         self.debug_checkpoint.rewind(state);
     }
 
     #[cfg(not(debug_assertions))]
-    fn rewind(self, _: &ParserState) {}
+    fn rewind(self, _: &JsParserState) {}
 }
 
-/// Most of the [ParserState] is scoped state. It should, therefore, not be necessary to rewind
+/// Most of the [JsParserState] is scoped state. It should, therefore, not be necessary to rewind
 /// that state because that's already taken care of by `with_state` and `with_scoped_state`.
 /// But, you can never no and better be safe than sorry. That's why we use some heuristics
 /// to verify that non of the scoped state did change and assert for it when rewinding.
 #[derive(Debug, Clone)]
 #[cfg(debug_assertions)]
-pub(super) struct DebugParserStateCheckpoint {
+pub(super) struct JsDebugParserStateCheckpoint {
     parsing_context: ParsingContextFlags,
     label_set_len: usize,
     strict: Option<StrictMode>,
@@ -262,8 +262,8 @@ pub(super) struct DebugParserStateCheckpoint {
 }
 
 #[cfg(debug_assertions)]
-impl DebugParserStateCheckpoint {
-    fn snapshot(state: &ParserState) -> Self {
+impl JsDebugParserStateCheckpoint {
+    fn snapshot(state: &JsParserState) -> Self {
         Self {
             parsing_context: state.parsing_context,
             label_set_len: state.label_set.len(),
@@ -274,7 +274,7 @@ impl DebugParserStateCheckpoint {
         }
     }
 
-    fn rewind(self, state: &mut ParserState) {
+    fn rewind(self, state: &mut JsParserState) {
         assert_eq!(state.parsing_context, self.parsing_context);
         assert_eq!(state.label_set.len(), self.label_set_len);
         assert_eq!(state.strict, self.strict);
@@ -333,10 +333,10 @@ pub(crate) trait ChangeParserState {
     type Snapshot: Default;
 
     /// Applies the change to the passed in state and returns snapshot that allows restoring the previous state.
-    fn apply(self, state: &mut ParserState) -> Self::Snapshot;
+    fn apply(self, state: &mut JsParserState) -> Self::Snapshot;
 
     /// Restores the state to its previous value
-    fn restore(state: &mut ParserState, value: Self::Snapshot);
+    fn restore(state: &mut JsParserState, value: Self::Snapshot);
 }
 
 #[derive(Default, Debug)]
@@ -349,12 +349,12 @@ impl ChangeParserState for EnableStrictMode {
     type Snapshot = EnableStrictModeSnapshot;
 
     #[inline]
-    fn apply(self, state: &mut ParserState) -> Self::Snapshot {
+    fn apply(self, state: &mut JsParserState) -> Self::Snapshot {
         EnableStrictModeSnapshot(std::mem::replace(&mut state.strict, Some(self.0)))
     }
 
     #[inline]
-    fn restore(state: &mut ParserState, value: Self::Snapshot) {
+    fn restore(state: &mut JsParserState, value: Self::Snapshot) {
         state.strict = value.0
     }
 }
@@ -448,12 +448,12 @@ pub(crate) trait ChangeParserStateFlags {
 impl<T: ChangeParserStateFlags> ChangeParserState for T {
     type Snapshot = ParsingContextFlagsSnapshot;
 
-    fn apply(self, state: &mut ParserState) -> Self::Snapshot {
+    fn apply(self, state: &mut JsParserState) -> Self::Snapshot {
         let new_flags = self.compute_new_flags(state.parsing_context);
         ParsingContextFlagsSnapshot(std::mem::replace(&mut state.parsing_context, new_flags))
     }
 
-    fn restore(state: &mut ParserState, value: Self::Snapshot) {
+    fn restore(state: &mut JsParserState, value: Self::Snapshot) {
         state.parsing_context = value.0
     }
 }
@@ -507,7 +507,7 @@ impl ChangeParserState for EnterFunction {
     type Snapshot = EnterFunctionSnapshot;
 
     #[inline]
-    fn apply(self, state: &mut ParserState) -> Self::Snapshot {
+    fn apply(self, state: &mut JsParserState) -> Self::Snapshot {
         let new_flags = (state.parsing_context - ParsingContextFlags::FUNCTION_RESET_MASK)
             | ParsingContextFlags::IN_FUNCTION
             | ParsingContextFlags::from(self.0);
@@ -519,7 +519,7 @@ impl ChangeParserState for EnterFunction {
     }
 
     #[inline]
-    fn restore(state: &mut ParserState, value: Self::Snapshot) {
+    fn restore(state: &mut JsParserState, value: Self::Snapshot) {
         state.parsing_context = value.parsing_context;
         state.label_set = value.label_set;
     }
@@ -547,7 +547,7 @@ pub(crate) struct EnterClassStaticInitializationBlock;
 impl ChangeParserState for EnterClassStaticInitializationBlock {
     type Snapshot = EnterClassStaticInitializationBlockSnapshot;
 
-    fn apply(self, state: &mut ParserState) -> Self::Snapshot {
+    fn apply(self, state: &mut JsParserState) -> Self::Snapshot {
         let flags = (state.parsing_context
             - ParsingContextFlags::FUNCTION_RESET_MASK
             - ParsingContextFlags::IN_FUNCTION)
@@ -558,7 +558,7 @@ impl ChangeParserState for EnterClassStaticInitializationBlock {
         }
     }
 
-    fn restore(state: &mut ParserState, value: Self::Snapshot) {
+    fn restore(state: &mut JsParserState, value: Self::Snapshot) {
         state.parsing_context = value.flags;
         state.label_set = value.label_set;
     }
@@ -577,7 +577,7 @@ pub(crate) struct WithLabel(pub String, pub LabelledItem);
 impl ChangeParserState for WithLabel {
     type Snapshot = WithLabelSnapshot;
 
-    fn apply(self, state: &mut ParserState) -> Self::Snapshot {
+    fn apply(self, state: &mut JsParserState) -> Self::Snapshot {
         #[cfg(debug_assertions)]
         let previous_len = state.label_set.len();
         state.label_set.insert(self.0, self.1);
@@ -591,12 +591,12 @@ impl ChangeParserState for WithLabel {
     }
 
     #[cfg(not(debug_assertions))]
-    fn restore(state: &mut ParserState, _: Self::Snapshot) {
+    fn restore(state: &mut JsParserState, _: Self::Snapshot) {
         state.label_set.pop();
     }
 
     #[cfg(debug_assertions)]
-    fn restore(state: &mut ParserState, value: Self::Snapshot) {
+    fn restore(state: &mut JsParserState, value: Self::Snapshot) {
         assert_eq!(state.label_set.len(), value.label_set_len + 1);
         state.label_set.pop();
     }
@@ -623,7 +623,7 @@ pub(crate) struct EnterAmbientContext;
 impl ChangeParserState for EnterAmbientContext {
     type Snapshot = EnterAmbientContextSnapshot;
 
-    fn apply(self, state: &mut ParserState) -> Self::Snapshot {
+    fn apply(self, state: &mut JsParserState) -> Self::Snapshot {
         let new_flags = state.parsing_context | ParsingContextFlags::AMBIENT_CONTEXT;
         EnterAmbientContextSnapshot {
             flags: std::mem::replace(&mut state.parsing_context, new_flags),
@@ -632,7 +632,7 @@ impl ChangeParserState for EnterAmbientContext {
         }
     }
 
-    fn restore(state: &mut ParserState, value: Self::Snapshot) {
+    fn restore(state: &mut JsParserState, value: Self::Snapshot) {
         state.parsing_context = value.flags;
         state.default_item = value.default_item;
         state.strict = value.strict_mode;

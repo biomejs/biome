@@ -2,8 +2,8 @@ use crate::lexer::{JsLexContext, JsLexer, JsReLexContext, TextRange};
 use crate::prelude::*;
 use biome_js_syntax::JsSyntaxKind;
 use biome_js_syntax::JsSyntaxKind::EOF;
-use biome_parser::lexer::{BufferedLexer, LexContext, LexerCheckpoint};
-use biome_parser::token_source::Trivia;
+use biome_parser::lexer::{BufferedLexer, LexContext};
+use biome_parser::token_source::{TokenSourceCheckpoint, Trivia};
 use biome_rowan::{TextSize, TriviaPieceKind};
 use std::collections::VecDeque;
 
@@ -33,6 +33,8 @@ struct Lookahead {
     kind: JsSyntaxKind,
     after_newline: bool,
 }
+
+pub(crate) type JsTokenSourceCheckpoint = TokenSourceCheckpoint<JsSyntaxKind>;
 
 impl<'l> JsTokenSource<'l> {
     /// Creates a new token source.
@@ -155,18 +157,18 @@ impl<'l> JsTokenSource<'l> {
     }
 
     /// Creates a checkpoint to which it can later return using [Self::rewind].
-    pub fn checkpoint(&self) -> TokenSourceCheckpoint {
-        TokenSourceCheckpoint {
+    pub fn checkpoint(&self) -> JsTokenSourceCheckpoint {
+        JsTokenSourceCheckpoint {
             trivia_len: self.trivia_list.len() as u32,
-            lexer: self.lexer.checkpoint(),
+            lexer_checkpoint: self.lexer.checkpoint(),
         }
     }
 
     /// Restores the token source to a previous state
-    pub fn rewind(&mut self, checkpoint: TokenSourceCheckpoint) {
+    pub fn rewind(&mut self, checkpoint: JsTokenSourceCheckpoint) {
         assert!(self.trivia_list.len() >= checkpoint.trivia_len as usize);
         self.trivia_list.truncate(checkpoint.trivia_len as usize);
-        self.lexer.rewind(checkpoint.lexer);
+        self.lexer.rewind(checkpoint.lexer_checkpoint);
         self.non_trivia_lookahead.clear();
         self.lookahead_offset = 0;
     }
@@ -271,25 +273,5 @@ impl<'source> NthToken for JsTokenSource<'source> {
             self.lookahead(n)
                 .map_or(false, |lookahead| lookahead.after_newline)
         }
-    }
-}
-
-#[derive(Debug)]
-pub struct TokenSourceCheckpoint {
-    lexer: LexerCheckpoint<JsSyntaxKind>,
-    /// A `u32` should be enough because `TextSize` is also limited to `u32`.
-    /// The worst case is a document where every character is its own token. This would
-    /// result in `u32::MAX` tokens
-    trivia_len: u32,
-}
-
-impl TokenSourceCheckpoint {
-    /// byte offset in the source text
-    pub(crate) fn current_start(&self) -> TextSize {
-        self.lexer.current_start()
-    }
-
-    pub(crate) fn trivia_position(&self) -> usize {
-        self.trivia_len as usize
     }
 }

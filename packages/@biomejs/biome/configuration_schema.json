@@ -831,6 +831,11 @@
 				{
 					"description": "PascalCase",
 					"type": "string",
+					"enum": ["PascalCase"]
+				},
+				{
+					"description": "snake_case",
+					"type": "string",
 					"enum": ["snake_case"]
 				}
 			]

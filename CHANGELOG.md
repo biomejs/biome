@@ -172,6 +172,14 @@ Biome now scores 97% compatibility with Prettier and features more than 180 lint
   +
   ```
 
+- [useFilenamingConvention](https://biomejs.dev/linter/rules/use-filenaming-convention) accepts `PascalCase` in its configuration.
+
+  By default, the rule enforces that the filename is either in [`camelCase`], [`kebab-case`], [`snake_case`], or equal to the name of one export in the file.
+  The rule now accepts `PascalCase`.
+
+  Contributed by @Conaclos
+  Address [#1409](https://github.com/biomejs/biome/discussions/1409).
+
 - The code action (fix) of [noMultipleSpacesInRegularExpressionLiterals](https://biomejs.dev/linter/rules/no-multiple-spaces-in-regular-expression-literals/) is now marked as safe. Contributed by @Conaclos
 
 #### Bug fixes
@@ -279,6 +287,7 @@ Biome now scores 97% compatibility with Prettier and features more than 180 lint
 #### Bug fixes
 
 - Fix [#933](https://github.com/biomejs/biome/issues/933). Some files are properly ignored in the LSP too. E.g. `package.json`, `tsconfig.json`, etc.
+- Fix [#1394](https://github.com/biomejs/biome/issues/1394), by inferring the language extension from the internal saved files. Now newly created files JavaScript correctly show diagnostics.
 
 ### Formatter
 
