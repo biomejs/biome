@@ -1066,7 +1066,7 @@ fn get_slot_map_builder_impl(node: &AstNodeSrc, language_kind: LanguageKind) -> 
     }
 }
 
-fn get_field_predicate(field: &Field, language_kind: LanguageKind) -> TokenStream {
+pub(crate) fn get_field_predicate(field: &Field, language_kind: LanguageKind) -> TokenStream {
     match field {
         Field::Node { ty, .. } => {
             let ast_type_name = format_ident!("{}", ty);

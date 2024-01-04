@@ -1,7 +1,7 @@
 use super::kinds_src::AstSrc;
-use crate::generate_nodes::token_kind_to_code;
-use crate::kinds_src::TokenKind;
+use crate::generate_nodes::{get_field_predicate, token_kind_to_code};
 use crate::{kinds_src::Field, to_upper_snake_case, LanguageKind};
+use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 use xtask::Result;
 
@@ -27,41 +27,91 @@ pub fn generate_syntax_factory(ast: &AstSrc, language_kind: LanguageKind) -> Res
         let kind = format_ident!("{}", to_upper_snake_case(&node.name));
         let expected_len = node.fields.len();
 
-        let fields = node.fields.iter().map(|field| {
-            let field_predicate = match field {
-                Field::Node { ty, .. } => {
-                    let ast_type_name = format_ident!("{}", ty);
+        let fields = if node.dynamic {
+            let mut fields_copy = node.fields.iter().collect::<Vec<&Field>>();
+            // Chunk the fields of the node into groups of unordered nodes that need
+            // to be checked in parallel and ordered nodes that get checked one by one.
+            let field_groups = fields_copy.split_inclusive_mut(|field| !field.is_unordered());
 
-                    quote! {
-                        #ast_type_name::can_cast(element.kind())
-                    }
-                }
-                Field::Token { kind, .. } => match kind {
-                    TokenKind::Single(expected) => {
-                        let expected_kind = token_kind_to_code(expected, language_kind);
-                        quote! { element.kind() == #expected_kind}
-                    }
-                    TokenKind::Many(expected) => {
-                        let expected_kinds = expected
-                            .iter()
-                            .map(|kind| token_kind_to_code(kind, language_kind));
-                        quote! {
-                            matches!(element.kind(), #(#expected_kinds)|*)
+            field_groups
+                .map(|group| {
+                    match group.len() {
+                        0 => unreachable!("Somehow encountered a group of fields with no entries"),
+                        // Single-field groups are assumed to act like ordered fields, so
+                        // they can just check the kind and move on if there's no match.
+                        1 => {
+                            let field = group[0];
+                            let field_predicate = get_field_predicate(field, language_kind);
+
+                            quote! {
+                                if let Some(element) = &current_element {
+                                    if #field_predicate {
+                                        slots.mark_present();
+                                        current_element = elements.next();
+                                    }
+                                }
+                                slots.next_slot();
+                            }
+                        }
+                        _ => {
+                            let variants = group.iter().enumerate().map(|(index, field)| {
+                                let field_predicate = get_field_predicate(field, language_kind);
+
+                                quote! {
+                                    if !group_slot_map[#index] && #field_predicate {
+                                        group_slot_map[#index] = true;
+                                        unmatched_count -= 1;
+                                        slots.mark_present();
+                                        slots.next_slot();
+                                        current_element = elements.next();
+                                        continue;
+                                    }
+                                }
+                            });
+
+                            let group_length = group.len();
+
+                            quote! {
+                                let mut unmatched_count = #group_length;
+                                let mut group_slot_map = [false; #group_length];
+                                for _ in 0usize..#group_length {
+                                    let Some(element) = &current_element else {
+                                        break;
+                                    };
+
+                                    #(#variants)*
+
+                                    // If the element didn't match any of the variants, then no more
+                                    // are allowed to match, so move on to the next group.
+                                    break;
+                                }
+                                // Advanced past all of the expected slots for the group so that
+                                // they get marked as empty.
+                                for _ in 0..unmatched_count {
+                                    slots.next_slot();
+                                }
+                            }
                         }
                     }
-                },
-            };
-
-            quote! {
-                if let Some(element) = &current_element {
-                    if #field_predicate {
-                        slots.mark_present();
-                        current_element = elements.next();
+                })
+                .collect::<Vec<TokenStream>>()
+        } else {
+            node.fields
+                .iter()
+                .map(|field| {
+                    let field_predicate = get_field_predicate(field, language_kind);
+                    quote! {
+                        if let Some(element) = &current_element {
+                            if #field_predicate {
+                                slots.mark_present();
+                                current_element = elements.next();
+                            }
+                        }
+                        slots.next_slot();
                     }
-                }
-                slots.next_slot();
-            }
-        });
+                })
+                .collect::<Vec<TokenStream>>()
+        };
 
         quote! {
             #kind => {

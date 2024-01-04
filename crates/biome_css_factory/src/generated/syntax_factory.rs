@@ -3514,41 +3514,57 @@ impl SyntaxFactory for CssSyntaxFactory {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<8usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
-                if let Some(element) = &current_element {
-                    if CssDashedIdentifier::can_cast(element.kind()) {
+                let mut unmatched_count = 5usize;
+                let mut group_slot_map = [false; 5usize];
+                for _ in 0usize..5usize {
+                    let Some(element) = &current_element else {
+                        break;
+                    };
+                    if !group_slot_map[0usize] && CssDashedIdentifier::can_cast(element.kind()) {
+                        group_slot_map[0usize] = true;
+                        unmatched_count -= 1;
                         slots.mark_present();
+                        slots.next_slot();
                         current_element = elements.next();
+                        continue;
                     }
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element {
-                    if CssCustomIdentifier::can_cast(element.kind()) {
+                    if !group_slot_map[1usize] && CssCustomIdentifier::can_cast(element.kind()) {
+                        group_slot_map[1usize] = true;
+                        unmatched_count -= 1;
                         slots.mark_present();
+                        slots.next_slot();
                         current_element = elements.next();
+                        continue;
                     }
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element {
-                    if CssNumber::can_cast(element.kind()) {
+                    if !group_slot_map[2usize] && CssNumber::can_cast(element.kind()) {
+                        group_slot_map[2usize] = true;
+                        unmatched_count -= 1;
                         slots.mark_present();
+                        slots.next_slot();
                         current_element = elements.next();
+                        continue;
                     }
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element {
-                    if CssString::can_cast(element.kind()) {
+                    if !group_slot_map[3usize] && CssString::can_cast(element.kind()) {
+                        group_slot_map[3usize] = true;
+                        unmatched_count -= 1;
                         slots.mark_present();
+                        slots.next_slot();
                         current_element = elements.next();
+                        continue;
                     }
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element {
-                    if CssRegularDimension::can_cast(element.kind()) {
+                    if !group_slot_map[4usize] && CssRegularDimension::can_cast(element.kind()) {
+                        group_slot_map[4usize] = true;
+                        unmatched_count -= 1;
                         slots.mark_present();
+                        slots.next_slot();
                         current_element = elements.next();
+                        continue;
                     }
+                    break;
                 }
-                slots.next_slot();
+                for _ in 0..unmatched_count {
+                    slots.next_slot();
+                }
                 if let Some(element) = &current_element {
                     if element.kind() == T ! [/] {
                         slots.mark_present();
