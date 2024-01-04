@@ -1,12 +1,8 @@
 ---
-title: useImportType (not released)
+title: useImportType (since v1.5.0)
 ---
 
 **Diagnostic Category: `lint/nursery/useImportType`**
-
-:::danger
-This rule hasn't been released yet.
-:::
 
 :::caution
 This rule is part of the [nursery](/linter/rules/#nursery) group.
