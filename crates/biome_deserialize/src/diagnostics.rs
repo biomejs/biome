@@ -130,13 +130,21 @@ impl DeserializationDiagnostic {
             .note_with_list("Accepted values:", allowed_variants)
     }
 
-    /// Emitted when there's a deprecated property
-    pub fn new_deprecated(key_name: &str, range: impl AsSpan, instead: &str) -> Self {
+    /// Emitted when there's a deprecated property and you can suggest an alternative solution
+    pub fn new_deprecated_use_instead(key_name: &str, range: impl AsSpan, instead: &str) -> Self {
         Self::new(
             markup! { "The property "<Emphasis>{key_name}</Emphasis>" is deprecated. Use "<Emphasis>{{instead}}</Emphasis>" instead." },
         )
         .with_range(range)
         .with_tags(DiagnosticTags::DEPRECATED_CODE).with_custom_severity(Severity::Warning)
+    }
+
+    /// Emitted when there's a deprecated property
+    pub fn new_deprecated(key_name: &str, range: impl AsSpan) -> Self {
+        Self::new(markup! { "The property "<Emphasis>{key_name}</Emphasis>" is deprecated." })
+            .with_range(range)
+            .with_tags(DiagnosticTags::DEPRECATED_CODE)
+            .with_custom_severity(Severity::Warning)
     }
 
     /// Adds a range to the diagnostic
