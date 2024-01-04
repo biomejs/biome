@@ -122,24 +122,15 @@ fn decide_void_type_context(node: &SyntaxNode<JsLanguage>) -> Option<VoidTypeCon
             }
 
             // Promise<void>
-            JsSyntaxKind::TS_TYPE_ARGUMENT_LIST => {
-                // handle generic function that has a void type argument
-                // e.g. functionGeneric<void>(undefined);
-                let Some(grand_parent) = parent.grand_parent() else {
-                    continue;
-                };
-                if grand_parent.kind() == JsSyntaxKind::JS_CALL_EXPRESSION {
-                    return Some(VoidTypeContext::Unknown);
-                }
-                return None;
-            }
-
+            // functionGeneric<void>(undefined)
+            JsSyntaxKind::TS_TYPE_ARGUMENT_LIST
             // function fn(this: void) {}
-            // fn(): void;
-            // fn<T = void>() {}
-            JsSyntaxKind::TS_THIS_PARAMETER
+            | JsSyntaxKind::TS_THIS_PARAMETER
+            // function fn(): void;
             | JsSyntaxKind::TS_RETURN_TYPE_ANNOTATION
+            // function fn<T = void>() {}
             | JsSyntaxKind::TS_TYPE_PARAMETER
+            // () => void
             | JsSyntaxKind::TS_FUNCTION_TYPE => {
                 return None;
             }

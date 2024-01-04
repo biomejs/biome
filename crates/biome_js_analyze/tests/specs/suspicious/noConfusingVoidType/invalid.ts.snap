@@ -12,7 +12,7 @@ function functionGeneric<T extends void>(arg: T) {}
 function functionGeneric2<T extends void = void>(arg: T) {}
 declare function functionDeclaration<T extends void>(arg: T): void;
 declare function functionDeclaration2<T extends void = void>(arg: T): void;
-functionGeneric<void>(undefined);
+
 declare function voidArray(args: void[]): void[];
 let value = undefined as void;
 let value = <void>undefined;
@@ -147,7 +147,7 @@ invalid.ts:7:48 lint/suspicious/noConfusingVoidType ━━━━━━━━━�
   > 7 │ declare function functionDeclaration<T extends void>(arg: T): void;
       │                                                ^^^^
     8 │ declare function functionDeclaration2<T extends void = void>(arg: T): void;
-    9 │ functionGeneric<void>(undefined);
+    9 │ 
   
   i Remove void
   
@@ -163,25 +163,8 @@ invalid.ts:8:49 lint/suspicious/noConfusingVoidType ━━━━━━━━━�
      7 │ declare function functionDeclaration<T extends void>(arg: T): void;
    > 8 │ declare function functionDeclaration2<T extends void = void>(arg: T): void;
        │                                                 ^^^^
-     9 │ functionGeneric<void>(undefined);
+     9 │ 
     10 │ declare function voidArray(args: void[]): void[];
-  
-  i Remove void
-  
-
-```
-
-```
-invalid.ts:9:17 lint/suspicious/noConfusingVoidType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! void is only valid as a return type or a type argument in generic type
-  
-     7 │ declare function functionDeclaration<T extends void>(arg: T): void;
-     8 │ declare function functionDeclaration2<T extends void = void>(arg: T): void;
-   > 9 │ functionGeneric<void>(undefined);
-       │                 ^^^^
-    10 │ declare function voidArray(args: void[]): void[];
-    11 │ let value = undefined as void;
   
   i Remove void
   
@@ -194,7 +177,7 @@ invalid.ts:10:34 lint/suspicious/noConfusingVoidType ━━━━━━━━━
   ! void is only valid as a return type or a type argument in generic type
   
      8 │ declare function functionDeclaration2<T extends void = void>(arg: T): void;
-     9 │ functionGeneric<void>(undefined);
+     9 │ 
   > 10 │ declare function voidArray(args: void[]): void[];
        │                                  ^^^^
     11 │ let value = undefined as void;
@@ -211,7 +194,7 @@ invalid.ts:10:43 lint/suspicious/noConfusingVoidType ━━━━━━━━━
   ! void is only valid as a return type or a type argument in generic type
   
      8 │ declare function functionDeclaration2<T extends void = void>(arg: T): void;
-     9 │ functionGeneric<void>(undefined);
+     9 │ 
   > 10 │ declare function voidArray(args: void[]): void[];
        │                                           ^^^^
     11 │ let value = undefined as void;
@@ -227,7 +210,6 @@ invalid.ts:11:26 lint/suspicious/noConfusingVoidType ━━━━━━━━━
 
   ! void is only valid as a return type or a type argument in generic type
   
-     9 │ functionGeneric<void>(undefined);
     10 │ declare function voidArray(args: void[]): void[];
   > 11 │ let value = undefined as void;
        │                          ^^^^
