@@ -111,9 +111,11 @@ impl Deserializable for PossibleOptions {
             }
             "noRestrictedGlobals" => Deserializable::deserialize(value, "options", diagnostics)
                 .map(Self::RestrictedGlobals),
-            "useExhaustiveDependencies" | "useHookAtTopLevel" => {
+            "useExhaustiveDependencies" => {
                 Deserializable::deserialize(value, "options", diagnostics).map(Self::Hooks)
             }
+            "useHookAtTopLevel" => Deserializable::deserialize(value, "options", diagnostics)
+                .map(Self::DeprecatedHooks),
             "useFilenamingConvention" => Deserializable::deserialize(value, "options", diagnostics)
                 .map(Self::FilenamingConvention),
             "useNamingConvention" => Deserializable::deserialize(value, "options", diagnostics)

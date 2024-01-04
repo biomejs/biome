@@ -443,6 +443,12 @@ impl<T> Deserialized<T> {
             .any(|d| d.severity() == Severity::Error)
     }
 
+    pub fn has_warnings(&self) -> bool {
+        self.diagnostics
+            .iter()
+            .any(|d| d.severity() == Severity::Warning)
+    }
+
     /// Consume itself to return the deserialized result and its diagnostics.
     pub fn consume(self) -> (Option<T>, Vec<Error>) {
         (self.deserialized, self.diagnostics)
