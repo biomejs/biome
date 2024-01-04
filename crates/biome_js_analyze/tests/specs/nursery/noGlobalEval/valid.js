@@ -99,23 +99,3 @@ callbacks.findLastIndex(function (cb) {
 ["1+1"].flatMap(function (str) {
 	return this.eval(str);
 }, new Evaluator());
-
-// TODO Fix to prevent errors for these cases
-// function foo() {
-// 	var eval = "foo";
-// 	window[eval]("foo");
-// }
-
-// function foo() {
-// 	var eval = "foo";
-// 	global[eval]("foo");
-// }
-
-// function foo() {
-// 	var eval = "foo";
-// 	globalThis[eval]("foo");
-// }
-
-// function foo(eval) {
-// 	eval("var a = 0");
-// }

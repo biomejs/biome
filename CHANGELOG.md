@@ -46,6 +46,7 @@ Biome now scores 97% compatibility with Prettier and features more than 180 lint
   ```shell
   biome explain daemon-logs
   ```
+- Removed the hard coded limit of 200 printable diagnostics. Contributed by @ematipico
 
 #### Bug fixes
 
@@ -301,6 +302,14 @@ The following rules are promoted:
         return x;
   -   }
     }
+  ```
+
+- Fix [#1383](https://github.com/biomejs/biome/issues/1383). [noConfusingVoidType](https://biomejs.dev/linter/rules/no-confusing-void-type) now accepts the `void` type in type parameter lists.
+
+  The rule no longer reports the following code:
+
+  ```ts
+  f<void>();
   ```
 
 - Fix [#728](https://github.com/biomejs/biome/issues/728). [useSingleVarDeclarator](https://biomejs.dev/linter/rules/use-single-var-declarator) no longer outputs invalid code. Contributed by @Conaclos
