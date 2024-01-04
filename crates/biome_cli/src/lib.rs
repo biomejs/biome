@@ -38,6 +38,9 @@ pub use reports::{
 };
 pub use service::{open_transport, SocketTransport};
 
+#[cfg(debug_assertions)]
+pub use crate::commands::daemon::biome_log_dir;
+
 pub(crate) const VERSION: &str = match option_env!("BIOME_VERSION") {
     Some(version) => version,
     None => env!("CARGO_PKG_VERSION"),
@@ -192,7 +195,6 @@ impl<'app> CliSession<'app> {
                 config_path,
             } => commands::daemon::run_server(stop_on_disconnect, config_path),
             BiomeCommand::PrintSocket => commands::daemon::print_socket(),
-            BiomeCommand::PrintCacheDir => commands::daemon::print_cache_dir(),
         };
 
         if has_metrics {

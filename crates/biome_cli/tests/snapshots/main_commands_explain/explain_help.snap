@@ -6,6 +6,9 @@ expression: content
 
 ```block
 A command to retrieve the documentation of various aspects of the CLI.
+## Examples
+```shell biome explain noDebugger ```
+```shell biome explain daemon-logs ```
 
 Usage: explain NAME
 
