@@ -210,10 +210,7 @@ fn generate_group(
     writeln!(main_page_buffer)?;
     write_markup_to_string(main_page_buffer, description)?;
     writeln!(main_page_buffer)?;
-    writeln!(
-        main_page_buffer,
-        "| Rule name | Properties |  Description |"
-    )?;
+    writeln!(main_page_buffer, "| Rule name | Description | Properties |")?;
     writeln!(main_page_buffer, "| --- | --- | --- |")?;
 
     for (rule, meta) in rules {

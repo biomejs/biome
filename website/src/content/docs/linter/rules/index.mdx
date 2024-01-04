@@ -11,7 +11,7 @@ Below the list of rules supported by Biome, divided by group. Here's a legend of
 ## Accessibility
 
 Rules focused on preventing accessibility problems.
-| Rule name | Properties |  Description |
+| Rule name | Description | Properties |
 | --- | --- | --- |
 | [noAccessKey](/linter/rules/no-access-key) | Enforce that the <code>accessKey</code> attribute is not used on any HTML element. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span><span aria-label="The rule has an unsafe fix" role="img" title="The rule has an unsafe fix">⚠️ </span> |
 | [noAriaUnsupportedElements](/linter/rules/no-aria-unsupported-elements) | Enforce that elements that do not support ARIA roles, states, and properties do not have those attributes. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span><span aria-label="The rule has an unsafe fix" role="img" title="The rule has an unsafe fix">⚠️ </span> |
@@ -45,7 +45,7 @@ Rules focused on preventing accessibility problems.
 ## Complexity
 
 Rules that focus on inspecting complex code that could be simplified.
-| Rule name | Properties |  Description |
+| Rule name | Description | Properties |
 | --- | --- | --- |
 | [noBannedTypes](/linter/rules/no-banned-types) | Disallow primitive type aliases and misleading types. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span><span aria-label="The rule has a safe fix" role="img" title="The rule has a safe fix">🔧 </span> |
 | [noExcessiveCognitiveComplexity](/linter/rules/no-excessive-cognitive-complexity) | Disallow functions that exceed a given Cognitive Complexity score. |  |
@@ -75,7 +75,7 @@ Rules that focus on inspecting complex code that could be simplified.
 ## Correctness
 
 Rules that detect code that is guaranteed to be incorrect or useless.
-| Rule name | Properties |  Description |
+| Rule name | Description | Properties |
 | --- | --- | --- |
 | [noChildrenProp](/linter/rules/no-children-prop) | Prevent passing of <strong>children</strong> as props. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span> |
 | [noConstAssign](/linter/rules/no-const-assign) | Prevents from having <code>const</code> variables being re-assigned. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span><span aria-label="The rule has an unsafe fix" role="img" title="The rule has an unsafe fix">⚠️ </span> |
@@ -114,7 +114,7 @@ Rules that detect code that is guaranteed to be incorrect or useless.
 ## Performance
 
 Rules catching ways your code could be written to run faster, or generally be more efficient.
-| Rule name | Properties |  Description |
+| Rule name | Description | Properties |
 | --- | --- | --- |
 | [noAccumulatingSpread](/linter/rules/no-accumulating-spread) | Disallow the use of spread (<code>...</code>) syntax on accumulators. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span> |
 | [noDelete](/linter/rules/no-delete) | Disallow the use of the <code>delete</code> operator. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span><span aria-label="The rule has an unsafe fix" role="img" title="The rule has an unsafe fix">⚠️ </span> |
@@ -122,7 +122,7 @@ Rules catching ways your code could be written to run faster, or generally be mo
 ## Security
 
 Rules that detect potential security flaws.
-| Rule name | Properties |  Description |
+| Rule name | Description | Properties |
 | --- | --- | --- |
 | [noDangerouslySetInnerHtml](/linter/rules/no-dangerously-set-inner-html) | Prevent the usage of dangerous JSX props | <span aria-label="Recommended" role="img" title="Recommended">✅ </span> |
 | [noDangerouslySetInnerHtmlWithChildren](/linter/rules/no-dangerously-set-inner-html-with-children) | Report when a DOM element or a component uses both <code>children</code> and <code>dangerouslySetInnerHTML</code> prop. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span> |
@@ -130,7 +130,7 @@ Rules that detect potential security flaws.
 ## Style
 
 Rules enforcing a consistent and idiomatic way of writing your code.
-| Rule name | Properties |  Description |
+| Rule name | Description | Properties |
 | --- | --- | --- |
 | [noArguments](/linter/rules/no-arguments) | Disallow the use of <code>arguments</code> | <span aria-label="Recommended" role="img" title="Recommended">✅ </span> |
 | [noCommaOperator](/linter/rules/no-comma-operator) | Disallow comma operator. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span> |
@@ -169,7 +169,7 @@ Rules enforcing a consistent and idiomatic way of writing your code.
 ## Suspicious
 
 Rules that detect code that is likely to be incorrect or useless.
-| Rule name | Properties |  Description |
+| Rule name | Description | Properties |
 | --- | --- | --- |
 | [noApproximativeNumericConstant](/linter/rules/no-approximative-numeric-constant) | Usually, the definition in the standard library is more precise than what people come up with or the used constant exceeds the maximum precision of the number type. |  |
 | [noArrayIndexKey](/linter/rules/no-array-index-key) | Discourage the usage of Array index in keys. | <span aria-label="Recommended" role="img" title="Recommended">✅ </span> |
@@ -226,7 +226,7 @@ warning, depending on whether we intend for the rule to be recommended or not wh
 Nursery rules get promoted to other groups once they become stable or may be removed.
 
 Rules that belong to this group <strong>are not subject to semantic version</strong>.
-| Rule name | Properties |  Description |
+| Rule name | Description | Properties |
 | --- | --- | --- |
 | [noAriaHiddenOnFocusable](/linter/rules/no-aria-hidden-on-focusable) | Enforce that aria-hidden=&quot;true&quot; is not set on focusable elements. | <span aria-label="The rule has an unsafe fix" role="img" title="The rule has an unsafe fix">⚠️ </span> |
 | [noDefaultExport](/linter/rules/no-default-export) | Disallow default exports. |  |
