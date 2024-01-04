@@ -1,5 +1,5 @@
 ---
-title: noGlobalEval (since vnext)
+title: noGlobalEval (since v1.5.0)
 ---
 
 **Diagnostic Category: `lint/nursery/noGlobalEval`**

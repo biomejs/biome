@@ -52,7 +52,7 @@ declare_rule! {
     /// foo.eval("let a = 0;");
     /// ```
     pub(crate) NoGlobalEval {
-        version: "next",
+        version: "1.5.0",
         name: "noGlobalEval",
         recommended: true,
     }
