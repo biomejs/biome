@@ -926,6 +926,10 @@ export interface Nursery {
 	 */
 	useImportRestrictions?: RuleConfiguration;
 	/**
+	 * Promotes the use of import type for types.
+	 */
+	useImportType?: RuleConfiguration;
+	/**
 	 * Enforces using the node: protocol for Node.js builtin modules.
 	 */
 	useNodejsImportProtocol?: RuleConfiguration;
@@ -1665,6 +1669,7 @@ export type Category =
 	| "lint/nursery/useForOf"
 	| "lint/nursery/useGroupedTypeImport"
 	| "lint/nursery/useImportRestrictions"
+	| "lint/nursery/useImportType"
 	| "lint/nursery/useNodejsImportProtocol"
 	| "lint/nursery/useNumberNamespace"
 	| "lint/nursery/useShorthandFunctionType"

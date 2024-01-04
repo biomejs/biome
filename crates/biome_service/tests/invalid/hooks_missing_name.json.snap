@@ -34,6 +34,7 @@ hooks_missing_name.json:6:5 deserialize ━━━━━━━━━━━━━�
   - useForOf
   - useGroupedTypeImport
   - useImportRestrictions
+  - useImportType
   - useNodejsImportProtocol
   - useNumberNamespace
   - useShorthandFunctionType

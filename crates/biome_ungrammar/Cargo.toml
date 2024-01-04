@@ -1,0 +1,14 @@
+[package]
+authors.workspace    = true
+categories.workspace = true
+description          = "A DSL for describing concrete syntax trees"
+edition.workspace    = true
+homepage.workspace   = true
+keywords.workspace   = true
+license.workspace    = true
+name                 = "biome_ungrammar"
+repository.workspace = true
+version              = "0.3.1"
+
+[lints]
+workspace = true
