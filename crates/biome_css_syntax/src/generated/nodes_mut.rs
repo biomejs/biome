@@ -1990,53 +1990,133 @@ impl CssUnknownDimension {
     }
 }
 impl CssUnorderedTesting {
-    pub fn with_style(self, element: Option<CssDashedIdentifier>) -> Self {
-        Self::unwrap_cast(self.syntax.splice_slots(
-            0usize..=0usize,
-            once(element.map(|element| element.into_syntax().into())),
-        ))
+    pub fn with_style(
+        self,
+        element: Option<CssDashedIdentifier>,
+        slot_index: u8,
+    ) -> Result<Self, ()> {
+        if self.slot_map[0usize] != SLOT_MAP_EMPTY_VALUE {
+            return Err(());
+        }
+        let mut updated_slot_map = self.slot_map.clone();
+        updated_slot_map[0usize] = slot_index;
+        Ok(Self {
+            syntax: self.syntax.splice_slots(
+                (slot_index as usize)..=(slot_index as usize),
+                once(element.map(|element| element.into_syntax().into())),
+            ),
+            slot_map: updated_slot_map,
+        })
     }
-    pub fn with_variant(self, element: Option<CssCustomIdentifier>) -> Self {
-        Self::unwrap_cast(self.syntax.splice_slots(
-            1usize..=1usize,
-            once(element.map(|element| element.into_syntax().into())),
-        ))
+    pub fn with_variant(
+        self,
+        element: Option<CssCustomIdentifier>,
+        slot_index: u8,
+    ) -> Result<Self, ()> {
+        if self.slot_map[1usize] != SLOT_MAP_EMPTY_VALUE {
+            return Err(());
+        }
+        let mut updated_slot_map = self.slot_map.clone();
+        updated_slot_map[1usize] = slot_index;
+        Ok(Self {
+            syntax: self.syntax.splice_slots(
+                (slot_index as usize)..=(slot_index as usize),
+                once(element.map(|element| element.into_syntax().into())),
+            ),
+            slot_map: updated_slot_map,
+        })
     }
-    pub fn with_weight(self, element: Option<CssNumber>) -> Self {
-        Self::unwrap_cast(self.syntax.splice_slots(
-            2usize..=2usize,
-            once(element.map(|element| element.into_syntax().into())),
-        ))
+    pub fn with_weight(self, element: Option<CssNumber>, slot_index: u8) -> Result<Self, ()> {
+        if self.slot_map[2usize] != SLOT_MAP_EMPTY_VALUE {
+            return Err(());
+        }
+        let mut updated_slot_map = self.slot_map.clone();
+        updated_slot_map[2usize] = slot_index;
+        Ok(Self {
+            syntax: self.syntax.splice_slots(
+                (slot_index as usize)..=(slot_index as usize),
+                once(element.map(|element| element.into_syntax().into())),
+            ),
+            slot_map: updated_slot_map,
+        })
     }
-    pub fn with_stretch(self, element: Option<CssString>) -> Self {
-        Self::unwrap_cast(self.syntax.splice_slots(
-            3usize..=3usize,
-            once(element.map(|element| element.into_syntax().into())),
-        ))
+    pub fn with_stretch(self, element: Option<CssString>, slot_index: u8) -> Result<Self, ()> {
+        if self.slot_map[3usize] != SLOT_MAP_EMPTY_VALUE {
+            return Err(());
+        }
+        let mut updated_slot_map = self.slot_map.clone();
+        updated_slot_map[3usize] = slot_index;
+        Ok(Self {
+            syntax: self.syntax.splice_slots(
+                (slot_index as usize)..=(slot_index as usize),
+                once(element.map(|element| element.into_syntax().into())),
+            ),
+            slot_map: updated_slot_map,
+        })
     }
-    pub fn with_size(self, element: CssRegularDimension) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(4usize..=4usize, once(Some(element.into_syntax().into()))),
-        )
+    pub fn with_size(self, element: CssRegularDimension, slot_index: u8) -> Result<Self, ()> {
+        if self.slot_map[4usize] != SLOT_MAP_EMPTY_VALUE {
+            return Err(());
+        }
+        let mut updated_slot_map = self.slot_map.clone();
+        updated_slot_map[4usize] = slot_index;
+        Ok(Self {
+            syntax: self.syntax.splice_slots(
+                (slot_index as usize)..=(slot_index as usize),
+                once(Some(element.into_syntax().into())),
+            ),
+            slot_map: updated_slot_map,
+        })
     }
-    pub fn with_slash_token(self, element: Option<SyntaxToken>) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(5usize..=5usize, once(element.map(|element| element.into()))),
-        )
+    pub fn with_slash_token(
+        self,
+        element: Option<SyntaxToken>,
+        slot_index: u8,
+    ) -> Result<Self, ()> {
+        if self.slot_map[5usize] != SLOT_MAP_EMPTY_VALUE {
+            return Err(());
+        }
+        let mut updated_slot_map = self.slot_map.clone();
+        updated_slot_map[5usize] = slot_index;
+        Ok(Self {
+            syntax: self.syntax.splice_slots(
+                (slot_index as usize)..=(slot_index as usize),
+                once(element.map(|element| element.into())),
+            ),
+            slot_map: updated_slot_map,
+        })
     }
-    pub fn with_line_height(self, element: Option<CssBinaryExpression>) -> Self {
-        Self::unwrap_cast(self.syntax.splice_slots(
-            6usize..=6usize,
-            once(element.map(|element| element.into_syntax().into())),
-        ))
+    pub fn with_line_height(
+        self,
+        element: Option<CssBinaryExpression>,
+        slot_index: u8,
+    ) -> Result<Self, ()> {
+        if self.slot_map[6usize] != SLOT_MAP_EMPTY_VALUE {
+            return Err(());
+        }
+        let mut updated_slot_map = self.slot_map.clone();
+        updated_slot_map[6usize] = slot_index;
+        Ok(Self {
+            syntax: self.syntax.splice_slots(
+                (slot_index as usize)..=(slot_index as usize),
+                once(element.map(|element| element.into_syntax().into())),
+            ),
+            slot_map: updated_slot_map,
+        })
     }
-    pub fn with_family(self, element: CssColor) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(7usize..=7usize, once(Some(element.into_syntax().into()))),
-        )
+    pub fn with_family(self, element: CssColor, slot_index: u8) -> Result<Self, ()> {
+        if self.slot_map[7usize] != SLOT_MAP_EMPTY_VALUE {
+            return Err(());
+        }
+        let mut updated_slot_map = self.slot_map.clone();
+        updated_slot_map[7usize] = slot_index;
+        Ok(Self {
+            syntax: self.syntax.splice_slots(
+                (slot_index as usize)..=(slot_index as usize),
+                once(Some(element.into_syntax().into())),
+            ),
+            slot_map: updated_slot_map,
+        })
     }
 }
 impl CssUrlFunction {

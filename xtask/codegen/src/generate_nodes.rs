@@ -878,7 +878,7 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
 
         /// Sentinel value indicating a missing element in a dynamic node, where
         /// the slots are not statically known.
-        const SLOT_MAP_EMPTY_VALUE: u8 = u8::MAX;
+        pub(crate) const SLOT_MAP_EMPTY_VALUE: u8 = u8::MAX;
 
         #(#node_defs)*
         #(#union_defs)*
