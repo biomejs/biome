@@ -3,6 +3,7 @@
 pub(crate) mod all_property_value;
 pub(crate) mod at_rule;
 pub(crate) mod attribute_matcher_value;
+pub(crate) mod border_property_value;
 pub(crate) mod compound_selector;
 pub(crate) mod container_and_combinable_query;
 pub(crate) mod container_or_combinable_query;
@@ -27,6 +28,7 @@ pub(crate) mod keyframes_block;
 pub(crate) mod keyframes_item;
 pub(crate) mod keyframes_selector;
 pub(crate) mod layer;
+pub(crate) mod line_width;
 pub(crate) mod media_and_combinable_condition;
 pub(crate) mod media_condition;
 pub(crate) mod media_in_parens;

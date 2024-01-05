@@ -522,12 +522,34 @@ CssDeclaration =
 //
 // When in doubt, ask about it! Discussion will help lead to the best representation and tradeoff
 // and ensure that the resulting grammar and syntax tree work correctly and efficiently.
+//
+// ## Referencing other rules
+//
+// The CSS grammar often "embeds" property rules inside of other rules to build them up. In the
+// grammar, this is represented by the property name in quotes, like `<'line-height'>`, and
+// is defined as "any value that would be valid for that property, excluding the CSS-wide
+// keywords".
+//
+// To handle this, we can use the property value nodes directly in other definitions. This is
+// another reason why splitting out the `AnyCss*PropertyValue` and `Css*` node types is important.
+// For example, the value type of `CssBorderProperty` is `AnyCssBorderPropertyValue = CssBorder`,
+// which implicitly adds the Css-wide keywords as well as generic and bogus handling into the
+// allowed types. But if `<'border'>` were to be referenced by some other rule, we would only want
+// the valid value types to be included, which we could do by using `CssBorder` directly.
+//
+//   CssPositionedBorderPropertyValue =
+//       position: ('top' | 'bottom')
+//       border: CssBorder
+//
+// Even if the valid value type is only a single node type, this structure ensures that any value
+// definition can be embedded in another value definition, regardless of its structure.
 
 
 AnyCssProperty =
 	CssGenericProperty
 	| CssBogusProperty
 	| CssAllProperty
+	| CssBorderProperty
 	| CssZIndexProperty
 
 /// https://drafts.csswg.org/css-cascade/#all-shorthand
@@ -544,6 +566,35 @@ CssAllProperty =
 // `CssUnknownPropertyValue` as alternatives for the parser to use for
 // recovery and representing "valid but incorrect" inputs.
 AnyCssAllPropertyValue = CssWideKeyword
+
+/// https://drafts.csswg.org/css-backgrounds/#propdef-border
+/// border =
+///   <line-width> ||
+///   <line-style> ||
+///   <color>
+CssBorderProperty =
+	name: CssIdentifier
+	':'
+	value: AnyCssBorderPropertyValue
+
+AnyCssBorderPropertyValue =
+	CssBorder
+
+CssBorder =
+	line_width: AnyCssLineWidth ||
+	line_style: CssLineStyle ||
+	color: CssColor
+
+// TODO: This should be narrowed down to CssLength when we can.
+AnyCssLineWidth =
+	CssRegularDimension
+	| CssLineWidthKeyword
+
+CssLineWidthKeyword = keyword: ('thin' | 'medium' | 'thick')
+
+CssLineStyle =
+	keyword: ( 'none' | 'hidden' | 'dotted' | 'dashed' | 'solid' | 'double'  | 'groove' | 'ridge' | 'inset' | 'outset')
+
 
 /// https://drafts.csswg.org/css2/#z-index
 /// z-index =

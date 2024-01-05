@@ -365,7 +365,13 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
                     let variant_is_enum = ast.unions.iter().find(|e| &e.name == *current_enum);
                     let variant_name = format_ident!("{}", current_enum);
 
-                    if variant_is_enum.is_some() {
+                    let variant_is_dynamic = ast
+                        .nodes
+                        .iter()
+                        .find(|e| &e.name == *current_enum)
+                        .is_some_and(|node| node.fields.iter().any(|field| field.is_unordered()));
+
+                    if variant_is_enum.is_some() || variant_is_dynamic {
                         quote! {
                             #variant_name::cast(syntax)?
                         }

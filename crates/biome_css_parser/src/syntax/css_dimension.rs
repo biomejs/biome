@@ -40,12 +40,12 @@ pub(crate) fn parse_percentage_dimension(p: &mut CssParser) -> ParsedSyntax {
 }
 
 #[inline]
-fn is_at_regular_dimension(p: &mut CssParser) -> bool {
+pub(crate) fn is_at_regular_dimension(p: &mut CssParser) -> bool {
     p.at(CSS_DIMENSION_VALUE)
 }
 
 #[inline]
-fn parse_regular_dimension(p: &mut CssParser) -> ParsedSyntax {
+pub(crate) fn parse_regular_dimension(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_regular_dimension(p) {
         return Absent;
     }
@@ -176,4 +176,55 @@ const FLEX_UNIT_SET: TokenSet<CssSyntaxKind> = token_set!(T![fr],);
 #[inline]
 fn is_nth_at_flex_unit(p: &mut CssParser, n: usize) -> bool {
     p.nth_at_ts(n, FLEX_UNIT_SET)
+}
+
+// TODO: In the future, remove the `#[allow(dead_code)]` as these get used.
+
+/// Returns true if the parser is currently at the start of a RegularDimension
+/// that will become a Length value
+#[inline]
+pub(crate) fn is_at_length_dimension(p: &mut CssParser) -> bool {
+    is_at_regular_dimension(p) && is_nth_at_length_unit(p, 1)
+}
+/// Returns true if the parser is currently at the start of a RegularDimension
+/// that will become a Length value
+#[inline]
+#[allow(dead_code)]
+pub(crate) fn is_at_container_lengths_dimension(p: &mut CssParser) -> bool {
+    is_at_regular_dimension(p) && is_nth_at_container_lengths_unit(p, 1)
+}
+/// Returns true if the parser is currently at the start of a RegularDimension
+/// that will become an Angle value
+#[inline]
+#[allow(dead_code)]
+pub(crate) fn is_at_angle_dimension(p: &mut CssParser) -> bool {
+    is_at_regular_dimension(p) && is_nth_at_angle_unit(p, 1)
+}
+/// Returns true if the parser is currently at the start of a RegularDimension
+/// that will become a Time value
+#[inline]
+#[allow(dead_code)]
+pub(crate) fn is_at_time_dimension(p: &mut CssParser) -> bool {
+    is_at_regular_dimension(p) && is_nth_at_time_unit(p, 1)
+}
+/// Returns true if the parser is currently at the start of a RegularDimension
+/// that will become a Frequency value
+#[inline]
+#[allow(dead_code)]
+pub(crate) fn is_at_frequency_dimension(p: &mut CssParser) -> bool {
+    is_at_regular_dimension(p) && is_nth_at_frequency_unit(p, 1)
+}
+/// Returns true if the parser is currently at the start of a RegularDimension
+/// that will become a Resolution value
+#[inline]
+#[allow(dead_code)]
+pub(crate) fn is_at_resolution_dimension(p: &mut CssParser) -> bool {
+    is_at_regular_dimension(p) && is_nth_at_resolution_unit(p, 1)
+}
+/// Returns true if the parser is currently at the start of a RegularDimension
+/// that will become a Flex value
+#[inline]
+#[allow(dead_code)]
+pub(crate) fn is_at_flex_dimension(p: &mut CssParser) -> bool {
+    is_at_regular_dimension(p) && is_nth_at_flex_unit(p, 1)
 }

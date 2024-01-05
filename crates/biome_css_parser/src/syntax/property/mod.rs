@@ -1,4 +1,5 @@
 mod all;
+mod border;
 mod z_index;
 
 use crate::parser::CssParser;
@@ -15,6 +16,7 @@ use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::{token_set, Parser, TokenSet};
 
 use self::all::parse_all_property;
+use self::border::parse_border_property;
 use self::z_index::parse_z_index_property;
 
 pub(crate) fn is_at_any_property(p: &mut CssParser) -> bool {
@@ -28,6 +30,7 @@ pub(crate) fn parse_any_property(p: &mut CssParser) -> ParsedSyntax {
 
     match p.cur_text() {
         "all" => parse_all_property(p),
+        "border" => parse_border_property(p),
         "z-index" => parse_z_index_property(p),
         _ => parse_generic_property(p),
     }

@@ -149,6 +149,59 @@ pub fn css_binary_expression(
         ],
     ))
 }
+pub fn css_border() -> CssBorderBuilder {
+    CssBorderBuilder {
+        line_width: None,
+        line_style: None,
+        color: None,
+    }
+}
+pub struct CssBorderBuilder {
+    line_width: Option<AnyCssLineWidth>,
+    line_style: Option<CssLineStyle>,
+    color: Option<CssColor>,
+}
+impl CssBorderBuilder {
+    pub fn with_line_width(mut self, line_width: AnyCssLineWidth) -> Self {
+        self.line_width = Some(line_width);
+        self
+    }
+    pub fn with_line_style(mut self, line_style: CssLineStyle) -> Self {
+        self.line_style = Some(line_style);
+        self
+    }
+    pub fn with_color(mut self, color: CssColor) -> Self {
+        self.color = Some(color);
+        self
+    }
+    pub fn build(self) -> CssBorder {
+        CssBorder::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::CSS_BORDER,
+            [
+                self.line_width
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                self.line_style
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                self.color
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn css_border_property(
+    name: CssIdentifier,
+    colon_token: SyntaxToken,
+    value: AnyCssBorderPropertyValue,
+) -> CssBorderProperty {
+    CssBorderProperty::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_BORDER_PROPERTY,
+        [
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Token(colon_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
+        ],
+    ))
+}
 pub fn css_charset_at_rule(
     charset_token: SyntaxToken,
     encoding: CssString,
@@ -753,6 +806,18 @@ pub fn css_layer_reference(
             Some(SyntaxElement::Node(references.into_syntax())),
             Some(SyntaxElement::Token(semicolon_token)),
         ],
+    ))
+}
+pub fn css_line_style(keyword_token: SyntaxToken) -> CssLineStyle {
+    CssLineStyle::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_LINE_STYLE,
+        [Some(SyntaxElement::Token(keyword_token))],
+    ))
+}
+pub fn css_line_width_keyword(keyword_token: SyntaxToken) -> CssLineWidthKeyword {
+    CssLineWidthKeyword::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_LINE_WIDTH_KEYWORD,
+        [Some(SyntaxElement::Token(keyword_token))],
     ))
 }
 pub fn css_list_of_component_values_expression(
