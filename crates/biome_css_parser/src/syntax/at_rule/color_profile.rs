@@ -11,13 +11,13 @@ use biome_parser::prelude::ParsedSyntax::Absent;
 use biome_parser::prelude::*;
 
 #[inline]
-pub(crate) fn is_color_profile_at_rule(p: &mut CssParser) -> bool {
+pub(crate) fn is_at_color_profile_at_rule(p: &mut CssParser) -> bool {
     p.at(T![color_profile])
 }
 
 #[inline]
 pub(crate) fn parse_color_profile_at_rule(p: &mut CssParser) -> ParsedSyntax {
-    if !is_color_profile_at_rule(p) {
+    if !is_at_color_profile_at_rule(p) {
         return Absent;
     }
 

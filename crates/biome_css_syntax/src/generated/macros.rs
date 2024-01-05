@@ -173,6 +173,22 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssIdentifier::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_IMPORT_ANONYMOUS_LAYER => {
+                    let $pattern = unsafe { $crate::CssImportAnonymousLayer::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_IMPORT_AT_RULE => {
+                    let $pattern = unsafe { $crate::CssImportAtRule::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_IMPORT_NAMED_LAYER => {
+                    let $pattern = unsafe { $crate::CssImportNamedLayer::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_IMPORT_SUPPORTS => {
+                    let $pattern = unsafe { $crate::CssImportSupports::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_KEYFRAMES_AT_RULE => {
                     let $pattern = unsafe { $crate::CssKeyframesAtRule::new_unchecked(node) };
                     $body

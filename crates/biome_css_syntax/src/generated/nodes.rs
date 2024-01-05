@@ -1634,6 +1634,205 @@ pub struct CssIdentifierFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssImportAnonymousLayer {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssImportAnonymousLayer {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssImportAnonymousLayerFields {
+        CssImportAnonymousLayerFields {
+            layer_token: self.layer_token(),
+        }
+    }
+    pub fn layer_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssImportAnonymousLayer {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssImportAnonymousLayerFields {
+    pub layer_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssImportAtRule {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssImportAtRule {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssImportAtRuleFields {
+        CssImportAtRuleFields {
+            import_token: self.import_token(),
+            url: self.url(),
+            layer: self.layer(),
+            supports: self.supports(),
+            media: self.media(),
+            semicolon_token: self.semicolon_token(),
+        }
+    }
+    pub fn import_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn url(&self) -> SyntaxResult<AnyCssImportUrl> {
+        support::required_node(&self.syntax, 1usize)
+    }
+    pub fn layer(&self) -> Option<AnyCssImportLayer> {
+        support::node(&self.syntax, 2usize)
+    }
+    pub fn supports(&self) -> Option<CssImportSupports> {
+        support::node(&self.syntax, 3usize)
+    }
+    pub fn media(&self) -> CssMediaQueryList {
+        support::list(&self.syntax, 4usize)
+    }
+    pub fn semicolon_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 5usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssImportAtRule {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssImportAtRuleFields {
+    pub import_token: SyntaxResult<SyntaxToken>,
+    pub url: SyntaxResult<AnyCssImportUrl>,
+    pub layer: Option<AnyCssImportLayer>,
+    pub supports: Option<CssImportSupports>,
+    pub media: CssMediaQueryList,
+    pub semicolon_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssImportNamedLayer {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssImportNamedLayer {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssImportNamedLayerFields {
+        CssImportNamedLayerFields {
+            layer_token: self.layer_token(),
+            l_paren_token: self.l_paren_token(),
+            name: self.name(),
+            r_paren_token: self.r_paren_token(),
+        }
+    }
+    pub fn layer_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn name(&self) -> CssLayerNameList {
+        support::list(&self.syntax, 2usize)
+    }
+    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 3usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssImportNamedLayer {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssImportNamedLayerFields {
+    pub layer_token: SyntaxResult<SyntaxToken>,
+    pub l_paren_token: SyntaxResult<SyntaxToken>,
+    pub name: CssLayerNameList,
+    pub r_paren_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssImportSupports {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssImportSupports {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssImportSupportsFields {
+        CssImportSupportsFields {
+            supports_token: self.supports_token(),
+            l_paren_token: self.l_paren_token(),
+            condition: self.condition(),
+            r_paren_token: self.r_paren_token(),
+        }
+    }
+    pub fn supports_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn condition(&self) -> SyntaxResult<AnyCssImportSupportsCondition> {
+        support::required_node(&self.syntax, 2usize)
+    }
+    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 3usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssImportSupports {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssImportSupportsFields {
+    pub supports_token: SyntaxResult<SyntaxToken>,
+    pub l_paren_token: SyntaxResult<SyntaxToken>,
+    pub condition: SyntaxResult<AnyCssImportSupportsCondition>,
+    pub r_paren_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssKeyframesAtRule {
     pub(crate) syntax: SyntaxNode,
 }
@@ -5197,6 +5396,7 @@ pub enum AnyCssAtRule {
     CssCounterStyleAtRule(CssCounterStyleAtRule),
     CssFontFaceAtRule(CssFontFaceAtRule),
     CssFontPaletteValuesAtRule(CssFontPaletteValuesAtRule),
+    CssImportAtRule(CssImportAtRule),
     CssKeyframesAtRule(CssKeyframesAtRule),
     CssLayerAtRule(CssLayerAtRule),
     CssMediaAtRule(CssMediaAtRule),
@@ -5244,6 +5444,12 @@ impl AnyCssAtRule {
     pub fn as_css_font_palette_values_at_rule(&self) -> Option<&CssFontPaletteValuesAtRule> {
         match &self {
             AnyCssAtRule::CssFontPaletteValuesAtRule(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_import_at_rule(&self) -> Option<&CssImportAtRule> {
+        match &self {
+            AnyCssAtRule::CssImportAtRule(item) => Some(item),
             _ => None,
         }
     }
@@ -5682,6 +5888,66 @@ impl AnyCssGenericComponentValue {
     pub fn as_css_generic_delimiter(&self) -> Option<&CssGenericDelimiter> {
         match &self {
             AnyCssGenericComponentValue::CssGenericDelimiter(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub enum AnyCssImportLayer {
+    CssImportAnonymousLayer(CssImportAnonymousLayer),
+    CssImportNamedLayer(CssImportNamedLayer),
+}
+impl AnyCssImportLayer {
+    pub fn as_css_import_anonymous_layer(&self) -> Option<&CssImportAnonymousLayer> {
+        match &self {
+            AnyCssImportLayer::CssImportAnonymousLayer(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_import_named_layer(&self) -> Option<&CssImportNamedLayer> {
+        match &self {
+            AnyCssImportLayer::CssImportNamedLayer(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub enum AnyCssImportSupportsCondition {
+    AnyCssSupportsCondition(AnyCssSupportsCondition),
+    CssDeclaration(CssDeclaration),
+}
+impl AnyCssImportSupportsCondition {
+    pub fn as_any_css_supports_condition(&self) -> Option<&AnyCssSupportsCondition> {
+        match &self {
+            AnyCssImportSupportsCondition::AnyCssSupportsCondition(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_declaration(&self) -> Option<&CssDeclaration> {
+        match &self {
+            AnyCssImportSupportsCondition::CssDeclaration(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub enum AnyCssImportUrl {
+    CssString(CssString),
+    CssUrlFunction(CssUrlFunction),
+}
+impl AnyCssImportUrl {
+    pub fn as_css_string(&self) -> Option<&CssString> {
+        match &self {
+            AnyCssImportUrl::CssString(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_url_function(&self) -> Option<&CssUrlFunction> {
+        match &self {
+            AnyCssImportUrl::CssUrlFunction(item) => Some(item),
             _ => None,
         }
     }
@@ -8334,6 +8600,196 @@ impl From<CssIdentifier> for SyntaxNode {
 }
 impl From<CssIdentifier> for SyntaxElement {
     fn from(n: CssIdentifier) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssImportAnonymousLayer {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_IMPORT_ANONYMOUS_LAYER as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_IMPORT_ANONYMOUS_LAYER
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssImportAnonymousLayer {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssImportAnonymousLayer")
+            .field(
+                "layer_token",
+                &support::DebugSyntaxResult(self.layer_token()),
+            )
+            .finish()
+    }
+}
+impl From<CssImportAnonymousLayer> for SyntaxNode {
+    fn from(n: CssImportAnonymousLayer) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssImportAnonymousLayer> for SyntaxElement {
+    fn from(n: CssImportAnonymousLayer) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssImportAtRule {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_IMPORT_AT_RULE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_IMPORT_AT_RULE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssImportAtRule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssImportAtRule")
+            .field(
+                "import_token",
+                &support::DebugSyntaxResult(self.import_token()),
+            )
+            .field("url", &support::DebugSyntaxResult(self.url()))
+            .field("layer", &support::DebugOptionalElement(self.layer()))
+            .field("supports", &support::DebugOptionalElement(self.supports()))
+            .field("media", &self.media())
+            .field(
+                "semicolon_token",
+                &support::DebugSyntaxResult(self.semicolon_token()),
+            )
+            .finish()
+    }
+}
+impl From<CssImportAtRule> for SyntaxNode {
+    fn from(n: CssImportAtRule) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssImportAtRule> for SyntaxElement {
+    fn from(n: CssImportAtRule) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssImportNamedLayer {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_IMPORT_NAMED_LAYER as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_IMPORT_NAMED_LAYER
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssImportNamedLayer {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssImportNamedLayer")
+            .field(
+                "layer_token",
+                &support::DebugSyntaxResult(self.layer_token()),
+            )
+            .field(
+                "l_paren_token",
+                &support::DebugSyntaxResult(self.l_paren_token()),
+            )
+            .field("name", &self.name())
+            .field(
+                "r_paren_token",
+                &support::DebugSyntaxResult(self.r_paren_token()),
+            )
+            .finish()
+    }
+}
+impl From<CssImportNamedLayer> for SyntaxNode {
+    fn from(n: CssImportNamedLayer) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssImportNamedLayer> for SyntaxElement {
+    fn from(n: CssImportNamedLayer) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssImportSupports {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_IMPORT_SUPPORTS as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_IMPORT_SUPPORTS
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssImportSupports {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssImportSupports")
+            .field(
+                "supports_token",
+                &support::DebugSyntaxResult(self.supports_token()),
+            )
+            .field(
+                "l_paren_token",
+                &support::DebugSyntaxResult(self.l_paren_token()),
+            )
+            .field("condition", &support::DebugSyntaxResult(self.condition()))
+            .field(
+                "r_paren_token",
+                &support::DebugSyntaxResult(self.r_paren_token()),
+            )
+            .finish()
+    }
+}
+impl From<CssImportSupports> for SyntaxNode {
+    fn from(n: CssImportSupports) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssImportSupports> for SyntaxElement {
+    fn from(n: CssImportSupports) -> SyntaxElement {
         n.syntax.into()
     }
 }
@@ -11846,6 +12302,11 @@ impl From<CssFontPaletteValuesAtRule> for AnyCssAtRule {
         AnyCssAtRule::CssFontPaletteValuesAtRule(node)
     }
 }
+impl From<CssImportAtRule> for AnyCssAtRule {
+    fn from(node: CssImportAtRule) -> AnyCssAtRule {
+        AnyCssAtRule::CssImportAtRule(node)
+    }
+}
 impl From<CssKeyframesAtRule> for AnyCssAtRule {
     fn from(node: CssKeyframesAtRule) -> AnyCssAtRule {
         AnyCssAtRule::CssKeyframesAtRule(node)
@@ -11885,6 +12346,7 @@ impl AstNode for AnyCssAtRule {
         .union(CssCounterStyleAtRule::KIND_SET)
         .union(CssFontFaceAtRule::KIND_SET)
         .union(CssFontPaletteValuesAtRule::KIND_SET)
+        .union(CssImportAtRule::KIND_SET)
         .union(CssKeyframesAtRule::KIND_SET)
         .union(CssLayerAtRule::KIND_SET)
         .union(CssMediaAtRule::KIND_SET)
@@ -11901,6 +12363,7 @@ impl AstNode for AnyCssAtRule {
                 | CSS_COUNTER_STYLE_AT_RULE
                 | CSS_FONT_FACE_AT_RULE
                 | CSS_FONT_PALETTE_VALUES_AT_RULE
+                | CSS_IMPORT_AT_RULE
                 | CSS_KEYFRAMES_AT_RULE
                 | CSS_LAYER_AT_RULE
                 | CSS_MEDIA_AT_RULE
@@ -11926,6 +12389,7 @@ impl AstNode for AnyCssAtRule {
             CSS_FONT_PALETTE_VALUES_AT_RULE => {
                 AnyCssAtRule::CssFontPaletteValuesAtRule(CssFontPaletteValuesAtRule { syntax })
             }
+            CSS_IMPORT_AT_RULE => AnyCssAtRule::CssImportAtRule(CssImportAtRule { syntax }),
             CSS_KEYFRAMES_AT_RULE => {
                 AnyCssAtRule::CssKeyframesAtRule(CssKeyframesAtRule { syntax })
             }
@@ -11947,6 +12411,7 @@ impl AstNode for AnyCssAtRule {
             AnyCssAtRule::CssCounterStyleAtRule(it) => &it.syntax,
             AnyCssAtRule::CssFontFaceAtRule(it) => &it.syntax,
             AnyCssAtRule::CssFontPaletteValuesAtRule(it) => &it.syntax,
+            AnyCssAtRule::CssImportAtRule(it) => &it.syntax,
             AnyCssAtRule::CssKeyframesAtRule(it) => &it.syntax,
             AnyCssAtRule::CssLayerAtRule(it) => &it.syntax,
             AnyCssAtRule::CssMediaAtRule(it) => &it.syntax,
@@ -11964,6 +12429,7 @@ impl AstNode for AnyCssAtRule {
             AnyCssAtRule::CssCounterStyleAtRule(it) => it.syntax,
             AnyCssAtRule::CssFontFaceAtRule(it) => it.syntax,
             AnyCssAtRule::CssFontPaletteValuesAtRule(it) => it.syntax,
+            AnyCssAtRule::CssImportAtRule(it) => it.syntax,
             AnyCssAtRule::CssKeyframesAtRule(it) => it.syntax,
             AnyCssAtRule::CssLayerAtRule(it) => it.syntax,
             AnyCssAtRule::CssMediaAtRule(it) => it.syntax,
@@ -11983,6 +12449,7 @@ impl std::fmt::Debug for AnyCssAtRule {
             AnyCssAtRule::CssCounterStyleAtRule(it) => std::fmt::Debug::fmt(it, f),
             AnyCssAtRule::CssFontFaceAtRule(it) => std::fmt::Debug::fmt(it, f),
             AnyCssAtRule::CssFontPaletteValuesAtRule(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssAtRule::CssImportAtRule(it) => std::fmt::Debug::fmt(it, f),
             AnyCssAtRule::CssKeyframesAtRule(it) => std::fmt::Debug::fmt(it, f),
             AnyCssAtRule::CssLayerAtRule(it) => std::fmt::Debug::fmt(it, f),
             AnyCssAtRule::CssMediaAtRule(it) => std::fmt::Debug::fmt(it, f),
@@ -12002,6 +12469,7 @@ impl From<AnyCssAtRule> for SyntaxNode {
             AnyCssAtRule::CssCounterStyleAtRule(it) => it.into(),
             AnyCssAtRule::CssFontFaceAtRule(it) => it.into(),
             AnyCssAtRule::CssFontPaletteValuesAtRule(it) => it.into(),
+            AnyCssAtRule::CssImportAtRule(it) => it.into(),
             AnyCssAtRule::CssKeyframesAtRule(it) => it.into(),
             AnyCssAtRule::CssLayerAtRule(it) => it.into(),
             AnyCssAtRule::CssMediaAtRule(it) => it.into(),
@@ -13294,6 +13762,198 @@ impl From<AnyCssGenericComponentValue> for SyntaxNode {
 }
 impl From<AnyCssGenericComponentValue> for SyntaxElement {
     fn from(n: AnyCssGenericComponentValue) -> SyntaxElement {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<CssImportAnonymousLayer> for AnyCssImportLayer {
+    fn from(node: CssImportAnonymousLayer) -> AnyCssImportLayer {
+        AnyCssImportLayer::CssImportAnonymousLayer(node)
+    }
+}
+impl From<CssImportNamedLayer> for AnyCssImportLayer {
+    fn from(node: CssImportNamedLayer) -> AnyCssImportLayer {
+        AnyCssImportLayer::CssImportNamedLayer(node)
+    }
+}
+impl AstNode for AnyCssImportLayer {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        CssImportAnonymousLayer::KIND_SET.union(CssImportNamedLayer::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, CSS_IMPORT_ANONYMOUS_LAYER | CSS_IMPORT_NAMED_LAYER)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_IMPORT_ANONYMOUS_LAYER => {
+                AnyCssImportLayer::CssImportAnonymousLayer(CssImportAnonymousLayer { syntax })
+            }
+            CSS_IMPORT_NAMED_LAYER => {
+                AnyCssImportLayer::CssImportNamedLayer(CssImportNamedLayer { syntax })
+            }
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            AnyCssImportLayer::CssImportAnonymousLayer(it) => &it.syntax,
+            AnyCssImportLayer::CssImportNamedLayer(it) => &it.syntax,
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            AnyCssImportLayer::CssImportAnonymousLayer(it) => it.syntax,
+            AnyCssImportLayer::CssImportNamedLayer(it) => it.syntax,
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssImportLayer {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            AnyCssImportLayer::CssImportAnonymousLayer(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssImportLayer::CssImportNamedLayer(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssImportLayer> for SyntaxNode {
+    fn from(n: AnyCssImportLayer) -> SyntaxNode {
+        match n {
+            AnyCssImportLayer::CssImportAnonymousLayer(it) => it.into(),
+            AnyCssImportLayer::CssImportNamedLayer(it) => it.into(),
+        }
+    }
+}
+impl From<AnyCssImportLayer> for SyntaxElement {
+    fn from(n: AnyCssImportLayer) -> SyntaxElement {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<CssDeclaration> for AnyCssImportSupportsCondition {
+    fn from(node: CssDeclaration) -> AnyCssImportSupportsCondition {
+        AnyCssImportSupportsCondition::CssDeclaration(node)
+    }
+}
+impl AstNode for AnyCssImportSupportsCondition {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        AnyCssSupportsCondition::KIND_SET.union(CssDeclaration::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        match kind {
+            CSS_DECLARATION => true,
+            k if AnyCssSupportsCondition::can_cast(k) => true,
+            _ => false,
+        }
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_DECLARATION => {
+                AnyCssImportSupportsCondition::CssDeclaration(CssDeclaration { syntax })
+            }
+            _ => {
+                if let Some(any_css_supports_condition) = AnyCssSupportsCondition::cast(syntax) {
+                    return Some(AnyCssImportSupportsCondition::AnyCssSupportsCondition(
+                        any_css_supports_condition,
+                    ));
+                }
+                return None;
+            }
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            AnyCssImportSupportsCondition::CssDeclaration(it) => &it.syntax,
+            AnyCssImportSupportsCondition::AnyCssSupportsCondition(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            AnyCssImportSupportsCondition::CssDeclaration(it) => it.syntax,
+            AnyCssImportSupportsCondition::AnyCssSupportsCondition(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssImportSupportsCondition {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            AnyCssImportSupportsCondition::AnyCssSupportsCondition(it) => {
+                std::fmt::Debug::fmt(it, f)
+            }
+            AnyCssImportSupportsCondition::CssDeclaration(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssImportSupportsCondition> for SyntaxNode {
+    fn from(n: AnyCssImportSupportsCondition) -> SyntaxNode {
+        match n {
+            AnyCssImportSupportsCondition::AnyCssSupportsCondition(it) => it.into(),
+            AnyCssImportSupportsCondition::CssDeclaration(it) => it.into(),
+        }
+    }
+}
+impl From<AnyCssImportSupportsCondition> for SyntaxElement {
+    fn from(n: AnyCssImportSupportsCondition) -> SyntaxElement {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<CssString> for AnyCssImportUrl {
+    fn from(node: CssString) -> AnyCssImportUrl {
+        AnyCssImportUrl::CssString(node)
+    }
+}
+impl From<CssUrlFunction> for AnyCssImportUrl {
+    fn from(node: CssUrlFunction) -> AnyCssImportUrl {
+        AnyCssImportUrl::CssUrlFunction(node)
+    }
+}
+impl AstNode for AnyCssImportUrl {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = CssString::KIND_SET.union(CssUrlFunction::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, CSS_STRING | CSS_URL_FUNCTION)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_STRING => AnyCssImportUrl::CssString(CssString { syntax }),
+            CSS_URL_FUNCTION => AnyCssImportUrl::CssUrlFunction(CssUrlFunction { syntax }),
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            AnyCssImportUrl::CssString(it) => &it.syntax,
+            AnyCssImportUrl::CssUrlFunction(it) => &it.syntax,
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            AnyCssImportUrl::CssString(it) => it.syntax,
+            AnyCssImportUrl::CssUrlFunction(it) => it.syntax,
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssImportUrl {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            AnyCssImportUrl::CssString(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssImportUrl::CssUrlFunction(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssImportUrl> for SyntaxNode {
+    fn from(n: AnyCssImportUrl) -> SyntaxNode {
+        match n {
+            AnyCssImportUrl::CssString(it) => it.into(),
+            AnyCssImportUrl::CssUrlFunction(it) => it.into(),
+        }
+    }
+}
+impl From<AnyCssImportUrl> for SyntaxElement {
+    fn from(n: AnyCssImportUrl) -> SyntaxElement {
         let node: SyntaxNode = n.into();
         node.into()
     }
@@ -16509,6 +17169,21 @@ impl std::fmt::Display for AnyCssGenericComponentValue {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for AnyCssImportLayer {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyCssImportSupportsCondition {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyCssImportUrl {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AnyCssKeyframeName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -16880,6 +17555,26 @@ impl std::fmt::Display for CssIdSelector {
     }
 }
 impl std::fmt::Display for CssIdentifier {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssImportAnonymousLayer {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssImportAtRule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssImportNamedLayer {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssImportSupports {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

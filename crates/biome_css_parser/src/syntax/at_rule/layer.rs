@@ -97,7 +97,7 @@ const LAYER_NAME_LIST_END_SET: TokenSet<CssSyntaxKind> = token_set!(T![,], T!['{
 const LAYER_NAME_LIST_RECOVERY_SET: TokenSet<CssSyntaxKind> =
     LAYER_NAME_LIST_END_SET.union(token_set!(T![.]));
 
-struct LayerNameList;
+pub(crate) struct LayerNameList;
 
 impl ParseSeparatedList for LayerNameList {
     type Kind = CssSyntaxKind;

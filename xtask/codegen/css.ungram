@@ -507,6 +507,7 @@ AnyCssAtRule =
 	| CssLayerAtRule
 	| CssSupportsAtRule
 	| CssScopeAtRule
+	| CssImportAtRule
 	| CssBogusAtRule
 
 // @charset "UTF-8";
@@ -744,6 +745,8 @@ AnyCssKeyframesSelector =
 // @keyframes "something" { from {} to {} }
 //                          ^^^^    ^^
 CssKeyframesIdentSelector =
+	// The `from` keyword. Equivalent to 0%.
+	// The `to` keyword. Equivalent to 100%.
 	selector: ('from' | 'to')
 
 // @keyframes "something" { 30%, 60% {} }
@@ -1188,6 +1191,60 @@ CssScopeEdge =
 	selectors: CssSelectorList
 	')'
 
+// https://drafts.csswg.org/css-cascade/#at-import
+// @import = @import [ <url> | <string> ] [ layer | layer( <layer-name> ) ]? <import-conditions> ;
+// <url> =  <url()> | <src()>
+// <url()> = url( <string> <url-modifier>* ) | <url-token>
+// <src()> = src( <string> <url-modifier>* )
+// <layer-name> = <ident> [ '.' <ident> ]*
+//
+// <import-conditions> = [ supports( [ <supports-condition> | <declaration> ] ) ]? <media-query-list>?
+
+// @import url("./test.css") layer(default) supports(display: flex) screen and (min-width: 400px);
+//  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssImportAtRule =
+	'import'
+	url: AnyCssImportUrl
+	layer: AnyCssImportLayer?
+	supports: CssImportSupports?
+	media: CssMediaQueryList
+	';'
+
+// @import url("./test.css");
+//             ^^^^^^^^^^^^
+// @import "./test.scss";
+//         ^^^^^^^^^^^^^
+AnyCssImportUrl = CssUrlFunction | CssString
+
+AnyCssImportLayer =
+	CssImportAnonymousLayer
+	| CssImportNamedLayer
+
+// @import url("./test.css") layer;
+//                           ^^^^^
+CssImportAnonymousLayer =
+	'layer'
+
+// @import url("./test.css") layer(module.foo);
+//                           ^^^^^^^^^^^^^^^^^
+CssImportNamedLayer =
+	'layer'
+	'('
+	name: CssLayerNameList
+	')'
+
+// @import url("./test.css") layer(default) supports(display: flex);
+//                                          ^^^^^^^^^^^^^^^^^^^^^^^
+CssImportSupports =
+	'supports'
+	'('
+	condition: AnyCssImportSupportsCondition
+	')'
+
+AnyCssImportSupportsCondition =
+	AnyCssSupportsCondition
+	| CssDeclaration
+
 ///////////////
 // AUXILIARY
 ///////////////
@@ -1259,6 +1316,7 @@ CssSimpleFunction =
 	items: CssParameterList
 	')'
 
+// TODO add 'src'
 CssUrlFunction = 'url' '(' AnyCssUrlValue? ')'
 
 AnyCssUrlValue =
