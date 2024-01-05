@@ -1100,11 +1100,9 @@ pub(crate) fn group_fields_for_ordering(node: &AstNodeSrc) -> Vec<Vec<&Field>> {
     let mut last_was_ordered = true;
 
     for field in node.fields.iter() {
-        if !field.is_unordered() || last_was_ordered {
-            if !current_group.is_empty() {
-                groups.push(current_group);
-                current_group = vec![];
-            }
+        if (!field.is_unordered() || last_was_ordered) && !current_group.is_empty() {
+            groups.push(current_group);
+            current_group = vec![];
         }
         current_group.push(field);
         last_was_ordered = !field.is_unordered();
