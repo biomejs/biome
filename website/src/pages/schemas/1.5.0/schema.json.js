@@ -1480,6 +1480,13 @@ export function GET() {
 							{ type: "null" },
 						],
 					},
+					useImportType: {
+						description: "Promotes the use of import type for types.",
+						anyOf: [
+							{ $ref: "#/definitions/RuleConfiguration" },
+							{ type: "null" },
+						],
+					},
 					useNodejsImportProtocol: {
 						description:
 							"Enforces using the node: protocol for Node.js builtin modules.",
