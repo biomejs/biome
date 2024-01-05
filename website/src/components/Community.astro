@@ -1,54 +1,242 @@
 ---
-import { Image } from "astro:assets";
-
-// for people that could/should not appear in the list
-const denyList = [853712];
-
-const apiUrl =
-  "https://api.github.com/repos/biomejs/biome/contributors?per_page=35";
-
-let contributors: any[] | undefined = [];
-contributors = await fetch(apiUrl)
-  .then((res) => {
-		if (res.status < 400) {
-			return undefined;
-		} else {
-			return res.json();
-		}
-	})
-  .catch((error) => console.error("Error:", error));
-
-if (contributors && Array.isArray(contributors)) {
-	contributors = contributors.filter((contributor) => {
-  	return !denyList.includes(contributor.id);
-	});
-}
-
-const organizedContributors: any[] = []; // Organize contributors into rows and columns
-const contributorsPerRow = [5, 4, 6, 5, 3, 5, 4];
-
-let startIndex = 0;
-if (Array.isArray(contributors)) {
-	contributorsPerRow.forEach((contributorsInRow) => {
-		const row = contributors.slice(startIndex, startIndex + contributorsInRow);
-		organizedContributors.push([...row]);
-		startIndex += contributorsInRow;
-	});
-}
+ // Generated file, do not edit by hand, see `xtask/codegen` 
+ import { Image } from "astro:assets"  
 ---
-
-{
-  organizedContributors.map((row) => (
-    <div class="contributor-row">
-      {row.map((person: any) => (
-        <Image
-          class="contributor-avatar"
-          src={person.avatar_url}
-          alt={"User " + person.login}
-          width="84"
-          height="84"
+<div class="contributor-row">
+<Image
+              class="contributor-avatar"
+              src=https://avatars.githubusercontent.com/u/602478?v=4
+              alt="User ematipico"
+              width="84"
+              height="84"
         />
-      ))}
-    </div>
-  ))
-}
+<Image
+              class="contributor-avatar"
+              src=https://avatars.githubusercontent.com/u/853712?v=4
+              alt="User sebmck"
+              width="84"
+              height="84"
+        />
+<Image
+              class="contributor-avatar"
+              src=https://avatars.githubusercontent.com/u/1203881?v=4
+              alt="User MichaReiser"
+              width="84"
+              height="84"
+        />
+<Image
+              class="contributor-avatar"
+              src=https://avatars.githubusercontent.com/u/2358560?v=4
+              alt="User Conaclos"
+              width="84"
+              height="84"
+        />
+<Image
+              class="contributor-avatar"
+              src=https://avatars.githubusercontent.com/u/1895119?v=4
+              alt="User leops"
+              width="84"
+              height="84"
+        />
+</div>
+<div class="contributor-row">
+<Image
+              class="contributor-avatar"
+              src=https://avatars.githubusercontent.com/u/83425?v=4
+              alt="User xunilrj"
+              width="84"
+              height="84"
+        />
+<Image
+              class="contributor-avatar"
+              src=https://avatars.githubusercontent.com/u/6227442?v=4
+              alt="User denbezrukov"
+              width="84"
+              height="84"
+        />
+<Image
+              class="contributor-avatar"
+              src=https://avatars.githubusercontent.com/u/7271639?v=4
+              alt="User yassere"
+              width="84"
+              height="84"
+        />
+<Image
+              class="contributor-avatar"
+              src=https://avatars.githubusercontent.com/u/17974631?v=4
+              alt="User IWANABETHATGUY"
+              width="84"
+              height="84"
+        />
+</div>
+<div class="contributor-row">
+<Image
+              class="contributor-avatar"
+              src=https://avatars.githubusercontent.com/u/41323220?v=4
+              alt="User yeonjuan"
+              width="84"
+              height="84"
+        />
+<Image
+              class="contributor-avatar"
+              src=https://avatars.githubusercontent.com/u/5262527?v=4
+              alt="User diokey"
+              width="84"
+              height="84"
+        />
+<Image
+              class="contributor-avatar"
+              src=https://avatars.githubusercontent.com/u/1084297?v=4
+              alt="User EduardoLopes"
+              width="84"
+              height="84"
+        />
+<Image
+              class="contributor-avatar"
+              src=https://avatars.githubusercontent.com/u/168498?v=4
+              alt="User ooflorent"
+              width="84"
+              height="84"
+        />
+<Image
+              class="contributor-avatar"
+              src=https://avatars.githubusercontent.com/u/17228098?v=4
+              alt="User nissy-dev"
+              width="84"
+              height="84"
+        />
+<Image
+              class="contributor-avatar"
+              src=https://avatars.githubusercontent.com/u/783733?v=4
+              alt="User faultyserver"
+              width="84"
+              height="84"
+        />
+</div>
+<div class="contributor-row">
+<Image
+              class="contributor-avatar"
+              src=https://avatars.githubusercontent.com/u/33844379?v=4
+              alt="User jer3m01"
+              width="84"
+              height="84"
+        />
+<Image
+              class="contributor-avatar"
+              src=https://avatars.githubusercontent.com/u/334586?v=4
+              alt="User bitpshr"
+              width="84"
+              height="84"
+        />
+<Image
+              class="contributor-avatar"
+              src=https://avatars.githubusercontent.com/u/20097860?v=4
+              alt="User macovedj"
+              width="84"
+              height="84"
+        />
+<Image
+              class="contributor-avatar"
+              src=https://avatars.githubusercontent.com/u/38400669?v=4
+              alt="User unvalley"
+              width="84"
+              height="84"
+        />
+<Image
+              class="contributor-avatar"
+              src=https://avatars.githubusercontent.com/u/649677?v=4
+              alt="User nhedger"
+              width="84"
+              height="84"
+        />
+</div>
+<div class="contributor-row">
+<Image
+              class="contributor-avatar"
+              src=https://avatars.githubusercontent.com/u/78874691?v=4
+              alt="User victor-teles"
+              width="84"
+              height="84"
+        />
+<Image
+              class="contributor-avatar"
+              src=https://avatars.githubusercontent.com/u/1430279?v=4
+              alt="User Boshen"
+              width="84"
+              height="84"
+        />
+<Image
+              class="contributor-avatar"
+              src=https://avatars.githubusercontent.com/u/19197564?v=4
+              alt="User Kelbie"
+              width="84"
+              height="84"
+        />
+</div>
+<div class="contributor-row">
+<Image
+              class="contributor-avatar"
+              src=https://avatars.githubusercontent.com/u/8802980?v=4
+              alt="User mattcompiles"
+              width="84"
+              height="84"
+        />
+<Image
+              class="contributor-avatar"
+              src=https://avatars.githubusercontent.com/u/10727813?v=4
+              alt="User JustBeYou"
+              width="84"
+              height="84"
+        />
+<Image
+              class="contributor-avatar"
+              src=https://avatars.githubusercontent.com/u/3211873?v=4
+              alt="User VictorHom"
+              width="84"
+              height="84"
+        />
+<Image
+              class="contributor-avatar"
+              src=https://avatars.githubusercontent.com/u/85363195?v=4
+              alt="User vasucp1207"
+              width="84"
+              height="84"
+        />
+<Image
+              class="contributor-avatar"
+              src=https://avatars.githubusercontent.com/u/952783?v=4
+              alt="User jamiebuilds"
+              width="84"
+              height="84"
+        />
+</div>
+<div class="contributor-row">
+<Image
+              class="contributor-avatar"
+              src=https://avatars.githubusercontent.com/u/40111357?v=4
+              alt="User 1ntEgr8"
+              width="84"
+              height="84"
+        />
+<Image
+              class="contributor-avatar"
+              src=https://avatars.githubusercontent.com/u/11046907?v=4
+              alt="User kaioduarte"
+              width="84"
+              height="84"
+        />
+<Image
+              class="contributor-avatar"
+              src=https://avatars.githubusercontent.com/u/41065217?v=4
+              alt="User TaKO8Ki"
+              width="84"
+              height="84"
+        />
+<Image
+              class="contributor-avatar"
+              src=https://avatars.githubusercontent.com/u/22080780?v=4
+              alt="User iaravindreddyp"
+              width="84"
+              height="84"
+        />
+</div>

@@ -869,6 +869,12 @@ export function GET() {
 				},
 				additionalProperties: false,
 			},
+			DeprecatedHooksOptions: {
+				description:
+					"Options for the `useHookAtTopLevel` rule have been deprecated, since we now use the React hook naming convention to determine whether a function is a hook.",
+				type: "object",
+				additionalProperties: false,
+			},
 			EnumMemberCase: {
 				description: "Supported cases for TypeScript `enum` member names.",
 				oneOf: [
@@ -901,6 +907,11 @@ export function GET() {
 					},
 					{
 						description: "PascalCase",
+						type: "string",
+						enum: ["PascalCase"],
+					},
+					{
+						description: "snake_case",
 						type: "string",
 						enum: ["snake_case"],
 					},
@@ -1037,8 +1048,7 @@ export function GET() {
 				additionalProperties: false,
 			},
 			HooksOptions: {
-				description:
-					"Options for the rule `useExhaustiveDependencies` and `useHookAtTopLevel`",
+				description: "Options for the rule `useExhaustiveDependencies`",
 				type: "object",
 				required: ["hooks"],
 				properties: {
@@ -1350,6 +1360,13 @@ export function GET() {
 					},
 					noEmptyBlockStatements: {
 						description: "Disallow empty block statements and static blocks.",
+						anyOf: [
+							{ $ref: "#/definitions/RuleConfiguration" },
+							{ type: "null" },
+						],
+					},
+					noGlobalEval: {
+						description: "Disallow the use of global eval().",
 						anyOf: [
 							{ $ref: "#/definitions/RuleConfiguration" },
 							{ type: "null" },
@@ -1685,9 +1702,12 @@ export function GET() {
 						allOf: [{ $ref: "#/definitions/FilenamingConventionOptions" }],
 					},
 					{
-						description:
-							"Options for `useExhaustiveDependencies` and `useHookAtTopLevel` rule",
+						description: "Options for `useExhaustiveDependencies` rule",
 						allOf: [{ $ref: "#/definitions/HooksOptions" }],
+					},
+					{
+						description: "Deprecated options for `useHookAtTopLevel` rule",
+						allOf: [{ $ref: "#/definitions/DeprecatedHooksOptions" }],
 					},
 					{
 						description: "Options for `useNamingConvention` rule",
