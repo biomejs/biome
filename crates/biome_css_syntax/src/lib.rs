@@ -100,6 +100,7 @@ impl biome_rowan::SyntaxKind for CssSyntaxKind {
                 | CSS_BOGUS_LAYER
                 | CSS_BOGUS_SCOPE_RANGE
                 | CSS_BOGUS_PROPERTY
+                | CSS_BOGUS_PROPERTY_VALUE
         )
     }
 

@@ -11,6 +11,7 @@ pub(crate) mod bogus_media_query;
 pub(crate) mod bogus_page_selector_pseudo;
 pub(crate) mod bogus_parameter;
 pub(crate) mod bogus_property;
+pub(crate) mod bogus_property_value;
 pub(crate) mod bogus_pseudo_class;
 pub(crate) mod bogus_pseudo_element;
 pub(crate) mod bogus_rule;

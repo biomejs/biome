@@ -1,0 +1,576 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+div {
+    /* Global values */
+    z-index: inherit;
+    z-index: initial;
+    z-index: unset;
+    z-index: revert;
+    z-index: revert-layer;
+
+    /* auto */
+    z-index: auto;
+
+    /* <integer> */
+    z-index: 1;
+    z-index: 0;
+    z-index: -1;
+    z-index: -123456;
+    z-index: 444567;
+
+
+    /* Incorrect values become generic */
+    z-index: 10s;
+    z-index: one-value;
+    z-index: multiple values;
+    z-index: delimited, values;
+    z-index: delimited / slash / values;
+    z-index: mixed, delimiters / can be, used;
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selector_token: missing (optional),
+                    simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
+                        ident: CssIdentifier {
+                            value_token: IDENT@0..4 "div" [] [Whitespace(" ")],
+                        },
+                    },
+                    sub_selectors: CssSubSelectorList [],
+                },
+            ],
+            block: CssDeclarationListBlock {
+                l_curly_token: L_CURLY@4..5 "{" [] [],
+                declarations: CssDeclarationList [
+                    CssDeclaration {
+                        property: CssZIndexProperty {
+                            name: CssIdentifier {
+                                value_token: IDENT@5..41 "z-index" [Newline("\n"), Whitespace("    "), Comments("/* Global values */"), Newline("\n"), Whitespace("    ")] [],
+                            },
+                            colon_token: COLON@41..43 ":" [] [Whitespace(" ")],
+                            value: CssWideKeyword {
+                                value: INHERIT_KW@43..50 "inherit" [] [],
+                            },
+                        },
+                        important: missing (optional),
+                    },
+                    SEMICOLON@50..51 ";" [] [],
+                    CssDeclaration {
+                        property: CssZIndexProperty {
+                            name: CssIdentifier {
+                                value_token: IDENT@51..63 "z-index" [Newline("\n"), Whitespace("    ")] [],
+                            },
+                            colon_token: COLON@63..65 ":" [] [Whitespace(" ")],
+                            value: CssWideKeyword {
+                                value: INITIAL_KW@65..72 "initial" [] [],
+                            },
+                        },
+                        important: missing (optional),
+                    },
+                    SEMICOLON@72..73 ";" [] [],
+                    CssDeclaration {
+                        property: CssZIndexProperty {
+                            name: CssIdentifier {
+                                value_token: IDENT@73..85 "z-index" [Newline("\n"), Whitespace("    ")] [],
+                            },
+                            colon_token: COLON@85..87 ":" [] [Whitespace(" ")],
+                            value: CssWideKeyword {
+                                value: UNSET_KW@87..92 "unset" [] [],
+                            },
+                        },
+                        important: missing (optional),
+                    },
+                    SEMICOLON@92..93 ";" [] [],
+                    CssDeclaration {
+                        property: CssZIndexProperty {
+                            name: CssIdentifier {
+                                value_token: IDENT@93..105 "z-index" [Newline("\n"), Whitespace("    ")] [],
+                            },
+                            colon_token: COLON@105..107 ":" [] [Whitespace(" ")],
+                            value: CssWideKeyword {
+                                value: REVERT_KW@107..113 "revert" [] [],
+                            },
+                        },
+                        important: missing (optional),
+                    },
+                    SEMICOLON@113..114 ";" [] [],
+                    CssDeclaration {
+                        property: CssZIndexProperty {
+                            name: CssIdentifier {
+                                value_token: IDENT@114..126 "z-index" [Newline("\n"), Whitespace("    ")] [],
+                            },
+                            colon_token: COLON@126..128 ":" [] [Whitespace(" ")],
+                            value: CssWideKeyword {
+                                value: REVERT_LAYER_KW@128..140 "revert-layer" [] [],
+                            },
+                        },
+                        important: missing (optional),
+                    },
+                    SEMICOLON@140..141 ";" [] [],
+                    CssDeclaration {
+                        property: CssZIndexProperty {
+                            name: CssIdentifier {
+                                value_token: IDENT@141..169 "z-index" [Newline("\n"), Newline("\n"), Whitespace("    "), Comments("/* auto */"), Newline("\n"), Whitespace("    ")] [],
+                            },
+                            colon_token: COLON@169..171 ":" [] [Whitespace(" ")],
+                            value: CssAuto {
+                                value_token: AUTO_KW@171..175 "auto" [] [],
+                            },
+                        },
+                        important: missing (optional),
+                    },
+                    SEMICOLON@175..176 ";" [] [],
+                    CssDeclaration {
+                        property: CssZIndexProperty {
+                            name: CssIdentifier {
+                                value_token: IDENT@176..209 "z-index" [Newline("\n"), Newline("\n"), Whitespace("    "), Comments("/* <integer> */"), Newline("\n"), Whitespace("    ")] [],
+                            },
+                            colon_token: COLON@209..211 ":" [] [Whitespace(" ")],
+                            value: CssNumber {
+                                value_token: CSS_NUMBER_LITERAL@211..212 "1" [] [],
+                            },
+                        },
+                        important: missing (optional),
+                    },
+                    SEMICOLON@212..213 ";" [] [],
+                    CssDeclaration {
+                        property: CssZIndexProperty {
+                            name: CssIdentifier {
+                                value_token: IDENT@213..225 "z-index" [Newline("\n"), Whitespace("    ")] [],
+                            },
+                            colon_token: COLON@225..227 ":" [] [Whitespace(" ")],
+                            value: CssNumber {
+                                value_token: CSS_NUMBER_LITERAL@227..228 "0" [] [],
+                            },
+                        },
+                        important: missing (optional),
+                    },
+                    SEMICOLON@228..229 ";" [] [],
+                    CssDeclaration {
+                        property: CssZIndexProperty {
+                            name: CssIdentifier {
+                                value_token: IDENT@229..241 "z-index" [Newline("\n"), Whitespace("    ")] [],
+                            },
+                            colon_token: COLON@241..243 ":" [] [Whitespace(" ")],
+                            value: CssNumber {
+                                value_token: CSS_NUMBER_LITERAL@243..245 "-1" [] [],
+                            },
+                        },
+                        important: missing (optional),
+                    },
+                    SEMICOLON@245..246 ";" [] [],
+                    CssDeclaration {
+                        property: CssZIndexProperty {
+                            name: CssIdentifier {
+                                value_token: IDENT@246..258 "z-index" [Newline("\n"), Whitespace("    ")] [],
+                            },
+                            colon_token: COLON@258..260 ":" [] [Whitespace(" ")],
+                            value: CssNumber {
+                                value_token: CSS_NUMBER_LITERAL@260..267 "-123456" [] [],
+                            },
+                        },
+                        important: missing (optional),
+                    },
+                    SEMICOLON@267..268 ";" [] [],
+                    CssDeclaration {
+                        property: CssZIndexProperty {
+                            name: CssIdentifier {
+                                value_token: IDENT@268..280 "z-index" [Newline("\n"), Whitespace("    ")] [],
+                            },
+                            colon_token: COLON@280..282 ":" [] [Whitespace(" ")],
+                            value: CssNumber {
+                                value_token: CSS_NUMBER_LITERAL@282..288 "444567" [] [],
+                            },
+                        },
+                        important: missing (optional),
+                    },
+                    SEMICOLON@288..289 ";" [] [],
+                    CssDeclaration {
+                        property: CssZIndexProperty {
+                            name: CssIdentifier {
+                                value_token: IDENT@289..345 "z-index" [Newline("\n"), Newline("\n"), Newline("\n"), Whitespace("    "), Comments("/* Incorrect values b ..."), Newline("\n"), Whitespace("    ")] [],
+                            },
+                            colon_token: COLON@345..347 ":" [] [Whitespace(" ")],
+                            value: CssUnknownPropertyValue {
+                                css_generic_component_value_list: CssGenericComponentValueList [
+                                    CssRegularDimension {
+                                        value_token: CSS_NUMBER_LITERAL@347..349 "10" [] [],
+                                        unit_token: IDENT@349..350 "s" [] [],
+                                    },
+                                ],
+                            },
+                        },
+                        important: missing (optional),
+                    },
+                    SEMICOLON@350..351 ";" [] [],
+                    CssDeclaration {
+                        property: CssZIndexProperty {
+                            name: CssIdentifier {
+                                value_token: IDENT@351..363 "z-index" [Newline("\n"), Whitespace("    ")] [],
+                            },
+                            colon_token: COLON@363..365 ":" [] [Whitespace(" ")],
+                            value: CssUnknownPropertyValue {
+                                css_generic_component_value_list: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@365..374 "one-value" [] [],
+                                    },
+                                ],
+                            },
+                        },
+                        important: missing (optional),
+                    },
+                    SEMICOLON@374..375 ";" [] [],
+                    CssDeclaration {
+                        property: CssZIndexProperty {
+                            name: CssIdentifier {
+                                value_token: IDENT@375..387 "z-index" [Newline("\n"), Whitespace("    ")] [],
+                            },
+                            colon_token: COLON@387..389 ":" [] [Whitespace(" ")],
+                            value: CssUnknownPropertyValue {
+                                css_generic_component_value_list: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@389..398 "multiple" [] [Whitespace(" ")],
+                                    },
+                                    CssIdentifier {
+                                        value_token: IDENT@398..404 "values" [] [],
+                                    },
+                                ],
+                            },
+                        },
+                        important: missing (optional),
+                    },
+                    SEMICOLON@404..405 ";" [] [],
+                    CssDeclaration {
+                        property: CssZIndexProperty {
+                            name: CssIdentifier {
+                                value_token: IDENT@405..417 "z-index" [Newline("\n"), Whitespace("    ")] [],
+                            },
+                            colon_token: COLON@417..419 ":" [] [Whitespace(" ")],
+                            value: CssUnknownPropertyValue {
+                                css_generic_component_value_list: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@419..428 "delimited" [] [],
+                                    },
+                                    CssGenericDelimiter {
+                                        value: COMMA@428..430 "," [] [Whitespace(" ")],
+                                    },
+                                    CssIdentifier {
+                                        value_token: IDENT@430..436 "values" [] [],
+                                    },
+                                ],
+                            },
+                        },
+                        important: missing (optional),
+                    },
+                    SEMICOLON@436..437 ";" [] [],
+                    CssDeclaration {
+                        property: CssZIndexProperty {
+                            name: CssIdentifier {
+                                value_token: IDENT@437..449 "z-index" [Newline("\n"), Whitespace("    ")] [],
+                            },
+                            colon_token: COLON@449..451 ":" [] [Whitespace(" ")],
+                            value: CssUnknownPropertyValue {
+                                css_generic_component_value_list: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@451..461 "delimited" [] [Whitespace(" ")],
+                                    },
+                                    CssGenericDelimiter {
+                                        value: SLASH@461..463 "/" [] [Whitespace(" ")],
+                                    },
+                                    CssIdentifier {
+                                        value_token: IDENT@463..469 "slash" [] [Whitespace(" ")],
+                                    },
+                                    CssGenericDelimiter {
+                                        value: SLASH@469..471 "/" [] [Whitespace(" ")],
+                                    },
+                                    CssIdentifier {
+                                        value_token: IDENT@471..477 "values" [] [],
+                                    },
+                                ],
+                            },
+                        },
+                        important: missing (optional),
+                    },
+                    SEMICOLON@477..478 ";" [] [],
+                    CssDeclaration {
+                        property: CssZIndexProperty {
+                            name: CssIdentifier {
+                                value_token: IDENT@478..490 "z-index" [Newline("\n"), Whitespace("    ")] [],
+                            },
+                            colon_token: COLON@490..492 ":" [] [Whitespace(" ")],
+                            value: CssUnknownPropertyValue {
+                                css_generic_component_value_list: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@492..497 "mixed" [] [],
+                                    },
+                                    CssGenericDelimiter {
+                                        value: COMMA@497..499 "," [] [Whitespace(" ")],
+                                    },
+                                    CssIdentifier {
+                                        value_token: IDENT@499..510 "delimiters" [] [Whitespace(" ")],
+                                    },
+                                    CssGenericDelimiter {
+                                        value: SLASH@510..512 "/" [] [Whitespace(" ")],
+                                    },
+                                    CssIdentifier {
+                                        value_token: IDENT@512..516 "can" [] [Whitespace(" ")],
+                                    },
+                                    CssIdentifier {
+                                        value_token: IDENT@516..518 "be" [] [],
+                                    },
+                                    CssGenericDelimiter {
+                                        value: COMMA@518..520 "," [] [Whitespace(" ")],
+                                    },
+                                    CssIdentifier {
+                                        value_token: IDENT@520..524 "used" [] [],
+                                    },
+                                ],
+                            },
+                        },
+                        important: missing (optional),
+                    },
+                    SEMICOLON@524..525 ";" [] [],
+                ],
+                r_curly_token: R_CURLY@525..527 "}" [Newline("\n")] [],
+            },
+        },
+    ],
+    eof_token: EOF@527..528 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..528
+  0: (empty)
+  1: CSS_RULE_LIST@0..527
+    0: CSS_RULE@0..527
+      0: CSS_SELECTOR_LIST@0..4
+        0: CSS_COMPOUND_SELECTOR@0..4
+          0: (empty)
+          1: CSS_TYPE_SELECTOR@0..4
+            0: (empty)
+            1: CSS_IDENTIFIER@0..4
+              0: IDENT@0..4 "div" [] [Whitespace(" ")]
+          2: CSS_SUB_SELECTOR_LIST@4..4
+      1: CSS_DECLARATION_LIST_BLOCK@4..527
+        0: L_CURLY@4..5 "{" [] []
+        1: CSS_DECLARATION_LIST@5..525
+          0: CSS_DECLARATION@5..50
+            0: CSS_Z_INDEX_PROPERTY@5..50
+              0: CSS_IDENTIFIER@5..41
+                0: IDENT@5..41 "z-index" [Newline("\n"), Whitespace("    "), Comments("/* Global values */"), Newline("\n"), Whitespace("    ")] []
+              1: COLON@41..43 ":" [] [Whitespace(" ")]
+              2: CSS_WIDE_KEYWORD@43..50
+                0: INHERIT_KW@43..50 "inherit" [] []
+            1: (empty)
+          1: SEMICOLON@50..51 ";" [] []
+          2: CSS_DECLARATION@51..72
+            0: CSS_Z_INDEX_PROPERTY@51..72
+              0: CSS_IDENTIFIER@51..63
+                0: IDENT@51..63 "z-index" [Newline("\n"), Whitespace("    ")] []
+              1: COLON@63..65 ":" [] [Whitespace(" ")]
+              2: CSS_WIDE_KEYWORD@65..72
+                0: INITIAL_KW@65..72 "initial" [] []
+            1: (empty)
+          3: SEMICOLON@72..73 ";" [] []
+          4: CSS_DECLARATION@73..92
+            0: CSS_Z_INDEX_PROPERTY@73..92
+              0: CSS_IDENTIFIER@73..85
+                0: IDENT@73..85 "z-index" [Newline("\n"), Whitespace("    ")] []
+              1: COLON@85..87 ":" [] [Whitespace(" ")]
+              2: CSS_WIDE_KEYWORD@87..92
+                0: UNSET_KW@87..92 "unset" [] []
+            1: (empty)
+          5: SEMICOLON@92..93 ";" [] []
+          6: CSS_DECLARATION@93..113
+            0: CSS_Z_INDEX_PROPERTY@93..113
+              0: CSS_IDENTIFIER@93..105
+                0: IDENT@93..105 "z-index" [Newline("\n"), Whitespace("    ")] []
+              1: COLON@105..107 ":" [] [Whitespace(" ")]
+              2: CSS_WIDE_KEYWORD@107..113
+                0: REVERT_KW@107..113 "revert" [] []
+            1: (empty)
+          7: SEMICOLON@113..114 ";" [] []
+          8: CSS_DECLARATION@114..140
+            0: CSS_Z_INDEX_PROPERTY@114..140
+              0: CSS_IDENTIFIER@114..126
+                0: IDENT@114..126 "z-index" [Newline("\n"), Whitespace("    ")] []
+              1: COLON@126..128 ":" [] [Whitespace(" ")]
+              2: CSS_WIDE_KEYWORD@128..140
+                0: REVERT_LAYER_KW@128..140 "revert-layer" [] []
+            1: (empty)
+          9: SEMICOLON@140..141 ";" [] []
+          10: CSS_DECLARATION@141..175
+            0: CSS_Z_INDEX_PROPERTY@141..175
+              0: CSS_IDENTIFIER@141..169
+                0: IDENT@141..169 "z-index" [Newline("\n"), Newline("\n"), Whitespace("    "), Comments("/* auto */"), Newline("\n"), Whitespace("    ")] []
+              1: COLON@169..171 ":" [] [Whitespace(" ")]
+              2: CSS_AUTO@171..175
+                0: AUTO_KW@171..175 "auto" [] []
+            1: (empty)
+          11: SEMICOLON@175..176 ";" [] []
+          12: CSS_DECLARATION@176..212
+            0: CSS_Z_INDEX_PROPERTY@176..212
+              0: CSS_IDENTIFIER@176..209
+                0: IDENT@176..209 "z-index" [Newline("\n"), Newline("\n"), Whitespace("    "), Comments("/* <integer> */"), Newline("\n"), Whitespace("    ")] []
+              1: COLON@209..211 ":" [] [Whitespace(" ")]
+              2: CSS_NUMBER@211..212
+                0: CSS_NUMBER_LITERAL@211..212 "1" [] []
+            1: (empty)
+          13: SEMICOLON@212..213 ";" [] []
+          14: CSS_DECLARATION@213..228
+            0: CSS_Z_INDEX_PROPERTY@213..228
+              0: CSS_IDENTIFIER@213..225
+                0: IDENT@213..225 "z-index" [Newline("\n"), Whitespace("    ")] []
+              1: COLON@225..227 ":" [] [Whitespace(" ")]
+              2: CSS_NUMBER@227..228
+                0: CSS_NUMBER_LITERAL@227..228 "0" [] []
+            1: (empty)
+          15: SEMICOLON@228..229 ";" [] []
+          16: CSS_DECLARATION@229..245
+            0: CSS_Z_INDEX_PROPERTY@229..245
+              0: CSS_IDENTIFIER@229..241
+                0: IDENT@229..241 "z-index" [Newline("\n"), Whitespace("    ")] []
+              1: COLON@241..243 ":" [] [Whitespace(" ")]
+              2: CSS_NUMBER@243..245
+                0: CSS_NUMBER_LITERAL@243..245 "-1" [] []
+            1: (empty)
+          17: SEMICOLON@245..246 ";" [] []
+          18: CSS_DECLARATION@246..267
+            0: CSS_Z_INDEX_PROPERTY@246..267
+              0: CSS_IDENTIFIER@246..258
+                0: IDENT@246..258 "z-index" [Newline("\n"), Whitespace("    ")] []
+              1: COLON@258..260 ":" [] [Whitespace(" ")]
+              2: CSS_NUMBER@260..267
+                0: CSS_NUMBER_LITERAL@260..267 "-123456" [] []
+            1: (empty)
+          19: SEMICOLON@267..268 ";" [] []
+          20: CSS_DECLARATION@268..288
+            0: CSS_Z_INDEX_PROPERTY@268..288
+              0: CSS_IDENTIFIER@268..280
+                0: IDENT@268..280 "z-index" [Newline("\n"), Whitespace("    ")] []
+              1: COLON@280..282 ":" [] [Whitespace(" ")]
+              2: CSS_NUMBER@282..288
+                0: CSS_NUMBER_LITERAL@282..288 "444567" [] []
+            1: (empty)
+          21: SEMICOLON@288..289 ";" [] []
+          22: CSS_DECLARATION@289..350
+            0: CSS_Z_INDEX_PROPERTY@289..350
+              0: CSS_IDENTIFIER@289..345
+                0: IDENT@289..345 "z-index" [Newline("\n"), Newline("\n"), Newline("\n"), Whitespace("    "), Comments("/* Incorrect values b ..."), Newline("\n"), Whitespace("    ")] []
+              1: COLON@345..347 ":" [] [Whitespace(" ")]
+              2: CSS_UNKNOWN_PROPERTY_VALUE@347..350
+                0: CSS_GENERIC_COMPONENT_VALUE_LIST@347..350
+                  0: CSS_REGULAR_DIMENSION@347..350
+                    0: CSS_NUMBER_LITERAL@347..349 "10" [] []
+                    1: IDENT@349..350 "s" [] []
+            1: (empty)
+          23: SEMICOLON@350..351 ";" [] []
+          24: CSS_DECLARATION@351..374
+            0: CSS_Z_INDEX_PROPERTY@351..374
+              0: CSS_IDENTIFIER@351..363
+                0: IDENT@351..363 "z-index" [Newline("\n"), Whitespace("    ")] []
+              1: COLON@363..365 ":" [] [Whitespace(" ")]
+              2: CSS_UNKNOWN_PROPERTY_VALUE@365..374
+                0: CSS_GENERIC_COMPONENT_VALUE_LIST@365..374
+                  0: CSS_IDENTIFIER@365..374
+                    0: IDENT@365..374 "one-value" [] []
+            1: (empty)
+          25: SEMICOLON@374..375 ";" [] []
+          26: CSS_DECLARATION@375..404
+            0: CSS_Z_INDEX_PROPERTY@375..404
+              0: CSS_IDENTIFIER@375..387
+                0: IDENT@375..387 "z-index" [Newline("\n"), Whitespace("    ")] []
+              1: COLON@387..389 ":" [] [Whitespace(" ")]
+              2: CSS_UNKNOWN_PROPERTY_VALUE@389..404
+                0: CSS_GENERIC_COMPONENT_VALUE_LIST@389..404
+                  0: CSS_IDENTIFIER@389..398
+                    0: IDENT@389..398 "multiple" [] [Whitespace(" ")]
+                  1: CSS_IDENTIFIER@398..404
+                    0: IDENT@398..404 "values" [] []
+            1: (empty)
+          27: SEMICOLON@404..405 ";" [] []
+          28: CSS_DECLARATION@405..436
+            0: CSS_Z_INDEX_PROPERTY@405..436
+              0: CSS_IDENTIFIER@405..417
+                0: IDENT@405..417 "z-index" [Newline("\n"), Whitespace("    ")] []
+              1: COLON@417..419 ":" [] [Whitespace(" ")]
+              2: CSS_UNKNOWN_PROPERTY_VALUE@419..436
+                0: CSS_GENERIC_COMPONENT_VALUE_LIST@419..436
+                  0: CSS_IDENTIFIER@419..428
+                    0: IDENT@419..428 "delimited" [] []
+                  1: CSS_GENERIC_DELIMITER@428..430
+                    0: COMMA@428..430 "," [] [Whitespace(" ")]
+                  2: CSS_IDENTIFIER@430..436
+                    0: IDENT@430..436 "values" [] []
+            1: (empty)
+          29: SEMICOLON@436..437 ";" [] []
+          30: CSS_DECLARATION@437..477
+            0: CSS_Z_INDEX_PROPERTY@437..477
+              0: CSS_IDENTIFIER@437..449
+                0: IDENT@437..449 "z-index" [Newline("\n"), Whitespace("    ")] []
+              1: COLON@449..451 ":" [] [Whitespace(" ")]
+              2: CSS_UNKNOWN_PROPERTY_VALUE@451..477
+                0: CSS_GENERIC_COMPONENT_VALUE_LIST@451..477
+                  0: CSS_IDENTIFIER@451..461
+                    0: IDENT@451..461 "delimited" [] [Whitespace(" ")]
+                  1: CSS_GENERIC_DELIMITER@461..463
+                    0: SLASH@461..463 "/" [] [Whitespace(" ")]
+                  2: CSS_IDENTIFIER@463..469
+                    0: IDENT@463..469 "slash" [] [Whitespace(" ")]
+                  3: CSS_GENERIC_DELIMITER@469..471
+                    0: SLASH@469..471 "/" [] [Whitespace(" ")]
+                  4: CSS_IDENTIFIER@471..477
+                    0: IDENT@471..477 "values" [] []
+            1: (empty)
+          31: SEMICOLON@477..478 ";" [] []
+          32: CSS_DECLARATION@478..524
+            0: CSS_Z_INDEX_PROPERTY@478..524
+              0: CSS_IDENTIFIER@478..490
+                0: IDENT@478..490 "z-index" [Newline("\n"), Whitespace("    ")] []
+              1: COLON@490..492 ":" [] [Whitespace(" ")]
+              2: CSS_UNKNOWN_PROPERTY_VALUE@492..524
+                0: CSS_GENERIC_COMPONENT_VALUE_LIST@492..524
+                  0: CSS_IDENTIFIER@492..497
+                    0: IDENT@492..497 "mixed" [] []
+                  1: CSS_GENERIC_DELIMITER@497..499
+                    0: COMMA@497..499 "," [] [Whitespace(" ")]
+                  2: CSS_IDENTIFIER@499..510
+                    0: IDENT@499..510 "delimiters" [] [Whitespace(" ")]
+                  3: CSS_GENERIC_DELIMITER@510..512
+                    0: SLASH@510..512 "/" [] [Whitespace(" ")]
+                  4: CSS_IDENTIFIER@512..516
+                    0: IDENT@512..516 "can" [] [Whitespace(" ")]
+                  5: CSS_IDENTIFIER@516..518
+                    0: IDENT@516..518 "be" [] []
+                  6: CSS_GENERIC_DELIMITER@518..520
+                    0: COMMA@518..520 "," [] [Whitespace(" ")]
+                  7: CSS_IDENTIFIER@520..524
+                    0: IDENT@520..524 "used" [] []
+            1: (empty)
+          33: SEMICOLON@524..525 ";" [] []
+        2: R_CURLY@525..527 "}" [Newline("\n")] []
+  2: EOF@527..528 "" [Newline("\n")] []
+
+```
+
+

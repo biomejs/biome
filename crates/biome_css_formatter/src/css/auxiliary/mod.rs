@@ -3,6 +3,7 @@
 pub(crate) mod attribute_matcher;
 pub(crate) mod attribute_matcher_value;
 pub(crate) mod attribute_name;
+pub(crate) mod auto;
 pub(crate) mod binary_expression;
 pub(crate) mod container_and_query;
 pub(crate) mod container_not_query;
@@ -63,4 +64,6 @@ pub(crate) mod supports_feature_declaration;
 pub(crate) mod supports_not_condition;
 pub(crate) mod supports_or_condition;
 pub(crate) mod universal_namespace_prefix;
+pub(crate) mod unknown_property_value;
 pub(crate) mod url_function;
+pub(crate) mod wide_keyword;

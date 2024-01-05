@@ -7,6 +7,20 @@ use biome_css_syntax::{
     *,
 };
 use biome_rowan::AstNode;
+pub fn css_all_property(
+    name: CssIdentifier,
+    colon_token: SyntaxToken,
+    value: AnyCssAllPropertyValue,
+) -> CssAllProperty {
+    CssAllProperty::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_ALL_PROPERTY,
+        [
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Token(colon_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
+        ],
+    ))
+}
 pub fn css_at_rule(at_token: SyntaxToken, rule: AnyCssAtRule) -> CssAtRule {
     CssAtRule::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_AT_RULE,
@@ -114,6 +128,12 @@ impl CssAttributeSelectorBuilder {
             ],
         ))
     }
+}
+pub fn css_auto(value_token: SyntaxToken) -> CssAuto {
+    CssAuto::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_AUTO,
+        [Some(SyntaxElement::Token(value_token))],
+    ))
 }
 pub fn css_binary_expression(
     left: AnyCssExpression,
@@ -1799,6 +1819,16 @@ pub fn css_unknown_dimension(
         ],
     ))
 }
+pub fn css_unknown_property_value(
+    css_generic_component_value_list: CssGenericComponentValueList,
+) -> CssUnknownPropertyValue {
+    CssUnknownPropertyValue::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_UNKNOWN_PROPERTY_VALUE,
+        [Some(SyntaxElement::Node(
+            css_generic_component_value_list.into_syntax(),
+        ))],
+    ))
+}
 pub fn css_url_function(
     url_token: SyntaxToken,
     l_paren_token: SyntaxToken,
@@ -1839,6 +1869,26 @@ pub fn css_url_value_raw(value_token: SyntaxToken) -> CssUrlValueRaw {
     CssUrlValueRaw::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_URL_VALUE_RAW,
         [Some(SyntaxElement::Token(value_token))],
+    ))
+}
+pub fn css_wide_keyword(value_token: SyntaxToken) -> CssWideKeyword {
+    CssWideKeyword::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_WIDE_KEYWORD,
+        [Some(SyntaxElement::Token(value_token))],
+    ))
+}
+pub fn css_z_index_property(
+    name: CssIdentifier,
+    colon_token: SyntaxToken,
+    value: AnyCssZIndexPropertyValue,
+) -> CssZIndexProperty {
+    CssZIndexProperty::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_Z_INDEX_PROPERTY,
+        [
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Token(colon_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
+        ],
     ))
 }
 pub fn css_component_value_list<I>(items: I) -> CssComponentValueList
@@ -2262,6 +2312,16 @@ where
 {
     CssBogusProperty::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_BOGUS_PROPERTY,
+        slots,
+    ))
+}
+pub fn css_bogus_property_value<I>(slots: I) -> CssBogusPropertyValue
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssBogusPropertyValue::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_BOGUS_PROPERTY_VALUE,
         slots,
     ))
 }
