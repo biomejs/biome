@@ -33,7 +33,7 @@ use crate::lexer::{JsLexContext, JsReLexContext};
 use crate::span::Span;
 use crate::syntax::class::parse_decorators;
 use crate::JsSyntaxFeature::TypeScript;
-use crate::{Absent, JsParser, ParseRecovery, ParsedSyntax, Present};
+use crate::{Absent, JsParser, ParseRecoveryTokenSet, ParsedSyntax, Present};
 use biome_js_syntax::JsSyntaxKind::TS_TYPE_ANNOTATION;
 use biome_js_syntax::T;
 use biome_js_syntax::{JsSyntaxKind::*, *};
@@ -230,9 +230,9 @@ impl ParseSeparatedList for TsTypeParameterList {
     }
 
     fn recover(&mut self, p: &mut JsParser, parsed_element: ParsedSyntax) -> RecoveryResult {
-        parsed_element.or_recover(
+        parsed_element.or_recover_with_token_set(
             p,
-            &ParseRecovery::new(
+            &ParseRecoveryTokenSet::new(
                 TS_BOGUS_TYPE,
                 token_set![T![>], T![,], T![ident], T![yield], T![await]],
             )
@@ -1185,9 +1185,9 @@ impl ParseNodeList for TypeMembers {
     }
 
     fn recover(&mut self, p: &mut JsParser, member: ParsedSyntax) -> RecoveryResult {
-        member.or_recover(
+        member.or_recover_with_token_set(
             p,
-            &ParseRecovery::new(JS_BOGUS, token_set![T!['}'], T![,], T![;]])
+            &ParseRecoveryTokenSet::new(JS_BOGUS, token_set![T!['}'], T![,], T![;]])
                 .enable_recovery_on_line_break(),
             expected_property_or_signature,
         )
@@ -1463,9 +1463,9 @@ impl ParseSeparatedList for TsTupleTypeElementList {
     }
 
     fn recover(&mut self, p: &mut JsParser, parsed_element: ParsedSyntax) -> RecoveryResult {
-        parsed_element.or_recover(
+        parsed_element.or_recover_with_token_set(
             p,
-            &ParseRecovery::new(
+            &ParseRecoveryTokenSet::new(
                 TS_BOGUS_TYPE,
                 token_set![
                     T![']'],
@@ -2109,9 +2109,9 @@ impl ParseSeparatedList for TypeArgumentsList {
             // The parser shouldn't perform error recovery in that case and simply bail out of parsing
             RecoveryResult::Err(RecoveryError::AlreadyRecovered)
         } else {
-            parsed_element.or_recover(
+            parsed_element.or_recover_with_token_set(
                 p,
-                &ParseRecovery::new(
+                &ParseRecoveryTokenSet::new(
                     TS_BOGUS_TYPE,
                     token_set![T![>], T![,], T![ident], T![yield], T![await]],
                 )

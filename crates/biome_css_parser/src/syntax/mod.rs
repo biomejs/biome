@@ -2,22 +2,24 @@ mod at_rule;
 mod blocks;
 mod css_dimension;
 mod parse_error;
+mod property;
 mod selector;
 
 use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
-use crate::syntax::at_rule::{at_at_rule, parse_at_rule};
+use crate::syntax::at_rule::{is_at_at_rule, parse_at_rule};
 use crate::syntax::blocks::parse_or_recover_declaration_list_block;
 use crate::syntax::css_dimension::{is_at_any_dimension, parse_any_dimension};
 use crate::syntax::parse_error::expected_any_rule;
 use crate::syntax::parse_error::expected_expression;
 use crate::syntax::parse_error::expected_identifier;
-use crate::syntax::selector::CssSelectorList;
-use crate::syntax::selector::{is_at_selector, CssSubSelectorList};
+use crate::syntax::property::parse_any_property;
+use crate::syntax::selector::is_at_selector;
+use crate::syntax::selector::SelectorList;
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
-use biome_parser::parse_recovery::{ParseRecovery, RecoveryResult};
+use biome_parser::parse_recovery::{ParseRecovery, ParseRecoveryTokenSet, RecoveryResult};
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::{token_set, Parser, TokenSet};
@@ -43,31 +45,40 @@ pub(crate) fn parse_root(p: &mut CssParser) {
     let m = p.start();
     p.eat(UNICODE_BOM);
 
-    CssRuleList::new(EOF).parse_list(p);
+    RuleList::new(EOF).parse_list(p);
 
     m.complete(p, CSS_ROOT);
 }
 
-struct CssRuleList {
+struct RuleList {
     end_kind: CssSyntaxKind,
 }
 
-impl CssRuleList {
+impl RuleList {
     fn new(end_kind: CssSyntaxKind) -> Self {
         Self { end_kind }
     }
 }
 
-// TODO: better recovery set. may be we need to pass function instead of token set
-const CSS_RULE_LIST_RECOVERY_SET: TokenSet<CssSyntaxKind> =
-    token_set!(T![@], T![&], T![|], T![*], T![ident]).union(CssSubSelectorList::START_SET);
-impl ParseNodeList for CssRuleList {
+struct RuleListParseRecovery;
+
+impl ParseRecovery for RuleListParseRecovery {
+    type Kind = CssSyntaxKind;
+    type Parser<'source> = CssParser<'source>;
+    const RECOVERED_KIND: Self::Kind = CSS_BOGUS_RULE;
+
+    fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
+        is_at_at_rule(p) || is_at_rule(p)
+    }
+}
+
+impl ParseNodeList for RuleList {
     type Kind = CssSyntaxKind;
     type Parser<'source> = CssParser<'source>;
     const LIST_KIND: Self::Kind = CSS_RULE_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        if at_at_rule(p) {
+        if is_at_at_rule(p) {
             parse_at_rule(p)
         } else if is_at_rule(p) {
             parse_rule(p)
@@ -85,11 +96,7 @@ impl ParseNodeList for CssRuleList {
         p: &mut Self::Parser<'_>,
         parsed_element: ParsedSyntax,
     ) -> RecoveryResult {
-        parsed_element.or_recover(
-            p,
-            &ParseRecovery::new(CSS_BOGUS_RULE, CSS_RULE_LIST_RECOVERY_SET),
-            expected_any_rule,
-        )
+        parsed_element.or_recover(p, &RuleListParseRecovery, expected_any_rule)
     }
 }
 
@@ -106,7 +113,7 @@ pub(crate) fn parse_rule(p: &mut CssParser) -> ParsedSyntax {
 
     let m = p.start();
 
-    CssSelectorList::default().parse_list(p);
+    SelectorList::default().parse_list(p);
 
     let kind = if parse_or_recover_declaration_list_block(p).is_ok() {
         CSS_RULE
@@ -117,9 +124,9 @@ pub(crate) fn parse_rule(p: &mut CssParser) -> ParsedSyntax {
     Present(m.complete(p, kind))
 }
 
-pub(crate) struct CssDeclarationList;
+pub(crate) struct DeclarationList;
 
-impl ParseSeparatedList for CssDeclarationList {
+impl ParseSeparatedList for DeclarationList {
     type Kind = CssSyntaxKind;
     type Parser<'source> = CssParser<'source>;
     const LIST_KIND: Self::Kind = CSS_DECLARATION_LIST;
@@ -137,9 +144,9 @@ impl ParseSeparatedList for CssDeclarationList {
         p: &mut Self::Parser<'_>,
         parsed_element: ParsedSyntax,
     ) -> RecoveryResult {
-        parsed_element.or_recover(
+        parsed_element.or_recover_with_token_set(
             p,
-            &ParseRecovery::new(CSS_BOGUS, token_set!(T!['}'])),
+            &ParseRecoveryTokenSet::new(CSS_BOGUS, token_set!(T!['}'])),
             expected_declaration_item,
         )
     }
@@ -153,45 +160,16 @@ impl ParseSeparatedList for CssDeclarationList {
     }
 }
 
-struct ListOfComponentValues;
-impl ParseNodeList for ListOfComponentValues {
-    type Kind = CssSyntaxKind;
-    type Parser<'source> = CssParser<'source>;
-    const LIST_KIND: Self::Kind = CSS_COMPONENT_VALUE_LIST;
-
-    fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        parse_any_value(p)
-    }
-
-    fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        !is_at_any_value(p)
-    }
-
-    fn recover(
-        &mut self,
-        p: &mut Self::Parser<'_>,
-        parsed_element: ParsedSyntax,
-    ) -> RecoveryResult {
-        parsed_element.or_recover(
-            p,
-            &ParseRecovery::new(CSS_BOGUS_COMPONENT_VALUE, token_set!(T!['}'], T![;])),
-            expected_component_value,
-        )
-    }
-}
 #[inline]
 pub(crate) fn parse_declaration(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_identifier(p) {
         return Absent;
     }
     let m = p.start();
-    parse_regular_identifier(p).ok();
 
-    p.expect(T![:]);
-
-    ListOfComponentValues.parse_list(p);
-
+    parse_any_property(p).ok();
     parse_declaration_important(p).ok();
+
     Present(m.complete(p, CSS_DECLARATION))
 }
 
@@ -280,9 +258,9 @@ pub(crate) fn is_at_any_function(p: &mut CssParser) -> bool {
     is_at_identifier(p) && p.nth_at(1, T!['('])
 }
 
-pub(crate) struct CssParameterList;
+pub(crate) struct ParameterList;
 
-impl ParseSeparatedList for CssParameterList {
+impl ParseSeparatedList for ParameterList {
     type Kind = CssSyntaxKind;
     type Parser<'source> = CssParser<'source>;
     const LIST_KIND: Self::Kind = CSS_PARAMETER_LIST;
@@ -300,9 +278,9 @@ impl ParseSeparatedList for CssParameterList {
         p: &mut Self::Parser<'_>,
         parsed_element: ParsedSyntax,
     ) -> RecoveryResult {
-        parsed_element.or_recover(
+        parsed_element.or_recover_with_token_set(
             p,
-            &ParseRecovery::new(CSS_BOGUS_PARAMETER, token_set!(T![,], T![')'])),
+            &ParseRecoveryTokenSet::new(CSS_BOGUS_PARAMETER, token_set!(T![,], T![')'])),
             expected_declaration_item,
         )
     }
@@ -356,13 +334,40 @@ pub(crate) fn parse_any_expression(p: &mut CssParser) -> ParsedSyntax {
     param
 }
 
+struct CssComponentValueList;
+impl ParseNodeList for CssComponentValueList {
+    type Kind = CssSyntaxKind;
+    type Parser<'source> = CssParser<'source>;
+    const LIST_KIND: Self::Kind = CSS_COMPONENT_VALUE_LIST;
+
+    fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
+        parse_any_value(p)
+    }
+
+    fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
+        !is_at_any_value(p)
+    }
+
+    fn recover(
+        &mut self,
+        p: &mut Self::Parser<'_>,
+        parsed_element: ParsedSyntax,
+    ) -> RecoveryResult {
+        parsed_element.or_recover_with_token_set(
+            p,
+            &ParseRecoveryTokenSet::new(CSS_BOGUS, token_set!(T!['}'], T![;])),
+            expected_component_value,
+        )
+    }
+}
+
 #[inline]
 pub(crate) fn parse_list_of_component_values_expression(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_any_value(p) {
         return Absent;
     }
     let m = p.start();
-    ListOfComponentValues.parse_list(p);
+    CssComponentValueList.parse_list(p);
     Present(m.complete(p, CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION))
 }
 
@@ -406,7 +411,7 @@ fn parse_simple_function(p: &mut CssParser) -> ParsedSyntax {
     let simple_fn = p.start();
     parse_regular_identifier(p).or_add_diagnostic(p, expected_identifier);
     p.expect(T!['(']);
-    CssParameterList.parse_list(p);
+    ParameterList.parse_list(p);
     p.expect(T![')']);
     Present(simple_fn.complete(p, CSS_SIMPLE_FUNCTION))
 }
@@ -595,4 +600,87 @@ pub(crate) fn parse_string(p: &mut CssParser) -> ParsedSyntax {
 
 fn is_at_string(p: &mut CssParser) -> bool {
     p.at(CSS_STRING_LITERAL)
+}
+
+/// Attempt to parse some input with the given parsing function. If parsing
+/// succeeds, `Ok` is returned with the result of the parse and the state is
+/// preserved. If parsing fails, this function rewinds the parser back to
+/// where it was before attempting the parse and the `Err` value is returned.
+#[allow(dead_code)] // TODO: Remove this allow once it's actually used
+pub(crate) fn try_parse<T, E>(
+    p: &mut CssParser,
+    func: impl FnOnce(&mut CssParser) -> Result<T, E>,
+) -> Result<T, E> {
+    let checkpoint = p.checkpoint();
+    let old_speculative_parsing = std::mem::replace(&mut p.state_mut().speculative_parsing, true);
+
+    let res = func(p);
+    p.state_mut().speculative_parsing = old_speculative_parsing;
+
+    if res.is_err() {
+        p.rewind(checkpoint);
+    }
+
+    res
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::{parser::CssParser, CssParserOptions};
+    use biome_css_syntax::{CssSyntaxKind, T};
+    use biome_parser::prelude::ParsedSyntax::{Absent, Present};
+    use biome_parser::Parser;
+
+    use super::{parse_regular_identifier, parse_regular_number, try_parse};
+
+    #[test]
+    fn try_parse_rewinds_to_checkpoint() {
+        let mut p = CssParser::new("width: blue;", CssParserOptions::default());
+
+        let pre_try_range = p.cur_range();
+        let result = try_parse(&mut p, |p| {
+            // advance the parser within the attempt
+            // parse `width`
+            parse_regular_identifier(p).ok();
+            // parse `:`
+            p.expect(T![:]);
+
+            // attempt to parse a number, but fail because the input has `blue`.
+            match parse_regular_number(p) {
+                Present(marker) => Ok(Present(marker)),
+                Absent => Err(()),
+            }
+        });
+
+        assert!(result.is_err());
+        // The parser should've rewound back to the start.
+        assert_eq!(p.cur_range(), pre_try_range);
+        assert_eq!(p.cur_text(), "width");
+    }
+
+    #[test]
+    fn try_parse_preserves_position_on_success() {
+        let mut p = CssParser::new("width: 100;", CssParserOptions::default());
+
+        let pre_try_range = p.cur_range();
+        let result = try_parse(&mut p, |p| {
+            // advance the parser within the attempt
+            // parse `width`
+            parse_regular_identifier(p).ok();
+            // parse `:`
+            p.expect(T![:]);
+
+            // attempt to parse a number, and succeed because the input has `100`.
+            match parse_regular_number(p) {
+                Present(marker) => Ok(Present(marker)),
+                Absent => Err(()),
+            }
+        });
+
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap().kind(&p), Some(CssSyntaxKind::CSS_NUMBER));
+        // The parser should not have rewound and is now at the semicolon
+        assert_ne!(p.cur_range(), pre_try_range);
+        assert_eq!(p.cur_text(), ";");
+    }
 }

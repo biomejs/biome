@@ -17,13 +17,13 @@ impl SyntaxFactory for CssSyntaxFactory {
             CSS_BOGUS
             | CSS_BOGUS_AT_RULE
             | CSS_BOGUS_BLOCK
-            | CSS_BOGUS_COMPONENT_VALUE
             | CSS_BOGUS_DECLARATION_ITEM
             | CSS_BOGUS_KEYFRAMES_ITEM
             | CSS_BOGUS_LAYER
             | CSS_BOGUS_MEDIA_QUERY
             | CSS_BOGUS_PAGE_SELECTOR_PSEUDO
             | CSS_BOGUS_PARAMETER
+            | CSS_BOGUS_PROPERTY
             | CSS_BOGUS_PSEUDO_CLASS
             | CSS_BOGUS_PSEUDO_ELEMENT
             | CSS_BOGUS_RULE
@@ -833,24 +833,10 @@ impl SyntaxFactory for CssSyntaxFactory {
             }
             CSS_DECLARATION => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
+                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element {
-                    if AnyCssDeclarationName::can_cast(element.kind()) {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element {
-                    if element.kind() == T ! [:] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element {
-                    if CssComponentValueList::can_cast(element.kind()) {
+                    if AnyCssProperty::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -1047,6 +1033,58 @@ impl SyntaxFactory for CssSyntaxFactory {
                     );
                 }
                 slots.into_node(CSS_FONT_PALETTE_VALUES_AT_RULE, children)
+            }
+            CSS_GENERIC_DELIMITER => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element {
+                    if matches!(element.kind(), T ! [,] | T ! [/]) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_GENERIC_DELIMITER.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_GENERIC_DELIMITER, children)
+            }
+            CSS_GENERIC_PROPERTY => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element {
+                    if AnyCssDeclarationName::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if element.kind() == T ! [:] {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if CssGenericComponentValueList::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_GENERIC_PROPERTY.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_GENERIC_PROPERTY, children)
             }
             CSS_ID_SELECTOR => {
                 let mut elements = (&children).into_iter();
@@ -1919,38 +1957,12 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.into_node(CSS_PARENTHESIZED_EXPRESSION, children)
             }
-            CSS_PERCENT_DIMENSION => {
-                let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
-                let mut current_element = elements.next();
-                if let Some(element) = &current_element {
-                    if CssNumber::can_cast(element.kind()) {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element {
-                    if element.kind() == T ! [%] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
-                }
-                slots.next_slot();
-                if current_element.is_some() {
-                    return RawSyntaxNode::new(
-                        CSS_PERCENT_DIMENSION.to_bogus(),
-                        children.into_iter().map(Some),
-                    );
-                }
-                slots.into_node(CSS_PERCENT_DIMENSION, children)
-            }
             CSS_PERCENTAGE => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element {
-                    if CssNumber::can_cast(element.kind()) {
+                    if element.kind() == CSS_NUMBER_LITERAL {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -2834,14 +2846,14 @@ impl SyntaxFactory for CssSyntaxFactory {
                 let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element {
-                    if CssNumber::can_cast(element.kind()) {
+                    if element.kind() == CSS_NUMBER_LITERAL {
                         slots.mark_present();
                         current_element = elements.next();
                     }
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if CssIdentifier::can_cast(element.kind()) {
+                    if element.kind() == IDENT {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -3472,6 +3484,32 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.into_node(CSS_UNIVERSAL_SELECTOR, children)
             }
+            CSS_UNKNOWN_DIMENSION => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element {
+                    if element.kind() == CSS_NUMBER_LITERAL {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if element.kind() == IDENT {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_UNKNOWN_DIMENSION.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_UNKNOWN_DIMENSION, children)
+            }
             CSS_URL_FUNCTION => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
@@ -3550,6 +3588,9 @@ impl SyntaxFactory for CssSyntaxFactory {
             ),
             CSS_DECLARATION_OR_AT_RULE_LIST => {
                 Self::make_node_list_syntax(kind, children, AnyCssDeclarationOrAtRule::can_cast)
+            }
+            CSS_GENERIC_COMPONENT_VALUE_LIST => {
+                Self::make_node_list_syntax(kind, children, AnyCssGenericComponentValue::can_cast)
             }
             CSS_KEYFRAMES_ITEM_LIST => {
                 Self::make_node_list_syntax(kind, children, AnyCssKeyframesItem::can_cast)

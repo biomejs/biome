@@ -773,7 +773,25 @@ impl<'src> CssLexer<'src> {
             }
         }
 
-        CSS_NUMBER_LITERAL
+        // A Number immediately followed by an identifier is considered a single
+        // <dimension> token according to the spec: https://www.w3.org/TR/css-values-4/#dimensions.
+        // Spaces are not allowed, but by default this lexer will skip over
+        // whitespace tokens, making it difficult to determine on the next token
+        // if it is actually a dimension unit or a separated identifier. So, if
+        // the next characters constitute an identifier after parsing a number,
+        // this special CSS_DIMENSION_VALUE token will indicate to the parser
+        // that it is part of a dimension and the next token can safely be
+        // consumed as the unit.
+        //
+        // The parser will re-cast these tokens as CSS_NUMBER_LITERALs when
+        // creating the Dimension node to hide this internal detail.
+        if matches!(self.current_byte(), Some(b'%')) {
+            CSS_PERCENTAGE_VALUE
+        } else if self.is_ident_start() {
+            CSS_DIMENSION_VALUE
+        } else {
+            CSS_NUMBER_LITERAL
+        }
     }
 
     fn consume_number_sequence(&mut self) {
@@ -1030,19 +1048,11 @@ impl<'src> CssLexer<'src> {
                 self.advance(1);
 
                 match self.current_byte() {
-                    Some(c) if c.is_ascii_hexdigit() => {
-                        let hex = self.consume_escape_sequence(c);
-
-                        if hex == REPLACEMENT_CHARACTER {
-                            let diagnostic = ParseDiagnostic::new(
-                                "Invalid escape sequence",
-                                escape_start..self.text_position(),
-                            );
-                            self.diagnostics.push(diagnostic);
-                        }
-
-                        hex
-                    }
+                    // Any valid escape sequence can be used as an identifier,
+                    // even if it becomes the REPLACEMENT CHARACTER (like `\0`).
+                    // This is important to handle for cases like the "media
+                    // min-width hack": http://browserbu.gs/css-hacks/media-min-width-0-backslash-0/.
+                    Some(c) if c.is_ascii_hexdigit() => self.consume_escape_sequence(c),
 
                     Some(_) => {
                         let chr = self.current_char_unchecked();

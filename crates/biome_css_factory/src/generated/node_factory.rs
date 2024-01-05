@@ -423,22 +423,14 @@ pub fn css_dashed_identifier(value_token: SyntaxToken) -> CssDashedIdentifier {
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
-pub fn css_declaration(
-    name: AnyCssDeclarationName,
-    colon_token: SyntaxToken,
-    value: CssComponentValueList,
-) -> CssDeclarationBuilder {
+pub fn css_declaration(property: AnyCssProperty) -> CssDeclarationBuilder {
     CssDeclarationBuilder {
-        name,
-        colon_token,
-        value,
+        property,
         important: None,
     }
 }
 pub struct CssDeclarationBuilder {
-    name: AnyCssDeclarationName,
-    colon_token: SyntaxToken,
-    value: CssComponentValueList,
+    property: AnyCssProperty,
     important: Option<CssDeclarationImportant>,
 }
 impl CssDeclarationBuilder {
@@ -450,9 +442,7 @@ impl CssDeclarationBuilder {
         CssDeclaration::unwrap_cast(SyntaxNode::new_detached(
             CssSyntaxKind::CSS_DECLARATION,
             [
-                Some(SyntaxElement::Node(self.name.into_syntax())),
-                Some(SyntaxElement::Token(self.colon_token)),
-                Some(SyntaxElement::Node(self.value.into_syntax())),
+                Some(SyntaxElement::Node(self.property.into_syntax())),
                 self.important
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
             ],
@@ -534,6 +524,26 @@ pub fn css_font_palette_values_at_rule(
             Some(SyntaxElement::Token(font_palette_values_token)),
             Some(SyntaxElement::Node(name.into_syntax())),
             Some(SyntaxElement::Node(block.into_syntax())),
+        ],
+    ))
+}
+pub fn css_generic_delimiter(value_token: SyntaxToken) -> CssGenericDelimiter {
+    CssGenericDelimiter::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_GENERIC_DELIMITER,
+        [Some(SyntaxElement::Token(value_token))],
+    ))
+}
+pub fn css_generic_property(
+    name: AnyCssDeclarationName,
+    colon_token: SyntaxToken,
+    value: CssGenericComponentValueList,
+) -> CssGenericProperty {
+    CssGenericProperty::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_GENERIC_PROPERTY,
+        [
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Token(colon_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
         ],
     ))
 }
@@ -944,21 +954,12 @@ impl CssParenthesizedExpressionBuilder {
         ))
     }
 }
-pub fn css_percent_dimension(value: CssNumber, unit_token: SyntaxToken) -> CssPercentDimension {
-    CssPercentDimension::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_PERCENT_DIMENSION,
-        [
-            Some(SyntaxElement::Node(value.into_syntax())),
-            Some(SyntaxElement::Token(unit_token)),
-        ],
-    ))
-}
-pub fn css_percentage(value: CssNumber, reminder_token: SyntaxToken) -> CssPercentage {
+pub fn css_percentage(value_token: SyntaxToken, percent_token: SyntaxToken) -> CssPercentage {
     CssPercentage::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_PERCENTAGE,
         [
-            Some(SyntaxElement::Node(value.into_syntax())),
-            Some(SyntaxElement::Token(reminder_token)),
+            Some(SyntaxElement::Token(value_token)),
+            Some(SyntaxElement::Token(percent_token)),
         ],
     ))
 }
@@ -1358,12 +1359,15 @@ pub fn css_ratio(
         ],
     ))
 }
-pub fn css_regular_dimension(value: CssNumber, unit: CssIdentifier) -> CssRegularDimension {
+pub fn css_regular_dimension(
+    value_token: SyntaxToken,
+    unit_token: SyntaxToken,
+) -> CssRegularDimension {
     CssRegularDimension::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_REGULAR_DIMENSION,
         [
-            Some(SyntaxElement::Node(value.into_syntax())),
-            Some(SyntaxElement::Node(unit.into_syntax())),
+            Some(SyntaxElement::Token(value_token)),
+            Some(SyntaxElement::Token(unit_token)),
         ],
     ))
 }
@@ -1697,6 +1701,18 @@ impl CssUniversalSelectorBuilder {
         ))
     }
 }
+pub fn css_unknown_dimension(
+    value_token: SyntaxToken,
+    unit_token: SyntaxToken,
+) -> CssUnknownDimension {
+    CssUnknownDimension::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_UNKNOWN_DIMENSION,
+        [
+            Some(SyntaxElement::Token(value_token)),
+            Some(SyntaxElement::Token(unit_token)),
+        ],
+    ))
+}
 pub fn css_url_function(
     url_token: SyntaxToken,
     l_paren_token: SyntaxToken,
@@ -1800,6 +1816,18 @@ where
 {
     CssDeclarationOrAtRuleList::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_DECLARATION_OR_AT_RULE_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
+    ))
+}
+pub fn css_generic_component_value_list<I>(items: I) -> CssGenericComponentValueList
+where
+    I: IntoIterator<Item = AnyCssGenericComponentValue>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssGenericComponentValueList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_GENERIC_COMPONENT_VALUE_LIST,
         items
             .into_iter()
             .map(|item| Some(item.into_syntax().into())),
@@ -2081,16 +2109,6 @@ where
         slots,
     ))
 }
-pub fn css_bogus_component_value<I>(slots: I) -> CssBogusComponentValue
-where
-    I: IntoIterator<Item = Option<SyntaxElement>>,
-    I::IntoIter: ExactSizeIterator,
-{
-    CssBogusComponentValue::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_BOGUS_COMPONENT_VALUE,
-        slots,
-    ))
-}
 pub fn css_bogus_declaration_item<I>(slots: I) -> CssBogusDeclarationItem
 where
     I: IntoIterator<Item = Option<SyntaxElement>>,
@@ -2148,6 +2166,16 @@ where
 {
     CssBogusParameter::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_BOGUS_PARAMETER,
+        slots,
+    ))
+}
+pub fn css_bogus_property<I>(slots: I) -> CssBogusProperty
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssBogusProperty::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_BOGUS_PROPERTY,
         slots,
     ))
 }

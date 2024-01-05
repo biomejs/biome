@@ -775,6 +775,9 @@
 				"lineWidth": {
 					"description": "What's the max width of a line applied to CSS (and its super languages) files. Defaults to 80.",
 					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
+				},
+				"quoteStyle": {
+					"anyOf": [{ "$ref": "#/definitions/QuoteStyle" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
@@ -788,6 +791,11 @@
 					"type": ["boolean", "null"]
 				}
 			},
+			"additionalProperties": false
+		},
+		"DeprecatedHooksOptions": {
+			"description": "Options for the `useHookAtTopLevel` rule have been deprecated, since we now use the React hook naming convention to determine whether a function is a hook.",
+			"type": "object",
 			"additionalProperties": false
 		},
 		"EnumMemberCase": {
@@ -822,6 +830,11 @@
 				},
 				{
 					"description": "PascalCase",
+					"type": "string",
+					"enum": ["PascalCase"]
+				},
+				{
+					"description": "snake_case",
 					"type": "string",
 					"enum": ["snake_case"]
 				}
@@ -947,7 +960,7 @@
 			"additionalProperties": false
 		},
 		"HooksOptions": {
-			"description": "Options for the rule `useExhaustiveDependencies` and `useHookAtTopLevel`",
+			"description": "Options for the rule `useExhaustiveDependencies`",
 			"type": "object",
 			"required": ["hooks"],
 			"properties": {
@@ -1254,6 +1267,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noGlobalEval": {
+					"description": "Disallow the use of global eval().",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noImplicitAnyLet": {
 					"description": "Disallow use of implicit any type on variable declarations.",
 					"anyOf": [
@@ -1276,7 +1296,7 @@
 					]
 				},
 				"noNodejsModules": {
-					"description": "Forbid the use of Node.js builtin modules. Can be useful for client-side web projects that do not have access to those modules.",
+					"description": "Forbid the use of Node.js builtin modules.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -1363,15 +1383,22 @@
 						{ "type": "null" }
 					]
 				},
-				"useNodeImportProtocol": {
+				"useImportType": {
+					"description": "Promotes the use of import type for types.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useNodejsImportProtocol": {
 					"description": "Enforces using the node: protocol for Node.js builtin modules.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
 				},
-				"useNumberProperties": {
-					"description": "Use Number properties instead of global ones.",
+				"useNumberNamespace": {
+					"description": "Use the Number properties instead of global ones.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -1588,8 +1615,12 @@
 					"allOf": [{ "$ref": "#/definitions/FilenamingConventionOptions" }]
 				},
 				{
-					"description": "Options for `useExhaustiveDependencies` and `useHookAtTopLevel` rule",
+					"description": "Options for `useExhaustiveDependencies` rule",
 					"allOf": [{ "$ref": "#/definitions/HooksOptions" }]
+				},
+				{
+					"description": "Deprecated options for `useHookAtTopLevel` rule",
+					"allOf": [{ "$ref": "#/definitions/DeprecatedHooksOptions" }]
 				},
 				{
 					"description": "Options for `useNamingConvention` rule",
@@ -1841,6 +1872,13 @@
 				},
 				"useCollapsedElseIf": {
 					"description": "Enforce using else if instead of nested if in else clauses.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useConsistentArrayType": {
+					"description": "Require consistently using either T[] or Array<T>",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

@@ -155,7 +155,7 @@ declare_rule! {
     /// }
     /// ```
     ///
-    /// Given the previous example, your hooks be used like this:
+    /// Given the previous example, your hooks can be used like this:
     ///
     /// ```js
     /// function Foo() {
@@ -217,7 +217,7 @@ impl Default for ReactExtensiveDependenciesOptions {
     }
 }
 
-/// Options for the rule `useExhaustiveDependencies` and `useHookAtTopLevel`
+/// Options for the rule `useExhaustiveDependencies`
 #[derive(Default, Deserialize, Serialize, Eq, PartialEq, Debug, Clone)]
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]

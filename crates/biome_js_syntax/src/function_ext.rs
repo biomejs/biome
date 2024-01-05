@@ -1,6 +1,6 @@
 use crate::{
-    AnyJsFunction, AnyJsFunctionBody, JsMethodClassMember, JsMethodObjectMember, JsStatementList,
-    JsSyntaxToken,
+    AnyJsCallArgument, AnyJsFunction, AnyJsFunctionBody, JsCallArguments, JsMethodClassMember,
+    JsMethodObjectMember, JsStatementList, JsSyntaxToken,
 };
 use biome_rowan::{declare_node_union, AstNode, SyntaxResult, TextRange};
 
@@ -99,5 +99,35 @@ impl AnyFunctionLike {
                 method_obj_member.body().ok()?.statements()
             }
         })
+    }
+}
+
+impl JsCallArguments {
+    /// Get [AnyJsCallArgument] by its index inside the [JsCallExpression] argument list.
+    ///
+    /// Each index inside `indices` should be unique qnd in-order.
+    ///
+    /// Supports a maximum of 16 indices to avoid stack overflow.
+    pub fn get_arguments_by_index<const N: usize>(
+        &self,
+        indices: [usize; N],
+    ) -> [Option<AnyJsCallArgument>; N] {
+        debug_assert!(N <= 16);
+        // assert there are no duplicates and they are in-order
+        debug_assert!(indices.windows(2).all(|vs| vs[0] < vs[1]));
+
+        const INIT: Option<AnyJsCallArgument> = None;
+        let mut result = [INIT; N];
+        let mut next = 0;
+        for (i, arg) in self.args().into_iter().flatten().enumerate() {
+            if i == indices[next] {
+                result[next] = Some(arg);
+                next += 1;
+                if next == N {
+                    break;
+                }
+            }
+        }
+        result
     }
 }

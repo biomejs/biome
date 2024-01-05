@@ -7,16 +7,11 @@ pub(crate) struct FormatCssDeclaration;
 impl FormatNodeRule<CssDeclaration> for FormatCssDeclaration {
     fn fmt_fields(&self, node: &CssDeclaration, f: &mut CssFormatter) -> FormatResult<()> {
         let CssDeclarationFields {
-            name,
-            colon_token,
-            value,
+            property,
             important,
         } = node.as_fields();
 
-        write!(
-            f,
-            [name.format(), colon_token.format(), space(), value.format()]
-        )?;
+        write!(f, [property.format()])?;
 
         if important.is_some() {
             write!(f, [space(), important.format()])?;

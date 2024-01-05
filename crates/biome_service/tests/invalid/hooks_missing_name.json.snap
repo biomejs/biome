@@ -21,6 +21,7 @@ hooks_missing_name.json:6:5 deserialize ━━━━━━━━━━━━━�
   - noDefaultExport
   - noDuplicateJsonKeys
   - noEmptyBlockStatements
+  - noGlobalEval
   - noImplicitAnyLet
   - noInvalidUseBeforeDeclaration
   - noMisleadingCharacterClass
@@ -36,8 +37,9 @@ hooks_missing_name.json:6:5 deserialize ━━━━━━━━━━━━━�
   - useForOf
   - useGroupedTypeImport
   - useImportRestrictions
-  - useNodeImportProtocol
-  - useNumberProperties
+  - useImportType
+  - useNodejsImportProtocol
+  - useNumberNamespace
   - useRegexLiterals
   - useShorthandFunctionType
   - useValidAriaRole

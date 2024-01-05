@@ -67,6 +67,16 @@ impl CssSyntaxKind {
     pub const fn is_non_contextual_keyword(self) -> bool {
         self.is_keyword() && !self.is_contextual_keyword()
     }
+
+    /// Returns true for all _known_ dimension units.
+    ///
+    /// Note that dimensions allow any identifier as the unit value, but only
+    /// these known units will be parsed as a `CssRegularDimension`. All others
+    /// will be parsed as `CssUnknownDimension` instead.
+    #[inline]
+    pub const fn is_known_dimension_unit(self) -> bool {
+        (self as u16) >= (EM_KW as u16) && (self as u16) <= (FR_KW as u16)
+    }
 }
 
 impl biome_rowan::SyntaxKind for CssSyntaxKind {
@@ -89,6 +99,7 @@ impl biome_rowan::SyntaxKind for CssSyntaxKind {
                 | CSS_BOGUS_PAGE_SELECTOR_PSEUDO
                 | CSS_BOGUS_LAYER
                 | CSS_BOGUS_SCOPE_RANGE
+                | CSS_BOGUS_PROPERTY
         )
     }
 
@@ -107,6 +118,8 @@ impl biome_rowan::SyntaxKind for CssSyntaxKind {
             kind if AnyCssPageSelectorPseudo::can_cast(*kind) => CSS_BOGUS_PAGE_SELECTOR_PSEUDO,
             kind if AnyCssLayer::can_cast(*kind) => CSS_BOGUS_LAYER,
             kind if AnyCssScopeRange::can_cast(*kind) => CSS_BOGUS_SCOPE_RANGE,
+            kind if AnyCssKeyframesItem::can_cast(*kind) => CSS_BOGUS_KEYFRAMES_ITEM,
+            kind if AnyCssProperty::can_cast(*kind) => CSS_BOGUS_PROPERTY,
 
             _ => CSS_BOGUS,
         }

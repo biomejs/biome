@@ -8,16 +8,16 @@ import {
 import Playground from "./Playground";
 import LoadingScreen from "./components/LoadingScreen";
 import {
-	ArrowParentheses,
-	IndentStyle,
-	LintRules,
+	type ArrowParentheses,
+	type IndentStyle,
+	type LintRules,
 	LoadingState,
 	type PlaygroundSettings,
 	type PlaygroundState,
-	QuoteProperties,
-	QuoteStyle,
-	Semicolons,
-	TrailingComma,
+	type QuoteProperties,
+	type QuoteStyle,
+	type Semicolons,
+	type TrailingComma,
 	defaultPlaygroundState,
 	emptyBiomeOutput,
 	emptyPrettierOutput,

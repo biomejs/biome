@@ -50,8 +50,8 @@ CssBogusKeyframesItem =  SyntaxElement*
 CssBogusRule =  SyntaxElement*
 CssBogusParameter = SyntaxElement*
 CssBogusDeclarationItem = SyntaxElement*
-CssBogusComponentValue = SyntaxElement*
 CssBogusMediaQuery =  SyntaxElement*
+CssBogusProperty =  SyntaxElement*
 
 CssRoot =
 	bom: 'UNICODE_BOM'?
@@ -445,10 +445,38 @@ CssRuleListBlock =
 CssDeclarationList = CssDeclaration (';' CssDeclaration)* ';'?
 
 CssDeclaration =
+	property: AnyCssProperty
+	important: CssDeclarationImportant?
+
+AnyCssProperty =
+	CssGenericProperty
+	| CssBogusProperty
+
+CssGenericProperty =
 	name: AnyCssDeclarationName
 	':'
-	value: CssComponentValueList
-	important: CssDeclarationImportant?
+	value: CssGenericComponentValueList
+
+// div {
+//	--bs-btn-focus-shadow-rgb: 33, 37, 41;
+//	                           ^^^^^^^^^^
+//  background: transparent center/1em auto no-repeat;
+//              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+// }
+CssGenericComponentValueList = AnyCssGenericComponentValue*
+
+AnyCssGenericComponentValue =
+	AnyCssValue
+	| CssGenericDelimiter
+
+// div {
+//	--bs-btn-focus-shadow-rgb: 33, 37, 41;
+//	                             ^   ^
+//  background: transparent center/1em auto no-repeat;
+//                                ^
+// }
+CssGenericDelimiter =
+	value: (',' | '/')
 
 CssComponentValueList = AnyCssValue*
 
@@ -1164,6 +1192,8 @@ CssScopeEdge =
 // AUXILIARY
 ///////////////
 
+// When adding values here, add them as `NodeConcept::Value` in the
+// `name_to_module` function in `src/formatter.rs`.
 AnyCssValue =
 	CssIdentifier
 	| CssCustomIdentifier
@@ -1176,19 +1206,39 @@ AnyCssValue =
 	| CssColor
 
 
+// https://drafts.csswg.org/css-syntax/#typedef-dimension-token
+//
+// Known, valid units like `px` or `vh` will be parsed as `CssRegularDimension`,
+// but the spec considers any identifier after the number to be the "unit".
+// These cases will instead be parsed into `CssUnknownDimension`.
+//
+// Dimensions and percentages are considered unique tokens in CSS, and so these
+// nodes just represent the tokens directly, rather than wrapping them in
+// `CssNumber` and `CssIdentifier`. This helps users easily distinguish between
+// things like `100`, `100px`, and `100%`, where they are all distinct, non-
+// overlapping types. If these instead used the number and identifier nodes, a
+// visitor would incidentally visit them even though they cannot be safely
+// operated on individually (i.e., the whole dimension must be treated as a
+// whole and not two individual pieces).
+
 // 10px
 // 100vh
 // 4rem
 // 1e-2
+// 0\0
+// 0Unknown
 AnyCssDimension =
-	CssRegularDimension | CssPercentage
+	CssRegularDimension | CssUnknownDimension | CssPercentage
 
 CssRegularDimension =
-	value: CssNumber
-	unit: CssIdentifier
-CssPercentDimension =
-	value: CssNumber
-	unit: '%'
+	value: 'css_number_literal'
+	unit: 'ident'
+CssUnknownDimension =
+	value: 'css_number_literal'
+	unit: 'ident'
+CssPercentage =
+	value: 'css_number_literal'
+	'%'
 
 // 3 / 2
 CssRatio =
@@ -1214,10 +1264,6 @@ CssUrlFunction = 'url' '(' AnyCssUrlValue? ')'
 AnyCssUrlValue =
 	CssUrlValueRaw
 	| CssString
-
-CssPercentage =
-	value: CssNumber
-	'%'
 
 CssParameterList = CssParameter (',' CssParameter)* ','?
 

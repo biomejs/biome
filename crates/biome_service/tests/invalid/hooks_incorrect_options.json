@@ -2,7 +2,7 @@
 	"$schema": "../../../../packages/@biomejs/biome/configuration_schema.json",
 	"linter": {
 		"rules": {
-			"nursery": {
+			"correctness": {
 				"useExhaustiveDependencies": {
 					"level": "error",
 					"options": {

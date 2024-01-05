@@ -52,3 +52,14 @@ type GenericFunction<T> = (arg: T) => T;
 
 // Function type with optional parameter
 type OptionalParamFunction = (arg?: string) => void;
+
+// If there are inner comments, they should be ignored
+interface Example2 {
+	// Inner comment
+	(): string; // Inner trailing comment
+}
+
+type G = {
+	// Inner comment
+	(): number // Inner trailing comment
+}

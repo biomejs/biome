@@ -1,0 +1,22 @@
+---
+source: crates/biome_service/tests/spec_tests.rs
+expression: css_formatter_quote_style.json
+---
+css_formatter_quote_style.json:4:27 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Found an unknown value `wrong`.
+  
+    2 │     "css": {
+    3 │         "formatter": {
+  > 4 │             "quoteStyle": "wrong"
+      │                           ^^^^^^^
+    5 │         }
+    6 │     }
+  
+  i Accepted values:
+  
+  - double
+  - single
+  
+
+

@@ -281,6 +281,10 @@ export default defineConfig({
 								es: "Integración Continua"
 							},
 						},
+						{
+							label: "Git Hooks",
+							link: "/recipes/git-hooks",
+						},
 					],
 				},
 				{

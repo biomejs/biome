@@ -234,7 +234,7 @@ Allows to specify custom hooks - from libraries or internal projects - that can 
 }
 ```
 
-Given the previous example, your hooks be used like this:
+Given the previous example, your hooks can be used like this:
 
 ```jsx
 function Foo() {

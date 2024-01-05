@@ -588,10 +588,13 @@ enum NodeConcept {
     Tag,
     Attribute,
 
-    // JSON / CSS
+    // JSON
     Value,
+
+    // CSS
     Pseudo,
     Selector,
+    Property,
 }
 
 impl NodeConcept {
@@ -615,6 +618,7 @@ impl NodeConcept {
             NodeConcept::Value => "value",
             NodeConcept::Pseudo => "pseudo",
             NodeConcept::Selector => "selectors",
+            NodeConcept::Property => "properties",
         }
     }
 }
@@ -738,9 +742,19 @@ fn name_to_module(kind: &NodeKind, in_name: &str, language: LanguageKind) -> Nod
             LanguageKind::Css => match name {
                 _ if name.ends_with("AtRule") => NodeConcept::Statement,
                 _ if name.ends_with("Selector") => NodeConcept::Selector,
-                _ if name.starts_with("Pseudo") => NodeConcept::Pseudo,
-                _ if matches!(name, "Number" | "Percentage" | "Ratio" | "String")
-                    || name.ends_with("Dimension") =>
+                _ if name.contains("Pseudo") => NodeConcept::Pseudo,
+                _ if name.ends_with("Property") => NodeConcept::Property,
+                _ if matches!(
+                    name,
+                    "Number"
+                        | "Percentage"
+                        | "Ratio"
+                        | "String"
+                        | "Color"
+                        | "Length"
+                        | "UrlValueRaw"
+                ) || name.ends_with("Dimension")
+                    || name.ends_with("Identifier") =>
                 {
                     NodeConcept::Value
                 }

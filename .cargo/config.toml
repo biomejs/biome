@@ -30,7 +30,7 @@ documentation = """
     --no-deps
 """
 format = "fmt --all --verbose"
-lint = "clippy --workspace --all-targets --verbose -- --deny warnings"
+lint = "clippy --workspace --all-targets -- --deny warnings"
 lintdoc = "run -p xtask_lintdoc --"
 
 [profile.release]

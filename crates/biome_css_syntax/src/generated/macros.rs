@@ -157,6 +157,14 @@ macro_rules! map_syntax_node {
                         unsafe { $crate::CssFontPaletteValuesAtRule::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_GENERIC_DELIMITER => {
+                    let $pattern = unsafe { $crate::CssGenericDelimiter::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_GENERIC_PROPERTY => {
+                    let $pattern = unsafe { $crate::CssGenericProperty::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_ID_SELECTOR => {
                     let $pattern = unsafe { $crate::CssIdSelector::new_unchecked(node) };
                     $body
@@ -288,10 +296,6 @@ macro_rules! map_syntax_node {
                 $crate::CssSyntaxKind::CSS_PARENTHESIZED_EXPRESSION => {
                     let $pattern =
                         unsafe { $crate::CssParenthesizedExpression::new_unchecked(node) };
-                    $body
-                }
-                $crate::CssSyntaxKind::CSS_PERCENT_DIMENSION => {
-                    let $pattern = unsafe { $crate::CssPercentDimension::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_PERCENTAGE => {
@@ -514,6 +518,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssUniversalSelector::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_UNKNOWN_DIMENSION => {
+                    let $pattern = unsafe { $crate::CssUnknownDimension::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_URL_FUNCTION => {
                     let $pattern = unsafe { $crate::CssUrlFunction::new_unchecked(node) };
                     $body
@@ -532,10 +540,6 @@ macro_rules! map_syntax_node {
                 }
                 $crate::CssSyntaxKind::CSS_BOGUS_BLOCK => {
                     let $pattern = unsafe { $crate::CssBogusBlock::new_unchecked(node) };
-                    $body
-                }
-                $crate::CssSyntaxKind::CSS_BOGUS_COMPONENT_VALUE => {
-                    let $pattern = unsafe { $crate::CssBogusComponentValue::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_BOGUS_DECLARATION_ITEM => {
@@ -561,6 +565,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::CssSyntaxKind::CSS_BOGUS_PARAMETER => {
                     let $pattern = unsafe { $crate::CssBogusParameter::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_BOGUS_PROPERTY => {
+                    let $pattern = unsafe { $crate::CssBogusProperty::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_BOGUS_PSEUDO_CLASS => {
@@ -602,6 +610,11 @@ macro_rules! map_syntax_node {
                 $crate::CssSyntaxKind::CSS_DECLARATION_OR_AT_RULE_LIST => {
                     let $pattern =
                         unsafe { $crate::CssDeclarationOrAtRuleList::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_GENERIC_COMPONENT_VALUE_LIST => {
+                    let $pattern =
+                        unsafe { $crate::CssGenericComponentValueList::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_KEYFRAMES_ITEM_LIST => {

@@ -69,8 +69,6 @@ impl DiagnosticTag {
     }
 }
 
-pub const MAXIMUM_DISPLAYABLE_DIAGNOSTICS: u16 = 200;
-
 /// Utility function for testing purpose. The function will print an [Error]
 /// to a string, which is then returned by the function.
 pub fn print_diagnostic_to_string(diagnostic: &Error) -> String {

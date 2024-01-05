@@ -1,8 +1,12 @@
 ---
-title: noThenProperty (since vnext)
+title: noThenProperty (not released)
 ---
 
 **Diagnostic Category: `lint/nursery/noThenProperty`**
+
+:::danger
+This rule hasn't been released yet.
+:::
 
 :::caution
 This rule is part of the [nursery](/linter/rules/#nursery) group.

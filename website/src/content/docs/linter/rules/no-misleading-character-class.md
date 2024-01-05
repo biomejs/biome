@@ -1,8 +1,12 @@
 ---
-title: noMisleadingCharacterClass (since vnext)
+title: noMisleadingCharacterClass (not released)
 ---
 
 **Diagnostic Category: `lint/nursery/noMisleadingCharacterClass`**
+
+:::danger
+This rule hasn't been released yet.
+:::
 
 :::caution
 This rule is part of the [nursery](/linter/rules/#nursery) group.

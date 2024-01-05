@@ -262,6 +262,7 @@ export interface CssFormatter {
 	 * What's the max width of a line applied to CSS (and its super languages) files. Defaults to 80.
 	 */
 	lineWidth?: LineWidth;
+	quoteStyle?: QuoteStyle;
 }
 /**
  * Options that changes how the CSS parser behaves
@@ -445,8 +446,8 @@ export interface OverridePattern {
 	organizeImports?: OverrideOrganizeImportsConfiguration;
 }
 export type VcsClientKind = "git";
-export type ArrowParentheses = "always" | "asNeeded";
 export type QuoteStyle = "double" | "single";
+export type ArrowParentheses = "always" | "asNeeded";
 export type QuoteProperties = "asNeeded" | "preserve";
 export type Semicolons = "always" | "asNeeded";
 /**
@@ -857,6 +858,10 @@ export interface Nursery {
 	 */
 	noEmptyBlockStatements?: RuleConfiguration;
 	/**
+	 * Disallow the use of global eval().
+	 */
+	noGlobalEval?: RuleConfiguration;
+	/**
 	 * Disallow use of implicit any type on variable declarations.
 	 */
 	noImplicitAnyLet?: RuleConfiguration;
@@ -869,7 +874,7 @@ export interface Nursery {
 	 */
 	noMisleadingCharacterClass?: RuleConfiguration;
 	/**
-	 * Forbid the use of Node.js builtin modules. Can be useful for client-side web projects that do not have access to those modules.
+	 * Forbid the use of Node.js builtin modules.
 	 */
 	noNodejsModules?: RuleConfiguration;
 	/**
@@ -921,13 +926,17 @@ export interface Nursery {
 	 */
 	useImportRestrictions?: RuleConfiguration;
 	/**
+	 * Promotes the use of import type for types.
+	 */
+	useImportType?: RuleConfiguration;
+	/**
 	 * Enforces using the node: protocol for Node.js builtin modules.
 	 */
-	useNodeImportProtocol?: RuleConfiguration;
+	useNodejsImportProtocol?: RuleConfiguration;
 	/**
-	 * Use Number properties instead of global ones.
+	 * Use the Number properties instead of global ones.
 	 */
-	useNumberProperties?: RuleConfiguration;
+	useNumberNamespace?: RuleConfiguration;
 	/**
 	 * Enforce the use of the regular expression literals instead of the RegExp constructor if possible.
 	 */
@@ -1063,6 +1072,10 @@ export interface Style {
 	 * Enforce using else if instead of nested if in else clauses.
 	 */
 	useCollapsedElseIf?: RuleConfiguration;
+	/**
+	 * Require consistently using either T[] or Array<T>
+	 */
+	useConsistentArrayType?: RuleConfiguration;
 	/**
 	 * Require const declarations for variables that are never reassigned after declared.
 	 */
@@ -1366,6 +1379,7 @@ export type PossibleOptions =
 	| ComplexityOptions
 	| FilenamingConventionOptions
 	| HooksOptions
+	| DeprecatedHooksOptions
 	| NamingConventionOptions
 	| RestrictedGlobalsOptions
 	| ValidAriaRoleOptions;
@@ -1392,7 +1406,7 @@ export interface FilenamingConventionOptions {
 	strictCase: boolean;
 }
 /**
- * Options for the rule `useExhaustiveDependencies` and `useHookAtTopLevel`
+ * Options for the rule `useExhaustiveDependencies`
  */
 export interface HooksOptions {
 	/**
@@ -1400,6 +1414,10 @@ export interface HooksOptions {
 	 */
 	hooks: Hooks[];
 }
+/**
+ * Options for the `useHookAtTopLevel` rule have been deprecated, since we now use the React hook naming convention to determine whether a function is a hook.
+ */
+export interface DeprecatedHooksOptions {}
 /**
  * Rule's options.
  */
@@ -1450,7 +1468,12 @@ export type EnumMemberCase = "PascalCase" | "CONSTANT_CASE" | "camelCase";
 /**
  * Supported cases for TypeScript `enum` member names.
  */
-export type FilenameCase = "camelCase" | "export" | "kebab-case" | "snake_case";
+export type FilenameCase =
+	| "camelCase"
+	| "export"
+	| "kebab-case"
+	| "PascalCase"
+	| "snake_case";
 export interface ProjectFeaturesParams {
 	manifest_path: RomePath;
 }
@@ -1628,6 +1651,7 @@ export type Category =
 	| "lint/nursery/noDefaultExport"
 	| "lint/nursery/noDuplicateJsonKeys"
 	| "lint/nursery/noEmptyBlockStatements"
+	| "lint/nursery/noGlobalEval"
 	| "lint/nursery/noImplicitAnyLet"
 	| "lint/nursery/noInvalidUseBeforeDeclaration"
 	| "lint/nursery/noMisleadingCharacterClass"
@@ -1645,8 +1669,9 @@ export type Category =
 	| "lint/nursery/useForOf"
 	| "lint/nursery/useGroupedTypeImport"
 	| "lint/nursery/useImportRestrictions"
-	| "lint/nursery/useNodeImportProtocol"
-	| "lint/nursery/useNumberProperties"
+	| "lint/nursery/useImportType"
+	| "lint/nursery/useNodejsImportProtocol"
+	| "lint/nursery/useNumberNamespace"
 	| "lint/nursery/useRegexLiterals"
 	| "lint/nursery/useShorthandFunctionType"
 	| "lint/nursery/useValidAriaRole"
@@ -1672,6 +1697,7 @@ export type Category =
 	| "lint/style/useBlockStatements"
 	| "lint/style/useCollapsedElseIf"
 	| "lint/style/useConst"
+	| "lint/style/useConsistentArrayType"
 	| "lint/style/useDefaultParameterLast"
 	| "lint/style/useEnumInitializers"
 	| "lint/style/useExponentiationOperator"

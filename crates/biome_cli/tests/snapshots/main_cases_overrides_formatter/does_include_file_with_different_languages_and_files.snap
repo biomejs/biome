@@ -22,13 +22,6 @@ expression: content
           "lineWidth": 20,
           "indentWidth": 4
         }
-      },
-      "css": {
-        "formatter": {
-          "indentStyle": "space",
-          "lineWidth": 30,
-          "indentWidth": 3
-        }
       }
     },
     {
@@ -39,13 +32,6 @@ expression: content
           "indentStyle": "space",
           "lineWidth": 20,
           "indentWidth": 4
-        }
-      },
-      "css": {
-        "formatter": {
-          "indentStyle": "space",
-          "lineWidth": 30,
-          "indentWidth": 3
         }
       }
     }

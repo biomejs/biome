@@ -33,7 +33,7 @@ fn run_invalid_configurations(input: &'static str, _: &str, _: &str, _: &str) {
     };
 
     assert!(
-        result.has_errors(),
+        result.has_errors() || result.has_warnings(),
         "This test should have diagnostics, but it doesn't have any"
     );
 

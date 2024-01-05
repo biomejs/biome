@@ -37,6 +37,16 @@ Biome now scores 97% compatibility with Prettier and features more than 180 lint
   ```
 
 - Introduced a new command called `biome explain`, which has the capability to display documentation for lint rules. Contributed by @kalleep
+- You can use the command `biome explain` to print the documentation of lint rules. Contributed by @kalleep
+  ```shell
+  biome explain noDebugger
+  biome explain useAltText
+  ```
+- You can use the command `biome explain` to print the directory where daemon logs are stored. Contributed by @ematipico
+  ```shell
+  biome explain daemon-logs
+  ```
+- Removed the hard coded limit of 200 printable diagnostics. Contributed by @ematipico
 
 #### Bug fixes
 
@@ -107,7 +117,7 @@ Biome now scores 97% compatibility with Prettier and features more than 180 lint
 
 #### New features
 
-- Add [useExportType](https://biomejs.dev/linter/rules/use-export-type) that enforces the use of type-only exports for names that are only types. Contributed by @Conaclos
+- Add [useExportType](https://biomejs.dev/linter/rules/use-export-type) that enforces the use of type-only exports for types. Contributed by @Conaclos
 
   ```diff
     interface A {}
@@ -121,19 +131,35 @@ Biome now scores 97% compatibility with Prettier and features more than 180 lint
   + export type { B }
   ```
 
+- Add [useImportType](https://biomejs.dev/linter/rules/use-import-type) that enforces the use of type-only imports for types. Contributed by @Conaclos
+
+  ```diff
+  - import { A, B } from "./mod.js";
+  + import { type A, B } from "mod";
+    let a: A;
+    const b: B = new B();
+  ```
+
+  Also, the rule groups type-only imports:
+
+  ```diff
+  - import { type A, type B } from "./mod.js";
+  + import type { A, B } from "./mod.js";
+  ```
+
 - Add [useFilenamingConvention](https://biomejs.dev/linter/rules/use-filenaming-convention), that enforces naming conventions for JavaScript and TypeScript filenames. Contributed by @Conaclos
 
   By default, the rule requires that a filename be in `camelCase`, `kebab-case`, `snake_case`, or matches the name of an `export` in the file.
   The rule provides options to restrict the allowed cases.
 
-- Add [useNodeImportProtocol](https://biomejs.dev/linter/rules/use-node-import-protocol) that enforces the use of the `node:` protocol when importing _Node.js_ modules. Contributed by @2-NOW
+- Add [useNodejsImportProtocol](https://biomejs.dev/linter/rules/use-nodejs-import-protocol) that enforces the use of the `node:` protocol when importing _Node.js_ modules. Contributed by @2-NOW and @Conaclos
 
   ```diff
   - import fs from "fs";
   + import fs from "node:fs";
   ```
 
-- Add [noNodejsModules](https://biomejs.dev/linter/rules/no-nodejs-modules), that disallows the use of _Node.js_ modules. Contributed by @anonrig and @ematipico
+- Add [noNodejsModules](https://biomejs.dev/linter/rules/no-nodejs-modules), that disallows the use of _Node.js_ modules. Contributed by @anonrig, @ematipico, and @Conaclos
 
 - Add [noInvalidUseBeforeDeclaration](https://biomejs.dev/linter/rules/no-invalid-use-before-declaration) that reports variables and function parameters used before their declaration. Contributed by @Conaclos
 
@@ -143,6 +169,9 @@ Biome now scores 97% compatibility with Prettier and features more than 180 lint
     const c = 0;
   }
   ```
+
+- Add [noGlobalEval](https://biomejs.dev/linter/rules/no-global-eval) that reports any use of the global `eval`.
+  Contributed by @you-5805
 
 #### Enhancements
 
@@ -177,6 +206,14 @@ Biome now scores 97% compatibility with Prettier and features more than 180 lint
   +    2 // 2
   +
   ```
+
+- [useFilenamingConvention](https://biomejs.dev/linter/rules/use-filenaming-convention) accepts `PascalCase` in its configuration.
+
+  By default, the rule enforces that the filename is either in [`camelCase`], [`kebab-case`], [`snake_case`], or equal to the name of one export in the file.
+  The rule now accepts `PascalCase`.
+
+  Contributed by @Conaclos
+  Address [#1409](https://github.com/biomejs/biome/discussions/1409).
 
 - The code action (fix) of [noMultipleSpacesInRegularExpressionLiterals](https://biomejs.dev/linter/rules/no-multiple-spaces-in-regular-expression-literals/) is now marked as safe. Contributed by @Conaclos
 
@@ -237,6 +274,14 @@ Biome now scores 97% compatibility with Prettier and features more than 180 lint
     }
   ```
 
+- Fix [#1383](https://github.com/biomejs/biome/issues/1383). [noConfusingVoidType](https://biomejs.dev/linter/rules/no-confusing-void-type) now accepts the `void` type in type parameter lists.
+
+  The rule no longer reports the following code:
+
+  ```ts
+  f<void>();
+  ```
+
 - Fix [#728](https://github.com/biomejs/biome/issues/728). [useSingleVarDeclarator](https://biomejs.dev/linter/rules/use-single-var-declarator) no longer outputs invalid code. Contributed by @Conaclos
 
 - Fix [#1167](https://github.com/biomejs/biome/issues/1167). [useValidAriaProps](https://biomejs.dev/linter/rules/use-valid-aria-props) no longer reports `aria-atomic` as invalid. Contributed by @unvalley
@@ -285,6 +330,7 @@ Biome now scores 97% compatibility with Prettier and features more than 180 lint
 #### Bug fixes
 
 - Fix [#933](https://github.com/biomejs/biome/issues/933). Some files are properly ignored in the LSP too. E.g. `package.json`, `tsconfig.json`, etc.
+- Fix [#1394](https://github.com/biomejs/biome/issues/1394), by inferring the language extension from the internal saved files. Now newly created files JavaScript correctly show diagnostics.
 
 ### Formatter
 
@@ -492,9 +538,7 @@ The following rules are now deprecated:
 
 #### New features
 
-- Add [noUnusedPrivateClassMembers](https://biomejs.dev/linter/rules/no-unused-private-class-members) rule.
-  The rule disallow unused private class members.
-  Contributed by @victor-teles
+- Add [noUnusedPrivateClassMembers](https://biomejs.dev/linter/rules/no-unused-private-class-members) rule. The rule disallow unused private class members. Contributed by @victor-teles
 
 #### Bug fixes
 
@@ -515,6 +559,35 @@ The following rules are now deprecated:
 - Fix [#609](https://github.com/biomejs/biome/issues/609) `useExhaustiveDependencies`, by removing `useContext`, `useId` and `useSyncExternalStore` from the known hooks. Contributed by @msdlisper
 
 - Fix `useExhaustiveDependencies`, by removing `useContext`, `useId` and `useSyncExternalStore` from the known hooks. Contributed by @msdlisper
+
+- Fix [#871](https://github.com/biomejs/biome/issues/871) and [#610](https://github.com/biomejs/biome/issues/610). Now `useHookAtTopLevel` correctly handles nested functions.  Contributed by @arendjr
+
+- The options of the rule `useHookAtTopLevel` are deprecated and will be removed in Biome 2.0. The rule now determines the hooks using the naming convention set by React.
+
+  ```diff
+  {
+    "linter": {
+      "rules": {
+        "correctness": {
+  +        "useHookAtTopLevel": "error",
+  -        "useHookAtTopLevel": {
+  -          "level": "error",
+  -          "options": {
+  -            "hooks": [
+  -              {
+  -                "name": "useLocation",
+  -                "closureIndex": 0,
+  -                "dependenciesIndex": 1
+  -              },
+  -              { "name": "useQuery", "closureIndex": 1, "dependenciesIndex": 0 }
+  -            ]
+  -          }
+  -        }
+        }
+      }
+    }
+  }
+  ```
 
 ### Parser
 

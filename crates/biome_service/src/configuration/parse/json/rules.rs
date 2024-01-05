@@ -930,6 +930,10 @@ impl Deserializable for Nursery {
                                 diagnostics,
                             );
                         }
+                        "noGlobalEval" => {
+                            result.no_global_eval =
+                                Deserializable::deserialize(&value, "noGlobalEval", diagnostics);
+                        }
                         "noImplicitAnyLet" => {
                             result.no_implicit_any_let = Deserializable::deserialize(
                                 &value,
@@ -1017,17 +1021,21 @@ impl Deserializable for Nursery {
                                 diagnostics,
                             );
                         }
-                        "useNodeImportProtocol" => {
-                            result.use_node_import_protocol = Deserializable::deserialize(
+                        "useImportType" => {
+                            result.use_import_type =
+                                Deserializable::deserialize(&value, "useImportType", diagnostics);
+                        }
+                        "useNodejsImportProtocol" => {
+                            result.use_nodejs_import_protocol = Deserializable::deserialize(
                                 &value,
-                                "useNodeImportProtocol",
+                                "useNodejsImportProtocol",
                                 diagnostics,
                             );
                         }
-                        "useNumberProperties" => {
-                            result.use_number_properties = Deserializable::deserialize(
+                        "useNumberNamespace" => {
+                            result.use_number_namespace = Deserializable::deserialize(
                                 &value,
-                                "useNumberProperties",
+                                "useNumberNamespace",
                                 diagnostics,
                             );
                         }
@@ -1063,6 +1071,7 @@ impl Deserializable for Nursery {
                                     "noDefaultExport",
                                     "noDuplicateJsonKeys",
                                     "noEmptyBlockStatements",
+                                    "noGlobalEval",
                                     "noImplicitAnyLet",
                                     "noInvalidUseBeforeDeclaration",
                                     "noMisleadingCharacterClass",
@@ -1078,8 +1087,9 @@ impl Deserializable for Nursery {
                                     "useForOf",
                                     "useGroupedTypeImport",
                                     "useImportRestrictions",
-                                    "useNodeImportProtocol",
-                                    "useNumberProperties",
+                                    "useImportType",
+                                    "useNodejsImportProtocol",
+                                    "useNumberNamespace",
                                     "useRegexLiterals",
                                     "useShorthandFunctionType",
                                     "useValidAriaRole",
@@ -1382,6 +1392,13 @@ impl Deserializable for Style {
                                 diagnostics,
                             );
                         }
+                        "useConsistentArrayType" => {
+                            result.use_consistent_array_type = Deserializable::deserialize(
+                                &value,
+                                "useConsistentArrayType",
+                                diagnostics,
+                            );
+                        }
                         "useConst" => {
                             result.use_const =
                                 Deserializable::deserialize(&value, "useConst", diagnostics);
@@ -1502,6 +1519,7 @@ impl Deserializable for Style {
                                     "useAsConstAssertion",
                                     "useBlockStatements",
                                     "useCollapsedElseIf",
+                                    "useConsistentArrayType",
                                     "useConst",
                                     "useDefaultParameterLast",
                                     "useEnumInitializers",
