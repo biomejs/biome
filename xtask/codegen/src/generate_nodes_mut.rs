@@ -50,7 +50,7 @@ pub fn generate_nodes_mut(ast: &AstSrc, language_kind: LanguageKind) -> Result<S
                                 if self.slot_map[#index] != SLOT_MAP_EMPTY_VALUE {
                                     return Err(());
                                 }
-                                
+
                                 let mut updated_slot_map = self.slot_map.clone();
                                 updated_slot_map[#index] = slot_index;
                                 Ok(Self {

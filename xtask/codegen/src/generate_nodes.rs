@@ -205,8 +205,8 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
             };
 
             let cast_impl = if needs_dynamic_slots {
-                quote! { 
-                    if Self::can_cast(syntax.kind()) { 
+                quote! {
+                    if Self::can_cast(syntax.kind()) {
                         let slot_map = #name::build_slot_map(&syntax);
                         Some(Self { syntax, slot_map })
                     } else { None }
@@ -863,7 +863,6 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
         #![allow(clippy::match_like_matches_macro)]
         use crate::{
             macros::map_syntax_node,
-            T,
             #language as Language, #syntax_element as SyntaxElement, #syntax_element_children as SyntaxElementChildren,
             #syntax_kind::{self as SyntaxKind, *},
             #syntax_list as SyntaxList, #syntax_node as SyntaxNode, #syntax_token as SyntaxToken,
@@ -878,6 +877,7 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
 
         /// Sentinel value indicating a missing element in a dynamic node, where
         /// the slots are not statically known.
+        #[allow(dead_code)]
         pub(crate) const SLOT_MAP_EMPTY_VALUE: u8 = u8::MAX;
 
         #(#node_defs)*
@@ -916,7 +916,7 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
 
     let ast = ast
         .to_string()
-        .replace("T ! [ ", "T![")
+        .replace("T ! [ ", "crate::T![")
         .replace(" ] )", "])");
 
     let pretty = xtask::reformat(ast)?;
@@ -971,14 +971,13 @@ pub(crate) fn token_kind_to_code(
 ///     current child does not match any of the fields.
 ///   - The `slot_map` entry for the defined grammar node is filled with the
 ///     index of the current child.
-fn get_slot_map_builder_impl(node: &AstNodeSrc, language_kind: LanguageKind) -> TokenStream {    
+fn get_slot_map_builder_impl(node: &AstNodeSrc, language_kind: LanguageKind) -> TokenStream {
     let slot_count = node.fields.len();
 
     // Chunk the fields of the node into groups of unordered nodes that need
     // to be checked in parallel and ordered nodes that get checked one by one.
     let field_groups = group_fields_for_ordering(&node);
     let mut field_index = 0;
-
 
     let last_field = field_groups.last().and_then(|group| group.last());
 
@@ -1029,7 +1028,7 @@ fn get_slot_map_builder_impl(node: &AstNodeSrc, language_kind: LanguageKind) -> 
                         } else {
                             Default::default()
                         };
-                        
+
                         quote! {
                             #maybe_else if slot_map[#this_field_index] == SLOT_MAP_EMPTY_VALUE && #field_predicate {
                                 slot_map[#this_field_index] = current_slot;
@@ -1091,7 +1090,6 @@ pub(crate) fn get_field_predicate(field: &Field, language_kind: LanguageKind) ->
     }
 }
 
-
 /// Group the fields of a node into groups of consecutive unordered fields,
 /// keeping each ordered field as its own group. This allows the code generation
 /// to create loops/switches/etc for the unordered fields while preserving the
@@ -1111,7 +1109,7 @@ pub(crate) fn group_fields_for_ordering(node: &AstNodeSrc) -> Vec<Vec<&Field>> {
         current_group.push(field);
         last_was_ordered = !field.is_unordered();
     }
-    
+
     groups.push(current_group);
     groups
 }
