@@ -3,9 +3,9 @@ title: Git Hooks
 description: 在 Git Hooks 中使用 Biome
 ---
 
-Git 允许在运行 git 命令的过程中执行 [Git Hooks](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks) 脚本.
+Git 允许在运行 git 命令的过程中执行 [Git Hooks](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks) 脚本。
 例如，你可以在提交或者推送之前格式化及 lint 暂存（staged）的文件。
-有几款工具来简化 git 钩子的管理。
+有几款工具来简化 git hook 的管理。
 在接下来的章节里，我们将会介绍几款工具以及如何将他们与 Biome 集成。
 
 
@@ -15,7 +15,7 @@ Git 允许在运行 git 命令的过程中执行 [Git Hooks](https://git-scm.com
 它可以[通过 NPM 进行安装](https://github.com/evilmartians/lefthook#install)。
 
 在你的 git 仓库的根路径下新增一个文件并命名为 `lefthook.yml`。
-_Lefthook_ 配置案例：
+一些 _Lefthook_ 的配置案例：
 
 - 提交前检查代码格式及 lint
 
@@ -49,7 +49,7 @@ _Lefthook_ 配置案例：
         run: npx biome check --no-errors-on-unmatched --files-ignore-unknown=true {pushed_files}
   ```
 
-注意你并不需要使用 `glob` 和 `--files-ignore-unknown=true`_Lefthook_。
+注意你并不需要使用 `glob` 和 `--files-ignore-unknown=true` _Lefthook_。
 只使用 `--files-ignore-unknown=true` 来允许目前和接下来支持通过 Biome 处理过的文件。
 如果你希望能够更多地管理哪些文件被处理过，你应该使用 `glob`。
 
@@ -57,7 +57,7 @@ _Lefthook_ 配置案例：
 
 配置之后，运行 `lefthook install` 来设置 hooks。
 
-如果你的项目包含 `package.json` 文件,
+如果你的项目包含 `package.json` 文件，
 你可以通过 `scripts.postinstall` 命令，在包安装完成后自动设置 _Lefthook_。
 
 ```json title="package.json"
@@ -72,10 +72,10 @@ _Lefthook_ 配置案例：
 ## Husky
 
 [Husky](https://github.com/typicode/husky) 是一款在 JavaScript 生态系统内广泛使用的 hook 管理工具。
-[Husky] 并不会隐藏未暂存的变更，也不能提供暂存的文件列表。
-这也是为什么其通常和诸如 _lint-staged_ 或 _git-format-staged_ 等其他工具搭配使用.
+Husky 并不会隐藏未暂存的变更，也不能提供暂存的文件列表。
+这也是为什么其通常和诸如 _lint-staged_ 或 _git-format-staged_ 等其他工具搭配使用。
 
-如果你的项目包含 `package.json` 文件,
+如果你的项目包含 `package.json` 文件，
 你可以通过 `scripts.postinstall` 命令，在包安装完成后自动设置 _husky_。
 
 ```json title="package.json"
@@ -124,12 +124,12 @@ lint-staged 的配置直接集成在 `package.json` 内。
 
 ### git-format-staged
 
-相较于诸如 _lefthook_, _pre-commit_, 和 _lint-staged_ 等其他工具，
+相较于诸如 _lefthook_、_pre-commit_ 和 _lint-staged_ 等其他工具，
 [git-format-staged](https://github.com/hallettj/git-format-staged) 并没有在内部使用 `git stash` 命令。
 这避免了当未暂存变更和更新后的已暂存变更存在冲突时需要手动处理。
 参见[comparison of _git-format-staged_ with other tools](https://github.com/hallettj/git-format-staged#comparisons-to-similar-utilities)。
 
-配置案例：
+一些配置案例：
 
 - 提交前检查代码格式及 lint
 
@@ -151,7 +151,7 @@ Biome 通过 [biomejs/pre-commit](https://github.com/biomejs/pre-commit) 仓库�
 
 | hook `id`       | 描述                                                                           |
 | --------------- | ---------------------------------------------------------------------------   |
-| `biome-ci`      | 检查格式, 检查导入项是否规范, 以及 lint 执行                                     |
+| `biome-ci`      | 检查格式，检查导入项是否规范，以及 lint 执行                                     |
 | `biome-check`   | 对已提交文件进行格式化，导入项规范，lint，安全地代码修复                           |
 | `biome-format`  | 格式化已提交的文件                                                              |
 | `biome-lint`    | 对已提交代码执行 lint 及安全地代码修复                                           |
