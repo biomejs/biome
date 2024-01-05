@@ -32,7 +32,7 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
 
                         let is_optional = field.is_optional();
 
-                        let slot_index_access = if needs_dynamic_slots {
+                        let slot_index_access = if field.is_unordered() {
                             quote! { self.slot_map[#slot_index] as usize }
                         } else {
                             quote! { #slot_index }
@@ -56,7 +56,7 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
                         let is_list = ast.is_list(ty);
                         let ty = format_ident!("{}", &ty);
 
-                        let slot_index_access = if needs_dynamic_slots {
+                        let slot_index_access = if field.is_unordered() {
                             quote! { self.slot_map[#slot_index] as usize }
                         } else {
                             quote! { #slot_index }
@@ -971,18 +971,18 @@ pub(crate) fn token_kind_to_code(
 ///     current child does not match any of the fields.
 ///   - The `slot_map` entry for the defined grammar node is filled with the
 ///     index of the current child.
-fn get_slot_map_builder_impl(node: &AstNodeSrc, language_kind: LanguageKind) -> TokenStream {
-    let mut fields_copy = node.fields.iter().collect::<Vec<&Field>>();
-    let slot_count = fields_copy.len();
-
-    let last_field = node.fields.last();
+fn get_slot_map_builder_impl(node: &AstNodeSrc, language_kind: LanguageKind) -> TokenStream {    
+    let slot_count = node.fields.len();
 
     // Chunk the fields of the node into groups of unordered nodes that need
     // to be checked in parallel and ordered nodes that get checked one by one.
-    let field_groups = fields_copy.split_inclusive_mut(|field| !field.is_unordered());
+    let field_groups = group_fields_for_ordering(&node);
     let mut field_index = 0;
 
-    let field_mappers = field_groups
+
+    let last_field = field_groups.last().and_then(|group| group.last());
+
+    let field_mappers = field_groups.iter()
         .map(|group| {
             match group.len() {
                 0 => unreachable!("Somehow encountered a group of fields with no entries"),
@@ -994,7 +994,7 @@ fn get_slot_map_builder_impl(node: &AstNodeSrc, language_kind: LanguageKind) -> 
                     field_index += 1;
                     let field_predicate = get_field_predicate(field, language_kind);
 
-                    let is_last = last_field.is_some_and(|last| field == last);
+                    let is_last = last_field.is_some_and(|last| field == *last);
 
                     // Don't increment current_element and current_slot if this is the
                     // last element, otherwise Rust warns about the value being unused.
@@ -1012,24 +1012,27 @@ fn get_slot_map_builder_impl(node: &AstNodeSrc, language_kind: LanguageKind) -> 
                                 if #field_predicate {
                                     slot_map[#this_field_index] = current_slot;
                                 }
-                                current_element = children.next();
                             }
                             current_slot += 1;
+                            current_element = children.next();
                         }
                     }
                 }
                 _ => {
-                    let variants = group.iter().map(|field| {
+                    let variants = group.iter().enumerate().map(|(index, field)| {
                         let this_field_index = field_index;
                         field_index += 1;
                         let field_predicate = get_field_predicate(field, language_kind);
+
+                        let maybe_else = if index > 0 {
+                            quote! { else }
+                        } else {
+                            Default::default()
+                        };
                         
                         quote! {
-                            if slot_map[#this_field_index] == SLOT_MAP_EMPTY_VALUE && #field_predicate {
+                            #maybe_else if slot_map[#this_field_index] == SLOT_MAP_EMPTY_VALUE && #field_predicate {
                                 slot_map[#this_field_index] = current_slot;
-                                current_slot += 1;
-                                current_element = children.next();
-                                continue;
                             }
                         }
                     });
@@ -1038,15 +1041,11 @@ fn get_slot_map_builder_impl(node: &AstNodeSrc, language_kind: LanguageKind) -> 
 
                     quote! {
                         for _ in 0usize..#group_length {
-                            let Some(element) = &current_element else {
-                                break;
+                            if let Some(element) = &current_element {
+                                #(#variants)*
                             };
-
-                            #(#variants)*
-
-                            // If the element didn't match any of the variants, then no more
-                            // are allowed to match, so move on to the next group.
-                            break;
+                            current_slot += 1;
+                            current_element = children.next();
                         }
                     }
                 }
@@ -1090,4 +1089,29 @@ pub(crate) fn get_field_predicate(field: &Field, language_kind: LanguageKind) ->
             }
         },
     }
+}
+
+
+/// Group the fields of a node into groups of consecutive unordered fields,
+/// keeping each ordered field as its own group. This allows the code generation
+/// to create loops/switches/etc for the unordered fields while preserving the
+/// sequential sorting of the ordered fields.
+pub(crate) fn group_fields_for_ordering(node: &AstNodeSrc) -> Vec<Vec<&Field>> {
+    let mut groups = vec![];
+    let mut current_group = vec![];
+    let mut last_was_ordered = true;
+
+    for field in node.fields.iter() {
+        if !field.is_unordered() || last_was_ordered {
+            if !current_group.is_empty() {
+                groups.push(current_group);
+                current_group = vec![];
+            }
+        }
+        current_group.push(field);
+        last_was_ordered = !field.is_unordered();
+    }
+    
+    groups.push(current_group);
+    groups
 }

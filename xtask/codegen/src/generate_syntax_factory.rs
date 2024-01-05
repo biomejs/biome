@@ -1,6 +1,6 @@
 use super::kinds_src::AstSrc;
-use crate::generate_nodes::{get_field_predicate, token_kind_to_code};
-use crate::{kinds_src::Field, to_upper_snake_case, LanguageKind};
+use crate::generate_nodes::{get_field_predicate, group_fields_for_ordering, token_kind_to_code};
+use crate::{to_upper_snake_case, LanguageKind};
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 use xtask::Result;
@@ -28,12 +28,12 @@ pub fn generate_syntax_factory(ast: &AstSrc, language_kind: LanguageKind) -> Res
         let expected_len = node.fields.len();
 
         let fields = if node.dynamic {
-            let mut fields_copy = node.fields.iter().collect::<Vec<&Field>>();
             // Chunk the fields of the node into groups of unordered nodes that need
             // to be checked in parallel and ordered nodes that get checked one by one.
-            let field_groups = fields_copy.split_inclusive_mut(|field| !field.is_unordered());
+            let field_groups = group_fields_for_ordering(&node);
 
             field_groups
+                .iter()
                 .map(|group| {
                     match group.len() {
                         0 => unreachable!("Somehow encountered a group of fields with no entries"),
@@ -57,14 +57,15 @@ pub fn generate_syntax_factory(ast: &AstSrc, language_kind: LanguageKind) -> Res
                             let variants = group.iter().enumerate().map(|(index, field)| {
                                 let field_predicate = get_field_predicate(field, language_kind);
 
+                                let maybe_else = if index > 0 {
+                                    quote! { else }
+                                } else {
+                                    Default::default()
+                                };
+
                                 quote! {
-                                    if !group_slot_map[#index] && #field_predicate {
+                                    #maybe_else if !group_slot_map[#index] && #field_predicate {
                                         group_slot_map[#index] = true;
-                                        unmatched_count -= 1;
-                                        slots.mark_present();
-                                        slots.next_slot();
-                                        current_element = elements.next();
-                                        continue;
                                     }
                                 }
                             });
@@ -79,11 +80,15 @@ pub fn generate_syntax_factory(ast: &AstSrc, language_kind: LanguageKind) -> Res
                                         break;
                                     };
 
-                                    #(#variants)*
-
-                                    // If the element didn't match any of the variants, then no more
-                                    // are allowed to match, so move on to the next group.
-                                    break;
+                                    #(#variants)* else {
+                                        // If the element didn't match any of the variants, then no more
+                                        // are allowed to match, so move on to the next group.
+                                        break;
+                                    }
+                                    unmatched_count -= 1;
+                                    slots.mark_present();
+                                    slots.next_slot();
+                                    current_element = elements.next();
                                 }
                                 // Advanced past all of the expected slots for the group so that
                                 // they get marked as empty.
