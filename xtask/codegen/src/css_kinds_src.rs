@@ -401,6 +401,5 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_BOGUS_PROPERTY",
         "CSS_BOGUS_MEDIA_QUERY",
         "CSS_BOGUS_SCOPE_RANGE",
-        "CSS_UNORDERED_TESTING",
     ],
 };

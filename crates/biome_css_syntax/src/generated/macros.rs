@@ -522,10 +522,6 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssUnknownDimension::new_unchecked(node) };
                     $body
                 }
-                $crate::CssSyntaxKind::CSS_UNORDERED_TESTING => {
-                    let $pattern = unsafe { $crate::CssUnorderedTesting::new_unchecked(node) };
-                    $body
-                }
                 $crate::CssSyntaxKind::CSS_URL_FUNCTION => {
                     let $pattern = unsafe { $crate::CssUrlFunction::new_unchecked(node) };
                     $body
