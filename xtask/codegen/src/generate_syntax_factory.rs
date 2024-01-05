@@ -30,7 +30,7 @@ pub fn generate_syntax_factory(ast: &AstSrc, language_kind: LanguageKind) -> Res
         let fields = if node.dynamic {
             // Chunk the fields of the node into groups of unordered nodes that need
             // to be checked in parallel and ordered nodes that get checked one by one.
-            let field_groups = group_fields_for_ordering(&node);
+            let field_groups = group_fields_for_ordering(node);
 
             field_groups
                 .iter()

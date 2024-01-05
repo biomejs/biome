@@ -976,7 +976,7 @@ fn get_slot_map_builder_impl(node: &AstNodeSrc, language_kind: LanguageKind) -> 
 
     // Chunk the fields of the node into groups of unordered nodes that need
     // to be checked in parallel and ordered nodes that get checked one by one.
-    let field_groups = group_fields_for_ordering(&node);
+    let field_groups = group_fields_for_ordering(node);
     let mut field_index = 0;
 
     let last_field = field_groups.last().and_then(|group| group.last());
