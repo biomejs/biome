@@ -13,7 +13,7 @@ use crate::syntax::css_dimension::{is_at_any_dimension, parse_any_dimension};
 use crate::syntax::parse_error::expected_any_rule;
 use crate::syntax::parse_error::expected_expression;
 use crate::syntax::parse_error::expected_identifier;
-use crate::syntax::property::parse_any_property;
+use crate::syntax::property::{is_at_any_property, parse_any_property};
 use crate::syntax::selector::is_at_selector;
 use crate::syntax::selector::SelectorList;
 use biome_css_syntax::CssSyntaxKind::*;
@@ -160,11 +160,15 @@ impl ParseSeparatedList for DeclarationList {
     }
 }
 
+pub(crate) fn is_at_declaration(p: &mut CssParser) -> bool {
+    is_at_any_property(p)
+}
 #[inline]
 pub(crate) fn parse_declaration(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_identifier(p) {
+    if !is_at_declaration(p) {
         return Absent;
     }
+
     let m = p.start();
 
     parse_any_property(p).ok();
@@ -175,7 +179,7 @@ pub(crate) fn parse_declaration(p: &mut CssParser) -> ParsedSyntax {
 
 #[inline]
 pub(crate) fn parse_declaration_with_semicolon(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_identifier(p) {
+    if !is_at_declaration(p) {
         return Absent;
     }
 

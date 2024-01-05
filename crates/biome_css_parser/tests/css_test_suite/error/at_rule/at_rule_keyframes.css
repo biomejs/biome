@@ -63,8 +63,7 @@
 
 	to {
 		transform: translateX(100%);
-
-}
+	}
 
 
 @keyframes inherit { }

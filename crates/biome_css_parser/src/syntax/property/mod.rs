@@ -9,7 +9,15 @@ use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::{token_set, Parser, TokenSet};
 
+pub(crate) fn is_at_any_property(p: &mut CssParser) -> bool {
+    is_at_generic_property(p)
+}
+
 pub(crate) fn parse_any_property(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_any_property(p) {
+        return Absent;
+    }
+
     if is_at_generic_property(p) {
         parse_generic_property(p)
     } else {
@@ -19,7 +27,7 @@ pub(crate) fn parse_any_property(p: &mut CssParser) -> ParsedSyntax {
 
 #[inline]
 pub(crate) fn is_at_generic_property(p: &mut CssParser) -> bool {
-    is_at_identifier(p)
+    is_at_identifier(p) && p.nth_at(1, T![:])
 }
 
 #[inline]

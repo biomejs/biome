@@ -562,6 +562,92 @@ pub fn css_identifier(value_token: SyntaxToken) -> CssIdentifier {
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
+pub fn css_import_anonymous_layer(layer_token: SyntaxToken) -> CssImportAnonymousLayer {
+    CssImportAnonymousLayer::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_IMPORT_ANONYMOUS_LAYER,
+        [Some(SyntaxElement::Token(layer_token))],
+    ))
+}
+pub fn css_import_at_rule(
+    import_token: SyntaxToken,
+    url: AnyCssImportUrl,
+    media: CssMediaQueryList,
+    semicolon_token: SyntaxToken,
+) -> CssImportAtRuleBuilder {
+    CssImportAtRuleBuilder {
+        import_token,
+        url,
+        media,
+        semicolon_token,
+        layer: None,
+        supports: None,
+    }
+}
+pub struct CssImportAtRuleBuilder {
+    import_token: SyntaxToken,
+    url: AnyCssImportUrl,
+    media: CssMediaQueryList,
+    semicolon_token: SyntaxToken,
+    layer: Option<AnyCssImportLayer>,
+    supports: Option<CssImportSupports>,
+}
+impl CssImportAtRuleBuilder {
+    pub fn with_layer(mut self, layer: AnyCssImportLayer) -> Self {
+        self.layer = Some(layer);
+        self
+    }
+    pub fn with_supports(mut self, supports: CssImportSupports) -> Self {
+        self.supports = Some(supports);
+        self
+    }
+    pub fn build(self) -> CssImportAtRule {
+        CssImportAtRule::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::CSS_IMPORT_AT_RULE,
+            [
+                Some(SyntaxElement::Token(self.import_token)),
+                Some(SyntaxElement::Node(self.url.into_syntax())),
+                self.layer
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                self.supports
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Node(self.media.into_syntax())),
+                Some(SyntaxElement::Token(self.semicolon_token)),
+            ],
+        ))
+    }
+}
+pub fn css_import_named_layer(
+    layer_token: SyntaxToken,
+    l_paren_token: SyntaxToken,
+    name: CssLayerNameList,
+    r_paren_token: SyntaxToken,
+) -> CssImportNamedLayer {
+    CssImportNamedLayer::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_IMPORT_NAMED_LAYER,
+        [
+            Some(SyntaxElement::Token(layer_token)),
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
+pub fn css_import_supports(
+    supports_token: SyntaxToken,
+    l_paren_token: SyntaxToken,
+    condition: AnyCssImportSupportsCondition,
+    r_paren_token: SyntaxToken,
+) -> CssImportSupports {
+    CssImportSupports::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_IMPORT_SUPPORTS,
+        [
+            Some(SyntaxElement::Token(supports_token)),
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(condition.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
 pub fn css_keyframes_at_rule(
     keyframes_token: SyntaxToken,
     name: AnyCssKeyframeName,
