@@ -821,6 +821,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_ungrammar"
+version = "0.3.1"
+
+[[package]]
 name = "biome_wasm"
 version = "0.0.0"
 dependencies = [
@@ -3160,12 +3164,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "ungrammar"
-version = "1.16.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a3e5df347f0bf3ec1d670aad6ca5c6a1859cd9ea61d2113125794654ccced68f"
-
-[[package]]
 name = "unicase"
 version = "2.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3633,6 +3631,7 @@ dependencies = [
  "biome_json_syntax",
  "biome_rowan",
  "biome_service",
+ "biome_ungrammar",
  "case",
  "convert_case",
  "filetime",
@@ -3645,7 +3644,6 @@ dependencies = [
  "schemars",
  "serde",
  "serde_json",
- "ungrammar",
  "ureq",
  "walkdir",
  "xtask",

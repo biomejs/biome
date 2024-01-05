@@ -210,10 +210,7 @@ fn generate_group(
     writeln!(main_page_buffer)?;
     write_markup_to_string(main_page_buffer, description)?;
     writeln!(main_page_buffer)?;
-    writeln!(
-        main_page_buffer,
-        "| Rule name | Properties |  Description |"
-    )?;
+    writeln!(main_page_buffer, "| Rule name | Description | Properties |")?;
     writeln!(main_page_buffer, "| --- | --- | --- |")?;
 
     for (rule, meta) in rules {
@@ -283,9 +280,14 @@ fn generate_rule(
 ) -> Result<Vec<Event<'static>>> {
     let mut content = Vec::new();
 
+    let title_version = if version == "next" {
+        "(not released)".to_string()
+    } else {
+        format!("(since v{version})")
+    };
     // Write the header for this lint rule
     writeln!(content, "---")?;
-    writeln!(content, "title: {rule} (since v{version})")?;
+    writeln!(content, "title: {rule} {title_version}")?;
     writeln!(content, "---")?;
     writeln!(content)?;
 
@@ -293,6 +295,13 @@ fn generate_rule(
     writeln!(content)?;
 
     writeln!(content)?;
+
+    if version == "next" {
+        writeln!(content, ":::danger")?;
+        writeln!(content, "This rule hasn't been released yet.")?;
+        writeln!(content, ":::")?;
+        writeln!(content)?;
+    }
 
     if is_recommended {
         writeln!(content, ":::note")?;

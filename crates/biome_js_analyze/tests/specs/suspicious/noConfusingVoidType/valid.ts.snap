@@ -45,6 +45,7 @@ class Test {
   method(this: void) {}
 }
 
+functionGeneric<void>(undefined);
 ```
 
 

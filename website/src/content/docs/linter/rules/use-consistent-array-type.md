@@ -1,8 +1,12 @@
 ---
-title: useConsistentArrayType (since vnext)
+title: useConsistentArrayType (not released)
 ---
 
 **Diagnostic Category: `lint/style/useConsistentArrayType`**
+
+:::danger
+This rule hasn't been released yet.
+:::
 
 Require consistently using either `T[]` or `Array<T>`
 

@@ -1,8 +1,12 @@
 ---
-title: useFilenamingConvention (since vnext)
+title: useFilenamingConvention (not released)
 ---
 
 **Diagnostic Category: `lint/nursery/useFilenamingConvention`**
+
+:::danger
+This rule hasn't been released yet.
+:::
 
 :::caution
 This rule is part of the [nursery](/linter/rules/#nursery) group.

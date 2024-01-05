@@ -1,8 +1,12 @@
 ---
-title: useShorthandFunctionType (since vnext)
+title: useShorthandFunctionType (not released)
 ---
 
 **Diagnostic Category: `lint/nursery/useShorthandFunctionType`**
+
+:::danger
+This rule hasn't been released yet.
+:::
 
 :::caution
 This rule is part of the [nursery](/linter/rules/#nursery) group.
