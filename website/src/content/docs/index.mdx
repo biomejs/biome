@@ -43,19 +43,6 @@ import Sponsors from "@src/components/Sponsors.astro";
 <div class="gradient"></div>
 <div class="grid"></div>
 
-<Card>
-  <h2 align="center">
-    What's Biome
-  </h2>
-  <p>
-    Biome is a performant toolchain for web projects, it aims to provide developer tools to maintain the health of said projects.
-
-    ```shell
-    npm install --save-dev --save-exact @biomejs/biome
-    ```
-  </p>
-</Card>
-
 
 <div class="hero-code">
   <div class="formatter">
@@ -96,6 +83,7 @@ import Sponsors from "@src/components/Sponsors.astro";
     Try the Biome formatter on the [Playground](/playground/) or directly on your project:
 
     ```shell
+    npm install --save-dev --save-exact @biomejs/biome
     npx @biomejs/biome format ./src
     ```
 
@@ -114,7 +102,27 @@ import Sponsors from "@src/components/Sponsors.astro";
     Try the Biome linter on the [Playground](/playground/) or directly on your project:
 
     ```shell
+    npm install --save-dev --save-exact @biomejs/biome
     npx @biomejs/biome lint ./src
+    ```
+
+  </div>
+</div>
+
+
+<div class="hero-code">
+  <div class="formatter">
+    <h2 class="head">Everything all at once</h2>
+
+    Not only can you format and lint your code separately, you can do it **all at once with a single command**!
+
+    Every tool integrates seamlessly with others to create **a cohesive toolchain** for web projects.
+
+    Run all tools with the `check` command:
+
+    ```shell
+    npm install --save-dev --save-exact @biomejs/biome
+    npx @biomejs/biome check ./src
     ```
 
   </div>
