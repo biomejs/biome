@@ -109,7 +109,7 @@ fn get_contributors(token: &str) -> Vec<Contributor> {
         token,
         &mut contributors,
     );
-    contributors.sort_by(|a, b| a.contributions.cmp(&b.contributions));
+    contributors.sort_by(|a, b| b.contributions.cmp(&a.contributions));
     contributors
 }
 
