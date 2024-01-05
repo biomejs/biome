@@ -105,10 +105,18 @@ where
     }
 }
 
-/// The main trait to go from untyped `SyntaxNode`  to a typed ast. The
+/// The main trait to go from untyped `SyntaxNode` to a typed ast. The
 /// conversion itself has zero runtime cost: ast and syntax nodes have exactly
 /// the same representation: a pointer to the tree root and a pointer to the
 /// node itself.
+///
+/// The only exception to this is for Dynamic nodes, which allow the fields
+/// of the AstNode to be mapped to any slot of the SyntaxNode using an additional
+/// `slot_map`. This must get built every time the untyped syntax node is
+/// converted into the typed ast node, and is determined by the order of fields
+/// in the original grammar. Even still, this cost is relatively low and should
+/// not be considered prohibitive, as the only work done is checking
+/// [AstNode::can_cast] for each of the children to their respective slots.
 pub trait AstNode: Clone {
     type Language: Language;
 

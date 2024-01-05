@@ -19,6 +19,10 @@ use serde::ser::SerializeSeq;
 #[cfg(feature = "serde")]
 use serde::{Serialize, Serializer};
 use std::fmt::{Debug, Formatter};
+#[doc = r" Sentinel value indicating a missing element in a dynamic node, where"]
+#[doc = r" the slots are not statically known."]
+#[allow(dead_code)]
+pub(crate) const SLOT_MAP_EMPTY_VALUE: u8 = u8::MAX;
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssAtRule {
     pub(crate) syntax: SyntaxNode,
