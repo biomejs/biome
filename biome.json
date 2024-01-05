@@ -21,7 +21,12 @@
 			"*.svg",
 			"*.png",
 			"*.yml",
-			"**/undefined/**"
+			"*.yaml",
+			"**/undefined/**",
+			"**LICENSE-MIT**",
+			"**LICENSE-APACHE**",
+			"**/ROME_LICENSE**",
+			"**ROME-LICENSE-MIT**"
 		]
 	},
 	"formatter": {

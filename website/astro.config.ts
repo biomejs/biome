@@ -196,16 +196,26 @@ export default defineConfig({
 						},
 						{
 							label: "Linter",
-							link: "/linter",
-						},
-						{
-							label: "Lint rules",
-							link: "/linter/rules",
-							translations: {
-								ja: "Lintルール",
-								"zh-CN": "Lint 规则",
-								"pt-BR": "Regras do Linter",
-							},
+							items: [
+								{
+									label: "Introduction",
+									link: "/linter",
+									translations: {
+										ja: "イントロダクション",
+										"zh-CN": "介绍",
+										"pt-BR": "Introdução",
+									},
+								},
+								{
+									label: "Lint rules",
+									link: "/linter/rules",
+									translations: {
+										ja: "Lintルール",
+										"zh-CN": "Lint 规则",
+										"pt-BR": "Regras do Linter",
+									},
+								},
+							],
 						},
 					],
 				},
@@ -257,6 +267,7 @@ export default defineConfig({
 						{
 							label: "Git Hooks",
 							link: "/recipes/git-hooks",
+							badge: "New",
 						},
 					],
 				},

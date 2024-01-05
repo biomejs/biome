@@ -1,6 +1,5 @@
 use pico_args::Arguments;
 use serde::{Deserialize, Serialize};
-use std::cmp::Ordering;
 use std::fmt::Write;
 use std::path::PathBuf;
 use xtask::glue::fs2;
@@ -20,7 +19,7 @@ fn main() -> Result<()> {
 
     Ok(())
 }
-const IMPORT_IMAGE: &'static str = "import { Image } from \"astro:assets\"";
+const IMPORT_IMAGE: &str = "import { Image } from \"astro:assets\"";
 
 fn write_contributors_in_community(root: PathBuf, contributors: &[Contributor]) -> Result<()> {
     let mut content = String::new();
@@ -95,7 +94,7 @@ fn write_contributors_in_credits(root: PathBuf, contributors: &[Contributor]) ->
     Ok(())
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Ord, PartialOrd, Eq, PartialEq)]
 struct Contributor {
     avatar_url: String,
     login: String,
@@ -110,15 +109,7 @@ fn get_contributors(token: &str) -> Vec<Contributor> {
         token,
         &mut contributors,
     );
-    contributors.sort_by(|a, b| {
-        if a.contributions > b.contributions {
-            Ordering::Less
-        } else if a.contributions < b.contributions {
-            Ordering::Greater
-        } else {
-            Ordering::Equal
-        }
-    });
+    contributors.sort_by(|a, b| a.contributions.cmp(&b.contributions));
     contributors
 }
 
