@@ -26,6 +26,10 @@ foo() + '\n';
 
 1 * /**leading*/'foo'    /**trailing */                   + 'bar';
 
+`foo` + 1;
+
+`foo${1}` + 2;
+
 // strings including `${`
 
 '${foo.' + bar + '.baz}';

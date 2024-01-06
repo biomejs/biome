@@ -253,6 +253,14 @@ Biome now scores 97% compatibility with Prettier and features more than 180 lint
   1 + (2 + "a") // `${1}${2}a`
   ```
 
+- Fix: [useTemplate](https://biomejs.dev/linter/rules/use-template/) now reports expressions with an interpolated template literal and non-string expressions. Contributed by @n-gude
+
+  The following code is now reported:
+
+  ```js
+  `a${1}` + 2;
+  ```
+
 ### Parser
 
 #### BREAKING CHANGES

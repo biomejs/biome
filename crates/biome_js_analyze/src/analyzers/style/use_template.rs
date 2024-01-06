@@ -115,6 +115,7 @@ impl Rule for UseTemplate {
 fn can_be_template_literal(node: &JsBinaryExpression) -> Option<bool> {
     let mut iter = node.syntax().preorder();
     let mut has_constant_string_constituent = false;
+    let mut has_interpolated_string_constituent = false;
     let mut has_non_constant_string_constituent = false;
     while let Some(walk) = iter.next() {
         if let WalkEvent::Enter(node) = walk {
@@ -129,6 +130,9 @@ fn can_be_template_literal(node: &JsBinaryExpression) -> Option<bool> {
                 AnyJsExpression::JsTemplateExpression(ref template) if template.is_constant() => {
                     has_constant_string_constituent = true;
                 }
+                AnyJsExpression::JsTemplateExpression(ref template) if template.tag().is_none() => {
+                    has_interpolated_string_constituent = true;
+                }
                 AnyJsExpression::AnyJsLiteralExpression(
                     AnyJsLiteralExpression::JsStringLiteralExpression(_),
                 ) => {
@@ -138,7 +142,10 @@ fn can_be_template_literal(node: &JsBinaryExpression) -> Option<bool> {
                     has_non_constant_string_constituent = true;
                 }
             }
-            if has_non_constant_string_constituent && has_constant_string_constituent {
+            if (has_constant_string_constituent
+                && (has_non_constant_string_constituent || has_interpolated_string_constituent))
+                || (has_interpolated_string_constituent && has_non_constant_string_constituent)
+            {
                 return Some(true);
             }
             iter.skip_subtree();
