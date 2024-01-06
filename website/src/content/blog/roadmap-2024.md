@@ -141,7 +141,7 @@ With the Roadmap 2024, we also publish a new version. This version has few featu
 Update Biome using the following commands:
 
 ```shell
-npm i @biomejs/biome@latest --exact --save-dev
+npm install --save-dev --save-exact @biomejs/biome@latest
 npx @biomejs/biome migrate
 ```
 
