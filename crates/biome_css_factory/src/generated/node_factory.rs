@@ -2406,16 +2406,6 @@ where
         slots,
     ))
 }
-pub fn css_bogus_url_modifier<I>(slots: I) -> CssBogusUrlModifier
-where
-    I: IntoIterator<Item = Option<SyntaxElement>>,
-    I::IntoIter: ExactSizeIterator,
-{
-    CssBogusUrlModifier::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_BOGUS_URL_MODIFIER,
-        slots,
-    ))
-}
 pub fn css_bogus_pseudo_class<I>(slots: I) -> CssBogusPseudoClass
 where
     I: IntoIterator<Item = Option<SyntaxElement>>,
@@ -2473,6 +2463,16 @@ where
 {
     CssBogusSubSelector::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_BOGUS_SUB_SELECTOR,
+        slots,
+    ))
+}
+pub fn css_bogus_url_modifier<I>(slots: I) -> CssBogusUrlModifier
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssBogusUrlModifier::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_BOGUS_URL_MODIFIER,
         slots,
     ))
 }

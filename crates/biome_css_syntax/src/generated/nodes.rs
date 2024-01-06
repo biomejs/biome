@@ -7241,33 +7241,6 @@ impl AnyCssScopeRange {
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
-pub enum AnyCssUrlModifier {
-    CssBogusUrlModifier(CssBogusUrlModifier),
-    CssIdentifier(CssIdentifier),
-    CssSimpleFunction(CssSimpleFunction),
-}
-impl AnyCssUrlModifier {
-    pub fn as_css_bogus_url_modifier(&self) -> Option<&CssBogusUrlModifier> {
-        match &self {
-            AnyCssUrlModifier::CssBogusUrlModifier(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_css_identifier(&self) -> Option<&CssIdentifier> {
-        match &self {
-            AnyCssUrlModifier::CssIdentifier(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_css_simple_function(&self) -> Option<&CssSimpleFunction> {
-        match &self {
-            AnyCssUrlModifier::CssSimpleFunction(item) => Some(item),
-            _ => None,
-        }
-    }
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum AnyCssSelector {
     CssBogusSelector(CssBogusSelector),
     CssComplexSelector(CssComplexSelector),
@@ -7472,6 +7445,33 @@ impl AnyCssSupportsOrCombinableCondition {
     pub fn as_css_supports_or_condition(&self) -> Option<&CssSupportsOrCondition> {
         match &self {
             AnyCssSupportsOrCombinableCondition::CssSupportsOrCondition(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub enum AnyCssUrlModifier {
+    CssBogusUrlModifier(CssBogusUrlModifier),
+    CssIdentifier(CssIdentifier),
+    CssSimpleFunction(CssSimpleFunction),
+}
+impl AnyCssUrlModifier {
+    pub fn as_css_bogus_url_modifier(&self) -> Option<&CssBogusUrlModifier> {
+        match &self {
+            AnyCssUrlModifier::CssBogusUrlModifier(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_identifier(&self) -> Option<&CssIdentifier> {
+        match &self {
+            AnyCssUrlModifier::CssIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_simple_function(&self) -> Option<&CssSimpleFunction> {
+        match &self {
+            AnyCssUrlModifier::CssSimpleFunction(item) => Some(item),
             _ => None,
         }
     }
