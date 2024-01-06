@@ -6,6 +6,8 @@ function Component1({ a }) {
     const value = useContext();
     const memoizedCallback = useCallback();
 
+    const otherValue = useValue() || defaultValue;
+
     {
         useEffect();
     }
@@ -15,14 +17,43 @@ const implicitReturn = (x) => useMemo(() => x, [x]);
 
 const implicitReturnInsideWrappedComponent = forwardRef((x) => useMemo(() => x, [x]));
 
-function useStuff() {
+function useHookInsideObjectLiteral() {
     return {
         abc: useCallback(() => null, [])
     };
 }
 
-function useStuff2() {
+function useHookInsideArrayLiteral() {
     return [useCallback(() => null, [])];
+}
+
+function useHookInsideFinallyClause() {
+    try {
+    } finally {
+        useCleanUp();
+    }
+}
+
+function useHookInsideFinallyClause2() {
+    try {
+    } catch (error) {
+    } finally {
+        useCleanUp();
+    }
+}
+
+function useHookToCalculateKey(key) {
+    const object = {};
+    object[useObjectKey(key)] = true;
+    return object;
+}
+
+function useKeyOfHookResult(key) {
+    return useContext(Context)[key];
+}
+
+function usePropertyOfHookResult() {
+    return useContext(Context).someProp;
 }
 
 const obj = {
