@@ -862,7 +862,7 @@ impl<'src> CssLexer<'src> {
             b"font-face" => FONT_FACE_KW,
             b"font-feature-values" => FONT_FEATURE_VALUES_KW,
             b"font-palette-values" => FONT_PALETTE_VALUES_KW,
-            //
+            // font-feature-values items
             b"stylistic" => STYLISTIC_KW,
             b"historical-forms" => HISTORICAL_FORMS_KW,
             b"styleset" => STYLESET_KW,
