@@ -1452,6 +1452,32 @@ invalid.js:59:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━
 ```
 
 ```
+invalid.js:60:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This call to parseInt() can be replaced by a binary literal.
+  
+    58 │ parseInt('11'/**/, 2);
+    59 │ parseInt(`11`/**/, 2);
+  > 60 │ parseInt('11', 2 /**/);
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+    61 │ parseInt('11', 2)//comment
+    62 │ ;
+  
+  i Using a literal avoids unnecessary computations.
+  
+  i Unsafe fix: Use the computed binary literal instead.
+  
+    58 58 │   parseInt('11'/**/, 2);
+    59 59 │   parseInt(`11`/**/, 2);
+    60    │ - parseInt('11',·2·/**/);
+       60 │ + 0b11;
+    61 61 │   parseInt('11', 2)//comment
+    62 62 │   ;
+  
+
+```
+
+```
 invalid.js:61:1 lint/style/useNumericLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This call to parseInt() can be replaced by a binary literal.

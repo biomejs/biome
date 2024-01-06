@@ -534,8 +534,18 @@ impl JsObjectExpression {
 }
 
 impl JsNumberLiteralExpression {
+    /// ## Examples
+    ///
+    /// ```
+    /// use biome_js_factory::make;
+    /// use biome_rowan::TriviaPieceKind;
+    ///
+    /// let number = make::js_number_literal_expression(make::js_number_literal("1.23")
+    ///     .with_trailing_trivia(vec![(TriviaPieceKind::Whitespace, " ")]));
+    /// assert_eq!(number.as_number().unwrap(), 1.23);
+    /// ```
     pub fn as_number(&self) -> Option<f64> {
-        parse_js_number(self.value_token().unwrap().text())
+        parse_js_number(self.value_token().unwrap().text_trimmed())
     }
 }
 
