@@ -50,7 +50,7 @@ import Sponsors from "@src/components/Sponsors.astro";
 
     **Biome is a [fast formatter](https://github.com/biomejs/biome/tree/main/benchmark#formatting)** for _JavaScript_, _TypeScript_, _JSX_, and _JSON_ that scores **[97% compatibility with _Prettier_](https://console.algora.io/challenges/prettier)**, **saving CI and developer time**.
 
-    Biome can even **format malformed code** as you write it.
+    Biome can even **format malformed code** as you write it in [your favorite editor](/guides/integrate-in-editor/).
 
     <div class="linter format">
       <div class="inp">
@@ -80,11 +80,11 @@ import Sponsors from "@src/components/Sponsors.astro";
       </div>
     </div>
 
-    Try the Biome formatter on the [Playground](/playground/) or directly on your project:
+    Try the Biome formatter on the [playground](/playground/) or directly on your project:
 
     ```shell
     npm install --save-dev --save-exact @biomejs/biome
-    npx @biomejs/biome format ./src
+    npx @biomejs/biome format --write ./src
     ```
 
   </div>
@@ -95,15 +95,15 @@ import Sponsors from "@src/components/Sponsors.astro";
   <div class="formatter">
     <h2 class="head">Fix problems, learn best practice</h2>
 
-    **Biome is a [performant linter](https://github.com/biomejs/biome/tree/main/benchmark#linting)** for _JavaScript_, _TypeScript_, and _JSX_ that features **[more than 190 rules](https://biomejs.dev/linter/rules/)** from ESLint, TypeSCript ESLint, and [other sources](https://github.com/biomejs/biome/discussions/3).
+    **Biome is a [performant linter](https://github.com/biomejs/biome/tree/main/benchmark#linting)** for _JavaScript_, _TypeScript_, and _JSX_ that features **[more than 190 rules](https://biomejs.dev/linter/rules/)** from ESLint, TypeScript ESLint, and [other sources](https://github.com/biomejs/biome/discussions/3).
 
     **Biome outputs detailed and contextualized diagnostics** that help you to improve your code and become a better programmer!
 
-    Try the Biome linter on the [Playground](/playground/) or directly on your project:
+    Try the Biome linter on the [playground](/playground/) or directly on your project:
 
     ```shell
     npm install --save-dev --save-exact @biomejs/biome
-    npx @biomejs/biome lint ./src
+    npx @biomejs/biome lint --apply ./src
     ```
 
   </div>
@@ -122,7 +122,7 @@ import Sponsors from "@src/components/Sponsors.astro";
 
     ```shell
     npm install --save-dev --save-exact @biomejs/biome
-    npx @biomejs/biome check ./src
+    npx @biomejs/biome check --apply ./src
     ```
 
   </div>
