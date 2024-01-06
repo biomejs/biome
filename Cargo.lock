@@ -263,10 +263,10 @@ dependencies = [
  "biome_css_factory",
  "biome_css_syntax",
  "biome_diagnostics",
- "biome_js_unicode_table",
  "biome_parser",
  "biome_rowan",
  "biome_test_utils",
+ "biome_unicode_table",
  "insta",
  "quickcheck",
  "quickcheck_macros",
@@ -414,12 +414,12 @@ dependencies = [
  "biome_js_parser",
  "biome_js_semantic",
  "biome_js_syntax",
- "biome_js_unicode_table",
  "biome_json_factory",
  "biome_json_syntax",
  "biome_rowan",
  "biome_test_utils",
  "biome_text_edit",
+ "biome_unicode_table",
  "countme",
  "insta",
  "lazy_static",
@@ -456,11 +456,11 @@ dependencies = [
  "biome_js_factory",
  "biome_js_parser",
  "biome_js_syntax",
- "biome_js_unicode_table",
  "biome_json_syntax",
  "biome_parser",
  "biome_rowan",
  "biome_text_size",
+ "biome_unicode_table",
  "cfg-if",
  "countme",
  "iai",
@@ -484,9 +484,9 @@ dependencies = [
  "biome_diagnostics",
  "biome_js_factory",
  "biome_js_syntax",
- "biome_js_unicode_table",
  "biome_parser",
  "biome_rowan",
+ "biome_unicode_table",
  "bitflags 2.3.1",
  "cfg-if",
  "drop_bomb",
@@ -549,10 +549,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "biome_js_unicode_table"
-version = "0.4.0"
-
-[[package]]
 name = "biome_json_analyze"
 version = "0.4.0"
 dependencies = [
@@ -606,11 +602,11 @@ version = "0.4.0"
 dependencies = [
  "biome_console",
  "biome_diagnostics",
- "biome_js_unicode_table",
  "biome_json_factory",
  "biome_json_syntax",
  "biome_parser",
  "biome_rowan",
+ "biome_unicode_table",
  "insta",
  "quickcheck",
  "quickcheck_macros",
@@ -823,6 +819,10 @@ dependencies = [
 [[package]]
 name = "biome_ungrammar"
 version = "0.3.1"
+
+[[package]]
+name = "biome_unicode_table"
+version = "0.4.0"
 
 [[package]]
 name = "biome_wasm"
