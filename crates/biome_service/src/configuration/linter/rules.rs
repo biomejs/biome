@@ -2698,9 +2698,10 @@ impl Nursery {
         "useShorthandFunctionType",
         "useValidAriaRole",
     ];
-    const RECOMMENDED_RULES: [&'static str; 12] = [
+    const RECOMMENDED_RULES: [&'static str; 13] = [
         "noAriaHiddenOnFocusable",
         "noDuplicateJsonKeys",
+        "noGlobalAssign",
         "noGlobalEval",
         "noImplicitAnyLet",
         "noThenProperty",
@@ -2712,9 +2713,10 @@ impl Nursery {
         "useNumberNamespace",
         "useValidAriaRole",
     ];
-    const RECOMMENDED_RULES_AS_FILTERS: [RuleFilter<'static>; 12] = [
+    const RECOMMENDED_RULES_AS_FILTERS: [RuleFilter<'static>; 13] = [
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[6]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]),
@@ -3054,7 +3056,7 @@ impl Nursery {
     pub(crate) fn is_recommended_rule(rule_name: &str) -> bool {
         Self::RECOMMENDED_RULES.contains(&rule_name)
     }
-    pub(crate) fn recommended_rules_as_filters() -> [RuleFilter<'static>; 12] {
+    pub(crate) fn recommended_rules_as_filters() -> [RuleFilter<'static>; 13] {
         Self::RECOMMENDED_RULES_AS_FILTERS
     }
     pub(crate) fn all_rules_as_filters() -> [RuleFilter<'static>; 27] {

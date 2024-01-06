@@ -11,7 +11,7 @@ declare_rule! {
     /// Disallow assignments to native objects and read-only global variables.
     ///
     /// _JavaScript environments contain numerous built-in global variables, such as `window` in browsers and `process` in _Node.js.
-    /// Assigning values to these global variables can be problematic as it can overwride essential functionality.
+    /// Assigning values to these global variables can be problematic as it can override essential functionality.
     ///
     /// Source: https://eslint.org/docs/latest/rules/no-global-assign
     ///
@@ -24,26 +24,27 @@ declare_rule! {
     /// ```
     ///
     /// ```js,expect_diagnostic
-    /// window = 1;
+    /// window = {};
     /// ```
     ///
     /// ```js,expect_diagnostic
-    /// undefined = 1;
+    /// undefined = true;
     /// ```
     ///
     /// ## Valid
     ///
     /// ```js
-    /// let a = 1;
-    /// let b = 1;
-    /// b = 100;
-    /// a = 100;
+    /// a = 0;
     /// ```
     ///
+    /// ```js
+    /// let window;
+    /// window = {};
+    /// ```
     pub(crate) NoGlobalAssign {
         version: "next",
         name: "noGlobalAssign",
-        recommended: false,
+        recommended: true,
     }
 }
 
@@ -56,13 +57,11 @@ impl Rule for NoGlobalAssign {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let global_refs = ctx.query().all_unresolved_references();
         let mut result = vec![];
-
         for global_ref in global_refs {
             let is_write = global_ref.syntax().kind() == JsSyntaxKind::JS_IDENTIFIER_ASSIGNMENT;
-            let identifier = global_ref.syntax().text_trimmed();
-            let text = identifier.to_string();
-
             if is_write {
+                let identifier = global_ref.syntax().text_trimmed();
+                let text = identifier.to_string();
                 let is_global_var = NODE.binary_search(&text.as_str()).is_ok()
                     || BROWSER.binary_search(&text.as_str()).is_ok()
                     || BUILTIN.binary_search(&text.as_str()).is_ok()
@@ -72,7 +71,6 @@ impl Rule for NoGlobalAssign {
                 }
             }
         }
-
         result
     }
 
@@ -82,7 +80,7 @@ impl Rule for NoGlobalAssign {
                 rule_category!(),
                 range,
                 markup! {
-                    "A global variable should not be reassigned"
+                    "A global variable should not be reassigned."
                 },
             )
             .note(markup! {
