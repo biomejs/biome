@@ -567,7 +567,8 @@ impl<'src> CssLexer<'src> {
             let dispatch = lookup_byte(chr);
             return match dispatch {
                 // TLD byte covers `url(~package/tilde.css)`;
-                IDT | UNI | PRD | SLH | ZER | DIG | TLD => self.consume_url_raw_value(),
+                // HAS byte covers `url(#IDofSVGpath);`
+                IDT | UNI | PRD | SLH | ZER | DIG | TLD | HAS => self.consume_url_raw_value(),
                 _ => self.consume_token(current),
             };
         }
@@ -577,10 +578,19 @@ impl<'src> CssLexer<'src> {
         let start = self.text_position();
         while let Some(chr) = self.current_byte() {
             let dispatch = lookup_byte(chr);
-            if matches!(dispatch, PNC) {
-                return CSS_URL_VALUE_RAW_LITERAL;
+            match dispatch {
+                PNC => {
+                    return CSS_URL_VALUE_RAW_LITERAL;
+                }
+                BSL if self.is_valid_escape_at(1) => {
+                    // We can escape any character, so we just skip over the escape sequence
+                    // Even a closing parenthesis (PNC token):
+                    // url(https://example.com/ima\)ge.png);
+                    //                            ^^ escaped closing paren
+                    self.advance(2)
+                }
+                _ => self.advance(1),
             }
-            self.advance(1);
         }
         let diagnostic = ParseDiagnostic::new("Invalid url raw value", start..self.text_position());
         self.diagnostics.push(diagnostic);
@@ -983,6 +993,7 @@ impl<'src> CssLexer<'src> {
             b"supports" => SUPPORTS_KW,
             b"selector" => SELECTOR_KW,
             b"url" => URL_KW,
+            b"src" => SRC_KW,
             b"scope" => SCOPE_KW,
             b"import" => IMPORT_KW,
             _ => IDENT,

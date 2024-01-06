@@ -136,13 +136,8 @@ pub fn quick_test() {
     let code = r#"
 
 
-@keyframes name2 {
-	from {
-	    color: red;
-
-	to {
-		color: blue;
-	}
+div {
+background: URL(https://example.com/ima\)ge.png);
 }
 
     "#;

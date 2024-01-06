@@ -651,6 +651,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssBogusSubSelector::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_BOGUS_URL_MODIFIER => {
+                    let $pattern = unsafe { $crate::CssBogusUrlModifier::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_COMPONENT_VALUE_LIST => {
                     let $pattern = unsafe { $crate::CssComponentValueList::new_unchecked(node) };
                     $body
@@ -728,6 +732,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::CssSyntaxKind::CSS_SUB_SELECTOR_LIST => {
                     let $pattern = unsafe { $crate::CssSubSelectorList::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_URL_MODIFIER_LIST => {
+                    let $pattern = unsafe { $crate::CssUrlModifierList::new_unchecked(node) };
                     $body
                 }
                 _ => unreachable!(),

@@ -4,6 +4,7 @@ mod css_dimension;
 mod parse_error;
 mod property;
 mod selector;
+mod value;
 
 use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
@@ -16,6 +17,7 @@ use crate::syntax::parse_error::expected_identifier;
 use crate::syntax::property::{is_at_any_property, parse_any_property};
 use crate::syntax::selector::is_at_selector;
 use crate::syntax::selector::SelectorList;
+use crate::syntax::value::url::{is_at_url_function, parse_url_function};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
@@ -259,7 +261,12 @@ pub(crate) fn parse_color(p: &mut CssParser) -> ParsedSyntax {
 
 #[inline]
 pub(crate) fn is_at_any_function(p: &mut CssParser) -> bool {
-    is_at_identifier(p) && p.nth_at(1, T!['('])
+    is_nth_at_any_function(p, 0)
+}
+
+#[inline]
+pub(crate) fn is_nth_at_any_function(p: &mut CssParser, n: usize) -> bool {
+    is_nth_at_identifier(p, n) && p.nth_at(n + 1, T!['('])
 }
 
 pub(crate) struct ParameterList;
@@ -420,22 +427,6 @@ fn parse_simple_function(p: &mut CssParser) -> ParsedSyntax {
     Present(simple_fn.complete(p, CSS_SIMPLE_FUNCTION))
 }
 
-pub(crate) fn is_at_url_function(p: &mut CssParser) -> bool {
-    p.at(T![url]) && p.nth_at(1, T!['('])
-}
-
-pub(crate) fn parse_url_function(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_url_function(p) {
-        return Absent;
-    }
-    let url_fn = p.start();
-    p.expect(T![url]);
-    p.expect_with_context(T!['('], CssLexContext::UrlRawValue);
-    parse_url_value(p).ok();
-    p.expect(T![')']);
-    Present(url_fn.complete(p, CSS_URL_FUNCTION))
-}
-
 #[inline]
 pub(crate) fn is_at_ratio(p: &mut CssParser) -> bool {
     p.at(CSS_NUMBER_LITERAL) && p.nth_at(1, T![/])
@@ -451,24 +442,6 @@ pub(crate) fn parse_ratio(p: &mut CssParser) -> ParsedSyntax {
     p.eat(T![/]);
     parse_regular_number(p).or_add_diagnostic(p, expected_number);
     Present(m.complete(p, CSS_RATIO))
-}
-
-pub(crate) fn is_at_url_value(p: &mut CssParser) -> bool {
-    p.at(CSS_URL_VALUE_RAW_LITERAL) || is_at_string(p)
-}
-
-#[inline]
-pub(crate) fn parse_url_value(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_url_value(p) {
-        return Absent;
-    }
-
-    if is_at_string(p) {
-        return parse_string(p);
-    }
-    let m = p.start();
-    p.expect(CSS_URL_VALUE_RAW_LITERAL);
-    Present(m.complete(p, CSS_URL_VALUE_RAW))
 }
 
 #[inline]

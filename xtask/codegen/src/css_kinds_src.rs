@@ -90,6 +90,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "to",
         "var",
         "url",
+        "src",
         "font-palette-values",
         "auto",
         "thin",
@@ -333,6 +334,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_BINARY_EXPRESSION",
         "CSS_URL_VALUE_RAW",
         "CSS_URL_FUNCTION",
+        "CSS_URL_MODIFIER_LIST",
         "CSS_COLOR",
         "CSS_AUTO",
         "CSS_BORDER",
@@ -431,5 +433,6 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_BOGUS_PROPERTY_VALUE",
         "CSS_BOGUS_MEDIA_QUERY",
         "CSS_BOGUS_SCOPE_RANGE",
+        "CSS_BOGUS_URL_MODIFIER",
     ],
 };

@@ -187,11 +187,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@1..8 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@8..11 "url" [] [],
+                    name: URL_KW@8..11 "url" [] [],
                     l_paren_token: L_PAREN@11..12 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@12..25 "\"./style.css\"" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@25..26 ")" [] [],
                 },
                 layer: missing (optional),
@@ -205,11 +206,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@29..36 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@36..39 "url" [] [],
+                    name: URL_KW@36..39 "url" [] [],
                     l_paren_token: L_PAREN@39..40 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@40..53 "'./style.css'" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@53..54 ")" [] [],
                 },
                 layer: missing (optional),
@@ -223,11 +225,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@57..64 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@64..67 "url" [] [],
+                    name: URL_KW@64..67 "url" [] [],
                     l_paren_token: L_PAREN@67..68 "(" [] [],
-                    any_css_url_value: CssUrlValueRaw {
+                    value: CssUrlValueRaw {
                         value_token: CSS_URL_VALUE_RAW_LITERAL@68..79 "./style.css" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@79..80 ")" [] [],
                 },
                 layer: missing (optional),
@@ -267,11 +270,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@129..136 "IMPORT" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@136..139 "url" [] [],
+                    name: URL_KW@136..139 "url" [] [],
                     l_paren_token: L_PAREN@139..140 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@140..153 "\"./style.css\"" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@153..154 ")" [] [],
                 },
                 layer: missing (optional),
@@ -285,11 +289,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@157..164 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@164..167 "URL" [] [],
+                    name: URL_KW@164..167 "URL" [] [],
                     l_paren_token: L_PAREN@167..168 "(" [] [],
-                    any_css_url_value: CssUrlValueRaw {
+                    value: CssUrlValueRaw {
                         value_token: CSS_URL_VALUE_RAW_LITERAL@168..179 "./style.css" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@179..180 ")" [] [],
                 },
                 layer: missing (optional),
@@ -303,11 +308,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@183..190 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@190..193 "URL" [] [],
+                    name: URL_KW@190..193 "URL" [] [],
                     l_paren_token: L_PAREN@193..194 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@194..207 "\"./style.css\"" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@207..208 ")" [] [],
                 },
                 layer: missing (optional),
@@ -356,11 +362,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@259..266 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@266..269 "url" [] [],
+                    name: URL_KW@266..269 "url" [] [],
                     l_paren_token: L_PAREN@269..270 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@270..285 "'landscape.css'" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@285..287 ")" [] [Whitespace(" ")],
                 },
                 layer: missing (optional),
@@ -399,11 +406,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@324..331 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@331..334 "url" [] [],
+                    name: URL_KW@331..334 "url" [] [],
                     l_paren_token: L_PAREN@334..335 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@335..346 "\"theme.css\"" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@346..348 ")" [] [Whitespace(" ")],
                 },
                 layer: CssImportAnonymousLayer {
@@ -419,11 +427,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@356..363 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@363..366 "url" [] [],
+                    name: URL_KW@363..366 "url" [] [],
                     l_paren_token: L_PAREN@366..367 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@367..378 "\"theme.css\"" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@378..380 ")" [] [Whitespace(" ")],
                 },
                 layer: CssImportAnonymousLayer {
@@ -439,11 +448,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@391..398 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@398..401 "url" [] [],
+                    name: URL_KW@398..401 "url" [] [],
                     l_paren_token: L_PAREN@401..402 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@402..413 "\"theme.css\"" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@413..415 ")" [] [Whitespace(" ")],
                 },
                 layer: CssImportAnonymousLayer {
@@ -459,11 +469,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@423..430 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@430..433 "url" [] [],
+                    name: URL_KW@430..433 "url" [] [],
                     l_paren_token: L_PAREN@433..434 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@434..445 "\"theme.css\"" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@445..447 ")" [] [Whitespace(" ")],
                 },
                 layer: CssImportNamedLayer {
@@ -486,11 +497,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@464..471 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@471..474 "url" [] [],
+                    name: URL_KW@471..474 "url" [] [],
                     l_paren_token: L_PAREN@474..475 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@475..486 "\"theme.css\"" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@486..488 ")" [] [Whitespace(" ")],
                 },
                 layer: CssImportNamedLayer {
@@ -513,11 +525,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@505..512 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@512..515 "url" [] [],
+                    name: URL_KW@512..515 "url" [] [],
                     l_paren_token: L_PAREN@515..516 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@516..526 "\"tabs.css\"" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@526..528 ")" [] [Whitespace(" ")],
                 },
                 layer: CssImportNamedLayer {
@@ -544,11 +557,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@557..564 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@564..567 "url" [] [],
+                    name: URL_KW@564..567 "url" [] [],
                     l_paren_token: L_PAREN@567..568 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@568..582 "\"override.css\"" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@582..584 ")" [] [Whitespace(" ")],
                 },
                 layer: CssImportAnonymousLayer {
@@ -564,11 +578,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@592..599 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@599..602 "url" [] [],
+                    name: URL_KW@599..602 "url" [] [],
                     l_paren_token: L_PAREN@602..603 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@603..615 "\"narrow.css\"" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@615..617 ")" [] [Whitespace(" ")],
                 },
                 layer: missing (optional),
@@ -626,11 +641,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@675..682 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@682..685 "url" [] [],
+                    name: URL_KW@682..685 "url" [] [],
                     l_paren_token: L_PAREN@685..686 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@686..698 "\"narrow.css\"" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@698..700 ")" [] [Whitespace(" ")],
                 },
                 layer: missing (optional),
@@ -688,11 +704,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@758..765 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@765..768 "url" [] [],
+                    name: URL_KW@765..768 "url" [] [],
                     l_paren_token: L_PAREN@768..769 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@769..790 "\"fallback-layout.css\"" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@790..792 ")" [] [Whitespace(" ")],
                 },
                 layer: missing (optional),
@@ -731,11 +748,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@824..831 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@831..834 "url" [] [],
+                    name: URL_KW@831..834 "url" [] [],
                     l_paren_token: L_PAREN@834..835 "(" [] [],
-                    any_css_url_value: CssUrlValueRaw {
+                    value: CssUrlValueRaw {
                         value_token: CSS_URL_VALUE_RAW_LITERAL@835..843 "test.css" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@843..844 ")" [] [],
                 },
                 layer: missing (optional),
@@ -749,11 +767,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@847..854 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@854..857 "url" [] [],
+                    name: URL_KW@854..857 "url" [] [],
                     l_paren_token: L_PAREN@857..858 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@858..868 "'test.css'" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@868..869 ")" [] [],
                 },
                 layer: missing (optional),
@@ -767,11 +786,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@872..879 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@879..882 "url" [] [],
+                    name: URL_KW@879..882 "url" [] [],
                     l_paren_token: L_PAREN@882..883 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@883..893 "\"test.css\"" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@893..894 ")" [] [],
                 },
                 layer: missing (optional),
@@ -785,11 +805,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@897..904 "IMPORT" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@904..907 "url" [] [],
+                    name: URL_KW@904..907 "url" [] [],
                     l_paren_token: L_PAREN@907..908 "(" [] [],
-                    any_css_url_value: CssUrlValueRaw {
+                    value: CssUrlValueRaw {
                         value_token: CSS_URL_VALUE_RAW_LITERAL@908..916 "test.css" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@916..917 ")" [] [],
                 },
                 layer: missing (optional),
@@ -803,11 +824,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@920..927 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@927..930 "URL" [] [],
+                    name: URL_KW@927..930 "URL" [] [],
                     l_paren_token: L_PAREN@930..931 "(" [] [],
-                    any_css_url_value: CssUrlValueRaw {
+                    value: CssUrlValueRaw {
                         value_token: CSS_URL_VALUE_RAW_LITERAL@931..939 "test.css" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@939..940 ")" [] [],
                 },
                 layer: missing (optional),
@@ -821,11 +843,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@943..950 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@950..953 "url" [] [],
+                    name: URL_KW@950..953 "url" [] [],
                     l_paren_token: L_PAREN@953..954 "(" [] [],
-                    any_css_url_value: CssUrlValueRaw {
+                    value: CssUrlValueRaw {
                         value_token: CSS_URL_VALUE_RAW_LITERAL@954..963 "test.css " [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@963..964 ")" [] [],
                 },
                 layer: missing (optional),
@@ -839,11 +862,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@967..974 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@974..977 "url" [] [],
+                    name: URL_KW@974..977 "url" [] [],
                     l_paren_token: L_PAREN@977..979 "(" [] [Whitespace(" ")],
-                    any_css_url_value: CssUrlValueRaw {
+                    value: CssUrlValueRaw {
                         value_token: CSS_URL_VALUE_RAW_LITERAL@979..987 "test.css" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@987..988 ")" [] [],
                 },
                 layer: missing (optional),
@@ -857,11 +881,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@991..998 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@998..1001 "url" [] [],
+                    name: URL_KW@998..1001 "url" [] [],
                     l_paren_token: L_PAREN@1001..1003 "(" [] [Whitespace(" ")],
-                    any_css_url_value: CssUrlValueRaw {
+                    value: CssUrlValueRaw {
                         value_token: CSS_URL_VALUE_RAW_LITERAL@1003..1012 "test.css " [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@1012..1013 ")" [] [],
                 },
                 layer: missing (optional),
@@ -875,11 +900,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@1016..1023 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@1023..1026 "url" [] [],
+                    name: URL_KW@1023..1026 "url" [] [],
                     l_paren_token: L_PAREN@1026..1027 "(" [] [],
-                    any_css_url_value: CssUrlValueRaw {
+                    value: CssUrlValueRaw {
                         value_token: CSS_URL_VALUE_RAW_LITERAL@1027..1037 "test.css\n" [Newline("\n")] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@1037..1038 ")" [] [],
                 },
                 layer: missing (optional),
@@ -893,9 +919,10 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@1041..1048 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@1048..1051 "url" [] [],
+                    name: URL_KW@1048..1051 "url" [] [],
                     l_paren_token: L_PAREN@1051..1052 "(" [] [],
-                    any_css_url_value: missing (optional),
+                    value: missing (optional),
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@1052..1053 ")" [] [],
                 },
                 layer: missing (optional),
@@ -909,11 +936,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@1056..1063 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@1063..1066 "url" [] [],
+                    name: URL_KW@1063..1066 "url" [] [],
                     l_paren_token: L_PAREN@1066..1067 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@1067..1069 "''" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@1069..1070 ")" [] [],
                 },
                 layer: missing (optional),
@@ -927,11 +955,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@1073..1080 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@1080..1083 "url" [] [],
+                    name: URL_KW@1080..1083 "url" [] [],
                     l_paren_token: L_PAREN@1083..1084 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@1084..1086 "\"\"" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@1086..1087 ")" [] [],
                 },
                 layer: missing (optional),
@@ -1023,9 +1052,10 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@1183..1190 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@1190..1193 "url" [] [],
+                    name: URL_KW@1190..1193 "url" [] [],
                     l_paren_token: L_PAREN@1193..1194 "(" [] [],
-                    any_css_url_value: missing (optional),
+                    value: missing (optional),
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@1194..1195 ")" [] [],
                 },
                 layer: missing (optional),
@@ -1039,11 +1069,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@1198..1205 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@1205..1208 "url" [] [],
+                    name: URL_KW@1205..1208 "url" [] [],
                     l_paren_token: L_PAREN@1208..1209 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@1209..1211 "''" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@1211..1212 ")" [] [],
                 },
                 layer: missing (optional),
@@ -1057,11 +1088,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@1215..1222 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@1222..1225 "url" [] [],
+                    name: URL_KW@1222..1225 "url" [] [],
                     l_paren_token: L_PAREN@1225..1226 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@1226..1228 "\"\"" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@1228..1229 ")" [] [],
                 },
                 layer: missing (optional),
@@ -1075,11 +1107,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@1232..1239 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@1239..1242 "url" [] [],
+                    name: URL_KW@1239..1242 "url" [] [],
                     l_paren_token: L_PAREN@1242..1243 "(" [] [],
-                    any_css_url_value: CssUrlValueRaw {
+                    value: CssUrlValueRaw {
                         value_token: CSS_URL_VALUE_RAW_LITERAL@1243..1251 "test.css" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@1251..1253 ")" [] [Whitespace(" ")],
                 },
                 layer: missing (optional),
@@ -1118,11 +1151,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@1290..1297 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@1297..1300 "url" [] [],
+                    name: URL_KW@1297..1300 "url" [] [],
                     l_paren_token: L_PAREN@1300..1301 "(" [] [],
-                    any_css_url_value: CssUrlValueRaw {
+                    value: CssUrlValueRaw {
                         value_token: CSS_URL_VALUE_RAW_LITERAL@1301..1309 "test.css" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@1309..1311 ")" [] [Whitespace(" ")],
                 },
                 layer: missing (optional),
@@ -1161,11 +1195,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@1349..1356 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@1356..1359 "url" [] [],
+                    name: URL_KW@1356..1359 "url" [] [],
                     l_paren_token: L_PAREN@1359..1360 "(" [] [],
-                    any_css_url_value: CssUrlValueRaw {
+                    value: CssUrlValueRaw {
                         value_token: CSS_URL_VALUE_RAW_LITERAL@1360..1368 "test.css" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@1368..1369 ")" [] [],
                 },
                 layer: missing (optional),
@@ -1204,11 +1239,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@1406..1413 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@1413..1416 "url" [] [],
+                    name: URL_KW@1413..1416 "url" [] [],
                     l_paren_token: L_PAREN@1416..1417 "(" [] [],
-                    any_css_url_value: CssUrlValueRaw {
+                    value: CssUrlValueRaw {
                         value_token: CSS_URL_VALUE_RAW_LITERAL@1417..1425 "test.css" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@1425..1429 ")" [] [Whitespace("   ")],
                 },
                 layer: missing (optional),
@@ -1247,11 +1283,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@1485..1492 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@1492..1495 "url" [] [],
+                    name: URL_KW@1492..1495 "url" [] [],
                     l_paren_token: L_PAREN@1495..1496 "(" [] [],
-                    any_css_url_value: CssUrlValueRaw {
+                    value: CssUrlValueRaw {
                         value_token: CSS_URL_VALUE_RAW_LITERAL@1496..1504 "test.css" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@1504..1506 ")" [] [Whitespace(" ")],
                 },
                 layer: missing (optional),
@@ -1290,11 +1327,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@1543..1550 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@1550..1553 "url" [] [],
+                    name: URL_KW@1550..1553 "url" [] [],
                     l_paren_token: L_PAREN@1553..1554 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@1554..1579 "\"//example.com/style.css\"" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@1579..1580 ")" [] [],
                 },
                 layer: missing (optional),
@@ -1308,11 +1346,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@1583..1590 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@1590..1593 "url" [] [],
+                    name: URL_KW@1590..1593 "url" [] [],
                     l_paren_token: L_PAREN@1593..1594 "(" [] [],
-                    any_css_url_value: CssUrlValueRaw {
+                    value: CssUrlValueRaw {
                         value_token: CSS_URL_VALUE_RAW_LITERAL@1594..1611 "~package/test.css" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@1611..1612 ")" [] [],
                 },
                 layer: missing (optional),
@@ -1326,11 +1365,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@1615..1622 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@1622..1625 "url" [] [],
+                    name: URL_KW@1622..1625 "url" [] [],
                     l_paren_token: L_PAREN@1625..1626 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@1626..1674 "'https://fonts.googleapis.com/css?family=Roboto'" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@1674..1675 ")" [] [],
                 },
                 layer: missing (optional),
@@ -1344,11 +1384,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@1678..1685 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@1685..1688 "url" [] [],
+                    name: URL_KW@1685..1688 "url" [] [],
                     l_paren_token: L_PAREN@1688..1689 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@1689..1743 "'https://fonts.googleapis.com/css?family=Noto+Sans+TC'" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@1743..1744 ")" [] [],
                 },
                 layer: missing (optional),
@@ -1362,11 +1403,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@1747..1754 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@1754..1757 "url" [] [],
+                    name: URL_KW@1754..1757 "url" [] [],
                     l_paren_token: L_PAREN@1757..1758 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@1758..1819 "'https://fonts.googleapis.com/css?family=Noto+Sans+TC|Roboto'" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@1819..1820 ")" [] [],
                 },
                 layer: missing (optional),
@@ -1380,11 +1422,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@1823..1830 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@1830..1833 "url" [] [],
+                    name: URL_KW@1830..1833 "url" [] [],
                     l_paren_token: L_PAREN@1833..1834 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@1834..1850 "'./relative.css'" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@1850..1851 ")" [] [],
                 },
                 layer: missing (optional),
@@ -1398,11 +1441,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@1854..1861 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@1861..1864 "url" [] [],
+                    name: URL_KW@1861..1864 "url" [] [],
                     l_paren_token: L_PAREN@1864..1865 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@1865..1893 "'../import/top-relative.css'" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@1893..1894 ")" [] [],
                 },
                 layer: missing (optional),
@@ -1416,11 +1460,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@1897..1904 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@1904..1907 "url" [] [],
+                    name: URL_KW@1904..1907 "url" [] [],
                     l_paren_token: L_PAREN@1907..1908 "(" [] [],
-                    any_css_url_value: CssUrlValueRaw {
+                    value: CssUrlValueRaw {
                         value_token: CSS_URL_VALUE_RAW_LITERAL@1908..1926 "~package/tilde.css" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@1926..1927 ")" [] [],
                 },
                 layer: missing (optional),
@@ -1434,11 +1479,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@1930..1937 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@1937..1940 "url" [] [],
+                    name: URL_KW@1937..1940 "url" [] [],
                     l_paren_token: L_PAREN@1940..1941 "(" [] [],
-                    any_css_url_value: CssUrlValueRaw {
+                    value: CssUrlValueRaw {
                         value_token: CSS_URL_VALUE_RAW_LITERAL@1941..1965 "~aliasesImport/alias.css" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@1965..1966 ")" [] [],
                 },
                 layer: missing (optional),
@@ -1452,11 +1498,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@1969..1976 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@1976..1979 "url" [] [],
+                    name: URL_KW@1976..1979 "url" [] [],
                     l_paren_token: L_PAREN@1979..1980 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@1980..1991 "'./url.css'" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@1991..1992 ")" [] [],
                 },
                 layer: missing (optional),
@@ -1470,11 +1517,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@1996..2003 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@2003..2006 "url" [] [],
+                    name: URL_KW@2003..2006 "url" [] [],
                     l_paren_token: L_PAREN@2006..2007 "(" [] [],
-                    any_css_url_value: CssUrlValueRaw {
+                    value: CssUrlValueRaw {
                         value_token: CSS_URL_VALUE_RAW_LITERAL@2007..2017 "./test.css" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@2017..2018 ")" [] [],
                 },
                 layer: missing (optional),
@@ -1514,11 +1562,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@2074..2081 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@2081..2084 "url" [] [],
+                    name: URL_KW@2081..2084 "url" [] [],
                     l_paren_token: L_PAREN@2084..2085 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@2085..2099 "'./te\\\nst.css'" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@2099..2100 ")" [] [],
                 },
                 layer: missing (optional),
@@ -1532,11 +1581,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@2103..2110 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@2110..2113 "url" [] [],
+                    name: URL_KW@2110..2113 "url" [] [],
                     l_paren_token: L_PAREN@2113..2114 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@2114..2132 "'./te\\\n\\\n\\\nst.css'" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@2132..2133 ")" [] [],
                 },
                 layer: missing (optional),
@@ -1563,11 +1613,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@2160..2167 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@2167..2170 "url" [] [],
+                    name: URL_KW@2167..2170 "url" [] [],
                     l_paren_token: L_PAREN@2170..2171 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@2171..2184 "\"./te'st.css\"" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@2184..2185 ")" [] [],
                 },
                 layer: missing (optional),
@@ -1594,11 +1645,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@2212..2219 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@2219..2222 "url" [] [],
+                    name: URL_KW@2219..2222 "url" [] [],
                     l_paren_token: L_PAREN@2222..2223 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@2223..2237 "'./te\\'st.css'" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@2237..2238 ")" [] [],
                 },
                 layer: missing (optional),
@@ -1625,11 +1677,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@2268..2275 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@2275..2278 "url" [] [],
+                    name: URL_KW@2275..2278 "url" [] [],
                     l_paren_token: L_PAREN@2278..2279 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@2279..2296 "'./test test.css'" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@2296..2297 ")" [] [],
                 },
                 layer: missing (optional),
@@ -1656,11 +1709,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@2328..2335 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@2335..2338 "url" [] [],
+                    name: URL_KW@2335..2338 "url" [] [],
                     l_paren_token: L_PAREN@2338..2339 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@2339..2357 "'./test\\ test.css'" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@2357..2358 ")" [] [],
                 },
                 layer: missing (optional),
@@ -1687,11 +1741,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@2390..2397 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@2397..2400 "url" [] [],
+                    name: URL_KW@2397..2400 "url" [] [],
                     l_paren_token: L_PAREN@2400..2401 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@2401..2420 "'./test%20test.css'" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@2420..2421 ")" [] [],
                 },
                 layer: missing (optional),
@@ -1718,11 +1773,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@2454..2461 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@2461..2464 "url" [] [],
+                    name: URL_KW@2461..2464 "url" [] [],
                     l_paren_token: L_PAREN@2464..2465 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@2465..2485 "'./\\74\\65\\73\\74.css'" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@2485..2486 ")" [] [],
                 },
                 layer: missing (optional),
@@ -1749,11 +1805,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@2517..2524 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@2524..2527 "url" [] [],
+                    name: URL_KW@2524..2527 "url" [] [],
                     l_paren_token: L_PAREN@2527..2528 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@2528..2546 "'./t\\65\\73\\74.css'" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@2546..2547 ")" [] [],
                 },
                 layer: missing (optional),
@@ -1767,11 +1824,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@2550..2557 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@2557..2560 "url" [] [],
+                    name: URL_KW@2557..2560 "url" [] [],
                     l_paren_token: L_PAREN@2560..2561 "(" [] [],
-                    any_css_url_value: CssUrlValueRaw {
+                    value: CssUrlValueRaw {
                         value_token: CSS_URL_VALUE_RAW_LITERAL@2561..2577 "./test\\ test.css" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@2577..2578 ")" [] [],
                 },
                 layer: missing (optional),
@@ -1785,11 +1843,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@2581..2588 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@2588..2591 "url" [] [],
+                    name: URL_KW@2588..2591 "url" [] [],
                     l_paren_token: L_PAREN@2591..2592 "(" [] [],
-                    any_css_url_value: CssUrlValueRaw {
+                    value: CssUrlValueRaw {
                         value_token: CSS_URL_VALUE_RAW_LITERAL@2592..2611 "./t\\65st%20test.css" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@2611..2612 ")" [] [],
                 },
                 layer: missing (optional),
@@ -1803,11 +1862,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@2615..2622 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@2622..2625 "url" [] [],
+                    name: URL_KW@2622..2625 "url" [] [],
                     l_paren_token: L_PAREN@2625..2626 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@2626..2647 "'./t\\65st%20test.css'" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@2647..2648 ")" [] [],
                 },
                 layer: missing (optional),
@@ -1821,11 +1881,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@2651..2658 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@2658..2661 "url" [] [],
+                    name: URL_KW@2658..2661 "url" [] [],
                     l_paren_token: L_PAREN@2661..2662 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@2662..2683 "\"./t\\65st%20test.css\"" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@2683..2684 ")" [] [],
                 },
                 layer: missing (optional),
@@ -1865,11 +1926,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@2749..2756 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@2756..2759 "url" [] [],
+                    name: URL_KW@2756..2759 "url" [] [],
                     l_paren_token: L_PAREN@2759..2777 "(" [] [Whitespace("                 ")],
-                    any_css_url_value: CssUrlValueRaw {
+                    value: CssUrlValueRaw {
                         value_token: CSS_URL_VALUE_RAW_LITERAL@2777..2807 "test.css                      " [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@2807..2808 ")" [] [],
                 },
                 layer: missing (optional),
@@ -1896,11 +1958,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@2829..2836 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@2836..2839 "url" [] [],
+                    name: URL_KW@2836..2839 "url" [] [],
                     l_paren_token: L_PAREN@2839..2840 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@2840..2908 "'!!../../helpers/string-loader.js?esModule=false!~package/tilde.css'" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@2908..2909 ")" [] [],
                 },
                 layer: missing (optional),
@@ -1914,11 +1977,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@2913..2920 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@2920..2923 "url" [] [],
+                    name: URL_KW@2920..2923 "url" [] [],
                     l_paren_token: L_PAREN@2923..2924 "(" [] [],
-                    any_css_url_value: CssUrlValueRaw {
+                    value: CssUrlValueRaw {
                         value_token: CSS_URL_VALUE_RAW_LITERAL@2924..2940 "test.css?foo=bar" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@2940..2941 ")" [] [],
                 },
                 layer: missing (optional),
@@ -1932,11 +1996,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@2944..2951 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@2951..2954 "url" [] [],
+                    name: URL_KW@2951..2954 "url" [] [],
                     l_paren_token: L_PAREN@2954..2955 "(" [] [],
-                    any_css_url_value: CssUrlValueRaw {
+                    value: CssUrlValueRaw {
                         value_token: CSS_URL_VALUE_RAW_LITERAL@2955..2976 "test.css?foo=bar#hash" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@2976..2977 ")" [] [],
                 },
                 layer: missing (optional),
@@ -1950,11 +2015,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@2980..2987 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@2987..2990 "url" [] [],
+                    name: URL_KW@2987..2990 "url" [] [],
                     l_paren_token: L_PAREN@2990..2991 "(" [] [],
-                    any_css_url_value: CssUrlValueRaw {
+                    value: CssUrlValueRaw {
                         value_token: CSS_URL_VALUE_RAW_LITERAL@2991..3005 "test.css?#hash" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@3005..3006 ")" [] [],
                 },
                 layer: missing (optional),
@@ -2124,11 +2190,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@3238..3245 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@3245..3248 "url" [] [],
+                    name: URL_KW@3245..3248 "url" [] [],
                     l_paren_token: L_PAREN@3248..3249 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@3249..3267 "'   ./test.css   '" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@3267..3268 ")" [] [],
                 },
                 layer: missing (optional),
@@ -2142,11 +2209,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@3271..3278 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@3278..3281 "url" [] [],
+                    name: URL_KW@3278..3281 "url" [] [],
                     l_paren_token: L_PAREN@3281..3285 "(" [] [Whitespace("   ")],
-                    any_css_url_value: CssUrlValueRaw {
+                    value: CssUrlValueRaw {
                         value_token: CSS_URL_VALUE_RAW_LITERAL@3285..3298 "./test.css   " [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@3298..3299 ")" [] [],
                 },
                 layer: missing (optional),
@@ -2173,11 +2241,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@3325..3332 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@3332..3335 "url" [] [],
+                    name: URL_KW@3332..3335 "url" [] [],
                     l_paren_token: L_PAREN@3335..3336 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@3336..3390 "'   https://fonts.googleapis.com/css?family=Roboto   '" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@3390..3391 ")" [] [],
                 },
                 layer: missing (optional),
@@ -2191,11 +2260,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@3394..3401 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@3401..3404 "url" [] [],
+                    name: URL_KW@3401..3404 "url" [] [],
                     l_paren_token: L_PAREN@3404..3405 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@3405..3455 "'!!../../helpers/string-loader.js?esModule=false!'" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@3455..3456 ")" [] [],
                 },
                 layer: missing (optional),
@@ -2209,11 +2279,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@3459..3466 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@3466..3469 "url" [] [],
+                    name: URL_KW@3466..3469 "url" [] [],
                     l_paren_token: L_PAREN@3469..3470 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@3470..3544 "'   !!../../helpers/string-loader.js?esModule=false!~package/tilde.css   '" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@3544..3545 ")" [] [],
                 },
                 layer: missing (optional),
@@ -2227,11 +2298,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@3548..3555 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@3555..3558 "url" [] [],
+                    name: URL_KW@3555..3558 "url" [] [],
                     l_paren_token: L_PAREN@3558..3559 "(" [] [],
-                    any_css_url_value: CssUrlValueRaw {
+                    value: CssUrlValueRaw {
                         value_token: CSS_URL_VALUE_RAW_LITERAL@3559..3632 "data:text/css;charset=utf-8,a%20%7B%0D%0A%20%20color%3A%20red%3B%0D%0A%7D" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@3632..3633 ")" [] [],
                 },
                 layer: missing (optional),
@@ -2245,11 +2317,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@3637..3644 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@3644..3647 "url" [] [],
+                    name: URL_KW@3644..3647 "url" [] [],
                     l_paren_token: L_PAREN@3647..3648 "(" [] [],
-                    any_css_url_value: CssUrlValueRaw {
+                    value: CssUrlValueRaw {
                         value_token: CSS_URL_VALUE_RAW_LITERAL@3648..3665 "package/first.css" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@3665..3666 ")" [] [],
                 },
                 layer: missing (optional),
@@ -2263,11 +2336,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@3669..3676 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@3676..3679 "url" [] [],
+                    name: URL_KW@3676..3679 "url" [] [],
                     l_paren_token: L_PAREN@3679..3680 "(" [] [],
-                    any_css_url_value: CssUrlValueRaw {
+                    value: CssUrlValueRaw {
                         value_token: CSS_URL_VALUE_RAW_LITERAL@3680..3698 "package/second.css" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@3698..3699 ")" [] [],
                 },
                 layer: missing (optional),
@@ -2281,11 +2355,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@3703..3710 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@3710..3713 "url" [] [],
+                    name: URL_KW@3710..3713 "url" [] [],
                     l_paren_token: L_PAREN@3713..3714 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@3714..3726 "\"./test.css\"" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@3726..3728 ")" [] [Whitespace(" ")],
                 },
                 layer: missing (optional),
@@ -2317,11 +2392,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@3754..3761 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@3761..3764 "url" [] [],
+                    name: URL_KW@3761..3764 "url" [] [],
                     l_paren_token: L_PAREN@3764..3765 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@3765..3777 "\"./test.css\"" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@3777..3779 ")" [] [Whitespace(" ")],
                 },
                 layer: missing (optional),
@@ -2356,11 +2432,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@3816..3823 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@3823..3826 "url" [] [],
+                    name: URL_KW@3823..3826 "url" [] [],
                     l_paren_token: L_PAREN@3826..3827 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@3827..3839 "\"./test.css\"" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@3839..3841 ")" [] [Whitespace(" ")],
                 },
                 layer: missing (optional),
@@ -2418,11 +2495,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@3897..3904 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@3904..3907 "url" [] [],
+                    name: URL_KW@3904..3907 "url" [] [],
                     l_paren_token: L_PAREN@3907..3908 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@3908..3920 "\"./test.css\"" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@3920..3922 ")" [] [Whitespace(" ")],
                 },
                 layer: CssImportAnonymousLayer {
@@ -2438,11 +2516,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@3930..3937 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@3937..3940 "url" [] [],
+                    name: URL_KW@3937..3940 "url" [] [],
                     l_paren_token: L_PAREN@3940..3941 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@3941..3953 "\"./test.css\"" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@3953..3955 ")" [] [Whitespace(" ")],
                 },
                 layer: CssImportNamedLayer {
@@ -2465,11 +2544,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@3972..3979 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@3979..3982 "url" [] [],
+                    name: URL_KW@3979..3982 "url" [] [],
                     l_paren_token: L_PAREN@3982..3983 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@3983..3995 "\"./test.css\"" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@3995..3997 ")" [] [Whitespace(" ")],
                 },
                 layer: CssImportNamedLayer {
@@ -2536,11 +2616,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@4068..4075 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@4075..4078 "url" [] [],
+                    name: URL_KW@4075..4078 "url" [] [],
                     l_paren_token: L_PAREN@4078..4079 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@4079..4091 "\"./test.css\"" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@4091..4093 ")" [] [Whitespace(" ")],
                 },
                 layer: CssImportAnonymousLayer {
@@ -2600,11 +2681,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@4155..4162 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@4162..4165 "url" [] [],
+                    name: URL_KW@4162..4165 "url" [] [],
                     l_paren_token: L_PAREN@4165..4166 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@4166..4178 "\"./test.css\"" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@4178..4180 ")" [] [Whitespace(" ")],
                 },
                 layer: CssImportAnonymousLayer {
@@ -2664,11 +2746,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@4242..4249 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@4249..4252 "url" [] [],
+                    name: URL_KW@4249..4252 "url" [] [],
                     l_paren_token: L_PAREN@4252..4253 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@4253..4265 "\"./test.css\"" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@4265..4267 ")" [] [Whitespace(" ")],
                 },
                 layer: CssImportAnonymousLayer {
@@ -2684,11 +2767,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@4275..4282 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@4282..4285 "url" [] [],
+                    name: URL_KW@4282..4285 "url" [] [],
                     l_paren_token: L_PAREN@4285..4286 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@4286..4316 "\"http://example.com/style.css\"" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@4316..4318 ")" [] [Whitespace(" ")],
                 },
                 layer: missing (optional),
@@ -2746,11 +2830,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@4374..4381 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@4381..4384 "url" [] [],
+                    name: URL_KW@4381..4384 "url" [] [],
                     l_paren_token: L_PAREN@4384..4385 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@4385..4397 "\"./test.css\"" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@4397..4398 ")" [] [],
                 },
                 layer: CssImportNamedLayer {
@@ -2817,11 +2902,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@4466..4473 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@4473..4476 "url" [] [],
+                    name: URL_KW@4473..4476 "url" [] [],
                     l_paren_token: L_PAREN@4476..4477 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@4477..4489 "\"./test.css\"" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@4489..4490 ")" [] [],
                 },
                 layer: missing (optional),
@@ -2861,11 +2947,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@4522..4529 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@4529..4532 "url" [] [],
+                    name: URL_KW@4529..4532 "url" [] [],
                     l_paren_token: L_PAREN@4532..4533 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@4533..4545 "\"./test.css\"" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@4545..4551 ")" [] [Whitespace("     ")],
                 },
                 layer: CssImportNamedLayer {
@@ -2932,11 +3019,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@4686..4693 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@4693..4696 "url" [] [],
+                    name: URL_KW@4693..4696 "url" [] [],
                     l_paren_token: L_PAREN@4696..4697 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@4697..4709 "\"./test.css\"" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@4709..4711 ")" [] [Whitespace(" ")],
                 },
                 layer: CssImportNamedLayer {
@@ -3003,11 +3091,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@4782..4789 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@4789..4792 "url" [] [],
+                    name: URL_KW@4789..4792 "url" [] [],
                     l_paren_token: L_PAREN@4792..4793 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@4793..4805 "\"./test.css\"" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@4805..4821 ")" [] [Whitespace(" "), Comments("/* Comment */"), Whitespace(" ")],
                 },
                 layer: CssImportNamedLayer {
@@ -3074,11 +3163,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@5075..5082 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@5082..5085 "url" [] [],
+                    name: URL_KW@5082..5085 "url" [] [],
                     l_paren_token: L_PAREN@5085..5086 "(" [] [],
-                    any_css_url_value: CssUrlValueRaw {
+                    value: CssUrlValueRaw {
                         value_token: CSS_URL_VALUE_RAW_LITERAL@5086..5094 "test.css" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@5094..5109 ")" [] [Whitespace(" "), Comments("/* Comment */")],
                 },
                 layer: missing (optional),
@@ -3092,11 +3182,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@5112..5133 "import" [] [Whitespace(" "), Comments("/* Comment */"), Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@5133..5136 "url" [] [],
+                    name: URL_KW@5133..5136 "url" [] [],
                     l_paren_token: L_PAREN@5136..5137 "(" [] [],
-                    any_css_url_value: CssUrlValueRaw {
+                    value: CssUrlValueRaw {
                         value_token: CSS_URL_VALUE_RAW_LITERAL@5137..5145 "test.css" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@5145..5160 ")" [] [Whitespace(" "), Comments("/* Comment */")],
                 },
                 layer: missing (optional),
@@ -3110,11 +3201,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@5163..5170 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@5170..5173 "url" [] [],
+                    name: URL_KW@5170..5173 "url" [] [],
                     l_paren_token: L_PAREN@5173..5174 "(" [] [],
-                    any_css_url_value: CssUrlValueRaw {
+                    value: CssUrlValueRaw {
                         value_token: CSS_URL_VALUE_RAW_LITERAL@5174..5182 "test.css" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@5182..5198 ")" [] [Whitespace(" "), Comments("/* Comment */"), Whitespace(" ")],
                 },
                 layer: missing (optional),
@@ -3153,11 +3245,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@5234..5255 "import" [] [Whitespace(" "), Comments("/* Comment */"), Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@5255..5258 "url" [] [],
+                    name: URL_KW@5255..5258 "url" [] [],
                     l_paren_token: L_PAREN@5258..5259 "(" [] [],
-                    any_css_url_value: CssUrlValueRaw {
+                    value: CssUrlValueRaw {
                         value_token: CSS_URL_VALUE_RAW_LITERAL@5259..5267 "test.css" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@5267..5283 ")" [] [Whitespace(" "), Comments("/* Comment */"), Whitespace(" ")],
                 },
                 layer: missing (optional),
@@ -3196,11 +3289,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@5320..5327 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@5327..5330 "url" [] [],
+                    name: URL_KW@5327..5330 "url" [] [],
                     l_paren_token: L_PAREN@5330..5331 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@5331..5361 "\"./deep-import-with-media.css\"" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@5361..5363 ")" [] [Whitespace(" ")],
                 },
                 layer: missing (optional),
@@ -3230,11 +3324,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@5394..5401 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@5401..5404 "url" [] [],
+                    name: URL_KW@5401..5404 "url" [] [],
                     l_paren_token: L_PAREN@5404..5405 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@5405..5433 "\"./import-with-supports.css\"" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@5433..5435 ")" [] [Whitespace(" ")],
                 },
                 layer: missing (optional),
@@ -3266,11 +3361,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@5461..5468 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@5468..5471 "url" [] [],
+                    name: URL_KW@5468..5471 "url" [] [],
                     l_paren_token: L_PAREN@5471..5472 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@5472..5500 "\"./import-with-supports.css\"" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@5500..5502 ")" [] [Whitespace(" ")],
                 },
                 layer: missing (optional),
@@ -3310,11 +3406,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@5532..5539 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@5539..5542 "url" [] [],
+                    name: URL_KW@5539..5542 "url" [] [],
                     l_paren_token: L_PAREN@5542..5543 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@5543..5576 "\"./deep-import-with-supports.css\"" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@5576..5578 ")" [] [Whitespace(" ")],
                 },
                 layer: missing (optional),
@@ -3346,11 +3443,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@5604..5611 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@5611..5614 "url" [] [],
+                    name: URL_KW@5611..5614 "url" [] [],
                     l_paren_token: L_PAREN@5614..5615 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@5615..5627 "'./test.css'" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@5627..5629 ")" [] [Whitespace(" ")],
                 },
                 layer: missing (optional),
@@ -3382,11 +3480,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@5655..5662 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@5662..5665 "url" [] [],
+                    name: URL_KW@5662..5665 "url" [] [],
                     l_paren_token: L_PAREN@5665..5666 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@5666..5678 "'./test.css'" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@5678..5680 ")" [] [Whitespace(" ")],
                 },
                 layer: missing (optional),
@@ -3418,11 +3517,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@5718..5725 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@5725..5728 "url" [] [],
+                    name: URL_KW@5725..5728 "url" [] [],
                     l_paren_token: L_PAREN@5728..5729 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@5729..5767 "\"./import-with-supports-and-media.css\"" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@5767..5769 ")" [] [Whitespace(" ")],
                 },
                 layer: missing (optional),
@@ -3480,11 +3580,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@5825..5832 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@5832..5835 "url" [] [],
+                    name: URL_KW@5832..5835 "url" [] [],
                     l_paren_token: L_PAREN@5835..5836 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@5836..5848 "\"./test.css\"" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@5848..5850 ")" [] [Whitespace(" ")],
                 },
                 layer: CssImportNamedLayer {
@@ -3507,11 +3608,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@5869..5876 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@5876..5879 "url" [] [],
+                    name: URL_KW@5876..5879 "url" [] [],
                     l_paren_token: L_PAREN@5879..5880 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@5880..5914 "\"./import-multiple-with-layer.css\"" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@5914..5916 ")" [] [Whitespace(" ")],
                 },
                 layer: CssImportNamedLayer {
@@ -3534,11 +3636,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@5933..5940 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@5940..5943 "url" [] [],
+                    name: URL_KW@5940..5943 "url" [] [],
                     l_paren_token: L_PAREN@5943..5944 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@5944..5972 "\"./import-unnamed-layer.css\"" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@5972..5974 ")" [] [Whitespace(" ")],
                 },
                 layer: CssImportNamedLayer {
@@ -3561,11 +3664,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@5988..5995 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@5995..5998 "url" [] [],
+                    name: URL_KW@5995..5998 "url" [] [],
                     l_paren_token: L_PAREN@5998..5999 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@5999..6037 "\"./import-with-layer-and-supports.css\"" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@6037..6039 ")" [] [Whitespace(" ")],
                 },
                 layer: CssImportNamedLayer {
@@ -3606,11 +3710,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@6081..6088 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@6088..6091 "url" [] [],
+                    name: URL_KW@6088..6091 "url" [] [],
                     l_paren_token: L_PAREN@6091..6092 "(" [] [],
-                    any_css_url_value: CssUrlValueRaw {
+                    value: CssUrlValueRaw {
                         value_token: CSS_URL_VALUE_RAW_LITERAL@6092..6110 "bootstrap-base.css" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@6110..6112 ")" [] [Whitespace(" ")],
                 },
                 layer: CssImportNamedLayer {
@@ -3633,11 +3738,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@6126..6133 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@6133..6136 "url" [] [],
+                    name: URL_KW@6133..6136 "url" [] [],
                     l_paren_token: L_PAREN@6136..6137 "(" [] [],
-                    any_css_url_value: CssUrlValueRaw {
+                    value: CssUrlValueRaw {
                         value_token: CSS_URL_VALUE_RAW_LITERAL@6137..6154 "base-headings.css" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@6154..6156 ")" [] [Whitespace(" ")],
                 },
                 layer: CssImportAnonymousLayer {
@@ -3653,11 +3759,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@6164..6171 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@6171..6174 "url" [] [],
+                    name: URL_KW@6171..6174 "url" [] [],
                     l_paren_token: L_PAREN@6174..6175 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@6175..6185 "\"tabs.css\"" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@6185..6187 ")" [] [Whitespace(" ")],
                 },
                 layer: CssImportNamedLayer {
@@ -3684,11 +3791,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@6216..6223 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@6223..6226 "url" [] [],
+                    name: URL_KW@6223..6226 "url" [] [],
                     l_paren_token: L_PAREN@6226..6227 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@6227..6241 "\"override.css\"" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@6241..6243 ")" [] [Whitespace(" ")],
                 },
                 layer: CssImportAnonymousLayer {
@@ -3704,11 +3812,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@6251..6258 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@6258..6261 "url" [] [],
+                    name: URL_KW@6258..6261 "url" [] [],
                     l_paren_token: L_PAREN@6261..6262 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@6262..6283 "\"fallback-layout.css\"" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@6283..6285 ")" [] [Whitespace(" ")],
                 },
                 layer: missing (optional),
@@ -3747,11 +3856,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@6317..6324 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@6324..6327 "url" [] [],
+                    name: URL_KW@6324..6327 "url" [] [],
                     l_paren_token: L_PAREN@6327..6328 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@6328..6340 "\"narrow.css\"" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@6340..6342 ")" [] [Whitespace(" ")],
                 },
                 layer: missing (optional),
@@ -3840,11 +3950,12 @@ CssRoot {
             rule: CssImportAtRule {
                 import_token: IMPORT_KW@6449..6456 "import" [] [Whitespace(" ")],
                 url: CssUrlFunction {
-                    url_token: URL_KW@6456..6459 "url" [] [],
+                    name: URL_KW@6456..6459 "url" [] [],
                     l_paren_token: L_PAREN@6459..6460 "(" [] [],
-                    any_css_url_value: CssString {
+                    value: CssString {
                         value_token: CSS_STRING_LITERAL@6460..6470 "\"tabs.css\"" [] [],
                     },
+                    modifiers: CssUrlModifierList [],
                     r_paren_token: R_PAREN@6470..6472 ")" [] [Whitespace(" ")],
                 },
                 layer: CssImportNamedLayer {
@@ -3886,7 +3997,8 @@ CssRoot {
           1: L_PAREN@11..12 "(" [] []
           2: CSS_STRING@12..25
             0: CSS_STRING_LITERAL@12..25 "\"./style.css\"" [] []
-          3: R_PAREN@25..26 ")" [] []
+          3: CSS_URL_MODIFIER_LIST@25..25
+          4: R_PAREN@25..26 ")" [] []
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@26..26
@@ -3900,7 +4012,8 @@ CssRoot {
           1: L_PAREN@39..40 "(" [] []
           2: CSS_STRING@40..53
             0: CSS_STRING_LITERAL@40..53 "'./style.css'" [] []
-          3: R_PAREN@53..54 ")" [] []
+          3: CSS_URL_MODIFIER_LIST@53..53
+          4: R_PAREN@53..54 ")" [] []
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@54..54
@@ -3914,7 +4027,8 @@ CssRoot {
           1: L_PAREN@67..68 "(" [] []
           2: CSS_URL_VALUE_RAW@68..79
             0: CSS_URL_VALUE_RAW_LITERAL@68..79 "./style.css" [] []
-          3: R_PAREN@79..80 ")" [] []
+          3: CSS_URL_MODIFIER_LIST@79..79
+          4: R_PAREN@79..80 ")" [] []
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@80..80
@@ -3948,7 +4062,8 @@ CssRoot {
           1: L_PAREN@139..140 "(" [] []
           2: CSS_STRING@140..153
             0: CSS_STRING_LITERAL@140..153 "\"./style.css\"" [] []
-          3: R_PAREN@153..154 ")" [] []
+          3: CSS_URL_MODIFIER_LIST@153..153
+          4: R_PAREN@153..154 ")" [] []
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@154..154
@@ -3962,7 +4077,8 @@ CssRoot {
           1: L_PAREN@167..168 "(" [] []
           2: CSS_URL_VALUE_RAW@168..179
             0: CSS_URL_VALUE_RAW_LITERAL@168..179 "./style.css" [] []
-          3: R_PAREN@179..180 ")" [] []
+          3: CSS_URL_MODIFIER_LIST@179..179
+          4: R_PAREN@179..180 ")" [] []
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@180..180
@@ -3976,7 +4092,8 @@ CssRoot {
           1: L_PAREN@193..194 "(" [] []
           2: CSS_STRING@194..207
             0: CSS_STRING_LITERAL@194..207 "\"./style.css\"" [] []
-          3: R_PAREN@207..208 ")" [] []
+          3: CSS_URL_MODIFIER_LIST@207..207
+          4: R_PAREN@207..208 ")" [] []
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@208..208
@@ -4015,7 +4132,8 @@ CssRoot {
           1: L_PAREN@269..270 "(" [] []
           2: CSS_STRING@270..285
             0: CSS_STRING_LITERAL@270..285 "'landscape.css'" [] []
-          3: R_PAREN@285..287 ")" [] [Whitespace(" ")]
+          3: CSS_URL_MODIFIER_LIST@285..285
+          4: R_PAREN@285..287 ")" [] [Whitespace(" ")]
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@287..321
@@ -4045,7 +4163,8 @@ CssRoot {
           1: L_PAREN@334..335 "(" [] []
           2: CSS_STRING@335..346
             0: CSS_STRING_LITERAL@335..346 "\"theme.css\"" [] []
-          3: R_PAREN@346..348 ")" [] [Whitespace(" ")]
+          3: CSS_URL_MODIFIER_LIST@346..346
+          4: R_PAREN@346..348 ")" [] [Whitespace(" ")]
         2: CSS_IMPORT_ANONYMOUS_LAYER@348..353
           0: LAYER_KW@348..353 "layer" [] []
         3: (empty)
@@ -4060,7 +4179,8 @@ CssRoot {
           1: L_PAREN@366..367 "(" [] []
           2: CSS_STRING@367..378
             0: CSS_STRING_LITERAL@367..378 "\"theme.css\"" [] []
-          3: R_PAREN@378..380 ")" [] [Whitespace(" ")]
+          3: CSS_URL_MODIFIER_LIST@378..378
+          4: R_PAREN@378..380 ")" [] [Whitespace(" ")]
         2: CSS_IMPORT_ANONYMOUS_LAYER@380..388
           0: LAYER_KW@380..388 "layer" [] [Whitespace("   ")]
         3: (empty)
@@ -4075,7 +4195,8 @@ CssRoot {
           1: L_PAREN@401..402 "(" [] []
           2: CSS_STRING@402..413
             0: CSS_STRING_LITERAL@402..413 "\"theme.css\"" [] []
-          3: R_PAREN@413..415 ")" [] [Whitespace(" ")]
+          3: CSS_URL_MODIFIER_LIST@413..413
+          4: R_PAREN@413..415 ")" [] [Whitespace(" ")]
         2: CSS_IMPORT_ANONYMOUS_LAYER@415..420
           0: LAYER_KW@415..420 "LAYER" [] []
         3: (empty)
@@ -4090,7 +4211,8 @@ CssRoot {
           1: L_PAREN@433..434 "(" [] []
           2: CSS_STRING@434..445
             0: CSS_STRING_LITERAL@434..445 "\"theme.css\"" [] []
-          3: R_PAREN@445..447 ")" [] [Whitespace(" ")]
+          3: CSS_URL_MODIFIER_LIST@445..445
+          4: R_PAREN@445..447 ")" [] [Whitespace(" ")]
         2: CSS_IMPORT_NAMED_LAYER@447..461
           0: LAYER_KW@447..452 "layer" [] []
           1: L_PAREN@452..453 "(" [] []
@@ -4110,7 +4232,8 @@ CssRoot {
           1: L_PAREN@474..475 "(" [] []
           2: CSS_STRING@475..486
             0: CSS_STRING_LITERAL@475..486 "\"theme.css\"" [] []
-          3: R_PAREN@486..488 ")" [] [Whitespace(" ")]
+          3: CSS_URL_MODIFIER_LIST@486..486
+          4: R_PAREN@486..488 ")" [] [Whitespace(" ")]
         2: CSS_IMPORT_NAMED_LAYER@488..502
           0: LAYER_KW@488..493 "LAYER" [] []
           1: L_PAREN@493..494 "(" [] []
@@ -4130,7 +4253,8 @@ CssRoot {
           1: L_PAREN@515..516 "(" [] []
           2: CSS_STRING@516..526
             0: CSS_STRING_LITERAL@516..526 "\"tabs.css\"" [] []
-          3: R_PAREN@526..528 ")" [] [Whitespace(" ")]
+          3: CSS_URL_MODIFIER_LIST@526..526
+          4: R_PAREN@526..528 ")" [] [Whitespace(" ")]
         2: CSS_IMPORT_NAMED_LAYER@528..554
           0: LAYER_KW@528..533 "layer" [] []
           1: L_PAREN@533..534 "(" [] []
@@ -4153,7 +4277,8 @@ CssRoot {
           1: L_PAREN@567..568 "(" [] []
           2: CSS_STRING@568..582
             0: CSS_STRING_LITERAL@568..582 "\"override.css\"" [] []
-          3: R_PAREN@582..584 ")" [] [Whitespace(" ")]
+          3: CSS_URL_MODIFIER_LIST@582..582
+          4: R_PAREN@582..584 ")" [] [Whitespace(" ")]
         2: CSS_IMPORT_ANONYMOUS_LAYER@584..589
           0: LAYER_KW@584..589 "layer" [] []
         3: (empty)
@@ -4168,7 +4293,8 @@ CssRoot {
           1: L_PAREN@602..603 "(" [] []
           2: CSS_STRING@603..615
             0: CSS_STRING_LITERAL@603..615 "\"narrow.css\"" [] []
-          3: R_PAREN@615..617 ")" [] [Whitespace(" ")]
+          3: CSS_URL_MODIFIER_LIST@615..615
+          4: R_PAREN@615..617 ")" [] [Whitespace(" ")]
         2: (empty)
         3: CSS_IMPORT_SUPPORTS@617..641
           0: SUPPORTS_KW@617..625 "supports" [] []
@@ -4211,7 +4337,8 @@ CssRoot {
           1: L_PAREN@685..686 "(" [] []
           2: CSS_STRING@686..698
             0: CSS_STRING_LITERAL@686..698 "\"narrow.css\"" [] []
-          3: R_PAREN@698..700 ")" [] [Whitespace(" ")]
+          3: CSS_URL_MODIFIER_LIST@698..698
+          4: R_PAREN@698..700 ")" [] [Whitespace(" ")]
         2: (empty)
         3: CSS_IMPORT_SUPPORTS@700..724
           0: SUPPORTS_KW@700..708 "SUPPORTS" [] []
@@ -4254,7 +4381,8 @@ CssRoot {
           1: L_PAREN@768..769 "(" [] []
           2: CSS_STRING@769..790
             0: CSS_STRING_LITERAL@769..790 "\"fallback-layout.css\"" [] []
-          3: R_PAREN@790..792 ")" [] [Whitespace(" ")]
+          3: CSS_URL_MODIFIER_LIST@790..790
+          4: R_PAREN@790..792 ")" [] [Whitespace(" ")]
         2: (empty)
         3: CSS_IMPORT_SUPPORTS@792..821
           0: SUPPORTS_KW@792..800 "supports" [] []
@@ -4285,7 +4413,8 @@ CssRoot {
           1: L_PAREN@834..835 "(" [] []
           2: CSS_URL_VALUE_RAW@835..843
             0: CSS_URL_VALUE_RAW_LITERAL@835..843 "test.css" [] []
-          3: R_PAREN@843..844 ")" [] []
+          3: CSS_URL_MODIFIER_LIST@843..843
+          4: R_PAREN@843..844 ")" [] []
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@844..844
@@ -4299,7 +4428,8 @@ CssRoot {
           1: L_PAREN@857..858 "(" [] []
           2: CSS_STRING@858..868
             0: CSS_STRING_LITERAL@858..868 "'test.css'" [] []
-          3: R_PAREN@868..869 ")" [] []
+          3: CSS_URL_MODIFIER_LIST@868..868
+          4: R_PAREN@868..869 ")" [] []
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@869..869
@@ -4313,7 +4443,8 @@ CssRoot {
           1: L_PAREN@882..883 "(" [] []
           2: CSS_STRING@883..893
             0: CSS_STRING_LITERAL@883..893 "\"test.css\"" [] []
-          3: R_PAREN@893..894 ")" [] []
+          3: CSS_URL_MODIFIER_LIST@893..893
+          4: R_PAREN@893..894 ")" [] []
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@894..894
@@ -4327,7 +4458,8 @@ CssRoot {
           1: L_PAREN@907..908 "(" [] []
           2: CSS_URL_VALUE_RAW@908..916
             0: CSS_URL_VALUE_RAW_LITERAL@908..916 "test.css" [] []
-          3: R_PAREN@916..917 ")" [] []
+          3: CSS_URL_MODIFIER_LIST@916..916
+          4: R_PAREN@916..917 ")" [] []
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@917..917
@@ -4341,7 +4473,8 @@ CssRoot {
           1: L_PAREN@930..931 "(" [] []
           2: CSS_URL_VALUE_RAW@931..939
             0: CSS_URL_VALUE_RAW_LITERAL@931..939 "test.css" [] []
-          3: R_PAREN@939..940 ")" [] []
+          3: CSS_URL_MODIFIER_LIST@939..939
+          4: R_PAREN@939..940 ")" [] []
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@940..940
@@ -4355,7 +4488,8 @@ CssRoot {
           1: L_PAREN@953..954 "(" [] []
           2: CSS_URL_VALUE_RAW@954..963
             0: CSS_URL_VALUE_RAW_LITERAL@954..963 "test.css " [] []
-          3: R_PAREN@963..964 ")" [] []
+          3: CSS_URL_MODIFIER_LIST@963..963
+          4: R_PAREN@963..964 ")" [] []
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@964..964
@@ -4369,7 +4503,8 @@ CssRoot {
           1: L_PAREN@977..979 "(" [] [Whitespace(" ")]
           2: CSS_URL_VALUE_RAW@979..987
             0: CSS_URL_VALUE_RAW_LITERAL@979..987 "test.css" [] []
-          3: R_PAREN@987..988 ")" [] []
+          3: CSS_URL_MODIFIER_LIST@987..987
+          4: R_PAREN@987..988 ")" [] []
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@988..988
@@ -4383,7 +4518,8 @@ CssRoot {
           1: L_PAREN@1001..1003 "(" [] [Whitespace(" ")]
           2: CSS_URL_VALUE_RAW@1003..1012
             0: CSS_URL_VALUE_RAW_LITERAL@1003..1012 "test.css " [] []
-          3: R_PAREN@1012..1013 ")" [] []
+          3: CSS_URL_MODIFIER_LIST@1012..1012
+          4: R_PAREN@1012..1013 ")" [] []
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@1013..1013
@@ -4397,7 +4533,8 @@ CssRoot {
           1: L_PAREN@1026..1027 "(" [] []
           2: CSS_URL_VALUE_RAW@1027..1037
             0: CSS_URL_VALUE_RAW_LITERAL@1027..1037 "test.css\n" [Newline("\n")] []
-          3: R_PAREN@1037..1038 ")" [] []
+          3: CSS_URL_MODIFIER_LIST@1037..1037
+          4: R_PAREN@1037..1038 ")" [] []
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@1038..1038
@@ -4410,7 +4547,8 @@ CssRoot {
           0: URL_KW@1048..1051 "url" [] []
           1: L_PAREN@1051..1052 "(" [] []
           2: (empty)
-          3: R_PAREN@1052..1053 ")" [] []
+          3: CSS_URL_MODIFIER_LIST@1052..1052
+          4: R_PAREN@1052..1053 ")" [] []
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@1053..1053
@@ -4424,7 +4562,8 @@ CssRoot {
           1: L_PAREN@1066..1067 "(" [] []
           2: CSS_STRING@1067..1069
             0: CSS_STRING_LITERAL@1067..1069 "''" [] []
-          3: R_PAREN@1069..1070 ")" [] []
+          3: CSS_URL_MODIFIER_LIST@1069..1069
+          4: R_PAREN@1069..1070 ")" [] []
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@1070..1070
@@ -4438,7 +4577,8 @@ CssRoot {
           1: L_PAREN@1083..1084 "(" [] []
           2: CSS_STRING@1084..1086
             0: CSS_STRING_LITERAL@1084..1086 "\"\"" [] []
-          3: R_PAREN@1086..1087 ")" [] []
+          3: CSS_URL_MODIFIER_LIST@1086..1086
+          4: R_PAREN@1086..1087 ")" [] []
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@1087..1087
@@ -4511,7 +4651,8 @@ CssRoot {
           0: URL_KW@1190..1193 "url" [] []
           1: L_PAREN@1193..1194 "(" [] []
           2: (empty)
-          3: R_PAREN@1194..1195 ")" [] []
+          3: CSS_URL_MODIFIER_LIST@1194..1194
+          4: R_PAREN@1194..1195 ")" [] []
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@1195..1195
@@ -4525,7 +4666,8 @@ CssRoot {
           1: L_PAREN@1208..1209 "(" [] []
           2: CSS_STRING@1209..1211
             0: CSS_STRING_LITERAL@1209..1211 "''" [] []
-          3: R_PAREN@1211..1212 ")" [] []
+          3: CSS_URL_MODIFIER_LIST@1211..1211
+          4: R_PAREN@1211..1212 ")" [] []
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@1212..1212
@@ -4539,7 +4681,8 @@ CssRoot {
           1: L_PAREN@1225..1226 "(" [] []
           2: CSS_STRING@1226..1228
             0: CSS_STRING_LITERAL@1226..1228 "\"\"" [] []
-          3: R_PAREN@1228..1229 ")" [] []
+          3: CSS_URL_MODIFIER_LIST@1228..1228
+          4: R_PAREN@1228..1229 ")" [] []
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@1229..1229
@@ -4553,7 +4696,8 @@ CssRoot {
           1: L_PAREN@1242..1243 "(" [] []
           2: CSS_URL_VALUE_RAW@1243..1251
             0: CSS_URL_VALUE_RAW_LITERAL@1243..1251 "test.css" [] []
-          3: R_PAREN@1251..1253 ")" [] [Whitespace(" ")]
+          3: CSS_URL_MODIFIER_LIST@1251..1251
+          4: R_PAREN@1251..1253 ")" [] [Whitespace(" ")]
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@1253..1287
@@ -4583,7 +4727,8 @@ CssRoot {
           1: L_PAREN@1300..1301 "(" [] []
           2: CSS_URL_VALUE_RAW@1301..1309
             0: CSS_URL_VALUE_RAW_LITERAL@1301..1309 "test.css" [] []
-          3: R_PAREN@1309..1311 ")" [] [Whitespace(" ")]
+          3: CSS_URL_MODIFIER_LIST@1309..1309
+          4: R_PAREN@1309..1311 ")" [] [Whitespace(" ")]
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@1311..1346
@@ -4613,7 +4758,8 @@ CssRoot {
           1: L_PAREN@1359..1360 "(" [] []
           2: CSS_URL_VALUE_RAW@1360..1368
             0: CSS_URL_VALUE_RAW_LITERAL@1360..1368 "test.css" [] []
-          3: R_PAREN@1368..1369 ")" [] []
+          3: CSS_URL_MODIFIER_LIST@1368..1368
+          4: R_PAREN@1368..1369 ")" [] []
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@1369..1403
@@ -4643,7 +4789,8 @@ CssRoot {
           1: L_PAREN@1416..1417 "(" [] []
           2: CSS_URL_VALUE_RAW@1417..1425
             0: CSS_URL_VALUE_RAW_LITERAL@1417..1425 "test.css" [] []
-          3: R_PAREN@1425..1429 ")" [] [Whitespace("   ")]
+          3: CSS_URL_MODIFIER_LIST@1425..1425
+          4: R_PAREN@1425..1429 ")" [] [Whitespace("   ")]
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@1429..1482
@@ -4673,7 +4820,8 @@ CssRoot {
           1: L_PAREN@1495..1496 "(" [] []
           2: CSS_URL_VALUE_RAW@1496..1504
             0: CSS_URL_VALUE_RAW_LITERAL@1496..1504 "test.css" [] []
-          3: R_PAREN@1504..1506 ")" [] [Whitespace(" ")]
+          3: CSS_URL_MODIFIER_LIST@1504..1504
+          4: R_PAREN@1504..1506 ")" [] [Whitespace(" ")]
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@1506..1540
@@ -4703,7 +4851,8 @@ CssRoot {
           1: L_PAREN@1553..1554 "(" [] []
           2: CSS_STRING@1554..1579
             0: CSS_STRING_LITERAL@1554..1579 "\"//example.com/style.css\"" [] []
-          3: R_PAREN@1579..1580 ")" [] []
+          3: CSS_URL_MODIFIER_LIST@1579..1579
+          4: R_PAREN@1579..1580 ")" [] []
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@1580..1580
@@ -4717,7 +4866,8 @@ CssRoot {
           1: L_PAREN@1593..1594 "(" [] []
           2: CSS_URL_VALUE_RAW@1594..1611
             0: CSS_URL_VALUE_RAW_LITERAL@1594..1611 "~package/test.css" [] []
-          3: R_PAREN@1611..1612 ")" [] []
+          3: CSS_URL_MODIFIER_LIST@1611..1611
+          4: R_PAREN@1611..1612 ")" [] []
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@1612..1612
@@ -4731,7 +4881,8 @@ CssRoot {
           1: L_PAREN@1625..1626 "(" [] []
           2: CSS_STRING@1626..1674
             0: CSS_STRING_LITERAL@1626..1674 "'https://fonts.googleapis.com/css?family=Roboto'" [] []
-          3: R_PAREN@1674..1675 ")" [] []
+          3: CSS_URL_MODIFIER_LIST@1674..1674
+          4: R_PAREN@1674..1675 ")" [] []
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@1675..1675
@@ -4745,7 +4896,8 @@ CssRoot {
           1: L_PAREN@1688..1689 "(" [] []
           2: CSS_STRING@1689..1743
             0: CSS_STRING_LITERAL@1689..1743 "'https://fonts.googleapis.com/css?family=Noto+Sans+TC'" [] []
-          3: R_PAREN@1743..1744 ")" [] []
+          3: CSS_URL_MODIFIER_LIST@1743..1743
+          4: R_PAREN@1743..1744 ")" [] []
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@1744..1744
@@ -4759,7 +4911,8 @@ CssRoot {
           1: L_PAREN@1757..1758 "(" [] []
           2: CSS_STRING@1758..1819
             0: CSS_STRING_LITERAL@1758..1819 "'https://fonts.googleapis.com/css?family=Noto+Sans+TC|Roboto'" [] []
-          3: R_PAREN@1819..1820 ")" [] []
+          3: CSS_URL_MODIFIER_LIST@1819..1819
+          4: R_PAREN@1819..1820 ")" [] []
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@1820..1820
@@ -4773,7 +4926,8 @@ CssRoot {
           1: L_PAREN@1833..1834 "(" [] []
           2: CSS_STRING@1834..1850
             0: CSS_STRING_LITERAL@1834..1850 "'./relative.css'" [] []
-          3: R_PAREN@1850..1851 ")" [] []
+          3: CSS_URL_MODIFIER_LIST@1850..1850
+          4: R_PAREN@1850..1851 ")" [] []
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@1851..1851
@@ -4787,7 +4941,8 @@ CssRoot {
           1: L_PAREN@1864..1865 "(" [] []
           2: CSS_STRING@1865..1893
             0: CSS_STRING_LITERAL@1865..1893 "'../import/top-relative.css'" [] []
-          3: R_PAREN@1893..1894 ")" [] []
+          3: CSS_URL_MODIFIER_LIST@1893..1893
+          4: R_PAREN@1893..1894 ")" [] []
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@1894..1894
@@ -4801,7 +4956,8 @@ CssRoot {
           1: L_PAREN@1907..1908 "(" [] []
           2: CSS_URL_VALUE_RAW@1908..1926
             0: CSS_URL_VALUE_RAW_LITERAL@1908..1926 "~package/tilde.css" [] []
-          3: R_PAREN@1926..1927 ")" [] []
+          3: CSS_URL_MODIFIER_LIST@1926..1926
+          4: R_PAREN@1926..1927 ")" [] []
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@1927..1927
@@ -4815,7 +4971,8 @@ CssRoot {
           1: L_PAREN@1940..1941 "(" [] []
           2: CSS_URL_VALUE_RAW@1941..1965
             0: CSS_URL_VALUE_RAW_LITERAL@1941..1965 "~aliasesImport/alias.css" [] []
-          3: R_PAREN@1965..1966 ")" [] []
+          3: CSS_URL_MODIFIER_LIST@1965..1965
+          4: R_PAREN@1965..1966 ")" [] []
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@1966..1966
@@ -4829,7 +4986,8 @@ CssRoot {
           1: L_PAREN@1979..1980 "(" [] []
           2: CSS_STRING@1980..1991
             0: CSS_STRING_LITERAL@1980..1991 "'./url.css'" [] []
-          3: R_PAREN@1991..1992 ")" [] []
+          3: CSS_URL_MODIFIER_LIST@1991..1991
+          4: R_PAREN@1991..1992 ")" [] []
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@1992..1992
@@ -4843,7 +5001,8 @@ CssRoot {
           1: L_PAREN@2006..2007 "(" [] []
           2: CSS_URL_VALUE_RAW@2007..2017
             0: CSS_URL_VALUE_RAW_LITERAL@2007..2017 "./test.css" [] []
-          3: R_PAREN@2017..2018 ")" [] []
+          3: CSS_URL_MODIFIER_LIST@2017..2017
+          4: R_PAREN@2017..2018 ")" [] []
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@2018..2018
@@ -4877,7 +5036,8 @@ CssRoot {
           1: L_PAREN@2084..2085 "(" [] []
           2: CSS_STRING@2085..2099
             0: CSS_STRING_LITERAL@2085..2099 "'./te\\\nst.css'" [] []
-          3: R_PAREN@2099..2100 ")" [] []
+          3: CSS_URL_MODIFIER_LIST@2099..2099
+          4: R_PAREN@2099..2100 ")" [] []
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@2100..2100
@@ -4891,7 +5051,8 @@ CssRoot {
           1: L_PAREN@2113..2114 "(" [] []
           2: CSS_STRING@2114..2132
             0: CSS_STRING_LITERAL@2114..2132 "'./te\\\n\\\n\\\nst.css'" [] []
-          3: R_PAREN@2132..2133 ")" [] []
+          3: CSS_URL_MODIFIER_LIST@2132..2132
+          4: R_PAREN@2132..2133 ")" [] []
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@2133..2133
@@ -4915,7 +5076,8 @@ CssRoot {
           1: L_PAREN@2170..2171 "(" [] []
           2: CSS_STRING@2171..2184
             0: CSS_STRING_LITERAL@2171..2184 "\"./te'st.css\"" [] []
-          3: R_PAREN@2184..2185 ")" [] []
+          3: CSS_URL_MODIFIER_LIST@2184..2184
+          4: R_PAREN@2184..2185 ")" [] []
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@2185..2185
@@ -4939,7 +5101,8 @@ CssRoot {
           1: L_PAREN@2222..2223 "(" [] []
           2: CSS_STRING@2223..2237
             0: CSS_STRING_LITERAL@2223..2237 "'./te\\'st.css'" [] []
-          3: R_PAREN@2237..2238 ")" [] []
+          3: CSS_URL_MODIFIER_LIST@2237..2237
+          4: R_PAREN@2237..2238 ")" [] []
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@2238..2238
@@ -4963,7 +5126,8 @@ CssRoot {
           1: L_PAREN@2278..2279 "(" [] []
           2: CSS_STRING@2279..2296
             0: CSS_STRING_LITERAL@2279..2296 "'./test test.css'" [] []
-          3: R_PAREN@2296..2297 ")" [] []
+          3: CSS_URL_MODIFIER_LIST@2296..2296
+          4: R_PAREN@2296..2297 ")" [] []
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@2297..2297
@@ -4987,7 +5151,8 @@ CssRoot {
           1: L_PAREN@2338..2339 "(" [] []
           2: CSS_STRING@2339..2357
             0: CSS_STRING_LITERAL@2339..2357 "'./test\\ test.css'" [] []
-          3: R_PAREN@2357..2358 ")" [] []
+          3: CSS_URL_MODIFIER_LIST@2357..2357
+          4: R_PAREN@2357..2358 ")" [] []
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@2358..2358
@@ -5011,7 +5176,8 @@ CssRoot {
           1: L_PAREN@2400..2401 "(" [] []
           2: CSS_STRING@2401..2420
             0: CSS_STRING_LITERAL@2401..2420 "'./test%20test.css'" [] []
-          3: R_PAREN@2420..2421 ")" [] []
+          3: CSS_URL_MODIFIER_LIST@2420..2420
+          4: R_PAREN@2420..2421 ")" [] []
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@2421..2421
@@ -5035,7 +5201,8 @@ CssRoot {
           1: L_PAREN@2464..2465 "(" [] []
           2: CSS_STRING@2465..2485
             0: CSS_STRING_LITERAL@2465..2485 "'./\\74\\65\\73\\74.css'" [] []
-          3: R_PAREN@2485..2486 ")" [] []
+          3: CSS_URL_MODIFIER_LIST@2485..2485
+          4: R_PAREN@2485..2486 ")" [] []
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@2486..2486
@@ -5059,7 +5226,8 @@ CssRoot {
           1: L_PAREN@2527..2528 "(" [] []
           2: CSS_STRING@2528..2546
             0: CSS_STRING_LITERAL@2528..2546 "'./t\\65\\73\\74.css'" [] []
-          3: R_PAREN@2546..2547 ")" [] []
+          3: CSS_URL_MODIFIER_LIST@2546..2546
+          4: R_PAREN@2546..2547 ")" [] []
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@2547..2547
@@ -5073,7 +5241,8 @@ CssRoot {
           1: L_PAREN@2560..2561 "(" [] []
           2: CSS_URL_VALUE_RAW@2561..2577
             0: CSS_URL_VALUE_RAW_LITERAL@2561..2577 "./test\\ test.css" [] []
-          3: R_PAREN@2577..2578 ")" [] []
+          3: CSS_URL_MODIFIER_LIST@2577..2577
+          4: R_PAREN@2577..2578 ")" [] []
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@2578..2578
@@ -5087,7 +5256,8 @@ CssRoot {
           1: L_PAREN@2591..2592 "(" [] []
           2: CSS_URL_VALUE_RAW@2592..2611
             0: CSS_URL_VALUE_RAW_LITERAL@2592..2611 "./t\\65st%20test.css" [] []
-          3: R_PAREN@2611..2612 ")" [] []
+          3: CSS_URL_MODIFIER_LIST@2611..2611
+          4: R_PAREN@2611..2612 ")" [] []
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@2612..2612
@@ -5101,7 +5271,8 @@ CssRoot {
           1: L_PAREN@2625..2626 "(" [] []
           2: CSS_STRING@2626..2647
             0: CSS_STRING_LITERAL@2626..2647 "'./t\\65st%20test.css'" [] []
-          3: R_PAREN@2647..2648 ")" [] []
+          3: CSS_URL_MODIFIER_LIST@2647..2647
+          4: R_PAREN@2647..2648 ")" [] []
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@2648..2648
@@ -5115,7 +5286,8 @@ CssRoot {
           1: L_PAREN@2661..2662 "(" [] []
           2: CSS_STRING@2662..2683
             0: CSS_STRING_LITERAL@2662..2683 "\"./t\\65st%20test.css\"" [] []
-          3: R_PAREN@2683..2684 ")" [] []
+          3: CSS_URL_MODIFIER_LIST@2683..2683
+          4: R_PAREN@2683..2684 ")" [] []
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@2684..2684
@@ -5149,7 +5321,8 @@ CssRoot {
           1: L_PAREN@2759..2777 "(" [] [Whitespace("                 ")]
           2: CSS_URL_VALUE_RAW@2777..2807
             0: CSS_URL_VALUE_RAW_LITERAL@2777..2807 "test.css                      " [] []
-          3: R_PAREN@2807..2808 ")" [] []
+          3: CSS_URL_MODIFIER_LIST@2807..2807
+          4: R_PAREN@2807..2808 ")" [] []
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@2808..2808
@@ -5173,7 +5346,8 @@ CssRoot {
           1: L_PAREN@2839..2840 "(" [] []
           2: CSS_STRING@2840..2908
             0: CSS_STRING_LITERAL@2840..2908 "'!!../../helpers/string-loader.js?esModule=false!~package/tilde.css'" [] []
-          3: R_PAREN@2908..2909 ")" [] []
+          3: CSS_URL_MODIFIER_LIST@2908..2908
+          4: R_PAREN@2908..2909 ")" [] []
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@2909..2909
@@ -5187,7 +5361,8 @@ CssRoot {
           1: L_PAREN@2923..2924 "(" [] []
           2: CSS_URL_VALUE_RAW@2924..2940
             0: CSS_URL_VALUE_RAW_LITERAL@2924..2940 "test.css?foo=bar" [] []
-          3: R_PAREN@2940..2941 ")" [] []
+          3: CSS_URL_MODIFIER_LIST@2940..2940
+          4: R_PAREN@2940..2941 ")" [] []
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@2941..2941
@@ -5201,7 +5376,8 @@ CssRoot {
           1: L_PAREN@2954..2955 "(" [] []
           2: CSS_URL_VALUE_RAW@2955..2976
             0: CSS_URL_VALUE_RAW_LITERAL@2955..2976 "test.css?foo=bar#hash" [] []
-          3: R_PAREN@2976..2977 ")" [] []
+          3: CSS_URL_MODIFIER_LIST@2976..2976
+          4: R_PAREN@2976..2977 ")" [] []
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@2977..2977
@@ -5215,7 +5391,8 @@ CssRoot {
           1: L_PAREN@2990..2991 "(" [] []
           2: CSS_URL_VALUE_RAW@2991..3005
             0: CSS_URL_VALUE_RAW_LITERAL@2991..3005 "test.css?#hash" [] []
-          3: R_PAREN@3005..3006 ")" [] []
+          3: CSS_URL_MODIFIER_LIST@3005..3005
+          4: R_PAREN@3005..3006 ")" [] []
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@3006..3006
@@ -5337,7 +5514,8 @@ CssRoot {
           1: L_PAREN@3248..3249 "(" [] []
           2: CSS_STRING@3249..3267
             0: CSS_STRING_LITERAL@3249..3267 "'   ./test.css   '" [] []
-          3: R_PAREN@3267..3268 ")" [] []
+          3: CSS_URL_MODIFIER_LIST@3267..3267
+          4: R_PAREN@3267..3268 ")" [] []
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@3268..3268
@@ -5351,7 +5529,8 @@ CssRoot {
           1: L_PAREN@3281..3285 "(" [] [Whitespace("   ")]
           2: CSS_URL_VALUE_RAW@3285..3298
             0: CSS_URL_VALUE_RAW_LITERAL@3285..3298 "./test.css   " [] []
-          3: R_PAREN@3298..3299 ")" [] []
+          3: CSS_URL_MODIFIER_LIST@3298..3298
+          4: R_PAREN@3298..3299 ")" [] []
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@3299..3299
@@ -5375,7 +5554,8 @@ CssRoot {
           1: L_PAREN@3335..3336 "(" [] []
           2: CSS_STRING@3336..3390
             0: CSS_STRING_LITERAL@3336..3390 "'   https://fonts.googleapis.com/css?family=Roboto   '" [] []
-          3: R_PAREN@3390..3391 ")" [] []
+          3: CSS_URL_MODIFIER_LIST@3390..3390
+          4: R_PAREN@3390..3391 ")" [] []
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@3391..3391
@@ -5389,7 +5569,8 @@ CssRoot {
           1: L_PAREN@3404..3405 "(" [] []
           2: CSS_STRING@3405..3455
             0: CSS_STRING_LITERAL@3405..3455 "'!!../../helpers/string-loader.js?esModule=false!'" [] []
-          3: R_PAREN@3455..3456 ")" [] []
+          3: CSS_URL_MODIFIER_LIST@3455..3455
+          4: R_PAREN@3455..3456 ")" [] []
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@3456..3456
@@ -5403,7 +5584,8 @@ CssRoot {
           1: L_PAREN@3469..3470 "(" [] []
           2: CSS_STRING@3470..3544
             0: CSS_STRING_LITERAL@3470..3544 "'   !!../../helpers/string-loader.js?esModule=false!~package/tilde.css   '" [] []
-          3: R_PAREN@3544..3545 ")" [] []
+          3: CSS_URL_MODIFIER_LIST@3544..3544
+          4: R_PAREN@3544..3545 ")" [] []
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@3545..3545
@@ -5417,7 +5599,8 @@ CssRoot {
           1: L_PAREN@3558..3559 "(" [] []
           2: CSS_URL_VALUE_RAW@3559..3632
             0: CSS_URL_VALUE_RAW_LITERAL@3559..3632 "data:text/css;charset=utf-8,a%20%7B%0D%0A%20%20color%3A%20red%3B%0D%0A%7D" [] []
-          3: R_PAREN@3632..3633 ")" [] []
+          3: CSS_URL_MODIFIER_LIST@3632..3632
+          4: R_PAREN@3632..3633 ")" [] []
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@3633..3633
@@ -5431,7 +5614,8 @@ CssRoot {
           1: L_PAREN@3647..3648 "(" [] []
           2: CSS_URL_VALUE_RAW@3648..3665
             0: CSS_URL_VALUE_RAW_LITERAL@3648..3665 "package/first.css" [] []
-          3: R_PAREN@3665..3666 ")" [] []
+          3: CSS_URL_MODIFIER_LIST@3665..3665
+          4: R_PAREN@3665..3666 ")" [] []
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@3666..3666
@@ -5445,7 +5629,8 @@ CssRoot {
           1: L_PAREN@3679..3680 "(" [] []
           2: CSS_URL_VALUE_RAW@3680..3698
             0: CSS_URL_VALUE_RAW_LITERAL@3680..3698 "package/second.css" [] []
-          3: R_PAREN@3698..3699 ")" [] []
+          3: CSS_URL_MODIFIER_LIST@3698..3698
+          4: R_PAREN@3698..3699 ")" [] []
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@3699..3699
@@ -5459,7 +5644,8 @@ CssRoot {
           1: L_PAREN@3713..3714 "(" [] []
           2: CSS_STRING@3714..3726
             0: CSS_STRING_LITERAL@3714..3726 "\"./test.css\"" [] []
-          3: R_PAREN@3726..3728 ")" [] [Whitespace(" ")]
+          3: CSS_URL_MODIFIER_LIST@3726..3726
+          4: R_PAREN@3726..3728 ")" [] [Whitespace(" ")]
         2: (empty)
         3: CSS_IMPORT_SUPPORTS@3728..3751
           0: SUPPORTS_KW@3728..3736 "supports" [] []
@@ -5485,7 +5671,8 @@ CssRoot {
           1: L_PAREN@3764..3765 "(" [] []
           2: CSS_STRING@3765..3777
             0: CSS_STRING_LITERAL@3765..3777 "\"./test.css\"" [] []
-          3: R_PAREN@3777..3779 ")" [] [Whitespace(" ")]
+          3: CSS_URL_MODIFIER_LIST@3777..3777
+          4: R_PAREN@3777..3779 ")" [] [Whitespace(" ")]
         2: (empty)
         3: CSS_IMPORT_SUPPORTS@3779..3813
           0: SUPPORTS_KW@3779..3787 "supports" [] []
@@ -5513,7 +5700,8 @@ CssRoot {
           1: L_PAREN@3826..3827 "(" [] []
           2: CSS_STRING@3827..3839
             0: CSS_STRING_LITERAL@3827..3839 "\"./test.css\"" [] []
-          3: R_PAREN@3839..3841 ")" [] [Whitespace(" ")]
+          3: CSS_URL_MODIFIER_LIST@3839..3839
+          4: R_PAREN@3839..3841 ")" [] [Whitespace(" ")]
         2: (empty)
         3: CSS_IMPORT_SUPPORTS@3841..3865
           0: SUPPORTS_KW@3841..3849 "supports" [] []
@@ -5556,7 +5744,8 @@ CssRoot {
           1: L_PAREN@3907..3908 "(" [] []
           2: CSS_STRING@3908..3920
             0: CSS_STRING_LITERAL@3908..3920 "\"./test.css\"" [] []
-          3: R_PAREN@3920..3922 ")" [] [Whitespace(" ")]
+          3: CSS_URL_MODIFIER_LIST@3920..3920
+          4: R_PAREN@3920..3922 ")" [] [Whitespace(" ")]
         2: CSS_IMPORT_ANONYMOUS_LAYER@3922..3927
           0: LAYER_KW@3922..3927 "layer" [] []
         3: (empty)
@@ -5571,7 +5760,8 @@ CssRoot {
           1: L_PAREN@3940..3941 "(" [] []
           2: CSS_STRING@3941..3953
             0: CSS_STRING_LITERAL@3941..3953 "\"./test.css\"" [] []
-          3: R_PAREN@3953..3955 ")" [] [Whitespace(" ")]
+          3: CSS_URL_MODIFIER_LIST@3953..3953
+          4: R_PAREN@3953..3955 ")" [] [Whitespace(" ")]
         2: CSS_IMPORT_NAMED_LAYER@3955..3969
           0: LAYER_KW@3955..3960 "layer" [] []
           1: L_PAREN@3960..3961 "(" [] []
@@ -5591,7 +5781,8 @@ CssRoot {
           1: L_PAREN@3982..3983 "(" [] []
           2: CSS_STRING@3983..3995
             0: CSS_STRING_LITERAL@3983..3995 "\"./test.css\"" [] []
-          3: R_PAREN@3995..3997 ")" [] [Whitespace(" ")]
+          3: CSS_URL_MODIFIER_LIST@3995..3995
+          4: R_PAREN@3995..3997 ")" [] [Whitespace(" ")]
         2: CSS_IMPORT_NAMED_LAYER@3997..4012
           0: LAYER_KW@3997..4002 "layer" [] []
           1: L_PAREN@4002..4003 "(" [] []
@@ -5640,7 +5831,8 @@ CssRoot {
           1: L_PAREN@4078..4079 "(" [] []
           2: CSS_STRING@4079..4091
             0: CSS_STRING_LITERAL@4079..4091 "\"./test.css\"" [] []
-          3: R_PAREN@4091..4093 ")" [] [Whitespace(" ")]
+          3: CSS_URL_MODIFIER_LIST@4091..4091
+          4: R_PAREN@4091..4093 ")" [] [Whitespace(" ")]
         2: CSS_IMPORT_ANONYMOUS_LAYER@4093..4099
           0: LAYER_KW@4093..4099 "layer" [] [Whitespace(" ")]
         3: CSS_IMPORT_SUPPORTS@4099..4123
@@ -5684,7 +5876,8 @@ CssRoot {
           1: L_PAREN@4165..4166 "(" [] []
           2: CSS_STRING@4166..4178
             0: CSS_STRING_LITERAL@4166..4178 "\"./test.css\"" [] []
-          3: R_PAREN@4178..4180 ")" [] [Whitespace(" ")]
+          3: CSS_URL_MODIFIER_LIST@4178..4178
+          4: R_PAREN@4178..4180 ")" [] [Whitespace(" ")]
         2: CSS_IMPORT_ANONYMOUS_LAYER@4180..4186
           0: LAYER_KW@4180..4186 "layer" [] [Whitespace(" ")]
         3: CSS_IMPORT_SUPPORTS@4186..4210
@@ -5728,7 +5921,8 @@ CssRoot {
           1: L_PAREN@4252..4253 "(" [] []
           2: CSS_STRING@4253..4265
             0: CSS_STRING_LITERAL@4253..4265 "\"./test.css\"" [] []
-          3: R_PAREN@4265..4267 ")" [] [Whitespace(" ")]
+          3: CSS_URL_MODIFIER_LIST@4265..4265
+          4: R_PAREN@4265..4267 ")" [] [Whitespace(" ")]
         2: CSS_IMPORT_ANONYMOUS_LAYER@4267..4272
           0: LAYER_KW@4267..4272 "layer" [] []
         3: (empty)
@@ -5743,7 +5937,8 @@ CssRoot {
           1: L_PAREN@4285..4286 "(" [] []
           2: CSS_STRING@4286..4316
             0: CSS_STRING_LITERAL@4286..4316 "\"http://example.com/style.css\"" [] []
-          3: R_PAREN@4316..4318 ")" [] [Whitespace(" ")]
+          3: CSS_URL_MODIFIER_LIST@4316..4316
+          4: R_PAREN@4316..4318 ")" [] [Whitespace(" ")]
         2: (empty)
         3: CSS_IMPORT_SUPPORTS@4318..4342
           0: SUPPORTS_KW@4318..4326 "supports" [] []
@@ -5786,7 +5981,8 @@ CssRoot {
           1: L_PAREN@4384..4385 "(" [] []
           2: CSS_STRING@4385..4397
             0: CSS_STRING_LITERAL@4385..4397 "\"./test.css\"" [] []
-          3: R_PAREN@4397..4398 ")" [] []
+          3: CSS_URL_MODIFIER_LIST@4397..4397
+          4: R_PAREN@4397..4398 ")" [] []
         2: CSS_IMPORT_NAMED_LAYER@4398..4412
           0: LAYER_KW@4398..4403 "layer" [] []
           1: L_PAREN@4403..4404 "(" [] []
@@ -5835,7 +6031,8 @@ CssRoot {
           1: L_PAREN@4476..4477 "(" [] []
           2: CSS_STRING@4477..4489
             0: CSS_STRING_LITERAL@4477..4489 "\"./test.css\"" [] []
-          3: R_PAREN@4489..4490 ")" [] []
+          3: CSS_URL_MODIFIER_LIST@4489..4489
+          4: R_PAREN@4489..4490 ")" [] []
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@4490..4519
@@ -5866,7 +6063,8 @@ CssRoot {
           1: L_PAREN@4532..4533 "(" [] []
           2: CSS_STRING@4533..4545
             0: CSS_STRING_LITERAL@4533..4545 "\"./test.css\"" [] []
-          3: R_PAREN@4545..4551 ")" [] [Whitespace("     ")]
+          3: CSS_URL_MODIFIER_LIST@4545..4545
+          4: R_PAREN@4545..4551 ")" [] [Whitespace("     ")]
         2: CSS_IMPORT_NAMED_LAYER@4551..4580
           0: LAYER_KW@4551..4556 "layer" [] []
           1: L_PAREN@4556..4562 "(" [] [Whitespace("     ")]
@@ -5915,7 +6113,8 @@ CssRoot {
           1: L_PAREN@4696..4697 "(" [] []
           2: CSS_STRING@4697..4709
             0: CSS_STRING_LITERAL@4697..4709 "\"./test.css\"" [] []
-          3: R_PAREN@4709..4711 ")" [] [Whitespace(" ")]
+          3: CSS_URL_MODIFIER_LIST@4709..4709
+          4: R_PAREN@4709..4711 ")" [] [Whitespace(" ")]
         2: CSS_IMPORT_NAMED_LAYER@4711..4726
           0: LAYER_KW@4711..4716 "LAYER" [] []
           1: L_PAREN@4716..4717 "(" [] []
@@ -5964,7 +6163,8 @@ CssRoot {
           1: L_PAREN@4792..4793 "(" [] []
           2: CSS_STRING@4793..4805
             0: CSS_STRING_LITERAL@4793..4805 "\"./test.css\"" [] []
-          3: R_PAREN@4805..4821 ")" [] [Whitespace(" "), Comments("/* Comment */"), Whitespace(" ")]
+          3: CSS_URL_MODIFIER_LIST@4805..4805
+          4: R_PAREN@4805..4821 ")" [] [Whitespace(" "), Comments("/* Comment */"), Whitespace(" ")]
         2: CSS_IMPORT_NAMED_LAYER@4821..4876
           0: LAYER_KW@4821..4826 "layer" [] []
           1: L_PAREN@4826..4840 "(" [] [Comments("/* Comment */")]
@@ -6013,7 +6213,8 @@ CssRoot {
           1: L_PAREN@5085..5086 "(" [] []
           2: CSS_URL_VALUE_RAW@5086..5094
             0: CSS_URL_VALUE_RAW_LITERAL@5086..5094 "test.css" [] []
-          3: R_PAREN@5094..5109 ")" [] [Whitespace(" "), Comments("/* Comment */")]
+          3: CSS_URL_MODIFIER_LIST@5094..5094
+          4: R_PAREN@5094..5109 ")" [] [Whitespace(" "), Comments("/* Comment */")]
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@5109..5109
@@ -6027,7 +6228,8 @@ CssRoot {
           1: L_PAREN@5136..5137 "(" [] []
           2: CSS_URL_VALUE_RAW@5137..5145
             0: CSS_URL_VALUE_RAW_LITERAL@5137..5145 "test.css" [] []
-          3: R_PAREN@5145..5160 ")" [] [Whitespace(" "), Comments("/* Comment */")]
+          3: CSS_URL_MODIFIER_LIST@5145..5145
+          4: R_PAREN@5145..5160 ")" [] [Whitespace(" "), Comments("/* Comment */")]
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@5160..5160
@@ -6041,7 +6243,8 @@ CssRoot {
           1: L_PAREN@5173..5174 "(" [] []
           2: CSS_URL_VALUE_RAW@5174..5182
             0: CSS_URL_VALUE_RAW_LITERAL@5174..5182 "test.css" [] []
-          3: R_PAREN@5182..5198 ")" [] [Whitespace(" "), Comments("/* Comment */"), Whitespace(" ")]
+          3: CSS_URL_MODIFIER_LIST@5182..5182
+          4: R_PAREN@5182..5198 ")" [] [Whitespace(" "), Comments("/* Comment */"), Whitespace(" ")]
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@5198..5231
@@ -6071,7 +6274,8 @@ CssRoot {
           1: L_PAREN@5258..5259 "(" [] []
           2: CSS_URL_VALUE_RAW@5259..5267
             0: CSS_URL_VALUE_RAW_LITERAL@5259..5267 "test.css" [] []
-          3: R_PAREN@5267..5283 ")" [] [Whitespace(" "), Comments("/* Comment */"), Whitespace(" ")]
+          3: CSS_URL_MODIFIER_LIST@5267..5267
+          4: R_PAREN@5267..5283 ")" [] [Whitespace(" "), Comments("/* Comment */"), Whitespace(" ")]
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@5283..5316
@@ -6101,7 +6305,8 @@ CssRoot {
           1: L_PAREN@5330..5331 "(" [] []
           2: CSS_STRING@5331..5361
             0: CSS_STRING_LITERAL@5331..5361 "\"./deep-import-with-media.css\"" [] []
-          3: R_PAREN@5361..5363 ")" [] [Whitespace(" ")]
+          3: CSS_URL_MODIFIER_LIST@5361..5361
+          4: R_PAREN@5361..5363 ")" [] [Whitespace(" ")]
         2: (empty)
         3: (empty)
         4: CSS_MEDIA_QUERY_LIST@5363..5391
@@ -6125,7 +6330,8 @@ CssRoot {
           1: L_PAREN@5404..5405 "(" [] []
           2: CSS_STRING@5405..5433
             0: CSS_STRING_LITERAL@5405..5433 "\"./import-with-supports.css\"" [] []
-          3: R_PAREN@5433..5435 ")" [] [Whitespace(" ")]
+          3: CSS_URL_MODIFIER_LIST@5433..5433
+          4: R_PAREN@5433..5435 ")" [] [Whitespace(" ")]
         2: (empty)
         3: CSS_IMPORT_SUPPORTS@5435..5458
           0: SUPPORTS_KW@5435..5443 "supports" [] []
@@ -6151,7 +6357,8 @@ CssRoot {
           1: L_PAREN@5471..5472 "(" [] []
           2: CSS_STRING@5472..5500
             0: CSS_STRING_LITERAL@5472..5500 "\"./import-with-supports.css\"" [] []
-          3: R_PAREN@5500..5502 ")" [] [Whitespace(" ")]
+          3: CSS_URL_MODIFIER_LIST@5500..5500
+          4: R_PAREN@5500..5502 ")" [] [Whitespace(" ")]
         2: (empty)
         3: CSS_IMPORT_SUPPORTS@5502..5529
           0: SUPPORTS_KW@5502..5510 "supports" [] []
@@ -6183,7 +6390,8 @@ CssRoot {
           1: L_PAREN@5542..5543 "(" [] []
           2: CSS_STRING@5543..5576
             0: CSS_STRING_LITERAL@5543..5576 "\"./deep-import-with-supports.css\"" [] []
-          3: R_PAREN@5576..5578 ")" [] [Whitespace(" ")]
+          3: CSS_URL_MODIFIER_LIST@5576..5576
+          4: R_PAREN@5576..5578 ")" [] [Whitespace(" ")]
         2: (empty)
         3: CSS_IMPORT_SUPPORTS@5578..5601
           0: SUPPORTS_KW@5578..5586 "supports" [] []
@@ -6209,7 +6417,8 @@ CssRoot {
           1: L_PAREN@5614..5615 "(" [] []
           2: CSS_STRING@5615..5627
             0: CSS_STRING_LITERAL@5615..5627 "'./test.css'" [] []
-          3: R_PAREN@5627..5629 ")" [] [Whitespace(" ")]
+          3: CSS_URL_MODIFIER_LIST@5627..5627
+          4: R_PAREN@5627..5629 ")" [] [Whitespace(" ")]
         2: (empty)
         3: CSS_IMPORT_SUPPORTS@5629..5652
           0: SUPPORTS_KW@5629..5637 "supports" [] []
@@ -6235,7 +6444,8 @@ CssRoot {
           1: L_PAREN@5665..5666 "(" [] []
           2: CSS_STRING@5666..5678
             0: CSS_STRING_LITERAL@5666..5678 "'./test.css'" [] []
-          3: R_PAREN@5678..5680 ")" [] [Whitespace(" ")]
+          3: CSS_URL_MODIFIER_LIST@5678..5678
+          4: R_PAREN@5678..5680 ")" [] [Whitespace(" ")]
         2: (empty)
         3: CSS_IMPORT_SUPPORTS@5680..5715
           0: SUPPORTS_KW@5680..5688 "supports" [] []
@@ -6261,7 +6471,8 @@ CssRoot {
           1: L_PAREN@5728..5729 "(" [] []
           2: CSS_STRING@5729..5767
             0: CSS_STRING_LITERAL@5729..5767 "\"./import-with-supports-and-media.css\"" [] []
-          3: R_PAREN@5767..5769 ")" [] [Whitespace(" ")]
+          3: CSS_URL_MODIFIER_LIST@5767..5767
+          4: R_PAREN@5767..5769 ")" [] [Whitespace(" ")]
         2: (empty)
         3: CSS_IMPORT_SUPPORTS@5769..5793
           0: SUPPORTS_KW@5769..5777 "supports" [] []
@@ -6304,7 +6515,8 @@ CssRoot {
           1: L_PAREN@5835..5836 "(" [] []
           2: CSS_STRING@5836..5848
             0: CSS_STRING_LITERAL@5836..5848 "\"./test.css\"" [] []
-          3: R_PAREN@5848..5850 ")" [] [Whitespace(" ")]
+          3: CSS_URL_MODIFIER_LIST@5848..5848
+          4: R_PAREN@5848..5850 ")" [] [Whitespace(" ")]
         2: CSS_IMPORT_NAMED_LAYER@5850..5866
           0: LAYER_KW@5850..5855 "layer" [] []
           1: L_PAREN@5855..5856 "(" [] []
@@ -6324,7 +6536,8 @@ CssRoot {
           1: L_PAREN@5879..5880 "(" [] []
           2: CSS_STRING@5880..5914
             0: CSS_STRING_LITERAL@5880..5914 "\"./import-multiple-with-layer.css\"" [] []
-          3: R_PAREN@5914..5916 ")" [] [Whitespace(" ")]
+          3: CSS_URL_MODIFIER_LIST@5914..5914
+          4: R_PAREN@5914..5916 ")" [] [Whitespace(" ")]
         2: CSS_IMPORT_NAMED_LAYER@5916..5930
           0: LAYER_KW@5916..5921 "layer" [] []
           1: L_PAREN@5921..5922 "(" [] []
@@ -6344,7 +6557,8 @@ CssRoot {
           1: L_PAREN@5943..5944 "(" [] []
           2: CSS_STRING@5944..5972
             0: CSS_STRING_LITERAL@5944..5972 "\"./import-unnamed-layer.css\"" [] []
-          3: R_PAREN@5972..5974 ")" [] [Whitespace(" ")]
+          3: CSS_URL_MODIFIER_LIST@5972..5972
+          4: R_PAREN@5972..5974 ")" [] [Whitespace(" ")]
         2: CSS_IMPORT_NAMED_LAYER@5974..5985
           0: LAYER_KW@5974..5979 "layer" [] []
           1: L_PAREN@5979..5980 "(" [] []
@@ -6364,7 +6578,8 @@ CssRoot {
           1: L_PAREN@5998..5999 "(" [] []
           2: CSS_STRING@5999..6037
             0: CSS_STRING_LITERAL@5999..6037 "\"./import-with-layer-and-supports.css\"" [] []
-          3: R_PAREN@6037..6039 ")" [] [Whitespace(" ")]
+          3: CSS_URL_MODIFIER_LIST@6037..6037
+          4: R_PAREN@6037..6039 ")" [] [Whitespace(" ")]
         2: CSS_IMPORT_NAMED_LAYER@6039..6054
           0: LAYER_KW@6039..6044 "layer" [] []
           1: L_PAREN@6044..6045 "(" [] []
@@ -6396,7 +6611,8 @@ CssRoot {
           1: L_PAREN@6091..6092 "(" [] []
           2: CSS_URL_VALUE_RAW@6092..6110
             0: CSS_URL_VALUE_RAW_LITERAL@6092..6110 "bootstrap-base.css" [] []
-          3: R_PAREN@6110..6112 ")" [] [Whitespace(" ")]
+          3: CSS_URL_MODIFIER_LIST@6110..6110
+          4: R_PAREN@6110..6112 ")" [] [Whitespace(" ")]
         2: CSS_IMPORT_NAMED_LAYER@6112..6123
           0: LAYER_KW@6112..6117 "layer" [] []
           1: L_PAREN@6117..6118 "(" [] []
@@ -6416,7 +6632,8 @@ CssRoot {
           1: L_PAREN@6136..6137 "(" [] []
           2: CSS_URL_VALUE_RAW@6137..6154
             0: CSS_URL_VALUE_RAW_LITERAL@6137..6154 "base-headings.css" [] []
-          3: R_PAREN@6154..6156 ")" [] [Whitespace(" ")]
+          3: CSS_URL_MODIFIER_LIST@6154..6154
+          4: R_PAREN@6154..6156 ")" [] [Whitespace(" ")]
         2: CSS_IMPORT_ANONYMOUS_LAYER@6156..6161
           0: LAYER_KW@6156..6161 "layer" [] []
         3: (empty)
@@ -6431,7 +6648,8 @@ CssRoot {
           1: L_PAREN@6174..6175 "(" [] []
           2: CSS_STRING@6175..6185
             0: CSS_STRING_LITERAL@6175..6185 "\"tabs.css\"" [] []
-          3: R_PAREN@6185..6187 ")" [] [Whitespace(" ")]
+          3: CSS_URL_MODIFIER_LIST@6185..6185
+          4: R_PAREN@6185..6187 ")" [] [Whitespace(" ")]
         2: CSS_IMPORT_NAMED_LAYER@6187..6213
           0: LAYER_KW@6187..6192 "layer" [] []
           1: L_PAREN@6192..6193 "(" [] []
@@ -6454,7 +6672,8 @@ CssRoot {
           1: L_PAREN@6226..6227 "(" [] []
           2: CSS_STRING@6227..6241
             0: CSS_STRING_LITERAL@6227..6241 "\"override.css\"" [] []
-          3: R_PAREN@6241..6243 ")" [] [Whitespace(" ")]
+          3: CSS_URL_MODIFIER_LIST@6241..6241
+          4: R_PAREN@6241..6243 ")" [] [Whitespace(" ")]
         2: CSS_IMPORT_ANONYMOUS_LAYER@6243..6248
           0: LAYER_KW@6243..6248 "layer" [] []
         3: (empty)
@@ -6469,7 +6688,8 @@ CssRoot {
           1: L_PAREN@6261..6262 "(" [] []
           2: CSS_STRING@6262..6283
             0: CSS_STRING_LITERAL@6262..6283 "\"fallback-layout.css\"" [] []
-          3: R_PAREN@6283..6285 ")" [] [Whitespace(" ")]
+          3: CSS_URL_MODIFIER_LIST@6283..6283
+          4: R_PAREN@6283..6285 ")" [] [Whitespace(" ")]
         2: (empty)
         3: CSS_IMPORT_SUPPORTS@6285..6314
           0: SUPPORTS_KW@6285..6293 "supports" [] []
@@ -6500,7 +6720,8 @@ CssRoot {
           1: L_PAREN@6327..6328 "(" [] []
           2: CSS_STRING@6328..6340
             0: CSS_STRING_LITERAL@6328..6340 "\"narrow.css\"" [] []
-          3: R_PAREN@6340..6342 ")" [] [Whitespace(" ")]
+          3: CSS_URL_MODIFIER_LIST@6340..6340
+          4: R_PAREN@6340..6342 ")" [] [Whitespace(" ")]
         2: (empty)
         3: CSS_IMPORT_SUPPORTS@6342..6366
           0: SUPPORTS_KW@6342..6350 "supports" [] []
@@ -6565,7 +6786,8 @@ CssRoot {
           1: L_PAREN@6459..6460 "(" [] []
           2: CSS_STRING@6460..6470
             0: CSS_STRING_LITERAL@6460..6470 "\"tabs.css\"" [] []
-          3: R_PAREN@6470..6472 ")" [] [Whitespace(" ")]
+          3: CSS_URL_MODIFIER_LIST@6470..6470
+          4: R_PAREN@6470..6472 ")" [] [Whitespace(" ")]
         2: CSS_IMPORT_NAMED_LAYER@6472..6504
           0: LAYER_KW@6472..6477 "layer" [] []
           1: L_PAREN@6477..6481 "(" [] [Whitespace("   ")]
