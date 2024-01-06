@@ -382,6 +382,7 @@ impl CssBorder {
     }
     #[doc = r" Construct the `slot_map` for this node by checking the `kind` of"]
     #[doc = r" each child of `syntax` against the defined grammar for the node."]
+    #[allow(clippy::explicit_counter_loop)]
     pub fn build_slot_map(syntax: &SyntaxNode) -> [u8; 3usize] {
         let mut children = syntax.children();
         let mut slot_map = [SLOT_MAP_EMPTY_VALUE; 3usize];

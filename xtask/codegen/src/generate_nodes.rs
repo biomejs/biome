@@ -184,8 +184,16 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
                         Self { syntax, slot_map }
                     }
 
+                    // The allow for clippy is needed because nodes that _only_ have
+                    // unordered fields will have a single loop where the loop counter
+                    // is the same as the current slot, but nodes that mix ordered and
+                    // unordered fields will need the value outside of the loop. Generating
+                    // code that does this appeasingly for both cases is not worth the
+                    // effort and has no performance cost.
+
                     /// Construct the `slot_map` for this node by checking the `kind` of
                     /// each child of `syntax` against the defined grammar for the node.
+                    #[allow(clippy::explicit_counter_loop)]
                     pub fn build_slot_map(syntax: &SyntaxNode) -> #slot_map_type {
                         #slot_map_builder_impl
                     }
