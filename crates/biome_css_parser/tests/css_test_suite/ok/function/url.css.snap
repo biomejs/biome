@@ -14,8 +14,8 @@ a {
     background-image: url(   './image (1).jpg');
     background-image: url('./image (1).jpg'   );
     background-image: url(   './image (1).jpg'   );
-    background-image: url(
-    './image (1).jpg'
+    background-image: url(   
+    './image (1).jpg'   
     );
     background-image: url();
     background-image: url(   );
@@ -27,19 +27,19 @@ a {
     background-image: url(./image.png);
     background-image: url(   ./image.png   );
     background-image: url(   ./image\32.png   );
-    background-image: url(
-    ./image\32.png
+    background-image: url(   
+    ./image\32.png   
     );
     background-image: url(
-
-
-
+    
+    
+    
        ./image\32.png
-
-
-
+    
+    
+    
     );
-    background-image: url(
+    background-image: url(   
 
 
 
