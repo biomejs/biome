@@ -383,7 +383,7 @@ impl CssBorder {
     #[doc = r" Construct the `slot_map` for this node by checking the `kind` of"]
     #[doc = r" each child of `syntax` against the defined grammar for the node."]
     pub fn build_slot_map(syntax: &SyntaxNode) -> [u8; 3usize] {
-        let mut children = syntax.children().into_iter();
+        let mut children = syntax.children();
         let mut slot_map = [SLOT_MAP_EMPTY_VALUE; 3usize];
         let mut current_slot = 0;
         let mut current_element = children.next();

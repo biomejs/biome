@@ -134,55 +134,38 @@ impl CssBinaryExpression {
     }
 }
 impl CssBorder {
-    pub fn with_line_width(
-        self,
-        element: Option<AnyCssLineWidth>,
-        slot_index: u8,
-    ) -> Result<Self, ()> {
-        if self.slot_map[0usize] != SLOT_MAP_EMPTY_VALUE {
-            return Err(());
-        }
-        let mut updated_slot_map = self.slot_map.clone();
+    pub fn with_line_width(self, element: Option<AnyCssLineWidth>, slot_index: u8) -> Self {
+        let mut updated_slot_map = self.slot_map;
         updated_slot_map[0usize] = slot_index;
-        Ok(Self {
+        Self {
             syntax: self.syntax.splice_slots(
                 (slot_index as usize)..=(slot_index as usize),
                 once(element.map(|element| element.into_syntax().into())),
             ),
             slot_map: updated_slot_map,
-        })
-    }
-    pub fn with_line_style(
-        self,
-        element: Option<CssLineStyle>,
-        slot_index: u8,
-    ) -> Result<Self, ()> {
-        if self.slot_map[1usize] != SLOT_MAP_EMPTY_VALUE {
-            return Err(());
         }
-        let mut updated_slot_map = self.slot_map.clone();
+    }
+    pub fn with_line_style(self, element: Option<CssLineStyle>, slot_index: u8) -> Self {
+        let mut updated_slot_map = self.slot_map;
         updated_slot_map[1usize] = slot_index;
-        Ok(Self {
+        Self {
             syntax: self.syntax.splice_slots(
                 (slot_index as usize)..=(slot_index as usize),
                 once(element.map(|element| element.into_syntax().into())),
             ),
             slot_map: updated_slot_map,
-        })
-    }
-    pub fn with_color(self, element: Option<CssColor>, slot_index: u8) -> Result<Self, ()> {
-        if self.slot_map[2usize] != SLOT_MAP_EMPTY_VALUE {
-            return Err(());
         }
-        let mut updated_slot_map = self.slot_map.clone();
+    }
+    pub fn with_color(self, element: Option<CssColor>, slot_index: u8) -> Self {
+        let mut updated_slot_map = self.slot_map;
         updated_slot_map[2usize] = slot_index;
-        Ok(Self {
+        Self {
             syntax: self.syntax.splice_slots(
                 (slot_index as usize)..=(slot_index as usize),
                 once(element.map(|element| element.into_syntax().into())),
             ),
             slot_map: updated_slot_map,
-        })
+        }
     }
 }
 impl CssBorderProperty {

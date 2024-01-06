@@ -44,19 +44,15 @@ pub fn generate_nodes_mut(ast: &AstSrc, language_kind: LanguageKind) -> Result<S
                     // update the `slot_map` accordingly based on what we're given.
                     if node.dynamic {
                         quote! {
-                            pub fn #method_name(self, element: #arg_type, slot_index: u8) -> Result<Self, ()> {
+                            pub fn #method_name(self, element: #arg_type, slot_index: u8) -> Self {
                                 // TODO: Implement range checking for the slot index to ensure other
                                 // tokens can't accidentally be overridden.
-                                if self.slot_map[#index] != SLOT_MAP_EMPTY_VALUE {
-                                    return Err(());
-                                }
-
-                                let mut updated_slot_map = self.slot_map.clone();
+                                let mut updated_slot_map = self.slot_map;
                                 updated_slot_map[#index] = slot_index;
-                                Ok(Self {
+                                Self {
                                     syntax: self.syntax.splice_slots((slot_index as usize)..=(slot_index as usize), once(#element)),
                                     slot_map: updated_slot_map,
-                                })
+                                }
                             }
                         }
                     } else {

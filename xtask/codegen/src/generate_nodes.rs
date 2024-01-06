@@ -1059,7 +1059,7 @@ fn get_slot_map_builder_impl(node: &AstNodeSrc, language_kind: LanguageKind) -> 
         .collect::<Vec<TokenStream>>();
 
     quote! {
-        let mut children = syntax.children().into_iter();
+        let mut children = syntax.children();
         let mut slot_map = [SLOT_MAP_EMPTY_VALUE; #slot_count];
         let mut current_slot = 0;
         let mut current_element = children.next();
