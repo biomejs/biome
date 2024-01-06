@@ -38,42 +38,21 @@ import "../../styles/_installation.scss";
 import "../../styles/_community.scss";
 import Netlify from "@src/components/Netlify.astro";
 import Sponsors from "@src/components/Sponsors.astro";
+import LinterExample from "@src/components/linter/example.md";
 
 
 <div class="gradient"></div>
 <div class="grid"></div>
 
-<Card>
-  <h2 align="center">
-    What's Biome
-  </h2>
-  <p>
-    Biome is a performant toolchain for web projects, it aims to provide developer tools to maintain the health of said projects.
-
-    ```shell
-    npm install --save-dev --save-exact @biomejs/biome
-    ```
-  </p>
-
-  **Biome is a [fast formatter](./benchmark#formatting)** for _JavaScript_, _TypeScript_, _JSX_, and _JSON_ that scores **[97% compatibility with _Prettier_](https://console.algora.io/challenges/prettier)**.
-
-  ```shell
-  npx @biomejs/biome format ./src
-  ```
-
-  **Biome is a [performant linter](https://github.com/biomejs/biome/tree/main/benchmark#linting)** for _JavaScript_, _TypeScript_, and _JSX_ that features **[more than 190 rules](https://biomejs.dev/linter/rules/)** from ESLint, TypeSCript ESLint, and [other sources](https://github.com/biomejs/biome/discussions/3).
-  It **outputs detailed and contextualized diagnostics** that help you to improve your code and become a better programmer!
-
-  ```shell
-  npx @biomejs/biome lint ./src
-  ```
-</Card>
-
 
 <div class="hero-code">
   <div class="formatter">
-    <h2 class="head">Supercharge your workflow</h2>
-    <p>Experience the seamless integration of a vertical toolchain. Full of useful features like formatting and linting, with even more in the future.</p>
+    <h2 class="head">Format code like Prettier, save time</h2>
+
+    **Biome is a [fast formatter](https://github.com/biomejs/biome/tree/main/benchmark#formatting)** for _JavaScript_, _TypeScript_, _JSX_, and _JSON_ that scores **[97% compatibility with _Prettier_](https://console.algora.io/challenges/prettier)**, **saving CI and developer time**.
+
+    Biome can even **format malformed code** as you write it in [your favorite editor](/guides/integrate-in-editor/).
+
     <div class="linter format">
       <div class="inp">
         <span>CODE</span>
@@ -88,22 +67,71 @@ import Sponsors from "@src/components/Sponsors.astro";
         <div class="bench-comp">
           <div class="bench">
             <div>
-              <ProgressBar client:visible duration={5} label="Biome" />
-              <ProgressBar client:visible duration={10} label="Dprint" />
-              <ProgressBar client:visible duration={20} label="Prettier" />
+              <ProgressBar client:visible duration={0.41} label="Biome" />
+              <ProgressBar client:visible duration={14.35} label="Prettier" />
             </div>
           </div>
           <div class="perf-comp">
-            <div class="comp">~25x</div>
+            <div class="comp">~35x</div>
             <div class="comp-des">
-              Faster than Prettier when formatting 85,000 lines of code.
+              Faster than Prettier when formatting 171,127 lines of code in 2,104 files with an Intel Core i7 1270P.
             </div>
           </div>
         </div>
       </div>
     </div>
+
+    Try the Biome formatter on the [playground](/playground/) or directly on your project:
+
+    ```shell
+    npm install --save-dev --save-exact @biomejs/biome
+    npx @biomejs/biome format --write ./src
+    ```
+
   </div>
 </div>
+
+
+<div class="hero-code">
+  <div class="formatter">
+    <h2 class="head">Fix problems, learn best practice</h2>
+
+    **Biome is a [performant linter](https://github.com/biomejs/biome/tree/main/benchmark#linting)** for _JavaScript_, _TypeScript_, and _JSX_ that features **[more than 190 rules](https://biomejs.dev/linter/rules/)** from ESLint, TypeScript ESLint, and [other sources](https://github.com/biomejs/biome/discussions/3).
+
+    **Biome outputs detailed and contextualized diagnostics** that help you to improve your code and become a better programmer!
+
+    <LinterExample />
+
+    Try the Biome linter on the [playground](/playground/) or directly on your project:
+
+    ```shell
+    npm install --save-dev --save-exact @biomejs/biome
+    npx @biomejs/biome lint --apply ./src
+    ```
+
+  </div>
+</div>
+
+
+<div class="hero-code">
+  <div class="formatter">
+    <h2 class="head">Everything all at once</h2>
+
+    Not only can you format and lint your code separately, you can do it **all at once with a single command**!
+
+    Every tool integrates seamlessly with others to create **a cohesive toolchain** for web projects.
+
+    Run all tools with the `check` command:
+
+    ```shell
+    npm install --save-dev --save-exact @biomejs/biome
+    npx @biomejs/biome check --apply ./src
+    ```
+
+  </div>
+</div>
+
+
 
 <div class="card-cnt">
 

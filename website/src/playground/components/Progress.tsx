@@ -20,7 +20,7 @@ const ProgressBar = ({
 			if (Math.floor(newProgress) >= duration) {
 				clearInterval(interval);
 			} else {
-				setProgress(newProgress);
+				setProgress(Math.min(newProgress, duration));
 			}
 		};
 
