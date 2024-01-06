@@ -38,9 +38,32 @@ pub fn generate_nodes_mut(ast: &AstSrc, language_kind: LanguageKind) -> Result<S
                         (quote! { #type_name }, quote! { Some(#element) })
                     };
 
-                    quote! {
-                        pub fn #method_name(self, element: #arg_type) -> Self {
-                            Self::unwrap_cast(self.syntax.splice_slots(#index..=#index, once(#element)))
+                    // Dynamic nodes also track a `slot_map` that has to be calculated
+                    // every time the SyntaxNode gets cast back into an AstNode, so we
+                    // want to avoid that cast as much as possible. We also need to
+                    // update the `slot_map` accordingly based on what we're given.
+                    if node.dynamic {
+                        quote! {
+                            pub fn #method_name(self, element: #arg_type, slot_index: u8) -> Result<Self, ()> {
+                                // TODO: Implement range checking for the slot index to ensure other
+                                // tokens can't accidentally be overridden.
+                                if self.slot_map[#index] != SLOT_MAP_EMPTY_VALUE {
+                                    return Err(());
+                                }
+
+                                let mut updated_slot_map = self.slot_map.clone();
+                                updated_slot_map[#index] = slot_index;
+                                Ok(Self {
+                                    syntax: self.syntax.splice_slots((slot_index as usize)..=(slot_index as usize), once(#element)),
+                                    slot_map: updated_slot_map,
+                                })
+                            }
+                        }
+                    } else {
+                        quote! {
+                            pub fn #method_name(self, element: #arg_type) -> Self {
+                                Self::unwrap_cast(self.syntax.splice_slots(#index..=#index, once(#element)))
+                            }
                         }
                     }
                 })

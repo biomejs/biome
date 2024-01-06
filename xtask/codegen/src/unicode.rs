@@ -5,7 +5,7 @@ use quote::quote;
 
 mod paths {
     pub const DERIVED_CORE_PROPERTIES: &str = "target/DerivedCoreProperties.txt";
-    pub const TABLES: &str = "crates/biome_js_unicode_table/src/tables.rs";
+    pub const TABLES: &str = "crates/biome_unicode_table/src/tables.rs";
 }
 
 pub fn generate_tables() -> Result<()> {

@@ -1,0 +1,16 @@
+div {
+    /* Custom property, always generic */
+    --custom-property
+    :
+     one-value ;
+    --custom-property:    multiple   
+     values;
+    --custom-property: delimited
+    , values
+    ;
+        --custom-property   :
+         delimited / slash / values;
+    --custom-property: mixed, delimiters/can   be  ,
+     used
+     ;
+}

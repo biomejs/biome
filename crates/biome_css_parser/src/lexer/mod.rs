@@ -4,11 +4,11 @@ mod tests;
 
 use crate::CssParserOptions;
 use biome_css_syntax::{CssSyntaxKind, CssSyntaxKind::*, TextLen, TextRange, TextSize, T};
-use biome_js_unicode_table::{
-    is_css_id_continue, is_css_id_start, lookup_byte, Dispatch, Dispatch::*,
-};
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{LexContext, Lexer, LexerCheckpoint, TokenFlags};
+use biome_unicode_table::{
+    is_css_id_continue, is_css_id_start, lookup_byte, Dispatch, Dispatch::*,
+};
 use std::char::REPLACEMENT_CHARACTER;
 use unicode_bom::Bom;
 
@@ -566,7 +566,8 @@ impl<'src> CssLexer<'src> {
         if let Some(chr) = self.current_byte() {
             let dispatch = lookup_byte(chr);
             return match dispatch {
-                IDT | UNI | PRD | SLH | ZER | DIG => self.consume_url_raw_value(),
+                // TLD byte covers `url(~package/tilde.css)`;
+                IDT | UNI | PRD | SLH | ZER | DIG | TLD => self.consume_url_raw_value(),
                 _ => self.consume_token(current),
             };
         }
@@ -861,6 +862,7 @@ impl<'src> CssLexer<'src> {
             b"style" => STYLE_KW,
             b"font-face" => FONT_FACE_KW,
             b"font-palette-values" => FONT_PALETTE_VALUES_KW,
+            b"auto" => AUTO_KW,
             // CSS-Wide keywords
             b"initial" => INITIAL_KW,
             b"inherit" => INHERIT_KW,
@@ -969,6 +971,7 @@ impl<'src> CssLexer<'src> {
             b"selector" => SELECTOR_KW,
             b"url" => URL_KW,
             b"scope" => SCOPE_KW,
+            b"import" => IMPORT_KW,
             _ => IDENT,
         }
     }

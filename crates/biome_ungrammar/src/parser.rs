@@ -3,7 +3,7 @@ use std::collections::HashMap;
 
 use crate::{
     error::{bail, format_err, Result},
-    lexer::{self, TokenKind},
+    lexer::{self, CombinatorKind, TokenKind},
     Grammar, Node, NodeData, Rule, Token, TokenData,
 };
 
@@ -92,6 +92,8 @@ impl Parser {
     }
 }
 
+/// Parse a full Node. The entire production of:
+/// name '=' Rule.
 fn node(p: &mut Parser) -> Result<()> {
     let token = p.bump()?;
     let node = match token.kind {
@@ -108,37 +110,63 @@ fn node(p: &mut Parser) -> Result<()> {
     Ok(())
 }
 
+/// Parse any Rule, the right-hand side of a production. This handles
+/// all of the combinators other than juxtaposition:
+/// 'auto' | Expr | Value
+/// length || color || direction
+/// veritcal && horizontal
 fn rule(p: &mut Parser) -> Result<Rule> {
     if let Some(lexer::Token {
-        kind: TokenKind::Pipe,
+        kind: TokenKind::Pipe | TokenKind::DoubleAmpersand | TokenKind::DoublePipe,
         loc,
     }) = p.peek()
     {
         bail!(
             *loc,
             "The first element in a sequence of productions or alternatives \
-            must not have a leading pipe (`|`)"
+            must not be a combinator (`|`, `||`, or `&&`)"
         );
     }
 
     let lhs = seq_rule(p)?;
-    let mut alt = vec![lhs];
+    let mut rules = vec![lhs];
+    let mut combinator_kind: Option<CombinatorKind> = None;
     while let Some(token) = p.peek() {
-        if token.kind != TokenKind::Pipe {
+        let token_combinator = CombinatorKind::new(&token.kind);
+
+        if matches!(token_combinator, CombinatorKind::NonCombinator) {
             break;
         }
+
+        match combinator_kind {
+            Some(kind) if kind != token_combinator => {
+                bail!(token.loc, "Cannot mix combinators at the same level in a Rule. Use parentheses to specify precedence");
+            }
+            None => combinator_kind = Some(token_combinator),
+            _ => (),
+        }
+
         p.bump()?;
         let rule = seq_rule(p)?;
-        alt.push(rule)
+        rules.push(rule)
     }
-    let res = if alt.len() == 1 {
-        alt.pop().unwrap()
+    let res = if rules.len() == 1 {
+        rules.pop().unwrap()
     } else {
-        Rule::Alt(alt)
+        match combinator_kind {
+            Some(CombinatorKind::DoubleAmpersand) => Rule::UnorderedAll(rules),
+            Some(CombinatorKind::DoublePipe) => Rule::UnorderedSome(rules),
+            Some(CombinatorKind::Pipe) => Rule::Alt(rules),
+            None | Some(CombinatorKind::NonCombinator) => {
+                unreachable!("Matched more than one rule but didn't determine a combinator")
+            }
+        }
     };
     Ok(res)
 }
 
+/// Parse a multi-element sequence as a single Rule:
+/// 'while' '(' Expr ')'
 fn seq_rule(p: &mut Parser) -> Result<Rule> {
     let lhs = atom_rule(p)?;
 
@@ -154,6 +182,11 @@ fn seq_rule(p: &mut Parser) -> Result<Rule> {
     Ok(res)
 }
 
+/// Parse any single-element Rule, returning an Error if no rule is parsed.
+/// Rule
+/// Rule*
+/// Rule?
+/// ( Rule )
 fn atom_rule(p: &mut Parser) -> Result<Rule> {
     match opt_atom_rule(p)? {
         Some(it) => Ok(it),
@@ -164,6 +197,11 @@ fn atom_rule(p: &mut Parser) -> Result<Rule> {
     }
 }
 
+/// Parse any single-element Rule. Returns None if no rule is parsed.
+/// Rule
+/// Rule*
+/// Rule?
+/// ( Rule )
 fn opt_atom_rule(p: &mut Parser) -> Result<Option<Rule>> {
     let token = match p.peek() {
         Some(it) => it,

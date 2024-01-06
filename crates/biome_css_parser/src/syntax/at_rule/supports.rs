@@ -36,7 +36,7 @@ pub(crate) fn parse_supports_at_rule(p: &mut CssParser) -> ParsedSyntax {
 }
 
 #[inline]
-fn parse_any_supports_condition(p: &mut CssParser) -> ParsedSyntax {
+pub(crate) fn parse_any_supports_condition(p: &mut CssParser) -> ParsedSyntax {
     if is_at_supports_not_condition(p) {
         parse_supports_not_condition(p)
     } else {
@@ -89,7 +89,7 @@ fn parse_supports_or_condition(p: &mut CssParser) -> ParsedSyntax {
 }
 
 #[inline]
-fn is_at_supports_not_condition(p: &mut CssParser) -> bool {
+pub(crate) fn is_at_supports_not_condition(p: &mut CssParser) -> bool {
     p.at(T![not])
 }
 #[inline]

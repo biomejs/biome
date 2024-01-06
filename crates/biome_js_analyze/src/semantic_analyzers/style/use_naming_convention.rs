@@ -23,10 +23,10 @@ use biome_js_syntax::{
     JsLiteralMemberName, JsPrivateClassMemberName, JsSyntaxKind, JsSyntaxToken,
     JsVariableDeclarator, JsVariableKind, TsEnumMember, TsIdentifierBinding, TsTypeParameterName,
 };
-use biome_js_unicode_table::is_js_ident;
 use biome_rowan::{
     declare_node_union, AstNode, AstNodeList, BatchMutationExt, SyntaxResult, TextRange, TokenText,
 };
+use biome_unicode_table::is_js_ident;
 use serde::{Deserialize, Serialize};
 use smallvec::SmallVec;
 

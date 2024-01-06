@@ -93,7 +93,7 @@ biome_js_parser              = { version = "0.4.0", path = "./crates/biome_js_pa
 biome_js_semantic            = { version = "0.4.0", path = "./crates/biome_js_semantic" }
 biome_js_syntax              = { version = "0.4.0", path = "./crates/biome_js_syntax" }
 biome_js_transform           = { version = "0.4.0", path = "./crates/biome_js_transform" }
-biome_js_unicode_table       = { version = "0.4.0", path = "./crates/biome_js_unicode_table" }
+biome_unicode_table       = { version = "0.4.0", path = "./crates/biome_js_unicode_table" }
 biome_json_analyze           = { version = "0.4.0", path = "./crates/biome_json_analyze" }
 biome_json_factory           = { version = "0.4.0", path = "./crates/biome_json_factory" }
 biome_json_formatter         = { version = "0.4.0", path = "./crates/biome_json_formatter" }

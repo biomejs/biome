@@ -127,6 +127,8 @@ Biome now scores 97% compatibility with Prettier and features more than 180 lint
 
 - Fix [#1171](https://github.com/biomejs/biome/issues/1171). Correctly format empty statement with comment inside arrow body when used as single argument in call expression. Contributed by @kalleep
 
+- Fix [#1106](https://github.com/biomejs/biome/issues/1106). Fix invalid formatting of single bindings when Arrow Parentheses is set to "AsNeeded" and the expression breaks over multiple lines. [#1449](https://github.com/biomejs/biome/pull/1449) Contributed by @faultyserver
+
 ### JavaScript APIs
 
 ### Linter

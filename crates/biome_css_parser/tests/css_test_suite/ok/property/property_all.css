@@ -1,0 +1,17 @@
+div {
+    /* Global values */
+    all: inherit;
+    all: initial;
+    all: unset;
+    all: revert;
+    all: revert-layer;
+
+
+    /* Incorrect values become generic */
+    all: 10s;
+    all: one-value;
+    all: multiple values;
+    all: delimited, values;
+    all: delimited / slash / values;
+    all: mixed, delimiters / can be, used;
+}

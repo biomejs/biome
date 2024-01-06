@@ -1,0 +1,37 @@
+@keyframes name1 {
+	from
+		color: red;
+	}
+	to {
+		color: blue;
+	}
+}
+
+@keyframes name1 {
+	from
+	}
+	to {
+		color: blue;
+	}
+}
+
+@keyframes name2 {
+	from {
+	color: red;
+
+	to {
+		color: blue;
+	}
+}
+
+@keyframes name3 {
+	from, someivalidselector {
+		color: red;
+	}
+	from, someivalidselector, 50% {
+		color: red;
+	}
+	0%, 50%
+		color: blue;
+	}
+}

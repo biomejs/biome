@@ -30,7 +30,7 @@ pub(crate) fn parse_declaration_list_block(p: &mut CssParser) -> ParsedSyntax {
 
     let m = p.start();
 
-    p.expect(T!['{']);
+    p.bump(T!['{']);
     DeclarationList.parse_list(p);
     p.expect(T!['}']);
 

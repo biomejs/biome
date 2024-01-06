@@ -26,7 +26,7 @@ pub(crate) fn parse_media_at_rule(p: &mut CssParser) -> ParsedSyntax {
 
     p.bump(T![media]);
 
-    MediaQueryList.parse_list(p);
+    MediaQueryList::new(T!['{']).parse_list(p);
 
     if parse_or_recover_rule_list_block(p).is_err() {
         return Present(m.complete(p, CSS_BOGUS_AT_RULE));
@@ -35,8 +35,15 @@ pub(crate) fn parse_media_at_rule(p: &mut CssParser) -> ParsedSyntax {
     Present(m.complete(p, CSS_MEDIA_AT_RULE))
 }
 
-#[derive(Default)]
-pub(crate) struct MediaQueryList;
+pub(crate) struct MediaQueryList {
+    end_kind: CssSyntaxKind,
+}
+
+impl MediaQueryList {
+    pub(crate) fn new(end_kind: CssSyntaxKind) -> Self {
+        Self { end_kind }
+    }
+}
 
 impl ParseSeparatedList for MediaQueryList {
     type Kind = CssSyntaxKind;
@@ -48,7 +55,7 @@ impl ParseSeparatedList for MediaQueryList {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(T!['{'])
+        p.at(self.end_kind)
     }
 
     fn recover(

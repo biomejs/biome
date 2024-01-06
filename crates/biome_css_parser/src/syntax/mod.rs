@@ -13,7 +13,7 @@ use crate::syntax::css_dimension::{is_at_any_dimension, parse_any_dimension};
 use crate::syntax::parse_error::expected_any_rule;
 use crate::syntax::parse_error::expected_expression;
 use crate::syntax::parse_error::expected_identifier;
-use crate::syntax::property::parse_any_property;
+use crate::syntax::property::{is_at_any_property, parse_any_property};
 use crate::syntax::selector::is_at_selector;
 use crate::syntax::selector::SelectorList;
 use biome_css_syntax::CssSyntaxKind::*;
@@ -160,11 +160,15 @@ impl ParseSeparatedList for DeclarationList {
     }
 }
 
+pub(crate) fn is_at_declaration(p: &mut CssParser) -> bool {
+    is_at_any_property(p)
+}
 #[inline]
 pub(crate) fn parse_declaration(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_identifier(p) {
+    if !is_at_declaration(p) {
         return Absent;
     }
+
     let m = p.start();
 
     parse_any_property(p).ok();
@@ -175,7 +179,7 @@ pub(crate) fn parse_declaration(p: &mut CssParser) -> ParsedSyntax {
 
 #[inline]
 pub(crate) fn parse_declaration_with_semicolon(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_identifier(p) {
+    if !is_at_declaration(p) {
         return Absent;
     }
 
@@ -602,11 +606,28 @@ fn is_at_string(p: &mut CssParser) -> bool {
     p.at(CSS_STRING_LITERAL)
 }
 
+#[inline]
+pub(crate) fn parse_css_auto(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_css_auto(p) {
+        return Absent;
+    }
+
+    let m = p.start();
+
+    p.bump(AUTO_KW);
+
+    Present(m.complete(p, CSS_AUTO))
+}
+
+fn is_at_css_auto(p: &mut CssParser) -> bool {
+    p.at(AUTO_KW)
+}
+
 /// Attempt to parse some input with the given parsing function. If parsing
 /// succeeds, `Ok` is returned with the result of the parse and the state is
 /// preserved. If parsing fails, this function rewinds the parser back to
 /// where it was before attempting the parse and the `Err` value is returned.
-#[allow(dead_code)] // TODO: Remove this allow once it's actually used
+#[must_use = "The result of try_parse contains information about whether the parse succeeded and should not be ignored"]
 pub(crate) fn try_parse<T, E>(
     p: &mut CssParser,
     func: impl FnOnce(&mut CssParser) -> Result<T, E>,

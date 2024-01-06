@@ -4,7 +4,7 @@ use biome_formatter::token::string::normalize_string;
 use biome_formatter::QuoteStyle;
 use biome_js_syntax::JsSyntaxKind::{JSX_STRING_LITERAL, JS_STRING_LITERAL};
 use biome_js_syntax::{JsFileSource, JsSyntaxToken};
-use biome_js_unicode_table::is_js_ident;
+use biome_unicode_table::is_js_ident;
 use std::borrow::Cow;
 use unicode_width::UnicodeWidthStr;
 

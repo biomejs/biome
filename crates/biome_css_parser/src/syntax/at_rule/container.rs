@@ -3,7 +3,7 @@ use crate::parser::CssParser;
 use crate::syntax::at_rule::feature::parse_any_query_feature;
 use crate::syntax::blocks::parse_or_recover_rule_list_block;
 use crate::syntax::parse_error::expected_non_css_wide_keyword_identifier;
-use crate::syntax::{is_at_identifier, parse_custom_identifier, parse_declaration};
+use crate::syntax::{is_at_declaration, parse_custom_identifier, parse_declaration};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::T;
 use biome_parser::parsed_syntax::ParsedSyntax::Present;
@@ -197,7 +197,7 @@ fn parse_container_style_query_in_parens(p: &mut CssParser) -> ParsedSyntax {
 fn parse_any_container_style_query(p: &mut CssParser) -> ParsedSyntax {
     if is_at_container_style_not_query(p) {
         parse_container_style_not_query(p)
-    } else if is_at_identifier(p) {
+    } else if is_at_declaration(p) {
         parse_declaration(p)
     } else {
         parse_any_container_style_combinable_query(p)

@@ -91,6 +91,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "var",
         "url",
         "font-palette-values",
+        "auto",
         // HERE: Add new regular keywords _above_ here. Be sure to also add them
         // to `consume_identifier` in `biome_css_parser/src/lexer/mod.rs` as well.
         // CSS-wide keywords
@@ -205,6 +206,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         //
         "supports",
         "selector",
+        "import",
         //
         "font-face",
         // Don't add to the end of this list, add new keywords above the "HERE"
@@ -261,9 +263,12 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_GENERIC_COMPONENT_VALUE_LIST",
         "CSS_GENERIC_DELIMITER",
         "CSS_GENERIC_PROPERTY",
+        "CSS_UNKNOWN_PROPERTY_VALUE",
+        // Properties
+        "CSS_ALL_PROPERTY",
+        "CSS_Z_INDEX_PROPERTY",
         "CSS_PARAMETER_LIST",
         "CSS_DECLARATION_IMPORTANT",
-        "CSS_UNIT",
         "CSS_REGULAR_DIMENSION",
         "CSS_UNKNOWN_DIMENSION",
         // Selectors nodes
@@ -314,6 +319,8 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_URL_VALUE_RAW",
         "CSS_URL_FUNCTION",
         "CSS_COLOR",
+        "CSS_AUTO",
+        "CSS_WIDE_KEYWORD",
         // At rule nodes
         "CSS_AT_RULE",
         "CSS_CHARSET_AT_RULE",
@@ -383,6 +390,10 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_SCOPE_RANGE_END",
         "CSS_SCOPE_RANGE_INTERVAL",
         "CSS_SCOPE_EDGE",
+        "CSS_IMPORT_AT_RULE",
+        "CSS_IMPORT_ANONYMOUS_LAYER",
+        "CSS_IMPORT_NAMED_LAYER",
+        "CSS_IMPORT_SUPPORTS",
         // Bogus nodes
         "CSS_BOGUS",
         "CSS_BOGUS_BLOCK",
@@ -399,6 +410,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_BOGUS_COMPONENT_VALUE",
         "CSS_BOGUS_PARAMETER",
         "CSS_BOGUS_PROPERTY",
+        "CSS_BOGUS_PROPERTY_VALUE",
         "CSS_BOGUS_MEDIA_QUERY",
         "CSS_BOGUS_SCOPE_RANGE",
     ],

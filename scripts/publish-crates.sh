@@ -12,7 +12,7 @@ set -eo pipefail
 published_crates=(
   "biome_diagnostics_categories"
   "biome_diagnostics_macros"
-  "biome_js_unicode_table"
+  "biome_unicode_table"
   "biome_markup"
   "biome_text_size"
   "biome_console"

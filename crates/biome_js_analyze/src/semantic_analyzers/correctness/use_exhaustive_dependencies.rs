@@ -155,7 +155,7 @@ declare_rule! {
     /// }
     /// ```
     ///
-    /// Given the previous example, your hooks be used like this:
+    /// Given the previous example, your hooks can be used like this:
     ///
     /// ```js
     /// function Foo() {
