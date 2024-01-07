@@ -223,6 +223,10 @@ The following rules are promoted:
   Object = {}; // report assignment to `Object`.
   ```
 
+- Add [noMisleadingCharacterClass](https://biomejs.dev/linter/rules/no-misleading-character-class) that disallows characters made with multiple code points in character class. Contributed by @togami2864
+
+- Add [noThenProperty](https://biomejs.dev/linter/rules/no-then-property) that disallows the use of `then` as property name. Adding a `then` property makes an object thenable that can lead to errors with Promises. Contributed by @togami2864
+
 #### Enhancements
 
 - Address [#959](https://github.com/biomejs/biome/issues/959) and [#1157](https://github.com/biomejs/biome/issues/1157). [noEmptyInterface](https://biomejs.dev/linter/rules/no-empty-interface) no longer reports empty interfaces that extend a type. Contributed by @Conaclos
