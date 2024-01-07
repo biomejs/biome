@@ -2,7 +2,7 @@ use crate::changed::get_changed_files;
 use crate::cli_options::CliOptions;
 use crate::commands::validate_configuration_diagnostics;
 use crate::{execute_mode, setup_cli_subscriber, CliDiagnostic, CliSession, Execution};
-use biome_deserialize::MergeWith;
+use biome_deserialize::Merge;
 use biome_service::configuration::organize_imports::OrganizeImports;
 use biome_service::configuration::{
     load_configuration, FormatterConfiguration, LinterConfiguration, LoadedConfiguration,

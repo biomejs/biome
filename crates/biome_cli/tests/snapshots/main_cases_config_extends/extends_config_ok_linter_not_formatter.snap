@@ -52,7 +52,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 ```block
 test.js:1:1 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This is an unexpected use of the debugger statement.
+  ! This is an unexpected use of the debugger statement.
   
   > 1 │ debugger; console.log("string");·
       │ ^^^^^^^^^
@@ -61,14 +61,6 @@ test.js:1:1 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━�
   
     1 │ debugger;·console.log("string");·
       │ ----------                       
-
-```
-
-```block
-test.js lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × The file contains diagnostics that needs to be addressed.
-  
 
 ```
 

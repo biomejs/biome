@@ -1,33 +1,31 @@
 use std::num::{NonZeroU16, NonZeroU32, NonZeroU64, NonZeroU8};
 
-/// Simple trait to merge two types of the same type
-pub trait MergeWith<T> {
+/// Trait that allows deep merging of types, including injection of defaults.
+pub trait Merge {
     /// Merges `other` into `self`.
     ///
     /// Values that are non-`None` in `other` will take precedence over values
     /// in `self`. Complex types may get recursively merged instead of
     /// overwritten.
-    fn merge_with(&mut self, other: T);
+    fn merge_with(&mut self, other: Self);
+
+    /// Merges defaults into `self` for any fields that were not set.
+    ///
+    /// For types that don't have nested fields, this does nothing.
+    fn merge_in_defaults(&mut self);
 }
 
-impl<M> MergeWith<Option<M>> for M
-where
-    M: MergeWith<M>,
-{
-    fn merge_with(&mut self, other: Option<M>) {
-        if let Some(other) = other {
-            self.merge_with(other);
-        }
-    }
-}
-
-/// This macro is used to implement [MergeWith] for all (primitive) types where
+/// This macro is used to implement [Merge] for all (primitive) types where
 /// merging can simply be implemented through overwriting the value.
 macro_rules! overwrite_on_merge {
     ( $ty:ident ) => {
-        impl MergeWith<$ty> for $ty {
-            fn merge_with(&mut self, other: $ty) {
+        impl Merge for $ty {
+            fn merge_with(&mut self, other: Self) {
                 *self = other
+            }
+
+            fn merge_in_defaults(&mut self) {
+                // Defaults shouldn't overwrite set values.
             }
         }
     };

@@ -40,7 +40,7 @@ use biome_diagnostics::{Error, Severity};
 use biome_rowan::TextRange;
 pub use diagnostics::{DeserializationAdvice, DeserializationDiagnostic, VisitableType};
 pub use impls::*;
-pub use merge::MergeWith;
+pub use merge::Merge;
 pub use none_state::NoneState;
 use std::fmt::Debug;
 pub use string_set::StringSet;

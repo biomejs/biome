@@ -10,7 +10,7 @@ use crate::settings::{
 };
 use crate::{Rules, WorkspaceError};
 use biome_css_syntax::CssLanguage;
-use biome_deserialize::{MergeWith, StringSet};
+use biome_deserialize::StringSet;
 use biome_deserialize_macros::{Mergeable, NoneState};
 use biome_formatter::{LineEnding, LineWidth};
 use biome_js_syntax::JsLanguage;
@@ -20,7 +20,7 @@ use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 use std::str::FromStr;
 
-#[derive(Debug, Default, Serialize, Deserialize, Eq, PartialEq, Clone, Bpaf)]
+#[derive(Bpaf, Clone, Debug, Default, Deserialize, Eq, Mergeable, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Overrides(#[bpaf(hide)] pub Vec<OverridePattern>);
@@ -30,12 +30,6 @@ impl FromStr for Overrides {
 
     fn from_str(_s: &str) -> Result<Self, Self::Err> {
         Ok(Self::default())
-    }
-}
-
-impl MergeWith<Overrides> for Overrides {
-    fn merge_with(&mut self, other: Overrides) {
-        self.0.extend(other.0);
     }
 }
 
