@@ -184,8 +184,16 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
                         Self { syntax, slot_map }
                     }
 
+                    // The allow for clippy is needed because nodes that _only_ have
+                    // unordered fields will have a single loop where the loop counter
+                    // is the same as the current slot, but nodes that mix ordered and
+                    // unordered fields will need the value outside of the loop. Generating
+                    // code that does this appeasingly for both cases is not worth the
+                    // effort and has no performance cost.
+
                     /// Construct the `slot_map` for this node by checking the `kind` of
                     /// each child of `syntax` against the defined grammar for the node.
+                    #[allow(clippy::explicit_counter_loop)]
                     pub fn build_slot_map(syntax: &SyntaxNode) -> #slot_map_type {
                         #slot_map_builder_impl
                     }
@@ -365,7 +373,13 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
                     let variant_is_enum = ast.unions.iter().find(|e| &e.name == *current_enum);
                     let variant_name = format_ident!("{}", current_enum);
 
-                    if variant_is_enum.is_some() {
+                    let variant_is_dynamic = ast
+                        .nodes
+                        .iter()
+                        .find(|e| &e.name == *current_enum)
+                        .is_some_and(|node| node.fields.iter().any(|field| field.is_unordered()));
+
+                    if variant_is_enum.is_some() || variant_is_dynamic {
                         quote! {
                             #variant_name::cast(syntax)?
                         }
@@ -1053,7 +1067,7 @@ fn get_slot_map_builder_impl(node: &AstNodeSrc, language_kind: LanguageKind) -> 
         .collect::<Vec<TokenStream>>();
 
     quote! {
-        let mut children = syntax.children().into_iter();
+        let mut children = syntax.children();
         let mut slot_map = [SLOT_MAP_EMPTY_VALUE; #slot_count];
         let mut current_slot = 0;
         let mut current_element = children.next();

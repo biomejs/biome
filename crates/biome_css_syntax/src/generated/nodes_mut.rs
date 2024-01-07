@@ -133,6 +133,61 @@ impl CssBinaryExpression {
         )
     }
 }
+impl CssBorder {
+    pub fn with_line_width(self, element: Option<AnyCssLineWidth>, slot_index: u8) -> Self {
+        let mut updated_slot_map = self.slot_map;
+        updated_slot_map[0usize] = slot_index;
+        Self {
+            syntax: self.syntax.splice_slots(
+                (slot_index as usize)..=(slot_index as usize),
+                once(element.map(|element| element.into_syntax().into())),
+            ),
+            slot_map: updated_slot_map,
+        }
+    }
+    pub fn with_line_style(self, element: Option<CssLineStyle>, slot_index: u8) -> Self {
+        let mut updated_slot_map = self.slot_map;
+        updated_slot_map[1usize] = slot_index;
+        Self {
+            syntax: self.syntax.splice_slots(
+                (slot_index as usize)..=(slot_index as usize),
+                once(element.map(|element| element.into_syntax().into())),
+            ),
+            slot_map: updated_slot_map,
+        }
+    }
+    pub fn with_color(self, element: Option<CssColor>, slot_index: u8) -> Self {
+        let mut updated_slot_map = self.slot_map;
+        updated_slot_map[2usize] = slot_index;
+        Self {
+            syntax: self.syntax.splice_slots(
+                (slot_index as usize)..=(slot_index as usize),
+                once(element.map(|element| element.into_syntax().into())),
+            ),
+            slot_map: updated_slot_map,
+        }
+    }
+}
+impl CssBorderProperty {
+    pub fn with_name(self, element: CssIdentifier) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_colon_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_value(self, element: AnyCssBorderPropertyValue) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
 impl CssCharsetAtRule {
     pub fn with_charset_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
@@ -870,6 +925,22 @@ impl CssLayerReference {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into()))),
+        )
+    }
+}
+impl CssLineStyle {
+    pub fn with_keyword_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+}
+impl CssLineWidthKeyword {
+    pub fn with_keyword_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
 }
@@ -2127,7 +2198,7 @@ impl CssUnknownPropertyValue {
     }
 }
 impl CssUrlFunction {
-    pub fn with_url_token(self, element: SyntaxToken) -> Self {
+    pub fn with_name_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
@@ -2139,16 +2210,22 @@ impl CssUrlFunction {
                 .splice_slots(1usize..=1usize, once(Some(element.into()))),
         )
     }
-    pub fn with_any_css_url_value(self, element: Option<AnyCssUrlValue>) -> Self {
+    pub fn with_value(self, element: Option<AnyCssUrlValue>) -> Self {
         Self::unwrap_cast(self.syntax.splice_slots(
             2usize..=2usize,
             once(element.map(|element| element.into_syntax().into())),
         ))
     }
+    pub fn with_modifiers(self, element: CssUrlModifierList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(3usize..=3usize, once(Some(element.into_syntax().into()))),
+        )
+    }
     pub fn with_r_paren_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(3usize..=3usize, once(Some(element.into()))),
+                .splice_slots(4usize..=4usize, once(Some(element.into()))),
         )
     }
 }

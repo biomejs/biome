@@ -2,10 +2,8 @@ use crate::parser::CssParser;
 use crate::syntax::at_rule::layer::LayerNameList;
 use crate::syntax::at_rule::media::MediaQueryList;
 use crate::syntax::at_rule::supports::parse_any_supports_condition;
-use crate::syntax::{
-    is_at_declaration, is_at_string, is_at_url_function, parse_declaration, parse_string,
-    parse_url_function,
-};
+use crate::syntax::value::url::{is_at_url_function, parse_url_function};
+use crate::syntax::{is_at_declaration, is_at_string, parse_declaration, parse_string};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::T;
 use biome_parser::parse_lists::ParseSeparatedList;

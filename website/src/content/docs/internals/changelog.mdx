@@ -273,6 +273,10 @@ The following rules are promoted:
 
 - The code action (fix) of [noMultipleSpacesInRegularExpressionLiterals](https://biomejs.dev/linter/rules/no-multiple-spaces-in-regular-expression-literals/) is now marked as safe. Contributed by @Conaclos
 
+- [useArrowFunction](https://biomejs.dev/linter/rules/use-arrow-function/) no longer reports function expressions that use `new.target`. Contributed by @Conaclos
+
+- [noForEach](https://biomejs.dev/linter/rules/no-for-each) now reports only calls that use a callback with `0` or `1` parameter. Address [#547](https://github.com/biomejs/biome/issues/547). Contributed by @Conaclos
+
 #### Bug fixes
 
 - Fix [#1061](https://github.com/biomejs/biome/issues/1061). [noRedeclare](https://biomejs.dev/linter/rules/no-redeclare) no longer reports overloads of `export default function`. Contributed by @Conaclos
@@ -342,6 +346,42 @@ The following rules are promoted:
 
 - Fix [#1167](https://github.com/biomejs/biome/issues/1167). [useValidAriaProps](https://biomejs.dev/linter/rules/use-valid-aria-props) no longer reports `aria-atomic` as invalid. Contributed by @unvalley
 
+- Fix [#1192](https://github.com/biomejs/biome/issues/1192). [useTemplate](https://biomejs.dev/linter/rules/use-template/) now correctly handles parenthesized expressions and respects type coercions. Contributed by @n-gude
+
+  These cases are now properly handled:
+
+  ```js
+  "a" + (1 + 2) // `a${1 + 2}`
+  ```
+
+  ```js
+  1 + (2 + "a") // `${1}${2}a`
+  ```
+
+- Fix [#1456](https://github.com/biomejs/biome/issues/1456). [useTemplate](https://biomejs.dev/linter/rules/use-template/) now reports expressions with an interpolated template literal and non-string expressions. Contributed by @n-gude
+
+  The following code is now reported:
+
+  ```js
+  `a${1}` + 2;
+  ```
+
+- Fix [#1436](https://github.com/biomejs/biome/issues/1436). [useArrowFunction](https://biomejs.dev/linter/rules/use-arrow-function/) now applies a correct fix when a function expression is used in a call expression or a member access. Contributed by @Conaclos
+
+  For example, the rule proposed the following fix:
+
+  ```diff
+  - const called = function() {}();
+  + const called = () => {}();
+  ```
+
+  It now proposes a fix that adds the needed parentheses:
+
+  ```diff
+  - const called = function() {}();
+  + const called = (() => {})();
+  ```
+
 ### Parser
 
 #### BREAKING CHANGES
@@ -361,7 +401,7 @@ The following rules are promoted:
 
   These cases are now properly parsed:
 
-  _JavasSript_:
+  _JavaScript_:
 
   ```javascript
     a ? (b) : a => {};

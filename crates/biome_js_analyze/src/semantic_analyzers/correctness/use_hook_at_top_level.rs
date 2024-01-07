@@ -12,8 +12,10 @@ use biome_deserialize::{
 };
 use biome_js_semantic::{CallsExtensions, SemanticModel};
 use biome_js_syntax::{
-    AnyFunctionLike, AnyJsExpression, AnyJsFunction, JsCallExpression, JsLanguage,
-    JsMethodObjectMember, JsReturnStatement, JsSyntaxKind, TextRange,
+    AnyFunctionLike, AnyJsExpression, AnyJsFunction, JsAssignmentWithDefault,
+    JsBindingPatternWithDefault, JsCallExpression, JsConditionalExpression, JsIfStatement,
+    JsLanguage, JsLogicalExpression, JsMethodObjectMember, JsObjectBindingPatternShorthandProperty,
+    JsReturnStatement, JsSyntaxKind, JsTryFinallyStatement, TextRange,
 };
 use biome_rowan::{declare_node_union, AstNode, Language, SyntaxNode, WalkEvent};
 use rustc_hash::FxHashMap;
@@ -83,34 +85,108 @@ pub enum Suggestion {
 fn enclosing_function_if_call_is_at_top_level(
     call: &JsCallExpression,
 ) -> Option<AnyJsFunctionOrMethod> {
-    let next = call.syntax().ancestors().find(|x| {
-        !matches!(
-            x.kind(),
-            JsSyntaxKind::JS_ARRAY_ELEMENT_LIST
-                | JsSyntaxKind::JS_ARRAY_EXPRESSION
-                | JsSyntaxKind::JS_BLOCK_STATEMENT
-                | JsSyntaxKind::JS_CALL_ARGUMENT_LIST
-                | JsSyntaxKind::JS_CALL_ARGUMENTS
-                | JsSyntaxKind::JS_CALL_EXPRESSION
-                | JsSyntaxKind::JS_EXPRESSION_STATEMENT
-                | JsSyntaxKind::JS_FUNCTION_BODY
-                | JsSyntaxKind::JS_INITIALIZER_CLAUSE
-                | JsSyntaxKind::JS_OBJECT_EXPRESSION
-                | JsSyntaxKind::JS_OBJECT_MEMBER_LIST
-                | JsSyntaxKind::JS_PROPERTY_OBJECT_MEMBER
-                | JsSyntaxKind::JS_RETURN_STATEMENT
-                | JsSyntaxKind::JS_STATEMENT_LIST
-                | JsSyntaxKind::JS_STATIC_MEMBER_EXPRESSION
-                | JsSyntaxKind::JS_VARIABLE_DECLARATOR
-                | JsSyntaxKind::JS_VARIABLE_DECLARATOR_LIST
-                | JsSyntaxKind::JS_VARIABLE_DECLARATION
-                | JsSyntaxKind::JS_VARIABLE_STATEMENT
-                | JsSyntaxKind::TS_AS_EXPRESSION
-                | JsSyntaxKind::TS_SATISFIES_EXPRESSION
-        )
-    });
+    let mut prev_node = None;
 
-    next.and_then(AnyJsFunctionOrMethod::cast)
+    for node in call.syntax().ancestors() {
+        if let Some(enclosing_function) = AnyJsFunctionOrMethod::cast_ref(&node) {
+            return Some(enclosing_function);
+        }
+
+        if let Some(prev_node) = prev_node {
+            if is_conditional_expression(&node, &prev_node) {
+                return None;
+            }
+        }
+
+        prev_node = Some(node);
+    }
+
+    None
+}
+
+/// Determines whether the given `node` is executed conditionally due to the
+/// position it takes within its `parent_node`.
+///
+/// Returns `true` if and only if the parent node is a node that introduces a
+/// condition that makes execution of `node` conditional.
+///
+/// Generally, this means that for conditional expressions, the "test" is
+/// considered unconditional (since it is always evaluated), while the branches
+/// are considered conditional.
+///
+/// For example:
+///
+/// ```js
+///    testNode ? truthyNode : falsyNode
+/// // ^^^^^^^^---------------------------- This node is always executed.
+/// //            ^^^^^^^^^^---^^^^^^^^^--- These nodes are conditionally executed.
+/// ```
+fn is_conditional_expression(
+    parent_node: &SyntaxNode<JsLanguage>,
+    node: &SyntaxNode<JsLanguage>,
+) -> bool {
+    if let Some(assignment_with_default) = JsAssignmentWithDefault::cast_ref(parent_node) {
+        return assignment_with_default
+            .default()
+            .is_ok_and(|default| default.syntax() == node);
+    }
+
+    if let Some(binding_pattern_with_default) = JsBindingPatternWithDefault::cast_ref(parent_node) {
+        return binding_pattern_with_default
+            .default()
+            .is_ok_and(|default| default.syntax() == node);
+    }
+
+    if let Some(conditional_expression) = JsConditionalExpression::cast_ref(parent_node) {
+        return conditional_expression
+            .test()
+            .is_ok_and(|test| test.syntax() != node);
+    }
+
+    if let Some(if_statement) = JsIfStatement::cast_ref(parent_node) {
+        return if_statement.test().is_ok_and(|test| test.syntax() != node);
+    }
+
+    if let Some(logical_expression) = JsLogicalExpression::cast_ref(parent_node) {
+        return logical_expression
+            .right()
+            .is_ok_and(|right| right.syntax() == node);
+    }
+
+    if let Some(object_binding_pattern_shorthand_property) =
+        JsObjectBindingPatternShorthandProperty::cast_ref(parent_node)
+    {
+        return object_binding_pattern_shorthand_property
+            .init()
+            .is_some_and(|init| init.syntax() == node);
+    }
+
+    if let Some(try_finally_statement) = JsTryFinallyStatement::cast_ref(parent_node) {
+        // Code inside `try` statements is considered conditional, because a
+        // thrown error is expected at any point, so there's no guarantee
+        // whether code will run unconditionally. But we make an exception for
+        // the `finally` clause since it does run unconditionally.
+        //
+        // Note: Of course code outside a `try` block may throw too, but then
+        // the exception will bubble up and break the entire component, instead
+        // of being merely a violation of the rules of hooks.
+        return try_finally_statement
+            .finally_clause()
+            .is_ok_and(|finally_clause| finally_clause.syntax() != node);
+    }
+
+    // The following statement kinds are considered to always make their inner
+    // nodes conditional:
+    matches!(
+        parent_node.kind(),
+        JsSyntaxKind::JS_DO_WHILE_STATEMENT
+            | JsSyntaxKind::JS_FOR_IN_STATEMENT
+            | JsSyntaxKind::JS_FOR_OF_STATEMENT
+            | JsSyntaxKind::JS_FOR_STATEMENT
+            | JsSyntaxKind::JS_SWITCH_STATEMENT
+            | JsSyntaxKind::JS_TRY_STATEMENT
+            | JsSyntaxKind::JS_WHILE_STATEMENT
+    )
 }
 
 fn is_nested_function(function: &AnyJsFunctionOrMethod) -> bool {

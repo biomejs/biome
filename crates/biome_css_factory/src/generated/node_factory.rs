@@ -149,6 +149,59 @@ pub fn css_binary_expression(
         ],
     ))
 }
+pub fn css_border() -> CssBorderBuilder {
+    CssBorderBuilder {
+        line_width: None,
+        line_style: None,
+        color: None,
+    }
+}
+pub struct CssBorderBuilder {
+    line_width: Option<AnyCssLineWidth>,
+    line_style: Option<CssLineStyle>,
+    color: Option<CssColor>,
+}
+impl CssBorderBuilder {
+    pub fn with_line_width(mut self, line_width: AnyCssLineWidth) -> Self {
+        self.line_width = Some(line_width);
+        self
+    }
+    pub fn with_line_style(mut self, line_style: CssLineStyle) -> Self {
+        self.line_style = Some(line_style);
+        self
+    }
+    pub fn with_color(mut self, color: CssColor) -> Self {
+        self.color = Some(color);
+        self
+    }
+    pub fn build(self) -> CssBorder {
+        CssBorder::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::CSS_BORDER,
+            [
+                self.line_width
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                self.line_style
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                self.color
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn css_border_property(
+    name: CssIdentifier,
+    colon_token: SyntaxToken,
+    value: AnyCssBorderPropertyValue,
+) -> CssBorderProperty {
+    CssBorderProperty::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_BORDER_PROPERTY,
+        [
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Token(colon_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
+        ],
+    ))
+}
 pub fn css_charset_at_rule(
     charset_token: SyntaxToken,
     encoding: CssString,
@@ -753,6 +806,18 @@ pub fn css_layer_reference(
             Some(SyntaxElement::Node(references.into_syntax())),
             Some(SyntaxElement::Token(semicolon_token)),
         ],
+    ))
+}
+pub fn css_line_style(keyword_token: SyntaxToken) -> CssLineStyle {
+    CssLineStyle::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_LINE_STYLE,
+        [Some(SyntaxElement::Token(keyword_token))],
+    ))
+}
+pub fn css_line_width_keyword(keyword_token: SyntaxToken) -> CssLineWidthKeyword {
+    CssLineWidthKeyword::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_LINE_WIDTH_KEYWORD,
+        [Some(SyntaxElement::Token(keyword_token))],
     ))
 }
 pub fn css_list_of_component_values_expression(
@@ -1830,36 +1895,40 @@ pub fn css_unknown_property_value(
     ))
 }
 pub fn css_url_function(
-    url_token: SyntaxToken,
+    name_token: SyntaxToken,
     l_paren_token: SyntaxToken,
+    modifiers: CssUrlModifierList,
     r_paren_token: SyntaxToken,
 ) -> CssUrlFunctionBuilder {
     CssUrlFunctionBuilder {
-        url_token,
+        name_token,
         l_paren_token,
+        modifiers,
         r_paren_token,
-        any_css_url_value: None,
+        value: None,
     }
 }
 pub struct CssUrlFunctionBuilder {
-    url_token: SyntaxToken,
+    name_token: SyntaxToken,
     l_paren_token: SyntaxToken,
+    modifiers: CssUrlModifierList,
     r_paren_token: SyntaxToken,
-    any_css_url_value: Option<AnyCssUrlValue>,
+    value: Option<AnyCssUrlValue>,
 }
 impl CssUrlFunctionBuilder {
-    pub fn with_any_css_url_value(mut self, any_css_url_value: AnyCssUrlValue) -> Self {
-        self.any_css_url_value = Some(any_css_url_value);
+    pub fn with_value(mut self, value: AnyCssUrlValue) -> Self {
+        self.value = Some(value);
         self
     }
     pub fn build(self) -> CssUrlFunction {
         CssUrlFunction::unwrap_cast(SyntaxNode::new_detached(
             CssSyntaxKind::CSS_URL_FUNCTION,
             [
-                Some(SyntaxElement::Token(self.url_token)),
+                Some(SyntaxElement::Token(self.name_token)),
                 Some(SyntaxElement::Token(self.l_paren_token)),
-                self.any_css_url_value
+                self.value
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Node(self.modifiers.into_syntax())),
                 Some(SyntaxElement::Token(self.r_paren_token)),
             ],
         ))
@@ -2218,6 +2287,18 @@ where
             .map(|item| Some(item.into_syntax().into())),
     ))
 }
+pub fn css_url_modifier_list<I>(items: I) -> CssUrlModifierList
+where
+    I: IntoIterator<Item = AnyCssUrlModifier>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssUrlModifierList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_URL_MODIFIER_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
+    ))
+}
 pub fn css_bogus<I>(slots: I) -> CssBogus
 where
     I: IntoIterator<Item = Option<SyntaxElement>>,
@@ -2382,6 +2463,16 @@ where
 {
     CssBogusSubSelector::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_BOGUS_SUB_SELECTOR,
+        slots,
+    ))
+}
+pub fn css_bogus_url_modifier<I>(slots: I) -> CssBogusUrlModifier
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssBogusUrlModifier::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_BOGUS_URL_MODIFIER,
         slots,
     ))
 }

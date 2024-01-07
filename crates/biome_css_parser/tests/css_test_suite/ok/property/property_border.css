@@ -1,0 +1,49 @@
+div {
+    /* Global values */
+    border: inherit;
+    border: initial;
+    border: unset;
+    border: revert;
+    border: revert-layer;
+
+    /* <line-style> */
+    border: solid;
+    border: none;
+    border: hidden;
+    border: dotted;
+    border: dashed;
+    border: solid;
+    border: double;
+    border: groove;
+    border: ridge;
+    border: inset;
+    border: outset;
+
+    /* <line-width> */
+    border: thin;
+    border: medium;
+    border: thick;
+    border: 100px;
+    border: 20em;
+    border: 5vh;
+
+    /* <color> */
+    border: #fff;
+
+    /* combinations */
+    border: 2px dotted;
+    border: outset #f33;
+    border: medium dashed #000;
+    border: groove  #fff 10px;
+    border: #00f 20vh inset;
+    border: thin #0000 none;
+
+
+    /* Incorrect values become generic */
+    border: 10s;
+    border: one-value;
+    border: multiple values;
+    border: delimited, values;
+    border: delimited / slash / values;
+    border: mixed, delimiters / can be, used;
+}

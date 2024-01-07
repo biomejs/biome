@@ -48,6 +48,14 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssBinaryExpression::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_BORDER => {
+                    let $pattern = unsafe { $crate::CssBorder::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_BORDER_PROPERTY => {
+                    let $pattern = unsafe { $crate::CssBorderProperty::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_CHARSET_AT_RULE => {
                     let $pattern = unsafe { $crate::CssCharsetAtRule::new_unchecked(node) };
                     $body
@@ -229,6 +237,14 @@ macro_rules! map_syntax_node {
                 }
                 $crate::CssSyntaxKind::CSS_LAYER_REFERENCE => {
                     let $pattern = unsafe { $crate::CssLayerReference::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_LINE_STYLE => {
+                    let $pattern = unsafe { $crate::CssLineStyle::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_LINE_WIDTH_KEYWORD => {
+                    let $pattern = unsafe { $crate::CssLineWidthKeyword::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION => {
@@ -635,6 +651,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssBogusSubSelector::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_BOGUS_URL_MODIFIER => {
+                    let $pattern = unsafe { $crate::CssBogusUrlModifier::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_COMPONENT_VALUE_LIST => {
                     let $pattern = unsafe { $crate::CssComponentValueList::new_unchecked(node) };
                     $body
@@ -712,6 +732,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::CssSyntaxKind::CSS_SUB_SELECTOR_LIST => {
                     let $pattern = unsafe { $crate::CssSubSelectorList::new_unchecked(node) };
+                    $body
+                }
+                $crate::CssSyntaxKind::CSS_URL_MODIFIER_LIST => {
+                    let $pattern = unsafe { $crate::CssUrlModifierList::new_unchecked(node) };
                     $body
                 }
                 _ => unreachable!(),

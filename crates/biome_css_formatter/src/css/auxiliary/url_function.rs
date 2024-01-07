@@ -7,18 +7,20 @@ pub(crate) struct FormatCssUrlFunction;
 impl FormatNodeRule<CssUrlFunction> for FormatCssUrlFunction {
     fn fmt_fields(&self, node: &CssUrlFunction, f: &mut CssFormatter) -> FormatResult<()> {
         let CssUrlFunctionFields {
-            url_token,
+            name,
             l_paren_token,
-            any_css_url_value,
+            value,
+            modifiers,
             r_paren_token,
         } = node.as_fields();
 
         write!(
             f,
             [
-                url_token.format(),
+                name.format(),
                 l_paren_token.format(),
-                any_css_url_value.format(),
+                value.format(),
+                modifiers.format(),
                 r_paren_token.format()
             ]
         )

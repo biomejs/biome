@@ -7,7 +7,7 @@ info: css/range/mid_value.css
 
 ```css
 div {
-    border  :   1px   solid  green   ;
+    padding  :   1px   20PX  555000.000Vh   ;
 }
 
 ```
@@ -29,7 +29,7 @@ Quote style: Double Quotes
 
 ```css
 div {
-    border: 1px solid green   ;
+    padding: 1px 20px 555000.000vh   ;
 }
 ```
 
