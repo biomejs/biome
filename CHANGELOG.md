@@ -182,7 +182,7 @@ The following rules are promoted:
   By default, the rule requires that a filename be in `camelCase`, `kebab-case`, `snake_case`, or matches the name of an `export` in the file.
   The rule provides options to restrict the allowed cases.
 
-- Add [useNodejsImportProtocol](https://biomejs.dev/linter/rules/use-nodejs-import-protocol) that enforces the use of the `node:` protocol when importing _Node.js_ modules. Contributed by @2-NOW and @Conaclos
+- Add [useNodejsImportProtocol](https://biomejs.dev/linter/rules/use-nodejs-import-protocol) that enforces the use of the `node:` protocol when importing _Node.js_ modules. Contributed by @2-NOW, @vasucp1207, and @Conaclos
 
   ```diff
   - import fs from "fs";
@@ -197,6 +197,15 @@ The following rules are promoted:
   - - Infinity;
   + Number.NEGATIVE_INFINITY;
   ```
+
+- Add [useShorthandFunctionType](https://biomejs.dev/linter/rules/use-shorthand-function-type) that enforces using function types instead of object type with call signatures. Contributed by @emab, @ImBIOS, and @seitarof
+
+  ```diff
+  - interface Example {
+  -   (): string;
+  - }
+  + type Example = () => string
+```
 
 - Add [noNodejsModules](https://biomejs.dev/linter/rules/no-nodejs-modules), that disallows the use of _Node.js_ modules. Contributed by @anonrig, @ematipico, and @Conaclos
 
@@ -225,11 +234,17 @@ The following rules are promoted:
 
 - Add [noMisleadingCharacterClass](https://biomejs.dev/linter/rules/no-misleading-character-class) that disallows characters made with multiple code points in character class. Contributed by @togami2864
 
-- Add [noThenProperty](https://biomejs.dev/linter/rules/no-then-property) that disallows the use of `then` as property name. Adding a `then` property makes an object thenable that can lead to errors with Promises. Contributed by @togami2864
+- Add [noThenProperty](https://biomejs.dev/linter/rules/no-then-property) that disallows the use of `then` as property name. Adding a `then` property makes an object _thenable_ that can lead to errors with Promises. Contributed by @togami2864
+
+- Add [noUselessTernary](https://biomejs.dev/linter/rules/no-useless-ternary) that disallows conditional expressions (ternaries) when simpler alternatives exist.
+
+  ```js
+  var a = x ? true : true; // this could be simplified to `x`
+  ```
 
 #### Enhancements
 
-- Address [#959](https://github.com/biomejs/biome/issues/959) and [#1157](https://github.com/biomejs/biome/issues/1157). [noEmptyInterface](https://biomejs.dev/linter/rules/no-empty-interface) no longer reports empty interfaces that extend a type. Contributed by @Conaclos
+- [noEmptyInterface](https://biomejs.dev/linter/rules/no-empty-interface) ignores empty interfaces that extend a type. Address [#959](https://github.com/biomejs/biome/issues/959) and [#1157](https://github.com/biomejs/biome/issues/1157). Contributed by @Conaclos
 
   This allows supporting interface augmentation in external modules as demonstrated in the following example:
 
@@ -244,7 +259,7 @@ The following rules are promoted:
   }
   ```
 
-- Preserve more comments in the fix of [useExponentiationOperator](https://biomejs.dev/linter/rules/use-exponentiation-operator). Contributed by @Conaclos
+- Preserve more comments in the code fix of [useExponentiationOperator](https://biomejs.dev/linter/rules/use-exponentiation-operator). Contributed by @Conaclos
 
   The rule now preserves comments that follow the (optional) trailing comma.
 
@@ -261,17 +276,18 @@ The following rules are promoted:
   +
   ```
 
-- [useFilenamingConvention](https://biomejs.dev/linter/rules/use-filenaming-convention) accepts `PascalCase` in its configuration.
+- `<svg>` element is now considered as a non-interactive HTML element ([#1095](https://github.com/biomejs/biome/issues/1095)). Contributed by @chansuke
 
-  By default, the rule enforces that the filename is either in [`camelCase`], [`kebab-case`], [`snake_case`], or equal to the name of one export in the file.
-  The rule now accepts `PascalCase`.
+  This affects the following rules:
+  - [noAriaHiddenOnFocusable](https://biomejs.dev/linter/rules/no-aria-hidden-on-focusable)
+  - [noInteractiveElementToNoninteractiveRole](https://biomejs.dev/linter/rules/no-interactive-element-to-noninteractive-role)
+  - [noNoninteractiveElementToInteractiveRole](https://biomejs.dev/linter/rules/no-noninteractive-element-to-interactive-role)
+  - [noNoninteractiveTabindex](https://biomejs.dev/linter/rules/no-noninteractive-tabindex)
+  - [useAriaActivedescendantWithTabindex](https://biomejs.dev/linter/rules/use-aria-activedescendant-with-tabindex)
 
-  Contributed by @Conaclos
-  Address [#1409](https://github.com/biomejs/biome/discussions/1409).
+- [noMultipleSpacesInRegularExpressionLiterals](https://biomejs.dev/linter/rules/no-multiple-spaces-in-regular-expression-literals/) has a safe code fix. Contributed by @Conaclos
 
-- The code action (fix) of [noMultipleSpacesInRegularExpressionLiterals](https://biomejs.dev/linter/rules/no-multiple-spaces-in-regular-expression-literals/) is now marked as safe. Contributed by @Conaclos
-
-- [useArrowFunction](https://biomejs.dev/linter/rules/use-arrow-function/) no longer reports function expressions that use `new.target`. Contributed by @Conaclos
+- [useArrowFunction](https://biomejs.dev/linter/rules/use-arrow-function/) ignores expressions that use `new.target`. Contributed by @Conaclos
 
 - [noForEach](https://biomejs.dev/linter/rules/no-for-each) now reports only calls that use a callback with `0` or `1` parameter. Address [#547](https://github.com/biomejs/biome/issues/547). Contributed by @Conaclos
 
@@ -380,6 +396,14 @@ The following rules are promoted:
   + const called = (() => {})();
   ```
 
+- Fix [#696](https://github.com/biomejs/biome/issues/696). [useHookAtTopLevel](https://biomejs.dev/linter/rules/use-hook-at-top-level) now correctly detects early returns before the calls to the hook.
+
+- The code fix of [noUselessTypeCOnstraint](https://biomejs.dev/linter/rules/no-useless-type-c-onstraint) now adds a trailing comma when needed to disambiguate a type parameter list from a JSX element. COntributed by @Conaclos
+
+- Fix [#578](https://github.com/biomejs/biome/issues/578). [useExhaustiveDependencies](https://biomejs.dev/linter/rules/use-exhaustive-dependencies) now correctly recognizes hooks namespaced under the `React` namespace.  Contributed by @XiNiHa
+
+- Fix [#910](https://github.com/biomejs/biome/issues/910). [noSvgWithoutTitle](https://biomejs.dev/linter/rules/no-svg-without-title) now ignores `<svg>` element with `aria-hidden="true"`. COntributed by @vasucp1207
+
 ### Parser
 
 #### BREAKING CHANGES
@@ -392,6 +416,16 @@ The following rules are promoted:
   For example, it is no longer possible to represent a combined import with a `type` qualifier such as `import type D, { N } from ""`.
 
   See [#1163](https://github.com/biomejs/biome/pull/1163) for more details.
+
+#### New features
+
+- Imports and exports with both an _import attribute_ and a `type` qualifier are now reported as parse errors.
+
+  ```ts
+  import type A from "mod" with { type: "json" };
+  //     ^^^^              ^^^^^^^^^^^^^^^^^^^^^
+  //     parse error
+  ```
 
 #### Bug fixes
 
@@ -416,6 +450,13 @@ The following rules are promoted:
   ```jsx
     bar ? (foo) : (<a>{() => {}}</a>);
   ```
+
+### Crates
+
+#### BREAKING CHANGES
+
+- Rename the `biome_js_unicode_table` crate to `biome_unicode_table` ([#1302](https://github.com/biomejs/biome/issues/1302)). COntributed by @chansuke
+
 
 ## 1.4.1 (2023-11-30)
 
