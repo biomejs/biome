@@ -135,8 +135,7 @@ fn parse_font_feature_values_item(p: &mut CssParser) -> ParsedSyntax {
     };
 
     if parse_or_recover_declaration_list_block(p).is_err() {
-        // TODO: should we set CSS_BOGUS_FONT_FEATURE_VALUES_BLOCK ?
-        return Present(m.complete(p, CSS_BOGUS_AT_RULE));
+        return Present(m.complete(p, CSS_BOGUS_BLOCK));
     }
 
     Present(m.complete(p, CSS_FONT_FEATURE_VALUES_ITEM))
