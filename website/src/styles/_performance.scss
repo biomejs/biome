@@ -2,12 +2,12 @@
 
 .hero-code {
     margin-top: 7rem !important;
+}
 
-	.head {
-		text-align: center;
-		@include desktop-only {
-			font-size: 3.7rem;
-		}
+.head {
+	text-align: center;
+	@include desktop-only {
+		font-size: 3.7rem;
 	}
 }
 
