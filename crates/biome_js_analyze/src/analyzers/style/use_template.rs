@@ -109,7 +109,8 @@ impl Rule for UseTemplate {
 /// This is the case, if:
 ///
 /// - the binary expression contains the `+` operator,
-/// - the binary expression contains a string-like literal and a non-string-like
+/// - the binary expression contains a string-like literal and a non-string-like or one of them and
+///   an interpolated template literal
 ///
 /// String-like literals are string literals and untagged template literals.
 fn can_be_template_literal(node: &JsBinaryExpression) -> Option<bool> {
@@ -119,18 +120,18 @@ fn can_be_template_literal(node: &JsBinaryExpression) -> Option<bool> {
     let mut has_non_constant_string_constituent = false;
     while let Some(walk) = iter.next() {
         if let WalkEvent::Enter(node) = walk {
-            let node = AnyJsExpression::cast(node)?;
-            match node {
+            let expression = AnyJsExpression::cast(node)?;
+            match &expression {
                 AnyJsExpression::JsParenthesizedExpression(_) => continue,
-                AnyJsExpression::JsBinaryExpression(node)
-                    if node.operator().ok()? == JsBinaryOperator::Plus =>
+                AnyJsExpression::JsBinaryExpression(binary)
+                    if binary.operator() == Ok(JsBinaryOperator::Plus) =>
                 {
                     continue
                 }
-                AnyJsExpression::JsTemplateExpression(ref template) if template.is_constant() => {
+                AnyJsExpression::JsTemplateExpression(template) if template.is_constant() => {
                     has_constant_string_constituent = true;
                 }
-                AnyJsExpression::JsTemplateExpression(ref template) if template.tag().is_none() => {
+                AnyJsExpression::JsTemplateExpression(template) if template.tag().is_none() => {
                     has_interpolated_string_constituent = true;
                 }
                 AnyJsExpression::AnyJsLiteralExpression(
@@ -159,7 +160,7 @@ fn template_expression_from_binary_expression(
 ) -> Option<JsTemplateExpression> {
     // For each nested binary expression (with operator `+`), we keep track of the last left expressions
     // and whether it evaluates to a string.
-    // Once we see the a string/template literal, we insert all of `left_expressions_stack` in
+    // Once we see a string/template literal, we insert all of `left_expressions_stack` in
     // `template_elements` and the seen string/template literal.
     // Any subsequent expression is directly inserted in `template_elements` if its parent
     // evaluates to a string.
@@ -170,29 +171,25 @@ fn template_expression_from_binary_expression(
     let mut iter = node.syntax().preorder();
     while let Some(walk) = iter.next() {
         match walk {
-            WalkEvent::Enter(node) => {
-                match AnyJsExpression::cast(node)? {
-                    AnyJsExpression::JsParenthesizedExpression(_) => continue,
-                    AnyJsExpression::JsBinaryExpression(ref binary)
-                        if binary.operator().ok()? == JsBinaryOperator::Plus =>
-                    {
-                        left_expressions_stack.push(vec![]);
-                        binary_evaluates_to_string_stack.push(false);
-                        continue;
-                    }
-                    _ => {}
+            WalkEvent::Enter(node) => match AnyJsExpression::cast(node)? {
+                AnyJsExpression::JsParenthesizedExpression(_) => {}
+                AnyJsExpression::JsBinaryExpression(ref binary)
+                    if binary.operator() == Ok(JsBinaryOperator::Plus) =>
+                {
+                    left_expressions_stack.push(vec![]);
+                    binary_evaluates_to_string_stack.push(false);
                 }
-                iter.skip_subtree();
-            }
+                _ => iter.skip_subtree(),
+            },
             WalkEvent::Leave(node) => {
                 let expression = AnyJsExpression::cast(node)?;
-                match expression {
+                match &expression {
                     // Skip parenthesized expressions, because they would be added twice to
                     // `left_expressions_stack` or `template_elements` (see the last match arm):
                     // First the contained expression and then the parenthesized expression itself.
                     AnyJsExpression::JsParenthesizedExpression(_) => continue,
-                    AnyJsExpression::JsBinaryExpression(ref binary)
-                        if binary.operator().ok()? == JsBinaryOperator::Plus =>
+                    AnyJsExpression::JsBinaryExpression(binary)
+                        if binary.operator() == Ok(JsBinaryOperator::Plus) =>
                     {
                         left_expressions_stack.pop()?;
 
@@ -210,9 +207,7 @@ fn template_expression_from_binary_expression(
                             left_expressions.push(expression)
                         }
                     }
-                    AnyJsExpression::JsTemplateExpression(ref template)
-                        if template.tag().is_none() =>
-                    {
+                    AnyJsExpression::JsTemplateExpression(template) if template.tag().is_none() => {
                         *binary_evaluates_to_string_stack.last_mut()? = true;
 
                         for left_expression in
@@ -223,7 +218,7 @@ fn template_expression_from_binary_expression(
                         flatten_template_element_list(&mut template_elements, template.elements())?;
                     }
                     AnyJsExpression::AnyJsLiteralExpression(
-                        AnyJsLiteralExpression::JsStringLiteralExpression(ref string_literal),
+                        AnyJsLiteralExpression::JsStringLiteralExpression(string_literal),
                     ) => {
                         *binary_evaluates_to_string_stack.last_mut()? = true;
 
@@ -234,7 +229,7 @@ fn template_expression_from_binary_expression(
                         }
                         template_elements.push(template_chunk_from(string_literal)?);
                     }
-                    expression => {
+                    _expression => {
                         if !template_elements.is_empty()
                             && *binary_evaluates_to_string_stack.last()?
                         {
