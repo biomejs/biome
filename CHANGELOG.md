@@ -451,6 +451,17 @@ The following rules are promoted:
     bar ? (foo) : (<a>{() => {}}</a>);
   ```
 
+- Allow empty type parameter lists for interfaces and type aliases ([#1237](https://github.com/biomejs/biome/issues/1237)). COntributed by @togami2864
+
+  _TypeScript_ allows interface declarations and type aliases to have empty type parameter lists.
+  Previously Biome didn't handle this edge case.
+  Now, it correctly parse this syntax:
+
+  ```ts
+  interface Foo<> {}
+  type Bar<> = {}
+  ```
+
 ### Crates
 
 #### BREAKING CHANGES
