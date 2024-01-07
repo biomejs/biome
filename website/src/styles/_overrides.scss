@@ -45,7 +45,7 @@
 }
 
 .card-cnt {
-  margin-top: 12.5rem !important;
+  margin-top: 7rem !important;
 }
 
 .card-cnt>.card-grid>.card {
@@ -95,10 +95,6 @@
   border-radius: 0.3rem;
 }
 
-.card-cnt {
-  margin-top: 12.5rem !important;
-}
-
 .card-cnt>.card-grid>.card {
   transition: all 0.5s ease;
   position: relative;
@@ -147,7 +143,7 @@
 }
 
 .expressive-code:nth-child(-n+2)>figure>pre>code>.copy {
-  display: hidden;
+  display: none;
 }
 
 .expressive-code:nth-child(-n+2)>figure>pre>code {
@@ -161,7 +157,7 @@
 }
 
 .expressive-code:nth-child(-n+2)>figure>pre>code>.copy {
-  display: hidden;
+  display: none;
 }
 
 @media only screen and (max-width: 960px) {
