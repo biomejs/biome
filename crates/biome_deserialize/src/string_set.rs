@@ -1,4 +1,4 @@
-use crate::{Deserializable, DeserializableValue, Merge, NoneState};
+use crate::{Deserializable, DeserializableValue, Merge};
 use indexmap::set::IntoIter;
 use indexmap::IndexSet;
 use serde::de::{SeqAccess, Visitor};
@@ -101,12 +101,6 @@ impl Merge for StringSet {
 
     fn merge_in_defaults(&mut self) {
         // Default is an empty set, so nothing to do.
-    }
-}
-
-impl NoneState for StringSet {
-    fn none() -> Self {
-        Self::default()
     }
 }
 
