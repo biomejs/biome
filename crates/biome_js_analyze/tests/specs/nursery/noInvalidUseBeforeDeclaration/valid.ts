@@ -12,3 +12,5 @@ let n = N.X;
 namespace N {
     export const X = 0;
 }
+
+type X = typeof X; const X = 0;
