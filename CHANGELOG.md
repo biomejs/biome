@@ -219,6 +219,8 @@ Biome now scores 97% compatibility with Prettier and features more than 180 lint
 
 - The code action (fix) of [noMultipleSpacesInRegularExpressionLiterals](https://biomejs.dev/linter/rules/no-multiple-spaces-in-regular-expression-literals/) is now marked as safe. Contributed by @Conaclos
 
+- [useArrowFunction](https://biomejs.dev/linter/rules/use-arrow-function/) no longer reports function expressions that use `new.target`. Contributed by @Conaclos
+
 #### Bug fixes
 
 - Fix [#1061](https://github.com/biomejs/biome/issues/1061). [noRedeclare](https://biomejs.dev/linter/rules/no-redeclare) no longer reports overloads of `export default function`. Contributed by @Conaclos
@@ -306,6 +308,22 @@ Biome now scores 97% compatibility with Prettier and features more than 180 lint
 
   ```js
   `a${1}` + 2;
+  ```
+
+- Fix [#1436](https://github.com/biomejs/biome/issues/1436). [useArrowFunction](https://biomejs.dev/linter/rules/use-arrow-function/) now applies a correct fix when a function expression is used in a call expression or a member access. Contributed by @Conaclos
+
+  For example, the rule proposed the following fix:
+
+  ```diff
+  - const called = function() {}();
+  + const called = () => {}();
+  ```
+
+  It now proposes a fix that adds the needed parentheses:
+
+  ```diff
+  - const called = function() {}();
+  + const called = (() => {})();
   ```
 
 ### Parser

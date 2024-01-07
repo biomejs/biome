@@ -42,6 +42,12 @@ function f7() {
     };
 }
 
+const f8 = function(a) {}.bind(null, 0);
+
+const f9 = function(a) {}["bind"](null, 0);
+
+const called = function () {}();
+
 ```
 
 # Diagnostics
@@ -253,6 +259,82 @@ invalid.ts:30:12 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━�
        30 │ + ····return·()·=>·{
     31 31 │           if (self instanceof Number) {
     32 32 │               return self;
+  
+
+```
+
+```
+invalid.ts:39:12 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function expression can be turned into an arrow function.
+  
+    37 │ }
+    38 │ 
+  > 39 │ const f8 = function(a) {}.bind(null, 0);
+       │            ^^^^^^^^^^^^^^
+    40 │ 
+    41 │ const f9 = function(a) {}["bind"](null, 0);
+  
+  i Function expressions that don't use this can be turned into arrow functions.
+  
+  i Safe fix: Use an arrow function instead.
+  
+    37 37 │   }
+    38 38 │   
+    39    │ - const·f8·=·function(a)·{}.bind(null,·0);
+       39 │ + const·f8·=·((a)·=>·{}).bind(null,·0);
+    40 40 │   
+    41 41 │   const f9 = function(a) {}["bind"](null, 0);
+  
+
+```
+
+```
+invalid.ts:41:12 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function expression can be turned into an arrow function.
+  
+    39 │ const f8 = function(a) {}.bind(null, 0);
+    40 │ 
+  > 41 │ const f9 = function(a) {}["bind"](null, 0);
+       │            ^^^^^^^^^^^^^^
+    42 │ 
+    43 │ const called = function () {}();
+  
+  i Function expressions that don't use this can be turned into arrow functions.
+  
+  i Safe fix: Use an arrow function instead.
+  
+    39 39 │   const f8 = function(a) {}.bind(null, 0);
+    40 40 │   
+    41    │ - const·f9·=·function(a)·{}["bind"](null,·0);
+       41 │ + const·f9·=·((a)·=>·{})["bind"](null,·0);
+    42 42 │   
+    43 43 │   const called = function () {}();
+  
+
+```
+
+```
+invalid.ts:43:16 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function expression can be turned into an arrow function.
+  
+    41 │ const f9 = function(a) {}["bind"](null, 0);
+    42 │ 
+  > 43 │ const called = function () {}();
+       │                ^^^^^^^^^^^^^^
+    44 │ 
+  
+  i Function expressions that don't use this can be turned into arrow functions.
+  
+  i Safe fix: Use an arrow function instead.
+  
+    41 41 │   const f9 = function(a) {}["bind"](null, 0);
+    42 42 │   
+    43    │ - const·called·=·function·()·{}();
+       43 │ + const·called·=·(()·=>·{})();
+    44 44 │   
   
 
 ```

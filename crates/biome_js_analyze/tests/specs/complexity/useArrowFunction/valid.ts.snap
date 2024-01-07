@@ -87,6 +87,10 @@ export default function() {
     return 0;
 }
 
+const usingNewTarget = function () {
+    return new.target;
+}
+
 ```
 
 

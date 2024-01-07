@@ -80,3 +80,7 @@ export const DEFAULT_COUNTER = {
 export default function() {
     return 0;
 }
+
+const usingNewTarget = function () {
+    return new.target;
+}
