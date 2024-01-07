@@ -4,7 +4,7 @@ use crate::commands::{get_stdin, validate_configuration_diagnostics};
 use crate::{
     execute_mode, setup_cli_subscriber, CliDiagnostic, CliSession, Execution, TraversalMode,
 };
-use biome_deserialize::MergeWith;
+use biome_deserialize::Merge;
 use biome_service::configuration::organize_imports::OrganizeImports;
 use biome_service::configuration::{
     load_configuration, FormatterConfiguration, LinterConfiguration, LoadedConfiguration,
@@ -99,7 +99,9 @@ pub(crate) fn check(
         organize_imports.enabled = organize_imports_enabled;
     }
 
-    fs_configuration.merge_with(configuration);
+    if let Some(configuration) = configuration {
+        fs_configuration.merge_with(configuration);
+    }
 
     // check if support of git ignore files is enabled
     let vcs_base_path = configuration_path.or(session.app.fs.working_directory());

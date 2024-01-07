@@ -7,7 +7,7 @@ use crate::{
     execute_mode, setup_cli_subscriber, CliDiagnostic, CliSession, Execution, TraversalMode,
 };
 use biome_console::{markup, ConsoleExt};
-use biome_deserialize::{MergeWith, NoneState};
+use biome_deserialize::{Merge, NoneState};
 use biome_diagnostics::PrintDiagnostic;
 use biome_service::configuration::css::CssFormatter;
 use biome_service::configuration::json::JsonFormatter;

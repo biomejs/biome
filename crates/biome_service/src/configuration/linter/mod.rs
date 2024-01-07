@@ -5,7 +5,7 @@ pub use crate::configuration::linter::rules::Rules;
 use crate::configuration::overrides::OverrideLinterConfiguration;
 use crate::settings::{to_matcher, LinterSettings};
 use crate::{Matcher, WorkspaceError};
-use biome_deserialize::StringSet;
+use biome_deserialize::{Merge, StringSet};
 use biome_deserialize_macros::{Mergeable, NoneState};
 use biome_diagnostics::Severity;
 use biome_js_analyze::options::PossibleOptions;
@@ -98,7 +98,7 @@ impl TryFrom<OverrideLinterConfiguration> for LinterSettings {
     }
 }
 
-#[derive(Clone, Debug, Deserialize, Eq, Mergeable, PartialEq, Serialize)]
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, untagged)]
 pub enum RuleConfiguration {
@@ -140,6 +140,39 @@ impl RuleConfiguration {
 impl Default for RuleConfiguration {
     fn default() -> Self {
         Self::Plain(RulePlainConfiguration::Error)
+    }
+}
+
+// Rule configuration has a custom [Merge] implementation so that overriding the
+// severity doesn't override the options.
+impl Merge for RuleConfiguration {
+    fn merge_with(&mut self, other: Self) {
+        *self = match (&self, other) {
+            (Self::WithOptions(this), Self::Plain(other)) => {
+                Self::WithOptions(Box::new(RuleWithOptions {
+                    level: other,
+                    options: this.options.clone(),
+                }))
+            }
+            // FIXME: Rule options don't have a `NoneState`, so we can't deep
+            //        merge them yet. For now, if an override specifies options,
+            //        it will still override *all* options.
+            (_, other) => other,
+        };
+    }
+
+    fn merge_in_defaults(&mut self) {
+        match (&self, Self::default()) {
+            (Self::Plain(this), Self::WithOptions(default)) => {
+                *self = Self::WithOptions(Box::new(RuleWithOptions {
+                    level: this.clone(),
+                    options: default.options,
+                }));
+            }
+            (_, _) => {
+                // Don't overwrite other values with default.
+            }
+        }
     }
 }
 

@@ -5,7 +5,7 @@ use syn::{Data, Fields};
 
 pub enum MergeableData {
     Enum,
-    NewType,
+    Newtype,
     Struct(Fields),
 }
 
@@ -22,7 +22,7 @@ impl DeriveInput {
                 if data.fields.iter().all(|field| field.ident.is_some()) {
                     MergeableData::Struct(data.fields)
                 } else {
-                    MergeableData::NewType
+                    MergeableData::Newtype
                 }
             }
             Data::Union(_) => abort!(input, "Mergeable can only be derived for enums and structs"),
@@ -38,26 +38,34 @@ impl DeriveInput {
 pub(crate) fn generate_mergeable(input: DeriveInput) -> TokenStream {
     match input.data {
         MergeableData::Enum => generate_mergeable_enum(input.ident),
-        MergeableData::NewType => generate_mergeable_new_type(input.ident),
+        MergeableData::Newtype => generate_mergeable_newtype(input.ident),
         MergeableData::Struct(fields) => generate_mergeable_struct(input.ident, fields),
     }
 }
 
 fn generate_mergeable_enum(ident: Ident) -> TokenStream {
     quote! {
-        impl biome_deserialize::MergeWith<#ident> for #ident {
-            fn merge_with(&mut self, other: #ident) {
+        impl biome_deserialize::Merge for #ident {
+            fn merge_with(&mut self, other: Self) {
                 *self = other;
+            }
+
+            fn merge_in_defaults(&mut self) {
+                // Enums shouldn't be overwritten by the default.
             }
         }
     }
 }
 
-fn generate_mergeable_new_type(ident: Ident) -> TokenStream {
+fn generate_mergeable_newtype(ident: Ident) -> TokenStream {
     quote! {
-        impl biome_deserialize::MergeWith<#ident> for #ident {
-            fn merge_with(&mut self, other: #ident) {
+        impl biome_deserialize::Merge for #ident {
+            fn merge_with(&mut self, other: Self) {
                 self.0 = other.0;
+            }
+
+            fn merge_in_defaults(&mut self) {
+                // Newtypes shouldn't be overwritten by the default.
             }
         }
     }
@@ -71,7 +79,7 @@ fn generate_mergeable_struct(ident: Ident, fields: Fields) -> TokenStream {
             quote! {
                 if let Some(other_value) = other.#field_ident {
                     match self.#field_ident.as_mut() {
-                        Some(own_value) => biome_deserialize::MergeWith::merge_with(own_value, other_value),
+                        Some(own_value) => biome_deserialize::Merge::merge_with(own_value, other_value),
                         None => {
                             self.#field_ident = Some(other_value);
                         }
@@ -81,10 +89,30 @@ fn generate_mergeable_struct(ident: Ident, fields: Fields) -> TokenStream {
         })
         .collect();
 
+    let default_fields: Vec<_> = fields
+        .iter()
+        .filter_map(|field| field.ident.as_ref())
+        .map(|field_ident| {
+            quote! {
+                match self.#field_ident.as_mut() {
+                    Some(value) => biome_deserialize::Merge::merge_in_defaults(value),
+                    None => {
+                        self.#field_ident = default.#field_ident;
+                    }
+                }
+            }
+        })
+        .collect();
+
     quote! {
-        impl biome_deserialize::MergeWith<#ident> for #ident {
-            fn merge_with(&mut self, other: #ident) {
+        impl biome_deserialize::Merge for #ident {
+            fn merge_with(&mut self, other: Self) {
                 #( #merge_fields )*
+            }
+
+            fn merge_in_defaults(&mut self) {
+                let default = Self::default();
+                #( #default_fields )*
             }
         }
     }

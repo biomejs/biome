@@ -25,7 +25,7 @@ use crate::{DynRef, WorkspaceError, VERSION};
 use biome_analyze::AnalyzerRules;
 use biome_console::markup;
 use biome_deserialize::json::deserialize_from_json_str;
-use biome_deserialize::{Deserialized, MergeWith, StringSet};
+use biome_deserialize::{Deserialized, Merge, StringSet};
 use biome_deserialize_macros::{Mergeable, NoneState};
 use biome_diagnostics::{DiagnosticExt, Error, Severity};
 use biome_fs::{AutoSearchResult, FileSystem, OpenOptions};
@@ -278,7 +278,7 @@ pub fn load_configuration(
     let config = load_config(fs, config_path)?;
     let mut loaded_configuration = LoadedConfiguration::from(config);
     loaded_configuration.apply_extends(fs)?;
-    loaded_configuration.apply_defaults();
+    loaded_configuration.configuration.merge_in_defaults();
     Ok(loaded_configuration)
 }
 
@@ -469,14 +469,6 @@ impl LoadedConfiguration {
         );
 
         Ok(())
-    }
-
-    /// Mutates the configuration so that any fields that have not been configured explicitly by the
-    /// user are filled in with their default values.
-    fn apply_defaults(&mut self) {
-        let configuration = std::mem::take(&mut self.configuration);
-        // `self.configuration` now has all the defaults, so we merge in the configured values:
-        self.configuration.merge_with(configuration);
     }
 
     /// It attempts to deserialize all the configuration files that were specified in the `extends` property

@@ -1,4 +1,4 @@
-use crate::{Deserializable, DeserializableValue, MergeWith, NoneState};
+use crate::{Deserializable, DeserializableValue, Merge, NoneState};
 use indexmap::set::IntoIter;
 use indexmap::IndexSet;
 use serde::de::{SeqAccess, Visitor};
@@ -94,9 +94,13 @@ impl IntoIterator for StringSet {
     }
 }
 
-impl MergeWith<StringSet> for StringSet {
-    fn merge_with(&mut self, other: StringSet) {
+impl Merge for StringSet {
+    fn merge_with(&mut self, other: Self) {
         self.extend(other)
+    }
+
+    fn merge_in_defaults(&mut self) {
+        // Default is an empty set, so nothing to do.
     }
 }
 
