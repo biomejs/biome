@@ -1,6 +1,6 @@
 div{color  :  blue  
     
     ;
-    <<<ROME_RANGE_START>>>    border   :  1px   solid;<<<ROME_RANGE_END>>>
+    <<<ROME_RANGE_START>>>    padding   :  10px   20px;<<<ROME_RANGE_END>>>
 }
 div{color:green;}

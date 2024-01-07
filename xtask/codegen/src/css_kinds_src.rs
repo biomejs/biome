@@ -92,6 +92,19 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "url",
         "font-palette-values",
         "auto",
+        "thin",
+        "medium",
+        "thick",
+        "none",
+        "hidden",
+        "dotted",
+        "dashed",
+        "solid",
+        "double",
+        "groove",
+        "ridge",
+        "inset",
+        "outset",
         // HERE: Add new regular keywords _above_ here. Be sure to also add them
         // to `consume_identifier` in `biome_css_parser/src/lexer/mod.rs` as well.
         // CSS-wide keywords
@@ -266,6 +279,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_UNKNOWN_PROPERTY_VALUE",
         // Properties
         "CSS_ALL_PROPERTY",
+        "CSS_BORDER_PROPERTY",
         "CSS_Z_INDEX_PROPERTY",
         "CSS_PARAMETER_LIST",
         "CSS_DECLARATION_IMPORTANT",
@@ -313,6 +327,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_ATTRIBUTE_NAME",
         "CSS_ATTRIBUTE_MATCHER",
         "CSS_ATTRIBUTE_MATCHER_VALUE",
+        // Values
         "CSS_PARENTHESIZED_EXPRESSION",
         "CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION",
         "CSS_BINARY_EXPRESSION",
@@ -320,7 +335,10 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_URL_FUNCTION",
         "CSS_COLOR",
         "CSS_AUTO",
+        "CSS_BORDER",
         "CSS_WIDE_KEYWORD",
+        "CSS_LINE_WIDTH_KEYWORD",
+        "CSS_LINE_STYLE",
         // At rule nodes
         "CSS_AT_RULE",
         "CSS_CHARSET_AT_RULE",

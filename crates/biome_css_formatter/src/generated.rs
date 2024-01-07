@@ -1687,6 +1687,46 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssAllProperty {
         )
     }
 }
+impl FormatRule<biome_css_syntax::CssBorderProperty>
+    for crate::css::properties::border_property::FormatCssBorderProperty
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssBorderProperty,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::CssBorderProperty>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssBorderProperty {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssBorderProperty,
+        crate::css::properties::border_property::FormatCssBorderProperty,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::css::properties::border_property::FormatCssBorderProperty::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssBorderProperty {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssBorderProperty,
+        crate::css::properties::border_property::FormatCssBorderProperty,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::properties::border_property::FormatCssBorderProperty::default(),
+        )
+    }
+}
 impl FormatRule<biome_css_syntax::CssZIndexProperty>
     for crate::css::properties::z_index_property::FormatCssZIndexProperty
 {
@@ -1764,6 +1804,179 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssWideKeyword {
         FormatOwnedWithRule::new(
             self,
             crate::css::auxiliary::wide_keyword::FormatCssWideKeyword::default(),
+        )
+    }
+}
+impl FormatRule<biome_css_syntax::CssBorder> for crate::css::auxiliary::border::FormatCssBorder {
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(&self, node: &biome_css_syntax::CssBorder, f: &mut CssFormatter) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::CssBorder>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssBorder {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssBorder,
+        crate::css::auxiliary::border::FormatCssBorder,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::css::auxiliary::border::FormatCssBorder::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssBorder {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssBorder,
+        crate::css::auxiliary::border::FormatCssBorder,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::auxiliary::border::FormatCssBorder::default(),
+        )
+    }
+}
+impl FormatRule<biome_css_syntax::CssLineStyle>
+    for crate::css::auxiliary::line_style::FormatCssLineStyle
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(&self, node: &biome_css_syntax::CssLineStyle, f: &mut CssFormatter) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::CssLineStyle>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssLineStyle {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssLineStyle,
+        crate::css::auxiliary::line_style::FormatCssLineStyle,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::css::auxiliary::line_style::FormatCssLineStyle::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssLineStyle {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssLineStyle,
+        crate::css::auxiliary::line_style::FormatCssLineStyle,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::auxiliary::line_style::FormatCssLineStyle::default(),
+        )
+    }
+}
+impl FormatRule<biome_css_syntax::CssColor> for crate::css::value::color::FormatCssColor {
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(&self, node: &biome_css_syntax::CssColor, f: &mut CssFormatter) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::CssColor>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssColor {
+    type Format<'a> =
+        FormatRefWithRule<'a, biome_css_syntax::CssColor, crate::css::value::color::FormatCssColor>;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(self, crate::css::value::color::FormatCssColor::default())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssColor {
+    type Format =
+        FormatOwnedWithRule<biome_css_syntax::CssColor, crate::css::value::color::FormatCssColor>;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(self, crate::css::value::color::FormatCssColor::default())
+    }
+}
+impl FormatRule<biome_css_syntax::CssRegularDimension>
+    for crate::css::value::regular_dimension::FormatCssRegularDimension
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssRegularDimension,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::CssRegularDimension>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssRegularDimension {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssRegularDimension,
+        crate::css::value::regular_dimension::FormatCssRegularDimension,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::css::value::regular_dimension::FormatCssRegularDimension::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssRegularDimension {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssRegularDimension,
+        crate::css::value::regular_dimension::FormatCssRegularDimension,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::value::regular_dimension::FormatCssRegularDimension::default(),
+        )
+    }
+}
+impl FormatRule<biome_css_syntax::CssLineWidthKeyword>
+    for crate::css::auxiliary::line_width_keyword::FormatCssLineWidthKeyword
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssLineWidthKeyword,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::CssLineWidthKeyword>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssLineWidthKeyword {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssLineWidthKeyword,
+        crate::css::auxiliary::line_width_keyword::FormatCssLineWidthKeyword,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::css::auxiliary::line_width_keyword::FormatCssLineWidthKeyword::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssLineWidthKeyword {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssLineWidthKeyword,
+        crate::css::auxiliary::line_width_keyword::FormatCssLineWidthKeyword,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::auxiliary::line_width_keyword::FormatCssLineWidthKeyword::default(),
         )
     }
 }
@@ -4362,69 +4575,6 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssImportNamedLayer {
         )
     }
 }
-impl FormatRule<biome_css_syntax::CssColor> for crate::css::value::color::FormatCssColor {
-    type Context = CssFormatContext;
-    #[inline(always)]
-    fn fmt(&self, node: &biome_css_syntax::CssColor, f: &mut CssFormatter) -> FormatResult<()> {
-        FormatNodeRule::<biome_css_syntax::CssColor>::fmt(self, node, f)
-    }
-}
-impl AsFormat<CssFormatContext> for biome_css_syntax::CssColor {
-    type Format<'a> =
-        FormatRefWithRule<'a, biome_css_syntax::CssColor, crate::css::value::color::FormatCssColor>;
-    fn format(&self) -> Self::Format<'_> {
-        #![allow(clippy::default_constructed_unit_structs)]
-        FormatRefWithRule::new(self, crate::css::value::color::FormatCssColor::default())
-    }
-}
-impl IntoFormat<CssFormatContext> for biome_css_syntax::CssColor {
-    type Format =
-        FormatOwnedWithRule<biome_css_syntax::CssColor, crate::css::value::color::FormatCssColor>;
-    fn into_format(self) -> Self::Format {
-        #![allow(clippy::default_constructed_unit_structs)]
-        FormatOwnedWithRule::new(self, crate::css::value::color::FormatCssColor::default())
-    }
-}
-impl FormatRule<biome_css_syntax::CssRegularDimension>
-    for crate::css::value::regular_dimension::FormatCssRegularDimension
-{
-    type Context = CssFormatContext;
-    #[inline(always)]
-    fn fmt(
-        &self,
-        node: &biome_css_syntax::CssRegularDimension,
-        f: &mut CssFormatter,
-    ) -> FormatResult<()> {
-        FormatNodeRule::<biome_css_syntax::CssRegularDimension>::fmt(self, node, f)
-    }
-}
-impl AsFormat<CssFormatContext> for biome_css_syntax::CssRegularDimension {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        biome_css_syntax::CssRegularDimension,
-        crate::css::value::regular_dimension::FormatCssRegularDimension,
-    >;
-    fn format(&self) -> Self::Format<'_> {
-        #![allow(clippy::default_constructed_unit_structs)]
-        FormatRefWithRule::new(
-            self,
-            crate::css::value::regular_dimension::FormatCssRegularDimension::default(),
-        )
-    }
-}
-impl IntoFormat<CssFormatContext> for biome_css_syntax::CssRegularDimension {
-    type Format = FormatOwnedWithRule<
-        biome_css_syntax::CssRegularDimension,
-        crate::css::value::regular_dimension::FormatCssRegularDimension,
-    >;
-    fn into_format(self) -> Self::Format {
-        #![allow(clippy::default_constructed_unit_structs)]
-        FormatOwnedWithRule::new(
-            self,
-            crate::css::value::regular_dimension::FormatCssRegularDimension::default(),
-        )
-    }
-}
 impl FormatRule<biome_css_syntax::CssUnknownDimension>
     for crate::css::value::unknown_dimension::FormatCssUnknownDimension
 {
@@ -6263,6 +6413,60 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssAllPropertyValue {
         FormatOwnedWithRule::new(
             self,
             crate::css::any::all_property_value::FormatAnyCssAllPropertyValue::default(),
+        )
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssBorderPropertyValue {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::AnyCssBorderPropertyValue,
+        crate::css::any::border_property_value::FormatAnyCssBorderPropertyValue,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::css::any::border_property_value::FormatAnyCssBorderPropertyValue::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssBorderPropertyValue {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::AnyCssBorderPropertyValue,
+        crate::css::any::border_property_value::FormatAnyCssBorderPropertyValue,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::any::border_property_value::FormatAnyCssBorderPropertyValue::default(),
+        )
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssLineWidth {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::AnyCssLineWidth,
+        crate::css::any::line_width::FormatAnyCssLineWidth,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::css::any::line_width::FormatAnyCssLineWidth::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssLineWidth {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::AnyCssLineWidth,
+        crate::css::any::line_width::FormatAnyCssLineWidth,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::any::line_width::FormatAnyCssLineWidth::default(),
         )
     }
 }

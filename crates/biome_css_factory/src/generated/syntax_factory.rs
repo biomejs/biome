@@ -260,6 +260,74 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.into_node(CSS_BINARY_EXPRESSION, children)
             }
+            CSS_BORDER => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                let mut unmatched_count = 3usize;
+                let mut group_slot_map = [false; 3usize];
+                for _ in 0usize..3usize {
+                    let Some(element) = &current_element else {
+                        break;
+                    };
+                    if !group_slot_map[0usize] && AnyCssLineWidth::can_cast(element.kind()) {
+                        group_slot_map[0usize] = true;
+                    } else if !group_slot_map[1usize] && CssLineStyle::can_cast(element.kind()) {
+                        group_slot_map[1usize] = true;
+                    } else if !group_slot_map[2usize] && CssColor::can_cast(element.kind()) {
+                        group_slot_map[2usize] = true;
+                    } else {
+                        break;
+                    }
+                    unmatched_count -= 1;
+                    slots.mark_present();
+                    slots.next_slot();
+                    current_element = elements.next();
+                }
+                for _ in 0..unmatched_count {
+                    slots.next_slot();
+                }
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_BORDER.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_BORDER, children)
+            }
+            CSS_BORDER_PROPERTY => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element {
+                    if CssIdentifier::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if element.kind() == T ! [:] {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if AnyCssBorderPropertyValue::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_BORDER_PROPERTY.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_BORDER_PROPERTY, children)
+            }
             CSS_CHARSET_AT_RULE => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
@@ -1541,6 +1609,56 @@ impl SyntaxFactory for CssSyntaxFactory {
                     );
                 }
                 slots.into_node(CSS_LAYER_REFERENCE, children)
+            }
+            CSS_LINE_STYLE => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element {
+                    if matches!(
+                        element.kind(),
+                        T![none]
+                            | T![hidden]
+                            | T![dotted]
+                            | T![dashed]
+                            | T![solid]
+                            | T![double]
+                            | T![groove]
+                            | T![ridge]
+                            | T![inset]
+                            | T![outset]
+                    ) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_LINE_STYLE.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_LINE_STYLE, children)
+            }
+            CSS_LINE_WIDTH_KEYWORD => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element {
+                    if matches!(element.kind(), T![thin] | T![medium] | T![thick]) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_LINE_WIDTH_KEYWORD.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_LINE_WIDTH_KEYWORD, children)
             }
             CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION => {
                 let mut elements = (&children).into_iter();

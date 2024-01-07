@@ -9,7 +9,7 @@ info: css/range/single_declaration.css
 div{color  :  blue  
     
     ;
-        border   :  1px   solid;
+        padding   :  10px   20px;
 }
 div{color:green;}
 
@@ -33,7 +33,7 @@ Quote style: Double Quotes
 ```css
 div {
 	color: blue;
-	border: 1px solid;
+	padding: 10px 20px;
 }
 div{color:green;}
 ```
