@@ -6,14 +6,14 @@ use crate::configuration::{
     JsonConfiguration,
 };
 use crate::{
-    configuration::FilesConfiguration, Configuration, ConfigurationDiagnostic, Matcher, MergeWith,
-    Rules, WorkspaceError,
+    configuration::FilesConfiguration, Configuration, ConfigurationDiagnostic, Matcher, Rules,
+    WorkspaceError,
 };
 use biome_analyze::{AnalyzerRules, RuleFilter};
 use biome_css_formatter::context::CssFormatOptions;
 use biome_css_parser::CssParserOptions;
 use biome_css_syntax::CssLanguage;
-use biome_deserialize::StringSet;
+use biome_deserialize::{MergeWith, StringSet};
 use biome_diagnostics::Category;
 use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth};
 use biome_fs::RomePath;

@@ -71,7 +71,6 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
     let mut struct_groups = Vec::new();
     let mut line_groups = Vec::new();
     let mut default_for_groups = Vec::new();
-    let mut merge_width_groups = Vec::new();
     let mut group_as_default_rules = Vec::new();
     let mut group_as_disabled_rules = Vec::new();
     let mut group_match_code = Vec::new();
@@ -95,13 +94,6 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
         });
         default_for_groups.push(quote! {
             #property_group_name: None
-        });
-
-        merge_width_groups.push(quote! {
-            if let Some(other) = other.#property_group_name {
-               let #property_group_name = self.#property_group_name.get_or_insert(#group_struct_name::default());
-                #property_group_name.merge_with(other);
-            }
         });
 
         let global_recommended = if group == "nursery" {
@@ -159,12 +151,13 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
         use serde::{Deserialize, Serialize};
         #[cfg(feature = "schema")]
         use schemars::JsonSchema;
-        use crate::{MergeWith, RuleConfiguration};
+        use crate::RuleConfiguration;
         use biome_analyze::RuleFilter;
         use indexmap::IndexSet;
         use biome_diagnostics::{Category, Severity};
+        use biome_deserialize_macros::{Mergeable, NoneState};
 
-        #[derive(Deserialize, Serialize, Debug, Clone, Eq, PartialEq)]
+        #[derive(Clone, Debug, Deserialize, Eq, Mergeable, NoneState, PartialEq, Serialize)]
         #[cfg_attr(feature = "schema", derive(JsonSchema))]
         #[serde(rename_all = "camelCase", deny_unknown_fields)]
         pub struct Rules {
@@ -188,31 +181,6 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
                 }
             }
         }
-
-        impl MergeWith<Rules> for Rules {
-            fn merge_with(&mut self, other: Rules) {
-                if let Some(recommended) = other.recommended {
-                    self.recommended = Some(recommended);
-                }
-
-                if let Some(all) = other.all {
-                    self.all = Some(all);
-                }
-
-                #( #merge_width_groups )*
-            }
-
-            fn merge_with_if_not_default(&mut self, other: Rules)
-            where
-                Rules: Default,
-            {
-                if other != Rules::default() {
-                    self.merge_with(other)
-                }
-            }
-        }
-
-
 
         impl Rules {
 
@@ -301,7 +269,7 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
         use crate::configuration::linter::*;
         use crate::Rules;
         use biome_console::markup;
-        use biome_deserialize::{Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor, Text, VisitableType};
+        use biome_deserialize::{Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor, NoneState, Text, VisitableType};
         use biome_rowan::TextRange;
 
         impl Deserializable for Rules {
@@ -312,7 +280,7 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
             ) -> Option<Self> {
                 struct Visitor;
                 impl DeserializationVisitor for Visitor  {
-                    type Output =Rules;
+                    type Output = Rules;
                     const EXPECTED_TYPE: VisitableType = VisitableType::MAP;
                     fn visit_map(
                         self,
@@ -322,7 +290,7 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
                         diagnostics: &mut Vec<DeserializationDiagnostic>,
                     ) -> Option<Self::Output> {
                         let mut recommended_is_set = false;
-                        let mut result = Self::Output::default();
+                        let mut result = Self::Output::none();
                         for (key, value) in members.flatten() {
                             let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
                                 continue;
@@ -352,7 +320,7 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
                                 ))
                                 .with_range(range)
                                 .with_note(markup!("Biome will fallback to its defaults for this section.")));
-                            return Some(Self::Output::default());
+                            return Some(Self::Output::none());
                         }
                         Some(result)
                     }
@@ -409,7 +377,6 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
     let mut declarations = Vec::new();
     let mut lines_rule = Vec::new();
     let mut schema_lines_rules = Vec::new();
-    let mut merge_with_lines_rules = Vec::new();
     let mut rule_enabled_check_line = Vec::new();
     let mut rule_disabled_check_line = Vec::new();
     let mut get_rule_configuration_line = Vec::new();
@@ -489,12 +456,6 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
             pub #rule_identifier: Option<RuleConfiguration>
         });
 
-        merge_with_lines_rules.push(quote! {
-            if let Some(#rule_identifier) = other.#rule_identifier {
-                self.#rule_identifier = Some(#rule_identifier);
-            }
-        });
-
         rule_enabled_check_line.push(quote! {
             if let Some(rule) = self.#rule_identifier.as_ref() {
                 if rule.is_enabled() {
@@ -536,7 +497,7 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
         )
     };
     quote! {
-        #[derive(Deserialize, Default, Serialize, Debug, Eq, PartialEq, Clone)]
+        #[derive(Clone, Debug, Default, Deserialize, Eq, Mergeable, NoneState, PartialEq, Serialize)]
         #[cfg_attr(feature = "schema", derive(JsonSchema))]
         #[serde(rename_all = "camelCase", default)]
         /// A list of rules that belong to this group
@@ -550,18 +511,6 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
             pub all: Option<bool>,
 
             #( #schema_lines_rules ),*
-        }
-
-        impl MergeWith<#group_struct_name> for #group_struct_name {
-            fn merge_with(&mut self, other: #group_struct_name) {
-                #( #merge_with_lines_rules )*
-            }
-
-            fn merge_with_if_not_default(&mut self, other: #group_struct_name) where #group_struct_name: Default {
-                if other != #group_struct_name::default() {
-                    self.merge_with(other);
-                }
-            }
         }
 
         impl #group_struct_name {
@@ -694,7 +643,7 @@ fn generate_visitor(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) -
                         diagnostics: &mut Vec<DeserializationDiagnostic>,
                     ) -> Option<Self::Output> {
                         let mut recommended_is_set = false;
-                        let mut result = Self::Output::default();
+                        let mut result = Self::Output::none();
                         for (key, value) in members.flatten() {
                             let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
                                 continue;
@@ -724,7 +673,7 @@ fn generate_visitor(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) -
                                 ))
                                 .with_range(range)
                                 .with_note(markup!("Biome will fallback to its defaults for this section.")));
-                            return Some(Self::Output::default());
+                            return Some(Self::Output::none());
                         }
                         Some(result)
                     }

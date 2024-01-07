@@ -1,7 +1,7 @@
 use crate::configuration::json::{JsonConfiguration, JsonFormatter, JsonParser};
 use biome_deserialize::{
-    Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor, Text,
-    VisitableType,
+    Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor,
+    NoneState, Text, VisitableType,
 };
 
 impl Deserializable for JsonConfiguration {
@@ -28,7 +28,7 @@ impl DeserializationVisitor for JsonConfigurationVisitor {
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self::Output> {
         const ALLOWED_KEYS: &[&str] = &["parser", "formatter"];
-        let mut result = Self::Output::default();
+        let mut result = Self::Output::none();
         for (key, value) in members.flatten() {
             let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
                 continue;
@@ -77,7 +77,7 @@ impl DeserializationVisitor for JsonParserVisitor {
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self::Output> {
         const ALLOWED_KEYS: &[&str] = &["allowComments", "allowTrailingCommas"];
-        let mut result = Self::Output::default();
+        let mut result = Self::Output::none();
         for (key, value) in members.flatten() {
             let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
                 continue;
@@ -135,7 +135,7 @@ impl DeserializationVisitor for JsonFormatterVisitor {
             "lineEnding",
             "lineWidth",
         ];
-        let mut result = Self::Output::default();
+        let mut result = Self::Output::none();
         for (key, value) in members.flatten() {
             let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
                 continue;

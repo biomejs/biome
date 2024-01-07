@@ -46,35 +46,35 @@ use crate::group_id::UniqueGroupIdBuilder;
 use crate::prelude::TagKind;
 use std::fmt::Debug;
 
+use crate::builders::syntax_token_cow_slice;
+use crate::comments::{CommentStyle, Comments, SourceComment};
+pub use crate::diagnostics::{ActualStart, FormatError, InvalidDocumentError, PrintError};
 use crate::format_element::document::Document;
 #[cfg(debug_assertions)]
 use crate::printed_tokens::PrintedTokens;
 use crate::printer::{Printer, PrinterOptions};
+use crate::trivia::{format_skipped_token_trivia, format_trimmed_token};
 pub use arguments::{Argument, Arguments};
 use biome_deserialize::{
     Deserializable, DeserializableValue, DeserializationDiagnostic, Text, TextNumber,
+};
+use biome_deserialize_macros::Mergeable;
+use biome_rowan::{
+    Language, NodeOrToken, SyntaxElement, SyntaxNode, SyntaxResult, SyntaxToken, SyntaxTriviaPiece,
+    TextLen, TextRange, TextSize, TokenAtOffset,
 };
 pub use buffer::{
     Buffer, BufferExtensions, BufferSnapshot, Inspect, PreambleBuffer, RemoveSoftLinesBuffer,
     VecBuffer,
 };
 pub use builders::BestFitting;
-use token::string::Quote;
-
-use crate::builders::syntax_token_cow_slice;
-use crate::comments::{CommentStyle, Comments, SourceComment};
-pub use crate::diagnostics::{ActualStart, FormatError, InvalidDocumentError, PrintError};
-use crate::trivia::{format_skipped_token_trivia, format_trimmed_token};
-use biome_rowan::{
-    Language, NodeOrToken, SyntaxElement, SyntaxNode, SyntaxResult, SyntaxToken, SyntaxTriviaPiece,
-    TextLen, TextRange, TextSize, TokenAtOffset,
-};
 pub use format_element::{normalize_newlines, FormatElement, LINE_TERMINATORS};
 pub use group_id::GroupId;
 pub use source_map::{TransformSourceMap, TransformSourceMapBuilder};
 use std::marker::PhantomData;
 use std::num::ParseIntError;
 use std::str::FromStr;
+use token::string::Quote;
 
 #[derive(Debug, Eq, PartialEq, Clone, Copy, Hash)]
 #[cfg_attr(
@@ -126,7 +126,7 @@ impl std::fmt::Display for IndentStyle {
     }
 }
 
-#[derive(Debug, Eq, PartialEq, Clone, Copy, Hash)]
+#[derive(Clone, Copy, Debug, Eq, Hash, Mergeable, PartialEq)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
@@ -246,7 +246,7 @@ impl From<u8> for IndentWidth {
 /// Validated value for the `line_width` formatter options
 ///
 /// The allowed range of values is 1..=320
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Mergeable, PartialEq)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
@@ -357,7 +357,7 @@ impl From<LineWidth> for u16 {
     }
 }
 
-#[derive(Debug, Default, Eq, Hash, PartialEq, Clone, Copy)]
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, Mergeable, PartialEq)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),

@@ -1,4 +1,5 @@
-use crate::{Deserializable, DeserializableValue};
+use crate::{Deserializable, DeserializableValue, MergeWith, NoneState};
+use indexmap::set::IntoIter;
 use indexmap::IndexSet;
 use serde::de::{SeqAccess, Visitor};
 use serde::ser::SerializeSeq;
@@ -23,6 +24,13 @@ impl StringSet {
 
     pub fn clear(&mut self) {
         self.0.clear();
+    }
+
+    pub fn extend<I>(&mut self, iter: I)
+    where
+        I: IntoIterator<Item = String>,
+    {
+        self.0.extend(iter)
     }
 }
 
@@ -74,6 +82,27 @@ impl<'de> Deserialize<'de> for StringSet {
             }
         }
         deserializer.deserialize_seq(IndexVisitor).map(StringSet)
+    }
+}
+
+impl IntoIterator for StringSet {
+    type Item = String;
+    type IntoIter = IntoIter<String>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.into_iter()
+    }
+}
+
+impl MergeWith<StringSet> for StringSet {
+    fn merge_with(&mut self, other: StringSet) {
+        self.extend(other)
+    }
+}
+
+impl NoneState for StringSet {
+    fn none() -> Self {
+        Self::default()
     }
 }
 

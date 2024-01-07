@@ -2,11 +2,11 @@
 mod rules;
 
 pub use crate::configuration::linter::rules::Rules;
-use crate::configuration::merge::MergeWith;
 use crate::configuration::overrides::OverrideLinterConfiguration;
 use crate::settings::{to_matcher, LinterSettings};
 use crate::{Matcher, WorkspaceError};
 use biome_deserialize::StringSet;
+use biome_deserialize_macros::{Mergeable, NoneState};
 use biome_diagnostics::Severity;
 use biome_js_analyze::options::PossibleOptions;
 use bpaf::Bpaf;
@@ -17,7 +17,7 @@ use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 use std::str::FromStr;
 
-#[derive(Deserialize, Serialize, Debug, Clone, Bpaf, Eq, PartialEq)]
+#[derive(Debug, Deserialize, Mergeable, NoneState, Serialize, Clone, Bpaf, Eq, PartialEq)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct LinterConfiguration {
@@ -42,23 +42,6 @@ pub struct LinterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[bpaf(hide)]
     pub include: Option<StringSet>,
-}
-
-impl MergeWith<LinterConfiguration> for LinterConfiguration {
-    fn merge_with(&mut self, other: LinterConfiguration) {
-        if let Some(enabled) = other.enabled {
-            self.enabled = Some(enabled);
-        }
-    }
-
-    fn merge_with_if_not_default(&mut self, other: LinterConfiguration)
-    where
-        LinterConfiguration: Default,
-    {
-        if other != LinterConfiguration::default() {
-            self.merge_with(other)
-        }
-    }
 }
 
 impl LinterConfiguration {
@@ -115,7 +98,7 @@ impl TryFrom<OverrideLinterConfiguration> for LinterSettings {
     }
 }
 
-#[derive(Deserialize, Serialize, Debug, Clone, Eq, PartialEq)]
+#[derive(Clone, Debug, Deserialize, Eq, Mergeable, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, untagged)]
 pub enum RuleConfiguration {
@@ -153,6 +136,7 @@ impl RuleConfiguration {
         !self.is_disabled()
     }
 }
+
 impl Default for RuleConfiguration {
     fn default() -> Self {
         Self::Plain(RulePlainConfiguration::Error)
