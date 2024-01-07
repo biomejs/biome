@@ -33,7 +33,7 @@ pub(crate) fn lint(session: CliSession, payload: LintCommandPayload) -> Result<(
         apply,
         apply_unsafe,
         cli_options,
-        linter_configuration,
+        mut linter_configuration,
         mut paths,
         stdin_file_path,
         vcs_configuration,
@@ -77,6 +77,10 @@ pub(crate) fn lint(session: CliSession, payload: LintCommandPayload) -> Result<(
         {
             None
         } else {
+            if let Some(linter) = linter_configuration.as_mut() {
+                // Don't overwrite rules from the CLI configuration.
+                linter.rules = None;
+            }
             linter_configuration
         },
         files: files_configuration,

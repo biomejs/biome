@@ -99,7 +99,11 @@ pub(crate) fn check(
         organize_imports.enabled = organize_imports_enabled;
     }
 
-    if let Some(configuration) = configuration {
+    if let Some(mut configuration) = configuration {
+        if let Some(linter) = configuration.linter.as_mut() {
+            // Don't overwrite rules from the CLI configuration.
+            linter.rules = None;
+        }
         fs_configuration.merge_with(configuration);
     }
 
