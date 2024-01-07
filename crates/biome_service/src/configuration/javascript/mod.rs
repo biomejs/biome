@@ -1,13 +1,15 @@
 mod formatter;
 
 pub use crate::configuration::javascript::formatter::{javascript_formatter, JavascriptFormatter};
-use crate::configuration::merge::MergeWith;
 use biome_deserialize::StringSet;
+use biome_deserialize_macros::{Mergeable, NoneState};
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 
 /// A set of options applied to the JavaScript files
-#[derive(Default, Debug, Deserialize, Serialize, Eq, PartialEq, Clone, Bpaf)]
+#[derive(
+    Bpaf, Clone, Default, Debug, Deserialize, Eq, Mergeable, NoneState, PartialEq, Serialize,
+)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(default, deny_unknown_fields)]
 pub struct JavascriptConfiguration {
@@ -33,56 +35,6 @@ pub struct JavascriptConfiguration {
     pub organize_imports: Option<JavascriptOrganizeImports>,
 }
 
-impl MergeWith<JavascriptConfiguration> for JavascriptConfiguration {
-    fn merge_with(&mut self, other: JavascriptConfiguration) {
-        if let Some(other_formatter) = other.formatter {
-            let formatter = self
-                .formatter
-                .get_or_insert_with(JavascriptFormatter::default);
-            formatter.merge_with(other_formatter);
-        }
-    }
-
-    fn merge_with_if_not_default(&mut self, other: JavascriptConfiguration)
-    where
-        JavascriptConfiguration: Default,
-    {
-        if let Some(other_formatter) = other.formatter {
-            if other_formatter != JavascriptFormatter::default() {
-                let formatter = self
-                    .formatter
-                    .get_or_insert_with(JavascriptFormatter::default);
-                formatter.merge_with(other_formatter);
-            }
-        }
-    }
-}
-
-impl MergeWith<Option<JavascriptFormatter>> for JavascriptConfiguration {
-    fn merge_with(&mut self, other: Option<JavascriptFormatter>) {
-        if let Some(other_formatter) = other {
-            let formatter = self
-                .formatter
-                .get_or_insert_with(JavascriptFormatter::default);
-            formatter.merge_with(other_formatter);
-        }
-    }
-
-    fn merge_with_if_not_default(&mut self, other: Option<JavascriptFormatter>)
-    where
-        Option<JavascriptFormatter>: Default,
-    {
-        if let Some(other_formatter) = other {
-            if other_formatter != JavascriptFormatter::default() {
-                let formatter = self
-                    .formatter
-                    .get_or_insert_with(JavascriptFormatter::default);
-                formatter.merge_with(other_formatter);
-            }
-        }
-    }
-}
-
 impl JavascriptConfiguration {
     pub fn with_formatter() -> Self {
         Self {
@@ -92,13 +44,17 @@ impl JavascriptConfiguration {
     }
 }
 
-#[derive(Debug, Default, Deserialize, Serialize, Eq, PartialEq, Clone, Bpaf)]
+#[derive(
+    Bpaf, Clone, Debug, Default, Deserialize, Eq, Mergeable, NoneState, PartialEq, Serialize,
+)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(default, deny_unknown_fields)]
 pub struct JavascriptOrganizeImports {}
 
 /// Options that changes how the JavaScript parser behaves
-#[derive(Default, Debug, Deserialize, Serialize, Eq, PartialEq, Clone, Bpaf)]
+#[derive(
+    Bpaf, Clone, Debug, Default, Deserialize, Eq, Mergeable, NoneState, PartialEq, Serialize,
+)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct JavascriptParser {
@@ -108,27 +64,4 @@ pub struct JavascriptParser {
     ///
     /// These decorators belong to an old proposal, and they are subject to change.
     pub unsafe_parameter_decorators_enabled: Option<bool>,
-}
-
-impl MergeWith<JavascriptParser> for JavascriptParser {
-    fn merge_with(&mut self, other: JavascriptParser) {
-        if let Some(unsafe_parameter_decorators_enabled) = other.unsafe_parameter_decorators_enabled
-        {
-            self.unsafe_parameter_decorators_enabled = Some(unsafe_parameter_decorators_enabled);
-        }
-    }
-
-    fn merge_with_if_not_default(&mut self, other: JavascriptParser)
-    where
-        JavascriptParser: Default,
-    {
-        if other != JavascriptParser::default() {
-            if let Some(unsafe_parameter_decorators_enabled) =
-                other.unsafe_parameter_decorators_enabled
-            {
-                self.unsafe_parameter_decorators_enabled =
-                    Some(unsafe_parameter_decorators_enabled);
-            }
-        }
-    }
 }

@@ -300,6 +300,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_deserialize_macros"
+version = "0.3.1"
+dependencies = [
+ "proc-macro-error",
+ "proc-macro2",
+ "quote",
+ "syn 1.0.109",
+]
+
+[[package]]
 name = "biome_diagnostics"
 version = "0.3.1"
 dependencies = [
@@ -349,6 +359,7 @@ version = "0.3.1"
 dependencies = [
  "biome_console",
  "biome_deserialize",
+ "biome_deserialize_macros",
  "biome_diagnostics",
  "biome_js_parser",
  "biome_js_syntax",
@@ -448,6 +459,7 @@ version = "0.3.1"
 dependencies = [
  "biome_console",
  "biome_deserialize",
+ "biome_deserialize_macros",
  "biome_diagnostics",
  "biome_diagnostics_categories",
  "biome_formatter",
@@ -733,6 +745,7 @@ dependencies = [
  "biome_css_parser",
  "biome_css_syntax",
  "biome_deserialize",
+ "biome_deserialize_macros",
  "biome_diagnostics",
  "biome_flags",
  "biome_formatter",

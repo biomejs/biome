@@ -4,12 +4,13 @@ use crate::commands::validate_configuration_diagnostics;
 use crate::{
     execute_mode, setup_cli_subscriber, CliDiagnostic, CliSession, Execution, TraversalMode,
 };
+use biome_deserialize::MergeWith;
 use biome_service::configuration::organize_imports::OrganizeImports;
 use biome_service::configuration::{
     load_configuration, FormatterConfiguration, LinterConfiguration, LoadedConfiguration,
 };
 use biome_service::workspace::{FixFileMode, UpdateSettingsParams};
-use biome_service::{Configuration, ConfigurationBasePath, MergeWith};
+use biome_service::{Configuration, ConfigurationBasePath};
 use std::ffi::OsString;
 use std::path::PathBuf;
 
