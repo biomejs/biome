@@ -12,7 +12,8 @@ use crate::{
 use biome_rowan::{support, AstNode, RawSyntaxKind, SyntaxKindSet, SyntaxResult};
 #[allow(unused)]
 use biome_rowan::{
-    AstNodeList, AstNodeListIterator, AstSeparatedList, AstSeparatedListNodesIterator,
+    AstNodeList, AstNodeListIterator, AstNodeSlotMap, AstSeparatedList,
+    AstSeparatedListNodesIterator,
 };
 #[cfg(feature = "serde")]
 use serde::ser::SerializeSeq;
@@ -7927,6 +7928,11 @@ impl AstNode for CssBorder {
     }
     fn into_syntax(self) -> SyntaxNode {
         self.syntax
+    }
+}
+impl AstNodeSlotMap<3usize> for CssBorder {
+    fn slot_map(&self) -> &[u8; 3usize] {
+        &self.slot_map
     }
 }
 impl std::fmt::Debug for CssBorder {
