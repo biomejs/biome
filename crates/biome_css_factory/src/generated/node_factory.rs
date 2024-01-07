@@ -1895,36 +1895,40 @@ pub fn css_unknown_property_value(
     ))
 }
 pub fn css_url_function(
-    url_token: SyntaxToken,
+    name_token: SyntaxToken,
     l_paren_token: SyntaxToken,
+    modifiers: CssUrlModifierList,
     r_paren_token: SyntaxToken,
 ) -> CssUrlFunctionBuilder {
     CssUrlFunctionBuilder {
-        url_token,
+        name_token,
         l_paren_token,
+        modifiers,
         r_paren_token,
-        any_css_url_value: None,
+        value: None,
     }
 }
 pub struct CssUrlFunctionBuilder {
-    url_token: SyntaxToken,
+    name_token: SyntaxToken,
     l_paren_token: SyntaxToken,
+    modifiers: CssUrlModifierList,
     r_paren_token: SyntaxToken,
-    any_css_url_value: Option<AnyCssUrlValue>,
+    value: Option<AnyCssUrlValue>,
 }
 impl CssUrlFunctionBuilder {
-    pub fn with_any_css_url_value(mut self, any_css_url_value: AnyCssUrlValue) -> Self {
-        self.any_css_url_value = Some(any_css_url_value);
+    pub fn with_value(mut self, value: AnyCssUrlValue) -> Self {
+        self.value = Some(value);
         self
     }
     pub fn build(self) -> CssUrlFunction {
         CssUrlFunction::unwrap_cast(SyntaxNode::new_detached(
             CssSyntaxKind::CSS_URL_FUNCTION,
             [
-                Some(SyntaxElement::Token(self.url_token)),
+                Some(SyntaxElement::Token(self.name_token)),
                 Some(SyntaxElement::Token(self.l_paren_token)),
-                self.any_css_url_value
+                self.value
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Node(self.modifiers.into_syntax())),
                 Some(SyntaxElement::Token(self.r_paren_token)),
             ],
         ))
@@ -2283,6 +2287,18 @@ where
             .map(|item| Some(item.into_syntax().into())),
     ))
 }
+pub fn css_url_modifier_list<I>(items: I) -> CssUrlModifierList
+where
+    I: IntoIterator<Item = AnyCssUrlModifier>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssUrlModifierList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_URL_MODIFIER_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
+    ))
+}
 pub fn css_bogus<I>(slots: I) -> CssBogus
 where
     I: IntoIterator<Item = Option<SyntaxElement>>,
@@ -2447,6 +2463,16 @@ where
 {
     CssBogusSubSelector::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_BOGUS_SUB_SELECTOR,
+        slots,
+    ))
+}
+pub fn css_bogus_url_modifier<I>(slots: I) -> CssBogusUrlModifier
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssBogusUrlModifier::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_BOGUS_URL_MODIFIER,
         slots,
     ))
 }

@@ -60,6 +60,7 @@ pub(crate) mod supports_and_combinable_condition;
 pub(crate) mod supports_condition;
 pub(crate) mod supports_in_parens;
 pub(crate) mod supports_or_combinable_condition;
+pub(crate) mod url_modifier;
 pub(crate) mod url_value;
 pub(crate) mod value;
 pub(crate) mod z_index_property_value;

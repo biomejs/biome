@@ -5283,6 +5283,33 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssSubSelectorList {
         )
     }
 }
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssUrlModifierList {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssUrlModifierList,
+        crate::css::lists::url_modifier_list::FormatCssUrlModifierList,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::css::lists::url_modifier_list::FormatCssUrlModifierList::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssUrlModifierList {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssUrlModifierList,
+        crate::css::lists::url_modifier_list::FormatCssUrlModifierList,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::lists::url_modifier_list::FormatCssUrlModifierList::default(),
+        )
+    }
+}
 impl FormatRule<biome_css_syntax::CssBogus> for crate::css::bogus::bogus::FormatCssBogus {
     type Context = CssFormatContext;
     #[inline(always)]
@@ -5893,6 +5920,46 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssBogusProperty {
         FormatOwnedWithRule::new(
             self,
             crate::css::bogus::bogus_property::FormatCssBogusProperty::default(),
+        )
+    }
+}
+impl FormatRule<biome_css_syntax::CssBogusUrlModifier>
+    for crate::css::bogus::bogus_url_modifier::FormatCssBogusUrlModifier
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssBogusUrlModifier,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatBogusNodeRule::<biome_css_syntax::CssBogusUrlModifier>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssBogusUrlModifier {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssBogusUrlModifier,
+        crate::css::bogus::bogus_url_modifier::FormatCssBogusUrlModifier,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::css::bogus::bogus_url_modifier::FormatCssBogusUrlModifier::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssBogusUrlModifier {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssBogusUrlModifier,
+        crate::css::bogus::bogus_url_modifier::FormatCssBogusUrlModifier,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::bogus::bogus_url_modifier::FormatCssBogusUrlModifier::default(),
         )
     }
 }
@@ -7511,6 +7578,33 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssUrlValue {
         FormatOwnedWithRule::new(
             self,
             crate::css::any::url_value::FormatAnyCssUrlValue::default(),
+        )
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssUrlModifier {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::AnyCssUrlModifier,
+        crate::css::any::url_modifier::FormatAnyCssUrlModifier,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::css::any::url_modifier::FormatAnyCssUrlModifier::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssUrlModifier {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::AnyCssUrlModifier,
+        crate::css::any::url_modifier::FormatAnyCssUrlModifier,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::any::url_modifier::FormatAnyCssUrlModifier::default(),
         )
     }
 }

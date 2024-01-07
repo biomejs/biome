@@ -30,7 +30,8 @@ impl SyntaxFactory for CssSyntaxFactory {
             | CSS_BOGUS_RULE
             | CSS_BOGUS_SCOPE_RANGE
             | CSS_BOGUS_SELECTOR
-            | CSS_BOGUS_SUB_SELECTOR => RawSyntaxNode::new(kind, children.into_iter().map(Some)),
+            | CSS_BOGUS_SUB_SELECTOR
+            | CSS_BOGUS_URL_MODIFIER => RawSyntaxNode::new(kind, children.into_iter().map(Some)),
             CSS_ALL_PROPERTY => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
@@ -3852,10 +3853,10 @@ impl SyntaxFactory for CssSyntaxFactory {
             }
             CSS_URL_FUNCTION => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
+                let mut slots: RawNodeSlots<5usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element {
-                    if element.kind() == T![url] {
+                    if matches!(element.kind(), T![url] | T![src]) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -3870,6 +3871,13 @@ impl SyntaxFactory for CssSyntaxFactory {
                 slots.next_slot();
                 if let Some(element) = &current_element {
                     if AnyCssUrlValue::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if CssUrlModifierList::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -4067,6 +4075,9 @@ impl SyntaxFactory for CssSyntaxFactory {
             ),
             CSS_SUB_SELECTOR_LIST => {
                 Self::make_node_list_syntax(kind, children, AnyCssSubSelector::can_cast)
+            }
+            CSS_URL_MODIFIER_LIST => {
+                Self::make_node_list_syntax(kind, children, AnyCssUrlModifier::can_cast)
             }
             _ => unreachable!("Is {:?} a token?", kind),
         }

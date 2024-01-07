@@ -52,6 +52,7 @@ CssBogusParameter = SyntaxElement*
 CssBogusDeclarationItem = SyntaxElement*
 CssBogusMediaQuery =  SyntaxElement*
 CssBogusProperty =  SyntaxElement*
+CssBogusUrlModifier =  SyntaxElement*
 CssBogusPropertyValue = SyntaxElement*
 
 CssRoot =
@@ -469,7 +470,7 @@ CssDeclaration =
 //     name so that the automatic insertion will work as expected.
 //
 // ## Specifying Values:
-// 
+//
 // Many values in the CSS grammar are written as references to other productions, like
 // `<length-percentage>`. Sometimes these are simple combinations of other kinds of tokens (like
 // length-percentage is), but other times they have their own syntax with multiple tokens or
@@ -603,7 +604,7 @@ CssLineStyle =
 ///   inherit
 ///
 /// `inherit` is covered by the CssWideKeyword set.
-CssZIndexProperty = 
+CssZIndexProperty =
 	name: CssIdentifier
 	':'
 	value: AnyCssZIndexPropertyValue
@@ -613,7 +614,7 @@ AnyCssZIndexPropertyValue =
 	CssAuto
 	| CssNumber
 
-CssAuto = 
+CssAuto =
 	value: 'auto'
 
 /// Css Wide keywords are implicitly accepted by _all_ properties when given
@@ -1505,8 +1506,29 @@ CssSimpleFunction =
 	items: CssParameterList
 	')'
 
-// TODO add 'src'
-CssUrlFunction = 'url' '(' AnyCssUrlValue? ')'
+// https://drafts.csswg.org/css-values-4/#url-value
+// <url> = <url()> | <src()>
+//
+// <url()> = url( <string> <url-modifier>* ) | <url-token>
+// <src()> = src( <string> <url-modifier>* )
+//
+// url("//aa.com/img.svg" foo bar baz func(test))
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssUrlFunction =
+	name: ('url' | 'src')
+	'('
+	value: AnyCssUrlValue?
+	modifiers: CssUrlModifierList
+	')'
+
+// url("//aa.com/img.svg" foo bar baz func(test))
+//                        ^^^^^^^^^^^^^^^^^^^^^^^
+CssUrlModifierList = AnyCssUrlModifier*
+
+AnyCssUrlModifier =
+	CssIdentifier
+	| CssSimpleFunction
+	| CssBogusUrlModifier
 
 AnyCssUrlValue =
 	CssUrlValueRaw
