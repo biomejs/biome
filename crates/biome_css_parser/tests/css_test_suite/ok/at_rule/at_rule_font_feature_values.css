@@ -17,3 +17,12 @@
 	}
 }
 
+@font-feature-values ident {
+	@historical-forms { }
+	@character-variant { }
+	@swash { }
+	@ornaments { }
+	@annotation { }
+}
+
+

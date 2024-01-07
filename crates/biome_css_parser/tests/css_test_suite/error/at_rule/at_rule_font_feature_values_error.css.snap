@@ -9,7 +9,7 @@ expression: snapshot
 @font-feature-values  {  }
 @font-feature-values 6788 {  }
 @font-feature-values ident
-@font-palette-values ;
+@font-feature-values ;
 
 ```
 
@@ -66,7 +66,7 @@ CssRoot {
             at_token: AT@84..86 "@" [Newline("\n")] [],
             rule: CssBogusAtRule {
                 items: [
-                    FONT_PALETTE_VALUES_KW@86..106 "font-palette-values" [] [Whitespace(" ")],
+                    FONT_FEATURE_VALUES_KW@86..106 "font-feature-values" [] [Whitespace(" ")],
                     CssBogus {
                         items: [
                             SEMICOLON@106..107 ";" [] [],
@@ -113,7 +113,7 @@ CssRoot {
     3: CSS_AT_RULE@84..107
       0: AT@84..86 "@" [Newline("\n")] []
       1: CSS_BOGUS_AT_RULE@86..107
-        0: FONT_PALETTE_VALUES_KW@86..106 "font-palette-values" [] [Whitespace(" ")]
+        0: FONT_FEATURE_VALUES_KW@86..106 "font-feature-values" [] [Whitespace(" ")]
         1: CSS_BOGUS@106..107
           0: SEMICOLON@106..107 ";" [] []
   2: EOF@107..108 "" [Newline("\n")] []
@@ -147,7 +147,7 @@ at_rule_font_feature_values_error.css:2:22 parse ━━━━━━━━━━�
   > 2 │ @font-feature-values 6788 {  }
       │                      ^^^^
     3 │ @font-feature-values ident
-    4 │ @font-palette-values ;
+    4 │ @font-feature-values ;
   
   i Expected an identifier here.
   
@@ -155,7 +155,7 @@ at_rule_font_feature_values_error.css:2:22 parse ━━━━━━━━━━�
   > 2 │ @font-feature-values 6788 {  }
       │                      ^^^^
     3 │ @font-feature-values ident
-    4 │ @font-palette-values ;
+    4 │ @font-feature-values ;
   
 at_rule_font_feature_values_error.css:4:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -163,7 +163,7 @@ at_rule_font_feature_values_error.css:4:1 parse ━━━━━━━━━━�
   
     2 │ @font-feature-values 6788 {  }
     3 │ @font-feature-values ident
-  > 4 │ @font-palette-values ;
+  > 4 │ @font-feature-values ;
       │ ^
     5 │ 
   
@@ -171,25 +171,25 @@ at_rule_font_feature_values_error.css:4:1 parse ━━━━━━━━━━�
   
     2 │ @font-feature-values 6788 {  }
     3 │ @font-feature-values ident
-  > 4 │ @font-palette-values ;
+  > 4 │ @font-feature-values ;
       │ ^
     5 │ 
   
 at_rule_font_feature_values_error.css:4:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a dashed identifier but instead found ';'.
+  × Expected an identifier but instead found ';'.
   
     2 │ @font-feature-values 6788 {  }
     3 │ @font-feature-values ident
-  > 4 │ @font-palette-values ;
+  > 4 │ @font-feature-values ;
       │                      ^
     5 │ 
   
-  i Expected a dashed identifier here.
+  i Expected an identifier here.
   
     2 │ @font-feature-values 6788 {  }
     3 │ @font-feature-values ident
-  > 4 │ @font-palette-values ;
+  > 4 │ @font-feature-values ;
       │                      ^
     5 │ 
   
@@ -198,14 +198,14 @@ at_rule_font_feature_values_error.css:5:1 parse ━━━━━━━━━━�
   × Expected a body but instead found the end of the file.
   
     3 │ @font-feature-values ident
-    4 │ @font-palette-values ;
+    4 │ @font-feature-values ;
   > 5 │ 
       │ 
   
   i Expected a body here.
   
     3 │ @font-feature-values ident
-    4 │ @font-palette-values ;
+    4 │ @font-feature-values ;
   > 5 │ 
       │ 
   

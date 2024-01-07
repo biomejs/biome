@@ -35,7 +35,7 @@ pub(crate) fn parse_font_feature_values_at_rule(p: &mut CssParser) -> ParsedSynt
 
     p.bump(T![font_feature_values]);
 
-    // TODO: handle whitespace
+    // TODO: handle font family e.g. `Font One`
     let name = if is_at_identifier(p) {
         parse_custom_identifier(p, CssLexContext::Regular)
     } else {

@@ -25,6 +25,15 @@ expression: snapshot
 	}
 }
 
+@font-feature-values ident {
+	@historical-forms { }
+	@character-variant { }
+	@swash { }
+	@ornaments { }
+	@annotation { }
+}
+
+
 
 ```
 
@@ -168,17 +177,77 @@ CssRoot {
                 },
             },
         },
+        CssAtRule {
+            at_token: AT@231..234 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssFontFeatureValuesAtRule {
+                font_feature_values_token: FONT_FEATURE_VALUES_KW@234..254 "font-feature-values" [] [Whitespace(" ")],
+                name: CssCustomIdentifier {
+                    value_token: IDENT@254..260 "ident" [] [Whitespace(" ")],
+                },
+                block: CssFontFeatureValuesBlock {
+                    l_curly_token: L_CURLY@260..261 "{" [] [],
+                    items: CssFontFeatureValuesItemList [
+                        CssFontFeatureValuesItem {
+                            at_token: AT@261..264 "@" [Newline("\n"), Whitespace("\t")] [],
+                            name: HISTORICAL_FORMS_KW@264..281 "historical-forms" [] [Whitespace(" ")],
+                            block: CssDeclarationListBlock {
+                                l_curly_token: L_CURLY@281..283 "{" [] [Whitespace(" ")],
+                                declarations: CssDeclarationList [],
+                                r_curly_token: R_CURLY@283..284 "}" [] [],
+                            },
+                        },
+                        CssFontFeatureValuesItem {
+                            at_token: AT@284..287 "@" [Newline("\n"), Whitespace("\t")] [],
+                            name: CHARACTER_VARIANT_KW@287..305 "character-variant" [] [Whitespace(" ")],
+                            block: CssDeclarationListBlock {
+                                l_curly_token: L_CURLY@305..307 "{" [] [Whitespace(" ")],
+                                declarations: CssDeclarationList [],
+                                r_curly_token: R_CURLY@307..308 "}" [] [],
+                            },
+                        },
+                        CssFontFeatureValuesItem {
+                            at_token: AT@308..311 "@" [Newline("\n"), Whitespace("\t")] [],
+                            name: SWASH_KW@311..317 "swash" [] [Whitespace(" ")],
+                            block: CssDeclarationListBlock {
+                                l_curly_token: L_CURLY@317..319 "{" [] [Whitespace(" ")],
+                                declarations: CssDeclarationList [],
+                                r_curly_token: R_CURLY@319..320 "}" [] [],
+                            },
+                        },
+                        CssFontFeatureValuesItem {
+                            at_token: AT@320..323 "@" [Newline("\n"), Whitespace("\t")] [],
+                            name: ORNAMENTS_KW@323..333 "ornaments" [] [Whitespace(" ")],
+                            block: CssDeclarationListBlock {
+                                l_curly_token: L_CURLY@333..335 "{" [] [Whitespace(" ")],
+                                declarations: CssDeclarationList [],
+                                r_curly_token: R_CURLY@335..336 "}" [] [],
+                            },
+                        },
+                        CssFontFeatureValuesItem {
+                            at_token: AT@336..339 "@" [Newline("\n"), Whitespace("\t")] [],
+                            name: ANNOTATION_KW@339..350 "annotation" [] [Whitespace(" ")],
+                            block: CssDeclarationListBlock {
+                                l_curly_token: L_CURLY@350..352 "{" [] [Whitespace(" ")],
+                                declarations: CssDeclarationList [],
+                                r_curly_token: R_CURLY@352..353 "}" [] [],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@353..355 "}" [Newline("\n")] [],
+                },
+            },
+        },
     ],
-    eof_token: EOF@231..233 "" [Newline("\n"), Newline("\n")] [],
+    eof_token: EOF@355..358 "" [Newline("\n"), Newline("\n"), Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..233
+0: CSS_ROOT@0..358
   0: (empty)
-  1: CSS_RULE_LIST@0..231
+  1: CSS_RULE_LIST@0..355
     0: CSS_AT_RULE@0..31
       0: AT@0..1 "@" [] []
       1: CSS_FONT_FEATURE_VALUES_AT_RULE@1..31
@@ -270,7 +339,52 @@ CssRoot {
                   1: SEMICOLON@225..226 ";" [] []
                 2: R_CURLY@226..229 "}" [Newline("\n"), Whitespace("\t")] []
           2: R_CURLY@229..231 "}" [Newline("\n")] []
-  2: EOF@231..233 "" [Newline("\n"), Newline("\n")] []
+    4: CSS_AT_RULE@231..355
+      0: AT@231..234 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_FONT_FEATURE_VALUES_AT_RULE@234..355
+        0: FONT_FEATURE_VALUES_KW@234..254 "font-feature-values" [] [Whitespace(" ")]
+        1: CSS_CUSTOM_IDENTIFIER@254..260
+          0: IDENT@254..260 "ident" [] [Whitespace(" ")]
+        2: CSS_FONT_FEATURE_VALUES_BLOCK@260..355
+          0: L_CURLY@260..261 "{" [] []
+          1: CSS_FONT_FEATURE_VALUES_ITEM_LIST@261..353
+            0: CSS_FONT_FEATURE_VALUES_ITEM@261..284
+              0: AT@261..264 "@" [Newline("\n"), Whitespace("\t")] []
+              1: HISTORICAL_FORMS_KW@264..281 "historical-forms" [] [Whitespace(" ")]
+              2: CSS_DECLARATION_LIST_BLOCK@281..284
+                0: L_CURLY@281..283 "{" [] [Whitespace(" ")]
+                1: CSS_DECLARATION_LIST@283..283
+                2: R_CURLY@283..284 "}" [] []
+            1: CSS_FONT_FEATURE_VALUES_ITEM@284..308
+              0: AT@284..287 "@" [Newline("\n"), Whitespace("\t")] []
+              1: CHARACTER_VARIANT_KW@287..305 "character-variant" [] [Whitespace(" ")]
+              2: CSS_DECLARATION_LIST_BLOCK@305..308
+                0: L_CURLY@305..307 "{" [] [Whitespace(" ")]
+                1: CSS_DECLARATION_LIST@307..307
+                2: R_CURLY@307..308 "}" [] []
+            2: CSS_FONT_FEATURE_VALUES_ITEM@308..320
+              0: AT@308..311 "@" [Newline("\n"), Whitespace("\t")] []
+              1: SWASH_KW@311..317 "swash" [] [Whitespace(" ")]
+              2: CSS_DECLARATION_LIST_BLOCK@317..320
+                0: L_CURLY@317..319 "{" [] [Whitespace(" ")]
+                1: CSS_DECLARATION_LIST@319..319
+                2: R_CURLY@319..320 "}" [] []
+            3: CSS_FONT_FEATURE_VALUES_ITEM@320..336
+              0: AT@320..323 "@" [Newline("\n"), Whitespace("\t")] []
+              1: ORNAMENTS_KW@323..333 "ornaments" [] [Whitespace(" ")]
+              2: CSS_DECLARATION_LIST_BLOCK@333..336
+                0: L_CURLY@333..335 "{" [] [Whitespace(" ")]
+                1: CSS_DECLARATION_LIST@335..335
+                2: R_CURLY@335..336 "}" [] []
+            4: CSS_FONT_FEATURE_VALUES_ITEM@336..353
+              0: AT@336..339 "@" [Newline("\n"), Whitespace("\t")] []
+              1: ANNOTATION_KW@339..350 "annotation" [] [Whitespace(" ")]
+              2: CSS_DECLARATION_LIST_BLOCK@350..353
+                0: L_CURLY@350..352 "{" [] [Whitespace(" ")]
+                1: CSS_DECLARATION_LIST@352..352
+                2: R_CURLY@352..353 "}" [] []
+          2: R_CURLY@353..355 "}" [Newline("\n")] []
+  2: EOF@355..358 "" [Newline("\n"), Newline("\n"), Newline("\n")] []
 
 ```
 
