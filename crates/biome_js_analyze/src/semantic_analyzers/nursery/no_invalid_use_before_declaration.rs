@@ -3,7 +3,7 @@ use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_js_syntax::{
     binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding},
-    AnyJsExportNamedSpecifier,
+    AnyJsExportNamedSpecifier, AnyJsIdentifierUsage,
 };
 use biome_rowan::{AstNode, SyntaxNodeOptionExt, TextRange};
 
@@ -75,6 +75,7 @@ impl Rule for NoInvalidUseBeforeDeclaration {
         let mut result = vec![];
         for binding in model.all_bindings() {
             let AnyJsIdentifierBinding::JsIdentifierBinding(id) = binding.tree() else {
+                // Ignore type declarations (interfaces, type-aliases, ...)
                 continue;
             };
             let Some(declaration) = id.declaration() else {
@@ -121,8 +122,21 @@ impl Rule for NoInvalidUseBeforeDeclaration {
                     // const X = 0;
                     // ```
                     && (declaration_control_flow_root.is_none() ||
-                    declaration_control_flow_root == reference.syntax().ancestors().skip(1).find(|ancestor| AnyJsControlFlowRoot::can_cast(ancestor.kind()))
+                        declaration_control_flow_root == reference
+                            .syntax()
+                            .ancestors()
+                            .skip(1)
+                            .find(|ancestor| AnyJsControlFlowRoot::can_cast(ancestor.kind()))
                     )
+                    // ignore when used as a type.
+                    // For example:
+                    //
+                    // ```js
+                    // type Y = typeof X;
+                    // const X = 0;
+                    // ```
+                    && !AnyJsIdentifierUsage::cast_ref(reference.syntax())
+                        .is_some_and(|usage| usage.is_only_type())
                 {
                     result.push(InvalidUseBeforeDeclaration {
                         declaration_kind,
