@@ -294,6 +294,26 @@ Biome now scores 97% compatibility with Prettier and features more than 180 lint
 
 - Fix [#1167](https://github.com/biomejs/biome/issues/1167). [useValidAriaProps](https://biomejs.dev/linter/rules/use-valid-aria-props) no longer reports `aria-atomic` as invalid. Contributed by @unvalley
 
+- Fix [#1192](https://github.com/biomejs/biome/issues/1192). [useTemplate](https://biomejs.dev/linter/rules/use-template/) now correctly handles parenthesized expressions and respects type coercions. Contributed by @n-gude
+
+  These cases are now properly handled:
+
+  ```js
+  "a" + (1 + 2) // `a${1 + 2}`
+  ```
+
+  ```js
+  1 + (2 + "a") // `${1}${2}a`
+  ```
+
+- Fix [#1456](https://github.com/biomejs/biome/issues/1456). [useTemplate](https://biomejs.dev/linter/rules/use-template/) now reports expressions with an interpolated template literal and non-string expressions. Contributed by @n-gude
+
+  The following code is now reported:
+
+  ```js
+  `a${1}` + 2;
+  ```
+
 ### Parser
 
 #### BREAKING CHANGES
@@ -313,7 +333,7 @@ Biome now scores 97% compatibility with Prettier and features more than 180 lint
 
   These cases are now properly parsed:
 
-  _JavasSript_:
+  _JavaScript_:
 
   ```javascript
     a ? (b) : a => {};
