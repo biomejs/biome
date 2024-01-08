@@ -305,6 +305,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssNamespace::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_NAMESPACE_AT_RULE => {
+                    let $pattern = unsafe { $crate::CssNamespaceAtRule::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_NTH_OFFSET => {
                     let $pattern = unsafe { $crate::CssNthOffset::new_unchecked(node) };
                     $body

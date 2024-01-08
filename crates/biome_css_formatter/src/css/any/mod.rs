@@ -37,6 +37,7 @@ pub(crate) mod media_query;
 pub(crate) mod media_type_condition;
 pub(crate) mod media_type_query;
 pub(crate) mod namespace_prefix;
+pub(crate) mod namespace_url;
 pub(crate) mod page_at_rule_block;
 pub(crate) mod page_at_rule_item;
 pub(crate) mod page_selector;

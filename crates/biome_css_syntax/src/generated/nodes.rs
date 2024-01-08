@@ -3025,6 +3025,57 @@ pub struct CssNamespaceFields {
     pub bitwise_or_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssNamespaceAtRule {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssNamespaceAtRule {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssNamespaceAtRuleFields {
+        CssNamespaceAtRuleFields {
+            namespace_token: self.namespace_token(),
+            prefix: self.prefix(),
+            url: self.url(),
+            semicolon_token: self.semicolon_token(),
+        }
+    }
+    pub fn namespace_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn prefix(&self) -> Option<CssIdentifier> {
+        support::node(&self.syntax, 1usize)
+    }
+    pub fn url(&self) -> SyntaxResult<AnyCssNamespaceUrl> {
+        support::required_node(&self.syntax, 2usize)
+    }
+    pub fn semicolon_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 3usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssNamespaceAtRule {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssNamespaceAtRuleFields {
+    pub namespace_token: SyntaxResult<SyntaxToken>,
+    pub prefix: Option<CssIdentifier>,
+    pub url: SyntaxResult<AnyCssNamespaceUrl>,
+    pub semicolon_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssNthOffset {
     pub(crate) syntax: SyntaxNode,
 }
@@ -5827,6 +5878,7 @@ pub enum AnyCssAtRule {
     CssKeyframesAtRule(CssKeyframesAtRule),
     CssLayerAtRule(CssLayerAtRule),
     CssMediaAtRule(CssMediaAtRule),
+    CssNamespaceAtRule(CssNamespaceAtRule),
     CssPageAtRule(CssPageAtRule),
     CssScopeAtRule(CssScopeAtRule),
     CssSupportsAtRule(CssSupportsAtRule),
@@ -5895,6 +5947,12 @@ impl AnyCssAtRule {
     pub fn as_css_media_at_rule(&self) -> Option<&CssMediaAtRule> {
         match &self {
             AnyCssAtRule::CssMediaAtRule(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_namespace_at_rule(&self) -> Option<&CssNamespaceAtRule> {
+        match &self {
+            AnyCssAtRule::CssNamespaceAtRule(item) => Some(item),
             _ => None,
         }
     }
@@ -6731,6 +6789,26 @@ impl AnyCssNamespacePrefix {
     pub fn as_css_universal_namespace_prefix(&self) -> Option<&CssUniversalNamespacePrefix> {
         match &self {
             AnyCssNamespacePrefix::CssUniversalNamespacePrefix(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub enum AnyCssNamespaceUrl {
+    CssString(CssString),
+    CssUrlFunction(CssUrlFunction),
+}
+impl AnyCssNamespaceUrl {
+    pub fn as_css_string(&self) -> Option<&CssString> {
+        match &self {
+            AnyCssNamespaceUrl::CssString(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_url_function(&self) -> Option<&CssUrlFunction> {
+        match &self {
+            AnyCssNamespaceUrl::CssUrlFunction(item) => Some(item),
             _ => None,
         }
     }
@@ -10508,6 +10586,53 @@ impl From<CssNamespace> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for CssNamespaceAtRule {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_NAMESPACE_AT_RULE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_NAMESPACE_AT_RULE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssNamespaceAtRule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssNamespaceAtRule")
+            .field(
+                "namespace_token",
+                &support::DebugSyntaxResult(self.namespace_token()),
+            )
+            .field("prefix", &support::DebugOptionalElement(self.prefix()))
+            .field("url", &support::DebugSyntaxResult(self.url()))
+            .field(
+                "semicolon_token",
+                &support::DebugSyntaxResult(self.semicolon_token()),
+            )
+            .finish()
+    }
+}
+impl From<CssNamespaceAtRule> for SyntaxNode {
+    fn from(n: CssNamespaceAtRule) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssNamespaceAtRule> for SyntaxElement {
+    fn from(n: CssNamespaceAtRule) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
 impl AstNode for CssNthOffset {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -13340,6 +13465,11 @@ impl From<CssMediaAtRule> for AnyCssAtRule {
         AnyCssAtRule::CssMediaAtRule(node)
     }
 }
+impl From<CssNamespaceAtRule> for AnyCssAtRule {
+    fn from(node: CssNamespaceAtRule) -> AnyCssAtRule {
+        AnyCssAtRule::CssNamespaceAtRule(node)
+    }
+}
 impl From<CssPageAtRule> for AnyCssAtRule {
     fn from(node: CssPageAtRule) -> AnyCssAtRule {
         AnyCssAtRule::CssPageAtRule(node)
@@ -13368,6 +13498,7 @@ impl AstNode for AnyCssAtRule {
         .union(CssKeyframesAtRule::KIND_SET)
         .union(CssLayerAtRule::KIND_SET)
         .union(CssMediaAtRule::KIND_SET)
+        .union(CssNamespaceAtRule::KIND_SET)
         .union(CssPageAtRule::KIND_SET)
         .union(CssScopeAtRule::KIND_SET)
         .union(CssSupportsAtRule::KIND_SET);
@@ -13385,6 +13516,7 @@ impl AstNode for AnyCssAtRule {
                 | CSS_KEYFRAMES_AT_RULE
                 | CSS_LAYER_AT_RULE
                 | CSS_MEDIA_AT_RULE
+                | CSS_NAMESPACE_AT_RULE
                 | CSS_PAGE_AT_RULE
                 | CSS_SCOPE_AT_RULE
                 | CSS_SUPPORTS_AT_RULE
@@ -13413,6 +13545,9 @@ impl AstNode for AnyCssAtRule {
             }
             CSS_LAYER_AT_RULE => AnyCssAtRule::CssLayerAtRule(CssLayerAtRule { syntax }),
             CSS_MEDIA_AT_RULE => AnyCssAtRule::CssMediaAtRule(CssMediaAtRule { syntax }),
+            CSS_NAMESPACE_AT_RULE => {
+                AnyCssAtRule::CssNamespaceAtRule(CssNamespaceAtRule { syntax })
+            }
             CSS_PAGE_AT_RULE => AnyCssAtRule::CssPageAtRule(CssPageAtRule { syntax }),
             CSS_SCOPE_AT_RULE => AnyCssAtRule::CssScopeAtRule(CssScopeAtRule { syntax }),
             CSS_SUPPORTS_AT_RULE => AnyCssAtRule::CssSupportsAtRule(CssSupportsAtRule { syntax }),
@@ -13433,6 +13568,7 @@ impl AstNode for AnyCssAtRule {
             AnyCssAtRule::CssKeyframesAtRule(it) => &it.syntax,
             AnyCssAtRule::CssLayerAtRule(it) => &it.syntax,
             AnyCssAtRule::CssMediaAtRule(it) => &it.syntax,
+            AnyCssAtRule::CssNamespaceAtRule(it) => &it.syntax,
             AnyCssAtRule::CssPageAtRule(it) => &it.syntax,
             AnyCssAtRule::CssScopeAtRule(it) => &it.syntax,
             AnyCssAtRule::CssSupportsAtRule(it) => &it.syntax,
@@ -13451,6 +13587,7 @@ impl AstNode for AnyCssAtRule {
             AnyCssAtRule::CssKeyframesAtRule(it) => it.syntax,
             AnyCssAtRule::CssLayerAtRule(it) => it.syntax,
             AnyCssAtRule::CssMediaAtRule(it) => it.syntax,
+            AnyCssAtRule::CssNamespaceAtRule(it) => it.syntax,
             AnyCssAtRule::CssPageAtRule(it) => it.syntax,
             AnyCssAtRule::CssScopeAtRule(it) => it.syntax,
             AnyCssAtRule::CssSupportsAtRule(it) => it.syntax,
@@ -13471,6 +13608,7 @@ impl std::fmt::Debug for AnyCssAtRule {
             AnyCssAtRule::CssKeyframesAtRule(it) => std::fmt::Debug::fmt(it, f),
             AnyCssAtRule::CssLayerAtRule(it) => std::fmt::Debug::fmt(it, f),
             AnyCssAtRule::CssMediaAtRule(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssAtRule::CssNamespaceAtRule(it) => std::fmt::Debug::fmt(it, f),
             AnyCssAtRule::CssPageAtRule(it) => std::fmt::Debug::fmt(it, f),
             AnyCssAtRule::CssScopeAtRule(it) => std::fmt::Debug::fmt(it, f),
             AnyCssAtRule::CssSupportsAtRule(it) => std::fmt::Debug::fmt(it, f),
@@ -13491,6 +13629,7 @@ impl From<AnyCssAtRule> for SyntaxNode {
             AnyCssAtRule::CssKeyframesAtRule(it) => it.into(),
             AnyCssAtRule::CssLayerAtRule(it) => it.into(),
             AnyCssAtRule::CssMediaAtRule(it) => it.into(),
+            AnyCssAtRule::CssNamespaceAtRule(it) => it.into(),
             AnyCssAtRule::CssPageAtRule(it) => it.into(),
             AnyCssAtRule::CssScopeAtRule(it) => it.into(),
             AnyCssAtRule::CssSupportsAtRule(it) => it.into(),
@@ -16082,6 +16221,65 @@ impl From<AnyCssNamespacePrefix> for SyntaxElement {
         node.into()
     }
 }
+impl From<CssString> for AnyCssNamespaceUrl {
+    fn from(node: CssString) -> AnyCssNamespaceUrl {
+        AnyCssNamespaceUrl::CssString(node)
+    }
+}
+impl From<CssUrlFunction> for AnyCssNamespaceUrl {
+    fn from(node: CssUrlFunction) -> AnyCssNamespaceUrl {
+        AnyCssNamespaceUrl::CssUrlFunction(node)
+    }
+}
+impl AstNode for AnyCssNamespaceUrl {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = CssString::KIND_SET.union(CssUrlFunction::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, CSS_STRING | CSS_URL_FUNCTION)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_STRING => AnyCssNamespaceUrl::CssString(CssString { syntax }),
+            CSS_URL_FUNCTION => AnyCssNamespaceUrl::CssUrlFunction(CssUrlFunction { syntax }),
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            AnyCssNamespaceUrl::CssString(it) => &it.syntax,
+            AnyCssNamespaceUrl::CssUrlFunction(it) => &it.syntax,
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            AnyCssNamespaceUrl::CssString(it) => it.syntax,
+            AnyCssNamespaceUrl::CssUrlFunction(it) => it.syntax,
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssNamespaceUrl {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            AnyCssNamespaceUrl::CssString(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssNamespaceUrl::CssUrlFunction(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssNamespaceUrl> for SyntaxNode {
+    fn from(n: AnyCssNamespaceUrl) -> SyntaxNode {
+        match n {
+            AnyCssNamespaceUrl::CssString(it) => it.into(),
+            AnyCssNamespaceUrl::CssUrlFunction(it) => it.into(),
+        }
+    }
+}
+impl From<AnyCssNamespaceUrl> for SyntaxElement {
+    fn from(n: AnyCssNamespaceUrl) -> SyntaxElement {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<CssBogusBlock> for AnyCssPageAtRuleBlock {
     fn from(node: CssBogusBlock) -> AnyCssPageAtRuleBlock {
         AnyCssPageAtRuleBlock::CssBogusBlock(node)
@@ -18665,6 +18863,11 @@ impl std::fmt::Display for AnyCssNamespacePrefix {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for AnyCssNamespaceUrl {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AnyCssPageAtRuleBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -19141,6 +19344,11 @@ impl std::fmt::Display for CssNamedNamespacePrefix {
     }
 }
 impl std::fmt::Display for CssNamespace {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssNamespaceAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

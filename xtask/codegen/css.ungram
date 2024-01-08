@@ -698,6 +698,7 @@ AnyCssAtRule =
 	| CssSupportsAtRule
 	| CssScopeAtRule
 	| CssImportAtRule
+	| CssNamespaceAtRule
 	| CssBogusAtRule
 
 // @charset "UTF-8";
@@ -1434,6 +1435,18 @@ CssImportSupports =
 AnyCssImportSupportsCondition =
 	AnyCssSupportsCondition
 	| CssDeclaration
+
+// https://drafts.csswg.org/css-namespaces/#declaration
+// @namespace = @namespace <namespace-prefix>? [ <string> | <url> ] ;
+// <namespace-prefix> = <ident>
+
+CssNamespaceAtRule =
+	'namespace'
+	prefix: CssIdentifier?
+	url: AnyCssNamespaceUrl
+	';'
+
+AnyCssNamespaceUrl = CssUrlFunction | CssString
 
 ///////////////
 // AUXILIARY

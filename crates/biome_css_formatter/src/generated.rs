@@ -2640,6 +2640,46 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssImportAtRule {
         )
     }
 }
+impl FormatRule<biome_css_syntax::CssNamespaceAtRule>
+    for crate::css::statements::namespace_at_rule::FormatCssNamespaceAtRule
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssNamespaceAtRule,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::CssNamespaceAtRule>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssNamespaceAtRule {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssNamespaceAtRule,
+        crate::css::statements::namespace_at_rule::FormatCssNamespaceAtRule,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::css::statements::namespace_at_rule::FormatCssNamespaceAtRule::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssNamespaceAtRule {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssNamespaceAtRule,
+        crate::css::statements::namespace_at_rule::FormatCssNamespaceAtRule,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::statements::namespace_at_rule::FormatCssNamespaceAtRule::default(),
+        )
+    }
+}
 impl FormatRule<biome_css_syntax::CssContainerNotQuery>
     for crate::css::auxiliary::container_not_query::FormatCssContainerNotQuery
 {
@@ -7552,6 +7592,33 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssImportSupportsCond
     fn into_format(self) -> Self::Format {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule :: new (self , crate :: css :: any :: import_supports_condition :: FormatAnyCssImportSupportsCondition :: default ())
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssNamespaceUrl {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::AnyCssNamespaceUrl,
+        crate::css::any::namespace_url::FormatAnyCssNamespaceUrl,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::css::any::namespace_url::FormatAnyCssNamespaceUrl::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssNamespaceUrl {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::AnyCssNamespaceUrl,
+        crate::css::any::namespace_url::FormatAnyCssNamespaceUrl,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::any::namespace_url::FormatAnyCssNamespaceUrl::default(),
+        )
     }
 }
 impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssUrlValue {

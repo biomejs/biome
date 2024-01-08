@@ -1009,6 +1009,42 @@ impl CssNamespaceBuilder {
         ))
     }
 }
+pub fn css_namespace_at_rule(
+    namespace_token: SyntaxToken,
+    url: AnyCssNamespaceUrl,
+    semicolon_token: SyntaxToken,
+) -> CssNamespaceAtRuleBuilder {
+    CssNamespaceAtRuleBuilder {
+        namespace_token,
+        url,
+        semicolon_token,
+        prefix: None,
+    }
+}
+pub struct CssNamespaceAtRuleBuilder {
+    namespace_token: SyntaxToken,
+    url: AnyCssNamespaceUrl,
+    semicolon_token: SyntaxToken,
+    prefix: Option<CssIdentifier>,
+}
+impl CssNamespaceAtRuleBuilder {
+    pub fn with_prefix(mut self, prefix: CssIdentifier) -> Self {
+        self.prefix = Some(prefix);
+        self
+    }
+    pub fn build(self) -> CssNamespaceAtRule {
+        CssNamespaceAtRule::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::CSS_NAMESPACE_AT_RULE,
+            [
+                Some(SyntaxElement::Token(self.namespace_token)),
+                self.prefix
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Node(self.url.into_syntax())),
+                Some(SyntaxElement::Token(self.semicolon_token)),
+            ],
+        ))
+    }
+}
 pub fn css_nth_offset(sign_token: SyntaxToken, value: CssNumber) -> CssNthOffset {
     CssNthOffset::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_NTH_OFFSET,

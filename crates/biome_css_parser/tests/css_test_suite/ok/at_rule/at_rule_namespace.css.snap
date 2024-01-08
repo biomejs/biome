@@ -1,0 +1,250 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@namespace empty "";
+@namespace "";
+@namespace url(http://www.w3.org/1999/xhtml);
+@namespace url("http://www.w3.org/1999/xhtml");
+@namespace svg url(http://www.w3.org/2000/svg);
+@namespace svg url("http://www.w3.org/2000/svg");
+@namespace "http://www.w3.org/1999/xhtml";
+@namespace svg "http://www.w3.org/2000/svg";
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssNamespaceAtRule {
+                namespace_token: NAMESPACE_KW@1..11 "namespace" [] [Whitespace(" ")],
+                prefix: CssIdentifier {
+                    value_token: IDENT@11..17 "empty" [] [Whitespace(" ")],
+                },
+                url: CssString {
+                    value_token: CSS_STRING_LITERAL@17..19 "\"\"" [] [],
+                },
+                semicolon_token: SEMICOLON@19..20 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@20..22 "@" [Newline("\n")] [],
+            rule: CssNamespaceAtRule {
+                namespace_token: NAMESPACE_KW@22..32 "namespace" [] [Whitespace(" ")],
+                prefix: missing (optional),
+                url: CssString {
+                    value_token: CSS_STRING_LITERAL@32..34 "\"\"" [] [],
+                },
+                semicolon_token: SEMICOLON@34..35 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@35..37 "@" [Newline("\n")] [],
+            rule: CssNamespaceAtRule {
+                namespace_token: NAMESPACE_KW@37..47 "namespace" [] [Whitespace(" ")],
+                prefix: missing (optional),
+                url: CssUrlFunction {
+                    name: URL_KW@47..50 "url" [] [],
+                    l_paren_token: L_PAREN@50..51 "(" [] [],
+                    value: CssUrlValueRaw {
+                        value_token: CSS_URL_VALUE_RAW_LITERAL@51..79 "http://www.w3.org/1999/xhtml" [] [],
+                    },
+                    modifiers: CssUrlModifierList [],
+                    r_paren_token: R_PAREN@79..80 ")" [] [],
+                },
+                semicolon_token: SEMICOLON@80..81 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@81..83 "@" [Newline("\n")] [],
+            rule: CssNamespaceAtRule {
+                namespace_token: NAMESPACE_KW@83..93 "namespace" [] [Whitespace(" ")],
+                prefix: missing (optional),
+                url: CssUrlFunction {
+                    name: URL_KW@93..96 "url" [] [],
+                    l_paren_token: L_PAREN@96..97 "(" [] [],
+                    value: CssString {
+                        value_token: CSS_STRING_LITERAL@97..127 "\"http://www.w3.org/1999/xhtml\"" [] [],
+                    },
+                    modifiers: CssUrlModifierList [],
+                    r_paren_token: R_PAREN@127..128 ")" [] [],
+                },
+                semicolon_token: SEMICOLON@128..129 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@129..131 "@" [Newline("\n")] [],
+            rule: CssNamespaceAtRule {
+                namespace_token: NAMESPACE_KW@131..141 "namespace" [] [Whitespace(" ")],
+                prefix: CssIdentifier {
+                    value_token: IDENT@141..145 "svg" [] [Whitespace(" ")],
+                },
+                url: CssUrlFunction {
+                    name: URL_KW@145..148 "url" [] [],
+                    l_paren_token: L_PAREN@148..149 "(" [] [],
+                    value: CssUrlValueRaw {
+                        value_token: CSS_URL_VALUE_RAW_LITERAL@149..175 "http://www.w3.org/2000/svg" [] [],
+                    },
+                    modifiers: CssUrlModifierList [],
+                    r_paren_token: R_PAREN@175..176 ")" [] [],
+                },
+                semicolon_token: SEMICOLON@176..177 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@177..179 "@" [Newline("\n")] [],
+            rule: CssNamespaceAtRule {
+                namespace_token: NAMESPACE_KW@179..189 "namespace" [] [Whitespace(" ")],
+                prefix: CssIdentifier {
+                    value_token: IDENT@189..193 "svg" [] [Whitespace(" ")],
+                },
+                url: CssUrlFunction {
+                    name: URL_KW@193..196 "url" [] [],
+                    l_paren_token: L_PAREN@196..197 "(" [] [],
+                    value: CssString {
+                        value_token: CSS_STRING_LITERAL@197..225 "\"http://www.w3.org/2000/svg\"" [] [],
+                    },
+                    modifiers: CssUrlModifierList [],
+                    r_paren_token: R_PAREN@225..226 ")" [] [],
+                },
+                semicolon_token: SEMICOLON@226..227 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@227..229 "@" [Newline("\n")] [],
+            rule: CssNamespaceAtRule {
+                namespace_token: NAMESPACE_KW@229..239 "namespace" [] [Whitespace(" ")],
+                prefix: missing (optional),
+                url: CssString {
+                    value_token: CSS_STRING_LITERAL@239..269 "\"http://www.w3.org/1999/xhtml\"" [] [],
+                },
+                semicolon_token: SEMICOLON@269..270 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@270..272 "@" [Newline("\n")] [],
+            rule: CssNamespaceAtRule {
+                namespace_token: NAMESPACE_KW@272..282 "namespace" [] [Whitespace(" ")],
+                prefix: CssIdentifier {
+                    value_token: IDENT@282..286 "svg" [] [Whitespace(" ")],
+                },
+                url: CssString {
+                    value_token: CSS_STRING_LITERAL@286..314 "\"http://www.w3.org/2000/svg\"" [] [],
+                },
+                semicolon_token: SEMICOLON@314..315 ";" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@315..316 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..316
+  0: (empty)
+  1: CSS_RULE_LIST@0..315
+    0: CSS_AT_RULE@0..20
+      0: AT@0..1 "@" [] []
+      1: CSS_NAMESPACE_AT_RULE@1..20
+        0: NAMESPACE_KW@1..11 "namespace" [] [Whitespace(" ")]
+        1: CSS_IDENTIFIER@11..17
+          0: IDENT@11..17 "empty" [] [Whitespace(" ")]
+        2: CSS_STRING@17..19
+          0: CSS_STRING_LITERAL@17..19 "\"\"" [] []
+        3: SEMICOLON@19..20 ";" [] []
+    1: CSS_AT_RULE@20..35
+      0: AT@20..22 "@" [Newline("\n")] []
+      1: CSS_NAMESPACE_AT_RULE@22..35
+        0: NAMESPACE_KW@22..32 "namespace" [] [Whitespace(" ")]
+        1: (empty)
+        2: CSS_STRING@32..34
+          0: CSS_STRING_LITERAL@32..34 "\"\"" [] []
+        3: SEMICOLON@34..35 ";" [] []
+    2: CSS_AT_RULE@35..81
+      0: AT@35..37 "@" [Newline("\n")] []
+      1: CSS_NAMESPACE_AT_RULE@37..81
+        0: NAMESPACE_KW@37..47 "namespace" [] [Whitespace(" ")]
+        1: (empty)
+        2: CSS_URL_FUNCTION@47..80
+          0: URL_KW@47..50 "url" [] []
+          1: L_PAREN@50..51 "(" [] []
+          2: CSS_URL_VALUE_RAW@51..79
+            0: CSS_URL_VALUE_RAW_LITERAL@51..79 "http://www.w3.org/1999/xhtml" [] []
+          3: CSS_URL_MODIFIER_LIST@79..79
+          4: R_PAREN@79..80 ")" [] []
+        3: SEMICOLON@80..81 ";" [] []
+    3: CSS_AT_RULE@81..129
+      0: AT@81..83 "@" [Newline("\n")] []
+      1: CSS_NAMESPACE_AT_RULE@83..129
+        0: NAMESPACE_KW@83..93 "namespace" [] [Whitespace(" ")]
+        1: (empty)
+        2: CSS_URL_FUNCTION@93..128
+          0: URL_KW@93..96 "url" [] []
+          1: L_PAREN@96..97 "(" [] []
+          2: CSS_STRING@97..127
+            0: CSS_STRING_LITERAL@97..127 "\"http://www.w3.org/1999/xhtml\"" [] []
+          3: CSS_URL_MODIFIER_LIST@127..127
+          4: R_PAREN@127..128 ")" [] []
+        3: SEMICOLON@128..129 ";" [] []
+    4: CSS_AT_RULE@129..177
+      0: AT@129..131 "@" [Newline("\n")] []
+      1: CSS_NAMESPACE_AT_RULE@131..177
+        0: NAMESPACE_KW@131..141 "namespace" [] [Whitespace(" ")]
+        1: CSS_IDENTIFIER@141..145
+          0: IDENT@141..145 "svg" [] [Whitespace(" ")]
+        2: CSS_URL_FUNCTION@145..176
+          0: URL_KW@145..148 "url" [] []
+          1: L_PAREN@148..149 "(" [] []
+          2: CSS_URL_VALUE_RAW@149..175
+            0: CSS_URL_VALUE_RAW_LITERAL@149..175 "http://www.w3.org/2000/svg" [] []
+          3: CSS_URL_MODIFIER_LIST@175..175
+          4: R_PAREN@175..176 ")" [] []
+        3: SEMICOLON@176..177 ";" [] []
+    5: CSS_AT_RULE@177..227
+      0: AT@177..179 "@" [Newline("\n")] []
+      1: CSS_NAMESPACE_AT_RULE@179..227
+        0: NAMESPACE_KW@179..189 "namespace" [] [Whitespace(" ")]
+        1: CSS_IDENTIFIER@189..193
+          0: IDENT@189..193 "svg" [] [Whitespace(" ")]
+        2: CSS_URL_FUNCTION@193..226
+          0: URL_KW@193..196 "url" [] []
+          1: L_PAREN@196..197 "(" [] []
+          2: CSS_STRING@197..225
+            0: CSS_STRING_LITERAL@197..225 "\"http://www.w3.org/2000/svg\"" [] []
+          3: CSS_URL_MODIFIER_LIST@225..225
+          4: R_PAREN@225..226 ")" [] []
+        3: SEMICOLON@226..227 ";" [] []
+    6: CSS_AT_RULE@227..270
+      0: AT@227..229 "@" [Newline("\n")] []
+      1: CSS_NAMESPACE_AT_RULE@229..270
+        0: NAMESPACE_KW@229..239 "namespace" [] [Whitespace(" ")]
+        1: (empty)
+        2: CSS_STRING@239..269
+          0: CSS_STRING_LITERAL@239..269 "\"http://www.w3.org/1999/xhtml\"" [] []
+        3: SEMICOLON@269..270 ";" [] []
+    7: CSS_AT_RULE@270..315
+      0: AT@270..272 "@" [Newline("\n")] []
+      1: CSS_NAMESPACE_AT_RULE@272..315
+        0: NAMESPACE_KW@272..282 "namespace" [] [Whitespace(" ")]
+        1: CSS_IDENTIFIER@282..286
+          0: IDENT@282..286 "svg" [] [Whitespace(" ")]
+        2: CSS_STRING@286..314
+          0: CSS_STRING_LITERAL@286..314 "\"http://www.w3.org/2000/svg\"" [] []
+        3: SEMICOLON@314..315 ";" [] []
+  2: EOF@315..316 "" [Newline("\n")] []
+
+```
+
+

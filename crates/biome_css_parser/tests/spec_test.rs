@@ -136,9 +136,7 @@ pub fn quick_test() {
     let code = r#"
 
 
-div {
-background: URL(https://example.com/ima\)ge.png);
-}
+@namespace url(http://www.w3.org/1999/xhtml);
 
     "#;
 
