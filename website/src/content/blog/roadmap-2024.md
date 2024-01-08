@@ -54,7 +54,7 @@ Users have different needs, though, so it will only be possible to satisfy some 
 
 CSS is our next language of focus, and we are making good progress. HTML and Markdown will follow. Follow our [up-to-date page](/internals/language-support) to keep up with the progress of our work.
 
-The CSS language will enable much work and experimentation: CSS formatting and linting, and we will port some of the lint rules from `styelelint`. A new area of experimentation is cross-linting.
+The CSS language will enable much work and experimentation: CSS formatting and linting, and we will port some of the lint rules from `stylelint`. A new area of experimentation is cross-linting.
 
 The idea of cross-linting can be explained with an example: compute the CSS styles/classes defined in a project and warn a user when said styles aren't used inside JSX/HTML files.
 
