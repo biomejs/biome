@@ -228,7 +228,7 @@ dependencies = [
 
 [[package]]
 name = "biome_css_analyze"
-version = "0.1.0"
+version = "0.4.0"
 dependencies = [
  "biome_analyze",
  "biome_console",
