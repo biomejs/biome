@@ -66,7 +66,7 @@ declare_rule! {
     /// [`PascalCase`]: https://en.wikipedia.org/wiki/Camel_case
     /// [`snake_case`]: https://en.wikipedia.org/wiki/Snake_case
     pub(crate) UseFilenamingConvention {
-        version: "next",
+        version: "1.5.0",
         name: "useFilenamingConvention",
         recommended: false,
     }

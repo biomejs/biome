@@ -1,12 +1,8 @@
 ---
-title: useNumberNamespace (not released)
+title: useNumberNamespace (since v1.5.0)
 ---
 
 **Diagnostic Category: `lint/nursery/useNumberNamespace`**
-
-:::danger
-This rule hasn't been released yet.
-:::
 
 :::caution
 This rule is part of the [nursery](/linter/rules/#nursery) group.

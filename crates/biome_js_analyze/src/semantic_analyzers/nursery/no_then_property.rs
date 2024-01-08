@@ -85,7 +85,7 @@ declare_rule! {
     /// ```
     ///
     pub(crate) NoThenProperty {
-        version: "next",
+        version: "1.5.0",
         name: "noThenProperty",
         recommended: true,
     }

@@ -135,6 +135,10 @@ export default defineConfig({
 								"pt-BR": "Integrando o Biome no seu editor",
 							},
 						},
+						{
+							label: "Integrate Biome with your VCS",
+							link: "/guides/integrate-in-vcs",
+						},
 					],
 				},
 				{
@@ -192,16 +196,26 @@ export default defineConfig({
 						},
 						{
 							label: "Linter",
-							link: "/linter",
-						},
-						{
-							label: "Lint rules",
-							link: "/linter/rules",
-							translations: {
-								ja: "Lintルール",
-								"zh-CN": "Lint 规则",
-								"pt-BR": "Regras do Linter",
-							},
+							items: [
+								{
+									label: "Introduction",
+									link: "/linter",
+									translations: {
+										ja: "イントロダクション",
+										"zh-CN": "介绍",
+										"pt-BR": "Introdução",
+									},
+								},
+								{
+									label: "Lint rules",
+									link: "/linter/rules",
+									translations: {
+										ja: "Lintルール",
+										"zh-CN": "Lint 规则",
+										"pt-BR": "Regras do Linter",
+									},
+								},
+							],
 						},
 					],
 				},
@@ -253,6 +267,7 @@ export default defineConfig({
 						{
 							label: "Git Hooks",
 							link: "/recipes/git-hooks",
+							badge: "New",
 						},
 					],
 				},
@@ -321,20 +336,12 @@ export default defineConfig({
 				},
 			],
 			logo: {
-				light: "./src/assets/svg/biome-logo.svg",
-				dark: "./src/assets/svg/biome-logo.svg",
+				light: "./src/assets/svg/logo-light-transparent.svg",
+				dark: "./src/assets/svg/logo-dark-transparent.svg",
 				replacesTitle: true,
 			},
 			favicon: "/img/favicon.svg",
 			head: [
-				{
-					tag: "link",
-					attrs: {
-						rel: "icon",
-						href: "/images/favicon-32x32.png",
-						sizes: "32x32",
-					},
-				},
 				{
 					tag: "meta",
 					attrs: { property: "og:image", content: `${site}/img/og.png?v=1` },
@@ -363,6 +370,7 @@ export default defineConfig({
 			components: {
 				SiteTitle: "./src/components/starlight/SiteTitle.astro",
 				Sidebar: "./src/components/starlight/Sidebar.astro",
+				Hero: "./src/components/starlight/Hero.astro",
 			},
 		}),
 	],

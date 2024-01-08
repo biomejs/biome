@@ -147,6 +147,13 @@ impl Deserializable for A11y {
                             result.no_access_key =
                                 Deserializable::deserialize(&value, "noAccessKey", diagnostics);
                         }
+                        "noAriaHiddenOnFocusable" => {
+                            result.no_aria_hidden_on_focusable = Deserializable::deserialize(
+                                &value,
+                                "noAriaHiddenOnFocusable",
+                                diagnostics,
+                            );
+                        }
                         "noAriaUnsupportedElements" => {
                             result.no_aria_unsupported_elements = Deserializable::deserialize(
                                 &value,
@@ -295,6 +302,13 @@ impl Deserializable for A11y {
                                 diagnostics,
                             );
                         }
+                        "useValidAriaRole" => {
+                            result.use_valid_aria_role = Deserializable::deserialize(
+                                &value,
+                                "useValidAriaRole",
+                                diagnostics,
+                            );
+                        }
                         "useValidAriaValues" => {
                             result.use_valid_aria_values = Deserializable::deserialize(
                                 &value,
@@ -314,6 +328,7 @@ impl Deserializable for A11y {
                                     "recommended",
                                     "all",
                                     "noAccessKey",
+                                    "noAriaHiddenOnFocusable",
                                     "noAriaUnsupportedElements",
                                     "noAutofocus",
                                     "noBlankTarget",
@@ -339,6 +354,7 @@ impl Deserializable for A11y {
                                     "useMediaCaption",
                                     "useValidAnchor",
                                     "useValidAriaProps",
+                                    "useValidAriaRole",
                                     "useValidAriaValues",
                                     "useValidLang",
                                 ],
@@ -519,6 +535,13 @@ impl Deserializable for Complexity {
                                 diagnostics,
                             );
                         }
+                        "useRegexLiterals" => {
+                            result.use_regex_literals = Deserializable::deserialize(
+                                &value,
+                                "useRegexLiterals",
+                                diagnostics,
+                            );
+                        }
                         "useSimpleNumberKeys" => {
                             result.use_simple_number_keys = Deserializable::deserialize(
                                 &value,
@@ -562,6 +585,7 @@ impl Deserializable for Complexity {
                                     "useFlatMap",
                                     "useLiteralKeys",
                                     "useOptionalChain",
+                                    "useRegexLiterals",
                                     "useSimpleNumberKeys",
                                     "useSimplifiedLogicExpression",
                                 ],
@@ -905,17 +929,6 @@ impl Deserializable for Nursery {
                             result.all =
                                 Deserializable::deserialize(&value, &key_text, diagnostics);
                         }
-                        "noAriaHiddenOnFocusable" => {
-                            result.no_aria_hidden_on_focusable = Deserializable::deserialize(
-                                &value,
-                                "noAriaHiddenOnFocusable",
-                                diagnostics,
-                            );
-                        }
-                        "noDefaultExport" => {
-                            result.no_default_export =
-                                Deserializable::deserialize(&value, "noDefaultExport", diagnostics);
-                        }
                         "noDuplicateJsonKeys" => {
                             result.no_duplicate_json_keys = Deserializable::deserialize(
                                 &value,
@@ -930,6 +943,13 @@ impl Deserializable for Nursery {
                                 diagnostics,
                             );
                         }
+                        "noEmptyTypeParameters" => {
+                            result.no_empty_type_parameters = Deserializable::deserialize(
+                                &value,
+                                "noEmptyTypeParameters",
+                                diagnostics,
+                            );
+                        }
                         "noGlobalAssign" => {
                             result.no_global_assign =
                                 Deserializable::deserialize(&value, "noGlobalAssign", diagnostics);
@@ -937,13 +957,6 @@ impl Deserializable for Nursery {
                         "noGlobalEval" => {
                             result.no_global_eval =
                                 Deserializable::deserialize(&value, "noGlobalEval", diagnostics);
-                        }
-                        "noImplicitAnyLet" => {
-                            result.no_implicit_any_let = Deserializable::deserialize(
-                                &value,
-                                "noImplicitAnyLet",
-                                diagnostics,
-                            );
                         }
                         "noInvalidUseBeforeDeclaration" => {
                             result.no_invalid_use_before_declaration = Deserializable::deserialize(
@@ -1043,24 +1056,10 @@ impl Deserializable for Nursery {
                                 diagnostics,
                             );
                         }
-                        "useRegexLiterals" => {
-                            result.use_regex_literals = Deserializable::deserialize(
-                                &value,
-                                "useRegexLiterals",
-                                diagnostics,
-                            );
-                        }
                         "useShorthandFunctionType" => {
                             result.use_shorthand_function_type = Deserializable::deserialize(
                                 &value,
                                 "useShorthandFunctionType",
-                                diagnostics,
-                            );
-                        }
-                        "useValidAriaRole" => {
-                            result.use_valid_aria_role = Deserializable::deserialize(
-                                &value,
-                                "useValidAriaRole",
                                 diagnostics,
                             );
                         }
@@ -1071,13 +1070,11 @@ impl Deserializable for Nursery {
                                 &[
                                     "recommended",
                                     "all",
-                                    "noAriaHiddenOnFocusable",
-                                    "noDefaultExport",
                                     "noDuplicateJsonKeys",
                                     "noEmptyBlockStatements",
+                                    "noEmptyTypeParameters",
                                     "noGlobalAssign",
                                     "noGlobalEval",
-                                    "noImplicitAnyLet",
                                     "noInvalidUseBeforeDeclaration",
                                     "noMisleadingCharacterClass",
                                     "noNodejsModules",
@@ -1095,9 +1092,7 @@ impl Deserializable for Nursery {
                                     "useImportType",
                                     "useNodejsImportProtocol",
                                     "useNumberNamespace",
-                                    "useRegexLiterals",
                                     "useShorthandFunctionType",
-                                    "useValidAriaRole",
                                 ],
                             ));
                         }
@@ -1304,6 +1299,10 @@ impl Deserializable for Style {
                             result.no_comma_operator =
                                 Deserializable::deserialize(&value, "noCommaOperator", diagnostics);
                         }
+                        "noDefaultExport" => {
+                            result.no_default_export =
+                                Deserializable::deserialize(&value, "noDefaultExport", diagnostics);
+                        }
                         "noImplicitBoolean" => {
                             result.no_implicit_boolean = Deserializable::deserialize(
                                 &value,
@@ -1509,6 +1508,7 @@ impl Deserializable for Style {
                                     "all",
                                     "noArguments",
                                     "noCommaOperator",
+                                    "noDefaultExport",
                                     "noImplicitBoolean",
                                     "noInferrableTypes",
                                     "noNamespace",
@@ -1749,6 +1749,13 @@ impl Deserializable for Suspicious {
                             result.no_global_is_nan =
                                 Deserializable::deserialize(&value, "noGlobalIsNan", diagnostics);
                         }
+                        "noImplicitAnyLet" => {
+                            result.no_implicit_any_let = Deserializable::deserialize(
+                                &value,
+                                "noImplicitAnyLet",
+                                diagnostics,
+                            );
+                        }
                         "noImportAssign" => {
                             result.no_import_assign =
                                 Deserializable::deserialize(&value, "noImportAssign", diagnostics);
@@ -1878,6 +1885,7 @@ impl Deserializable for Suspicious {
                                     "noFunctionAssign",
                                     "noGlobalIsFinite",
                                     "noGlobalIsNan",
+                                    "noImplicitAnyLet",
                                     "noImportAssign",
                                     "noLabelVar",
                                     "noMisleadingInstantiator",

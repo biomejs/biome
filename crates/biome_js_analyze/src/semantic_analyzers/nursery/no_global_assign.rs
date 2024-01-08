@@ -42,7 +42,7 @@ declare_rule! {
     /// window = {};
     /// ```
     pub(crate) NoGlobalAssign {
-        version: "next",
+        version: "1.5.0",
         name: "noGlobalAssign",
         recommended: true,
     }

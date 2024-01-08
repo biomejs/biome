@@ -31,7 +31,7 @@ declare_rule! {
     /// import fs from "fs-custom";
     /// ```
     pub(crate) NoNodejsModules {
-        version: "next",
+        version: "1.5.0",
         name: "noNodejsModules",
         recommended: false,
     }

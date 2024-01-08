@@ -71,7 +71,7 @@ declare_rule! {
     /// or if the options is set to the "generic", that all will converted to `Array<T>` or `ReadonlyArray<T>`.
     ///
     pub(crate) UseConsistentArrayType {
-        version: "next",
+        version: "1.5.0",
         name: "useConsistentArrayType",
         recommended: false,
         fix_kind: FixKind::Unsafe,

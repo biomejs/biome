@@ -354,14 +354,14 @@ object_binding_pattern.js:1:9 parse ━━━━━━━━━━━━━━�
 --
 object_binding_pattern.js:1:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Object and Array patterns require initializers
+  × Object and Array patterns require initializers.
   
   > 1 │ let { 5 } } = { eval: "foo" };
       │     ^^^^^
     2 │ let { eval } = { eval: "foo" };
     3 │ let { 5, 6 } = { eval: "foo" };
   
-  i this pattern is declared, but it is not given an initialized value
+  i This pattern is declared, but it is not given an initialized value.
   
 --
 object_binding_pattern.js:1:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

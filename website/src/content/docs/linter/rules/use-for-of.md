@@ -1,12 +1,8 @@
 ---
-title: useForOf (not released)
+title: useForOf (since v1.5.0)
 ---
 
 **Diagnostic Category: `lint/nursery/useForOf`**
-
-:::danger
-This rule hasn't been released yet.
-:::
 
 :::caution
 This rule is part of the [nursery](/linter/rules/#nursery) group.

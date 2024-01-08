@@ -66,7 +66,7 @@ declare_rule! {
     /// export type { B };
     /// ```
     pub(crate) UseImportType {
-        version: "next",
+        version: "1.5.0",
         name: "useImportType",
         recommended: true,
         fix_kind: FixKind::Safe,

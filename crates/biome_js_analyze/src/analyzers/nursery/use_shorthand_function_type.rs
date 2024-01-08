@@ -80,7 +80,7 @@ declare_rule! {
     ///```
     ///
     pub(crate) UseShorthandFunctionType {
-        version: "next",
+        version: "1.5.0",
         name: "useShorthandFunctionType",
         recommended: false,
         fix_kind: FixKind::Safe,

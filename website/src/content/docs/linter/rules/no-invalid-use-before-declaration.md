@@ -1,12 +1,8 @@
 ---
-title: noInvalidUseBeforeDeclaration (not released)
+title: noInvalidUseBeforeDeclaration (since v1.5.0)
 ---
 
 **Diagnostic Category: `lint/nursery/noInvalidUseBeforeDeclaration`**
-
-:::danger
-This rule hasn't been released yet.
-:::
 
 :::caution
 This rule is part of the [nursery](/linter/rules/#nursery) group.
@@ -32,7 +28,7 @@ function f() {
 
 <pre class="language-text"><code class="language-text">nursery/noInvalidUseBeforeDeclaration.js:3:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Const declarations must have an initialized value</span>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Const declarations must have an initialized value.</span>
   
     <strong>1 │ </strong>function f() {
     <strong>2 │ </strong>    console.log(x);
@@ -41,7 +37,7 @@ function f() {
     <strong>4 │ </strong>}
     <strong>5 │ </strong>
   
-<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">this variable needs to be initialized</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">This variable needs to be initialized.</span>
   
 </code></pre>
 

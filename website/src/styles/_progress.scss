@@ -1,0 +1,67 @@
+.prog-cont {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    gap: 0;
+}
+
+.label {
+    margin-top: 1.2rem;
+    width: 3.1rem;
+    margin-left: 0.6rem;
+    font-size: 1rem;
+}
+
+.progress-bar-container {
+    margin-left: 0.6rem;
+    margin-right: 0.6rem;
+    display: flex;
+    width: 21.3rem;
+    height: 1.2rem;
+    background: var(--sl-color-gray-5);
+    position: relative;
+    overflow: hidden;
+}
+
+.bar {
+    height: 100%;
+    transition: width 0.1s ease-in;
+    background-color: var(--sl-perf-progress);
+}
+
+.time {
+    position: absolute;
+    right: 2%;
+    top: 0%;
+    font-size: 0.7rem;
+}
+
+@media only screen and (max-width: 1080px) {
+    .progress-bar-container {
+        width: 305px;
+    }
+}
+
+@media only screen and (max-width: 970px) {
+    .progress-bar-container {
+        width: 285px;
+    }
+}
+
+@media only screen and (max-width: 960px) {
+    .progress-bar-container {
+        width: 400px;
+    }
+}
+
+@media only screen and (max-width: 750px) {
+    .progress-bar-container {
+        width: 300px;
+    }
+}
+
+@media only screen and (max-width: 400px) {
+    .progress-bar-container {
+        width: 230px;
+    }
+}

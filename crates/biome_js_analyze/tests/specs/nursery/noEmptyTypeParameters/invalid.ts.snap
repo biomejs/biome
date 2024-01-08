@@ -10,25 +10,29 @@ interface B<> {};
 
 # Diagnostics
 ```
-invalid.ts:1:8 lint/nursery/noEmptyTypeParameters ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:1:7 lint/nursery/noEmptyTypeParameters ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Empty type parameter list <> is not recommended
+  ! Using an empty type parameter list is confusing.
   
   > 1 │ type A<> = {};
-      │        
+      │       ^^
     2 │ interface B<> {};
+  
+  i Remove the empty type parameter list or add a type parameter.
   
 
 ```
 
 ```
-invalid.ts:2:13 lint/nursery/noEmptyTypeParameters ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:2:12 lint/nursery/noEmptyTypeParameters ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Empty type parameter list <> is not recommended
+  ! Using an empty type parameter list is confusing.
   
     1 │ type A<> = {};
   > 2 │ interface B<> {};
-      │             
+      │            ^^
+  
+  i Remove the empty type parameter list or add a type parameter.
   
 
 ```

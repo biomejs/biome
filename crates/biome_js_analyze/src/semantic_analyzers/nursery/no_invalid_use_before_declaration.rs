@@ -58,7 +58,7 @@ declare_rule! {
     /// const CONSTANT = 0;
     /// ```
     pub(crate) NoInvalidUseBeforeDeclaration {
-        version: "next",
+        version: "1.5.0",
         name: "noInvalidUseBeforeDeclaration",
         recommended: false,
     }
