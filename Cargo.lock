@@ -372,6 +372,7 @@ dependencies = [
  "biome_js_parser",
  "biome_js_syntax",
  "biome_rowan",
+ "biome_text_size",
  "cfg-if",
  "countme",
  "drop_bomb",
@@ -380,6 +381,7 @@ dependencies = [
  "rustc-hash",
  "schemars",
  "serde",
+ "static_assertions",
  "tracing",
  "unicode-width",
 ]

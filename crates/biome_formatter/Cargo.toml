@@ -18,6 +18,7 @@ biome_console     = { workspace = true }
 biome_deserialize = { workspace = true }
 biome_diagnostics = { workspace = true }
 biome_rowan       = { workspace = true }
+biome_text_size   = { workspace = true }
 cfg-if            = "1.0.0"
 countme           = { workspace = true }
 drop_bomb         = "0.1.5"
@@ -25,6 +26,7 @@ indexmap          = { workspace = true }
 rustc-hash        = { workspace = true }
 schemars          = { workspace = true, optional = true }
 serde             = { workspace = true, features = ["derive"], optional = true }
+static_assertions = "1.1"
 tracing           = { workspace = true }
 unicode-width     = "0.1.9"
 

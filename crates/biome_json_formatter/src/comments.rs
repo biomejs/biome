@@ -30,7 +30,10 @@ impl FormatRule<SourceComment<JsonLanguage>> for FormatJsonLeadingComment {
 
             // SAFETY: Safe, `is_alignable_comment` only returns `true` for multiline comments
             let first_line = lines.next().unwrap();
-            write!(f, [dynamic_text(first_line.trim_end(), source_offset)])?;
+            write!(
+                f,
+                [dynamic_text(first_line.trim_end(), Some(source_offset))]
+            )?;
 
             source_offset += first_line.text_len();
 
@@ -43,7 +46,10 @@ impl FormatRule<SourceComment<JsonLanguage>> for FormatJsonLeadingComment {
                         for line in lines {
                             write!(
                                 f,
-                                [hard_line_break(), dynamic_text(line.trim(), source_offset)]
+                                [
+                                    hard_line_break(),
+                                    dynamic_text(line.trim(), Some(source_offset))
+                                ]
                             )?;
 
                             source_offset += line.text_len();
