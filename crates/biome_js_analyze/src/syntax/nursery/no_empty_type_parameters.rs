@@ -1,71 +1,84 @@
-use crate::semantic_services::Semantic;
+use biome_analyze::Ast;
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
-use biome_js_semantic::{Reference, ReferencesExtensions};
-use biome_js_syntax::JsIdentifierBinding;
+use biome_js_syntax::TextRange;
+use biome_js_syntax::{TsInterfaceDeclaration, TsTypeAliasDeclaration};
+use biome_rowan::declare_node_union;
+use biome_rowan::AstNode;
+use biome_rowan::AstSeparatedList;
 
 declare_rule! {
-    /// Succinct description of the rule.
+    /// Disallow empty type parameters in type aliases and interfaces.
     ///
-    /// Put context and details about the rule.
-    /// As a starting point, you can take the description of the corresponding _ESLint_ rule (if any).
-    ///
-    /// Try to stay consistent with the descriptions of implemented rules.
-    ///
-    /// Add a link to the corresponding ESLint rule (if any):
-    ///
-    /// Source: https://eslint.org/docs/latest/rules/rule-name
+    /// TypeScript permits the use of empty type parameter lists in type alias and interface declarations; however, this practice is generally discouraged.
+    /// Allowing empty type parameter lists can lead to unclear or ambiguous code, where the intention of the generic type is not self-evident.
+    /// This rule disallows empty type parameter lists in type alias and interface declarations.
     ///
     /// ## Examples
     ///
     /// ### Invalid
     ///
-    /// ```js,expect_diagnostic
-    /// var a = 1;
-    /// a = 2;
+    /// ```ts,expect_diagnostic
+    /// interface Foo<> {}
+    /// ```
+    /// ```ts,expect_diagnostic
+    /// type Foo<> = {}
     /// ```
     ///
     /// ## Valid
     ///
-    /// ```js
-    /// var a = 1;
+    /// ```ts
+    /// interface Foo{}
+    /// ```
+    ///
+    /// ```ts
+    /// type Foo<T> = {
+    ///  bar: T;
+    /// }
     /// ```
     ///
     pub(crate) NoEmptyTypeParameters {
         version: "next",
         name: "noEmptyTypeParameters",
-        recommended: false,
+        recommended: true,
     }
 }
 
+declare_node_union! {
+    pub(crate) NoEmptyTypeParametersQuery = TsInterfaceDeclaration | TsTypeAliasDeclaration
+}
+
 impl Rule for NoEmptyTypeParameters {
-    type Query = Semantic<JsIdentifierBinding>;
-    type State = Reference;
-    type Signals = Vec<Self::State>;
+    type Query = Ast<NoEmptyTypeParametersQuery>;
+    type State = TextRange;
+    type Signals = Option<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let binding = ctx.query();
-        let model = ctx.model();
-        binding.all_references(model).collect()
+        match binding {
+            NoEmptyTypeParametersQuery::TsInterfaceDeclaration(decl) => {
+                let type_parameters = decl.type_parameters()?;
+                if type_parameters.items().is_empty() {
+                    return Some(type_parameters.items().range());
+                }
+                None
+            }
+            NoEmptyTypeParametersQuery::TsTypeAliasDeclaration(decl) => {
+                let type_parameters = decl.type_parameters()?;
+                if type_parameters.items().is_empty() {
+                    return Some(type_parameters.items().range());
+                }
+                None
+            }
+        }
     }
 
     fn diagnostic(_: &RuleContext<Self>, reference: &Self::State) -> Option<RuleDiagnostic> {
-        //
-        // Read our guidelines to write great diagnostics:
-        // https://docs.rs/biome_analyze/latest/biome_analyze/#what-a-rule-should-say-to-the-user
-        //
-        Some(
-            RuleDiagnostic::new(
-                rule_category!(),
-                reference.range(),
-                markup! {
-                    "Variable is read here."
-                },
-            )
-            .note(markup! {
-                "This note will give you more information."
-            }),
-        )
+        Some(RuleDiagnostic::new(
+            rule_category!(),
+            reference,
+            markup! {"Empty type parameter list "<Emphasis>"<>"</Emphasis>" is not recommended"},
+        ))
     }
 }
