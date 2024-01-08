@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: issue548.js
 ---
 # Input
-```js
+```jsx
 // See https://github.com/biomejs/biome/issues/548
 a[c] = b[0];
 ```

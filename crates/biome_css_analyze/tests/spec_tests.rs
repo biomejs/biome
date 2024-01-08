@@ -20,6 +20,7 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     let input_file = Path::new(input);
     let file_name = input_file.file_name().and_then(OsStr::to_str).unwrap();
 
+    dbg!(input_file);
     let (group, rule) = parse_test_path(input_file);
     if rule == "specs" || rule == "suppression" {
         panic!("the test file must be placed in the {rule}/<group-name>/<rule-name>/ directory");
@@ -173,6 +174,7 @@ pub(crate) fn analyze_and_snap(
         input_code,
         diagnostics.as_slice(),
         code_fixes.as_slice(),
+        "css",
     );
 
     diagnostics.len()

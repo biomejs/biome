@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: validImport.tsx
 ---
 # Input
-```js
+```tsx
 import ReactDom, { render } from "react-dom";
 
 ReactDom.render(<div />, document.body);

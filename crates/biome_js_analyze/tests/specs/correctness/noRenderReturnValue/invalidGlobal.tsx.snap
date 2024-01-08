@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidGlobal.tsx
 ---
 # Input
-```js
+```tsx
 const a = ReactDOM.render(<div />, document.body);
 const foo = bar && ReactDOM.render(<div />, document.body);
 const foo = bar ? ReactDOM.render(<div />, document.body) : null

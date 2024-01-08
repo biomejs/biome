@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid_with_export_from.js
 ---
 # Input
-```js
+```jsx
 export * from "mod";
 export {}
 ```

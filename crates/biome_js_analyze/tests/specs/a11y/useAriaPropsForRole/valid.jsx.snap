@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.jsx
 ---
 # Input
-```js
+```jsx
 var a = <span role="checkbox" aria-checked="true"></span>;
 var a = <span role="switch" aria-checked="true"></span>;
 var a = <span role="spinbutton" aria-valuemax="100" aria-valuemin="0" aria-valuenow="50"></span>;

@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
 ---
 # Input
-```js
+```jsx
 // Invalid
 var x = 9007199254740993
 var x = 9007199254740.993e3

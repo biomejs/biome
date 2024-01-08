@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsonc
 ---
 # Input
-```js
+```cjs
 function foo() { }; foo = bar;
 ```
 
@@ -27,7 +27,7 @@ invalid.jsonc:1:10 lint/suspicious/noFunctionAssign ━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 function foo2() { foo2 = bar; }
 ```
 
@@ -51,7 +51,7 @@ invalid.jsonc:1:10 lint/suspicious/noFunctionAssign ━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 foo3 = bar; function foo3() { };
 ```
 
@@ -77,7 +77,7 @@ invalid.jsonc:1:22 lint/suspicious/noFunctionAssign ━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 [foo4] = bar; function foo4() { };
 ```
 
@@ -103,7 +103,7 @@ invalid.jsonc:1:24 lint/suspicious/noFunctionAssign ━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 ({ x: foo5 = 0 } = bar); function foo5() { };
 ```
 
@@ -129,7 +129,7 @@ invalid.jsonc:1:35 lint/suspicious/noFunctionAssign ━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 function foo6() { [foo6] = bar; }
 ```
 
@@ -153,7 +153,7 @@ invalid.jsonc:1:10 lint/suspicious/noFunctionAssign ━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 (function () { ({ x: foo7 = 0 } = bar); function foo7() { }; })();
 ```
 

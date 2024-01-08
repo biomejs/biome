@@ -209,9 +209,10 @@ pub fn write_analyzer_snapshot(
     input_code: &str,
     diagnostics: &[String],
     code_fixes: &[String],
+    markdown_language: &str,
 ) {
     writeln!(snapshot, "# Input").unwrap();
-    writeln!(snapshot, "```js").unwrap();
+    writeln!(snapshot, "```{markdown_language}").unwrap();
     writeln!(snapshot, "{}", input_code).unwrap();
     writeln!(snapshot, "```").unwrap();
     writeln!(snapshot).unwrap();

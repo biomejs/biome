@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.ts
 ---
 # Input
-```js
+```ts
 function b(a, b, b) {}
 function c(a, a, a) {}
 const d = (a, b, a) => {};

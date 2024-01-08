@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: validArithmetic.js
 ---
 # Input
-```js
+```jsx
 obj?.foo | bar
 obj?.foo & bar
 obj?.foo >> obj?.bar;

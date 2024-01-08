@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: JsThrowStatement.js
 ---
 # Input
-```js
+```jsx
 function JsThrowStatement1() {
     throw new Error();
     afterThrow();

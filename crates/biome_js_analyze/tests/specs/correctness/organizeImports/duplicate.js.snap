@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: duplicate.js
 ---
 # Input
-```js
+```jsx
 import b from 'b';
 import a from 'a';
 import { A } from 'a';

@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: namedSpecifiers.js
 ---
 # Input
-```js
+```jsx
 import { a1, a3, a5, a2, a4 } from 'a';
 
 import { b1 /* comment 1 */, b3 /* comment 3 */, b5 /* comment 5 */, b2 /* comment 2 */, b4 /* comment 4 */, } from 'b';

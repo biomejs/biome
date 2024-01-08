@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
 ---
 # Input
-```js
+```jsx
 { var foo = function() { try { return 1; } catch(err) { return 2; } finally { return 3; } } }
 { var foo = function() { try { return 1 } catch(err) { return 2 } finally { if(true) { return 3 } else { return 2 } } } }
 { var foo = function() { try { return 1 } catch(err) { return 2 } finally { return 3 } } }

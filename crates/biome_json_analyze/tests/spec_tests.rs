@@ -106,6 +106,7 @@ pub(crate) fn analyze_and_snap(
         input_code,
         diagnostics.as_slice(),
         code_fixes.as_slice(),
+        "json",
     );
 
     diagnostics.len()

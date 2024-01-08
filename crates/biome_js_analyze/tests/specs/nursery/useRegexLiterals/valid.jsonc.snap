@@ -3,357 +3,357 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.jsonc
 ---
 # Input
-```js
+```cjs
 /abc/
 ```
 
 # Input
-```js
+```cjs
 /abc/g
 ```
 
 # Input
-```js
+```cjs
 new RegExp(pattern)
 ```
 
 # Input
-```js
+```cjs
 new RegExp('\\p{Emoji_Presentation}\\P{Script_Extensions=Latin}' + '', `ug`)
 ```
 
 # Input
-```js
+```cjs
 new RegExp('\\cA' + '')
 ```
 
 # Input
-```js
+```cjs
 RegExp(pattern, 'g')
 ```
 
 # Input
-```js
+```cjs
 new RegExp(f('a'))
 ```
 
 # Input
-```js
+```cjs
 RegExp(prefix + 'a')
 ```
 
 # Input
-```js
+```cjs
 new RegExp('a' + suffix)
 ```
 
 # Input
-```js
+```cjs
 RegExp(`a` + suffix);
 ```
 
 # Input
-```js
+```cjs
 new RegExp(String.raw`a` + suffix);
 ```
 
 # Input
-```js
+```cjs
 RegExp('a', flags)
 ```
 
 # Input
-```js
+```cjs
 const flags = 'gu';RegExp('a', flags)
 ```
 
 # Input
-```js
+```cjs
 RegExp('a', 'g' + flags)
 ```
 
 # Input
-```js
+```cjs
 new RegExp(String.raw`a`, flags);
 ```
 
 # Input
-```js
+```cjs
 RegExp(`${prefix}abc`)
 ```
 
 # Input
-```js
+```cjs
 new RegExp(`a${b}c`);
 ```
 
 # Input
-```js
+```cjs
 new RegExp(`a${''}c`);
 ```
 
 # Input
-```js
+```cjs
 new RegExp(String.raw`a${b}c`);
 ```
 
 # Input
-```js
+```cjs
 new RegExp(String.raw`a${''}c`);
 ```
 
 # Input
-```js
+```cjs
 new RegExp('a' + 'b')
 ```
 
 # Input
-```js
+```cjs
 RegExp(1)
 ```
 
 # Input
-```js
+```cjs
 new RegExp('(\\p{Emoji_Presentation})\\1' + '', `ug`)
 ```
 
 # Input
-```js
+```cjs
 RegExp(String.raw`\78\126` + '\\5934', '' + `g` + '')
 ```
 
 # Input
-```js
+```cjs
 func(new RegExp(String.raw`a${''}c\d`, 'u'),new RegExp(String.raw`a${''}c\d`, 'u'))
 ```
 
 # Input
-```js
+```cjs
 new RegExp('\\[' + "b\\]")
 ```
 
 # Input
-```js
+```cjs
 new RegExp(/a/);
 ```
 
 # Input
-```js
+```cjs
 new RegExp;
 ```
 
 # Input
-```js
+```cjs
 new RegExp();
 ```
 
 # Input
-```js
+```cjs
 RegExp();
 ```
 
 # Input
-```js
+```cjs
 new RegExp('a', 'g', 'b');
 ```
 
 # Input
-```js
+```cjs
 RegExp('a', 'g', 'b');
 ```
 
 # Input
-```js
+```cjs
 new RegExp(`a`, `g`, `b`);
 ```
 
 # Input
-```js
+```cjs
 RegExp(`a`, `g`, `b`);
 ```
 
 # Input
-```js
+```cjs
 new RegExp(String.raw`a`, String.raw`g`, String.raw`b`);
 ```
 
 # Input
-```js
+```cjs
 RegExp(String.raw`a`, String.raw`g`, String.raw`b`);
 ```
 
 # Input
-```js
+```cjs
 new RegExp(/a/, 'u', 'foo');
 ```
 
 # Input
-```js
+```cjs
 new RegExp(String`a`);
 ```
 
 # Input
-```js
+```cjs
 RegExp(raw`a`);
 ```
 
 # Input
-```js
+```cjs
 new RegExp(f(String.raw)`a`);
 ```
 
 # Input
-```js
+```cjs
 RegExp(string.raw`a`);
 ```
 
 # Input
-```js
+```cjs
 new RegExp(String.Raw`a`);
 ```
 
 # Input
-```js
+```cjs
 new RegExp(String[raw]`a`);
 ```
 
 # Input
-```js
+```cjs
 RegExp(String.raw.foo`a`);
 ```
 
 # Input
-```js
+```cjs
 new RegExp(String.foo.raw`a`);
 ```
 
 # Input
-```js
+```cjs
 RegExp(foo.String.raw`a`);
 ```
 
 # Input
-```js
+```cjs
 new RegExp(String.raw);
 ```
 
 # Input
-```js
+```cjs
 let String; new RegExp(String.raw`a`);
 ```
 
 # Input
-```js
+```cjs
 function foo() { var String; new RegExp(String.raw`a`); }
 ```
 
 # Input
-```js
+```cjs
 function foo(String) { RegExp(String.raw`a`); }
 ```
 
 # Input
-```js
+```cjs
 if (foo) { const String = bar; RegExp(String.raw`a`); }
 ```
 
 # Input
-```js
+```cjs
 new Regexp('abc');
 ```
 
 # Input
-```js
+```cjs
 Regexp(`a`);
 ```
 
 # Input
-```js
+```cjs
 new Regexp(String.raw`a`);
 ```
 
 # Input
-```js
+```cjs
 let RegExp; new RegExp('a');
 ```
 
 # Input
-```js
+```cjs
 function foo() { var RegExp; RegExp('a', 'g'); }
 ```
 
 # Input
-```js
+```cjs
 function foo(RegExp) { new RegExp(String.raw`a`); }
 ```
 
 # Input
-```js
+```cjs
 if (foo) { const RegExp = bar; RegExp('a'); }
 ```
 
 # Input
-```js
+```cjs
 class C { #RegExp; foo() { globalThis.#RegExp('a'); } }
 ```
 
 # Input
-```js
+```cjs
 new RegExp('[[A--B]]' + a, 'v')
 ```
 
 # Input
-```js
+```cjs
 new Regexp('abc')
 ```
 
 # Input
-```js
+```cjs
 Regexp(`a`);
 ```
 
 # Input
-```js
+```cjs
 new Regexp(String.raw`a`);
 ```
 
 # Input
-```js
+```cjs
 RegExp('*');
 ```
 
 # Input
-```js
+```cjs
 new RegExp('*', 'g');
 ```
 
 # Input
-```js
+```cjs
 RegExp('*', 'g');
 ```
 
 # Input
-```js
+```cjs
 new RegExp('a', 'uv')
 ```
 
 # Input
-```js
+```cjs
 new RegExp('+');
 ```
 
 # Input
-```js
+```cjs
 RegExp('+');
 ```
 
 # Input
-```js
+```cjs
 new RegExp('+', 'g');
 ```
 
 # Input
-```js
+```cjs
 RegExp('+', 'g');
 ```
 

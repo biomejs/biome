@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.tsx
 ---
 # Input
-```js
+```tsx
 // valid
 <div />;
 <div>child</div>;

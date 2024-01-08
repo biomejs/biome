@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidTopLevelVariable.ts
 ---
 # Input
-```js
+```ts
 export const Unknown_Style = 0
 
 export var Unknown_Style_1 = 0

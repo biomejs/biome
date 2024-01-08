@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsonc
 ---
 # Input
-```js
+```cjs
 switch (a) { case 1: let x = 1; break; }
 ```
 
@@ -30,7 +30,7 @@ invalid.jsonc:1:22 lint/correctness/noSwitchDeclarations  FIXABLE  ━━━━�
 ```
 
 # Input
-```js
+```cjs
 switch (a) { default: let x = 2; break; }
 ```
 
@@ -57,7 +57,7 @@ invalid.jsonc:1:23 lint/correctness/noSwitchDeclarations  FIXABLE  ━━━━�
 ```
 
 # Input
-```js
+```cjs
 switch (a) { case 1: const x = 1; break; }
 ```
 
@@ -84,7 +84,7 @@ invalid.jsonc:1:22 lint/correctness/noSwitchDeclarations  FIXABLE  ━━━━�
 ```
 
 # Input
-```js
+```cjs
 switch (a) { default: const x = 2; break; }
 ```
 
@@ -111,7 +111,7 @@ invalid.jsonc:1:23 lint/correctness/noSwitchDeclarations  FIXABLE  ━━━━�
 ```
 
 # Input
-```js
+```cjs
 switch (a) { case 1: function f() {} break; }
 ```
 
@@ -138,7 +138,7 @@ invalid.jsonc:1:22 lint/correctness/noSwitchDeclarations  FIXABLE  ━━━━�
 ```
 
 # Input
-```js
+```cjs
 switch (a) { default: function f() {} break; }
 ```
 
@@ -165,7 +165,7 @@ invalid.jsonc:1:23 lint/correctness/noSwitchDeclarations  FIXABLE  ━━━━�
 ```
 
 # Input
-```js
+```cjs
 switch (a) { case 1: class C {} break; }
 ```
 
@@ -192,7 +192,7 @@ invalid.jsonc:1:22 lint/correctness/noSwitchDeclarations  FIXABLE  ━━━━�
 ```
 
 # Input
-```js
+```cjs
 switch (a) { default: class C {} break; }
 ```
 

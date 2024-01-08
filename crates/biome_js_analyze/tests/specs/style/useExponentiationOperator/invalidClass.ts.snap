@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidClass.ts
 ---
 # Input
-```js
+```ts
 // @ts-nocheck
 class C<T> extends Math.pow(a, b) implements Foo<T> {}
 (class A extends Math.pow(a, b) implements Foo {})

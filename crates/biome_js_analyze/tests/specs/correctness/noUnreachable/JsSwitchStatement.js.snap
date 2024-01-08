@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: JsSwitchStatement.js
 ---
 # Input
-```js
+```jsx
 function JsSwitchStatement1() {
     switch (value) {
         case 0:

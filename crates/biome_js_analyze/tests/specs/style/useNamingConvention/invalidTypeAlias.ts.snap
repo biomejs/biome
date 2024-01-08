@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidTypeAlias.ts
 ---
 # Input
-```js
+```ts
 export type camelCase = {}
 
 export type CONSTANT_CASE = {}

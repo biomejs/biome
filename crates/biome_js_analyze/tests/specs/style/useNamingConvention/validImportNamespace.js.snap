@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: validImportNamespace.js
 ---
 # Input
-```js
+```jsx
 import * as x from ""
 
 import * as camelCase from ""

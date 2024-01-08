@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: SuppressionComments.js
 ---
 # Input
-```js
+```jsx
 // rome-ignore lint/correctness/noUnreachable: this comment does nothing
 function SuppressionComments1() {
     beforeReturn();

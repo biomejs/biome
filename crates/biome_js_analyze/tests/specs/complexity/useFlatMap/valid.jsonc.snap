@@ -3,27 +3,27 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.jsonc
 ---
 # Input
-```js
+```cjs
 [0, [12], [[16]]].map(Number).flat(2);
 ```
 
 # Input
-```js
+```cjs
 array.flat().map(Number);
 ```
 
 # Input
-```js
+```cjs
 array.map(Number).flat(customFn);
 ```
 
 # Input
-```js
+```cjs
 MyObject.map(one, two, tree).flat();
 ```
 
 # Input
-```js
+```cjs
 MyObject.map().flat(1, 'test')
 ```
 

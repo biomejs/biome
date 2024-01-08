@@ -3,147 +3,147 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.jsonc
 ---
 # Input
-```js
+```cjs
 x === 0;
 ```
 
 # Input
-```js
+```cjs
 0 === x;
 ```
 
 # Input
-```js
+```cjs
 x == 0;
 ```
 
 # Input
-```js
+```cjs
 0 == x;
 ```
 
 # Input
-```js
+```cjs
 x === '0';
 ```
 
 # Input
-```js
+```cjs
 '0' === x;
 ```
 
 # Input
-```js
+```cjs
 x == '0';
 ```
 
 # Input
-```js
+```cjs
 '0' == x;
 ```
 
 # Input
-```js
+```cjs
 x === '-0';
 ```
 
 # Input
-```js
+```cjs
 '-0' === x;
 ```
 
 # Input
-```js
+```cjs
 x == '-0';
 ```
 
 # Input
-```js
+```cjs
 '-0' == x;
 ```
 
 # Input
-```js
+```cjs
 x === -1;
 ```
 
 # Input
-```js
+```cjs
 -1 === x;
 ```
 
 # Input
-```js
+```cjs
 x < 0;
 ```
 
 # Input
-```js
+```cjs
 0 < x;
 ```
 
 # Input
-```js
+```cjs
 x <= 0;
 ```
 
 # Input
-```js
+```cjs
 0 <= x;
 ```
 
 # Input
-```js
+```cjs
 x > 0;
 ```
 
 # Input
-```js
+```cjs
 0 > x;
 ```
 
 # Input
-```js
+```cjs
 x >= 0;
 ```
 
 # Input
-```js
+```cjs
 0 >= x;
 ```
 
 # Input
-```js
+```cjs
 x != 0;
 ```
 
 # Input
-```js
+```cjs
 0 != x;
 ```
 
 # Input
-```js
+```cjs
 x !== 0;
 ```
 
 # Input
-```js
+```cjs
 0 !== x;
 ```
 
 # Input
-```js
+```cjs
 Object.is(x, -0);
 ```
 
 # Input
-```js
+```cjs
 x || -0;
 ```
 
 # Input
-```js
+```cjs
 x === +0;
 ```
 

@@ -1,10 +1,9 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 99
 expression: fromImportRenameValid.jsx
 ---
 # Input
-```js
+```jsx
 import AwesomeNoReact, { Fragment as AwesomeFragment } from "noReact";
 import AwesomeReact, { StrictMode as AwesomeStrictMode } from "react";
 

@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsonc
 ---
 # Input
-```js
+```cjs
 const a = s.toUpperCase() === 'abc';
 ```
 
@@ -35,7 +35,7 @@ invalid.jsonc:1:11 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━�
 ```
 
 # Input
-```js
+```cjs
 const c = s.toUpperCase() == 'abc';
 ```
 
@@ -67,7 +67,7 @@ invalid.jsonc:1:11 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━�
 ```
 
 # Input
-```js
+```cjs
 const a2 = 'abc' === s.toUpperCase();
 ```
 
@@ -99,7 +99,7 @@ invalid.jsonc:1:12 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (s.toUpperCase() === 'abc' && c == d && e == f) {}
 ```
 
@@ -131,7 +131,7 @@ invalid.jsonc:1:5 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━�
 ```
 
 # Input
-```js
+```cjs
 while (s.toUpperCase() === 'abc' && c == d && e == f) {}
 ```
 
@@ -163,7 +163,7 @@ invalid.jsonc:1:8 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━�
 ```
 
 # Input
-```js
+```cjs
 while (s.toUpperCase() === 'abc') {}
 ```
 
@@ -195,7 +195,7 @@ invalid.jsonc:1:8 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━�
 ```
 
 # Input
-```js
+```cjs
 let b = s.toLowerCase() === `eFg`;
 ```
 
@@ -227,7 +227,7 @@ invalid.jsonc:1:9 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━�
 ```
 
 # Input
-```js
+```cjs
 do {} while (s.toLowerCase() === 'ABC');
 ```
 
@@ -259,7 +259,7 @@ invalid.jsonc:1:14 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━�
 ```
 
 # Input
-```js
+```cjs
 for (; s.toLowerCase() === 'ABC'; ) {}
 ```
 
@@ -291,7 +291,7 @@ invalid.jsonc:1:8 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━�
 ```
 
 # Input
-```js
+```cjs
 switch (s.toUpperCase()) { case 'ABC': case 'abc': case 'aBc': default: }
 ```
 
@@ -349,7 +349,7 @@ invalid.jsonc:1:57 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━�
 ```
 
 # Input
-```js
+```cjs
 for (; s['toLowerCase']() === 'ABC'; ) {}
 ```
 
@@ -381,7 +381,7 @@ invalid.jsonc:1:8 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━�
 ```
 
 # Input
-```js
+```cjs
 for (; s[`toUpperCase`]() === 'abc'; ) {}
 ```
 
@@ -413,7 +413,7 @@ invalid.jsonc:1:8 lint/correctness/noStringCaseMismatch  FIXABLE  ━━━━�
 ```
 
 # Input
-```js
+```cjs
 switch (s['toLowerCase']()) { case 'Abc': case 'aBc': case 'abC': default: }
 ```
 
