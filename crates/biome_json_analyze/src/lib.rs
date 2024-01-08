@@ -2,7 +2,10 @@ mod analyzers;
 mod registry;
 
 pub use crate::registry::visit_registry;
-use biome_analyze::{AnalysisFilter, AnalyzerOptions, AnalyzerSignal, ControlFlow, LanguageRoot, MatchQueryParams, MetadataRegistry, RuleRegistry, SuppressionDiagnostic, SuppressionKind};
+use biome_analyze::{
+    AnalysisFilter, AnalyzerOptions, AnalyzerSignal, ControlFlow, LanguageRoot, MatchQueryParams,
+    MetadataRegistry, RuleRegistry, SuppressionDiagnostic, SuppressionKind,
+};
 use biome_diagnostics::Error;
 use biome_json_syntax::JsonLanguage;
 

@@ -20,7 +20,6 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     let input_file = Path::new(input);
     let file_name = input_file.file_name().and_then(OsStr::to_str).unwrap();
 
-    dbg!(input_file);
     let (group, rule) = parse_test_path(input_file);
     if rule == "specs" || rule == "suppression" {
         panic!("the test file must be placed in the {rule}/<group-name>/<rule-name>/ directory");
@@ -183,7 +182,7 @@ pub(crate) fn analyze_and_snap(
 fn check_code_action(
     path: &Path,
     source: &str,
-    source_type: CssFileSource,
+    _source_type: CssFileSource,
     action: &AnalyzerAction<CssLanguage>,
     options: CssParserOptions,
 ) {
@@ -214,7 +213,7 @@ fn check_code_action(
     assert_errors_are_absent(re_parse.tree().syntax(), re_parse.diagnostics(), path);
 }
 
-pub(crate) fn run_suppression_test(input: &'static str, _: &str, _: &str, _: &str) {
+pub(crate) fn _run_suppression_test(input: &'static str, _: &str, _: &str, _: &str) {
     register_leak_checker();
 
     let input_file = Path::new(input);
