@@ -41,6 +41,7 @@ pub fn create_analyzer_options(
         let deserialized = biome_deserialize::json::deserialize_from_json_str::<Configuration>(
             json.as_str(),
             JsonParserOptions::default(),
+            "",
         );
         if deserialized.has_errors() {
             diagnostics.extend(
