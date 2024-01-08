@@ -14,28 +14,28 @@ socialImage: ../../assets/old-social-logo.png
 ---
 ## Roadmap 2024
 
-We are thrilled to share what the Core Contributors and Maintainers would like to focus in 2024.
+We are thrilled to share what the Core Contributors and Maintainers would like to focus on in 2024.
 
-We want to remind that Biome is a community-driven project, so we can't promise that all the ideas outlined below are going to be shipped.
+We want to remind you that Biome is a community-driven project, so we can only promise that some of the ideas outlined below will be shipped.
 
-However, if you're excited about some aspects of the project, and you want to see some of them developed faster than others, you can help us in many ways:
-- [**Be involved in the project and the community**](https://github.com/biomejs). Help us to build those features.
-- [**Sponsor us**](https://opencollective.com/biome). Ask your company to sponsor us. Biome is so fast that can cut down CI times in your company, and save money. Performance is part of our mission. Plus, sponsorship is a good medium of _advertisement_ for your company.
-- [**Improve our documentation with ideas, recipes, or guides**](/guides/getting-started). Translate our documentation, help us to make Biome available to people who aren't proficient in English.
+However, if you're excited about some aspects of the project and you want to see some of them developed faster than others, you can help us in many ways:
+- [**Be involved in the project and the community**](https://github.com/biomejs). Please help us to build those features.
+- [**Sponsor us**](https://opencollective.com/biome). Ask your company to sponsor us. Biome is so fast that it can reduce your company's CI times and save money. Performance is part of our mission. Plus, sponsorship is a good medium of _advertisement_ for your company.
+- [**Improve our documentation with ideas, recipes, or guides**](/guides/getting-started). Translate our documentation and help us to make Biome available to people who aren't proficient in English.
 
 
 ### Preface
 
-The project is young and still can't compete against other giants such as Prettier, ESLint, Webpack, Vite, ESBuild, etc., although the recent events (sponsors, bounty challenge, Biome being a fork of Rome) showed that the users **have** interest in the project, and we showed those users that we have the tools for fulfilling a need.
+The project is young and can't compete against giants such as Prettier, ESLint, Webpack, Vite, ESBuild, etc. However, the recent events (sponsors, bounty challenge, Biome being a fork of Rome) showed that the users **have** interest in the project, and we showed those users that we have the tools to fulfil a need.
 
-Moving small projects from ESLint/Prettier is easy, but moving **big** code bases is challenging and time-consuming. This is a big point of friction in Biome.
+Moving small projects from ESLint/Prettier is easy, but moving **big** code bases is challenging and time-consuming; this is a big friction point in Biome.
 
-Users have different needs though, so it will be impossible to satisfy all of them. We want to make sure that all features and contributions to our project [embrace our philosophy](/internals/philosophy/) and provide the best experience by default.
+Users have different needs, though, so it will only be possible to satisfy some of them. We want to ensure that all features and contributions to our project [embrace our philosophy](/internals/philosophy/) and provide the best experience by default.
 
 ### Main area of focus
 
 1. Help users to move to Biome
-2. Expand Biome's language support, so Biome tools can span more of the web ecosystem
+2. Expand Biome's language support so Biome tools can span more of the web ecosystem
 3. Deepen Biome's existing capabilities to offer more functionalities
 4. Plugins
 5. Transformations
@@ -47,21 +47,21 @@ Users have different needs though, so it will be impossible to satisfy all of th
 - Offer guides on our website to users who want to migrate from ESlint (CLI commands and configuration)
 - Offer a section on our website that shows a mapping of the ESLint rules to our rules
 - Offer commands to ease the transition
-  - A command called `biome migrate prettier` that will read `.prettierrc` and `.prettierignore`, will update the `biome.json` file (or create it) with the configuration coming from the Prettier files.
-  - A command called `biome migrate eslint` that will read the JSON configuration of Eslint and the ignore file. There will be expectations and limitations.
+  - A command called `biome migrate prettier` that will read `.prettierrc` and `.prettierignore` will update the `biome.json` file (or create it) with the configuration from the Prettier files.
+  - A command called `biome migrate eslint` will read the JSON configuration of Eslint and the ignore file. There will be expectations and limitations.
 
 
 ### Expand Biome's language support
 
-CSS is our next language of focus and is making good progress. HTML and Markdown will follow. Follow our [up-to-date page](/internals/language-support) to keep up with the progress of our work.
+CSS is our next language of focus, and we are making good progress. HTML and Markdown will follow. Follow our [up-to-date page](/internals/language-support) to keep up with the progress of our work.
 
-The CSS language will enable a lot of work and experimentation: CSS formatting and linting, and we will port some of the lint rules from `styelelint`. A new area of experimentation is cross-linting.
+The CSS language will enable much work and experimentation: CSS formatting and linting, and we will port some of the lint rules from `styelelint`. A new area of experimentation is cross-linting.
 
-The idea of cross-linting can be explained with an example: compute the CSS styles/classes defined in a project, and warn a user when said styles aren't used inside JSX/HTML files.
+The idea of cross-linting can be explained with an example: compute the CSS styles/classes defined in a project and warn a user when said styles aren't used inside JSX/HTML files.
 
 Plus, we unlock another area of experimentation, which is embedded formatting.
 
-HTML and Markdown will be our next languages of focus. HTML will enable us to parse other variants of HTML that are popular in the frontend ecosystem: [Vue](https://vuejs.org/), [Svelte](https://svelte.dev/) and [Astro](https://astro.build/). This would require some exploration on how to represent super languages of HTML.
+HTML and Markdown will be our next languages of focus. HTML will enable us to parse other variants of HTML that are popular in the frontend ecosystem: [Vue](https://vuejs.org/), [Svelte](https://svelte.dev/) and [Astro](https://astro.build/), and this would require some exploration of how to represent super languages of HTML.
 
 ### Deepen Biome's existing capabilities to offer more functionalities.
 
@@ -71,11 +71,11 @@ HTML and Markdown will be our next languages of focus. HTML will enable us to pa
 
 #### Project analysis and dependency resolution
 
-We will provide lint rules that can read the manifest, detect errors such as invalid licenses.
+We will provide lint rules to read the manifest and detect errors such as invalid licenses.
 
 With project resolution, we will be able to provide more lint rules, some of which will be able to detect unused modules.
 
-With dependency resolution, we will be able to provide to - for example - detect dependencies that aren't used inside a project.
+With dependency resolution, we can - for example - detect dependencies that aren't used inside a project.
 
 With this infrastructure, our LSP is going to be more powerful and provide more features, for example:
 - rename variables across a project;
@@ -84,9 +84,9 @@ With this infrastructure, our LSP is going to be more powerful and provide more 
 
 #### Type system
 
-Building a full-fledged type system such as TypeScript is a massive effort, that's why we decided to take a different direction and start by building a subset of the type system that would require stricter typing. This approach would allow us to build some important lint rules that users have been asking for.
+Building a full-fledged type system such as TypeScript is a massive effort; that's why we decided to take a different direction and start by building a subset of the type system requiring stricter typing. This approach would allow us to build some important lint rules that users have been asking for.
 
-This will come with a downside: relying on a stricter code, and minimal type inference from the compiler.
+This will come with a downside: relying on a stricter code and minimal type inference from the compiler.
 
 Once we have something we can rely on, we can slowly widen the capabilities of our type system.
 
@@ -94,17 +94,17 @@ Once we have something we can rely on, we can slowly widen the capabilities of o
 
 More features for the command line tool, such as:
 - Add the `explain` command for offline documentation;
-- Allow to export the output in different formats (JSON, etc.)
+- Allow the output to be exported in different formats (JSON, etc.)
 - Auto-completion for other shells such as `zsh`;
 - Implement the `--modified` argument, which allows to format - for example - only the modified lines of a document;
-- Expose metrics for Biome's operations, and being able to track down possible performance bottlenecks;
+- Expose metrics for Biome's operations and being able to track down possible performance bottlenecks;
 
 ### Plugins
 
-We will explore plugins, and come up with a design that fits Biome.
+We will explore plugins and come up with a design that fits Biome.
 Biome is different from other tools because Biome is a toolchain that has multiple tools in it, so we have to think out of the box and propose a design that might differ from the tools people are used to.
 
-We don't know yet what a Biome's plugin will look like, although we think a plugin should be able to tap all the tools that Biome offers.
+We don't know yet what a Biome's plugin will look like, although a plugin should be able to tap all the tools that Biome offers.
 
 Some ideas that we will consider:
 - DSL
@@ -113,15 +113,15 @@ Some ideas that we will consider:
 
 ### Transformations
 
-Transformations and code generation are going to be our first steps towards our compiler.
+Transformations and code generation will be our first steps towards our compiler.
 
 We will provide the ability to transform TypeScript and JSX files into JavaScript files.
 
 ### Community and content
 
-Biome has a growing ecosystem, with an official VSCode extension, an official IntelliJ extension, and a Discord bot. We want to grow the features provided by these tools and welcome any user who wants to help us.
+Biome has a growing ecosystem, with an official VSCode extension, an official IntelliJ extension, and a Discord bot. We want to grow the features these tools provide and welcome any user who wants to help us.
 
-Our community is slowly growing, and we want to reward any person who sticks around and contributes to Biome. At Biome, **we value any type of contribution**, so you don't need to be proficient in Rust in order to help us. Even participating to discussions and help us to shape our features, or helping other people are considered *contributions*. If you'd like to continue contributing to our ecosystem, we also encourage you to [nominate yourself as a maintainer of the project](https://github.com/biomejs/biome/blob/main/GOVERNANCE.md#maintainer-nomination).
+Our community is slowly growing, and we want to reward anyone who sticks around and contributes to Biome. At Biome, **we value any contribution**, so you don't need to be proficient in Rust to help us. Even participating in discussions and helping us to shape our features or helping other people are considered *contributions*. If you'd like to continue contributing to our ecosystem, we also encourage you to [nominate yourself as a maintainer of the project](https://github.com/biomejs/biome/blob/main/GOVERNANCE.md#maintainer-nomination).
 
 Recently Biome started its own [YouTube Channel](https://www.youtube.com/channel/UC6ssscaFgCSlbv1Pb6krGVw). We will use this channel to share learning content with the community.
 
@@ -149,7 +149,7 @@ npx @biomejs/biome migrate
 
 - Process only the files that were changed.
 - The command `biome ci` now prints diagnostics in GitHub PRs.
-- A new command `biome explain`.
+- A new command,`biome explain`.
 - The command `biome migrate` updates the `$schema`.
 - New lint rules.
 
@@ -159,7 +159,7 @@ If you enable the integration with VCS, you can tell Biome to process only the f
 
 This feature practically makes some utilities such as `lint-staged` obsolete.
 
-In order to take advantage of this feature, you have to tell Biome what's the default branch in the configuration file, then you'll have to pass the option `--changed` via CLI:
+To take advantage of this feature, you have to tell Biome what's the default branch in the configuration file, and then you'll have to pass the option `--changed` via CLI:
 
 ```json title="biome.json" ins={5}
 {
@@ -179,11 +179,11 @@ biome format --changed --write
 
 #### The command `biome ci` now prints diagnostics in GitHub PRs
 
-For quite some time, users were confused by the difference of the commands `check` and `ci`, because until now their behaviours are very similar. From this version, the command `ci` is able to detect the GitHub CI environment, and print annotation in the PRs.
+For quite some time, users were confused by the difference between the commands `check` and `ci`because, until now, their behaviours have been very similar. From this version, the command `ci` can detect the GitHub CI environment and print annotation in the PRs.
 
 ![Screenshot of a GitHub annotation printed by Biome](../../assets/blog/roadmap-2024/github-annotation.png)
 
-It's possible that you would need to change in your permissions of your workflow files, in case you don't see the annotations:
+It's possible that you would need to change your permissions of your workflow files in case you don't see the annotations:
 
 ```yaml title=".github/workflows/action.yml"
 permissions:
@@ -192,13 +192,13 @@ permissions:
 
 #### A new command `biome explain`
 
-This command will serve as "offline" documentation tool. In this release, the command supports the explanation of all the lint rules, for example you can request documentation for `noAccumulatingSpread`:
+This command will serve as an "offline" documentation tool. In this release, the command supports the explanation of all the lint rules; for example you can request documentation for `noAccumulatingSpread`:
 
 ```shell
 biome explain noAccumulatingSpread
 ```
 
-Which will print the following markdown:
+Which will print the following Markdown:
 
 ``````markdown
 # noAccumulatingSpread
@@ -295,18 +295,18 @@ let a: A;
 <pre class="language-text"><code class="language-text">nursery/useImportType.js:1:1 <a href="https://biomejs.dev/linter/rules/use-import-type">lint/nursery/useImportType</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">All these imports are only used as types.</span>
-  
+
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>import { A } from &quot;./mod.js&quot;;
    <strong>   │ </strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
     <strong>2 │ </strong>type TypeOfA = typeof A;
     <strong>3 │ </strong>let a: A;
-  
+
 <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Importing the types with </span><span style="color: lightgreen;"><strong>import type</strong></span><span style="color: lightgreen;"> ensures that they are removed by the transpilers and avoids loading unnecessary modules.</span>
-  
+
 <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Safe fix</span><span style="color: lightgreen;">: </span><span style="color: lightgreen;">Use </span><span style="color: lightgreen;"><strong>import type</strong></span><span style="color: lightgreen;">.</span>
-  
+
 <strong>  </strong><strong>  1 │ </strong>import<span style="opacity: 0.8;">·</span><span style="color: MediumSeaGreen;">t</span><span style="color: MediumSeaGreen;">y</span><span style="color: MediumSeaGreen;">p</span><span style="color: MediumSeaGreen;">e</span><span style="opacity: 0.8;"><span style="color: MediumSeaGreen;">·</span></span>{<span style="opacity: 0.8;">·</span>A<span style="opacity: 0.8;">·</span>}<span style="opacity: 0.8;">·</span>from<span style="opacity: 0.8;">·</span>&quot;./mod.js&quot;;
-<strong>  </strong><strong>    │ </strong>       <span style="color: MediumSeaGreen;">+</span><span style="color: MediumSeaGreen;">+</span><span style="color: MediumSeaGreen;">+</span><span style="color: MediumSeaGreen;">+</span><span style="color: MediumSeaGreen;">+</span>                      
+<strong>  </strong><strong>    │ </strong>       <span style="color: MediumSeaGreen;">+</span><span style="color: MediumSeaGreen;">+</span><span style="color: MediumSeaGreen;">+</span><span style="color: MediumSeaGreen;">+</span><span style="color: MediumSeaGreen;">+</span>
 </code></pre>
 
 #####  [useFilenamingConvention](https://biomejs.dev/linter/rules/use-filenaming-convention)
@@ -393,15 +393,15 @@ eval("var a = 0");
 <pre class="language-text"><code class="language-text">nursery/noGlobalEval.js:1:1 <a href="https://biomejs.dev/linter/rules/no-global-eval">lint/nursery/noGlobalEval</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;"><strong>eval()</strong></span><span style="color: Tomato;"> exposes to security risks and performance issues.</span>
-  
+
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>eval(&quot;var a = 0&quot;);
    <strong>   │ </strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
     <strong>2 │ </strong>
-  
+
 <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">See the </span><span style="color: lightgreen;"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/eval#never_use_eval!">MDN web docs</a></span><span style="color: lightgreen;"> for more details.</span>
-  
+
 <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Refactor the code so that it doesn't need to call </span><span style="color: lightgreen;"><strong>eval()</strong></span><span style="color: lightgreen;">.</span>
-  
+
 </code></pre>
 
 ##### [noGlobalAssign](https://biomejs.dev/linter/rules/no-global-assign)
@@ -413,13 +413,13 @@ Object = null;
 <pre class="language-text"><code class="language-text">nursery/noGlobalAssign.js:1:1 <a href="https://biomejs.dev/linter/rules/no-global-assign">lint/nursery/noGlobalAssign</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">A global variable should not be reassigned.</span>
-  
+
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>Object = null;
    <strong>   │ </strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
     <strong>2 │ </strong>
-  
+
 <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Assigning to a global variable can override essential functionality.</span>
-  
+
 </code></pre>
 
 ##### [noMisleadingCharacterClass](https://biomejs.dev/linter/rules/no-misleading-character-class)
@@ -431,11 +431,11 @@ Object = null;
 <pre class="language-text"><code class="language-text">nursery/noMisleadingCharacterClass.js:1:1 <a href="https://biomejs.dev/linter/rules/no-misleading-character-class">lint/nursery/noMisleadingCharacterClass</a> ━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Unexpected combined character in the character class.</span>
-  
+
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>/^[Á]$/u;
    <strong>   │ </strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
     <strong>2 │ </strong>
-  
+
 </code></pre>
 
 ##### [noThenProperty](https://biomejs.dev/linter/rules/no-then-property)
@@ -449,13 +449,13 @@ const foo = {
 <pre class="language-text"><code class="language-text">nursery/noThenProperty.js:2:5 <a href="https://biomejs.dev/linter/rules/no-then-property">lint/nursery/noThenProperty</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Do not add </span><span style="color: Tomato;"><strong>then</strong></span><span style="color: Tomato;"> to an object.</span>
-  
+
     <strong>1 │ </strong>const foo = {
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>2 │ </strong>    then() {}
    <strong>   │ </strong>    <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
     <strong>3 │ </strong>};
     <strong>4 │ </strong>
-  
+
 </code></pre>
 
 ```jsx
@@ -473,14 +473,14 @@ var a = x ? true : true;
 <pre class="language-text"><code class="language-text">nursery/noUselessTernary.js:1:9 <a href="https://biomejs.dev/linter/rules/no-useless-ternary">lint/nursery/noUselessTernary</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Unnecessary use of boolean literals in conditional expression.</span>
-  
+
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>var a = x ? true : true;
    <strong>   │ </strong>        <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
     <strong>2 │ </strong>
-  
+
 <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Simplify your code by directly assigning the result without using a ternary operator.</span>
-  
+
 <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">If your goal is negation, you may use the logical NOT (!) or double NOT (!!) operator for clearer and concise code.
 </span><span style="color: lightgreen;">  </span><span style="color: lightgreen;">  </span><span style="color: lightgreen;"> Check for more details about </span><span style="color: lightgreen;"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Logical_NOT">NOT</a></span><span style="color: lightgreen;"> operator.</span>
-  
+
 </code></pre>
