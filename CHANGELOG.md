@@ -223,6 +223,17 @@ The following rules are promoted:
   This rule will replace [useShorthandArrayType](https://biomejs.dev/linter/rules/use-shorthand-array-type).
   It provides an option to choose between the shorthand or the generic syntax.
 
+- Add [noEmptyTypeParameters](https://biomejs.dev/linter/rules/no-empty-type-parameters) that ensures that any type parameter list has at least one type parameter.
+
+  This will report the following empty type parameter lists:
+
+  ```ts
+  interface Foo<> {}
+  //           ^^
+  type Bar<> = {};
+  //      ^^
+  ```
+
 - Add [noGlobalEval](https://biomejs.dev/linter/rules/no-global-eval) that reports any use of the global `eval`.
   Contributed by @you-5805
 
@@ -459,7 +470,7 @@ The following rules are promoted:
 
   ```ts
   interface Foo<> {}
-  type Bar<> = {}
+  type Bar<> = {};
   ```
 
 ### Crates
