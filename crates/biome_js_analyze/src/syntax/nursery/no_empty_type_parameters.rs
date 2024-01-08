@@ -1,11 +1,8 @@
 use biome_analyze::Ast;
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
-use biome_js_syntax::TextRange;
-use biome_js_syntax::{TsInterfaceDeclaration, TsTypeAliasDeclaration};
-use biome_rowan::declare_node_union;
-use biome_rowan::AstNode;
-use biome_rowan::AstSeparatedList;
+use biome_js_syntax::{JsSyntaxKind, TextRange, TsTypeParameters};
+use biome_rowan::{AstNode, AstSeparatedList, SyntaxNodeOptionExt};
 
 declare_rule! {
     /// Disallow empty type parameters in type aliases and interfaces.
@@ -44,34 +41,26 @@ declare_rule! {
     }
 }
 
-declare_node_union! {
-    pub(crate) NoEmptyTypeParametersQuery = TsInterfaceDeclaration | TsTypeAliasDeclaration
-}
-
 impl Rule for NoEmptyTypeParameters {
-    type Query = Ast<NoEmptyTypeParametersQuery>;
+    type Query = Ast<TsTypeParameters>;
     type State = TextRange;
     type Signals = Option<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let binding = ctx.query();
-        match binding {
-            NoEmptyTypeParametersQuery::TsInterfaceDeclaration(decl) => {
-                let type_parameters = decl.type_parameters()?;
-                if type_parameters.items().is_empty() {
-                    return Some(type_parameters.items().range());
-                }
-                None
-            }
-            NoEmptyTypeParametersQuery::TsTypeAliasDeclaration(decl) => {
-                let type_parameters = decl.type_parameters()?;
-                if type_parameters.items().is_empty() {
-                    return Some(type_parameters.items().range());
-                }
-                None
-            }
+        let node = ctx.query();
+        if node.items().is_empty()
+            && matches!(
+                node.syntax().parent().kind(),
+                Some(
+                    JsSyntaxKind::TS_INTERFACE_DECLARATION
+                        | JsSyntaxKind::TS_TYPE_ALIAS_DECLARATION
+                )
+            )
+        {
+            return Some(node.items().range());
         }
+        None
     }
 
     fn diagnostic(_: &RuleContext<Self>, reference: &Self::State) -> Option<RuleDiagnostic> {
