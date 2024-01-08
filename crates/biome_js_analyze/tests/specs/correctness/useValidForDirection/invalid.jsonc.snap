@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsonc
 ---
 # Input
-```js
+```cjs
 for (var i = 0; i < 10; i--) {}
 ```
 
@@ -20,7 +20,7 @@ invalid.jsonc:1:5 lint/correctness/useValidForDirection ━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 for (var i = 0; i <= 10; i--) {}
 ```
 
@@ -37,7 +37,7 @@ invalid.jsonc:1:5 lint/correctness/useValidForDirection ━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 for (var i = 10; i > 10; i++) {}
 ```
 
@@ -54,7 +54,7 @@ invalid.jsonc:1:5 lint/correctness/useValidForDirection ━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 for (var i = 10; i >= 0; i++) {}
 ```
 
@@ -71,7 +71,7 @@ invalid.jsonc:1:5 lint/correctness/useValidForDirection ━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 for (var i = 0; i < 10; i -= 1) {}
 ```
 
@@ -88,7 +88,7 @@ invalid.jsonc:1:5 lint/correctness/useValidForDirection ━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 for (var i = 0; i <= 10; i -= 1) {}
 ```
 
@@ -105,7 +105,7 @@ invalid.jsonc:1:5 lint/correctness/useValidForDirection ━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 for (var i = 10; i > 10; i += 1) {}
 ```
 
@@ -122,7 +122,7 @@ invalid.jsonc:1:5 lint/correctness/useValidForDirection ━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 for (var i = 10; i >= 0; i += 1) {}
 ```
 
@@ -139,7 +139,7 @@ invalid.jsonc:1:5 lint/correctness/useValidForDirection ━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 for (var i = 0; i < 10; i += -1) {}
 ```
 
@@ -156,7 +156,7 @@ invalid.jsonc:1:5 lint/correctness/useValidForDirection ━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 for (var i = 0; i <= 10; i += -1) {}
 ```
 
@@ -173,7 +173,7 @@ invalid.jsonc:1:5 lint/correctness/useValidForDirection ━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 for (var i = 10; i > 10; i -= -1) {}
 ```
 
@@ -190,7 +190,7 @@ invalid.jsonc:1:5 lint/correctness/useValidForDirection ━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 for (var i = 10; i >= 0; i -= -1) {}
 ```
 

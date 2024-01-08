@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidInterface.ts
 ---
 # Input
-```js
+```ts
 interface I {
     f(): I
     g(i: I): void

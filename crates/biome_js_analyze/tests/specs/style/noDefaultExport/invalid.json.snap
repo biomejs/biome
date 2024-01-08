@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.json
 ---
 # Input
-```js
+```cjs
 export default function f() {};
 ```
 
@@ -24,7 +24,7 @@ invalid.json:1:8 lint/style/noDefaultExport ━━━━━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 export default class C {};
 ```
 
@@ -45,7 +45,7 @@ invalid.json:1:8 lint/style/noDefaultExport ━━━━━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 export default function () {};
 ```
 
@@ -66,7 +66,7 @@ invalid.json:1:8 lint/style/noDefaultExport ━━━━━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 export default class {};
 ```
 
@@ -87,7 +87,7 @@ invalid.json:1:8 lint/style/noDefaultExport ━━━━━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 export default X;
 ```
 
@@ -108,7 +108,7 @@ invalid.json:1:8 lint/style/noDefaultExport ━━━━━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 export default { f() {} };
 ```
 
@@ -129,7 +129,7 @@ invalid.json:1:8 lint/style/noDefaultExport ━━━━━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 export { X as default };
 ```
 
@@ -150,7 +150,7 @@ invalid.json:1:15 lint/style/noDefaultExport ━━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 export { X as 'default' };
 ```
 
@@ -171,12 +171,12 @@ invalid.json:1:15 lint/style/noDefaultExport ━━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 export { default } from './module';
 ```
 
 # Input
-```js
+```cjs
 export { X as default } from './module';
 ```
 
@@ -197,7 +197,7 @@ invalid.json:1:15 lint/style/noDefaultExport ━━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 export { X as 'default' } from './module';
 ```
 

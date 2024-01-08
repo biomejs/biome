@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid_properties_value_shorthand.js
 ---
 # Input
-```js
+```jsx
 const options = {
 	normalize: parseFloat,
 	parseInt,

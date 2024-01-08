@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.cjs
 ---
 # Input
-```js
+```cjs
 module.exports = class {};
 exports = function () {};
 module.exports.A = class A {};

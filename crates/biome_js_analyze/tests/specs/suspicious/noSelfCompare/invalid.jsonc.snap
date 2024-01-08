@@ -1,10 +1,9 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 96
 expression: invalid.jsonc
 ---
 # Input
-```js
+```cjs
 if (x === x) { }
 ```
 
@@ -21,7 +20,7 @@ invalid.jsonc:1:5 lint/suspicious/noSelfCompare ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (x !== x) { }
 ```
 
@@ -38,7 +37,7 @@ invalid.jsonc:1:5 lint/suspicious/noSelfCompare ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (x > x) { }
 ```
 
@@ -55,7 +54,7 @@ invalid.jsonc:1:5 lint/suspicious/noSelfCompare ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if ('x' > 'x') { }
 ```
 
@@ -72,7 +71,7 @@ invalid.jsonc:1:5 lint/suspicious/noSelfCompare ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if ('x' > 'x') { }
 ```
 
@@ -89,7 +88,7 @@ invalid.jsonc:1:5 lint/suspicious/noSelfCompare ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 do {} while (x === x)
 ```
 
@@ -106,7 +105,7 @@ invalid.jsonc:1:14 lint/suspicious/noSelfCompare ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 x === x
 ```
 
@@ -123,7 +122,7 @@ invalid.jsonc:1:1 lint/suspicious/noSelfCompare ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 x !== x
 ```
 
@@ -140,7 +139,7 @@ invalid.jsonc:1:1 lint/suspicious/noSelfCompare ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 x == x
 ```
 
@@ -157,7 +156,7 @@ invalid.jsonc:1:1 lint/suspicious/noSelfCompare ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 x != x
 ```
 
@@ -174,7 +173,7 @@ invalid.jsonc:1:1 lint/suspicious/noSelfCompare ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 x > x
 ```
 
@@ -191,7 +190,7 @@ invalid.jsonc:1:1 lint/suspicious/noSelfCompare ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 x < x
 ```
 
@@ -208,7 +207,7 @@ invalid.jsonc:1:1 lint/suspicious/noSelfCompare ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 x >= x
 ```
 
@@ -225,7 +224,7 @@ invalid.jsonc:1:1 lint/suspicious/noSelfCompare ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 x <= x
 ```
 
@@ -242,7 +241,7 @@ invalid.jsonc:1:1 lint/suspicious/noSelfCompare ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 foo.bar().baz.qux >= foo.bar ().baz .qux
 ```
 
@@ -259,7 +258,7 @@ invalid.jsonc:1:1 lint/suspicious/noSelfCompare ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 class C { #field; foo() { this.#field === this.#field; } }
 ```
 

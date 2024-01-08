@@ -1,10 +1,9 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 96
 expression: invalid.jsx
 ---
 # Input
-```js
+```jsx
 let a = <html lang="lorem" />;
 let a = <html lang="en-babab" />;
 let a = <html lang="en-GB-something" />;

@@ -1,10 +1,9 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 73
 expression: valid.ts
 ---
 # Input
-```js
+```ts
 export function g(a: number, b?: number, c = 0) {}
 
 export function h(a: number, b = 0, c?: number) {}

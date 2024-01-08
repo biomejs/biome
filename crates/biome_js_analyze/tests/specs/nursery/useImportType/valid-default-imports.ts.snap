@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid-default-imports.ts
 ---
 # Input
-```js
+```ts
 import A from "";
 export { A }
 const AA = A;

@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: insideJsx.jsx
 ---
 # Input
-```js
+```jsx
 // invalid
 let a = <div dangerouslySetInnerHTML={{ __html: 'child' }} />
 

@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.js
 ---
 # Input
-```js
+```jsx
 config.newIsCap = config.newIsCap !== false;
 var a = x === 2 ? 'Yes' : 'No';
 var a = x === 2 ? true : 'No';

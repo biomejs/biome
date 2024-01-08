@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsonc
 ---
 # Input
-```js
+```cjs
 let x = 1; foo(x);
 ```
 
@@ -30,7 +30,7 @@ invalid.jsonc:1:1 lint/style/useConst  FIXABLE  ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 for (let i in [1,2,3]) { foo(i); }
 ```
 
@@ -57,7 +57,7 @@ invalid.jsonc:1:6 lint/style/useConst  FIXABLE  ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 for (let x of [1,2,3]) { foo(x); }
 ```
 
@@ -84,7 +84,7 @@ invalid.jsonc:1:6 lint/style/useConst  FIXABLE  ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 (function() { let x = 1; foo(x); })();
 ```
 
@@ -111,7 +111,7 @@ invalid.jsonc:1:15 lint/style/useConst  FIXABLE  ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 (function() { for (let i in [1,2,3]) { foo(i); } })();
 ```
 
@@ -138,7 +138,7 @@ invalid.jsonc:1:20 lint/style/useConst  FIXABLE  ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 (function() { for (let x of [1,2,3]) { foo(x); } })();
 ```
 
@@ -165,7 +165,7 @@ invalid.jsonc:1:20 lint/style/useConst  FIXABLE  ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 let f = (function() { let g = x; })(); f = 1;
 ```
 
@@ -192,7 +192,7 @@ invalid.jsonc:1:23 lint/style/useConst  FIXABLE  ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 let x = 0; { let x = 1; foo(x); } x = 0;
 ```
 
@@ -219,7 +219,7 @@ invalid.jsonc:1:14 lint/style/useConst  FIXABLE  ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 for (let i = 0; i < 10; ++i) { let x = 1; foo(x); }
 ```
 
@@ -246,7 +246,7 @@ invalid.jsonc:1:32 lint/style/useConst  FIXABLE  ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 for (let i in [1,2,3]) { let x = 1; foo(x); }
 ```
 
@@ -294,7 +294,7 @@ invalid.jsonc:1:26 lint/style/useConst  FIXABLE  ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 var foo = function() { for (const b of c) { let a; a = 1; } };
 ```
 
@@ -316,7 +316,7 @@ invalid.jsonc:1:45 lint/style/useConst ━━━━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 var foo = function() { for (const b of c) { let a; ({a} = 1); } };
 ```
 
@@ -338,7 +338,7 @@ invalid.jsonc:1:45 lint/style/useConst ━━━━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 let x; x = 0;
 ```
 
@@ -360,7 +360,7 @@ invalid.jsonc:1:1 lint/style/useConst ━━━━━━━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 switch (a) { case 0: let x; x = 0; }
 ```
 
@@ -382,7 +382,7 @@ invalid.jsonc:1:22 lint/style/useConst ━━━━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 (function() { let x; x = 1; })();
 ```
 
@@ -404,7 +404,7 @@ invalid.jsonc:1:15 lint/style/useConst ━━━━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 let {a: {b, c}} = {a: {b: 1, c: 2}}
 ```
 
@@ -436,7 +436,7 @@ invalid.jsonc:1:1 lint/style/useConst  FIXABLE  ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 let {a = 0, b} = obj; foo(a, b);
 ```
 
@@ -468,7 +468,7 @@ invalid.jsonc:1:1 lint/style/useConst  FIXABLE  ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 let [a] = [1]
 ```
 
@@ -495,7 +495,7 @@ invalid.jsonc:1:1 lint/style/useConst  FIXABLE  ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 let {a} = obj
 ```
 
@@ -522,7 +522,7 @@ invalid.jsonc:1:1 lint/style/useConst  FIXABLE  ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 let a, b; ({a = 0, b} = obj); foo(a, b);
 ```
 
@@ -549,7 +549,7 @@ invalid.jsonc:1:1 lint/style/useConst ━━━━━━━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 let x; function foo() { bar(x); } x = 0;
 ```
 
@@ -571,7 +571,7 @@ invalid.jsonc:1:1 lint/style/useConst ━━━━━━━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 /*eslint use-x:error*/ let x = 1
 ```
 
@@ -598,7 +598,7 @@ invalid.jsonc:1:24 lint/style/useConst  FIXABLE  ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 /*eslint use-x:error*/ { let x = 1 }
 ```
 
@@ -625,7 +625,7 @@ invalid.jsonc:1:26 lint/style/useConst  FIXABLE  ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 let { foo, bar } = baz;
 ```
 
@@ -657,7 +657,7 @@ invalid.jsonc:1:1 lint/style/useConst  FIXABLE  ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 const x = [1,2]; let [,y] = x;
 ```
 
@@ -684,7 +684,7 @@ invalid.jsonc:1:18 lint/style/useConst  FIXABLE  ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 const x = [1,2,3]; let [y,,z] = x;
 ```
 
@@ -716,7 +716,7 @@ invalid.jsonc:1:20 lint/style/useConst  FIXABLE  ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 let predicate; [, {foo:returnType, predicate}] = foo();
 ```
 
@@ -738,7 +738,7 @@ invalid.jsonc:1:1 lint/style/useConst ━━━━━━━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 let predicate; [, {foo:returnType, predicate}, ...bar ] = foo();
 ```
 
@@ -760,7 +760,7 @@ invalid.jsonc:1:1 lint/style/useConst ━━━━━━━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 let predicate; [, {foo:returnType, ...predicate} ] = foo();
 ```
 
@@ -782,7 +782,7 @@ invalid.jsonc:1:1 lint/style/useConst ━━━━━━━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 let x = 'x', y = 'y';
 ```
 
@@ -814,7 +814,7 @@ invalid.jsonc:1:1 lint/style/useConst  FIXABLE  ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 let x = 1, y = 'y'; let z = 1;
 ```
 
@@ -867,7 +867,7 @@ invalid.jsonc:1:21 lint/style/useConst  FIXABLE  ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 let { a, b, c} = obj; let { x, y, z} = anotherObj; x = 2;
 ```
 
@@ -904,7 +904,7 @@ invalid.jsonc:1:1 lint/style/useConst  FIXABLE  ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 let x = 'x', y = 'y'; function someFunc() { let a = 1, b = 2; foo(a, b) }
 ```
 
@@ -962,7 +962,7 @@ invalid.jsonc:1:45 lint/style/useConst  FIXABLE  ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 let someFunc = () => { let a = 1, b = 2; foo(a, b) }
 ```
 
@@ -1015,7 +1015,7 @@ invalid.jsonc:1:24 lint/style/useConst  FIXABLE  ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 /*eslint no-undef-init:error*/ let foo = undefined;
 ```
 
@@ -1042,7 +1042,7 @@ invalid.jsonc:1:32 lint/style/useConst  FIXABLE  ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 let a = 1; class C { static { a; } }
 ```
 
@@ -1069,7 +1069,7 @@ invalid.jsonc:1:1 lint/style/useConst  FIXABLE  ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 class C { static { a; } } let a = 1;
 ```
 
@@ -1096,7 +1096,7 @@ invalid.jsonc:1:27 lint/style/useConst  FIXABLE  ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 class C { static { let a = 1; } }
 ```
 
@@ -1123,7 +1123,7 @@ invalid.jsonc:1:20 lint/style/useConst  FIXABLE  ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 class C { static { if (foo) { let a = 1; } } }
 ```
 
@@ -1150,7 +1150,7 @@ invalid.jsonc:1:31 lint/style/useConst  FIXABLE  ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 class C { static { let a = 1; if (foo) { a; } } }
 ```
 
@@ -1177,7 +1177,7 @@ invalid.jsonc:1:20 lint/style/useConst  FIXABLE  ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 class C { static { if (foo) { let a; a = 1; } } }
 ```
 
@@ -1199,7 +1199,7 @@ invalid.jsonc:1:31 lint/style/useConst ━━━━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 class C { static { let a; a = 1; } }
 ```
 
@@ -1221,7 +1221,7 @@ invalid.jsonc:1:20 lint/style/useConst ━━━━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 class C { static { let { a, b } = foo; } }
 ```
 
@@ -1253,7 +1253,7 @@ invalid.jsonc:1:20 lint/style/useConst  FIXABLE  ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 class C { static { let a, b; ({ a, b } = foo); } }
 ```
 
@@ -1280,7 +1280,7 @@ invalid.jsonc:1:20 lint/style/useConst ━━━━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 class C { static { let a; let b; ({ a, b } = foo); } }
 ```
 
@@ -1318,7 +1318,7 @@ invalid.jsonc:1:27 lint/style/useConst ━━━━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 class C { static { let a; a = 0; console.log(a); } }
 ```
 
@@ -1340,7 +1340,7 @@ invalid.jsonc:1:20 lint/style/useConst ━━━━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 let { itemId, list } = {}, obj = []; console.log(itemId, list, obj);
 ```
 
@@ -1377,7 +1377,7 @@ invalid.jsonc:1:1 lint/style/useConst  FIXABLE  ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 let [ itemId, list ] = [], obj = []; console.log(itemId, list, obj);
 ```
 
@@ -1414,7 +1414,7 @@ invalid.jsonc:1:1 lint/style/useConst  FIXABLE  ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 class C { static { () => a; let a = 1; } };
 ```
 
@@ -1441,7 +1441,7 @@ invalid.jsonc:1:29 lint/style/useConst  FIXABLE  ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 let x; function foo() { bar(x); } x = 0;
 ```
 

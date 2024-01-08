@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid-named-imports.ts
 ---
 # Input
-```js
+```ts
 // Empty import
 import {} from "";
 

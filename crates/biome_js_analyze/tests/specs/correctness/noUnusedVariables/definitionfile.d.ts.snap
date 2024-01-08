@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: definitionfile.d.ts
 ---
 # Input
-```js
+```ts
 declare const SOMECONSTANT: number;
 
 declare class D {

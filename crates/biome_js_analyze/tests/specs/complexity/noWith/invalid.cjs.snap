@@ -1,10 +1,9 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 96
 expression: invalid.cjs
 ---
 # Input
-```js
+```cjs
 function f() {
   with (point) {
     r = Math.sqrt(x * x + y * y); // is r a member of point?

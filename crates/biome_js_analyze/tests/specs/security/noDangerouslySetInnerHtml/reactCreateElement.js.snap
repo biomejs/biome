@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: reactCreateElement.js
 ---
 # Input
-```js
+```jsx
 React.createElement('div', {
     dangerouslySetInnerHTML: { __html: 'child' }
 });

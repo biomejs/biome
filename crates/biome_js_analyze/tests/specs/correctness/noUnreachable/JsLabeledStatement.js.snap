@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: JsLabeledStatement.js
 ---
 # Input
-```js
+```jsx
 function JsLabeledStatement1() {
     label: while (true) {
         if (true) {

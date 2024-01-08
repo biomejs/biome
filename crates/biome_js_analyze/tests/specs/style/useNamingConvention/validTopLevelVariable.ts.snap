@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: validTopLevelVariable.ts
 ---
 # Input
-```js
+```ts
 export const CONSTANT_CASE = 0
 
 export const camelCase = 0

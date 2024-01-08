@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsonc
 ---
 # Input
-```js
+```cjs
 for (; true;);
 ```
 
@@ -20,7 +20,7 @@ invalid.jsonc:1:8 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 for (; ``;);
 ```
 
@@ -37,7 +37,7 @@ invalid.jsonc:1:8 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 for (; `foo`;);
 ```
 
@@ -54,7 +54,7 @@ invalid.jsonc:1:8 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 for (; `foo${bar}`;);
 ```
 
@@ -71,7 +71,7 @@ invalid.jsonc:1:8 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 do { } while (1)
 ```
 
@@ -88,7 +88,7 @@ invalid.jsonc:1:15 lint/correctness/noConstantCondition ━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 do { } while ('1')
 ```
 
@@ -105,7 +105,7 @@ invalid.jsonc:1:15 lint/correctness/noConstantCondition ━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 do { } while (0)
 ```
 
@@ -122,7 +122,7 @@ invalid.jsonc:1:15 lint/correctness/noConstantCondition ━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 do { } while (t = -2)
 ```
 
@@ -139,7 +139,7 @@ invalid.jsonc:1:15 lint/correctness/noConstantCondition ━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 do { } while (``)
 ```
 
@@ -156,7 +156,7 @@ invalid.jsonc:1:15 lint/correctness/noConstantCondition ━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 do { } while (`foo`)
 ```
 
@@ -173,7 +173,7 @@ invalid.jsonc:1:15 lint/correctness/noConstantCondition ━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 do { } while (`foo${bar}`)
 ```
 
@@ -190,7 +190,7 @@ invalid.jsonc:1:15 lint/correctness/noConstantCondition ━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 true ? 1 : 2;
 ```
 
@@ -207,7 +207,7 @@ invalid.jsonc:1:1 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 1 ? 1 : 2;
 ```
 
@@ -224,7 +224,7 @@ invalid.jsonc:1:1 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 q = 0 ? 1 : 2;
 ```
 
@@ -241,7 +241,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 (q = 0) ? 1 : 2;
 ```
 
@@ -258,7 +258,7 @@ invalid.jsonc:1:1 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 `` ? 1 : 2;
 ```
 
@@ -275,7 +275,7 @@ invalid.jsonc:1:1 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 `foo` ? 1 : 2;
 ```
 
@@ -292,7 +292,7 @@ invalid.jsonc:1:1 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 `foo${bar}` ? 1 : 2;
 ```
 
@@ -309,7 +309,7 @@ invalid.jsonc:1:1 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (-2);
 ```
 
@@ -326,7 +326,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (true);
 ```
 
@@ -343,7 +343,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (1);
 ```
 
@@ -360,7 +360,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if ({});
 ```
 
@@ -377,7 +377,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (0 < 1);
 ```
 
@@ -394,7 +394,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (0 || 1);
 ```
 
@@ -411,7 +411,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (a, 1);
 ```
 
@@ -428,7 +428,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (`foo`);
 ```
 
@@ -445,7 +445,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (``);
 ```
 
@@ -462,7 +462,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (`\
 `);
 ```
@@ -482,7 +482,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (`${'bar'}`);
 ```
 
@@ -499,7 +499,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (`${'bar' + `foo`}`);
 ```
 
@@ -516,7 +516,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (`foo${false || true}`);
 ```
 
@@ -533,7 +533,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (`foo${0 || 1}`);
 ```
 
@@ -550,7 +550,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (`foo${bar}`);
 ```
 
@@ -567,7 +567,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (`${bar}foo`);
 ```
 
@@ -584,7 +584,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (!(true || a));
 ```
 
@@ -601,7 +601,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (!(a && void b && c));
 ```
 
@@ -618,7 +618,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (0 || !(a && null));
 ```
 
@@ -635,7 +635,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (1 + !(a || true));
 ```
 
@@ -652,7 +652,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (!(null && a) > 1);
 ```
 
@@ -669,7 +669,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (+(!(a && 0)));
 ```
 
@@ -686,7 +686,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (!typeof a === 'string');
 ```
 
@@ -703,7 +703,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (-('foo' || a));
 ```
 
@@ -720,7 +720,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (+(void a && b) === ~(1 || c));
 ```
 
@@ -737,7 +737,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (a ||= true);
 ```
 
@@ -754,7 +754,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (a ||= 5);
 ```
 
@@ -771,7 +771,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (a ||= 'foo' || b);
 ```
 
@@ -788,7 +788,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (a ||= b || /regex/);
 ```
 
@@ -805,7 +805,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (a ||= b ||= true);
 ```
 
@@ -822,7 +822,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (a ||= b ||= c || 1);
 ```
 
@@ -839,7 +839,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (!(a ||= true));
 ```
 
@@ -856,7 +856,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (!(a ||= 'foo') === true);
 ```
 
@@ -873,7 +873,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (!(a ||= 'foo') === false);
 ```
 
@@ -890,7 +890,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (a || (b ||= true));
 ```
 
@@ -907,7 +907,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if ((a ||= 1) || b);
 ```
 
@@ -924,7 +924,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if ((a ||= true) && true);
 ```
 
@@ -941,7 +941,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (true && (a ||= true));
 ```
 
@@ -958,7 +958,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (a &&= false);
 ```
 
@@ -975,7 +975,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (a &&= null);
 ```
 
@@ -992,7 +992,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (a &&= void b);
 ```
 
@@ -1009,7 +1009,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (a &&= 0 && b);
 ```
 
@@ -1026,7 +1026,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (a &&= b && '');
 ```
 
@@ -1043,7 +1043,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (a &&= b &&= false);
 ```
 
@@ -1060,7 +1060,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (a &&= b &&= c && false);
 ```
 
@@ -1077,7 +1077,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (!(a &&= false));
 ```
 
@@ -1094,7 +1094,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (!(a &&= 0) + 1);
 ```
 
@@ -1111,7 +1111,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (a && (b &&= false));
 ```
 
@@ -1128,7 +1128,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if ((a &&= null) && b);
 ```
 
@@ -1145,7 +1145,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (false || (a &&= false));
 ```
 
@@ -1162,7 +1162,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if ((a &&= false) || false);
 ```
 
@@ -1179,7 +1179,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 while ([]);
 ```
 
@@ -1196,7 +1196,7 @@ invalid.jsonc:1:8 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 while (~!0);
 ```
 
@@ -1213,7 +1213,7 @@ invalid.jsonc:1:8 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 while (x = 1);
 ```
 
@@ -1230,7 +1230,7 @@ invalid.jsonc:1:8 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 while (function () { });
 ```
 
@@ -1247,7 +1247,7 @@ invalid.jsonc:1:8 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 while (1);
 ```
 
@@ -1264,7 +1264,7 @@ invalid.jsonc:1:8 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 while (() => { });
 ```
 
@@ -1281,7 +1281,7 @@ invalid.jsonc:1:8 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 while (`foo`);
 ```
 
@@ -1298,7 +1298,7 @@ invalid.jsonc:1:8 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 while (``);
 ```
 
@@ -1315,7 +1315,7 @@ invalid.jsonc:1:8 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 while (`${'foo'}`);
 ```
 
@@ -1332,7 +1332,7 @@ invalid.jsonc:1:8 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 while (`${'foo' + 'bar'}`);
 ```
 
@@ -1349,7 +1349,7 @@ invalid.jsonc:1:8 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (typeof x) { }
 ```
 
@@ -1366,7 +1366,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (typeof 'abc' === 'string') { }
 ```
 
@@ -1383,7 +1383,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (a = typeof b) { }
 ```
 
@@ -1400,7 +1400,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (a, typeof b) { }
 ```
 
@@ -1417,7 +1417,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (typeof 'a' == 'string' || typeof 'b' == 'string') { }
 ```
 
@@ -1434,7 +1434,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 while (typeof x) { }
 ```
 
@@ -1451,7 +1451,7 @@ invalid.jsonc:1:8 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (1 || void x);
 ```
 
@@ -1468,7 +1468,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (void x);
 ```
 
@@ -1485,7 +1485,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (y = void x);
 ```
 
@@ -1502,7 +1502,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (x, void x);
 ```
 
@@ -1519,7 +1519,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (void x === void y);
 ```
 
@@ -1536,7 +1536,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (void x && a);
 ```
 
@@ -1553,7 +1553,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (a && void x);
 ```
 
@@ -1570,7 +1570,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (false && abc === 'str') { }
 ```
 
@@ -1587,7 +1587,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (true || abc === 'str') { }
 ```
 
@@ -1604,7 +1604,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (1 || abc === 'str') { }
 ```
 
@@ -1621,7 +1621,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (abc === 'str' || true) { }
 ```
 
@@ -1638,7 +1638,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (abc === 'str' || true || def === 'str') { }
 ```
 
@@ -1655,7 +1655,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (false || true) { }
 ```
 
@@ -1672,7 +1672,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (typeof abc === 'str' || true) { }
 ```
 
@@ -1689,7 +1689,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if ('str' || a) { }
 ```
 
@@ -1706,7 +1706,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if ('str' || abc === 'str') { }
 ```
 
@@ -1723,7 +1723,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if ('str1' || 'str2') { }
 ```
 
@@ -1740,7 +1740,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if ('str1' && 'str2') { }
 ```
 
@@ -1757,7 +1757,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (abc === 'str' || 'str') { }
 ```
 
@@ -1774,7 +1774,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (a || 'str') { }
 ```
 
@@ -1791,7 +1791,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 function* foo() { while (1) { } yield 'foo'; }
 ```
 
@@ -1808,7 +1808,7 @@ invalid.jsonc:1:26 lint/correctness/noConstantCondition ━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 function* foo() { while (1) { if (true) { yield 'foo'; } } }
 ```
 
@@ -1836,7 +1836,7 @@ invalid.jsonc:1:35 lint/correctness/noConstantCondition ━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 function* foo() { while (1) { yield 'foo'; } while (1) { } }
 ```
 
@@ -1853,7 +1853,7 @@ invalid.jsonc:1:53 lint/correctness/noConstantCondition ━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 var a = function* foo() { while (1) { } yield 'foo'; }
 ```
 
@@ -1870,7 +1870,7 @@ invalid.jsonc:1:34 lint/correctness/noConstantCondition ━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 while (1) { function* foo() { yield; } }
 ```
 
@@ -1887,7 +1887,7 @@ invalid.jsonc:1:8 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 function* foo() { if (true) { yield 'foo'; } }
 ```
 
@@ -1904,7 +1904,7 @@ invalid.jsonc:1:23 lint/correctness/noConstantCondition ━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 function* foo() { for (let foo = yield; true;) { } }
 ```
 
@@ -1921,7 +1921,7 @@ invalid.jsonc:1:41 lint/correctness/noConstantCondition ━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 function* foo() { for (foo = yield; true;) { } }
 ```
 
@@ -1938,7 +1938,7 @@ invalid.jsonc:1:37 lint/correctness/noConstantCondition ━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 function foo() { while (1) { function* bar() { while (1) { yield; } } } }
 ```
 
@@ -1955,7 +1955,7 @@ invalid.jsonc:1:25 lint/correctness/noConstantCondition ━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 function foo() { while (1) { const bar = function* () { while (1) { yield; } } } }
 ```
 
@@ -1972,7 +1972,7 @@ invalid.jsonc:1:25 lint/correctness/noConstantCondition ━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 function* foo() { for (let foo = 1 + 2 + 3 + (yield); true; baz) { } }
 ```
 
@@ -1989,7 +1989,7 @@ invalid.jsonc:1:55 lint/correctness/noConstantCondition ━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 if ([a]) { }
 ```
 
@@ -2006,7 +2006,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if ([]) { }
 ```
 
@@ -2023,7 +2023,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if ('' + ['a']) { }
 ```
 
@@ -2040,7 +2040,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if ('' + []) { }
 ```
 
@@ -2057,7 +2057,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (+1) { }
 ```
 
@@ -2074,7 +2074,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if ([,] + '') { }
 ```
 
@@ -2091,7 +2091,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (/foo/ui);
 ```
 
@@ -2108,7 +2108,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (0n);
 ```
 
@@ -2125,7 +2125,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (0b0n);
 ```
 
@@ -2142,7 +2142,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (0o0n);
 ```
 
@@ -2159,7 +2159,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (0x0n);
 ```
 
@@ -2176,7 +2176,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (0b1n);
 ```
 
@@ -2193,7 +2193,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (0o1n);
 ```
 
@@ -2210,7 +2210,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (0x1n);
 ```
 
@@ -2227,7 +2227,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (0x1n || foo);
 ```
 
@@ -2244,7 +2244,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (class { }) { }
 ```
 
@@ -2261,7 +2261,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (new Foo()) { }
 ```
 
@@ -2278,7 +2278,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (new Boolean(foo)) { }
 ```
 
@@ -2295,7 +2295,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (new String(foo)) { }
 ```
 
@@ -2312,7 +2312,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (new Number(foo)) { }
 ```
 
@@ -2329,7 +2329,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (`${[...['a']]}`) { }
 ```
 
@@ -2346,7 +2346,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (undefined) { }
 ```
 
@@ -2363,7 +2363,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (Boolean(1)) { }
 ```
 
@@ -2380,7 +2380,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (Boolean()) { }
 ```
 
@@ -2397,7 +2397,7 @@ invalid.jsonc:1:5 lint/correctness/noConstantCondition ━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (Boolean([a])) { }
 ```
 

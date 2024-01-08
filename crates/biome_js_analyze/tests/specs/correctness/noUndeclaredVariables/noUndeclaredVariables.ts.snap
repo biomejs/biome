@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: noUndeclaredVariables.ts
 ---
 # Input
-```js
+```ts
 // valid
 export type EventHandler<T extends string> = `on${T}`
 export type EventHandlerDefault<T extends string = 'click'> = `on${T}`

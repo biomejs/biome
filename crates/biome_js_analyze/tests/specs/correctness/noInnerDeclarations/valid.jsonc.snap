@@ -1,130 +1,129 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 92
 expression: valid.jsonc
 ---
 # Input
-```js
+```cjs
 function doSomething() { }
 ```
 
 # Input
-```js
+```cjs
 function doSomething() { function somethingElse() { } }
 ```
 
 # Input
-```js
+```cjs
 (function() { function doSomething() { } }());
 ```
 
 # Input
-```js
+```cjs
 if (test) { const fn = function() { }; }
 ```
 
 # Input
-```js
+```cjs
 if (test) { const fn = function expr() { }; }
 ```
 
 # Input
-```js
+```cjs
 function decl() { var fn = function expr() { }; }
 ```
 
 # Input
-```js
+```cjs
 function decl(arg) { var fn; if (arg) { fn = function() { }; } }
 ```
 
 # Input
-```js
+```cjs
 function decl(arg) { var fn; if (arg) { fn = function expr() { }; } }
 ```
 
 # Input
-```js
+```cjs
 var x = {doSomething() {function doSomethingElse() {}}}
 ```
 
 # Input
-```js
+```cjs
 function decl(arg) { var fn; if (arg) { fn = function expr() { }; } }
 ```
 
 # Input
-```js
+```cjs
 if (test) { let x = 1; }
 ```
 
 # Input
-```js
+```cjs
 if (test) { const x = 1; }
 ```
 
 # Input
-```js
+```cjs
 var foo;
 ```
 
 # Input
-```js
+```cjs
 var foo = 42;
 ```
 
 # Input
-```js
+```cjs
 function doSomething() { var foo; }
 ```
 
 # Input
-```js
+```cjs
 (function() { var foo; }());
 ```
 
 # Input
-```js
+```cjs
 foo(() => { function bar() { } });
 ```
 
 # Input
-```js
+```cjs
 var fn = () => {var foo;}
 ```
 
 # Input
-```js
+```cjs
 var x = {doSomething() {var foo;}}
 ```
 
 # Input
-```js
+```cjs
 exports.foo = () => {}
 ```
 
 # Input
-```js
+```cjs
 exports.foo = function(){}
 ```
 
 # Input
-```js
+```cjs
 module.exports = function foo(){}
 ```
 
 # Input
-```js
+```cjs
 class C { method() { function foo() {} } }
 ```
 
 # Input
-```js
+```cjs
 class C { method() { var x; } }
 ```
 
 # Input
-```js
+```cjs
 class C { static { var x; } }
 ```
 

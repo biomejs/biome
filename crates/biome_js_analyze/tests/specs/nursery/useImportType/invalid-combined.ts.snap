@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid-combined.ts
 ---
 # Input
-```js
+```ts
 // Leading comment
 import/*1*/A/*2*/
 // Comma comment

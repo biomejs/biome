@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.ts
 ---
 # Input
-```js
+```ts
 interface A extends B { prop: number; }
 
 // valid because extending multiple interfaces

@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: fromImportValid.jsx
 ---
 # Input
-```js
+```jsx
 import React, {Fragment} from "notReact";
 
 <>

@@ -3,32 +3,32 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.jsonc
 ---
 # Input
-```js
+```cjs
 function a(a, b, c) {}
 ```
 
 # Input
-```js
+```cjs
 var j = function (j, b, c) {};
 ```
 
 # Input
-```js
+```cjs
 function k({ k, b }, { c, d }) {}
 ```
 
 # Input
-```js
+```cjs
 function l([, l]) {}
 ```
 
 # Input
-```js
+```cjs
 function foo([[a, b], [c, d]]) {}
 ```
 
 # Input
-```js
+```cjs
 function test(a = function (a) {}) {}
 ```
 

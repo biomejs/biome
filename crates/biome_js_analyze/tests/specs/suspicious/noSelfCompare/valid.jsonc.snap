@@ -3,42 +3,42 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.jsonc
 ---
 # Input
-```js
+```cjs
 if (a || b) { }
 ```
 
 # Input
-```js
+```cjs
 if (1 ^ 2) { }
 ```
 
 # Input
-```js
+```cjs
 if (x === y) { }
 ```
 
 # Input
-```js
+```cjs
 if (1 === 2) { }
 ```
 
 # Input
-```js
+```cjs
 y=x*x
 ```
 
 # Input
-```js
+```cjs
 foo.bar.baz === foo.bar.qux
 ```
 
 # Input
-```js
+```cjs
 class C { #field; foo() { this.#field === this['#field']; } }
 ```
 
 # Input
-```js
+```cjs
 class C { #field; foo() { this['#field'] === this.#field; } }
 ```
 

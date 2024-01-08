@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.jsx
 ---
 # Input
-```js
+```jsx
 let a = <Html lang="en-babab" />;
 let a = <html lang="en-US"></html>;
 let a = <html lang="en"></html>;

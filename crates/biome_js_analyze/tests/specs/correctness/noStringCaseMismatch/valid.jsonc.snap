@@ -3,32 +3,32 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.jsonc
 ---
 # Input
-```js
+```cjs
 s.toUpperCase() === 'ABC';
 ```
 
 # Input
-```js
+```cjs
 s.toLowerCase() === 'abc';
 ```
 
 # Input
-```js
+```cjs
 s.toUpperCase() === '20';
 ```
 
 # Input
-```js
+```cjs
 s.toLowerCase() === '20';
 ```
 
 # Input
-```js
+```cjs
 s.toLowerCase() === `eFg${12}`;
 ```
 
 # Input
-```js
+```cjs
 s.toLowerCase() == `eFg${12}`;
 ```
 

@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsonc
 ---
 # Input
-```js
+```cjs
 A: while (a) break A;
 ```
 
@@ -25,7 +25,7 @@ invalid.jsonc:1:20 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 A: while (a) { B: { continue A; } }
 ```
 
@@ -47,7 +47,7 @@ invalid.jsonc:1:30 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 X: while (x) { A: while (a) { B: { break A; break B; continue X; } } }
 ```
 
@@ -69,7 +69,7 @@ invalid.jsonc:1:42 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 A: do { break A; } while (a);
 ```
 
@@ -91,7 +91,7 @@ invalid.jsonc:1:15 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 A: for (;;) { break A; }
 ```
 
@@ -113,7 +113,7 @@ invalid.jsonc:1:21 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 A: for (a in obj) { break A; }
 ```
 
@@ -135,7 +135,7 @@ invalid.jsonc:1:27 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 A: for (a of ary) { break A; }
 ```
 
@@ -157,7 +157,7 @@ invalid.jsonc:1:27 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 A: switch (a) { case 0: break A; }
 ```
 
@@ -179,7 +179,7 @@ invalid.jsonc:1:31 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 X: while (x) { A: switch (a) { case 0: break A; } }
 ```
 
@@ -201,7 +201,7 @@ invalid.jsonc:1:46 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 X: switch (a) { case 0: A: while (b) break A; }
 ```
 
@@ -223,7 +223,7 @@ invalid.jsonc:1:44 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 A: while (true) { break A; while (true) { break A; } }
 ```
 
@@ -245,7 +245,7 @@ invalid.jsonc:1:25 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 A: while(true) { /*before*/break A; }
 ```
 
@@ -267,7 +267,7 @@ invalid.jsonc:1:34 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 A: while(true) { break/**/ A; }
 ```
 
@@ -289,7 +289,7 @@ invalid.jsonc:1:28 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 A: while(true) { continue /**/ A; }
 ```
 
@@ -311,7 +311,7 @@ invalid.jsonc:1:32 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 A: while(true) { break /**/A; }
 ```
 
@@ -333,7 +333,7 @@ invalid.jsonc:1:28 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 A: while(true) { continue/**/A; }
 ```
 
@@ -355,7 +355,7 @@ invalid.jsonc:1:30 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 A: while(true) { continue A/*after*/; }
 ```
 
@@ -377,7 +377,7 @@ invalid.jsonc:1:27 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 A: while(true) { break A //after
  }
 ```
@@ -401,7 +401,7 @@ invalid.jsonc:1:24 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 A: while(true) { break A /*after*/
 foo() }
 ```
@@ -425,7 +425,7 @@ invalid.jsonc:1:24 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 A: while(true) { while(true) { break A; } break A; }
 ```
 
@@ -447,7 +447,7 @@ invalid.jsonc:1:49 lint/complexity/noUselessLabel  FIXABLE  ━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 A: while(true) { (() => { A: while(true) {} } )(); break A; }
 ```
 

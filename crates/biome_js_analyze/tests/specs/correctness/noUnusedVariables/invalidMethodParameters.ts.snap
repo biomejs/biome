@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidMethodParameters.ts
 ---
 # Input
-```js
+```ts
 class D {
 	constructor(a: number) {}
 	f(a: number) {}

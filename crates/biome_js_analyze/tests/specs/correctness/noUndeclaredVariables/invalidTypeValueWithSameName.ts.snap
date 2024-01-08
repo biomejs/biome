@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidTypeValueWithSameName.ts
 ---
 # Input
-```js
+```ts
 const a = 0;
 export type { a }
 ```

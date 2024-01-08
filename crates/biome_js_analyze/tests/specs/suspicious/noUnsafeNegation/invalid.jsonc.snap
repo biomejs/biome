@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsonc
 ---
 # Input
-```js
+```cjs
 !1 in [1,2];
 ```
 
@@ -24,7 +24,7 @@ invalid.jsonc:1:1 lint/suspicious/noUnsafeNegation  FIXABLE  ━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 /**test*/!/** test*/1 instanceof [1,2];
 ```
 

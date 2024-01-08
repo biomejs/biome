@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: withDefaultNamespaceInvalid.js
 ---
 # Input
-```js
+```jsx
 import * as DefaultNamespace  from "react";
 
 DefaultNamespace.createElement('button');

@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidIndexParameter.ts
 ---
 # Input
-```js
+```ts
 export interface X {
     [PascalCase: string]: unknown
 

@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: lambdas.js
 ---
 # Input
-```js
+```jsx
 function lambdas(array) {
     for (item of array) {              // +1, nesting = 1
         if (item) {                    // +2, nesting = 2

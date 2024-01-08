@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid-index-signatures.ts
 ---
 # Input
-```js
+```ts
 type ValidIndexSignatures = {
 	a: {
 		[index: string]: string;

@@ -3,117 +3,117 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.jsonc
 ---
 # Input
-```js
+```cjs
 for (var i = 0; i < 10; i++) {}
 ```
 
 # Input
-```js
+```cjs
 for (var i = 0; i <= 10; i++) {}
 ```
 
 # Input
-```js
+```cjs
 for (var i = 10; i > 0; i--) {}
 ```
 
 # Input
-```js
+```cjs
 for (var i = 10; i >= 0; i--) {}
 ```
 
 # Input
-```js
+```cjs
 for (var i = 10; i > 0; ) {}
 ```
 
 # Input
-```js
+```cjs
 for (var i = 10; i >= 0; ) {}
 ```
 
 # Input
-```js
+```cjs
 for (var i = 10; i < 0; ) {}
 ```
 
 # Input
-```js
+```cjs
 for (var i = 10; i <= 0; ) {}
 ```
 
 # Input
-```js
+```cjs
 for (var i = 10; i <= 0; j++) {}
 ```
 
 # Input
-```js
+```cjs
 for (var i = 10; i <= 0; j--) {}
 ```
 
 # Input
-```js
+```cjs
 for (var i = 10; i >= 0; j++) {}
 ```
 
 # Input
-```js
+```cjs
 for (var i = 10; i >= 0; j--) {}
 ```
 
 # Input
-```js
+```cjs
 for (var i = 10; i >= 0; j += 2) {}
 ```
 
 # Input
-```js
+```cjs
 for (var i = 10; i >= 0; j -= 2) {}
 ```
 
 # Input
-```js
+```cjs
 for (var i = 10; i >= 0; i |= 2) {}
 ```
 
 # Input
-```js
+```cjs
 for (var i = 10; i >= 0; i %= 2) {}
 ```
 
 # Input
-```js
+```cjs
 for (var i = 0; i < MAX; i += STEP_SIZE);
 ```
 
 # Input
-```js
+```cjs
 for (var i = 0; i < MAX; i -= STEP_SIZE);
 ```
 
 # Input
-```js
+```cjs
 for (var i = 10; i > 0; i += STEP_SIZE);
 ```
 
 # Input
-```js
+```cjs
 for (var i = 0; i !== 10; i += 1) {}
 ```
 
 # Input
-```js
+```cjs
 for (var i = 0; i === 10; i += 1) {}
 ```
 
 # Input
-```js
+```cjs
 for (var i = 0; i == 10; i += 1) {}
 ```
 
 # Input
-```js
+```cjs
 for (var i = 0; i != 10; i += 1) {}
 ```
 

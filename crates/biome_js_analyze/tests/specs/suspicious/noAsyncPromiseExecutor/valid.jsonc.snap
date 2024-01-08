@@ -3,22 +3,22 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.jsonc
 ---
 # Input
-```js
+```cjs
 new Promise((resolve, reject) => {})
 ```
 
 # Input
-```js
+```cjs
 new Promise((resolve, reject) => {}, async function unrelated() {})
 ```
 
 # Input
-```js
+```cjs
 new Foo(async (resolve, reject) => {})
 ```
 
 # Input
-```js
+```cjs
 new Foo((( (resolve, reject) => {} )))
 ```
 
