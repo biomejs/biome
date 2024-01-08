@@ -8,7 +8,7 @@ Read our [guidelines to categorize a change](https://biomejs.dev/internals/versi
 New entries must be placed in a section entitled `Unreleased`.
 Read our [guidelines for writing a good changelog entry](https://github.com/biomejs/biome/blob/main/CONTRIBUTING.md#changelog).
 
-## 1.5.0
+## 1.5.0 (2024-01-08)
 
 Biome now scores 97% compatibility with Prettier and features more than 180 linter rules.
 

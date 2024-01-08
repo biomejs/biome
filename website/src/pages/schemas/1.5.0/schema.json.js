@@ -1365,6 +1365,14 @@ export function GET() {
 							{ type: "null" },
 						],
 					},
+					noGlobalAssign: {
+						description:
+							"Disallow assignments to native objects and read-only global variables.",
+						anyOf: [
+							{ $ref: "#/definitions/RuleConfiguration" },
+							{ type: "null" },
+						],
+					},
 					noGlobalEval: {
 						description: "Disallow the use of global eval().",
 						anyOf: [
