@@ -14,9 +14,11 @@ mod language {
 fn quick_test() {
     let src = r#"
     div {
-        prod: fn(100px);
-        prod: --fn(100px);
-        prod: --fn--fn(100px);
+        border: #fff    solid
+        
+        2px;
+        border: THICK   #000;
+        border: medium;
     }
 
 "#;

@@ -223,6 +223,18 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
                 quote! { if Self::can_cast(syntax.kind()) { Some(Self { syntax }) } else { None } }
             };
 
+            let ast_node_slot_map_impl = if needs_dynamic_slots {
+                quote! {
+                    impl AstNodeSlotMap<#slot_count> for #name {
+                        fn slot_map(&self) -> &#slot_map_type {
+                            &self.slot_map
+                        }
+                    }
+                }
+            } else {
+                Default::default()
+            };
+
             (
                 quote! {
                     // TODO: review documentation
@@ -276,6 +288,8 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
                         fn syntax(&self) -> &SyntaxNode { &self.syntax }
                         fn into_syntax(self) -> SyntaxNode { self.syntax }
                     }
+
+                    #ast_node_slot_map_impl
 
                     impl std::fmt::Debug for #name {
                         fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -883,9 +897,9 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
         };
         #[allow(unused)]
         use biome_rowan::{
-            AstNodeList, AstNodeListIterator, AstSeparatedList, AstSeparatedListNodesIterator
+            AstNodeList, AstNodeListIterator,  AstNodeSlotMap, AstSeparatedList, AstSeparatedListNodesIterator
         };
-        use biome_rowan::{support, AstNode, SyntaxKindSet, RawSyntaxKind, SyntaxResult};
+        use biome_rowan::{support, AstNode,SyntaxKindSet, RawSyntaxKind, SyntaxResult};
         use std::fmt::{Debug, Formatter};
         #serde_import
 

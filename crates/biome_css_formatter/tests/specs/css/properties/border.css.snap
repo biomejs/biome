@@ -1,0 +1,94 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/properties/border.css
+---
+
+# Input
+
+```css
+div {
+    /* Generic property tests */
+    border: InItial;
+    border
+    :
+    inherit
+    ;
+
+    border  :   zzz-unknown-value  ;
+    border  : a,
+    value list ;
+
+
+    /* <line-style> */
+    border : SOLID;
+    border: none
+    ;
+
+    /* <line-width> */
+    border : ThIn;
+    border: 
+    medium
+    ;
+    border:   100px;
+
+    /* <color> */
+    border: 
+    #fff;
+
+    /* combinations */
+    border: 2px
+    dotted;
+    border  :   outset   #f33;
+    border:#000 medium  
+     
+    dashed
+        
+        ;
+}
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+-----
+
+```css
+div {
+	/* Generic property tests */
+	border: initial;
+	border: inherit;
+
+	border: zzz-unknown-value;
+	border: a , value list;
+
+	/* <line-style> */
+	border: solid;
+	border: none;
+
+	/* <line-width> */
+	border: thin;
+	border: medium;
+	border: 100px;
+
+	/* <color> */
+	border: #fff;
+
+	/* combinations */
+	border: 2px dotted;
+	border: outset #f33;
+	border: #000 medium dashed;
+}
+```
+
+
