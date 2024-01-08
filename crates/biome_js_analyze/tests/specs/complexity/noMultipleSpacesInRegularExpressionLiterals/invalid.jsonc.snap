@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsonc
 ---
 # Input
-```js
+```cjs
 /   /;
 ```
 
@@ -27,7 +27,7 @@ invalid.jsonc:1:2 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 
 # Input
-```js
+```cjs
 /  foo/;
 ```
 
@@ -51,7 +51,7 @@ invalid.jsonc:1:2 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 
 # Input
-```js
+```cjs
 /foo   /;
 ```
 
@@ -75,7 +75,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 
 # Input
-```js
+```cjs
 /foo  bar/;
 ```
 
@@ -99,7 +99,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 
 # Input
-```js
+```cjs
 /foo   bar    baz/;
 ```
 
@@ -123,7 +123,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 
 # Input
-```js
+```cjs
 /foo [ba]r  b(a|z)/;
 ```
 
@@ -147,7 +147,7 @@ invalid.jsonc:1:11 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  
 ```
 
 # Input
-```js
+```cjs
 /foo  +/;
 ```
 
@@ -171,7 +171,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 
 # Input
-```js
+```cjs
 /foo  +?/;
 ```
 
@@ -195,7 +195,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 
 # Input
-```js
+```cjs
 /foo  */;
 ```
 
@@ -219,7 +219,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 
 # Input
-```js
+```cjs
 /foo  *?/;
 ```
 
@@ -243,7 +243,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 
 # Input
-```js
+```cjs
 /foo   */;
 ```
 
@@ -267,7 +267,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 
 # Input
-```js
+```cjs
 /foo  ?/;
 ```
 
@@ -291,7 +291,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 
 # Input
-```js
+```cjs
 /foo  {2}/;
 ```
 
@@ -315,7 +315,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 
 # Input
-```js
+```cjs
 /foo  {2}a{1,2}/;
 ```
 
@@ -339,7 +339,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 
 # Input
-```js
+```cjs
 /foo  {2,}/;
 ```
 
@@ -363,7 +363,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 
 # Input
-```js
+```cjs
 /foo  {,2}/;
 ```
 
@@ -387,7 +387,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 
 # Input
-```js
+```cjs
 /foo  {2,3}/;
 ```
 
@@ -411,7 +411,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 
 # Input
-```js
+```cjs
 /foo  +  *   *   {2,}/;
 ```
 
@@ -435,7 +435,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 
 # Input
-```js
+```cjs
 /foo  {}/;
 ```
 
@@ -459,7 +459,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 
 # Input
-```js
+```cjs
 /foo  {,}/;
 ```
 
@@ -483,7 +483,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 
 # Input
-```js
+```cjs
 /foo  {,2}/;
 ```
 
@@ -507,7 +507,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 
 # Input
-```js
+```cjs
 /foo  {1 2}/;
 ```
 
@@ -531,7 +531,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 
 # Input
-```js
+```cjs
 /foo  {1/;
 ```
 
@@ -555,7 +555,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 
 # Input
-```js
+```cjs
 /foo  {1,2/;
 ```
 

@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: validDecorator.js
 ---
 # Input
-```js
+```jsx
 class A {
     constructor(@inject("foo") foo) {}
 }

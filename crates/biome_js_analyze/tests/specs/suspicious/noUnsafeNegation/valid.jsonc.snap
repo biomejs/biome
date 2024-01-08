@@ -3,32 +3,32 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.jsonc
 ---
 # Input
-```js
+```cjs
 -1 in [1,2];
 ```
 
 # Input
-```js
+```cjs
 ~1 in [1,2];
 ```
 
 # Input
-```js
+```cjs
 typeof 1 in [1,2];
 ```
 
 # Input
-```js
+```cjs
 void 1 in [1,2];
 ```
 
 # Input
-```js
+```cjs
 delete 1 in [1,2];
 ```
 
 # Input
-```js
+```cjs
 +1 instanceof [1,2];
 ```
 

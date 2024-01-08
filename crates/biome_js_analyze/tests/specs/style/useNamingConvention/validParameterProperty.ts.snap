@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: validParameterProperty.ts
 ---
 # Input
-```js
+```ts
 export default class {
     constructor(
         readonly p: unknown,

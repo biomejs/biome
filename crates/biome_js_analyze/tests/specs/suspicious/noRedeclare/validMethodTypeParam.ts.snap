@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: validMethodTypeParam.ts
 ---
 # Input
-```js
+```ts
 interface I {
 	get<T>(f: T): T;
 	post<T>(g: T): T;

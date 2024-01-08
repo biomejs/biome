@@ -1,9 +1,9 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-expression: useKeyWithClickEventsValid.jsx
+expression: valid.jsx
 ---
 # Input
-```js
+```jsx
 <>
     <div onClick={() => {}} onKeyUp={handleKeyUp} />
     <div onClick={() => {}} onKeyDown={handleKeyDown} />

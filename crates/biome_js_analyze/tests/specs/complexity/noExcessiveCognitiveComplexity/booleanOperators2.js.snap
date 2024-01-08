@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: booleanOperators2.js
 ---
 # Input
-```js
+```jsx
 function booleanOperators2() {
     if (a                                     // +1 for `if`
         &&                                    // +1

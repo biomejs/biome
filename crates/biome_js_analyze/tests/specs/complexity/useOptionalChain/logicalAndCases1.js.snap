@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: logicalAndCases1.js
 ---
 # Input
-```js
+```jsx
 // base cases
 
 // chained members

@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsonc
 ---
 # Input
-```js
+```cjs
 new RegExp('');
 ```
 
@@ -27,7 +27,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 RegExp('', '');
 ```
 
@@ -51,7 +51,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 new RegExp(String.raw``);
 ```
 
@@ -75,7 +75,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 new RegExp('abc');
 ```
 
@@ -99,7 +99,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 new RegExp((('abc')), ('g'));
 ```
 
@@ -123,7 +123,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 RegExp('abc');
 ```
 
@@ -147,7 +147,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 new RegExp('abc', 'g');
 ```
 
@@ -171,7 +171,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 RegExp('abc', 'g');
 ```
 
@@ -195,7 +195,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 new RegExp(`abc`);
 ```
 
@@ -219,7 +219,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 RegExp(`abc`);
 ```
 
@@ -243,7 +243,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 new RegExp(`abc`, `g`);
 ```
 
@@ -267,7 +267,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 RegExp(`abc`, `g`);
 ```
 
@@ -291,7 +291,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 new RegExp(String.raw`abc`);
 ```
 
@@ -315,7 +315,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 new RegExp(String.raw`abc
 abc`);
 ```
@@ -343,7 +343,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 new RegExp(String.raw`	abc
 abc`);
 ```
@@ -371,7 +371,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 RegExp(String.raw`abc`);
 ```
 
@@ -395,7 +395,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 new RegExp(String.raw`abc`, String.raw`g`);
 ```
 
@@ -419,7 +419,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 RegExp(String.raw`abc`, String.raw`g`);
 ```
 
@@ -443,7 +443,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 new RegExp(String['raw']`a`);
 ```
 
@@ -467,7 +467,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 new RegExp('a', `g`);
 ```
 
@@ -491,7 +491,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 RegExp(`a`, 'g');
 ```
 
@@ -515,7 +515,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 RegExp(String.raw`a`, 'g');
 ```
 
@@ -539,7 +539,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 new RegExp(String.raw`\d`, `g`);
 ```
 
@@ -563,7 +563,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 new RegExp(String.raw`\\d`, `g`);
 ```
 
@@ -587,7 +587,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 new RegExp(String['raw']`\\d`, `g`);
 ```
 
@@ -611,7 +611,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 new RegExp(String["raw"]`\\d`, `g`);
 ```
 
@@ -635,7 +635,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 RegExp('a', String.raw`g`);
 ```
 
@@ -659,7 +659,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 new globalThis.RegExp('a');
 ```
 
@@ -683,7 +683,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 globalThis.RegExp('a');
 ```
 
@@ -707,7 +707,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 (globalThis).RegExp('a');
 ```
 
@@ -731,7 +731,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 new RegExp((String?.raw)`a`);
 ```
 
@@ -755,7 +755,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 RegExp('abc', 'u');
 ```
 
@@ -779,7 +779,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 new RegExp('abc', 'd');
 ```
 
@@ -803,7 +803,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 RegExp('abc', 'd');
 ```
 
@@ -827,7 +827,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 RegExp('\\\\', '');
 ```
 
@@ -851,7 +851,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 RegExp('\n', '');
 ```
 
@@ -875,7 +875,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 RegExp('\n\n', '');
 ```
 
@@ -899,7 +899,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 RegExp('\t', '');
 ```
 
@@ -923,7 +923,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 RegExp('\t\t', '');
 ```
 
@@ -947,7 +947,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 RegExp('\r\n', '');
 ```
 
@@ -971,7 +971,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 RegExp('\u1234', 'g')
 ```
 
@@ -995,7 +995,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 RegExp('\u{1234}', 'g')
 ```
 
@@ -1019,7 +1019,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 RegExp('\u{11111}', 'g')
 ```
 
@@ -1043,7 +1043,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 RegExp('\v', '');
 ```
 
@@ -1067,7 +1067,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 RegExp('\v\v', '');
 ```
 
@@ -1091,7 +1091,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 RegExp('\f', '');
 ```
 
@@ -1115,7 +1115,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 RegExp('\f\f', '');
 ```
 
@@ -1139,7 +1139,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 RegExp('\\b', '');
 ```
 
@@ -1163,7 +1163,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 RegExp('\\b\\b', '');
 ```
 
@@ -1187,7 +1187,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 new RegExp('\\B\\b', '');
 ```
 
@@ -1211,7 +1211,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 RegExp('\\w', '');
 ```
 
@@ -1235,7 +1235,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 new globalThis.RegExp('\\W', '');
 ```
 
@@ -1259,7 +1259,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 RegExp('\\s', '');
 ```
 
@@ -1283,7 +1283,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 new RegExp('\\S', '')
 ```
 
@@ -1307,7 +1307,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 globalThis.RegExp('\\d', '');
 ```
 
@@ -1331,7 +1331,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 globalThis.RegExp('\\D', '')
 ```
 
@@ -1355,7 +1355,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 globalThis.RegExp('\\\\\\D', '')
 ```
 
@@ -1379,7 +1379,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 new RegExp('\\D\\D', '')
 ```
 
@@ -1403,7 +1403,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 new globalThis.RegExp('\\0\\0', '');
 ```
 
@@ -1427,7 +1427,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 new RegExp('\\0\\0', '');
 ```
 
@@ -1451,7 +1451,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 new RegExp('\0\0', 'g');
 ```
 
@@ -1475,7 +1475,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 RegExp('\\0\\0\\0', '')
 ```
 
@@ -1499,7 +1499,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 RegExp('\\78\\126\\5934', '')
 ```
 
@@ -1523,7 +1523,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 new window['RegExp']('\\x56\\x78\\x45', '');
 ```
 
@@ -1547,7 +1547,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 new (window['RegExp'])('\\x56\\x78\\x45', '');
 ```
 
@@ -1571,7 +1571,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 a in(RegExp('abc'))
 ```
 
@@ -1595,7 +1595,7 @@ invalid.jsonc:1:6 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 func(new RegExp(String.raw`\w{1, 2`, 'u'),new RegExp(String.raw`\w{1, 2`, 'u'))
 ```
 
@@ -1637,7 +1637,7 @@ invalid.jsonc:1:43 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 x = y;
             RegExp("foo").test(x) ? bar() : baz()
 ```
@@ -1664,7 +1664,7 @@ invalid.jsonc:2:13 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 typeof RegExp("foo")
 ```
 
@@ -1688,7 +1688,7 @@ invalid.jsonc:1:8 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 RegExp("foo") instanceof RegExp(String.raw`blahblah`, 'g') ? typeof new RegExp('(\\p{Emoji_Presentation})\\1', `ug`) : false
 ```
 
@@ -1748,7 +1748,7 @@ invalid.jsonc:1:69 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 [   new RegExp(`someregular`)]
 ```
 
@@ -1772,7 +1772,7 @@ invalid.jsonc:1:5 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 const totallyValidatesEmails = new RegExp("\\S+@(\\S+\\.)+\\S+")
             if (typeof totallyValidatesEmails === 'object') {
                 runSomethingThatExists(Regexp('stuff'))
@@ -1803,7 +1803,7 @@ invalid.jsonc:1:32 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 !new RegExp('^Hey, ', 'u') && new RegExp('jk$') && ~new RegExp('^Sup, ') || new RegExp('hi') + new RegExp('person') === -new RegExp('hi again') ? 5 * new RegExp('abc') : 'notregbutstring'
 ```
 
@@ -1935,7 +1935,7 @@ invalid.jsonc:1:151 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 #!/usr/bin/sh
             RegExp("foo")
 ```
@@ -1962,7 +1962,7 @@ invalid.jsonc:2:13 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 async function abc(){await new RegExp("foo")}
 ```
 
@@ -1986,7 +1986,7 @@ invalid.jsonc:1:28 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 function* abc(){yield new RegExp("foo")}
 ```
 
@@ -2010,7 +2010,7 @@ invalid.jsonc:1:23 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 function* abc(){yield* new RegExp("foo")}
 ```
 
@@ -2034,7 +2034,7 @@ invalid.jsonc:1:24 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 console.log({ ...new RegExp('a') })
 ```
 
@@ -2058,7 +2058,7 @@ invalid.jsonc:1:18 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 delete RegExp('a');
 ```
 
@@ -2082,7 +2082,7 @@ invalid.jsonc:1:8 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 void RegExp('a');
 ```
 
@@ -2106,7 +2106,7 @@ invalid.jsonc:1:6 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 new RegExp("\\S+@(\\S+\\.)+\\S+")**RegExp('a')
 ```
 
@@ -2148,7 +2148,7 @@ invalid.jsonc:1:36 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 new RegExp("\\S+@(\\S+\\.)+\\S+")%RegExp('a')
 ```
 
@@ -2190,7 +2190,7 @@ invalid.jsonc:1:35 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 a in RegExp('abc')
 ```
 
@@ -2214,7 +2214,7 @@ invalid.jsonc:1:6 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 
             /abc/ == new RegExp('cba');
             
@@ -2243,7 +2243,7 @@ invalid.jsonc:2:22 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 
             /abc/ === new RegExp('cba');
             
@@ -2272,7 +2272,7 @@ invalid.jsonc:2:23 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 
             /abc/ != new RegExp('cba');
             
@@ -2301,7 +2301,7 @@ invalid.jsonc:2:22 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 
             /abc/ !== new RegExp('cba');
             
@@ -2330,7 +2330,7 @@ invalid.jsonc:2:23 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 
             /abc/ > new RegExp('cba');
             
@@ -2359,7 +2359,7 @@ invalid.jsonc:2:21 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 
             /abc/ < new RegExp('cba');
             
@@ -2388,7 +2388,7 @@ invalid.jsonc:2:21 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 
             /abc/ >= new RegExp('cba');
             
@@ -2417,7 +2417,7 @@ invalid.jsonc:2:22 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 
             /abc/ <= new RegExp('cba');
             
@@ -2446,7 +2446,7 @@ invalid.jsonc:2:22 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 
             /abc/ << new RegExp('cba');
             
@@ -2475,7 +2475,7 @@ invalid.jsonc:2:22 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 
             /abc/ >> new RegExp('cba');
             
@@ -2504,7 +2504,7 @@ invalid.jsonc:2:22 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 
             /abc/ >>> new RegExp('cba');
             
@@ -2533,7 +2533,7 @@ invalid.jsonc:2:23 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 
             /abc/ ^ new RegExp('cba');
             
@@ -2562,7 +2562,7 @@ invalid.jsonc:2:21 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 
             /abc/ & new RegExp('cba');
             
@@ -2591,7 +2591,7 @@ invalid.jsonc:2:21 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 
             /abc/ | new RegExp('cba');
             
@@ -2620,7 +2620,7 @@ invalid.jsonc:2:21 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 
             null ?? new RegExp('blah')
             
@@ -2649,7 +2649,7 @@ invalid.jsonc:2:21 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 
             abc *= new RegExp('blah')
             
@@ -2678,7 +2678,7 @@ invalid.jsonc:2:20 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 
             console.log({a: new RegExp('sup')})
             
@@ -2707,7 +2707,7 @@ invalid.jsonc:2:29 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 
             console.log(() => {new RegExp('sup')})
             
@@ -2736,7 +2736,7 @@ invalid.jsonc:2:32 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 
             function abc() {new RegExp('sup')}
             
@@ -2765,7 +2765,7 @@ invalid.jsonc:2:29 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 
             function abc() {return new RegExp('sup')}
             
@@ -2794,7 +2794,7 @@ invalid.jsonc:2:36 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 
             abc <<= new RegExp('cba');
             
@@ -2823,7 +2823,7 @@ invalid.jsonc:2:21 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 
             abc >>= new RegExp('cba');
             
@@ -2852,7 +2852,7 @@ invalid.jsonc:2:21 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 
             abc >>>= new RegExp('cba');
             
@@ -2881,7 +2881,7 @@ invalid.jsonc:2:22 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 
             abc ^= new RegExp('cba');
             
@@ -2910,7 +2910,7 @@ invalid.jsonc:2:20 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 
             abc &= new RegExp('cba');
             
@@ -2939,7 +2939,7 @@ invalid.jsonc:2:20 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 
             abc |= new RegExp('cba');
             
@@ -2968,7 +2968,7 @@ invalid.jsonc:2:20 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 
             abc ??= new RegExp('cba');
             
@@ -2997,7 +2997,7 @@ invalid.jsonc:2:21 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 
             abc &&= new RegExp('cba');
             
@@ -3026,7 +3026,7 @@ invalid.jsonc:2:21 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 
             abc ||= new RegExp('cba');
             
@@ -3055,7 +3055,7 @@ invalid.jsonc:2:21 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 
             abc **= new RegExp('blah')
             
@@ -3084,7 +3084,7 @@ invalid.jsonc:2:21 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 
             abc /= new RegExp('blah')
             
@@ -3113,7 +3113,7 @@ invalid.jsonc:2:20 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 
             abc += new RegExp('blah')
             
@@ -3142,7 +3142,7 @@ invalid.jsonc:2:20 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 
             abc -= new RegExp('blah')
             
@@ -3171,7 +3171,7 @@ invalid.jsonc:2:20 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 
             abc %= new RegExp('blah')
             
@@ -3200,7 +3200,7 @@ invalid.jsonc:2:20 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 
             () => new RegExp('blah')
             
@@ -3229,7 +3229,7 @@ invalid.jsonc:2:19 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 a/RegExp("foo")in b
 ```
 
@@ -3253,7 +3253,7 @@ invalid.jsonc:1:3 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 a/RegExp("foo")instanceof b
 ```
 
@@ -3277,7 +3277,7 @@ invalid.jsonc:1:3 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 do RegExp("foo")
 while (true);
 ```
@@ -3304,7 +3304,7 @@ invalid.jsonc:1:4 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 for(let i;i<5;i++) { break
 new RegExp('search')}
 ```
@@ -3331,7 +3331,7 @@ invalid.jsonc:2:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 for(let i;i<5;i++) { continue
 new RegExp('search')}
 ```
@@ -3358,7 +3358,7 @@ invalid.jsonc:2:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 
             switch (value) {
                 case "possibility":
@@ -3398,7 +3398,7 @@ invalid.jsonc:5:22 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 throw new RegExp('abcdefg') // fail with a regular expression
 ```
 
@@ -3422,7 +3422,7 @@ invalid.jsonc:1:7 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 for (value of new RegExp('something being searched')) { console.log(value) }
 ```
 
@@ -3446,7 +3446,7 @@ invalid.jsonc:1:15 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 (async function(){for await (value of new RegExp('something being searched')) { console.log(value) }})()
 ```
 
@@ -3470,7 +3470,7 @@ invalid.jsonc:1:39 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 for (value in new RegExp('something being searched')) { console.log(value) }
 ```
 
@@ -3494,7 +3494,7 @@ invalid.jsonc:1:15 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 if (condition1 && condition2) new RegExp('avalue').test(str);
 ```
 
@@ -3518,7 +3518,7 @@ invalid.jsonc:1:31 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 debugger
 new RegExp('myReg')
 ```
@@ -3545,7 +3545,7 @@ invalid.jsonc:2:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 RegExp("\\\n")
 ```
 
@@ -3569,7 +3569,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 RegExp("\\\t")
 ```
 
@@ -3593,7 +3593,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 RegExp("\\\f")
 ```
 
@@ -3617,7 +3617,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 RegExp("\\\v")
 ```
 
@@ -3641,7 +3641,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 RegExp("\\\r")
 ```
 
@@ -3665,7 +3665,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 new RegExp("	")
 ```
 
@@ -3689,7 +3689,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 new RegExp("/")
 ```
 
@@ -3713,7 +3713,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 new RegExp("\.")
 ```
 
@@ -3737,7 +3737,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 new RegExp("\\.")
 ```
 
@@ -3761,7 +3761,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 new RegExp("\\\n\\\n")
 ```
 
@@ -3785,7 +3785,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 new RegExp("\\\n\\\f\\\n")
 ```
 
@@ -3809,7 +3809,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 new RegExp("\u000A\u000A");
 ```
 
@@ -3833,7 +3833,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 new RegExp('mysafereg' /* comment explaining its safety */)
 ```
 
@@ -3857,7 +3857,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 new RegExp('[[A--B]]', 'v')
 ```
 
@@ -3881,7 +3881,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 new RegExp('[[A--B]]', 'v')
 ```
 
@@ -3905,7 +3905,7 @@ invalid.jsonc:1:1 lint/nursery/useRegexLiterals  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 new RegExp('[[A&&&]]', 'v')
 ```
 

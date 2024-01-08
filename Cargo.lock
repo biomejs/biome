@@ -227,6 +227,25 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_css_analyze"
+version = "0.4.0"
+dependencies = [
+ "biome_analyze",
+ "biome_console",
+ "biome_css_factory",
+ "biome_css_parser",
+ "biome_css_syntax",
+ "biome_diagnostics",
+ "biome_rowan",
+ "biome_service",
+ "biome_test_utils",
+ "insta",
+ "lazy_static",
+ "rustc-hash",
+ "tests_macros",
+]
+
+[[package]]
 name = "biome_css_factory"
 version = "0.3.1"
 dependencies = [

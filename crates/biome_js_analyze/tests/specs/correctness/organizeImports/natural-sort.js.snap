@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: natural-sort.js
 ---
 # Input
-```js
+```jsx
 import a1 from 'a1';
 import a10 from 'a10';
 import a100 from 'a100';

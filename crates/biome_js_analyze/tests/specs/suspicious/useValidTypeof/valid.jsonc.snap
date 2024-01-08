@@ -3,17 +3,17 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.jsonc
 ---
 # Input
-```js
+```cjs
 typeof foo === 'string'
 ```
 
 # Input
-```js
+```cjs
 typeof bar == 'undefined'
 ```
 
 # Input
-```js
+```cjs
 typeof bar === typeof qux
 ```
 

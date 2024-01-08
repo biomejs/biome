@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: validPackagePrivateImports.js
 ---
 # Input
-```js
+```jsx
 /* should not generate diagnostics */
 
 // Imports within the same module are always allowed.

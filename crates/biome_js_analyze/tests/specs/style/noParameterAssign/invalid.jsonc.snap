@@ -1,10 +1,9 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 96
 expression: invalid.jsonc
 ---
 # Input
-```js
+```cjs
 function foo(bar) { bar = 13; }
 ```
 
@@ -28,7 +27,7 @@ invalid.jsonc:1:21 lint/style/noParameterAssign ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 function foo(bar) { bar += 13; }
 ```
 
@@ -52,7 +51,7 @@ invalid.jsonc:1:21 lint/style/noParameterAssign ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 function foo(bar) { (function() { bar = 13; })(); }
 ```
 
@@ -76,7 +75,7 @@ invalid.jsonc:1:35 lint/style/noParameterAssign ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 function foo(bar) { ++bar; }
 ```
 
@@ -100,7 +99,7 @@ invalid.jsonc:1:23 lint/style/noParameterAssign ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 function foo(bar) { ++bar; }
 ```
 
@@ -124,7 +123,7 @@ invalid.jsonc:1:23 lint/style/noParameterAssign ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 function foo(bar) { --bar; }
 ```
 
@@ -148,7 +147,7 @@ invalid.jsonc:1:23 lint/style/noParameterAssign ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 function foo(bar) { bar--; }
 ```
 
@@ -172,7 +171,7 @@ invalid.jsonc:1:21 lint/style/noParameterAssign ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 function foo(bar) { bar--; }
 ```
 
@@ -196,7 +195,7 @@ invalid.jsonc:1:21 lint/style/noParameterAssign ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 function foo(bar) { bar--; }
 ```
 
@@ -220,7 +219,7 @@ invalid.jsonc:1:21 lint/style/noParameterAssign ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 function foo(bar) { ({bar} = {}); }
 ```
 
@@ -244,7 +243,7 @@ invalid.jsonc:1:23 lint/style/noParameterAssign ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 function foo(bar) { ({x: [, bar = 0]} = {}); }
 ```
 
@@ -268,7 +267,7 @@ invalid.jsonc:1:29 lint/style/noParameterAssign ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 function foo(bar) { for (bar in baz); }
 ```
 
@@ -292,7 +291,7 @@ invalid.jsonc:1:26 lint/style/noParameterAssign ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 function foo(bar) { for (bar of baz); }
 ```
 
@@ -316,7 +315,7 @@ invalid.jsonc:1:26 lint/style/noParameterAssign ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 function foo(a) { ({a} = obj); }
 ```
 
@@ -340,7 +339,7 @@ invalid.jsonc:1:21 lint/style/noParameterAssign ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 function foo(a) { ([...a] = obj); }
 ```
 
@@ -364,7 +363,7 @@ invalid.jsonc:1:24 lint/style/noParameterAssign ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 function foo(a) { ({...a} = obj); }
 ```
 
@@ -388,7 +387,7 @@ invalid.jsonc:1:24 lint/style/noParameterAssign ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 function foo(a) { a &&= b; }
 ```
 
@@ -412,7 +411,7 @@ invalid.jsonc:1:19 lint/style/noParameterAssign ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 function foo(a) { a ||= b; }
 ```
 
@@ -436,7 +435,7 @@ invalid.jsonc:1:19 lint/style/noParameterAssign ━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 function foo(a) { a ??= b; }
 ```
 

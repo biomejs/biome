@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: HighComplexity.js
 ---
 # Input
-```js
+```jsx
 function HighComplexity1() {
     if (a) { func() } else { func() };
     if (a) { func() } else { func() };

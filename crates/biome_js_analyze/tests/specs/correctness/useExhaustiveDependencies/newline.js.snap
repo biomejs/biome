@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: newline.js
 ---
 # Input
-```js
+```jsx
 import { useState, useEffect } from 'react';
 
 export const OtherComponent = () => {

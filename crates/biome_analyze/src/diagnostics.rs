@@ -138,9 +138,9 @@ impl AnalyzerDiagnostic {
     }
 }
 
-#[derive(Debug, Diagnostic)]
+#[derive(Debug, Diagnostic, Clone)]
 #[diagnostic(severity = Warning)]
-pub(crate) struct SuppressionDiagnostic {
+pub struct SuppressionDiagnostic {
     #[category]
     category: &'static Category,
     #[location(span)]

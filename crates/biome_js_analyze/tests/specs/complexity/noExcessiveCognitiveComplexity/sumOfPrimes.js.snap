@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: sumOfPrimes.js
 ---
 # Input
-```js
+```jsx
 function sumOfPrimes(max) {
     let total = 0;
     OUT: for (let i = 1; i <= max; ++i) { // +1

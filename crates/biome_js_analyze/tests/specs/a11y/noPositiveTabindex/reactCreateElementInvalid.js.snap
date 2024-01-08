@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: reactCreateElementInvalid.js
 ---
 # Input
-```js
+```jsx
 React.createElement("div", { tabIndex: '1' })
 React.createElement("div", { tabIndex: 1 })
 React.createElement("div", { tabIndex: +1 })

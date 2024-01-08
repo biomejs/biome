@@ -3,12 +3,12 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.jsonc
 ---
 # Input
-```js
+```cjs
 class A { }
 ```
 
 # Input
-```js
+```cjs
 class A { constructor(a, b = 0){ } }
 ```
 
@@ -29,67 +29,67 @@ valid.jsonc:1:11 lint/complexity/noUselessConstructor  FIXABLE  ━━━━━�
 ```
 
 # Input
-```js
+```cjs
 class A { constructor(){ doSomething(); } }
 ```
 
 # Input
-```js
+```cjs
 class A extends B { constructor(){} }
 ```
 
 # Input
-```js
+```cjs
 class A extends B { constructor(){ super('foo'); } }
 ```
 
 # Input
-```js
+```cjs
 class A extends B { constructor(foo, bar){ super(foo, bar, 1); } }
 ```
 
 # Input
-```js
+```cjs
 class A extends B { constructor(){ super(); doSomething(); } }
 ```
 
 # Input
-```js
+```cjs
 class A extends B { constructor(...args){ super(...args); doSomething(); } }
 ```
 
 # Input
-```js
+```cjs
 class A { dummyMethod(){ doSomething(); } }
 ```
 
 # Input
-```js
+```cjs
 class A extends B.C { constructor() { super(foo); } }
 ```
 
 # Input
-```js
+```cjs
 class A extends B { constructor(a, b, c) { super(a, b); } }
 ```
 
 # Input
-```js
+```cjs
 class A extends B { constructor(foo, bar){ super(foo); } }
 ```
 
 # Input
-```js
+```cjs
 class A extends B { constructor(test) { super(); } }
 ```
 
 # Input
-```js
+```cjs
 class A extends B { constructor() { foo; } }
 ```
 
 # Input
-```js
+```cjs
 class A extends B { constructor(foo, bar) { super(bar); } }
 ```
 

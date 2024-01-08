@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid-duplicate.ts
 ---
 # Input
-```js
+```ts
 const obj = {
 	a: 1,
 	a: 2,

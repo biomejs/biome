@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: issue_3668.jsx
 ---
 # Input
-```js
+```jsx
 // should not trigger
 function Component2() {
     const str = 'str';

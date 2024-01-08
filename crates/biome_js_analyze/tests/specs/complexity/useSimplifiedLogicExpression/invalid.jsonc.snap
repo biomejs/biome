@@ -3,12 +3,12 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsonc
 ---
 # Input
-```js
+```cjs
 const boolExp = true;
 ```
 
 # Input
-```js
+```cjs
 const r = true && boolExp;
 ```
 
@@ -29,12 +29,12 @@ invalid.jsonc:1:11 lint/complexity/useSimplifiedLogicExpression  FIXABLE  ━━
 ```
 
 # Input
-```js
+```cjs
 const boolExp2 = true;
 ```
 
 # Input
-```js
+```cjs
 const r2 = boolExp || true;
 ```
 
@@ -55,12 +55,12 @@ invalid.jsonc:1:12 lint/complexity/useSimplifiedLogicExpression  FIXABLE  ━━
 ```
 
 # Input
-```js
+```cjs
 const nonNullExp = 123;
 ```
 
 # Input
-```js
+```cjs
 const r3 = null ?? nonNullExp;
 ```
 
@@ -81,17 +81,17 @@ invalid.jsonc:1:12 lint/complexity/useSimplifiedLogicExpression  FIXABLE  ━━
 ```
 
 # Input
-```js
+```cjs
 const boolExpr1 = true;
 ```
 
 # Input
-```js
+```cjs
 const boolExpr2 = false;
 ```
 
 # Input
-```js
+```cjs
 const r4 = !boolExpr1 || !boolExpr2;
 ```
 

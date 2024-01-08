@@ -1,10 +1,9 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 91
 expression: typeParameters.ts
 ---
 # Input
-```js
+```ts
 export type OtherType = {
 	[K in keyof number]: number[K];
 };

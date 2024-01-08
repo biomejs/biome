@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidClass.ts
 ---
 # Input
-```js
+```ts
 class D {
 	f(a: D): D | undefined { return; }
 }

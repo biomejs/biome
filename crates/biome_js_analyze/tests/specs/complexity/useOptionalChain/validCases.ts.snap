@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: validCases.ts
 ---
 # Input
-```js
+```ts
 // Do not simplify when a binary expression is used in the last expression
 foo && foo.bar != null;
 foo && foo.bar != undefined;

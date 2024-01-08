@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.ts
 ---
 # Input
-```js
+```ts
 let f = Object();
 
 let foo: { x: number; y: number } = { x: 1, y: 1 };

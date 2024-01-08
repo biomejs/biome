@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: validFunctionParameter.js
 ---
 # Input
-```js
+```jsx
 function f(a, specialParameter, _unused, $1, stream$, _, $, __doubledUnderscore, __) {}
 ```
 

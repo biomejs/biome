@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: comments.js
 ---
 # Input
-```js
+```jsx
 // leading b
 import b, {
     B, // dangling b

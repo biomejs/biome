@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.ts
 ---
 # Input
-```js
+```ts
 export function h(a: number, b?: number, c: number) {}
 
 export function l(a = 0, b?: number, c: number) {}

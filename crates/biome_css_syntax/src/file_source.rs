@@ -2,7 +2,7 @@ use crate::CssLanguage;
 use biome_rowan::{FileSource, FileSourceError};
 use std::path::Path;
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, Copy)]
 pub struct CssFileSource {
     // Unused until we potentially support postcss/less/sass
     #[allow(unused)]
@@ -13,7 +13,7 @@ pub struct CssFileSource {
 ///
 /// Currently, Biome only supports plain CSS, and aims to be compatible with
 /// the latest Recommendation level standards.
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, Copy)]
 enum CssVariant {
     #[default]
     Standard,

@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: validTypeParam.ts
 ---
 # Input
-```js
+```ts
 export function f<T extends U, U>(a: T) {
     return a;
 }

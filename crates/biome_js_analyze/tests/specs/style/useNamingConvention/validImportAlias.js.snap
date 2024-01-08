@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: validImportAlias.js
 ---
 # Input
-```js
+```jsx
 import { X as X } from ""
 
 import { Y as CONSTANT_Y  } from ""

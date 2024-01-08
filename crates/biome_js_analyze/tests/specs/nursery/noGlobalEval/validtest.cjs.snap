@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: validtest.cjs
 ---
 # Input
-```js
+```cjs
 function foo() {
 	var eval = "foo";
 	window[eval]("foo");

@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsonc
 ---
 # Input
-```js
+```cjs
 var {} = foo;
 ```
 
@@ -20,7 +20,7 @@ invalid.jsonc:1:5 lint/correctness/noEmptyPattern ━━━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 var [] = foo;
 ```
 
@@ -37,7 +37,7 @@ invalid.jsonc:1:5 lint/correctness/noEmptyPattern ━━━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 var {a: {}} = foo;
 ```
 
@@ -54,7 +54,7 @@ invalid.jsonc:1:9 lint/correctness/noEmptyPattern ━━━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 var {a, b: {}} = foo;
 ```
 
@@ -71,7 +71,7 @@ invalid.jsonc:1:12 lint/correctness/noEmptyPattern ━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 var {a: []} = foo;
 ```
 
@@ -88,7 +88,7 @@ invalid.jsonc:1:9 lint/correctness/noEmptyPattern ━━━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 function foo({}) {};
 ```
 
@@ -105,7 +105,7 @@ invalid.jsonc:1:14 lint/correctness/noEmptyPattern ━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 function foo([]) {};
 ```
 
@@ -122,7 +122,7 @@ invalid.jsonc:1:14 lint/correctness/noEmptyPattern ━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 function foo({a: {}}) {};
 ```
 
@@ -139,7 +139,7 @@ invalid.jsonc:1:18 lint/correctness/noEmptyPattern ━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 function foo({a: []}) {};
 ```
 
