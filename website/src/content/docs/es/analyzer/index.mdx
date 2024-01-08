@@ -1,0 +1,133 @@
+---
+title: Analizador
+description: Lo que proporciona el analizador de Biome
+---
+
+El analizador de Biome ofrece una serie de características que los usuarios pueden aprovechar.
+
+## Ordenamiento de importaciones
+
+Biome permite ordenar las declaraciones de importación utilizando un [ordenamiento natural](https://en.wikipedia.org/wiki/Natural_sort_order).
+
+Esta función está habilitada por defecto pero se puede desactivar mediante configuración:
+
+```json title="biome.json"
+{
+  "organizeImports": {
+    "enabled": false
+  }
+}
+```
+
+### ¿Cómo se ordenan las importaciones?
+
+Las declaraciones de importación se ordenan por "distancia". Los módulos que están "más lejos" del usuario se colocan en la parte superior, mientras que los módulos "más cercanos" al usuario se colocan en la parte inferior:
+
+1. Los módulos importados a través del protocolo "bun:"". Esto es aplicable al escribir código ejecutado por Bun;
+2. Los módulos integrados de Node.js que se importan explícitamente utilizando el protocolo `node:` y los módulos integrados comunes de Node, como `assert`;
+3. Los módulos importados a través del protocolo `npm:`. Esto es aplicable al escribir código ejecutado por Deno;
+4. Los módulos importados mediante URL;
+5. Los módulos importados de bibliotecas;
+6. Los módulos importados mediante importaciones absolutas;
+7. Los módulos importados desde un nombre precedido por `#`. Esto es aplicable al usar [las importaciones de subrutas de Node](https://nodejs.org/api/packages.html#subpath-imports);
+8. Los módulos importados mediante importaciones relativas;
+9. Los módulos que no pudieron ser identificados por los criterios anteriores.
+
+Por ejemplo, dado el siguiente código:
+
+```ts title="example.ts"
+import uncle from "../uncle";
+import sibling from "./sibling";
+import express from "npm:express";
+import imageUrl from "url:./image.png";
+import assert from "node:assert";
+import aunt from "../aunt";
+import { VERSION } from "https://deno.land/std/version.ts";
+import { mock, test } from "node:test";
+import { expect } from "bun:test";
+import { internal } from "#internal";
+import { secret } from "/absolute/path";
+import React from "react";
+```
+
+Serán ordenados así:
+
+```ts title="example.ts"
+ import { expect } from "bun:test";
+ import assert from "node:assert";
+ import { mock, test } from "node:test";
+ import express from "npm:express";
+ import { VERSION } from "https://deno.land/std/version.ts";
+ import React from "react";
+ import { secret } from "/absolute/path";
+ import { internal } from "#internal";
+ import aunt from "../aunt";
+ import uncle from "../uncle";
+ import sibling from "./sibling";
+ import imageUrl from "url:./image.png";
+```
+
+Puedes aplicar la ordenación de dos formas: a través del [CLI](#ordenación-de-importaciones-a-través-del-cli) o mediante la [extensión de VSCode](#ordenación-de-importaciones-mediante-la-extensión-de-vscode).
+
+### Importaciones agrupadas
+
+Es común tener declaraciones de importación en un orden específico, principalmente cuando trabajas en un proyecto frontend y realizas importaciones de archivos CSS.
+
+```js title="example.js"
+import "../styles/reset.css";
+import "../styles/layout.css";
+import { Grid } from "../components/Grid.jsx";
+```
+
+Otro caso común es importar polyfills o archivos shim, los cuales deben permanecer en la parte superior del archivo.
+
+```js title="example.js"
+import "../polyfills/array/flatMap";
+import { functionThatUsesFlatMap } from "./utils.js";
+```
+
+En estos casos, Biome ordenará estas tres importaciones, y podría ocurrir que el orden **rompa** tu aplicación.
+
+Para evitar esto, crea un 'grupo' de importaciones. Creas un 'grupo' agregando una **nueva línea** para separar los grupos.
+
+Al hacerlo, Biome limitará la ordenación solo a las declaraciones de importación que pertenezcan al mismo grupo.
+
+```js title="example.js"
+// grupo 1, solo estos dos archivos serán ordenados
+import "../styles/reset.css";
+import "../styles/layout.css";
+
+// grupo 2, solo este archivo será ordenado
+import { Grid } from "../components/Grid.jsx";
+```
+
+```js title="example.js"
+// grupo 1, el polyfill/shim
+import "../polyfills/array/flatMap";
+
+// Grupo 2, los archivos que requieren el polyfill/shim
+import { functionThatUsesFlatMap } from "./utils.js";
+```
+
+### Ordenación de importaciones a través del CLI
+
+Utilizando el comando `check`, con la opción `--apply`.
+
+```shell
+biome check --apply ./path/to/src
+```
+
+### Ordenación de importaciones mediante la extensión de VSCode
+
+La extensión de Biome para VS Code admite la ordenación de importaciones a través de la acción de código _Organize Imports_.
+Por defecto, esta acción se puede ejecutar usando el atajo de teclado <kbd title="Shift">⇧</kbd>+<kbd>Alt</kbd>+<kbd>O</kbd>, o está accesible a través del _Paquete de Comandos_ (<kbd>Ctrl</kbd>/<kbd title="Cmd">⌘</kbd>+<kbd title="Shift">⇧</kbd>+<kbd>P</kbd>) seleccionando _Organize Imports_.
+
+Puedes añadir lo siguiente a la configuración de tu editor si quieres que la acción se ejecute automáticamente al guardar en lugar de llamarla manualmente:
+
+```json title="settings.json"
+{
+	"editor.codeActionsOnSave":{
+		"source.organizeImports.biome": true
+	}
+}
+```
