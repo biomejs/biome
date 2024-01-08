@@ -4,12 +4,13 @@ use crate::commands::validate_configuration_diagnostics;
 use crate::{
     execute_mode, setup_cli_subscriber, CliDiagnostic, CliSession, Execution, TraversalMode,
 };
+use biome_deserialize::Merge;
 use biome_service::configuration::organize_imports::OrganizeImports;
 use biome_service::configuration::{
     load_configuration, FormatterConfiguration, LinterConfiguration, LoadedConfiguration,
 };
 use biome_service::workspace::{FixFileMode, UpdateSettingsParams};
-use biome_service::{Configuration, ConfigurationBasePath, MergeWith};
+use biome_service::{Configuration, ConfigurationBasePath};
 use std::ffi::OsString;
 use std::path::PathBuf;
 
@@ -102,7 +103,13 @@ pub(crate) fn check(
         organize_imports.enabled = organize_imports_enabled;
     }
 
-    fs_configuration.merge_with(configuration);
+    if let Some(mut configuration) = configuration {
+        if let Some(linter) = configuration.linter.as_mut() {
+            // Don't overwrite rules from the CLI configuration.
+            linter.rules = None;
+        }
+        fs_configuration.merge_with(configuration);
+    }
 
     // check if support of git ignore files is enabled
     let vcs_base_path = configuration_path.or(session.app.fs.working_directory());

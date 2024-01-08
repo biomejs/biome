@@ -1,13 +1,13 @@
-use crate::configuration::merge::MergeWith;
 use crate::configuration::overrides::OverrideOrganizeImportsConfiguration;
 use crate::settings::{to_matcher, OrganizeImportsSettings};
 use crate::{Matcher, WorkspaceError};
 use biome_deserialize::StringSet;
+use biome_deserialize_macros::{Mergeable, NoneState};
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
-#[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Clone, Bpaf)]
+#[derive(Bpaf, Clone, Debug, Deserialize, Eq, Mergeable, NoneState, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct OrganizeImports {
@@ -46,29 +46,6 @@ impl OrganizeImports {
 
     pub const fn is_enabled(&self) -> bool {
         !self.is_disabled()
-    }
-}
-
-impl MergeWith<OrganizeImports> for OrganizeImports {
-    fn merge_with(&mut self, other: OrganizeImports) {
-        if let Some(enabled) = other.enabled {
-            self.enabled = Some(enabled)
-        }
-        if let Some(include) = other.include {
-            self.include = Some(include)
-        }
-        if let Some(ignore) = other.ignore {
-            self.ignore = Some(ignore)
-        }
-    }
-
-    fn merge_with_if_not_default(&mut self, other: OrganizeImports)
-    where
-        OrganizeImports: Default,
-    {
-        if other != OrganizeImports::default() {
-            self.merge_with(other)
-        }
     }
 }
 

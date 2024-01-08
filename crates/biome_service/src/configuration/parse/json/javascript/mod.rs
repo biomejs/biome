@@ -3,8 +3,8 @@ mod formatter;
 use crate::configuration::javascript::{JavascriptOrganizeImports, JavascriptParser};
 use crate::configuration::JavascriptConfiguration;
 use biome_deserialize::{
-    Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor, Text,
-    VisitableType,
+    Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor,
+    NoneState, Text, VisitableType,
 };
 
 impl Deserializable for JavascriptConfiguration {
@@ -31,7 +31,7 @@ impl DeserializationVisitor for JavascriptConfigurationVisitor {
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self::Output> {
         const ALLOWED_KEYS: &[&str] = &["formatter", "globals", "organizeImports", "parser"];
-        let mut result = Self::Output::default();
+        let mut result = Self::Output::none();
         for (key, value) in members.flatten() {
             let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
                 continue;
@@ -86,7 +86,7 @@ impl DeserializationVisitor for JavascriptOrganizeImportsVisitor {
         _name: &str,
         _diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self::Output> {
-        Some(Self::Output::default())
+        Some(Self::Output::none())
     }
 }
 
@@ -114,7 +114,7 @@ impl DeserializationVisitor for JavascriptParserVisitor {
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self::Output> {
         const ALLOWED_KEYS: &[&str] = &["unsafeParameterDecoratorsEnabled"];
-        let mut result = Self::Output::default();
+        let mut result = Self::Output::none();
         for (key, value) in members.flatten() {
             let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
                 continue;
