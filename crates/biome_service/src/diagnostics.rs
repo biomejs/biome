@@ -700,7 +700,7 @@ pub struct ProtectedFileAdvice;
 
 impl Advices for ProtectedFileAdvice {
     fn record(&self, visitor: &mut dyn Visit) -> std::io::Result<()> {
-        visitor.record_log(LogCategory::Info, &markup! { "You can hide this diagnostic by using "<Emphasis>"--diagnostic-level=warning"</Emphasis>" to increase the diagnostic level shown by CLI." })
+        visitor.record_log(LogCategory::Info, &markup! { "You can hide this diagnostic by using "<Emphasis>"--diagnostic-level=warn"</Emphasis>" to increase the diagnostic level shown by CLI." })
     }
 }
 
