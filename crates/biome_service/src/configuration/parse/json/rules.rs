@@ -943,6 +943,13 @@ impl Deserializable for Nursery {
                                 diagnostics,
                             );
                         }
+                        "noEmptyTypeParameters" => {
+                            result.no_empty_type_parameters = Deserializable::deserialize(
+                                &value,
+                                "noEmptyTypeParameters",
+                                diagnostics,
+                            );
+                        }
                         "noGlobalAssign" => {
                             result.no_global_assign =
                                 Deserializable::deserialize(&value, "noGlobalAssign", diagnostics);
@@ -1065,6 +1072,7 @@ impl Deserializable for Nursery {
                                     "all",
                                     "noDuplicateJsonKeys",
                                     "noEmptyBlockStatements",
+                                    "noEmptyTypeParameters",
                                     "noGlobalAssign",
                                     "noGlobalEval",
                                     "noInvalidUseBeforeDeclaration",

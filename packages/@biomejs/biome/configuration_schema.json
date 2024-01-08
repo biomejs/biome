@@ -1274,6 +1274,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noEmptyTypeParameters": {
+					"description": "Disallow empty type parameters in type aliases and interfaces.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noGlobalAssign": {
 					"description": "Disallow assignments to native objects and read-only global variables.",
 					"anyOf": [

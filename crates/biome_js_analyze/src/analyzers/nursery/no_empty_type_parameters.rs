@@ -1,7 +1,7 @@
 use biome_analyze::Ast;
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
-use biome_js_syntax::{JsSyntaxKind, TextRange, TsTypeParameters};
+use biome_js_syntax::{JsSyntaxKind, TsTypeParameters};
 use biome_rowan::{AstNode, AstSeparatedList, SyntaxNodeOptionExt};
 
 declare_rule! {
@@ -34,7 +34,6 @@ declare_rule! {
     ///  bar: T;
     /// }
     /// ```
-    ///
     pub(crate) NoEmptyTypeParameters {
         version: "1.5.0",
         name: "noEmptyTypeParameters",
@@ -44,31 +43,31 @@ declare_rule! {
 
 impl Rule for NoEmptyTypeParameters {
     type Query = Ast<TsTypeParameters>;
-    type State = TextRange;
+    type State = ();
     type Signals = Option<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        if node.items().is_empty()
+        (node.items().is_empty()
+            // We only handle interfaces and type aliases where an empty type parameter list is allowed.
+            // other empty type parameter lists are parse errors.
             && matches!(
                 node.syntax().parent().kind(),
                 Some(
                     JsSyntaxKind::TS_INTERFACE_DECLARATION
                         | JsSyntaxKind::TS_TYPE_ALIAS_DECLARATION
                 )
-            )
-        {
-            return Some(node.items().range());
-        }
-        None
+            ))
+        .then_some(())
     }
 
-    fn diagnostic(_: &RuleContext<Self>, reference: &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
+        let node = ctx.query();
         Some(RuleDiagnostic::new(
             rule_category!(),
-            reference,
-            markup! {"Empty type parameter list "<Emphasis>"<>"</Emphasis>" is not recommended"},
-        ))
+            node.range(),
+            markup! {"Using an "<Emphasis>"empty type parameter list"</Emphasis>" is confusing."},
+        ).note("Remove the empty type parameter list or add a type parameter."))
     }
 }

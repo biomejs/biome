@@ -862,6 +862,10 @@ export interface Nursery {
 	 */
 	noEmptyBlockStatements?: RuleConfiguration;
 	/**
+	 * Disallow empty type parameters in type aliases and interfaces.
+	 */
+	noEmptyTypeParameters?: RuleConfiguration;
+	/**
 	 * Disallow assignments to native objects and read-only global variables.
 	 */
 	noGlobalAssign?: RuleConfiguration;
