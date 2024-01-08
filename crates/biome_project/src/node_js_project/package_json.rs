@@ -24,7 +24,7 @@ impl Manifest for PackageJson {
     type Language = JsonLanguage;
 
     fn deserialize_manifest(root: &LanguageRoot<Self::Language>) -> Deserialized<Self> {
-        deserialize_from_json_ast::<PackageJson>(root)
+        deserialize_from_json_ast::<PackageJson>(root, "")
     }
 }
 

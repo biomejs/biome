@@ -15,6 +15,8 @@ use biome_rowan::{AstNode, AstSeparatedList};
 /// To implement [Deserializable], it can need to implement [DeserializationVisitor] that allows
 /// visiting a value.
 ///
+/// `name` corresponds to the name used in a diagnostic to designate the deserialized value.
+///
 /// ## Examples
 ///
 /// ```
@@ -75,19 +77,20 @@ use biome_rowan::{AstNode, AstSeparatedList};
 /// }
 ///
 /// let source = r#"{ "lorem": "ipsum" }"#;
-/// let deserialized = deserialize_from_json_str::<NewConfiguration>(&source, JsonParserOptions::default());
+/// let deserialized = deserialize_from_json_str::<NewConfiguration>(&source, JsonParserOptions::default(), "");
 /// assert!(!deserialized.has_errors());
 /// assert_eq!(deserialized.into_deserialized().unwrap(), NewConfiguration { lorem: "ipsum".to_string() });
 /// ```
 pub fn deserialize_from_json_str<Output: Deserializable>(
     source: &str,
     options: JsonParserOptions,
+    name: &str,
 ) -> Deserialized<Output> {
     let parse = parse_json(source, options);
     let Deserialized {
         diagnostics,
         deserialized,
-    } = deserialize_from_json_ast::<Output>(&parse.tree());
+    } = deserialize_from_json_ast::<Output>(&parse.tree(), name);
     let mut errors = parse
         .into_diagnostics()
         .into_iter()
@@ -106,12 +109,17 @@ pub fn deserialize_from_json_str<Output: Deserializable>(
 }
 
 /// Attempts to deserialize a JSON AST, given the `Output`.
-pub fn deserialize_from_json_ast<Output: Deserializable>(parse: &JsonRoot) -> Deserialized<Output> {
+///
+/// `name` corresponds to the name used in a diagnostic to designate the deserialized value.
+pub fn deserialize_from_json_ast<Output: Deserializable>(
+    parse: &JsonRoot,
+    name: &str,
+) -> Deserialized<Output> {
     let mut diagnostics = vec![];
     let deserialized = parse
         .value()
         .ok()
-        .and_then(|value| Output::deserialize(&value, "", &mut diagnostics));
+        .and_then(|value| Output::deserialize(&value, name, &mut diagnostics));
     Deserialized {
         diagnostics: diagnostics.into_iter().map(Error::from).collect::<Vec<_>>(),
         deserialized,
@@ -198,9 +206,37 @@ mod tests {
         let Deserialized {
             deserialized,
             diagnostics,
-        } = deserialize_from_json_str::<()>(source, JsonParserOptions::default());
+        } = deserialize_from_json_str::<()>(source, JsonParserOptions::default(), "");
         assert!(!diagnostics.is_empty());
         assert!(deserialized.is_none());
+    }
+
+    #[test]
+    fn test_name() {
+        #[derive(Debug, Eq, PartialEq)]
+        struct Name {
+            name: String,
+        }
+        impl Deserializable for Name {
+            fn deserialize(
+                _value: &impl DeserializableValue,
+                name: &str,
+                _diagnostics: &mut Vec<DeserializationDiagnostic>,
+            ) -> Option<Self> {
+                Some(Name {
+                    name: name.to_string(),
+                })
+            }
+        }
+        let source = "0";
+        let Deserialized { deserialized, .. } =
+            deserialize_from_json_str::<Name>(source, JsonParserOptions::default(), "root");
+        assert_eq!(
+            deserialized,
+            Some(Name {
+                name: "root".to_string()
+            })
+        )
     }
 
     #[test]
@@ -209,7 +245,7 @@ mod tests {
         let Deserialized {
             deserialized,
             diagnostics,
-        } = deserialize_from_json_str::<bool>(source, JsonParserOptions::default());
+        } = deserialize_from_json_str::<bool>(source, JsonParserOptions::default(), "");
         assert!(diagnostics.is_empty());
         assert!(deserialized.unwrap());
 
@@ -217,7 +253,7 @@ mod tests {
         let Deserialized {
             deserialized,
             diagnostics,
-        } = deserialize_from_json_str::<bool>(source, JsonParserOptions::default());
+        } = deserialize_from_json_str::<bool>(source, JsonParserOptions::default(), "");
         assert!(!diagnostics.is_empty());
         assert!(deserialized.is_none());
     }
@@ -228,7 +264,7 @@ mod tests {
         let Deserialized {
             deserialized,
             diagnostics,
-        } = deserialize_from_json_str::<f32>(source, JsonParserOptions::default());
+        } = deserialize_from_json_str::<f32>(source, JsonParserOptions::default(), "");
         assert!(diagnostics.is_empty());
         assert_eq!(deserialized, Some(0.5));
     }
@@ -239,7 +275,7 @@ mod tests {
         let Deserialized {
             deserialized,
             diagnostics,
-        } = deserialize_from_json_str::<f64>(source, JsonParserOptions::default());
+        } = deserialize_from_json_str::<f64>(source, JsonParserOptions::default(), "");
         assert!(diagnostics.is_empty());
         assert_eq!(deserialized, Some(0.5));
     }
@@ -250,7 +286,7 @@ mod tests {
         let Deserialized {
             deserialized,
             diagnostics,
-        } = deserialize_from_json_str::<i8>(source, JsonParserOptions::default());
+        } = deserialize_from_json_str::<i8>(source, JsonParserOptions::default(), "");
         assert!(diagnostics.is_empty());
         assert_eq!(deserialized, Some(-1));
 
@@ -258,7 +294,7 @@ mod tests {
         let Deserialized {
             deserialized,
             diagnostics,
-        } = deserialize_from_json_str::<i8>(&source, JsonParserOptions::default());
+        } = deserialize_from_json_str::<i8>(&source, JsonParserOptions::default(), "");
         assert!(!diagnostics.is_empty());
         assert!(deserialized.is_none());
     }
@@ -269,7 +305,7 @@ mod tests {
         let Deserialized {
             deserialized,
             diagnostics,
-        } = deserialize_from_json_str::<i16>(source, JsonParserOptions::default());
+        } = deserialize_from_json_str::<i16>(source, JsonParserOptions::default(), "");
         assert!(diagnostics.is_empty());
         assert_eq!(deserialized, Some(-1));
 
@@ -277,7 +313,7 @@ mod tests {
         let Deserialized {
             deserialized,
             diagnostics,
-        } = deserialize_from_json_str::<i16>(&source, JsonParserOptions::default());
+        } = deserialize_from_json_str::<i16>(&source, JsonParserOptions::default(), "");
         assert!(!diagnostics.is_empty());
         assert!(deserialized.is_none());
     }
@@ -288,7 +324,7 @@ mod tests {
         let Deserialized {
             deserialized,
             diagnostics,
-        } = deserialize_from_json_str::<i32>(source, JsonParserOptions::default());
+        } = deserialize_from_json_str::<i32>(source, JsonParserOptions::default(), "");
         assert!(diagnostics.is_empty());
         assert_eq!(deserialized, Some(-1));
 
@@ -296,7 +332,7 @@ mod tests {
         let Deserialized {
             deserialized,
             diagnostics,
-        } = deserialize_from_json_str::<i32>(&source, JsonParserOptions::default());
+        } = deserialize_from_json_str::<i32>(&source, JsonParserOptions::default(), "");
         assert!(!diagnostics.is_empty());
         assert!(deserialized.is_none());
     }
@@ -307,7 +343,7 @@ mod tests {
         let Deserialized {
             deserialized,
             diagnostics,
-        } = deserialize_from_json_str::<i64>(source, JsonParserOptions::default());
+        } = deserialize_from_json_str::<i64>(source, JsonParserOptions::default(), "");
         assert!(diagnostics.is_empty());
         assert_eq!(deserialized, Some(-1));
 
@@ -315,7 +351,7 @@ mod tests {
         let Deserialized {
             deserialized,
             diagnostics,
-        } = deserialize_from_json_str::<i64>(&source, JsonParserOptions::default());
+        } = deserialize_from_json_str::<i64>(&source, JsonParserOptions::default(), "");
         assert!(!diagnostics.is_empty());
         assert!(deserialized.is_none());
     }
@@ -326,7 +362,7 @@ mod tests {
         let Deserialized {
             deserialized,
             diagnostics,
-        } = deserialize_from_json_str::<isize>(source, JsonParserOptions::default());
+        } = deserialize_from_json_str::<isize>(source, JsonParserOptions::default(), "");
         assert!(diagnostics.is_empty());
         assert_eq!(deserialized, Some(-1));
 
@@ -334,7 +370,7 @@ mod tests {
         let Deserialized {
             deserialized,
             diagnostics,
-        } = deserialize_from_json_str::<isize>(&source, JsonParserOptions::default());
+        } = deserialize_from_json_str::<isize>(&source, JsonParserOptions::default(), "");
         assert!(!diagnostics.is_empty());
         assert!(deserialized.is_none());
     }
@@ -345,7 +381,7 @@ mod tests {
         let Deserialized {
             deserialized,
             diagnostics,
-        } = deserialize_from_json_str::<u8>(source, JsonParserOptions::default());
+        } = deserialize_from_json_str::<u8>(source, JsonParserOptions::default(), "");
         assert!(diagnostics.is_empty());
         assert_eq!(deserialized, Some(0));
 
@@ -353,7 +389,7 @@ mod tests {
         let Deserialized {
             deserialized,
             diagnostics,
-        } = deserialize_from_json_str::<u8>(source, JsonParserOptions::default());
+        } = deserialize_from_json_str::<u8>(source, JsonParserOptions::default(), "");
         assert!(!diagnostics.is_empty());
         assert!(deserialized.is_none());
     }
@@ -364,7 +400,7 @@ mod tests {
         let Deserialized {
             deserialized,
             diagnostics,
-        } = deserialize_from_json_str::<u16>(source, JsonParserOptions::default());
+        } = deserialize_from_json_str::<u16>(source, JsonParserOptions::default(), "");
         assert!(diagnostics.is_empty());
         assert_eq!(deserialized, Some(0));
 
@@ -372,7 +408,7 @@ mod tests {
         let Deserialized {
             deserialized,
             diagnostics,
-        } = deserialize_from_json_str::<u16>(source, JsonParserOptions::default());
+        } = deserialize_from_json_str::<u16>(source, JsonParserOptions::default(), "");
         assert!(!diagnostics.is_empty());
         assert!(deserialized.is_none());
     }
@@ -383,7 +419,7 @@ mod tests {
         let Deserialized {
             deserialized,
             diagnostics,
-        } = deserialize_from_json_str::<u32>(source, JsonParserOptions::default());
+        } = deserialize_from_json_str::<u32>(source, JsonParserOptions::default(), "");
         assert!(diagnostics.is_empty());
         assert_eq!(deserialized, Some(0));
 
@@ -391,7 +427,7 @@ mod tests {
         let Deserialized {
             deserialized,
             diagnostics,
-        } = deserialize_from_json_str::<u32>(source, JsonParserOptions::default());
+        } = deserialize_from_json_str::<u32>(source, JsonParserOptions::default(), "");
         assert!(!diagnostics.is_empty());
         assert!(deserialized.is_none());
     }
@@ -402,7 +438,7 @@ mod tests {
         let Deserialized {
             deserialized,
             diagnostics,
-        } = deserialize_from_json_str::<u64>(source, JsonParserOptions::default());
+        } = deserialize_from_json_str::<u64>(source, JsonParserOptions::default(), "");
         assert!(diagnostics.is_empty());
         assert_eq!(deserialized, Some(0));
 
@@ -410,7 +446,7 @@ mod tests {
         let Deserialized {
             deserialized,
             diagnostics,
-        } = deserialize_from_json_str::<u64>(source, JsonParserOptions::default());
+        } = deserialize_from_json_str::<u64>(source, JsonParserOptions::default(), "");
         assert!(!diagnostics.is_empty());
         assert!(deserialized.is_none());
     }
@@ -421,7 +457,7 @@ mod tests {
         let Deserialized {
             deserialized,
             diagnostics,
-        } = deserialize_from_json_str::<usize>(source, JsonParserOptions::default());
+        } = deserialize_from_json_str::<usize>(source, JsonParserOptions::default(), "");
         assert!(diagnostics.is_empty());
         assert_eq!(deserialized, Some(0));
 
@@ -429,7 +465,7 @@ mod tests {
         let Deserialized {
             deserialized,
             diagnostics,
-        } = deserialize_from_json_str::<usize>(source, JsonParserOptions::default());
+        } = deserialize_from_json_str::<usize>(source, JsonParserOptions::default(), "");
         assert!(!diagnostics.is_empty());
         assert!(deserialized.is_none());
     }
@@ -440,7 +476,7 @@ mod tests {
         let Deserialized {
             deserialized,
             diagnostics,
-        } = deserialize_from_json_str::<NonZeroU8>(source, JsonParserOptions::default());
+        } = deserialize_from_json_str::<NonZeroU8>(source, JsonParserOptions::default(), "");
         assert!(diagnostics.is_empty());
         assert_eq!(deserialized, NonZeroU8::new(1));
 
@@ -448,7 +484,7 @@ mod tests {
         let Deserialized {
             deserialized,
             diagnostics,
-        } = deserialize_from_json_str::<NonZeroU8>(source, JsonParserOptions::default());
+        } = deserialize_from_json_str::<NonZeroU8>(source, JsonParserOptions::default(), "");
         assert!(!diagnostics.is_empty());
         assert!(deserialized.is_none());
     }
@@ -459,7 +495,7 @@ mod tests {
         let Deserialized {
             deserialized,
             diagnostics,
-        } = deserialize_from_json_str::<NonZeroU16>(source, JsonParserOptions::default());
+        } = deserialize_from_json_str::<NonZeroU16>(source, JsonParserOptions::default(), "");
         assert!(diagnostics.is_empty());
         assert_eq!(deserialized, NonZeroU16::new(1));
 
@@ -467,7 +503,7 @@ mod tests {
         let Deserialized {
             deserialized,
             diagnostics,
-        } = deserialize_from_json_str::<NonZeroU16>(source, JsonParserOptions::default());
+        } = deserialize_from_json_str::<NonZeroU16>(source, JsonParserOptions::default(), "");
         assert!(!diagnostics.is_empty());
         assert!(deserialized.is_none());
     }
@@ -478,7 +514,7 @@ mod tests {
         let Deserialized {
             deserialized,
             diagnostics,
-        } = deserialize_from_json_str::<NonZeroU32>(source, JsonParserOptions::default());
+        } = deserialize_from_json_str::<NonZeroU32>(source, JsonParserOptions::default(), "");
         assert!(diagnostics.is_empty());
         assert_eq!(deserialized, NonZeroU32::new(1));
 
@@ -486,7 +522,7 @@ mod tests {
         let Deserialized {
             deserialized,
             diagnostics,
-        } = deserialize_from_json_str::<NonZeroU32>(source, JsonParserOptions::default());
+        } = deserialize_from_json_str::<NonZeroU32>(source, JsonParserOptions::default(), "");
         assert!(!diagnostics.is_empty());
         assert!(deserialized.is_none());
     }
@@ -497,7 +533,7 @@ mod tests {
         let Deserialized {
             deserialized,
             diagnostics,
-        } = deserialize_from_json_str::<NonZeroU64>(source, JsonParserOptions::default());
+        } = deserialize_from_json_str::<NonZeroU64>(source, JsonParserOptions::default(), "");
         assert!(diagnostics.is_empty());
         assert_eq!(deserialized, NonZeroU64::new(1));
 
@@ -505,7 +541,7 @@ mod tests {
         let Deserialized {
             deserialized,
             diagnostics,
-        } = deserialize_from_json_str::<NonZeroU64>(source, JsonParserOptions::default());
+        } = deserialize_from_json_str::<NonZeroU64>(source, JsonParserOptions::default(), "");
         assert!(!diagnostics.is_empty());
         assert!(deserialized.is_none());
     }
@@ -516,7 +552,7 @@ mod tests {
         let Deserialized {
             deserialized,
             diagnostics,
-        } = deserialize_from_json_str::<NonZeroUsize>(source, JsonParserOptions::default());
+        } = deserialize_from_json_str::<NonZeroUsize>(source, JsonParserOptions::default(), "");
         assert!(diagnostics.is_empty());
         assert_eq!(deserialized, NonZeroUsize::new(1));
 
@@ -524,7 +560,7 @@ mod tests {
         let Deserialized {
             deserialized,
             diagnostics,
-        } = deserialize_from_json_str::<NonZeroUsize>(source, JsonParserOptions::default());
+        } = deserialize_from_json_str::<NonZeroUsize>(source, JsonParserOptions::default(), "");
         assert!(!diagnostics.is_empty());
         assert!(deserialized.is_none());
     }
@@ -535,7 +571,7 @@ mod tests {
         let Deserialized {
             deserialized,
             diagnostics,
-        } = deserialize_from_json_str::<TextNumber>(&source, JsonParserOptions::default());
+        } = deserialize_from_json_str::<TextNumber>(&source, JsonParserOptions::default(), "");
         assert!(diagnostics.is_empty());
         assert_eq!(deserialized.unwrap().text(), u128::MAX.to_string());
 
@@ -543,7 +579,7 @@ mod tests {
         let Deserialized {
             deserialized,
             diagnostics,
-        } = deserialize_from_json_str::<TextNumber>(source, JsonParserOptions::default());
+        } = deserialize_from_json_str::<TextNumber>(source, JsonParserOptions::default(), "");
         assert!(!diagnostics.is_empty());
         assert!(deserialized.is_none());
     }
@@ -554,7 +590,7 @@ mod tests {
         let Deserialized {
             deserialized,
             diagnostics,
-        } = deserialize_from_json_str::<String>(source, JsonParserOptions::default());
+        } = deserialize_from_json_str::<String>(source, JsonParserOptions::default(), "");
         assert!(diagnostics.is_empty());
         assert_eq!(deserialized.unwrap(), "string");
 
@@ -562,7 +598,7 @@ mod tests {
         let Deserialized {
             deserialized,
             diagnostics,
-        } = deserialize_from_json_str::<String>(source, JsonParserOptions::default());
+        } = deserialize_from_json_str::<String>(source, JsonParserOptions::default(), "");
         assert!(!diagnostics.is_empty());
         assert!(deserialized.is_none());
     }
@@ -573,7 +609,7 @@ mod tests {
         let Deserialized {
             deserialized,
             diagnostics,
-        } = deserialize_from_json_str::<Vec<u8>>(source, JsonParserOptions::default());
+        } = deserialize_from_json_str::<Vec<u8>>(source, JsonParserOptions::default(), "");
         assert!(diagnostics.is_empty());
         assert_eq!(deserialized.unwrap(), vec![0, 1]);
 
@@ -581,7 +617,7 @@ mod tests {
         let Deserialized {
             deserialized,
             diagnostics,
-        } = deserialize_from_json_str::<Vec<u8>>(source, JsonParserOptions::default());
+        } = deserialize_from_json_str::<Vec<u8>>(source, JsonParserOptions::default(), "");
         assert!(!diagnostics.is_empty());
         assert!(deserialized.is_none());
     }
@@ -592,7 +628,7 @@ mod tests {
         let Deserialized {
             deserialized,
             diagnostics,
-        } = deserialize_from_json_str::<HashSet<u8>>(source, JsonParserOptions::default());
+        } = deserialize_from_json_str::<HashSet<u8>>(source, JsonParserOptions::default(), "");
         assert!(diagnostics.is_empty());
         assert_eq!(deserialized.unwrap(), HashSet::from([0, 1]));
 
@@ -600,7 +636,7 @@ mod tests {
         let Deserialized {
             deserialized,
             diagnostics,
-        } = deserialize_from_json_str::<HashSet<u8>>(source, JsonParserOptions::default());
+        } = deserialize_from_json_str::<HashSet<u8>>(source, JsonParserOptions::default(), "");
         assert!(!diagnostics.is_empty());
         assert!(deserialized.is_none());
     }
@@ -611,7 +647,7 @@ mod tests {
         let Deserialized {
             deserialized,
             diagnostics,
-        } = deserialize_from_json_str::<IndexSet<u8>>(source, JsonParserOptions::default());
+        } = deserialize_from_json_str::<IndexSet<u8>>(source, JsonParserOptions::default(), "");
         assert!(diagnostics.is_empty());
         assert_eq!(deserialized.unwrap(), IndexSet::from([0, 1]));
 
@@ -619,7 +655,7 @@ mod tests {
         let Deserialized {
             deserialized,
             diagnostics,
-        } = deserialize_from_json_str::<IndexSet<u8>>(source, JsonParserOptions::default());
+        } = deserialize_from_json_str::<IndexSet<u8>>(source, JsonParserOptions::default(), "");
         assert!(!diagnostics.is_empty());
         assert!(deserialized.is_none());
     }
@@ -630,7 +666,11 @@ mod tests {
         let Deserialized {
             deserialized,
             diagnostics,
-        } = deserialize_from_json_str::<HashMap<String, u8>>(source, JsonParserOptions::default());
+        } = deserialize_from_json_str::<HashMap<String, u8>>(
+            source,
+            JsonParserOptions::default(),
+            "",
+        );
         assert!(diagnostics.is_empty());
         assert_eq!(
             deserialized.unwrap(),
@@ -641,7 +681,11 @@ mod tests {
         let Deserialized {
             deserialized,
             diagnostics,
-        } = deserialize_from_json_str::<HashMap<String, u8>>(source, JsonParserOptions::default());
+        } = deserialize_from_json_str::<HashMap<String, u8>>(
+            source,
+            JsonParserOptions::default(),
+            "",
+        );
         assert!(!diagnostics.is_empty());
         assert!(deserialized.is_none());
     }
@@ -652,7 +696,11 @@ mod tests {
         let Deserialized {
             deserialized,
             diagnostics,
-        } = deserialize_from_json_str::<BTreeMap<String, u8>>(source, JsonParserOptions::default());
+        } = deserialize_from_json_str::<BTreeMap<String, u8>>(
+            source,
+            JsonParserOptions::default(),
+            "",
+        );
         assert!(diagnostics.is_empty());
         assert_eq!(
             deserialized.unwrap(),
@@ -663,7 +711,11 @@ mod tests {
         let Deserialized {
             deserialized,
             diagnostics,
-        } = deserialize_from_json_str::<BTreeMap<String, u8>>(source, JsonParserOptions::default());
+        } = deserialize_from_json_str::<BTreeMap<String, u8>>(
+            source,
+            JsonParserOptions::default(),
+            "",
+        );
         assert!(!diagnostics.is_empty());
         assert!(deserialized.is_none());
     }
@@ -674,7 +726,11 @@ mod tests {
         let Deserialized {
             deserialized,
             diagnostics,
-        } = deserialize_from_json_str::<IndexMap<String, u8>>(source, JsonParserOptions::default());
+        } = deserialize_from_json_str::<IndexMap<String, u8>>(
+            source,
+            JsonParserOptions::default(),
+            "",
+        );
         assert!(diagnostics.is_empty());
         assert_eq!(
             deserialized.unwrap(),
@@ -685,7 +741,11 @@ mod tests {
         let Deserialized {
             deserialized,
             diagnostics,
-        } = deserialize_from_json_str::<IndexMap<String, u8>>(source, JsonParserOptions::default());
+        } = deserialize_from_json_str::<IndexMap<String, u8>>(
+            source,
+            JsonParserOptions::default(),
+            "",
+        );
         assert!(!diagnostics.is_empty());
         assert!(deserialized.is_none());
     }

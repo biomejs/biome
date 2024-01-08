@@ -86,14 +86,14 @@ pub use string_set::StringSet;
 /// use biome_json_parser::JsonParserOptions;
 ///
 /// let source = r#""A""#;
-/// let deserialized = deserialize_from_json_str::<Variant>(&source, JsonParserOptions::default());
+/// let deserialized = deserialize_from_json_str::<Variant>(&source, JsonParserOptions::default(), "");
 /// assert!(!deserialized.has_errors());
 /// assert!(matches!(deserialized.into_deserialized(), Some(Variant::A)));
 /// ```
 pub trait Deserializable: Sized {
     /// Returns the deserialized form of `value`, or `None` if it failed.
     /// Any diagnostics emitted during deserialization are appended to `diagnostics`.
-    /// `name` corresponds to the name used in a diagnostic to designate the value.
+    /// `name` corresponds to the name used in a diagnostic to designate the deserialized value.
     fn deserialize(
         value: &impl DeserializableValue,
         name: &str,
@@ -197,7 +197,7 @@ pub trait DeserializableValue: Sized {
 /// use biome_json_parser::JsonParserOptions;
 ///
 /// let source = r#"{ "name": "Isaac Asimov" }"#;
-/// let deserialized = deserialize_from_json_str::<Person>(&source, JsonParserOptions::default());
+/// let deserialized = deserialize_from_json_str::<Person>(&source, JsonParserOptions::default(), "");
 /// assert!(!deserialized.has_errors());
 /// assert_eq!(deserialized.into_deserialized(), Some(Person { name: "Isaac Asimov".to_string() }));
 /// ```
@@ -252,12 +252,12 @@ pub trait DeserializableValue: Sized {
 /// use biome_json_parser::JsonParserOptions;
 ///
 /// let source = r#" "string" "#;
-/// let deserialized = deserialize_from_json_str::<Union>(&source, JsonParserOptions::default());
+/// let deserialized = deserialize_from_json_str::<Union>(&source, JsonParserOptions::default(), "");
 /// assert!(!deserialized.has_errors());
 /// assert_eq!(deserialized.into_deserialized(), Some(Union::Str("string".to_string())));
 ///
 /// let source = "true";
-/// let deserialized = deserialize_from_json_str::<Union>(&source, JsonParserOptions::default());
+/// let deserialized = deserialize_from_json_str::<Union>(&source, JsonParserOptions::default(), "");
 /// assert!(!deserialized.has_errors());
 /// assert_eq!(deserialized.into_deserialized(), Some(Union::Bool(true)));
 /// ```
