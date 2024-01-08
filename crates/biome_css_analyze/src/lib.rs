@@ -2,9 +2,12 @@ mod analyzers;
 mod registry;
 
 pub use crate::registry::visit_registry;
-use biome_analyze::{AnalysisFilter, AnalyzerOptions, AnalyzerSignal, ControlFlow, LanguageRoot, MatchQueryParams, MetadataRegistry, RuleRegistry, SuppressionDiagnostic, SuppressionKind};
+use biome_analyze::{
+    AnalysisFilter, AnalyzerOptions, AnalyzerSignal, ControlFlow, LanguageRoot, MatchQueryParams,
+    MetadataRegistry, RuleRegistry, SuppressionDiagnostic, SuppressionKind,
+};
+use biome_css_syntax::CssLanguage;
 use biome_diagnostics::Error;
-use biome_json_syntax::JsonLanguage;
 
 /// Return the static [MetadataRegistry] for the JSON analyzer rules
 pub fn metadata() -> &'static MetadataRegistry {
@@ -23,13 +26,13 @@ pub fn metadata() -> &'static MetadataRegistry {
 /// to selectively restrict analysis to specific rules / a specific source range,
 /// then call `emit_signal` when an analysis rule emits a diagnostic or action
 pub fn analyze<'a, F, B>(
-    root: &LanguageRoot<JsonLanguage>,
+    root: &LanguageRoot<CssLanguage>,
     filter: AnalysisFilter,
     options: &'a AnalyzerOptions,
     emit_signal: F,
 ) -> (Option<B>, Vec<Error>)
 where
-    F: FnMut(&dyn AnalyzerSignal<JsonLanguage>) -> ControlFlow<B> + 'a,
+    F: FnMut(&dyn AnalyzerSignal<CssLanguage>) -> ControlFlow<B> + 'a,
     B: 'a,
 {
     analyze_with_inspect_matcher(root, filter, |_| {}, options, emit_signal)
@@ -42,15 +45,15 @@ where
 /// used to inspect the "query matches" emitted by the analyzer before they are
 /// processed by the lint rules registry
 pub fn analyze_with_inspect_matcher<'a, V, F, B>(
-    root: &LanguageRoot<JsonLanguage>,
+    root: &LanguageRoot<CssLanguage>,
     filter: AnalysisFilter,
     inspect_matcher: V,
     options: &'a AnalyzerOptions,
     mut emit_signal: F,
 ) -> (Option<B>, Vec<Error>)
 where
-    V: FnMut(&MatchQueryParams<JsonLanguage>) + 'a,
-    F: FnMut(&dyn AnalyzerSignal<JsonLanguage>) -> ControlFlow<B> + 'a,
+    V: FnMut(&MatchQueryParams<CssLanguage>) + 'a,
+    F: FnMut(&dyn AnalyzerSignal<CssLanguage>) -> ControlFlow<B> + 'a,
     B: 'a,
 {
     fn parse_linter_suppression_comment(
@@ -96,10 +99,10 @@ mod tests {
     use biome_analyze::{AnalyzerOptions, Never, RuleFilter};
     use biome_console::fmt::{Formatter, Termcolor};
     use biome_console::{markup, Markup};
+    use biome_css_parser::{parse_css, CssParserOptions};
+    use biome_css_syntax::TextRange;
     use biome_diagnostics::termcolor::NoColor;
     use biome_diagnostics::{Diagnostic, DiagnosticExt, PrintDiagnostic, Severity};
-    use biome_json_parser::{parse_json, JsonParserOptions};
-    use biome_json_syntax::TextRange;
     use std::slice;
 
     use crate::{analyze, AnalysisFilter, ControlFlow};
@@ -116,16 +119,10 @@ mod tests {
             String::from_utf8(buffer).unwrap()
         }
 
-        const SOURCE: &str = r#"{
-	"foo": "",
-	"foo": "",
-	"foo": "",
-	"bar": "",
-	"bar": ""
-}
+        const SOURCE: &str = r#".something {}
 "#;
 
-        let parsed = parse_json(SOURCE, JsonParserOptions::default());
+        let parsed = parse_css(SOURCE, CssParserOptions::default());
 
         let mut error_ranges: Vec<TextRange> = Vec::new();
         let rule_filter = RuleFilter::Rule("nursery", "noDuplicateKeys");
