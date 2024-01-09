@@ -116,14 +116,14 @@ impl Matcher {
             }
             let matches = self
                 .ignore
-                .matched(source_as_string, source.is_dir())
+                .matched_path_or_any_parents(source_as_string, source.is_dir())
                 .is_ignore()
                 || self
                     .git_ignore
                     .as_ref()
                     .map(|ignore| {
                         ignore
-                            .matched(source_as_string, source.is_dir())
+                            .matched_path_or_any_parents(source_as_string, source.is_dir())
                             .is_ignore()
                     })
                     .unwrap_or_default();
@@ -190,7 +190,7 @@ mod test {
 
     #[test]
     fn matches_single_path_2() {
-        let ignore = Matcher::try_from("./test/**/*.rs").unwrap();
+        let ignore = Matcher::try_from("test/").unwrap();
         let result = ignore.matches_path(Path::new("test/workspace.rs"));
 
         assert!(result);
