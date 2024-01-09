@@ -6,7 +6,7 @@ use crate::configuration::overrides::OverrideLinterConfiguration;
 use crate::settings::{to_matcher, LinterSettings};
 use crate::{Matcher, WorkspaceError};
 use biome_deserialize::{Merge, StringSet};
-use biome_deserialize_macros::{Mergeable, NoneState};
+use biome_deserialize_macros::{Merge, NoneState};
 use biome_diagnostics::Severity;
 use biome_js_analyze::options::PossibleOptions;
 use bpaf::Bpaf;
@@ -17,7 +17,7 @@ use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 use std::str::FromStr;
 
-#[derive(Debug, Deserialize, Mergeable, NoneState, Serialize, Clone, Bpaf, Eq, PartialEq)]
+#[derive(Debug, Deserialize, Merge, NoneState, Serialize, Clone, Bpaf, Eq, PartialEq)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct LinterConfiguration {

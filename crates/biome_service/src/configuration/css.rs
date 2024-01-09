@@ -1,13 +1,11 @@
 use crate::configuration::{deserialize_line_width, serialize_line_width, PlainIndentStyle};
-use biome_deserialize_macros::{Mergeable, NoneState};
+use biome_deserialize_macros::{Merge, NoneState};
 use biome_formatter::{LineEnding, LineWidth, QuoteStyle};
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 
 /// Options applied to CSS files
-#[derive(
-    Bpaf, Clone, Default, Debug, Deserialize, Eq, Mergeable, NoneState, PartialEq, Serialize,
-)]
+#[derive(Bpaf, Clone, Default, Debug, Deserialize, Eq, Merge, NoneState, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(default, deny_unknown_fields)]
 pub struct CssConfiguration {
@@ -23,9 +21,7 @@ pub struct CssConfiguration {
 }
 
 /// Options that changes how the CSS parser behaves
-#[derive(
-    Bpaf, Clone, Default, Debug, Deserialize, Eq, Mergeable, NoneState, PartialEq, Serialize,
-)]
+#[derive(Bpaf, Clone, Default, Debug, Deserialize, Eq, Merge, NoneState, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct CssParser {
@@ -35,9 +31,7 @@ pub struct CssParser {
     pub allow_wrong_line_comments: Option<bool>,
 }
 
-#[derive(
-    Bpaf, Clone, Default, Debug, Deserialize, Eq, Mergeable, NoneState, PartialEq, Serialize,
-)]
+#[derive(Bpaf, Clone, Default, Debug, Deserialize, Eq, Merge, NoneState, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct CssFormatter {

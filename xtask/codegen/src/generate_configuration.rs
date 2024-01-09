@@ -155,9 +155,9 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
         use biome_analyze::RuleFilter;
         use indexmap::IndexSet;
         use biome_diagnostics::{Category, Severity};
-        use biome_deserialize_macros::{Mergeable, NoneState};
+        use biome_deserialize_macros::{Merge, NoneState};
 
-        #[derive(Clone, Debug, Deserialize, Eq, Mergeable, NoneState, PartialEq, Serialize)]
+        #[derive(Clone, Debug, Deserialize, Eq, Merge, NoneState, PartialEq, Serialize)]
         #[cfg_attr(feature = "schema", derive(JsonSchema))]
         #[serde(rename_all = "camelCase", deny_unknown_fields)]
         pub struct Rules {
@@ -497,7 +497,7 @@ fn generate_struct(group: &str, rules: &BTreeMap<&'static str, RuleMetadata>) ->
         )
     };
     quote! {
-        #[derive(Clone, Debug, Default, Deserialize, Eq, Mergeable, NoneState, PartialEq, Serialize)]
+        #[derive(Clone, Debug, Default, Deserialize, Eq, Merge, NoneState, PartialEq, Serialize)]
         #[cfg_attr(feature = "schema", derive(JsonSchema))]
         #[serde(rename_all = "camelCase", default)]
         /// A list of rules that belong to this group

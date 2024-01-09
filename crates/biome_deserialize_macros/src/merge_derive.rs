@@ -25,7 +25,7 @@ impl DeriveInput {
                     MergeableData::Newtype
                 }
             }
-            Data::Union(_) => abort!(input, "Mergeable can only be derived for enums and structs"),
+            Data::Union(_) => abort!(input, "Merge can only be derived for enums and structs"),
         };
 
         Self {
@@ -35,15 +35,15 @@ impl DeriveInput {
     }
 }
 
-pub(crate) fn generate_mergeable(input: DeriveInput) -> TokenStream {
+pub(crate) fn generate_merge(input: DeriveInput) -> TokenStream {
     match input.data {
-        MergeableData::Enum => generate_mergeable_enum(input.ident),
-        MergeableData::Newtype => generate_mergeable_newtype(input.ident),
-        MergeableData::Struct(fields) => generate_mergeable_struct(input.ident, fields),
+        MergeableData::Enum => generate_merge_enum(input.ident),
+        MergeableData::Newtype => generate_merge_newtype(input.ident),
+        MergeableData::Struct(fields) => generate_merge_struct(input.ident, fields),
     }
 }
 
-fn generate_mergeable_enum(ident: Ident) -> TokenStream {
+fn generate_merge_enum(ident: Ident) -> TokenStream {
     quote! {
         impl biome_deserialize::Merge for #ident {
             fn merge_with(&mut self, other: Self) {
@@ -57,7 +57,7 @@ fn generate_mergeable_enum(ident: Ident) -> TokenStream {
     }
 }
 
-fn generate_mergeable_newtype(ident: Ident) -> TokenStream {
+fn generate_merge_newtype(ident: Ident) -> TokenStream {
     quote! {
         impl biome_deserialize::Merge for #ident {
             fn merge_with(&mut self, other: Self) {
@@ -71,7 +71,7 @@ fn generate_mergeable_newtype(ident: Ident) -> TokenStream {
     }
 }
 
-fn generate_mergeable_struct(ident: Ident, fields: Fields) -> TokenStream {
+fn generate_merge_struct(ident: Ident, fields: Fields) -> TokenStream {
     let merge_fields: Vec<_> = fields
         .iter()
         .filter_map(|field| field.ident.as_ref())

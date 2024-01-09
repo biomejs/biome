@@ -11,7 +11,7 @@ use crate::settings::{
 use crate::{Rules, WorkspaceError};
 use biome_css_syntax::CssLanguage;
 use biome_deserialize::StringSet;
-use biome_deserialize_macros::{Mergeable, NoneState};
+use biome_deserialize_macros::{Merge, NoneState};
 use biome_formatter::{LineEnding, LineWidth};
 use biome_js_syntax::JsLanguage;
 use biome_json_syntax::JsonLanguage;
@@ -20,7 +20,7 @@ use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 use std::str::FromStr;
 
-#[derive(Bpaf, Clone, Debug, Default, Deserialize, Eq, Mergeable, PartialEq, Serialize)]
+#[derive(Bpaf, Clone, Debug, Default, Deserialize, Eq, Merge, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Overrides(#[bpaf(hide)] pub Vec<OverridePattern>);
@@ -33,9 +33,7 @@ impl FromStr for Overrides {
     }
 }
 
-#[derive(
-    Bpaf, Clone, Debug, Default, Deserialize, Eq, Mergeable, NoneState, PartialEq, Serialize,
-)]
+#[derive(Bpaf, Clone, Debug, Default, Deserialize, Eq, Merge, NoneState, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct OverridePattern {
@@ -90,9 +88,7 @@ impl FromStr for OverridePattern {
     }
 }
 
-#[derive(
-    Bpaf, Clone, Debug, Default, Deserialize, Eq, Mergeable, NoneState, PartialEq, Serialize,
-)]
+#[derive(Bpaf, Clone, Debug, Default, Deserialize, Eq, Merge, NoneState, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct OverrideFormatterConfiguration {
@@ -134,9 +130,7 @@ pub struct OverrideFormatterConfiguration {
     pub line_width: Option<LineWidth>,
 }
 
-#[derive(
-    Bpaf, Clone, Debug, Default, Deserialize, Eq, Mergeable, NoneState, PartialEq, Serialize,
-)]
+#[derive(Bpaf, Clone, Debug, Default, Deserialize, Eq, Merge, NoneState, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct OverrideLinterConfiguration {
@@ -151,9 +145,7 @@ pub struct OverrideLinterConfiguration {
     pub rules: Option<Rules>,
 }
 
-#[derive(
-    Bpaf, Clone, Debug, Default, Deserialize, Eq, Mergeable, NoneState, PartialEq, Serialize,
-)]
+#[derive(Bpaf, Clone, Debug, Default, Deserialize, Eq, Merge, NoneState, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct OverrideOrganizeImportsConfiguration {

@@ -2,12 +2,12 @@ use crate::configuration::overrides::OverrideOrganizeImportsConfiguration;
 use crate::settings::{to_matcher, OrganizeImportsSettings};
 use crate::{Matcher, WorkspaceError};
 use biome_deserialize::StringSet;
-use biome_deserialize_macros::{Mergeable, NoneState};
+use biome_deserialize_macros::{Merge, NoneState};
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
-#[derive(Bpaf, Clone, Debug, Deserialize, Eq, Mergeable, NoneState, PartialEq, Serialize)]
+#[derive(Bpaf, Clone, Debug, Deserialize, Eq, Merge, NoneState, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct OrganizeImports {

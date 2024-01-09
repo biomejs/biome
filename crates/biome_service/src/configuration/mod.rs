@@ -26,7 +26,7 @@ use biome_analyze::AnalyzerRules;
 use biome_console::markup;
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize::{Deserialized, Merge, StringSet};
-use biome_deserialize_macros::{Mergeable, NoneState};
+use biome_deserialize_macros::{Merge, NoneState};
 use biome_diagnostics::{DiagnosticExt, Error, Severity};
 use biome_fs::{AutoSearchResult, FileSystem, OpenOptions};
 use biome_js_analyze::metadata;
@@ -50,7 +50,7 @@ use std::num::NonZeroU64;
 use std::path::{Path, PathBuf};
 
 /// The configuration that is contained inside the file `biome.json`
-#[derive(Bpaf, Clone, Debug, Deserialize, Eq, Mergeable, NoneState, PartialEq, Serialize)]
+#[derive(Bpaf, Clone, Debug, Deserialize, Eq, Merge, NoneState, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(deny_unknown_fields, rename_all = "camelCase")]
 pub struct Configuration {
@@ -207,9 +207,7 @@ impl Configuration {
 }
 
 /// The configuration of the filesystem
-#[derive(
-    Bpaf, Clone, Debug, Default, Deserialize, Eq, Mergeable, NoneState, PartialEq, Serialize,
-)]
+#[derive(Bpaf, Clone, Debug, Default, Deserialize, Eq, Merge, NoneState, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct FilesConfiguration {

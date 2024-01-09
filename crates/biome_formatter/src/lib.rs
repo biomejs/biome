@@ -58,7 +58,7 @@ pub use arguments::{Argument, Arguments};
 use biome_deserialize::{
     Deserializable, DeserializableValue, DeserializationDiagnostic, Text, TextNumber,
 };
-use biome_deserialize_macros::Mergeable;
+use biome_deserialize_macros::Merge;
 use biome_rowan::{
     Language, NodeOrToken, SyntaxElement, SyntaxNode, SyntaxResult, SyntaxToken, SyntaxTriviaPiece,
     TextLen, TextRange, TextSize, TokenAtOffset,
@@ -126,7 +126,7 @@ impl std::fmt::Display for IndentStyle {
     }
 }
 
-#[derive(Clone, Copy, Debug, Eq, Hash, Mergeable, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, Merge, PartialEq)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
@@ -246,7 +246,7 @@ impl From<u8> for IndentWidth {
 /// Validated value for the `line_width` formatter options
 ///
 /// The allowed range of values is 1..=320
-#[derive(Clone, Copy, Debug, Eq, Mergeable, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Merge, PartialEq)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
@@ -357,7 +357,7 @@ impl From<LineWidth> for u16 {
     }
 }
 
-#[derive(Clone, Copy, Debug, Default, Eq, Hash, Mergeable, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, Merge, PartialEq)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),

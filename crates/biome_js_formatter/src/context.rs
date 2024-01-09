@@ -1,7 +1,7 @@
 use crate::comments::{FormatJsLeadingComment, JsCommentStyle, JsComments};
 use crate::context::trailing_comma::TrailingComma;
 use biome_deserialize::{Deserializable, DeserializableValue, DeserializationDiagnostic, Text};
-use biome_deserialize_macros::Mergeable;
+use biome_deserialize_macros::Merge;
 use biome_formatter::printer::PrinterOptions;
 use biome_formatter::{
     CstFormatContext, FormatContext, FormatElement, FormatOptions, IndentStyle, IndentWidth,
@@ -379,7 +379,7 @@ impl fmt::Display for JsFormatOptions {
     }
 }
 
-#[derive(Clone, Copy, Debug, Default, Eq, Hash, Mergeable, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, Merge, PartialEq)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
@@ -435,7 +435,7 @@ impl Deserializable for QuoteProperties {
     }
 }
 
-#[derive(Clone, Copy, Debug, Default, Eq, Hash, Mergeable, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, Merge, PartialEq)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
@@ -500,7 +500,7 @@ impl Deserializable for Semicolons {
     }
 }
 
-#[derive(Clone, Copy, Debug, Default, Eq, Hash, Mergeable, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, Merge, PartialEq)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
@@ -566,7 +566,7 @@ impl Deserializable for ArrowParentheses {
     }
 }
 
-#[derive(Clone, Copy, Debug, Eq, Hash, Mergeable, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, Merge, PartialEq)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
@@ -593,7 +593,7 @@ impl From<bool> for BracketSpacing {
     }
 }
 
-#[derive(Clone, Copy, Debug, Default, Eq, Hash, Mergeable, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, Merge, PartialEq)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),

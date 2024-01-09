@@ -2,7 +2,7 @@ use crate::configuration::overrides::OverrideFormatterConfiguration;
 use crate::settings::{to_matcher, FormatSettings};
 use crate::{Matcher, WorkspaceError};
 use biome_deserialize::StringSet;
-use biome_deserialize_macros::{Mergeable, NoneState};
+use biome_deserialize_macros::{Merge, NoneState};
 use biome_formatter::{IndentStyle, LineEnding, LineWidth};
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
@@ -10,7 +10,7 @@ use std::path::PathBuf;
 use std::str::FromStr;
 
 /// Generic options applied to all files
-#[derive(Bpaf, Clone, Debug, Deserialize, Eq, Mergeable, NoneState, PartialEq, Serialize)]
+#[derive(Bpaf, Clone, Debug, Deserialize, Eq, Merge, NoneState, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct FormatterConfiguration {
@@ -187,7 +187,7 @@ where
     s.serialize_u16(line_width.unwrap_or_default().get())
 }
 
-#[derive(Clone, Copy, Debug, Default, Deserialize, Eq, Mergeable, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Default, Deserialize, Eq, Merge, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub enum PlainIndentStyle {
