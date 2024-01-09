@@ -38,6 +38,7 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 #### Bug fixes
 
+<<<<<<< HEAD
 ### Parser
 
 
@@ -58,6 +59,11 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 #### Bug fixes
 
 - Fix [#1170](https://github.com/biomejs/biome/issues/1170). Fix placement of comments inside default switch clause. Now all line comments that have a preceding node will keep their position. Contributed by @kalleep
+=======
+- Fix [#1172](https://github.com/biomejs/biome/issues/1172). Fix placement of line comment after function expression parentheses, they are now attached to first statement in body. Contributed by @kalleep
+
+### JavaScript APIs
+>>>>>>> accd41b745 (fix changelog)
 
 ### Linter
 
@@ -206,8 +212,6 @@ Biome now scores 97% compatibility with Prettier and features more than 180 lint
 - Fix [#1171](https://github.com/biomejs/biome/issues/1171). Correctly format empty statement with comment inside arrow body when used as single argument in call expression. Contributed by @kalleep
 
 - Fix [#1106](https://github.com/biomejs/biome/issues/1106). Fix invalid formatting of single bindings when Arrow Parentheses is set to "AsNeeded" and the expression breaks over multiple lines. [#1449](https://github.com/biomejs/biome/pull/1449) Contributed by @faultyserver
-
-- Fix [#1172](https://github.com/biomejs/biome/issues/1172). Fix placement of line comment after function expression parentheses, they are now attached to first statement in body. Contributed by @kalleep
 
 ### JavaScript APIs
 
