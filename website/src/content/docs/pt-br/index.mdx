@@ -2,9 +2,11 @@
 title: Biome
 head:
   - tag: title
-    content: Biome, toolchain of the web
+    content: Biome, conjunto de ferramentas da web
 template: splash
 description: Formate, verifique erros e muito mais em uma fração de segundo.
+editUrl: false
+next: false
 hero:
   title: Um conjunto de ferramentas para seu projeto web
   tagline: Formate, verifique erros e muito mais em uma fração de segundo.
@@ -24,35 +26,190 @@ hero:
 ---
 
 import { Card, CardGrid } from "@astrojs/starlight/components";
+import Inputf from "@src/components/formatter/input.md";
+import Outputf from "@src/components/formatter/output.md";
+import ProgressBar from "../../../playground/components/Progress.tsx";
+import Community from "@src/components/Community.astro";
+import { Icon } from "@astrojs/starlight/components";
+import arrow from "../../../assets/svg/arrow-right.svg";
+import { Image } from "astro:assets";
+import "../../../styles/_performance.scss";
+import "../../../styles/_installation.scss";
+import "../../../styles/_community.scss";
 import Netlify from "@src/components/Netlify.astro";
 import Sponsors from "@src/components/Sponsors.astro";
+import LinterExample from "@src/components/linter/example.md";
 
-<CardGrid stagger>
-  <Card title="Rápido" icon="rocket">
-    Construído com Rust e uma arquitetura inovadora inspirado pelo
-    rust-analyzer.
-  </Card>
-  <Card title="Simples" icon="pencil">
-    Nenhuma configuração é necessária para começar a usar! Caso precise, temos
-    diversas opções disponíveis!
-  </Card>
-  <Card title="Escalável" icon="random">
-    Projetado para suportar codebases de qualquer tamanho. Focado no crescimento
-    do projeto, em vez de suas ferramentas.
-  </Card>
-  <Card title="Otimizado" icon="setting">
-    Com uma integração interna eficiente, conseguimos reutilizar trabalhos
-    anteriores, e qualquer melhoria em uma ferramenta beneficia todas elas.
-  </Card>
-  <Card title="Prático e informativo" icon="information">
-    Esqueça aquelas mensagens de erro obscuras! Quando alguma coisa está errada,
-    nós falamos exatamente o que está errado e como consertar!
-  </Card>
-  <Card title="Pacote completo" icon="add-document">
-    Suporte pronto para todas as funcionalidades de linguagem que você utiliza
-    atualmente. Suporte de primeira classe para TypeScript e JSX.
-  </Card>
-</CardGrid>
+
+<div class="gradient"></div>
+<div class="grid"></div>
+
+
+<div class="hero-code">
+    <h2 class="head">Formata código como o Prettier e economiza tempo</h2>
+
+    **Biome é um [formatador rápido](https://github.com/biomejs/biome/tree/main/benchmark#formatting)** para _JavaScript_, _TypeScript_, _JSX_, e _JSON_ que atinge **[97% de compatibilidade com o _Prettier_](https://console.algora.io/challenges/prettier)**, **economizando tempo para o desenvolvedor e para o CI**.
+
+    O Biome pode até **formatar código malformado** enquanto você programa no seu [editor favorito](/pt-br/guides/integrate-in-editor/).
+
+    <div class="linter format">
+      <div class="inp">
+        <span>CÓDIGO</span>
+        <Inputf />
+      </div>
+      <div class="out">
+        <span>SAÍDA</span>
+        <Outputf />
+      </div>
+      <div class="perf-out">
+        <span>PERFORMANCE</span>
+        <div class="bench-comp">
+          <div class="bench">
+            <div>
+              <ProgressBar client:visible duration={0.41} label="Biome" />
+              <ProgressBar client:visible duration={14.35} label="Prettier" />
+            </div>
+          </div>
+          <div class="perf-comp">
+            <div class="comp">~35x</div>
+            <div class="comp-des">
+              Mais rápido que o Prettier quando formata 171,217 linhas de código em 2,104 arquivos com um Intel Core i7 1270P.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    Teste o formatador do Biome no [playground](/playground/) ou diretamente no seu projeto:
+
+    ```shell
+    npm i -D --save-exact @biomejs/biome
+    npx @biomejs/biome format --write ./src
+    ```
+</div>
+
+
+<div class="hero-code">
+    <h2 class="head">Corrija problemas e aprenda boas práticas</h2>
+
+    **O Biome é um [linter performático](https://github.com/biomejs/biome/tree/main/benchmark#linting)** para _JavaScript_, _TypeScript_, e _JSX_ que possui **[mais de 190 regras](https://biomejs.dev/pt-br/linter/rules/)** do ESLint, TypeScript ESLint, e [de outras fontes](https://github.com/biomejs/biome/discussions/3).
+
+    **O Biome retorna diagnósticos detalhados e contextualizados** que ajuda a melhorar seu código e ajuda você a se tornar um programador melhor!
+
+    <LinterExample />
+
+    Teste o linter do Biome no [playground](/playground/) ou diretamente no seu projeto:
+
+    ```shell
+    npm i -D --save-exact @biomejs/biome
+    npx @biomejs/biome lint --apply ./src
+    ```
+
+</div>
+
+
+<div class="hero-code">
+    <h2 class="head">Tudo de uma vez</h2>
+
+    Não só como você pode formatar e analisar erros no seu código separadamente, você pode fazer **tudo isso com um comando**!
+
+    Cada ferramenta integra suavemente com as outras para criar um **conjunto de ferramentas coesivo** para projetos web.
+
+    Rode todas as ferramentas com o comando `check`
+
+    ```shell
+    npm i -D --save-exact @biomejs/biome
+    npx @biomejs/biome check --apply ./src
+    ```
+
+</div>
+
+
+
+<div class="card-cnt">
+
+<CardGrid>
+    <Card title="Rápido" icon="rocket">
+      Construído com Rust e uma arquitetura inovadora inspirado pelo rust-analyzer.
+    </Card>
+    <Card title="Simples" icon="pencil">
+      Nenhuma configuração é necessária para começar a usar! Caso precise, temos
+      diversas opções disponíveis!
+    </Card>
+    <Card title="Escalável" icon="random">
+      Projetado para suportar codebases de qualquer tamanho. Focado no crescimento
+      do projeto, em vez de suas ferramentas.
+    </Card>
+    <Card title="Otimizado" icon="setting">
+      Com uma integração interna eficiente, conseguimos reutilizar trabalhos
+      anteriores, e qualquer melhoria em uma ferramenta beneficia todas elas.
+    </Card>
+    <Card title="Prático e informativo" icon="information">
+      Esqueça aquelas mensagens de erro obscuras! Quando alguma coisa está errada,
+      nós falamos exatamente o que está errado e como consertar!
+    </Card>
+    <Card title="Pacote completo" icon="add-document">
+      Suporte pronto para todas as funcionalidades de linguagem que você utiliza
+      atualmente. Suporte de primeira classe para TypeScript e JSX.
+    </Card>
+  </CardGrid>
+</div>
+<div class="installation-body">
+  <div class="installation">
+    <div class="installation-left">
+      <h2 class="head">Experimente o Biome</h2>
+      <div class="installation-description">
+        Instale o Biome utilizando o seu gerenciador de pacotes favorito e integre ele no seu editor.
+      </div>
+      <a class="installation-biome" href="/pt-br/guides/getting-started/#instalação">
+        Instale com um gerenciador de pacotes
+        <Image src={arrow} alt="arrow" />
+      </a>
+      <a
+        href="/pt-br/guides/integrate-in-editor/"
+        class="installation-extension"
+      >
+        Integre o Biome no seu editor
+        <Image src={arrow} alt="arrow" />
+      </a>
+    </div>
+
+    <div class="extension-img"></div>
+
+  </div>
+</div>
+
+<div class="community">
+  <div class="community-grid"></div>
+  <h2 class="head">Comunidade</h2>
+  <div class="community-connect">
+    <div class="community-description">
+      Desenvolvido pela nossa incrível comunidade
+    </div>
+    <div class="community-links">
+      <a href="https://discord.gg/BypW39g6Yc" class="discord">
+        <Icon name="discord" />
+        <p>Discord</p>
+      </a>
+      <a href="https://github.com/biomejs/biome" class="github">
+        <Icon name="github" />
+        <p>Github</p>
+      </a>
+      <a href="https://twitter.com/biomejs" class="x">
+        <Icon name="x.com" />
+        <p>Twitter</p>
+      </a>
+      <a href="https://fosstodon.org/@biomejs" class="mastodon">
+        <Icon name="mastodon" />
+        <p>Mastodon</p>
+      </a>
+    </div>
+  </div>
+  <div class="connect">
+    <Community />
+  </div>
+</div>
 
 <Sponsors title="Patrocinadores" />
 
