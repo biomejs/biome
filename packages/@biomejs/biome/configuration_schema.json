@@ -1384,6 +1384,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useConsistentArrayType": {
+					"description": "Require consistently using either T[] or Array<T>",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useExportType": {
 					"description": "Promotes the use of export type for types.",
 					"anyOf": [
@@ -1905,13 +1912,6 @@
 				},
 				"useCollapsedElseIf": {
 					"description": "Enforce using else if instead of nested if in else clauses.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useConsistentArrayType": {
-					"description": "Require consistently using either T[] or Array<T>",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

@@ -1,7 +1,7 @@
 //! This module contains the rules that have options
 
+use crate::analyzers::nursery::use_consistent_array_type::ConsistentArrayTypeOptions;
 use crate::analyzers::nursery::use_filenaming_convention::FilenamingConventionOptions;
-use crate::analyzers::style::use_consistent_array_type::ConsistentArrayTypeOptions;
 use crate::semantic_analyzers::correctness::use_exhaustive_dependencies::HooksOptions;
 use crate::semantic_analyzers::correctness::use_hook_at_top_level::DeprecatedHooksOptions;
 use crate::semantic_analyzers::style::no_restricted_globals::RestrictedGlobalsOptions;
