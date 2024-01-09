@@ -72,6 +72,9 @@ impl Rule for NoConsoleLog {
             )
             .note(markup! {
                 <Emphasis>"console.log"</Emphasis>" is usually a tool for debugging and you don't want to have that in production."
+            })
+            .note(markup! {
+                "If it is not for debugging purpose then using "<Emphasis>"console.info"</Emphasis>" might be more appropriate."
             }),
         )
     }

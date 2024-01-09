@@ -26,6 +26,10 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ### Linter
 
+#### Enhancements
+
+- Add an unsafe code fix for [noConsoleLog](https://biomejs.dev/linter/rules/no-console-log/).  Contributed by @vasucp1207
+
 #### Bug fixes
 
 - Fix [#1483](https://github.com/biomejs/biome/issues/1483). [useConsistentArrayType](https://biomejs.dev/rules/use-consistent-array-type) now correctly handles its option. Contributed by @Conaclos

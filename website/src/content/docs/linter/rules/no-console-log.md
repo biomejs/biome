@@ -24,6 +24,8 @@ console.log()
   
 <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;"><strong>console.log</strong></span><span style="color: lightgreen;"> is usually a tool for debugging and you don't want to have that in production.</span>
   
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">If it is not for debugging purpose then using </span><span style="color: lightgreen;"><strong>console.info</strong></span><span style="color: lightgreen;"> might be more appropriate.</span>
+  
 <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Unsafe fix</span><span style="color: lightgreen;">: </span><span style="color: lightgreen;">Remove console.log</span>
   
 <strong>  </strong><strong>  1 │ </strong><span style="color: Tomato;">c</span><span style="color: Tomato;">o</span><span style="color: Tomato;">n</span><span style="color: Tomato;">s</span><span style="color: Tomato;">o</span><span style="color: Tomato;">l</span><span style="color: Tomato;">e</span><span style="color: Tomato;">.</span><span style="color: Tomato;">l</span><span style="color: Tomato;">o</span><span style="color: Tomato;">g</span><span style="color: Tomato;">(</span><span style="color: Tomato;">)</span>
