@@ -1,8 +1,11 @@
-use crate::semantic_services::Semantic;
-use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
+use crate::{semantic_services::Semantic, JsRuleAction};
+use biome_analyze::{
+    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
+};
 use biome_console::markup;
+use biome_diagnostics::Applicability;
 use biome_js_syntax::{global_identifier, AnyJsMemberExpression, JsCallExpression};
-use biome_rowan::AstNode;
+use biome_rowan::{AstNode, BatchMutationExt};
 
 declare_rule! {
     /// Disallow the use of `console.log`
@@ -31,6 +34,7 @@ declare_rule! {
         version: "1.0.0",
         name: "noConsoleLog",
         recommended: false,
+        fix_kind: FixKind::Unsafe,
     }
 }
 
@@ -70,5 +74,19 @@ impl Rule for NoConsoleLog {
                 <Emphasis>"console.log"</Emphasis>" is usually a tool for debugging and you don't want to have that in production."
             }),
         )
+    }
+
+    fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
+        let call_expression = ctx.query();
+        let mut mutation = ctx.root().begin();
+
+        mutation.remove_node(call_expression.clone());
+
+        Some(JsRuleAction {
+            category: ActionCategory::QuickFix,
+            applicability: Applicability::MaybeIncorrect,
+            message: markup! { "Remove console.log" }.to_owned(),
+            mutation,
+        })
     }
 }

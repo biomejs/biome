@@ -10,7 +10,7 @@ console.log("something")
 
 # Diagnostics
 ```
-invalid.js:1:1 lint/suspicious/noConsoleLog ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:1:1 lint/suspicious/noConsoleLog  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use console.log
   
@@ -20,6 +20,10 @@ invalid.js:1:1 lint/suspicious/noConsoleLog ━━━━━━━━━━━━
   
   i console.log is usually a tool for debugging and you don't want to have that in production.
   
+  i Unsafe fix: Remove console.log
+  
+    1 │ console.log("something")
+      │ ------------------------
 
 ```
 
