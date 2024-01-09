@@ -20,6 +20,10 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ### Formatter
 
+#### Bug fixes
+
+- Fix [#1172](https://github.com/biomejs/biome/issues/1172). Fix placement of line comment after function expression parentheses, they are now attached to first statement in body. Contributed by @kalleep
+
 ### JavaScript APIs
 
 ### Linter
@@ -32,7 +36,6 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 #### Bug fixes
 
-<<<<<<< HEAD
 ### Parser
 
 
@@ -53,11 +56,6 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 #### Bug fixes
 
 - Fix [#1170](https://github.com/biomejs/biome/issues/1170). Fix placement of comments inside default switch clause. Now all line comments that have a preceding node will keep their position. Contributed by @kalleep
-=======
-- Fix [#1172](https://github.com/biomejs/biome/issues/1172). Fix placement of line comment after function expression parentheses, they are now attached to first statement in body. Contributed by @kalleep
-
-### JavaScript APIs
->>>>>>> accd41b745 (fix changelog)
 
 ### Linter
 

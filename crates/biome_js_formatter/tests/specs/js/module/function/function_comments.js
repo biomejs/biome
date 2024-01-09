@@ -11,7 +11,6 @@ function b() // leading comment
 
 }
 
-
 function c( //some comment
     foo, bar,
 ) {}
