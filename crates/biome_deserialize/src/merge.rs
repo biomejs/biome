@@ -15,6 +15,25 @@ pub trait Merge {
     fn merge_in_defaults(&mut self);
 }
 
+impl<T> Merge for Option<T>
+where
+    T: Merge,
+{
+    fn merge_with(&mut self, other: Self) {
+        if let Some(other) = other {
+            match self.as_mut() {
+                Some(this) => this.merge_with(other),
+                None => *self = Some(other),
+            }
+        }
+    }
+
+    fn merge_in_defaults(&mut self) {
+        // The default for an `Option` is always `None`, for which
+        // there is no reason to merge it in.
+    }
+}
+
 /// This macro is used to implement [Merge] for all (primitive) types where
 /// merging can simply be implemented through overwriting the value.
 macro_rules! overwrite_on_merge {

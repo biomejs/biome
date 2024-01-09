@@ -7,18 +7,17 @@ use crate::{
     execute_mode, setup_cli_subscriber, CliDiagnostic, CliSession, Execution, TraversalMode,
 };
 use biome_console::{markup, ConsoleExt};
-use biome_deserialize::{Merge, NoneState};
+use biome_deserialize::Merge;
 use biome_diagnostics::PrintDiagnostic;
 use biome_service::configuration::css::CssFormatter;
 use biome_service::configuration::json::JsonFormatter;
 use biome_service::configuration::vcs::VcsConfiguration;
 use biome_service::configuration::{
-    load_configuration, CssConfiguration, FilesConfiguration, FormatterConfiguration,
-    JavascriptConfiguration, JsonConfiguration, LoadedConfiguration,
+    load_configuration, FilesConfiguration, FormatterConfiguration, LoadedConfiguration,
 };
 use biome_service::workspace::UpdateSettingsParams;
+use biome_service::{ConfigurationBasePath, JavascriptFormatter};
 use biome_service::{JavascriptFormatter, MergeWith};
-use biome_service::{Configuration, ConfigurationBasePath, JavascriptFormatter};
 use std::ffi::OsString;
 
 pub(crate) struct FormatCommandPayload {
@@ -126,35 +125,34 @@ pub(crate) fn format(
         }
     }
 
-    configuration.merge_with(Configuration {
-        css: Some(CssConfiguration {
-            formatter: css_formatter,
-            ..NoneState::none()
-        }),
-        files: files_configuration,
-        formatter: if configuration
-            .formatter
-            .as_ref()
-            .is_some_and(FormatterConfiguration::is_disabled)
-        {
-            None
-        } else {
-            Some(FormatterConfiguration {
-                enabled: Some(true),
-                ..formatter_configuration.unwrap_or_else(NoneState::none)
-            })
-        },
-        javascript: Some(JavascriptConfiguration {
-            formatter: javascript_formatter,
-            ..NoneState::none()
-        }),
-        json: Some(JsonConfiguration {
-            formatter: json_formatter,
-            ..NoneState::none()
-        }),
-        vcs: vcs_configuration,
-        ..NoneState::none()
-    });
+    if css_formatter.is_some() {
+        let css = configuration.css.get_or_insert_with(Default::default);
+        css.formatter.merge_with(css_formatter);
+    }
+    configuration.files.merge_with(files_configuration);
+    if !configuration
+        .formatter
+        .as_ref()
+        .is_some_and(FormatterConfiguration::is_disabled)
+    {
+        let formatter = configuration.formatter.get_or_insert_with(Default::default);
+        if let Some(formatter_configuration) = formatter_configuration {
+            formatter.merge_with(formatter_configuration);
+        }
+
+        formatter.enabled = Some(true);
+    }
+    if javascript_formatter.is_some() {
+        let javascript = configuration
+            .javascript
+            .get_or_insert_with(Default::default);
+        javascript.formatter.merge_with(javascript_formatter);
+    }
+    if json_formatter.is_some() {
+        let json = configuration.json.get_or_insert_with(Default::default);
+        json.formatter.merge_with(json_formatter);
+    }
+    configuration.vcs.merge_with(vcs_configuration);
 
     // check if support of git ignore files is enabled
     let vcs_base_path = configuration_path.or(session.app.fs.working_directory());
