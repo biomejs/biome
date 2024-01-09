@@ -353,6 +353,14 @@ export default defineConfig({
 						content: `${site}/img/og.png?v=1`,
 					},
 				},
+				{
+					tag: "link",
+					attrs: {
+						rel: "alternate",
+						type: "application/rss+xml",
+						href: `${site}/feed.xml`,
+					},
+				},
 			],
 			customCss: [
 				// Relative path to your custom CSS file
