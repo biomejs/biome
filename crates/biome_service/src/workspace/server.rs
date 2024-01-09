@@ -269,7 +269,6 @@ impl Workspace for WorkspaceServer {
                     let language = self.get_language(&params.path);
                     if language == Language::Unknown {
                         file_features.ignore_not_supported();
-                        return Ok(entry.insert(file_features).clone());
                     }
                 }
                 for feature in params.feature {
