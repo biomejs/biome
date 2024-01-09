@@ -6,7 +6,7 @@ function functionGeneric<T extends void>(arg: T) {}
 function functionGeneric2<T extends void = void>(arg: T) {}
 declare function functionDeclaration<T extends void>(arg: T): void;
 declare function functionDeclaration2<T extends void = void>(arg: T): void;
-functionGeneric<void>(undefined);
+
 declare function voidArray(args: void[]): void[];
 let value = undefined as void;
 let value = <void>undefined;

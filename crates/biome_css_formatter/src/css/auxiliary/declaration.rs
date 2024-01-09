@@ -1,10 +1,22 @@
 use crate::prelude::*;
-use biome_css_syntax::CssDeclaration;
-use biome_rowan::AstNode;
+use biome_css_syntax::{CssDeclaration, CssDeclarationFields};
+use biome_formatter::write;
+
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatCssDeclaration;
 impl FormatNodeRule<CssDeclaration> for FormatCssDeclaration {
     fn fmt_fields(&self, node: &CssDeclaration, f: &mut CssFormatter) -> FormatResult<()> {
-        format_verbatim_node(node.syntax()).fmt(f)
+        let CssDeclarationFields {
+            property,
+            important,
+        } = node.as_fields();
+
+        write!(f, [property.format()])?;
+
+        if important.is_some() {
+            write!(f, [space(), important.format()])?;
+        }
+
+        Ok(())
     }
 }

@@ -1,0 +1,21 @@
+[attr="double"] {
+    background: url("/double/quoted/path");
+}
+
+[attr='single'] {
+    background: url('/single/quoted/path');
+}
+
+[attr=no-quotes] {
+    /* this url-token should stay unquoted */
+    background: url(/unquoted/path);
+}
+
+[attr=\eescaped] {
+}
+
+div {
+    width: 0\eestays-unquoted;
+    --\eeunquoted: green;
+    color: var(--\eeunquoted);
+}

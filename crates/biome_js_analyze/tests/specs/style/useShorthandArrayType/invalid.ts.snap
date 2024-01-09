@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.ts
 ---
 # Input
-```js
+```ts
 let valid: Array<foo>;
 let invalid1: Array<foo, Array<string>>;
 let invalid2: Promise<Array<string>>;

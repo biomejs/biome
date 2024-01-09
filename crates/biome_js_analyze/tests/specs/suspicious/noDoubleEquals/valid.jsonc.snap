@@ -3,12 +3,12 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.jsonc
 ---
 # Input
-```js
+```cjs
 const isNull = a == null;
 ```
 
 # Input
-```js
+```cjs
 const isNonNull = a != null;
 ```
 

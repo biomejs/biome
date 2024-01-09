@@ -19,30 +19,29 @@ expression: snapshot
 CssRoot {
     bom_token: missing (optional),
     rules: CssRuleList [
+        CssBogusRule {
+            items: [
+                BANG@0..1 "!" [] [],
+            ],
+        },
         CssRule {
             prelude: CssSelectorList [
-                CssBogusSelector {
-                    items: [
-                        BANG@0..1 "!" [] [],
-                    ],
-                },
-                missing separator,
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
                         CssClassSelector {
                             dot_token: DOT@1..2 "." [] [],
-                            name: CssIdentifier {
+                            name: CssCustomIdentifier {
                                 value_token: IDENT@2..11 "selector" [] [Whitespace(" ")],
                             },
                         },
                     ],
                 },
             ],
-            block: CssBlock {
+            block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@11..12 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@12..15 "}" [Newline("\n"), Newline("\n")] [],
             },
         },
@@ -57,20 +56,19 @@ CssRoot {
 0: CSS_ROOT@0..16
   0: (empty)
   1: CSS_RULE_LIST@0..15
-    0: CSS_RULE@0..15
-      0: CSS_SELECTOR_LIST@0..11
-        0: CSS_BOGUS_SELECTOR@0..1
-          0: BANG@0..1 "!" [] []
-        1: (empty)
-        2: CSS_COMPOUND_SELECTOR@1..11
+    0: CSS_BOGUS_RULE@0..1
+      0: BANG@0..1 "!" [] []
+    1: CSS_RULE@1..15
+      0: CSS_SELECTOR_LIST@1..11
+        0: CSS_COMPOUND_SELECTOR@1..11
           0: (empty)
           1: (empty)
           2: CSS_SUB_SELECTOR_LIST@1..11
             0: CSS_CLASS_SELECTOR@1..11
               0: DOT@1..2 "." [] []
-              1: CSS_IDENTIFIER@2..11
+              1: CSS_CUSTOM_IDENTIFIER@2..11
                 0: IDENT@2..11 "selector" [] [Whitespace(" ")]
-      1: CSS_BLOCK@11..15
+      1: CSS_DECLARATION_LIST_BLOCK@11..15
         0: L_CURLY@11..12 "{" [] []
         1: CSS_DECLARATION_LIST@12..12
         2: R_CURLY@12..15 "}" [Newline("\n"), Newline("\n")] []
@@ -83,30 +81,19 @@ CssRoot {
 ```
 invalid_selector.css:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a selector but instead found '!'.
+  × Expected a rule, or an at rule but instead found '!'.
   
   > 1 │ !.selector {
       │ ^
     2 │ 
     3 │ }
   
-  i Expected a selector here.
+  i Expected a rule, or an at rule here.
   
   > 1 │ !.selector {
       │ ^
     2 │ 
     3 │ }
-  
-invalid_selector.css:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `.`
-  
-  > 1 │ !.selector {
-      │  ^
-    2 │ 
-    3 │ }
-  
-  i Remove .
   
 ```
 

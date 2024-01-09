@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsonc
 ---
 # Input
-```js
+```cjs
 /   /;
 ```
 
@@ -18,7 +18,7 @@ invalid.jsonc:1:2 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
   
   i It's hard to visually count the amount of spaces.
   
-  i Unsafe fix: Use a quantifier instead.
+  i Safe fix: Use a quantifier instead.
   
   - /···/;
   + /·{3}/;
@@ -27,7 +27,7 @@ invalid.jsonc:1:2 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 
 # Input
-```js
+```cjs
 /  foo/;
 ```
 
@@ -42,7 +42,7 @@ invalid.jsonc:1:2 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
   
   i It's hard to visually count the amount of spaces.
   
-  i Unsafe fix: Use a quantifier instead.
+  i Safe fix: Use a quantifier instead.
   
   - /··foo/;
   + /·{2}foo/;
@@ -51,7 +51,7 @@ invalid.jsonc:1:2 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 
 # Input
-```js
+```cjs
 /foo   /;
 ```
 
@@ -66,7 +66,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
   
   i It's hard to visually count the amount of spaces.
   
-  i Unsafe fix: Use a quantifier instead.
+  i Safe fix: Use a quantifier instead.
   
   - /foo···/;
   + /foo·{3}/;
@@ -75,7 +75,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 
 # Input
-```js
+```cjs
 /foo  bar/;
 ```
 
@@ -90,7 +90,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
   
   i It's hard to visually count the amount of spaces.
   
-  i Unsafe fix: Use a quantifier instead.
+  i Safe fix: Use a quantifier instead.
   
   - /foo··bar/;
   + /foo·{2}bar/;
@@ -99,7 +99,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 
 # Input
-```js
+```cjs
 /foo   bar    baz/;
 ```
 
@@ -114,7 +114,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
   
   i It's hard to visually count the amount of spaces.
   
-  i Unsafe fix: Use a quantifier instead.
+  i Safe fix: Use a quantifier instead.
   
   - /foo···bar····baz/;
   + /foo·{3}bar·{4}baz/;
@@ -123,7 +123,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 
 # Input
-```js
+```cjs
 /foo [ba]r  b(a|z)/;
 ```
 
@@ -138,7 +138,7 @@ invalid.jsonc:1:11 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  
   
   i It's hard to visually count the amount of spaces.
   
-  i Unsafe fix: Use a quantifier instead.
+  i Safe fix: Use a quantifier instead.
   
   - /foo·[ba]r··b(a|z)/;
   + /foo·[ba]r·{2}b(a|z)/;
@@ -147,7 +147,7 @@ invalid.jsonc:1:11 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  
 ```
 
 # Input
-```js
+```cjs
 /foo  +/;
 ```
 
@@ -162,7 +162,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
   
   i It's hard to visually count the amount of spaces.
   
-  i Unsafe fix: Use a quantifier instead.
+  i Safe fix: Use a quantifier instead.
   
   - /foo··+/;
   + /foo·{2,}/;
@@ -171,7 +171,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 
 # Input
-```js
+```cjs
 /foo  +?/;
 ```
 
@@ -186,7 +186,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
   
   i It's hard to visually count the amount of spaces.
   
-  i Unsafe fix: Use a quantifier instead.
+  i Safe fix: Use a quantifier instead.
   
   - /foo··+?/;
   + /foo·{2,}?/;
@@ -195,7 +195,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 
 # Input
-```js
+```cjs
 /foo  */;
 ```
 
@@ -210,7 +210,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
   
   i It's hard to visually count the amount of spaces.
   
-  i Unsafe fix: Use a quantifier instead.
+  i Safe fix: Use a quantifier instead.
   
   - /foo··*/;
   + /foo·+/;
@@ -219,7 +219,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 
 # Input
-```js
+```cjs
 /foo  *?/;
 ```
 
@@ -234,7 +234,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
   
   i It's hard to visually count the amount of spaces.
   
-  i Unsafe fix: Use a quantifier instead.
+  i Safe fix: Use a quantifier instead.
   
   - /foo··*?/;
   + /foo·+?/;
@@ -243,7 +243,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 
 # Input
-```js
+```cjs
 /foo   */;
 ```
 
@@ -258,7 +258,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
   
   i It's hard to visually count the amount of spaces.
   
-  i Unsafe fix: Use a quantifier instead.
+  i Safe fix: Use a quantifier instead.
   
   - /foo···*/;
   + /foo·{2,}/;
@@ -267,7 +267,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 
 # Input
-```js
+```cjs
 /foo  ?/;
 ```
 
@@ -282,7 +282,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
   
   i It's hard to visually count the amount of spaces.
   
-  i Unsafe fix: Use a quantifier instead.
+  i Safe fix: Use a quantifier instead.
   
   - /foo··?/;
   + /foo·{1,2}/;
@@ -291,7 +291,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 
 # Input
-```js
+```cjs
 /foo  {2}/;
 ```
 
@@ -306,7 +306,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
   
   i It's hard to visually count the amount of spaces.
   
-  i Unsafe fix: Use a quantifier instead.
+  i Safe fix: Use a quantifier instead.
   
   - /foo··{2}/;
   + /foo·{3}/;
@@ -315,7 +315,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 
 # Input
-```js
+```cjs
 /foo  {2}a{1,2}/;
 ```
 
@@ -330,7 +330,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
   
   i It's hard to visually count the amount of spaces.
   
-  i Unsafe fix: Use a quantifier instead.
+  i Safe fix: Use a quantifier instead.
   
   - /foo··{2}a{1,2}/;
   + /foo·{3}a{1,2}/;
@@ -339,7 +339,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 
 # Input
-```js
+```cjs
 /foo  {2,}/;
 ```
 
@@ -354,7 +354,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
   
   i It's hard to visually count the amount of spaces.
   
-  i Unsafe fix: Use a quantifier instead.
+  i Safe fix: Use a quantifier instead.
   
   - /foo··{2,}/;
   + /foo·{3,}/;
@@ -363,7 +363,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 
 # Input
-```js
+```cjs
 /foo  {,2}/;
 ```
 
@@ -378,7 +378,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
   
   i It's hard to visually count the amount of spaces.
   
-  i Unsafe fix: Use a quantifier instead.
+  i Safe fix: Use a quantifier instead.
   
   - /foo··{,2}/;
   + /foo·{2}{,2}/;
@@ -387,7 +387,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 
 # Input
-```js
+```cjs
 /foo  {2,3}/;
 ```
 
@@ -402,7 +402,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
   
   i It's hard to visually count the amount of spaces.
   
-  i Unsafe fix: Use a quantifier instead.
+  i Safe fix: Use a quantifier instead.
   
   - /foo··{2,3}/;
   + /foo·{3,4}/;
@@ -411,7 +411,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 
 # Input
-```js
+```cjs
 /foo  +  *   *   {2,}/;
 ```
 
@@ -426,7 +426,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
   
   i It's hard to visually count the amount of spaces.
   
-  i Unsafe fix: Use a quantifier instead.
+  i Safe fix: Use a quantifier instead.
   
   - /foo··+··*···*···{2,}/;
   + /foo·{2,}·+·{2,}·{4,}/;
@@ -435,7 +435,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 
 # Input
-```js
+```cjs
 /foo  {}/;
 ```
 
@@ -450,7 +450,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
   
   i It's hard to visually count the amount of spaces.
   
-  i Unsafe fix: Use a quantifier instead.
+  i Safe fix: Use a quantifier instead.
   
   - /foo··{}/;
   + /foo·{2}{}/;
@@ -459,7 +459,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 
 # Input
-```js
+```cjs
 /foo  {,}/;
 ```
 
@@ -474,7 +474,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
   
   i It's hard to visually count the amount of spaces.
   
-  i Unsafe fix: Use a quantifier instead.
+  i Safe fix: Use a quantifier instead.
   
   - /foo··{,}/;
   + /foo·{2}{,}/;
@@ -483,7 +483,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 
 # Input
-```js
+```cjs
 /foo  {,2}/;
 ```
 
@@ -498,7 +498,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
   
   i It's hard to visually count the amount of spaces.
   
-  i Unsafe fix: Use a quantifier instead.
+  i Safe fix: Use a quantifier instead.
   
   - /foo··{,2}/;
   + /foo·{2}{,2}/;
@@ -507,7 +507,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 
 # Input
-```js
+```cjs
 /foo  {1 2}/;
 ```
 
@@ -522,7 +522,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
   
   i It's hard to visually count the amount of spaces.
   
-  i Unsafe fix: Use a quantifier instead.
+  i Safe fix: Use a quantifier instead.
   
   - /foo··{1·2}/;
   + /foo·{2}{1·2}/;
@@ -531,7 +531,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 
 # Input
-```js
+```cjs
 /foo  {1/;
 ```
 
@@ -546,7 +546,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
   
   i It's hard to visually count the amount of spaces.
   
-  i Unsafe fix: Use a quantifier instead.
+  i Safe fix: Use a quantifier instead.
   
   - /foo··{1/;
   + /foo·{2}{1/;
@@ -555,7 +555,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 ```
 
 # Input
-```js
+```cjs
 /foo  {1,2/;
 ```
 
@@ -570,7 +570,7 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
   
   i It's hard to visually count the amount of spaces.
   
-  i Unsafe fix: Use a quantifier instead.
+  i Safe fix: Use a quantifier instead.
   
   - /foo··{1,2/;
   + /foo·{2}{1,2/;

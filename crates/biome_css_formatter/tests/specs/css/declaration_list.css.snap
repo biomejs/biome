@@ -1,0 +1,89 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/declaration_list.css
+---
+
+# Input
+
+```css
+.empty {  }
+.oneDeclaration { color     : blue; }
+.multipleDeclarations { color     : blue   ;  background-color  : red; }
+
+.newline {
+    color: blue; background-color: red;
+}
+.no-trailing-semi {
+    color: blue
+}
+
+.empty-line {
+    color: blue;
+    
+    background-color: red;
+}
+.grouping {
+color: blue   ;color: green    ;
+    color  : red ;
+    
+
+        background-color:      red;
+    font-size:   12px;
+    
+    
+    font-weight   :   700;
+}
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+-----
+
+```css
+.empty {
+}
+.oneDeclaration {
+	color: blue;
+}
+.multipleDeclarations {
+	color: blue;
+	background-color: red;
+}
+
+.newline {
+	color: blue;
+	background-color: red;
+}
+.no-trailing-semi {
+	color: blue;
+}
+
+.empty-line {
+	color: blue;
+
+	background-color: red;
+}
+.grouping {
+	color: blue;
+	color: green;
+	color: red;
+
+	background-color: red;
+	font-size: 12px;
+
+	font-weight: 700;
+}
+```
+
+

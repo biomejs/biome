@@ -87,6 +87,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noAriaHiddenOnFocusable": {
+					"description": "Enforce that aria-hidden=\"true\" is not set on focusable elements.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noAriaUnsupportedElements": {
 					"description": "Enforce that elements that do not support ARIA roles, states, and properties do not have those attributes.",
 					"anyOf": [
@@ -261,6 +268,13 @@
 				},
 				"useValidAriaProps": {
 					"description": "Ensures that ARIA properties aria-* are all valid.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useValidAriaRole": {
+					"description": "Elements with ARIA roles must use a valid, non-abstract ARIA role.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -449,6 +463,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useRegexLiterals": {
+					"description": "Enforce the use of the regular expression literals instead of the RegExp constructor if possible.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useSimpleNumberKeys": {
 					"description": "Disallow number literal object member names which are not base10 or uses underscore as separator",
 					"anyOf": [
@@ -476,6 +497,28 @@
 					"format": "uint8",
 					"minimum": 1.0
 				}
+			},
+			"additionalProperties": false
+		},
+		"ConsistentArrayType": {
+			"oneOf": [
+				{
+					"description": "`ItemType[]`",
+					"type": "string",
+					"enum": ["shorthand"]
+				},
+				{
+					"description": "`Array<ItemType>`",
+					"type": "string",
+					"enum": ["generic"]
+				}
+			]
+		},
+		"ConsistentArrayTypeOptions": {
+			"type": "object",
+			"required": ["syntax"],
+			"properties": {
+				"syntax": { "$ref": "#/definitions/ConsistentArrayType" }
 			},
 			"additionalProperties": false
 		},
@@ -775,6 +818,9 @@
 				"lineWidth": {
 					"description": "What's the max width of a line applied to CSS (and its super languages) files. Defaults to 80.",
 					"anyOf": [{ "$ref": "#/definitions/LineWidth" }, { "type": "null" }]
+				},
+				"quoteStyle": {
+					"anyOf": [{ "$ref": "#/definitions/QuoteStyle" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
@@ -788,6 +834,11 @@
 					"type": ["boolean", "null"]
 				}
 			},
+			"additionalProperties": false
+		},
+		"DeprecatedHooksOptions": {
+			"description": "Options for the `useHookAtTopLevel` rule have been deprecated, since we now use the React hook naming convention to determine whether a function is a hook.",
+			"type": "object",
 			"additionalProperties": false
 		},
 		"EnumMemberCase": {
@@ -805,6 +856,52 @@
 				},
 				{ "description": "camelCase", "type": "string", "enum": ["camelCase"] }
 			]
+		},
+		"FilenameCase": {
+			"description": "Supported cases for TypeScript `enum` member names.",
+			"oneOf": [
+				{ "description": "camelCase", "type": "string", "enum": ["camelCase"] },
+				{
+					"description": "Match an export name",
+					"type": "string",
+					"enum": ["export"]
+				},
+				{
+					"description": "kebab-case",
+					"type": "string",
+					"enum": ["kebab-case"]
+				},
+				{
+					"description": "PascalCase",
+					"type": "string",
+					"enum": ["PascalCase"]
+				},
+				{
+					"description": "snake_case",
+					"type": "string",
+					"enum": ["snake_case"]
+				}
+			]
+		},
+		"FilenameCases": {
+			"type": "array",
+			"items": { "$ref": "#/definitions/FilenameCase" },
+			"uniqueItems": true
+		},
+		"FilenamingConventionOptions": {
+			"description": "Rule's options.",
+			"type": "object",
+			"properties": {
+				"filenameCases": {
+					"description": "Allowed cases for _TypeScript_ `enum` member names.",
+					"allOf": [{ "$ref": "#/definitions/FilenameCases" }]
+				},
+				"strictCase": {
+					"description": "If `false`, then consecutive uppercase are allowed in _camel_ and _pascal_ cases. This does not affect other [Case].",
+					"type": "boolean"
+				}
+			},
+			"additionalProperties": false
 		},
 		"FilesConfiguration": {
 			"description": "The configuration of the filesystem",
@@ -906,7 +1003,7 @@
 			"additionalProperties": false
 		},
 		"HooksOptions": {
-			"description": "Options for the rule `useExhaustiveDependencies` and `useHookAtTopLevel`",
+			"description": "Options for the rule `useExhaustiveDependencies`",
 			"type": "object",
 			"required": ["hooks"],
 			"properties": {
@@ -1185,20 +1282,6 @@
 					"description": "It enables ALL rules for this group.",
 					"type": ["boolean", "null"]
 				},
-				"noAriaHiddenOnFocusable": {
-					"description": "Enforce that aria-hidden=\"true\" is not set on focusable elements.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noDefaultExport": {
-					"description": "Disallow default exports.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noDuplicateJsonKeys": {
 					"description": "Disallow two keys with the same name inside a JSON object.",
 					"anyOf": [
@@ -1213,8 +1296,22 @@
 						{ "type": "null" }
 					]
 				},
-				"noImplicitAnyLet": {
-					"description": "Disallow use of implicit any type on variable declarations.",
+				"noEmptyTypeParameters": {
+					"description": "Disallow empty type parameters in type aliases and interfaces.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noGlobalAssign": {
+					"description": "Disallow assignments to native objects and read-only global variables.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noGlobalEval": {
+					"description": "Disallow the use of global eval().",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -1235,7 +1332,14 @@
 					]
 				},
 				"noNodejsModules": {
-					"description": "Forbid the use of Node.js builtin modules. Can be useful for client-side web projects that do not have access to those modules.",
+					"description": "Forbid the use of Node.js builtin modules.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noThenProperty": {
+					"description": "Disallow then property.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -1287,6 +1391,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useFilenamingConvention": {
+					"description": "Enforce naming conventions for JavaScript and TypeScript filenames.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useForOf": {
 					"description": "This rule recommends a for-of loop when in a for loop, the index used to extract an item from the iterated array.",
 					"anyOf": [
@@ -1308,15 +1419,22 @@
 						{ "type": "null" }
 					]
 				},
-				"useNodeImportProtocol": {
+				"useImportType": {
+					"description": "Promotes the use of import type for types.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useNodejsImportProtocol": {
 					"description": "Enforces using the node: protocol for Node.js builtin modules.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
 				},
-				"useRegexLiterals": {
-					"description": "Enforce the use of the regular expression literals instead of the RegExp constructor if possible.",
+				"useNumberNamespace": {
+					"description": "Use the Number properties instead of global ones.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -1324,13 +1442,6 @@
 				},
 				"useShorthandFunctionType": {
 					"description": "Enforce using function types instead of object type with call signatures.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useValidAriaRole": {
-					"description": "Elements with ARIA roles must use a valid, non-abstract ARIA role.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -1522,8 +1633,20 @@
 					"allOf": [{ "$ref": "#/definitions/ComplexityOptions" }]
 				},
 				{
-					"description": "Options for `useExhaustiveDependencies` and `useHookAtTopLevel` rule",
+					"description": "Options for `useConsistentArrayType` rule",
+					"allOf": [{ "$ref": "#/definitions/ConsistentArrayTypeOptions" }]
+				},
+				{
+					"description": "Options for `useFilenamingConvention` rule",
+					"allOf": [{ "$ref": "#/definitions/FilenamingConventionOptions" }]
+				},
+				{
+					"description": "Options for `useExhaustiveDependencies` rule",
 					"allOf": [{ "$ref": "#/definitions/HooksOptions" }]
+				},
+				{
+					"description": "Deprecated options for `useHookAtTopLevel` rule",
+					"allOf": [{ "$ref": "#/definitions/DeprecatedHooksOptions" }]
 				},
 				{
 					"description": "Options for `useNamingConvention` rule",
@@ -1671,6 +1794,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noDefaultExport": {
+					"description": "Disallow default exports.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noImplicitBoolean": {
 					"description": "Disallow implicit true values on JSX boolean attributes",
 					"anyOf": [
@@ -1775,6 +1905,13 @@
 				},
 				"useCollapsedElseIf": {
 					"description": "Enforce using else if instead of nested if in else clauses.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useConsistentArrayType": {
+					"description": "Require consistently using either T[] or Array<T>",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -2079,6 +2216,13 @@
 				},
 				"noGlobalIsNan": {
 					"description": "Use Number.isNaN instead of global isNaN.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noImplicitAnyLet": {
+					"description": "Disallow use of implicit any type on variable declarations.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

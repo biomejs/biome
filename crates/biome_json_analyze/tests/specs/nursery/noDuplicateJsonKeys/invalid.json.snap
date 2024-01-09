@@ -3,7 +3,7 @@ source: crates/biome_json_analyze/tests/spec_tests.rs
 expression: invalid.json
 ---
 # Input
-```js
+```json
 {
 	"foo": "",
 	"foo": "",

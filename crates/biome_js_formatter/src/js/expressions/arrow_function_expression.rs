@@ -225,14 +225,13 @@ fn format_signature(
                 AnyJsArrowFunctionParameters::AnyJsBinding(binding) => {
                     let should_hug =
                         is_test_call_argument(arrow.syntax())? || is_first_or_last_call_argument;
-
                     let parentheses_not_needed = can_avoid_parentheses(arrow, f);
 
                     if !parentheses_not_needed {
                         write!(f, [text("(")])?;
                     }
 
-                    if should_hug {
+                    if should_hug || parentheses_not_needed {
                         write!(f, [binding.format()])?;
                     } else {
                         write!(

@@ -1,52 +1,48 @@
 //! This module contains the rules that have options
 
-use crate::analyzers::complexity::no_excessive_cognitive_complexity::{
-    complexity_options, ComplexityOptions,
-};
-use crate::aria_analyzers::nursery::use_valid_aria_role::{
-    valid_aria_role_options, ValidAriaRoleOptions,
-};
-use crate::semantic_analyzers::correctness::use_exhaustive_dependencies::{
-    hooks_options, HooksOptions,
-};
-use crate::semantic_analyzers::style::no_restricted_globals::{
-    restricted_globals_options, RestrictedGlobalsOptions,
-};
-use crate::semantic_analyzers::style::use_naming_convention::{
-    naming_convention_options, NamingConventionOptions,
+use crate::analyzers::nursery::use_filenaming_convention::FilenamingConventionOptions;
+use crate::analyzers::style::use_consistent_array_type::ConsistentArrayTypeOptions;
+use crate::semantic_analyzers::correctness::use_exhaustive_dependencies::HooksOptions;
+use crate::semantic_analyzers::correctness::use_hook_at_top_level::DeprecatedHooksOptions;
+use crate::semantic_analyzers::style::no_restricted_globals::RestrictedGlobalsOptions;
+use crate::semantic_analyzers::style::use_naming_convention::NamingConventionOptions;
+use crate::{
+    analyzers::complexity::no_excessive_cognitive_complexity::ComplexityOptions,
+    aria_analyzers::a11y::use_valid_aria_role::ValidAriaRoleOptions,
 };
 use biome_analyze::options::RuleOptions;
 use biome_analyze::RuleKey;
 use biome_console::markup;
 use biome_deserialize::{Deserializable, DeserializableValue, DeserializationDiagnostic};
-use bpaf::Bpaf;
 #[cfg(feature = "schemars")]
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use std::str::FromStr;
 
-#[derive(Deserialize, Serialize, Debug, Eq, PartialEq, Clone, Bpaf)]
+#[derive(Deserialize, Serialize, Debug, Eq, PartialEq, Clone)]
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, untagged)]
 pub enum PossibleOptions {
     /// Options for `noExcessiveComplexity` rule
-    Complexity(#[bpaf(external(complexity_options), hide)] ComplexityOptions),
-    /// Options for `useExhaustiveDependencies` and `useHookAtTopLevel` rule
-    Hooks(#[bpaf(external(hooks_options), hide)] HooksOptions),
+    Complexity(ComplexityOptions),
+    /// Options for `useConsistentArrayType` rule
+    ConsistentArrayType(ConsistentArrayTypeOptions),
+    /// Options for `useFilenamingConvention` rule
+    FilenamingConvention(FilenamingConventionOptions),
+    /// Options for `useExhaustiveDependencies` rule
+    Hooks(HooksOptions),
+    /// Deprecated options for `useHookAtTopLevel` rule
+    DeprecatedHooks(DeprecatedHooksOptions),
     /// Options for `useNamingConvention` rule
-    NamingConvention(#[bpaf(external(naming_convention_options), hide)] NamingConventionOptions),
+    NamingConvention(NamingConventionOptions),
     /// Options for `noRestrictedGlobals` rule
-    RestrictedGlobals(#[bpaf(external(restricted_globals_options), hide)] RestrictedGlobalsOptions),
+    RestrictedGlobals(RestrictedGlobalsOptions),
     /// Options for `useValidAriaRole` rule
-    ValidAriaRole(#[bpaf(external(valid_aria_role_options), hide)] ValidAriaRoleOptions),
+    ValidAriaRole(ValidAriaRoleOptions),
 }
 
-// Required by [Bpaf].
-impl FromStr for PossibleOptions {
-    type Err = ();
-
-    fn from_str(_s: &str) -> Result<Self, Self::Err> {
-        Ok(Self::Complexity(ComplexityOptions::default()))
+impl Default for PossibleOptions {
+    fn default() -> Self {
+        Self::Complexity(ComplexityOptions::default())
     }
 }
 
@@ -60,10 +56,31 @@ impl PossibleOptions {
                 };
                 RuleOptions::new(options)
             }
-            "useExhaustiveDependencies" | "useHookAtTopLevel" => {
+            "useConsistentArrayType" => {
+                let options = match self {
+                    PossibleOptions::ConsistentArrayType(options) => options.clone(),
+                    _ => ConsistentArrayTypeOptions::default(),
+                };
+                RuleOptions::new(options)
+            }
+            "useExhaustiveDependencies" => {
                 let options = match self {
                     PossibleOptions::Hooks(options) => options.clone(),
                     _ => HooksOptions::default(),
+                };
+                RuleOptions::new(options)
+            }
+            "useFilenamingConvention" => {
+                let options = match self {
+                    PossibleOptions::FilenamingConvention(options) => options.clone(),
+                    _ => FilenamingConventionOptions::default(),
+                };
+                RuleOptions::new(options)
+            }
+            "useHookAtTopLevel" => {
+                let options = match self {
+                    PossibleOptions::DeprecatedHooks(options) => options.clone(),
+                    _ => DeprecatedHooksOptions::default(),
                 };
                 RuleOptions::new(options)
             }
@@ -106,9 +123,15 @@ impl Deserializable for PossibleOptions {
             }
             "noRestrictedGlobals" => Deserializable::deserialize(value, "options", diagnostics)
                 .map(Self::RestrictedGlobals),
-            "useExhaustiveDependencies" | "useHookAtTopLevel" => {
+            "useConsistentArrayType" => Deserializable::deserialize(value, "options", diagnostics)
+                .map(Self::ConsistentArrayType),
+            "useExhaustiveDependencies" => {
                 Deserializable::deserialize(value, "options", diagnostics).map(Self::Hooks)
             }
+            "useHookAtTopLevel" => Deserializable::deserialize(value, "options", diagnostics)
+                .map(Self::DeprecatedHooks),
+            "useFilenamingConvention" => Deserializable::deserialize(value, "options", diagnostics)
+                .map(Self::FilenamingConvention),
             "useNamingConvention" => Deserializable::deserialize(value, "options", diagnostics)
                 .map(Self::NamingConvention),
             "useValidAriaRole" => {

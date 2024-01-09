@@ -1,0 +1,61 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/selectors/complex_selector.css
+---
+
+# Input
+
+```css
+.parent>.child {}
+.parent > .child {}
+.parent  >  .child {}
+
+.parent+.child {}
+.parent + .child {}
+.parent  +  .child {}
+
+.parent~.child {}
+.parent ~ .child {}
+.parent  ~  .child {}
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+-----
+
+```css
+.parent > .child {
+}
+.parent > .child {
+}
+.parent > .child {
+}
+
+.parent + .child {
+}
+.parent + .child {
+}
+.parent + .child {
+}
+
+.parent ~ .child {
+}
+.parent ~ .child {
+}
+.parent ~ .child {
+}
+```
+
+

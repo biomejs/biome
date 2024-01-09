@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: nullishAndLogicalOr1.ts
 ---
 # Input
-```js
+```ts
 (foo || {}).bar;
 (foo || ({})).bar;
 (await foo || {}).bar;

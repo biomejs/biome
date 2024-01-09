@@ -1,0 +1,105 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/pseudo/pseudo_class_function_nth.css
+---
+
+# Input
+
+```css
+:nth-child(2n+1) {}
+:nth-child(2n + 1) {}
+:nth-child(-2n   - 3) {}
+:nth-child(+2n   - 3) {}
+:nth-child(2n
+ +
+ 
+   1) {}
+:nth-child(
+    2n+ 1) {}
+:nth-child(
+    2n) {}
+
+:nth-child(
+odd) {}
+:nth-child(
+    even) {}
+:nth-child(
+    102) {}
+:nth-child(
+    -102) {}
+
+
+:nth-child(2n+1 of li, .test) {}
+:nth-child(
+    
+    2n+1 of 
+    li,
+    
+    .test) {}
+
+:nth-child(2n+1
+    of
+    li, .test) {}
+:nth-child(2n+1
+        of
+        li, .test, .anotherLongClassName, #aSelectorLongEnoughToBreak, .OverMultipleLinesWithIndentation) {}
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+-----
+
+```css
+:nth-child(2n + 1) {
+}
+:nth-child(2n + 1) {
+}
+:nth-child(-2n - 3) {
+}
+:nth-child(+2n - 3) {
+}
+:nth-child(2n + 1) {
+}
+:nth-child(2n + 1) {
+}
+:nth-child(2n) {
+}
+
+:nth-child(odd) {
+}
+:nth-child(even) {
+}
+:nth-child(102) {
+}
+:nth-child(-102) {
+}
+
+:nth-child(2n + 1 of li, .test) {
+}
+:nth-child(2n + 1 of li, .test) {
+}
+
+:nth-child(2n + 1 of li, .test) {
+}
+:nth-child(
+		2n + 1 of li,
+		.test,
+		.anotherLongClassName,
+		#aSelectorLongEnoughToBreak,
+		.OverMultipleLinesWithIndentation
+	) {
+}
+```
+
+

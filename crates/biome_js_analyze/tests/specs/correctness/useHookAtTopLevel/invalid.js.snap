@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
 ---
 # Input
-```js
+```jsx
 // Hook called directly at the component function
 function Component1({ a }) {
     if (a == 1) {
@@ -16,7 +16,7 @@ function Component1({ a }) {
         }
     }
 
-    for (;a < 10;) {
+    for (; a < 10;) {
         useEffect();
     }
 
@@ -28,13 +28,13 @@ function Component1({ a }) {
         useEffect();
     }
 
-    while(a < 10) {
+    while (a < 10) {
         useEffect();
     }
 
     do {
         useEffect();
-    } while(a < 10)
+    } while (a < 10)
 
     a && useEffect();
 
@@ -50,7 +50,7 @@ function helper2() {
     helper1();
 }
 
-function Component2({a}) {
+function Component2({ a }) {
     if (a) {
         helper2(1);
     }
@@ -133,6 +133,35 @@ function Component14() {
     Component13();
 }
 
+function useHookInsideTryClause() {
+    try {
+        useState();
+    } catch { }
+}
+
+function useHookInsideCatchClause() {
+    try {
+    } catch (error) {
+        useErrorHandler(error);
+    }
+}
+
+function useHookInsideObjectBindingInitializer(props) {
+    const { value = useDefaultValue() } = props;
+}
+
+function useHookInsideObjectBindingInitializerInArgument({ value = useDefaultValue() }) {
+}
+
+function useHookInsideArrayAssignmentInitializer(props) {
+    let item;
+    [item = useDefaultItem()] = props.array;
+}
+
+function useHookInsideArrayBindingInitializer(props) {
+    const [item = useDefaultItem()] = props.array;
+}
+
 ```
 
 # Diagnostics
@@ -179,7 +208,7 @@ invalid.js:14:9 lint/correctness/useHookAtTopLevel ━━━━━━━━━�
 
   ! This hook is being called conditionally, but all hooks must be called in the exact same order in every component render.
   
-    13 │     for (;a < 10;) {
+    13 │     for (; a < 10;) {
   > 14 │         useEffect();
        │         ^^^^^^^^^
     15 │     }
@@ -233,7 +262,7 @@ invalid.js:26:9 lint/correctness/useHookAtTopLevel ━━━━━━━━━�
 
   ! This hook is being called conditionally, but all hooks must be called in the exact same order in every component render.
   
-    25 │     while(a < 10) {
+    25 │     while (a < 10) {
   > 26 │         useEffect();
        │         ^^^^^^^^^
     27 │     }
@@ -254,7 +283,7 @@ invalid.js:30:9 lint/correctness/useHookAtTopLevel ━━━━━━━━━�
     29 │     do {
   > 30 │         useEffect();
        │         ^^^^^^^^^
-    31 │     } while(a < 10)
+    31 │     } while (a < 10)
     32 │ 
   
   i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
@@ -269,7 +298,7 @@ invalid.js:33:10 lint/correctness/useHookAtTopLevel ━━━━━━━━━�
 
   ! This hook is being called conditionally, but all hooks must be called in the exact same order in every component render.
   
-    31 │     } while(a < 10)
+    31 │     } while (a < 10)
     32 │ 
   > 33 │     a && useEffect();
        │          ^^^^^^^^^
@@ -286,7 +315,7 @@ invalid.js:33:10 lint/correctness/useHookAtTopLevel ━━━━━━━━━�
 ```
 invalid.js:35:17 lint/correctness/useHookAtTopLevel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This hook is being called conditionally, but all hooks must be called in the exact same order in every component render.
+  ! This hook is being called from a nested function, but all hooks must be called unconditionally from the top-level component.
   
     33 │     a && useEffect();
     34 │ 
@@ -327,7 +356,7 @@ invalid.js:40:5 lint/correctness/useHookAtTopLevel ━━━━━━━━━�
   
   i 
   
-    47 │ function Component2({a}) {
+    47 │ function Component2({ a }) {
   > 48 │     if (a) {
        │             
   > 49 │         helper2(1);
@@ -621,6 +650,118 @@ invalid.js:119:5 lint/correctness/useHookAtTopLevel ━━━━━━━━━�
         │         ^^^^^^^
     125 │     }
     126 │ 
+  
+  i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
+  
+  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  
+
+```
+
+```
+invalid.js:132:9 lint/correctness/useHookAtTopLevel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This hook is being called conditionally, but all hooks must be called in the exact same order in every component render.
+  
+    130 │ function useHookInsideTryClause() {
+    131 │     try {
+  > 132 │         useState();
+        │         ^^^^^^^^
+    133 │     } catch { }
+    134 │ }
+  
+  i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
+  
+  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  
+
+```
+
+```
+invalid.js:139:9 lint/correctness/useHookAtTopLevel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This hook is being called conditionally, but all hooks must be called in the exact same order in every component render.
+  
+    137 │     try {
+    138 │     } catch (error) {
+  > 139 │         useErrorHandler(error);
+        │         ^^^^^^^^^^^^^^^
+    140 │     }
+    141 │ }
+  
+  i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
+  
+  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  
+
+```
+
+```
+invalid.js:144:21 lint/correctness/useHookAtTopLevel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This hook is being called conditionally, but all hooks must be called in the exact same order in every component render.
+  
+    143 │ function useHookInsideObjectBindingInitializer(props) {
+  > 144 │     const { value = useDefaultValue() } = props;
+        │                     ^^^^^^^^^^^^^^^
+    145 │ }
+    146 │ 
+  
+  i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
+  
+  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  
+
+```
+
+```
+invalid.js:147:68 lint/correctness/useHookAtTopLevel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This hook is being called conditionally, but all hooks must be called in the exact same order in every component render.
+  
+    145 │ }
+    146 │ 
+  > 147 │ function useHookInsideObjectBindingInitializerInArgument({ value = useDefaultValue() }) {
+        │                                                                    ^^^^^^^^^^^^^^^
+    148 │ }
+    149 │ 
+  
+  i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
+  
+  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  
+
+```
+
+```
+invalid.js:152:13 lint/correctness/useHookAtTopLevel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This hook is being called conditionally, but all hooks must be called in the exact same order in every component render.
+  
+    150 │ function useHookInsideArrayAssignmentInitializer(props) {
+    151 │     let item;
+  > 152 │     [item = useDefaultItem()] = props.array;
+        │             ^^^^^^^^^^^^^^
+    153 │ }
+    154 │ 
+  
+  i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
+  
+  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  
+
+```
+
+```
+invalid.js:156:19 lint/correctness/useHookAtTopLevel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This hook is being called conditionally, but all hooks must be called in the exact same order in every component render.
+  
+    155 │ function useHookInsideArrayBindingInitializer(props) {
+  > 156 │     const [item = useDefaultItem()] = props.array;
+        │                   ^^^^^^^^^^^^^^
+    157 │ }
+    158 │ 
   
   i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
   

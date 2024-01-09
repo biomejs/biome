@@ -1,10 +1,9 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 96
 expression: invalid.jsx
 ---
 # Input
-```js
+```jsx
 var a = <span role="checkbox"></span>;
 var a = <span role="switch"></span>;
 var a = <span role="spinbutton"></span>;

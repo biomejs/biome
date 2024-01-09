@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
 ---
 # Input
-```js
+```jsx
 const self = this, v = 0, /*u*/ u = 2, self2 = this;
 
 function f() {

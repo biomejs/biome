@@ -1,9 +1,9 @@
 ---
-source: crates/rome_js_analyze/tests/spec_tests.rs
+source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.ts
 ---
 # Input
-```js
+```ts
 /* should not generate diagnostics */
 
 declare abstract class C {

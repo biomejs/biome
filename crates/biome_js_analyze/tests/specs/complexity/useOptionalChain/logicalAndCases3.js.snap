@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: logicalAndCases3.js
 ---
 # Input
-```js
+```jsx
 // chained calls
 foo && foo.bar && foo.bar.baz && foo.bar.baz.buzz() && bing.bong
 foo && foo.bar && foo.bar.baz && foo.bar.baz.buzz && foo.bar.baz.buzz() && bing.bong

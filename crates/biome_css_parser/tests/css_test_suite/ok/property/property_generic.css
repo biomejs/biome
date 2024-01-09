@@ -1,0 +1,26 @@
+div {
+    /* Unknown property, always generic */
+    unknown-property: a value;
+    unknown-property: one-value;
+    unknown-property: multiple values;
+    unknown-property: delimited, values;
+    unknown-property: delimited / slash / values;
+    unknown-property: mixed, delimiters / can be, used;
+
+    /* Custom property, always generic */
+    --custom-property: a value;
+    --custom-property: one-value;
+    --custom-property: multiple values;
+    --custom-property: delimited, values;
+    --custom-property: delimited / slash / values;
+    --custom-property: mixed, delimiters / can be, used;
+
+
+    /* Known property, incorrect values become generic */
+    all: 10s;
+    all: one-value;
+    all: multiple values;
+    all: delimited, values;
+    all: delimited / slash / values;
+    all: mixed, delimiters / can be, used;
+}

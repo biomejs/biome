@@ -122,7 +122,8 @@ impl CallInfo {
         if args.len() != 2 {
             return None;
         }
-        let [Some(text), Some(radix)] = expr.get_arguments_by_index([0, 1]) else {
+        let [Some(text), Some(radix)] = expr.arguments().ok()?.get_arguments_by_index([0, 1])
+        else {
             return None;
         };
         let text = text

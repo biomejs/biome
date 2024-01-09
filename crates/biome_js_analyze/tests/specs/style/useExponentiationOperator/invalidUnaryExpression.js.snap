@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidUnaryExpression.js
 ---
 # Input
-```js
+```jsx
 // unary expressions are exception by the language - parens are required for the base to disambiguate operator precedence
 Math.pow(+a, b)
 Math.pow(a, +b)

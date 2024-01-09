@@ -16,7 +16,6 @@ proc-macro2    = { version = "1.0.63", features = ["span-locations"] }
 pulldown-cmark = { version = "0.9", default-features = false, optional = true }
 quote          = "1.0.14"
 serde          = { workspace = true, optional = true }
-ungrammar      = "1.14.9"
 ureq           = "2.4.0"
 walkdir        = "2.3.2"
 xtask          = { path = '../', version = "0.0" }
@@ -36,6 +35,7 @@ biome_json_parser    = { workspace = true, optional = true }
 biome_json_syntax    = { workspace = true, optional = true }
 biome_rowan          = { workspace = true, optional = true }
 biome_service        = { workspace = true, features = ["schema"], optional = true }
+biome_ungrammar      = { workspace = true }
 schemars             = { version = "0.8.10", optional = true }
 serde_json           = { version = "1.0.74", optional = true }
 
@@ -62,3 +62,7 @@ schema = [
   "biome_diagnostics",
 ]
 website = ["schema", "biome_service", "biome_cli/docgen", "biome_js_parser", "biome_js_formatter", "biome_js_syntax"]
+
+
+[lints]
+workspace = true

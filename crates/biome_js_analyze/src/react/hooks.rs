@@ -1,13 +1,14 @@
 use crate::react::{is_react_call_api, ReactLibrary};
 
 use biome_js_semantic::{Capture, Closure, ClosureExtensions, SemanticModel};
+use biome_js_syntax::JsLanguage;
 use biome_js_syntax::{
     binding_ext::AnyJsIdentifierBinding, static_value::StaticValue, AnyJsExpression,
     AnyJsMemberExpression, JsArrayBindingPattern, JsArrayBindingPatternElementList,
     JsArrowFunctionExpression, JsCallExpression, JsFunctionExpression, JsVariableDeclarator,
     TextRange,
 };
-use biome_rowan::AstNode;
+use biome_rowan::{AstNode, SyntaxToken};
 use rustc_hash::{FxHashMap, FxHashSet};
 use serde::{Deserialize, Serialize};
 
@@ -95,10 +96,7 @@ impl From<(usize, usize)> for ReactHookConfiguration {
     }
 }
 
-pub(crate) fn react_hook_configuration<'a>(
-    call: &JsCallExpression,
-    hooks: &'a FxHashMap<String, ReactHookConfiguration>,
-) -> Option<&'a ReactHookConfiguration> {
+fn get_untrimmed_callee_name(call: &JsCallExpression) -> Option<SyntaxToken<JsLanguage>> {
     let name = call
         .callee()
         .ok()?
@@ -107,9 +105,21 @@ pub(crate) fn react_hook_configuration<'a>(
         .ok()?
         .value_token()
         .ok()?;
-    let name = name.text_trimmed();
+    Some(name)
+}
 
-    hooks.get(name)
+/// Checks whether the given call expression calls a React hook, based on the
+/// official convention for React hook naming: Hook names must start with `use`
+/// followed by a capital letter.
+///
+/// Source: https://react.dev/learn/reusing-logic-with-custom-hooks#hook-names-always-start-with-use
+pub(crate) fn is_react_hook_call(call: &JsCallExpression) -> bool {
+    let Some(name) = get_untrimmed_callee_name(call) else {
+        return false;
+    };
+
+    let name = name.text_trimmed();
+    name.starts_with("use") && name.chars().nth(3).is_some_and(char::is_uppercase)
 }
 
 const HOOKS_WITH_DEPS_API: [&str; 6] = [
@@ -164,7 +174,7 @@ pub(crate) fn react_hook_with_dependency(
 
     let mut indices = [closure_index, dependencies_index];
     indices.sort_unstable();
-    let [closure_node, dependencies_node] = call.get_arguments_by_index(indices);
+    let [closure_node, dependencies_node] = call.arguments().ok()?.get_arguments_by_index(indices);
 
     Some(ReactCallWithDependencyResult {
         function_name_range,
@@ -256,9 +266,45 @@ pub fn is_binding_react_stable(
 #[cfg(test)]
 mod test {
     use super::*;
+    use crate::react::hooks::is_react_hook_call;
     use biome_js_parser::JsParserOptions;
     use biome_js_semantic::{semantic_model, SemanticModelOptions};
     use biome_js_syntax::JsFileSource;
+
+    #[test]
+    fn test_is_react_hook_call() {
+        {
+            let r = biome_js_parser::parse(
+                r#"useRef();"#,
+                JsFileSource::js_module(),
+                JsParserOptions::default(),
+            );
+            let node = r
+                .syntax()
+                .descendants()
+                .filter(|x| x.text_trimmed() == "useRef()")
+                .last()
+                .unwrap();
+            let call = JsCallExpression::cast_ref(&node).unwrap();
+            assert!(is_react_hook_call(&call));
+        }
+
+        {
+            let r = biome_js_parser::parse(
+                r#"userCredentials();"#,
+                JsFileSource::js_module(),
+                JsParserOptions::default(),
+            );
+            let node = r
+                .syntax()
+                .descendants()
+                .filter(|x| x.text_trimmed() == "userCredentials()")
+                .last()
+                .unwrap();
+            let call = JsCallExpression::cast_ref(&node).unwrap();
+            assert!(!is_react_hook_call(&call));
+        }
+    }
 
     #[test]
     pub fn ok_react_stable_captures() {

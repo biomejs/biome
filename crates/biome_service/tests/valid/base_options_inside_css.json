@@ -1,0 +1,16 @@
+{
+	"$schema": "../../../../packages/@biomejs/biome/configuration_schema.json",
+	"formatter": {
+		"indentSize": 2
+	},
+	"css": {
+		"formatter": {
+			"enabled": true,
+			"indentStyle": "space",
+			"indentSize": 2,
+			"lineEnding": "lf",
+			"lineWidth": 200,
+			"quoteStyle": "single"
+		}
+	}
+}

@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidFunction.ts
 ---
 # Input
-```js
+```ts
 function f1() { }
 
 // recursive functions are never called,

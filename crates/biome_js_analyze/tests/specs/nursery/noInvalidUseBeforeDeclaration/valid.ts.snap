@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.ts
 ---
 # Input
-```js
+```ts
 
 let i: I;
 interface I {}
@@ -18,6 +18,8 @@ let n = N.X;
 namespace N {
     export const X = 0;
 }
+
+type X = typeof X; const X = 0;
 
 ```
 

@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.js
 ---
 # Input
-```js
+```jsx
 import A from "mod";
 import * as B from "mod";
 import { C } from "mod";

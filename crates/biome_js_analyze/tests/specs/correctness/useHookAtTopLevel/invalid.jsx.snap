@@ -1,0 +1,40 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+function Component() {
+    return (
+        <div onClick={function onClick() {
+            const [count, setCount] = useState();
+            setCount(count + 1);
+        }}>
+            Click Me!
+        </div>
+    );
+}
+
+```
+
+# Diagnostics
+```
+invalid.jsx:4:39 lint/correctness/useHookAtTopLevel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This hook is being called from a nested function, but all hooks must be called unconditionally from the top-level component.
+  
+    2 │     return (
+    3 │         <div onClick={function onClick() {
+  > 4 │             const [count, setCount] = useState();
+      │                                       ^^^^^^^^
+    5 │             setCount(count + 1);
+    6 │         }}>
+  
+  i For React to preserve state between calls, hooks needs to be called unconditionally and always in the same order.
+  
+  i See https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
+  
+
+```
+
+

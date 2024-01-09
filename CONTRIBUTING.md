@@ -353,12 +353,6 @@ If in doubt, take a look to existing changelog lines.
 If your PR requires some update on the website (new features, breaking changes, etc.), you should create a new PR once the previous PR is successfully merged.
 When adding new features, the documentation should be part of a new PR, which will be merged right before the release.
 
-### Magic comments
-
-- `!bench_parser` benchmarks the parser's runtime performance and writes a comment with the results;
-- `!bench_formatter` benchmarks the formatter runtime performance and writes a comment with the results;
-- `!bench_analyzer` benchmarks the analyzer runtime performance and writes a comment with the results;
-
 ### Versioning
 
 We follow the specs suggested by [the official documentation](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#prerelease-extensions):
@@ -397,6 +391,7 @@ We have several resources explaining about Biome. They will help you understand 
 
 - [Rust Dublin October 2023 - Biome - YouTube](https://youtu.be/stxiUYmHn0s?si=C9cMsc93nNrZa-r1)
 - [Rome, a Modern Toolchain! by Emanuele Stoppa - GitNation](https://portal.gitnation.org/contents/rome-a-modern-toolchain)
+- [How to create a lint rule in Biome](https://www.youtube.com/watch?v=zfzMO3nW_Wo&t=343s)
 
 ## Current Members
 
@@ -412,12 +407,11 @@ Members are listed in alphabetical order. Members are free to use the full name,
 - [Daiki Nishikawa @nissy-dev](https://github.com/nissy-dev)
 - [Denis Bezrukov @denbezrukov](https://github.com/denbezrukov)
 - [Hiroki Ihoriya @unvalley](https://github.com/unvalley)
+- [Jon Egeland @faultyserver](https://github.com/faultyserver)
 
 ### Maintainers team
 
-- [Jon Egeland @faultyserver](https://github.com/faultyserver)
 - [Madeline Gurriarán @SuperchupuDev](https://github.com/SuperchupuDev)
 - [Nicolas Hedger @nhedger](https://github.com/nhedger)
 - [Victor Teles @victor-teles](https://github.com/victor-teles)
 - [Takayuki Maeda @TaKO8Ki](https://github.com/TaKO8Ki)
-- [Jon Egeland @faultyserver](https://github.com/faultyserver)

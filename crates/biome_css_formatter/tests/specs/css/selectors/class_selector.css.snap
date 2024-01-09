@@ -1,0 +1,85 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/selectors/class_selector.css
+---
+
+# Input
+
+```css
+.one {}
+.one.two {}
+
+.one .two {}
+.one.two .three.four {}
+
+
+div.one.two {}
+div#one.two {}
+div.one#two {}
+div .one {}
+div .one.two {}
+
+.one.two.three.four.five.six.seven.eight.nine.ten.eleven.twelve.thirteen.fourteen.fifteen.sixteen.seventeen.eighteen.nineteen.twenty {}
+
+.one, .two {}
+.one.two, .three.four {}
+.one .two.three, .four {}
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+-----
+
+```css
+.one {
+}
+.one.two {
+}
+
+.one .two {
+}
+.one.two .three.four {
+}
+
+div.one.two {
+}
+div#one.two {
+}
+div.one#two {
+}
+div .one {
+}
+div .one.two {
+}
+
+.one.two.three.four.five.six.seven.eight.nine.ten.eleven.twelve.thirteen.fourteen.fifteen.sixteen.seventeen.eighteen.nineteen.twenty {
+}
+
+.one,
+.two {
+}
+.one.two,
+.three.four {
+}
+.one .two.three,
+.four {
+}
+```
+
+# Lines exceeding max width of 80 characters
+```
+   22: .one.two.three.four.five.six.seven.eight.nine.ten.eleven.twelve.thirteen.fourteen.fifteen.sixteen.seventeen.eighteen.nineteen.twenty {
+```
+
+

@@ -441,14 +441,14 @@ JsModule {
 --
 using_declaration_statement_err.js:1:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Using declarations must have an initialized value
+  × Using declarations must have an initialized value.
   
   > 1 │ using a;
       │       ^
     2 │ using {b};
     3 │ using c = d, e;
   
-  i this variable needs to be initialized
+  i This variable needs to be initialized.
   
 --
 using_declaration_statement_err.js:2:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -480,7 +480,7 @@ using_declaration_statement_err.js:2:7 parse ━━━━━━━━━━━�
 --
 using_declaration_statement_err.js:3:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Using declarations must have an initialized value
+  × Using declarations must have an initialized value.
   
     1 │ using a;
     2 │ using {b};
@@ -489,7 +489,7 @@ using_declaration_statement_err.js:3:14 parse ━━━━━━━━━━━�
     4 │ export using m = n;
     5 │ await using f;
   
-  i this variable needs to be initialized
+  i This variable needs to be initialized.
   
 --
 using_declaration_statement_err.js:4:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -515,7 +515,7 @@ using_declaration_statement_err.js:4:8 parse ━━━━━━━━━━━�
 --
 using_declaration_statement_err.js:5:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Using declarations must have an initialized value
+  × Using declarations must have an initialized value.
   
     3 │ using c = d, e;
     4 │ export using m = n;
@@ -524,12 +524,12 @@ using_declaration_statement_err.js:5:13 parse ━━━━━━━━━━━�
     6 │ await using g = h, j;
     7 │ await using [o] = p;
   
-  i this variable needs to be initialized
+  i This variable needs to be initialized.
   
 --
 using_declaration_statement_err.js:6:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Using declarations must have an initialized value
+  × Using declarations must have an initialized value.
   
     4 │ export using m = n;
     5 │ await using f;
@@ -538,7 +538,7 @@ using_declaration_statement_err.js:6:20 parse ━━━━━━━━━━━�
     7 │ await using [o] = p;
     8 │ export await using q = r;
   
-  i this variable needs to be initialized
+  i This variable needs to be initialized.
   
 --
 using_declaration_statement_err.js:7:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

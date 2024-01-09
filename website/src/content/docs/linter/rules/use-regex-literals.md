@@ -2,10 +2,10 @@
 title: useRegexLiterals (since v1.3.0)
 ---
 
-**Diagnostic Category: `lint/nursery/useRegexLiterals`**
+**Diagnostic Category: `lint/complexity/useRegexLiterals`**
 
-:::caution
-This rule is part of the [nursery](/linter/rules/#nursery) group.
+:::note
+This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
 Enforce the use of the regular expression literals instead of the RegExp constructor if possible.
@@ -31,9 +31,9 @@ Source: https://eslint.org/docs/latest/rules/prefer-regex-literals/
 new RegExp("abc", "u");
 ```
 
-<pre class="language-text"><code class="language-text">nursery/useRegexLiterals.js:1:1 <a href="https://biomejs.dev/linter/rules/use-regex-literals">lint/nursery/useRegexLiterals</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/useRegexLiterals.js:1:1 <a href="https://biomejs.dev/linter/rules/use-regex-literals">lint/complexity/useRegexLiterals</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━
 
-<strong><span style="color: Orange;">  </span></strong><strong><span style="color: Orange;">⚠</span></strong> <span style="color: Orange;">Use a regular expression literal instead of the </span><span style="color: Orange;"><strong>RegExp</strong></span><span style="color: Orange;"> constructor.</span>
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Use a regular expression literal instead of the </span><span style="color: Tomato;"><strong>RegExp</strong></span><span style="color: Tomato;"> constructor.</span>
   
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>new RegExp(&quot;abc&quot;, &quot;u&quot;);
    <strong>   │ </strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>

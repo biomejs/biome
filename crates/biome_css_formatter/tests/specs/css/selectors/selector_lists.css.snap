@@ -1,0 +1,72 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/selectors/selector_lists.css
+---
+
+# Input
+
+```css
+html {}
+
+div   ,  p {}
+
+p
+
+{
+
+}
+
+div.with.really.long#selector#content, div.another.really.long#selector.that.goes.past.the.line.length.with.a.single.selector
+{}
+
+h1, h2     , h3
+
+
+, h4,    h5,      h6 {}
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+-----
+
+```css
+html {
+}
+
+div,
+p {
+}
+
+p {
+}
+
+div.with.really.long#selector#content,
+div.another.really.long#selector.that.goes.past.the.line.length.with.a.single.selector {
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+}
+```
+
+# Lines exceeding max width of 80 characters
+```
+   12: div.another.really.long#selector.that.goes.past.the.line.length.with.a.single.selector {
+```
+
+

@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
 ---
 # Input
-```js
+```jsx
 var foo = {
     get bar() {}
 };
@@ -192,7 +192,7 @@ invalid.js:14:5 lint/suspicious/useGetterReturn ━━━━━━━━━━�
 ```
 invalid.js:23:9 lint/suspicious/useGetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This return should return a value because it is located in a return.
+  ! This return should return a value because it is located in a getter.
   
     21 │ var foo = {
     22 │     get bar() {
@@ -259,7 +259,7 @@ invalid.js:40:5 lint/suspicious/useGetterReturn ━━━━━━━━━━�
 ```
 invalid.js:49:9 lint/suspicious/useGetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This return should return a value because it is located in a return.
+  ! This return should return a value because it is located in a getter.
   
     47 │ class Foo {
     48 │     get bar() {

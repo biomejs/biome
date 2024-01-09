@@ -1,0 +1,130 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/atrule/media.css
+---
+
+# Input
+
+```css
+@media screen and (min-width: 480px) {}
+@media  screen and (min-width: 480px) {}
+@media screen and  (min-width: 480px) {}
+@media screen and (min-width: 480px) {}
+@media screen and (min-width :480px) {}
+@media screen and (min-width : 480px) {}
+@media screen and (min-width  :  480px) {}
+@media
+  screen
+  and
+  (min-width
+  :
+  480px) {}
+@media screen and ( min-width: 480px) {}
+@media screen and (min-width: 480px ) {}
+@media screen and ( min-width: 480px ) {}
+@media screen and (  min-width:  480px  ) {}
+@media not screen and (color), print and (color) { }
+@media not screen and (color) , print and (color) { }
+@media not screen and (color),print and (color) { }
+@media not screen and (color) , print and (color) { }
+@media not screen and (color)  ,  print and (color) { }
+@media not screen and ( color), print and (color) { }
+@media not screen and (color ), print and (color) { }
+@media not screen and ( color ), print and (color) { }
+@media not screen and (  color  ), print and (color) { }
+@media (--small-viewport) {}
+@media
+(
+--small-viewport
+)
+{
+}
+@media
+
+(
+
+--small-viewport
+
+)
+
+{
+
+}
+
+
+@media all and (-webkit-min-device-pixel-ratio: 1.5), all and (-o-min-device-pixel-ratio: 3/2), all and (min--moz-device-pixel-ratio: 1.5), all and (min-device-pixel-ratio: 1.5) {}
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+-----
+
+```css
+@media screen and (min-width: 480px) {
+}
+@media screen and (min-width: 480px) {
+}
+@media screen and (min-width: 480px) {
+}
+@media screen and (min-width: 480px) {
+}
+@media screen and (min-width: 480px) {
+}
+@media screen and (min-width: 480px) {
+}
+@media screen and (min-width: 480px) {
+}
+@media screen and (min-width: 480px) {
+}
+@media screen and (min-width: 480px) {
+}
+@media screen and (min-width: 480px) {
+}
+@media screen and (min-width: 480px) {
+}
+@media screen and (min-width: 480px) {
+}
+@media not screen and (color), print and (color) {
+}
+@media not screen and (color), print and (color) {
+}
+@media not screen and (color), print and (color) {
+}
+@media not screen and (color), print and (color) {
+}
+@media not screen and (color), print and (color) {
+}
+@media not screen and (color), print and (color) {
+}
+@media not screen and (color), print and (color) {
+}
+@media not screen and (color), print and (color) {
+}
+@media not screen and (color), print and (color) {
+}
+@media (--small-viewport) {
+}
+@media (--small-viewport) {
+}
+@media (--small-viewport) {
+}
+
+@media all and (-webkit-min-device-pixel-ratio: 1.5),
+	all and (-o-min-device-pixel-ratio: 3 / 2),
+	all and (min--moz-device-pixel-ratio: 1.5),
+	all and (min-device-pixel-ratio: 1.5) {
+}
+```
+
+

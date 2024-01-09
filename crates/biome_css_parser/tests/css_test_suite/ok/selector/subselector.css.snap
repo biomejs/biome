@@ -34,34 +34,34 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssClassSelector {
                             dot_token: DOT@3..4 "." [] [],
-                            name: CssIdentifier {
+                            name: CssCustomIdentifier {
                                 value_token: IDENT@4..9 "class" [] [],
                             },
                         },
                         CssClassSelector {
                             dot_token: DOT@9..10 "." [] [],
-                            name: CssIdentifier {
+                            name: CssCustomIdentifier {
                                 value_token: IDENT@10..17 "content" [] [],
                             },
                         },
                         CssIdSelector {
                             hash_token: HASH@17..18 "#" [] [],
-                            name: CssIdentifier {
+                            name: CssCustomIdentifier {
                                 value_token: IDENT@18..20 "id" [] [],
                             },
                         },
                         CssIdSelector {
                             hash_token: HASH@20..21 "#" [] [],
-                            name: CssIdentifier {
+                            name: CssCustomIdentifier {
                                 value_token: IDENT@21..24 "id" [] [Whitespace(" ")],
                             },
                         },
                     ],
                 },
             ],
-            block: CssBlock {
+            block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@24..25 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@25..26 "}" [] [],
             },
         },
@@ -76,34 +76,34 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssClassSelector {
                             dot_token: DOT@28..29 "." [] [],
-                            name: CssIdentifier {
+                            name: CssCustomIdentifier {
                                 value_token: IDENT@29..34 "class" [] [],
                             },
                         },
                         CssClassSelector {
                             dot_token: DOT@34..35 "." [] [],
-                            name: CssIdentifier {
+                            name: CssCustomIdentifier {
                                 value_token: IDENT@35..42 "content" [] [],
                             },
                         },
                         CssIdSelector {
                             hash_token: HASH@42..43 "#" [] [],
-                            name: CssIdentifier {
+                            name: CssCustomIdentifier {
                                 value_token: IDENT@43..45 "id" [] [],
                             },
                         },
                         CssIdSelector {
                             hash_token: HASH@45..46 "#" [] [],
-                            name: CssIdentifier {
+                            name: CssCustomIdentifier {
                                 value_token: IDENT@46..50 "id1" [] [Whitespace(" ")],
                             },
                         },
                     ],
                 },
             ],
-            block: CssBlock {
+            block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@50..51 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@51..52 "}" [] [],
             },
         },
@@ -115,34 +115,34 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssClassSelector {
                             dot_token: DOT@52..54 "." [Newline("\n")] [],
-                            name: CssIdentifier {
+                            name: CssCustomIdentifier {
                                 value_token: IDENT@54..59 "class" [] [],
                             },
                         },
                         CssClassSelector {
                             dot_token: DOT@59..60 "." [] [],
-                            name: CssIdentifier {
+                            name: CssCustomIdentifier {
                                 value_token: IDENT@60..67 "content" [] [],
                             },
                         },
                         CssIdSelector {
                             hash_token: HASH@67..68 "#" [] [],
-                            name: CssIdentifier {
+                            name: CssCustomIdentifier {
                                 value_token: IDENT@68..70 "id" [] [],
                             },
                         },
                         CssIdSelector {
                             hash_token: HASH@70..71 "#" [] [],
-                            name: CssIdentifier {
+                            name: CssCustomIdentifier {
                                 value_token: IDENT@71..75 "id1" [] [Whitespace(" ")],
                             },
                         },
                     ],
                 },
             ],
-            block: CssBlock {
+            block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@75..76 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@76..77 "}" [] [],
             },
         },
@@ -159,25 +159,25 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssClassSelector {
                             dot_token: DOT@82..83 "." [] [],
-                            name: CssIdentifier {
+                            name: CssCustomIdentifier {
                                 value_token: IDENT@83..88 "class" [] [],
                             },
                         },
                         CssClassSelector {
                             dot_token: DOT@88..89 "." [] [],
-                            name: CssIdentifier {
+                            name: CssCustomIdentifier {
                                 value_token: IDENT@89..96 "content" [] [],
                             },
                         },
                         CssIdSelector {
                             hash_token: HASH@96..97 "#" [] [],
-                            name: CssIdentifier {
+                            name: CssCustomIdentifier {
                                 value_token: IDENT@97..99 "id" [] [],
                             },
                         },
                         CssIdSelector {
                             hash_token: HASH@99..100 "#" [] [],
-                            name: CssIdentifier {
+                            name: CssCustomIdentifier {
                                 value_token: IDENT@100..102 "id" [] [],
                             },
                         },
@@ -193,25 +193,25 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssClassSelector {
                             dot_token: DOT@105..106 "." [] [],
-                            name: CssIdentifier {
+                            name: CssCustomIdentifier {
                                 value_token: IDENT@106..111 "class" [] [],
                             },
                         },
                         CssClassSelector {
                             dot_token: DOT@111..112 "." [] [],
-                            name: CssIdentifier {
+                            name: CssCustomIdentifier {
                                 value_token: IDENT@112..119 "content" [] [],
                             },
                         },
                         CssIdSelector {
                             hash_token: HASH@119..120 "#" [] [],
-                            name: CssIdentifier {
+                            name: CssCustomIdentifier {
                                 value_token: IDENT@120..122 "id" [] [],
                             },
                         },
                         CssIdSelector {
                             hash_token: HASH@122..123 "#" [] [],
-                            name: CssIdentifier {
+                            name: CssCustomIdentifier {
                                 value_token: IDENT@123..126 "id1" [] [],
                             },
                         },
@@ -224,34 +224,34 @@ CssRoot {
                     sub_selectors: CssSubSelectorList [
                         CssClassSelector {
                             dot_token: DOT@128..129 "." [] [],
-                            name: CssIdentifier {
+                            name: CssCustomIdentifier {
                                 value_token: IDENT@129..134 "class" [] [],
                             },
                         },
                         CssClassSelector {
                             dot_token: DOT@134..135 "." [] [],
-                            name: CssIdentifier {
+                            name: CssCustomIdentifier {
                                 value_token: IDENT@135..142 "content" [] [],
                             },
                         },
                         CssIdSelector {
                             hash_token: HASH@142..143 "#" [] [],
-                            name: CssIdentifier {
+                            name: CssCustomIdentifier {
                                 value_token: IDENT@143..145 "id" [] [],
                             },
                         },
                         CssIdSelector {
                             hash_token: HASH@145..146 "#" [] [],
-                            name: CssIdentifier {
+                            name: CssCustomIdentifier {
                                 value_token: IDENT@146..150 "id1" [] [Whitespace(" ")],
                             },
                         },
                     ],
                 },
             ],
-            block: CssBlock {
+            block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@150..151 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@151..152 "}" [] [],
             },
         },
@@ -277,21 +277,21 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@3..24
             0: CSS_CLASS_SELECTOR@3..9
               0: DOT@3..4 "." [] []
-              1: CSS_IDENTIFIER@4..9
+              1: CSS_CUSTOM_IDENTIFIER@4..9
                 0: IDENT@4..9 "class" [] []
             1: CSS_CLASS_SELECTOR@9..17
               0: DOT@9..10 "." [] []
-              1: CSS_IDENTIFIER@10..17
+              1: CSS_CUSTOM_IDENTIFIER@10..17
                 0: IDENT@10..17 "content" [] []
             2: CSS_ID_SELECTOR@17..20
               0: HASH@17..18 "#" [] []
-              1: CSS_IDENTIFIER@18..20
+              1: CSS_CUSTOM_IDENTIFIER@18..20
                 0: IDENT@18..20 "id" [] []
             3: CSS_ID_SELECTOR@20..24
               0: HASH@20..21 "#" [] []
-              1: CSS_IDENTIFIER@21..24
+              1: CSS_CUSTOM_IDENTIFIER@21..24
                 0: IDENT@21..24 "id" [] [Whitespace(" ")]
-      1: CSS_BLOCK@24..26
+      1: CSS_DECLARATION_LIST_BLOCK@24..26
         0: L_CURLY@24..25 "{" [] []
         1: CSS_DECLARATION_LIST@25..25
         2: R_CURLY@25..26 "}" [] []
@@ -305,21 +305,21 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@28..50
             0: CSS_CLASS_SELECTOR@28..34
               0: DOT@28..29 "." [] []
-              1: CSS_IDENTIFIER@29..34
+              1: CSS_CUSTOM_IDENTIFIER@29..34
                 0: IDENT@29..34 "class" [] []
             1: CSS_CLASS_SELECTOR@34..42
               0: DOT@34..35 "." [] []
-              1: CSS_IDENTIFIER@35..42
+              1: CSS_CUSTOM_IDENTIFIER@35..42
                 0: IDENT@35..42 "content" [] []
             2: CSS_ID_SELECTOR@42..45
               0: HASH@42..43 "#" [] []
-              1: CSS_IDENTIFIER@43..45
+              1: CSS_CUSTOM_IDENTIFIER@43..45
                 0: IDENT@43..45 "id" [] []
             3: CSS_ID_SELECTOR@45..50
               0: HASH@45..46 "#" [] []
-              1: CSS_IDENTIFIER@46..50
+              1: CSS_CUSTOM_IDENTIFIER@46..50
                 0: IDENT@46..50 "id1" [] [Whitespace(" ")]
-      1: CSS_BLOCK@50..52
+      1: CSS_DECLARATION_LIST_BLOCK@50..52
         0: L_CURLY@50..51 "{" [] []
         1: CSS_DECLARATION_LIST@51..51
         2: R_CURLY@51..52 "}" [] []
@@ -331,21 +331,21 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@52..75
             0: CSS_CLASS_SELECTOR@52..59
               0: DOT@52..54 "." [Newline("\n")] []
-              1: CSS_IDENTIFIER@54..59
+              1: CSS_CUSTOM_IDENTIFIER@54..59
                 0: IDENT@54..59 "class" [] []
             1: CSS_CLASS_SELECTOR@59..67
               0: DOT@59..60 "." [] []
-              1: CSS_IDENTIFIER@60..67
+              1: CSS_CUSTOM_IDENTIFIER@60..67
                 0: IDENT@60..67 "content" [] []
             2: CSS_ID_SELECTOR@67..70
               0: HASH@67..68 "#" [] []
-              1: CSS_IDENTIFIER@68..70
+              1: CSS_CUSTOM_IDENTIFIER@68..70
                 0: IDENT@68..70 "id" [] []
             3: CSS_ID_SELECTOR@70..75
               0: HASH@70..71 "#" [] []
-              1: CSS_IDENTIFIER@71..75
+              1: CSS_CUSTOM_IDENTIFIER@71..75
                 0: IDENT@71..75 "id1" [] [Whitespace(" ")]
-      1: CSS_BLOCK@75..77
+      1: CSS_DECLARATION_LIST_BLOCK@75..77
         0: L_CURLY@75..76 "{" [] []
         1: CSS_DECLARATION_LIST@76..76
         2: R_CURLY@76..77 "}" [] []
@@ -360,19 +360,19 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@82..102
             0: CSS_CLASS_SELECTOR@82..88
               0: DOT@82..83 "." [] []
-              1: CSS_IDENTIFIER@83..88
+              1: CSS_CUSTOM_IDENTIFIER@83..88
                 0: IDENT@83..88 "class" [] []
             1: CSS_CLASS_SELECTOR@88..96
               0: DOT@88..89 "." [] []
-              1: CSS_IDENTIFIER@89..96
+              1: CSS_CUSTOM_IDENTIFIER@89..96
                 0: IDENT@89..96 "content" [] []
             2: CSS_ID_SELECTOR@96..99
               0: HASH@96..97 "#" [] []
-              1: CSS_IDENTIFIER@97..99
+              1: CSS_CUSTOM_IDENTIFIER@97..99
                 0: IDENT@97..99 "id" [] []
             3: CSS_ID_SELECTOR@99..102
               0: HASH@99..100 "#" [] []
-              1: CSS_IDENTIFIER@100..102
+              1: CSS_CUSTOM_IDENTIFIER@100..102
                 0: IDENT@100..102 "id" [] []
         1: COMMA@102..104 "," [] [Whitespace(" ")]
         2: CSS_COMPOUND_SELECTOR@104..126
@@ -383,19 +383,19 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@105..126
             0: CSS_CLASS_SELECTOR@105..111
               0: DOT@105..106 "." [] []
-              1: CSS_IDENTIFIER@106..111
+              1: CSS_CUSTOM_IDENTIFIER@106..111
                 0: IDENT@106..111 "class" [] []
             1: CSS_CLASS_SELECTOR@111..119
               0: DOT@111..112 "." [] []
-              1: CSS_IDENTIFIER@112..119
+              1: CSS_CUSTOM_IDENTIFIER@112..119
                 0: IDENT@112..119 "content" [] []
             2: CSS_ID_SELECTOR@119..122
               0: HASH@119..120 "#" [] []
-              1: CSS_IDENTIFIER@120..122
+              1: CSS_CUSTOM_IDENTIFIER@120..122
                 0: IDENT@120..122 "id" [] []
             3: CSS_ID_SELECTOR@122..126
               0: HASH@122..123 "#" [] []
-              1: CSS_IDENTIFIER@123..126
+              1: CSS_CUSTOM_IDENTIFIER@123..126
                 0: IDENT@123..126 "id1" [] []
         3: COMMA@126..128 "," [] [Whitespace(" ")]
         4: CSS_COMPOUND_SELECTOR@128..150
@@ -404,21 +404,21 @@ CssRoot {
           2: CSS_SUB_SELECTOR_LIST@128..150
             0: CSS_CLASS_SELECTOR@128..134
               0: DOT@128..129 "." [] []
-              1: CSS_IDENTIFIER@129..134
+              1: CSS_CUSTOM_IDENTIFIER@129..134
                 0: IDENT@129..134 "class" [] []
             1: CSS_CLASS_SELECTOR@134..142
               0: DOT@134..135 "." [] []
-              1: CSS_IDENTIFIER@135..142
+              1: CSS_CUSTOM_IDENTIFIER@135..142
                 0: IDENT@135..142 "content" [] []
             2: CSS_ID_SELECTOR@142..145
               0: HASH@142..143 "#" [] []
-              1: CSS_IDENTIFIER@143..145
+              1: CSS_CUSTOM_IDENTIFIER@143..145
                 0: IDENT@143..145 "id" [] []
             3: CSS_ID_SELECTOR@145..150
               0: HASH@145..146 "#" [] []
-              1: CSS_IDENTIFIER@146..150
+              1: CSS_CUSTOM_IDENTIFIER@146..150
                 0: IDENT@146..150 "id1" [] [Whitespace(" ")]
-      1: CSS_BLOCK@150..152
+      1: CSS_DECLARATION_LIST_BLOCK@150..152
         0: L_CURLY@150..151 "{" [] []
         1: CSS_DECLARATION_LIST@151..151
         2: R_CURLY@151..152 "}" [] []

@@ -1,5 +1,6 @@
 import type { Dispatch, SetStateAction } from "react";
-import React, { useState } from "react";
+import type React from "react";
+import { useState } from "react";
 import {
 	ArrowParentheses,
 	IndentStyle,
@@ -652,7 +653,7 @@ function FormatterSettings({
 						id="indentWidth"
 						value={indentWidth}
 						onChange={(e) => {
-							setIndentWidth(parseInt(e.target.value));
+							setIndentWidth(Number.parseInt(e.target.value));
 						}}
 					/>
 				</div>
@@ -902,7 +903,7 @@ function LineWidthInput({
 							id="lineWidth"
 							value={lineWidth}
 							onChange={(e) => {
-								setLineWidth(parseInt(e.target.value));
+								setLineWidth(Number.parseInt(e.target.value));
 							}}
 						/>
 					)}

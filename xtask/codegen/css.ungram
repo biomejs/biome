@@ -40,14 +40,20 @@ CssBogus = SyntaxElement*
 CssBogusSelector = SyntaxElement*
 CssBogusSubSelector = SyntaxElement*
 CssBogusPseudoClass = SyntaxElement*
+CssBogusPageSelectorPseudo = SyntaxElement*
 CssBogusPseudoElement = SyntaxElement*
 CssBogusAtRule = SyntaxElement*
-CssBogusBody =  SyntaxElement*
+CssBogusLayer = SyntaxElement*
+CssBogusBlock =  SyntaxElement*
+CssBogusScopeRange =  SyntaxElement*
+CssBogusKeyframesItem =  SyntaxElement*
 CssBogusRule =  SyntaxElement*
 CssBogusParameter = SyntaxElement*
 CssBogusDeclarationItem = SyntaxElement*
-CssBogusComponentValue = SyntaxElement*
 CssBogusMediaQuery =  SyntaxElement*
+CssBogusProperty =  SyntaxElement*
+CssBogusUrlModifier =  SyntaxElement*
+CssBogusPropertyValue = SyntaxElement*
 
 CssRoot =
 	bom: 'UNICODE_BOM'?
@@ -66,8 +72,7 @@ AnyCssRule =
 // ^^^^^^^^^^^^^^^^^^^^^
 CssRule =
 	prelude: CssSelectorList
-	block: CssBlock
-
+	block: AnyCssDeclarationListBlock
 
 /////////////
 /// SELECTORS
@@ -152,13 +157,13 @@ CssUniversalNamespacePrefix =
 // ^^^^
 CssIdSelector =
 	'#'
-	name: CssIdentifier
+	name: CssCustomIdentifier
 
 // .app {}
 // ^^^^
 CssClassSelector =
 	'.'
-	name: CssIdentifier
+	name: CssCustomIdentifier
 
 // [title = "title" i] {}
 // ^^^^^^^^^^^^^^^^^^^
@@ -226,15 +231,15 @@ CssPseudoClassFunctionSelector =
 CssPseudoClassFunctionSelectorList =
  	name: ('matches' | 'not' | 'is' | 'where')
 	'('
-	selector_list: CssSelectorList
+	selectors: CssSelectorList
 	')'
 
 // :-webkit-any(i,p,:link,span:focus) {}
 //  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 CssPseudoClassFunctionCompoundSelectorList =
- 	name: ('-moz-any' | '-webkit-any' | 'past' | 'current' | 'future')
+ 	name: ('any' | 'past' | 'current' | 'future')
 	'('
-	compound_selector_list: CssCompoundSelectorList
+	compound_selectors: CssCompoundSelectorList
 	')'
 
 // :-webkit-any(i,p,:link,span:focus) {}
@@ -258,7 +263,7 @@ AnyCssCompoundSelector =
 CssPseudoClassFunctionRelativeSelectorList =
  	name: 'has'
 	'('
-	relative_selector_list: CssRelativeSelectorList
+	relative_selectors: CssRelativeSelectorList
 	')'
 
 // :has(> img, +dt) {}
@@ -280,7 +285,7 @@ CssRelativeSelector =
 CssPseudoClassFunctionValueList =
  	name: 'lang'
 	'('
-	value_list: CssPseudoValueList
+	values: CssPseudoValueList
 	')'
 
 // :lang(de, fr) {}
@@ -357,7 +362,7 @@ CssNthOffset =
 //             		 ^^^^^^^^^^^^
 CssPseudoClassOfNthSelector =
 	'of'
-	selector_list: CssSelectorList
+	selectors: CssSelectorList
 
 // a::after {}
 //  ^^^^^^^^
@@ -398,26 +403,278 @@ CssPseudoElementFunctionIdentifier =
 	ident: CssIdentifier
 	')'
 
-CssBlock =
+/////////////
+// COMMON BLOCKS
+////////////
+
+// @page :left { background: red; @media (500px <= width <= 500px) {  } }
+// 						 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssDeclarationOrAtRuleBlock =
 	'{'
-	declaration_list: CssDeclarationList
+	items: CssDeclarationOrAtRuleList
+ 	'}'
+
+CssDeclarationOrAtRuleList = AnyCssDeclarationOrAtRule*
+
+AnyCssDeclarationOrAtRule =
+    CssDeclarationWithSemicolon
+    | CssAtRule
+
+// @page :left { background: red; @media (500px <= width <= 500px) {  } }
+// 						   ^^^^^^^^^^^^^^^^
+CssDeclarationWithSemicolon =
+    declaration: CssDeclaration
+    ';'
+
+AnyCssDeclarationListBlock =
+	CssDeclarationListBlock
+	| CssBogusBlock
+
+CssDeclarationListBlock =
+	'{'
+	declarations: CssDeclarationList
+ 	'}'
+
+AnyCssRuleListBlock =
+	CssRuleListBlock
+	| CssBogusBlock
+
+CssRuleListBlock =
+	'{'
+	rules: CssRuleList
  	'}'
 
 CssDeclarationList = CssDeclaration (';' CssDeclaration)* ';'?
 
 CssDeclaration =
+	property: AnyCssProperty
+	important: CssDeclarationImportant?
+
+
+/////////////
+// PROPERTIES
+////////////
+
+// ## Conventions for specifying Property nodes:
+//
+//   - The name of the node should be `CSS*Property`, with the `*` being the PascalCase
+//     representation of the name (e.g., `z-index` becomes `ZIndex`).
+//   - The `value` field should be defined as a Node with the name `AnyCss*PropertyValue`, with
+//     the * being the PascalCase representation of the property name. This will tell the code
+//     generator to automatically insert the `CssWideKeyword`, `CssUnknownPropertyValue`, and
+//     `CssBogusPropertyValue` variants for the enum.
+//   - With that automatic insertion by the code generator, only specify the _explicitly defined_
+//     productions from the CSS grammar as part of the `AnyCss*PropertyValue` node, leaving out
+//     all of the other variants.
+//   - Even if there is only one production for the value, still use the `AnyCss*PropertyValue`
+//     name so that the automatic insertion will work as expected.
+//
+// ## Specifying Values:
+//
+// Many values in the CSS grammar are written as references to other productions, like
+// `<length-percentage>`. Sometimes these are simple combinations of other kinds of tokens (like
+// length-percentage is), but other times they have their own syntax with multiple tokens or
+// ordering or combinators and so on.
+//
+// When building the CSS syntax tree for Biome, we want to provide as much fidelity and granularity
+// as possible (i.e., be _exact_ and _accurate_), but we also don't want to explode the tree result
+// from parsing the input with dozens if not hundreds of intermediate nodes that make it harder to
+// work with. This tradeoff can make it difficult to know how to best represent a given syntax in
+// the grammar. As an example, consider the same `<length-percentage>` token from above. The
+// definition of this token is "a CSS data type [that] represents a value that can be either a
+// <length> or a <percentage>". In terms of grammar, it looks like this:
+//
+//   length-percentage =
+//       <length> |
+//       <percentage>
+//
+// In this grammar, we _could_ encode this as a new Node type and use it in other productions, like
+// in `width`:
+//
+//   width =
+//       auto |
+//       <length-percentage [0,∞]> |
+//       min-content |
+//       max-content |
+//       fit-content(<length-percentage [0,∞]>)
+//
+// But in reality, adding a new node type for this ends up being difficult to work with, since it's
+// a layer of indirection in the parsed syntax tree that complicates traversal, parent-child
+// relationships, and more. Instead, these simple "aliases" for variations are best written inline
+// as part of the parent rule itself:
+//
+//   width =
+//       CssAuto |
+//       CssLength |
+//       CssPercentage
+//       // ...
+//
+// This way, the `width` knows exactly what kind of value it contains as a direct child, without
+// having to go through an intermediate node, and consumers can more easily see where lengths and
+// percentages are used (the parent of the `length` is the `width` value directly, rather than the
+// grandparent if there was an intermediate node).
+//
+// Other cases, however, _do_ deserve their own nodes and types. Often times this will just have to
+// be done based on feel, but a good example is `CssWideKeyword`, which is a single node that
+// represents any of the global keywords (`initial`, `inherit`, etc.). This node provides
+// additional value because it allows a consumer of the syntax tree to immediately know if _any_ of
+// the global keywords are being used, and simplifies the grammar definition to avoid needing to
+// specify 5+ keywords in each rule.
+//
+// When in doubt, ask about it! Discussion will help lead to the best representation and tradeoff
+// and ensure that the resulting grammar and syntax tree work correctly and efficiently.
+//
+// ## Referencing other rules
+//
+// The CSS grammar often "embeds" property rules inside of other rules to build them up. In the
+// grammar, this is represented by the property name in quotes, like `<'line-height'>`, and
+// is defined as "any value that would be valid for that property, excluding the CSS-wide
+// keywords".
+//
+// To handle this, we can use the property value nodes directly in other definitions. This is
+// another reason why splitting out the `AnyCss*PropertyValue` and `Css*` node types is important.
+// For example, the value type of `CssBorderProperty` is `AnyCssBorderPropertyValue = CssBorder`,
+// which implicitly adds the Css-wide keywords as well as generic and bogus handling into the
+// allowed types. But if `<'border'>` were to be referenced by some other rule, we would only want
+// the valid value types to be included, which we could do by using `CssBorder` directly.
+//
+//   CssPositionedBorderPropertyValue =
+//       position: ('top' | 'bottom')
+//       border: CssBorder
+//
+// Even if the valid value type is only a single node type, this structure ensures that any value
+// definition can be embedded in another value definition, regardless of its structure.
+
+
+AnyCssProperty =
+	CssGenericProperty
+	| CssBogusProperty
+	| CssAllProperty
+	| CssBorderProperty
+	| CssZIndexProperty
+
+/// https://drafts.csswg.org/css-cascade/#all-shorthand
+/// all =
+///   <global-keyword>
+CssAllProperty =
+    name: CssIdentifier
+	':'
+	value: AnyCssAllPropertyValue
+
+// The only valid values for the `all` property are the css-wide keywords. We
+// still use the `AnyCss*PropertyValue` node naming convention here to
+// automatically insert `CssBogusPropertyValue` and
+// `CssUnknownPropertyValue` as alternatives for the parser to use for
+// recovery and representing "valid but incorrect" inputs.
+AnyCssAllPropertyValue = CssWideKeyword
+
+/// https://drafts.csswg.org/css-backgrounds/#propdef-border
+/// border =
+///   <line-width> ||
+///   <line-style> ||
+///   <color>
+CssBorderProperty =
+	name: CssIdentifier
+	':'
+	value: AnyCssBorderPropertyValue
+
+AnyCssBorderPropertyValue =
+	CssBorder
+
+CssBorder =
+	line_width: AnyCssLineWidth ||
+	line_style: CssLineStyle ||
+	color: CssColor
+
+// TODO: This should be narrowed down to CssLength when we can.
+AnyCssLineWidth =
+	CssRegularDimension
+	| CssLineWidthKeyword
+
+CssLineWidthKeyword = keyword: ('thin' | 'medium' | 'thick')
+
+CssLineStyle =
+	keyword: ( 'none' | 'hidden' | 'dotted' | 'dashed' | 'solid' | 'double'  | 'groove' | 'ridge' | 'inset' | 'outset')
+
+
+/// https://drafts.csswg.org/css2/#z-index
+/// z-index =
+///   auto |
+///   <integer> |
+///   inherit
+///
+/// `inherit` is covered by the CssWideKeyword set.
+CssZIndexProperty =
+	name: CssIdentifier
+	':'
+	value: AnyCssZIndexPropertyValue
+
+// The parser will be responsible for ensuring the `Number` is an integer.
+AnyCssZIndexPropertyValue =
+	CssAuto
+	| CssNumber
+
+CssAuto =
+	value: 'auto'
+
+/// Css Wide keywords are implicitly accepted by _all_ properties when given
+/// as the sole value (like `width: unset;`). This node _should not_ be
+/// specified directly in any node definitions in this grammar. It is inserted
+/// implicitly by the code generator when encountering any node named
+/// `Any*PropertyValue`. This is an important distinction to be able to follow
+/// the "Property value ranges" value type of the value syntax definition:
+/// https://www.w3.org/TR/css-values/#component-types.
+CssWideKeyword =
+	value: ('inherit' | 'initial' | 'unset' | 'revert' | 'revert-layer' | 'default')
+
+/// Because of the way Biome's syntax generation works, List nodes can't be used
+/// directly as variants in a union. This node is a wrapper around the generic
+/// component value list to indicate a property value that is _syntactically valid_,
+/// but doesn't match the syntax definition for that property.
+///
+/// It is a more-correct alternative to a Bogus node that implies _acceptability_,
+/// but not necessarily _semantic validity_.
+CssUnknownPropertyValue = CssGenericComponentValueList
+
+CssGenericProperty =
 	name: AnyCssDeclarationName
 	':'
-	value: CssComponentValueList
-	important: CssDeclarationImportant?
+	value: CssGenericComponentValueList
+
+// div {
+//	--bs-btn-focus-shadow-rgb: 33, 37, 41;
+//	                           ^^^^^^^^^^
+//  background: transparent center/1em auto no-repeat;
+//              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+// }
+//
+// This node type is implicitly added to any Node definition with the name
+// `Any*PropertyValue`, similarly to `CssWideKeyword`. It is the default used
+// in place of a Bogus node, where the syntax of the property and value is
+// _correct_, but semantically does not match the specified grammar.
+CssGenericComponentValueList = AnyCssGenericComponentValue*
+
+AnyCssGenericComponentValue =
+	AnyCssValue
+	| CssGenericDelimiter
+
+// div {
+//	--bs-btn-focus-shadow-rgb: 33, 37, 41;
+//	                             ^   ^
+//  background: transparent center/1em auto no-repeat;
+//                                ^
+// }
+CssGenericDelimiter =
+	value: (',' | '/')
 
 CssComponentValueList = AnyCssValue*
 
-AnyCssDeclarationName = CssIdentifier | CssCustomProperty
+AnyCssDeclarationName = CssIdentifier | CssDashedIdentifier
 
 CssDeclarationImportant =
 	'!'
 	'important'
+
 
 /////////////
 // AT RULES
@@ -433,8 +690,15 @@ AnyCssAtRule =
 	| CssCounterStyleAtRule
 	| CssContainerAtRule
 	| CssFontFaceAtRule
+	| CssFontPaletteValuesAtRule
 	| CssKeyframesAtRule
 	| CssMediaAtRule
+	| CssPageAtRule
+	| CssLayerAtRule
+	| CssSupportsAtRule
+	| CssScopeAtRule
+	| CssImportAtRule
+	| CssNamespaceAtRule
 	| CssBogusAtRule
 
 // @charset "UTF-8";
@@ -448,21 +712,30 @@ CssCharsetAtRule =
 // ^^^^^^^^^^^^^^^^^^^^^^^^
 // @color-profile device-cmyk {}
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+// TODO: `name` should be `<dashed-ident> | device-cmyk` instead
 CssColorProfileAtRule =
 	'color-profile'
-	name: CssIdentifier
-	block: CssBlock
+	name: CssCustomIdentifier
+	block: AnyCssDeclarationListBlock
 
 CssCounterStyleAtRule =
 	'counter-style'
-	name: CssIdentifier
-	block: CssBlock
+	name: CssCustomIdentifier
+	block: AnyCssDeclarationListBlock
 
 // @font-face {}
 // ^^^^^^^^^^^^^
 CssFontFaceAtRule =
 	'font-face'
-	block: CssBlock
+	block: AnyCssDeclarationListBlock
+
+
+// @font-palette-values --ident {}
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssFontPaletteValuesAtRule =
+	'font-palette-values'
+	name: CssDashedIdentifier
+	block: AnyCssDeclarationListBlock
 
 
 // https://drafts.csswg.org/css-contain-3/#container-rule
@@ -491,9 +764,9 @@ CssFontFaceAtRule =
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 CssContainerAtRule =
 	'container'
-	name: CssIdentifier?
+	name: CssCustomIdentifier?
 	query: AnyCssContainerQuery
-	block: CssBlock
+	block: AnyCssRuleListBlock
 
 // <container-query>
 AnyCssContainerQuery =
@@ -613,32 +886,64 @@ AnyCssContainerStyleInParens =
 	AnyCssContainerStyleQuery
 	| CssDeclaration
 
+// https://drafts.csswg.org/css-animations/#keyframes
+// @keyframes = @keyframes <keyframes-name> { <qualified-rule-list> }
+// <keyframes-name> = <custom-ident> | <string>
+// <keyframe-block> = <keyframe-selector># { <declaration-list> }
+// <keyframe-selector> = from | to | <percentage [0,100]>
+
 // @keyframes "something" { from {} to {} }
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 CssKeyframesAtRule =
 	'keyframes'
-	name: CssIdentifier | CssString
-	body: CssKeyframesBody
+	name: AnyCssKeyframeName
+	block: AnyCssKeyframesBlock
 
+AnyCssKeyframesBlock =
+	CssKeyframesBlock
+	| CssBogusBlock
 
-CssKeyframesBody =
+// @keyframes "something" { from {} to {} }
+//            ^^^^^^^^^^^
+AnyCssKeyframeName = CssCustomIdentifier | CssString
+
+// @keyframes "something" { from {} to {} }
+//                        ^^^^^^^^^^^^^^^^^
+CssKeyframesBlock =
 	'{'
 	items: CssKeyframesItemList
 	'}'
 
-CssKeyframesItemList = CssKeyframesBlock*
+CssKeyframesItemList = AnyCssKeyframesItem*
+
+AnyCssKeyframesItem =
+	CssKeyframesItem
+	| CssBogusKeyframesItem
 
 // @keyframes "something" { 30%, 60% {} }
 //                          ^^^^^^^^^^^
-CssKeyframesBlock =
+CssKeyframesItem =
 	selectors: CssKeyframesSelectorList
-	'{'
-	declarations: CssDeclarationList
-	'}'
+	block: AnyCssDeclarationListBlock
 
-CssKeyframesSelectorList =  (CssKeyframesSelector (',' CssKeyframesSelector)*)
+CssKeyframesSelectorList =  (AnyCssKeyframesSelector (',' AnyCssKeyframesSelector)*)
 
-CssKeyframesSelector = 'from' | 'to' | CssPercentage
+AnyCssKeyframesSelector =
+	CssKeyframesIdentSelector
+	| CssKeyframesPercentageSelector
+	| CssBogusSelector
+
+// @keyframes "something" { from {} to {} }
+//                          ^^^^    ^^
+CssKeyframesIdentSelector =
+	// The `from` keyword. Equivalent to 0%.
+	// The `to` keyword. Equivalent to 100%.
+	selector: ('from' | 'to')
+
+// @keyframes "something" { 30%, 60% {} }
+//                          ^^^  ^^^
+CssKeyframesPercentageSelector =
+	selector: CssPercentage
 
 // https://drafts.csswg.org/mediaqueries-5/#media-query
 // <media-query> = <media-condition>
@@ -674,8 +979,8 @@ CssKeyframesSelector = 'from' | 'to' | CssPercentage
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 CssMediaAtRule =
 	'media'
-	query_list: CssMediaQueryList
-	block: CssBlock
+	queries: CssMediaQueryList
+	block: AnyCssRuleListBlock
 
 // @media screen, (width > 500px), print {}
 // 				^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -828,35 +1133,372 @@ AnyCssQueryFeatureValue =
 	| AnyCssDimension
 	| CssIdentifier
 	| CssRatio
-	| CssAnyFunction
+	| AnyCssFunction
+
+// https://drafts.csswg.org/css-page/#at-ruledef-page
+// @page = @page <page-selector-list>? { <declaration-rule-list> }
+// <page-selector-list> = <page-selector>#
+// <page-selector> = [ <ident-token>? <pseudo-page>* ]!
+// <pseudo-page> = ':' [ left | right | first | blank ]
+
+// @page :first {  }
+// ^^^^^^^^^^^^^^^^^
+CssPageAtRule =
+	'page'
+	selectors: CssPageSelectorList
+	block: AnyCssPageAtRuleBlock
+
+// @page name:first,:blank:first {  }
+// 			 ^^^^^^^^^^^^^^^^^^^^^^^
+CssPageSelectorList = (AnyCssPageSelector (',' AnyCssPageSelector)*)
+
+AnyCssPageSelector =
+	CssPageSelector
+	| CssBogusSelector
+
+// @page name:first,:blank:first {  }
+//       ^^^^^^^^^^ ^^^^^^^^^^^^
+// NOTE: The CSS Spec uses `<ident>` for the name, but also explicitly states
+// that the name is case sensitive. For simplicity, `<custom-ident>` gets the
+// exact same behavior.
+CssPageSelector =
+	type: CssCustomIdentifier?
+	pseudos: CssPageSelectorPseudoList
+
+CssPageSelectorPseudoList = AnyCssPageSelectorPseudo*
+
+AnyCssPageSelectorPseudo =
+	CssPageSelectorPseudo
+	| CssBogusPageSelectorPseudo
+
+// @page name:first,:blank:first {  }
+// 			     ^^^^^^ ^^^^^^^^^^^^
+CssPageSelectorPseudo =
+	':'
+	selector: ('left' | 'right' | 'first' | 'blank')
+
+AnyCssPageAtRuleBlock =
+	CssPageAtRuleBlock
+	| CssBogusBlock
+
+// @page :left { @left-middle {} background: red; @media (500px <= width <= 500px) {  } }
+// 						 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssPageAtRuleBlock =
+	'{'
+	items: CssPageAtRuleItemList
+ 	'}'
+
+CssPageAtRuleItemList = AnyCssPageAtRuleItem*
+
+AnyCssPageAtRuleItem =
+	CssDeclarationWithSemicolon
+	| CssAtRule
+	| CssMarginAtRule
+
+// @page :left { @left-middle {} background: red; }
+// 						   ^^^^^^^^^^^^^^^
+CssMarginAtRule =
+	'@'
+	name: (
+		'top-left-corner'
+		| 'top-left'
+		| 'top-center'
+		| 'top-right'
+		| 'top-right-corner'
+		| 'bottom-left-corner'
+		| 'bottom-left'
+		| 'bottom-center'
+		| 'bottom-right'
+		| 'bottom-right-corner'
+		| 'left-top'
+		| 'left-middle'
+		| 'left-bottom'
+		| 'right-top'
+		| 'right-middle'
+		| 'right-bottom'
+	)
+	block: CssDeclarationOrAtRuleBlock
+
+// https://drafts.csswg.org/css-cascade-5/#layering
+// @layer =
+//  @layer <layer-name>? { <rule-list> }  |
+//  @layer <layer-name># ;
+//
+// <layer-name> =
+//   <ident> [ '.' <ident> ]*
+
+// @layer override { }
+//  ^^^^^^^^^^^^^^^^^^
+// @layer framework, bar.baz;
+//  ^^^^^^^^^^^^^^^^^^^^^^^^^
+CssLayerAtRule =
+	'layer'
+	layer: AnyCssLayer
+
+AnyCssLayer =
+	CssLayerDeclaration
+	| CssLayerReference
+	| CssBogusLayer
+
+// @layer override.bar { }
+//        ^^^^^^^^^^^^^^^^
+CssLayerDeclaration =
+	references: CssLayerReferenceList
+	block: AnyCssRuleListBlock
+
+// @layer framework, bar.baz;
+//        ^^^^^^^^^^^^^^^^^^^
+CssLayerReference =
+	references: CssLayerReferenceList
+	';'
+
+// @layer framework, bar.baz;
+//        ^^^^^^^^^^^^^^^^^^
+CssLayerReferenceList = (CssLayerNameList (',' CssLayerNameList)*)
+
+// @layer framework, bar.baz;
+//                   ^^^^^^^
+CssLayerNameList = (CssIdentifier ('.' CssIdentifier)*)
+
+// https://drafts.csswg.org/css-conditional-3/#at-supports
+// https://drafts.csswg.org/css-conditional-4/#at-supports-ext
+// @supports <supports-condition> {
+//  <rule-list>
+// }
+// <supports-condition> = not <supports-in-parens>
+//                     | <supports-in-parens> [ and <supports-in-parens> ]*
+//                     | <supports-in-parens> [ or <supports-in-parens> ]*
+// <supports-in-parens> = ( <supports-condition> ) | <supports-feature> | <general-enclosed>
+// <supports-feature> = <supports-selector-fn> | <supports-decl>
+// <supports-selector-fn> = selector( <complex-selector> )
+// <supports-decl> = ( <declaration> )
+// <general-enclosed> branch must only be chosen if the input does not match either of the preceding branches.
+// <general-enclosed> exists to allow for future expansion of the grammar in a reasonably compatible way.
+
+// @supports (display: grid) {}
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssSupportsAtRule =
+	'supports'
+	condition: AnyCssSupportsCondition
+	block: AnyCssRuleListBlock
+
+AnyCssSupportsCondition =
+	CssSupportsNotCondition
+	| CssSupportsOrCondition
+	| CssSupportsAndCondition
+	| AnyCssSupportsInParens
+
+// @supports not (display: grid) {}
+//           ^^^^^^^^^^^^^^^^^^^
+CssSupportsNotCondition =
+	'not'
+	query: AnyCssSupportsInParens
+
+// @supports (transition-property: color) and (animation-name: foo) {}
+//           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssSupportsAndCondition =
+	left: AnyCssSupportsInParens
+	'and'
+	right: AnyCssSupportsAndCombinableCondition
+
+// @supports (transition-property: color) and ((animation-name: foo) or (display: flex)) {}
+//           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AnyCssSupportsAndCombinableCondition =
+	CssSupportsAndCondition
+	| AnyCssSupportsInParens
+
+// @supports (transition-property: color) or (animation-name: foo) {}
+//           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssSupportsOrCondition =
+	left: AnyCssSupportsInParens
+	'or'
+	right: AnyCssSupportsOrCombinableCondition
+
+// @supports (transition-property: color) or ((animation-name: foo) and (display: flex)) {}
+//           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AnyCssSupportsOrCombinableCondition =
+	CssSupportsOrCondition
+	| AnyCssSupportsInParens
+
+AnyCssSupportsInParens =
+	CssSupportsConditionInParens
+	| CssSupportsFeatureDeclaration
+	| CssSupportsFeatureSelector
+	| CssSimpleFunction
+	| AnyCssValue // general-enclosed
+
+// @supports (transition-property: color) or (not (animation-name: foo)) {}
+//                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssSupportsConditionInParens =
+	'('
+	condition: AnyCssSupportsCondition
+	')'
+
+// @supports not (display: flex) {}
+// 				       ^^^^^^^^^^^^^^^
+CssSupportsFeatureDeclaration =
+	'('
+	declaration: CssDeclaration
+	')'
+
+// @supports selector(:focus-visible) { }
+// 				   ^^^^^^^^^^^^^^^^^^^^^^^^
+CssSupportsFeatureSelector =
+	'selector'
+	'('
+	selector: AnyCssSelector
+	')'
+
+// https://drafts.csswg.org/css-cascade-6/#at-ruledef-scope
+// @scope [(<scope-start>)]? [to (<scope-end>)]? {
+//     <rule-list>
+//   }
+
+CssScopeAtRule =
+	'scope'
+	range: AnyCssScopeRange?
+	block: AnyCssRuleListBlock
+
+AnyCssScopeRange =
+	CssScopeRangeStart
+	| CssScopeRangeEnd
+	| CssScopeRangeInterval
+	| CssBogusScopeRange
+
+CssScopeRangeStart =
+	start: CssScopeEdge
+
+CssScopeRangeEnd =
+	'to'
+	end: CssScopeEdge
+
+CssScopeRangeInterval =
+	start: CssScopeEdge
+	'to'
+	end: CssScopeEdge
+
+CssScopeEdge =
+	'('
+	selectors: CssSelectorList
+	')'
+
+// https://drafts.csswg.org/css-cascade/#at-import
+// @import = @import [ <url> | <string> ] [ layer | layer( <layer-name> ) ]? <import-conditions> ;
+// <url> =  <url()> | <src()>
+// <url()> = url( <string> <url-modifier>* ) | <url-token>
+// <src()> = src( <string> <url-modifier>* )
+// <layer-name> = <ident> [ '.' <ident> ]*
+//
+// <import-conditions> = [ supports( [ <supports-condition> | <declaration> ] ) ]? <media-query-list>?
+
+// @import url("./test.css") layer(default) supports(display: flex) screen and (min-width: 400px);
+//  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssImportAtRule =
+	'import'
+	url: AnyCssImportUrl
+	layer: AnyCssImportLayer?
+	supports: CssImportSupports?
+	media: CssMediaQueryList
+	';'
+
+// @import url("./test.css");
+//             ^^^^^^^^^^^^
+// @import "./test.scss";
+//         ^^^^^^^^^^^^^
+AnyCssImportUrl = CssUrlFunction | CssString
+
+AnyCssImportLayer =
+	CssImportAnonymousLayer
+	| CssImportNamedLayer
+
+// @import url("./test.css") layer;
+//                           ^^^^^
+CssImportAnonymousLayer =
+	'layer'
+
+// @import url("./test.css") layer(module.foo);
+//                           ^^^^^^^^^^^^^^^^^
+CssImportNamedLayer =
+	'layer'
+	'('
+	name: CssLayerNameList
+	')'
+
+// @import url("./test.css") layer(default) supports(display: flex);
+//                                          ^^^^^^^^^^^^^^^^^^^^^^^
+CssImportSupports =
+	'supports'
+	'('
+	condition: AnyCssImportSupportsCondition
+	')'
+
+AnyCssImportSupportsCondition =
+	AnyCssSupportsCondition
+	| CssDeclaration
+
+// https://drafts.csswg.org/css-namespaces/#declaration
+// @namespace = @namespace <namespace-prefix>? [ <string> | <url> ] ;
+// <namespace-prefix> = <ident>
+
+CssNamespaceAtRule =
+	'namespace'
+	prefix: CssIdentifier?
+	url: AnyCssNamespaceUrl
+	';'
+
+AnyCssNamespaceUrl = CssUrlFunction | CssString
 
 ///////////////
 // AUXILIARY
 ///////////////
 
+// When adding values here, add them as `NodeConcept::Value` in the
+// `name_to_module` function in `src/formatter.rs`.
 AnyCssValue =
 	CssIdentifier
+	| CssCustomIdentifier
+	| CssDashedIdentifier
 	| CssString
 	| CssNumber
 	| AnyCssDimension
 	| CssRatio
-	| CssAnyFunction
-	| CssCustomProperty
+	| AnyCssFunction
+	| CssColor
 
+
+// https://drafts.csswg.org/css-syntax/#typedef-dimension-token
+//
+// Known, valid units like `px` or `vh` will be parsed as `CssRegularDimension`,
+// but the spec considers any identifier after the number to be the "unit".
+// These cases will instead be parsed into `CssUnknownDimension`.
+//
+// Dimensions and percentages are considered unique tokens in CSS, and so these
+// nodes just represent the tokens directly, rather than wrapping them in
+// `CssNumber` and `CssIdentifier`. This helps users easily distinguish between
+// things like `100`, `100px`, and `100%`, where they are all distinct, non-
+// overlapping types. If these instead used the number and identifier nodes, a
+// visitor would incidentally visit them even though they cannot be safely
+// operated on individually (i.e., the whole dimension must be treated as a
+// whole and not two individual pieces).
 
 // 10px
 // 100vh
 // 4rem
 // 1e-2
+// 0\0
+// 0Unknown
 AnyCssDimension =
-	CssRegularDimension | CssPercentage
+	CssRegularDimension | CssUnknownDimension | CssPercentage
 
 CssRegularDimension =
-	value: CssNumber
-	unit: CssIdentifier
-CssPercentDimension =
-	value: CssNumber
-	unit: '%'
+	value: 'css_number_literal'
+	unit: 'ident'
+CssUnknownDimension =
+	value: 'css_number_literal'
+	unit: 'ident'
+CssPercentage =
+	value: 'css_number_literal'
+	'%'
 
 // 3 / 2
 CssRatio =
@@ -865,8 +1507,9 @@ CssRatio =
 	denominator: CssNumber
 
 
-CssAnyFunction =
+AnyCssFunction =
 	CssSimpleFunction
+	| CssUrlFunction
 
 // content: counter(section);
 // 					^^^^^^^^^^^^^^^^
@@ -876,24 +1519,33 @@ CssSimpleFunction =
 	items: CssParameterList
 	')'
 
-CssVarFunction =
-	'var'
+// https://drafts.csswg.org/css-values-4/#url-value
+// <url> = <url()> | <src()>
+//
+// <url()> = url( <string> <url-modifier>* ) | <url-token>
+// <src()> = src( <string> <url-modifier>* )
+//
+// url("//aa.com/img.svg" foo bar baz func(test))
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssUrlFunction =
+	name: ('url' | 'src')
 	'('
-		property: CssCustomProperty
-		value: CssVarFunctionValue?
+	value: AnyCssUrlValue?
+	modifiers: CssUrlModifierList
 	')'
 
-CssVarFunctionValue =
-	','
-	value: CssIdentifier
+// url("//aa.com/img.svg" foo bar baz func(test))
+//                        ^^^^^^^^^^^^^^^^^^^^^^^
+CssUrlModifierList = AnyCssUrlModifier*
 
-CssPercentage =
-	value: CssNumber
-	'%'
+AnyCssUrlModifier =
+	CssIdentifier
+	| CssSimpleFunction
+	| CssBogusUrlModifier
 
-
-// parsed with --ident
-CssCustomProperty = value: CssIdentifier
+AnyCssUrlValue =
+	CssUrlValueRaw
+	| CssString
 
 CssParameterList = CssParameter (',' CssParameter)* ','?
 
@@ -901,8 +1553,40 @@ CssParameterList = CssParameter (',' CssParameter)* ','?
 //			    ^^^
 // repeating-radial-gradient(red, yellow 10%, green 15%);
 //                                ^^^^^^^^^^
-CssParameter = CssComponentValueList
+CssParameter = AnyCssExpression
 
+AnyCssExpression =
+	CssBinaryExpression
+	| CssParenthesizedExpression
+	| CssListOfComponentValuesExpression
+
+CssListOfComponentValuesExpression = CssComponentValueList
+
+CssBinaryExpression =
+	left: AnyCssExpression
+	operator_token: (
+		'+' | '-' | '*' | '/'
+	)
+	right: AnyCssExpression
+
+
+CssParenthesizedExpression =
+	'(' expression: AnyCssExpression? ')'
+
+// #fff
+// ^^^^
+CssColor =
+	'#'
+	value:'css_color_literal'
+
+// Any identifier. Case insensitve, used for standard property names, values, type selectors, etc.
 CssIdentifier = value: 'ident'
+// Any non-standard identifier. Case sensitive, used for class names, ids, etc. Custom identifiers
+// _may_ overlap with standard identifiers defined by CSS (e.g., `color`).
+CssCustomIdentifier = value: 'ident'
+// An identifier starting with two dashes, `--`. Case sensitive, used for custom property names.
+// Dashed identifiers are guaranteed to never overlap with an identifier defined by CSS.
+CssDashedIdentifier = value: 'ident'
 CssString = value: 'css_string_literal'
 CssNumber = value: 'css_number_literal'
+CssUrlValueRaw = value: 'css_url_value_raw_literal'

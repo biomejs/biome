@@ -118,10 +118,6 @@ impl WorkspaceSettings {
             )?;
         }
 
-        if let Some(overrides) = configuration.overrides {
-            self.override_settings = to_override_settings(overrides, vcs_path, gitignore_matches)?;
-        }
-
         // javascript settings
         if let Some(javascript) = configuration.javascript {
             self.languages.javascript = javascript.into();
@@ -133,6 +129,12 @@ impl WorkspaceSettings {
         // css settings
         if let Some(css) = configuration.css {
             self.languages.css = css.into();
+        }
+
+        // NOTE: keep this last. Computing the overrides require reading the settings computed by the parent settings.
+        if let Some(overrides) = configuration.overrides {
+            self.override_settings =
+                to_override_settings(overrides, vcs_path, gitignore_matches, self)?;
         }
 
         Ok(())
@@ -357,6 +359,7 @@ impl From<CssConfiguration> for LanguageSettings<CssLanguage> {
                 .map(Into::into)
                 .or(formatter.indent_size.map(Into::into));
             language_setting.formatter.indent_style = formatter.indent_style.map(Into::into);
+            language_setting.formatter.quote_style = formatter.quote_style;
         }
         language_setting
     }
@@ -551,7 +554,6 @@ impl OverrideSettings {
             if included {
                 let js_formatter = &pattern.languages.javascript.formatter;
                 let formatter = &pattern.formatter;
-
                 if let Some(indent_style) = js_formatter.indent_style.or(formatter.indent_style) {
                     options.set_indent_style(indent_style);
                 }
@@ -644,23 +646,19 @@ impl OverrideSettings {
             }
             if included {
                 let css_formatter = &pattern.languages.css.formatter;
+                let formatter = &pattern.formatter;
 
-                if let Some(indent_style) = css_formatter
-                    .indent_style
-                    .or(pattern.formatter.indent_style)
-                {
+                if let Some(indent_style) = css_formatter.indent_style.or(formatter.indent_style) {
                     options.set_indent_style(indent_style);
                 }
-
-                if let Some(indent_width) = css_formatter
-                    .indent_width
-                    .or(pattern.formatter.indent_width)
-                {
+                if let Some(indent_width) = css_formatter.indent_width.or(formatter.indent_width) {
                     options.set_indent_width(indent_width)
                 }
-                if let Some(line_width) = css_formatter.line_width.or(pattern.formatter.line_width)
-                {
+                if let Some(line_width) = css_formatter.line_width.or(formatter.line_width) {
                     options.set_line_width(line_width);
+                }
+                if let Some(quote_style) = css_formatter.quote_style {
+                    options.set_quote_style(quote_style);
                 }
             }
 

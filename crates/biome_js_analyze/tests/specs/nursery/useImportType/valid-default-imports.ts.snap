@@ -1,0 +1,23 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-default-imports.ts
+---
+# Input
+```ts
+import A from "";
+export { A }
+const AA = A;
+
+// With Import attributes
+import B from "" with { type: "json" };
+type BB = B;
+
+// No reference
+import C from "";
+
+import type D from "";
+export type { D };
+
+```
+
+

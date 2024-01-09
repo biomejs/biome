@@ -1,0 +1,15 @@
+
+div {    color  : blue ;
+
+    <<<ROME_RANGE_START>>>
+    background-color  : 
+    green;
+}
+
+.foo   html
+{
+    color  : green ;
+    <<<ROME_RANGE_END>>>
+
+    background-color   : blue;
+}

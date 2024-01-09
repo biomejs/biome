@@ -319,7 +319,7 @@ mod test {
     fn deserialization_error() {
         let content = "{ \n\n\"formatter\" }";
         let result =
-            deserialize_from_json_str::<Configuration>(content, JsonParserOptions::default());
+            deserialize_from_json_str::<Configuration>(content, JsonParserOptions::default(), "");
 
         assert!(result.has_errors());
         for diagnostic in result.into_diagnostics() {
@@ -343,7 +343,7 @@ mod test {
   }
 }"#;
         let _result =
-            deserialize_from_json_str::<Configuration>(content, JsonParserOptions::default())
+            deserialize_from_json_str::<Configuration>(content, JsonParserOptions::default(), "")
                 .into_deserialized()
                 .unwrap_or_default();
     }

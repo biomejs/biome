@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidTypeParam.ts
 ---
 # Input
-```js
+```ts
 export function f<T>() {}
 export class C<T> {}
 export type Alias<T> = number

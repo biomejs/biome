@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidTypeValueSameNames.ts
 ---
 # Input
-```js
+```ts
 
 type a = number
 export const a = 5;

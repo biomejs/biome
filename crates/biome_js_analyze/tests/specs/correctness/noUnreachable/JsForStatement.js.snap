@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: JsForStatement.js
 ---
 # Input
-```js
+```jsx
 function JsForStatement1() {
     for (let i = 0; i < 10; ++i) {
         break;

@@ -3,10 +3,20 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.js
 ---
 # Input
-```js
-for (const el of els) {
-   el
- }
+```jsx
+for (const el of els) {}
+
+els.forEach((el, i) => {});
+
+els.forEach((el, i, array) => {});
+
+els.forEach(function(el, i) {});
+
+els.forEach(function (el, i, array) {});
+
+els.forEach(f);
+
+els.forEach(function(el) {}, thisArg, unexpectedExtraParam);
 
 ```
 

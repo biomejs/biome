@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsonc
 ---
 # Input
-```js
+```cjs
 var a = 3; var a = 10;
 ```
 
@@ -25,7 +25,7 @@ invalid.jsonc:1:16 lint/suspicious/noRedeclare ━━━━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 var c; { var a; var a;} 
 ```
 
@@ -47,7 +47,7 @@ invalid.jsonc:1:21 lint/suspicious/noRedeclare ━━━━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 var a; { function a(){} }
 ```
 
@@ -69,7 +69,7 @@ invalid.jsonc:1:19 lint/suspicious/noRedeclare ━━━━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 switch(foo) { case a: var b = 3;
 case b: var b = 4}
 ```
@@ -94,7 +94,7 @@ invalid.jsonc:2:13 lint/suspicious/noRedeclare ━━━━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 var a = 3; var a = 10;
 ```
 
@@ -116,7 +116,7 @@ invalid.jsonc:1:16 lint/suspicious/noRedeclare ━━━━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 var a = {}; var a = [];
 ```
 
@@ -138,7 +138,7 @@ invalid.jsonc:1:17 lint/suspicious/noRedeclare ━━━━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 var a; function a() {}
 ```
 
@@ -160,7 +160,7 @@ invalid.jsonc:1:17 lint/suspicious/noRedeclare ━━━━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 function a() {} function a() {}
 ```
 
@@ -182,7 +182,7 @@ invalid.jsonc:1:26 lint/suspicious/noRedeclare ━━━━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 var a = function() { }; var a = function() { }
 ```
 
@@ -204,7 +204,7 @@ invalid.jsonc:1:29 lint/suspicious/noRedeclare ━━━━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 var a = function() { }; var a = new Date();
 ```
 
@@ -226,7 +226,7 @@ invalid.jsonc:1:29 lint/suspicious/noRedeclare ━━━━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 var a = 3; var a = 10; var a = 15;
 ```
 
@@ -264,7 +264,7 @@ invalid.jsonc:1:28 lint/suspicious/noRedeclare ━━━━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 var a; var a;
 ```
 
@@ -286,7 +286,7 @@ invalid.jsonc:1:12 lint/suspicious/noRedeclare ━━━━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 export var a; var a;
 ```
 
@@ -308,7 +308,7 @@ invalid.jsonc:1:19 lint/suspicious/noRedeclare ━━━━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 class C { static { var a; var a; } }
 ```
 
@@ -330,7 +330,7 @@ invalid.jsonc:1:31 lint/suspicious/noRedeclare ━━━━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 class C { static { var a; { var a; } } }
 ```
 
@@ -352,7 +352,7 @@ invalid.jsonc:1:33 lint/suspicious/noRedeclare ━━━━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 class C { static { { var a; } var a; } }
 ```
 
@@ -374,7 +374,7 @@ invalid.jsonc:1:35 lint/suspicious/noRedeclare ━━━━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 class C { static { { var a; } { var a; } } }
 ```
 
@@ -396,7 +396,7 @@ invalid.jsonc:1:37 lint/suspicious/noRedeclare ━━━━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 var a; var {a = 0, b: Object = 0} = {};
 ```
 
@@ -418,7 +418,7 @@ invalid.jsonc:1:13 lint/suspicious/noRedeclare ━━━━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 var a; var {a = 0, b: globalThis = 0} = {};
 ```
 
@@ -440,7 +440,7 @@ invalid.jsonc:1:13 lint/suspicious/noRedeclare ━━━━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 function f() { var a; var a; }
 ```
 
@@ -462,7 +462,7 @@ invalid.jsonc:1:27 lint/suspicious/noRedeclare ━━━━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 function f() { var a; if (test) { var a; } }
 ```
 
@@ -484,7 +484,7 @@ invalid.jsonc:1:39 lint/suspicious/noRedeclare ━━━━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 for (var a, a;;);
 ```
 
@@ -506,7 +506,7 @@ invalid.jsonc:1:13 lint/suspicious/noRedeclare ━━━━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 for (;;){ var a, a,;}
 ```
 
@@ -528,7 +528,7 @@ invalid.jsonc:1:18 lint/suspicious/noRedeclare ━━━━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 function f(x) { var x = 5; }
 ```
 

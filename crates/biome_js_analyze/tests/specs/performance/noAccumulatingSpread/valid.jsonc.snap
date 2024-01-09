@@ -3,57 +3,57 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.jsonc
 ---
 # Input
-```js
+```cjs
 foo.reduce((acc, bar) => {acc.push(bar); return acc;}, [])
 ```
 
 # Input
-```js
+```cjs
 foo.reduceRight((acc, bar) => {acc.push(bar); return acc;}, [])
 ```
 
 # Input
-```js
+```cjs
 foo.reduce((acc, bar) => {acc.push(...bar); return acc;}, [])
 ```
 
 # Input
-```js
+```cjs
 foo.reduceRight((acc, bar) => {acc.push(...bar); return acc;}, [])
 ```
 
 # Input
-```js
+```cjs
 foo.reduce((acc, bar) => {acc[bar.key] = bar.value; return acc;}, {})
 ```
 
 # Input
-```js
+```cjs
 foo.reduceRight((acc, bar) => {acc[bar.key] = bar.value; return acc;}, {})
 ```
 
 # Input
-```js
+```cjs
 foo.reduce((acc, bar) => {acc[bar.key] = { ...bar.value }; return acc;}, {})
 ```
 
 # Input
-```js
+```cjs
 foo.reduceRight((acc, bar) => {acc[bar.key] = { ...bar.value }; return acc;}, {})
 ```
 
 # Input
-```js
+```cjs
 foo.reduce((acc,value,index,array,somethingExtra) => [...acc, value], [])
 ```
 
 # Input
-```js
+```cjs
 foo.reduce((acc) => [...acc], [])
 ```
 
 # Input
-```js
+```cjs
 foo.reduce((acc, bar) => [...acc, bar], [], 123)
 ```
 

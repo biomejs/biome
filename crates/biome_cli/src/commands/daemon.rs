@@ -153,7 +153,7 @@ const fn log_file_name_prefix() -> &'static str {
 }
 
 pub(crate) fn read_most_recent_log_file() -> io::Result<Option<String>> {
-    let logs_dir = rome_log_dir();
+    let logs_dir = biome_log_dir();
 
     let most_recent = fs::read_dir(logs_dir)?
         .flatten()
@@ -183,7 +183,7 @@ pub(crate) fn read_most_recent_log_file() -> io::Result<Option<String>> {
 /// `biome-logs/server.log.yyyy-MM-dd-HH` files inside the system temporary
 /// directory)
 fn setup_tracing_subscriber() {
-    let file_appender = tracing_appender::rolling::hourly(rome_log_dir(), log_file_name_prefix());
+    let file_appender = tracing_appender::rolling::hourly(biome_log_dir(), log_file_name_prefix());
 
     registry()
         .with(
@@ -199,10 +199,10 @@ fn setup_tracing_subscriber() {
         .init();
 }
 
-pub(super) fn rome_log_dir() -> PathBuf {
+pub fn biome_log_dir() -> PathBuf {
     match env::var_os("BIOME_LOG_DIR") {
         Some(directory) => PathBuf::from(directory),
-        None => env::temp_dir().join("biome-logs"),
+        None => biome_fs::ensure_cache_dir().join("biome-logs"),
     }
 }
 

@@ -2,10 +2,9 @@ use crate::comments::{FormatJsLeadingComment, JsCommentStyle, JsComments};
 use crate::context::trailing_comma::TrailingComma;
 use biome_deserialize::{Deserializable, DeserializableValue, DeserializationDiagnostic, Text};
 use biome_formatter::printer::PrinterOptions;
-use biome_formatter::token::string::Quote;
 use biome_formatter::{
     CstFormatContext, FormatContext, FormatElement, FormatOptions, IndentStyle, IndentWidth,
-    LineEnding, LineWidth, TransformSourceMap,
+    LineEnding, LineWidth, QuoteStyle, TransformSourceMap,
 };
 use biome_js_syntax::{AnyJsFunctionBody, JsFileSource, JsLanguage};
 use std::fmt;
@@ -376,116 +375,6 @@ impl fmt::Display for JsFormatOptions {
         writeln!(f, "Arrow parentheses: {}", self.arrow_parentheses)?;
         writeln!(f, "Bracket spacing: {}", self.bracket_spacing.value())?;
         writeln!(f, "Bracket same line: {}", self.bracket_same_line.value())
-    }
-}
-
-#[derive(Debug, Eq, Hash, PartialEq, Clone, Copy)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
-    serde(rename_all = "camelCase")
-)]
-#[derive(Default)]
-pub enum QuoteStyle {
-    #[default]
-    Double,
-    Single,
-}
-
-impl FromStr for QuoteStyle {
-    type Err = &'static str;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "double" | "Double" => Ok(Self::Double),
-            "single" | "Single" => Ok(Self::Single),
-            // TODO: replace this error with a diagnostic
-            _ => Err("Value not supported for QuoteStyle"),
-        }
-    }
-}
-
-impl fmt::Display for QuoteStyle {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            QuoteStyle::Double => write!(f, "Double Quotes"),
-            QuoteStyle::Single => write!(f, "Single Quotes"),
-        }
-    }
-}
-
-impl QuoteStyle {
-    pub fn as_char(&self) -> char {
-        match self {
-            QuoteStyle::Double => '"',
-            QuoteStyle::Single => '\'',
-        }
-    }
-
-    pub fn as_string(&self) -> &str {
-        match self {
-            QuoteStyle::Double => "\"",
-            QuoteStyle::Single => "'",
-        }
-    }
-
-    /// Returns the quote, prepended with a backslash (escaped)
-    pub fn as_escaped(&self) -> &str {
-        match self {
-            QuoteStyle::Double => "\\\"",
-            QuoteStyle::Single => "\\'",
-        }
-    }
-
-    pub fn as_bytes(&self) -> u8 {
-        self.as_char() as u8
-    }
-
-    /// Returns the quote in HTML entity
-    pub fn as_html_entity(&self) -> &str {
-        match self {
-            QuoteStyle::Double => "&quot;",
-            QuoteStyle::Single => "&apos;",
-        }
-    }
-
-    /// Given the current quote, it returns the other one
-    pub fn other(&self) -> Self {
-        match self {
-            QuoteStyle::Double => QuoteStyle::Single,
-            QuoteStyle::Single => QuoteStyle::Double,
-        }
-    }
-}
-
-impl From<QuoteStyle> for Quote {
-    fn from(quote: QuoteStyle) -> Self {
-        match quote {
-            QuoteStyle::Double => Self::Double,
-            QuoteStyle::Single => Self::Single,
-        }
-    }
-}
-
-impl Deserializable for QuoteStyle {
-    fn deserialize(
-        value: &impl DeserializableValue,
-        name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<Self> {
-        const ALLOWED_VARIANTS: &[&str] = &["double", "single"];
-        match Text::deserialize(value, name, diagnostics)?.text() {
-            "double" => Some(QuoteStyle::Double),
-            "single" => Some(QuoteStyle::Single),
-            unknown_variant => {
-                diagnostics.push(DeserializationDiagnostic::new_unknown_value(
-                    unknown_variant,
-                    value.range(),
-                    ALLOWED_VARIANTS,
-                ));
-                None
-            }
-        }
     }
 }
 

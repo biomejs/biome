@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: logicalAndCases4.js
 ---
 # Input
-```js
+```jsx
 // chained calls with element access
 foo !== null && foo.bar !== null && foo.bar.baz !== null && foo.bar.baz[buzz]()
 foo !== null && foo.bar !== null && foo.bar.baz !== null && foo.bar.baz[buzz] !== null && foo.bar.baz[buzz]()

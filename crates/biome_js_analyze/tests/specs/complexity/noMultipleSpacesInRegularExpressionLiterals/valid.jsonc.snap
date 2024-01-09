@@ -3,22 +3,22 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.jsonc
 ---
 # Input
-```js
+```cjs
 /foo {2}bar/;
 ```
 
 # Input
-```js
+```cjs
 /foo bar baz/;
 ```
 
 # Input
-```js
+```cjs
 /foo bar	baz/;
 ```
 
 # Input
-```js
+```cjs
 /foo /;
 ```
 

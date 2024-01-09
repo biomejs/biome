@@ -38,6 +38,9 @@ pub use reports::{
 };
 pub use service::{open_transport, SocketTransport};
 
+#[cfg(debug_assertions)]
+pub use crate::commands::daemon::biome_log_dir;
+
 pub(crate) const VERSION: &str = match option_env!("BIOME_VERSION") {
     Some(version) => version,
     None => env!("CARGO_PKG_VERSION"),
@@ -181,6 +184,7 @@ impl<'app> CliSession<'app> {
                     since,
                 },
             ),
+            BiomeCommand::Explain { doc } => commands::explain::explain(self, doc),
             BiomeCommand::Init => commands::init::init(self),
             BiomeCommand::LspProxy(config_path) => commands::daemon::lsp_proxy(config_path),
             BiomeCommand::Migrate(cli_options, write) => {

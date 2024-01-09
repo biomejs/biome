@@ -1,0 +1,6 @@
+p {
+    font-size:   100 ;
+    font-size:   100% ;
+    font-size:  10   /   5 ;
+    font-size: "foo" ;
+}

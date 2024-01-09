@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: validTypeMethod.ts
 ---
 # Input
-```js
+```ts
 export interface X {
     m(): void
 

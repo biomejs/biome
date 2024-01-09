@@ -1,10 +1,9 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 96
 expression: invalid.jsonc
 ---
 # Input
-```js
+```cjs
 a = 1, 2
 ```
 
@@ -23,7 +22,7 @@ invalid.jsonc:1:6 lint/style/noCommaOperator ━━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 do {} while (doSomething(), !!test);
 ```
 
@@ -42,7 +41,7 @@ invalid.jsonc:1:27 lint/style/noCommaOperator ━━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 for (; doSomething(), !!test; );
 ```
 
@@ -61,7 +60,7 @@ invalid.jsonc:1:21 lint/style/noCommaOperator ━━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if (doSomething(), !!test);
 ```
 
@@ -80,7 +79,7 @@ invalid.jsonc:1:18 lint/style/noCommaOperator ━━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 switch (doSomething(), val) {}
 ```
 
@@ -99,7 +98,7 @@ invalid.jsonc:1:22 lint/style/noCommaOperator ━━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 while (doSomething(), !!test);
 ```
 
@@ -118,7 +117,7 @@ invalid.jsonc:1:21 lint/style/noCommaOperator ━━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 with (doSomething(), val) {}
 ```
 
@@ -137,7 +136,7 @@ invalid.jsonc:1:20 lint/style/noCommaOperator ━━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 a => (doSomething(), a)
 ```
 
@@ -156,7 +155,7 @@ invalid.jsonc:1:20 lint/style/noCommaOperator ━━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 (1), 2
 ```
 
@@ -175,7 +174,7 @@ invalid.jsonc:1:4 lint/style/noCommaOperator ━━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 ((1)) , (2)
 ```
 
@@ -194,7 +193,7 @@ invalid.jsonc:1:7 lint/style/noCommaOperator ━━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 while((1) , 2);
 ```
 
@@ -213,7 +212,7 @@ invalid.jsonc:1:11 lint/style/noCommaOperator ━━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 var foo = (1, 2);
 ```
 
@@ -232,7 +231,7 @@ invalid.jsonc:1:13 lint/style/noCommaOperator ━━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 (0,eval)("foo()");
 ```
 
@@ -251,7 +250,7 @@ invalid.jsonc:1:3 lint/style/noCommaOperator ━━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 foo(a, (b, c), d);
 ```
 
@@ -270,7 +269,7 @@ invalid.jsonc:1:10 lint/style/noCommaOperator ━━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 do {} while ((doSomething(), !!test));
 ```
 
@@ -289,7 +288,7 @@ invalid.jsonc:1:28 lint/style/noCommaOperator ━━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 for (; (doSomething(), !!test); );
 ```
 
@@ -308,7 +307,7 @@ invalid.jsonc:1:22 lint/style/noCommaOperator ━━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 if ((doSomething(), !!test));
 ```
 
@@ -327,7 +326,7 @@ invalid.jsonc:1:19 lint/style/noCommaOperator ━━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 switch ((doSomething(), val)) {}
 ```
 
@@ -346,7 +345,7 @@ invalid.jsonc:1:23 lint/style/noCommaOperator ━━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 while ((doSomething(), !!test));
 ```
 
@@ -365,7 +364,7 @@ invalid.jsonc:1:22 lint/style/noCommaOperator ━━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 with ((doSomething(), val)) {}
 ```
 
@@ -384,7 +383,7 @@ invalid.jsonc:1:21 lint/style/noCommaOperator ━━━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 a => ((doSomething(), a))
 ```
 

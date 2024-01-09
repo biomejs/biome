@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: JsBreakStatement.js
 ---
 # Input
-```js
+```jsx
 function JsBreakStatement1() {
     while (true) {
         break;

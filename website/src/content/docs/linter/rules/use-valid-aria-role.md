@@ -2,10 +2,10 @@
 title: useValidAriaRole (since v1.4.0)
 ---
 
-**Diagnostic Category: `lint/nursery/useValidAriaRole`**
+**Diagnostic Category: `lint/a11y/useValidAriaRole`**
 
-:::caution
-This rule is part of the [nursery](/linter/rules/#nursery) group.
+:::note
+This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
 Elements with ARIA roles must use a valid, non-abstract ARIA role.
@@ -20,7 +20,7 @@ Source: https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rule
 <div role="datepicker"></div>
 ```
 
-<pre class="language-text"><code class="language-text">nursery/useValidAriaRole.js:1:1 <a href="https://biomejs.dev/lint/rules/use-valid-aria-role">lint/nursery/useValidAriaRole</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/useValidAriaRole.js:1:1 <a href="https://biomejs.dev/linter/rules/use-valid-aria-role">lint/a11y/useValidAriaRole</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Enforce that elements with ARIA roles must use a valid, non-abstract ARIA role.</span>
   
@@ -41,7 +41,7 @@ Source: https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rule
 <div role="range"></div>
 ```
 
-<pre class="language-text"><code class="language-text">nursery/useValidAriaRole.js:1:1 <a href="https://biomejs.dev/lint/rules/use-valid-aria-role">lint/nursery/useValidAriaRole</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/useValidAriaRole.js:1:1 <a href="https://biomejs.dev/linter/rules/use-valid-aria-role">lint/a11y/useValidAriaRole</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Enforce that elements with ARIA roles must use a valid, non-abstract ARIA role.</span>
   
@@ -62,7 +62,7 @@ Source: https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rule
 <div role=""></div>
 ```
 
-<pre class="language-text"><code class="language-text">nursery/useValidAriaRole.js:1:1 <a href="https://biomejs.dev/lint/rules/use-valid-aria-role">lint/nursery/useValidAriaRole</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/useValidAriaRole.js:1:1 <a href="https://biomejs.dev/linter/rules/use-valid-aria-role">lint/a11y/useValidAriaRole</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Enforce that elements with ARIA roles must use a valid, non-abstract ARIA role.</span>
   
@@ -83,7 +83,7 @@ Source: https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rule
 <Foo role="foo"></Foo>
 ```
 
-<pre class="language-text"><code class="language-text">nursery/useValidAriaRole.js:1:1 <a href="https://biomejs.dev/lint/rules/use-valid-aria-role">lint/nursery/useValidAriaRole</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/useValidAriaRole.js:1:1 <a href="https://biomejs.dev/linter/rules/use-valid-aria-role">lint/a11y/useValidAriaRole</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Enforce that elements with ARIA roles must use a valid, non-abstract ARIA role.</span>
   

@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: validFunctions.ts
 ---
 # Input
-```js
+```ts
 /* should not generate diagnostics */
 
 // used function declaration

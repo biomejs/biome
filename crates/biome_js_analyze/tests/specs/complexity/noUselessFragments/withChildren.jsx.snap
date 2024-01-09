@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: withChildren.jsx
 ---
 # Input
-```js
+```jsx
 <>
     <>foo</>
     <React.Fragment>foo</React.Fragment>

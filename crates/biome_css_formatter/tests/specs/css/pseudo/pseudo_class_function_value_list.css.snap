@@ -1,0 +1,51 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/pseudo/pseudo_class_function_value_list.css
+---
+
+# Input
+
+```css
+:lang(de, fr) {}
+:lang(
+    de,
+    
+    fr
+    ) {}
+
+:lang(
+    de
+    ) {}
+:lang(
+    de, fr, en, es, hi, pt
+) {}
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+-----
+
+```css
+:lang(de, fr) {
+}
+:lang(de, fr) {
+}
+
+:lang(de) {
+}
+:lang(de, fr, en, es, hi, pt) {
+}
+```
+
+

@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: validForStatement.js
 ---
 # Input
-```js
+```jsx
 
 let f;
 for(f = 0; f < 5; f++) {}

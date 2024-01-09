@@ -49,6 +49,7 @@ These are plugin maintained by other communities, that you install in your edito
 - [`helix`](https://helix-editor.com/): follow the instruction of [this manual](https://github.com/biomejs/biome/blob/main/editors/helix/manual.md)
 - [`coc-biome`](https://github.com/fannheyward/coc-biome): Biome extension for [`coc.nvim`](https://github.com/neoclide/coc.nvim)
 - [`sublime text`](http://www.sublimetext.com/): follow the [`LSP-biome`](https://github.com/sublimelsp/LSP-biome) installation instructions
+- [`Emacs`](https://www.gnu.org/software/emacs/): ensure you have [`lsp-mode`](https://github.com/emacs-lsp/lsp-mode) installed, follow the [`lsp-biome`](https://github.com/cxa/lsp-biome) installation instructions to enable Biome support in `lsp-mode`
 
 :::note
 Is there a plugin for an editor that isn't listed here? Please file a PR and we will be happy to add it to the list
@@ -117,17 +118,16 @@ Operations via the daemon are significantly slower than the CLI itself, so it's 
 
 ### Daemon logs
 
-The Biome daemon saves logs in your file system. Logs are store in a folder called `biome-logs`. You can find this folder in the temporary directory of your operating system.
+The Biome daemon saves logs in your file system. Logs are stored in a folder called `biome-logs`. The path of  this folder changes based on your operative system:
+-  Linux: `~/.cache/biome`;
+-  Windows: `C:\Users\<UserName>\AppData\Local\biomejs\biome\cache`
+-  macOS: `/Users/<UserName>/Library/Caches/dev.biomejs.biome`
 
-From Windows, using a powershell:
+For other operative systems, you can find the folder in the system's temporary directory.
+
+To obtain the precise path, execute the following command:
 ```shell
-$env:TEMP
-```
-
-From Linux/macOS, using a terminal:
-
-```shell
-echo $TMPDIR
+biome explain daemon-logs
 ```
 
 The log files are rotated on an hourly basis.

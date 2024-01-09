@@ -41,9 +41,9 @@ CssRoot {
                     ],
                 },
             ],
-            block: CssBlock {
+            block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@18..19 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@19..20 "}" [] [],
             },
         },
@@ -71,7 +71,7 @@ CssRoot {
                                     sub_selectors: CssSubSelectorList [
                                         CssIdSelector {
                                             hash_token: HASH@39..40 "#" [] [],
-                                            name: CssIdentifier {
+                                            name: CssCustomIdentifier {
                                                 value_token: IDENT@40..46 "scroll" [] [],
                                             },
                                         },
@@ -83,9 +83,9 @@ CssRoot {
                     ],
                 },
             ],
-            block: CssBlock {
+            block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@48..49 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@49..50 "}" [] [],
             },
         },
@@ -113,7 +113,7 @@ CssRoot {
                                     sub_selectors: CssSubSelectorList [
                                         CssIdSelector {
                                             hash_token: HASH@72..73 "#" [] [],
-                                            name: CssIdentifier {
+                                            name: CssCustomIdentifier {
                                                 value_token: IDENT@73..82 "scroll" [] [Whitespace("   ")],
                                             },
                                         },
@@ -125,9 +125,9 @@ CssRoot {
                     ],
                 },
             ],
-            block: CssBlock {
+            block: CssDeclarationListBlock {
                 l_curly_token: L_CURLY@84..85 "{" [] [],
-                declaration_list: CssDeclarationList [],
+                declarations: CssDeclarationList [],
                 r_curly_token: R_CURLY@85..86 "}" [] [],
             },
         },
@@ -156,7 +156,7 @@ CssRoot {
               1: CSS_PSEUDO_ELEMENT_IDENTIFIER@7..18
                 0: CSS_IDENTIFIER@7..18
                   0: IDENT@7..18 "cue-region" [] [Whitespace(" ")]
-      1: CSS_BLOCK@18..20
+      1: CSS_DECLARATION_LIST_BLOCK@18..20
         0: L_CURLY@18..19 "{" [] []
         1: CSS_DECLARATION_LIST@19..19
         2: R_CURLY@19..20 "}" [] []
@@ -181,10 +181,10 @@ CssRoot {
                   2: CSS_SUB_SELECTOR_LIST@39..46
                     0: CSS_ID_SELECTOR@39..46
                       0: HASH@39..40 "#" [] []
-                      1: CSS_IDENTIFIER@40..46
+                      1: CSS_CUSTOM_IDENTIFIER@40..46
                         0: IDENT@40..46 "scroll" [] []
                 3: R_PAREN@46..48 ")" [] [Whitespace(" ")]
-      1: CSS_BLOCK@48..50
+      1: CSS_DECLARATION_LIST_BLOCK@48..50
         0: L_CURLY@48..49 "{" [] []
         1: CSS_DECLARATION_LIST@49..49
         2: R_CURLY@49..50 "}" [] []
@@ -209,10 +209,10 @@ CssRoot {
                   2: CSS_SUB_SELECTOR_LIST@72..82
                     0: CSS_ID_SELECTOR@72..82
                       0: HASH@72..73 "#" [] []
-                      1: CSS_IDENTIFIER@73..82
+                      1: CSS_CUSTOM_IDENTIFIER@73..82
                         0: IDENT@73..82 "scroll" [] [Whitespace("   ")]
                 3: R_PAREN@82..84 ")" [] [Whitespace(" ")]
-      1: CSS_BLOCK@84..86
+      1: CSS_DECLARATION_LIST_BLOCK@84..86
         0: L_CURLY@84..85 "{" [] []
         1: CSS_DECLARATION_LIST@85..85
         2: R_CURLY@85..86 "}" [] []

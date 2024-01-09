@@ -1,0 +1,360 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.jsonc
+---
+# Input
+```cjs
+/abc/
+```
+
+# Input
+```cjs
+/abc/g
+```
+
+# Input
+```cjs
+new RegExp(pattern)
+```
+
+# Input
+```cjs
+new RegExp('\\p{Emoji_Presentation}\\P{Script_Extensions=Latin}' + '', `ug`)
+```
+
+# Input
+```cjs
+new RegExp('\\cA' + '')
+```
+
+# Input
+```cjs
+RegExp(pattern, 'g')
+```
+
+# Input
+```cjs
+new RegExp(f('a'))
+```
+
+# Input
+```cjs
+RegExp(prefix + 'a')
+```
+
+# Input
+```cjs
+new RegExp('a' + suffix)
+```
+
+# Input
+```cjs
+RegExp(`a` + suffix);
+```
+
+# Input
+```cjs
+new RegExp(String.raw`a` + suffix);
+```
+
+# Input
+```cjs
+RegExp('a', flags)
+```
+
+# Input
+```cjs
+const flags = 'gu';RegExp('a', flags)
+```
+
+# Input
+```cjs
+RegExp('a', 'g' + flags)
+```
+
+# Input
+```cjs
+new RegExp(String.raw`a`, flags);
+```
+
+# Input
+```cjs
+RegExp(`${prefix}abc`)
+```
+
+# Input
+```cjs
+new RegExp(`a${b}c`);
+```
+
+# Input
+```cjs
+new RegExp(`a${''}c`);
+```
+
+# Input
+```cjs
+new RegExp(String.raw`a${b}c`);
+```
+
+# Input
+```cjs
+new RegExp(String.raw`a${''}c`);
+```
+
+# Input
+```cjs
+new RegExp('a' + 'b')
+```
+
+# Input
+```cjs
+RegExp(1)
+```
+
+# Input
+```cjs
+new RegExp('(\\p{Emoji_Presentation})\\1' + '', `ug`)
+```
+
+# Input
+```cjs
+RegExp(String.raw`\78\126` + '\\5934', '' + `g` + '')
+```
+
+# Input
+```cjs
+func(new RegExp(String.raw`a${''}c\d`, 'u'),new RegExp(String.raw`a${''}c\d`, 'u'))
+```
+
+# Input
+```cjs
+new RegExp('\\[' + "b\\]")
+```
+
+# Input
+```cjs
+new RegExp(/a/);
+```
+
+# Input
+```cjs
+new RegExp;
+```
+
+# Input
+```cjs
+new RegExp();
+```
+
+# Input
+```cjs
+RegExp();
+```
+
+# Input
+```cjs
+new RegExp('a', 'g', 'b');
+```
+
+# Input
+```cjs
+RegExp('a', 'g', 'b');
+```
+
+# Input
+```cjs
+new RegExp(`a`, `g`, `b`);
+```
+
+# Input
+```cjs
+RegExp(`a`, `g`, `b`);
+```
+
+# Input
+```cjs
+new RegExp(String.raw`a`, String.raw`g`, String.raw`b`);
+```
+
+# Input
+```cjs
+RegExp(String.raw`a`, String.raw`g`, String.raw`b`);
+```
+
+# Input
+```cjs
+new RegExp(/a/, 'u', 'foo');
+```
+
+# Input
+```cjs
+new RegExp(String`a`);
+```
+
+# Input
+```cjs
+RegExp(raw`a`);
+```
+
+# Input
+```cjs
+new RegExp(f(String.raw)`a`);
+```
+
+# Input
+```cjs
+RegExp(string.raw`a`);
+```
+
+# Input
+```cjs
+new RegExp(String.Raw`a`);
+```
+
+# Input
+```cjs
+new RegExp(String[raw]`a`);
+```
+
+# Input
+```cjs
+RegExp(String.raw.foo`a`);
+```
+
+# Input
+```cjs
+new RegExp(String.foo.raw`a`);
+```
+
+# Input
+```cjs
+RegExp(foo.String.raw`a`);
+```
+
+# Input
+```cjs
+new RegExp(String.raw);
+```
+
+# Input
+```cjs
+let String; new RegExp(String.raw`a`);
+```
+
+# Input
+```cjs
+function foo() { var String; new RegExp(String.raw`a`); }
+```
+
+# Input
+```cjs
+function foo(String) { RegExp(String.raw`a`); }
+```
+
+# Input
+```cjs
+if (foo) { const String = bar; RegExp(String.raw`a`); }
+```
+
+# Input
+```cjs
+new Regexp('abc');
+```
+
+# Input
+```cjs
+Regexp(`a`);
+```
+
+# Input
+```cjs
+new Regexp(String.raw`a`);
+```
+
+# Input
+```cjs
+let RegExp; new RegExp('a');
+```
+
+# Input
+```cjs
+function foo() { var RegExp; RegExp('a', 'g'); }
+```
+
+# Input
+```cjs
+function foo(RegExp) { new RegExp(String.raw`a`); }
+```
+
+# Input
+```cjs
+if (foo) { const RegExp = bar; RegExp('a'); }
+```
+
+# Input
+```cjs
+class C { #RegExp; foo() { globalThis.#RegExp('a'); } }
+```
+
+# Input
+```cjs
+new RegExp('[[A--B]]' + a, 'v')
+```
+
+# Input
+```cjs
+new Regexp('abc')
+```
+
+# Input
+```cjs
+Regexp(`a`);
+```
+
+# Input
+```cjs
+new Regexp(String.raw`a`);
+```
+
+# Input
+```cjs
+RegExp('*');
+```
+
+# Input
+```cjs
+new RegExp('*', 'g');
+```
+
+# Input
+```cjs
+RegExp('*', 'g');
+```
+
+# Input
+```cjs
+new RegExp('a', 'uv')
+```
+
+# Input
+```cjs
+new RegExp('+');
+```
+
+# Input
+```cjs
+RegExp('+');
+```
+
+# Input
+```cjs
+new RegExp('+', 'g');
+```
+
+# Input
+```cjs
+RegExp('+', 'g');
+```
+
+

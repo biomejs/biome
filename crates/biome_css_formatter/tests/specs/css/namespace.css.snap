@@ -1,0 +1,87 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/namespace.css
+---
+
+# Input
+
+```css
+hello|* {
+
+}
+
+spaced     | * {}
+
+
+newline
+
+
+|   * {
+
+}
+
+*|  * {}
+
+*    | hello {}
+
+long-ident
+
+|
+
+
+other-ident .html {
+
+}
+
+
+.complex  * | html {}
+
+.complex-ident   ident | hello {
+
+}
+
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+-----
+
+```css
+hello|* {
+}
+
+spaced|* {
+}
+
+newline|* {
+}
+
+*|* {
+}
+
+*|hello {
+}
+
+long-ident|other-ident .html {
+}
+
+.complex *|html {
+}
+
+.complex-ident ident|hello {
+}
+```
+
+

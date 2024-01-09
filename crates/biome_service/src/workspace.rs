@@ -150,7 +150,7 @@ impl FileFeaturesResult {
         self
     }
 
-    pub fn with_settings_and_language(
+    pub(crate) fn with_settings_and_language(
         mut self,
         settings: &WorkspaceSettings,
         language: &Language,
@@ -215,6 +215,13 @@ impl FileFeaturesResult {
         }
     }
 
+    /// The file will be protected for all features
+    pub fn set_protected_for_all_features(&mut self) {
+        for support_kind in self.features_supported.values_mut() {
+            *support_kind = SupportKind::Protected;
+        }
+    }
+
     pub fn ignored(&mut self, feature: FeatureName) {
         self.features_supported
             .insert(feature, SupportKind::Ignored);
@@ -256,6 +263,13 @@ impl FileFeaturesResult {
             .all(|support_kind| support_kind.is_ignored())
     }
 
+    /// The file is protected only if all the features marked it as protected
+    pub fn is_protected(&self) -> bool {
+        self.features_supported
+            .values()
+            .all(|support_kind| support_kind.is_protected())
+    }
+
     /// The file is not supported if all the featured marked it as not supported
     pub fn is_not_supported(&self) -> bool {
         self.features_supported
@@ -295,6 +309,8 @@ pub enum SupportKind {
     Supported,
     /// The file is ignored (configuration)
     Ignored,
+    /// The file is protected, meaning that it can't be processed because other tools manage it
+    Protected,
     /// The feature is not enabled (configuration or the file doesn't need it)
     FeatureNotEnabled,
     /// The file is not capable of having this feature
@@ -314,6 +330,9 @@ impl SupportKind {
     }
     pub const fn is_ignored(&self) -> bool {
         matches!(self, SupportKind::Ignored)
+    }
+    pub const fn is_protected(&self) -> bool {
+        matches!(self, SupportKind::Protected)
     }
 }
 

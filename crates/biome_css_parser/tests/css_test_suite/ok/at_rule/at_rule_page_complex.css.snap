@@ -1,0 +1,2621 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@page :first:right:left:blank, name:first:right:left:blank {
+	color: green;
+
+	@container (500px <= width <= 500px) {  }
+
+	@top-left-corner {
+		content: "foo";
+		color: blue;
+
+		@container (500px <= width <= 500px) {  }
+
+	}
+
+	@top-left {
+		content: "foo";
+		@container (500px <= width <= 500px) {  }
+
+		color: blue;
+
+	}
+	@top-center {
+		@container (500px <= width <= 500px) {  }
+
+		content: "foo";
+		color: blue;
+	}
+
+	@top-right {
+		content: "foo";
+		@container (500px <= width <= 500px) {  }
+
+		color: blue;
+	}
+
+	@top-right-corner {
+		@container (500px <= width <= 500px) {  }
+
+		content: "foo";
+		color: blue;
+	}
+
+	@bottom-left-corner {
+		content: "foo";
+		@container (500px <= width <= 500px) {  }
+
+		color: blue;
+	}
+
+	@bottom-left {
+		content: "foo";
+		color: blue;
+		@container (500px <= width <= 500px) {  }
+
+	}
+
+	@bottom-center {
+		@container (500px <= width <= 500px) {  }
+
+		content: "foo";
+		color: blue;
+	}
+
+	@bottom-right {
+		content: "foo";
+		@container (500px <= width <= 500px) {  }
+
+		color: blue;
+	}
+
+	@bottom-right-corner {
+		content: "foo";
+		color: blue;
+		@container (500px <= width <= 500px) {  }
+
+	}
+
+	@left-top {
+		@container (500px <= width <= 500px) {  }
+
+		content: "foo";
+		color: blue;
+	}
+
+	@left-middle {
+		@container (500px <= width <= 500px) {  }
+
+		content: "foo";
+		color: blue;
+		@container (500px <= width <= 500px) {  }
+
+	}
+
+	@left-bottom {
+		content: "foo";
+		color: blue;
+		@container (500px <= width <= 500px) {  }
+
+	}
+
+	@right-top {
+		content: "foo";
+		@container (500px <= width <= 500px) {  }
+
+		color: blue;
+	}
+
+	@right-middle {
+		content: "foo";
+		@container (500px <= width <= 500px) {  }
+
+		color: blue;
+	}
+	content: "foo";
+	@container (500px <= width <= 500px) {  }
+
+
+	@right-bottom {
+		content: "foo";
+		@container (500px <= width <= 500px) {  }
+
+		color: blue;
+	}
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssPageAtRule {
+                page_token: PAGE_KW@1..6 "page" [] [Whitespace(" ")],
+                selectors: CssPageSelectorList [
+                    CssPageSelector {
+                        ty: missing (optional),
+                        pseudos: CssPageSelectorPseudoList [
+                            CssPageSelectorPseudo {
+                                colon_token: COLON@6..7 ":" [] [],
+                                selector: FIRST_KW@7..12 "first" [] [],
+                            },
+                            CssPageSelectorPseudo {
+                                colon_token: COLON@12..13 ":" [] [],
+                                selector: RIGHT_KW@13..18 "right" [] [],
+                            },
+                            CssPageSelectorPseudo {
+                                colon_token: COLON@18..19 ":" [] [],
+                                selector: LEFT_KW@19..23 "left" [] [],
+                            },
+                            CssPageSelectorPseudo {
+                                colon_token: COLON@23..24 ":" [] [],
+                                selector: BLANK_KW@24..29 "blank" [] [],
+                            },
+                        ],
+                    },
+                    COMMA@29..31 "," [] [Whitespace(" ")],
+                    CssPageSelector {
+                        ty: CssCustomIdentifier {
+                            value_token: IDENT@31..35 "name" [] [],
+                        },
+                        pseudos: CssPageSelectorPseudoList [
+                            CssPageSelectorPseudo {
+                                colon_token: COLON@35..36 ":" [] [],
+                                selector: FIRST_KW@36..41 "first" [] [],
+                            },
+                            CssPageSelectorPseudo {
+                                colon_token: COLON@41..42 ":" [] [],
+                                selector: RIGHT_KW@42..47 "right" [] [],
+                            },
+                            CssPageSelectorPseudo {
+                                colon_token: COLON@47..48 ":" [] [],
+                                selector: LEFT_KW@48..52 "left" [] [],
+                            },
+                            CssPageSelectorPseudo {
+                                colon_token: COLON@52..53 ":" [] [],
+                                selector: BLANK_KW@53..59 "blank" [] [Whitespace(" ")],
+                            },
+                        ],
+                    },
+                ],
+                block: CssPageAtRuleBlock {
+                    l_curly_token: L_CURLY@59..60 "{" [] [],
+                    items: CssPageAtRuleItemList [
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@60..67 "color" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                    colon_token: COLON@67..69 ":" [] [Whitespace(" ")],
+                                    value: CssGenericComponentValueList [
+                                        CssIdentifier {
+                                            value_token: IDENT@69..74 "green" [] [],
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@74..75 ";" [] [],
+                        },
+                        CssAtRule {
+                            at_token: AT@75..79 "@" [Newline("\n"), Newline("\n"), Whitespace("\t")] [],
+                            rule: CssContainerAtRule {
+                                container_token: CONTAINER_KW@79..89 "container" [] [Whitespace(" ")],
+                                name: missing (optional),
+                                query: CssContainerSizeFeatureInParens {
+                                    l_paren_token: L_PAREN@89..90 "(" [] [],
+                                    feature: CssQueryFeatureRangeInterval {
+                                        left: CssRegularDimension {
+                                            value_token: CSS_NUMBER_LITERAL@90..93 "500" [] [],
+                                            unit_token: IDENT@93..96 "px" [] [Whitespace(" ")],
+                                        },
+                                        left_comparison: CssQueryFeatureRangeComparison {
+                                            operator: LTEQ@96..99 "<=" [] [Whitespace(" ")],
+                                        },
+                                        name: CssIdentifier {
+                                            value_token: IDENT@99..105 "width" [] [Whitespace(" ")],
+                                        },
+                                        right_comparison: CssQueryFeatureRangeComparison {
+                                            operator: LTEQ@105..108 "<=" [] [Whitespace(" ")],
+                                        },
+                                        right: CssRegularDimension {
+                                            value_token: CSS_NUMBER_LITERAL@108..111 "500" [] [],
+                                            unit_token: IDENT@111..113 "px" [] [],
+                                        },
+                                    },
+                                    r_paren_token: R_PAREN@113..115 ")" [] [Whitespace(" ")],
+                                },
+                                block: CssRuleListBlock {
+                                    l_curly_token: L_CURLY@115..118 "{" [] [Whitespace("  ")],
+                                    rules: CssRuleList [],
+                                    r_curly_token: R_CURLY@118..119 "}" [] [],
+                                },
+                            },
+                        },
+                        CssMarginAtRule {
+                            at_token: AT@119..123 "@" [Newline("\n"), Newline("\n"), Whitespace("\t")] [],
+                            name: TOP_LEFT_CORNER_KW@123..139 "top-left-corner" [] [Whitespace(" ")],
+                            block: CssDeclarationOrAtRuleBlock {
+                                l_curly_token: L_CURLY@139..140 "{" [] [],
+                                items: CssDeclarationOrAtRuleList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@140..150 "content" [Newline("\n"), Whitespace("\t\t")] [],
+                                                },
+                                                colon_token: COLON@150..152 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssString {
+                                                        value_token: CSS_STRING_LITERAL@152..157 "\"foo\"" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@157..158 ";" [] [],
+                                    },
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@158..166 "color" [Newline("\n"), Whitespace("\t\t")] [],
+                                                },
+                                                colon_token: COLON@166..168 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@168..172 "blue" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@172..173 ";" [] [],
+                                    },
+                                    CssAtRule {
+                                        at_token: AT@173..178 "@" [Newline("\n"), Newline("\n"), Whitespace("\t\t")] [],
+                                        rule: CssContainerAtRule {
+                                            container_token: CONTAINER_KW@178..188 "container" [] [Whitespace(" ")],
+                                            name: missing (optional),
+                                            query: CssContainerSizeFeatureInParens {
+                                                l_paren_token: L_PAREN@188..189 "(" [] [],
+                                                feature: CssQueryFeatureRangeInterval {
+                                                    left: CssRegularDimension {
+                                                        value_token: CSS_NUMBER_LITERAL@189..192 "500" [] [],
+                                                        unit_token: IDENT@192..195 "px" [] [Whitespace(" ")],
+                                                    },
+                                                    left_comparison: CssQueryFeatureRangeComparison {
+                                                        operator: LTEQ@195..198 "<=" [] [Whitespace(" ")],
+                                                    },
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@198..204 "width" [] [Whitespace(" ")],
+                                                    },
+                                                    right_comparison: CssQueryFeatureRangeComparison {
+                                                        operator: LTEQ@204..207 "<=" [] [Whitespace(" ")],
+                                                    },
+                                                    right: CssRegularDimension {
+                                                        value_token: CSS_NUMBER_LITERAL@207..210 "500" [] [],
+                                                        unit_token: IDENT@210..212 "px" [] [],
+                                                    },
+                                                },
+                                                r_paren_token: R_PAREN@212..214 ")" [] [Whitespace(" ")],
+                                            },
+                                            block: CssRuleListBlock {
+                                                l_curly_token: L_CURLY@214..217 "{" [] [Whitespace("  ")],
+                                                rules: CssRuleList [],
+                                                r_curly_token: R_CURLY@217..218 "}" [] [],
+                                            },
+                                        },
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@218..222 "}" [Newline("\n"), Newline("\n"), Whitespace("\t")] [],
+                            },
+                        },
+                        CssMarginAtRule {
+                            at_token: AT@222..226 "@" [Newline("\n"), Newline("\n"), Whitespace("\t")] [],
+                            name: TOP_LEFT_KW@226..235 "top-left" [] [Whitespace(" ")],
+                            block: CssDeclarationOrAtRuleBlock {
+                                l_curly_token: L_CURLY@235..236 "{" [] [],
+                                items: CssDeclarationOrAtRuleList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@236..246 "content" [Newline("\n"), Whitespace("\t\t")] [],
+                                                },
+                                                colon_token: COLON@246..248 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssString {
+                                                        value_token: CSS_STRING_LITERAL@248..253 "\"foo\"" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@253..254 ";" [] [],
+                                    },
+                                    CssAtRule {
+                                        at_token: AT@254..258 "@" [Newline("\n"), Whitespace("\t\t")] [],
+                                        rule: CssContainerAtRule {
+                                            container_token: CONTAINER_KW@258..268 "container" [] [Whitespace(" ")],
+                                            name: missing (optional),
+                                            query: CssContainerSizeFeatureInParens {
+                                                l_paren_token: L_PAREN@268..269 "(" [] [],
+                                                feature: CssQueryFeatureRangeInterval {
+                                                    left: CssRegularDimension {
+                                                        value_token: CSS_NUMBER_LITERAL@269..272 "500" [] [],
+                                                        unit_token: IDENT@272..275 "px" [] [Whitespace(" ")],
+                                                    },
+                                                    left_comparison: CssQueryFeatureRangeComparison {
+                                                        operator: LTEQ@275..278 "<=" [] [Whitespace(" ")],
+                                                    },
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@278..284 "width" [] [Whitespace(" ")],
+                                                    },
+                                                    right_comparison: CssQueryFeatureRangeComparison {
+                                                        operator: LTEQ@284..287 "<=" [] [Whitespace(" ")],
+                                                    },
+                                                    right: CssRegularDimension {
+                                                        value_token: CSS_NUMBER_LITERAL@287..290 "500" [] [],
+                                                        unit_token: IDENT@290..292 "px" [] [],
+                                                    },
+                                                },
+                                                r_paren_token: R_PAREN@292..294 ")" [] [Whitespace(" ")],
+                                            },
+                                            block: CssRuleListBlock {
+                                                l_curly_token: L_CURLY@294..297 "{" [] [Whitespace("  ")],
+                                                rules: CssRuleList [],
+                                                r_curly_token: R_CURLY@297..298 "}" [] [],
+                                            },
+                                        },
+                                    },
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@298..307 "color" [Newline("\n"), Newline("\n"), Whitespace("\t\t")] [],
+                                                },
+                                                colon_token: COLON@307..309 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@309..313 "blue" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@313..314 ";" [] [],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@314..318 "}" [Newline("\n"), Newline("\n"), Whitespace("\t")] [],
+                            },
+                        },
+                        CssMarginAtRule {
+                            at_token: AT@318..321 "@" [Newline("\n"), Whitespace("\t")] [],
+                            name: TOP_CENTER_KW@321..332 "top-center" [] [Whitespace(" ")],
+                            block: CssDeclarationOrAtRuleBlock {
+                                l_curly_token: L_CURLY@332..333 "{" [] [],
+                                items: CssDeclarationOrAtRuleList [
+                                    CssAtRule {
+                                        at_token: AT@333..337 "@" [Newline("\n"), Whitespace("\t\t")] [],
+                                        rule: CssContainerAtRule {
+                                            container_token: CONTAINER_KW@337..347 "container" [] [Whitespace(" ")],
+                                            name: missing (optional),
+                                            query: CssContainerSizeFeatureInParens {
+                                                l_paren_token: L_PAREN@347..348 "(" [] [],
+                                                feature: CssQueryFeatureRangeInterval {
+                                                    left: CssRegularDimension {
+                                                        value_token: CSS_NUMBER_LITERAL@348..351 "500" [] [],
+                                                        unit_token: IDENT@351..354 "px" [] [Whitespace(" ")],
+                                                    },
+                                                    left_comparison: CssQueryFeatureRangeComparison {
+                                                        operator: LTEQ@354..357 "<=" [] [Whitespace(" ")],
+                                                    },
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@357..363 "width" [] [Whitespace(" ")],
+                                                    },
+                                                    right_comparison: CssQueryFeatureRangeComparison {
+                                                        operator: LTEQ@363..366 "<=" [] [Whitespace(" ")],
+                                                    },
+                                                    right: CssRegularDimension {
+                                                        value_token: CSS_NUMBER_LITERAL@366..369 "500" [] [],
+                                                        unit_token: IDENT@369..371 "px" [] [],
+                                                    },
+                                                },
+                                                r_paren_token: R_PAREN@371..373 ")" [] [Whitespace(" ")],
+                                            },
+                                            block: CssRuleListBlock {
+                                                l_curly_token: L_CURLY@373..376 "{" [] [Whitespace("  ")],
+                                                rules: CssRuleList [],
+                                                r_curly_token: R_CURLY@376..377 "}" [] [],
+                                            },
+                                        },
+                                    },
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@377..388 "content" [Newline("\n"), Newline("\n"), Whitespace("\t\t")] [],
+                                                },
+                                                colon_token: COLON@388..390 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssString {
+                                                        value_token: CSS_STRING_LITERAL@390..395 "\"foo\"" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@395..396 ";" [] [],
+                                    },
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@396..404 "color" [Newline("\n"), Whitespace("\t\t")] [],
+                                                },
+                                                colon_token: COLON@404..406 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@406..410 "blue" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@410..411 ";" [] [],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@411..414 "}" [Newline("\n"), Whitespace("\t")] [],
+                            },
+                        },
+                        CssMarginAtRule {
+                            at_token: AT@414..418 "@" [Newline("\n"), Newline("\n"), Whitespace("\t")] [],
+                            name: TOP_RIGHT_KW@418..428 "top-right" [] [Whitespace(" ")],
+                            block: CssDeclarationOrAtRuleBlock {
+                                l_curly_token: L_CURLY@428..429 "{" [] [],
+                                items: CssDeclarationOrAtRuleList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@429..439 "content" [Newline("\n"), Whitespace("\t\t")] [],
+                                                },
+                                                colon_token: COLON@439..441 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssString {
+                                                        value_token: CSS_STRING_LITERAL@441..446 "\"foo\"" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@446..447 ";" [] [],
+                                    },
+                                    CssAtRule {
+                                        at_token: AT@447..451 "@" [Newline("\n"), Whitespace("\t\t")] [],
+                                        rule: CssContainerAtRule {
+                                            container_token: CONTAINER_KW@451..461 "container" [] [Whitespace(" ")],
+                                            name: missing (optional),
+                                            query: CssContainerSizeFeatureInParens {
+                                                l_paren_token: L_PAREN@461..462 "(" [] [],
+                                                feature: CssQueryFeatureRangeInterval {
+                                                    left: CssRegularDimension {
+                                                        value_token: CSS_NUMBER_LITERAL@462..465 "500" [] [],
+                                                        unit_token: IDENT@465..468 "px" [] [Whitespace(" ")],
+                                                    },
+                                                    left_comparison: CssQueryFeatureRangeComparison {
+                                                        operator: LTEQ@468..471 "<=" [] [Whitespace(" ")],
+                                                    },
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@471..477 "width" [] [Whitespace(" ")],
+                                                    },
+                                                    right_comparison: CssQueryFeatureRangeComparison {
+                                                        operator: LTEQ@477..480 "<=" [] [Whitespace(" ")],
+                                                    },
+                                                    right: CssRegularDimension {
+                                                        value_token: CSS_NUMBER_LITERAL@480..483 "500" [] [],
+                                                        unit_token: IDENT@483..485 "px" [] [],
+                                                    },
+                                                },
+                                                r_paren_token: R_PAREN@485..487 ")" [] [Whitespace(" ")],
+                                            },
+                                            block: CssRuleListBlock {
+                                                l_curly_token: L_CURLY@487..490 "{" [] [Whitespace("  ")],
+                                                rules: CssRuleList [],
+                                                r_curly_token: R_CURLY@490..491 "}" [] [],
+                                            },
+                                        },
+                                    },
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@491..500 "color" [Newline("\n"), Newline("\n"), Whitespace("\t\t")] [],
+                                                },
+                                                colon_token: COLON@500..502 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@502..506 "blue" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@506..507 ";" [] [],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@507..510 "}" [Newline("\n"), Whitespace("\t")] [],
+                            },
+                        },
+                        CssMarginAtRule {
+                            at_token: AT@510..514 "@" [Newline("\n"), Newline("\n"), Whitespace("\t")] [],
+                            name: TOP_RIGHT_CORNER_KW@514..531 "top-right-corner" [] [Whitespace(" ")],
+                            block: CssDeclarationOrAtRuleBlock {
+                                l_curly_token: L_CURLY@531..532 "{" [] [],
+                                items: CssDeclarationOrAtRuleList [
+                                    CssAtRule {
+                                        at_token: AT@532..536 "@" [Newline("\n"), Whitespace("\t\t")] [],
+                                        rule: CssContainerAtRule {
+                                            container_token: CONTAINER_KW@536..546 "container" [] [Whitespace(" ")],
+                                            name: missing (optional),
+                                            query: CssContainerSizeFeatureInParens {
+                                                l_paren_token: L_PAREN@546..547 "(" [] [],
+                                                feature: CssQueryFeatureRangeInterval {
+                                                    left: CssRegularDimension {
+                                                        value_token: CSS_NUMBER_LITERAL@547..550 "500" [] [],
+                                                        unit_token: IDENT@550..553 "px" [] [Whitespace(" ")],
+                                                    },
+                                                    left_comparison: CssQueryFeatureRangeComparison {
+                                                        operator: LTEQ@553..556 "<=" [] [Whitespace(" ")],
+                                                    },
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@556..562 "width" [] [Whitespace(" ")],
+                                                    },
+                                                    right_comparison: CssQueryFeatureRangeComparison {
+                                                        operator: LTEQ@562..565 "<=" [] [Whitespace(" ")],
+                                                    },
+                                                    right: CssRegularDimension {
+                                                        value_token: CSS_NUMBER_LITERAL@565..568 "500" [] [],
+                                                        unit_token: IDENT@568..570 "px" [] [],
+                                                    },
+                                                },
+                                                r_paren_token: R_PAREN@570..572 ")" [] [Whitespace(" ")],
+                                            },
+                                            block: CssRuleListBlock {
+                                                l_curly_token: L_CURLY@572..575 "{" [] [Whitespace("  ")],
+                                                rules: CssRuleList [],
+                                                r_curly_token: R_CURLY@575..576 "}" [] [],
+                                            },
+                                        },
+                                    },
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@576..587 "content" [Newline("\n"), Newline("\n"), Whitespace("\t\t")] [],
+                                                },
+                                                colon_token: COLON@587..589 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssString {
+                                                        value_token: CSS_STRING_LITERAL@589..594 "\"foo\"" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@594..595 ";" [] [],
+                                    },
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@595..603 "color" [Newline("\n"), Whitespace("\t\t")] [],
+                                                },
+                                                colon_token: COLON@603..605 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@605..609 "blue" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@609..610 ";" [] [],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@610..613 "}" [Newline("\n"), Whitespace("\t")] [],
+                            },
+                        },
+                        CssMarginAtRule {
+                            at_token: AT@613..617 "@" [Newline("\n"), Newline("\n"), Whitespace("\t")] [],
+                            name: BOTTOM_LEFT_CORNER_KW@617..636 "bottom-left-corner" [] [Whitespace(" ")],
+                            block: CssDeclarationOrAtRuleBlock {
+                                l_curly_token: L_CURLY@636..637 "{" [] [],
+                                items: CssDeclarationOrAtRuleList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@637..647 "content" [Newline("\n"), Whitespace("\t\t")] [],
+                                                },
+                                                colon_token: COLON@647..649 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssString {
+                                                        value_token: CSS_STRING_LITERAL@649..654 "\"foo\"" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@654..655 ";" [] [],
+                                    },
+                                    CssAtRule {
+                                        at_token: AT@655..659 "@" [Newline("\n"), Whitespace("\t\t")] [],
+                                        rule: CssContainerAtRule {
+                                            container_token: CONTAINER_KW@659..669 "container" [] [Whitespace(" ")],
+                                            name: missing (optional),
+                                            query: CssContainerSizeFeatureInParens {
+                                                l_paren_token: L_PAREN@669..670 "(" [] [],
+                                                feature: CssQueryFeatureRangeInterval {
+                                                    left: CssRegularDimension {
+                                                        value_token: CSS_NUMBER_LITERAL@670..673 "500" [] [],
+                                                        unit_token: IDENT@673..676 "px" [] [Whitespace(" ")],
+                                                    },
+                                                    left_comparison: CssQueryFeatureRangeComparison {
+                                                        operator: LTEQ@676..679 "<=" [] [Whitespace(" ")],
+                                                    },
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@679..685 "width" [] [Whitespace(" ")],
+                                                    },
+                                                    right_comparison: CssQueryFeatureRangeComparison {
+                                                        operator: LTEQ@685..688 "<=" [] [Whitespace(" ")],
+                                                    },
+                                                    right: CssRegularDimension {
+                                                        value_token: CSS_NUMBER_LITERAL@688..691 "500" [] [],
+                                                        unit_token: IDENT@691..693 "px" [] [],
+                                                    },
+                                                },
+                                                r_paren_token: R_PAREN@693..695 ")" [] [Whitespace(" ")],
+                                            },
+                                            block: CssRuleListBlock {
+                                                l_curly_token: L_CURLY@695..698 "{" [] [Whitespace("  ")],
+                                                rules: CssRuleList [],
+                                                r_curly_token: R_CURLY@698..699 "}" [] [],
+                                            },
+                                        },
+                                    },
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@699..708 "color" [Newline("\n"), Newline("\n"), Whitespace("\t\t")] [],
+                                                },
+                                                colon_token: COLON@708..710 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@710..714 "blue" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@714..715 ";" [] [],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@715..718 "}" [Newline("\n"), Whitespace("\t")] [],
+                            },
+                        },
+                        CssMarginAtRule {
+                            at_token: AT@718..722 "@" [Newline("\n"), Newline("\n"), Whitespace("\t")] [],
+                            name: BOTTOM_LEFT_KW@722..734 "bottom-left" [] [Whitespace(" ")],
+                            block: CssDeclarationOrAtRuleBlock {
+                                l_curly_token: L_CURLY@734..735 "{" [] [],
+                                items: CssDeclarationOrAtRuleList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@735..745 "content" [Newline("\n"), Whitespace("\t\t")] [],
+                                                },
+                                                colon_token: COLON@745..747 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssString {
+                                                        value_token: CSS_STRING_LITERAL@747..752 "\"foo\"" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@752..753 ";" [] [],
+                                    },
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@753..761 "color" [Newline("\n"), Whitespace("\t\t")] [],
+                                                },
+                                                colon_token: COLON@761..763 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@763..767 "blue" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@767..768 ";" [] [],
+                                    },
+                                    CssAtRule {
+                                        at_token: AT@768..772 "@" [Newline("\n"), Whitespace("\t\t")] [],
+                                        rule: CssContainerAtRule {
+                                            container_token: CONTAINER_KW@772..782 "container" [] [Whitespace(" ")],
+                                            name: missing (optional),
+                                            query: CssContainerSizeFeatureInParens {
+                                                l_paren_token: L_PAREN@782..783 "(" [] [],
+                                                feature: CssQueryFeatureRangeInterval {
+                                                    left: CssRegularDimension {
+                                                        value_token: CSS_NUMBER_LITERAL@783..786 "500" [] [],
+                                                        unit_token: IDENT@786..789 "px" [] [Whitespace(" ")],
+                                                    },
+                                                    left_comparison: CssQueryFeatureRangeComparison {
+                                                        operator: LTEQ@789..792 "<=" [] [Whitespace(" ")],
+                                                    },
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@792..798 "width" [] [Whitespace(" ")],
+                                                    },
+                                                    right_comparison: CssQueryFeatureRangeComparison {
+                                                        operator: LTEQ@798..801 "<=" [] [Whitespace(" ")],
+                                                    },
+                                                    right: CssRegularDimension {
+                                                        value_token: CSS_NUMBER_LITERAL@801..804 "500" [] [],
+                                                        unit_token: IDENT@804..806 "px" [] [],
+                                                    },
+                                                },
+                                                r_paren_token: R_PAREN@806..808 ")" [] [Whitespace(" ")],
+                                            },
+                                            block: CssRuleListBlock {
+                                                l_curly_token: L_CURLY@808..811 "{" [] [Whitespace("  ")],
+                                                rules: CssRuleList [],
+                                                r_curly_token: R_CURLY@811..812 "}" [] [],
+                                            },
+                                        },
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@812..816 "}" [Newline("\n"), Newline("\n"), Whitespace("\t")] [],
+                            },
+                        },
+                        CssMarginAtRule {
+                            at_token: AT@816..820 "@" [Newline("\n"), Newline("\n"), Whitespace("\t")] [],
+                            name: BOTTOM_CENTER_KW@820..834 "bottom-center" [] [Whitespace(" ")],
+                            block: CssDeclarationOrAtRuleBlock {
+                                l_curly_token: L_CURLY@834..835 "{" [] [],
+                                items: CssDeclarationOrAtRuleList [
+                                    CssAtRule {
+                                        at_token: AT@835..839 "@" [Newline("\n"), Whitespace("\t\t")] [],
+                                        rule: CssContainerAtRule {
+                                            container_token: CONTAINER_KW@839..849 "container" [] [Whitespace(" ")],
+                                            name: missing (optional),
+                                            query: CssContainerSizeFeatureInParens {
+                                                l_paren_token: L_PAREN@849..850 "(" [] [],
+                                                feature: CssQueryFeatureRangeInterval {
+                                                    left: CssRegularDimension {
+                                                        value_token: CSS_NUMBER_LITERAL@850..853 "500" [] [],
+                                                        unit_token: IDENT@853..856 "px" [] [Whitespace(" ")],
+                                                    },
+                                                    left_comparison: CssQueryFeatureRangeComparison {
+                                                        operator: LTEQ@856..859 "<=" [] [Whitespace(" ")],
+                                                    },
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@859..865 "width" [] [Whitespace(" ")],
+                                                    },
+                                                    right_comparison: CssQueryFeatureRangeComparison {
+                                                        operator: LTEQ@865..868 "<=" [] [Whitespace(" ")],
+                                                    },
+                                                    right: CssRegularDimension {
+                                                        value_token: CSS_NUMBER_LITERAL@868..871 "500" [] [],
+                                                        unit_token: IDENT@871..873 "px" [] [],
+                                                    },
+                                                },
+                                                r_paren_token: R_PAREN@873..875 ")" [] [Whitespace(" ")],
+                                            },
+                                            block: CssRuleListBlock {
+                                                l_curly_token: L_CURLY@875..878 "{" [] [Whitespace("  ")],
+                                                rules: CssRuleList [],
+                                                r_curly_token: R_CURLY@878..879 "}" [] [],
+                                            },
+                                        },
+                                    },
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@879..890 "content" [Newline("\n"), Newline("\n"), Whitespace("\t\t")] [],
+                                                },
+                                                colon_token: COLON@890..892 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssString {
+                                                        value_token: CSS_STRING_LITERAL@892..897 "\"foo\"" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@897..898 ";" [] [],
+                                    },
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@898..906 "color" [Newline("\n"), Whitespace("\t\t")] [],
+                                                },
+                                                colon_token: COLON@906..908 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@908..912 "blue" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@912..913 ";" [] [],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@913..916 "}" [Newline("\n"), Whitespace("\t")] [],
+                            },
+                        },
+                        CssMarginAtRule {
+                            at_token: AT@916..920 "@" [Newline("\n"), Newline("\n"), Whitespace("\t")] [],
+                            name: BOTTOM_RIGHT_KW@920..933 "bottom-right" [] [Whitespace(" ")],
+                            block: CssDeclarationOrAtRuleBlock {
+                                l_curly_token: L_CURLY@933..934 "{" [] [],
+                                items: CssDeclarationOrAtRuleList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@934..944 "content" [Newline("\n"), Whitespace("\t\t")] [],
+                                                },
+                                                colon_token: COLON@944..946 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssString {
+                                                        value_token: CSS_STRING_LITERAL@946..951 "\"foo\"" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@951..952 ";" [] [],
+                                    },
+                                    CssAtRule {
+                                        at_token: AT@952..956 "@" [Newline("\n"), Whitespace("\t\t")] [],
+                                        rule: CssContainerAtRule {
+                                            container_token: CONTAINER_KW@956..966 "container" [] [Whitespace(" ")],
+                                            name: missing (optional),
+                                            query: CssContainerSizeFeatureInParens {
+                                                l_paren_token: L_PAREN@966..967 "(" [] [],
+                                                feature: CssQueryFeatureRangeInterval {
+                                                    left: CssRegularDimension {
+                                                        value_token: CSS_NUMBER_LITERAL@967..970 "500" [] [],
+                                                        unit_token: IDENT@970..973 "px" [] [Whitespace(" ")],
+                                                    },
+                                                    left_comparison: CssQueryFeatureRangeComparison {
+                                                        operator: LTEQ@973..976 "<=" [] [Whitespace(" ")],
+                                                    },
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@976..982 "width" [] [Whitespace(" ")],
+                                                    },
+                                                    right_comparison: CssQueryFeatureRangeComparison {
+                                                        operator: LTEQ@982..985 "<=" [] [Whitespace(" ")],
+                                                    },
+                                                    right: CssRegularDimension {
+                                                        value_token: CSS_NUMBER_LITERAL@985..988 "500" [] [],
+                                                        unit_token: IDENT@988..990 "px" [] [],
+                                                    },
+                                                },
+                                                r_paren_token: R_PAREN@990..992 ")" [] [Whitespace(" ")],
+                                            },
+                                            block: CssRuleListBlock {
+                                                l_curly_token: L_CURLY@992..995 "{" [] [Whitespace("  ")],
+                                                rules: CssRuleList [],
+                                                r_curly_token: R_CURLY@995..996 "}" [] [],
+                                            },
+                                        },
+                                    },
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@996..1005 "color" [Newline("\n"), Newline("\n"), Whitespace("\t\t")] [],
+                                                },
+                                                colon_token: COLON@1005..1007 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@1007..1011 "blue" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@1011..1012 ";" [] [],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@1012..1015 "}" [Newline("\n"), Whitespace("\t")] [],
+                            },
+                        },
+                        CssMarginAtRule {
+                            at_token: AT@1015..1019 "@" [Newline("\n"), Newline("\n"), Whitespace("\t")] [],
+                            name: BOTTOM_RIGHT_CORNER_KW@1019..1039 "bottom-right-corner" [] [Whitespace(" ")],
+                            block: CssDeclarationOrAtRuleBlock {
+                                l_curly_token: L_CURLY@1039..1040 "{" [] [],
+                                items: CssDeclarationOrAtRuleList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@1040..1050 "content" [Newline("\n"), Whitespace("\t\t")] [],
+                                                },
+                                                colon_token: COLON@1050..1052 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssString {
+                                                        value_token: CSS_STRING_LITERAL@1052..1057 "\"foo\"" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@1057..1058 ";" [] [],
+                                    },
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@1058..1066 "color" [Newline("\n"), Whitespace("\t\t")] [],
+                                                },
+                                                colon_token: COLON@1066..1068 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@1068..1072 "blue" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@1072..1073 ";" [] [],
+                                    },
+                                    CssAtRule {
+                                        at_token: AT@1073..1077 "@" [Newline("\n"), Whitespace("\t\t")] [],
+                                        rule: CssContainerAtRule {
+                                            container_token: CONTAINER_KW@1077..1087 "container" [] [Whitespace(" ")],
+                                            name: missing (optional),
+                                            query: CssContainerSizeFeatureInParens {
+                                                l_paren_token: L_PAREN@1087..1088 "(" [] [],
+                                                feature: CssQueryFeatureRangeInterval {
+                                                    left: CssRegularDimension {
+                                                        value_token: CSS_NUMBER_LITERAL@1088..1091 "500" [] [],
+                                                        unit_token: IDENT@1091..1094 "px" [] [Whitespace(" ")],
+                                                    },
+                                                    left_comparison: CssQueryFeatureRangeComparison {
+                                                        operator: LTEQ@1094..1097 "<=" [] [Whitespace(" ")],
+                                                    },
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@1097..1103 "width" [] [Whitespace(" ")],
+                                                    },
+                                                    right_comparison: CssQueryFeatureRangeComparison {
+                                                        operator: LTEQ@1103..1106 "<=" [] [Whitespace(" ")],
+                                                    },
+                                                    right: CssRegularDimension {
+                                                        value_token: CSS_NUMBER_LITERAL@1106..1109 "500" [] [],
+                                                        unit_token: IDENT@1109..1111 "px" [] [],
+                                                    },
+                                                },
+                                                r_paren_token: R_PAREN@1111..1113 ")" [] [Whitespace(" ")],
+                                            },
+                                            block: CssRuleListBlock {
+                                                l_curly_token: L_CURLY@1113..1116 "{" [] [Whitespace("  ")],
+                                                rules: CssRuleList [],
+                                                r_curly_token: R_CURLY@1116..1117 "}" [] [],
+                                            },
+                                        },
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@1117..1121 "}" [Newline("\n"), Newline("\n"), Whitespace("\t")] [],
+                            },
+                        },
+                        CssMarginAtRule {
+                            at_token: AT@1121..1125 "@" [Newline("\n"), Newline("\n"), Whitespace("\t")] [],
+                            name: LEFT_TOP_KW@1125..1134 "left-top" [] [Whitespace(" ")],
+                            block: CssDeclarationOrAtRuleBlock {
+                                l_curly_token: L_CURLY@1134..1135 "{" [] [],
+                                items: CssDeclarationOrAtRuleList [
+                                    CssAtRule {
+                                        at_token: AT@1135..1139 "@" [Newline("\n"), Whitespace("\t\t")] [],
+                                        rule: CssContainerAtRule {
+                                            container_token: CONTAINER_KW@1139..1149 "container" [] [Whitespace(" ")],
+                                            name: missing (optional),
+                                            query: CssContainerSizeFeatureInParens {
+                                                l_paren_token: L_PAREN@1149..1150 "(" [] [],
+                                                feature: CssQueryFeatureRangeInterval {
+                                                    left: CssRegularDimension {
+                                                        value_token: CSS_NUMBER_LITERAL@1150..1153 "500" [] [],
+                                                        unit_token: IDENT@1153..1156 "px" [] [Whitespace(" ")],
+                                                    },
+                                                    left_comparison: CssQueryFeatureRangeComparison {
+                                                        operator: LTEQ@1156..1159 "<=" [] [Whitespace(" ")],
+                                                    },
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@1159..1165 "width" [] [Whitespace(" ")],
+                                                    },
+                                                    right_comparison: CssQueryFeatureRangeComparison {
+                                                        operator: LTEQ@1165..1168 "<=" [] [Whitespace(" ")],
+                                                    },
+                                                    right: CssRegularDimension {
+                                                        value_token: CSS_NUMBER_LITERAL@1168..1171 "500" [] [],
+                                                        unit_token: IDENT@1171..1173 "px" [] [],
+                                                    },
+                                                },
+                                                r_paren_token: R_PAREN@1173..1175 ")" [] [Whitespace(" ")],
+                                            },
+                                            block: CssRuleListBlock {
+                                                l_curly_token: L_CURLY@1175..1178 "{" [] [Whitespace("  ")],
+                                                rules: CssRuleList [],
+                                                r_curly_token: R_CURLY@1178..1179 "}" [] [],
+                                            },
+                                        },
+                                    },
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@1179..1190 "content" [Newline("\n"), Newline("\n"), Whitespace("\t\t")] [],
+                                                },
+                                                colon_token: COLON@1190..1192 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssString {
+                                                        value_token: CSS_STRING_LITERAL@1192..1197 "\"foo\"" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@1197..1198 ";" [] [],
+                                    },
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@1198..1206 "color" [Newline("\n"), Whitespace("\t\t")] [],
+                                                },
+                                                colon_token: COLON@1206..1208 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@1208..1212 "blue" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@1212..1213 ";" [] [],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@1213..1216 "}" [Newline("\n"), Whitespace("\t")] [],
+                            },
+                        },
+                        CssMarginAtRule {
+                            at_token: AT@1216..1220 "@" [Newline("\n"), Newline("\n"), Whitespace("\t")] [],
+                            name: LEFT_MIDDLE_KW@1220..1232 "left-middle" [] [Whitespace(" ")],
+                            block: CssDeclarationOrAtRuleBlock {
+                                l_curly_token: L_CURLY@1232..1233 "{" [] [],
+                                items: CssDeclarationOrAtRuleList [
+                                    CssAtRule {
+                                        at_token: AT@1233..1237 "@" [Newline("\n"), Whitespace("\t\t")] [],
+                                        rule: CssContainerAtRule {
+                                            container_token: CONTAINER_KW@1237..1247 "container" [] [Whitespace(" ")],
+                                            name: missing (optional),
+                                            query: CssContainerSizeFeatureInParens {
+                                                l_paren_token: L_PAREN@1247..1248 "(" [] [],
+                                                feature: CssQueryFeatureRangeInterval {
+                                                    left: CssRegularDimension {
+                                                        value_token: CSS_NUMBER_LITERAL@1248..1251 "500" [] [],
+                                                        unit_token: IDENT@1251..1254 "px" [] [Whitespace(" ")],
+                                                    },
+                                                    left_comparison: CssQueryFeatureRangeComparison {
+                                                        operator: LTEQ@1254..1257 "<=" [] [Whitespace(" ")],
+                                                    },
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@1257..1263 "width" [] [Whitespace(" ")],
+                                                    },
+                                                    right_comparison: CssQueryFeatureRangeComparison {
+                                                        operator: LTEQ@1263..1266 "<=" [] [Whitespace(" ")],
+                                                    },
+                                                    right: CssRegularDimension {
+                                                        value_token: CSS_NUMBER_LITERAL@1266..1269 "500" [] [],
+                                                        unit_token: IDENT@1269..1271 "px" [] [],
+                                                    },
+                                                },
+                                                r_paren_token: R_PAREN@1271..1273 ")" [] [Whitespace(" ")],
+                                            },
+                                            block: CssRuleListBlock {
+                                                l_curly_token: L_CURLY@1273..1276 "{" [] [Whitespace("  ")],
+                                                rules: CssRuleList [],
+                                                r_curly_token: R_CURLY@1276..1277 "}" [] [],
+                                            },
+                                        },
+                                    },
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@1277..1288 "content" [Newline("\n"), Newline("\n"), Whitespace("\t\t")] [],
+                                                },
+                                                colon_token: COLON@1288..1290 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssString {
+                                                        value_token: CSS_STRING_LITERAL@1290..1295 "\"foo\"" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@1295..1296 ";" [] [],
+                                    },
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@1296..1304 "color" [Newline("\n"), Whitespace("\t\t")] [],
+                                                },
+                                                colon_token: COLON@1304..1306 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@1306..1310 "blue" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@1310..1311 ";" [] [],
+                                    },
+                                    CssAtRule {
+                                        at_token: AT@1311..1315 "@" [Newline("\n"), Whitespace("\t\t")] [],
+                                        rule: CssContainerAtRule {
+                                            container_token: CONTAINER_KW@1315..1325 "container" [] [Whitespace(" ")],
+                                            name: missing (optional),
+                                            query: CssContainerSizeFeatureInParens {
+                                                l_paren_token: L_PAREN@1325..1326 "(" [] [],
+                                                feature: CssQueryFeatureRangeInterval {
+                                                    left: CssRegularDimension {
+                                                        value_token: CSS_NUMBER_LITERAL@1326..1329 "500" [] [],
+                                                        unit_token: IDENT@1329..1332 "px" [] [Whitespace(" ")],
+                                                    },
+                                                    left_comparison: CssQueryFeatureRangeComparison {
+                                                        operator: LTEQ@1332..1335 "<=" [] [Whitespace(" ")],
+                                                    },
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@1335..1341 "width" [] [Whitespace(" ")],
+                                                    },
+                                                    right_comparison: CssQueryFeatureRangeComparison {
+                                                        operator: LTEQ@1341..1344 "<=" [] [Whitespace(" ")],
+                                                    },
+                                                    right: CssRegularDimension {
+                                                        value_token: CSS_NUMBER_LITERAL@1344..1347 "500" [] [],
+                                                        unit_token: IDENT@1347..1349 "px" [] [],
+                                                    },
+                                                },
+                                                r_paren_token: R_PAREN@1349..1351 ")" [] [Whitespace(" ")],
+                                            },
+                                            block: CssRuleListBlock {
+                                                l_curly_token: L_CURLY@1351..1354 "{" [] [Whitespace("  ")],
+                                                rules: CssRuleList [],
+                                                r_curly_token: R_CURLY@1354..1355 "}" [] [],
+                                            },
+                                        },
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@1355..1359 "}" [Newline("\n"), Newline("\n"), Whitespace("\t")] [],
+                            },
+                        },
+                        CssMarginAtRule {
+                            at_token: AT@1359..1363 "@" [Newline("\n"), Newline("\n"), Whitespace("\t")] [],
+                            name: LEFT_BOTTOM_KW@1363..1375 "left-bottom" [] [Whitespace(" ")],
+                            block: CssDeclarationOrAtRuleBlock {
+                                l_curly_token: L_CURLY@1375..1376 "{" [] [],
+                                items: CssDeclarationOrAtRuleList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@1376..1386 "content" [Newline("\n"), Whitespace("\t\t")] [],
+                                                },
+                                                colon_token: COLON@1386..1388 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssString {
+                                                        value_token: CSS_STRING_LITERAL@1388..1393 "\"foo\"" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@1393..1394 ";" [] [],
+                                    },
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@1394..1402 "color" [Newline("\n"), Whitespace("\t\t")] [],
+                                                },
+                                                colon_token: COLON@1402..1404 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@1404..1408 "blue" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@1408..1409 ";" [] [],
+                                    },
+                                    CssAtRule {
+                                        at_token: AT@1409..1413 "@" [Newline("\n"), Whitespace("\t\t")] [],
+                                        rule: CssContainerAtRule {
+                                            container_token: CONTAINER_KW@1413..1423 "container" [] [Whitespace(" ")],
+                                            name: missing (optional),
+                                            query: CssContainerSizeFeatureInParens {
+                                                l_paren_token: L_PAREN@1423..1424 "(" [] [],
+                                                feature: CssQueryFeatureRangeInterval {
+                                                    left: CssRegularDimension {
+                                                        value_token: CSS_NUMBER_LITERAL@1424..1427 "500" [] [],
+                                                        unit_token: IDENT@1427..1430 "px" [] [Whitespace(" ")],
+                                                    },
+                                                    left_comparison: CssQueryFeatureRangeComparison {
+                                                        operator: LTEQ@1430..1433 "<=" [] [Whitespace(" ")],
+                                                    },
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@1433..1439 "width" [] [Whitespace(" ")],
+                                                    },
+                                                    right_comparison: CssQueryFeatureRangeComparison {
+                                                        operator: LTEQ@1439..1442 "<=" [] [Whitespace(" ")],
+                                                    },
+                                                    right: CssRegularDimension {
+                                                        value_token: CSS_NUMBER_LITERAL@1442..1445 "500" [] [],
+                                                        unit_token: IDENT@1445..1447 "px" [] [],
+                                                    },
+                                                },
+                                                r_paren_token: R_PAREN@1447..1449 ")" [] [Whitespace(" ")],
+                                            },
+                                            block: CssRuleListBlock {
+                                                l_curly_token: L_CURLY@1449..1452 "{" [] [Whitespace("  ")],
+                                                rules: CssRuleList [],
+                                                r_curly_token: R_CURLY@1452..1453 "}" [] [],
+                                            },
+                                        },
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@1453..1457 "}" [Newline("\n"), Newline("\n"), Whitespace("\t")] [],
+                            },
+                        },
+                        CssMarginAtRule {
+                            at_token: AT@1457..1461 "@" [Newline("\n"), Newline("\n"), Whitespace("\t")] [],
+                            name: RIGHT_TOP_KW@1461..1471 "right-top" [] [Whitespace(" ")],
+                            block: CssDeclarationOrAtRuleBlock {
+                                l_curly_token: L_CURLY@1471..1472 "{" [] [],
+                                items: CssDeclarationOrAtRuleList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@1472..1482 "content" [Newline("\n"), Whitespace("\t\t")] [],
+                                                },
+                                                colon_token: COLON@1482..1484 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssString {
+                                                        value_token: CSS_STRING_LITERAL@1484..1489 "\"foo\"" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@1489..1490 ";" [] [],
+                                    },
+                                    CssAtRule {
+                                        at_token: AT@1490..1494 "@" [Newline("\n"), Whitespace("\t\t")] [],
+                                        rule: CssContainerAtRule {
+                                            container_token: CONTAINER_KW@1494..1504 "container" [] [Whitespace(" ")],
+                                            name: missing (optional),
+                                            query: CssContainerSizeFeatureInParens {
+                                                l_paren_token: L_PAREN@1504..1505 "(" [] [],
+                                                feature: CssQueryFeatureRangeInterval {
+                                                    left: CssRegularDimension {
+                                                        value_token: CSS_NUMBER_LITERAL@1505..1508 "500" [] [],
+                                                        unit_token: IDENT@1508..1511 "px" [] [Whitespace(" ")],
+                                                    },
+                                                    left_comparison: CssQueryFeatureRangeComparison {
+                                                        operator: LTEQ@1511..1514 "<=" [] [Whitespace(" ")],
+                                                    },
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@1514..1520 "width" [] [Whitespace(" ")],
+                                                    },
+                                                    right_comparison: CssQueryFeatureRangeComparison {
+                                                        operator: LTEQ@1520..1523 "<=" [] [Whitespace(" ")],
+                                                    },
+                                                    right: CssRegularDimension {
+                                                        value_token: CSS_NUMBER_LITERAL@1523..1526 "500" [] [],
+                                                        unit_token: IDENT@1526..1528 "px" [] [],
+                                                    },
+                                                },
+                                                r_paren_token: R_PAREN@1528..1530 ")" [] [Whitespace(" ")],
+                                            },
+                                            block: CssRuleListBlock {
+                                                l_curly_token: L_CURLY@1530..1533 "{" [] [Whitespace("  ")],
+                                                rules: CssRuleList [],
+                                                r_curly_token: R_CURLY@1533..1534 "}" [] [],
+                                            },
+                                        },
+                                    },
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@1534..1543 "color" [Newline("\n"), Newline("\n"), Whitespace("\t\t")] [],
+                                                },
+                                                colon_token: COLON@1543..1545 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@1545..1549 "blue" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@1549..1550 ";" [] [],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@1550..1553 "}" [Newline("\n"), Whitespace("\t")] [],
+                            },
+                        },
+                        CssMarginAtRule {
+                            at_token: AT@1553..1557 "@" [Newline("\n"), Newline("\n"), Whitespace("\t")] [],
+                            name: RIGHT_MIDDLE_KW@1557..1570 "right-middle" [] [Whitespace(" ")],
+                            block: CssDeclarationOrAtRuleBlock {
+                                l_curly_token: L_CURLY@1570..1571 "{" [] [],
+                                items: CssDeclarationOrAtRuleList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@1571..1581 "content" [Newline("\n"), Whitespace("\t\t")] [],
+                                                },
+                                                colon_token: COLON@1581..1583 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssString {
+                                                        value_token: CSS_STRING_LITERAL@1583..1588 "\"foo\"" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@1588..1589 ";" [] [],
+                                    },
+                                    CssAtRule {
+                                        at_token: AT@1589..1593 "@" [Newline("\n"), Whitespace("\t\t")] [],
+                                        rule: CssContainerAtRule {
+                                            container_token: CONTAINER_KW@1593..1603 "container" [] [Whitespace(" ")],
+                                            name: missing (optional),
+                                            query: CssContainerSizeFeatureInParens {
+                                                l_paren_token: L_PAREN@1603..1604 "(" [] [],
+                                                feature: CssQueryFeatureRangeInterval {
+                                                    left: CssRegularDimension {
+                                                        value_token: CSS_NUMBER_LITERAL@1604..1607 "500" [] [],
+                                                        unit_token: IDENT@1607..1610 "px" [] [Whitespace(" ")],
+                                                    },
+                                                    left_comparison: CssQueryFeatureRangeComparison {
+                                                        operator: LTEQ@1610..1613 "<=" [] [Whitespace(" ")],
+                                                    },
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@1613..1619 "width" [] [Whitespace(" ")],
+                                                    },
+                                                    right_comparison: CssQueryFeatureRangeComparison {
+                                                        operator: LTEQ@1619..1622 "<=" [] [Whitespace(" ")],
+                                                    },
+                                                    right: CssRegularDimension {
+                                                        value_token: CSS_NUMBER_LITERAL@1622..1625 "500" [] [],
+                                                        unit_token: IDENT@1625..1627 "px" [] [],
+                                                    },
+                                                },
+                                                r_paren_token: R_PAREN@1627..1629 ")" [] [Whitespace(" ")],
+                                            },
+                                            block: CssRuleListBlock {
+                                                l_curly_token: L_CURLY@1629..1632 "{" [] [Whitespace("  ")],
+                                                rules: CssRuleList [],
+                                                r_curly_token: R_CURLY@1632..1633 "}" [] [],
+                                            },
+                                        },
+                                    },
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@1633..1642 "color" [Newline("\n"), Newline("\n"), Whitespace("\t\t")] [],
+                                                },
+                                                colon_token: COLON@1642..1644 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@1644..1648 "blue" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@1648..1649 ";" [] [],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@1649..1652 "}" [Newline("\n"), Whitespace("\t")] [],
+                            },
+                        },
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@1652..1661 "content" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                    colon_token: COLON@1661..1663 ":" [] [Whitespace(" ")],
+                                    value: CssGenericComponentValueList [
+                                        CssString {
+                                            value_token: CSS_STRING_LITERAL@1663..1668 "\"foo\"" [] [],
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@1668..1669 ";" [] [],
+                        },
+                        CssAtRule {
+                            at_token: AT@1669..1672 "@" [Newline("\n"), Whitespace("\t")] [],
+                            rule: CssContainerAtRule {
+                                container_token: CONTAINER_KW@1672..1682 "container" [] [Whitespace(" ")],
+                                name: missing (optional),
+                                query: CssContainerSizeFeatureInParens {
+                                    l_paren_token: L_PAREN@1682..1683 "(" [] [],
+                                    feature: CssQueryFeatureRangeInterval {
+                                        left: CssRegularDimension {
+                                            value_token: CSS_NUMBER_LITERAL@1683..1686 "500" [] [],
+                                            unit_token: IDENT@1686..1689 "px" [] [Whitespace(" ")],
+                                        },
+                                        left_comparison: CssQueryFeatureRangeComparison {
+                                            operator: LTEQ@1689..1692 "<=" [] [Whitespace(" ")],
+                                        },
+                                        name: CssIdentifier {
+                                            value_token: IDENT@1692..1698 "width" [] [Whitespace(" ")],
+                                        },
+                                        right_comparison: CssQueryFeatureRangeComparison {
+                                            operator: LTEQ@1698..1701 "<=" [] [Whitespace(" ")],
+                                        },
+                                        right: CssRegularDimension {
+                                            value_token: CSS_NUMBER_LITERAL@1701..1704 "500" [] [],
+                                            unit_token: IDENT@1704..1706 "px" [] [],
+                                        },
+                                    },
+                                    r_paren_token: R_PAREN@1706..1708 ")" [] [Whitespace(" ")],
+                                },
+                                block: CssRuleListBlock {
+                                    l_curly_token: L_CURLY@1708..1711 "{" [] [Whitespace("  ")],
+                                    rules: CssRuleList [],
+                                    r_curly_token: R_CURLY@1711..1712 "}" [] [],
+                                },
+                            },
+                        },
+                        CssMarginAtRule {
+                            at_token: AT@1712..1717 "@" [Newline("\n"), Newline("\n"), Newline("\n"), Whitespace("\t")] [],
+                            name: RIGHT_BOTTOM_KW@1717..1730 "right-bottom" [] [Whitespace(" ")],
+                            block: CssDeclarationOrAtRuleBlock {
+                                l_curly_token: L_CURLY@1730..1731 "{" [] [],
+                                items: CssDeclarationOrAtRuleList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@1731..1741 "content" [Newline("\n"), Whitespace("\t\t")] [],
+                                                },
+                                                colon_token: COLON@1741..1743 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssString {
+                                                        value_token: CSS_STRING_LITERAL@1743..1748 "\"foo\"" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@1748..1749 ";" [] [],
+                                    },
+                                    CssAtRule {
+                                        at_token: AT@1749..1753 "@" [Newline("\n"), Whitespace("\t\t")] [],
+                                        rule: CssContainerAtRule {
+                                            container_token: CONTAINER_KW@1753..1763 "container" [] [Whitespace(" ")],
+                                            name: missing (optional),
+                                            query: CssContainerSizeFeatureInParens {
+                                                l_paren_token: L_PAREN@1763..1764 "(" [] [],
+                                                feature: CssQueryFeatureRangeInterval {
+                                                    left: CssRegularDimension {
+                                                        value_token: CSS_NUMBER_LITERAL@1764..1767 "500" [] [],
+                                                        unit_token: IDENT@1767..1770 "px" [] [Whitespace(" ")],
+                                                    },
+                                                    left_comparison: CssQueryFeatureRangeComparison {
+                                                        operator: LTEQ@1770..1773 "<=" [] [Whitespace(" ")],
+                                                    },
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@1773..1779 "width" [] [Whitespace(" ")],
+                                                    },
+                                                    right_comparison: CssQueryFeatureRangeComparison {
+                                                        operator: LTEQ@1779..1782 "<=" [] [Whitespace(" ")],
+                                                    },
+                                                    right: CssRegularDimension {
+                                                        value_token: CSS_NUMBER_LITERAL@1782..1785 "500" [] [],
+                                                        unit_token: IDENT@1785..1787 "px" [] [],
+                                                    },
+                                                },
+                                                r_paren_token: R_PAREN@1787..1789 ")" [] [Whitespace(" ")],
+                                            },
+                                            block: CssRuleListBlock {
+                                                l_curly_token: L_CURLY@1789..1792 "{" [] [Whitespace("  ")],
+                                                rules: CssRuleList [],
+                                                r_curly_token: R_CURLY@1792..1793 "}" [] [],
+                                            },
+                                        },
+                                    },
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@1793..1802 "color" [Newline("\n"), Newline("\n"), Whitespace("\t\t")] [],
+                                                },
+                                                colon_token: COLON@1802..1804 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@1804..1808 "blue" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@1808..1809 ";" [] [],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@1809..1812 "}" [Newline("\n"), Whitespace("\t")] [],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@1812..1814 "}" [Newline("\n")] [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@1814..1815 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..1815
+  0: (empty)
+  1: CSS_RULE_LIST@0..1814
+    0: CSS_AT_RULE@0..1814
+      0: AT@0..1 "@" [] []
+      1: CSS_PAGE_AT_RULE@1..1814
+        0: PAGE_KW@1..6 "page" [] [Whitespace(" ")]
+        1: CSS_PAGE_SELECTOR_LIST@6..59
+          0: CSS_PAGE_SELECTOR@6..29
+            0: (empty)
+            1: CSS_PAGE_SELECTOR_PSEUDO_LIST@6..29
+              0: CSS_PAGE_SELECTOR_PSEUDO@6..12
+                0: COLON@6..7 ":" [] []
+                1: FIRST_KW@7..12 "first" [] []
+              1: CSS_PAGE_SELECTOR_PSEUDO@12..18
+                0: COLON@12..13 ":" [] []
+                1: RIGHT_KW@13..18 "right" [] []
+              2: CSS_PAGE_SELECTOR_PSEUDO@18..23
+                0: COLON@18..19 ":" [] []
+                1: LEFT_KW@19..23 "left" [] []
+              3: CSS_PAGE_SELECTOR_PSEUDO@23..29
+                0: COLON@23..24 ":" [] []
+                1: BLANK_KW@24..29 "blank" [] []
+          1: COMMA@29..31 "," [] [Whitespace(" ")]
+          2: CSS_PAGE_SELECTOR@31..59
+            0: CSS_CUSTOM_IDENTIFIER@31..35
+              0: IDENT@31..35 "name" [] []
+            1: CSS_PAGE_SELECTOR_PSEUDO_LIST@35..59
+              0: CSS_PAGE_SELECTOR_PSEUDO@35..41
+                0: COLON@35..36 ":" [] []
+                1: FIRST_KW@36..41 "first" [] []
+              1: CSS_PAGE_SELECTOR_PSEUDO@41..47
+                0: COLON@41..42 ":" [] []
+                1: RIGHT_KW@42..47 "right" [] []
+              2: CSS_PAGE_SELECTOR_PSEUDO@47..52
+                0: COLON@47..48 ":" [] []
+                1: LEFT_KW@48..52 "left" [] []
+              3: CSS_PAGE_SELECTOR_PSEUDO@52..59
+                0: COLON@52..53 ":" [] []
+                1: BLANK_KW@53..59 "blank" [] [Whitespace(" ")]
+        2: CSS_PAGE_AT_RULE_BLOCK@59..1814
+          0: L_CURLY@59..60 "{" [] []
+          1: CSS_PAGE_AT_RULE_ITEM_LIST@60..1812
+            0: CSS_DECLARATION_WITH_SEMICOLON@60..75
+              0: CSS_DECLARATION@60..74
+                0: CSS_GENERIC_PROPERTY@60..74
+                  0: CSS_IDENTIFIER@60..67
+                    0: IDENT@60..67 "color" [Newline("\n"), Whitespace("\t")] []
+                  1: COLON@67..69 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@69..74
+                    0: CSS_IDENTIFIER@69..74
+                      0: IDENT@69..74 "green" [] []
+                1: (empty)
+              1: SEMICOLON@74..75 ";" [] []
+            1: CSS_AT_RULE@75..119
+              0: AT@75..79 "@" [Newline("\n"), Newline("\n"), Whitespace("\t")] []
+              1: CSS_CONTAINER_AT_RULE@79..119
+                0: CONTAINER_KW@79..89 "container" [] [Whitespace(" ")]
+                1: (empty)
+                2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@89..115
+                  0: L_PAREN@89..90 "(" [] []
+                  1: CSS_QUERY_FEATURE_RANGE_INTERVAL@90..113
+                    0: CSS_REGULAR_DIMENSION@90..96
+                      0: CSS_NUMBER_LITERAL@90..93 "500" [] []
+                      1: IDENT@93..96 "px" [] [Whitespace(" ")]
+                    1: CSS_QUERY_FEATURE_RANGE_COMPARISON@96..99
+                      0: LTEQ@96..99 "<=" [] [Whitespace(" ")]
+                    2: CSS_IDENTIFIER@99..105
+                      0: IDENT@99..105 "width" [] [Whitespace(" ")]
+                    3: CSS_QUERY_FEATURE_RANGE_COMPARISON@105..108
+                      0: LTEQ@105..108 "<=" [] [Whitespace(" ")]
+                    4: CSS_REGULAR_DIMENSION@108..113
+                      0: CSS_NUMBER_LITERAL@108..111 "500" [] []
+                      1: IDENT@111..113 "px" [] []
+                  2: R_PAREN@113..115 ")" [] [Whitespace(" ")]
+                3: CSS_RULE_LIST_BLOCK@115..119
+                  0: L_CURLY@115..118 "{" [] [Whitespace("  ")]
+                  1: CSS_RULE_LIST@118..118
+                  2: R_CURLY@118..119 "}" [] []
+            2: CSS_MARGIN_AT_RULE@119..222
+              0: AT@119..123 "@" [Newline("\n"), Newline("\n"), Whitespace("\t")] []
+              1: TOP_LEFT_CORNER_KW@123..139 "top-left-corner" [] [Whitespace(" ")]
+              2: CSS_DECLARATION_OR_AT_RULE_BLOCK@139..222
+                0: L_CURLY@139..140 "{" [] []
+                1: CSS_DECLARATION_OR_AT_RULE_LIST@140..218
+                  0: CSS_DECLARATION_WITH_SEMICOLON@140..158
+                    0: CSS_DECLARATION@140..157
+                      0: CSS_GENERIC_PROPERTY@140..157
+                        0: CSS_IDENTIFIER@140..150
+                          0: IDENT@140..150 "content" [Newline("\n"), Whitespace("\t\t")] []
+                        1: COLON@150..152 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@152..157
+                          0: CSS_STRING@152..157
+                            0: CSS_STRING_LITERAL@152..157 "\"foo\"" [] []
+                      1: (empty)
+                    1: SEMICOLON@157..158 ";" [] []
+                  1: CSS_DECLARATION_WITH_SEMICOLON@158..173
+                    0: CSS_DECLARATION@158..172
+                      0: CSS_GENERIC_PROPERTY@158..172
+                        0: CSS_IDENTIFIER@158..166
+                          0: IDENT@158..166 "color" [Newline("\n"), Whitespace("\t\t")] []
+                        1: COLON@166..168 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@168..172
+                          0: CSS_IDENTIFIER@168..172
+                            0: IDENT@168..172 "blue" [] []
+                      1: (empty)
+                    1: SEMICOLON@172..173 ";" [] []
+                  2: CSS_AT_RULE@173..218
+                    0: AT@173..178 "@" [Newline("\n"), Newline("\n"), Whitespace("\t\t")] []
+                    1: CSS_CONTAINER_AT_RULE@178..218
+                      0: CONTAINER_KW@178..188 "container" [] [Whitespace(" ")]
+                      1: (empty)
+                      2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@188..214
+                        0: L_PAREN@188..189 "(" [] []
+                        1: CSS_QUERY_FEATURE_RANGE_INTERVAL@189..212
+                          0: CSS_REGULAR_DIMENSION@189..195
+                            0: CSS_NUMBER_LITERAL@189..192 "500" [] []
+                            1: IDENT@192..195 "px" [] [Whitespace(" ")]
+                          1: CSS_QUERY_FEATURE_RANGE_COMPARISON@195..198
+                            0: LTEQ@195..198 "<=" [] [Whitespace(" ")]
+                          2: CSS_IDENTIFIER@198..204
+                            0: IDENT@198..204 "width" [] [Whitespace(" ")]
+                          3: CSS_QUERY_FEATURE_RANGE_COMPARISON@204..207
+                            0: LTEQ@204..207 "<=" [] [Whitespace(" ")]
+                          4: CSS_REGULAR_DIMENSION@207..212
+                            0: CSS_NUMBER_LITERAL@207..210 "500" [] []
+                            1: IDENT@210..212 "px" [] []
+                        2: R_PAREN@212..214 ")" [] [Whitespace(" ")]
+                      3: CSS_RULE_LIST_BLOCK@214..218
+                        0: L_CURLY@214..217 "{" [] [Whitespace("  ")]
+                        1: CSS_RULE_LIST@217..217
+                        2: R_CURLY@217..218 "}" [] []
+                2: R_CURLY@218..222 "}" [Newline("\n"), Newline("\n"), Whitespace("\t")] []
+            3: CSS_MARGIN_AT_RULE@222..318
+              0: AT@222..226 "@" [Newline("\n"), Newline("\n"), Whitespace("\t")] []
+              1: TOP_LEFT_KW@226..235 "top-left" [] [Whitespace(" ")]
+              2: CSS_DECLARATION_OR_AT_RULE_BLOCK@235..318
+                0: L_CURLY@235..236 "{" [] []
+                1: CSS_DECLARATION_OR_AT_RULE_LIST@236..314
+                  0: CSS_DECLARATION_WITH_SEMICOLON@236..254
+                    0: CSS_DECLARATION@236..253
+                      0: CSS_GENERIC_PROPERTY@236..253
+                        0: CSS_IDENTIFIER@236..246
+                          0: IDENT@236..246 "content" [Newline("\n"), Whitespace("\t\t")] []
+                        1: COLON@246..248 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@248..253
+                          0: CSS_STRING@248..253
+                            0: CSS_STRING_LITERAL@248..253 "\"foo\"" [] []
+                      1: (empty)
+                    1: SEMICOLON@253..254 ";" [] []
+                  1: CSS_AT_RULE@254..298
+                    0: AT@254..258 "@" [Newline("\n"), Whitespace("\t\t")] []
+                    1: CSS_CONTAINER_AT_RULE@258..298
+                      0: CONTAINER_KW@258..268 "container" [] [Whitespace(" ")]
+                      1: (empty)
+                      2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@268..294
+                        0: L_PAREN@268..269 "(" [] []
+                        1: CSS_QUERY_FEATURE_RANGE_INTERVAL@269..292
+                          0: CSS_REGULAR_DIMENSION@269..275
+                            0: CSS_NUMBER_LITERAL@269..272 "500" [] []
+                            1: IDENT@272..275 "px" [] [Whitespace(" ")]
+                          1: CSS_QUERY_FEATURE_RANGE_COMPARISON@275..278
+                            0: LTEQ@275..278 "<=" [] [Whitespace(" ")]
+                          2: CSS_IDENTIFIER@278..284
+                            0: IDENT@278..284 "width" [] [Whitespace(" ")]
+                          3: CSS_QUERY_FEATURE_RANGE_COMPARISON@284..287
+                            0: LTEQ@284..287 "<=" [] [Whitespace(" ")]
+                          4: CSS_REGULAR_DIMENSION@287..292
+                            0: CSS_NUMBER_LITERAL@287..290 "500" [] []
+                            1: IDENT@290..292 "px" [] []
+                        2: R_PAREN@292..294 ")" [] [Whitespace(" ")]
+                      3: CSS_RULE_LIST_BLOCK@294..298
+                        0: L_CURLY@294..297 "{" [] [Whitespace("  ")]
+                        1: CSS_RULE_LIST@297..297
+                        2: R_CURLY@297..298 "}" [] []
+                  2: CSS_DECLARATION_WITH_SEMICOLON@298..314
+                    0: CSS_DECLARATION@298..313
+                      0: CSS_GENERIC_PROPERTY@298..313
+                        0: CSS_IDENTIFIER@298..307
+                          0: IDENT@298..307 "color" [Newline("\n"), Newline("\n"), Whitespace("\t\t")] []
+                        1: COLON@307..309 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@309..313
+                          0: CSS_IDENTIFIER@309..313
+                            0: IDENT@309..313 "blue" [] []
+                      1: (empty)
+                    1: SEMICOLON@313..314 ";" [] []
+                2: R_CURLY@314..318 "}" [Newline("\n"), Newline("\n"), Whitespace("\t")] []
+            4: CSS_MARGIN_AT_RULE@318..414
+              0: AT@318..321 "@" [Newline("\n"), Whitespace("\t")] []
+              1: TOP_CENTER_KW@321..332 "top-center" [] [Whitespace(" ")]
+              2: CSS_DECLARATION_OR_AT_RULE_BLOCK@332..414
+                0: L_CURLY@332..333 "{" [] []
+                1: CSS_DECLARATION_OR_AT_RULE_LIST@333..411
+                  0: CSS_AT_RULE@333..377
+                    0: AT@333..337 "@" [Newline("\n"), Whitespace("\t\t")] []
+                    1: CSS_CONTAINER_AT_RULE@337..377
+                      0: CONTAINER_KW@337..347 "container" [] [Whitespace(" ")]
+                      1: (empty)
+                      2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@347..373
+                        0: L_PAREN@347..348 "(" [] []
+                        1: CSS_QUERY_FEATURE_RANGE_INTERVAL@348..371
+                          0: CSS_REGULAR_DIMENSION@348..354
+                            0: CSS_NUMBER_LITERAL@348..351 "500" [] []
+                            1: IDENT@351..354 "px" [] [Whitespace(" ")]
+                          1: CSS_QUERY_FEATURE_RANGE_COMPARISON@354..357
+                            0: LTEQ@354..357 "<=" [] [Whitespace(" ")]
+                          2: CSS_IDENTIFIER@357..363
+                            0: IDENT@357..363 "width" [] [Whitespace(" ")]
+                          3: CSS_QUERY_FEATURE_RANGE_COMPARISON@363..366
+                            0: LTEQ@363..366 "<=" [] [Whitespace(" ")]
+                          4: CSS_REGULAR_DIMENSION@366..371
+                            0: CSS_NUMBER_LITERAL@366..369 "500" [] []
+                            1: IDENT@369..371 "px" [] []
+                        2: R_PAREN@371..373 ")" [] [Whitespace(" ")]
+                      3: CSS_RULE_LIST_BLOCK@373..377
+                        0: L_CURLY@373..376 "{" [] [Whitespace("  ")]
+                        1: CSS_RULE_LIST@376..376
+                        2: R_CURLY@376..377 "}" [] []
+                  1: CSS_DECLARATION_WITH_SEMICOLON@377..396
+                    0: CSS_DECLARATION@377..395
+                      0: CSS_GENERIC_PROPERTY@377..395
+                        0: CSS_IDENTIFIER@377..388
+                          0: IDENT@377..388 "content" [Newline("\n"), Newline("\n"), Whitespace("\t\t")] []
+                        1: COLON@388..390 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@390..395
+                          0: CSS_STRING@390..395
+                            0: CSS_STRING_LITERAL@390..395 "\"foo\"" [] []
+                      1: (empty)
+                    1: SEMICOLON@395..396 ";" [] []
+                  2: CSS_DECLARATION_WITH_SEMICOLON@396..411
+                    0: CSS_DECLARATION@396..410
+                      0: CSS_GENERIC_PROPERTY@396..410
+                        0: CSS_IDENTIFIER@396..404
+                          0: IDENT@396..404 "color" [Newline("\n"), Whitespace("\t\t")] []
+                        1: COLON@404..406 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@406..410
+                          0: CSS_IDENTIFIER@406..410
+                            0: IDENT@406..410 "blue" [] []
+                      1: (empty)
+                    1: SEMICOLON@410..411 ";" [] []
+                2: R_CURLY@411..414 "}" [Newline("\n"), Whitespace("\t")] []
+            5: CSS_MARGIN_AT_RULE@414..510
+              0: AT@414..418 "@" [Newline("\n"), Newline("\n"), Whitespace("\t")] []
+              1: TOP_RIGHT_KW@418..428 "top-right" [] [Whitespace(" ")]
+              2: CSS_DECLARATION_OR_AT_RULE_BLOCK@428..510
+                0: L_CURLY@428..429 "{" [] []
+                1: CSS_DECLARATION_OR_AT_RULE_LIST@429..507
+                  0: CSS_DECLARATION_WITH_SEMICOLON@429..447
+                    0: CSS_DECLARATION@429..446
+                      0: CSS_GENERIC_PROPERTY@429..446
+                        0: CSS_IDENTIFIER@429..439
+                          0: IDENT@429..439 "content" [Newline("\n"), Whitespace("\t\t")] []
+                        1: COLON@439..441 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@441..446
+                          0: CSS_STRING@441..446
+                            0: CSS_STRING_LITERAL@441..446 "\"foo\"" [] []
+                      1: (empty)
+                    1: SEMICOLON@446..447 ";" [] []
+                  1: CSS_AT_RULE@447..491
+                    0: AT@447..451 "@" [Newline("\n"), Whitespace("\t\t")] []
+                    1: CSS_CONTAINER_AT_RULE@451..491
+                      0: CONTAINER_KW@451..461 "container" [] [Whitespace(" ")]
+                      1: (empty)
+                      2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@461..487
+                        0: L_PAREN@461..462 "(" [] []
+                        1: CSS_QUERY_FEATURE_RANGE_INTERVAL@462..485
+                          0: CSS_REGULAR_DIMENSION@462..468
+                            0: CSS_NUMBER_LITERAL@462..465 "500" [] []
+                            1: IDENT@465..468 "px" [] [Whitespace(" ")]
+                          1: CSS_QUERY_FEATURE_RANGE_COMPARISON@468..471
+                            0: LTEQ@468..471 "<=" [] [Whitespace(" ")]
+                          2: CSS_IDENTIFIER@471..477
+                            0: IDENT@471..477 "width" [] [Whitespace(" ")]
+                          3: CSS_QUERY_FEATURE_RANGE_COMPARISON@477..480
+                            0: LTEQ@477..480 "<=" [] [Whitespace(" ")]
+                          4: CSS_REGULAR_DIMENSION@480..485
+                            0: CSS_NUMBER_LITERAL@480..483 "500" [] []
+                            1: IDENT@483..485 "px" [] []
+                        2: R_PAREN@485..487 ")" [] [Whitespace(" ")]
+                      3: CSS_RULE_LIST_BLOCK@487..491
+                        0: L_CURLY@487..490 "{" [] [Whitespace("  ")]
+                        1: CSS_RULE_LIST@490..490
+                        2: R_CURLY@490..491 "}" [] []
+                  2: CSS_DECLARATION_WITH_SEMICOLON@491..507
+                    0: CSS_DECLARATION@491..506
+                      0: CSS_GENERIC_PROPERTY@491..506
+                        0: CSS_IDENTIFIER@491..500
+                          0: IDENT@491..500 "color" [Newline("\n"), Newline("\n"), Whitespace("\t\t")] []
+                        1: COLON@500..502 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@502..506
+                          0: CSS_IDENTIFIER@502..506
+                            0: IDENT@502..506 "blue" [] []
+                      1: (empty)
+                    1: SEMICOLON@506..507 ";" [] []
+                2: R_CURLY@507..510 "}" [Newline("\n"), Whitespace("\t")] []
+            6: CSS_MARGIN_AT_RULE@510..613
+              0: AT@510..514 "@" [Newline("\n"), Newline("\n"), Whitespace("\t")] []
+              1: TOP_RIGHT_CORNER_KW@514..531 "top-right-corner" [] [Whitespace(" ")]
+              2: CSS_DECLARATION_OR_AT_RULE_BLOCK@531..613
+                0: L_CURLY@531..532 "{" [] []
+                1: CSS_DECLARATION_OR_AT_RULE_LIST@532..610
+                  0: CSS_AT_RULE@532..576
+                    0: AT@532..536 "@" [Newline("\n"), Whitespace("\t\t")] []
+                    1: CSS_CONTAINER_AT_RULE@536..576
+                      0: CONTAINER_KW@536..546 "container" [] [Whitespace(" ")]
+                      1: (empty)
+                      2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@546..572
+                        0: L_PAREN@546..547 "(" [] []
+                        1: CSS_QUERY_FEATURE_RANGE_INTERVAL@547..570
+                          0: CSS_REGULAR_DIMENSION@547..553
+                            0: CSS_NUMBER_LITERAL@547..550 "500" [] []
+                            1: IDENT@550..553 "px" [] [Whitespace(" ")]
+                          1: CSS_QUERY_FEATURE_RANGE_COMPARISON@553..556
+                            0: LTEQ@553..556 "<=" [] [Whitespace(" ")]
+                          2: CSS_IDENTIFIER@556..562
+                            0: IDENT@556..562 "width" [] [Whitespace(" ")]
+                          3: CSS_QUERY_FEATURE_RANGE_COMPARISON@562..565
+                            0: LTEQ@562..565 "<=" [] [Whitespace(" ")]
+                          4: CSS_REGULAR_DIMENSION@565..570
+                            0: CSS_NUMBER_LITERAL@565..568 "500" [] []
+                            1: IDENT@568..570 "px" [] []
+                        2: R_PAREN@570..572 ")" [] [Whitespace(" ")]
+                      3: CSS_RULE_LIST_BLOCK@572..576
+                        0: L_CURLY@572..575 "{" [] [Whitespace("  ")]
+                        1: CSS_RULE_LIST@575..575
+                        2: R_CURLY@575..576 "}" [] []
+                  1: CSS_DECLARATION_WITH_SEMICOLON@576..595
+                    0: CSS_DECLARATION@576..594
+                      0: CSS_GENERIC_PROPERTY@576..594
+                        0: CSS_IDENTIFIER@576..587
+                          0: IDENT@576..587 "content" [Newline("\n"), Newline("\n"), Whitespace("\t\t")] []
+                        1: COLON@587..589 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@589..594
+                          0: CSS_STRING@589..594
+                            0: CSS_STRING_LITERAL@589..594 "\"foo\"" [] []
+                      1: (empty)
+                    1: SEMICOLON@594..595 ";" [] []
+                  2: CSS_DECLARATION_WITH_SEMICOLON@595..610
+                    0: CSS_DECLARATION@595..609
+                      0: CSS_GENERIC_PROPERTY@595..609
+                        0: CSS_IDENTIFIER@595..603
+                          0: IDENT@595..603 "color" [Newline("\n"), Whitespace("\t\t")] []
+                        1: COLON@603..605 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@605..609
+                          0: CSS_IDENTIFIER@605..609
+                            0: IDENT@605..609 "blue" [] []
+                      1: (empty)
+                    1: SEMICOLON@609..610 ";" [] []
+                2: R_CURLY@610..613 "}" [Newline("\n"), Whitespace("\t")] []
+            7: CSS_MARGIN_AT_RULE@613..718
+              0: AT@613..617 "@" [Newline("\n"), Newline("\n"), Whitespace("\t")] []
+              1: BOTTOM_LEFT_CORNER_KW@617..636 "bottom-left-corner" [] [Whitespace(" ")]
+              2: CSS_DECLARATION_OR_AT_RULE_BLOCK@636..718
+                0: L_CURLY@636..637 "{" [] []
+                1: CSS_DECLARATION_OR_AT_RULE_LIST@637..715
+                  0: CSS_DECLARATION_WITH_SEMICOLON@637..655
+                    0: CSS_DECLARATION@637..654
+                      0: CSS_GENERIC_PROPERTY@637..654
+                        0: CSS_IDENTIFIER@637..647
+                          0: IDENT@637..647 "content" [Newline("\n"), Whitespace("\t\t")] []
+                        1: COLON@647..649 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@649..654
+                          0: CSS_STRING@649..654
+                            0: CSS_STRING_LITERAL@649..654 "\"foo\"" [] []
+                      1: (empty)
+                    1: SEMICOLON@654..655 ";" [] []
+                  1: CSS_AT_RULE@655..699
+                    0: AT@655..659 "@" [Newline("\n"), Whitespace("\t\t")] []
+                    1: CSS_CONTAINER_AT_RULE@659..699
+                      0: CONTAINER_KW@659..669 "container" [] [Whitespace(" ")]
+                      1: (empty)
+                      2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@669..695
+                        0: L_PAREN@669..670 "(" [] []
+                        1: CSS_QUERY_FEATURE_RANGE_INTERVAL@670..693
+                          0: CSS_REGULAR_DIMENSION@670..676
+                            0: CSS_NUMBER_LITERAL@670..673 "500" [] []
+                            1: IDENT@673..676 "px" [] [Whitespace(" ")]
+                          1: CSS_QUERY_FEATURE_RANGE_COMPARISON@676..679
+                            0: LTEQ@676..679 "<=" [] [Whitespace(" ")]
+                          2: CSS_IDENTIFIER@679..685
+                            0: IDENT@679..685 "width" [] [Whitespace(" ")]
+                          3: CSS_QUERY_FEATURE_RANGE_COMPARISON@685..688
+                            0: LTEQ@685..688 "<=" [] [Whitespace(" ")]
+                          4: CSS_REGULAR_DIMENSION@688..693
+                            0: CSS_NUMBER_LITERAL@688..691 "500" [] []
+                            1: IDENT@691..693 "px" [] []
+                        2: R_PAREN@693..695 ")" [] [Whitespace(" ")]
+                      3: CSS_RULE_LIST_BLOCK@695..699
+                        0: L_CURLY@695..698 "{" [] [Whitespace("  ")]
+                        1: CSS_RULE_LIST@698..698
+                        2: R_CURLY@698..699 "}" [] []
+                  2: CSS_DECLARATION_WITH_SEMICOLON@699..715
+                    0: CSS_DECLARATION@699..714
+                      0: CSS_GENERIC_PROPERTY@699..714
+                        0: CSS_IDENTIFIER@699..708
+                          0: IDENT@699..708 "color" [Newline("\n"), Newline("\n"), Whitespace("\t\t")] []
+                        1: COLON@708..710 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@710..714
+                          0: CSS_IDENTIFIER@710..714
+                            0: IDENT@710..714 "blue" [] []
+                      1: (empty)
+                    1: SEMICOLON@714..715 ";" [] []
+                2: R_CURLY@715..718 "}" [Newline("\n"), Whitespace("\t")] []
+            8: CSS_MARGIN_AT_RULE@718..816
+              0: AT@718..722 "@" [Newline("\n"), Newline("\n"), Whitespace("\t")] []
+              1: BOTTOM_LEFT_KW@722..734 "bottom-left" [] [Whitespace(" ")]
+              2: CSS_DECLARATION_OR_AT_RULE_BLOCK@734..816
+                0: L_CURLY@734..735 "{" [] []
+                1: CSS_DECLARATION_OR_AT_RULE_LIST@735..812
+                  0: CSS_DECLARATION_WITH_SEMICOLON@735..753
+                    0: CSS_DECLARATION@735..752
+                      0: CSS_GENERIC_PROPERTY@735..752
+                        0: CSS_IDENTIFIER@735..745
+                          0: IDENT@735..745 "content" [Newline("\n"), Whitespace("\t\t")] []
+                        1: COLON@745..747 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@747..752
+                          0: CSS_STRING@747..752
+                            0: CSS_STRING_LITERAL@747..752 "\"foo\"" [] []
+                      1: (empty)
+                    1: SEMICOLON@752..753 ";" [] []
+                  1: CSS_DECLARATION_WITH_SEMICOLON@753..768
+                    0: CSS_DECLARATION@753..767
+                      0: CSS_GENERIC_PROPERTY@753..767
+                        0: CSS_IDENTIFIER@753..761
+                          0: IDENT@753..761 "color" [Newline("\n"), Whitespace("\t\t")] []
+                        1: COLON@761..763 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@763..767
+                          0: CSS_IDENTIFIER@763..767
+                            0: IDENT@763..767 "blue" [] []
+                      1: (empty)
+                    1: SEMICOLON@767..768 ";" [] []
+                  2: CSS_AT_RULE@768..812
+                    0: AT@768..772 "@" [Newline("\n"), Whitespace("\t\t")] []
+                    1: CSS_CONTAINER_AT_RULE@772..812
+                      0: CONTAINER_KW@772..782 "container" [] [Whitespace(" ")]
+                      1: (empty)
+                      2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@782..808
+                        0: L_PAREN@782..783 "(" [] []
+                        1: CSS_QUERY_FEATURE_RANGE_INTERVAL@783..806
+                          0: CSS_REGULAR_DIMENSION@783..789
+                            0: CSS_NUMBER_LITERAL@783..786 "500" [] []
+                            1: IDENT@786..789 "px" [] [Whitespace(" ")]
+                          1: CSS_QUERY_FEATURE_RANGE_COMPARISON@789..792
+                            0: LTEQ@789..792 "<=" [] [Whitespace(" ")]
+                          2: CSS_IDENTIFIER@792..798
+                            0: IDENT@792..798 "width" [] [Whitespace(" ")]
+                          3: CSS_QUERY_FEATURE_RANGE_COMPARISON@798..801
+                            0: LTEQ@798..801 "<=" [] [Whitespace(" ")]
+                          4: CSS_REGULAR_DIMENSION@801..806
+                            0: CSS_NUMBER_LITERAL@801..804 "500" [] []
+                            1: IDENT@804..806 "px" [] []
+                        2: R_PAREN@806..808 ")" [] [Whitespace(" ")]
+                      3: CSS_RULE_LIST_BLOCK@808..812
+                        0: L_CURLY@808..811 "{" [] [Whitespace("  ")]
+                        1: CSS_RULE_LIST@811..811
+                        2: R_CURLY@811..812 "}" [] []
+                2: R_CURLY@812..816 "}" [Newline("\n"), Newline("\n"), Whitespace("\t")] []
+            9: CSS_MARGIN_AT_RULE@816..916
+              0: AT@816..820 "@" [Newline("\n"), Newline("\n"), Whitespace("\t")] []
+              1: BOTTOM_CENTER_KW@820..834 "bottom-center" [] [Whitespace(" ")]
+              2: CSS_DECLARATION_OR_AT_RULE_BLOCK@834..916
+                0: L_CURLY@834..835 "{" [] []
+                1: CSS_DECLARATION_OR_AT_RULE_LIST@835..913
+                  0: CSS_AT_RULE@835..879
+                    0: AT@835..839 "@" [Newline("\n"), Whitespace("\t\t")] []
+                    1: CSS_CONTAINER_AT_RULE@839..879
+                      0: CONTAINER_KW@839..849 "container" [] [Whitespace(" ")]
+                      1: (empty)
+                      2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@849..875
+                        0: L_PAREN@849..850 "(" [] []
+                        1: CSS_QUERY_FEATURE_RANGE_INTERVAL@850..873
+                          0: CSS_REGULAR_DIMENSION@850..856
+                            0: CSS_NUMBER_LITERAL@850..853 "500" [] []
+                            1: IDENT@853..856 "px" [] [Whitespace(" ")]
+                          1: CSS_QUERY_FEATURE_RANGE_COMPARISON@856..859
+                            0: LTEQ@856..859 "<=" [] [Whitespace(" ")]
+                          2: CSS_IDENTIFIER@859..865
+                            0: IDENT@859..865 "width" [] [Whitespace(" ")]
+                          3: CSS_QUERY_FEATURE_RANGE_COMPARISON@865..868
+                            0: LTEQ@865..868 "<=" [] [Whitespace(" ")]
+                          4: CSS_REGULAR_DIMENSION@868..873
+                            0: CSS_NUMBER_LITERAL@868..871 "500" [] []
+                            1: IDENT@871..873 "px" [] []
+                        2: R_PAREN@873..875 ")" [] [Whitespace(" ")]
+                      3: CSS_RULE_LIST_BLOCK@875..879
+                        0: L_CURLY@875..878 "{" [] [Whitespace("  ")]
+                        1: CSS_RULE_LIST@878..878
+                        2: R_CURLY@878..879 "}" [] []
+                  1: CSS_DECLARATION_WITH_SEMICOLON@879..898
+                    0: CSS_DECLARATION@879..897
+                      0: CSS_GENERIC_PROPERTY@879..897
+                        0: CSS_IDENTIFIER@879..890
+                          0: IDENT@879..890 "content" [Newline("\n"), Newline("\n"), Whitespace("\t\t")] []
+                        1: COLON@890..892 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@892..897
+                          0: CSS_STRING@892..897
+                            0: CSS_STRING_LITERAL@892..897 "\"foo\"" [] []
+                      1: (empty)
+                    1: SEMICOLON@897..898 ";" [] []
+                  2: CSS_DECLARATION_WITH_SEMICOLON@898..913
+                    0: CSS_DECLARATION@898..912
+                      0: CSS_GENERIC_PROPERTY@898..912
+                        0: CSS_IDENTIFIER@898..906
+                          0: IDENT@898..906 "color" [Newline("\n"), Whitespace("\t\t")] []
+                        1: COLON@906..908 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@908..912
+                          0: CSS_IDENTIFIER@908..912
+                            0: IDENT@908..912 "blue" [] []
+                      1: (empty)
+                    1: SEMICOLON@912..913 ";" [] []
+                2: R_CURLY@913..916 "}" [Newline("\n"), Whitespace("\t")] []
+            10: CSS_MARGIN_AT_RULE@916..1015
+              0: AT@916..920 "@" [Newline("\n"), Newline("\n"), Whitespace("\t")] []
+              1: BOTTOM_RIGHT_KW@920..933 "bottom-right" [] [Whitespace(" ")]
+              2: CSS_DECLARATION_OR_AT_RULE_BLOCK@933..1015
+                0: L_CURLY@933..934 "{" [] []
+                1: CSS_DECLARATION_OR_AT_RULE_LIST@934..1012
+                  0: CSS_DECLARATION_WITH_SEMICOLON@934..952
+                    0: CSS_DECLARATION@934..951
+                      0: CSS_GENERIC_PROPERTY@934..951
+                        0: CSS_IDENTIFIER@934..944
+                          0: IDENT@934..944 "content" [Newline("\n"), Whitespace("\t\t")] []
+                        1: COLON@944..946 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@946..951
+                          0: CSS_STRING@946..951
+                            0: CSS_STRING_LITERAL@946..951 "\"foo\"" [] []
+                      1: (empty)
+                    1: SEMICOLON@951..952 ";" [] []
+                  1: CSS_AT_RULE@952..996
+                    0: AT@952..956 "@" [Newline("\n"), Whitespace("\t\t")] []
+                    1: CSS_CONTAINER_AT_RULE@956..996
+                      0: CONTAINER_KW@956..966 "container" [] [Whitespace(" ")]
+                      1: (empty)
+                      2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@966..992
+                        0: L_PAREN@966..967 "(" [] []
+                        1: CSS_QUERY_FEATURE_RANGE_INTERVAL@967..990
+                          0: CSS_REGULAR_DIMENSION@967..973
+                            0: CSS_NUMBER_LITERAL@967..970 "500" [] []
+                            1: IDENT@970..973 "px" [] [Whitespace(" ")]
+                          1: CSS_QUERY_FEATURE_RANGE_COMPARISON@973..976
+                            0: LTEQ@973..976 "<=" [] [Whitespace(" ")]
+                          2: CSS_IDENTIFIER@976..982
+                            0: IDENT@976..982 "width" [] [Whitespace(" ")]
+                          3: CSS_QUERY_FEATURE_RANGE_COMPARISON@982..985
+                            0: LTEQ@982..985 "<=" [] [Whitespace(" ")]
+                          4: CSS_REGULAR_DIMENSION@985..990
+                            0: CSS_NUMBER_LITERAL@985..988 "500" [] []
+                            1: IDENT@988..990 "px" [] []
+                        2: R_PAREN@990..992 ")" [] [Whitespace(" ")]
+                      3: CSS_RULE_LIST_BLOCK@992..996
+                        0: L_CURLY@992..995 "{" [] [Whitespace("  ")]
+                        1: CSS_RULE_LIST@995..995
+                        2: R_CURLY@995..996 "}" [] []
+                  2: CSS_DECLARATION_WITH_SEMICOLON@996..1012
+                    0: CSS_DECLARATION@996..1011
+                      0: CSS_GENERIC_PROPERTY@996..1011
+                        0: CSS_IDENTIFIER@996..1005
+                          0: IDENT@996..1005 "color" [Newline("\n"), Newline("\n"), Whitespace("\t\t")] []
+                        1: COLON@1005..1007 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@1007..1011
+                          0: CSS_IDENTIFIER@1007..1011
+                            0: IDENT@1007..1011 "blue" [] []
+                      1: (empty)
+                    1: SEMICOLON@1011..1012 ";" [] []
+                2: R_CURLY@1012..1015 "}" [Newline("\n"), Whitespace("\t")] []
+            11: CSS_MARGIN_AT_RULE@1015..1121
+              0: AT@1015..1019 "@" [Newline("\n"), Newline("\n"), Whitespace("\t")] []
+              1: BOTTOM_RIGHT_CORNER_KW@1019..1039 "bottom-right-corner" [] [Whitespace(" ")]
+              2: CSS_DECLARATION_OR_AT_RULE_BLOCK@1039..1121
+                0: L_CURLY@1039..1040 "{" [] []
+                1: CSS_DECLARATION_OR_AT_RULE_LIST@1040..1117
+                  0: CSS_DECLARATION_WITH_SEMICOLON@1040..1058
+                    0: CSS_DECLARATION@1040..1057
+                      0: CSS_GENERIC_PROPERTY@1040..1057
+                        0: CSS_IDENTIFIER@1040..1050
+                          0: IDENT@1040..1050 "content" [Newline("\n"), Whitespace("\t\t")] []
+                        1: COLON@1050..1052 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@1052..1057
+                          0: CSS_STRING@1052..1057
+                            0: CSS_STRING_LITERAL@1052..1057 "\"foo\"" [] []
+                      1: (empty)
+                    1: SEMICOLON@1057..1058 ";" [] []
+                  1: CSS_DECLARATION_WITH_SEMICOLON@1058..1073
+                    0: CSS_DECLARATION@1058..1072
+                      0: CSS_GENERIC_PROPERTY@1058..1072
+                        0: CSS_IDENTIFIER@1058..1066
+                          0: IDENT@1058..1066 "color" [Newline("\n"), Whitespace("\t\t")] []
+                        1: COLON@1066..1068 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@1068..1072
+                          0: CSS_IDENTIFIER@1068..1072
+                            0: IDENT@1068..1072 "blue" [] []
+                      1: (empty)
+                    1: SEMICOLON@1072..1073 ";" [] []
+                  2: CSS_AT_RULE@1073..1117
+                    0: AT@1073..1077 "@" [Newline("\n"), Whitespace("\t\t")] []
+                    1: CSS_CONTAINER_AT_RULE@1077..1117
+                      0: CONTAINER_KW@1077..1087 "container" [] [Whitespace(" ")]
+                      1: (empty)
+                      2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@1087..1113
+                        0: L_PAREN@1087..1088 "(" [] []
+                        1: CSS_QUERY_FEATURE_RANGE_INTERVAL@1088..1111
+                          0: CSS_REGULAR_DIMENSION@1088..1094
+                            0: CSS_NUMBER_LITERAL@1088..1091 "500" [] []
+                            1: IDENT@1091..1094 "px" [] [Whitespace(" ")]
+                          1: CSS_QUERY_FEATURE_RANGE_COMPARISON@1094..1097
+                            0: LTEQ@1094..1097 "<=" [] [Whitespace(" ")]
+                          2: CSS_IDENTIFIER@1097..1103
+                            0: IDENT@1097..1103 "width" [] [Whitespace(" ")]
+                          3: CSS_QUERY_FEATURE_RANGE_COMPARISON@1103..1106
+                            0: LTEQ@1103..1106 "<=" [] [Whitespace(" ")]
+                          4: CSS_REGULAR_DIMENSION@1106..1111
+                            0: CSS_NUMBER_LITERAL@1106..1109 "500" [] []
+                            1: IDENT@1109..1111 "px" [] []
+                        2: R_PAREN@1111..1113 ")" [] [Whitespace(" ")]
+                      3: CSS_RULE_LIST_BLOCK@1113..1117
+                        0: L_CURLY@1113..1116 "{" [] [Whitespace("  ")]
+                        1: CSS_RULE_LIST@1116..1116
+                        2: R_CURLY@1116..1117 "}" [] []
+                2: R_CURLY@1117..1121 "}" [Newline("\n"), Newline("\n"), Whitespace("\t")] []
+            12: CSS_MARGIN_AT_RULE@1121..1216
+              0: AT@1121..1125 "@" [Newline("\n"), Newline("\n"), Whitespace("\t")] []
+              1: LEFT_TOP_KW@1125..1134 "left-top" [] [Whitespace(" ")]
+              2: CSS_DECLARATION_OR_AT_RULE_BLOCK@1134..1216
+                0: L_CURLY@1134..1135 "{" [] []
+                1: CSS_DECLARATION_OR_AT_RULE_LIST@1135..1213
+                  0: CSS_AT_RULE@1135..1179
+                    0: AT@1135..1139 "@" [Newline("\n"), Whitespace("\t\t")] []
+                    1: CSS_CONTAINER_AT_RULE@1139..1179
+                      0: CONTAINER_KW@1139..1149 "container" [] [Whitespace(" ")]
+                      1: (empty)
+                      2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@1149..1175
+                        0: L_PAREN@1149..1150 "(" [] []
+                        1: CSS_QUERY_FEATURE_RANGE_INTERVAL@1150..1173
+                          0: CSS_REGULAR_DIMENSION@1150..1156
+                            0: CSS_NUMBER_LITERAL@1150..1153 "500" [] []
+                            1: IDENT@1153..1156 "px" [] [Whitespace(" ")]
+                          1: CSS_QUERY_FEATURE_RANGE_COMPARISON@1156..1159
+                            0: LTEQ@1156..1159 "<=" [] [Whitespace(" ")]
+                          2: CSS_IDENTIFIER@1159..1165
+                            0: IDENT@1159..1165 "width" [] [Whitespace(" ")]
+                          3: CSS_QUERY_FEATURE_RANGE_COMPARISON@1165..1168
+                            0: LTEQ@1165..1168 "<=" [] [Whitespace(" ")]
+                          4: CSS_REGULAR_DIMENSION@1168..1173
+                            0: CSS_NUMBER_LITERAL@1168..1171 "500" [] []
+                            1: IDENT@1171..1173 "px" [] []
+                        2: R_PAREN@1173..1175 ")" [] [Whitespace(" ")]
+                      3: CSS_RULE_LIST_BLOCK@1175..1179
+                        0: L_CURLY@1175..1178 "{" [] [Whitespace("  ")]
+                        1: CSS_RULE_LIST@1178..1178
+                        2: R_CURLY@1178..1179 "}" [] []
+                  1: CSS_DECLARATION_WITH_SEMICOLON@1179..1198
+                    0: CSS_DECLARATION@1179..1197
+                      0: CSS_GENERIC_PROPERTY@1179..1197
+                        0: CSS_IDENTIFIER@1179..1190
+                          0: IDENT@1179..1190 "content" [Newline("\n"), Newline("\n"), Whitespace("\t\t")] []
+                        1: COLON@1190..1192 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@1192..1197
+                          0: CSS_STRING@1192..1197
+                            0: CSS_STRING_LITERAL@1192..1197 "\"foo\"" [] []
+                      1: (empty)
+                    1: SEMICOLON@1197..1198 ";" [] []
+                  2: CSS_DECLARATION_WITH_SEMICOLON@1198..1213
+                    0: CSS_DECLARATION@1198..1212
+                      0: CSS_GENERIC_PROPERTY@1198..1212
+                        0: CSS_IDENTIFIER@1198..1206
+                          0: IDENT@1198..1206 "color" [Newline("\n"), Whitespace("\t\t")] []
+                        1: COLON@1206..1208 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@1208..1212
+                          0: CSS_IDENTIFIER@1208..1212
+                            0: IDENT@1208..1212 "blue" [] []
+                      1: (empty)
+                    1: SEMICOLON@1212..1213 ";" [] []
+                2: R_CURLY@1213..1216 "}" [Newline("\n"), Whitespace("\t")] []
+            13: CSS_MARGIN_AT_RULE@1216..1359
+              0: AT@1216..1220 "@" [Newline("\n"), Newline("\n"), Whitespace("\t")] []
+              1: LEFT_MIDDLE_KW@1220..1232 "left-middle" [] [Whitespace(" ")]
+              2: CSS_DECLARATION_OR_AT_RULE_BLOCK@1232..1359
+                0: L_CURLY@1232..1233 "{" [] []
+                1: CSS_DECLARATION_OR_AT_RULE_LIST@1233..1355
+                  0: CSS_AT_RULE@1233..1277
+                    0: AT@1233..1237 "@" [Newline("\n"), Whitespace("\t\t")] []
+                    1: CSS_CONTAINER_AT_RULE@1237..1277
+                      0: CONTAINER_KW@1237..1247 "container" [] [Whitespace(" ")]
+                      1: (empty)
+                      2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@1247..1273
+                        0: L_PAREN@1247..1248 "(" [] []
+                        1: CSS_QUERY_FEATURE_RANGE_INTERVAL@1248..1271
+                          0: CSS_REGULAR_DIMENSION@1248..1254
+                            0: CSS_NUMBER_LITERAL@1248..1251 "500" [] []
+                            1: IDENT@1251..1254 "px" [] [Whitespace(" ")]
+                          1: CSS_QUERY_FEATURE_RANGE_COMPARISON@1254..1257
+                            0: LTEQ@1254..1257 "<=" [] [Whitespace(" ")]
+                          2: CSS_IDENTIFIER@1257..1263
+                            0: IDENT@1257..1263 "width" [] [Whitespace(" ")]
+                          3: CSS_QUERY_FEATURE_RANGE_COMPARISON@1263..1266
+                            0: LTEQ@1263..1266 "<=" [] [Whitespace(" ")]
+                          4: CSS_REGULAR_DIMENSION@1266..1271
+                            0: CSS_NUMBER_LITERAL@1266..1269 "500" [] []
+                            1: IDENT@1269..1271 "px" [] []
+                        2: R_PAREN@1271..1273 ")" [] [Whitespace(" ")]
+                      3: CSS_RULE_LIST_BLOCK@1273..1277
+                        0: L_CURLY@1273..1276 "{" [] [Whitespace("  ")]
+                        1: CSS_RULE_LIST@1276..1276
+                        2: R_CURLY@1276..1277 "}" [] []
+                  1: CSS_DECLARATION_WITH_SEMICOLON@1277..1296
+                    0: CSS_DECLARATION@1277..1295
+                      0: CSS_GENERIC_PROPERTY@1277..1295
+                        0: CSS_IDENTIFIER@1277..1288
+                          0: IDENT@1277..1288 "content" [Newline("\n"), Newline("\n"), Whitespace("\t\t")] []
+                        1: COLON@1288..1290 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@1290..1295
+                          0: CSS_STRING@1290..1295
+                            0: CSS_STRING_LITERAL@1290..1295 "\"foo\"" [] []
+                      1: (empty)
+                    1: SEMICOLON@1295..1296 ";" [] []
+                  2: CSS_DECLARATION_WITH_SEMICOLON@1296..1311
+                    0: CSS_DECLARATION@1296..1310
+                      0: CSS_GENERIC_PROPERTY@1296..1310
+                        0: CSS_IDENTIFIER@1296..1304
+                          0: IDENT@1296..1304 "color" [Newline("\n"), Whitespace("\t\t")] []
+                        1: COLON@1304..1306 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@1306..1310
+                          0: CSS_IDENTIFIER@1306..1310
+                            0: IDENT@1306..1310 "blue" [] []
+                      1: (empty)
+                    1: SEMICOLON@1310..1311 ";" [] []
+                  3: CSS_AT_RULE@1311..1355
+                    0: AT@1311..1315 "@" [Newline("\n"), Whitespace("\t\t")] []
+                    1: CSS_CONTAINER_AT_RULE@1315..1355
+                      0: CONTAINER_KW@1315..1325 "container" [] [Whitespace(" ")]
+                      1: (empty)
+                      2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@1325..1351
+                        0: L_PAREN@1325..1326 "(" [] []
+                        1: CSS_QUERY_FEATURE_RANGE_INTERVAL@1326..1349
+                          0: CSS_REGULAR_DIMENSION@1326..1332
+                            0: CSS_NUMBER_LITERAL@1326..1329 "500" [] []
+                            1: IDENT@1329..1332 "px" [] [Whitespace(" ")]
+                          1: CSS_QUERY_FEATURE_RANGE_COMPARISON@1332..1335
+                            0: LTEQ@1332..1335 "<=" [] [Whitespace(" ")]
+                          2: CSS_IDENTIFIER@1335..1341
+                            0: IDENT@1335..1341 "width" [] [Whitespace(" ")]
+                          3: CSS_QUERY_FEATURE_RANGE_COMPARISON@1341..1344
+                            0: LTEQ@1341..1344 "<=" [] [Whitespace(" ")]
+                          4: CSS_REGULAR_DIMENSION@1344..1349
+                            0: CSS_NUMBER_LITERAL@1344..1347 "500" [] []
+                            1: IDENT@1347..1349 "px" [] []
+                        2: R_PAREN@1349..1351 ")" [] [Whitespace(" ")]
+                      3: CSS_RULE_LIST_BLOCK@1351..1355
+                        0: L_CURLY@1351..1354 "{" [] [Whitespace("  ")]
+                        1: CSS_RULE_LIST@1354..1354
+                        2: R_CURLY@1354..1355 "}" [] []
+                2: R_CURLY@1355..1359 "}" [Newline("\n"), Newline("\n"), Whitespace("\t")] []
+            14: CSS_MARGIN_AT_RULE@1359..1457
+              0: AT@1359..1363 "@" [Newline("\n"), Newline("\n"), Whitespace("\t")] []
+              1: LEFT_BOTTOM_KW@1363..1375 "left-bottom" [] [Whitespace(" ")]
+              2: CSS_DECLARATION_OR_AT_RULE_BLOCK@1375..1457
+                0: L_CURLY@1375..1376 "{" [] []
+                1: CSS_DECLARATION_OR_AT_RULE_LIST@1376..1453
+                  0: CSS_DECLARATION_WITH_SEMICOLON@1376..1394
+                    0: CSS_DECLARATION@1376..1393
+                      0: CSS_GENERIC_PROPERTY@1376..1393
+                        0: CSS_IDENTIFIER@1376..1386
+                          0: IDENT@1376..1386 "content" [Newline("\n"), Whitespace("\t\t")] []
+                        1: COLON@1386..1388 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@1388..1393
+                          0: CSS_STRING@1388..1393
+                            0: CSS_STRING_LITERAL@1388..1393 "\"foo\"" [] []
+                      1: (empty)
+                    1: SEMICOLON@1393..1394 ";" [] []
+                  1: CSS_DECLARATION_WITH_SEMICOLON@1394..1409
+                    0: CSS_DECLARATION@1394..1408
+                      0: CSS_GENERIC_PROPERTY@1394..1408
+                        0: CSS_IDENTIFIER@1394..1402
+                          0: IDENT@1394..1402 "color" [Newline("\n"), Whitespace("\t\t")] []
+                        1: COLON@1402..1404 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@1404..1408
+                          0: CSS_IDENTIFIER@1404..1408
+                            0: IDENT@1404..1408 "blue" [] []
+                      1: (empty)
+                    1: SEMICOLON@1408..1409 ";" [] []
+                  2: CSS_AT_RULE@1409..1453
+                    0: AT@1409..1413 "@" [Newline("\n"), Whitespace("\t\t")] []
+                    1: CSS_CONTAINER_AT_RULE@1413..1453
+                      0: CONTAINER_KW@1413..1423 "container" [] [Whitespace(" ")]
+                      1: (empty)
+                      2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@1423..1449
+                        0: L_PAREN@1423..1424 "(" [] []
+                        1: CSS_QUERY_FEATURE_RANGE_INTERVAL@1424..1447
+                          0: CSS_REGULAR_DIMENSION@1424..1430
+                            0: CSS_NUMBER_LITERAL@1424..1427 "500" [] []
+                            1: IDENT@1427..1430 "px" [] [Whitespace(" ")]
+                          1: CSS_QUERY_FEATURE_RANGE_COMPARISON@1430..1433
+                            0: LTEQ@1430..1433 "<=" [] [Whitespace(" ")]
+                          2: CSS_IDENTIFIER@1433..1439
+                            0: IDENT@1433..1439 "width" [] [Whitespace(" ")]
+                          3: CSS_QUERY_FEATURE_RANGE_COMPARISON@1439..1442
+                            0: LTEQ@1439..1442 "<=" [] [Whitespace(" ")]
+                          4: CSS_REGULAR_DIMENSION@1442..1447
+                            0: CSS_NUMBER_LITERAL@1442..1445 "500" [] []
+                            1: IDENT@1445..1447 "px" [] []
+                        2: R_PAREN@1447..1449 ")" [] [Whitespace(" ")]
+                      3: CSS_RULE_LIST_BLOCK@1449..1453
+                        0: L_CURLY@1449..1452 "{" [] [Whitespace("  ")]
+                        1: CSS_RULE_LIST@1452..1452
+                        2: R_CURLY@1452..1453 "}" [] []
+                2: R_CURLY@1453..1457 "}" [Newline("\n"), Newline("\n"), Whitespace("\t")] []
+            15: CSS_MARGIN_AT_RULE@1457..1553
+              0: AT@1457..1461 "@" [Newline("\n"), Newline("\n"), Whitespace("\t")] []
+              1: RIGHT_TOP_KW@1461..1471 "right-top" [] [Whitespace(" ")]
+              2: CSS_DECLARATION_OR_AT_RULE_BLOCK@1471..1553
+                0: L_CURLY@1471..1472 "{" [] []
+                1: CSS_DECLARATION_OR_AT_RULE_LIST@1472..1550
+                  0: CSS_DECLARATION_WITH_SEMICOLON@1472..1490
+                    0: CSS_DECLARATION@1472..1489
+                      0: CSS_GENERIC_PROPERTY@1472..1489
+                        0: CSS_IDENTIFIER@1472..1482
+                          0: IDENT@1472..1482 "content" [Newline("\n"), Whitespace("\t\t")] []
+                        1: COLON@1482..1484 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@1484..1489
+                          0: CSS_STRING@1484..1489
+                            0: CSS_STRING_LITERAL@1484..1489 "\"foo\"" [] []
+                      1: (empty)
+                    1: SEMICOLON@1489..1490 ";" [] []
+                  1: CSS_AT_RULE@1490..1534
+                    0: AT@1490..1494 "@" [Newline("\n"), Whitespace("\t\t")] []
+                    1: CSS_CONTAINER_AT_RULE@1494..1534
+                      0: CONTAINER_KW@1494..1504 "container" [] [Whitespace(" ")]
+                      1: (empty)
+                      2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@1504..1530
+                        0: L_PAREN@1504..1505 "(" [] []
+                        1: CSS_QUERY_FEATURE_RANGE_INTERVAL@1505..1528
+                          0: CSS_REGULAR_DIMENSION@1505..1511
+                            0: CSS_NUMBER_LITERAL@1505..1508 "500" [] []
+                            1: IDENT@1508..1511 "px" [] [Whitespace(" ")]
+                          1: CSS_QUERY_FEATURE_RANGE_COMPARISON@1511..1514
+                            0: LTEQ@1511..1514 "<=" [] [Whitespace(" ")]
+                          2: CSS_IDENTIFIER@1514..1520
+                            0: IDENT@1514..1520 "width" [] [Whitespace(" ")]
+                          3: CSS_QUERY_FEATURE_RANGE_COMPARISON@1520..1523
+                            0: LTEQ@1520..1523 "<=" [] [Whitespace(" ")]
+                          4: CSS_REGULAR_DIMENSION@1523..1528
+                            0: CSS_NUMBER_LITERAL@1523..1526 "500" [] []
+                            1: IDENT@1526..1528 "px" [] []
+                        2: R_PAREN@1528..1530 ")" [] [Whitespace(" ")]
+                      3: CSS_RULE_LIST_BLOCK@1530..1534
+                        0: L_CURLY@1530..1533 "{" [] [Whitespace("  ")]
+                        1: CSS_RULE_LIST@1533..1533
+                        2: R_CURLY@1533..1534 "}" [] []
+                  2: CSS_DECLARATION_WITH_SEMICOLON@1534..1550
+                    0: CSS_DECLARATION@1534..1549
+                      0: CSS_GENERIC_PROPERTY@1534..1549
+                        0: CSS_IDENTIFIER@1534..1543
+                          0: IDENT@1534..1543 "color" [Newline("\n"), Newline("\n"), Whitespace("\t\t")] []
+                        1: COLON@1543..1545 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@1545..1549
+                          0: CSS_IDENTIFIER@1545..1549
+                            0: IDENT@1545..1549 "blue" [] []
+                      1: (empty)
+                    1: SEMICOLON@1549..1550 ";" [] []
+                2: R_CURLY@1550..1553 "}" [Newline("\n"), Whitespace("\t")] []
+            16: CSS_MARGIN_AT_RULE@1553..1652
+              0: AT@1553..1557 "@" [Newline("\n"), Newline("\n"), Whitespace("\t")] []
+              1: RIGHT_MIDDLE_KW@1557..1570 "right-middle" [] [Whitespace(" ")]
+              2: CSS_DECLARATION_OR_AT_RULE_BLOCK@1570..1652
+                0: L_CURLY@1570..1571 "{" [] []
+                1: CSS_DECLARATION_OR_AT_RULE_LIST@1571..1649
+                  0: CSS_DECLARATION_WITH_SEMICOLON@1571..1589
+                    0: CSS_DECLARATION@1571..1588
+                      0: CSS_GENERIC_PROPERTY@1571..1588
+                        0: CSS_IDENTIFIER@1571..1581
+                          0: IDENT@1571..1581 "content" [Newline("\n"), Whitespace("\t\t")] []
+                        1: COLON@1581..1583 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@1583..1588
+                          0: CSS_STRING@1583..1588
+                            0: CSS_STRING_LITERAL@1583..1588 "\"foo\"" [] []
+                      1: (empty)
+                    1: SEMICOLON@1588..1589 ";" [] []
+                  1: CSS_AT_RULE@1589..1633
+                    0: AT@1589..1593 "@" [Newline("\n"), Whitespace("\t\t")] []
+                    1: CSS_CONTAINER_AT_RULE@1593..1633
+                      0: CONTAINER_KW@1593..1603 "container" [] [Whitespace(" ")]
+                      1: (empty)
+                      2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@1603..1629
+                        0: L_PAREN@1603..1604 "(" [] []
+                        1: CSS_QUERY_FEATURE_RANGE_INTERVAL@1604..1627
+                          0: CSS_REGULAR_DIMENSION@1604..1610
+                            0: CSS_NUMBER_LITERAL@1604..1607 "500" [] []
+                            1: IDENT@1607..1610 "px" [] [Whitespace(" ")]
+                          1: CSS_QUERY_FEATURE_RANGE_COMPARISON@1610..1613
+                            0: LTEQ@1610..1613 "<=" [] [Whitespace(" ")]
+                          2: CSS_IDENTIFIER@1613..1619
+                            0: IDENT@1613..1619 "width" [] [Whitespace(" ")]
+                          3: CSS_QUERY_FEATURE_RANGE_COMPARISON@1619..1622
+                            0: LTEQ@1619..1622 "<=" [] [Whitespace(" ")]
+                          4: CSS_REGULAR_DIMENSION@1622..1627
+                            0: CSS_NUMBER_LITERAL@1622..1625 "500" [] []
+                            1: IDENT@1625..1627 "px" [] []
+                        2: R_PAREN@1627..1629 ")" [] [Whitespace(" ")]
+                      3: CSS_RULE_LIST_BLOCK@1629..1633
+                        0: L_CURLY@1629..1632 "{" [] [Whitespace("  ")]
+                        1: CSS_RULE_LIST@1632..1632
+                        2: R_CURLY@1632..1633 "}" [] []
+                  2: CSS_DECLARATION_WITH_SEMICOLON@1633..1649
+                    0: CSS_DECLARATION@1633..1648
+                      0: CSS_GENERIC_PROPERTY@1633..1648
+                        0: CSS_IDENTIFIER@1633..1642
+                          0: IDENT@1633..1642 "color" [Newline("\n"), Newline("\n"), Whitespace("\t\t")] []
+                        1: COLON@1642..1644 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@1644..1648
+                          0: CSS_IDENTIFIER@1644..1648
+                            0: IDENT@1644..1648 "blue" [] []
+                      1: (empty)
+                    1: SEMICOLON@1648..1649 ";" [] []
+                2: R_CURLY@1649..1652 "}" [Newline("\n"), Whitespace("\t")] []
+            17: CSS_DECLARATION_WITH_SEMICOLON@1652..1669
+              0: CSS_DECLARATION@1652..1668
+                0: CSS_GENERIC_PROPERTY@1652..1668
+                  0: CSS_IDENTIFIER@1652..1661
+                    0: IDENT@1652..1661 "content" [Newline("\n"), Whitespace("\t")] []
+                  1: COLON@1661..1663 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@1663..1668
+                    0: CSS_STRING@1663..1668
+                      0: CSS_STRING_LITERAL@1663..1668 "\"foo\"" [] []
+                1: (empty)
+              1: SEMICOLON@1668..1669 ";" [] []
+            18: CSS_AT_RULE@1669..1712
+              0: AT@1669..1672 "@" [Newline("\n"), Whitespace("\t")] []
+              1: CSS_CONTAINER_AT_RULE@1672..1712
+                0: CONTAINER_KW@1672..1682 "container" [] [Whitespace(" ")]
+                1: (empty)
+                2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@1682..1708
+                  0: L_PAREN@1682..1683 "(" [] []
+                  1: CSS_QUERY_FEATURE_RANGE_INTERVAL@1683..1706
+                    0: CSS_REGULAR_DIMENSION@1683..1689
+                      0: CSS_NUMBER_LITERAL@1683..1686 "500" [] []
+                      1: IDENT@1686..1689 "px" [] [Whitespace(" ")]
+                    1: CSS_QUERY_FEATURE_RANGE_COMPARISON@1689..1692
+                      0: LTEQ@1689..1692 "<=" [] [Whitespace(" ")]
+                    2: CSS_IDENTIFIER@1692..1698
+                      0: IDENT@1692..1698 "width" [] [Whitespace(" ")]
+                    3: CSS_QUERY_FEATURE_RANGE_COMPARISON@1698..1701
+                      0: LTEQ@1698..1701 "<=" [] [Whitespace(" ")]
+                    4: CSS_REGULAR_DIMENSION@1701..1706
+                      0: CSS_NUMBER_LITERAL@1701..1704 "500" [] []
+                      1: IDENT@1704..1706 "px" [] []
+                  2: R_PAREN@1706..1708 ")" [] [Whitespace(" ")]
+                3: CSS_RULE_LIST_BLOCK@1708..1712
+                  0: L_CURLY@1708..1711 "{" [] [Whitespace("  ")]
+                  1: CSS_RULE_LIST@1711..1711
+                  2: R_CURLY@1711..1712 "}" [] []
+            19: CSS_MARGIN_AT_RULE@1712..1812
+              0: AT@1712..1717 "@" [Newline("\n"), Newline("\n"), Newline("\n"), Whitespace("\t")] []
+              1: RIGHT_BOTTOM_KW@1717..1730 "right-bottom" [] [Whitespace(" ")]
+              2: CSS_DECLARATION_OR_AT_RULE_BLOCK@1730..1812
+                0: L_CURLY@1730..1731 "{" [] []
+                1: CSS_DECLARATION_OR_AT_RULE_LIST@1731..1809
+                  0: CSS_DECLARATION_WITH_SEMICOLON@1731..1749
+                    0: CSS_DECLARATION@1731..1748
+                      0: CSS_GENERIC_PROPERTY@1731..1748
+                        0: CSS_IDENTIFIER@1731..1741
+                          0: IDENT@1731..1741 "content" [Newline("\n"), Whitespace("\t\t")] []
+                        1: COLON@1741..1743 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@1743..1748
+                          0: CSS_STRING@1743..1748
+                            0: CSS_STRING_LITERAL@1743..1748 "\"foo\"" [] []
+                      1: (empty)
+                    1: SEMICOLON@1748..1749 ";" [] []
+                  1: CSS_AT_RULE@1749..1793
+                    0: AT@1749..1753 "@" [Newline("\n"), Whitespace("\t\t")] []
+                    1: CSS_CONTAINER_AT_RULE@1753..1793
+                      0: CONTAINER_KW@1753..1763 "container" [] [Whitespace(" ")]
+                      1: (empty)
+                      2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@1763..1789
+                        0: L_PAREN@1763..1764 "(" [] []
+                        1: CSS_QUERY_FEATURE_RANGE_INTERVAL@1764..1787
+                          0: CSS_REGULAR_DIMENSION@1764..1770
+                            0: CSS_NUMBER_LITERAL@1764..1767 "500" [] []
+                            1: IDENT@1767..1770 "px" [] [Whitespace(" ")]
+                          1: CSS_QUERY_FEATURE_RANGE_COMPARISON@1770..1773
+                            0: LTEQ@1770..1773 "<=" [] [Whitespace(" ")]
+                          2: CSS_IDENTIFIER@1773..1779
+                            0: IDENT@1773..1779 "width" [] [Whitespace(" ")]
+                          3: CSS_QUERY_FEATURE_RANGE_COMPARISON@1779..1782
+                            0: LTEQ@1779..1782 "<=" [] [Whitespace(" ")]
+                          4: CSS_REGULAR_DIMENSION@1782..1787
+                            0: CSS_NUMBER_LITERAL@1782..1785 "500" [] []
+                            1: IDENT@1785..1787 "px" [] []
+                        2: R_PAREN@1787..1789 ")" [] [Whitespace(" ")]
+                      3: CSS_RULE_LIST_BLOCK@1789..1793
+                        0: L_CURLY@1789..1792 "{" [] [Whitespace("  ")]
+                        1: CSS_RULE_LIST@1792..1792
+                        2: R_CURLY@1792..1793 "}" [] []
+                  2: CSS_DECLARATION_WITH_SEMICOLON@1793..1809
+                    0: CSS_DECLARATION@1793..1808
+                      0: CSS_GENERIC_PROPERTY@1793..1808
+                        0: CSS_IDENTIFIER@1793..1802
+                          0: IDENT@1793..1802 "color" [Newline("\n"), Newline("\n"), Whitespace("\t\t")] []
+                        1: COLON@1802..1804 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@1804..1808
+                          0: CSS_IDENTIFIER@1804..1808
+                            0: IDENT@1804..1808 "blue" [] []
+                      1: (empty)
+                    1: SEMICOLON@1808..1809 ";" [] []
+                2: R_CURLY@1809..1812 "}" [Newline("\n"), Whitespace("\t")] []
+          2: R_CURLY@1812..1814 "}" [Newline("\n")] []
+  2: EOF@1814..1815 "" [Newline("\n")] []
+
+```
+
+

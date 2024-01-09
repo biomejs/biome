@@ -1,0 +1,46 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/atrule/color_profile.css
+---
+
+# Input
+
+```css
+@color-profile --fogra39 {  }
+
+@color-profile    device-cmyk {  }
+
+@color-profile 
+
+DEVICE-CMYK
+ {  }
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+-----
+
+```css
+@color-profile --fogra39 {
+}
+
+@color-profile device-cmyk {
+}
+
+@color-profile DEVICE-CMYK {
+}
+```
+
+

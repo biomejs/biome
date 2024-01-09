@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: validNamespace.ts
 ---
 # Input
-```js
+```ts
 export namespace X {}
 
 export namespace PascalCase {}

@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.ts
 ---
 # Input
-```js
+```ts
 // const contexts
 const x/*before*/: /*inside*/ 1 /*after*/ = (1);
 

@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: JsTryStatement.js
 ---
 # Input
-```js
+```jsx
 function JsTryStatement1() {
     try {
         tryBlock();

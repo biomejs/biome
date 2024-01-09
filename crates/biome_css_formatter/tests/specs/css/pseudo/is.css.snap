@@ -1,0 +1,85 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/pseudo/is.css
+---
+
+# Input
+
+```css
+:is(ol, ul, menu:unsupported) :is(ol, ul) {
+    color: green;
+}
+
+:is(ol, ul) :is(ol, ul) ol {
+    list-style-type: lower-greek;
+    color: chocolate;
+}
+
+:is(ol, ul, menu, dir) :is(ol, ul, menu, dir) :is(ul, menu, dir) {
+  list-style-type: square;
+}
+
+h1 {
+  font-size: 30px;
+}
+
+:is(section, article, aside, nav) h1 {
+  font-size: 25px;
+}
+
+:is(section, article, aside, nav) :is(section, article, aside, nav) h1 {
+  font-size: 20px;
+}
+
+some-element:is(::before, ::after) {
+  display: block;
+}
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+-----
+
+```css
+:is(ol, ul, menu:unsupported) :is(ol, ul) {
+	color: green;
+}
+
+:is(ol, ul) :is(ol, ul) ol {
+	list-style-type: lower-greek;
+	color: chocolate;
+}
+
+:is(ol, ul, menu, dir) :is(ol, ul, menu, dir) :is(ul, menu, dir) {
+	list-style-type: square;
+}
+
+h1 {
+	font-size: 30px;
+}
+
+:is(section, article, aside, nav) h1 {
+	font-size: 25px;
+}
+
+:is(section, article, aside, nav) :is(section, article, aside, nav) h1 {
+	font-size: 20px;
+}
+
+some-element:is(::before, ::after) {
+	display: block;
+}
+```
+
+

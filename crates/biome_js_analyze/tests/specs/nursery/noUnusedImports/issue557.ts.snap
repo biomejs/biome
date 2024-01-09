@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: issue557.ts
 ---
 # Input
-```js
+```ts
 // See https://github.com/biomejs/biome/issues/557
 import type Type from "mod";
 export const a: typeof Type = {};

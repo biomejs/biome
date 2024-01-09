@@ -1,60 +1,59 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 92
 expression: valid.jsonc
 ---
 # Input
-```js
+```cjs
 const f = { label: foo ()}
 ```
 
 # Input
-```js
+```cjs
 while (true) {}
 ```
 
 # Input
-```js
+```cjs
 while (true) { break; }
 ```
 
 # Input
-```js
+```cjs
 while (true) { continue; }
 ```
 
 # Input
-```js
+```cjs
 label: while(true) {}
 ```
 
 # Input
-```js
+```cjs
 label: while (true) { break label; }
 ```
 
 # Input
-```js
+```cjs
 label: while (true) { continue label; }
 ```
 
 # Input
-```js
+```cjs
 A: while (a) { break A; }
 ```
 
 # Input
-```js
+```cjs
 A: do { if (b) { break A; } } while (a);
 ```
 
 # Input
-```js
+```cjs
 A: for (let a in obj) { for (;;) { switch (a) { case 0: break A; } } }
 ```
 
 # Input
-```js
+```cjs
 A: for (let a of arr) { for (;;) { switch (a) { case 0: break A; } } }
 ```
 

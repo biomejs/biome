@@ -1,0 +1,23 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-namespace-imports.ts
+---
+# Input
+```ts
+import * as A from "";
+export { A }
+const Inner = A.Inner;
+
+// With Import attributes
+import * as B from "" with { type: "json" };
+type BB = B;
+
+// No reference
+import * as C from "";
+
+import type * as D from "";
+export type { D };
+
+```
+
+

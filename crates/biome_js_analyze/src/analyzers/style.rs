@@ -3,6 +3,7 @@
 use biome_analyze::declare_group;
 
 pub(crate) mod no_comma_operator;
+pub(crate) mod no_default_export;
 pub(crate) mod no_implicit_boolean;
 pub(crate) mod no_inferrable_types;
 pub(crate) mod no_namespace;
@@ -14,6 +15,7 @@ pub(crate) mod no_useless_else;
 pub(crate) mod use_as_const_assertion;
 pub(crate) mod use_block_statements;
 pub(crate) mod use_collapsed_else_if;
+pub(crate) mod use_consistent_array_type;
 pub(crate) mod use_default_parameter_last;
 pub(crate) mod use_enum_initializers;
 pub(crate) mod use_exponentiation_operator;
@@ -32,6 +34,7 @@ declare_group! {
         name : "style" ,
         rules : [
             self :: no_comma_operator :: NoCommaOperator ,
+            self :: no_default_export :: NoDefaultExport ,
             self :: no_implicit_boolean :: NoImplicitBoolean ,
             self :: no_inferrable_types :: NoInferrableTypes ,
             self :: no_namespace :: NoNamespace ,
@@ -43,6 +46,7 @@ declare_group! {
             self :: use_as_const_assertion :: UseAsConstAssertion ,
             self :: use_block_statements :: UseBlockStatements ,
             self :: use_collapsed_else_if :: UseCollapsedElseIf ,
+            self :: use_consistent_array_type :: UseConsistentArrayType ,
             self :: use_default_parameter_last :: UseDefaultParameterLast ,
             self :: use_enum_initializers :: UseEnumInitializers ,
             self :: use_exponentiation_operator :: UseExponentiationOperator ,

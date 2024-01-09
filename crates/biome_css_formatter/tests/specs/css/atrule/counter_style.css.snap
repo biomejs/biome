@@ -1,0 +1,131 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/atrule/counter_style.css
+---
+
+# Input
+
+```css
+@counter-style identifier {
+    system: cyclic;
+    symbols: "\1F44D";
+    suffix: " ";
+}
+@counter-style identifier {
+system: cyclic;
+symbols: "\1F44D";
+suffix: " ";
+}
+@counter-style identifier{
+    system: cyclic;
+    symbols: "\1F44D";
+    suffix: " ";
+}
+@counter-style  identifier  {
+    system: cyclic;
+    symbols: "\1F44D";
+    suffix: " ";
+}
+@counter-style
+identifier
+{
+system
+:
+cyclic
+;
+symbols
+:
+"\1F44D"
+;
+suffix
+:
+" "
+;
+}
+
+@counter-style
+
+identifier
+
+{
+
+system
+
+:
+
+cyclic
+
+;
+
+symbols
+
+
+:
+
+"\1F44D"
+
+;
+
+suffix
+
+:
+
+" "
+
+;
+
+}
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+-----
+
+```css
+@counter-style identifier {
+	system: cyclic;
+	symbols: "\1F44D";
+	suffix: " ";
+}
+@counter-style identifier {
+	system: cyclic;
+	symbols: "\1F44D";
+	suffix: " ";
+}
+@counter-style identifier {
+	system: cyclic;
+	symbols: "\1F44D";
+	suffix: " ";
+}
+@counter-style identifier {
+	system: cyclic;
+	symbols: "\1F44D";
+	suffix: " ";
+}
+@counter-style identifier {
+	system: cyclic;
+	symbols: "\1F44D";
+	suffix: " ";
+}
+
+@counter-style identifier {
+	system: cyclic;
+
+	symbols: "\1F44D";
+
+	suffix: " ";
+}
+```
+
+

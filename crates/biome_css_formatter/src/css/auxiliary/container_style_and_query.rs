@@ -1,6 +1,7 @@
 use crate::prelude::*;
-use biome_css_syntax::CssContainerStyleAndQuery;
-use biome_rowan::AstNode;
+use biome_css_syntax::{CssContainerStyleAndQuery, CssContainerStyleAndQueryFields};
+use biome_formatter::write;
+
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatCssContainerStyleAndQuery;
 impl FormatNodeRule<CssContainerStyleAndQuery> for FormatCssContainerStyleAndQuery {
@@ -9,6 +10,21 @@ impl FormatNodeRule<CssContainerStyleAndQuery> for FormatCssContainerStyleAndQue
         node: &CssContainerStyleAndQuery,
         f: &mut CssFormatter,
     ) -> FormatResult<()> {
-        format_verbatim_node(node.syntax()).fmt(f)
+        let CssContainerStyleAndQueryFields {
+            left,
+            and_token,
+            right,
+        } = node.as_fields();
+
+        write!(
+            f,
+            [
+                left.format(),
+                space(),
+                and_token.format(),
+                space(),
+                right.format()
+            ]
+        )
     }
 }

@@ -3,87 +3,87 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.jsonc
 ---
 # Input
-```js
+```cjs
 ({ 0x1: 1, 1: 2 });
 ```
 
 # Input
-```js
+```cjs
 ({ 012: 1, 10: 2 });
 ```
 
 # Input
-```js
+```cjs
 ({ 0b1: 1, 1: 2 });
 ```
 
 # Input
-```js
+```cjs
 ({ 0o1: 1, 1: 2 });
 ```
 
 # Input
-```js
+```cjs
 ({ 1n: 1, 1: 2 });
 ```
 
 # Input
-```js
+```cjs
 ({ 1_0: 1, 10: 2 });
 ```
 
 # Input
-```js
+```cjs
 ({ a: 1, ['a']: 1 });
 ```
 
 # Input
-```js
+```cjs
 ({ a: 1, b: 1 });
 ```
 
 # Input
-```js
+```cjs
 ({ '': 1, ' ': 1 });
 ```
 
 # Input
-```js
+```cjs
 ({ 012: 1, 12: 1 });
 ```
 
 # Input
-```js
+```cjs
 ({ 1_0: 1, 1: 1 });
 ```
 
 # Input
-```js
+```cjs
 ({ a: 1, [a]: 1 });
 ```
 
 # Input
-```js
+```cjs
 ({ [a]: 1, [a]: 1 });
 ```
 
 # Input
-```js
+```cjs
 ({ get a() {}, set a(v) {} });
 ```
 
 # Input
-```js
+```cjs
 ({ a: 1, ...a });
 ```
 
 # Input
-```js
+```cjs
 ({ a: 1, b: { a: 1, b: 1 } });
 ```
 
 # Input
-```js
+```cjs
 var { a, a } = obj;
 ```
 

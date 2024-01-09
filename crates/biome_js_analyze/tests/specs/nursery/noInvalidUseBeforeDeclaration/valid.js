@@ -9,4 +9,4 @@ export { X }; const X = 1;
 
 let a; console.log(a);
 
-function h() { X; }; const X = 0;
+function h() { Y; }; const Y = 0;

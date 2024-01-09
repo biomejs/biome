@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: validGlobal.tsx
 ---
 # Input
-```js
+```tsx
 ReactDOM.render(<div />, document.body);
 function render1() {
     ReactDOM.render(<div />, document.body);

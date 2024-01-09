@@ -57,7 +57,7 @@ declare_rule! {
     /// export { TypeA } from "./mod.ts"
     /// ```
     pub(crate) UseExportType {
-        version: "next",
+        version: "1.5.0",
         name: "useExportType",
         recommended: true,
         fix_kind: FixKind::Safe,

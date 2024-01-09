@@ -1,0 +1,63 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/pseudo/pseudo_element_selector.css
+---
+
+# Input
+
+```css
+a::after {}
+
+::before {}
+
+video::cue(  b 
+
+) {}
+h1 
+video::cue(  b 
+
+) area {}
+
+video::cue-region(#scroll 
+> .div
+) {}
+
+::part(  active ) {}
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+-----
+
+```css
+a::after {
+}
+
+::before {
+}
+
+video::cue(b) {
+}
+h1 video::cue(b) area {
+}
+
+video::cue-region(#scroll > .div) {
+}
+
+::part(active) {
+}
+```
+
+

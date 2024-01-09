@@ -43,7 +43,7 @@ declare_rule! {
     /// ```
     ///
     pub(crate) UseForOf {
-        version: "next",
+        version: "1.5.0",
         name: "useForOf",
         recommended: false,
     }

@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: noChildrenPropValid.jsx
 ---
 # Input
-```js
+```jsx
 import { cloneElement } from "react";
 import React from "react";
 

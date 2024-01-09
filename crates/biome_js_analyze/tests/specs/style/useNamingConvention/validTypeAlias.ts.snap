@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: validTypeAlias.ts
 ---
 # Input
-```js
+```ts
 export type X = {}
 
 export type PascalCase = {}

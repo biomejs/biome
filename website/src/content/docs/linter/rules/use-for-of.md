@@ -1,5 +1,5 @@
 ---
-title: useForOf (since vnext)
+title: useForOf (since v1.5.0)
 ---
 
 **Diagnostic Category: `lint/nursery/useForOf`**

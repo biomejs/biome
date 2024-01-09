@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidEnum.ts
 ---
 # Input
-```js
+```ts
 enum specialStatus {}
 
 enum special_status {}

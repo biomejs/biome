@@ -29,7 +29,10 @@ pub fn create_analyzer_options(
     input_file: &Path,
     diagnostics: &mut Vec<String>,
 ) -> AnalyzerOptions {
-    let mut options = AnalyzerOptions::default();
+    let mut options = AnalyzerOptions {
+        configuration: Default::default(),
+        file_path: input_file.to_path_buf(),
+    };
     // We allow a test file to configure its rule using a special
     // file with the same name as the test but with extension ".options.json"
     // that configures that specific rule.
@@ -38,6 +41,7 @@ pub fn create_analyzer_options(
         let deserialized = biome_deserialize::json::deserialize_from_json_str::<Configuration>(
             json.as_str(),
             JsonParserOptions::default(),
+            "",
         );
         if deserialized.has_errors() {
             diagnostics.extend(
@@ -66,7 +70,7 @@ pub fn create_analyzer_options(
             };
             options = AnalyzerOptions {
                 configuration,
-                ..AnalyzerOptions::default()
+                ..options
             };
 
             Some(json)
@@ -206,9 +210,10 @@ pub fn write_analyzer_snapshot(
     input_code: &str,
     diagnostics: &[String],
     code_fixes: &[String],
+    markdown_language: &str,
 ) {
     writeln!(snapshot, "# Input").unwrap();
-    writeln!(snapshot, "```js").unwrap();
+    writeln!(snapshot, "```{markdown_language}").unwrap();
     writeln!(snapshot, "{}", input_code).unwrap();
     writeln!(snapshot, "```").unwrap();
     writeln!(snapshot).unwrap();

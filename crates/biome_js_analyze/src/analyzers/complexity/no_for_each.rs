@@ -1,7 +1,7 @@
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
-use biome_js_syntax::{AnyJsMemberExpression, JsCallExpression};
-use biome_rowan::AstNode;
+use biome_js_syntax::{AnyJsExpression, AnyJsMemberExpression, JsCallExpression};
+use biome_rowan::{AstNode, AstSeparatedList};
 
 declare_rule! {
     /// Prefer `for...of` statement instead of `Array.forEach`.
@@ -16,27 +16,38 @@ declare_rule! {
     ///
     /// - Debugging: `forEach` can make debugging more difficult, because it hides the iteration process.
     ///
+    /// ## Caveat
+    ///
+    /// We consider all objects with a method named `forEach` to be iterable.
+    /// This way, this rule applies to all objects with a method called `forEach`, not just `Array` instances.
+    ///
     /// ## Examples
     ///
     /// ### Invalid
     ///
     /// ```js,expect_diagnostic
-    /// els.forEach(el => {
-    ///   el
+    /// els.forEach((el) => {
+    ///   f(el);
     /// })
     /// ```
     ///
     /// ```js,expect_diagnostic
-    /// els['forEach'](el => {
-    ///   el
+    /// els["forEach"](el => {
+    ///   f(el);
     /// })
     /// ```
     ///
     /// ## Valid
     ///
     /// ```js
+    /// els.forEach((el, i) => {
+    ///   f(el, i)
+    /// })
+    /// ```
+    ///
+    /// ```js
     /// for (const el of els) {
-    ///   el
+    ///   f(el);
     /// }
     /// ```
     ///
@@ -57,20 +68,37 @@ impl Rule for NoForEach {
         let node = ctx.query();
         let member_expression =
             AnyJsMemberExpression::cast_ref(node.callee().ok()?.omit_parentheses().syntax())?;
-        (member_expression.member_name()?.text() == "forEach").then_some(())
+        if member_expression.member_name()?.text() != "forEach" {
+            return None;
+        }
+        // Extract first parameter and ensure we have no more than 2 parameters.
+        let [Some(first), _, None] = node.arguments().ok()?.get_arguments_by_index([0, 1, 2])
+        else {
+            return None;
+        };
+        // Report calls that use a callbacks with 0 or 1 parameter.
+        let parameter_count = match first.as_any_js_expression()? {
+            AnyJsExpression::JsArrowFunctionExpression(function) => {
+                function.parameters().ok()?.len()
+            }
+            AnyJsExpression::JsFunctionExpression(function) => {
+                function.parameters().ok()?.items().len()
+            }
+            _ => return None,
+        };
+        (parameter_count <= 1).then_some(())
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
-
         Some(RuleDiagnostic::new(
             rule_category!(),
             node.syntax().text_trimmed_range(),
             markup! {
-                "Prefer for...of instead of Array.forEach"
+                "Prefer "<Emphasis>"for...of"</Emphasis>" instead of "<Emphasis>"forEach"</Emphasis>"."
             },
         ).note(markup!{
-            <Emphasis>"forEach"</Emphasis>" could lead to performance issues when working with large arrays. When combined with functions like .filter or .map, this causes multiple iterations over the same type."
+            <Emphasis>"forEach"</Emphasis>" may lead to performance issues when working with large arrays. When combined with functions like "<Emphasis>"filter"</Emphasis>" or "<Emphasis>"map"</Emphasis>", this causes multiple iterations over the same type."
         }))
     }
 }

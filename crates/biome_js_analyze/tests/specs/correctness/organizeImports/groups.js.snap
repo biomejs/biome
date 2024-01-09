@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: groups.js
 ---
 # Input
-```js
+```jsx
 import uncle from "../uncle";
 import sibling from "./sibling";
 import express from "npm:express";

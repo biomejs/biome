@@ -7,7 +7,7 @@ mod traverse;
 use crate::cli_options::CliOptions;
 use crate::execute::traverse::traverse;
 use crate::{CliDiagnostic, CliSession};
-use biome_diagnostics::{category, Category, MAXIMUM_DISPLAYABLE_DIAGNOSTICS};
+use biome_diagnostics::{category, Category};
 use biome_fs::RomePath;
 use biome_service::workspace::{FeatureName, FixFileMode};
 use std::ffi::OsString;
@@ -117,7 +117,7 @@ impl Execution {
         Self {
             report_mode: ReportMode::default(),
             traversal_mode: mode,
-            max_diagnostics: MAXIMUM_DISPLAYABLE_DIAGNOSTICS,
+            max_diagnostics: 20,
         }
     }
 
@@ -137,7 +137,7 @@ impl Execution {
                     None
                 },
             },
-            max_diagnostics: MAXIMUM_DISPLAYABLE_DIAGNOSTICS,
+            max_diagnostics: 20,
         }
     }
 
@@ -146,7 +146,7 @@ impl Execution {
         Self {
             traversal_mode,
             report_mode,
-            max_diagnostics: MAXIMUM_DISPLAYABLE_DIAGNOSTICS,
+            max_diagnostics: 20,
         }
     }
 
@@ -257,19 +257,18 @@ pub(crate) fn execute_mode(
     cli_options: &CliOptions,
     paths: Vec<OsString>,
 ) -> Result<(), CliDiagnostic> {
-    if cli_options.max_diagnostics > MAXIMUM_DISPLAYABLE_DIAGNOSTICS {
-        return Err(CliDiagnostic::overflown_argument(
-            "--max-diagnostics",
-            MAXIMUM_DISPLAYABLE_DIAGNOSTICS,
-        ));
-    }
-
     mode.max_diagnostics = cli_options.max_diagnostics;
 
     // don't do any traversal if there's some content coming from stdin
     if let Some((path, content)) = mode.as_stdin_file() {
         let rome_path = RomePath::new(path);
-        std_in::run(session, &mode, rome_path, content.as_str())
+        std_in::run(
+            session,
+            &mode,
+            rome_path,
+            content.as_str(),
+            cli_options.verbose,
+        )
     } else if let TraversalMode::Migrate {
         write,
         configuration_file_path,

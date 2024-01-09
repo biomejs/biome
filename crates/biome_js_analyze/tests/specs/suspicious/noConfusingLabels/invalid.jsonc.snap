@@ -1,10 +1,9 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 96
 expression: invalid.jsonc
 ---
 # Input
-```js
+```cjs
 label: foo();
 ```
 
@@ -24,7 +23,7 @@ invalid.jsonc:1:1 lint/suspicious/noConfusingLabels ━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 A: const foo = 0;
 ```
 
@@ -44,7 +43,7 @@ invalid.jsonc:1:1 lint/suspicious/noConfusingLabels ━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 A: break A = 0;
 ```
 
@@ -64,7 +63,7 @@ invalid.jsonc:1:1 lint/suspicious/noConfusingLabels ━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 A: let foo = 0;
 ```
 
@@ -84,7 +83,7 @@ invalid.jsonc:1:1 lint/suspicious/noConfusingLabels ━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 A: if (a) { if (foo()) { break A; } bar(); };
 ```
 
@@ -104,7 +103,7 @@ invalid.jsonc:1:1 lint/suspicious/noConfusingLabels ━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 A: { if (foo()) { break A; } bar(); };
 ```
 
@@ -124,7 +123,7 @@ invalid.jsonc:1:1 lint/suspicious/noConfusingLabels ━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 A: { if (foo()) { break A; } bar(); };
 ```
 
@@ -144,7 +143,7 @@ invalid.jsonc:1:1 lint/suspicious/noConfusingLabels ━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 A: { if (foo()) { break A; } bar(); };
 ```
 
@@ -164,7 +163,7 @@ invalid.jsonc:1:1 lint/suspicious/noConfusingLabels ━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 A: switch (a) { case 0: break A; default: break; };
 ```
 
@@ -184,7 +183,7 @@ invalid.jsonc:1:1 lint/suspicious/noConfusingLabels ━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 A: switch (a) { case 0: break A; default: break; };
 ```
 

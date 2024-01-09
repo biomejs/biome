@@ -3,7 +3,7 @@ use crate::syntax::parse_error::expected_string;
 use crate::syntax::parse_string;
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, TextRange, T};
-use biome_parser::parse_recovery::ParseRecovery;
+use biome_parser::parse_recovery::ParseRecoveryTokenSet;
 use biome_parser::parsed_syntax::ParsedSyntax::Present;
 use biome_parser::prelude::ParsedSyntax::Absent;
 use biome_parser::prelude::*;
@@ -24,9 +24,10 @@ pub(crate) fn parse_charset_at_rule(p: &mut CssParser) -> ParsedSyntax {
 
     p.bump(T![charset]);
 
-    let kind = match parse_string(p).or_recover(
+    let kind = match parse_string(p).or_recover_with_token_set(
         p,
-        &ParseRecovery::new(CSS_BOGUS, CHARTSET_RECOVERY_SET).enable_recovery_on_line_break(),
+        &ParseRecoveryTokenSet::new(CSS_BOGUS, CHARTSET_RECOVERY_SET)
+            .enable_recovery_on_line_break(),
         expected_string,
     ) {
         Ok(encoding) if !encoding.kind(p).is_bogus() => {
@@ -52,7 +53,7 @@ fn eat_or_recover_close_token(p: &mut CssParser, encoding: CompletedMarker) -> b
     if p.eat(T![;]) {
         true
     } else {
-        if let Ok(m) = ParseRecovery::new(CSS_BOGUS, CHARTSET_RECOVERY_SET)
+        if let Ok(m) = ParseRecoveryTokenSet::new(CSS_BOGUS, CHARTSET_RECOVERY_SET)
             .enable_recovery_on_line_break()
             .recover(p)
         {

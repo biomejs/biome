@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsx
 ---
 # Input
-```js
+```jsx
 <input type="submit" accessKey="s" value="Submit" />;
 <button accessKey="n">Next</button>;
 <div accessKey="h" {...props} />;

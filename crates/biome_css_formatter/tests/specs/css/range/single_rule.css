@@ -1,0 +1,4 @@
+div{color:blue;}
+<<<ROME_RANGE_START>>>div{color:green;}<<<ROME_RANGE_END>>>
+
+div{color:red;}

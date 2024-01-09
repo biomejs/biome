@@ -9,7 +9,7 @@ use std::path::Path;
 const TEST_CONTENTS: &str = "debugger;";
 
 #[test]
-fn logs_the_appropriate_messages_according_to_set_diagonstics_level() {
+fn logs_the_appropriate_messages_according_to_set_diagnostics_level() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
     let file_path = Path::new("biome.json");
@@ -63,7 +63,7 @@ fn logs_the_appropriate_messages_according_to_set_diagonstics_level() {
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "logs_the_appropriate_messages_according_to_set_diagonstics_level",
+        "logs_the_appropriate_messages_according_to_set_diagnostics_level",
         fs,
         console,
         result,

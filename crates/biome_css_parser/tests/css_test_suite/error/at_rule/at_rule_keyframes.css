@@ -1,0 +1,75 @@
+@keyframes {
+	from {
+		transform: translateX(0%);
+	}
+
+	to {
+		transform: translateX(100%);
+	}
+}
+
+@keyframes slidein {
+	{
+		transform: translateX(0%);
+	}
+}
+
+@keyframes slidein {
+	from to {
+		transform: translateX(100%);
+	}
+}
+
+@keyframes slidein {
+	100vh {
+		transform: translateX(0%);
+	}
+}
+
+@keyframes slidein {
+	from {
+		transform: translateX(0%);
+
+
+	to {
+		transform: translateX(100%);
+	}
+}
+
+@keyframes slidein {
+	from
+		transform: translateX(0%);
+	}
+
+	to {
+		transform: translateX(100%);
+	}
+}
+
+@keyframes slidein {
+	from {
+		transform: translateX(0%);
+	}
+
+	to
+		transform: translateX(100%);
+	}
+}
+
+@keyframes slidein {
+	from {
+		transform: translateX(0%);
+	}
+
+	to {
+		transform: translateX(100%);
+	}
+
+
+@keyframes inherit { }
+@keyframes initial { }
+@keyframes unset { }
+@keyframes revert { }
+@keyframes revert-layer { }
+
+@keyframes slidein

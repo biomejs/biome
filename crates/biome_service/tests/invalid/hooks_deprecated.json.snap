@@ -1,0 +1,24 @@
+---
+source: crates/biome_service/tests/spec_tests.rs
+expression: hooks_deprecated.json
+---
+hooks_deprecated.json:9:16 deserialize  DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The property hooks is deprecated.
+  
+     7 │ 					"level": "error",
+     8 │ 					"options": {
+   > 9 │ 						"hooks": [
+       │ 						         ^
+  > 10 │ 							{
+        ...
+  > 15 │ 							{ "name": "useQuery", "closureIndex": 1, "dependenciesIndex": 0 }
+  > 16 │ 						]
+       │ 						^
+    17 │ 					}
+    18 │ 				}
+  
+  i useHookAtTopLevel now uses the React hook naming convention to determine hook calls.
+  
+
+

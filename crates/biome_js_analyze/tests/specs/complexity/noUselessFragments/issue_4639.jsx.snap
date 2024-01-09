@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: issue_4639.jsx
 ---
 # Input
-```js
+```jsx
 export function SomeComponent() {
   return <div x-some-prop={<>Foo</>} />;
 }

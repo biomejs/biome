@@ -13,7 +13,9 @@ use biome_css_formatter::context::CssFormatOptions;
 use biome_css_formatter::{can_format_css_yet, format_node};
 use biome_css_parser::CssParserOptions;
 use biome_css_syntax::{CssFileSource, CssLanguage, CssRoot, CssSyntaxNode};
-use biome_formatter::{FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed};
+use biome_formatter::{
+    FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, QuoteStyle,
+};
 use biome_fs::RomePath;
 use biome_parser::AnyParse;
 use biome_rowan::{FileSource, NodeCache};
@@ -26,6 +28,7 @@ pub struct CssFormatterSettings {
     pub line_width: Option<LineWidth>,
     pub indent_width: Option<IndentWidth>,
     pub indent_style: Option<IndentStyle>,
+    pub quote_style: Option<QuoteStyle>,
     pub enabled: Option<bool>,
 }
 
@@ -72,7 +75,8 @@ impl Language for CssLanguage {
             CssFormatOptions::new(path.as_path().try_into().unwrap_or_default())
                 .with_indent_style(indent_style)
                 .with_indent_width(indent_width)
-                .with_line_width(line_width),
+                .with_line_width(line_width)
+                .with_quote_style(language.quote_style.unwrap_or_default()),
         )
     }
 }

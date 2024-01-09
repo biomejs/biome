@@ -157,6 +157,7 @@ fn redact_snapshot(input: &str) -> Option<Cow<'_, str>> {
     }
 
     output = replace_temp_dir(output);
+    output = replace_biome_dir(output);
 
     // Ref: https://docs.github.com/actions/learn-github-actions/variables#default-environment-variables
     let is_github = std::env::var("GITHUB_ACTIONS")
@@ -239,6 +240,46 @@ fn replace_temp_dir(input: Cow<str>) -> Cow<str> {
 
         result.push_str(before);
         result.push_str("<TEMP_DIR>");
+
+        let after = after.split_at(temp_dir.len()).1;
+        let header_line = after.lines().next().unwrap();
+
+        match header_line.split_once('\u{2501}') {
+            Some((between_temp_and_line, _)) => {
+                // Diagnostic header line, normalize the horizontal line
+                result.push_str(between_temp_and_line);
+                result.push_str(&"\u{2501}".repeat(20));
+                rest = after.split_at(header_line.len()).1;
+            }
+            None => {
+                // Not a header line, only replace tempdir
+                rest = after;
+            }
+        }
+    }
+
+    if result.is_empty() {
+        input
+    } else {
+        result.push_str(rest);
+        Cow::Owned(result)
+    }
+}
+
+/// Replace the path to the temporary directory with "<TEMP_DIR>"
+/// And normalizes the count of `-` at the end of the diagnostic
+fn replace_biome_dir(input: Cow<str>) -> Cow<str> {
+    let mut result = String::new();
+    let mut rest = input.as_ref();
+
+    let temp_dir = biome_fs::ensure_cache_dir().display().to_string();
+    let temp_dir = temp_dir.trim_end_matches(MAIN_SEPARATOR);
+
+    while let Some(index) = rest.find(temp_dir) {
+        let (before, after) = rest.split_at(index);
+
+        result.push_str(before);
+        result.push_str("<BIOME_DIR>");
 
         let after = after.split_at(temp_dir.len()).1;
         let header_line = after.lines().next().unwrap();
@@ -401,7 +442,7 @@ pub fn assert_file_contents(fs: &MemoryFileSystem, path: &Path, expected_content
     assert_eq!(
         content,
         expected_content,
-        "file {} doesn't match the expected content",
+        "file {} doesn't match the expected content (right)",
         path.display()
     );
 }

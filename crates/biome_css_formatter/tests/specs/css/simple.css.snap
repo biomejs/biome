@@ -1,0 +1,45 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/simple.css
+---
+
+# Input
+
+```css
+html {}
+
+div { color: white;}
+
+div { color: white; background-color: red;}
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+-----
+
+```css
+html {
+}
+
+div {
+	color: white;
+}
+
+div {
+	color: white;
+	background-color: red;
+}
+```
+
+

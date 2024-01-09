@@ -1,0 +1,34 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-namesapce-imports.ts
+---
+# Input
+```ts
+import * as A from "";
+export { type A }
+type AA = typeof A.Class;
+let a: A.Type1;
+
+```
+
+# Diagnostics
+```
+invalid-namesapce-imports.ts:1:1 lint/nursery/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! All these imports are only used as types.
+  
+  > 1 │ import * as A from "";
+      │ ^^^^^^^^^^^^^^^^^^^^^^
+    2 │ export { type A }
+    3 │ type AA = typeof A.Class;
+  
+  i Importing the types with import type ensures that they are removed by the transpilers and avoids loading unnecessary modules.
+  
+  i Safe fix: Use import type.
+  
+    1 │ import·type·*·as·A·from·"";
+      │        +++++               
+
+```
+
+

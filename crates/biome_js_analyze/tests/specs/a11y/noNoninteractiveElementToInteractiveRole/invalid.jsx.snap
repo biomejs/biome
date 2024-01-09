@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsx
 ---
 # Input
-```js
+```jsx
 let a = <h1 role="checkbox"></h1>;
 let a = <h1 role="radio"></h1>;
 let a = <h1 role="button"></h1>;

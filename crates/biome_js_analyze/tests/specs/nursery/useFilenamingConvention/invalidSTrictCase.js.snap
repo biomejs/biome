@@ -1,0 +1,22 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidSTrictCase.js
+---
+# Input
+```jsx
+
+```
+
+# Diagnostics
+```
+invalidSTrictCase.js lint/nursery/useFilenamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The filename is in camelCase, however, two consecutive uppercase characters are not allowed because `strictCase` is set to `true`.
+  
+  i If you want to use consecutive uppercase characters in camelCase then consider setting `strictCase` option to `false`.
+     Check rule options for more information.
+  
+
+```
+
+

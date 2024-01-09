@@ -1,0 +1,386 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```jsx
+var foo = "foo";
+eval(foo);
+
+eval("foo");
+
+(0, eval)("foo");
+
+(0, window.eval)("foo");
+
+(0, window["eval"])("foo");
+
+var EVAL = eval;
+EVAL("foo");
+
+var EVAL = this.eval;
+EVAL("foo");
+
+("use strict");
+var EVAL = this.eval;
+EVAL("foo");
+
+() => {
+	this.eval("foo");
+};
+
+() => {
+	"use strict";
+	this.eval("foo");
+};
+
+("use strict");
+() => {
+	this.eval("foo");
+};
+
+() => {
+	"use strict";
+	() => {
+		this.eval("foo");
+	};
+};
+
+(function (exe) {
+	exe("foo");
+})(eval);
+
+window.eval("foo");
+
+window.window.eval("foo");
+
+window.window["eval"]("foo");
+
+this.eval("foo");
+
+("use strict");
+this.eval("foo");
+
+function foo() {
+	this.eval("foo");
+}
+
+var EVAL = globalThis.eval;
+EVAL("foo");
+
+globalThis.eval("foo");
+
+globalThis.globalThis.eval("foo");
+
+globalThis.globalThis["eval"]("foo");
+
+(0, globalThis.eval)("foo");
+
+(0, globalThis["eval"])("foo");
+
+```
+
+# Diagnostics
+```
+invalid.js:2:1 lint/nursery/noGlobalEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! eval() exposes to security risks and performance issues.
+  
+    1 │ var foo = "foo";
+  > 2 │ eval(foo);
+      │ ^^^^
+    3 │ 
+    4 │ eval("foo");
+  
+  i See the MDN web docs for more details.
+  
+  i Refactor the code so that it doesn't need to call eval().
+  
+
+```
+
+```
+invalid.js:4:1 lint/nursery/noGlobalEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! eval() exposes to security risks and performance issues.
+  
+    2 │ eval(foo);
+    3 │ 
+  > 4 │ eval("foo");
+      │ ^^^^
+    5 │ 
+    6 │ (0, eval)("foo");
+  
+  i See the MDN web docs for more details.
+  
+  i Refactor the code so that it doesn't need to call eval().
+  
+
+```
+
+```
+invalid.js:6:5 lint/nursery/noGlobalEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! eval() exposes to security risks and performance issues.
+  
+    4 │ eval("foo");
+    5 │ 
+  > 6 │ (0, eval)("foo");
+      │     ^^^^
+    7 │ 
+    8 │ (0, window.eval)("foo");
+  
+  i See the MDN web docs for more details.
+  
+  i Refactor the code so that it doesn't need to call eval().
+  
+
+```
+
+```
+invalid.js:8:5 lint/nursery/noGlobalEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! eval() exposes to security risks and performance issues.
+  
+     6 │ (0, eval)("foo");
+     7 │ 
+   > 8 │ (0, window.eval)("foo");
+       │     ^^^^^^^^^^^
+     9 │ 
+    10 │ (0, window["eval"])("foo");
+  
+  i See the MDN web docs for more details.
+  
+  i Refactor the code so that it doesn't need to call eval().
+  
+
+```
+
+```
+invalid.js:10:5 lint/nursery/noGlobalEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! eval() exposes to security risks and performance issues.
+  
+     8 │ (0, window.eval)("foo");
+     9 │ 
+  > 10 │ (0, window["eval"])("foo");
+       │     ^^^^^^^^^^^^^^
+    11 │ 
+    12 │ var EVAL = eval;
+  
+  i See the MDN web docs for more details.
+  
+  i Refactor the code so that it doesn't need to call eval().
+  
+
+```
+
+```
+invalid.js:12:12 lint/nursery/noGlobalEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! eval() exposes to security risks and performance issues.
+  
+    10 │ (0, window["eval"])("foo");
+    11 │ 
+  > 12 │ var EVAL = eval;
+       │            ^^^^
+    13 │ EVAL("foo");
+    14 │ 
+  
+  i See the MDN web docs for more details.
+  
+  i Refactor the code so that it doesn't need to call eval().
+  
+
+```
+
+```
+invalid.js:45:4 lint/nursery/noGlobalEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! eval() exposes to security risks and performance issues.
+  
+    43 │ (function (exe) {
+    44 │ 	exe("foo");
+  > 45 │ })(eval);
+       │    ^^^^
+    46 │ 
+    47 │ window.eval("foo");
+  
+  i See the MDN web docs for more details.
+  
+  i Refactor the code so that it doesn't need to call eval().
+  
+
+```
+
+```
+invalid.js:47:1 lint/nursery/noGlobalEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! eval() exposes to security risks and performance issues.
+  
+    45 │ })(eval);
+    46 │ 
+  > 47 │ window.eval("foo");
+       │ ^^^^^^^^^^^
+    48 │ 
+    49 │ window.window.eval("foo");
+  
+  i See the MDN web docs for more details.
+  
+  i Refactor the code so that it doesn't need to call eval().
+  
+
+```
+
+```
+invalid.js:49:1 lint/nursery/noGlobalEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! eval() exposes to security risks and performance issues.
+  
+    47 │ window.eval("foo");
+    48 │ 
+  > 49 │ window.window.eval("foo");
+       │ ^^^^^^^^^^^^^^^^^^
+    50 │ 
+    51 │ window.window["eval"]("foo");
+  
+  i See the MDN web docs for more details.
+  
+  i Refactor the code so that it doesn't need to call eval().
+  
+
+```
+
+```
+invalid.js:51:1 lint/nursery/noGlobalEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! eval() exposes to security risks and performance issues.
+  
+    49 │ window.window.eval("foo");
+    50 │ 
+  > 51 │ window.window["eval"]("foo");
+       │ ^^^^^^^^^^^^^^^^^^^^^
+    52 │ 
+    53 │ this.eval("foo");
+  
+  i See the MDN web docs for more details.
+  
+  i Refactor the code so that it doesn't need to call eval().
+  
+
+```
+
+```
+invalid.js:62:12 lint/nursery/noGlobalEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! eval() exposes to security risks and performance issues.
+  
+    60 │ }
+    61 │ 
+  > 62 │ var EVAL = globalThis.eval;
+       │            ^^^^^^^^^^^^^^^
+    63 │ EVAL("foo");
+    64 │ 
+  
+  i See the MDN web docs for more details.
+  
+  i Refactor the code so that it doesn't need to call eval().
+  
+
+```
+
+```
+invalid.js:65:1 lint/nursery/noGlobalEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! eval() exposes to security risks and performance issues.
+  
+    63 │ EVAL("foo");
+    64 │ 
+  > 65 │ globalThis.eval("foo");
+       │ ^^^^^^^^^^^^^^^
+    66 │ 
+    67 │ globalThis.globalThis.eval("foo");
+  
+  i See the MDN web docs for more details.
+  
+  i Refactor the code so that it doesn't need to call eval().
+  
+
+```
+
+```
+invalid.js:67:1 lint/nursery/noGlobalEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! eval() exposes to security risks and performance issues.
+  
+    65 │ globalThis.eval("foo");
+    66 │ 
+  > 67 │ globalThis.globalThis.eval("foo");
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    68 │ 
+    69 │ globalThis.globalThis["eval"]("foo");
+  
+  i See the MDN web docs for more details.
+  
+  i Refactor the code so that it doesn't need to call eval().
+  
+
+```
+
+```
+invalid.js:69:1 lint/nursery/noGlobalEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! eval() exposes to security risks and performance issues.
+  
+    67 │ globalThis.globalThis.eval("foo");
+    68 │ 
+  > 69 │ globalThis.globalThis["eval"]("foo");
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    70 │ 
+    71 │ (0, globalThis.eval)("foo");
+  
+  i See the MDN web docs for more details.
+  
+  i Refactor the code so that it doesn't need to call eval().
+  
+
+```
+
+```
+invalid.js:71:5 lint/nursery/noGlobalEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! eval() exposes to security risks and performance issues.
+  
+    69 │ globalThis.globalThis["eval"]("foo");
+    70 │ 
+  > 71 │ (0, globalThis.eval)("foo");
+       │     ^^^^^^^^^^^^^^^
+    72 │ 
+    73 │ (0, globalThis["eval"])("foo");
+  
+  i See the MDN web docs for more details.
+  
+  i Refactor the code so that it doesn't need to call eval().
+  
+
+```
+
+```
+invalid.js:73:5 lint/nursery/noGlobalEval ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! eval() exposes to security risks and performance issues.
+  
+    71 │ (0, globalThis.eval)("foo");
+    72 │ 
+  > 73 │ (0, globalThis["eval"])("foo");
+       │     ^^^^^^^^^^^^^^^^^^
+    74 │ 
+  
+  i See the MDN web docs for more details.
+  
+  i Refactor the code so that it doesn't need to call eval().
+  
+
+```
+
+

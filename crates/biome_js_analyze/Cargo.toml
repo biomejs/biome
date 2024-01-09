@@ -8,32 +8,31 @@ keywords.workspace   = true
 license.workspace    = true
 name                 = "biome_js_analyze"
 repository.workspace = true
-version              = "0.3.1"
+version              = "0.4.0"
 
 [dependencies]
-biome_analyze          = { workspace = true }
-biome_aria             = { workspace = true }
-biome_console          = { workspace = true }
-biome_control_flow     = { workspace = true }
-biome_deserialize      = { workspace = true }
-biome_diagnostics      = { workspace = true }
-biome_js_factory       = { workspace = true }
-biome_js_semantic      = { workspace = true }
-biome_js_syntax        = { workspace = true }
-biome_js_unicode_table = { workspace = true }
-biome_json_factory     = { workspace = true }
-biome_json_syntax      = { workspace = true }
-biome_rowan            = { workspace = true }
-bpaf.workspace         = true
-lazy_static            = { workspace = true }
-log                    = "0.4.20"
-natord                 = "1.0.9"
-roaring                = "0.10.1"
-rustc-hash             = { workspace = true }
-schemars               = { workspace = true, optional = true }
-serde                  = { workspace = true, features = ["derive"] }
-serde_json             = { workspace = true }
-smallvec               = { workspace = true }
+biome_analyze       = { workspace = true }
+biome_aria          = { workspace = true }
+biome_console       = { workspace = true }
+biome_control_flow  = { workspace = true }
+biome_deserialize   = { workspace = true }
+biome_diagnostics   = { workspace = true }
+biome_js_factory    = { workspace = true }
+biome_js_semantic   = { workspace = true }
+biome_js_syntax     = { workspace = true }
+biome_json_factory  = { workspace = true }
+biome_json_syntax   = { workspace = true }
+biome_rowan         = { workspace = true }
+biome_unicode_table = { workspace = true }
+lazy_static         = { workspace = true }
+log                 = "0.4.20"
+natord              = "1.0.9"
+roaring             = "0.10.1"
+rustc-hash          = { workspace = true }
+schemars            = { workspace = true, optional = true }
+serde               = { workspace = true, features = ["derive"] }
+serde_json          = { workspace = true }
+smallvec            = { workspace = true }
 
 [dev-dependencies]
 biome_js_parser  = { path = "../biome_js_parser", features = ["tests"] }

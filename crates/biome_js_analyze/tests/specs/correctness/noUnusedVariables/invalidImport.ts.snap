@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidImport.ts
 ---
 # Input
-```js
+```ts
 import A from 'A';
 import { B } from 'b';
 import c2 = c1;

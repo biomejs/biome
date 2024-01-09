@@ -1,4 +1,6 @@
 @container name  (width <= 500px) {  }
+@container name  (width <= 500px) or (width <= 500px) or (width <= 500px) or (width <= 500px)  {  }
+@container name  (width <= 500px) and (width <= 500px) and (width <= 500px) and (width <= 500px)  {  }
 @container name  (width <= 500px) and ((width >= 600px) or (inline-width >= 300em)) {  }
 @container name  (width <= 500px) and ((width >= 600px) or (not (inline-width >= 300em))) {  }
 @container name  (width <= 500px) and ((width >= 600px) or (not (inline-width >= 300em))) and (width <= 500px) {  }
@@ -12,3 +14,11 @@
 @container name style((not (--b: red)) or ((not (--c: green)) and (background: red))) {  }
 @container name style(not (not (--b: red))) {  }
 @container name (width <= 500px) and  style((not (--b: red)) or ((not (--c: green)) and (background: red))) {  }
+@container name  (width <= 500px)  {
+	#inner {
+		background-color: skyblue;
+	}
+	div {
+		background-color: skyblue;
+	}
+}

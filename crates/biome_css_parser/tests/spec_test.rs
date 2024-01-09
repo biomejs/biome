@@ -134,8 +134,12 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 #[test]
 pub fn quick_test() {
     let code = r#"
-    @media (600px < height), not all and not (600px < height) {}
+
+
+@namespace url(http://www.w3.org/1999/xhtml);
+
     "#;
+
     let root = parse_css(
         code,
         CssParserOptions::default().allow_wrong_line_comments(),

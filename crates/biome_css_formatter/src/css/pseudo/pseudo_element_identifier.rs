@@ -1,6 +1,7 @@
 use crate::prelude::*;
-use biome_css_syntax::CssPseudoElementIdentifier;
-use biome_rowan::AstNode;
+use biome_css_syntax::{CssPseudoElementIdentifier, CssPseudoElementIdentifierFields};
+use biome_formatter::write;
+
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatCssPseudoElementIdentifier;
 impl FormatNodeRule<CssPseudoElementIdentifier> for FormatCssPseudoElementIdentifier {
@@ -9,6 +10,8 @@ impl FormatNodeRule<CssPseudoElementIdentifier> for FormatCssPseudoElementIdenti
         node: &CssPseudoElementIdentifier,
         f: &mut CssFormatter,
     ) -> FormatResult<()> {
-        format_verbatim_node(node.syntax()).fmt(f)
+        let CssPseudoElementIdentifierFields { name } = node.as_fields();
+
+        write!(f, [name.format()])
     }
 }
