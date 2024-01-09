@@ -141,27 +141,14 @@ impl Matcher {
 mod test {
     use crate::matcher::Matcher;
     use ignore::gitignore::GitignoreBuilder;
-    use std::env;
     use std::path::Path;
 
     #[test]
     fn matches() {
-        let current = env::current_dir().unwrap();
-        let dir = format!("{}/**/*.rs", current.display());
-        let ignore = Matcher::try_from(dir.as_str()).unwrap();
-        let path = env::current_dir().unwrap().join("src/workspace.rs");
-        let result = ignore.matches_path(path.as_path());
-
-        assert!(result);
-    }
-
-    #[test]
-    fn matches_path() {
-        let current = env::current_dir().unwrap();
-        let dir = format!("{}/**/*.rs", current.display());
-        let ignore = Matcher::try_from(dir.as_str()).unwrap();
-        let path = env::current_dir().unwrap().join("src/workspace.rs");
-        let result = ignore.matches_path(path.as_path());
+        let dir = "src/**/*.rs";
+        let ignore = Matcher::try_from(dir).unwrap();
+        let path = Path::new("src/workspace.rs");
+        let result = ignore.matches_path(path);
 
         assert!(result);
     }
@@ -180,12 +167,12 @@ mod test {
                 .unwrap(),
         );
 
-        let path = env::current_dir().unwrap().join("tests").join("invalid");
+        let path = Path::new("tests").join("invalid");
         let result = ignore.matches_path(path.as_path());
 
         assert!(!result);
 
-        let path = env::current_dir().unwrap().join("tests").join("valid");
+        let path = Path::new("tests").join("valid");
         let result = ignore.matches_path(path.as_path());
 
         assert!(result);
@@ -193,19 +180,17 @@ mod test {
 
     #[test]
     fn matches_single_path() {
-        let dir = env::current_dir().unwrap().join("src/workspace.rs");
+        let dir = Path::new("src/workspace.rs");
         let ignore = Matcher::try_from(dir.to_str().unwrap()).unwrap();
-        let path = env::current_dir().unwrap().join("src/workspace.rs");
-        let result = ignore.matches_path(path.as_path());
+        let path = Path::new("src/workspace.rs");
+        let result = ignore.matches_path(path);
 
         assert!(result);
     }
 
     #[test]
     fn matches_single_path_2() {
-        let dir = env::current_dir().unwrap().join("./test/**/*.rs");
         let ignore = Matcher::try_from("./test/**/*.rs").unwrap();
-        let path = env::current_dir().unwrap().join("test/workspace.rs");
         let result = ignore.matches_path(Path::new("test/workspace.rs"));
 
         assert!(result);
