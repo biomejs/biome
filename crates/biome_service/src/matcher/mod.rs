@@ -123,7 +123,7 @@ impl Matcher {
                     .as_ref()
                     .map(|ignore| {
                         ignore
-                            .matched_path_or_any_parents(source_as_string, source.is_dir())
+                            .matched(source_as_string, source.is_dir())
                             .is_ignore()
                     })
                     .unwrap_or_default();
