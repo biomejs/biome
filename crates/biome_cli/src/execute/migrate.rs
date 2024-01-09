@@ -1,6 +1,7 @@
 use crate::execute::diagnostics::{ContentDiffAdvice, MigrateDiffDiagnostic};
 use crate::{CliDiagnostic, CliSession};
 use biome_console::{markup, ConsoleExt};
+use biome_diagnostics::Diagnostic;
 use biome_diagnostics::{category, PrintDiagnostic};
 use biome_fs::{FileSystemExt, OpenOptions};
 use biome_json_parser::JsonParserOptions;
@@ -112,9 +113,11 @@ pub(crate) fn run(
                     },
                 }
             };
-            console.error(markup! {
-                {if verbose { PrintDiagnostic::verbose(&diagnostic) } else { PrintDiagnostic::simple(&diagnostic) }}
-            });
+            if diagnostic.tags().is_verbose() && verbose {
+                console.error(markup! {{PrintDiagnostic::verbose(&diagnostic)}})
+            } else {
+                console.error(markup! {{PrintDiagnostic::simple(&diagnostic)}})
+            }
             console.log(markup! {
                 "Run the command "<Emphasis>"biome migrate --write"</Emphasis>" to apply the changes."
             })

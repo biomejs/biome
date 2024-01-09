@@ -1427,6 +1427,37 @@ fn unsupported_file() {
 }
 
 #[test]
+fn unsupported_file_verbose() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Path::new("check.txt");
+    fs.insert(file_path.into(), LINT_ERROR.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("lint"),
+                "--verbose",
+                file_path.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "unsupported_file_verbose",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn suppression_syntax_error() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
