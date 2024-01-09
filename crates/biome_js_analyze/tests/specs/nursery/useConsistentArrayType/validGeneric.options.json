@@ -1,7 +1,7 @@
 {
 	"linter": {
 		"rules": {
-			"style": {
+			"nursery": {
 				"useConsistentArrayType": {
 					"level": "error",
 					"options": {

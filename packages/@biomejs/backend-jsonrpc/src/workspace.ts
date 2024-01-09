@@ -914,6 +914,10 @@ export interface Nursery {
 	 */
 	useAwait?: RuleConfiguration;
 	/**
+	 * Require consistently using either T[] or Array<T>
+	 */
+	useConsistentArrayType?: RuleConfiguration;
+	/**
 	 * Promotes the use of export type for types.
 	 */
 	useExportType?: RuleConfiguration;
@@ -1076,10 +1080,6 @@ export interface Style {
 	 * Enforce using else if instead of nested if in else clauses.
 	 */
 	useCollapsedElseIf?: RuleConfiguration;
-	/**
-	 * Require consistently using either T[] or Array<T>
-	 */
-	useConsistentArrayType?: RuleConfiguration;
 	/**
 	 * Require const declarations for variables that are never reassigned after declared.
 	 */
@@ -1679,6 +1679,7 @@ export type Category =
 	| "lint/nursery/noUselessTernary"
 	| "lint/nursery/useAwait"
 	| "lint/nursery/useBiomeSuppressionComment"
+	| "lint/nursery/useConsistentArrayType"
 	| "lint/nursery/useExportType"
 	| "lint/nursery/useFilenamingConvention"
 	| "lint/nursery/useForOf"
@@ -1710,7 +1711,6 @@ export type Category =
 	| "lint/style/useAsConstAssertion"
 	| "lint/style/useBlockStatements"
 	| "lint/style/useCollapsedElseIf"
-	| "lint/style/useConsistentArrayType"
 	| "lint/style/useConst"
 	| "lint/style/useDefaultParameterLast"
 	| "lint/style/useEnumInitializers"
