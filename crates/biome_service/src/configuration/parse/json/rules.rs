@@ -1009,6 +1009,13 @@ impl Deserializable for Nursery {
                             result.use_await =
                                 Deserializable::deserialize(&value, "useAwait", diagnostics);
                         }
+                        "useConsistentArrayType" => {
+                            result.use_consistent_array_type = Deserializable::deserialize(
+                                &value,
+                                "useConsistentArrayType",
+                                diagnostics,
+                            );
+                        }
                         "useExportType" => {
                             result.use_export_type =
                                 Deserializable::deserialize(&value, "useExportType", diagnostics);
@@ -1084,6 +1091,7 @@ impl Deserializable for Nursery {
                                     "noUselessLoneBlockStatements",
                                     "noUselessTernary",
                                     "useAwait",
+                                    "useConsistentArrayType",
                                     "useExportType",
                                     "useFilenamingConvention",
                                     "useForOf",
@@ -1396,13 +1404,6 @@ impl Deserializable for Style {
                                 diagnostics,
                             );
                         }
-                        "useConsistentArrayType" => {
-                            result.use_consistent_array_type = Deserializable::deserialize(
-                                &value,
-                                "useConsistentArrayType",
-                                diagnostics,
-                            );
-                        }
                         "useConst" => {
                             result.use_const =
                                 Deserializable::deserialize(&value, "useConst", diagnostics);
@@ -1524,7 +1525,6 @@ impl Deserializable for Style {
                                     "useAsConstAssertion",
                                     "useBlockStatements",
                                     "useCollapsedElseIf",
-                                    "useConsistentArrayType",
                                     "useConst",
                                     "useDefaultParameterLast",
                                     "useEnumInitializers",
