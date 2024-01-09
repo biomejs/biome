@@ -659,7 +659,8 @@ fn handle_function_comment(comment: DecoratedComment<JsLanguage>) -> CommentPlac
     // Make line comments between the `)` token and the function body leading comments
     // of the first statement or dangling comments of the body.
     // ```javascript
-    // function test() // comment {
+    // function test() // comment
+    // {
     //  console.log("Hy");
     // }
     // ```
