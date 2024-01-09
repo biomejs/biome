@@ -102,6 +102,9 @@ pub(crate) fn check(
     if let Some(mut configuration) = configuration {
         if let Some(linter) = configuration.linter.as_mut() {
             // Don't overwrite rules from the CLI configuration.
+            // Otherwise, rules that are disabled in the config file might
+            // become re-enabled due to the defaults included in the CLI
+            // configuration.
             linter.rules = None;
         }
         fs_configuration.merge_with(configuration);
