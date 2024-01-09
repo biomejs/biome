@@ -100,7 +100,7 @@ impl CommentStyle for JsCommentStyle {
     ) -> CommentPlacement<Self::Language> {
         match comment.text_position() {
             CommentTextPosition::EndOfLine => handle_typecast_comment(comment)
-                .or_else(handle_function_declaration_comment)
+                .or_else(handle_function_comment)
                 .or_else(handle_conditional_comment)
                 .or_else(handle_if_statement_comment)
                 .or_else(handle_while_comment)
@@ -119,7 +119,7 @@ impl CommentStyle for JsCommentStyle {
                 .or_else(handle_after_arrow_fat_arrow_comment)
                 .or_else(handle_import_export_specifier_comment),
             CommentTextPosition::OwnLine => handle_member_expression_comment(comment)
-                .or_else(handle_function_declaration_comment)
+                .or_else(handle_function_comment)
                 .or_else(handle_if_statement_comment)
                 .or_else(handle_while_comment)
                 .or_else(handle_try_comment)
@@ -641,9 +641,7 @@ fn handle_member_expression_comment(
     }
 }
 
-fn handle_function_declaration_comment(
-    comment: DecoratedComment<JsLanguage>,
-) -> CommentPlacement<JsLanguage> {
+fn handle_function_comment(comment: DecoratedComment<JsLanguage>) -> CommentPlacement<JsLanguage> {
     if !matches!(
         comment.enclosing_node().kind(),
         JsSyntaxKind::JS_FUNCTION_DECLARATION
