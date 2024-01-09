@@ -877,7 +877,10 @@ pub fn to_matcher(
     if let Some(string_set) = string_set {
         for pattern in string_set.iter() {
             git_builder
-                .add_line(working_directory.clone(), pattern)
+                .add_line(
+                    working_directory.clone(),
+                    pattern.strip_prefix("./").unwrap_or(pattern),
+                )
                 .map_err(|error| {
                     WorkspaceError::Configuration(
                         ConfigurationDiagnostic::new_invalid_ignore_pattern(

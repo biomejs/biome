@@ -21,12 +21,17 @@ impl TryFrom<&str> for Matcher {
 
     fn try_from(value: &str) -> Result<Self, Self::Error> {
         let mut builder = GitignoreBuilder::new("");
-        builder.add_line(None, value).map_err(|error| {
-            WorkspaceError::Configuration(ConfigurationDiagnostic::new_invalid_ignore_pattern(
-                value.to_string(),
-                error.to_string(),
-            ))
-        })?;
+        builder
+            .add_line(
+                Some(PathBuf::new()),
+                value.strip_prefix("./").unwrap_or(value),
+            )
+            .map_err(|error| {
+                WorkspaceError::Configuration(ConfigurationDiagnostic::new_invalid_ignore_pattern(
+                    value.to_string(),
+                    error.to_string(),
+                ))
+            })?;
 
         let ignore = builder.build().map_err(|error| {
             WorkspaceError::Configuration(ConfigurationDiagnostic::InvalidIgnorePattern(
@@ -137,6 +142,7 @@ mod test {
     use crate::matcher::Matcher;
     use ignore::gitignore::GitignoreBuilder;
     use std::env;
+    use std::path::Path;
 
     #[test]
     fn matches() {
@@ -191,6 +197,16 @@ mod test {
         let ignore = Matcher::try_from(dir.to_str().unwrap()).unwrap();
         let path = env::current_dir().unwrap().join("src/workspace.rs");
         let result = ignore.matches_path(path.as_path());
+
+        assert!(result);
+    }
+
+    #[test]
+    fn matches_single_path_2() {
+        let dir = env::current_dir().unwrap().join("./test/**/*.rs");
+        let ignore = Matcher::try_from("./test/**/*.rs").unwrap();
+        let path = env::current_dir().unwrap().join("test/workspace.rs");
+        let result = ignore.matches_path(Path::new("test/workspace.rs"));
 
         assert!(result);
     }
