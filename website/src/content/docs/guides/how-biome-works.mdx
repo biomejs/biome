@@ -94,7 +94,57 @@ The following files are parsed as **`JSON` files** with  the options `json.parse
 - `.hintrc`
 - `.babelrc`
 
-## Syntax rules for `ignore` and `include`
+## `ignore` and `include` explained
+
+Biome will resolve the globs specified in `ignore` and `include` relatively from the working directory.
+
+The working directory is the directory where you usually run a CLI command. This means that you have to place **particular attention** when the configuration file is placed in a
+different directory that is different from where you execute your command.
+
+For example, you have a project that contains two directories called `backend/` and `frontend/`, and decide to place your `biome.json` at the root folder of the project. Inside the `frontend/` project, you have your `package.json` with some scripts that runs Biome:
+
+```
+├── backend
+├── biome.json
+└── frontend
+    └── package.json
+```
+
+```json title="biome.json"
+{
+  "files": {
+    "include": ["src/**/*.js", "src/**/*.ts"]
+  },
+  "formatter": {
+    "indentStyle": "space"
+  }
+}
+```
+
+```json title="frontend/package.json"
+{
+  "name": "frontend-project",
+  "scripts": {
+    "format": "biome format --write ./"
+  }
+}
+```
+
+When you run the script `format` inside `frontend/package.json`, the working directory resolved by that script will be `frontend/`, the globs `src/**/*.js` and `src/**/*.ts` will have as "base" directory `frontend/`.
+
+:::note
+When both `ignore` and `include` are specified, Biome gives **precedence** to `ignore`.
+:::
+
+:::caution
+`ignore` and `include` inside `overrides` have a **different** semantics:
+- for `ignore`: if a file matches the globs, **_don't_ apply** the configuration inside this override, and keep apply the next overrides;
+- for `include`: if a file matches the globs, **apply** the configuration inside this override, and keep apply the next overrides;
+:::
+
+
+### Glob syntax explained
+
 
 The syntax and meaning of these two options loosely follow the [globset rules](https://docs.rs/globset/latest/globset/#syntax) but without the ability to set options.
 
@@ -118,7 +168,6 @@ The syntax and meaning of these two options loosely follow the [globset rules](h
 > - Metacharacters such as `*` and `?` can be escaped with character class
 > notation. e.g., `[*]` matches `*`.
 
-### Ignore folders and ignore files
 
 
 

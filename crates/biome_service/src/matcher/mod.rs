@@ -1,6 +1,5 @@
 use crate::configuration::diagnostics::InvalidIgnorePattern;
 use crate::{ConfigurationDiagnostic, WorkspaceError};
-use globset::GlobSet;
 use ignore::gitignore::{Gitignore, GitignoreBuilder};
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
@@ -11,16 +10,41 @@ use std::sync::RwLock;
 #[derive(Debug)]
 pub struct Matcher {
     git_ignore: Option<Gitignore>,
-    glob: GlobSet,
+    /// The globs
+    ignore: Gitignore,
     /// Whether the string was already checked
     already_checked: RwLock<HashMap<String, bool>>,
+}
+
+impl TryFrom<&str> for Matcher {
+    type Error = WorkspaceError;
+
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        let mut builder = GitignoreBuilder::new("");
+        builder.add_line(None, value).map_err(|error| {
+            WorkspaceError::Configuration(ConfigurationDiagnostic::new_invalid_ignore_pattern(
+                value.to_string(),
+                error.to_string(),
+            ))
+        })?;
+
+        let ignore = builder.build().map_err(|error| {
+            WorkspaceError::Configuration(ConfigurationDiagnostic::InvalidIgnorePattern(
+                InvalidIgnorePattern {
+                    message: error.to_string(),
+                },
+            ))
+        })?;
+
+        Ok(Matcher::new(ignore))
+    }
 }
 
 impl Matcher {
     pub fn empty() -> Self {
         Self {
             git_ignore: None,
-            glob: GlobSet::empty(),
+            ignore: Gitignore::empty(),
             already_checked: RwLock::new(HashMap::default()),
         }
     }
@@ -28,9 +52,9 @@ impl Matcher {
     /// Creates a new Matcher with given options.
     ///
     /// Check [glob website](https://docs.rs/glob/latest/glob/struct.MatchOptions.html) for [MatchOptions]
-    pub fn new(glob: GlobSet) -> Self {
+    pub fn new(ignore: Gitignore) -> Self {
         Self {
-            glob,
+            ignore,
             git_ignore: None,
             already_checked: RwLock::new(HashMap::default()),
         }
@@ -65,25 +89,9 @@ impl Matcher {
         Ok(())
     }
 
-    /// It matches the given string against the stored patterns.
-    ///
-    /// It returns [true] if there's at least a match
-    pub fn matches(&self, source: &str) -> bool {
-        let mut already_ignored = self.already_checked.write().unwrap();
-        if let Some(matches) = already_ignored.get(source) {
-            return *matches;
-        }
-        if self.glob.is_match(source) {
-            already_ignored.insert(source.to_string(), true);
-            return true;
-        }
-        already_ignored.insert(source.to_string(), false);
-        false
-    }
-
     /// If no globs haven't been stored, the function returns [true]
     pub fn is_empty(&self) -> bool {
-        self.glob.is_empty()
+        self.ignore.is_empty()
             && self
                 .git_ignore
                 .as_ref()
@@ -101,7 +109,10 @@ impl Matcher {
             if let Some(matches) = already_checked.get(source_as_string) {
                 return *matches;
             }
-            let matches = self.glob.is_match(source)
+            let matches = self
+                .ignore
+                .matched(source_as_string, source.is_dir())
+                .is_ignore()
                 || self
                     .git_ignore
                     .as_ref()
@@ -124,21 +135,16 @@ impl Matcher {
 #[cfg(test)]
 mod test {
     use crate::matcher::Matcher;
-    use globset::{Glob, GlobSetBuilder};
+    use ignore::gitignore::GitignoreBuilder;
     use std::env;
 
     #[test]
     fn matches() {
         let current = env::current_dir().unwrap();
         let dir = format!("{}/**/*.rs", current.display());
-        let ignore = Matcher::new(
-            GlobSetBuilder::new()
-                .add(Glob::new(&dir).unwrap())
-                .build()
-                .unwrap(),
-        );
+        let ignore = Matcher::try_from(dir.as_str()).unwrap();
         let path = env::current_dir().unwrap().join("src/workspace.rs");
-        let result = ignore.matches(path.to_str().unwrap());
+        let result = ignore.matches_path(path.as_path());
 
         assert!(result);
     }
@@ -147,12 +153,7 @@ mod test {
     fn matches_path() {
         let current = env::current_dir().unwrap();
         let dir = format!("{}/**/*.rs", current.display());
-        let ignore = Matcher::new(
-            GlobSetBuilder::new()
-                .add(Glob::new(&dir).unwrap())
-                .build()
-                .unwrap(),
-        );
+        let ignore = Matcher::try_from(dir.as_str()).unwrap();
         let path = env::current_dir().unwrap().join("src/workspace.rs");
         let result = ignore.matches_path(path.as_path());
 
@@ -164,9 +165,11 @@ mod test {
         let dir = "inv";
         let valid_test_dir = "**/valid";
         let ignore = Matcher::new(
-            GlobSetBuilder::new()
-                .add(Glob::new(dir).unwrap())
-                .add(Glob::new(valid_test_dir).unwrap())
+            GitignoreBuilder::new("")
+                .add_line(None, &dir)
+                .unwrap()
+                .add_line(None, &valid_test_dir)
+                .unwrap()
                 .build()
                 .unwrap(),
         );
@@ -185,14 +188,9 @@ mod test {
     #[test]
     fn matches_single_path() {
         let dir = env::current_dir().unwrap().join("src/workspace.rs");
-        let ignore = Matcher::new(
-            GlobSetBuilder::new()
-                .add(Glob::new(&dir.display().to_string()).unwrap())
-                .build()
-                .unwrap(),
-        );
+        let ignore = Matcher::try_from(dir.to_str().unwrap()).unwrap();
         let path = env::current_dir().unwrap().join("src/workspace.rs");
-        let result = ignore.matches(path.to_str().unwrap());
+        let result = ignore.matches_path(path.as_path());
 
         assert!(result);
     }

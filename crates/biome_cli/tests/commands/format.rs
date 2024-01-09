@@ -1301,7 +1301,7 @@ fn does_not_format_ignored_directories() {
         ("test1.js", false),
         ("test2.js", false),
         ("test3/test.js", false),
-        ("test4/test.js", true),
+        ("test4/test.js", false),
         ("test5/test.js", false),
         ("test6/test.js", false),
         ("test/test.test7.js", false),
@@ -1322,24 +1322,12 @@ fn does_not_format_ignored_directories() {
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
     for (file_path, expect_formatted) in FILES {
-        let mut file = fs
-            .open(Path::new(file_path))
-            .expect("formatting target file was removed by the CLI");
-
-        let mut content = String::new();
-        file.read_to_string(&mut content)
-            .expect("failed to read file from memory FS");
-
         let expected = if expect_formatted {
             FORMATTED
         } else {
             UNFORMATTED
         };
-
-        assert_eq!(
-            content, expected,
-            "content of {file_path} doesn't match the expected content"
-        );
+        assert_file_contents(&fs, &Path::new(file_path), expected);
     }
 
     assert_cli_snapshot(SnapshotPayload::new(

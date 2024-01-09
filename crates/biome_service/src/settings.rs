@@ -25,7 +25,7 @@ use biome_js_syntax::JsLanguage;
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonLanguage;
-use globset::{Glob, GlobSetBuilder};
+use ignore::gitignore::GitignoreBuilder;
 use indexmap::IndexSet;
 use std::ops::{BitOr, Sub};
 use std::path::{Path, PathBuf};
@@ -90,28 +90,43 @@ impl WorkspaceSettings {
     pub fn merge_with_configuration(
         &mut self,
         configuration: Configuration,
+        working_directory: Option<PathBuf>,
         vcs_path: Option<PathBuf>,
         gitignore_matches: &[String],
     ) -> Result<(), WorkspaceError> {
         // formatter part
         if let Some(formatter) = configuration.formatter {
-            self.formatter = to_format_settings(formatter, vcs_path.clone(), gitignore_matches)?;
+            self.formatter = to_format_settings(
+                working_directory.clone(),
+                formatter,
+                vcs_path.clone(),
+                gitignore_matches,
+            )?;
         }
 
         // linter part
         if let Some(linter) = configuration.linter {
-            self.linter = to_linter_settings(linter, vcs_path.clone(), gitignore_matches)?;
+            self.linter = to_linter_settings(
+                working_directory.clone(),
+                linter,
+                vcs_path.clone(),
+                gitignore_matches,
+            )?;
         }
 
         // Filesystem settings
-        if let Some(files) =
-            to_file_settings(configuration.files, vcs_path.clone(), gitignore_matches)?
-        {
+        if let Some(files) = to_file_settings(
+            working_directory.clone(),
+            configuration.files,
+            vcs_path.clone(),
+            gitignore_matches,
+        )? {
             self.files = files;
         }
 
         if let Some(organize_imports) = configuration.organize_imports {
             self.organize_imports = to_organize_imports_settings(
+                working_directory.clone(),
                 organize_imports,
                 vcs_path.clone(),
                 gitignore_matches,
@@ -133,8 +148,13 @@ impl WorkspaceSettings {
 
         // NOTE: keep this last. Computing the overrides require reading the settings computed by the parent settings.
         if let Some(overrides) = configuration.overrides {
-            self.override_settings =
-                to_override_settings(overrides, vcs_path, gitignore_matches, self)?;
+            self.override_settings = to_override_settings(
+                working_directory.clone(),
+                overrides,
+                vcs_path,
+                gitignore_matches,
+                self,
+            )?;
         }
 
         Ok(())
@@ -444,6 +464,7 @@ impl Default for FilesSettings {
 }
 
 fn to_file_settings(
+    working_directory: Option<PathBuf>,
     config: Option<FilesConfiguration>,
     vcs_config_path: Option<PathBuf>,
     gitignore_matches: &[String],
@@ -460,11 +481,13 @@ fn to_file_settings(
         Some(FilesSettings {
             max_size: config.max_size.unwrap_or(DEFAULT_FILE_SIZE_LIMIT),
             ignored_files: to_matcher(
+                working_directory.clone(),
                 config.ignore.as_ref(),
                 vcs_config_path.clone(),
                 gitignore_matches,
             )?,
             included_files: to_matcher(
+                working_directory,
                 config.include.as_ref(),
                 vcs_config_path,
                 gitignore_matches,
@@ -845,22 +868,28 @@ pub struct OverrideSettingPattern {
 ///
 /// It can raise an error if the patterns aren't valid
 pub fn to_matcher(
+    working_directory: Option<PathBuf>,
     string_set: Option<&StringSet>,
     vcs_path: Option<PathBuf>,
     git_ignore_matches: &[String],
 ) -> Result<Matcher, WorkspaceError> {
-    let mut builder = GlobSetBuilder::new();
+    let mut git_builder =
+        GitignoreBuilder::new(working_directory.clone().unwrap_or(PathBuf::new()));
     if let Some(string_set) = string_set {
         for pattern in string_set.iter() {
-            builder.add(Glob::new(pattern).map_err(|err| {
-                WorkspaceError::Configuration(ConfigurationDiagnostic::new_invalid_ignore_pattern(
-                    pattern.to_string(),
-                    err.to_string(),
-                ))
-            })?);
+            git_builder
+                .add_line(working_directory.clone(), pattern)
+                .map_err(|error| {
+                    WorkspaceError::Configuration(
+                        ConfigurationDiagnostic::new_invalid_ignore_pattern(
+                            pattern.to_string(),
+                            error.to_string(),
+                        ),
+                    )
+                })?;
         }
     }
-    let mut matcher = Matcher::new(builder.build().map_err(|err| {
+    let mut matcher = Matcher::new(git_builder.build().map_err(|err| {
         WorkspaceError::Configuration(ConfigurationDiagnostic::InvalidIgnorePattern(
             InvalidIgnorePattern {
                 message: err.to_string(),

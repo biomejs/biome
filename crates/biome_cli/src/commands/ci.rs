@@ -108,6 +108,7 @@ pub(crate) fn ci(session: CliSession, mut payload: CiCommandPayload) -> Result<(
         .workspace
         .update_settings(UpdateSettingsParams {
             configuration,
+            working_directory: session.app.fs.working_directory(),
             vcs_base_path,
             gitignore_matches,
         })?;

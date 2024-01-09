@@ -134,6 +134,7 @@ pub(crate) fn check(
         .app
         .workspace
         .update_settings(UpdateSettingsParams {
+            working_directory: session.app.fs.working_directory(),
             configuration: fs_configuration,
             vcs_base_path,
             gitignore_matches,

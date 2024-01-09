@@ -432,6 +432,7 @@ impl Session {
                     match result {
                         Ok((vcs_base_path, gitignore_matches)) => {
                             let result = self.workspace.update_settings(UpdateSettingsParams {
+                                working_directory: fs.working_directory(),
                                 configuration,
                                 vcs_base_path,
                                 gitignore_matches,

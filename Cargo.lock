@@ -772,7 +772,6 @@ dependencies = [
  "biome_text_edit",
  "bpaf",
  "dashmap",
- "globset",
  "ignore",
  "indexmap",
  "insta",

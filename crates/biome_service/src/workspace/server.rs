@@ -349,6 +349,7 @@ impl Workspace for WorkspaceServer {
 
         settings.merge_with_configuration(
             params.configuration,
+            params.working_directory,
             params.vcs_base_path,
             params.gitignore_matches.as_slice(),
         )?;
