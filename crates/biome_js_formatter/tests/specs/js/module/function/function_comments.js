@@ -38,4 +38,3 @@ function f()
 function h() /* a */ {
 	a;
 };
-
