@@ -201,6 +201,8 @@ Biome now scores 97% compatibility with Prettier and features more than 180 lint
 
 - Fix [#1106](https://github.com/biomejs/biome/issues/1106). Fix invalid formatting of single bindings when Arrow Parentheses is set to "AsNeeded" and the expression breaks over multiple lines. [#1449](https://github.com/biomejs/biome/pull/1449) Contributed by @faultyserver
 
+- Fix [#1172](https://github.com/biomejs/biome/issues/1172). Fix placement of line comment after function expression parentheses, they are now attached to first statement in body. Contributed by @kalleep
+
 ### JavaScript APIs
 
 ### Linter
