@@ -244,12 +244,6 @@ impl Rule for NoUselessFragments {
             };
 
             let child = node.children().first();
-            // can't apply a code action because it will create invalid syntax
-            // for example `<div x-some-prop={<></>}` would become `<div x-some-prop=` which would produce
-            // a syntax error
-            if node.children().is_empty() {
-                return None;
-            }
             if let Some(child) = child {
                 let new_node = match child {
                     AnyJsxChild::JsxElement(node) => {
@@ -286,7 +280,10 @@ impl Rule for NoUselessFragments {
                     mutation.remove_element(parent.into());
                 }
             } else {
-                mutation.remove_element(parent.into());
+                // can't apply a code action when there is no children because it will create invalid syntax
+                // for example `<div x-some-prop={<></>}` would become `<div x-some-prop=` which would produce
+                // a syntax error
+                return None;
             }
         }
 
