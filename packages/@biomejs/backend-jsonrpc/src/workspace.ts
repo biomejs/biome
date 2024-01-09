@@ -1844,7 +1844,8 @@ export type DiagnosticTag =
 	| "fixable"
 	| "internal"
 	| "unnecessaryCode"
-	| "deprecatedCode";
+	| "deprecatedCode"
+	| "verbose";
 /**
  * The category for a log advice, defines how the message should be presented to the user.
  */
