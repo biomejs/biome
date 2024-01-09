@@ -1385,6 +1385,7 @@ export interface RuleWithOptions {
 }
 export type PossibleOptions =
 	| ComplexityOptions
+	| ConsistentArrayTypeOptions
 	| FilenamingConventionOptions
 	| HooksOptions
 	| DeprecatedHooksOptions
@@ -1399,6 +1400,9 @@ export interface ComplexityOptions {
 	 * The maximum complexity score that we allow. Anything higher is considered excessive.
 	 */
 	maxAllowedComplexity: number;
+}
+export interface ConsistentArrayTypeOptions {
+	syntax: ConsistentArrayType;
 }
 /**
  * Rule's options.
@@ -1452,6 +1456,7 @@ export interface ValidAriaRoleOptions {
 	allowedInvalidRoles: string[];
 	ignoreNonDom: boolean;
 }
+export type ConsistentArrayType = "shorthand" | "generic";
 export type FilenameCases = FilenameCase[];
 export interface Hooks {
 	/**

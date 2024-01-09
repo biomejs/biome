@@ -500,6 +500,28 @@
 			},
 			"additionalProperties": false
 		},
+		"ConsistentArrayType": {
+			"oneOf": [
+				{
+					"description": "`ItemType[]`",
+					"type": "string",
+					"enum": ["shorthand"]
+				},
+				{
+					"description": "`Array<ItemType>`",
+					"type": "string",
+					"enum": ["generic"]
+				}
+			]
+		},
+		"ConsistentArrayTypeOptions": {
+			"type": "object",
+			"required": ["syntax"],
+			"properties": {
+				"syntax": { "$ref": "#/definitions/ConsistentArrayType" }
+			},
+			"additionalProperties": false
+		},
 		"Correctness": {
 			"description": "A list of rules that belong to this group",
 			"type": "object",
@@ -1609,6 +1631,10 @@
 				{
 					"description": "Options for `noExcessiveComplexity` rule",
 					"allOf": [{ "$ref": "#/definitions/ComplexityOptions" }]
+				},
+				{
+					"description": "Options for `useConsistentArrayType` rule",
+					"allOf": [{ "$ref": "#/definitions/ConsistentArrayTypeOptions" }]
 				},
 				{
 					"description": "Options for `useFilenamingConvention` rule",
