@@ -147,7 +147,7 @@ impl Session {
             configuration_status: AtomicU8::new(ConfigurationStatus::Missing as u8),
             documents,
             extension_settings: config,
-            fs: DynRef::Owned(Box::new(OsFileSystem)),
+            fs: DynRef::Owned(Box::<OsFileSystem>::default()),
             cancellation,
             config_path: None,
         }

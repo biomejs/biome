@@ -20,7 +20,13 @@ use std::{
 const MAX_SYMLINK_DEPTH: u8 = 3;
 
 /// Implementation of [FileSystem] that directly calls through to the underlying OS
-pub struct OsFileSystem;
+pub struct OsFileSystem(pub Option<PathBuf>);
+
+impl Default for OsFileSystem {
+    fn default() -> Self {
+        Self(env::current_dir().ok())
+    }
+}
 
 impl FileSystem for OsFileSystem {
     fn open_with_options(&self, path: &Path, options: OpenOptions) -> io::Result<Box<dyn File>> {
@@ -41,7 +47,7 @@ impl FileSystem for OsFileSystem {
     }
 
     fn working_directory(&self) -> Option<PathBuf> {
-        env::current_dir().ok()
+        self.0.clone()
     }
 
     fn path_exists(&self, path: &Path) -> bool {
