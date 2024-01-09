@@ -873,8 +873,7 @@ pub fn to_matcher(
     vcs_path: Option<PathBuf>,
     git_ignore_matches: &[String],
 ) -> Result<Matcher, WorkspaceError> {
-    let mut git_builder =
-        GitignoreBuilder::new(working_directory.clone().unwrap_or(PathBuf::new()));
+    let mut git_builder = GitignoreBuilder::new(working_directory.clone().unwrap_or_default());
     if let Some(string_set) = string_set {
         for pattern in string_set.iter() {
             git_builder

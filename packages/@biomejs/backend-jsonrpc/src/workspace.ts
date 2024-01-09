@@ -21,6 +21,7 @@ export interface UpdateSettingsParams {
 	configuration: Configuration;
 	gitignore_matches: string[];
 	vcs_base_path?: string;
+	working_directory?: string;
 }
 /**
  * The configuration that is contained inside the file `biome.json`

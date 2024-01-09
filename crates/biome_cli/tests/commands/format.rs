@@ -1327,7 +1327,7 @@ fn does_not_format_ignored_directories() {
         } else {
             UNFORMATTED
         };
-        assert_file_contents(&fs, &Path::new(file_path), expected);
+        assert_file_contents(&fs, Path::new(file_path), expected);
     }
 
     assert_cli_snapshot(SnapshotPayload::new(

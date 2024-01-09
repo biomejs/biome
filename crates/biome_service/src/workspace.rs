@@ -378,7 +378,7 @@ pub struct UpdateSettingsParams {
     pub vcs_base_path: Option<PathBuf>,
     // @ematipico TODO: have a better data structure for this
     pub gitignore_matches: Vec<String>,
-    pub working_directory: Option<PathBuf>
+    pub working_directory: Option<PathBuf>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]

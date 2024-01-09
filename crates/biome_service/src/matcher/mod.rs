@@ -166,9 +166,9 @@ mod test {
         let valid_test_dir = "**/valid";
         let ignore = Matcher::new(
             GitignoreBuilder::new("")
-                .add_line(None, &dir)
+                .add_line(None, dir)
                 .unwrap()
-                .add_line(None, &valid_test_dir)
+                .add_line(None, valid_test_dir)
                 .unwrap()
                 .build()
                 .unwrap(),
