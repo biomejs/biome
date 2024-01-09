@@ -4,14 +4,19 @@ use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
 };
 use biome_console::{markup, Markup, MarkupBuf};
-use biome_deserialize::{Deserializable, DeserializableValue, DeserializationDiagnostic, Text};
+use biome_deserialize::{
+    Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor, Text,
+    VisitableType,
+};
 use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyTsName, AnyTsType, JsSyntaxKind, JsSyntaxToken, TriviaPieceKind, TsReferenceType,
     TsTypeArguments, T,
 };
-use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, SyntaxNodeOptionExt, TriviaPiece};
+use biome_rowan::{
+    AstNode, AstSeparatedList, BatchMutationExt, SyntaxNodeOptionExt, TextRange, TriviaPiece,
+};
 #[cfg(feature = "schemars")]
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -489,14 +494,61 @@ pub enum ConsistentArrayType {
     Generic,
 }
 
+impl Deserializable for ConsistentArrayTypeOptions {
+    fn deserialize(
+        value: &impl DeserializableValue,
+        name: &str,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> Option<Self> {
+        struct Visitor;
+        impl DeserializationVisitor for Visitor {
+            type Output = ConsistentArrayTypeOptions;
+            const EXPECTED_TYPE: VisitableType = VisitableType::MAP;
+            fn visit_map(
+                self,
+                members: impl Iterator<
+                    Item = Option<(impl DeserializableValue, impl DeserializableValue)>,
+                >,
+                _range: TextRange,
+                _name: &str,
+                diagnostics: &mut Vec<DeserializationDiagnostic>,
+            ) -> Option<Self::Output> {
+                const ALLOWED_KEYS: &[&str] = &["syntax"];
+                let mut result = Self::Output::default();
+                for (key, value) in members.flatten() {
+                    let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
+                        continue;
+                    };
+                    match key_text.text() {
+                        "syntax" => {
+                            if let Some(val) =
+                                Deserializable::deserialize(&value, &key_text, diagnostics)
+                            {
+                                result.syntax = val;
+                            }
+                        }
+                        text => diagnostics.push(DeserializationDiagnostic::new_unknown_key(
+                            text,
+                            key.range(),
+                            ALLOWED_KEYS,
+                        )),
+                    }
+                }
+                Some(result)
+            }
+        }
+        value.deserialize(Visitor, name, diagnostics)
+    }
+}
+
 impl FromStr for ConsistentArrayType {
     type Err = &'static str;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "Shorthand" => Ok(Self::Shorthand),
-            "Generic" => Ok(Self::Generic),
-            _ => Err("Value not supported for enum member case"),
+            "shorthand" => Ok(Self::Shorthand),
+            "generic" => Ok(Self::Generic),
+            _ => Err("Value not supported for array type syntax"),
         }
     }
 }

@@ -1,6 +1,7 @@
 //! This module contains the rules that have options
 
 use crate::analyzers::nursery::use_filenaming_convention::FilenamingConventionOptions;
+use crate::analyzers::style::use_consistent_array_type::ConsistentArrayTypeOptions;
 use crate::semantic_analyzers::correctness::use_exhaustive_dependencies::HooksOptions;
 use crate::semantic_analyzers::correctness::use_hook_at_top_level::DeprecatedHooksOptions;
 use crate::semantic_analyzers::style::no_restricted_globals::RestrictedGlobalsOptions;
@@ -23,6 +24,8 @@ use serde::{Deserialize, Serialize};
 pub enum PossibleOptions {
     /// Options for `noExcessiveComplexity` rule
     Complexity(ComplexityOptions),
+    /// Options for `useConsistentArrayType` rule
+    ConsistentArrayType(ConsistentArrayTypeOptions),
     /// Options for `useFilenamingConvention` rule
     FilenamingConvention(FilenamingConventionOptions),
     /// Options for `useExhaustiveDependencies` rule
@@ -50,6 +53,13 @@ impl PossibleOptions {
                 let options = match self {
                     PossibleOptions::Complexity(options) => options.clone(),
                     _ => ComplexityOptions::default(),
+                };
+                RuleOptions::new(options)
+            }
+            "useConsistentArrayType" => {
+                let options = match self {
+                    PossibleOptions::ConsistentArrayType(options) => options.clone(),
+                    _ => ConsistentArrayTypeOptions::default(),
                 };
                 RuleOptions::new(options)
             }
@@ -113,6 +123,8 @@ impl Deserializable for PossibleOptions {
             }
             "noRestrictedGlobals" => Deserializable::deserialize(value, "options", diagnostics)
                 .map(Self::RestrictedGlobals),
+            "useConsistentArrayType" => Deserializable::deserialize(value, "options", diagnostics)
+                .map(Self::ConsistentArrayType),
             "useExhaustiveDependencies" => {
                 Deserializable::deserialize(value, "options", diagnostics).map(Self::Hooks)
             }
