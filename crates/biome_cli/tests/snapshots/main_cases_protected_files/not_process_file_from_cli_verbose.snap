@@ -28,7 +28,7 @@ package.json project ━━━━━━━━━━━━━━━━━━━�
   
   Verbose advice
   
-    i You can hide this diagnostic by using --diagnostic-level=warning to increase the diagnostic level shown by CLI.
+    i You can hide this diagnostic by using --diagnostic-level=warn to increase the diagnostic level shown by CLI.
     
 
 ```
