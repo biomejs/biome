@@ -1,0 +1,57 @@
+---
+title: Biome
+template: splash
+description: Formatea, corrige y más en una fracción de segundos.
+hero:
+  title: Un conjunto de herramientas para tu proyecto web.
+  tagline: Formatea, corrige y más en una fracción de segundos.
+  image:
+    alt: Biome, Conjunto de herramientas de la web
+    file: ../../../assets/biome-logo-slogan.svg
+  actions:
+    - text: Comenzar
+      link: /es/guides/getting-started/
+      icon: right-arrow
+      variant: primary
+    - text: Ver en GitHub
+      link: https://github.com/biomejs/biome
+      icon: external
+      variant: secondary
+banner:
+  content: |
+    ¡Biome reclama la recompensa del <a href="/blog/biome-wins-prettier-challenge">desafío de Prettier</a>!
+---
+
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+import Netlify from "@src/components/Netlify.astro";
+import Sponsors from "@src/components/Sponsors.astro";
+
+<CardGrid stagger>
+    <Card title="Rapido" icon="rocket">
+        Construido con Rust y una arquitectura innovadora inspirada en rust-analyzer.
+    </Card>
+    <Card title="Sencillo" icon="pencil">
+        No se necesita configuración alguna para empezar. Hay opciones extensas disponibles cuando las necesites.
+    </Card>
+    <Card title="Escalable" icon="random">
+        Diseñado para manejar bases de código de cualquier tamaño. Enfócate en hacer crecer tu producto en lugar de las herramientas.
+    </Card>
+    <Card title="Optimizado" icon="setting">
+        Con una integración interna sólida, podemos reutilizar trabajos anteriores y cualquier mejora en una herramienta que mejora todas.
+    </Card>
+    <Card title="Accionable e informativo" icon="information">
+        Evitar mensajes de error ambiguos. Cuando indicamos que algo está mal, te decimos exactamente dónde está el problema y cómo solucionarlo.
+    </Card>
+    <Card title="Todo incluido" icon="add-document">
+        Compatibilidad inmediata para todas las características del lenguaje que utilices en el front-end. Especialmente compatible con TypeScript y JSX.
+    </Card>
+</CardGrid>
+
+
+## Patrocinadores
+
+
+<Sponsors />
+
+<Netlify />
