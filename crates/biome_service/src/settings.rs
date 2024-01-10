@@ -1,4 +1,3 @@
-use crate::configuration::diagnostics::InvalidIgnorePattern;
 use crate::configuration::formatter::to_format_settings;
 use crate::configuration::linter::to_linter_settings;
 use crate::configuration::organize_imports::to_organize_imports_settings;
@@ -25,7 +24,6 @@ use biome_js_syntax::JsLanguage;
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonLanguage;
-use ignore::gitignore::GitignoreBuilder;
 use indexmap::IndexSet;
 use std::ops::{BitOr, Sub};
 use std::path::{Path, PathBuf};
@@ -873,35 +871,22 @@ pub fn to_matcher(
     vcs_path: Option<PathBuf>,
     git_ignore_matches: &[String],
 ) -> Result<Matcher, WorkspaceError> {
-    let mut git_builder = GitignoreBuilder::new(working_directory.clone().unwrap_or_default());
+    let mut matcher = Matcher::empty();
+    if let Some(working_directory) = working_directory {
+        matcher.set_root(working_directory)
+    }
     if let Some(string_set) = string_set {
         for pattern in string_set.iter() {
-            git_builder
-                .add_line(
-                    working_directory.clone(),
-                    pattern.strip_prefix("./").unwrap_or(pattern),
-                )
-                .map_err(|error| {
-                    WorkspaceError::Configuration(
-                        ConfigurationDiagnostic::new_invalid_ignore_pattern(
-                            pattern.to_string(),
-                            error.to_string(),
-                        ),
-                    )
-                })?;
+            matcher.add_pattern(pattern).map_err(|err| {
+                WorkspaceError::Configuration(ConfigurationDiagnostic::new_invalid_ignore_pattern(
+                    pattern.to_string(),
+                    err.msg.to_string(),
+                ))
+            })?;
         }
     }
-    let mut matcher = Matcher::new(git_builder.build().map_err(|err| {
-        WorkspaceError::Configuration(ConfigurationDiagnostic::InvalidIgnorePattern(
-            InvalidIgnorePattern {
-                message: err.to_string(),
-            },
-        ))
-    })?);
-
     if let Some(vcs_path) = vcs_path {
         matcher.add_gitignore_matches(vcs_path, git_ignore_matches)?;
     }
-
     Ok(matcher)
 }

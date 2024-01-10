@@ -60,7 +60,8 @@ statement();
 ## `test4/test.js`
 
 ```js
-  statement(  )  
+statement();
+
 ```
 
 ## `test5/test.js`
@@ -78,7 +79,7 @@ statement();
 # Emitted Messages
 
 ```block
-Formatted 2 file(s) in <TIME>
+Formatted 3 file(s) in <TIME>
 ```
 
 

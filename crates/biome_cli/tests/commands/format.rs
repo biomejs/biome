@@ -1301,7 +1301,7 @@ fn does_not_format_ignored_directories() {
         ("test1.js", false),
         ("test2.js", false),
         ("test3/test.js", false),
-        ("test4/test.js", false),
+        ("test4/test.js", true),
         ("test5/test.js", false),
         ("test6/test.js", false),
         ("test/test.test7.js", false),
