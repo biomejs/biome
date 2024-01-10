@@ -4,7 +4,7 @@ description: BiomeにおけるGit Hooksの利用
 ---
 
 Gitでは、[Git Hooks](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks) を使うことでgitコマンドの実行中にスクリプトを実行することができます。
-例えば、コミットやプッシュの前にステージングされたファイルをフォーマットしたりリントすることができます。
+例えば、コミットやプッシュの前にステージングされたファイルをformatしたりlintすることができます。
 Git Hooks の管理を簡単にするツールがいくつかあります。
 以下のセクションでは、それらのツールで Biome を使う方法を紹介します。
 
@@ -15,9 +15,9 @@ Git Hooks の管理を簡単にするツールがいくつかあります。
 [NPM経由でインストール](https://github.com/evilmartians/lefthook#install)できます。
 
 Gitリポジトリのルートに`lefthook.yml`というファイルを追加します。
-以下は _Lefthook_ の設定例です:
+以下は _Lefthook_ の設定例です：
 
-- コミットをする前にフォーマットのチェックとリントを行う
+- コミットをする前にformatのチェックとlintを行う
 
   ```yaml title="lefthook.yml"
   pre-commit:
@@ -27,7 +27,7 @@ Gitリポジトリのルートに`lefthook.yml`というファイルを追加し
         run: npx biome check --no-errors-on-unmatched --files-ignore-unknown=true {staged_files}
   ```
 
-- コミットをする前にフォーマットチェックやリントを行い、[安全な修正](../linter#安全な修正safe-fixes)を行う
+- コミットをする前にformatチェックやlintを行い、[安全な修正](../linter#安全な修正safe-fixes)を行う
 
   ```yaml title="lefthook.yml"
   pre-commit:
@@ -39,7 +39,7 @@ Gitリポジトリのルートに`lefthook.yml`というファイルを追加し
 
 `git update-index --again` は、ステージングされたファイルを再度ステージングします。
 
-- プッシュする前にフォーマットのチェックとリントを行う
+- プッシュする前にformatのチェックとlintを行う
 
   ```yaml title="lefthook.yml"
   pre-push:
@@ -90,7 +90,7 @@ Husky はステージングされていない変更を無視したり、ステ�
 
 [lint-staged](https://github.com/lint-staged/lint-staged)は、JavaScriptのエコシステムで最も使われているツールのひとつです。
 
-husky の設定に以下の項目を追加します:
+husky の設定に以下の項目を追加します：
 
 ```shell title=".husky/pre-commit"
 lint-staged
@@ -130,14 +130,14 @@ _lefthook_、_pre-commit_、_lint-staged_ などの他のツールとは対照�
 詳しくは [_git-format-staged_ と他のツールの比較](https://github.com/hallettj/git-format-staged#comparisons-to-similar-utilities) を参照してください。
 
 
-設定例:
+設定例：
 
-- コミットをする前にフォーマットのチェックとリントを行う
+- コミットをする前にformatのチェックとlintを行う
   ```shell title=".husky/pre-commit"
   git-format-staged --formatter 'biome check --files-ignore-unknown=true --no-errors-on-unmatched \"{}\"' .
   ```
 
-- コミットをする前にフォーマットチェックやリント、安全な修正を行う
+- コミットをする前にformatチェックやlint、安全な修正を行う
 
   ```shell title=".husky/pre-commit"
   git-format-staged --formatter 'biome check --apply --files-ignore-unknown=true --no-errors-on-unmatched \"{}\"' .
@@ -152,13 +152,13 @@ Biome は [biomejs/pre-commit](https://github.com/biomejs/pre-commit) リポジ�
 
 | hook `id`       | description                                                                 |
 | --------------- | --------------------------------------------------------------------------- |
-| `biome-ci`      | フォーマットのチェック、インポート文が正しく並んでいるかのチェック、リント        |
-| `biome-check`   | フォーマット、インポート文の整理、リント、コミットされたファイルへ安全な修正の適用 |
-| `biome-format`  | コミットされたファイルのフォーマット                                           |
-| `biome-lint`    | リント、コミットされたファイルへ安全な修正の適用                                |
+| `biome-ci`      | formatのチェック、インポート文が正しく並んでいるかのチェック、lint        |
+| `biome-check`   | format、インポート文の整理、lint、コミットされたファイルへ安全な修正の適用 |
+| `biome-format`  | コミットされたファイルのformat                                           |
+| `biome-lint`    | lint、コミットされたファイルへ安全な修正の適用                                |
 
 以下の例では、リポジトリに [pre-commit](https://pre-commit.com/index.html#install) をインストールして `pre-commit install` を実行したと仮定します。
-`biome-check` フックを使いたい場合は、プロジェクトのルートにある `.pre-commit-config.yaml` というファイルに次の設定を追加してください:
+`biome-check` フックを使いたい場合は、プロジェクトのルートにある `.pre-commit-config.yaml` というファイルに次の設定を追加してください：
 
 
 ```yaml title=".pre-commit-config.yaml"
@@ -203,9 +203,9 @@ pre-commit の `files` オプションは必須ではありません。
 前のセクションで紹介したような専用ツールの使用をおすすめします。
 
 
-シェルスクリプトの例:
+シェルスクリプトの例：
 
-- コミットをする前にフォーマットのチェックとリントを行う
+- コミットをする前にformatのチェックとlintを行う
 
   ```shell title=".git/hooks/pre-commit"
   #!/bin/sh
@@ -215,7 +215,7 @@ pre-commit の `files` オプションは必須ではありません。
       xargs -0 npx biome check --files-ignore-unknown=true --no-errors-on-unmatched $STAGED_FILES
   ```
 
-- コミットをする前にフォーマットチェックやリント、安全な修正を行う
+- コミットをする前にformatチェックやlint、安全な修正を行う
 
   ```shell title=".git/hooks/pre-commit"
   #!/bin/sh
