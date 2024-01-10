@@ -48,6 +48,10 @@ const f9 = function(a) {}["bind"](null, 0);
 
 const called = function () {}();
 
+const f10 = function(x) {
+    return 0, 1;
+}
+
 ```
 
 # Diagnostics
@@ -325,6 +329,7 @@ invalid.ts:43:16 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━�
   > 43 │ const called = function () {}();
        │                ^^^^^^^^^^^^^^
     44 │ 
+    45 │ const f10 = function(x) {
   
   i Function expressions that don't use this can be turned into arrow functions.
   
@@ -335,6 +340,36 @@ invalid.ts:43:16 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━�
     43    │ - const·called·=·function·()·{}();
        43 │ + const·called·=·(()·=>·{})();
     44 44 │   
+    45 45 │   const f10 = function(x) {
+  
+
+```
+
+```
+invalid.ts:45:13 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function expression can be turned into an arrow function.
+  
+    43 │ const called = function () {}();
+    44 │ 
+  > 45 │ const f10 = function(x) {
+       │             ^^^^^^^^^^^^^
+  > 46 │     return 0, 1;
+  > 47 │ }
+       │ ^
+    48 │ 
+  
+  i Function expressions that don't use this can be turned into arrow functions.
+  
+  i Safe fix: Use an arrow function instead.
+  
+    43 43 │   const called = function () {}();
+    44 44 │   
+    45    │ - const·f10·=·function(x)·{
+    46    │ - ····return·0,·1;
+    47    │ - }
+       45 │ + const·f10·=·(x)·=>·(0,·1)
+    48 46 │   
   
 
 ```

@@ -30,7 +30,7 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 #### Bug fixes
 
-- Fix [#1170](https://github.com/biomejs/biome/issues/1170). Fix placement of comments inside default switch clause. Now all line comments that has a preceding node will keep their position. Contributed by @kalleep
+- Fix [#1170](https://github.com/biomejs/biome/issues/1170). Fix placement of comments inside default switch clause. Now all line comments that have a preceding node will keep their position. Contributed by @kalleep
 
 ### Linter
 
@@ -41,6 +41,22 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 - [useConsistentArrayType](https://biomejs.dev/rules/use-consistent-array-type) was accidentally placed in the `style` rule group instead of the `nursery` group. It is now correctly placed under `nursery`.
 
 - Fix [#1483](https://github.com/biomejs/biome/issues/1483). [useConsistentArrayType](https://biomejs.dev/rules/use-consistent-array-type) now correctly handles its option. Contributed by @Conaclos
+
+- Fix [#1502](https://github.com/biomejs/biome/issues/1502). [useArrowFunction](https://biomejs.dev/rules/) now correctly handle functions that return a (comma) sequence expression. Contributed by @Conaclos
+
+  Previously the rule made an erroneous suggestion:
+
+  ```diff
+  - f(function() { return 0, 1; }, "");
+  + f(() => 0, 1, "")
+  ```
+
+  Now, the rule wraps any comma sequence between parentheses:
+
+  ```diff
+  - f(function() { return 0, 1; }, "");
+  + f(() => (0, 1), "")
+  ```
 
 
 ## 1.5.0 (2024-01-08)
