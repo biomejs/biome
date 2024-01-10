@@ -8,6 +8,33 @@ Read our [guidelines to categorize a change](https://biomejs.dev/internals/versi
 New entries must be placed in a section entitled `Unreleased`.
 Read our [guidelines for writing a good changelog entry](https://github.com/biomejs/biome/blob/main/CONTRIBUTING.md#changelog).
 
+## Unreleased
+
+### Analyzer
+
+### CLI
+
+### Configuration
+
+### Editors
+
+### Formatter
+
+### JavaScript APIs
+
+### Linter
+
+#### New features
+
+#### Enhancements
+
+- Add an unsafe code fix for [noConsoleLog](https://biomejs.dev/linter/rules/no-console-log/). Contributed by @vasucp1207
+
+#### Bug fixes
+
+### Parser
+
+
 ## 1.5.1 (2024-01-10)
 
 ### CLI
@@ -27,10 +54,6 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 - Fix [#1170](https://github.com/biomejs/biome/issues/1170). Fix placement of comments inside default switch clause. Now all line comments that have a preceding node will keep their position. Contributed by @kalleep
 
 ### Linter
-
-#### Enhancements
-
-- Add an unsafe code fix for [noConsoleLog](https://biomejs.dev/linter/rules/no-console-log/).  Contributed by @vasucp1207
 
 #### Bug fixes
 
