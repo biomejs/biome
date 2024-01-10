@@ -108,18 +108,35 @@ fn get_untrimmed_callee_name(call: &JsCallExpression) -> Option<SyntaxToken<JsLa
     Some(name)
 }
 
-/// Checks whether the given call expression calls a React hook, based on the
+/// Checks whether the given function name belongs to a React component, based
+/// on the official convention for React component naming: React component names
+/// must start with a capital letter.
+///
+/// Source: https://react.dev/learn/reusing-logic-with-custom-hooks#hook-names-always-start-with-use
+pub(crate) fn is_react_component(name: &str) -> bool {
+    name.chars().next().is_some_and(char::is_uppercase)
+}
+
+/// Checks whether the given function name belongs to a React hook, based on the
 /// official convention for React hook naming: Hook names must start with `use`
 /// followed by a capital letter.
 ///
 /// Source: https://react.dev/learn/reusing-logic-with-custom-hooks#hook-names-always-start-with-use
+pub(crate) fn is_react_hook(name: &str) -> bool {
+    name.starts_with("use") && name.chars().nth(3).is_some_and(char::is_uppercase)
+}
+
+/// Checks whether the given call expression calls a React hook, based on the
+/// official convention for React hook naming: Hook names must start with `use`
+/// followed by a capital letter.
+///
+/// See [is_react_hook()].
 pub(crate) fn is_react_hook_call(call: &JsCallExpression) -> bool {
     let Some(name) = get_untrimmed_callee_name(call) else {
         return false;
     };
 
-    let name = name.text_trimmed();
-    name.starts_with("use") && name.chars().nth(3).is_some_and(char::is_uppercase)
+    is_react_hook(name.text_trimmed())
 }
 
 const HOOKS_WITH_DEPS_API: [&str; 6] = [
