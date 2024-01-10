@@ -6,7 +6,7 @@ description: BiomeにおけるGit Hooksの利用
 Gitでは、[Git Hooks](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks) を使うことでgitコマンドの実行中にスクリプトを実行することができます。
 例えば、コミットやプッシュの前にステージングされたファイルをフォーマットしたりリントすることができます。
 Git Hooks の管理を簡単にするツールがいくつかあります。
-以下のセクションでは、そのいくつかと Biome での使い方を紹介します。
+以下のセクションでは、それらのツールで Biome を使う方法を紹介します。
 
 
 ## Lefthook
@@ -27,7 +27,7 @@ Gitリポジトリのルートに`lefthook.yml`というファイルを追加し
         run: npx biome check --no-errors-on-unmatched --files-ignore-unknown=true {staged_files}
   ```
 
-- コミットをする前にフォーマットチェックやリントを行い、安全な修正を行う
+- コミットをする前にフォーマットチェックやリントを行い、[安全な修正](../linter#安全な修正safe-fixes)を行う
 
   ```yaml title="lefthook.yml"
   pre-commit:
@@ -49,11 +49,11 @@ Gitリポジトリのルートに`lefthook.yml`というファイルを追加し
         run: npx biome check --no-errors-on-unmatched --files-ignore-unknown=true {pushed_files}
   ```
 
-`glob`と`--files-ignore-unknown=true`の両方を使わなくても良いことに注意してください。
-`--files-ignore-unknown=true` のみを使用すると、Biome がサポートしている、もしくは将来サポートするかもしれないファイルを扱うことができます。
-どのファイルを扱うかをもっとコントロールしたい場合は `glob` を使ってください。
+`glob`と`--files-ignore-unknown=true` を併用する必要はありません。
+`--files-ignore-unknown=true` を指定するだけでBiomeが現在サポートしている、もしくは将来サポートするかもしれないファイルのみを対象とすることができます。
+どのファイルをBiomeの対象にするかをもっとコントロールしたい場合は `glob` を使ってください。
 
-`--no-errors-on-unmatched`は、*どのファイルも処理されなかった場合*に発生する可能性のあるエラーを抑制します。
+`--no-errors-on-unmatched`は、*どのファイルも処理されなかった場合*に発生するエラーを抑制します。
 
 設定したら、`lefthook install` を実行してフックのセットアップを完了させましょう。
 
@@ -72,7 +72,7 @@ Gitリポジトリのルートに`lefthook.yml`というファイルを追加し
 ## Husky
 
 [Husky](https://github.com/typicode/husky)は、JavaScriptエコシステムで広く使われているフックマネージャーです。
-Husky はステージングされていない変更を無視したり、ステージングされているファイルの一覧を取得することができません。
+Husky はステージングされていない変更を無視したり、ステージングされているファイルののみを対象とすることができません。
 そのため、 _lint-staged_ や _git-format-staged_ といった別のツールと組み合わせて使われることが多いです。
 
 プロジェクトに `package.json` が含まれている場合、
@@ -108,7 +108,7 @@ Git Hooks を実行するときに便利なコマンドの例です：
       "biome check --files-ignore-unknown=true", // フォーマットのチェックとリント
       "biome check --apply --no-errors-on-unmatched", // フォーマット、インポート文のソート、リント、安全な修正の適用
       "biome check --apply --organize-imports-enabled=false --no-errors-on-unmatched", // フォーマットと安全な修正の適用
-      "biome check --apply-unsafe --no-errors-on-unmatched", // フォーマット、インポート文のソート、リント、安全及び破壊的な修正の適用
+      "biome check --apply-unsafe --no-errors-on-unmatched", // フォーマット、インポート文のソート、リント、安全及び安全ではない修正の適用
       "biome format --write --no-errors-on-unmatched", // フォーマット
       "biome lint --apply --no-errors-on-unmatched", // リントと安全な修正の適用
     ],
@@ -120,15 +120,13 @@ Git Hooks を実行するときに便利なコマンドの例です：
 }
 ```
 
-Remember to use the CLI option `--no-errors-on-unmatched` in your command, to silent possible errors in case *no files are processed*.
-
 *処理されなかったファイルがない* 場合を示すエラーを非表示にするため、コマンド実行時に`--no-errors-on-unmatched`を使用することを忘れないでください。
 
 
 ### git-format-staged
 
 _lefthook_、_pre-commit_、_lint-staged_ などの他のツールとは対照的に、[git-format-staged](https://github.com/hallettj/git-format-staged) は内部的に `git stash` を使用しません。
-これにより、ステージされていない変更と更新されたステージされた変更の間で衝突が発生した場合に手動で介入する必要がなくなります。
+これにより、ステージングされていない変更とステージングされた変更の間で衝突が発生した場合に手動で介入する必要がなくなります。
 詳しくは [_git-format-staged_ と他のツールの比較](https://github.com/hallettj/git-format-staged#comparisons-to-similar-utilities) を参照してください。
 
 
@@ -154,7 +152,7 @@ Biome は [biomejs/pre-commit](https://github.com/biomejs/pre-commit) リポジ�
 
 | hook `id`       | description                                                                 |
 | --------------- | --------------------------------------------------------------------------- |
-| `biome-ci`      | フォーマットのチェック、インポート文がまとまっているかのチェック、リント           |
+| `biome-ci`      | フォーマットのチェック、インポート文が正しく並んでいるかのチェック、リント        |
 | `biome-check`   | フォーマット、インポート文の整理、リント、コミットされたファイルへ安全な修正の適用 |
 | `biome-format`  | コミットされたファイルのフォーマット                                           |
 | `biome-lint`    | リント、コミットされたファイルへ安全な修正の適用                                |
@@ -177,7 +175,7 @@ repos:
 [pre-commit](https://pre-commit.com/)は別々にツールをインストールするため、pre-commit はどのツールがインストールされるか知っておく必要があります。
 なので `additional_dependencies` オプションを使ってBiomeのバージョンを指定しなくてはいけません。
 
-Biome がすでに `npm` パッケージとしてローカルリポジトリにインストールされている場合、
+Biome がすでに `npm` のパッケージとしてローカルリポジトリにインストールされている場合、
 Biome を更新する際に `package.json` と `.pre-commit-config.yaml` の両方を更新するのは開発者の負担になります。
 提供されているBiomeフックを使う代わりに、独自の[ローカルフック](https://pre-commit.com/index.html#repository-local-hooks)を指定することができます。
 
@@ -196,7 +194,7 @@ repos:
 ```
 
 Biome は`--files-ignore-unknown=true`を指定することで未知のファイルを無視するため、
-pre-commit の `files` オプショナルは必須ではありません。
+pre-commit の `files` オプションは必須ではありません。
 
 ## Shell script
 
