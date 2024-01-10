@@ -15,7 +15,7 @@ pub struct CliOptions {
     #[bpaf(long("use-server"), switch, fallback(false))]
     pub use_server: bool,
 
-    /// Print additional verbose advices on diagnostics
+    /// Print additional diagnostics, and some diagnostics show more information.
     #[bpaf(long("verbose"), switch, fallback(false))]
     pub verbose: bool,
 

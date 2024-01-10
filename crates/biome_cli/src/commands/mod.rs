@@ -3,7 +3,7 @@ use crate::diagnostics::DeprecatedConfigurationFile;
 use crate::logging::LoggingKind;
 use crate::{CliDiagnostic, LoggingLevel, VERSION};
 use biome_console::{markup, Console, ConsoleExt};
-use biome_diagnostics::PrintDiagnostic;
+use biome_diagnostics::{Diagnostic, PrintDiagnostic};
 use biome_service::configuration::css::CssFormatter;
 use biome_service::configuration::json::JsonFormatter;
 use biome_service::configuration::vcs::VcsConfiguration;
@@ -400,20 +400,23 @@ pub(crate) fn validate_configuration_diagnostics(
     {
         if file_path == "rome.json" {
             let diagnostic = DeprecatedConfigurationFile::new(file_path);
-            console.error(markup!{
-                {if verbose { PrintDiagnostic::verbose(&diagnostic) } else { PrintDiagnostic::simple(&diagnostic) }}
-            });
+            if diagnostic.tags().is_verbose() && verbose {
+                console.error(markup! {{PrintDiagnostic::verbose(&diagnostic)}})
+            } else {
+                console.error(markup! {{PrintDiagnostic::simple(&diagnostic)}})
+            }
         }
     }
     let diagnostics = loaded_configuration.as_diagnostics_iter();
     for diagnostic in diagnostics {
-        console.error(markup!{
-            {if verbose { PrintDiagnostic::verbose(diagnostic) } else { PrintDiagnostic::simple(diagnostic) }}
-        });
+        if diagnostic.tags().is_verbose() && verbose {
+            console.error(markup! {{PrintDiagnostic::verbose(diagnostic)}})
+        } else {
+            console.error(markup! {{PrintDiagnostic::simple(diagnostic)}})
+        }
     }
 
     if loaded_configuration.has_errors() {
-        println!("{:#?}", loaded_configuration);
         return Err(CliDiagnostic::workspace_error(
             WorkspaceError::Configuration(ConfigurationDiagnostic::invalid_configuration(
                 "Biome exited because the configuration resulted in errors. Please fix them.",

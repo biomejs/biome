@@ -7,9 +7,9 @@ use crate::execute::diagnostics::{
 };
 use crate::{CliDiagnostic, CliSession, Execution, FormatterReportSummary, Report, TraversalMode};
 use biome_console::{fmt, markup, Console, ConsoleExt};
-use biome_diagnostics::Diagnostic;
 use biome_diagnostics::PrintGitHubDiagnostic;
 use biome_diagnostics::{category, DiagnosticExt, Error, PrintDiagnostic, Resource, Severity};
+use biome_diagnostics::{Diagnostic, DiagnosticTags};
 use biome_fs::{FileSystem, PathInterner, RomePath};
 use biome_fs::{TraversalContext, TraversalScope};
 use biome_service::workspace::{FeaturesBuilder, IsPathIgnoredParams};
@@ -549,9 +549,13 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
 
         for diagnostic in diagnostics_to_print {
             if diagnostic.severity() >= self.diagnostic_level {
-                console.error(markup! {
-                {if self.verbose { PrintDiagnostic::verbose(&diagnostic) } else { PrintDiagnostic::simple(&diagnostic) }}
-            });
+                if diagnostic.tags().is_verbose() {
+                    if self.verbose {
+                        console.error(markup! {{PrintDiagnostic::verbose(&diagnostic)}})
+                    }
+                } else {
+                    console.error(markup! {{PrintDiagnostic::simple(&diagnostic)}})
+                }
             }
 
             if running_on_github {
@@ -609,7 +613,8 @@ impl<'ctx, 'app> TraversalOptions<'ctx, 'app> {
     pub(crate) fn miss_handler_err(&self, err: WorkspaceError, rome_path: &RomePath) {
         self.push_diagnostic(
             err.with_category(category!("files/missingHandler"))
-                .with_file_path(rome_path.display().to_string()),
+                .with_file_path(rome_path.display().to_string())
+                .with_tags(DiagnosticTags::VERBOSE),
         );
     }
 
