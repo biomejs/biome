@@ -312,10 +312,8 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
             return true;
         }
 
-        if diagnostic_tags.is_verbose() {
-            if !self.verbose {
-                return true;
-            }
+        if diagnostic_tags.is_verbose() && !self.verbose {
+            return true;
         }
 
         false

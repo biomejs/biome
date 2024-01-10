@@ -1,6 +1,6 @@
 use crate::snap_test::{assert_cli_snapshot, SnapshotPayload};
 use crate::{run_cli, UNFORMATTED};
-use biome_console::{BufferConsole, LogLevel, MarkupBuf};
+use biome_console::{BufferConsole, LogLevel};
 use biome_fs::MemoryFileSystem;
 use biome_service::DynRef;
 use bpaf::Args;
@@ -79,7 +79,7 @@ fn max_diagnostics_no_verbose() {
         let file_path = PathBuf::from(format!("src/folder_{i}/package.json"));
         fs.insert(file_path, "{}".as_bytes());
     }
-    let file_path = PathBuf::from(format!("src/file.js"));
+    let file_path = PathBuf::from("src/file.js".to_string());
     fs.insert(file_path, UNFORMATTED.as_bytes());
 
     let result = run_cli(
@@ -113,7 +113,7 @@ fn max_diagnostics_verbose() {
         let file_path = PathBuf::from(format!("src/folder_{i}/package.json"));
         fs.insert(file_path, "{}".as_bytes());
     }
-    let file_path = PathBuf::from(format!("src/file.js"));
+    let file_path = PathBuf::from("src/file.js".to_string());
     fs.insert(file_path, UNFORMATTED.as_bytes());
 
     let result = run_cli(
