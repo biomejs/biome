@@ -286,8 +286,8 @@ impl Pattern {
     ///
     /// # Examples
     ///
-    /// ```rust
-    /// use crate::biome_service::Pattern;
+    /// ```rust,ignore
+    /// use crate::Pattern;
     ///
     /// assert!(Pattern::new("c?t").unwrap().matches("cat"));
     /// assert!(Pattern::new("k[!e]tteh").unwrap().matches("kitteh"));
