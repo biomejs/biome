@@ -32,9 +32,9 @@ pub struct RuleMetadata {
     /// The kind of fix
     pub fix_kind: Option<FixKind>,
     /// The source URL of the rule
-    pub source: Option<Source>,
+    pub source: Option<RuleSource>,
     /// The source kind of the rule
-    pub source_kind: Option<SourceKind>,
+    pub source_kind: Option<RuleSourceKind>,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -57,7 +57,7 @@ impl Display for FixKind {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub enum Source {
+pub enum RuleSource {
     /// Rules from [Rust Clippy](https://rust-lang.github.io/rust-clippy/master/index.html)
     Clippy(&'static str),
     /// Rules from [Eslint](https://eslint.org/)
@@ -78,7 +78,7 @@ pub enum Source {
     EslintMysticatea(&'static str),
 }
 
-impl Source {
+impl RuleSource {
     pub fn as_rule_name(&self) -> &'static str {
         match self {
             Self::Clippy(rule_name) => rule_name,
@@ -113,7 +113,7 @@ impl Source {
 }
 
 #[derive(Debug, Clone)]
-pub enum SourceKind {
+pub enum RuleSourceKind {
     /// The rule implements the same logic of the source
     SameLogic,
     /// The rule deviate of the logic of the source
@@ -149,12 +149,15 @@ impl RuleMetadata {
         self
     }
 
-    pub const fn source(mut self, source: Source) -> Self {
+    pub const fn source(mut self, source: RuleSource) -> Self {
         self.source = Some(source);
+        if self.source_kind.is_none() {
+            self.source_kind = Some(RuleSourceKind::SameLogic);
+        }
         self
     }
 
-    pub const fn source_kind(mut self, source_kind: SourceKind) -> Self {
+    pub const fn source_kind(mut self, source_kind: RuleSourceKind) -> Self {
         self.source_kind = Some(source_kind);
         self
     }
