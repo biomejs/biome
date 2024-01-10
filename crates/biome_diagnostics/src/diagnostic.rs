@@ -97,6 +97,7 @@ pub trait Diagnostic: Debug {
     /// - If the diagnostic is being emitted as part of a crash / fatal error
     /// - If the diagnostic is a warning about a piece of unused or unnecessary code
     /// - If the diagnostic is a warning about a piece of deprecated or obsolete code.
+    /// - If the diagnostic is meant to provide more information
     fn tags(&self) -> DiagnosticTags {
         DiagnosticTags::empty()
     }
@@ -171,6 +172,7 @@ pub(super) enum DiagnosticTag {
     Internal,
     UnnecessaryCode,
     DeprecatedCode,
+    Verbose,
 }
 
 bitflags! {
@@ -186,6 +188,14 @@ bitflags! {
         /// This diagnostic tags deprecated or obsolete code, this may change
         /// how the diagnostic is render in editors.
         const DEPRECATED_CODE = 1 << DiagnosticTag::DeprecatedCode as u8;
+        /// This diagnostic is verbose and should be printed only if the `--verbose` option is provided
+        const VERBOSE = 1 << DiagnosticTag::Verbose as u8;
+    }
+}
+
+impl DiagnosticTags {
+    pub const fn is_verbose(&self) -> bool {
+        self.contains(Self::VERBOSE)
     }
 }
 

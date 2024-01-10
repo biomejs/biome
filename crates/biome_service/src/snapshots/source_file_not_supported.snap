@@ -8,7 +8,7 @@ not_supported.toml files/missingHandler ━━━━━━━━━━━━━�
   
   Verbose advice
   
-    i If you want to turn off this diagnostic, consider using --files-ignore-unknownfrom the CLI, or files.ignoreUnknown from the configuration file.
+    i If you want to turn off this diagnostic, consider using --files-ignore-unknown from the CLI, or files.ignoreUnknown from the configuration file.
     
 
 

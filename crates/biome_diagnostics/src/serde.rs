@@ -281,6 +281,7 @@ impl From<DiagnosticTag> for DiagnosticTags {
             DiagnosticTag::Internal => DiagnosticTags::INTERNAL,
             DiagnosticTag::UnnecessaryCode => DiagnosticTags::UNNECESSARY_CODE,
             DiagnosticTag::DeprecatedCode => DiagnosticTags::DEPRECATED_CODE,
+            DiagnosticTag::Verbose => DiagnosticTags::VERBOSE,
         }
     }
 }
