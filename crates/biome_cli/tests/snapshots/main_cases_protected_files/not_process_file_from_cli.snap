@@ -22,14 +22,6 @@ internalError/io ━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
-package.json project ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i The file package.json is protected because is handled by another tool. Biome won't process it.
-  
-
-```
-
-```block
 Compared 0 file(s) in <TIME>
 ```
 

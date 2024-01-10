@@ -62,7 +62,7 @@ pub fn create_analyzer_options(
             let configuration = deserialized.into_deserialized().unwrap_or_default();
             let mut settings = WorkspaceSettings::default();
             settings
-                .merge_with_configuration(configuration, None, &[])
+                .merge_with_configuration(configuration, None, None, &[])
                 .unwrap();
             let configuration = AnalyzerConfiguration {
                 rules: to_analyzer_rules(&settings, input_file),

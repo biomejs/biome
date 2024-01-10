@@ -797,7 +797,7 @@ fn fs_error_dereferenced_symlink() {
     }
 
     let result = run_cli(
-        DynRef::Owned(Box::new(OsFileSystem)),
+        DynRef::Owned(Box::new(OsFileSystem(Some(root_path.clone())))),
         &mut console,
         Args::from([("check"), root_path.display().to_string().as_str()].as_slice()),
     );
@@ -841,7 +841,7 @@ fn fs_error_infinite_symlink_expansion_to_dirs() {
     }
 
     let result = run_cli(
-        DynRef::Owned(Box::new(OsFileSystem)),
+        DynRef::Owned(Box::new(OsFileSystem(Some(root_path.clone())))),
         &mut console,
         Args::from([("check"), (root_path.display().to_string().as_str())].as_slice()),
     );
@@ -887,7 +887,7 @@ fn fs_error_infinite_symlink_expansion_to_files() {
     }
 
     let result = run_cli(
-        DynRef::Owned(Box::new(OsFileSystem)),
+        DynRef::Owned(Box::new(OsFileSystem(Some(root_path.clone())))),
         &mut console,
         Args::from([("check"), (root_path.display().to_string().as_str())].as_slice()),
     );
@@ -1067,7 +1067,7 @@ fn fs_files_ignore_symlink() {
     }
 
     let result = run_cli(
-        DynRef::Owned(Box::new(OsFileSystem)),
+        DynRef::Owned(Box::new(OsFileSystem(Some(root_path.clone())))),
         &mut console,
         Args::from(
             [
@@ -1426,6 +1426,37 @@ fn unsupported_file() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "unsupported_file",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn unsupported_file_verbose() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Path::new("check.txt");
+    fs.insert(file_path.into(), LINT_ERROR.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("check"),
+                "--verbose",
+                file_path.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "unsupported_file_verbose",
         fs,
         console,
         result,

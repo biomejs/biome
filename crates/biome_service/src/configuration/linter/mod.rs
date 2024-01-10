@@ -79,6 +79,7 @@ impl Default for LinterConfiguration {
 }
 
 pub fn to_linter_settings(
+    working_directory: Option<PathBuf>,
     conf: LinterConfiguration,
     vcs_path: Option<PathBuf>,
     gitignore_matches: &[String],
@@ -86,8 +87,18 @@ pub fn to_linter_settings(
     Ok(LinterSettings {
         enabled: conf.enabled.unwrap_or_default(),
         rules: conf.rules,
-        ignored_files: to_matcher(conf.ignore.as_ref(), vcs_path.clone(), gitignore_matches)?,
-        included_files: to_matcher(conf.include.as_ref(), vcs_path, gitignore_matches)?,
+        ignored_files: to_matcher(
+            working_directory.clone(),
+            conf.ignore.as_ref(),
+            vcs_path.clone(),
+            gitignore_matches,
+        )?,
+        included_files: to_matcher(
+            working_directory.clone(),
+            conf.include.as_ref(),
+            vcs_path,
+            gitignore_matches,
+        )?,
     })
 }
 

@@ -503,7 +503,7 @@ impl Diagnostic for SourceFileNotSupported {
         visitor.record_log(
             LogCategory::Info,
             &markup! {
-                "If you want to turn off this diagnostic, consider using "<Emphasis>"--files-ignore-unknown"</Emphasis>"from the CLI, or "<Emphasis>"files.ignoreUnknown"</Emphasis>" from the configuration file."
+                "If you want to turn off this diagnostic, consider using "<Emphasis>"--files-ignore-unknown"</Emphasis>" from the CLI, or "<Emphasis>"files.ignoreUnknown"</Emphasis>" from the configuration file."
             }
         )
     }
@@ -685,7 +685,8 @@ pub struct DisabledVcs {}
     message(
         message("The file "<Emphasis>{self.file_path}</Emphasis>" is protected because is handled by another tool. Biome won't process it."),
         description = "The file {file_path} is protected because is handled by another tool. Biome won't process it.",
-    )
+    ),
+    tags(VERBOSE)
 )]
 pub struct ProtectedFile {
     #[location(resource)]
