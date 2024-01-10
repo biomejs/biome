@@ -153,6 +153,9 @@ export default defineConfig({
 						{
 							label: "Integrate Biome with your VCS",
 							link: "/guides/integrate-in-vcs",
+							translations: {
+								es: "Integra Biome con tu VCS",
+							},
 						},
 					],
 				},
@@ -225,6 +228,7 @@ export default defineConfig({
 										ja: "イントロダクション",
 										"zh-CN": "介绍",
 										"pt-BR": "Introdução",
+										es: "Introducción",
 									},
 								},
 								{
@@ -234,6 +238,7 @@ export default defineConfig({
 										ja: "Lintルール",
 										"zh-CN": "Lint 规则",
 										"pt-BR": "Regras do Linter",
+										es: "Reglas del Linter",
 									},
 								},
 							],
@@ -291,7 +296,7 @@ export default defineConfig({
 								ja: "継続的インテグレーション",
 								"zh-CN": "持续集成",
 								"pt-BR": "Integração Contínua",
-								es: "Integración Continua"
+								es: "Integración Continua",
 							},
 						},
 						{
@@ -307,7 +312,7 @@ export default defineConfig({
 						ja: "内部原理",
 						"zh-CN": "内部原理",
 						"pt-BR": "Aspectos Internos",
-						es: "Aspectos Internos"
+						es: "Aspectos Internos",
 					},
 					items: [
 						{
@@ -317,7 +322,7 @@ export default defineConfig({
 								ja: "理念",
 								"zh-CN": "理念",
 								"pt-BR": "Filosofia",
-								es: "Filosofía"
+								es: "Filosofía",
 							},
 						},
 						{
@@ -327,7 +332,7 @@ export default defineConfig({
 								ja: "言語サポート",
 								"zh-CN": "语言支持",
 								"pt-BR": "Suporte de linguagens",
-								es: "Soporte de Idiomas"
+								es: "Soporte de Idiomas",
 							},
 						},
 						{
@@ -337,7 +342,7 @@ export default defineConfig({
 								ja: "アーキテクチャ",
 								"zh-CN": "架构",
 								"pt-BR": "Arquitetura",
-								es: "Arquitectura"
+								es: "Arquitectura",
 							},
 						},
 						{
@@ -347,7 +352,7 @@ export default defineConfig({
 								ja: "クレジット",
 								"zh-CN": "鸣谢",
 								"pt-BR": "Créditos",
-								es: "Créditos"
+								es: "Créditos",
 							},
 						},
 						{
@@ -357,7 +362,7 @@ export default defineConfig({
 								ja: "バージョニング",
 								"zh-CN": "版本控制",
 								"pt-BR": "Versionamento",
-								es:"Control de Versiones" 
+								es: "Control de Versiones",
 							},
 						},
 						{
@@ -366,7 +371,7 @@ export default defineConfig({
 							translations: {
 								"zh-CN": "更新日志",
 								"pt-BR": "Alterações",
-								es: "Modificaciones"
+								es: "Modificaciones",
 							},
 						},
 					],
