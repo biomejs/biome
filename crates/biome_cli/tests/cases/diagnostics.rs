@@ -1,10 +1,10 @@
-use crate::run_cli;
 use crate::snap_test::{assert_cli_snapshot, SnapshotPayload};
-use biome_console::{BufferConsole, LogLevel};
+use crate::{run_cli, UNFORMATTED};
+use biome_console::{BufferConsole, LogLevel, MarkupBuf};
 use biome_fs::MemoryFileSystem;
 use biome_service::DynRef;
 use bpaf::Args;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 const TEST_CONTENTS: &str = "debugger;";
 
@@ -64,6 +64,74 @@ fn logs_the_appropriate_messages_according_to_set_diagnostics_level() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "logs_the_appropriate_messages_according_to_set_diagnostics_level",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn max_diagnostics_no_verbose() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    for i in 0..10 {
+        let file_path = PathBuf::from(format!("src/folder_{i}/package.json"));
+        fs.insert(file_path, "{}".as_bytes());
+    }
+    let file_path = PathBuf::from(format!("src/file.js"));
+    fs.insert(file_path, UNFORMATTED.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("ci"), ("--max-diagnostics"), ("10"), ("src")].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    for i in 0..10 {
+        let file_path = PathBuf::from(format!("src/folder_{i}/package.json"));
+        fs.remove(Path::new(&file_path));
+    }
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "max_diagnostics_no_verbose",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn max_diagnostics_verbose() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    for i in 0..8 {
+        let file_path = PathBuf::from(format!("src/folder_{i}/package.json"));
+        fs.insert(file_path, "{}".as_bytes());
+    }
+    let file_path = PathBuf::from(format!("src/file.js"));
+    fs.insert(file_path, UNFORMATTED.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("ci"), ("--max-diagnostics=10"), "--verbose", ("src")].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    for i in 0..8 {
+        let file_path = PathBuf::from(format!("src/folder_{i}/package.json"));
+        fs.remove(Path::new(&file_path));
+    }
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "max_diagnostics_verbose",
         fs,
         console,
         result,
