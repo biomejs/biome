@@ -8,6 +8,8 @@ title: noInnerDeclarations (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://eslint.org/docs/latest/rules/no-inner-declarations" target="_blank"><code>no-inner-declarations</code></a>
+
 Disallow `function` and `var` declarations that are accessible outside their block.
 
 A `var` is accessible in the whole body of the nearest root (function, module, script, static block).
@@ -20,8 +22,6 @@ In ES2015, inside an _ES module_, a `function` declaration is always block-scope
 Note that `const` and `let` declarations are block-scoped,
 and therefore they are not affected by this rule.
 Moreover, `function` declarations in nested blocks are allowed inside _ES modules_.
-
-Source: https://eslint.org/docs/rules/no-inner-declarations
 
 ## Examples
 

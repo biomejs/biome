@@ -1,4 +1,4 @@
-use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_semantic::{ReferencesExtensions, SemanticModel};
 use biome_js_syntax::{
@@ -14,9 +14,6 @@ use crate::{semantic_services::Semantic, utils::is_node_equal};
 
 declare_rule! {
     /// This rule recommends a `for-of` loop when in a `for` loop, the index used to extract an item from the iterated array.
-    ///
-    ///
-    /// Source: https://typescript-eslint.io/rules/prefer-for-of/
     ///
     /// ## Examples
     ///
@@ -45,6 +42,7 @@ declare_rule! {
     pub(crate) UseForOf {
         version: "1.5.0",
         name: "useForOf",
+        source: RuleSource::EslintTypeScript("prefer-for-of"),
         recommended: false,
     }
 }

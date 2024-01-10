@@ -4,7 +4,7 @@ use crate::globals::runtime::{BUILTIN, ES_2021};
 use crate::globals::typescript::TYPESCRIPT_BUILTIN;
 use crate::semantic_services::SemanticServices;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, Rule, RuleDiagnostic};
+use biome_analyze::{declare_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::{JsFileSource, Language, TextRange, TsAsExpression, TsReferenceType};
 use biome_rowan::AstNode;
@@ -34,6 +34,7 @@ declare_rule! {
     pub(crate) NoUndeclaredVariables {
         version: "1.0.0",
         name: "noUndeclaredVariables",
+        source: RuleSource::Eslint("no-undef"),
         recommended: false,
     }
 }

@@ -1788,7 +1788,7 @@
 					"type": ["boolean", "null"]
 				},
 				"noArguments": {
-					"description": "Disallow the use of arguments",
+					"description": "Disallow the use of arguments.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

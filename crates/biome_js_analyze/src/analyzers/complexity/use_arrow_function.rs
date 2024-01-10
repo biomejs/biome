@@ -1,7 +1,8 @@
 use crate::JsRuleAction;
 use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, AddVisitor, FixKind, Phases, QueryMatch,
-    Queryable, Rule, RuleDiagnostic, ServiceBag, Visitor, VisitorContext,
+    Queryable, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, ServiceBag, Visitor,
+    VisitorContext,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
@@ -69,6 +70,8 @@ declare_rule! {
     pub(crate) UseArrowFunction {
         version: "1.0.0",
         name: "useArrowFunction",
+        source: RuleSource::Eslint("prefer-arrow-callback"),
+        source_kind: RuleSourceKind::Inspired,
         recommended: true,
         fix_kind: FixKind::Safe,
     }

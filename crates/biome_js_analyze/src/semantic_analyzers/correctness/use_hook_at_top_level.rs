@@ -1,5 +1,6 @@
 use crate::react::hooks::is_react_hook_call;
 use crate::semantic_services::{SemanticModelBuilderVisitor, SemanticServices};
+use biome_analyze::RuleSource;
 use biome_analyze::{
     context::RuleContext, declare_rule, AddVisitor, FromServices, MissingServicesDiagnostic, Phase,
     Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, RuleKey, ServiceBag, Visitor,
@@ -63,6 +64,7 @@ declare_rule! {
     pub(crate) UseHookAtTopLevel {
         version: "1.0.0",
         name: "useHookAtTopLevel",
+        source: RuleSource::EslintReactHooks("rules-of-hooks"),
         recommended: false,
     }
 }

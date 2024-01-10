@@ -8,6 +8,8 @@ title: noDistractingElements (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/no-distracting-elements.md" target="_blank"><code>no-distracting-elements</code></a>
+
 Enforces that no distracting elements are used.
 
 Elements that can be visually distracting can cause accessibility issues with visually impaired users.

@@ -1,6 +1,6 @@
 use crate::{aria_services::Aria, JsRuleAction};
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
+    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
@@ -9,8 +9,6 @@ use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
 
 declare_rule! {
     /// Enforce that elements that do not support ARIA roles, states, and properties do not have those attributes.
-    ///
-    /// Source: https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/aria-unsupported-elements.md
     ///
     /// ## Examples
     ///
@@ -38,6 +36,7 @@ declare_rule! {
     pub(crate) NoAriaUnsupportedElements {
         version: "1.0.0",
         name: "noAriaUnsupportedElements",
+        source: RuleSource::EslintJsxA11y("aria-unsupported-elements"),
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }

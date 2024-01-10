@@ -8,12 +8,12 @@ title: noThenProperty (since v1.5.0)
 This rule is part of the [nursery](/linter/rules/#nursery) group.
 :::
 
+Source: <a href="https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/no-thenable.md" target="_blank"><code>no-thenable</code></a>
+
 Disallow `then` property.
 
 When combining objects with a `then` method (thenable objects) with await expressions or dynamic imports, caution is necessary.
 These syntaxes interpret the object's then method as intended for the resolution or rejection of a promise, which can lead to unexpected behavior or errors.
-
-Source: https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/no-thenable.md
 
 ## Examples
 

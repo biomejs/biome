@@ -8,13 +8,13 @@ title: noParameterAssign (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://eslint.org/docs/latest/rules/no-param-reassign" target="_blank"><code>no-param-reassign</code></a>
+
 Disallow reassigning `function` parameters.
 
 Assignment to a `function` parameters can be misleading and confusing,
 as modifying parameters will also mutate the `arguments` object.
 It is often unintended and indicative of a programmer error.
-
-Source: https://eslint.org/docs/latest/rules/no-param-reassign
 
 In contrast to the _ESLint_ rule, this rule cannot be configured to report
 assignments to a property of a parameter.

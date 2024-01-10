@@ -8,6 +8,8 @@ title: noExtraBooleanCast (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://eslint.org/docs/latest/rules/no-extra-boolean-cast" target="_blank"><code>no-extra-boolean-cast</code></a>
+
 Disallow unnecessary boolean casts
 
 ## Examples

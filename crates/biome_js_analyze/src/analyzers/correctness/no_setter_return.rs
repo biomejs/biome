@@ -1,5 +1,5 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::{JsReturnStatement, JsSetterClassMember, JsSetterObjectMember};
 use biome_rowan::{declare_node_union, AstNode};
@@ -67,6 +67,7 @@ declare_rule! {
     pub(crate) NoSetterReturn {
         version: "1.0.0",
         name: "noSetterReturn",
+        source: RuleSource::Eslint("no-setter-return"),
         recommended: true,
     }
 }

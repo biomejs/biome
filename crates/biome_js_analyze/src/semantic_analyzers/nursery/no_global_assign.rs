@@ -3,6 +3,7 @@ use crate::globals::node::NODE;
 use crate::globals::runtime::{BUILTIN, ES_2021};
 
 use crate::semantic_services::SemanticServices;
+use biome_analyze::RuleSource;
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_js_syntax::{JsSyntaxKind, TextRange};
@@ -12,8 +13,6 @@ declare_rule! {
     ///
     /// _JavaScript environments contain numerous built-in global variables, such as `window` in browsers and `process` in _Node.js.
     /// Assigning values to these global variables can be problematic as it can override essential functionality.
-    ///
-    /// Source: https://eslint.org/docs/latest/rules/no-global-assign
     ///
     /// ## Examples
     ///
@@ -44,6 +43,7 @@ declare_rule! {
     pub(crate) NoGlobalAssign {
         version: "1.5.0",
         name: "noGlobalAssign",
+        source: RuleSource::Eslint("no-global-assign"),
         recommended: true,
     }
 }

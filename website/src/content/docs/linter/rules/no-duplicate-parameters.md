@@ -8,13 +8,13 @@ title: noDuplicateParameters (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://eslint.org/docs/latest/rules/no-dupe-args" target="_blank"><code>no-dupe-args</code></a>
+
 Disallow duplicate function parameter name.
 
 If more than one parameter has the same name in a function definition,
 the last occurrence overrides the preceding occurrences.
 A duplicated name might be a typing error.
-
-Source: https://eslint.org/docs/latest/rules/no-dupe-args
 
 ## Examples
 

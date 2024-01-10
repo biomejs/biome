@@ -1,6 +1,6 @@
 use crate::utils::is_node_equal;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_js_syntax::{AnyJsExpression, AnyJsSwitchClause, JsSwitchStatement};
 use biome_rowan::{AstNode, TextRange};
 
@@ -8,8 +8,6 @@ declare_rule! {
     /// Disallow duplicate case labels.
     ///
     /// If a switch statement has duplicate test expressions in case clauses, it is likely that a programmer copied a case clause but forgot to change the test expression.
-    ///
-    /// Source: https://eslint.org/docs/latest/rules/no-duplicate-case
     ///
     /// ## Examples
     ///
@@ -85,6 +83,7 @@ declare_rule! {
     pub(crate) NoDuplicateCase {
         version: "1.0.0",
         name: "noDuplicateCase",
+        source: RuleSource::Eslint("no-duplicate-case"),
         recommended: true,
     }
 }

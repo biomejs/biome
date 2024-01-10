@@ -62,6 +62,10 @@ pub enum RuleSource {
     Clippy(&'static str),
     /// Rules from [Eslint](https://eslint.org/)
     Eslint(&'static str),
+    /// Rules from [Eslint Plugin Import](https://github.com/import-js/eslint-plugin-import)
+    EslintImport(&'static str),
+    /// Rules from [Eslint Plugin Import Access](https://github.com/uhyo/eslint-plugin-import-access)
+    EslintImportAccess(&'static str),
     /// Rules from [Eslint Plugin Jest](https://github.com/jest-community/eslint-plugin-jest)
     EslintJest(&'static str),
     /// Rules from [Eslint Plugin JSX A11y](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y)
@@ -70,7 +74,11 @@ pub enum RuleSource {
     EslintReact(&'static str),
     /// Rules from [Eslint Plugin React Hooks](https://github.com/facebook/react/blob/main/packages/eslint-plugin-react-hooks/README.md)
     EslintReactHooks(&'static str),
-    /// Rules from [Typescript Eslint Plugin](https://typescript-eslint.io)
+    /// Rules from [Eslint Plugin Sonar](https://github.com/SonarSource/eslint-plugin-sonarjs)
+    EslintSonarJs(&'static str),
+    /// Rules from [Eslint Plugin Stylistic](https://eslint.style)
+    EslintStylistic(&'static str),
+    /// Rules from [Eslint Plugin Typescript](https://typescript-eslint.io)
     EslintTypeScript(&'static str),
     /// Rules from [Eslint Plugin Unicorn](https://github.com/sindresorhus/eslint-plugin-unicorn)
     EslintUnicorn(&'static str),
@@ -81,27 +89,35 @@ pub enum RuleSource {
 impl RuleSource {
     pub fn as_rule_name(&self) -> &'static str {
         match self {
-            Self::Clippy(rule_name) => rule_name,
-            Self::Eslint(rule_name) => rule_name,
-            Self::EslintJest(rule_name) => rule_name,
-            Self::EslintJsxA11y(rule_name) => rule_name,
-            Self::EslintReact(rule_name) => rule_name,
-            Self::EslintReactHooks(rule_name) => rule_name,
-            Self::EslintTypeScript(rule_name) => rule_name,
-            Self::EslintUnicorn(rule_name) => rule_name,
-            Self::EslintMysticatea(rule_name) => rule_name,
+            Self::Clippy(rule_name)
+            | Self::Eslint(rule_name)
+            | Self::EslintImport(rule_name)
+            | Self::EslintImportAccess(rule_name)
+            | Self::EslintJest(rule_name)
+            | Self::EslintJsxA11y(rule_name)
+            | Self::EslintReact(rule_name)
+            | Self::EslintReactHooks(rule_name)
+            | Self::EslintTypeScript(rule_name)
+            | Self::EslintSonarJs(rule_name)
+            | Self::EslintStylistic(rule_name)
+            | Self::EslintUnicorn(rule_name)
+            | Self::EslintMysticatea(rule_name) => rule_name,
         }
     }
 
     pub fn as_rule_url(&self) -> String {
         match self {
             Self::Clippy(rule_name) => format!("https://rust-lang.github.io/rust-clippy/master/#/{rule_name}"),
-            Self::Eslint(rule_name) => format!( "https://eslint.org/docs/latest/rules/{rule_name}"),
+            Self::Eslint(rule_name) => format!("https://eslint.org/docs/latest/rules/{rule_name}"),
+            Self::EslintImport(rule_name) => format!("https://github.com/import-js/eslint-plugin-import/blob/main/docs/rules/{rule_name}.md"),
+            Self::EslintImportAccess(rule_name) => format!("https://github.com/uhyo/eslint-plugin-import-access/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintJest(rule_name) => format!("https://github.com/jest-community/eslint-plugin-jest/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintJsxA11y(rule_name) => format!("https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintReact(rule_name) => format!("https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/{rule_name}.md"),
             Self::EslintReactHooks(_) =>  "https://github.com/facebook/react/blob/main/packages/eslint-plugin-react-hooks/README.md".to_string(),
             Self::EslintTypeScript(rule_name) => format!("https://typescript-eslint.io/rules/{rule_name}"),
+            Self::EslintSonarJs(rule_name) => format!("https://github.com/SonarSource/eslint-plugin-sonarjs/blob/HEAD/docs/rules/{rule_name}.md"),
+            Self::EslintStylistic(rule_name) => format!("https://eslint.style/rules/default/{rule_name}"),
             Self::EslintUnicorn(rule_name) => format!("https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintMysticatea(rule_name) => format!("https://github.com/mysticatea/eslint-plugin/blob/master/docs/rules/{rule_name}.md"),
         }
@@ -112,9 +128,10 @@ impl RuleSource {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Default, Clone)]
 pub enum RuleSourceKind {
     /// The rule implements the same logic of the source
+    #[default]
     SameLogic,
     /// The rule deviate of the logic of the source
     Inspired,
@@ -151,9 +168,9 @@ impl RuleMetadata {
 
     pub const fn source(mut self, source: RuleSource) -> Self {
         self.source = Some(source);
-        if self.source_kind.is_none() {
-            self.source_kind = Some(RuleSourceKind::SameLogic);
-        }
+        //if self.source_kind.is_none() {
+        //    self.source_kind = Some(RuleSourceKind::SameLogic);
+        //}
         self
     }
 

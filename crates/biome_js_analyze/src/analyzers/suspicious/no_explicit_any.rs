@@ -1,5 +1,5 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::{TsAnyType, TsTypeConstraintClause};
 use biome_rowan::AstNode;
@@ -15,8 +15,6 @@ declare_rule! {
     ///
     /// Sometimes you can use the type `unknown` instead of the type `any`.
     /// It also accepts any value, however it requires to check that a property exists before calling it.
-    ///
-    /// Source: https://typescript-eslint.io/rules/no-explicit-any
     ///
     /// ## Examples
     ///
@@ -56,6 +54,7 @@ declare_rule! {
     pub(crate) NoExplicitAny {
         version: "1.0.0",
         name: "noExplicitAny",
+        source: RuleSource::EslintTypeScript("no-explicit-any"),
         recommended: true,
     }
 }

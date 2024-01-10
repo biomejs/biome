@@ -1,6 +1,6 @@
 use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic};
+use biome_analyze::{declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make::{ident, js_name};
@@ -9,7 +9,6 @@ use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
 
 declare_rule! {
     /// Promotes the use of `.flatMap()` when `map().flat()` are used together.
-    ///
     ///
     /// ## Examples
     ///
@@ -35,6 +34,7 @@ declare_rule! {
     pub(crate) UseFlatMap {
         version: "1.0.0",
         name: "useFlatMap",
+        source: RuleSource::EslintUnicorn("prefer-array-flat-map"),
         recommended: true,
         fix_kind: FixKind::Safe,
     }

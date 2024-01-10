@@ -323,7 +323,7 @@ fn generate_rule(
 
     if let Some(source) = source {
         let (source_rule_url, source_rule_name) = source.as_url_and_rule_name();
-        match source_kind.unwrap() {
+        match source_kind.cloned().unwrap_or_default() {
             RuleSourceKind::Inspired => {
                 write!(content, "Inspired from: ")?;
             }

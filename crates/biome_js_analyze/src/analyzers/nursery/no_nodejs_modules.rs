@@ -1,5 +1,5 @@
 use crate::globals::node::is_node_builtin_module;
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::inner_string_text;
 use biome_rowan::TextRange;
@@ -10,8 +10,6 @@ declare_rule! {
     /// Forbid the use of Node.js builtin modules.
     ///
     /// This can be useful for client-side web projects that don't have access to those modules.
-    ///
-    /// Source: https://github.com/import-js/eslint-plugin-import/blob/main/docs/rules/no-nodejs-modules.md
     ///
     /// ## Examples
     ///
@@ -33,6 +31,7 @@ declare_rule! {
     pub(crate) NoNodejsModules {
         version: "1.5.0",
         name: "noNodejsModules",
+        source: RuleSource::EslintImport("no-nodejs-modules"),
         recommended: false,
     }
 }

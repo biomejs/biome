@@ -1,6 +1,7 @@
 use crate::JsRuleAction;
 use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
+    RuleSource,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
@@ -39,8 +40,6 @@ declare_rule! {
     /// import type { A, B } from "mod";
     /// ```
     ///
-    /// Source: https://typescript-eslint.io/rules/no-import-type-side-effects/
-    ///
     /// ## Examples
     ///
     /// ### Invalid
@@ -61,6 +60,7 @@ declare_rule! {
     pub(crate) UseGroupedTypeImport {
         version: "1.0.0",
         name: "useGroupedTypeImport",
+        source: RuleSource::EslintTypeScript("no-import-type-side-effects"),
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }

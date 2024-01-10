@@ -1,6 +1,6 @@
 use biome_analyze::{
     context::RuleContext, declare_rule, AddVisitor, Phases, QueryMatch, Queryable, Rule,
-    RuleDiagnostic, ServiceBag, Visitor, VisitorContext,
+    RuleDiagnostic, RuleSource, ServiceBag, Visitor, VisitorContext,
 };
 use biome_console::markup;
 use biome_js_syntax::{AnyFunctionLike, JsAwaitExpression, JsLanguage, TextRange, WalkEvent};
@@ -14,8 +14,6 @@ declare_rule! {
     /// resolved value and handle the asynchronous operation appropriately. Without `await`,
     /// the function operates synchronously and might not leverage the advantages of async
     /// functions.
-    ///
-    /// Source: [require-await](https://eslint.org/docs/latest/rules/require-await)
     ///
     /// ## Examples
     ///
@@ -48,6 +46,7 @@ declare_rule! {
     pub(crate) UseAwait {
         version: "1.4.0",
         name: "useAwait",
+        source: RuleSource::Eslint("require-await"),
         recommended: true,
     }
 }

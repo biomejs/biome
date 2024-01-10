@@ -8,9 +8,9 @@ title: useMediaCaption (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
-Enforces that `audio` and `video` elements must have a `track` for captions.
+Source: <a href="https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/media-has-caption.md" target="_blank"><code>media-has-caption</code></a>
 
-**ESLint Equivalent:** [media-has-caption](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/media-has-caption.md)
+Enforces that `audio` and `video` elements must have a `track` for captions.
 
 ## Examples
 

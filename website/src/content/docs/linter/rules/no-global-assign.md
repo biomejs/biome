@@ -8,12 +8,12 @@ title: noGlobalAssign (since v1.5.0)
 This rule is part of the [nursery](/linter/rules/#nursery) group.
 :::
 
+Source: <a href="https://eslint.org/docs/latest/rules/no-global-assign" target="_blank"><code>no-global-assign</code></a>
+
 Disallow assignments to native objects and read-only global variables.
 
 _JavaScript environments contain numerous built-in global variables, such as `window` in browsers and `process` in _Node.js.
 Assigning values to these global variables can be problematic as it can override essential functionality.
-
-Source: https://eslint.org/docs/latest/rules/no-global-assign
 
 ## Examples
 

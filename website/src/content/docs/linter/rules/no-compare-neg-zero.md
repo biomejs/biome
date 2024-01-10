@@ -8,6 +8,8 @@ title: noCompareNegZero (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://eslint.org/docs/latest/rules/no-compare-neg-zero" target="_blank"><code>no-compare-neg-zero</code></a>
+
 Disallow comparing against `-0`
 
 ## Examples

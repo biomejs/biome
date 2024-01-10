@@ -1,5 +1,5 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::{JsCaseClause, JsDefaultClause};
 use biome_rowan::{AstNode, Direction};
@@ -17,8 +17,6 @@ declare_rule! {
     /// However, such flow is not common and it would be confusing to the readers.
     ///
     /// Even if there is no "fall through" logic, it’s still unexpected to see the default clause before or between the case clauses. By convention, it is expected to be the last clause.
-    ///
-    /// Source: https://eslint.org/docs/latest/rules/default-case-last
     ///
     /// ## Examples
     ///
@@ -74,6 +72,7 @@ declare_rule! {
     pub(crate) UseDefaultSwitchClauseLast {
         version: "1.0.0",
         name: "useDefaultSwitchClauseLast",
+        source: RuleSource::Eslint("default-case-last"),
         recommended: true,
     }
 }

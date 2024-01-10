@@ -8,14 +8,14 @@ title: noConstructorReturn (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://eslint.org/docs/latest/rules/no-constructor-return" target="_blank"><code>no-constructor-return</code></a>
+
 Disallow returning a value from a `constructor`.
 
 Returning a value from a `constructor` of a class is a possible error.
 Forbidding this pattern prevents errors resulting from unfamiliarity with JavaScript or a copy-paste error.
 
 Only returning without a value is allowed, as it’s a control flow statement.
-
-Source: https://eslint.org/docs/latest/rules/no-constructor-return
 
 ## Examples
 

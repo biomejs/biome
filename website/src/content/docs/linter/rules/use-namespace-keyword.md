@@ -8,6 +8,8 @@ title: useNamespaceKeyword (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://typescript-eslint.io/rules/prefer-namespace-keyword" target="_blank"><code>prefer-namespace-keyword</code></a>
+
 Require using the `namespace` keyword over the `module` keyword to declare TypeScript namespaces.
 
 TypeScript historically allowed a code organization called _namespace_.
@@ -17,8 +19,6 @@ For projects still using _namespaces_, it's preferred to use the `namespace` key
 The `module` keyword is deprecated to avoid any confusion with the _ECMAScript modules_ which are often called _modules_.
 
 Note that TypeScript `module` declarations to describe external APIs (`declare module "foo" {}`) are still allowed.
-
-Source: https://typescript-eslint.io/rules/prefer-namespace-keyword
 
 See also: https://www.typescriptlang.org/docs/handbook/namespaces-and-modules.html
 

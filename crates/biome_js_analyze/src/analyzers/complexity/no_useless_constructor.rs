@@ -1,5 +1,6 @@
 use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
+    RuleSource,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
@@ -22,8 +23,6 @@ declare_rule! {
     /// - decorated classes;
     /// - constructors with at least one [parameter property](https://www.typescriptlang.org/docs/handbook/classes.html#parameter-properties);
     /// - `private` and `protected` constructors.
-    ///
-    /// Source: https://typescript-eslint.io/rules/no-useless-constructor
     ///
     /// ## Caveat
     ///
@@ -106,6 +105,7 @@ declare_rule! {
     pub(crate) NoUselessConstructor {
         version: "1.0.0",
         name: "noUselessConstructor",
+        source: RuleSource::EslintTypeScript("no-useless-constructor"),
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }

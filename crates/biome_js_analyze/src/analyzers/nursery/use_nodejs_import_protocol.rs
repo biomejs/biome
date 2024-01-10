@@ -1,5 +1,6 @@
 use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
+    RuleSource,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
@@ -16,8 +17,6 @@ declare_rule! {
     ///
     /// The rule marks traditional imports like `import fs from "fs";` as invalid,
     /// suggesting the format `import fs from "node:fs";` instead.
-    ///
-    /// Source: https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/prefer-node-protocol.md
     ///
     /// ## Examples
     ///
@@ -48,6 +47,7 @@ declare_rule! {
     pub(crate) UseNodejsImportProtocol {
         version: "1.5.0",
         name: "useNodejsImportProtocol",
+        source: RuleSource::EslintUnicorn("prefer-node-protocol"),
         recommended: false,
         fix_kind: FixKind::Unsafe,
     }

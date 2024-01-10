@@ -1,5 +1,5 @@
 use crate::ControlFlowGraph;
-use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_control_flow::{builder::ROOT_BLOCK_ID, ExceptionHandlerKind, InstructionKind};
 use biome_js_syntax::{JsGetterClassMember, JsGetterObjectMember, JsReturnStatement};
@@ -8,8 +8,6 @@ use roaring::RoaringBitmap;
 
 declare_rule! {
     /// Enforce `get` methods to always return a value.
-    ///
-    /// Source: https://eslint.org/docs/latest/rules/getter-return
     ///
     /// ## Examples
     ///
@@ -62,6 +60,7 @@ declare_rule! {
     pub(crate) UseGetterReturn {
         version: "1.0.0",
         name: "useGetterReturn",
+        source: RuleSource::Eslint("getter-return"),
         recommended: true,
     }
 }

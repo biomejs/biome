@@ -8,11 +8,11 @@ title: useYield (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://eslint.org/docs/latest/rules/require-yield" target="_blank"><code>require-yield</code></a>
+
 Require generator functions to contain `yield`.
 
 This rule generates warnings for generator functions that do not have the `yield` keyword.
-
-Source: [require-yield](https://eslint.org/docs/latest/rules/require-yield).
 
 ## Examples
 

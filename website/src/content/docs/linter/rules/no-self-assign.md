@@ -8,11 +8,11 @@ title: noSelfAssign (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://eslint.org/docs/latest/rules/no-self-assign" target="_blank"><code>no-self-assign</code></a>
+
 Disallow assignments where both sides are exactly the same.
 
 Self assignments have no effect, so probably those are an error due to incomplete refactoring.
-
-Source: https://eslint.org/docs/latest/rules/no-self-assign
 
 ## Examples
 

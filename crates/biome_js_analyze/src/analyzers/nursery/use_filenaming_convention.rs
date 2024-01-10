@@ -1,7 +1,9 @@
 use std::{hash::Hash, str::FromStr};
 
 use crate::{semantic_services::SemanticServices, utils::case::Case};
-use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
+use biome_analyze::{
+    context::RuleContext, declare_rule, Rule, RuleDiagnostic, RuleSource, RuleSourceKind,
+};
 use biome_console::markup;
 use biome_deserialize::{
     Deserializable, DeserializationDiagnostic, DeserializationVisitor, Text, VisitableType,
@@ -68,6 +70,8 @@ declare_rule! {
     pub(crate) UseFilenamingConvention {
         version: "1.5.0",
         name: "useFilenamingConvention",
+        source: RuleSource::EslintUnicorn("filename-case"),
+        source_kind: RuleSourceKind::Inspired,
         recommended: false,
     }
 }

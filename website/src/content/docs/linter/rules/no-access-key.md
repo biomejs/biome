@@ -8,6 +8,8 @@ title: noAccessKey (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/no-access-key.md" target="_blank"><code>no-access-key</code></a>
+
 Enforce that the `accessKey` attribute is not used on any HTML element.
 
 The `accessKey` assigns a keyboard shortcut to the current element. However, the `accessKey` value

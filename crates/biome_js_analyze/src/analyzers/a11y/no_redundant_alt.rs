@@ -1,5 +1,5 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_js_syntax::{
@@ -42,6 +42,7 @@ declare_rule! {
     pub(crate) NoRedundantAlt {
         version: "1.0.0",
         name: "noRedundantAlt",
+        source: RuleSource::EslintJsxA11y("no-redundant-roles"),
         recommended: true,
     }
 }

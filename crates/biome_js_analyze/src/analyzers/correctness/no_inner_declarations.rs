@@ -1,4 +1,4 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::{AnyJsDeclaration, JsFileSource, JsStatementList, JsSyntaxKind};
 use biome_rowan::AstNode;
@@ -18,8 +18,6 @@ declare_rule! {
     /// Note that `const` and `let` declarations are block-scoped,
     /// and therefore they are not affected by this rule.
     /// Moreover, `function` declarations in nested blocks are allowed inside _ES modules_.
-    ///
-    /// Source: https://eslint.org/docs/rules/no-inner-declarations
     ///
     /// ## Examples
     ///
@@ -90,6 +88,7 @@ declare_rule! {
     pub(crate) NoInnerDeclarations {
         version: "1.0.0",
         name: "noInnerDeclarations",
+        source: RuleSource::Eslint("no-inner-declarations"),
         recommended: true,
     }
 }

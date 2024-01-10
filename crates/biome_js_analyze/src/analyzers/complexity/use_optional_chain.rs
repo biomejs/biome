@@ -1,3 +1,4 @@
+use biome_analyze::RuleSource;
 use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
 };
@@ -75,6 +76,7 @@ declare_rule! {
     pub(crate) UseOptionalChain {
         version: "1.0.0",
         name: "useOptionalChain",
+        source: RuleSource::EslintTypeScript("prefer-optional-chain"),
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }

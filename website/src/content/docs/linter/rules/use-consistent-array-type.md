@@ -8,13 +8,13 @@ title: useConsistentArrayType (since v1.5.0)
 This rule is part of the [nursery](/linter/rules/#nursery) group.
 :::
 
+Source: <a href="https://typescript-eslint.io/rules/array-type" target="_blank"><code>array-type</code></a>
+
 Require consistently using either `T[]` or `Array<T>`
 
 _TypeScript_ provides two equivalent ways to define an array type: `T[]` and `Array<T>`.
 The two styles are functionally equivalent.
 Using the same style consistently across your codebase makes it easier for developers to read and understand array types.
-
-Source: https://typescript-eslint.io/rules/array-type
 
 ## Example
 

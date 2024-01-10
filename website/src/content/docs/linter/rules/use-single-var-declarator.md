@@ -8,13 +8,13 @@ title: useSingleVarDeclarator (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://eslint.org/docs/latest/rules/one-var" target="_blank"><code>one-var</code></a>
+
 Disallow multiple variable declarations in the same variable statement
 
 In JavaScript, multiple variables can be declared within a single `var`, `const` or `let` declaration.
 It is often considered a best practice to declare every variable separately.
 That is what this rule enforces.
-
-Source: https://eslint.org/docs/latest/rules/one-var
 
 ## Examples
 

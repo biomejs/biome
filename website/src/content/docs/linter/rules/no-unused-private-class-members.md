@@ -8,12 +8,12 @@ title: noUnusedPrivateClassMembers (since v1.3.3)
 This rule is part of the [nursery](/linter/rules/#nursery) group.
 :::
 
+Source: <a href="https://eslint.org/docs/latest/rules/no-unused-private-class-members" target="_blank"><code>no-unused-private-class-members</code></a>
+
 Disallow unused private class members
 
 Private class members that are declared and not used anywhere in the code are most likely an error due to incomplete refactoring.
 Such class members take up space in the code and can lead to confusion by readers.
-
-Source: https://eslint.org/docs/latest/rules/no-unused-private-class-members/
 
 ## Examples
 

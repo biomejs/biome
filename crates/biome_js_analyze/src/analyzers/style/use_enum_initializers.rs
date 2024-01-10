@@ -1,6 +1,6 @@
 use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic};
+use biome_analyze::{declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make;
@@ -15,8 +15,6 @@ declare_rule! {
     ///
     /// When the value of enum members are important,
     /// allowing implicit values for enum members can cause bugs if enum declarations are modified over time.
-    ///
-    /// Source: https://typescript-eslint.io/rules/prefer-enum-initializers
     ///
     /// ## Examples
     ///
@@ -69,6 +67,7 @@ declare_rule! {
     pub(crate) UseEnumInitializers {
         version: "1.0.0",
         name: "useEnumInitializers",
+        source: RuleSource::EslintTypeScript("prefer-enum-initializers"),
         recommended: true,
         fix_kind: FixKind::Safe,
     }
