@@ -330,22 +330,39 @@ fn handle_continue_break_comment(
 ///     }
 /// ```
 ///
-/// All other same line comments become `Dangling` comments that are handled inside of the default case
-/// formatting
+/// All other same line comments will use `Default` placement if they have a perceding node.
+/// ```javascript
+/// switch(x) {
+///     default:
+///         a(); // asd
+///         break;
+/// }
+/// ```
+///
+/// All other comments become `Dangling` comments that are handled inside of the default case
+/// formatting.
 fn handle_switch_default_case_comment(
     comment: DecoratedComment<JsLanguage>,
 ) -> CommentPlacement<JsLanguage> {
-    match (comment.enclosing_node().kind(), comment.following_node()) {
-        (JsSyntaxKind::JS_DEFAULT_CLAUSE, Some(following)) => {
-            match JsBlockStatement::cast_ref(following) {
-                Some(block) if comment.kind().is_line() => {
-                    place_block_statement_comment(block, comment)
-                }
-                _ => CommentPlacement::dangling(comment.enclosing_node().clone(), comment),
-            }
-        }
-        _ => CommentPlacement::Default(comment),
+    if comment.enclosing_node().kind() != JsSyntaxKind::JS_DEFAULT_CLAUSE {
+        return CommentPlacement::Default(comment);
     }
+
+    if !comment.kind().is_line() {
+        return CommentPlacement::dangling(comment.enclosing_node().clone(), comment);
+    }
+
+    let Some(block) = comment
+        .following_node()
+        .and_then(JsBlockStatement::cast_ref)
+    else {
+        if comment.preceding_node().is_some() {
+            return CommentPlacement::Default(comment);
+        }
+        return CommentPlacement::dangling(comment.enclosing_node().clone(), comment);
+    };
+
+    place_block_statement_comment(block, comment)
 }
 
 fn handle_labelled_statement_comment(
