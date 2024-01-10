@@ -297,11 +297,13 @@ fn to_arrow_body(body: JsFunctionBody) -> AnyJsFunctionBody {
         // To keep comments, we keep the regular function body
         return early_result;
     }
-    if let Some(first_token) = return_arg.syntax().first_token() {
-        if first_token.kind() == T!['{'] {
-            // () => ({ ... })
-            return AnyJsFunctionBody::AnyJsExpression(make::parenthesized(return_arg).into());
-        }
+    if matches!(
+        return_arg,
+        AnyJsExpression::JsSequenceExpression(_) | AnyJsExpression::JsObjectExpression(_)
+    ) {
+        // () => (first, second)
+        // () => ({ ... })
+        return AnyJsFunctionBody::AnyJsExpression(make::parenthesized(return_arg).into());
     }
     // () => expression
     AnyJsFunctionBody::AnyJsExpression(return_arg)
