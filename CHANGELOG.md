@@ -28,9 +28,11 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 #### Bug fixes
 
-- [useConsistentArrayType](https://biomejs.dev/rules/use-consistent-array-type) was accidentally placed in the `style` rule group instead of the `nursery` group. It is now correctly placed under `nursery`.
+- [useConsistentArrayType](https://biomejs.dev/linter/rules/use-consistent-array-type) was accidentally placed in the `style` rule group instead of the `nursery` group. It is now correctly placed under `nursery`.
 
-- Fix [#1483](https://github.com/biomejs/biome/issues/1483). [useConsistentArrayType](https://biomejs.dev/rules/use-consistent-array-type) now correctly handles its option. Contributed by @Conaclos
+- Fix [#1483](https://github.com/biomejs/biome/issues/1483). [useConsistentArrayType](https://biomejs.dev/linter/rules/use-consistent-array-type) now correctly handles its option. Contributed by @Conaclos
+
+- Fix [#1475](https://github.com/biomejs/biome/issues/1473): [useHookAtTopLevel](https://biomejs.dev/linter/rules/use-hook-at-top-level/) now correctly handles React components and hooks that are nested inside other functions. Contributed by @arendjr
 
 ### Parser
 
