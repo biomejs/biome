@@ -10,8 +10,6 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ## 1.5.1 (2024-01-10)
 
-### Analyzer
-
 ### CLI
 
 #### Bug fixes
@@ -21,17 +19,12 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 - Fix [#1465](https://github.com/biomejs/biome/issues/1465), by taking in consideration the workspace folder when matching a pattern. Contributed by @ematipico
 - Fix [#1465](https://github.com/biomejs/biome/issues/1465), by correctly process globs that contain file names. Contributed by @ematipico
 
-### Configuration
-
-### Editors
 
 ### Formatter
 
 #### Bug fixes
 
 - Fix [#1170](https://github.com/biomejs/biome/issues/1170). Fix placement of comments inside default switch clause. Now all line comments that has a preceding node will keep their position. Contributed by @kalleep
-
-### JavaScript APIs
 
 ### Linter
 
@@ -43,7 +36,6 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 - Fix [#1483](https://github.com/biomejs/biome/issues/1483). [useConsistentArrayType](https://biomejs.dev/rules/use-consistent-array-type) now correctly handles its option. Contributed by @Conaclos
 
-### Parser
 
 ## 1.5.0 (2024-01-08)
 
