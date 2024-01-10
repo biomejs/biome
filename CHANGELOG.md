@@ -8,9 +8,7 @@ Read our [guidelines to categorize a change](https://biomejs.dev/internals/versi
 New entries must be placed in a section entitled `Unreleased`.
 Read our [guidelines for writing a good changelog entry](https://github.com/biomejs/biome/blob/main/CONTRIBUTING.md#changelog).
 
-## Unreleased
-
-### Analyzer
+## 1.5.1 (2024-01-10)
 
 ### CLI
 
@@ -21,17 +19,12 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 - Fix [#1465](https://github.com/biomejs/biome/issues/1465), by taking in consideration the workspace folder when matching a pattern. Contributed by @ematipico
 - Fix [#1465](https://github.com/biomejs/biome/issues/1465), by correctly process globs that contain file names. Contributed by @ematipico
 
-### Configuration
-
-### Editors
 
 ### Formatter
 
 #### Bug fixes
 
-- Fix [#1170](https://github.com/biomejs/biome/issues/1170). Fix placement of comments inside default switch clause. Now all line comments that has a preceding node will keep their position. Contributed by @kalleep
-
-### JavaScript APIs
+- Fix [#1170](https://github.com/biomejs/biome/issues/1170). Fix placement of comments inside default switch clause. Now all line comments that have a preceding node will keep their position. Contributed by @kalleep
 
 ### Linter
 
@@ -59,7 +52,6 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
   + f(() => (0, 1), "")
   ```
 
-### Parser
 
 ## 1.5.0 (2024-01-08)
 
