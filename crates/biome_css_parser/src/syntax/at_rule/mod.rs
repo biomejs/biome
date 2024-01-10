@@ -13,6 +13,7 @@ mod namespace;
 mod page;
 mod parse_error;
 mod scope;
+mod starting_style;
 mod supports;
 
 use crate::parser::CssParser;
@@ -35,6 +36,9 @@ use crate::syntax::at_rule::media::{is_at_media_at_rule, parse_media_at_rule};
 use crate::syntax::at_rule::namespace::{is_at_namespace_at_rule, parse_namespace_at_rule};
 use crate::syntax::at_rule::page::{is_at_page_at_rule, parse_page_at_rule};
 use crate::syntax::at_rule::scope::{is_at_scope_at_rule, parse_scope_at_rule};
+use crate::syntax::at_rule::starting_style::{
+    is_at_starting_style_at_rule, parse_starting_style_at_rule,
+};
 use crate::syntax::at_rule::supports::{is_at_supports_at_rule, parse_supports_at_rule};
 use crate::syntax::parse_error::expected_any_at_rule;
 use biome_css_syntax::CssSyntaxKind::*;
@@ -99,6 +103,8 @@ pub(crate) fn parse_any_at_rule(p: &mut CssParser) -> ParsedSyntax {
         parse_import_at_rule(p)
     } else if is_at_namespace_at_rule(p) {
         parse_namespace_at_rule(p)
+    } else if is_at_starting_style_at_rule(p) {
+        parse_starting_style_at_rule(p)
     } else {
         Absent
     }

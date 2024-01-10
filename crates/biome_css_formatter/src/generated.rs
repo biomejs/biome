@@ -2680,6 +2680,46 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssNamespaceAtRule {
         )
     }
 }
+impl FormatRule<biome_css_syntax::CssStartingStyleAtRule>
+    for crate::css::statements::starting_style_at_rule::FormatCssStartingStyleAtRule
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssStartingStyleAtRule,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::CssStartingStyleAtRule>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssStartingStyleAtRule {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssStartingStyleAtRule,
+        crate::css::statements::starting_style_at_rule::FormatCssStartingStyleAtRule,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::css::statements::starting_style_at_rule::FormatCssStartingStyleAtRule::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssStartingStyleAtRule {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssStartingStyleAtRule,
+        crate::css::statements::starting_style_at_rule::FormatCssStartingStyleAtRule,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::statements::starting_style_at_rule::FormatCssStartingStyleAtRule::default(),
+        )
+    }
+}
 impl FormatRule<biome_css_syntax::CssContainerNotQuery>
     for crate::css::auxiliary::container_not_query::FormatCssContainerNotQuery
 {
@@ -7618,6 +7658,33 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssNamespaceUrl {
         FormatOwnedWithRule::new(
             self,
             crate::css::any::namespace_url::FormatAnyCssNamespaceUrl::default(),
+        )
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssStartingStyleBlock {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::AnyCssStartingStyleBlock,
+        crate::css::any::starting_style_block::FormatAnyCssStartingStyleBlock,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::css::any::starting_style_block::FormatAnyCssStartingStyleBlock::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssStartingStyleBlock {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::AnyCssStartingStyleBlock,
+        crate::css::any::starting_style_block::FormatAnyCssStartingStyleBlock,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::any::starting_style_block::FormatAnyCssStartingStyleBlock::default(),
         )
     }
 }
