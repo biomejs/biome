@@ -171,7 +171,7 @@ repos:
 これで`git commit`を実行したときに `biome check --apply` が実行されるようになりました。
 
 [pre-commit](https://pre-commit.com/)は別々にツールをインストールするため、pre-commit はどのツールがインストールされるか知っておく必要があります。
-なので `additional_dependencies` オプションを使ってBiomeのバージョンを指定しなくてはいけません。
+そのため、`additional_dependencies` オプションを使ってBiomeのバージョンを指定しなくてはいけません。
 
 Biome がすでに `npm` のパッケージとしてローカルリポジトリにインストールされている場合、
 Biome を更新する際に `package.json` と `.pre-commit-config.yaml` の両方を更新するのは開発者の負担になります。
