@@ -20,6 +20,7 @@ use biome_service::{
 };
 use crossbeam::channel::{unbounded, Receiver, Sender};
 use rustc_hash::FxHashSet;
+use std::sync::atomic::AtomicU64;
 use std::{
     ffi::OsString,
     io,
@@ -246,10 +247,10 @@ struct DiagnosticsPrinter<'ctx> {
     ///  Execution of the traversal
     execution: &'ctx Execution,
     /// The maximum number of diagnostics the console thread is allowed to print
-    max_diagnostics: u16,
+    max_diagnostics: u64,
     /// The approximate number of diagnostics the console will print before
     /// folding the rest into the "skipped diagnostics" counter
-    remaining_diagnostics: AtomicU16,
+    remaining_diagnostics: AtomicU64,
     /// Mutable reference to a boolean flag tracking whether the console thread
     /// printed any error-level message
     errors: AtomicUsize,
@@ -260,6 +261,9 @@ struct DiagnosticsPrinter<'ctx> {
     verbose: bool,
     /// The diagnostic level the console thread should print
     diagnostic_level: Severity,
+
+    not_printed_diagnostics: AtomicU64,
+    printed_diagnostics: AtomicU64,
 }
 
 impl<'ctx> DiagnosticsPrinter<'ctx> {
@@ -267,11 +271,13 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
         Self {
             errors: AtomicUsize::new(0),
             warnings: AtomicUsize::new(0),
-            remaining_diagnostics: AtomicU16::new(0),
+            remaining_diagnostics: AtomicU64::new(0),
             execution,
             diagnostic_level: Severity::Hint,
             verbose: false,
             max_diagnostics: 20,
+            not_printed_diagnostics: AtomicU64::new(0),
+            printed_diagnostics: AtomicU64::new(0),
         }
     }
 
@@ -281,7 +287,7 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
     }
 
     fn with_max_diagnostics(mut self, value: u16) -> Self {
-        self.max_diagnostics = value;
+        self.max_diagnostics = value as u64;
         self
     }
 
@@ -298,6 +304,38 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
         self.warnings.load(Ordering::Relaxed)
     }
 
+    /// Checks if the diagnostic we received from the thread should be considered or not. Logic:
+    /// - it should not be considered if its severity level is lower than the one provided via CLI;
+    /// - it should not be considered if it's a verbose diagnostic and the CLI **didn't** request a `--verbose` option.
+    fn should_skip_diagnostic(&self, severity: Severity, diagnostic_tags: DiagnosticTags) -> bool {
+        if severity < self.diagnostic_level {
+            return true;
+        }
+
+        if diagnostic_tags.is_verbose() && !self.verbose {
+            return true;
+        }
+
+        false
+    }
+
+    /// Count the diagnostic, and then returns a boolean that tells if it should be printed
+    fn should_print(&self) -> bool {
+        let printed_diagnostics = self.printed_diagnostics.load(Ordering::Relaxed);
+        let should_print = printed_diagnostics < self.max_diagnostics;
+        if should_print {
+            self.printed_diagnostics.fetch_add(1, Ordering::Relaxed);
+            self.remaining_diagnostics.store(
+                self.max_diagnostics.saturating_sub(printed_diagnostics),
+                Ordering::Relaxed,
+            );
+        } else {
+            self.not_printed_diagnostics.fetch_add(1, Ordering::Relaxed);
+        }
+
+        should_print
+    }
+
     fn run(
         &self,
         receiver: Receiver<Message>,
@@ -305,8 +343,6 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
         console: &'ctx mut dyn Console,
     ) {
         let mut paths: FxHashSet<String> = FxHashSet::default();
-        let mut printed_diagnostics: u16 = 0;
-        let mut not_printed_diagnostics = 0;
         let mut total_skipped_suggested_fixes = 0;
 
         let mut diagnostics_to_print = vec![];
@@ -322,19 +358,10 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                 Message::ApplyError(error) => {
                     // *errors += 1;
                     self.errors.fetch_add(1, Ordering::Relaxed);
-                    if error.severity() < self.diagnostic_level {
+                    if self.should_skip_diagnostic(error.severity(), error.tags()) {
                         continue;
                     }
-                    let should_print = printed_diagnostics < self.max_diagnostics;
-                    if should_print {
-                        printed_diagnostics += 1;
-                        self.remaining_diagnostics.store(
-                            self.max_diagnostics.saturating_sub(printed_diagnostics),
-                            Ordering::Relaxed,
-                        );
-                    } else {
-                        not_printed_diagnostics += 1;
-                    }
+                    let should_print = self.should_print();
                     if self.execution.should_report_to_terminal() && should_print {
                         diagnostics_to_print.push(Error::from(error));
                     }
@@ -342,7 +369,7 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
 
                 Message::Error(mut err) => {
                     let location = err.location();
-                    if err.severity() < self.diagnostic_level {
+                    if self.should_skip_diagnostic(err.severity(), err.tags()) {
                         continue;
                     }
                     if err.severity() == Severity::Warning {
@@ -376,16 +403,7 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                         }
                     }
 
-                    let should_print = printed_diagnostics < self.max_diagnostics;
-                    if should_print {
-                        printed_diagnostics += 1;
-                        self.remaining_diagnostics.store(
-                            self.max_diagnostics.saturating_sub(printed_diagnostics),
-                            Ordering::Relaxed,
-                        );
-                    } else {
-                        not_printed_diagnostics += 1;
-                    }
+                    let should_print = self.should_print();
 
                     if self.execution.should_report_to_terminal() && should_print {
                         diagnostics_to_print.push(err);
@@ -398,13 +416,14 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                     diagnostics,
                     skipped_diagnostics,
                 } => {
-                    not_printed_diagnostics += skipped_diagnostics;
+                    self.not_printed_diagnostics
+                        .fetch_add(skipped_diagnostics, Ordering::Relaxed);
 
                     // is CI mode we want to print all the diagnostics
                     if self.execution.is_ci() {
                         for diag in diagnostics {
                             let severity = diag.severity();
-                            if severity < self.diagnostic_level {
+                            if self.should_skip_diagnostic(severity, diag.tags()) {
                                 continue;
                             }
 
@@ -421,29 +440,17 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                     } else {
                         for diag in diagnostics {
                             let severity = diag.severity();
-                            if severity < self.diagnostic_level {
+                            if self.should_skip_diagnostic(severity, diag.tags()) {
                                 continue;
                             }
                             if severity == Severity::Error {
                                 self.errors.fetch_add(1, Ordering::Relaxed);
-
-                                // *errors += 1;
                             }
                             if severity == Severity::Warning {
-                                // *warnings += 1;
                                 self.warnings.fetch_add(1, Ordering::Relaxed);
                             }
 
-                            let should_print = printed_diagnostics < self.max_diagnostics;
-                            if should_print {
-                                printed_diagnostics += 1;
-                                self.remaining_diagnostics.store(
-                                    self.max_diagnostics.saturating_sub(printed_diagnostics),
-                                    Ordering::Relaxed,
-                                );
-                            } else {
-                                not_printed_diagnostics += 1;
-                            }
+                            let should_print = self.should_print();
 
                             if self.execution.should_report_to_terminal() && should_print {
                                 let diag =
@@ -472,20 +479,11 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
                         Severity::Hint
                     };
 
-                    if severity < self.diagnostic_level {
+                    if self.should_skip_diagnostic(severity, DiagnosticTags::empty()) {
                         continue;
                     }
 
-                    let should_print = printed_diagnostics < self.max_diagnostics;
-                    if should_print {
-                        printed_diagnostics += 1;
-                        self.remaining_diagnostics.store(
-                            self.max_diagnostics.saturating_sub(printed_diagnostics),
-                            Ordering::Relaxed,
-                        );
-                    } else {
-                        not_printed_diagnostics += 1;
-                    }
+                    let should_print = self.should_print();
 
                     if self.execution.should_report_to_terminal() && should_print {
                         if self.execution.is_ci() {
@@ -565,16 +563,17 @@ impl<'ctx> DiagnosticsPrinter<'ctx> {
 
         if self.execution.is_check() && total_skipped_suggested_fixes > 0 {
             console.log(markup! {
-            <Warn>"Skipped "{total_skipped_suggested_fixes}" suggested fixes.\n"</Warn>
-            <Info>"If you wish to apply the suggested (unsafe) fixes, use the command "<Emphasis>"biome check --apply-unsafe\n"</Emphasis></Info>
-        })
+                <Warn>"Skipped "{total_skipped_suggested_fixes}" suggested fixes.\n"</Warn>
+                <Info>"If you wish to apply the suggested (unsafe) fixes, use the command "<Emphasis>"biome check --apply-unsafe\n"</Emphasis></Info>
+            })
         }
 
+        let not_printed_diagnostics = self.not_printed_diagnostics.load(Ordering::Relaxed);
         if !self.execution.is_ci() && not_printed_diagnostics > 0 {
             console.log(markup! {
-            <Warn>"The number of diagnostics exceeds the number allowed by Biome.\n"</Warn>
-            <Info>"Diagnostics not shown: "</Info><Emphasis>{not_printed_diagnostics}</Emphasis><Info>"."</Info>
-        })
+                <Warn>"The number of diagnostics exceeds the number allowed by Biome.\n"</Warn>
+                <Info>"Diagnostics not shown: "</Info><Emphasis>{not_printed_diagnostics}</Emphasis><Info>"."</Info>
+            })
         }
     }
 }
