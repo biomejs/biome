@@ -173,9 +173,8 @@ repos:
 [pre-commit](https://pre-commit.com/)は別々にツールをインストールするため、pre-commit はどのツールがインストールされるか知っておく必要があります。
 そのため、`additional_dependencies` オプションを使ってBiomeのバージョンを指定しなくてはいけません。
 
-Biome がすでに `npm` のパッケージとしてローカルリポジトリにインストールされている場合、
-Biome を更新する際に `package.json` と `.pre-commit-config.yaml` の両方を更新するのは開発者の負担になります。
-提供されているBiomeフックを使う代わりに、独自の[ローカルフック](https://pre-commit.com/index.html#repository-local-hooks)を指定することができます。
+Biome がすでに `npm` のパッケージとしてローカルリポジトリにインストールされている場合、Biome を更新する際に `package.json` と `.pre-commit-config.yaml` の両方を更新するのは開発者の負担になります。
+提供されているBiomeフックを使う代わりに、独自の[ローカルフック](https://pre-commit.com/index.html#repository-local-hooks)を指定できます。
 
 例えば、`npm` を使用する場合、`.pre-commit-config.yaml` に以下のようなフックを書くことができます：
 
