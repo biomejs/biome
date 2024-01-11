@@ -6,7 +6,9 @@ use biome_js_syntax::{
     JsCallArguments, JsCallExpression, JsLanguage, JsStringLiteralExpression,
     JsTemplateChunkElement, JsxAttribute, JsxString,
 };
-use biome_rowan::{declare_node_union, AstNode, Language, SyntaxNode, TextRange, WalkEvent};
+use biome_rowan::{
+    declare_node_union, AstNode, Language, SyntaxNode, TextRange, TokenText, WalkEvent,
+};
 
 use super::UseSortedClassesOptions;
 
@@ -24,18 +26,15 @@ fn get_options_from_analyzer(analyzer_options: &AnalyzerOptions) -> UseSortedCla
     }
 }
 
-fn get_callee_name(call_expression: &JsCallExpression) -> Option<String> {
-    Some(
-        call_expression
-            .callee()
-            .ok()?
-            .as_js_identifier_expression()?
-            .name()
-            .ok()?
-            .name()
-            .ok()?
-            .to_string(),
-    )
+fn get_callee_name(call_expression: &JsCallExpression) -> Option<TokenText> {
+    call_expression
+        .callee()
+        .ok()?
+        .as_js_identifier_expression()?
+        .name()
+        .ok()?
+        .name()
+        .ok()
 }
 
 fn is_call_expression_of_target_function(

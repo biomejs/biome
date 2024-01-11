@@ -1,14 +1,14 @@
-// Each CSS class needs to be processed to determine the information that will be used to sort it.
-// This information includes:
-// - The layer it belongs to (e.g. `components` or `utilities`).
-// - The index of the utility within the layer.
-// - The total variants weight that results from the combination of all the variants.
-// - The text of the class itself.
-// It is generated according to the information contained in a `SortConfig`, which includes:
-// - The list of layers, in order.
-// - The list of utilities, in order, for each layer.
-// - The list of variants, in order of importance (which is used to compute the variants weight).
-// - Other options, such as prefix and separator.
+//! Each CSS class needs to be processed to determine the information that will be used to sort it.
+//! This information includes:
+//! - The layer it belongs to (e.g. `components` or `utilities`).
+//! - The index of the utility within the layer.
+//! - The total variants weight that results from the combination of all the variants.
+//! - The text of the class itself.
+//! It is generated according to the information contained in a `SortConfig`, which includes:
+//! - The list of layers, in order.
+//! - The list of utilities, in order, for each layer.
+//! - The list of variants, in order of importance (which is used to compute the variants weight).
+//! - Other options, such as prefix and separator.
 
 use super::{
     class_lexer::{tokenize_class, ClassSegmentStructure},

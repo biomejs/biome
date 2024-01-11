@@ -5,11 +5,13 @@ use super::sort_config::{UtilitiesConfig, UtilityLayer};
 
 #[derive(Default)]
 pub enum UseSortedClassesPreset {
+    #[allow(unused)]
     None,
     #[default]
     TailwindCSS, // TODO: should this be the default?
 }
 
+// TODO: make this static
 pub fn get_utilities_preset(preset: &UseSortedClassesPreset) -> UtilitiesConfig {
     match preset {
         UseSortedClassesPreset::None => {

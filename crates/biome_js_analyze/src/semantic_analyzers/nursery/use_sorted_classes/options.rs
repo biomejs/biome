@@ -63,8 +63,7 @@ impl DeserializationVisitor for UseSortedClassesOptionsVisitor {
                     if let Some(attributes_option) =
                         Deserializable::deserialize(&value, &key_text, diagnostics)
                     {
-                        let attributes_option: Vec<String> = attributes_option; // TODO: is there a better way to do this?
-                        result.attributes.extend(attributes_option);
+                        result.attributes.extend::<Vec<String>>(attributes_option);
                     }
                 }
                 "functions" => {
