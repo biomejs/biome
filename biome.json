@@ -7,10 +7,10 @@
 	},
 	"files": {
 		"ignore": [
-			"**/dist",
-			"**/.astro",
-			"**/assets",
-			"**/public",
+			"dist/**",
+			".astro/**",
+			"assets/**",
+			"public/**",
 			"**/__snapshots__",
 			"**/editors/intellij/**",
 			"*.astro",
@@ -22,11 +22,12 @@
 			"*.png",
 			"*.yml",
 			"*.yaml",
+			"*.snap",
 			"**/undefined/**",
-			"**LICENSE-MIT**",
-			"**LICENSE-APACHE**",
-			"**/ROME_LICENSE**",
-			"**ROME-LICENSE-MIT**"
+			"LICENSE-MIT",
+			"LICENSE-APACHE",
+			"ROME_LICENSE",
+			"ROME-LICENSE-MIT"
 		]
 	},
 	"formatter": {

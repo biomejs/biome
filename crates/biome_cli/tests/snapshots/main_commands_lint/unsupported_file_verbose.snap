@@ -1,0 +1,41 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `check.txt`
+
+```txt
+for(;true;);
+
+```
+
+# Termination Message
+
+```block
+internalError/io ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × No files were processed in the specified paths.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+check.txt files/missingHandler  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome could not determine the language for the file extension txt
+  
+  Verbose advice
+  
+    i If you want to turn off this diagnostic, consider using --files-ignore-unknown from the CLI, or files.ignoreUnknown from the configuration file.
+    
+
+```
+
+```block
+Checked 0 file(s) in <TIME>
+```
+
+

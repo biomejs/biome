@@ -209,7 +209,8 @@ class Foo {
 	@decorator /*before*/
 	/*after*/ method() {}
 	@decorator.method(value) /*before*/
-	async /*after*/ method() {}
+	/*after*/
+	async method() {}
 	@decorator /*before*/
 	*/*after*/ method() {}
 	@decorator.method(value) /*before*/

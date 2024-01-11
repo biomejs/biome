@@ -269,7 +269,6 @@ impl Workspace for WorkspaceServer {
                     let language = self.get_language(&params.path);
                     if language == Language::Unknown {
                         file_features.ignore_not_supported();
-                        return Ok(entry.insert(file_features).clone());
                     }
                 }
                 for feature in params.feature {
@@ -349,6 +348,7 @@ impl Workspace for WorkspaceServer {
 
         settings.merge_with_configuration(
             params.configuration,
+            params.working_directory,
             params.vcs_base_path,
             params.gitignore_matches.as_slice(),
         )?;

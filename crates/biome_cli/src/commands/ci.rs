@@ -7,9 +7,8 @@ use biome_service::configuration::{
     load_configuration, FormatterConfiguration, LinterConfiguration, LoadedConfiguration,
 };
 use biome_service::workspace::UpdateSettingsParams;
-use biome_service::{Configuration, ConfigurationBasePath, MergeWith};
+use biome_service::{Configuration, MergeWith};
 use std::ffi::OsString;
-use std::path::PathBuf;
 
 pub(crate) struct CiCommandPayload {
     pub(crate) formatter_enabled: Option<bool>,
@@ -29,12 +28,10 @@ pub(crate) fn ci(session: CliSession, mut payload: CiCommandPayload) -> Result<(
         payload.cli_options.log_kind.clone(),
     );
 
-    let base_path = match payload.cli_options.config_path.as_ref() {
-        None => ConfigurationBasePath::default(),
-        Some(path) => ConfigurationBasePath::FromUser(PathBuf::from(path)),
-    };
-
-    let loaded_configuration = load_configuration(&session.app.fs, base_path)?;
+    let loaded_configuration = load_configuration(
+        &session.app.fs,
+        payload.cli_options.as_configuration_base_path(),
+    )?;
 
     validate_configuration_diagnostics(
         &loaded_configuration,
@@ -108,6 +105,7 @@ pub(crate) fn ci(session: CliSession, mut payload: CiCommandPayload) -> Result<(
         .workspace
         .update_settings(UpdateSettingsParams {
             configuration,
+            working_directory: session.app.fs.working_directory(),
             vcs_base_path,
             gitignore_matches,
         })?;

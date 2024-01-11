@@ -100,7 +100,7 @@ impl CommentStyle for JsCommentStyle {
     ) -> CommentPlacement<Self::Language> {
         match comment.text_position() {
             CommentTextPosition::EndOfLine => handle_typecast_comment(comment)
-                .or_else(handle_function_declaration_comment)
+                .or_else(handle_function_comment)
                 .or_else(handle_conditional_comment)
                 .or_else(handle_if_statement_comment)
                 .or_else(handle_while_comment)
@@ -119,7 +119,7 @@ impl CommentStyle for JsCommentStyle {
                 .or_else(handle_after_arrow_fat_arrow_comment)
                 .or_else(handle_import_export_specifier_comment),
             CommentTextPosition::OwnLine => handle_member_expression_comment(comment)
-                .or_else(handle_function_declaration_comment)
+                .or_else(handle_function_comment)
                 .or_else(handle_if_statement_comment)
                 .or_else(handle_while_comment)
                 .or_else(handle_try_comment)
@@ -133,7 +133,8 @@ impl CommentStyle for JsCommentStyle {
                 .or_else(handle_mapped_type_comment)
                 .or_else(handle_continue_break_comment)
                 .or_else(handle_union_type_comment)
-                .or_else(handle_import_export_specifier_comment),
+                .or_else(handle_import_export_specifier_comment)
+                .or_else(handle_class_method_comment),
             CommentTextPosition::SameLine => handle_if_statement_comment(comment)
                 .or_else(handle_while_comment)
                 .or_else(handle_for_comment)
@@ -330,22 +331,39 @@ fn handle_continue_break_comment(
 ///     }
 /// ```
 ///
-/// All other same line comments become `Dangling` comments that are handled inside of the default case
-/// formatting
+/// All other same line comments will use `Default` placement if they have a perceding node.
+/// ```javascript
+/// switch(x) {
+///     default:
+///         a(); // asd
+///         break;
+/// }
+/// ```
+///
+/// All other comments become `Dangling` comments that are handled inside of the default case
+/// formatting.
 fn handle_switch_default_case_comment(
     comment: DecoratedComment<JsLanguage>,
 ) -> CommentPlacement<JsLanguage> {
-    match (comment.enclosing_node().kind(), comment.following_node()) {
-        (JsSyntaxKind::JS_DEFAULT_CLAUSE, Some(following)) => {
-            match JsBlockStatement::cast_ref(following) {
-                Some(block) if comment.kind().is_line() => {
-                    place_block_statement_comment(block, comment)
-                }
-                _ => CommentPlacement::dangling(comment.enclosing_node().clone(), comment),
-            }
-        }
-        _ => CommentPlacement::Default(comment),
+    if comment.enclosing_node().kind() != JsSyntaxKind::JS_DEFAULT_CLAUSE {
+        return CommentPlacement::Default(comment);
     }
+
+    if !comment.kind().is_line() {
+        return CommentPlacement::dangling(comment.enclosing_node().clone(), comment);
+    }
+
+    let Some(block) = comment
+        .following_node()
+        .and_then(JsBlockStatement::cast_ref)
+    else {
+        if comment.preceding_node().is_some() {
+            return CommentPlacement::Default(comment);
+        }
+        return CommentPlacement::dangling(comment.enclosing_node().clone(), comment);
+    };
+
+    place_block_statement_comment(block, comment)
 }
 
 fn handle_labelled_statement_comment(
@@ -624,38 +642,32 @@ fn handle_member_expression_comment(
     }
 }
 
-fn handle_function_declaration_comment(
-    comment: DecoratedComment<JsLanguage>,
-) -> CommentPlacement<JsLanguage> {
-    let is_function_declaration = matches!(
+fn handle_function_comment(comment: DecoratedComment<JsLanguage>) -> CommentPlacement<JsLanguage> {
+    if !matches!(
         comment.enclosing_node().kind(),
         JsSyntaxKind::JS_FUNCTION_DECLARATION
             | JsSyntaxKind::JS_FUNCTION_EXPORT_DEFAULT_DECLARATION
-    );
-
-    let following = match comment.following_node() {
-        Some(following) if is_function_declaration => following,
-        _ => return CommentPlacement::Default(comment),
+            | JsSyntaxKind::JS_FUNCTION_EXPRESSION
+    ) || !comment.kind().is_line()
+    {
+        return CommentPlacement::Default(comment);
     };
 
-    // Make comments between the `)` token and the function body leading comments
-    // of the first non empty statement or dangling comments of the body.
+    let Some(body) = comment.following_node().and_then(JsFunctionBody::cast_ref) else {
+        return CommentPlacement::Default(comment);
+    };
+
+    // Make line comments between the `)` token and the function body leading comments
+    // of the first statement or dangling comments of the body.
     // ```javascript
-    // function test() /* comment */ {
+    // function test() // comment
+    // {
     //  console.log("Hy");
     // }
     // ```
-    if let Some(body) = JsFunctionBody::cast_ref(following) {
-        match body
-            .statements()
-            .iter()
-            .find(|statement| !matches!(statement, AnyJsStatement::JsEmptyStatement(_)))
-        {
-            Some(first) => CommentPlacement::leading(first.into_syntax(), comment),
-            None => CommentPlacement::dangling(body.into_syntax(), comment),
-        }
-    } else {
-        CommentPlacement::Default(comment)
+    match body.statements().first() {
+        Some(first) => CommentPlacement::leading(first.into_syntax(), comment),
+        None => CommentPlacement::dangling(body.into_syntax(), comment),
     }
 }
 
@@ -1240,6 +1252,32 @@ fn handle_import_export_specifier_comment(
             }
         }
 
+        _ => CommentPlacement::Default(comment),
+    }
+}
+
+/// Ensure that comments before the `async`` keyword are placed just before it.
+/// ```javascript
+/// class Foo {
+///    @decorator()
+///    // comment
+///    async method() {}
+/// }
+fn handle_class_method_comment(
+    comment: DecoratedComment<JsLanguage>,
+) -> CommentPlacement<JsLanguage> {
+    let enclosing_node = comment.enclosing_node();
+    match enclosing_node.kind() {
+        JsSyntaxKind::JS_METHOD_CLASS_MEMBER => {
+            if let Some(following_token) = comment.following_token() {
+                if following_token.kind() == JsSyntaxKind::ASYNC_KW {
+                    if let Some(preceding) = comment.preceding_node() {
+                        return CommentPlacement::trailing(preceding.clone(), comment);
+                    }
+                }
+            }
+            CommentPlacement::Default(comment)
+        }
         _ => CommentPlacement::Default(comment),
     }
 }

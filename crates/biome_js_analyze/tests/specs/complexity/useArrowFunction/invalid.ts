@@ -36,8 +36,18 @@ function f7() {
     };
 }
 
-const f8 = function(a) {}.bind(null, 0);
+const f10 = function(x) {
+    return 0, 1;
+}
 
-const f9 = function(a) {}["bind"](null, 0);
-
-const called = function () {}();
+const as = function () {} as () => void;
+const satisfies = function () {} satisfies () => void;
+const unary = +function () {};
+const conditionalTest = function () {} ? true : false;
+class ExtendsClause extends function() {} {};
+const non_null_assertion = function () {}!;
+const call = function () {}();
+const staticMember = function(a) {}.bind(null, 0);
+const computedMember = function(a) {}["bind"](null, 0);
+const logical = false || function () {};
+const binary = false + function () {};

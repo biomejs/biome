@@ -110,7 +110,8 @@ impl Language {
             "typescriptreact" => Language::TypeScriptReact,
             "json" => Language::Json,
             "jsonc" => Language::Jsonc,
-            "css" => Language::Css,
+            // TODO: remove this when we are ready to handle CSS files
+            "css" => Language::Unknown,
             _ => Language::Unknown,
         }
     }
@@ -341,6 +342,7 @@ pub(crate) trait ExtensionHandler {
 pub(crate) struct Features {
     js: JsFileHandler,
     json: JsonFileHandler,
+    #[allow(unused)]
     css: CssFileHandler,
     unknown: UnknownFileHandler,
 }
@@ -380,7 +382,8 @@ impl Features {
             | Language::TypeScript
             | Language::TypeScriptReact => self.js.capabilities(),
             Language::Json | Language::Jsonc => self.json.capabilities(),
-            Language::Css => self.css.capabilities(),
+            // TODO: change this when we are ready to handle CSS files
+            Language::Css => self.unknown.capabilities(),
             Language::Unknown => self.unknown.capabilities(),
         }
     }

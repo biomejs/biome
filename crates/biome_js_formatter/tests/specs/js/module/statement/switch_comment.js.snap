@@ -1,0 +1,75 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: js/module/statement/switch_comment.js
+---
+
+# Input
+
+```js
+switch(5){default: // comment5
+// comment5a
+foo();bar();//comment5b
+break;// comment5c
+}
+
+switch(x) {
+  default:
+    a(); // asd
+    break;
+}
+
+switch(x) {
+  default:
+    // a
+    a(); // ab
+    break;
+}
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+JSX quote style: Double Quotes
+Quote properties: As needed
+Trailing comma: All
+Semicolons: Always
+Arrow parentheses: Always
+Bracket spacing: true
+Bracket same line: false
+-----
+
+```js
+switch (5) {
+	default: // comment5
+		// comment5a
+		foo();
+		bar(); //comment5b
+		break; // comment5c
+}
+
+switch (x) {
+	default:
+		a(); // asd
+		break;
+}
+
+switch (x) {
+	default:
+		// a
+		a(); // ab
+		break;
+}
+```
+
+
