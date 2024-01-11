@@ -155,3 +155,14 @@ function useHookInsideArrayAssignmentInitializer(props) {
 function useHookInsideArrayBindingInitializer(props) {
     const [item = useDefaultItem()] = props.array;
 }
+
+test('b', () => {
+    const TestComponent = () => {
+        useState();
+        const handler = () => {
+            useHook();
+        };
+    };
+
+    render(<TestComponent />);
+});
