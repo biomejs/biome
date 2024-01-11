@@ -33,7 +33,7 @@ impl ClassInfo {
 
     /// Compare based on variants weight. Classes with higher weight go first.
     /// Returns `None` if they have the same weight.
-    fn cmp_variants_weight(&self, other: &ClassInfo) -> Option<Ordering> {
+    fn cmp_variants_weight(&self, _other: &ClassInfo) -> Option<Ordering> {
         // TODO: implement variant weight comparison.
         None
     }
