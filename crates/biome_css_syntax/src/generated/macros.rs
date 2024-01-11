@@ -514,6 +514,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssSimpleFunction::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_STARTING_STYLE_AT_RULE => {
+                    let $pattern = unsafe { $crate::CssStartingStyleAtRule::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_STRING => {
                     let $pattern = unsafe { $crate::CssString::new_unchecked(node) };
                     $body

@@ -135,9 +135,16 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 pub fn quick_test() {
     let code = r#"
 
-
-@namespace url(http://www.w3.org/1999/xhtml);
-
+@starting-style {
+	h1 {
+		background-color: transparent;
+	}
+	@layer foo {
+        @starting-style {
+            height: 100px;
+        }
+    }
+}
     "#;
 
     let root = parse_css(
