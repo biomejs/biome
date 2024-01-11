@@ -22,7 +22,7 @@ use biome_diagnostics::{
     serde::Diagnostic as SerdeDiagnostic, Diagnostic, DiagnosticExt, Severity,
 };
 use biome_formatter::Printed;
-use biome_fs::RomePath;
+use biome_fs::{RomePath, BIOME_JSON};
 use biome_parser::AnyParse;
 use biome_rowan::NodeCache;
 use dashmap::{mapref::entry::Entry, DashMap};
@@ -154,24 +154,8 @@ impl WorkspaceServer {
     fn get_parse(
         &self,
         rome_path: RomePath,
-        feature: Option<FeatureName>,
+        _feature: Option<FeatureName>,
     ) -> Result<AnyParse, WorkspaceError> {
-        let ignored = if let Some(feature) = feature {
-            self.is_path_ignored(IsPathIgnoredParams {
-                rome_path: rome_path.clone(),
-                feature,
-            })?
-        } else {
-            false
-        };
-
-        if ignored {
-            return Err(WorkspaceError::file_ignored(format!(
-                "{}",
-                rome_path.to_path_buf().display()
-            )));
-        }
-
         match self.syntax.entry(rome_path) {
             Entry::Occupied(entry) => Ok(entry.get().clone()),
             Entry::Vacant(entry) => {
@@ -290,6 +274,9 @@ impl Workspace for WorkspaceServer {
     fn is_path_ignored(&self, params: IsPathIgnoredParams) -> Result<bool, WorkspaceError> {
         let settings = self.settings();
         let path = params.rome_path.as_path();
+        if path.file_name().and_then(|s| s.to_str()) == Some(BIOME_JSON) {
+            return Ok(false);
+        }
 
         let excluded_by_override = settings.as_ref().override_settings.is_path_excluded(path);
         let included_by_override = settings.as_ref().override_settings.is_path_included(path);
