@@ -74,8 +74,7 @@ Gitリポジトリのルートに`lefthook.yml`というファイルを追加し
 Husky はステージングされていない変更を無視したり、ステージングされているファイルのみを対象としたりすることができません。
 そのため、 _lint-staged_ や _git-format-staged_ といった別のツールと組み合わせて使われることが多いです。
 
-プロジェクトに `package.json` が含まれている場合、
-`scripts.postinstall` を使ってパッケージのインストール時に自動的に _husky_ のフックを設定することができます：
+プロジェクトに `package.json` が含まれている場合、`scripts.postinstall` を使ってパッケージのインストール時に自動的に _husky_ のフックを設定することができます：
 
 ```json title="package.json"
 {
