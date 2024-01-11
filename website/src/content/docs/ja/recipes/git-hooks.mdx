@@ -27,7 +27,7 @@ Gitリポジトリのルートに`lefthook.yml`というファイルを追加し
         run: npx biome check --no-errors-on-unmatched --files-ignore-unknown=true {staged_files}
   ```
 
-- コミットをする前にformatチェックやlintを行い、[安全な修正](../linter#安全な修正safe-fixes)を行う
+- コミット前にformatチェックやlintを行い、[安全な修正](../linter#安全な修正safe-fixes)を行う
 
   ```yaml title="lefthook.yml"
   pre-commit:
