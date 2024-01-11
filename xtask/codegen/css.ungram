@@ -54,6 +54,7 @@ CssBogusMediaQuery =  SyntaxElement*
 CssBogusProperty =  SyntaxElement*
 CssBogusUrlModifier =  SyntaxElement*
 CssBogusPropertyValue = SyntaxElement*
+CssBogusDocumentMatcher = SyntaxElement*
 
 CssRoot =
 	bom: 'UNICODE_BOM'?
@@ -700,6 +701,7 @@ AnyCssAtRule =
 	| CssImportAtRule
 	| CssNamespaceAtRule
 	| CssStartingStyleAtRule
+	| CssDocumentAtRule
 	| CssBogusAtRule
 
 // @charset "UTF-8";
@@ -1467,6 +1469,33 @@ AnyCssStartingStyleBlock =
 	CssRuleListBlock
 	| CssDeclarationListBlock
 	| CssBogusBlock
+
+// https://www.w3.org/TR/2012/WD-css3-conditional-20120911/#at-document
+// @document [ <url>                   |
+//            url-prefix(<string>)     |
+//            domain(<string>)         |
+//            media-document(<string>) |
+//            regexp(<string>)
+//          ]# {
+//  <group-rule-body>
+// }
+CssDocumentAtRule =
+	'document'
+	matchers: CssDocumentMatcherList
+	block: AnyCssRuleListBlock
+
+CssDocumentMatcherList = AnyCssDocumentMatcher (',' AnyCssDocumentMatcher)* ','?
+
+AnyCssDocumentMatcher =
+	CssUrlFunction
+	| CssDocumentCustomMatcher
+	| CssBogusDocumentMatcher
+
+CssDocumentCustomMatcher =
+	name: ('url-prefix' | 'domain' | 'media-document' | 'regexp')
+	'('
+	value: CssString
+	')'
 
 ///////////////
 // AUXILIARY

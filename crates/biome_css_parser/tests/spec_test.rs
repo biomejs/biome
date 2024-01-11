@@ -135,15 +135,10 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 pub fn quick_test() {
     let code = r#"
 
-@starting-style {
+@document url("https://www.example.com/") {
 	h1 {
-		background-color: transparent;
+		color: green;
 	}
-	@layer foo {
-        @starting-style {
-            height: 100px;
-        }
-    }
 }
     "#;
 

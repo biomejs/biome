@@ -998,6 +998,12 @@ impl<'src> CssLexer<'src> {
             b"import" => IMPORT_KW,
             b"namespace" => NAMESPACE_KW,
             b"starting-style" => STARTING_STYLE_KW,
+            b"document" => DOCUMENT_KW,
+            b"-moz-document" => DOCUMENT_KW,
+            b"url-prefix" => URL_PREFIX_KW,
+            b"domain" => DOMAIN_KW,
+            b"media-document" => MEDIA_DOCUMENT_KW,
+            b"regexp" => REGEXP_KW,
             _ => IDENT,
         }
     }

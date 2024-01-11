@@ -5,6 +5,7 @@ pub(crate) mod charset_at_rule;
 pub(crate) mod color_profile_at_rule;
 pub(crate) mod container_at_rule;
 pub(crate) mod counter_style_at_rule;
+pub(crate) mod document_at_rule;
 pub(crate) mod font_face_at_rule;
 pub(crate) mod font_palette_values_at_rule;
 pub(crate) mod import_at_rule;
