@@ -100,7 +100,7 @@ impl CommentStyle for JsCommentStyle {
     ) -> CommentPlacement<Self::Language> {
         match comment.text_position() {
             CommentTextPosition::EndOfLine => handle_typecast_comment(comment)
-                .or_else(handle_function_declaration_comment)
+                .or_else(handle_function_comment)
                 .or_else(handle_conditional_comment)
                 .or_else(handle_if_statement_comment)
                 .or_else(handle_while_comment)
@@ -119,7 +119,7 @@ impl CommentStyle for JsCommentStyle {
                 .or_else(handle_after_arrow_fat_arrow_comment)
                 .or_else(handle_import_export_specifier_comment),
             CommentTextPosition::OwnLine => handle_member_expression_comment(comment)
-                .or_else(handle_function_declaration_comment)
+                .or_else(handle_function_comment)
                 .or_else(handle_if_statement_comment)
                 .or_else(handle_while_comment)
                 .or_else(handle_try_comment)
@@ -641,38 +641,32 @@ fn handle_member_expression_comment(
     }
 }
 
-fn handle_function_declaration_comment(
-    comment: DecoratedComment<JsLanguage>,
-) -> CommentPlacement<JsLanguage> {
-    let is_function_declaration = matches!(
+fn handle_function_comment(comment: DecoratedComment<JsLanguage>) -> CommentPlacement<JsLanguage> {
+    if !matches!(
         comment.enclosing_node().kind(),
         JsSyntaxKind::JS_FUNCTION_DECLARATION
             | JsSyntaxKind::JS_FUNCTION_EXPORT_DEFAULT_DECLARATION
-    );
-
-    let following = match comment.following_node() {
-        Some(following) if is_function_declaration => following,
-        _ => return CommentPlacement::Default(comment),
+            | JsSyntaxKind::JS_FUNCTION_EXPRESSION
+    ) || !comment.kind().is_line()
+    {
+        return CommentPlacement::Default(comment);
     };
 
-    // Make comments between the `)` token and the function body leading comments
-    // of the first non empty statement or dangling comments of the body.
+    let Some(body) = comment.following_node().and_then(JsFunctionBody::cast_ref) else {
+        return CommentPlacement::Default(comment);
+    };
+
+    // Make line comments between the `)` token and the function body leading comments
+    // of the first statement or dangling comments of the body.
     // ```javascript
-    // function test() /* comment */ {
+    // function test() // comment
+    // {
     //  console.log("Hy");
     // }
     // ```
-    if let Some(body) = JsFunctionBody::cast_ref(following) {
-        match body
-            .statements()
-            .iter()
-            .find(|statement| !matches!(statement, AnyJsStatement::JsEmptyStatement(_)))
-        {
-            Some(first) => CommentPlacement::leading(first.into_syntax(), comment),
-            None => CommentPlacement::dangling(body.into_syntax(), comment),
-        }
-    } else {
-        CommentPlacement::Default(comment)
+    match body.statements().first() {
+        Some(first) => CommentPlacement::leading(first.into_syntax(), comment),
+        None => CommentPlacement::dangling(body.into_syntax(), comment),
     }
 }
 
