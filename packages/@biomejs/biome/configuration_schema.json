@@ -1455,7 +1455,7 @@
 					]
 				},
 				"useSortedClasses": {
-					"description": "Enforce the sorting of CSS classes.",
+					"description": "Enforce the sorting of CSS utility classes.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

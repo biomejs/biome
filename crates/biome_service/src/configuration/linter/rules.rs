@@ -2627,7 +2627,7 @@ pub struct Nursery {
     #[doc = "Enforce using function types instead of object type with call signatures."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_shorthand_function_type: Option<RuleConfiguration>,
-    #[doc = "Enforce the sorting of CSS classes."]
+    #[doc = "Enforce the sorting of CSS utility classes."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_sorted_classes: Option<RuleConfiguration>,
 }

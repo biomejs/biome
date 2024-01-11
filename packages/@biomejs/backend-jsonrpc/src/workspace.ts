@@ -955,7 +955,7 @@ export interface Nursery {
 	 */
 	useShorthandFunctionType?: RuleConfiguration;
 	/**
-	 * Enforce the sorting of CSS classes.
+	 * Enforce the sorting of CSS utility classes.
 	 */
 	useSortedClasses?: RuleConfiguration;
 }
