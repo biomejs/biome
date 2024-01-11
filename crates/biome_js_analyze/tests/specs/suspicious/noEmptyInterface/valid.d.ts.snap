@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.d.ts
 ---
 # Input
-```js
+```ts
 declare global {
     export interface App extends Services {}
 }

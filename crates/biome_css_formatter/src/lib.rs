@@ -5,17 +5,25 @@ mod cst;
 mod generated;
 mod prelude;
 mod separated;
+mod utils;
+
+use std::borrow::Cow;
 
 use crate::comments::CssCommentStyle;
 pub(crate) use crate::context::CssFormatContext;
 use crate::context::CssFormatOptions;
 use crate::cst::FormatCssSyntaxNode;
-use biome_css_syntax::{AnyCssValue, CssLanguage, CssSyntaxNode, CssSyntaxToken};
+use biome_css_syntax::{
+    AnyCssDeclarationListBlock, AnyCssRule, AnyCssRuleListBlock, AnyCssValue, CssLanguage,
+    CssSyntaxKind, CssSyntaxNode, CssSyntaxToken,
+};
 use biome_formatter::comments::Comments;
 use biome_formatter::prelude::*;
+use biome_formatter::token::string::ToAsciiLowercaseCow;
+use biome_formatter::trivia::format_skipped_token_trivia;
 use biome_formatter::{
     write, CstFormatContext, FormatContext, FormatLanguage, FormatOwnedWithRule, FormatRefWithRule,
-    FormatToken, TransformSourceMap,
+    TransformSourceMap,
 };
 use biome_formatter::{Formatted, Printed};
 use biome_rowan::{AstNode, SyntaxNode, TextRange};
@@ -239,8 +247,22 @@ impl FormatLanguage for CssFormatLanguage {
     type Context = CssFormatContext;
     type FormatRule = FormatCssSyntaxNode;
 
+    // For CSS, range formatting allows:
+    // - any block of rules or declarations
+    // - any individual rule or declaration
+    // - any individual value
+    // - a complete value definition for a declaration
     fn is_range_formatting_node(&self, node: &SyntaxNode<Self::SyntaxLanguage>) -> bool {
-        AnyCssValue::can_cast(node.kind())
+        AnyCssDeclarationListBlock::can_cast(node.kind())
+            || AnyCssRuleListBlock::can_cast(node.kind())
+            || AnyCssValue::can_cast(node.kind())
+            || AnyCssRule::can_cast(node.kind())
+            || matches!(
+                node.kind(),
+                CssSyntaxKind::CSS_DECLARATION
+                    | CssSyntaxKind::CSS_COMPONENT_VALUE_LIST
+                    | CssSyntaxKind::CSS_SELECTOR_LIST
+            )
     }
 
     fn options(&self) -> &<Self::Context as FormatContext>::Options {
@@ -257,14 +279,42 @@ impl FormatLanguage for CssFormatLanguage {
     }
 }
 
-/// Format implementation specific to JavaScript tokens.
-pub(crate) type FormatCssSyntaxToken = FormatToken<CssFormatContext>;
+/// Format implementation specific to CSS tokens.
+///
+/// This re-implementation of FormatToken allows the formatter to automatically
+/// rewrite all keywords in lowercase, since they are case-insensitive. Other
+/// tokens like identifiers handle lowercasing themselves.
+#[derive(Default, Debug, Clone, Copy)]
+pub(crate) struct FormatCssSyntaxToken;
+
+impl FormatRule<CssSyntaxToken> for FormatCssSyntaxToken {
+    type Context = CssFormatContext;
+
+    fn fmt(&self, token: &CssSyntaxToken, f: &mut Formatter<Self::Context>) -> FormatResult<()> {
+        f.state_mut().track_token(token);
+
+        write!(f, [format_skipped_token_trivia(token)])?;
+
+        if token.kind().is_contextual_keyword() {
+            let original = token.text_trimmed();
+            match original.to_ascii_lowercase_cow() {
+                Cow::Borrowed(_) => write!(f, [format_trimmed_token(token)]),
+                Cow::Owned(lowercase) => write!(
+                    f,
+                    [dynamic_text(&lowercase, token.text_trimmed_range().start())]
+                ),
+            }
+        } else {
+            write!(f, [format_trimmed_token(token)])
+        }
+    }
+}
 
 impl AsFormat<CssFormatContext> for CssSyntaxToken {
     type Format<'a> = FormatRefWithRule<'a, CssSyntaxToken, FormatCssSyntaxToken>;
 
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule::new(self, FormatCssSyntaxToken::default())
+        FormatRefWithRule::new(self, FormatCssSyntaxToken)
     }
 }
 
@@ -272,7 +322,7 @@ impl IntoFormat<CssFormatContext> for CssSyntaxToken {
     type Format = FormatOwnedWithRule<CssSyntaxToken, FormatCssSyntaxToken>;
 
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule::new(self, FormatCssSyntaxToken::default())
+        FormatOwnedWithRule::new(self, FormatCssSyntaxToken)
     }
 }
 

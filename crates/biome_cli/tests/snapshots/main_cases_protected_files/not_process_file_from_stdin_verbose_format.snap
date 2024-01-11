@@ -1,0 +1,25 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+# Input messages
+
+```block
+{ "name": "test" }
+```
+
+# Emitted Messages
+
+```block
+package.json project  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The file package.json is protected because is handled by another tool. Biome won't process it.
+  
+  Verbose advice
+  
+    i You can hide this diagnostic by using --diagnostic-level=warn to increase the diagnostic level shown by CLI.
+    
+
+```
+
+

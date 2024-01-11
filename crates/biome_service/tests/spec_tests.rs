@@ -20,12 +20,14 @@ fn run_invalid_configurations(input: &'static str, _: &str, _: &str, _: &str) {
         "json" => deserialize_from_json_str::<Configuration>(
             input_code.as_str(),
             JsonParserOptions::default(),
+            "",
         ),
         "jsonc" => deserialize_from_json_str::<Configuration>(
             input_code.as_str(),
             JsonParserOptions::default()
                 .with_allow_comments()
                 .with_allow_trailing_commas(),
+            "",
         ),
         _ => {
             panic!("Extension not supported");
@@ -33,7 +35,7 @@ fn run_invalid_configurations(input: &'static str, _: &str, _: &str, _: &str) {
     };
 
     assert!(
-        result.has_errors(),
+        result.has_errors() || result.has_warnings(),
         "This test should have diagnostics, but it doesn't have any"
     );
 
@@ -69,10 +71,12 @@ fn run_valid_configurations(input: &'static str, _: &str, _: &str, _: &str) {
         "json" => deserialize_from_json_str::<Configuration>(
             input_code.as_str(),
             JsonParserOptions::default(),
+            "",
         ),
         "jsonc" => deserialize_from_json_str::<Configuration>(
             input_code.as_str(),
             JsonParserOptions::default().with_allow_comments(),
+            "",
         ),
         _ => {
             panic!("Extension not supported");
@@ -116,7 +120,8 @@ fn quick_test() {
             }
         }
     }"#;
-    let result = deserialize_from_json_str::<Configuration>(source, JsonParserOptions::default());
+    let result =
+        deserialize_from_json_str::<Configuration>(source, JsonParserOptions::default(), "");
 
     dbg!(result.diagnostics());
     assert!(!result.has_errors());

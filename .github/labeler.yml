@@ -48,6 +48,7 @@ A-Diagnostic:
 
 A-Tooling:
   - xtask/**
+  - crates/biome_ungrammar/**
 
 A-Website:
   - website/**

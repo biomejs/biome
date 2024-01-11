@@ -652,7 +652,7 @@ for_stmt_err.js:7:5 parse ━━━━━━━━━━━━━━━━━━
 --
 for_stmt_err.js:8:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Object and Array patterns require initializers
+  × Object and Array patterns require initializers.
   
     6 │ for await (let a in []) {}
     7 │ for await (let i = 0; i < 10; ++i) {}
@@ -660,7 +660,7 @@ for_stmt_err.js:8:10 parse ━━━━━━━━━━━━━━━━━�
       │          ^^^
     9 │ 
   
-  i this pattern is declared, but it is not given an initialized value
+  i This pattern is declared, but it is not given an initialized value.
   
 --
 for ;; {}

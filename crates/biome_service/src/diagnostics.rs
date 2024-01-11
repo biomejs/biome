@@ -3,7 +3,7 @@ use crate::ConfigurationDiagnostic;
 use biome_console::fmt::Bytes;
 use biome_console::markup;
 use biome_diagnostics::{
-    category, Category, Diagnostic, DiagnosticTags, Location, Severity, Visit,
+    category, Advices, Category, Diagnostic, DiagnosticTags, Location, LogCategory, Severity, Visit,
 };
 use biome_formatter::{FormatError, PrintError};
 use biome_fs::{FileSystemDiagnostic, RomePath};
@@ -54,6 +54,8 @@ pub enum WorkspaceError {
     FileSystem(FileSystemDiagnostic),
     /// Raised when there's an issue around the VCS integration
     Vcs(VcsDiagnostic),
+    /// Diagnostic raised when a file is protected
+    ProtectedFile(ProtectedFile),
 }
 
 impl WorkspaceError {
@@ -98,6 +100,13 @@ impl WorkspaceError {
     pub fn vcs_disabled() -> Self {
         Self::Vcs(VcsDiagnostic::DisabledVcs(DisabledVcs {}))
     }
+
+    pub fn protected_file(file_path: impl Into<String>) -> Self {
+        Self::ProtectedFile(ProtectedFile {
+            file_path: file_path.into(),
+            verbose_advice: ProtectedFileAdvice,
+        })
+    }
 }
 
 impl Error for WorkspaceError {}
@@ -140,6 +149,7 @@ impl Diagnostic for WorkspaceError {
             WorkspaceError::FileTooLarge(error) => error.category(),
             WorkspaceError::FileSystem(error) => error.category(),
             WorkspaceError::Vcs(error) => error.category(),
+            WorkspaceError::ProtectedFile(error) => error.category(),
         }
     }
 
@@ -162,6 +172,7 @@ impl Diagnostic for WorkspaceError {
             WorkspaceError::FileTooLarge(error) => error.description(fmt),
             WorkspaceError::FileSystem(error) => error.description(fmt),
             WorkspaceError::Vcs(error) => error.description(fmt),
+            WorkspaceError::ProtectedFile(error) => error.description(fmt),
         }
     }
 
@@ -184,6 +195,7 @@ impl Diagnostic for WorkspaceError {
             WorkspaceError::FileTooLarge(error) => error.message(fmt),
             WorkspaceError::FileSystem(error) => error.message(fmt),
             WorkspaceError::Vcs(error) => error.message(fmt),
+            WorkspaceError::ProtectedFile(error) => error.message(fmt),
         }
     }
 
@@ -206,6 +218,7 @@ impl Diagnostic for WorkspaceError {
             WorkspaceError::FileTooLarge(error) => error.severity(),
             WorkspaceError::FileSystem(error) => error.severity(),
             WorkspaceError::Vcs(error) => error.severity(),
+            WorkspaceError::ProtectedFile(error) => error.severity(),
         }
     }
 
@@ -228,6 +241,7 @@ impl Diagnostic for WorkspaceError {
             WorkspaceError::FileTooLarge(error) => error.tags(),
             WorkspaceError::FileSystem(error) => error.tags(),
             WorkspaceError::Vcs(error) => error.tags(),
+            WorkspaceError::ProtectedFile(error) => error.tags(),
         }
     }
 
@@ -250,6 +264,7 @@ impl Diagnostic for WorkspaceError {
             WorkspaceError::FileTooLarge(error) => error.location(),
             WorkspaceError::FileSystem(error) => error.location(),
             WorkspaceError::Vcs(error) => error.location(),
+            WorkspaceError::ProtectedFile(error) => error.location(),
         }
     }
 
@@ -272,6 +287,7 @@ impl Diagnostic for WorkspaceError {
             WorkspaceError::FileTooLarge(error) => Diagnostic::source(error),
             WorkspaceError::FileSystem(error) => Diagnostic::source(error),
             WorkspaceError::Vcs(error) => Diagnostic::source(error),
+            WorkspaceError::ProtectedFile(error) => Diagnostic::source(error),
         }
     }
 
@@ -294,6 +310,7 @@ impl Diagnostic for WorkspaceError {
             WorkspaceError::FileTooLarge(error) => error.advices(visitor),
             WorkspaceError::FileSystem(error) => error.advices(visitor),
             WorkspaceError::Vcs(error) => error.advices(visitor),
+            WorkspaceError::ProtectedFile(error) => error.advices(visitor),
         }
     }
     fn verbose_advices(&self, visitor: &mut dyn Visit) -> std::io::Result<()> {
@@ -315,6 +332,7 @@ impl Diagnostic for WorkspaceError {
             WorkspaceError::FileTooLarge(error) => error.verbose_advices(visitor),
             WorkspaceError::FileSystem(error) => error.verbose_advices(visitor),
             WorkspaceError::Vcs(error) => error.verbose_advices(visitor),
+            WorkspaceError::ProtectedFile(error) => error.verbose_advices(visitor),
         }
     }
 }
@@ -479,6 +497,15 @@ impl Diagnostic for SourceFileNotSupported {
                 }
             )
         }
+    }
+
+    fn verbose_advices(&self, visitor: &mut dyn Visit) -> std::io::Result<()> {
+        visitor.record_log(
+            LogCategory::Info,
+            &markup! {
+                "If you want to turn off this diagnostic, consider using "<Emphasis>"--files-ignore-unknown"</Emphasis>" from the CLI, or "<Emphasis>"files.ignoreUnknown"</Emphasis>" from the configuration file."
+            }
+        )
     }
 }
 
@@ -650,6 +677,33 @@ pub struct NoVcsFolderFound {
     message = "Biome couldn't determine a directory for the VCS integration. VCS integration will be disabled."
 )]
 pub struct DisabledVcs {}
+
+#[derive(Debug, Serialize, Deserialize, Diagnostic)]
+#[diagnostic(
+    category = "project",
+    severity = Information,
+    message(
+        message("The file "<Emphasis>{self.file_path}</Emphasis>" is protected because is handled by another tool. Biome won't process it."),
+        description = "The file {file_path} is protected because is handled by another tool. Biome won't process it.",
+    ),
+    tags(VERBOSE)
+)]
+pub struct ProtectedFile {
+    #[location(resource)]
+    pub file_path: String,
+
+    #[verbose_advice]
+    pub verbose_advice: ProtectedFileAdvice,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ProtectedFileAdvice;
+
+impl Advices for ProtectedFileAdvice {
+    fn record(&self, visitor: &mut dyn Visit) -> std::io::Result<()> {
+        visitor.record_log(LogCategory::Info, &markup! { "You can hide this diagnostic by using "<Emphasis>"--diagnostic-level=warn"</Emphasis>" to increase the diagnostic level shown by CLI." })
+    }
+}
 
 #[cfg(test)]
 mod test {

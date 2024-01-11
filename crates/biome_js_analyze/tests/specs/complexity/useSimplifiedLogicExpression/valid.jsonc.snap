@@ -3,37 +3,37 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.jsonc
 ---
 # Input
-```js
+```cjs
 const boolExpr3 = true;
 ```
 
 # Input
-```js
+```cjs
 const boolExpr4 = false;
 ```
 
 # Input
-```js
+```cjs
 const r5 = !(boolExpr1 && boolExpr2);
 ```
 
 # Input
-```js
+```cjs
 const boolExpr5 = true;
 ```
 
 # Input
-```js
+```cjs
 const boolExpr6 = false;
 ```
 
 # Input
-```js
+```cjs
 const r6 = !!boolExpr1 || !!boolExpr2;
 ```
 
 # Input
-```js
+```cjs
 !!x
 ```
 

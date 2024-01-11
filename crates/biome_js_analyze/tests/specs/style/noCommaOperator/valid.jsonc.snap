@@ -3,37 +3,37 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.jsonc
 ---
 # Input
-```js
+```cjs
 let arr = [1, 2];
 ```
 
 # Input
-```js
+```cjs
 let obj = {a: 1, b: 2};
 ```
 
 # Input
-```js
+```cjs
 let a = 1, b = 2;
 ```
 
 # Input
-```js
+```cjs
 foo(a, b, d);
 ```
 
 # Input
-```js
+```cjs
 for (i = 0, j = 0; test; );
 ```
 
 # Input
-```js
+```cjs
 for (; test; i++, j++);
 ```
 
 # Input
-```js
+```cjs
 for (let i = 0, j = 1, k = 2; i < 100; i++, j++, k++) {}
 ```
 

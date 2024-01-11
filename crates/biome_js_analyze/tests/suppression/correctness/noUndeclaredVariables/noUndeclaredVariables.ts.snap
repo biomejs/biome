@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: noUndeclaredVariables.ts
 ---
 # Input
-```js
+```jsx
 export type Invalid<S extends number> = `Hello ${T}`
 
 export type Invalid<S extends number> = `

@@ -2,10 +2,10 @@
 title: noAriaHiddenOnFocusable (since v1.4.0)
 ---
 
-**Diagnostic Category: `lint/nursery/noAriaHiddenOnFocusable`**
+**Diagnostic Category: `lint/a11y/noAriaHiddenOnFocusable`**
 
-:::caution
-This rule is part of the [nursery](/linter/rules/#nursery) group.
+:::note
+This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
 Enforce that aria-hidden="true" is not set on focusable elements.
@@ -24,7 +24,7 @@ Source: https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rule
 <div aria-hidden="true" tabIndex="0" />
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noAriaHiddenOnFocusable.js:1:1 <a href="https://biomejs.dev/linter/rules/no-aria-hidden-on-focusable">lint/nursery/noAriaHiddenOnFocusable</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/noAriaHiddenOnFocusable.js:1:1 <a href="https://biomejs.dev/linter/rules/no-aria-hidden-on-focusable">lint/a11y/noAriaHiddenOnFocusable</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Disallow </span><span style="color: Tomato;"><strong>aria-hidden=&quot;true&quot;</strong></span><span style="color: Tomato;"> from being set on focusable elements.</span>
   
@@ -44,7 +44,7 @@ Source: https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rule
 <a href="/" aria-hidden="true" />
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noAriaHiddenOnFocusable.js:1:1 <a href="https://biomejs.dev/linter/rules/no-aria-hidden-on-focusable">lint/nursery/noAriaHiddenOnFocusable</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">a11y/noAriaHiddenOnFocusable.js:1:1 <a href="https://biomejs.dev/linter/rules/no-aria-hidden-on-focusable">lint/a11y/noAriaHiddenOnFocusable</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Disallow </span><span style="color: Tomato;"><strong>aria-hidden=&quot;true&quot;</strong></span><span style="color: Tomato;"> from being set on focusable elements.</span>
   

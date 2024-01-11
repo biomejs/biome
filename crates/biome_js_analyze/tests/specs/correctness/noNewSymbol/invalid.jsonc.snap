@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsonc
 ---
 # Input
-```js
+```cjs
 var foo = new Symbol('foo');
 ```
 
@@ -24,7 +24,7 @@ invalid.jsonc:1:11 lint/correctness/noNewSymbol  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 var foo = new globalThis.Symbol('foo');
 ```
 
@@ -45,7 +45,7 @@ invalid.jsonc:1:11 lint/correctness/noNewSymbol  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 var foo = new window.Symbol('foo');
 ```
 
@@ -66,7 +66,7 @@ invalid.jsonc:1:11 lint/correctness/noNewSymbol  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 var foo2 = new Symbol();
 ```
 
@@ -87,7 +87,7 @@ invalid.jsonc:1:12 lint/correctness/noNewSymbol  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 var lorem = new Symbol() // comment
 ```
 
@@ -108,7 +108,7 @@ invalid.jsonc:1:13 lint/correctness/noNewSymbol  FIXABLE  ━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 var s = /* prefix_cmt */ new /* suffix_cmt */ Symbol() // comment
 ```
 

@@ -16,6 +16,7 @@ use biome_diagnostics::{
 use biome_rowan::{AstNode, BatchMutation, BatchMutationExt, Language, TextRange};
 use std::fmt::Debug;
 
+#[derive(Debug, Clone)]
 /// Static metadata containing information about a rule
 pub struct RuleMetadata {
     /// It marks if a rule is deprecated, and if so a reason has to be provided.
@@ -30,9 +31,13 @@ pub struct RuleMetadata {
     pub recommended: bool,
     /// The kind of fix
     pub fix_kind: Option<FixKind>,
+    /// The source URL of the rule
+    pub source: Option<Source>,
+    /// The source kind of the rule
+    pub source_kind: Option<SourceKind>,
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 /// Used to identify the kind of code action emitted by a rule
 pub enum FixKind {
     /// The rule emits a code action that is safe to apply. Usually these fixes don't change the semantic of the program.
@@ -40,6 +45,79 @@ pub enum FixKind {
     /// The rule emits a code action that is _unsafe_ to apply. Usually these fixes remove comments, or change
     /// the semantic of the program.
     Unsafe,
+}
+
+impl Display for FixKind {
+    fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
+        match self {
+            FixKind::Safe => fmt.write_str("Safe"),
+            FixKind::Unsafe => fmt.write_str("Unsafe"),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub enum Source {
+    /// Rules from [Rust Clippy](https://rust-lang.github.io/rust-clippy/master/index.html)
+    Clippy(&'static str),
+    /// Rules from [Eslint](https://eslint.org/)
+    Eslint(&'static str),
+    /// Rules from [Eslint Plugin Jest](https://github.com/jest-community/eslint-plugin-jest)
+    EslintJest(&'static str),
+    /// Rules from [Eslint Plugin JSX A11y](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y)
+    EslintJsxA11y(&'static str),
+    /// Rules from [Eslint Plugin React](https://github.com/jsx-eslint/eslint-plugin-react)
+    EslintReact(&'static str),
+    /// Rules from [Eslint Plugin React Hooks](https://github.com/facebook/react/blob/main/packages/eslint-plugin-react-hooks/README.md)
+    EslintReactHooks(&'static str),
+    /// Rules from [Typescript Eslint Plugin](https://typescript-eslint.io)
+    EslintTypeScript(&'static str),
+    /// Rules from [Eslint Plugin Unicorn](https://github.com/sindresorhus/eslint-plugin-unicorn)
+    EslintUnicorn(&'static str),
+    /// Rules from [Eslint Plugin Mysticatea](https://github.com/mysticatea/eslint-plugin)
+    EslintMysticatea(&'static str),
+}
+
+impl Source {
+    pub fn as_rule_name(&self) -> &'static str {
+        match self {
+            Self::Clippy(rule_name) => rule_name,
+            Self::Eslint(rule_name) => rule_name,
+            Self::EslintJest(rule_name) => rule_name,
+            Self::EslintJsxA11y(rule_name) => rule_name,
+            Self::EslintReact(rule_name) => rule_name,
+            Self::EslintReactHooks(rule_name) => rule_name,
+            Self::EslintTypeScript(rule_name) => rule_name,
+            Self::EslintUnicorn(rule_name) => rule_name,
+            Self::EslintMysticatea(rule_name) => rule_name,
+        }
+    }
+
+    pub fn as_rule_url(&self) -> String {
+        match self {
+            Self::Clippy(rule_name) => format!("https://rust-lang.github.io/rust-clippy/master/#/{rule_name}"),
+            Self::Eslint(rule_name) => format!( "https://eslint.org/docs/latest/rules/{rule_name}"),
+            Self::EslintJest(rule_name) => format!("https://github.com/jest-community/eslint-plugin-jest/blob/main/docs/rules/{rule_name}.md"),
+            Self::EslintJsxA11y(rule_name) => format!("https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/{rule_name}.md"),
+            Self::EslintReact(rule_name) => format!("https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/{rule_name}.md"),
+            Self::EslintReactHooks(_) =>  "https://github.com/facebook/react/blob/main/packages/eslint-plugin-react-hooks/README.md".to_string(),
+            Self::EslintTypeScript(rule_name) => format!("https://typescript-eslint.io/rules/{rule_name}"),
+            Self::EslintUnicorn(rule_name) => format!("https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/{rule_name}.md"),
+            Self::EslintMysticatea(rule_name) => format!("https://github.com/mysticatea/eslint-plugin/blob/master/docs/rules/{rule_name}.md"),
+        }
+    }
+
+    pub fn as_url_and_rule_name(&self) -> (String, &'static str) {
+        (self.as_rule_url(), self.as_rule_name())
+    }
+}
+
+#[derive(Debug, Clone)]
+pub enum SourceKind {
+    /// The rule implements the same logic of the source
+    SameLogic,
+    /// The rule deviate of the logic of the source
+    Inspired,
 }
 
 impl RuleMetadata {
@@ -51,6 +129,8 @@ impl RuleMetadata {
             docs,
             recommended: false,
             fix_kind: None,
+            source: None,
+            source_kind: None,
         }
     }
 
@@ -66,6 +146,16 @@ impl RuleMetadata {
 
     pub const fn fix_kind(mut self, kind: FixKind) -> Self {
         self.fix_kind = Some(kind);
+        self
+    }
+
+    pub const fn source(mut self, source: Source) -> Self {
+        self.source = Some(source);
+        self
+    }
+
+    pub const fn source_kind(mut self, source_kind: SourceKind) -> Self {
+        self.source_kind = Some(source_kind);
         self
     }
 }

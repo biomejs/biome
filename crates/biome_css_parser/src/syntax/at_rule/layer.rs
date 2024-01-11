@@ -6,7 +6,7 @@ use crate::syntax::{is_at_identifier, parse_regular_identifier};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::ParseSeparatedList;
-use biome_parser::parse_recovery::{ParseRecovery, RecoveryResult};
+use biome_parser::parse_recovery::{ParseRecoveryTokenSet, RecoveryResult};
 use biome_parser::parsed_syntax::ParsedSyntax::Present;
 use biome_parser::prelude::ParsedSyntax::Absent;
 use biome_parser::prelude::*;
@@ -35,7 +35,7 @@ pub(crate) fn parse_layer_at_rule(p: &mut CssParser) -> ParsedSyntax {
 pub(crate) fn parse_any_layer(p: &mut CssParser) -> CompletedMarker {
     let m = p.start();
 
-    CssLayerReferenceList.parse_list(p);
+    LayerReferenceList.parse_list(p);
 
     if p.at(T!['{']) {
         let kind = if parse_or_recover_rule_list_block(p).is_ok() {
@@ -60,15 +60,15 @@ const LAYER_REFERENCE_LIST_END_SET: TokenSet<CssSyntaxKind> = token_set!(T!['{']
 const LAYER_REFERENCE_LIST_RECOVERY_SET: TokenSet<CssSyntaxKind> =
     LAYER_REFERENCE_LIST_END_SET.union(token_set!(T![,]));
 
-struct CssLayerReferenceList;
+struct LayerReferenceList;
 
-impl ParseSeparatedList for CssLayerReferenceList {
+impl ParseSeparatedList for LayerReferenceList {
     type Kind = CssSyntaxKind;
     type Parser<'source> = CssParser<'source>;
     const LIST_KIND: Self::Kind = CSS_LAYER_REFERENCE_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        Present(CssLayerNameList.parse_list(p))
+        LayerNameList.parse_list(p).into()
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
@@ -80,9 +80,9 @@ impl ParseSeparatedList for CssLayerReferenceList {
         p: &mut Self::Parser<'_>,
         parsed_element: ParsedSyntax,
     ) -> RecoveryResult {
-        parsed_element.or_recover(
+        parsed_element.or_recover_with_token_set(
             p,
-            &ParseRecovery::new(CSS_BOGUS, LAYER_REFERENCE_LIST_RECOVERY_SET)
+            &ParseRecoveryTokenSet::new(CSS_BOGUS, LAYER_REFERENCE_LIST_RECOVERY_SET)
                 .enable_recovery_on_line_break(),
             expected_identifier,
         )
@@ -97,14 +97,24 @@ const LAYER_NAME_LIST_END_SET: TokenSet<CssSyntaxKind> = token_set!(T![,], T!['{
 const LAYER_NAME_LIST_RECOVERY_SET: TokenSet<CssSyntaxKind> =
     LAYER_NAME_LIST_END_SET.union(token_set!(T![.]));
 
-struct CssLayerNameList;
+pub(crate) struct LayerNameList;
 
-impl ParseSeparatedList for CssLayerNameList {
+impl ParseSeparatedList for LayerNameList {
     type Kind = CssSyntaxKind;
     type Parser<'source> = CssParser<'source>;
     const LIST_KIND: Self::Kind = CSS_LAYER_NAME_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
+        // The Spec for `<layer-name>` technically adds that "The CSS-wide
+        // keywords are reserved for future use, and cause the rule to be
+        // invalid at parse time"...but it's unclear if that means it's a
+        // _parse error_, or just not a valid layer. The examples in the
+        // document use `default`, which was an _old_ keyword (renamed to
+        // `revert` in Level 4), and all of the validators I've found allow
+        // keywords as identifiers here, so for now we will continue to
+        // allow them as well.
+        //
+        // https://drafts.csswg.org/css-cascade-5/#typedef-layer-name
         parse_regular_identifier(p)
     }
 
@@ -117,9 +127,9 @@ impl ParseSeparatedList for CssLayerNameList {
         p: &mut Self::Parser<'_>,
         parsed_element: ParsedSyntax,
     ) -> RecoveryResult {
-        parsed_element.or_recover(
+        parsed_element.or_recover_with_token_set(
             p,
-            &ParseRecovery::new(CSS_BOGUS, LAYER_NAME_LIST_RECOVERY_SET),
+            &ParseRecoveryTokenSet::new(CSS_BOGUS, LAYER_NAME_LIST_RECOVERY_SET),
             expected_identifier,
         )
     }

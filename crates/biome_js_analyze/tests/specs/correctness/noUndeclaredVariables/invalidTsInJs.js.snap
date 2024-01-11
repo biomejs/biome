@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidTsInJs.js
 ---
 # Input
-```js
+```jsx
 ArrayLike;
 PromiseLike;
 

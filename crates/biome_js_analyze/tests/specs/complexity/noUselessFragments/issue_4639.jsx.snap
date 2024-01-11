@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: issue_4639.jsx
 ---
 # Input
-```js
+```jsx
 export function SomeComponent() {
   return <div x-some-prop={<>Foo</>} />;
 }
@@ -21,6 +21,8 @@ issue_4639.jsx:2:28 lint/complexity/noUselessFragments  FIXABLE  ━━━━━
       │                            ^^^^^^^^
     3 │ }
     4 │ 
+  
+  i A fragment is redundant if it contains only one child, or if it is the child of a html element, and is not a keyed fragment.
   
   i Unsafe fix: Remove the Fragment
   

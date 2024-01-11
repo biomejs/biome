@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: nestedControlFlowStructures.js
 ---
 # Input
-```js
+```jsx
 function nestedControlFlowStructures(num) {
     try {
         if (condition1) {                        // +1

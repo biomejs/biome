@@ -40,7 +40,7 @@ use biome_js_syntax::JsSyntaxKind::*;
 use biome_js_syntax::TextSize;
 use biome_js_syntax::{JsSyntaxKind, T};
 use biome_parser::parse_lists::ParseNodeList;
-use biome_parser::parse_recovery::ParseRecovery;
+use biome_parser::parse_recovery::ParseRecoveryTokenSet;
 use biome_parser::ParserProgress;
 use biome_rowan::{SyntaxKind, TextRange};
 use bitflags::bitflags;
@@ -274,6 +274,9 @@ fn parse_class(p: &mut JsParser, kind: ClassKind, decorator_list: ParsedSyntax) 
 
     // test ts ts_class_type_parameters
     // class BuildError<A, B, C> {}
+
+    // test_err ts ts_class_type_parameters_errors
+    // class BuildError<> {}
     TypeScript
         .parse_exclusive_syntax(
             p,
@@ -476,9 +479,9 @@ impl ParseNodeList for ClassMembersList {
         //     let a=;
         //   };
         // };
-        parsed_element.or_recover(
+        parsed_element.or_recover_with_token_set(
             p,
-            &ParseRecovery::new(
+            &ParseRecoveryTokenSet::new(
                 JS_BOGUS_MEMBER,
                 token_set![
                     T![;],
@@ -733,6 +736,12 @@ fn parse_class_member_impl(
         // class Test {
         //  get a<A>(): A {}
         //  set a<A>(value: A) {}
+        // }
+
+        // test_err ts ts_getter_setter_type_parameters_errors
+        // class Test {
+        //  get a<>(): A {}
+        //  set a<>(value: A) {}
         // }
         if let Present(type_parameters) = parse_ts_type_parameters(p, TypeContext::default()) {
             p.error(ts_accessor_type_parameters_error(p, &type_parameters))
@@ -1527,6 +1536,7 @@ fn parse_constructor_class_member_body(
 
     // test_err ts ts_constructor_type_parameters
     // class A { constructor<A>(b) {} }
+    // class A { constructor<>(b) {} }
     if let Present(type_parameters) = parse_ts_type_parameters(p, TypeContext::default()) {
         p.error(ts_constructor_type_parameters_error(p, &type_parameters));
     }

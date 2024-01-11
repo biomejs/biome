@@ -31,7 +31,6 @@ The configuration that is contained inside the file `biome.json`
         --indent-width=NUMBER  The size of the indentation, 2 by default
         --line-ending=<lf|crlf|cr>  The type of line ending.
         --line-width=NUMBER   What's the max width of a line. Defaults to 80.
-        --quote-style=<double|single>  The type of quotes used in JavaScript code. Defaults to double.
         --jsx-quote-style=<double|single>  The type of quotes used in JSX. Defaults to double.
         --quote-properties=<preserve|as-needed>  When properties in objects are quoted. Defaults to asNeeded.
         --trailing-comma=<all|es5|none>  Print trailing commas wherever possible in multi-line comma-separated
@@ -57,6 +56,7 @@ The configuration that is contained inside the file `biome.json`
                               (and its super languages) files.
         --javascript-formatter-line-width=NUMBER  What's the max width of a line applied to JavaScript
                               (and its super languages) files. Defaults to 80.
+        --quote-style=<double|single>  The type of quotes used in JavaScript code. Defaults to double.
         --json-formatter-enabled=<true|false>  Control the formatter for JSON (and its super languages)
                               files.
         --json-formatter-indent-style=<tab|space>  The indent style applied to JSON (and its super languages)
@@ -75,7 +75,7 @@ Global options applied to all commands
                               "force" forces the formatting of markup using ANSI even if the console
                               output is determined to be incompatible
         --use-server          Connect to a running instance of the Biome daemon server.
-        --verbose             Print additional verbose advices on diagnostics
+        --verbose             Print additional diagnostics, and some diagnostics show more information.
         --config-path=PATH    Set the filesystem path to the directory of the biome.json configuration
                               file
         --max-diagnostics=NUMBER  Cap the amount of diagnostics displayed.

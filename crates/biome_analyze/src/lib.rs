@@ -26,7 +26,7 @@ pub use crate::categories::{
     ActionCategory, RefactorKind, RuleCategories, RuleCategory, SourceActionKind,
 };
 pub use crate::diagnostics::AnalyzerDiagnostic;
-use crate::diagnostics::SuppressionDiagnostic;
+pub use crate::diagnostics::SuppressionDiagnostic;
 pub use crate::matcher::{InspectMatcher, MatchQueryParams, QueryMatcher, RuleKey, SignalEntry};
 pub use crate::options::{AnalyzerConfiguration, AnalyzerOptions, AnalyzerRules};
 pub use crate::query::{AddVisitor, QueryKey, QueryMatch, Queryable};
@@ -36,7 +36,7 @@ pub use crate::registry::{
 };
 pub use crate::rule::{
     CategoryLanguage, FixKind, GroupCategory, GroupLanguage, Rule, RuleAction, RuleDiagnostic,
-    RuleGroup, RuleMeta, RuleMetadata, SuppressAction,
+    RuleGroup, RuleMeta, RuleMetadata, Source, SourceKind, SuppressAction,
 };
 pub use crate::services::{FromServices, MissingServicesDiagnostic, ServiceBag};
 pub use crate::signals::{

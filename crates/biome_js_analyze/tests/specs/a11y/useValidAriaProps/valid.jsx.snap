@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.jsx
 ---
 # Input
-```js
+```jsx
 var a = <div />;
 var a = <div></div>;
 var a = <div aria="wee"></div>;

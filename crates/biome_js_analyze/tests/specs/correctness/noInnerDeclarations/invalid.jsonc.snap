@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsonc
 ---
 # Input
-```js
+```cjs
 if (test) { var foo; }
 ```
 
@@ -23,7 +23,7 @@ invalid.jsonc:1:13 lint/correctness/noInnerDeclarations ━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 function doSomething() { while (test) { var foo; } }
 ```
 
@@ -43,7 +43,7 @@ invalid.jsonc:1:41 lint/correctness/noInnerDeclarations ━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 if (test) { function doSomething() { } }
 ```
 
@@ -63,7 +63,7 @@ invalid.jsonc:1:13 lint/correctness/noInnerDeclarations ━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 if (foo) var a; 
 ```
 
@@ -83,7 +83,7 @@ invalid.jsonc:1:10 lint/correctness/noInnerDeclarations ━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 if (foo) /* some comments */ var a;
 ```
 
@@ -103,7 +103,7 @@ invalid.jsonc:1:30 lint/correctness/noInnerDeclarations ━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 if (foo){ function f(){ if(bar){ var a; } } }
 ```
 
@@ -137,7 +137,7 @@ invalid.jsonc:1:34 lint/correctness/noInnerDeclarations ━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 if (foo) function f(){ if(bar) var a; }
 ```
 
@@ -171,7 +171,7 @@ invalid.jsonc:1:32 lint/correctness/noInnerDeclarations ━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 if (foo) { var fn = function(){} }
 ```
 
@@ -191,7 +191,7 @@ invalid.jsonc:1:12 lint/correctness/noInnerDeclarations ━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 if (foo) function f(){}
 ```
 
@@ -211,7 +211,7 @@ invalid.jsonc:1:10 lint/correctness/noInnerDeclarations ━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 function bar() { if (foo) function f(){}; }
 ```
 
@@ -231,7 +231,7 @@ invalid.jsonc:1:27 lint/correctness/noInnerDeclarations ━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 function bar() { if (foo) var a; }
 ```
 
@@ -251,7 +251,7 @@ invalid.jsonc:1:27 lint/correctness/noInnerDeclarations ━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 if (foo){ var a; }
 ```
 
@@ -271,7 +271,7 @@ invalid.jsonc:1:11 lint/correctness/noInnerDeclarations ━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 function doSomething() { do { function somethingElse() { } } while (test); }
 ```
 
@@ -291,7 +291,7 @@ invalid.jsonc:1:31 lint/correctness/noInnerDeclarations ━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 (function() { if (test) { function doSomething() { } } }());
 ```
 
@@ -311,7 +311,7 @@ invalid.jsonc:1:27 lint/correctness/noInnerDeclarations ━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 while (test) { var foo; }
 ```
 
@@ -331,7 +331,7 @@ invalid.jsonc:1:16 lint/correctness/noInnerDeclarations ━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 function doSomething() { if (test) { var foo = 42; } }
 ```
 
@@ -351,7 +351,7 @@ invalid.jsonc:1:38 lint/correctness/noInnerDeclarations ━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 (function() { if (test) { var foo; } }());
 ```
 
@@ -371,7 +371,7 @@ invalid.jsonc:1:27 lint/correctness/noInnerDeclarations ━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 const doSomething = () => { if (test) { var foo = 42; } }
 ```
 
@@ -391,7 +391,7 @@ invalid.jsonc:1:41 lint/correctness/noInnerDeclarations ━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 class C { constructor() { if(test) { var foo; } } }
 ```
 
@@ -411,7 +411,7 @@ invalid.jsonc:1:38 lint/correctness/noInnerDeclarations ━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 class C { get x() { if(test) { var foo; } } }
 ```
 
@@ -431,7 +431,7 @@ invalid.jsonc:1:32 lint/correctness/noInnerDeclarations ━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 class C { set x(value) { if(test) { var foo; } } }
 ```
 
@@ -451,7 +451,7 @@ invalid.jsonc:1:37 lint/correctness/noInnerDeclarations ━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 class C { method() { if(test) { var foo; } } }
 ```
 
@@ -471,7 +471,7 @@ invalid.jsonc:1:33 lint/correctness/noInnerDeclarations ━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 class C { static { if (test) { function foo() {} } } }
 ```
 
@@ -491,7 +491,7 @@ invalid.jsonc:1:32 lint/correctness/noInnerDeclarations ━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 class C { static { if (test) { var foo; } } }
 ```
 
@@ -511,7 +511,7 @@ invalid.jsonc:1:32 lint/correctness/noInnerDeclarations ━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 class C { static { if (test) { if (anotherTest) { var foo; } } } }
 ```
 

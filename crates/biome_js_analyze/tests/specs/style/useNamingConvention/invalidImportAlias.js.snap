@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidImportAlias.js
 ---
 # Input
-```js
+```jsx
 import { X as XxXX } from ""
 
 import { Y as snake_case  } from ""

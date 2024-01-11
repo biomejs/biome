@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.js
 ---
 # Input
-```js
+```jsx
 parseInt(1);
 parseInt(1, 3);
 Number.parseInt(1);

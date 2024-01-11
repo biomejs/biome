@@ -10,7 +10,7 @@ function Component1({ a }) {
         }
     }
 
-    for (;a < 10;) {
+    for (; a < 10;) {
         useEffect();
     }
 
@@ -22,13 +22,13 @@ function Component1({ a }) {
         useEffect();
     }
 
-    while(a < 10) {
+    while (a < 10) {
         useEffect();
     }
 
     do {
         useEffect();
-    } while(a < 10)
+    } while (a < 10)
 
     a && useEffect();
 
@@ -44,7 +44,7 @@ function helper2() {
     helper1();
 }
 
-function Component2({a}) {
+function Component2({ a }) {
     if (a) {
         helper2(1);
     }
@@ -126,3 +126,43 @@ function Component14() {
 
     Component13();
 }
+
+function useHookInsideTryClause() {
+    try {
+        useState();
+    } catch { }
+}
+
+function useHookInsideCatchClause() {
+    try {
+    } catch (error) {
+        useErrorHandler(error);
+    }
+}
+
+function useHookInsideObjectBindingInitializer(props) {
+    const { value = useDefaultValue() } = props;
+}
+
+function useHookInsideObjectBindingInitializerInArgument({ value = useDefaultValue() }) {
+}
+
+function useHookInsideArrayAssignmentInitializer(props) {
+    let item;
+    [item = useDefaultItem()] = props.array;
+}
+
+function useHookInsideArrayBindingInitializer(props) {
+    const [item = useDefaultItem()] = props.array;
+}
+
+test('b', () => {
+    const TestComponent = () => {
+        useState();
+        const handler = () => {
+            useHook();
+        };
+    };
+
+    render(<TestComponent />);
+});

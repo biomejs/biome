@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsonc
 ---
 # Input
-```js
+```cjs
 typeof foo === 'strnig'
 ```
 
@@ -22,7 +22,7 @@ invalid.jsonc:1:16 lint/suspicious/useValidTypeof ━━━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 typeof foo == 'undefimed'
 ```
 
@@ -41,7 +41,7 @@ invalid.jsonc:1:15 lint/suspicious/useValidTypeof ━━━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 typeof bar != 'nunber'
 ```
 
@@ -60,7 +60,7 @@ invalid.jsonc:1:15 lint/suspicious/useValidTypeof ━━━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 typeof bar !== 'fucntion'
 ```
 
@@ -79,7 +79,7 @@ invalid.jsonc:1:16 lint/suspicious/useValidTypeof ━━━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 typeof foo === undefined
 ```
 
@@ -102,7 +102,7 @@ invalid.jsonc:1:16 lint/suspicious/useValidTypeof  FIXABLE  ━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 typeof bar == Object
 ```
 
@@ -126,7 +126,7 @@ invalid.jsonc:1:15 lint/suspicious/useValidTypeof  FIXABLE  ━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 typeof foo === baz
 ```
 
@@ -145,7 +145,7 @@ invalid.jsonc:1:16 lint/suspicious/useValidTypeof ━━━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 typeof foo == 5
 ```
 
@@ -164,7 +164,7 @@ invalid.jsonc:1:15 lint/suspicious/useValidTypeof ━━━━━━━━━━
 ```
 
 # Input
-```js
+```cjs
 typeof foo == -5
 ```
 

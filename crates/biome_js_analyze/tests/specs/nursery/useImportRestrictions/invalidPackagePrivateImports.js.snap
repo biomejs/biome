@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidPackagePrivateImports.js
 ---
 # Input
-```js
+```jsx
 // Attempt to import from `foo.js` from outside its `sub` module.
 import { fooPackageVariable } from "./sub/foo.js";
 

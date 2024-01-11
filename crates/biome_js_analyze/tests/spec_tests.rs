@@ -173,6 +173,7 @@ pub(crate) fn analyze_and_snap(
         input_code,
         diagnostics.as_slice(),
         code_fixes.as_slice(),
+        source_type.file_extension(),
     );
 
     diagnostics.len()

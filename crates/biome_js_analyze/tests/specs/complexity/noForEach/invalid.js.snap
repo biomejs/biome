@@ -3,22 +3,20 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
 ---
 # Input
-```js
-els.forEach((el) => {
-	el;
-});
+```jsx
+els.forEach((el) => {});
 
-(els.forEach)((el) => {
-	el;
-});
+els.forEach(el => {});
 
-els['forEach']((el) => {
-	el;
-});
+els.forEach(() => {});
 
-(els['forEach'])((el) => {
-	el;
-});
+(els.forEach)((el) => {});
+
+els['forEach']((el) => {});
+
+(els['forEach'])((el) => {});
+
+els.forEach(function(el) {}, thisArg);
 
 ```
 
@@ -26,17 +24,31 @@ els['forEach']((el) => {
 ```
 invalid.js:1:1 lint/complexity/noForEach ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Prefer for...of instead of Array.forEach
+  ! Prefer for...of instead of forEach.
   
-  > 1 │ els.forEach((el) => {
+  > 1 │ els.forEach((el) => {});
+      │ ^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ 
+    3 │ els.forEach(el => {});
+  
+  i forEach may lead to performance issues when working with large arrays. When combined with functions like filter or map, this causes multiple iterations over the same type.
+  
+
+```
+
+```
+invalid.js:3:1 lint/complexity/noForEach ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer for...of instead of forEach.
+  
+    1 │ els.forEach((el) => {});
+    2 │ 
+  > 3 │ els.forEach(el => {});
       │ ^^^^^^^^^^^^^^^^^^^^^
-  > 2 │ 	el;
-  > 3 │ });
-      │ ^^
     4 │ 
-    5 │ (els.forEach)((el) => {
+    5 │ els.forEach(() => {});
   
-  i forEach could lead to performance issues when working with large arrays. When combined with functions like .filter or .map, this causes multiple iterations over the same type.
+  i forEach may lead to performance issues when working with large arrays. When combined with functions like filter or map, this causes multiple iterations over the same type.
   
 
 ```
@@ -44,19 +56,33 @@ invalid.js:1:1 lint/complexity/noForEach ━━━━━━━━━━━━━
 ```
 invalid.js:5:1 lint/complexity/noForEach ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Prefer for...of instead of Array.forEach
+  ! Prefer for...of instead of forEach.
   
-    3 │ });
+    3 │ els.forEach(el => {});
     4 │ 
-  > 5 │ (els.forEach)((el) => {
-      │ ^^^^^^^^^^^^^^^^^^^^^^^
-  > 6 │ 	el;
-  > 7 │ });
-      │ ^^
-    8 │ 
-    9 │ els['forEach']((el) => {
+  > 5 │ els.forEach(() => {});
+      │ ^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+    7 │ (els.forEach)((el) => {});
   
-  i forEach could lead to performance issues when working with large arrays. When combined with functions like .filter or .map, this causes multiple iterations over the same type.
+  i forEach may lead to performance issues when working with large arrays. When combined with functions like filter or map, this causes multiple iterations over the same type.
+  
+
+```
+
+```
+invalid.js:7:1 lint/complexity/noForEach ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer for...of instead of forEach.
+  
+    5 │ els.forEach(() => {});
+    6 │ 
+  > 7 │ (els.forEach)((el) => {});
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 
+    9 │ els['forEach']((el) => {});
+  
+  i forEach may lead to performance issues when working with large arrays. When combined with functions like filter or map, this causes multiple iterations over the same type.
   
 
 ```
@@ -64,19 +90,33 @@ invalid.js:5:1 lint/complexity/noForEach ━━━━━━━━━━━━━
 ```
 invalid.js:9:1 lint/complexity/noForEach ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Prefer for...of instead of Array.forEach
+  ! Prefer for...of instead of forEach.
   
-     7 │ });
+     7 │ (els.forEach)((el) => {});
      8 │ 
-   > 9 │ els['forEach']((el) => {
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^
-  > 10 │ 	el;
-  > 11 │ });
-       │ ^^
-    12 │ 
-    13 │ (els['forEach'])((el) => {
+   > 9 │ els['forEach']((el) => {});
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 
+    11 │ (els['forEach'])((el) => {});
   
-  i forEach could lead to performance issues when working with large arrays. When combined with functions like .filter or .map, this causes multiple iterations over the same type.
+  i forEach may lead to performance issues when working with large arrays. When combined with functions like filter or map, this causes multiple iterations over the same type.
+  
+
+```
+
+```
+invalid.js:11:1 lint/complexity/noForEach ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer for...of instead of forEach.
+  
+     9 │ els['forEach']((el) => {});
+    10 │ 
+  > 11 │ (els['forEach'])((el) => {});
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ 
+    13 │ els.forEach(function(el) {}, thisArg);
+  
+  i forEach may lead to performance issues when working with large arrays. When combined with functions like filter or map, this causes multiple iterations over the same type.
   
 
 ```
@@ -84,18 +124,15 @@ invalid.js:9:1 lint/complexity/noForEach ━━━━━━━━━━━━━
 ```
 invalid.js:13:1 lint/complexity/noForEach ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Prefer for...of instead of Array.forEach
+  ! Prefer for...of instead of forEach.
   
-    11 │ });
+    11 │ (els['forEach'])((el) => {});
     12 │ 
-  > 13 │ (els['forEach'])((el) => {
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
-  > 14 │ 	el;
-  > 15 │ });
-       │ ^^
-    16 │ 
+  > 13 │ els.forEach(function(el) {}, thisArg);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ 
   
-  i forEach could lead to performance issues when working with large arrays. When combined with functions like .filter or .map, this causes multiple iterations over the same type.
+  i forEach may lead to performance issues when working with large arrays. When combined with functions like filter or map, this causes multiple iterations over the same type.
   
 
 ```

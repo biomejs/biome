@@ -4,7 +4,6 @@ use crate::execute::process_file::{
     DiffKind, FileResult, FileStatus, Message, SharedTraversalOptions,
 };
 use crate::execute::TraversalMode;
-use crate::FormatterReportFileDetail;
 use biome_diagnostics::{category, DiagnosticExt};
 use biome_service::workspace::RuleCategories;
 use std::path::Path;
@@ -73,15 +72,6 @@ pub(crate) fn format_with_guard<'ctx>(
                 if should_write {
                     workspace_file.update_file(output)?;
                 } else {
-                    if !ctx.execution.should_report_to_terminal() {
-                        ctx.push_format_stat(
-                            workspace_file.path.display().to_string(),
-                            FormatterReportFileDetail {
-                                formatted_content: Some(output.clone()),
-                            },
-                        )
-                    }
-
                     return Ok(FileStatus::Message(Message::Diff {
                         file_name: workspace_file.path.display().to_string(),
                         old: input,

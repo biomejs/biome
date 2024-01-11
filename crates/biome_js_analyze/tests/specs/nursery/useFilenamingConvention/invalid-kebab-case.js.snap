@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid-kebab-case.js
 ---
 # Input
-```js
+```jsx
 
 ```
 

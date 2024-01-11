@@ -588,6 +588,9 @@ pub struct AstNodeSrc {
     pub name: String,
     // pub traits: Vec<String>,
     pub fields: Vec<Field>,
+    /// Whether the fields of the node should be ordered dynamically using a
+    /// slot map for accesses.
+    pub dynamic: bool,
 }
 
 #[derive(Debug, Eq, PartialEq)]
@@ -602,11 +605,13 @@ pub enum Field {
         name: String,
         kind: TokenKind,
         optional: bool,
+        unordered: bool,
     },
     Node {
         name: String,
         ty: String,
         optional: bool,
+        unordered: bool,
     },
 }
 
@@ -673,7 +678,8 @@ impl Field {
                     ("!=", _) => "inequality",
                     ("!==", _) => "strict_inequality",
                     ("/", _) => "slash",
-                    ("%", _) => "reminder",
+                    ("%", LanguageKind::Css) => "percent",
+                    ("%", _) => "remainder",
                     ("**", _) => "exponent",
                     ("<<", _) => "left_shift",
                     (">>", _) => "right_shift",
@@ -733,6 +739,13 @@ impl Field {
         match self {
             Field::Node { optional, .. } => *optional,
             Field::Token { optional, .. } => *optional,
+        }
+    }
+
+    pub fn is_unordered(&self) -> bool {
+        match self {
+            Field::Node { unordered, .. } => *unordered,
+            Field::Token { unordered, .. } => *unordered,
         }
     }
 }

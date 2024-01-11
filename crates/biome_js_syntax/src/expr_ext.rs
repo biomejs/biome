@@ -2,14 +2,14 @@
 use crate::numbers::parse_js_number;
 use crate::static_value::StaticValue;
 use crate::{
-    inner_string_text, AnyJsCallArgument, AnyJsClassMemberName, AnyJsExpression,
-    AnyJsLiteralExpression, AnyJsObjectMemberName, AnyJsTemplateElement, JsArrayExpression,
-    JsArrayHole, JsAssignmentExpression, JsBinaryExpression, JsCallExpression,
-    JsComputedMemberAssignment, JsComputedMemberExpression, JsLiteralMemberName,
-    JsLogicalExpression, JsNewExpression, JsNumberLiteralExpression, JsObjectExpression,
-    JsPostUpdateExpression, JsReferenceIdentifier, JsRegexLiteralExpression,
-    JsStaticMemberExpression, JsStringLiteralExpression, JsSyntaxToken, JsTemplateChunkElement,
-    JsTemplateExpression, JsUnaryExpression, OperatorPrecedence, TsStringLiteralType, T,
+    inner_string_text, AnyJsClassMemberName, AnyJsExpression, AnyJsLiteralExpression,
+    AnyJsObjectMemberName, AnyJsTemplateElement, JsArrayExpression, JsArrayHole,
+    JsAssignmentExpression, JsBinaryExpression, JsCallExpression, JsComputedMemberAssignment,
+    JsComputedMemberExpression, JsLiteralMemberName, JsLogicalExpression, JsNewExpression,
+    JsNumberLiteralExpression, JsObjectExpression, JsPostUpdateExpression, JsReferenceIdentifier,
+    JsRegexLiteralExpression, JsStaticMemberExpression, JsStringLiteralExpression, JsSyntaxToken,
+    JsTemplateChunkElement, JsTemplateExpression, JsUnaryExpression, OperatorPrecedence,
+    TsStringLiteralType, T,
 };
 use crate::{JsPreUpdateExpression, JsSyntaxKind::*};
 use biome_rowan::{
@@ -534,8 +534,18 @@ impl JsObjectExpression {
 }
 
 impl JsNumberLiteralExpression {
+    /// ## Examples
+    ///
+    /// ```
+    /// use biome_js_factory::make;
+    /// use biome_rowan::TriviaPieceKind;
+    ///
+    /// let number = make::js_number_literal_expression(make::js_number_literal("1.23")
+    ///     .with_trailing_trivia(vec![(TriviaPieceKind::Whitespace, " ")]));
+    /// assert_eq!(number.as_number().unwrap(), 1.23);
+    /// ```
     pub fn as_number(&self) -> Option<f64> {
-        parse_js_number(self.value_token().unwrap().text())
+        parse_js_number(self.value_token().unwrap().text_trimmed())
     }
 }
 
@@ -1266,45 +1276,6 @@ impl JsCallExpression {
     /// ```
     pub fn is_optional_chain(&self) -> bool {
         AnyJsOptionalChainExpression::from(self.clone()).is_optional_chain()
-    }
-
-    /// Get [AnyJsCallArgument] by it index inside the [JsCallExpression] argument list.
-    ///
-    /// Each index inside "indices" should be unique.
-    /// "indices" must be sorted.
-    ///
-    /// Supports maximum of 16 indices to avoid stack overflow. Each argument will consume:
-    ///
-    /// - 8 bytes for the `Option<AnyJsCallArgument>` result;
-    /// - 8 bytes for the [usize] argument.
-    pub fn get_arguments_by_index<const N: usize>(
-        &self,
-        indices: [usize; N],
-    ) -> [Option<AnyJsCallArgument>; N] {
-        debug_assert!(N <= 16);
-        // assert there are no duplicates and they are in-order
-        debug_assert!(indices.windows(2).all(|vs| vs[0] < vs[1]));
-
-        const INIT: Option<AnyJsCallArgument> = None;
-        let mut results = [INIT; N];
-        let mut next = 0;
-        for (i, arg) in self
-            .arguments()
-            .ok()
-            .map(|x| x.args().into_iter())
-            .into_iter()
-            .flatten()
-            .enumerate()
-        {
-            if i == indices[next] {
-                results[next] = arg.ok();
-                next += 1;
-                if next == N {
-                    break;
-                }
-            }
-        }
-        results
     }
 
     pub fn has_callee(&self, name: &str) -> bool {

@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: logicalAndCases6.js
 ---
 # Input
-```js
+```jsx
 // case with a jump (i.e. a non-nullish prop)
 foo != undefined && foo.bar != undefined && foo.bar.baz.buzz()
 foo.bar != undefined && foo.bar.baz.buzz()

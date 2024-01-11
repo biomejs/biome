@@ -43,6 +43,20 @@ declare_rule! {
     /// ```jsx,expect_diagnostic
     /// <></>
     /// ```
+    ///
+    /// ## Valid
+    ///
+    /// ```jsx
+    /// <>
+    ///     <Foo />
+    ///     <Bar />
+    /// </>
+    /// ```
+    ///
+    /// ```jsx
+    /// <>foo {bar}</>
+    /// ```
+    ///
     pub(crate) NoUselessFragments {
         version: "1.0.0",
         name: "noUselessFragments",
@@ -266,7 +280,10 @@ impl Rule for NoUselessFragments {
                     mutation.remove_element(parent.into());
                 }
             } else {
-                mutation.remove_element(parent.into());
+                // can't apply a code action when there is no children because it will create invalid syntax
+                // for example `<div x-some-prop={<></>}` would become `<div x-some-prop=` which would produce
+                // a syntax error
+                return None;
             }
         }
 
@@ -286,6 +303,8 @@ impl Rule for NoUselessFragments {
             markup! {
                 "Avoid using unnecessary "<Emphasis>"Fragment"</Emphasis>"."
             },
-        ))
+        ).note(markup! {
+            "A fragment is redundant if it contains only one child, or if it is the child of a html element, and is not a keyed "<Hyperlink href="https://legacy.reactjs.org/docs/fragments.html#keyed-fragments">"fragment"</Hyperlink>"."
+        }))
     }
 }

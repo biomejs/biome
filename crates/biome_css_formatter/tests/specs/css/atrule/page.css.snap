@@ -95,6 +95,7 @@ Indent style: Tab
 Indent width: 2
 Line ending: LF
 Line width: 80
+Quote style: Double Quotes
 -----
 
 ```css
@@ -182,9 +183,9 @@ Line width: 80
 	margin: 20px;
 }
 
-@page :FIRST {
+@page :first {
 }
-@page :LEFT {
+@page :left {
 }
 ```
 

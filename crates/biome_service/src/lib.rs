@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 use std::ops::{Deref, DerefMut};
 
 pub mod configuration;
+pub mod documentation;
 pub mod file_handlers;
 pub mod project_handlers;
 
@@ -45,7 +46,7 @@ pub struct App<'app> {
 
 impl<'app> App<'app> {
     pub fn with_console(console: &'app mut dyn Console) -> Self {
-        Self::with_filesystem_and_console(DynRef::Owned(Box::new(OsFileSystem)), console)
+        Self::with_filesystem_and_console(DynRef::Owned(Box::<OsFileSystem>::default()), console)
     }
 
     /// Create a new instance of the app using the specified [FileSystem] and [Console] implementation

@@ -14,7 +14,11 @@ const { post } = Astro.props;
   {
     post.coverImage && (
       <figure class="blog-cover">
-        <Image alt={post.coverImage.alt} src={post.coverImage.src} />
+				<picture>
+					<Image alt={post.coverImage.alt} src={post.coverImage.lightSrc} class="dark:sl-hidden" />
+					<Image alt={post.coverImage.alt} src={post.coverImage.darkSrc} class="light:sl-hidden" />
+				</picture>
+
         {post.coverImage.caption && (
           <figcaption class="blog-cover-caption">
             {post.coverImage.caption}

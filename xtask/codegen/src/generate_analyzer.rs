@@ -10,6 +10,7 @@ use xtask::{glue::fs2, project_root};
 pub fn generate_analyzer() -> Result<()> {
     generate_js_analyzer()?;
     generate_json_analyzer()?;
+    generate_css_analyzer()?;
     Ok(())
 }
 
@@ -49,6 +50,17 @@ fn generate_json_analyzer() -> Result<()> {
         "analyzers",
         &mut analyzers,
         project_root().join("crates/biome_json_analyze/src"),
+    )?;
+
+    update_css_registry_builder(analyzers)
+}
+
+fn generate_css_analyzer() -> Result<()> {
+    let mut analyzers = BTreeMap::new();
+    generate_category(
+        "analyzers",
+        &mut analyzers,
+        project_root().join("crates/biome_css_analyze/src"),
     )?;
 
     update_json_registry_builder(analyzers)
@@ -250,6 +262,24 @@ fn update_json_registry_builder(analyzers: BTreeMap<&'static str, TokenStream>) 
         use biome_json_syntax::JsonLanguage;
 
         pub fn visit_registry<V: RegistryVisitor<JsonLanguage>>(registry: &mut V) {
+            #( #categories )*
+        }
+    })?;
+
+    fs2::write(path, tokens)?;
+
+    Ok(())
+}
+fn update_css_registry_builder(analyzers: BTreeMap<&'static str, TokenStream>) -> Result<()> {
+    let path = project_root().join("crates/biome_css_analyze/src/registry.rs");
+
+    let categories = analyzers.into_values();
+
+    let tokens = xtask::reformat(quote! {
+        use biome_analyze::RegistryVisitor;
+        use biome_css_syntax::CssLanguage;
+
+        pub fn visit_registry<V: RegistryVisitor<CssLanguage>>(registry: &mut V) {
             #( #categories )*
         }
     })?;

@@ -15,7 +15,8 @@ const blogSchema = (image: ImageFunction) =>
 		authors: z.array(z.string()),
 		coverImage: z
 			.object({
-				src: image(),
+				lightSrc: image(),
+				darkSrc: image(),
 				caption: z.string().optional(),
 				alt: z.string(),
 			})

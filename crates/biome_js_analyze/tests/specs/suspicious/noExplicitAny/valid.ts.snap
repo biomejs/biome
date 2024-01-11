@@ -1,10 +1,9 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 100
 expression: valid.ts
 ---
 # Input
-```js
+```ts
 const number: number = 1;
 
 function greet(): string {}

@@ -4,6 +4,7 @@ use crate::execute::diagnostics::{ContentDiffAdvice, FormatDiffDiagnostic};
 use crate::execute::Execution;
 use crate::{CliDiagnostic, CliSession};
 use biome_console::{markup, ConsoleExt};
+use biome_diagnostics::Diagnostic;
 use biome_diagnostics::PrintDiagnostic;
 use biome_fs::RomePath;
 use biome_service::workspace::{
@@ -11,6 +12,7 @@ use biome_service::workspace::{
     OpenFileParams, OrganizeImportsParams, PullDiagnosticsParams, RuleCategories,
     SupportsFeatureParams,
 };
+use biome_service::WorkspaceError;
 use std::borrow::Cow;
 
 pub(crate) fn run<'a>(
@@ -18,6 +20,7 @@ pub(crate) fn run<'a>(
     mode: &'a Execution,
     rome_path: RomePath,
     content: &'a str,
+    verbose: bool,
 ) -> Result<(), CliDiagnostic> {
     let workspace = &*session.app.workspace;
     let console = &mut *session.app.console;
@@ -28,6 +31,16 @@ pub(crate) fn run<'a>(
             path: rome_path.clone(),
             feature: FeaturesBuilder::new().with_formatter().build(),
         })?;
+        if file_features.is_protected() {
+            let protected_diagnostic =
+                WorkspaceError::protected_file(rome_path.display().to_string());
+            if protected_diagnostic.tags().is_verbose() && verbose {
+                console.error(markup! {{PrintDiagnostic::verbose(&protected_diagnostic)}})
+            } else {
+                console.error(markup! {{PrintDiagnostic::simple(&protected_diagnostic)}})
+            }
+            return Ok(());
+        };
         if file_features.supports_for(&FeatureName::Format) {
             workspace.open_file(OpenFileParams {
                 path: rome_path.clone(),
@@ -67,6 +80,18 @@ pub(crate) fn run<'a>(
                 .with_formatter()
                 .build(),
         })?;
+
+        if file_features.is_protected() {
+            let protected_diagnostic =
+                WorkspaceError::protected_file(rome_path.display().to_string());
+            if protected_diagnostic.tags().is_verbose() && verbose {
+                console.error(markup! {{PrintDiagnostic::verbose(&protected_diagnostic)}})
+            } else {
+                console.error(markup! {{PrintDiagnostic::simple(&protected_diagnostic)}})
+            }
+            return Ok(());
+        };
+
         if let Some(fix_file_mode) = mode.as_fix_file_mode() {
             if file_features.supports_for(&FeatureName::Lint) {
                 let fix_file_result = workspace.fix_file(FixFileParams {
@@ -146,7 +171,7 @@ pub(crate) fn run<'a>(
         if !diagnostics.is_empty() {
             for diag in diagnostics {
                 console.error(markup! {
-                    {PrintDiagnostic::simple(&diag)}
+                    {if verbose { PrintDiagnostic::verbose(&diag) } else { PrintDiagnostic::simple(&diag) }}
                 })
             }
         }

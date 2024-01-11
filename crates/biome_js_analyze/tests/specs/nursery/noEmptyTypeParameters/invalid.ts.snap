@@ -1,0 +1,40 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+type A<> = {};
+interface B<> {};
+```
+
+# Diagnostics
+```
+invalid.ts:1:7 lint/nursery/noEmptyTypeParameters ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Using an empty type parameter list is confusing.
+  
+  > 1 │ type A<> = {};
+      │       ^^
+    2 │ interface B<> {};
+  
+  i Remove the empty type parameter list or add a type parameter.
+  
+
+```
+
+```
+invalid.ts:2:12 lint/nursery/noEmptyTypeParameters ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Using an empty type parameter list is confusing.
+  
+    1 │ type A<> = {};
+  > 2 │ interface B<> {};
+      │            ^^
+  
+  i Remove the empty type parameter list or add a type parameter.
+  
+
+```
+
+

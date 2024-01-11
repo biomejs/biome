@@ -11,11 +11,11 @@ use biome_js_syntax::{
     JsFunctionDeclaration, JsFunctionExportDefaultDeclaration, JsFunctionExpression,
     JsGetterClassMember, JsGetterObjectMember, JsLanguage, JsMethodClassMember,
     JsMethodObjectMember, JsModule, JsScript, JsSetterClassMember, JsSetterObjectMember,
-    JsStaticInitializationBlockClassMember, JsThisExpression, T,
+    JsStaticInitializationBlockClassMember, JsSyntaxKind, T,
 };
 use biome_rowan::{
     declare_node_union, AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, Language,
-    SyntaxNode, TextRange, TriviaPieceKind, WalkEvent,
+    SyntaxNode, SyntaxNodeOptionExt, TextRange, TriviaPieceKind, WalkEvent,
 };
 
 declare_rule! {
@@ -92,17 +92,14 @@ impl Rule for UseArrowFunction {
             // Ignore generators and function with a name.
             return None;
         }
-        let has_this_parameter =
-            function_expression
-                .parameters()
-                .ok()?
-                .items()
-                .iter()
-                .any(|param| {
-                    param
-                        .map(|param| param.as_ts_this_parameter().is_some())
-                        .unwrap_or_default()
-                });
+        let has_this_parameter = function_expression
+            .parameters()
+            .ok()?
+            .items()
+            .iter()
+            .nth(0)
+            .and_then(|param| param.ok())
+            .is_some_and(|param| param.as_ts_this_parameter().is_some());
         if has_this_parameter {
             // Ignore functions that explicitly declare a `this` type.
             return None;
@@ -145,10 +142,16 @@ impl Rule for UseArrowFunction {
             arrow_function_builder =
                 arrow_function_builder.with_return_type_annotation(return_type_annotation);
         }
+        let arrow_function = arrow_function_builder.build();
+        let arrow_function = if needs_parentheses(function_expression) {
+            AnyJsExpression::from(make::parenthesized(arrow_function))
+        } else {
+            AnyJsExpression::from(arrow_function)
+        };
         let mut mutation = ctx.root().begin();
         mutation.replace_node(
             AnyJsExpression::from(function_expression.clone()),
-            AnyJsExpression::from(arrow_function_builder.build()),
+            arrow_function,
         );
         Some(JsRuleAction {
             category: ActionCategory::QuickFix,
@@ -158,6 +161,24 @@ impl Rule for UseArrowFunction {
             mutation,
         })
     }
+}
+
+/// Returns `true` if `function_expr` needs parenthesis when turned into an arrow function.
+fn needs_parentheses(function_expression: &JsFunctionExpression) -> bool {
+    function_expression
+        .syntax()
+        .parent()
+        .kind()
+        .is_some_and(|parent_kind| {
+            matches!(
+                parent_kind,
+                JsSyntaxKind::JS_CALL_EXPRESSION
+                    | JsSyntaxKind::JS_STATIC_MEMBER_ASSIGNMENT
+                    | JsSyntaxKind::JS_STATIC_MEMBER_EXPRESSION
+                    | JsSyntaxKind::JS_COMPUTED_MEMBER_ASSIGNMENT
+                    | JsSyntaxKind::JS_COMPUTED_MEMBER_EXPRESSION
+            )
+        })
 }
 
 declare_node_union! {
@@ -233,9 +254,12 @@ impl Visitor for AnyThisScopeVisitor {
                         has_this: false,
                     });
                 }
-                if JsThisExpression::can_cast(node.kind()) {
-                    // When the visitor enters a `this` expression, set the
-                    // `has_this` flag for the top entry on the stack to `true`
+                if matches!(
+                    node.kind(),
+                    JsSyntaxKind::JS_THIS_EXPRESSION | JsSyntaxKind::JS_NEW_TARGET_EXPRESSION
+                ) {
+                    // When the visitor enters a `this` expression or `new.target`,
+                    // set the `has_this` flag for the top entry on the stack to `true`.
                     if let Some(AnyThisScopeMetadata { has_this, .. }) = self.stack.last_mut() {
                         *has_this = true;
                     }
@@ -273,11 +297,13 @@ fn to_arrow_body(body: JsFunctionBody) -> AnyJsFunctionBody {
         // To keep comments, we keep the regular function body
         return early_result;
     }
-    if let Some(first_token) = return_arg.syntax().first_token() {
-        if first_token.kind() == T!['{'] {
-            // () => ({ ... })
-            return AnyJsFunctionBody::AnyJsExpression(make::parenthesized(return_arg).into());
-        }
+    if matches!(
+        return_arg,
+        AnyJsExpression::JsSequenceExpression(_) | AnyJsExpression::JsObjectExpression(_)
+    ) {
+        // () => (first, second)
+        // () => ({ ... })
+        return AnyJsFunctionBody::AnyJsExpression(make::parenthesized(return_arg).into());
     }
     // () => expression
     AnyJsFunctionBody::AnyJsExpression(return_arg)

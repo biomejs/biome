@@ -63,9 +63,13 @@
 
 	to {
 		transform: translateX(100%);
+	}
 
-}
+
+@keyframes inherit { }
+@keyframes initial { }
+@keyframes unset { }
+@keyframes revert { }
+@keyframes revert-layer { }
 
 @keyframes slidein
-
-

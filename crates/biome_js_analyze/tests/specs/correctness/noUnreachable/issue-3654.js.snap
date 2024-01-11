@@ -1,10 +1,9 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 73
 expression: issue-3654.js
 ---
 # Input
-```js
+```jsx
 function testFAIL() {
   try {
     return fn();

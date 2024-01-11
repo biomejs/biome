@@ -1,0 +1,11 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-unused.ts
+---
+# Input
+```ts
+import A, { B } from "mod";
+import C, * as D from "mod";
+```
+
+

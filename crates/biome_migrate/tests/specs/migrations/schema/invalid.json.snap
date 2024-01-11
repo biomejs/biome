@@ -3,7 +3,7 @@ source: crates/biome_migrate/tests/spec_tests.rs
 expression: invalid.json
 ---
 # Input
-```js
+```json
 {
 	"$schema": "https://biomejs.dev/schemas/1.0.0/schema.json"
 }

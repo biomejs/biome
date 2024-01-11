@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: validTypeConstraints.ts
 ---
 # Input
-```js
+```ts
 function f<T extends any>() {}
 ```
 

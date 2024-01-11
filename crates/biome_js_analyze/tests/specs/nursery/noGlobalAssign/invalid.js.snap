@@ -1,0 +1,174 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```jsx
+window = {};
+Object = null;
+undefined = 1;
+length = 1;
+top = 1;
+String++;
+({Object = 0, String = 0} = {});
+require = 0;
+```
+
+# Diagnostics
+```
+invalid.js:1:1 lint/nursery/noGlobalAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A global variable should not be reassigned.
+  
+  > 1 │ window = {};
+      │ ^^^^^^^
+    2 │ Object = null;
+    3 │ undefined = 1;
+  
+  i Assigning to a global variable can override essential functionality.
+  
+
+```
+
+```
+invalid.js:1:13 lint/nursery/noGlobalAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A global variable should not be reassigned.
+  
+  > 1 │ window = {};
+      │             
+  > 2 │ Object = null;
+      │ ^^^^^^^
+    3 │ undefined = 1;
+    4 │ length = 1;
+  
+  i Assigning to a global variable can override essential functionality.
+  
+
+```
+
+```
+invalid.js:2:15 lint/nursery/noGlobalAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A global variable should not be reassigned.
+  
+    1 │ window = {};
+  > 2 │ Object = null;
+      │               
+  > 3 │ undefined = 1;
+      │ ^^^^^^^^^^
+    4 │ length = 1;
+    5 │ top = 1;
+  
+  i Assigning to a global variable can override essential functionality.
+  
+
+```
+
+```
+invalid.js:3:15 lint/nursery/noGlobalAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A global variable should not be reassigned.
+  
+    1 │ window = {};
+    2 │ Object = null;
+  > 3 │ undefined = 1;
+      │               
+  > 4 │ length = 1;
+      │ ^^^^^^^
+    5 │ top = 1;
+    6 │ String++;
+  
+  i Assigning to a global variable can override essential functionality.
+  
+
+```
+
+```
+invalid.js:4:12 lint/nursery/noGlobalAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A global variable should not be reassigned.
+  
+    2 │ Object = null;
+    3 │ undefined = 1;
+  > 4 │ length = 1;
+      │            
+  > 5 │ top = 1;
+      │ ^^^^
+    6 │ String++;
+    7 │ ({Object = 0, String = 0} = {});
+  
+  i Assigning to a global variable can override essential functionality.
+  
+
+```
+
+```
+invalid.js:5:9 lint/nursery/noGlobalAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A global variable should not be reassigned.
+  
+    3 │ undefined = 1;
+    4 │ length = 1;
+  > 5 │ top = 1;
+      │         
+  > 6 │ String++;
+      │ ^^^^^^
+    7 │ ({Object = 0, String = 0} = {});
+    8 │ require = 0;
+  
+  i Assigning to a global variable can override essential functionality.
+  
+
+```
+
+```
+invalid.js:7:3 lint/nursery/noGlobalAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A global variable should not be reassigned.
+  
+    5 │ top = 1;
+    6 │ String++;
+  > 7 │ ({Object = 0, String = 0} = {});
+      │   ^^^^^^^
+    8 │ require = 0;
+  
+  i Assigning to a global variable can override essential functionality.
+  
+
+```
+
+```
+invalid.js:7:15 lint/nursery/noGlobalAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A global variable should not be reassigned.
+  
+    5 │ top = 1;
+    6 │ String++;
+  > 7 │ ({Object = 0, String = 0} = {});
+      │               ^^^^^^^
+    8 │ require = 0;
+  
+  i Assigning to a global variable can override essential functionality.
+  
+
+```
+
+```
+invalid.js:7:33 lint/nursery/noGlobalAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A global variable should not be reassigned.
+  
+    5 │ top = 1;
+    6 │ String++;
+  > 7 │ ({Object = 0, String = 0} = {});
+      │                                 
+  > 8 │ require = 0;
+      │ ^^^^^^^^
+  
+  i Assigning to a global variable can override essential functionality.
+  
+
+```
+
+

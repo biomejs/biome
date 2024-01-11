@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.js
 ---
 # Input
-```js
+```jsx
 foo + 'baz';
 
 1 * 2 + 'foo';
@@ -31,6 +31,10 @@ foo() + ' bar';
 foo() + '\n';
 
 1 * /**leading*/'foo'    /**trailing */                   + 'bar';
+
+`foo` + 1;
+
+`foo${1}` + 2;
 
 // strings including `${`
 
@@ -61,6 +65,51 @@ const x = a + ("b") + c;
 + //h
 bar //i
 
+
+// parentheses and type coercion
+
+"a" + (1 + 2); // `a${1 + 2}`
+
+(1 + 2) + "a"; // `${1 + 2}a`
+
+1 + 2 + "a"; // `${1 + 2}a`
+
+(1 + 2) + ("a"); // `${1 + 2}a`
+
+"a" + 1 + 2; // `a${1}${2}`
+
+1 + (2 + "a"); // `${1}${2}a`
+
+(1 + 2) + (3 + 4) + "a"; // `${(1 + 2) + (3 + 4)}a`
+
+(1 + 2) + ((3 + 4) + "a"); // `${1 + 2}${3 + 4}a`
+
+"a" + (1 + 2 + "b"); // `a${1 + 2}b`
+
+(1 + 2 + "a") + "b"; // `${1 + 2}ab`
+
+("a" + 1 + 2) + "b"; // `a${1}${2}b`
+
+("a" + 1) + (2 + "b"); // `a${1}${2}b`
+
+(1 + 2) + (3 + "a") + 4 + (5 + ("b" + 6)); // `${1 + 2}${3}a${4}${5}b${6}`
+
+"a" + 1 + (2 + (3 + 4)); // `a${1}${2 + (3 + 4)}`
+
+1 + (2 + (3 + 4)) + "a"; // `${1·+·(2·+·(3·+·4))}a`
+
+1 - 2 + "a"; // `${1 - 2}a`
+
+"a" + (1 - 2); // `a${1 - 2}`
+
+(foo && bar) + "baz"; // `${foo && bar}baz`
+
+"foo" + (bar && baz); // `foo${bar && baz}`
+
+(1 + foo && bar) + "baz"; // `${1 + foo && bar}baz`
+
+"foo" + (bar && baz + 1); // `foo${bar && baz + 1}`
+
 ```
 
 # Diagnostics
@@ -76,10 +125,10 @@ invalid.js:1:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
   
   i Unsafe fix: Use a template literal.
   
-     1    │ - foo·+·'baz';
-        1 │ + `${foo}baz`;
-     2  2 │   
-     3  3 │   1 * 2 + 'foo';
+      1     │ - foo·+·'baz';
+          1 │ + `${foo}baz`;
+      2   2 │   
+      3   3 │   1 * 2 + 'foo';
   
 
 ```
@@ -98,12 +147,12 @@ invalid.js:3:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
   
   i Unsafe fix: Use a template literal.
   
-     1  1 │   foo + 'baz';
-     2  2 │   
-     3    │ - 1·*·2·+·'foo';
-        3 │ + `${1·*·2}foo`;
-     4  4 │   
-     5  5 │   1 + 2 + 3 + "px" + 4 + 5;
+      1   1 │   foo + 'baz';
+      2   2 │   
+      3     │ - 1·*·2·+·'foo';
+          3 │ + `${1·*·2}foo`;
+      4   4 │   
+      5   5 │   1 + 2 + 3 + "px" + 4 + 5;
   
 
 ```
@@ -122,12 +171,12 @@ invalid.js:5:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
   
   i Unsafe fix: Use a template literal.
   
-     3  3 │   1 * 2 + 'foo';
-     4  4 │   
-     5    │ - 1·+·2·+·3·+·"px"·+·4·+·5;
-        5 │ + `${1·+·2·+·3}px${4}${5}`;
-     6  6 │   
-     7  7 │   a + b + c + 'px' + d + e;
+      3   3 │   1 * 2 + 'foo';
+      4   4 │   
+      5     │ - 1·+·2·+·3·+·"px"·+·4·+·5;
+          5 │ + `${1·+·2·+·3}px${4}${5}`;
+      6   6 │   
+      7   7 │   a + b + c + 'px' + d + e;
   
 
 ```
@@ -146,12 +195,12 @@ invalid.js:7:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
   
   i Unsafe fix: Use a template literal.
   
-     5  5 │   1 + 2 + 3 + "px" + 4 + 5;
-     6  6 │   
-     7    │ - a·+·b·+·c·+·'px'·+·d·+·e;
-        7 │ + `${a·+·b·+·c}px${d}${e}`;
-     8  8 │   
-     9  9 │   1 + 'foo' + 2 + 'bar' + 'baz' + 3;
+      5   5 │   1 + 2 + 3 + "px" + 4 + 5;
+      6   6 │   
+      7     │ - a·+·b·+·c·+·'px'·+·d·+·e;
+          7 │ + `${a·+·b·+·c}px${d}${e}`;
+      8   8 │   
+      9   9 │   1 + 'foo' + 2 + 'bar' + 'baz' + 3;
   
 
 ```
@@ -170,12 +219,12 @@ invalid.js:9:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
   
   i Unsafe fix: Use a template literal.
   
-     7  7 │   a + b + c + 'px' + d + e;
-     8  8 │   
-     9    │ - 1·+·'foo'·+·2·+·'bar'·+·'baz'·+·3;
-        9 │ + `${1}foo${2}barbaz${3}`;
-    10 10 │   
-    11 11 │   (1 + 'foo') * 2;
+      7   7 │   a + b + c + 'px' + d + e;
+      8   8 │   
+      9     │ - 1·+·'foo'·+·2·+·'bar'·+·'baz'·+·3;
+          9 │ + `${1}foo${2}barbaz${3}`;
+     10  10 │   
+     11  11 │   (1 + 'foo') * 2;
   
 
 ```
@@ -194,12 +243,12 @@ invalid.js:11:2 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
   
   i Unsafe fix: Use a template literal.
   
-     9  9 │   1 + 'foo' + 2 + 'bar' + 'baz' + 3;
-    10 10 │   
-    11    │ - (1·+·'foo')·*·2;
-       11 │ + (`${1}foo`)·*·2;
-    12 12 │   
-    13 13 │   1 * (2 + 'foo') + 'bar';
+      9   9 │   1 + 'foo' + 2 + 'bar' + 'baz' + 3;
+     10  10 │   
+     11     │ - (1·+·'foo')·*·2;
+         11 │ + (`${1}foo`)·*·2;
+     12  12 │   
+     13  13 │   1 * (2 + 'foo') + 'bar';
   
 
 ```
@@ -218,12 +267,12 @@ invalid.js:13:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
   
   i Unsafe fix: Use a template literal.
   
-    11 11 │   (1 + 'foo') * 2;
-    12 12 │   
-    13    │ - 1·*·(2·+·'foo')·+·'bar';
-       13 │ + `${1·*·(2·+·'foo')}bar`;
-    14 14 │   
-    15 15 │   'foo' + 1;
+     11  11 │   (1 + 'foo') * 2;
+     12  12 │   
+     13     │ - 1·*·(2·+·'foo')·+·'bar';
+         13 │ + `${1·*·(2·+·'foo')}bar`;
+     14  14 │   
+     15  15 │   'foo' + 1;
   
 
 ```
@@ -242,12 +291,12 @@ invalid.js:13:6 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
   
   i Unsafe fix: Use a template literal.
   
-    11 11 │   (1 + 'foo') * 2;
-    12 12 │   
-    13    │ - 1·*·(2·+·'foo')·+·'bar';
-       13 │ + 1·*·(`${2}foo`)·+·'bar';
-    14 14 │   
-    15 15 │   'foo' + 1;
+     11  11 │   (1 + 'foo') * 2;
+     12  12 │   
+     13     │ - 1·*·(2·+·'foo')·+·'bar';
+         13 │ + 1·*·(`${2}foo`)·+·'bar';
+     14  14 │   
+     15  15 │   'foo' + 1;
   
 
 ```
@@ -266,12 +315,12 @@ invalid.js:15:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
   
   i Unsafe fix: Use a template literal.
   
-    13 13 │   1 * (2 + 'foo') + 'bar';
-    14 14 │   
-    15    │ - 'foo'·+·1;
-       15 │ + `foo${1}`;
-    16 16 │   
-    17 17 │   'foo' + `bar${`baz${'bat' + 'bam'}`}` + 'boo';
+     13  13 │   1 * (2 + 'foo') + 'bar';
+     14  14 │   
+     15     │ - 'foo'·+·1;
+         15 │ + `foo${1}`;
+     16  16 │   
+     17  17 │   'foo' + `bar${`baz${'bat' + 'bam'}`}` + 'boo';
   
 
 ```
@@ -290,12 +339,12 @@ invalid.js:17:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
   
   i Unsafe fix: Use a template literal.
   
-    15 15 │   'foo' + 1;
-    16 16 │   
-    17    │ - 'foo'·+·`bar${`baz${'bat'·+·'bam'}`}`·+·'boo';
-       17 │ + `foobarbaz${'bat'·+·'bam'}boo`;
-    18 18 │   
-    19 19 │   'foo' + 1 + 2;
+     15  15 │   'foo' + 1;
+     16  16 │   
+     17     │ - 'foo'·+·`bar${`baz${'bat'·+·'bam'}`}`·+·'boo';
+         17 │ + `foobarbaz${'bat'·+·'bam'}boo`;
+     18  18 │   
+     19  19 │   'foo' + 1 + 2;
   
 
 ```
@@ -314,12 +363,12 @@ invalid.js:19:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
   
   i Unsafe fix: Use a template literal.
   
-    17 17 │   'foo' + `bar${`baz${'bat' + 'bam'}`}` + 'boo';
-    18 18 │   
-    19    │ - 'foo'·+·1·+·2;
-       19 │ + `foo${1}${2}`;
-    20 20 │   
-    21 21 │   1 + '2' - 3;
+     17  17 │   'foo' + `bar${`baz${'bat' + 'bam'}`}` + 'boo';
+     18  18 │   
+     19     │ - 'foo'·+·1·+·2;
+         19 │ + `foo${1}${2}`;
+     20  20 │   
+     21  21 │   1 + '2' - 3;
   
 
 ```
@@ -338,12 +387,12 @@ invalid.js:21:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
   
   i Unsafe fix: Use a template literal.
   
-    19 19 │   'foo' + 1 + 2;
-    20 20 │   
-    21    │ - 1·+·'2'·-·3;
-       21 │ + `${1}2`·-·3;
-    22 22 │   
-    23 23 │   foo() + ' bar';
+     19  19 │   'foo' + 1 + 2;
+     20  20 │   
+     21     │ - 1·+·'2'·-·3;
+         21 │ + `${1}2`·-·3;
+     22  22 │   
+     23  23 │   foo() + ' bar';
   
 
 ```
@@ -362,12 +411,12 @@ invalid.js:23:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
   
   i Unsafe fix: Use a template literal.
   
-    21 21 │   1 + '2' - 3;
-    22 22 │   
-    23    │ - foo()·+·'·bar';
-       23 │ + `${foo()}·bar`;
-    24 24 │   
-    25 25 │   foo() + '\n';
+     21  21 │   1 + '2' - 3;
+     22  22 │   
+     23     │ - foo()·+·'·bar';
+         23 │ + `${foo()}·bar`;
+     24  24 │   
+     25  25 │   foo() + '\n';
   
 
 ```
@@ -386,12 +435,12 @@ invalid.js:25:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
   
   i Unsafe fix: Use a template literal.
   
-    23 23 │   foo() + ' bar';
-    24 24 │   
-    25    │ - foo()·+·'\n';
-       25 │ + `${foo()}\n`;
-    26 26 │   
-    27 27 │   1 * /**leading*/'foo'    /**trailing */                   + 'bar';
+     23  23 │   foo() + ' bar';
+     24  24 │   
+     25     │ - foo()·+·'\n';
+         25 │ + `${foo()}\n`;
+     26  26 │   
+     27  27 │   1 * /**leading*/'foo'    /**trailing */                   + 'bar';
   
 
 ```
@@ -406,16 +455,40 @@ invalid.js:27:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
   > 27 │ 1 * /**leading*/'foo'    /**trailing */                   + 'bar';
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     28 │ 
-    29 │ // strings including `${`
+    29 │ `foo` + 1;
   
   i Unsafe fix: Use a template literal.
   
-    25 25 │   foo() + '\n';
-    26 26 │   
-    27    │ - 1·*·/**leading*/'foo'····/**trailing·*/···················+·'bar';
-       27 │ + `${1·*·/**leading*/'foo'}bar`;
-    28 28 │   
-    29 29 │   // strings including `${`
+     25  25 │   foo() + '\n';
+     26  26 │   
+     27     │ - 1·*·/**leading*/'foo'····/**trailing·*/···················+·'bar';
+         27 │ + `${1·*·/**leading*/'foo'}bar`;
+     28  28 │   
+     29  29 │   `foo` + 1;
+  
+
+```
+
+```
+invalid.js:29:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Template literals are preferred over string concatenation.
+  
+    27 │ 1 * /**leading*/'foo'    /**trailing */                   + 'bar';
+    28 │ 
+  > 29 │ `foo` + 1;
+       │ ^^^^^^^^^
+    30 │ 
+    31 │ `foo${1}` + 2;
+  
+  i Unsafe fix: Use a template literal.
+  
+     27  27 │   1 * /**leading*/'foo'    /**trailing */                   + 'bar';
+     28  28 │   
+     29     │ - `foo`·+·1;
+         29 │ + `foo${1}`;
+     30  30 │   
+     31  31 │   `foo${1}` + 2;
   
 
 ```
@@ -425,45 +498,21 @@ invalid.js:31:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
 
   ! Template literals are preferred over string concatenation.
   
-    29 │ // strings including `${`
+    29 │ `foo` + 1;
     30 │ 
-  > 31 │ '${foo.' + bar + '.baz}';
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+  > 31 │ `foo${1}` + 2;
+       │ ^^^^^^^^^^^^^
     32 │ 
-    33 │ 'foo: ${bar.' + baz + '.bat}';
+    33 │ // strings including `${`
   
   i Unsafe fix: Use a template literal.
   
-    29 29 │   // strings including `${`
-    30 30 │   
-    31    │ - '${foo.'·+·bar·+·'.baz}';
-       31 │ + `\${foo.${bar}.baz}`;
-    32 32 │   
-    33 33 │   'foo: ${bar.' + baz + '.bat}';
-  
-
-```
-
-```
-invalid.js:33:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Template literals are preferred over string concatenation.
-  
-    31 │ '${foo.' + bar + '.baz}';
-    32 │ 
-  > 33 │ 'foo: ${bar.' + baz + '.bat}';
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    34 │ 
-    35 │ 'foo: `bar.' + baz + '.bat}';
-  
-  i Unsafe fix: Use a template literal.
-  
-    31 31 │   '${foo.' + bar + '.baz}';
-    32 32 │   
-    33    │ - 'foo:·${bar.'·+·baz·+·'.bat}';
-       33 │ + `foo:·\${bar.${baz}.bat}`;
-    34 34 │   
-    35 35 │   'foo: `bar.' + baz + '.bat}';
+     29  29 │   `foo` + 1;
+     30  30 │   
+     31     │ - `foo${1}`·+·2;
+         31 │ + `foo${1}${2}`;
+     32  32 │   
+     33  33 │   // strings including `${`
   
 
 ```
@@ -473,21 +522,21 @@ invalid.js:35:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
 
   ! Template literals are preferred over string concatenation.
   
-    33 │ 'foo: ${bar.' + baz + '.bat}';
+    33 │ // strings including `${`
     34 │ 
-  > 35 │ 'foo: `bar.' + baz + '.bat}';
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 35 │ '${foo.' + bar + '.baz}';
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
     36 │ 
-    37 │ '${foo}: `bar.' + baz + '.bat}';
+    37 │ 'foo: ${bar.' + baz + '.bat}';
   
   i Unsafe fix: Use a template literal.
   
-    33 33 │   'foo: ${bar.' + baz + '.bat}';
-    34 34 │   
-    35    │ - 'foo:·`bar.'·+·baz·+·'.bat}';
-       35 │ + `foo:·\`bar.${baz}.bat}`;
-    36 36 │   
-    37 37 │   '${foo}: `bar.' + baz + '.bat}';
+     33  33 │   // strings including `${`
+     34  34 │   
+     35     │ - '${foo.'·+·bar·+·'.baz}';
+         35 │ + `\${foo.${bar}.baz}`;
+     36  36 │   
+     37  37 │   'foo: ${bar.' + baz + '.bat}';
   
 
 ```
@@ -497,21 +546,21 @@ invalid.js:37:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
 
   ! Template literals are preferred over string concatenation.
   
-    35 │ 'foo: `bar.' + baz + '.bat}';
+    35 │ '${foo.' + bar + '.baz}';
     36 │ 
-  > 37 │ '${foo}: `bar.' + baz + '.bat}';
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 37 │ 'foo: ${bar.' + baz + '.bat}';
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     38 │ 
-    39 │ 'foo: ${bar.' + baz + '.bat}';
+    39 │ 'foo: `bar.' + baz + '.bat}';
   
   i Unsafe fix: Use a template literal.
   
-    35 35 │   'foo: `bar.' + baz + '.bat}';
-    36 36 │   
-    37    │ - '${foo}:·`bar.'·+·baz·+·'.bat}';
-       37 │ + `\${foo}:·\`bar.${baz}.bat}`;
-    38 38 │   
-    39 39 │   'foo: ${bar.' + baz + '.bat}';
+     35  35 │   '${foo.' + bar + '.baz}';
+     36  36 │   
+     37     │ - 'foo:·${bar.'·+·baz·+·'.bat}';
+         37 │ + `foo:·\${bar.${baz}.bat}`;
+     38  38 │   
+     39  39 │   'foo: `bar.' + baz + '.bat}';
   
 
 ```
@@ -521,21 +570,21 @@ invalid.js:39:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
 
   ! Template literals are preferred over string concatenation.
   
-    37 │ '${foo}: `bar.' + baz + '.bat}';
+    37 │ 'foo: ${bar.' + baz + '.bat}';
     38 │ 
-  > 39 │ 'foo: ${bar.' + baz + '.bat}';
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 39 │ 'foo: `bar.' + baz + '.bat}';
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     40 │ 
-    41 │ 'foo: `bar.' + baz + '.bat}';
+    41 │ '${foo}: `bar.' + baz + '.bat}';
   
   i Unsafe fix: Use a template literal.
   
-    37 37 │   '${foo}: `bar.' + baz + '.bat}';
-    38 38 │   
-    39    │ - 'foo:·${bar.'·+·baz·+·'.bat}';
-       39 │ + `foo:·\${bar.${baz}.bat}`;
-    40 40 │   
-    41 41 │   'foo: `bar.' + baz + '.bat}';
+     37  37 │   'foo: ${bar.' + baz + '.bat}';
+     38  38 │   
+     39     │ - 'foo:·`bar.'·+·baz·+·'.bat}';
+         39 │ + `foo:·\`bar.${baz}.bat}`;
+     40  40 │   
+     41  41 │   '${foo}: `bar.' + baz + '.bat}';
   
 
 ```
@@ -545,21 +594,21 @@ invalid.js:41:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
 
   ! Template literals are preferred over string concatenation.
   
-    39 │ 'foo: ${bar.' + baz + '.bat}';
+    39 │ 'foo: `bar.' + baz + '.bat}';
     40 │ 
-  > 41 │ 'foo: `bar.' + baz + '.bat}';
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 41 │ '${foo}: `bar.' + baz + '.bat}';
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     42 │ 
-    43 │ 'foo: \\${bar.' + baz + '.bat}';
+    43 │ 'foo: ${bar.' + baz + '.bat}';
   
   i Unsafe fix: Use a template literal.
   
-    39 39 │   'foo: ${bar.' + baz + '.bat}';
-    40 40 │   
-    41    │ - 'foo:·`bar.'·+·baz·+·'.bat}';
-       41 │ + `foo:·\`bar.${baz}.bat}`;
-    42 42 │   
-    43 43 │   'foo: \\${bar.' + baz + '.bat}';
+     39  39 │   'foo: `bar.' + baz + '.bat}';
+     40  40 │   
+     41     │ - '${foo}:·`bar.'·+·baz·+·'.bat}';
+         41 │ + `\${foo}:·\`bar.${baz}.bat}`;
+     42  42 │   
+     43  43 │   'foo: ${bar.' + baz + '.bat}';
   
 
 ```
@@ -569,21 +618,21 @@ invalid.js:43:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
 
   ! Template literals are preferred over string concatenation.
   
-    41 │ 'foo: `bar.' + baz + '.bat}';
+    41 │ '${foo}: `bar.' + baz + '.bat}';
     42 │ 
-  > 43 │ 'foo: \\${bar.' + baz + '.bat}';
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 43 │ 'foo: ${bar.' + baz + '.bat}';
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     44 │ 
-    45 │ 'foo: \\${bar.' + baz + '.bat}';
+    45 │ 'foo: `bar.' + baz + '.bat}';
   
   i Unsafe fix: Use a template literal.
   
-    41 41 │   'foo: `bar.' + baz + '.bat}';
-    42 42 │   
-    43    │ - 'foo:·\\${bar.'·+·baz·+·'.bat}';
-       43 │ + `foo:·\\\${bar.${baz}.bat}`;
-    44 44 │   
-    45 45 │   'foo: \\${bar.' + baz + '.bat}';
+     41  41 │   '${foo}: `bar.' + baz + '.bat}';
+     42  42 │   
+     43     │ - 'foo:·${bar.'·+·baz·+·'.bat}';
+         43 │ + `foo:·\${bar.${baz}.bat}`;
+     44  44 │   
+     45  45 │   'foo: `bar.' + baz + '.bat}';
   
 
 ```
@@ -593,95 +642,646 @@ invalid.js:45:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━�
 
   ! Template literals are preferred over string concatenation.
   
-    43 │ 'foo: \\${bar.' + baz + '.bat}';
+    43 │ 'foo: ${bar.' + baz + '.bat}';
     44 │ 
-  > 45 │ 'foo: \\${bar.' + baz + '.bat}';
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 45 │ 'foo: `bar.' + baz + '.bat}';
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     46 │ 
-    47 │ // parentheses
+    47 │ 'foo: \\${bar.' + baz + '.bat}';
   
   i Unsafe fix: Use a template literal.
   
-    43 43 │   'foo: \\${bar.' + baz + '.bat}';
-    44 44 │   
-    45    │ - 'foo:·\\${bar.'·+·baz·+·'.bat}';
-       45 │ + `foo:·\\\${bar.${baz}.bat}`;
-    46 46 │   
-    47 47 │   // parentheses
+     43  43 │   'foo: ${bar.' + baz + '.bat}';
+     44  44 │   
+     45     │ - 'foo:·`bar.'·+·baz·+·'.bat}';
+         45 │ + `foo:·\`bar.${baz}.bat}`;
+     46  46 │   
+     47  47 │   'foo: \\${bar.' + baz + '.bat}';
   
 
 ```
 
 ```
-invalid.js:49:11 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:47:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Template literals are preferred over string concatenation.
   
-    47 │ // parentheses
+    45 │ 'foo: `bar.' + baz + '.bat}';
+    46 │ 
+  > 47 │ 'foo: \\${bar.' + baz + '.bat}';
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     48 │ 
-  > 49 │ const x = a + ("b") + c;
-       │           ^^^^^^^^^^^^^
-    50 │ 
-    51 │ ("a") + (b) + ("c");
+    49 │ 'foo: \\${bar.' + baz + '.bat}';
   
   i Unsafe fix: Use a template literal.
   
-    47 47 │   // parentheses
-    48 48 │   
-    49    │ - const·x·=·a·+·("b")·+·c;
-       49 │ + const·x·=·`${a}b${c}`;
-    50 50 │   
-    51 51 │   ("a") + (b) + ("c");
+     45  45 │   'foo: `bar.' + baz + '.bat}';
+     46  46 │   
+     47     │ - 'foo:·\\${bar.'·+·baz·+·'.bat}';
+         47 │ + `foo:·\\\${bar.${baz}.bat}`;
+     48  48 │   
+     49  49 │   'foo: \\${bar.' + baz + '.bat}';
   
 
 ```
 
 ```
-invalid.js:51:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:49:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Template literals are preferred over string concatenation.
   
-    49 │ const x = a + ("b") + c;
+    47 │ 'foo: \\${bar.' + baz + '.bat}';
+    48 │ 
+  > 49 │ 'foo: \\${bar.' + baz + '.bat}';
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     50 │ 
-  > 51 │ ("a") + (b) + ("c");
-       │ ^^^^^^^^^^^^^^^^^^^
+    51 │ // parentheses
+  
+  i Unsafe fix: Use a template literal.
+  
+     47  47 │   'foo: \\${bar.' + baz + '.bat}';
+     48  48 │   
+     49     │ - 'foo:·\\${bar.'·+·baz·+·'.bat}';
+         49 │ + `foo:·\\\${bar.${baz}.bat}`;
+     50  50 │   
+     51  51 │   // parentheses
+  
+
+```
+
+```
+invalid.js:53:11 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Template literals are preferred over string concatenation.
+  
+    51 │ // parentheses
     52 │ 
-    53 │ //a
+  > 53 │ const x = a + ("b") + c;
+       │           ^^^^^^^^^^^^^
+    54 │ 
+    55 │ ("a") + (b) + ("c");
   
   i Unsafe fix: Use a template literal.
   
-    49 49 │   const x = a + ("b") + c;
-    50 50 │   
-    51    │ - ("a")·+·(b)·+·("c");
-       51 │ + `a${b}c`;
-    52 52 │   
-    53 53 │   //a
+     51  51 │   // parentheses
+     52  52 │   
+     53     │ - const·x·=·a·+·("b")·+·c;
+         53 │ + const·x·=·`${a}b${c}`;
+     54  54 │   
+     55  55 │   ("a") + (b) + ("c");
   
 
 ```
 
 ```
-invalid.js:54:7 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:55:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Template literals are preferred over string concatenation.
   
-    53 │ //a
-  > 54 │ /*b*/ foo /*c*/ + /*d*/ 'baz' /*e*/ + /*f*/ 1 //g
-       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  > 55 │ + //h
-  > 56 │ bar //i
-       │ ^^^
-    57 │ 
+    53 │ const x = a + ("b") + c;
+    54 │ 
+  > 55 │ ("a") + (b) + ("c");
+       │ ^^^^^^^^^^^^^^^^^^^
+    56 │ 
+    57 │ //a
   
   i Unsafe fix: Use a template literal.
   
-    52 52 │   
-    53 53 │   //a
-    54    │ - /*b*/·foo·/*c*/·+·/*d*/·'baz'·/*e*/·+·/*f*/·1·//g
-    55    │ - +·//h
-    56    │ - bar·//i
-       54 │ + /*b*/·`${foo}baz${1}${bar}`·//i
-    57 55 │   
+     53  53 │   const x = a + ("b") + c;
+     54  54 │   
+     55     │ - ("a")·+·(b)·+·("c");
+         55 │ + `a${b}c`;
+     56  56 │   
+     57  57 │   //a
+  
+
+```
+
+```
+invalid.js:58:7 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Template literals are preferred over string concatenation.
+  
+    57 │ //a
+  > 58 │ /*b*/ foo /*c*/ + /*d*/ 'baz' /*e*/ + /*f*/ 1 //g
+       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 59 │ + //h
+  > 60 │ bar //i
+       │ ^^^
+    61 │ 
+  
+  i Unsafe fix: Use a template literal.
+  
+     56  56 │   
+     57  57 │   //a
+     58     │ - /*b*/·foo·/*c*/·+·/*d*/·'baz'·/*e*/·+·/*f*/·1·//g
+     59     │ - +·//h
+     60     │ - bar·//i
+         58 │ + /*b*/·`${foo}baz${1}${bar}`·//i
+     61  59 │   
+     62  60 │   
+  
+
+```
+
+```
+invalid.js:65:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Template literals are preferred over string concatenation.
+  
+    63 │ // parentheses and type coercion
+    64 │ 
+  > 65 │ "a" + (1 + 2); // `a${1 + 2}`
+       │ ^^^^^^^^^^^^^
+    66 │ 
+    67 │ (1 + 2) + "a"; // `${1 + 2}a`
+  
+  i Unsafe fix: Use a template literal.
+  
+     63  63 │   // parentheses and type coercion
+     64  64 │   
+     65     │ - "a"·+·(1·+·2);·//·`a${1·+·2}`
+         65 │ + `a${1·+·2}`;·//·`a${1·+·2}`
+     66  66 │   
+     67  67 │   (1 + 2) + "a"; // `${1 + 2}a`
+  
+
+```
+
+```
+invalid.js:67:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Template literals are preferred over string concatenation.
+  
+    65 │ "a" + (1 + 2); // `a${1 + 2}`
+    66 │ 
+  > 67 │ (1 + 2) + "a"; // `${1 + 2}a`
+       │ ^^^^^^^^^^^^^
+    68 │ 
+    69 │ 1 + 2 + "a"; // `${1 + 2}a`
+  
+  i Unsafe fix: Use a template literal.
+  
+     65  65 │   "a" + (1 + 2); // `a${1 + 2}`
+     66  66 │   
+     67     │ - (1·+·2)·+·"a";·//·`${1·+·2}a`
+         67 │ + `${1·+·2}a`;·//·`${1·+·2}a`
+     68  68 │   
+     69  69 │   1 + 2 + "a"; // `${1 + 2}a`
+  
+
+```
+
+```
+invalid.js:69:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Template literals are preferred over string concatenation.
+  
+    67 │ (1 + 2) + "a"; // `${1 + 2}a`
+    68 │ 
+  > 69 │ 1 + 2 + "a"; // `${1 + 2}a`
+       │ ^^^^^^^^^^^
+    70 │ 
+    71 │ (1 + 2) + ("a"); // `${1 + 2}a`
+  
+  i Unsafe fix: Use a template literal.
+  
+     67  67 │   (1 + 2) + "a"; // `${1 + 2}a`
+     68  68 │   
+     69     │ - 1·+·2·+·"a";·//·`${1·+·2}a`
+         69 │ + `${1·+·2}a`;·//·`${1·+·2}a`
+     70  70 │   
+     71  71 │   (1 + 2) + ("a"); // `${1 + 2}a`
+  
+
+```
+
+```
+invalid.js:71:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Template literals are preferred over string concatenation.
+  
+    69 │ 1 + 2 + "a"; // `${1 + 2}a`
+    70 │ 
+  > 71 │ (1 + 2) + ("a"); // `${1 + 2}a`
+       │ ^^^^^^^^^^^^^^^
+    72 │ 
+    73 │ "a" + 1 + 2; // `a${1}${2}`
+  
+  i Unsafe fix: Use a template literal.
+  
+     69  69 │   1 + 2 + "a"; // `${1 + 2}a`
+     70  70 │   
+     71     │ - (1·+·2)·+·("a");·//·`${1·+·2}a`
+         71 │ + `${1·+·2}a`;·//·`${1·+·2}a`
+     72  72 │   
+     73  73 │   "a" + 1 + 2; // `a${1}${2}`
+  
+
+```
+
+```
+invalid.js:73:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Template literals are preferred over string concatenation.
+  
+    71 │ (1 + 2) + ("a"); // `${1 + 2}a`
+    72 │ 
+  > 73 │ "a" + 1 + 2; // `a${1}${2}`
+       │ ^^^^^^^^^^^
+    74 │ 
+    75 │ 1 + (2 + "a"); // `${1}${2}a`
+  
+  i Unsafe fix: Use a template literal.
+  
+     71  71 │   (1 + 2) + ("a"); // `${1 + 2}a`
+     72  72 │   
+     73     │ - "a"·+·1·+·2;·//·`a${1}${2}`
+         73 │ + `a${1}${2}`;·//·`a${1}${2}`
+     74  74 │   
+     75  75 │   1 + (2 + "a"); // `${1}${2}a`
+  
+
+```
+
+```
+invalid.js:75:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Template literals are preferred over string concatenation.
+  
+    73 │ "a" + 1 + 2; // `a${1}${2}`
+    74 │ 
+  > 75 │ 1 + (2 + "a"); // `${1}${2}a`
+       │ ^^^^^^^^^^^^^
+    76 │ 
+    77 │ (1 + 2) + (3 + 4) + "a"; // `${(1 + 2) + (3 + 4)}a`
+  
+  i Unsafe fix: Use a template literal.
+  
+     73  73 │   "a" + 1 + 2; // `a${1}${2}`
+     74  74 │   
+     75     │ - 1·+·(2·+·"a");·//·`${1}${2}a`
+         75 │ + `${1}${2}a`;·//·`${1}${2}a`
+     76  76 │   
+     77  77 │   (1 + 2) + (3 + 4) + "a"; // `${(1 + 2) + (3 + 4)}a`
+  
+
+```
+
+```
+invalid.js:77:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Template literals are preferred over string concatenation.
+  
+    75 │ 1 + (2 + "a"); // `${1}${2}a`
+    76 │ 
+  > 77 │ (1 + 2) + (3 + 4) + "a"; // `${(1 + 2) + (3 + 4)}a`
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    78 │ 
+    79 │ (1 + 2) + ((3 + 4) + "a"); // `${1 + 2}${3 + 4}a`
+  
+  i Unsafe fix: Use a template literal.
+  
+     75  75 │   1 + (2 + "a"); // `${1}${2}a`
+     76  76 │   
+     77     │ - (1·+·2)·+·(3·+·4)·+·"a";·//·`${(1·+·2)·+·(3·+·4)}a`
+         77 │ + `${(1·+·2)·+·(3·+·4)}a`;·//·`${(1·+·2)·+·(3·+·4)}a`
+     78  78 │   
+     79  79 │   (1 + 2) + ((3 + 4) + "a"); // `${1 + 2}${3 + 4}a`
+  
+
+```
+
+```
+invalid.js:79:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Template literals are preferred over string concatenation.
+  
+    77 │ (1 + 2) + (3 + 4) + "a"; // `${(1 + 2) + (3 + 4)}a`
+    78 │ 
+  > 79 │ (1 + 2) + ((3 + 4) + "a"); // `${1 + 2}${3 + 4}a`
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    80 │ 
+    81 │ "a" + (1 + 2 + "b"); // `a${1 + 2}b`
+  
+  i Unsafe fix: Use a template literal.
+  
+     77  77 │   (1 + 2) + (3 + 4) + "a"; // `${(1 + 2) + (3 + 4)}a`
+     78  78 │   
+     79     │ - (1·+·2)·+·((3·+·4)·+·"a");·//·`${1·+·2}${3·+·4}a`
+         79 │ + `${1·+·2}${3·+·4}a`;·//·`${1·+·2}${3·+·4}a`
+     80  80 │   
+     81  81 │   "a" + (1 + 2 + "b"); // `a${1 + 2}b`
+  
+
+```
+
+```
+invalid.js:81:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Template literals are preferred over string concatenation.
+  
+    79 │ (1 + 2) + ((3 + 4) + "a"); // `${1 + 2}${3 + 4}a`
+    80 │ 
+  > 81 │ "a" + (1 + 2 + "b"); // `a${1 + 2}b`
+       │ ^^^^^^^^^^^^^^^^^^^
+    82 │ 
+    83 │ (1 + 2 + "a") + "b"; // `${1 + 2}ab`
+  
+  i Unsafe fix: Use a template literal.
+  
+     79  79 │   (1 + 2) + ((3 + 4) + "a"); // `${1 + 2}${3 + 4}a`
+     80  80 │   
+     81     │ - "a"·+·(1·+·2·+·"b");·//·`a${1·+·2}b`
+         81 │ + `a${1·+·2}b`;·//·`a${1·+·2}b`
+     82  82 │   
+     83  83 │   (1 + 2 + "a") + "b"; // `${1 + 2}ab`
+  
+
+```
+
+```
+invalid.js:83:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Template literals are preferred over string concatenation.
+  
+    81 │ "a" + (1 + 2 + "b"); // `a${1 + 2}b`
+    82 │ 
+  > 83 │ (1 + 2 + "a") + "b"; // `${1 + 2}ab`
+       │ ^^^^^^^^^^^^^^^^^^^
+    84 │ 
+    85 │ ("a" + 1 + 2) + "b"; // `a${1}${2}b`
+  
+  i Unsafe fix: Use a template literal.
+  
+     81  81 │   "a" + (1 + 2 + "b"); // `a${1 + 2}b`
+     82  82 │   
+     83     │ - (1·+·2·+·"a")·+·"b";·//·`${1·+·2}ab`
+         83 │ + `${1·+·2}ab`;·//·`${1·+·2}ab`
+     84  84 │   
+     85  85 │   ("a" + 1 + 2) + "b"; // `a${1}${2}b`
+  
+
+```
+
+```
+invalid.js:85:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Template literals are preferred over string concatenation.
+  
+    83 │ (1 + 2 + "a") + "b"; // `${1 + 2}ab`
+    84 │ 
+  > 85 │ ("a" + 1 + 2) + "b"; // `a${1}${2}b`
+       │ ^^^^^^^^^^^^^^^^^^^
+    86 │ 
+    87 │ ("a" + 1) + (2 + "b"); // `a${1}${2}b`
+  
+  i Unsafe fix: Use a template literal.
+  
+     83  83 │   (1 + 2 + "a") + "b"; // `${1 + 2}ab`
+     84  84 │   
+     85     │ - ("a"·+·1·+·2)·+·"b";·//·`a${1}${2}b`
+         85 │ + `a${1}${2}b`;·//·`a${1}${2}b`
+     86  86 │   
+     87  87 │   ("a" + 1) + (2 + "b"); // `a${1}${2}b`
+  
+
+```
+
+```
+invalid.js:87:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Template literals are preferred over string concatenation.
+  
+    85 │ ("a" + 1 + 2) + "b"; // `a${1}${2}b`
+    86 │ 
+  > 87 │ ("a" + 1) + (2 + "b"); // `a${1}${2}b`
+       │ ^^^^^^^^^^^^^^^^^^^^^
+    88 │ 
+    89 │ (1 + 2) + (3 + "a") + 4 + (5 + ("b" + 6)); // `${1 + 2}${3}a${4}${5}b${6}`
+  
+  i Unsafe fix: Use a template literal.
+  
+     85  85 │   ("a" + 1 + 2) + "b"; // `a${1}${2}b`
+     86  86 │   
+     87     │ - ("a"·+·1)·+·(2·+·"b");·//·`a${1}${2}b`
+         87 │ + `a${1}${2}b`;·//·`a${1}${2}b`
+     88  88 │   
+     89  89 │   (1 + 2) + (3 + "a") + 4 + (5 + ("b" + 6)); // `${1 + 2}${3}a${4}${5}b${6}`
+  
+
+```
+
+```
+invalid.js:89:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Template literals are preferred over string concatenation.
+  
+    87 │ ("a" + 1) + (2 + "b"); // `a${1}${2}b`
+    88 │ 
+  > 89 │ (1 + 2) + (3 + "a") + 4 + (5 + ("b" + 6)); // `${1 + 2}${3}a${4}${5}b${6}`
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    90 │ 
+    91 │ "a" + 1 + (2 + (3 + 4)); // `a${1}${2 + (3 + 4)}`
+  
+  i Unsafe fix: Use a template literal.
+  
+     87  87 │   ("a" + 1) + (2 + "b"); // `a${1}${2}b`
+     88  88 │   
+     89     │ - (1·+·2)·+·(3·+·"a")·+·4·+·(5·+·("b"·+·6));·//·`${1·+·2}${3}a${4}${5}b${6}`
+         89 │ + `${1·+·2}${3}a${4}${5}b${6}`;·//·`${1·+·2}${3}a${4}${5}b${6}`
+     90  90 │   
+     91  91 │   "a" + 1 + (2 + (3 + 4)); // `a${1}${2 + (3 + 4)}`
+  
+
+```
+
+```
+invalid.js:91:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Template literals are preferred over string concatenation.
+  
+    89 │ (1 + 2) + (3 + "a") + 4 + (5 + ("b" + 6)); // `${1 + 2}${3}a${4}${5}b${6}`
+    90 │ 
+  > 91 │ "a" + 1 + (2 + (3 + 4)); // `a${1}${2 + (3 + 4)}`
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    92 │ 
+    93 │ 1 + (2 + (3 + 4)) + "a"; // `${1·+·(2·+·(3·+·4))}a`
+  
+  i Unsafe fix: Use a template literal.
+  
+     89  89 │   (1 + 2) + (3 + "a") + 4 + (5 + ("b" + 6)); // `${1 + 2}${3}a${4}${5}b${6}`
+     90  90 │   
+     91     │ - "a"·+·1·+·(2·+·(3·+·4));·//·`a${1}${2·+·(3·+·4)}`
+         91 │ + `a${1}${2·+·(3·+·4)}`;·//·`a${1}${2·+·(3·+·4)}`
+     92  92 │   
+     93  93 │   1 + (2 + (3 + 4)) + "a"; // `${1·+·(2·+·(3·+·4))}a`
+  
+
+```
+
+```
+invalid.js:93:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Template literals are preferred over string concatenation.
+  
+    91 │ "a" + 1 + (2 + (3 + 4)); // `a${1}${2 + (3 + 4)}`
+    92 │ 
+  > 93 │ 1 + (2 + (3 + 4)) + "a"; // `${1·+·(2·+·(3·+·4))}a`
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    94 │ 
+    95 │ 1 - 2 + "a"; // `${1 - 2}a`
+  
+  i Unsafe fix: Use a template literal.
+  
+     91  91 │   "a" + 1 + (2 + (3 + 4)); // `a${1}${2 + (3 + 4)}`
+     92  92 │   
+     93     │ - 1·+·(2·+·(3·+·4))·+·"a";·//·`${1·+·(2·+·(3·+·4))}a`
+         93 │ + `${1·+·(2·+·(3·+·4))}a`;·//·`${1·+·(2·+·(3·+·4))}a`
+     94  94 │   
+     95  95 │   1 - 2 + "a"; // `${1 - 2}a`
+  
+
+```
+
+```
+invalid.js:95:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Template literals are preferred over string concatenation.
+  
+    93 │ 1 + (2 + (3 + 4)) + "a"; // `${1·+·(2·+·(3·+·4))}a`
+    94 │ 
+  > 95 │ 1 - 2 + "a"; // `${1 - 2}a`
+       │ ^^^^^^^^^^^
+    96 │ 
+    97 │ "a" + (1 - 2); // `a${1 - 2}`
+  
+  i Unsafe fix: Use a template literal.
+  
+     93  93 │   1 + (2 + (3 + 4)) + "a"; // `${1·+·(2·+·(3·+·4))}a`
+     94  94 │   
+     95     │ - 1·-·2·+·"a";·//·`${1·-·2}a`
+         95 │ + `${1·-·2}a`;·//·`${1·-·2}a`
+     96  96 │   
+     97  97 │   "a" + (1 - 2); // `a${1 - 2}`
+  
+
+```
+
+```
+invalid.js:97:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Template literals are preferred over string concatenation.
+  
+    95 │ 1 - 2 + "a"; // `${1 - 2}a`
+    96 │ 
+  > 97 │ "a" + (1 - 2); // `a${1 - 2}`
+       │ ^^^^^^^^^^^^^
+    98 │ 
+    99 │ (foo && bar) + "baz"; // `${foo && bar}baz`
+  
+  i Unsafe fix: Use a template literal.
+  
+     95  95 │   1 - 2 + "a"; // `${1 - 2}a`
+     96  96 │   
+     97     │ - "a"·+·(1·-·2);·//·`a${1·-·2}`
+         97 │ + `a${1·-·2}`;·//·`a${1·-·2}`
+     98  98 │   
+     99  99 │   (foo && bar) + "baz"; // `${foo && bar}baz`
+  
+
+```
+
+```
+invalid.js:99:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Template literals are preferred over string concatenation.
+  
+     97 │ "a" + (1 - 2); // `a${1 - 2}`
+     98 │ 
+   > 99 │ (foo && bar) + "baz"; // `${foo && bar}baz`
+        │ ^^^^^^^^^^^^^^^^^^^^
+    100 │ 
+    101 │ "foo" + (bar && baz); // `foo${bar && baz}`
+  
+  i Unsafe fix: Use a template literal.
+  
+     97  97 │   "a" + (1 - 2); // `a${1 - 2}`
+     98  98 │   
+     99     │ - (foo·&&·bar)·+·"baz";·//·`${foo·&&·bar}baz`
+         99 │ + `${foo·&&·bar}baz`;·//·`${foo·&&·bar}baz`
+    100 100 │   
+    101 101 │   "foo" + (bar && baz); // `foo${bar && baz}`
+  
+
+```
+
+```
+invalid.js:101:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Template literals are preferred over string concatenation.
+  
+     99 │ (foo && bar) + "baz"; // `${foo && bar}baz`
+    100 │ 
+  > 101 │ "foo" + (bar && baz); // `foo${bar && baz}`
+        │ ^^^^^^^^^^^^^^^^^^^^
+    102 │ 
+    103 │ (1 + foo && bar) + "baz"; // `${1 + foo && bar}baz`
+  
+  i Unsafe fix: Use a template literal.
+  
+     99  99 │   (foo && bar) + "baz"; // `${foo && bar}baz`
+    100 100 │   
+    101     │ - "foo"·+·(bar·&&·baz);·//·`foo${bar·&&·baz}`
+        101 │ + `foo${bar·&&·baz}`;·//·`foo${bar·&&·baz}`
+    102 102 │   
+    103 103 │   (1 + foo && bar) + "baz"; // `${1 + foo && bar}baz`
+  
+
+```
+
+```
+invalid.js:103:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Template literals are preferred over string concatenation.
+  
+    101 │ "foo" + (bar && baz); // `foo${bar && baz}`
+    102 │ 
+  > 103 │ (1 + foo && bar) + "baz"; // `${1 + foo && bar}baz`
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    104 │ 
+    105 │ "foo" + (bar && baz + 1); // `foo${bar && baz + 1}`
+  
+  i Unsafe fix: Use a template literal.
+  
+    101 101 │   "foo" + (bar && baz); // `foo${bar && baz}`
+    102 102 │   
+    103     │ - (1·+·foo·&&·bar)·+·"baz";·//·`${1·+·foo·&&·bar}baz`
+        103 │ + `${1·+·foo·&&·bar}baz`;·//·`${1·+·foo·&&·bar}baz`
+    104 104 │   
+    105 105 │   "foo" + (bar && baz + 1); // `foo${bar && baz + 1}`
+  
+
+```
+
+```
+invalid.js:105:1 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Template literals are preferred over string concatenation.
+  
+    103 │ (1 + foo && bar) + "baz"; // `${1 + foo && bar}baz`
+    104 │ 
+  > 105 │ "foo" + (bar && baz + 1); // `foo${bar && baz + 1}`
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    106 │ 
+  
+  i Unsafe fix: Use a template literal.
+  
+    103 103 │   (1 + foo && bar) + "baz"; // `${1 + foo && bar}baz`
+    104 104 │   
+    105     │ - "foo"·+·(bar·&&·baz·+·1);·//·`foo${bar·&&·baz·+·1}`
+        105 │ + `foo${bar·&&·baz·+·1}`;·//·`foo${bar·&&·baz·+·1}`
+    106 106 │   
   
 
 ```

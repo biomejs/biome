@@ -35,3 +35,13 @@ function f7() {
         }
     };
 }
+
+const f8 = function(a) {}.bind(null, 0);
+
+const f9 = function(a) {}["bind"](null, 0);
+
+const called = function () {}();
+
+const f10 = function(x) {
+    return 0, 1;
+}

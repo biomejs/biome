@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsonc
 ---
 # Input
-```js
+```cjs
 class A { constructor(){} }
 ```
 
@@ -24,7 +24,7 @@ invalid.jsonc:1:11 lint/complexity/noUselessConstructor  FIXABLE  ━━━━�
 ```
 
 # Input
-```js
+```cjs
 class A { 'constructor'(){} }
 ```
 
@@ -45,7 +45,7 @@ invalid.jsonc:1:11 lint/complexity/noUselessConstructor  FIXABLE  ━━━━�
 ```
 
 # Input
-```js
+```cjs
 class A extends B { constructor() { super(); } }
 ```
 
@@ -66,7 +66,7 @@ invalid.jsonc:1:21 lint/complexity/noUselessConstructor  FIXABLE  ━━━━�
 ```
 
 # Input
-```js
+```cjs
 class A extends B { constructor(foo){ super(foo); } }
 ```
 
@@ -87,7 +87,7 @@ invalid.jsonc:1:21 lint/complexity/noUselessConstructor  FIXABLE  ━━━━�
 ```
 
 # Input
-```js
+```cjs
 class A extends B { constructor(foo, bar){ super(foo, bar); } }
 ```
 
@@ -108,7 +108,7 @@ invalid.jsonc:1:21 lint/complexity/noUselessConstructor  FIXABLE  ━━━━�
 ```
 
 # Input
-```js
+```cjs
 class A extends B { constructor(...args){ super(...args); } }
 ```
 
@@ -129,7 +129,7 @@ invalid.jsonc:1:21 lint/complexity/noUselessConstructor  FIXABLE  ━━━━�
 ```
 
 # Input
-```js
+```cjs
 class A extends B { constructor(a, b, ...c) { super(a, b, ...c); } }
 ```
 

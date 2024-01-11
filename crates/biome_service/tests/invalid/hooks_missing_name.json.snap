@@ -17,29 +17,30 @@ hooks_missing_name.json:6:5 deserialize ━━━━━━━━━━━━━�
   
   - recommended
   - all
-  - noAriaHiddenOnFocusable
-  - noDefaultExport
   - noDuplicateJsonKeys
   - noEmptyBlockStatements
-  - noImplicitAnyLet
+  - noEmptyTypeParameters
+  - noGlobalAssign
+  - noGlobalEval
   - noInvalidUseBeforeDeclaration
   - noMisleadingCharacterClass
   - noNodejsModules
+  - noThenProperty
   - noUnusedImports
   - noUnusedPrivateClassMembers
   - noUselessLoneBlockStatements
   - noUselessTernary
   - useAwait
+  - useConsistentArrayType
   - useExportType
   - useFilenamingConvention
   - useForOf
   - useGroupedTypeImport
   - useImportRestrictions
-  - useNodeImportProtocol
-  - useNumberProperties
-  - useRegexLiterals
+  - useImportType
+  - useNodejsImportProtocol
+  - useNumberNamespace
   - useShorthandFunctionType
-  - useValidAriaRole
   
 
 

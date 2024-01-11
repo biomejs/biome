@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidScript.jsonc
 ---
 # Input
-```js
+```cjs
 var x = 1; foo(x);
 ```
 
@@ -29,7 +29,7 @@ invalidScript.jsonc:1:1 lint/style/noVar  FIXABLE  ━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 var x = 1; x = 5;
 ```
 
@@ -55,7 +55,7 @@ invalidScript.jsonc:1:1 lint/style/noVar  FIXABLE  ━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 for (var i in [1,2,3]) { foo(i); }
 ```
 
@@ -81,7 +81,7 @@ invalidScript.jsonc:1:6 lint/style/noVar  FIXABLE  ━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 for (var x of [1,2,3]) { foo(x); }
 ```
 
@@ -107,7 +107,7 @@ invalidScript.jsonc:1:6 lint/style/noVar  FIXABLE  ━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 var [x = -1, y] = [1,2]; y = 0;
 ```
 
@@ -133,7 +133,7 @@ invalidScript.jsonc:1:1 lint/style/noVar  FIXABLE  ━━━━━━━━━�
 ```
 
 # Input
-```js
+```cjs
 var {a: x = -1, b: y} = {a:1,b:2}; y = 0;
 ```
 

@@ -1,0 +1,151 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/atrule/scope.css
+---
+
+# Input
+
+```css
+@scope
+{
+/* Only match links inside a light-scheme */
+a { color: darkmagenta; }
+}
+
+@scope (
+    .light-scheme
+    
+)
+{
+/* Only match links inside a light-scheme */
+a {
+	color: darkmagenta;
+}
+}
+
+@scope 
+to 
+(
+.content
+>
+*
+)
+{
+img {
+	border-radius: 50%;
+}
+
+.content {
+	padding: 1em;
+}
+}
+
+@scope (
+    .media-object   )   to  (   .content >   *){
+img {
+	border-radius: 50%;
+}
+
+.content {
+	padding: 1em;
+}
+}
+
+@scope  TO   (.content > *  ) {
+img {
+	border-radius: 50%;
+}
+
+.content {
+	padding: 1em;
+}
+}
+
+@scope (  #inner  ) {
+@keyframes --my-anim {
+	to {
+		background-color: rgb(0, 0, 255);
+	}
+}
+}
+
+@scope (.media-object,
+div:active
+) 
+to ( .content > *  , :hover  ) {}
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Quote style: Double Quotes
+-----
+
+```css
+@scope {
+	/* Only match links inside a light-scheme */
+	a {
+		color: darkmagenta;
+	}
+}
+
+@scope (.light-scheme) {
+	/* Only match links inside a light-scheme */
+	a {
+		color: darkmagenta;
+	}
+}
+
+@scope to (.content > *) {
+	img {
+		border-radius: 50%;
+	}
+
+	.content {
+		padding: 1em;
+	}
+}
+
+@scope (.media-object) to (.content > *) {
+	img {
+		border-radius: 50%;
+	}
+
+	.content {
+		padding: 1em;
+	}
+}
+
+@scope to (.content > *) {
+	img {
+		border-radius: 50%;
+	}
+
+	.content {
+		padding: 1em;
+	}
+}
+
+@scope (#inner) {
+	@keyframes --my-anim {
+		to {
+			background-color: rgb(0, 0, 255);
+		}
+	}
+}
+
+@scope (.media-object, div:active) to (.content > *, :hover) {
+}
+```
+
+

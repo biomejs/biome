@@ -41,6 +41,7 @@ pub fn create_analyzer_options(
         let deserialized = biome_deserialize::json::deserialize_from_json_str::<Configuration>(
             json.as_str(),
             JsonParserOptions::default(),
+            "",
         );
         if deserialized.has_errors() {
             diagnostics.extend(
@@ -61,7 +62,7 @@ pub fn create_analyzer_options(
             let configuration = deserialized.into_deserialized().unwrap_or_default();
             let mut settings = WorkspaceSettings::default();
             settings
-                .merge_with_configuration(configuration, None, &[])
+                .merge_with_configuration(configuration, None, None, &[])
                 .unwrap();
             let configuration = AnalyzerConfiguration {
                 rules: to_analyzer_rules(&settings, input_file),
@@ -209,9 +210,10 @@ pub fn write_analyzer_snapshot(
     input_code: &str,
     diagnostics: &[String],
     code_fixes: &[String],
+    markdown_language: &str,
 ) {
     writeln!(snapshot, "# Input").unwrap();
-    writeln!(snapshot, "```js").unwrap();
+    writeln!(snapshot, "```{markdown_language}").unwrap();
     writeln!(snapshot, "{}", input_code).unwrap();
     writeln!(snapshot, "```").unwrap();
     writeln!(snapshot).unwrap();

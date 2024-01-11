@@ -36,7 +36,7 @@ If you have problems with resolving the physical file, you can use the one publi
 
 ## `extends`
 
-A list of paths to other JSON files that will extend the current configuration file.
+A list of paths to other JSON files. Biome resolves and applies the options of the files contained in the `extends` list, and eventually applies the options contained in the `biome.json` file.
 
 
 ```json title="biome.json"
@@ -185,6 +185,10 @@ folder where `biome.json` was found.
 If Biome can't find the configuration, it will attempt to use the current working directory.
 If no current working directory can't be found, Biome won't use the VCS integration, and a diagnostic
 will be emitted
+
+### `vcs.defaultBranch`
+
+The main branch of the project. Biome will use this branch when evaluating the changed files.
 
 ## `linter`
 
@@ -538,7 +542,7 @@ Allows to support the unsafe/experimental parameter decorators.
   "javascript": {
     "parser": {
 	    "unsafeParameterDecoratorsEnabled": true
-      }
+    }
   }
 }
 ```

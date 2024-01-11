@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: simpleBranches2.js
 ---
 # Input
-```js
+```jsx
 function simpleBranches2() {
     if (firstCondition) {                 // +1
         return 1;

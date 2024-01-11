@@ -1,0 +1,123 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-named-imports.ts
+---
+# Input
+```ts
+import { A, B, C, D, E } from "";
+type AA = A;
+type BB = typeof B;
+export { type C };
+export { D };
+const EE = E;
+
+import { X, Y } from "";
+type XX = X;
+const YY = Y;
+
+//import { type U, V } from "";
+//type VV = V;
+
+import { type X, type Y, type Z } from "";
+export type { X, Y, Z };
+
+```
+
+# Diagnostics
+```
+invalid-named-imports.ts:1:1 lint/nursery/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Some named imports are only used as types.
+  
+  > 1 │ import { A, B, C, D, E } from "";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ type AA = A;
+    3 │ type BB = typeof B;
+  
+  i This import is only used as a type.
+  
+  > 1 │ import { A, B, C, D, E } from "";
+      │          ^
+    2 │ type AA = A;
+    3 │ type BB = typeof B;
+  
+  i This import is only used as a type.
+  
+  > 1 │ import { A, B, C, D, E } from "";
+      │             ^
+    2 │ type AA = A;
+    3 │ type BB = typeof B;
+  
+  i This import is only used as a type.
+  
+  > 1 │ import { A, B, C, D, E } from "";
+      │                ^
+    2 │ type AA = A;
+    3 │ type BB = typeof B;
+  
+  i Importing the types with import type ensures that they are removed by the transpilers and avoids loading unnecessary modules.
+  
+  i Safe fix: Use import type.
+  
+    1 │ import·{·type·A,·type·B,·type·C,·D,·E·}·from·"";
+      │          +++++   +++++   +++++                  
+
+```
+
+```
+invalid-named-imports.ts:8:1 lint/nursery/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Some named imports are only used as types.
+  
+     6 │ const EE = E;
+     7 │ 
+   > 8 │ import { X, Y } from "";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ type XX = X;
+    10 │ const YY = Y;
+  
+  i This import is only used as a type.
+  
+     6 │ const EE = E;
+     7 │ 
+   > 8 │ import { X, Y } from "";
+       │          ^
+     9 │ type XX = X;
+    10 │ const YY = Y;
+  
+  i Importing the types with import type ensures that they are removed by the transpilers and avoids loading unnecessary modules.
+  
+  i Safe fix: Use import type.
+  
+    8 │ import·{·type·X,·Y·}·from·"";
+      │          +++++               
+
+```
+
+```
+invalid-named-imports.ts:15:1 lint/nursery/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! All these imports are only used as types.
+  
+    13 │ //type VV = V;
+    14 │ 
+  > 15 │ import { type X, type Y, type Z } from "";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ export type { X, Y, Z };
+    17 │ 
+  
+  i Importing the types with import type ensures that they are removed by the transpilers and avoids loading unnecessary modules.
+  
+  i Safe fix: Use import type.
+  
+    13 13 │   //type VV = V;
+    14 14 │   
+    15    │ - import·{·type·X,·type·Y,·type·Z·}·from·"";
+       15 │ + import·type·{·X,·Y,·Z·}·from·"";
+    16 16 │   export type { X, Y, Z };
+    17 17 │   
+  
+
+```
+
+

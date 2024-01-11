@@ -2,10 +2,10 @@
 title: noImplicitAnyLet (since v1.4.0)
 ---
 
-**Diagnostic Category: `lint/nursery/noImplicitAnyLet`**
+**Diagnostic Category: `lint/suspicious/noImplicitAnyLet`**
 
-:::caution
-This rule is part of the [nursery](/linter/rules/#nursery) group.
+:::note
+This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
 Disallow use of implicit `any` type on variable declarations.
@@ -26,7 +26,7 @@ var a;
 a = 2;
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noImplicitAnyLet.js:1:5 <a href="https://biomejs.dev/lint/rules/no-implicit-any-let">lint/nursery/noImplicitAnyLet</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noImplicitAnyLet.js:1:5 <a href="https://biomejs.dev/linter/rules/no-implicit-any-let">lint/suspicious/noImplicitAnyLet</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This variable has implicitly the </span><span style="color: Tomato;"><strong>any</strong></span><span style="color: Tomato;"> type.</span>
   
@@ -44,7 +44,7 @@ let b;
 b = 1
 ```
 
-<pre class="language-text"><code class="language-text">nursery/noImplicitAnyLet.js:1:5 <a href="https://biomejs.dev/lint/rules/no-implicit-any-let">lint/nursery/noImplicitAnyLet</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">suspicious/noImplicitAnyLet.js:1:5 <a href="https://biomejs.dev/linter/rules/no-implicit-any-let">lint/suspicious/noImplicitAnyLet</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">This variable has implicitly the </span><span style="color: Tomato;"><strong>any</strong></span><span style="color: Tomato;"> type.</span>
   

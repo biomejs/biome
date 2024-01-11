@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: complexLogicalAndCases.ts
 ---
 # Input
-```js
+```ts
 // currently do not handle complex computed properties
 foo && foo[bar as string] && foo[bar as string].baz;
 foo && foo[1 + 2] && foo[1 + 2].baz;

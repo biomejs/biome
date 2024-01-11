@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: createElementBindingInvalid.js
 ---
 # Input
-```js
+```jsx
 import React, { createElement } from "react";
 
 React.createElement('div', {

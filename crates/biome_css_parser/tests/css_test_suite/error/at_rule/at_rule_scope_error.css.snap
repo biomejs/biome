@@ -1,0 +1,381 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@scope (.media-object) to (.content > * {}
+@scope (.media-object {}
+@scope (.media-object to (.content > *) {}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssScopeAtRule {
+                scope_token: SCOPE_KW@1..7 "scope" [] [Whitespace(" ")],
+                range: CssScopeRangeInterval {
+                    start: CssScopeEdge {
+                        l_paren_token: L_PAREN@7..8 "(" [] [],
+                        selectors: CssSelectorList [
+                            CssCompoundSelector {
+                                nesting_selector_token: missing (optional),
+                                simple_selector: missing (optional),
+                                sub_selectors: CssSubSelectorList [
+                                    CssClassSelector {
+                                        dot_token: DOT@8..9 "." [] [],
+                                        name: CssCustomIdentifier {
+                                            value_token: IDENT@9..21 "media-object" [] [],
+                                        },
+                                    },
+                                ],
+                            },
+                        ],
+                        r_paren_token: R_PAREN@21..23 ")" [] [Whitespace(" ")],
+                    },
+                    to_token: TO_KW@23..26 "to" [] [Whitespace(" ")],
+                    end: CssScopeEdge {
+                        l_paren_token: L_PAREN@26..27 "(" [] [],
+                        selectors: CssSelectorList [
+                            CssComplexSelector {
+                                left: CssCompoundSelector {
+                                    nesting_selector_token: missing (optional),
+                                    simple_selector: missing (optional),
+                                    sub_selectors: CssSubSelectorList [
+                                        CssClassSelector {
+                                            dot_token: DOT@27..28 "." [] [],
+                                            name: CssCustomIdentifier {
+                                                value_token: IDENT@28..36 "content" [] [Whitespace(" ")],
+                                            },
+                                        },
+                                    ],
+                                },
+                                combinator: R_ANGLE@36..38 ">" [] [Whitespace(" ")],
+                                right: CssCompoundSelector {
+                                    nesting_selector_token: missing (optional),
+                                    simple_selector: CssUniversalSelector {
+                                        namespace: missing (optional),
+                                        star_token: STAR@38..40 "*" [] [Whitespace(" ")],
+                                    },
+                                    sub_selectors: CssSubSelectorList [],
+                                },
+                            },
+                        ],
+                        r_paren_token: missing (required),
+                    },
+                },
+                block: CssRuleListBlock {
+                    l_curly_token: L_CURLY@40..41 "{" [] [],
+                    rules: CssRuleList [],
+                    r_curly_token: R_CURLY@41..42 "}" [] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@42..44 "@" [Newline("\n")] [],
+            rule: CssScopeAtRule {
+                scope_token: SCOPE_KW@44..50 "scope" [] [Whitespace(" ")],
+                range: CssScopeRangeStart {
+                    start: CssScopeEdge {
+                        l_paren_token: L_PAREN@50..51 "(" [] [],
+                        selectors: CssSelectorList [
+                            CssCompoundSelector {
+                                nesting_selector_token: missing (optional),
+                                simple_selector: missing (optional),
+                                sub_selectors: CssSubSelectorList [
+                                    CssClassSelector {
+                                        dot_token: DOT@51..52 "." [] [],
+                                        name: CssCustomIdentifier {
+                                            value_token: IDENT@52..65 "media-object" [] [Whitespace(" ")],
+                                        },
+                                    },
+                                ],
+                            },
+                        ],
+                        r_paren_token: missing (required),
+                    },
+                },
+                block: CssRuleListBlock {
+                    l_curly_token: L_CURLY@65..66 "{" [] [],
+                    rules: CssRuleList [],
+                    r_curly_token: R_CURLY@66..67 "}" [] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@67..69 "@" [Newline("\n")] [],
+            rule: CssScopeAtRule {
+                scope_token: SCOPE_KW@69..75 "scope" [] [Whitespace(" ")],
+                range: CssScopeRangeStart {
+                    start: CssScopeEdge {
+                        l_paren_token: L_PAREN@75..76 "(" [] [],
+                        selectors: CssSelectorList [
+                            CssComplexSelector {
+                                left: CssComplexSelector {
+                                    left: CssCompoundSelector {
+                                        nesting_selector_token: missing (optional),
+                                        simple_selector: missing (optional),
+                                        sub_selectors: CssSubSelectorList [
+                                            CssClassSelector {
+                                                dot_token: DOT@76..77 "." [] [],
+                                                name: CssCustomIdentifier {
+                                                    value_token: IDENT@77..89 "media-object" [] [],
+                                                },
+                                            },
+                                        ],
+                                    },
+                                    combinator: CSS_SPACE_LITERAL@89..90 " " [] [],
+                                    right: CssCompoundSelector {
+                                        nesting_selector_token: missing (optional),
+                                        simple_selector: CssTypeSelector {
+                                            namespace: missing (optional),
+                                            ident: CssIdentifier {
+                                                value_token: IDENT@90..92 "to" [] [],
+                                            },
+                                        },
+                                        sub_selectors: CssSubSelectorList [],
+                                    },
+                                },
+                                combinator: CSS_SPACE_LITERAL@92..93 " " [] [],
+                                right: missing (required),
+                            },
+                            missing separator,
+                            CssBogusSelector {
+                                items: [
+                                    L_PAREN@93..94 "(" [] [],
+                                ],
+                            },
+                            missing separator,
+                            CssComplexSelector {
+                                left: CssCompoundSelector {
+                                    nesting_selector_token: missing (optional),
+                                    simple_selector: missing (optional),
+                                    sub_selectors: CssSubSelectorList [
+                                        CssClassSelector {
+                                            dot_token: DOT@94..95 "." [] [],
+                                            name: CssCustomIdentifier {
+                                                value_token: IDENT@95..103 "content" [] [Whitespace(" ")],
+                                            },
+                                        },
+                                    ],
+                                },
+                                combinator: R_ANGLE@103..105 ">" [] [Whitespace(" ")],
+                                right: CssCompoundSelector {
+                                    nesting_selector_token: missing (optional),
+                                    simple_selector: CssUniversalSelector {
+                                        namespace: missing (optional),
+                                        star_token: STAR@105..106 "*" [] [],
+                                    },
+                                    sub_selectors: CssSubSelectorList [],
+                                },
+                            },
+                        ],
+                        r_paren_token: R_PAREN@106..108 ")" [] [Whitespace(" ")],
+                    },
+                },
+                block: CssRuleListBlock {
+                    l_curly_token: L_CURLY@108..109 "{" [] [],
+                    rules: CssRuleList [],
+                    r_curly_token: R_CURLY@109..110 "}" [] [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@110..111 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..111
+  0: (empty)
+  1: CSS_RULE_LIST@0..110
+    0: CSS_AT_RULE@0..42
+      0: AT@0..1 "@" [] []
+      1: CSS_SCOPE_AT_RULE@1..42
+        0: SCOPE_KW@1..7 "scope" [] [Whitespace(" ")]
+        1: CSS_SCOPE_RANGE_INTERVAL@7..40
+          0: CSS_SCOPE_EDGE@7..23
+            0: L_PAREN@7..8 "(" [] []
+            1: CSS_SELECTOR_LIST@8..21
+              0: CSS_COMPOUND_SELECTOR@8..21
+                0: (empty)
+                1: (empty)
+                2: CSS_SUB_SELECTOR_LIST@8..21
+                  0: CSS_CLASS_SELECTOR@8..21
+                    0: DOT@8..9 "." [] []
+                    1: CSS_CUSTOM_IDENTIFIER@9..21
+                      0: IDENT@9..21 "media-object" [] []
+            2: R_PAREN@21..23 ")" [] [Whitespace(" ")]
+          1: TO_KW@23..26 "to" [] [Whitespace(" ")]
+          2: CSS_SCOPE_EDGE@26..40
+            0: L_PAREN@26..27 "(" [] []
+            1: CSS_SELECTOR_LIST@27..40
+              0: CSS_COMPLEX_SELECTOR@27..40
+                0: CSS_COMPOUND_SELECTOR@27..36
+                  0: (empty)
+                  1: (empty)
+                  2: CSS_SUB_SELECTOR_LIST@27..36
+                    0: CSS_CLASS_SELECTOR@27..36
+                      0: DOT@27..28 "." [] []
+                      1: CSS_CUSTOM_IDENTIFIER@28..36
+                        0: IDENT@28..36 "content" [] [Whitespace(" ")]
+                1: R_ANGLE@36..38 ">" [] [Whitespace(" ")]
+                2: CSS_COMPOUND_SELECTOR@38..40
+                  0: (empty)
+                  1: CSS_UNIVERSAL_SELECTOR@38..40
+                    0: (empty)
+                    1: STAR@38..40 "*" [] [Whitespace(" ")]
+                  2: CSS_SUB_SELECTOR_LIST@40..40
+            2: (empty)
+        2: CSS_RULE_LIST_BLOCK@40..42
+          0: L_CURLY@40..41 "{" [] []
+          1: CSS_RULE_LIST@41..41
+          2: R_CURLY@41..42 "}" [] []
+    1: CSS_AT_RULE@42..67
+      0: AT@42..44 "@" [Newline("\n")] []
+      1: CSS_SCOPE_AT_RULE@44..67
+        0: SCOPE_KW@44..50 "scope" [] [Whitespace(" ")]
+        1: CSS_SCOPE_RANGE_START@50..65
+          0: CSS_SCOPE_EDGE@50..65
+            0: L_PAREN@50..51 "(" [] []
+            1: CSS_SELECTOR_LIST@51..65
+              0: CSS_COMPOUND_SELECTOR@51..65
+                0: (empty)
+                1: (empty)
+                2: CSS_SUB_SELECTOR_LIST@51..65
+                  0: CSS_CLASS_SELECTOR@51..65
+                    0: DOT@51..52 "." [] []
+                    1: CSS_CUSTOM_IDENTIFIER@52..65
+                      0: IDENT@52..65 "media-object" [] [Whitespace(" ")]
+            2: (empty)
+        2: CSS_RULE_LIST_BLOCK@65..67
+          0: L_CURLY@65..66 "{" [] []
+          1: CSS_RULE_LIST@66..66
+          2: R_CURLY@66..67 "}" [] []
+    2: CSS_AT_RULE@67..110
+      0: AT@67..69 "@" [Newline("\n")] []
+      1: CSS_SCOPE_AT_RULE@69..110
+        0: SCOPE_KW@69..75 "scope" [] [Whitespace(" ")]
+        1: CSS_SCOPE_RANGE_START@75..108
+          0: CSS_SCOPE_EDGE@75..108
+            0: L_PAREN@75..76 "(" [] []
+            1: CSS_SELECTOR_LIST@76..106
+              0: CSS_COMPLEX_SELECTOR@76..93
+                0: CSS_COMPLEX_SELECTOR@76..92
+                  0: CSS_COMPOUND_SELECTOR@76..89
+                    0: (empty)
+                    1: (empty)
+                    2: CSS_SUB_SELECTOR_LIST@76..89
+                      0: CSS_CLASS_SELECTOR@76..89
+                        0: DOT@76..77 "." [] []
+                        1: CSS_CUSTOM_IDENTIFIER@77..89
+                          0: IDENT@77..89 "media-object" [] []
+                  1: CSS_SPACE_LITERAL@89..90 " " [] []
+                  2: CSS_COMPOUND_SELECTOR@90..92
+                    0: (empty)
+                    1: CSS_TYPE_SELECTOR@90..92
+                      0: (empty)
+                      1: CSS_IDENTIFIER@90..92
+                        0: IDENT@90..92 "to" [] []
+                    2: CSS_SUB_SELECTOR_LIST@92..92
+                1: CSS_SPACE_LITERAL@92..93 " " [] []
+                2: (empty)
+              1: (empty)
+              2: CSS_BOGUS_SELECTOR@93..94
+                0: L_PAREN@93..94 "(" [] []
+              3: (empty)
+              4: CSS_COMPLEX_SELECTOR@94..106
+                0: CSS_COMPOUND_SELECTOR@94..103
+                  0: (empty)
+                  1: (empty)
+                  2: CSS_SUB_SELECTOR_LIST@94..103
+                    0: CSS_CLASS_SELECTOR@94..103
+                      0: DOT@94..95 "." [] []
+                      1: CSS_CUSTOM_IDENTIFIER@95..103
+                        0: IDENT@95..103 "content" [] [Whitespace(" ")]
+                1: R_ANGLE@103..105 ">" [] [Whitespace(" ")]
+                2: CSS_COMPOUND_SELECTOR@105..106
+                  0: (empty)
+                  1: CSS_UNIVERSAL_SELECTOR@105..106
+                    0: (empty)
+                    1: STAR@105..106 "*" [] []
+                  2: CSS_SUB_SELECTOR_LIST@106..106
+            2: R_PAREN@106..108 ")" [] [Whitespace(" ")]
+        2: CSS_RULE_LIST_BLOCK@108..110
+          0: L_CURLY@108..109 "{" [] []
+          1: CSS_RULE_LIST@109..109
+          2: R_CURLY@109..110 "}" [] []
+  2: EOF@110..111 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+at_rule_scope_error.css:1:41 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `)` but instead found `{`
+  
+  > 1 │ @scope (.media-object) to (.content > * {}
+      │                                         ^
+    2 │ @scope (.media-object {}
+    3 │ @scope (.media-object to (.content > *) {}
+  
+  i Remove {
+  
+at_rule_scope_error.css:2:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `)` but instead found `{`
+  
+    1 │ @scope (.media-object) to (.content > * {}
+  > 2 │ @scope (.media-object {}
+      │                       ^
+    3 │ @scope (.media-object to (.content > *) {}
+    4 │ 
+  
+  i Remove {
+  
+at_rule_scope_error.css:3:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a compound selector but instead found '('.
+  
+    1 │ @scope (.media-object) to (.content > * {}
+    2 │ @scope (.media-object {}
+  > 3 │ @scope (.media-object to (.content > *) {}
+      │                          ^
+    4 │ 
+  
+  i Expected a compound selector here.
+  
+    1 │ @scope (.media-object) to (.content > * {}
+    2 │ @scope (.media-object {}
+  > 3 │ @scope (.media-object to (.content > *) {}
+      │                          ^
+    4 │ 
+  
+at_rule_scope_error.css:3:27 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `.`
+  
+    1 │ @scope (.media-object) to (.content > * {}
+    2 │ @scope (.media-object {}
+  > 3 │ @scope (.media-object to (.content > *) {}
+      │                           ^
+    4 │ 
+  
+  i Remove .
+  
+```
+
+

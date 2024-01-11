@@ -1,9 +1,31 @@
 @import "_variables";
 
+.logo-creator {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	text-align: center;
+
+	a {
+		border: 1px solid var(--sl-border);
+		background-color: var(--sl-color-black);
+		text-decoration: none;
+		border-radius: 12px;
+	}
+
+	img {
+		width: 250px;
+		height: 250px;
+	}
+
+	span {
+		margin: calc($unit / 2) 0;
+	}
+}
+
 ul.credits-people-list {
 	text-align: center;
-	margin: 0;
-	margin-top: 32px;
+	margin: 32px 0 0;
 	padding: 0;
 	display: flex;
 	align-items: flex-start;
@@ -28,8 +50,7 @@ ul.credits-people-list {
 	}
 
 	li {
-		margin: 0 $unit;
-		margin-bottom: $unit;
+		margin: 0 $unit $unit;
 		width: 220px;
 		list-style: none;
 		border: 1px solid var(--sl-border);

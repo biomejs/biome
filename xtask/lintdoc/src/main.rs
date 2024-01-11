@@ -1,6 +1,6 @@
 use biome_analyze::{
     AnalysisFilter, AnalyzerOptions, ControlFlow, FixKind, GroupCategory, Queryable,
-    RegistryVisitor, Rule, RuleCategory, RuleFilter, RuleGroup, RuleMetadata,
+    RegistryVisitor, Rule, RuleCategory, RuleFilter, RuleGroup, RuleMetadata, Source, SourceKind,
 };
 use biome_console::fmt::Termcolor;
 use biome_console::{
@@ -210,10 +210,7 @@ fn generate_group(
     writeln!(main_page_buffer)?;
     write_markup_to_string(main_page_buffer, description)?;
     writeln!(main_page_buffer)?;
-    writeln!(
-        main_page_buffer,
-        "| Rule name | Properties |  Description |"
-    )?;
+    writeln!(main_page_buffer, "| Rule name | Description | Properties |")?;
     writeln!(main_page_buffer, "| --- | --- | --- |")?;
 
     for (rule, meta) in rules {
@@ -234,6 +231,8 @@ fn generate_group(
             meta.version,
             is_recommended,
             has_code_action,
+            meta.source.as_ref(),
+            meta.source_kind.as_ref(),
         ) {
             Ok(summary) => {
                 let mut properties = String::new();
@@ -266,6 +265,7 @@ fn generate_group(
     Ok(())
 }
 
+#[allow(clippy::too_many_arguments)]
 /// Generates the documentation page for a single lint rule
 fn generate_rule(
     root: &Path,
@@ -275,12 +275,19 @@ fn generate_rule(
     version: &'static str,
     is_recommended: bool,
     has_fix_kind: bool,
+    source: Option<&Source>,
+    source_kind: Option<&SourceKind>,
 ) -> Result<Vec<Event<'static>>> {
     let mut content = Vec::new();
 
+    let title_version = if version == "next" {
+        "(not released)".to_string()
+    } else {
+        format!("(since v{version})")
+    };
     // Write the header for this lint rule
     writeln!(content, "---")?;
-    writeln!(content, "title: {rule} (since v{version})")?;
+    writeln!(content, "title: {rule} {title_version}")?;
     writeln!(content, "---")?;
     writeln!(content)?;
 
@@ -288,6 +295,13 @@ fn generate_rule(
     writeln!(content)?;
 
     writeln!(content)?;
+
+    if version == "next" {
+        writeln!(content, ":::danger")?;
+        writeln!(content, "This rule hasn't been released yet.")?;
+        writeln!(content, ":::")?;
+        writeln!(content)?;
+    }
 
     if is_recommended {
         writeln!(content, ":::note")?;
@@ -303,6 +317,23 @@ fn generate_rule(
             "This rule is part of the [nursery](/linter/rules/#nursery) group."
         )?;
         writeln!(content, ":::")?;
+        writeln!(content)?;
+    }
+
+    if let Some(source) = source {
+        let (source_rule_url, source_rule_name) = source.as_url_and_rule_name();
+        match source_kind.unwrap() {
+            SourceKind::Inspired => {
+                write!(content, "Inspired from: ")?;
+            }
+            SourceKind::SameLogic => {
+                write!(content, "Source: ")?;
+            }
+        };
+        writeln!(
+            content,
+            "<a href=\"{source_rule_url}\" target=\"_blank\"><code>{source_rule_name}</code></a>"
+        )?;
         writeln!(content)?;
     }
 

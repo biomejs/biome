@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: fromImportRenameInvalid.jsx
 ---
 # Input
-```js
+```jsx
 import AwesomeReact, { Fragment as AwesomeFragment } from "react";
 
 <>
@@ -25,6 +25,8 @@ fromImportRenameInvalid.jsx:4:5 lint/complexity/noUselessFragments  FIXABLE  ━
     5 │     <AwesomeReact.Fragment>foo</AwesomeReact.Fragment>
     6 │ </>
   
+  i A fragment is redundant if it contains only one child, or if it is the child of a html element, and is not a keyed fragment.
+  
   i Unsafe fix: Remove the Fragment
   
     4 │ ····<AwesomeFragment></AwesomeFragment>
@@ -43,6 +45,8 @@ fromImportRenameInvalid.jsx:5:5 lint/complexity/noUselessFragments  FIXABLE  ━
       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     6 │ </>
     7 │ 
+  
+  i A fragment is redundant if it contains only one child, or if it is the child of a html element, and is not a keyed fragment.
   
   i Unsafe fix: Remove the Fragment
   

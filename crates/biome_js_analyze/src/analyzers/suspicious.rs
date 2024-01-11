@@ -21,6 +21,7 @@ pub(crate) mod no_empty_interface;
 pub(crate) mod no_explicit_any;
 pub(crate) mod no_extra_non_null_assertion;
 pub(crate) mod no_fallthrough_switch_clause;
+pub(crate) mod no_implicit_any_let;
 pub(crate) mod no_misleading_instantiator;
 pub(crate) mod no_misrefactored_shorthand_assign;
 pub(crate) mod no_prototype_builtins;
@@ -57,6 +58,7 @@ declare_group! {
             self :: no_explicit_any :: NoExplicitAny ,
             self :: no_extra_non_null_assertion :: NoExtraNonNullAssertion ,
             self :: no_fallthrough_switch_clause :: NoFallthroughSwitchClause ,
+            self :: no_implicit_any_let :: NoImplicitAnyLet ,
             self :: no_misleading_instantiator :: NoMisleadingInstantiator ,
             self :: no_misrefactored_shorthand_assign :: NoMisrefactoredShorthandAssign ,
             self :: no_prototype_builtins :: NoPrototypeBuiltins ,

@@ -1,10 +1,9 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 73
 expression: valid.ts
 ---
 # Input
-```js
+```ts
 export class Foo {
   constructor(name: string) {}
 }

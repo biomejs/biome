@@ -9,10 +9,10 @@ import {
 	type PlaygroundSettings,
 	type PrettierOptions,
 	type PrettierOutput,
-	QuoteProperties,
+	type QuoteProperties,
 	QuoteStyle,
 	Semicolons,
-	TrailingComma,
+	type TrailingComma,
 	defaultPlaygroundState,
 } from "../types";
 import { isJsonFilename, isTypeScriptFilename } from "../utils";

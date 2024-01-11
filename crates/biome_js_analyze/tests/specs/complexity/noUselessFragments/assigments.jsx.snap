@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: assigments.jsx
 ---
 # Input
-```js
+```jsx
 arr = <>Error</>
 
 ```
@@ -17,6 +17,8 @@ assigments.jsx:1:7 lint/complexity/noUselessFragments  FIXABLE  ━━━━━�
   > 1 │ arr = <>Error</>
       │       ^^^^^^^^^^
     2 │ 
+  
+  i A fragment is redundant if it contains only one child, or if it is the child of a html element, and is not a keyed fragment.
   
   i Unsafe fix: Remove the Fragment
   

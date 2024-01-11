@@ -14,18 +14,17 @@ use crate::generate_node_factory::generate_node_factory;
 use crate::generate_nodes_mut::generate_nodes_mut;
 use crate::generate_syntax_factory::generate_syntax_factory;
 use crate::json_kinds_src::JSON_KINDS_SRC;
-use crate::kinds_src::{AstListSeparatorConfiguration, AstListSrc, TokenKind};
+use crate::kinds_src::{
+    AstEnumSrc, AstListSeparatorConfiguration, AstListSrc, AstNodeSrc, TokenKind, JS_KINDS_SRC,
+};
 use crate::termcolorful::{println_string_with_fg_color, Color};
 use crate::ALL_LANGUAGE_KIND;
 use crate::{
-    generate_macros::generate_macros,
-    generate_nodes::generate_nodes,
-    generate_syntax_kinds::generate_syntax_kinds,
-    kinds_src::{AstEnumSrc, AstNodeSrc, JS_KINDS_SRC},
-    update, LanguageKind,
+    generate_macros::generate_macros, generate_nodes::generate_nodes,
+    generate_syntax_kinds::generate_syntax_kinds, update, LanguageKind,
 };
+use biome_ungrammar::{Grammar, Rule, Token};
 use std::fmt::Write;
-use ungrammar::{Grammar, Rule, Token};
 use xtask::{project_root, Result};
 // these node won't generate any code
 pub const SYNTAX_ELEMENT_TYPE: &str = "SyntaxElement";
@@ -183,6 +182,20 @@ pub(crate) fn load_json_ast() -> AstSrc {
     make_ast(&grammar)
 }
 
+pub(crate) fn append_css_property_value_implied_alternatives(variants: Vec<String>) -> Vec<String> {
+    let mut cloned = variants.clone();
+    if !cloned.iter().any(|v| v == "CssWideKeyword") {
+        cloned.push(String::from("CssWideKeyword"));
+    }
+    if !cloned.iter().any(|v| v == "CssUnknownPropertyValue") {
+        cloned.push(String::from("CssUnknownPropertyValue"));
+    }
+    if !cloned.iter().any(|v| v == "CssBogusPropertyValue") {
+        cloned.push(String::from("CssBogusPropertyValue"));
+    }
+    cloned
+}
+
 fn make_ast(grammar: &Grammar) -> AstSrc {
     let mut ast = AstSrc::default();
 
@@ -194,19 +207,43 @@ fn make_ast(grammar: &Grammar) -> AstSrc {
 
         let rule = &grammar[node].rule;
 
-        match classify_node_rule(grammar, rule) {
-            NodeRuleClassification::Union(variants) => ast.unions.push(AstEnumSrc {
-                documentation: vec![],
-                name,
-                variants,
-            }),
+        match classify_node_rule(grammar, rule, &name) {
+            NodeRuleClassification::Union(variants) => {
+                // TODO: This is CSS-specific and would be better handled with a per-language
+                // method for classifying or modifying rules before generation.
+                let variants = if name.trim().starts_with("AnyCss")
+                    && name.trim().ends_with("PropertyValue")
+                {
+                    append_css_property_value_implied_alternatives(variants)
+                } else {
+                    variants
+                };
+
+                ast.unions.push(AstEnumSrc {
+                    documentation: vec![],
+                    name,
+                    variants,
+                })
+            }
             NodeRuleClassification::Node => {
                 let mut fields = vec![];
-                handle_rule(&mut fields, grammar, rule, None, false);
+                handle_rule(&mut fields, grammar, rule, None, false, false);
+                let is_dynamic = fields.iter().any(|field| field.is_unordered());
                 ast.nodes.push(AstNodeSrc {
                     documentation: vec![],
                     name,
                     fields,
+                    dynamic: is_dynamic,
+                })
+            }
+            NodeRuleClassification::DynamicNode => {
+                let mut fields = vec![];
+                handle_rule(&mut fields, grammar, rule, None, false, true);
+                ast.nodes.push(AstNodeSrc {
+                    documentation: vec![],
+                    name,
+                    fields,
+                    dynamic: true,
                 })
             }
             NodeRuleClassification::Bogus => ast.bogus.push(name),
@@ -233,8 +270,15 @@ fn make_ast(grammar: &Grammar) -> AstSrc {
 enum NodeRuleClassification {
     /// Union of the form `A = B | C`
     Union(Vec<String>),
+
     /// Regular node containing tokens or sub nodes of the form `A = B 'c'
     Node,
+
+    /// Node containing tokens or sub nodes where at least some of the children
+    /// can be unordered, such as the form `A = E '#' (B && C && D)?`. If any
+    /// children of a node are unordered, the entire node becomes dynamically ordered
+    DynamicNode,
+
     /// A bogus node of the form `A = SyntaxElement*`
     Bogus,
 
@@ -248,7 +292,7 @@ enum NodeRuleClassification {
     },
 }
 
-fn classify_node_rule(grammar: &Grammar, rule: &Rule) -> NodeRuleClassification {
+fn classify_node_rule(grammar: &Grammar, rule: &Rule, name: &str) -> NodeRuleClassification {
     match rule {
         // this is for enums
         Rule::Alt(alternatives) => {
@@ -295,6 +339,16 @@ fn classify_node_rule(grammar: &Grammar, rule: &Rule) -> NodeRuleClassification 
                 NodeRuleClassification::Node
             }
         }
+        Rule::UnorderedAll(_) | Rule::UnorderedSome(_) => NodeRuleClassification::DynamicNode,
+        Rule::Node(node) if name.starts_with("AnyCss") && name.ends_with("PropertyValue") => {
+            // TODO: This is CSS-specific and would be better handled with a per-language
+            // method for classifying or modifying rules before generation.
+            //
+            // We use the convention `AnyCss*PropertyValue` to automatically inject
+            // additional implicit variants. If there is only one normal production for
+            // the node, then it won't be a `Rule::Alt`, and needs to be handled
+            NodeRuleClassification::Union(vec![grammar[*node].name.clone()])
+        }
         _ => NodeRuleClassification::Node,
     }
 }
@@ -317,24 +371,30 @@ fn handle_rule(
     rule: &Rule,
     label: Option<&str>,
     optional: bool,
+    unordered: bool,
 ) {
     match rule {
         Rule::Labeled { label, rule } => {
             // Some methods need to be manually implemented because they need some custom logic;
             // we use the prefix "manual__" to exclude labelled nodes.
 
-            if handle_tokens_in_unions(fields, grammar, rule, label, optional) {
+            if handle_tokens_in_unions(fields, grammar, rule, label, optional, unordered) {
                 return;
             }
 
-            handle_rule(fields, grammar, rule, Some(label), optional)
+            handle_rule(fields, grammar, rule, Some(label), optional, unordered)
         }
         Rule::Node(node) => {
             let ty = grammar[*node].name.clone();
             let name = label
                 .map(String::from)
                 .unwrap_or_else(|| to_lower_snake_case(&ty));
-            let field = Field::Node { name, ty, optional };
+            let field = Field::Node {
+                name,
+                ty,
+                optional,
+                unordered,
+            };
             fields.push(field);
         }
         Rule::Token(token) => {
@@ -349,6 +409,7 @@ fn handle_rule(
                 name: label.map(String::from).unwrap_or_else(|| name.clone()),
                 kind: TokenKind::Single(name),
                 optional,
+                unordered,
             };
             fields.push(field);
         }
@@ -357,17 +418,39 @@ fn handle_rule(
             panic!("Create a list node for *many* children {:?}", label);
         }
         Rule::Opt(rule) => {
-            handle_rule(fields, grammar, rule, label, true);
+            handle_rule(fields, grammar, rule, label, true, false);
         }
         Rule::Alt(rules) => {
+            // Alts must be required. We don't support alternated rules nested
+            // within an Opt, like `(A | B)?`. For those, make a new Rule.
+            if optional {
+                panic!(
+                    "Alternates cannot be nested within an optional Rule. Use a new Node to contain the alternate {:?}",
+                    label
+                );
+            }
             for rule in rules {
-                handle_rule(fields, grammar, rule, label, false);
+                handle_rule(fields, grammar, rule, label, false, false);
             }
         }
-
         Rule::Seq(rules) => {
             for rule in rules {
-                handle_rule(fields, grammar, rule, label, false);
+                // Sequences can be optional if they are wrapped by an Opt rule, so
+                // it is inherited
+                handle_rule(fields, grammar, rule, label, optional, false);
+            }
+        }
+        Rule::UnorderedAll(rules) => {
+            for rule in rules {
+                // UnorderedAll only implies each contained rule is unordered, while
+                // optionality is inherited from the parent.
+                handle_rule(fields, grammar, rule, label, optional, true);
+            }
+        }
+        Rule::UnorderedSome(rules) => {
+            for rule in rules {
+                // UnorderedSome implies each contained rule is unordered _and_ optional.
+                handle_rule(fields, grammar, rule, label, true, true);
             }
         }
     };
@@ -435,6 +518,7 @@ fn handle_tokens_in_unions(
     rule: &Rule,
     label: &str,
     optional: bool,
+    unordered: bool,
 ) -> bool {
     let (rule, optional) = match rule {
         Rule::Opt(rule) => (&**rule, true),
@@ -458,6 +542,7 @@ fn handle_tokens_in_unions(
         name: label.to_string(),
         kind: TokenKind::Many(token_kinds),
         optional,
+        unordered,
     };
     fields.push(field);
     true

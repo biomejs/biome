@@ -28,12 +28,12 @@ pub use highlight::*;
 
 use biome_js_syntax::JsSyntaxKind::*;
 pub use biome_js_syntax::*;
-use biome_js_unicode_table::{
+use biome_parser::diagnostic::ParseDiagnostic;
+use biome_parser::lexer::{LexContext, Lexer, LexerCheckpoint, TokenFlags};
+use biome_unicode_table::{
     is_js_id_continue, is_js_id_start, lookup_byte,
     Dispatch::{self, *},
 };
-use biome_parser::diagnostic::ParseDiagnostic;
-use biome_parser::lexer::{LexContext, Lexer, LexerCheckpoint, TokenFlags};
 use unicode_bom::Bom;
 
 use self::errors::invalid_digits_after_unicode_escape_sequence;

@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.tsx
 ---
 # Input
-```js
+```tsx
 const a3 = <div>// comment</div>;
 const a4 = <div>/* comment */</div>;
 const a5 = <div>/** comment */</div>;

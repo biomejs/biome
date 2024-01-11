@@ -1,0 +1,150 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@namespace ;
+@namespace 12321;
+@namespace url(http://www.w3.org/1999/xhtml)
+
+
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssBogusAtRule {
+                items: [
+                    NAMESPACE_KW@1..11 "namespace" [] [Whitespace(" ")],
+                    SEMICOLON@11..12 ";" [] [],
+                ],
+            },
+        },
+        CssAtRule {
+            at_token: AT@12..14 "@" [Newline("\n")] [],
+            rule: CssBogusAtRule {
+                items: [
+                    NAMESPACE_KW@14..24 "namespace" [] [Whitespace(" ")],
+                    CssBogus {
+                        items: [
+                            CSS_NUMBER_LITERAL@24..29 "12321" [] [],
+                        ],
+                    },
+                    SEMICOLON@29..30 ";" [] [],
+                ],
+            },
+        },
+        CssAtRule {
+            at_token: AT@30..32 "@" [Newline("\n")] [],
+            rule: CssNamespaceAtRule {
+                namespace_token: NAMESPACE_KW@32..42 "namespace" [] [Whitespace(" ")],
+                prefix: missing (optional),
+                url: CssUrlFunction {
+                    name: URL_KW@42..45 "url" [] [],
+                    l_paren_token: L_PAREN@45..46 "(" [] [],
+                    value: CssUrlValueRaw {
+                        value_token: CSS_URL_VALUE_RAW_LITERAL@46..74 "http://www.w3.org/1999/xhtml" [] [],
+                    },
+                    modifiers: CssUrlModifierList [],
+                    r_paren_token: R_PAREN@74..75 ")" [] [],
+                },
+                semicolon_token: missing (required),
+            },
+        },
+    ],
+    eof_token: EOF@75..78 "" [Newline("\n"), Newline("\n"), Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..78
+  0: (empty)
+  1: CSS_RULE_LIST@0..75
+    0: CSS_AT_RULE@0..12
+      0: AT@0..1 "@" [] []
+      1: CSS_BOGUS_AT_RULE@1..12
+        0: NAMESPACE_KW@1..11 "namespace" [] [Whitespace(" ")]
+        1: SEMICOLON@11..12 ";" [] []
+    1: CSS_AT_RULE@12..30
+      0: AT@12..14 "@" [Newline("\n")] []
+      1: CSS_BOGUS_AT_RULE@14..30
+        0: NAMESPACE_KW@14..24 "namespace" [] [Whitespace(" ")]
+        1: CSS_BOGUS@24..29
+          0: CSS_NUMBER_LITERAL@24..29 "12321" [] []
+        2: SEMICOLON@29..30 ";" [] []
+    2: CSS_AT_RULE@30..75
+      0: AT@30..32 "@" [Newline("\n")] []
+      1: CSS_NAMESPACE_AT_RULE@32..75
+        0: NAMESPACE_KW@32..42 "namespace" [] [Whitespace(" ")]
+        1: (empty)
+        2: CSS_URL_FUNCTION@42..75
+          0: URL_KW@42..45 "url" [] []
+          1: L_PAREN@45..46 "(" [] []
+          2: CSS_URL_VALUE_RAW@46..74
+            0: CSS_URL_VALUE_RAW_LITERAL@46..74 "http://www.w3.org/1999/xhtml" [] []
+          3: CSS_URL_MODIFIER_LIST@74..74
+          4: R_PAREN@74..75 ")" [] []
+        3: (empty)
+  2: EOF@75..78 "" [Newline("\n"), Newline("\n"), Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+at_rule_namespace_error.css:1:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+  > 1 │ @namespace ;
+      │            ^
+    2 │ @namespace 12321;
+    3 │ @namespace url(http://www.w3.org/1999/xhtml)
+  
+  i Expected one of:
+  
+  - url()
+  - <string-token>
+  
+at_rule_namespace_error.css:2:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    1 │ @namespace ;
+  > 2 │ @namespace 12321;
+      │            ^^^^^
+    3 │ @namespace url(http://www.w3.org/1999/xhtml)
+    4 │ 
+  
+  i Expected one of:
+  
+  - url()
+  - <string-token>
+  
+at_rule_namespace_error.css:6:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `;` but instead the file ends
+  
+  > 6 │ 
+      │ 
+  
+  i the file ends here
+  
+  > 6 │ 
+      │ 
+  
+```
+
+

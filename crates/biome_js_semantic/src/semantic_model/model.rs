@@ -1,5 +1,5 @@
 use super::*;
-use biome_js_syntax::{AnyJsFunction, AnyJsRoot, JsInitializerClause, JsVariableDeclarator};
+use biome_js_syntax::{AnyJsFunction, AnyJsRoot};
 
 #[derive(Copy, Clone, Debug)]
 pub(crate) struct BindingIndex(usize);
@@ -225,8 +225,8 @@ impl SemanticModel {
         let first = self
             .data
             .globals
-            .get(0)
-            .and_then(|global| global.references.get(0))
+            .first()
+            .and_then(|global| global.references.first())
             .map(|_| GlobalReference {
                 data: self.data.clone(),
                 global_id: 0,
@@ -271,7 +271,7 @@ impl SemanticModel {
         let first = self
             .data
             .unresolved_references
-            .get(0)
+            .first()
             .map(|_| UnresolvedReference {
                 data: self.data.clone(),
                 id: 0,
@@ -363,20 +363,11 @@ impl SemanticModel {
     /// assert_eq!(2, all_calls_to_f.unwrap().count());
     /// ```
     pub fn all_calls(&self, function: &AnyJsFunction) -> Option<AllCallsIter> {
-        let identifier = match function {
-            AnyJsFunction::JsFunctionDeclaration(declaration) => declaration.id().ok()?,
-            AnyJsFunction::JsFunctionExportDefaultDeclaration(declaration) => declaration.id()?,
-            AnyJsFunction::JsArrowFunctionExpression(_)
-            | AnyJsFunction::JsFunctionExpression(_) => {
-                let parent = function
-                    .parent::<JsInitializerClause>()?
-                    .parent::<JsVariableDeclarator>()?;
-                parent.id().ok()?.as_any_js_binding()?.clone()
-            }
-        };
-
         Some(AllCallsIter {
-            references: identifier.as_js_identifier_binding()?.all_reads(self),
+            references: function
+                .binding()?
+                .as_js_identifier_binding()?
+                .all_reads(self),
         })
     }
 }

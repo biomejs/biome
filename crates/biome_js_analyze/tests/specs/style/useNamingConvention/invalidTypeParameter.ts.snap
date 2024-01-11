@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidTypeParameter.ts
 ---
 # Input
-```js
+```ts
 export default class <l, l1, camelCase, CONSTANT_CASE, snake_case, Unknown_Style> {}
 
 type Mapped<T> = {

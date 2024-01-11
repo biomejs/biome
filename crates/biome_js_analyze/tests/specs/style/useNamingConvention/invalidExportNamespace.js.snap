@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidExportNamespace.js
 ---
 # Input
-```js
+```jsx
 export * as X from ""
 
 export * as PascalCase from ""

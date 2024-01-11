@@ -14,12 +14,14 @@ export interface SupportsFeatureResult {
 export type SupportKind =
 	| "Supported"
 	| "Ignored"
+	| "Protected"
 	| "FeatureNotEnabled"
 	| "FileNotSupported";
 export interface UpdateSettingsParams {
 	configuration: Configuration;
 	gitignore_matches: string[];
 	vcs_base_path?: string;
+	working_directory?: string;
 }
 /**
  * The configuration that is contained inside the file `biome.json`
@@ -261,6 +263,7 @@ export interface CssFormatter {
 	 * What's the max width of a line applied to CSS (and its super languages) files. Defaults to 80.
 	 */
 	lineWidth?: LineWidth;
+	quoteStyle?: QuoteStyle;
 }
 /**
  * Options that changes how the CSS parser behaves
@@ -444,8 +447,8 @@ export interface OverridePattern {
 	organizeImports?: OverrideOrganizeImportsConfiguration;
 }
 export type VcsClientKind = "git";
-export type ArrowParentheses = "always" | "asNeeded";
 export type QuoteStyle = "double" | "single";
+export type ArrowParentheses = "always" | "asNeeded";
 export type QuoteProperties = "asNeeded" | "preserve";
 export type Semicolons = "always" | "asNeeded";
 /**
@@ -464,6 +467,10 @@ export interface A11y {
 	 * Enforce that the accessKey attribute is not used on any HTML element.
 	 */
 	noAccessKey?: RuleConfiguration;
+	/**
+	 * Enforce that aria-hidden="true" is not set on focusable elements.
+	 */
+	noAriaHiddenOnFocusable?: RuleConfiguration;
 	/**
 	 * Enforce that elements that do not support ARIA roles, states, and properties do not have those attributes.
 	 */
@@ -568,6 +575,10 @@ export interface A11y {
 	 * Ensures that ARIA properties aria-* are all valid.
 	 */
 	useValidAriaProps?: RuleConfiguration;
+	/**
+	 * Elements with ARIA roles must use a valid, non-abstract ARIA role.
+	 */
+	useValidAriaRole?: RuleConfiguration;
 	/**
 	 * Enforce that ARIA state and property values are valid.
 	 */
@@ -677,6 +688,10 @@ export interface Complexity {
 	 * Enforce using concise optional chain instead of chained logical expressions.
 	 */
 	useOptionalChain?: RuleConfiguration;
+	/**
+	 * Enforce the use of the regular expression literals instead of the RegExp constructor if possible.
+	 */
+	useRegexLiterals?: RuleConfiguration;
 	/**
 	 * Disallow number literal object member names which are not base10 or uses underscore as separator
 	 */
@@ -840,14 +855,6 @@ export interface Nursery {
 	 */
 	all?: boolean;
 	/**
-	 * Enforce that aria-hidden="true" is not set on focusable elements.
-	 */
-	noAriaHiddenOnFocusable?: RuleConfiguration;
-	/**
-	 * Disallow default exports.
-	 */
-	noDefaultExport?: RuleConfiguration;
-	/**
 	 * Disallow two keys with the same name inside a JSON object.
 	 */
 	noDuplicateJsonKeys?: RuleConfiguration;
@@ -856,9 +863,17 @@ export interface Nursery {
 	 */
 	noEmptyBlockStatements?: RuleConfiguration;
 	/**
-	 * Disallow use of implicit any type on variable declarations.
+	 * Disallow empty type parameters in type aliases and interfaces.
 	 */
-	noImplicitAnyLet?: RuleConfiguration;
+	noEmptyTypeParameters?: RuleConfiguration;
+	/**
+	 * Disallow assignments to native objects and read-only global variables.
+	 */
+	noGlobalAssign?: RuleConfiguration;
+	/**
+	 * Disallow the use of global eval().
+	 */
+	noGlobalEval?: RuleConfiguration;
 	/**
 	 * Disallow the use of variables and function parameters before their declaration
 	 */
@@ -868,9 +883,13 @@ export interface Nursery {
 	 */
 	noMisleadingCharacterClass?: RuleConfiguration;
 	/**
-	 * Forbid the use of Node.js builtin modules. Can be useful for client-side web projects that do not have access to those modules.
+	 * Forbid the use of Node.js builtin modules.
 	 */
 	noNodejsModules?: RuleConfiguration;
+	/**
+	 * Disallow then property.
+	 */
+	noThenProperty?: RuleConfiguration;
 	/**
 	 * Disallow unused imports.
 	 */
@@ -896,6 +915,10 @@ export interface Nursery {
 	 */
 	useAwait?: RuleConfiguration;
 	/**
+	 * Require consistently using either T[] or Array<T>
+	 */
+	useConsistentArrayType?: RuleConfiguration;
+	/**
 	 * Promotes the use of export type for types.
 	 */
 	useExportType?: RuleConfiguration;
@@ -916,29 +939,21 @@ export interface Nursery {
 	 */
 	useImportRestrictions?: RuleConfiguration;
 	/**
+	 * Promotes the use of import type for types.
+	 */
+	useImportType?: RuleConfiguration;
+	/**
 	 * Enforces using the node: protocol for Node.js builtin modules.
 	 */
-	useNodeImportProtocol?: RuleConfiguration;
+	useNodejsImportProtocol?: RuleConfiguration;
 	/**
-	 * Use Number properties instead of global ones.
+	 * Use the Number properties instead of global ones.
 	 */
-	useNumberProperties?: RuleConfiguration;
-	/**
-	 * Enforce the use of the regular expression literals instead of the RegExp constructor if possible.
-	 */
-	useRegexLiterals?: RuleConfiguration;
+	useNumberNamespace?: RuleConfiguration;
 	/**
 	 * Enforce using function types instead of object type with call signatures.
 	 */
 	useShorthandFunctionType?: RuleConfiguration;
-	/**
-	 * Enforce the sorting of CSS classes.
-	 */
-	useSortedClasses?: RuleConfiguration;
-	/**
-	 * Elements with ARIA roles must use a valid, non-abstract ARIA role.
-	 */
-	useValidAriaRole?: RuleConfiguration;
 }
 /**
  * A list of rules that belong to this group
@@ -998,6 +1013,10 @@ export interface Style {
 	 * Disallow comma operator.
 	 */
 	noCommaOperator?: RuleConfiguration;
+	/**
+	 * Disallow default exports.
+	 */
+	noDefaultExport?: RuleConfiguration;
 	/**
 	 * Disallow implicit true values on JSX boolean attributes
 	 */
@@ -1240,6 +1259,10 @@ export interface Suspicious {
 	 */
 	noGlobalIsNan?: RuleConfiguration;
 	/**
+	 * Disallow use of implicit any type on variable declarations.
+	 */
+	noImplicitAnyLet?: RuleConfiguration;
+	/**
 	 * Disallow assigning to imported bindings
 	 */
 	noImportAssign?: RuleConfiguration;
@@ -1363,8 +1386,10 @@ export interface RuleWithOptions {
 }
 export type PossibleOptions =
 	| ComplexityOptions
+	| ConsistentArrayTypeOptions
 	| FilenamingConventionOptions
 	| HooksOptions
+	| DeprecatedHooksOptions
 	| NamingConventionOptions
 	| RestrictedGlobalsOptions
 	| ValidAriaRoleOptions;
@@ -1376,6 +1401,9 @@ export interface ComplexityOptions {
 	 * The maximum complexity score that we allow. Anything higher is considered excessive.
 	 */
 	maxAllowedComplexity: number;
+}
+export interface ConsistentArrayTypeOptions {
+	syntax: ConsistentArrayType;
 }
 /**
  * Rule's options.
@@ -1391,7 +1419,7 @@ export interface FilenamingConventionOptions {
 	strictCase: boolean;
 }
 /**
- * Options for the rule `useExhaustiveDependencies` and `useHookAtTopLevel`
+ * Options for the rule `useExhaustiveDependencies`
  */
 export interface HooksOptions {
 	/**
@@ -1399,6 +1427,10 @@ export interface HooksOptions {
 	 */
 	hooks: Hooks[];
 }
+/**
+ * Options for the `useHookAtTopLevel` rule have been deprecated, since we now use the React hook naming convention to determine whether a function is a hook.
+ */
+export interface DeprecatedHooksOptions {}
 /**
  * Rule's options.
  */
@@ -1425,6 +1457,7 @@ export interface ValidAriaRoleOptions {
 	allowedInvalidRoles: string[];
 	ignoreNonDom: boolean;
 }
+export type ConsistentArrayType = "shorthand" | "generic";
 export type FilenameCases = FilenameCase[];
 export interface Hooks {
 	/**
@@ -1449,7 +1482,12 @@ export type EnumMemberCase = "PascalCase" | "CONSTANT_CASE" | "camelCase";
 /**
  * Supported cases for TypeScript `enum` member names.
  */
-export type FilenameCase = "camelCase" | "export" | "kebab-case" | "snake_case";
+export type FilenameCase =
+	| "camelCase"
+	| "export"
+	| "kebab-case"
+	| "PascalCase"
+	| "snake_case";
 export interface ProjectFeaturesParams {
 	manifest_path: RomePath;
 }
@@ -1538,6 +1576,7 @@ export interface Advices {
 }
 export type Category =
 	| "lint/a11y/noAccessKey"
+	| "lint/a11y/noAriaHiddenOnFocusable"
 	| "lint/a11y/noAriaUnsupportedElements"
 	| "lint/a11y/noAutofocus"
 	| "lint/a11y/noBlankTarget"
@@ -1563,6 +1602,7 @@ export type Category =
 	| "lint/a11y/useMediaCaption"
 	| "lint/a11y/useValidAnchor"
 	| "lint/a11y/useValidAriaProps"
+	| "lint/a11y/useValidAriaRole"
 	| "lint/a11y/useValidAriaValues"
 	| "lint/a11y/useValidLang"
 	| "lint/complexity/noBannedTypes"
@@ -1587,6 +1627,7 @@ export type Category =
 	| "lint/complexity/useFlatMap"
 	| "lint/complexity/useLiteralKeys"
 	| "lint/complexity/useOptionalChain"
+	| "lint/complexity/useRegexLiterals"
 	| "lint/complexity/useSimpleNumberKeys"
 	| "lint/complexity/useSimplifiedLogicExpression"
 	| "lint/correctness/noChildrenProp"
@@ -1623,14 +1664,15 @@ export type Category =
 	| "lint/correctness/useValidForDirection"
 	| "lint/correctness/useYield"
 	| "lint/nursery/noApproximativeNumericConstant"
-	| "lint/nursery/noAriaHiddenOnFocusable"
-	| "lint/nursery/noDefaultExport"
 	| "lint/nursery/noDuplicateJsonKeys"
 	| "lint/nursery/noEmptyBlockStatements"
-	| "lint/nursery/noImplicitAnyLet"
+	| "lint/nursery/noEmptyTypeParameters"
+	| "lint/nursery/noGlobalAssign"
+	| "lint/nursery/noGlobalEval"
 	| "lint/nursery/noInvalidUseBeforeDeclaration"
 	| "lint/nursery/noMisleadingCharacterClass"
 	| "lint/nursery/noNodejsModules"
+	| "lint/nursery/noThenProperty"
 	| "lint/nursery/noTypeOnlyImportAttributes"
 	| "lint/nursery/noUnusedImports"
 	| "lint/nursery/noUnusedPrivateClassMembers"
@@ -1638,23 +1680,23 @@ export type Category =
 	| "lint/nursery/noUselessTernary"
 	| "lint/nursery/useAwait"
 	| "lint/nursery/useBiomeSuppressionComment"
+	| "lint/nursery/useConsistentArrayType"
 	| "lint/nursery/useExportType"
 	| "lint/nursery/useFilenamingConvention"
 	| "lint/nursery/useForOf"
 	| "lint/nursery/useGroupedTypeImport"
 	| "lint/nursery/useImportRestrictions"
-	| "lint/nursery/useNodeImportProtocol"
-	| "lint/nursery/useNumberProperties"
-	| "lint/nursery/useRegexLiterals"
+	| "lint/nursery/useImportType"
+	| "lint/nursery/useNodejsImportProtocol"
+	| "lint/nursery/useNumberNamespace"
 	| "lint/nursery/useShorthandFunctionType"
-	| "lint/nursery/useSortedClasses"
-	| "lint/nursery/useValidAriaRole"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noDelete"
 	| "lint/security/noDangerouslySetInnerHtml"
 	| "lint/security/noDangerouslySetInnerHtmlWithChildren"
 	| "lint/style/noArguments"
 	| "lint/style/noCommaOperator"
+	| "lint/style/noDefaultExport"
 	| "lint/style/noImplicitBoolean"
 	| "lint/style/noInferrableTypes"
 	| "lint/style/noNamespace"
@@ -1712,6 +1754,7 @@ export type Category =
 	| "lint/suspicious/noFunctionAssign"
 	| "lint/suspicious/noGlobalIsFinite"
 	| "lint/suspicious/noGlobalIsNan"
+	| "lint/suspicious/noImplicitAnyLet"
 	| "lint/suspicious/noImportAssign"
 	| "lint/suspicious/noLabelVar"
 	| "lint/suspicious/noMisleadingInstantiator"
@@ -1802,7 +1845,8 @@ export type DiagnosticTag =
 	| "fixable"
 	| "internal"
 	| "unnecessaryCode"
-	| "deprecatedCode";
+	| "deprecatedCode"
+	| "verbose";
 /**
  * The category for a log advice, defines how the message should be presented to the user.
  */

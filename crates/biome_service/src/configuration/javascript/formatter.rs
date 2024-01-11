@@ -1,9 +1,9 @@
 use crate::configuration::PlainIndentStyle;
 use crate::configuration::{deserialize_line_width, serialize_line_width};
 use crate::MergeWith;
-use biome_formatter::{LineEnding, LineWidth};
+use biome_formatter::{LineEnding, LineWidth, QuoteStyle};
 use biome_js_formatter::context::trailing_comma::TrailingComma;
-use biome_js_formatter::context::{ArrowParentheses, QuoteProperties, QuoteStyle, Semicolons};
+use biome_js_formatter::context::{ArrowParentheses, QuoteProperties, Semicolons};
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 
@@ -12,10 +12,6 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct JavascriptFormatter {
-    /// The type of quotes used in JavaScript code. Defaults to double.
-    #[bpaf(long("quote-style"), argument("double|single"), optional)]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub quote_style: Option<QuoteStyle>,
     /// The type of quotes used in JSX. Defaults to double.
     #[bpaf(long("jsx-quote-style"), argument("double|single"), optional)]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -90,6 +86,13 @@ pub struct JavascriptFormatter {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[bpaf(long("javascript-formatter-line-width"), argument("NUMBER"), optional)]
     pub line_width: Option<LineWidth>,
+
+    // TODO: Rename the argument to `javascript-formatter-quote-style` once
+    // it's also a top-level configurable property.
+    /// The type of quotes used in JavaScript code. Defaults to double.
+    #[bpaf(long("quote-style"), argument("double|single"), optional)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub quote_style: Option<QuoteStyle>,
 }
 
 impl MergeWith<JavascriptFormatter> for JavascriptFormatter {

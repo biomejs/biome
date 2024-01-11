@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.ts
 ---
 # Input
-```js
+```ts
 import type A from "" with { type: "json" };
 import type * as B from "" with { type: "json" };
 import type { C } from "" with { type: "json" };

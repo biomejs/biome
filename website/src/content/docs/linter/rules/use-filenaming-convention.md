@@ -1,5 +1,5 @@
 ---
-title: useFilenamingConvention (since vnext)
+title: useFilenamingConvention (since v1.5.0)
 ---
 
 **Diagnostic Category: `lint/nursery/useFilenamingConvention`**
@@ -51,7 +51,7 @@ Default: `true`
 By default, the rule enforces that the filename  is either in [`camelCase`](https://en.wikipedia.org/wiki/Camel_case), [`kebab-case`](https://en.wikipedia.org/wiki/Letter_case#Kebab_case), [`snake_case`](https://en.wikipedia.org/wiki/Snake_case), or equal to the name of one export in the file.
 
 You can enforce a stricter convention by setting `filenameCases` option.
-`filenameCases` accepts an array of cases among the following cases: [`camelCase`](https://en.wikipedia.org/wiki/Camel_case), [`kebab-case`](https://en.wikipedia.org/wiki/Letter_case#Kebab_case), [`snake_case`](https://en.wikipedia.org/wiki/Snake_case), and `export`.
+`filenameCases` accepts an array of cases among the following cases: [`camelCase`](https://en.wikipedia.org/wiki/Camel_case), [`kebab-case`](https://en.wikipedia.org/wiki/Letter_case#Kebab_case), [`PascalCase`](https://en.wikipedia.org/wiki/Camel_case), [`snake_case`](https://en.wikipedia.org/wiki/Snake_case), and `export`.
 
 ## Related links
 

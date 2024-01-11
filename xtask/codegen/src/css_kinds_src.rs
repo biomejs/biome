@@ -89,7 +89,33 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "from",
         "to",
         "var",
+        "url",
+        "src",
         "font-palette-values",
+        "auto",
+        "thin",
+        "medium",
+        "thick",
+        "none",
+        "hidden",
+        "dotted",
+        "dashed",
+        "solid",
+        "double",
+        "groove",
+        "ridge",
+        "inset",
+        "outset",
+        // HERE: Add new regular keywords _above_ here. Be sure to also add them
+        // to `consume_identifier` in `biome_css_parser/src/lexer/mod.rs` as well.
+        // CSS-wide keywords
+        "initial",
+        "inherit",
+        "unset",
+        "revert",
+        "revert-layer",
+        "default",
+        // START: Only add dimension units after `em` and before `fr` below.
         // length units
         "em",
         "rem",
@@ -164,6 +190,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "x",
         // flex units
         "fr",
+        // END: Add new units _above_ `fr` to preserve range checks.
         // page at rule
         "page",
         "left",
@@ -188,16 +215,33 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "right-bottom",
         // layer at rule
         "layer",
+        // scope at rule
+        "scope",
+        //
+        "supports",
+        "selector",
+        "import",
+        "namespace",
         //
         "font-face",
-        // Don't add to the end of this list, add to the end of the list in
-        // because we have a range check in is_contextual_keyword function.
+        // Don't add to the end of this list, add new keywords above the "HERE"
+        // marker above, because we have a range check in is_contextual_keyword function.
     ],
     literals: &[
         "CSS_STRING_LITERAL",
         "CSS_NUMBER_LITERAL",
-        "CSS_CUSTOM_PROPERTY",
+        "CSS_DASHED_IDENTIFIER",
+        "CSS_CUSTOM_IDENTIFIER",
         "CSS_SPACE_LITERAL",
+        "CSS_URL_VALUE_RAW_LITERAL",
+        "CSS_COLOR_LITERAL",
+        // Special literal token to represent a number that is _immediately_
+        // followed by an identifier, which means it is a `<dimension>` token
+        // according to the spec: https://www.w3.org/TR/css-values-4/#dimensions.
+        "CSS_DIMENSION_VALUE",
+        // Similarly, `<percentage>` also disallows spaces, so this token
+        // represents a number immediately preceding a `%`.
+        "CSS_PERCENTAGE_VALUE",
     ],
     tokens: &[
         "ERROR_TOKEN",
@@ -231,11 +275,18 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_ATTRIBUTE_LIST",
         "CSS_DECLARATION_LIST",
         "CSS_COMPONENT_VALUE_LIST",
+        "CSS_GENERIC_COMPONENT_VALUE_LIST",
+        "CSS_GENERIC_DELIMITER",
+        "CSS_GENERIC_PROPERTY",
+        "CSS_UNKNOWN_PROPERTY_VALUE",
+        // Properties
+        "CSS_ALL_PROPERTY",
+        "CSS_BORDER_PROPERTY",
+        "CSS_Z_INDEX_PROPERTY",
         "CSS_PARAMETER_LIST",
         "CSS_DECLARATION_IMPORTANT",
-        "CSS_UNIT",
-        "CSS_PERCENT_DIMENSION",
         "CSS_REGULAR_DIMENSION",
+        "CSS_UNKNOWN_DIMENSION",
         // Selectors nodes
         "CSS_NAMESPACE",
         "CSS_NAMED_NAMESPACE_PREFIX",
@@ -278,6 +329,19 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_ATTRIBUTE_NAME",
         "CSS_ATTRIBUTE_MATCHER",
         "CSS_ATTRIBUTE_MATCHER_VALUE",
+        // Values
+        "CSS_PARENTHESIZED_EXPRESSION",
+        "CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION",
+        "CSS_BINARY_EXPRESSION",
+        "CSS_URL_VALUE_RAW",
+        "CSS_URL_FUNCTION",
+        "CSS_URL_MODIFIER_LIST",
+        "CSS_COLOR",
+        "CSS_AUTO",
+        "CSS_BORDER",
+        "CSS_WIDE_KEYWORD",
+        "CSS_LINE_WIDTH_KEYWORD",
+        "CSS_LINE_STYLE",
         // At rule nodes
         "CSS_AT_RULE",
         "CSS_CHARSET_AT_RULE",
@@ -335,6 +399,23 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_LAYER_REFERENCE_LIST",
         "CSS_LAYER_NAME_LIST",
         "CSS_LAYER_DECLARATION",
+        "CSS_SUPPORTS_AT_RULE",
+        "CSS_SUPPORTS_NOT_CONDITION",
+        "CSS_SUPPORTS_AND_CONDITION",
+        "CSS_SUPPORTS_OR_CONDITION",
+        "CSS_SUPPORTS_CONDITION_IN_PARENS",
+        "CSS_SUPPORTS_FEATURE_DECLARATION",
+        "CSS_SUPPORTS_FEATURE_SELECTOR",
+        "CSS_SCOPE_AT_RULE",
+        "CSS_SCOPE_RANGE_START",
+        "CSS_SCOPE_RANGE_END",
+        "CSS_SCOPE_RANGE_INTERVAL",
+        "CSS_SCOPE_EDGE",
+        "CSS_IMPORT_AT_RULE",
+        "CSS_IMPORT_ANONYMOUS_LAYER",
+        "CSS_IMPORT_NAMED_LAYER",
+        "CSS_IMPORT_SUPPORTS",
+        "CSS_NAMESPACE_AT_RULE",
         // Bogus nodes
         "CSS_BOGUS",
         "CSS_BOGUS_BLOCK",
@@ -350,6 +431,10 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_BOGUS_DECLARATION_ITEM",
         "CSS_BOGUS_COMPONENT_VALUE",
         "CSS_BOGUS_PARAMETER",
+        "CSS_BOGUS_PROPERTY",
+        "CSS_BOGUS_PROPERTY_VALUE",
         "CSS_BOGUS_MEDIA_QUERY",
+        "CSS_BOGUS_SCOPE_RANGE",
+        "CSS_BOGUS_URL_MODIFIER",
     ],
 };

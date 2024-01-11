@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: fromImportNamespaceInvalid.jsx
 ---
 # Input
-```js
+```jsx
 import * as AwesomeReact from "react";
 
 <>
@@ -23,6 +23,8 @@ fromImportNamespaceInvalid.jsx:4:5 lint/complexity/noUselessFragments  FIXABLE  
       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     5 │ </>
     6 │ 
+  
+  i A fragment is redundant if it contains only one child, or if it is the child of a html element, and is not a keyed fragment.
   
   i Unsafe fix: Remove the Fragment
   

@@ -12,7 +12,7 @@ impl FormatRule<AnyCssQueryFeatureValue> for FormatAnyCssQueryFeatureValue {
             AnyCssQueryFeatureValue::AnyCssDimension(node) => node.format().fmt(f),
             AnyCssQueryFeatureValue::CssIdentifier(node) => node.format().fmt(f),
             AnyCssQueryFeatureValue::CssRatio(node) => node.format().fmt(f),
-            AnyCssQueryFeatureValue::CssAnyFunction(node) => node.format().fmt(f),
+            AnyCssQueryFeatureValue::AnyCssFunction(node) => node.format().fmt(f),
         }
     }
 }

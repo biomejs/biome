@@ -35,7 +35,7 @@ pub(crate) fn parse_pseudo_class_function_compound_selector_list(
     p.bump_ts(PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR_LIST_SET);
     p.bump(T!['(']);
 
-    let list = CssCompoundSelectorList.parse_list(p);
+    let list = CompoundSelectorList.parse_list(p);
     let list_range = list.range(p);
 
     if list_range.is_empty() {
@@ -54,9 +54,9 @@ pub(crate) fn parse_pseudo_class_function_compound_selector_list(
     Present(m.complete(p, kind))
 }
 
-struct CssCompoundSelectorList;
+struct CompoundSelectorList;
 
-impl ParseSeparatedList for CssCompoundSelectorList {
+impl ParseSeparatedList for CompoundSelectorList {
     type Kind = CssSyntaxKind;
     type Parser<'source> = CssParser<'source>;
 

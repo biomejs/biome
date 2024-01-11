@@ -58,14 +58,15 @@ declare_rule! {
     /// By default, the rule enforces that the filename  is either in [`camelCase`], [`kebab-case`], [`snake_case`], or equal to the name of one export in the file.
     ///
     /// You can enforce a stricter convention by setting `filenameCases` option.
-    /// `filenameCases` accepts an array of cases among the following cases: [`camelCase`], [`kebab-case`], [`snake_case`], and `export`.
+    /// `filenameCases` accepts an array of cases among the following cases: [`camelCase`], [`kebab-case`], [`PascalCase`], [`snake_case`], and `export`.
     ///
     /// [case]: https://en.wikipedia.org/wiki/Naming_convention_(programming)#Examples_of_multiple-word_identifier_formats
     /// [`camelCase`]: https://en.wikipedia.org/wiki/Camel_case
     /// [`kebab-case`]: https://en.wikipedia.org/wiki/Letter_case#Kebab_case
+    /// [`PascalCase`]: https://en.wikipedia.org/wiki/Camel_case
     /// [`snake_case`]: https://en.wikipedia.org/wiki/Snake_case
     pub(crate) UseFilenamingConvention {
-        version: "next",
+        version: "1.5.0",
         name: "useFilenamingConvention",
         recommended: false,
     }
@@ -234,7 +235,7 @@ const fn is_default_strict_case(strict_case: &bool) -> bool {
 }
 
 fn is_default_filename_cases(value: &FilenameCases) -> bool {
-    value.0.len() == 4
+    value.0.len() == 4 && !value.0.contains(&FilenameCase::Pascal)
 }
 
 impl Default for FilenamingConventionOptions {
@@ -367,13 +368,22 @@ pub enum FilenameCase {
     Kebab,
 
     /// PascalCase
+    #[serde(rename = "PascalCase")]
+    Pascal,
+
+    /// snake_case
     #[serde(rename = "snake_case")]
     Snake,
 }
 
 impl FilenameCase {
-    pub const ALLOWED_VARIANTS: &'static [&'static str] =
-        &["camelCase", "export", "kebab-case", "snake_case"];
+    pub const ALLOWED_VARIANTS: &'static [&'static str] = &[
+        "camelCase",
+        "export",
+        "kebab-case",
+        "PascalCase",
+        "snake_case",
+    ];
 }
 
 impl FromStr for FilenameCase {
@@ -384,6 +394,7 @@ impl FromStr for FilenameCase {
             "camelCase" => Ok(Self::Camel),
             "export" => Ok(Self::Export),
             "kebab-case" => Ok(Self::Kebab),
+            "PascalCase" => Ok(Self::Pascal),
             "snake_case" => Ok(Self::Snake),
             _ => Err("Value not supported for enum member case"),
         }
@@ -396,7 +407,6 @@ impl Deserializable for FilenameCase {
         name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        const ALLOWED_VARIANTS: &[&str] = &["camelCase", "export", "kebab-case", "snake_case"];
         let value_text = Text::deserialize(value, name, diagnostics)?;
         if let Ok(value) = value_text.parse::<Self>() {
             Some(value)
@@ -404,7 +414,7 @@ impl Deserializable for FilenameCase {
             diagnostics.push(DeserializationDiagnostic::new_unknown_value(
                 value_text.text(),
                 value.range(),
-                ALLOWED_VARIANTS,
+                Self::ALLOWED_VARIANTS,
             ));
             None
         }
@@ -419,6 +429,7 @@ impl TryFrom<FilenameCase> for Case {
             FilenameCase::Camel => Ok(Self::Camel),
             FilenameCase::Export => Err("`export` is not a valid case"),
             FilenameCase::Kebab => Ok(Self::Kebab),
+            FilenameCase::Pascal => Ok(Self::Pascal),
             FilenameCase::Snake => Ok(Self::Snake),
         }
     }

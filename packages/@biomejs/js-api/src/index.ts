@@ -5,7 +5,7 @@ import type {
 	RomePath,
 	Workspace,
 } from "@biomejs/wasm-nodejs";
-import { Distribution, WasmModule, loadModule, wrapError } from "./wasm";
+import { Distribution, type WasmModule, loadModule, wrapError } from "./wasm";
 
 // Re-export of some useful types for users
 export type { Configuration, Diagnostic };

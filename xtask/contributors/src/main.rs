@@ -1,6 +1,7 @@
 use pico_args::Arguments;
 use serde::{Deserialize, Serialize};
 use std::fmt::Write;
+use std::path::PathBuf;
 use xtask::glue::fs2;
 use xtask::*;
 
@@ -12,18 +13,56 @@ fn main() -> Result<()> {
     let root = project_root().join("website/src/components");
     let mut args = Arguments::from_env();
     let token: String = args.value_from_str("--token").unwrap();
-    let contributors = get_contributors(&token);
+    let contributors = get_contributors(token.as_str());
+    write_contributors_in_credits(root.clone(), contributors.as_slice())?;
+    write_contributors_in_community(root.clone(), contributors.as_slice())?;
 
+    Ok(())
+}
+const IMPORT_IMAGE: &str = "import { Image } from \"astro:assets\"";
+
+fn write_contributors_in_community(root: PathBuf, contributors: &[Contributor]) -> Result<()> {
     let mut content = String::new();
 
-    let command = "Use the command `cargo contributors`".to_string();
-    write!(
-        content,
-        "{{/** {} */}}",
-        prepend_generated_preamble(command)
-    )?;
+    content.push_str(format!("---\n // {} \n {}  \n---\n", PREAMBLE, IMPORT_IMAGE).as_str());
+
+    let contributors_per_row = [5, 4, 6, 5, 3, 5, 4];
+
+    let mut current_index = 0;
+    for items_per_row in contributors_per_row {
+        let current_contributors = &contributors[current_index..current_index + items_per_row];
+        writeln!(content, "<div class=\"contributor-row\">")?;
+        for contributor in current_contributors {
+            let person = format!("User {}", contributor.login);
+
+            writeln!(
+                content,
+                "<Image
+              class=\"contributor-avatar\"
+              src={}
+              alt=\"{}\"
+              width=\"84\"
+              height=\"84\"
+        />",
+                contributor.avatar_url, person
+            )?;
+        }
+        current_index += items_per_row;
+
+        writeln!(content, "</div>")?;
+    }
+
+    fs2::write(root.join("Community.astro"), content)?;
+    Ok(())
+}
+
+fn write_contributors_in_credits(root: PathBuf, contributors: &[Contributor]) -> Result<()> {
+    let mut content = String::new();
+
+    content.push_str(format!("---\n // {} \n {}  \n---\n", PREAMBLE, IMPORT_IMAGE).as_str());
+
     content.push('\n');
-    content.push_str("<h3>Code contributors</h3>");
+    content.push_str("<h2>Code contributors</h2>");
     content.push('\n');
     content.push_str("<ul class=\"credits-people-list contributors\">");
     content.push('\n');
@@ -38,7 +77,7 @@ fn main() -> Result<()> {
             &mut contributor_html,
         );
         contributor_html.push_str("\">");
-        contributor_html.push_str("<img src=\"");
+        contributor_html.push_str("<Image width=\"150\" height=\"150\" src=\"");
         html_escape::encode_double_quoted_attribute_to_string(
             format!("{}", escaped_avatar),
             &mut contributor_html,
@@ -52,14 +91,15 @@ fn main() -> Result<()> {
 
     content.push_str("</ul>");
     fs2::write(root.join("Contributors.astro"), content)?;
-
     Ok(())
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Ord, PartialOrd, Eq, PartialEq)]
 struct Contributor {
     avatar_url: String,
     login: String,
+    id: u64,
+    contributions: u64,
 }
 
 fn get_contributors(token: &str) -> Vec<Contributor> {
@@ -69,6 +109,7 @@ fn get_contributors(token: &str) -> Vec<Contributor> {
         token,
         &mut contributors,
     );
+    contributors.sort_by(|a, b| b.contributions.cmp(&a.contributions));
     contributors
 }
 

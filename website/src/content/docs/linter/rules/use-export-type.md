@@ -1,5 +1,5 @@
 ---
-title: useExportType (since vnext)
+title: useExportType (since v1.5.0)
 ---
 
 **Diagnostic Category: `lint/nursery/useExportType`**

@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidImport.tsx
 ---
 # Input
-```js
+```tsx
 import CustomReactDOM, { render as customRender } from "react-dom";
 
 const a = CustomReactDOM.render(<div />, document.body);

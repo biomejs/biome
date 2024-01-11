@@ -134,7 +134,10 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 #[test]
 pub fn quick_test() {
     let code = r#"
-@page{margin: 1cm;}
+
+
+@namespace url(http://www.w3.org/1999/xhtml);
+
     "#;
 
     let root = parse_css(

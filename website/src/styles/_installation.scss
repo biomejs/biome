@@ -1,0 +1,72 @@
+.installation-body {
+    display: flex;
+    justify-content: center;
+}
+
+.installation {
+    position: relative;
+    border: 1px solid var(--sl-color-gray-5);
+    overflow: hidden;
+    margin-top: 7rem;
+    width: 68rem;
+    display: flex;
+    gap: 2.5rem;
+    background:
+        radial-gradient(hsla(var(--sl-hue-red), 68%, 52%, 16%), transparent 40%) no-repeat -60vw -50vh / 105vw 200vh,
+        radial-gradient(var(--sl-color-blue-low), transparent 40%) no-repeat 30vw -100vh / 105vw 200vh;
+}
+
+.installation-left {
+    padding: 2.5rem 2.5rem 4.5rem;
+}
+
+.installation-left>a>img {
+    margin: 0;
+}
+
+.installation-left>a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.installation-description {
+    max-width: 25rem;
+}
+
+.installation-extension,
+.installation-biome {
+    display: flex;
+    margin-top: 1rem;
+    align-items: center;
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 0.5rem;
+    cursor: pointer;
+}
+
+.installation-extension:hover,
+.installation-biome:hover {
+    background: hsla(var(--sl-hue-blue), 68%, 52%, 16%);
+    text-decoration: underline;
+}
+
+.extension-img {
+    position: absolute;
+    height: 24rem;
+    width: 31rem;
+    border-top-left-radius: 0.6rem;
+    background-repeat: no-repeat;
+    background-image: url("../assets/vscode-extension.png");
+    background-size: 330%;
+    right: -5.0rem;
+    bottom: -1.4rem;
+}
+
+@media only screen and (max-width: 900px) {
+    // hide vscode extension image on smaller screens
+    .extension-img {
+        display: none;
+    }
+}

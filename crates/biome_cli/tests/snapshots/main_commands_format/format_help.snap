@@ -17,7 +17,6 @@ Generic options applied to all files
         --line-width=NUMBER   What's the max width of a line. Defaults to 80.
 
 Formatting options specific to the JavaScript files
-        --quote-style=<double|single>  The type of quotes used in JavaScript code. Defaults to double.
         --jsx-quote-style=<double|single>  The type of quotes used in JSX. Defaults to double.
         --quote-properties=<preserve|as-needed>  When properties in objects are quoted. Defaults to asNeeded.
         --trailing-comma=<all|es5|none>  Print trailing commas wherever possible in multi-line comma-separated
@@ -43,6 +42,7 @@ Formatting options specific to the JavaScript files
                               (and its super languages) files.
         --javascript-formatter-line-width=NUMBER  What's the max width of a line applied to JavaScript
                               (and its super languages) files. Defaults to 80.
+        --quote-style=<double|single>  The type of quotes used in JavaScript code. Defaults to double.
 
 Set of properties to integrate Biome with a VCS software.
         --vcs-client-kind=<git>  The kind of client.
@@ -67,7 +67,7 @@ Global options applied to all commands
                               "force" forces the formatting of markup using ANSI even if the console
                               output is determined to be incompatible
         --use-server          Connect to a running instance of the Biome daemon server.
-        --verbose             Print additional verbose advices on diagnostics
+        --verbose             Print additional diagnostics, and some diagnostics show more information.
         --config-path=PATH    Set the filesystem path to the directory of the biome.json configuration
                               file
         --max-diagnostics=NUMBER  Cap the amount of diagnostics displayed.

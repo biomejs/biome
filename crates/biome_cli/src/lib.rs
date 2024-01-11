@@ -38,6 +38,9 @@ pub use reports::{
 };
 pub use service::{open_transport, SocketTransport};
 
+#[cfg(debug_assertions)]
+pub use crate::commands::daemon::biome_log_dir;
+
 pub(crate) const VERSION: &str = match option_env!("BIOME_VERSION") {
     Some(version) => version,
     None => env!("CARGO_PKG_VERSION"),
@@ -56,7 +59,7 @@ impl<'app> CliSession<'app> {
     ) -> Result<Self, CliDiagnostic> {
         Ok(Self {
             app: App::new(
-                DynRef::Owned(Box::new(OsFileSystem)),
+                DynRef::Owned(Box::<OsFileSystem>::default()),
                 console,
                 WorkspaceRef::Borrowed(workspace),
             ),
@@ -181,6 +184,7 @@ impl<'app> CliSession<'app> {
                     since,
                 },
             ),
+            BiomeCommand::Explain { doc } => commands::explain::explain(self, doc),
             BiomeCommand::Init => commands::init::init(self),
             BiomeCommand::LspProxy(config_path) => commands::daemon::lsp_proxy(config_path),
             BiomeCommand::Migrate(cli_options, write) => {
@@ -191,7 +195,6 @@ impl<'app> CliSession<'app> {
                 config_path,
             } => commands::daemon::run_server(stop_on_disconnect, config_path),
             BiomeCommand::PrintSocket => commands::daemon::print_socket(),
-            BiomeCommand::PrintCacheDir => commands::daemon::print_cache_dir(),
         };
 
         if has_metrics {

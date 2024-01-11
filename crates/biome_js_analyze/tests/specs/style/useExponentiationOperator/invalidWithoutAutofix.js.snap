@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidWithoutAutofix.js
 ---
 # Input
-```js
+```jsx
 // shouldn't autofix if the call doesn't have exactly two arguments
 Math.pow()
 Math.pow(a)

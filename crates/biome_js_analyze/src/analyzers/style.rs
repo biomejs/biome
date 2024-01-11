@@ -3,6 +3,7 @@
 use biome_analyze::declare_group;
 
 pub(crate) mod no_comma_operator;
+pub(crate) mod no_default_export;
 pub(crate) mod no_implicit_boolean;
 pub(crate) mod no_inferrable_types;
 pub(crate) mod no_namespace;
@@ -32,6 +33,7 @@ declare_group! {
         name : "style" ,
         rules : [
             self :: no_comma_operator :: NoCommaOperator ,
+            self :: no_default_export :: NoDefaultExport ,
             self :: no_implicit_boolean :: NoImplicitBoolean ,
             self :: no_inferrable_types :: NoInferrableTypes ,
             self :: no_namespace :: NoNamespace ,

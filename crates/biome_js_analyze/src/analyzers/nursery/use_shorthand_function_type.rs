@@ -80,7 +80,7 @@ declare_rule! {
     ///```
     ///
     pub(crate) UseShorthandFunctionType {
-        version: "next",
+        version: "1.5.0",
         name: "useShorthandFunctionType",
         recommended: false,
         fix_kind: FixKind::Safe,
@@ -128,6 +128,11 @@ impl Rule for UseShorthandFunctionType {
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
         let node = ctx.query();
         let mut mutation = ctx.root().begin();
+
+        // If there are comments, it's not a single call signature.
+        if node.syntax().has_comments_direct() {
+            return None;
+        }
 
         let ts_type_member_list = node.parent::<TsTypeMemberList>()?;
 

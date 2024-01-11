@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: withCommentsInvalid.jsx
 ---
 # Input
-```js
+```jsx
 <>
     </* test */>empty</>
     <>empty</* comment */ />
@@ -24,6 +24,8 @@ withCommentsInvalid.jsx:2:5 lint/complexity/noUselessFragments  FIXABLE  ━━�
     3 │     <>empty</* comment */ />
     4 │     <>empty</ /* comment */>
   
+  i A fragment is redundant if it contains only one child, or if it is the child of a html element, and is not a keyed fragment.
+  
   i Unsafe fix: Remove the Fragment
   
     2 │ ····</*·test·*/>empty</>
@@ -43,6 +45,8 @@ withCommentsInvalid.jsx:3:5 lint/complexity/noUselessFragments  FIXABLE  ━━�
     4 │     <>empty</ /* comment */>
     5 │ </>
   
+  i A fragment is redundant if it contains only one child, or if it is the child of a html element, and is not a keyed fragment.
+  
   i Unsafe fix: Remove the Fragment
   
     3 │ ····<>empty</*·comment·*/·/>
@@ -61,6 +65,8 @@ withCommentsInvalid.jsx:4:5 lint/complexity/noUselessFragments  FIXABLE  ━━�
       │     ^^^^^^^^^^^^^^^^^^^^^^^^
     5 │ </>
     6 │ 
+  
+  i A fragment is redundant if it contains only one child, or if it is the child of a html element, and is not a keyed fragment.
   
   i Unsafe fix: Remove the Fragment
   

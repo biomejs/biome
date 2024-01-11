@@ -3,734 +3,734 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.jsonc
 ---
 # Input
-```js
+```cjs
 if (a);
 ```
 
 # Input
-```js
+```cjs
 if (a == 0);
 ```
 
 # Input
-```js
+```cjs
 if (a = f());
 ```
 
 # Input
-```js
+```cjs
 if (a += 1);
 ```
 
 # Input
-```js
+```cjs
 if (a |= 1);
 ```
 
 # Input
-```js
+```cjs
 if (a |= true);
 ```
 
 # Input
-```js
+```cjs
 if (a |= false);
 ```
 
 # Input
-```js
+```cjs
 if (a &= 1);
 ```
 
 # Input
-```js
+```cjs
 if (a &= true);
 ```
 
 # Input
-```js
+```cjs
 if (a &= false);
 ```
 
 # Input
-```js
+```cjs
 if (a >>= 1);
 ```
 
 # Input
-```js
+```cjs
 if (a >>= true);
 ```
 
 # Input
-```js
+```cjs
 if (a >>= false);
 ```
 
 # Input
-```js
+```cjs
 if (a >>>= 1);
 ```
 
 # Input
-```js
+```cjs
 if (a ??= 1);
 ```
 
 # Input
-```js
+```cjs
 if (a ??= true);
 ```
 
 # Input
-```js
+```cjs
 if (a ??= false);
 ```
 
 # Input
-```js
+```cjs
 if (a ||= b);
 ```
 
 # Input
-```js
+```cjs
 if (a ||= false);
 ```
 
 # Input
-```js
+```cjs
 if (a ||= 0);
 ```
 
 # Input
-```js
+```cjs
 if (a ||= void 0);
 ```
 
 # Input
-```js
+```cjs
 if (+(a ||= 1));
 ```
 
 # Input
-```js
+```cjs
 if (f(a ||= true));
 ```
 
 # Input
-```js
+```cjs
 if ((a ||= 1) + 2);
 ```
 
 # Input
-```js
+```cjs
 if (1 + (a ||= true));
 ```
 
 # Input
-```js
+```cjs
 if (a ||= '' || false);
 ```
 
 # Input
-```js
+```cjs
 if (a ||= void 0 || null);
 ```
 
 # Input
-```js
+```cjs
 if ((a ||= false) || b);
 ```
 
 # Input
-```js
+```cjs
 if (a || (b ||= false));
 ```
 
 # Input
-```js
+```cjs
 if ((a ||= true) && b);
 ```
 
 # Input
-```js
+```cjs
 if (a && (b ||= true));
 ```
 
 # Input
-```js
+```cjs
 if (a &&= b);
 ```
 
 # Input
-```js
+```cjs
 if (a &&= true);
 ```
 
 # Input
-```js
+```cjs
 if (a &&= 1);
 ```
 
 # Input
-```js
+```cjs
 if (a &&= 'foo');
 ```
 
 # Input
-```js
+```cjs
 if ((a &&= '') + false);
 ```
 
 # Input
-```js
+```cjs
 if ('' + (a &&= null));
 ```
 
 # Input
-```js
+```cjs
 if (a &&= 1 && 2);
 ```
 
 # Input
-```js
+```cjs
 if ((a &&= true) && b);
 ```
 
 # Input
-```js
+```cjs
 if (a && (b &&= true));
 ```
 
 # Input
-```js
+```cjs
 if ((a &&= false) || b);
 ```
 
 # Input
-```js
+```cjs
 if (a || (b &&= false));
 ```
 
 # Input
-```js
+```cjs
 if (a ||= b ||= false);
 ```
 
 # Input
-```js
+```cjs
 if (a &&= b &&= true);
 ```
 
 # Input
-```js
+```cjs
 if (a ||= b &&= false);
 ```
 
 # Input
-```js
+```cjs
 if (a ||= b &&= true);
 ```
 
 # Input
-```js
+```cjs
 if (a &&= b ||= false);
 ```
 
 # Input
-```js
+```cjs
 if (a &&= b ||= true);
 ```
 
 # Input
-```js
+```cjs
 if (1, a);
 ```
 
 # Input
-```js
+```cjs
 if ('every' in []);
 ```
 
 # Input
-```js
+```cjs
 // Ignore for now, not sure why ESLint detect this as valid
 ```
 
 # Input
-```js
+```cjs
 // if (`\
 ${a}`) { }
 ```
 
 # Input
-```js
+```cjs
 if (`${a}`);
 ```
 
 # Input
-```js
+```cjs
 if (`${foo()}`);
 ```
 
 # Input
-```js
+```cjs
 if (`${a === 'b' && b === 'a'}`);
 ```
 
 # Input
-```js
+```cjs
 if (`foo${a}` === 'fooa');
 ```
 
 # Input
-```js
+```cjs
 if (tag`a`);
 ```
 
 # Input
-```js
+```cjs
 if (tag`${a}`);
 ```
 
 # Input
-```js
+```cjs
 if (+(a || true));
 ```
 
 # Input
-```js
+```cjs
 if (-(a || true));
 ```
 
 # Input
-```js
+```cjs
 if (~(a || 1));
 ```
 
 # Input
-```js
+```cjs
 if (+(a && 0) === +(b && 0));
 ```
 
 # Input
-```js
+```cjs
 while (~!a);
 ```
 
 # Input
-```js
+```cjs
 while (a = b);
 ```
 
 # Input
-```js
+```cjs
 while (`${a}`);
 ```
 
 # Input
-```js
+```cjs
 for (; x < 10;);
 ```
 
 # Input
-```js
+```cjs
 for (; ;);
 ```
 
 # Input
-```js
+```cjs
 for (; `${a}`;);
 ```
 
 # Input
-```js
+```cjs
 do { } while (x)
 ```
 
 # Input
-```js
+```cjs
 q > 0 ? 1 : 2;
 ```
 
 # Input
-```js
+```cjs
 `${a}` === a ? 1 : 2;
 ```
 
 # Input
-```js
+```cjs
 `foo${a}` === a ? 1 : 2;
 ```
 
 # Input
-```js
+```cjs
 tag`a` === a ? 1 : 2;
 ```
 
 # Input
-```js
+```cjs
 tag`${a}` === a ? 1 : 2;
 ```
 
 # Input
-```js
+```cjs
 while (x += 3) { };
 ```
 
 # Input
-```js
+```cjs
 while (tag`a`) { };
 ```
 
 # Input
-```js
+```cjs
 while (tag`${a}`) { };
 ```
 
 # Input
-```js
+```cjs
 // while (`\
 ${a}`) { }
 ```
 
 # Input
-```js
+```cjs
 if (typeof x === 'undefined') { };
 ```
 
 # Input
-```js
+```cjs
 if (`${typeof x}` === 'undefined') { };
 ```
 
 # Input
-```js
+```cjs
 if (a === 'str' && typeof b) { };
 ```
 
 # Input
-```js
+```cjs
 typeof a == typeof b;
 ```
 
 # Input
-```js
+```cjs
 typeof 'a' === 'string' || typeof b === 'string';
 ```
 
 # Input
-```js
+```cjs
 `${typeof 'a'}` === 'string' || `${typeof b}` === 'string';
 ```
 
 # Input
-```js
+```cjs
 if (void a || a);
 ```
 
 # Input
-```js
+```cjs
 if (a || void a);
 ```
 
 # Input
-```js
+```cjs
 if (xyz === 'str1' && abc === 'str2') { }
 ```
 
 # Input
-```js
+```cjs
 if (xyz === 'str1' || abc === 'str2') { }
 ```
 
 # Input
-```js
+```cjs
 if (xyz === 'str1' || abc === 'str2' && pqr === 5) { }
 ```
 
 # Input
-```js
+```cjs
 if (typeof abc === 'string' && abc === 'str2') { }
 ```
 
 # Input
-```js
+```cjs
 if (false || abc === 'str') { }
 ```
 
 # Input
-```js
+```cjs
 if (true && abc === 'str') { }
 ```
 
 # Input
-```js
+```cjs
 if (typeof 'str' && abc === 'str') { }
 ```
 
 # Input
-```js
+```cjs
 if (abc === 'str' || false || def === 'str') { }
 ```
 
 # Input
-```js
+```cjs
 if (true && abc === 'str' || def === 'str') { }
 ```
 
 # Input
-```js
+```cjs
 if (true && typeof abc === 'string') { }
 ```
 
 # Input
-```js
+```cjs
 if ('str1' && a) { }
 ```
 
 # Input
-```js
+```cjs
 if (a && 'str') { }
 ```
 
 # Input
-```js
+```cjs
 if ((foo || true) === 'baz') { }
 ```
 
 # Input
-```js
+```cjs
 if ((foo || 'bar') === 'baz') { }
 ```
 
 # Input
-```js
+```cjs
 if ((foo || 'bar') !== 'baz') { }
 ```
 
 # Input
-```js
+```cjs
 if ((foo || 'bar') == 'baz') { }
 ```
 
 # Input
-```js
+```cjs
 if ((foo || 'bar') != 'baz') { }
 ```
 
 # Input
-```js
+```cjs
 if ((foo || 233) > 666) { }
 ```
 
 # Input
-```js
+```cjs
 if ((foo || 233) < 666) { }
 ```
 
 # Input
-```js
+```cjs
 if ((foo || 233) >= 666) { }
 ```
 
 # Input
-```js
+```cjs
 if ((foo || 233) <= 666) { }
 ```
 
 # Input
-```js
+```cjs
 if ((key || 'k') in obj) { }
 ```
 
 # Input
-```js
+```cjs
 if ((foo || {}) instanceof obj) { }
 ```
 
 # Input
-```js
+```cjs
 if ((foo || 'bar' || 'bar') === 'bar');
 ```
 
 # Input
-```js
+```cjs
 if ((foo || 1n) === 'baz') { }
 ```
 
 # Input
-```js
+```cjs
 if (a && 0n || b);
 ```
 
 # Input
-```js
+```cjs
 if (1n && a) { };
 ```
 
 # Input
-```js
+```cjs
 if ('' + [y] === '' + [ty]) { }
 ```
 
 # Input
-```js
+```cjs
 if ('a' === '' + [ty]) { }
 ```
 
 # Input
-```js
+```cjs
 if ('' + [y, m, d] === 'a') { }
 ```
 
 # Input
-```js
+```cjs
 if ('' + [y, 'm'] === '' + [ty, 'tm']) { }
 ```
 
 # Input
-```js
+```cjs
 if ('' + [y, 'm'] === '' + ['ty']) { }
 ```
 
 # Input
-```js
+```cjs
 if ([,] in ($2)); else;
 ```
 
 # Input
-```js
+```cjs
 if ([...x] + '' === 'y') { }
 ```
 
 # Input
-```js
+```cjs
 function* foo() { while (true) { yield 'foo'; } }
 ```
 
 # Input
-```js
+```cjs
 function* foo() { for (; true;) { yield 'foo'; } }
 ```
 
 # Input
-```js
+```cjs
 function* foo() { do { yield 'foo'; } while (true) }
 ```
 
 # Input
-```js
+```cjs
 function* foo() { while (true) { while (true) { yield; } } }
 ```
 
 # Input
-```js
+```cjs
 function* foo() { for (; yield;) { } }
 ```
 
 # Input
-```js
+```cjs
 function* foo() { for (; ; yield) { } }
 ```
 
 # Input
-```js
+```cjs
 function* foo() { while (true) { function* foo() { yield; } yield; } }
 ```
 
 # Input
-```js
+```cjs
 function* foo() { for (let x = yield; x < 10; x++) { yield; } yield; }
 ```
 
 # Input
-```js
+```cjs
 function* foo() { for (let x = yield; ; x++) { yield; } }
 ```
 
 # Input
-```js
+```cjs
 if (new Number(x) + 1 === 2) { }
 ```
 
 # Input
-```js
+```cjs
 if ([a] == [b]) { }
 ```
 
 # Input
-```js
+```cjs
 if (+[...a]) { }
 ```
 
 # Input
-```js
+```cjs
 if (+[...[...a]]) { }
 ```
 
 # Input
-```js
+```cjs
 if (`${[...a]}`) { }
 ```
 
 # Input
-```js
+```cjs
 if (`${[a]}`) { }
 ```
 
 # Input
-```js
+```cjs
 if (+[a]) { }
 ```
 
 # Input
-```js
+```cjs
 if (0 - [a]) { }
 ```
 
 # Input
-```js
+```cjs
 if (1 * [a]) { }
 ```
 
 # Input
-```js
+```cjs
 if (Boolean(a)) { }
 ```
 
 # Input
-```js
+```cjs
 if (Boolean(...args)) { }
 ```
 
 # Input
-```js
+```cjs
 if (foo.Boolean(1)) { }
 ```
 
 # Input
-```js
+```cjs
 function foo(Boolean) { if (Boolean(12)) { } }
 ```
 
 # Input
-```js
+```cjs
 const Boolean = () => { }; if (Boolean(1)) { }
 ```
 
 # Input
-```js
+```cjs
 const undefined = 'lol'; if (undefined) { }
 ```
 
 # Input
-```js
+```cjs
 while (true);
 ```
 
 # Input
-```js
+```cjs
 function foo(Boolean) { while (true); }
 ```
 

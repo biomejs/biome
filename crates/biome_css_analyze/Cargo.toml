@@ -1,0 +1,33 @@
+[package]
+authors.workspace    = true
+categories.workspace = true
+description          = "Biome's CSS linter"
+edition.workspace    = true
+homepage.workspace   = true
+keywords.workspace   = true
+license.workspace    = true
+name                 = "biome_css_analyze"
+repository.workspace = true
+version              = "0.4.0"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+biome_analyze     = { workspace = true }
+biome_console     = { workspace = true }
+biome_css_syntax  = { workspace = true }
+biome_diagnostics = { workspace = true }
+biome_rowan       = { workspace = true }
+lazy_static       = { workspace = true }
+rustc-hash        = { workspace = true }
+
+[dev-dependencies]
+biome_css_factory = { path = "../biome_css_factory" }
+biome_css_parser  = { path = "../biome_css_parser" }
+biome_service     = { path = "../biome_service" }
+biome_test_utils  = { path = "../biome_test_utils" }
+insta             = { workspace = true, features = ["glob"] }
+tests_macros      = { path = "../tests_macros" }
+
+[lints]
+workspace = true

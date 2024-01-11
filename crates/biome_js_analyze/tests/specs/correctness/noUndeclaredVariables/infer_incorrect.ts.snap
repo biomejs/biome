@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: infer_incorrect.ts
 ---
 # Input
-```js
+```ts
 type A = number extends infer T ? never : T;
 
 ```

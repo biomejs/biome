@@ -1,0 +1,346 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidShorthand.ts
+---
+# Input
+```ts
+let valid: Foo[];
+let invalid1: Array<foo, string[]>;
+let invalid2: Promise<string[]>;
+let invalid3: Foo<Bar>[];
+let invalid4: [number, number][];
+
+let readonlyInvalid1: readonly foo[];
+let readonlyInvalid2: Promise<readonly string[]>;
+let readonlyInvalid3: readonly Foo<Bar>[];
+let readonlyInvalid4: readonly [number, number][];
+let readonlyInvalid5: readonly (readonly number[])[];
+let readonlyInvalid6: readonly (readonly (readonly number[])[])[];
+
+```
+
+# Diagnostics
+```
+invalidShorthand.ts:1:12 lint/nursery/useConsistentArrayType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Array<T> syntax instead of shorthand T[] syntax.
+  
+  > 1 │ let valid: Foo[];
+      │            ^^^^^
+    2 │ let invalid1: Array<foo, string[]>;
+    3 │ let invalid2: Promise<string[]>;
+  
+  i Unsafe fix: Use Array<T> syntax to replace
+  
+     1    │ - let·valid:·Foo[];
+        1 │ + let·valid:·Array<Foo>;
+     2  2 │   let invalid1: Array<foo, string[]>;
+     3  3 │   let invalid2: Promise<string[]>;
+  
+
+```
+
+```
+invalidShorthand.ts:2:26 lint/nursery/useConsistentArrayType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Array<T> syntax instead of shorthand T[] syntax.
+  
+    1 │ let valid: Foo[];
+  > 2 │ let invalid1: Array<foo, string[]>;
+      │                          ^^^^^^^^
+    3 │ let invalid2: Promise<string[]>;
+    4 │ let invalid3: Foo<Bar>[];
+  
+  i Unsafe fix: Use Array<T> syntax to replace
+  
+     1  1 │   let valid: Foo[];
+     2    │ - let·invalid1:·Array<foo,·string[]>;
+        2 │ + let·invalid1:·Array<foo,·Array<string>>;
+     3  3 │   let invalid2: Promise<string[]>;
+     4  4 │   let invalid3: Foo<Bar>[];
+  
+
+```
+
+```
+invalidShorthand.ts:3:23 lint/nursery/useConsistentArrayType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Array<T> syntax instead of shorthand T[] syntax.
+  
+    1 │ let valid: Foo[];
+    2 │ let invalid1: Array<foo, string[]>;
+  > 3 │ let invalid2: Promise<string[]>;
+      │                       ^^^^^^^^
+    4 │ let invalid3: Foo<Bar>[];
+    5 │ let invalid4: [number, number][];
+  
+  i Unsafe fix: Use Array<T> syntax to replace
+  
+     1  1 │   let valid: Foo[];
+     2  2 │   let invalid1: Array<foo, string[]>;
+     3    │ - let·invalid2:·Promise<string[]>;
+        3 │ + let·invalid2:·Promise<Array<string>>;
+     4  4 │   let invalid3: Foo<Bar>[];
+     5  5 │   let invalid4: [number, number][];
+  
+
+```
+
+```
+invalidShorthand.ts:4:15 lint/nursery/useConsistentArrayType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Array<T> syntax instead of shorthand T[] syntax.
+  
+    2 │ let invalid1: Array<foo, string[]>;
+    3 │ let invalid2: Promise<string[]>;
+  > 4 │ let invalid3: Foo<Bar>[];
+      │               ^^^^^^^^^^
+    5 │ let invalid4: [number, number][];
+    6 │ 
+  
+  i Unsafe fix: Use Array<T> syntax to replace
+  
+     2  2 │   let invalid1: Array<foo, string[]>;
+     3  3 │   let invalid2: Promise<string[]>;
+     4    │ - let·invalid3:·Foo<Bar>[];
+        4 │ + let·invalid3:·Array<Foo<Bar>>;
+     5  5 │   let invalid4: [number, number][];
+     6  6 │   
+  
+
+```
+
+```
+invalidShorthand.ts:5:15 lint/nursery/useConsistentArrayType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Array<T> syntax instead of shorthand T[] syntax.
+  
+    3 │ let invalid2: Promise<string[]>;
+    4 │ let invalid3: Foo<Bar>[];
+  > 5 │ let invalid4: [number, number][];
+      │               ^^^^^^^^^^^^^^^^^^
+    6 │ 
+    7 │ let readonlyInvalid1: readonly foo[];
+  
+  i Unsafe fix: Use Array<T> syntax to replace
+  
+     3  3 │   let invalid2: Promise<string[]>;
+     4  4 │   let invalid3: Foo<Bar>[];
+     5    │ - let·invalid4:·[number,·number][];
+        5 │ + let·invalid4:·Array<[number,·number]>;
+     6  6 │   
+     7  7 │   let readonlyInvalid1: readonly foo[];
+  
+
+```
+
+```
+invalidShorthand.ts:7:23 lint/nursery/useConsistentArrayType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use ReadonlyArray<T> syntax instead of shorthand readonly T[] syntax.
+  
+    5 │ let invalid4: [number, number][];
+    6 │ 
+  > 7 │ let readonlyInvalid1: readonly foo[];
+      │                       ^^^^^^^^^^^^^^
+    8 │ let readonlyInvalid2: Promise<readonly string[]>;
+    9 │ let readonlyInvalid3: readonly Foo<Bar>[];
+  
+  i Unsafe fix: Use Array<T> syntax to replace
+  
+     5  5 │   let invalid4: [number, number][];
+     6  6 │   
+     7    │ - let·readonlyInvalid1:·readonly·foo[];
+        7 │ + let·readonlyInvalid1:·ReadonlyArray<foo>;
+     8  8 │   let readonlyInvalid2: Promise<readonly string[]>;
+     9  9 │   let readonlyInvalid3: readonly Foo<Bar>[];
+  
+
+```
+
+```
+invalidShorthand.ts:8:31 lint/nursery/useConsistentArrayType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use ReadonlyArray<T> syntax instead of shorthand readonly T[] syntax.
+  
+     7 │ let readonlyInvalid1: readonly foo[];
+   > 8 │ let readonlyInvalid2: Promise<readonly string[]>;
+       │                               ^^^^^^^^^^^^^^^^^
+     9 │ let readonlyInvalid3: readonly Foo<Bar>[];
+    10 │ let readonlyInvalid4: readonly [number, number][];
+  
+  i Unsafe fix: Use Array<T> syntax to replace
+  
+     6  6 │   
+     7  7 │   let readonlyInvalid1: readonly foo[];
+     8    │ - let·readonlyInvalid2:·Promise<readonly·string[]>;
+        8 │ + let·readonlyInvalid2:·Promise<ReadonlyArray<string>>;
+     9  9 │   let readonlyInvalid3: readonly Foo<Bar>[];
+    10 10 │   let readonlyInvalid4: readonly [number, number][];
+  
+
+```
+
+```
+invalidShorthand.ts:9:23 lint/nursery/useConsistentArrayType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use ReadonlyArray<T> syntax instead of shorthand readonly T[] syntax.
+  
+     7 │ let readonlyInvalid1: readonly foo[];
+     8 │ let readonlyInvalid2: Promise<readonly string[]>;
+   > 9 │ let readonlyInvalid3: readonly Foo<Bar>[];
+       │                       ^^^^^^^^^^^^^^^^^^^
+    10 │ let readonlyInvalid4: readonly [number, number][];
+    11 │ let readonlyInvalid5: readonly (readonly number[])[];
+  
+  i Unsafe fix: Use Array<T> syntax to replace
+  
+     7  7 │   let readonlyInvalid1: readonly foo[];
+     8  8 │   let readonlyInvalid2: Promise<readonly string[]>;
+     9    │ - let·readonlyInvalid3:·readonly·Foo<Bar>[];
+        9 │ + let·readonlyInvalid3:·ReadonlyArray<Foo<Bar>>;
+    10 10 │   let readonlyInvalid4: readonly [number, number][];
+    11 11 │   let readonlyInvalid5: readonly (readonly number[])[];
+  
+
+```
+
+```
+invalidShorthand.ts:10:23 lint/nursery/useConsistentArrayType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use ReadonlyArray<T> syntax instead of shorthand readonly T[] syntax.
+  
+     8 │ let readonlyInvalid2: Promise<readonly string[]>;
+     9 │ let readonlyInvalid3: readonly Foo<Bar>[];
+  > 10 │ let readonlyInvalid4: readonly [number, number][];
+       │                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ let readonlyInvalid5: readonly (readonly number[])[];
+    12 │ let readonlyInvalid6: readonly (readonly (readonly number[])[])[];
+  
+  i Unsafe fix: Use Array<T> syntax to replace
+  
+     8  8 │   let readonlyInvalid2: Promise<readonly string[]>;
+     9  9 │   let readonlyInvalid3: readonly Foo<Bar>[];
+    10    │ - let·readonlyInvalid4:·readonly·[number,·number][];
+       10 │ + let·readonlyInvalid4:·ReadonlyArray<[number,·number]>;
+    11 11 │   let readonlyInvalid5: readonly (readonly number[])[];
+    12 12 │   let readonlyInvalid6: readonly (readonly (readonly number[])[])[];
+  
+
+```
+
+```
+invalidShorthand.ts:11:23 lint/nursery/useConsistentArrayType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use ReadonlyArray<T> syntax instead of shorthand readonly T[] syntax.
+  
+     9 │ let readonlyInvalid3: readonly Foo<Bar>[];
+    10 │ let readonlyInvalid4: readonly [number, number][];
+  > 11 │ let readonlyInvalid5: readonly (readonly number[])[];
+       │                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ let readonlyInvalid6: readonly (readonly (readonly number[])[])[];
+    13 │ 
+  
+  i Unsafe fix: Use Array<T> syntax to replace
+  
+     9  9 │   let readonlyInvalid3: readonly Foo<Bar>[];
+    10 10 │   let readonlyInvalid4: readonly [number, number][];
+    11    │ - let·readonlyInvalid5:·readonly·(readonly·number[])[];
+       11 │ + let·readonlyInvalid5:·ReadonlyArray<ReadonlyArray<number>>;
+    12 12 │   let readonlyInvalid6: readonly (readonly (readonly number[])[])[];
+    13 13 │   
+  
+
+```
+
+```
+invalidShorthand.ts:11:33 lint/nursery/useConsistentArrayType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use ReadonlyArray<T> syntax instead of shorthand readonly T[] syntax.
+  
+     9 │ let readonlyInvalid3: readonly Foo<Bar>[];
+    10 │ let readonlyInvalid4: readonly [number, number][];
+  > 11 │ let readonlyInvalid5: readonly (readonly number[])[];
+       │                                 ^^^^^^^^^^^^^^^^^
+    12 │ let readonlyInvalid6: readonly (readonly (readonly number[])[])[];
+    13 │ 
+  
+  i Unsafe fix: Use Array<T> syntax to replace
+  
+     9  9 │   let readonlyInvalid3: readonly Foo<Bar>[];
+    10 10 │   let readonlyInvalid4: readonly [number, number][];
+    11    │ - let·readonlyInvalid5:·readonly·(readonly·number[])[];
+       11 │ + let·readonlyInvalid5:·readonly·(ReadonlyArray<number>)[];
+    12 12 │   let readonlyInvalid6: readonly (readonly (readonly number[])[])[];
+    13 13 │   
+  
+
+```
+
+```
+invalidShorthand.ts:12:23 lint/nursery/useConsistentArrayType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use ReadonlyArray<T> syntax instead of shorthand readonly T[] syntax.
+  
+    10 │ let readonlyInvalid4: readonly [number, number][];
+    11 │ let readonlyInvalid5: readonly (readonly number[])[];
+  > 12 │ let readonlyInvalid6: readonly (readonly (readonly number[])[])[];
+       │                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ 
+  
+  i Unsafe fix: Use Array<T> syntax to replace
+  
+    10 10 │   let readonlyInvalid4: readonly [number, number][];
+    11 11 │   let readonlyInvalid5: readonly (readonly number[])[];
+    12    │ - let·readonlyInvalid6:·readonly·(readonly·(readonly·number[])[])[];
+       12 │ + let·readonlyInvalid6:·ReadonlyArray<ReadonlyArray<(readonly·number[])>>;
+    13 13 │   
+  
+
+```
+
+```
+invalidShorthand.ts:12:33 lint/nursery/useConsistentArrayType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use ReadonlyArray<T> syntax instead of shorthand readonly T[] syntax.
+  
+    10 │ let readonlyInvalid4: readonly [number, number][];
+    11 │ let readonlyInvalid5: readonly (readonly number[])[];
+  > 12 │ let readonlyInvalid6: readonly (readonly (readonly number[])[])[];
+       │                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ 
+  
+  i Unsafe fix: Use Array<T> syntax to replace
+  
+    10 10 │   let readonlyInvalid4: readonly [number, number][];
+    11 11 │   let readonlyInvalid5: readonly (readonly number[])[];
+    12    │ - let·readonlyInvalid6:·readonly·(readonly·(readonly·number[])[])[];
+       12 │ + let·readonlyInvalid6:·readonly·(ReadonlyArray<ReadonlyArray<number>>)[];
+    13 13 │   
+  
+
+```
+
+```
+invalidShorthand.ts:12:43 lint/nursery/useConsistentArrayType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use ReadonlyArray<T> syntax instead of shorthand readonly T[] syntax.
+  
+    10 │ let readonlyInvalid4: readonly [number, number][];
+    11 │ let readonlyInvalid5: readonly (readonly number[])[];
+  > 12 │ let readonlyInvalid6: readonly (readonly (readonly number[])[])[];
+       │                                           ^^^^^^^^^^^^^^^^^
+    13 │ 
+  
+  i Unsafe fix: Use Array<T> syntax to replace
+  
+    10 10 │   let readonlyInvalid4: readonly [number, number][];
+    11 11 │   let readonlyInvalid5: readonly (readonly number[])[];
+    12    │ - let·readonlyInvalid6:·readonly·(readonly·(readonly·number[])[])[];
+       12 │ + let·readonlyInvalid6:·readonly·(readonly·(ReadonlyArray<number>)[])[];
+    13 13 │   
+  
+
+```
+
+

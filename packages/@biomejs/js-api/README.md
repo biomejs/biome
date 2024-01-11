@@ -26,13 +26,13 @@ const biome = await Biome.create({
 	distribution: Distribution.NODE, // Or BUNDLER / WEB depending on the distribution package you've installed
 });
 
-const formatted = await biome.formatContent("function f   (a, b) { return a == b; }", {
+const formatted = biome.formatContent("function f   (a, b) { return a == b; }", {
 	filePath: "example.js",
 });
 
 console.log('Formatted content: ', formatted.content);
 
-const result = await biome.lintContent(formatted.content, {
+const result = biome.lintContent(formatted.content, {
 	filePath: "example.js",
 });
 

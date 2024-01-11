@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsx
 ---
 # Input
-```js
+```jsx
 var a = <span role="checkbox" aria-checked="test"></span>;
 var a = <span aria-autocomplete="test"></span>;
 var a = <span aria-invalid="foo"></span>;

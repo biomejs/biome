@@ -24,6 +24,11 @@ const FORMATTED_LINE_WIDTH: &str = "const a = [\"loreum\", \"ipsum\"];\n";
 const FORMATTED_WITH_SINGLE_QUOTES: &str = "const a = ['loreum', 'ipsum'];\n";
 const FORMATTED_WITH_NO_SEMICOLONS: &str = "const a = [\"loreum\", \"ipsum\"]\n";
 
+const CSS_UNFORMATTED_QUOTES: &str =
+    r#"[class='foo'] { background-image: url("/path/to/file.jpg")}"#;
+const CSS_FORMATTED_SINGLE_QUOTES_AND_SPACES: &str =
+    "[class='foo'] {\n  background-image: url('/path/to/file.jpg');\n}\n";
+
 #[test]
 fn does_handle_included_file_and_disable_formatter() {
     let mut console = BufferConsole::default();
@@ -230,6 +235,7 @@ fn does_include_file_with_different_overrides() {
 }
 
 #[test]
+#[ignore = "Enable when we are ready to handle CSS files"]
 fn does_include_file_with_different_languages() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
@@ -239,10 +245,10 @@ fn does_include_file_with_different_languages() {
         r#"{
   "overrides": [
     { "include": ["test.js"], "formatter": { "lineWidth": 120 }, "javascript": { "formatter": { "quoteStyle": "single" } } },
-    { "include": ["test2.js"], "formatter": { "lineWidth": 120, "indentStyle": "space" }, "javascript": { "formatter": { "semicolons": "asNeeded" } } }
+    { "include": ["test2.js"], "formatter": { "lineWidth": 120, "indentStyle": "space" }, "javascript": { "formatter": { "semicolons": "asNeeded" } } },
+    { "include": ["test.css"], "formatter": { "lineWidth": 120, "indentStyle": "space" }, "css": { "formatter": { "quoteStyle": "single" } } }
    ]
 }
-
 "#
         .as_bytes(),
     );
@@ -252,6 +258,8 @@ fn does_include_file_with_different_languages() {
 
     let test2 = Path::new("test2.js");
     fs.insert(test2.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
+    let test_css = Path::new("test.css");
+    fs.insert(test_css.into(), CSS_UNFORMATTED_QUOTES.as_bytes());
 
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
@@ -262,6 +270,7 @@ fn does_include_file_with_different_languages() {
                 ("--write"),
                 test.as_os_str().to_str().unwrap(),
                 test2.as_os_str().to_str().unwrap(),
+                test_css.as_os_str().to_str().unwrap(),
             ]
             .as_slice(),
         ),
@@ -271,6 +280,7 @@ fn does_include_file_with_different_languages() {
 
     assert_file_contents(&fs, test, FORMATTED_WITH_SINGLE_QUOTES);
     assert_file_contents(&fs, test2, FORMATTED_WITH_NO_SEMICOLONS);
+    assert_file_contents(&fs, test_css, CSS_FORMATTED_SINGLE_QUOTES_AND_SPACES);
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -282,6 +292,7 @@ fn does_include_file_with_different_languages() {
 }
 
 #[test]
+#[ignore = "Enable when we are ready to handle CSS files"]
 fn does_include_file_with_different_languages_and_files() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
@@ -295,14 +306,12 @@ fn does_include_file_with_different_languages_and_files() {
         "include": ["test2.js"],
         "formatter": { "lineWidth": 120, "indentStyle": "space" },
         "javascript": { "formatter": { "semicolons": "asNeeded" } },
-        "json": { "formatter": { "indentStyle": "space", "lineWidth": 20, "indentWidth": 4 } },
-        "css": { "formatter": { "indentStyle": "space", "lineWidth": 30, "indentWidth": 3 } }
+        "json": { "formatter": { "indentStyle": "space", "lineWidth": 20, "indentWidth": 4 } }
     },
     {
         "include": ["test3.json"],
         "formatter": { "lineWidth": 120, "indentStyle": "space" },
-        "json": { "formatter": { "indentStyle": "space", "lineWidth": 20, "indentWidth": 4 } },
-        "css": { "formatter": { "indentStyle": "space", "lineWidth": 30, "indentWidth": 3 } }
+        "json": { "formatter": { "indentStyle": "space", "lineWidth": 20, "indentWidth": 4 } }
     }
   ]
 }
@@ -453,6 +462,58 @@ fn does_not_change_formatting_language_settings() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "does_not_change_formatting_language_settings",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn does_not_change_formatting_language_settings_2() {
+    let mut console = BufferConsole::default();
+    let mut fs = MemoryFileSystem::default();
+    let file_path = Path::new("biome.json");
+    fs.insert(
+        file_path.into(),
+        r#"{
+    "javascript": { "formatter": { "lineWidth": 20 } },
+  "overrides": [
+    { "include": ["test.js"], "linter": { "enabled": false } }
+  ]
+}
+
+"#
+        .as_bytes(),
+    );
+
+    let test = Path::new("test.js");
+    fs.insert(test.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
+
+    let test2 = Path::new("test2.js");
+    fs.insert(test2.into(), UNFORMATTED_LINE_WIDTH.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("format"),
+                ("--write"),
+                test.as_os_str().to_str().unwrap(),
+                test2.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, test, FORMATTED_LINE_WIDTH_OVERRIDDEN);
+    assert_file_contents(&fs, test2, FORMATTED_LINE_WIDTH_OVERRIDDEN);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "does_not_change_formatting_language_settings_2",
         fs,
         console,
         result,

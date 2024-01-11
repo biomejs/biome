@@ -61,3 +61,15 @@
 		h1, h2 { color: maroon; }
 	}
 }
+
+/* See https://drafts.csswg.org/css-cascade-5/#typedef-layer-name. These may
+ * become invalid in the future, or remain valid. The draft spec says that the
+ * CSS-wide keywords are "cause the rule to be invalid at parse time", but all
+ * parsers I've found so far allow these as names.
+ */
+@layer inherit { }
+@layer initial { }
+@layer initial.unset.default { }
+@layer unset { }
+@layer revert { }
+@layer revert-layer { }

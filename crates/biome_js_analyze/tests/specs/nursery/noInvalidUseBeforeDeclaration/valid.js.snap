@@ -3,7 +3,7 @@ source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.js
 ---
 # Input
-```js
+```jsx
 
 g();
 function g() { f(); }
@@ -15,7 +15,7 @@ export { X }; const X = 1;
 
 let a; console.log(a);
 
-function h() { X; }; const X = 0;
+function h() { Y; }; const Y = 0;
 
 ```
 

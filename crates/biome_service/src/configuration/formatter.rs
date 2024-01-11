@@ -139,6 +139,7 @@ impl MergeWith<FormatterConfiguration> for FormatterConfiguration {
 }
 
 pub fn to_format_settings(
+    working_directory: Option<PathBuf>,
     conf: FormatterConfiguration,
     vcs_path: Option<PathBuf>,
     gitignore_matches: &[String],
@@ -161,8 +162,18 @@ pub fn to_format_settings(
         line_ending: conf.line_ending,
         line_width: conf.line_width,
         format_with_errors: conf.format_with_errors.unwrap_or_default(),
-        ignored_files: to_matcher(conf.ignore.as_ref(), vcs_path.clone(), gitignore_matches)?,
-        included_files: to_matcher(conf.include.as_ref(), vcs_path, gitignore_matches)?,
+        ignored_files: to_matcher(
+            working_directory.clone(),
+            conf.ignore.as_ref(),
+            vcs_path.clone(),
+            gitignore_matches,
+        )?,
+        included_files: to_matcher(
+            working_directory,
+            conf.include.as_ref(),
+            vcs_path,
+            gitignore_matches,
+        )?,
     })
 }
 

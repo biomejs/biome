@@ -1,25 +1,24 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 92
 expression: valid.jsonc
 ---
 # Input
-```js
+```cjs
 switch (a) { case 1: { let x = 1; break; } default: { let x = 2; break; } }
 ```
 
 # Input
-```js
+```cjs
 switch (a) { case 1: { const x = 1; break; } default: { const x = 2; break; } }
 ```
 
 # Input
-```js
+```cjs
 switch (a) { case 1: { function f() {} break; } default: { function f() {} break; } }
 ```
 
 # Input
-```js
+```cjs
 switch (a) { case 1: { class C {} break; } default: { class C {} break; } }
 ```
 

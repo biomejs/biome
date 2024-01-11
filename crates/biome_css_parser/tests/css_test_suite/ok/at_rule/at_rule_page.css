@@ -59,3 +59,10 @@
 
 @page :FIRST {}
 @page :LEFT {}
+
+@page inherit {} /* page allows the CSS-wide keywords as names */
+@page initial {}
+@page INITIAL {}
+@page unset {}
+@page revert {}
+@page revert-layer {}

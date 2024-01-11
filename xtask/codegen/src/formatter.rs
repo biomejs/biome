@@ -295,6 +295,7 @@ fn generate_formatter(repo: &GitRepo, language_kind: LanguageKind) {
         modules.insert(repo, &path);
 
         let node_id = Ident::new(&name, Span::call_site());
+        let node_fields_id = Ident::new(&format!("{name}Fields"), Span::call_site());
         let format_id = Ident::new(&format!("Format{name}"), Span::call_site());
 
         let qualified_format_id = {
@@ -358,18 +359,49 @@ fn generate_formatter(repo: &GitRepo, language_kind: LanguageKind) {
                 }
             },
             NodeKind::Node => {
-                quote! {
-                    use crate::prelude::*;
+                // TODO: This is CSS-specific and would be nice to handle in a
+                // per-language generator somehow.
+                if language_kind == LanguageKind::Css
+                    && matches!(
+                        get_node_concept(&kind, &module.dialect, &language_kind, &name),
+                        NodeConcept::Property
+                    )
+                {
+                    quote! {
+                        use crate::prelude::*;
 
-                    use biome_rowan::AstNode;
-                    use #syntax_crate_ident::#node_id;
+                        use #syntax_crate_ident::{#node_id, #node_fields_id};
+                        use biome_formatter::write;
 
-                    #[derive(Debug, Clone, Default)]
-                    pub(crate) struct #format_id;
+                        #[derive(Debug, Clone, Default)]
+                        pub(crate) struct #format_id;
 
-                    impl FormatNodeRule<#node_id> for #format_id {
-                        fn fmt_fields(&self, node: &#node_id, f: &mut #formatter_ident) -> FormatResult<()> {
-                            format_verbatim_node(node.syntax()).fmt(f)
+                        impl FormatNodeRule<#node_id> for #format_id {
+                            fn fmt_fields(&self, node: &#node_id, f: &mut #formatter_ident) -> FormatResult<()> {
+                                let #node_fields_id {
+                                    name,
+                                    colon_token,
+                                    value
+                                } = node.as_fields();
+
+                                write!(f, [name.format(), colon_token.format(), space(), value.format()])
+                            }
+                        }
+                    }
+                } else {
+                    quote! {
+                        use crate::prelude::*;
+
+                        use biome_rowan::AstNode;
+                        use #syntax_crate_ident::#node_id;
+
+                        #[derive(Debug, Clone, Default)]
+                        pub(crate) struct #format_id;
+
+                        impl FormatNodeRule<#node_id> for #format_id {
+                            fn fmt_fields(&self, node: &#node_id, f: &mut #formatter_ident) -> FormatResult<()> {
+                                format_verbatim_node(node.syntax()).fmt(f)
+                            }
                         }
                     }
                 }
@@ -588,10 +620,13 @@ enum NodeConcept {
     Tag,
     Attribute,
 
-    // JSON / CSS
+    // JSON
     Value,
+
+    // CSS
     Pseudo,
     Selector,
+    Property,
 }
 
 impl NodeConcept {
@@ -615,6 +650,7 @@ impl NodeConcept {
             NodeConcept::Value => "value",
             NodeConcept::Pseudo => "pseudo",
             NodeConcept::Selector => "selectors",
+            NodeConcept::Property => "properties",
         }
     }
 }
@@ -638,25 +674,13 @@ impl NodeModuleInformation {
     }
 }
 
-/// Convert an AstNode name to a path / Rust module name
-fn name_to_module(kind: &NodeKind, in_name: &str, language: LanguageKind) -> NodeModuleInformation {
-    let mut upper_case_indices = in_name.match_indices(|c: char| c.is_uppercase());
-
-    assert!(matches!(upper_case_indices.next(), Some((0, _))));
-
-    let (second_upper_start, _) = upper_case_indices.next().expect("Node name malformed");
-    let (mut dialect_prefix, mut name) = in_name.split_at(second_upper_start);
-
-    // AnyJsX
-    if dialect_prefix == "Any" {
-        let (third_upper_start, _) = upper_case_indices.next().expect("Node name malformed");
-        (dialect_prefix, name) = name.split_at(third_upper_start - dialect_prefix.len());
-    }
-
-    let dialect = NodeDialect::from_str(dialect_prefix);
-
-    // Classify nodes by concept
-    let concept = if matches!(kind, NodeKind::Bogus) {
+fn get_node_concept(
+    kind: &NodeKind,
+    dialect: &NodeDialect,
+    language: &LanguageKind,
+    name: &str,
+) -> NodeConcept {
+    if matches!(kind, NodeKind::Bogus) {
         NodeConcept::Bogus
     } else if matches!(kind, NodeKind::List { .. }) {
         NodeConcept::List
@@ -738,16 +762,47 @@ fn name_to_module(kind: &NodeKind, in_name: &str, language: LanguageKind) -> Nod
             LanguageKind::Css => match name {
                 _ if name.ends_with("AtRule") => NodeConcept::Statement,
                 _ if name.ends_with("Selector") => NodeConcept::Selector,
-                _ if name.starts_with("Pseudo") => NodeConcept::Pseudo,
-                _ if matches!(name, "Number" | "Percentage" | "Ratio" | "String")
-                    || name.ends_with("Dimension") =>
+                _ if name.contains("Pseudo") => NodeConcept::Pseudo,
+                _ if name.ends_with("Property") => NodeConcept::Property,
+                _ if matches!(
+                    name,
+                    "Number"
+                        | "Percentage"
+                        | "Ratio"
+                        | "String"
+                        | "Color"
+                        | "Length"
+                        | "UrlValueRaw"
+                ) || name.ends_with("Dimension")
+                    || name.ends_with("Identifier") =>
                 {
                     NodeConcept::Value
                 }
                 _ => NodeConcept::Auxiliary,
             },
         }
-    };
+    }
+}
+
+/// Convert an AstNode name to a path / Rust module name
+fn name_to_module(kind: &NodeKind, in_name: &str, language: LanguageKind) -> NodeModuleInformation {
+    let mut upper_case_indices = in_name.match_indices(|c: char| c.is_uppercase());
+
+    assert!(matches!(upper_case_indices.next(), Some((0, _))));
+
+    let (second_upper_start, _) = upper_case_indices.next().expect("Node name malformed");
+    let (mut dialect_prefix, mut name) = in_name.split_at(second_upper_start);
+
+    // AnyJsX
+    if dialect_prefix == "Any" {
+        let (third_upper_start, _) = upper_case_indices.next().expect("Node name malformed");
+        (dialect_prefix, name) = name.split_at(third_upper_start - dialect_prefix.len());
+    }
+
+    let dialect = NodeDialect::from_str(dialect_prefix);
+
+    // Classify nodes by concept
+    let concept = get_node_concept(kind, &dialect, &language, name);
 
     // Convert the names from CamelCase to snake_case
     let mut stem = String::new();
