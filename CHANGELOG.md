@@ -40,13 +40,13 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 - Add an unsafe code fix for [noConsoleLog](https://biomejs.dev/linter/rules/no-console-log/). Contributed by @vasucp1207
 
-- [useArrowFunction](https://biomejs.dev/rules/) no longer reports function in `extends` clauses or in a `new` expression. COntributed by @Conaclos
+- [useArrowFunction](https://biomejs.dev/linter/rules/use-arrow-function) no longer reports function in `extends` clauses or in a `new` expression. COntributed by @Conaclos
 
   This cases requires the presence of a prototype.
 
 #### Bug fixes
 
-- The fix of [useArrowFunction](https://biomejs.dev/rules/) now adds parentheses around the arrow function in more cases where it is needed ([#1524](https://github.com/biomejs/biome/issues/1524)).
+- The fix of [useArrowFunction](https://biomejs.dev/linter/rules/use-arrow-function) now adds parentheses around the arrow function in more cases where it is needed ([#1524](https://github.com/biomejs/biome/issues/1524)).
 
   A function expression doesn't need parentheses in most expressions where it can appear.
   This is not the case with the arrow function.
@@ -100,7 +100,7 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 - Fix [#1483](https://github.com/biomejs/biome/issues/1483). [useConsistentArrayType](https://biomejs.dev/linter/rules/use-consistent-array-type) now correctly handles its option. Contributed by @Conaclos
 
-- Fix [#1502](https://github.com/biomejs/biome/issues/1502). [useArrowFunction](https://biomejs.dev/rules/) now correctly handle functions that return a (comma) sequence expression. Contributed by @Conaclos
+- Fix [#1502](https://github.com/biomejs/biome/issues/1502). [useArrowFunction](https://biomejs.dev/linter/rules/use-arrow-function) now correctly handle functions that return a (comma) sequence expression. Contributed by @Conaclos
 
   Previously the rule made an erroneous suggestion:
 
@@ -520,7 +520,7 @@ The following rules are promoted:
 
 - Fix [#696](https://github.com/biomejs/biome/issues/696). [useHookAtTopLevel](https://biomejs.dev/linter/rules/use-hook-at-top-level) now correctly detects early returns before the calls to the hook.
 
-- The code fix of [noUselessTypeCOnstraint](https://biomejs.dev/linter/rules/no-useless-type-c-onstraint) now adds a trailing comma when needed to disambiguate a type parameter list from a JSX element. COntributed by @Conaclos
+- The code fix of [noUselessTypeCOnstraint](https://biomejs.dev/linter/rules/no-useless-type-constraint) now adds a trailing comma when needed to disambiguate a type parameter list from a JSX element. COntributed by @Conaclos
 
 - Fix [#578](https://github.com/biomejs/biome/issues/578). [useExhaustiveDependencies](https://biomejs.dev/linter/rules/use-exhaustive-dependencies) now correctly recognizes hooks namespaced under the `React` namespace.  Contributed by @XiNiHa
 
@@ -711,7 +711,7 @@ The following rules are now recommended:
 
 - [a11y/noAccessKey](https://biomejs.dev/linter/rules/no-access-key)
 - [a11y/useHeadingContent](https://biomejs.dev/linter/rules/use-heading-content)
-- [complexity/useSimpleNumberKeys](https://biomejs.dev/linter/use-simple-number-keys)
+- [complexity/useSimpleNumberKeys](https://biomejs.dev/linter/rules/use-simple-number-keys)
 
 The following rules are now deprecated:
 
@@ -730,7 +730,7 @@ The following rules are now deprecated:
 
 - Add [useValidAriaRole](https://biomejs.dev/linter/rules/use-valid-aria-role). Contributed by @vasucp1207
 
-- Add [useRegexLiterals](https://biomejs.dev/linter/use-regex-literals) that suggests turning call to the regex constructor into regex literals. COntributed by @Yuiki
+- Add [useRegexLiterals](https://biomejs.dev/linter/rules/use-regex-literals) that suggests turning call to the regex constructor into regex literals. COntributed by @Yuiki
 
 #### Enhancements
 
@@ -760,9 +760,9 @@ The following rules are now deprecated:
 
 - Fix [#69](https://github.com/biomejs/biome/issues/69) that made [correctness/noUnnecessaryContinue](https://biomejs.dev/linter/rules/no-unnecessary-continue) incorrectly reports a `continue` used to break a switch clause. Contributed by @TaKO8Ki
 
-- Fix [#664](https://github.com/biomejs/biome/issues/664) by improving the diagnostic of [style/useNamingConvention](https://biomejs.dev/linter/use-naming-convention) when double capital are detected in strict camel case mode. Contributed by @vasucp1207
+- Fix [#664](https://github.com/biomejs/biome/issues/664) by improving the diagnostic of [style/useNamingConvention](https://biomejs.dev/linter/rules/use-naming-convention) when double capital are detected in strict camel case mode. Contributed by @vasucp1207
 
-- Fix [#643](https://github.com/biomejs/biome/issues/643) that erroneously parsed the option of [complexity/useExhaustiveDependencies](https://biomejs.dev/linter/use-naming-convention). Contributed by @arendjr
+- Fix [#643](https://github.com/biomejs/biome/issues/643) that erroneously parsed the option of [complexity/useExhaustiveDependencies](https://biomejs.dev/linter/rules/use-naming-convention). Contributed by @arendjr
 
 ### Parser
 
@@ -1061,7 +1061,7 @@ The following rules are now recommended:
 
 - Add [noEmptyCharacterClassInRegex](https://biomejs.dev/linter/rules/no-empty-character-class-in-regex) rule. The rule reports empty character classes and empty negated character classes in regular expression literals. Contributed by @Conaclos
 
-- Add [noMisleadingInstantiator](https://biomejs.dev/linter/rules/no-mileading-instantiator) rule. The rule reports the misleading use of the `new` and `constructor` methods. Contributed by @unvalley
+- Add [noMisleadingInstantiator](https://biomejs.dev/linter/rules/no-misleading-instantiator) rule. The rule reports the misleading use of the `new` and `constructor` methods. Contributed by @unvalley
 
 - Add [noUselessElse](https://biomejs.dev/linter/rules/no-useless-else) rule.
   The rule reports `else` clauses that can be omitted because their `if` branches break.
@@ -1111,13 +1111,13 @@ The following rules are now recommended:
   - [useEnumInitializers](https://biomejs.dev/linter/rules/use-enum-initializers)
   - [useWhile](https://biomejs.dev/linter/rules/use-while)
 
-- [noAccumulatingSpread](https://biomejs.dev/linter/no-accumulating-spread) makes more check in order to reduce potential false positives. Contributed by @Vivalldi
+- [noAccumulatingSpread](https://biomejs.dev/linter/rules/no-accumulating-spread) makes more check in order to reduce potential false positives. Contributed by @Vivalldi
 
 - [noConstAssign](https://biomejs.dev/linter/rules/no-const-assign) now provides an unsafe code fix that replaces `const` with `let`. Contributed by @vasucp1207
 
-- [noExcessiveComplexity](https://biomejs.dev/linter/rules/no-excessive-complexity) default complexity threshold is now `15`. Contributed by @arendjr
+- [noExcessiveComplexity](https://biomejs.dev/linter/rules/no-excessive-cognitive-complexity) default complexity threshold is now `15`. Contributed by @arendjr
 
-- [noPositiveTabindexValue](https://biomejs.dev/linter/rules/no-positive-tabindex-value) now provides an unsafe code fix that set to `0` the tab index. Contributed by @vasucp1207
+- [noPositiveTabindexValue](https://biomejs.dev/linter/rules/no-positive-tabindex) now provides an unsafe code fix that set to `0` the tab index. Contributed by @vasucp1207
 
 - [noUnusedLabels](https://biomejs.dev/linter/rules/no-unused-labels) no longer reports unbreakable labeled statements. Contributed by @Conaclos
 
@@ -1249,7 +1249,7 @@ The following rules are promoted:
 
 #### Removed rules
 
-- Remove [noConfusingArrow](https://biomejs.dev/linter/rules/no-confusing-arrow/).
+- Remove `noConfusingArrow`
 
   Code formatters, such as prettier and Biome, always adds parentheses around the parameter or the body of an arrow function.
   This makes the rule useless.
@@ -1554,7 +1554,7 @@ The following rules are promoted:
 
 - Fix [rome#4616](https://github.com/rome/tools/issues/4616)
 
-  Previously [noUnreachableSuper](https://biomejs.dev/linter/rules/no-unreacheable-super/) reported valid codes with complex nesting of control flow structures.
+  Previously [noUnreachableSuper](https://biomejs.dev/linter/rules/no-unreachable-super/) reported valid codes with complex nesting of control flow structures.
 
   Contributed by @Conaclos
 
@@ -1747,11 +1747,11 @@ The following rules are promoted:
 
 - Remove `useCamelCase`
 
-  Use [useNamingConvention](https://biomejs.dev/linter/rules/use-camel-case/) instead.
+  Use [useNamingConvention](https://biomejs.dev/linter/rules/use-naming-convention/) instead.
 
 #### New rules
 
-- Add [noExcessiveComplexity](https://biomejs.dev/linter/rules/no-excessive-complexity/)
+- Add [noExcessiveComplexity](https://biomejs.dev/linter/rules/no-excessive-cognitive-complexity/)
 
 - Add [useImportRestrictions](https://biomejs.dev/linter/rules/use-import-restrictions/)
 
@@ -1833,7 +1833,7 @@ The following rules are now recommended:
 
 - [noRedeclare](https://biomejs.dev/linter/rules/no-redeclare/): allow redeclare of index signatures are in different type members [#4478](https://github.com/rome/tools/issues/4478)
 
-- Improve [noConsoleLog](https://biomejs.dev/linter/rules/no-console-log/), [noGlobalObjectCalls](https://biomejs.dev/linter/rules/no-global-object-calls/), [useIsNan](https://biomejs.dev/linter/rules/useisnan/), and [useNumericLiterals](https://biomejs.dev/linter/rules/use-numeric-literals/) by handling `globalThis` and `window` namespaces.
+- Improve [noConsoleLog](https://biomejs.dev/linter/rules/no-console-log/), [noGlobalObjectCalls](https://biomejs.dev/linter/rules/no-global-object-calls/), [useIsNan](https://biomejs.dev/linter/rules/use-is-nan/), and [useNumericLiterals](https://biomejs.dev/linter/rules/use-numeric-literals/) by handling `globalThis` and `window` namespaces.
 
   For instance, the following code is now reported by `noConsoleLog`:
 
@@ -2038,7 +2038,7 @@ The following rules are now recommended:
 
 - Fix [noInvalidConstructorSuper](https://biomejs.dev/linter/rules/no-invalid-constructor-super/) that erroneously reported generic parents [#4624](https://github.com/rome/tools/issues/4624).
 
--  Fix [noDuplicateCase](https://biomejs.dev/linter/rules/noDuplicateCase/) that erroneously reported as equals the strings literals `"'"` and `'"'` [#4706](https://github.com/rome/tools/issues/4706).
+-  Fix [noDuplicateCase](https://biomejs.dev/linter/rules/no-duplicate-case/) that erroneously reported as equals the strings literals `"'"` and `'"'` [#4706](https://github.com/rome/tools/issues/4706).
 
 - Fix [NoUnreachableSuper](https://biomejs.dev/linter/rules/no-unreachable-super/)'s false positive diagnostics ([#4483](https://github.com/rome/tools/issues/4483)) caused to nested if statement.
 
@@ -2051,7 +2051,7 @@ The following rules are now recommended:
 
 - Fix [noUselessConstructor](https://biomejs.dev/linter/rules/no-useless-constructor/) which erroneously reported constructors with default parameters [rome#4781](https://github.com/rome/tools/issues/4781)
 
-- Fix [noUselessFragments](https://biomejs.dev/linter/rules/nouselessfragments/)'s panics when running `biome check --apply-unsafe` ([#4637](https://github.com/rome/tools/issues/4639))
+- Fix [noUselessFragments](https://biomejs.dev/linter/rules/no-useless-fragments/)'s panics when running `biome check --apply-unsafe` ([#4637](https://github.com/rome/tools/issues/4639))
 
   This rule's code action emits an invalid AST, so I fixed using JsxString instead of JsStringLiteral
 
