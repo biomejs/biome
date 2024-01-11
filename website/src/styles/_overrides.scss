@@ -123,11 +123,11 @@
   --size: 15vw;
 }
 
-.linter>div>.expressive-code:nth-child(-n+2) {
+.expressive-code:nth-child(-n+2) {
   margin-top: 0 !important;
 }
 
-.linter>div>.expressive-code:nth-child(-n+2)>figure>pre {
+.expressive-code:nth-child(-n+2)>figure>pre {
   border: none;
   padding: 1.2rem;
 }
@@ -138,11 +138,11 @@
   font-size: 0.7rem;
 }
 
-.linter>div>.expressive-code:first-child>figure>pre {
+.expressive-code:first-child>figure>pre {
   border-bottom-left-radius: 1rem;
 }
 
-.linter>div>.expressive-code:nth-child(-n+2)>figure>pre>code>.copy {
+.expressive-code:nth-child(-n+2)>figure>pre>code>.copy {
   display: none;
 }
 
@@ -152,11 +152,11 @@
   font-size: 0.7rem;
 }
 
-.linter>div>.expressive-code:first-child>figure>pre {
+.expressive-code:first-child>figure>pre {
   border-bottom-left-radius: 1rem;
 }
 
-.linter>div>.expressive-code:nth-child(-n+2)>figure>pre>code>.copy {
+.expressive-code:nth-child(-n+2)>figure>pre>code>.copy {
   display: none;
 }
 
