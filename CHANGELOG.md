@@ -39,7 +39,34 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 - Add an unsafe code fix for [noConsoleLog](https://biomejs.dev/linter/rules/no-console-log/). Contributed by @vasucp1207
 
+- [useArrowFunction](https://biomejs.dev/rules/) no longer reports function in `extends` clauses or in a `new` expression. COntributed by @Conaclos
+
+  This cases requires the presence of a prototype.
+
 #### Bug fixes
+
+- The fix of [useArrowFunction](https://biomejs.dev/rules/) now adds parentheses around the arrow function in more cases where it is needed ([#1524](https://github.com/biomejs/biome/issues/1524)).
+
+  A function expression doesn't need parentheses in most expressions where it can appear.
+  This is not the case with the arrow function.
+  We previously added parentheses when the function appears in a call or member expression.
+  We now add parentheses in binary-like expressions and other cases where they are needed, hopefully covering all cases.
+
+  Previously:
+
+  ```diff
+  - f = f ?? function() {};
+  + f = f ?? () => {};
+  ```
+
+  Now:
+
+  ```diff
+  - f = f ?? function() {};
+  + f = f ?? (() => {});
+  ```
+
+  Contributed by @Conaclos
 
 ### Parser
 
