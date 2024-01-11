@@ -1,8 +1,12 @@
 ---
-title: useSortedClasses (since vnext)
+title: useSortedClasses (not released)
 ---
 
 **Diagnostic Category: `lint/nursery/useSortedClasses`**
+
+:::danger
+This rule hasn't been released yet.
+:::
 
 :::caution
 This rule is part of the [nursery](/linter/rules/#nursery) group.

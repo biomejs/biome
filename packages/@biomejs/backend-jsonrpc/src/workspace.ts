@@ -954,6 +954,10 @@ export interface Nursery {
 	 * Enforce using function types instead of object type with call signatures.
 	 */
 	useShorthandFunctionType?: RuleConfiguration;
+	/**
+	 * Enforce the sorting of CSS classes.
+	 */
+	useSortedClasses?: RuleConfiguration;
 }
 /**
  * A list of rules that belong to this group
@@ -1690,6 +1694,7 @@ export type Category =
 	| "lint/nursery/useNodejsImportProtocol"
 	| "lint/nursery/useNumberNamespace"
 	| "lint/nursery/useShorthandFunctionType"
+	| "lint/nursery/useSortedClasses"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noDelete"
 	| "lint/security/noDangerouslySetInnerHtml"

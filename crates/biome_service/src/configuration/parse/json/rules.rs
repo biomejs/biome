@@ -1070,6 +1070,13 @@ impl Deserializable for Nursery {
                                 diagnostics,
                             );
                         }
+                        "useSortedClasses" => {
+                            result.use_sorted_classes = Deserializable::deserialize(
+                                &value,
+                                "useSortedClasses",
+                                diagnostics,
+                            );
+                        }
                         unknown_key => {
                             diagnostics.push(DeserializationDiagnostic::new_unknown_key(
                                 unknown_key,
@@ -1101,6 +1108,7 @@ impl Deserializable for Nursery {
                                     "useNodejsImportProtocol",
                                     "useNumberNamespace",
                                     "useShorthandFunctionType",
+                                    "useSortedClasses",
                                 ],
                             ));
                         }
