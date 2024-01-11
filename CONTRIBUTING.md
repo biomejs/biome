@@ -33,7 +33,6 @@ We can use help in a bunch of areas and any help is greatly appreciated!
     - [Changelog](#changelog)
       - [Writing a changelog line](#writing-a-changelog-line)
     - [Documentation](#documentation)
-    - [Magic comments](#magic-comments)
     - [Versioning](#versioning)
   - [Releasing](#releasing)
   - [Resources](#resources)
@@ -415,3 +414,4 @@ Members are listed in alphabetical order. Members are free to use the full name,
 - [Nicolas Hedger @nhedger](https://github.com/nhedger)
 - [Victor Teles @victor-teles](https://github.com/victor-teles)
 - [Takayuki Maeda @TaKO8Ki](https://github.com/TaKO8Ki)
+- [Vasu Singh @vasucp1207](https://github.com/vasucp1207)
