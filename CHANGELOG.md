@@ -14,6 +14,9 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ### CLI
 
+- Fix [#1512](https://github.com/biomejs/biome/issues/1512) by skipping verbose diagnostics from the count. Contributed by @ematipico
+- Don't handle CSS files, the formatter isn't ready yet. Contributed by @ematipico
+
 ### Configuration
 
 ### Editors
