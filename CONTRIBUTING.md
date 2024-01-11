@@ -33,6 +33,7 @@ We can use help in a bunch of areas and any help is greatly appreciated!
     - [Changelog](#changelog)
       - [Writing a changelog line](#writing-a-changelog-line)
     - [Documentation](#documentation)
+    - [Magic comments](#magic-comments)
     - [Versioning](#versioning)
   - [Releasing](#releasing)
   - [Resources](#resources)
