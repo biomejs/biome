@@ -135,7 +135,7 @@ _lefthook_、_pre-commit_、_lint-staged_ などの他のツールとは対照�
   git-format-staged --formatter 'biome check --files-ignore-unknown=true --no-errors-on-unmatched \"{}\"' .
   ```
 
-- コミットをする前にformatチェックやlint、安全な修正を行う
+- コミット前にformatやlintのチェック・安全な修正を行う
 
   ```shell title=".husky/pre-commit"
   git-format-staged --formatter 'biome check --apply --files-ignore-unknown=true --no-errors-on-unmatched \"{}\"' .
