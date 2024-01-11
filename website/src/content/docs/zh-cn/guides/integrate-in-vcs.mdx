@@ -1,0 +1,66 @@
+---
+title: 与版本控制系统集成
+description: 了解 Biome 是如何工作的，如原理、配置等。
+---
+
+版本控制系统（VCS，Version Control System）旨在增加仅能由版本控制系统提供的额外特性，允许更多地定制个性化的开发体验。
+
+集成是一个可选项，它有两个必填参数。`vcs.enabled` 字段，以及 `vcs.clientKind` 字段，二者都在配置文件中：
+
+```json title="biome.json"
+{
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git"
+  }
+}
+```
+
+这个配置不会执行任何操作。你必须选择额外的特性。
+
+### 使用 ignore 文件
+
+这是一个让 Biome 读取版本控制系统的 ignore 文件并忽略其指定的所有文件和文件夹。这是一个可选的特性，同时必须支持 `vcs.useIgnoreFile` 字段：
+
+```json title="biome.json" ins={5}
+{
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  }
+}
+```
+
+### 仅处理变更文件
+
+这是一个仅能通过命令行工具（CLI）使用的特性，能够**只**处理有内容**变更**的文件。
+
+首先，你必须更新配置文件并通过 Biome 的 `vcs.defaultBranch` 字段配置默认分支：
+
+```json title="biome.json" ins={6}
+{
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true,
+    "defaultBranch": "main"
+  }
+}
+```
+
+然后，在命令行中增加 `--changed` 选项，来处理那些被版本控制系统标记为“变更”的文件。Biome 会在版本控制系统的帮助下，会判断出 `main` 分支的变更文件以及当前修订内容：
+
+```shell
+biome format --changed
+```
+
+:::caution
+Biome 不会检查变更内容，这意味着即使是在文件里增加了空格或新的一行，都会将该文件标记为“变更”
+:::
+
+或者，可以通过 `--since` 选项来制定任意一个分支。这个选项**优先**于 `vcs.defaultBranch` 选项。例如，你可能想要针对 `next` 分支来来检查变更：
+
+```shell
+biome format --changed --since=next
+```
