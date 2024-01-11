@@ -123,45 +123,45 @@
   --size: 15vw;
 }
 
-.expressive-code:nth-child(-n+2) {
+.linter>div>.expressive-code:nth-child(-n+2) {
   margin-top: 0 !important;
 }
 
-.expressive-code:nth-child(-n+2)>figure>pre {
+.linter>div>.expressive-code:nth-child(-n+2)>figure>pre {
   border: none;
   padding: 1.2rem;
 }
 
-.expressive-code:nth-child(-n+2)>figure>pre>code {
+.linter>div>.expressive-code:nth-child(-n+2)>figure>pre>code {
   height: 400px !important;
   overflow: scroll;
   font-size: 0.7rem;
 }
 
-.expressive-code:first-child>figure>pre {
+.linter>div>.expressive-code:first-child>figure>pre {
   border-bottom-left-radius: 1rem;
 }
 
-.expressive-code:nth-child(-n+2)>figure>pre>code>.copy {
+.linter>div>.expressive-code:nth-child(-n+2)>figure>pre>code>.copy {
   display: none;
 }
 
-.expressive-code:nth-child(-n+2)>figure>pre>code {
+.linter>div>.expressive-code:nth-child(-n+2)>figure>pre>code {
   height: 400px !important;
   overflow: scroll;
   font-size: 0.7rem;
 }
 
-.expressive-code:first-child>figure>pre {
+.linter>div>.expressive-code:first-child>figure>pre {
   border-bottom-left-radius: 1rem;
 }
 
-.expressive-code:nth-child(-n+2)>figure>pre>code>.copy {
+.linter>div>.expressive-code:nth-child(-n+2)>figure>pre>code>.copy {
   display: none;
 }
 
 @media only screen and (max-width: 960px) {
-  .expressive-code:nth-child(-n+2)>figure>pre>code {
+  .linter>div>.expressive-code:nth-child(-n+2)>figure>pre>code {
     height: 250px !important;
     overflow: scroll;
     font-size: 0.7rem;
