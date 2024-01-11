@@ -211,7 +211,7 @@ Biome は`--files-ignore-unknown=true`を指定することで未知のファイ
       xargs -0 npx biome check --files-ignore-unknown=true --no-errors-on-unmatched $STAGED_FILES
   ```
 
-- コミットをする前にformatチェックやlint、安全な修正を行う
+- コミット前にformatやlintのチェック、安全な修正を行う
 
   ```shell title=".git/hooks/pre-commit"
   #!/bin/sh
