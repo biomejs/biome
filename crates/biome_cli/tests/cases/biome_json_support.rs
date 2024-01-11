@@ -211,3 +211,45 @@ fn ci_biome_json() {
         result,
     ));
 }
+
+#[test]
+fn biome_json_is_not_ignored() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        PathBuf::from("biome.json"),
+        r#"{
+        "files": { "ignore": ["*.json"] },
+  "formatter": {
+    "enabled": false
+  }
+}
+"#
+        .as_bytes(),
+    );
+
+    let input_file = Path::new("file.js");
+
+    fs.insert(input_file.into(), "  statement(  )  ".as_bytes());
+
+    let input_file = Path::new("file.json");
+
+    fs.insert(input_file.into(), "  statement(  )  ".as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("ci"), "./"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "biome_json_is_not_ignored",
+        fs,
+        console,
+        result,
+    ));
+}
