@@ -42,16 +42,21 @@ function f7() {
     };
 }
 
-const f8 = function(a) {}.bind(null, 0);
-
-const f9 = function(a) {}["bind"](null, 0);
-
-const called = function () {}();
-
 const f10 = function(x) {
     return 0, 1;
 }
 
+const as = function () {} as () => void;
+const satisfies = function () {} satisfies () => void;
+const unary = +function () {};
+const conditionalTest = function () {} ? true : false;
+class ExtendsClause extends function() {} {};
+const non_null_assertion = function () {}!;
+const call = function () {}();
+const staticMember = function(a) {}.bind(null, 0);
+const computedMember = function(a) {}["bind"](null, 0);
+const logical = false || function () {};
+const binary = false + function () {};
 ```
 
 # Diagnostics
@@ -268,16 +273,19 @@ invalid.ts:30:12 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.ts:39:12 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:39:13 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This function expression can be turned into an arrow function.
   
     37 │ }
     38 │ 
-  > 39 │ const f8 = function(a) {}.bind(null, 0);
-       │            ^^^^^^^^^^^^^^
-    40 │ 
-    41 │ const f9 = function(a) {}["bind"](null, 0);
+  > 39 │ const f10 = function(x) {
+       │             ^^^^^^^^^^^^^
+  > 40 │     return 0, 1;
+  > 41 │ }
+       │ ^
+    42 │ 
+    43 │ const as = function () {} as () => void;
   
   i Function expressions that don't use this can be turned into arrow functions.
   
@@ -285,91 +293,265 @@ invalid.ts:39:12 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━�
   
     37 37 │   }
     38 38 │   
-    39    │ - const·f8·=·function(a)·{}.bind(null,·0);
-       39 │ + const·f8·=·((a)·=>·{}).bind(null,·0);
-    40 40 │   
-    41 41 │   const f9 = function(a) {}["bind"](null, 0);
+    39    │ - const·f10·=·function(x)·{
+    40    │ - ····return·0,·1;
+    41    │ - }
+       39 │ + const·f10·=·(x)·=>·(0,·1)
+    42 40 │   
+    43 41 │   const as = function () {} as () => void;
   
 
 ```
 
 ```
-invalid.ts:41:12 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:43:12 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This function expression can be turned into an arrow function.
   
-    39 │ const f8 = function(a) {}.bind(null, 0);
-    40 │ 
-  > 41 │ const f9 = function(a) {}["bind"](null, 0);
+    41 │ }
+    42 │ 
+  > 43 │ const as = function () {} as () => void;
        │            ^^^^^^^^^^^^^^
-    42 │ 
-    43 │ const called = function () {}();
+    44 │ const satisfies = function () {} satisfies () => void;
+    45 │ const unary = +function () {};
   
   i Function expressions that don't use this can be turned into arrow functions.
   
   i Safe fix: Use an arrow function instead.
   
-    39 39 │   const f8 = function(a) {}.bind(null, 0);
-    40 40 │   
-    41    │ - const·f9·=·function(a)·{}["bind"](null,·0);
-       41 │ + const·f9·=·((a)·=>·{})["bind"](null,·0);
+    41 41 │   }
     42 42 │   
-    43 43 │   const called = function () {}();
+    43    │ - const·as·=·function·()·{}·as·()·=>·void;
+       43 │ + const·as·=·(()·=>·{})·as·()·=>·void;
+    44 44 │   const satisfies = function () {} satisfies () => void;
+    45 45 │   const unary = +function () {};
   
 
 ```
 
 ```
-invalid.ts:43:16 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:44:19 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This function expression can be turned into an arrow function.
   
-    41 │ const f9 = function(a) {}["bind"](null, 0);
-    42 │ 
-  > 43 │ const called = function () {}();
+    43 │ const as = function () {} as () => void;
+  > 44 │ const satisfies = function () {} satisfies () => void;
+       │                   ^^^^^^^^^^^^^^
+    45 │ const unary = +function () {};
+    46 │ const conditionalTest = function () {} ? true : false;
+  
+  i Function expressions that don't use this can be turned into arrow functions.
+  
+  i Safe fix: Use an arrow function instead.
+  
+    42 42 │   
+    43 43 │   const as = function () {} as () => void;
+    44    │ - const·satisfies·=·function·()·{}·satisfies·()·=>·void;
+       44 │ + const·satisfies·=·(()·=>·{})·satisfies·()·=>·void;
+    45 45 │   const unary = +function () {};
+    46 46 │   const conditionalTest = function () {} ? true : false;
+  
+
+```
+
+```
+invalid.ts:45:16 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function expression can be turned into an arrow function.
+  
+    43 │ const as = function () {} as () => void;
+    44 │ const satisfies = function () {} satisfies () => void;
+  > 45 │ const unary = +function () {};
        │                ^^^^^^^^^^^^^^
-    44 │ 
-    45 │ const f10 = function(x) {
+    46 │ const conditionalTest = function () {} ? true : false;
+    47 │ class ExtendsClause extends function() {} {};
   
   i Function expressions that don't use this can be turned into arrow functions.
   
   i Safe fix: Use an arrow function instead.
   
-    41 41 │   const f9 = function(a) {}["bind"](null, 0);
-    42 42 │   
-    43    │ - const·called·=·function·()·{}();
-       43 │ + const·called·=·(()·=>·{})();
-    44 44 │   
-    45 45 │   const f10 = function(x) {
+    43 43 │   const as = function () {} as () => void;
+    44 44 │   const satisfies = function () {} satisfies () => void;
+    45    │ - const·unary·=·+function·()·{};
+       45 │ + const·unary·=·+(()·=>·{});
+    46 46 │   const conditionalTest = function () {} ? true : false;
+    47 47 │   class ExtendsClause extends function() {} {};
   
 
 ```
 
 ```
-invalid.ts:45:13 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:46:25 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This function expression can be turned into an arrow function.
   
-    43 │ const called = function () {}();
-    44 │ 
-  > 45 │ const f10 = function(x) {
-       │             ^^^^^^^^^^^^^
-  > 46 │     return 0, 1;
-  > 47 │ }
-       │ ^
-    48 │ 
+    44 │ const satisfies = function () {} satisfies () => void;
+    45 │ const unary = +function () {};
+  > 46 │ const conditionalTest = function () {} ? true : false;
+       │                         ^^^^^^^^^^^^^^
+    47 │ class ExtendsClause extends function() {} {};
+    48 │ const non_null_assertion = function () {}!;
   
   i Function expressions that don't use this can be turned into arrow functions.
   
   i Safe fix: Use an arrow function instead.
   
-    43 43 │   const called = function () {}();
-    44 44 │   
-    45    │ - const·f10·=·function(x)·{
-    46    │ - ····return·0,·1;
-    47    │ - }
-       45 │ + const·f10·=·(x)·=>·(0,·1)
-    48 46 │   
+    44 44 │   const satisfies = function () {} satisfies () => void;
+    45 45 │   const unary = +function () {};
+    46    │ - const·conditionalTest·=·function·()·{}·?·true·:·false;
+       46 │ + const·conditionalTest·=·(()·=>·{})·?·true·:·false;
+    47 47 │   class ExtendsClause extends function() {} {};
+    48 48 │   const non_null_assertion = function () {}!;
+  
+
+```
+
+```
+invalid.ts:48:28 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function expression can be turned into an arrow function.
+  
+    46 │ const conditionalTest = function () {} ? true : false;
+    47 │ class ExtendsClause extends function() {} {};
+  > 48 │ const non_null_assertion = function () {}!;
+       │                            ^^^^^^^^^^^^^^
+    49 │ const call = function () {}();
+    50 │ const staticMember = function(a) {}.bind(null, 0);
+  
+  i Function expressions that don't use this can be turned into arrow functions.
+  
+  i Safe fix: Use an arrow function instead.
+  
+    46 46 │   const conditionalTest = function () {} ? true : false;
+    47 47 │   class ExtendsClause extends function() {} {};
+    48    │ - const·non_null_assertion·=·function·()·{}!;
+       48 │ + const·non_null_assertion·=·(()·=>·{})!;
+    49 49 │   const call = function () {}();
+    50 50 │   const staticMember = function(a) {}.bind(null, 0);
+  
+
+```
+
+```
+invalid.ts:49:14 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function expression can be turned into an arrow function.
+  
+    47 │ class ExtendsClause extends function() {} {};
+    48 │ const non_null_assertion = function () {}!;
+  > 49 │ const call = function () {}();
+       │              ^^^^^^^^^^^^^^
+    50 │ const staticMember = function(a) {}.bind(null, 0);
+    51 │ const computedMember = function(a) {}["bind"](null, 0);
+  
+  i Function expressions that don't use this can be turned into arrow functions.
+  
+  i Safe fix: Use an arrow function instead.
+  
+    47 47 │   class ExtendsClause extends function() {} {};
+    48 48 │   const non_null_assertion = function () {}!;
+    49    │ - const·call·=·function·()·{}();
+       49 │ + const·call·=·(()·=>·{})();
+    50 50 │   const staticMember = function(a) {}.bind(null, 0);
+    51 51 │   const computedMember = function(a) {}["bind"](null, 0);
+  
+
+```
+
+```
+invalid.ts:50:22 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function expression can be turned into an arrow function.
+  
+    48 │ const non_null_assertion = function () {}!;
+    49 │ const call = function () {}();
+  > 50 │ const staticMember = function(a) {}.bind(null, 0);
+       │                      ^^^^^^^^^^^^^^
+    51 │ const computedMember = function(a) {}["bind"](null, 0);
+    52 │ const logical = false || function () {};
+  
+  i Function expressions that don't use this can be turned into arrow functions.
+  
+  i Safe fix: Use an arrow function instead.
+  
+    48 48 │   const non_null_assertion = function () {}!;
+    49 49 │   const call = function () {}();
+    50    │ - const·staticMember·=·function(a)·{}.bind(null,·0);
+       50 │ + const·staticMember·=·((a)·=>·{}).bind(null,·0);
+    51 51 │   const computedMember = function(a) {}["bind"](null, 0);
+    52 52 │   const logical = false || function () {};
+  
+
+```
+
+```
+invalid.ts:51:24 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function expression can be turned into an arrow function.
+  
+    49 │ const call = function () {}();
+    50 │ const staticMember = function(a) {}.bind(null, 0);
+  > 51 │ const computedMember = function(a) {}["bind"](null, 0);
+       │                        ^^^^^^^^^^^^^^
+    52 │ const logical = false || function () {};
+    53 │ const binary = false + function () {};
+  
+  i Function expressions that don't use this can be turned into arrow functions.
+  
+  i Safe fix: Use an arrow function instead.
+  
+    49 49 │   const call = function () {}();
+    50 50 │   const staticMember = function(a) {}.bind(null, 0);
+    51    │ - const·computedMember·=·function(a)·{}["bind"](null,·0);
+       51 │ + const·computedMember·=·((a)·=>·{})["bind"](null,·0);
+    52 52 │   const logical = false || function () {};
+    53 53 │   const binary = false + function () {};
+  
+
+```
+
+```
+invalid.ts:52:26 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function expression can be turned into an arrow function.
+  
+    50 │ const staticMember = function(a) {}.bind(null, 0);
+    51 │ const computedMember = function(a) {}["bind"](null, 0);
+  > 52 │ const logical = false || function () {};
+       │                          ^^^^^^^^^^^^^^
+    53 │ const binary = false + function () {};
+  
+  i Function expressions that don't use this can be turned into arrow functions.
+  
+  i Safe fix: Use an arrow function instead.
+  
+    50 50 │   const staticMember = function(a) {}.bind(null, 0);
+    51 51 │   const computedMember = function(a) {}["bind"](null, 0);
+    52    │ - const·logical·=·false·||·function·()·{};
+       52 │ + const·logical·=·false·||·(()·=>·{});
+    53 53 │   const binary = false + function () {};
+  
+
+```
+
+```
+invalid.ts:53:24 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function expression can be turned into an arrow function.
+  
+    51 │ const computedMember = function(a) {}["bind"](null, 0);
+    52 │ const logical = false || function () {};
+  > 53 │ const binary = false + function () {};
+       │                        ^^^^^^^^^^^^^^
+  
+  i Function expressions that don't use this can be turned into arrow functions.
+  
+  i Safe fix: Use an arrow function instead.
+  
+    51 51 │   const computedMember = function(a) {}["bind"](null, 0);
+    52 52 │   const logical = false || function () {};
+    53    │ - const·binary·=·false·+·function·()·{};
+       53 │ + const·binary·=·false·+·(()·=>·{});
   
 
 ```
