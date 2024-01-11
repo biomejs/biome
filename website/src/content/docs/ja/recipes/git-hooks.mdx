@@ -1,0 +1,231 @@
+---
+title: Git Hooks
+description: BiomeにおけるGit Hooksの利用
+---
+
+Gitでは、[Git Hooks](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks) を使うことでgitコマンドの実行中にスクリプトを実行することができます。
+例えば、コミットやプッシュの前にステージングされたファイルに対してformatやlintを実行できます。
+Git Hooks の管理を簡単にするツールがいくつかあります。
+以下のセクションでは、それらのツールで Biome を使う方法を紹介します。
+
+
+## Lefthook
+
+[Lefthook](https://github.com/evilmartians/lefthook)は高速で依存性のない、クロスプラットフォーム対応のフックマネージャです。
+[NPM経由でインストール](https://github.com/evilmartians/lefthook#install)できます。
+
+Gitリポジトリのルートに`lefthook.yml`というファイルを追加します。
+以下は _Lefthook_ の設定例です：
+
+- コミット前にformatとlintのチェックを行う
+
+  ```yaml title="lefthook.yml"
+  pre-commit:
+    commands:
+      check:
+        glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc}"
+        run: npx biome check --no-errors-on-unmatched --files-ignore-unknown=true {staged_files}
+  ```
+
+- コミット前にformatチェックやlintを行い、[安全な修正](../linter#安全な修正safe-fixes)を行う
+
+  ```yaml title="lefthook.yml"
+  pre-commit:
+    commands:
+      check:
+        glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc}"
+        run: npx biome check --apply --no-errors-on-unmatched --files-ignore-unknown=true {staged_files} && git update-index --again
+  ```
+
+`git update-index --again` は、ステージングされたファイルを再度ステージングします。
+
+- プッシュ前にformatとlintのチェックを行う
+
+  ```yaml title="lefthook.yml"
+  pre-push:
+    commands:
+      check:
+        glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc}"
+        run: npx biome check --no-errors-on-unmatched --files-ignore-unknown=true {pushed_files}
+  ```
+
+`glob`と`--files-ignore-unknown=true` を併用する必要はありません。
+`--files-ignore-unknown=true` を指定するだけで、Biomeが現在サポートしている（もしくは将来サポートするかもしれない）ファイルのみを対象にできます。
+対象ファイルをさらにコントロールしたい場合は、`glob` を使ってください。
+
+`--no-errors-on-unmatched`は、*どのファイルも処理されなかった場合*に発生するエラーを抑制します。
+
+設定後、`lefthook install` を実行してフックのセットアップを完了させましょう。
+
+プロジェクトに `package.json` が含まれている場合、パッケージのインストール時に `scripts.postinstall` を使って自動的に _Lefthook_ のフックを設定することができます：
+
+```json title="package.json"
+{
+  "scripts": {
+    "postinstall": "lefthook install"
+  }
+}
+```
+
+
+## Husky
+
+[Husky](https://github.com/typicode/husky)は、JavaScriptエコシステムで広く使われているフックマネージャーです。
+Husky はステージングされていない変更を無視したり、ステージングされているファイルのみを対象としたりすることができません。
+そのため、 _lint-staged_ や _git-format-staged_ といった別のツールと組み合わせて使われることが多いです。
+
+プロジェクトに `package.json` が含まれている場合、`scripts.postinstall` を使ってパッケージのインストール時に自動的に _husky_ のフックを設定することができます：
+
+```json title="package.json"
+{
+  "scripts": {
+    "postinstall": "husky install"
+  }
+}
+```
+
+### lint-staged
+
+[lint-staged](https://github.com/lint-staged/lint-staged)は、JavaScriptのエコシステムで最も使われているツールのひとつです。
+
+husky の設定に以下の項目を追加します：
+
+```shell title=".husky/pre-commit"
+lint-staged
+```
+
+lint-staged の設定は `package.json` に直接埋め込まれます。
+Git Hooks を実行するときに便利なコマンドの例です：
+
+```jsonc title="package.json"
+{
+  "lint-staged": {
+    // Run Biome on staged files that have the following extensions: js, ts, jsx, tsx, json and jsonc
+    // 次の拡張子を持つステージングファイルに対してBiomeを実行する: js, ts, jsx, tsx, json and jsonc
+    "**.{js|ts|cjs|mjs|d.cts|d.mts|jsx|tsx|json|jsonc}": [
+      "biome check --files-ignore-unknown=true", // フォーマットのチェックとリント
+      "biome check --apply --no-errors-on-unmatched", // フォーマット、インポート文のソート、リント、安全な修正の適用
+      "biome check --apply --organize-imports-enabled=false --no-errors-on-unmatched", // フォーマットと安全な修正の適用
+      "biome check --apply-unsafe --no-errors-on-unmatched", // フォーマット、インポート文のソート、リント、安全及び安全ではない修正の適用
+      "biome format --write --no-errors-on-unmatched", // フォーマット
+      "biome lint --apply --no-errors-on-unmatched", // リントと安全な修正の適用
+    ],
+    // あるいは、すべてのファイルを渡し、不明な拡張子を無視することもできます
+    "*": [
+      "biome check --no-errors-on-unmatched --files-ignore-unknown=true", // フォーマットのチェックとリント
+    ]
+  }
+}
+```
+
+*処理されなかったファイルがない* 場合を示すエラーを非表示にするため、コマンド実行時に`--no-errors-on-unmatched`を使用することを忘れないでください。
+
+
+### git-format-staged
+
+_lefthook_、_pre-commit_、_lint-staged_ などの他のツールとは対照的に、[git-format-staged](https://github.com/hallettj/git-format-staged) は内部的に `git stash` を使用しません。
+これにより、ステージングされていない変更とステージングされた変更の間で衝突が発生した場合に、手動で介入する必要がなくなります。
+詳しくは [_git-format-staged_ と他のツールの比較](https://github.com/hallettj/git-format-staged#comparisons-to-similar-utilities) を参照してください。
+
+
+設定例：
+
+- コミット前にformatとlintのチェックを行う
+  ```shell title=".husky/pre-commit"
+  git-format-staged --formatter 'biome check --files-ignore-unknown=true --no-errors-on-unmatched \"{}\"' .
+  ```
+
+- コミット前にformatやlintのチェック・安全な修正を行う
+
+  ```shell title=".husky/pre-commit"
+  git-format-staged --formatter 'biome check --apply --files-ignore-unknown=true --no-errors-on-unmatched \"{}\"' .
+  ```
+
+## pre-commit
+
+
+[pre-commit](https://pre-commit.com/)は、多言語フックマネージャーです。
+Biome は [biomejs/pre-commit](https://github.com/biomejs/pre-commit) リポジトリ経由で4つの [pre-commit](https://pre-commit.com/) のフックを提供します。
+
+
+| hook `id`       | description                                                                 |
+| --------------- | --------------------------------------------------------------------------- |
+| `biome-ci`      | formatのチェック、インポート文が正しく並んでいるかのチェック、lint        |
+| `biome-check`   | format、インポート文の整理、lint、コミットされたファイルへ安全な修正の適用 |
+| `biome-format`  | コミットされたファイルのformat                                           |
+| `biome-lint`    | lint、コミットされたファイルへ安全な修正の適用                                |
+
+以下の例では、リポジトリに [pre-commit](https://pre-commit.com/index.html#install) をインストールして `pre-commit install` を実行したと仮定します。
+`biome-check` フックを使いたい場合は、プロジェクトのルートにある `.pre-commit-config.yaml` というファイルに次の設定を追加してください：
+
+
+```yaml title=".pre-commit-config.yaml"
+repos:
+-   repo: https://github.com/biomejs/pre-commit
+    rev: "0.1.0"  # タグやハッシュ値を指定してください
+    hooks:
+    -   id: biome-check
+        additional_dependencies: ["@biomejs/biome@1.4.1"]
+```
+
+これで`git commit`を実行したときに `biome check --apply` が実行されるようになりました。
+
+[pre-commit](https://pre-commit.com/)は別々にツールをインストールするため、pre-commit はどのツールがインストールされるか知っておく必要があります。
+そのため、`additional_dependencies` オプションを使ってBiomeのバージョンを指定しなくてはいけません。
+
+Biome がすでに `npm` のパッケージとしてローカルリポジトリにインストールされている場合、Biome を更新する際に `package.json` と `.pre-commit-config.yaml` の両方を更新するのは開発者の負担になります。
+提供されているBiomeフックを使う代わりに、独自の[ローカルフック](https://pre-commit.com/index.html#repository-local-hooks)を指定できます。
+
+例えば、`npm` を使用する場合、`.pre-commit-config.yaml` に以下のようなフックを書くことができます：
+
+```yaml title=".pre-commit-config.yaml"
+repos:
+  - repo: local
+    hooks:
+      - id: local-biome-check
+        name: biome check
+        entry: npx biome check --apply --files-ignore-unknown=true --no-errors-on-unmatched
+        language: system
+        types: [text]
+        files: "\\.(jsx?|tsx?|c(js|ts)|m(js|ts)|d\\.(ts|cts|mts)|jsonc?)$"
+```
+
+Biome は`--files-ignore-unknown=true`を指定することで未知のファイルを無視するため、pre-commit の `files` オプションは必須ではありません。
+
+## Shell script
+
+独自のシェルスクリプトを使うこともできます。
+クロスプラットフォームの互換性に関する問題に遭遇する可能性があることに注意してください。
+前のセクションで紹介したような専用ツールの使用をおすすめします。
+
+
+シェルスクリプトの例：
+
+- コミット前にformatとlintのチェックを行う
+
+  ```shell title=".git/hooks/pre-commit"
+  #!/bin/sh
+  set -eu
+
+  git diff -z --staged --name-only --diff-filter=ACMR | \
+      xargs -0 npx biome check --files-ignore-unknown=true --no-errors-on-unmatched $STAGED_FILES
+  ```
+
+- コミット前にformatやlintのチェック、安全な修正を行う
+
+  ```shell title=".git/hooks/pre-commit"
+  #!/bin/sh
+  set -eu
+
+  if ! git status --short | grep --quiet '^MM'; then
+    printf '%s\n' "ERROR: Some staged files have unstaged changes" >&2
+    exit 1;
+  fi
+
+  git diff -z --staged --name-only --diff-filter=ACMR | \
+      xargs -0 npx biome check --files-ignore-unknown=true --no-errors-on-unmatched
+
+  git update-index --again
+  ```
+
+すでにステージングされたファイルに新たな変更がある場合は、フックを失敗させていることに注意してください。
