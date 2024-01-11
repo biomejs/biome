@@ -31,6 +31,8 @@ foo
    <strong>   │ </strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
     <strong>4 │ </strong>
   
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">A fragment is redundant if it contains only one child, or if it is the child of a html element, and is not a keyed </span><span style="color: lightgreen;"><a href="https://legacy.reactjs.org/docs/fragments.html#keyed-fragments">fragment</a></span><span style="color: lightgreen;">.</span>
+  
 <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Unsafe fix</span><span style="color: lightgreen;">: </span><span style="color: lightgreen;">Remove the Fragment</span>
   
     <strong>1</strong>  <strong> │ </strong><span style="color: Tomato;">-</span> <span style="color: Tomato;"><strong>&lt;</strong></span><span style="color: Tomato;"><strong>&gt;</strong></span>
@@ -58,6 +60,8 @@ foo
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>3 │ </strong>&lt;/React.Fragment&gt;
    <strong>   │ </strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
     <strong>4 │ </strong>
+  
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">A fragment is redundant if it contains only one child, or if it is the child of a html element, and is not a keyed </span><span style="color: lightgreen;"><a href="https://legacy.reactjs.org/docs/fragments.html#keyed-fragments">fragment</a></span><span style="color: lightgreen;">.</span>
   
 <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Unsafe fix</span><span style="color: lightgreen;">: </span><span style="color: lightgreen;">Remove the Fragment</span>
   
@@ -87,6 +91,8 @@ foo
     <strong>3 │ </strong>    &lt;SomeComponent /&gt;
     <strong>4 │ </strong>&lt;/&gt;
   
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">A fragment is redundant if it contains only one child, or if it is the child of a html element, and is not a keyed </span><span style="color: lightgreen;"><a href="https://legacy.reactjs.org/docs/fragments.html#keyed-fragments">fragment</a></span><span style="color: lightgreen;">.</span>
+  
 <strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Unsafe fix</span><span style="color: lightgreen;">: </span><span style="color: lightgreen;">Remove the Fragment</span>
   
 <strong>  </strong><strong>  2 │ </strong><span style="opacity: 0.8;">·</span><span style="opacity: 0.8;">·</span><span style="opacity: 0.8;">·</span><span style="opacity: 0.8;">·</span><span style="color: Tomato;">&lt;</span><span style="color: Tomato;">&gt;</span>foo<span style="color: Tomato;">&lt;</span><span style="color: Tomato;">/</span><span style="color: Tomato;">&gt;</span>
@@ -97,7 +103,7 @@ foo
 <></>
 ```
 
-<pre class="language-text"><code class="language-text">complexity/noUselessFragments.js:1:1 <a href="https://biomejs.dev/linter/rules/no-useless-fragments">lint/complexity/noUselessFragments</a> <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━
+<pre class="language-text"><code class="language-text">complexity/noUselessFragments.js:1:1 <a href="https://biomejs.dev/linter/rules/no-useless-fragments">lint/complexity/noUselessFragments</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 <strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Avoid using unnecessary </span><span style="color: Tomato;"><strong>Fragment</strong></span><span style="color: Tomato;">.</span>
   
@@ -105,11 +111,22 @@ foo
    <strong>   │ </strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
     <strong>2 │ </strong>
   
-<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Unsafe fix</span><span style="color: lightgreen;">: </span><span style="color: lightgreen;">Remove the Fragment</span>
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">A fragment is redundant if it contains only one child, or if it is the child of a html element, and is not a keyed </span><span style="color: lightgreen;"><a href="https://legacy.reactjs.org/docs/fragments.html#keyed-fragments">fragment</a></span><span style="color: lightgreen;">.</span>
   
-<strong>  </strong><strong>  1 │ </strong><span style="color: Tomato;">&lt;</span><span style="color: Tomato;">&gt;</span><span style="color: Tomato;">&lt;</span><span style="color: Tomato;">/</span><span style="color: Tomato;">&gt;</span>
-<strong>  </strong><strong>    │ </strong><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span>
 </code></pre>
+
+## Valid
+
+```jsx
+<>
+    <Foo />
+    <Bar />
+</>
+```
+
+```jsx
+<>foo {bar}</>
+```
 
 ## Related links
 

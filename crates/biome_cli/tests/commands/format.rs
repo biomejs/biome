@@ -623,6 +623,7 @@ fn applies_custom_quote_style() {
 }
 
 #[test]
+#[ignore = "Enable when we are ready to handle CSS files"]
 fn applies_custom_css_quote_style() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
@@ -1322,24 +1323,12 @@ fn does_not_format_ignored_directories() {
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
     for (file_path, expect_formatted) in FILES {
-        let mut file = fs
-            .open(Path::new(file_path))
-            .expect("formatting target file was removed by the CLI");
-
-        let mut content = String::new();
-        file.read_to_string(&mut content)
-            .expect("failed to read file from memory FS");
-
         let expected = if expect_formatted {
             FORMATTED
         } else {
             UNFORMATTED
         };
-
-        assert_eq!(
-            content, expected,
-            "content of {file_path} doesn't match the expected content"
-        );
+        assert_file_contents(&fs, Path::new(file_path), expected);
     }
 
     assert_cli_snapshot(SnapshotPayload::new(

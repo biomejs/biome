@@ -4,6 +4,7 @@ use crate::execute::diagnostics::{ContentDiffAdvice, FormatDiffDiagnostic};
 use crate::execute::Execution;
 use crate::{CliDiagnostic, CliSession};
 use biome_console::{markup, ConsoleExt};
+use biome_diagnostics::Diagnostic;
 use biome_diagnostics::PrintDiagnostic;
 use biome_fs::RomePath;
 use biome_service::workspace::{
@@ -33,9 +34,11 @@ pub(crate) fn run<'a>(
         if file_features.is_protected() {
             let protected_diagnostic =
                 WorkspaceError::protected_file(rome_path.display().to_string());
-            console.error(markup! {
-                {if verbose { PrintDiagnostic::verbose(&protected_diagnostic) } else { PrintDiagnostic::simple(&protected_diagnostic) }}
-            });
+            if protected_diagnostic.tags().is_verbose() && verbose {
+                console.error(markup! {{PrintDiagnostic::verbose(&protected_diagnostic)}})
+            } else {
+                console.error(markup! {{PrintDiagnostic::simple(&protected_diagnostic)}})
+            }
             return Ok(());
         };
         if file_features.supports_for(&FeatureName::Format) {
@@ -81,9 +84,11 @@ pub(crate) fn run<'a>(
         if file_features.is_protected() {
             let protected_diagnostic =
                 WorkspaceError::protected_file(rome_path.display().to_string());
-            console.error(markup! {
-                {if verbose { PrintDiagnostic::verbose(&protected_diagnostic) } else { PrintDiagnostic::simple(&protected_diagnostic) }}
-            });
+            if protected_diagnostic.tags().is_verbose() && verbose {
+                console.error(markup! {{PrintDiagnostic::verbose(&protected_diagnostic)}})
+            } else {
+                console.error(markup! {{PrintDiagnostic::simple(&protected_diagnostic)}})
+            }
             return Ok(());
         };
 

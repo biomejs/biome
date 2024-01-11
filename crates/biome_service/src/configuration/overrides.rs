@@ -334,6 +334,7 @@ impl MergeWith<OverrideOrganizeImportsConfiguration> for OverrideOrganizeImports
 }
 
 pub fn to_override_settings(
+    working_directory: Option<PathBuf>,
     overrides: Overrides,
     vcs_base_path: Option<PathBuf>,
     gitignore_matches: &[String],
@@ -363,11 +364,13 @@ pub fn to_override_settings(
 
         let pattern_setting = OverrideSettingPattern {
             include: to_matcher(
+                working_directory.clone(),
                 pattern.include.as_ref(),
                 vcs_base_path.clone(),
                 gitignore_matches,
             )?,
             exclude: to_matcher(
+                working_directory.clone(),
                 pattern.ignore.as_ref(),
                 vcs_base_path.clone(),
                 gitignore_matches,
