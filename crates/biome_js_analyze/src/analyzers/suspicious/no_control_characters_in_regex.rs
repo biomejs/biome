@@ -1,5 +1,5 @@
 use crate::utils::escape_string;
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::{
     AnyJsExpression, JsCallArguments, JsCallExpression, JsNewExpression, JsRegexLiteralExpression,
@@ -22,8 +22,6 @@ declare_rule! {
     /// - Unescaped raw characters from U+0000 to U+001F
     ///
     /// Control escapes such as `\t` and `\n` are allowed by this rule.
-    ///
-    /// Source: https://eslint.org/docs/latest/rules/no-control-regex
     ///
     /// ## Examples
     ///
@@ -63,6 +61,7 @@ declare_rule! {
     pub(crate) NoControlCharactersInRegex {
         version: "1.0.0",
         name: "noControlCharactersInRegex",
+        source: RuleSource::Eslint("no-control-regex"),
         recommended: true,
     }
 }

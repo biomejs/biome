@@ -8,6 +8,8 @@ title: useLiteralEnumMembers (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://typescript-eslint.io/rules/prefer-literal-enum-member" target="_blank"><code>prefer-literal-enum-member</code></a>
+
 Require all enum members to be literal values.
 
 Usually, an enum member is initialized with a literal number or a literal string.
@@ -16,8 +18,6 @@ Using a computed enum member is often error-prone and confusing.
 This rule requires the initialization of enum members with constant expressions.
 It allows numeric and bitwise expressions for supporting [enum flags](https://stackoverflow.com/questions/39359740/what-are-enum-flags-in-typescript/39359953#39359953).
 It also allows referencing previous enum members.
-
-Source: https://typescript-eslint.io/rules/prefer-literal-enum-member/
 
 ## Examples
 

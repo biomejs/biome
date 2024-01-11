@@ -8,14 +8,14 @@ title: noSwitchDeclarations (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://eslint.org/docs/latest/rules/no-case-declarations" target="_blank"><code>no-case-declarations</code></a>
+
 Disallow lexical declarations in `switch` clauses.
 
 Lexical declarations in `switch` clauses are accessible in the entire `switch`.
 However, it only gets initialized when it is assigned, which will only happen if the `switch` clause where it is defined is reached.
 
 To ensure that the lexical declarations only apply to the current `switch` clause wrap your declarations in a block.
-
-Source: https://eslint.org/docs/latest/rules/no-case-declarations
 
 ## Examples
 

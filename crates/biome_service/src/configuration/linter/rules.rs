@@ -3395,7 +3395,7 @@ pub struct Style {
     #[doc = r" It enables ALL rules for this group."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub all: Option<bool>,
-    #[doc = "Disallow the use of arguments"]
+    #[doc = "Disallow the use of arguments."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_arguments: Option<RuleConfiguration>,
     #[doc = "Disallow comma operator."]

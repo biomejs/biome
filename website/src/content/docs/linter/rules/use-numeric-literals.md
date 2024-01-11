@@ -8,6 +8,8 @@ title: useNumericLiterals (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://eslint.org/docs/latest/rules/prefer-numeric-literals" target="_blank"><code>prefer-numeric-literals</code></a>
+
 Disallow `parseInt()` and `Number.parseInt()` in favor of binary, octal, and hexadecimal literals
 
 _JavaScript_ provides literal forms for binary, octal, and hexadecimal numbers.

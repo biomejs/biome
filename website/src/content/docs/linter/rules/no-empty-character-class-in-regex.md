@@ -8,13 +8,13 @@ title: noEmptyCharacterClassInRegex (since v1.3.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://eslint.org/docs/latest/rules/no-empty-character-class" target="_blank"><code>no-empty-character-class</code></a>
+
 Disallow empty character classes in regular expression literals.
 
 Empty character classes don't match anything.
 In contrast, negated empty classes match any character.
 They are often the result of a typing mistake.
-
-Source: https://eslint.org/docs/latest/rules/no-empty-character-class/
 
 ## Examples
 

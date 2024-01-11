@@ -1,7 +1,7 @@
 use biome_analyze::context::RuleContext;
 use biome_analyze::{
     declare_rule, ActionCategory, AddVisitor, FixKind, Phases, QueryMatch, Queryable, Rule,
-    RuleDiagnostic, ServiceBag, Visitor, VisitorContext,
+    RuleDiagnostic, RuleSource, ServiceBag, Visitor, VisitorContext,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
@@ -20,8 +20,6 @@ declare_rule! {
     /// Disallow unused labels.
     ///
     /// Labels that are declared and never used are most likely an error due to incomplete refactoring.
-    ///
-    /// Source: https://eslint.org/docs/latest/rules/no-unused-labels
     ///
     /// ## Examples
     ///
@@ -56,6 +54,7 @@ declare_rule! {
     pub(crate) NoUnusedLabels {
         version: "1.0.0",
         name: "noUnusedLabels",
+        source: RuleSource::Eslint("no-unused-labels"),
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }

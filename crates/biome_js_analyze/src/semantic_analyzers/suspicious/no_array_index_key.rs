@@ -1,7 +1,7 @@
 use crate::react::{is_react_call_api, ReactLibrary};
 use crate::semantic_services::Semantic;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, Rule, RuleDiagnostic};
+use biome_analyze::{declare_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::{
     AnyJsFunction, AnyJsMemberExpression, JsCallArgumentList, JsCallArguments, JsCallExpression,
@@ -39,6 +39,7 @@ declare_rule! {
     pub(crate) NoArrayIndexKey {
         version: "1.0.0",
         name: "noArrayIndexKey",
+        source: RuleSource::EslintReact("no-array-index-key"),
         recommended: true,
     }
 }

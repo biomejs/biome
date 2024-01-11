@@ -8,6 +8,8 @@ title: useButtonType (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/button-has-type.md" target="_blank"><code>button-has-type</code></a>
+
 Enforces the usage of the attribute `type` for the element `button`
 
 ## Examples

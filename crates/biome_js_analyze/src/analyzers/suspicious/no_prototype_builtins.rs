@@ -1,4 +1,4 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::{AnyJsMemberExpression, JsCallExpression, TextRange};
 use biome_rowan::AstNode;
@@ -42,6 +42,7 @@ declare_rule! {
     pub(crate) NoPrototypeBuiltins {
         version: "1.0.0",
         name: "noPrototypeBuiltins",
+        source: RuleSource::Eslint("no-prototype-builtins"),
         recommended: true,
     }
 }

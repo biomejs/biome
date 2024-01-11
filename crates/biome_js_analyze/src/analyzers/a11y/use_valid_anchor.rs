@@ -1,5 +1,5 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::{markup, MarkupBuf};
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_rowan::{AstNode, TextRange};
@@ -66,6 +66,7 @@ declare_rule! {
     pub(crate) UseValidAnchor {
         version: "1.0.0",
         name: "useValidAnchor",
+        source: RuleSource::EslintJsxA11y("anchor-is-valid"),
         recommended: true,
     }
 }

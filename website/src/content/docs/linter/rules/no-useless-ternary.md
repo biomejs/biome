@@ -8,13 +8,12 @@ title: noUselessTernary (since v1.5.0)
 This rule is part of the [nursery](/linter/rules/#nursery) group.
 :::
 
+Source: <a href="https://eslint.org/docs/latest/rules/no-unneeded-ternary" target="_blank"><code>no-unneeded-ternary</code></a>
+
 Disallow ternary operators when simpler alternatives exist.
 
 It’s a common mistake in JavaScript to use a conditional expression to select between two
 boolean values instead of using the logical NOT (`!`) or double NOT (`!!`) to convert the test to a boolean.
-Here are some examples:
-
-Source: https://eslint.org/docs/latest/rules/no-unneeded-ternary/
 
 ## Examples
 

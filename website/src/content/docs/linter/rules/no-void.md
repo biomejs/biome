@@ -4,13 +4,13 @@ title: noVoid (since v1.0.0)
 
 **Diagnostic Category: `lint/complexity/noVoid`**
 
+Source: <a href="https://eslint.org/docs/latest/rules/no-void" target="_blank"><code>no-void</code></a>
+
 Disallow the use of `void` operators, which is not a familiar operator.
 
 >The `void` operator is often used merely to obtain the undefined primitive value,
 usually using `void(0)` (which is equivalent to `void 0`). In these cases, the global variable `undefined` can be used.
 
-
-Source: https://eslint.org/docs/latest/rules/no-void
 
 ## Examples
 

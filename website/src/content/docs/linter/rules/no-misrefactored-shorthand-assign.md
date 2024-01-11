@@ -4,12 +4,12 @@ title: noMisrefactoredShorthandAssign (since v1.3.0)
 
 **Diagnostic Category: `lint/suspicious/noMisrefactoredShorthandAssign`**
 
+Source: <a href="https://rust-lang.github.io/rust-clippy/master/#/misrefactored_assign_op" target="_blank"><code>misrefactored_assign_op</code></a>
+
 Disallow shorthand assign when variable appears on both sides.
 
 This rule helps to avoid potential bugs related to incorrect assignments or unintended
 side effects that may occur during refactoring.
-
-Source: https://rust-lang.github.io/rust-clippy/master/#/misrefactored_assign_op
 
 ## Examples
 

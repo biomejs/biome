@@ -8,6 +8,8 @@ title: noPrecisionLoss (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://eslint.org/docs/latest/rules/no-loss-of-precision" target="_blank"><code>no-loss-of-precision</code></a>
+
 Disallow literal numbers that lose precision
 
 ## Examples

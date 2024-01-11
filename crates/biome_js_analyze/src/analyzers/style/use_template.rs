@@ -1,3 +1,4 @@
+use biome_analyze::RuleSource;
 use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
 };
@@ -49,6 +50,7 @@ declare_rule! {
     pub(crate) UseTemplate {
         version: "1.0.0",
         name: "useTemplate",
+        source: RuleSource::Eslint("prefer-template"),
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }

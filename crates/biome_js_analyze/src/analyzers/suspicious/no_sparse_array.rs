@@ -1,5 +1,6 @@
 use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
+    RuleSource,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
@@ -22,6 +23,7 @@ declare_rule! {
     pub(crate) NoSparseArray {
         version: "1.0.0",
         name: "noSparseArray",
+        source: RuleSource::Eslint("no-sparse-array"),
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }

@@ -8,6 +8,8 @@ title: useTemplate (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://eslint.org/docs/latest/rules/prefer-template" target="_blank"><code>prefer-template</code></a>
+
 Prefer template literals over string concatenation.
 
 ## Examples

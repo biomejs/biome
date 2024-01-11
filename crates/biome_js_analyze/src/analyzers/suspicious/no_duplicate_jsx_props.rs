@@ -1,5 +1,5 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_js_syntax::{AnyJsxAttribute, JsxAttribute};
@@ -33,6 +33,7 @@ declare_rule! {
  pub(crate) NoDuplicateJsxProps {
         version: "1.0.0",
         name: "noDuplicateJsxProps",
+        source: RuleSource::EslintReact("jsx-no-duplicate-props"),
         recommended: true,
     }
 }

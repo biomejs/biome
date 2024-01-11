@@ -8,6 +8,8 @@ title: noGlobalEval (since v1.5.0)
 This rule is part of the [nursery](/linter/rules/#nursery) group.
 :::
 
+Source: <a href="https://eslint.org/docs/latest/rules/no-eval" target="_blank"><code>no-eval</code></a>
+
 Disallow the use of global `eval()`.
 
 The `eval()` function evaluates the passed string as a _JavaScript_ code.
@@ -17,8 +19,6 @@ The use of `eval()` exposes to [security risks and performance issues](https://d
 If the executed code is somehow affected by a malicious party,
 then you may end up executing malicious code with the privileges of the caller.
 Moreover, changing variables in the caller's scope is expensive in modern _JavaScript_ interpreters.
-
-Source: https://eslint.org/docs/latest/rules/no-eval
 
 ## Examples
 

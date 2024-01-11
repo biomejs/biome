@@ -8,14 +8,14 @@ title: useNumberNamespace (since v1.5.0)
 This rule is part of the [nursery](/linter/rules/#nursery) group.
 :::
 
+Source: <a href="https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/prefer-number-properties.md" target="_blank"><code>prefer-number-properties</code></a>
+
 Use the `Number` properties instead of global ones.
 
 _ES2015_ moved some globals into the `Number` properties for consistency.
 
 The rule doesn't report the globals `isFinite` and `isNan` because they have a slightly different behabior to their corresponding `Number`'s properties `Number.isFinite` and `Number.isNan`.
 You can use the dedicated rules [noGlobalIsFinite](https://biomejs.dev/linter/rules/no-global-is-finite/) and  [noGlobalIsNan](https://biomejs.dev/linter/rules/no-global-is-nan/) to enforce the use of `Number.isFinite` and `Number.isNan`.
-
-Source: https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/prefer-number-properties.md
 
 ## Examples
 

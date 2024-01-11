@@ -1,4 +1,5 @@
 use crate::JsRuleAction;
+use biome_analyze::RuleSource;
 use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
 };
@@ -24,8 +25,6 @@ declare_rule! {
     /// The function type form is generally preferred when possible for being more succinct.
     ///
     /// This rule suggests using a function type instead of an interface or object type literal with a single call signature.
-    ///
-    /// Source: https://typescript-eslint.io/rules/prefer-function-type/
     ///
     /// ## Examples
     ///
@@ -82,6 +81,7 @@ declare_rule! {
     pub(crate) UseShorthandFunctionType {
         version: "1.5.0",
         name: "useShorthandFunctionType",
+        source: RuleSource::EslintTypeScript("prefer-function-type"),
         recommended: false,
         fix_kind: FixKind::Safe,
     }

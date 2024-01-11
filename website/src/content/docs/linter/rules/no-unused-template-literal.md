@@ -8,6 +8,8 @@ title: noUnusedTemplateLiteral (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://typescript-eslint.io/rules/no-useless-template-literals" target="_blank"><code>no-useless-template-literals</code></a>
+
 Disallow template literals if interpolation and special-character handling are not needed
 
 ## Examples

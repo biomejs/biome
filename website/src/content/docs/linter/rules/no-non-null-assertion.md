@@ -8,6 +8,8 @@ title: noNonNullAssertion (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://typescript-eslint.io/rules/no-non-null-assertion" target="_blank"><code>no-non-null-assertion</code></a>
+
 Disallow non-null assertions using the `!` postfix operator.
 
 TypeScript's `!` non-null assertion operator asserts to the type system that an expression is non-nullable, as

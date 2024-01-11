@@ -1,4 +1,4 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::{markup, MarkupBuf};
 use biome_js_syntax::{
     AnyJsClassMember, AnyTsType, AnyTsTypeMember, JsClassDeclaration, JsLanguage,
@@ -16,8 +16,6 @@ declare_rule! {
     /// - When a type alias has a `constructor` method.
     ///
     /// You should not use this rule if you intentionally want a class with a `new` method, and you're confident nobody working in your code will mistake it with an `constructor`.
-    ///
-    /// Source: https://typescript-eslint.io/rules/no-misused-new/
     ///
     /// ## Examples
     ///
@@ -50,6 +48,7 @@ declare_rule! {
     pub(crate) NoMisleadingInstantiator {
         version: "1.3.0",
         name: "noMisleadingInstantiator",
+        source: RuleSource::EslintTypeScript("no-misused-new"),
         recommended: true,
     }
 }

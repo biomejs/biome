@@ -8,6 +8,8 @@ title: noUnsafeOptionalChaining (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://eslint.org/docs/latest/rules/no-unsafe-optional-chaining" target="_blank"><code>no-unsafe-optional-chaining</code></a>
+
 Disallow the use of optional chaining in contexts where the undefined value is not allowed.
 
 The optional chaining (?.) expression can short-circuit with a return value of undefined.

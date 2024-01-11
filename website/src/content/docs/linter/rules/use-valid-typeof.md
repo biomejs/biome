@@ -8,6 +8,8 @@ title: useValidTypeof (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://eslint.org/docs/latest/rules/valid-typeof" target="_blank"><code>valid-typeof</code></a>
+
 This rule verifies the result of `typeof $expr` unary expressions is being compared to valid values, either string literals containing valid type names or other `typeof` expressions
 
 ## Examples

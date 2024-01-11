@@ -1,4 +1,4 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::TsModuleDeclaration;
 use biome_rowan::AstNode;
@@ -9,8 +9,6 @@ declare_rule! {
     /// Namespaces are an old way to organize your code in TypeScript.
     /// They are not recommended anymore and should be replaced by ES6 modules
     /// (the `import`/`export` syntax).
-    ///
-    /// Source: https://typescript-eslint.io/rules/no-namespace
     ///
     /// ## Examples
     ///
@@ -50,6 +48,7 @@ declare_rule! {
     pub(crate) NoNamespace {
         version: "1.0.0",
         name: "noNamespace",
+        source: RuleSource::EslintTypeScript("no-namespace"),
         recommended: false,
     }
 }

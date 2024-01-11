@@ -1,5 +1,6 @@
 use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
+    RuleSource,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
@@ -20,8 +21,6 @@ declare_rule! {
     /// > whose contents are available in the global scope.
     ///
     /// However, an `export {}` statement does nothing if there are any other top-level import or export in the file.
-    ///
-    /// Source: https://typescript-eslint.io/rules/no-useless-empty-export/
     ///
     /// ## Examples
     ///
@@ -46,6 +45,7 @@ declare_rule! {
     pub(crate) NoUselessEmptyExport {
         version: "1.0.0",
         name: "noUselessEmptyExport",
+        source: RuleSource::EslintTypeScript("no-useless-empty-export"),
         recommended: true,
         fix_kind: FixKind::Safe,
     }

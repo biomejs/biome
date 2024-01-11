@@ -1,6 +1,6 @@
 use crate::aria_services::Aria;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, Rule, RuleDiagnostic};
+use biome_analyze::{declare_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_aria::AriaPropertyTypeEnum;
 use biome_console::markup;
 use biome_js_syntax::{JsSyntaxToken, JsxAttribute, TextRange};
@@ -9,7 +9,6 @@ use std::slice::Iter;
 
 declare_rule! {
     /// Enforce that ARIA state and property values are valid.
-    ///
     ///
     /// ## Examples
     ///
@@ -41,14 +40,17 @@ declare_rule! {
     /// ```
     ///
     /// ## Accessibility guidelines
+    ///
     /// - [WCAG 4.1.2](https://www.w3.org/WAI/WCAG21/Understanding/name-role-value)
     ///
     /// ### Resources
+    ///
     /// - [ARIA Spec, States and Properties](https://www.w3.org/TR/wai-aria/#states_and_properties)
     /// - [Chrome Audit Rules, AX_ARIA_04](https://github.com/GoogleChrome/accessibility-developer-tools/wiki/Audit-Rules#ax_aria_04)
     pub(crate) UseValidAriaValues {
         version: "1.0.0",
         name: "useValidAriaValues",
+        source: RuleSource::EslintJsxA11y("aria-proptypes"),
         recommended: true,
     }
 }

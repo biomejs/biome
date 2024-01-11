@@ -1,5 +1,5 @@
 use crate::semantic_services::Semantic;
-use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::{global_identifier, AnyJsExpression, JsCallExpression, JsNewExpression};
 use biome_rowan::{declare_node_union, SyntaxResult, TextRange};
@@ -86,6 +86,7 @@ declare_rule! {
     pub(crate) NoGlobalObjectCalls {
         version: "1.0.0",
         name: "noGlobalObjectCalls",
+        source: RuleSource::Eslint("no-obj-calls"),
         recommended: true,
     }
 }

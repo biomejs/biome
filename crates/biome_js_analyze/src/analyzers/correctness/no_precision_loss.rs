@@ -2,7 +2,7 @@ use std::num::IntErrorKind;
 use std::ops::RangeInclusive;
 
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 
 use biome_js_syntax::numbers::split_into_radix_and_number;
@@ -56,6 +56,7 @@ declare_rule! {
     pub(crate) NoPrecisionLoss {
         version: "1.0.0",
         name: "noPrecisionLoss",
+        source: RuleSource::Eslint("no-loss-of-precision"),
         recommended: true,
     }
 }

@@ -8,6 +8,8 @@ title: noArrayIndexKey (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/no-array-index-key.md" target="_blank"><code>no-array-index-key</code></a>
+
 Discourage the usage of Array index in keys.
 
 >We don’t recommend using indexes for keys if the order of items may change.
