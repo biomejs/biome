@@ -235,6 +235,7 @@ fn does_include_file_with_different_overrides() {
 }
 
 #[test]
+#[ignore = "Enable when we are ready to handle CSS files"]
 fn does_include_file_with_different_languages() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();
@@ -291,6 +292,7 @@ fn does_include_file_with_different_languages() {
 }
 
 #[test]
+#[ignore = "Enable when we are ready to handle CSS files"]
 fn does_include_file_with_different_languages_and_files() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();

@@ -623,6 +623,7 @@ fn applies_custom_quote_style() {
 }
 
 #[test]
+#[ignore = "Enable when we are ready to handle CSS files"]
 fn applies_custom_css_quote_style() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
