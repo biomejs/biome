@@ -133,7 +133,8 @@ impl CommentStyle for JsCommentStyle {
                 .or_else(handle_mapped_type_comment)
                 .or_else(handle_continue_break_comment)
                 .or_else(handle_union_type_comment)
-                .or_else(handle_import_export_specifier_comment),
+                .or_else(handle_import_export_specifier_comment)
+                .or_else(handle_class_method_comment),
             CommentTextPosition::SameLine => handle_if_statement_comment(comment)
                 .or_else(handle_while_comment)
                 .or_else(handle_for_comment)
@@ -1251,6 +1252,32 @@ fn handle_import_export_specifier_comment(
             }
         }
 
+        _ => CommentPlacement::Default(comment),
+    }
+}
+
+/// Ensure that comments before the `async`` keyword are placed just before it.
+/// ```javascript
+/// class Foo {
+///    @decorator()
+///    // comment
+///    async method() {}
+/// }
+fn handle_class_method_comment(
+    comment: DecoratedComment<JsLanguage>,
+) -> CommentPlacement<JsLanguage> {
+    let enclosing_node = comment.enclosing_node();
+    match enclosing_node.kind() {
+        JsSyntaxKind::JS_METHOD_CLASS_MEMBER => {
+            if let Some(following_token) = comment.following_token() {
+                if following_token.kind() == JsSyntaxKind::ASYNC_KW {
+                    if let Some(preceding) = comment.preceding_node() {
+                        return CommentPlacement::trailing(preceding.clone(), comment);
+                    }
+                }
+            }
+            CommentPlacement::Default(comment)
+        }
         _ => CommentPlacement::Default(comment),
     }
 }
