@@ -130,7 +130,7 @@ _lefthook_、_pre-commit_、_lint-staged_ などの他のツールとは対照�
 
 設定例：
 
-- コミットをする前にformatのチェックとlintを行う
+- コミット前にformatとlintのチェックを行う
   ```shell title=".husky/pre-commit"
   git-format-staged --formatter 'biome check --files-ignore-unknown=true --no-errors-on-unmatched \"{}\"' .
   ```
