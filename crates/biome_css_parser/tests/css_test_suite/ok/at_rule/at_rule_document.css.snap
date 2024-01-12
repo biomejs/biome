@@ -58,7 +58,7 @@ CssRoot {
                 block: CssRuleListBlock {
                     l_curly_token: L_CURLY@42..43 "{" [] [],
                     rules: CssRuleList [
-                        CssRule {
+                        CssQualifiedRule {
                             prelude: CssSelectorList [
                                 CssCompoundSelector {
                                     nesting_selector_token: missing (optional),
@@ -152,7 +152,7 @@ CssRoot {
                 block: CssRuleListBlock {
                     l_curly_token: L_CURLY@216..217 "{" [] [],
                     rules: CssRuleList [
-                        CssRule {
+                        CssQualifiedRule {
                             prelude: CssSelectorList [
                                 CssCompoundSelector {
                                     nesting_selector_token: missing (optional),
@@ -325,7 +325,7 @@ CssRoot {
                                 block: CssRuleListBlock {
                                     l_curly_token: L_CURLY@517..518 "{" [] [],
                                     rules: CssRuleList [
-                                        CssRule {
+                                        CssQualifiedRule {
                                             prelude: CssSelectorList [
                                                 CssCompoundSelector {
                                                     nesting_selector_token: missing (optional),
@@ -401,7 +401,7 @@ CssRoot {
         2: CSS_RULE_LIST_BLOCK@42..70
           0: L_CURLY@42..43 "{" [] []
           1: CSS_RULE_LIST@43..68
-            0: CSS_RULE@43..68
+            0: CSS_QUALIFIED_RULE@43..68
               0: CSS_SELECTOR_LIST@43..48
                 0: CSS_COMPOUND_SELECTOR@43..48
                   0: (empty)
@@ -468,7 +468,7 @@ CssRoot {
         2: CSS_RULE_LIST_BLOCK@216..269
           0: L_CURLY@216..217 "{" [] []
           1: CSS_RULE_LIST@217..267
-            0: CSS_RULE@217..267
+            0: CSS_QUALIFIED_RULE@217..267
               0: CSS_SELECTOR_LIST@217..224
                 0: CSS_COMPOUND_SELECTOR@217..224
                   0: (empty)
@@ -590,7 +590,7 @@ CssRoot {
                 2: CSS_RULE_LIST_BLOCK@517..560
                   0: L_CURLY@517..518 "{" [] []
                   1: CSS_RULE_LIST@518..557
-                    0: CSS_RULE@518..557
+                    0: CSS_QUALIFIED_RULE@518..557
                       0: CSS_SELECTOR_LIST@518..529
                         0: CSS_COMPOUND_SELECTOR@518..529
                           0: (empty)

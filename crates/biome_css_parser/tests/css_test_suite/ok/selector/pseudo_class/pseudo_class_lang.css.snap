@@ -24,7 +24,7 @@ html:lang(de, fr) {}
 CssRoot {
     bom_token: missing (optional),
     rules: CssRuleList [
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -52,7 +52,7 @@ CssRoot {
                 r_curly_token: R_CURLY@16..17 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -80,7 +80,7 @@ CssRoot {
                 r_curly_token: R_CURLY@35..36 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -113,7 +113,7 @@ CssRoot {
                 r_curly_token: R_CURLY@55..56 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -146,7 +146,7 @@ CssRoot {
                 r_curly_token: R_CURLY@72..73 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -183,7 +183,7 @@ CssRoot {
                 r_curly_token: R_CURLY@93..94 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssComplexSelector {
                     left: CssCompoundSelector {
@@ -224,7 +224,7 @@ CssRoot {
                 r_curly_token: R_CURLY@113..114 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssComplexSelector {
                     left: CssCompoundSelector {
@@ -265,7 +265,7 @@ CssRoot {
                 r_curly_token: R_CURLY@130..131 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssComplexSelector {
                     left: CssCompoundSelector {
@@ -319,7 +319,7 @@ CssRoot {
 0: CSS_ROOT@0..155
   0: (empty)
   1: CSS_RULE_LIST@0..154
-    0: CSS_RULE@0..17
+    0: CSS_QUALIFIED_RULE@0..17
       0: CSS_SELECTOR_LIST@0..15
         0: CSS_COMPOUND_SELECTOR@0..15
           0: (empty)
@@ -338,7 +338,7 @@ CssRoot {
         0: L_CURLY@15..16 "{" [] []
         1: CSS_DECLARATION_LIST@16..16
         2: R_CURLY@16..17 "}" [] []
-    1: CSS_RULE@17..36
+    1: CSS_QUALIFIED_RULE@17..36
       0: CSS_SELECTOR_LIST@17..34
         0: CSS_COMPOUND_SELECTOR@17..34
           0: (empty)
@@ -357,7 +357,7 @@ CssRoot {
         0: L_CURLY@34..35 "{" [] []
         1: CSS_DECLARATION_LIST@35..35
         2: R_CURLY@35..36 "}" [] []
-    2: CSS_RULE@36..56
+    2: CSS_QUALIFIED_RULE@36..56
       0: CSS_SELECTOR_LIST@36..54
         0: CSS_COMPOUND_SELECTOR@36..54
           0: (empty)
@@ -379,7 +379,7 @@ CssRoot {
         0: L_CURLY@54..55 "{" [] []
         1: CSS_DECLARATION_LIST@55..55
         2: R_CURLY@55..56 "}" [] []
-    3: CSS_RULE@56..73
+    3: CSS_QUALIFIED_RULE@56..73
       0: CSS_SELECTOR_LIST@56..71
         0: CSS_COMPOUND_SELECTOR@56..71
           0: (empty)
@@ -401,7 +401,7 @@ CssRoot {
         0: L_CURLY@71..72 "{" [] []
         1: CSS_DECLARATION_LIST@72..72
         2: R_CURLY@72..73 "}" [] []
-    4: CSS_RULE@73..94
+    4: CSS_QUALIFIED_RULE@73..94
       0: CSS_SELECTOR_LIST@73..92
         0: CSS_COMPOUND_SELECTOR@73..92
           0: (empty)
@@ -426,7 +426,7 @@ CssRoot {
         0: L_CURLY@92..93 "{" [] []
         1: CSS_DECLARATION_LIST@93..93
         2: R_CURLY@93..94 "}" [] []
-    5: CSS_RULE@94..114
+    5: CSS_QUALIFIED_RULE@94..114
       0: CSS_SELECTOR_LIST@94..112
         0: CSS_COMPLEX_SELECTOR@94..112
           0: CSS_COMPOUND_SELECTOR@94..108
@@ -454,7 +454,7 @@ CssRoot {
         0: L_CURLY@112..113 "{" [] []
         1: CSS_DECLARATION_LIST@113..113
         2: R_CURLY@113..114 "}" [] []
-    6: CSS_RULE@114..131
+    6: CSS_QUALIFIED_RULE@114..131
       0: CSS_SELECTOR_LIST@114..129
         0: CSS_COMPLEX_SELECTOR@114..129
           0: CSS_COMPOUND_SELECTOR@114..125
@@ -482,7 +482,7 @@ CssRoot {
         0: L_CURLY@129..130 "{" [] []
         1: CSS_DECLARATION_LIST@130..130
         2: R_CURLY@130..131 "}" [] []
-    7: CSS_RULE@131..154
+    7: CSS_QUALIFIED_RULE@131..154
       0: CSS_SELECTOR_LIST@131..152
         0: CSS_COMPLEX_SELECTOR@131..152
           0: CSS_COMPOUND_SELECTOR@131..144

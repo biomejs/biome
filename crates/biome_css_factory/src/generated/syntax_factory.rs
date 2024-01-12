@@ -3060,6 +3060,32 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.into_node(CSS_PSEUDO_ELEMENT_SELECTOR, children)
             }
+            CSS_QUALIFIED_RULE => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element {
+                    if CssSelectorList::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if AnyCssDeclarationListBlock::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_QUALIFIED_RULE.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_QUALIFIED_RULE, children)
+            }
             CSS_QUERY_FEATURE_BOOLEAN => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
@@ -3361,29 +3387,6 @@ impl SyntaxFactory for CssSyntaxFactory {
                     return RawSyntaxNode::new(CSS_ROOT.to_bogus(), children.into_iter().map(Some));
                 }
                 slots.into_node(CSS_ROOT, children)
-            }
-            CSS_RULE => {
-                let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
-                let mut current_element = elements.next();
-                if let Some(element) = &current_element {
-                    if CssSelectorList::can_cast(element.kind()) {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element {
-                    if AnyCssDeclarationListBlock::can_cast(element.kind()) {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
-                }
-                slots.next_slot();
-                if current_element.is_some() {
-                    return RawSyntaxNode::new(CSS_RULE.to_bogus(), children.into_iter().map(Some));
-                }
-                slots.into_node(CSS_RULE, children)
             }
             CSS_RULE_LIST_BLOCK => {
                 let mut elements = (&children).into_iter();

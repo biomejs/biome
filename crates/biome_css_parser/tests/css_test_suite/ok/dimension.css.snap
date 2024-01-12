@@ -96,7 +96,7 @@ expression: snapshot
 CssRoot {
     bom_token: missing (optional),
     rules: CssRuleList [
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -1270,7 +1270,7 @@ CssRoot {
                 r_curly_token: R_CURLY@915..917 "}" [Newline("\n")] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -1335,7 +1335,7 @@ CssRoot {
 0: CSS_ROOT@0..979
   0: (empty)
   1: CSS_RULE_LIST@0..979
-    0: CSS_RULE@0..917
+    0: CSS_QUALIFIED_RULE@0..917
       0: CSS_SELECTOR_LIST@0..10
         0: CSS_COMPOUND_SELECTOR@0..10
           0: (empty)
@@ -2141,7 +2141,7 @@ CssRoot {
             1: (empty)
           143: SEMICOLON@914..915 ";" [] []
         2: R_CURLY@915..917 "}" [Newline("\n")] []
-    1: CSS_RULE@917..979
+    1: CSS_QUALIFIED_RULE@917..979
       0: CSS_SELECTOR_LIST@917..939
         0: CSS_COMPOUND_SELECTOR@917..939
           0: (empty)

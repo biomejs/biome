@@ -501,7 +501,7 @@ CssRoot {
                 },
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -1122,7 +1122,7 @@ CssRoot {
                   0: R_PAREN@446..447 ")" [] []
                   1: SEMICOLON@447..448 ";" [] []
           2: R_CURLY@448..451 "}" [Newline("\n"), Whitespace("\t")] []
-    6: CSS_RULE@451..492
+    6: CSS_QUALIFIED_RULE@451..492
       0: CSS_SELECTOR_LIST@451..457
         0: CSS_COMPOUND_SELECTOR@451..457
           0: (empty)
@@ -1481,7 +1481,7 @@ at_rule_keyframes.css:42:2 parse ━━━━━━━━━━━━━━━�
   
 at_rule_keyframes.css:47:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a rule, or an at rule but instead found '}'.
+  × Expected a qualified rule, or an at rule but instead found '}'.
   
     45 │ 		transform: translateX(100%);
     46 │ 	}
@@ -1490,7 +1490,7 @@ at_rule_keyframes.css:47:1 parse ━━━━━━━━━━━━━━━�
     48 │ 
     49 │ @keyframes slidein {
   
-  i Expected a rule, or an at rule here.
+  i Expected a qualified rule, or an at rule here.
   
     45 │ 		transform: translateX(100%);
     46 │ 	}
@@ -1551,7 +1551,7 @@ at_rule_keyframes.css:56:2 parse ━━━━━━━━━━━━━━━�
   
 at_rule_keyframes.css:57:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a rule, or an at rule but instead found '}'.
+  × Expected a qualified rule, or an at rule but instead found '}'.
   
     55 │ 		transform: translateX(100%);
     56 │ 	}
@@ -1560,7 +1560,7 @@ at_rule_keyframes.css:57:1 parse ━━━━━━━━━━━━━━━�
     58 │ 
     59 │ @keyframes slidein {
   
-  i Expected a rule, or an at rule here.
+  i Expected a qualified rule, or an at rule here.
   
     55 │ 		transform: translateX(100%);
     56 │ 	}
