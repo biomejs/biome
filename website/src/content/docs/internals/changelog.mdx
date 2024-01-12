@@ -43,6 +43,8 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 - Fix [#1172](https://github.com/biomejs/biome/issues/1172). Fix placement of line comment after function expression parentheses, they are now attached to first statement in body. Contributed by @kalleep
 
+- Fix [#1511](https://github.com/biomejs/biome/issues/1511) that made the JavaScript formatter crash. Contributed @Conaclos
+
 ### JavaScript APIs
 
 ### Linter
@@ -1922,7 +1924,7 @@ The following rules are now recommended:
 
   The code action now removes any whitespace between the parameter name and its initialization.
 
-- Relax [noConfusingArrow](https://biomejs.dev/linter/rules/no-confusing-arrow/)
+- Relax `noConfusingArrow`
 
   All arrow functions that enclose its parameter with parenthesis are allowed.
   Thus, the following snippet no longer trigger the rule:
