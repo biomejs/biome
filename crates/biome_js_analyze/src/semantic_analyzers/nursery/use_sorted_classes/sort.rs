@@ -1,5 +1,7 @@
 use std::cmp::Ordering;
 
+use biome_rowan::TokenText;
+
 use super::{
     class_info::{get_class_info, ClassInfo},
     sort_config::SortConfig,
@@ -79,7 +81,7 @@ fn compare_classes(a: &ClassInfo, b: &ClassInfo) -> Ordering {
 }
 
 /// Sort the given class string according to the given sort config.
-pub fn sort_class_name(class_name: &str, sort_config: &SortConfig) -> String {
+pub fn sort_class_name(class_name: &TokenText, sort_config: &SortConfig) -> String {
     // Obtain classes by splitting the class string by whitespace.
     let classes = class_name.split_whitespace().collect::<Vec<&str>>();
 

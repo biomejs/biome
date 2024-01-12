@@ -50,9 +50,6 @@ impl DeserializationVisitor for UseSortedClassesOptionsVisitor {
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self::Output> {
         let mut result = UseSortedClassesOptions::default();
-        result
-            .attributes
-            .extend(CLASS_ATTRIBUTES.iter().map(|&s| s.to_string()));
 
         for (key, value) in members.flatten() {
             let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {

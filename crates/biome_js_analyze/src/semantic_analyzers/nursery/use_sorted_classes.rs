@@ -123,8 +123,8 @@ impl Rule for UseSortedClasses {
         );
 
         let value = ctx.query().value()?;
-        let sorted_value = sort_class_name(value.as_str(), &sort_config);
-        if value != sorted_value {
+        let sorted_value = sort_class_name(&value, &sort_config);
+        if value.text() != sorted_value {
             Some(sorted_value)
         } else {
             None
@@ -132,16 +132,11 @@ impl Rule for UseSortedClasses {
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
-        Some(
-            RuleDiagnostic::new(
-                rule_category!(),
-                ctx.query().range(),
-                "These classes should be sorted.",
-            )
-            .note(markup! {
-                "The safe fix will automatically sort them."
-            }),
-        )
+        Some(RuleDiagnostic::new(
+            rule_category!(),
+            ctx.query().range(),
+            "These CSS classes should be sorted.",
+        ))
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {

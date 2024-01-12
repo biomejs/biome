@@ -16,14 +16,12 @@ use super::UseSortedClassesOptions;
 // -----
 
 fn get_options_from_analyzer(analyzer_options: &AnalyzerOptions) -> UseSortedClassesOptions {
-    match analyzer_options
+    analyzer_options
         .configuration
         .rules
         .get_rule_options::<UseSortedClassesOptions>(&RuleKey::new("nursery", "useSortedClasses"))
-    {
-        Some(options) => options.clone(),
-        None => UseSortedClassesOptions::default(),
-    }
+        .cloned()
+        .unwrap_or_default()
 }
 
 fn get_callee_name(call_expression: &JsCallExpression) -> Option<TokenText> {
@@ -41,14 +39,20 @@ fn is_call_expression_of_target_function(
     call_expression: &JsCallExpression,
     target_functions: &[String],
 ) -> bool {
-    match get_callee_name(call_expression) {
-        Some(name) => target_functions.contains(&name.to_string()),
-        None => false,
-    }
+    get_callee_name(call_expression)
+        .is_some_and(|name| target_functions.contains(&name.to_string()))
 }
 
-fn get_attribute_name(attribute: &JsxAttribute) -> Option<String> {
-    Some(attribute.name().ok()?.as_jsx_name()?.to_string())
+fn get_attribute_name(attribute: &JsxAttribute) -> Option<TokenText> {
+    Some(
+        attribute
+            .name()
+            .ok()?
+            .as_jsx_name()?
+            .value_token()
+            .ok()?
+            .token_text_trimmed(),
+    )
 }
 
 fn is_target_attribute(attribute: &JsxAttribute, target_attributes: &[String]) -> bool {
@@ -180,16 +184,14 @@ declare_node_union! {
 
 impl AnyClassStringLike {
     /// Returns the value of the string literal, JSX string, or template chunk.
-    pub fn value(&self) -> Option<String> {
+    pub fn value(&self) -> Option<TokenText> {
         match self {
-            AnyClassStringLike::JsStringLiteralExpression(string_literal) => {
-                Some(string_literal.inner_string_text().ok()?.to_string())
+            Self::JsStringLiteralExpression(string_literal) => {
+                Some(string_literal.inner_string_text().ok()?)
             }
-            AnyClassStringLike::JsxString(jsx_string) => {
-                Some(jsx_string.inner_string_text().ok()?.to_string())
-            }
-            AnyClassStringLike::JsTemplateChunkElement(template_chunk) => {
-                Some(template_chunk.to_string())
+            Self::JsxString(jsx_string) => Some(jsx_string.inner_string_text().ok()?),
+            Self::JsTemplateChunkElement(template_chunk) => {
+                Some(template_chunk.template_chunk_token().ok()?.token_text())
             }
         }
     }
