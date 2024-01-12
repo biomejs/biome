@@ -79,7 +79,7 @@ CssRoot {
                 block: CssRuleListBlock {
                     l_curly_token: L_CURLY@7..8 "{" [] [],
                     rules: CssRuleList [
-                        CssRule {
+                        CssQualifiedRule {
                             prelude: CssSelectorList [
                                 CssCompoundSelector {
                                     nesting_selector_token: missing (optional),
@@ -146,7 +146,7 @@ CssRoot {
                 block: CssRuleListBlock {
                     l_curly_token: L_CURLY@112..113 "{" [] [],
                     rules: CssRuleList [
-                        CssRule {
+                        CssQualifiedRule {
                             prelude: CssSelectorList [
                                 CssCompoundSelector {
                                     nesting_selector_token: missing (optional),
@@ -225,7 +225,7 @@ CssRoot {
                 block: CssRuleListBlock {
                     l_curly_token: L_CURLY@215..216 "{" [] [],
                     rules: CssRuleList [
-                        CssRule {
+                        CssQualifiedRule {
                             prelude: CssSelectorList [
                                 CssCompoundSelector {
                                     nesting_selector_token: missing (optional),
@@ -261,7 +261,7 @@ CssRoot {
                                 r_curly_token: R_CURLY@243..245 "}" [Newline("\n")] [],
                             },
                         },
-                        CssRule {
+                        CssQualifiedRule {
                             prelude: CssSelectorList [
                                 CssCompoundSelector {
                                     nesting_selector_token: missing (optional),
@@ -361,7 +361,7 @@ CssRoot {
                 block: CssRuleListBlock {
                     l_curly_token: L_CURLY@319..320 "{" [] [],
                     rules: CssRuleList [
-                        CssRule {
+                        CssQualifiedRule {
                             prelude: CssSelectorList [
                                 CssCompoundSelector {
                                     nesting_selector_token: missing (optional),
@@ -397,7 +397,7 @@ CssRoot {
                                 r_curly_token: R_CURLY@347..349 "}" [Newline("\n")] [],
                             },
                         },
-                        CssRule {
+                        CssQualifiedRule {
                             prelude: CssSelectorList [
                                 CssCompoundSelector {
                                     nesting_selector_token: missing (optional),
@@ -479,7 +479,7 @@ CssRoot {
                 block: CssRuleListBlock {
                     l_curly_token: L_CURLY@407..408 "{" [] [],
                     rules: CssRuleList [
-                        CssRule {
+                        CssQualifiedRule {
                             prelude: CssSelectorList [
                                 CssCompoundSelector {
                                     nesting_selector_token: missing (optional),
@@ -515,7 +515,7 @@ CssRoot {
                                 r_curly_token: R_CURLY@435..437 "}" [Newline("\n")] [],
                             },
                         },
-                        CssRule {
+                        CssQualifiedRule {
                             prelude: CssSelectorList [
                                 CssCompoundSelector {
                                     nesting_selector_token: missing (optional),
@@ -783,7 +783,7 @@ CssRoot {
         2: CSS_RULE_LIST_BLOCK@7..87
           0: L_CURLY@7..8 "{" [] []
           1: CSS_RULE_LIST@8..85
-            0: CSS_RULE@8..85
+            0: CSS_QUALIFIED_RULE@8..85
               0: CSS_SELECTOR_LIST@8..59
                 0: CSS_COMPOUND_SELECTOR@8..59
                   0: (empty)
@@ -827,7 +827,7 @@ CssRoot {
         2: CSS_RULE_LIST_BLOCK@112..188
           0: L_CURLY@112..113 "{" [] []
           1: CSS_RULE_LIST@113..186
-            0: CSS_RULE@113..186
+            0: CSS_QUALIFIED_RULE@113..186
               0: CSS_SELECTOR_LIST@113..162
                 0: CSS_COMPOUND_SELECTOR@113..162
                   0: (empty)
@@ -880,7 +880,7 @@ CssRoot {
         2: CSS_RULE_LIST_BLOCK@215..276
           0: L_CURLY@215..216 "{" [] []
           1: CSS_RULE_LIST@216..274
-            0: CSS_RULE@216..245
+            0: CSS_QUALIFIED_RULE@216..245
               0: CSS_SELECTOR_LIST@216..221
                 0: CSS_COMPOUND_SELECTOR@216..221
                   0: (empty)
@@ -904,7 +904,7 @@ CssRoot {
                     1: (empty)
                   1: SEMICOLON@242..243 ";" [] []
                 2: R_CURLY@243..245 "}" [Newline("\n")] []
-            1: CSS_RULE@245..274
+            1: CSS_QUALIFIED_RULE@245..274
               0: CSS_SELECTOR_LIST@245..256
                 0: CSS_COMPOUND_SELECTOR@245..256
                   0: (empty)
@@ -971,7 +971,7 @@ CssRoot {
         2: CSS_RULE_LIST_BLOCK@319..380
           0: L_CURLY@319..320 "{" [] []
           1: CSS_RULE_LIST@320..378
-            0: CSS_RULE@320..349
+            0: CSS_QUALIFIED_RULE@320..349
               0: CSS_SELECTOR_LIST@320..325
                 0: CSS_COMPOUND_SELECTOR@320..325
                   0: (empty)
@@ -995,7 +995,7 @@ CssRoot {
                     1: (empty)
                   1: SEMICOLON@346..347 ";" [] []
                 2: R_CURLY@347..349 "}" [Newline("\n")] []
-            1: CSS_RULE@349..378
+            1: CSS_QUALIFIED_RULE@349..378
               0: CSS_SELECTOR_LIST@349..360
                 0: CSS_COMPOUND_SELECTOR@349..360
                   0: (empty)
@@ -1050,7 +1050,7 @@ CssRoot {
         2: CSS_RULE_LIST_BLOCK@407..468
           0: L_CURLY@407..408 "{" [] []
           1: CSS_RULE_LIST@408..466
-            0: CSS_RULE@408..437
+            0: CSS_QUALIFIED_RULE@408..437
               0: CSS_SELECTOR_LIST@408..413
                 0: CSS_COMPOUND_SELECTOR@408..413
                   0: (empty)
@@ -1074,7 +1074,7 @@ CssRoot {
                     1: (empty)
                   1: SEMICOLON@434..435 ";" [] []
                 2: R_CURLY@435..437 "}" [Newline("\n")] []
-            1: CSS_RULE@437..466
+            1: CSS_QUALIFIED_RULE@437..466
               0: CSS_SELECTOR_LIST@437..448
                 0: CSS_COMPOUND_SELECTOR@437..448
                   0: (empty)

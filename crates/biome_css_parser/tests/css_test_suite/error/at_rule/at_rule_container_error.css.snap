@@ -220,7 +220,7 @@ CssRoot {
                 ],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssComplexSelector {
                     left: CssCompoundSelector {
@@ -263,7 +263,7 @@ CssRoot {
                 ],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssComplexSelector {
                     left: CssCompoundSelector {
@@ -612,7 +612,7 @@ CssRoot {
         0: CONTAINER_KW@203..213 "container" [] [Whitespace(" ")]
         1: CSS_BOGUS@213..221
           0: INHERIT_KW@213..221 "inherit" [] [Whitespace(" ")]
-    6: CSS_RULE@221..240
+    6: CSS_QUALIFIED_RULE@221..240
       0: CSS_SELECTOR_LIST@221..237
         0: CSS_COMPLEX_SELECTOR@221..227
           0: CSS_COMPOUND_SELECTOR@221..226
@@ -640,7 +640,7 @@ CssRoot {
         0: CONTAINER_KW@243..253 "container" [] [Whitespace(" ")]
         1: CSS_CUSTOM_IDENTIFIER@253..257
           0: IDENT@253..257 "not" [] [Whitespace(" ")]
-    8: CSS_RULE@257..277
+    8: CSS_QUALIFIED_RULE@257..277
       0: CSS_SELECTOR_LIST@257..273
         0: CSS_COMPLEX_SELECTOR@257..263
           0: CSS_COMPOUND_SELECTOR@257..262

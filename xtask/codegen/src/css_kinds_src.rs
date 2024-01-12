@@ -260,7 +260,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
     nodes: &[
         "CSS_ROOT",
         "CSS_RULE_LIST",
-        "CSS_RULE",
+        "CSS_QUALIFIED_RULE",
         "CSS_SELECTOR_LIST",
         "CSS_ANY_FUNCTION",
         "CSS_DECLARATION_LIST_BLOCK",

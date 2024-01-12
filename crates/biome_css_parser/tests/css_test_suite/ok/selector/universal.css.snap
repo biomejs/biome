@@ -19,7 +19,7 @@ foo|* {}
 CssRoot {
     bom_token: missing (optional),
     rules: CssRuleList [
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -45,7 +45,7 @@ CssRoot {
                 r_curly_token: R_CURLY@7..8 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -67,7 +67,7 @@ CssRoot {
                 r_curly_token: R_CURLY@14..15 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -102,7 +102,7 @@ CssRoot {
 0: CSS_ROOT@0..25
   0: (empty)
   1: CSS_RULE_LIST@0..24
-    0: CSS_RULE@0..8
+    0: CSS_QUALIFIED_RULE@0..8
       0: CSS_SELECTOR_LIST@0..6
         0: CSS_COMPOUND_SELECTOR@0..2
           0: (empty)
@@ -121,7 +121,7 @@ CssRoot {
         0: L_CURLY@6..7 "{" [] []
         1: CSS_DECLARATION_LIST@7..7
         2: R_CURLY@7..8 "}" [] []
-    1: CSS_RULE@8..15
+    1: CSS_QUALIFIED_RULE@8..15
       0: CSS_SELECTOR_LIST@8..13
         0: CSS_COMPOUND_SELECTOR@8..13
           0: (empty)
@@ -136,7 +136,7 @@ CssRoot {
         0: L_CURLY@13..14 "{" [] []
         1: CSS_DECLARATION_LIST@14..14
         2: R_CURLY@14..15 "}" [] []
-    2: CSS_RULE@15..24
+    2: CSS_QUALIFIED_RULE@15..24
       0: CSS_SELECTOR_LIST@15..22
         0: CSS_COMPOUND_SELECTOR@15..22
           0: (empty)

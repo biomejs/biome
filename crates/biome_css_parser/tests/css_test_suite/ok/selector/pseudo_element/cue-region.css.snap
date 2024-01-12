@@ -19,7 +19,7 @@ video::cue-region(   #scroll   ) {}
 CssRoot {
     bom_token: missing (optional),
     rules: CssRuleList [
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -47,7 +47,7 @@ CssRoot {
                 r_curly_token: R_CURLY@19..20 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -89,7 +89,7 @@ CssRoot {
                 r_curly_token: R_CURLY@49..50 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -142,7 +142,7 @@ CssRoot {
 0: CSS_ROOT@0..87
   0: (empty)
   1: CSS_RULE_LIST@0..86
-    0: CSS_RULE@0..20
+    0: CSS_QUALIFIED_RULE@0..20
       0: CSS_SELECTOR_LIST@0..18
         0: CSS_COMPOUND_SELECTOR@0..18
           0: (empty)
@@ -160,7 +160,7 @@ CssRoot {
         0: L_CURLY@18..19 "{" [] []
         1: CSS_DECLARATION_LIST@19..19
         2: R_CURLY@19..20 "}" [] []
-    1: CSS_RULE@20..50
+    1: CSS_QUALIFIED_RULE@20..50
       0: CSS_SELECTOR_LIST@20..48
         0: CSS_COMPOUND_SELECTOR@20..48
           0: (empty)
@@ -188,7 +188,7 @@ CssRoot {
         0: L_CURLY@48..49 "{" [] []
         1: CSS_DECLARATION_LIST@49..49
         2: R_CURLY@49..50 "}" [] []
-    2: CSS_RULE@50..86
+    2: CSS_QUALIFIED_RULE@50..86
       0: CSS_SELECTOR_LIST@50..84
         0: CSS_COMPOUND_SELECTOR@50..84
           0: (empty)

@@ -64,13 +64,13 @@ CssRoot =
 CssRuleList = AnyCssRule*
 
 AnyCssRule =
-	CssRule
+	CssQualifiedRule
 	| CssAtRule
 	| CssBogusRule
 
 // .header { color: red }
 // ^^^^^^^^^^^^^^^^^^^^^
-CssRule =
+CssQualifiedRule =
 	prelude: CssSelectorList
 	block: AnyCssDeclarationListBlock
 

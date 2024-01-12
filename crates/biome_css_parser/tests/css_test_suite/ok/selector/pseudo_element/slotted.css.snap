@@ -21,7 +21,7 @@ expression: snapshot
 CssRoot {
     bom_token: missing (optional),
     rules: CssRuleList [
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -54,7 +54,7 @@ CssRoot {
                 r_curly_token: R_CURLY@14..15 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -89,7 +89,7 @@ CssRoot {
                 r_curly_token: R_CURLY@33..34 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -124,7 +124,7 @@ CssRoot {
                 r_curly_token: R_CURLY@58..59 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -170,7 +170,7 @@ CssRoot {
 0: CSS_ROOT@0..80
   0: (empty)
   1: CSS_RULE_LIST@0..79
-    0: CSS_RULE@0..15
+    0: CSS_QUALIFIED_RULE@0..15
       0: CSS_SELECTOR_LIST@0..13
         0: CSS_COMPOUND_SELECTOR@0..13
           0: (empty)
@@ -193,7 +193,7 @@ CssRoot {
         0: L_CURLY@13..14 "{" [] []
         1: CSS_DECLARATION_LIST@14..14
         2: R_CURLY@14..15 "}" [] []
-    1: CSS_RULE@15..34
+    1: CSS_QUALIFIED_RULE@15..34
       0: CSS_SELECTOR_LIST@15..32
         0: CSS_COMPOUND_SELECTOR@15..32
           0: (empty)
@@ -217,7 +217,7 @@ CssRoot {
         0: L_CURLY@32..33 "{" [] []
         1: CSS_DECLARATION_LIST@33..33
         2: R_CURLY@33..34 "}" [] []
-    2: CSS_RULE@34..59
+    2: CSS_QUALIFIED_RULE@34..59
       0: CSS_SELECTOR_LIST@34..57
         0: CSS_COMPOUND_SELECTOR@34..57
           0: (empty)
@@ -241,7 +241,7 @@ CssRoot {
         0: L_CURLY@57..58 "{" [] []
         1: CSS_DECLARATION_LIST@58..58
         2: R_CURLY@58..59 "}" [] []
-    3: CSS_RULE@59..79
+    3: CSS_QUALIFIED_RULE@59..79
       0: CSS_SELECTOR_LIST@59..76
         0: CSS_COMPOUND_SELECTOR@59..76
           0: (empty)

@@ -24,7 +24,7 @@ div::highlight(foo) {
 CssRoot {
     bom_token: missing (optional),
     rules: CssRuleList [
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -50,7 +50,7 @@ CssRoot {
                 r_curly_token: R_CURLY@21..23 "}" [Newline("\n")] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -81,7 +81,7 @@ CssRoot {
                 r_curly_token: R_CURLY@46..48 "}" [Newline("\n")] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -123,7 +123,7 @@ CssRoot {
 0: CSS_ROOT@0..74
   0: (empty)
   1: CSS_RULE_LIST@0..73
-    0: CSS_RULE@0..23
+    0: CSS_QUALIFIED_RULE@0..23
       0: CSS_SELECTOR_LIST@0..20
         0: CSS_COMPOUND_SELECTOR@0..20
           0: (empty)
@@ -141,7 +141,7 @@ CssRoot {
         0: L_CURLY@20..21 "{" [] []
         1: CSS_DECLARATION_LIST@21..21
         2: R_CURLY@21..23 "}" [Newline("\n")] []
-    1: CSS_RULE@23..48
+    1: CSS_QUALIFIED_RULE@23..48
       0: CSS_SELECTOR_LIST@23..45
         0: CSS_COMPOUND_SELECTOR@23..45
           0: (empty)
@@ -162,7 +162,7 @@ CssRoot {
         0: L_CURLY@45..46 "{" [] []
         1: CSS_DECLARATION_LIST@46..46
         2: R_CURLY@46..48 "}" [Newline("\n")] []
-    2: CSS_RULE@48..73
+    2: CSS_QUALIFIED_RULE@48..73
       0: CSS_SELECTOR_LIST@48..70
         0: CSS_COMPOUND_SELECTOR@48..70
           0: (empty)

@@ -19,7 +19,7 @@ expression: snapshot
 CssRoot {
     bom_token: missing (optional),
     rules: CssRuleList [
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -52,7 +52,7 @@ CssRoot {
                 r_curly_token: R_CURLY@19..20 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -85,7 +85,7 @@ CssRoot {
                 r_curly_token: R_CURLY@46..47 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssComplexSelector {
                     left: CssCompoundSelector {
@@ -144,7 +144,7 @@ CssRoot {
 0: CSS_ROOT@0..74
   0: (empty)
   1: CSS_RULE_LIST@0..73
-    0: CSS_RULE@0..20
+    0: CSS_QUALIFIED_RULE@0..20
       0: CSS_SELECTOR_LIST@0..18
         0: CSS_COMPOUND_SELECTOR@0..18
           0: (empty)
@@ -167,7 +167,7 @@ CssRoot {
         0: L_CURLY@18..19 "{" [] []
         1: CSS_DECLARATION_LIST@19..19
         2: R_CURLY@19..20 "}" [] []
-    1: CSS_RULE@20..47
+    1: CSS_QUALIFIED_RULE@20..47
       0: CSS_SELECTOR_LIST@20..45
         0: CSS_COMPOUND_SELECTOR@20..45
           0: (empty)
@@ -190,7 +190,7 @@ CssRoot {
         0: L_CURLY@45..46 "{" [] []
         1: CSS_DECLARATION_LIST@46..46
         2: R_CURLY@46..47 "}" [] []
-    2: CSS_RULE@47..73
+    2: CSS_QUALIFIED_RULE@47..73
       0: CSS_SELECTOR_LIST@47..71
         0: CSS_COMPLEX_SELECTOR@47..71
           0: CSS_COMPOUND_SELECTOR@47..65
