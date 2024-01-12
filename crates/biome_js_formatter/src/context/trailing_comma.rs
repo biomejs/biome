@@ -1,6 +1,7 @@
 use crate::prelude::*;
 use crate::{JsFormatContext, JsFormatOptions};
 use biome_deserialize::{Deserializable, DeserializableValue, DeserializationDiagnostic, Text};
+use biome_deserialize_macros::Merge;
 use biome_formatter::prelude::{if_group_breaks, text};
 use biome_formatter::write;
 use biome_formatter::{Format, FormatResult};
@@ -51,7 +52,7 @@ impl Format<JsFormatContext> for FormatTrailingComma {
 }
 
 /// Print trailing commas wherever possible in multi-line comma-separated syntactic structures.
-#[derive(Default, Debug, Eq, PartialEq, Hash, Clone, Copy)]
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, Merge, PartialEq)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),

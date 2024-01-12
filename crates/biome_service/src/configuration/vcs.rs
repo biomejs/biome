@@ -1,4 +1,4 @@
-use crate::configuration::merge::MergeWith;
+use biome_deserialize_macros::{Merge, NoneState};
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
@@ -6,7 +6,7 @@ use std::str::FromStr;
 const GIT_IGNORE_FILE_NAME: &str = ".gitignore";
 
 /// Set of properties to integrate Biome with a VCS software.
-#[derive(Debug, Default, Deserialize, Serialize, Clone, Bpaf, Eq, PartialEq)]
+#[derive(Bpaf, Clone, Debug, Default, Deserialize, Eq, Merge, NoneState, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(deny_unknown_fields, rename_all = "camelCase")]
 pub struct VcsConfiguration {
@@ -52,36 +52,7 @@ impl VcsConfiguration {
     }
 }
 
-impl MergeWith<VcsConfiguration> for VcsConfiguration {
-    fn merge_with(&mut self, other: VcsConfiguration) {
-        if let Some(enabled) = other.enabled {
-            self.enabled = Some(enabled);
-        }
-        if let Some(client_kind) = other.client_kind {
-            self.client_kind = Some(client_kind);
-        }
-        if let Some(use_ignore_file) = other.use_ignore_file {
-            self.use_ignore_file = Some(use_ignore_file);
-        }
-        if let Some(root) = other.root {
-            self.root = Some(root);
-        }
-        if let Some(default_branch) = other.default_branch {
-            self.root = Some(default_branch);
-        }
-    }
-
-    fn merge_with_if_not_default(&mut self, other: VcsConfiguration)
-    where
-        VcsConfiguration: Default,
-    {
-        if other != VcsConfiguration::default() {
-            self.merge_with(other)
-        }
-    }
-}
-
-#[derive(Debug, Default, Deserialize, Clone, Serialize, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Deserialize, Eq, Merge, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub enum VcsClientKind {

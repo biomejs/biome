@@ -21,6 +21,10 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ### Configuration
 
+#### Bug fixes
+
+- Fix [1440](https://github.com/biomejs/biome/issues/1440), a case where `extends` and `overrides` weren't correctly emitting the final configuration. Contributed by @arendjr
+
 ### Editors
 
 ### Formatter
