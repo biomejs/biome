@@ -1,0 +1,68 @@
+---
+title: Integrando o Biome com o seu VCS
+description: Aprenda como o Biome funciona, incluindo suposições, configuração e mais.
+---
+
+
+A integração com o VCS (Sistema de controle de versão) é projetada para aproveitar recursos **adicionais** que somente um VCS pode fornecer, permitindo customizar
+sua experiência ainda mais.
+
+Essa integração é **opcional** e possui dois campos obrigatórios. O campo `vcs.enabled` e o campo `vcs.clientKind`, ambos no arquivo de configuração:
+
+```json title="biome.json"
+{
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git"
+  }
+}
+```
+
+Essa configuração não faz **nada por si só**. Você precisa adicionar novos recursos.
+
+### Ignorando arquivos
+
+Esse é um recurso que permite que o Biome leia os arquivos ignorados do VCS e ignora todos os arquivos e pastas especificados nele. Esse é um recurso opcional, e você precisa ativar o campo `vcs.useIgnoreFile`:
+
+```json title="biome.json" ins={5}
+{
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  }
+}
+```
+
+### Processando apenas arquivos modificados
+
+Esse é um recurso que só está disponível via CLI e permite processar **apenas** os arquivos que foram **alterados** de uma revisão para outra.
+
+Primeiro, você tem que atualizar seu arquivo de configuração e dizer para o Biome qual é a branch padrão com o campo `vcs.defaultBranch`:
+
+```json title="biome.json" ins={6}
+{
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true,
+    "defaultBranch": "main"
+  }
+}
+```
+
+Em seguida, adicione a opção `--changed` no seu comando para processar apenas os arquivos que o seu VCS marcar como "modificado". O Biome, com ajuda do VCS, vai determinar o arquivo alterado da branch `main` e sua revisão atual:
+
+```shell
+biome format --changed
+```
+
+:::caution
+O Biome não verifica o que foi alterado, isso significa que adicionar espaços e novas linhas em um arquivo vai marcar-lo como "modificado"
+:::
+
+Alternativamente, você pode usar a opção `--since` para especificar uma branch. Essa opção **tem precedência** sobre a opção `vcs.defaultBranch`. Por exemplo, você pode querer verificar suas alterações em relação a branch `next`:
+
+```shell
+biome format --changed --since=next
+```
