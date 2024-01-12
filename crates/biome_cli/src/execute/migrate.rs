@@ -1,3 +1,5 @@
+mod prettier;
+
 use crate::execute::diagnostics::{ContentDiffAdvice, MigrateDiffDiagnostic};
 use crate::{CliDiagnostic, CliSession};
 use biome_console::{markup, ConsoleExt};
@@ -14,13 +16,25 @@ use std::borrow::Cow;
 use std::ffi::OsStr;
 use std::path::PathBuf;
 
-pub(crate) fn run(
-    session: CliSession,
-    write: bool,
-    configuration_file_path: PathBuf,
-    configuration_directory_path: PathBuf,
-    verbose: bool,
-) -> Result<(), CliDiagnostic> {
+pub(crate) struct MigratePayload<'a> {
+    pub(crate) session: CliSession<'a>,
+    pub(crate) write: bool,
+    pub(crate) configuration_file_path: PathBuf,
+    pub(crate) configuration_directory_path: PathBuf,
+    pub(crate) verbose: bool,
+    pub(crate) prettier: bool,
+}
+
+pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> {
+    let MigratePayload {
+        session,
+        write,
+        configuration_file_path,
+        configuration_directory_path,
+        verbose,
+        // we will use it later
+        prettier: _,
+    } = migrate_payload;
     let fs = &*session.app.fs;
     let has_deprecated_configuration =
         configuration_file_path.file_name() == Some(OsStr::new("rome.json"));
