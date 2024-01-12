@@ -223,6 +223,11 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "import",
         "namespace",
         "starting-style",
+        "document",
+        "url-prefix",
+        "domain",
+        "media-document",
+        "regexp",
         //
         "font-face",
         // Don't add to the end of this list, add new keywords above the "HERE"
@@ -418,6 +423,9 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_IMPORT_SUPPORTS",
         "CSS_NAMESPACE_AT_RULE",
         "CSS_STARTING_STYLE_AT_RULE",
+        "CSS_DOCUMENT_AT_RULE",
+        "CSS_DOCUMENT_MATCHER_LIST",
+        "CSS_DOCUMENT_CUSTOM_MATCHER",
         // Bogus nodes
         "CSS_BOGUS",
         "CSS_BOGUS_BLOCK",
@@ -438,5 +446,6 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_BOGUS_MEDIA_QUERY",
         "CSS_BOGUS_SCOPE_RANGE",
         "CSS_BOGUS_URL_MODIFIER",
+        "CSS_BOGUS_DOCUMENT_MATCHER",
     ],
 };
