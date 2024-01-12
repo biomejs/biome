@@ -5,13 +5,13 @@ expression: content
 # Input messages
 
 ```block
-{ "name": "test" }
+{ "name": "something" }
 ```
 
 # Emitted Messages
 
 ```block
-{ "name": "test" }
+{ "name": "something" }
 ```
 
 

@@ -1,6 +1,6 @@
 use crate::run_cli;
-use crate::snap_test::{assert_cli_snapshot, SnapshotPayload};
-use biome_console::BufferConsole;
+use crate::snap_test::{assert_cli_snapshot, markup_to_string, SnapshotPayload};
+use biome_console::{markup, BufferConsole};
 use biome_fs::MemoryFileSystem;
 use biome_service::DynRef;
 use bpaf::Args;
@@ -152,6 +152,42 @@ fn not_process_file_from_cli_verbose() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "not_process_file_from_cli_verbose",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn should_return_the_content_of_protected_files_via_stdin() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    console
+        .in_buffer
+        .push(r#"{ "name": "something" }"#.to_string());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("format"), ("--stdin-file-path"), ("package.json")].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    let message = console
+        .out_buffer
+        .first()
+        .expect("Console should have written a message");
+
+    let content = markup_to_string(markup! {
+        {message.content}
+    });
+
+    assert_eq!(content, r#"{ "name": "something" }"#);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_return_the_content_of_protected_files_via_stdin",
         fs,
         console,
         result,
