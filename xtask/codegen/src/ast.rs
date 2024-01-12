@@ -6,17 +6,18 @@ use std::str::FromStr;
 use std::vec;
 
 use super::{
-    kinds_src::{AstSrc, Field},
+    js_kinds_src::{AstSrc, Field},
     to_lower_snake_case, Mode,
 };
 use crate::css_kinds_src::CSS_KINDS_SRC;
 use crate::generate_node_factory::generate_node_factory;
 use crate::generate_nodes_mut::generate_nodes_mut;
 use crate::generate_syntax_factory::generate_syntax_factory;
-use crate::json_kinds_src::JSON_KINDS_SRC;
-use crate::kinds_src::{
+use crate::html_kinds_src::HTML_KINDS_SRC;
+use crate::js_kinds_src::{
     AstEnumSrc, AstListSeparatorConfiguration, AstListSrc, AstNodeSrc, TokenKind, JS_KINDS_SRC,
 };
+use crate::json_kinds_src::JSON_KINDS_SRC;
 use crate::termcolorful::{println_string_with_fg_color, Color};
 use crate::ALL_LANGUAGE_KIND;
 use crate::{
@@ -26,6 +27,7 @@ use crate::{
 use biome_ungrammar::{Grammar, Rule, Token};
 use std::fmt::Write;
 use xtask::{project_root, Result};
+
 // these node won't generate any code
 pub const SYNTAX_ELEMENT_TYPE: &str = "SyntaxElement";
 
@@ -65,6 +67,7 @@ pub(crate) fn load_ast(language: LanguageKind) -> AstSrc {
         LanguageKind::Js => load_js_ast(),
         LanguageKind::Css => load_css_ast(),
         LanguageKind::Json => load_json_ast(),
+        LanguageKind::Html => load_html_ast(),
     }
 }
 
@@ -82,6 +85,7 @@ pub(crate) fn generate_syntax(ast: AstSrc, mode: &Mode, language_kind: LanguageK
         LanguageKind::Js => JS_KINDS_SRC,
         LanguageKind::Css => CSS_KINDS_SRC,
         LanguageKind::Json => JSON_KINDS_SRC,
+        LanguageKind::Html => HTML_KINDS_SRC,
     };
 
     let ast_nodes_file = syntax_generated_path.join("nodes.rs");
@@ -178,6 +182,12 @@ pub(crate) fn load_css_ast() -> AstSrc {
 
 pub(crate) fn load_json_ast() -> AstSrc {
     let grammar_src = include_str!("../json.ungram");
+    let grammar: Grammar = grammar_src.parse().unwrap();
+    make_ast(&grammar)
+}
+
+pub(crate) fn load_html_ast() -> AstSrc {
+    let grammar_src = include_str!("../html.ungram");
     let grammar: Grammar = grammar_src.parse().unwrap();
     make_ast(&grammar)
 }

@@ -1,6 +1,6 @@
-use super::kinds_src::AstSrc;
+use super::js_kinds_src::AstSrc;
 use crate::to_lower_snake_case;
-use crate::{kinds_src::Field, to_upper_snake_case, LanguageKind};
+use crate::{js_kinds_src::Field, to_upper_snake_case, LanguageKind};
 use quote::{format_ident, quote};
 use xtask::Result;
 
