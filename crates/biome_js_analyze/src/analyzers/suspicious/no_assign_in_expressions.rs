@@ -1,5 +1,5 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind};
 use biome_console::markup;
 use biome_js_syntax::{
     JsAssignmentExpression, JsExpressionStatement, JsForStatement, JsParenthesizedExpression,
@@ -44,6 +44,8 @@ declare_rule! {
     pub(crate) NoAssignInExpressions {
         version: "1.0.0",
         name: "noAssignInExpressions",
+        source: RuleSource::Eslint("no-cond-assign"),
+        source_kind: RuleSourceKind::Inspired,
         recommended: true,
     }
 }

@@ -1,6 +1,6 @@
 use crate::aria_services::Aria;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, Rule, RuleDiagnostic};
+use biome_analyze::{declare_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_rowan::{AstNode, TextRange};
@@ -31,6 +31,7 @@ declare_rule! {
     pub(crate) UseValidLang {
         version: "1.0.0",
         name: "useValidLang",
+        source: RuleSource::EslintJsxA11y("lang"),
         recommended: true,
     }
 }

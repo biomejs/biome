@@ -1,6 +1,7 @@
 use crate::{semantic_services::Semantic, JsRuleAction};
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
+    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource,
+    RuleSourceKind,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
@@ -59,6 +60,8 @@ declare_rule! {
     pub(crate) UseExportType {
         version: "1.5.0",
         name: "useExportType",
+        source: RuleSource::EslintTypeScript("consistent-type-exports"),
+        source_kind: RuleSourceKind::Inspired,
         recommended: true,
         fix_kind: FixKind::Safe,
     }

@@ -8,11 +8,11 @@ title: noUselessLabel (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://eslint.org/docs/latest/rules/no-extra-label" target="_blank"><code>no-extra-label</code></a>
+
 Disallow unnecessary labels.
 
 If a loop contains no nested loops or switches, labeling the loop is unnecessary.
-
-Source: https://eslint.org/docs/latest/rules/no-extra-label
 
 ## Examples
 

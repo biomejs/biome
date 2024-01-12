@@ -1256,7 +1256,8 @@ fn handle_import_export_specifier_comment(
     }
 }
 
-/// Ensure that comments before the `async`` keyword are placed just before it.
+/// Attach comments before the `async` keyword or `*` token to the preceding node if it exists
+/// to ensure these comments are placed before the `async` keyword or `*` token.
 /// ```javascript
 /// class Foo {
 ///    @decorator()
@@ -1270,7 +1271,10 @@ fn handle_class_method_comment(
     match enclosing_node.kind() {
         JsSyntaxKind::JS_METHOD_CLASS_MEMBER => {
             if let Some(following_token) = comment.following_token() {
-                if following_token.kind() == JsSyntaxKind::ASYNC_KW {
+                if matches!(
+                    following_token.kind(),
+                    JsSyntaxKind::ASYNC_KW | JsSyntaxKind::STAR
+                ) {
                     if let Some(preceding) = comment.preceding_node() {
                         return CommentPlacement::trailing(preceding.clone(), comment);
                     }

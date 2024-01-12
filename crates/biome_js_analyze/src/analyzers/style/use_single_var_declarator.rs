@@ -1,5 +1,6 @@
 use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
+    RuleSource,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
@@ -20,8 +21,6 @@ declare_rule! {
     /// In JavaScript, multiple variables can be declared within a single `var`, `const` or `let` declaration.
     /// It is often considered a best practice to declare every variable separately.
     /// That is what this rule enforces.
-    ///
-    /// Source: https://eslint.org/docs/latest/rules/one-var
     ///
     /// ## Examples
     ///
@@ -45,6 +44,7 @@ declare_rule! {
     pub(crate) UseSingleVarDeclarator {
         version: "1.0.0",
         name: "useSingleVarDeclarator",
+        source: RuleSource::Eslint("one-var"),
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }

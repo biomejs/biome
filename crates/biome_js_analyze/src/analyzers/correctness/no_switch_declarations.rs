@@ -1,5 +1,5 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic};
+use biome_analyze::{declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make;
@@ -17,8 +17,6 @@ declare_rule! {
     /// However, it only gets initialized when it is assigned, which will only happen if the `switch` clause where it is defined is reached.
     ///
     /// To ensure that the lexical declarations only apply to the current `switch` clause wrap your declarations in a block.
-    ///
-    /// Source: https://eslint.org/docs/latest/rules/no-case-declarations
     ///
     /// ## Examples
     ///
@@ -74,6 +72,7 @@ declare_rule! {
     pub(crate) NoSwitchDeclarations {
         version: "1.0.0",
         name: "noSwitchDeclarations",
+        source: RuleSource::Eslint("no-case-declarations"),
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }

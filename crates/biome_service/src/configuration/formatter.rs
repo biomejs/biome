@@ -1,8 +1,8 @@
-use crate::configuration::merge::MergeWith;
 use crate::configuration::overrides::OverrideFormatterConfiguration;
 use crate::settings::{to_matcher, FormatSettings};
 use crate::{Matcher, WorkspaceError};
 use biome_deserialize::StringSet;
+use biome_deserialize_macros::{Merge, NoneState};
 use biome_formatter::{IndentStyle, LineEnding, LineWidth};
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
@@ -10,7 +10,7 @@ use std::path::PathBuf;
 use std::str::FromStr;
 
 /// Generic options applied to all files
-#[derive(Deserialize, Serialize, Debug, Eq, PartialEq, Clone, Bpaf)]
+#[derive(Bpaf, Clone, Debug, Deserialize, Eq, Merge, NoneState, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct FormatterConfiguration {
@@ -92,49 +92,6 @@ impl FromStr for FormatterConfiguration {
 
     fn from_str(_s: &str) -> Result<Self, Self::Err> {
         Ok(Self::default())
-    }
-}
-
-impl MergeWith<FormatterConfiguration> for FormatterConfiguration {
-    fn merge_with(&mut self, other: FormatterConfiguration) {
-        if let Some(enabled) = other.enabled {
-            self.enabled = Some(enabled);
-        }
-        if let Some(indent_size) = other.indent_size {
-            self.indent_width = Some(indent_size);
-        }
-        if let Some(indent_width) = other.indent_width {
-            self.indent_width = Some(indent_width);
-        }
-        if let Some(indent_style) = other.indent_style {
-            self.indent_style = Some(indent_style);
-        }
-        if let Some(line_ending) = other.line_ending {
-            self.line_ending = Some(line_ending);
-        }
-        if let Some(line_width) = other.line_width {
-            self.line_width = Some(line_width);
-        }
-
-        if let Some(format_with_errors) = other.format_with_errors {
-            self.format_with_errors = Some(format_with_errors);
-        }
-        if let Some(ignore) = other.ignore {
-            self.ignore = Some(ignore)
-        }
-
-        if let Some(include) = other.include {
-            self.include = Some(include)
-        }
-    }
-
-    fn merge_with_if_not_default(&mut self, other: FormatterConfiguration)
-    where
-        FormatterConfiguration: Default,
-    {
-        if other != FormatterConfiguration::default() {
-            self.merge_with(other)
-        }
     }
 }
 
@@ -230,7 +187,7 @@ where
     s.serialize_u16(line_width.unwrap_or_default().get())
 }
 
-#[derive(Deserialize, Serialize, Debug, Eq, PartialEq, Clone, Default)]
+#[derive(Clone, Copy, Debug, Default, Deserialize, Eq, Merge, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub enum PlainIndentStyle {

@@ -1,6 +1,7 @@
 use crate::JsRuleAction;
 use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
+    RuleSource,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
@@ -11,8 +12,6 @@ declare_rule! {
     /// Enforce using `else if` instead of nested `if` in `else` clauses.
     ///
     /// If an `if` statement is the only statement in the `else` block, it is often clearer to use an `else if` form.
-    ///
-    /// Source: https://eslint.org/docs/latest/rules/no-lonely-if
     ///
     /// ## Examples
     ///
@@ -85,6 +84,7 @@ declare_rule! {
     pub(crate) UseCollapsedElseIf {
         version: "1.1.0",
         name: "useCollapsedElseIf",
+        source: RuleSource::Eslint("no-lonely-if"),
         recommended: false,
         fix_kind: FixKind::Safe,
     }

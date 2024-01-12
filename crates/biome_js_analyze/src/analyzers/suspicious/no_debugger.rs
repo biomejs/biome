@@ -1,5 +1,6 @@
 use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
+    RuleSource,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
@@ -28,6 +29,7 @@ declare_rule! {
     pub(crate) NoDebugger {
         version: "1.0.0",
         name: "noDebugger",
+        source: RuleSource::Eslint("no-debugger"),
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }

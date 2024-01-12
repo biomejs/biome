@@ -8,6 +8,8 @@ title: noThisInStatic (since v1.3.1)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://github.com/mysticatea/eslint-plugin/blob/master/docs/rules/no-this-in-static.md" target="_blank"><code>no-this-in-static</code></a>
+
 Disallow `this` and `super` in `static` contexts.
 
 In JavaScript, the `this` keyword in static contexts refers to the class (the constructor) instance,
@@ -20,8 +22,6 @@ This can lead to unexpected behavior if not properly understood.
 This rule enforces the use of the class name itself to access static methods,
 which can make the code clearer and less prone to errors. It helps to prevent
 misunderstandings and bugs that can arise from the unique behavior of `this` and `super` in static contexts.
-
-Source: https://github.com/mysticatea/eslint-plugin/blob/master/docs/rules/no-this-in-static.md
 
 ## Example
 

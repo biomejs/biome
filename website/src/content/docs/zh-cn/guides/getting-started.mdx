@@ -25,7 +25,9 @@ import PackageManagerCommand from "@src/components/PackageManagerCommand.astro";
   bun="add --dev --exact @biomejs/biome"
 />
 
-> **注意**：也可以全局安装Biome，而不是本地安装。但不推荐这样做。
+:::note
+也可以全局安装Biome，而不是本地安装。但不推荐这样做。
+:::
 
 强烈建议在安装Biome时不要使用范围运算符。有关更多信息，请查看[版本页面](/internals/versioning/)。
 
@@ -41,7 +43,7 @@ import PackageManagerCommand from "@src/components/PackageManagerCommand.astro";
 
 ```json title="biome.json"
 {
-  "$schema": "https://biomejs.dev/schemas/1.4.0/schema.json",
+  "$schema": "https://biomejs.dev/schemas/1.5.1/schema.json",
   "organizeImports": {
     "enabled": false
   },

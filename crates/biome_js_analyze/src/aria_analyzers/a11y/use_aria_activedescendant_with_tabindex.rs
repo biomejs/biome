@@ -1,6 +1,6 @@
 use crate::{aria_services::Aria, JsRuleAction};
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
+    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
@@ -30,8 +30,6 @@ declare_rule! {
     /// Because an element with `aria-activedescendant` must be tabbable,
     /// it must either have an inherent tabIndex of zero or declare a tabIndex attribute.
     ///
-    /// Source: https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/aria-activedescendant-has-tabindex.md
-    ///
     /// ## Examples
     ///
     /// ### Invalid
@@ -53,6 +51,7 @@ declare_rule! {
     pub(crate) UseAriaActivedescendantWithTabindex {
         version: "1.3.0",
         name: "useAriaActivedescendantWithTabindex",
+        source: RuleSource::EslintJsxA11y("aria-activedescendant-has-tabindex"),
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }

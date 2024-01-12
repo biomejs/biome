@@ -4,6 +4,8 @@ title: noConsoleLog (since v1.0.0)
 
 **Diagnostic Category: `lint/suspicious/noConsoleLog`**
 
+Inspired from: <a href="https://eslint.org/docs/latest/rules/no-console" target="_blank"><code>no-console</code></a>
+
 Disallow the use of `console.log`
 
 ## Examples

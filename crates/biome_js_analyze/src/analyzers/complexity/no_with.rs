@@ -1,5 +1,5 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::JsWithStatement;
 
@@ -25,6 +25,7 @@ declare_rule! {
     pub(crate) NoWith {
         version: "1.0.0",
         name: "noWith",
+        source: RuleSource::Eslint("no-with"),
         recommended: true,
     }
 }

@@ -4,12 +4,13 @@ use crate::commands::{get_stdin, validate_configuration_diagnostics};
 use crate::{
     execute_mode, setup_cli_subscriber, CliDiagnostic, CliSession, Execution, TraversalMode,
 };
+use biome_deserialize::{Merge, NoneState};
 use biome_service::configuration::vcs::VcsConfiguration;
 use biome_service::configuration::{
     load_configuration, FilesConfiguration, LinterConfiguration, LoadedConfiguration,
 };
 use biome_service::workspace::{FixFileMode, UpdateSettingsParams};
-use biome_service::MergeWith;
+use biome_service::Configuration;
 use std::ffi::OsString;
 
 pub(crate) struct LintCommandPayload {
@@ -31,7 +32,7 @@ pub(crate) fn lint(session: CliSession, payload: LintCommandPayload) -> Result<(
         apply,
         apply_unsafe,
         cli_options,
-        linter_configuration,
+        mut linter_configuration,
         mut paths,
         stdin_file_path,
         vcs_configuration,
@@ -67,9 +68,24 @@ pub(crate) fn lint(session: CliSession, payload: LintCommandPayload) -> Result<(
         directory_path: configuration_path,
         ..
     } = loaded_configuration;
-    fs_configuration.merge_with(linter_configuration);
-    fs_configuration.merge_with(files_configuration);
-    fs_configuration.merge_with(vcs_configuration);
+    fs_configuration.merge_with(Configuration {
+        linter: if fs_configuration
+            .linter
+            .as_ref()
+            .is_some_and(LinterConfiguration::is_disabled)
+        {
+            None
+        } else {
+            if let Some(linter) = linter_configuration.as_mut() {
+                // Don't overwrite rules from the CLI configuration.
+                linter.rules = None;
+            }
+            linter_configuration
+        },
+        files: files_configuration,
+        vcs: vcs_configuration,
+        ..NoneState::none()
+    });
 
     // check if support of git ignore files is enabled
     let vcs_base_path = configuration_path.or(session.app.fs.working_directory());

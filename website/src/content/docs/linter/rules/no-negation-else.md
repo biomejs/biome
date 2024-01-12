@@ -4,9 +4,9 @@ title: noNegationElse (since v1.0.0)
 
 **Diagnostic Category: `lint/style/noNegationElse`**
 
-Disallow negation in the condition of an `if` statement if it has an `else` clause.
+Source: <a href="https://eslint.org/docs/latest/rules/no-negated-condition" target="_blank"><code>no-negated-condition</code></a>
 
-Source: https://eslint.org/docs/latest/rules/no-negated-condition/
+Disallow negation in the condition of an `if` statement if it has an `else` clause.
 
 ## Examples
 

@@ -1,4 +1,4 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::{JsArrayBindingPattern, JsObjectBindingPattern};
 use biome_rowan::{declare_node_union, AstNode, AstSeparatedList};
@@ -35,6 +35,7 @@ declare_rule! {
     pub(crate) NoEmptyPattern {
         version: "1.0.0",
         name: "noEmptyPattern",
+        source: RuleSource::Eslint("no-empty-pattern"),
         recommended: true,
     }
 }

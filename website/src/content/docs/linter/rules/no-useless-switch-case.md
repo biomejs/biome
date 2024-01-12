@@ -8,14 +8,14 @@ title: noUselessSwitchCase (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/no-useless-switch-case.md" target="_blank"><code>no-useless-switch-case</code></a>
+
 Disallow useless `case` in `switch` statements.
 
 A `switch` statement can optionally have a `default` clause.
 
 The `default` clause will be still executed only if there is no match in the `case` clauses.
 An empty `case` clause that precedes the `default` clause is thus useless.
-
-Source: https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/no-useless-switch-case.md
 
 ## Examples
 

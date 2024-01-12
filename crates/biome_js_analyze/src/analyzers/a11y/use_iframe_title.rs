@@ -1,4 +1,4 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_rowan::AstNode;
@@ -61,6 +61,7 @@ declare_rule! {
     pub(crate) UseIframeTitle {
         version: "1.0.0",
         name: "useIframeTitle",
+        source: RuleSource::EslintJsxA11y("iframe-has-title"),
         recommended: true,
     }
 }

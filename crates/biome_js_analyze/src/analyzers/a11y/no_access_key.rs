@@ -1,6 +1,7 @@
 use crate::JsRuleAction;
 use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
+    RuleSource,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
@@ -39,6 +40,7 @@ declare_rule! {
     pub(crate) NoAccessKey {
         version: "1.0.0",
         name: "noAccessKey",
+        source: RuleSource::EslintJsxA11y("no-access-key"),
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }

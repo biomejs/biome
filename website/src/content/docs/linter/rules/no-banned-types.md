@@ -8,6 +8,8 @@ title: noBannedTypes (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://typescript-eslint.io/rules/ban-types" target="_blank"><code>ban-types</code></a>
+
 Disallow primitive type aliases and misleading types.
 
 - Enforce consistent names for primitive types
@@ -70,8 +72,6 @@ type NonNullableMyType = NonNullable<MyType>;
 ```
 
 
-
-Source: https://typescript-eslint.io/rules/ban-types
 
 ## Examples
 

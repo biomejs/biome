@@ -1,0 +1,34 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `biome.json`
+
+```json
+{
+  "files": { "ignore": ["*.json"] },
+  "formatter": {
+    "enabled": false
+  }
+}
+```
+
+## `file.js`
+
+```js
+  statement(  )  
+```
+
+## `file.json`
+
+```json
+  statement(  )  
+```
+
+# Emitted Messages
+
+```block
+Checked 2 file(s) in <TIME>
+```
+
+

@@ -34,11 +34,14 @@ pub(crate) fn run<'a>(
         if file_features.is_protected() {
             let protected_diagnostic =
                 WorkspaceError::protected_file(rome_path.display().to_string());
-            if protected_diagnostic.tags().is_verbose() && verbose {
-                console.error(markup! {{PrintDiagnostic::verbose(&protected_diagnostic)}})
+            if protected_diagnostic.tags().is_verbose() {
+                if verbose {
+                    console.error(markup! {{PrintDiagnostic::verbose(&protected_diagnostic)}})
+                }
             } else {
                 console.error(markup! {{PrintDiagnostic::simple(&protected_diagnostic)}})
             }
+            console.append(markup! {{content}});
             return Ok(());
         };
         if file_features.supports_for(&FeatureName::Format) {
@@ -84,11 +87,14 @@ pub(crate) fn run<'a>(
         if file_features.is_protected() {
             let protected_diagnostic =
                 WorkspaceError::protected_file(rome_path.display().to_string());
-            if protected_diagnostic.tags().is_verbose() && verbose {
-                console.error(markup! {{PrintDiagnostic::verbose(&protected_diagnostic)}})
+            if protected_diagnostic.tags().is_verbose() {
+                if verbose {
+                    console.error(markup! {{PrintDiagnostic::verbose(&protected_diagnostic)}})
+                }
             } else {
                 console.error(markup! {{PrintDiagnostic::simple(&protected_diagnostic)}})
             }
+            console.append(markup! {{content}});
             return Ok(());
         };
 

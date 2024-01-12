@@ -8,6 +8,8 @@ title: useValidForDirection (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://eslint.org/docs/latest/rules/for-direction" target="_blank"><code>for-direction</code></a>
+
 Enforce "for" loop update clause moving the counter in the right direction.
 
 A for loop with a stop condition that can never be reached,

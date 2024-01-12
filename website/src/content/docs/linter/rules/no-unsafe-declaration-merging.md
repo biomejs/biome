@@ -8,6 +8,8 @@ title: noUnsafeDeclarationMerging (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://typescript-eslint.io/rules/no-unsafe-declaration-merging" target="_blank"><code>no-unsafe-declaration-merging</code></a>
+
 Disallow unsafe declaration merging between interfaces and classes.
 
 _TypeScript_'s [declaration merging](https://www.typescriptlang.org/docs/handbook/declaration-merging.html) supports merging separate declarations with the same name.
@@ -15,8 +17,6 @@ _TypeScript_'s [declaration merging](https://www.typescriptlang.org/docs/handboo
 _Declaration merging_ between classes and interfaces is unsafe.
 The _TypeScript Compiler_ doesn't check whether properties defined in the interface are initialized in the class.
 This can cause lead to _TypeScript_ not detecting code that will cause runtime errors.
-
-Source: https://typescript-eslint.io/rules/no-unsafe-declaration-merging/
 
 ## Examples
 

@@ -1,4 +1,5 @@
 use crate::semantic_services::Semantic;
+use biome_analyze::RuleSource;
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
 use biome_console::{markup, MarkupBuf};
 use biome_js_syntax::{
@@ -17,8 +18,6 @@ declare_rule! {
     ///
     /// When combining objects with a `then` method (thenable objects) with await expressions or dynamic imports, caution is necessary.
     /// These syntaxes interpret the object's then method as intended for the resolution or rejection of a promise, which can lead to unexpected behavior or errors.
-    ///
-    /// Source: https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/no-thenable.md
     ///
     /// ## Examples
     ///
@@ -87,6 +86,7 @@ declare_rule! {
     pub(crate) NoThenProperty {
         version: "1.5.0",
         name: "noThenProperty",
+        source: RuleSource::EslintUnicorn("no-thenable"),
         recommended: true,
     }
 }

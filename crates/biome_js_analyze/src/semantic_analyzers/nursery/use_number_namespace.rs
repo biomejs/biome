@@ -1,6 +1,6 @@
 use crate::{semantic_services::Semantic, JsRuleAction};
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
+    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
@@ -18,8 +18,6 @@ declare_rule! {
     ///
     /// The rule doesn't report the globals `isFinite` and `isNan` because they have a slightly different behabior to their corresponding `Number`'s properties `Number.isFinite` and `Number.isNan`.
     /// You can use the dedicated rules [noGlobalIsFinite](https://biomejs.dev/linter/rules/no-global-is-finite/) and  [noGlobalIsNan](https://biomejs.dev/linter/rules/no-global-is-nan/) to enforce the use of `Number.isFinite` and `Number.isNan`.
-    ///
-    /// Source: https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/prefer-number-properties.md
     ///
     /// ## Examples
     ///
@@ -70,6 +68,7 @@ declare_rule! {
     pub(crate) UseNumberNamespace {
         version: "1.5.0",
         name: "useNumberNamespace",
+        source: RuleSource::EslintUnicorn("prefer-number-properties"),
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }

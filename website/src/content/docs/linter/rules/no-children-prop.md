@@ -8,6 +8,8 @@ title: noChildrenProp (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/no-children-prop.md" target="_blank"><code>no-children-prop</code></a>
+
 Prevent passing of **children** as props.
 
 When using JSX, the children should be nested between the opening and closing tags.

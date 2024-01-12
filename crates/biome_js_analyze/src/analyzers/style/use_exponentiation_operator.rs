@@ -1,7 +1,7 @@
 use crate::semantic_services::Semantic;
 use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic};
+use biome_analyze::{declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::{make, syntax::T};
@@ -20,8 +20,6 @@ declare_rule! {
     ///
     /// Introduced in ES2016, the infix exponentiation operator `**` is an alternative for the standard `Math.pow` function.
     /// Infix notation is considered to be more readable and thus more preferable than the function notation.
-    ///
-    /// Source: https://eslint.org/docs/latest/rules/prefer-exponentiation-operator
     ///
     /// ## Examples
     ///
@@ -58,6 +56,7 @@ declare_rule! {
     pub(crate) UseExponentiationOperator {
         version: "1.0.0",
         name: "useExponentiationOperator",
+        source: RuleSource::Eslint("prefer-exponentiation-operator"),
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }

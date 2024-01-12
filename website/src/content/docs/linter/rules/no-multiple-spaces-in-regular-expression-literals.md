@@ -8,9 +8,9 @@ title: noMultipleSpacesInRegularExpressionLiterals (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
-Disallow unclear usage of consecutive space characters in regular expression literals
+Source: <a href="https://eslint.org/docs/latest/rules/no-regex-spaces" target="_blank"><code>no-regex-spaces</code></a>
 
-Source: https://eslint.org/docs/latest/rules/no-regex-spaces/
+Disallow unclear usage of consecutive space characters in regular expression literals
 
 ## Examples
 

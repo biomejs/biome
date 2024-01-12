@@ -4,11 +4,11 @@ title: useShorthandAssign (since v1.3.0)
 
 **Diagnostic Category: `lint/style/useShorthandAssign`**
 
+Source: <a href="https://eslint.org/docs/latest/rules/operator-assignment" target="_blank"><code>operator-assignment</code></a>
+
 Require assignment operator shorthand where possible.
 
 JavaScript provides shorthand operators combining a variable assignment and simple mathematical operation.
-
-Source: https://eslint.org/docs/latest/rules/operator-assignment/
 
 ## Examples
 

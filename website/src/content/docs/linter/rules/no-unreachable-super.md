@@ -8,6 +8,8 @@ title: noUnreachableSuper (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://eslint.org/docs/latest/rules/no-this-before-super" target="_blank"><code>no-this-before-super</code></a>
+
 Ensures the `super()` constructor is called exactly once on every code  path in a class constructor before `this` is accessed if the class has a superclass
 
 ## Examples

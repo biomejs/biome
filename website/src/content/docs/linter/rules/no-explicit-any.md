@@ -8,6 +8,8 @@ title: noExplicitAny (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://typescript-eslint.io/rules/no-explicit-any" target="_blank"><code>no-explicit-any</code></a>
+
 Disallow the `any` type usage.
 
 The `any` type in TypeScript is a dangerous "escape hatch" from the type system.
@@ -18,8 +20,6 @@ but doesn't prevent `any` from being explicitly used the way this rule does.
 
 Sometimes you can use the type `unknown` instead of the type `any`.
 It also accepts any value, however it requires to check that a property exists before calling it.
-
-Source: https://typescript-eslint.io/rules/no-explicit-any
 
 ## Examples
 

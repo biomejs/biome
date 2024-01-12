@@ -8,9 +8,9 @@ title: useForOf (since v1.5.0)
 This rule is part of the [nursery](/linter/rules/#nursery) group.
 :::
 
-This rule recommends a `for-of` loop when in a `for` loop, the index used to extract an item from the iterated array.
+Source: <a href="https://typescript-eslint.io/rules/prefer-for-of" target="_blank"><code>prefer-for-of</code></a>
 
-Source: https://typescript-eslint.io/rules/prefer-for-of/
+This rule recommends a `for-of` loop when in a `for` loop, the index used to extract an item from the iterated array.
 
 ## Examples
 

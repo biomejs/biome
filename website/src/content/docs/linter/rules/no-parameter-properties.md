@@ -4,14 +4,14 @@ title: noParameterProperties (since v1.0.0)
 
 **Diagnostic Category: `lint/style/noParameterProperties`**
 
+Inspired from: <a href="https://typescript-eslint.io/rules/parameter-properties" target="_blank"><code>parameter-properties</code></a>
+
 Disallow the use of parameter properties in class constructors.
 
 TypeScript includes a "parameter properties" shorthand for declaring a class constructor parameter and class property in one location.
 Parameter properties can confuse those new to TypeScript as they are less explicit than other ways of declaring and initializing class members.
 Moreover, private class properties, starting with `#`, cannot be turned into "parameter properties".
 This questions the future of this feature.
-
-Source: https://typescript-eslint.io/rules/parameter-properties
 
 ## Examples
 

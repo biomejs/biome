@@ -1,3 +1,4 @@
+use biome_analyze::RuleSource;
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_js_syntax::parameter_ext::{AnyJsParameterList, AnyJsParameters, AnyParameter};
@@ -14,8 +15,6 @@ declare_rule! {
     /// If more than one parameter has the same name in a function definition,
     /// the last occurrence overrides the preceding occurrences.
     /// A duplicated name might be a typing error.
-    ///
-    /// Source: https://eslint.org/docs/latest/rules/no-dupe-args
     ///
     /// ## Examples
     ///
@@ -41,6 +40,7 @@ declare_rule! {
     pub(crate) NoDuplicateParameters {
         version: "1.0.0",
         name: "noDuplicateParameters",
+        source: RuleSource::Eslint("no-dupe-args"),
         recommended: true,
     }
 }

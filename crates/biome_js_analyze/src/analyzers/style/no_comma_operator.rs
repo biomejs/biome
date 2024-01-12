@@ -1,5 +1,5 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_js_syntax::{JsForStatement, JsSequenceExpression};
 use biome_rowan::AstNode;
 
@@ -11,8 +11,6 @@ declare_rule! {
     /// It frequently obscures side effects, and its use is often an accident.
     ///
     /// The use of the comma operator in the initialization and update parts of a `for` is still allowed.
-    ///
-    /// Source: https://eslint.org/docs/latest/rules/no-sequences
     ///
     /// ## Examples
     ///
@@ -41,6 +39,7 @@ declare_rule! {
     pub(crate) NoCommaOperator {
         version: "1.0.0",
         name: "noCommaOperator",
+        source: RuleSource::Eslint("no-sequences"),
         recommended: true,
     }
 }

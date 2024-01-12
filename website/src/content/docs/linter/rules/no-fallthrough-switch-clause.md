@@ -8,12 +8,12 @@ title: noFallthroughSwitchClause (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://eslint.org/docs/latest/rules/no-fallthrough" target="_blank"><code>no-fallthrough</code></a>
+
 Disallow fallthrough of `switch` clauses.
 
 Switch clauses in `switch` statements fall through by default.
 This can lead to unexpected behavior when forgotten.
-
-Source: https://eslint.org/docs/latest/rules/no-fallthrough
 
 ## Examples
 

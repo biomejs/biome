@@ -8,12 +8,12 @@ title: useNodejsImportProtocol (since v1.5.0)
 This rule is part of the [nursery](/linter/rules/#nursery) group.
 :::
 
+Source: <a href="https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/prefer-node-protocol.md" target="_blank"><code>prefer-node-protocol</code></a>
+
 Enforces using the `node:` protocol for Node.js builtin modules.
 
 The rule marks traditional imports like `import fs from "fs";` as invalid,
 suggesting the format `import fs from "node:fs";` instead.
-
-Source: https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/prefer-node-protocol.md
 
 ## Examples
 

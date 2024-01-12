@@ -4,6 +4,8 @@ title: useNamingConvention (since v1.0.0)
 
 **Diagnostic Category: `lint/style/useNamingConvention`**
 
+Inspired from: <a href="https://typescript-eslint.io/rules/naming-convention" target="_blank"><code>naming-convention</code></a>
+
 Enforce naming conventions for everything across a codebase.
 
 Enforcing [naming conventions](https://en.wikipedia.org/wiki/Naming_convention_(programming)) helps to keep the codebase consistent,

@@ -1,4 +1,5 @@
 use crate::JsRuleAction;
+use biome_analyze::RuleSource;
 use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
 };
@@ -24,8 +25,6 @@ declare_rule! {
     /// In contrast to ESLint's rule, this rule allows to use a wide type for `const` declarations.
     /// Moreover, the rule does not recognize `undefined` values, primitive type constructors (String, Number, ...), and `RegExp` type.
     /// These global variables could be shadowed by local ones.
-    ///
-    /// Source: https://typescript-eslint.io/rules/no-inferrable-types
     ///
     /// ## Examples
     ///
@@ -99,6 +98,7 @@ declare_rule! {
     pub(crate) NoInferrableTypes {
         version: "1.0.0",
         name: "noInferrableTypes",
+        source: RuleSource::EslintTypeScript("no-inferrable-types"),
         recommended: true,
         fix_kind: FixKind::Safe,
     }

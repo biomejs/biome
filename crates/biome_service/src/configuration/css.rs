@@ -1,11 +1,11 @@
-use crate::configuration::merge::MergeWith;
 use crate::configuration::{deserialize_line_width, serialize_line_width, PlainIndentStyle};
+use biome_deserialize_macros::{Merge, NoneState};
 use biome_formatter::{LineEnding, LineWidth, QuoteStyle};
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 
 /// Options applied to CSS files
-#[derive(Default, Debug, Deserialize, Serialize, Eq, PartialEq, Clone, Bpaf)]
+#[derive(Bpaf, Clone, Default, Debug, Deserialize, Eq, Merge, NoneState, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(default, deny_unknown_fields)]
 pub struct CssConfiguration {
@@ -20,30 +20,8 @@ pub struct CssConfiguration {
     pub formatter: Option<CssFormatter>,
 }
 
-impl MergeWith<CssConfiguration> for CssConfiguration {
-    fn merge_with(&mut self, other: CssConfiguration) {
-        if let Some(other_parser) = other.parser {
-            let parser = self.parser.get_or_insert_with(CssParser::default);
-            parser.merge_with(other_parser);
-        }
-        if let Some(other_formatter) = other.formatter {
-            let formatter = self.formatter.get_or_insert_with(CssFormatter::default);
-            formatter.merge_with(other_formatter);
-        }
-    }
-
-    fn merge_with_if_not_default(&mut self, other: CssConfiguration)
-    where
-        CssConfiguration: Default,
-    {
-        if other != CssConfiguration::default() {
-            self.merge_with(other)
-        }
-    }
-}
-
 /// Options that changes how the CSS parser behaves
-#[derive(Default, Debug, Deserialize, Serialize, Eq, PartialEq, Clone, Bpaf)]
+#[derive(Bpaf, Clone, Default, Debug, Deserialize, Eq, Merge, NoneState, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct CssParser {
@@ -53,24 +31,7 @@ pub struct CssParser {
     pub allow_wrong_line_comments: Option<bool>,
 }
 
-impl MergeWith<CssParser> for CssParser {
-    fn merge_with(&mut self, other: CssParser) {
-        if let Some(allow_wrong_line_comments) = other.allow_wrong_line_comments {
-            self.allow_wrong_line_comments = Some(allow_wrong_line_comments);
-        }
-    }
-
-    fn merge_with_if_not_default(&mut self, other: CssParser)
-    where
-        CssParser: Default,
-    {
-        if other != CssParser::default() {
-            self.merge_with(other)
-        }
-    }
-}
-
-#[derive(Default, Debug, Deserialize, Serialize, Eq, PartialEq, Clone, Bpaf)]
+#[derive(Bpaf, Clone, Default, Debug, Deserialize, Eq, Merge, NoneState, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct CssFormatter {
@@ -111,54 +72,4 @@ pub struct CssFormatter {
     #[bpaf(long("css-formatter-quote-style"), argument("double|single"), optional)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub quote_style: Option<QuoteStyle>,
-}
-
-impl MergeWith<CssFormatter> for CssFormatter {
-    fn merge_with(&mut self, other: CssFormatter) {
-        if let Some(enabled) = other.enabled {
-            self.enabled = Some(enabled);
-        }
-        if let Some(indent_size) = other.indent_size {
-            self.indent_width = Some(indent_size);
-        }
-        if let Some(indent_style) = other.indent_style {
-            self.indent_style = Some(indent_style);
-        }
-        if let Some(line_width) = other.line_width {
-            self.line_width = Some(line_width);
-        }
-        if let Some(quote_style) = other.quote_style {
-            self.quote_style = Some(quote_style);
-        }
-    }
-
-    fn merge_with_if_not_default(&mut self, other: CssFormatter)
-    where
-        CssFormatter: Default,
-    {
-        if other != CssFormatter::default() {
-            self.merge_with(other)
-        }
-    }
-}
-
-impl MergeWith<Option<CssFormatter>> for CssConfiguration {
-    fn merge_with(&mut self, other: Option<CssFormatter>) {
-        if let Some(other_formatter) = other {
-            let formatter = self.formatter.get_or_insert_with(CssFormatter::default);
-            formatter.merge_with(other_formatter);
-        }
-    }
-
-    fn merge_with_if_not_default(&mut self, other: Option<CssFormatter>)
-    where
-        Option<CssFormatter>: Default,
-    {
-        if let Some(other_formatter) = other {
-            if other_formatter != CssFormatter::default() {
-                let formatter = self.formatter.get_or_insert_with(CssFormatter::default);
-                formatter.merge_with(other_formatter);
-            }
-        }
-    }
 }

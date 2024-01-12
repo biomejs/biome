@@ -1,6 +1,6 @@
 use crate::{control_flow::AnyJsControlFlowRoot, semantic_services::Semantic, JsRuleAction};
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
+    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
@@ -17,8 +17,6 @@ declare_rule! {
     /// ECMAScript 6 allows programmers to create variables with block scope instead of function scope using the let and const keywords.
     ///
     /// Block scope is common in many other programming languages and helps programmers avoid mistakes.
-    ///
-    /// Source: https://eslint.org/docs/latest/rules/no-var
     ///
     /// ## Examples
     ///
@@ -37,6 +35,7 @@ declare_rule! {
     pub(crate) NoVar {
         version: "1.0.0",
         name: "noVar",
+        source: RuleSource::Eslint("no-var"),
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }

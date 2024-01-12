@@ -8,6 +8,8 @@ title: noDuplicateObjectKeys (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://eslint.org/docs/latest/rules/no-dupe-keys" target="_blank"><code>no-dupe-keys</code></a>
+
 Prevents object literals having more than one property declaration for the same name.
 
 If an object property with the same name is defined multiple times (except when combining a getter with a setter), only the last definition makes it into the object and previous definitions are ignored, which is likely a mistake.

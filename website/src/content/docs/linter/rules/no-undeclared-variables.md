@@ -4,6 +4,8 @@ title: noUndeclaredVariables (since v1.0.0)
 
 **Diagnostic Category: `lint/correctness/noUndeclaredVariables`**
 
+Source: <a href="https://eslint.org/docs/latest/rules/no-undef" target="_blank"><code>no-undef</code></a>
+
 Prevents the usage of variables that haven't been declared inside the document.
 
 If you need to allow-list some global bindings, you can use the [`javascript.globals`](/reference/configuration/#javascriptglobals) configuration.

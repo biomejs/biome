@@ -1,5 +1,5 @@
 use crate::semantic_services::Semantic;
-use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_semantic::ReferencesExtensions;
 use biome_js_syntax::{
@@ -52,6 +52,7 @@ declare_rule! {
     pub(crate) NoImportAssign {
         version: "1.0.0",
         name: "noImportAssign",
+        source: RuleSource::Eslint("no-import-assign"),
         recommended: true,
     }
 }

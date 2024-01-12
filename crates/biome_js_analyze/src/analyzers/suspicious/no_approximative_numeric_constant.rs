@@ -1,14 +1,12 @@
 use std::f64::consts as f64;
 
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::JsNumberLiteralExpression;
 use biome_rowan::AstNode;
 
 declare_rule! {
     /// Usually, the definition in the standard library is more precise than what people come up with or the used constant exceeds the maximum precision of the number type.
-    ///
-    /// Source: https://rust-lang.github.io/rust-clippy/master/#approx_constant
     ///
     /// ## Examples
     ///
@@ -32,6 +30,7 @@ declare_rule! {
     pub(crate) NoApproximativeNumericConstant {
         version: "1.3.0",
         name: "noApproximativeNumericConstant",
+        source: RuleSource::Clippy("approx_constant"),
         recommended: false,
     }
 }

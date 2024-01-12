@@ -1,6 +1,6 @@
 use std::{cmp::Ordering, collections::VecDeque, num::NonZeroU32, vec::IntoIter};
 
-use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_control_flow::{
     builder::{BlockId, ROOT_BLOCK_ID},
     ExceptionHandler, ExceptionHandlerKind, Instruction, InstructionKind,
@@ -50,6 +50,7 @@ declare_rule! {
     pub(crate) NoUnreachable {
         version: "1.0.0",
         name: "noUnreachable",
+        source: RuleSource::Eslint("no-unreachable"),
         recommended: true,
     }
 }

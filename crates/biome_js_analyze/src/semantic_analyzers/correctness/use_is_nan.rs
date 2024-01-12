@@ -1,5 +1,5 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic};
+use biome_analyze::{declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make;
@@ -28,8 +28,6 @@ declare_rule! {
     /// When the argument to `isNaN()` is not a number, the value is first coerced to a number.
     /// `Number.isNaN()` does not perform this coercion.
     /// Therefore, it is a more reliable way to test whether a value is `NaN`.
-    ///
-    /// Source: [use-isnan](https://eslint.org/docs/latest/rules/use-isnan).
     ///
     /// ## Examples
     ///
@@ -64,6 +62,7 @@ declare_rule! {
     pub(crate) UseIsNan {
         version: "1.0.0",
         name: "useIsNan",
+        source: RuleSource::Eslint("use-isnan"),
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }

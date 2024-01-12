@@ -8,6 +8,8 @@ title: useAwait (since v1.4.0)
 This rule is part of the [nursery](/linter/rules/#nursery) group.
 :::
 
+Source: <a href="https://eslint.org/docs/latest/rules/require-await" target="_blank"><code>require-await</code></a>
+
 Ensure `async` functions utilize `await`.
 
 This rule reports `async` functions that lack an `await` expression. As `async`
@@ -15,8 +17,6 @@ functions return a promise, the use of `await` is often necessary to capture the
 resolved value and handle the asynchronous operation appropriately. Without `await`,
 the function operates synchronously and might not leverage the advantages of async
 functions.
-
-Source: [require-await](https://eslint.org/docs/latest/rules/require-await)
 
 ## Examples
 

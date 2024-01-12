@@ -8,6 +8,8 @@ title: useOptionalChain (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://typescript-eslint.io/rules/prefer-optional-chain" target="_blank"><code>prefer-optional-chain</code></a>
+
 Enforce using concise optional chain instead of chained logical expressions.
 
 TypeScript 3.7 added support for the optional chain operator.

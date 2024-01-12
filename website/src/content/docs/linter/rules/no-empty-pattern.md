@@ -8,6 +8,8 @@ title: noEmptyPattern (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://eslint.org/docs/latest/rules/no-empty-pattern" target="_blank"><code>no-empty-pattern</code></a>
+
 Disallows empty destructuring patterns.
 
 ## Examples

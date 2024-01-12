@@ -8,6 +8,8 @@ title: noInvalidNewBuiltin (since v1.3.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://eslint.org/docs/latest/rules/no-new-native-nonconstructor" target="_blank"><code>no-new-native-nonconstructor</code></a>
+
 Disallow `new` operators with global non-constructor functions.
 
 Some global functions cannot be called using the new operator and
@@ -15,8 +17,6 @@ will throw a `TypeError` if you attempt to do so. These functions are:
 
 - [`Symbol`](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Symbol/Symbol)
 - [`BigInt`](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/BigInt/BigInt)
-
-Source: https://eslint.org/docs/latest/rules/no-new-native-nonconstructor/
 
 ## Examples
 

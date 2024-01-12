@@ -8,6 +8,8 @@ title: useDefaultSwitchClauseLast (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://eslint.org/docs/latest/rules/default-case-last" target="_blank"><code>default-case-last</code></a>
+
 Enforce default clauses in switch statements to be last
 
 A switch statement can optionally have a default clause.
@@ -20,8 +22,6 @@ but there is also the ability to “fall through” from the default clause to t
 However, such flow is not common and it would be confusing to the readers.
 
 Even if there is no "fall through" logic, it’s still unexpected to see the default clause before or between the case clauses. By convention, it is expected to be the last clause.
-
-Source: https://eslint.org/docs/latest/rules/default-case-last
 
 ## Examples
 
