@@ -263,7 +263,7 @@ Biome is a linter too, and it features [177 rules](https://biomejs.dev/linter/ru
   <strong>  </strong><strong>    │ </strong>     <span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span>
   </code></pre>
 
-- [useRegexLiterals](https://biomejs.dev/linter/use-regex-literals)
+- [useRegexLiterals](https://biomejs.dev/linter/rules/use-regex-literals)
 
 ```jsx
 new RegExp("abc", "u");
@@ -329,7 +329,7 @@ new RegExp("abc", "u");
 
   </code></pre>
 
-- [complexity/useSimpleNumberKeys](https://biomejs.dev/linter/use-simple-number-keys)
+- [complexity/useSimpleNumberKeys](https://biomejs.dev/linter/rules/use-simple-number-keys)
 
   ```jsx
   ({ 0x1: 1 });

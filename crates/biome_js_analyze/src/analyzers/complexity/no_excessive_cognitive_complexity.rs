@@ -35,7 +35,7 @@ declare_rule! {
     /// those that exceed a configured complexity threshold (default: 15).
     ///
     /// The complexity score is calculated based on the Cognitive Complexity
-    /// algorithm: http://redirect.sonarsource.com/doc/cognitive-complexity.html
+    /// algorithm: https://redirect.sonarsource.com/doc/cognitive-complexity.html
     ///
     /// ## Examples
     ///
