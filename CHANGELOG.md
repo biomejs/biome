@@ -32,7 +32,7 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 - Fix [#1172](https://github.com/biomejs/biome/issues/1172). Fix placement of line comment after function expression parentheses, they are now attached to first statement in body. Contributed by @kalleep
 
-- Fix [#1511](https://github.com/biomejs/biome/issues/1511) that made the JavaScript formatter crash. COntributed @Conaclos
+- Fix [#1511](https://github.com/biomejs/biome/issues/1511) that made the JavaScript formatter crash. Contributed @Conaclos
 
 ### JavaScript APIs
 
