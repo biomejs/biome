@@ -1270,7 +1270,10 @@ fn handle_class_method_comment(
     match enclosing_node.kind() {
         JsSyntaxKind::JS_METHOD_CLASS_MEMBER => {
             if let Some(following_token) = comment.following_token() {
-                if following_token.kind() == JsSyntaxKind::ASYNC_KW {
+                if matches!(
+                    following_token.kind(),
+                    JsSyntaxKind::ASYNC_KW | JsSyntaxKind::STAR
+                ) {
                     if let Some(preceding) = comment.preceding_node() {
                         return CommentPlacement::trailing(preceding.clone(), comment);
                     }
