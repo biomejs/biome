@@ -1341,6 +1341,98 @@ fn does_not_format_ignored_directories() {
 }
 
 #[test]
+fn does_not_format_non_included_and_ignored_files() {
+    let config = r#"{
+        "files": {
+          "include": ["file1.js", "file2.js", "file3.js"],
+          "ignore": ["file2.js"]
+        },
+        "formatter": {
+          "include": ["file2.js"],
+          "ignore": ["file3.js"]
+        }
+    }"#;
+    let files = [("file1.js", true), ("file2.js", true), ("file3.js", false)];
+
+    let mut console = BufferConsole::default();
+    let mut fs = MemoryFileSystem::default();
+    let file_path = Path::new("biome.json");
+    fs.insert(file_path.into(), config);
+    for (file_path, _) in files {
+        let file_path = Path::new(file_path);
+        fs.insert(file_path.into(), UNFORMATTED.as_bytes());
+    }
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("format"), ("."), ("--write")].as_slice()),
+    );
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    for (file_path, expect_formatted) in files {
+        let expected = if expect_formatted {
+            FORMATTED
+        } else {
+            UNFORMATTED
+        };
+        assert_file_contents(&fs, Path::new(file_path), expected);
+    }
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "does_not_format_non_included_and_ignored_files",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn does_not_format_ignored_file_in_included_directory() {
+    let config = r#"{
+        "formatter": {
+          "include": ["src"],
+          "ignore": ["src/file2.js"]
+        }
+    }"#;
+    let files = [("src/file1.js", true), ("src/file2.js", false)];
+
+    let mut console = BufferConsole::default();
+    let mut fs = MemoryFileSystem::default();
+    let file_path = Path::new("biome.json");
+    fs.insert(file_path.into(), config);
+    for (file_path, _) in files {
+        let file_path = Path::new(file_path);
+        fs.insert(file_path.into(), UNFORMATTED.as_bytes());
+    }
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("format"), ("."), ("--write")].as_slice()),
+    );
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    for (file_path, expect_formatted) in files {
+        let expected = if expect_formatted {
+            FORMATTED
+        } else {
+            UNFORMATTED
+        };
+        assert_file_contents(&fs, Path::new(file_path), expected);
+    }
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "does_not_format_ignored_file_in_included_directory",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn fs_error_read_only() {
     let mut fs = MemoryFileSystem::new_read_only();
     let mut console = BufferConsole::default();

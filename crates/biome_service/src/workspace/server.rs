@@ -206,14 +206,9 @@ impl WorkspaceServer {
     /// Check whether a file is ignored in the top-level config `files.ignore`/`files.include`
     fn is_ignored_by_top_level_config(&self, path: &Path) -> bool {
         let settings = self.settings();
-
-        if !settings.as_ref().files.ignored_files.is_empty() {
-            return settings.as_ref().files.ignored_files.matches_path(path);
-        } else if !settings.as_ref().files.included_files.is_empty() {
-            return !settings.as_ref().files.included_files.matches_path(path);
-        }
-
-        false
+        let is_included = settings.as_ref().files.included_files.is_empty()
+            || settings.as_ref().files.included_files.matches_path(path);
+        !is_included || settings.as_ref().files.ignored_files.matches_path(path)
     }
 }
 
@@ -278,26 +273,19 @@ impl Workspace for WorkspaceServer {
             return Ok(false);
         }
 
-        let excluded_by_override = settings.as_ref().override_settings.is_path_excluded(path);
-        let included_by_override = settings.as_ref().override_settings.is_path_included(path);
-
         // Overrides have top priority
-        if let Some(excluded_by_override) = excluded_by_override {
-            if excluded_by_override {
-                return Ok(true);
-            }
+        let excluded_by_override = settings.as_ref().override_settings.is_path_excluded(path);
+        if excluded_by_override.unwrap_or_default() {
+            return Ok(true);
         }
-
-        if let Some(included_by_override) = included_by_override {
-            if included_by_override {
-                return Ok(!included_by_override);
-            }
+        let included_by_override = settings.as_ref().override_settings.is_path_included(path);
+        if included_by_override.unwrap_or_default() {
+            return Ok(false);
         }
 
         let (ignored_files, included_files) = match params.feature {
             FeatureName::Format => {
                 let formatter = &settings.as_ref().formatter;
-
                 (&formatter.ignored_files, &formatter.included_files)
             }
             FeatureName::Lint => {
@@ -313,11 +301,11 @@ impl Workspace for WorkspaceServer {
             }
         };
 
-        if !ignored_files.is_empty() {
-            if ignored_files.matches_path(path) {
-                return Ok(true);
-            }
-        } else if !included_files.is_empty() && included_files.matches_path(path) {
+        // Tool include/ignore have priority over (global) files include/ignore
+        if ignored_files.matches_path(path) {
+            return Ok(true);
+        }
+        if !included_files.is_empty() && included_files.matches_path(path) {
             return Ok(false);
         }
 
