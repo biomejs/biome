@@ -86,6 +86,8 @@ biome_diagnostics_categories = { version = "0.4.0", path = "./crates/biome_diagn
 biome_diagnostics_macros     = { version = "0.4.0", path = "./crates/biome_diagnostics_macros" }
 biome_formatter              = { version = "0.4.0", path = "./crates/biome_formatter" }
 biome_fs                     = { version = "0.4.0", path = "./crates/biome_fs" }
+biome_html_factory           = { version = "0.4.0", path = "./crates/biome_html_factory" }
+biome_html_syntax            = { version = "0.4.0", path = "./crates/biome_html_syntax" }
 biome_js_analyze             = { version = "0.4.0", path = "./crates/biome_js_analyze" }
 biome_js_factory             = { version = "0.4.0", path = "./crates/biome_js_factory" }
 biome_js_formatter           = { version = "0.4.0", path = "./crates/biome_js_formatter" }
@@ -98,16 +100,14 @@ biome_json_factory           = { version = "0.4.0", path = "./crates/biome_json_
 biome_json_formatter         = { version = "0.4.0", path = "./crates/biome_json_formatter" }
 biome_json_parser            = { version = "0.4.0", path = "./crates/biome_json_parser" }
 biome_json_syntax            = { version = "0.4.0", path = "./crates/biome_json_syntax" }
-biome_html_factory           = { version = "0.4.0", path = "./crates/biome_html_factory" }
-biome_html_syntax            = { version = "0.4.0", path = "./crates/biome_html_syntax" }
 
-biome_markup                 = { version = "0.4.0", path = "./crates/biome_markup" }
-biome_parser                 = { version = "0.4.0", path = "./crates/biome_parser" }
-biome_rowan                  = { version = "0.4.0", path = "./crates/biome_rowan" }
-biome_suppression            = { version = "0.4.0", path = "./crates/biome_suppression" }
-biome_text_edit              = { version = "0.4.0", path = "./crates/biome_text_edit" }
-biome_text_size              = { version = "0.4.0", path = "./crates/biome_text_size" }
-biome_unicode_table          = { version = "0.4.0", path = "./crates/biome_unicode_table" }
+biome_markup        = { version = "0.4.0", path = "./crates/biome_markup" }
+biome_parser        = { version = "0.4.0", path = "./crates/biome_parser" }
+biome_rowan         = { version = "0.4.0", path = "./crates/biome_rowan" }
+biome_suppression   = { version = "0.4.0", path = "./crates/biome_suppression" }
+biome_text_edit     = { version = "0.4.0", path = "./crates/biome_text_edit" }
+biome_text_size     = { version = "0.4.0", path = "./crates/biome_text_size" }
+biome_unicode_table = { version = "0.4.0", path = "./crates/biome_unicode_table" }
 # not publish
 biome_cli            = { path = "./crates/biome_cli" }
 biome_flags          = { path = "./crates/biome_flags" }

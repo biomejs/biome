@@ -431,12 +431,7 @@ dependencies = [
 name = "biome_html_syntax"
 version = "0.4.0"
 dependencies = [
- "biome_console",
- "biome_diagnostics",
- "biome_html_factory",
  "biome_rowan",
- "schemars",
- "serde",
 ]
 
 [[package]]
