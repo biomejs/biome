@@ -46,10 +46,10 @@ HtmlRoot =
 
 // <!DOCTYPE html>
 // ^^^^^^^^^^^^^^^
+// TODO: add better representation
 HtmlDirective =
 	'<'
 	'!'
-	// TODO: add better representation
 	content: HtmlString
 	'>'
 
@@ -59,23 +59,24 @@ HtmlDirective =
 
 HtmlElementList = AnyHtmlElement*
 
-AnyHtmlTag =
-	HtmlSelfClosingTag
+AnyHtmlElement =
+	HtmlSelfClosingElement
 	| HtmlElement
 
 
 // <a />
 HtmlSelfClosingElement =
 	'<'
-	name: AnyHtmlElementName
+	name: HtmlName
 	attributes: HtmlAttributeList
 	'/'
 	'>'
 
 HtmlElement =
 	opening_element: HtmlOpeningElement
-	children: HtmlChildList
+	children: HtmlElementList
 	closing_element: HtmlClosingElement
+
 
 // <a href="">
 // ^^        ^
@@ -104,12 +105,11 @@ HtmlAttribute =
 
 
 // <a href="">
-//    ^^^^^
+//       ^^^^
 HtmlAttributeInitializerClause =
 	'='
-	value: AnyHtmlAttributeValue
+	value: HtmlString
 
-AnyHtmlAttributeValue = HtmlString
 
 HtmlString = value: 'html_string_literal'
 HtmlName = value: 'html_ident'

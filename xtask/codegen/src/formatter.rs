@@ -780,6 +780,11 @@ fn get_node_concept(
                 }
                 _ => NodeConcept::Auxiliary,
             },
+
+            LanguageKind::Html => match name {
+                _ if name.ends_with("Value") => NodeConcept::Value,
+                _ => NodeConcept::Auxiliary,
+            },
         }
     }
 }
@@ -841,6 +846,7 @@ impl LanguageKind {
             LanguageKind::Js => "JsFormatter",
             LanguageKind::Css => "CssFormatter",
             LanguageKind::Json => "JsonFormatter",
+            LanguageKind::Html => "HtmlFormatter",
         };
 
         Ident::new(name, Span::call_site())
@@ -851,6 +857,7 @@ impl LanguageKind {
             LanguageKind::Js => "JsFormatContext",
             LanguageKind::Css => "CssFormatContext",
             LanguageKind::Json => "JsonFormatContext",
+            LanguageKind::Html => "HtmlFormatContext",
         };
 
         Ident::new(name, Span::call_site())

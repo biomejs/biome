@@ -1,8 +1,7 @@
+use crate::kind_src::KindsSrc;
 use crate::{to_upper_snake_case, LanguageKind, Result};
 use proc_macro2::{Literal, Punct, Spacing};
 use quote::{format_ident, quote};
-
-use super::kinds_src::KindsSrc;
 
 pub fn generate_syntax_kinds(grammar: KindsSrc, language_kind: LanguageKind) -> Result<String> {
     let syntax_kind = language_kind.syntax_kind();
@@ -117,6 +116,19 @@ pub fn generate_syntax_kinds(grammar: KindsSrc, language_kind: LanguageKind) -> 
                         #(#punctuation => #punctuation_strings,)*
                         #(#full_keywords => #all_keyword_to_strings,)*
                         JSON_STRING_LITERAL => "string literal",
+                        _ => return None,
+                    };
+                    Some(tok)
+                }
+            }
+        }
+        LanguageKind::Html => {
+            quote! {
+                pub const fn to_string(&self) -> Option<&'static str> {
+                    let tok = match self {
+                        #(#punctuation => #punctuation_strings,)*
+                        #(#full_keywords => #all_keyword_to_strings,)*
+                        HTML_STRING_LITERAL => "string literal",
                         _ => return None,
                     };
                     Some(tok)
