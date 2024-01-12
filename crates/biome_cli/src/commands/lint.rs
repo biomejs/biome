@@ -10,8 +10,7 @@ use biome_service::configuration::{
     load_configuration, FilesConfiguration, LinterConfiguration, LoadedConfiguration,
 };
 use biome_service::workspace::{FixFileMode, UpdateSettingsParams};
-use biome_service::MergeWith;
-use biome_service::{Configuration, ConfigurationBasePath};
+use biome_service::Configuration;
 use std::ffi::OsString;
 
 pub(crate) struct LintCommandPayload {

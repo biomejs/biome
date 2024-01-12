@@ -8,8 +8,7 @@ use biome_service::configuration::{
     load_configuration, FormatterConfiguration, LinterConfiguration, LoadedConfiguration,
 };
 use biome_service::workspace::UpdateSettingsParams;
-use biome_service::{Configuration, ConfigurationBasePath};
-use biome_service::{Configuration, MergeWith};
+use biome_service::Configuration;
 use std::ffi::OsString;
 
 pub(crate) struct CiCommandPayload {

@@ -16,8 +16,7 @@ use biome_service::configuration::{
     load_configuration, FilesConfiguration, FormatterConfiguration, LoadedConfiguration,
 };
 use biome_service::workspace::UpdateSettingsParams;
-use biome_service::{ConfigurationBasePath, JavascriptFormatter};
-use biome_service::{JavascriptFormatter, MergeWith};
+use biome_service::JavascriptFormatter;
 use std::ffi::OsString;
 
 pub(crate) struct FormatCommandPayload {
