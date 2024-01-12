@@ -1,0 +1,115 @@
+// CSS Un-Grammar.
+//
+// This grammar specifies the structure of Rust's concrete syntax tree.
+// It does not specify parsing rules (ambiguities, precedence, etc are out of scope).
+// Tokens are processed -- contextual keywords are recognised, compound operators glued.
+//
+// Legend:
+//
+//   //          				-- comment
+//   Name =      				-- non-terminal definition
+//   'ident'     				-- token (terminal)
+//   A B         				-- sequence
+//   A | B       				-- alternation
+//   A*          				-- zero or more repetition
+//   (A (',' A)* ','?)	-- repetition of node A separated by ',' and allowing a trailing comma
+//   (A (',' A)*)	      -- repetition of node A separated by ',' without a trailing comma
+//   A?          				-- zero or one repetition
+//   (A)         				-- same as A
+//   label:A     				-- suggested name for field of AST node
+
+// NOTES
+//
+// - SyntaxNode, SyntaxToken and SyntaxElement will be stripped from the codegen
+// - Bogus nodes are special nodes used to keep track of broken code; they are
+//   not part of the grammar but they will appear inside the green tree
+
+
+///////////////
+// BOGUS NODES
+///////////////
+// SyntaxElement is a generic data structure that is meant to track nodes and tokens
+// in cases where we care about both types
+//
+// As Bogus* node will need to yield both tokens and nodes without discrimination,
+// and their children will need to yield nodes and tokens as well.
+// For this reason, SyntaxElement = SyntaxElement
+SyntaxElement = SyntaxElement
+
+HtmlBogus = SyntaxElement*
+
+HtmlRoot =
+	bom: 'UNICODE_BOM'?
+	directive: HtmlDirective
+	tags: HtmlElementList
+	eof: 'EOF'
+
+// <!DOCTYPE html>
+// ^^^^^^^^^^^^^^^
+HtmlDirective =
+	'<'
+	'!'
+	// TODO: add better representation
+	content: HtmlString
+	'>'
+
+// ==================================
+// Elements (AKA tags)
+// ==================================
+
+HtmlElementList = AnyHtmlElement*
+
+AnyHtmlTag =
+	HtmlSelfClosingTag
+	| HtmlElement
+
+
+// <a />
+HtmlSelfClosingElement =
+	'<'
+	name: AnyHtmlElementName
+	attributes: HtmlAttributeList
+	'/'
+	'>'
+
+HtmlElement =
+	opening_element: HtmlOpeningElement
+	children: HtmlChildList
+	closing_element: HtmlClosingElement
+
+// <a href="">
+// ^^        ^
+HtmlOpeningElement =
+	'<'
+	name: HtmlName
+	attributes: HtmlAttributeList
+	'>'
+
+// </a>
+HtmlClosingElement =
+	'<'
+	'/'
+	name: HtmlName
+	'>'
+
+// ==================================
+// Attributes
+// ==================================
+
+HtmlAttributeList = HtmlAttribute*
+
+HtmlAttribute =
+	name: HtmlName
+	initializer: HtmlAttributeInitializerClause?
+
+
+// <a href="">
+//    ^^^^^
+HtmlAttributeInitializerClause =
+	'='
+	value: AnyHtmlAttributeValue
+
+AnyHtmlAttributeValue = HtmlString
+
+HtmlString = value: 'html_string_literal'
+HtmlName = value: 'html_ident'
