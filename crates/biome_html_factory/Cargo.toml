@@ -1,0 +1,18 @@
+[package]
+authors.workspace    = true
+description          = "Utilities to create HTML AST for biome_html_parser"
+documentation        = "https://docs.rs/biome_html_factory"
+edition.workspace    = true
+license.workspace    = true
+name                 = "biome_html_factory"
+repository.workspace = true
+version              = "0.4.0"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+biome_html_syntax = { workspace = true }
+biome_rowan       = { workspace = true }
+
+[lints]
+workspace = true
