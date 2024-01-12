@@ -1,6 +1,6 @@
 use crate::semantic_services::SemanticServices;
-use biome_analyze::declare_rule;
 use biome_analyze::{context::RuleContext, Rule, RuleDiagnostic};
+use biome_analyze::{declare_rule, RuleSource};
 use biome_console::markup;
 use biome_js_semantic::Scope;
 use biome_js_syntax::binding_ext::AnyJsBindingDeclaration;
@@ -10,8 +10,6 @@ use rustc_hash::FxHashMap;
 
 declare_rule! {
     /// Disallow variable, function, class, and type redeclarations in the same scope.
-    ///
-    /// Source: https://typescript-eslint.io/rules/no-redeclare
     ///
     /// ## Examples
     ///
@@ -63,6 +61,7 @@ declare_rule! {
     pub(crate) NoRedeclare {
         version: "1.0.0",
         name: "noRedeclare",
+        source: RuleSource::EslintTypeScript("no-redeclare"),
         recommended: true,
     }
 }

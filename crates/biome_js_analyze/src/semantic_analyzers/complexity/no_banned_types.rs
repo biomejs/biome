@@ -1,7 +1,7 @@
 use std::fmt::Display;
 
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic};
+use biome_analyze::{declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make;
@@ -62,8 +62,6 @@ declare_rule! {
     ///   type NonNullableMyType = NonNullable<MyType>;
     ///   ```
     ///
-    /// Source: https://typescript-eslint.io/rules/ban-types
-    ///
     /// ## Examples
     ///
     /// ### Invalid
@@ -93,6 +91,7 @@ declare_rule! {
     pub(crate) NoBannedTypes {
         version: "1.0.0",
         name: "noBannedTypes",
+        source: RuleSource::EslintTypeScript("ban-types"),
         recommended: true,
         fix_kind: FixKind::Safe,
     }

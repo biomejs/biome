@@ -8,6 +8,8 @@ title: useFlatMap (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/prefer-array-flat-map.md" target="_blank"><code>prefer-array-flat-map</code></a>
+
 Promotes the use of `.flatMap()` when `map().flat()` are used together.
 
 ## Examples

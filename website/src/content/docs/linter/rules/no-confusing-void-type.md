@@ -8,6 +8,8 @@ title: noConfusingVoidType (since v1.2.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://typescript-eslint.io/rules/no-invalid-void-type" target="_blank"><code>no-invalid-void-type</code></a>
+
 Disallow `void` type outside of generic or return types.
 
 `void` in TypeScript refers to a function return that is meant to be ignored. Attempting to use a void type outside of a return type or generic type argument is often a sign of programmer error. `void` can also be misleading for other developers even if used correctly.

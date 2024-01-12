@@ -8,6 +8,8 @@ title: useRegexLiterals (since v1.3.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://eslint.org/docs/latest/rules/prefer-regex-literals" target="_blank"><code>prefer-regex-literals</code></a>
+
 Enforce the use of the regular expression literals instead of the RegExp constructor if possible.
 
 There are two ways to create a regular expression:
@@ -20,8 +22,6 @@ because it takes string arguments.
 
 Using regular expression literals avoids some escaping required in a string literal,
 and are easier to analyze statically.
-
-Source: https://eslint.org/docs/latest/rules/prefer-regex-literals/
 
 ## Examples
 

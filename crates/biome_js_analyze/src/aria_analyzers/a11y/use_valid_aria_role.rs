@@ -1,6 +1,6 @@
 use crate::{aria_services::Aria, JsRuleAction};
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
+    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
 use biome_deserialize::{
@@ -13,8 +13,6 @@ use serde::{Deserialize, Serialize};
 
 declare_rule! {
     /// Elements with ARIA roles must use a valid, non-abstract ARIA role.
-    ///
-    /// Source: https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/aria-role.md
     ///
     /// ## Examples
     ///
@@ -71,6 +69,7 @@ declare_rule! {
     pub(crate) UseValidAriaRole {
         version: "1.4.0",
         name: "useValidAriaRole",
+        source: RuleSource::EslintJsxA11y("aria-role"),
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }

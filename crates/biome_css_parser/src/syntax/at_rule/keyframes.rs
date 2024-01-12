@@ -3,7 +3,7 @@ use crate::parser::CssParser;
 use crate::syntax::at_rule::parse_error::{
     expected_keyframes_item, expected_keyframes_item_selector,
 };
-use crate::syntax::blocks::parse_declaration_list_block;
+use crate::syntax::blocks::{parse_block_body, parse_declaration_list_block};
 use crate::syntax::css_dimension::{is_at_percentage_dimension, parse_percentage_dimension};
 use crate::syntax::parse_error::{expected_block, expected_non_css_wide_keyword_identifier};
 use crate::syntax::{
@@ -74,10 +74,9 @@ fn parse_keyframes_block(p: &mut CssParser) -> ParsedSyntax {
         return Absent;
     }
 
-    let m = p.start();
-    p.bump(T!['{']);
-    KeyframesItemList.parse_list(p);
-    p.expect(T!['}']);
+    let m = parse_block_body(p, |p| {
+        KeyframesItemList.parse_list(p);
+    });
 
     Present(m.complete(p, CSS_KEYFRAMES_BLOCK))
 }
@@ -141,7 +140,7 @@ impl ParseRecovery for KeyframesItemBlockParseRecovery {
         //          color: blue;
         //      }
         //   }
-        p.at_ts(token_set!(T!['}'])) || is_at_keyframes_item_selector(p)
+        p.at(T!['}']) || is_at_keyframes_item_selector(p)
     }
 }
 

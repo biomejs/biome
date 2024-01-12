@@ -8,6 +8,8 @@ title: noLabelVar (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://eslint.org/docs/latest/rules/no-label-var" target="_blank"><code>no-label-var</code></a>
+
 Disallow labels that share a name with a variable
 
 ## Examples

@@ -5111,6 +5111,47 @@ pub struct CssSimpleFunctionFields {
     pub r_paren_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssStartingStyleAtRule {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssStartingStyleAtRule {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssStartingStyleAtRuleFields {
+        CssStartingStyleAtRuleFields {
+            starting_style_token: self.starting_style_token(),
+            block: self.block(),
+        }
+    }
+    pub fn starting_style_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn block(&self) -> SyntaxResult<AnyCssStartingStyleBlock> {
+        support::required_node(&self.syntax, 1usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssStartingStyleAtRule {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssStartingStyleAtRuleFields {
+    pub starting_style_token: SyntaxResult<SyntaxToken>,
+    pub block: SyntaxResult<AnyCssStartingStyleBlock>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssString {
     pub(crate) syntax: SyntaxNode,
 }
@@ -5881,6 +5922,7 @@ pub enum AnyCssAtRule {
     CssNamespaceAtRule(CssNamespaceAtRule),
     CssPageAtRule(CssPageAtRule),
     CssScopeAtRule(CssScopeAtRule),
+    CssStartingStyleAtRule(CssStartingStyleAtRule),
     CssSupportsAtRule(CssSupportsAtRule),
 }
 impl AnyCssAtRule {
@@ -5965,6 +6007,12 @@ impl AnyCssAtRule {
     pub fn as_css_scope_at_rule(&self) -> Option<&CssScopeAtRule> {
         match &self {
             AnyCssAtRule::CssScopeAtRule(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_starting_style_at_rule(&self) -> Option<&CssStartingStyleAtRule> {
+        match &self {
+            AnyCssAtRule::CssStartingStyleAtRule(item) => Some(item),
             _ => None,
         }
     }
@@ -7360,6 +7408,33 @@ impl AnyCssSimpleSelector {
     pub fn as_css_universal_selector(&self) -> Option<&CssUniversalSelector> {
         match &self {
             AnyCssSimpleSelector::CssUniversalSelector(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub enum AnyCssStartingStyleBlock {
+    CssBogusBlock(CssBogusBlock),
+    CssDeclarationListBlock(CssDeclarationListBlock),
+    CssRuleListBlock(CssRuleListBlock),
+}
+impl AnyCssStartingStyleBlock {
+    pub fn as_css_bogus_block(&self) -> Option<&CssBogusBlock> {
+        match &self {
+            AnyCssStartingStyleBlock::CssBogusBlock(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_declaration_list_block(&self) -> Option<&CssDeclarationListBlock> {
+        match &self {
+            AnyCssStartingStyleBlock::CssDeclarationListBlock(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_rule_list_block(&self) -> Option<&CssRuleListBlock> {
+        match &self {
+            AnyCssStartingStyleBlock::CssRuleListBlock(item) => Some(item),
             _ => None,
         }
     }
@@ -12609,6 +12684,48 @@ impl From<CssSimpleFunction> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for CssStartingStyleAtRule {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_STARTING_STYLE_AT_RULE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_STARTING_STYLE_AT_RULE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssStartingStyleAtRule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssStartingStyleAtRule")
+            .field(
+                "starting_style_token",
+                &support::DebugSyntaxResult(self.starting_style_token()),
+            )
+            .field("block", &support::DebugSyntaxResult(self.block()))
+            .finish()
+    }
+}
+impl From<CssStartingStyleAtRule> for SyntaxNode {
+    fn from(n: CssStartingStyleAtRule) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssStartingStyleAtRule> for SyntaxElement {
+    fn from(n: CssStartingStyleAtRule) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
 impl AstNode for CssString {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -13480,6 +13597,11 @@ impl From<CssScopeAtRule> for AnyCssAtRule {
         AnyCssAtRule::CssScopeAtRule(node)
     }
 }
+impl From<CssStartingStyleAtRule> for AnyCssAtRule {
+    fn from(node: CssStartingStyleAtRule) -> AnyCssAtRule {
+        AnyCssAtRule::CssStartingStyleAtRule(node)
+    }
+}
 impl From<CssSupportsAtRule> for AnyCssAtRule {
     fn from(node: CssSupportsAtRule) -> AnyCssAtRule {
         AnyCssAtRule::CssSupportsAtRule(node)
@@ -13501,6 +13623,7 @@ impl AstNode for AnyCssAtRule {
         .union(CssNamespaceAtRule::KIND_SET)
         .union(CssPageAtRule::KIND_SET)
         .union(CssScopeAtRule::KIND_SET)
+        .union(CssStartingStyleAtRule::KIND_SET)
         .union(CssSupportsAtRule::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
@@ -13519,6 +13642,7 @@ impl AstNode for AnyCssAtRule {
                 | CSS_NAMESPACE_AT_RULE
                 | CSS_PAGE_AT_RULE
                 | CSS_SCOPE_AT_RULE
+                | CSS_STARTING_STYLE_AT_RULE
                 | CSS_SUPPORTS_AT_RULE
         )
     }
@@ -13550,6 +13674,9 @@ impl AstNode for AnyCssAtRule {
             }
             CSS_PAGE_AT_RULE => AnyCssAtRule::CssPageAtRule(CssPageAtRule { syntax }),
             CSS_SCOPE_AT_RULE => AnyCssAtRule::CssScopeAtRule(CssScopeAtRule { syntax }),
+            CSS_STARTING_STYLE_AT_RULE => {
+                AnyCssAtRule::CssStartingStyleAtRule(CssStartingStyleAtRule { syntax })
+            }
             CSS_SUPPORTS_AT_RULE => AnyCssAtRule::CssSupportsAtRule(CssSupportsAtRule { syntax }),
             _ => return None,
         };
@@ -13571,6 +13698,7 @@ impl AstNode for AnyCssAtRule {
             AnyCssAtRule::CssNamespaceAtRule(it) => &it.syntax,
             AnyCssAtRule::CssPageAtRule(it) => &it.syntax,
             AnyCssAtRule::CssScopeAtRule(it) => &it.syntax,
+            AnyCssAtRule::CssStartingStyleAtRule(it) => &it.syntax,
             AnyCssAtRule::CssSupportsAtRule(it) => &it.syntax,
         }
     }
@@ -13590,6 +13718,7 @@ impl AstNode for AnyCssAtRule {
             AnyCssAtRule::CssNamespaceAtRule(it) => it.syntax,
             AnyCssAtRule::CssPageAtRule(it) => it.syntax,
             AnyCssAtRule::CssScopeAtRule(it) => it.syntax,
+            AnyCssAtRule::CssStartingStyleAtRule(it) => it.syntax,
             AnyCssAtRule::CssSupportsAtRule(it) => it.syntax,
         }
     }
@@ -13611,6 +13740,7 @@ impl std::fmt::Debug for AnyCssAtRule {
             AnyCssAtRule::CssNamespaceAtRule(it) => std::fmt::Debug::fmt(it, f),
             AnyCssAtRule::CssPageAtRule(it) => std::fmt::Debug::fmt(it, f),
             AnyCssAtRule::CssScopeAtRule(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssAtRule::CssStartingStyleAtRule(it) => std::fmt::Debug::fmt(it, f),
             AnyCssAtRule::CssSupportsAtRule(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -13632,6 +13762,7 @@ impl From<AnyCssAtRule> for SyntaxNode {
             AnyCssAtRule::CssNamespaceAtRule(it) => it.into(),
             AnyCssAtRule::CssPageAtRule(it) => it.into(),
             AnyCssAtRule::CssScopeAtRule(it) => it.into(),
+            AnyCssAtRule::CssStartingStyleAtRule(it) => it.into(),
             AnyCssAtRule::CssSupportsAtRule(it) => it.into(),
         }
     }
@@ -17807,6 +17938,86 @@ impl From<AnyCssSimpleSelector> for SyntaxElement {
         node.into()
     }
 }
+impl From<CssBogusBlock> for AnyCssStartingStyleBlock {
+    fn from(node: CssBogusBlock) -> AnyCssStartingStyleBlock {
+        AnyCssStartingStyleBlock::CssBogusBlock(node)
+    }
+}
+impl From<CssDeclarationListBlock> for AnyCssStartingStyleBlock {
+    fn from(node: CssDeclarationListBlock) -> AnyCssStartingStyleBlock {
+        AnyCssStartingStyleBlock::CssDeclarationListBlock(node)
+    }
+}
+impl From<CssRuleListBlock> for AnyCssStartingStyleBlock {
+    fn from(node: CssRuleListBlock) -> AnyCssStartingStyleBlock {
+        AnyCssStartingStyleBlock::CssRuleListBlock(node)
+    }
+}
+impl AstNode for AnyCssStartingStyleBlock {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = CssBogusBlock::KIND_SET
+        .union(CssDeclarationListBlock::KIND_SET)
+        .union(CssRuleListBlock::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(
+            kind,
+            CSS_BOGUS_BLOCK | CSS_DECLARATION_LIST_BLOCK | CSS_RULE_LIST_BLOCK
+        )
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_BOGUS_BLOCK => AnyCssStartingStyleBlock::CssBogusBlock(CssBogusBlock { syntax }),
+            CSS_DECLARATION_LIST_BLOCK => {
+                AnyCssStartingStyleBlock::CssDeclarationListBlock(CssDeclarationListBlock {
+                    syntax,
+                })
+            }
+            CSS_RULE_LIST_BLOCK => {
+                AnyCssStartingStyleBlock::CssRuleListBlock(CssRuleListBlock { syntax })
+            }
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            AnyCssStartingStyleBlock::CssBogusBlock(it) => &it.syntax,
+            AnyCssStartingStyleBlock::CssDeclarationListBlock(it) => &it.syntax,
+            AnyCssStartingStyleBlock::CssRuleListBlock(it) => &it.syntax,
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            AnyCssStartingStyleBlock::CssBogusBlock(it) => it.syntax,
+            AnyCssStartingStyleBlock::CssDeclarationListBlock(it) => it.syntax,
+            AnyCssStartingStyleBlock::CssRuleListBlock(it) => it.syntax,
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssStartingStyleBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            AnyCssStartingStyleBlock::CssBogusBlock(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssStartingStyleBlock::CssDeclarationListBlock(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssStartingStyleBlock::CssRuleListBlock(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssStartingStyleBlock> for SyntaxNode {
+    fn from(n: AnyCssStartingStyleBlock) -> SyntaxNode {
+        match n {
+            AnyCssStartingStyleBlock::CssBogusBlock(it) => it.into(),
+            AnyCssStartingStyleBlock::CssDeclarationListBlock(it) => it.into(),
+            AnyCssStartingStyleBlock::CssRuleListBlock(it) => it.into(),
+        }
+    }
+}
+impl From<AnyCssStartingStyleBlock> for SyntaxElement {
+    fn from(n: AnyCssStartingStyleBlock) -> SyntaxElement {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<CssAttributeSelector> for AnyCssSubSelector {
     fn from(node: CssAttributeSelector) -> AnyCssSubSelector {
         AnyCssSubSelector::CssAttributeSelector(node)
@@ -18958,6 +19169,11 @@ impl std::fmt::Display for AnyCssSimpleSelector {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for AnyCssStartingStyleBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AnyCssSubSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -19579,6 +19795,11 @@ impl std::fmt::Display for CssScopeRangeStart {
     }
 }
 impl std::fmt::Display for CssSimpleFunction {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssStartingStyleAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

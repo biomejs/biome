@@ -1,5 +1,6 @@
 use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
+    RuleSource,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
@@ -36,6 +37,7 @@ declare_rule! {
     pub(crate) NoCompareNegZero {
         version: "1.0.0",
         name: "noCompareNegZero",
+        source: RuleSource::Eslint("no-compare-neg-zero"),
         recommended: true,
         fix_kind: FixKind::Safe,
     }

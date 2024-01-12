@@ -8,14 +8,14 @@ title: noUselessCatch (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://eslint.org/docs/latest/rules/no-useless-catch" target="_blank"><code>no-useless-catch</code></a>
+
 Disallow unnecessary `catch` clauses.
 
 A `catch` clause that only rethrows the original error is redundant,
 and has no effect on the runtime behavior of the program.
 These redundant clauses can be a source of confusion and code bloat,
 so it’s better to disallow these unnecessary `catch` clauses.
-
-Source: https://eslint.org/docs/latest/rules/no-useless-catch
 
 ## Examples
 

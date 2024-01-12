@@ -1,7 +1,7 @@
 use crate::aria_services::Aria;
 use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic};
+use biome_analyze::{declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
@@ -28,6 +28,7 @@ declare_rule! {
     pub(crate) UseValidAriaProps {
         version: "1.0.0",
         name: "useValidAriaProps",
+        source: RuleSource::EslintJsxA11y("aria-props"),
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }

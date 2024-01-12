@@ -1,4 +1,4 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::{
     AnyJsClass, AnyJsClassMember, JsGetterClassMember, JsMethodClassMember, JsPropertyClassMember,
@@ -19,8 +19,6 @@ declare_rule! {
     /// 	- As an alternative, you can import * as ... the module to get all of them in a single object.
     /// - IDEs can't provide as good suggestions for static class or namespace imported properties when you start typing property names
     /// - It's more difficult to statically analyze code for unused variables, etc. when they're all on the class (see: Finding dead code (and dead types) in TypeScript).
-    ///
-    /// Source: https://typescript-eslint.io/rules/no-extraneous-class
     ///
     /// ## Examples
     ///
@@ -93,6 +91,7 @@ declare_rule! {
     pub(crate) NoStaticOnlyClass {
         version: "1.0.0",
         name: "noStaticOnlyClass",
+        source: RuleSource::EslintTypeScript("no-extraneous-class"),
         recommended: true,
     }
 }

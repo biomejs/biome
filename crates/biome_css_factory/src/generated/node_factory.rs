@@ -1746,6 +1746,18 @@ pub fn css_simple_function(
         ],
     ))
 }
+pub fn css_starting_style_at_rule(
+    starting_style_token: SyntaxToken,
+    block: AnyCssStartingStyleBlock,
+) -> CssStartingStyleAtRule {
+    CssStartingStyleAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_STARTING_STYLE_AT_RULE,
+        [
+            Some(SyntaxElement::Token(starting_style_token)),
+            Some(SyntaxElement::Node(block.into_syntax())),
+        ],
+    ))
+}
 pub fn css_string(value_token: SyntaxToken) -> CssString {
     CssString::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_STRING,

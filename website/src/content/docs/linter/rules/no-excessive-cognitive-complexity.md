@@ -4,6 +4,8 @@ title: noExcessiveCognitiveComplexity (since v1.0.0)
 
 **Diagnostic Category: `lint/complexity/noExcessiveCognitiveComplexity`**
 
+Source: <a href="https://github.com/SonarSource/eslint-plugin-sonarjs/blob/HEAD/docs/rules/cognitive-complexity.md" target="_blank"><code>cognitive-complexity</code></a>
+
 Disallow functions that exceed a given Cognitive Complexity score.
 
 The more complexity a function contains, the harder it is to understand
@@ -17,11 +19,7 @@ This rule calculates a complexity score for every function and disallows
 those that exceed a configured complexity threshold (default: 15).
 
 The complexity score is calculated based on the Cognitive Complexity
-algorithm: http://redirect.sonarsource.com/doc/cognitive-complexity.html
-
-Source:
-
-- https://github.com/SonarSource/eslint-plugin-sonarjs/blob/HEAD/docs/rules/cognitive-complexity.md
+algorithm: https://redirect.sonarsource.com/doc/cognitive-complexity.html
 
 ## Examples
 

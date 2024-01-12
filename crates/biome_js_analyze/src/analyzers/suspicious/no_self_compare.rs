@@ -1,6 +1,6 @@
 use crate::utils::is_node_equal;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_js_syntax::JsBinaryExpression;
 use biome_rowan::AstNode;
 
@@ -11,8 +11,6 @@ declare_rule! {
     ///
     /// > The only time you would compare a variable against itself is when you are testing for `NaN`.
     /// However, it is far more appropriate to use `typeof x === 'number' && Number.isNaN(x)` for that use case rather than leaving the reader of the code to determine the intent of self comparison.
-    ///
-    /// Source: [no-self-compare](https://eslint.org/docs/latest/rules/no-self-compare).
     ///
     /// ## Examples
     ///
@@ -29,6 +27,7 @@ declare_rule! {
     pub(crate) NoSelfCompare {
         version: "1.0.0",
         name: "noSelfCompare",
+        source: RuleSource::Eslint("no-self-compare"),
         recommended: true,
     }
 }

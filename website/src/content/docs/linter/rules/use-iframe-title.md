@@ -8,6 +8,8 @@ title: useIframeTitle (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/iframe-has-title.md" target="_blank"><code>iframe-has-title</code></a>
+
 Enforces the usage of the attribute `title` for the element `iframe`.
 
 ## Examples

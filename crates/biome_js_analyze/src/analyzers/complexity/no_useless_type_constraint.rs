@@ -1,5 +1,5 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic};
+use biome_analyze::{declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 
 use biome_diagnostics::Applicability;
@@ -21,8 +21,6 @@ declare_rule! {
     /// A supplied type must then be a subtype of the supplied constraint.
     /// All types are subtypes of `any` and `unknown`.
     /// It is thus useless to extend from `any` or `unknown`.
-    ///
-    /// Source: https://typescript-eslint.io/rules/no-unnecessary-type-constraint/
     ///
     /// ## Examples
     ///
@@ -81,6 +79,7 @@ declare_rule! {
     pub(crate) NoUselessTypeConstraint {
         version: "1.0.0",
         name: "noUselessTypeConstraint",
+        source: RuleSource::EslintTypeScript("no-unnecessary-type-constraint"),
         recommended: true,
         fix_kind: FixKind::Safe,
     }

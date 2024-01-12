@@ -8,9 +8,9 @@ title: noRedundantRoles (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
-Enforce explicit `role` property is not the same as implicit/default role property on an element.
+Source: <a href="https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/no-redundant-roles.md" target="_blank"><code>no-redundant-roles</code></a>
 
-ESLint (eslint-plugin-jsx-a11y) Equivalent: [no-redundant-roles](https://github.com/evcohen/eslint-plugin-jsx-a11y/blob/main/docs/rules/no-redundant-roles.md)
+Enforce explicit `role` property is not the same as implicit/default role property on an element.
 
 ## Examples
 

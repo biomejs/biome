@@ -1,6 +1,6 @@
 use crate::aria_services::Aria;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, Rule, RuleDiagnostic};
+use biome_analyze::{declare_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_js_syntax::JsxAttribute;
@@ -41,6 +41,7 @@ declare_rule! {
     pub(crate) UseAriaPropsForRole {
         version: "1.0.0",
         name: "useAriaPropsForRole",
+        source: RuleSource::EslintJsxA11y("role-has-required-aria-props"),
         recommended: true,
     }
 }

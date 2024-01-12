@@ -8,6 +8,8 @@ title: noInvalidConstructorSuper (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://eslint.org/docs/latest/rules/constructor-super" target="_blank"><code>constructor-super</code></a>
+
 Prevents the incorrect use of `super()` inside classes. It also checks whether a call `super()` is missing from classes that extends other constructors.
 
 ## Examples

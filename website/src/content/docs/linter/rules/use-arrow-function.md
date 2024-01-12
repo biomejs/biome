@@ -8,6 +8,8 @@ title: useArrowFunction (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Inspired from: <a href="https://eslint.org/docs/latest/rules/prefer-arrow-callback" target="_blank"><code>prefer-arrow-callback</code></a>
+
 Use arrow functions over function expressions.
 
 An arrow function expression is a compact alternative to a regular function expression,

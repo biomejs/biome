@@ -1,3 +1,4 @@
+use biome_analyze::RuleSource;
 use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
 };
@@ -49,6 +50,7 @@ declare_rule! {
     pub(crate) NoDoubleEquals {
         version: "1.0.0",
         name: "noDoubleEquals",
+        source: RuleSource::Eslint("eqeqeq"),
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }

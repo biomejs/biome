@@ -8,6 +8,8 @@ title: useHtmlLang (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/html-has-lang.md" target="_blank"><code>html-has-lang</code></a>
+
 Enforce that `html` element has `lang` attribute.
 
 ## Examples

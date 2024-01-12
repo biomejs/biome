@@ -8,11 +8,7 @@ declare_rule! {
     /// TypeScript variable declaration without any type annotation and initialization have the `any` type.
     /// The any type in TypeScript is a dangerous “escape hatch” from the type system.
     /// Using any disables many type checking rules and is generally best used only as a last resort or when prototyping code.
-    /// TypeScript’s `--noImplicitAny` compiler option doesn't report this case.
-    ///
-    ///
-    ///
-    /// Source: https://www.typescriptlang.org/tsconfig#noImplicitAny
+    /// TypeScript’s [`--noImplicitAny` compiler option](https://www.typescriptlang.org/tsconfig#noImplicitAny) doesn't report this case.
     ///
     /// ## Examples
     ///

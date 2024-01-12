@@ -1,5 +1,6 @@
 use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
+    RuleSource,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
@@ -55,10 +56,10 @@ declare_rule! {
     /// !x;
     /// !!x;
     /// ```
-
     pub(crate) NoExtraBooleanCast {
         version: "1.0.0",
         name: "noExtraBooleanCast",
+        source: RuleSource::Eslint("no-extra-boolean-cast"),
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }

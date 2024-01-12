@@ -1,5 +1,5 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic};
+use biome_analyze::{declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_syntax::{
@@ -13,8 +13,6 @@ declare_rule! {
     /// Prevents the wrong usage of the non-null assertion operator (`!`) in TypeScript files.
     ///
     /// > The `!` non-null assertion operator in TypeScript is used to assert that a value's type does not include `null` or `undefined`. Using the operator any more than once on a single value does nothing.
-    ///
-    /// Source: https://typescript-eslint.io/rules/no-extra-non-null-assertion
     ///
     /// ## Examples
     ///
@@ -50,6 +48,7 @@ declare_rule! {
     pub(crate) NoExtraNonNullAssertion {
         version: "1.0.0",
         name: "noExtraNonNullAssertion",
+        source: RuleSource::EslintTypeScript("no-extra-non-null-assertion"),
         recommended: true,
         fix_kind: FixKind::Safe,
     }

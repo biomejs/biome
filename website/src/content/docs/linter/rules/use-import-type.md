@@ -8,6 +8,8 @@ title: useImportType (since v1.5.0)
 This rule is part of the [nursery](/linter/rules/#nursery) group.
 :::
 
+Inspired from: <a href="https://typescript-eslint.io/rules/consistent-type-imports" target="_blank"><code>consistent-type-imports</code></a>
+
 Promotes the use of `import type` for types.
 
 _TypeScript_ allows specifying a `type` qualifier on an `import` to indicate that the `import` doesn't exist at runtime.
@@ -16,8 +18,6 @@ This also ensures that some modules are not loaded at runtime.
 
 The rule ensures that all imports used only as a type use a type-only `import`.
 It also groups inline type imports into a grouped `import type`.
-
-Source: https://typescript-eslint.io/rules/consistent-type-imports
 
 ## Examples
 

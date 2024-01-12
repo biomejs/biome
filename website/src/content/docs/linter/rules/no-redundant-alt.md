@@ -8,6 +8,8 @@ title: noRedundantAlt (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/no-redundant-roles.md" target="_blank"><code>no-redundant-roles</code></a>
+
 Enforce `img` alt prop does not contain the word "image", "picture", or "photo".
 
 The rule will first check if `aria-hidden` is truthy to determine whether to enforce the rule. If the image is

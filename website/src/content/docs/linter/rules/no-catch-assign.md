@@ -8,12 +8,12 @@ title: noCatchAssign (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://eslint.org/docs/latest/rules/no-ex-assign" target="_blank"><code>no-ex-assign</code></a>
+
 Disallow reassigning exceptions in catch clauses.
 
 Assignment to a `catch` parameter can be misleading and confusing.
 It is often unintended and indicative of a programmer error.
-
-Source: https://eslint.org/docs/latest/rules/no-ex-assign
 
 ## Examples
 

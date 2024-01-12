@@ -1,6 +1,7 @@
 use crate::{semantic_services::Semantic, JsRuleAction};
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
+    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource,
+    RuleSourceKind,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
@@ -28,8 +29,6 @@ declare_rule! {
     ///
     /// The rule ensures that all imports used only as a type use a type-only `import`.
     /// It also groups inline type imports into a grouped `import type`.
-    ///
-    /// Source: https://typescript-eslint.io/rules/consistent-type-imports
     ///
     /// ## Examples
     ///
@@ -68,6 +67,8 @@ declare_rule! {
     pub(crate) UseImportType {
         version: "1.5.0",
         name: "useImportType",
+        source: RuleSource::EslintTypeScript("consistent-type-imports"),
+        source_kind: RuleSourceKind::Inspired,
         recommended: true,
         fix_kind: FixKind::Safe,
     }

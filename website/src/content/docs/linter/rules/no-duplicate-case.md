@@ -8,11 +8,11 @@ title: noDuplicateCase (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://eslint.org/docs/latest/rules/no-duplicate-case" target="_blank"><code>no-duplicate-case</code></a>
+
 Disallow duplicate case labels.
 
 If a switch statement has duplicate test expressions in case clauses, it is likely that a programmer copied a case clause but forgot to change the test expression.
-
-Source: https://eslint.org/docs/latest/rules/no-duplicate-case
 
 ## Examples
 

@@ -1,4 +1,4 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, AnyJsMemberExpression, JsUnaryOperator,
@@ -16,8 +16,6 @@ declare_rule! {
     /// This rule requires the initialization of enum members with constant expressions.
     /// It allows numeric and bitwise expressions for supporting [enum flags](https://stackoverflow.com/questions/39359740/what-are-enum-flags-in-typescript/39359953#39359953).
     /// It also allows referencing previous enum members.
-    ///
-    /// Source: https://typescript-eslint.io/rules/prefer-literal-enum-member/
     ///
     /// ## Examples
     ///
@@ -66,6 +64,7 @@ declare_rule! {
     pub(crate) UseLiteralEnumMembers {
         version: "1.0.0",
         name: "useLiteralEnumMembers",
+        source: RuleSource::EslintTypeScript("prefer-literal-enum-member"),
         recommended: true,
     }
 }

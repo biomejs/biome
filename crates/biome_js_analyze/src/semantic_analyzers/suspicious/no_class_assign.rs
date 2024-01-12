@@ -1,5 +1,5 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, Rule, RuleDiagnostic};
+use biome_analyze::{declare_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_semantic::{Reference, ReferencesExtensions};
 use biome_js_syntax::AnyJsClass;
@@ -68,6 +68,7 @@ declare_rule! {
     pub(crate) NoClassAssign {
         version: "1.0.0",
         name: "noClassAssign",
+        source: RuleSource::Eslint("no-class-assign"),
         recommended: true,
     }
 }

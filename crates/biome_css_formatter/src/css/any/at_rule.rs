@@ -22,6 +22,7 @@ impl FormatRule<AnyCssAtRule> for FormatAnyCssAtRule {
             AnyCssAtRule::CssScopeAtRule(node) => node.format().fmt(f),
             AnyCssAtRule::CssImportAtRule(node) => node.format().fmt(f),
             AnyCssAtRule::CssNamespaceAtRule(node) => node.format().fmt(f),
+            AnyCssAtRule::CssStartingStyleAtRule(node) => node.format().fmt(f),
             AnyCssAtRule::CssBogusAtRule(node) => node.format().fmt(f),
         }
     }

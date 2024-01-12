@@ -1,6 +1,6 @@
 use crate::{semantic_services::Semantic, JsRuleAction};
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
+    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
@@ -19,8 +19,6 @@ declare_rule! {
     ///
     /// - [`Symbol`](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Symbol/Symbol)
     /// - [`BigInt`](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/BigInt/BigInt)
-    ///
-    /// Source: https://eslint.org/docs/latest/rules/no-new-native-nonconstructor/
     ///
     /// ## Examples
     ///
@@ -54,6 +52,7 @@ declare_rule! {
     pub(crate) NoInvalidNewBuiltin {
         version: "1.3.0",
         name: "noInvalidNewBuiltin",
+        source: RuleSource::Eslint("no-new-native-nonconstructor"),
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }

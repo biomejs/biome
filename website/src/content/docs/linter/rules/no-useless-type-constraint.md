@@ -8,14 +8,14 @@ title: noUselessTypeConstraint (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://typescript-eslint.io/rules/no-unnecessary-type-constraint" target="_blank"><code>no-unnecessary-type-constraint</code></a>
+
 Disallow using `any` or `unknown` as type constraint.
 
 Generic type parameters (`<T>`) in TypeScript may be **constrained** with [`extends`](https://www.typescriptlang.org/docs/handbook/generics.html#generic-constraints).
 A supplied type must then be a subtype of the supplied constraint.
 All types are subtypes of `any` and `unknown`.
 It is thus useless to extend from `any` or `unknown`.
-
-Source: https://typescript-eslint.io/rules/no-unnecessary-type-constraint/
 
 ## Examples
 

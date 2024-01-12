@@ -8,15 +8,14 @@ title: noEmptyBlockStatements (since v1.3.0)
 This rule is part of the [nursery](/linter/rules/#nursery) group.
 :::
 
+Source: <a href="https://eslint.org/docs/latest/rules/no-empty" target="_blank"><code>no-empty</code></a>
+
 Disallow empty block statements and static blocks.
 
 Empty static blocks and block statements, while not technically errors, usually occur due to refactoring that wasn’t completed. They can cause confusion when reading code.
 
 This rule disallows empty block statements and static blocks.
 This rule ignores block statements or static blocks which contain a comment (for example, in an empty catch or finally block of a try statement to indicate that execution should continue regardless of errors).
-
-Source: https://eslint.org/docs/latest/rules/no-empty-static-block/
-Source: https://eslint.org/docs/latest/rules/no-empty/
 
 ## Examples
 

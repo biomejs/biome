@@ -1,6 +1,7 @@
 use biome_analyze::{
     AnalysisFilter, AnalyzerOptions, ControlFlow, FixKind, GroupCategory, Queryable,
-    RegistryVisitor, Rule, RuleCategory, RuleFilter, RuleGroup, RuleMetadata, Source, SourceKind,
+    RegistryVisitor, Rule, RuleCategory, RuleFilter, RuleGroup, RuleMetadata, RuleSource,
+    RuleSourceKind,
 };
 use biome_console::fmt::Termcolor;
 use biome_console::{
@@ -275,8 +276,8 @@ fn generate_rule(
     version: &'static str,
     is_recommended: bool,
     has_fix_kind: bool,
-    source: Option<&Source>,
-    source_kind: Option<&SourceKind>,
+    source: Option<&RuleSource>,
+    source_kind: Option<&RuleSourceKind>,
 ) -> Result<Vec<Event<'static>>> {
     let mut content = Vec::new();
 
@@ -322,11 +323,11 @@ fn generate_rule(
 
     if let Some(source) = source {
         let (source_rule_url, source_rule_name) = source.as_url_and_rule_name();
-        match source_kind.unwrap() {
-            SourceKind::Inspired => {
+        match source_kind.cloned().unwrap_or_default() {
+            RuleSourceKind::Inspired => {
                 write!(content, "Inspired from: ")?;
             }
-            SourceKind::SameLogic => {
+            RuleSourceKind::SameLogic => {
                 write!(content, "Source: ")?;
             }
         };

@@ -84,3 +84,5 @@ export default function() {
 const usingNewTarget = function () {
     return new.target;
 }
+
+class ExtendsClause extends (function() {}) {}

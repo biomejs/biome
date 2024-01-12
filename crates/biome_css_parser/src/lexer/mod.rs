@@ -997,6 +997,7 @@ impl<'src> CssLexer<'src> {
             b"scope" => SCOPE_KW,
             b"import" => IMPORT_KW,
             b"namespace" => NAMESPACE_KW,
+            b"starting-style" => STARTING_STYLE_KW,
             _ => IDENT,
         }
     }

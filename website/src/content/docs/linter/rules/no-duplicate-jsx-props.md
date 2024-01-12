@@ -8,6 +8,8 @@ title: noDuplicateJsxProps (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/jsx-no-duplicate-props.md" target="_blank"><code>jsx-no-duplicate-props</code></a>
+
 Prevents JSX properties to be assigned multiple times.
 
 ## Examples

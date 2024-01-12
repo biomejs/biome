@@ -1,5 +1,5 @@
 use crate::{semantic_services::Semantic, utils::rename::RenamableNode};
-use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
@@ -82,6 +82,7 @@ declare_rule! {
     pub(crate) NoConstantCondition    {
         version: "1.0.0",
         name: "noConstantCondition",
+        source: RuleSource::Eslint("no-constant-condition"),
         recommended: true,
     }
 }

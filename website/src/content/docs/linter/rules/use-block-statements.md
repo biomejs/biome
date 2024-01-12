@@ -4,6 +4,8 @@ title: useBlockStatements (since v1.0.0)
 
 **Diagnostic Category: `lint/style/useBlockStatements`**
 
+Source: <a href="https://eslint.org/docs/latest/rules/curly" target="_blank"><code>curly</code></a>
+
 Requires following curly brace conventions.
 
 JavaScript allows the omission of curly braces when a block contains only one statement. However, it is considered by many to be best practice to never omit curly braces around blocks, even when they are optional, because it can lead to bugs and reduces code clarity.

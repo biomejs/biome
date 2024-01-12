@@ -67,7 +67,6 @@ AnyCssRule =
 	| CssAtRule
 	| CssBogusRule
 
-
 // .header { color: red }
 // ^^^^^^^^^^^^^^^^^^^^^
 CssRule =
@@ -405,6 +404,7 @@ CssPseudoElementFunctionIdentifier =
 
 /////////////
 // COMMON BLOCKS
+// https://drafts.csswg.org/css-syntax-3/#typedef-declaration-rule-list
 ////////////
 
 // @page :left { background: red; @media (500px <= width <= 500px) {  } }
@@ -699,6 +699,7 @@ AnyCssAtRule =
 	| CssScopeAtRule
 	| CssImportAtRule
 	| CssNamespaceAtRule
+	| CssStartingStyleAtRule
 	| CssBogusAtRule
 
 // @charset "UTF-8";
@@ -1447,6 +1448,25 @@ CssNamespaceAtRule =
 	';'
 
 AnyCssNamespaceUrl = CssUrlFunction | CssString
+
+// https://drafts.csswg.org/css-transitions-2/#at-ruledef-starting-style
+// @starting-style {
+//     rulesets
+//   }
+//
+// selector {
+//  @starting-style {
+//    declarations
+//  }
+// }
+CssStartingStyleAtRule =
+	'starting-style'
+	block: AnyCssStartingStyleBlock
+
+AnyCssStartingStyleBlock =
+	CssRuleListBlock
+	| CssDeclarationListBlock
+	| CssBogusBlock
 
 ///////////////
 // AUXILIARY

@@ -51,35 +51,6 @@ class Something2 {
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,7 +1,7 @@
- class Foo1 {
-   @foo
--  // comment
--  async method() {}
-+  async // comment
-+  method() {}
- }
- 
- class Foo2 {
-@@ -12,14 +12,14 @@
- 
- class Foo3 {
-   @foo
--  // comment
--  *method() {}
-+  *// comment
-+  method() {}
- }
- 
- class Foo4 {
-   @foo
--  // comment
--  async *method() {}
-+  async *// comment
-+  method() {}
- }
- 
- class Something {
 @@ -30,6 +30,6 @@
  
  class Something2 {
@@ -96,8 +67,8 @@ class Something2 {
 ```ts
 class Foo1 {
   @foo
-  async // comment
-  method() {}
+  // comment
+  async method() {}
 }
 
 class Foo2 {
@@ -108,14 +79,14 @@ class Foo2 {
 
 class Foo3 {
   @foo
-  *// comment
-  method() {}
+  // comment
+  *method() {}
 }
 
 class Foo4 {
   @foo
-  async *// comment
-  method() {}
+  // comment
+  async *method() {}
 }
 
 class Something {

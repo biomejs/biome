@@ -1,5 +1,5 @@
 use crate::semantic_services::Semantic;
-use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::{JsLabeledStatement, JsSyntaxNode, JsSyntaxToken};
 use biome_rowan::AstNode;
@@ -25,6 +25,7 @@ declare_rule! {
     pub(crate) NoLabelVar {
         version: "1.0.0",
         name: "noLabelVar",
+        source: RuleSource::Eslint("no-label-var"),
         recommended: true,
     }
 }

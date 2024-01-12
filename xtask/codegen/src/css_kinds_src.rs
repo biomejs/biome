@@ -222,6 +222,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "selector",
         "import",
         "namespace",
+        "starting-style",
         //
         "font-face",
         // Don't add to the end of this list, add new keywords above the "HERE"
@@ -416,6 +417,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_IMPORT_NAMED_LAYER",
         "CSS_IMPORT_SUPPORTS",
         "CSS_NAMESPACE_AT_RULE",
+        "CSS_STARTING_STYLE_AT_RULE",
         // Bogus nodes
         "CSS_BOGUS",
         "CSS_BOGUS_BLOCK",
