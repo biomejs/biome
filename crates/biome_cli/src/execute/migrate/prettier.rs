@@ -401,7 +401,7 @@ impl TryFrom<PrettierConfiguration> for JavascriptFormatter {
 
 #[cfg(test)]
 mod test {
-    use crate::execute::migrate::prettier::PrettierConfiguration;
+    use crate::execute::migrate::prettier::{PrettierConfiguration, PrettierTrailingComma};
     use biome_deserialize::json::deserialize_from_json_str;
     use biome_json_parser::JsonParserOptions;
 
@@ -419,6 +419,41 @@ mod test {
             configuration,
             PrettierConfiguration {
                 use_tabs: true,
+                ..PrettierConfiguration::default()
+            }
+        )
+    }
+
+    #[test]
+    fn some_properties() {
+        let configuration = deserialize_from_json_str::<PrettierConfiguration>(
+            r#"
+{
+  "printWidth": 100,
+  "semi": true,
+  "singleQuote": true,
+  "tabWidth": 2,
+  "trailingComma": "es5",
+  "useTabs": true,
+  "jsxSingleQuote": true
+}
+            "#,
+            JsonParserOptions::default(),
+            "",
+        )
+        .into_deserialized()
+        .unwrap();
+
+        assert_eq!(
+            configuration,
+            PrettierConfiguration {
+                use_tabs: true,
+                print_width: 100,
+                semi: true,
+                single_quote: true,
+                tab_width: 2,
+                trailing_comma: PrettierTrailingComma::Es5,
+                jsx_single_quote: true,
                 ..PrettierConfiguration::default()
             }
         )

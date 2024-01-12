@@ -22,6 +22,7 @@ pub(crate) struct MigratePayload<'a> {
     pub(crate) configuration_file_path: PathBuf,
     pub(crate) configuration_directory_path: PathBuf,
     pub(crate) verbose: bool,
+    #[allow(unused)]
     pub(crate) prettier: bool,
 }
 
