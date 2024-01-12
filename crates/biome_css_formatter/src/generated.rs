@@ -30,30 +30,44 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssRoot {
         FormatOwnedWithRule::new(self, crate::css::auxiliary::root::FormatCssRoot::default())
     }
 }
-impl FormatRule<biome_css_syntax::CssRule> for crate::css::auxiliary::rule::FormatCssRule {
+impl FormatRule<biome_css_syntax::CssQualifiedRule>
+    for crate::css::auxiliary::qualified_rule::FormatCssQualifiedRule
+{
     type Context = CssFormatContext;
     #[inline(always)]
-    fn fmt(&self, node: &biome_css_syntax::CssRule, f: &mut CssFormatter) -> FormatResult<()> {
-        FormatNodeRule::<biome_css_syntax::CssRule>::fmt(self, node, f)
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssQualifiedRule,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::CssQualifiedRule>::fmt(self, node, f)
     }
 }
-impl AsFormat<CssFormatContext> for biome_css_syntax::CssRule {
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssQualifiedRule {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_css_syntax::CssRule,
-        crate::css::auxiliary::rule::FormatCssRule,
+        biome_css_syntax::CssQualifiedRule,
+        crate::css::auxiliary::qualified_rule::FormatCssQualifiedRule,
     >;
     fn format(&self) -> Self::Format<'_> {
         #![allow(clippy::default_constructed_unit_structs)]
-        FormatRefWithRule::new(self, crate::css::auxiliary::rule::FormatCssRule::default())
+        FormatRefWithRule::new(
+            self,
+            crate::css::auxiliary::qualified_rule::FormatCssQualifiedRule::default(),
+        )
     }
 }
-impl IntoFormat<CssFormatContext> for biome_css_syntax::CssRule {
-    type Format =
-        FormatOwnedWithRule<biome_css_syntax::CssRule, crate::css::auxiliary::rule::FormatCssRule>;
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssQualifiedRule {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssQualifiedRule,
+        crate::css::auxiliary::qualified_rule::FormatCssQualifiedRule,
+    >;
     fn into_format(self) -> Self::Format {
         #![allow(clippy::default_constructed_unit_structs)]
-        FormatOwnedWithRule::new(self, crate::css::auxiliary::rule::FormatCssRule::default())
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::auxiliary::qualified_rule::FormatCssQualifiedRule::default(),
+        )
     }
 }
 impl FormatRule<biome_css_syntax::CssAtRule> for crate::css::statements::at_rule::FormatCssAtRule {

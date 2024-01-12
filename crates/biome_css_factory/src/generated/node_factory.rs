@@ -1508,6 +1508,18 @@ pub fn css_pseudo_element_selector(
         ],
     ))
 }
+pub fn css_qualified_rule(
+    prelude: CssSelectorList,
+    block: AnyCssDeclarationListBlock,
+) -> CssQualifiedRule {
+    CssQualifiedRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_QUALIFIED_RULE,
+        [
+            Some(SyntaxElement::Node(prelude.into_syntax())),
+            Some(SyntaxElement::Node(block.into_syntax())),
+        ],
+    ))
+}
 pub fn css_query_feature_boolean(name: CssIdentifier) -> CssQueryFeatureBoolean {
     CssQueryFeatureBoolean::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_QUERY_FEATURE_BOOLEAN,
@@ -1661,15 +1673,6 @@ impl CssRootBuilder {
             ],
         ))
     }
-}
-pub fn css_rule(prelude: CssSelectorList, block: AnyCssDeclarationListBlock) -> CssRule {
-    CssRule::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_RULE,
-        [
-            Some(SyntaxElement::Node(prelude.into_syntax())),
-            Some(SyntaxElement::Node(block.into_syntax())),
-        ],
-    ))
 }
 pub fn css_rule_list_block(
     l_curly_token: SyntaxToken,

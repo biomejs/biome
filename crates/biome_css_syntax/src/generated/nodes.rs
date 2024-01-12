@@ -4417,6 +4417,47 @@ pub struct CssPseudoElementSelectorFields {
     pub element: SyntaxResult<AnyCssPseudoElement>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssQualifiedRule {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssQualifiedRule {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssQualifiedRuleFields {
+        CssQualifiedRuleFields {
+            prelude: self.prelude(),
+            block: self.block(),
+        }
+    }
+    pub fn prelude(&self) -> CssSelectorList {
+        support::list(&self.syntax, 0usize)
+    }
+    pub fn block(&self) -> SyntaxResult<AnyCssDeclarationListBlock> {
+        support::required_node(&self.syntax, 1usize)
+    }
+}
+#[cfg(feature = "serde")]
+impl Serialize for CssQualifiedRule {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub struct CssQualifiedRuleFields {
+    pub prelude: CssSelectorList,
+    pub block: SyntaxResult<AnyCssDeclarationListBlock>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssQueryFeatureBoolean {
     pub(crate) syntax: SyntaxNode,
 }
@@ -4853,47 +4894,6 @@ pub struct CssRootFields {
     pub bom_token: Option<SyntaxToken>,
     pub rules: CssRuleList,
     pub eof_token: SyntaxResult<SyntaxToken>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
-pub struct CssRule {
-    pub(crate) syntax: SyntaxNode,
-}
-impl CssRule {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> CssRuleFields {
-        CssRuleFields {
-            prelude: self.prelude(),
-            block: self.block(),
-        }
-    }
-    pub fn prelude(&self) -> CssSelectorList {
-        support::list(&self.syntax, 0usize)
-    }
-    pub fn block(&self) -> SyntaxResult<AnyCssDeclarationListBlock> {
-        support::required_node(&self.syntax, 1usize)
-    }
-}
-#[cfg(feature = "serde")]
-impl Serialize for CssRule {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[cfg_attr(feature = "serde", derive(Serialize))]
-pub struct CssRuleFields {
-    pub prelude: CssSelectorList,
-    pub block: SyntaxResult<AnyCssDeclarationListBlock>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssRuleListBlock {
@@ -7420,7 +7420,7 @@ impl AnyCssRelativeSelector {
 pub enum AnyCssRule {
     CssAtRule(CssAtRule),
     CssBogusRule(CssBogusRule),
-    CssRule(CssRule),
+    CssQualifiedRule(CssQualifiedRule),
 }
 impl AnyCssRule {
     pub fn as_css_at_rule(&self) -> Option<&CssAtRule> {
@@ -7435,9 +7435,9 @@ impl AnyCssRule {
             _ => None,
         }
     }
-    pub fn as_css_rule(&self) -> Option<&CssRule> {
+    pub fn as_css_qualified_rule(&self) -> Option<&CssQualifiedRule> {
         match &self {
-            AnyCssRule::CssRule(item) => Some(item),
+            AnyCssRule::CssQualifiedRule(item) => Some(item),
             _ => None,
         }
     }
@@ -12147,6 +12147,45 @@ impl From<CssPseudoElementSelector> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for CssQualifiedRule {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_QUALIFIED_RULE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_QUALIFIED_RULE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssQualifiedRule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssQualifiedRule")
+            .field("prelude", &self.prelude())
+            .field("block", &support::DebugSyntaxResult(self.block()))
+            .finish()
+    }
+}
+impl From<CssQualifiedRule> for SyntaxNode {
+    fn from(n: CssQualifiedRule) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssQualifiedRule> for SyntaxElement {
+    fn from(n: CssQualifiedRule) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
 impl AstNode for CssQueryFeatureBoolean {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -12564,45 +12603,6 @@ impl From<CssRoot> for SyntaxNode {
 }
 impl From<CssRoot> for SyntaxElement {
     fn from(n: CssRoot) -> SyntaxElement {
-        n.syntax.into()
-    }
-}
-impl AstNode for CssRule {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_RULE as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == CSS_RULE
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for CssRule {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CssRule")
-            .field("prelude", &self.prelude())
-            .field("block", &support::DebugSyntaxResult(self.block()))
-            .finish()
-    }
-}
-impl From<CssRule> for SyntaxNode {
-    fn from(n: CssRule) -> SyntaxNode {
-        n.syntax
-    }
-}
-impl From<CssRule> for SyntaxElement {
-    fn from(n: CssRule) -> SyntaxElement {
         n.syntax.into()
     }
 }
@@ -17892,24 +17892,24 @@ impl From<CssBogusRule> for AnyCssRule {
         AnyCssRule::CssBogusRule(node)
     }
 }
-impl From<CssRule> for AnyCssRule {
-    fn from(node: CssRule) -> AnyCssRule {
-        AnyCssRule::CssRule(node)
+impl From<CssQualifiedRule> for AnyCssRule {
+    fn from(node: CssQualifiedRule) -> AnyCssRule {
+        AnyCssRule::CssQualifiedRule(node)
     }
 }
 impl AstNode for AnyCssRule {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = CssAtRule::KIND_SET
         .union(CssBogusRule::KIND_SET)
-        .union(CssRule::KIND_SET);
+        .union(CssQualifiedRule::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, CSS_AT_RULE | CSS_BOGUS_RULE | CSS_RULE)
+        matches!(kind, CSS_AT_RULE | CSS_BOGUS_RULE | CSS_QUALIFIED_RULE)
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             CSS_AT_RULE => AnyCssRule::CssAtRule(CssAtRule { syntax }),
             CSS_BOGUS_RULE => AnyCssRule::CssBogusRule(CssBogusRule { syntax }),
-            CSS_RULE => AnyCssRule::CssRule(CssRule { syntax }),
+            CSS_QUALIFIED_RULE => AnyCssRule::CssQualifiedRule(CssQualifiedRule { syntax }),
             _ => return None,
         };
         Some(res)
@@ -17918,14 +17918,14 @@ impl AstNode for AnyCssRule {
         match self {
             AnyCssRule::CssAtRule(it) => &it.syntax,
             AnyCssRule::CssBogusRule(it) => &it.syntax,
-            AnyCssRule::CssRule(it) => &it.syntax,
+            AnyCssRule::CssQualifiedRule(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
             AnyCssRule::CssAtRule(it) => it.syntax,
             AnyCssRule::CssBogusRule(it) => it.syntax,
-            AnyCssRule::CssRule(it) => it.syntax,
+            AnyCssRule::CssQualifiedRule(it) => it.syntax,
         }
     }
 }
@@ -17934,7 +17934,7 @@ impl std::fmt::Debug for AnyCssRule {
         match self {
             AnyCssRule::CssAtRule(it) => std::fmt::Debug::fmt(it, f),
             AnyCssRule::CssBogusRule(it) => std::fmt::Debug::fmt(it, f),
-            AnyCssRule::CssRule(it) => std::fmt::Debug::fmt(it, f),
+            AnyCssRule::CssQualifiedRule(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -17943,7 +17943,7 @@ impl From<AnyCssRule> for SyntaxNode {
         match n {
             AnyCssRule::CssAtRule(it) => it.into(),
             AnyCssRule::CssBogusRule(it) => it.into(),
-            AnyCssRule::CssRule(it) => it.into(),
+            AnyCssRule::CssQualifiedRule(it) => it.into(),
         }
     }
 }
@@ -20035,6 +20035,11 @@ impl std::fmt::Display for CssPseudoElementSelector {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for CssQualifiedRule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for CssQueryFeatureBoolean {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -20081,11 +20086,6 @@ impl std::fmt::Display for CssRelativeSelector {
     }
 }
 impl std::fmt::Display for CssRoot {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
-impl std::fmt::Display for CssRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

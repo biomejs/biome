@@ -24,7 +24,7 @@ CssRoot {
                 BANG@0..1 "!" [] [],
             ],
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -58,7 +58,7 @@ CssRoot {
   1: CSS_RULE_LIST@0..15
     0: CSS_BOGUS_RULE@0..1
       0: BANG@0..1 "!" [] []
-    1: CSS_RULE@1..15
+    1: CSS_QUALIFIED_RULE@1..15
       0: CSS_SELECTOR_LIST@1..11
         0: CSS_COMPOUND_SELECTOR@1..11
           0: (empty)
@@ -81,14 +81,14 @@ CssRoot {
 ```
 invalid_selector.css:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a rule, or an at rule but instead found '!'.
+  × Expected a qualified rule, or an at rule but instead found '!'.
   
   > 1 │ !.selector {
       │ ^
     2 │ 
     3 │ }
   
-  i Expected a rule, or an at rule here.
+  i Expected a qualified rule, or an at rule here.
   
   > 1 │ !.selector {
       │ ^
