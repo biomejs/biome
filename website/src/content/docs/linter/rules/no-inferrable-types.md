@@ -8,6 +8,8 @@ title: noInferrableTypes (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://typescript-eslint.io/rules/no-inferrable-types" target="_blank"><code>no-inferrable-types</code></a>
+
 Disallow type annotations for variables, parameters, and class properties initialized with a literal expression.
 
 TypeScript is able to infer the types of parameters, properties, and variables from their default or initial values.
@@ -17,8 +19,6 @@ Doing so adds unnecessary verbosity to code making it harder to read.
 In contrast to ESLint's rule, this rule allows to use a wide type for `const` declarations.
 Moreover, the rule does not recognize `undefined` values, primitive type constructors (String, Number, ...), and `RegExp` type.
 These global variables could be shadowed by local ones.
-
-Source: https://typescript-eslint.io/rules/no-inferrable-types
 
 ## Examples
 

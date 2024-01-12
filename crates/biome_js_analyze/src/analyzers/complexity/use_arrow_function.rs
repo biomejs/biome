@@ -1,7 +1,8 @@
 use crate::JsRuleAction;
 use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, AddVisitor, FixKind, Phases, QueryMatch,
-    Queryable, Rule, RuleDiagnostic, ServiceBag, Visitor, VisitorContext,
+    Queryable, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, ServiceBag, Visitor,
+    VisitorContext,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
@@ -15,7 +16,7 @@ use biome_js_syntax::{
 };
 use biome_rowan::{
     declare_node_union, AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, Language,
-    SyntaxNode, SyntaxNodeOptionExt, TextRange, TriviaPieceKind, WalkEvent,
+    SyntaxNode, TextRange, TriviaPieceKind, WalkEvent,
 };
 
 declare_rule! {
@@ -69,6 +70,8 @@ declare_rule! {
     pub(crate) UseArrowFunction {
         version: "1.0.0",
         name: "useArrowFunction",
+        source: RuleSource::Eslint("prefer-arrow-callback"),
+        source_kind: RuleSourceKind::Inspired,
         recommended: true,
         fix_kind: FixKind::Safe,
     }
@@ -102,6 +105,21 @@ impl Rule for UseArrowFunction {
             .is_some_and(|param| param.as_ts_this_parameter().is_some());
         if has_this_parameter {
             // Ignore functions that explicitly declare a `this` type.
+            return None;
+        }
+        let requires_prototype = function_expression
+            .syntax()
+            .ancestors()
+            .skip(1)
+            .find(|ancestor| ancestor.kind() != JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION)
+            .is_some_and(|ancestor| {
+                matches!(
+                    ancestor.kind(),
+                    JsSyntaxKind::JS_NEW_EXPRESSION | JsSyntaxKind::JS_EXTENDS_CLAUSE
+                )
+            });
+        if requires_prototype {
+            // Ignore cases where a prototype is required
             return None;
         }
         Some(())
@@ -144,7 +162,7 @@ impl Rule for UseArrowFunction {
         }
         let arrow_function = arrow_function_builder.build();
         let arrow_function = if needs_parentheses(function_expression) {
-            AnyJsExpression::from(make::parenthesized(arrow_function))
+            AnyJsExpression::from(make::parenthesized(arrow_function.trim_trailing_trivia()?))
         } else {
             AnyJsExpression::from(arrow_function)
         };
@@ -165,20 +183,41 @@ impl Rule for UseArrowFunction {
 
 /// Returns `true` if `function_expr` needs parenthesis when turned into an arrow function.
 fn needs_parentheses(function_expression: &JsFunctionExpression) -> bool {
-    function_expression
-        .syntax()
-        .parent()
-        .kind()
-        .is_some_and(|parent_kind| {
-            matches!(
-                parent_kind,
-                JsSyntaxKind::JS_CALL_EXPRESSION
+    function_expression.syntax().parent().is_some_and(|parent| {
+        // Copied from the implementation of `NeedsParentheses` for `JsArrowFunctionExpression`
+        // in the `biome_js_formatter` crate.
+        // TODO: Should `NeedsParentheses` be moved in `biome_js_syntax`?
+        matches!(
+            parent.kind(),
+            JsSyntaxKind::TS_AS_EXPRESSION
+                    | JsSyntaxKind::TS_SATISFIES_EXPRESSION
+                    | JsSyntaxKind::JS_UNARY_EXPRESSION
+                    | JsSyntaxKind::JS_AWAIT_EXPRESSION
+                    | JsSyntaxKind::TS_TYPE_ASSERTION_EXPRESSION
+                    // Conditional expression
+                    // NOTE: parens are only needed when the arrow function appears in the test.
+                    // To simplify we always add parens.
+                    | JsSyntaxKind::JS_CONDITIONAL_EXPRESSION
+                    // Lower expression
+                    | JsSyntaxKind::JS_EXTENDS_CLAUSE
+                    | JsSyntaxKind::TS_NON_NULL_ASSERTION_EXPRESSION
+                    // Callee
+                    | JsSyntaxKind::JS_CALL_EXPRESSION
+                    | JsSyntaxKind::JS_NEW_EXPRESSION
+                    // Member-like
                     | JsSyntaxKind::JS_STATIC_MEMBER_ASSIGNMENT
                     | JsSyntaxKind::JS_STATIC_MEMBER_EXPRESSION
                     | JsSyntaxKind::JS_COMPUTED_MEMBER_ASSIGNMENT
                     | JsSyntaxKind::JS_COMPUTED_MEMBER_EXPRESSION
-            )
-        })
+                    // Template tag
+                    | JsSyntaxKind::JS_TEMPLATE_EXPRESSION
+                    // Binary-like
+                    | JsSyntaxKind::JS_LOGICAL_EXPRESSION
+                    | JsSyntaxKind::JS_BINARY_EXPRESSION
+                    | JsSyntaxKind::JS_INSTANCEOF_EXPRESSION
+                    | JsSyntaxKind::JS_IN_EXPRESSION
+        )
+    })
 }
 
 declare_node_union! {

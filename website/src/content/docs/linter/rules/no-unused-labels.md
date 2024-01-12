@@ -8,11 +8,11 @@ title: noUnusedLabels (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://eslint.org/docs/latest/rules/no-unused-labels" target="_blank"><code>no-unused-labels</code></a>
+
 Disallow unused labels.
 
 Labels that are declared and never used are most likely an error due to incomplete refactoring.
-
-Source: https://eslint.org/docs/latest/rules/no-unused-labels
 
 ## Examples
 

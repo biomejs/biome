@@ -8,6 +8,8 @@ title: noStaticOnlyClass (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://typescript-eslint.io/rules/no-extraneous-class" target="_blank"><code>no-extraneous-class</code></a>
+
 This rule reports when a class has no non-static members, such as for a class used exclusively as a static namespace.
 
 Users who come from a [OOP](https://en.wikipedia.org/wiki/Object-oriented_programming) paradigm may wrap their utility functions in an extra class,
@@ -19,8 +21,6 @@ instead of putting them at the top level of an ECMAScript module. Doing so is ge
 
 - IDEs can't provide as good suggestions for static class or namespace imported properties when you start typing property names
 - It's more difficult to statically analyze code for unused variables, etc. when they're all on the class (see: Finding dead code (and dead types) in TypeScript).
-
-Source: https://typescript-eslint.io/rules/no-extraneous-class
 
 ## Examples
 

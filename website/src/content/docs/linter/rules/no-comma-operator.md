@@ -8,6 +8,8 @@ title: noCommaOperator (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://eslint.org/docs/latest/rules/no-sequences" target="_blank"><code>no-sequences</code></a>
+
 Disallow comma operator.
 
 The comma operator includes multiple expressions where only one is expected.
@@ -15,8 +17,6 @@ It evaluates every operand from left to right and returns the value of the last 
 It frequently obscures side effects, and its use is often an accident.
 
 The use of the comma operator in the initialization and update parts of a `for` is still allowed.
-
-Source: https://eslint.org/docs/latest/rules/no-sequences
 
 ## Examples
 

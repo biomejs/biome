@@ -1,10 +1,10 @@
 use crate::semantic_services::SemanticServices;
-use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::TextRange;
 
 declare_rule! {
-    /// Disallow the use of ```arguments```
+    /// Disallow the use of `arguments`.
     ///
     /// ## Examples
     ///
@@ -27,6 +27,7 @@ declare_rule! {
     pub(crate) NoArguments {
         version: "1.0.0",
         name: "noArguments",
+        source: RuleSource::Eslint("prefer-rest-params"),
         recommended: true,
     }
 }

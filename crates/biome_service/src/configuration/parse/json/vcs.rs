@@ -1,8 +1,8 @@
 use crate::configuration::vcs::{VcsClientKind, VcsConfiguration};
 use biome_console::markup;
 use biome_deserialize::{
-    Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor, Text,
-    VisitableType,
+    Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor,
+    NoneState, Text, VisitableType,
 };
 
 impl Deserializable for VcsConfiguration {
@@ -29,7 +29,7 @@ impl DeserializationVisitor for VcsConfigurationVisitor {
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self::Output> {
         const ALLOWED_KEYS: &[&str] = &["clientKind", "enabled", "useIgnoreFile", "root"];
-        let mut result = Self::Output::default();
+        let mut result = Self::Output::none();
         for (key, value) in members.flatten() {
             let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
                 continue;

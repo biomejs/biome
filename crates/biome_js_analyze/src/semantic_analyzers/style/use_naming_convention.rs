@@ -8,7 +8,8 @@ use crate::{
     JsRuleAction,
 };
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
+    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource,
+    RuleSourceKind,
 };
 use biome_console::markup;
 use biome_deserialize::{
@@ -276,6 +277,8 @@ declare_rule! {
     pub(crate)  UseNamingConvention {
         version: "1.0.0",
         name: "useNamingConvention",
+        source: RuleSource::EslintTypeScript("naming-convention"),
+        source_kind: RuleSourceKind::Inspired,
         recommended: false,
         fix_kind: FixKind::Safe,
     }

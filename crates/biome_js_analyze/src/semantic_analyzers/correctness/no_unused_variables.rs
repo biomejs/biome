@@ -1,5 +1,6 @@
 use crate::JsRuleAction;
 use crate::{semantic_services::Semantic, utils::rename::RenameSymbolExtensions};
+use biome_analyze::RuleSource;
 use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
 };
@@ -98,6 +99,7 @@ declare_rule! {
     pub(crate) NoUnusedVariables {
         version: "1.0.0",
         name: "noUnusedVariables",
+        source: RuleSource::Eslint("no-unused-vars"),
         recommended: false,
         fix_kind: FixKind::Unsafe,
     }

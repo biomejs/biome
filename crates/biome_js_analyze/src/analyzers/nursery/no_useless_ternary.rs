@@ -1,4 +1,4 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::{AnyJsExpression, JsConditionalExpression, JsSyntaxKind};
 use biome_rowan::AstNode;
@@ -8,9 +8,6 @@ declare_rule! {
     ///
     /// It’s a common mistake in JavaScript to use a conditional expression to select between two
     /// boolean values instead of using the logical NOT (`!`) or double NOT (`!!`) to convert the test to a boolean.
-    /// Here are some examples:
-    ///
-    /// Source: https://eslint.org/docs/latest/rules/no-unneeded-ternary/
     ///
     /// ## Examples
     ///
@@ -49,6 +46,7 @@ declare_rule! {
     pub(crate) NoUselessTernary {
         version: "1.5.0",
         name: "noUselessTernary",
+        source: RuleSource::Eslint("no-unneeded-ternary"),
         recommended: true,
     }
 }

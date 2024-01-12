@@ -8,6 +8,8 @@ title: useShorthandFunctionType (since v1.5.0)
 This rule is part of the [nursery](/linter/rules/#nursery) group.
 :::
 
+Source: <a href="https://typescript-eslint.io/rules/prefer-function-type" target="_blank"><code>prefer-function-type</code></a>
+
 Enforce using function types instead of object type with call signatures.
 
 TypeScript allows for two common ways to declare a type for a function:
@@ -18,8 +20,6 @@ TypeScript allows for two common ways to declare a type for a function:
 The function type form is generally preferred when possible for being more succinct.
 
 This rule suggests using a function type instead of an interface or object type literal with a single call signature.
-
-Source: https://typescript-eslint.io/rules/prefer-function-type/
 
 ## Examples
 

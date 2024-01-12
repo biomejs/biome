@@ -8,6 +8,8 @@ title: noUselessConstructor (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://typescript-eslint.io/rules/no-useless-constructor" target="_blank"><code>no-useless-constructor</code></a>
+
 Disallow unnecessary constructors.
 
 _ES2015_ provides a default class constructor if one is not specified.
@@ -18,8 +20,6 @@ The rule ignores:
 - decorated classes;
 - constructors with at least one [parameter property](https://www.typescriptlang.org/docs/handbook/classes.html#parameter-properties);
 - `private` and `protected` constructors.
-
-Source: https://typescript-eslint.io/rules/no-useless-constructor
 
 ## Caveat
 

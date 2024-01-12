@@ -8,6 +8,8 @@ title: useAsConstAssertion (since v1.3.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://typescript-eslint.io/rules/prefer-as-const" target="_blank"><code>prefer-as-const</code></a>
+
 Enforce the use of `as const` over literal type and type annotation.
 
 In TypeScript, there are three common ways to specify that a value is of a specific type such as `2` and not a general type such as `number`:
@@ -17,8 +19,6 @@ In TypeScript, there are three common ways to specify that a value is of a speci
 3. type annotation: explicitly telling the literal type to TypeScript when declare variables
 
 The rule suggests to use `as const` when you're using `as` with a literal type or type annotation, since `as const` is simpler and doesn't require retyping the value.
-
-Source: https://typescript-eslint.io/rules/prefer-as-const/
 
 ## Examples
 

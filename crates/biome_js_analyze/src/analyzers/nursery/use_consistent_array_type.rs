@@ -2,6 +2,7 @@ use std::str::FromStr;
 
 use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
+    RuleSource,
 };
 use biome_console::{markup, Markup, MarkupBuf};
 use biome_deserialize::{
@@ -29,8 +30,6 @@ declare_rule! {
     /// _TypeScript_ provides two equivalent ways to define an array type: `T[]` and `Array<T>`.
     /// The two styles are functionally equivalent.
     /// Using the same style consistently across your codebase makes it easier for developers to read and understand array types.
-    ///
-    /// Source: https://typescript-eslint.io/rules/array-type
     ///
     /// ## Example
     ///
@@ -78,6 +77,7 @@ declare_rule! {
     pub(crate) UseConsistentArrayType {
         version: "1.5.0",
         name: "useConsistentArrayType",
+        source: RuleSource::EslintTypeScript("array-type"),
         recommended: false,
         fix_kind: FixKind::Unsafe,
     }

@@ -1,6 +1,6 @@
 use crate::{aria_services::Aria, JsRuleAction};
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
+    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_aria::{roles::AriaRoleDefinition, AriaRoles};
 use biome_console::markup;
@@ -12,8 +12,6 @@ use biome_rowan::{AstNode, BatchMutationExt};
 
 declare_rule! {
     /// Enforce explicit `role` property is not the same as implicit/default role property on an element.
-    ///
-    /// ESLint (eslint-plugin-jsx-a11y) Equivalent: [no-redundant-roles](https://github.com/evcohen/eslint-plugin-jsx-a11y/blob/main/docs/rules/no-redundant-roles.md)
     ///
     /// ## Examples
     ///
@@ -48,6 +46,7 @@ declare_rule! {
     pub(crate) NoRedundantRoles {
         version: "1.0.0",
         name: "noRedundantRoles",
+        source: RuleSource::EslintJsxA11y("no-redundant-roles"),
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }

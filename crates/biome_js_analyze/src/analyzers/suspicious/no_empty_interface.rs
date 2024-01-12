@@ -1,6 +1,8 @@
 use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic};
+use biome_analyze::{
+    declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource, RuleSourceKind,
+};
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::{
@@ -19,8 +21,6 @@ declare_rule! {
     /// Using an empty interface is often a sign of programmer error, such as misunderstanding the concept of `{}` or forgetting to fill in fields.
     ///
     /// The rule ignores empty interfaces that `extends` one or multiple types.
-    ///
-    /// Inspired by: https://typescript-eslint.io/rules/no-empty-interface
     ///
     /// ## Examples
     ///
@@ -43,6 +43,8 @@ declare_rule! {
     pub(crate) NoEmptyInterface {
         version: "1.0.0",
         name: "noEmptyInterface",
+        source: RuleSource::EslintTypeScript("no-empty-interface"),
+        source_kind: RuleSourceKind::Inspired,
         recommended: true,
         fix_kind: FixKind::Safe,
     }

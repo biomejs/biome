@@ -1,4 +1,4 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::{JsLanguage, JsSyntaxKind, TsVoidType};
 use biome_rowan::{AstNode, SyntaxNode};
@@ -49,6 +49,7 @@ declare_rule! {
     pub(crate) NoConfusingVoidType {
         version: "1.2.0",
         name: "noConfusingVoidType",
+        source: RuleSource::EslintTypeScript("no-invalid-void-type"),
         recommended: true,
     }
 }

@@ -1,5 +1,6 @@
 use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
+    RuleSource, RuleSourceKind,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
@@ -13,8 +14,6 @@ use crate::JsRuleAction;
 
 declare_rule! {
     /// When expressing array types, this rule promotes the usage of `T[]` shorthand instead of `Array<T>`.
-    ///
-    /// ESLint (typescript-eslint) equivalent: [array-type/array-simple](https://typescript-eslint.io/rules/array-type/#array-simple)
     ///
     /// ## Examples
     ///
@@ -53,6 +52,8 @@ declare_rule! {
     pub(crate) UseShorthandArrayType  {
         version: "1.0.0",
         name: "useShorthandArrayType",
+        source: RuleSource::EslintTypeScript("array-type"),
+        source_kind: RuleSourceKind::Inspired,
         recommended: false,
         fix_kind: FixKind::Unsafe,
     }

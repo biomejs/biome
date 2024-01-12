@@ -1,4 +1,4 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::JsUnaryExpression;
 use biome_rowan::AstNode;
@@ -8,8 +8,6 @@ declare_rule! {
     ///
     /// > The `void` operator is often used merely to obtain the undefined primitive value,
     /// > usually using `void(0)` (which is equivalent to `void 0`). In these cases, the global variable `undefined` can be used.
-    ///
-    /// Source: https://eslint.org/docs/latest/rules/no-void
     ///
     /// ## Examples
     ///
@@ -22,6 +20,7 @@ declare_rule! {
     pub(crate) NoVoid {
         version: "1.0.0",
         name: "noVoid",
+        source: RuleSource::Eslint("no-void"),
         recommended: false,
     }
 }

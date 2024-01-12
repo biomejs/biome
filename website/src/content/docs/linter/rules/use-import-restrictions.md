@@ -8,6 +8,8 @@ title: useImportRestrictions (since v1.0.0)
 This rule is part of the [nursery](/linter/rules/#nursery) group.
 :::
 
+Inspired from: <a href="https://github.com/import-js/eslint-plugin-import/blob/main/docs/rules/jsdoc.md" target="_blank"><code>jsdoc</code></a>
+
 Disallows package private imports.
 
 This rules enforces the following restrictions:

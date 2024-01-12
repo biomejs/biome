@@ -8,6 +8,8 @@ title: useAltText (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/alt-text.md" target="_blank"><code>alt-text</code></a>
+
 Enforce that all elements that require alternative text have meaningful information to relay back to the end user.
 
 This is a critical component of accessibility for screen reader users in order for them to understand the content's purpose on the page.

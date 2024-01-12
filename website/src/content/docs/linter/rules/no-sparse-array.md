@@ -8,6 +8,8 @@ title: noSparseArray (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://eslint.org/docs/latest/rules/no-sparse-array" target="_blank"><code>no-sparse-array</code></a>
+
 Disallow sparse arrays
 
 ## Examples

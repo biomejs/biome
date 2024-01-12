@@ -21,6 +21,7 @@ pub(crate) mod declaration_important;
 pub(crate) mod declaration_list_block;
 pub(crate) mod declaration_or_at_rule_block;
 pub(crate) mod declaration_with_semicolon;
+pub(crate) mod document_custom_matcher;
 pub(crate) mod generic_delimiter;
 pub(crate) mod import_anonymous_layer;
 pub(crate) mod import_named_layer;

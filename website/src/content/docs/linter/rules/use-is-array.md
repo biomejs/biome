@@ -8,6 +8,8 @@ title: useIsArray (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/no-instanceof-array.md" target="_blank"><code>no-instanceof-array</code></a>
+
 Use `Array.isArray()` instead of `instanceof Array`.
 
 In _JavaScript_ some array-like objects such as _arguments_ are not instances of the `Array` class.    ///
@@ -16,8 +18,6 @@ For instance, two frames in a web browser have a distinct `Array` class.
 Passing arrays across these contexts, results in arrays that are not instances of the contextual global `Array` class.
 To avoid these issues, use `Array.isArray()` instead of `instanceof Array`.
 See the [MDN docs](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/isArray) for more details.
-
-Source: https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/no-instanceof-array.md
 
 ## Examples
 

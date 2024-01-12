@@ -1,5 +1,5 @@
 use crate::semantic_services::Semantic;
-use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_semantic::{AllBindingWriteReferencesIter, Reference, ReferencesExtensions};
 use biome_js_syntax::{AnyJsBinding, AnyJsBindingPattern, AnyJsFormalParameter, AnyJsParameter};
@@ -11,8 +11,6 @@ declare_rule! {
     /// Assignment to a `function` parameters can be misleading and confusing,
     /// as modifying parameters will also mutate the `arguments` object.
     /// It is often unintended and indicative of a programmer error.
-    ///
-    /// Source: https://eslint.org/docs/latest/rules/no-param-reassign
     ///
     /// In contrast to the _ESLint_ rule, this rule cannot be configured to report
     /// assignments to a property of a parameter.
@@ -58,6 +56,7 @@ declare_rule! {
     pub(crate) NoParameterAssign {
         version: "1.0.0",
         name: "noParameterAssign",
+        source: RuleSource::Eslint("no-param-reassign"),
         recommended: true,
     }
 }

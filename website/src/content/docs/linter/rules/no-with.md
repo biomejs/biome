@@ -8,6 +8,8 @@ title: noWith (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://eslint.org/docs/latest/rules/no-with" target="_blank"><code>no-with</code></a>
+
 Disallow `with` statements in non-strict contexts.
 
 The `with` statement is potentially problematic because it adds members of an object to the current

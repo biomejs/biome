@@ -8,6 +8,8 @@ title: noMisleadingCharacterClass (since v1.5.0)
 This rule is part of the [nursery](/linter/rules/#nursery) group.
 :::
 
+Source: <a href="https://eslint.org/docs/latest/rules/no-misleading-character-class" target="_blank"><code>no-misleading-character-class</code></a>
+
 Disallow characters made with multiple code points in character class syntax.
 
 Unicode includes the characters which are made with multiple code points. e.g. Á, 🇯🇵, 👨‍👩‍👦.
@@ -15,8 +17,6 @@ A RegExp character class `/[abc]/` cannot handle characters with multiple code p
 For example, the character `❇️` consists of two code points: `❇` (U+2747) and `VARIATION SELECTOR-16` (U+FE0F).
 If this character is in a RegExp character class, it will match to either `❇` or `VARIATION SELECTOR-16` rather than `❇️`.
 This rule reports the regular expressions which include multiple code point characters in character class syntax.
-
-Source: https://eslint.org/docs/latest/rules/no-misleading-character-class
 
 ## Examples
 

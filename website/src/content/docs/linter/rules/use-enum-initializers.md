@@ -8,6 +8,8 @@ title: useEnumInitializers (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://typescript-eslint.io/rules/prefer-enum-initializers" target="_blank"><code>prefer-enum-initializers</code></a>
+
 Require that each enum member value be explicitly initialized.
 
 _TypeScript_ enums are a practical way to organize semantically related constant values.
@@ -15,8 +17,6 @@ Members of enums that don't have explicit values are by default given sequential
 
 When the value of enum members are important,
 allowing implicit values for enum members can cause bugs if enum declarations are modified over time.
-
-Source: https://typescript-eslint.io/rules/prefer-enum-initializers
 
 ## Examples
 

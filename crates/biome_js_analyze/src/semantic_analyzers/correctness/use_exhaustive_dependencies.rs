@@ -1,5 +1,6 @@
 use crate::react::hooks::*;
 use crate::semantic_services::Semantic;
+use biome_analyze::RuleSource;
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_deserialize::{
@@ -167,6 +168,7 @@ declare_rule! {
     pub(crate) UseExhaustiveDependencies {
         version: "1.0.0",
         name: "useExhaustiveDependencies",
+        source: RuleSource::EslintReactHooks("exhaustive-deps"),
         recommended: true,
     }
 }

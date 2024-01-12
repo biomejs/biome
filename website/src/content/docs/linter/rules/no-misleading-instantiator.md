@@ -8,6 +8,8 @@ title: noMisleadingInstantiator (since v1.3.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://typescript-eslint.io/rules/no-misused-new" target="_blank"><code>no-misused-new</code></a>
+
 Enforce proper usage of `new` and `constructor`.
 
 In JavaScript, classes utilize the `constructor` method to initialize a new instance. On the other hand, TypeScript interfaces can describe a class type with a `new()` method signature, though this pattern is not commonly seen in real-world code. Developers, especially those new to JavaScript or TypeScript, might occasionally confuse the use of `constructor` with `new`.
@@ -18,8 +20,6 @@ This rule triggers warnings in the following scenarios:
 - When a type alias has a `constructor` method.
 
 You should not use this rule if you intentionally want a class with a `new` method, and you're confident nobody working in your code will mistake it with an `constructor`.
-
-Source: https://typescript-eslint.io/rules/no-misused-new/
 
 ## Examples
 

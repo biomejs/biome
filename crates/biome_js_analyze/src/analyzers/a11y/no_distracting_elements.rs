@@ -1,5 +1,5 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic};
+use biome_analyze::{declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
@@ -40,6 +40,7 @@ declare_rule! {
     pub(crate) NoDistractingElements {
         version: "1.0.0",
         name: "noDistractingElements",
+        source: RuleSource::EslintJsxA11y("no-distracting-elements"),
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }

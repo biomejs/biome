@@ -8,6 +8,8 @@ title: noUselessRename (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://eslint.org/docs/latest/rules/no-useless-rename" target="_blank"><code>no-useless-rename</code></a>
+
 Disallow renaming import, export, and destructured assignments to the same name.
 
 ES2015 allows for the renaming of references in import and export statements as well as destructuring assignments.
@@ -21,8 +23,6 @@ let { foo: bar } = baz;
 
 With this syntax, it is possible to rename a reference to the same name.
 This is a completely redundant operation, as this is the same as not renaming at all.
-
-Source: https://eslint.org/docs/latest/rules/no-useless-rename
 
 ## Examples
 

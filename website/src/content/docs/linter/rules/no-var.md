@@ -8,13 +8,13 @@ title: noVar (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://eslint.org/docs/latest/rules/no-var" target="_blank"><code>no-var</code></a>
+
 Disallow the use of `var`
 
 ECMAScript 6 allows programmers to create variables with block scope instead of function scope using the let and const keywords.
 
 Block scope is common in many other programming languages and helps programmers avoid mistakes.
-
-Source: https://eslint.org/docs/latest/rules/no-var
 
 ## Examples
 

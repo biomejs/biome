@@ -8,6 +8,8 @@ title: noDangerouslySetInnerHtml (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/no-danger-with-children.md" target="_blank"><code>no-danger-with-children</code></a>
+
 Prevent the usage of dangerous JSX props
 
 ## Examples

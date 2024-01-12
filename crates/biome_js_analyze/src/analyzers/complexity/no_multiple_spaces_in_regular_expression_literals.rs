@@ -1,5 +1,6 @@
 use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
+    RuleSource,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
@@ -11,8 +12,6 @@ use crate::JsRuleAction;
 
 declare_rule! {
     /// Disallow unclear usage of consecutive space characters in regular expression literals
-    ///
-    /// Source: https://eslint.org/docs/latest/rules/no-regex-spaces/
     ///
     /// ## Examples
     ///
@@ -50,6 +49,7 @@ declare_rule! {
     pub(crate) NoMultipleSpacesInRegularExpressionLiterals {
         version: "1.0.0",
         name: "noMultipleSpacesInRegularExpressionLiterals",
+        source: RuleSource::Eslint("no-regex-spaces"),
         recommended: true,
         fix_kind: FixKind::Safe,
     }

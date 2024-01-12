@@ -4,13 +4,13 @@ title: noNamespace (since v1.0.0)
 
 **Diagnostic Category: `lint/style/noNamespace`**
 
+Source: <a href="https://typescript-eslint.io/rules/no-namespace" target="_blank"><code>no-namespace</code></a>
+
 Disallow the use of TypeScript's `namespace`s.
 
 Namespaces are an old way to organize your code in TypeScript.
 They are not recommended anymore and should be replaced by ES6 modules
 (the `import`/`export` syntax).
-
-Source: https://typescript-eslint.io/rules/no-namespace
 
 ## Examples
 

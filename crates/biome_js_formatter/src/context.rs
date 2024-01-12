@@ -1,6 +1,7 @@
 use crate::comments::{FormatJsLeadingComment, JsCommentStyle, JsComments};
 use crate::context::trailing_comma::TrailingComma;
 use biome_deserialize::{Deserializable, DeserializableValue, DeserializationDiagnostic, Text};
+use biome_deserialize_macros::Merge;
 use biome_formatter::printer::PrinterOptions;
 use biome_formatter::{
     CstFormatContext, FormatContext, FormatElement, FormatOptions, IndentStyle, IndentWidth,
@@ -378,7 +379,7 @@ impl fmt::Display for JsFormatOptions {
     }
 }
 
-#[derive(Debug, Eq, PartialEq, Hash, Clone, Copy, Default)]
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, Merge, PartialEq)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
@@ -434,7 +435,7 @@ impl Deserializable for QuoteProperties {
     }
 }
 
-#[derive(Debug, Eq, PartialEq, Clone, Hash, Copy, Default)]
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, Merge, PartialEq)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
@@ -499,7 +500,7 @@ impl Deserializable for Semicolons {
     }
 }
 
-#[derive(Debug, Eq, PartialEq, Clone, Copy, Hash, Default)]
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, Merge, PartialEq)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
@@ -565,7 +566,7 @@ impl Deserializable for ArrowParentheses {
     }
 }
 
-#[derive(Debug, Eq, PartialEq, Clone, Copy, Hash)]
+#[derive(Clone, Copy, Debug, Eq, Hash, Merge, PartialEq)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
@@ -592,7 +593,7 @@ impl From<bool> for BracketSpacing {
     }
 }
 
-#[derive(Debug, Default, Eq, PartialEq, Clone, Copy, Hash)]
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, Merge, PartialEq)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),

@@ -8,6 +8,8 @@ title: noNonoctalDecimalEscape (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://eslint.org/docs/latest/rules/no-nonoctal-decimal-escape" target="_blank"><code>no-nonoctal-decimal-escape</code></a>
+
 Disallow `\8` and `\9` escape sequences in string literals.
 
 Since ECMAScript 2021, the escape sequences \8 and \9 have been defined as non-octal decimal escape sequences.
@@ -22,8 +24,6 @@ Although this syntax is deprecated, it is still supported for compatibility reas
 If the ECMAScript host is not a web browser, this syntax is optional.
 However, web browsers are still required to support it, but only in non-strict mode.
 Regardless of your targeted environment, it is recommended to avoid using these escape sequences in new code.
-
-Source: https://eslint.org/docs/latest/rules/no-nonoctal-decimal-escape
 
 ## Examples
 

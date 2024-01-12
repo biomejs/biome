@@ -8,12 +8,12 @@ title: noUselessThisAlias (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Inspired from: <a href="https://typescript-eslint.io/rules/no-this-alias" target="_blank"><code>no-this-alias</code></a>
+
 Disallow useless `this` aliasing.
 
 Arrow functions inherits `this` from their enclosing scope;
 this makes `this` aliasing useless in this situation.
-
-Credits: https://typescript-eslint.io/rules/no-this-alias/
 
 ## Examples
 

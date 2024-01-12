@@ -51,17 +51,6 @@ class Something2 {
 ```diff
 --- Prettier
 +++ Biome
-@@ -12,8 +12,8 @@
- 
- class Foo3 {
-   @foo
--  // comment
--  *method() {}
-+  *// comment
-+  method() {}
- }
- 
- class Foo4 {
 @@ -30,6 +30,6 @@
  
  class Something2 {
@@ -90,8 +79,8 @@ class Foo2 {
 
 class Foo3 {
   @foo
-  *// comment
-  method() {}
+  // comment
+  *method() {}
 }
 
 class Foo4 {

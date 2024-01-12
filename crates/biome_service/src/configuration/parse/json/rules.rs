@@ -4,8 +4,8 @@ use crate::configuration::linter::*;
 use crate::Rules;
 use biome_console::markup;
 use biome_deserialize::{
-    Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor, Text,
-    VisitableType,
+    Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor,
+    NoneState, Text, VisitableType,
 };
 use biome_rowan::TextRange;
 impl Deserializable for Rules {
@@ -28,7 +28,7 @@ impl Deserializable for Rules {
                 diagnostics: &mut Vec<DeserializationDiagnostic>,
             ) -> Option<Self::Output> {
                 let mut recommended_is_set = false;
-                let mut result = Self::Output::default();
+                let mut result = Self::Output::none();
                 for (key, value) in members.flatten() {
                     let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
                         continue;
@@ -100,7 +100,7 @@ impl Deserializable for Rules {
                     && matches!(result.all, Some(true))
                 {
                     diagnostics . push (DeserializationDiagnostic :: new (markup ! (< Emphasis > "'recommended'" < / Emphasis > " and " < Emphasis > "'all'" < / Emphasis > " can't be both " < Emphasis > "'true'" < / Emphasis > ". You should choose only one of them.")) . with_range (range) . with_note (markup ! ("Biome will fallback to its defaults for this section."))) ;
-                    return Some(Self::Output::default());
+                    return Some(Self::Output::none());
                 }
                 Some(result)
             }
@@ -128,7 +128,7 @@ impl Deserializable for A11y {
                 diagnostics: &mut Vec<DeserializationDiagnostic>,
             ) -> Option<Self::Output> {
                 let mut recommended_is_set = false;
-                let mut result = Self::Output::default();
+                let mut result = Self::Output::none();
                 for (key, value) in members.flatten() {
                     let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
                         continue;
@@ -367,7 +367,7 @@ impl Deserializable for A11y {
                     && matches!(result.all, Some(true))
                 {
                     diagnostics . push (DeserializationDiagnostic :: new (markup ! (< Emphasis > "'recommended'" < / Emphasis > " and " < Emphasis > "'all'" < / Emphasis > " can't be both " < Emphasis > "'true'" < / Emphasis > ". You should choose only one of them.")) . with_range (range) . with_note (markup ! ("Biome will fallback to its defaults for this section."))) ;
-                    return Some(Self::Output::default());
+                    return Some(Self::Output::none());
                 }
                 Some(result)
             }
@@ -395,7 +395,7 @@ impl Deserializable for Complexity {
                 diagnostics: &mut Vec<DeserializationDiagnostic>,
             ) -> Option<Self::Output> {
                 let mut recommended_is_set = false;
-                let mut result = Self::Output::default();
+                let mut result = Self::Output::none();
                 for (key, value) in members.flatten() {
                     let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
                         continue;
@@ -598,7 +598,7 @@ impl Deserializable for Complexity {
                     && matches!(result.all, Some(true))
                 {
                     diagnostics . push (DeserializationDiagnostic :: new (markup ! (< Emphasis > "'recommended'" < / Emphasis > " and " < Emphasis > "'all'" < / Emphasis > " can't be both " < Emphasis > "'true'" < / Emphasis > ". You should choose only one of them.")) . with_range (range) . with_note (markup ! ("Biome will fallback to its defaults for this section."))) ;
-                    return Some(Self::Output::default());
+                    return Some(Self::Output::none());
                 }
                 Some(result)
             }
@@ -626,7 +626,7 @@ impl Deserializable for Correctness {
                 diagnostics: &mut Vec<DeserializationDiagnostic>,
             ) -> Option<Self::Output> {
                 let mut recommended_is_set = false;
-                let mut result = Self::Output::default();
+                let mut result = Self::Output::none();
                 for (key, value) in members.flatten() {
                     let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
                         continue;
@@ -886,7 +886,7 @@ impl Deserializable for Correctness {
                     && matches!(result.all, Some(true))
                 {
                     diagnostics . push (DeserializationDiagnostic :: new (markup ! (< Emphasis > "'recommended'" < / Emphasis > " and " < Emphasis > "'all'" < / Emphasis > " can't be both " < Emphasis > "'true'" < / Emphasis > ". You should choose only one of them.")) . with_range (range) . with_note (markup ! ("Biome will fallback to its defaults for this section."))) ;
-                    return Some(Self::Output::default());
+                    return Some(Self::Output::none());
                 }
                 Some(result)
             }
@@ -914,7 +914,7 @@ impl Deserializable for Nursery {
                 diagnostics: &mut Vec<DeserializationDiagnostic>,
             ) -> Option<Self::Output> {
                 let mut recommended_is_set = false;
-                let mut result = Self::Output::default();
+                let mut result = Self::Output::none();
                 for (key, value) in members.flatten() {
                     let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
                         continue;
@@ -1119,7 +1119,7 @@ impl Deserializable for Nursery {
                     && matches!(result.all, Some(true))
                 {
                     diagnostics . push (DeserializationDiagnostic :: new (markup ! (< Emphasis > "'recommended'" < / Emphasis > " and " < Emphasis > "'all'" < / Emphasis > " can't be both " < Emphasis > "'true'" < / Emphasis > ". You should choose only one of them.")) . with_range (range) . with_note (markup ! ("Biome will fallback to its defaults for this section."))) ;
-                    return Some(Self::Output::default());
+                    return Some(Self::Output::none());
                 }
                 Some(result)
             }
@@ -1147,7 +1147,7 @@ impl Deserializable for Performance {
                 diagnostics: &mut Vec<DeserializationDiagnostic>,
             ) -> Option<Self::Output> {
                 let mut recommended_is_set = false;
-                let mut result = Self::Output::default();
+                let mut result = Self::Output::none();
                 for (key, value) in members.flatten() {
                     let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
                         continue;
@@ -1187,7 +1187,7 @@ impl Deserializable for Performance {
                     && matches!(result.all, Some(true))
                 {
                     diagnostics . push (DeserializationDiagnostic :: new (markup ! (< Emphasis > "'recommended'" < / Emphasis > " and " < Emphasis > "'all'" < / Emphasis > " can't be both " < Emphasis > "'true'" < / Emphasis > ". You should choose only one of them.")) . with_range (range) . with_note (markup ! ("Biome will fallback to its defaults for this section."))) ;
-                    return Some(Self::Output::default());
+                    return Some(Self::Output::none());
                 }
                 Some(result)
             }
@@ -1215,7 +1215,7 @@ impl Deserializable for Security {
                 diagnostics: &mut Vec<DeserializationDiagnostic>,
             ) -> Option<Self::Output> {
                 let mut recommended_is_set = false;
-                let mut result = Self::Output::default();
+                let mut result = Self::Output::none();
                 for (key, value) in members.flatten() {
                     let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
                         continue;
@@ -1264,7 +1264,7 @@ impl Deserializable for Security {
                     && matches!(result.all, Some(true))
                 {
                     diagnostics . push (DeserializationDiagnostic :: new (markup ! (< Emphasis > "'recommended'" < / Emphasis > " and " < Emphasis > "'all'" < / Emphasis > " can't be both " < Emphasis > "'true'" < / Emphasis > ". You should choose only one of them.")) . with_range (range) . with_note (markup ! ("Biome will fallback to its defaults for this section."))) ;
-                    return Some(Self::Output::default());
+                    return Some(Self::Output::none());
                 }
                 Some(result)
             }
@@ -1292,7 +1292,7 @@ impl Deserializable for Style {
                 diagnostics: &mut Vec<DeserializationDiagnostic>,
             ) -> Option<Self::Output> {
                 let mut recommended_is_set = false;
-                let mut result = Self::Output::default();
+                let mut result = Self::Output::none();
                 for (key, value) in members.flatten() {
                     let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
                         continue;
@@ -1558,7 +1558,7 @@ impl Deserializable for Style {
                     && matches!(result.all, Some(true))
                 {
                     diagnostics . push (DeserializationDiagnostic :: new (markup ! (< Emphasis > "'recommended'" < / Emphasis > " and " < Emphasis > "'all'" < / Emphasis > " can't be both " < Emphasis > "'true'" < / Emphasis > ". You should choose only one of them.")) . with_range (range) . with_note (markup ! ("Biome will fallback to its defaults for this section."))) ;
-                    return Some(Self::Output::default());
+                    return Some(Self::Output::none());
                 }
                 Some(result)
             }
@@ -1586,7 +1586,7 @@ impl Deserializable for Suspicious {
                 diagnostics: &mut Vec<DeserializationDiagnostic>,
             ) -> Option<Self::Output> {
                 let mut recommended_is_set = false;
-                let mut result = Self::Output::default();
+                let mut result = Self::Output::none();
                 for (key, value) in members.flatten() {
                     let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
                         continue;
@@ -1921,7 +1921,7 @@ impl Deserializable for Suspicious {
                     && matches!(result.all, Some(true))
                 {
                     diagnostics . push (DeserializationDiagnostic :: new (markup ! (< Emphasis > "'recommended'" < / Emphasis > " and " < Emphasis > "'all'" < / Emphasis > " can't be both " < Emphasis > "'true'" < / Emphasis > ". You should choose only one of them.")) . with_range (range) . with_note (markup ! ("Biome will fallback to its defaults for this section."))) ;
-                    return Some(Self::Output::default());
+                    return Some(Self::Output::none());
                 }
                 Some(result)
             }
