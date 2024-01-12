@@ -557,10 +557,6 @@ fn clean_interned(
                 Some((mut cleaned, rest)) => {
                     let mut is_in_expanded_conditional_content = false;
                     for element in rest {
-                        if is_in_expanded_conditional_content {
-                            continue;
-                        }
-
                         let element = match element {
                             FormatElement::Tag(Tag::StartConditionalContent(condition))
                                 if condition.mode == PrintMode::Expanded =>
