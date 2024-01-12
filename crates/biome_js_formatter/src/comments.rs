@@ -1256,7 +1256,8 @@ fn handle_import_export_specifier_comment(
     }
 }
 
-/// Ensure that comments before the `async`` keyword are placed just before it.
+/// Attach comments before the `async` keyword or `*` token to the preceding node if it exists
+/// to ensure these comments are placed before the `async` keyword or `*` token.
 /// ```javascript
 /// class Foo {
 ///    @decorator()
