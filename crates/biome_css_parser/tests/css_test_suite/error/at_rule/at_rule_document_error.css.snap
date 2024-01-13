@@ -1,0 +1,214 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+ @document url(http://example.com),
+		 invalid-url, /* Error in URL, recover here */ url(http://example.org) {
+		}
+
+ @document url(http://example.com),
+ invalid-url, /* Error in URL, recover here */ {
+ }
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssAtRule {
+            at_token: AT@0..2 "@" [Whitespace(" ")] [],
+            rule: CssDocumentAtRule {
+                document_token: DOCUMENT_KW@2..11 "document" [] [Whitespace(" ")],
+                matchers: CssDocumentMatcherList [
+                    CssUrlFunction {
+                        name: URL_KW@11..14 "url" [] [],
+                        l_paren_token: L_PAREN@14..15 "(" [] [],
+                        value: CssUrlValueRaw {
+                            value_token: CSS_URL_VALUE_RAW_LITERAL@15..33 "http://example.com" [] [],
+                        },
+                        modifiers: CssUrlModifierList [],
+                        r_paren_token: R_PAREN@33..34 ")" [] [],
+                    },
+                    COMMA@34..35 "," [] [],
+                    CssBogusDocumentMatcher {
+                        items: [
+                            IDENT@35..50 "invalid-url" [Newline("\n"), Whitespace("\t\t ")] [],
+                        ],
+                    },
+                    COMMA@50..85 "," [] [Whitespace(" "), Comments("/* Error in URL, reco ..."), Whitespace(" ")],
+                    CssUrlFunction {
+                        name: URL_KW@85..88 "url" [] [],
+                        l_paren_token: L_PAREN@88..89 "(" [] [],
+                        value: CssUrlValueRaw {
+                            value_token: CSS_URL_VALUE_RAW_LITERAL@89..107 "http://example.org" [] [],
+                        },
+                        modifiers: CssUrlModifierList [],
+                        r_paren_token: R_PAREN@107..109 ")" [] [Whitespace(" ")],
+                    },
+                ],
+                block: CssRuleListBlock {
+                    l_curly_token: L_CURLY@109..110 "{" [] [],
+                    rules: CssRuleList [],
+                    r_curly_token: R_CURLY@110..114 "}" [Newline("\n"), Whitespace("\t\t")] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@114..118 "@" [Newline("\n"), Newline("\n"), Whitespace(" ")] [],
+            rule: CssDocumentAtRule {
+                document_token: DOCUMENT_KW@118..127 "document" [] [Whitespace(" ")],
+                matchers: CssDocumentMatcherList [
+                    CssUrlFunction {
+                        name: URL_KW@127..130 "url" [] [],
+                        l_paren_token: L_PAREN@130..131 "(" [] [],
+                        value: CssUrlValueRaw {
+                            value_token: CSS_URL_VALUE_RAW_LITERAL@131..149 "http://example.com" [] [],
+                        },
+                        modifiers: CssUrlModifierList [],
+                        r_paren_token: R_PAREN@149..150 ")" [] [],
+                    },
+                    COMMA@150..151 "," [] [],
+                    CssBogusDocumentMatcher {
+                        items: [
+                            IDENT@151..164 "invalid-url" [Newline("\n"), Whitespace(" ")] [],
+                        ],
+                    },
+                    COMMA@164..199 "," [] [Whitespace(" "), Comments("/* Error in URL, reco ..."), Whitespace(" ")],
+                ],
+                block: CssRuleListBlock {
+                    l_curly_token: L_CURLY@199..200 "{" [] [],
+                    rules: CssRuleList [],
+                    r_curly_token: R_CURLY@200..203 "}" [Newline("\n"), Whitespace(" ")] [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@203..204 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..204
+  0: (empty)
+  1: CSS_RULE_LIST@0..203
+    0: CSS_AT_RULE@0..114
+      0: AT@0..2 "@" [Whitespace(" ")] []
+      1: CSS_DOCUMENT_AT_RULE@2..114
+        0: DOCUMENT_KW@2..11 "document" [] [Whitespace(" ")]
+        1: CSS_DOCUMENT_MATCHER_LIST@11..109
+          0: CSS_URL_FUNCTION@11..34
+            0: URL_KW@11..14 "url" [] []
+            1: L_PAREN@14..15 "(" [] []
+            2: CSS_URL_VALUE_RAW@15..33
+              0: CSS_URL_VALUE_RAW_LITERAL@15..33 "http://example.com" [] []
+            3: CSS_URL_MODIFIER_LIST@33..33
+            4: R_PAREN@33..34 ")" [] []
+          1: COMMA@34..35 "," [] []
+          2: CSS_BOGUS_DOCUMENT_MATCHER@35..50
+            0: IDENT@35..50 "invalid-url" [Newline("\n"), Whitespace("\t\t ")] []
+          3: COMMA@50..85 "," [] [Whitespace(" "), Comments("/* Error in URL, reco ..."), Whitespace(" ")]
+          4: CSS_URL_FUNCTION@85..109
+            0: URL_KW@85..88 "url" [] []
+            1: L_PAREN@88..89 "(" [] []
+            2: CSS_URL_VALUE_RAW@89..107
+              0: CSS_URL_VALUE_RAW_LITERAL@89..107 "http://example.org" [] []
+            3: CSS_URL_MODIFIER_LIST@107..107
+            4: R_PAREN@107..109 ")" [] [Whitespace(" ")]
+        2: CSS_RULE_LIST_BLOCK@109..114
+          0: L_CURLY@109..110 "{" [] []
+          1: CSS_RULE_LIST@110..110
+          2: R_CURLY@110..114 "}" [Newline("\n"), Whitespace("\t\t")] []
+    1: CSS_AT_RULE@114..203
+      0: AT@114..118 "@" [Newline("\n"), Newline("\n"), Whitespace(" ")] []
+      1: CSS_DOCUMENT_AT_RULE@118..203
+        0: DOCUMENT_KW@118..127 "document" [] [Whitespace(" ")]
+        1: CSS_DOCUMENT_MATCHER_LIST@127..199
+          0: CSS_URL_FUNCTION@127..150
+            0: URL_KW@127..130 "url" [] []
+            1: L_PAREN@130..131 "(" [] []
+            2: CSS_URL_VALUE_RAW@131..149
+              0: CSS_URL_VALUE_RAW_LITERAL@131..149 "http://example.com" [] []
+            3: CSS_URL_MODIFIER_LIST@149..149
+            4: R_PAREN@149..150 ")" [] []
+          1: COMMA@150..151 "," [] []
+          2: CSS_BOGUS_DOCUMENT_MATCHER@151..164
+            0: IDENT@151..164 "invalid-url" [Newline("\n"), Whitespace(" ")] []
+          3: COMMA@164..199 "," [] [Whitespace(" "), Comments("/* Error in URL, reco ..."), Whitespace(" ")]
+        2: CSS_RULE_LIST_BLOCK@199..203
+          0: L_CURLY@199..200 "{" [] []
+          1: CSS_RULE_LIST@200..200
+          2: R_CURLY@200..203 "}" [Newline("\n"), Whitespace(" ")] []
+  2: EOF@203..204 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+at_rule_document_error.css:2:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    1 │  @document url(http://example.com),
+  > 2 │ 		 invalid-url, /* Error in URL, recover here */ url(http://example.org) {
+      │ 		 ^^^^^^^^^^^
+    3 │ 		}
+    4 │ 
+  
+  i Expected one of:
+  
+  - url()
+  - url-prefix(<string>)
+  - domain(<string>)
+  - media-document(<string>)
+  - regexp(<string>)
+  
+at_rule_document_error.css:6:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    5 │  @document url(http://example.com),
+  > 6 │  invalid-url, /* Error in URL, recover here */ {
+      │  ^^^^^^^^^^^
+    7 │  }
+    8 │ 
+  
+  i Expected one of:
+  
+  - url()
+  - url-prefix(<string>)
+  - domain(<string>)
+  - media-document(<string>)
+  - regexp(<string>)
+  
+at_rule_document_error.css:6:48 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    5 │  @document url(http://example.com),
+  > 6 │  invalid-url, /* Error in URL, recover here */ {
+      │                                                ^
+    7 │  }
+    8 │ 
+  
+  i Expected one of:
+  
+  - url()
+  - url-prefix(<string>)
+  - domain(<string>)
+  - media-document(<string>)
+  - regexp(<string>)
+  
+```
+
+

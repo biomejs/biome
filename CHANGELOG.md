@@ -14,11 +14,38 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ### CLI
 
+### Bug fixes
+
 - Fix [#1512](https://github.com/biomejs/biome/issues/1512) by skipping verbose diagnostics from the count. Contributed by @ematipico
-- Don't handle CSS files, the formatter isn't ready yet. Contributed by @ematipico
+
+- Don't emit verbose warnings when a protected file is ignored.
+
+  Some files, such as `package.json` and `tsconfig.json`, are [protected](https://biomejs.dev/guides/how-biome-works/#protected-files).
+  Biome emits a verbose warning when it encounters a protected file.
+
+  Previously, Biome emitted this verbose warning even if the file was ignored by the configuration.
+  Now, it doesn't emit verbose warnings for protected files that are ignored.
+
+  Contributed by @Conaclos
+
 - The file `biome.json` can't be ignored anymore. Contributed by @ematipico
 
+- Fix [#1541](https://github.com/biomejs/biome/issues/1541) where the content of protected files wasn't returned to `stdout`. Contributed by @ematipico
+
+- Don't handle CSS files, the formatter isn't ready yet. Contributed by @ematipico
+
 ### Configuration
+
+#### Bug fixes
+
+- Fix [1440](https://github.com/biomejs/biome/issues/1440), a case where `extends` and `overrides` weren't correctly emitting the final configuration. Contributed by @arendjr
+
+- Correctly handle `include` when `ignore` is set (#1468). Contributed by @Conaclos
+
+  Previously, Biome ignored `include` if `ignore` was set.
+  Now, Biome check both `include` and `ignore`.
+  A file is processed if it is included and not ignored.
+  If `include` is not set all files are considered included.
 
 ### Editors
 
@@ -31,6 +58,8 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 - Fix [#1406](https://github.com/biomejs/biome/issues/1406). Ensure comments before the `async` keyword are placed before it. Contributed by @ah-yu
 
 - Fix [#1172](https://github.com/biomejs/biome/issues/1172). Fix placement of line comment after function expression parentheses, they are now attached to first statement in body. Contributed by @kalleep
+
+- Fix [#1511](https://github.com/biomejs/biome/issues/1511) that made the JavaScript formatter crash. Contributed @Conaclos
 
 ### JavaScript APIs
 
@@ -1911,7 +1940,7 @@ The following rules are now recommended:
 
   The code action now removes any whitespace between the parameter name and its initialization.
 
-- Relax [noConfusingArrow](https://biomejs.dev/linter/rules/no-confusing-arrow/)
+- Relax `noConfusingArrow`
 
   All arrow functions that enclose its parameter with parenthesis are allowed.
   Thus, the following snippet no longer trigger the rule:

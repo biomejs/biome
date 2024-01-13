@@ -6,14 +6,14 @@ use crate::configuration::{
     JsonConfiguration,
 };
 use crate::{
-    configuration::FilesConfiguration, Configuration, ConfigurationDiagnostic, Matcher, MergeWith,
-    Rules, WorkspaceError,
+    configuration::FilesConfiguration, Configuration, ConfigurationDiagnostic, Matcher, Rules,
+    WorkspaceError,
 };
 use biome_analyze::{AnalyzerRules, RuleFilter};
 use biome_css_formatter::context::CssFormatOptions;
 use biome_css_parser::CssParserOptions;
 use biome_css_syntax::CssLanguage;
-use biome_deserialize::StringSet;
+use biome_deserialize::{Merge, StringSet};
 use biome_diagnostics::Category;
 use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth};
 use biome_fs::RomePath;
@@ -484,12 +484,10 @@ fn to_file_settings(
                 vcs_config_path.clone(),
                 gitignore_matches,
             )?,
-            included_files: to_matcher(
-                working_directory,
-                config.include.as_ref(),
-                vcs_config_path,
-                gitignore_matches,
-            )?,
+            // Don't set `gitignore` for the include matcher.
+            // TODO: it could better to create dedicated matcher types:
+            // one for ignore and the other for include.
+            included_files: to_matcher(working_directory, config.include.as_ref(), None, &[])?,
             ignore_unknown: config.ignore_unknown.unwrap_or_default(),
         })
     } else {

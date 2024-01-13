@@ -60,7 +60,7 @@ pub(crate) fn parse_url_function(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_url_function(p) {
         return Absent;
     }
-    let url_fn = p.start();
+    let m = p.start();
 
     p.bump_ts(URL_SET);
 
@@ -76,7 +76,7 @@ pub(crate) fn parse_url_function(p: &mut CssParser) -> ParsedSyntax {
     UrlModifierList.parse_list(p);
     p.expect(T![')']);
 
-    Present(url_fn.complete(p, CSS_URL_FUNCTION))
+    Present(m.complete(p, CSS_URL_FUNCTION))
 }
 
 /// Determines if the current position of the parser is at a URL value.

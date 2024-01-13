@@ -1,7 +1,7 @@
 use crate::configuration::{FormatterConfiguration, PlainIndentStyle};
 use biome_deserialize::{
-    Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor, Text,
-    VisitableType,
+    Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor,
+    NoneState, Text, VisitableType,
 };
 use biome_rowan::TextRange;
 
@@ -39,7 +39,7 @@ impl DeserializationVisitor for FormatterConfigurationVisitor {
             "ignore",
             "include",
         ];
-        let mut result = Self::Output::default();
+        let mut result = Self::Output::none();
         for (key, value) in members.flatten() {
             let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
                 continue;

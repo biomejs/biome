@@ -24,7 +24,7 @@ expression: snapshot
 CssRoot {
     bom_token: missing (optional),
     rules: CssRuleList [
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -48,7 +48,7 @@ CssRoot {
                 r_curly_token: R_CURLY@8..9 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -73,7 +73,7 @@ CssRoot {
                 r_curly_token: R_CURLY@19..20 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -117,7 +117,7 @@ CssRoot {
                 r_curly_token: R_CURLY@42..43 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -160,7 +160,7 @@ CssRoot {
                 r_curly_token: R_CURLY@64..65 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -204,7 +204,7 @@ CssRoot {
                 r_curly_token: R_CURLY@86..87 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -247,7 +247,7 @@ CssRoot {
                 r_curly_token: R_CURLY@107..108 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -327,7 +327,7 @@ CssRoot {
 0: CSS_ROOT@0..134
   0: (empty)
   1: CSS_RULE_LIST@0..133
-    0: CSS_RULE@0..9
+    0: CSS_QUALIFIED_RULE@0..9
       0: CSS_SELECTOR_LIST@0..7
         0: CSS_COMPOUND_SELECTOR@0..7
           0: (empty)
@@ -342,7 +342,7 @@ CssRoot {
         0: L_CURLY@7..8 "{" [] []
         1: CSS_DECLARATION_LIST@8..8
         2: R_CURLY@8..9 "}" [] []
-    1: CSS_RULE@9..20
+    1: CSS_QUALIFIED_RULE@9..20
       0: CSS_SELECTOR_LIST@9..18
         0: CSS_COMPOUND_SELECTOR@9..18
           0: (empty)
@@ -358,7 +358,7 @@ CssRoot {
         0: L_CURLY@18..19 "{" [] []
         1: CSS_DECLARATION_LIST@19..19
         2: R_CURLY@19..20 "}" [] []
-    2: CSS_RULE@20..43
+    2: CSS_QUALIFIED_RULE@20..43
       0: CSS_SELECTOR_LIST@20..41
         0: CSS_COMPOUND_SELECTOR@20..41
           0: (empty)
@@ -386,7 +386,7 @@ CssRoot {
         0: L_CURLY@41..42 "{" [] []
         1: CSS_DECLARATION_LIST@42..42
         2: R_CURLY@42..43 "}" [] []
-    3: CSS_RULE@43..65
+    3: CSS_QUALIFIED_RULE@43..65
       0: CSS_SELECTOR_LIST@43..63
         0: CSS_COMPOUND_SELECTOR@43..63
           0: (empty)
@@ -413,7 +413,7 @@ CssRoot {
         0: L_CURLY@63..64 "{" [] []
         1: CSS_DECLARATION_LIST@64..64
         2: R_CURLY@64..65 "}" [] []
-    4: CSS_RULE@65..87
+    4: CSS_QUALIFIED_RULE@65..87
       0: CSS_SELECTOR_LIST@65..85
         0: CSS_COMPOUND_SELECTOR@65..85
           0: (empty)
@@ -441,7 +441,7 @@ CssRoot {
         0: L_CURLY@85..86 "{" [] []
         1: CSS_DECLARATION_LIST@86..86
         2: R_CURLY@86..87 "}" [] []
-    5: CSS_RULE@87..108
+    5: CSS_QUALIFIED_RULE@87..108
       0: CSS_SELECTOR_LIST@87..106
         0: CSS_COMPOUND_SELECTOR@87..106
           0: (empty)
@@ -468,7 +468,7 @@ CssRoot {
         0: L_CURLY@106..107 "{" [] []
         1: CSS_DECLARATION_LIST@107..107
         2: R_CURLY@107..108 "}" [] []
-    6: CSS_RULE@108..122
+    6: CSS_QUALIFIED_RULE@108..122
       0: CSS_SELECTOR_LIST@108..120
         0: CSS_COMPOUND_SELECTOR@108..120
           0: (empty)

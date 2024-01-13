@@ -3,8 +3,8 @@ use crate::configuration::overrides::{
     OverrideOrganizeImportsConfiguration, OverridePattern, Overrides,
 };
 use biome_deserialize::{
-    Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor, Text,
-    VisitableType,
+    Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor,
+    NoneState, Text, VisitableType,
 };
 
 impl Deserializable for Overrides {
@@ -54,7 +54,7 @@ impl DeserializationVisitor for OverridePatternVisitor {
             "json",
             "css",
         ];
-        let mut result = Self::Output::default();
+        let mut result = Self::Output::none();
         for (key, value) in members.flatten() {
             let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
                 continue;
@@ -128,7 +128,7 @@ impl DeserializationVisitor for OverrideFormatterConfigurationVisitor {
             "lineEnding",
             "lineWidth",
         ];
-        let mut result = Self::Output::default();
+        let mut result = Self::Output::none();
         for (key, value) in members.flatten() {
             let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
                 continue;
@@ -200,7 +200,7 @@ impl DeserializationVisitor for OverrideLinterConfigurationVisitor {
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self::Output> {
         const ALLOWED_KEYS: &[&str] = &["enabled", "rules"];
-        let mut result = Self::Output::default();
+        let mut result = Self::Output::none();
         for (key, value) in members.flatten() {
             let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
                 continue;
@@ -251,7 +251,7 @@ impl DeserializationVisitor for OverrideOrganizeImportsConfigurationVisitor {
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self::Output> {
         const ALLOWED_KEYS: &[&str] = &["enabled"];
-        let mut result = Self::Output::default();
+        let mut result = Self::Output::none();
         for (key, value) in members.flatten() {
             let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
                 continue;

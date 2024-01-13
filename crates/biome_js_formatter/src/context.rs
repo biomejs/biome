@@ -1,6 +1,7 @@
+pub mod trailing_comma;
+
 use crate::comments::{FormatJsLeadingComment, JsCommentStyle, JsComments};
-use crate::context::trailing_comma::TrailingComma;
-use biome_deserialize_macros::Deserializable;
+use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::printer::PrinterOptions;
 use biome_formatter::{
     CstFormatContext, FormatContext, FormatElement, FormatOptions, IndentStyle, IndentWidth,
@@ -11,8 +12,7 @@ use std::fmt;
 use std::fmt::Debug;
 use std::rc::Rc;
 use std::str::FromStr;
-
-pub mod trailing_comma;
+pub use trailing_comma::TrailingComma;
 
 #[derive(Debug, Clone)]
 pub struct JsFormatContext {
@@ -378,7 +378,7 @@ impl fmt::Display for JsFormatOptions {
     }
 }
 
-#[derive(Clone, Copy, Debug, Default, Deserializable, Eq, Hash, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Deserializable, Eq, Hash, Merge, PartialEq)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
@@ -412,7 +412,7 @@ impl fmt::Display for QuoteProperties {
     }
 }
 
-#[derive(Clone, Copy, Debug, Default, Deserializable, Eq, Hash, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Deserializable, Eq, Hash, Merge, PartialEq)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
@@ -455,7 +455,7 @@ impl fmt::Display for Semicolons {
     }
 }
 
-#[derive(Clone, Copy, Debug, Default, Deserializable, Eq, Hash, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Deserializable, Eq, Hash, Merge, PartialEq)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
@@ -499,7 +499,7 @@ impl fmt::Display for ArrowParentheses {
     }
 }
 
-#[derive(Debug, Eq, PartialEq, Clone, Copy, Hash)]
+#[derive(Clone, Copy, Debug, Eq, Hash, Merge, PartialEq)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
@@ -526,7 +526,7 @@ impl From<bool> for BracketSpacing {
     }
 }
 
-#[derive(Debug, Default, Eq, PartialEq, Clone, Copy, Hash)]
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, Merge, PartialEq)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),

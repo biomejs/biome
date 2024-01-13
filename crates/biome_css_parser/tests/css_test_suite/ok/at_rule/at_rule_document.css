@@ -1,0 +1,24 @@
+@document url("https://www.example.com/") {
+	h1 {
+		color: green;
+	}
+}
+
+@document url("http://www.w3.org/"), url-prefix("http://www.w3.org/Style/"), domain("mozilla.org"), media-document("video"), regexp("https:.*") {
+	body {
+		color: purple;
+		background: yellow;
+	}
+}
+
+@document url(https://www.example.com/) {}
+@-moz-document url("https://www.example.com/") {}
+@-moz-document/* near */ /* filter */ url("example.com/{") /* a */ {}
+
+@document url("https://www.example.com/") {
+	@media screen and (min-width: 900px) {
+		article {
+			padding: 1rem 3rem;
+		}
+	}
+}

@@ -1,0 +1,35 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `biome.json`
+
+```json
+{
+  "formatter": {
+    "include": ["src"],
+    "ignore": ["src/file2.js"]
+  }
+}
+```
+
+## `src/file1.js`
+
+```js
+statement();
+
+```
+
+## `src/file2.js`
+
+```js
+  statement(  )  
+```
+
+# Emitted Messages
+
+```block
+Formatted 2 file(s) in <TIME>
+```
+
+

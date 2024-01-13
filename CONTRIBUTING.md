@@ -411,8 +411,9 @@ Members are listed in alphabetical order. Members are free to use the full name,
 
 ### Maintainers team
 
+- [Arend van Beelen @arendjr](https://github.com/arendjr)
 - [Madeline Gurriarán @SuperchupuDev](https://github.com/SuperchupuDev)
 - [Nicolas Hedger @nhedger](https://github.com/nhedger)
-- [Victor Teles @victor-teles](https://github.com/victor-teles)
 - [Takayuki Maeda @TaKO8Ki](https://github.com/TaKO8Ki)
 - [Vasu Singh @vasucp1207](https://github.com/vasucp1207)
+- [Victor Teles @victor-teles](https://github.com/victor-teles)

@@ -248,12 +248,19 @@ pub enum BiomeCommand {
     ),
     /// It updates the configuration when there are breaking changes
     #[bpaf(command)]
-    Migrate(
-        #[bpaf(external(cli_options), hide_usage)] CliOptions,
+    Migrate {
+        /// It attempts to find the files `.prettierrc`/`prettier.json` and `.prettierignore`, and map
+        /// Prettier's configuration into `biome.json`
+        #[bpaf(long("prettier"), switch, hide, hide_usage)]
+        prettier: bool,
+
+        #[bpaf(external, hide_usage)]
+        cli_options: CliOptions,
+
         /// Writes the new configuration file to disk
         #[bpaf(long("write"), switch)]
-        bool,
-    ),
+        write: bool,
+    },
 
     /// A command to retrieve the documentation of various aspects of the CLI.
     ///
@@ -294,7 +301,7 @@ impl BiomeCommand {
             | BiomeCommand::Lint { cli_options, .. }
             | BiomeCommand::Ci { cli_options, .. }
             | BiomeCommand::Format { cli_options, .. }
-            | BiomeCommand::Migrate(cli_options, _) => cli_options.colors.as_ref(),
+            | BiomeCommand::Migrate { cli_options, .. } => cli_options.colors.as_ref(),
             BiomeCommand::LspProxy(_)
             | BiomeCommand::Start(_)
             | BiomeCommand::Stop
@@ -313,7 +320,7 @@ impl BiomeCommand {
             | BiomeCommand::Lint { cli_options, .. }
             | BiomeCommand::Ci { cli_options, .. }
             | BiomeCommand::Format { cli_options, .. }
-            | BiomeCommand::Migrate(cli_options, _) => cli_options.use_server,
+            | BiomeCommand::Migrate { cli_options, .. } => cli_options.use_server,
             BiomeCommand::Init
             | BiomeCommand::Start(_)
             | BiomeCommand::Stop
@@ -334,7 +341,7 @@ impl BiomeCommand {
             | BiomeCommand::Lint { cli_options, .. }
             | BiomeCommand::Format { cli_options, .. }
             | BiomeCommand::Ci { cli_options, .. }
-            | BiomeCommand::Migrate(cli_options, _) => cli_options.verbose,
+            | BiomeCommand::Migrate { cli_options, .. } => cli_options.verbose,
             BiomeCommand::Version(_)
             | BiomeCommand::Rage(..)
             | BiomeCommand::Start(_)
@@ -353,7 +360,7 @@ impl BiomeCommand {
             | BiomeCommand::Lint { cli_options, .. }
             | BiomeCommand::Format { cli_options, .. }
             | BiomeCommand::Ci { cli_options, .. }
-            | BiomeCommand::Migrate(cli_options, _) => cli_options.log_level.clone(),
+            | BiomeCommand::Migrate { cli_options, .. } => cli_options.log_level.clone(),
             BiomeCommand::Version(_)
             | BiomeCommand::LspProxy(_)
             | BiomeCommand::Rage(..)
@@ -371,7 +378,7 @@ impl BiomeCommand {
             | BiomeCommand::Lint { cli_options, .. }
             | BiomeCommand::Format { cli_options, .. }
             | BiomeCommand::Ci { cli_options, .. }
-            | BiomeCommand::Migrate(cli_options, _) => cli_options.log_kind.clone(),
+            | BiomeCommand::Migrate { cli_options, .. } => cli_options.log_kind.clone(),
             BiomeCommand::Version(_)
             | BiomeCommand::Rage(..)
             | BiomeCommand::LspProxy(_)

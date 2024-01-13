@@ -1,7 +1,7 @@
 use crate::configuration::FilesConfiguration;
 use biome_deserialize::{
-    Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor, Text,
-    VisitableType,
+    Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor,
+    NoneState, Text, VisitableType,
 };
 use biome_rowan::TextRange;
 
@@ -29,7 +29,7 @@ impl DeserializationVisitor for FilesConfigurationVisitor {
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self::Output> {
         const ALLOWED_KEYS: &[&str] = &["maxSize", "ignore", "include", "ignoreUnknown"];
-        let mut result = Self::Output::default();
+        let mut result = Self::Output::none();
         for (key, value) in members.flatten() {
             let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
                 continue;

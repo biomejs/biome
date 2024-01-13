@@ -42,3 +42,17 @@ pub(crate) fn expected_any_scope_range(p: &CssParser, range: TextRange) -> Parse
 pub(crate) fn expected_any_namespace_url(p: &CssParser, range: TextRange) -> ParseDiagnostic {
     expect_one_of(&["url()", "<string-token>"], range).into_diagnostic(p)
 }
+
+pub(crate) fn expected_any_document_matcher(p: &CssParser, range: TextRange) -> ParseDiagnostic {
+    expect_one_of(
+        &[
+            "url()",
+            "url-prefix(<string>)",
+            "domain(<string>)",
+            "media-document(<string>)",
+            "regexp(<string>)",
+        ],
+        range,
+    )
+    .into_diagnostic(p)
+}

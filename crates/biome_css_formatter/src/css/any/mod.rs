@@ -17,6 +17,7 @@ pub(crate) mod declaration_list_block;
 pub(crate) mod declaration_name;
 pub(crate) mod declaration_or_at_rule;
 pub(crate) mod dimension;
+pub(crate) mod document_matcher;
 pub(crate) mod expression;
 pub(crate) mod function;
 pub(crate) mod generic_component_value;

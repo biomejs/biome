@@ -2,6 +2,7 @@ mod charset;
 mod color_profile;
 mod container;
 mod counter_style;
+mod document;
 mod feature;
 mod font_face;
 mod font_palette_values;
@@ -25,6 +26,7 @@ use crate::syntax::at_rule::container::{is_at_container_at_rule, parse_container
 use crate::syntax::at_rule::counter_style::{
     is_at_counter_style_at_rule, parse_counter_style_at_rule,
 };
+use crate::syntax::at_rule::document::{is_at_document_at_rule, parse_document_at_rule};
 use crate::syntax::at_rule::font_face::{is_at_font_face_at_rule, parse_font_face_at_rule};
 use crate::syntax::at_rule::font_palette_values::{
     is_at_font_palette_values_at_rule, parse_font_palette_values_at_rule,
@@ -105,6 +107,8 @@ pub(crate) fn parse_any_at_rule(p: &mut CssParser) -> ParsedSyntax {
         parse_namespace_at_rule(p)
     } else if is_at_starting_style_at_rule(p) {
         parse_starting_style_at_rule(p)
+    } else if is_at_document_at_rule(p) {
+        parse_document_at_rule(p)
     } else {
         Absent
     }
