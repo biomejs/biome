@@ -226,39 +226,37 @@ impl Workspace for WorkspaceServer {
             Entry::Vacant(entry) => {
                 let capabilities = self.get_file_capabilities(&params.path);
                 let language = Language::from_path(&params.path);
-                let file_name = params
-                    .path
-                    .file_name()
-                    .and_then(|file_name| file_name.to_str());
+                let path = params.path.as_path();
                 let settings = self.settings.read().unwrap();
                 let mut file_features = FileFeaturesResult::new();
 
-                if let Some(file_name) = file_name {
-                    if FileFeaturesResult::FILES_TO_NOT_PROCESS.contains(&file_name) {
-                        file_features.set_protected_for_all_features();
-                        return Ok(entry.insert(file_features).clone());
-                    }
-                }
-
                 file_features = file_features
                     .with_capabilities(&capabilities)
-                    .with_settings_and_language(&settings, &language, params.path.as_path());
+                    .with_settings_and_language(&settings, &language, path);
 
-                if settings.files.ignore_unknown {
-                    let language = self.get_language(&params.path);
-                    if language == Language::Unknown {
-                        file_features.ignore_not_supported();
+                if settings.files.ignore_unknown
+                    && language == Language::Unknown
+                    && self.get_language(&params.path) == Language::Unknown
+                {
+                    file_features.ignore_not_supported();
+                } else {
+                    for feature in params.feature {
+                        let is_ignored = self.is_path_ignored(IsPathIgnoredParams {
+                            rome_path: params.path.clone(),
+                            feature: feature.clone(),
+                        })?;
+                        if is_ignored {
+                            file_features.ignored(feature);
+                        }
                     }
                 }
-                for feature in params.feature {
-                    let is_ignored = self.is_path_ignored(IsPathIgnoredParams {
-                        rome_path: params.path.clone(),
-                        feature: feature.clone(),
-                    })?;
 
-                    if is_ignored {
-                        file_features.ignored(feature);
-                    }
+                // If the file is not ignored by at least one feature,
+                // then check that the file is not protected.
+                // Protected files must be ignored.
+                if !file_features.is_not_processed() && FileFeaturesResult::is_protected_file(path)
+                {
+                    file_features.set_protected_for_all_features();
                 }
 
                 Ok(entry.insert(file_features).clone())
