@@ -54,6 +54,7 @@ use std::path::{Path, PathBuf};
     Bpaf, Clone, Debug, Deserialize, Deserializable, Eq, Merge, NoneState, PartialEq, Serialize,
 )]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[deserializable(from_none)]
 #[serde(deny_unknown_fields, rename_all = "camelCase")]
 pub struct Configuration {
     /// A field for the [JSON schema](https://json-schema.org/) specification

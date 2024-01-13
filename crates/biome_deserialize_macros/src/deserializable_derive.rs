@@ -1,4 +1,5 @@
 mod enum_variant_attrs;
+mod struct_attrs;
 mod struct_field_attrs;
 
 use crate::deserializable_derive::enum_variant_attrs::EnumVariantAttrs;
@@ -7,13 +8,8 @@ use convert_case::{Case, Casing};
 use proc_macro2::{Ident, Span, TokenStream};
 use proc_macro_error::*;
 use quote::quote;
-use syn::{Data, Fields, Type, Variant};
-
-pub enum DeserializableData {
-    Enum(Vec<Variant>),
-    Newtype,
-    Struct(Fields),
-}
+use syn::{Data, Type};
+use self::struct_attrs::StructAttrs;
 
 pub(crate) struct DeriveInput {
     pub ident: Ident,
@@ -24,20 +20,53 @@ impl DeriveInput {
     pub fn parse(input: syn::DeriveInput) -> Self {
         let data = match input.data {
             Data::Enum(data) => {
-                DeserializableData::Enum(data.variants.into_iter().filter(|variant| {
-                    if variant.fields.is_empty() {
-                        true
-                    } else {
-                        abort!(
-                            variant.fields,
-                            "Deserializable derive cannot handle enum variants with fields -- you may need a custom Deserializable implementation"
-                        )
-                    }
-                }).collect())
+                let data = data
+                    .variants
+                    .into_iter()
+                    .filter(|variant| {
+                        if variant.fields.is_empty() {
+                            true
+                        } else {
+                            abort!(
+                                variant.fields,
+                                "Deserializable derive cannot handle enum variants with fields -- you may need a custom Deserializable implementation"
+                            )
+                        }
+                    })
+                    .map(|variant| {
+                        let attrs = EnumVariantAttrs::from_attrs(&variant.attrs);
+            
+                        let ident = variant.ident;
+                        let key = attrs
+                            .rename
+                            .unwrap_or_else(|| ident.to_string().to_case(Case::Camel));
+            
+                        DeserializableVariantData { ident, key }
+                    })
+                    .collect();
+                DeserializableData::Enum(data)
             },
             Data::Struct(data) => {
                 if data.fields.iter().all(|field| field.ident.is_some()) {
-                    DeserializableData::Struct(data.fields)
+                    let attrs = StructAttrs::from_attrs(&input.attrs);
+
+                    let fields = data
+                        .fields
+                        .into_iter()
+                        .filter_map(|field| field.ident.map(|ident| (ident, field.attrs, field.ty)))
+                        .map(|(ident, attrs, ty)| {
+                            let attrs = StructFieldAttrs::from_attrs(&attrs);
+                            
+                            let disallow_empty = attrs.disallow_empty;
+                            let key = attrs
+                                .rename
+                                .unwrap_or_else(|| ident.to_string().to_case(Case::Camel));
+                
+                            DeserializableFieldData { disallow_empty, ident, key, ty }
+                        })
+                        .collect();
+                    let from_none = attrs.from_none;
+                    DeserializableData::Struct(DeserializableStructData { fields, from_none })
                 } else if data.fields.len() == 1 {
                     DeserializableData::Newtype
                 } else {
@@ -57,39 +86,46 @@ impl DeriveInput {
     }
 }
 
+pub enum DeserializableData {
+    Enum(Vec<DeserializableVariantData>),
+    Newtype,
+    Struct(DeserializableStructData),
+}
+
+pub struct DeserializableStructData {
+    fields: Vec<DeserializableFieldData>,
+    from_none: bool,
+}
+
+pub struct DeserializableFieldData {
+    disallow_empty: bool,
+    ident: Ident,
+    key: String,
+    ty: Type,
+}
+
+pub struct DeserializableVariantData {
+    ident: Ident,
+    key: String,
+}
+
 pub(crate) fn generate_deserializable(input: DeriveInput) -> TokenStream {
     match input.data {
         DeserializableData::Enum(variants) => generate_deserializable_enum(input.ident, variants),
         DeserializableData::Newtype => generate_deserializable_newtype(input.ident),
-        DeserializableData::Struct(fields) => generate_deserializable_struct(input.ident, fields),
+        DeserializableData::Struct(data) => generate_deserializable_struct(input.ident, data),
     }
 }
 
-fn generate_deserializable_enum(ident: Ident, variants: Vec<Variant>) -> TokenStream {
+fn generate_deserializable_enum(ident: Ident, variants: Vec<DeserializableVariantData>) -> TokenStream {
     let allowed_variants: Vec<_> = variants
         .iter()
-        .map(|variant| {
-            let attrs = EnumVariantAttrs::from_attrs(&variant.attrs);
-
-            let variant_ident = &variant.ident;
-            let key = attrs
-                .rename
-                .unwrap_or_else(|| variant_ident.to_string().to_case(Case::Camel));
-
-            quote! { #key }
-        })
+        .map(|DeserializableVariantData { key, .. }| quote! { #key })
         .collect();
 
     let deserialize_variants: Vec<_> = variants
         .iter()
-        .map(|variant| {
-            let attrs = EnumVariantAttrs::from_attrs(&variant.attrs);
-
-            let variant_ident = &variant.ident;
-            let key = attrs
-                .rename
-                .unwrap_or_else(|| variant_ident.to_string().to_case(Case::Camel));
-
+        .map(|DeserializableVariantData { ident: variant_ident, key }| {
             quote! { #key => Some(#ident::#variant_ident) }
         })
         .collect();
@@ -132,23 +168,17 @@ fn generate_deserializable_newtype(ident: Ident) -> TokenStream {
     }
 }
 
-fn generate_deserializable_struct(ident: Ident, fields: Fields) -> TokenStream {
-    let allowed_keys: Vec<_> = fields
+fn generate_deserializable_struct(ident: Ident, data: DeserializableStructData) -> TokenStream {
+    let allowed_keys: Vec<_> = data
+        .fields
         .iter()
-        .filter_map(|field| field.ident.as_ref())
-        .map(|field_ident| {
-            let key = field_ident.to_string().to_case(Case::Camel);
-            quote! { #key }
-        })
+        .map(|DeserializableFieldData { key, .. }| quote! { #key })
         .collect();
 
-    let deserialize_fields: Vec<_> = fields
+    let deserialize_fields: Vec<_> = data
+        .fields
         .into_iter()
-        .filter_map(|field| field.ident.map(|ident| (ident, field.ty, field.attrs)))
-        .map(|(field_ident, ty, attrs)| {
-            let attrs = StructFieldAttrs::from_attrs(&attrs);
-
-            let key = attrs.rename.unwrap_or_else(|| field_ident.to_string().to_case(Case::Camel));
+        .map(|DeserializableFieldData { disallow_empty, ident: field_ident, key, ty }| {
             let is_optional = matches!(
                 &ty,
                 Type::Path(path) if path
@@ -158,7 +188,7 @@ fn generate_deserializable_struct(ident: Ident, fields: Fields) -> TokenStream {
                     .is_some_and(|segment| segment.ident == "Option")
             );
 
-            let is_empty_check = attrs.disallow_empty.then(|| {
+            let is_empty_check = disallow_empty.then(|| {
                 let test = if is_optional {
                     quote! { value.as_ref().is_some_and(|v| v.is_empty()) }
                 } else {
@@ -201,6 +231,11 @@ fn generate_deserializable_struct(ident: Ident, fields: Fields) -> TokenStream {
         .collect();
 
     let visitor_ident = Ident::new(&format!("{ident}Visitor"), Span::call_site());
+    let result_init = if data.from_none {
+        quote! { biome_deserialize::NoneState::none() }
+    } else {
+        quote! { Self::Output::default() }
+    };
 
     quote! {
         impl biome_deserialize::Deserializable for #ident {
@@ -227,7 +262,7 @@ fn generate_deserializable_struct(ident: Ident, fields: Fields) -> TokenStream {
                 diagnostics: &mut Vec<biome_deserialize::DeserializationDiagnostic>,
             ) -> Option<Self::Output> {
                 use biome_deserialize::{Deserializable, DeserializationDiagnostic, Text};
-                let mut result = Self::Output::default();
+                let mut result: Self::Output = #result_init;
                 for (key, value) in members.flatten() {
                     let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
                         continue;
