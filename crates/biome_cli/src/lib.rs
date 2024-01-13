@@ -187,9 +187,11 @@ impl<'app> CliSession<'app> {
             BiomeCommand::Explain { doc } => commands::explain::explain(self, doc),
             BiomeCommand::Init => commands::init::init(self),
             BiomeCommand::LspProxy(config_path) => commands::daemon::lsp_proxy(config_path),
-            BiomeCommand::Migrate(cli_options, write) => {
-                commands::migrate::migrate(self, cli_options, write)
-            }
+            BiomeCommand::Migrate {
+                cli_options,
+                write,
+                prettier,
+            } => commands::migrate::migrate(self, cli_options, write, prettier),
             BiomeCommand::RunServer {
                 stop_on_disconnect,
                 config_path,
