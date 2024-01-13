@@ -25,6 +25,13 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 - Fix [1440](https://github.com/biomejs/biome/issues/1440), a case where `extends` and `overrides` weren't correctly emitting the final configuration. Contributed by @arendjr
 
+- Correctly handle `include` when `ignore` is set (#1468). Contributed by @Conaclos
+
+  Previously, Biome ignored `include` if `ignore` was set.
+  Now, Biome check both `include` and `ignore`.
+  A file is processed if it is included and not ignored.
+  If `include` is not set all files are considered included.
+
 ### Editors
 
 ### Formatter
