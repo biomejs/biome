@@ -257,7 +257,8 @@ impl Rule for NoUselessFragments {
                         jsx_tag_expression(AnyJsxTag::JsxSelfClosingElement(node)).into_syntax(),
                     ),
                     AnyJsxChild::JsxText(text) => {
-                        let new_value = format!("\"{}\"", text.value_token().ok()?.text().trim());
+                        let new_value =
+                            format!("\"{}\"", text.value_token().ok()?.token_text().trim());
                         if parent.kind() == JsSyntaxKind::JSX_EXPRESSION_ATTRIBUTE_VALUE {
                             Some(jsx_string(ident(&new_value)).into_syntax())
                         } else {
