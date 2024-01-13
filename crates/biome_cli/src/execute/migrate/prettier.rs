@@ -408,7 +408,7 @@ mod test {
     #[test]
     fn ok() {
         let configuration = deserialize_from_json_str::<PrettierConfiguration>(
-            r#"{ "use_tabs": true }"#,
+            r#"{ "useTabs": true }"#,
             JsonParserOptions::default(),
             "",
         )
