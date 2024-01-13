@@ -1,5 +1,5 @@
 use crate::comments::{FormatJsLeadingComment, JsCommentStyle, JsComments};
-use crate::context::trailing_comma::TrailingComma;
+pub use crate::context::trailing_comma::TrailingComma;
 use biome_deserialize::{Deserializable, DeserializableValue, DeserializationDiagnostic, Text};
 use biome_deserialize_macros::Merge;
 use biome_formatter::printer::PrinterOptions;
