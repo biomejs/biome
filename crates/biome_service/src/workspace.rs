@@ -95,29 +95,38 @@ pub struct FileFeaturesResult {
 }
 
 impl FileFeaturesResult {
-    /// Files that should not be processed no matter the cases
-    pub(crate) const FILES_TO_NOT_PROCESS: &'static [&'static str; 12] = &[
-        "package.json",
-        "package-lock.json",
-        "npm-shrinkwrap.json",
-        "yarn.lock",
+    /// Sorted array of files that should not be processed no matter the cases.
+    /// These files are handled by other tools.
+    const PROTECTED_FILES: &'static [&'static str; 11] = &[
+        // Composer
         "composer.json",
         "composer.lock",
-        "typescript.json",
-        "tsconfig.json",
-        "jsconfig.json",
+        // Deno
         "deno.json",
         "deno.jsonc",
-        // TODO: remove this when are able to handle nested .gitignore files
-        ".gitignore",
+        // TSC
+        "jsconfig.json",
+        // NPM
+        "npm-shrinkwrap.json",
+        "package-lock.json",
+        "package.json",
+        // TSC
+        "tsconfig.json",
+        "typescript.json",
+        // Yarn
+        "yarn.lock",
     ];
 
-    /// Checks whether this file can be processed
-    fn can_process(&self, path: &Path) -> bool {
+    /// Checks whether this file is protected.
+    /// A protected file is handled by a specific tool and should be ignored.
+    pub(crate) fn is_protected_file(path: &Path) -> bool {
         path.file_name()
             .and_then(OsStr::to_str)
-            .map(|file_name| !FileFeaturesResult::FILES_TO_NOT_PROCESS.contains(&file_name))
-            .unwrap_or_default()
+            .is_some_and(|file_name| {
+                FileFeaturesResult::PROTECTED_FILES
+                    .binary_search(&file_name)
+                    .is_ok()
+            })
     }
 
     /// By default, all features are not supported by a file.
@@ -156,48 +165,44 @@ impl FileFeaturesResult {
         language: &Language,
         path: &Path,
     ) -> Self {
-        if self.can_process(path) {
-            let formatter_disabled =
-                if let Some(disabled) = settings.override_settings.formatter_disabled(path) {
-                    disabled
-                } else if language.is_javascript_like() {
-                    !settings.formatter().enabled || settings.javascript_formatter_disabled()
-                } else if language.is_json_like() {
-                    !settings.formatter().enabled || settings.json_formatter_disabled()
-                } else if language.is_css_like() {
-                    !can_format_css_yet()
-                        || !settings.formatter().enabled
-                        || settings.css_formatter_disabled()
-                } else {
-                    !settings.formatter().enabled
-                };
-            if formatter_disabled {
-                self.features_supported
-                    .insert(FeatureName::Format, SupportKind::FeatureNotEnabled);
-            }
-            // linter
-            if let Some(disabled) = settings.override_settings.linter_disabled(path) {
-                if disabled {
-                    self.features_supported
-                        .insert(FeatureName::Lint, SupportKind::FeatureNotEnabled);
-                }
-            } else if !settings.linter().enabled {
+        let formatter_disabled =
+            if let Some(disabled) = settings.override_settings.formatter_disabled(path) {
+                disabled
+            } else if language.is_javascript_like() {
+                !settings.formatter().enabled || settings.javascript_formatter_disabled()
+            } else if language.is_json_like() {
+                !settings.formatter().enabled || settings.json_formatter_disabled()
+            } else if language.is_css_like() {
+                !can_format_css_yet()
+                    || !settings.formatter().enabled
+                    || settings.css_formatter_disabled()
+            } else {
+                !settings.formatter().enabled
+            };
+        if formatter_disabled {
+            self.features_supported
+                .insert(FeatureName::Format, SupportKind::FeatureNotEnabled);
+        }
+        // linter
+        if let Some(disabled) = settings.override_settings.linter_disabled(path) {
+            if disabled {
                 self.features_supported
                     .insert(FeatureName::Lint, SupportKind::FeatureNotEnabled);
             }
+        } else if !settings.linter().enabled {
+            self.features_supported
+                .insert(FeatureName::Lint, SupportKind::FeatureNotEnabled);
+        }
 
-            // organize imports
-            if let Some(disabled) = settings.override_settings.organize_imports_disabled(path) {
-                if disabled {
-                    self.features_supported
-                        .insert(FeatureName::OrganizeImports, SupportKind::FeatureNotEnabled);
-                }
-            } else if !settings.organize_imports().enabled {
+        // organize imports
+        if let Some(disabled) = settings.override_settings.organize_imports_disabled(path) {
+            if disabled {
                 self.features_supported
                     .insert(FeatureName::OrganizeImports, SupportKind::FeatureNotEnabled);
             }
-        } else {
-            self.features_supported = HashMap::from(FileFeaturesResult::WORKSPACE_FEATURES);
+        } else if !settings.organize_imports().enabled {
+            self.features_supported
+                .insert(FeatureName::OrganizeImports, SupportKind::FeatureNotEnabled);
         }
 
         debug!(
@@ -282,6 +287,20 @@ impl FileFeaturesResult {
         self.features_supported
             .values()
             .all(|support_kind| support_kind.is_not_enabled())
+    }
+
+    /// The file is not processed if for every enabled feature
+    /// the file is either protected, not supported, ignored.
+    pub fn is_not_processed(&self) -> bool {
+        self.features_supported.values().all(|support_kind| {
+            matches!(
+                support_kind,
+                SupportKind::FeatureNotEnabled
+                    | SupportKind::FileNotSupported
+                    | SupportKind::Ignored
+                    | SupportKind::Protected
+            )
+        })
     }
 }
 
@@ -857,5 +876,12 @@ impl<'app, W: Workspace + ?Sized> Drop for FileGuard<'app, W> {
             // this case it's generally better to silently matcher the error
             // than panic (especially in a drop handler)
             .ok();
+    }
+}
+
+#[test]
+fn test_order() {
+    for items in FileFeaturesResult::PROTECTED_FILES.windows(2) {
+        assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
     }
 }
