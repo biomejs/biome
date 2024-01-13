@@ -14,10 +14,25 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ### CLI
 
+### Bug fixes
+
 - Fix [#1512](https://github.com/biomejs/biome/issues/1512) by skipping verbose diagnostics from the count. Contributed by @ematipico
-- Don't handle CSS files, the formatter isn't ready yet. Contributed by @ematipico
+
+- Don't emit verbose warnings when a protected file is ignored.
+
+  Some files, such as `package.json` and `tsconfig.json`, are [protected](https://biomejs.dev/guides/how-biome-works/#protected-files).
+  Biome emits a verbose warning when it encounters a protected file.
+
+  Previously, Biome emitted this verbose warning even if the file was ignored by the configuration.
+  Now, it doesn't emit verbose warnings for protected files that are ignored.
+
+  Contributed by @Conaclos
+
 - The file `biome.json` can't be ignored anymore. Contributed by @ematipico
+
 - Fix [#1541](https://github.com/biomejs/biome/issues/1541) where the content of protected files wasn't returned to `stdout`. Contributed by @ematipico
+
+- Don't handle CSS files, the formatter isn't ready yet. Contributed by @ematipico
 
 ### Configuration
 
