@@ -117,7 +117,7 @@ ready:
   git diff --exit-code --quiet
   just gen
   just documentation
-  #just format # fromat is already run in `just gen`
+  #just format # format is already run in `just gen`
   just lint
   just test
   just test-doc

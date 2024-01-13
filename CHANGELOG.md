@@ -51,6 +51,8 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
   This cases requires the presence of a prototype.
 
+- Add dependency variable names on error message when useExhaustiveDependencies rule shows errors. Contributed by @mehm8128
+
 #### Bug fixes
 
 - The fix of [useArrowFunction](https://biomejs.dev/linter/rules/use-arrow-function) now adds parentheses around the arrow function in more cases where it is needed ([#1524](https://github.com/biomejs/biome/issues/1524)).
