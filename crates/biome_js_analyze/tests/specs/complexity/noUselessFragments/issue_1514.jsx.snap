@@ -4,6 +4,7 @@ expression: issue_1514.jsx
 ---
 # Input
 ```jsx
+// https://github.com/biomejs/biome/issues/1514
 const SomeComponent = () => {
     return (
         <React.Fragment>
@@ -15,32 +16,32 @@ const SomeComponent = () => {
 
 # Diagnostics
 ```
-issue_1514.jsx:3:9 lint/complexity/noUselessFragments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+issue_1514.jsx:4:9 lint/complexity/noUselessFragments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Avoid using unnecessary Fragment.
   
-    1 │ const SomeComponent = () => {
-    2 │     return (
-  > 3 │         <React.Fragment>
+    2 │ const SomeComponent = () => {
+    3 │     return (
+  > 4 │         <React.Fragment>
       │         ^^^^^^^^^^^^^^^^
-  > 4 │             Your Data Dispute Request was sent to your current Employer
-  > 5 │         </React.Fragment>
+  > 5 │             Your Data Dispute Request was sent to your current Employer
+  > 6 │         </React.Fragment>
       │         ^^^^^^^^^^^^^^^^^
-    6 │     );
-    7 │ }
+    7 │     );
+    8 │ }
   
   i A fragment is redundant if it contains only one child, or if it is the child of a html element, and is not a keyed fragment.
   
   i Unsafe fix: Remove the Fragment
   
-    1 1 │   const SomeComponent = () => {
-    2 2 │       return (
-    3   │ - ········<React.Fragment>
-    4   │ - ············Your·Data·Dispute·Request·was·sent·to·your·current·Employer
-    5   │ - ········</React.Fragment>
-      3 │ + ········"Your·Data·Dispute·Request·was·sent·to·your·current·Employer"
-    6 4 │       );
-    7 5 │   }
+    2 2 │   const SomeComponent = () => {
+    3 3 │       return (
+    4   │ - ········<React.Fragment>
+    5   │ - ············Your·Data·Dispute·Request·was·sent·to·your·current·Employer
+    6   │ - ········</React.Fragment>
+      4 │ + ········"Your·Data·Dispute·Request·was·sent·to·your·current·Employer"
+    7 5 │       );
+    8 6 │   }
   
 
 ```
