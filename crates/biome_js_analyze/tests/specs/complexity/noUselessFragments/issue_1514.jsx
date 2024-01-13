@@ -1,3 +1,4 @@
+// https://github.com/biomejs/biome/issues/1514
 const SomeComponent = () => {
     return (
         <React.Fragment>
