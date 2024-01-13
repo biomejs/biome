@@ -827,22 +827,33 @@ impl<'src> JsLexer<'src> {
     /// This method will stop writing into the buffer if the buffer is too small to
     /// fit the whole identifier.
     #[inline]
-    fn consume_and_get_ident(&mut self, buf: &mut [u8]) -> (usize, bool) {
+    fn consume_and_get_ident(&mut self, buf: &mut [u8]) -> (usize, bool, bool) {
         let mut idx = 0;
         let mut any_escaped = false;
+        let mut only_ascii_used = true;
+
         while self.next_byte_bounded().is_some() {
-            if let Some((c, escaped)) = self.cur_ident_part() {
-                if let Some(buf) = buf.get_mut(idx..idx + 4) {
-                    let res = c.encode_utf8(buf);
-                    idx += res.len();
-                    any_escaped |= escaped;
+            if let Some((part, escaped)) = self.cur_ident_part() {
+                if only_ascii_used && !part.is_ascii() {
+                    only_ascii_used = false;
                 }
+
+                if only_ascii_used {
+                    // Ensure that there is space in the buffer.
+                    // Since we're only dealing with ASCII, we need at most 1 byte.
+                    if let Some(buf) = buf.get_mut(idx..idx + 1) {
+                        // Convert the ASCII character to lowercase.
+                        buf[0] = part as u8;
+                        idx += 1;
+                    }
+                }
+                any_escaped |= escaped;
             } else {
-                return (idx, any_escaped);
+                return (idx, any_escaped, only_ascii_used);
             }
         }
 
-        (idx, any_escaped)
+        (idx, any_escaped, only_ascii_used)
     }
 
     /// Consume a string literal and advance the lexer, and returning a list of errors that occurred when reading the string
@@ -995,10 +1006,14 @@ impl<'src> JsLexer<'src> {
         let mut buf = [0u8; 16];
         let len = first.encode_utf8(&mut buf).len();
 
-        let (count, escaped) = self.consume_and_get_ident(&mut buf[len..]);
+        let (count, escaped, only_ascii_used) = self.consume_and_get_ident(&mut buf[len..]);
 
         if escaped {
             self.current_flags |= TokenFlags::UNICODE_ESCAPE;
+        }
+
+        if !only_ascii_used {
+            return T![ident];
         }
 
         match &buf[..count + len] {

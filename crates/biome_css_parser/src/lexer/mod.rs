@@ -818,7 +818,11 @@ impl<'src> CssLexer<'src> {
         // Note to keep the buffer large enough to fit every possible keyword that
         // the lexer can return
         let mut buf = [0u8; 22];
-        let count = self.consume_ident_sequence(&mut buf);
+        let (count, only_ascii_used) = self.consume_ident_sequence(&mut buf);
+
+        if !only_ascii_used {
+            return IDENT;
+        }
 
         match buf[..count].to_ascii_lowercase().as_slice() {
             b"media" => MEDIA_KW,
@@ -1009,29 +1013,36 @@ impl<'src> CssLexer<'src> {
     }
 
     /// Consume a ident sequence.
-    fn consume_ident_sequence(&mut self, buf: &mut [u8]) -> usize {
+    fn consume_ident_sequence(&mut self, buf: &mut [u8]) -> (usize, bool) {
         debug_assert!(self.is_ident_start());
 
         let mut idx = 0;
         let mut is_first = true;
+        let mut only_ascii_used = true;
         // Repeatedly consume the next input code point from the stream.
         while let Some(current) = self.current_byte() {
             if let Some(part) = self.consume_ident_part(current, is_first) {
                 is_first = false;
 
-                // In this context, "+ 4" represents a safety measure for the buffer size.
-                // It ensures that there are at least 4 slots available in the buffer.
-                // This is necessary because the maximum UTF-8 sequence length is 4 bytes.
-                if let Some(buf) = buf.get_mut(idx..idx + 4) {
-                    let res = part.encode_utf8(buf);
-                    idx += res.len();
+                if only_ascii_used && !part.is_ascii() {
+                    only_ascii_used = false;
+                }
+
+                if only_ascii_used {
+                    // Ensure that there is space in the buffer.
+                    // Since we're only dealing with ASCII, we need at most 1 byte.
+                    if let Some(buf) = buf.get_mut(idx..idx + 1) {
+                        // Convert the ASCII character to lowercase.
+                        buf[0] = part.to_ascii_lowercase() as u8;
+                        idx += 1;
+                    }
                 }
             } else {
                 break;
             }
         }
 
-        idx
+        (idx, only_ascii_used)
     }
 
     /// Tries to consume a character that forms part of a CSS identifier.
