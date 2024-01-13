@@ -15,6 +15,7 @@ version              = "0.4.0"
 [dependencies]
 biome_console                = { workspace = true }
 biome_deserialize            = { workspace = true }
+biome_deserialize_macros     = { workspace = true }
 biome_diagnostics_categories = { workspace = true }
 biome_formatter              = { workspace = true }
 biome_js_factory             = { workspace = true }

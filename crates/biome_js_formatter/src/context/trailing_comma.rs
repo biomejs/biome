@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use crate::{JsFormatContext, JsFormatOptions};
-use biome_deserialize::{Deserializable, DeserializableValue, DeserializationDiagnostic, Text};
+use biome_deserialize_macros::Deserializable;
 use biome_formatter::prelude::{if_group_breaks, text};
 use biome_formatter::write;
 use biome_formatter::{Format, FormatResult};
@@ -51,7 +51,7 @@ impl Format<JsFormatContext> for FormatTrailingComma {
 }
 
 /// Print trailing commas wherever possible in multi-line comma-separated syntactic structures.
-#[derive(Default, Debug, Eq, PartialEq, Hash, Clone, Copy)]
+#[derive(Clone, Copy, Default, Debug, Deserializable, Eq, Hash, PartialEq)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
@@ -99,29 +99,6 @@ impl fmt::Display for TrailingComma {
             TrailingComma::Es5 => std::write!(f, "ES5"),
             TrailingComma::All => std::write!(f, "All"),
             TrailingComma::None => std::write!(f, "None"),
-        }
-    }
-}
-
-impl Deserializable for TrailingComma {
-    fn deserialize(
-        value: &impl DeserializableValue,
-        name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<Self> {
-        match Text::deserialize(value, name, diagnostics)?.text() {
-            "all" => Some(TrailingComma::All),
-            "es5" => Some(TrailingComma::Es5),
-            "none" => Some(TrailingComma::None),
-            unknown_variant => {
-                const ALLOWED_VARIANTS: &[&str] = &["all", "es5", "none"];
-                diagnostics.push(DeserializationDiagnostic::new_unknown_value(
-                    unknown_variant,
-                    value.range(),
-                    ALLOWED_VARIANTS,
-                ));
-                None
-            }
         }
     }
 }

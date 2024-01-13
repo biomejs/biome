@@ -12,8 +12,8 @@ use biome_rowan::{AstNode, AstSeparatedList};
 /// are consumed and joined with the diagnostics emitted during the deserialization.
 ///
 /// The data structures that need to be deserialized have to implement the [Deserializable] trait.
-/// To implement [Deserializable], it can need to implement [DeserializationVisitor] that allows
-/// visiting a value.
+/// For most data structures, this can be achieved using the
+/// [biome_deserialize_macros::Deserializable] derive.
 ///
 /// `name` corresponds to the name used in a diagnostic to designate the deserialized value.
 ///
@@ -25,55 +25,9 @@ use biome_rowan::{AstNode, AstSeparatedList};
 /// use biome_json_parser::JsonParserOptions;
 /// use biome_rowan::{TextRange, TokenText};
 ///
-/// #[derive(Default, Debug, Eq, PartialEq)]
+/// #[derive(Debug, Default, Deserializable, Eq, PartialEq)]
 /// struct NewConfiguration {
 ///     lorem: String
-/// }
-///
-/// impl Deserializable for NewConfiguration {
-///     fn deserialize(
-///         value: &impl DeserializableValue,
-///         name: &str,
-///         diagnostics: &mut Vec<DeserializationDiagnostic>,
-///     ) -> Option<Self> {
-///         value.deserialize(Visitor, name, diagnostics)
-///     }
-/// }
-///
-/// struct Visitor;
-/// impl DeserializationVisitor for Visitor {
-///     type Output = NewConfiguration;
-///
-///     const EXPECTED_TYPE: VisitableType = VisitableType::MAP;
-///
-///     fn visit_map(
-///         self,
-///         members: impl Iterator<Item = Option<(impl DeserializableValue, impl DeserializableValue)>>,
-///         _range: TextRange,
-///         _name: &str,
-///         diagnostics: &mut Vec<DeserializationDiagnostic>,
-///     ) -> Option<Self::Output> {
-///         const ALLOWED_KEYS: &[&str] = &["strictCase", "enumMemberCase"];
-///         let mut result = NewConfiguration::default();
-///         for (key, value) in members.flatten() {
-///             let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
-///                 continue;
-///             };
-///             match key_text.text() {
-///                 "lorem" => {
-///                     if let Some(value) = Deserializable::deserialize(&value, &key_text, diagnostics) {
-///                         result.lorem = value;
-///                     }
-///                 },
-///                 _ => diagnostics.push(DeserializationDiagnostic::new_unknown_key(
-///                     &key_text,
-///                     key.range(),
-///                     ALLOWED_KEYS,
-///                 )),
-///             }
-///         }
-///         Some(result)
-///     }
 /// }
 ///
 /// let source = r#"{ "lorem": "ipsum" }"#;

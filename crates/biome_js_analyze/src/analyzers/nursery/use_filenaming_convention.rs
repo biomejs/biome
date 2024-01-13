@@ -1,17 +1,15 @@
-use std::{hash::Hash, str::FromStr};
-
 use crate::{semantic_services::SemanticServices, utils::case::Case};
 use biome_analyze::{
     context::RuleContext, declare_rule, Rule, RuleDiagnostic, RuleSource, RuleSourceKind,
 };
 use biome_console::markup;
-use biome_deserialize::{
-    Deserializable, DeserializationDiagnostic, DeserializationVisitor, Text, VisitableType,
-};
+use biome_deserialize_macros::Deserializable;
 use biome_rowan::TextRange;
 use rustc_hash::FxHashSet;
 use serde::{Deserialize, Serialize};
+use std::{hash::Hash, str::FromStr};
 
+use biome_deserialize::{DeserializableValue, DeserializationDiagnostic};
 #[cfg(feature = "schemars")]
 use schemars::JsonSchema;
 use smallvec::SmallVec;
@@ -213,7 +211,7 @@ pub(crate) enum FileNamingConventionState {
 }
 
 /// Rule's options.
-#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct FilenamingConventionOptions {
@@ -251,67 +249,7 @@ impl Default for FilenamingConventionOptions {
     }
 }
 
-impl Deserializable for FilenamingConventionOptions {
-    fn deserialize(
-        value: &impl biome_deserialize::DeserializableValue,
-        name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<Self> {
-        value.deserialize(FilenamingConventionOptionsVisitor, name, diagnostics)
-    }
-}
-
-struct FilenamingConventionOptionsVisitor;
-impl DeserializationVisitor for FilenamingConventionOptionsVisitor {
-    type Output = FilenamingConventionOptions;
-
-    const EXPECTED_TYPE: VisitableType = VisitableType::MAP;
-
-    fn visit_map(
-        self,
-        members: impl Iterator<
-            Item = Option<(
-                impl biome_deserialize::DeserializableValue,
-                impl biome_deserialize::DeserializableValue,
-            )>,
-        >,
-        _range: biome_rowan::TextRange,
-        _name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<Self::Output> {
-        const ALLOWED_KEYS: &[&str] = &["strictCase", "filenameCases"];
-        let mut result = Self::Output::default();
-        for (key, value) in members.flatten() {
-            let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
-                continue;
-            };
-            match key_text.text() {
-                "strictCase" => {
-                    if let Some(strict_case) =
-                        Deserializable::deserialize(&value, &key_text, diagnostics)
-                    {
-                        result.strict_case = strict_case;
-                    }
-                }
-                "filenameCases" => {
-                    if let Some(filename_cases) =
-                        Deserializable::deserialize(&value, &key_text, diagnostics)
-                    {
-                        result.filename_cases = filename_cases;
-                    }
-                }
-                unknown_key => diagnostics.push(DeserializationDiagnostic::new_unknown_key(
-                    unknown_key,
-                    key.range(),
-                    ALLOWED_KEYS,
-                )),
-            }
-        }
-        Some(result)
-    }
-}
-
-#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
 pub struct FilenameCases(FxHashSet<FilenameCase>);
 
@@ -335,13 +273,14 @@ impl Default for FilenameCases {
     }
 }
 
-impl Deserializable for FilenameCases {
+impl biome_deserialize::Deserializable for FilenameCases {
     fn deserialize(
-        value: &impl biome_deserialize::DeserializableValue,
+        value: &impl DeserializableValue,
         name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        let cases: FxHashSet<_> = Deserializable::deserialize(value, name, diagnostics)?;
+        let cases: FxHashSet<_> =
+            biome_deserialize::Deserializable::deserialize(value, name, diagnostics)?;
         if cases.is_empty() {
             diagnostics.push(
                 DeserializationDiagnostic::new(markup! {
@@ -356,7 +295,7 @@ impl Deserializable for FilenameCases {
 }
 
 /// Supported cases for TypeScript `enum` member names.
-#[derive(Debug, Copy, Clone, Hash, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, Deserialize, Deserializable, Eq, Hash, PartialEq, Serialize)]
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
 pub enum FilenameCase {
     /// camelCase
@@ -401,26 +340,6 @@ impl FromStr for FilenameCase {
             "PascalCase" => Ok(Self::Pascal),
             "snake_case" => Ok(Self::Snake),
             _ => Err("Value not supported for enum member case"),
-        }
-    }
-}
-
-impl Deserializable for FilenameCase {
-    fn deserialize(
-        value: &impl biome_deserialize::DeserializableValue,
-        name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<Self> {
-        let value_text = Text::deserialize(value, name, diagnostics)?;
-        if let Ok(value) = value_text.parse::<Self>() {
-            Some(value)
-        } else {
-            diagnostics.push(DeserializationDiagnostic::new_unknown_value(
-                value_text.text(),
-                value.range(),
-                Self::ALLOWED_VARIANTS,
-            ));
-            None
         }
     }
 }

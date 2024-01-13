@@ -34,7 +34,7 @@ mod impls;
 pub mod json;
 pub mod string_set;
 use biome_diagnostics::{Error, Severity};
-use biome_rowan::TextRange;
+pub use biome_rowan::TextRange;
 pub use diagnostics::{DeserializationAdvice, DeserializationDiagnostic, VisitableType};
 pub use impls::*;
 use std::fmt::Debug;
@@ -46,40 +46,19 @@ pub use string_set::StringSet;
 /// To implement [Deserializable], you can reuse a type that implements [Deserializable] and
 /// turn the obtained value into what you want.
 ///
-/// When deserializing more complex types, such as a `struct`,
-/// you have to use a type that implements [DeserializationVisitor].
+/// When deserializing more complex types, such as a `struct` or `enum`, you can use the
+/// [Deserializable] derive macro.
 ///
 /// ## Example
 ///
 /// ```
-/// use biome_deserialize::{DeserializationDiagnostic,  Deserializable, Text, DeserializableValue};
+/// use biome_deserialize_macros::Deserializable;
 /// use biome_rowan::TextRange;
 ///
+/// #[derive(Deserializable)]
 /// pub enum Variant {
 ///     A,
 ///     B,
-/// }
-///
-/// impl Deserializable for Variant {
-///     fn deserialize(
-///         value: &impl DeserializableValue,
-///         name: &str,
-///         diagnostics: &mut Vec<DeserializationDiagnostic>,
-///     ) -> Option<Self> {
-///         match Text::deserialize(value, name, diagnostics)?.text() {
-///             "A" => Some(Variant::A),
-///             "B" => Some(Variant::B),
-///             unknown_variant => {
-///                 const ALLOWED_VARIANTS: &[&str] = &["A", "B"];
-///                 diagnostics.push(DeserializationDiagnostic::new_unknown_value(
-///                     unknown_variant,
-///                     value.range(),
-///                     ALLOWED_VARIANTS,
-///                 ));
-///                 None
-///             }
-///         }
-///     }
 /// }
 ///
 /// use biome_deserialize::json::deserialize_from_json_str;

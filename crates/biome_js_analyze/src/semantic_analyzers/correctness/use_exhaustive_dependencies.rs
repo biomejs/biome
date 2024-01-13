@@ -3,10 +3,7 @@ use crate::semantic_services::Semantic;
 use biome_analyze::RuleSource;
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
-use biome_deserialize::{
-    Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor, Text,
-    VisitableType,
-};
+use biome_deserialize_macros::Deserializable;
 use biome_js_semantic::{Capture, SemanticModel};
 use biome_js_syntax::{
     binding_ext::AnyJsBindingDeclaration, JsCallExpression, JsStaticMemberExpression, JsSyntaxKind,
@@ -220,71 +217,21 @@ impl Default for ReactExtensiveDependenciesOptions {
 }
 
 /// Options for the rule `useExhaustiveDependencies`
-#[derive(Default, Deserialize, Serialize, Eq, PartialEq, Debug, Clone)]
+#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct HooksOptions {
     /// List of safe hooks
+    #[deserializable(disallow_empty)]
     pub hooks: Vec<Hooks>,
 }
 
-impl Deserializable for HooksOptions {
-    fn deserialize(
-        value: &impl DeserializableValue,
-        name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<Self> {
-        value.deserialize(HooksOptionsVisitor, name, diagnostics)
-    }
-}
-
-struct HooksOptionsVisitor;
-impl DeserializationVisitor for HooksOptionsVisitor {
-    type Output = HooksOptions;
-
-    const EXPECTED_TYPE: VisitableType = VisitableType::MAP;
-
-    fn visit_map(
-        self,
-        members: impl Iterator<Item = Option<(impl DeserializableValue, impl DeserializableValue)>>,
-        _range: TextRange,
-        _name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<Self::Output> {
-        const ALLOWED_KEYS: &[&str] = &["hooks"];
-        let mut result = Self::Output::default();
-        for (key, value) in members.flatten() {
-            let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
-                continue;
-            };
-            match key_text.text() {
-                "hooks" => {
-                    let val_range = value.range();
-                    result.hooks = Deserializable::deserialize(&value, &key_text, diagnostics)
-                        .unwrap_or_default();
-                    if result.hooks.is_empty() {
-                        diagnostics.push(
-                            DeserializationDiagnostic::new("At least one element is needed")
-                                .with_range(val_range),
-                        );
-                    }
-                }
-                text => diagnostics.push(DeserializationDiagnostic::new_unknown_key(
-                    text,
-                    key.range(),
-                    ALLOWED_KEYS,
-                )),
-            }
-        }
-        Some(result)
-    }
-}
-
-#[derive(Default, Deserialize, Serialize, Eq, PartialEq, Debug, Clone)]
+#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Hooks {
     /// The name of the hook
+    #[deserializable(disallow_empty)]
     pub name: String,
     /// The "position" of the closure function, starting from zero.
     ///
@@ -292,68 +239,6 @@ pub struct Hooks {
     pub closure_index: Option<usize>,
     /// The "position" of the array of dependencies, starting from zero.
     pub dependencies_index: Option<usize>,
-}
-
-impl Deserializable for Hooks {
-    fn deserialize(
-        value: &impl DeserializableValue,
-        name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<Self> {
-        value.deserialize(HooksVisitor, name, diagnostics)
-    }
-}
-
-struct HooksVisitor;
-impl DeserializationVisitor for HooksVisitor {
-    type Output = Hooks;
-
-    const EXPECTED_TYPE: VisitableType = VisitableType::MAP;
-
-    fn visit_map(
-        self,
-        members: impl Iterator<Item = Option<(impl DeserializableValue, impl DeserializableValue)>>,
-        _range: TextRange,
-        _name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<Self::Output> {
-        const ALLOWED_KEYS: &[&str] = &["name", "closureIndex", "dependenciesIndex"];
-        let mut result = Self::Output::default();
-        for (key, value) in members.flatten() {
-            let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
-                continue;
-            };
-            match key_text.text() {
-                "name" => {
-                    let val_range = value.range();
-                    result.name = Deserializable::deserialize(&value, &key_text, diagnostics)
-                        .unwrap_or_default();
-                    if result.name.is_empty() {
-                        diagnostics.push(
-                            DeserializationDiagnostic::new(markup!(
-                                "The field "<Emphasis>"name"</Emphasis>" is mandatory"
-                            ))
-                            .with_range(val_range),
-                        )
-                    }
-                }
-                "closureIndex" => {
-                    result.closure_index =
-                        Deserializable::deserialize(&value, &key_text, diagnostics);
-                }
-                "dependenciesIndex" => {
-                    result.dependencies_index =
-                        Deserializable::deserialize(&value, &key_text, diagnostics);
-                }
-                unknown_key => diagnostics.push(DeserializationDiagnostic::new_unknown_key(
-                    unknown_key,
-                    key.range(),
-                    ALLOWED_KEYS,
-                )),
-            }
-        }
-        Some(result)
-    }
 }
 
 impl ReactExtensiveDependenciesOptions {

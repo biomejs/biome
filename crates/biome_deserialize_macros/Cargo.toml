@@ -1,0 +1,24 @@
+[package]
+authors.workspace    = true
+categories.workspace = true
+description          = "Macros to help implement deserializable types in Biome"
+edition.workspace    = true
+homepage.workspace   = true
+keywords.workspace   = true
+license.workspace    = true
+name                 = "biome_deserialize_macros"
+repository.workspace = true
+version              = "0.4.0"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+convert_case     = { workspace = true }
+proc-macro-error = { version = "1.0.4", default-features = false }
+proc-macro2      = "1.0.63"
+quote            = "1.0.14"
+syn              = "1.0.85"
+
+[lints]
+workspace = true
