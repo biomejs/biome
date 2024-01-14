@@ -71,7 +71,7 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 - Add an unsafe code fix for [noConsoleLog](https://biomejs.dev/linter/rules/no-console-log/). Contributed by @vasucp1207
 
-- [useArrowFunction](https://biomejs.dev/linter/rules/use-arrow-function) no longer reports function in `extends` clauses or in a `new` expression. COntributed by @Conaclos
+- [useArrowFunction](https://biomejs.dev/linter/rules/use-arrow-function) no longer reports function in `extends` clauses or in a `new` expression. Contributed by @Conaclos
 
   This cases requires the presence of a prototype.
 
@@ -99,6 +99,8 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
   ```
 
   Contributed by @Conaclos
+
+- Fix [#1514](https://github.com/biomejs/biome/issues/1514). Fix autofix suggestion to avoid the syntax error in `no_useless_fragments`. Contributed by @togami2864
 
 ### Parser
 
