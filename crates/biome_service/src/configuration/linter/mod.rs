@@ -203,7 +203,6 @@ impl From<&RulePlainConfiguration> for Severity {
 
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
-#[deserializable(from_none)]
 #[serde(rename_all = "camelCase")]
 pub enum RulePlainConfiguration {
     #[default]

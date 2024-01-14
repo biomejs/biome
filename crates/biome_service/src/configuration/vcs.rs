@@ -1,4 +1,4 @@
-use biome_deserialize_macros::{Merge, NoneState};
+use biome_deserialize_macros::{Deserializable, Merge, NoneState};
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
@@ -52,7 +52,9 @@ impl VcsConfiguration {
     }
 }
 
-#[derive(Clone, Copy, Debug, Default, Deserialize, Eq, Merge, PartialEq, Serialize)]
+#[derive(
+    Clone, Copy, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize,
+)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub enum VcsClientKind {
