@@ -209,7 +209,9 @@ impl Configuration {
 }
 
 /// The configuration of the filesystem
-#[derive(Bpaf, Clone, Debug, Default, Deserialize, Eq, Merge, NoneState, PartialEq, Serialize)]
+#[derive(
+    Bpaf, Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize,
+)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct FilesConfiguration {

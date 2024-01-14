@@ -184,6 +184,8 @@ fn generate_deserializable_struct(ident: Ident, data: DeserializableStructData) 
     let allowed_keys: Vec<_> = data
         .fields
         .iter()
+        // It's not helpful to report deprecated keys as valid alternative.
+        .filter(|data| data.deprecated.is_none())
         .map(|DeserializableFieldData { key, .. }| quote! { #key })
         .collect();
 
