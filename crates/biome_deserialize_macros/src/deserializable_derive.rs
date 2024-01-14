@@ -2,6 +2,8 @@ mod enum_variant_attrs;
 mod struct_attrs;
 mod struct_field_attrs;
 
+use self::struct_attrs::StructAttrs;
+use self::struct_field_attrs::DeprecatedField;
 use crate::deserializable_derive::enum_variant_attrs::EnumVariantAttrs;
 use crate::deserializable_derive::struct_field_attrs::StructFieldAttrs;
 use convert_case::{Case, Casing};
@@ -9,8 +11,6 @@ use proc_macro2::{Ident, Span, TokenStream};
 use proc_macro_error::*;
 use quote::quote;
 use syn::{Data, Type};
-use self::struct_attrs::StructAttrs;
-use self::struct_field_attrs::DeprecatedField;
 
 pub(crate) struct DeriveInput {
     pub ident: Ident,
@@ -36,23 +36,24 @@ impl DeriveInput {
                     })
                     .map(|variant| {
                         let attrs = EnumVariantAttrs::from_attrs(&variant.attrs);
-            
+
                         let ident = variant.ident;
                         let key = attrs
                             .rename
                             .unwrap_or_else(|| ident.to_string().to_case(Case::Camel));
-            
+
                         DeserializableVariantData { ident, key }
                     })
                     .collect();
                 DeserializableData::Enum(data)
-            },
+            }
             Data::Struct(data) => {
                 if data.fields.iter().all(|field| field.ident.is_some()) {
                     let attrs = StructAttrs::from_attrs(&input.attrs);
 
                     let fields = data
-                        .fields.clone()
+                        .fields
+                        .clone()
                         .into_iter()
                         .filter_map(|field| field.ident.map(|ident| (ident, field.attrs, field.ty)))
                         .map(|(ident, attrs, ty)| {
@@ -82,7 +83,10 @@ impl DeriveInput {
                     )
                 }
             }
-            _ => abort!(input, "Deserializable can only be derived for enums and structs"),
+            _ => abort!(
+                input,
+                "Deserializable can only be derived for enums and structs"
+            ),
         };
 
         Self {
@@ -129,7 +133,10 @@ pub(crate) fn generate_deserializable(input: DeriveInput) -> TokenStream {
     }
 }
 
-fn generate_deserializable_enum(ident: Ident, variants: Vec<DeserializableVariantData>) -> TokenStream {
+fn generate_deserializable_enum(
+    ident: Ident,
+    variants: Vec<DeserializableVariantData>,
+) -> TokenStream {
     let allowed_variants: Vec<_> = variants
         .iter()
         .map(|DeserializableVariantData { key, .. }| quote! { #key })
@@ -137,9 +144,14 @@ fn generate_deserializable_enum(ident: Ident, variants: Vec<DeserializableVarian
 
     let deserialize_variants: Vec<_> = variants
         .iter()
-        .map(|DeserializableVariantData { ident: variant_ident, key }| {
-            quote! { #key => Some(#ident::#variant_ident) }
-        })
+        .map(
+            |DeserializableVariantData {
+                 ident: variant_ident,
+                 key,
+             }| {
+                quote! { #key => Some(#ident::#variant_ident) }
+            },
+        )
         .collect();
 
     quote! {
