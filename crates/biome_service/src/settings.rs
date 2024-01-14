@@ -484,9 +484,6 @@ fn to_file_settings(
                 vcs_config_path.clone(),
                 gitignore_matches,
             )?,
-            // Don't set `gitignore` for the include matcher.
-            // TODO: it could better to create dedicated matcher types:
-            // one for ignore and the other for include.
             included_files: to_matcher(working_directory, config.include.as_ref(), None, &[])?,
             ignore_unknown: config.ignore_unknown.unwrap_or_default(),
         })

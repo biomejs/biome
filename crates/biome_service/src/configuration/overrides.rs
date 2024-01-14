@@ -158,8 +158,8 @@ pub struct OverrideOrganizeImportsConfiguration {
 pub fn to_override_settings(
     working_directory: Option<PathBuf>,
     overrides: Overrides,
-    vcs_base_path: Option<PathBuf>,
-    gitignore_matches: &[String],
+    _vcs_base_path: Option<PathBuf>,
+    _gitignore_matches: &[String],
     current_settings: &WorkspaceSettings,
 ) -> Result<OverrideSettings, WorkspaceError> {
     let mut override_settings = OverrideSettings::default();
@@ -188,14 +188,14 @@ pub fn to_override_settings(
             include: to_matcher(
                 working_directory.clone(),
                 pattern.include.as_ref(),
-                vcs_base_path.clone(),
-                gitignore_matches,
+                None,
+                &[],
             )?,
             exclude: to_matcher(
                 working_directory.clone(),
                 pattern.ignore.as_ref(),
-                vcs_base_path.clone(),
-                gitignore_matches,
+                None,
+                &[],
             )?,
             formatter,
             linter,

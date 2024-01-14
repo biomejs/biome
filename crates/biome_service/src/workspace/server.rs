@@ -210,6 +210,30 @@ impl WorkspaceServer {
             || settings.as_ref().files.included_files.matches_path(path);
         !is_included || settings.as_ref().files.ignored_files.matches_path(path)
     }
+
+    fn is_ignored_by_feature_config(&self, path: &Path, feature: &FeatureName) -> bool {
+        let settings = self.settings();
+        let (feature_included_files, feature_ignored_files) = match feature {
+            FeatureName::Format => {
+                let formatter = &settings.as_ref().formatter;
+                (&formatter.included_files, &formatter.ignored_files)
+            }
+            FeatureName::Lint => {
+                let linter = &settings.as_ref().linter;
+                (&linter.included_files, &linter.ignored_files)
+            }
+            FeatureName::OrganizeImports => {
+                let organize_imports = &settings.as_ref().organize_imports;
+                (
+                    &organize_imports.included_files,
+                    &organize_imports.ignored_files,
+                )
+            }
+        };
+        let is_feature_included =
+            feature_included_files.is_empty() || feature_included_files.matches_path(path);
+        !is_feature_included || feature_ignored_files.matches_path(path)
+    }
 }
 
 impl Workspace for WorkspaceServer {
@@ -239,13 +263,13 @@ impl Workspace for WorkspaceServer {
                     && self.get_language(&params.path) == Language::Unknown
                 {
                     file_features.ignore_not_supported();
+                } else if path.file_name().and_then(|s| s.to_str()) == Some(BIOME_JSON) {
+                    // Never ignore Biome's config file
+                } else if self.is_ignored_by_top_level_config(path) {
+                    file_features.set_ignored_for_all_features();
                 } else {
                     for feature in params.feature {
-                        let is_ignored = self.is_path_ignored(IsPathIgnoredParams {
-                            rome_path: params.path.clone(),
-                            feature: feature.clone(),
-                        })?;
-                        if is_ignored {
+                        if self.is_ignored_by_feature_config(path, &feature) {
                             file_features.ignored(feature);
                         }
                     }
@@ -265,49 +289,17 @@ impl Workspace for WorkspaceServer {
     }
 
     fn is_path_ignored(&self, params: IsPathIgnoredParams) -> Result<bool, WorkspaceError> {
-        let settings = self.settings();
         let path = params.rome_path.as_path();
+        // Never ignore Biome's config file regardless `include`/`ignore`
         if path.file_name().and_then(|s| s.to_str()) == Some(BIOME_JSON) {
             return Ok(false);
         }
-
-        // Overrides have top priority
-        let excluded_by_override = settings.as_ref().override_settings.is_path_excluded(path);
-        if excluded_by_override.unwrap_or_default() {
+        // Apply top-level `include`/`ignore`
+        if self.is_ignored_by_top_level_config(path) {
             return Ok(true);
         }
-        let included_by_override = settings.as_ref().override_settings.is_path_included(path);
-        if included_by_override.unwrap_or_default() {
-            return Ok(false);
-        }
-
-        let (ignored_files, included_files) = match params.feature {
-            FeatureName::Format => {
-                let formatter = &settings.as_ref().formatter;
-                (&formatter.ignored_files, &formatter.included_files)
-            }
-            FeatureName::Lint => {
-                let linter = &settings.as_ref().linter;
-                (&linter.ignored_files, &linter.included_files)
-            }
-            FeatureName::OrganizeImports => {
-                let organize_imports = &settings.as_ref().organize_imports;
-                (
-                    &organize_imports.ignored_files,
-                    &organize_imports.included_files,
-                )
-            }
-        };
-
-        // Tool include/ignore have priority over (global) files include/ignore
-        if ignored_files.matches_path(path) {
-            return Ok(true);
-        }
-        if !included_files.is_empty() && included_files.matches_path(path) {
-            return Ok(false);
-        }
-
-        Ok(self.is_ignored_by_top_level_config(path))
+        // Apply feature-level `include`/`ignore`
+        Ok(self.is_ignored_by_feature_config(path, &params.feature))
     }
 
     /// Update the global settings for this workspace
