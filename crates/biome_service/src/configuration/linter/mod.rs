@@ -6,7 +6,7 @@ use crate::configuration::overrides::OverrideLinterConfiguration;
 use crate::settings::{to_matcher, LinterSettings};
 use crate::{Matcher, WorkspaceError};
 use biome_deserialize::{Merge, StringSet};
-use biome_deserialize_macros::{Merge, NoneState};
+use biome_deserialize_macros::{Deserializable, Merge, NoneState};
 use biome_diagnostics::Severity;
 use biome_js_analyze::options::PossibleOptions;
 use bpaf::Bpaf;
@@ -17,8 +17,11 @@ use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 use std::str::FromStr;
 
-#[derive(Debug, Deserialize, Merge, NoneState, Serialize, Clone, Bpaf, Eq, PartialEq)]
+#[derive(
+    Bpaf, Clone, Debug, Deserialize, Deserializable, Eq, Merge, NoneState, PartialEq, Serialize,
+)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[deserializable(from_none)]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct LinterConfiguration {
     /// if `false`, it disables the feature and the linter won't be executed. `true` by default
@@ -198,8 +201,9 @@ impl From<&RulePlainConfiguration> for Severity {
     }
 }
 
-#[derive(Default, Deserialize, Serialize, Debug, Eq, PartialEq, Clone)]
+#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
+#[deserializable(from_none)]
 #[serde(rename_all = "camelCase")]
 pub enum RulePlainConfiguration {
     #[default]
@@ -221,11 +225,13 @@ impl FromStr for RulePlainConfiguration {
     }
 }
 
-#[derive(Default, Deserialize, Serialize, Debug, Eq, PartialEq, Clone)]
+#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct RuleWithOptions {
     pub level: RulePlainConfiguration,
+
+    #[deserializable(passthrough_name)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub options: Option<PossibleOptions>,
 }

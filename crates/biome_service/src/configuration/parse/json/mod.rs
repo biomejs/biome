@@ -1,9 +1,7 @@
 //! This module is responsible to parse the configuration from a JSON format
 //!
 
-mod css;
 mod files;
-mod formatter;
 mod javascript;
 mod json_impl;
 mod linter;

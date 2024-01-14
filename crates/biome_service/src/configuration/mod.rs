@@ -278,6 +278,7 @@ pub fn load_configuration(
     let config = load_config(fs, config_path)?;
     let mut loaded_configuration = LoadedConfiguration::from(config);
     loaded_configuration.apply_extends(fs)?;
+    loaded_configuration.migrate_deprecated_fields();
     loaded_configuration.configuration.merge_in_defaults();
     Ok(loaded_configuration)
 }
@@ -536,6 +537,48 @@ impl LoadedConfiguration {
     /// It return an iterator over the diagnostics emitted during the resolution of the configuration file
     pub fn as_diagnostics_iter(&self) -> ConfigurationDiagnosticsIter {
         ConfigurationDiagnosticsIter::new(self.diagnostics.as_slice())
+    }
+
+    /// Checks for the presence of deprecated fields and updates the
+    /// configuration to apply them to the new schema.
+    fn migrate_deprecated_fields(&mut self) {
+        let config = &mut self.configuration;
+
+        // TODO: remove in biome 2.0
+        if let Some(formatter) = config.css.as_mut().and_then(|css| css.formatter.as_mut()) {
+            if formatter.indent_size.is_some() && formatter.indent_width.is_none() {
+                formatter.indent_width = formatter.indent_size;
+            }
+        }
+
+        // TODO: remove in biome 2.0
+        if let Some(formatter) = config.formatter.as_mut() {
+            if formatter.indent_size.is_some() && formatter.indent_width.is_none() {
+                formatter.indent_width = formatter.indent_size;
+            }
+        }
+
+        // TODO: remove in biome 2.0
+        if let Some(formatter) = config
+            .javascript
+            .as_mut()
+            .and_then(|js| js.formatter.as_mut())
+        {
+            if formatter.indent_size.is_some() && formatter.indent_width.is_none() {
+                formatter.indent_width = formatter.indent_size;
+            }
+        }
+
+        // TODO: remove in biome 2.0
+        if let Some(formatter) = config
+            .json
+            .as_mut()
+            .and_then(|json| json.formatter.as_mut())
+        {
+            if formatter.indent_size.is_some() && formatter.indent_width.is_none() {
+                formatter.indent_width = formatter.indent_size;
+            }
+        }
     }
 }
 

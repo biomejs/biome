@@ -1,7 +1,7 @@
 //! Implementation of [DeserializableValue] for the JSON data format.
 use crate::{
     Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor,
-    Deserialized, Text, TextNumber,
+    Deserialized, Text, TextNumber, VisitableType,
 };
 use biome_diagnostics::{DiagnosticExt, Error};
 use biome_json_parser::{parse_json, JsonParserOptions};
@@ -20,10 +20,9 @@ use biome_rowan::{AstNode, AstSeparatedList};
 /// ## Examples
 ///
 /// ```
-/// use biome_deserialize::{DeserializationDiagnostic, Deserializable, DeserializableValue, DeserializationVisitor, Text, VisitableType};
 /// use biome_deserialize::json::deserialize_from_json_str;
+/// use biome_deserialize_macros::Deserializable;
 /// use biome_json_parser::JsonParserOptions;
-/// use biome_rowan::{TextRange, TokenText};
 ///
 /// #[derive(Debug, Default, Deserializable, Eq, PartialEq)]
 /// struct NewConfiguration {
@@ -125,6 +124,18 @@ impl DeserializableValue for AnyJsonValue {
             }
         }
     }
+
+    fn is_type(&self, ty: VisitableType) -> bool {
+        match self {
+            AnyJsonValue::JsonArrayValue(_) => ty == VisitableType::ARRAY,
+            AnyJsonValue::JsonBogusValue(_) => false,
+            AnyJsonValue::JsonBooleanValue(_) => ty == VisitableType::BOOL,
+            AnyJsonValue::JsonNullValue(_) => ty == VisitableType::NULL,
+            AnyJsonValue::JsonNumberValue(_) => ty == VisitableType::NUMBER,
+            AnyJsonValue::JsonObjectValue(_) => ty == VisitableType::MAP,
+            AnyJsonValue::JsonStringValue(_) => ty == VisitableType::STR,
+        }
+    }
 }
 
 impl DeserializableValue for JsonMemberName {
@@ -140,6 +151,10 @@ impl DeserializableValue for JsonMemberName {
     ) -> Option<V::Output> {
         let value = self.inner_string_text().ok()?;
         visitor.visit_str(Text(value), AstNode::range(self), name, diagnostics)
+    }
+
+    fn is_type(&self, _ty: VisitableType) -> bool {
+        false
     }
 }
 

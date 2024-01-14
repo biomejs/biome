@@ -69,7 +69,7 @@ pub use string_set::StringSet;
 /// use biome_deserialize::json::deserialize_from_json_str;
 /// use biome_json_parser::JsonParserOptions;
 ///
-/// let source = r#""A""#;
+/// let source = r#""a""#;
 /// let deserialized = deserialize_from_json_str::<Variant>(&source, JsonParserOptions::default(), "");
 /// assert!(!deserialized.has_errors());
 /// assert!(matches!(deserialized.into_deserialized(), Some(Variant::A)));
@@ -102,6 +102,9 @@ pub trait DeserializableValue: Sized {
         name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<V::Output>;
+
+    /// Returns whether the value is of the given type.
+    fn is_type(&self, ty: VisitableType) -> bool;
 }
 
 /// This trait represents a visitor that walks through a [DeserializableValue].

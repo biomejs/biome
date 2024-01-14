@@ -10,6 +10,7 @@ use proc_macro_error::*;
 use quote::quote;
 use syn::{Data, Type};
 use self::struct_attrs::StructAttrs;
+use self::struct_field_attrs::DeprecatedField;
 
 pub(crate) struct DeriveInput {
     pub ident: Ident,
@@ -51,18 +52,23 @@ impl DeriveInput {
                     let attrs = StructAttrs::from_attrs(&input.attrs);
 
                     let fields = data
-                        .fields
+                        .fields.clone()
                         .into_iter()
                         .filter_map(|field| field.ident.map(|ident| (ident, field.attrs, field.ty)))
                         .map(|(ident, attrs, ty)| {
                             let attrs = StructFieldAttrs::from_attrs(&attrs);
-                            
-                            let disallow_empty = attrs.disallow_empty;
                             let key = attrs
                                 .rename
                                 .unwrap_or_else(|| ident.to_string().to_case(Case::Camel));
-                
-                            DeserializableFieldData { disallow_empty, ident, key, ty }
+
+                            DeserializableFieldData {
+                                deprecated: attrs.deprecated,
+                                disallow_empty: attrs.disallow_empty,
+                                ident,
+                                key,
+                                passthrough_name: attrs.passthrough_name,
+                                ty,
+                            }
                         })
                         .collect();
                     let from_none = attrs.from_none;
@@ -86,24 +92,30 @@ impl DeriveInput {
     }
 }
 
+#[derive(Debug)]
 pub enum DeserializableData {
     Enum(Vec<DeserializableVariantData>),
     Newtype,
     Struct(DeserializableStructData),
 }
 
+#[derive(Debug)]
 pub struct DeserializableStructData {
     fields: Vec<DeserializableFieldData>,
     from_none: bool,
 }
 
+#[derive(Debug)]
 pub struct DeserializableFieldData {
+    deprecated: Option<DeprecatedField>,
     disallow_empty: bool,
     ident: Ident,
     key: String,
     ty: Type,
+    passthrough_name: bool,
 }
 
+#[derive(Debug)]
 pub struct DeserializableVariantData {
     ident: Ident,
     key: String,
@@ -178,7 +190,9 @@ fn generate_deserializable_struct(ident: Ident, data: DeserializableStructData) 
     let deserialize_fields: Vec<_> = data
         .fields
         .into_iter()
-        .map(|DeserializableFieldData { disallow_empty, ident: field_ident, key, ty }| {
+        .map(|field_data| {
+            let DeserializableFieldData { ident: field_ident, key, ty, .. } = field_data;
+
             let is_optional = matches!(
                 &ty,
                 Type::Path(path) if path
@@ -188,11 +202,29 @@ fn generate_deserializable_struct(ident: Ident, data: DeserializableStructData) 
                     .is_some_and(|segment| segment.ident == "Option")
             );
 
-            let is_empty_check = disallow_empty.then(|| {
+            let deprecation_notice = field_data.deprecated.map(|deprecated| {
+                match deprecated {
+                    DeprecatedField::Message(message) => quote! {
+                        diagnostics.push(DeserializationDiagnostic::new_deprecated(
+                            key_text.text(),
+                            value.range()
+                        ).with_note(#message));
+                    },
+                    DeprecatedField::UseInstead(path) => quote! {
+                        diagnostics.push(DeserializationDiagnostic::new_deprecated_use_instead(
+                            &key_text,
+                            key.range(),
+                            #path,
+                        ));
+                    },
+                }
+            });
+
+            let is_empty_check = field_data.disallow_empty.then(|| {
                 let test = if is_optional {
-                    quote! { value.as_ref().is_some_and(|v| v.is_empty()) }
+                    quote! { parsed_value.as_ref().is_some_and(|v| v.is_empty()) }
                 } else {
-                    quote! { value.is_empty() }
+                    quote! { parsed_value.is_empty() }
                 };
                 quote! {
                     if #test {
@@ -200,29 +232,36 @@ fn generate_deserializable_struct(ident: Ident, data: DeserializableStructData) 
                             DeserializationDiagnostic::new(markup!(
                                 <Emphasis>#key</Emphasis>" may not be empty"
                             ))
-                                .with_range(value_range)
+                                .with_range(value.range())
                         );
                         continue;
                     }
                 }
             });
 
+            let name = match field_data.passthrough_name {
+                true => quote! { name },
+                false => quote! { &key_text }
+            };
+
             if is_optional {
                 quote! {
                     #key => {
-                        let value: #ty = Deserializable::deserialize(&value, &key_text, diagnostics);
+                        let parsed_value: #ty = Deserializable::deserialize(&value, #name, diagnostics);
                         #is_empty_check
-                        result.#field_ident = value;
+                        result.#field_ident = parsed_value;
+                        #deprecation_notice
                     }
                 }
             } else {
                 quote! {
                     #key => {
                         let deserialize_result: Option<#ty> =
-                            Deserializable::deserialize(&value, &key_text, diagnostics);
-                        if let Some(value) = deserialize_result {
+                            Deserializable::deserialize(&value, #name, diagnostics);
+                        if let Some(parsed_value) = deserialize_result {
                             #is_empty_check
-                            result.#field_ident = value;
+                            result.#field_ident = parsed_value;
+                            #deprecation_notice
                         }
                     }
                 }
@@ -258,7 +297,7 @@ fn generate_deserializable_struct(ident: Ident, data: DeserializableStructData) 
                 self,
                 members: impl Iterator<Item = Option<(impl biome_deserialize::DeserializableValue, impl biome_deserialize::DeserializableValue)>>,
                 _range: biome_deserialize::TextRange,
-                _name: &str,
+                name: &str,
                 diagnostics: &mut Vec<biome_deserialize::DeserializationDiagnostic>,
             ) -> Option<Self::Output> {
                 use biome_deserialize::{Deserializable, DeserializationDiagnostic, Text};
@@ -267,7 +306,6 @@ fn generate_deserializable_struct(ident: Ident, data: DeserializableStructData) 
                     let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
                         continue;
                     };
-                    let value_range = value.range();
                     match key_text.text() {
                         #(#deserialize_fields)*
                         unknown_key => {

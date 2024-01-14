@@ -19,7 +19,7 @@ use syn::{parse_macro_input, DeriveInput};
 ///
 /// ## Examples
 ///
-/// ```
+/// ```no_test
 /// #[derive(Default, Deserializable)]
 /// struct StructWithNamedFields {
 ///     foo: String,
@@ -39,9 +39,11 @@ use syn::{parse_macro_input, DeriveInput};
 /// ## Struct field attributes
 ///
 /// When [Deserializable] is derived on a struct, its fields may be adjusted
-/// through attributes:
+/// through attributes.
 ///
-/// ```
+/// ### `disallow_empty`
+///
+/// ```no_test
 /// #[derive(Default, Deserializable)]
 /// struct StructWithFields {
 ///     // Deserialization of `foo` is rejected if an empty string is provided.
@@ -49,7 +51,36 @@ use syn::{parse_macro_input, DeriveInput};
 ///     #[deserializable(disallow_empty)]
 ///     foo: String,
 /// }
+/// ```
 ///
+/// ### `passthrough_name`
+///
+/// A particularly noteworthy attribute is `passthrough_name`. Every
+/// deserializer receives a `name` argument which is used to add context to
+/// diagnostics reported when deserializing the value. Typically, when the value
+/// of an object property is deserialized, the `name` refers to the name of the
+/// property. In some cases however, you may want to pass through the name given
+/// to the object's deserializer instead, in order to prevent losing more
+/// "distant" context.
+///
+/// An example is the `RuleWithOptions` struct, where the name of the rule is
+/// passed through to the deserializer for `PossibleOptions`. Without this
+/// attribute, the name given to the field's deserializer would always be
+/// "options".
+///
+/// ```no_test
+/// #[derive(Default, Deserializable)]
+/// pub struct RuleWithOptions {
+///     pub level: RulePlainConfiguration,
+///
+///     #[deserializable(passthrough_name)]
+///     pub options: Option<PossibleOptions>,
+/// }
+/// ```
+///
+/// ### `rename`
+///
+/// ```no_test
 /// #[derive(Default, Deserializable)]
 /// struct StructWithFields {
 ///     // Use "$schema" as serialized property, instead of "schema". By
@@ -62,7 +93,7 @@ use syn::{parse_macro_input, DeriveInput};
 /// For structs that also implement Serde's `Serialize` or `Deserialize`, it
 /// automatically picks up on Serde's `rename` attribute:
 ///
-/// ```
+/// ```no_test
 /// #[derive(Default, Deserialize, Deserializable, Serialize)]
 /// struct StructWithFields {
 ///     // This also works:
@@ -74,9 +105,11 @@ use syn::{parse_macro_input, DeriveInput};
 /// ## Enum variant attributes
 ///
 /// When [Deserializable] is derived on a enum, the deserialization of its
-/// variants may also be adjusted through attributes:
+/// variants may also be adjusted through attributes.
 ///
-/// ```
+/// ### `rename`
+///
+/// ```no_test
 /// #[derive(Deserializable)]
 /// enum Cases {
 ///     // Serialized representation defaults to "camelCase", which is what we
