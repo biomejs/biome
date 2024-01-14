@@ -1,15 +1,20 @@
+use crate::CliDiagnostic;
+use crate::CliDiagnostic::IoError;
 use biome_deserialize::{
     Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor, Text,
     VisitableType,
 };
+use biome_diagnostics::Error;
 use biome_formatter::{LineEnding, LineWidth, QuoteStyle};
+use biome_fs::{FileSystem, OpenOptions};
 use biome_js_formatter::context::{ArrowParentheses, QuoteProperties, Semicolons, TrailingComma};
 use biome_service::configuration::{FormatterConfiguration, PlainIndentStyle};
-use biome_service::JavascriptFormatter;
+use biome_service::{DynRef, JavascriptFormatter};
 use biome_text_size::TextRange;
+use std::path::Path;
 
 #[derive(Debug, Eq, PartialEq)]
-struct PrettierConfiguration {
+pub(crate) struct PrettierConfiguration {
     /// https://prettier.io/docs/en/options#print-width
     print_width: u16,
     /// https://prettier.io/docs/en/options#use-tabs
@@ -397,6 +402,32 @@ impl TryFrom<PrettierConfiguration> for JavascriptFormatter {
             jsx_quote_style: Some(jsx_quote_style),
         })
     }
+}
+
+const PRETTIER_CONFIG_FILES: [&str; 2] = [".prettierrc", ".prettierrc.json"];
+pub(crate) fn read_prettier_configuration(
+    fs: &DynRef<'_, dyn FileSystem>,
+) -> Result<String, CliDiagnostic> {
+    let mut content = String::new();
+
+    for config_name in PRETTIER_CONFIG_FILES {
+        let open_options = OpenOptions::default().read(true);
+        let path = Path::new(config_name);
+        let file = fs.open_with_options(&path, open_options);
+        match file {
+            Ok(mut file) => {
+                let result = file.read_to_string(&mut content);
+                if let Err(err) = result {
+                    let diag = Error::from(biome_diagnostics::adapters::IoError::from(err));
+                }
+            }
+            Err(_) => {
+                continue;
+            }
+        }
+    }
+
+    Ok(content)
 }
 
 #[cfg(test)]

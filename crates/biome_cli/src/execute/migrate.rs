@@ -1,15 +1,17 @@
 mod prettier;
 
 use crate::execute::diagnostics::{ContentDiffAdvice, MigrateDiffDiagnostic};
+use crate::execute::migrate::prettier::{read_prettier_configuration, PrettierConfiguration};
 use crate::{CliDiagnostic, CliSession};
 use biome_console::{markup, ConsoleExt};
+use biome_deserialize::json::deserialize_from_json_ast;
 use biome_diagnostics::Diagnostic;
 use biome_diagnostics::{category, PrintDiagnostic};
 use biome_fs::{FileSystemExt, OpenOptions};
-use biome_json_parser::JsonParserOptions;
+use biome_json_parser::{parse_json_with_cache, JsonParserOptions};
 use biome_json_syntax::JsonRoot;
 use biome_migrate::{migrate_configuration, ControlFlow};
-use biome_rowan::AstNode;
+use biome_rowan::{AstNode, NodeCache};
 use biome_service::workspace::FixAction;
 use biome_service::VERSION;
 use std::borrow::Cow;
@@ -36,6 +38,7 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
         // we will use it later
         prettier: _,
     } = migrate_payload;
+    let mut cache = NodeCache::default();
     let fs = &*session.app.fs;
     let has_deprecated_configuration =
         configuration_file_path.file_name() == Some(OsStr::new("rome.json"));
@@ -50,8 +53,11 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
         fs.open_with_options(configuration_file_path.as_path(), open_options)?;
     let mut configuration_content = String::new();
     configuration_file.read_to_string(&mut configuration_content)?;
-    let parsed =
-        biome_json_parser::parse_json(&configuration_content, JsonParserOptions::default());
+    let parsed = parse_json_with_cache(
+        &configuration_content,
+        &mut cache,
+        JsonParserOptions::default(),
+    );
     let mut errors = 0;
     let mut tree = parsed.tree();
     let mut actions = Vec::new();
@@ -96,6 +102,24 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
     }
     let console = &mut *session.app.console;
     let new_configuration_content = tree.to_string();
+
+    let prettier_configuration = read_prettier_configuration(&session.app.fs)?;
+
+    let parsed_json_configuration = parse_json_with_cache(
+        prettier_configuration.as_str(),
+        &mut cache,
+        JsonParserOptions::default()
+            .with_allow_comments()
+            .with_allow_trailing_commas(),
+    );
+
+    let deserialized =
+        deserialize_from_json_ast::<PrettierConfiguration>(&parsed_json_configuration.tree(), "");
+
+    if !deserialized.has_errors() {
+        let deserialized = deserialized.into_deserialized();
+        if let Some(deserialized) = deserialized {}
+    }
 
     if configuration_content != new_configuration_content || has_deprecated_configuration {
         if write {
