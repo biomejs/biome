@@ -180,56 +180,54 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
                 }
             }
         }
-    } else {
-        if configuration_content != new_configuration_content || has_deprecated_configuration {
-            if write {
-                let mut configuration_file = if has_deprecated_configuration {
-                    let biome_file_path = configuration_directory_path.join(fs.config_name());
-                    fs.create_new(biome_file_path.as_path())?
-                } else {
-                    configuration_file
-                };
-                configuration_file.set_content(tree.to_string().as_bytes())?;
-                console.log(markup!{
+    } else if configuration_content != new_configuration_content || has_deprecated_configuration {
+        if write {
+            let mut configuration_file = if has_deprecated_configuration {
+                let biome_file_path = configuration_directory_path.join(fs.config_name());
+                fs.create_new(biome_file_path.as_path())?
+            } else {
+                configuration_file
+            };
+            configuration_file.set_content(tree.to_string().as_bytes())?;
+            console.log(markup!{
                     <Info>"The configuration "<Emphasis>{{configuration_file_path.display().to_string()}}</Emphasis>" has been successfully migrated."</Info>
                 })
-            } else {
-                let file_name = configuration_file_path.display().to_string();
-                let diagnostic = if has_deprecated_configuration {
-                    MigrateDiffDiagnostic {
-                        file_name,
-                        diff: ContentDiffAdvice {
-                            old: "rome.json".to_string(),
-                            new: "biome.json".to_string(),
-                        },
-                    }
-                } else {
-                    MigrateDiffDiagnostic {
-                        file_name,
-                        diff: ContentDiffAdvice {
-                            old: configuration_content,
-                            new: new_configuration_content,
-                        },
-                    }
-                };
-                if diagnostic.tags().is_verbose() {
-                    if verbose {
-                        console.error(markup! {{PrintDiagnostic::verbose(&diagnostic)}})
-                    }
-                } else {
-                    console.error(markup! {{PrintDiagnostic::simple(&diagnostic)}})
+        } else {
+            let file_name = configuration_file_path.display().to_string();
+            let diagnostic = if has_deprecated_configuration {
+                MigrateDiffDiagnostic {
+                    file_name,
+                    diff: ContentDiffAdvice {
+                        old: "rome.json".to_string(),
+                        new: "biome.json".to_string(),
+                    },
                 }
-                console.log(markup! {
+            } else {
+                MigrateDiffDiagnostic {
+                    file_name,
+                    diff: ContentDiffAdvice {
+                        old: configuration_content,
+                        new: new_configuration_content,
+                    },
+                }
+            };
+            if diagnostic.tags().is_verbose() {
+                if verbose {
+                    console.error(markup! {{PrintDiagnostic::verbose(&diagnostic)}})
+                }
+            } else {
+                console.error(markup! {{PrintDiagnostic::simple(&diagnostic)}})
+            }
+            console.log(markup! {
                     "Run the command with the option "<Emphasis>"--write"</Emphasis>" to apply the changes."
                 })
-            }
-        } else {
-            console.log(markup! {
-                <Info>
-                "Your configuration file is up to date."
-                </Info>
-            })
         }
+    } else {
+        console.log(markup! {
+            <Info>
+            "Your configuration file is up to date."
+            </Info>
+        })
     }
 
     Ok(())

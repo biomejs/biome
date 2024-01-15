@@ -415,7 +415,7 @@ pub(crate) fn read_and_deserialize_prettier_configuration(
     for config_name in PRETTIER_CONFIG_FILES {
         let open_options = OpenOptions::default().read(true);
         let path = Path::new(config_name);
-        let file = fs.open_with_options(&path, open_options);
+        let file = fs.open_with_options(path, open_options);
         match file {
             Ok(mut file) => {
                 let result = file.read_to_string(&mut content);
