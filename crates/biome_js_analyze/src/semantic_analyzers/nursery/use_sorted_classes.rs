@@ -106,7 +106,7 @@ declare_rule! {
 }
 
 impl Rule for UseSortedClasses {
-    type Query = Ast<AnyClassStringLike>;
+    type Query = AnyClassStringLike;
     type State = String;
     type Signals = Option<Self::State>;
     type Options = UseSortedClassesOptions;

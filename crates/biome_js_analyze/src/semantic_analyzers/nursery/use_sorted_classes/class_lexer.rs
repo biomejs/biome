@@ -76,7 +76,7 @@ pub struct ClassStructure {
 
 /// Processes a CSS class into a class structure, containing a list of variants and the
 /// utility itself.
-pub fn tokenize_class(class_name: &str) -> ClassStructure {
+pub fn tokenize_class(class_name: &str) -> Option<ClassStructure> {
     // TODO: add custom separator argument (currently hardcoded to `:`).
     let mut arbitrary_block_depth = 0;
     let mut at_arbitrary_block_start = false;
@@ -159,11 +159,9 @@ pub fn tokenize_class(class_name: &str) -> ClassStructure {
             text: s.to_string(),
         })
         .collect();
-    let utility = variants
-        .pop()
-        .expect("TODO: error message (this should never happen)");
+    let utility = variants.pop()?;
 
-    ClassStructure { variants, utility }
+    Some(ClassStructure { variants, utility })
 }
 
 // TODO: unit tests.

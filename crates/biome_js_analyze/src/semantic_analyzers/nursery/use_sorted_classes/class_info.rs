@@ -138,7 +138,7 @@ pub struct ClassInfo {
 /// Computes sort-related information about a CSS class. If the class is not recognized as a utility,
 /// it is considered a custom class instead and `None` is returned.
 pub fn get_class_info(class_name: &str, sort_config: &SortConfig) -> Option<ClassInfo> {
-    let utility_data = tokenize_class(class_name);
+    let utility_data = tokenize_class(class_name)?;
     let utility_info = get_utility_info(&sort_config.utilities, &utility_data.utility);
     if let Some(utility_info) = utility_info {
         return Some(ClassInfo {

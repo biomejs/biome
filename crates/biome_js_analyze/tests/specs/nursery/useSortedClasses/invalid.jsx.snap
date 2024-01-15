@@ -1,0 +1,30 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+<div class="px-4 p-4" />;
+
+```
+
+# Diagnostics
+```
+invalid.jsx:1:12 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These CSS classes should be sorted.
+  
+  > 1 │ <div class="px-4 p-4" />;
+      │            ^^^^^^^^^^
+    2 │ 
+  
+  i Safe fix: Sort the classes.
+  
+    1   │ - <div·class="px-4·p-4"·/>;
+      1 │ + <div·class="p-4·px-4"·/>;
+    2 2 │   
+  
+
+```
+
+
