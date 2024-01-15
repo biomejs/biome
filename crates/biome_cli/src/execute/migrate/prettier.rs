@@ -1,19 +1,22 @@
+use crate::diagnostics::MigrationDiagnostic;
 use crate::CliDiagnostic;
-use crate::CliDiagnostic::IoError;
+use biome_console::{markup, Console, ConsoleExt};
+use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize::{
     Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor, Text,
     VisitableType,
 };
-use biome_diagnostics::Error;
+use biome_diagnostics::{DiagnosticExt, PrintDiagnostic};
 use biome_formatter::{LineEnding, LineWidth, QuoteStyle};
 use biome_fs::{FileSystem, OpenOptions};
 use biome_js_formatter::context::{ArrowParentheses, QuoteProperties, Semicolons, TrailingComma};
+use biome_json_parser::JsonParserOptions;
 use biome_service::configuration::{FormatterConfiguration, PlainIndentStyle};
 use biome_service::{DynRef, JavascriptFormatter};
 use biome_text_size::TextRange;
 use std::path::Path;
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Eq, PartialEq, Clone)]
 pub(crate) struct PrettierConfiguration {
     /// https://prettier.io/docs/en/options#print-width
     print_width: u16,
@@ -41,7 +44,7 @@ pub(crate) struct PrettierConfiguration {
     end_of_line: EndOfLine,
 }
 
-#[derive(Debug, Eq, PartialEq, Default)]
+#[derive(Debug, Eq, PartialEq, Default, Clone)]
 enum EndOfLine {
     #[default]
     Lf,
@@ -72,7 +75,7 @@ impl Deserializable for EndOfLine {
     }
 }
 
-#[derive(Debug, Eq, PartialEq, Default)]
+#[derive(Debug, Eq, PartialEq, Default, Clone)]
 enum ArrowParens {
     #[default]
     Always,
@@ -101,7 +104,7 @@ impl Deserializable for ArrowParens {
     }
 }
 
-#[derive(Debug, Eq, PartialEq, Default)]
+#[derive(Debug, Default, Eq, PartialEq, Clone)]
 enum PrettierTrailingComma {
     #[default]
     All,
@@ -132,8 +135,7 @@ impl Deserializable for PrettierTrailingComma {
     }
 }
 
-#[derive(Debug, Eq, PartialEq, Default)]
-
+#[derive(Debug, Eq, Default, PartialEq, Clone)]
 enum QuoteProps {
     #[default]
     AsNeeded,
@@ -343,7 +345,7 @@ impl TryFrom<PrettierConfiguration> for FormatterConfiguration {
     type Error = String;
     fn try_from(value: PrettierConfiguration) -> Result<Self, Self::Error> {
         // TODO: handle error
-        let line_width = LineWidth::try_from(value.print_width).unwrap();
+        let line_width = LineWidth::try_from(value.print_width).map_err(|err| err.to_string())?;
         let indent_style = if value.use_tabs {
             PlainIndentStyle::Tab
         } else {
@@ -364,9 +366,8 @@ impl TryFrom<PrettierConfiguration> for FormatterConfiguration {
     }
 }
 
-impl TryFrom<PrettierConfiguration> for JavascriptFormatter {
-    type Error = String;
-    fn try_from(value: PrettierConfiguration) -> Result<Self, Self::Error> {
+impl From<PrettierConfiguration> for JavascriptFormatter {
+    fn from(value: PrettierConfiguration) -> Self {
         let semicolons = if value.semi {
             Semicolons::Always
         } else {
@@ -382,7 +383,7 @@ impl TryFrom<PrettierConfiguration> for JavascriptFormatter {
         } else {
             QuoteStyle::Double
         };
-        Ok(Self {
+        Self {
             indent_width: None,
             line_width: None,
             indent_style: None,
@@ -400,16 +401,17 @@ impl TryFrom<PrettierConfiguration> for JavascriptFormatter {
             quote_properties: Some(value.quote_props.into()),
             bracket_spacing: Some(value.bracket_spacing),
             jsx_quote_style: Some(jsx_quote_style),
-        })
+        }
     }
 }
 
 const PRETTIER_CONFIG_FILES: [&str; 2] = [".prettierrc", ".prettierrc.json"];
-pub(crate) fn read_prettier_configuration(
+pub(crate) fn read_and_deserialize_prettier_configuration(
     fs: &DynRef<'_, dyn FileSystem>,
-) -> Result<String, CliDiagnostic> {
+    console: &mut dyn Console,
+) -> Result<Option<(FormatterConfiguration, JavascriptFormatter)>, CliDiagnostic> {
     let mut content = String::new();
-
+    let mut prettier_config_path = Path::new("");
     for config_name in PRETTIER_CONFIG_FILES {
         let open_options = OpenOptions::default().read(true);
         let path = Path::new(config_name);
@@ -418,8 +420,10 @@ pub(crate) fn read_prettier_configuration(
             Ok(mut file) => {
                 let result = file.read_to_string(&mut content);
                 if let Err(err) = result {
-                    let diag = Error::from(biome_diagnostics::adapters::IoError::from(err));
+                    return Err(CliDiagnostic::io_error(err));
                 }
+                prettier_config_path = path;
+                break;
             }
             Err(_) => {
                 continue;
@@ -427,7 +431,43 @@ pub(crate) fn read_prettier_configuration(
         }
     }
 
-    Ok(content)
+    if content.is_empty() {
+        return Err(CliDiagnostic::MigrateError(MigrationDiagnostic {
+            reason: "Biome couldn't find a Prettier configuration file.".to_string(),
+        }));
+    }
+
+    let deserialized = deserialize_from_json_str::<PrettierConfiguration>(
+        content.as_str(),
+        JsonParserOptions::default()
+            .with_allow_trailing_commas()
+            .with_allow_comments(),
+        "",
+    );
+
+    if deserialized.has_errors() {
+        let diagnostics = deserialized.into_diagnostics();
+        for diagnostic in diagnostics {
+            let diagnostic = diagnostic.with_file_path(prettier_config_path.display().to_string());
+            console.error(markup! {{PrintDiagnostic::simple(&diagnostic)}});
+        }
+        return Err(CliDiagnostic::MigrateError(MigrationDiagnostic {
+            reason: "Could not deserialize the Prettier configuration file".to_string(),
+        }));
+    } else {
+        let prettier_configuration = deserialized.into_deserialized();
+
+        if let Some(prettier_configuration) = prettier_configuration {
+            let formatter_configuration = prettier_configuration
+                .clone()
+                .try_into()
+                .map_err(|err| CliDiagnostic::MigrateError(MigrationDiagnostic { reason: err }))?;
+            let javascript_configuration = prettier_configuration.into();
+            return Ok(Some((formatter_configuration, javascript_configuration)));
+        }
+    }
+
+    Ok(None)
 }
 
 #[cfg(test)]
