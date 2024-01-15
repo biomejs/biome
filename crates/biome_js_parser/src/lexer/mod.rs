@@ -637,7 +637,7 @@ impl<'src> JsLexer<'src> {
             // but it may cause a panic for other crates which just consume the diagnostics
             let invalid = self.current_char_unchecked();
             let err = ParseDiagnostic::new(  "expected hex digits for a unicode code point escape, but encountered an invalid character",
-                self.position..self.position + invalid.len_utf8() );
+                                             self.position..self.position + invalid.len_utf8() );
             self.diagnostics.push(err);
             self.position -= 1;
             return Err(());
@@ -1902,7 +1902,7 @@ impl<'src> JsLexer<'src> {
                                 self.resolve_identifier(chr)
                             } else {
                                 let err = ParseDiagnostic::new(  "unexpected unicode escape",
-                                    start..self.position).with_hint("this escape is unexpected, as it does not designate the start of an identifier");
+                                                                 start..self.position).with_hint("this escape is unexpected, as it does not designate the start of an identifier");
                                 self.diagnostics.push(err);
                                 self.next_byte();
                                 JsSyntaxKind::ERROR_TOKEN
