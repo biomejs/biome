@@ -378,7 +378,7 @@ pub enum Fix {
     /// When a dependency needs to be added.
     AddDependency {
         function_name_range: TextRange,
-        captures: Vec<TextRange>,
+        captures: (String, Vec<TextRange>),
         dependencies_len: usize,
     },
     /// When a dependency needs to be removed.
@@ -392,6 +392,7 @@ pub enum Fix {
         function_name_range: TextRange,
         capture_range: TextRange,
         dependency_range: TextRange,
+        dependency_text: String,
     },
 }
 
@@ -632,6 +633,7 @@ impl Rule for UseExhaustiveDependencies {
                                 function_name_range: result.function_name_range,
                                 capture_range: *capture_range,
                                 dependency_range: dep.syntax().text_trimmed_range(),
+                                dependency_text: dep.syntax().text_trimmed().to_string(),
                             });
                         }
                         _ => {}
@@ -674,7 +676,7 @@ impl Rule for UseExhaustiveDependencies {
             }
 
             // Generate signals
-            for (_, captures) in add_deps {
+            for captures in add_deps {
                 signals.push(Fix::AddDependency {
                     function_name_range: result.function_name_range,
                     captures,
@@ -701,15 +703,14 @@ impl Rule for UseExhaustiveDependencies {
                 captures,
                 dependencies_len,
             } => {
+                let (capture_text, captures_range) = captures;
                 let mut diag = RuleDiagnostic::new(
                     rule_category!(),
                     function_name_range,
-                    markup! {
-                        "This hook does not specify all of its dependencies."
-                    },
+                    markup! {"This hook does not specify all of its dependencies: "{capture_text}""},
                 );
 
-                for range in captures {
+                for range in captures_range {
                     diag = diag.detail(
                         range,
                         "This dependency is not specified in the hook dependency list.",
@@ -717,7 +718,7 @@ impl Rule for UseExhaustiveDependencies {
                 }
 
                 if *dependencies_len == 0 {
-                    diag = if captures.len() == 1 {
+                    diag = if captures_range.len() == 1 {
                         diag.note("Either include it or remove the dependency array")
                     } else {
                         diag.note("Either include them or remove the dependency array")
@@ -731,11 +732,16 @@ impl Rule for UseExhaustiveDependencies {
                 dependencies,
                 component_function,
             } => {
+                let deps_joined_with_comma = dependencies
+                    .iter()
+                    .map(|dep| dep.syntax().text_trimmed().to_string())
+                    .collect::<Vec<String>>()
+                    .join(", ");
                 let mut diag = RuleDiagnostic::new(
                     rule_category!(),
                     function_name_range,
                     markup! {
-                        "This hook specifies more dependencies than necessary."
+                        "This hook specifies more dependencies than necessary: "{deps_joined_with_comma}""
                     },
                 );
 
@@ -761,12 +767,13 @@ impl Rule for UseExhaustiveDependencies {
                 function_name_range,
                 capture_range,
                 dependency_range,
+                dependency_text,
             } => {
                 let diag = RuleDiagnostic::new(
                     rule_category!(),
                     function_name_range,
                     markup! {
-                        "This hook specifies a dependency more specific that its captures"
+                        "This hook specifies a dependency more specific that its captures: "{dependency_text}""
                     },
                 )
                 .detail(capture_range, "This capture is more generic than...")
