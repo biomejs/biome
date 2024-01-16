@@ -131,39 +131,6 @@ extraDependenciesInvalid.js:19:3 lint/correctness/useExhaustiveDependencies ━�
 ```
 extraDependenciesInvalid.js:28:3 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This hook specifies a dependency more specific that its captures: someObj.id
-  
-    26 │ function MyComponent1() {
-    27 │   let someObj = getObj();
-  > 28 │   useEffect(() => {
-       │   ^^^^^^^^^
-    29 │       console.log(someObj)
-    30 │   }, [someObj.id]);
-  
-  i This capture is more generic than...
-  
-    27 │   let someObj = getObj();
-    28 │   useEffect(() => {
-  > 29 │       console.log(someObj)
-       │                   ^^^^^^^
-    30 │   }, [someObj.id]);
-    31 │ }
-  
-  i ...this dependency.
-  
-    28 │   useEffect(() => {
-    29 │       console.log(someObj)
-  > 30 │   }, [someObj.id]);
-       │       ^^^^^^^^^^
-    31 │ }
-    32 │ 
-  
-
-```
-
-```
-extraDependenciesInvalid.js:28:3 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━━━
-
   ! This hook does not specify all of its dependencies: someObj
   
     26 │ function MyComponent1() {
@@ -181,6 +148,30 @@ extraDependenciesInvalid.js:28:3 lint/correctness/useExhaustiveDependencies ━�
        │                   ^^^^^^^
     30 │   }, [someObj.id]);
     31 │ }
+  
+
+```
+
+```
+extraDependenciesInvalid.js:28:3 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This hook specifies more dependencies than necessary: someObj.id
+  
+    26 │ function MyComponent1() {
+    27 │   let someObj = getObj();
+  > 28 │   useEffect(() => {
+       │   ^^^^^^^^^
+    29 │       console.log(someObj)
+    30 │   }, [someObj.id]);
+  
+  i This dependency can be removed from the list.
+  
+    28 │   useEffect(() => {
+    29 │       console.log(someObj)
+  > 30 │   }, [someObj.id]);
+       │       ^^^^^^^^^^
+    31 │ }
+    32 │ 
   
 
 ```

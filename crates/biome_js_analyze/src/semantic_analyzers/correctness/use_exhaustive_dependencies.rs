@@ -527,37 +527,58 @@ fn is_out_of_function_scope(
     )
 }
 
-fn into_member_vec(node: &JsSyntaxNode) -> Vec<String> {
-    let mut vec = vec![];
-    let mut next = Some(node.clone());
+struct MemberNameIterator {
+    current_member: JsSyntaxNode,
+    ended: bool,
+}
 
-    while let Some(node) = &next {
-        match AnyJsMemberExpression::cast_ref(node) {
+impl MemberNameIterator {
+    fn new(node: &JsSyntaxNode) -> Self {
+        Self {
+            current_member: node.clone(),
+            ended: false,
+        }
+    }
+}
+
+impl Iterator for MemberNameIterator {
+    type Item = String;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.ended {
+            return None;
+        }
+
+        return match AnyJsMemberExpression::cast_ref(&self.current_member) {
             Some(member_expr) => {
                 let member_name = member_expr
                     .member_name()
-                    .and_then(|it| it.as_string_constant().map(|it| it.to_owned()));
+                    .and_then(|it| it.as_string_constant().map(|it| it.to_string()));
                 match member_name {
                     Some(name) => {
-                        vec.insert(0, name);
-                        next = member_expr.object().ok().map(AstNode::into_syntax);
+                        if let Some(new_member) =
+                            member_expr.object().ok().map(AstNode::into_syntax)
+                        {
+                            self.current_member = new_member;
+                        }
+                        Some(name)
                     }
-                    None => break,
+                    None => {
+                        self.ended = true;
+                        None
+                    }
                 }
             }
             None => {
-                vec.insert(0, node.text_trimmed().to_string());
-                break;
+                self.ended = true;
+                Some(self.current_member.text_trimmed().to_string())
             }
-        }
+        };
     }
-
-    vec
 }
-
 fn compare_member_depth(a: &JsSyntaxNode, b: &JsSyntaxNode) -> (bool, bool) {
-    let mut a_member_iter = into_member_vec(a).into_iter();
-    let mut b_member_iter = into_member_vec(b).into_iter();
+    let mut a_member_iter = MemberNameIterator::new(a).into_iter();
+    let mut b_member_iter = MemberNameIterator::new(b).into_iter();
 
     loop {
         let a_member = a_member_iter.next();
