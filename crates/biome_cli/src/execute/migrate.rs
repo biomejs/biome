@@ -1,17 +1,25 @@
 mod prettier;
 
+use crate::diagnostics::MigrationDiagnostic;
 use crate::execute::diagnostics::{ContentDiffAdvice, MigrateDiffDiagnostic};
+use crate::execute::migrate::prettier::read_prettier_files;
 use crate::{CliDiagnostic, CliSession};
 use biome_console::{markup, ConsoleExt};
+use biome_deserialize::json::deserialize_from_json_str;
+use biome_deserialize::Merge;
+use biome_deserialize::NoneState;
 use biome_diagnostics::Diagnostic;
 use biome_diagnostics::{category, PrintDiagnostic};
-use biome_fs::{FileSystemExt, OpenOptions};
-use biome_json_parser::JsonParserOptions;
+use biome_fs::{FileSystemExt, OpenOptions, RomePath};
+use biome_json_parser::{parse_json_with_cache, JsonParserOptions};
 use biome_json_syntax::JsonRoot;
 use biome_migrate::{migrate_configuration, ControlFlow};
-use biome_rowan::AstNode;
-use biome_service::workspace::FixAction;
-use biome_service::VERSION;
+use biome_rowan::{AstNode, NodeCache};
+use biome_service::configuration::JavascriptConfiguration;
+use biome_service::workspace::{
+    ChangeFileParams, FixAction, FormatFileParams, Language, OpenFileParams,
+};
+use biome_service::{Configuration, VERSION};
 use std::borrow::Cow;
 use std::ffi::OsStr;
 use std::path::PathBuf;
@@ -33,10 +41,13 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
         configuration_file_path,
         configuration_directory_path,
         verbose,
-        // we will use it later
-        prettier: _,
+        prettier,
     } = migrate_payload;
-    let fs = &*session.app.fs;
+    let mut cache = NodeCache::default();
+    let fs = &session.app.fs;
+    let console = session.app.console;
+    let workspace = session.app.workspace;
+
     let has_deprecated_configuration =
         configuration_file_path.file_name() == Some(OsStr::new("rome.json"));
 
@@ -50,8 +61,21 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
         fs.open_with_options(configuration_file_path.as_path(), open_options)?;
     let mut configuration_content = String::new();
     configuration_file.read_to_string(&mut configuration_content)?;
-    let parsed =
-        biome_json_parser::parse_json(&configuration_content, JsonParserOptions::default());
+
+    let rome_path = RomePath::new(configuration_file_path.as_path());
+    workspace.open_file(OpenFileParams {
+        path: rome_path.clone(),
+        content: configuration_content.to_string(),
+        version: 0,
+        language_hint: Language::Json,
+    })?;
+
+    let parsed = parse_json_with_cache(
+        &configuration_content,
+        &mut cache,
+        JsonParserOptions::default(),
+    );
+
     let mut errors = 0;
     let mut tree = parsed.tree();
     let mut actions = Vec::new();
@@ -94,10 +118,70 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
             }
         }
     }
-    let console = &mut *session.app.console;
+
     let new_configuration_content = tree.to_string();
 
-    if configuration_content != new_configuration_content || has_deprecated_configuration {
+    if prettier {
+        let prettier_configuration = read_prettier_files(fs, console)?;
+
+        if let Some((formatter_configuration, javascript_configuration)) =
+            prettier_configuration.get_biome_configuration()
+        {
+            let configuration = deserialize_from_json_str::<Configuration>(
+                configuration_content.as_str(),
+                JsonParserOptions::default(),
+                "",
+            )
+            .into_deserialized();
+            if let Some(mut configuration) = configuration {
+                configuration.merge_with(Configuration {
+                    formatter: Some(formatter_configuration.clone()),
+                    javascript: Some(JavascriptConfiguration {
+                        formatter: Some(javascript_configuration.clone()),
+                        ..NoneState::none()
+                    }),
+                    ..NoneState::none()
+                });
+
+                let new_content = serde_json::to_string(&configuration).map_err(|err| {
+                    CliDiagnostic::MigrateError(MigrationDiagnostic {
+                        reason: err.to_string(),
+                    })
+                })?;
+
+                workspace.change_file(ChangeFileParams {
+                    path: rome_path.clone(),
+                    content: new_content,
+                    version: 1,
+                })?;
+
+                let printed = workspace.format_file(FormatFileParams {
+                    path: rome_path.clone(),
+                })?;
+
+                if write {
+                    configuration_file.set_content(printed.as_code().as_bytes())?;
+                    console.log(markup!{
+                        <Info>"The configuration "<Emphasis>{{configuration_file_path.display().to_string()}}</Emphasis>" has been successfully migrated."</Info>
+                    });
+                } else {
+                    let file_name = configuration_file_path.display().to_string();
+                    let diagnostic = MigrateDiffDiagnostic {
+                        file_name,
+                        diff: ContentDiffAdvice {
+                            old: configuration_content,
+                            new: printed.as_code().to_string(),
+                        },
+                    };
+                    console.error(markup! {{PrintDiagnostic::simple(&diagnostic)}});
+
+                    console.log(markup! {
+                        "Run the command with the option "<Emphasis>"--write"</Emphasis>" to apply the changes."
+                    })
+                }
+            }
+        }
+    } else if configuration_content != new_configuration_content || has_deprecated_configuration {
         if write {
             let mut configuration_file = if has_deprecated_configuration {
                 let biome_file_path = configuration_directory_path.join(fs.config_name());
@@ -107,8 +191,8 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
             };
             configuration_file.set_content(tree.to_string().as_bytes())?;
             console.log(markup!{
-                <Info>"The configuration "<Emphasis>{{configuration_file_path.display().to_string()}}</Emphasis>" has been successfully migrated."</Info>
-            })
+                    <Info>"The configuration "<Emphasis>{{configuration_file_path.display().to_string()}}</Emphasis>" has been successfully migrated."</Info>
+                })
         } else {
             let file_name = configuration_file_path.display().to_string();
             let diagnostic = if has_deprecated_configuration {
@@ -128,14 +212,16 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
                     },
                 }
             };
-            if diagnostic.tags().is_verbose() && verbose {
-                console.error(markup! {{PrintDiagnostic::verbose(&diagnostic)}})
+            if diagnostic.tags().is_verbose() {
+                if verbose {
+                    console.error(markup! {{PrintDiagnostic::verbose(&diagnostic)}})
+                }
             } else {
                 console.error(markup! {{PrintDiagnostic::simple(&diagnostic)}})
             }
             console.log(markup! {
-                "Run the command "<Emphasis>"biome migrate --write"</Emphasis>" to apply the changes."
-            })
+                    "Run the command with the option "<Emphasis>"--write"</Emphasis>" to apply the changes."
+                })
         }
     } else {
         console.log(markup! {
@@ -144,5 +230,6 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
             </Info>
         })
     }
+
     Ok(())
 }

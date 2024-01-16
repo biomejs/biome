@@ -2,7 +2,7 @@ mod check;
 mod format;
 mod lint;
 mod organize_imports;
-mod workspace_file;
+pub(crate) mod workspace_file;
 
 use crate::execute::diagnostics::{ResultExt, UnhandledDiagnostic};
 use crate::execute::process_file::check::check_file;
