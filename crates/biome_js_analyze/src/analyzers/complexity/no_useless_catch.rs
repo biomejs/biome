@@ -1,4 +1,4 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::{JsCatchClause, TextRange};
 use biome_rowan::{AstNode, AstNodeList};
@@ -10,8 +10,6 @@ declare_rule! {
     /// and has no effect on the runtime behavior of the program.
     /// These redundant clauses can be a source of confusion and code bloat,
     /// so it’s better to disallow these unnecessary `catch` clauses.
-    ///
-    /// Source: https://eslint.org/docs/latest/rules/no-useless-catch
     ///
     /// ## Examples
     ///
@@ -55,6 +53,7 @@ declare_rule! {
     pub(crate) NoUselessCatch {
         version: "1.0.0",
         name: "noUselessCatch",
+        source: RuleSource::Eslint("no-useless-catch"),
         recommended: true,
     }
 }

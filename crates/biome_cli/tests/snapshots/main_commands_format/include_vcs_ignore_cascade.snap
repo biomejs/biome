@@ -1,0 +1,61 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `biome.json`
+
+```json
+{
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "files": {
+    "ignore": ["file2.js"]
+  },
+  "formatter": {
+    "include": ["file1.js", "file2.js", "file4.js"],
+    "ignore": ["file3.js"]
+  }
+}
+```
+
+## `.gitignore`
+
+```gitignore
+file4.js
+```
+
+## `file1.js`
+
+```js
+statement();
+
+```
+
+## `file2.js`
+
+```js
+  statement(  )  
+```
+
+## `file3.js`
+
+```js
+  statement(  )  
+```
+
+## `file4.js`
+
+```js
+  statement(  )  
+```
+
+# Emitted Messages
+
+```block
+Formatted 2 file(s) in <TIME>
+```
+
+

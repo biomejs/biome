@@ -1,5 +1,6 @@
 use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
+    RuleSource,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
@@ -21,8 +22,6 @@ declare_rule! {
     ///
     /// Private class members that are declared and not used anywhere in the code are most likely an error due to incomplete refactoring.
     /// Such class members take up space in the code and can lead to confusion by readers.
-    ///
-    /// Source: https://eslint.org/docs/latest/rules/no-unused-private-class-members/
     ///
     /// ## Examples
     ///
@@ -65,6 +64,7 @@ declare_rule! {
     pub(crate) NoUnusedPrivateClassMembers {
         version: "1.3.3",
         name: "noUnusedPrivateClassMembers",
+        source: RuleSource::Eslint("no-unused-private-class-members"),
         recommended: false,
         fix_kind: FixKind::Unsafe,
     }

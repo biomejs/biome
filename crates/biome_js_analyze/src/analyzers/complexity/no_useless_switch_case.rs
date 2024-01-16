@@ -1,5 +1,5 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic};
+use biome_analyze::{declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_syntax::{AnyJsSwitchClause, JsCaseClause, JsDefaultClause};
@@ -14,8 +14,6 @@ declare_rule! {
     ///
     /// The `default` clause will be still executed only if there is no match in the `case` clauses.
     /// An empty `case` clause that precedes the `default` clause is thus useless.
-    ///
-    /// Source: https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/no-useless-switch-case.md
     ///
     /// ## Examples
     ///
@@ -62,6 +60,7 @@ declare_rule! {
     pub(crate) NoUselessSwitchCase {
         version: "1.0.0",
         name: "noUselessSwitchCase",
+        source: RuleSource::EslintUnicorn("no-useless-switch-case"),
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }

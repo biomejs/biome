@@ -8,6 +8,8 @@ title: useIsNan (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://eslint.org/docs/latest/rules/use-isnan" target="_blank"><code>use-isnan</code></a>
+
 Require calls to `isNaN()` when checking for `NaN`.
 
 In JavaScript, `NaN` is a special value of the `Number` type.
@@ -24,8 +26,6 @@ Note that `Number.isNaN()` and `isNaN()` [have not the same behavior](https://de
 When the argument to `isNaN()` is not a number, the value is first coerced to a number.
 `Number.isNaN()` does not perform this coercion.
 Therefore, it is a more reliable way to test whether a value is `NaN`.
-
-Source: [use-isnan](https://eslint.org/docs/latest/rules/use-isnan).
 
 ## Examples
 

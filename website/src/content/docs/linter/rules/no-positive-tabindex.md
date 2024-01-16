@@ -8,6 +8,8 @@ title: noPositiveTabindex (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/tabindex-no-positive.md" target="_blank"><code>tabindex-no-positive</code></a>
+
 Prevent the usage of positive integers on `tabIndex` property
 
 Avoid positive `tabIndex` property values to synchronize the flow of the page with keyboard tab order.

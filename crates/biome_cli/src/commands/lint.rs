@@ -1,17 +1,17 @@
 use crate::changed::get_changed_files;
 use crate::cli_options::CliOptions;
-use crate::commands::validate_configuration_diagnostics;
+use crate::commands::{get_stdin, validate_configuration_diagnostics};
 use crate::{
     execute_mode, setup_cli_subscriber, CliDiagnostic, CliSession, Execution, TraversalMode,
 };
+use biome_deserialize::{Merge, NoneState};
 use biome_service::configuration::vcs::VcsConfiguration;
 use biome_service::configuration::{
     load_configuration, FilesConfiguration, LinterConfiguration, LoadedConfiguration,
 };
 use biome_service::workspace::{FixFileMode, UpdateSettingsParams};
-use biome_service::{ConfigurationBasePath, MergeWith};
+use biome_service::Configuration;
 use std::ffi::OsString;
-use std::path::PathBuf;
 
 pub(crate) struct LintCommandPayload {
     pub(crate) apply: bool,
@@ -27,15 +27,12 @@ pub(crate) struct LintCommandPayload {
 }
 
 /// Handler for the "lint" command of the Biome CLI
-pub(crate) fn lint(
-    mut session: CliSession,
-    payload: LintCommandPayload,
-) -> Result<(), CliDiagnostic> {
+pub(crate) fn lint(session: CliSession, payload: LintCommandPayload) -> Result<(), CliDiagnostic> {
     let LintCommandPayload {
         apply,
         apply_unsafe,
         cli_options,
-        linter_configuration,
+        mut linter_configuration,
         mut paths,
         stdin_file_path,
         vcs_configuration,
@@ -58,12 +55,8 @@ pub(crate) fn lint(
         Some(FixFileMode::SafeAndUnsafeFixes)
     };
 
-    let base_path = match cli_options.config_path.as_ref() {
-        None => ConfigurationBasePath::default(),
-        Some(path) => ConfigurationBasePath::FromUser(PathBuf::from(path)),
-    };
-
-    let loaded_configuration = load_configuration(&session.app.fs, base_path)?;
+    let loaded_configuration =
+        load_configuration(&session.app.fs, cli_options.as_configuration_base_path())?;
     validate_configuration_diagnostics(
         &loaded_configuration,
         session.app.console,
@@ -75,9 +68,24 @@ pub(crate) fn lint(
         directory_path: configuration_path,
         ..
     } = loaded_configuration;
-    fs_configuration.merge_with(linter_configuration);
-    fs_configuration.merge_with(files_configuration);
-    fs_configuration.merge_with(vcs_configuration);
+    fs_configuration.merge_with(Configuration {
+        linter: if fs_configuration
+            .linter
+            .as_ref()
+            .is_some_and(LinterConfiguration::is_disabled)
+        {
+            None
+        } else {
+            if let Some(linter) = linter_configuration.as_mut() {
+                // Don't overwrite rules from the CLI configuration.
+                linter.rules = None;
+            }
+            linter_configuration
+        },
+        files: files_configuration,
+        vcs: vcs_configuration,
+        ..NoneState::none()
+    });
 
     // check if support of git ignore files is enabled
     let vcs_base_path = configuration_path.or(session.app.fs.working_directory());
@@ -92,19 +100,7 @@ pub(crate) fn lint(
         paths = get_changed_files(&session.app.fs, &fs_configuration, since)?;
     }
 
-    let stdin = if let Some(stdin_file_path) = stdin_file_path {
-        let console = &mut session.app.console;
-        let input_code = console.read();
-        if let Some(input_code) = input_code {
-            let path = PathBuf::from(stdin_file_path);
-            Some((path, input_code))
-        } else {
-            // we provided the argument without a piped stdin, we bail
-            return Err(CliDiagnostic::missing_argument("stdin", "lint"));
-        }
-    } else {
-        None
-    };
+    let stdin = get_stdin(stdin_file_path, &mut *session.app.console, "lint")?;
 
     session
         .app

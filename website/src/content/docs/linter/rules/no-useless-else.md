@@ -8,6 +8,8 @@ title: noUselessElse (since v1.3.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Inspired from: <a href="https://eslint.org/docs/latest/rules/no-else-return" target="_blank"><code>no-else-return</code></a>
+
 Disallow `else` block when the `if` block breaks early.
 
 If an `if` block breaks early using a breaking statement (`return`, `break`, `continue`, or `throw`),

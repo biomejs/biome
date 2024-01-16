@@ -2,21 +2,21 @@ use crate::changed::get_changed_files;
 use crate::cli_options::CliOptions;
 use crate::commands::validate_configuration_diagnostics;
 use crate::{execute_mode, setup_cli_subscriber, CliDiagnostic, CliSession, Execution};
+use biome_deserialize::Merge;
 use biome_service::configuration::organize_imports::OrganizeImports;
 use biome_service::configuration::{
     load_configuration, FormatterConfiguration, LinterConfiguration, LoadedConfiguration,
 };
 use biome_service::workspace::UpdateSettingsParams;
-use biome_service::{Configuration, ConfigurationBasePath, MergeWith};
+use biome_service::Configuration;
 use std::ffi::OsString;
-use std::path::PathBuf;
 
 pub(crate) struct CiCommandPayload {
     pub(crate) formatter_enabled: Option<bool>,
     pub(crate) linter_enabled: Option<bool>,
     pub(crate) organize_imports_enabled: Option<bool>,
     pub(crate) paths: Vec<OsString>,
-    pub(crate) rome_configuration: Configuration,
+    pub(crate) configuration: Configuration,
     pub(crate) cli_options: CliOptions,
     pub(crate) changed: bool,
     pub(crate) since: Option<String>,
@@ -29,12 +29,10 @@ pub(crate) fn ci(session: CliSession, mut payload: CiCommandPayload) -> Result<(
         payload.cli_options.log_kind.clone(),
     );
 
-    let base_path = match payload.cli_options.config_path.as_ref() {
-        None => ConfigurationBasePath::default(),
-        Some(path) => ConfigurationBasePath::FromUser(PathBuf::from(path)),
-    };
-
-    let loaded_configuration = load_configuration(&session.app.fs, base_path)?;
+    let loaded_configuration = load_configuration(
+        &session.app.fs,
+        payload.cli_options.as_configuration_base_path(),
+    )?;
 
     validate_configuration_diagnostics(
         &loaded_configuration,
@@ -79,16 +77,7 @@ pub(crate) fn ci(session: CliSession, mut payload: CiCommandPayload) -> Result<(
         return Err(CliDiagnostic::incompatible_end_configuration("Formatter, linter and organize imports are disabled, can't perform the command. This is probably and error."));
     }
 
-    configuration.merge_with(payload.rome_configuration.files);
-    configuration.merge_with(payload.rome_configuration.vcs);
-    configuration.merge_with_if(
-        payload.rome_configuration.formatter,
-        !configuration.is_formatter_disabled(),
-    );
-    configuration.merge_with_if(
-        payload.rome_configuration.organize_imports,
-        !configuration.is_organize_imports_disabled(),
-    );
+    configuration.merge_with(payload.configuration);
 
     // check if support of git ignore files is enabled
     let vcs_base_path = configuration_path.or(session.app.fs.working_directory());

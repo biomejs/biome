@@ -1,7 +1,7 @@
 use crate::react::ReactCreateElementCall;
 use crate::semantic_services::Semantic;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, Rule, RuleDiagnostic};
+use biome_analyze::{declare_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::{AnyJsxAttributeName, JsCallExpression, JsxAttribute};
 use biome_rowan::{declare_node_union, AstNode, TextRange};
@@ -28,6 +28,7 @@ declare_rule! {
     pub(crate) NoDangerouslySetInnerHtml {
         version: "1.0.0",
         name: "noDangerouslySetInnerHtml",
+        source: RuleSource::EslintReact("no-danger-with-children"),
         recommended: true,
     }
 }

@@ -155,6 +155,7 @@ export default defineConfig({
 							link: "/guides/integrate-in-vcs",
 							translations: {
 								es: "Integra Biome con tu VCS",
+								"pt-BR": "Integrando o Biome com o seu VCS",
 							},
 						},
 					],

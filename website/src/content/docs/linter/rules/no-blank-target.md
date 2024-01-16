@@ -8,6 +8,8 @@ title: noBlankTarget (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/jsx-no-target-blank.md" target="_blank"><code>jsx-no-target-blank</code></a>
+
 Disallow `target="_blank"` attribute without `rel="noreferrer"`
 
 When creating anchor `a` element, there are times when its link has to be opened in a new browser tab

@@ -2,11 +2,11 @@
 mod rules;
 
 pub use crate::configuration::linter::rules::Rules;
-use crate::configuration::merge::MergeWith;
 use crate::configuration::overrides::OverrideLinterConfiguration;
 use crate::settings::{to_matcher, LinterSettings};
 use crate::{Matcher, WorkspaceError};
-use biome_deserialize::StringSet;
+use biome_deserialize::{Merge, StringSet};
+use biome_deserialize_macros::{Merge, NoneState};
 use biome_diagnostics::Severity;
 use biome_js_analyze::options::PossibleOptions;
 use bpaf::Bpaf;
@@ -17,7 +17,7 @@ use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 use std::str::FromStr;
 
-#[derive(Deserialize, Serialize, Debug, Clone, Bpaf, Eq, PartialEq)]
+#[derive(Debug, Deserialize, Merge, NoneState, Serialize, Clone, Bpaf, Eq, PartialEq)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct LinterConfiguration {
@@ -44,23 +44,6 @@ pub struct LinterConfiguration {
     pub include: Option<StringSet>,
 }
 
-impl MergeWith<LinterConfiguration> for LinterConfiguration {
-    fn merge_with(&mut self, other: LinterConfiguration) {
-        if let Some(enabled) = other.enabled {
-            self.enabled = Some(enabled);
-        }
-    }
-
-    fn merge_with_if_not_default(&mut self, other: LinterConfiguration)
-    where
-        LinterConfiguration: Default,
-    {
-        if other != LinterConfiguration::default() {
-            self.merge_with(other)
-        }
-    }
-}
-
 impl LinterConfiguration {
     pub const fn is_disabled(&self) -> bool {
         matches!(self.enabled, Some(false))
@@ -81,24 +64,14 @@ impl Default for LinterConfiguration {
 pub fn to_linter_settings(
     working_directory: Option<PathBuf>,
     conf: LinterConfiguration,
-    vcs_path: Option<PathBuf>,
-    gitignore_matches: &[String],
+    _vcs_path: Option<PathBuf>,
+    _gitignore_matches: &[String],
 ) -> Result<LinterSettings, WorkspaceError> {
     Ok(LinterSettings {
         enabled: conf.enabled.unwrap_or_default(),
         rules: conf.rules,
-        ignored_files: to_matcher(
-            working_directory.clone(),
-            conf.ignore.as_ref(),
-            vcs_path.clone(),
-            gitignore_matches,
-        )?,
-        included_files: to_matcher(
-            working_directory.clone(),
-            conf.include.as_ref(),
-            vcs_path,
-            gitignore_matches,
-        )?,
+        ignored_files: to_matcher(working_directory.clone(), conf.ignore.as_ref(), None, &[])?,
+        included_files: to_matcher(working_directory.clone(), conf.include.as_ref(), None, &[])?,
     })
 }
 
@@ -115,7 +88,7 @@ impl TryFrom<OverrideLinterConfiguration> for LinterSettings {
     }
 }
 
-#[derive(Deserialize, Serialize, Debug, Clone, Eq, PartialEq)]
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, untagged)]
 pub enum RuleConfiguration {
@@ -153,9 +126,43 @@ impl RuleConfiguration {
         !self.is_disabled()
     }
 }
+
 impl Default for RuleConfiguration {
     fn default() -> Self {
         Self::Plain(RulePlainConfiguration::Error)
+    }
+}
+
+// Rule configuration has a custom [Merge] implementation so that overriding the
+// severity doesn't override the options.
+impl Merge for RuleConfiguration {
+    fn merge_with(&mut self, other: Self) {
+        *self = match (&self, other) {
+            (Self::WithOptions(this), Self::Plain(other)) => {
+                Self::WithOptions(Box::new(RuleWithOptions {
+                    level: other,
+                    options: this.options.clone(),
+                }))
+            }
+            // FIXME: Rule options don't have a `NoneState`, so we can't deep
+            //        merge them yet. For now, if an override specifies options,
+            //        it will still override *all* options.
+            (_, other) => other,
+        };
+    }
+
+    fn merge_in_defaults(&mut self) {
+        match (&self, Self::default()) {
+            (Self::Plain(this), Self::WithOptions(default)) => {
+                *self = Self::WithOptions(Box::new(RuleWithOptions {
+                    level: this.clone(),
+                    options: default.options,
+                }));
+            }
+            (_, _) => {
+                // Don't overwrite other values with default.
+            }
+        }
     }
 }
 

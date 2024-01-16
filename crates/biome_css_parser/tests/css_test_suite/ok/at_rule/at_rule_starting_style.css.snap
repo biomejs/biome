@@ -1,0 +1,266 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@starting-style {
+	h1 {
+		background-color: transparent;
+	}
+
+	@layer foo {
+		@starting-style {
+			background-color: transparent;
+		}
+
+		div {
+			height: 100px;
+		}
+	}
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssStartingStyleAtRule {
+                starting_style_token: STARTING_STYLE_KW@1..16 "starting-style" [] [Whitespace(" ")],
+                block: CssRuleListBlock {
+                    l_curly_token: L_CURLY@16..17 "{" [] [],
+                    rules: CssRuleList [
+                        CssQualifiedRule {
+                            prelude: CssSelectorList [
+                                CssCompoundSelector {
+                                    nesting_selector_token: missing (optional),
+                                    simple_selector: CssTypeSelector {
+                                        namespace: missing (optional),
+                                        ident: CssIdentifier {
+                                            value_token: IDENT@17..22 "h1" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
+                                        },
+                                    },
+                                    sub_selectors: CssSubSelectorList [],
+                                },
+                            ],
+                            block: CssDeclarationListBlock {
+                                l_curly_token: L_CURLY@22..23 "{" [] [],
+                                declarations: CssDeclarationList [
+                                    CssDeclaration {
+                                        property: CssGenericProperty {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@23..42 "background-color" [Newline("\n"), Whitespace("\t\t")] [],
+                                            },
+                                            colon_token: COLON@42..44 ":" [] [Whitespace(" ")],
+                                            value: CssGenericComponentValueList [
+                                                CssIdentifier {
+                                                    value_token: IDENT@44..55 "transparent" [] [],
+                                                },
+                                            ],
+                                        },
+                                        important: missing (optional),
+                                    },
+                                    SEMICOLON@55..56 ";" [] [],
+                                ],
+                                r_curly_token: R_CURLY@56..59 "}" [Newline("\n"), Whitespace("\t")] [],
+                            },
+                        },
+                        CssAtRule {
+                            at_token: AT@59..63 "@" [Newline("\n"), Newline("\n"), Whitespace("\t")] [],
+                            rule: CssLayerAtRule {
+                                layer_token: LAYER_KW@63..69 "layer" [] [Whitespace(" ")],
+                                layer: CssLayerDeclaration {
+                                    references: CssLayerReferenceList [
+                                        CssLayerNameList [
+                                            CssIdentifier {
+                                                value_token: IDENT@69..73 "foo" [] [Whitespace(" ")],
+                                            },
+                                        ],
+                                    ],
+                                    block: CssRuleListBlock {
+                                        l_curly_token: L_CURLY@73..74 "{" [] [],
+                                        rules: CssRuleList [
+                                            CssAtRule {
+                                                at_token: AT@74..78 "@" [Newline("\n"), Whitespace("\t\t")] [],
+                                                rule: CssStartingStyleAtRule {
+                                                    starting_style_token: STARTING_STYLE_KW@78..93 "starting-style" [] [Whitespace(" ")],
+                                                    block: CssDeclarationListBlock {
+                                                        l_curly_token: L_CURLY@93..94 "{" [] [],
+                                                        declarations: CssDeclarationList [
+                                                            CssDeclaration {
+                                                                property: CssGenericProperty {
+                                                                    name: CssIdentifier {
+                                                                        value_token: IDENT@94..114 "background-color" [Newline("\n"), Whitespace("\t\t\t")] [],
+                                                                    },
+                                                                    colon_token: COLON@114..116 ":" [] [Whitespace(" ")],
+                                                                    value: CssGenericComponentValueList [
+                                                                        CssIdentifier {
+                                                                            value_token: IDENT@116..127 "transparent" [] [],
+                                                                        },
+                                                                    ],
+                                                                },
+                                                                important: missing (optional),
+                                                            },
+                                                            SEMICOLON@127..128 ";" [] [],
+                                                        ],
+                                                        r_curly_token: R_CURLY@128..132 "}" [Newline("\n"), Whitespace("\t\t")] [],
+                                                    },
+                                                },
+                                            },
+                                            CssQualifiedRule {
+                                                prelude: CssSelectorList [
+                                                    CssCompoundSelector {
+                                                        nesting_selector_token: missing (optional),
+                                                        simple_selector: CssTypeSelector {
+                                                            namespace: missing (optional),
+                                                            ident: CssIdentifier {
+                                                                value_token: IDENT@132..140 "div" [Newline("\n"), Newline("\n"), Whitespace("\t\t")] [Whitespace(" ")],
+                                                            },
+                                                        },
+                                                        sub_selectors: CssSubSelectorList [],
+                                                    },
+                                                ],
+                                                block: CssDeclarationListBlock {
+                                                    l_curly_token: L_CURLY@140..141 "{" [] [],
+                                                    declarations: CssDeclarationList [
+                                                        CssDeclaration {
+                                                            property: CssGenericProperty {
+                                                                name: CssIdentifier {
+                                                                    value_token: IDENT@141..151 "height" [Newline("\n"), Whitespace("\t\t\t")] [],
+                                                                },
+                                                                colon_token: COLON@151..153 ":" [] [Whitespace(" ")],
+                                                                value: CssGenericComponentValueList [
+                                                                    CssRegularDimension {
+                                                                        value_token: CSS_NUMBER_LITERAL@153..156 "100" [] [],
+                                                                        unit_token: IDENT@156..158 "px" [] [],
+                                                                    },
+                                                                ],
+                                                            },
+                                                            important: missing (optional),
+                                                        },
+                                                        SEMICOLON@158..159 ";" [] [],
+                                                    ],
+                                                    r_curly_token: R_CURLY@159..163 "}" [Newline("\n"), Whitespace("\t\t")] [],
+                                                },
+                                            },
+                                        ],
+                                        r_curly_token: R_CURLY@163..166 "}" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                },
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@166..168 "}" [Newline("\n")] [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@168..169 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..169
+  0: (empty)
+  1: CSS_RULE_LIST@0..168
+    0: CSS_AT_RULE@0..168
+      0: AT@0..1 "@" [] []
+      1: CSS_STARTING_STYLE_AT_RULE@1..168
+        0: STARTING_STYLE_KW@1..16 "starting-style" [] [Whitespace(" ")]
+        1: CSS_RULE_LIST_BLOCK@16..168
+          0: L_CURLY@16..17 "{" [] []
+          1: CSS_RULE_LIST@17..166
+            0: CSS_QUALIFIED_RULE@17..59
+              0: CSS_SELECTOR_LIST@17..22
+                0: CSS_COMPOUND_SELECTOR@17..22
+                  0: (empty)
+                  1: CSS_TYPE_SELECTOR@17..22
+                    0: (empty)
+                    1: CSS_IDENTIFIER@17..22
+                      0: IDENT@17..22 "h1" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
+                  2: CSS_SUB_SELECTOR_LIST@22..22
+              1: CSS_DECLARATION_LIST_BLOCK@22..59
+                0: L_CURLY@22..23 "{" [] []
+                1: CSS_DECLARATION_LIST@23..56
+                  0: CSS_DECLARATION@23..55
+                    0: CSS_GENERIC_PROPERTY@23..55
+                      0: CSS_IDENTIFIER@23..42
+                        0: IDENT@23..42 "background-color" [Newline("\n"), Whitespace("\t\t")] []
+                      1: COLON@42..44 ":" [] [Whitespace(" ")]
+                      2: CSS_GENERIC_COMPONENT_VALUE_LIST@44..55
+                        0: CSS_IDENTIFIER@44..55
+                          0: IDENT@44..55 "transparent" [] []
+                    1: (empty)
+                  1: SEMICOLON@55..56 ";" [] []
+                2: R_CURLY@56..59 "}" [Newline("\n"), Whitespace("\t")] []
+            1: CSS_AT_RULE@59..166
+              0: AT@59..63 "@" [Newline("\n"), Newline("\n"), Whitespace("\t")] []
+              1: CSS_LAYER_AT_RULE@63..166
+                0: LAYER_KW@63..69 "layer" [] [Whitespace(" ")]
+                1: CSS_LAYER_DECLARATION@69..166
+                  0: CSS_LAYER_REFERENCE_LIST@69..73
+                    0: CSS_LAYER_NAME_LIST@69..73
+                      0: CSS_IDENTIFIER@69..73
+                        0: IDENT@69..73 "foo" [] [Whitespace(" ")]
+                  1: CSS_RULE_LIST_BLOCK@73..166
+                    0: L_CURLY@73..74 "{" [] []
+                    1: CSS_RULE_LIST@74..163
+                      0: CSS_AT_RULE@74..132
+                        0: AT@74..78 "@" [Newline("\n"), Whitespace("\t\t")] []
+                        1: CSS_STARTING_STYLE_AT_RULE@78..132
+                          0: STARTING_STYLE_KW@78..93 "starting-style" [] [Whitespace(" ")]
+                          1: CSS_DECLARATION_LIST_BLOCK@93..132
+                            0: L_CURLY@93..94 "{" [] []
+                            1: CSS_DECLARATION_LIST@94..128
+                              0: CSS_DECLARATION@94..127
+                                0: CSS_GENERIC_PROPERTY@94..127
+                                  0: CSS_IDENTIFIER@94..114
+                                    0: IDENT@94..114 "background-color" [Newline("\n"), Whitespace("\t\t\t")] []
+                                  1: COLON@114..116 ":" [] [Whitespace(" ")]
+                                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@116..127
+                                    0: CSS_IDENTIFIER@116..127
+                                      0: IDENT@116..127 "transparent" [] []
+                                1: (empty)
+                              1: SEMICOLON@127..128 ";" [] []
+                            2: R_CURLY@128..132 "}" [Newline("\n"), Whitespace("\t\t")] []
+                      1: CSS_QUALIFIED_RULE@132..163
+                        0: CSS_SELECTOR_LIST@132..140
+                          0: CSS_COMPOUND_SELECTOR@132..140
+                            0: (empty)
+                            1: CSS_TYPE_SELECTOR@132..140
+                              0: (empty)
+                              1: CSS_IDENTIFIER@132..140
+                                0: IDENT@132..140 "div" [Newline("\n"), Newline("\n"), Whitespace("\t\t")] [Whitespace(" ")]
+                            2: CSS_SUB_SELECTOR_LIST@140..140
+                        1: CSS_DECLARATION_LIST_BLOCK@140..163
+                          0: L_CURLY@140..141 "{" [] []
+                          1: CSS_DECLARATION_LIST@141..159
+                            0: CSS_DECLARATION@141..158
+                              0: CSS_GENERIC_PROPERTY@141..158
+                                0: CSS_IDENTIFIER@141..151
+                                  0: IDENT@141..151 "height" [Newline("\n"), Whitespace("\t\t\t")] []
+                                1: COLON@151..153 ":" [] [Whitespace(" ")]
+                                2: CSS_GENERIC_COMPONENT_VALUE_LIST@153..158
+                                  0: CSS_REGULAR_DIMENSION@153..158
+                                    0: CSS_NUMBER_LITERAL@153..156 "100" [] []
+                                    1: IDENT@156..158 "px" [] []
+                              1: (empty)
+                            1: SEMICOLON@158..159 ";" [] []
+                          2: R_CURLY@159..163 "}" [Newline("\n"), Whitespace("\t\t")] []
+                    2: R_CURLY@163..166 "}" [Newline("\n"), Whitespace("\t")] []
+          2: R_CURLY@166..168 "}" [Newline("\n")] []
+  2: EOF@168..169 "" [Newline("\n")] []
+
+```
+
+

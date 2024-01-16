@@ -1,0 +1,15 @@
+@starting-style {
+	h1 {
+		background-color: transparent;
+	}
+
+	@layer foo {
+		@starting-style {
+			background-color: transparent;
+		}
+
+		div {
+			height: 100px;
+		}
+	}
+}

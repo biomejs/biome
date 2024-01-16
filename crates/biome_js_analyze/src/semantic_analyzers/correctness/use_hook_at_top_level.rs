@@ -1,5 +1,6 @@
-use crate::react::hooks::is_react_hook_call;
+use crate::react::hooks::{is_react_component, is_react_hook, is_react_hook_call};
 use crate::semantic_services::{SemanticModelBuilderVisitor, SemanticServices};
+use biome_analyze::RuleSource;
 use biome_analyze::{
     context::RuleContext, declare_rule, AddVisitor, FromServices, MissingServicesDiagnostic, Phase,
     Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, RuleKey, ServiceBag, Visitor,
@@ -12,10 +13,11 @@ use biome_deserialize::{
 };
 use biome_js_semantic::{CallsExtensions, SemanticModel};
 use biome_js_syntax::{
-    AnyFunctionLike, AnyJsExpression, AnyJsFunction, JsAssignmentWithDefault,
-    JsBindingPatternWithDefault, JsCallExpression, JsConditionalExpression, JsIfStatement,
-    JsLanguage, JsLogicalExpression, JsMethodObjectMember, JsObjectBindingPatternShorthandProperty,
-    JsReturnStatement, JsSyntaxKind, JsTryFinallyStatement, TextRange,
+    AnyFunctionLike, AnyJsBinding, AnyJsExpression, AnyJsFunction, AnyJsObjectMemberName,
+    JsAssignmentWithDefault, JsBindingPatternWithDefault, JsCallExpression,
+    JsConditionalExpression, JsIfStatement, JsLanguage, JsLogicalExpression, JsMethodObjectMember,
+    JsObjectBindingPatternShorthandProperty, JsReturnStatement, JsSyntaxKind,
+    JsTryFinallyStatement, TextRange,
 };
 use biome_rowan::{declare_node_union, AstNode, Language, SyntaxNode, WalkEvent};
 use rustc_hash::FxHashMap;
@@ -63,12 +65,36 @@ declare_rule! {
     pub(crate) UseHookAtTopLevel {
         version: "1.0.0",
         name: "useHookAtTopLevel",
+        source: RuleSource::EslintReactHooks("rules-of-hooks"),
         recommended: false,
     }
 }
 
 declare_node_union! {
     pub AnyJsFunctionOrMethod = AnyJsFunction | JsMethodObjectMember
+}
+
+impl AnyJsFunctionOrMethod {
+    fn is_react_component_or_hook(&self) -> bool {
+        if let Some(name) = self.name() {
+            if is_react_component(&name) || is_react_hook(&name) {
+                return true;
+            }
+        }
+
+        false
+    }
+
+    fn name(&self) -> Option<String> {
+        match self {
+            AnyJsFunctionOrMethod::AnyJsFunction(function) => {
+                function.binding().as_ref().map(AnyJsBinding::text)
+            }
+            AnyJsFunctionOrMethod::JsMethodObjectMember(method) => {
+                method.name().ok().as_ref().map(AnyJsObjectMemberName::text)
+            }
+        }
+    }
 }
 
 pub enum Suggestion {
@@ -189,14 +215,19 @@ fn is_conditional_expression(
     )
 }
 
-fn is_nested_function(function: &AnyJsFunctionOrMethod) -> bool {
+fn is_nested_function_inside_component_or_hook(function: &AnyJsFunctionOrMethod) -> bool {
+    if function.is_react_component_or_hook() {
+        return false;
+    }
+
     let Some(parent) = function.syntax().parent() else {
         return false;
     };
 
-    parent
-        .ancestors()
-        .any(|node| AnyJsFunctionOrMethod::can_cast(node.kind()))
+    parent.ancestors().any(|node| {
+        AnyJsFunctionOrMethod::cast(node)
+            .is_some_and(|enclosing_function| enclosing_function.is_react_component_or_hook())
+    })
 }
 
 /// Model for tracking which function calls are preceeded by an early return.
@@ -400,9 +431,10 @@ impl Rule for UseHookAtTopLevel {
             path.push(range);
 
             if let Some(enclosing_function) = enclosing_function_if_call_is_at_top_level(&call) {
-                if is_nested_function(&enclosing_function) {
-                    // We cannot allow nested functions, since it would break
-                    // the requirement for hooks to be called from the top-level.
+                if is_nested_function_inside_component_or_hook(&enclosing_function) {
+                    // We cannot allow nested functions inside hooks and
+                    // components, since it would break the requirement for
+                    // hooks to be called from the top-level.
                     return Some(Suggestion::None {
                         hook_name_range: get_hook_name_range()?,
                         path,

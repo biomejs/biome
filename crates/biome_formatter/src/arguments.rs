@@ -56,6 +56,13 @@ impl<'fmt, Context> Argument<'fmt, Context> {
     }
 }
 
+impl<'fmt, Context> Format<Context> for Argument<'fmt, Context> {
+    #[inline(always)]
+    fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
+        self.format(f)
+    }
+}
+
 /// Sequence of objects that should be formatted in the specified order.
 ///
 /// The [`format_args!`] macro will safely create an instance of this structure.
@@ -87,7 +94,7 @@ impl<'fmt, Context> Arguments<'fmt, Context> {
 
     /// Returns the arguments
     #[inline]
-    pub(super) fn items(&self) -> &'fmt [Argument<'fmt, Context>] {
+    pub fn items(&self) -> &'fmt [Argument<'fmt, Context>] {
         self.0
     }
 }

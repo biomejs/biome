@@ -8,6 +8,8 @@ title: noInvalidUseBeforeDeclaration (since v1.5.0)
 This rule is part of the [nursery](/linter/rules/#nursery) group.
 :::
 
+Source: <a href="https://typescript-eslint.io/rules/no-use-before-define" target="_blank"><code>no-use-before-define</code></a>
+
 Disallow the use of variables and function parameters before their declaration
 
 JavaScript doesn't allow the use of block-scoped variables (`let`, `const`) and function parameters before their declaration.

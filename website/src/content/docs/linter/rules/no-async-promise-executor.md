@@ -8,6 +8,8 @@ title: noAsyncPromiseExecutor (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://eslint.org/docs/latest/rules/no-async-promise-executor" target="_blank"><code>no-async-promise-executor</code></a>
+
 Disallows using an async function as a Promise executor.
 
 The executor function can also be an async function. However, this is usually a mistake, for a few reasons:

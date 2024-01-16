@@ -1,4 +1,4 @@
-use crate::kinds_src::KindsSrc;
+use crate::kind_src::KindsSrc;
 
 pub const JSON_KINDS_SRC: KindsSrc = KindsSrc {
     punct: &[

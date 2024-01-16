@@ -1,4 +1,4 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::AnyJsExportClause;
 use biome_rowan::{AstNode, AstSeparatedList, TextRange};
@@ -20,8 +20,6 @@ declare_rule! {
     ///
     /// Note that this rule disallows only default exports in EcmaScript Module.
     /// It ignores CommonJS default exports.
-    ///
-    /// Source: https://github.com/import-js/eslint-plugin-import/blob/main/docs/rules/no-default-export.md
     ///
     /// ## Examples
     ///
@@ -61,6 +59,7 @@ declare_rule! {
     pub(crate) NoDefaultExport {
         version: "1.4.0",
         name: "noDefaultExport",
+        source: RuleSource::EslintImport("no-default-export"),
         recommended: false,
     }
 }

@@ -1,3 +1,4 @@
+use biome_analyze::RuleSource;
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_js_syntax::{
@@ -19,8 +20,6 @@ declare_rule! {
     /// Disallow assignments where both sides are exactly the same.
     ///
     /// Self assignments have no effect, so probably those are an error due to incomplete refactoring.
-    ///
-    /// Source: https://eslint.org/docs/latest/rules/no-self-assign
     ///
     /// ## Examples
     ///
@@ -67,6 +66,7 @@ declare_rule! {
     pub(crate) NoSelfAssign {
         version: "1.0.0",
         name: "noSelfAssign",
+        source: RuleSource::Eslint("no-self-assign"),
         recommended: true,
     }
 }

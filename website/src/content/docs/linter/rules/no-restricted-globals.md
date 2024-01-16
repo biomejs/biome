@@ -4,6 +4,8 @@ title: noRestrictedGlobals (since v1.0.0)
 
 **Diagnostic Category: `lint/style/noRestrictedGlobals`**
 
+Source: <a href="https://eslint.org/docs/latest/rules/no-restricted-globals" target="_blank"><code>no-restricted-globals</code></a>
+
 This rule allows you to specify global variable names that you don’t want to use in your application.
 
 >Disallowing usage of specific global variables can be useful if you want to allow a set of

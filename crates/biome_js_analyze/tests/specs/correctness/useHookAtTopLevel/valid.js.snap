@@ -108,6 +108,30 @@ function Component8() {
     useEffect();
 };
 
+test('a', () => {
+    function TestComponent() {
+        useState();
+        useHook();
+    }
+
+    render(<TestComponent />);
+});
+
+test('b', () => {
+    const TestComponent = () => {
+        useState();
+        useHook();
+    };
+
+    render(<TestComponent />);
+});
+
+test('c', () => {
+    const { result } = renderHook(() => useHook());
+
+    expect(result.current).toBeDefined();
+});
+
 ```
 
 

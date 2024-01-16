@@ -1,4 +1,4 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::{AnyJsExpression, AnyJsMemberExpression, JsCallExpression};
 use biome_rowan::{AstNode, AstSeparatedList};
@@ -54,6 +54,7 @@ declare_rule! {
     pub(crate) NoForEach {
         version: "1.0.0",
         name: "noForEach",
+        source: RuleSource::EslintUnicorn("no-array-for-each"),
         recommended: true,
     }
 }

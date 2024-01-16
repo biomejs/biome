@@ -11,6 +11,7 @@ pub(crate) fn migrate(
     session: CliSession,
     cli_options: CliOptions,
     write: bool,
+    prettier: bool,
 ) -> Result<(), CliDiagnostic> {
     let base_path = match cli_options.config_path.as_ref() {
         None => ConfigurationBasePath::default(),
@@ -30,6 +31,7 @@ pub(crate) fn migrate(
                 write,
                 configuration_file_path: path,
                 configuration_directory_path: directory_path,
+                prettier,
             }),
             session,
             &cli_options,

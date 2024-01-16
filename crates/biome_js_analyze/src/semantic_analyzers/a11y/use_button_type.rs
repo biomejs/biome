@@ -1,5 +1,6 @@
 use crate::react::{ReactApiCall, ReactCreateElementCall};
 use crate::semantic_services::Semantic;
+use biome_analyze::RuleSource;
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_js_syntax::{
@@ -38,6 +39,7 @@ declare_rule! {
     pub(crate) UseButtonType {
         version: "1.0.0",
         name: "useButtonType",
+        source: RuleSource::EslintReact("button-has-type"),
         recommended: true,
     }
 }

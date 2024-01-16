@@ -5,6 +5,7 @@ mod std_in;
 mod traverse;
 
 use crate::cli_options::CliOptions;
+use crate::execute::migrate::MigratePayload;
 use crate::execute::traverse::traverse;
 use crate::{CliDiagnostic, CliSession};
 use biome_diagnostics::{category, Category};
@@ -12,7 +13,7 @@ use biome_fs::RomePath;
 use biome_service::workspace::{FeatureName, FixFileMode};
 use std::ffi::OsString;
 use std::fmt::{Display, Formatter};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 /// Useful information during the traversal of files and virtual content
 pub(crate) struct Execution {
@@ -40,6 +41,31 @@ pub(crate) enum ExecutionEnvironment {
     GitHub,
 }
 
+/// A type that holds the information to execute the CLI via `stdin
+#[derive(Debug)]
+pub(crate) struct Stdin(
+    /// The virtual path to the file
+    PathBuf,
+    /// The content of the file
+    String,
+);
+
+impl Stdin {
+    fn as_path(&self) -> &Path {
+        self.0.as_path()
+    }
+
+    fn as_content(&self) -> &str {
+        self.1.as_str()
+    }
+}
+
+impl From<(PathBuf, String)> for Stdin {
+    fn from((path, content): (PathBuf, String)) -> Self {
+        Self(path, content)
+    }
+}
+
 #[derive(Debug)]
 pub(crate) enum TraversalMode {
     /// This mode is enabled when running the command `biome check`
@@ -52,7 +78,7 @@ pub(crate) enum TraversalMode {
         /// An optional tuple.
         /// 1. The virtual path to the file
         /// 2. The content of the file
-        stdin: Option<(PathBuf, String)>,
+        stdin: Option<Stdin>,
     },
     /// This mode is enabled when running the command `biome lint`
     Lint {
@@ -64,7 +90,7 @@ pub(crate) enum TraversalMode {
         /// An optional tuple.
         /// 1. The virtual path to the file
         /// 2. The content of the file
-        stdin: Option<(PathBuf, String)>,
+        stdin: Option<Stdin>,
     },
     /// This mode is enabled when running the command `biome ci`
     CI {
@@ -80,13 +106,18 @@ pub(crate) enum TraversalMode {
         /// An optional tuple.
         /// 1. The virtual path to the file
         /// 2. The content of the file
-        stdin: Option<(PathBuf, String)>,
+        stdin: Option<Stdin>,
     },
     /// This mode is enabled when running the command `biome migrate`
     Migrate {
+        /// Write result to disk
         write: bool,
+        /// The path directory where `biome.json` is placed
         configuration_file_path: PathBuf,
+        /// The path to `biome.json`
         configuration_directory_path: PathBuf,
+        /// Migrate from prettier
+        prettier: bool,
     },
 }
 
@@ -239,7 +270,7 @@ impl Execution {
         }
     }
 
-    pub(crate) fn as_stdin_file(&self) -> Option<&(PathBuf, String)> {
+    pub(crate) fn as_stdin_file(&self) -> Option<&Stdin> {
         match &self.traversal_mode {
             TraversalMode::Format { stdin, .. }
             | TraversalMode::Lint { stdin, .. }
@@ -260,28 +291,31 @@ pub(crate) fn execute_mode(
     mode.max_diagnostics = cli_options.max_diagnostics;
 
     // don't do any traversal if there's some content coming from stdin
-    if let Some((path, content)) = mode.as_stdin_file() {
-        let rome_path = RomePath::new(path);
+    if let Some(stdin) = mode.as_stdin_file() {
+        let rome_path = RomePath::new(stdin.as_path());
         std_in::run(
             session,
             &mode,
             rome_path,
-            content.as_str(),
+            stdin.as_content(),
             cli_options.verbose,
         )
     } else if let TraversalMode::Migrate {
         write,
         configuration_file_path,
         configuration_directory_path,
+        prettier,
     } = mode.traversal_mode
     {
-        migrate::run(
+        let payload = MigratePayload {
             session,
             write,
             configuration_file_path,
             configuration_directory_path,
-            cli_options.verbose,
-        )
+            verbose: cli_options.verbose,
+            prettier,
+        };
+        migrate::run(payload)
     } else {
         traverse(mode, session, cli_options, paths)
     }

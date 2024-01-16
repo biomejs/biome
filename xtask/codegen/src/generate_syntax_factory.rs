@@ -1,4 +1,4 @@
-use super::kinds_src::AstSrc;
+use super::js_kinds_src::AstSrc;
 use crate::generate_nodes::{get_field_predicate, group_fields_for_ordering, token_kind_to_code};
 use crate::{to_upper_snake_case, LanguageKind};
 use proc_macro2::TokenStream;
@@ -21,6 +21,11 @@ pub fn generate_syntax_factory(ast: &AstSrc, language_kind: LanguageKind) -> Res
             quote! { biome_json_syntax },
             quote! { JsonSyntaxKind },
             quote! { JsonSyntaxFactory },
+        ),
+        LanguageKind::Html => (
+            quote! { biome_html_syntax },
+            quote! { HtmlSyntaxKind },
+            quote! { HtmlSyntaxFactory },
         ),
     };
     let normal_node_arms = ast.nodes.iter().map(|node| {

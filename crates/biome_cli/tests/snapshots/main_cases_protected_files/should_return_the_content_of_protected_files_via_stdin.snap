@@ -1,0 +1,17 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+# Input messages
+
+```block
+{ "name": "something" }
+```
+
+# Emitted Messages
+
+```block
+{ "name": "something" }
+```
+
+

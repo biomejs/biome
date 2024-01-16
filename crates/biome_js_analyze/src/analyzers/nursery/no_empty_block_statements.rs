@@ -1,4 +1,4 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::{
     JsBlockStatement, JsFunctionBody, JsStaticInitializationBlockClassMember, JsSwitchStatement,
@@ -12,9 +12,6 @@ declare_rule! {
     ///
     /// This rule disallows empty block statements and static blocks.
     /// This rule ignores block statements or static blocks which contain a comment (for example, in an empty catch or finally block of a try statement to indicate that execution should continue regardless of errors).
-    ///
-    /// Source: https://eslint.org/docs/latest/rules/no-empty-static-block/
-    /// Source: https://eslint.org/docs/latest/rules/no-empty/
     ///
     /// ## Examples
     ///
@@ -57,6 +54,8 @@ declare_rule! {
     pub(crate) NoEmptyBlockStatements {
         version: "1.3.0",
         name: "noEmptyBlockStatements",
+        // Include also `eslint/no-empty-static-block`
+        source: RuleSource::Eslint("no-empty"),
         recommended: false,
     }
 }

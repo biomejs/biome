@@ -8,6 +8,8 @@ title: useAriaActivedescendantWithTabindex (since v1.3.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/aria-activedescendant-has-tabindex.md" target="_blank"><code>aria-activedescendant-has-tabindex</code></a>
+
 Enforce that `tabIndex` is assigned to non-interactive HTML elements with `aria-activedescendant`.
 
 `aria-activedescendant` is used to manage to focus within a [composite widget](https://www.w3.org/TR/wai-aria/#composite).
@@ -22,8 +24,6 @@ as the value of `aria-activedescendant` on the input element.
 
 Because an element with `aria-activedescendant` must be tabbable,
 it must either have an inherent tabIndex of zero or declare a tabIndex attribute.
-
-Source: https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/aria-activedescendant-has-tabindex.md
 
 ## Examples
 

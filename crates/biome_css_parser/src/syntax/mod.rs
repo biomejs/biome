@@ -70,7 +70,7 @@ impl ParseRecovery for RuleListParseRecovery {
     const RECOVERED_KIND: Self::Kind = CSS_BOGUS_RULE;
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
-        is_at_at_rule(p) || is_at_rule(p)
+        is_at_at_rule(p) || is_at_qualified_rule(p)
     }
 }
 
@@ -82,8 +82,8 @@ impl ParseNodeList for RuleList {
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
         if is_at_at_rule(p) {
             parse_at_rule(p)
-        } else if is_at_rule(p) {
-            parse_rule(p)
+        } else if is_at_qualified_rule(p) {
+            parse_qualified_rule(p)
         } else {
             Absent
         }
@@ -103,13 +103,13 @@ impl ParseNodeList for RuleList {
 }
 
 #[inline]
-pub(crate) fn is_at_rule(p: &mut CssParser) -> bool {
+pub(crate) fn is_at_qualified_rule(p: &mut CssParser) -> bool {
     is_at_selector(p)
 }
 
 #[inline]
-pub(crate) fn parse_rule(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_rule(p) {
+pub(crate) fn parse_qualified_rule(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_qualified_rule(p) {
         return Absent;
     }
 
@@ -118,7 +118,7 @@ pub(crate) fn parse_rule(p: &mut CssParser) -> ParsedSyntax {
     SelectorList::default().parse_list(p);
 
     let kind = if parse_or_recover_declaration_list_block(p).is_ok() {
-        CSS_RULE
+        CSS_QUALIFIED_RULE
     } else {
         CSS_BOGUS_RULE
     };

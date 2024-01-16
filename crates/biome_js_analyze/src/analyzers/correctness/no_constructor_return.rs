@@ -1,4 +1,5 @@
 use biome_analyze::context::RuleContext;
+use biome_analyze::RuleSource;
 use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_js_syntax::{JsConstructorClassMember, JsReturnStatement};
@@ -13,8 +14,6 @@ declare_rule! {
     /// Forbidding this pattern prevents errors resulting from unfamiliarity with JavaScript or a copy-paste error.
     ///
     /// Only returning without a value is allowed, as it’s a control flow statement.
-    ///
-    /// Source: https://eslint.org/docs/latest/rules/no-constructor-return
     ///
     /// ## Examples
     ///
@@ -47,6 +46,7 @@ declare_rule! {
     pub(crate) NoConstructorReturn {
         version: "1.0.0",
         name: "noConstructorReturn",
+        source: RuleSource::Eslint("no-constructor-return"),
         recommended: true,
     }
 }

@@ -4,9 +4,9 @@ title: noApproximativeNumericConstant (since v1.3.0)
 
 **Diagnostic Category: `lint/suspicious/noApproximativeNumericConstant`**
 
-Usually, the definition in the standard library is more precise than what people come up with or the used constant exceeds the maximum precision of the number type.
+Source: <a href="https://rust-lang.github.io/rust-clippy/master/#/approx_constant" target="_blank"><code>approx_constant</code></a>
 
-Source: https://rust-lang.github.io/rust-clippy/master/#approx_constant
+Usually, the definition in the standard library is more precise than what people come up with or the used constant exceeds the maximum precision of the number type.
 
 ## Examples
 

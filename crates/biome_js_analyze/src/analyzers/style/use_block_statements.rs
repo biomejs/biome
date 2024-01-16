@@ -1,5 +1,7 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, ActionCategory, Ast, FixKind, Rule, RuleAction, RuleDiagnostic};
+use biome_analyze::{
+    declare_rule, ActionCategory, Ast, FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource,
+};
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make;
@@ -66,6 +68,7 @@ declare_rule! {
     pub(crate) UseBlockStatements {
         version: "1.0.0",
         name: "useBlockStatements",
+        source: RuleSource::Eslint("curly"),
         recommended: false,
         fix_kind: FixKind::Unsafe,
     }

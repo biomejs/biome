@@ -8,6 +8,8 @@ title: noDoubleEquals (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://eslint.org/docs/latest/rules/eqeqeq" target="_blank"><code>eqeqeq</code></a>
+
 Require the use of `===` and `!==`
 
 It is generally bad practice to use `==` for comparison instead of

@@ -1,4 +1,4 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::{jsx_ext::AnyJsxElement, JsxElement};
 use biome_rowan::AstNode;
@@ -47,6 +47,7 @@ declare_rule! {
     pub(crate) UseHeadingContent {
         version: "1.0.0",
         name: "useHeadingContent",
+        source: RuleSource::EslintJsxA11y("heading-has-content"),
         recommended: true,
     }
 }

@@ -1,6 +1,7 @@
 use crate::{control_flow::AnyJsControlFlowRoot, semantic_services::Semantic, JsRuleAction};
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
+    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource,
+    RuleSourceKind,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
@@ -18,8 +19,6 @@ declare_rule! {
     ///
     /// Arrow functions inherits `this` from their enclosing scope;
     /// this makes `this` aliasing useless in this situation.
-    ///
-    /// Credits: https://typescript-eslint.io/rules/no-this-alias/
     ///
     /// ## Examples
     ///
@@ -53,6 +52,8 @@ declare_rule! {
     pub(crate) NoUselessThisAlias {
         version: "1.0.0",
         name: "noUselessThisAlias",
+        source: RuleSource::EslintTypeScript("no-this-alias"),
+        source_kind: RuleSourceKind::Inspired,
         recommended: true,
         fix_kind: FixKind::Safe,
     }

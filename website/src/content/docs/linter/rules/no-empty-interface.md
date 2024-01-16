@@ -8,14 +8,14 @@ title: noEmptyInterface (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Inspired from: <a href="https://typescript-eslint.io/rules/no-empty-interface" target="_blank"><code>no-empty-interface</code></a>
+
 Disallow the declaration of empty interfaces.
 
 An empty interface in TypeScript does very little: any non-nullable value is assignable to `{}`.
 Using an empty interface is often a sign of programmer error, such as misunderstanding the concept of `{}` or forgetting to fill in fields.
 
 The rule ignores empty interfaces that `extends` one or multiple types.
-
-Inspired by: https://typescript-eslint.io/rules/no-empty-interface
 
 ## Examples
 

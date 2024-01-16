@@ -12,7 +12,8 @@ use crate::{
 use biome_rowan::{support, AstNode, RawSyntaxKind, SyntaxKindSet, SyntaxResult};
 #[allow(unused)]
 use biome_rowan::{
-    AstNodeList, AstNodeListIterator, AstSeparatedList, AstSeparatedListNodesIterator,
+    AstNodeList, AstNodeListIterator, AstNodeSlotMap, AstSeparatedList,
+    AstSeparatedListNodesIterator,
 };
 #[cfg(feature = "serde")]
 use serde::ser::SerializeSeq;

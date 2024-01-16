@@ -1,5 +1,5 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic};
+use biome_analyze::{declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make;
@@ -34,6 +34,7 @@ declare_rule! {
     pub(crate) NoStringCaseMismatch {
         version: "1.0.0",
         name: "noStringCaseMismatch",
+        source: RuleSource::Clippy("match_str_case_mismatch"),
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }

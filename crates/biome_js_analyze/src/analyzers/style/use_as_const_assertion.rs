@@ -1,6 +1,7 @@
 use crate::JsRuleAction;
 use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
+    RuleSource,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
@@ -22,8 +23,6 @@ declare_rule! {
     /// 3. type annotation: explicitly telling the literal type to TypeScript when declare variables
     ///
     /// The rule suggests to use `as const` when you're using `as` with a literal type or type annotation, since `as const` is simpler and doesn't require retyping the value.
-    ///
-    /// Source: https://typescript-eslint.io/rules/prefer-as-const/
     ///
     /// ## Examples
     ///
@@ -49,6 +48,7 @@ declare_rule! {
     pub(crate) UseAsConstAssertion {
         version: "1.3.0",
         name: "useAsConstAssertion",
+        source: RuleSource::EslintTypeScript("prefer-as-const"),
         recommended: true,
         fix_kind: FixKind::Safe,
     }

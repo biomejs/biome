@@ -623,6 +623,7 @@ fn applies_custom_quote_style() {
 }
 
 #[test]
+#[ignore = "Enable when we are ready to handle CSS files"]
 fn applies_custom_css_quote_style() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
@@ -1340,6 +1341,107 @@ fn does_not_format_ignored_directories() {
 }
 
 #[test]
+fn does_not_format_ignored_file_in_included_directory() {
+    let config = r#"{
+        "formatter": {
+          "include": ["src"],
+          "ignore": ["src/file2.js"]
+        }
+    }"#;
+    let files = [("src/file1.js", true), ("src/file2.js", false)];
+
+    let mut console = BufferConsole::default();
+    let mut fs = MemoryFileSystem::default();
+    let file_path = Path::new("biome.json");
+    fs.insert(file_path.into(), config);
+    for (file_path, _) in files {
+        let file_path = Path::new(file_path);
+        fs.insert(file_path.into(), UNFORMATTED.as_bytes());
+    }
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("format"), ("."), ("--write")].as_slice()),
+    );
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    for (file_path, expect_formatted) in files {
+        let expected = if expect_formatted {
+            FORMATTED
+        } else {
+            UNFORMATTED
+        };
+        assert_file_contents(&fs, Path::new(file_path), expected);
+    }
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "does_not_format_ignored_file_in_included_directory",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn include_ignore_cascade() {
+    // Only `file1.js` will be formatted:
+    // - `file2.js` is ignored at top-level
+    // - `file3.js` is ignored at formatter-level
+    // - `file4.js` is not included at top-level
+    let config = r#"{
+        "files": {
+          "include": ["file1.js", "file2.js", "file3.js"],
+          "ignore": ["file2.js"]
+        },
+        "formatter": {
+          "include": ["file1.js", "file2.js"],
+          "ignore": ["file3.js"]
+        }
+    }"#;
+    let files = [
+        ("file1.js", true),
+        ("file2.js", false),
+        ("file3.js", false),
+        ("file4.js", false),
+    ];
+
+    let mut console = BufferConsole::default();
+    let mut fs = MemoryFileSystem::default();
+    let file_path = Path::new("biome.json");
+    fs.insert(file_path.into(), config);
+    for (file_path, _) in files {
+        let file_path = Path::new(file_path);
+        fs.insert(file_path.into(), UNFORMATTED.as_bytes());
+    }
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("format"), ("."), ("--write")].as_slice()),
+    );
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    for (file_path, expect_formatted) in files {
+        let expected = if expect_formatted {
+            FORMATTED
+        } else {
+            UNFORMATTED
+        };
+        assert_file_contents(&fs, Path::new(file_path), expected);
+    }
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "include_ignore_cascade",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn fs_error_read_only() {
     let mut fs = MemoryFileSystem::new_read_only();
     let mut console = BufferConsole::default();
@@ -1780,6 +1882,118 @@ file2.js
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "ignore_vcs_ignored_file_via_cli",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn include_vcs_ignore_cascade() {
+    // Only `file1.js` will be formatted:
+    // - `file2.js` is ignored at top-level
+    // - `file3.js` is ignored at formatter-level
+    // - `file4.js` is ignored in `.gitignore`
+    let git_ignore = r#"file4.js"#;
+    let config = r#"{
+        "vcs": {
+            "enabled": true,
+            "clientKind": "git",
+            "useIgnoreFile": true
+        },
+        "files": {
+          "ignore": ["file2.js"]
+        },
+        "formatter": {
+          "include": ["file1.js", "file2.js", "file4.js"],
+          "ignore": ["file3.js"]
+        }
+    }"#;
+    let files = [
+        ("file1.js", true),
+        ("file2.js", false),
+        ("file3.js", false),
+        ("file4.js", false),
+    ];
+
+    let mut console = BufferConsole::default();
+    let mut fs = MemoryFileSystem::default();
+    let gitignore_file = Path::new(".gitignore");
+    fs.insert(gitignore_file.into(), git_ignore.as_bytes());
+    let file_path = Path::new("biome.json");
+    fs.insert(file_path.into(), config);
+    for (file_path, _) in files {
+        let file_path = Path::new(file_path);
+        fs.insert(file_path.into(), UNFORMATTED.as_bytes());
+    }
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("format"), ("."), ("--write")].as_slice()),
+    );
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    for (file_path, expect_formatted) in files {
+        let expected = if expect_formatted {
+            FORMATTED
+        } else {
+            UNFORMATTED
+        };
+        assert_file_contents(&fs, Path::new(file_path), expected);
+    }
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "include_vcs_ignore_cascade",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn vcs_absolute_path() {
+    let git_ignore = r#"file.js"#;
+    let config = r#"{
+        "vcs": {
+            "enabled": true,
+            "clientKind": "git",
+            "useIgnoreFile": true
+        }
+    }"#;
+    let files = [("/symbolic/link/to/path.js", true)];
+
+    let mut console = BufferConsole::default();
+    let mut fs = MemoryFileSystem::default();
+    let gitignore_file = Path::new(".gitignore");
+    fs.insert(gitignore_file.into(), git_ignore.as_bytes());
+    let file_path = Path::new("biome.json");
+    fs.insert(file_path.into(), config);
+    for (file_path, _) in files {
+        let file_path = Path::new(file_path);
+        fs.insert(file_path.into(), UNFORMATTED.as_bytes());
+    }
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("format"), ("."), ("--write")].as_slice()),
+    );
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    for (file_path, expect_formatted) in files {
+        let expected = if expect_formatted {
+            FORMATTED
+        } else {
+            UNFORMATTED
+        };
+        assert_file_contents(&fs, Path::new(file_path), expected);
+    }
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "vcs_absolute_path",
         fs,
         console,
         result,
@@ -2427,6 +2641,49 @@ const a = {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "should_apply_different_indent_style",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn override_don_t_affect_ignored_files() {
+    let config = r#"{
+        "overrides": [{
+            "ignore": ["file2.js"]
+        }]
+    }"#;
+    let files = [("file1.js", true), ("file2.js", true)];
+
+    let mut console = BufferConsole::default();
+    let mut fs = MemoryFileSystem::default();
+    let file_path = Path::new("biome.json");
+    fs.insert(file_path.into(), config);
+    for (file_path, _) in files {
+        let file_path = Path::new(file_path);
+        fs.insert(file_path.into(), UNFORMATTED.as_bytes());
+    }
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("format"), ("."), ("--write")].as_slice()),
+    );
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    for (file_path, expect_formatted) in files {
+        let expected = if expect_formatted {
+            FORMATTED
+        } else {
+            UNFORMATTED
+        };
+        assert_file_contents(&fs, Path::new(file_path), expected);
+    }
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "override_don_t_affect_ignored_files",
         fs,
         console,
         result,

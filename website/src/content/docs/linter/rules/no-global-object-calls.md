@@ -8,6 +8,8 @@ title: noGlobalObjectCalls (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://eslint.org/docs/latest/rules/no-obj-calls" target="_blank"><code>no-obj-calls</code></a>
+
 Disallow calling global object properties as functions
 
 ECMAScript provides several global objects that are intended to be used as-is.

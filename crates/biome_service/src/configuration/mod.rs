@@ -9,7 +9,6 @@ mod generated;
 pub mod javascript;
 pub mod json;
 pub mod linter;
-mod merge;
 pub mod organize_imports;
 mod overrides;
 mod parse;
@@ -18,7 +17,6 @@ pub mod vcs;
 use crate::configuration::diagnostics::CantLoadExtendFile;
 pub use crate::configuration::diagnostics::ConfigurationDiagnostic;
 pub(crate) use crate::configuration::generated::push_to_analyzer_rules;
-pub use crate::configuration::merge::MergeWith;
 use crate::configuration::organize_imports::{organize_imports, OrganizeImports};
 use crate::configuration::overrides::Overrides;
 use crate::configuration::vcs::{vcs_configuration, VcsConfiguration};
@@ -27,7 +25,8 @@ use crate::{DynRef, WorkspaceError, VERSION};
 use biome_analyze::AnalyzerRules;
 use biome_console::markup;
 use biome_deserialize::json::deserialize_from_json_str;
-use biome_deserialize::{Deserialized, StringSet};
+use biome_deserialize::{Deserialized, Merge, StringSet};
+use biome_deserialize_macros::{Merge, NoneState};
 use biome_diagnostics::{DiagnosticExt, Error, Severity};
 use biome_fs::{AutoSearchResult, FileSystem, OpenOptions};
 use biome_js_analyze::metadata;
@@ -51,7 +50,7 @@ use std::num::NonZeroU64;
 use std::path::{Path, PathBuf};
 
 /// The configuration that is contained inside the file `biome.json`
-#[derive(Debug, Deserialize, Serialize, Clone, Bpaf, Eq, PartialEq)]
+#[derive(Bpaf, Clone, Debug, Deserialize, Eq, Merge, NoneState, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(deny_unknown_fields, rename_all = "camelCase")]
 pub struct Configuration {
@@ -133,53 +132,6 @@ impl Default for Configuration {
     }
 }
 
-impl MergeWith<Configuration> for Configuration {
-    fn merge_with(&mut self, other_configuration: Configuration) {
-        // files
-        self.merge_with(other_configuration.files);
-        // formatter
-        self.merge_with(other_configuration.formatter);
-        // javascript
-        self.merge_with(other_configuration.javascript);
-        // json
-        self.merge_with(other_configuration.json);
-        // css
-        self.merge_with(other_configuration.css);
-        // linter
-        self.merge_with(other_configuration.linter);
-        // organize imports
-        self.merge_with(other_configuration.organize_imports);
-        // VCS
-        self.merge_with(other_configuration.vcs);
-        // overrides
-        self.merge_with(other_configuration.overrides);
-    }
-
-    fn merge_with_if_not_default(&mut self, other_configuration: Configuration)
-    where
-        Configuration: Default,
-    {
-        // files
-        self.merge_with_if_not_default(other_configuration.files);
-        // formatter
-        self.merge_with_if_not_default(other_configuration.formatter);
-        // javascript
-        self.merge_with_if_not_default(other_configuration.javascript);
-        // json
-        self.merge_with_if_not_default(other_configuration.json);
-        // css
-        self.merge_with_if_not_default(other_configuration.css);
-        // linter
-        self.merge_with_if_not_default(other_configuration.linter);
-        // organize imports
-        self.merge_with_if_not_default(other_configuration.organize_imports);
-        // VCS
-        self.merge_with_if_not_default(other_configuration.vcs);
-        // overrides
-        self.merge_with_if_not_default(other_configuration.overrides);
-    }
-}
-
 impl Configuration {
     pub fn is_formatter_disabled(&self) -> bool {
         self.formatter
@@ -254,224 +206,8 @@ impl Configuration {
     }
 }
 
-impl MergeWith<Option<VcsConfiguration>> for Configuration {
-    fn merge_with(&mut self, other: Option<VcsConfiguration>) {
-        if let Some(other_vcs) = other {
-            let vcs = self.vcs.get_or_insert_with(VcsConfiguration::default);
-            vcs.merge_with(other_vcs);
-        }
-    }
-
-    fn merge_with_if_not_default(&mut self, other: Option<VcsConfiguration>)
-    where
-        Option<VcsConfiguration>: Default,
-    {
-        self.merge_with(other)
-    }
-}
-
-impl MergeWith<Option<OrganizeImports>> for Configuration {
-    fn merge_with(&mut self, other: Option<OrganizeImports>) {
-        if let Some(other_organize_imports) = other {
-            let organize_imports = self
-                .organize_imports
-                .get_or_insert_with(OrganizeImports::default);
-            organize_imports.merge_with(other_organize_imports);
-        }
-    }
-
-    fn merge_with_if_not_default(&mut self, other: Option<OrganizeImports>)
-    where
-        Option<OrganizeImports>: Default,
-    {
-        self.merge_with(other)
-    }
-}
-
-impl MergeWith<Option<LinterConfiguration>> for Configuration {
-    fn merge_with(&mut self, other: Option<LinterConfiguration>) {
-        if let Some(other_linter) = other {
-            let linter = self.linter.get_or_insert_with(LinterConfiguration::default);
-            linter.merge_with(other_linter);
-        }
-    }
-
-    fn merge_with_if_not_default(&mut self, other: Option<LinterConfiguration>)
-    where
-        Option<LinterConfiguration>: Default,
-    {
-        if let Some(other_linter) = other {
-            let linter = self.linter.get_or_insert_with(LinterConfiguration::default);
-            linter.merge_with_if_not_default(other_linter);
-        }
-    }
-}
-impl MergeWith<Option<FilesConfiguration>> for Configuration {
-    fn merge_with(&mut self, other: Option<FilesConfiguration>) {
-        if let Some(files_configuration) = other {
-            let files = self.files.get_or_insert_with(FilesConfiguration::default);
-            files.merge_with(files_configuration);
-        };
-    }
-
-    fn merge_with_if_not_default(&mut self, other: Option<FilesConfiguration>)
-    where
-        Option<FilesConfiguration>: Default,
-    {
-        if let Some(files_configuration) = other {
-            let files = self.files.get_or_insert_with(FilesConfiguration::default);
-            files.merge_with_if_not_default(files_configuration);
-        };
-    }
-}
-impl MergeWith<Option<JavascriptConfiguration>> for Configuration {
-    fn merge_with(&mut self, other: Option<JavascriptConfiguration>) {
-        if let Some(other) = other {
-            let js_configuration = self
-                .javascript
-                .get_or_insert_with(JavascriptConfiguration::default);
-            js_configuration.merge_with(other);
-        }
-    }
-
-    fn merge_with_if_not_default(&mut self, other: Option<JavascriptConfiguration>)
-    where
-        Option<JavascriptConfiguration>: Default,
-    {
-        if let Some(other) = other {
-            let js_configuration = self
-                .javascript
-                .get_or_insert_with(JavascriptConfiguration::default);
-            js_configuration.merge_with_if_not_default(other);
-        }
-    }
-}
-impl MergeWith<Option<JsonConfiguration>> for Configuration {
-    fn merge_with(&mut self, other: Option<JsonConfiguration>) {
-        if let Some(other) = other {
-            let json_configuration = self.json.get_or_insert_with(JsonConfiguration::default);
-            json_configuration.merge_with(other);
-        }
-    }
-
-    fn merge_with_if_not_default(&mut self, other: Option<JsonConfiguration>)
-    where
-        Option<JsonConfiguration>: Default,
-    {
-        if let Some(other) = other {
-            let json_configuration = self.json.get_or_insert_with(JsonConfiguration::default);
-            json_configuration.merge_with_if_not_default(other);
-        }
-    }
-}
-impl MergeWith<Option<CssConfiguration>> for Configuration {
-    fn merge_with(&mut self, other: Option<CssConfiguration>) {
-        if let Some(other) = other {
-            let css_configuration = self.css.get_or_insert_with(CssConfiguration::default);
-            css_configuration.merge_with(other);
-        }
-    }
-
-    fn merge_with_if_not_default(&mut self, other: Option<CssConfiguration>)
-    where
-        Option<CssConfiguration>: Default,
-    {
-        if let Some(other) = other {
-            let css_configuration = self.css.get_or_insert_with(CssConfiguration::default);
-            css_configuration.merge_with_if_not_default(other);
-        }
-    }
-}
-impl MergeWith<Option<FormatterConfiguration>> for Configuration {
-    fn merge_with(&mut self, other: Option<FormatterConfiguration>) {
-        if let Some(other_formatter) = other {
-            let formatter = self
-                .formatter
-                .get_or_insert_with(FormatterConfiguration::default);
-            formatter.merge_with(other_formatter);
-        }
-    }
-
-    fn merge_with_if_not_default(&mut self, other: Option<FormatterConfiguration>)
-    where
-        Option<FormatterConfiguration>: Default,
-    {
-        if let Some(other_formatter) = other {
-            let formatter = self
-                .formatter
-                .get_or_insert_with(FormatterConfiguration::default);
-            formatter.merge_with_if_not_default(other_formatter);
-        }
-    }
-}
-
-impl MergeWith<Option<JavascriptFormatter>> for Configuration {
-    fn merge_with(&mut self, other: Option<JavascriptFormatter>) {
-        let javascript_configuration = self
-            .javascript
-            .get_or_insert_with(JavascriptConfiguration::default);
-        javascript_configuration.merge_with(other);
-    }
-
-    fn merge_with_if_not_default(&mut self, other: Option<JavascriptFormatter>)
-    where
-        Option<JavascriptFormatter>: Default,
-    {
-        let javascript_configuration = self
-            .javascript
-            .get_or_insert_with(JavascriptConfiguration::default);
-        javascript_configuration.merge_with_if_not_default(other);
-    }
-}
-
-impl MergeWith<Option<JsonFormatter>> for Configuration {
-    fn merge_with(&mut self, other: Option<JsonFormatter>) {
-        let json_configuration = self.json.get_or_insert_with(JsonConfiguration::default);
-        json_configuration.merge_with(other);
-    }
-
-    fn merge_with_if_not_default(&mut self, other: Option<JsonFormatter>)
-    where
-        Option<JsonFormatter>: Default,
-    {
-        let json_configuration = self.json.get_or_insert_with(JsonConfiguration::default);
-        json_configuration.merge_with_if_not_default(other);
-    }
-}
-
-impl MergeWith<Option<CssFormatter>> for Configuration {
-    fn merge_with(&mut self, other: Option<CssFormatter>) {
-        let css_configuration = self.css.get_or_insert_with(CssConfiguration::default);
-        css_configuration.merge_with(other);
-    }
-
-    fn merge_with_if_not_default(&mut self, other: Option<CssFormatter>)
-    where
-        Option<CssFormatter>: Default,
-    {
-        let css_configuration = self.css.get_or_insert_with(CssConfiguration::default);
-        css_configuration.merge_with_if_not_default(other);
-    }
-}
-
-impl MergeWith<Option<Overrides>> for Configuration {
-    fn merge_with(&mut self, other: Option<Overrides>) {
-        if let Some(other) = other {
-            let overrides = self.overrides.get_or_insert_with(Overrides::default);
-            overrides.merge_with(other);
-        }
-    }
-
-    fn merge_with_if_not_default(&mut self, other: Option<Overrides>)
-    where
-        Option<Overrides>: Default,
-    {
-        self.merge_with(other)
-    }
-}
-
 /// The configuration of the filesystem
-#[derive(Default, Debug, Deserialize, Serialize, Clone, Bpaf, Eq, PartialEq)]
+#[derive(Bpaf, Clone, Debug, Default, Deserialize, Eq, Merge, NoneState, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct FilesConfiguration {
@@ -496,32 +232,6 @@ pub struct FilesConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[bpaf(long("files-ignore-unknown"), argument("true|false"), optional)]
     pub ignore_unknown: Option<bool>,
-}
-
-impl MergeWith<FilesConfiguration> for FilesConfiguration {
-    fn merge_with(&mut self, other: FilesConfiguration) {
-        if let Some(ignore) = other.ignore {
-            self.ignore = Some(ignore)
-        }
-        if let Some(include) = other.include {
-            self.include = Some(include)
-        }
-        if let Some(max_size) = other.max_size {
-            self.max_size = Some(max_size)
-        }
-        if let Some(ignore_unknown) = other.ignore_unknown {
-            self.ignore_unknown = Some(ignore_unknown)
-        }
-    }
-
-    fn merge_with_if_not_default(&mut self, other: FilesConfiguration)
-    where
-        FilesConfiguration: Default,
-    {
-        if other != FilesConfiguration::default() {
-            self.merge_with(other)
-        }
-    }
 }
 
 /// - [Result]: if an error occurred while loading the configuration file.
@@ -564,8 +274,10 @@ pub fn load_configuration(
     config_path: ConfigurationBasePath,
 ) -> Result<LoadedConfiguration, WorkspaceError> {
     let config = load_config(fs, config_path)?;
-    let loaded_configuration = LoadedConfiguration::from(config);
-    loaded_configuration.apply_extends(fs)
+    let mut loaded_configuration = LoadedConfiguration::from(config);
+    loaded_configuration.apply_extends(fs)?;
+    loaded_configuration.configuration.merge_in_defaults();
+    Ok(loaded_configuration)
 }
 
 /// Load the configuration from the file system.
@@ -714,15 +426,13 @@ pub struct LoadedConfiguration {
 }
 
 impl LoadedConfiguration {
-    /// Consumes itself to generate a new [LoadedConfiguration] where the new `configuration`
-    /// is the result of its `extends` fields applied from left to right, and the last one element
-    /// applied is itself.
+    /// Mutates the configuration so that any fields that have not been configured explicitly are
+    /// filled in with their values from configs listed in the `extends` field.
+    ///
+    /// The `extends` configs are applied from left to right.
     ///
     /// If a configuration can't be resolved from the file system, the operation will fail.
-    pub fn apply_extends(
-        mut self,
-        fs: &DynRef<'_, dyn FileSystem>,
-    ) -> Result<Self, WorkspaceError> {
+    fn apply_extends(&mut self, fs: &DynRef<'_, dyn FileSystem>) -> Result<(), WorkspaceError> {
         let deserialized = self.deserialize_extends(fs)?;
         let (configurations, errors): (Vec<_>, Vec<_>) = deserialized
             .into_iter()
@@ -736,13 +446,12 @@ impl LoadedConfiguration {
                 previous_configuration
             },
         );
-        let configuration = if let Some(mut extended_configuration) = extended_configuration {
-            // Here we want to keep only the values that aren't a default
-            extended_configuration.merge_with_if_not_default(self.configuration);
-            extended_configuration
-        } else {
-            self.configuration
-        };
+        if let Some(mut extended_configuration) = extended_configuration {
+            // We swap them to avoid having to clone `self.configuration` to merge it.
+            std::mem::swap(&mut self.configuration, &mut extended_configuration);
+            self.configuration.merge_with(extended_configuration)
+        }
+
         self.diagnostics.extend(
             errors
                 .into_iter()
@@ -757,12 +466,7 @@ impl LoadedConfiguration {
                 .collect::<Vec<_>>(),
         );
 
-        Ok(Self {
-            configuration,
-            diagnostics: self.diagnostics,
-            file_path: self.file_path,
-            directory_path: self.directory_path,
-        })
+        Ok(())
     }
 
     /// It attempts to deserialize all the configuration files that were specified in the `extends` property

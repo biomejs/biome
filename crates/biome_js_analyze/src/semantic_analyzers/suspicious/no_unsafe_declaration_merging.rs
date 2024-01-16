@@ -1,5 +1,5 @@
 use crate::semantic_services::Semantic;
-use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::{binding_ext::AnyJsBindingDeclaration, TsInterfaceDeclaration};
 use biome_rowan::{AstNode, TextRange};
@@ -12,8 +12,6 @@ declare_rule! {
     /// _Declaration merging_ between classes and interfaces is unsafe.
     /// The _TypeScript Compiler_ doesn't check whether properties defined in the interface are initialized in the class.
     /// This can cause lead to _TypeScript_ not detecting code that will cause runtime errors.
-    ///
-    /// Source: https://typescript-eslint.io/rules/no-unsafe-declaration-merging/
     ///
     /// ## Examples
     ///
@@ -45,6 +43,7 @@ declare_rule! {
     pub(crate) NoUnsafeDeclarationMerging {
         version: "1.0.0",
         name: "noUnsafeDeclarationMerging",
+        source: RuleSource::EslintTypeScript("no-unsafe-declaration-merging"),
         recommended: true,
     }
 }

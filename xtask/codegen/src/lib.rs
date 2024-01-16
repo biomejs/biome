@@ -11,8 +11,11 @@ mod generate_nodes;
 mod generate_nodes_mut;
 mod generate_syntax_factory;
 mod generate_syntax_kinds;
+mod js_kinds_src;
 mod json_kinds_src;
-mod kinds_src;
+
+mod html_kinds_src;
+mod kind_src;
 mod parser_tests;
 pub mod promote_rule;
 mod termcolorful;
@@ -41,6 +44,7 @@ pub enum LanguageKind {
     Js,
     Css,
     Json,
+    Html,
 }
 
 impl std::fmt::Display for LanguageKind {
@@ -49,12 +53,17 @@ impl std::fmt::Display for LanguageKind {
             LanguageKind::Js => write!(f, "js"),
             LanguageKind::Css => write!(f, "css"),
             LanguageKind::Json => write!(f, "json"),
+            LanguageKind::Html => write!(f, "html"),
         }
     }
 }
 
-pub const ALL_LANGUAGE_KIND: [LanguageKind; 3] =
-    [LanguageKind::Js, LanguageKind::Css, LanguageKind::Json];
+pub const ALL_LANGUAGE_KIND: [LanguageKind; 4] = [
+    LanguageKind::Js,
+    LanguageKind::Css,
+    LanguageKind::Json,
+    LanguageKind::Html,
+];
 
 impl FromStr for LanguageKind {
     type Err = String;
@@ -64,6 +73,7 @@ impl FromStr for LanguageKind {
             "js" => Ok(LanguageKind::Js),
             "css" => Ok(LanguageKind::Css),
             "json" => Ok(LanguageKind::Json),
+            "html" => Ok(LanguageKind::Html),
             _ => Err(format!(
                 "Language {} not supported, please use: `js`, `css` or `json`",
                 kind
@@ -82,6 +92,7 @@ impl LanguageKind {
             LanguageKind::Js => quote! { JsSyntaxKind },
             LanguageKind::Css => quote! { CssSyntaxKind },
             LanguageKind::Json => quote! { JsonSyntaxKind },
+            LanguageKind::Html => quote! { HtmlSyntaxKind },
         }
     }
 
@@ -90,6 +101,7 @@ impl LanguageKind {
             LanguageKind::Js => quote! { JsSyntaxNode },
             LanguageKind::Css => quote! { CssSyntaxNode },
             LanguageKind::Json => quote! { JsonSyntaxNode },
+            LanguageKind::Html => quote! { HtmlSyntaxNode },
         }
     }
 
@@ -98,6 +110,7 @@ impl LanguageKind {
             LanguageKind::Js => quote! { JsSyntaxElement },
             LanguageKind::Css => quote! { CssSyntaxElement },
             LanguageKind::Json => quote! { JsonSyntaxElement },
+            LanguageKind::Html => quote! { HtmlSyntaxElement },
         }
     }
 
@@ -106,6 +119,7 @@ impl LanguageKind {
             LanguageKind::Js => quote! { JsSyntaxToken },
             LanguageKind::Css => quote! { CssSyntaxToken },
             LanguageKind::Json => quote! { JsonSyntaxToken },
+            LanguageKind::Html => quote! { HtmlSyntaxToken },
         }
     }
 
@@ -114,6 +128,7 @@ impl LanguageKind {
             LanguageKind::Js => quote! { JsSyntaxElementChildren },
             LanguageKind::Css => quote! { CssSyntaxElementChildren },
             LanguageKind::Json => quote! { JsonSyntaxElementChildren },
+            LanguageKind::Html => quote! { HtmlSyntaxElementChildren },
         }
     }
 
@@ -122,6 +137,7 @@ impl LanguageKind {
             LanguageKind::Js => quote! { JsSyntaxList },
             LanguageKind::Css => quote! { CssSyntaxList },
             LanguageKind::Json => quote! { JsonSyntaxList },
+            LanguageKind::Html => quote! { HtmlSyntaxList },
         }
     }
 
@@ -130,6 +146,7 @@ impl LanguageKind {
             LanguageKind::Js => quote! { JsLanguage },
             LanguageKind::Css => quote! { CssLanguage },
             LanguageKind::Json => quote! { JsonLanguage },
+            LanguageKind::Html => quote! { HtmlLanguage },
         }
     }
 
@@ -138,6 +155,7 @@ impl LanguageKind {
             LanguageKind::Js => "biome_js_formatter",
             LanguageKind::Css => "biome_css_formatter",
             LanguageKind::Json => "biome_json_formatter",
+            LanguageKind::Html => "biome_html_formatter",
         }
     }
 
@@ -146,6 +164,7 @@ impl LanguageKind {
             LanguageKind::Js => "biome_js_syntax",
             LanguageKind::Css => "biome_css_syntax",
             LanguageKind::Json => "biome_json_syntax",
+            LanguageKind::Html => "biome_html_syntax",
         }
     }
 
@@ -154,6 +173,7 @@ impl LanguageKind {
             LanguageKind::Js => "biome_js_factory",
             LanguageKind::Css => "biome_css_factory",
             LanguageKind::Json => "biome_json_factory",
+            LanguageKind::Html => "biome_html_factory",
         }
     }
 }

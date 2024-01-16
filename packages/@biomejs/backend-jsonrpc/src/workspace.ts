@@ -1006,7 +1006,7 @@ export interface Style {
 	 */
 	all?: boolean;
 	/**
-	 * Disallow the use of arguments
+	 * Disallow the use of arguments.
 	 */
 	noArguments?: RuleConfiguration;
 	/**

@@ -8,6 +8,8 @@ title: noClassAssign (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://eslint.org/docs/latest/rules/no-class-assign" target="_blank"><code>no-class-assign</code></a>
+
 Disallow reassigning class members.
 
 A class declaration creates a variable that we can modify, however, the modification is a mistake in most cases.

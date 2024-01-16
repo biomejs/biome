@@ -1,5 +1,5 @@
 use crate::semantic_services::Semantic;
-use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::{global_identifier, AnyJsExpression};
 use biome_rowan::AstNode;
@@ -14,8 +14,6 @@ declare_rule! {
     /// If the executed code is somehow affected by a malicious party,
     /// then you may end up executing malicious code with the privileges of the caller.
     /// Moreover, changing variables in the caller's scope is expensive in modern _JavaScript_ interpreters.
-    ///
-    /// Source: https://eslint.org/docs/latest/rules/no-eval
     ///
     /// ## Examples
     ///
@@ -54,6 +52,7 @@ declare_rule! {
     pub(crate) NoGlobalEval {
         version: "1.5.0",
         name: "noGlobalEval",
+        source: RuleSource::Eslint("no-eval"),
         recommended: true,
     }
 }

@@ -1,4 +1,6 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{
+    context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind,
+};
 use biome_console::markup;
 use biome_js_syntax::JsModuleSource;
 use biome_rowan::{AstNode, TokenText};
@@ -73,6 +75,8 @@ declare_rule! {
     pub(crate) UseImportRestrictions {
         version: "1.0.0",
         name: "useImportRestrictions",
+        source: RuleSource::EslintImport("jsdoc"),
+        source_kind: RuleSourceKind::Inspired,
         recommended: false,
     }
 }

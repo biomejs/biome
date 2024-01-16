@@ -1,0 +1,49 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue_1514.jsx
+---
+# Input
+```jsx
+// https://github.com/biomejs/biome/issues/1514
+const SomeComponent = () => {
+    return (
+        <React.Fragment>
+            Your Data Dispute Request was sent to your current Employer
+        </React.Fragment>
+    );
+}
+```
+
+# Diagnostics
+```
+issue_1514.jsx:4:9 lint/complexity/noUselessFragments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid using unnecessary Fragment.
+  
+    2 │ const SomeComponent = () => {
+    3 │     return (
+  > 4 │         <React.Fragment>
+      │         ^^^^^^^^^^^^^^^^
+  > 5 │             Your Data Dispute Request was sent to your current Employer
+  > 6 │         </React.Fragment>
+      │         ^^^^^^^^^^^^^^^^^
+    7 │     );
+    8 │ }
+  
+  i A fragment is redundant if it contains only one child, or if it is the child of a html element, and is not a keyed fragment.
+  
+  i Unsafe fix: Remove the Fragment
+  
+    2 2 │   const SomeComponent = () => {
+    3 3 │       return (
+    4   │ - ········<React.Fragment>
+    5   │ - ············Your·Data·Dispute·Request·was·sent·to·your·current·Employer
+    6   │ - ········</React.Fragment>
+      4 │ + ········"Your·Data·Dispute·Request·was·sent·to·your·current·Employer"
+    7 5 │       );
+    8 6 │   }
+  
+
+```
+
+

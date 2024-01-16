@@ -22,7 +22,7 @@ use biome_diagnostics::{
     serde::Diagnostic as SerdeDiagnostic, Diagnostic, DiagnosticExt, Severity,
 };
 use biome_formatter::Printed;
-use biome_fs::RomePath;
+use biome_fs::{RomePath, BIOME_JSON};
 use biome_parser::AnyParse;
 use biome_rowan::NodeCache;
 use dashmap::{mapref::entry::Entry, DashMap};
@@ -154,24 +154,8 @@ impl WorkspaceServer {
     fn get_parse(
         &self,
         rome_path: RomePath,
-        feature: Option<FeatureName>,
+        _feature: Option<FeatureName>,
     ) -> Result<AnyParse, WorkspaceError> {
-        let ignored = if let Some(feature) = feature {
-            self.is_path_ignored(IsPathIgnoredParams {
-                rome_path: rome_path.clone(),
-                feature,
-            })?
-        } else {
-            false
-        };
-
-        if ignored {
-            return Err(WorkspaceError::file_ignored(format!(
-                "{}",
-                rome_path.to_path_buf().display()
-            )));
-        }
-
         match self.syntax.entry(rome_path) {
             Entry::Occupied(entry) => Ok(entry.get().clone()),
             Entry::Vacant(entry) => {
@@ -222,14 +206,33 @@ impl WorkspaceServer {
     /// Check whether a file is ignored in the top-level config `files.ignore`/`files.include`
     fn is_ignored_by_top_level_config(&self, path: &Path) -> bool {
         let settings = self.settings();
+        let is_included = settings.as_ref().files.included_files.is_empty()
+            || settings.as_ref().files.included_files.matches_path(path);
+        !is_included || settings.as_ref().files.ignored_files.matches_path(path)
+    }
 
-        if !settings.as_ref().files.ignored_files.is_empty() {
-            return settings.as_ref().files.ignored_files.matches_path(path);
-        } else if !settings.as_ref().files.included_files.is_empty() {
-            return !settings.as_ref().files.included_files.matches_path(path);
-        }
-
-        false
+    fn is_ignored_by_feature_config(&self, path: &Path, feature: &FeatureName) -> bool {
+        let settings = self.settings();
+        let (feature_included_files, feature_ignored_files) = match feature {
+            FeatureName::Format => {
+                let formatter = &settings.as_ref().formatter;
+                (&formatter.included_files, &formatter.ignored_files)
+            }
+            FeatureName::Lint => {
+                let linter = &settings.as_ref().linter;
+                (&linter.included_files, &linter.ignored_files)
+            }
+            FeatureName::OrganizeImports => {
+                let organize_imports = &settings.as_ref().organize_imports;
+                (
+                    &organize_imports.included_files,
+                    &organize_imports.ignored_files,
+                )
+            }
+        };
+        let is_feature_included =
+            feature_included_files.is_empty() || feature_included_files.matches_path(path);
+        !is_feature_included || feature_ignored_files.matches_path(path)
     }
 }
 
@@ -247,39 +250,37 @@ impl Workspace for WorkspaceServer {
             Entry::Vacant(entry) => {
                 let capabilities = self.get_file_capabilities(&params.path);
                 let language = Language::from_path(&params.path);
-                let file_name = params
-                    .path
-                    .file_name()
-                    .and_then(|file_name| file_name.to_str());
+                let path = params.path.as_path();
                 let settings = self.settings.read().unwrap();
                 let mut file_features = FileFeaturesResult::new();
 
-                if let Some(file_name) = file_name {
-                    if FileFeaturesResult::FILES_TO_NOT_PROCESS.contains(&file_name) {
-                        file_features.set_protected_for_all_features();
-                        return Ok(entry.insert(file_features).clone());
-                    }
-                }
-
                 file_features = file_features
                     .with_capabilities(&capabilities)
-                    .with_settings_and_language(&settings, &language, params.path.as_path());
+                    .with_settings_and_language(&settings, &language, path);
 
-                if settings.files.ignore_unknown {
-                    let language = self.get_language(&params.path);
-                    if language == Language::Unknown {
-                        file_features.ignore_not_supported();
+                if settings.files.ignore_unknown
+                    && language == Language::Unknown
+                    && self.get_language(&params.path) == Language::Unknown
+                {
+                    file_features.ignore_not_supported();
+                } else if path.file_name().and_then(|s| s.to_str()) == Some(BIOME_JSON) {
+                    // Never ignore Biome's config file
+                } else if self.is_ignored_by_top_level_config(path) {
+                    file_features.set_ignored_for_all_features();
+                } else {
+                    for feature in params.feature {
+                        if self.is_ignored_by_feature_config(path, &feature) {
+                            file_features.ignored(feature);
+                        }
                     }
                 }
-                for feature in params.feature {
-                    let is_ignored = self.is_path_ignored(IsPathIgnoredParams {
-                        rome_path: params.path.clone(),
-                        feature: feature.clone(),
-                    })?;
 
-                    if is_ignored {
-                        file_features.ignored(feature);
-                    }
+                // If the file is not ignored by at least one feature,
+                // then check that the file is not protected.
+                // Protected files must be ignored.
+                if !file_features.is_not_processed() && FileFeaturesResult::is_protected_file(path)
+                {
+                    file_features.set_protected_for_all_features();
                 }
 
                 Ok(entry.insert(file_features).clone())
@@ -288,53 +289,17 @@ impl Workspace for WorkspaceServer {
     }
 
     fn is_path_ignored(&self, params: IsPathIgnoredParams) -> Result<bool, WorkspaceError> {
-        let settings = self.settings();
         let path = params.rome_path.as_path();
-
-        let excluded_by_override = settings.as_ref().override_settings.is_path_excluded(path);
-        let included_by_override = settings.as_ref().override_settings.is_path_included(path);
-
-        // Overrides have top priority
-        if let Some(excluded_by_override) = excluded_by_override {
-            if excluded_by_override {
-                return Ok(true);
-            }
-        }
-
-        if let Some(included_by_override) = included_by_override {
-            if included_by_override {
-                return Ok(!included_by_override);
-            }
-        }
-
-        let (ignored_files, included_files) = match params.feature {
-            FeatureName::Format => {
-                let formatter = &settings.as_ref().formatter;
-
-                (&formatter.ignored_files, &formatter.included_files)
-            }
-            FeatureName::Lint => {
-                let linter = &settings.as_ref().linter;
-                (&linter.ignored_files, &linter.included_files)
-            }
-            FeatureName::OrganizeImports => {
-                let organize_imports = &settings.as_ref().organize_imports;
-                (
-                    &organize_imports.ignored_files,
-                    &organize_imports.included_files,
-                )
-            }
-        };
-
-        if !ignored_files.is_empty() {
-            if ignored_files.matches_path(path) {
-                return Ok(true);
-            }
-        } else if !included_files.is_empty() && included_files.matches_path(path) {
+        // Never ignore Biome's config file regardless `include`/`ignore`
+        if path.file_name().and_then(|s| s.to_str()) == Some(BIOME_JSON) {
             return Ok(false);
         }
-
-        Ok(self.is_ignored_by_top_level_config(path))
+        // Apply top-level `include`/`ignore`
+        if self.is_ignored_by_top_level_config(path) {
+            return Ok(true);
+        }
+        // Apply feature-level `include`/`ignore`
+        Ok(self.is_ignored_by_feature_config(path, &params.feature))
     }
 
     /// Update the global settings for this workspace

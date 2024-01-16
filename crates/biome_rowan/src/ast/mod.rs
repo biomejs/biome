@@ -319,6 +319,83 @@ pub trait AstNode: Clone {
     }
 }
 
+/// An AstNode that supports dynamic ordering of the fields it contains uses a
+/// `slot_map` to map the _declared_ order of fields to the _concrete_ order
+/// as parsed from the source content. Implementing this trait lets consumers
+///
+pub trait AstNodeSlotMap<const N: usize> {
+    /// Return the internal slot_map that was built when constructed from the
+    /// underlying [SyntaxNode].
+    fn slot_map(&self) -> &[u8; N];
+
+    /// Invert and sort the `slot_map` for the [AstNode] to return a mapping of
+    /// _concrete_ field ordering from the source to the _declared_ ordering of
+    /// the [AstNode].
+    ///
+    /// Note that the _entire_ slot map is inverted and returned, including
+    /// both the ordered and the unordered fields. Ordered fields will have
+    /// their slot positions fixed in both the original and the inverted slot
+    /// maps, since they can't be moved. Ordered fields also act as boundary
+    /// points for unordered fields, meaning the concrete order will never
+    /// allow the concrete slot of an unordered field to appear on the opposite
+    /// side of an ordered field, even if the field is empty, and the ordered
+    /// fields will _always_ have the same slot in both maps.
+    ///
+    /// Example: Given a grammar like:
+    ///   MultiplyVectorsNode =
+    ///     (Color
+    ///     || Number
+    ///     || String)
+    ///     'x'
+    ///     (Color
+    ///     || Number
+    ///     || String)
+    /// There are two sets of unordered fields here (the groups combined with
+    /// `||` operators). Each contains three fields, and then there is a single
+    /// ordered field between them, the `x` token. This Node declares a
+    /// `slot_map` with 7 indices. The first three can be mapped in any order,
+    /// and the last three can be mapped in any order, but the `x` token will
+    /// _always_ occupy the fourth slot (zero-based index 3).
+    ///
+    /// Now, given an input like `10 "hello" #fff x "bye" #000 20`, the
+    /// constructed [AstNode]'s slot_map would look like
+    /// `[2, 0, 1, 3, 6, 4, 5]`. The first `Color` field, declared as index 0,
+    /// appears at the 2nd index in the concrete source, so the value at index
+    /// 0 is 2, and so on for the rest of the fields.
+    ///
+    /// The inversion of this slot map, then, is `[1, 2, 0, 3, 5, 6, 4]`. To
+    /// compare these, think: the value 0 in the original `slot_map` appeared
+    /// at index 1, so index 0 in the inverted map has the _value_ 1, then
+    /// apply that for of the slots. As you can see `3` is still in the same
+    /// position, because it is an ordered field.
+    ///
+    /// ## Optional Fields
+    ///
+    /// It's also possible for unordered fields to be _optional_, meaning they
+    /// are not present in the concrete source. In this case, the sentinel
+    /// value of `255` ([`std::u8::MAX`]) is placed in the slot map. When
+    /// inverting the map, if a slot index cannot be found in the map, it is
+    /// preserved as the same sentinel value in the inverted map.
+    ///
+    /// Using the same grammar as before, the input `10 x #000` is also valid,
+    /// but is missing many of the optional fields. The `slot_map` for this
+    /// node would include sentinel values for all of the missing fields, like:
+    /// `[255, 0, 255, 3, 4, 255, 255]`. Inverting this map would then yield:
+    /// `[1, 255, 255, 3, 4, 255, 255]`. Each declared slot is still
+    /// represented in the inverted map, but only the fields that exist in the
+    /// concrete source have usable values.
+    fn concrete_order_slot_map(&self) -> [u8; N] {
+        let mut inverted = [u8::MAX; N];
+        for (declared_slot, concrete_slot) in self.slot_map().iter().enumerate() {
+            if *concrete_slot != u8::MAX {
+                inverted[*concrete_slot as usize] = declared_slot as u8;
+            }
+        }
+
+        inverted
+    }
+}
+
 pub trait SyntaxNodeCast<L: Language> {
     /// Tries to cast the current syntax node to specified AST node.
     ///

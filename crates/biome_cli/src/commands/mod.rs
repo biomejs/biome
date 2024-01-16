@@ -1,5 +1,6 @@
 use crate::cli_options::{cli_options, CliOptions, ColorsArg};
 use crate::diagnostics::DeprecatedConfigurationFile;
+use crate::execute::Stdin;
 use crate::logging::LoggingKind;
 use crate::{CliDiagnostic, LoggingLevel, VERSION};
 use biome_console::{markup, Console, ConsoleExt};
@@ -247,12 +248,19 @@ pub enum BiomeCommand {
     ),
     /// It updates the configuration when there are breaking changes
     #[bpaf(command)]
-    Migrate(
-        #[bpaf(external(cli_options), hide_usage)] CliOptions,
+    Migrate {
+        /// It attempts to find the files `.prettierrc`/`prettier.json` and `.prettierignore`, and map
+        /// Prettier's configuration into `biome.json`
+        #[bpaf(long("prettier"), switch, hide, hide_usage)]
+        prettier: bool,
+
+        #[bpaf(external, hide_usage)]
+        cli_options: CliOptions,
+
         /// Writes the new configuration file to disk
         #[bpaf(long("write"), switch)]
-        bool,
-    ),
+        write: bool,
+    },
 
     /// A command to retrieve the documentation of various aspects of the CLI.
     ///
@@ -293,7 +301,7 @@ impl BiomeCommand {
             | BiomeCommand::Lint { cli_options, .. }
             | BiomeCommand::Ci { cli_options, .. }
             | BiomeCommand::Format { cli_options, .. }
-            | BiomeCommand::Migrate(cli_options, _) => cli_options.colors.as_ref(),
+            | BiomeCommand::Migrate { cli_options, .. } => cli_options.colors.as_ref(),
             BiomeCommand::LspProxy(_)
             | BiomeCommand::Start(_)
             | BiomeCommand::Stop
@@ -312,7 +320,7 @@ impl BiomeCommand {
             | BiomeCommand::Lint { cli_options, .. }
             | BiomeCommand::Ci { cli_options, .. }
             | BiomeCommand::Format { cli_options, .. }
-            | BiomeCommand::Migrate(cli_options, _) => cli_options.use_server,
+            | BiomeCommand::Migrate { cli_options, .. } => cli_options.use_server,
             BiomeCommand::Init
             | BiomeCommand::Start(_)
             | BiomeCommand::Stop
@@ -333,7 +341,7 @@ impl BiomeCommand {
             | BiomeCommand::Lint { cli_options, .. }
             | BiomeCommand::Format { cli_options, .. }
             | BiomeCommand::Ci { cli_options, .. }
-            | BiomeCommand::Migrate(cli_options, _) => cli_options.verbose,
+            | BiomeCommand::Migrate { cli_options, .. } => cli_options.verbose,
             BiomeCommand::Version(_)
             | BiomeCommand::Rage(..)
             | BiomeCommand::Start(_)
@@ -352,7 +360,7 @@ impl BiomeCommand {
             | BiomeCommand::Lint { cli_options, .. }
             | BiomeCommand::Format { cli_options, .. }
             | BiomeCommand::Ci { cli_options, .. }
-            | BiomeCommand::Migrate(cli_options, _) => cli_options.log_level.clone(),
+            | BiomeCommand::Migrate { cli_options, .. } => cli_options.log_level.clone(),
             BiomeCommand::Version(_)
             | BiomeCommand::LspProxy(_)
             | BiomeCommand::Rage(..)
@@ -370,7 +378,7 @@ impl BiomeCommand {
             | BiomeCommand::Lint { cli_options, .. }
             | BiomeCommand::Format { cli_options, .. }
             | BiomeCommand::Ci { cli_options, .. }
-            | BiomeCommand::Migrate(cli_options, _) => cli_options.log_kind.clone(),
+            | BiomeCommand::Migrate { cli_options, .. } => cli_options.log_kind.clone(),
             BiomeCommand::Version(_)
             | BiomeCommand::Rage(..)
             | BiomeCommand::LspProxy(_)
@@ -425,4 +433,29 @@ pub(crate) fn validate_configuration_diagnostics(
     }
 
     Ok(())
+}
+
+/// Computes [Stdin] if the CLI has the necessary information.
+///
+/// ## Errors
+/// - If the user didn't provide anything via `stdin` but the option `--stdin-file-path` is passed.
+pub(crate) fn get_stdin(
+    stdin_file_path: Option<String>,
+    console: &mut dyn Console,
+    command_name: &str,
+) -> Result<Option<Stdin>, CliDiagnostic> {
+    let stdin = if let Some(stdin_file_path) = stdin_file_path {
+        let input_code = console.read();
+        if let Some(input_code) = input_code {
+            let path = PathBuf::from(stdin_file_path);
+            Some((path, input_code).into())
+        } else {
+            // we provided the argument without a piped stdin, we bail
+            return Err(CliDiagnostic::missing_argument("stdin", command_name));
+        }
+    } else {
+        None
+    };
+
+    Ok(stdin)
 }

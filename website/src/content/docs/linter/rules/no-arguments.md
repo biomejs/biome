@@ -8,7 +8,9 @@ title: noArguments (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
-Disallow the use of `arguments`
+Source: <a href="https://eslint.org/docs/latest/rules/prefer-rest-params" target="_blank"><code>prefer-rest-params</code></a>
+
+Disallow the use of `arguments`.
 
 ## Examples
 

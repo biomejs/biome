@@ -1,17 +1,17 @@
 use crate::changed::get_changed_files;
 use crate::cli_options::CliOptions;
-use crate::commands::validate_configuration_diagnostics;
+use crate::commands::{get_stdin, validate_configuration_diagnostics};
 use crate::{
     execute_mode, setup_cli_subscriber, CliDiagnostic, CliSession, Execution, TraversalMode,
 };
+use biome_deserialize::Merge;
 use biome_service::configuration::organize_imports::OrganizeImports;
 use biome_service::configuration::{
     load_configuration, FormatterConfiguration, LinterConfiguration, LoadedConfiguration,
 };
 use biome_service::workspace::{FixFileMode, UpdateSettingsParams};
-use biome_service::{Configuration, ConfigurationBasePath, MergeWith};
+use biome_service::Configuration;
 use std::ffi::OsString;
-use std::path::PathBuf;
 
 pub(crate) struct CheckCommandPayload {
     pub(crate) apply: bool,
@@ -29,7 +29,7 @@ pub(crate) struct CheckCommandPayload {
 
 /// Handler for the "check" command of the Biome CLI
 pub(crate) fn check(
-    mut session: CliSession,
+    session: CliSession,
     payload: CheckCommandPayload,
 ) -> Result<(), CliDiagnostic> {
     let CheckCommandPayload {
@@ -60,12 +60,8 @@ pub(crate) fn check(
         Some(FixFileMode::SafeAndUnsafeFixes)
     };
 
-    let base_path = match cli_options.config_path.as_ref() {
-        None => ConfigurationBasePath::default(),
-        Some(path) => ConfigurationBasePath::FromUser(PathBuf::from(path)),
-    };
-
-    let loaded_configuration = load_configuration(&session.app.fs, base_path)?;
+    let loaded_configuration =
+        load_configuration(&session.app.fs, cli_options.as_configuration_base_path())?;
     validate_configuration_diagnostics(
         &loaded_configuration,
         session.app.console,
@@ -102,26 +98,23 @@ pub(crate) fn check(
         organize_imports.enabled = organize_imports_enabled;
     }
 
-    fs_configuration.merge_with(configuration);
+    if let Some(mut configuration) = configuration {
+        if let Some(linter) = configuration.linter.as_mut() {
+            // Don't overwrite rules from the CLI configuration.
+            // Otherwise, rules that are disabled in the config file might
+            // become re-enabled due to the defaults included in the CLI
+            // configuration.
+            linter.rules = None;
+        }
+        fs_configuration.merge_with(configuration);
+    }
 
     // check if support of git ignore files is enabled
     let vcs_base_path = configuration_path.or(session.app.fs.working_directory());
     let (vcs_base_path, gitignore_matches) =
         fs_configuration.retrieve_gitignore_matches(&session.app.fs, vcs_base_path.as_deref())?;
 
-    let stdin = if let Some(stdin_file_path) = stdin_file_path {
-        let console = &mut session.app.console;
-        let input_code = console.read();
-        if let Some(input_code) = input_code {
-            let path = PathBuf::from(stdin_file_path);
-            Some((path, input_code))
-        } else {
-            // we provided the argument without a piped stdin, we bail
-            return Err(CliDiagnostic::missing_argument("stdin", "check"));
-        }
-    } else {
-        None
-    };
+    let stdin = get_stdin(stdin_file_path, &mut *session.app.console, "check")?;
 
     if since.is_some() && !changed {
         return Err(CliDiagnostic::incompatible_arguments("since", "changed"));

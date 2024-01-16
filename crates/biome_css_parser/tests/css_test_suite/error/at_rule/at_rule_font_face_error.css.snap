@@ -26,7 +26,7 @@ CssRoot {
                 ],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -101,7 +101,7 @@ CssRoot {
       0: AT@0..1 "@" [] []
       1: CSS_BOGUS_AT_RULE@1..11
         0: FONT_FACE_KW@1..11 "font-face" [] [Whitespace(" ")]
-    1: CSS_RULE@11..17
+    1: CSS_QUALIFIED_RULE@11..17
       0: CSS_SELECTOR_LIST@11..15
         0: CSS_COMPOUND_SELECTOR@11..15
           0: (empty)

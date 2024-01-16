@@ -1,6 +1,6 @@
 use biome_analyze::{
     context::RuleContext, declare_rule, AddVisitor, Phases, QueryMatch, Queryable, Rule,
-    RuleDiagnostic, ServiceBag, Visitor, VisitorContext,
+    RuleDiagnostic, RuleSource, ServiceBag, Visitor, VisitorContext,
 };
 use biome_console::markup;
 use biome_deserialize::{
@@ -35,11 +35,7 @@ declare_rule! {
     /// those that exceed a configured complexity threshold (default: 15).
     ///
     /// The complexity score is calculated based on the Cognitive Complexity
-    /// algorithm: http://redirect.sonarsource.com/doc/cognitive-complexity.html
-    ///
-    /// Source:
-    ///
-    /// * https://github.com/SonarSource/eslint-plugin-sonarjs/blob/HEAD/docs/rules/cognitive-complexity.md
+    /// algorithm: https://redirect.sonarsource.com/doc/cognitive-complexity.html
     ///
     /// ## Examples
     ///
@@ -79,6 +75,7 @@ declare_rule! {
     pub(crate) NoExcessiveCognitiveComplexity {
         version: "1.0.0",
         name: "noExcessiveCognitiveComplexity",
+        source: RuleSource::EslintSonarJs("cognitive-complexity"),
         recommended: false,
     }
 }
