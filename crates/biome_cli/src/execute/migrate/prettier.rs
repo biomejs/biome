@@ -409,6 +409,7 @@ pub(crate) struct FromPrettierConfiguration {
     /// Path of the Prettier configuration file
     configuration_path: Option<PathBuf>,
     /// Path of the `.prettierignore` file
+    #[allow(unused)]
     ignore_path: Option<PathBuf>,
 
     /// The translated Biome configuration, from the Prettier configuration
@@ -427,6 +428,7 @@ impl FromPrettierConfiguration {
         self.configuration_path = Some(path);
     }
 
+    #[allow(unused)]
     pub(crate) fn store_ignore_path(&mut self, path: PathBuf) {
         self.ignore_path = Some(path)
     }
