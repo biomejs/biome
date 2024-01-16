@@ -101,7 +101,7 @@ declare_rule! {
         version: "next",
         name: "useSortedClasses",
         recommended: false,
-        fix_kind: FixKind::Safe,
+        fix_kind: FixKind::Unsafe,
     }
 }
 
@@ -142,34 +142,25 @@ impl Rule for UseSortedClasses {
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
         let mut mutation = ctx.root().begin();
         match ctx.query() {
-            // TODO: make this DRYer
             AnyClassStringLike::JsStringLiteralExpression(string_literal) => {
                 let replacement = js_string_literal_expression(js_string_literal(state));
                 mutation.replace_node(string_literal.clone(), replacement);
-                Some(JsRuleAction {
-                    category: ActionCategory::QuickFix,
-                    applicability: Applicability::Always,
-                    message: markup! {
-                        "Sort the classes."
-                    }
-                    .to_owned(),
-                    mutation,
-                })
             }
             AnyClassStringLike::JsxString(jsx_string_node) => {
                 let replacement = jsx_string(js_string_literal(state));
                 mutation.replace_node(jsx_string_node.clone(), replacement);
-                Some(JsRuleAction {
-                    category: ActionCategory::QuickFix,
-                    applicability: Applicability::Always,
-                    message: markup! {
-                        "Sort the classes."
-                    }
-                    .to_owned(),
-                    mutation,
-                })
             }
-            _ => None,
-        }
+            AnyClassStringLike::JsTemplateChunkElement(_) => return None,
+        };
+
+        Some(JsRuleAction {
+            category: ActionCategory::QuickFix,
+            applicability: Applicability::MaybeIncorrect,
+            message: markup! {
+                "Sort the classes."
+            }
+            .to_owned(),
+            mutation,
+        })
     }
 }

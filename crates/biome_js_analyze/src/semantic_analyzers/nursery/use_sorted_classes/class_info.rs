@@ -30,7 +30,7 @@ enum UtilityMatch {
 
 impl UtilityMatch {
     /// Checks if a utility matches a target, and returns the result.
-    fn from(target: &String, utility_text: &str) -> UtilityMatch {
+    fn from(target: &str, utility_text: &str) -> UtilityMatch {
         // If the target ends with `$`, then it's an exact target.
         if target.ends_with('$') {
             // Check if the utility matches the target (without the final `$`) exactly.

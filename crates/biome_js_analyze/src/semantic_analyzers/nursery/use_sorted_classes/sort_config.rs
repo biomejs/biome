@@ -10,7 +10,7 @@ use std::collections::HashMap;
 /// A utility layer, containing its name and an ordered list of classes.
 pub struct UtilityLayer {
     pub name: String,
-    pub classes: Vec<String>,
+    pub classes: &'static [&'static str],
 }
 
 /// The utilities config, contains an ordered list of utility layers.

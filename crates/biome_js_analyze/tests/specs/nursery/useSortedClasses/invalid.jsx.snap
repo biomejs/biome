@@ -4,7 +4,7 @@ expression: invalid.jsx
 ---
 # Input
 ```jsx
-<div class="px-4 p-4" />;
+<div class="px-2 foo p-4 bar" />
 
 ```
 
@@ -14,14 +14,14 @@ invalid.jsx:1:12 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━�
 
   ! These CSS classes should be sorted.
   
-  > 1 │ <div class="px-4 p-4" />;
-      │            ^^^^^^^^^^
+  > 1 │ <div class="px-2 foo p-4 bar" />
+      │            ^^^^^^^^^^^^^^^^^^
     2 │ 
   
-  i Safe fix: Sort the classes.
+  i Unsafe fix: Sort the classes.
   
-    1   │ - <div·class="px-4·p-4"·/>;
-      1 │ + <div·class="p-4·px-4"·/>;
+    1   │ - <div·class="px-2·foo·p-4·bar"·/>
+      1 │ + <div·class="foo·bar·p-4·px-2"·/>
     2 2 │   
   
 
