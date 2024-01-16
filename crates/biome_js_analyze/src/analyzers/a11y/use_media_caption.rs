@@ -1,5 +1,5 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_js_syntax::{AnyJsxChild, JsxElement, TextRange};
@@ -7,8 +7,6 @@ use biome_rowan::AstNode;
 
 declare_rule! {
     /// Enforces that `audio` and `video` elements must have a `track` for captions.
-    ///
-    /// **ESLint Equivalent:** [media-has-caption](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/media-has-caption.md)
     ///
     /// ## Examples
     ///
@@ -35,6 +33,7 @@ declare_rule! {
     pub(crate) UseMediaCaption {
         version: "1.0.0",
         name: "useMediaCaption",
+        source: RuleSource::EslintJsxA11y("media-has-caption"),
         recommended: true,
     }
 }

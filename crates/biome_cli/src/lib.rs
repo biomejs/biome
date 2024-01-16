@@ -82,7 +82,7 @@ impl<'app> CliSession<'app> {
                 apply,
                 apply_unsafe,
                 cli_options,
-                configuration: rome_configuration,
+                configuration,
                 paths,
                 stdin_file_path,
                 linter_enabled,
@@ -96,7 +96,7 @@ impl<'app> CliSession<'app> {
                     apply_unsafe,
                     apply,
                     cli_options,
-                    configuration: rome_configuration,
+                    configuration,
                     paths,
                     stdin_file_path,
                     linter_enabled,
@@ -136,7 +136,7 @@ impl<'app> CliSession<'app> {
                 linter_enabled,
                 formatter_enabled,
                 organize_imports_enabled,
-                configuration: rome_configuration,
+                configuration,
                 paths,
                 cli_options,
                 changed,
@@ -147,7 +147,7 @@ impl<'app> CliSession<'app> {
                     linter_enabled,
                     formatter_enabled,
                     organize_imports_enabled,
-                    rome_configuration,
+                    configuration,
                     paths,
                     cli_options,
                     changed,
@@ -187,9 +187,11 @@ impl<'app> CliSession<'app> {
             BiomeCommand::Explain { doc } => commands::explain::explain(self, doc),
             BiomeCommand::Init => commands::init::init(self),
             BiomeCommand::LspProxy(config_path) => commands::daemon::lsp_proxy(config_path),
-            BiomeCommand::Migrate(cli_options, write) => {
-                commands::migrate::migrate(self, cli_options, write)
-            }
+            BiomeCommand::Migrate {
+                cli_options,
+                write,
+                prettier,
+            } => commands::migrate::migrate(self, cli_options, write, prettier),
             BiomeCommand::RunServer {
                 stop_on_disconnect,
                 config_path,

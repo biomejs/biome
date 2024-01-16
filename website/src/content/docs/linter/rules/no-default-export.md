@@ -4,6 +4,8 @@ title: noDefaultExport (since v1.4.0)
 
 **Diagnostic Category: `lint/style/noDefaultExport`**
 
+Source: <a href="https://github.com/import-js/eslint-plugin-import/blob/main/docs/rules/no-default-export.md" target="_blank"><code>no-default-export</code></a>
+
 Disallow default exports.
 
 Default exports cannot be easily discovered inside an editor:
@@ -20,8 +22,6 @@ For all these reasons, a team may want to disallow default exports.
 
 Note that this rule disallows only default exports in EcmaScript Module.
 It ignores CommonJS default exports.
-
-Source: https://github.com/import-js/eslint-plugin-import/blob/main/docs/rules/no-default-export.md
 
 ## Examples
 

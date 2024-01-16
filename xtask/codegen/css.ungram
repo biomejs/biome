@@ -54,6 +54,7 @@ CssBogusMediaQuery =  SyntaxElement*
 CssBogusProperty =  SyntaxElement*
 CssBogusUrlModifier =  SyntaxElement*
 CssBogusPropertyValue = SyntaxElement*
+CssBogusDocumentMatcher = SyntaxElement*
 
 CssRoot =
 	bom: 'UNICODE_BOM'?
@@ -63,14 +64,13 @@ CssRoot =
 CssRuleList = AnyCssRule*
 
 AnyCssRule =
-	CssRule
+	CssQualifiedRule
 	| CssAtRule
 	| CssBogusRule
 
-
 // .header { color: red }
 // ^^^^^^^^^^^^^^^^^^^^^
-CssRule =
+CssQualifiedRule =
 	prelude: CssSelectorList
 	block: AnyCssDeclarationListBlock
 
@@ -405,6 +405,7 @@ CssPseudoElementFunctionIdentifier =
 
 /////////////
 // COMMON BLOCKS
+// https://drafts.csswg.org/css-syntax-3/#typedef-declaration-rule-list
 ////////////
 
 // @page :left { background: red; @media (500px <= width <= 500px) {  } }
@@ -699,6 +700,8 @@ AnyCssAtRule =
 	| CssScopeAtRule
 	| CssImportAtRule
 	| CssNamespaceAtRule
+	| CssStartingStyleAtRule
+	| CssDocumentAtRule
 	| CssBogusAtRule
 
 // @charset "UTF-8";
@@ -1447,6 +1450,52 @@ CssNamespaceAtRule =
 	';'
 
 AnyCssNamespaceUrl = CssUrlFunction | CssString
+
+// https://drafts.csswg.org/css-transitions-2/#at-ruledef-starting-style
+// @starting-style {
+//     rulesets
+//   }
+//
+// selector {
+//  @starting-style {
+//    declarations
+//  }
+// }
+CssStartingStyleAtRule =
+	'starting-style'
+	block: AnyCssStartingStyleBlock
+
+AnyCssStartingStyleBlock =
+	CssRuleListBlock
+	| CssDeclarationListBlock
+	| CssBogusBlock
+
+// https://www.w3.org/TR/2012/WD-css3-conditional-20120911/#at-document
+// @document [ <url>                   |
+//            url-prefix(<string>)     |
+//            domain(<string>)         |
+//            media-document(<string>) |
+//            regexp(<string>)
+//          ]# {
+//  <group-rule-body>
+// }
+CssDocumentAtRule =
+	'document'
+	matchers: CssDocumentMatcherList
+	block: AnyCssRuleListBlock
+
+CssDocumentMatcherList = AnyCssDocumentMatcher (',' AnyCssDocumentMatcher)* ','?
+
+AnyCssDocumentMatcher =
+	CssUrlFunction
+	| CssDocumentCustomMatcher
+	| CssBogusDocumentMatcher
+
+CssDocumentCustomMatcher =
+	name: ('url-prefix' | 'domain' | 'media-document' | 'regexp')
+	'('
+	value: CssString
+	')'
 
 ///////////////
 // AUXILIARY

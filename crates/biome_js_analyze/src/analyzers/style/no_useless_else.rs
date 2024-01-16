@@ -2,6 +2,7 @@ use std::borrow::Cow;
 
 use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
+    RuleSource, RuleSourceKind,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
@@ -87,6 +88,8 @@ declare_rule! {
     pub(crate) NoUselessElse {
         version: "1.3.0",
         name: "noUselessElse",
+        source: RuleSource::Eslint("no-else-return"),
+        source_kind: RuleSourceKind::Inspired,
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }

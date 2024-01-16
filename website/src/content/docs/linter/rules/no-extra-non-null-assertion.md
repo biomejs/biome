@@ -8,12 +8,12 @@ title: noExtraNonNullAssertion (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://typescript-eslint.io/rules/no-extra-non-null-assertion" target="_blank"><code>no-extra-non-null-assertion</code></a>
+
 Prevents the wrong usage of the non-null assertion operator (`!`) in TypeScript files.
 
 >The `!` non-null assertion operator in TypeScript is used to assert that a value's type does not include `null` or `undefined`. Using the operator any more than once on a single value does nothing.
 
-
-Source: https://typescript-eslint.io/rules/no-extra-non-null-assertion
 
 ## Examples
 

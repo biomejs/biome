@@ -1,6 +1,6 @@
 use std::collections::VecDeque;
 
-use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_control_flow::{
     builder::{BlockId, ROOT_BLOCK_ID},
@@ -18,8 +18,6 @@ declare_rule! {
     ///
     /// Switch clauses in `switch` statements fall through by default.
     /// This can lead to unexpected behavior when forgotten.
-    ///
-    /// Source: https://eslint.org/docs/latest/rules/no-fallthrough
     ///
     /// ## Examples
     ///
@@ -57,6 +55,7 @@ declare_rule! {
     pub(crate) NoFallthroughSwitchClause {
         version: "1.0.0",
         name: "noFallthroughSwitchClause",
+        source: RuleSource::Eslint("no-fallthrough"),
         recommended: true,
     }
 }

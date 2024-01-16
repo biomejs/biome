@@ -8,6 +8,8 @@ title: useExportType (since v1.5.0)
 This rule is part of the [nursery](/linter/rules/#nursery) group.
 :::
 
+Inspired from: <a href="https://typescript-eslint.io/rules/consistent-type-exports" target="_blank"><code>consistent-type-exports</code></a>
+
 Promotes the use of `export type` for types.
 
 _TypeScript_ allows specifying a `type` marker on an `export` to indicate that the `export` doesn't exist at runtime.

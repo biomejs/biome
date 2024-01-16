@@ -1,5 +1,5 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::{markup, MarkupBuf};
 use biome_js_syntax::{
     AnyJsClass, AnyJsExpression, JsAssignmentOperator, JsConstructorClassMember, JsLogicalOperator,
@@ -48,6 +48,7 @@ declare_rule! {
     pub(crate) NoInvalidConstructorSuper {
         version: "1.0.0",
         name: "noInvalidConstructorSuper",
+        source: RuleSource::Eslint("constructor-super"),
         recommended: true,
     }
 }

@@ -1,7 +1,7 @@
 use crate::semantic_services::Semantic;
 use crate::JsRuleAction;
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
+    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
@@ -17,8 +17,6 @@ declare_rule! {
     ///
     /// > In JavaScript, prior to ES6, standalone code blocks delimited by curly braces do not create a new scope and have no use.
     /// > In ES6, code blocks may create a new scope if a block-level binding (let and const), a class declaration or a function declaration (in strict mode) are present. A block is not considered redundant in these cases.
-    ///
-    /// Source: https://eslint.org/docs/latest/rules/no-lone-blocks
     ///
     /// ## Examples
     ///
@@ -48,6 +46,7 @@ declare_rule! {
     pub(crate) NoUselessLoneBlockStatements {
         version: "1.3.3",
         name: "noUselessLoneBlockStatements",
+        source: RuleSource::Eslint("no-lone-blocks"),
         recommended: false,
         fix_kind: FixKind::Unsafe,
     }

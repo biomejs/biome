@@ -1,3 +1,4 @@
+use biome_analyze::RuleSource;
 use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
 use biome_js_syntax::{
     AnyJsClassMemberName, JsClassMemberList, JsGetterClassMember, JsMethodClassMember,
@@ -86,6 +87,7 @@ declare_rule! {
     pub(crate) NoDuplicateClassMembers {
         version: "1.0.0",
         name: "noDuplicateClassMembers",
+        source: RuleSource::Eslint("no-dupe-class-members"),
         recommended: true,
     }
 }

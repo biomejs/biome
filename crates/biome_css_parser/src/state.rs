@@ -11,12 +11,22 @@ pub(crate) struct CssParserState {
     /// The challenge is, that it isn't possible to tell which of the two kinds it is until the parser
     /// processed all of `(a, b)`.
     pub(crate) speculative_parsing: bool,
+
+    /// Indicates whether the parser is currently dealing with a nesting block in the CSS document.
+    ///
+    /// This field is essential for understanding the current context of the parser. When set to `true`,
+    /// it indicates that the parser is inside a nested or inner element, such as rules within media queries
+    /// or other nested structures. Conversely, when set to `false`, it implies that the parser is at the root level,
+    /// handling top-level `@rules` or style declarations directly under the stylesheet.
+    /// This distinction is critical for correctly interpreting and parsing different sections of a CSS document.
+    pub(crate) is_nesting_block: bool,
 }
 
 impl CssParserState {
     pub fn new() -> Self {
         Self {
             speculative_parsing: false,
+            is_nesting_block: false,
         }
     }
 }

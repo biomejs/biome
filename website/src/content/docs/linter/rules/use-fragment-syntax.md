@@ -4,6 +4,8 @@ title: useFragmentSyntax (since v1.0.0)
 
 **Diagnostic Category: `lint/style/useFragmentSyntax`**
 
+Source: <a href="https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/jsx-fragments.md" target="_blank"><code>jsx-fragments</code></a>
+
 This rule enforces the use of `<>...</>` over `<Fragment>...</Fragment>`.
 
 The shorthand fragment syntax saves keystrokes and is only inapplicable when keys are required.

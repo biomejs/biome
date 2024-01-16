@@ -1,0 +1,626 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@document url("https://www.example.com/") {
+	h1 {
+		color: green;
+	}
+}
+
+@document url("http://www.w3.org/"), url-prefix("http://www.w3.org/Style/"), domain("mozilla.org"), media-document("video"), regexp("https:.*") {
+	body {
+		color: purple;
+		background: yellow;
+	}
+}
+
+@document url(https://www.example.com/) {}
+@-moz-document url("https://www.example.com/") {}
+@-moz-document/* near */ /* filter */ url("example.com/{") /* a */ {}
+
+@document url("https://www.example.com/") {
+	@media screen and (min-width: 900px) {
+		article {
+			padding: 1rem 3rem;
+		}
+	}
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssDocumentAtRule {
+                document_token: DOCUMENT_KW@1..10 "document" [] [Whitespace(" ")],
+                matchers: CssDocumentMatcherList [
+                    CssUrlFunction {
+                        name: URL_KW@10..13 "url" [] [],
+                        l_paren_token: L_PAREN@13..14 "(" [] [],
+                        value: CssString {
+                            value_token: CSS_STRING_LITERAL@14..40 "\"https://www.example.com/\"" [] [],
+                        },
+                        modifiers: CssUrlModifierList [],
+                        r_paren_token: R_PAREN@40..42 ")" [] [Whitespace(" ")],
+                    },
+                ],
+                block: CssRuleListBlock {
+                    l_curly_token: L_CURLY@42..43 "{" [] [],
+                    rules: CssRuleList [
+                        CssQualifiedRule {
+                            prelude: CssSelectorList [
+                                CssCompoundSelector {
+                                    nesting_selector_token: missing (optional),
+                                    simple_selector: CssTypeSelector {
+                                        namespace: missing (optional),
+                                        ident: CssIdentifier {
+                                            value_token: IDENT@43..48 "h1" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
+                                        },
+                                    },
+                                    sub_selectors: CssSubSelectorList [],
+                                },
+                            ],
+                            block: CssDeclarationListBlock {
+                                l_curly_token: L_CURLY@48..49 "{" [] [],
+                                declarations: CssDeclarationList [
+                                    CssDeclaration {
+                                        property: CssGenericProperty {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@49..57 "color" [Newline("\n"), Whitespace("\t\t")] [],
+                                            },
+                                            colon_token: COLON@57..59 ":" [] [Whitespace(" ")],
+                                            value: CssGenericComponentValueList [
+                                                CssIdentifier {
+                                                    value_token: IDENT@59..64 "green" [] [],
+                                                },
+                                            ],
+                                        },
+                                        important: missing (optional),
+                                    },
+                                    SEMICOLON@64..65 ";" [] [],
+                                ],
+                                r_curly_token: R_CURLY@65..68 "}" [Newline("\n"), Whitespace("\t")] [],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@68..70 "}" [Newline("\n")] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@70..73 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssDocumentAtRule {
+                document_token: DOCUMENT_KW@73..82 "document" [] [Whitespace(" ")],
+                matchers: CssDocumentMatcherList [
+                    CssUrlFunction {
+                        name: URL_KW@82..85 "url" [] [],
+                        l_paren_token: L_PAREN@85..86 "(" [] [],
+                        value: CssString {
+                            value_token: CSS_STRING_LITERAL@86..106 "\"http://www.w3.org/\"" [] [],
+                        },
+                        modifiers: CssUrlModifierList [],
+                        r_paren_token: R_PAREN@106..107 ")" [] [],
+                    },
+                    COMMA@107..109 "," [] [Whitespace(" ")],
+                    CssDocumentCustomMatcher {
+                        name: URL_PREFIX_KW@109..119 "url-prefix" [] [],
+                        l_paren_token: L_PAREN@119..120 "(" [] [],
+                        value: CssString {
+                            value_token: CSS_STRING_LITERAL@120..146 "\"http://www.w3.org/Style/\"" [] [],
+                        },
+                        r_paren_token: R_PAREN@146..147 ")" [] [],
+                    },
+                    COMMA@147..149 "," [] [Whitespace(" ")],
+                    CssDocumentCustomMatcher {
+                        name: DOMAIN_KW@149..155 "domain" [] [],
+                        l_paren_token: L_PAREN@155..156 "(" [] [],
+                        value: CssString {
+                            value_token: CSS_STRING_LITERAL@156..169 "\"mozilla.org\"" [] [],
+                        },
+                        r_paren_token: R_PAREN@169..170 ")" [] [],
+                    },
+                    COMMA@170..172 "," [] [Whitespace(" ")],
+                    CssDocumentCustomMatcher {
+                        name: MEDIA_DOCUMENT_KW@172..186 "media-document" [] [],
+                        l_paren_token: L_PAREN@186..187 "(" [] [],
+                        value: CssString {
+                            value_token: CSS_STRING_LITERAL@187..194 "\"video\"" [] [],
+                        },
+                        r_paren_token: R_PAREN@194..195 ")" [] [],
+                    },
+                    COMMA@195..197 "," [] [Whitespace(" ")],
+                    CssDocumentCustomMatcher {
+                        name: REGEXP_KW@197..203 "regexp" [] [],
+                        l_paren_token: L_PAREN@203..204 "(" [] [],
+                        value: CssString {
+                            value_token: CSS_STRING_LITERAL@204..214 "\"https:.*\"" [] [],
+                        },
+                        r_paren_token: R_PAREN@214..216 ")" [] [Whitespace(" ")],
+                    },
+                ],
+                block: CssRuleListBlock {
+                    l_curly_token: L_CURLY@216..217 "{" [] [],
+                    rules: CssRuleList [
+                        CssQualifiedRule {
+                            prelude: CssSelectorList [
+                                CssCompoundSelector {
+                                    nesting_selector_token: missing (optional),
+                                    simple_selector: CssTypeSelector {
+                                        namespace: missing (optional),
+                                        ident: CssIdentifier {
+                                            value_token: IDENT@217..224 "body" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")],
+                                        },
+                                    },
+                                    sub_selectors: CssSubSelectorList [],
+                                },
+                            ],
+                            block: CssDeclarationListBlock {
+                                l_curly_token: L_CURLY@224..225 "{" [] [],
+                                declarations: CssDeclarationList [
+                                    CssDeclaration {
+                                        property: CssGenericProperty {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@225..233 "color" [Newline("\n"), Whitespace("\t\t")] [],
+                                            },
+                                            colon_token: COLON@233..235 ":" [] [Whitespace(" ")],
+                                            value: CssGenericComponentValueList [
+                                                CssIdentifier {
+                                                    value_token: IDENT@235..241 "purple" [] [],
+                                                },
+                                            ],
+                                        },
+                                        important: missing (optional),
+                                    },
+                                    SEMICOLON@241..242 ";" [] [],
+                                    CssDeclaration {
+                                        property: CssGenericProperty {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@242..255 "background" [Newline("\n"), Whitespace("\t\t")] [],
+                                            },
+                                            colon_token: COLON@255..257 ":" [] [Whitespace(" ")],
+                                            value: CssGenericComponentValueList [
+                                                CssIdentifier {
+                                                    value_token: IDENT@257..263 "yellow" [] [],
+                                                },
+                                            ],
+                                        },
+                                        important: missing (optional),
+                                    },
+                                    SEMICOLON@263..264 ";" [] [],
+                                ],
+                                r_curly_token: R_CURLY@264..267 "}" [Newline("\n"), Whitespace("\t")] [],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@267..269 "}" [Newline("\n")] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@269..272 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssDocumentAtRule {
+                document_token: DOCUMENT_KW@272..281 "document" [] [Whitespace(" ")],
+                matchers: CssDocumentMatcherList [
+                    CssUrlFunction {
+                        name: URL_KW@281..284 "url" [] [],
+                        l_paren_token: L_PAREN@284..285 "(" [] [],
+                        value: CssUrlValueRaw {
+                            value_token: CSS_URL_VALUE_RAW_LITERAL@285..309 "https://www.example.com/" [] [],
+                        },
+                        modifiers: CssUrlModifierList [],
+                        r_paren_token: R_PAREN@309..311 ")" [] [Whitespace(" ")],
+                    },
+                ],
+                block: CssRuleListBlock {
+                    l_curly_token: L_CURLY@311..312 "{" [] [],
+                    rules: CssRuleList [],
+                    r_curly_token: R_CURLY@312..313 "}" [] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@313..315 "@" [Newline("\n")] [],
+            rule: CssDocumentAtRule {
+                document_token: DOCUMENT_KW@315..329 "-moz-document" [] [Whitespace(" ")],
+                matchers: CssDocumentMatcherList [
+                    CssUrlFunction {
+                        name: URL_KW@329..332 "url" [] [],
+                        l_paren_token: L_PAREN@332..333 "(" [] [],
+                        value: CssString {
+                            value_token: CSS_STRING_LITERAL@333..359 "\"https://www.example.com/\"" [] [],
+                        },
+                        modifiers: CssUrlModifierList [],
+                        r_paren_token: R_PAREN@359..361 ")" [] [Whitespace(" ")],
+                    },
+                ],
+                block: CssRuleListBlock {
+                    l_curly_token: L_CURLY@361..362 "{" [] [],
+                    rules: CssRuleList [],
+                    r_curly_token: R_CURLY@362..363 "}" [] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@363..365 "@" [Newline("\n")] [],
+            rule: CssDocumentAtRule {
+                document_token: DOCUMENT_KW@365..402 "-moz-document" [] [Comments("/* near */"), Whitespace(" "), Comments("/* filter */"), Whitespace(" ")],
+                matchers: CssDocumentMatcherList [
+                    CssUrlFunction {
+                        name: URL_KW@402..405 "url" [] [],
+                        l_paren_token: L_PAREN@405..406 "(" [] [],
+                        value: CssString {
+                            value_token: CSS_STRING_LITERAL@406..421 "\"example.com/{\"" [] [],
+                        },
+                        modifiers: CssUrlModifierList [],
+                        r_paren_token: R_PAREN@421..431 ")" [] [Whitespace(" "), Comments("/* a */"), Whitespace(" ")],
+                    },
+                ],
+                block: CssRuleListBlock {
+                    l_curly_token: L_CURLY@431..432 "{" [] [],
+                    rules: CssRuleList [],
+                    r_curly_token: R_CURLY@432..433 "}" [] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@433..436 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssDocumentAtRule {
+                document_token: DOCUMENT_KW@436..445 "document" [] [Whitespace(" ")],
+                matchers: CssDocumentMatcherList [
+                    CssUrlFunction {
+                        name: URL_KW@445..448 "url" [] [],
+                        l_paren_token: L_PAREN@448..449 "(" [] [],
+                        value: CssString {
+                            value_token: CSS_STRING_LITERAL@449..475 "\"https://www.example.com/\"" [] [],
+                        },
+                        modifiers: CssUrlModifierList [],
+                        r_paren_token: R_PAREN@475..477 ")" [] [Whitespace(" ")],
+                    },
+                ],
+                block: CssRuleListBlock {
+                    l_curly_token: L_CURLY@477..478 "{" [] [],
+                    rules: CssRuleList [
+                        CssAtRule {
+                            at_token: AT@478..481 "@" [Newline("\n"), Whitespace("\t")] [],
+                            rule: CssMediaAtRule {
+                                media_token: MEDIA_KW@481..487 "media" [] [Whitespace(" ")],
+                                queries: CssMediaQueryList [
+                                    CssMediaAndTypeQuery {
+                                        left: CssMediaTypeQuery {
+                                            modifier: missing (optional),
+                                            ty: CssMediaType {
+                                                value: CssIdentifier {
+                                                    value_token: IDENT@487..494 "screen" [] [Whitespace(" ")],
+                                                },
+                                            },
+                                        },
+                                        and_token: AND_KW@494..498 "and" [] [Whitespace(" ")],
+                                        right: CssMediaFeatureInParens {
+                                            l_paren_token: L_PAREN@498..499 "(" [] [],
+                                            feature: CssQueryFeaturePlain {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@499..508 "min-width" [] [],
+                                                },
+                                                colon_token: COLON@508..510 ":" [] [Whitespace(" ")],
+                                                value: CssRegularDimension {
+                                                    value_token: CSS_NUMBER_LITERAL@510..513 "900" [] [],
+                                                    unit_token: IDENT@513..515 "px" [] [],
+                                                },
+                                            },
+                                            r_paren_token: R_PAREN@515..517 ")" [] [Whitespace(" ")],
+                                        },
+                                    },
+                                ],
+                                block: CssRuleListBlock {
+                                    l_curly_token: L_CURLY@517..518 "{" [] [],
+                                    rules: CssRuleList [
+                                        CssQualifiedRule {
+                                            prelude: CssSelectorList [
+                                                CssCompoundSelector {
+                                                    nesting_selector_token: missing (optional),
+                                                    simple_selector: CssTypeSelector {
+                                                        namespace: missing (optional),
+                                                        ident: CssIdentifier {
+                                                            value_token: IDENT@518..529 "article" [Newline("\n"), Whitespace("\t\t")] [Whitespace(" ")],
+                                                        },
+                                                    },
+                                                    sub_selectors: CssSubSelectorList [],
+                                                },
+                                            ],
+                                            block: CssDeclarationListBlock {
+                                                l_curly_token: L_CURLY@529..530 "{" [] [],
+                                                declarations: CssDeclarationList [
+                                                    CssDeclaration {
+                                                        property: CssGenericProperty {
+                                                            name: CssIdentifier {
+                                                                value_token: IDENT@530..541 "padding" [Newline("\n"), Whitespace("\t\t\t")] [],
+                                                            },
+                                                            colon_token: COLON@541..543 ":" [] [Whitespace(" ")],
+                                                            value: CssGenericComponentValueList [
+                                                                CssRegularDimension {
+                                                                    value_token: CSS_NUMBER_LITERAL@543..544 "1" [] [],
+                                                                    unit_token: IDENT@544..548 "rem" [] [Whitespace(" ")],
+                                                                },
+                                                                CssRegularDimension {
+                                                                    value_token: CSS_NUMBER_LITERAL@548..549 "3" [] [],
+                                                                    unit_token: IDENT@549..552 "rem" [] [],
+                                                                },
+                                                            ],
+                                                        },
+                                                        important: missing (optional),
+                                                    },
+                                                    SEMICOLON@552..553 ";" [] [],
+                                                ],
+                                                r_curly_token: R_CURLY@553..557 "}" [Newline("\n"), Whitespace("\t\t")] [],
+                                            },
+                                        },
+                                    ],
+                                    r_curly_token: R_CURLY@557..560 "}" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@560..562 "}" [Newline("\n")] [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@562..563 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..563
+  0: (empty)
+  1: CSS_RULE_LIST@0..562
+    0: CSS_AT_RULE@0..70
+      0: AT@0..1 "@" [] []
+      1: CSS_DOCUMENT_AT_RULE@1..70
+        0: DOCUMENT_KW@1..10 "document" [] [Whitespace(" ")]
+        1: CSS_DOCUMENT_MATCHER_LIST@10..42
+          0: CSS_URL_FUNCTION@10..42
+            0: URL_KW@10..13 "url" [] []
+            1: L_PAREN@13..14 "(" [] []
+            2: CSS_STRING@14..40
+              0: CSS_STRING_LITERAL@14..40 "\"https://www.example.com/\"" [] []
+            3: CSS_URL_MODIFIER_LIST@40..40
+            4: R_PAREN@40..42 ")" [] [Whitespace(" ")]
+        2: CSS_RULE_LIST_BLOCK@42..70
+          0: L_CURLY@42..43 "{" [] []
+          1: CSS_RULE_LIST@43..68
+            0: CSS_QUALIFIED_RULE@43..68
+              0: CSS_SELECTOR_LIST@43..48
+                0: CSS_COMPOUND_SELECTOR@43..48
+                  0: (empty)
+                  1: CSS_TYPE_SELECTOR@43..48
+                    0: (empty)
+                    1: CSS_IDENTIFIER@43..48
+                      0: IDENT@43..48 "h1" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
+                  2: CSS_SUB_SELECTOR_LIST@48..48
+              1: CSS_DECLARATION_LIST_BLOCK@48..68
+                0: L_CURLY@48..49 "{" [] []
+                1: CSS_DECLARATION_LIST@49..65
+                  0: CSS_DECLARATION@49..64
+                    0: CSS_GENERIC_PROPERTY@49..64
+                      0: CSS_IDENTIFIER@49..57
+                        0: IDENT@49..57 "color" [Newline("\n"), Whitespace("\t\t")] []
+                      1: COLON@57..59 ":" [] [Whitespace(" ")]
+                      2: CSS_GENERIC_COMPONENT_VALUE_LIST@59..64
+                        0: CSS_IDENTIFIER@59..64
+                          0: IDENT@59..64 "green" [] []
+                    1: (empty)
+                  1: SEMICOLON@64..65 ";" [] []
+                2: R_CURLY@65..68 "}" [Newline("\n"), Whitespace("\t")] []
+          2: R_CURLY@68..70 "}" [Newline("\n")] []
+    1: CSS_AT_RULE@70..269
+      0: AT@70..73 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_DOCUMENT_AT_RULE@73..269
+        0: DOCUMENT_KW@73..82 "document" [] [Whitespace(" ")]
+        1: CSS_DOCUMENT_MATCHER_LIST@82..216
+          0: CSS_URL_FUNCTION@82..107
+            0: URL_KW@82..85 "url" [] []
+            1: L_PAREN@85..86 "(" [] []
+            2: CSS_STRING@86..106
+              0: CSS_STRING_LITERAL@86..106 "\"http://www.w3.org/\"" [] []
+            3: CSS_URL_MODIFIER_LIST@106..106
+            4: R_PAREN@106..107 ")" [] []
+          1: COMMA@107..109 "," [] [Whitespace(" ")]
+          2: CSS_DOCUMENT_CUSTOM_MATCHER@109..147
+            0: URL_PREFIX_KW@109..119 "url-prefix" [] []
+            1: L_PAREN@119..120 "(" [] []
+            2: CSS_STRING@120..146
+              0: CSS_STRING_LITERAL@120..146 "\"http://www.w3.org/Style/\"" [] []
+            3: R_PAREN@146..147 ")" [] []
+          3: COMMA@147..149 "," [] [Whitespace(" ")]
+          4: CSS_DOCUMENT_CUSTOM_MATCHER@149..170
+            0: DOMAIN_KW@149..155 "domain" [] []
+            1: L_PAREN@155..156 "(" [] []
+            2: CSS_STRING@156..169
+              0: CSS_STRING_LITERAL@156..169 "\"mozilla.org\"" [] []
+            3: R_PAREN@169..170 ")" [] []
+          5: COMMA@170..172 "," [] [Whitespace(" ")]
+          6: CSS_DOCUMENT_CUSTOM_MATCHER@172..195
+            0: MEDIA_DOCUMENT_KW@172..186 "media-document" [] []
+            1: L_PAREN@186..187 "(" [] []
+            2: CSS_STRING@187..194
+              0: CSS_STRING_LITERAL@187..194 "\"video\"" [] []
+            3: R_PAREN@194..195 ")" [] []
+          7: COMMA@195..197 "," [] [Whitespace(" ")]
+          8: CSS_DOCUMENT_CUSTOM_MATCHER@197..216
+            0: REGEXP_KW@197..203 "regexp" [] []
+            1: L_PAREN@203..204 "(" [] []
+            2: CSS_STRING@204..214
+              0: CSS_STRING_LITERAL@204..214 "\"https:.*\"" [] []
+            3: R_PAREN@214..216 ")" [] [Whitespace(" ")]
+        2: CSS_RULE_LIST_BLOCK@216..269
+          0: L_CURLY@216..217 "{" [] []
+          1: CSS_RULE_LIST@217..267
+            0: CSS_QUALIFIED_RULE@217..267
+              0: CSS_SELECTOR_LIST@217..224
+                0: CSS_COMPOUND_SELECTOR@217..224
+                  0: (empty)
+                  1: CSS_TYPE_SELECTOR@217..224
+                    0: (empty)
+                    1: CSS_IDENTIFIER@217..224
+                      0: IDENT@217..224 "body" [Newline("\n"), Whitespace("\t")] [Whitespace(" ")]
+                  2: CSS_SUB_SELECTOR_LIST@224..224
+              1: CSS_DECLARATION_LIST_BLOCK@224..267
+                0: L_CURLY@224..225 "{" [] []
+                1: CSS_DECLARATION_LIST@225..264
+                  0: CSS_DECLARATION@225..241
+                    0: CSS_GENERIC_PROPERTY@225..241
+                      0: CSS_IDENTIFIER@225..233
+                        0: IDENT@225..233 "color" [Newline("\n"), Whitespace("\t\t")] []
+                      1: COLON@233..235 ":" [] [Whitespace(" ")]
+                      2: CSS_GENERIC_COMPONENT_VALUE_LIST@235..241
+                        0: CSS_IDENTIFIER@235..241
+                          0: IDENT@235..241 "purple" [] []
+                    1: (empty)
+                  1: SEMICOLON@241..242 ";" [] []
+                  2: CSS_DECLARATION@242..263
+                    0: CSS_GENERIC_PROPERTY@242..263
+                      0: CSS_IDENTIFIER@242..255
+                        0: IDENT@242..255 "background" [Newline("\n"), Whitespace("\t\t")] []
+                      1: COLON@255..257 ":" [] [Whitespace(" ")]
+                      2: CSS_GENERIC_COMPONENT_VALUE_LIST@257..263
+                        0: CSS_IDENTIFIER@257..263
+                          0: IDENT@257..263 "yellow" [] []
+                    1: (empty)
+                  3: SEMICOLON@263..264 ";" [] []
+                2: R_CURLY@264..267 "}" [Newline("\n"), Whitespace("\t")] []
+          2: R_CURLY@267..269 "}" [Newline("\n")] []
+    2: CSS_AT_RULE@269..313
+      0: AT@269..272 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_DOCUMENT_AT_RULE@272..313
+        0: DOCUMENT_KW@272..281 "document" [] [Whitespace(" ")]
+        1: CSS_DOCUMENT_MATCHER_LIST@281..311
+          0: CSS_URL_FUNCTION@281..311
+            0: URL_KW@281..284 "url" [] []
+            1: L_PAREN@284..285 "(" [] []
+            2: CSS_URL_VALUE_RAW@285..309
+              0: CSS_URL_VALUE_RAW_LITERAL@285..309 "https://www.example.com/" [] []
+            3: CSS_URL_MODIFIER_LIST@309..309
+            4: R_PAREN@309..311 ")" [] [Whitespace(" ")]
+        2: CSS_RULE_LIST_BLOCK@311..313
+          0: L_CURLY@311..312 "{" [] []
+          1: CSS_RULE_LIST@312..312
+          2: R_CURLY@312..313 "}" [] []
+    3: CSS_AT_RULE@313..363
+      0: AT@313..315 "@" [Newline("\n")] []
+      1: CSS_DOCUMENT_AT_RULE@315..363
+        0: DOCUMENT_KW@315..329 "-moz-document" [] [Whitespace(" ")]
+        1: CSS_DOCUMENT_MATCHER_LIST@329..361
+          0: CSS_URL_FUNCTION@329..361
+            0: URL_KW@329..332 "url" [] []
+            1: L_PAREN@332..333 "(" [] []
+            2: CSS_STRING@333..359
+              0: CSS_STRING_LITERAL@333..359 "\"https://www.example.com/\"" [] []
+            3: CSS_URL_MODIFIER_LIST@359..359
+            4: R_PAREN@359..361 ")" [] [Whitespace(" ")]
+        2: CSS_RULE_LIST_BLOCK@361..363
+          0: L_CURLY@361..362 "{" [] []
+          1: CSS_RULE_LIST@362..362
+          2: R_CURLY@362..363 "}" [] []
+    4: CSS_AT_RULE@363..433
+      0: AT@363..365 "@" [Newline("\n")] []
+      1: CSS_DOCUMENT_AT_RULE@365..433
+        0: DOCUMENT_KW@365..402 "-moz-document" [] [Comments("/* near */"), Whitespace(" "), Comments("/* filter */"), Whitespace(" ")]
+        1: CSS_DOCUMENT_MATCHER_LIST@402..431
+          0: CSS_URL_FUNCTION@402..431
+            0: URL_KW@402..405 "url" [] []
+            1: L_PAREN@405..406 "(" [] []
+            2: CSS_STRING@406..421
+              0: CSS_STRING_LITERAL@406..421 "\"example.com/{\"" [] []
+            3: CSS_URL_MODIFIER_LIST@421..421
+            4: R_PAREN@421..431 ")" [] [Whitespace(" "), Comments("/* a */"), Whitespace(" ")]
+        2: CSS_RULE_LIST_BLOCK@431..433
+          0: L_CURLY@431..432 "{" [] []
+          1: CSS_RULE_LIST@432..432
+          2: R_CURLY@432..433 "}" [] []
+    5: CSS_AT_RULE@433..562
+      0: AT@433..436 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_DOCUMENT_AT_RULE@436..562
+        0: DOCUMENT_KW@436..445 "document" [] [Whitespace(" ")]
+        1: CSS_DOCUMENT_MATCHER_LIST@445..477
+          0: CSS_URL_FUNCTION@445..477
+            0: URL_KW@445..448 "url" [] []
+            1: L_PAREN@448..449 "(" [] []
+            2: CSS_STRING@449..475
+              0: CSS_STRING_LITERAL@449..475 "\"https://www.example.com/\"" [] []
+            3: CSS_URL_MODIFIER_LIST@475..475
+            4: R_PAREN@475..477 ")" [] [Whitespace(" ")]
+        2: CSS_RULE_LIST_BLOCK@477..562
+          0: L_CURLY@477..478 "{" [] []
+          1: CSS_RULE_LIST@478..560
+            0: CSS_AT_RULE@478..560
+              0: AT@478..481 "@" [Newline("\n"), Whitespace("\t")] []
+              1: CSS_MEDIA_AT_RULE@481..560
+                0: MEDIA_KW@481..487 "media" [] [Whitespace(" ")]
+                1: CSS_MEDIA_QUERY_LIST@487..517
+                  0: CSS_MEDIA_AND_TYPE_QUERY@487..517
+                    0: CSS_MEDIA_TYPE_QUERY@487..494
+                      0: (empty)
+                      1: CSS_MEDIA_TYPE@487..494
+                        0: CSS_IDENTIFIER@487..494
+                          0: IDENT@487..494 "screen" [] [Whitespace(" ")]
+                    1: AND_KW@494..498 "and" [] [Whitespace(" ")]
+                    2: CSS_MEDIA_FEATURE_IN_PARENS@498..517
+                      0: L_PAREN@498..499 "(" [] []
+                      1: CSS_QUERY_FEATURE_PLAIN@499..515
+                        0: CSS_IDENTIFIER@499..508
+                          0: IDENT@499..508 "min-width" [] []
+                        1: COLON@508..510 ":" [] [Whitespace(" ")]
+                        2: CSS_REGULAR_DIMENSION@510..515
+                          0: CSS_NUMBER_LITERAL@510..513 "900" [] []
+                          1: IDENT@513..515 "px" [] []
+                      2: R_PAREN@515..517 ")" [] [Whitespace(" ")]
+                2: CSS_RULE_LIST_BLOCK@517..560
+                  0: L_CURLY@517..518 "{" [] []
+                  1: CSS_RULE_LIST@518..557
+                    0: CSS_QUALIFIED_RULE@518..557
+                      0: CSS_SELECTOR_LIST@518..529
+                        0: CSS_COMPOUND_SELECTOR@518..529
+                          0: (empty)
+                          1: CSS_TYPE_SELECTOR@518..529
+                            0: (empty)
+                            1: CSS_IDENTIFIER@518..529
+                              0: IDENT@518..529 "article" [Newline("\n"), Whitespace("\t\t")] [Whitespace(" ")]
+                          2: CSS_SUB_SELECTOR_LIST@529..529
+                      1: CSS_DECLARATION_LIST_BLOCK@529..557
+                        0: L_CURLY@529..530 "{" [] []
+                        1: CSS_DECLARATION_LIST@530..553
+                          0: CSS_DECLARATION@530..552
+                            0: CSS_GENERIC_PROPERTY@530..552
+                              0: CSS_IDENTIFIER@530..541
+                                0: IDENT@530..541 "padding" [Newline("\n"), Whitespace("\t\t\t")] []
+                              1: COLON@541..543 ":" [] [Whitespace(" ")]
+                              2: CSS_GENERIC_COMPONENT_VALUE_LIST@543..552
+                                0: CSS_REGULAR_DIMENSION@543..548
+                                  0: CSS_NUMBER_LITERAL@543..544 "1" [] []
+                                  1: IDENT@544..548 "rem" [] [Whitespace(" ")]
+                                1: CSS_REGULAR_DIMENSION@548..552
+                                  0: CSS_NUMBER_LITERAL@548..549 "3" [] []
+                                  1: IDENT@549..552 "rem" [] []
+                            1: (empty)
+                          1: SEMICOLON@552..553 ";" [] []
+                        2: R_CURLY@553..557 "}" [Newline("\n"), Whitespace("\t\t")] []
+                  2: R_CURLY@557..560 "}" [Newline("\n"), Whitespace("\t")] []
+          2: R_CURLY@560..562 "}" [Newline("\n")] []
+  2: EOF@562..563 "" [Newline("\n")] []
+
+```
+
+

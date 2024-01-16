@@ -138,7 +138,7 @@ CssRoot {
                 },
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -417,7 +417,7 @@ CssRoot {
                 0: CSS_KEYFRAMES_IDENT_SELECTOR@87..93
                   0: FROM_KW@87..93 "from" [Newline("\n"), Whitespace("\t")] []
           2: R_CURLY@93..96 "}" [Newline("\n"), Whitespace("\t")] []
-    2: CSS_RULE@96..120
+    2: CSS_QUALIFIED_RULE@96..120
       0: CSS_SELECTOR_LIST@96..101
         0: CSS_COMPOUND_SELECTOR@96..101
           0: (empty)
@@ -601,7 +601,7 @@ at_rule_keyframes_1.css:12:2 parse ━━━━━━━━━━━━━━━
   
 at_rule_keyframes_1.css:16:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected a rule, or an at rule but instead found '}'.
+  × Expected a qualified rule, or an at rule but instead found '}'.
   
     14 │ 		color: blue;
     15 │ 	}
@@ -610,7 +610,7 @@ at_rule_keyframes_1.css:16:1 parse ━━━━━━━━━━━━━━━
     17 │ 
     18 │ @keyframes name2 {
   
-  i Expected a rule, or an at rule here.
+  i Expected a qualified rule, or an at rule here.
   
     14 │ 		color: blue;
     15 │ 	}

@@ -1,6 +1,6 @@
 use crate::{semantic_services::Semantic, JsRuleAction};
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
+    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
 
@@ -59,6 +59,7 @@ declare_rule! {
     pub(crate) UseConst {
         version: "1.0.0",
         name: "useConst",
+        source: RuleSource::Eslint("prefer-const"),
         recommended: true,
         fix_kind: FixKind::Safe,
     }

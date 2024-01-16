@@ -1,5 +1,5 @@
 use crate::semantic_services::Semantic;
-use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_semantic::ReferencesExtensions;
 use biome_js_syntax::JsCatchClause;
@@ -10,8 +10,6 @@ declare_rule! {
     ///
     /// Assignment to a `catch` parameter can be misleading and confusing.
     /// It is often unintended and indicative of a programmer error.
-    ///
-    /// Source: https://eslint.org/docs/latest/rules/no-ex-assign
     ///
     /// ## Examples
     ///
@@ -39,6 +37,7 @@ declare_rule! {
     pub(crate) NoCatchAssign {
         version: "1.0.0",
         name: "noCatchAssign",
+        source: RuleSource::Eslint("no-ex-assign"),
         recommended: true,
     }
 }

@@ -312,7 +312,7 @@ impl Deserializable for Person {
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
         // Delegate the deserialization to `PersonVisitor`.
-        // `value` will call the `PersonVisitor::viist_` method that corresponds to its type.
+        // `value` will call the `PersonVisitor::visit_` method that corresponds to its type.
         value.deserialize(PersonVisitor, name, diagnostics)
     }
 }

@@ -1,6 +1,7 @@
 use crate::css_kinds_src::CSS_KINDS_SRC;
+use crate::html_kinds_src::HTML_KINDS_SRC;
+use crate::js_kinds_src::{AstNodeSrc, AstSrc, Field, TokenKind, JS_KINDS_SRC};
 use crate::json_kinds_src::JSON_KINDS_SRC;
-use crate::kinds_src::{AstNodeSrc, AstSrc, Field, TokenKind, JS_KINDS_SRC};
 use crate::{to_lower_snake_case, to_upper_snake_case, LanguageKind};
 use proc_macro2::{Literal, TokenStream};
 use quote::{format_ident, quote};
@@ -223,6 +224,18 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
                 quote! { if Self::can_cast(syntax.kind()) { Some(Self { syntax }) } else { None } }
             };
 
+            let ast_node_slot_map_impl = if needs_dynamic_slots {
+                quote! {
+                    impl AstNodeSlotMap<#slot_count> for #name {
+                        fn slot_map(&self) -> &#slot_map_type {
+                            &self.slot_map
+                        }
+                    }
+                }
+            } else {
+                Default::default()
+            };
+
             (
                 quote! {
                     // TODO: review documentation
@@ -276,6 +289,8 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
                         fn syntax(&self) -> &SyntaxNode { &self.syntax }
                         fn into_syntax(self) -> SyntaxNode { self.syntax }
                     }
+
+                    #ast_node_slot_map_impl
 
                     impl std::fmt::Debug for #name {
                         fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -883,9 +898,9 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
         };
         #[allow(unused)]
         use biome_rowan::{
-            AstNodeList, AstNodeListIterator, AstSeparatedList, AstSeparatedListNodesIterator
+            AstNodeList, AstNodeListIterator,  AstNodeSlotMap, AstSeparatedList, AstSeparatedListNodesIterator
         };
-        use biome_rowan::{support, AstNode, SyntaxKindSet, RawSyntaxKind, SyntaxResult};
+        use biome_rowan::{support, AstNode,SyntaxKindSet, RawSyntaxKind, SyntaxResult};
         use std::fmt::{Debug, Formatter};
         #serde_import
 
@@ -947,6 +962,7 @@ pub(crate) fn token_kind_to_code(
         LanguageKind::Js => JS_KINDS_SRC,
         LanguageKind::Css => CSS_KINDS_SRC,
         LanguageKind::Json => JSON_KINDS_SRC,
+        LanguageKind::Html => HTML_KINDS_SRC,
     };
     if kind_source.literals.contains(&kind_variant_name.as_str())
         || kind_source.tokens.contains(&kind_variant_name.as_str())

@@ -1,5 +1,6 @@
 use crate::react::hooks::*;
 use crate::semantic_services::Semantic;
+use biome_analyze::RuleSource;
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_deserialize::{
@@ -8,10 +9,12 @@ use biome_deserialize::{
 };
 use biome_js_semantic::{Capture, SemanticModel};
 use biome_js_syntax::{
-    binding_ext::AnyJsBindingDeclaration, JsCallExpression, JsStaticMemberExpression, JsSyntaxKind,
-    JsSyntaxNode, JsVariableDeclaration, TextRange,
+    binding_ext::AnyJsBindingDeclaration, JsCallExpression, JsSyntaxKind, JsSyntaxNode,
+    JsVariableDeclaration, TextRange,
 };
-use biome_js_syntax::{AnyJsExpression, JsIdentifierExpression, TsTypeofType};
+use biome_js_syntax::{
+    AnyJsExpression, AnyJsMemberExpression, JsIdentifierExpression, TsTypeofType,
+};
 use biome_rowan::{AstNode, SyntaxNodeCast};
 use rustc_hash::{FxHashMap, FxHashSet};
 use serde::{Deserialize, Serialize};
@@ -167,6 +170,7 @@ declare_rule! {
     pub(crate) UseExhaustiveDependencies {
         version: "1.0.0",
         name: "useExhaustiveDependencies",
+        source: RuleSource::EslintReactHooks("exhaustive-deps"),
         recommended: true,
     }
 }
@@ -376,7 +380,7 @@ pub enum Fix {
     /// When a dependency needs to be added.
     AddDependency {
         function_name_range: TextRange,
-        captures: Vec<TextRange>,
+        captures: (String, Vec<TextRange>),
         dependencies_len: usize,
     },
     /// When a dependency needs to be removed.
@@ -390,16 +394,15 @@ pub enum Fix {
         function_name_range: TextRange,
         capture_range: TextRange,
         dependency_range: TextRange,
+        dependency_text: String,
     },
 }
 
-fn get_whole_static_member_expression(
-    reference: &JsSyntaxNode,
-) -> Option<JsStaticMemberExpression> {
+fn get_whole_static_member_expression(reference: &JsSyntaxNode) -> Option<AnyJsMemberExpression> {
     let root = reference
         .ancestors()
         .skip(2) //IDENT and JS_REFERENCE_IDENTIFIER
-        .take_while(|x| x.kind() == JsSyntaxKind::JS_STATIC_MEMBER_EXPRESSION)
+        .take_while(|x| AnyJsMemberExpression::can_cast(x.kind()))
         .last()?;
     root.cast()
 }
@@ -524,6 +527,55 @@ fn is_out_of_function_scope(
     )
 }
 
+fn into_member_vec(node: &JsSyntaxNode) -> Vec<String> {
+    let mut vec = vec![];
+    let mut next = Some(node.clone());
+
+    while let Some(node) = &next {
+        match AnyJsMemberExpression::cast_ref(node) {
+            Some(member_expr) => {
+                let member_name = member_expr
+                    .member_name()
+                    .and_then(|it| it.as_string_constant().map(|it| it.to_owned()));
+                match member_name {
+                    Some(name) => {
+                        vec.insert(0, name);
+                        next = member_expr.object().ok().map(AstNode::into_syntax);
+                    }
+                    None => break,
+                }
+            }
+            None => {
+                vec.insert(0, node.text_trimmed().to_string());
+                break;
+            }
+        }
+    }
+
+    vec
+}
+
+fn compare_member_depth(a: &JsSyntaxNode, b: &JsSyntaxNode) -> (bool, bool) {
+    let mut a_member_iter = into_member_vec(a).into_iter();
+    let mut b_member_iter = into_member_vec(b).into_iter();
+
+    loop {
+        let a_member = a_member_iter.next();
+        let b_member = b_member_iter.next();
+
+        match (a_member, b_member) {
+            (Some(a_member), Some(b_member)) => {
+                if a_member != b_member {
+                    return (false, false);
+                }
+            }
+            (Some(_), None) => return (true, false),
+            (None, Some(_)) => return (false, true),
+            (None, None) => return (true, true),
+        }
+    }
+}
+
 impl Rule for UseExhaustiveDependencies {
     type Query = Semantic<JsCallExpression>;
     type State = Fix;
@@ -563,19 +615,18 @@ impl Rule for UseExhaustiveDependencies {
                 .map(|capture| {
                     let path = get_whole_static_member_expression(capture.node());
 
-                    let (text, range) = if let Some(path) = path {
-                        (
+                    match path {
+                        Some(path) => (
                             path.syntax().text_trimmed().to_string(),
                             path.syntax().text_trimmed_range(),
-                        )
-                    } else {
-                        (
+                            path.syntax().clone(),
+                        ),
+                        None => (
                             capture.node().text_trimmed().to_string(),
                             capture.node().text_trimmed_range(),
-                        )
-                    };
-
-                    (text, range, capture)
+                            capture.node().clone(),
+                        ),
+                    }
                 })
                 .collect();
 
@@ -585,24 +636,14 @@ impl Rule for UseExhaustiveDependencies {
             let mut add_deps: BTreeMap<String, Vec<TextRange>> = BTreeMap::new();
 
             // Evaluate all the captures
-            for (capture_text, capture_range, _) in captures.iter() {
+            for (capture_text, capture_range, capture_path) in captures.iter() {
                 let mut suggested_fix = None;
                 let mut is_captured_covered = false;
                 for dep in deps.iter() {
-                    // capture_text and dependency_text should filter the "?" inside
-                    // in order to ignore optional chaining
-                    let filter_capture_text = capture_text.replace('?', "");
-                    let filter_dependency_text =
-                        dep.syntax().text_trimmed().to_string().replace('?', "");
-                    let capture_deeper_than_dependency =
-                        filter_capture_text.starts_with(&filter_dependency_text);
-                    let dependency_deeper_than_capture =
-                        filter_dependency_text.starts_with(&filter_capture_text);
+                    let (capture_contains_dep, dep_contains_capture) =
+                        compare_member_depth(capture_path, dep.syntax());
 
-                    match (
-                        capture_deeper_than_dependency,
-                        dependency_deeper_than_capture,
-                    ) {
+                    match (capture_contains_dep, dep_contains_capture) {
                         // capture == dependency
                         (true, true) => {
                             suggested_fix = None;
@@ -630,6 +671,7 @@ impl Rule for UseExhaustiveDependencies {
                                 function_name_range: result.function_name_range,
                                 capture_range: *capture_range,
                                 dependency_range: dep.syntax().text_trimmed_range(),
+                                dependency_text: dep.syntax().text_trimmed().to_string(),
                             });
                         }
                         _ => {}
@@ -649,22 +691,11 @@ impl Rule for UseExhaustiveDependencies {
             let mut remove_deps: Vec<AnyJsExpression> = vec![];
             // Search for dependencies not captured
             for dep in deps {
-                let mut covers_any_capture = false;
-                for (capture_text, _, _) in captures.iter() {
-                    // capture_text and dependency_text should filter the "?" inside
-                    // in order to ignore optional chaining
-                    let filter_capture_text = capture_text.replace('?', "");
-                    let filter_dependency_text =
-                        dep.syntax().text_trimmed().to_string().replace('?', "");
-                    let capture_deeper_dependency =
-                        filter_capture_text.starts_with(&filter_dependency_text);
-                    let dependency_deeper_capture =
-                        filter_dependency_text.starts_with(&filter_capture_text);
-                    if capture_deeper_dependency || dependency_deeper_capture {
-                        covers_any_capture = true;
-                        break;
-                    }
-                }
+                let covers_any_capture = captures.iter().any(|(_, _, capture_path)| {
+                    let (capture_contains_dep, dep_contains_capture) =
+                        compare_member_depth(capture_path, dep.syntax());
+                    capture_contains_dep || dep_contains_capture
+                });
 
                 if !covers_any_capture {
                     remove_deps.push(dep);
@@ -672,7 +703,7 @@ impl Rule for UseExhaustiveDependencies {
             }
 
             // Generate signals
-            for (_, captures) in add_deps {
+            for captures in add_deps {
                 signals.push(Fix::AddDependency {
                     function_name_range: result.function_name_range,
                     captures,
@@ -699,15 +730,14 @@ impl Rule for UseExhaustiveDependencies {
                 captures,
                 dependencies_len,
             } => {
+                let (capture_text, captures_range) = captures;
                 let mut diag = RuleDiagnostic::new(
                     rule_category!(),
                     function_name_range,
-                    markup! {
-                        "This hook does not specify all of its dependencies."
-                    },
+                    markup! {"This hook does not specify all of its dependencies: "{capture_text}""},
                 );
 
-                for range in captures {
+                for range in captures_range {
                     diag = diag.detail(
                         range,
                         "This dependency is not specified in the hook dependency list.",
@@ -715,7 +745,7 @@ impl Rule for UseExhaustiveDependencies {
                 }
 
                 if *dependencies_len == 0 {
-                    diag = if captures.len() == 1 {
+                    diag = if captures_range.len() == 1 {
                         diag.note("Either include it or remove the dependency array")
                     } else {
                         diag.note("Either include them or remove the dependency array")
@@ -729,11 +759,16 @@ impl Rule for UseExhaustiveDependencies {
                 dependencies,
                 component_function,
             } => {
+                let deps_joined_with_comma = dependencies
+                    .iter()
+                    .map(|dep| dep.syntax().text_trimmed().to_string())
+                    .collect::<Vec<String>>()
+                    .join(", ");
                 let mut diag = RuleDiagnostic::new(
                     rule_category!(),
                     function_name_range,
                     markup! {
-                        "This hook specifies more dependencies than necessary."
+                        "This hook specifies more dependencies than necessary: "{deps_joined_with_comma}""
                     },
                 );
 
@@ -759,12 +794,13 @@ impl Rule for UseExhaustiveDependencies {
                 function_name_range,
                 capture_range,
                 dependency_range,
+                dependency_text,
             } => {
                 let diag = RuleDiagnostic::new(
                     rule_category!(),
                     function_name_range,
                     markup! {
-                        "This hook specifies a dependency more specific that its captures"
+                        "This hook specifies a dependency more specific that its captures: "{dependency_text}""
                     },
                 )
                 .detail(capture_range, "This capture is more generic than...")

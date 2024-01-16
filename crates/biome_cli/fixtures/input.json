@@ -1,8 +1,0 @@
-{
-	"string": "foo",
-	"boolean": false,
-	"number": 15,
-	"object": {
-		"something": 15
-	}
-}

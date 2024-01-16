@@ -574,6 +574,36 @@ pub fn css_declaration_with_semicolon(
         ],
     ))
 }
+pub fn css_document_at_rule(
+    document_token: SyntaxToken,
+    matchers: CssDocumentMatcherList,
+    block: AnyCssRuleListBlock,
+) -> CssDocumentAtRule {
+    CssDocumentAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_DOCUMENT_AT_RULE,
+        [
+            Some(SyntaxElement::Token(document_token)),
+            Some(SyntaxElement::Node(matchers.into_syntax())),
+            Some(SyntaxElement::Node(block.into_syntax())),
+        ],
+    ))
+}
+pub fn css_document_custom_matcher(
+    name_token: SyntaxToken,
+    l_paren_token: SyntaxToken,
+    value: CssString,
+    r_paren_token: SyntaxToken,
+) -> CssDocumentCustomMatcher {
+    CssDocumentCustomMatcher::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_DOCUMENT_CUSTOM_MATCHER,
+        [
+            Some(SyntaxElement::Token(name_token)),
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
 pub fn css_font_face_at_rule(
     font_face_token: SyntaxToken,
     block: AnyCssDeclarationListBlock,
@@ -1478,6 +1508,18 @@ pub fn css_pseudo_element_selector(
         ],
     ))
 }
+pub fn css_qualified_rule(
+    prelude: CssSelectorList,
+    block: AnyCssDeclarationListBlock,
+) -> CssQualifiedRule {
+    CssQualifiedRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_QUALIFIED_RULE,
+        [
+            Some(SyntaxElement::Node(prelude.into_syntax())),
+            Some(SyntaxElement::Node(block.into_syntax())),
+        ],
+    ))
+}
 pub fn css_query_feature_boolean(name: CssIdentifier) -> CssQueryFeatureBoolean {
     CssQueryFeatureBoolean::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_QUERY_FEATURE_BOOLEAN,
@@ -1632,15 +1674,6 @@ impl CssRootBuilder {
         ))
     }
 }
-pub fn css_rule(prelude: CssSelectorList, block: AnyCssDeclarationListBlock) -> CssRule {
-    CssRule::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_RULE,
-        [
-            Some(SyntaxElement::Node(prelude.into_syntax())),
-            Some(SyntaxElement::Node(block.into_syntax())),
-        ],
-    ))
-}
 pub fn css_rule_list_block(
     l_curly_token: SyntaxToken,
     rules: CssRuleList,
@@ -1743,6 +1776,18 @@ pub fn css_simple_function(
             Some(SyntaxElement::Token(l_paren_token)),
             Some(SyntaxElement::Node(items.into_syntax())),
             Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
+pub fn css_starting_style_at_rule(
+    starting_style_token: SyntaxToken,
+    block: AnyCssStartingStyleBlock,
+) -> CssStartingStyleAtRule {
+    CssStartingStyleAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_STARTING_STYLE_AT_RULE,
+        [
+            Some(SyntaxElement::Token(starting_style_token)),
+            Some(SyntaxElement::Node(block.into_syntax())),
         ],
     ))
 }
@@ -2062,6 +2107,27 @@ where
             .map(|item| Some(item.into_syntax().into())),
     ))
 }
+pub fn css_document_matcher_list<I, S>(items: I, separators: S) -> CssDocumentMatcherList
+where
+    I: IntoIterator<Item = AnyCssDocumentMatcher>,
+    I::IntoIter: ExactSizeIterator,
+    S: IntoIterator<Item = CssSyntaxToken>,
+    S::IntoIter: ExactSizeIterator,
+{
+    let mut items = items.into_iter();
+    let mut separators = separators.into_iter();
+    let length = items.len() + separators.len();
+    CssDocumentMatcherList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_DOCUMENT_MATCHER_LIST,
+        (0..length).map(|index| {
+            if index % 2 == 0 {
+                Some(items.next()?.into_syntax().into())
+            } else {
+                Some(separators.next()?.into())
+            }
+        }),
+    ))
+}
 pub fn css_generic_component_value_list<I>(items: I) -> CssGenericComponentValueList
 where
     I: IntoIterator<Item = AnyCssGenericComponentValue>,
@@ -2369,6 +2435,16 @@ where
 {
     CssBogusDeclarationItem::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_BOGUS_DECLARATION_ITEM,
+        slots,
+    ))
+}
+pub fn css_bogus_document_matcher<I>(slots: I) -> CssBogusDocumentMatcher
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssBogusDocumentMatcher::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_BOGUS_DOCUMENT_MATCHER,
         slots,
     ))
 }

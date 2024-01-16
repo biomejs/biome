@@ -31,7 +31,7 @@ function MyComponent2() {
 ```
 checkHooksImportedFromReact.js:3:9 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This hook does not specify all of its dependencies.
+  ! This hook does not specify all of its dependencies: a
   
     1 │ function MyComponent1() {
     2 │   let a = 1;

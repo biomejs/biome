@@ -8,6 +8,8 @@ title: noCommentText (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/jsx-no-comment-textnodes.md" target="_blank"><code>jsx-no-comment-textnodes</code></a>
+
 Prevent comments from being inserted as text nodes
 
 ## Examples

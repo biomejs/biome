@@ -2,20 +2,12 @@
 //! Based on the rust analyzer parser and ast definitions
 
 use crate::css_kinds_src::CSS_KINDS_SRC;
+use crate::html_kinds_src::HTML_KINDS_SRC;
 use crate::json_kinds_src::JSON_KINDS_SRC;
+use crate::kind_src::{KindsSrc, LANGUAGE_PREFIXES};
 use crate::LanguageKind;
 use quote::format_ident;
 use std::collections::BTreeMap;
-
-const LANGUAGE_PREFIXES: [&str; 6] = ["js_", "ts_", "jsx_", "tsx_", "css_", "json_"];
-
-pub struct KindsSrc<'a> {
-    pub punct: &'a [(&'a str, &'a str)],
-    pub keywords: &'a [&'a str],
-    pub literals: &'a [&'a str],
-    pub tokens: &'a [&'a str],
-    pub nodes: &'a [&'a str],
-}
 
 pub const JS_KINDS_SRC: KindsSrc = KindsSrc {
     punct: &[
@@ -699,6 +691,7 @@ impl Field {
                     LanguageKind::Js => JS_KINDS_SRC,
                     LanguageKind::Css => CSS_KINDS_SRC,
                     LanguageKind::Json => JSON_KINDS_SRC,
+                    LanguageKind::Html => HTML_KINDS_SRC,
                 };
 
                 // we need to replace "-" with "_" for the keywords

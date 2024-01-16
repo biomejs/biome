@@ -1,6 +1,6 @@
 use crate::{aria_services::Aria, JsRuleAction};
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
+    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
@@ -13,8 +13,6 @@ declare_rule! {
     /// `aria-hidden="true"` can be used to hide purely decorative content from screen reader users.
     /// A focusable element with `aria-hidden="true"` can be reached by keyboard.
     /// This can lead to confusion or unexpected behavior for screen reader users.
-    ///
-    /// Source: https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/no-aria-hidden-on-focusable.md
     ///
     /// ## Example
     ///
@@ -47,6 +45,7 @@ declare_rule! {
     pub(crate) NoAriaHiddenOnFocusable {
         version: "1.4.0",
         name: "noAriaHiddenOnFocusable",
+        source: RuleSource::EslintJsxA11y("no-aria-hidden-on-focusable"),
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }

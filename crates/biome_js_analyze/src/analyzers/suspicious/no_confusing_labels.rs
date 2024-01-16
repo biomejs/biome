@@ -1,5 +1,5 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind};
 use biome_console::markup;
 use biome_js_syntax::{AnyJsStatement, JsLabeledStatement};
 
@@ -8,8 +8,6 @@ declare_rule! {
     ///
     /// Labeled statements in JavaScript are used in conjunction with `break` and `continue` to control flow around multiple loops.
     /// Their use for other statements is suspicious and unfamiliar.
-    ///
-    /// Source: https://eslint.org/docs/latest/rules/no-labels
     ///
     /// ## Examples
     ///
@@ -52,6 +50,8 @@ declare_rule! {
     pub(crate) NoConfusingLabels {
         version: "1.0.0",
         name: "noConfusingLabels",
+        source: RuleSource::Eslint("no-labels"),
+        source_kind: RuleSourceKind::Inspired,
         recommended: true,
     }
 }

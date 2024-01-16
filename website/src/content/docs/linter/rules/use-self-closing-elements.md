@@ -8,6 +8,8 @@ title: useSelfClosingElements (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://eslint.style/rules/default/jsx-self-closing-comp" target="_blank"><code>jsx-self-closing-comp</code></a>
+
 Prevent extra closing tags for components without children
 
 ## Examples

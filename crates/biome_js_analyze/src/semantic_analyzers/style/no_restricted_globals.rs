@@ -1,6 +1,6 @@
 use crate::semantic_services::SemanticServices;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, Rule, RuleDiagnostic};
+use biome_analyze::{declare_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_deserialize::{
     Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor, Text,
@@ -51,6 +51,7 @@ declare_rule! {
     pub(crate) NoRestrictedGlobals {
         version: "1.0.0",
         name: "noRestrictedGlobals",
+        source: RuleSource::Eslint("no-restricted-globals"),
         recommended: false,
     }
 }

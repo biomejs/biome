@@ -8,6 +8,8 @@ title: noUnsafeFinally (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://eslint.org/docs/latest/rules/no-unsafe-finally" target="_blank"><code>no-unsafe-finally</code></a>
+
 Disallow control flow statements in finally blocks.
 
 JavaScript suspends the control flow statements of `try` and `catch` blocks until

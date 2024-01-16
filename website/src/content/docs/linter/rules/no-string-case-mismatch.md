@@ -8,6 +8,8 @@ title: noStringCaseMismatch (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://rust-lang.github.io/rust-clippy/master/#/match_str_case_mismatch" target="_blank"><code>match_str_case_mismatch</code></a>
+
 Disallow comparison of expressions modifying the string case with non-compliant value.
 
 ## Examples

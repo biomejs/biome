@@ -1,4 +1,4 @@
-use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_control_flow::{
     builder::{BlockId, ROOT_BLOCK_ID},
@@ -64,6 +64,7 @@ declare_rule! {
     pub(crate) NoUnreachableSuper {
         version: "1.0.0",
         name: "noUnreachableSuper",
+        source: RuleSource::Eslint("no-this-before-super"),
         recommended: true,
     }
 }

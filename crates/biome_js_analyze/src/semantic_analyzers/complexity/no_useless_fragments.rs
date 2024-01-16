@@ -2,7 +2,7 @@ use crate::react::{jsx_member_name_is_react_fragment, jsx_reference_identifier_i
 use crate::semantic_services::Semantic;
 use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic};
+use biome_analyze::{declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make::{
@@ -60,6 +60,7 @@ declare_rule! {
     pub(crate) NoUselessFragments {
         version: "1.0.0",
         name: "noUselessFragments",
+        source: RuleSource::EslintReact("jsx-no-useless-fragment"),
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }
@@ -256,7 +257,8 @@ impl Rule for NoUselessFragments {
                         jsx_tag_expression(AnyJsxTag::JsxSelfClosingElement(node)).into_syntax(),
                     ),
                     AnyJsxChild::JsxText(text) => {
-                        let new_value = format!("\"{}\"", text.value_token().ok()?);
+                        let new_value =
+                            format!("\"{}\"", text.value_token().ok()?.token_text().trim());
                         if parent.kind() == JsSyntaxKind::JSX_EXPRESSION_ATTRIBUTE_VALUE {
                             Some(jsx_string(ident(&new_value)).into_syntax())
                         } else {

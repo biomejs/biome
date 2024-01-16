@@ -1,7 +1,7 @@
 use crate::configuration::javascript::JavascriptFormatter;
 use biome_deserialize::{
-    Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor, Text,
-    VisitableType,
+    Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor,
+    NoneState, Text, VisitableType,
 };
 
 impl Deserializable for JavascriptFormatter {
@@ -43,7 +43,7 @@ impl DeserializationVisitor for JavascriptFormatterVisitor {
             "lineEnding",
             "lineWidth",
         ];
-        let mut result = Self::Output::default();
+        let mut result = Self::Output::none();
         for (key, value) in members.flatten() {
             let key_range = key.range();
             let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {

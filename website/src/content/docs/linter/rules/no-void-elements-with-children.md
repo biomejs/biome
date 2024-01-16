@@ -8,6 +8,8 @@ title: noVoidElementsWithChildren (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/void-dom-elements-no-children.md" target="_blank"><code>void-dom-elements-no-children</code></a>
+
 This rules prevents void elements (AKA self-closing elements) from having children.
 
 ## Examples

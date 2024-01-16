@@ -1,7 +1,7 @@
 use biome_analyze::context::RuleContext;
 use biome_analyze::{
-    declare_rule, AddVisitor, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, ServiceBag,
-    Visitor, VisitorContext,
+    declare_rule, AddVisitor, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, RuleSource,
+    ServiceBag, Visitor, VisitorContext,
 };
 use biome_console::markup;
 use biome_js_syntax::{AnyFunctionLike, JsLanguage, JsYieldExpression, TextRange, WalkEvent};
@@ -11,8 +11,6 @@ declare_rule! {
     /// Require generator functions to contain `yield`.
     ///
     /// This rule generates warnings for generator functions that do not have the `yield` keyword.
-    ///
-    /// Source: [require-yield](https://eslint.org/docs/latest/rules/require-yield).
     ///
     /// ## Examples
     ///
@@ -41,6 +39,7 @@ declare_rule! {
     pub(crate) UseYield {
         version: "1.0.0",
         name: "useYield",
+        source: RuleSource::Eslint("require-yield"),
         recommended: true,
     }
 }

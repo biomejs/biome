@@ -1,11 +1,12 @@
 use crate::prelude::*;
-use biome_css_syntax::{CssRule, CssRuleFields};
+use biome_css_syntax::{CssQualifiedRule, CssQualifiedRuleFields};
 use biome_formatter::write;
+
 #[derive(Debug, Clone, Default)]
-pub(crate) struct FormatCssRule;
-impl FormatNodeRule<CssRule> for FormatCssRule {
-    fn fmt_fields(&self, node: &CssRule, f: &mut CssFormatter) -> FormatResult<()> {
-        let CssRuleFields { prelude, block } = node.as_fields();
+pub(crate) struct FormatCssQualifiedRule;
+impl FormatNodeRule<CssQualifiedRule> for FormatCssQualifiedRule {
+    fn fmt_fields(&self, node: &CssQualifiedRule, f: &mut CssFormatter) -> FormatResult<()> {
+        let CssQualifiedRuleFields { prelude, block } = node.as_fields();
 
         write!(
             f,

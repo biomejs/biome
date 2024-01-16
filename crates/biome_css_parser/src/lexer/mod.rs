@@ -818,9 +818,13 @@ impl<'src> CssLexer<'src> {
         // Note to keep the buffer large enough to fit every possible keyword that
         // the lexer can return
         let mut buf = [0u8; 22];
-        let count = self.consume_ident_sequence(&mut buf);
+        let (count, only_ascii_used) = self.consume_ident_sequence(&mut buf);
 
-        match buf[..count].to_ascii_lowercase().as_slice() {
+        if !only_ascii_used {
+            return IDENT;
+        }
+
+        match &buf[..count] {
             b"media" => MEDIA_KW,
             b"keyframes" => KEYFRAMES_KW,
             b"-webkit-keyframes" => KEYFRAMES_KW,
@@ -997,34 +1001,72 @@ impl<'src> CssLexer<'src> {
             b"scope" => SCOPE_KW,
             b"import" => IMPORT_KW,
             b"namespace" => NAMESPACE_KW,
+            b"starting-style" => STARTING_STYLE_KW,
+            b"document" => DOCUMENT_KW,
+            b"-moz-document" => DOCUMENT_KW,
+            b"url-prefix" => URL_PREFIX_KW,
+            b"domain" => DOMAIN_KW,
+            b"media-document" => MEDIA_DOCUMENT_KW,
+            b"regexp" => REGEXP_KW,
             _ => IDENT,
         }
     }
 
-    /// Consume a ident sequence.
-    fn consume_ident_sequence(&mut self, buf: &mut [u8]) -> usize {
+    /// Consumes a sequence of identifier characters from a byte stream, appending
+    /// them to the provided buffer in lowercase ASCII form.
+    ///
+    /// This function iteratively processes bytes from the stream, which are part
+    /// of an identifier, and appends their lowercase ASCII representation to the buffer.
+    /// It stops processing either when the buffer is full or when a non-identifier
+    /// character is encountered.
+    ///
+    /// # Arguments
+    ///
+    /// * `buf` - A mutable reference to a byte array where the identifier characters
+    ///           will be appended. This buffer should be pre-allocated and have enough
+    ///           space to hold the expected identifier.
+    ///
+    /// # Returns
+    ///
+    /// A tuple containing:
+    ///
+    /// * The number of bytes appended to the buffer (`usize`).
+    /// * A boolean indicating whether only ASCII characters were used (`true` if so).
+    ///
+    /// # Panics
+    ///
+    /// This function will panic if the first character to be consumed is not a valid
+    /// start of an identifier, as determined by `self.is_ident_start()`.
+    fn consume_ident_sequence(&mut self, buf: &mut [u8]) -> (usize, bool) {
         debug_assert!(self.is_ident_start());
 
         let mut idx = 0;
         let mut is_first = true;
+        let mut only_ascii_used = true;
         // Repeatedly consume the next input code point from the stream.
         while let Some(current) = self.current_byte() {
             if let Some(part) = self.consume_ident_part(current, is_first) {
                 is_first = false;
 
-                // In this context, "+ 4" represents a safety measure for the buffer size.
-                // It ensures that there are at least 4 slots available in the buffer.
-                // This is necessary because the maximum UTF-8 sequence length is 4 bytes.
-                if let Some(buf) = buf.get_mut(idx..idx + 4) {
-                    let res = part.encode_utf8(buf);
-                    idx += res.len();
+                if only_ascii_used && !part.is_ascii() {
+                    only_ascii_used = false;
+                }
+
+                if only_ascii_used {
+                    // Ensure that there is space in the buffer.
+                    // Since we're only dealing with ASCII, we need at most 1 byte.
+                    if let Some(buf) = buf.get_mut(idx..idx + 1) {
+                        // Convert the ASCII character to lowercase.
+                        buf[0] = part.to_ascii_lowercase() as u8;
+                        idx += 1;
+                    }
                 }
             } else {
                 break;
             }
         }
 
-        idx
+        (idx, only_ascii_used)
     }
 
     /// Tries to consume a character that forms part of a CSS identifier.

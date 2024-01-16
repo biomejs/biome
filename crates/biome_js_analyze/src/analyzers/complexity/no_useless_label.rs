@@ -1,5 +1,5 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic};
+use biome_analyze::{declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_syntax::{AnyJsStatement, JsLabeledStatement, JsSyntaxKind};
@@ -11,8 +11,6 @@ declare_rule! {
     /// Disallow unnecessary labels.
     ///
     /// If a loop contains no nested loops or switches, labeling the loop is unnecessary.
-    ///
-    /// Source: https://eslint.org/docs/latest/rules/no-extra-label
     ///
     /// ## Examples
     ///
@@ -37,6 +35,7 @@ declare_rule! {
     pub(crate) NoUselessLabel {
         version: "1.0.0",
         name: "noUselessLabel",
+        source: RuleSource::Eslint("no-extra-label"),
         recommended: true,
         fix_kind: FixKind::Safe,
     }

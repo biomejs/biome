@@ -202,7 +202,8 @@ class Foo {
 	/*after*/
 	async method() {}
 	@dec /*before*/
-	*/*after*/ method() {}
+	/*after*/
+	*method() {}
 	@dec /*before*/
 	get /*after*/ getter() {}
 	@dec /*before*/

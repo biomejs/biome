@@ -1,6 +1,6 @@
 use crate::{aria_services::Aria, JsRuleAction};
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
+    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
@@ -17,8 +17,6 @@ declare_rule! {
     ///
     /// [WAI-ARIA roles](https://www.w3.org/TR/wai-aria-1.1/#usage_intro) should not be used to convert an interactive element to a non-interactive element.
     /// Non-interactive ARIA roles include `article`, `banner`, `complementary`, `img`, `listitem`, `main`, `region` and `tooltip`.
-    ///
-    /// Source: https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/no-interactive-element-to-noninteractive-role.md
     ///
     /// ## Examples
     ///
@@ -37,6 +35,7 @@ declare_rule! {
     pub(crate) NoInteractiveElementToNoninteractiveRole {
         version: "1.3.0",
         name: "noInteractiveElementToNoninteractiveRole",
+        source: RuleSource::EslintJsxA11y("no-interactive-element-to-noninteractive-role"),
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }

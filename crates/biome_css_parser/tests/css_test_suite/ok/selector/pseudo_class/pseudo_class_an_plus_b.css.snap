@@ -124,7 +124,7 @@ tr:nth-child(even of :not([hidden])) {}
 CssRoot {
     bom_token: missing (optional),
     rules: CssRuleList [
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -163,7 +163,7 @@ CssRoot {
                 r_curly_token: R_CURLY@18..19 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -202,7 +202,7 @@ CssRoot {
                 r_curly_token: R_CURLY@39..40 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -241,7 +241,7 @@ CssRoot {
                 r_curly_token: R_CURLY@61..62 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -280,7 +280,7 @@ CssRoot {
                 r_curly_token: R_CURLY@82..83 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -319,7 +319,7 @@ CssRoot {
                 r_curly_token: R_CURLY@102..103 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -358,7 +358,7 @@ CssRoot {
                 r_curly_token: R_CURLY@123..124 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -397,7 +397,7 @@ CssRoot {
                 r_curly_token: R_CURLY@144..145 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -436,7 +436,7 @@ CssRoot {
                 r_curly_token: R_CURLY@166..167 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -475,7 +475,7 @@ CssRoot {
                 r_curly_token: R_CURLY@187..188 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -514,7 +514,7 @@ CssRoot {
                 r_curly_token: R_CURLY@209..210 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -553,7 +553,7 @@ CssRoot {
                 r_curly_token: R_CURLY@232..233 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -592,7 +592,7 @@ CssRoot {
                 r_curly_token: R_CURLY@254..255 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -631,7 +631,7 @@ CssRoot {
                 r_curly_token: R_CURLY@275..276 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -670,7 +670,7 @@ CssRoot {
                 r_curly_token: R_CURLY@297..298 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -709,7 +709,7 @@ CssRoot {
                 r_curly_token: R_CURLY@320..321 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -748,7 +748,7 @@ CssRoot {
                 r_curly_token: R_CURLY@341..342 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -787,7 +787,7 @@ CssRoot {
                 r_curly_token: R_CURLY@363..364 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -826,7 +826,7 @@ CssRoot {
                 r_curly_token: R_CURLY@386..387 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -865,7 +865,7 @@ CssRoot {
                 r_curly_token: R_CURLY@408..409 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -904,7 +904,7 @@ CssRoot {
                 r_curly_token: R_CURLY@429..430 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -943,7 +943,7 @@ CssRoot {
                 r_curly_token: R_CURLY@451..452 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -982,7 +982,7 @@ CssRoot {
                 r_curly_token: R_CURLY@473..474 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -1021,7 +1021,7 @@ CssRoot {
                 r_curly_token: R_CURLY@496..497 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -1058,7 +1058,7 @@ CssRoot {
                 r_curly_token: R_CURLY@515..516 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -1095,7 +1095,7 @@ CssRoot {
                 r_curly_token: R_CURLY@535..536 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -1132,7 +1132,7 @@ CssRoot {
                 r_curly_token: R_CURLY@556..557 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -1169,7 +1169,7 @@ CssRoot {
                 r_curly_token: R_CURLY@576..577 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -1206,7 +1206,7 @@ CssRoot {
                 r_curly_token: R_CURLY@595..596 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -1243,7 +1243,7 @@ CssRoot {
                 r_curly_token: R_CURLY@615..616 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -1280,7 +1280,7 @@ CssRoot {
                 r_curly_token: R_CURLY@635..636 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -1317,7 +1317,7 @@ CssRoot {
                 r_curly_token: R_CURLY@656..657 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -1354,7 +1354,7 @@ CssRoot {
                 r_curly_token: R_CURLY@676..677 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -1391,7 +1391,7 @@ CssRoot {
                 r_curly_token: R_CURLY@697..698 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -1428,7 +1428,7 @@ CssRoot {
                 r_curly_token: R_CURLY@719..720 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -1465,7 +1465,7 @@ CssRoot {
                 r_curly_token: R_CURLY@740..741 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -1502,7 +1502,7 @@ CssRoot {
                 r_curly_token: R_CURLY@760..761 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -1539,7 +1539,7 @@ CssRoot {
                 r_curly_token: R_CURLY@781..782 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -1576,7 +1576,7 @@ CssRoot {
                 r_curly_token: R_CURLY@802..803 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -1613,7 +1613,7 @@ CssRoot {
                 r_curly_token: R_CURLY@824..825 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -1650,7 +1650,7 @@ CssRoot {
                 r_curly_token: R_CURLY@844..845 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -1687,7 +1687,7 @@ CssRoot {
                 r_curly_token: R_CURLY@865..866 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -1724,7 +1724,7 @@ CssRoot {
                 r_curly_token: R_CURLY@887..888 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -1761,7 +1761,7 @@ CssRoot {
                 r_curly_token: R_CURLY@908..909 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -1798,7 +1798,7 @@ CssRoot {
                 r_curly_token: R_CURLY@928..929 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -1835,7 +1835,7 @@ CssRoot {
                 r_curly_token: R_CURLY@949..950 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -1872,7 +1872,7 @@ CssRoot {
                 r_curly_token: R_CURLY@970..971 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -1909,7 +1909,7 @@ CssRoot {
                 r_curly_token: R_CURLY@992..993 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -1941,7 +1941,7 @@ CssRoot {
                 r_curly_token: R_CURLY@1009..1010 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -1973,7 +1973,7 @@ CssRoot {
                 r_curly_token: R_CURLY@1027..1028 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -2005,7 +2005,7 @@ CssRoot {
                 r_curly_token: R_CURLY@1045..1046 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -2039,7 +2039,7 @@ CssRoot {
                 r_curly_token: R_CURLY@1063..1064 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -2073,7 +2073,7 @@ CssRoot {
                 r_curly_token: R_CURLY@1082..1083 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -2107,7 +2107,7 @@ CssRoot {
                 r_curly_token: R_CURLY@1101..1102 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -2139,7 +2139,7 @@ CssRoot {
                 r_curly_token: R_CURLY@1118..1119 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -2171,7 +2171,7 @@ CssRoot {
                 r_curly_token: R_CURLY@1136..1137 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -2203,7 +2203,7 @@ CssRoot {
                 r_curly_token: R_CURLY@1154..1155 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -2237,7 +2237,7 @@ CssRoot {
                 r_curly_token: R_CURLY@1172..1173 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -2271,7 +2271,7 @@ CssRoot {
                 r_curly_token: R_CURLY@1191..1192 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -2305,7 +2305,7 @@ CssRoot {
                 r_curly_token: R_CURLY@1210..1211 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -2337,7 +2337,7 @@ CssRoot {
                 r_curly_token: R_CURLY@1227..1228 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -2369,7 +2369,7 @@ CssRoot {
                 r_curly_token: R_CURLY@1245..1246 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -2401,7 +2401,7 @@ CssRoot {
                 r_curly_token: R_CURLY@1263..1264 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -2440,7 +2440,7 @@ CssRoot {
                 r_curly_token: R_CURLY@1295..1296 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -2479,7 +2479,7 @@ CssRoot {
                 r_curly_token: R_CURLY@1316..1317 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -2518,7 +2518,7 @@ CssRoot {
                 r_curly_token: R_CURLY@1336..1337 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -2547,7 +2547,7 @@ CssRoot {
                 r_curly_token: R_CURLY@1356..1357 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -2576,7 +2576,7 @@ CssRoot {
                 r_curly_token: R_CURLY@1375..1376 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -2605,7 +2605,7 @@ CssRoot {
                 r_curly_token: R_CURLY@1394..1395 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -2634,7 +2634,7 @@ CssRoot {
                 r_curly_token: R_CURLY@1414..1415 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -2663,7 +2663,7 @@ CssRoot {
                 r_curly_token: R_CURLY@1434..1435 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -2692,7 +2692,7 @@ CssRoot {
                 r_curly_token: R_CURLY@1454..1455 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -2731,7 +2731,7 @@ CssRoot {
                 r_curly_token: R_CURLY@1507..1508 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -2770,7 +2770,7 @@ CssRoot {
                 r_curly_token: R_CURLY@1565..1566 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -2809,7 +2809,7 @@ CssRoot {
                 r_curly_token: R_CURLY@1594..1595 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -2848,7 +2848,7 @@ CssRoot {
                 r_curly_token: R_CURLY@1628..1629 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -2887,7 +2887,7 @@ CssRoot {
                 r_curly_token: R_CURLY@1650..1651 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -2926,7 +2926,7 @@ CssRoot {
                 r_curly_token: R_CURLY@1675..1676 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -2965,7 +2965,7 @@ CssRoot {
                 r_curly_token: R_CURLY@1697..1698 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -3004,7 +3004,7 @@ CssRoot {
                 r_curly_token: R_CURLY@1724..1725 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -3033,7 +3033,7 @@ CssRoot {
                 r_curly_token: R_CURLY@1742..1743 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -3072,7 +3072,7 @@ CssRoot {
                 r_curly_token: R_CURLY@1760..1761 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -3101,7 +3101,7 @@ CssRoot {
                 r_curly_token: R_CURLY@1782..1783 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -3140,7 +3140,7 @@ CssRoot {
                 r_curly_token: R_CURLY@1805..1806 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -3177,7 +3177,7 @@ CssRoot {
                 r_curly_token: R_CURLY@1824..1825 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -3214,7 +3214,7 @@ CssRoot {
                 r_curly_token: R_CURLY@1842..1843 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -3251,7 +3251,7 @@ CssRoot {
                 r_curly_token: R_CURLY@1860..1861 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -3288,7 +3288,7 @@ CssRoot {
                 r_curly_token: R_CURLY@1877..1878 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -3325,7 +3325,7 @@ CssRoot {
                 r_curly_token: R_CURLY@1895..1896 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -3362,7 +3362,7 @@ CssRoot {
                 r_curly_token: R_CURLY@1913..1914 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -3399,7 +3399,7 @@ CssRoot {
                 r_curly_token: R_CURLY@1930..1931 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -3436,7 +3436,7 @@ CssRoot {
                 r_curly_token: R_CURLY@1948..1949 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -3473,7 +3473,7 @@ CssRoot {
                 r_curly_token: R_CURLY@1966..1967 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -3526,7 +3526,7 @@ CssRoot {
                 r_curly_token: R_CURLY@1993..1994 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -3579,7 +3579,7 @@ CssRoot {
                 r_curly_token: R_CURLY@2025..2026 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -3645,7 +3645,7 @@ CssRoot {
                 r_curly_token: R_CURLY@2057..2058 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -3711,7 +3711,7 @@ CssRoot {
                 r_curly_token: R_CURLY@2090..2091 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -3769,7 +3769,7 @@ CssRoot {
                 r_curly_token: R_CURLY@2126..2127 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -3840,7 +3840,7 @@ CssRoot {
                 r_curly_token: R_CURLY@2166..2167 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssComplexSelector {
                     left: CssCompoundSelector {
@@ -3905,7 +3905,7 @@ CssRoot {
 0: CSS_ROOT@0..2195
   0: (empty)
   1: CSS_RULE_LIST@0..2194
-    0: CSS_RULE@0..19
+    0: CSS_QUALIFIED_RULE@0..19
       0: CSS_SELECTOR_LIST@0..17
         0: CSS_COMPOUND_SELECTOR@0..17
           0: (empty)
@@ -3932,7 +3932,7 @@ CssRoot {
         0: L_CURLY@17..18 "{" [] []
         1: CSS_DECLARATION_LIST@18..18
         2: R_CURLY@18..19 "}" [] []
-    1: CSS_RULE@19..40
+    1: CSS_QUALIFIED_RULE@19..40
       0: CSS_SELECTOR_LIST@19..38
         0: CSS_COMPOUND_SELECTOR@19..38
           0: (empty)
@@ -3959,7 +3959,7 @@ CssRoot {
         0: L_CURLY@38..39 "{" [] []
         1: CSS_DECLARATION_LIST@39..39
         2: R_CURLY@39..40 "}" [] []
-    2: CSS_RULE@40..62
+    2: CSS_QUALIFIED_RULE@40..62
       0: CSS_SELECTOR_LIST@40..60
         0: CSS_COMPOUND_SELECTOR@40..60
           0: (empty)
@@ -3986,7 +3986,7 @@ CssRoot {
         0: L_CURLY@60..61 "{" [] []
         1: CSS_DECLARATION_LIST@61..61
         2: R_CURLY@61..62 "}" [] []
-    3: CSS_RULE@62..83
+    3: CSS_QUALIFIED_RULE@62..83
       0: CSS_SELECTOR_LIST@62..81
         0: CSS_COMPOUND_SELECTOR@62..81
           0: (empty)
@@ -4013,7 +4013,7 @@ CssRoot {
         0: L_CURLY@81..82 "{" [] []
         1: CSS_DECLARATION_LIST@82..82
         2: R_CURLY@82..83 "}" [] []
-    4: CSS_RULE@83..103
+    4: CSS_QUALIFIED_RULE@83..103
       0: CSS_SELECTOR_LIST@83..101
         0: CSS_COMPOUND_SELECTOR@83..101
           0: (empty)
@@ -4040,7 +4040,7 @@ CssRoot {
         0: L_CURLY@101..102 "{" [] []
         1: CSS_DECLARATION_LIST@102..102
         2: R_CURLY@102..103 "}" [] []
-    5: CSS_RULE@103..124
+    5: CSS_QUALIFIED_RULE@103..124
       0: CSS_SELECTOR_LIST@103..122
         0: CSS_COMPOUND_SELECTOR@103..122
           0: (empty)
@@ -4067,7 +4067,7 @@ CssRoot {
         0: L_CURLY@122..123 "{" [] []
         1: CSS_DECLARATION_LIST@123..123
         2: R_CURLY@123..124 "}" [] []
-    6: CSS_RULE@124..145
+    6: CSS_QUALIFIED_RULE@124..145
       0: CSS_SELECTOR_LIST@124..143
         0: CSS_COMPOUND_SELECTOR@124..143
           0: (empty)
@@ -4094,7 +4094,7 @@ CssRoot {
         0: L_CURLY@143..144 "{" [] []
         1: CSS_DECLARATION_LIST@144..144
         2: R_CURLY@144..145 "}" [] []
-    7: CSS_RULE@145..167
+    7: CSS_QUALIFIED_RULE@145..167
       0: CSS_SELECTOR_LIST@145..165
         0: CSS_COMPOUND_SELECTOR@145..165
           0: (empty)
@@ -4121,7 +4121,7 @@ CssRoot {
         0: L_CURLY@165..166 "{" [] []
         1: CSS_DECLARATION_LIST@166..166
         2: R_CURLY@166..167 "}" [] []
-    8: CSS_RULE@167..188
+    8: CSS_QUALIFIED_RULE@167..188
       0: CSS_SELECTOR_LIST@167..186
         0: CSS_COMPOUND_SELECTOR@167..186
           0: (empty)
@@ -4148,7 +4148,7 @@ CssRoot {
         0: L_CURLY@186..187 "{" [] []
         1: CSS_DECLARATION_LIST@187..187
         2: R_CURLY@187..188 "}" [] []
-    9: CSS_RULE@188..210
+    9: CSS_QUALIFIED_RULE@188..210
       0: CSS_SELECTOR_LIST@188..208
         0: CSS_COMPOUND_SELECTOR@188..208
           0: (empty)
@@ -4175,7 +4175,7 @@ CssRoot {
         0: L_CURLY@208..209 "{" [] []
         1: CSS_DECLARATION_LIST@209..209
         2: R_CURLY@209..210 "}" [] []
-    10: CSS_RULE@210..233
+    10: CSS_QUALIFIED_RULE@210..233
       0: CSS_SELECTOR_LIST@210..231
         0: CSS_COMPOUND_SELECTOR@210..231
           0: (empty)
@@ -4202,7 +4202,7 @@ CssRoot {
         0: L_CURLY@231..232 "{" [] []
         1: CSS_DECLARATION_LIST@232..232
         2: R_CURLY@232..233 "}" [] []
-    11: CSS_RULE@233..255
+    11: CSS_QUALIFIED_RULE@233..255
       0: CSS_SELECTOR_LIST@233..253
         0: CSS_COMPOUND_SELECTOR@233..253
           0: (empty)
@@ -4229,7 +4229,7 @@ CssRoot {
         0: L_CURLY@253..254 "{" [] []
         1: CSS_DECLARATION_LIST@254..254
         2: R_CURLY@254..255 "}" [] []
-    12: CSS_RULE@255..276
+    12: CSS_QUALIFIED_RULE@255..276
       0: CSS_SELECTOR_LIST@255..274
         0: CSS_COMPOUND_SELECTOR@255..274
           0: (empty)
@@ -4256,7 +4256,7 @@ CssRoot {
         0: L_CURLY@274..275 "{" [] []
         1: CSS_DECLARATION_LIST@275..275
         2: R_CURLY@275..276 "}" [] []
-    13: CSS_RULE@276..298
+    13: CSS_QUALIFIED_RULE@276..298
       0: CSS_SELECTOR_LIST@276..296
         0: CSS_COMPOUND_SELECTOR@276..296
           0: (empty)
@@ -4283,7 +4283,7 @@ CssRoot {
         0: L_CURLY@296..297 "{" [] []
         1: CSS_DECLARATION_LIST@297..297
         2: R_CURLY@297..298 "}" [] []
-    14: CSS_RULE@298..321
+    14: CSS_QUALIFIED_RULE@298..321
       0: CSS_SELECTOR_LIST@298..319
         0: CSS_COMPOUND_SELECTOR@298..319
           0: (empty)
@@ -4310,7 +4310,7 @@ CssRoot {
         0: L_CURLY@319..320 "{" [] []
         1: CSS_DECLARATION_LIST@320..320
         2: R_CURLY@320..321 "}" [] []
-    15: CSS_RULE@321..342
+    15: CSS_QUALIFIED_RULE@321..342
       0: CSS_SELECTOR_LIST@321..340
         0: CSS_COMPOUND_SELECTOR@321..340
           0: (empty)
@@ -4337,7 +4337,7 @@ CssRoot {
         0: L_CURLY@340..341 "{" [] []
         1: CSS_DECLARATION_LIST@341..341
         2: R_CURLY@341..342 "}" [] []
-    16: CSS_RULE@342..364
+    16: CSS_QUALIFIED_RULE@342..364
       0: CSS_SELECTOR_LIST@342..362
         0: CSS_COMPOUND_SELECTOR@342..362
           0: (empty)
@@ -4364,7 +4364,7 @@ CssRoot {
         0: L_CURLY@362..363 "{" [] []
         1: CSS_DECLARATION_LIST@363..363
         2: R_CURLY@363..364 "}" [] []
-    17: CSS_RULE@364..387
+    17: CSS_QUALIFIED_RULE@364..387
       0: CSS_SELECTOR_LIST@364..385
         0: CSS_COMPOUND_SELECTOR@364..385
           0: (empty)
@@ -4391,7 +4391,7 @@ CssRoot {
         0: L_CURLY@385..386 "{" [] []
         1: CSS_DECLARATION_LIST@386..386
         2: R_CURLY@386..387 "}" [] []
-    18: CSS_RULE@387..409
+    18: CSS_QUALIFIED_RULE@387..409
       0: CSS_SELECTOR_LIST@387..407
         0: CSS_COMPOUND_SELECTOR@387..407
           0: (empty)
@@ -4418,7 +4418,7 @@ CssRoot {
         0: L_CURLY@407..408 "{" [] []
         1: CSS_DECLARATION_LIST@408..408
         2: R_CURLY@408..409 "}" [] []
-    19: CSS_RULE@409..430
+    19: CSS_QUALIFIED_RULE@409..430
       0: CSS_SELECTOR_LIST@409..428
         0: CSS_COMPOUND_SELECTOR@409..428
           0: (empty)
@@ -4445,7 +4445,7 @@ CssRoot {
         0: L_CURLY@428..429 "{" [] []
         1: CSS_DECLARATION_LIST@429..429
         2: R_CURLY@429..430 "}" [] []
-    20: CSS_RULE@430..452
+    20: CSS_QUALIFIED_RULE@430..452
       0: CSS_SELECTOR_LIST@430..450
         0: CSS_COMPOUND_SELECTOR@430..450
           0: (empty)
@@ -4472,7 +4472,7 @@ CssRoot {
         0: L_CURLY@450..451 "{" [] []
         1: CSS_DECLARATION_LIST@451..451
         2: R_CURLY@451..452 "}" [] []
-    21: CSS_RULE@452..474
+    21: CSS_QUALIFIED_RULE@452..474
       0: CSS_SELECTOR_LIST@452..472
         0: CSS_COMPOUND_SELECTOR@452..472
           0: (empty)
@@ -4499,7 +4499,7 @@ CssRoot {
         0: L_CURLY@472..473 "{" [] []
         1: CSS_DECLARATION_LIST@473..473
         2: R_CURLY@473..474 "}" [] []
-    22: CSS_RULE@474..497
+    22: CSS_QUALIFIED_RULE@474..497
       0: CSS_SELECTOR_LIST@474..495
         0: CSS_COMPOUND_SELECTOR@474..495
           0: (empty)
@@ -4526,7 +4526,7 @@ CssRoot {
         0: L_CURLY@495..496 "{" [] []
         1: CSS_DECLARATION_LIST@496..496
         2: R_CURLY@496..497 "}" [] []
-    23: CSS_RULE@497..516
+    23: CSS_QUALIFIED_RULE@497..516
       0: CSS_SELECTOR_LIST@497..514
         0: CSS_COMPOUND_SELECTOR@497..514
           0: (empty)
@@ -4552,7 +4552,7 @@ CssRoot {
         0: L_CURLY@514..515 "{" [] []
         1: CSS_DECLARATION_LIST@515..515
         2: R_CURLY@515..516 "}" [] []
-    24: CSS_RULE@516..536
+    24: CSS_QUALIFIED_RULE@516..536
       0: CSS_SELECTOR_LIST@516..534
         0: CSS_COMPOUND_SELECTOR@516..534
           0: (empty)
@@ -4578,7 +4578,7 @@ CssRoot {
         0: L_CURLY@534..535 "{" [] []
         1: CSS_DECLARATION_LIST@535..535
         2: R_CURLY@535..536 "}" [] []
-    25: CSS_RULE@536..557
+    25: CSS_QUALIFIED_RULE@536..557
       0: CSS_SELECTOR_LIST@536..555
         0: CSS_COMPOUND_SELECTOR@536..555
           0: (empty)
@@ -4604,7 +4604,7 @@ CssRoot {
         0: L_CURLY@555..556 "{" [] []
         1: CSS_DECLARATION_LIST@556..556
         2: R_CURLY@556..557 "}" [] []
-    26: CSS_RULE@557..577
+    26: CSS_QUALIFIED_RULE@557..577
       0: CSS_SELECTOR_LIST@557..575
         0: CSS_COMPOUND_SELECTOR@557..575
           0: (empty)
@@ -4630,7 +4630,7 @@ CssRoot {
         0: L_CURLY@575..576 "{" [] []
         1: CSS_DECLARATION_LIST@576..576
         2: R_CURLY@576..577 "}" [] []
-    27: CSS_RULE@577..596
+    27: CSS_QUALIFIED_RULE@577..596
       0: CSS_SELECTOR_LIST@577..594
         0: CSS_COMPOUND_SELECTOR@577..594
           0: (empty)
@@ -4656,7 +4656,7 @@ CssRoot {
         0: L_CURLY@594..595 "{" [] []
         1: CSS_DECLARATION_LIST@595..595
         2: R_CURLY@595..596 "}" [] []
-    28: CSS_RULE@596..616
+    28: CSS_QUALIFIED_RULE@596..616
       0: CSS_SELECTOR_LIST@596..614
         0: CSS_COMPOUND_SELECTOR@596..614
           0: (empty)
@@ -4682,7 +4682,7 @@ CssRoot {
         0: L_CURLY@614..615 "{" [] []
         1: CSS_DECLARATION_LIST@615..615
         2: R_CURLY@615..616 "}" [] []
-    29: CSS_RULE@616..636
+    29: CSS_QUALIFIED_RULE@616..636
       0: CSS_SELECTOR_LIST@616..634
         0: CSS_COMPOUND_SELECTOR@616..634
           0: (empty)
@@ -4708,7 +4708,7 @@ CssRoot {
         0: L_CURLY@634..635 "{" [] []
         1: CSS_DECLARATION_LIST@635..635
         2: R_CURLY@635..636 "}" [] []
-    30: CSS_RULE@636..657
+    30: CSS_QUALIFIED_RULE@636..657
       0: CSS_SELECTOR_LIST@636..655
         0: CSS_COMPOUND_SELECTOR@636..655
           0: (empty)
@@ -4734,7 +4734,7 @@ CssRoot {
         0: L_CURLY@655..656 "{" [] []
         1: CSS_DECLARATION_LIST@656..656
         2: R_CURLY@656..657 "}" [] []
-    31: CSS_RULE@657..677
+    31: CSS_QUALIFIED_RULE@657..677
       0: CSS_SELECTOR_LIST@657..675
         0: CSS_COMPOUND_SELECTOR@657..675
           0: (empty)
@@ -4760,7 +4760,7 @@ CssRoot {
         0: L_CURLY@675..676 "{" [] []
         1: CSS_DECLARATION_LIST@676..676
         2: R_CURLY@676..677 "}" [] []
-    32: CSS_RULE@677..698
+    32: CSS_QUALIFIED_RULE@677..698
       0: CSS_SELECTOR_LIST@677..696
         0: CSS_COMPOUND_SELECTOR@677..696
           0: (empty)
@@ -4786,7 +4786,7 @@ CssRoot {
         0: L_CURLY@696..697 "{" [] []
         1: CSS_DECLARATION_LIST@697..697
         2: R_CURLY@697..698 "}" [] []
-    33: CSS_RULE@698..720
+    33: CSS_QUALIFIED_RULE@698..720
       0: CSS_SELECTOR_LIST@698..718
         0: CSS_COMPOUND_SELECTOR@698..718
           0: (empty)
@@ -4812,7 +4812,7 @@ CssRoot {
         0: L_CURLY@718..719 "{" [] []
         1: CSS_DECLARATION_LIST@719..719
         2: R_CURLY@719..720 "}" [] []
-    34: CSS_RULE@720..741
+    34: CSS_QUALIFIED_RULE@720..741
       0: CSS_SELECTOR_LIST@720..739
         0: CSS_COMPOUND_SELECTOR@720..739
           0: (empty)
@@ -4838,7 +4838,7 @@ CssRoot {
         0: L_CURLY@739..740 "{" [] []
         1: CSS_DECLARATION_LIST@740..740
         2: R_CURLY@740..741 "}" [] []
-    35: CSS_RULE@741..761
+    35: CSS_QUALIFIED_RULE@741..761
       0: CSS_SELECTOR_LIST@741..759
         0: CSS_COMPOUND_SELECTOR@741..759
           0: (empty)
@@ -4864,7 +4864,7 @@ CssRoot {
         0: L_CURLY@759..760 "{" [] []
         1: CSS_DECLARATION_LIST@760..760
         2: R_CURLY@760..761 "}" [] []
-    36: CSS_RULE@761..782
+    36: CSS_QUALIFIED_RULE@761..782
       0: CSS_SELECTOR_LIST@761..780
         0: CSS_COMPOUND_SELECTOR@761..780
           0: (empty)
@@ -4890,7 +4890,7 @@ CssRoot {
         0: L_CURLY@780..781 "{" [] []
         1: CSS_DECLARATION_LIST@781..781
         2: R_CURLY@781..782 "}" [] []
-    37: CSS_RULE@782..803
+    37: CSS_QUALIFIED_RULE@782..803
       0: CSS_SELECTOR_LIST@782..801
         0: CSS_COMPOUND_SELECTOR@782..801
           0: (empty)
@@ -4916,7 +4916,7 @@ CssRoot {
         0: L_CURLY@801..802 "{" [] []
         1: CSS_DECLARATION_LIST@802..802
         2: R_CURLY@802..803 "}" [] []
-    38: CSS_RULE@803..825
+    38: CSS_QUALIFIED_RULE@803..825
       0: CSS_SELECTOR_LIST@803..823
         0: CSS_COMPOUND_SELECTOR@803..823
           0: (empty)
@@ -4942,7 +4942,7 @@ CssRoot {
         0: L_CURLY@823..824 "{" [] []
         1: CSS_DECLARATION_LIST@824..824
         2: R_CURLY@824..825 "}" [] []
-    39: CSS_RULE@825..845
+    39: CSS_QUALIFIED_RULE@825..845
       0: CSS_SELECTOR_LIST@825..843
         0: CSS_COMPOUND_SELECTOR@825..843
           0: (empty)
@@ -4968,7 +4968,7 @@ CssRoot {
         0: L_CURLY@843..844 "{" [] []
         1: CSS_DECLARATION_LIST@844..844
         2: R_CURLY@844..845 "}" [] []
-    40: CSS_RULE@845..866
+    40: CSS_QUALIFIED_RULE@845..866
       0: CSS_SELECTOR_LIST@845..864
         0: CSS_COMPOUND_SELECTOR@845..864
           0: (empty)
@@ -4994,7 +4994,7 @@ CssRoot {
         0: L_CURLY@864..865 "{" [] []
         1: CSS_DECLARATION_LIST@865..865
         2: R_CURLY@865..866 "}" [] []
-    41: CSS_RULE@866..888
+    41: CSS_QUALIFIED_RULE@866..888
       0: CSS_SELECTOR_LIST@866..886
         0: CSS_COMPOUND_SELECTOR@866..886
           0: (empty)
@@ -5020,7 +5020,7 @@ CssRoot {
         0: L_CURLY@886..887 "{" [] []
         1: CSS_DECLARATION_LIST@887..887
         2: R_CURLY@887..888 "}" [] []
-    42: CSS_RULE@888..909
+    42: CSS_QUALIFIED_RULE@888..909
       0: CSS_SELECTOR_LIST@888..907
         0: CSS_COMPOUND_SELECTOR@888..907
           0: (empty)
@@ -5046,7 +5046,7 @@ CssRoot {
         0: L_CURLY@907..908 "{" [] []
         1: CSS_DECLARATION_LIST@908..908
         2: R_CURLY@908..909 "}" [] []
-    43: CSS_RULE@909..929
+    43: CSS_QUALIFIED_RULE@909..929
       0: CSS_SELECTOR_LIST@909..927
         0: CSS_COMPOUND_SELECTOR@909..927
           0: (empty)
@@ -5072,7 +5072,7 @@ CssRoot {
         0: L_CURLY@927..928 "{" [] []
         1: CSS_DECLARATION_LIST@928..928
         2: R_CURLY@928..929 "}" [] []
-    44: CSS_RULE@929..950
+    44: CSS_QUALIFIED_RULE@929..950
       0: CSS_SELECTOR_LIST@929..948
         0: CSS_COMPOUND_SELECTOR@929..948
           0: (empty)
@@ -5098,7 +5098,7 @@ CssRoot {
         0: L_CURLY@948..949 "{" [] []
         1: CSS_DECLARATION_LIST@949..949
         2: R_CURLY@949..950 "}" [] []
-    45: CSS_RULE@950..971
+    45: CSS_QUALIFIED_RULE@950..971
       0: CSS_SELECTOR_LIST@950..969
         0: CSS_COMPOUND_SELECTOR@950..969
           0: (empty)
@@ -5124,7 +5124,7 @@ CssRoot {
         0: L_CURLY@969..970 "{" [] []
         1: CSS_DECLARATION_LIST@970..970
         2: R_CURLY@970..971 "}" [] []
-    46: CSS_RULE@971..993
+    46: CSS_QUALIFIED_RULE@971..993
       0: CSS_SELECTOR_LIST@971..991
         0: CSS_COMPOUND_SELECTOR@971..991
           0: (empty)
@@ -5150,7 +5150,7 @@ CssRoot {
         0: L_CURLY@991..992 "{" [] []
         1: CSS_DECLARATION_LIST@992..992
         2: R_CURLY@992..993 "}" [] []
-    47: CSS_RULE@993..1010
+    47: CSS_QUALIFIED_RULE@993..1010
       0: CSS_SELECTOR_LIST@993..1008
         0: CSS_COMPOUND_SELECTOR@993..1008
           0: (empty)
@@ -5173,7 +5173,7 @@ CssRoot {
         0: L_CURLY@1008..1009 "{" [] []
         1: CSS_DECLARATION_LIST@1009..1009
         2: R_CURLY@1009..1010 "}" [] []
-    48: CSS_RULE@1010..1028
+    48: CSS_QUALIFIED_RULE@1010..1028
       0: CSS_SELECTOR_LIST@1010..1026
         0: CSS_COMPOUND_SELECTOR@1010..1026
           0: (empty)
@@ -5196,7 +5196,7 @@ CssRoot {
         0: L_CURLY@1026..1027 "{" [] []
         1: CSS_DECLARATION_LIST@1027..1027
         2: R_CURLY@1027..1028 "}" [] []
-    49: CSS_RULE@1028..1046
+    49: CSS_QUALIFIED_RULE@1028..1046
       0: CSS_SELECTOR_LIST@1028..1044
         0: CSS_COMPOUND_SELECTOR@1028..1044
           0: (empty)
@@ -5219,7 +5219,7 @@ CssRoot {
         0: L_CURLY@1044..1045 "{" [] []
         1: CSS_DECLARATION_LIST@1045..1045
         2: R_CURLY@1045..1046 "}" [] []
-    50: CSS_RULE@1046..1064
+    50: CSS_QUALIFIED_RULE@1046..1064
       0: CSS_SELECTOR_LIST@1046..1062
         0: CSS_COMPOUND_SELECTOR@1046..1062
           0: (empty)
@@ -5243,7 +5243,7 @@ CssRoot {
         0: L_CURLY@1062..1063 "{" [] []
         1: CSS_DECLARATION_LIST@1063..1063
         2: R_CURLY@1063..1064 "}" [] []
-    51: CSS_RULE@1064..1083
+    51: CSS_QUALIFIED_RULE@1064..1083
       0: CSS_SELECTOR_LIST@1064..1081
         0: CSS_COMPOUND_SELECTOR@1064..1081
           0: (empty)
@@ -5267,7 +5267,7 @@ CssRoot {
         0: L_CURLY@1081..1082 "{" [] []
         1: CSS_DECLARATION_LIST@1082..1082
         2: R_CURLY@1082..1083 "}" [] []
-    52: CSS_RULE@1083..1102
+    52: CSS_QUALIFIED_RULE@1083..1102
       0: CSS_SELECTOR_LIST@1083..1100
         0: CSS_COMPOUND_SELECTOR@1083..1100
           0: (empty)
@@ -5291,7 +5291,7 @@ CssRoot {
         0: L_CURLY@1100..1101 "{" [] []
         1: CSS_DECLARATION_LIST@1101..1101
         2: R_CURLY@1101..1102 "}" [] []
-    53: CSS_RULE@1102..1119
+    53: CSS_QUALIFIED_RULE@1102..1119
       0: CSS_SELECTOR_LIST@1102..1117
         0: CSS_COMPOUND_SELECTOR@1102..1117
           0: (empty)
@@ -5314,7 +5314,7 @@ CssRoot {
         0: L_CURLY@1117..1118 "{" [] []
         1: CSS_DECLARATION_LIST@1118..1118
         2: R_CURLY@1118..1119 "}" [] []
-    54: CSS_RULE@1119..1137
+    54: CSS_QUALIFIED_RULE@1119..1137
       0: CSS_SELECTOR_LIST@1119..1135
         0: CSS_COMPOUND_SELECTOR@1119..1135
           0: (empty)
@@ -5337,7 +5337,7 @@ CssRoot {
         0: L_CURLY@1135..1136 "{" [] []
         1: CSS_DECLARATION_LIST@1136..1136
         2: R_CURLY@1136..1137 "}" [] []
-    55: CSS_RULE@1137..1155
+    55: CSS_QUALIFIED_RULE@1137..1155
       0: CSS_SELECTOR_LIST@1137..1153
         0: CSS_COMPOUND_SELECTOR@1137..1153
           0: (empty)
@@ -5360,7 +5360,7 @@ CssRoot {
         0: L_CURLY@1153..1154 "{" [] []
         1: CSS_DECLARATION_LIST@1154..1154
         2: R_CURLY@1154..1155 "}" [] []
-    56: CSS_RULE@1155..1173
+    56: CSS_QUALIFIED_RULE@1155..1173
       0: CSS_SELECTOR_LIST@1155..1171
         0: CSS_COMPOUND_SELECTOR@1155..1171
           0: (empty)
@@ -5384,7 +5384,7 @@ CssRoot {
         0: L_CURLY@1171..1172 "{" [] []
         1: CSS_DECLARATION_LIST@1172..1172
         2: R_CURLY@1172..1173 "}" [] []
-    57: CSS_RULE@1173..1192
+    57: CSS_QUALIFIED_RULE@1173..1192
       0: CSS_SELECTOR_LIST@1173..1190
         0: CSS_COMPOUND_SELECTOR@1173..1190
           0: (empty)
@@ -5408,7 +5408,7 @@ CssRoot {
         0: L_CURLY@1190..1191 "{" [] []
         1: CSS_DECLARATION_LIST@1191..1191
         2: R_CURLY@1191..1192 "}" [] []
-    58: CSS_RULE@1192..1211
+    58: CSS_QUALIFIED_RULE@1192..1211
       0: CSS_SELECTOR_LIST@1192..1209
         0: CSS_COMPOUND_SELECTOR@1192..1209
           0: (empty)
@@ -5432,7 +5432,7 @@ CssRoot {
         0: L_CURLY@1209..1210 "{" [] []
         1: CSS_DECLARATION_LIST@1210..1210
         2: R_CURLY@1210..1211 "}" [] []
-    59: CSS_RULE@1211..1228
+    59: CSS_QUALIFIED_RULE@1211..1228
       0: CSS_SELECTOR_LIST@1211..1226
         0: CSS_COMPOUND_SELECTOR@1211..1226
           0: (empty)
@@ -5454,7 +5454,7 @@ CssRoot {
         0: L_CURLY@1226..1227 "{" [] []
         1: CSS_DECLARATION_LIST@1227..1227
         2: R_CURLY@1227..1228 "}" [] []
-    60: CSS_RULE@1228..1246
+    60: CSS_QUALIFIED_RULE@1228..1246
       0: CSS_SELECTOR_LIST@1228..1244
         0: CSS_COMPOUND_SELECTOR@1228..1244
           0: (empty)
@@ -5476,7 +5476,7 @@ CssRoot {
         0: L_CURLY@1244..1245 "{" [] []
         1: CSS_DECLARATION_LIST@1245..1245
         2: R_CURLY@1245..1246 "}" [] []
-    61: CSS_RULE@1246..1264
+    61: CSS_QUALIFIED_RULE@1246..1264
       0: CSS_SELECTOR_LIST@1246..1262
         0: CSS_COMPOUND_SELECTOR@1246..1262
           0: (empty)
@@ -5498,7 +5498,7 @@ CssRoot {
         0: L_CURLY@1262..1263 "{" [] []
         1: CSS_DECLARATION_LIST@1263..1263
         2: R_CURLY@1263..1264 "}" [] []
-    62: CSS_RULE@1264..1296
+    62: CSS_QUALIFIED_RULE@1264..1296
       0: CSS_SELECTOR_LIST@1264..1294
         0: CSS_COMPOUND_SELECTOR@1264..1294
           0: (empty)
@@ -5525,7 +5525,7 @@ CssRoot {
         0: L_CURLY@1294..1295 "{" [] []
         1: CSS_DECLARATION_LIST@1295..1295
         2: R_CURLY@1295..1296 "}" [] []
-    63: CSS_RULE@1296..1317
+    63: CSS_QUALIFIED_RULE@1296..1317
       0: CSS_SELECTOR_LIST@1296..1315
         0: CSS_COMPOUND_SELECTOR@1296..1315
           0: (empty)
@@ -5552,7 +5552,7 @@ CssRoot {
         0: L_CURLY@1315..1316 "{" [] []
         1: CSS_DECLARATION_LIST@1316..1316
         2: R_CURLY@1316..1317 "}" [] []
-    64: CSS_RULE@1317..1337
+    64: CSS_QUALIFIED_RULE@1317..1337
       0: CSS_SELECTOR_LIST@1317..1335
         0: CSS_COMPOUND_SELECTOR@1317..1335
           0: (empty)
@@ -5579,7 +5579,7 @@ CssRoot {
         0: L_CURLY@1335..1336 "{" [] []
         1: CSS_DECLARATION_LIST@1336..1336
         2: R_CURLY@1336..1337 "}" [] []
-    65: CSS_RULE@1337..1357
+    65: CSS_QUALIFIED_RULE@1337..1357
       0: CSS_SELECTOR_LIST@1337..1355
         0: CSS_COMPOUND_SELECTOR@1337..1355
           0: (empty)
@@ -5599,7 +5599,7 @@ CssRoot {
         0: L_CURLY@1355..1356 "{" [] []
         1: CSS_DECLARATION_LIST@1356..1356
         2: R_CURLY@1356..1357 "}" [] []
-    66: CSS_RULE@1357..1376
+    66: CSS_QUALIFIED_RULE@1357..1376
       0: CSS_SELECTOR_LIST@1357..1374
         0: CSS_COMPOUND_SELECTOR@1357..1374
           0: (empty)
@@ -5619,7 +5619,7 @@ CssRoot {
         0: L_CURLY@1374..1375 "{" [] []
         1: CSS_DECLARATION_LIST@1375..1375
         2: R_CURLY@1375..1376 "}" [] []
-    67: CSS_RULE@1376..1395
+    67: CSS_QUALIFIED_RULE@1376..1395
       0: CSS_SELECTOR_LIST@1376..1393
         0: CSS_COMPOUND_SELECTOR@1376..1393
           0: (empty)
@@ -5639,7 +5639,7 @@ CssRoot {
         0: L_CURLY@1393..1394 "{" [] []
         1: CSS_DECLARATION_LIST@1394..1394
         2: R_CURLY@1394..1395 "}" [] []
-    68: CSS_RULE@1395..1415
+    68: CSS_QUALIFIED_RULE@1395..1415
       0: CSS_SELECTOR_LIST@1395..1413
         0: CSS_COMPOUND_SELECTOR@1395..1413
           0: (empty)
@@ -5659,7 +5659,7 @@ CssRoot {
         0: L_CURLY@1413..1414 "{" [] []
         1: CSS_DECLARATION_LIST@1414..1414
         2: R_CURLY@1414..1415 "}" [] []
-    69: CSS_RULE@1415..1435
+    69: CSS_QUALIFIED_RULE@1415..1435
       0: CSS_SELECTOR_LIST@1415..1433
         0: CSS_COMPOUND_SELECTOR@1415..1433
           0: (empty)
@@ -5679,7 +5679,7 @@ CssRoot {
         0: L_CURLY@1433..1434 "{" [] []
         1: CSS_DECLARATION_LIST@1434..1434
         2: R_CURLY@1434..1435 "}" [] []
-    70: CSS_RULE@1435..1455
+    70: CSS_QUALIFIED_RULE@1435..1455
       0: CSS_SELECTOR_LIST@1435..1453
         0: CSS_COMPOUND_SELECTOR@1435..1453
           0: (empty)
@@ -5699,7 +5699,7 @@ CssRoot {
         0: L_CURLY@1453..1454 "{" [] []
         1: CSS_DECLARATION_LIST@1454..1454
         2: R_CURLY@1454..1455 "}" [] []
-    71: CSS_RULE@1455..1508
+    71: CSS_QUALIFIED_RULE@1455..1508
       0: CSS_SELECTOR_LIST@1455..1506
         0: CSS_COMPOUND_SELECTOR@1455..1506
           0: (empty)
@@ -5726,7 +5726,7 @@ CssRoot {
         0: L_CURLY@1506..1507 "{" [] []
         1: CSS_DECLARATION_LIST@1507..1507
         2: R_CURLY@1507..1508 "}" [] []
-    72: CSS_RULE@1508..1566
+    72: CSS_QUALIFIED_RULE@1508..1566
       0: CSS_SELECTOR_LIST@1508..1564
         0: CSS_COMPOUND_SELECTOR@1508..1564
           0: (empty)
@@ -5753,7 +5753,7 @@ CssRoot {
         0: L_CURLY@1564..1565 "{" [] []
         1: CSS_DECLARATION_LIST@1565..1565
         2: R_CURLY@1565..1566 "}" [] []
-    73: CSS_RULE@1566..1595
+    73: CSS_QUALIFIED_RULE@1566..1595
       0: CSS_SELECTOR_LIST@1566..1593
         0: CSS_COMPOUND_SELECTOR@1566..1593
           0: (empty)
@@ -5780,7 +5780,7 @@ CssRoot {
         0: L_CURLY@1593..1594 "{" [] []
         1: CSS_DECLARATION_LIST@1594..1594
         2: R_CURLY@1594..1595 "}" [] []
-    74: CSS_RULE@1595..1629
+    74: CSS_QUALIFIED_RULE@1595..1629
       0: CSS_SELECTOR_LIST@1595..1627
         0: CSS_COMPOUND_SELECTOR@1595..1627
           0: (empty)
@@ -5807,7 +5807,7 @@ CssRoot {
         0: L_CURLY@1627..1628 "{" [] []
         1: CSS_DECLARATION_LIST@1628..1628
         2: R_CURLY@1628..1629 "}" [] []
-    75: CSS_RULE@1629..1651
+    75: CSS_QUALIFIED_RULE@1629..1651
       0: CSS_SELECTOR_LIST@1629..1649
         0: CSS_COMPOUND_SELECTOR@1629..1649
           0: (empty)
@@ -5834,7 +5834,7 @@ CssRoot {
         0: L_CURLY@1649..1650 "{" [] []
         1: CSS_DECLARATION_LIST@1650..1650
         2: R_CURLY@1650..1651 "}" [] []
-    76: CSS_RULE@1651..1676
+    76: CSS_QUALIFIED_RULE@1651..1676
       0: CSS_SELECTOR_LIST@1651..1674
         0: CSS_COMPOUND_SELECTOR@1651..1674
           0: (empty)
@@ -5861,7 +5861,7 @@ CssRoot {
         0: L_CURLY@1674..1675 "{" [] []
         1: CSS_DECLARATION_LIST@1675..1675
         2: R_CURLY@1675..1676 "}" [] []
-    77: CSS_RULE@1676..1698
+    77: CSS_QUALIFIED_RULE@1676..1698
       0: CSS_SELECTOR_LIST@1676..1696
         0: CSS_COMPOUND_SELECTOR@1676..1696
           0: (empty)
@@ -5888,7 +5888,7 @@ CssRoot {
         0: L_CURLY@1696..1697 "{" [] []
         1: CSS_DECLARATION_LIST@1697..1697
         2: R_CURLY@1697..1698 "}" [] []
-    78: CSS_RULE@1698..1725
+    78: CSS_QUALIFIED_RULE@1698..1725
       0: CSS_SELECTOR_LIST@1698..1723
         0: CSS_COMPOUND_SELECTOR@1698..1723
           0: (empty)
@@ -5915,7 +5915,7 @@ CssRoot {
         0: L_CURLY@1723..1724 "{" [] []
         1: CSS_DECLARATION_LIST@1724..1724
         2: R_CURLY@1724..1725 "}" [] []
-    79: CSS_RULE@1725..1743
+    79: CSS_QUALIFIED_RULE@1725..1743
       0: CSS_SELECTOR_LIST@1725..1741
         0: CSS_COMPOUND_SELECTOR@1725..1741
           0: (empty)
@@ -5935,7 +5935,7 @@ CssRoot {
         0: L_CURLY@1741..1742 "{" [] []
         1: CSS_DECLARATION_LIST@1742..1742
         2: R_CURLY@1742..1743 "}" [] []
-    80: CSS_RULE@1743..1761
+    80: CSS_QUALIFIED_RULE@1743..1761
       0: CSS_SELECTOR_LIST@1743..1759
         0: CSS_COMPOUND_SELECTOR@1743..1759
           0: (empty)
@@ -5962,7 +5962,7 @@ CssRoot {
         0: L_CURLY@1759..1760 "{" [] []
         1: CSS_DECLARATION_LIST@1760..1760
         2: R_CURLY@1760..1761 "}" [] []
-    81: CSS_RULE@1761..1783
+    81: CSS_QUALIFIED_RULE@1761..1783
       0: CSS_SELECTOR_LIST@1761..1781
         0: CSS_COMPOUND_SELECTOR@1761..1781
           0: (empty)
@@ -5982,7 +5982,7 @@ CssRoot {
         0: L_CURLY@1781..1782 "{" [] []
         1: CSS_DECLARATION_LIST@1782..1782
         2: R_CURLY@1782..1783 "}" [] []
-    82: CSS_RULE@1783..1806
+    82: CSS_QUALIFIED_RULE@1783..1806
       0: CSS_SELECTOR_LIST@1783..1804
         0: CSS_COMPOUND_SELECTOR@1783..1804
           0: (empty)
@@ -6009,7 +6009,7 @@ CssRoot {
         0: L_CURLY@1804..1805 "{" [] []
         1: CSS_DECLARATION_LIST@1805..1805
         2: R_CURLY@1805..1806 "}" [] []
-    83: CSS_RULE@1806..1825
+    83: CSS_QUALIFIED_RULE@1806..1825
       0: CSS_SELECTOR_LIST@1806..1823
         0: CSS_COMPOUND_SELECTOR@1806..1823
           0: (empty)
@@ -6034,7 +6034,7 @@ CssRoot {
         0: L_CURLY@1823..1824 "{" [] []
         1: CSS_DECLARATION_LIST@1824..1824
         2: R_CURLY@1824..1825 "}" [] []
-    84: CSS_RULE@1825..1843
+    84: CSS_QUALIFIED_RULE@1825..1843
       0: CSS_SELECTOR_LIST@1825..1841
         0: CSS_COMPOUND_SELECTOR@1825..1841
           0: (empty)
@@ -6059,7 +6059,7 @@ CssRoot {
         0: L_CURLY@1841..1842 "{" [] []
         1: CSS_DECLARATION_LIST@1842..1842
         2: R_CURLY@1842..1843 "}" [] []
-    85: CSS_RULE@1843..1861
+    85: CSS_QUALIFIED_RULE@1843..1861
       0: CSS_SELECTOR_LIST@1843..1859
         0: CSS_COMPOUND_SELECTOR@1843..1859
           0: (empty)
@@ -6084,7 +6084,7 @@ CssRoot {
         0: L_CURLY@1859..1860 "{" [] []
         1: CSS_DECLARATION_LIST@1860..1860
         2: R_CURLY@1860..1861 "}" [] []
-    86: CSS_RULE@1861..1878
+    86: CSS_QUALIFIED_RULE@1861..1878
       0: CSS_SELECTOR_LIST@1861..1876
         0: CSS_COMPOUND_SELECTOR@1861..1876
           0: (empty)
@@ -6109,7 +6109,7 @@ CssRoot {
         0: L_CURLY@1876..1877 "{" [] []
         1: CSS_DECLARATION_LIST@1877..1877
         2: R_CURLY@1877..1878 "}" [] []
-    87: CSS_RULE@1878..1896
+    87: CSS_QUALIFIED_RULE@1878..1896
       0: CSS_SELECTOR_LIST@1878..1894
         0: CSS_COMPOUND_SELECTOR@1878..1894
           0: (empty)
@@ -6134,7 +6134,7 @@ CssRoot {
         0: L_CURLY@1894..1895 "{" [] []
         1: CSS_DECLARATION_LIST@1895..1895
         2: R_CURLY@1895..1896 "}" [] []
-    88: CSS_RULE@1896..1914
+    88: CSS_QUALIFIED_RULE@1896..1914
       0: CSS_SELECTOR_LIST@1896..1912
         0: CSS_COMPOUND_SELECTOR@1896..1912
           0: (empty)
@@ -6159,7 +6159,7 @@ CssRoot {
         0: L_CURLY@1912..1913 "{" [] []
         1: CSS_DECLARATION_LIST@1913..1913
         2: R_CURLY@1913..1914 "}" [] []
-    89: CSS_RULE@1914..1931
+    89: CSS_QUALIFIED_RULE@1914..1931
       0: CSS_SELECTOR_LIST@1914..1929
         0: CSS_COMPOUND_SELECTOR@1914..1929
           0: (empty)
@@ -6184,7 +6184,7 @@ CssRoot {
         0: L_CURLY@1929..1930 "{" [] []
         1: CSS_DECLARATION_LIST@1930..1930
         2: R_CURLY@1930..1931 "}" [] []
-    90: CSS_RULE@1931..1949
+    90: CSS_QUALIFIED_RULE@1931..1949
       0: CSS_SELECTOR_LIST@1931..1947
         0: CSS_COMPOUND_SELECTOR@1931..1947
           0: (empty)
@@ -6209,7 +6209,7 @@ CssRoot {
         0: L_CURLY@1947..1948 "{" [] []
         1: CSS_DECLARATION_LIST@1948..1948
         2: R_CURLY@1948..1949 "}" [] []
-    91: CSS_RULE@1949..1967
+    91: CSS_QUALIFIED_RULE@1949..1967
       0: CSS_SELECTOR_LIST@1949..1965
         0: CSS_COMPOUND_SELECTOR@1949..1965
           0: (empty)
@@ -6234,7 +6234,7 @@ CssRoot {
         0: L_CURLY@1965..1966 "{" [] []
         1: CSS_DECLARATION_LIST@1966..1966
         2: R_CURLY@1966..1967 "}" [] []
-    92: CSS_RULE@1967..1994
+    92: CSS_QUALIFIED_RULE@1967..1994
       0: CSS_SELECTOR_LIST@1967..1992
         0: CSS_COMPOUND_SELECTOR@1967..1992
           0: (empty)
@@ -6270,7 +6270,7 @@ CssRoot {
         0: L_CURLY@1992..1993 "{" [] []
         1: CSS_DECLARATION_LIST@1993..1993
         2: R_CURLY@1993..1994 "}" [] []
-    93: CSS_RULE@1994..2026
+    93: CSS_QUALIFIED_RULE@1994..2026
       0: CSS_SELECTOR_LIST@1994..2024
         0: CSS_COMPOUND_SELECTOR@1994..2024
           0: (empty)
@@ -6306,7 +6306,7 @@ CssRoot {
         0: L_CURLY@2024..2025 "{" [] []
         1: CSS_DECLARATION_LIST@2025..2025
         2: R_CURLY@2025..2026 "}" [] []
-    94: CSS_RULE@2026..2058
+    94: CSS_QUALIFIED_RULE@2026..2058
       0: CSS_SELECTOR_LIST@2026..2056
         0: CSS_COMPOUND_SELECTOR@2026..2056
           0: (empty)
@@ -6351,7 +6351,7 @@ CssRoot {
         0: L_CURLY@2056..2057 "{" [] []
         1: CSS_DECLARATION_LIST@2057..2057
         2: R_CURLY@2057..2058 "}" [] []
-    95: CSS_RULE@2058..2091
+    95: CSS_QUALIFIED_RULE@2058..2091
       0: CSS_SELECTOR_LIST@2058..2089
         0: CSS_COMPOUND_SELECTOR@2058..2089
           0: (empty)
@@ -6396,7 +6396,7 @@ CssRoot {
         0: L_CURLY@2089..2090 "{" [] []
         1: CSS_DECLARATION_LIST@2090..2090
         2: R_CURLY@2090..2091 "}" [] []
-    96: CSS_RULE@2091..2127
+    96: CSS_QUALIFIED_RULE@2091..2127
       0: CSS_SELECTOR_LIST@2091..2125
         0: CSS_COMPOUND_SELECTOR@2091..2125
           0: (empty)
@@ -6435,7 +6435,7 @@ CssRoot {
         0: L_CURLY@2125..2126 "{" [] []
         1: CSS_DECLARATION_LIST@2126..2126
         2: R_CURLY@2126..2127 "}" [] []
-    97: CSS_RULE@2127..2167
+    97: CSS_QUALIFIED_RULE@2127..2167
       0: CSS_SELECTOR_LIST@2127..2165
         0: CSS_COMPOUND_SELECTOR@2127..2165
           0: (empty)
@@ -6483,7 +6483,7 @@ CssRoot {
         0: L_CURLY@2165..2166 "{" [] []
         1: CSS_DECLARATION_LIST@2166..2166
         2: R_CURLY@2166..2167 "}" [] []
-    98: CSS_RULE@2167..2194
+    98: CSS_QUALIFIED_RULE@2167..2194
       0: CSS_SELECTOR_LIST@2167..2192
         0: CSS_COMPLEX_SELECTOR@2167..2192
           0: CSS_COMPOUND_SELECTOR@2167..2184

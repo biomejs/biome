@@ -8,6 +8,8 @@ title: noUnsafeNegation (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://eslint.org/docs/latest/rules/no-unsafe-negation" target="_blank"><code>no-unsafe-negation</code></a>
+
 Disallow using unsafe negation.
 
 ## Examples

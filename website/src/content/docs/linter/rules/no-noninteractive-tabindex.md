@@ -8,13 +8,13 @@ title: noNoninteractiveTabindex (since v1.0.0)
 This rule is recommended by Biome. A diagnostic error will appear when linting your code.
 :::
 
+Source: <a href="https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/no-noninteractive-tabindex.md" target="_blank"><code>no-noninteractive-tabindex</code></a>
+
 Enforce that `tabIndex` is not assigned to non-interactive HTML elements.
 
 When using the tab key to navigate a webpage, limit it to interactive elements.
 You don't need to add tabindex to items in an unordered list as assistive technology can navigate through the HTML.
 Keep the tab ring small, which is the order of elements when tabbing, for a more efficient and accessible browsing experience.
-
-ESLint (eslint-plugin-jsx-a11y) Equivalent: [no-noninteractive-tabindex](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/no-noninteractive-tabindex.md)
 
 ## Examples
 

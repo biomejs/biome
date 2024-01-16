@@ -1,5 +1,6 @@
 use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
+    RuleSource,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
@@ -13,8 +14,6 @@ use crate::JsRuleAction;
 
 declare_rule! {
     /// Disallow negation in the condition of an `if` statement if it has an `else` clause.
-    ///
-    /// Source: https://eslint.org/docs/latest/rules/no-negated-condition/
     ///
     /// ## Examples
     ///
@@ -48,6 +47,7 @@ declare_rule! {
     pub(crate) NoNegationElse {
         version: "1.0.0",
         name: "noNegationElse",
+        source: RuleSource::Eslint("no-negated-condition"),
         recommended: false,
         fix_kind: FixKind::Safe,
     }

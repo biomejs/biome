@@ -1,5 +1,6 @@
 use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
+    RuleSource,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
@@ -19,8 +20,6 @@ declare_rule! {
     /// The `module` keyword is deprecated to avoid any confusion with the _ECMAScript modules_ which are often called _modules_.
     ///
     /// Note that TypeScript `module` declarations to describe external APIs (`declare module "foo" {}`) are still allowed.
-    ///
-    /// Source: https://typescript-eslint.io/rules/prefer-namespace-keyword
     ///
     /// See also: https://www.typescriptlang.org/docs/handbook/namespaces-and-modules.html
     ///
@@ -45,6 +44,7 @@ declare_rule! {
     pub(crate) UseNamespaceKeyword {
         version: "1.0.0",
         name: "useNamespaceKeyword",
+        source: RuleSource::EslintTypeScript("prefer-namespace-keyword"),
         recommended: true,
         fix_kind: FixKind::Safe,
     }

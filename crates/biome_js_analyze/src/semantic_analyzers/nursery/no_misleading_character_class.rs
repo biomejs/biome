@@ -1,6 +1,6 @@
 use crate::{semantic_services::Semantic, JsRuleAction};
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
+    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
@@ -22,8 +22,6 @@ declare_rule! {
     /// For example, the character `❇️` consists of two code points: `❇` (U+2747) and `VARIATION SELECTOR-16` (U+FE0F).
     /// If this character is in a RegExp character class, it will match to either `❇` or `VARIATION SELECTOR-16` rather than `❇️`.
     /// This rule reports the regular expressions which include multiple code point characters in character class syntax.
-    ///
-    /// Source: https://eslint.org/docs/latest/rules/no-misleading-character-class
     ///
     /// ## Examples
     ///
@@ -65,6 +63,7 @@ declare_rule! {
     pub(crate) NoMisleadingCharacterClass {
         version: "1.5.0",
         name: "noMisleadingCharacterClass",
+        source: RuleSource::Eslint("no-misleading-character-class"),
         recommended: false,
         fix_kind: FixKind::Safe,
     }

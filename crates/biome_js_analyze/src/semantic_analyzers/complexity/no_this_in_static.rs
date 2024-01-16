@@ -1,5 +1,6 @@
 use biome_analyze::{
     context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
+    RuleSource,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
@@ -25,8 +26,6 @@ declare_rule! {
     /// This rule enforces the use of the class name itself to access static methods,
     /// which can make the code clearer and less prone to errors. It helps to prevent
     /// misunderstandings and bugs that can arise from the unique behavior of `this` and `super` in static contexts.
-    ///
-    /// Source: https://github.com/mysticatea/eslint-plugin/blob/master/docs/rules/no-this-in-static.md
     ///
     /// ## Example
     ///
@@ -82,6 +81,7 @@ declare_rule! {
     pub(crate) NoThisInStatic {
         version: "1.3.1",
         name: "noThisInStatic",
+        source: RuleSource::EslintMysticatea("no-this-in-static"),
         recommended: true,
         fix_kind: FixKind::Unsafe,
     }

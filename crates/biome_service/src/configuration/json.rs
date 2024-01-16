@@ -1,11 +1,11 @@
-use crate::configuration::merge::MergeWith;
 use crate::configuration::{deserialize_line_width, serialize_line_width, PlainIndentStyle};
+use biome_deserialize_macros::{Merge, NoneState};
 use biome_formatter::{LineEnding, LineWidth};
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 
 /// Options applied to JSON files
-#[derive(Default, Debug, Deserialize, Serialize, Eq, PartialEq, Clone, Bpaf)]
+#[derive(Bpaf, Clone, Debug, Default, Deserialize, Eq, Merge, NoneState, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(default, deny_unknown_fields)]
 pub struct JsonConfiguration {
@@ -20,30 +20,8 @@ pub struct JsonConfiguration {
     pub formatter: Option<JsonFormatter>,
 }
 
-impl MergeWith<JsonConfiguration> for JsonConfiguration {
-    fn merge_with(&mut self, other: JsonConfiguration) {
-        if let Some(other_parser) = other.parser {
-            let parser = self.parser.get_or_insert_with(JsonParser::default);
-            parser.merge_with(other_parser);
-        }
-        if let Some(other_formatter) = other.formatter {
-            let formatter = self.formatter.get_or_insert_with(JsonFormatter::default);
-            formatter.merge_with(other_formatter);
-        }
-    }
-
-    fn merge_with_if_not_default(&mut self, other: JsonConfiguration)
-    where
-        JsonConfiguration: Default,
-    {
-        if other != JsonConfiguration::default() {
-            self.merge_with(other)
-        }
-    }
-}
-
 /// Options that changes how the JSON parser behaves
-#[derive(Default, Debug, Deserialize, Serialize, Eq, PartialEq, Clone, Bpaf)]
+#[derive(Bpaf, Clone, Debug, Default, Deserialize, Eq, Merge, NoneState, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct JsonParser {
@@ -57,27 +35,7 @@ pub struct JsonParser {
     pub allow_trailing_commas: Option<bool>,
 }
 
-impl MergeWith<JsonParser> for JsonParser {
-    fn merge_with(&mut self, other: JsonParser) {
-        if let Some(allow_comments) = other.allow_comments {
-            self.allow_comments = Some(allow_comments);
-        }
-        if let Some(allow_trailing_commas) = other.allow_trailing_commas {
-            self.allow_trailing_commas = Some(allow_trailing_commas);
-        }
-    }
-
-    fn merge_with_if_not_default(&mut self, other: JsonParser)
-    where
-        JsonParser: Default,
-    {
-        if other != JsonParser::default() {
-            self.merge_with(other)
-        }
-    }
-}
-
-#[derive(Default, Debug, Deserialize, Serialize, Eq, PartialEq, Clone, Bpaf)]
+#[derive(Bpaf, Clone, Debug, Default, Deserialize, Eq, Merge, NoneState, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct JsonFormatter {
@@ -114,51 +72,4 @@ pub struct JsonFormatter {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[bpaf(long("json-formatter-line-width"), argument("NUMBER"), optional)]
     pub line_width: Option<LineWidth>,
-}
-
-impl MergeWith<JsonFormatter> for JsonFormatter {
-    fn merge_with(&mut self, other: JsonFormatter) {
-        if let Some(enabled) = other.enabled {
-            self.enabled = Some(enabled);
-        }
-        if let Some(indent_size) = other.indent_size {
-            self.indent_width = Some(indent_size);
-        }
-        if let Some(indent_style) = other.indent_style {
-            self.indent_style = Some(indent_style);
-        }
-        if let Some(line_width) = other.line_width {
-            self.line_width = Some(line_width);
-        }
-    }
-
-    fn merge_with_if_not_default(&mut self, other: JsonFormatter)
-    where
-        JsonFormatter: Default,
-    {
-        if other != JsonFormatter::default() {
-            self.merge_with(other)
-        }
-    }
-}
-
-impl MergeWith<Option<JsonFormatter>> for JsonConfiguration {
-    fn merge_with(&mut self, other: Option<JsonFormatter>) {
-        if let Some(other_formatter) = other {
-            let formatter = self.formatter.get_or_insert_with(JsonFormatter::default);
-            formatter.merge_with(other_formatter);
-        }
-    }
-
-    fn merge_with_if_not_default(&mut self, other: Option<JsonFormatter>)
-    where
-        Option<JsonFormatter>: Default,
-    {
-        if let Some(other_formatter) = other {
-            if other_formatter != JsonFormatter::default() {
-                let formatter = self.formatter.get_or_insert_with(JsonFormatter::default);
-                formatter.merge_with(other_formatter);
-            }
-        }
-    }
 }

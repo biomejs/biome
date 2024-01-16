@@ -18,7 +18,7 @@ tabbed-custom-element::part(   active   ) {}
 CssRoot {
     bom_token: missing (optional),
     rules: CssRuleList [
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -49,7 +49,7 @@ CssRoot {
                 r_curly_token: R_CURLY@37..38 "}" [] [],
             },
         },
-        CssRule {
+        CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
                     nesting_selector_token: missing (optional),
@@ -91,7 +91,7 @@ CssRoot {
 0: CSS_ROOT@0..84
   0: (empty)
   1: CSS_RULE_LIST@0..83
-    0: CSS_RULE@0..38
+    0: CSS_QUALIFIED_RULE@0..38
       0: CSS_SELECTOR_LIST@0..36
         0: CSS_COMPOUND_SELECTOR@0..36
           0: (empty)
@@ -112,7 +112,7 @@ CssRoot {
         0: L_CURLY@36..37 "{" [] []
         1: CSS_DECLARATION_LIST@37..37
         2: R_CURLY@37..38 "}" [] []
-    1: CSS_RULE@38..83
+    1: CSS_QUALIFIED_RULE@38..83
       0: CSS_SELECTOR_LIST@38..81
         0: CSS_COMPOUND_SELECTOR@38..81
           0: (empty)

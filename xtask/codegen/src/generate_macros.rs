@@ -1,4 +1,4 @@
-use super::kinds_src::AstSrc;
+use super::js_kinds_src::AstSrc;
 use crate::{to_upper_snake_case, LanguageKind, Result};
 use quote::{format_ident, quote};
 
