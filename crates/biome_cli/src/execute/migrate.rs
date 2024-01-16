@@ -2,7 +2,7 @@ mod prettier;
 
 use crate::diagnostics::MigrationDiagnostic;
 use crate::execute::diagnostics::{ContentDiffAdvice, MigrateDiffDiagnostic};
-use crate::execute::migrate::prettier::read_and_deserialize_prettier_configuration;
+use crate::execute::migrate::prettier::read_prettier_files;
 use crate::{CliDiagnostic, CliSession};
 use biome_console::{markup, ConsoleExt};
 use biome_deserialize::json::deserialize_from_json_str;
@@ -41,7 +41,6 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
         configuration_file_path,
         configuration_directory_path,
         verbose,
-        // we will use it later
         prettier,
     } = migrate_payload;
     let mut cache = NodeCache::default();
@@ -123,9 +122,11 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
     let new_configuration_content = tree.to_string();
 
     if prettier {
-        let prettier_configuration = read_and_deserialize_prettier_configuration(fs, console)?;
+        let prettier_configuration = read_prettier_files(fs, console)?;
 
-        if let Some((formatter_configuration, javascript_configuration)) = prettier_configuration {
+        if let Some((formatter_configuration, javascript_configuration)) =
+            prettier_configuration.get_biome_configuration()
+        {
             let configuration = deserialize_from_json_str::<Configuration>(
                 configuration_content.as_str(),
                 JsonParserOptions::default(),
@@ -134,9 +135,9 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
             .into_deserialized();
             if let Some(mut configuration) = configuration {
                 configuration.merge_with(Configuration {
-                    formatter: Some(formatter_configuration),
+                    formatter: Some(formatter_configuration.clone()),
                     javascript: Some(JavascriptConfiguration {
-                        formatter: Some(javascript_configuration),
+                        formatter: Some(javascript_configuration.clone()),
                         ..NoneState::none()
                     }),
                     ..NoneState::none()

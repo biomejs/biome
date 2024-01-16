@@ -27,7 +27,7 @@ biome.json migrate ━━━━━━━━━━━━━━━━━━━━�
        3 │ + → → "enabled":·true,
        4 │ + → → "formatWithErrors":·false,
        5 │ + → → "indentStyle":·"space",
-       6 │ + → → "indentWidth":·4,
+       6 │ + → → "indentWidth":·2,
        7 │ + → → "lineEnding":·"lf",
        8 │ + → → "lineWidth":·80
        9 │ + → },

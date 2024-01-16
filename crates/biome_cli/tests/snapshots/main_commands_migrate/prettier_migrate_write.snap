@@ -10,7 +10,7 @@ expression: content
     "enabled": true,
     "formatWithErrors": false,
     "indentStyle": "space",
-    "indentWidth": 4,
+    "indentWidth": 2,
     "lineEnding": "lf",
     "lineWidth": 80
   },

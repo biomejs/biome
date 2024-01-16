@@ -14,7 +14,7 @@ use biome_json_parser::JsonParserOptions;
 use biome_service::configuration::{FormatterConfiguration, PlainIndentStyle};
 use biome_service::{DynRef, JavascriptFormatter};
 use biome_text_size::TextRange;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 #[derive(Debug, Eq, PartialEq, Clone)]
 pub(crate) struct PrettierConfiguration {
@@ -42,6 +42,26 @@ pub(crate) struct PrettierConfiguration {
     arrow_parens: ArrowParens,
     /// https://prettier.io/docs/en/options#end-of-line
     end_of_line: EndOfLine,
+}
+
+impl Default for PrettierConfiguration {
+    fn default() -> Self {
+        Self {
+            print_width: 80,
+
+            use_tabs: false,
+            trailing_comma: PrettierTrailingComma::default(),
+            tab_width: 2,
+            semi: false,
+            single_quote: true,
+            bracket_spacing: true,
+            bracket_line: false,
+            quote_props: QuoteProps::default(),
+            jsx_single_quote: false,
+            arrow_parens: ArrowParens::default(),
+            end_of_line: EndOfLine::default(),
+        }
+    }
 }
 
 #[derive(Debug, Eq, PartialEq, Default, Clone)]
@@ -172,26 +192,6 @@ impl TryFrom<&str> for PrettierTrailingComma {
             "none" => Ok(Self::None),
             "es5" => Ok(Self::Es5),
             _ => Err("Option not supported".to_string()),
-        }
-    }
-}
-
-impl Default for PrettierConfiguration {
-    fn default() -> Self {
-        Self {
-            print_width: 80,
-
-            use_tabs: false,
-            trailing_comma: PrettierTrailingComma::default(),
-            tab_width: 4,
-            semi: false,
-            single_quote: true,
-            bracket_spacing: true,
-            bracket_line: false,
-            quote_props: QuoteProps::default(),
-            jsx_single_quote: false,
-            arrow_parens: ArrowParens::default(),
-            end_of_line: EndOfLine::default(),
         }
     }
 }
@@ -344,7 +344,6 @@ impl From<QuoteProps> for QuoteProperties {
 impl TryFrom<PrettierConfiguration> for FormatterConfiguration {
     type Error = String;
     fn try_from(value: PrettierConfiguration) -> Result<Self, Self::Error> {
-        // TODO: handle error
         let line_width = LineWidth::try_from(value.print_width).map_err(|err| err.to_string())?;
         let indent_style = if value.use_tabs {
             PlainIndentStyle::Tab
@@ -405,11 +404,47 @@ impl From<PrettierConfiguration> for JavascriptFormatter {
     }
 }
 
+#[derive(Debug, Default)]
+pub(crate) struct FromPrettierConfiguration {
+    /// Path of the Prettier configuration file
+    configuration_path: Option<PathBuf>,
+    /// Path of the `.prettierignore` file
+    ignore_path: Option<PathBuf>,
+
+    /// The translated Biome configuration, from the Prettier configuration
+    biome_configuration: Option<(FormatterConfiguration, JavascriptFormatter)>,
+}
+
+impl FromPrettierConfiguration {
+    pub(crate) fn store_configuration(
+        &mut self,
+        configuration: (FormatterConfiguration, JavascriptFormatter),
+    ) {
+        self.biome_configuration = Some(configuration);
+    }
+
+    pub(crate) fn store_configuration_path(&mut self, path: PathBuf) {
+        self.configuration_path = Some(path);
+    }
+
+    pub(crate) fn store_ignore_path(&mut self, path: PathBuf) {
+        self.ignore_path = Some(path)
+    }
+
+    pub(crate) fn get_biome_configuration(
+        &self,
+    ) -> Option<&(FormatterConfiguration, JavascriptFormatter)> {
+        self.biome_configuration.as_ref()
+    }
+}
+
 const PRETTIER_CONFIG_FILES: [&str; 2] = [".prettierrc", ".prettierrc.json"];
-pub(crate) fn read_and_deserialize_prettier_configuration(
+/// This function is in charge of reading prettier files, deserialize its contents and convert them in a Biome configuration type
+pub(crate) fn read_prettier_files(
     fs: &DynRef<'_, dyn FileSystem>,
     console: &mut dyn Console,
-) -> Result<Option<(FormatterConfiguration, JavascriptFormatter)>, CliDiagnostic> {
+) -> Result<FromPrettierConfiguration, CliDiagnostic> {
+    let mut from_prettier_configuration = FromPrettierConfiguration::default();
     let mut content = String::new();
     let mut prettier_config_path = Path::new("");
     for config_name in PRETTIER_CONFIG_FILES {
@@ -437,6 +472,8 @@ pub(crate) fn read_and_deserialize_prettier_configuration(
         }));
     }
 
+    from_prettier_configuration.store_configuration_path(prettier_config_path.to_path_buf());
+
     let deserialized = deserialize_from_json_str::<PrettierConfiguration>(
         content.as_str(),
         JsonParserOptions::default()
@@ -463,11 +500,12 @@ pub(crate) fn read_and_deserialize_prettier_configuration(
                 .try_into()
                 .map_err(|err| CliDiagnostic::MigrateError(MigrationDiagnostic { reason: err }))?;
             let javascript_configuration = prettier_configuration.into();
-            return Ok(Some((formatter_configuration, javascript_configuration)));
+            from_prettier_configuration
+                .store_configuration((formatter_configuration, javascript_configuration));
         }
     }
 
-    Ok(None)
+    Ok(from_prettier_configuration)
 }
 
 #[cfg(test)]
