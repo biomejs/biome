@@ -576,6 +576,35 @@ impl Iterator for MemberNameIterator {
         };
     }
 }
+
+fn into_member_vec(node: &JsSyntaxNode) -> Vec<String> {
+    let mut vec = vec![];
+    let mut next = Some(node.clone());
+
+    while let Some(node) = &next {
+        match AnyJsMemberExpression::cast_ref(node) {
+            Some(member_expr) => {
+                let member_name = member_expr
+                    .member_name()
+                    .and_then(|it| it.as_string_constant().map(|it| it.to_owned()));
+                match member_name {
+                    Some(name) => {
+                        vec.insert(0, name);
+                        next = member_expr.object().ok().map(AstNode::into_syntax);
+                    }
+                    None => break,
+                }
+            }
+            None => {
+                vec.insert(0, node.text_trimmed().to_string());
+                break;
+            }
+        }
+    }
+
+    vec
+}
+
 fn compare_member_depth(a: &JsSyntaxNode, b: &JsSyntaxNode) -> (bool, bool) {
     let mut a_member_iter = MemberNameIterator::new(a).into_iter();
     let mut b_member_iter = MemberNameIterator::new(b).into_iter();
