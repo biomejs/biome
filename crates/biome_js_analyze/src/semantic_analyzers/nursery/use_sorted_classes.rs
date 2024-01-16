@@ -7,7 +7,7 @@ mod sort;
 mod sort_config;
 
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
+    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
