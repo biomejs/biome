@@ -81,7 +81,7 @@ biome_css_formatter          = { version = "0.4.0", path = "./crates/biome_css_f
 biome_css_parser             = { version = "0.4.0", path = "./crates/biome_css_parser" }
 biome_css_syntax             = { version = "0.4.0", path = "./crates/biome_css_syntax" }
 biome_deserialize            = { version = "0.4.0", path = "./crates/biome_deserialize" }
-biome_deserialize_macros     = { version = "0.3.1", path = "./crates/biome_deserialize_macros" }
+biome_deserialize_macros     = { version = "0.4.0", path = "./crates/biome_deserialize_macros" }
 biome_diagnostics            = { version = "0.4.0", path = "./crates/biome_diagnostics" }
 biome_diagnostics_categories = { version = "0.4.0", path = "./crates/biome_diagnostics_categories" }
 biome_diagnostics_macros     = { version = "0.4.0", path = "./crates/biome_diagnostics_macros" }
@@ -124,6 +124,7 @@ tests_macros         = { path = "./crates/tests_macros" }
 # Crates needed in the workspace
 bitflags          = "2.3.1"
 bpaf              = { version = "0.9.5", features = ["derive"] }
+convert_case      = "0.6.0"
 countme           = "3.0.1"
 dashmap           = "5.4.0"
 ignore            = "0.4.21"

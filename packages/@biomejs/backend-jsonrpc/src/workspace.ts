@@ -1456,10 +1456,10 @@ export interface RestrictedGlobalsOptions {
 	/**
 	 * A list of names that should trigger the rule
 	 */
-	deniedGlobals?: string[];
+	deniedGlobals: string[];
 }
 export interface ValidAriaRoleOptions {
-	allowedInvalidRoles: string[];
+	allowInvalidRoles: string[];
 	ignoreNonDom: boolean;
 }
 export interface UtilityClassSortingOptions {

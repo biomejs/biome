@@ -1,4 +1,5 @@
-use biome_deserialize_macros::{Merge, NoneState};
+use biome_deserialize::{DeserializableValidator, DeserializationDiagnostic};
+use biome_deserialize_macros::{Deserializable, Merge, NoneState};
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
@@ -6,13 +7,27 @@ use std::str::FromStr;
 const GIT_IGNORE_FILE_NAME: &str = ".gitignore";
 
 /// Set of properties to integrate Biome with a VCS software.
-#[derive(Bpaf, Clone, Debug, Default, Deserialize, Eq, Merge, NoneState, PartialEq, Serialize)]
+#[derive(
+    Bpaf,
+    Clone,
+    Debug,
+    Default,
+    Deserialize,
+    Deserializable,
+    Eq,
+    Merge,
+    NoneState,
+    PartialEq,
+    Serialize,
+)]
+#[deserializable(from_none, with_validator)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(deny_unknown_fields, rename_all = "camelCase")]
 pub struct VcsConfiguration {
     /// The kind of client.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[bpaf(long("vcs-client-kind"), argument("git"), optional)]
+    #[deserializable(bail_on_error)]
     pub client_kind: Option<VcsClientKind>,
 
     /// Whether Biome should integrate itself with the VCS client
@@ -52,7 +67,31 @@ impl VcsConfiguration {
     }
 }
 
-#[derive(Clone, Copy, Debug, Default, Deserialize, Eq, Merge, PartialEq, Serialize)]
+impl DeserializableValidator for VcsConfiguration {
+    fn validate(
+        &self,
+        _name: &str,
+        range: biome_rowan::TextRange,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> bool {
+        if self.client_kind.is_none() && !self.is_disabled() {
+            diagnostics.push(
+                DeserializationDiagnostic::new(
+                    "You enabled the VCS integration, but you didn't specify a client.",
+                )
+                .with_range(range)
+                .with_note("Biome will disable the VCS integration until the issue is fixed."),
+            );
+            return false;
+        }
+
+        true
+    }
+}
+
+#[derive(
+    Clone, Copy, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize,
+)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub enum VcsClientKind {

@@ -1685,10 +1685,11 @@
 		"RestrictedGlobalsOptions": {
 			"description": "Options for the rule `noRestrictedGlobals`.",
 			"type": "object",
+			"required": ["deniedGlobals"],
 			"properties": {
 				"deniedGlobals": {
 					"description": "A list of names that should trigger the rule",
-					"type": ["array", "null"],
+					"type": "array",
 					"items": { "type": "string" }
 				}
 			},
@@ -2402,12 +2403,9 @@
 		},
 		"ValidAriaRoleOptions": {
 			"type": "object",
-			"required": ["allowedInvalidRoles", "ignoreNonDom"],
+			"required": ["allowInvalidRoles", "ignoreNonDom"],
 			"properties": {
-				"allowedInvalidRoles": {
-					"type": "array",
-					"items": { "type": "string" }
-				},
+				"allowInvalidRoles": { "type": "array", "items": { "type": "string" } },
 				"ignoreNonDom": { "type": "boolean" }
 			},
 			"additionalProperties": false
