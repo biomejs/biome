@@ -59,6 +59,7 @@ pub struct CssFormatter {
     /// The size of the indentation applied to CSS (and its super languages) files. Default to 2.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[bpaf(long("css-formatter-indent-size"), argument("NUMBER"), optional)]
+    #[deprecated = "Please use indent_width instead"]
     #[deserializable(deprecated(use_instead = "css.formatter.indentWidth"))]
     pub indent_size: Option<u8>,
 

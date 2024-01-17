@@ -35,6 +35,7 @@ pub struct FormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[deserializable(deprecated(use_instead = "formatter.indentWidth"))]
     #[bpaf(long("indent-size"), argument("NUMBER"), optional)]
+    #[deprecated = "Please use indent_width instead"]
     pub indent_size: Option<u8>,
 
     /// The size of the indentation, 2 by default
