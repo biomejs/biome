@@ -47,21 +47,22 @@ impl FormatRule<SourceComment<JsLanguage>> for FormatJsLeadingComment {
             // Indent the remaining lines by one space so that all `*` are aligned.
             write!(
                 f,
-                [align(
-                    1,
-                    &format_once(|f| {
-                        for line in lines {
-                            write!(
-                                f,
-                                [hard_line_break(), dynamic_text(line.trim(), source_offset)]
-                            )?;
+                [&format_once(|f| {
+                    for line in lines {
+                        write!(
+                            f,
+                            [
+                                hard_line_break(),
+                                text(" "),
+                                dynamic_text(line.trim(), source_offset)
+                            ]
+                        )?;
 
-                            source_offset += line.text_len();
-                        }
+                        source_offset += line.text_len();
+                    }
 
-                        Ok(())
-                    })
-                )]
+                    Ok(())
+                })]
             )
         } else {
             write!(f, [comment.piece().as_piece()])
