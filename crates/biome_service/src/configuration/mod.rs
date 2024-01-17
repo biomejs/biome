@@ -11,7 +11,6 @@ pub mod json;
 pub mod linter;
 pub mod organize_imports;
 mod overrides;
-mod parse;
 pub mod vcs;
 
 use crate::configuration::diagnostics::CantLoadExtendFile;

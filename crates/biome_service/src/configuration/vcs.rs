@@ -72,7 +72,7 @@ impl DeserializableValidator for VcsConfiguration {
         &self,
         _name: &str,
         range: biome_rowan::TextRange,
-        diagnostics: &mut Vec<biome_deserialize::DeserializationDiagnostic>,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> bool {
         if self.client_kind.is_none() && !self.is_disabled() {
             diagnostics.push(

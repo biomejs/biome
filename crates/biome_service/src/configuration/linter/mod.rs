@@ -5,7 +5,9 @@ pub use crate::configuration::linter::rules::Rules;
 use crate::configuration::overrides::OverrideLinterConfiguration;
 use crate::settings::{to_matcher, LinterSettings};
 use crate::{Matcher, WorkspaceError};
-use biome_deserialize::{Merge, StringSet};
+use biome_deserialize::{
+    DeserializableValue, DeserializationDiagnostic, Merge, StringSet, VisitableType,
+};
 use biome_deserialize_macros::{Deserializable, Merge, NoneState};
 use biome_diagnostics::Severity;
 use biome_js_analyze::options::PossibleOptions;
@@ -97,6 +99,22 @@ impl TryFrom<OverrideLinterConfiguration> for LinterSettings {
 pub enum RuleConfiguration {
     Plain(RulePlainConfiguration),
     WithOptions(Box<RuleWithOptions>),
+}
+
+impl biome_deserialize::Deserializable for RuleConfiguration {
+    fn deserialize(
+        value: &impl DeserializableValue,
+        rule_name: &str,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> Option<Self> {
+        if value.is_type(VisitableType::STR) {
+            biome_deserialize::Deserializable::deserialize(value, rule_name, diagnostics)
+                .map(Self::Plain)
+        } else {
+            biome_deserialize::Deserializable::deserialize(value, rule_name, diagnostics)
+                .map(|rule| Self::WithOptions(Box::new(rule)))
+        }
+    }
 }
 
 impl FromStr for RuleConfiguration {
