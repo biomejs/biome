@@ -181,6 +181,10 @@ macro_rules! map_syntax_node {
                         unsafe { $crate::CssFontPaletteValuesAtRule::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_FUNCTION => {
+                    let $pattern = unsafe { $crate::CssFunction::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_GENERIC_DELIMITER => {
                     let $pattern = unsafe { $crate::CssGenericDelimiter::new_unchecked(node) };
                     $body
@@ -516,10 +520,6 @@ macro_rules! map_syntax_node {
                 }
                 $crate::CssSyntaxKind::CSS_SCOPE_RANGE_START => {
                     let $pattern = unsafe { $crate::CssScopeRangeStart::new_unchecked(node) };
-                    $body
-                }
-                $crate::CssSyntaxKind::CSS_SIMPLE_FUNCTION => {
-                    let $pattern = unsafe { $crate::CssSimpleFunction::new_unchecked(node) };
                     $body
                 }
                 $crate::CssSyntaxKind::CSS_STARTING_STYLE_AT_RULE => {

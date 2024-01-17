@@ -309,7 +309,7 @@ CssRoot {
                                         CssIdentifier {
                                             value_token: IDENT@602..606 "baz" [] [Whitespace(" ")],
                                         },
-                                        CssSimpleFunction {
+                                        CssFunction {
                                             name: CssIdentifier {
                                                 value_token: IDENT@606..610 "func" [] [],
                                             },
@@ -349,7 +349,7 @@ CssRoot {
                                         value_token: CSS_STRING_LITERAL@636..667 "\"http://example.com/image.svg\"" [] [Whitespace(" ")],
                                     },
                                     modifiers: CssUrlModifierList [
-                                        CssSimpleFunction {
+                                        CssFunction {
                                             name: CssIdentifier {
                                                 value_token: IDENT@667..672 "param" [] [],
                                             },
@@ -361,7 +361,7 @@ CssRoot {
                                                             CssDashedIdentifier {
                                                                 value_token: IDENT@673..681 "--color" [] [Whitespace(" ")],
                                                             },
-                                                            CssSimpleFunction {
+                                                            CssFunction {
                                                                 name: CssIdentifier {
                                                                     value_token: IDENT@681..684 "var" [] [],
                                                                 },
@@ -523,7 +523,7 @@ CssRoot {
                                     l_paren_token: L_PAREN@946..947 "(" [] [],
                                     value: missing (optional),
                                     modifiers: CssUrlModifierList [
-                                        CssSimpleFunction {
+                                        CssFunction {
                                             name: CssIdentifier {
                                                 value_token: IDENT@947..950 "var" [] [],
                                             },
@@ -872,7 +872,7 @@ CssRoot {
                       0: IDENT@598..602 "bar" [] [Whitespace(" ")]
                     2: CSS_IDENTIFIER@602..606
                       0: IDENT@602..606 "baz" [] [Whitespace(" ")]
-                    3: CSS_SIMPLE_FUNCTION@606..616
+                    3: CSS_FUNCTION@606..616
                       0: CSS_IDENTIFIER@606..610
                         0: IDENT@606..610 "func" [] []
                       1: L_PAREN@610..611 "(" [] []
@@ -898,7 +898,7 @@ CssRoot {
                   2: CSS_STRING@636..667
                     0: CSS_STRING_LITERAL@636..667 "\"http://example.com/image.svg\"" [] [Whitespace(" ")]
                   3: CSS_URL_MODIFIER_LIST@667..702
-                    0: CSS_SIMPLE_FUNCTION@667..702
+                    0: CSS_FUNCTION@667..702
                       0: CSS_IDENTIFIER@667..672
                         0: IDENT@667..672 "param" [] []
                       1: L_PAREN@672..673 "(" [] []
@@ -908,7 +908,7 @@ CssRoot {
                             0: CSS_COMPONENT_VALUE_LIST@673..701
                               0: CSS_DASHED_IDENTIFIER@673..681
                                 0: IDENT@673..681 "--color" [] [Whitespace(" ")]
-                              1: CSS_SIMPLE_FUNCTION@681..701
+                              1: CSS_FUNCTION@681..701
                                 0: CSS_IDENTIFIER@681..684
                                   0: IDENT@681..684 "var" [] []
                                 1: L_PAREN@684..685 "(" [] []
@@ -1018,7 +1018,7 @@ CssRoot {
                   1: L_PAREN@946..947 "(" [] []
                   2: (empty)
                   3: CSS_URL_MODIFIER_LIST@947..957
-                    0: CSS_SIMPLE_FUNCTION@947..957
+                    0: CSS_FUNCTION@947..957
                       0: CSS_IDENTIFIER@947..950
                         0: IDENT@947..950 "var" [] []
                       1: L_PAREN@950..951 "(" [] []

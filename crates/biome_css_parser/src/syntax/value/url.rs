@@ -1,11 +1,9 @@
 use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 
+use crate::syntax::value::function::{is_at_function, is_nth_at_function, parse_function};
 use crate::syntax::value::parse_error::expected_url_modifier;
-use crate::syntax::{
-    is_at_any_function, is_at_identifier, is_at_string, is_nth_at_any_function,
-    parse_regular_identifier, parse_simple_function, parse_string,
-};
+use crate::syntax::{is_at_identifier, is_at_string, parse_regular_identifier, parse_string};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::ParseNodeList;
@@ -64,7 +62,7 @@ pub(crate) fn parse_url_function(p: &mut CssParser) -> ParsedSyntax {
 
     p.bump_ts(URL_SET);
 
-    if is_nth_at_any_function(p, 1) {
+    if is_nth_at_function(p, 1) {
         // we need to check if the next token is a function or not
         // to cover the case of `src(var(--foo));`
         p.bump(T!['(']);
@@ -170,7 +168,7 @@ impl ParseNodeList for UrlModifierList {
 /// indicating a potential modifier for a URL in CSS.
 #[inline]
 pub(crate) fn is_at_url_modifier(p: &mut CssParser) -> bool {
-    is_at_identifier(p) || is_at_any_function(p)
+    is_at_identifier(p) || is_at_function(p)
 }
 
 /// Parses a URL modifier, which can be either a simple function or a regular identifier.
@@ -180,8 +178,8 @@ pub(crate) fn parse_url_modifier(p: &mut CssParser) -> ParsedSyntax {
         return Absent;
     }
 
-    if is_at_any_function(p) {
-        parse_simple_function(p)
+    if is_at_function(p) {
+        parse_function(p)
     } else {
         parse_regular_identifier(p)
     }
