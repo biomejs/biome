@@ -4,9 +4,10 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::{
-    AnyJsFunction, AnyJsMemberExpression, JsCallArgumentList, JsCallArguments, JsCallExpression,
-    JsFormalParameter, JsObjectExpression, JsObjectMemberList, JsParameterList, JsParameters,
-    JsPropertyObjectMember, JsReferenceIdentifier, JsxAttribute,
+    AnyJsExpression, AnyJsFunction, AnyJsMemberExpression, AnyJsTemplateElement,
+    JsBinaryExpression, JsCallArgumentList, JsCallArguments, JsCallExpression, JsFormalParameter,
+    JsObjectExpression, JsObjectMemberList, JsParameterList, JsParameters, JsPropertyObjectMember,
+    JsReferenceIdentifier, JsxAttribute,
 };
 use biome_rowan::{declare_node_union, AstNode, TextRange};
 
@@ -36,6 +37,32 @@ declare_rule! {
     ///     React.cloneElement(child, { key: index })
     /// ))
     /// ```
+    ///
+    /// ```jsx,expect_diagnostic
+    /// something.forEach((Element, index) => {
+    ///     <Component key={`test-key-${index}`} >foo</Component>
+    /// });
+    /// ```
+    ///
+    /// ```jsx,expect_diagnostic
+    /// something.forEach((Element, index) => {
+    ///     <Component key={"test" + index} >foo</Component>
+    /// });
+    /// ```
+    ///
+    /// ### Valid
+    /// ```jsx
+    /// something.forEach((item) => {
+    ///     <Component key={item.id} >foo</Component>
+    /// });
+    /// ```
+    ///
+    /// ```jsx
+    /// something.forEach((item) => {
+    ///     <Component key={item.baz.foo} >foo</Component>
+    /// });
+    /// ```
+    ///
     pub(crate) NoArrayIndexKey {
         version: "1.0.0",
         name: "noArrayIndexKey",
@@ -71,7 +98,7 @@ impl NoArrayIndexKeyQuery {
     }
 
     /// Extracts the reference from the possible invalid prop
-    fn as_js_reference_identifier(&self) -> Option<JsReferenceIdentifier> {
+    fn as_js_expression(&self) -> Option<AnyJsExpression> {
         match self {
             NoArrayIndexKeyQuery::JsxAttribute(attribute) => attribute
                 .initializer()?
@@ -79,16 +106,10 @@ impl NoArrayIndexKeyQuery {
                 .ok()?
                 .as_jsx_expression_attribute_value()?
                 .expression()
-                .ok()?
-                .as_js_identifier_expression()?
-                .name()
                 .ok(),
-            NoArrayIndexKeyQuery::JsPropertyObjectMember(object_member) => object_member
-                .value()
-                .ok()?
-                .as_js_identifier_expression()?
-                .name()
-                .ok(),
+            NoArrayIndexKeyQuery::JsPropertyObjectMember(object_member) => {
+                object_member.value().ok()
+            }
         }
     }
 }
@@ -114,7 +135,35 @@ impl Rule for NoArrayIndexKey {
         }
 
         let model = ctx.model();
-        let reference = node.as_js_reference_identifier()?;
+        let reference = node.as_js_expression()?;
+
+        let mut capture_array_index = None;
+
+        match reference {
+            AnyJsExpression::JsIdentifierExpression(identifier_expression) => {
+                capture_array_index = Some(identifier_expression.name().ok()?);
+            }
+            AnyJsExpression::JsTemplateExpression(template_expression) => {
+                let template_elements = template_expression.elements();
+                for element in template_elements {
+                    if let AnyJsTemplateElement::JsTemplateElement(template_element) = element {
+                        let cap_index_value = template_element
+                            .expression()
+                            .ok()?
+                            .as_js_identifier_expression()?
+                            .name()
+                            .ok();
+                        capture_array_index = cap_index_value;
+                    }
+                }
+            }
+            AnyJsExpression::JsBinaryExpression(binary_expression) => {
+                let _ = cap_array_index_value(&binary_expression, &mut capture_array_index);
+            }
+            _ => {}
+        };
+
+        let reference = capture_array_index?;
 
         // Given the reference identifier retrieved from the key property,
         // find the declaration and ensure it resolves to the parameter of a function,
@@ -226,4 +275,31 @@ fn is_array_method_index(
     } else {
         None
     }
+}
+
+fn cap_array_index_value(
+    binary_expression: &JsBinaryExpression,
+    capture_array_index: &mut Option<JsReferenceIdentifier>,
+) -> Option<()> {
+    let left = binary_expression.left().ok()?;
+    let right = binary_expression.right().ok()?;
+
+    // recursive call if left or right again are binary_expressions
+    if let Some(left_binary) = left.as_js_binary_expression() {
+        cap_array_index_value(left_binary, capture_array_index);
+    };
+
+    if let Some(right_binary) = right.as_js_binary_expression() {
+        cap_array_index_value(right_binary, capture_array_index);
+    };
+
+    if let Some(left_expression) = left.as_js_identifier_expression() {
+        *capture_array_index = left_expression.name().ok();
+    };
+
+    if let Some(right_expression) = right.as_js_identifier_expression() {
+        *capture_array_index = right_expression.name().ok();
+    };
+
+    Some(())
 }
