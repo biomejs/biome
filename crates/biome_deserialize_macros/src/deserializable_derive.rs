@@ -319,7 +319,7 @@ fn generate_deserializable_struct(
                 } else {
                     quote! { None }
                 };
-    
+
                 quote! {
                     #key => {
                         result.#field_ident = match Deserializable::deserialize(&value, #name, diagnostics)#validate {
@@ -337,7 +337,7 @@ fn generate_deserializable_struct(
                 } else {
                     quote! { {} }
                 };
-    
+
                 quote! {
                     #key => {
                         match Deserializable::deserialize(&value, #name, diagnostics)#validate {
@@ -363,7 +363,12 @@ fn generate_deserializable_struct(
             .map(|field_data| &field_data.key)
             .collect();
         let required_fields = required_fields.iter().map(|field_data| {
-            let DeserializableFieldData { ident: field_ident, key, ty, .. } = field_data;
+            let DeserializableFieldData {
+                ident: field_ident,
+                key,
+                ty,
+                ..
+            } = field_data;
             quote! {
                 if result.#field_ident == #ty::default() {
                     diagnostics.push(DeserializationDiagnostic::new_missing_key(
