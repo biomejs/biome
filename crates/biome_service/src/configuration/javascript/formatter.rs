@@ -71,7 +71,6 @@ pub struct JavascriptFormatter {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[deserializable(deprecated(use_instead = "javascript.formatter.indentWidth"))]
     #[bpaf(long("javascript-formatter-indent-size"), argument("NUMBER"), optional)]
-    #[deprecated = "Please use indent_width instead"]
     pub indent_size: Option<u8>,
 
     /// The size of the indentation applied to JavaScript (and its super languages) files. Default to 2.
