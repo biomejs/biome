@@ -218,6 +218,10 @@ export default defineConfig({
 										"pt-BR": "Regras do Linter",
 									},
 								},
+								{
+									label: "Linter sources",
+									link: "/linter/linter-sources",
+								}
 							],
 						},
 					],
