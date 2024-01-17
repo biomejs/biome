@@ -35,6 +35,7 @@ pub mod json;
 mod merge;
 mod none_state;
 pub mod string_set;
+mod validator;
 
 use biome_diagnostics::{Error, Severity};
 pub use biome_rowan::TextRange;
@@ -44,6 +45,7 @@ pub use merge::Merge;
 pub use none_state::NoneState;
 use std::fmt::Debug;
 pub use string_set::StringSet;
+pub use validator::*;
 
 /// Implemented by data structures that can deserialize any [DeserializableValue].
 ///

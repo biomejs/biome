@@ -10,10 +10,11 @@ use convert_case::{Case, Casing};
 use proc_macro2::{Ident, Span, TokenStream};
 use proc_macro_error::*;
 use quote::quote;
-use syn::{Data, Type};
+use syn::{Data, GenericParam, Generics, Path, PathSegment, Type};
 
 pub(crate) struct DeriveInput {
     pub ident: Ident,
+    pub generics: Generics,
     pub data: DeserializableData,
 }
 
@@ -63,19 +64,29 @@ impl DeriveInput {
                                 .unwrap_or_else(|| ident.to_string().to_case(Case::Camel));
 
                             DeserializableFieldData {
+                                bail_on_error: attrs.bail_on_error,
                                 deprecated: attrs.deprecated,
-                                disallow_empty: attrs.disallow_empty,
                                 ident,
                                 key,
                                 passthrough_name: attrs.passthrough_name,
+                                required: attrs.required,
                                 ty,
+                                validate: attrs.validate,
                             }
                         })
                         .collect();
-                    let from_none = attrs.from_none;
-                    DeserializableData::Struct(DeserializableStructData { fields, from_none })
+
+                    DeserializableData::Struct(DeserializableStructData {
+                        fields,
+                        from_none: attrs.from_none,
+                        with_validator: attrs.with_validator,
+                    })
                 } else if data.fields.len() == 1 {
-                    DeserializableData::Newtype
+                    let attrs = StructAttrs::from_attrs(&input.attrs);
+
+                    DeserializableData::Newtype(DeserializableNewtypeData {
+                        with_validator: attrs.with_validator,
+                    })
                 } else {
                     abort!(
                         data.fields,
@@ -91,6 +102,7 @@ impl DeriveInput {
 
         Self {
             ident: input.ident,
+            generics: input.generics,
             data,
         }
     }
@@ -99,24 +111,32 @@ impl DeriveInput {
 #[derive(Debug)]
 pub enum DeserializableData {
     Enum(Vec<DeserializableVariantData>),
-    Newtype,
+    Newtype(DeserializableNewtypeData),
     Struct(DeserializableStructData),
+}
+
+#[derive(Debug)]
+pub struct DeserializableNewtypeData {
+    with_validator: bool,
 }
 
 #[derive(Debug)]
 pub struct DeserializableStructData {
     fields: Vec<DeserializableFieldData>,
     from_none: bool,
+    with_validator: bool,
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct DeserializableFieldData {
+    bail_on_error: bool,
     deprecated: Option<DeprecatedField>,
-    disallow_empty: bool,
     ident: Ident,
     key: String,
-    ty: Type,
     passthrough_name: bool,
+    required: bool,
+    ty: Type,
+    validate: Option<String>,
 }
 
 #[derive(Debug)]
@@ -127,14 +147,21 @@ pub struct DeserializableVariantData {
 
 pub(crate) fn generate_deserializable(input: DeriveInput) -> TokenStream {
     match input.data {
-        DeserializableData::Enum(variants) => generate_deserializable_enum(input.ident, variants),
-        DeserializableData::Newtype => generate_deserializable_newtype(input.ident),
-        DeserializableData::Struct(data) => generate_deserializable_struct(input.ident, data),
+        DeserializableData::Enum(variants) => {
+            generate_deserializable_enum(input.ident, input.generics, variants)
+        }
+        DeserializableData::Newtype(data) => {
+            generate_deserializable_newtype(input.ident, input.generics, data)
+        }
+        DeserializableData::Struct(data) => {
+            generate_deserializable_struct(input.ident, input.generics, data)
+        }
     }
 }
 
 fn generate_deserializable_enum(
     ident: Ident,
+    generics: Generics,
     variants: Vec<DeserializableVariantData>,
 ) -> TokenStream {
     let allowed_variants: Vec<_> = variants
@@ -149,13 +176,15 @@ fn generate_deserializable_enum(
                  ident: variant_ident,
                  key,
              }| {
-                quote! { #key => Some(#ident::#variant_ident) }
+                quote! { #key => Some(Self::#variant_ident) }
             },
         )
         .collect();
 
+    let trait_bounds = generate_trait_bounds(&generics);
+
     quote! {
-        impl biome_deserialize::Deserializable for #ident {
+        impl #generics biome_deserialize::Deserializable for #ident #generics #trait_bounds{
             fn deserialize(
                 value: &impl biome_deserialize::DeserializableValue,
                 name: &str,
@@ -178,27 +207,56 @@ fn generate_deserializable_enum(
     }
 }
 
-fn generate_deserializable_newtype(ident: Ident) -> TokenStream {
+fn generate_deserializable_newtype(
+    ident: Ident,
+    generics: Generics,
+    data: DeserializableNewtypeData,
+) -> TokenStream {
+    let validator = if data.with_validator {
+        quote! {
+            if !biome_deserialize::DeserializableValidator::validate(&result, name, value.range(), diagnostics) {
+                return None;
+            }
+        }
+    } else {
+        quote! {}
+    };
+
+    let trait_bounds = generate_trait_bounds(&generics);
+
     quote! {
-        impl biome_deserialize::Deserializable for #ident {
+        impl #generics biome_deserialize::Deserializable for #ident #generics #trait_bounds {
             fn deserialize(
                 value: &impl biome_deserialize::DeserializableValue,
                 name: &str,
                 diagnostics: &mut Vec<biome_deserialize::DeserializationDiagnostic>,
             ) -> Option<Self> {
-                biome_deserialize::Deserializable::deserialize(value, name, diagnostics).map(#ident)
+                let result = biome_deserialize::Deserializable::deserialize(value, name, diagnostics).map(Self)?;
+                #validator
+                Some(result)
             }
         }
     }
 }
 
-fn generate_deserializable_struct(ident: Ident, data: DeserializableStructData) -> TokenStream {
+fn generate_deserializable_struct(
+    ident: Ident,
+    generics: Generics,
+    data: DeserializableStructData,
+) -> TokenStream {
     let allowed_keys: Vec<_> = data
         .fields
         .iter()
         // It's not helpful to report deprecated keys as valid alternative.
         .filter(|data| data.deprecated.is_none())
         .map(|DeserializableFieldData { key, .. }| quote! { #key })
+        .collect();
+
+    let required_fields: Vec<_> = data
+        .fields
+        .iter()
+        .filter(|data| data.required)
+        .cloned()
         .collect();
 
     let deserialize_fields: Vec<_> = data
@@ -234,54 +292,103 @@ fn generate_deserializable_struct(ident: Ident, data: DeserializableStructData) 
                 }
             });
 
-            let is_empty_check = field_data.disallow_empty.then(|| {
-                let test = if is_optional {
-                    quote! { parsed_value.as_ref().is_some_and(|v| v.is_empty()) }
-                } else {
-                    quote! { parsed_value.is_empty() }
-                };
-                quote! {
-                    if #test {
-                        diagnostics.push(
-                            DeserializationDiagnostic::new(markup!(
-                                <Emphasis>#key</Emphasis>" may not be empty"
-                            ))
-                                .with_range(value.range())
-                        );
-                        continue;
-                    }
-                }
-            });
-
             let name = match field_data.passthrough_name {
                 true => quote! { name },
                 false => quote! { &key_text }
             };
 
+            let validate = field_data.validate.map(|validate| {
+                let path = Path {
+                    leading_colon: None,
+                    segments: validate
+                        .split("::")
+                        .map(|segment| {
+                            PathSegment::from(Ident::new(segment, Span::call_site()))
+                        })
+                        .collect(),
+                };
+
+                quote! {
+                    .filter(|v| #path(v, #key, value.range(), diagnostics))
+                }
+            });
+
             if is_optional {
+                let error_result = if field_data.bail_on_error || field_data.required {
+                    quote! { return None }
+                } else {
+                    quote! { None }
+                };
+    
                 quote! {
                     #key => {
-                        let parsed_value: #ty = Deserializable::deserialize(&value, #name, diagnostics);
-                        #is_empty_check
-                        result.#field_ident = parsed_value;
-                        #deprecation_notice
+                        result.#field_ident = match Deserializable::deserialize(&value, #name, diagnostics)#validate {
+                            Some(value) => {
+                                #deprecation_notice
+                                Some(value)
+                            }
+                            None => #error_result,
+                        };
                     }
                 }
             } else {
+                let error_result = if field_data.bail_on_error || field_data.required {
+                    quote! { return None, }
+                } else {
+                    quote! { {} }
+                };
+    
                 quote! {
                     #key => {
-                        let deserialize_result: Option<#ty> =
-                            Deserializable::deserialize(&value, #name, diagnostics);
-                        if let Some(parsed_value) = deserialize_result {
-                            #is_empty_check
-                            result.#field_ident = parsed_value;
-                            #deprecation_notice
+                        match Deserializable::deserialize(&value, #name, diagnostics)#validate {
+                            Some(value) => {
+                                #deprecation_notice
+                                result.#field_ident = value;
+                            }
+                            None => #error_result
                         }
                     }
                 }
             }
         })
         .collect();
+
+    let trait_bounds = generate_trait_bounds(&generics);
+
+    let validator = if required_fields.is_empty() {
+        quote! {}
+    } else {
+        let required_keys: Vec<_> = required_fields
+            .iter()
+            .map(|field_data| &field_data.key)
+            .collect();
+        let required_fields = required_fields.iter().map(|field_data| {
+            let DeserializableFieldData { ident: field_ident, key, ty, .. } = field_data;
+            quote! {
+                if result.#field_ident == #ty::default() {
+                    diagnostics.push(DeserializationDiagnostic::new_missing_key(
+                        #key,
+                        range,
+                        REQUIRED_KEYS,
+                    ))
+                }
+            }
+        });
+        quote! {
+            const REQUIRED_KEYS: &[&str] = &[#(#required_keys),*];
+            #(#required_fields)*
+        }
+    };
+    let validator = if data.with_validator {
+        quote! {
+            #validator
+            if !biome_deserialize::DeserializableValidator::validate(&result, name, range, diagnostics) {
+                return None;
+            }
+        }
+    } else {
+        validator
+    };
 
     let visitor_ident = Ident::new(&format!("{ident}Visitor"), Span::call_site());
     let result_init = if data.from_none {
@@ -291,7 +398,7 @@ fn generate_deserializable_struct(ident: Ident, data: DeserializableStructData) 
     };
 
     quote! {
-        impl biome_deserialize::Deserializable for #ident {
+        impl #generics biome_deserialize::Deserializable for #ident #generics #trait_bounds {
             fn deserialize(
                 value: &impl biome_deserialize::DeserializableValue,
                 name: &str,
@@ -301,8 +408,8 @@ fn generate_deserializable_struct(ident: Ident, data: DeserializableStructData) 
             }
         }
 
-        struct #visitor_ident;
-        impl biome_deserialize::DeserializationVisitor for #visitor_ident {
+        struct #visitor_ident #generics;
+        impl #generics biome_deserialize::DeserializationVisitor for #visitor_ident #generics {
             type Output = #ident;
 
             const EXPECTED_TYPE: biome_deserialize::VisitableType = biome_deserialize::VisitableType::MAP;
@@ -310,7 +417,7 @@ fn generate_deserializable_struct(ident: Ident, data: DeserializableStructData) 
             fn visit_map(
                 self,
                 members: impl Iterator<Item = Option<(impl biome_deserialize::DeserializableValue, impl biome_deserialize::DeserializableValue)>>,
-                _range: biome_deserialize::TextRange,
+                range: biome_deserialize::TextRange,
                 name: &str,
                 diagnostics: &mut Vec<biome_deserialize::DeserializationDiagnostic>,
             ) -> Option<Self::Output> {
@@ -332,8 +439,26 @@ fn generate_deserializable_struct(ident: Ident, data: DeserializableStructData) 
                         }
                     }
                 }
+                #validator
                 Some(result)
             }
+        }
+    }
+}
+
+fn generate_trait_bounds(generics: &Generics) -> TokenStream {
+    if generics.params.is_empty() {
+        quote! {}
+    } else {
+        let params = generics.params.iter().map(|param| match param {
+            GenericParam::Type(ty) => {
+                let ident = &ty.ident;
+                quote! { #ident: biome_deserialize::Deserializable }
+            }
+            _ => abort!(generics, "Unsupported generic parameter"),
+        });
+        quote! {
+            where #(#params),*
         }
     }
 }

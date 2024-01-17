@@ -3,4 +3,3 @@
 
 mod linter;
 mod rules;
-mod vcs;

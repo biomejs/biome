@@ -36,20 +36,86 @@ use syn::{parse_macro_input, DeriveInput};
 /// }
 /// ```
 ///
-/// ## Struct field attributes
+/// ## Struct attributes
 ///
-/// When [Deserializable] is derived on a struct, its fields may be adjusted
+/// When [Deserializable] is derived on a struct, its behavior may be adjusted
 /// through attributes.
 ///
-/// ### `disallow_empty`
+/// ### `with_validator`
+///
+/// When the `with_validator` attribute is present, the deserializable type is
+/// expected to implement the `DeserializableValidator` trait. The generated
+/// deserializer will call its `validate()` method and reject the instance if
+/// it returns `false`.
 ///
 /// ```no_test
 /// #[derive(Default, Deserializable)]
-/// struct StructWithFields {
-///     // Deserialization of `foo` is rejected if an empty string is provided.
-///     // This is supported on any type that has an `is_empty()` method.
-///     #[deserializable(disallow_empty)]
-///     foo: String,
+/// #[deserializable(with_validator)]
+/// struct ValidatedStruct {
+///     // In real code, please use the `validate` attribute instead (see below)!
+///     non_empty: String,
+/// }
+///
+/// impl DeserializableValidator for ValidatedStruct {
+///     fn fn validate(
+///         &self,
+///         name: &str,
+///         range: biome_rowan::TextRange,
+///         diagnostics: &mut Vec<crate::DeserializationDiagnostic>,
+///     ) -> bool {
+///         if self.non_empty.is_empty() {
+///             diagnostics.push(
+///                 DeserializationDiagnostic::new(markup! {
+///                     <Emphasis>"foo"</Emphasis>" may not be empty"
+///                 })
+///                 .with_range(range),
+///             );
+///             false
+///         } else {
+///             true
+///         }
+///     }
+/// }
+/// ```
+///
+/// ## Struct field attributes
+///
+/// A struct's fields may also be adjusted through attributes.
+///
+/// ### `bail_on_error`
+///
+/// If present, bails on deserializing the entire struct if validation for this
+/// this field fails.
+///
+/// Note the struct may still be deserialized if the field is not present in the
+/// serialized representation at all. In that case `Default::default()` will be
+/// filled in. If this is not what you want, you probably want to use the
+/// `required` attribute instead.
+///
+/// ```no_test
+/// #[derive(Default, Deserializable)]
+/// pub struct ReactHook {
+///     #[deserializable(bail_on_error)]
+///     pub name: String,
+/// }
+/// ```
+///
+/// ### `deprecated`
+///
+/// Used to generate diagnostics when a deprecated field is deserialized. Note
+/// this does not alter the behavior of the deserializer, so you still need to
+/// account for the field's value after deserialization.
+///
+/// ```no_test
+/// #[derive(Default, Deserializable)]
+/// pub struct ReactHook {
+///     #[deserializable(deprecated(use_instead = "name"))]
+///     pub old_name: String,
+///
+///     #[deserializable(deprecated(message = "nick names are not used anymore"))]
+///     pub nick_name: String,
+///
+///     pub name: String,
 /// }
 /// ```
 ///
@@ -99,6 +165,44 @@ use syn::{parse_macro_input, DeriveInput};
 ///     // This also works:
 ///     #[serde(rename = "$schema")]
 ///     schema: Option<String>,
+/// }
+/// ```
+///
+/// ### `required`
+///
+/// If present, presence of this field is required for successful
+/// deserialization of the struct.
+///
+/// Note this does not check whether the value is meaningful. For instance, an
+/// empty string would still be accepted. For such use case, you may also want
+/// to use the `validate` attribute.
+///
+/// Implies `bail_on_error`.
+///
+/// ```no_test
+/// #[derive(Default, Deserializable)]
+/// pub struct StructWithRequiredName {
+///     #[deserializable(required)]
+///     pub name: String,
+/// }
+/// ```
+///
+/// ### `validate`
+///
+/// Like the `with_validator` annotation, this allows the invocation of a
+/// validation function that can emit diagnostics and reject instances. But
+/// unlike `with_validator`, this attribute takes an argument that allows you
+/// to specify the validation function.
+///
+/// Note the validator is not invoked if the field is not present in the
+/// serialized representation at all. To cover this, you may also want to use
+/// the `required` attribute.
+///
+/// ```no_test
+/// #[derive(Default, Deserializable)]
+/// struct ValidatedStruct {
+///     #[deserializable(required, validate = "biome_deserialize::non_empty")]
+///     non_empty: String,
 /// }
 /// ```
 ///

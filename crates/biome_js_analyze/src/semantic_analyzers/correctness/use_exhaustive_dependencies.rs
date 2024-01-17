@@ -3,6 +3,7 @@ use crate::semantic_services::Semantic;
 use biome_analyze::RuleSource;
 use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
+use biome_deserialize::non_empty;
 use biome_deserialize_macros::Deserializable;
 use biome_js_semantic::{Capture, SemanticModel};
 use biome_js_syntax::{
@@ -222,7 +223,7 @@ impl Default for ReactExtensiveDependenciesOptions {
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct HooksOptions {
     /// List of safe hooks
-    #[deserializable(disallow_empty)]
+    #[deserializable(validate = "non_empty")]
     pub hooks: Vec<Hooks>,
 }
 
@@ -231,7 +232,7 @@ pub struct HooksOptions {
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Hooks {
     /// The name of the hook
-    #[deserializable(disallow_empty)]
+    #[deserializable(validate = "non_empty")]
     pub name: String,
     /// The "position" of the closure function, starting from zero.
     ///

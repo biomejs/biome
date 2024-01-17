@@ -6,10 +6,16 @@ use syn::{parenthesized, Attribute, Error, LitStr, Token};
 
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct StructFieldAttrs {
+    /// If `true`, bails on deserializing the entire struct if validation for
+    /// this field fails.
+    ///
+    /// Note the struct may still be deserialized if the field is not present in
+    /// the serialized representation at all. In that case `Default::default()`
+    /// will be filled in.
+    pub bail_on_error: bool,
+
     /// If set, this provides information about the deprecated of the field.
     pub deprecated: Option<DeprecatedField>,
-
-    pub disallow_empty: bool,
 
     /// If set, the name passed to the deserializer (which was passed by the
     /// deserializer of the parent object) is also passed through to the
@@ -20,6 +26,15 @@ pub struct StructFieldAttrs {
     ///
     /// See also: <https://serde.rs/field-attrs.html#rename>
     pub rename: Option<String>,
+
+    /// If `true`, presence of this field is required for successful
+    /// deserialization of the struct.
+    ///
+    /// Implies `bail_on_error`.
+    pub required: bool,
+
+    /// Optional validation function to be called on the field value.
+    pub validate: Option<String>,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -51,17 +66,23 @@ impl StructFieldAttrs {
     }
 
     fn merge_with(&mut self, other: Self) {
+        if other.bail_on_error {
+            self.bail_on_error = other.bail_on_error;
+        }
         if other.deprecated.is_some() {
             self.deprecated = other.deprecated;
-        }
-        if other.disallow_empty {
-            self.disallow_empty = other.disallow_empty;
         }
         if other.passthrough_name {
             self.passthrough_name = other.passthrough_name;
         }
         if other.rename.is_some() {
             self.rename = other.rename;
+        }
+        if other.required {
+            self.required = other.required;
+        }
+        if other.validate.is_some() {
+            self.validate = other.validate;
         }
     }
 
@@ -91,12 +112,14 @@ impl Parse for StructFieldAttrs {
         loop {
             let key: Ident = content.call(IdentExt::parse_any)?;
             match key.to_string().as_ref() {
+                "bail_on_error" => result.bail_on_error = true,
                 "deprecated" => {
                     result.deprecated = Some(content.parse::<DeprecatedField>()?);
                 }
-                "disallow_empty" => result.disallow_empty = true,
                 "passthrough_name" => result.passthrough_name = true,
                 "rename" => result.rename = Some(parse_value()?),
+                "required" => result.required = true,
+                "validate" => result.validate = Some(parse_value()?),
                 other => {
                     return Err(Error::new(
                         content.span(),

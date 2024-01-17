@@ -6,6 +6,7 @@ use syn::{parenthesized, Attribute, Error, Token};
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct StructAttrs {
     pub from_none: bool,
+    pub with_validator: bool,
 }
 
 impl StructAttrs {
@@ -26,6 +27,9 @@ impl StructAttrs {
         if other.from_none {
             self.from_none = other.from_none;
         }
+        if other.with_validator {
+            self.with_validator = other.with_validator;
+        }
     }
 }
 
@@ -39,6 +43,7 @@ impl Parse for StructAttrs {
             let key: Ident = content.call(IdentExt::parse_any)?;
             match key.to_string().as_ref() {
                 "from_none" => result.from_none = true,
+                "with_validator" => result.with_validator = true,
                 other => {
                     return Err(Error::new(
                         content.span(),

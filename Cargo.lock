@@ -169,6 +169,7 @@ dependencies = [
  "biome_console",
  "biome_css_formatter",
  "biome_deserialize",
+ "biome_deserialize_macros",
  "biome_diagnostics",
  "biome_flags",
  "biome_formatter",
