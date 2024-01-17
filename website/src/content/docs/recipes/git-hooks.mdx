@@ -46,7 +46,7 @@ Some examples of _Lefthook_ configurations:
     commands:
       check:
         glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc}"
-        run: npx biome check --no-errors-on-unmatched --files-ignore-unknown=true {pushed_files}
+        run: npx biome check --no-errors-on-unmatched --files-ignore-unknown=true {push_files}
   ```
 
 Note that you don't need to use both `glob` and `--files-ignore-unknown=true`.
