@@ -83,6 +83,78 @@ React.Children.map(this.props.children, (child, index) => (
   
 </code></pre>
 
+```jsx
+something.forEach((Element, index) => {
+    <Component key={`test-key-${index}`} >foo</Component>
+});
+```
+
+<pre class="language-text"><code class="language-text">suspicious/noArrayIndexKey.js:2:33 <a href="https://biomejs.dev/linter/rules/no-array-index-key">lint/suspicious/noArrayIndexKey</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Avoid using the index of an array as key property in an element.</span>
+  
+    <strong>1 │ </strong>something.forEach((Element, index) =&gt; {
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>2 │ </strong>    &lt;Component key={`test-key-${index}`} &gt;foo&lt;/Component&gt;
+   <strong>   │ </strong>                                <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
+    <strong>3 │ </strong>});
+    <strong>4 │ </strong>
+  
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">This is the source of the key value.</span>
+  
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>something.forEach((Element, index) =&gt; {
+   <strong>   │ </strong>                            <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
+    <strong>2 │ </strong>    &lt;Component key={`test-key-${index}`} &gt;foo&lt;/Component&gt;
+    <strong>3 │ </strong>});
+  
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">The order of the items may change, and this also affects performances and component state.</span>
+  
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Check the </span><span style="color: lightgreen;"><a href="https://reactjs.org/docs/lists-and-keys.html#keys">React documentation</a></span><span style="color: lightgreen;">. </span>
+  
+</code></pre>
+
+```jsx
+something.forEach((Element, index) => {
+    <Component key={"test" + index} >foo</Component>
+});
+```
+
+<pre class="language-text"><code class="language-text">suspicious/noArrayIndexKey.js:2:30 <a href="https://biomejs.dev/linter/rules/no-array-index-key">lint/suspicious/noArrayIndexKey</a> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">✖</span></strong> <span style="color: Tomato;">Avoid using the index of an array as key property in an element.</span>
+  
+    <strong>1 │ </strong>something.forEach((Element, index) =&gt; {
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>2 │ </strong>    &lt;Component key={&quot;test&quot; + index} &gt;foo&lt;/Component&gt;
+   <strong>   │ </strong>                             <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
+    <strong>3 │ </strong>});
+    <strong>4 │ </strong>
+  
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">This is the source of the key value.</span>
+  
+<strong><span style="color: Tomato;">  </span></strong><strong><span style="color: Tomato;">&gt;</span></strong> <strong>1 │ </strong>something.forEach((Element, index) =&gt; {
+   <strong>   │ </strong>                            <strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong><strong><span style="color: Tomato;">^</span></strong>
+    <strong>2 │ </strong>    &lt;Component key={&quot;test&quot; + index} &gt;foo&lt;/Component&gt;
+    <strong>3 │ </strong>});
+  
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">The order of the items may change, and this also affects performances and component state.</span>
+  
+<strong><span style="color: lightgreen;">  </span></strong><strong><span style="color: lightgreen;">ℹ</span></strong> <span style="color: lightgreen;">Check the </span><span style="color: lightgreen;"><a href="https://reactjs.org/docs/lists-and-keys.html#keys">React documentation</a></span><span style="color: lightgreen;">. </span>
+  
+</code></pre>
+
+### Valid
+
+```jsx
+something.forEach((item) => {
+    <Component key={item.id} >foo</Component>
+});
+```
+
+```jsx
+something.forEach((item) => {
+    <Component key={item.baz.foo} >foo</Component>
+});
+```
+
 ## Related links
 
 - [Disable a rule](/linter/#disable-a-lint-rule)
