@@ -18,7 +18,6 @@ formatter_quote_style.json:3:9 deserialize ━━━━━━━━━━━━�
   - enabled
   - formatWithErrors
   - indentStyle
-  - indentSize
   - indentWidth
   - lineEnding
   - lineWidth
