@@ -161,22 +161,22 @@ impl Matcher {
             }
         }
 
-        if let Some(source_as_string) = source.to_str() {
-            if self
-                .git_ignore
-                .as_ref()
-                .map(|ignore| {
+        self.git_ignore
+            .as_ref()
+            .map(|ignore| {
+                // `matched_path_or_any_parents` panics if `source` is not under the gitignore root.
+                // This checks excludes absolute paths that are not a prefix of the base root.
+                if !source.has_root() || source.starts_with(ignore.path()) {
+                    // Because Biome passes a list of paths,
+                    // we use `matched_path_or_any_parents` instead of `matched`.
                     ignore
-                        .matched_path_or_any_parents(source_as_string, source.is_dir())
+                        .matched_path_or_any_parents(source, source.is_dir())
                         .is_ignore()
-                })
-                .unwrap_or_default()
-            {
-                return true;
-            }
-        }
-
-        false
+                } else {
+                    false
+                }
+            })
+            .unwrap_or_default()
     }
 }
 

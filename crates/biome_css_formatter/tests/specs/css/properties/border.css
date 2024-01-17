@@ -1,0 +1,39 @@
+div {
+    /* Generic property tests */
+    border: InItial;
+    border
+    :
+    inherit
+    ;
+
+    border  :   zzz-unknown-value  ;
+    border  : a,
+    value list ;
+
+
+    /* <line-style> */
+    border : SOLID;
+    border: none
+    ;
+
+    /* <line-width> */
+    border : ThIn;
+    border: 
+    medium
+    ;
+    border:   100px;
+
+    /* <color> */
+    border: 
+    #fff;
+
+    /* combinations */
+    border: 2px
+    dotted;
+    border  :   outset   #f33;
+    border:#000 medium  
+     
+    dashed
+        
+        ;
+}

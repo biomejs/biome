@@ -1,0 +1,37 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `biome.json`
+
+```json
+{
+  "overrides": [
+    {
+      "ignore": ["file2.js"]
+    }
+  ]
+}
+```
+
+## `file1.js`
+
+```js
+statement();
+
+```
+
+## `file2.js`
+
+```js
+statement();
+
+```
+
+# Emitted Messages
+
+```block
+Formatted 3 file(s) in <TIME>
+```
+
+
