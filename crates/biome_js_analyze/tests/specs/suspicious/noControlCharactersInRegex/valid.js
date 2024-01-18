@@ -18,3 +18,4 @@ var regex = /\u{1F}/g;
 var regex = /\t/;
 var regex = /\n/;
 new (function foo() {})("\\x1f");
+/[\u200E\u2066-\u2069]/gu;

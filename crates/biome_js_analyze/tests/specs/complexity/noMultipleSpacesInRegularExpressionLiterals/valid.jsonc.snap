@@ -22,4 +22,9 @@ expression: valid.jsonc
 /foo /;
 ```
 
+# Input
+```cjs
+/‎⁦⁩/gu;
+```
+
 
