@@ -2689,3 +2689,44 @@ fn override_don_t_affect_ignored_files() {
         result,
     ));
 }
+
+#[test]
+fn format_with_configured_line_ending() {
+    let mut console = BufferConsole::default();
+    let mut fs = MemoryFileSystem::default();
+
+    let config = r#"{
+        "formatter": {
+            "lineEnding": "crlf",
+            "lineWidth": 20
+        }
+    }"#;
+    let code_json = r#"{ "name": "mike", "surname": "ross" }"#;
+    let code_js = r#"const b = { "name": "mike", "surname": "ross" }"#;
+    let json_file = Path::new("input.json");
+    fs.insert(json_file.into(), code_json.as_bytes());
+
+    let js_file = Path::new("input.js");
+    fs.insert(js_file.into(), code_js.as_bytes());
+
+    let file_path = Path::new("biome.json");
+    fs.insert(file_path.into(), config);
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("format"), ("."), ("--write")].as_slice()),
+    );
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(
+        &fs,
+        json_file,
+        "{\r\n\t\"name\": \"mike\",\r\n\t\"surname\": \"ross\"\r\n}\r\n",
+    );
+    assert_file_contents(
+        &fs,
+        js_file,
+        "const b = {\r\n\tname: \"mike\",\r\n\tsurname: \"ross\",\r\n};\r\n",
+    );
+}

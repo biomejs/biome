@@ -111,10 +111,17 @@ impl Language for JsLanguage {
         } else {
             global.indent_width.unwrap_or_default()
         };
+
+        let line_ending = if let Some(line_ending) = language.line_ending {
+            line_ending
+        } else {
+            global.line_ending.unwrap_or_default()
+        };
         let options = JsFormatOptions::new(path.as_path().try_into().unwrap_or_default())
             .with_indent_style(indent_style)
             .with_indent_width(indent_width)
             .with_line_width(line_width)
+            .with_line_ending(line_ending)
             .with_quote_style(language.quote_style.unwrap_or_default())
             .with_jsx_quote_style(language.jsx_quote_style.unwrap_or_default())
             .with_quote_properties(language.quote_properties.unwrap_or_default())
