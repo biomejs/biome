@@ -62,7 +62,8 @@ impl Rule for NoEmptyCharacterClassInRegex {
         let trimmed_text = pattern.text();
         let mut class_start_index = None;
         let mut is_negated_class = false;
-        let mut enumerated_char_iter = trimmed_text.chars().enumerate();
+        // We use `char_indices` to get the byte index of every character
+        let mut enumerated_char_iter = trimmed_text.char_indices();
         while let Some((i, ch)) = enumerated_char_iter.next() {
             match ch {
                 '\\' => {
