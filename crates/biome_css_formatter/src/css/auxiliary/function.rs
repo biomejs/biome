@@ -1,12 +1,11 @@
 use crate::prelude::*;
-use biome_css_syntax::{CssSimpleFunction, CssSimpleFunctionFields};
+use biome_css_syntax::{CssFunction, CssFunctionFields};
 use biome_formatter::{format_args, write};
-
 #[derive(Debug, Clone, Default)]
-pub(crate) struct FormatCssSimpleFunction;
-impl FormatNodeRule<CssSimpleFunction> for FormatCssSimpleFunction {
-    fn fmt_fields(&self, node: &CssSimpleFunction, f: &mut CssFormatter) -> FormatResult<()> {
-        let CssSimpleFunctionFields {
+pub(crate) struct FormatCssFunction;
+impl FormatNodeRule<CssFunction> for FormatCssFunction {
+    fn fmt_fields(&self, node: &CssFunction, f: &mut CssFormatter) -> FormatResult<()> {
+        let CssFunctionFields {
             name,
             l_paren_token,
             items,

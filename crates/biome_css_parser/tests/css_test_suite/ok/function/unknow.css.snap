@@ -43,7 +43,7 @@ CssRoot {
                             },
                             colon_token: COLON@14..16 ":" [] [Whitespace(" ")],
                             value: CssGenericComponentValueList [
-                                CssSimpleFunction {
+                                CssFunction {
                                     name: CssIdentifier {
                                         value_token: IDENT@16..18 "fn" [] [],
                                     },
@@ -74,7 +74,7 @@ CssRoot {
                             },
                             colon_token: COLON@35..37 ":" [] [Whitespace(" ")],
                             value: CssGenericComponentValueList [
-                                CssSimpleFunction {
+                                CssFunction {
                                     name: CssIdentifier {
                                         value_token: IDENT@37..41 "--fn" [] [],
                                     },
@@ -105,7 +105,7 @@ CssRoot {
                             },
                             colon_token: COLON@58..60 ":" [] [Whitespace(" ")],
                             value: CssGenericComponentValueList [
-                                CssSimpleFunction {
+                                CssFunction {
                                     name: CssIdentifier {
                                         value_token: IDENT@60..68 "--fn--fn" [] [],
                                     },
@@ -162,7 +162,7 @@ CssRoot {
                 0: IDENT@5..14 "prod" [Newline("\n"), Whitespace("    ")] []
               1: COLON@14..16 ":" [] [Whitespace(" ")]
               2: CSS_GENERIC_COMPONENT_VALUE_LIST@16..25
-                0: CSS_SIMPLE_FUNCTION@16..25
+                0: CSS_FUNCTION@16..25
                   0: CSS_IDENTIFIER@16..18
                     0: IDENT@16..18 "fn" [] []
                   1: L_PAREN@18..19 "(" [] []
@@ -182,7 +182,7 @@ CssRoot {
                 0: IDENT@26..35 "prod" [Newline("\n"), Whitespace("    ")] []
               1: COLON@35..37 ":" [] [Whitespace(" ")]
               2: CSS_GENERIC_COMPONENT_VALUE_LIST@37..48
-                0: CSS_SIMPLE_FUNCTION@37..48
+                0: CSS_FUNCTION@37..48
                   0: CSS_IDENTIFIER@37..41
                     0: IDENT@37..41 "--fn" [] []
                   1: L_PAREN@41..42 "(" [] []
@@ -202,7 +202,7 @@ CssRoot {
                 0: IDENT@49..58 "prod" [Newline("\n"), Whitespace("    ")] []
               1: COLON@58..60 ":" [] [Whitespace(" ")]
               2: CSS_GENERIC_COMPONENT_VALUE_LIST@60..75
-                0: CSS_SIMPLE_FUNCTION@60..75
+                0: CSS_FUNCTION@60..75
                   0: CSS_IDENTIFIER@60..68
                     0: IDENT@60..68 "--fn--fn" [] []
                   1: L_PAREN@68..69 "(" [] []
