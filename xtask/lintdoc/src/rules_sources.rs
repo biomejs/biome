@@ -89,29 +89,17 @@ Some **Biome** rules might **not** have options, compared to the original rule.
 
     let mut footnotes = 0;
     for (source, rules) in rules_by_source {
-        writeln!(buffer, "## {source} rules to Biome")?;
+        writeln!(buffer, "## {source}")?;
         writeln!(buffer, r#"| {source} rule name | Biome rule name |"#)?;
         writeln!(buffer, r#"| ---- | ---- |"#)?;
 
-        footnotes += push_to_table(rules, &mut buffer, footnotes)?;
-    }
-
-    for index in 0..footnotes {
-        writeln!(
-            buffer,
-            "[^{}]: This rule is inspired from the source, so its logic might be different.",
-            index + 1
-        )?;
+        footnotes += push_to_table(rules, &mut buffer)?;
     }
 
     Ok(buffer)
 }
 
-fn push_to_table(
-    source_set: BTreeSet<SourceSet>,
-    buffer: &mut Vec<u8>,
-    start_from: u8,
-) -> Result<u8> {
+fn push_to_table(source_set: BTreeSet<SourceSet>, buffer: &mut Vec<u8>) -> Result<u8> {
     let mut footnotes = 0;
     for source_set in source_set {
         write!(
@@ -125,7 +113,7 @@ fn push_to_table(
 
         if source_set.inspired {
             footnotes += 1;
-            write!(buffer, "[^{}]", start_from + footnotes)?;
+            write!(buffer, " (inspired)")?;
         }
         writeln!(buffer, " |")?;
     }
