@@ -93,6 +93,7 @@ impl ParseRecovery for ParameterListParseRecovery {
     /// - A comma ',', indicating the list separator.
     /// - The next parameter, indicating the start of a new parameter.
     /// - A closing parenthesis ')', indicating the end of a parameter list.
+    /// - A ';', indicating the end of a declaration.
     /// # Examples
     /// Basic usage in CSS:
     ///
@@ -100,7 +101,7 @@ impl ParseRecovery for ParameterListParseRecovery {
     /// transform: rotate(30deg,, /* Error in parameter, recover here */)
     /// ```
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at_ts(token_set!(T![,], T![')'])) || is_at_parameter(p)
+        p.at_ts(token_set!(T![,], T![')'], T![;])) || is_at_parameter(p)
     }
 }
 
