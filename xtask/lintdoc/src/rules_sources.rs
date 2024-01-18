@@ -87,13 +87,12 @@ Some **Biome** rules might **not** have options, compared to the original rule.
         }
     }
 
-    let mut footnotes = 0;
     for (source, rules) in rules_by_source {
         writeln!(buffer, "## {source}")?;
         writeln!(buffer, r#"| {source} rule name | Biome rule name |"#)?;
         writeln!(buffer, r#"| ---- | ---- |"#)?;
 
-        footnotes += push_to_table(rules, &mut buffer)?;
+        push_to_table(rules, &mut buffer)?;
     }
 
     Ok(buffer)
