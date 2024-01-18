@@ -62,7 +62,7 @@ Some **Biome** rules might **not** have options, compared to the original rule.
             if let Some(set) = set {
                 set.insert(SourceSet {
                     biome_rule_name: rule_name.to_string(),
-                    biome_link: format!("/lint/rules/{}", rule_name.to_case(Case::Kebab)),
+                    biome_link: format!("/linter/rules/{}", rule_name.to_case(Case::Kebab)),
                     source_link: source.to_rule_url(),
                     source_rule_name: source.as_rule_name().to_string(),
                     inspired: metadata
