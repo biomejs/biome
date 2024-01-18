@@ -528,7 +528,7 @@ CssRoot {
                         comparison: CssQueryFeatureRangeComparison {
                             operator: GTEQ@664..666 ">=" [] [],
                         },
-                        right: CssSimpleFunction {
+                        right: CssFunction {
                             name: CssIdentifier {
                                 value_token: IDENT@666..670 "calc" [] [],
                             },
@@ -997,7 +997,7 @@ CssRoot {
               0: IDENT@653..664 "inline-size" [] []
             1: CSS_QUERY_FEATURE_RANGE_COMPARISON@664..666
               0: GTEQ@664..666 ">=" [] []
-            2: CSS_SIMPLE_FUNCTION@666..677
+            2: CSS_FUNCTION@666..677
               0: CSS_IDENTIFIER@666..670
                 0: IDENT@666..670 "calc" [] []
               1: L_PAREN@670..671 "(" [] []

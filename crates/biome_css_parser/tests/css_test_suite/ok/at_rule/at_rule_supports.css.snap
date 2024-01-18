@@ -824,7 +824,7 @@ CssRoot {
                                 },
                                 colon_token: COLON@750..752 ":" [] [Whitespace(" ")],
                                 value: CssGenericComponentValueList [
-                                    CssSimpleFunction {
+                                    CssFunction {
                                         name: CssIdentifier {
                                             value_token: IDENT@752..758 "rotate" [] [],
                                         },
@@ -912,7 +912,7 @@ CssRoot {
                                         },
                                         colon_token: COLON@849..851 ":" [] [Whitespace(" ")],
                                         value: CssGenericComponentValueList [
-                                            CssSimpleFunction {
+                                            CssFunction {
                                                 name: CssIdentifier {
                                                     value_token: IDENT@851..857 "rotate" [] [],
                                                 },
@@ -1003,7 +1003,7 @@ CssRoot {
                                         },
                                         colon_token: COLON@990..995 ":" [] [Whitespace("    ")],
                                         value: CssGenericComponentValueList [
-                                            CssSimpleFunction {
+                                            CssFunction {
                                                 name: CssIdentifier {
                                                     value_token: IDENT@995..1001 "rotate" [] [],
                                                 },
@@ -1094,7 +1094,7 @@ CssRoot {
                                         },
                                         colon_token: COLON@1096..1097 ":" [] [],
                                         value: CssGenericComponentValueList [
-                                            CssSimpleFunction {
+                                            CssFunction {
                                                 name: CssIdentifier {
                                                     value_token: IDENT@1097..1103 "rotate" [] [],
                                                 },
@@ -1285,7 +1285,7 @@ CssRoot {
                                 },
                                 colon_token: COLON@1299..1301 ":" [] [Whitespace(" ")],
                                 value: CssGenericComponentValueList [
-                                    CssSimpleFunction {
+                                    CssFunction {
                                         name: CssIdentifier {
                                             value_token: IDENT@1301..1307 "rotate" [] [],
                                         },
@@ -1373,7 +1373,7 @@ CssRoot {
                                         },
                                         colon_token: COLON@1398..1400 ":" [] [Whitespace(" ")],
                                         value: CssGenericComponentValueList [
-                                            CssSimpleFunction {
+                                            CssFunction {
                                                 name: CssIdentifier {
                                                     value_token: IDENT@1400..1406 "rotate" [] [],
                                                 },
@@ -1621,7 +1621,7 @@ CssRoot {
                 supports_token: SUPPORTS_KW@1619..1628 "supports" [] [Whitespace(" ")],
                 condition: CssSupportsConditionInParens {
                     l_paren_token: L_PAREN@1628..1629 "(" [] [],
-                    condition: CssSimpleFunction {
+                    condition: CssFunction {
                         name: CssIdentifier {
                             value_token: IDENT@1629..1638 "--element" [] [],
                         },
@@ -1912,7 +1912,7 @@ CssRoot {
             at_token: AT@1869..1872 "@" [Newline("\n"), Newline("\n")] [],
             rule: CssSupportsAtRule {
                 supports_token: SUPPORTS_KW@1872..1881 "supports" [] [Whitespace(" ")],
-                condition: CssSimpleFunction {
+                condition: CssFunction {
                     name: CssIdentifier {
                         value_token: IDENT@1881..1885 "func" [] [],
                     },
@@ -1997,7 +1997,7 @@ CssRoot {
                 supports_token: SUPPORTS_KW@1928..1937 "supports" [] [Whitespace(" ")],
                 condition: CssSupportsConditionInParens {
                     l_paren_token: L_PAREN@1937..1938 "(" [] [],
-                    condition: CssSimpleFunction {
+                    condition: CssFunction {
                         name: CssIdentifier {
                             value_token: IDENT@1938..1942 "func" [] [],
                         },
@@ -2084,7 +2084,7 @@ CssRoot {
                 supports_token: SUPPORTS_KW@1986..1995 "supports" [] [Whitespace(" ")],
                 condition: CssSupportsConditionInParens {
                     l_paren_token: L_PAREN@1995..1999 "(" [] [Whitespace("   ")],
-                    condition: CssSimpleFunction {
+                    condition: CssFunction {
                         name: CssIdentifier {
                             value_token: IDENT@1999..2003 "func" [] [],
                         },
@@ -2313,7 +2313,7 @@ CssRoot {
                                             },
                                             colon_token: COLON@2223..2225 ":" [] [Whitespace(" ")],
                                             value: CssGenericComponentValueList [
-                                                CssSimpleFunction {
+                                                CssFunction {
                                                     name: CssIdentifier {
                                                         value_token: IDENT@2225..2228 "var" [] [],
                                                     },
@@ -2856,7 +2856,7 @@ CssRoot {
                             },
                             colon_token: COLON@2675..2677 ":" [] [Whitespace(" ")],
                             value: CssGenericComponentValueList [
-                                CssSimpleFunction {
+                                CssFunction {
                                     name: CssIdentifier {
                                         value_token: IDENT@2677..2681 "calc" [] [],
                                     },
@@ -2930,7 +2930,7 @@ CssRoot {
                 supports_token: SUPPORTS_KW@2725..2734 "supports" [] [Whitespace(" ")],
                 condition: CssSupportsConditionInParens {
                     l_paren_token: L_PAREN@2734..2735 "(" [] [],
-                    condition: CssSimpleFunction {
+                    condition: CssFunction {
                         name: CssIdentifier {
                             value_token: IDENT@2735..2739 "func" [] [],
                         },
@@ -3096,7 +3096,7 @@ CssRoot {
                 supports_token: SUPPORTS_KW@2867..2876 "supports" [] [Whitespace(" ")],
                 condition: CssSupportsConditionInParens {
                     l_paren_token: L_PAREN@2876..2880 "(" [] [Whitespace("   ")],
-                    condition: CssSimpleFunction {
+                    condition: CssFunction {
                         name: CssIdentifier {
                             value_token: IDENT@2880..2884 "func" [] [],
                         },
@@ -3278,7 +3278,7 @@ CssRoot {
                 supports_token: SUPPORTS_KW@3040..3049 "supports" [] [Whitespace(" ")],
                 condition: CssSupportsConditionInParens {
                     l_paren_token: L_PAREN@3049..3050 "(" [] [],
-                    condition: CssSimpleFunction {
+                    condition: CssFunction {
                         name: CssIdentifier {
                             value_token: IDENT@3050..3059 "--element" [] [],
                         },
@@ -3797,7 +3797,7 @@ CssRoot {
                   0: IDENT@741..750 "transform" [] []
                 1: COLON@750..752 ":" [] [Whitespace(" ")]
                 2: CSS_GENERIC_COMPONENT_VALUE_LIST@752..765
-                  0: CSS_SIMPLE_FUNCTION@752..765
+                  0: CSS_FUNCTION@752..765
                     0: CSS_IDENTIFIER@752..758
                       0: IDENT@752..758 "rotate" [] []
                     1: L_PAREN@758..759 "(" [] []
@@ -3857,7 +3857,7 @@ CssRoot {
                       0: IDENT@840..849 "transform" [] []
                     1: COLON@849..851 ":" [] [Whitespace(" ")]
                     2: CSS_GENERIC_COMPONENT_VALUE_LIST@851..864
-                      0: CSS_SIMPLE_FUNCTION@851..864
+                      0: CSS_FUNCTION@851..864
                         0: CSS_IDENTIFIER@851..857
                           0: IDENT@851..857 "rotate" [] []
                         1: L_PAREN@857..858 "(" [] []
@@ -3918,7 +3918,7 @@ CssRoot {
                       0: IDENT@978..990 "transform" [] [Whitespace("   ")]
                     1: COLON@990..995 ":" [] [Whitespace("    ")]
                     2: CSS_GENERIC_COMPONENT_VALUE_LIST@995..1011
-                      0: CSS_SIMPLE_FUNCTION@995..1011
+                      0: CSS_FUNCTION@995..1011
                         0: CSS_IDENTIFIER@995..1001
                           0: IDENT@995..1001 "rotate" [] []
                         1: L_PAREN@1001..1002 "(" [] []
@@ -3979,7 +3979,7 @@ CssRoot {
                       0: IDENT@1087..1096 "transform" [] []
                     1: COLON@1096..1097 ":" [] []
                     2: CSS_GENERIC_COMPONENT_VALUE_LIST@1097..1110
-                      0: CSS_SIMPLE_FUNCTION@1097..1110
+                      0: CSS_FUNCTION@1097..1110
                         0: CSS_IDENTIFIER@1097..1103
                           0: IDENT@1097..1103 "rotate" [] []
                         1: L_PAREN@1103..1104 "(" [] []
@@ -4108,7 +4108,7 @@ CssRoot {
                   0: IDENT@1290..1299 "transform" [] []
                 1: COLON@1299..1301 ":" [] [Whitespace(" ")]
                 2: CSS_GENERIC_COMPONENT_VALUE_LIST@1301..1314
-                  0: CSS_SIMPLE_FUNCTION@1301..1314
+                  0: CSS_FUNCTION@1301..1314
                     0: CSS_IDENTIFIER@1301..1307
                       0: IDENT@1301..1307 "rotate" [] []
                     1: L_PAREN@1307..1308 "(" [] []
@@ -4168,7 +4168,7 @@ CssRoot {
                       0: IDENT@1389..1398 "transform" [] []
                     1: COLON@1398..1400 ":" [] [Whitespace(" ")]
                     2: CSS_GENERIC_COMPONENT_VALUE_LIST@1400..1413
-                      0: CSS_SIMPLE_FUNCTION@1400..1413
+                      0: CSS_FUNCTION@1400..1413
                         0: CSS_IDENTIFIER@1400..1406
                           0: IDENT@1400..1406 "rotate" [] []
                         1: L_PAREN@1406..1407 "(" [] []
@@ -4331,7 +4331,7 @@ CssRoot {
         0: SUPPORTS_KW@1619..1628 "supports" [] [Whitespace(" ")]
         1: CSS_SUPPORTS_CONDITION_IN_PARENS@1628..1653
           0: L_PAREN@1628..1629 "(" [] []
-          1: CSS_SIMPLE_FUNCTION@1629..1651
+          1: CSS_FUNCTION@1629..1651
             0: CSS_IDENTIFIER@1629..1638
               0: IDENT@1629..1638 "--element" [] []
             1: L_PAREN@1638..1639 "(" [] []
@@ -4525,7 +4525,7 @@ CssRoot {
       0: AT@1869..1872 "@" [Newline("\n"), Newline("\n")] []
       1: CSS_SUPPORTS_AT_RULE@1872..1925
         0: SUPPORTS_KW@1872..1881 "supports" [] [Whitespace(" ")]
-        1: CSS_SIMPLE_FUNCTION@1881..1898
+        1: CSS_FUNCTION@1881..1898
           0: CSS_IDENTIFIER@1881..1885
             0: IDENT@1881..1885 "func" [] []
           1: L_PAREN@1885..1886 "(" [] []
@@ -4580,7 +4580,7 @@ CssRoot {
         0: SUPPORTS_KW@1928..1937 "supports" [] [Whitespace(" ")]
         1: CSS_SUPPORTS_CONDITION_IN_PARENS@1937..1956
           0: L_PAREN@1937..1938 "(" [] []
-          1: CSS_SIMPLE_FUNCTION@1938..1954
+          1: CSS_FUNCTION@1938..1954
             0: CSS_IDENTIFIER@1938..1942
               0: IDENT@1938..1942 "func" [] []
             1: L_PAREN@1942..1943 "(" [] []
@@ -4636,7 +4636,7 @@ CssRoot {
         0: SUPPORTS_KW@1986..1995 "supports" [] [Whitespace(" ")]
         1: CSS_SUPPORTS_CONDITION_IN_PARENS@1995..2035
           0: L_PAREN@1995..1999 "(" [] [Whitespace("   ")]
-          1: CSS_SIMPLE_FUNCTION@1999..2033
+          1: CSS_FUNCTION@1999..2033
             0: CSS_IDENTIFIER@1999..2003
               0: IDENT@1999..2003 "func" [] []
             1: L_PAREN@2003..2007 "(" [] [Whitespace("   ")]
@@ -4788,7 +4788,7 @@ CssRoot {
                         0: IDENT@2215..2223 "color" [Newline("\n"), Whitespace("\t\t")] []
                       1: COLON@2223..2225 ":" [] [Whitespace(" ")]
                       2: CSS_GENERIC_COMPONENT_VALUE_LIST@2225..2239
-                        0: CSS_SIMPLE_FUNCTION@2225..2239
+                        0: CSS_FUNCTION@2225..2239
                           0: CSS_IDENTIFIER@2225..2228
                             0: IDENT@2225..2228 "var" [] []
                           1: L_PAREN@2228..2229 "(" [] []
@@ -5152,7 +5152,7 @@ CssRoot {
                 0: IDENT@2670..2675 "width" [] []
               1: COLON@2675..2677 ":" [] [Whitespace(" ")]
               2: CSS_GENERIC_COMPONENT_VALUE_LIST@2677..2688
-                0: CSS_SIMPLE_FUNCTION@2677..2688
+                0: CSS_FUNCTION@2677..2688
                   0: CSS_IDENTIFIER@2677..2681
                     0: IDENT@2677..2681 "calc" [] []
                   1: L_PAREN@2681..2682 "(" [] []
@@ -5199,7 +5199,7 @@ CssRoot {
         0: SUPPORTS_KW@2725..2734 "supports" [] [Whitespace(" ")]
         1: CSS_SUPPORTS_CONDITION_IN_PARENS@2734..2744
           0: L_PAREN@2734..2735 "(" [] []
-          1: CSS_SIMPLE_FUNCTION@2735..2742
+          1: CSS_FUNCTION@2735..2742
             0: CSS_IDENTIFIER@2735..2739
               0: IDENT@2735..2739 "func" [] []
             1: L_PAREN@2739..2740 "(" [] []
@@ -5310,7 +5310,7 @@ CssRoot {
         0: SUPPORTS_KW@2867..2876 "supports" [] [Whitespace(" ")]
         1: CSS_SUPPORTS_CONDITION_IN_PARENS@2876..2900
           0: L_PAREN@2876..2880 "(" [] [Whitespace("   ")]
-          1: CSS_SIMPLE_FUNCTION@2880..2898
+          1: CSS_FUNCTION@2880..2898
             0: CSS_IDENTIFIER@2880..2884
               0: IDENT@2880..2884 "func" [] []
             1: L_PAREN@2884..2885 "(" [] []
@@ -5431,7 +5431,7 @@ CssRoot {
         0: SUPPORTS_KW@3040..3049 "supports" [] [Whitespace(" ")]
         1: CSS_SUPPORTS_CONDITION_IN_PARENS@3049..3074
           0: L_PAREN@3049..3050 "(" [] []
-          1: CSS_SIMPLE_FUNCTION@3050..3072
+          1: CSS_FUNCTION@3050..3072
             0: CSS_IDENTIFIER@3050..3059
               0: IDENT@3050..3059 "--element" [] []
             1: L_PAREN@3059..3060 "(" [] []

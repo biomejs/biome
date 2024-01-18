@@ -611,7 +611,7 @@ CssRoot {
                                                             },
                                                             colon_token: COLON@535..537 ":" [] [Whitespace(" ")],
                                                             value: CssGenericComponentValueList [
-                                                                CssSimpleFunction {
+                                                                CssFunction {
                                                                     name: CssIdentifier {
                                                                         value_token: IDENT@537..540 "rgb" [] [],
                                                                     },
@@ -1142,7 +1142,7 @@ CssRoot {
                                 0: IDENT@516..535 "background-color" [Newline("\n"), Whitespace("\t\t")] []
                               1: COLON@535..537 ":" [] [Whitespace(" ")]
                               2: CSS_GENERIC_COMPONENT_VALUE_LIST@537..551
-                                0: CSS_SIMPLE_FUNCTION@537..551
+                                0: CSS_FUNCTION@537..551
                                   0: CSS_IDENTIFIER@537..540
                                     0: IDENT@537..540 "rgb" [] []
                                   1: L_PAREN@540..541 "(" [] []

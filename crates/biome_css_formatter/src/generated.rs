@@ -4353,43 +4353,39 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssSupportsFeatureSelect
         FormatOwnedWithRule :: new (self , crate :: css :: selectors :: supports_feature_selector :: FormatCssSupportsFeatureSelector :: default ())
     }
 }
-impl FormatRule<biome_css_syntax::CssSimpleFunction>
-    for crate::css::auxiliary::simple_function::FormatCssSimpleFunction
+impl FormatRule<biome_css_syntax::CssFunction>
+    for crate::css::auxiliary::function::FormatCssFunction
 {
     type Context = CssFormatContext;
     #[inline(always)]
-    fn fmt(
-        &self,
-        node: &biome_css_syntax::CssSimpleFunction,
-        f: &mut CssFormatter,
-    ) -> FormatResult<()> {
-        FormatNodeRule::<biome_css_syntax::CssSimpleFunction>::fmt(self, node, f)
+    fn fmt(&self, node: &biome_css_syntax::CssFunction, f: &mut CssFormatter) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::CssFunction>::fmt(self, node, f)
     }
 }
-impl AsFormat<CssFormatContext> for biome_css_syntax::CssSimpleFunction {
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssFunction {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_css_syntax::CssSimpleFunction,
-        crate::css::auxiliary::simple_function::FormatCssSimpleFunction,
+        biome_css_syntax::CssFunction,
+        crate::css::auxiliary::function::FormatCssFunction,
     >;
     fn format(&self) -> Self::Format<'_> {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::css::auxiliary::simple_function::FormatCssSimpleFunction::default(),
+            crate::css::auxiliary::function::FormatCssFunction::default(),
         )
     }
 }
-impl IntoFormat<CssFormatContext> for biome_css_syntax::CssSimpleFunction {
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssFunction {
     type Format = FormatOwnedWithRule<
-        biome_css_syntax::CssSimpleFunction,
-        crate::css::auxiliary::simple_function::FormatCssSimpleFunction,
+        biome_css_syntax::CssFunction,
+        crate::css::auxiliary::function::FormatCssFunction,
     >;
     fn into_format(self) -> Self::Format {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::css::auxiliary::simple_function::FormatCssSimpleFunction::default(),
+            crate::css::auxiliary::function::FormatCssFunction::default(),
         )
     }
 }
