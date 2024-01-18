@@ -369,13 +369,15 @@ fn capture_needs_to_be_in_the_dependency_list(
         | AnyJsBindingDeclaration::TsDeclareFunctionExportDefaultDeclaration(_)
         | AnyJsBindingDeclaration::JsCatchDeclaration(_) => Some(capture),
 
+        // Ignore TypeScript `import <id> =`
+        AnyJsBindingDeclaration::TsImportEqualsDeclaration(_) => None,
+
         // This should be unreachable because of the test if the capture is imported
         AnyJsBindingDeclaration::JsShorthandNamedImportSpecifier(_)
         | AnyJsBindingDeclaration::JsNamedImportSpecifier(_)
         | AnyJsBindingDeclaration::JsBogusNamedImportSpecifier(_)
         | AnyJsBindingDeclaration::JsDefaultImportSpecifier(_)
-        | AnyJsBindingDeclaration::JsNamespaceImportSpecifier(_)
-        | AnyJsBindingDeclaration::TsImportEqualsDeclaration(_) => {
+        | AnyJsBindingDeclaration::JsNamespaceImportSpecifier(_) => {
             unreachable!()
         }
     }
