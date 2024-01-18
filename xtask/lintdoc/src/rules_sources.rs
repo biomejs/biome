@@ -103,7 +103,7 @@ fn push_to_table(source_set: BTreeSet<SourceSet>, buffer: &mut Vec<u8>) -> Resul
     for source_set in source_set {
         write!(
             buffer,
-            "| [{}]({}) |[{}](/linter/rules/{})",
+            "| [{}]({}) |[{}]({})",
             source_set.source_rule_name,
             source_set.source_link,
             source_set.biome_rule_name,
