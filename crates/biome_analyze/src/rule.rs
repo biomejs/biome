@@ -216,6 +216,12 @@ pub enum RuleSourceKind {
     Inspired,
 }
 
+impl RuleSourceKind {
+    pub const fn is_inspired(&self) -> bool {
+        matches!(self, Self::Inspired)
+    }
+}
+
 impl RuleMetadata {
     pub const fn new(version: &'static str, name: &'static str, docs: &'static str) -> Self {
         Self {
