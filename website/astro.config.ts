@@ -221,7 +221,7 @@ export default defineConfig({
 								{
 									label: "Linter sources",
 									link: "/linter/linter-sources",
-								}
+								},
 							],
 						},
 					],

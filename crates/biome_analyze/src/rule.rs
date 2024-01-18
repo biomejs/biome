@@ -57,7 +57,7 @@ impl Display for FixKind {
     }
 }
 
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(Debug, Clone, Eq)]
 pub enum RuleSource {
     /// Rules from [Rust Clippy](https://rust-lang.github.io/rust-clippy/master/index.html)
     Clippy(&'static str),
@@ -87,11 +87,17 @@ pub enum RuleSource {
     EslintMysticatea(&'static str),
 }
 
+impl PartialEq for RuleSource {
+    fn eq(&self, other: &Self) -> bool {
+        std::mem::discriminant(self) == std::mem::discriminant(other)
+    }
+}
+
 impl std::fmt::Display for RuleSource {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            RuleSource::Clippy(_) => write!(f, "clippy"),
-            RuleSource::Eslint(_) => write!(f, "eslint"),
+            RuleSource::Clippy(_) => write!(f, "Clippy"),
+            RuleSource::Eslint(_) => write!(f, "ESLint"),
             RuleSource::EslintImport(_) => write!(f, "eslint-plugin-import"),
             RuleSource::EslintImportAccess(_) => write!(f, "eslint-plugin-import-access"),
             RuleSource::EslintJest(_) => write!(f, "eslint-plugin-jest"),
@@ -148,7 +154,7 @@ impl RuleSource {
         }
     }
 
-    pub fn as_rule_url(&self) -> String {
+    pub fn to_rule_url(&self) -> String {
         match self {
             Self::Clippy(rule_name) => format!("https://rust-lang.github.io/rust-clippy/master/#/{rule_name}"),
             Self::Eslint(rule_name) => format!("https://eslint.org/docs/latest/rules/{rule_name}"),
@@ -167,7 +173,7 @@ impl RuleSource {
     }
 
     pub fn as_url_and_rule_name(&self) -> (String, &'static str) {
-        (self.as_rule_url(), self.as_rule_name())
+        (self.to_rule_url(), self.as_rule_name())
     }
 
     /// Original ESLint rule
@@ -194,6 +200,10 @@ impl RuleSource {
                 | Self::EslintSonarJs(_)
                 | Self::EslintUnicorn(_)
         )
+    }
+
+    pub const fn is_clippy(&self) -> bool {
+        matches!(self, Self::Clippy(_))
     }
 }
 
