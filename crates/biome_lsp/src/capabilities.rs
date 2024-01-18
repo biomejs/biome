@@ -13,21 +13,42 @@ pub(crate) fn server_capabilities(capabilities: &ClientCapabilities) -> ServerCa
         .as_ref()
         .and_then(|text_document| text_document.formatting.as_ref())
         .and_then(|formatting| formatting.dynamic_registration)
-        .unwrap_or(false);
+        .map(|supported| {
+            if supported {
+                None
+            } else {
+                Some(OneOf::Left(true))
+            }
+        });
 
     let supports_range_formatter_dynamic_registration = capabilities
         .text_document
         .as_ref()
         .and_then(|text_document| text_document.range_formatting.as_ref())
         .and_then(|range_formatting| range_formatting.dynamic_registration)
-        .unwrap_or(false);
+        .map(|supported| {
+            if supported {
+                None
+            } else {
+                Some(OneOf::Left(true))
+            }
+        });
 
     let supports_on_type_formatter_dynamic_registration = capabilities
         .text_document
         .as_ref()
         .and_then(|text_document| text_document.on_type_formatting.as_ref())
         .and_then(|on_type_formatting| on_type_formatting.dynamic_registration)
-        .unwrap_or(false);
+        .map(|supported| {
+            if supported {
+                None
+            } else {
+                Some(DocumentOnTypeFormattingOptions {
+                    first_trigger_character: String::from("}"),
+                    more_trigger_character: Some(vec![String::from("]"), String::from(")")]),
+                })
+            }
+        });
 
     ServerCapabilities {
         position_encoding: Some(match negotiated_encoding(capabilities) {
@@ -40,24 +61,10 @@ pub(crate) fn server_capabilities(capabilities: &ClientCapabilities) -> ServerCa
         text_document_sync: Some(TextDocumentSyncCapability::Kind(
             TextDocumentSyncKind::INCREMENTAL,
         )),
-        document_formatting_provider: if supports_formatter_dynamic_registration {
-            None
-        } else {
-            Some(OneOf::Left(true))
-        },
-        document_range_formatting_provider: if supports_range_formatter_dynamic_registration {
-            None
-        } else {
-            Some(OneOf::Left(true))
-        },
-        document_on_type_formatting_provider: if supports_on_type_formatter_dynamic_registration {
-            None
-        } else {
-            Some(DocumentOnTypeFormattingOptions {
-                first_trigger_character: String::from("}"),
-                more_trigger_character: Some(vec![String::from("]"), String::from(")")]),
-            })
-        },
+        document_formatting_provider: supports_formatter_dynamic_registration.unwrap(),
+        document_range_formatting_provider: supports_range_formatter_dynamic_registration.unwrap(),
+        document_on_type_formatting_provider: supports_on_type_formatter_dynamic_registration
+            .unwrap(),
         code_action_provider: Some(CodeActionProviderCapability::Simple(true)),
         rename_provider: None,
         ..Default::default()
