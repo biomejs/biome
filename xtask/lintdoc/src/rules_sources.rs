@@ -36,7 +36,7 @@ pub(crate) fn generate_rule_sources(
     writeln!(
         buffer,
         r#"---
-title: Linter sources
+title: Rules sources
 description: A page that maps lint rules from other sources to Biome
 ---
     "#

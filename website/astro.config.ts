@@ -220,7 +220,7 @@ export default defineConfig({
 								},
 								{
 									label: "Rules sources",
-									link: "/linter/linter-sources",
+									link: "/linter/rules-sources",
 								},
 							],
 						},
