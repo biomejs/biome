@@ -33,7 +33,7 @@ use xtask::{glue::fs2, *};
 fn main() -> Result<()> {
     let root = project_root().join("website/src/content/docs/linter/rules");
     let reference_groups = project_root().join("website/src/components/generated/Groups.astro");
-    let rules_sources = project_root().join("website/src/content/docs/linter/linter-sources.mdx");
+    let rules_sources = project_root().join("website/src/content/docs/linter/rules-sources.mdx");
     let reference_number_of_rules =
         project_root().join("website/src/components/generated/NumberOfRules.astro");
     let reference_recommended_rules =
@@ -56,7 +56,7 @@ fn main() -> Result<()> {
     let mut index = Vec::new();
     let mut reference_buffer = Vec::new();
     writeln!(index, "---")?;
-    writeln!(index, "title: Lint Rules")?;
+    writeln!(index, "title: Rules")?;
     writeln!(index, "description: List of available lint rules.")?;
     writeln!(index, "---")?;
     writeln!(index)?;
