@@ -1,3 +1,6 @@
+mod rules_sources;
+
+use crate::rules_sources::generate_rule_sources;
 use biome_analyze::{
     AnalysisFilter, AnalyzerOptions, ControlFlow, FixKind, GroupCategory, Queryable,
     RegistryVisitor, Rule, RuleCategory, RuleFilter, RuleGroup, RuleMetadata, RuleSource,
@@ -30,6 +33,7 @@ use xtask::{glue::fs2, *};
 fn main() -> Result<()> {
     let root = project_root().join("website/src/content/docs/linter/rules");
     let reference_groups = project_root().join("website/src/components/generated/Groups.astro");
+    let rules_sources = project_root().join("website/src/content/docs/linter/rules-sources.mdx");
     let reference_number_of_rules =
         project_root().join("website/src/components/generated/NumberOfRules.astro");
     let reference_recommended_rules =
@@ -52,7 +56,7 @@ fn main() -> Result<()> {
     let mut index = Vec::new();
     let mut reference_buffer = Vec::new();
     writeln!(index, "---")?;
-    writeln!(index, "title: Lint Rules")?;
+    writeln!(index, "title: Rules")?;
     writeln!(index, "description: List of available lint rules.")?;
     writeln!(index, "---")?;
     writeln!(index)?;
@@ -145,6 +149,7 @@ fn main() -> Result<()> {
         reference_buffer,
         "<!-- this file is auto generated, use `cargo lintdoc` to update it -->"
     )?;
+    let rule_sources_buffer = generate_rule_sources(groups.clone())?;
     for (group, rules) in groups {
         generate_group(
             group,
@@ -192,6 +197,7 @@ fn main() -> Result<()> {
     fs2::write(reference_groups, reference_buffer)?;
     fs2::write(reference_number_of_rules, number_of_rules_buffer)?;
     fs2::write(reference_recommended_rules, recommended_rules_buffer)?;
+    fs2::write(rules_sources, rule_sources_buffer)?;
 
     Ok(())
 }
