@@ -26,6 +26,7 @@ expression: valid.js
 /[[a][b]]/v;
 /[\q{}]/v;
 /[[^]--\p{ASCII}]/v;
+/[\u200E\u2066-\u2069]/gu;
 ```
 
 # Diagnostics
@@ -57,6 +58,7 @@ valid.js:22:3 lint/correctness/noEmptyCharacterClassInRegex ━━━━━━�
     21 │ /[\q{}]/v;
   > 22 │ /[[^]--\p{ASCII}]/v;
        │   ^^^
+    23 │ /[\u200E\u2066-\u2069]/gu;
   
   i Negated empty character classes match anything.
     If you want to match against [, escape it \[.
