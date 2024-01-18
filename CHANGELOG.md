@@ -14,6 +14,12 @@ Read our [guidelines for writing a good changelog entry](https://github.com/biom
 
 ### CLI
 
+### LSP
+
+#### Bug fixes
+
+- Fix [#1584](https://github.com/biomejs/biome/issues/1584). Ensure the LSP only registers the formatter once. Contributed by @nhedger
+
 ### Configuration
 
 ### Editors
