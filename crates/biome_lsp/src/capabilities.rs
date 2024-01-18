@@ -13,7 +13,7 @@ pub(crate) fn server_capabilities(capabilities: &ClientCapabilities) -> ServerCa
         .as_ref()
         .and_then(|text_document| text_document.formatting.as_ref())
         .and_then(|formatting| formatting.dynamic_registration)
-        .map(|supported| {
+        .and_then(|supported| {
             if supported {
                 None
             } else {
@@ -26,7 +26,7 @@ pub(crate) fn server_capabilities(capabilities: &ClientCapabilities) -> ServerCa
         .as_ref()
         .and_then(|text_document| text_document.range_formatting.as_ref())
         .and_then(|range_formatting| range_formatting.dynamic_registration)
-        .map(|supported| {
+        .and_then(|supported| {
             if supported {
                 None
             } else {
@@ -39,7 +39,7 @@ pub(crate) fn server_capabilities(capabilities: &ClientCapabilities) -> ServerCa
         .as_ref()
         .and_then(|text_document| text_document.on_type_formatting.as_ref())
         .and_then(|on_type_formatting| on_type_formatting.dynamic_registration)
-        .map(|supported| {
+        .and_then(|supported| {
             if supported {
                 None
             } else {
@@ -61,10 +61,9 @@ pub(crate) fn server_capabilities(capabilities: &ClientCapabilities) -> ServerCa
         text_document_sync: Some(TextDocumentSyncCapability::Kind(
             TextDocumentSyncKind::INCREMENTAL,
         )),
-        document_formatting_provider: supports_formatter_dynamic_registration.unwrap(),
-        document_range_formatting_provider: supports_range_formatter_dynamic_registration.unwrap(),
-        document_on_type_formatting_provider: supports_on_type_formatter_dynamic_registration
-            .unwrap(),
+        document_formatting_provider: supports_formatter_dynamic_registration,
+        document_range_formatting_provider: supports_range_formatter_dynamic_registration,
+        document_on_type_formatting_provider: supports_on_type_formatter_dynamic_registration,
         code_action_provider: Some(CodeActionProviderCapability::Simple(true)),
         rename_provider: None,
         ..Default::default()
