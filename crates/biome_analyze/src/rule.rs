@@ -15,7 +15,7 @@ use biome_diagnostics::{
 };
 use biome_rowan::{AstNode, BatchMutation, BatchMutationExt, Language, TextRange};
 use std::cmp::Ordering;
-use std::fmt::Debug;
+use std::fmt::{write, Debug};
 
 #[derive(Debug, Clone)]
 /// Static metadata containing information about a rule
@@ -85,6 +85,11 @@ pub enum RuleSource {
     EslintUnicorn(&'static str),
     /// Rules from [Eslint Plugin Mysticatea](https://github.com/mysticatea/eslint-plugin)
     EslintMysticatea(&'static str),
+    /// Rules from [Mocha](https://github.com/lo1tuma/eslint-plugin-mocha)
+    EslintMocha(&'static str),
+
+    /// Multiple sources
+    Multiple(Vec<RuleSource>),
 }
 
 impl PartialEq for RuleSource {
@@ -109,6 +114,14 @@ impl std::fmt::Display for RuleSource {
             RuleSource::EslintTypeScript(_) => write!(f, "eslint-plugin-typescript"),
             RuleSource::EslintUnicorn(_) => write!(f, "eslint-plugin-unicorn"),
             RuleSource::EslintMysticatea(_) => write!(f, "eslint-plugin-mysticates"),
+            RuleSource::EslintMocha(_) => write!(f, "eslint-plugin-mocha"),
+            RuleSource::Multiple(sources) => {
+                for source in sources {
+                    write!(f, "{}", source)?;
+                    write!(f, ", ")?;
+                }
+                Ok(())
+            }
         }
     }
 }
@@ -150,7 +163,9 @@ impl RuleSource {
             | Self::EslintSonarJs(rule_name)
             | Self::EslintStylistic(rule_name)
             | Self::EslintUnicorn(rule_name)
+            | Self::EslintMocha(rule_name)
             | Self::EslintMysticatea(rule_name) => rule_name,
+            Self::Multiple(_) => todo!(),
         }
     }
 
