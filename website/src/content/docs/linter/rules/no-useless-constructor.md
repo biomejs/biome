@@ -146,7 +146,7 @@ class B extends A {
   
 </code></pre>
 
-## Valid
+### Valid
 
 ```jsx
 class A {

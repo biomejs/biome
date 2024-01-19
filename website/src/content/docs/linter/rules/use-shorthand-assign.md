@@ -74,7 +74,7 @@ a = a * 1;
   
 </code></pre>
 
-## Valid
+### Valid
 
 ```jsx
 a += 1;

@@ -24,7 +24,7 @@ declare_rule! {
     /// isNaN({}); // true
     /// ```
     ///
-    /// ## Valid
+    /// ### Valid
     ///
     /// ```js
     /// Number.isNaN({}); // false

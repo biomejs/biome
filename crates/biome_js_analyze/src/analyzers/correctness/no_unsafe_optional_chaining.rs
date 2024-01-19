@@ -50,7 +50,7 @@ declare_rule! {
     /// (baz?.bar).foo;
     /// ```
     ///
-    /// ## Valid
+    /// ### Valid
     ///
     /// ```js
     /// (obj?.foo)?.();

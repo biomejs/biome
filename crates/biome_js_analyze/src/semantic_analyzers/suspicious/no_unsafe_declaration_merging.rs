@@ -28,7 +28,7 @@ declare_rule! {
     /// foo.f(); // Runtime Error: Cannot read properties of undefined.
     /// ```
     ///
-    /// ## Valid
+    /// ### Valid
     ///
     /// ```ts
     /// interface Foo {}

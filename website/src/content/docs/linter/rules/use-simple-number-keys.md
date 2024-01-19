@@ -114,7 +114,7 @@ Disallow number literal object member names which are not base10 or uses undersc
   
 </code></pre>
 
-## Valid
+### Valid
 
 ```jsx
 ({ 0: "zero" });

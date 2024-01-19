@@ -81,7 +81,7 @@ a.reduce((acc, val) => ({...acc, [val]: val}), {});
   
 </code></pre>
 
-## Valid
+### Valid
 
 ```jsx
 var a = ['a', 'b', 'c'];

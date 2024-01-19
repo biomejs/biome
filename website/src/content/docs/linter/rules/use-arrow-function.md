@@ -80,7 +80,7 @@ const delegatedFetch = async function(url) {
   
 </code></pre>
 
-## Valid
+### Valid
 
 ```jsx
 const f = function() {

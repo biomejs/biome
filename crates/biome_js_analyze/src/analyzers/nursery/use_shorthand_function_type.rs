@@ -42,7 +42,7 @@ declare_rule! {
     /// }
     /// ```
     ///
-    /// ## Valid
+    /// ### Valid
     ///
     /// ```ts
     /// type Example = () => string;

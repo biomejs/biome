@@ -22,7 +22,7 @@ declare_rule! {
     /// <h1></h1>
     /// ```
     ///
-    /// ## Valid
+    /// ### Valid
     ///
     /// ```jsx
     /// <h1>heading</h1>

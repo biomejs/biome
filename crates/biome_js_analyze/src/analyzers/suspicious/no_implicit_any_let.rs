@@ -24,7 +24,7 @@ declare_rule! {
     /// b = 1
     /// ```
     ///
-    /// ## Valid
+    /// ### Valid
     ///
     /// ```ts
     /// var a = 1;

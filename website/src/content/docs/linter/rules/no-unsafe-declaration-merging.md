@@ -55,7 +55,7 @@ foo.f(); // Runtime Error: Cannot read properties of undefined.
   
 </code></pre>
 
-## Valid
+### Valid
 
 ```ts
 interface Foo {}

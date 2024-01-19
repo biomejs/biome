@@ -30,7 +30,7 @@ declare_rule! {
     /// declare namespace foo {}
     /// ```
     ///
-    /// ## Valid
+    /// ### Valid
     ///
     /// ```ts
     /// import foo from 'foo';

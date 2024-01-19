@@ -41,7 +41,7 @@ isFinite(false); // true
   
 </code></pre>
 
-## Valid
+### Valid
 
 ```jsx
 Number.isFinite(false); // false
