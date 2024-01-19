@@ -86,7 +86,7 @@ import { type A } from "mod";
   
 </code></pre>
 
-## Valid
+### Valid
 
 ```ts
 import type { A, B } from "mod";

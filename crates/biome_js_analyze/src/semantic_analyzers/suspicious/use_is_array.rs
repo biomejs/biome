@@ -29,7 +29,7 @@ declare_rule! {
     /// if (xs instanceof Array) {}
     /// ```
     ///
-    /// ## Valid
+    /// ### Valid
     ///
     /// ```js
     /// const xs = [];

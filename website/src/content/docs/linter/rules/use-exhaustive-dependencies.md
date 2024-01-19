@@ -174,7 +174,7 @@ function component() {
   
 </code></pre>
 
-## Valid
+### Valid
 
 ```jsx
 import { useEffect } from "react";

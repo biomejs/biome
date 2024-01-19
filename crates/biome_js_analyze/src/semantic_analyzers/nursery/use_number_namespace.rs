@@ -43,7 +43,7 @@ declare_rule! {
     /// -Infinity; // true
     /// ```
     ///
-    /// ## Valid
+    /// ### Valid
     ///
     /// ```js
     /// Number.parseInt("1"); // false

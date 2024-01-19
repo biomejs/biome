@@ -23,7 +23,7 @@ declare_rule! {
     /// type Bar<> = {};
     /// ```
     ///
-    /// ## Valid
+    /// ### Valid
     ///
     /// ```ts
     /// interface Foo {}

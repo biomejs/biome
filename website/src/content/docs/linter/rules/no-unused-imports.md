@@ -113,7 +113,7 @@ export { B }
   
 </code></pre>
 
-## Valid
+### Valid
 
 ```ts
 import { A, type B } from 'mod';

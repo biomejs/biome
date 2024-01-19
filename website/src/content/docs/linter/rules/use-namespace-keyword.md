@@ -48,7 +48,7 @@ module Example {}
   
 </code></pre>
 
-## Valid
+### Valid
 
 ```ts
 namespace Example {}

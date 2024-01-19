@@ -37,7 +37,7 @@ declare_rule! {
     /// new RegExp("abc", "u");
     /// ```
     ///
-    /// ## Valid
+    /// ### Valid
     ///
     /// ```js
     /// /abc/u;

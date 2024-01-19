@@ -86,7 +86,7 @@ class Option {
   
 </code></pre>
 
-## Valid
+### Valid
 
 ```jsx
 class Person {

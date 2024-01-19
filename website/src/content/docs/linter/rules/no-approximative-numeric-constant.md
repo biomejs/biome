@@ -44,7 +44,7 @@ let x = 2.302;
   
 </code></pre>
 
-## Valid
+### Valid
 
 ```jsx
 let x = Math.PI;

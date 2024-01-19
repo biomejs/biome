@@ -31,7 +31,7 @@ declare_rule! {
     /// var invalid = foo.propertyIsEnumerable("bar");
     /// ```
     ///
-    /// ## Valid
+    /// ### Valid
     ///
     /// ```js
     /// var valid = Object.hasOwn(foo, "bar");

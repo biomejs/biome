@@ -29,7 +29,7 @@ declare_rule! {
     /// var a = foo + 1 ? true : false;
     /// ```
     ///
-    /// ## Valid
+    /// ### Valid
     ///
     /// ```js
     /// var a = x === 2 ? 'Yes' : 'No';

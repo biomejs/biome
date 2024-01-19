@@ -79,7 +79,7 @@ function foo(example: { (): number }): number {
   
 </code></pre>
 
-## Valid
+### Valid
 
 ```ts
 type Example = () => string;

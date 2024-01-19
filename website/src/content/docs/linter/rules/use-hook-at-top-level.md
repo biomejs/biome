@@ -76,7 +76,7 @@ function Component1({ a }) {
   
 </code></pre>
 
-## Valid
+### Valid
 
 ```jsx
 function Component1() {

@@ -31,7 +31,7 @@ declare_rule! {
     /// module Example {}
     /// ```
     ///
-    /// ## Valid
+    /// ### Valid
     ///
     /// ```ts
     /// namespace Example {}

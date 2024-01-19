@@ -70,7 +70,7 @@ React.createElement('button');
   
 </code></pre>
 
-## Valid
+### Valid
 
 ```jsx
 <>

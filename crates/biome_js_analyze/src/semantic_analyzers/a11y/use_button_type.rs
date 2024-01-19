@@ -28,7 +28,7 @@ declare_rule! {
     /// React.createElement('button');
     /// ```
     ///
-    /// ## Valid
+    /// ### Valid
     ///
     /// ```jsx
     /// <>
