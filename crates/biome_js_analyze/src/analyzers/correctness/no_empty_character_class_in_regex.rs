@@ -24,7 +24,7 @@ declare_rule! {
     /// /^a[^]/.test("ax"); // true
     /// ```
     ///
-    /// ## Valid
+    /// ### Valid
     ///
     /// ```js
     /// /^a[xy]/.test("ay"); // true

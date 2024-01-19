@@ -51,7 +51,7 @@ declare_rule! {
     /// /^[👍]$/; // surrogate pair without u flag
     /// ```
     ///
-    /// ## Valid
+    /// ### Valid
     ///
     /// ```js
     /// /^[abc]$/;

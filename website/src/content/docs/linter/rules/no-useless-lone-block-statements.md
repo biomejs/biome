@@ -73,7 +73,7 @@ if (foo) {
   
 </code></pre>
 
-## Valid
+### Valid
 
 ```jsx
 while (foo) {

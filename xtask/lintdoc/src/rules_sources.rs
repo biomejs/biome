@@ -26,8 +26,6 @@ impl PartialOrd for SourceSet {
     }
 }
 
-impl SourceSet {}
-
 pub(crate) fn generate_rule_sources(
     rules: BTreeMap<&str, BTreeMap<&'static str, RuleMetadata>>,
 ) -> Result<Vec<u8>> {
@@ -42,19 +40,13 @@ description: A page that maps lint rules from other sources to Biome
     "#
     )?;
 
-    writeln!(
-        buffer,
-        r#":::note
-Some **Biome** rules might **not** have options, compared to the original rule.
-:::"#
-    )?;
-
     let rules = rules
         .into_iter()
         .flat_map(|(_, rule)| rule)
         .collect::<BTreeMap<&str, RuleMetadata>>();
 
     let mut rules_by_source = BTreeMap::<String, BTreeSet<SourceSet>>::new();
+    let mut exclusive_biome_rules = BTreeSet::<(String, String)>::new();
 
     for (rule_name, metadata) in rules {
         if let Some(source) = &metadata.source {
@@ -74,7 +66,7 @@ Some **Biome** rules might **not** have options, compared to the original rule.
                 let mut set = BTreeSet::new();
                 set.insert(SourceSet {
                     biome_rule_name: rule_name.to_string(),
-                    biome_link: format!("/lint/rules/{}", rule_name.to_case(Case::Kebab)),
+                    biome_link: format!("/linter/rules/{}", rule_name.to_case(Case::Kebab)),
                     source_link: source.to_rule_url(),
                     source_rule_name: source.as_rule_name().to_string(),
                     inspired: metadata
@@ -84,11 +76,29 @@ Some **Biome** rules might **not** have options, compared to the original rule.
                 });
                 rules_by_source.insert(format!("{source}"), set);
             }
+        } else {
+            exclusive_biome_rules.insert((
+                rule_name.to_string(),
+                format!("/linter/rules/{}", rule_name.to_case(Case::Kebab)),
+            ));
         }
     }
 
+    writeln!(buffer, "## Biome exclusive rules",)?;
+    for (rule, link) in exclusive_biome_rules {
+        writeln!(buffer, "- [{}]({}) ", rule, link)?;
+    }
+
+    writeln!(buffer, "## Rules from other sources",)?;
+    writeln!(
+        buffer,
+        r#":::note
+Some **Biome** rules might **not** have options, compared to the original rule.
+:::"#
+    )?;
+
     for (source, rules) in rules_by_source {
-        writeln!(buffer, "## {source}")?;
+        writeln!(buffer, "### {source}")?;
         writeln!(buffer, r#"| {source} rule name | Biome rule name |"#)?;
         writeln!(buffer, r#"| ---- | ---- |"#)?;
 

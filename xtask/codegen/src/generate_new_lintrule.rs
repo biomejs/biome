@@ -47,7 +47,7 @@ declare_rule! {{
     /// a = 2;
     /// ```
     ///
-    /// ## Valid
+    /// ### Valid
     ///
     /// ```js
     /// var a = 1;

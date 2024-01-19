@@ -133,7 +133,7 @@ Refer to the references to learn about why this is important.
   
 </code></pre>
 
-## Valid
+### Valid
 
 ```jsx
 <a>content</a>

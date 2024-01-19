@@ -80,7 +80,7 @@ declare namespace foo {}
   
 </code></pre>
 
-## Valid
+### Valid
 
 ```ts
 import foo from 'foo';

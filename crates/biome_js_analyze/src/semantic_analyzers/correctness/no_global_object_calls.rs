@@ -67,7 +67,7 @@ declare_rule! {
     /// var newIntl = new Intl();
     /// ```
     ///
-    /// ## Valid
+    /// ### Valid
     ///
     /// ```js
     /// function area(r) {

@@ -64,7 +64,7 @@ Enforce that heading elements (h1, h2, etc.) have content and that the content i
   
 </code></pre>
 
-## Valid
+### Valid
 
 ```jsx
 <h1>heading</h1>

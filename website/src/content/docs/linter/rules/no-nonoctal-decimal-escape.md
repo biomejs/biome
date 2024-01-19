@@ -89,7 +89,7 @@ const x = "Don't use \9 escape.";
 <strong>  </strong><strong>    │ </strong>                     <span style="color: Tomato;">-</span>           
 </code></pre>
 
-## Valid
+### Valid
 
 ```jsx
 const x = "8";

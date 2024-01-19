@@ -3,16 +3,34 @@ title: Rules sources
 description: A page that maps lint rules from other sources to Biome
 ---
     
+## Biome exclusive rules
+- [noAccumulatingSpread](/linter/rules/no-accumulating-spread) 
+- [noConstEnum](/linter/rules/no-const-enum) 
+- [noDelete](/linter/rules/no-delete) 
+- [noGlobalIsFinite](/linter/rules/no-global-is-finite) 
+- [noGlobalIsNan](/linter/rules/no-global-is-nan) 
+- [noImplicitAnyLet](/linter/rules/no-implicit-any-let) 
+- [noRedundantUseStrict](/linter/rules/no-redundant-use-strict) 
+- [noRenderReturnValue](/linter/rules/no-render-return-value) 
+- [noShoutyConstants](/linter/rules/no-shouty-constants) 
+- [noSvgWithoutTitle](/linter/rules/no-svg-without-title) 
+- [noUnnecessaryContinue](/linter/rules/no-unnecessary-continue) 
+- [noVoidTypeReturn](/linter/rules/no-void-type-return) 
+- [useSimpleNumberKeys](/linter/rules/use-simple-number-keys) 
+- [useSimplifiedLogicExpression](/linter/rules/use-simplified-logic-expression) 
+- [useSingleCaseStatement](/linter/rules/use-single-case-statement) 
+- [useWhile](/linter/rules/use-while) 
+## Rules from other sources
 :::note
 Some **Biome** rules might **not** have options, compared to the original rule.
 :::
-## Clippy
+### Clippy
 | Clippy rule name | Biome rule name |
 | ---- | ---- |
-| [approx_constant](https://rust-lang.github.io/rust-clippy/master/#/approx_constant) |[noApproximativeNumericConstant](/lint/rules/no-approximative-numeric-constant) (inspired) |
+| [approx_constant](https://rust-lang.github.io/rust-clippy/master/#/approx_constant) |[noApproximativeNumericConstant](/linter/rules/no-approximative-numeric-constant) (inspired) |
 | [match_str_case_mismatch](https://rust-lang.github.io/rust-clippy/master/#/match_str_case_mismatch) |[noStringCaseMismatch](/linter/rules/no-string-case-mismatch) |
 | [misrefactored_assign_op](https://rust-lang.github.io/rust-clippy/master/#/misrefactored_assign_op) |[noMisrefactoredShorthandAssign](/linter/rules/no-misrefactored-shorthand-assign) |
-## ESLint
+### ESLint
 | ESLint rule name | Biome rule name |
 | ---- | ---- |
 | [constructor-super](https://eslint.org/docs/latest/rules/constructor-super) |[noInvalidConstructorSuper](/linter/rules/no-invalid-constructor-super) |
@@ -87,16 +105,16 @@ Some **Biome** rules might **not** have options, compared to the original rule.
 | [prefer-exponentiation-operator](https://eslint.org/docs/latest/rules/prefer-exponentiation-operator) |[useExponentiationOperator](/linter/rules/use-exponentiation-operator) |
 | [prefer-numeric-literals](https://eslint.org/docs/latest/rules/prefer-numeric-literals) |[useNumericLiterals](/linter/rules/use-numeric-literals) |
 | [prefer-regex-literals](https://eslint.org/docs/latest/rules/prefer-regex-literals) |[useRegexLiterals](/linter/rules/use-regex-literals) |
-| [prefer-rest-params](https://eslint.org/docs/latest/rules/prefer-rest-params) |[noArguments](/lint/rules/no-arguments) (inspired) |
+| [prefer-rest-params](https://eslint.org/docs/latest/rules/prefer-rest-params) |[noArguments](/linter/rules/no-arguments) (inspired) |
 | [prefer-template](https://eslint.org/docs/latest/rules/prefer-template) |[useTemplate](/linter/rules/use-template) |
 | [require-yield](https://eslint.org/docs/latest/rules/require-yield) |[useYield](/linter/rules/use-yield) |
 | [use-isnan](https://eslint.org/docs/latest/rules/use-isnan) |[useIsNan](/linter/rules/use-is-nan) |
 | [valid-typeof](https://eslint.org/docs/latest/rules/valid-typeof) |[useValidTypeof](/linter/rules/use-valid-typeof) |
-## eslint-plugin-import
+### eslint-plugin-import
 | eslint-plugin-import rule name | Biome rule name |
 | ---- | ---- |
-| [no-default-export](https://github.com/import-js/eslint-plugin-import/blob/main/docs/rules/no-default-export.md) |[noDefaultExport](/lint/rules/no-default-export) (inspired) |
-## eslint-plugin-jsx-a11y
+| [no-default-export](https://github.com/import-js/eslint-plugin-import/blob/main/docs/rules/no-default-export.md) |[noDefaultExport](/linter/rules/no-default-export) (inspired) |
+### eslint-plugin-jsx-a11y
 | eslint-plugin-jsx-a11y rule name | Biome rule name |
 | ---- | ---- |
 | [alt-text](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/alt-text.md) |[useAltText](/linter/rules/use-alt-text) |
@@ -114,7 +132,7 @@ Some **Biome** rules might **not** have options, compared to the original rule.
 | [lang](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/lang.md) |[useValidLang](/linter/rules/use-valid-lang) |
 | [media-has-caption](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/media-has-caption.md) |[useMediaCaption](/linter/rules/use-media-caption) |
 | [mouse-events-have-key-events](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/mouse-events-have-key-events.md) |[useKeyWithMouseEvents](/linter/rules/use-key-with-mouse-events) |
-| [no-access-key](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/no-access-key.md) |[noAccessKey](/lint/rules/no-access-key) (inspired) |
+| [no-access-key](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/no-access-key.md) |[noAccessKey](/linter/rules/no-access-key) (inspired) |
 | [no-aria-hidden-on-focusable](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/no-aria-hidden-on-focusable.md) |[noAriaHiddenOnFocusable](/linter/rules/no-aria-hidden-on-focusable) |
 | [no-autofocus](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/no-autofocus.md) |[noAutofocus](/linter/rules/no-autofocus) |
 | [no-distracting-elements](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/no-distracting-elements.md) |[noDistractingElements](/linter/rules/no-distracting-elements) |
@@ -125,11 +143,11 @@ Some **Biome** rules might **not** have options, compared to the original rule.
 | [role-has-required-aria-props](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/role-has-required-aria-props.md) |[useAriaPropsForRole](/linter/rules/use-aria-props-for-role) |
 | [scope](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/scope.md) |[noHeaderScope](/linter/rules/no-header-scope) |
 | [tabindex-no-positive](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/docs/rules/tabindex-no-positive.md) |[noPositiveTabindex](/linter/rules/no-positive-tabindex) |
-## eslint-plugin-mysticates
+### eslint-plugin-mysticates
 | eslint-plugin-mysticates rule name | Biome rule name |
 | ---- | ---- |
-| [no-this-in-static](https://github.com/mysticatea/eslint-plugin/blob/master/docs/rules/no-this-in-static.md) |[noThisInStatic](/lint/rules/no-this-in-static) (inspired) |
-## eslint-plugin-react
+| [no-this-in-static](https://github.com/mysticatea/eslint-plugin/blob/master/docs/rules/no-this-in-static.md) |[noThisInStatic](/linter/rules/no-this-in-static) (inspired) |
+### eslint-plugin-react
 | eslint-plugin-react rule name | Biome rule name |
 | ---- | ---- |
 | [button-has-type](https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/button-has-type.md) |[useButtonType](/linter/rules/use-button-type) |
@@ -139,29 +157,29 @@ Some **Biome** rules might **not** have options, compared to the original rule.
 | [jsx-no-duplicate-props](https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/jsx-no-duplicate-props.md) |[noDuplicateJsxProps](/linter/rules/no-duplicate-jsx-props) |
 | [jsx-no-target-blank](https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/jsx-no-target-blank.md) |[noBlankTarget](/linter/rules/no-blank-target) |
 | [jsx-no-useless-fragment](https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/jsx-no-useless-fragment.md) |[noUselessFragments](/linter/rules/no-useless-fragments) |
-| [no-array-index-key](https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/no-array-index-key.md) |[noArrayIndexKey](/lint/rules/no-array-index-key) (inspired) |
+| [no-array-index-key](https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/no-array-index-key.md) |[noArrayIndexKey](/linter/rules/no-array-index-key) (inspired) |
 | [no-children-prop](https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/no-children-prop.md) |[noChildrenProp](/linter/rules/no-children-prop) |
 | [no-danger](https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/no-danger.md) |[noDangerouslySetInnerHtmlWithChildren](/linter/rules/no-dangerously-set-inner-html-with-children) |
 | [no-danger-with-children](https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/no-danger-with-children.md) |[noDangerouslySetInnerHtml](/linter/rules/no-dangerously-set-inner-html) |
 | [void-dom-elements-no-children](https://github.com/jsx-eslint/eslint-plugin-react/blob/master/docs/rules/void-dom-elements-no-children.md) |[noVoidElementsWithChildren](/linter/rules/no-void-elements-with-children) |
-## eslint-plugin-react-hooks
+### eslint-plugin-react-hooks
 | eslint-plugin-react-hooks rule name | Biome rule name |
 | ---- | ---- |
-| [exhaustive-deps](https://github.com/facebook/react/blob/main/packages/eslint-plugin-react-hooks/README.md) |[useExhaustiveDependencies](/lint/rules/use-exhaustive-dependencies) (inspired) |
+| [exhaustive-deps](https://github.com/facebook/react/blob/main/packages/eslint-plugin-react-hooks/README.md) |[useExhaustiveDependencies](/linter/rules/use-exhaustive-dependencies) (inspired) |
 | [rules-of-hooks](https://github.com/facebook/react/blob/main/packages/eslint-plugin-react-hooks/README.md) |[useHookAtTopLevel](/linter/rules/use-hook-at-top-level) |
-## eslint-plugin-sonarjs
+### eslint-plugin-sonarjs
 | eslint-plugin-sonarjs rule name | Biome rule name |
 | ---- | ---- |
-| [cognitive-complexity](https://github.com/SonarSource/eslint-plugin-sonarjs/blob/HEAD/docs/rules/cognitive-complexity.md) |[noExcessiveCognitiveComplexity](/lint/rules/no-excessive-cognitive-complexity) (inspired) |
-## eslint-plugin-stylistic
+| [cognitive-complexity](https://github.com/SonarSource/eslint-plugin-sonarjs/blob/HEAD/docs/rules/cognitive-complexity.md) |[noExcessiveCognitiveComplexity](/linter/rules/no-excessive-cognitive-complexity) (inspired) |
+### eslint-plugin-stylistic
 | eslint-plugin-stylistic rule name | Biome rule name |
 | ---- | ---- |
-| [jsx-self-closing-comp](https://eslint.style/rules/default/jsx-self-closing-comp) |[useSelfClosingElements](/lint/rules/use-self-closing-elements) (inspired) |
-## eslint-plugin-typescript
+| [jsx-self-closing-comp](https://eslint.style/rules/default/jsx-self-closing-comp) |[useSelfClosingElements](/linter/rules/use-self-closing-elements) (inspired) |
+### eslint-plugin-typescript
 | eslint-plugin-typescript rule name | Biome rule name |
 | ---- | ---- |
 | [array-type](https://typescript-eslint.io/rules/array-type) |[useShorthandArrayType](/linter/rules/use-shorthand-array-type) (inspired) |
-| [ban-types](https://typescript-eslint.io/rules/ban-types) |[noBannedTypes](/lint/rules/no-banned-types) (inspired) |
+| [ban-types](https://typescript-eslint.io/rules/ban-types) |[noBannedTypes](/linter/rules/no-banned-types) (inspired) |
 | [naming-convention](https://typescript-eslint.io/rules/naming-convention) |[useNamingConvention](/linter/rules/use-naming-convention) (inspired) |
 | [no-empty-interface](https://typescript-eslint.io/rules/no-empty-interface) |[noEmptyInterface](/linter/rules/no-empty-interface) (inspired) |
 | [no-explicit-any](https://typescript-eslint.io/rules/no-explicit-any) |[noExplicitAny](/linter/rules/no-explicit-any) |
@@ -185,10 +203,10 @@ Some **Biome** rules might **not** have options, compared to the original rule.
 | [prefer-literal-enum-member](https://typescript-eslint.io/rules/prefer-literal-enum-member) |[useLiteralEnumMembers](/linter/rules/use-literal-enum-members) |
 | [prefer-namespace-keyword](https://typescript-eslint.io/rules/prefer-namespace-keyword) |[useNamespaceKeyword](/linter/rules/use-namespace-keyword) |
 | [prefer-optional-chain](https://typescript-eslint.io/rules/prefer-optional-chain) |[useOptionalChain](/linter/rules/use-optional-chain) |
-## eslint-plugin-unicorn
+### eslint-plugin-unicorn
 | eslint-plugin-unicorn rule name | Biome rule name |
 | ---- | ---- |
-| [no-array-for-each](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/no-array-for-each.md) |[noForEach](/lint/rules/no-for-each) (inspired) |
+| [no-array-for-each](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/no-array-for-each.md) |[noForEach](/linter/rules/no-for-each) (inspired) |
 | [no-instanceof-array](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/no-instanceof-array.md) |[useIsArray](/linter/rules/use-is-array) |
 | [no-useless-switch-case](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/no-useless-switch-case.md) |[noUselessSwitchCase](/linter/rules/no-useless-switch-case) |
 | [prefer-array-flat-map](https://github.com/sindresorhus/eslint-plugin-unicorn/blob/main/docs/rules/prefer-array-flat-map.md) |[useFlatMap](/linter/rules/use-flat-map) |

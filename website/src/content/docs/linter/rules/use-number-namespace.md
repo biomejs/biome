@@ -131,7 +131,7 @@ Infinity; // true
   
 </code></pre>
 
-## Valid
+### Valid
 
 ```jsx
 Number.parseInt("1"); // false

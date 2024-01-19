@@ -62,7 +62,7 @@ let bar = new BigInt(9007199254740991);
 <strong>  </strong><strong>    │ </strong>          <span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span><span style="color: Tomato;">-</span>                         
 </code></pre>
 
-## Valid
+### Valid
 
 ```jsx
 let foo = Symbol('foo');

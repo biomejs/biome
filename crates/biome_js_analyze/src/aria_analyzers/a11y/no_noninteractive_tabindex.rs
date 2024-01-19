@@ -34,7 +34,7 @@ declare_rule! {
     /// <article tabIndex="0" />
     /// ```
     ///
-    /// ## Valid
+    /// ### Valid
     ///
     /// ```jsx
     /// <div />

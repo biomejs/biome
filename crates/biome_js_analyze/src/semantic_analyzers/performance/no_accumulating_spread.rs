@@ -38,7 +38,7 @@ declare_rule! {
     /// a.reduce((acc, val) => ({...acc, [val]: val}), {});
     /// ```
     ///
-    /// ## Valid
+    /// ### Valid
     ///
     /// ```js
     /// var a = ['a', 'b', 'c'];

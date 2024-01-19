@@ -37,7 +37,7 @@ declare_rule! {
     /// })
     /// ```
     ///
-    /// ## Valid
+    /// ### Valid
     ///
     /// ```js
     /// els.forEach((el, i) => {
