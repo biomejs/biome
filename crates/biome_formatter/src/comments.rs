@@ -447,7 +447,7 @@ impl<L: Language> DecoratedComment<L> {
     /// and the token.
     ///
     /// ```ignore
-    /// a /* comment */ /* other b */
+    /// a /* comment */ /* other */ b
     /// ```
     ///
     /// The `following_token` for both comments is `b` because it's the token coming after the comments.
