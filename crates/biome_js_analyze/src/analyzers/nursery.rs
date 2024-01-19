@@ -2,6 +2,7 @@
 
 use biome_analyze::declare_group;
 
+pub(crate) mod no_disabled_tests;
 pub(crate) mod no_empty_block_statements;
 pub(crate) mod no_empty_type_parameters;
 pub(crate) mod no_nodejs_modules;
@@ -20,6 +21,7 @@ declare_group! {
     pub (crate) Nursery {
         name : "nursery" ,
         rules : [
+            self :: no_disabled_tests :: NoDisabledTests ,
             self :: no_empty_block_statements :: NoEmptyBlockStatements ,
             self :: no_empty_type_parameters :: NoEmptyTypeParameters ,
             self :: no_nodejs_modules :: NoNodejsModules ,
